@@ -12,15 +12,107 @@
   --font-mono: var(--font-geist-mono);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+body {
+  background: #ffffff;
+  color: #171717;
+  font-family: Arial, Helvetica, sans-serif;
+}
+
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
+.custom-scrollbar {
+  scrollbar-width: thin;
+  scrollbar-color: #cbd5e1 transparent;
+}
+
+.custom-scrollbar::-webkit-scrollbar {
+  width: 8px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  border-radius: 9999px;
+  background: #cbd5e1;
+}
+
+.nav-link {
+  color: #1f2937;
+  transition: color 0.2s ease;
+}
+
+.nav-link:hover {
+  color: #4461f2;
+}
+
+.menu-item {
+  display: flex;
+  width: 100%;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.625rem 1rem;
+  font-size: 0.875rem;
+  color: #374151;
+  transition: background-color 0.2s ease;
+}
+
+.menu-item:hover {
+  background: #f8fafc;
+}
+
+.menu-item i {
+  display: flex;
+  height: 1.75rem;
+  width: 1.75rem;
+  align-items: center;
+  justify-content: center;
+  border-radius: 9999px;
+  background: #f1f5f9;
+  color: #475569;
+}
+
+.shimmer-effect {
+  position: absolute;
+  inset: 0;
+  transform: translateX(-120%);
+  background: linear-gradient(110deg, transparent 20%, rgba(255, 255, 255, 0.32) 45%, transparent 70%);
+  animation: shimmer 2.3s infinite;
+}
+
+@keyframes shimmer {
+  100% {
+    transform: translateX(120%);
   }
 }
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+.sliding-text {
+  animation: slideWords 10s linear infinite;
+}
+
+@keyframes slideWords {
+  0%,
+  18% {
+    transform: translateY(0);
+  }
+  22%,
+  38% {
+    transform: translateY(-20px);
+  }
+  42%,
+  58% {
+    transform: translateY(-40px);
+  }
+  62%,
+  78% {
+    transform: translateY(-60px);
+  }
+  82%,
+  100% {
+    transform: translateY(-80px);
+  }
 }

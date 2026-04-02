@@ -1,5 +1,7 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
+import EducationNavbar from "@/components/EducationNavbar";
+import Footer from "@/components/Footer";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -27,7 +29,19 @@ export default function RootLayout({
       lang="en"
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
     >
-      <body className="min-h-full flex flex-col">{children}</body>
+      <head>
+        <link
+          rel="stylesheet"
+          href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css"
+        />
+      </head>
+      <body className="min-h-full flex flex-col bg-white">
+        <EducationNavbar />
+        <div className="flex min-h-screen flex-col bg-white pt-24.5 sm:pt-26">
+          <main className="flex-1 bg-white">{children}</main>
+          <Footer />
+        </div>
+      </body>
     </html>
   );
 }
