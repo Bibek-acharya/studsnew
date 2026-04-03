@@ -76,6 +76,7 @@ const Footer: React.FC<FooterProps> = ({ onNavigate }) => {
                   required
                   value={email}
                   onChange={(event) => setEmail(event.target.value)}
+                  suppressHydrationWarning
                   className="w-full rounded-full border border-slate-700 bg-slate-900/50 px-10 py-3 text-sm text-white outline-none transition-all placeholder:text-slate-600 focus:border-transparent focus:ring-2 focus:ring-blue-600"
                 />
                 <button

@@ -35,7 +35,7 @@ export default function RootLayout({
           href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css"
         />
       </head>
-      <body className="min-h-full flex flex-col bg-white">
+      <body className="min-h-full flex flex-col bg-white" suppressHydrationWarning>
         <EducationNavbar />
         <div className="flex min-h-screen flex-col bg-white pt-24.5 sm:pt-26">
           <main className="flex-1 bg-white">{children}</main>
