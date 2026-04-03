@@ -1,6 +1,6 @@
 "use client";
 
-import { BadgeCheck, MapPin, Award, ExternalLink, Heart, Clock, GraduationCap, Users, Bell, Send, PlayCircle, Flame, Monitor, Globe, TrendingUp, Building, BadgeCheckIcon } from "lucide-react";
+import { BadgeCheck, MapPin, Award, ExternalLink, Bookmark, Clock, GraduationCap, Users, Bell, Send, PlayCircle, Flame, Monitor, Globe, TrendingUp, Building, BadgeCheckIcon } from "lucide-react";
 
 interface ExamAnnouncementsSectionProps {
   onNavigate: (view: string, data?: any) => void;
@@ -83,53 +83,52 @@ const exams = [
 
 const ExamAnnouncementsSection: React.FC<ExamAnnouncementsSectionProps> = ({ onNavigate }) => {
   return (
-    <section className="mt-24 w-full">
-      <div className="max-w-[1400px] mx-auto w-full">
+    <section className="mt-16 sm:mt-20 md:mt-24 w-full">
+      <div className="max-w-[1400px] mx-auto w-full px-3 sm:px-4 md:px-6 lg:px-8">
         {/* New Heading and Subheading */}
-        <div className="text-center mb-12">
-          <h2 className="text-[32px] md:text-[40px] font-bold text-[#111827] mb-3 tracking-tight">
+        <div className="text-center mb-8 sm:mb-10 md:mb-12">
+          <h2 className="text-[26px] xs:text-[30px] sm:text-3xl md:text-[36px] lg:text-[40px] font-bold text-[#111827] mb-2 sm:mb-3 tracking-tight px-2">
             Find All Exam Announcements Easily.
           </h2>
-          <p className="text-[17px] text-[#6b7280] max-w-3xl mx-auto leading-relaxed">
+          <p className="text-[15px] sm:text-[16px] md:text-[17px] text-[#6b7280] max-w-3xl mx-auto leading-relaxed px-2">
             Discover institutions that match your academic profile and preferences.
           </p>
         </div>
 
         {/* Card Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-5 md:gap-6">
           {exams.map((exam) => (
-            <article key={exam.id} className="bg-white rounded-2xl p-5 shadow-[0_4px_20px_-4px_rgba(0,0,0,0.05)] border border-gray-100 flex flex-col h-full hover:shadow-lg transition-all duration-300">
-              <header className="flex justify-between items-start mb-5">
-                <div className="flex gap-3">
-                  <div className="w-12 h-12 rounded-xl border border-gray-100 flex items-center justify-center p-1 bg-white shadow-sm shrink-0">
+            <article key={exam.id} className="bg-white rounded-2xl p-4 sm:p-5 shadow-[0_4px_20px_-4px_rgba(0,0,0,0.05)] border border-gray-100 flex flex-col h-full hover:shadow-lg transition-all duration-300">
+              <header className="flex justify-between items-start mb-4 sm:mb-5">
+                <div className="flex gap-2.5 sm:gap-3">
+                  <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl border border-gray-100 flex items-center justify-center p-1 bg-white shadow-sm shrink-0">
                     <img src={exam.logo} alt={exam.institution} className="max-w-full max-h-full object-contain" />
                   </div>
                   <div className="flex flex-col min-w-0">
-                    <h3 className="text-[15px] font-bold text-[#111827] flex items-center gap-1.5 truncate">
+                    <h3 className="text-[13px] xs:text-[14px] sm:text-[15px] font-bold text-[#111827] flex items-center gap-1 sm:gap-1.5 truncate">
                       {exam.institution}
-                      {exam.verified && <BadgeCheckIcon className="w-[15px] h-[15px] text-white fill-blue-500 ml-1" />}
+                      {exam.verified && <BadgeCheckIcon className="w-[13px] h-[13px] sm:w-[15px] sm:h-[15px] text-white fill-blue-500 ml-0.5 sm:ml-1 shrink-0" />}
                     </h3>
-                    <div className="flex items-center gap-2 text-[11px] text-[#6b7280] mt-0.5">
-                      <span className="flex items-center gap-1"><MapPin className="w-3 h-3" /> {exam.location}</span>
-                      <span className="w-1 h-1 rounded-full bg-gray-300"></span>
-                      <span className="flex items-center gap-1"><Award className="w-3 h-3" /> {exam.affiliation}</span>
+                    <div className="flex items-center gap-1.5 sm:gap-2 text-[10px] xs:text-[11px] sm:text-[11px] text-[#6b7280] mt-0.5 flex-wrap">
+                      <span className="flex items-center gap-1"><MapPin className="w-2.5 h-2.5 sm:w-3 sm:h-3" /> {exam.location}</span>
+                      <span className="w-1 h-1 rounded-full bg-gray-300 hidden xs:inline"></span>
+                      <span className="flex items-center gap-1"><Award className="w-2.5 h-2.5 sm:w-3 sm:h-3" /> {exam.affiliation}</span>
                     </div>
-                    <a href="#" className="text-[#2563eb] text-[11px] font-medium mt-1 flex items-center gap-1 hover:underline">
-                      <ExternalLink className="w-3 h-3" /> {exam.website}
+                    <a href="#" className="text-[#2563eb] text-[10px] xs:text-[11px] sm:text-[11px] font-medium mt-0.5 sm:mt-1 flex items-center gap-1 hover:underline">
+                      <ExternalLink className="w-2.5 h-2.5 sm:w-3 sm:h-3" /> {exam.website}
                     </a>
                   </div>
                 </div>
-                <button className="text-gray-400 hover:text-red-500 hover:bg-red-50 p-1.5 rounded-full transition-all">
-                  <Heart className="w-5 h-5" />
-                </button>
+                {/* Bookmark placeholder - moved to footer to match financial aid layout */}
+                <div className="w-8 h-8 opacity-0"></div>
               </header>
 
               <main className="flex-grow">
-                <h4 className="text-[17px] font-bold text-[#111827] mb-3 leading-tight">{exam.title}</h4>
+                <h4 className="text-[15px] xs:text-[16px] sm:text-[17px] font-bold text-[#111827] mb-2.5 sm:mb-3 leading-tight">{exam.title}</h4>
                 
-                <div className="flex flex-wrap gap-2 mb-4">
+                <div className="flex flex-wrap gap-1.5 sm:gap-2 mb-3 sm:mb-4">
                   {exam.tags.map((tag, tIdx) => (
-                    <span key={tIdx} className={`px-2 py-1 rounded-md text-[10px] font-bold flex items-center gap-1.5 ${
+                    <span key={tIdx} className={`px-1.5 sm:px-2 py-0.5 sm:py-1 rounded-md text-[9px] xs:text-[10px] sm:text-[10px] font-bold flex items-center gap-1 sm:gap-1.5 ${
                       tag.type === 'alert' ? 'bg-red-50 text-red-500' :
                       tag.type === 'warning' ? 'bg-amber-50 text-amber-600' :
                       tag.type === 'success' ? 'bg-emerald-50 text-emerald-600' :
@@ -141,49 +140,51 @@ const ExamAnnouncementsSection: React.FC<ExamAnnouncementsSectionProps> = ({ onN
                   ))}
                 </div>
 
-                <div className="flex flex-col gap-3 mb-5">
-                  <div className="flex items-start gap-2.5">
-                    <Clock className="w-4 h-4 text-gray-400 mt-0.5" />
-                    <div className="flex flex-col">
-                      <span className="text-[11px] text-gray-500">Application Deadline</span>
-                      <span className="text-[13px] font-bold text-red-500">{exam.deadline}</span>
-                    </div>
+                {/* More Compact Details Box */}
+                <div className="bg-[#f8fafc] rounded-lg sm:rounded-xl p-2 sm:p-2.5 flex flex-col gap-1.5 sm:gap-2 mt-auto border border-[#f1f5f9]">
+                  <div className="flex items-center gap-2 sm:gap-2.5 text-[11px] xs:text-[12px] sm:text-[13px] text-[#475569]">
+                    <Clock className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-[#94a3b8] shrink-0" />
+                    <span className="truncate font-medium text-red-500 text-[11px] sm:text-[12px]">Ends: {exam.deadline}</span>
                   </div>
-                  <div className="flex items-start gap-2.5">
-                    <GraduationCap className="w-4 h-4 text-gray-400 mt-0.5" />
-                    <div className="flex flex-col">
-                      <span className="text-[11px] text-gray-500">Eligibility</span>
-                      <span className="text-[13px] font-semibold text-[#111827]">{exam.eligibility}</span>
-                    </div>
+                  <div className="flex items-center gap-2 sm:gap-2.5 text-[11px] xs:text-[12px] sm:text-[13px] text-[#475569]">
+                    <GraduationCap className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-[#94a3b8] shrink-0" />
+                    <span className="truncate text-[11px] sm:text-[12px]">{exam.eligibility}</span>
                   </div>
-                  <div className="flex items-start gap-2.5">
-                    <Users className="w-4 h-4 text-gray-400 mt-0.5" />
-                    <div className="flex flex-col">
-                      <span className="text-[11px] text-gray-500">Join Community</span>
-                      <div className="flex gap-2 mt-1">
-                        <a href={exam.whatsapp} className="bg-[#ecfdf5] text-[#059669] border border-[#a7f3d0] px-2 py-0.5 rounded text-[10px] font-bold flex items-center gap-1 hover:bg-[#d1fae5] transition-colors">
-                          <i className="fa-brands fa-whatsapp"></i> WhatsApp
-                        </a>
-                        <a href={exam.viber} className="bg-[#f5f3ff] text-[#6d28d9] border border-[#ddd6fe] px-2 py-0.5 rounded text-[10px] font-bold flex items-center gap-1 hover:bg-[#ede9fe] transition-colors">
-                          <i className="fa-brands fa-viber"></i> Viber
-                        </a>
-                      </div>
+                  <div className="flex items-center gap-2 sm:gap-2.5 text-[11px] xs:text-[12px] sm:text-[13px] text-[#475569]">
+                    <Users className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-[#94a3b8] shrink-0" />
+                    <div className="flex gap-1.5 sm:gap-2 text-[10px] sm:text-[11px]">
+                       <a href={exam.whatsapp} className="text-[#059669] hover:underline font-bold">WhatsApp</a>
+                       <span className="text-gray-300">|</span>
+                       <a href={exam.viber} className="text-[#6d28d9] hover:underline font-bold">Viber</a>
                     </div>
                   </div>
                 </div>
               </main>
 
-              <footer className="grid grid-cols-2 gap-2 pt-4 border-t border-dashed border-gray-100">
-                <button className="flex items-center justify-center gap-1.5 py-2 px-3 border border-gray-200 text-gray-600 font-bold text-[12px] rounded-lg hover:bg-gray-50 transition-colors">
-                  <Bell className="w-3.5 h-3.5" /> Notify
-                </button>
-                <button className="flex items-center justify-center gap-1.5 py-2 px-3 border border-gray-200 text-gray-600 font-bold text-[12px] rounded-lg hover:bg-gray-50 transition-colors">
-                  <Send className="w-3.5 h-3.5" /> Apply
-                </button>
-                <button className="col-span-2 flex items-center justify-center gap-2 py-2.5 px-3 bg-[#2563eb] text-white font-bold text-[13px] rounded-lg hover:bg-blue-700 transition-colors shadow-sm">
-                  <PlayCircle className="w-4 h-4" /> Start Mock Test
-                </button>
-              </footer>
+              {/* Restored Previous Button Structure with New Design */}
+              <div className="mt-3 sm:mt-4 pt-1 flex flex-col gap-2 sm:gap-2.5">
+                <div className="grid grid-cols-2 gap-2 sm:gap-2.5">
+                  <button className="flex items-center justify-center gap-1.5 py-1.5 sm:py-2 px-2 sm:px-3 border border-[#e2e8f0] text-[#475569] font-bold text-[11px] xs:text-[12px] rounded-lg hover:bg-gray-50 transition-colors">
+                    <Bell className="w-3.5 h-3.5" /> <span>Notify</span>
+                  </button>
+                  <button className="flex items-center justify-center gap-1.5 py-1.5 sm:py-2 px-2 sm:px-3 border border-[#e2e8f0] text-[#475569] font-bold text-[11px] xs:text-[12px] rounded-lg hover:bg-gray-50 transition-colors">
+                    <Send className="w-3.5 h-3.5" /> Apply
+                  </button>
+                </div>
+                
+                <div className="flex gap-2 sm:gap-2.5">
+                  <button className="flex-1 flex items-center justify-center gap-2 py-2 sm:py-2.5 px-3 bg-[#0000FF] text-white font-bold text-[12px] sm:text-[13px] rounded-lg hover:bg-[#0000CC] transition-colors shadow-sm">
+                    <PlayCircle className="w-4 h-4" /> Start Mock Test
+                  </button>
+                  <button 
+                    className="w-[36px] sm:w-[40px] shrink-0 bg-white border border-[#e2e8f0] text-[#94a3b8] rounded-lg flex items-center justify-center h-[36px] sm:h-[40px] hover:bg-[#f8fafc] hover:text-[#64748b] transition-all duration-200"
+                    aria-label="Bookmark"
+                    onClick={(e) => { e.stopPropagation(); }}
+                  >
+                    <Bookmark className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+                  </button>
+                </div>
+              </div>
             </article>
           ))}
         </div>

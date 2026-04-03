@@ -2,6 +2,7 @@
 
 import React, { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
+import { Crosshair } from "lucide-react";
 import {
   SearchItem,
   searchDatabase,
@@ -9,7 +10,7 @@ import {
   trendingSearches,
 } from "@/utils/searchDatabase";
 
-export const SearchBar: React.FC = () => {
+export const SearchBar: React.FC<{ isMobile?: boolean }> = ({ isMobile }) => {
   const [locationText, setLocationText] = useState(() => {
     if (typeof window === "undefined") return "Detect Location";
     return sessionStorage.getItem("navLocation") || "Detect Location";
@@ -137,7 +138,10 @@ export const SearchBar: React.FC = () => {
                 addr.road ||
                 addr.town;
               const city =
-                addr.city || addr.municipality || addr.county || addr.state_district;
+                addr.city ||
+                addr.municipality ||
+                addr.county ||
+                addr.state_district;
 
               if (precise && city && precise !== city) {
                 setLocationText(`${precise}, ${city}`);
@@ -178,7 +182,8 @@ export const SearchBar: React.FC = () => {
 
     if (navigator.geolocation) {
       navigator.geolocation.getCurrentPosition(
-        (position) => fetchLocation(position.coords.latitude, position.coords.longitude),
+        (position) =>
+          fetchLocation(position.coords.latitude, position.coords.longitude),
         () => fetchLocation(),
         { enableHighAccuracy: true, timeout: 5000, maximumAge: 0 },
       );
@@ -188,7 +193,13 @@ export const SearchBar: React.FC = () => {
   };
 
   return (
-    <div className="mx-4 hidden max-w-160 flex-1 md:mx-10 md:block">
+    <div
+      className={
+        isMobile
+          ? "w-full"
+          : "mx-4 hidden max-w-160 flex-1 md:mx-10 md:block"
+      }
+    >
       <div className="group relative flex h-10 w-full items-center overflow-visible rounded-full border border-gray-300 bg-white transition-all focus-within:border-[#4461f2] focus-within:ring-1 focus-within:ring-[#4461f2] sm:h-11.5">
         <div className="relative h-full shrink-0" ref={locContainerRef}>
           <button
@@ -212,38 +223,47 @@ export const SearchBar: React.FC = () => {
               <path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"></path>
               <circle cx="12" cy="10" r="3"></circle>
             </svg>
-            <span
-              className={`max-w-35 truncate whitespace-nowrap text-[15px] ${
-                locationText !== "Detect Location" ? "text-gray-900" : ""
-              }`}
-            >
-              {locationText}
-            </span>
+            {!isMobile && (
+              <span
+                className={`max-w-35 truncate whitespace-nowrap text-[15px] ${
+                  locationText !== "Detect Location" ? "text-gray-900" : ""
+                }`}
+              >
+                {locationText}
+              </span>
+            )}
+            {isMobile && locationText !== "Detect Location" && (
+              <span className="max-w-20 truncate whitespace-nowrap text-[14px] text-gray-900 ml-1">
+                {locationText}
+              </span>
+            )}
           </button>
 
           {isLocationOpen && (
-            <div className="custom-scrollbar absolute left-0 top-[calc(100%+8px)] z-200 max-h-80 w-75 overflow-y-auto rounded-lg border border-gray-100 bg-white py-2 shadow-xl">
+            <div className="custom-scrollbar absolute left-1/2 -translate-x-1/2 top-[calc(100%+8px)] z-200 max-h-80 w-75 overflow-y-auto rounded-lg border border-gray-100 bg-white py-2 shadow-xl">
               <button
                 onClick={autoDetectLocation}
-                className="flex w-full items-center gap-3 px-5 py-3 text-left text-[15px] font-medium text-blue-600 transition-colors hover:bg-gray-50"
+                className="flex w-full items-center gap-3 px-5 py-3 text-left text-[15px] font-medium text-[#0000FF] transition-colors hover:bg-gray-50"
               >
-                <i className="fa-solid fa-location-crosshairs"></i>
-                Detect Location
+                <Crosshair className="h-4 w-4" />
+                {isMobile ? "Location" : "Detect Location"}
               </button>
-              {["Thamel, Kathmandu", "Putalisadak, Kathmandu", "Lakeside, Pokhara"].map(
-                (loc) => (
-                  <button
-                    key={loc}
-                    onClick={() => {
-                      setLocationText(loc);
-                      setIsLocationOpen(false);
-                    }}
-                    className="w-full px-5 py-2.5 text-left text-[15px] text-gray-800 transition-colors hover:bg-gray-50"
-                  >
-                    {loc}
-                  </button>
-                ),
-              )}
+              {[
+                "Thamel, Kathmandu",
+                "Putalisadak, Kathmandu",
+                "Lakeside, Pokhara",
+              ].map((loc) => (
+                <button
+                  key={loc}
+                  onClick={() => {
+                    setLocationText(loc);
+                    setIsLocationOpen(false);
+                  }}
+                  className="w-full px-5 py-2.5 text-left text-[15px] text-gray-800 transition-colors hover:bg-gray-50"
+                >
+                  {loc}
+                </button>
+              ))}
             </div>
           )}
         </div>
@@ -271,15 +291,27 @@ export const SearchBar: React.FC = () => {
           {!searchQuery && (
             <div className="pointer-events-none absolute inset-y-0 left-9.5 flex items-center text-[15px] text-gray-400 peer-focus:hidden">
               <span className="mr-1 whitespace-nowrap">Search</span>
-              <div className="relative inline-block h-5 overflow-hidden align-bottom">
-                <div className="sliding-text flex flex-col leading-5">
-                  <span className="block h-5 whitespace-nowrap">+2 science colleges...</span>
-                  <span className="block h-5 whitespace-nowrap">BIT colleges in nepal...</span>
-                  <span className="block h-5 whitespace-nowrap">CMAT entrance preparation...</span>
-                  <span className="block h-5 whitespace-nowrap">MoE scholarships...</span>
-                  <span className="block h-5 whitespace-nowrap">+2 science colleges...</span>
+              {!isMobile && (
+                <div className="relative inline-block h-5 overflow-hidden align-bottom">
+                  <div className="sliding-text flex flex-col leading-5">
+                    <span className="block h-5 whitespace-nowrap">
+                      +2 science colleges...
+                    </span>
+                    <span className="block h-5 whitespace-nowrap">
+                      BIT colleges in nepal...
+                    </span>
+                    <span className="block h-5 whitespace-nowrap">
+                      CMAT entrance preparation...
+                    </span>
+                    <span className="block h-5 whitespace-nowrap">
+                      MoE scholarships...
+                    </span>
+                    <span className="block h-5 whitespace-nowrap">
+                      +2 science colleges...
+                    </span>
+                  </div>
                 </div>
-              </div>
+              )}
             </div>
           )}
 
@@ -300,11 +332,17 @@ export const SearchBar: React.FC = () => {
                     >
                       <div
                         className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-gray-400 text-white shadow-sm transition-transform duration-200 group-hover:scale-105"
-                        dangerouslySetInnerHTML={{ __html: searchIcons["Trending"] }}
+                        dangerouslySetInnerHTML={{
+                          __html: searchIcons["Trending"],
+                        }}
                       ></div>
                       <div className="flex flex-col">
-                        <span className="text-[15px] font-medium text-gray-900">{item.title}</span>
-                        <span className="text-[13px] text-gray-500">{item.type}</span>
+                        <span className="text-[15px] font-medium text-gray-900">
+                          {item.title}
+                        </span>
+                        <span className="text-[13px] text-gray-500">
+                          {item.type}
+                        </span>
                       </div>
                     </button>
                   ))}
@@ -317,14 +355,18 @@ export const SearchBar: React.FC = () => {
                     className="group flex w-full items-center gap-4 px-5 py-2.5 text-left transition-colors hover:bg-gray-50"
                   >
                     <div
-                      className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-blue-600 text-white shadow-sm transition-transform duration-200 group-hover:scale-105"
+                      className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-[#0000FF] text-white shadow-sm transition-transform duration-200 group-hover:scale-105"
                       dangerouslySetInnerHTML={{
                         __html: searchIcons[item.type] || searchIcons["Course"],
                       }}
                     ></div>
                     <div className="flex flex-col">
-                      <span className="text-[15px] font-medium text-gray-900">{item.title}</span>
-                      <span className="text-[13px] text-gray-500">{item.type}</span>
+                      <span className="text-[15px] font-medium text-gray-900">
+                        {item.title}
+                      </span>
+                      <span className="text-[13px] text-gray-500">
+                        {item.type}
+                      </span>
                     </div>
                   </button>
                 ))

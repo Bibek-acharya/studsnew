@@ -2,7 +2,11 @@
 
 import React, { useMemo } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { SearchItem, searchDatabase, searchIcons } from "@/utils/searchDatabase";
+import {
+  SearchItem,
+  searchDatabase,
+  searchIcons,
+} from "@/utils/searchDatabase";
 
 export default function SearchPage() {
   const params = useSearchParams();
@@ -72,15 +76,16 @@ export default function SearchPage() {
             Find Your Dream Path in Nepal
           </h1>
           <p className="mx-auto max-w-2xl text-lg text-gray-500">
-            Use the search bar above to discover top colleges, programs, admissions,
-            and scholarships tailored for you.
+            Use the search bar above to discover top colleges, programs,
+            admissions, and scholarships tailored for you.
           </p>
         </div>
       ) : (
         <div>
           <div className="mb-8 flex items-center justify-between">
             <h2 className="text-2xl font-bold text-gray-900">
-              Results for &quot;{q}&quot; {loc && loc !== "Detect Location" && `near ${loc}`}
+              Results for &quot;{q}&quot;{" "}
+              {loc && loc !== "Detect Location" && `near ${loc}`}
             </h2>
             <div className="text-sm font-medium text-gray-500">
               {results.length} result{results.length !== 1 ? "s" : ""} found
@@ -90,7 +95,9 @@ export default function SearchPage() {
           <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
             {results.length === 0 ? (
               <div className="col-span-full py-16 text-center">
-                <h3 className="mb-2 text-xl font-semibold text-gray-800">No matches found</h3>
+                <h3 className="mb-2 text-xl font-semibold text-gray-800">
+                  No matches found
+                </h3>
                 <p className="mx-auto max-w-sm text-gray-500">
                   Try checking spelling or searching with different keywords.
                 </p>
@@ -117,7 +124,9 @@ export default function SearchPage() {
                     {item.title}
                   </h3>
                   <div className="mt-auto flex items-center justify-between border-t border-gray-50 pt-4">
-                    <span className="text-[13px] font-medium text-gray-500">View Details</span>
+                    <span className="text-[13px] font-medium text-gray-500">
+                      View Details
+                    </span>
                     <span className="text-blue-600">&gt;</span>
                   </div>
                 </div>
