@@ -97,7 +97,7 @@ const DesktopDropdown: React.FC<{
         strokeWidth="2"
         strokeLinecap="round"
         strokeLinejoin="round"
-        className={`text-gray-400 transition-transform duration-200 ${isOpen ? "rotate-180 text-[#0000FF]" : ""}`}
+        className={`text-gray-400 transition-transform duration-200 ${isOpen ? "rotate-180 text-brand-blue" : ""}`}
       >
         <path d="m6 9 6 6 6-6" />
       </svg>
@@ -174,7 +174,7 @@ const NotificationItem: React.FC<{
       </span>
     </div>
     {unread && (
-      <div className="mt-1.5 sm:mt-2 h-1.5 sm:h-2 w-1.5 sm:w-2 shrink-0 rounded-full bg-[#0000FF]"></div>
+      <div className="mt-1.5 sm:mt-2 h-1.5 sm:h-2 w-1.5 sm:w-2 shrink-0 rounded-full bg-brand-blue"></div>
     )}
   </button>
 );
@@ -414,10 +414,7 @@ const EducationNavbar: React.FC<EducationNavbarProps> = ({
               href="/"
               className="flex shrink-0 cursor-pointer items-center gap-2"
             >
-              <div className="flex h-7 w-7 xs:h-8 xs:w-8 sm:h-9 sm:w-9 items-center justify-center rounded-lg bg-linear-to-br from-blue-600 to-indigo-600 shadow-sm">
-                <i className="fa-solid fa-graduation-cap text-xs sm:text-sm text-white"></i>
-              </div>
-              <span className="text-[16px] xs:text-[18px] sm:text-[22px] md:text-[26px] font-bold leading-none tracking-tight text-[#0000FF]">
+              <span className="text-[20px] sm:text-[22px] font-extrabold tracking-tight text-brand-blue leading-none">
                 Studsphere
               </span>
             </Link>
@@ -432,10 +429,22 @@ const EducationNavbar: React.FC<EducationNavbarProps> = ({
               {/* Write a Review - Desktop */}
               <button
                 onClick={() => go("writeReview")}
-                className="hidden lg:flex items-center gap-2 bg-primary hover:bg-primaryHover text-white px-4 py-2.5 rounded-md text-[14px] font-semibold transition-colors shrink-0"
+                className="hidden lg:flex items-center gap-2 bg-brand-blue hover:bg-brand-hover text-white px-4 py-2.5 rounded-md text-[14px] font-semibold transition-colors shrink-0"
               >
                 <i className="fa-solid fa-pen-to-square text-sm"></i>
                 <span>Write a Review</span>
+              </button>
+
+              {/* Mobile Search Icon */}
+              <button
+                className="md:hidden flex h-9.5 w-9.5 items-center justify-center rounded-full hover:bg-gray-100 transition-colors text-gray-600 shrink-0"
+                onClick={() => {
+                  setShowMobileSearch((prev) => !prev);
+                  setIsMobileOpen(false);
+                }}
+                aria-label="Toggle mobile search"
+              >
+                <Search size={18} />
               </button>
 
               {/* Notification Bell */}
@@ -446,7 +455,7 @@ const EducationNavbar: React.FC<EducationNavbarProps> = ({
                       prev === "notification-menu" ? null : "notification-menu"
                     )
                   }
-                  className="relative flex items-center justify-center w-[38px] h-[38px] rounded-full border border-gray-200 hover:bg-gray-50 transition-colors text-[#475569] shrink-0"
+                  className="relative flex items-center justify-center w-9.5 h-9.5 rounded-full border border-gray-200 hover:bg-gray-50 transition-colors text-[#475569] shrink-0"
                 >
                   <Bell size={18} />
                   {notifications.filter((n) => !n.isRead && !n.isArchived).length >
@@ -463,7 +472,7 @@ const EducationNavbar: React.FC<EducationNavbarProps> = ({
                 {activeMenu === "notification-menu" && (
                   <div className="absolute top-full right-0 z-200 mt-2 cursor-default font-inter sm:-right-2">
                     <div className="absolute -top-1.5 right-6 z-30 h-3 w-3 rotate-45 border-l border-t border-gray-200 bg-white"></div>
-                    <div className="relative z-20 flex w-[320px] flex-col overflow-hidden rounded-2xl border border-gray-200 bg-white text-left shadow-[0_8px_30px_rgb(0,0,0,0.12)] sm:w-[380px]">
+                    <div className="relative z-20 flex w-[320px] flex-col overflow-hidden rounded-2xl border border-gray-200 bg-white text-left shadow-[0_8px_30px_rgb(0,0,0,0.12)] sm:w-95">
                       <div className="z-10 flex items-center justify-between border-b border-gray-100 bg-white px-4 py-3">
                         <div className="flex items-center gap-2">
                           <h3 className="text-lg font-semibold text-gray-900">
@@ -502,7 +511,7 @@ const EducationNavbar: React.FC<EducationNavbarProps> = ({
                           </button>
                         ))}
                       </div>
-                      <div className="no-scrollbar flex max-h-[300px] flex-col overflow-y-auto">
+                      <div className="no-scrollbar flex max-h-75 flex-col overflow-y-auto">
                         {notifications
                           .filter((n) => {
                             if (currentNotifTab === "all") return !n.isArchived;
@@ -577,17 +586,18 @@ const EducationNavbar: React.FC<EducationNavbarProps> = ({
               </div>
 
               {/* User Profile - sm+ only */}
-              <div className="hidden sm:flex items-center gap-3 cursor-pointer group relative py-1 border-l border-gray-200 pl-3">
+              <div className="hidden lg:block w-px h-8 bg-gray-200"></div>
+              <div className="hidden sm:flex items-center gap-3 cursor-pointer group relative py-1">
                 {!user ? (
                    <div className="flex items-center overflow-hidden rounded-md text-[13px] font-medium shadow-sm">
                     <button onClick={() => go("login")} className="border-r border-gray-200 bg-gray-100 px-3 py-2 text-[#334155] transition-colors hover:bg-gray-200">Login</button>
-                    <button onClick={() => go("signup")} className="bg-[#0000FF] px-3 py-2 text-white transition-colors hover:bg-[#0000CC]">Register</button>
+                    <button onClick={() => go("signup")} className="bg-brand-blue px-3 py-2 text-white transition-colors hover:bg-brand-hover">Register</button>
                   </div>
                 ) : (
                   <>
                     <button onClick={() => setActiveMenu(prev => prev === 'profile-menu' ? null : 'profile-menu')} className="flex items-center gap-3">
                       <div className="relative">
-                        <div className="flex h-9 w-9 items-center justify-center rounded-full bg-[#0000FF] text-white font-bold text-sm shadow-sm ring-2 ring-white">
+                        <div className="flex h-9 w-9 items-center justify-center rounded-full bg-brand-blue text-white font-bold text-sm shadow-sm ring-2 ring-white">
                           <span>{initials}</span>
                         </div>
                         <div className="absolute bottom-0 right-0 w-2.5 h-2.5 bg-green-500 border-2 border-white rounded-full"></div>
@@ -604,7 +614,7 @@ const EducationNavbar: React.FC<EducationNavbarProps> = ({
 
                     {activeMenu === 'profile-menu' && (
                       <div className="absolute top-full right-0 pt-3 z-200 cursor-default font-inter">
-                        <div className="w-[270px] bg-white rounded-[18px] border border-gray-100/80 p-2.5 text-[14px] text-gray-600 font-medium select-none shadow-[0_8px_30px_rgb(0,0,0,0.08)] relative">
+                        <div className="w-67.5 bg-white rounded-[18px] border border-gray-100/80 p-2.5 text-[14px] text-gray-600 font-medium select-none shadow-[0_8px_30px_rgb(0,0,0,0.08)] relative">
                           <div className="absolute -top-1.5 right-6 w-3 h-3 bg-white border-t border-l border-gray-100/80 transform rotate-45"></div>
                           <div className="flex flex-col relative z-10 bg-white rounded-xl">
                             <div onClick={() => go("studentDashboard")} className="flex flex-col px-3 py-3 bg-[#f4f4f5] rounded-xl cursor-pointer mb-1 hover:bg-gray-100 transition-all">
@@ -612,13 +622,13 @@ const EducationNavbar: React.FC<EducationNavbarProps> = ({
                                 <User size={18} />
                                 <span className="font-semibold">View Profile</span>
                               </div>
-                              <div className="mt-2.5 pl-[30px]">
+                              <div className="mt-2.5 pl-7.5">
                                 <div className="flex justify-between items-center text-[11px] font-semibold text-gray-500 mb-1.5">
                                   <span>Profile Completion</span>
                                   <span className="text-[#5468FF]">80%</span>
                                 </div>
                                 <div className="w-full bg-gray-200/80 rounded-full h-1.5">
-                                  <div className="bg-[#0000FF] h-1.5 rounded-full w-[80%]"></div>
+                                  <div className="bg-brand-blue h-1.5 rounded-full w-[80%]"></div>
                                 </div>
                               </div>
                             </div>
@@ -631,7 +641,7 @@ const EducationNavbar: React.FC<EducationNavbarProps> = ({
                               <span>Saved College</span>
                               <span className="ml-auto text-gray-400 text-xs font-semibold">12</span>
                             </button>
-                            <div className="h-[1px] bg-gray-100 my-1.5 mx-2"></div>
+                            <div className="h-px bg-gray-100 my-1.5 mx-2"></div>
                             <button onClick={onLogout} className="flex items-center gap-3 px-3 py-2.5 hover:bg-red-50 text-red-500 rounded-xl transition-all">
                               <LogOut size={18} className="scale-x-[-1]" />
                               <span>Sign out</span>
@@ -645,7 +655,7 @@ const EducationNavbar: React.FC<EducationNavbarProps> = ({
               </div>
 
               <button
-                className="flex h-10 w-10 items-center justify-center text-gray-600 md:hidden rounded-full hover:bg-gray-100 transition-colors"
+                className="flex h-10 w-10 items-center justify-center text-gray-600 md:hidden rounded-md hover:bg-gray-100 transition-colors ml-1"
                 onClick={() => setIsMobileOpen(!isMobileOpen)}
                 aria-label="Toggle menu"
               >
@@ -817,9 +827,23 @@ const EducationNavbar: React.FC<EducationNavbarProps> = ({
 
         {isMobileOpen && (
           <div
-            className="fixed inset-0 z-150 bg-black/40 backdrop-blur-sm md:hidden"
+            className="fixed inset-0 z-100 bg-black/40 backdrop-blur-sm md:hidden"
             onClick={() => setIsMobileOpen(false)}
           />
+        )}
+
+        {showMobileSearch && (
+          <div
+            className="fixed inset-0 z-150 bg-black/35 backdrop-blur-sm md:hidden"
+            onClick={() => setShowMobileSearch(false)}
+          >
+            <div
+              className="mx-4 mt-20 rounded-2xl border border-gray-200 bg-white p-3 shadow-xl"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <SearchBar isMobile />
+            </div>
+          </div>
         )}
 
         {/* Mobile Menu Dropdown (Visible only when toggled on smaller screens) */}
@@ -827,7 +851,7 @@ const EducationNavbar: React.FC<EducationNavbarProps> = ({
           className={`${isMobileOpen ? "block" : "hidden"} md:hidden absolute top-full left-0 w-full bg-white border-t border-gray-200 shadow-lg px-4 py-4 z-200 max-h-[calc(100vh-70px)] overflow-y-auto no-scrollbar font-inter transition-all duration-300`}
         >
             {/* Mobile Search */}
-            <div className="flex items-center border border-gray-300 rounded-full h-11 bg-white focus-within:border-[#0000FF] focus-within:ring-1 focus-within:ring-[#0000FF] overflow-hidden mb-5">
+            <div className="flex items-center border border-gray-300 rounded-full h-11 bg-white focus-within:border-brand-blue focus-within:ring-1 focus-within:ring-brand-blue overflow-hidden mb-5">
                 <div className="flex items-center gap-2 px-4 h-full flex-1 w-full text-gray-500">
                     <Search size={16} className="text-gray-400" />
                     <input 
@@ -880,13 +904,13 @@ const EducationNavbar: React.FC<EducationNavbarProps> = ({
                                     <User size={18} className="text-gray-500" />
                                     <span className="font-semibold">View Profile</span>
                                 </div>
-                                <div className="mt-2.5 pl-[30px]">
+                                <div className="mt-2.5 pl-7.5">
                                     <div className="flex justify-between items-center text-[11px] font-semibold text-gray-500 mb-1.5">
                                         <span>Profile Completion</span>
                                         <span className="text-[#5468FF]">80%</span>
                                     </div>
                                     <div className="w-full bg-gray-200/80 rounded-full h-1.5 border border-gray-100 shadow-inner">
-                                        <div className="bg-[#0000FF] h-1.5 rounded-full w-[80%]"></div>
+                                        <div className="bg-brand-blue h-1.5 rounded-full w-[80%]"></div>
                                     </div>
                                 </div>
                             </div>
@@ -906,10 +930,10 @@ const EducationNavbar: React.FC<EducationNavbarProps> = ({
                             <div onClick={() => go("studentDashboard")} className="flex items-center gap-3 px-3 py-2.5 hover:bg-gray-50 rounded-xl cursor-pointer mb-0.5 transition-all">
                                 <Sparkles size={18} className="text-gray-500" />
                                 <span>Match</span>
-                                <span className="ml-auto bg-[#5468FF]/10 text-[#5468FF] text-[11px] font-bold px-2 py-[2px] rounded-full">3</span>
+                                <span className="ml-auto bg-[#5468FF]/10 text-[#5468FF] text-[11px] font-bold px-2 py-0.5 rounded-full">3</span>
                             </div>
 
-                            <div className="h-[1px] bg-gray-100 my-1.5 mx-2"></div>
+                            <div className="h-px bg-gray-100 my-1.5 mx-2"></div>
 
                             <div onClick={() => go("studentDashboard")} className="flex items-center gap-3 px-3 py-2.5 hover:bg-gray-50 rounded-xl cursor-pointer mb-0.5 transition-all">
                                 <Bell size={18} className="text-gray-500" />
@@ -922,7 +946,7 @@ const EducationNavbar: React.FC<EducationNavbarProps> = ({
                                 <span>Settings</span>
                             </div>
 
-                            <div className="h-[1px] bg-gray-100 my-1.5 mx-2"></div>
+                            <div className="h-px bg-gray-100 my-1.5 mx-2"></div>
 
                             <div onClick={() => go("contact")} className="flex items-center gap-3 px-3 py-2.5 hover:bg-gray-50 rounded-xl cursor-pointer transition-all">
                                 <MessageCircleQuestion size={18} className="text-gray-500" />

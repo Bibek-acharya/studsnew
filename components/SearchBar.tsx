@@ -200,14 +200,14 @@ export const SearchBar: React.FC<{ isMobile?: boolean }> = ({ isMobile }) => {
           : "mx-4 hidden max-w-160 flex-1 md:mx-10 md:block"
       }
     >
-      <div className="group relative flex h-10 w-full items-center overflow-visible rounded-full border border-gray-300 bg-white transition-all focus-within:border-[#4461f2] focus-within:ring-1 focus-within:ring-[#4461f2] sm:h-11.5">
+      <div className="group relative flex h-10 w-full items-center overflow-visible rounded-md border border-gray-300 bg-white transition-all focus-within:border-[#4461f2] focus-within:ring-1 focus-within:ring-[#4461f2] sm:h-11.5">
         <div className="relative h-full shrink-0" ref={locContainerRef}>
           <button
             onClick={() => {
               setIsLocationOpen(!isLocationOpen);
               setIsSearchOpen(false);
             }}
-            className="flex h-full items-center gap-2 rounded-l-full bg-transparent pl-4 pr-3 font-medium text-[#334155] outline-none transition-colors hover:bg-gray-50"
+            className="flex h-full items-center gap-2 rounded-l-md bg-transparent pl-4 pr-3 font-medium text-[#334155] outline-none transition-colors hover:bg-gray-50"
           >
             <svg
               width="18"
@@ -243,7 +243,7 @@ export const SearchBar: React.FC<{ isMobile?: boolean }> = ({ isMobile }) => {
             <div className="custom-scrollbar absolute left-1/2 -translate-x-1/2 top-[calc(100%+8px)] z-200 max-h-80 w-75 overflow-y-auto rounded-lg border border-gray-100 bg-white py-2 shadow-xl">
               <button
                 onClick={autoDetectLocation}
-                className="flex w-full items-center gap-3 px-5 py-3 text-left text-[15px] font-medium text-[#0000FF] transition-colors hover:bg-gray-50"
+                className="flex w-full items-center gap-3 px-5 py-3 text-left text-[15px] font-medium text-brand-blue transition-colors hover:bg-gray-50"
               >
                 <Crosshair className="h-4 w-4" />
                 {isMobile ? "Location" : "Detect Location"}
@@ -355,7 +355,7 @@ export const SearchBar: React.FC<{ isMobile?: boolean }> = ({ isMobile }) => {
                     className="group flex w-full items-center gap-4 px-5 py-2.5 text-left transition-colors hover:bg-gray-50"
                   >
                     <div
-                      className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-[#0000FF] text-white shadow-sm transition-transform duration-200 group-hover:scale-105"
+                      className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-brand-blue text-white shadow-sm transition-transform duration-200 group-hover:scale-105"
                       dangerouslySetInnerHTML={{
                         __html: searchIcons[item.type] || searchIcons["Course"],
                       }}

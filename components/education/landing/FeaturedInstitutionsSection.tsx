@@ -1,7 +1,7 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { CheckCircle2, Star, MapPin, Award, MessageSquare, ArrowRightLeft, Bookmark, BadgeCheckIcon } from "lucide-react";
+import { useState, useEffect, useRef } from "react";
+import { CheckCircle2, Star, MapPin, Award, MessageSquare, ArrowRightLeft, Bookmark, BadgeCheckIcon, Globe } from "lucide-react";
 
 interface College {
   id: string | number;
@@ -12,6 +12,7 @@ interface College {
   affiliation?: string;
   description?: string;
   type?: string;
+  website?: string;
 }
 
 interface FeaturedInstitutionsSectionProps {
@@ -21,6 +22,8 @@ interface FeaturedInstitutionsSectionProps {
 const FeaturedInstitutionsSection: React.FC<FeaturedInstitutionsSectionProps> = ({ onNavigate }) => {
   const [featuredColleges, setFeaturedColleges] = useState<College[]>([]);
   const [loading, setLoading] = useState(true);
+  const [bookmarked, setBookmarked] = useState<Set<string | number>>(new Set());
+  const [expandedDesc, setExpandedDesc] = useState<Set<string | number>>(new Set());
 
   useEffect(() => {
     setFeaturedColleges([
@@ -31,49 +34,71 @@ const FeaturedInstitutionsSection: React.FC<FeaturedInstitutionsSectionProps> = 
         rating: "4.5",
         type: "Private",
         location: "Kamalpokhari",
-        description: "The Institute of Engineering (IOE) entrance exam is tough. Learn the strategies,",
-        affiliation: "NEB, Tribhuwan University, Purbanchal University"
+        description: "The Institute of Engineering (IOE) entrance exam is tough. Learn the strategies, tips, and tricks to crack the exam with our expert guidance and comprehensive study materials. Get personalized counselling and find the right program for your career goals.",
+        affiliation: "NEB, Tribhuwan University, Purbanchal University",
+        website: "https://kist.edu.np"
       },
       {
         id: 2,
-        name: "KIST College & SS",
+        name: "Islington College",
         image_url: "https://kist-edu-np.s3.ap-south-1.amazonaws.com/uploads/album/value/e71ee13b2c733ac02f8709c49f3677c3d0f2d9d01766569944.jpg",
-        rating: "4.5",
+        rating: "4.3",
         type: "Private",
         location: "Kamalpokhari",
-        description: "The Institute of Engineering (IOE) entrance exam is tough. Learn the strategies,",
-        affiliation: "NEB, Tribhuwan University, Purbanchal University"
+        description: "Leading IT and business education institution affiliated with London Metropolitan University. Offering internationally recognized programs with modern facilities and industry connections.",
+        affiliation: "London Metropolitan University, CTEVT",
+        website: "https://islington.edu.np"
       },
       {
         id: 3,
-        name: "KIST College & SS",
+        name: "Kathmandu University",
         image_url: "https://www.collegenp.com/uploads/2025/02/kist-college-building.jpg",
-        rating: "4.5",
-        type: "Private",
-        location: "Kamalpokhari",
-        description: "The Institute of Engineering (IOE) entrance exam is tough. Learn the strategies,",
-        affiliation: "NEB, Tribhuwan University, Purbanchal University"
+        rating: "4.7",
+        type: "Public",
+        location: "Dhulikhel",
+        description: "Premier autonomous university known for engineering, science, and management programs. Ranked among the top universities in Nepal with world-class research facilities.",
+        affiliation: "Kathmandu University (Autonomous)",
+        website: "https://ku.edu.np"
       },
       {
         id: 4,
-        name: "KIST College & SS",
+        name: "NAMI College",
         image_url: "https://www.collegenp.com/uploads/2025/02/kist-college-building.jpg",
-        rating: "4.5",
+        rating: "4.2",
         type: "Private",
-        location: "Kamalpokhari",
-        description: "The Institute of Engineering (IOE) entrance exam is tough. Learn the strategies,",
-        affiliation: "NEB, Tribhuwan University, Purbanchal University"
+        location: "Lainchaur",
+        description: "Specialized in healthcare and management education with hands-on clinical training. Partnered with leading hospitals for practical experience and job placement support.",
+        affiliation: "Tribhuvan University, CTEVT",
+        website: "https://nami.edu.np"
       }
     ]);
     setLoading(false);
   }, []);
+
+  const toggleBookmark = (e: React.MouseEvent, id: string | number) => {
+    e.stopPropagation();
+    setBookmarked(prev => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
+  };
+
+  const toggleExpand = (id: string | number) => {
+    setExpandedDesc(prev => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
+  };
 
   if (loading) return null;
 
   return (
     <section className="mt-4 sm:mt-8 md:mt-12 lg:mt-16 w-full">
       <div className="max-w-[1400px] mx-auto w-full px-3 sm:px-4 md:px-6 lg:px-8">
-      {/* Header Section */}
       <div className="text-center mb-8 sm:mb-10 md:mb-12">
         <h2 className="text-[26px] xs:text-[30px] sm:text-3xl md:text-[36px] lg:text-[40px] font-bold text-[#111827] mb-2 sm:mb-3 tracking-tight px-2">
           Explore Featured Colleges & Universities
@@ -83,80 +108,153 @@ const FeaturedInstitutionsSection: React.FC<FeaturedInstitutionsSectionProps> = 
         </p>
       </div>
 
-      {/* Cards Grid */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-5 md:gap-6">
         {featuredColleges.map((college) => (
-          <div 
-            key={college.id} 
-            className="bg-white rounded-2xl p-3.5 sm:p-4 shadow-[0_4px_20px_-4px_rgba(0,0,0,0.05)] border border-gray-100 flex flex-col h-full hover:shadow-lg transition-all duration-300 group cursor-pointer"
-            onClick={() => onNavigate("collegeDetails", college)}
-          >
-            {/* Image */}
-            <div className="w-full h-36 xs:h-40 sm:h-44 rounded-xl overflow-hidden mb-4 sm:mb-5 bg-gray-50 relative">
-              <img 
-                src={college.image_url} 
-                alt={college.name} 
-                className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
-                onError={(e: any) => { e.target.src='https://placehold.co/600x400/f1f5f9/94a3b8?text=Image+Unavailable' }}
-              />
-            </div>
-            
-            {/* Content */}
-            <div className="flex-grow">
-              {/* Title */}
-              <div className="flex items-center gap-1.5 mb-2 sm:mb-2.5">
-                <h3 className="text-[16px] sm:text-[17px] md:text-[18px] font-bold text-[#111827] group-hover:text-[#2563eb] transition-colors line-clamp-1">
-                  {college.name}
-                </h3>
-                <BadgeCheckIcon className="w-[13px] h-[13px] sm:w-[14px] sm:h-[14px] md:w-[15px] md:h-[15px] text-white fill-blue-500 ml-0.5 sm:ml-1 shrink-0" />
-              </div>
-
-              {/* More Compact Details Box */}
-              <div className="bg-[#f8fafc] rounded-lg sm:rounded-xl p-2 sm:p-2.5 flex flex-col gap-1.5 sm:gap-2 mt-auto border border-[#f1f5f9]">
-                <div className="flex items-center gap-2 sm:gap-2.5 text-[11px] xs:text-[12px] sm:text-[13px] text-[#475569]">
-                  <Star className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-[#f59e0b] fill-current shrink-0" />
-                  <span className="font-bold text-[#374151]">{college.rating || "4.5"} Rating</span>
-                </div>
-                <div className="flex items-center gap-2 sm:gap-2.5 text-[11px] xs:text-[12px] sm:text-[13px] text-[#475569]">
-                  <Award className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-[#94a3b8] shrink-0" />
-                  <span className="truncate">{college.affiliation || "NEB, Tribhuwan University"}</span>
-                </div>
-                <div className="flex items-center gap-2 sm:gap-2.5 text-[11px] xs:text-[12px] sm:text-[13px] text-[#475569]">
-                  <MapPin className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-[#94a3b8] shrink-0" />
-                  <span className="truncate">{college.location || "Kamalpokhari, Kathmandu"}</span>
-                </div>
-              </div>
-            </div>
-
-            {/* Footer / Actions */}
-              {/* Restored Previous Button Structure with New Design */}
-              <div className="mt-3 sm:mt-4 pt-1 flex flex-col gap-2 sm:gap-2.5">
-                <button className="w-full bg-[#0000FF] hover:bg-[#0000CC] text-white font-semibold py-2 sm:py-2.5 rounded-lg text-[12px] sm:text-sm transition-colors">
-                  Get counselling
-                </button>
-                
-                <div className="flex items-center gap-1.5 sm:gap-2">
-                  <button className="flex-1 border border-[#e2e8f0] bg-white hover:bg-gray-50 text-[#475569] font-semibold py-1.5 sm:py-2 rounded-lg text-[11px] xs:text-[12px] flex items-center justify-center gap-1 sm:gap-1.5 transition-colors">
-                    <MessageSquare className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-[#94a3b8]" />
-                    <span>Ask</span>
-                  </button>
-                  <button className="flex-[0.9] bg-[#eab308] hover:bg-yellow-500 text-white font-semibold py-1.5 sm:py-2 rounded-lg text-[11px] xs:text-[12px] transition-colors">
-                    Compare
-                  </button>
-                  <button 
-                    className="w-[36px] sm:w-[38px] shrink-0 bg-white border border-[#e2e8f0] text-[#94a3b8] rounded-lg flex items-center justify-center h-[34px] sm:h-[38px] hover:bg-[#f8fafc] hover:text-[#64748b] transition-all duration-200"
-                    aria-label="Bookmark"
-                    onClick={(e) => { e.stopPropagation(); }}
-                  >
-                    <Bookmark className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
-                  </button>
-                </div>
-              </div>
-          </div>
+          <CollegeCard
+            key={college.id}
+            college={college}
+            isBookmarked={bookmarked.has(college.id)}
+            isExpanded={expandedDesc.has(college.id)}
+            onNavigate={onNavigate}
+            onToggleBookmark={toggleBookmark}
+            onToggleExpand={toggleExpand}
+          />
         ))}
       </div>
       </div>
     </section>
+  );
+};
+
+const CollegeCard: React.FC<{
+  college: College;
+  isBookmarked: boolean;
+  isExpanded: boolean;
+  onNavigate: (view: string, data?: any) => void;
+  onToggleBookmark: (e: React.MouseEvent, id: string | number) => void;
+  onToggleExpand: (id: string | number) => void;
+}> = ({ college, isBookmarked, isExpanded, onNavigate, onToggleBookmark, onToggleExpand }) => {
+  const shortDesc = college.description?.slice(0, 80) + "... " || "";
+  const fullDesc = college.description || "";
+
+  return (
+    <div
+      className="bg-white rounded-2xl p-4 border border-gray-100 flex flex-col h-full hover:border-gray-200 transition-all duration-300 cursor-pointer"
+      onClick={() => onNavigate("collegeDetails", college)}
+    >
+      <div className="w-full h-[140px] rounded-xl overflow-hidden mb-4 relative">
+        <div className="absolute top-3 left-3 bg-blue-600 text-white text-[10px] font-bold px-2 py-0.5 rounded uppercase tracking-wider z-10 shadow-sm">
+          Featured
+        </div>
+        <img
+          src={college.image_url}
+          alt={college.name}
+          className="w-full h-full object-cover"
+          onError={(e: any) => { e.target.src = 'https://placehold.co/600x400/f1f5f9/94a3b8?text=Image+Unavailable' }}
+        />
+      </div>
+
+      <div className="flex items-center gap-1.5 mb-2">
+        <h2
+          className="text-[20px] font-bold text-slate-800 tracking-tight hover:text-blue-600 transition-colors line-clamp-1"
+          onClick={(e) => e.stopPropagation()}
+        >
+          {college.name}
+        </h2>
+        <BadgeCheckIcon className="w-5 h-5 text-white fill-blue-500 shrink-0" />
+      </div>
+
+      <div className="flex items-center text-[14px] text-gray-500 mb-2">
+        <div className="flex items-center gap-1 font-bold text-slate-700">
+          <Star className="w-4 h-4 text-amber-500 fill-amber-500" />
+          <span>{college.rating || "4.5"}</span>
+        </div>
+        <span className="mx-3 text-gray-300 font-light">|</span>
+        <div className="flex items-center gap-1.5">
+          <Award className="w-[18px] h-[18px] text-gray-400" />
+          <span className="font-semibold text-slate-700">{college.type || "Private"}</span>
+        </div>
+        <span className="mx-3 text-gray-300 font-light">|</span>
+        <div className="flex items-center gap-1.5">
+          <MapPin className="w-[18px] h-[18px] text-gray-400" />
+          <span className="font-semibold text-slate-700">{college.location || "Kathmandu"}</span>
+        </div>
+      </div>
+
+      <div className="flex items-start gap-2 text-[14px] text-gray-500 mb-2">
+        <Award className="w-[18px] h-[18px] text-gray-400 shrink-0 mt-[3px]" />
+        <p className="leading-snug pr-4 font-semibold text-slate-700 line-clamp-1">
+          {college.affiliation || "Tribhuvan University"}
+        </p>
+      </div>
+
+      {college.website && (
+        <div className="flex items-center gap-2 text-[14px] text-gray-500 mb-3">
+          <Globe className="w-[18px] h-[18px] text-gray-400 shrink-0" />
+          <a
+            href={college.website}
+            target="_blank"
+            rel="noopener noreferrer"
+            onClick={(e) => e.stopPropagation()}
+            className="text-blue-600 hover:underline font-medium truncate"
+          >
+            {college.website.replace(/^https?:\/\//, "")}
+          </a>
+        </div>
+      )}
+
+      <p className="text-[14px] text-gray-500 leading-relaxed mb-4 pr-2">
+        <span>{isExpanded ? fullDesc : shortDesc}</span>
+        {college.description && college.description.length > 80 && (
+          <span
+            className="font-semibold text-blue-600 cursor-pointer hover:underline ml-1"
+            onClick={(e) => { e.stopPropagation(); onToggleExpand(college.id); }}
+          >
+            {isExpanded ? "Show less" : "Read more"}
+          </span>
+        )}
+      </p>
+
+      <div className="border-t border-dashed border-gray-200 mb-4" />
+
+      <div className="flex flex-col gap-3 mt-auto">
+        <button
+          className="w-full bg-[#2563EB] hover:bg-blue-700 text-white font-medium text-[14px] py-2.5 px-4 rounded-md transition-colors"
+          onClick={(e) => { e.stopPropagation(); onNavigate("bookCounselling", { collegeId: college.id }); }}
+        >
+          Get counselling
+        </button>
+
+        <div className="flex gap-2">
+          <button
+            className="flex-1 flex items-center justify-center gap-1.5 border border-gray-200 hover:bg-gray-50 text-slate-600 font-medium py-2 px-2 rounded-md transition-colors text-[13px]"
+            onClick={(e) => { e.stopPropagation(); onNavigate("campusForum", { collegeId: college.id, collegeName: college.name }); }}
+          >
+            <MessageSquare className="w-[16px] h-[16px] text-gray-500" />
+            Inquiry
+          </button>
+
+          <button
+            className="flex-1 bg-[#EAB308] hover:bg-yellow-500 text-white font-semibold py-2 px-2 rounded-md transition-colors text-[13px]"
+            onClick={(e) => { e.stopPropagation(); onNavigate("compareColleges", { collegeName: college.name }); }}
+          >
+            Compare now
+          </button>
+
+          <button
+            className={`w-10 flex items-center justify-center border rounded-md transition-colors shrink-0 ${
+              isBookmarked
+                ? "border-blue-200 bg-blue-50"
+                : "border-gray-200 hover:bg-gray-50"
+            }`}
+            title={isBookmarked ? "Remove Bookmark" : "Bookmark"}
+            onClick={(e) => onToggleBookmark(e, college.id)}
+          >
+            <Bookmark className={`w-4 h-4 transition-all ${isBookmarked ? "text-[#0000ff] fill-[#0000ff]" : "text-[#0000ff]"}`} />
+          </button>
+        </div>
+      </div>
+    </div>
   );
 };
 

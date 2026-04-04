@@ -10,6 +10,7 @@ interface FinancialAidSectionProps {
 const FinancialAidSection: React.FC<FinancialAidSectionProps> = ({ onNavigate }) => {
   const [scholarships, setScholarships] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [bookmarked, setBookmarked] = useState<Set<number>>(new Set());
 
   useEffect(() => {
     setScholarships([
@@ -20,6 +21,16 @@ const FinancialAidSection: React.FC<FinancialAidSectionProps> = ({ onNavigate })
     ]);
     setLoading(false);
   }, []);
+
+  const toggleBookmark = (e: React.MouseEvent, id: number) => {
+    e.stopPropagation();
+    setBookmarked(prev => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
+  };
 
   if (loading) return null;
 
@@ -37,7 +48,7 @@ const FinancialAidSection: React.FC<FinancialAidSectionProps> = ({ onNavigate })
       {/* Grid Container for Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-5 md:gap-6">
         {scholarships.map((scholarship) => (
-          <div key={scholarship.id} className="bg-white rounded-[14px] sm:rounded-[16px] p-3 sm:p-3.5 border border-[#e2e8f0] shadow-[0_2px_15px_rgba(0,0,0,0.06)] flex flex-col h-full group hover:shadow-lg transition-all duration-300">
+          <div key={scholarship.id} className="bg-white rounded-[14px] sm:rounded-[16px] p-3 sm:p-3.5 border border-[#e2e8f0] flex flex-col h-full group hover:border-gray-300 transition-all duration-300">
             {/* Image Area */}
             <div className="w-full h-[140px] xs:h-[160px] sm:h-[170px] rounded-[10px] sm:rounded-[12px] overflow-hidden mb-3 sm:mb-4 relative">
               <img 
@@ -109,8 +120,16 @@ const FinancialAidSection: React.FC<FinancialAidSectionProps> = ({ onNavigate })
                 <button className="flex-1 bg-[#0000FF] text-white rounded-lg py-2 sm:py-2.5 text-[12px] sm:text-[13px] md:text-[14px] font-semibold hover:bg-[#0000CC] hover:shadow-md transition-all duration-200">
                   Apply
                 </button>
-                <button className="w-[36px] sm:w-[40px] md:w-[44px] shrink-0 bg-white border border-[#cbd5e1] text-[#94a3b8] rounded-lg flex items-center justify-center hover:bg-[#f8fafc] hover:text-[#64748b] transition-all duration-200" aria-label="Bookmark">
-                  <Bookmark className="w-[14px] h-[14px] sm:w-[16px] sm:h-[16px] md:w-[18px] md:h-[18px]" />
+                <button
+                  className={`w-[36px] sm:w-[40px] md:w-[44px] shrink-0 rounded-lg flex items-center justify-center transition-all duration-200 ${
+                    bookmarked.has(scholarship.id)
+                      ? "border-blue-200 bg-blue-50"
+                      : "bg-white border border-[#cbd5e1] text-[#94a3b8] hover:bg-[#f8fafc] hover:text-[#64748b]"
+                  }`}
+                  title={bookmarked.has(scholarship.id) ? "Remove Bookmark" : "Bookmark"}
+                  onClick={(e) => toggleBookmark(e, scholarship.id)}
+                >
+                  <Bookmark className={`w-[14px] h-[14px] sm:w-[16px] sm:h-[16px] md:w-[18px] md:h-[18px] ${bookmarked.has(scholarship.id) ? "text-[#0000ff] fill-[#0000ff]" : ""}`} />
                 </button>
               </div>
             </div>

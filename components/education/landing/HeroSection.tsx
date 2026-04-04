@@ -2,7 +2,6 @@
 
 import { useState, useEffect } from "react";
 import { Search, Link as LinkIcon } from "lucide-react";
-import { SearchBar } from "@/components/SearchBar";
 
 interface HeroSectionProps {
   onNavigate: (view: string, data?: any) => void;
@@ -11,6 +10,7 @@ interface HeroSectionProps {
 const HeroSection: React.FC<HeroSectionProps> = ({ onNavigate }) => {
   const [currentSlide, setCurrentSlide] = useState(0);
   const [fade, setFade] = useState(true);
+  const [desktopQuery, setDesktopQuery] = useState("");
 
   const heroSlides = [
     {
@@ -51,13 +51,16 @@ const HeroSection: React.FC<HeroSectionProps> = ({ onNavigate }) => {
     return () => clearInterval(interval);
   }, [heroSlides.length]);
 
-  const handleSearch = (e: React.FormEvent) => {
+  const handleSearch = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+    const query = desktopQuery.trim();
+    if (!query) return;
+    onNavigate("findCollege", { search: query });
   };
 
   return (
-    <div className="w-full px-4 lg:px-8 pt-2 pb-6 md:pt-4 md:pb-8 lg:pt-4 flex justify-center max-w-[1440px] mx-auto">
-      <main className="relative w-full h-[340px] sm:h-[420px] md:h-auto md:min-h-[480px] lg:h-[540px] flex items-center justify-center overflow-hidden rounded-xl md:rounded-2xl shadow-2xl">
+    <div className="w-full px-4 lg:px-8 pt-2 pb-6 md:pt-4 md:pb-8 lg:pt-4 flex justify-center max-w-360 mx-auto">
+      <main className="relative w-full h-85 sm:h-105 md:h-auto md:min-h-120 lg:h-135 flex items-center justify-center overflow-hidden rounded-xl md:rounded-2xl shadow-2xl">
         
         {/* Background Slider Container */}
         <div id="slider-container" className="absolute inset-0 z-0">
@@ -74,7 +77,7 @@ const HeroSection: React.FC<HeroSectionProps> = ({ onNavigate }) => {
 
         {/* Dark Overlays */}
         <div className="absolute inset-0 bg-black/40 z-10"></div>
-        <div className="absolute inset-0 bg-gradient-to-b from-black/60 via-transparent to-black/80 z-10"></div>
+        <div className="absolute inset-0 bg-linear-to-b from-black/60 via-transparent to-black/80 z-10"></div>
 
         {/* MOBILE LAYOUT */}
         <div className="md:hidden relative z-20 w-full h-full flex flex-col justify-center items-center px-4 sm:px-6 pb-28 text-white text-center mt-4">
@@ -88,7 +91,7 @@ const HeroSection: React.FC<HeroSectionProps> = ({ onNavigate }) => {
         </div>
 
         {/* DESKTOP LAYOUT */}
-        <div className="hidden md:block relative z-20 w-full max-w-5xl mx-auto px-6 lg:px-8 text-center sm:pb-0 sm:mt-[-40px] text-white">
+        <div className="hidden md:block relative z-20 w-full max-w-5xl mx-auto px-6 lg:px-8 text-center sm:pb-0 sm:-mt-10 text-white">
           <h1 className="text-3xl md:text-4xl lg:text-5xl font-bold tracking-tight mb-3 drop-shadow-md leading-tight">
             Find Your Perfect College
           </h1>
@@ -97,9 +100,27 @@ const HeroSection: React.FC<HeroSectionProps> = ({ onNavigate }) => {
             programs, and student reviews to build your ideal college list.
           </p>
 
-          <div className="max-w-xl mx-auto flex justify-center">
-             <SearchBar />
-          </div>
+          <form
+            onSubmit={handleSearch}
+            className="max-w-3xl mx-auto bg-white rounded-lg p-2 flex flex-row items-center shadow-lg gap-2 transition-all duration-300"
+          >
+            <div className="w-full grow flex items-center px-4 gap-2">
+              <Search className="w-5 h-5 text-gray-400 shrink-0" />
+              <input
+                type="text"
+                value={desktopQuery}
+                onChange={(e) => setDesktopQuery(e.target.value)}
+                placeholder="Search by college name, location & program..."
+                className="w-full bg-transparent text-gray-800 text-[15px] py-2.5 outline-none placeholder-gray-400"
+              />
+            </div>
+            <button
+              type="submit"
+              className="w-auto bg-brand-blue hover:bg-brand-hover text-white font-semibold py-2.5 px-8 rounded-md transition-colors duration-200 shadow-sm text-[15px] whitespace-nowrap"
+            >
+              Search
+            </button>
+          </form>
 
           <div className="mt-6 flex flex-wrap justify-center items-center gap-3 text-sm font-medium text-gray-200 drop-shadow-md">
             <span className="font-bold text-white">Your recent visit:</span>
@@ -125,7 +146,7 @@ const HeroSection: React.FC<HeroSectionProps> = ({ onNavigate }) => {
                 onClick={() => setCurrentSlide(index)}
                 className={`nav-dot transition-all duration-300 focus:outline-none ${
                   currentSlide === index 
-                  ? "w-5 md:w-8 h-1.5 md:h-2.5 rounded-full bg-[#0000FF]" 
+                  ? "w-5 md:w-8 h-1.5 md:h-2.5 rounded-full bg-brand-blue" 
                   : "w-1.5 md:w-2.5 h-1.5 md:h-2.5 rounded-full bg-white/50 hover:bg-white/80"
                 }`}
                 aria-label={`Go to slide ${index + 1}`}
@@ -135,8 +156,8 @@ const HeroSection: React.FC<HeroSectionProps> = ({ onNavigate }) => {
         </div>
 
         {/* Floating Link (Desktop) */}
-        <a href={heroSlides[currentSlide].url} target="_blank" rel="noopener noreferrer" className="hidden md:flex absolute bottom-8 right-8 z-30 bg-white text-[#0000FF] items-center gap-2 px-5 py-2.5 rounded-full font-semibold shadow-lg hover:shadow-xl hover:-translate-y-1 transition-all duration-300 group">
-          <LinkIcon className="w-5 h-5 text-[#0000FF] group-hover:rotate-12 transition-transform" />
+        <a href={heroSlides[currentSlide].url} target="_blank" rel="noopener noreferrer" className="hidden md:flex absolute bottom-8 right-8 z-30 bg-white text-brand-blue items-center gap-2 px-5 py-2.5 rounded-full font-semibold shadow-lg hover:shadow-xl hover:-translate-y-1 transition-all duration-300 group">
+          <LinkIcon className="w-5 h-5 text-brand-blue group-hover:rotate-12 transition-transform" />
           <span className="text-base">{heroSlides[currentSlide].text}</span>
         </a>
 

@@ -2,7 +2,7 @@ import React, { useEffect, useMemo, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { College, apiService } from "@/services/api";
 import { CollegeFilters, DEFAULT_COLLEGE_FILTERS } from "@/app/find-college/types";
-import { BadgeCheckIcon, LockIcon } from "lucide-react";
+import { BadgeCheckIcon, LockIcon, Star, MapPin, Award, MessageSquare, Bookmark } from "lucide-react";
 
 import LocationAd from "./ads/LocationAd";
 import ByTypeAd from "./ads/ByTypeAd";
@@ -436,16 +436,21 @@ const ProgramCard: React.FC<{
   onToggleSelection: () => void;
   onClaim: () => void;
 }> = ({ college, isSaved, isSelected, isQuickInquiryMode, onNavigate, onToggleSaved, onToggleSelection, onClaim }) => {
+  const [isExpanded, setIsExpanded] = useState(false);
   const description =
-    (typeof college.description === "string" && college.description.trim()) ||
+    (typeof college.description === "string" && college.description) ||
     "Explore academics, facilities, and counselling support for this college.";
+  const shortDesc = description.slice(0, 80) + "... ";
 
   return (
-    <div className="flex h-full cursor-pointer flex-col rounded-[16px] border border-gray-100 bg-white p-2.5 shadow-[0_2px_15px_rgb(0,0,0,0.04)] transition-transform duration-300 hover:-translate-y-1">
+    <div className="flex h-full cursor-pointer flex-col rounded-2xl border border-gray-100 bg-white p-4 transition-all duration-300 hover:border-gray-200">
       <div
         onClick={() => onNavigate("collegeDetails", { id: college.id })}
-        className="group relative h-[140px] shrink-0 overflow-hidden rounded-[12px] text-left"
+        className="group relative h-[140px] shrink-0 overflow-hidden rounded-xl"
       >
+        <div className="absolute top-3 left-3 bg-blue-600 text-white text-[10px] font-bold px-2 py-0.5 rounded uppercase tracking-wider z-10 shadow-sm">
+          Featured
+        </div>
         <img
           src={college.image_url || "https://images.unsplash.com/photo-1562774053-701939374585?q=80&w=1200&auto=format&fit=crop"}
           alt={college.name}
@@ -470,107 +475,103 @@ const ProgramCard: React.FC<{
         </label>
       </div>
 
-      <div className="flex flex-1 flex-col px-1.5 pb-1 pt-3">
-        <div className="flex items-center justify-between">
-          <div className="flex w-full items-center gap-1.5">
-            <button
-              type="button"
-              onClick={() => onNavigate("collegeDetails", { id: college.id })}
-              className="truncate text-left text-[15px] font-bold text-gray-900 transition-colors hover:text-[#0000FF]"
-              title={college.name}
+      <div className="flex flex-1 flex-col px-0 pt-3">
+        <div className="flex items-center gap-1.5 mb-2">
+          <button
+            type="button"
+            onClick={() => onNavigate("collegeDetails", { id: college.id })}
+            className="truncate text-left text-[20px] font-bold text-slate-800 tracking-tight transition-colors hover:text-blue-600"
+            title={college.name}
+          >
+            {college.name}
+          </button>
+          {college.verified && (
+            <BadgeCheckIcon className="w-5 h-5 text-white fill-blue-500 shrink-0" />
+          )}
+        </div>
+
+        <div className="flex items-center text-[14px] text-gray-500 mb-2">
+          <div className="flex items-center gap-1 font-bold text-slate-700">
+            <Star className="w-4 h-4 text-amber-500 fill-amber-500" />
+            <span>{Number(college.rating || 0).toFixed(1)}</span>
+          </div>
+          <span className="mx-3 text-gray-300 font-light">|</span>
+          <div className="flex items-center gap-1.5">
+            <Award className="w-[18px] h-[18px] text-gray-400" />
+            <span className="font-semibold text-slate-700">{college.type || "College"}</span>
+          </div>
+          <span className="mx-3 text-gray-300 font-light">|</span>
+          <div className="flex items-center gap-1.5">
+            <MapPin className="w-[18px] h-[18px] text-gray-400" />
+            <span className="font-semibold text-slate-700">{college.location || "Kathmandu"}</span>
+          </div>
+        </div>
+
+        <div className="flex items-start gap-2 text-[14px] text-gray-500 mb-2">
+          <Award className="w-[18px] h-[18px] text-gray-400 shrink-0 mt-[3px]" />
+          <p className="leading-snug pr-4 font-semibold text-slate-700 line-clamp-1">
+            {college.affiliation || "NEB, Tribhuvan University, Purbanchal University"}
+          </p>
+        </div>
+
+        <p className="text-[14px] text-gray-500 leading-relaxed mb-4 pr-2">
+          <span>{isExpanded ? description : shortDesc}</span>
+          {description.length > 80 && (
+            <span
+              className="font-semibold text-blue-600 cursor-pointer hover:underline ml-1"
+              onClick={(e) => { e.stopPropagation(); setIsExpanded(!isExpanded); }}
             >
-              {college.name}
-            </button>
-            {college.verified && (
-              <BadgeCheckIcon className="w-[13px] h-[13px] sm:w-[15px] sm:h-[15px] text-white fill-[#0000FF] ml-0.5 sm:ml-1 shrink-0" />
-            )}
-          </div>
-        </div>
-
-        <div className="mt-1.5 flex flex-wrap items-center gap-x-2 gap-y-1.5 text-[11.5px] font-medium leading-none text-gray-500">
-          <div className="flex items-center gap-1 text-gray-700">
-            <i className="fa-solid fa-star text-[12px] text-[#f59e0b]"></i>
-            <span className="font-bold">{Number(college.rating || 0).toFixed(1)}</span>
-          </div>
-          <div className="h-3 w-px bg-gray-300"></div>
-          <div className="flex items-center gap-1">
-            <i className="fa-regular fa-building text-[12px] text-gray-400"></i>
-            {college.type || "College"}
-          </div>
-          <div className="h-3 w-px bg-gray-300"></div>
-          <div className="flex max-w-[90px] items-center gap-1 truncate">
-            <i className="fa-solid fa-location-dot shrink-0 text-[12px] text-gray-400"></i>
-            <span className="truncate">{college.location || "Kathmandu"}</span>
-          </div>
-          <div className="mt-1.5 flex w-full items-start gap-1 text-gray-600">
-            <i className="fa-solid fa-award mt-[2px] shrink-0 text-[12px] text-gray-400"></i>
-            <span className="leading-tight">
-              {college.affiliation || "NEB, Tribhuvan University, Purbanchal University"}
+              {isExpanded ? "Show less" : "Read more"}
             </span>
-          </div>
-        </div>
-
-        <p className="mt-3 line-clamp-2 text-[11.5px] leading-relaxed text-gray-600">
-          {description}
+          )}
         </p>
 
-        <div className="mt-auto pt-4">
-          <div className="mb-2.5 border-t-2 border-dotted border-gray-200"></div>
+        <div className="border-t border-dashed border-gray-200 mb-4" />
 
-          {!college.verified && (
-            <div className="mb-2 flex items-center justify-between px-1">
-              <span className="text-[11px] text-gray-500">Is this your college?</span>
-              <button 
-                type="button"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  onClaim();
-                }} 
-                className="text-[11px] font-semibold text-[#0000FF] hover:underline"
-              >
-                Claim now
-              </button>
-            </div>
-          )}
-
+        <div className="flex flex-col gap-3 mt-auto">
           <button
             type="button"
             onClick={(e) => {
+              e.stopPropagation();
               if (college.verified) {
                 onNavigate("bookCounselling", { collegeId: college.id });
-              } else {
-                e.stopPropagation();
               }
             }}
-            className="mb-1.5 flex h-[40px] w-full items-center justify-center truncate rounded-lg bg-[#0000FF] px-1 text-[13px] font-bold text-white shadow-sm transition-all duration-200 hover:bg-[#0000CC] hover:shadow-md"
+            className="w-full bg-[#2563EB] hover:bg-blue-700 text-white font-medium text-[14px] py-2.5 px-4 rounded-md transition-colors flex items-center justify-center gap-1.5"
           >
-            {!college.verified && <LockIcon className="mr-1.5" size={14} />}
+            {!college.verified && <LockIcon size={14} />}
             Get counselling
           </button>
 
           <div className="flex gap-2">
             <button
               type="button"
-              onClick={() => onNavigate("campusForum", { collegeId: college.id, collegeName: college.name })}
-              className="flex h-[36px] flex-1 items-center justify-center gap-1.5 rounded-lg border border-[#cbd5e1] bg-white px-1 text-[12px] font-bold text-[#334155] transition-all duration-200 hover:bg-[#f8fafc] hover:text-[#0f172a]"
+              onClick={(e) => { e.stopPropagation(); onNavigate("campusForum", { collegeId: college.id, collegeName: college.name }); }}
+              className="flex-1 flex items-center justify-center gap-1.5 border border-gray-200 hover:bg-gray-50 text-slate-600 font-medium py-2 px-2 rounded-md transition-colors text-[13px]"
             >
-              <i className="fa-regular fa-message text-[12px] text-[#94a3b8]"></i>
-              <span className="truncate">Ask Question</span>
+              <MessageSquare className="w-[16px] h-[16px] text-gray-500" />
+              Inquiry
             </button>
+
             <button
               type="button"
-              onClick={() => onNavigate("compareColleges", { collegeName: college.name })}
-              className="flex h-[36px] flex-1 items-center justify-center truncate rounded-lg bg-white border border-[#cbd5e1] px-1 text-[12px] font-bold text-[#334155] transition-all duration-200 hover:bg-[#f8fafc] hover:text-[#0f172a]"
+              onClick={(e) => { e.stopPropagation(); onNavigate("compareColleges", { collegeName: college.name }); }}
+              className="flex-1 bg-[#EAB308] hover:bg-yellow-500 text-white font-semibold py-2 px-2 rounded-md transition-colors text-[13px]"
             >
-              Compare
+              Compare now
             </button>
+
             <button
               type="button"
-              onClick={onToggleSaved}
-              className="group flex h-[36px] w-[36px] shrink-0 items-center justify-center rounded-lg border border-[#cbd5e1] bg-white text-[#94a3b8] transition-all duration-200 hover:bg-[#f8fafc] hover:text-[#64748b]"
-              aria-label={isSaved ? "Remove from bookmark" : "Bookmark college"}
+              onClick={(e) => { e.stopPropagation(); onToggleSaved(); }}
+              className={`w-10 flex items-center justify-center border rounded-md transition-colors shrink-0 ${
+                isSaved
+                  ? "border-blue-200 bg-blue-50"
+                  : "border-gray-200 hover:bg-gray-50"
+              }`}
+              title={isSaved ? "Remove Bookmark" : "Bookmark"}
             >
-              <i className={`fa-${isSaved ? "solid" : "regular"} fa-bookmark text-[14px] transition-colors ${isSaved ? "text-[#0000FF]" : ""}`}></i>
+              <Bookmark className={`w-4 h-4 transition-all ${isSaved ? "text-[#0000ff] fill-[#0000ff]" : "text-[#0000ff]"}`} />
             </button>
           </div>
         </div>

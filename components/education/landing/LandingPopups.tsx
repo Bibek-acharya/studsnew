@@ -9,8 +9,22 @@ import {
   AlertCircle,
   Loader2,
   Star,
-  MessageCircle,
 } from "lucide-react";
+
+const WhatsAppIcon = ({ className }: { className?: string }) => (
+  <svg
+    viewBox="0 0 24 24"
+    aria-hidden="true"
+    className={className}
+    fill="none"
+    xmlns="http://www.w3.org/2000/svg"
+  >
+    <path
+      d="M12 2.5C7.03 2.5 3 6.44 3 11.3c0 1.74.53 3.41 1.53 4.82L3.5 21.5l5.53-1.04c1.26.67 2.68 1.02 4.05 1.02 4.97 0 9-3.94 9-8.78 0-4.86-4.03-8.78-9.08-8.78Zm0 16.02c-1.26 0-2.5-.32-3.57-.93l-.26-.15-3.27.62.69-3.1-.17-.27A6.67 6.67 0 0 1 5.4 11.3c0-3.69 3.37-6.69 7.6-6.69 4.28 0 7.76 2.98 7.76 6.69 0 3.69-3.48 6.69-7.76 6.69Zm4.42-4.82c-.24-.12-1.43-.7-1.65-.78-.22-.08-.38-.12-.55.12-.17.24-.63.78-.77.94-.14.16-.28.18-.52.06-.24-.12-1.02-.36-1.94-1.14-.72-.62-1.2-1.38-1.34-1.62-.14-.24-.02-.37.1-.49.1-.1.24-.27.36-.41.12-.14.16-.24.24-.4.08-.16.04-.3-.02-.42-.06-.12-.55-1.31-.75-1.8-.2-.48-.4-.41-.55-.42h-.48c-.16 0-.42.06-.64.3-.22.24-.85.83-.85 2.02 0 1.18.87 2.32.99 2.48.12.16 1.69 2.56 4.1 3.58.57.24 1.01.38 1.36.49.57.18 1.09.15 1.5.09.46-.07 1.43-.58 1.63-1.15.2-.57.2-1.06.14-1.15-.06-.1-.22-.16-.46-.28Z"
+      fill="currentColor"
+    />
+  </svg>
+);
 
 const LandingPopups = () => {
   const [showNotification, setShowNotification] = useState(false);
@@ -213,7 +227,7 @@ const LandingPopups = () => {
                   Available on
                 </span>
                 <div className="flex gap-1.5 sm:gap-2">
-                  <MessageCircle className="h-3.5 w-3.5 cursor-pointer text-[#25D366] transition-transform hover:scale-110 xs:h-4 xs:w-4 sm:h-4.5 sm:w-4.5" />
+                  <WhatsAppIcon className="h-3.5 w-3.5 cursor-pointer text-[#25D366] transition-transform hover:scale-110 xs:h-4 xs:w-4 sm:h-4.5 sm:w-4.5" />
                 </div>
               </div>
             </div>

@@ -7,10 +7,9 @@ import { validators, useFieldValidation } from "@/utils/validation";
 interface SignupViewProps {
   onSwitch: () => void;
   onSignupSuccess: (email: string) => void;
-  onBack?: () => void;
 }
 
-const SignupView: React.FC<SignupViewProps> = ({ onSwitch, onSignupSuccess, onBack }) => {
+const SignupView: React.FC<SignupViewProps> = ({ onSwitch, onSignupSuccess }) => {
   const [showPassword, setShowPassword] = useState(false);
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const [agreedToTerms, setAgreedToTerms] = useState(false);
@@ -112,21 +111,9 @@ const SignupView: React.FC<SignupViewProps> = ({ onSwitch, onSignupSuccess, onBa
   };
 
   return (
-    <div className="w-full max-w-[360px] mx-auto flex flex-col py-4">
-      {onBack && (
-        <button
-          onClick={onBack}
-          className="mb-4 text-gray-500 hover:text-gray-800 self-start flex items-center text-sm font-medium transition-colors focus:outline-none"
-        >
-          <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-          </svg>
-          Back to Home
-        </button>
-      )}
-
+    <div className="w-full max-w-90 mx-auto flex flex-col py-4">
       <div className="flex items-center gap-2 mb-4">
-        <div className="bg-blue-600 text-white w-7 h-7 rounded-lg flex items-center justify-center flex-shrink-0">
+        <div className="bg-blue-600 text-white w-7 h-7 rounded-lg flex items-center justify-center shrink-0">
           <div className="w-2 h-2 bg-white rounded-full"></div>
         </div>
         <span className="text-lg font-bold tracking-tight text-gray-900">StudSphere</span>
@@ -235,7 +222,7 @@ const SignupView: React.FC<SignupViewProps> = ({ onSwitch, onSignupSuccess, onBa
               pattern="[0-9]{10}"
               title="Please enter a valid 10-digit number"
               disabled={loading}
-              className={`w-full pl-[5.5rem] pr-10 py-2.5 border rounded-lg text-sm focus:ring-1 outline-none transition-colors placeholder:text-gray-400 disabled:bg-gray-50 ${getBorderClass("phone")} ${getFocusClasses("phone")}`}
+              className={`w-full pl-22 pr-10 py-2.5 border rounded-lg text-sm focus:ring-1 outline-none transition-colors placeholder:text-gray-400 disabled:bg-gray-50 ${getBorderClass("phone")} ${getFocusClasses("phone")}`}
               value={values.phone}
               onChange={handleChange}
               onBlur={() => { touch("phone"); validateField("phone", values.phone, validators.phone); }}
@@ -348,7 +335,7 @@ const SignupView: React.FC<SignupViewProps> = ({ onSwitch, onSignupSuccess, onBa
 
         <div className="flex items-center mt-1 mb-2">
           <label className="flex items-center cursor-pointer">
-            <div className="relative flex items-center justify-center w-4 h-4 mr-2 flex-shrink-0">
+            <div className="relative flex items-center justify-center w-4 h-4 mr-2 shrink-0">
               <input
                 type="checkbox"
                 checked={agreedToTerms}

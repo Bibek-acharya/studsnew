@@ -39,50 +39,50 @@ export default function LoginPage() {
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-white px-4 py-8">
-      {view === "login" && (
-        <LoginView
-          onSwitch={() => setView("signup")}
-          onSuccess={handleLoginSuccess}
-          onForgotPassword={() => setView("forgot-password")}
-          onBack={() => router.push("/")}
-        />
-      )}
-      {view === "signup" && (
-        <SignupView
-          onSwitch={() => setView("login")}
-          onSignupSuccess={handleSignupSuccess}
-          onBack={() => router.push("/")}
-        />
-      )}
-      {view === "otp" && (
-        <OtpView
-          identifier={otpIdentifier}
-          type="email"
-          onVerified={handleOtpVerified}
-          onBack={goBack}
-        />
-      )}
-      {view === "forgot-password" && (
-        <ForgotPasswordView
-          onBack={goBack}
-          onSubmit={handleForgotPasswordSubmit}
-        />
-      )}
-      {view === "reset-otp" && (
-        <OtpView
-          identifier={otpIdentifier}
-          type="email"
-          onVerified={() => setView("set-new-password")}
-          onBack={goBack}
-        />
-      )}
-      {view === "set-new-password" && (
-        <SetNewPasswordView
-          identifier={otpIdentifier}
-          onBack={goBack}
-          onSuccess={() => router.push("/")}
-        />
-      )}
+      <div className="w-full max-w-110 rounded-2xl border border-gray-100 bg-white p-6 shadow-[0_20px_60px_rgba(15,23,42,0.08)]">
+        {view === "login" && (
+          <LoginView
+            onSwitch={() => setView("signup")}
+            onSuccess={handleLoginSuccess}
+            onForgotPassword={() => setView("forgot-password")}
+          />
+        )}
+        {view === "signup" && (
+          <SignupView
+            onSwitch={() => setView("login")}
+            onSignupSuccess={handleSignupSuccess}
+          />
+        )}
+        {view === "otp" && (
+          <OtpView
+            identifier={otpIdentifier}
+            type="email"
+            onVerified={handleOtpVerified}
+            onBack={goBack}
+          />
+        )}
+        {view === "forgot-password" && (
+          <ForgotPasswordView
+            onBack={goBack}
+            onSubmit={handleForgotPasswordSubmit}
+          />
+        )}
+        {view === "reset-otp" && (
+          <OtpView
+            identifier={otpIdentifier}
+            type="email"
+            onVerified={() => setView("set-new-password")}
+            onBack={goBack}
+          />
+        )}
+        {view === "set-new-password" && (
+          <SetNewPasswordView
+            identifier={otpIdentifier}
+            onBack={goBack}
+            onSuccess={() => router.push("/")}
+          />
+        )}
+      </div>
     </div>
   );
 }

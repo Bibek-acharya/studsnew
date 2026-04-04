@@ -22,10 +22,36 @@ const EventShowcaseSection: React.FC<EventShowcaseSectionProps> = ({ onNavigate 
         badgeIconClass: "text-[#0000FF]",
         badgeText: "Featured",
         title: "Learn today, lead tomorrow — your AI journey starts here!",
-        date: "Sat,15 Nov",
-        location: "Sallaghari,Bhaktpur",
+        date: "Sat, 15 Nov",
+        location: "Sallaghari, Bhaktapur",
         interested: "100+ Interested",
         avatars: [33, 47, 12],
+      },
+      {
+        image: "https://images.unsplash.com/photo-1505373877841-8d25f7d46678?auto=format&fit=crop&q=80&w=1200",
+        alt: "Tech Innovation Summit",
+        badgeIcon: "fa-bolt",
+        badgeClass: "bg-green-50 border-green-100 text-[#1dc05c]",
+        badgeIconClass: "text-[#1dc05c]",
+        badgeText: "Upcoming",
+        title: "Shape the future with cutting-edge tech innovation!",
+        date: "Wed, 22 Nov",
+        location: "Lalitpur, Kathmandu",
+        interested: "250+ Interested",
+        avatars: [22, 55, 88],
+      },
+      {
+        image: "https://images.unsplash.com/photo-1523580494863-6f3031224c94?auto=format&fit=crop&q=80&w=1200",
+        alt: "Education Expo",
+        badgeIcon: "fa-bolt",
+        badgeClass: "bg-yellow-50 border-yellow-100 text-[#dfac1d]",
+        badgeIconClass: "text-[#dfac1d]",
+        badgeText: "Hot",
+        title: "Unlock global opportunities at the education expo!",
+        date: "Mon, 5 Dec",
+        location: "Bhrikutimandap, Kathmandu",
+        interested: "500+ Interested",
+        avatars: [10, 34, 56],
       }
     ]);
     setLoading(false);
@@ -70,7 +96,7 @@ const EventShowcaseSection: React.FC<EventShowcaseSectionProps> = ({ onNavigate 
                   <img
                     src={slide.image}
                     alt={slide.alt}
-                    className="w-full h-[200px] xs:h-[260px] sm:h-[320px] md:h-[380px] lg:h-[420px] object-cover rounded-[1.25rem] sm:rounded-[1.5rem] md:rounded-[2rem] shadow-sm"
+                    className="w-full h-[200px] xs:h-[260px] sm:h-[320px] md:h-[380px] lg:h-[420px] object-cover rounded-xl md:rounded-2xl shadow-sm"
                   />
                 </div>
 
