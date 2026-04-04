@@ -1,3 +1,55 @@
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080";
+
+async function apiRequest<T>(path: string, options: RequestInit = {}): Promise<T> {
+  const token = typeof window !== "undefined" ? localStorage.getItem("token") : null;
+  const headers: Record<string, string> = {
+    "Content-Type": "application/json",
+    ...(token ? { Authorization: `Bearer ${token}` } : {}),
+    ...(options.headers as Record<string, string> || {}),
+  };
+
+  const response = await fetch(`${API_BASE_URL}${path}`, {
+    ...options,
+    headers,
+  });
+
+  const data = await response.json();
+
+  if (!response.ok) {
+    throw new Error(data.message || data.error || "Request failed");
+  }
+
+  return data as T;
+}
+
+export interface AuthResponse {
+  data: {
+    user: {
+      id: number;
+      email: string;
+      first_name: string;
+      last_name: string;
+      role: string;
+      preferences?: any;
+    };
+    token: string;
+  };
+  message: string;
+}
+
+export interface RegisterResponse {
+  data: {
+    email: string;
+    requires_otp: boolean;
+  };
+  message: string;
+}
+
+export interface OTPResponse {
+  data: any;
+  message: string;
+}
+
 export interface EducationCourse {
   id: number;
   title: string;
@@ -130,10 +182,45 @@ export const apiService = {
   isAuthenticated(): boolean {
     return !!this.getToken();
   },
-  async sendOTP(email: string): Promise<any> {
-    await new Promise(resolve => setTimeout(resolve, 500));
-    return { success: true, message: "OTP sent to " + email };
+  async login(email: string, password: string): Promise<AuthResponse> {
+    return apiRequest<AuthResponse>("/api/v1/auth/login", {
+      method: "POST",
+      body: JSON.stringify({ email, password }),
+    });
   },
+
+  async register(data: {
+    email: string;
+    password: string;
+    first_name: string;
+    last_name: string;
+    role?: string;
+    education_level?: string;
+  }): Promise<RegisterResponse> {
+    return apiRequest<RegisterResponse>("/api/v1/auth/register", {
+      method: "POST",
+      body: JSON.stringify(data),
+    });
+  },
+
+  async verifyOTP(email: string, otp: string): Promise<AuthResponse> {
+    return apiRequest<AuthResponse>("/api/v1/auth/verify-otp", {
+      method: "POST",
+      body: JSON.stringify({ email, otp }),
+    });
+  },
+
+  async sendOTP(email: string): Promise<OTPResponse> {
+    return apiRequest<OTPResponse>("/api/v1/auth/send-otp", {
+      method: "POST",
+      body: JSON.stringify({ email }),
+    });
+  },
+
+  async getProfile(): Promise<AuthResponse> {
+    return apiRequest<AuthResponse>("/api/v1/profile");
+  },
+
   async resetPassword(email: string, _password: string): Promise<any> {
     await new Promise(resolve => setTimeout(resolve, 500));
     return { success: true, message: "Password reset successfully" };
