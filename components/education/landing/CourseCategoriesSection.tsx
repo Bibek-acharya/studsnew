@@ -81,7 +81,7 @@ const CourseCategoriesSection: React.FC<CourseCategoriesSectionProps> = ({ onNav
           {courseCategories.map((course, idx) => (
             <div
               key={idx}
-              className="course-category-card flex-none w-70 xs:w-75 sm:w-80 bg-white rounded-xl snap-start group cursor-pointer border border-gray-100 hover:border-blue-100 hover:shadow-md transition-all duration-300 shadow-[0_2px_10px_rgba(0,0,0,0.02)] p-3.5 sm:p-4"
+              className="course-category-card flex-none w-70 xs:w-75 sm:w-80 bg-white rounded-xl snap-start group cursor-pointer border border-blue-500/20 hover:shadow-md transition-all duration-300 p-3.5 sm:p-4"
               onClick={() => onNavigate("courseCategory", { category: course.title })}
             >
               <div className="flex justify-between items-start mb-1">

@@ -46,13 +46,13 @@ const routeMap: Record<string, string> = {
   courseFinder: "/course-finder",
   bookCounselling: "/counseling",
   scholarshipFinderTool: "/scholarship-finder",
-  collegeRecommenderTool: "/",
+  collegeRecommenderTool: "/college-recommender",
   scholarshipFinder: "/scholarship-finder",
   scholarshipProviderZone: "/",
   scholarshipMain: "/",
   campusForum: "/campus-forum",
   admissionsDiscovery: "/",
-  entranceDiscovery: "/",
+  entranceDiscovery: "/entrance",
   universitiesPage: "/",
   rankingsPage: "/",
   newsPage: "/",
@@ -677,8 +677,8 @@ const EducationNavbar: React.FC<EducationNavbarProps> = ({
                   icon="fa-shuffle"
                   color="text-blue-500"
                   title="Compare College"
-                  desc="Compare multiple colleges side-by-side based on fees, ranking, and placement."
-                  onClick={() => go("compareColleges")}
+                  desc="Launching Soon"
+                  onClick={() => {}}
                 />
                 <DropdownCard
                   icon="fa-compass"
@@ -700,6 +700,13 @@ const EducationNavbar: React.FC<EducationNavbarProps> = ({
                   title="Scholarship Finder"
                   desc="Discover scholarships tailored to your academic profile and financial needs."
                   onClick={() => go("scholarshipFinderTool")}
+                />
+                <DropdownCard
+                  icon="fa-wand-magic-sparkles"
+                  color="text-emerald-500"
+                  title="College Recommender"
+                  desc="Get personalized college recommendations based on your preferences."
+                  onClick={() => go("collegeRecommenderTool")}
                 />
               </DesktopDropdown>
 
@@ -733,6 +740,15 @@ const EducationNavbar: React.FC<EducationNavbarProps> = ({
                   }
                 />
                 <DropdownCard
+                  icon="fa-cubes"
+                  color="text-orange-500"
+                  title="A-Level"
+                  desc="Discover internationally recognized Cambridge A-Level degrees."
+                  onClick={() =>
+                    go("admissionsDiscovery", { level: "a-level" })
+                  }
+                />
+                <DropdownCard
                   icon="fa-user-graduate"
                   color="text-purple-600"
                   title="Bachelor Degrees"
@@ -748,25 +764,18 @@ const EducationNavbar: React.FC<EducationNavbarProps> = ({
                   desc="Advance your career with postgraduate degrees like MBA and M.Tech."
                   onClick={() => go("admissionsDiscovery", { level: "master" })}
                 />
+                <DropdownCard
+                  icon="fa-wrench"
+                  color="text-green-600"
+                  title="Diploma / CTEVT"
+                  desc="Explore skills-oriented technical and vocational education."
+                  onClick={() => go("admissionsDiscovery", { level: "diploma" })}
+                />
               </DesktopDropdown>
 
               <NavItem onClick={() => go("entranceDiscovery")}>
                 Entrance
               </NavItem>
-              <NavItem onClick={() => go("universitiesPage")}>
-                Universities
-              </NavItem>
-
-              <NavItem onClick={() => go("rankingsPage")}>
-                Rankings
-                <div className="relative ml-1 sm:ml-1.5 mt-0.5 block">
-                  <span className="relative block overflow-hidden rounded bg-linear-to-r from-blue-400 via-blue-500 to-blue-600 px-1 sm:px-1.5 py-0.5 sm:py-0.75 text-[9px] sm:text-[10px] font-bold uppercase leading-none tracking-wider text-white shadow-sm">
-                    2082
-                    <span className="shimmer-effect"></span>
-                  </span>
-                </div>
-              </NavItem>
-
               <DesktopDropdown label="More" alignRight isOpen={activeMenu === "more"} onToggle={() => setActiveMenu((prev) => prev === "more" ? null : "more")}>
                 <DropdownCard
                   icon="fa-newspaper"
@@ -976,10 +985,11 @@ const EducationNavbar: React.FC<EducationNavbarProps> = ({
                         Tools <ChevronDown size={14} className={`text-gray-400 transition-transform duration-200 ${mobileMenus['tools'] ? "rotate-180" : ""}`} />
                     </button>
                     <div className={`${mobileMenus['tools'] ? "flex" : "hidden"} flex-col gap-1 pl-4 py-2 ml-2 mt-1 font-medium`}>
-                        <button onClick={() => go("compareColleges")} className="text-[14px] text-gray-600 hover:text-blue-600 hover:bg-gray-50 p-2 rounded-lg transition-colors flex items-center gap-3"><i className="fa-solid fa-shuffle w-4 text-center text-blue-500"></i> Compare College</button>
+                        <button className="text-[14px] text-gray-400 p-2 rounded-lg flex items-center gap-3 cursor-not-allowed"><i className="fa-solid fa-shuffle w-4 text-center text-blue-500"></i> Compare College <span className="ml-auto text-[10px] font-bold text-gray-400">SOON</span></button>
                         <button onClick={() => go("courseFinder")} className="text-[14px] text-gray-600 hover:text-blue-600 hover:bg-gray-50 p-2 rounded-lg transition-colors flex items-center gap-3"><i className="fa-solid fa-compass w-4 text-center text-green-500"></i> Course Finder</button>
                         <button onClick={() => go("bookCounselling")} className="text-[14px] text-gray-600 hover:text-blue-600 hover:bg-gray-50 p-2 rounded-lg transition-colors flex items-center gap-3"><i className="fa-solid fa-headset w-4 text-center text-teal-600"></i> Get Counselling?</button>
                         <button onClick={() => go("scholarshipFinderTool")} className="text-[14px] text-gray-600 hover:text-blue-600 hover:bg-gray-50 p-2 rounded-lg transition-colors flex items-center gap-3"><i className="fa-solid fa-award w-4 text-center text-yellow-500"></i> Scholarship Finder</button>
+                        <button onClick={() => go("collegeRecommenderTool")} className="text-[14px] text-gray-600 hover:text-blue-600 hover:bg-gray-50 p-2 rounded-lg transition-colors flex items-center gap-3"><i className="fa-solid fa-wand-magic-sparkles w-4 text-center text-emerald-500"></i> College Recommender</button>
                     </div>
                 </div>
 
@@ -1019,10 +1029,6 @@ const EducationNavbar: React.FC<EducationNavbarProps> = ({
                 </div>
 
                 <button onClick={() => go("entranceDiscovery")} className="w-full text-left hover:text-blue-600 hover:bg-gray-50 p-2 rounded-lg transition-colors">Entrance</button>
-                <button onClick={() => go("universitiesPage")} className="w-full text-left hover:text-blue-600 hover:bg-gray-50 p-2 rounded-lg transition-colors">Universities</button>
-                <button onClick={() => go("rankingsPage")} className="w-full text-left hover:text-blue-600 hover:bg-gray-50 p-2 rounded-lg transition-colors flex items-center justify-between">
-                  Rankings <span className="bg-blue-600 text-white text-[10px] leading-none px-1.5 py-1 rounded font-bold tracking-wide">2082</span>
-                </button>
                 
                 {/* Mobile More Dropdown */}
                 <div>

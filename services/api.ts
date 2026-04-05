@@ -28,6 +28,28 @@ export interface College {
   verified?: boolean;
 }
 
+export interface CollegeRecommendation {
+  id: number;
+  name: string;
+  location: string;
+  type?: string;
+  match_score: number;
+  reasons?: string[];
+}
+
+export interface CollegeRecommenderPayload {
+  student_type: string;
+  program_interest: string;
+  preferred_location: string;
+  budget_preference: string;
+  campus_life_priority: string;
+  career_goal: string;
+  need_scholarship: boolean;
+  preferred_mode: string;
+  college_type: string;
+  final_priority: string;
+}
+
 export interface CollegePagination {
   total: number;
   totalPages: number;
@@ -464,5 +486,39 @@ export const apiService = {
   async uploadForumMedia(token: string, files: File[]): Promise<string[]> {
     await new Promise(resolve => setTimeout(resolve, 800));
     return files.map(() => "https://images.unsplash.com/photo-1517694712202-14dd9538aa97?q=80&w=1200");
+  },
+
+  async getCollegeRecommenderRecommendations(payload: CollegeRecommenderPayload): Promise<{ data: { recommendations: CollegeRecommendation[] } }> {
+    await new Promise(resolve => setTimeout(resolve, 1200));
+    return {
+      data: {
+        recommendations: [
+          {
+            id: 1,
+            name: "Pulchowk Campus, IOE",
+            location: "Lalitpur",
+            type: "Engineering",
+            match_score: 9,
+            reasons: ["Strong academics", "High placement rate", "Low tuition fees"],
+          },
+          {
+            id: 2,
+            name: "Thapathali Campus, IOE",
+            location: "Kathmandu",
+            type: "Engineering",
+            match_score: 8,
+            reasons: ["Good infrastructure", "Affordable fees", "Central location"],
+          },
+          {
+            id: 3,
+            name: "Kathmandu University",
+            location: "Dhulikhel",
+            type: "Engineering",
+            match_score: 7,
+            reasons: ["Excellent campus life", "Modern labs", "International exposure"],
+          },
+        ],
+      },
+    };
   },
 };

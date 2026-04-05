@@ -81,8 +81,8 @@ const AboutVideoInteractive = () => {
   };
 
   return (
-    <div className="mx-auto mb-10 flex w-full max-w-[850px] flex-col items-center justify-center gap-6 xl:flex-row xl:gap-8">
-      <div className="relative h-[50vh] w-full max-w-[500px] shrink-0 overflow-hidden rounded-xl bg-gray-900 shadow-2xl ring-1 ring-gray-200/50 sm:h-[340px] sm:rounded-2xl">
+    <div className="mx-auto mb-10 flex w-full max-w-212.5 flex-col items-center justify-center gap-6 xl:flex-row xl:gap-8">
+      <div className="relative h-[50vh] w-full max-w-125 shrink-0 overflow-hidden rounded-xl bg-gray-900 shadow-2xl ring-1 ring-gray-200/50 sm:h-[340px] sm:rounded-2xl">
         <video 
           className="absolute inset-0 h-full w-full bg-gray-800 object-cover transition-opacity duration-300"
           src={mainData.video}
@@ -116,7 +116,7 @@ const AboutVideoInteractive = () => {
         </div>
       </div>
 
-      <div className="relative h-[50vh] w-full max-w-[280px] shrink-0 overflow-hidden rounded-2xl border border-white/10 bg-[#0000FF] p-5 shadow-xl sm:h-[340px] sm:p-6">
+      <div className="relative h-[50vh] w-full max-w-[280px] shrink-0 overflow-hidden rounded-2xl border border-white/10 bg-[#0B1C38] p-5 shadow-xl sm:h-[340px] sm:p-6">
         <div className={`relative z-10 flex h-full flex-col justify-center transition-opacity duration-150 ${fading ? 'opacity-50' : 'opacity-100'}`}>
           <img 
             src={mainData.avatar} 
@@ -124,14 +124,14 @@ const AboutVideoInteractive = () => {
             className="mb-3 h-12 w-12 rounded-xl border border-white/20 object-cover shadow-sm sm:mb-4 sm:h-14 sm:w-14"
           />
           <h2 dangerouslySetInnerHTML={{__html: mainData.title}} className="mb-2 text-[16px] font-bold leading-tight tracking-tight text-white sm:mb-3 sm:text-[18px]" />
-          <p className="mb-4 text-[12px] leading-relaxed text-[#0000FF]/80 sm:text-[13px]">
+          <p className="mb-4 text-[12px] leading-relaxed text-blue-100/80 sm:text-[13px]">
             {mainData.quote}
           </p>
           <div className="mt-auto">
             <h4 className="mb-1 text-[11px] font-bold uppercase tracking-wide text-white sm:text-[12px]">
               {mainData.author}
             </h4>
-            <p className="text-[12px] text-[#0000FF]/60">
+            <p className="text-[12px] text-blue-200/60">
               {mainData.role}
             </p>
           </div>
@@ -566,9 +566,10 @@ const CollegeDetailsPage: React.FC = () => {
                   href={websiteHref}
                   target="_blank"
                   rel="noreferrer"
-                  className="flex items-center gap-1 text-[13px] font-bold uppercase tracking-wide text-[#0000FF] transition-colors hover:text-[#0000CC]"
+                  className="flex items-center gap-1 text-[13px] font-bold tracking-wide text-[#0000FF] transition-colors hover:text-[#0000CC]"
                 >
-                  {website}
+                  <i className="fa-solid fa-globe text-[12px]"></i>
+                  {website.toLowerCase()}
                   <i className="fa-solid fa-arrow-up-right-from-square text-[11px]"></i>
                 </a>
               </div>
@@ -589,7 +590,7 @@ const CollegeDetailsPage: React.FC = () => {
         </div>
       </div>
 
-      <div className="sticky top-0 z-40 overflow-x-auto border-b border-t border-gray-100 bg-white px-6 shadow-sm shadow-gray-100/50 md:px-12 lg:px-24 xl:px-32">
+      <div className="sticky top-0 z-40 overflow-x-auto border-b border-t border-gray-100 bg-white px-6 shadow-sm shadow-gray-100/50 md:px-12 lg:px-24 xl:px-32 [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
         <nav className="flex space-x-8 whitespace-nowrap">
           {[
             ["about", "About"],
@@ -1060,65 +1061,68 @@ const CollegeDetailsPage: React.FC = () => {
         </div>
 
         <div className="space-y-6 lg:col-span-1">
-          <div className="rounded-[24px] border border-gray-100 bg-white p-6 shadow-sm">
-            <h3 className="mb-5 text-[18px] font-bold text-gray-900">Contact Information</h3>
-            <ul className="space-y-4">
-              <ContactInfoRow
+          <div className="w-full max-w-[420px] rounded-[2rem] border border-gray-100 bg-white p-8 shadow-sm sm:p-10">
+            <h3 className="mb-8 text-2xl font-bold text-gray-900">Contact Information</h3>
+            <div className="flex flex-col gap-6">
+              <ContactInfoRowV2
                 icon="fa-solid fa-location-dot"
                 title="Address"
                 value={locationText}
                 badge="bg-[#0000FF]/5 text-[#0000FF]"
               />
-              <ContactInfoRow
+              <ContactInfoRowV2
                 icon="fa-solid fa-phone"
                 title="Phone"
-                value={college?.phone || "+977 1-4444444, 4444445"}
-                badge="bg-green-50 text-green-600"
+                value={college?.phone || "+977-1-6680000"}
+                badge="bg-emerald-50 text-emerald-600"
               />
-              <ContactInfoRow
+              <ContactInfoRowV2
                 icon="fa-solid fa-envelope"
                 title="Email"
-                value={college?.email || "info@goldengate.edu.np"}
-                badge="bg-red-50 text-red-600"
+                value={college?.email || "info@soe.ku.edu.np"}
+                badge="bg-red-50 text-red-500"
+                link
+                linkHref="mailto:info@soe.ku.edu.np"
               />
-              <ContactInfoRow
+              <ContactInfoRowV2
                 icon="fa-solid fa-globe"
                 title="Website"
                 value={website}
                 badge="bg-purple-50 text-purple-600"
                 link
+                linkHref={websiteHref}
               />
-            </ul>
-            <div className="mt-5 w-full">
-              <h3 className="text-[15px] font-bold text-gray-900">Social Media</h3>
-              <div className="mt-3 flex gap-5 text-[26px]">
-                <a href="#" className="text-[#1877F2] drop-shadow-sm transition-transform hover:scale-110" title="Facebook">
-                  <i className="fa-brands fa-facebook"></i>
-                </a>
-                <a href="#" className="text-[#E4405F] drop-shadow-sm transition-transform hover:scale-110" title="Instagram">
-                  <i className="fa-brands fa-instagram"></i>
-                </a>
-                <a href="#" className="text-black drop-shadow-sm transition-transform hover:scale-110" title="TikTok">
-                  <i className="fa-brands fa-tiktok"></i>
-                </a>
-                <a href="#" className="text-[#FF0000] drop-shadow-sm transition-transform hover:scale-110" title="YouTube">
-                  <i className="fa-brands fa-youtube"></i>
-                </a>
-                <a href="#" className="text-[#0A66C2] drop-shadow-sm transition-transform hover:scale-110" title="LinkedIn">
-                  <i className="fa-brands fa-linkedin"></i>
-                </a>
+              <div className="w-full">
+                <h3 className="text-[15px] font-bold text-gray-900">Social Media</h3>
+                <div className="mt-3 flex gap-5 text-[26px]">
+                  <a href="#" className="text-[#1877F2] drop-shadow-sm transition-transform hover:scale-110" title="Facebook">
+                    <i className="fa-brands fa-facebook"></i>
+                  </a>
+                  <a href="#" className="text-[#E4405F] drop-shadow-sm transition-transform hover:scale-110" title="Instagram">
+                    <i className="fa-brands fa-instagram"></i>
+                  </a>
+                  <a href="#" className="text-black drop-shadow-sm transition-transform hover:scale-110" title="TikTok">
+                    <i className="fa-brands fa-tiktok"></i>
+                  </a>
+                  <a href="#" className="text-[#FF0000] drop-shadow-sm transition-transform hover:scale-110" title="YouTube">
+                    <i className="fa-brands fa-youtube"></i>
+                  </a>
+                  <a href="#" className="text-[#0A66C2] drop-shadow-sm transition-transform hover:scale-110" title="LinkedIn">
+                    <i className="fa-brands fa-linkedin"></i>
+                  </a>
+                </div>
               </div>
-            </div>
-            <div className="group relative mt-8 h-44 w-full cursor-pointer overflow-hidden rounded-2xl shadow-inner">
-              <div 
-                className="absolute inset-0 bg-cover bg-center transition-transform duration-500 group-hover:scale-105" 
-                style={{backgroundImage: "url('https://images.unsplash.com/photo-1524661135-423995f22d0b?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80')", filter: "opacity(0.8) contrast(0.9) sepia(0.2)"}}>
+              <div className="group relative mt-8 h-44 w-full cursor-pointer overflow-hidden rounded-2xl shadow-inner">
+                <div
+                  className="absolute inset-0 bg-cover bg-center transition-transform duration-500 group-hover:scale-105"
+                  style={{backgroundImage: "url('https://images.unsplash.com/photo-1524661135-423995f22d0b?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80')", filter: "opacity(0.8) contrast(0.9) sepia(0.2)"}}>
+                </div>
+                <div className="absolute inset-0 bg-white/20"></div>
+                <button className="absolute left-1/2 top-1/2 flex -translate-x-1/2 -translate-y-1/2 transform items-center gap-2 rounded-xl bg-white px-5 py-2.5 text-[14px] font-bold text-gray-900 shadow-md transition-all hover:bg-gray-50 hover:shadow-lg active:scale-95">
+                  <i className="fa-solid fa-arrow-up-right-from-square text-sm"></i>
+                  Get Directions
+                </button>
               </div>
-              <div className="absolute inset-0 bg-white/20"></div>
-              <button className="absolute left-1/2 top-1/2 flex -translate-x-1/2 -translate-y-1/2 transform items-center gap-2 rounded-xl bg-white px-5 py-2.5 text-[14px] font-bold text-gray-900 shadow-md transition-all hover:bg-gray-50 hover:shadow-lg active:scale-95">
-                <i className="fa-solid fa-arrow-up-right-from-square text-sm"></i>
-                Get Directions
-              </button>
             </div>
           </div>
 
@@ -1309,6 +1313,31 @@ const ContactInfoRow: React.FC<{
       )}
     </div>
   </li>
+);
+
+const ContactInfoRowV2: React.FC<{
+  icon: string;
+  title: string;
+  value: string;
+  badge: string;
+  link?: boolean;
+  linkHref?: string;
+}> = ({ icon, title, value, badge, link = false, linkHref = "#" }) => (
+  <div className="flex items-start gap-4">
+    <div className={`mt-0.5 flex h-11 w-11 shrink-0 items-center justify-center rounded-full ${badge}`}>
+      <i className={`${icon} text-lg`}></i>
+    </div>
+    <div>
+      <h3 className="text-[15px] font-bold text-gray-900">{title}</h3>
+      {link ? (
+        <a href={linkHref} className="mt-0.5 inline-block text-sm text-gray-500 transition-colors hover:text-[#0000FF]">
+          {value}
+        </a>
+      ) : (
+        <p className="mt-0.5 text-sm text-gray-500">{value}</p>
+      )}
+    </div>
+  </div>
 );
 
 const ClaimCollegeModal: React.FC<{

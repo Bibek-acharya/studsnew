@@ -7,7 +7,8 @@ import { CourseCarouselAd } from "./ads/CourseCarouselAd";
 import { KistProgramsAd } from "./ads/KistProgramsAd";
 import { SudsphereBannerAd } from "./ads/SudsphereBannerAd";
 import { useAuth } from "../../services/AuthContext";
-import RatingAd from "../FindCollege/ads/RatingAd";
+import RatingAd from "../find-college/ads/RatingAd";
+import GlobalFilterSection from "../ui/GlobalFilterSection";
 
 interface CourseFinderPageProps {
   onNavigate: (view: any, data?: any) => void;
@@ -206,6 +207,7 @@ const COURSES_PER_PAGE = 18;
 
 const CourseFinderPage: React.FC<CourseFinderPageProps> = ({ onNavigate }) => {
   const { isAuthenticated } = useAuth();
+  const [showAppliedDropdown, setShowAppliedDropdown] = useState(false);
   
   const [selectedLevels, setSelectedLevels] = useState<string[]>([]);
   const [selectedStreams, setSelectedStreams] = useState<string[]>([]);
@@ -372,7 +374,7 @@ const CourseFinderPage: React.FC<CourseFinderPageProps> = ({ onNavigate }) => {
   if (isLoading) {
     return (
       <div className="min-h-screen bg-slate-50 pt-24 px-6">
-        <div className="max-w-[1400px] mx-auto bg-white border border-gray-200 rounded-lg p-10 text-center text-gray-500 font-medium">
+        <div className="max-w-350 mx-auto bg-white border border-gray-200 rounded-lg p-10 text-center text-gray-500 font-medium">
           Loading courses...
         </div>
       </div>
@@ -380,7 +382,7 @@ const CourseFinderPage: React.FC<CourseFinderPageProps> = ({ onNavigate }) => {
   }
 
   return (
-    <div className="min-h-screen bg-slate-50 py-10 px-4 sm:px-6 lg:px-8 pt-24">
+    <div className="min-h-screen bg-gray-50 p-4 font-[Inter,sans-serif] text-gray-800 md:p-6 lg:p-8 pt-24">
       <style>{`
         .line-clamp-2 {
           display: -webkit-box;
@@ -390,25 +392,74 @@ const CourseFinderPage: React.FC<CourseFinderPageProps> = ({ onNavigate }) => {
         }
       `}</style>
 
-      <main className="max-w-[1400px] mx-auto w-full flex flex-col lg:flex-row gap-8 items-start">
-        <aside className="hidden lg:block w-full lg:w-[300px] flex-shrink-0 bg-white rounded-lg border border-gray-200 h-fit sticky top-24">
-          <div className="p-5 border-b border-gray-100 flex justify-between items-center bg-white rounded-t-lg z-10">
-            <h3 className="text-lg font-bold text-gray-900 flex items-center gap-2">
-              <i className="fa-solid fa-sliders"></i> Filters
+      <main className="mx-auto flex w-full max-w-350 flex-col gap-6 lg:flex-row lg:flex-nowrap lg:gap-8 items-start">
+        <aside className="w-full shrink-0 lg:w-75 h-fit sticky top-24 rounded-2xl border border-[#e9edf2] bg-white shadow-[0_2px_15px_rgb(0,0,0,0.04)] overflow-hidden">
+          <div className="flex items-center justify-between border-b border-gray-100 px-5 py-4">
+            <h3 className="text-[17px] font-bold text-gray-900 tracking-tight flex items-center gap-2">
+              <i className="fa-solid fa-sliders text-[14px]"></i> Filters
             </h3>
             <button
-              onClick={clearAllFilters}
-              className="text-blue-600 hover:text-blue-800 text-sm font-semibold transition-colors"
+              onClick={() => setShowAppliedDropdown((prev) => !prev)}
+              className="text-[12px] font-semibold text-brand-blue transition-colors hover:text-brand-hover"
             >
-              Clear All
+              <span className="inline-flex items-center gap-2 rounded-md border border-blue-100 bg-blue-50 px-3 py-1.5 text-blue-700">
+                Applied ({activeFilterPills.length + (maxFee < maxFeeBound ? 1 : 0)})
+                <i className={`fa-solid fa-chevron-down text-[10px] transition-transform ${showAppliedDropdown ? "rotate-180" : ""}`}></i>
+              </span>
             </button>
           </div>
 
-          <div className="px-5 pb-6">
-            <FilterAccordion
+          {showAppliedDropdown && (
+            <div className="mx-5 mt-3 rounded-xl border border-gray-200 bg-white p-3 shadow-sm">
+              {activeFilterPills.length === 0 && maxFee >= maxFeeBound ? (
+                <p className="text-[13px] italic text-gray-400">No filters selected yet.</p>
+              ) : (
+                <>
+                  <div className="flex flex-wrap gap-2 pb-3">
+                    {activeFilterPills.map((pill, index) => (
+                      <button
+                        key={`${pill.label}-${index}`}
+                        onClick={pill.remove}
+                        className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-bold bg-blue-50 text-blue-700 border border-blue-200 hover:bg-red-50 hover:text-red-700 hover:border-red-200 transition-colors"
+                      >
+                        {pill.label}
+                        <i className="fa-solid fa-xmark text-[10px]"></i>
+                      </button>
+                    ))}
+
+                    {maxFee < maxFeeBound && (
+                      <button
+                        onClick={() => setMaxFee(maxFeeBound)}
+                        className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-bold bg-blue-50 text-blue-700 border border-blue-200 hover:bg-red-50 hover:text-red-700 hover:border-red-200 transition-colors"
+                      >
+                        Max: Rs. {formatLakhLabel(maxFee)}
+                        <i className="fa-solid fa-xmark text-[10px]"></i>
+                      </button>
+                    )}
+                  </div>
+
+                  <div className="border-t border-gray-100 pt-2">
+                    <button
+                      onClick={() => {
+                        clearAllFilters();
+                        setShowAppliedDropdown(false);
+                      }}
+                      className="text-[12px] font-semibold text-red-600 transition-colors hover:text-red-700"
+                    >
+                      Reset Filters
+                    </button>
+                  </div>
+                </>
+              )}
+            </div>
+          )}
+
+          <div className="px-5 pb-4">
+            <GlobalFilterSection
               title="Education Level"
               isOpen={openSections.level}
               onToggle={() => setOpenSections((prev) => ({ ...prev, level: !prev.level }))}
+              contentClassName="pb-4 space-y-3"
             >
               {levelOptions.map((level) => (
                 <CheckboxItem
@@ -418,12 +469,13 @@ const CourseFinderPage: React.FC<CourseFinderPageProps> = ({ onNavigate }) => {
                   onChange={() => toggleArray(level, selectedLevels, setSelectedLevels)}
                 />
               ))}
-            </FilterAccordion>
+            </GlobalFilterSection>
 
-            <FilterAccordion
+            <GlobalFilterSection
               title="Field of Study"
               isOpen={openSections.stream}
               onToggle={() => setOpenSections((prev) => ({ ...prev, stream: !prev.stream }))}
+              contentClassName="pb-4 space-y-3"
             >
               <div className="relative mb-3">
                 <i className="fa-solid fa-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"></i>
@@ -443,12 +495,13 @@ const CourseFinderPage: React.FC<CourseFinderPageProps> = ({ onNavigate }) => {
                   onChange={() => toggleArray(stream, selectedStreams, setSelectedStreams)}
                 />
               ))}
-            </FilterAccordion>
+            </GlobalFilterSection>
 
-            <FilterAccordion
+            <GlobalFilterSection
               title="Affiliation / University"
               isOpen={openSections.affiliation}
               onToggle={() => setOpenSections((prev) => ({ ...prev, affiliation: !prev.affiliation }))}
+              contentClassName="pb-4 space-y-3"
             >
               <div className="relative mb-3">
                 <i className="fa-solid fa-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"></i>
@@ -468,12 +521,13 @@ const CourseFinderPage: React.FC<CourseFinderPageProps> = ({ onNavigate }) => {
                   onChange={() => toggleArray(affiliation, selectedAffiliations, setSelectedAffiliations)}
                 />
               ))}
-            </FilterAccordion>
+            </GlobalFilterSection>
 
-            <FilterAccordion
+            <GlobalFilterSection
               title="Fee Range"
               isOpen={openSections.fee}
               onToggle={() => setOpenSections((prev) => ({ ...prev, fee: !prev.fee }))}
+              contentClassName="pb-4 space-y-3"
             >
               <div className="px-1 space-y-4">
                 <div className="flex justify-between text-xs text-gray-500 font-medium mb-2">
@@ -501,12 +555,13 @@ const CourseFinderPage: React.FC<CourseFinderPageProps> = ({ onNavigate }) => {
                   onChange={() => toggleArray(range.key, selectedFeeRanges, setSelectedFeeRanges)}
                 />
               ))}
-            </FilterAccordion>
+            </GlobalFilterSection>
 
-            <FilterAccordion
+            <GlobalFilterSection
               title="Admission Status"
               isOpen={openSections.status}
               onToggle={() => setOpenSections((prev) => ({ ...prev, status: !prev.status }))}
+              contentClassName="pb-4 space-y-3"
             >
               {(["Admission Open", "Entrance Ongoing", "Closed"] as const).map((status) => (
                 <CheckboxItem
@@ -516,17 +571,17 @@ const CourseFinderPage: React.FC<CourseFinderPageProps> = ({ onNavigate }) => {
                   onChange={() => toggleArray(status, selectedStatuses, setSelectedStatuses)}
                 />
               ))}
-            </FilterAccordion>
+            </GlobalFilterSection>
           </div>
         </aside>
 
         <section className="flex-1 w-full min-w-0 flex flex-col">
           <div className="mb-1 flex flex-col md:flex-row md:items-end justify-between gap-4 border-b border-gray-200 pb-5">
             <div>
-              <h1 className="text-2xl font-bold text-gray-900 tracking-tight">
+              <h1 className="text-base font-bold text-gray-900">
                 Showing {paginatedCourses.length > 0 ? (currentPage - 1) * COURSES_PER_PAGE + 1 : 0}-{Math.min(currentPage * COURSES_PER_PAGE, filteredCourses.length)} of {filteredCourses.length.toLocaleString()} Courses
               </h1>
-              <p className="mt-1 text-sm text-gray-500 font-medium">
+              <p className="mt-1 text-[13px] text-gray-500 font-medium">
                 Explore and compare the best colleges tailored for you.
               </p>
             </div>
@@ -538,42 +593,9 @@ const CourseFinderPage: React.FC<CourseFinderPageProps> = ({ onNavigate }) => {
                 value={globalSearch}
                 onChange={(e) => setGlobalSearch(e.target.value)}
                 placeholder="Search colleges, degrees..."
-                className="w-full bg-white border border-gray-300 text-sm rounded-md pl-10 pr-4 h-11 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none font-medium"
+                className="w-full rounded-lg border border-gray-200 bg-white py-2.5 pl-10 pr-4 text-sm shadow-sm transition-all placeholder-gray-400 focus:border-transparent focus:outline-none focus:ring-2 focus:ring-brand-blue"
               />
             </div>
-          </div>
-
-          <div className="mb-2 min-h-[32px]">
-            {(activeFilterPills.length > 0 || maxFee < maxFeeBound) && (
-              <div className="flex-wrap items-center gap-2 flex">
-                <span className="text-xs font-semibold text-gray-400 uppercase tracking-wider mr-1">
-                  Active Filters:
-                </span>
-
-                <div className="flex flex-wrap gap-2">
-                  {activeFilterPills.map((pill, index) => (
-                    <button
-                      key={`${pill.label}-${index}`}
-                      onClick={pill.remove}
-                      className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-bold bg-blue-50 text-blue-700 border border-blue-200 hover:bg-red-50 hover:text-red-700 hover:border-red-200 transition-colors"
-                    >
-                      {pill.label}
-                      <i className="fa-solid fa-xmark text-[10px]"></i>
-                    </button>
-                  ))}
-
-                  {maxFee < maxFeeBound && (
-                    <button
-                      onClick={() => setMaxFee(maxFeeBound)}
-                      className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-bold bg-blue-50 text-blue-700 border border-blue-200 hover:bg-red-50 hover:text-red-700 hover:border-red-200 transition-colors"
-                    >
-                      Max: Rs. {formatLakhLabel(maxFee)}
-                      <i className="fa-solid fa-xmark text-[10px]"></i>
-                    </button>
-                  )}
-                </div>
-              </div>
-            )}
           </div>
 
           {paginatedCourses.length === 0 ? (
@@ -642,32 +664,32 @@ const CourseFinderPage: React.FC<CourseFinderPageProps> = ({ onNavigate }) => {
 
                       <div className="space-y-1.5 mb-5 text-xs font-medium text-gray-600 flex-1">
                         <div className="flex items-start gap-2">
-                          <i className="fa-solid fa-building-columns text-gray-400 text-sm shrink-0 mt-[2px]"></i>
+                          <i className="fa-solid fa-building-columns text-gray-400 text-sm shrink-0 mt-0.5"></i>
                           <p className="truncate" title={course.affiliation}>
                             <span className="font-bold text-gray-800">Affiliation:</span> {course.affiliation}
                           </p>
                         </div>
                         <div className="flex items-start gap-2">
-                          <i className="fa-solid fa-graduation-cap text-gray-400 text-sm shrink-0 mt-[2px]"></i>
+                          <i className="fa-solid fa-graduation-cap text-gray-400 text-sm shrink-0 mt-0.5"></i>
                           <p className="truncate" title={course.eligibility}>
                             <span className="font-bold text-gray-800">Eligibility:</span> {course.eligibility}
                           </p>
                         </div>
                         <div className="flex items-start gap-2">
-                          <i className="fa-solid fa-clipboard-list text-gray-400 text-sm shrink-0 mt-[2px]"></i>
+                          <i className="fa-solid fa-clipboard-list text-gray-400 text-sm shrink-0 mt-0.5"></i>
                           <p className="truncate" title={course.entrance}>
                             <span className="font-bold text-gray-800">Entrance:</span> {course.entrance}
                           </p>
                         </div>
                         <div className="flex items-start gap-2">
-                          <i className="fa-solid fa-money-bill-wave text-gray-400 text-sm shrink-0 mt-[2px]"></i>
+                          <i className="fa-solid fa-money-bill-wave text-gray-400 text-sm shrink-0 mt-0.5"></i>
                           <p>
                             <span className="font-bold text-gray-800">Est. Fee:</span>{" "}
                             <span className="text-green-600 font-bold">{course.feeDisplay}</span>
                           </p>
                         </div>
                         <div className="flex items-start gap-2">
-                          <i className="fa-solid fa-briefcase text-gray-400 text-sm shrink-0 mt-[2px]"></i>
+                          <i className="fa-solid fa-briefcase text-gray-400 text-sm shrink-0 mt-0.5"></i>
                           <p className="truncate" title={course.career}>
                             <span className="font-bold text-gray-800">Career:</span> {course.career}
                           </p>
@@ -758,39 +780,19 @@ const CourseFinderPage: React.FC<CourseFinderPageProps> = ({ onNavigate }) => {
   );
 };
 
-const FilterAccordion: React.FC<{
-  title: string;
-  isOpen: boolean;
-  onToggle: () => void;
-  children: React.ReactNode;
-}> = ({ title, isOpen, onToggle, children }) => (
-  <div className="py-4 border-b border-gray-100 last:border-b-0">
-    <button
-      onClick={onToggle}
-      className="w-full flex justify-between items-center text-left font-semibold text-gray-800 focus:outline-none group"
-    >
-      {title}
-      <i
-        className={`fa-solid fa-caret-down text-gray-400 transform transition-transform ${isOpen ? "rotate-180" : ""}`}
-      ></i>
-    </button>
-    {isOpen && <div className="mt-4 space-y-3">{children}</div>}
-  </div>
-);
-
 const CheckboxItem: React.FC<{ label: string; checked: boolean; onChange: () => void }> = ({
   label,
   checked,
   onChange,
 }) => (
-  <label className="flex items-center gap-3 cursor-pointer group">
+  <label className="group flex items-center gap-3 cursor-pointer">
     <input
       type="checkbox"
       checked={checked}
       onChange={onChange}
-      className="w-[1.15em] h-[1.15em] rounded-[2px] border border-slate-300 text-blue-600 focus:ring-blue-500"
+      className="h-[1.15em] w-[1.15em] rounded-xs border border-slate-300 text-blue-600 focus:ring-blue-500"
     />
-    <span className="text-sm font-medium text-gray-600 group-hover:text-gray-900">{label}</span>
+    <span className="text-[14.5px] text-[#475569] transition-colors group-hover:text-gray-900">{label}</span>
   </label>
 );
 

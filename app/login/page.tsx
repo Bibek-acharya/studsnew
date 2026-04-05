@@ -8,7 +8,13 @@ import OtpView from "@/components/auth/OtpView";
 import ForgotPasswordView from "@/components/auth/ForgotPasswordView";
 import SetNewPasswordView from "@/components/auth/SetNewPasswordView";
 
-type AuthView = "login" | "signup" | "otp" | "forgot-password" | "reset-otp" | "set-new-password";
+type AuthView =
+  | "login"
+  | "signup"
+  | "otp"
+  | "forgot-password"
+  | "reset-otp"
+  | "set-new-password";
 
 export default function LoginPage() {
   const [view, setView] = useState<AuthView>("login");

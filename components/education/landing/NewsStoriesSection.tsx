@@ -50,6 +50,13 @@ const newsData = [
   },
 ];
 
+const partnerLogos = [
+  "https://kist.edu.np/resources/assets/img/logo_small.jpg",
+  "https://www.trinity.edu.np/assets/backend/uploads/Logo/trinity%20college%20logo.jpg",
+  "https://advancefoundation.edu.np/public/assets/img/logo.jpg",
+  "https://kist.edu.np/resources/assets/img/logo_small.jpg",
+];
+
 const NewsStoriesSection: React.FC<NewsStoriesSectionProps> = ({ onNavigate }) => {
   const containerRef = useRef<HTMLDivElement | null>(null);
 
@@ -107,7 +114,7 @@ const NewsStoriesSection: React.FC<NewsStoriesSectionProps> = ({ onNavigate }) =
             {newsData.map((card, index) => (
               <article
                 key={index}
-                className="min-w-[260px] xs:min-w-[280px] sm:min-w-[300px] md:min-w-[320px] max-w-[300px] xs:max-w-[320px] sm:max-w-[340px] w-full flex-shrink-0 snap-start bg-white rounded-2xl border border-gray-100 flex flex-col hover:shadow-lg hover:-translate-y-1 transition-all duration-300 group cursor-pointer p-3 sm:p-4"
+                className="min-w-[260px] xs:min-w-[280px] sm:min-w-[300px] md:min-w-[320px] max-w-[300px] xs:max-w-[320px] sm:max-w-[340px] w-full flex-shrink-0 snap-start bg-white rounded-xl border border-blue-500/20 flex flex-col hover:-translate-y-1 transition-all duration-300 group cursor-pointer p-3.5 sm:p-4"
                 onClick={() => onNavigate("newsDetails", card)}
               >
                 <div className="mb-2.5 sm:mb-3">
@@ -123,22 +130,26 @@ const NewsStoriesSection: React.FC<NewsStoriesSectionProps> = ({ onNavigate }) =
                     onError={(e: any) => { e.target.src = "https://placehold.co/600x400/f1f5f9/94a3b8?text=News"; }}
                   />
                 </div>
-                <h3 className="text-[15px] xs:text-[16px] sm:text-lg font-bold text-[#111827] group-hover:text-blue-600 transition-colors mb-1.5 sm:mb-2 leading-snug line-clamp-2">
+                <h3 className="text-[17px] xs:text-[18px] sm:text-[19px] font-semibold text-gray-900 group-hover:text-[#0000FF] transition-all duration-300 tracking-tight mb-1 sm:mb-2 leading-snug line-clamp-2">
                   {card.title}
                 </h3>
-                <p className="text-[12px] xs:text-[13px] sm:text-[14px] text-gray-500 mb-3 sm:mb-4 flex-grow line-clamp-3 leading-relaxed">
+                <p className={`text-xs sm:text-sm text-gray-500 mb-5 sm:mb-6 flex-grow line-clamp-3 leading-relaxed group-hover:text-[#0000CC] transition-all duration-300`}>
                   {card.description}
                 </p>
-                <div className="flex items-center justify-between pt-1">
-                  <div className="flex items-center text-gray-400 gap-1 sm:gap-1.5 text-xs sm:text-sm font-medium">
-                    <Clock className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
-                    <span>{card.timeAgo}</span>
-                  </div>
-                  <div className="text-[#111827] font-bold text-xs sm:text-sm flex items-center gap-0.5 sm:gap-1 group-hover:text-blue-600 transition-colors">
-                    <span className="hidden xs:inline">View Details</span>
-                    <span className="xs:hidden">View</span>
-                    <ChevronRight className="w-3.5 h-3.5 sm:w-4 sm:h-4 stroke-[3]" />
-                  </div>
+                <div className="flex gap-1.5 sm:gap-2">
+                  {partnerLogos.map((logo, lIdx) => (
+                    <div
+                      key={lIdx}
+                      className="w-10 h-10 sm:w-11 sm:h-11 md:w-12 md:h-12 shrink-0 rounded-xl border border-gray-100 flex items-center justify-center p-1 sm:p-1.5 shadow-sm bg-white hover:border-gray-300 transition-colors"
+                    >
+                      <img
+                        src={logo}
+                        alt={`Partner ${lIdx + 1}`}
+                        className="max-w-full max-h-full object-contain mix-blend-multiply rounded-sm"
+                        onError={(e: any) => { e.target.src = "https://placehold.co/48x48/f1f5f9/94a3b8?text=Logo"; }}
+                      />
+                    </div>
+                  ))}
                 </div>
               </article>
             ))}

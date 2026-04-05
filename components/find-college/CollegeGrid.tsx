@@ -1,7 +1,7 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { College, apiService } from "@/services/api";
-import { CollegeFilters, DEFAULT_COLLEGE_FILTERS } from "@/app/find-college/types";
+import { CollegeFilters } from "@/app/find-college/types";
 import { BadgeCheckIcon, LockIcon, Star, MapPin, Award, MessageSquare, Bookmark } from "lucide-react";
 
 import LocationAd from "./ads/LocationAd";
@@ -14,33 +14,9 @@ interface CollegeGridProps {
   onNavigate: (view: any, data?: any) => void;
 }
 
-type ActiveFilterTag = {
-  key: Exclude<keyof CollegeFilters, "search">;
-  label: string;
-  value: string;
-};
-
 const SEARCHABLE_FILTER_KEYS: Array<keyof CollegeFilters> = [
   "academic",
   "stream",
-];
-
-const FILTER_KEYS_FOR_TAGS: Array<Exclude<keyof CollegeFilters, "search" | "feeMax" | "sortBy">> = [
-  "academic",
-  "program",
-  "course",
-  "province",
-  "district",
-  "type",
-  "university",
-  "courseDuration",
-  "quick",
-  "stream",
-  "location",
-  "facilities",
-  "feeRange",
-  "duration",
-  "popularity",
 ];
 
 const CollegeGrid: React.FC<CollegeGridProps> = ({ filters, setFilters, onNavigate }) => {
@@ -62,18 +38,6 @@ const CollegeGrid: React.FC<CollegeGridProps> = ({ filters, setFilters, onNaviga
       .filter(Boolean),
     [filters],
   );
-
-  const activeTags = useMemo<ActiveFilterTag[]>(() => {
-    const tags: ActiveFilterTag[] = [];
-
-    FILTER_KEYS_FOR_TAGS.forEach((key) => {
-      filters[key].forEach((value) => {
-        tags.push({ key, label: value, value });
-      });
-    });
-
-    return tags;
-  }, [filters]);
 
   const { data, isLoading, error } = useQuery({
     queryKey: ["colleges", currentPage, filters, isQuickInquiryMode],
@@ -104,19 +68,6 @@ const CollegeGrid: React.FC<CollegeGridProps> = ({ filters, setFilters, onNaviga
   const colleges = data?.data?.colleges || [];
   const totalResults = data?.data?.pagination?.total || 0;
   const totalPages = data?.data?.pagination?.totalPages || 1;
-
-  const removeFilter = (tag: ActiveFilterTag) => {
-    setFilters((prev) => {
-      return {
-        ...prev,
-        [tag.key]: prev[tag.key].filter((item) => item !== tag.value),
-      };
-    });
-  };
-
-  const resetAll = () => {
-    setFilters(DEFAULT_COLLEGE_FILTERS);
-  };
 
   const toggleSavedCollege = (collegeId: number) => {
     setSavedColleges((prev) =>
@@ -240,31 +191,6 @@ const CollegeGrid: React.FC<CollegeGridProps> = ({ filters, setFilters, onNaviga
           </div>
         </div>
 
-        {activeTags.length > 0 && (
-          <div className="mt-4 flex flex-wrap items-center gap-2 border-t border-gray-200 pt-4">
-            <span className="mr-1 shrink-0 text-[13px] font-semibold text-gray-600">
-              Filters Applied:
-            </span>
-            {activeTags.map((tag) => (
-              <button
-                key={`${tag.key}-${tag.value}`}
-                type="button"
-                onClick={() => removeFilter(tag)}
-                className="inline-flex cursor-pointer items-center gap-1.5 rounded-full border border-blue-100 bg-blue-50 px-3 py-1.5 text-[12px] font-medium text-[#0000FF] transition-colors hover:bg-blue-100"
-              >
-                {tag.label}
-                <i className="fa-solid fa-xmark text-[11px] text-blue-500"></i>
-              </button>
-            ))}
-            <button
-              type="button"
-              onClick={resetAll}
-              className="ml-2 shrink-0 text-[13px] font-semibold text-red-500 transition-colors hover:text-red-700 hover:underline"
-            >
-              Reset All
-            </button>
-          </div>
-        )}
       </div>
 
       <div className="grid grid-cols-1 gap-6 md:grid-cols-2 xl:grid-cols-3" id="card-grid">

@@ -3,9 +3,10 @@
 import React, { useState } from "react";
 import CourseFinderPage from "@/components/course-finder/CourseFinderPage";
 import CollegesAndCoursesPage from "@/components/course-finder/CollegesAndCoursesPage";
+import CourseDetailsPage from "@/components/course-finder/CourseDetailsPage";
 
 export default function FindCoursePage() {
-  const [view, setView] = useState<"finder" | "colleges">("finder");
+  const [view, setView] = useState<"finder" | "colleges" | "details">("finder");
   const [selectedCourse, setSelectedCourse] = useState<any>(null);
 
   const handleNavigate = (targetView: string, data?: any) => {
@@ -18,8 +19,9 @@ export default function FindCoursePage() {
       setView("colleges");
       window.scrollTo({ top: 0, behavior: "smooth" });
     } else if (targetView === "courseDetails") {
-      // Mock navigation to details
-      alert(`Navigating to details for course ID: ${data.id}`);
+      setSelectedCourse({ id: data.id });
+      setView("details");
+      window.scrollTo({ top: 0, behavior: "smooth" });
     }
   };
 
@@ -27,6 +29,14 @@ export default function FindCoursePage() {
     <div className="bg-slate-50 min-h-screen font-sans">
       {view === "finder" ? (
         <CourseFinderPage onNavigate={handleNavigate} />
+      ) : view === "details" ? (
+        <div className="pt-10">
+          <CourseDetailsPage
+            courseId={selectedCourse?.id || "1"}
+            onBack={() => setView("finder")}
+            onNavigate={handleNavigate}
+          />
+        </div>
       ) : (
         <div className="pt-10">
           <div className="max-w-[1400px] mx-auto px-6 mb-8 pt-4">

@@ -17,7 +17,7 @@ const SmarterToolsSection: React.FC<SmarterToolsSectionProps> = ({ onNavigate })
   </div>
   <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-5 md:gap-6 xl:gap-8">
     <div
-      className="bg-white rounded-2xl p-5 sm:p-6 md:p-7 flex flex-col h-full hover:-translate-y-1 hover:border hover:border-gray-200 transition-all duration-300 cursor-pointer"
+      className="bg-white rounded-2xl p-5 sm:p-6 md:p-7 flex flex-col h-full hover:-translate-y-1 border border-blue-500/20 transition-all duration-300 cursor-pointer"
       onClick={() => onNavigate("collegeRecommenderTool")}
     >
       <div className="w-12 h-12 sm:w-14 sm:h-14 rounded-2xl bg-[#e6f7ec] flex items-center justify-center mb-4 sm:mb-5 md:mb-6">
@@ -35,7 +35,7 @@ const SmarterToolsSection: React.FC<SmarterToolsSectionProps> = ({ onNavigate })
     </div>
 
     <div
-      className="bg-white rounded-2xl p-5 sm:p-6 md:p-7 shadow-[0_2px_15px_rgba(0,0,0,0.06)] flex flex-col h-full hover:-translate-y-1 transition-transform duration-300 cursor-pointer"
+      className="bg-white rounded-2xl p-5 sm:p-6 md:p-7 flex flex-col h-full hover:-translate-y-1 border border-blue-500/20 transition-all duration-300 cursor-pointer"
       onClick={() => onNavigate("compareColleges")}
     >
       <div className="w-12 h-12 sm:w-14 sm:h-14 rounded-2xl bg-[#e7f0ff] flex items-center justify-center mb-4 sm:mb-5 md:mb-6">
@@ -53,7 +53,7 @@ const SmarterToolsSection: React.FC<SmarterToolsSectionProps> = ({ onNavigate })
     </div>
 
     <div
-      className="bg-white rounded-2xl p-5 sm:p-6 md:p-7 shadow-[0_2px_15px_rgba(0,0,0,0.06)] flex flex-col h-full hover:-translate-y-1 transition-transform duration-300 cursor-pointer"
+      className="bg-white rounded-2xl p-5 sm:p-6 md:p-7 flex flex-col h-full hover:-translate-y-1 border border-blue-500/20 transition-all duration-300 cursor-pointer"
       onClick={() => onNavigate("scholarshipFinderTool")}
     >
       <div className="w-12 h-12 sm:w-14 sm:h-14 rounded-2xl bg-[#fdf6e3] flex items-center justify-center mb-4 sm:mb-5 md:mb-6">
@@ -71,7 +71,7 @@ const SmarterToolsSection: React.FC<SmarterToolsSectionProps> = ({ onNavigate })
     </div>
 
     <div
-      className="bg-white rounded-2xl p-5 sm:p-6 md:p-7 shadow-[0_2px_15px_rgba(0,0,0,0.06)] flex flex-col h-full hover:-translate-y-1 transition-transform duration-300 cursor-pointer"
+      className="bg-white rounded-2xl p-5 sm:p-6 md:p-7 flex flex-col h-full hover:-translate-y-1 border border-blue-500/20 transition-all duration-300 cursor-pointer"
       onClick={() => onNavigate("courseFinder")}
     >
       <div className="w-12 h-12 sm:w-14 sm:h-14 rounded-2xl bg-[#fceced] flex items-center justify-center mb-4 sm:mb-5 md:mb-6">

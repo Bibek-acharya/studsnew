@@ -13,7 +13,7 @@ import {
 
 const WhatsAppIcon = ({ className }: { className?: string }) => (
   <svg
-    viewBox="0 0 24 24"
+    viewBox="-1 -1 26 26"
     aria-hidden="true"
     className={className}
     fill="none"
@@ -86,11 +86,11 @@ const LandingPopups = () => {
       {showNotification && (
         <div
           id="notificationCard"
-          className="fixed inset-0 z-120 flex items-center justify-center rounded-none border-0 bg-white/95 p-4 shadow-2xl animate-[slideDownFade_0.5s_cubic-bezier(0.16,1,0.3,1)_forwards] sm:inset-auto sm:top-24 sm:right-4 sm:w-[calc(100%-2rem)] sm:max-w-152 sm:rounded-lg sm:border sm:bg-white sm:p-5 md:right-6 md:w-auto"
+          className="fixed inset-0 z-120 flex items-center justify-center rounded-none border-0 bg-white/95 p-4 shadow-2xl animate-[slideDownFade_0.5s_cubic-bezier(0.16,1,0.3,1)_forwards] sm:inset-auto sm:top-24 sm:right-4 sm:w-[calc(100%-2rem)] sm:max-w-152 sm:rounded-lg sm:bg-white sm:p-5 md:right-6 md:w-auto"
         >
           <button
             onClick={() => handleDismissNotification()}
-            className="absolute top-3 right-3 text-gray-400 hover:text-gray-700 hover:bg-gray-100 rounded-full p-1.5 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-gray-200 z-10"
+            className="absolute -top-1 right-3 text-gray-400 hover:text-gray-700 hover:bg-gray-100 rounded-full p-1.5 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-gray-200 z-10 sm:top-3"
           >
             <X size={16} />
           </button>
@@ -166,7 +166,7 @@ const LandingPopups = () => {
       {showCommunity && (
         <div
           id="community-card"
-          className="fixed bottom-4 left-3 z-50 w-full max-w-75 rounded-lg border border-gray-100 bg-white shadow-[0_10px_40px_rgba(0,0,0,0.1)] transition-all duration-300 animate-[slideUpLeft_0.5s_cubic-bezier(0.16,1,0.3,1)_forwards] xs:max-w-80 sm:bottom-6 sm:left-4 sm:max-w-85 md:left-6"
+          className="fixed bottom-4 left-3 z-50 w-full max-w-75 rounded-lg bg-white shadow-[0_10px_40px_rgba(0,0,0,0.1)] transition-all duration-300 animate-[slideUpLeft_0.5s_cubic-bezier(0.16,1,0.3,1)_forwards] xs:max-w-80 sm:bottom-6 sm:left-4 sm:max-w-85 md:left-6"
         >
           <div className="absolute -top-2.5 sm:-top-3 -left-1.5 sm:-left-2 z-20">
             <span className="relative overflow-hidden bg-[#2563EB] text-white px-2.5 sm:px-3.5 py-1 sm:py-1.5 rounded-lg font-bold text-[11px] xs:text-[12px] sm:text-[13px] shadow-sm block tracking-wider">
@@ -176,7 +176,7 @@ const LandingPopups = () => {
           </div>
           <button
             onClick={() => setShowCommunity(false)}
-            className="absolute top-1.5 sm:top-2 right-1.5 sm:right-2 text-gray-400 hover:text-gray-600 transition-colors p-1 sm:p-1.5 z-10"
+            className="absolute -top-1 right-1.5 sm:top-2 sm:right-2 text-gray-400 hover:text-gray-600 transition-colors p-1 sm:p-1.5 z-10"
           >
             <X size={14} className="sm:w-4 sm:h-4" />
           </button>

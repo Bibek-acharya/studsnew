@@ -14,30 +14,35 @@ const HeroSection: React.FC<HeroSectionProps> = ({ onNavigate }) => {
 
   const heroSlides = [
     {
-      image: "https://images.unsplash.com/photo-1541339907198-e08756dedf3f?q=80&w=2070&auto=format&fit=crop",
+      image:
+        "https://images.unsplash.com/photo-1541339907198-e08756dedf3f?q=80&w=2070&auto=format&fit=crop",
       text: "kist.edu.np",
-      url: "https://kist.edu.np"
+      url: "https://kist.edu.np",
     },
     {
-      image: "https://images.unsplash.com/photo-1498243691581-b145c3f54a5a?q=80&w=2070&auto=format&fit=crop",
+      image:
+        "https://images.unsplash.com/photo-1498243691581-b145c3f54a5a?q=80&w=2070&auto=format&fit=crop",
       text: "ggic.edu.np",
-      url: "https://ggic.edu.np"
+      url: "https://ggic.edu.np",
     },
     {
-      image: "https://images.unsplash.com/photo-1562774053-701939374585?q=80&w=2065&auto=format&fit=crop",
+      image:
+        "https://images.unsplash.com/photo-1562774053-701939374585?q=80&w=2065&auto=format&fit=crop",
       text: "islington.edu.np",
-      url: "https://islington.edu.np"
+      url: "https://islington.edu.np",
     },
     {
-      image: "https://images.unsplash.com/photo-1525926476841-be2069c93a4d?q=80&w=2070&auto=format&fit=crop",
+      image:
+        "https://images.unsplash.com/photo-1525926476841-be2069c93a4d?q=80&w=2070&auto=format&fit=crop",
       text: "texasintl.edu.np",
-      url: "https://texasintl.edu.np"
+      url: "https://texasintl.edu.np",
     },
     {
-      image: "https://images.unsplash.com/photo-1606761568499-6d2451b23c66?q=80&w=1974&auto=format&fit=crop",
+      image:
+        "https://images.unsplash.com/photo-1606761568499-6d2451b23c66?q=80&w=1974&auto=format&fit=crop",
       text: "nami.edu.np",
-      url: "https://nami.edu.np"
-    }
+      url: "https://nami.edu.np",
+    },
   ];
 
   useEffect(() => {
@@ -61,7 +66,6 @@ const HeroSection: React.FC<HeroSectionProps> = ({ onNavigate }) => {
   return (
     <div className="w-full px-4 lg:px-8 pt-2 pb-6 md:pt-4 md:pb-8 lg:pt-4 flex justify-center max-w-360 mx-auto">
       <main className="relative w-full h-85 sm:h-105 md:h-auto md:min-h-120 lg:h-135 flex items-center justify-center overflow-hidden rounded-xl md:rounded-2xl shadow-2xl">
-        
         {/* Background Slider Container */}
         <div id="slider-container" className="absolute inset-0 z-0">
           {heroSlides.map((slide, index) => (
@@ -85,8 +89,9 @@ const HeroSection: React.FC<HeroSectionProps> = ({ onNavigate }) => {
             Find Your Perfect College
           </h1>
           <p className="text-[12px] sm:text-[13px] text-gray-200 max-w-[320px] mx-auto mb-5 drop-shadow leading-relaxed">
-            Discover and compare colleges with our free search tool. Get insights on admissions,
-            programs, and student reviews to build your ideal college list.
+            Discover and compare colleges with our free search tool. Get
+            insights on admissions, programs, and student reviews to build your
+            ideal college list.
           </p>
         </div>
 
@@ -96,8 +101,9 @@ const HeroSection: React.FC<HeroSectionProps> = ({ onNavigate }) => {
             Find Your Perfect College
           </h1>
           <p className="text-[13px] md:text-sm lg:text-base text-gray-200 max-w-3xl mx-auto mb-6 drop-shadow px-0">
-            Discover and compare colleges with our free search tool. Get insights on admissions,
-            programs, and student reviews to build your ideal college list.
+            Discover and compare colleges with our free search tool. Get
+            insights on admissions, programs, and student reviews to build your
+            ideal college list.
           </p>
 
           <form
@@ -124,18 +130,37 @@ const HeroSection: React.FC<HeroSectionProps> = ({ onNavigate }) => {
 
           <div className="mt-6 flex flex-wrap justify-center items-center gap-3 text-sm font-medium text-gray-200 drop-shadow-md">
             <span className="font-bold text-white">Your recent visit:</span>
-            <button onClick={() => onNavigate("findCollege", { search: "BIT" })} className="hover:text-white hover:underline transition-colors">BIT Colleges</button>
+            <button
+              onClick={() => onNavigate("findCollege", { search: "BIT" })}
+              className="hover:text-white hover:underline transition-colors"
+            >
+              BIT Colleges
+            </button>
             <span className="text-gray-400 inline">&bull;</span>
-            <button onClick={() => onNavigate("collegeRecommender")} className="hover:text-white hover:underline transition-colors">College Predictor</button>
+            <button
+              onClick={() => onNavigate("collegeRecommender")}
+              className="hover:text-white hover:underline transition-colors"
+            >
+              College Predictor
+            </button>
             <span className="text-gray-400 inline">&bull;</span>
-            <button onClick={() => onNavigate("scholarshipFinder")} className="hover:text-white hover:underline transition-colors">Scholarship</button>
+            <button
+              onClick={() => onNavigate("scholarshipFinder")}
+              className="hover:text-white hover:underline transition-colors"
+            >
+              Scholarship
+            </button>
           </div>
         </div>
 
         {/* BOTTOM CONTROLS */}
         <div className="absolute bottom-4 md:bottom-8 left-0 w-full flex flex-col items-center z-30">
-          <a href={heroSlides[currentSlide].url} target="_blank" rel="noopener noreferrer" 
-             className={`md:hidden fade-text text-white text-[13px] font-semibold underline decoration-white/80 underline-offset-4 drop-shadow-lg hover:text-gray-200 transition-opacity duration-300 mb-3 ${fade ? 'opacity-100' : 'opacity-0'}`}>
+          <a
+            href={heroSlides[currentSlide].url}
+            target="_blank"
+            rel="noopener noreferrer"
+            className={`md:hidden fade-text text-white text-[13px] font-semibold underline decoration-white/80 underline-offset-4 drop-shadow-lg hover:text-gray-200 transition-opacity duration-300 mb-3 ${fade ? "opacity-100" : "opacity-0"}`}
+          >
             {heroSlides[currentSlide].text}
           </a>
 
@@ -145,9 +170,9 @@ const HeroSection: React.FC<HeroSectionProps> = ({ onNavigate }) => {
                 key={index}
                 onClick={() => setCurrentSlide(index)}
                 className={`nav-dot transition-all duration-300 focus:outline-none ${
-                  currentSlide === index 
-                  ? "w-5 md:w-8 h-1.5 md:h-2.5 rounded-full bg-brand-blue" 
-                  : "w-1.5 md:w-2.5 h-1.5 md:h-2.5 rounded-full bg-white/50 hover:bg-white/80"
+                  currentSlide === index
+                    ? "w-5 md:w-8 h-1.5 md:h-2.5 rounded-full bg-brand-blue"
+                    : "w-1.5 md:w-2.5 h-1.5 md:h-2.5 rounded-full bg-white/50 hover:bg-white/80"
                 }`}
                 aria-label={`Go to slide ${index + 1}`}
               ></button>
@@ -156,11 +181,15 @@ const HeroSection: React.FC<HeroSectionProps> = ({ onNavigate }) => {
         </div>
 
         {/* Floating Link (Desktop) */}
-        <a href={heroSlides[currentSlide].url} target="_blank" rel="noopener noreferrer" className="hidden md:flex absolute bottom-8 right-8 z-30 bg-white text-brand-blue items-center gap-2 px-5 py-2.5 rounded-full font-semibold shadow-lg hover:shadow-xl hover:-translate-y-1 transition-all duration-300 group">
+        <a
+          href={heroSlides[currentSlide].url}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="hidden md:flex absolute bottom-8 right-8 z-30 bg-white text-brand-blue items-center gap-2 px-5 py-2.5 rounded-full font-semibold shadow-lg hover:shadow-xl hover:-translate-y-1 transition-all duration-300 group"
+        >
           <LinkIcon className="w-5 h-5 text-brand-blue group-hover:rotate-12 transition-transform" />
           <span className="text-base">{heroSlides[currentSlide].text}</span>
         </a>
-
       </main>
     </div>
   );
