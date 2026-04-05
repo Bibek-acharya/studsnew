@@ -436,9 +436,7 @@ const CampusFeedPage: React.FC = () => {
                 <span className="text-sm font-medium text-gray-700 group-hover:text-blue-600 transition">Tribhuvan University</span>
               </a>
             </div>
-            <a href="#" className="inline-block text-blue-600 text-sm font-medium mt-5 hover:underline flex items-center gap-1">
-              View all colleges <ArrowRight className="w-4 h-4" />
-            </a>
+        
           </div>
         </div>
 

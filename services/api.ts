@@ -409,147 +409,159 @@ export const apiService = {
   },
 
   async getForumCommunities(token?: string): Promise<ForumCommunity[]> {
-    await new Promise(resolve => setTimeout(resolve, 400));
-    return [
-      { id: 1, name: "TU Techies", emoji: "💻", bg_color: "bg-blue-100", member_count: 1200, post_count: 450, is_member: true },
-      { id: 2, name: "KU Medical", emoji: "🩺", bg_color: "bg-red-100", member_count: 850, post_count: 230, is_member: false },
-      { id: 3, name: "Exam Prep", emoji: "📚", bg_color: "bg-green-100", member_count: 2400, post_count: 890, is_member: true },
-    ];
+    const headers: Record<string, string> = { "Content-Type": "application/json" };
+    if (token) headers.Authorization = `Bearer ${token}`;
+
+    const response = await fetch(`${API_BASE_URL}/api/v1/forum/communities`, { headers });
+    if (!response.ok) throw new Error("Failed to fetch communities");
+    const data = await response.json();
+    return data.data || data;
   },
 
-  async getForumPosts(limit?: number, token?: string, communityId?: number): Promise<ForumPost[]> {
-    await new Promise(resolve => setTimeout(resolve, 500));
-    const user = this.getUser()!;
-    return [
-      {
-        id: 101,
-        user_id: user.id,
-        community_id: communityId || 1,
-        title: "How to prepare for CEE?",
-        content: "I'm looking for the best resources to prepare for the Common Entrance Examination. Any suggestions?",
-        upvotes: 45,
-        downvotes: 2,
-        comment_count: 12,
-        is_liked: true,
-        is_poll: false,
-        created_at: new Date().toISOString(),
-        user: user,
-        community: { id: communityId || 1, name: "Medical Prep", emoji: "🩺", bg_color: "bg-red-100" }
-      },
-      {
-        id: 102,
-        user_id: 2,
-        community_id: communityId || 3,
-        title: "BSc CSIT vs BIT",
-        content: "Which one should I choose? I'm confused about the curriculum differences.",
-        image_url: "https://images.unsplash.com/photo-1517694712202-14dd9538aa97?q=80&w=1200",
-        upvotes: 89,
-        downvotes: 5,
-        comment_count: 24,
-        is_poll: false,
-        created_at: new Date(Date.now() - 3600000).toISOString(),
-        user: { id: 2, first_name: "Jane", last_name: "Smith", email: "jane@example.com", role: "Student" },
-        community: { id: communityId || 3, name: "Tech Talk", emoji: "💻", bg_color: "bg-blue-100" }
-      }
-    ];
+  async getForumPosts(limit?: number, token?: string, communityId?: number, page?: number): Promise<{ posts: ForumPost[]; has_more: boolean }> {
+    const params = new URLSearchParams();
+    if (limit) params.set("limit", String(limit));
+    if (communityId) params.set("community_id", String(communityId));
+    if (page) params.set("page", String(page));
+
+    const headers: Record<string, string> = { "Content-Type": "application/json" };
+    if (token) headers.Authorization = `Bearer ${token}`;
+
+    const response = await fetch(`${API_BASE_URL}/api/v1/forum/posts?${params.toString()}`, { headers });
+    if (!response.ok) throw new Error("Failed to fetch posts");
+    const data = await response.json();
+    return data.data || data;
   },
 
   async joinForumCommunity(token: string, id: number): Promise<any> {
-    await new Promise(resolve => setTimeout(resolve, 400));
-    return { is_member: true, member_count: 1201 };
+    const response = await fetch(`${API_BASE_URL}/api/v1/forum/communities/${id}/join`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+    });
+    if (!response.ok) throw new Error("Failed to join community");
+    const data = await response.json();
+    return data.data || data;
   },
 
   async getForumPostComments(postId: number, limit?: number, offset?: number): Promise<any> {
-    await new Promise(resolve => setTimeout(resolve, 400));
-    return {
-      comments: [
-        {
-          id: 1,
-          user_id: 2,
-          post_id: postId,
-          content: "Focus on NCERT for Biology and practice daily MCQs.",
-          created_at: new Date().toISOString(),
-          user: { id: 2, first_name: "Jane", last_name: "Smith", email: "jane@example.com", role: "Student" },
-          replies: []
-        }
-      ],
-      total_count: 1
-    };
+    const params = new URLSearchParams();
+    if (limit) params.set("limit", String(limit));
+    if (offset) params.set("offset", String(offset));
+
+    const response = await fetch(`${API_BASE_URL}/api/v1/forum/posts/${postId}/comments?${params.toString()}`);
+    if (!response.ok) throw new Error("Failed to fetch comments");
+    const data = await response.json();
+    return data.data || data;
   },
 
   async createForumComment(token: string, postId: number, data: any): Promise<ForumComment> {
-    await new Promise(resolve => setTimeout(resolve, 400));
-    const user = this.getUser()!;
-    return {
-      id: Math.floor(Math.random() * 1000),
-      user_id: user.id,
-      post_id: postId,
-      content: data.content,
-      created_at: new Date().toISOString(),
-      user: user,
-      replies: []
-    };
+    const response = await fetch(`${API_BASE_URL}/api/v1/forum/posts/${postId}/comments`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify(data),
+    });
+    if (!response.ok) throw new Error("Failed to create comment");
+    const result = await response.json();
+    return result.data || result;
   },
 
   async voteForumPoll(token: string, postId: number, optionIdx: number): Promise<any> {
-    await new Promise(resolve => setTimeout(resolve, 400));
-    return { total_votes: 100, voted_option: optionIdx, poll_results: { [optionIdx]: 50 } };
+    const response = await fetch(`${API_BASE_URL}/api/v1/forum/posts/${postId}/poll/vote`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify({ option_index: optionIdx }),
+    });
+    if (!response.ok) throw new Error("Failed to vote");
+    const data = await response.json();
+    return data.data || data;
   },
 
   async likeForumPost(token: string, postId: number): Promise<any> {
-    await new Promise(resolve => setTimeout(resolve, 300));
-    return { upvotes: 50, downvotes: 5, is_liked: true, is_disliked: false };
+    const response = await fetch(`${API_BASE_URL}/api/v1/forum/posts/${postId}/like`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+    });
+    if (!response.ok) throw new Error("Failed to like post");
+    const data = await response.json();
+    return data.data || data;
   },
 
   async dislikeForumPost(token: string, postId: number): Promise<any> {
-    await new Promise(resolve => setTimeout(resolve, 300));
-    return { upvotes: 45, downvotes: 10, is_liked: false, is_disliked: true };
+    const response = await fetch(`${API_BASE_URL}/api/v1/forum/posts/${postId}/dislike`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+    });
+    if (!response.ok) throw new Error("Failed to dislike post");
+    const data = await response.json();
+    return data.data || data;
   },
 
   async saveForumPost(token: string, postId: number): Promise<any> {
-    await new Promise(resolve => setTimeout(resolve, 300));
-    return { is_saved: true };
+    const response = await fetch(`${API_BASE_URL}/api/v1/forum/posts/${postId}/save`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+    });
+    if (!response.ok) throw new Error("Failed to save post");
+    const data = await response.json();
+    return data.data || data;
   },
 
   async createForumPost(token: string, data: any): Promise<ForumPost> {
-    await new Promise(resolve => setTimeout(resolve, 600));
-    const user = this.getUser()!;
-    return {
-      id: Math.floor(Math.random() * 1000),
-      user_id: user.id,
-      community_id: data.community_id,
-      title: data.title,
-      content: data.content,
-      is_poll: data.is_poll || false,
-      upvotes: 0,
-      downvotes: 0,
-      comment_count: 0,
-      created_at: new Date().toISOString(),
-      user: user
-    };
+    const response = await fetch(`${API_BASE_URL}/api/v1/forum/posts`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify(data),
+    });
+    if (!response.ok) throw new Error("Failed to create post");
+    const result = await response.json();
+    return result.data || result;
   },
 
   async updateForumPost(token: string, id: number, data: any): Promise<ForumPost> {
-    await new Promise(resolve => setTimeout(resolve, 500));
-    const user = this.getUser()!;
-    return {
-      id,
-      user_id: user.id,
-      community_id: 1,
-      title: data.title,
-      content: data.content,
-      is_poll: false,
-      upvotes: 10,
-      downvotes: 0,
-      comment_count: 5,
-      created_at: new Date().toISOString(),
-      user: user
-    };
+    const response = await fetch(`${API_BASE_URL}/api/v1/forum/posts/${id}`, {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify(data),
+    });
+    if (!response.ok) throw new Error("Failed to update post");
+    const result = await response.json();
+    return result.data || result;
   },
 
   async deleteForumPost(token: string, id: number): Promise<any> {
-    await new Promise(resolve => setTimeout(resolve, 400));
-    return { success: true };
+    const response = await fetch(`${API_BASE_URL}/api/v1/forum/posts/${id}`, {
+      method: "DELETE",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+    });
+    if (!response.ok) throw new Error("Failed to delete post");
+    return response.json();
   },
 
   async getCollegeById(id: number): Promise<{ data: College }> {
@@ -571,8 +583,19 @@ export const apiService = {
   },
 
   async uploadForumMedia(token: string, files: File[]): Promise<string[]> {
-    await new Promise(resolve => setTimeout(resolve, 800));
-    return files.map(() => "https://images.unsplash.com/photo-1517694712202-14dd9538aa97?q=80&w=1200");
+    const formData = new FormData();
+    files.forEach((file) => formData.append("files", file));
+
+    const response = await fetch(`${API_BASE_URL}/api/v1/forum/upload`, {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+      body: formData,
+    });
+    if (!response.ok) throw new Error("Failed to upload media");
+    const data = await response.json();
+    return data.data?.urls || data.urls || [];
   },
 
   async getCollegeRecommenderRecommendations(payload: CollegeRecommenderPayload): Promise<{ data: { recommendations: CollegeRecommendation[] } }> {

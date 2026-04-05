@@ -1,10 +1,8 @@
 "use client";
 
 import React from "react";
-import CampusFeedPage from "@/components/campus-forum/CampusFeedPage";
+import CampusForumPage from "@/components/campus-forum/CampusForumPage";
 
 export default function CampusForumRoute() {
-  return (
-    <CampusFeedPage />
-  );
+  return <CampusForumPage />;
 }
