@@ -43,7 +43,8 @@ const EntranceGrid: React.FC<EntranceGridProps> = ({ filters, setFilters }) => {
 
   const filteredExams = useMemo(() => {
     return MOCK_EXAMS.filter((exam) => {
-      const searchable = `${exam.title} ${exam.institution} ${exam.location} ${exam.affiliation}`.toLowerCase();
+      const searchable =
+        `${exam.title} ${exam.institution} ${exam.location} ${exam.affiliation}`.toLowerCase();
 
       if (filters.search) {
         const terms = filters.search.toLowerCase().split(" ");
@@ -54,8 +55,10 @@ const EntranceGrid: React.FC<EntranceGridProps> = ({ filters, setFilters }) => {
       if (filters.academicLevel.length > 0) {
         const text = `${exam.title} ${exam.affiliation}`.toLowerCase();
         const hasLevel = filters.academicLevel.some((level) => {
-          if (level === "plus2") return /\+2|higher secondary|intermediate|class 12|neb/.test(text);
-          if (level === "bachelor") return /bachelor|bsc|bba|be|entrance|cmat|cee/.test(text);
+          if (level === "plus2")
+            return /\+2|higher secondary|intermediate|class 12|neb/.test(text);
+          if (level === "bachelor")
+            return /bachelor|bsc|bba|be|entrance|cmat|cee/.test(text);
           if (level === "master") return /master|mba|mbs|msc|ma/.test(text);
           if (level === "diploma") return /diploma|ctevt|pcl/.test(text);
           return true;
@@ -64,18 +67,24 @@ const EntranceGrid: React.FC<EntranceGridProps> = ({ filters, setFilters }) => {
       }
 
       if (filters.stream.length > 0) {
-        const hasStream = filters.stream.some((s) => searchable.includes(s.toLowerCase()));
+        const hasStream = filters.stream.some((s) =>
+          searchable.includes(s.toLowerCase()),
+        );
         if (!hasStream) return false;
       }
 
       if (filters.programName.length > 0) {
-        const hasProgram = filters.programName.some((p) => searchable.includes(p.toLowerCase()));
+        const hasProgram = filters.programName.some((p) =>
+          searchable.includes(p.toLowerCase()),
+        );
         if (!hasProgram) return false;
       }
 
       if (filters.university.length > 0) {
         const uni = exam.institution.toLowerCase();
-        const hasUni = filters.university.some((u) => uni.includes(u.toLowerCase()));
+        const hasUni = filters.university.some((u) =>
+          uni.includes(u.toLowerCase()),
+        );
         if (!hasUni) return false;
       }
 
@@ -93,7 +102,10 @@ const EntranceGrid: React.FC<EntranceGridProps> = ({ filters, setFilters }) => {
   }, [filters]);
 
   const itemsPerPage = 3;
-  const totalPages = Math.max(1, Math.ceil(filteredExams.length / itemsPerPage));
+  const totalPages = Math.max(
+    1,
+    Math.ceil(filteredExams.length / itemsPerPage),
+  );
 
   const pagedExams = useMemo(() => {
     const startIndex = (currentPage - 1) * itemsPerPage;
@@ -117,7 +129,10 @@ const EntranceGrid: React.FC<EntranceGridProps> = ({ filters, setFilters }) => {
                 type="text"
                 value={filters.search}
                 onChange={(event) =>
-                  setFilters((prev) => ({ ...prev, search: event.target.value }))
+                  setFilters((prev) => ({
+                    ...prev,
+                    search: event.target.value,
+                  }))
                 }
                 placeholder="Search exams, universities..."
                 className="w-full rounded-lg border border-gray-200 bg-white py-2.5 pl-10 pr-4 text-sm shadow-sm transition-all placeholder-gray-400 focus:border-transparent focus:outline-none focus:ring-2 focus:ring-[#0000FF]"
@@ -125,7 +140,6 @@ const EntranceGrid: React.FC<EntranceGridProps> = ({ filters, setFilters }) => {
             </div>
           </div>
         </div>
-
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4 sm:gap-5 md:gap-6">
@@ -151,19 +165,21 @@ const EntranceGrid: React.FC<EntranceGridProps> = ({ filters, setFilters }) => {
             <span className="hidden sm:inline">Prev</span>
           </button>
 
-          {[1, 2, 3].filter((page) => page <= totalPages).map((page) => (
-            <button
-              key={page}
-              onClick={() => setCurrentPage(page)}
-              className={`flex h-9 w-9 items-center justify-center rounded-[8px] text-sm font-medium transition-colors ${
-                page === currentPage
-                  ? "bg-[#0000FF] text-white shadow-sm hover:bg-[#0000CC]"
-                  : "border border-gray-200 bg-white text-gray-600 hover:bg-gray-50"
-              }`}
-            >
-              {page}
-            </button>
-          ))}
+          {[1, 2, 3]
+            .filter((page) => page <= totalPages)
+            .map((page) => (
+              <button
+                key={page}
+                onClick={() => setCurrentPage(page)}
+                className={`flex h-9 w-9 items-center justify-center rounded-[8px] text-sm font-medium transition-colors ${
+                  page === currentPage
+                    ? "bg-[#0000FF] text-white shadow-sm hover:bg-[#0000CC]"
+                    : "border border-gray-200 bg-white text-gray-600 hover:bg-gray-50"
+                }`}
+              >
+                {page}
+              </button>
+            ))}
 
           {totalPages > 4 && (
             <span className="flex h-9 w-9 select-none items-center justify-center text-gray-400">
@@ -187,7 +203,9 @@ const EntranceGrid: React.FC<EntranceGridProps> = ({ filters, setFilters }) => {
           <button
             className="flex items-center gap-1 rounded-[8px] border border-gray-200 bg-white px-3 py-2 text-sm font-medium text-gray-600 transition-colors hover:bg-gray-50 disabled:cursor-not-allowed disabled:text-gray-400"
             disabled={currentPage === totalPages}
-            onClick={() => setCurrentPage((prev) => Math.min(totalPages, prev + 1))}
+            onClick={() =>
+              setCurrentPage((prev) => Math.min(totalPages, prev + 1))
+            }
           >
             <span className="hidden sm:inline">Next</span>
             <i className="fa-solid fa-chevron-right text-xs"></i>
@@ -218,9 +236,7 @@ const EntranceCard: React.FC<{ exam: Exam }> = ({ exam }) => {
   };
 
   return (
-    <article
-      className="bg-white rounded-2xl p-4 sm:p-5 border border-gray-100 flex flex-col h-full hover:border-gray-200 transition-all duration-300"
-    >
+    <article className="bg-white rounded-2xl p-4 sm:p-5 border border-gray-100 flex flex-col h-full hover:border-gray-200 transition-all duration-300">
       <header className="flex justify-between items-start mb-4 sm:mb-5">
         <div className="flex gap-2.5 sm:gap-3">
           <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl border border-gray-100 flex items-center justify-center p-1 bg-white shadow-sm shrink-0">
@@ -239,8 +255,7 @@ const EntranceCard: React.FC<{ exam: Exam }> = ({ exam }) => {
             </h3>
             <div className="flex items-center gap-1.5 sm:gap-2 text-[10px] xs:text-[11px] sm:text-[11px] text-[#6b7280] mt-0.5 flex-wrap">
               <span className="flex items-center gap-1">
-                <MapPin className="w-2.5 h-2.5 sm:w-3 sm:h-3" />{" "}
-                {exam.location}
+                <MapPin className="w-2.5 h-2.5 sm:w-3 sm:h-3" /> {exam.location}
               </span>
               <span className="w-1 h-1 rounded-full bg-gray-300 hidden xs:inline"></span>
               <span className="flex items-center gap-1">

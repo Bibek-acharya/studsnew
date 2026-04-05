@@ -1,5 +1,8 @@
 import React, { useState, useMemo, useEffect } from "react";
-import { CollegeFilters, DEFAULT_COLLEGE_FILTERS } from "@/app/find-college/types";
+import {
+  CollegeFilters,
+  DEFAULT_COLLEGE_FILTERS,
+} from "@/app/find-college/types";
 import GlobalFilterSection from "@/components/ui/GlobalFilterSection";
 
 interface FilterSidebarProps {
@@ -17,7 +20,10 @@ const ACADEMIC_LEVELS = [
   { id: "diploma", label: "Diploma / CTEVT", count: 410 },
 ];
 
-const PROGRAMS: Record<string, Array<{ id: string; label: string; count: number }>> = {
+const PROGRAMS: Record<
+  string,
+  Array<{ id: string; label: string; count: number }>
+> = {
   plus2: [
     { id: "p2_sci", label: "Science", count: 1200 },
     { id: "p2_mgmt", label: "Management", count: 1500 },
@@ -51,7 +57,10 @@ const PROGRAMS: Record<string, Array<{ id: string; label: string; count: number 
   ],
 };
 
-const COURSES: Record<string, Array<{ id: string; label: string; count: number }>> = {
+const COURSES: Record<
+  string,
+  Array<{ id: string; label: string; count: number }>
+> = {
   b_it: [
     { id: "c_bsc_csit", label: "BSc CSIT", count: 45 },
     { id: "c_bca", label: "BCA", count: 60 },
@@ -109,7 +118,10 @@ const PROVINCES = [
   { id: "prov_sudur", label: "Sudurpashchim", count: 180 },
 ];
 
-const DISTRICTS: Record<string, Array<{ id: string; label: string; count: number }>> = {
+const DISTRICTS: Record<
+  string,
+  Array<{ id: string; label: string; count: number }>
+> = {
   prov_koshi: [
     { id: "d_jhapa", label: "Jhapa", count: 80 },
     { id: "d_morang", label: "Morang", count: 110 },
@@ -159,7 +171,11 @@ const DOMESTIC_UNIVERSITIES = [
 const FOREIGN_UNIVERSITIES = [
   { id: "u_lincoln", label: "Lincoln University", count: 45 },
   { id: "u_london_met", label: "London Metropolitan University", count: 12 },
-  { id: "u_west_england", label: "University of the West of England", count: 8 },
+  {
+    id: "u_west_england",
+    label: "University of the West of England",
+    count: 8,
+  },
 ];
 
 const COLLEGE_TYPES = [
@@ -170,7 +186,13 @@ const COLLEGE_TYPES = [
   { id: "ct_foreign", label: "Foreign Affiliated", count: 35 },
 ];
 
-const COURSE_DURATIONS = ["1 Year", "2 Years", "3 Years", "4 Years", "5+ Years"];
+const COURSE_DURATIONS = [
+  "1 Year",
+  "2 Years",
+  "3 Years",
+  "4 Years",
+  "5+ Years",
+];
 const SORT_OPTIONS = [
   { id: "popularity", label: "Popularity" },
   { id: "rating", label: "Highest Rating" },
@@ -178,7 +200,9 @@ const SORT_OPTIONS = [
   { id: "fee_high", label: "Fee: High to Low" },
 ];
 
-const APPLIED_FILTER_KEYS: Array<Exclude<keyof CollegeFilters, "search" | "feeMax" | "sortBy">> = [
+const APPLIED_FILTER_KEYS: Array<
+  Exclude<keyof CollegeFilters, "search" | "feeMax" | "sortBy">
+> = [
   "academic",
   "program",
   "course",
@@ -211,8 +235,15 @@ const SearchInput: React.FC<{
   onChange: (v: string) => void;
 }> = ({ placeholder, value, onChange }) => (
   <div className="relative mb-3">
-    <svg className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
-      <circle cx="11" cy="11" r="8" /><line x1="21" y1="21" x2="16.65" y2="16.65" />
+    <svg
+      className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      viewBox="0 0 24 24"
+    >
+      <circle cx="11" cy="11" r="8" />
+      <line x1="21" y1="21" x2="16.65" y2="16.65" />
     </svg>
     <input
       type="text"
@@ -231,7 +262,10 @@ const CheckboxItem: React.FC<{
   checked: boolean;
   onChange: () => void;
 }> = ({ id, label, count, checked, onChange }) => (
-  <label htmlFor={id} className="group flex w-full cursor-pointer items-center justify-between">
+  <label
+    htmlFor={id}
+    className="group flex w-full cursor-pointer items-center justify-between"
+  >
     <div className="flex items-center gap-3">
       <input
         id={id}
@@ -240,10 +274,14 @@ const CheckboxItem: React.FC<{
         onChange={onChange}
         className="custom-checkbox"
       />
-      <span className="text-[14.5px] text-[#475569] transition-colors group-hover:text-gray-900">{label}</span>
+      <span className="text-[14.5px] text-[#475569] transition-colors group-hover:text-gray-900">
+        {label}
+      </span>
     </div>
     {count !== undefined && (
-      <span className="rounded-md bg-slate-50 px-2 py-0.5 text-[12px] font-medium text-slate-500">{count.toLocaleString()}</span>
+      <span className="rounded-md bg-slate-50 px-2 py-0.5 text-[12px] font-medium text-slate-500">
+        {count.toLocaleString()}
+      </span>
     )}
   </label>
 );
@@ -264,7 +302,9 @@ const RadioItem: React.FC<{
       onChange={onChange}
       className="custom-radio"
     />
-    <span className="text-[14.5px] text-[#475569] transition-colors group-hover:text-gray-900">{label}</span>
+    <span className="text-[14.5px] text-[#475569] transition-colors group-hover:text-gray-900">
+      {label}
+    </span>
   </label>
 );
 
@@ -274,12 +314,23 @@ const Accordion: React.FC<{
   children: React.ReactNode;
 }> = ({ title, defaultOpen = false, children }) => {
   const [open, setOpen] = useState(defaultOpen);
-  return <GlobalFilterSection title={title} isOpen={open} onToggle={() => setOpen((o) => !o)}>{children}</GlobalFilterSection>;
+  return (
+    <GlobalFilterSection
+      title={title}
+      isOpen={open}
+      onToggle={() => setOpen((o) => !o)}
+    >
+      {children}
+    </GlobalFilterSection>
+  );
 };
 
 // ── Main Sidebar ──────────────────────────────────────────────────────────────
 
-const FilterSidebar: React.FC<FilterSidebarProps> = ({ filters, setFilters }) => {
+const FilterSidebar: React.FC<FilterSidebarProps> = ({
+  filters,
+  setFilters,
+}) => {
   const [locating, setLocating] = useState(false);
   const [showAppliedDropdown, setShowAppliedDropdown] = useState(false);
   const [programSearch, setProgramSearch] = useState("");
@@ -291,11 +342,17 @@ const FilterSidebar: React.FC<FilterSidebarProps> = ({ filters, setFilters }) =>
 
   useEffect(() => {
     const updateLocation = (cityStr: string) => {
-      if (!cityStr || cityStr === "Detect Location" || cityStr === "Detecting..." || cityStr === "Location Found") return;
+      if (
+        !cityStr ||
+        cityStr === "Detect Location" ||
+        cityStr === "Detecting..." ||
+        cityStr === "Location Found"
+      )
+        return;
       setNavLocString(cityStr);
     };
 
-    const savedLoc = sessionStorage.getItem('navLocation');
+    const savedLoc = sessionStorage.getItem("navLocation");
     if (savedLoc) {
       updateLocation(savedLoc);
     }
@@ -305,44 +362,61 @@ const FilterSidebar: React.FC<FilterSidebarProps> = ({ filters, setFilters }) =>
       updateLocation(customEvent.detail);
     };
 
-    window.addEventListener('navLocationChange', handleNavLocation);
-    return () => window.removeEventListener('navLocationChange', handleNavLocation);
+    window.addEventListener("navLocationChange", handleNavLocation);
+    return () =>
+      window.removeEventListener("navLocationChange", handleNavLocation);
   }, [setFilters]);
 
   // Derived cascade data
   const availablePrograms = useMemo(() => {
     const progs = filters.academic.flatMap((a) => PROGRAMS[a] || []);
     if (!programSearch) return progs;
-    return progs.filter((p) => p.label.toLowerCase().includes(programSearch.toLowerCase()));
+    return progs.filter((p) =>
+      p.label.toLowerCase().includes(programSearch.toLowerCase()),
+    );
   }, [filters.academic, programSearch]);
 
   const availableCourses = useMemo(() => {
-    const showCourse = filters.academic.some((a) => ["bachelor", "master", "diploma"].includes(a));
+    const showCourse = filters.academic.some((a) =>
+      ["bachelor", "master", "diploma"].includes(a),
+    );
     if (!showCourse) return [];
     const courses = filters.program.flatMap((p) => COURSES[p] || []);
     if (!courseSearch) return courses;
-    return courses.filter((c) => c.label.toLowerCase().includes(courseSearch.toLowerCase()));
+    return courses.filter((c) =>
+      c.label.toLowerCase().includes(courseSearch.toLowerCase()),
+    );
   }, [filters.academic, filters.program, courseSearch]);
 
   const availableDistricts = useMemo(() => {
     const dists = filters.province.flatMap((p) => DISTRICTS[p] || []);
     if (!districtSearch) return dists;
-    return dists.filter((d) => d.label.toLowerCase().includes(districtSearch.toLowerCase()));
+    return dists.filter((d) =>
+      d.label.toLowerCase().includes(districtSearch.toLowerCase()),
+    );
   }, [filters.province, districtSearch]);
 
   const availableUniversities = useMemo(() => {
     const showForeign = filters.type.includes("ct_foreign");
-    const showDomestic = filters.type.length === 0 || filters.type.some((t) => t !== "ct_foreign");
+    const showDomestic =
+      filters.type.length === 0 || filters.type.some((t) => t !== "ct_foreign");
     let list = [
       ...(showDomestic ? DOMESTIC_UNIVERSITIES : []),
       ...(showForeign ? FOREIGN_UNIVERSITIES : []),
     ];
-    if (universitySearch) list = list.filter((u) => u.label.toLowerCase().includes(universitySearch.toLowerCase()));
+    if (universitySearch)
+      list = list.filter((u) =>
+        u.label.toLowerCase().includes(universitySearch.toLowerCase()),
+      );
     return list;
   }, [filters.type, universitySearch]);
 
-  const showCourseSection = filters.academic.some((a) => ["bachelor", "master", "diploma"].includes(a));
-  const showUniversitySection = filters.academic.some((a) => ["bachelor", "master"].includes(a));
+  const showCourseSection = filters.academic.some((a) =>
+    ["bachelor", "master", "diploma"].includes(a),
+  );
+  const showUniversitySection = filters.academic.some((a) =>
+    ["bachelor", "master"].includes(a),
+  );
 
   const filterLabelMap = useMemo(() => {
     const map = new Map<string, string>();
@@ -371,7 +445,11 @@ const FilterSidebar: React.FC<FilterSidebarProps> = ({ filters, setFilters }) =>
   }, []);
 
   const appliedFilters = useMemo(() => {
-    const tags: Array<{ key: Exclude<keyof CollegeFilters, "search" | "feeMax" | "sortBy">; value: string; label: string }> = [];
+    const tags: Array<{
+      key: Exclude<keyof CollegeFilters, "search" | "feeMax" | "sortBy">;
+      value: string;
+      label: string;
+    }> = [];
 
     APPLIED_FILTER_KEYS.forEach((key) => {
       filters[key].forEach((value) => {
@@ -387,7 +465,9 @@ const FilterSidebar: React.FC<FilterSidebarProps> = ({ filters, setFilters }) =>
   const toggle = (key: keyof CollegeFilters, value: string) => {
     setFilters((prev) => {
       const current = prev[key] as string[];
-      const next = current.includes(value) ? current.filter((v) => v !== value) : [...current, value];
+      const next = current.includes(value)
+        ? current.filter((v) => v !== value)
+        : [...current, value];
       return { ...prev, [key]: next };
     });
   };
@@ -404,18 +484,26 @@ const FilterSidebar: React.FC<FilterSidebarProps> = ({ filters, setFilters }) =>
 
         // 1. Try precise GPS via OpenStreetMap Nominatim (zoom=10 for city/district level)
         if (lat && lon) {
-          const res = await fetch(`https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lon}&format=json&zoom=10&addressdetails=1`);
+          const res = await fetch(
+            `https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lon}&format=json&zoom=10&addressdetails=1`,
+          );
           if (res.ok) {
             const data = await res.json();
             if (data && data.address) {
-              cityStr = data.address.county || data.address.city || data.address.state_district || "";
+              cityStr =
+                data.address.county ||
+                data.address.city ||
+                data.address.state_district ||
+                "";
             }
           }
         }
 
         // 2. Try generic IP-based location if GPS failed or permission denied
         if (!cityStr) {
-          const res = await fetch(`https://api.bigdatacloud.net/data/reverse-geocode-client?localityLanguage=en`);
+          const res = await fetch(
+            `https://api.bigdatacloud.net/data/reverse-geocode-client?localityLanguage=en`,
+          );
           if (res.ok) {
             const data = await res.json();
             if (data) {
@@ -429,7 +517,7 @@ const FilterSidebar: React.FC<FilterSidebarProps> = ({ filters, setFilters }) =>
           const normalizedSearch = cityStr.toLowerCase();
           let foundProvId = "";
           let foundDistId = "";
-          
+
           // Match Province
           for (const prov of PROVINCES) {
             if (normalizedSearch.includes(prov.label.toLowerCase())) {
@@ -441,7 +529,10 @@ const FilterSidebar: React.FC<FilterSidebarProps> = ({ filters, setFilters }) =>
           for (const [provKey, districts] of Object.entries(DISTRICTS)) {
             for (const dist of districts) {
               const distLower = dist.label.toLowerCase();
-              if (normalizedSearch.includes(distLower) || distLower.includes(normalizedSearch)) {
+              if (
+                normalizedSearch.includes(distLower) ||
+                distLower.includes(normalizedSearch)
+              ) {
                 foundDistId = dist.id;
                 foundProvId = provKey; // Auto-select parent province
               }
@@ -465,13 +556,15 @@ const FilterSidebar: React.FC<FilterSidebarProps> = ({ filters, setFilters }) =>
               district: Array.from(nextDist),
             };
           });
-          
-          sessionStorage.setItem('navLocation', cityStr);
-          window.dispatchEvent(new CustomEvent('navLocationChange', { detail: cityStr }));
+
+          sessionStorage.setItem("navLocation", cityStr);
+          window.dispatchEvent(
+            new CustomEvent("navLocationChange", { detail: cityStr }),
+          );
         } else {
           alert("Could not detect your district. Please select it manually.");
         }
-      } catch(e) {
+      } catch (e) {
         console.error(e);
         alert("Could not detect location.");
       } finally {
@@ -483,7 +576,7 @@ const FilterSidebar: React.FC<FilterSidebarProps> = ({ filters, setFilters }) =>
       navigator.geolocation.getCurrentPosition(
         (pos) => resolveLocation(pos.coords.latitude, pos.coords.longitude),
         () => resolveLocation(), // Fallback to IP if denied
-        { enableHighAccuracy: true, timeout: 5000, maximumAge: 0 }
+        { enableHighAccuracy: true, timeout: 5000, maximumAge: 0 },
       );
     } else {
       resolveLocation(); // Fallback instantly if geolocation unavailable
@@ -491,21 +584,32 @@ const FilterSidebar: React.FC<FilterSidebarProps> = ({ filters, setFilters }) =>
   };
 
   const filteredProvinces = provinceSearch
-    ? PROVINCES.filter((p) => p.label.toLowerCase().includes(provinceSearch.toLowerCase()))
+    ? PROVINCES.filter((p) =>
+        p.label.toLowerCase().includes(provinceSearch.toLowerCase()),
+      )
     : PROVINCES;
 
   return (
     <>
       {/* ── Filter Card ───────────────────────────────────── */}
       <div className="relative w-full rounded-[20px] border border-gray-100 bg-white p-6 shadow-[0_4px_24px_-8px_rgba(0,0,0,0.1)]">
-
         {/* Header */}
         <div className="mb-2 flex items-center justify-between">
           <div className="flex items-center gap-2.5">
-            <svg viewBox="0 0 24 24" fill="currentColor" className="h-6 w-6 text-blue-600">
-              <path fillRule="evenodd" clipRule="evenodd" d="M3 4a1 1 0 011-1h16a1 1 0 01.7 1.7L14 11.414V17a1 1 0 01-.293.707l-3 3A1 1 0 019 20v-8.586L3.3 4.7A1 1 0 013 4z" />
+            <svg
+              viewBox="0 0 24 24"
+              fill="currentColor"
+              className="h-6 w-6 text-blue-600"
+            >
+              <path
+                fillRule="evenodd"
+                clipRule="evenodd"
+                d="M3 4a1 1 0 011-1h16a1 1 0 01.7 1.7L14 11.414V17a1 1 0 01-.293.707l-3 3A1 1 0 019 20v-8.586L3.3 4.7A1 1 0 013 4z"
+              />
             </svg>
-            <h2 className="text-[20px] font-bold tracking-tight text-gray-900">Filters</h2>
+            <h2 className="text-[20px] font-bold tracking-tight text-gray-900">
+              Filters
+            </h2>
           </div>
           <button
             type="button"
@@ -513,14 +617,18 @@ const FilterSidebar: React.FC<FilterSidebarProps> = ({ filters, setFilters }) =>
             className="inline-flex items-center gap-2 rounded-md border border-blue-100 bg-blue-50 px-3 py-1.5 text-[12px] font-semibold text-blue-700 transition-colors hover:bg-blue-100"
           >
             Applied ({appliedFilters.length + (isFeeApplied ? 1 : 0)})
-            <i className={`fa-solid fa-chevron-down text-[10px] transition-transform ${showAppliedDropdown ? "rotate-180" : ""}`}></i>
+            <i
+              className={`fa-solid fa-chevron-down text-[10px] transition-transform ${showAppliedDropdown ? "rotate-180" : ""}`}
+            ></i>
           </button>
         </div>
 
         {showAppliedDropdown && (
           <div className="absolute right-6 top-16 z-30 w-[min(520px,calc(100%-3rem))] rounded-xl border border-gray-200 bg-white p-3 shadow-lg">
             {appliedFilters.length === 0 && !isFeeApplied ? (
-              <p className="px-1 py-2 text-[13px] italic text-gray-400">No filters selected yet.</p>
+              <p className="px-1 py-2 text-[13px] italic text-gray-400">
+                No filters selected yet.
+              </p>
             ) : (
               <>
                 <div className="flex flex-wrap gap-2 pb-3">
@@ -531,7 +639,9 @@ const FilterSidebar: React.FC<FilterSidebarProps> = ({ filters, setFilters }) =>
                       onClick={() =>
                         setFilters((prev) => ({
                           ...prev,
-                          [tag.key]: prev[tag.key].filter((item) => item !== tag.value),
+                          [tag.key]: prev[tag.key].filter(
+                            (item) => item !== tag.value,
+                          ),
                         }))
                       }
                       className="inline-flex items-center gap-1.5 rounded-full border border-blue-100 bg-blue-50 px-3 py-1.5 text-[12px] font-medium text-blue-700 transition-colors hover:border-red-100 hover:bg-red-50 hover:text-red-700"
@@ -544,7 +654,12 @@ const FilterSidebar: React.FC<FilterSidebarProps> = ({ filters, setFilters }) =>
                   {isFeeApplied && (
                     <button
                       type="button"
-                      onClick={() => setFilters((prev) => ({ ...prev, feeMax: DEFAULT_COLLEGE_FILTERS.feeMax }))}
+                      onClick={() =>
+                        setFilters((prev) => ({
+                          ...prev,
+                          feeMax: DEFAULT_COLLEGE_FILTERS.feeMax,
+                        }))
+                      }
                       className="inline-flex items-center gap-1.5 rounded-full border border-blue-100 bg-blue-50 px-3 py-1.5 text-[12px] font-medium text-blue-700 transition-colors hover:border-red-100 hover:bg-red-50 hover:text-red-700"
                     >
                       Max Fee: {formatFee(filters.feeMax)}
@@ -578,7 +693,18 @@ const FilterSidebar: React.FC<FilterSidebarProps> = ({ filters, setFilters }) =>
             className="flex w-full items-center justify-center gap-2 rounded-md border border-blue-500 bg-blue-50 px-4 py-3 text-blue-500 outline-none transition-all duration-200 hover:bg-blue-100 active:bg-blue-200"
           >
             {locating ? (
-              <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="animate-spin">
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="18"
+                height="18"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                className="animate-spin"
+              >
                 <circle cx="12" cy="12" r="3" />
                 <circle cx="12" cy="12" r="7" />
                 <line x1="12" y1="1" x2="12" y2="5" />
@@ -587,9 +713,17 @@ const FilterSidebar: React.FC<FilterSidebarProps> = ({ filters, setFilters }) =>
                 <line x1="19" y1="12" x2="23" y2="12" />
               </svg>
             ) : (
-              <i className={`fa-solid ${navLocString ? 'fa-location-dot' : 'fa-location-crosshairs'} text-[16px]`}></i>
+              <i
+                className={`fa-solid ${navLocString ? "fa-location-dot" : "fa-location-crosshairs"} text-[16px]`}
+              ></i>
             )}
-            <span className="text-[15px] font-medium">{locating ? "Locating..." : navLocString ? navLocString : "College Near Me"}</span>
+            <span className="text-[15px] font-medium">
+              {locating
+                ? "Locating..."
+                : navLocString
+                  ? navLocString
+                  : "College Near Me"}
+            </span>
           </button>
         </div>
 
@@ -617,11 +751,17 @@ const FilterSidebar: React.FC<FilterSidebarProps> = ({ filters, setFilters }) =>
 
         {/* 2. Program */}
         <Accordion title="Program" defaultOpen>
-          <SearchInput placeholder="Search programs..." value={programSearch} onChange={setProgramSearch} />
+          <SearchInput
+            placeholder="Search programs..."
+            value={programSearch}
+            onChange={setProgramSearch}
+          />
           <div className="custom-scrollbar flex max-h-[220px] flex-col gap-3.5 overflow-y-auto pr-1">
             {availablePrograms.length === 0 ? (
               <p className="px-1 text-[13px] italic text-gray-400">
-                {filters.academic.length === 0 ? "Select an Academic Level first." : "No programs found."}
+                {filters.academic.length === 0
+                  ? "Select an Academic Level first."
+                  : "No programs found."}
               </p>
             ) : (
               availablePrograms.map((item) => (
@@ -641,11 +781,17 @@ const FilterSidebar: React.FC<FilterSidebarProps> = ({ filters, setFilters }) =>
         {/* 3. Course (conditional) */}
         {showCourseSection && (
           <Accordion title="Course">
-            <SearchInput placeholder="Search courses..." value={courseSearch} onChange={setCourseSearch} />
+            <SearchInput
+              placeholder="Search courses..."
+              value={courseSearch}
+              onChange={setCourseSearch}
+            />
             <div className="custom-scrollbar flex max-h-[220px] flex-col gap-3.5 overflow-y-auto pr-1">
               {availableCourses.length === 0 ? (
                 <p className="px-1 text-[13px] italic text-gray-400">
-                  {filters.program.length === 0 ? "Select a Program first to view courses." : "No courses found."}
+                  {filters.program.length === 0
+                    ? "Select a Program first to view courses."
+                    : "No courses found."}
                 </p>
               ) : (
                 availableCourses.map((item) => (
@@ -665,7 +811,11 @@ const FilterSidebar: React.FC<FilterSidebarProps> = ({ filters, setFilters }) =>
 
         {/* 4. Province */}
         <Accordion title="Province">
-          <SearchInput placeholder="Search province..." value={provinceSearch} onChange={setProvinceSearch} />
+          <SearchInput
+            placeholder="Search province..."
+            value={provinceSearch}
+            onChange={setProvinceSearch}
+          />
           <div className="custom-scrollbar flex max-h-[220px] flex-col gap-3.5 overflow-y-auto pr-1">
             {filteredProvinces.map((item) => (
               <CheckboxItem
@@ -685,11 +835,17 @@ const FilterSidebar: React.FC<FilterSidebarProps> = ({ filters, setFilters }) =>
 
         {/* 5. District */}
         <Accordion title="District">
-          <SearchInput placeholder="Search district..." value={districtSearch} onChange={setDistrictSearch} />
+          <SearchInput
+            placeholder="Search district..."
+            value={districtSearch}
+            onChange={setDistrictSearch}
+          />
           <div className="custom-scrollbar flex max-h-[220px] flex-col gap-3.5 overflow-y-auto pr-1">
             {availableDistricts.length === 0 ? (
               <p className="px-1 text-[13px] italic text-gray-400">
-                {filters.province.length === 0 ? "Select a Province first." : "No districts found."}
+                {filters.province.length === 0
+                  ? "Select a Province first."
+                  : "No districts found."}
               </p>
             ) : (
               availableDistricts.map((item) => (
@@ -725,10 +881,16 @@ const FilterSidebar: React.FC<FilterSidebarProps> = ({ filters, setFilters }) =>
         {/* 7. University (conditional) */}
         {showUniversitySection && (
           <Accordion title="University">
-            <SearchInput placeholder="Search university..." value={universitySearch} onChange={setUniversitySearch} />
+            <SearchInput
+              placeholder="Search university..."
+              value={universitySearch}
+              onChange={setUniversitySearch}
+            />
             <div className="custom-scrollbar flex max-h-[220px] flex-col gap-3.5 overflow-y-auto pr-1">
               {availableUniversities.length === 0 ? (
-                <p className="px-1 text-[13px] italic text-gray-400">No universities found.</p>
+                <p className="px-1 text-[13px] italic text-gray-400">
+                  No universities found.
+                </p>
               ) : (
                 availableUniversities.map((item) => (
                   <CheckboxItem
@@ -749,7 +911,9 @@ const FilterSidebar: React.FC<FilterSidebarProps> = ({ filters, setFilters }) =>
         <Accordion title="Total Fee Range">
           <div className="px-2 pb-2 pt-2">
             <div className="mb-4 flex items-center justify-between">
-              <span className="text-[13px] font-medium text-gray-400">NPR 0</span>
+              <span className="text-[13px] font-medium text-gray-400">
+                NPR 0
+              </span>
               <span className="rounded-md bg-blue-50 px-2.5 py-1 text-[14px] font-bold text-blue-600">
                 {formatFee(filters.feeMax)}
               </span>
@@ -760,7 +924,12 @@ const FilterSidebar: React.FC<FilterSidebarProps> = ({ filters, setFilters }) =>
               max={2000000}
               step={50000}
               value={filters.feeMax}
-              onChange={(e) => setFilters((prev) => ({ ...prev, feeMax: Number(e.target.value) }))}
+              onChange={(e) =>
+                setFilters((prev) => ({
+                  ...prev,
+                  feeMax: Number(e.target.value),
+                }))
+              }
               className="fee-range w-full"
             />
           </div>
@@ -783,8 +952,13 @@ const FilterSidebar: React.FC<FilterSidebarProps> = ({ filters, setFilters }) =>
 
         {/* 10. Sort By */}
         <div>
-          <button type="button" className="group flex w-full items-center justify-between bg-white py-4">
-            <span className="text-[15px] font-semibold text-gray-900">Sort By</span>
+          <button
+            type="button"
+            className="group flex w-full items-center justify-between bg-white py-4"
+          >
+            <span className="text-[15px] font-semibold text-gray-900">
+              Sort By
+            </span>
           </button>
           <div className="flex flex-col gap-3.5 pb-4 pt-1">
             {SORT_OPTIONS.map((opt) => (
@@ -794,12 +968,13 @@ const FilterSidebar: React.FC<FilterSidebarProps> = ({ filters, setFilters }) =>
                 name="sort"
                 label={opt.label}
                 checked={filters.sortBy === opt.id}
-                onChange={() => setFilters((prev) => ({ ...prev, sortBy: opt.id }))}
+                onChange={() =>
+                  setFilters((prev) => ({ ...prev, sortBy: opt.id }))
+                }
               />
             ))}
           </div>
         </div>
-
       </div>
 
       <style>{`

@@ -1,5 +1,8 @@
 import React, { useState, useMemo } from "react";
-import { EntranceFilterState, DEFAULT_ENTRANCE_FILTERS } from "@/app/entrance/types";
+import {
+  EntranceFilterState,
+  DEFAULT_ENTRANCE_FILTERS,
+} from "@/app/entrance/types";
 
 interface EntranceFiltersProps {
   filters: EntranceFilterState;
@@ -49,14 +52,9 @@ const SORT_OPTIONS = [
   { id: "name", label: "Name (A-Z)" },
 ];
 
-const APPLIED_FILTER_KEYS: Array<Exclude<keyof EntranceFilterState, "search" | "sortBy">> = [
-  "academicLevel",
-  "stream",
-  "programName",
-  "university",
-  "status",
-  "quick",
-];
+const APPLIED_FILTER_KEYS: Array<
+  Exclude<keyof EntranceFilterState, "search" | "sortBy">
+> = ["academicLevel", "stream", "programName", "university", "status", "quick"];
 
 const SearchInput: React.FC<{
   placeholder: string;
@@ -64,8 +62,15 @@ const SearchInput: React.FC<{
   onChange: (v: string) => void;
 }> = ({ placeholder, value, onChange }) => (
   <div className="relative mb-3">
-    <svg className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
-      <circle cx="11" cy="11" r="8" /><line x1="21" y1="21" x2="16.65" y2="16.65" />
+    <svg
+      className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      viewBox="0 0 24 24"
+    >
+      <circle cx="11" cy="11" r="8" />
+      <line x1="21" y1="21" x2="16.65" y2="16.65" />
     </svg>
     <input
       type="text"
@@ -83,7 +88,10 @@ const CheckboxItem: React.FC<{
   checked: boolean;
   onChange: () => void;
 }> = ({ id, label, checked, onChange }) => (
-  <label htmlFor={id} className="group flex w-full cursor-pointer items-center justify-between">
+  <label
+    htmlFor={id}
+    className="group flex w-full cursor-pointer items-center justify-between"
+  >
     <div className="flex items-center gap-3">
       <input
         id={id}
@@ -92,7 +100,9 @@ const CheckboxItem: React.FC<{
         onChange={onChange}
         className="custom-checkbox"
       />
-      <span className="text-[14.5px] text-[#475569] transition-colors group-hover:text-gray-900">{label}</span>
+      <span className="text-[14.5px] text-[#475569] transition-colors group-hover:text-gray-900">
+        {label}
+      </span>
     </div>
   </label>
 );
@@ -113,7 +123,9 @@ const RadioItem: React.FC<{
       onChange={onChange}
       className="custom-radio"
     />
-    <span className="text-[14.5px] text-[#475569] transition-colors group-hover:text-gray-900">{label}</span>
+    <span className="text-[14.5px] text-[#475569] transition-colors group-hover:text-gray-900">
+      {label}
+    </span>
   </label>
 );
 
@@ -130,10 +142,17 @@ const Accordion: React.FC<{
         onClick={() => setOpen((o) => !o)}
         className="group flex w-full items-center justify-between bg-white py-4"
       >
-        <span className="text-[15px] font-semibold text-gray-900 transition-colors group-hover:text-blue-600">{title}</span>
+        <span className="text-[15px] font-semibold text-gray-900 transition-colors group-hover:text-blue-600">
+          {title}
+        </span>
         <svg
           className={`h-4 w-4 text-gray-500 transition-transform duration-300 ${open ? "rotate-180" : ""}`}
-          fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="2"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          viewBox="0 0 24 24"
         >
           <polyline points="6 9 12 15 18 9" />
         </svg>
@@ -148,7 +167,10 @@ const Accordion: React.FC<{
   );
 };
 
-const EntranceFilters: React.FC<EntranceFiltersProps> = ({ filters, setFilters }) => {
+const EntranceFilters: React.FC<EntranceFiltersProps> = ({
+  filters,
+  setFilters,
+}) => {
   const [showAppliedDropdown, setShowAppliedDropdown] = useState(false);
   const [streamSearch, setStreamSearch] = useState("");
   const [programSearch, setProgramSearch] = useState("");
@@ -157,7 +179,9 @@ const EntranceFilters: React.FC<EntranceFiltersProps> = ({ filters, setFilters }
   const toggle = (key: keyof EntranceFilterState, value: string) => {
     setFilters((prev) => {
       const current = prev[key] as string[];
-      const next = current.includes(value) ? current.filter((v) => v !== value) : [...current, value];
+      const next = current.includes(value)
+        ? current.filter((v) => v !== value)
+        : [...current, value];
       return { ...prev, [key]: next };
     });
   };
@@ -165,15 +189,21 @@ const EntranceFilters: React.FC<EntranceFiltersProps> = ({ filters, setFilters }
   const clearAll = () => setFilters(DEFAULT_ENTRANCE_FILTERS);
 
   const filteredStreams = streamSearch
-    ? STREAMS.filter((s) => s.label.toLowerCase().includes(streamSearch.toLowerCase()))
+    ? STREAMS.filter((s) =>
+        s.label.toLowerCase().includes(streamSearch.toLowerCase()),
+      )
     : STREAMS;
 
   const filteredPrograms = programSearch
-    ? PROGRAMS.filter((p) => p.label.toLowerCase().includes(programSearch.toLowerCase()))
+    ? PROGRAMS.filter((p) =>
+        p.label.toLowerCase().includes(programSearch.toLowerCase()),
+      )
     : PROGRAMS;
 
   const filteredUniversities = universitySearch
-    ? UNIVERSITIES.filter((u) => u.label.toLowerCase().includes(universitySearch.toLowerCase()))
+    ? UNIVERSITIES.filter((u) =>
+        u.label.toLowerCase().includes(universitySearch.toLowerCase()),
+      )
     : UNIVERSITIES;
 
   const filterLabelMap = useMemo(() => {
@@ -189,7 +219,11 @@ const EntranceFilters: React.FC<EntranceFiltersProps> = ({ filters, setFilters }
   }, []);
 
   const appliedFilters = useMemo(() => {
-    const tags: Array<{ key: Exclude<keyof EntranceFilterState, "search" | "sortBy">; value: string; label: string }> = [];
+    const tags: Array<{
+      key: Exclude<keyof EntranceFilterState, "search" | "sortBy">;
+      value: string;
+      label: string;
+    }> = [];
 
     APPLIED_FILTER_KEYS.forEach((key) => {
       filters[key].forEach((value) => {
@@ -205,10 +239,20 @@ const EntranceFilters: React.FC<EntranceFiltersProps> = ({ filters, setFilters }
       <div className="relative w-full rounded-[20px] border border-gray-100 bg-white p-6 shadow-[0_4px_24px_-8px_rgba(0,0,0,0.1)]">
         <div className="mb-2 flex items-center justify-between">
           <div className="flex items-center gap-2.5">
-            <svg viewBox="0 0 24 24" fill="currentColor" className="h-6 w-6 text-blue-600">
-              <path fillRule="evenodd" clipRule="evenodd" d="M3 4a1 1 0 011-1h16a1 1 0 01.7 1.7L14 11.414V17a1 1 0 01-.293.707l-3 3A1 1 0 019 20v-8.586L3.3 4.7A1 1 0 013 4z" />
+            <svg
+              viewBox="0 0 24 24"
+              fill="currentColor"
+              className="h-6 w-6 text-blue-600"
+            >
+              <path
+                fillRule="evenodd"
+                clipRule="evenodd"
+                d="M3 4a1 1 0 011-1h16a1 1 0 01.7 1.7L14 11.414V17a1 1 0 01-.293.707l-3 3A1 1 0 019 20v-8.586L3.3 4.7A1 1 0 013 4z"
+              />
             </svg>
-            <h2 className="text-[20px] font-bold tracking-tight text-gray-900">Filters</h2>
+            <h2 className="text-[20px] font-bold tracking-tight text-gray-900">
+              Filters
+            </h2>
           </div>
           <button
             type="button"
@@ -216,14 +260,18 @@ const EntranceFilters: React.FC<EntranceFiltersProps> = ({ filters, setFilters }
             className="inline-flex items-center gap-2 rounded-md border border-blue-100 bg-blue-50 px-3 py-1.5 text-[12px] font-semibold text-blue-700 transition-colors hover:bg-blue-100"
           >
             Applied ({appliedFilters.length})
-            <i className={`fa-solid fa-chevron-down text-[10px] transition-transform ${showAppliedDropdown ? "rotate-180" : ""}`}></i>
+            <i
+              className={`fa-solid fa-chevron-down text-[10px] transition-transform ${showAppliedDropdown ? "rotate-180" : ""}`}
+            ></i>
           </button>
         </div>
 
         {showAppliedDropdown && (
           <div className="absolute right-6 top-16 z-30 w-[min(520px,calc(100%-3rem))] rounded-xl border border-gray-200 bg-white p-3 shadow-lg">
             {appliedFilters.length === 0 ? (
-              <p className="px-1 py-2 text-[13px] italic text-gray-400">No filters selected yet.</p>
+              <p className="px-1 py-2 text-[13px] italic text-gray-400">
+                No filters selected yet.
+              </p>
             ) : (
               <>
                 <div className="flex flex-wrap gap-2 pb-3">
@@ -234,7 +282,9 @@ const EntranceFilters: React.FC<EntranceFiltersProps> = ({ filters, setFilters }
                       onClick={() =>
                         setFilters((prev) => ({
                           ...prev,
-                          [tag.key]: prev[tag.key].filter((item) => item !== tag.value),
+                          [tag.key]: prev[tag.key].filter(
+                            (item) => item !== tag.value,
+                          ),
                         }))
                       }
                       className="inline-flex items-center gap-1.5 rounded-full border border-blue-100 bg-blue-50 px-3 py-1.5 text-[12px] font-medium text-blue-700 transition-colors hover:border-red-100 hover:bg-red-50 hover:text-red-700"
@@ -277,7 +327,11 @@ const EntranceFilters: React.FC<EntranceFiltersProps> = ({ filters, setFilters }
         </Accordion>
 
         <Accordion title="Stream / Faculty" defaultOpen>
-          <SearchInput placeholder="Search streams..." value={streamSearch} onChange={setStreamSearch} />
+          <SearchInput
+            placeholder="Search streams..."
+            value={streamSearch}
+            onChange={setStreamSearch}
+          />
           <div className="custom-scrollbar flex max-h-[220px] flex-col gap-3.5 overflow-y-auto pr-1">
             {filteredStreams.map((item) => (
               <CheckboxItem
@@ -292,7 +346,11 @@ const EntranceFilters: React.FC<EntranceFiltersProps> = ({ filters, setFilters }
         </Accordion>
 
         <Accordion title="Program Name">
-          <SearchInput placeholder="Search programs..." value={programSearch} onChange={setProgramSearch} />
+          <SearchInput
+            placeholder="Search programs..."
+            value={programSearch}
+            onChange={setProgramSearch}
+          />
           <div className="custom-scrollbar flex max-h-[220px] flex-col gap-3.5 overflow-y-auto pr-1">
             {filteredPrograms.map((item) => (
               <CheckboxItem
@@ -307,7 +365,11 @@ const EntranceFilters: React.FC<EntranceFiltersProps> = ({ filters, setFilters }
         </Accordion>
 
         <Accordion title="University">
-          <SearchInput placeholder="Search university..." value={universitySearch} onChange={setUniversitySearch} />
+          <SearchInput
+            placeholder="Search university..."
+            value={universitySearch}
+            onChange={setUniversitySearch}
+          />
           <div className="custom-scrollbar flex max-h-[220px] flex-col gap-3.5 overflow-y-auto pr-1">
             {filteredUniversities.map((item) => (
               <CheckboxItem
@@ -336,8 +398,13 @@ const EntranceFilters: React.FC<EntranceFiltersProps> = ({ filters, setFilters }
         </Accordion>
 
         <div>
-          <button type="button" className="group flex w-full items-center justify-between bg-white py-4">
-            <span className="text-[15px] font-semibold text-gray-900">Sort By</span>
+          <button
+            type="button"
+            className="group flex w-full items-center justify-between bg-white py-4"
+          >
+            <span className="text-[15px] font-semibold text-gray-900">
+              Sort By
+            </span>
           </button>
           <div className="flex flex-col gap-3.5 pb-4 pt-1">
             {SORT_OPTIONS.map((opt) => (
@@ -347,7 +414,9 @@ const EntranceFilters: React.FC<EntranceFiltersProps> = ({ filters, setFilters }
                 name="sort"
                 label={opt.label}
                 checked={filters.sortBy === opt.id}
-                onChange={() => setFilters((prev) => ({ ...prev, sortBy: opt.id }))}
+                onChange={() =>
+                  setFilters((prev) => ({ ...prev, sortBy: opt.id }))
+                }
               />
             ))}
           </div>

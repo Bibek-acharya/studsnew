@@ -117,7 +117,12 @@ const feeRangeOptions: FeeRangeOption[] = [
   { key: "below1", label: "Below 1 Lakh", min: 0, max: 100000 },
   { key: "1to3", label: "1–3 Lakhs", min: 100000, max: 300000 },
   { key: "3to6", label: "3–6 Lakhs", min: 300000, max: 600000 },
-  { key: "6plus", label: "6+ Lakhs", min: 600000, max: Number.MAX_SAFE_INTEGER },
+  {
+    key: "6plus",
+    label: "6+ Lakhs",
+    min: 600000,
+    max: Number.MAX_SAFE_INTEGER,
+  },
 ];
 
 const levelOptions = ["+2 (NEB)", "Bachelor", "Master", "Diploma"];
@@ -135,7 +140,9 @@ const streamOptions = [
 const parseFee = (value?: string) => {
   if (!value) return 0;
   const text = value.toLowerCase().replace(/,/g, " ");
-  const numbers = Array.from(text.matchAll(/\d+(?:\.\d+)?/g)).map((match) => Number(match[0]));
+  const numbers = Array.from(text.matchAll(/\d+(?:\.\d+)?/g)).map((match) =>
+    Number(match[0]),
+  );
   if (numbers.length === 0) return 0;
   const hasLakh = /lakh|lac|l\b/.test(text);
   const hasK = /k\b/.test(text);
@@ -144,18 +151,28 @@ const parseFee = (value?: string) => {
 };
 
 const detectStatus = (course: EducationCourse): CourseCard["status"] => {
-  const token = [course.badges?.join(" "), course.highlights?.join(" "), course.description]
+  const token = [
+    course.badges?.join(" "),
+    course.highlights?.join(" "),
+    course.description,
+  ]
     .join(" ")
     .toLowerCase();
 
   if (token.includes("closed")) return "Closed";
-  if (token.includes("entrance") || token.includes("ongoing")) return "Entrance Ongoing";
+  if (token.includes("entrance") || token.includes("ongoing"))
+    return "Entrance Ongoing";
   return "Admission Open";
 };
 
 const detectLevel = (level: string): string => {
   const text = level.toLowerCase();
-  if (text.includes("+2") || text.includes("higher") || text.includes("intermediate")) return "+2 (NEB)";
+  if (
+    text.includes("+2") ||
+    text.includes("higher") ||
+    text.includes("intermediate")
+  )
+    return "+2 (NEB)";
   if (text.includes("master")) return "Master";
   if (text.includes("diploma") || text.includes("ctevt")) return "Diploma";
   return "Bachelor";
@@ -163,12 +180,27 @@ const detectLevel = (level: string): string => {
 
 const detectStream = (field: string): string => {
   const text = field.toLowerCase();
-  if (text.includes("it") || text.includes("computer") || text.includes("software") || text.includes("data")) {
+  if (
+    text.includes("it") ||
+    text.includes("computer") ||
+    text.includes("software") ||
+    text.includes("data")
+  ) {
     return "IT / Computer Science";
   }
   if (text.includes("engineering")) return "Engineering";
-  if (text.includes("medical") || text.includes("health") || text.includes("nursing")) return "Medical";
-  if (text.includes("manage") || text.includes("business") || text.includes("commerce")) return "Management";
+  if (
+    text.includes("medical") ||
+    text.includes("health") ||
+    text.includes("nursing")
+  )
+    return "Medical";
+  if (
+    text.includes("manage") ||
+    text.includes("business") ||
+    text.includes("commerce")
+  )
+    return "Management";
   if (text.includes("law")) return "Law";
   if (text.includes("education")) return "Education";
   if (text.includes("human")) return "Humanities";
@@ -176,14 +208,28 @@ const detectStream = (field: string): string => {
 };
 
 const getThemeByIndex = (index: number): CourseCard["colorTheme"] => {
-  const list: CourseCard["colorTheme"][] = ["purple", "blue", "emerald", "orange", "blue", "purple"];
+  const list: CourseCard["colorTheme"][] = [
+    "purple",
+    "blue",
+    "emerald",
+    "orange",
+    "blue",
+    "purple",
+  ];
   return list[index % list.length];
 };
 
-const mapCourseToCard = (course: EducationCourse, index: number): CourseCard => {
+const mapCourseToCard = (
+  course: EducationCourse,
+  index: number,
+): CourseCard => {
   const highlights = Array.isArray(course.highlights) ? course.highlights : [];
-  const entranceHighlight = highlights.find((item) => item.toLowerCase().includes("entrance"));
-  const eligibilityHighlight = highlights.find((item) => item.toLowerCase().includes("eligib"));
+  const entranceHighlight = highlights.find((item) =>
+    item.toLowerCase().includes("entrance"),
+  );
+  const eligibilityHighlight = highlights.find((item) =>
+    item.toLowerCase().includes("eligib"),
+  );
 
   return {
     id: String(course.id || index + 1),
@@ -208,10 +254,12 @@ const COURSES_PER_PAGE = 18;
 const CourseFinderPage: React.FC<CourseFinderPageProps> = ({ onNavigate }) => {
   const { isAuthenticated } = useAuth();
   const [showAppliedDropdown, setShowAppliedDropdown] = useState(false);
-  
+
   const [selectedLevels, setSelectedLevels] = useState<string[]>([]);
   const [selectedStreams, setSelectedStreams] = useState<string[]>([]);
-  const [selectedAffiliations, setSelectedAffiliations] = useState<string[]>([]);
+  const [selectedAffiliations, setSelectedAffiliations] = useState<string[]>(
+    [],
+  );
   const [selectedStatuses, setSelectedStatuses] = useState<string[]>([]);
   const [selectedFeeRanges, setSelectedFeeRanges] = useState<string[]>([]);
 
@@ -239,13 +287,16 @@ const CourseFinderPage: React.FC<CourseFinderPageProps> = ({ onNavigate }) => {
   }, [data]);
 
   const affiliations = useMemo(() => {
-    return Array.from(new Set<string>(mappedCourses.map((item) => item.affiliation))).sort((a, b) =>
-      a.localeCompare(b),
-    );
+    return Array.from(
+      new Set<string>(mappedCourses.map((item) => item.affiliation)),
+    ).sort((a, b) => a.localeCompare(b));
   }, [mappedCourses]);
 
   const maxFeeBound = useMemo(() => {
-    const max = mappedCourses.reduce((acc, item) => Math.max(acc, item.feeRaw), 1000000);
+    const max = mappedCourses.reduce(
+      (acc, item) => Math.max(acc, item.feeRaw),
+      1000000,
+    );
     return max > 0 ? Math.max(max, 1000000) : 1000000;
   }, [mappedCourses]);
 
@@ -265,7 +316,9 @@ const CourseFinderPage: React.FC<CourseFinderPageProps> = ({ onNavigate }) => {
   }, [selectedLevels]);
 
   React.useEffect(() => {
-    setSelectedStreams((prev) => prev.filter((stream) => validStreams.has(stream)));
+    setSelectedStreams((prev) =>
+      prev.filter((stream) => validStreams.has(stream)),
+    );
   }, [validStreams]);
 
   const filteredAffiliations = useMemo(() => {
@@ -294,17 +347,32 @@ const CourseFinderPage: React.FC<CourseFinderPageProps> = ({ onNavigate }) => {
         if (!hit) return false;
       }
 
-      if (selectedLevels.length > 0 && !selectedLevels.includes(course.level)) return false;
-      if (selectedStreams.length > 0 && !selectedStreams.includes(course.stream)) return false;
-      if (selectedAffiliations.length > 0 && !selectedAffiliations.includes(course.affiliation)) return false;
-      if (selectedStatuses.length > 0 && !selectedStatuses.includes(course.status)) return false;
+      if (selectedLevels.length > 0 && !selectedLevels.includes(course.level))
+        return false;
+      if (
+        selectedStreams.length > 0 &&
+        !selectedStreams.includes(course.stream)
+      )
+        return false;
+      if (
+        selectedAffiliations.length > 0 &&
+        !selectedAffiliations.includes(course.affiliation)
+      )
+        return false;
+      if (
+        selectedStatuses.length > 0 &&
+        !selectedStatuses.includes(course.status)
+      )
+        return false;
 
       if (course.feeRaw > maxFee) return false;
 
       if (selectedFeeRanges.length > 0) {
         const matched = feeRangeOptions
           .filter((range) => selectedFeeRanges.includes(range.key))
-          .some((range) => course.feeRaw >= range.min && course.feeRaw <= range.max);
+          .some(
+            (range) => course.feeRaw >= range.min && course.feeRaw <= range.max,
+          );
         if (!matched) return false;
       }
 
@@ -329,10 +397,19 @@ const CourseFinderPage: React.FC<CourseFinderPageProps> = ({ onNavigate }) => {
 
   React.useEffect(() => {
     setCurrentPage(1);
-  }, [selectedLevels, selectedStreams, selectedAffiliations, selectedStatuses, selectedFeeRanges, maxFee, globalSearch]);
+  }, [
+    selectedLevels,
+    selectedStreams,
+    selectedAffiliations,
+    selectedStatuses,
+    selectedFeeRanges,
+    maxFee,
+    globalSearch,
+  ]);
 
   const formatLakhLabel = (value: number) => {
-    if (value >= maxFeeBound) return `${(maxFeeBound / 100000).toFixed(1)}+ Lakhs`;
+    if (value >= maxFeeBound)
+      return `${(maxFeeBound / 100000).toFixed(1)}+ Lakhs`;
     return `${(value / 100000).toFixed(1)} Lakhs`;
   };
 
@@ -341,7 +418,11 @@ const CourseFinderPage: React.FC<CourseFinderPageProps> = ({ onNavigate }) => {
     selected: string[],
     setter: React.Dispatch<React.SetStateAction<string[]>>,
   ) => {
-    setter((prev) => (prev.includes(value) ? prev.filter((item) => item !== value) : [...prev, value]));
+    setter((prev) =>
+      prev.includes(value)
+        ? prev.filter((item) => item !== value)
+        : [...prev, value],
+    );
   };
 
   const clearAllFilters = () => {
@@ -358,15 +439,32 @@ const CourseFinderPage: React.FC<CourseFinderPageProps> = ({ onNavigate }) => {
   };
 
   const activeFilterPills = [
-    ...selectedLevels.map((value) => ({ label: value, remove: () => setSelectedLevels((prev) => prev.filter((v) => v !== value)) })),
-    ...selectedStreams.map((value) => ({ label: value, remove: () => setSelectedStreams((prev) => prev.filter((v) => v !== value)) })),
-    ...selectedAffiliations.map((value) => ({ label: value, remove: () => setSelectedAffiliations((prev) => prev.filter((v) => v !== value)) })),
-    ...selectedStatuses.map((value) => ({ label: value, remove: () => setSelectedStatuses((prev) => prev.filter((v) => v !== value)) })),
+    ...selectedLevels.map((value) => ({
+      label: value,
+      remove: () =>
+        setSelectedLevels((prev) => prev.filter((v) => v !== value)),
+    })),
+    ...selectedStreams.map((value) => ({
+      label: value,
+      remove: () =>
+        setSelectedStreams((prev) => prev.filter((v) => v !== value)),
+    })),
+    ...selectedAffiliations.map((value) => ({
+      label: value,
+      remove: () =>
+        setSelectedAffiliations((prev) => prev.filter((v) => v !== value)),
+    })),
+    ...selectedStatuses.map((value) => ({
+      label: value,
+      remove: () =>
+        setSelectedStatuses((prev) => prev.filter((v) => v !== value)),
+    })),
     ...selectedFeeRanges.map((value) => {
       const found = feeRangeOptions.find((range) => range.key === value);
       return {
         label: found?.label || value,
-        remove: () => setSelectedFeeRanges((prev) => prev.filter((v) => v !== value)),
+        remove: () =>
+          setSelectedFeeRanges((prev) => prev.filter((v) => v !== value)),
       };
     }),
   ];
@@ -403,8 +501,11 @@ const CourseFinderPage: React.FC<CourseFinderPageProps> = ({ onNavigate }) => {
               className="text-[12px] font-semibold text-brand-blue transition-colors hover:text-brand-hover"
             >
               <span className="inline-flex items-center gap-2 rounded-md border border-blue-100 bg-blue-50 px-3 py-1.5 text-blue-700">
-                Applied ({activeFilterPills.length + (maxFee < maxFeeBound ? 1 : 0)})
-                <i className={`fa-solid fa-chevron-down text-[10px] transition-transform ${showAppliedDropdown ? "rotate-180" : ""}`}></i>
+                Applied (
+                {activeFilterPills.length + (maxFee < maxFeeBound ? 1 : 0)})
+                <i
+                  className={`fa-solid fa-chevron-down text-[10px] transition-transform ${showAppliedDropdown ? "rotate-180" : ""}`}
+                ></i>
               </span>
             </button>
           </div>
@@ -412,7 +513,9 @@ const CourseFinderPage: React.FC<CourseFinderPageProps> = ({ onNavigate }) => {
           {showAppliedDropdown && (
             <div className="mx-5 mt-3 rounded-xl border border-gray-200 bg-white p-3 shadow-sm">
               {activeFilterPills.length === 0 && maxFee >= maxFeeBound ? (
-                <p className="text-[13px] italic text-gray-400">No filters selected yet.</p>
+                <p className="text-[13px] italic text-gray-400">
+                  No filters selected yet.
+                </p>
               ) : (
                 <>
                   <div className="flex flex-wrap gap-2 pb-3">
@@ -458,7 +561,9 @@ const CourseFinderPage: React.FC<CourseFinderPageProps> = ({ onNavigate }) => {
             <GlobalFilterSection
               title="Education Level"
               isOpen={openSections.level}
-              onToggle={() => setOpenSections((prev) => ({ ...prev, level: !prev.level }))}
+              onToggle={() =>
+                setOpenSections((prev) => ({ ...prev, level: !prev.level }))
+              }
               contentClassName="pb-4 space-y-3"
             >
               {levelOptions.map((level) => (
@@ -466,7 +571,9 @@ const CourseFinderPage: React.FC<CourseFinderPageProps> = ({ onNavigate }) => {
                   key={level}
                   label={level}
                   checked={selectedLevels.includes(level)}
-                  onChange={() => toggleArray(level, selectedLevels, setSelectedLevels)}
+                  onChange={() =>
+                    toggleArray(level, selectedLevels, setSelectedLevels)
+                  }
                 />
               ))}
             </GlobalFilterSection>
@@ -474,7 +581,9 @@ const CourseFinderPage: React.FC<CourseFinderPageProps> = ({ onNavigate }) => {
             <GlobalFilterSection
               title="Field of Study"
               isOpen={openSections.stream}
-              onToggle={() => setOpenSections((prev) => ({ ...prev, stream: !prev.stream }))}
+              onToggle={() =>
+                setOpenSections((prev) => ({ ...prev, stream: !prev.stream }))
+              }
               contentClassName="pb-4 space-y-3"
             >
               <div className="relative mb-3">
@@ -492,7 +601,9 @@ const CourseFinderPage: React.FC<CourseFinderPageProps> = ({ onNavigate }) => {
                   key={stream}
                   label={stream}
                   checked={selectedStreams.includes(stream)}
-                  onChange={() => toggleArray(stream, selectedStreams, setSelectedStreams)}
+                  onChange={() =>
+                    toggleArray(stream, selectedStreams, setSelectedStreams)
+                  }
                 />
               ))}
             </GlobalFilterSection>
@@ -500,7 +611,12 @@ const CourseFinderPage: React.FC<CourseFinderPageProps> = ({ onNavigate }) => {
             <GlobalFilterSection
               title="Affiliation / University"
               isOpen={openSections.affiliation}
-              onToggle={() => setOpenSections((prev) => ({ ...prev, affiliation: !prev.affiliation }))}
+              onToggle={() =>
+                setOpenSections((prev) => ({
+                  ...prev,
+                  affiliation: !prev.affiliation,
+                }))
+              }
               contentClassName="pb-4 space-y-3"
             >
               <div className="relative mb-3">
@@ -518,7 +634,13 @@ const CourseFinderPage: React.FC<CourseFinderPageProps> = ({ onNavigate }) => {
                   key={affiliation}
                   label={affiliation}
                   checked={selectedAffiliations.includes(affiliation)}
-                  onChange={() => toggleArray(affiliation, selectedAffiliations, setSelectedAffiliations)}
+                  onChange={() =>
+                    toggleArray(
+                      affiliation,
+                      selectedAffiliations,
+                      setSelectedAffiliations,
+                    )
+                  }
                 />
               ))}
             </GlobalFilterSection>
@@ -526,13 +648,17 @@ const CourseFinderPage: React.FC<CourseFinderPageProps> = ({ onNavigate }) => {
             <GlobalFilterSection
               title="Fee Range"
               isOpen={openSections.fee}
-              onToggle={() => setOpenSections((prev) => ({ ...prev, fee: !prev.fee }))}
+              onToggle={() =>
+                setOpenSections((prev) => ({ ...prev, fee: !prev.fee }))
+              }
               contentClassName="pb-4 space-y-3"
             >
               <div className="px-1 space-y-4">
                 <div className="flex justify-between text-xs text-gray-500 font-medium mb-2">
                   <span>Max Fee</span>
-                  <span className="text-blue-600 font-bold">{formatLakhLabel(maxFee)}</span>
+                  <span className="text-blue-600 font-bold">
+                    {formatLakhLabel(maxFee)}
+                  </span>
                 </div>
                 <input
                   type="range"
@@ -552,7 +678,13 @@ const CourseFinderPage: React.FC<CourseFinderPageProps> = ({ onNavigate }) => {
                   key={range.key}
                   label={range.label}
                   checked={selectedFeeRanges.includes(range.key)}
-                  onChange={() => toggleArray(range.key, selectedFeeRanges, setSelectedFeeRanges)}
+                  onChange={() =>
+                    toggleArray(
+                      range.key,
+                      selectedFeeRanges,
+                      setSelectedFeeRanges,
+                    )
+                  }
                 />
               ))}
             </GlobalFilterSection>
@@ -560,17 +692,23 @@ const CourseFinderPage: React.FC<CourseFinderPageProps> = ({ onNavigate }) => {
             <GlobalFilterSection
               title="Admission Status"
               isOpen={openSections.status}
-              onToggle={() => setOpenSections((prev) => ({ ...prev, status: !prev.status }))}
+              onToggle={() =>
+                setOpenSections((prev) => ({ ...prev, status: !prev.status }))
+              }
               contentClassName="pb-4 space-y-3"
             >
-              {(["Admission Open", "Entrance Ongoing", "Closed"] as const).map((status) => (
-                <CheckboxItem
-                  key={status}
-                  label={status}
-                  checked={selectedStatuses.includes(status)}
-                  onChange={() => toggleArray(status, selectedStatuses, setSelectedStatuses)}
-                />
-              ))}
+              {(["Admission Open", "Entrance Ongoing", "Closed"] as const).map(
+                (status) => (
+                  <CheckboxItem
+                    key={status}
+                    label={status}
+                    checked={selectedStatuses.includes(status)}
+                    onChange={() =>
+                      toggleArray(status, selectedStatuses, setSelectedStatuses)
+                    }
+                  />
+                ),
+              )}
             </GlobalFilterSection>
           </div>
         </aside>
@@ -579,7 +717,16 @@ const CourseFinderPage: React.FC<CourseFinderPageProps> = ({ onNavigate }) => {
           <div className="mb-1 flex flex-col md:flex-row md:items-end justify-between gap-4 border-b border-gray-200 pb-5">
             <div>
               <h1 className="text-base font-bold text-gray-900">
-                Showing {paginatedCourses.length > 0 ? (currentPage - 1) * COURSES_PER_PAGE + 1 : 0}-{Math.min(currentPage * COURSES_PER_PAGE, filteredCourses.length)} of {filteredCourses.length.toLocaleString()} Courses
+                Showing{" "}
+                {paginatedCourses.length > 0
+                  ? (currentPage - 1) * COURSES_PER_PAGE + 1
+                  : 0}
+                -
+                {Math.min(
+                  currentPage * COURSES_PER_PAGE,
+                  filteredCourses.length,
+                )}{" "}
+                of {filteredCourses.length.toLocaleString()} Courses
               </h1>
               <p className="mt-1 text-[13px] text-gray-500 font-medium">
                 Explore and compare the best colleges tailored for you.
@@ -601,9 +748,12 @@ const CourseFinderPage: React.FC<CourseFinderPageProps> = ({ onNavigate }) => {
           {paginatedCourses.length === 0 ? (
             <div className="flex flex-col items-center justify-center py-16 text-center bg-white rounded-lg border border-gray-200 border-dashed">
               <i className="fa-solid fa-magnifying-glass text-4xl text-gray-300 mb-3"></i>
-              <h3 className="text-lg font-bold text-gray-900 mb-1">No colleges found</h3>
+              <h3 className="text-lg font-bold text-gray-900 mb-1">
+                No colleges found
+              </h3>
               <p className="text-sm text-gray-500 font-medium max-w-sm">
-                Try adjusting your filters, clearing search terms, or removing tags to see more results.
+                Try adjusting your filters, clearing search terms, or removing
+                tags to see more results.
               </p>
               <button
                 onClick={clearAllFilters}
@@ -616,110 +766,146 @@ const CourseFinderPage: React.FC<CourseFinderPageProps> = ({ onNavigate }) => {
             <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5">
               {paginatedCourses.map((course, index) => {
                 const theme = themes[course.colorTheme];
-                
+
                 const showAd = (index + 1) % 6 === 0;
-                const globalIndex = (currentPage - 1) * COURSES_PER_PAGE + index;
+                const globalIndex =
+                  (currentPage - 1) * COURSES_PER_PAGE + index;
                 const adIndex = Math.floor(globalIndex / 6) % 3;
                 let AdComponent = null;
-                
+
                 if (showAd) {
                   if (adIndex === 0) AdComponent = <CourseCarouselAd />;
                   else if (adIndex === 1) AdComponent = <KistProgramsAd />;
-                  else AdComponent = isAuthenticated ? <RatingAd /> : <SudsphereBannerAd />;
+                  else
+                    AdComponent = isAuthenticated ? (
+                      <RatingAd />
+                    ) : (
+                      <SudsphereBannerAd />
+                    );
                 }
 
                 return (
                   <React.Fragment key={course.id}>
-                    <article
-                      className="bg-white rounded-lg border border-gray-200 overflow-hidden flex flex-col group"
-                    >
+                    <article className="bg-white rounded-lg border border-gray-200 overflow-hidden flex flex-col group">
                       <div className=" relative">
-                        <div className='p-2'>
-                          <img src={course.image} alt={course.title} className="w-full h-32 object-cover rounded-md" />
+                        <div className="p-2">
+                          <img
+                            src={course.image}
+                            alt={course.title}
+                            className="w-full h-32 object-cover rounded-md"
+                          />
                         </div>
-                      <div className="absolute top-2 right-2 bg-white/95 backdrop-blur-sm px-2 py-1 rounded-md flex items-center gap-1.5 border border-gray-200">
-                        <span className={`w-1.5 h-1.5 rounded-full ${statusDots[course.status]}`}></span>
-                        <span className="text-[10px] font-bold text-gray-800 uppercase tracking-wide">
-                          {course.status}
-                        </span>
-                      </div>
-                    </div>
-
-                    <div className="p-4 flex-1 flex flex-col">
-                      <div className="flex justify-between items-center mb-2.5">
-                        <span className={`px-2 py-0.5 rounded text-[10px] font-bold tracking-wider uppercase ${theme.bg} ${theme.text}`}>
-                          {course.level}
-                        </span>
-                        <div className="flex items-center text-gray-500 text-[11px] font-bold gap-1">
-                          <i className="fa-regular fa-clock text-sm"></i>
-                          <span>{course.duration}</span>
+                        <div className="absolute top-2 right-2 bg-white/95 backdrop-blur-sm px-2 py-1 rounded-md flex items-center gap-1.5 border border-gray-200">
+                          <span
+                            className={`w-1.5 h-1.5 rounded-full ${statusDots[course.status]}`}
+                          ></span>
+                          <span className="text-[10px] font-bold text-gray-800 uppercase tracking-wide">
+                            {course.status}
+                          </span>
                         </div>
                       </div>
 
-                      <h3
-                        className={`text-base font-bold text-gray-900 mb-3 ${theme.hover} transition-colors line-clamp-2 leading-snug`}
-                      >
-                        {course.title}
-                      </h3>
+                      <div className="p-4 flex-1 flex flex-col">
+                        <div className="flex justify-between items-center mb-2.5">
+                          <span
+                            className={`px-2 py-0.5 rounded text-[10px] font-bold tracking-wider uppercase ${theme.bg} ${theme.text}`}
+                          >
+                            {course.level}
+                          </span>
+                          <div className="flex items-center text-gray-500 text-[11px] font-bold gap-1">
+                            <i className="fa-regular fa-clock text-sm"></i>
+                            <span>{course.duration}</span>
+                          </div>
+                        </div>
 
-                      <div className="space-y-1.5 mb-5 text-xs font-medium text-gray-600 flex-1">
-                        <div className="flex items-start gap-2">
-                          <i className="fa-solid fa-building-columns text-gray-400 text-sm shrink-0 mt-0.5"></i>
-                          <p className="truncate" title={course.affiliation}>
-                            <span className="font-bold text-gray-800">Affiliation:</span> {course.affiliation}
-                          </p>
-                        </div>
-                        <div className="flex items-start gap-2">
-                          <i className="fa-solid fa-graduation-cap text-gray-400 text-sm shrink-0 mt-0.5"></i>
-                          <p className="truncate" title={course.eligibility}>
-                            <span className="font-bold text-gray-800">Eligibility:</span> {course.eligibility}
-                          </p>
-                        </div>
-                        <div className="flex items-start gap-2">
-                          <i className="fa-solid fa-clipboard-list text-gray-400 text-sm shrink-0 mt-0.5"></i>
-                          <p className="truncate" title={course.entrance}>
-                            <span className="font-bold text-gray-800">Entrance:</span> {course.entrance}
-                          </p>
-                        </div>
-                        <div className="flex items-start gap-2">
-                          <i className="fa-solid fa-money-bill-wave text-gray-400 text-sm shrink-0 mt-0.5"></i>
-                          <p>
-                            <span className="font-bold text-gray-800">Est. Fee:</span>{" "}
-                            <span className="text-green-600 font-bold">{course.feeDisplay}</span>
-                          </p>
-                        </div>
-                        <div className="flex items-start gap-2">
-                          <i className="fa-solid fa-briefcase text-gray-400 text-sm shrink-0 mt-0.5"></i>
-                          <p className="truncate" title={course.career}>
-                            <span className="font-bold text-gray-800">Career:</span> {course.career}
-                          </p>
-                        </div>
-                      </div>
-
-                      <div className="flex items-center gap-2 mt-auto pt-4 border-t border-gray-100">
-                        <button
-                          onClick={() => onNavigate("courseDetails", { id: course.id })}
-                          className="flex-1 h-10 border border-gray-300 rounded-md text-gray-700 font-bold text-xs hover:bg-gray-50 focus:ring-2 focus:ring-gray-100 outline-none transition-colors"
+                        <h3
+                          className={`text-base font-bold text-gray-900 mb-3 ${theme.hover} transition-colors line-clamp-2 leading-snug`}
                         >
-                          Details
-                        </button>
-                        <button
-                          onClick={() => onNavigate("universitiesPage", { courseId: course.id, courseTitle: course.title, collegesCount: course.stream })}
-                          className="flex-1 h-10 bg-blue-600 hover:bg-blue-700 rounded-md text-white font-bold text-xs focus:ring-2 focus:ring-blue-200 outline-none transition-colors flex items-center justify-center gap-1.5"
-                        >
-                          <span>View Colleges</span>
-                          <i className="fa-solid fa-chevron-right text-[10px]"></i>
-                        </button>
+                          {course.title}
+                        </h3>
+
+                        <div className="space-y-1.5 mb-5 text-xs font-medium text-gray-600 flex-1">
+                          <div className="flex items-start gap-2">
+                            <i className="fa-solid fa-building-columns text-gray-400 text-sm shrink-0 mt-0.5"></i>
+                            <p className="truncate" title={course.affiliation}>
+                              <span className="font-bold text-gray-800">
+                                Affiliation:
+                              </span>{" "}
+                              {course.affiliation}
+                            </p>
+                          </div>
+                          <div className="flex items-start gap-2">
+                            <i className="fa-solid fa-graduation-cap text-gray-400 text-sm shrink-0 mt-0.5"></i>
+                            <p className="truncate" title={course.eligibility}>
+                              <span className="font-bold text-gray-800">
+                                Eligibility:
+                              </span>{" "}
+                              {course.eligibility}
+                            </p>
+                          </div>
+                          <div className="flex items-start gap-2">
+                            <i className="fa-solid fa-clipboard-list text-gray-400 text-sm shrink-0 mt-0.5"></i>
+                            <p className="truncate" title={course.entrance}>
+                              <span className="font-bold text-gray-800">
+                                Entrance:
+                              </span>{" "}
+                              {course.entrance}
+                            </p>
+                          </div>
+                          <div className="flex items-start gap-2">
+                            <i className="fa-solid fa-money-bill-wave text-gray-400 text-sm shrink-0 mt-0.5"></i>
+                            <p>
+                              <span className="font-bold text-gray-800">
+                                Est. Fee:
+                              </span>{" "}
+                              <span className="text-green-600 font-bold">
+                                {course.feeDisplay}
+                              </span>
+                            </p>
+                          </div>
+                          <div className="flex items-start gap-2">
+                            <i className="fa-solid fa-briefcase text-gray-400 text-sm shrink-0 mt-0.5"></i>
+                            <p className="truncate" title={course.career}>
+                              <span className="font-bold text-gray-800">
+                                Career:
+                              </span>{" "}
+                              {course.career}
+                            </p>
+                          </div>
+                        </div>
+
+                        <div className="flex items-center gap-2 mt-auto pt-4 border-t border-gray-100">
+                          <button
+                            onClick={() =>
+                              onNavigate("courseDetails", { id: course.id })
+                            }
+                            className="flex-1 h-10 border border-gray-300 rounded-md text-gray-700 font-bold text-xs hover:bg-gray-50 focus:ring-2 focus:ring-gray-100 outline-none transition-colors"
+                          >
+                            Details
+                          </button>
+                          <button
+                            onClick={() =>
+                              onNavigate("universitiesPage", {
+                                courseId: course.id,
+                                courseTitle: course.title,
+                                collegesCount: course.stream,
+                              })
+                            }
+                            className="flex-1 h-10 bg-blue-600 hover:bg-blue-700 rounded-md text-white font-bold text-xs focus:ring-2 focus:ring-blue-200 outline-none transition-colors flex items-center justify-center gap-1.5"
+                          >
+                            <span>View Colleges</span>
+                            <i className="fa-solid fa-chevron-right text-[10px]"></i>
+                          </button>
+                        </div>
                       </div>
-                    </div>
-                  </article>
-                  
-                  {showAd && (
-                    <div className="col-span-1 md:col-span-2 xl:col-span-3 my-4">
-                      {AdComponent}
-                    </div>
-                  )}
-                </React.Fragment>
+                    </article>
+
+                    {showAd && (
+                      <div className="col-span-1 md:col-span-2 xl:col-span-3 my-4">
+                        {AdComponent}
+                      </div>
+                    )}
+                  </React.Fragment>
                 );
               })}
             </div>
@@ -766,7 +952,9 @@ const CourseFinderPage: React.FC<CourseFinderPageProps> = ({ onNavigate }) => {
                 })}
 
               <button
-                onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
+                onClick={() =>
+                  setCurrentPage((p) => Math.min(totalPages, p + 1))
+                }
                 disabled={currentPage === totalPages}
                 className="w-10 h-10 flex items-center justify-center rounded-md border border-gray-300 text-gray-600 font-bold text-sm hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
               >
@@ -780,11 +968,11 @@ const CourseFinderPage: React.FC<CourseFinderPageProps> = ({ onNavigate }) => {
   );
 };
 
-const CheckboxItem: React.FC<{ label: string; checked: boolean; onChange: () => void }> = ({
-  label,
-  checked,
-  onChange,
-}) => (
+const CheckboxItem: React.FC<{
+  label: string;
+  checked: boolean;
+  onChange: () => void;
+}> = ({ label, checked, onChange }) => (
   <label className="group flex items-center gap-3 cursor-pointer">
     <input
       type="checkbox"
@@ -792,7 +980,9 @@ const CheckboxItem: React.FC<{ label: string; checked: boolean; onChange: () => 
       onChange={onChange}
       className="h-[1.15em] w-[1.15em] rounded-xs border border-slate-300 text-blue-600 focus:ring-blue-500"
     />
-    <span className="text-[14.5px] text-[#475569] transition-colors group-hover:text-gray-900">{label}</span>
+    <span className="text-[14.5px] text-[#475569] transition-colors group-hover:text-gray-900">
+      {label}
+    </span>
   </label>
 );
 
