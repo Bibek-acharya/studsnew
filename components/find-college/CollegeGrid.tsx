@@ -47,7 +47,8 @@ const CollegeGrid: React.FC<CollegeGridProps> = ({
   const searchTerms = useMemo(
     () =>
       [filters.search, ...SEARCHABLE_FILTER_KEYS.flatMap((key) => filters[key])]
-        .map((value) => value.trim())
+        .flat()
+        .map((value) => value.toString().trim())
         .filter(Boolean),
     [filters],
   );

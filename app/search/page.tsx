@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useMemo } from "react";
+import React, { useMemo, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import {
   SearchItem,
@@ -8,7 +8,7 @@ import {
   searchIcons,
 } from "@/utils/searchDatabase";
 
-export default function SearchPage() {
+function SearchContent() {
   const params = useSearchParams();
   const router = useRouter();
   const q = params.get("q") || "";
@@ -136,5 +136,23 @@ export default function SearchPage() {
         </div>
       )}
     </main>
+  );
+}
+
+function SearchLoading() {
+  return (
+    <main className="mx-auto min-h-screen max-w-7xl p-6 md:p-10">
+      <div className="flex flex-col items-center justify-center py-20">
+        <div className="h-8 w-32 animate-pulse rounded bg-gray-200"></div>
+      </div>
+    </main>
+  );
+}
+
+export default function SearchPage() {
+  return (
+    <Suspense fallback={<SearchLoading />}>
+      <SearchContent />
+    </Suspense>
   );
 }
