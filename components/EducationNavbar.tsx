@@ -836,7 +836,7 @@ const EducationNavbar: React.FC<EducationNavbarProps> = ({
 
         {isMobileOpen && (
           <div
-            className="fixed inset-0 z-100 bg-black/40 backdrop-blur-sm md:hidden"
+            className="fixed inset-x-0 top-full bottom-0 z-100 bg-black/40 backdrop-blur-sm md:hidden"
             onClick={() => setIsMobileOpen(false)}
           />
         )}
