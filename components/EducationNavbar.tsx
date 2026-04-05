@@ -51,7 +51,7 @@ const routeMap: Record<string, string> = {
   scholarshipProviderZone: "/",
   scholarshipMain: "/",
   campusForum: "/campus-forum",
-  admissionsDiscovery: "/",
+  admissionsDiscovery: "/admissions",
   entranceDiscovery: "/entrance",
   universitiesPage: "/",
   rankingsPage: "/",
@@ -395,7 +395,11 @@ const EducationNavbar: React.FC<EducationNavbarProps> = ({
 
   const go = (viewKey: string, data?: { level?: string }) => {
     onNavigate?.(viewKey, data);
-    router.push(routeMap[viewKey] ?? "/");
+    if (viewKey === "admissionsDiscovery" && data?.level) {
+      router.push(`/admissions/${data.level}`);
+    } else {
+      router.push(routeMap[viewKey] ?? "/");
+    }
     setIsMobileOpen(false);
     setActiveMenu(null);
     setShowMobileSearch(false);
@@ -748,22 +752,7 @@ const EducationNavbar: React.FC<EducationNavbarProps> = ({
                     go("admissionsDiscovery", { level: "a-level" })
                   }
                 />
-                <DropdownCard
-                  icon="fa-user-graduate"
-                  color="text-purple-600"
-                  title="Bachelor Degrees"
-                  desc="Find undergraduate programs including B.Tech, B.Sc, BBA, and more."
-                  onClick={() =>
-                    go("admissionsDiscovery", { level: "bachelor" })
-                  }
-                />
-                <DropdownCard
-                  icon="fa-book-open"
-                  color="text-pink-600"
-                  title="Master Degrees"
-                  desc="Advance your career with postgraduate degrees like MBA and M.Tech."
-                  onClick={() => go("admissionsDiscovery", { level: "master" })}
-                />
+
                 <DropdownCard
                   icon="fa-wrench"
                   color="text-green-600"
@@ -1022,8 +1011,6 @@ const EducationNavbar: React.FC<EducationNavbarProps> = ({
                     <div className={`${mobileMenus['admission'] ? "flex" : "hidden"} flex-col gap-1 pl-4 py-2 ml-2 mt-1 font-medium`}>
                         <button onClick={() => go("admissionsDiscovery", { level: "high-school" })} className="text-[14px] text-gray-600 hover:text-blue-600 hover:bg-gray-50 p-2 rounded-lg transition-colors flex items-center gap-3"><i className="fa-solid fa-school w-4 text-center text-blue-500"></i> High School (+2)</button>
                         <button onClick={() => go("admissionsDiscovery", { level: "a-level" })} className="text-[14px] text-gray-600 hover:text-blue-600 hover:bg-gray-50 p-2 rounded-lg transition-colors flex items-center gap-3"><i className="fa-solid fa-cubes w-4 text-center text-orange-500"></i> A-Level</button>
-                        <button onClick={() => go("admissionsDiscovery", { level: "bachelor" })} className="text-[14px] text-gray-600 hover:text-blue-600 hover:bg-gray-50 p-2 rounded-lg transition-colors flex items-center gap-3"><i className="fa-solid fa-user-graduate w-4 text-center text-purple-600"></i> Bachelor Degrees</button>
-                        <button onClick={() => go("admissionsDiscovery", { level: "master" })} className="text-[14px] text-gray-600 hover:text-blue-600 hover:bg-gray-50 p-2 rounded-lg transition-colors flex items-center gap-3"><i className="fa-solid fa-book-open w-4 text-center text-pink-500"></i> Master Degrees</button>
                         <button onClick={() => go("admissionsDiscovery", { level: "diploma" })} className="text-[14px] text-gray-600 hover:text-blue-600 hover:bg-gray-50 p-2 rounded-lg transition-colors flex items-center gap-3"><i className="fa-solid fa-wrench w-4 text-center text-green-600"></i> Diploma / CTEVT</button>
                     </div>
                 </div>
