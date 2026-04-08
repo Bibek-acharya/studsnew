@@ -897,14 +897,14 @@ const NewsManagementPage = () => {
                         </button>
                       </div>
                       <div
-                        className="p-4 min-h-[300px] text-gray-700 outline-none text-base leading-relaxed"
+                        className="p-4 min-h-75 text-gray-700 outline-none text-base leading-relaxed"
                         contentEditable
                       ></div>
                     </div>
                   </div>
                 </div>
 
-                <div className="w-full lg:w-80 bg-gray-50 p-6 overflow-y-auto custom-scrollbar flex-shrink-0">
+                <div className="w-full lg:w-80 bg-gray-50 p-6 overflow-y-auto custom-scrollbar shrink-0">
                   <div className="space-y-6">
                     <div>
                       <label className="block text-sm font-semibold text-gray-700 mb-2">

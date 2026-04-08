@@ -16,7 +16,7 @@ const CommunityHeader: React.FC<{
 }> = ({ community, onJoin, onShare, onInvite, isLoading, onBack }) => {
   return (
     <header className="bg-white w-full border-b border-gray-100 pt-10 pb-8 px-4 sm:px-8 lg:px-12 mb-6">
-      <div className="max-w-[1200px] mx-auto">
+      <div className="max-w-300 mx-auto">
         <div className="mb-5 flex items-center justify-between">
           <div className="w-24 h-24 rounded-2xl overflow-hidden shadow-sm border border-gray-100 bg-white flex items-center justify-center text-4xl">
             {community.emoji || "🎓"}
@@ -594,6 +594,12 @@ const CampusForumPage: React.FC = () => {
 
   const selectedCommunity = communities.find((c) => c.id === selectedCommunityId);
   const canPostInFeed = !selectedCommunityId || isMemberOf(selectedCommunityId);
+  const forumCardUser = {
+    id: user?.id ?? 0,
+    first_name: user?.first_name ?? "Guest",
+    last_name: user?.last_name ?? "User",
+    role: user?.role ?? "STUDENT",
+  };
 
   return (
     <div className="min-h-screen bg-gray-50 text-[#1a1a1a] antialiased pb-12">
@@ -733,7 +739,7 @@ const CampusForumPage: React.FC = () => {
                 <ForumPostCard
                   key={post.id}
                   post={post}
-                  user={user}
+                  user={forumCardUser}
                   isAuthenticated={isAuthenticated}
                   openDropdown={openDropdown}
                   openComments={openComments}
