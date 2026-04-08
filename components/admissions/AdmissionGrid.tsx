@@ -18,7 +18,10 @@ const SEARCHABLE_FILTER_KEYS: Array<keyof AdmissionFilters> = [
   "program",
 ];
 
-const levelConfig: Record<string, { title: string; subtitle: string; badge: string }> = {
+const levelConfig: Record<
+  string,
+  { title: string; subtitle: string; badge: string }
+> = {
   "high-school": {
     title: "+2 Colleges",
     subtitle: "Science, Management & Humanities",
@@ -45,17 +48,20 @@ const sampleDirectAdmissions = [
     location: "Naxal, Kathmandu",
     website: "www.heraldcollege.edu.np",
     courseName: "Bachelors in IT & Software",
-    description: "Apply directly via the partner portal to skip the standard entrance queue. Verified for 2024 session.",
+    description:
+      "Apply directly via the partner portal to skip the standard entrance queue. Verified for 2024 session.",
   },
   {
-    image: "https://images.unsplash.com/photo-1523050854058-8df90110c9f1?auto=format&fit=crop&q=80&w=400&h=250",
+    image:
+      "https://images.unsplash.com/photo-1523050854058-8df90110c9f1?auto=format&fit=crop&q=80&w=400&h=250",
     collegeName: "Kathmandu Bernhard College",
     rating: 4.5,
     type: "Private",
     location: "Bafal, Kathmandu",
     website: "www.kbc.edu.np",
     courseName: "BBA in Business Administration",
-    description: "Direct admission available for eligible students. No entrance exam required for qualified candidates.",
+    description:
+      "Direct admission available for eligible students. No entrance exam required for qualified candidates.",
   },
 ];
 
@@ -197,7 +203,10 @@ const AdmissionGrid: React.FC<AdmissionGridProps> = ({
 }) => {
   const searchTerms = useMemo(
     () =>
-      [filters.search, ...SEARCHABLE_FILTER_KEYS.flatMap((key) => filters[key] as string[])]
+      [
+        filters.search,
+        ...SEARCHABLE_FILTER_KEYS.flatMap((key) => filters[key] as string[]),
+      ]
         .map((value) => (typeof value === "string" ? value.trim() : ""))
         .filter(Boolean),
     [filters],
@@ -212,25 +221,39 @@ const AdmissionGrid: React.FC<AdmissionGridProps> = ({
 
     if (filters.academic.length > 0) {
       results = results.filter((c) =>
-        c.programs.some((p) => filters.academic.some((a) => p.name.toLowerCase().includes(a.toLowerCase()))),
+        c.programs.some((p) =>
+          filters.academic.some((a) =>
+            p.name.toLowerCase().includes(a.toLowerCase()),
+          ),
+        ),
       );
     }
 
     if (filters.program.length > 0) {
       results = results.filter((c) =>
-        c.programs.some((p) => filters.program.some((pr) => p.name.toLowerCase().includes(pr.toLowerCase()))),
+        c.programs.some((p) =>
+          filters.program.some((pr) =>
+            p.name.toLowerCase().includes(pr.toLowerCase()),
+          ),
+        ),
       );
     }
 
     if (filters.province.length > 0) {
       results = results.filter((c) =>
-        filters.province.some((p) => c.location.toLowerCase().includes(p.replace("prov_", "").toLowerCase())),
+        filters.province.some((p) =>
+          c.location
+            .toLowerCase()
+            .includes(p.replace("prov_", "").toLowerCase()),
+        ),
       );
     }
 
     if (filters.district.length > 0) {
       results = results.filter((c) =>
-        filters.district.some((d) => c.location.toLowerCase().includes(d.replace("d_", "").toLowerCase())),
+        filters.district.some((d) =>
+          c.location.toLowerCase().includes(d.replace("d_", "").toLowerCase()),
+        ),
       );
     }
 
@@ -252,7 +275,9 @@ const AdmissionGrid: React.FC<AdmissionGridProps> = ({
         (c) =>
           terms.some((t) => c.collegeName.toLowerCase().includes(t)) ||
           terms.some((t) => c.location.toLowerCase().includes(t)) ||
-          terms.some((t) => c.programs.some((p) => p.name.toLowerCase().includes(t))),
+          terms.some((t) =>
+            c.programs.some((p) => p.name.toLowerCase().includes(t)),
+          ),
       );
     }
 
@@ -264,13 +289,21 @@ const AdmissionGrid: React.FC<AdmissionGridProps> = ({
 
     if (filters.academic.length > 0) {
       results = results.filter((c) =>
-        c.programs.some((p) => filters.academic.some((a) => p.toLowerCase().includes(a.toLowerCase()))),
+        c.programs.some((p) =>
+          filters.academic.some((a) =>
+            p.toLowerCase().includes(a.toLowerCase()),
+          ),
+        ),
       );
     }
 
     if (filters.province.length > 0) {
       results = results.filter((c) =>
-        filters.province.some((p) => c.location.toLowerCase().includes(p.replace("prov_", "").toLowerCase())),
+        filters.province.some((p) =>
+          c.location
+            .toLowerCase()
+            .includes(p.replace("prov_", "").toLowerCase()),
+        ),
       );
     }
 
@@ -313,7 +346,10 @@ const AdmissionGrid: React.FC<AdmissionGridProps> = ({
     return results;
   }, [filters, searchTerms]);
 
-  const totalResults = filteredColleges.length + filteredFeatured.length + (filters.directAdmission ? filteredDirect.length : 0);
+  const totalResults =
+    filteredColleges.length +
+    filteredFeatured.length +
+    (filters.directAdmission ? filteredDirect.length : 0);
   const config = levelConfig[level] || levelConfig["high-school"];
 
   return (
@@ -351,20 +387,27 @@ const AdmissionGrid: React.FC<AdmissionGridProps> = ({
       {filters.directAdmission && filteredDirect.length > 0 && (
         <section className="mb-10">
           <div className="flex items-center gap-2 mb-5">
-            <svg className="w-5 h-5 text-indigo-600" fill="currentColor" viewBox="0 0 20 20">
-              <path fillRule="evenodd" d="M11.3 1.046A1 1 0 0112 2v5h4a1 1 0 01.82 1.573l-7 10A1 1 0 018 18v-5H4a1 1 0 01-.82-1.573l7-10a1 1 0 011.12-.38z" clipRule="evenodd" />
+            <svg
+              className="w-5 h-5 text-indigo-600"
+              fill="currentColor"
+              viewBox="0 0 20 20"
+            >
+              <path
+                fillRule="evenodd"
+                d="M11.3 1.046A1 1 0 0112 2v5h4a1 1 0 01.82 1.573l-7 10A1 1 0 018 18v-5H4a1 1 0 01-.82-1.573l7-10a1 1 0 011.12-.38z"
+                clipRule="evenodd"
+              />
             </svg>
-            <h2 className="text-xl font-bold text-gray-900">Direct Admission</h2>
+            <h2 className="text-xl font-bold text-gray-900">
+              Direct Admission
+            </h2>
             <span className="bg-indigo-100 text-indigo-700 text-xs font-semibold px-2 py-0.5 rounded-full">
               No Entrance Required
             </span>
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
             {filteredDirect.map((college, index) => (
-              <DirectAdmissionCard
-                key={index}
-                {...college}
-              />
+              <DirectAdmissionCard key={index} {...college} />
             ))}
           </div>
         </section>
@@ -376,8 +419,12 @@ const AdmissionGrid: React.FC<AdmissionGridProps> = ({
           <div className="bg-gradient-to-br from-[#1053F3] to-[#2563EB] rounded-2xl p-5 md:p-7 flex flex-col gap-6 shadow-xl shadow-blue-900/10">
             <div className="text-white w-full px-1 flex justify-between items-end">
               <div>
-                <h2 className="text-xl md:text-2xl font-bold tracking-tight">Featured {config.badge} Colleges</h2>
-                <p className="text-blue-100 text-sm mt-1">Top picks for {config.subtitle.toLowerCase()}</p>
+                <h2 className="text-xl md:text-2xl font-bold tracking-tight">
+                  Featured {config.badge} Colleges
+                </h2>
+                <p className="text-blue-100 text-sm mt-1">
+                  Top picks for {config.subtitle.toLowerCase()}
+                </p>
               </div>
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 w-full">
@@ -392,22 +439,34 @@ const AdmissionGrid: React.FC<AdmissionGridProps> = ({
       {/* All Colleges Grid */}
       <section>
         <div className="flex items-center justify-between mb-5">
-          <h2 className="text-xl font-bold text-gray-900">All {config.badge} Colleges</h2>
-          <span className="text-sm text-gray-500">{filteredColleges.length} colleges found</span>
+          <h2 className="text-xl font-bold text-gray-900">
+            All {config.badge} Colleges
+          </h2>
+          <span className="text-sm text-gray-500">
+            {filteredColleges.length} colleges found
+          </span>
         </div>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
           {filteredColleges.map((college, index) => (
-            <div key={index} onClick={() => onNavigate("collegeDetails", { id: "kist-college" })} className="cursor-pointer">
+            <div
+              key={index}
+              onClick={() =>
+                onNavigate("collegeDetails", { id: "kist-college" })
+              }
+              className="cursor-pointer"
+            >
               <CollegeCard {...college} />
             </div>
           ))}
         </div>
 
-        {filteredColleges.length === 0 && filteredFeatured.length === 0 && (!filters.directAdmission || filteredDirect.length === 0) && (
-          <div className="col-span-1 rounded-[16px] border border-gray-100 bg-white py-16 text-center text-gray-500 shadow-[0_2px_15px_rgb(0,0,0,0.04)] md:col-span-2 xl:col-span-3">
-            No colleges found matching your filters.
-          </div>
-        )}
+        {filteredColleges.length === 0 &&
+          filteredFeatured.length === 0 &&
+          (!filters.directAdmission || filteredDirect.length === 0) && (
+            <div className="col-span-1 rounded-[16px] border border-gray-100 bg-white py-16 text-center text-gray-500 shadow-[0_2px_15px_rgb(0,0,0,0.04)] md:col-span-2 xl:col-span-3">
+              No colleges found matching your filters.
+            </div>
+          )}
       </section>
     </>
   );
