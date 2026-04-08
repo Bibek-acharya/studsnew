@@ -30,7 +30,9 @@ export type ViewKey =
   | "studentDashboard"
   | "writeReview"
   | "login"
-  | "signup";
+  | "signup"
+  | "scholarshipRecommenderTool"
+  ;
 
 export type NotificationTab = "all" | "following" | "system" | "archive";
 

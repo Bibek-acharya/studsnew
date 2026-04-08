@@ -15,6 +15,7 @@ export const routeMap: Record<ViewKey, string> = {
   bookCounselling: "/counseling",
   scholarshipProviderZone: "/scholarship-provider",
   scholarshipMain: "/",
+  scholarshipRecommenderTool: "/scholarship-recommender",
   scholarshipFinderTool: "/scholarship-finder",
   collegeRecommenderTool: "/college-recommender",
   campusForum: "/campus-forum",
@@ -69,7 +70,7 @@ export const desktopMenuSections: DesktopMenuSection[] = [
         color: "text-yellow-500",
         title: "Scholarship Recommender",
         desc: "Find scholarships tailored to your profile and needs.",
-        viewKey: "scholarshipFinderTool",
+        viewKey: "scholarshipRecommenderTool",
       },
       {
         icon: "fa-wand-magic-sparkles",

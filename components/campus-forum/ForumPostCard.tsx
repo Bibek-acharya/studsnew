@@ -194,7 +194,7 @@ const JoinButton: React.FC<JoinButtonProps> = ({ communityId, isMember, isLoadin
 
 interface ForumPostCardProps {
   post: ForumPost;
-  user: { id: number; first_name: string; last_name: string; role: string } | null;
+  user: { id: number; first_name: string; last_name: string; role: string };
   isAuthenticated: boolean;
   openDropdown: number | null;
   openComments: Record<number, boolean>;
