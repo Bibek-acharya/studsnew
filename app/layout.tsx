@@ -4,6 +4,7 @@ import { Geist_Mono, Plus_Jakarta_Sans } from "next/font/google";
 import FooterWrapper from "./footer-wrapper";
 import Providers from "./providers";
 import NavbarWrapper from "./navbar-wrapper";
+import "@fortawesome/fontawesome-free/css/all.min.css";
 import "./globals.css";
 
 const plusJakartaSans = Plus_Jakarta_Sans({
@@ -44,7 +45,7 @@ export default function RootLayout({
       <body className="min-h-full flex flex-col bg-white">
         <Providers>
           <NavbarWrapper />
-          <div className="flex min-h-screen flex-col bg-white">
+          <div className="flex min-h-screen flex-col bg-white pt-18 xs:pt-20 sm:pt-24 md:pt-27">
             <main className="flex-1 bg-white">{children}</main>
             <FooterWrapper />
           </div>
