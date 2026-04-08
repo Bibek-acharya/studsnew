@@ -58,7 +58,7 @@ const routeMap: Record<string, string> = {
   blogPage: "/blogs",
   eventsPage: "/events",
   contact: "/contact-us",
-  institutionZone: "/",
+  institutionZone: "/institution-zone",
   studentDashboard: "/",
   writeReview: "/",
   login: "/login",
