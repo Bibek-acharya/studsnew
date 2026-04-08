@@ -7,9 +7,9 @@ export default function NavbarWrapper() {
   const pathname = usePathname();
 
   // Hide the global navbar for specific routes
-  const hideGlobalNavbar = ["/scholarship-provider", "/institution-zone"].includes(
-    pathname
-  );
+  const hideGlobalNavbar =
+    pathname.startsWith("/scholarship-provider") ||
+    pathname.startsWith("/institution-zone");
 
   if (hideGlobalNavbar) {
     return null;
