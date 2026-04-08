@@ -431,12 +431,12 @@ export default function InstitutionZone() {
       <div className="bg-[#2D68FE] min-h-screen flex flex-col relative">
         {/* Header */}
         <header
-          className={`fixed top-0 left-0 right-0 z-100 transition-all duration-300 ${isScrolled ? "bg-[#2D68FE]/95 backdrop-blur-md py-4 shadow-lg" : "py-6 lg:py-8"}`}
+          className={`fixed top-0 left-0 right-0 z-100 transition-all duration-300 ${isScrolled ? "bg-[#2D68FE]/95 backdrop-blur-md py-4 shadow-lg" : "bg-[#2D68FE] py-6 lg:py-8"}`}
         >
           <div className="max-w-7xl mx-auto px-6 flex items-center justify-between text-white">
-            <div className="lg:flex-1 text-2xl font-bold tracking-tight">
+            <Link href={'/'} className="lg:flex-1 text-2xl font-bold tracking-tight">
               StudSphere
-            </div>
+            </Link>
 
             {/* Desktop Nav */}
             <nav className="hidden lg:flex lg:flex-1 justify-center items-center gap-8 text-[15px] font-medium relative">
