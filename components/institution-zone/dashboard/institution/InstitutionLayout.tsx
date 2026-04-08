@@ -1,277 +1,258 @@
 "use client";
 
-import React from "react";
+import React, { useState } from "react";
 import {
-  LayoutDashboard,
+  BarChart3,
   Users,
-  BookOpen,
+  FileText,
   Settings,
   MessageSquare,
-  Award,
-  Calendar,
   GraduationCap,
-  ClipboardCheck,
+  ClipboardList,
+  BookOpen,
   Building2,
+  Stethoscope,
+  Calendar,
+  Newspaper,
+  LayoutDashboard,
+  Menu,
+  X,
   Bell,
-  LineChart,
-  HelpCircle,
-  Share2,
-  FileDown,
-  LogOut,
-  Sparkles,
+  Search,
   ChevronRight,
-  Plus
 } from "lucide-react";
 
 export type InstitutionPage =
-  | "Overview"
-  | "Program List"
-  | "Admission Details"
-  | "QMS (Query System)"
-  | "Booked Counselling"
-  | "Entrance Portal"
-  | "News & Notices"
-  | "Events Management"
-  | "Institutional Profile"
-  | "Placement & Careers"
-  | "Faculty & Staff"
-  | "Scholarship"
-  | "Social Media & Links"
-  | "FAQ Management"
-  | "General Inquiries"
-  | "Analytics & Reports"
-  | "Account Settings";
+  | "overview"
+  | "admission"
+  | "admissionManage"
+  | "program"
+  | "collegeProfile"
+  | "counselling"
+  | "entrance"
+  | "events"
+  | "newsNotice"
+  | "qms"
+  | "scholarship"
+  | "scholarshipManage"
+  | "message"
+  | "settings";
+
+interface NavItem {
+  id: InstitutionPage;
+  label: string;
+  icon: React.ElementType;
+  category?: string;
+}
+
+const NAV_ITEMS: NavItem[] = [
+  { id: "overview", label: "Dashboard Overview", icon: LayoutDashboard },
+  { id: "collegeProfile", label: "College Profile", icon: Building2 },
+  { id: "program", label: "Programs & Courses", icon: BookOpen },
+  {
+    id: "admission",
+    label: "Admission Leads",
+    icon: Users,
+    category: "Admissions",
+  },
+  {
+    id: "admissionManage",
+    label: "Manage Admissions",
+    icon: GraduationCap,
+    category: "Admissions",
+  },
+  {
+    id: "scholarship",
+    label: "Scholarship Apps",
+    icon: FileText,
+    category: "Admissions",
+  },
+  {
+    id: "scholarshipManage",
+    label: "Manage Scholarships",
+    icon: BarChart3,
+    category: "Admissions",
+  },
+  {
+    id: "entrance",
+    label: "Entrance Exams",
+    icon: ClipboardList,
+    category: "Tools",
+  },
+  {
+    id: "counselling",
+    label: "Online Counselling",
+    icon: Stethoscope,
+    category: "Tools",
+  },
+  {
+    id: "qms",
+    label: "Query Management",
+    icon: MessageSquare,
+    category: "Engagement",
+  },
+  {
+    id: "events",
+    label: "Events & Activities",
+    icon: Calendar,
+    category: "Engagement",
+  },
+  {
+    id: "newsNotice",
+    label: "News & Notices",
+    icon: Newspaper,
+    category: "Engagement",
+  },
+  { id: "message", label: "Messages", icon: MessageSquare, category: "System" },
+  { id: "settings", label: "Settings", icon: Settings, category: "System" },
+];
 
 interface InstitutionLayoutProps {
   children: React.ReactNode;
-  activeTab: string;
-  setActiveTab: (tab: string) => void;
+  activePage: InstitutionPage;
+  onNavigate: (page: InstitutionPage) => void;
 }
 
 const InstitutionLayout: React.FC<InstitutionLayoutProps> = ({
   children,
-  activeTab,
-  setActiveTab,
+  activePage,
+  onNavigate,
 }) => {
+  const [isSidebarOpen, setIsSidebarOpen] = useState(true);
+
+  const groupedNavItems = NAV_ITEMS.reduce(
+    (acc, item) => {
+      const category = item.category || "Main";
+      if (!acc[category]) acc[category] = [];
+      acc[category].push(item);
+      return acc;
+    },
+    {} as Record<string, NavItem[]>,
+  );
+
   return (
-    <div className="flex h-screen bg-slate-50 overflow-hidden font-inter">
+    <div className="flex h-screen bg-[#F8FAFC]">
       {/* Sidebar */}
-      <div className="w-64 bg-white border-r border-slate-200 flex flex-col shrink-0">
-        <div className="p-6 border-b border-slate-100 flex items-center gap-3">
-          <div className="w-8 h-8 bg-indigo-600 rounded-lg flex items-center justify-center text-white font-bold">
-            S
-          </div>
-          <div>
-            <h2 className="text-lg font-bold text-slate-800 leading-none">
-              Studsphere
-            </h2>
-            <p className="text-[10px] text-slate-400 font-medium uppercase tracking-wider mt-1 font-bold">
-              Institution Zone
-            </p>
-          </div>
+      <aside
+        className={`${
+          isSidebarOpen ? "w-72" : "w-20"
+        } transition-all duration-300 bg-white border-r border-slate-200 flex flex-col z-50`}
+      >
+        <div className="p-6 flex items-center justify-between">
+          {isSidebarOpen ? (
+            <span className="text-xl font-bold text-blue-600 tracking-tight">
+              StudSphere{" "}
+              <span className="text-slate-400 font-medium text-sm">Inst.</span>
+            </span>
+          ) : (
+            <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center text-white font-bold ml-1">
+              S
+            </div>
+          )}
+          <button
+            onClick={() => setIsSidebarOpen(!isSidebarOpen)}
+            className="p-1.5 rounded-lg hover:bg-slate-100 text-slate-500"
+          >
+            {isSidebarOpen ? <X size={18} /> : <Menu size={18} />}
+          </button>
         </div>
 
-        <nav className="flex-1 overflow-y-auto p-4 space-y-1 custom-scrollbar scrollbar-hide">
-          <NavSection title="Dashboard">
-            <NavItem
-              active={activeTab === "Overview"}
-              onClick={() => setActiveTab("Overview")}
-              label="Overview"
-              icon={<LayoutDashboard size={18} />}
-            />
-            <NavItem
-              active={activeTab === "Program List"}
-              onClick={() => setActiveTab("Program List")}
-              label="Programs"
-              icon={<BookOpen size={18} />}
-            />
-            <NavItem
-              active={activeTab === "Admission Details"}
-              onClick={() => setActiveTab("Admission Details")}
-              label="Admissions"
-              icon={<Users size={18} />}
-            />
-          </NavSection>
-
-          <NavSection title="Academic Tools">
-            <NavItem
-              active={activeTab === "Booked Counselling"}
-              onClick={() => setActiveTab("Booked Counselling")}
-              label="Counselling"
-              icon={<GraduationCap size={18} />}
-            />
-            <NavItem
-              active={activeTab === "Entrance Portal"}
-              onClick={() => setActiveTab("Entrance Portal")}
-              label="Entrance Portals"
-              icon={<ClipboardCheck size={18} />}
-            />
-            <NavItem
-              active={activeTab === "Scholarship"}
-              onClick={() => setActiveTab("Scholarship")}
-              label="Scholarships"
-              icon={<Award size={18} />}
-            />
-          </NavSection>
-
-          <NavSection title="Institutional">
-            <NavItem
-              active={activeTab === "Institutional Profile"}
-              onClick={() => setActiveTab("Institutional Profile")}
-              label="Public Profile"
-              icon={<Building2 size={18} />}
-            />
-            <NavItem
-              active={activeTab === "Faculty & Staff"}
-              onClick={() => setActiveTab("Faculty & Staff")}
-              label="Faculty & Staff"
-              icon={<Users size={18} />}
-            />
-             <NavItem
-              active={activeTab === "Placement & Careers"}
-              onClick={() => setActiveTab("Placement & Careers")}
-              label="Placements"
-              icon={<Sparkles size={18} />}
-            />
-          </NavSection>
-
-          <NavSection title="Engagement">
-            <NavItem
-              active={activeTab === "QMS (Query System)"}
-              onClick={() => setActiveTab("QMS (Query System)")}
-              label="Query System"
-              icon={<MessageSquare size={18} />}
-            />
-            <NavItem
-              active={activeTab === "General Inquiries"}
-              onClick={() => setActiveTab("General Inquiries")}
-              label="Inquiries"
-              icon={<HelpCircle size={18} />}
-            />
-            <NavItem
-              active={activeTab === "FAQ Management"}
-              onClick={() => setActiveTab("FAQ Management")}
-              label="Knowledge Base"
-              icon={<BookOpen size={18} />}
-            />
-          </NavSection>
-
-          <NavSection title="Communication">
-            <NavItem
-              active={activeTab === "News & Notices"}
-              onClick={() => setActiveTab("News & Notices")}
-              label="Notices"
-              icon={<Bell size={18} />}
-            />
-            <NavItem
-              active={activeTab === "Events Management"}
-              onClick={() => setActiveTab("Events Management")}
-              label="Events"
-              icon={<Calendar size={18} />}
-            />
-            <NavItem
-              active={activeTab === "Social Media & Links"}
-              onClick={() => setActiveTab("Social Media & Links")}
-              label="Links"
-              icon={<Share2 size={18} />}
-            />
-          </NavSection>
-
-          <NavSection title="System">
-            <NavItem
-              active={activeTab === "Analytics & Reports"}
-              onClick={() => setActiveTab("Analytics & Reports")}
-              label="Analytics"
-              icon={<LineChart size={18} />}
-            />
-            <NavItem
-              active={activeTab === "Account Settings"}
-              onClick={() => setActiveTab("Account Settings")}
-              label="Settings"
-              icon={<Settings size={18} />}
-            />
-          </NavSection>
-        </nav>
+        <div className="flex-1 overflow-y-auto px-4 py-2 space-y-6">
+          {Object.entries(groupedNavItems).map(([category, items]) => (
+            <div key={category} className="space-y-1">
+              {isSidebarOpen && (
+                <h3 className="px-3 text-[11px] font-bold text-slate-400 uppercase tracking-widest mb-2">
+                  {category}
+                </h3>
+              )}
+              {items.map((item) => (
+                <button
+                  key={item.id}
+                  onClick={() => onNavigate(item.id)}
+                  className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all ${
+                    activePage === item.id
+                      ? "bg-blue-50 text-blue-600 font-semibold"
+                      : "text-slate-500 hover:bg-slate-50 hover:text-slate-900"
+                  }`}
+                >
+                  <item.icon
+                    size={20}
+                    className={
+                      activePage === item.id
+                        ? "text-blue-600"
+                        : "text-slate-400"
+                    }
+                  />
+                  {isSidebarOpen && (
+                    <span className="text-[14px] truncate">{item.label}</span>
+                  )}
+                  {isSidebarOpen && activePage === item.id && (
+                    <div className="ml-auto w-1.5 h-1.5 rounded-full bg-blue-600" />
+                  )}
+                </button>
+              ))}
+            </div>
+          ))}
+        </div>
 
         <div className="p-4 border-t border-slate-100">
-           <button className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs font-black uppercase tracking-widest text-rose-500 hover:bg-rose-50 transition-all">
-              <LogOut size={16} /> Logout
-           </button>
+          <div
+            className={`flex items-center gap-3 ${isSidebarOpen ? "px-2" : "justify-center"}`}
+          >
+            <div className="w-10 h-10 rounded-full bg-slate-100 flex items-center justify-center text-slate-500 font-bold border border-slate-200 overflow-hidden">
+              <Building2 size={24} />
+            </div>
+            {isSidebarOpen && (
+              <div className="flex flex-col min-w-0">
+                <span className="text-sm font-bold text-slate-900 truncate">
+                  Sagarmatha College
+                </span>
+                <span className="text-[11px] text-slate-400 font-medium">
+                  Premium Member
+                </span>
+              </div>
+            )}
+          </div>
         </div>
-      </div>
+      </aside>
 
       {/* Main Content */}
-      <div className="flex-1 flex flex-col min-w-0 overflow-hidden">
-        {/* Header */}
+      <main className="flex-1 flex flex-col min-w-0 overflow-hidden">
+        {/* Top Header */}
         <header className="h-16 bg-white border-b border-slate-200 flex items-center justify-between px-8 shrink-0">
-          <div className="flex items-center gap-4">
-             <h3 className="text-sm font-black text-slate-800 uppercase italic underline decoration-indigo-500/30">{activeTab}</h3>
+          <div className="flex items-center gap-4 flex-1">
+            <div className="relative max-w-md w-full hidden md:block">
+              <Search
+                className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"
+                size={16}
+              />
+              <input
+                type="text"
+                placeholder="Search leads, applications..."
+                className="w-full bg-slate-50 border-none rounded-lg py-2 pl-10 pr-4 text-sm focus:ring-2 focus:ring-blue-500/20 outline-none"
+              />
+            </div>
           </div>
           <div className="flex items-center gap-4">
-            <button className="p-2 text-slate-400 hover:text-indigo-600 transition-colors relative">
-               <Bell size={20} />
-               <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-rose-500 border-2 border-white rounded-full"></span>
+            <button className="relative p-2 rounded-lg hover:bg-slate-50 text-slate-500">
+              <Bell size={20} />
+              <div className="absolute top-2 right-2 w-2 h-2 bg-red-500 rounded-full border-2 border-white" />
             </button>
-            <div className="h-8 w-[1px] bg-slate-200 mx-2"></div>
-            <div className="flex items-center gap-3 cursor-pointer group">
-              <div className="text-right">
-                <p className="text-xs font-black text-slate-800 uppercase leading-none">NCIT ADMIN</p>
-                <p className="text-[10px] text-slate-400 mt-1 uppercase italic font-bold">Verified Inst.</p>
-              </div>
-              <div className="w-10 h-10 rounded-xl bg-indigo-50 border border-indigo-100 flex items-center justify-center text-indigo-600 font-black group-hover:bg-indigo-600 group-hover:text-white transition-all shadow-sm">
-                NC
-              </div>
-            </div>
+            <div className="h-8 w-px bg-slate-200 mx-1" />
+            <button className="flex items-center gap-2 px-3 py-1.5 rounded-lg border border-slate-200 hover:bg-slate-50 transition-colors">
+              <span className="text-sm font-medium text-slate-700">
+                Live Website
+              </span>
+              <ChevronRight size={14} className="text-slate-400" />
+            </button>
           </div>
         </header>
 
-        {/* Content */}
-        <main className="flex-1 overflow-y-auto bg-slate-50/50">
-          {children}
-        </main>
-      </div>
+        {/* Page Content */}
+        <div className="flex-1 overflow-y-auto">{children}</div>
+      </main>
     </div>
   );
 };
-
-interface NavSectionProps {
-  title: string;
-  children: React.ReactNode;
-}
-
-const NavSection: React.FC<NavSectionProps> = ({ title, children }) => (
-  <div className="py-2">
-    <h4 className="px-3 mb-2 text-[10px] font-black uppercase tracking-widest text-slate-400 italic">
-      {title}
-    </h4>
-    <div className="space-y-0.5">{children}</div>
-  </div>
-);
-
-interface NavItemProps {
-  active: boolean;
-  onClick: () => void;
-  label: string;
-  icon: React.ReactNode;
-}
-
-const NavItem: React.FC<NavItemProps> = ({ active, onClick, label, icon }) => (
-  <button
-    onClick={onClick}
-    className={`w-full flex items-center justify-between px-3 py-2 rounded-xl text-sm font-bold transition-all group ${
-      active
-        ? "bg-indigo-600 text-white shadow-lg shadow-indigo-500/20"
-        : "text-slate-600 hover:bg-indigo-50 hover:text-indigo-600"
-    }`}
-  >
-    <div className="flex items-center gap-3">
-      <span className={active ? "text-white" : "text-slate-400 group-hover:text-indigo-600 transition-colors"}>
-        {icon}
-      </span>
-      <span className="truncate">{label}</span>
-    </div>
-    {active && <ChevronRight size={14} className="opacity-50" />}
-  </button>
-);
 
 export default InstitutionLayout;

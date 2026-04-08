@@ -1,9 +1,10 @@
 "use client";
 
-import React, { useMemo, useState, useEffect } from "react";
+import React, { useMemo, useState, useEffect, useRef, useCallback } from "react";
 import { useParams } from "next/navigation";
 import { apiService } from "@/services/api";
-import { BadgeCheckIcon } from "lucide-react";
+import CollegeCard from "@/components/admissions/CollegeCard";
+import { BadgeCheckIcon, ChevronLeft, ChevronRight } from "lucide-react";
 
 type TabKey =
   | "about"
@@ -457,6 +458,16 @@ const downloads = [
   },
 ];
 
+const isCollegeVerified = (value: unknown): boolean => {
+  if (typeof value === "boolean") return value;
+  if (typeof value === "number") return value === 1;
+  if (typeof value === "string") {
+    const normalized = value.trim().toLowerCase();
+    return ["true", "1", "yes", "verified", "active"].includes(normalized);
+  }
+  return false;
+};
+
 const CollegeDetailsPage: React.FC = () => {
   const params = useParams();
   const collegeId = params.id ? Number(params.id) : null;
@@ -469,6 +480,34 @@ const CollegeDetailsPage: React.FC = () => {
   const [isClaimModalOpen, setIsClaimModalOpen] = useState(false);
   const [college, setCollege] = useState<any>(null);
   const [loading, setLoading] = useState(true);
+  const tabsScrollRef = useRef<HTMLDivElement | null>(null);
+  const tabsNavRef = useRef<HTMLElement | null>(null);
+  const [canScrollTabsLeft, setCanScrollTabsLeft] = useState(false);
+  const [canScrollTabsRight, setCanScrollTabsRight] = useState(false);
+
+  const updateTabScrollState = useCallback(() => {
+    const container = tabsScrollRef.current;
+    if (!container) {
+      setCanScrollTabsLeft(false);
+      setCanScrollTabsRight(false);
+      return;
+    }
+
+    const maxScrollLeft = container.scrollWidth - container.clientWidth;
+    setCanScrollTabsLeft(container.scrollLeft > 4);
+    setCanScrollTabsRight(container.scrollLeft < maxScrollLeft - 4);
+  }, []);
+
+  const scrollTabs = (direction: "left" | "right") => {
+    const container = tabsScrollRef.current;
+    if (!container) return;
+
+    const step = Math.max(180, Math.floor(container.clientWidth * 0.5));
+    container.scrollBy({
+      left: direction === "left" ? -step : step,
+      behavior: "smooth",
+    });
+  };
 
   useEffect(() => {
     if (collegeId) {
@@ -480,6 +519,39 @@ const CollegeDetailsPage: React.FC = () => {
     }
   }, [collegeId]);
 
+  useEffect(() => {
+    const container = tabsScrollRef.current;
+    if (!container) return;
+
+    updateTabScrollState();
+    const handleScroll = () => updateTabScrollState();
+    const handleResize = () => updateTabScrollState();
+
+    container.addEventListener("scroll", handleScroll, { passive: true });
+    window.addEventListener("resize", handleResize);
+
+    let observer: ResizeObserver | null = null;
+    if (typeof ResizeObserver !== "undefined") {
+      observer = new ResizeObserver(() => updateTabScrollState());
+      observer.observe(container);
+      if (tabsNavRef.current) {
+        observer.observe(tabsNavRef.current);
+      }
+    }
+
+    requestAnimationFrame(() => updateTabScrollState());
+
+    return () => {
+      container.removeEventListener("scroll", handleScroll);
+      window.removeEventListener("resize", handleResize);
+      observer?.disconnect();
+    };
+  }, [updateTabScrollState]);
+
+  useEffect(() => {
+    updateTabScrollState();
+  }, [activeTab, updateTabScrollState]);
+
   const name = college?.name || fallbackCollege.name;
   const locationText = college?.location || fallbackCollege.location;
   const rating = college?.rating ?? fallbackCollege.rating;
@@ -489,7 +561,7 @@ const CollegeDetailsPage: React.FC = () => {
   const websiteHref = website.startsWith("http://") || website.startsWith("https://") ? website : `https://${website}`;
   const banner = college?.image_url || fallbackCollege.banner;
   const description = college?.description || fallbackCollege.description;
-  const isVerified = college?.verified ?? false;
+  const isVerified = isCollegeVerified(college?.verified);
 
   const filteredCourses = useMemo(
     () => courses.filter((item) => courseFilter === "all" || item.level === courseFilter),
@@ -534,7 +606,7 @@ const CollegeDetailsPage: React.FC = () => {
               className="flex items-center gap-2 rounded-full border border-gray-100 bg-white px-5 py-2.5 text-sm font-bold text-gray-800 shadow-lg transition-all duration-300 hover:bg-gray-50 md:px-6 md:py-3 md:text-base"
             >
               <i className="fa-solid fa-building-shield text-[#0000FF]"></i>
-              <span>Claim College</span>
+              <span>Claim Now</span>
             </button>
           )}
         </div>
@@ -542,21 +614,21 @@ const CollegeDetailsPage: React.FC = () => {
 
       <div className="relative bg-white">
         <div className="relative px-6 pb-8 md:px-12 lg:px-24 xl:px-32">
-          <div className="absolute -top-2 left-6 z-10 flex h-[120px] w-[120px] items-center justify-center overflow-hidden rounded-xl border border-gray-100 bg-white p-2 shadow-[0_4px_20px_-3px_rgba(0,0,0,0.1)] md:-top-4 md:left-12 md:h-[150px] md:w-[150px] lg:left-24 xl:left-32">
+          <div className="relative z-10 mr-auto -mt-12 flex h-[120px] w-[120px] items-center justify-center overflow-hidden rounded-xl border border-gray-100 bg-white p-2 shadow-[0_4px_20px_-3px_rgba(0,0,0,0.1)] md:absolute md:-top-4 md:left-12 md:mx-0 md:mt-0 md:h-[150px] md:w-[150px] lg:left-24 xl:left-32">
             <img src={fallbackCollege.logo} alt="College Logo" className="h-full w-full object-contain" />
           </div>
 
-          <div className="flex flex-col items-start justify-between pt-6 lg:flex-row lg:items-end lg:pl-[170px]">
-            <div className="w-full space-y-3 lg:w-auto">
-              <div className="flex items-center gap-2">
+          <div className="mt-4 flex flex-col items-center justify-between gap-6 lg:mt-0 lg:flex-row lg:items-end lg:gap-0 lg:pl-[170px]">
+            <div className="w-full space-y-3 text-left lg:w-auto">
+              <div className="flex items-center justify-start gap-2">
                 <h1 className="text-[24px] font-bold tracking-tight text-gray-900 md:text-3xl">{name}</h1>
                 <BadgeCheckIcon className="text-white fill-[#0000FF]"/>
               </div>
-              <div className="flex items-center gap-1.5 text-[14px] font-medium text-gray-600 md:text-[15px]">
+              <div className="flex items-center justify-start gap-1.5 text-[14px] font-medium text-gray-600 md:text-[15px]">
                 <i className="fa-solid fa-location-dot text-gray-500"></i>
                 <span>{locationText}</span>
               </div>
-              <div className="flex items-center gap-5 pt-1 text-[14px] font-medium">
+              <div className="flex items-center justify-start gap-5 pt-1 text-[14px] font-medium">
                 <div className="flex items-center gap-1.5">
                   <i className="fa-solid fa-star text-yellow-400"></i>
                   <span className="font-bold text-gray-900">{rating}</span>
@@ -575,14 +647,14 @@ const CollegeDetailsPage: React.FC = () => {
               </div>
             </div>
 
-            <div className="mt-8 flex w-full flex-wrap items-center gap-3 lg:mt-0 lg:w-auto">
-              <button className="flex items-center justify-center gap-2 rounded-xl border border-gray-200 bg-white px-5 py-3 text-[15px] font-semibold text-gray-700 shadow-sm transition-colors hover:bg-gray-50">
+            <div className="mt-8 flex w-full flex-nowrap items-center gap-2 overflow-x-auto pb-1 lg:mt-0 lg:w-auto lg:gap-3 lg:overflow-visible lg:pb-0">
+              <button className="shrink-0 flex items-center justify-center gap-2 rounded-xl border border-gray-200 bg-white px-4 py-2.5 text-[14px] font-semibold text-gray-700 shadow-sm transition-colors hover:bg-gray-50 lg:px-5 lg:py-3 lg:text-[15px]">
                 <i className="fa-solid fa-download"></i>Brochure
               </button>
-              <button className="flex items-center justify-center gap-2 rounded-xl border border-gray-200 bg-white px-5 py-3 text-[15px] font-semibold text-gray-700 shadow-sm transition-colors hover:bg-gray-50">
+              <button className="shrink-0 flex items-center justify-center gap-2 rounded-xl border border-gray-200 bg-white px-4 py-2.5 text-[14px] font-semibold text-gray-700 shadow-sm transition-colors hover:bg-gray-50 lg:px-5 lg:py-3 lg:text-[15px]">
                 <i className="fa-regular fa-circle-question"></i>Ask Question
               </button>
-              <button className="flex items-center justify-center rounded-xl border border-gray-200 bg-white p-3 text-gray-700 shadow-sm transition-colors hover:bg-gray-50">
+              <button className="shrink-0 flex items-center justify-center rounded-xl border border-gray-200 bg-white p-2.5 text-gray-700 shadow-sm transition-colors hover:bg-gray-50 lg:p-3">
                 <i className="fa-solid fa-share-nodes"></i>
               </button>
             </div>
@@ -590,34 +662,64 @@ const CollegeDetailsPage: React.FC = () => {
         </div>
       </div>
 
-      <div className="sticky top-0 z-40 overflow-x-auto border-b border-t border-gray-100 bg-white px-6 shadow-sm shadow-gray-100/50 md:px-12 lg:px-24 xl:px-32 [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
-        <nav className="flex space-x-8 whitespace-nowrap">
-          {[
-            ["about", "About"],
-            ["courses", "Courses & Fees"],
-            ["admissions", "Admissions"],
-            ["offered", "Offered Program"],
-            ["facilities", "Facilities"],
-            ["events", "Events & Activities"],
-            ["scholarship", "Scholarship"],
-            ["alumni", "Alumni"],
-            ["gallery", "Gallery"],
-            ["review", "Review"],
-            ["news", "News & Notice"],
-            ["download", "Downloads"],
-          ].map(([key, label]) => {
-            const selected = activeTab === key;
-            return (
-              <button
-                key={key}
-                onClick={() => setActiveTab(key as TabKey)}
-                className={`border-b-2 py-4 text-[15px] ${selected ? "border-[#0000FF] font-bold text-gray-900" : "border-transparent font-semibold text-gray-500 hover:text-gray-900"}`}
-              >
-                {label}
-              </button>
-            );
-          })}
-        </nav>
+      <div className="sticky top-0 z-40 border-b border-t border-gray-100 bg-white shadow-sm shadow-gray-100/50">
+        <div className="relative overflow-hidden px-6 md:px-12 lg:px-24 xl:px-32">
+          <button
+            type="button"
+            onClick={() => scrollTabs("left")}
+            className={`absolute left-6 top-1/2 z-20 -translate-y-1/2 rounded-full border bg-white p-1.5 shadow-sm transition md:left-12 lg:left-24 xl:left-32 ${canScrollTabsLeft ? "border-gray-200 text-gray-700 hover:bg-gray-50" : "border-gray-100 text-gray-300"}`}
+            aria-label="Scroll tabs left"
+            aria-disabled={!canScrollTabsLeft}
+          >
+            <ChevronLeft className="h-4 w-4" />
+          </button>
+
+          <button
+            type="button"
+            onClick={() => scrollTabs("right")}
+            className={`absolute right-6 top-1/2 z-20 -translate-y-1/2 rounded-full border bg-white p-1.5 shadow-sm transition md:right-12 lg:right-24 xl:right-32 ${canScrollTabsRight ? "border-gray-200 text-gray-700 hover:bg-gray-50" : "border-gray-100 text-gray-300"}`}
+            aria-label="Scroll tabs right"
+            aria-disabled={!canScrollTabsRight}
+          >
+            <ChevronRight className="h-4 w-4" />
+          </button>
+
+          <div
+            ref={tabsScrollRef}
+            className="overflow-x-auto scroll-smooth px-8 sm:px-9 [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]"
+          >
+            <nav
+              ref={tabsNavRef}
+              className="flex w-max space-x-8 whitespace-nowrap pr-6 md:pr-12 lg:pr-24 xl:pr-32"
+            >
+              {[
+                ["about", "About"],
+                ["courses", "Courses & Fees"],
+                ["admissions", "Admissions"],
+                ["offered", "Offered Program"],
+                ["facilities", "Facilities"],
+                ["events", "Events & Activities"],
+                ["scholarship", "Scholarship"],
+                ["alumni", "Alumni"],
+                ["gallery", "Gallery"],
+                ["review", "Review"],
+                ["news", "News & Notice"],
+                ["download", "Downloads"],
+              ].map(([key, label]) => {
+                const selected = activeTab === key;
+                return (
+                  <button
+                    key={key}
+                    onClick={() => setActiveTab(key as TabKey)}
+                    className={`shrink-0 border-b-2 py-4 text-[15px] ${selected ? "border-[#0000FF] font-bold text-gray-900" : "border-transparent font-semibold text-gray-500 hover:text-gray-900"}`}
+                  >
+                    {label}
+                  </button>
+                );
+              })}
+            </nav>
+          </div>
+        </div>
       </div>
 
       <div className="grid grid-cols-1 gap-10 bg-[#f8fafc] px-6 py-8 md:gap-14 md:px-12 md:py-12 lg:grid-cols-3 lg:px-24 xl:px-32">
@@ -746,45 +848,26 @@ const CollegeDetailsPage: React.FC = () => {
               </div>
               <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
                 {filteredAdmissions.map((admission) => (
-                  <div key={admission.title} className="flex flex-col rounded-2xl border border-gray-100 bg-white shadow-sm hover:shadow-md">
-                    <div className="relative h-[180px] w-full overflow-hidden rounded-t-2xl">
-                      <img src={admission.image} className="h-full w-full object-cover" alt={admission.title} />
-                    </div>
-                    <div className="p-5">
-                      <span
-                        className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[11px] font-bold ${admission.status === "Ongoing" ? "bg-[#ecfdf5] text-[#10b981]" : "bg-[#fef2f2] text-[#ef4444]"}`}
-                      >
-                        <span className={`h-1.5 w-1.5 rounded-full ${admission.status === "Ongoing" ? "bg-[#10b981]" : "bg-[#ef4444]"}`}></span>
-                        {admission.status}
-                      </span>
-                      <h3 className="mt-2 text-[17px] font-bold text-gray-900">{admission.title}</h3>
-                      <div className="mt-1 flex items-center gap-2 text-[12.5px] font-medium text-gray-500">
-                        <i className="fa-solid fa-building-columns"></i>
-                        <span>{admission.affiliation}</span>
-                      </div>
-                      <div className="mt-3 flex justify-between rounded-xl border bg-[#f8fafc] p-4">
-                        <div>
-                          <span className="text-[11px] font-bold text-gray-500">Admission open</span>
-                          <p className="text-[13px] font-bold text-gray-900">{admission.openDate}</p>
-                        </div>
-                        <div className="text-right">
-                          <span className="text-[11px] font-bold text-gray-500">DEADLINE</span>
-                          <p className="text-[13px] font-bold text-gray-900">{admission.deadline}</p>
-                        </div>
-                      </div>
-                      <div className="mt-4 flex gap-3">
-                        <button className="flex-1 rounded-xl border border-gray-200 py-2.5 font-bold text-gray-700 hover:bg-gray-50">Details</button>
-                        <button
-                          className={`flex-[1.5] rounded-xl py-2.5 font-bold text-white ${admission.status === "Ongoing" ? "bg-[#111827] hover:bg-black" : "cursor-not-allowed bg-gray-300 text-gray-500"}`}
-                        >
-                          {admission.status === "Ongoing" ? "Apply Now" : "Closed"}
-                        </button>
-                        <button className="flex h-[42px] w-[42px] items-center justify-center rounded-xl border border-gray-200 hover:bg-gray-50">
-                          <i className="fa-regular fa-heart text-gray-600"></i>
-                        </button>
-                      </div>
-                    </div>
-                  </div>
+                  <CollegeCard
+                    key={admission.title}
+                    images={[admission.image, admission.image, admission.image]}
+                    tag={{
+                      text: admission.status === "Ongoing" ? "Admission Open" : "Closed",
+                      color: admission.status === "Ongoing" ? "bg-[#0d6efd]" : "bg-gray-500",
+                    }}
+                    collegeName={admission.affiliation}
+                    rating={4.5}
+                    type="Private"
+                    location={locationText}
+                    website={website}
+                    programs={[
+                      {
+                        name: admission.title,
+                        status: admission.status === "Ongoing" ? "Seats Available" : "Closing Soon",
+                      },
+                    ]}
+                    moreProgramsCount={0}
+                  />
                 ))}
               </div>
             </div>
@@ -1060,8 +1143,8 @@ const CollegeDetailsPage: React.FC = () => {
           )}
         </div>
 
-        <div className="space-y-6 lg:col-span-1">
-          <div className="w-full max-w-[420px] rounded-[2rem] border border-gray-100 bg-white p-8 shadow-sm sm:p-10">
+        <div className="space-y-6 lg:col-span-1 lg:w-full lg:max-w-[420px] lg:justify-self-end">
+          <div className="w-full rounded-[2rem] border border-gray-100 bg-white p-8 shadow-sm sm:p-10">
             <h3 className="mb-8 text-2xl font-bold text-gray-900">Contact Information</h3>
             <div className="flex flex-col gap-6">
               <ContactInfoRowV2

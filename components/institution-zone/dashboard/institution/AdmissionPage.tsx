@@ -1,217 +1,234 @@
 "use client";
 
 import React, { useState } from "react";
-import { 
-  Users, UserPlus, Filter, Search, Download, 
-  CheckCircle2, Clock, AlertCircle, ChevronRight,
-  Mail, Phone, Calendar, MoreVertical, FileText
+import {
+  Users,
+  Search,
+  Filter,
+  Download,
+  Mail,
+  Phone,
+  MoreVertical,
+  CheckCircle2,
+  XCircle,
+  Clock,
+  ChevronLeft,
+  ChevronRight,
+  ExternalLink,
+  Calendar,
 } from "lucide-react";
 
-interface Application {
-  id: string;
-  student: string;
-  email: string;
-  phone: string;
-  program: string;
-  status: "Pending" | "Under Review" | "Approved" | "Rejected";
-  date: string;
-  avatar: string;
-}
-
-const applications: Application[] = [
+const LEADS = [
   {
-    id: "APP-001",
-    student: "Rahul Sharma",
-    email: "rahul.s@example.com",
-    phone: "+977 9841234567",
-    program: "BSc CSIT",
-    status: "Approved",
-    date: "2026-03-05",
-    avatar: "RS",
+    id: "L-1024",
+    name: "Suman Giri",
+    email: "suman.giri@gmail.com",
+    phone: "9841234567",
+    program: "BSc.CSIT",
+    date: "2024-04-06",
+    status: "Interested",
+    source: "Website Search",
   },
   {
-    id: "APP-002",
-    student: "Priya Singh",
-    email: "priya.singh@example.com",
-    phone: "+977 9851098765",
+    id: "L-1023",
+    name: "Anish Magar",
+    email: "anish.m@outlook.com",
+    phone: "9860112233",
     program: "BBA",
-    status: "Under Review",
-    date: "2026-03-04",
-    avatar: "PS",
+    date: "2024-04-05",
+    status: "Waiting Call",
+    source: "Facebook Ad",
   },
   {
-    id: "APP-003",
-    student: "Amit Khadka",
-    email: "amit.k@example.com",
-    phone: "+977 9812345678",
-    program: "Civil Engineering",
-    status: "Pending",
-    date: "2026-03-03",
-    avatar: "AK",
+    id: "L-1022",
+    name: "Riya Shrestha",
+    email: "riya.stha@info.com",
+    phone: "9812345678",
+    program: "BCA",
+    date: "2024-04-05",
+    status: "Applied",
+    source: "Direct Visit",
   },
   {
-    id: "APP-004",
-    student: "Deepa Gurung",
-    email: "deepa.g@example.com",
-    phone: "+977 9801122334",
+    id: "L-1021",
+    name: "Prabin Tamang",
+    email: "prabin.t@gmail.com",
+    phone: "9845678901",
     program: "BIM",
+    date: "2024-04-04",
+    status: "Interested",
+    source: "College Fair",
+  },
+  {
+    id: "L-1020",
+    name: "Kusum Adhikari",
+    email: "kusum.a@yahoo.com",
+    phone: "9801234567",
+    program: "BE Computer",
+    date: "2024-04-04",
+    status: "Interested",
+    source: "Website Search",
+  },
+  {
+    id: "L-1019",
+    name: "Sabin Karki",
+    email: "sabin.k@gmail.com",
+    phone: "9849876543",
+    program: "BBS",
+    date: "2024-04-03",
     status: "Rejected",
-    date: "2026-03-01",
-    avatar: "DG",
+    source: "Direct Visit",
   },
 ];
 
 const AdmissionPage: React.FC = () => {
-  const [searchQuery, setSearchQuery] = useState("");
-
-  const getStatusStyle = (status: Application["status"]) => {
-    switch (status) {
-      case "Approved": return "bg-emerald-100 text-emerald-700 border-emerald-200";
-      case "Under Review": return "bg-blue-100 text-blue-700 border-blue-200";
-      case "Pending": return "bg-amber-100 text-amber-700 border-amber-200";
-      case "Rejected": return "bg-rose-100 text-rose-700 border-rose-200";
-      default: return "bg-slate-100 text-slate-700 border-slate-200";
-    }
-  };
+  const [activeTab, setActiveTab] = useState<
+    "all" | "interested" | "pending" | "applied"
+  >("all");
 
   return (
-    <div className="p-4 lg:p-8 max-w-7xl mx-auto space-y-6">
-      {/* Header */}
+    <div className="p-8 space-y-8 animate-in fade-in duration-500">
+      {/* Page Header */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-slate-900">Admission Portal</h1>
-          <p className="text-slate-500 text-sm mt-1">Review and manage student enrollment applications.</p>
+          <h1 className="text-2xl font-bold text-slate-900 tracking-tight">
+            Student Admission Leads
+          </h1>
+          <p className="text-slate-500 text-sm font-medium mt-1">
+            Manage and track student inquiries for your programs
+          </p>
         </div>
-        <div className="flex gap-2">
-          <button className="px-4 py-2 bg-white border border-slate-200 rounded-xl text-sm font-semibold hover:bg-slate-50 transition-all flex items-center gap-2 shadow-sm">
-            <Download className="w-4 h-4" /> Export Report
-          </button>
-          <button className="px-4 py-2 bg-blue-600 text-white rounded-xl text-sm font-semibold hover:bg-blue-700 transition-all flex items-center gap-2 shadow-sm">
-            <UserPlus className="w-4 h-4" /> Offline Admission
+        <div className="flex items-center gap-3">
+          <button className="flex items-center gap-2 px-4 py-2 bg-white border border-slate-200 rounded-xl text-sm font-bold text-slate-600 hover:bg-slate-50 transition-all shadow-sm">
+            <Download size={16} />
+            Export Leads
           </button>
         </div>
       </div>
 
-      {/* KPI Stats */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm flex items-center gap-4">
-          <div className="w-12 h-12 rounded-full bg-blue-50 flex items-center justify-center text-blue-600">
-            <Users className="w-6 h-6" />
-          </div>
-          <div>
-            <p className="text-xs text-slate-400 font-bold uppercase tracking-wider">Total Apps</p>
-            <h3 className="text-xl font-bold text-slate-900">1,248</h3>
-          </div>
-        </div>
-        <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm flex items-center gap-4">
-          <div className="w-12 h-12 rounded-full bg-amber-50 flex items-center justify-center text-amber-600">
-            <Clock className="w-6 h-6" />
-          </div>
-          <div>
-            <p className="text-xs text-slate-400 font-bold uppercase tracking-wider">Pending</p>
-            <h3 className="text-xl font-bold text-slate-900">84</h3>
-          </div>
-        </div>
-        <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm flex items-center gap-4">
-          <div className="w-12 h-12 rounded-full bg-emerald-50 flex items-center justify-center text-emerald-600">
-            <CheckCircle2 className="w-6 h-6" />
-          </div>
-          <div>
-            <p className="text-xs text-slate-400 font-bold uppercase tracking-wider">Approved</p>
-            <h3 className="text-xl font-bold text-slate-900">956</h3>
-          </div>
-        </div>
-        <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm flex items-center gap-4">
-          <div className="w-12 h-12 rounded-full bg-rose-50 flex items-center justify-center text-rose-600">
-            <AlertCircle className="w-6 h-6" />
-          </div>
-          <div>
-            <p className="text-xs text-slate-400 font-bold uppercase tracking-wider">Rejected</p>
-            <h3 className="text-xl font-bold text-slate-900">208</h3>
-          </div>
-        </div>
-      </div>
-
-      {/* Main Content Table Area */}
-      <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
-        {/* Table Filters */}
-        <div className="p-4 border-b border-slate-100 flex flex-col md:flex-row gap-4 justify-between">
-          <div className="relative w-full md:w-96">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
-            <input
-              type="text"
-              placeholder="Search by student name, ID or program..."
-              className="w-full pl-10 pr-4 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm transition-all focus:ring-2 focus:ring-blue-500/20 outline-none"
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-            />
-          </div>
-          <div className="flex items-center gap-2">
-            <button className="px-4 py-2 bg-white border border-slate-200 rounded-lg text-xs font-semibold hover:bg-slate-50 flex items-center gap-2">
-              <Filter className="w-4 h-4" /> Filter
+      {/* Filters & Tabs */}
+      <div className="bg-white rounded-2xl border border-slate-100 shadow-sm p-2 flex flex-col md:flex-row items-center gap-4">
+        <div className="flex p-1 bg-slate-50 rounded-xl w-full md:w-auto">
+          {(["all", "interested", "pending", "applied"] as const).map((tab) => (
+            <button
+              key={tab}
+              onClick={() => setActiveTab(tab)}
+              className={`flex-1 md:flex-none px-4 py-2 text-sm font-bold rounded-lg capitalize transition-all ${
+                activeTab === tab
+                  ? "bg-white text-blue-600 shadow-sm"
+                  : "text-slate-500 hover:text-slate-700"
+              }`}
+            >
+              {tab}
             </button>
-            <select className="bg-slate-50 border border-slate-200 rounded-lg px-4 py-2 text-xs font-semibold text-slate-700 focus:ring-2 focus:ring-blue-500/20 outline-none">
-              <option>All Status</option>
-              <option>Approved</option>
-              <option>Pending</option>
-              <option>Rejected</option>
-            </select>
-          </div>
+          ))}
         </div>
+        <div className="flex-1 md:flex none relative w-full">
+          <Search
+            size={16}
+            className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"
+          />
+          <input
+            type="text"
+            placeholder="Search by student name, email, phone..."
+            className="w-full bg-slate-50 border-none rounded-xl py-2 pl-10 pr-4 text-sm focus:ring-2 focus:ring-blue-500/20 outline-none"
+          />
+        </div>
+        <button className="p-2.5 rounded-xl border border-slate-200 bg-white text-slate-500 hover:text-slate-900">
+          <Filter size={20} />
+        </button>
+      </div>
 
-        {/* Applications Table */}
+      {/* Leads Table */}
+      <div className="bg-white rounded-3xl border border-slate-100 shadow-sm overflow-hidden min-h-[400px]">
         <div className="overflow-x-auto">
           <table className="w-full text-left">
-            <thead className="bg-slate-50 border-b border-slate-200">
-              <tr>
-                <th className="px-6 py-4 text-[10px] font-bold text-slate-400 uppercase tracking-widest text-center">Applicant</th>
-                <th className="px-6 py-4 text-[10px] font-bold text-slate-400 uppercase tracking-widest text-center">Program</th>
-                <th className="px-6 py-4 text-[10px] font-bold text-slate-400 uppercase tracking-widest text-center">Date Applied</th>
-                <th className="px-6 py-4 text-[10px] font-bold text-slate-400 uppercase tracking-widest text-center">Status</th>
-                <th className="px-6 py-4 text-[10px] font-bold text-slate-400 uppercase tracking-widest text-center">Contact</th>
-                <th className="px-6 py-4 text-[10px] font-bold text-slate-400 uppercase tracking-widest text-center">Action</th>
+            <thead>
+              <tr className="bg-slate-50/50">
+                <th className="px-6 py-4 text-[11px] font-black text-slate-400 uppercase tracking-widest">
+                  Student Info
+                </th>
+                <th className="px-6 py-4 text-[11px] font-black text-slate-400 uppercase tracking-widest">
+                  Goal Program
+                </th>
+                <th className="px-6 py-4 text-[11px] font-black text-slate-400 uppercase tracking-widest">
+                  Date Recieved
+                </th>
+                <th className="px-6 py-4 text-[11px] font-black text-slate-400 uppercase tracking-widest">
+                  Status
+                </th>
+                <th className="px-6 py-4 text-[11px] font-black text-slate-400 uppercase tracking-widest">
+                  Source
+                </th>
+                <th className="px-6 py-4"></th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-100">
-              {applications.map((app) => (
-                <tr key={app.id} className="hover:bg-slate-50 transition-colors group">
+            <tbody className="divide-y divide-slate-50">
+              {LEADS.map((lead) => (
+                <tr
+                  key={lead.id}
+                  className="hover:bg-slate-50/50 transition-colors group"
+                >
                   <td className="px-6 py-4">
-                    <div className="flex items-center gap-3">
-                      <div className="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center font-bold text-blue-600 text-sm">
-                        {app.avatar}
-                      </div>
-                      <div>
-                        <p className="font-bold text-slate-900 group-hover:text-blue-600 transition-colors">{app.student}</p>
-                        <p className="text-[10px] font-mono text-slate-400 mt-0.5 italic underline">{app.id}</p>
-                      </div>
+                    <div className="flex flex-col">
+                      <span className="text-[14px] font-bold text-slate-900">
+                        {lead.name}
+                      </span>
+                      <span className="text-[11px] text-slate-400 font-medium">
+                        {lead.email}
+                      </span>
+                      <span className="text-[11px] text-slate-400 font-medium">
+                        {lead.phone}
+                      </span>
                     </div>
                   </td>
                   <td className="px-6 py-4">
-                    <p className="text-sm font-semibold text-slate-600">{app.program}</p>
-                  </td>
-                  <td className="px-6 py-4">
-                    <div className="flex items-center gap-1.5 text-slate-500 text-xs">
-                      <Calendar className="w-3.5 h-3.5" />
-                      {new Date(app.date).toLocaleDateString()}
-                    </div>
-                  </td>
-                  <td className="px-6 py-4">
-                    <span className={`px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-widest border ${getStatusStyle(app.status)}`}>
-                      {app.status}
+                    <span className="px-3 py-1 bg-blue-50 text-blue-600 rounded-lg text-[12px] font-black tracking-tight">
+                      {lead.program}
                     </span>
                   </td>
                   <td className="px-6 py-4">
-                    <div className="flex items-center gap-3">
-                      <button className="p-2 bg-slate-100 rounded-lg text-slate-500 hover:text-blue-600 transition-all"><Phone className="w-3.5 h-3.5" /></button>
-                      <button className="p-2 bg-slate-100 rounded-lg text-slate-500 hover:text-indigo-600 transition-all"><Mail className="w-3.5 h-3.5" /></button>
+                    <div className="flex items-center gap-2 text-[13px] text-slate-600 font-medium">
+                      <Calendar size={14} className="text-slate-400" />
+                      {lead.date}
                     </div>
                   </td>
                   <td className="px-6 py-4">
-                    <div className="flex justify-end items-center gap-2">
-                      <button className="text-blue-600 font-bold text-xs flex items-center gap-1 hover:gap-2 transition-all">
-                        Review <ChevronRight className="w-4 h-4" />
+                    <div
+                      className={`inline-flex items-center gap-2 px-3 py-1 rounded-full text-[11px] font-black uppercase tracking-tight ${
+                        lead.status === "Applied"
+                          ? "bg-emerald-50 text-emerald-600"
+                          : lead.status === "Rejected"
+                            ? "bg-rose-50 text-rose-600"
+                            : "bg-amber-50 text-amber-600"
+                      }`}
+                    >
+                      {lead.status === "Applied" ? (
+                        <CheckCircle2 size={12} />
+                      ) : lead.status === "Rejected" ? (
+                        <XCircle size={12} />
+                      ) : (
+                        <Clock size={12} />
+                      )}
+                      {lead.status}
+                    </div>
+                  </td>
+                  <td className="px-6 py-4">
+                    <span className="text-[13px] text-slate-500 font-medium">
+                      {lead.source}
+                    </span>
+                  </td>
+                  <td className="px-6 py-4">
+                    <div className="flex items-center justify-end gap-2 text-slate-400">
+                      <button className="p-2 rounded-lg hover:bg-white hover:text-blue-600 transition-colors">
+                        <Mail size={18} />
                       </button>
-                      <button className="text-slate-400 hover:text-slate-600 transition-colors"><MoreVertical className="w-4 h-4" /></button>
+                      <button className="p-2 rounded-lg hover:bg-white hover:text-emerald-500 transition-colors">
+                        <Phone size={18} />
+                      </button>
+                      <button className="p-2 rounded-lg hover:bg-white hover:text-slate-900 transition-colors">
+                        <MoreVertical size={18} />
+                      </button>
                     </div>
                   </td>
                 </tr>
@@ -220,15 +237,30 @@ const AdmissionPage: React.FC = () => {
           </table>
         </div>
 
-        {/* Pagination Footer */}
-        <div className="p-4 bg-slate-50 border-t border-slate-100 flex items-center justify-between text-xs font-semibold text-slate-500">
-          <p>Showing 1 to 4 of 1,248 entries</p>
-          <div className="flex gap-1">
-            <button className="px-3 py-1 bg-white border border-slate-200 rounded-md hover:bg-slate-50">1</button>
-            <button className="px-3 py-1 hover:bg-slate-200 rounded-md transition-colors">2</button>
-            <button className="px-3 py-1 hover:bg-slate-200 rounded-md transition-colors">3</button>
-            <span className="px-2">...</span>
-            <button className="px-3 py-1 hover:bg-slate-200 rounded-md transition-colors">125</button>
+        {/* Pagination Bar */}
+        <div className="p-6 border-t border-slate-50 flex items-center justify-between">
+          <p className="text-sm font-medium text-slate-400">
+            Showing <span className="text-slate-900">1 to 6</span> of{" "}
+            <span className="text-slate-900">1,240</span> leads
+          </p>
+          <div className="flex items-center gap-2">
+            <button className="p-2 rounded-xl border border-slate-200 text-slate-400 hover:text-slate-900 hover:bg-slate-50 transition-all">
+              <ChevronLeft size={20} />
+            </button>
+            <div className="flex items-center gap-1">
+              <button className="w-10 h-10 rounded-xl bg-blue-600 text-white font-bold text-sm shadow-md shadow-blue-500/20">
+                1
+              </button>
+              <button className="w-10 h-10 rounded-xl text-slate-500 font-bold text-sm hover:bg-slate-50">
+                2
+              </button>
+              <button className="w-10 h-10 rounded-xl text-slate-500 font-bold text-sm hover:bg-slate-50">
+                3
+              </button>
+            </div>
+            <button className="p-2 rounded-xl border border-slate-200 text-slate-400 hover:text-slate-900 hover:bg-slate-50 transition-all">
+              <ChevronRight size={20} />
+            </button>
           </div>
         </div>
       </div>

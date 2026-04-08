@@ -1,5 +1,3 @@
-"use client";
-
 import React, { useMemo, useRef, useState } from "react";
 import {
   Info,
@@ -18,9 +16,6 @@ import {
   Image as ImageIcon,
   Trash2,
   Save,
-  ArrowLeft,
-  CheckCircle2,
-  Plus,
 } from "lucide-react";
 
 type StudyLevel = "+2" | "Bachelor" | "Master";
@@ -82,12 +77,12 @@ const inputClass =
 const textareaClass =
   "w-full border border-gray-300 rounded-lg p-3 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition";
 const addButtonClass =
-  "text-sm bg-blue-50 text-blue-600 border border-blue-200 px-3 py-1.5 rounded-lg hover:bg-blue-100 transition shadow-sm font-black uppercase italic";
+  "text-sm bg-blue-50 text-blue-600 border border-blue-200 px-3 py-1.5 rounded-lg hover:bg-blue-100 transition shadow-sm font-medium";
 const removeButtonClass =
   "text-red-400 hover:text-red-600 transition p-2 bg-white rounded shadow-sm border border-gray-200";
 
 const sectionTitle = (icon: React.ReactNode, title: string) => (
-  <h2 className="text-xl font-black mb-5 text-gray-800 border-b border-gray-200 pb-3 flex items-center uppercase italic">
+  <h2 className="text-xl font-semibold mb-5 text-gray-800 border-b border-gray-200 pb-3 flex items-center">
     <span className="bg-blue-100 text-blue-600 p-2 rounded-lg mr-3">
       {icon}
     </span>
@@ -95,15 +90,7 @@ const sectionTitle = (icon: React.ReactNode, title: string) => (
   </h2>
 );
 
-interface AdmissionManagePageProps {
-  onBack?: () => void;
-  programId?: string | null;
-}
-
-const AdmissionManagePage: React.FC<AdmissionManagePageProps> = ({
-  onBack,
-  programId,
-}) => {
+const AdmissionManagePage: React.FC = () => {
   const coverInputRef = useRef<HTMLInputElement>(null);
   const contactInputRef = useRef<HTMLInputElement>(null);
 
@@ -148,6 +135,9 @@ const AdmissionManagePage: React.FC<AdmissionManagePageProps> = ({
 
   const availablePrograms = studyLevel ? programMap[studyLevel] : [];
 
+  const nextId = <T extends { id: number }>(items: T[]) =>
+    Math.max(0, ...items.map((item) => item.id)) + 1;
+
   const handleSingleImage = (
     event: React.ChangeEvent<HTMLInputElement>,
     setter: React.Dispatch<React.SetStateAction<string>>,
@@ -157,509 +147,958 @@ const AdmissionManagePage: React.FC<AdmissionManagePageProps> = ({
     setter(URL.createObjectURL(file));
   };
 
+  const clearFileInput = (
+    input: HTMLInputElement | null,
+    setter: React.Dispatch<React.SetStateAction<string>>,
+  ) => {
+    if (input) input.value = "";
+    setter("");
+  };
+
   const handleSave = () => {
     setSaved(true);
     window.setTimeout(() => setSaved(false), 3000);
   };
 
   return (
-    <div className="bg-gray-50 p-6 lg:p-8 font-bold italic">
+    <div className="bg-gray-50 p-6 lg:p-8">
       <div className="max-w-6xl mx-auto space-y-8 pb-12">
-        {/* Header */}
-        <div className="flex items-center justify-between mb-8 group">
-          <div className="flex items-center gap-4">
-            <button
-              onClick={onBack}
-              className="p-2.5 bg-white border border-slate-200 rounded-xl text-slate-400 hover:text-indigo-600 hover:border-indigo-500 transition-all shadow-sm"
-            >
-              <ArrowLeft size={20} />
-            </button>
-            <div>
-              <h1 className="text-2xl font-black text-slate-900 uppercase italic">
-                {programId ? "Edit Program Details" : "Create New Program"}
-              </h1>
-              <p className="text-xs text-slate-400 font-bold uppercase tracking-widest mt-1">
-                Configuring academic node #{programId || "NEW"}
-              </p>
-            </div>
-          </div>
-          <button
-            onClick={handleSave}
-            className="px-6 py-2.5 bg-indigo-600 text-white rounded-xl text-sm font-black uppercase tracking-widest hover:bg-indigo-700 transition-all shadow-lg shadow-indigo-500/20 active:scale-95 flex items-center gap-2"
-          >
-            <Save size={18} /> Save Program
-          </button>
-        </div>
-
         {saved && (
-          <div className="bg-green-50 border border-green-200 text-green-700 rounded-xl px-4 py-3 text-sm font-medium shadow-sm flex items-center gap-2 animate-bounce">
-            <CheckCircle2 className="w-4 h-4" /> Program details saved
-            successfully.
+          <div className="bg-green-50 border border-green-200 text-green-700 rounded-xl px-4 py-3 text-sm font-medium shadow-sm">
+            Program details saved successfully.
           </div>
         )}
 
-        <form className="space-y-8" onSubmit={(e) => e.preventDefault()}>
-          {/* Section 1: Basic Info */}
+        <form
+          className="space-y-8"
+          onSubmit={(event) => event.preventDefault()}
+        >
           <div className={cardClass}>
             {sectionTitle(<Info className="w-5 h-5" />, "Basic Information")}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               <div className="col-span-1 md:col-span-2 lg:col-span-3">
-                <label className="block text-sm font-medium text-gray-700 mb-2 uppercase tracking-wide">
+                <label className="block text-sm font-medium text-gray-700 mb-2">
                   Cover Photo
                 </label>
-                <div className="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-slate-300 border-dashed rounded-xl hover:border-blue-500 transition-colors bg-slate-50 relative group overflow-hidden">
-                  {!coverPhoto ? (
+                <div className="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-gray-300 border-dashed rounded-xl hover:border-blue-500 transition-colors bg-gray-50 relative group overflow-hidden">
+                  {!coverPhoto && (
                     <div className="space-y-1 text-center relative z-10">
-                      <Upload className="mx-auto h-12 w-12 text-slate-400 group-hover:text-blue-500 transition-colors" />
-                      <div className="flex text-sm text-slate-600 justify-center flex-wrap">
+                      <Upload className="mx-auto h-12 w-12 text-gray-400 group-hover:text-blue-500 transition-colors" />
+                      <div className="flex text-sm text-gray-600 justify-center flex-wrap">
                         <button
                           type="button"
                           onClick={() => coverInputRef.current?.click()}
-                          className="font-bold text-blue-600 hover:text-blue-500"
+                          className="font-medium text-blue-600 hover:text-blue-500"
                         >
                           Upload a file
                         </button>
-                        <p className="pl-1 text-slate-400">or drag and drop</p>
+                        <p className="pl-1">or drag and drop</p>
                       </div>
-                      <p className="text-xs text-slate-400 font-medium">
+                      <p className="text-xs text-gray-500">
                         PNG, JPG, GIF up to 5MB
                       </p>
                     </div>
-                  ) : (
-                    <div className="relative w-full h-64">
-                      <img
-                        src={coverPhoto}
-                        alt="Cover"
-                        className="absolute inset-0 w-full h-full object-cover z-0 rounded-lg"
-                      />
-                      <button
-                        onClick={() => setCoverPhoto("")}
-                        className="absolute top-4 right-4 p-2 bg-white/80 backdrop-blur rounded-full text-red-500 hover:bg-white transition-all shadow-sm z-10"
-                      >
-                        <X size={16} />
-                      </button>
-                    </div>
+                  )}
+                  {coverPhoto && (
+                    <img
+                      src={coverPhoto}
+                      alt="Cover preview"
+                      className="absolute inset-0 w-full h-full object-cover z-0"
+                    />
                   )}
                   <input
-                    type="file"
                     ref={coverInputRef}
+                    type="file"
+                    accept="image/*"
                     className="hidden"
-                    onChange={(e) => handleSingleImage(e, setCoverPhoto)}
+                    onChange={(event) =>
+                      handleSingleImage(event, setCoverPhoto)
+                    }
                   />
+                  {coverPhoto && (
+                    <button
+                      type="button"
+                      className="absolute top-3 right-3 bg-red-500 text-white rounded-full w-8 h-8 flex items-center justify-center hover:bg-red-600 shadow-md z-20 transition"
+                      onClick={() =>
+                        clearFileInput(coverInputRef.current, setCoverPhoto)
+                      }
+                    >
+                      <X className="w-4 h-4" />
+                    </button>
+                  )}
                 </div>
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2 uppercase tracking-wide">
-                  Level
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Study Level
                 </label>
                 <select
                   value={studyLevel}
-                  onChange={(e) => {
-                    setStudyLevel(e.target.value as StudyLevel);
+                  onChange={(event) => {
+                    const nextLevel = event.target.value as StudyLevel | "";
+                    setStudyLevel(nextLevel);
                     setProgramName("");
                   }}
                   className={inputClass}
                 >
-                  <option value="">Select Level</option>
-                  <option value="+2">+2 (Secondary)</option>
-                  <option value="Bachelor">Bachelor Degree</option>
-                  <option value="Master">Master Degree</option>
+                  <option value="" disabled>
+                    Select Level
+                  </option>
+                  <option value="+2">+2 Level</option>
+                  <option value="Bachelor">Bachelor Level</option>
+                  <option value="Master">Master Level</option>
                 </select>
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2 uppercase tracking-wide">
+                <label className="block text-sm font-medium text-gray-700 mb-1">
                   Program Name
                 </label>
                 <select
                   value={programName}
-                  onChange={(e) => setProgramName(e.target.value)}
-                  disabled={!studyLevel}
+                  onChange={(event) => setProgramName(event.target.value)}
                   className={inputClass}
                 >
-                  <option value="">Select Program</option>
-                  {availablePrograms.map((p) => (
-                    <option key={p} value={p}>
-                      {p}
+                  <option value="" disabled>
+                    {studyLevel ? "Select Program" : "Select Study Level First"}
+                  </option>
+                  {availablePrograms.map((program) => (
+                    <option key={program} value={program}>
+                      {program}
                     </option>
                   ))}
                 </select>
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2 uppercase tracking-wide text-indigo-600">
-                  Admission Status
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Status
                 </label>
-                <div className="flex gap-4">
-                  {["Ongoing", "Completed", "Upcoming"].map((s) => (
-                    <button
-                      key={s}
-                      type="button"
-                      onClick={() => setStatus(s)}
-                      className={`px-4 py-2 text-[10px] rounded-xl font-black uppercase transition-all flex-1 ${status === s ? "bg-indigo-600 text-white shadow-md shadow-indigo-500/20" : "bg-white border border-slate-200 text-slate-400"}`}
-                    >
-                      {s}
-                    </button>
-                  ))}
-                </div>
+                <select
+                  value={status}
+                  onChange={(event) => setStatus(event.target.value)}
+                  className={inputClass}
+                >
+                  <option value="Ongoing">Ongoing (Admissions Open)</option>
+                  <option value="Closed">Closed</option>
+                </select>
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2 uppercase tracking-wide">
-                  University Affiliation
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Affiliation
                 </label>
                 <input
                   type="text"
                   value={affiliation}
-                  onChange={(e) => setAffiliation(e.target.value)}
-                  placeholder="e.g. Tribhuvan University"
+                  onChange={(event) => setAffiliation(event.target.value)}
+                  placeholder="e.g., Tribhuvan University, NEB"
                   className={inputClass}
                 />
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2 uppercase tracking-wide">
+                <label className="block text-sm font-medium text-gray-700 mb-1">
                   Duration
                 </label>
                 <input
                   type="text"
                   value={duration}
-                  onChange={(e) => setDuration(e.target.value)}
-                  placeholder="e.g. 4 Years"
+                  onChange={(event) => setDuration(event.target.value)}
+                  placeholder="e.g., 4 Years (8 Semesters)"
                   className={inputClass}
                 />
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2 uppercase tracking-wide">
-                  Direct Apply Link
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Apply Now Link
                 </label>
                 <input
                   type="url"
                   value={applyLink}
-                  onChange={(e) => setApplyLink(e.target.value)}
-                  placeholder="https://..."
+                  onChange={(event) => setApplyLink(event.target.value)}
+                  placeholder="e.g., https://apply.college.edu.np"
                   className={inputClass}
                 />
               </div>
             </div>
           </div>
 
-          {/* Section 2: Narrative */}
           <div className={cardClass}>
-            {sectionTitle(
-              <AlignLeft className="w-5 h-5" />,
-              "Program Narrative",
-            )}
-            <div className="space-y-6">
+            {sectionTitle(<AlignLeft className="w-5 h-5" />, "Program Content")}
+            <div className="space-y-5">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2 uppercase tracking-wide">
-                  Overview
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Overview / Summary
                 </label>
                 <textarea
-                  rows={4}
+                  rows={3}
                   value={overview}
-                  onChange={(e) => setOverview(e.target.value)}
+                  onChange={(event) => setOverview(event.target.value)}
+                  placeholder="Enter a brief introduction and summary of the course..."
                   className={textareaClass}
-                  placeholder="Describe the program vision..."
                 />
               </div>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2 uppercase tracking-wide">
-                    Program Objectives
-                  </label>
-                  <textarea
-                    rows={3}
-                    value={objectives}
-                    onChange={(e) => setObjectives(e.target.value)}
-                    className={textareaClass}
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2 uppercase tracking-wide">
-                    Eligibility Criteria
-                  </label>
-                  <textarea
-                    rows={3}
-                    value={eligibility}
-                    onChange={(e) => setEligibility(e.target.value)}
-                    className={textareaClass}
-                  />
-                </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Objectives
+                </label>
+                <textarea
+                  rows={3}
+                  value={objectives}
+                  onChange={(event) => setObjectives(event.target.value)}
+                  placeholder="List the primary objectives of this program..."
+                  className={textareaClass}
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Eligibility Criteria
+                </label>
+                <textarea
+                  rows={2}
+                  value={eligibility}
+                  onChange={(event) => setEligibility(event.target.value)}
+                  placeholder="e.g., Minimum D+ grade in grade 11 and 12..."
+                  className={textareaClass}
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Admission Process & Required Documents
+                </label>
+                <textarea
+                  rows={3}
+                  value={admissionProcess}
+                  onChange={(event) => setAdmissionProcess(event.target.value)}
+                  placeholder="Explain the step-by-step admission process and list required documents..."
+                  className={textareaClass}
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Why Choose Us for this program?
+                </label>
+                <textarea
+                  rows={3}
+                  value={whyUs}
+                  onChange={(event) => setWhyUs(event.target.value)}
+                  placeholder="Highlight key features, labs, placement opportunities, etc..."
+                  className={textareaClass}
+                />
               </div>
             </div>
           </div>
 
-          {/* Section 3: Fee Structure */}
           <div className={cardClass}>
-            {sectionTitle(<Banknote className="w-5 h-5" />, "Fee Transparency")}
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+            {sectionTitle(<Banknote className="w-5 h-5" />, "Fees Structure")}
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
               <div>
-                <label className="block text-xs font-black uppercase text-slate-400 mb-2">
+                <label className="block text-sm font-medium text-gray-700 mb-1">
                   Tuition Fee
                 </label>
-                <div className="relative">
-                  <span className="absolute left-3 top-2.5 text-slate-400 font-bold italic">
-                    Rs.
-                  </span>
-                  <input
-                    type="number"
-                    value={feeTuition}
-                    onChange={(e) => setFeeTuition(e.target.value)}
-                    className={`${inputClass} pl-10`}
-                  />
-                </div>
-              </div>
-              <div>
-                <label className="block text-xs font-black uppercase text-slate-400 mb-2">
-                  Lab & Library
-                </label>
-                <div className="relative">
-                  <span className="absolute left-3 top-2.5 text-slate-400 font-bold italic">
-                    Rs.
-                  </span>
-                  <input
-                    type="number"
-                    value={feeLab}
-                    onChange={(e) => setFeeLab(e.target.value)}
-                    className={`${inputClass} pl-10`}
-                  />
-                </div>
-              </div>
-              <div>
-                <label className="block text-xs font-black uppercase text-slate-400 mb-2">
-                  Examination
-                </label>
-                <div className="relative">
-                  <span className="absolute left-3 top-2.5 text-slate-400 font-bold italic">
-                    Rs.
-                  </span>
-                  <input
-                    type="number"
-                    value={feeExam}
-                    onChange={(e) => setFeeExam(e.target.value)}
-                    className={`${inputClass} pl-10`}
-                  />
-                </div>
-              </div>
-              <div className="bg-indigo-50 p-4 rounded-xl border border-indigo-100 flex flex-col justify-center">
-                <span className="text-[10px] font-black uppercase text-indigo-400">
-                  Total Program Cost
-                </span>
-                <span className="text-xl font-black text-indigo-700 italic">
-                  Rs. {totalFee.toLocaleString()}
-                </span>
-              </div>
-            </div>
-          </div>
-
-          {/* Section 4: Downloads & Resources */}
-          <div className={cardClass}>
-            <div className="flex items-center justify-between mb-5 border-b border-gray-200 pb-3">
-              <h2 className="text-xl font-black text-gray-800 uppercase italic flex items-center">
-                <span className="bg-blue-100 text-blue-600 p-2 rounded-lg mr-3">
-                  <FileText className="w-5 h-5" />
-                </span>
-                Downloads & PDFs
-              </h2>
-              <button
-                type="button"
-                onClick={() =>
-                  setPdfs([...pdfs, { id: Date.now(), name: "", link: "" }])
-                }
-                className={addButtonClass}
-              >
-                <Plus size={16} className="mr-1" /> Add Doc
-              </button>
-            </div>
-            <div className="space-y-4">
-              {pdfs.map((pdf) => (
-                <div
-                  key={pdf.id}
-                  className="flex gap-4 items-end bg-slate-50 p-4 rounded-xl group border border-transparent hover:border-slate-200 transition-all"
-                >
-                  <div className="flex-1">
-                    <label className="block text-[10px] font-black uppercase text-slate-400 mb-1">
-                      Document Title
-                    </label>
-                    <input
-                      type="text"
-                      placeholder="e.g. Syllabus 2024"
-                      className={inputClass}
-                    />
-                  </div>
-                  <div className="flex-1">
-                    <label className="block text-[10px] font-black uppercase text-slate-400 mb-1">
-                      External/Storage Link
-                    </label>
-                    <input
-                      type="url"
-                      placeholder="https://..."
-                      className={inputClass}
-                    />
-                  </div>
-                  <button
-                    type="button"
-                    onClick={() => setPdfs(pdfs.filter((p) => p.id !== pdf.id))}
-                    className={removeButtonClass}
-                  >
-                    <Trash2 size={18} />
-                  </button>
-                </div>
-              ))}
-            </div>
-          </div>
-
-          {/* Section 5: Faculty */}
-          <div className={cardClass}>
-            <div className="flex items-center justify-between mb-5 border-b border-gray-200 pb-3">
-              <h2 className="text-xl font-black text-gray-800 uppercase italic flex items-center">
-                <span className="bg-blue-100 text-blue-600 p-2 rounded-lg mr-3">
-                  <Presentation className="w-5 h-5" />
-                </span>
-                Program Faculty
-              </h2>
-              <button
-                type="button"
-                onClick={() =>
-                  setFaculty([
-                    ...faculty,
-                    { id: Date.now(), name: "", edu: "", exp: "", photo: "" },
-                  ])
-                }
-                className={addButtonClass}
-              >
-                <Plus size={16} className="mr-1" /> Add Mentor
-              </button>
-            </div>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              {faculty.map((f) => (
-                <div
-                  key={f.id}
-                  className="relative bg-white border border-slate-200 p-5 rounded-2xl shadow-sm group hover:shadow-md transition-all"
-                >
-                  <button
-                    type="button"
-                    onClick={() =>
-                      setFaculty(faculty.filter((item) => item.id !== f.id))
-                    }
-                    className="absolute -top-2 -right-2 p-1.5 bg-rose-500 text-white rounded-full shadow-lg opacity-0 group-hover:opacity-100 transition-all"
-                  >
-                    <X size={14} />
-                  </button>
-                  <div className="flex gap-4">
-                    <div className="w-20 h-20 bg-slate-100 rounded-xl flex-shrink-0 border-2 border-dashed border-slate-300 flex items-center justify-center text-slate-400">
-                      <ImageIcon size={24} />
-                    </div>
-                    <div className="flex-1 space-y-3">
-                      <input
-                        type="text"
-                        placeholder="Full Name"
-                        className="w-full text-sm font-black uppercase italic border-b border-slate-100 focus:border-blue-500 outline-none pb-1"
-                      />
-                      <input
-                        type="text"
-                        placeholder="Education (e.g. PhD, MIT)"
-                        className="w-full text-xs font-bold text-slate-400 border-b border-slate-100 focus:border-blue-500 outline-none pb-1"
-                      />
-                      <input
-                        type="text"
-                        placeholder="Experience (e.g. 10+ Years)"
-                        className="w-full text-xs font-bold text-slate-400 border-b border-slate-100 focus:border-blue-500 outline-none pb-1"
-                      />
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-
-          {/* Section 6: Local Contact */}
-          <div className={cardClass}>
-            {sectionTitle(
-              <IdCard className="w-5 h-5" />,
-              "Dedicated Contact Person",
-            )}
-            <div className="flex flex-col md:flex-row gap-8 items-start">
-              <div className="w-full md:w-32 h-32 bg-slate-100 rounded-2xl border-2 border-dashed border-slate-300 flex flex-col items-center justify-center text-slate-400 group relative overflow-hidden cursor-pointer hover:border-blue-500 transition-all">
-                {!contactPhoto ? (
-                  <>
-                    <Camera size={24} className="mb-1" />
-                    <span className="text-[10px] font-black uppercase">
-                      Photo
-                    </span>
-                  </>
-                ) : (
-                  <img
-                    src={contactPhoto}
-                    className="absolute inset-0 w-full h-full object-cover"
-                    alt="CM"
-                  />
-                )}
                 <input
-                  type="file"
-                  className="absolute inset-0 opacity-0 cursor-pointer"
-                  onChange={(e) => handleSingleImage(e, setContactPhoto)}
+                  type="number"
+                  value={feeTuition}
+                  onChange={(event) => setFeeTuition(event.target.value)}
+                  placeholder="0"
+                  className={inputClass}
                 />
               </div>
-              <div className="flex-1 grid grid-cols-1 md:grid-cols-2 gap-4 w-full">
-                <div className="col-span-1 md:col-span-2">
-                  <label className="block text-[10px] font-black uppercase text-slate-400 mb-1">
-                    Full Name
-                  </label>
-                  <input
-                    type="text"
-                    value={contactName}
-                    onChange={(e) => setContactName(e.target.value)}
-                    placeholder="e.g. Er. Sudesh Giri"
-                    className={inputClass}
-                  />
-                </div>
-                <div>
-                  <label className="block text-[10px] font-black uppercase text-slate-400 mb-1">
-                    Position / Office
-                  </label>
-                  <input
-                    type="text"
-                    value={contactPosition}
-                    onChange={(e) => setContactPosition(e.target.value)}
-                    placeholder="e.g. Program Coordinator"
-                    className={inputClass}
-                  />
-                </div>
-                <div>
-                  <label className="block text-[10px] font-black uppercase text-slate-400 mb-1">
-                    Email / Ext.
-                  </label>
-                  <input
-                    type="text"
-                    value={contactDetails}
-                    onChange={(e) => setContactDetails(e.target.value)}
-                    placeholder="example@ncit.edu.np"
-                    className={inputClass}
-                  />
-                </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Lab & Resources Fee
+                </label>
+                <input
+                  type="number"
+                  value={feeLab}
+                  onChange={(event) => setFeeLab(event.target.value)}
+                  placeholder="0"
+                  className={inputClass}
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Examination Fee
+                </label>
+                <input
+                  type="number"
+                  value={feeExam}
+                  onChange={(event) => setFeeExam(event.target.value)}
+                  placeholder="0"
+                  className={inputClass}
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-bold text-gray-900 mb-1">
+                  Total Fee (Auto-calculated)
+                </label>
+                <input
+                  type="number"
+                  value={totalFee}
+                  readOnly
+                  className="w-full border border-gray-300 rounded-lg p-2.5 bg-gray-50 font-bold text-blue-700 cursor-not-allowed"
+                />
               </div>
             </div>
           </div>
 
-          <div className="flex justify-end pt-12 items-center">
-            <button
-              type="button"
-              onClick={onBack}
-              title="Discard Draft"
-              className="px-6 py-2.5 text-rose-500 font-black uppercase text-[10px] hover:bg-rose-50 rounded-xl transition-all mr-4 italic"
-            >
-              Discard Draft
-            </button>
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            <div className={cardClass}>
+              <div className="flex justify-between items-center border-b border-gray-200 pb-3 mb-4">
+                <h2 className="text-lg font-semibold text-gray-800 flex items-center">
+                  <BookOpen className="text-blue-500 w-6 mr-2" />
+                  Curriculum
+                </h2>
+                <button
+                  type="button"
+                  onClick={() =>
+                    setCurriculum((prev) => [
+                      ...prev,
+                      { id: nextId(prev), sem: "", sub: "" },
+                    ])
+                  }
+                  className={addButtonClass}
+                >
+                  + Add Subject
+                </button>
+              </div>
+              <div className="space-y-3">
+                {curriculum.length === 0 ? (
+                  <p className="text-gray-400 text-sm italic text-center py-4 border border-dashed border-gray-200 rounded-lg">
+                    No curriculum subjects added yet.
+                  </p>
+                ) : (
+                  curriculum.map((item) => (
+                    <div
+                      key={item.id}
+                      className="flex space-x-3 items-center bg-gray-50 p-2 rounded-lg border border-gray-200"
+                    >
+                      <input
+                        type="text"
+                        value={item.sem}
+                        onChange={(event) =>
+                          setCurriculum((prev) =>
+                            prev.map((row) =>
+                              row.id === item.id
+                                ? { ...row, sem: event.target.value }
+                                : row,
+                            ),
+                          )
+                        }
+                        placeholder="Sem/Year (e.g. 1st Sem)"
+                        className="w-1/3 border border-gray-300 p-2 rounded focus:ring-2 focus:ring-blue-500 outline-none text-sm bg-white"
+                      />
+                      <input
+                        type="text"
+                        value={item.sub}
+                        onChange={(event) =>
+                          setCurriculum((prev) =>
+                            prev.map((row) =>
+                              row.id === item.id
+                                ? { ...row, sub: event.target.value }
+                                : row,
+                            ),
+                          )
+                        }
+                        placeholder="Subjects (comma separated)"
+                        className="w-2/3 border border-gray-300 p-2 rounded focus:ring-2 focus:ring-blue-500 outline-none text-sm bg-white"
+                      />
+                      <button
+                        type="button"
+                        onClick={() =>
+                          setCurriculum((prev) =>
+                            prev.filter((row) => row.id !== item.id),
+                          )
+                        }
+                        className={removeButtonClass}
+                        title="Remove"
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </button>
+                    </div>
+                  ))
+                )}
+              </div>
+            </div>
+
+            <div className={cardClass}>
+              <div className="flex justify-between items-center border-b border-gray-200 pb-3 mb-4">
+                <h2 className="text-lg font-semibold text-gray-800 flex items-center">
+                  <GraduationCap className="text-blue-500 w-6 mr-2" />
+                  Scholarships
+                </h2>
+                <button
+                  type="button"
+                  onClick={() =>
+                    setScholarships((prev) => [
+                      ...prev,
+                      { id: nextId(prev), type: "", elig: "", ben: "" },
+                    ])
+                  }
+                  className={addButtonClass}
+                >
+                  + Add Scholarship
+                </button>
+              </div>
+              <div className="space-y-3">
+                {scholarships.length === 0 ? (
+                  <p className="text-gray-400 text-sm italic text-center py-4 border border-dashed border-gray-200 rounded-lg">
+                    No scholarships added yet.
+                  </p>
+                ) : (
+                  scholarships.map((item) => (
+                    <div
+                      key={item.id}
+                      className="flex space-x-3 items-center bg-gray-50 p-2 rounded-lg border border-gray-200"
+                    >
+                      <input
+                        type="text"
+                        value={item.type}
+                        onChange={(event) =>
+                          setScholarships((prev) =>
+                            prev.map((row) =>
+                              row.id === item.id
+                                ? { ...row, type: event.target.value }
+                                : row,
+                            ),
+                          )
+                        }
+                        placeholder="Scholarship Type"
+                        className="w-1/4 border border-gray-300 p-2 rounded focus:ring-2 focus:ring-blue-500 outline-none text-sm bg-white"
+                      />
+                      <input
+                        type="text"
+                        value={item.elig}
+                        onChange={(event) =>
+                          setScholarships((prev) =>
+                            prev.map((row) =>
+                              row.id === item.id
+                                ? { ...row, elig: event.target.value }
+                                : row,
+                            ),
+                          )
+                        }
+                        placeholder="Eligibility Criteria"
+                        className="w-2/4 border border-gray-300 p-2 rounded focus:ring-2 focus:ring-blue-500 outline-none text-sm bg-white"
+                      />
+                      <input
+                        type="text"
+                        value={item.ben}
+                        onChange={(event) =>
+                          setScholarships((prev) =>
+                            prev.map((row) =>
+                              row.id === item.id
+                                ? { ...row, ben: event.target.value }
+                                : row,
+                            ),
+                          )
+                        }
+                        placeholder="Benefits"
+                        className="w-1/4 border border-gray-300 p-2 rounded focus:ring-2 focus:ring-blue-500 outline-none text-sm bg-white"
+                      />
+                      <button
+                        type="button"
+                        onClick={() =>
+                          setScholarships((prev) =>
+                            prev.filter((row) => row.id !== item.id),
+                          )
+                        }
+                        className={removeButtonClass}
+                        title="Remove"
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </button>
+                    </div>
+                  ))
+                )}
+              </div>
+            </div>
+
+            <div className={cardClass}>
+              <div className="flex justify-between items-center border-b border-gray-200 pb-3 mb-4">
+                <h2 className="text-lg font-semibold text-gray-800 flex items-center">
+                  <FileText className="text-blue-500 w-6 mr-2" />
+                  Model/Entrance PDFs
+                </h2>
+                <button
+                  type="button"
+                  onClick={() =>
+                    setPdfs((prev) => [
+                      ...prev,
+                      { id: nextId(prev), name: "", link: "" },
+                    ])
+                  }
+                  className={addButtonClass}
+                >
+                  + Add PDF
+                </button>
+              </div>
+              <div className="space-y-3">
+                {pdfs.length === 0 ? (
+                  <p className="text-gray-400 text-sm italic text-center py-4 border border-dashed border-gray-200 rounded-lg">
+                    No PDFs added yet.
+                  </p>
+                ) : (
+                  pdfs.map((item) => (
+                    <div
+                      key={item.id}
+                      className="flex space-x-3 items-center bg-gray-50 p-2 rounded-lg border border-gray-200"
+                    >
+                      <input
+                        type="text"
+                        value={item.name}
+                        onChange={(event) =>
+                          setPdfs((prev) =>
+                            prev.map((row) =>
+                              row.id === item.id
+                                ? { ...row, name: event.target.value }
+                                : row,
+                            ),
+                          )
+                        }
+                        placeholder="PDF File Name / Heading"
+                        className="w-1/2 border border-gray-300 p-2 rounded focus:ring-2 focus:ring-blue-500 outline-none text-sm bg-white"
+                      />
+                      <input
+                        type="url"
+                        value={item.link}
+                        onChange={(event) =>
+                          setPdfs((prev) =>
+                            prev.map((row) =>
+                              row.id === item.id
+                                ? { ...row, link: event.target.value }
+                                : row,
+                            ),
+                          )
+                        }
+                        placeholder="URL link to PDF"
+                        className="w-1/2 border border-gray-300 p-2 rounded focus:ring-2 focus:ring-blue-500 outline-none text-sm bg-white"
+                      />
+                      <button
+                        type="button"
+                        onClick={() =>
+                          setPdfs((prev) =>
+                            prev.filter((row) => row.id !== item.id),
+                          )
+                        }
+                        className={removeButtonClass}
+                        title="Remove"
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </button>
+                    </div>
+                  ))
+                )}
+              </div>
+            </div>
+
+            <div className={cardClass}>
+              <div className="flex justify-between items-center border-b border-gray-200 pb-3 mb-4">
+                <h2 className="text-lg font-semibold text-gray-800 flex items-center">
+                  <Building2 className="text-blue-500 w-6 mr-2" />
+                  Facilities
+                </h2>
+                <button
+                  type="button"
+                  onClick={() =>
+                    setFacilities((prev) => [
+                      ...prev,
+                      { id: nextId(prev), head: "", sub: "" },
+                    ])
+                  }
+                  className={addButtonClass}
+                >
+                  + Add Facility
+                </button>
+              </div>
+              <div className="space-y-3">
+                {facilities.length === 0 ? (
+                  <p className="text-gray-400 text-sm italic text-center py-4 border border-dashed border-gray-200 rounded-lg">
+                    No facilities added yet.
+                  </p>
+                ) : (
+                  facilities.map((item) => (
+                    <div
+                      key={item.id}
+                      className="flex space-x-3 items-center bg-gray-50 p-2 rounded-lg border border-gray-200"
+                    >
+                      <input
+                        type="text"
+                        value={item.head}
+                        onChange={(event) =>
+                          setFacilities((prev) =>
+                            prev.map((row) =>
+                              row.id === item.id
+                                ? { ...row, head: event.target.value }
+                                : row,
+                            ),
+                          )
+                        }
+                        placeholder="Facility Heading"
+                        className="w-1/3 border border-gray-300 p-2 rounded focus:ring-2 focus:ring-blue-500 outline-none text-sm bg-white"
+                      />
+                      <input
+                        type="text"
+                        value={item.sub}
+                        onChange={(event) =>
+                          setFacilities((prev) =>
+                            prev.map((row) =>
+                              row.id === item.id
+                                ? { ...row, sub: event.target.value }
+                                : row,
+                            ),
+                          )
+                        }
+                        placeholder="Short description / Sub-heading"
+                        className="w-2/3 border border-gray-300 p-2 rounded focus:ring-2 focus:ring-blue-500 outline-none text-sm bg-white"
+                      />
+                      <button
+                        type="button"
+                        onClick={() =>
+                          setFacilities((prev) =>
+                            prev.filter((row) => row.id !== item.id),
+                          )
+                        }
+                        className={removeButtonClass}
+                        title="Remove"
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </button>
+                    </div>
+                  ))
+                )}
+              </div>
+            </div>
+
+            <div className={`${cardClass} lg:col-span-2`}>
+              <div className="flex justify-between items-center border-b border-gray-200 pb-3 mb-4">
+                <h2 className="text-lg font-semibold text-gray-800 flex items-center">
+                  <Presentation className="text-blue-500 w-6 mr-2" />
+                  Faculty Members
+                </h2>
+                <button
+                  type="button"
+                  onClick={() =>
+                    setFaculty((prev) => [
+                      ...prev,
+                      {
+                        id: nextId(prev),
+                        name: "",
+                        edu: "",
+                        exp: "",
+                        photo: "",
+                      },
+                    ])
+                  }
+                  className={addButtonClass}
+                >
+                  + Add Faculty
+                </button>
+              </div>
+              <div className="space-y-3">
+                {faculty.length === 0 ? (
+                  <p className="text-gray-400 text-sm italic text-center py-4 border border-dashed border-gray-200 rounded-lg">
+                    No faculty members added yet.
+                  </p>
+                ) : (
+                  faculty.map((item) => (
+                    <div
+                      key={item.id}
+                      className="flex space-x-3 items-center bg-gray-50 p-3 rounded-lg border border-gray-200 flex-wrap gap-y-2 md:flex-nowrap shadow-sm hover:shadow transition-shadow"
+                    >
+                      <label className="w-12 h-12 flex-shrink-0 relative group rounded overflow-hidden border border-gray-300 bg-white flex items-center justify-center cursor-pointer">
+                        {item.photo ? (
+                          <img
+                            src={item.photo}
+                            alt="Faculty"
+                            className="w-full h-full object-cover"
+                          />
+                        ) : (
+                          <div className="text-gray-400 text-xs">
+                            <ImageIcon className="w-4 h-4" />
+                          </div>
+                        )}
+                        <span className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                          <Upload className="text-white w-3 h-3" />
+                        </span>
+                        <input
+                          type="file"
+                          accept="image/*"
+                          className="hidden"
+                          onChange={(event) => {
+                            const file = event.target.files?.[0];
+                            if (!file) return;
+                            const photoUrl = URL.createObjectURL(file);
+                            setFaculty((prev) =>
+                              prev.map((row) =>
+                                row.id === item.id
+                                  ? { ...row, photo: photoUrl }
+                                  : row,
+                              ),
+                            );
+                          }}
+                        />
+                      </label>
+                      <div className="flex-1 flex space-x-2">
+                        <input
+                          type="text"
+                          value={item.name}
+                          onChange={(event) =>
+                            setFaculty((prev) =>
+                              prev.map((row) =>
+                                row.id === item.id
+                                  ? { ...row, name: event.target.value }
+                                  : row,
+                              ),
+                            )
+                          }
+                          placeholder="Full Name"
+                          className="w-1/3 border border-gray-300 p-2 rounded focus:ring-2 focus:ring-blue-500 outline-none text-sm bg-white transition"
+                        />
+                        <input
+                          type="text"
+                          value={item.edu}
+                          onChange={(event) =>
+                            setFaculty((prev) =>
+                              prev.map((row) =>
+                                row.id === item.id
+                                  ? { ...row, edu: event.target.value }
+                                  : row,
+                              ),
+                            )
+                          }
+                          placeholder="Education Level"
+                          className="w-1/3 border border-gray-300 p-2 rounded focus:ring-2 focus:ring-blue-500 outline-none text-sm bg-white transition"
+                        />
+                        <input
+                          type="text"
+                          value={item.exp}
+                          onChange={(event) =>
+                            setFaculty((prev) =>
+                              prev.map((row) =>
+                                row.id === item.id
+                                  ? { ...row, exp: event.target.value }
+                                  : row,
+                              ),
+                            )
+                          }
+                          placeholder="Experience"
+                          className="w-1/3 border border-gray-300 p-2 rounded focus:ring-2 focus:ring-blue-500 outline-none text-sm bg-white transition"
+                        />
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() =>
+                          setFaculty((prev) =>
+                            prev.filter((row) => row.id !== item.id),
+                          )
+                        }
+                        className={`${removeButtonClass} ml-2`}
+                        title="Remove"
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </button>
+                    </div>
+                  ))
+                )}
+              </div>
+            </div>
+
+            <div className={`${cardClass} lg:col-span-2`}>
+              <div className="flex justify-between items-center border-b border-gray-200 pb-3 mb-4">
+                <h2 className="text-lg font-semibold text-gray-800 flex items-center">
+                  <CircleHelp className="text-blue-500 w-6 mr-2" />
+                  FAQs
+                </h2>
+                <button
+                  type="button"
+                  onClick={() =>
+                    setFaqs((prev) => [
+                      ...prev,
+                      { id: nextId(prev), q: "", a: "" },
+                    ])
+                  }
+                  className={addButtonClass}
+                >
+                  + Add FAQ
+                </button>
+              </div>
+              <div className="space-y-3">
+                {faqs.length === 0 ? (
+                  <p className="text-gray-400 text-sm italic text-center py-4 border border-dashed border-gray-200 rounded-lg">
+                    No FAQs added yet.
+                  </p>
+                ) : (
+                  faqs.map((item) => (
+                    <div
+                      key={item.id}
+                      className="flex space-x-3 items-start bg-gray-50 p-3 rounded-lg border border-gray-200"
+                    >
+                      <div className="flex-1 space-y-3">
+                        <input
+                          type="text"
+                          value={item.q}
+                          onChange={(event) =>
+                            setFaqs((prev) =>
+                              prev.map((row) =>
+                                row.id === item.id
+                                  ? { ...row, q: event.target.value }
+                                  : row,
+                              ),
+                            )
+                          }
+                          placeholder="Question"
+                          className="w-full border border-gray-300 p-2 rounded focus:ring-2 focus:ring-blue-500 outline-none text-sm bg-white font-medium"
+                        />
+                        <textarea
+                          rows={2}
+                          value={item.a}
+                          onChange={(event) =>
+                            setFaqs((prev) =>
+                              prev.map((row) =>
+                                row.id === item.id
+                                  ? { ...row, a: event.target.value }
+                                  : row,
+                              ),
+                            )
+                          }
+                          placeholder="Answer"
+                          className="w-full border border-gray-300 p-2 rounded focus:ring-2 focus:ring-blue-500 outline-none text-sm bg-white"
+                        />
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() =>
+                          setFaqs((prev) =>
+                            prev.filter((row) => row.id !== item.id),
+                          )
+                        }
+                        className={`${removeButtonClass} mt-1`}
+                        title="Remove"
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </button>
+                    </div>
+                  ))
+                )}
+              </div>
+            </div>
+          </div>
+
+          <div className={cardClass}>
+            {sectionTitle(<IdCard className="w-5 h-5" />, "Department Contact")}
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
+              <div className="lg:col-span-2">
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Profile Photo
+                </label>
+                <div className="flex items-center space-x-4">
+                  <div className="h-16 w-16 rounded-full overflow-hidden bg-gray-100 border border-gray-300 flex-shrink-0 relative group">
+                    {contactPhoto ? (
+                      <img
+                        src={contactPhoto}
+                        alt="Contact preview"
+                        className="h-full w-full object-cover"
+                      />
+                    ) : (
+                      <div className="h-full w-full flex items-center justify-center text-gray-400">
+                        <Camera className="w-6 h-6" />
+                      </div>
+                    )}
+                    <button
+                      type="button"
+                      onClick={() => contactInputRef.current?.click()}
+                      className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
+                    >
+                      <Camera className="text-white w-4 h-4" />
+                    </button>
+                    <input
+                      ref={contactInputRef}
+                      type="file"
+                      className="hidden"
+                      accept="image/*"
+                      onChange={(event) =>
+                        handleSingleImage(event, setContactPhoto)
+                      }
+                    />
+                  </div>
+                  <div className="flex flex-col">
+                    <button
+                      type="button"
+                      onClick={() => contactInputRef.current?.click()}
+                      className="text-sm font-medium text-blue-600 hover:text-blue-500 text-left"
+                    >
+                      Change Photo
+                    </button>
+                    {contactPhoto && (
+                      <button
+                        type="button"
+                        onClick={() =>
+                          clearFileInput(
+                            contactInputRef.current,
+                            setContactPhoto,
+                          )
+                        }
+                        className="text-xs text-red-500 hover:text-red-700 text-left mt-1"
+                      >
+                        Remove
+                      </button>
+                    )}
+                  </div>
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Name
+                </label>
+                <input
+                  type="text"
+                  value={contactName}
+                  onChange={(event) => setContactName(event.target.value)}
+                  placeholder="e.g., Dr. John Doe"
+                  className={inputClass}
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Position
+                </label>
+                <input
+                  type="text"
+                  value={contactPosition}
+                  onChange={(event) => setContactPosition(event.target.value)}
+                  placeholder="e.g., Head of Department"
+                  className={inputClass}
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Phone/Email
+                </label>
+                <input
+                  type="text"
+                  value={contactDetails}
+                  onChange={(event) => setContactDetails(event.target.value)}
+                  placeholder="e.g., 01-123456, info@college.edu"
+                  className={inputClass}
+                />
+              </div>
+            </div>
+          </div>
+
+          <div className="flex justify-end">
             <button
               type="button"
               onClick={handleSave}
-              className="px-10 py-3 bg-indigo-600 text-white font-black uppercase tracking-widest text-sm rounded-2xl hover:bg-slate-900 transition-all shadow-xl shadow-indigo-500/20 active:scale-95 italic"
+              className="bg-blue-600 text-white px-5 py-2 rounded-lg shadow hover:bg-blue-700 transition font-medium flex items-center"
             >
-              Save & Publish Program
+              <Save className="w-4 h-4 mr-2" /> Save Changes
             </button>
           </div>
         </form>
