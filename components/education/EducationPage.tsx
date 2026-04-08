@@ -21,7 +21,7 @@ interface EducationPageProps {
 
 const EducationPage: React.FC<EducationPageProps> = ({ onNavigate }) => {
   return (
-    <div className="bg-white min-h-screen font-sans text-[#111827] antialiased">
+    <div className="bg-white min-h-screen font-sans text-[#111827] antialiased pt-18 xs:pt-20 sm:pt-24 md:pt-27">
       {/* Section 1: Hero */}
       <HeroSection onNavigate={onNavigate} />
       {/* Section 2: Smarter Tools, Greater Success */}
