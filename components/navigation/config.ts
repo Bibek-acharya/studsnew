@@ -67,7 +67,7 @@ export const desktopMenuSections: DesktopMenuSection[] = [
       {
         icon: "fa-award",
         color: "text-yellow-500",
-        title: "Scholarship Finder",
+        title: "Scholarship Recommender",
         desc: "Find scholarships tailored to your profile and needs.",
         viewKey: "scholarshipFinderTool",
       },
@@ -85,7 +85,7 @@ export const desktopMenuSections: DesktopMenuSection[] = [
     label: "Scholarships",
     items: [
       {
-        icon: "fa-award",
+        icon: "fa-graduation-cap",
         color: "text-yellow-500",
         title: "Scholarship Finder",
         desc: "Find scholarships tailored to your profile and needs.",
