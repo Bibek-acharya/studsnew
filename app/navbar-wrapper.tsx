@@ -6,8 +6,12 @@ import EducationNavbar from "@/components/EducationNavbar";
 export default function NavbarWrapper() {
   const pathname = usePathname();
 
-  // Hide the global navbar for the scholarship-finder page if it's contributing to the "gray gap"
-  if (pathname === "/scholarship-finder") {
+  // Hide the global navbar for specific routes
+  const hideGlobalNavbar = ["/scholarship-provider", "/institution-zone"].includes(
+    pathname
+  );
+
+  if (hideGlobalNavbar) {
     return null;
   }
 
