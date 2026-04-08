@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import { useState } from "react";
 import {
   Newspaper,
   GraduationCap,
@@ -9,8 +9,6 @@ import {
   MagnifyingGlass,
   Bell,
   PlusCircle,
-  Plus,
-  Faders,
   SquaresFour,
   ListDashes,
   PaperPlaneTilt,
@@ -36,8 +34,6 @@ import {
   Eye,
   Copy,
   User,
-  Share2,
-  Bookmark,
   WarningCircle,
   Info,
 } from "@phosphor-icons/react";
@@ -903,7 +899,6 @@ const NewsManagementPage = () => {
                       <div
                         className="p-4 min-h-[300px] text-gray-700 outline-none text-base leading-relaxed"
                         contentEditable
-                        placeholder="Start writing the full news content here..."
                       ></div>
                     </div>
                   </div>
