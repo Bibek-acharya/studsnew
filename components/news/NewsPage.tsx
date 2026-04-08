@@ -76,9 +76,9 @@ const NewsPage: React.FC = () => {
   );
 
   return (
-    <main className="max-w-[1400px] mx-auto py-10 space-y-14 bg-gray-50 min-h-screen text-slate-800">
+    <main className="max-w-[1400px] mx-auto py-10 space-y-14 min-h-screen text-slate-800">
       <section>
-        <h2 className="text-2xl font-bold text-slate-900 mb-5">Browse by category</h2>
+        <h1 className="text-3xl font-bold text-slate-900 mb-5">Browse by category</h1>
         <div className="flex items-center gap-3 overflow-x-auto pb-4 -mx-4 px-4 sm:mx-0 sm:px-0 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
           {categoryPills.map((pill) => {
             const isActive = activeCategory === pill;
@@ -101,7 +101,7 @@ const NewsPage: React.FC = () => {
 
       {featuredNews && (
         <section>
-          <h2 className="text-2xl font-bold text-slate-900 mb-5">Featured Story of the Week</h2>
+          <h2 className="text-3xl font-bold text-slate-900 mb-5">Featured Story of the Week</h2>
           <Link
             href={`/news/${featuredNews.id}`}
             className="relative w-full h-[450px] sm:h-[400px] rounded-2xl overflow-hidden shadow-lg group cursor-pointer block"
@@ -146,7 +146,7 @@ const NewsPage: React.FC = () => {
 
       <section>
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
-          <h2 className="text-2xl font-bold text-slate-900">Latest News & stories</h2>
+          <h2 className="text-3xl font-bold text-slate-900">Latest News & stories</h2>
           <div className="flex items-center text-sm font-medium text-slate-600">
             <span className="mr-2">Sort by:</span>
             <label className="flex items-center gap-1 bg-white border border-gray-200 rounded-md px-3 py-1.5 hover:bg-gray-50 focus-within:ring-2 focus-within:ring-blue-500">
@@ -170,7 +170,7 @@ const NewsPage: React.FC = () => {
             return (
               <article
                 key={item.id}
-                className="bg-white border border-gray-100 rounded-2xl p-5 flex flex-col shadow-sm hover:shadow-xl hover:-translate-y-1.5 transition-all duration-300 group cursor-pointer"
+                className="bg-white border border-gray-100 hover:border-blue-500/20 rounded-2xl p-5 flex flex-col transition-all duration-300 group cursor-pointer"
               >
                 <div className="mb-4">
                   <span
@@ -182,7 +182,7 @@ const NewsPage: React.FC = () => {
                   </span>
                 </div>
 
-                <div className="rounded-xl overflow-hidden aspect-[16/10] mb-5 bg-gray-100">
+                <div className="rounded-xl overflow-hidden aspect-16/10 mb-5 bg-gray-100 h-30">
                   <img
                     src={item.image}
                     alt={item.title}
@@ -190,10 +190,10 @@ const NewsPage: React.FC = () => {
                   />
                 </div>
 
-                <Link href={`/news/${item.id}`} className="font-bold text-lg text-slate-900 leading-snug mb-2 group-hover:text-blue-600 transition-colors hover:underline">
+                <Link href={`/news/${item.id}`} className="font-bold text-lg text-slate-900 leading-snug mb-2 group-hover:text-blue-600 transition-colors ">
                   {item.title}
                 </Link>
-                <p className="text-slate-500 text-sm mb-5 flex-grow line-clamp-2 leading-relaxed">
+                <p className="text-slate-500 text-sm mb-5 grow line-clamp-2 leading-relaxed">
                   {item.excerpt}
                 </p>
 
@@ -202,7 +202,7 @@ const NewsPage: React.FC = () => {
                     <i className="fa-regular fa-clock mr-1.5"></i> 90 Days ago
                   </span>
                   <Link href={`/news/${item.id}`} className="text-blue-600 font-semibold flex items-center group-hover:translate-x-1 transition-transform duration-200">
-                    View Details <i className="fa-solid fa-chevron-right text-xs ml-1"></i>
+                    View Details 
                   </Link>
                 </div>
               </article>

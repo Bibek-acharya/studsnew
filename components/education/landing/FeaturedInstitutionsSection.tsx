@@ -1,7 +1,7 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
-import { CheckCircle2, Star, MapPin, Award, MessageSquare, ArrowRightLeft, Bookmark, BadgeCheckIcon, Globe } from "lucide-react";
+import { useState, useEffect } from "react";
+import { Star, MapPin, Award, MessageSquare, Bookmark, BadgeCheckIcon, Globe } from "lucide-react";
 
 interface College {
   id: string | number;
@@ -23,7 +23,6 @@ const FeaturedInstitutionsSection: React.FC<FeaturedInstitutionsSectionProps> = 
   const [featuredColleges, setFeaturedColleges] = useState<College[]>([]);
   const [loading, setLoading] = useState(true);
   const [bookmarked, setBookmarked] = useState<Set<string | number>>(new Set());
-  const [expandedDesc, setExpandedDesc] = useState<Set<string | number>>(new Set());
 
   useEffect(() => {
     setFeaturedColleges([
@@ -85,20 +84,11 @@ const FeaturedInstitutionsSection: React.FC<FeaturedInstitutionsSectionProps> = 
     });
   };
 
-  const toggleExpand = (id: string | number) => {
-    setExpandedDesc(prev => {
-      const next = new Set(prev);
-      if (next.has(id)) next.delete(id);
-      else next.add(id);
-      return next;
-    });
-  };
-
   if (loading) return null;
 
   return (
     <section className="mt-4 sm:mt-8 md:mt-12 lg:mt-16 w-full">
-      <div className="max-w-[1400px] mx-auto w-full px-3 sm:px-4 md:px-6 lg:px-8">
+      <div className="max-w-350 mx-auto w-full">
       <div className="text-center mb-8 sm:mb-10 md:mb-12">
         <h2 className="text-[26px] xs:text-[30px] sm:text-3xl md:text-[36px] lg:text-[40px] font-bold text-[#111827] mb-2 sm:mb-3 tracking-tight px-2">
           Explore Featured Colleges & Universities
@@ -114,10 +104,8 @@ const FeaturedInstitutionsSection: React.FC<FeaturedInstitutionsSectionProps> = 
             key={college.id}
             college={college}
             isBookmarked={bookmarked.has(college.id)}
-            isExpanded={expandedDesc.has(college.id)}
             onNavigate={onNavigate}
             onToggleBookmark={toggleBookmark}
-            onToggleExpand={toggleExpand}
           />
         ))}
       </div>
@@ -129,21 +117,18 @@ const FeaturedInstitutionsSection: React.FC<FeaturedInstitutionsSectionProps> = 
 const CollegeCard: React.FC<{
   college: College;
   isBookmarked: boolean;
-  isExpanded: boolean;
   onNavigate: (view: string, data?: any) => void;
   onToggleBookmark: (e: React.MouseEvent, id: string | number) => void;
-  onToggleExpand: (id: string | number) => void;
-}> = ({ college, isBookmarked, isExpanded, onNavigate, onToggleBookmark, onToggleExpand }) => {
-  const shortDesc = college.description?.slice(0, 80) + "... " || "";
-  const fullDesc = college.description || "";
+}> = ({ college, isBookmarked, onNavigate, onToggleBookmark }) => {
+  const hasLongDescription = (college.description?.length ?? 0) > 80;
 
   return (
     <div
-      className="bg-white rounded-2xl p-4 border border-gray-100 flex flex-col h-full hover:border-gray-200 transition-all duration-300 cursor-pointer"
+      className="bg-white rounded-2xl p-4 border border-gray-100 flex flex-col h-full hover:border-blue-500/20 transition-all duration-300 cursor-pointer"
       onClick={() => onNavigate("collegeDetails", college)}
     >
-      <div className="w-full h-[140px] rounded-xl overflow-hidden mb-4 relative">
-        <div className="absolute top-3 left-3 bg-blue-600 text-white text-[10px] font-bold px-2 py-0.5 rounded uppercase tracking-wider z-10 shadow-sm">
+      <div className="w-full h-30 rounded-lg overflow-hidden mb-4 relative">
+        <div className="absolute top-3 left-3 bg-[#0000ff] text-white text-[10px] font-bold px-2 py-0.5 rounded uppercase tracking-wider z-10 shadow-sm">
           Featured
         </div>
         <img
@@ -171,18 +156,18 @@ const CollegeCard: React.FC<{
         </div>
         <span className="mx-3 text-gray-300 font-light">|</span>
         <div className="flex items-center gap-1.5">
-          <Award className="w-[18px] h-[18px] text-gray-400" />
+          <Award className="w-4.5 h-4.5 text-gray-400" />
           <span className="font-semibold text-slate-700">{college.type || "Private"}</span>
         </div>
         <span className="mx-3 text-gray-300 font-light">|</span>
         <div className="flex items-center gap-1.5">
-          <MapPin className="w-[18px] h-[18px] text-gray-400" />
+          <MapPin className="w-4.5 h-4.5 text-gray-400" />
           <span className="font-semibold text-slate-700">{college.location || "Kathmandu"}</span>
         </div>
       </div>
 
       <div className="flex items-start gap-2 text-[14px] text-gray-500 mb-2">
-        <Award className="w-[18px] h-[18px] text-gray-400 shrink-0 mt-[3px]" />
+        <Award className="w-4.5 h-4.5 text-gray-400 shrink-0 mt-0.75" />
         <p className="leading-snug pr-4 font-semibold text-slate-700 line-clamp-1">
           {college.affiliation || "Tribhuvan University"}
         </p>
@@ -190,7 +175,7 @@ const CollegeCard: React.FC<{
 
       {college.website && (
         <div className="flex items-center gap-2 text-[14px] text-gray-500 mb-3">
-          <Globe className="w-[18px] h-[18px] text-gray-400 shrink-0" />
+          <Globe className="w-4.5 h-4.5 text-gray-400 shrink-0" />
           <a
             href={college.website}
             target="_blank"
@@ -203,23 +188,30 @@ const CollegeCard: React.FC<{
         </div>
       )}
 
-      <p className="text-[14px] text-gray-500 leading-relaxed mb-4 pr-2">
-        <span>{isExpanded ? fullDesc : shortDesc}</span>
-        {college.description && college.description.length > 80 && (
-          <span
-            className="font-semibold text-blue-600 cursor-pointer hover:underline ml-1"
-            onClick={(e) => { e.stopPropagation(); onToggleExpand(college.id); }}
-          >
-            {isExpanded ? "Show less" : "Read more"}
-          </span>
-        )}
+      <p className="text-[14px] text-gray-500 leading-relaxed pr-2 line-clamp-2">
+        {college.description || ""}
       </p>
+
+      {hasLongDescription && (
+        <button
+          type="button"
+          className="w-fit text-[14px] font-semibold text-blue-600 hover:underline mb-4"
+          onClick={(e) => {
+            e.stopPropagation();
+            onNavigate("collegeDetails", college);
+          }}
+        >
+          Read more
+        </button>
+      )}
+
+      {!hasLongDescription && <div className="mb-4" />}
 
       <div className="border-t border-dashed border-gray-200 mb-4" />
 
       <div className="flex flex-col gap-3 mt-auto">
         <button
-          className="w-full bg-[#2563EB] hover:bg-blue-700 text-white font-medium text-[14px] py-2.5 px-4 rounded-md transition-colors"
+          className="w-full bg-[#0000ff] hover:bg-blue-700 text-white font-medium text-[14px] py-2.5 px-4 rounded-lg transition-colors"
           onClick={(e) => { e.stopPropagation(); onNavigate("bookCounselling", { collegeId: college.id }); }}
         >
           Get counselling
@@ -230,7 +222,7 @@ const CollegeCard: React.FC<{
             className="flex-1 flex items-center justify-center gap-1.5 border border-gray-200 hover:bg-gray-50 text-slate-600 font-medium py-2 px-2 rounded-md transition-colors text-[13px]"
             onClick={(e) => { e.stopPropagation(); onNavigate("campusForum", { collegeId: college.id, collegeName: college.name }); }}
           >
-            <MessageSquare className="w-[16px] h-[16px] text-gray-500" />
+            <MessageSquare className="w-4 h-4 text-gray-500" />
             Inquiry
           </button>
 
@@ -250,7 +242,7 @@ const CollegeCard: React.FC<{
             title={isBookmarked ? "Remove Bookmark" : "Bookmark"}
             onClick={(e) => onToggleBookmark(e, college.id)}
           >
-            <Bookmark className={`w-4 h-4 transition-all ${isBookmarked ? "text-[#0000ff] fill-[#0000ff]" : "text-[#0000ff]"}`} />
+            <Bookmark className={`w-4 h-4 transition-all ${isBookmarked ? "text-[#0000ff] fill-[#0000ff]" : "text-gray-400"}`} />
           </button>
         </div>
       </div>

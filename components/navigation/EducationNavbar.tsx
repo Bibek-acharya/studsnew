@@ -28,7 +28,6 @@ import {
   desktopMenuSections,
   initialNotifications,
   mobileMenuSections,
-  mobileQuickLinks,
   notificationTabs,
   partnerMobileItems,
   routeMap,
@@ -41,6 +40,7 @@ import {
   NotificationTab,
   ViewKey,
 } from "./types";
+import Image from "next/image";
 
 const EducationNavbar: React.FC<EducationNavbarProps> = ({
   onNavigate,
@@ -214,6 +214,16 @@ const EducationNavbar: React.FC<EducationNavbarProps> = ({
     return () => go(viewKey, item.data);
   };
 
+  const toolsSection = desktopMenuSections.find((section) => section.key === "tools");
+  const scholarshipsSection = desktopMenuSections.find((section) => section.key === "scholarships");
+  const admissionSection = desktopMenuSections.find((section) => section.key === "admission");
+  const moreSection = desktopMenuSections.find((section) => section.key === "more");
+
+  const mobileToolsSection = mobileMenuSections.find((section) => section.key === "tools");
+  const mobileScholarshipsSection = mobileMenuSections.find((section) => section.key === "scholarships");
+  const mobileAdmissionSection = mobileMenuSections.find((section) => section.key === "admission");
+  const mobileMoreSection = mobileMenuSections.find((section) => section.key === "more");
+
   return (
     <>
       <header
@@ -225,11 +235,16 @@ const EducationNavbar: React.FC<EducationNavbarProps> = ({
           <div className="mx-auto flex w-full max-w-350 items-center justify-between gap-1.5 xs:gap-2 sm:gap-4 py-2.5 sm:py-3">
             <Link
               href="/"
-              className="flex shrink-0 cursor-pointer items-center gap-2"
+              className="flex shrink-0 cursor-pointer items-center min-w-0"
             >
-              <span className="text-[20px] sm:text-[22px] font-extrabold tracking-tight text-brand-blue leading-none">
-                Studsphere
-              </span>
+              <Image
+                src="/studsphere.png"
+                alt="Studsphere Logo"
+                width={4702}
+                height={1320}
+                priority
+                className="h-7 sm:h-9 w-auto max-w-55 sm:max-w-67.5 object-contain origin-left scale-115 sm:scale-125"
+              />
             </Link>
 
             {/* Desktop Search */}
@@ -515,17 +530,17 @@ const EducationNavbar: React.FC<EducationNavbarProps> = ({
             <nav className="no-scrollbar relative flex h-full min-w-0 flex-1 items-center gap-x-4 sm:gap-x-5 md:gap-x-6 lg:gap-x-7 xl:gap-x-8 overflow-visible whitespace-nowrap pr-2 text-[13px] sm:text-[14px] lg:text-[15px] font-medium text-[#212529]">
               <NavItem onClick={() => go("findCollege")}>Find College</NavItem>
 
-              {desktopMenuSections.map((section) => (
+              {toolsSection && (
                 <DesktopDropdown
-                  key={section.key}
-                  label={section.label}
-                  alignRight={section.alignRight}
-                  isOpen={activeMenu === section.key}
+                  key={toolsSection.key}
+                  label={toolsSection.label}
+                  alignRight={toolsSection.alignRight}
+                  isOpen={activeMenu === toolsSection.key}
                   onToggle={() =>
-                    setActiveMenu((prev) => (prev === section.key ? null : section.key))
+                    setActiveMenu((prev) => (prev === toolsSection.key ? null : toolsSection.key))
                   }
                 >
-                  {section.items.map((item) => (
+                  {toolsSection.items.map((item) => (
                     <DropdownCard
                       key={item.title}
                       icon={item.icon}
@@ -536,13 +551,86 @@ const EducationNavbar: React.FC<EducationNavbarProps> = ({
                     />
                   ))}
                 </DesktopDropdown>
-              ))}
+              )}
+
+              {scholarshipsSection && (
+                <DesktopDropdown
+                  key={scholarshipsSection.key}
+                  label={scholarshipsSection.label}
+                  alignRight={scholarshipsSection.alignRight}
+                  isOpen={activeMenu === scholarshipsSection.key}
+                  onToggle={() =>
+                    setActiveMenu((prev) =>
+                      prev === scholarshipsSection.key ? null : scholarshipsSection.key,
+                    )
+                  }
+                >
+                  {scholarshipsSection.items.map((item) => (
+                    <DropdownCard
+                      key={item.title}
+                      icon={item.icon}
+                      color={item.color}
+                      title={item.title}
+                      desc={item.desc}
+                      onClick={getDropdownClick(item)}
+                    />
+                  ))}
+                </DesktopDropdown>
+              )}
 
               <NavItem onClick={() => go("campusForum")}>Campus Feed</NavItem>
+
+              {admissionSection && (
+                <DesktopDropdown
+                  key={admissionSection.key}
+                  label={admissionSection.label}
+                  alignRight={admissionSection.alignRight}
+                  isOpen={activeMenu === admissionSection.key}
+                  onToggle={() =>
+                    setActiveMenu((prev) =>
+                      prev === admissionSection.key ? null : admissionSection.key,
+                    )
+                  }
+                >
+                  {admissionSection.items.map((item) => (
+                    <DropdownCard
+                      key={item.title}
+                      icon={item.icon}
+                      color={item.color}
+                      title={item.title}
+                      desc={item.desc}
+                      onClick={getDropdownClick(item)}
+                    />
+                  ))}
+                </DesktopDropdown>
+              )}
 
               <NavItem onClick={() => go("entranceDiscovery")}>
                 Entrance
               </NavItem>
+
+              {moreSection && (
+                <DesktopDropdown
+                  key={moreSection.key}
+                  label={moreSection.label}
+                  alignRight={moreSection.alignRight}
+                  isOpen={activeMenu === moreSection.key}
+                  onToggle={() =>
+                    setActiveMenu((prev) => (prev === moreSection.key ? null : moreSection.key))
+                  }
+                >
+                  {moreSection.items.map((item) => (
+                    <DropdownCard
+                      key={item.title}
+                      icon={item.icon}
+                      color={item.color}
+                      title={item.title}
+                      desc={item.desc}
+                      onClick={getDropdownClick(item)}
+                    />
+                  ))}
+                </DesktopDropdown>
+              )}
             </nav>
 
             {!user && (
@@ -769,40 +857,109 @@ const EducationNavbar: React.FC<EducationNavbarProps> = ({
 
           {/* Mobile Links */}
           <div className="flex flex-col gap-1 text-[15px] text-gray-700 font-semibold pb-4">
-            {mobileQuickLinks.map((link) => (
-              <button
-                key={link.viewKey}
-                onClick={() => go(link.viewKey)}
-                className="flex w-full items-center justify-between rounded-lg p-2 text-left transition-colors hover:bg-gray-50 hover:text-blue-600"
-              >
-                <span>{link.label}</span>
-                {link.badge && (
-                  <span className="bg-blue-600 text-white text-[10px] leading-none px-1.5 py-1 rounded font-bold tracking-wide">
-                    {link.badge}
-                  </span>
-                )}
-              </button>
-            ))}
+            <button
+              onClick={() => go("findCollege")}
+              className="flex w-full items-center justify-between rounded-lg p-2 text-left transition-colors hover:bg-gray-50 hover:text-blue-600"
+            >
+              <span>Find College</span>
+            </button>
 
-            {mobileMenuSections.map((section) => (
-              <div key={section.key}>
+            {mobileToolsSection && (
+              <div>
                 <button
-                  className={`flex w-full items-center justify-between rounded-lg p-2 text-left transition-colors hover:bg-gray-50 hover:text-blue-600 ${mobileMenus[section.key] ? "text-blue-600" : ""}`}
-                  onClick={() => toggleMobileMenu(section.key)}
+                  className={`flex w-full items-center justify-between rounded-lg p-2 text-left transition-colors hover:bg-gray-50 hover:text-blue-600 ${mobileMenus[mobileToolsSection.key] ? "text-blue-600" : ""}`}
+                  onClick={() => toggleMobileMenu(mobileToolsSection.key)}
                 >
-                  <span>{section.label}</span>
+                  <span>{mobileToolsSection.label}</span>
                   <ChevronDown
                     size={14}
-                    className={`text-gray-400 transition-transform duration-200 ${mobileMenus[section.key] ? "rotate-180" : ""}`}
+                    className={`text-gray-400 transition-transform duration-200 ${mobileMenus[mobileToolsSection.key] ? "rotate-180" : ""}`}
                   />
                 </button>
                 <div
-                  className={`${mobileMenus[section.key] ? "flex" : "hidden"} flex-col gap-1 pl-4 py-2 ml-2 mt-1 font-medium`}
+                  className={`${mobileMenus[mobileToolsSection.key] ? "flex" : "hidden"} flex-col gap-1 pl-4 py-2 ml-2 mt-1 font-medium`}
                 >
-                  {section.items.map(renderMobileAction)}
+                  {mobileToolsSection.items.map(renderMobileAction)}
                 </div>
               </div>
-            ))}
+            )}
+
+            {mobileScholarshipsSection && (
+              <div>
+                <button
+                  className={`flex w-full items-center justify-between rounded-lg p-2 text-left transition-colors hover:bg-gray-50 hover:text-blue-600 ${mobileMenus[mobileScholarshipsSection.key] ? "text-blue-600" : ""}`}
+                  onClick={() => toggleMobileMenu(mobileScholarshipsSection.key)}
+                >
+                  <span>{mobileScholarshipsSection.label}</span>
+                  <ChevronDown
+                    size={14}
+                    className={`text-gray-400 transition-transform duration-200 ${mobileMenus[mobileScholarshipsSection.key] ? "rotate-180" : ""}`}
+                  />
+                </button>
+                <div
+                  className={`${mobileMenus[mobileScholarshipsSection.key] ? "flex" : "hidden"} flex-col gap-1 pl-4 py-2 ml-2 mt-1 font-medium`}
+                >
+                  {mobileScholarshipsSection.items.map(renderMobileAction)}
+                </div>
+              </div>
+            )}
+
+            <button
+              onClick={() => go("campusForum")}
+              className="flex w-full items-center justify-between rounded-lg p-2 text-left transition-colors hover:bg-gray-50 hover:text-blue-600"
+            >
+              <span>Campus Feed</span>
+              <span className="bg-blue-600 text-white text-[10px] leading-none px-1.5 py-1 rounded font-bold tracking-wide">
+                NEW
+              </span>
+            </button>
+
+            {mobileAdmissionSection && (
+              <div key={mobileAdmissionSection.key}>
+                <button
+                  className={`flex w-full items-center justify-between rounded-lg p-2 text-left transition-colors hover:bg-gray-50 hover:text-blue-600 ${mobileMenus[mobileAdmissionSection.key] ? "text-blue-600" : ""}`}
+                  onClick={() => toggleMobileMenu(mobileAdmissionSection.key)}
+                >
+                  <span>{mobileAdmissionSection.label}</span>
+                  <ChevronDown
+                    size={14}
+                    className={`text-gray-400 transition-transform duration-200 ${mobileMenus[mobileAdmissionSection.key] ? "rotate-180" : ""}`}
+                  />
+                </button>
+                <div
+                  className={`${mobileMenus[mobileAdmissionSection.key] ? "flex" : "hidden"} flex-col gap-1 pl-4 py-2 ml-2 mt-1 font-medium`}
+                >
+                  {mobileAdmissionSection.items.map(renderMobileAction)}
+                </div>
+              </div>
+            )}
+
+            <button
+              onClick={() => go("entranceDiscovery")}
+              className="flex w-full items-center justify-between rounded-lg p-2 text-left transition-colors hover:bg-gray-50 hover:text-blue-600"
+            >
+              <span>Entrance</span>
+            </button>
+
+            {mobileMoreSection && (
+              <div>
+                <button
+                  className={`flex w-full items-center justify-between rounded-lg p-2 text-left transition-colors hover:bg-gray-50 hover:text-blue-600 ${mobileMenus[mobileMoreSection.key] ? "text-blue-600" : ""}`}
+                  onClick={() => toggleMobileMenu(mobileMoreSection.key)}
+                >
+                  <span>{mobileMoreSection.label}</span>
+                  <ChevronDown
+                    size={14}
+                    className={`text-gray-400 transition-transform duration-200 ${mobileMenus[mobileMoreSection.key] ? "rotate-180" : ""}`}
+                  />
+                </button>
+                <div
+                  className={`${mobileMenus[mobileMoreSection.key] ? "flex" : "hidden"} flex-col gap-1 pl-4 py-2 ml-2 mt-1 font-medium`}
+                >
+                  {mobileMoreSection.items.map(renderMobileAction)}
+                </div>
+              </div>
+            )}
 
             {user && (
               <div>

@@ -256,7 +256,7 @@ const BookCounsellingPage: React.FC<BookCounsellingPageProps> = ({ onNavigate })
                           type="button"
                           disabled={isDisabled}
                           onClick={() => setSelectedDate(item)}
-                          className={`w-[72px] flex-shrink-0 rounded-xl border p-3 transition-all ${
+                          className={`w-18 shrink-0 rounded-xl border p-3 transition-all ${
                             isDisabled
                               ? "cursor-not-allowed border-gray-100 bg-gray-50 opacity-60"
                               : isSelected
@@ -498,7 +498,7 @@ const BookCounsellingPage: React.FC<BookCounsellingPageProps> = ({ onNavigate })
             </div>
 
             <div className="flex items-start gap-4 rounded-xl border border-gray-100 bg-white p-5 shadow-sm">
-              <div className="mt-1 flex-shrink-0 rounded-full bg-blue-50 p-2">
+              <div className="mt-1 shrink-0 rounded-full bg-blue-50 p-2">
                 <i className="fa-solid fa-headset text-blue-600"></i>
               </div>
               <div>

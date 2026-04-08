@@ -9,7 +9,7 @@ interface RecommendedForYouSectionProps {
 const RecommendedForYouSection: React.FC<RecommendedForYouSectionProps> = ({ onNavigate }) => {
   return (
     <section className="mt-16 sm:mt-20 md:mt-24 w-full mb-8 sm:mb-10 md:mb-12">
-      <div className="max-w-[1400px] mx-auto w-full px-3 sm:px-4 md:px-6 lg:px-8">
+      <div className="max-w-350 mx-auto w-full ">
         {/* Banner Container */}
         <div className="bg-white border border-gray-200 rounded-xl md:rounded-2xl shadow-sm p-5 xs:p-6 sm:p-7 md:p-8 lg:p-10 flex flex-col md:flex-row items-center justify-between gap-6 sm:gap-8 md:gap-10 lg:gap-12">
           {/* Left Column: Illustration */}

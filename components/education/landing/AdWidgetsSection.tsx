@@ -63,7 +63,7 @@ const AdCard: React.FC<{ slides: AdSlide[]; carouselIndex: number }> = ({ slides
 
   return (
     <div
-      className="relative w-full h-[200px] xs:h-[230px] sm:h-[250px] md:h-[260px] rounded-lg overflow-hidden group shadow-sm bg-gray-900 cursor-pointer"
+      className="relative w-full h-50 xs:h-57.5 sm:h-62.5 md:h-65 rounded-lg overflow-hidden group shadow-sm bg-gray-900 cursor-pointer"
     >
       <img
         src={activeSlide.image}
@@ -136,7 +136,7 @@ const AdCard: React.FC<{ slides: AdSlide[]; carouselIndex: number }> = ({ slides
 const AdWidgetsSection = () => {
   return (
     <section className="mt-16 sm:mt-20 md:mt-24 w-full">
-      <div className="max-w-[1400px] mx-auto w-full px-3 sm:px-4 md:px-6 lg:px-8">
+      <div className="max-w-350 mx-auto w-full">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-5 md:gap-6">
           {adCarousels.map((slides, index) => (
             <AdCard key={index} slides={slides} carouselIndex={index} />

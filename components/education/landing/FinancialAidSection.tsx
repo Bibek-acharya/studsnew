@@ -36,10 +36,10 @@ const FinancialAidSection: React.FC<FinancialAidSectionProps> = ({ onNavigate })
 
   return (
     <section className="mt-16 sm:mt-20 md:mt-24 w-full">
-      <div className="max-w-[1400px] mx-auto w-full px-3 sm:px-4 md:px-6 lg:px-8">
+      <div className="max-w-350 mx-auto w-full">
       {/* Header Section */}
       <div className="text-center mb-8 sm:mb-10 md:mb-12">
-        <h2 className="text-[26px] xs:text-3xl sm:text-4xl font-extrabold text-[#0f172a] mb-3 sm:mb-4 tracking-tight px-2">Featured Financial Aid</h2>
+        <h2 className="text-[26px] xs:text-3xl sm:text-4xl md:text-[40px] font-bold text-[#0f172a] mb-3 sm:mb-4 tracking-tight px-2">Featured Financial Aid</h2>
         <p className="text-[14px] sm:text-[15px] md:text-[16px] text-[#64748b] max-w-2xl mx-auto leading-relaxed px-2">
           Discover scholarships, grants, and financial support options to fund your academic journey.
         </p>
@@ -48,9 +48,9 @@ const FinancialAidSection: React.FC<FinancialAidSectionProps> = ({ onNavigate })
       {/* Grid Container for Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-5 md:gap-6">
         {scholarships.map((scholarship) => (
-          <div key={scholarship.id} className="bg-white rounded-[14px] sm:rounded-[16px] p-3 sm:p-3.5 border border-[#e2e8f0] flex flex-col h-full group hover:border-gray-300 transition-all duration-300">
+          <div key={scholarship.id} className="bg-white rounded-[14px] sm:rounded-xl p-3 sm:p-3.5 border border-[#e2e8f0] flex flex-col h-full group hover:border-blue-500/20 transition-all duration-300">
             {/* Image Area */}
-            <div className="w-full h-[140px] xs:h-[160px] sm:h-[170px] rounded-[10px] sm:rounded-[12px] overflow-hidden mb-3 sm:mb-4 relative">
+            <div className="w-full h-30 rounded-[10px] sm:rounded-xl overflow-hidden mb-3 sm:mb-4 relative">
               <img 
                 src={scholarship.image || "https://images.unsplash.com/photo-1498050108023-c5249f4df085?q=80&w=600&auto=format&fit=crop"} 
                 alt={scholarship.title} 
@@ -73,13 +73,16 @@ const FinancialAidSection: React.FC<FinancialAidSectionProps> = ({ onNavigate })
               </div>
 
               {/* Title & Institution */}
-              <h3 className="text-[15px] xs:text-[16px] sm:text-[17px] font-bold text-[#0f172a] leading-[1.35] mb-1 sm:mb-1.5 line-clamp-2" title={scholarship.title}>
-                {scholarship.title}
+              <h3
+                className="text-[15px] xs:text-[16px] sm:text-[17px] font-bold text-[#0f172a] leading-[1.35] mb-1 sm:mb-1.5 truncate hover:text-[#0000ff]"
+                title={scholarship.title || "Scholarship"}
+              >
+                {scholarship.title || "Scholarship"}
               </h3>
               <div className="flex items-center text-[12px] xs:text-[13px] sm:text-[13.5px] text-[#64748b] mb-4 sm:mb-5">
                 <Building className="w-3.5 h-3.5 sm:w-4 sm:h-4 mr-1 sm:mr-1.5 shrink-0" />
                 <span className="truncate">{scholarship.provider || "Tribhuvan University, Nepal"}</span>
-                <BadgeCheckIcon className="w-[13px] h-[13px] sm:w-[15px] sm:h-[15px] text-white fill-blue-500 ml-0.5 sm:ml-1 shrink-0" />
+                <BadgeCheckIcon className="w-3.25 h-3.25 sm:w-3.75 sm:h-3.75 text-white fill-blue-500 ml-0.5 sm:ml-1 shrink-0" />
               </div>
 
               {/* Details Box */}

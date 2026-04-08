@@ -57,14 +57,14 @@ const TestimonialsSection: React.FC<TestimonialsSectionProps> = ({ onNavigate })
 
   return (
     <section className="mt-16 sm:mt-20 md:mt-24 w-full">
-      <div className="max-w-[1400px] mx-auto w-full px-3 sm:px-4 md:px-6 lg:px-8">
+      <div className="max-w-350 mx-auto w-full">
         {/* Header & Navigation */}
         <div className="flex flex-col md:flex-row md:items-end justify-between mb-8 sm:mb-10 md:mb-12 gap-4 sm:gap-6">
           <div className="max-w-2xl">
-            <h2 className="text-[#1A1F36] text-[26px] xs:text-3xl sm:text-4xl md:text-[44px] lg:text-5xl font-bold tracking-tight mb-2 sm:mb-3 md:mb-4">
+            <h2 className="text-[#1A1F36] text-[26px] xs:text-3xl sm:text-4xl md:text-[40px] font-bold tracking-tight mb-2 sm:mb-3 md:mb-4">
               What Our Students Say
             </h2>
-            <p className="text-[#4A5568] text-sm sm:text-base md:text-lg lg:text-xl leading-relaxed">
+            <p className="text-[#4A5568] text-sm sm:text-base md:text-lg leading-relaxed">
               Discover how our programs have transformed the careers and lives of students from around the globe.
             </p>
           </div>
@@ -73,13 +73,13 @@ const TestimonialsSection: React.FC<TestimonialsSectionProps> = ({ onNavigate })
           <div className="flex gap-2 sm:gap-3 md:gap-4 pb-2">
             <button
               onClick={() => scrollByWidth(-1)}
-              className="w-9 h-9 sm:w-11 sm:h-11 md:w-12 md:h-12 rounded-full border border-gray-200 flex items-center justify-center text-gray-500 hover:bg-gray-50 hover:text-[#1A1F36] transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#1A1F36]"
+              className="w-9 h-9 sm:w-11 sm:h-11 md:w-12 md:h-12 rounded-full border border-gray-200 flex items-center justify-center text-gray-500 hover:bg-gray-50 hover:text-[#1A1F36] transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#0000ff]"
             >
               <ChevronLeft className="w-4 h-4 sm:w-5 sm:h-5" />
             </button>
             <button
               onClick={() => scrollByWidth(1)}
-              className="w-9 h-9 sm:w-11 sm:h-11 md:w-12 md:h-12 rounded-full border border-gray-200 flex items-center justify-center text-gray-500 hover:bg-gray-50 hover:text-[#1A1F36] transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#1A1F36]"
+              className="w-9 h-9 sm:w-11 sm:h-11 md:w-12 md:h-12 rounded-full border border-gray-200 flex items-center justify-center text-gray-500 hover:bg-gray-50 hover:text-[#1A1F36] transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#0000ff]"
             >
               <ChevronRight className="w-4 h-4 sm:w-5 sm:h-5" />
             </button>

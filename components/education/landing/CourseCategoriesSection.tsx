@@ -41,7 +41,7 @@ const CourseCategoriesSection: React.FC<CourseCategoriesSectionProps> = ({ onNav
 
   return (
     <section className="w-full py-8 sm:py-10 md:py-12 lg:py-16">
-      <div className="max-w-350 mx-auto px-3 sm:px-4 md:px-6 lg:px-8">
+      <div className="max-w-350 mx-auto ">
       {/* Header Section */}
       <div className="flex flex-col md:flex-row md:items-end justify-between mb-6 sm:mb-8 gap-4">
         <div>
@@ -57,14 +57,14 @@ const CourseCategoriesSection: React.FC<CourseCategoriesSectionProps> = ({ onNav
         <div className="flex gap-2 sm:gap-3">
           <button
             onClick={() => scrollByCard(-1)}
-            className="w-9 h-9 sm:w-10 sm:h-10 md:w-12 md:h-12 rounded-full border border-gray-200 flex items-center justify-center hover:bg-gray-50 hover:border-gray-300 transition-all focus:outline-none focus:ring-2 focus:ring-gray-200 bg-white shadow-sm text-gray-500 hover:text-gray-800"
+            className="w-9 h-9 sm:w-10 sm:h-10 md:w-11 md:h-11 rounded-full border border-gray-200 flex items-center justify-center hover:bg-gray-100 text-gray-600 transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500"
             aria-label="Scroll Left"
           >
             <ChevronLeft className="w-4 h-4 sm:w-5 sm:h-5" />
           </button>
           <button
             onClick={() => scrollByCard(1)}
-            className="w-9 h-9 sm:w-10 sm:h-10 md:w-12 md:h-12 rounded-full border border-gray-200 flex items-center justify-center hover:bg-gray-50 hover:border-gray-300 transition-all focus:outline-none focus:ring-2 focus:ring-gray-200 bg-white shadow-sm text-gray-500 hover:text-gray-800"
+            className="w-9 h-9 sm:w-10 sm:h-10 md:w-11 md:h-11 rounded-full border border-gray-200 flex items-center justify-center hover:bg-gray-100 text-gray-600 transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500"
             aria-label="Scroll Right"
           >
             <ChevronRight className="w-4 h-4 sm:w-5 sm:h-5" />
@@ -81,7 +81,7 @@ const CourseCategoriesSection: React.FC<CourseCategoriesSectionProps> = ({ onNav
           {courseCategories.map((course, idx) => (
             <div
               key={idx}
-              className="course-category-card flex-none w-70 xs:w-75 sm:w-80 bg-white rounded-xl snap-start group cursor-pointer border border-blue-500/20 hover:shadow-md transition-all duration-300 p-3.5 sm:p-4"
+              className="course-category-card flex-none w-70 xs:w-75 sm:w-80 bg-white rounded-xl snap-start group cursor-pointer border border-blue-500/20 hover:shadow-xs transition-all duration-300 p-3.5 sm:p-4"
               onClick={() => onNavigate("courseCategory", { category: course.title })}
             >
               <div className="flex justify-between items-start mb-1">

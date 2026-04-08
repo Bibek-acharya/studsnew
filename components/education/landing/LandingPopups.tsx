@@ -40,7 +40,7 @@ const LandingPopups = () => {
   useEffect(() => {
     const timer = setTimeout(() => {
       setShowNotification(true);
-    }, 1500);
+    }, 150);
     return () => clearTimeout(timer);
   }, []);
 
@@ -82,7 +82,7 @@ const LandingPopups = () => {
 
   return (
     <>
-      {/* Subscription Card */}
+      {/* Subscription Card
       {showNotification && (
         <div
           id="notificationCard"
@@ -160,7 +160,7 @@ const LandingPopups = () => {
             </div>
           </div>
         </div>
-      )}
+      )} */}
 
       {/* Community Card */}
       {showCommunity && (

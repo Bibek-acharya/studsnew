@@ -64,8 +64,8 @@ const HeroSection: React.FC<HeroSectionProps> = ({ onNavigate }) => {
   };
 
   return (
-    <div className="w-full px-4 lg:px-8 pt-2 pb-6 md:pt-4 md:pb-8 lg:pt-4 flex justify-center max-w-360 mx-auto">
-      <main className="relative w-full h-85 sm:h-105 md:h-auto md:min-h-120 lg:h-135 flex items-center justify-center overflow-hidden rounded-xl md:rounded-2xl shadow-2xl">
+    <div className="w-full  pt-2 pb-6 md:pb-4 flex justify-center max-w-350 mx-auto">
+      <main className="relative w-full h-85 sm:h-105 md:h-auto md:min-h-120 lg:h-135 flex items-center justify-center overflow-hidden rounded-lg md:rounded-xl">
         {/* Background Slider Container */}
         <div id="slider-container" className="absolute inset-0 z-0">
           {heroSlides.map((slide, index) => (
@@ -81,7 +81,7 @@ const HeroSection: React.FC<HeroSectionProps> = ({ onNavigate }) => {
 
         {/* Dark Overlays */}
         <div className="absolute inset-0 bg-black/40 z-10"></div>
-        <div className="absolute inset-0 bg-linear-to-b from-black/60 via-transparent to-black/80 z-10"></div>
+        <div className="absolute inset-0 bg-linear-to-b from-black/60 via-transparent to-black/70 z-10"></div>
 
         {/* MOBILE LAYOUT */}
         <div className="md:hidden relative z-20 w-full h-full flex flex-col justify-center items-center px-4 sm:px-6 pb-28 text-white text-center mt-4">
