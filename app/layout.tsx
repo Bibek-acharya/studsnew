@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 
 import { Geist_Mono, Plus_Jakarta_Sans } from "next/font/google";
-import Footer from "@/components/Footer";
+import FooterWrapper from "./footer-wrapper";
 import Providers from "./providers";
 import NavbarWrapper from "./navbar-wrapper";
 import "./globals.css";
@@ -46,7 +46,7 @@ export default function RootLayout({
           <NavbarWrapper />
           <div className="flex min-h-screen flex-col bg-white">
             <main className="flex-1 bg-white">{children}</main>
-            <Footer />
+            <FooterWrapper />
           </div>
         </Providers>
       </body>
