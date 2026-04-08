@@ -1,885 +1,753 @@
-import React, { useMemo, useState } from "react";
+"use client";
 
-interface ScholarshipFinderRecommendation {
+import React, { useState } from "react";
+import {
+  SlidersHorizontal,
+  ChevronDown,
+  Search,
+  ArrowUpRight,
+  User,
+  ChevronLeft,
+  ChevronRight,
+  Image as ImageIcon,
+  BadgeCheck,
+  Banknote,
+  MapPin,
+  GraduationCap,
+  Calendar,
+  Bookmark,
+} from "lucide-react";
+
+// Types
+interface ScholarshipData {
   id: number;
+  imageUrl?: string;
+  imagePlaceholder?: string;
+  badgeType: string;
+  status: string;
+  statusDot: string;
+  statusText: string;
+  statusBg: string;
   title: string;
-  provider?: string;
-  funding_type?: string;
-  description?: string;
-  deadline?: string;
-  value?: string;
-  match_score?: number;
+  org: string;
+  amount: string;
+  location: string;
+  degree: string;
+  deadline: string;
 }
 
-interface ScholarshipFinderToolPayload {
-  education_level: string;
-  study_mode: string;
-  academic_score: string;
-  target_country: string;
-  need_type: string;
-  skills: string[];
-  achievements: string[];
-  involvements: string[];
-}
-
-interface ScholarshipFinderPageProps {
-  onNavigate: (view: any, data?: any) => void;
-}
-
-const educationLevels = [
-  "SEE Completed",
-  "Class 11",
-  "Class 12",
-  "+2 Completed",
-  "Bachelor Running",
-  "Bachelor Completed",
-  "Master Running",
-  "Planning to Study Abroad",
+// Data
+const scholarships: ScholarshipData[] = [
+  {
+    id: 1,
+    imagePlaceholder: "Women in Research Scholarship",
+    badgeType: "NEED BASED",
+    status: "CLOSED",
+    statusDot: "bg-gray-400",
+    statusText: "text-gray-500",
+    statusBg: "bg-gray-100",
+    title: "Women in Research Scholarship",
+    org: "Global Science Alliance",
+    amount: "NPR 500,000",
+    location: "Pokhara, Nepal",
+    degree: "Masters",
+    deadline: "Mar 28, 2026",
+  },
+  {
+    id: 2,
+    imageUrl: "https://images.unsplash.com/photo-1522202176988-66273c2fd55f?q=80&w=800&auto=format&fit=crop",
+    badgeType: "PARTIAL TUITION",
+    status: "CLOSING SOON",
+    statusDot: "bg-[#eab308]",
+    statusText: "text-[#eab308]",
+    statusBg: "bg-yellow-50",
+    title: "Nepal STEM Excellence Grant",
+    org: "Tech Nepal Foundation",
+    amount: "NPR 400,000",
+    location: "Kathmandu, Ne...",
+    degree: "Bachelors",
+    deadline: "Apr 10, 2026",
+  },
+  {
+    id: 3,
+    imageUrl: "https://images.unsplash.com/photo-1523050854058-8df90110c9f1?q=80&w=800&auto=format&fit=crop",
+    badgeType: "MERIT SCHOLARSHIP",
+    status: "OPEN",
+    statusDot: "bg-[#22c55e]",
+    statusText: "text-[#22c55e]",
+    statusBg: "bg-green-50",
+    title: "College Merit Excellence Award",
+    org: "KIST College",
+    amount: "NPR 200,000",
+    location: "Lalitpur, Nepal",
+    degree: "Bachelors",
+    deadline: "Apr 30, 2026",
+  },
+  {
+    id: 4,
+    imageUrl: "https://images.unsplash.com/photo-1541339907198-e08756dedf3f?q=80&w=800&auto=format&fit=crop",
+    badgeType: "RESEARCH GRANT",
+    status: "OPEN",
+    statusDot: "bg-[#22c55e]",
+    statusText: "text-[#22c55e]",
+    statusBg: "bg-green-50",
+    title: "Asian Tech Research Fellowship",
+    org: "Kyoto University",
+    amount: "¥1,500,000",
+    location: "Kyoto, Japan",
+    degree: "Ph.D.",
+    deadline: "Jun 20, 2026",
+  },
+  {
+    id: 5,
+    imagePlaceholder: "Community Leaders Aid",
+    badgeType: "NEED BASED",
+    status: "CLOSING SOON",
+    statusDot: "bg-[#eab308]",
+    statusText: "text-[#eab308]",
+    statusBg: "bg-yellow-50",
+    title: "Community Leaders Aid Fund",
+    org: "Social Impact NGO",
+    amount: "NPR 150,000",
+    location: "Kathmandu, Nepal",
+    degree: "Diploma",
+    deadline: "Apr 05, 2026",
+  },
+  {
+    id: 6,
+    imageUrl: "https://images.unsplash.com/photo-1519389950473-47ba0277781c?q=80&w=800&auto=format&fit=crop",
+    badgeType: "FULL TUITION",
+    status: "OPEN",
+    statusDot: "bg-[#22c55e]",
+    statusText: "text-[#22c55e]",
+    statusBg: "bg-green-50",
+    title: "Women in Tech Initiative",
+    org: "Oxford University",
+    amount: "£25,000 / Year",
+    location: "Oxford, UK",
+    degree: "Masters",
+    deadline: "Aug 10, 2026",
+  },
+  {
+    id: 7,
+    imagePlaceholder: "Future Entrepreneurs Fund",
+    badgeType: "MERIT BASED",
+    status: "OPEN",
+    statusDot: "bg-[#22c55e]",
+    statusText: "text-[#22c55e]",
+    statusBg: "bg-green-50",
+    title: "Future Entrepreneurs Fund",
+    org: "Global Business Org",
+    amount: "NPR 300,000",
+    location: "Kathmandu, Nepal",
+    degree: "Bachelors",
+    deadline: "Sep 15, 2026",
+  },
+  {
+    id: 8,
+    imageUrl: "https://images.unsplash.com/photo-1517486808906-6ca8b3f04846?q=80&w=800&auto=format&fit=crop",
+    badgeType: "PARTIAL TUITION",
+    status: "OPEN",
+    statusDot: "bg-[#22c55e]",
+    statusText: "text-[#22c55e]",
+    statusBg: "bg-green-50",
+    title: "Creative Arts Scholarship",
+    org: "National Arts Council",
+    amount: "NPR 250,000",
+    location: "Patan, Nepal",
+    degree: "Bachelors",
+    deadline: "Oct 10, 2026",
+  },
+  {
+    id: 9,
+    imagePlaceholder: "Medical Science Grant",
+    badgeType: "NEED BASED",
+    status: "CLOSING SOON",
+    statusDot: "bg-[#eab308]",
+    statusText: "text-[#eab308]",
+    statusBg: "bg-yellow-50",
+    title: "Medical Science Grant",
+    org: "Health Nepal Foundation",
+    amount: "NPR 800,000",
+    location: "Chitwan, Nepal",
+    degree: "Masters",
+    deadline: "May 01, 2026",
+  },
+  {
+    id: 10,
+    imageUrl: "https://images.unsplash.com/photo-1581091226825-a6a2a5aee158?q=80&w=800&auto=format&fit=crop",
+    badgeType: "RESEARCH GRANT",
+    status: "OPEN",
+    statusDot: "bg-[#22c55e]",
+    statusText: "text-[#22c55e]",
+    statusBg: "bg-green-50",
+    title: "Engineering Innovation Award",
+    org: "Tech Institute Nepal",
+    amount: "NPR 450,000",
+    location: "Pokhara, Nepal",
+    degree: "Bachelors",
+    deadline: "Nov 20, 2026",
+  },
+  {
+    id: 11,
+    imagePlaceholder: "Rural Education Support",
+    badgeType: "NEED BASED",
+    status: "OPEN",
+    statusDot: "bg-[#22c55e]",
+    statusText: "text-[#22c55e]",
+    statusBg: "bg-green-50",
+    title: "Rural Education Support",
+    org: "Himalayan Trust",
+    amount: "NPR 100,000",
+    location: "Solukhumbu, Nepal",
+    degree: "+2",
+    deadline: "Dec 05, 2026",
+  },
+  {
+    id: 12,
+    imageUrl: "https://images.unsplash.com/photo-1542744173-8e7e53415bb0?q=80&w=800&auto=format&fit=crop",
+    badgeType: "FULL TUITION",
+    status: "CLOSED",
+    statusDot: "bg-gray-400",
+    statusText: "text-gray-500",
+    statusBg: "bg-gray-100",
+    title: "Global Leadership Fellowship",
+    org: "International Uni",
+    amount: "$40,000 / Year",
+    location: "New York, USA",
+    degree: "Ph.D.",
+    deadline: "Jan 15, 2026",
+  },
+  {
+    id: 13,
+    imagePlaceholder: "Environmental Impact Grant",
+    badgeType: "RESEARCH GRANT",
+    status: "OPEN",
+    statusDot: "bg-[#22c55e]",
+    statusText: "text-[#22c55e]",
+    statusBg: "bg-green-50",
+    title: "Environmental Impact Grant",
+    org: "Green Earth Foundation",
+    amount: "NPR 350,000",
+    location: "Kathmandu, Nepal",
+    degree: "Masters",
+    deadline: "Feb 20, 2027",
+  },
+  {
+    id: 14,
+    imageUrl: "https://images.unsplash.com/photo-1515162816999-a0c47dc192f7?q=80&w=800&auto=format&fit=crop",
+    badgeType: "MERIT BASED",
+    status: "CLOSING SOON",
+    statusDot: "bg-[#eab308]",
+    statusText: "text-[#eab308]",
+    statusBg: "bg-yellow-50",
+    title: "Excellence in Humanities",
+    org: "National Literacy Trust",
+    amount: "NPR 150,000",
+    location: "Bhaktapur, Nepal",
+    degree: "Bachelors",
+    deadline: "Mar 10, 2027",
+  },
+  {
+    id: 15,
+    imagePlaceholder: "Tech Startups Fellowship",
+    badgeType: "FULL TUITION",
+    status: "OPEN",
+    statusDot: "bg-[#22c55e]",
+    statusText: "text-[#22c55e]",
+    statusBg: "bg-green-50",
+    title: "Tech Startups Fellowship",
+    org: "Silicon Valley Hub",
+    amount: "$20,000 / Year",
+    location: "San Francisco, USA",
+    degree: "Masters",
+    deadline: "Apr 05, 2027",
+  },
+  {
+    id: 16,
+    imageUrl: "https://images.unsplash.com/photo-1503676260728-1c00da094a0b?q=80&w=800&auto=format&fit=crop",
+    badgeType: "NEED BASED",
+    status: "OPEN",
+    statusDot: "bg-[#22c55e]",
+    statusText: "text-[#22c55e]",
+    statusBg: "bg-green-50",
+    title: "Public Health Scholarship",
+    org: "WHO Affiliates",
+    amount: "NPR 500,000",
+    location: "Lalitpur, Nepal",
+    degree: "Ph.D.",
+    deadline: "May 12, 2027",
+  },
+  {
+    id: 17,
+    imagePlaceholder: "NextGen Innovators Award",
+    badgeType: "PARTIAL TUITION",
+    status: "CLOSING SOON",
+    statusDot: "bg-[#eab308]",
+    statusText: "text-[#eab308]",
+    statusBg: "bg-yellow-50",
+    title: "NextGen Innovators Award",
+    org: "Global Innovators",
+    amount: "NPR 220,000",
+    location: "Kathmandu, Nepal",
+    degree: "+2",
+    deadline: "Jun 15, 2027",
+  },
+  {
+    id: 18,
+    imageUrl: "https://images.unsplash.com/photo-1434030216411-0b793f4b4173?q=80&w=800&auto=format&fit=crop",
+    badgeType: "RESEARCH GRANT",
+    status: "OPEN",
+    statusDot: "bg-[#22c55e]",
+    statusText: "text-[#22c55e]",
+    statusBg: "bg-green-50",
+    title: "Data Science Fellowship",
+    org: "Data Analytics Institute",
+    amount: "NPR 400,000",
+    location: "Pokhara, Nepal",
+    degree: "Masters",
+    deadline: "Jul 30, 2027",
+  },
 ];
 
-const studyModes = ["Full-time", "Part-time", "Either", "Not sure"];
-
-const fieldOptions = [
-  "Science (+2)",
-  "Management (+2)",
-  "Humanities (+2)",
-  "Law",
-  "Education",
-  "BBS",
-  "BBA",
-  "BIT",
-  "BSc CSIT",
-  "Engineering",
-  "MBBS",
-  "Nursing",
-  "Pharmacy",
-  "Agriculture",
-  "CA / ACCA",
-  "Hotel Management",
-  "Master's Programs",
-  "Abroad Study",
-];
-
-const provinces = [
-  "Koshi",
-  "Madhesh",
-  "Bagmati",
-  "Gandaki",
-  "Lumbini",
-  "Karnali",
-  "Sudurpashchim",
-];
-
-const districts = [
-  "Achham", "Arghakhanchi", "Baglung", "Baitadi", "Bajhang", "Bajura", "Banke", "Bara",
-  "Bardiya", "Bhaktapur", "Bhojpur", "Chitwan", "Dadeldhura", "Dailekh", "Dang", "Darchula",
-  "Dhading", "Dhankuta", "Dhanusha", "Dolakha", "Dolpa", "Doti", "Eastern Rukum", "Gorkha",
-  "Gulmi", "Humla", "Ilam", "Jajarkot", "Jhapa", "Jumla", "Kailali", "Kalikot",
-  "Kanchanpur", "Kapilvastu", "Kaski", "Kathmandu", "Kavrepalanchok", "Khotang", "Lalitpur",
-  "Lamjung", "Mahottari", "Makwanpur", "Manang", "Morang", "Mugu", "Mustang", "Myagdi",
-  "Nawalpur", "Nuwakot", "Okhaldhunga", "Palpa", "Panchthar", "Parbat", "Parsa", "Pyuthan",
-  "Ramechhap", "Rasuwa", "Rautahat", "Rolpa", "Rupandehi", "Salyan", "Sankhuwasabha", "Saptari",
-  "Sarlahi", "Sindhuli", "Sindhupalchok", "Siraha", "Solukhumbu", "Sunsari", "Surkhet", "Syangja",
-  "Tanahun", "Taplejung", "Terhathum", "Udayapur", "Western Rukum",
-];
-
-const categoryOptions = [
-  "Dalit",
-  "Janajati",
-  "Madhesi",
-  "Tharu",
-  "Muslim",
-  "Women",
-  "Remote Area Resident",
-  "Differently Abled",
-  "Conflict Victim Family",
-  "Martyrs' Family",
-  "None",
-];
-
-const genders = ["Male", "Female", "Other", "Prefer not to say"];
-
-const incomes = ["Below 2 lakh", "2–5 lakh", "5–10 lakh", "Above 10 lakh"];
-
-const talents = [
-  "Sports",
-  "Music",
-  "Debate",
-  "Coding",
-  "Leadership",
-  "Social Service",
-  "Research",
-  "Arts",
-];
-
-const achievements = [
-  "SEE Board Topper",
-  "+2 Distinction",
-  "National Competition Winner",
-  "Olympiad Participant",
-  "Published Research",
-  "None",
-];
-
-const involvements = [
-  "Community Service",
-  "NGO Work",
-  "Student Clubs",
-  "Entrepreneurship",
-  "Family Business",
-  "None",
-];
-
-const stepImage: Record<number, string> = {
-  1: "https://img.pikbest.com/origin/09/27/02/00ApIkbEsTaG6.png!sw800",
-  2: "https://illustrations.popsy.co/blue/studying.svg",
-  3: "https://clipart-library.com/2024/person-thinking-clipart/person-thinking-clipart-8.png",
-  4: "https://clipart-library.com/2024/person-thinking-clipart/person-thinking-clipart-8.png",
-  5: "https://cdni.iconscout.com/illustration/premium/thumb/achievement-illustration-svg-download-png-6983258.png",
+const FilterSection = ({
+  title,
+  icon,
+  children,
+  isOpenDefault = false,
+}: {
+  title: string;
+  icon?: React.ReactNode;
+  children: React.ReactNode;
+  isOpenDefault?: boolean;
+}) => {
+  return (
+    <details className="group mb-4 border-b border-gray-100 pb-4" open={isOpenDefault}>
+      <summary className="flex justify-between items-center font-semibold text-[14px] text-slate-800 cursor-pointer list-none">
+        <span className="flex items-center gap-2">
+          {icon}
+          {title}
+        </span>
+        <ChevronDown className="w-4 h-4 text-gray-500 transition-transform group-open:rotate-180" />
+      </summary>
+      <div className="mt-3">{children}</div>
+    </details>
+  );
 };
 
-const ScholarshipFinderPage: React.FC<ScholarshipFinderPageProps> = ({
-  onNavigate,
-}) => {
-  const [step, setStep] = useState(1);
-  const [loading, setLoading] = useState(false);
-  const [results, setResults] = useState<ScholarshipFinderRecommendation[]>([]);
-  const [selectedScholarshipIds, setSelectedScholarshipIds] = useState<number[]>([]);
-  const [deadlineSort, setDeadlineSort] = useState<"nearest" | "furthest" | "amount_highest">("nearest");
-  const [sortBy, setSortBy] = useState<"relevance" | "newest">("relevance");
+const CheckboxLabel = ({ label, checked = false }: { label: string; checked?: boolean }) => (
+  <label className="flex items-center gap-3 cursor-pointer group/label mb-3">
+    <input
+      type="checkbox"
+      defaultChecked={checked}
+      className="w-4 h-4 accent-[#0000ff] border-gray-300 rounded cursor-pointer"
+    />
+    <span className="text-[14px] text-gray-600 group-hover/label:text-gray-900 transition-colors">
+      {label}
+    </span>
+  </label>
+);
 
-  const [form, setForm] = useState({
-    education_level: "",
-    study_mode: "",
-    academic_score: "",
-    intended_field: "",
-    willing_essays: "",
-    willing_interviews: "",
-    willing_gpa: "",
-    province: "",
-    district: "",
-    study_plan: "",
-    categories: [] as string[],
-    gender: "",
-    income: "",
-    talent: "",
-    achievement: "",
-    involvements: [] as string[],
-  });
+const SearchInput = ({ placeholder }: { placeholder: string }) => (
+  <div className="relative mb-3">
+    <Search className="w-3.5 h-3.5 absolute left-2.5 top-1/2 -translate-y-1/2 text-gray-400" />
+    <input
+      type="text"
+      placeholder={placeholder}
+      className="w-full pl-8 pr-3 py-1.5 bg-gray-50 border border-gray-200 rounded-lg text-[12px] focus:outline-none focus:ring-1 focus:ring-blue-500/50 focus:border-blue-500 focus:bg-white transition-all placeholder:text-gray-400"
+    />
+  </div>
+);
 
-  const canContinue = useMemo(() => {
-    if (step === 1) return !!form.education_level && !!form.study_mode && !!form.academic_score;
-    if (step === 2)
-      return !!form.intended_field && !!form.willing_essays && !!form.willing_interviews && !!form.willing_gpa;
-    if (step === 3) return !!form.province && !!form.district && !!form.study_plan;
-    if (step === 4) return form.categories.length > 0 && !!form.gender && !!form.income;
-    return true;
-  }, [form, step]);
-
-  const progressNodes = (activeStep: number) => (
-    <div className="mb-8 flex items-center space-x-2 text-sm font-semibold">
-      {Array.from({ length: 5 }).map((_, idx) => {
-        const number = idx + 1;
-        const active = number === activeStep;
-        const done = number < activeStep;
-        return (
-          <React.Fragment key={number}>
-            <div
-              className={`flex h-7 w-7 items-center justify-center rounded-full text-xs font-bold ${
-                active
-                  ? "bg-blue-600 text-white ring-4 ring-blue-100"
-                  : done
-                  ? "bg-slate-900 text-white"
-                  : "border-2 border-slate-300 bg-white text-slate-400"
-              }`}
-            >
-              {number}
-            </div>
-            {number < 5 ? (
-              <div className={`h-[2px] w-4 ${done ? "bg-slate-700" : "bg-slate-300"}`}></div>
-            ) : null}
-          </React.Fragment>
-        );
-      })}
+const ScholarshipCard = ({ scholarship }: { scholarship: ScholarshipData }) => {
+  const imageHtml = scholarship.imageUrl ? (
+    <img src={scholarship.imageUrl} alt={scholarship.title} className="w-full h-full object-cover" />
+  ) : (
+    <div className="w-full h-full p-3 flex items-start bg-linear-to-br from-gray-200 to-gray-50">
+      <span className="text-gray-600 text-[13px] font-medium flex items-start gap-1.5 leading-snug">
+        <ImageIcon className="w-4 h-4 mt-0.5 text-gray-400 shrink-0" />
+        {scholarship.imagePlaceholder}
+      </span>
     </div>
   );
 
-  const toggleCategory = (value: string) => {
-    setForm((prev) => {
-      const has = prev.categories.includes(value);
-      let next = prev.categories;
-      if (value === "None") {
-        next = has ? prev.categories.filter((v) => v !== value) : ["None"];
-      } else {
-        const withoutNone = prev.categories.filter((v) => v !== "None");
-        next = has ? withoutNone.filter((v) => v !== value) : [...withoutNone, value];
-      }
-      return { ...prev, categories: next };
-    });
-  };
+  return (
+    <div className="flex flex-col bg-white rounded-2xl border border-gray-200/80 transition-all duration-300 hover:-translate-y-1 p-3">
+      {/* Image Area */}
+      <div className="h-31.25 w-full bg-gray-100 relative overflow-hidden rounded-xl mb-3">
+        {imageHtml}
+      </div>
 
-  const toggleInvolvement = (value: string) => {
-    setForm((prev) => {
-      const has = prev.involvements.includes(value);
-      let next = prev.involvements;
-      if (value === "None") {
-        next = has ? prev.involvements.filter((v) => v !== value) : ["None"];
-      } else {
-        const withoutNone = prev.involvements.filter((v) => v !== "None");
-        next = has ? withoutNone.filter((v) => v !== value) : [...withoutNone, value];
-      }
-      return { ...prev, involvements: next };
-    });
-  };
-
-  const getPayload = (): ScholarshipFinderToolPayload => {
-    const needType = `${form.income}; ${form.categories.join(", ")}`;
-    return {
-      education_level: form.education_level,
-      study_mode: form.study_mode,
-      academic_score: form.academic_score,
-      target_country:
-        form.study_plan === "Inside Nepal"
-          ? "Nepal"
-          : form.study_plan === "Abroad"
-          ? "Abroad"
-          : form.study_plan || "Nepal",
-      need_type: needType,
-      skills: [form.intended_field, form.talent].filter(Boolean),
-      achievements: [form.achievement].filter(Boolean),
-      involvements: form.involvements,
-    };
-  };
-
-  const parseDate = (dateText?: string): number => {
-    if (!dateText) return Number.MAX_SAFE_INTEGER;
-    const parsed = new Date(dateText).getTime();
-    return Number.isNaN(parsed) ? Number.MAX_SAFE_INTEGER : parsed;
-  };
-
-  const formatDeadline = (dateText?: string): string => {
-    if (!dateText) return "TBD";
-    const date = new Date(dateText);
-    if (Number.isNaN(date.getTime())) return String(dateText);
-    return new Intl.DateTimeFormat("en-US", {
-      month: "short",
-      day: "numeric",
-      year: "numeric",
-    }).format(date);
-  };
-
-  const parseAmount = (valueText?: string): number => {
-    if (!valueText) return 0;
-    const numeric = valueText.replace(/[^\d.]/g, "");
-    const parsed = Number(numeric);
-    return Number.isNaN(parsed) ? 0 : parsed;
-  };
-
-  const totalEstimatedValue = useMemo(() => {
-    const total = results.reduce((sum, item) => sum + parseAmount(item.value), 0);
-    return total > 0 ? total.toLocaleString() : "0";
-  }, [results]);
-
-  const displayedResults = useMemo(() => {
-    const sorted = [...results];
-
-    if (sortBy === "relevance") {
-      sorted.sort((a, b) => (b.match_score || 0) - (a.match_score || 0));
-    } else {
-      sorted.sort((a, b) => b.id - a.id);
-    }
-
-    if (deadlineSort === "nearest") {
-      sorted.sort((a, b) => parseDate(a.deadline) - parseDate(b.deadline));
-    } else if (deadlineSort === "furthest") {
-      sorted.sort((a, b) => parseDate(b.deadline) - parseDate(a.deadline));
-    } else {
-      sorted.sort((a, b) => parseAmount(b.value) - parseAmount(a.value));
-    }
-
-    return sorted;
-  }, [results, sortBy, deadlineSort]);
-
-  const handleShowResults = async () => {
-    setLoading(true);
-    try {
-      setResults([
-        { id: 1, title: "National Merit Scholarship", provider: "Government of Nepal", funding_type: "Merit-Based", description: "Full tuition waiver for top-performing students in SEE and +2 examinations.", deadline: "2026-03-15", value: "100000", match_score: 95 },
-        { id: 2, title: "Women in STEM Grant", provider: "TU Scholarship Board", funding_type: "Need-Based", description: "Supporting women pursuing science, technology, engineering, and mathematics fields.", deadline: "2026-04-20", value: "50000", match_score: 88 },
-        { id: 3, title: "Rural Excellence Award", provider: "District Education Office", funding_type: "Merit + Need", description: "For students from rural districts demonstrating academic excellence and financial need.", deadline: "2026-05-10", value: "75000", match_score: 82 },
-        { id: 4, title: "Sports Talent Scholarship", provider: "National Sports Council", funding_type: "Talent-Based", description: "For students excelling in sports at district or national level competitions.", deadline: "2026-06-01", value: "40000", match_score: 75 },
-      ]);
-      setSelectedScholarshipIds([]);
-      setStep(6);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  if (step === 6) {
-    const allSelected =
-      displayedResults.length > 0 &&
-      displayedResults.every((item) => selectedScholarshipIds.includes(item.id));
-
-    const toggleSelectAll = () => {
-      if (allSelected) {
-        setSelectedScholarshipIds([]);
-        return;
-      }
-      setSelectedScholarshipIds(displayedResults.map((item) => item.id));
-    };
-
-    const toggleSingle = (id: number) => {
-      setSelectedScholarshipIds((prev) =>
-        prev.includes(id) ? prev.filter((itemId) => itemId !== id) : [...prev, id],
-      );
-    };
-
-    return (
-      <div className="min-h-screen bg-stone-50 px-6 pb-32 pt-10 text-gray-900 antialiased lg:px-12">
-        <div className="mx-auto max-w-[1400px]">
-          <div className="mb-8">
-            <div className="mb-4 flex items-center text-sm font-medium text-gray-500">
-              <button className="transition-colors hover:text-blue-600" onClick={() => setStep(5)}>
-                Scholarships
-              </button>
-              <span className="mx-2">/</span>
-              <span className="text-gray-900">AI Recommendations</span>
-            </div>
-            <h1 className="mb-3 text-[2rem] font-bold leading-tight text-gray-900 md:text-[2.5rem]">
-              Scholarships that fit you best
-            </h1>
-            <p className="max-w-4xl text-[1.05rem] leading-relaxed text-gray-600">
-              These scholarships were handpicked based on your background, interests, and academic profile. You meet the key eligibility criteria, now it's time to explore and apply with confidence. You're eligible for <span className="font-bold text-blue-600">${totalEstimatedValue}+</span> in scholarships. Let's help you apply!
-            </p>
+      {/* Content Area */}
+      <div className="flex flex-col grow px-1">
+        {/* Badges */}
+        <div className="flex items-center gap-2 mb-2.5">
+          <span className="text-blue-600 bg-blue-50 text-[10px] font-bold px-2 py-1 rounded-md uppercase tracking-wide">
+            {scholarship.badgeType}
+          </span>
+          <div className={`flex items-center gap-1.5 px-2 py-1 rounded-md ${scholarship.statusBg}`}>
+            <span className={`w-1.5 h-1.5 rounded-full ${scholarship.statusDot}`}></span>
+            <span className={`text-[10px] font-bold uppercase tracking-wide ${scholarship.statusText}`}>
+              {scholarship.status}
+            </span>
           </div>
+        </div>
 
-          <div className="mb-8 flex flex-col items-center justify-between gap-4 sm:flex-row">
-            <button
-              onClick={() => setStep(1)}
-              className="flex w-full items-center justify-center gap-2 rounded-xl border border-gray-300 bg-white px-5 py-2.5 font-semibold text-gray-800 transition-colors hover:bg-gray-50 sm:w-auto"
-            >
-              <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4" />
-              </svg>
-              Refine your answers
-            </button>
+        {/* Title & Organization */}
+        <h3 className="font-bold text-[16px] leading-tight text-slate-900 mb-1">{scholarship.title}</h3>
+        <div className="flex items-center gap-1.5 text-[12.5px] text-gray-500 mb-3.5">
+          {scholarship.org}
+          <BadgeCheck className="w-3.5 h-3.5 text-white fill-[#2563eb]" />
+        </div>
 
-            <div className="flex w-full gap-3 sm:w-auto">
-              <div className="relative w-full sm:w-48">
-                <select
-                  value={deadlineSort}
-                  onChange={(event) => setDeadlineSort(event.target.value as "nearest" | "furthest" | "amount_highest")}
-                  className="w-full cursor-pointer appearance-none rounded-xl border border-gray-300 bg-white py-2.5 pl-4 pr-10 font-medium text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                >
-                  <option value="nearest">Deadline (Nearest)</option>
-                  <option value="furthest">Deadline (Furthest)</option>
-                  <option value="amount_highest">Amount (Highest)</option>
-                </select>
-                <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-4 text-gray-500">
-                  <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
-                  </svg>
-                </div>
-              </div>
-
-              <div className="relative w-full sm:w-40">
-                <select
-                  value={sortBy}
-                  onChange={(event) => setSortBy(event.target.value as "relevance" | "newest")}
-                  className="w-full cursor-pointer appearance-none rounded-xl border border-gray-300 bg-white py-2.5 pl-4 pr-10 font-medium text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                >
-                  <option value="relevance">Sort By</option>
-                  <option value="relevance">Relevance</option>
-                  <option value="newest">Newest</option>
-                </select>
-                <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-4 text-gray-500">
-                  <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
-                  </svg>
-                </div>
-              </div>
+        {/* Details Box */}
+        <div className="bg-[#f9fafb] rounded-xl p-3.5 border border-gray-100 mb-4 mt-auto flex flex-col gap-2.5">
+          <div className="grid grid-cols-2 gap-x-2">
+            {/* Amount */}
+            <div className="flex items-center gap-1.5 text-[12px] text-gray-600 font-medium">
+              <Banknote className="w-3.5 h-3.5 text-gray-400 shrink-0" />
+              <span className="truncate">{scholarship.amount}</span>
+            </div>
+            {/* Location */}
+            <div className="flex items-center gap-1.5 text-[12px] text-gray-600 font-medium">
+              <MapPin className="w-3.5 h-3.5 text-gray-400 shrink-0" />
+              <span className="truncate">{scholarship.location}</span>
             </div>
           </div>
 
-          <div className="grid grid-cols-1 gap-5 md:grid-cols-2 lg:grid-cols-4">
-            {displayedResults.map((item) => {
-              const selected = selectedScholarshipIds.includes(item.id);
-              return (
-              <div
-                key={item.id}
-                className="group relative flex h-full flex-col rounded-2xl border border-gray-200 bg-white p-5 transition-all hover:shadow-lg"
-              >
-                <div className="mb-3 flex items-start justify-between gap-3">
-                  <h3 className="text-[1.05rem] font-bold leading-snug text-gray-900 transition-colors group-hover:text-blue-700">
-                    {item.title}
-                  </h3>
-                  <input
-                    type="checkbox"
-                    checked={selected}
-                    onChange={() => toggleSingle(item.id)}
-                    className="card-checkbox mt-0.5 h-5 w-5 flex-shrink-0"
-                  />
-                </div>
-
-                <div className="mb-3 flex flex-wrap gap-2">
-                  <span className="rounded-full bg-blue-600 px-2.5 py-1 text-[0.65rem] font-bold uppercase tracking-wider text-white">
-                    {item.provider || "Provider"}
-                  </span>
-                  <span className="rounded-full border border-blue-100 bg-blue-50 px-2.5 py-1 text-[0.65rem] font-bold uppercase tracking-wider text-blue-700">
-                    {item.funding_type || "Support"}
-                  </span>
-                </div>
-
-                <p className="mb-5 flex-grow text-sm text-gray-600">
-                  {item.description || "Scholarship details available."}
-                </p>
-
-                <div className="mt-auto flex items-end justify-between border-t border-gray-100 pt-4">
-                  <div>
-                    <span className="mb-1 block text-[0.7rem] font-bold uppercase tracking-wider text-gray-400">
-                      Deadline
-                    </span>
-                    <span className="text-[0.95rem] font-bold text-blue-600">{formatDeadline(item.deadline)}</span>
-                  </div>
-                  <div className="flex gap-2">
-                    <button
-                      className="rounded-lg border border-gray-200 bg-gray-50 p-2 text-gray-400 transition-colors hover:bg-blue-50 hover:text-blue-600"
-                      title="Save"
-                    >
-                      <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z" />
-                      </svg>
-                    </button>
-                    <button
-                      onClick={() => onNavigate("scholarshipHubDetails", { id: item.id })}
-                      className="rounded-lg bg-blue-600 px-3.5 py-1.5 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-blue-700"
-                    >
-                      Apply
-                    </button>
-                  </div>
-                </div>
-              </div>
-            );})}
+          {/* Degree */}
+          <div className="flex items-center gap-1.5 text-[12px] text-gray-600 font-medium">
+            <GraduationCap className="w-3.5 h-3.5 text-gray-400 shrink-0" />
+            <span>{scholarship.degree}</span>
           </div>
 
-          <div className="fixed bottom-6 left-1/2 z-50 flex w-[90%] max-w-4xl -translate-x-1/2 items-center justify-between rounded-2xl border border-gray-200 bg-white p-4 shadow-[0_10px_40px_-10px_rgba(0,0,0,0.15)]">
-            <div className="flex items-center gap-4">
-              <span className="text-[0.95rem] font-bold text-gray-800">Select all</span>
-
-              <button
-                type="button"
-                onClick={toggleSelectAll}
-                className={`relative inline-flex h-6 w-10 items-center rounded-full transition-colors ${allSelected ? "bg-blue-600" : "bg-gray-300"}`}
-              >
-                <span
-                  className={`absolute h-5 w-5 rounded-full border-2 border-gray-300 bg-white transition-transform ${
-                    allSelected ? "translate-x-5 border-blue-600" : "translate-x-0.5"
-                  }`}
-                />
-              </button>
-
-              <span className="hidden text-sm font-semibold text-gray-500 sm:inline">
-                ({selectedScholarshipIds.length}/{displayedResults.length} Selected)
-              </span>
-            </div>
-
-            <button
-              disabled={selectedScholarshipIds.length === 0}
-              className={`rounded-xl px-6 py-3 font-bold text-white shadow-sm transition-colors ${
-                selectedScholarshipIds.length > 0
-                  ? "bg-gray-900 hover:bg-gray-800"
-                  : "bg-gray-400"
-              }`}
-            >
-              Add to shortlist
-            </button>
+          {/* Deadline */}
+          <div className="flex items-center gap-1.5 text-[12px] text-gray-800 font-medium">
+            <Calendar className="w-3.5 h-3.5 text-[#f43f5e] shrink-0" />
+            <span>Ends: {scholarship.deadline}</span>
           </div>
+        </div>
 
-          <style>{`
-            .card-checkbox {
-              appearance: none;
-              width: 1.25rem;
-              height: 1.25rem;
-              border: 2px solid #cbd5e1;
-              border-radius: 0.25rem;
-              outline: none;
-              cursor: pointer;
-              transition: all 0.2s;
-              position: relative;
-            }
-            .card-checkbox:checked {
-              background-color: #2563eb;
-              border-color: #2563eb;
-            }
-            .card-checkbox:checked::after {
-              content: '';
-              position: absolute;
-              top: 1px;
-              left: 5px;
-              width: 5px;
-              height: 10px;
-              border: solid white;
-              border-width: 0 2px 2px 0;
-              transform: rotate(45deg);
-            }
-          `}</style>
+        {/* Action Buttons */}
+        <div className="flex items-center gap-2">
+          <button className="flex-1 py-2 text-[13px] font-semibold text-gray-700 bg-white border border-gray-200 rounded-md hover:bg-gray-50 transition-colors">
+            Details
+          </button>
+          <button className="flex-[1.2] py-2 text-[13px] font-semibold text-white bg-[#0000ff] rounded-md hover:bg-[#0000cc] transition-colors">
+            Apply
+          </button>
+          <button className="p-2 border border-gray-200 rounded-md text-gray-400 hover:text-gray-600 hover:bg-gray-50 transition-colors flex items-center justify-center">
+            <Bookmark className="w-4.5 h-4.5" />
+          </button>
         </div>
       </div>
-    );
-  }
+    </div>
+  );
+};
+
+const FeaturedScholarshipsPage = () => {
+  const [toast, setToast] = useState<string | null>(null);
+
+  const handleExploreClick = (cardName: string) => {
+    setToast(`Redirecting to opportunities from ${cardName}...`);
+    setTimeout(() => setToast(null), 3000);
+  };
 
   return (
-    <div className="h-screen overflow-hidden bg-slate-50 text-slate-800">
-      <main className="mx-auto flex h-full w-full max-w-7xl flex-col lg:flex-row">
-        <div className="no-scrollbar w-full overflow-y-auto p-6 md:p-10 lg:w-[55%] lg:p-16">
-          <div className="mx-auto w-full max-w-xl pt-2">
-            {progressNodes(step)}
+    <div className="bg-white text-slate-800 font-['Plus_Jakarta_Sans',sans-serif]">
+      <div className="min-h-screen py-16 px-4 md:px-8">
+        <div className="max-w-7xl mx-auto">
+          {/* Main Layout: Sidebar + Grid */}
+          <div className="flex flex-col lg:flex-row gap-8 items-start">
+            {/* Filters Sidebar (Left Side) */}
+            <aside className="w-full lg:w-1/4 bg-white rounded-2xl border border-gray-200/80 p-5 shrink-0 sticky top-8">
+              <div className="flex items-center justify-between mb-6 pb-4 border-b border-gray-100">
+                <h3 className="font-bold text-[18px] text-slate-900 flex items-center gap-2">
+                  <SlidersHorizontal className="w-5 h-5 text-gray-500" />
+                  Filters
+                </h3>
+                <button className="text-[13px] font-semibold text-blue-600 hover:text-blue-800 transition-colors">
+                  Applied
+                </button>
+              </div>
 
-            {step === 1 && (
-              <>
-                <h1 className="mb-8 text-3xl font-bold leading-tight text-slate-900 md:text-4xl">
-                  Tell us where you are in your education journey
-                </h1>
+              {/* 1. Study Level */}
+              <FilterSection title="Study Level">
+                <CheckboxLabel label="+2" />
+                <CheckboxLabel label="Bachelor" />
+                <CheckboxLabel label="Master" />
+                <CheckboxLabel label="A Level" />
+                <CheckboxLabel label="CTEVT" />
+              </FilterSection>
 
-                <div className="space-y-8">
-                  <div>
-                    <label className="mb-3 block font-semibold text-slate-800">What level are you currently studying?</label>
-                    <select
-                      value={form.education_level}
-                      onChange={(e) => setForm((prev) => ({ ...prev, education_level: e.target.value }))}
-                      className="w-full rounded-xl border border-slate-300 bg-white px-4 py-3.5 text-slate-700 shadow-sm focus:border-blue-500 focus:outline-none"
-                    >
-                      <option value="">Select your education level</option>
-                      {educationLevels.map((item) => (
-                        <option key={item} value={item}>{item}</option>
-                      ))}
-                    </select>
+              {/* 2. Course / Stream */}
+              <FilterSection title="Course / Stream">
+                <SearchInput placeholder="Search course..." />
+                <CheckboxLabel label="Science" />
+                <CheckboxLabel label="Management" />
+                <CheckboxLabel label="IT" />
+                <CheckboxLabel label="Medical" />
+                <CheckboxLabel label="Humanities" />
+                <CheckboxLabel label="Engineering" />
+              </FilterSection>
+
+              {/* 3. Location */}
+              <FilterSection title="Location">
+                <SearchInput placeholder="Search province, district, city..." />
+                <CheckboxLabel label="All Nepal" />
+                <CheckboxLabel label="Province" />
+                <CheckboxLabel label="District" />
+                <CheckboxLabel label="City" />
+              </FilterSection>
+
+              {/* 4. Scholarship Type */}
+              <FilterSection title="Scholarship Type">
+                <SearchInput placeholder="Search type..." />
+                <CheckboxLabel label="Merit Based" />
+                <CheckboxLabel label="Need Based" />
+                <CheckboxLabel label="Entrance Based" />
+                <CheckboxLabel label="Quota Based" />
+                <CheckboxLabel label="Talent Based" />
+              </FilterSection>
+
+              {/* 5. Provider Type */}
+              <FilterSection title="Provider Type">
+                <SearchInput placeholder="Search provider..." />
+                <CheckboxLabel label="Government" />
+                <CheckboxLabel label="College" />
+                <CheckboxLabel label="University" />
+                <CheckboxLabel label="NGO" />
+                <CheckboxLabel label="INGO" />
+                <CheckboxLabel label="Private Organization" />
+              </FilterSection>
+
+              {/* 6. Scholarship Coverage */}
+              <FilterSection title="Scholarship Coverage">
+                <CheckboxLabel label="Full Scholarship" checked={true} />
+                <CheckboxLabel label="75%" />
+                <CheckboxLabel label="50%" />
+                <CheckboxLabel label="25%" />
+                <CheckboxLabel label="Tuition Only" />
+              </FilterSection>
+
+              {/* 7. GPA Requirement */}
+              <FilterSection title="GPA Requirement">
+                <CheckboxLabel label="No GPA Required" />
+                <CheckboxLabel label="2.0+" />
+                <CheckboxLabel label="2.5+" />
+                <CheckboxLabel label="3.0+" />
+                <CheckboxLabel label="3.5+" />
+              </FilterSection>
+
+              {/* 8. Entrance Requirement */}
+              <FilterSection title="Entrance Requirement">
+                <CheckboxLabel label="Entrance Required" />
+                <CheckboxLabel label="No Entrance" />
+                <CheckboxLabel label="Interview Only" />
+              </FilterSection>
+
+              {/* 9. Deadline */}
+              <FilterSection title="Deadline">
+                <CheckboxLabel label="Ending Soon" />
+                <CheckboxLabel label="This Week" />
+                <CheckboxLabel label="This Month" />
+                <CheckboxLabel label="Ongoing" />
+              </FilterSection>
+
+              {/* 10. Special Category */}
+              <FilterSection title="Special Category">
+                <SearchInput placeholder="Search category..." />
+                <CheckboxLabel label="Girls" />
+                <CheckboxLabel label="Dalit" />
+                <CheckboxLabel label="Remote Area" />
+                <CheckboxLabel label="Underprivileged" />
+                <CheckboxLabel label="Local Resident" />
+              </FilterSection>
+            </aside>
+
+            {/* Grid Container (Right Side) */}
+            <div className="w-full lg:w-3/4">
+              {/* Top Controls Section */}
+              <div className="mb-5 flex flex-col">
+                {/* Top Row: Count and Search */}
+                <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 pb-2">
+                  <div className="text-[14px] font-medium text-[#555] mb-2">
+                    Showing 1–20 of 256 scholarships
                   </div>
-
-                  <div>
-                    <label className="mb-3 block font-semibold text-slate-800">Study Mode Preference</label>
-                    <div className="flex flex-wrap gap-3">
-                      {studyModes.map((mode) => (
-                        <button
-                          key={mode}
-                          type="button"
-                          onClick={() => setForm((prev) => ({ ...prev, study_mode: mode }))}
-                          className={`rounded-full border px-5 py-2 text-sm font-medium transition-all ${
-                            form.study_mode === mode
-                              ? "border-blue-600 bg-blue-50 text-blue-700"
-                              : "border-slate-300 bg-white text-slate-600 hover:border-blue-400"
-                          }`}
-                        >
-                          {mode}
-                        </button>
-                      ))}
-                    </div>
-                  </div>
-
-                  <div>
-                    <label className="mb-3 block font-semibold text-slate-800">What is your academic score?</label>
+                  <div className="relative w-full sm:w-95">
+                    <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
                     <input
-                      value={form.academic_score}
-                      onChange={(e) => setForm((prev) => ({ ...prev, academic_score: e.target.value }))}
-                      placeholder="e.g. 3.8 or 85%"
-                      className="w-full rounded-xl border border-slate-300 bg-white px-4 py-3.5 text-slate-900 shadow-sm focus:border-blue-500 focus:outline-none"
+                      type="text"
+                      placeholder="Search scholarships, locations, courses..."
+                      className="w-full pl-9 pr-4 py-2.5 bg-white border border-gray-200 rounded-lg text-[14px] focus:outline-none focus:ring-1 focus:ring-blue-500/50 focus:border-blue-500 transition-all placeholder:text-gray-400 shadow-sm"
                     />
                   </div>
                 </div>
-              </>
-            )}
 
-            {step === 2 && (
-              <>
-                <h1 className="mb-6 text-3xl font-bold leading-tight text-slate-900 md:text-4xl">What Do You Want to Study?</h1>
+                {/* Bottom Row: Select All and Toggle */}
+                <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 pt-2 pb-4">
+                  <label className="flex items-center gap-1.5 cursor-pointer">
+                    <input
+                      type="checkbox"
+                      className="w-4.5 h-4.5 accent-[#0000ff] border-gray-300 rounded cursor-pointer bg-white"
+                    />
+                    <span className="text-[15px] font-semibold text-slate-900 ml-1">Select all</span>
+                    <span className="text-[14px] text-gray-500">(upto 5 quick apply scholarships)</span>
+                  </label>
 
-                <div className="space-y-5">
-                  <div>
-                    <label className="mb-2 block font-semibold text-slate-800">Intended Field of Study</label>
-                    <select
-                      value={form.intended_field}
-                      onChange={(e) => setForm((prev) => ({ ...prev, intended_field: e.target.value }))}
-                      className="w-full rounded-xl border border-slate-300 bg-white px-4 py-3 text-slate-700 shadow-sm focus:border-blue-500 focus:outline-none"
-                    >
-                      <option value="">Select your prospective major</option>
-                      {fieldOptions.map((opt) => (
-                        <option key={opt} value={opt}>{opt}</option>
-                      ))}
-                    </select>
-                  </div>
-
-                  <div className="space-y-3">
-                    <label className="block font-semibold text-slate-800">Are you willing to:</label>
-
-                    <div className="rounded-xl border border-slate-200 bg-white p-3 shadow-sm">
-                      <p className="mb-2 text-sm font-medium text-slate-700">Write scholarship essays?</p>
-                      <div className="flex gap-4 text-sm">
-                        <label className="flex items-center gap-2"><input type="radio" name="essays" checked={form.willing_essays === "Yes"} onChange={() => setForm((prev) => ({ ...prev, willing_essays: "Yes" }))} />Yes</label>
-                        <label className="flex items-center gap-2"><input type="radio" name="essays" checked={form.willing_essays === "No"} onChange={() => setForm((prev) => ({ ...prev, willing_essays: "No" }))} />No</label>
-                      </div>
-                    </div>
-
-                    <div className="rounded-xl border border-slate-200 bg-white p-3 shadow-sm">
-                      <p className="mb-2 text-sm font-medium text-slate-700">Attend scholarship interviews?</p>
-                      <div className="flex gap-4 text-sm">
-                        <label className="flex items-center gap-2"><input type="radio" name="interviews" checked={form.willing_interviews === "Yes"} onChange={() => setForm((prev) => ({ ...prev, willing_interviews: "Yes" }))} />Yes</label>
-                        <label className="flex items-center gap-2"><input type="radio" name="interviews" checked={form.willing_interviews === "No"} onChange={() => setForm((prev) => ({ ...prev, willing_interviews: "No" }))} />No</label>
-                      </div>
-                    </div>
-
-                    <div className="rounded-xl border border-slate-200 bg-white p-3 shadow-sm">
-                      <p className="mb-2 text-sm font-medium text-slate-700">Maintain minimum GPA requirement?</p>
-                      <div className="flex gap-4 text-sm">
-                        <label className="flex items-center gap-2"><input type="radio" name="gpa" checked={form.willing_gpa === "Yes"} onChange={() => setForm((prev) => ({ ...prev, willing_gpa: "Yes" }))} />Yes</label>
-                        <label className="flex items-center gap-2"><input type="radio" name="gpa" checked={form.willing_gpa === "No"} onChange={() => setForm((prev) => ({ ...prev, willing_gpa: "No" }))} />No</label>
-                      </div>
-                    </div>
+                  <div className="flex items-center gap-3">
+                    <span className="text-[15px] font-semibold text-slate-900">Quick Apply</span>
+                    <label className="relative inline-flex items-center cursor-pointer">
+                      <input type="checkbox" className="sr-only peer" />
+                      <div className="w-11 h-6 bg-[#cbd5e1] peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-0.5 after:left-0.5 after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-[#0000ff]"></div>
+                    </label>
                   </div>
                 </div>
-              </>
-            )}
 
-            {step === 3 && (
-              <>
-                <h1 className="mb-3 text-[2.3rem] font-bold leading-tight text-slate-800">Location & Citizenship</h1>
-                <p className="mb-8 text-lg font-medium text-slate-600">Many Nepal scholarships depend on district, province, or category.</p>
+                <hr className="border-gray-200 mb-6" />
+              </div>
 
-                <div className="space-y-6">
-                  <div className="grid grid-cols-1 gap-5 md:grid-cols-2">
-                    <div>
-                      <label className="mb-2 block text-sm font-bold text-slate-800">Your Province</label>
-                      <select
-                        value={form.province}
-                        onChange={(e) => setForm((prev) => ({ ...prev, province: e.target.value }))}
-                        className="w-full rounded-xl border border-slate-300 bg-white px-4 py-3.5 shadow-sm focus:border-blue-500 focus:outline-none"
-                      >
-                        <option value="">Select Province</option>
-                        {provinces.map((item) => (
-                          <option key={item} value={item}>{item}</option>
-                        ))}
-                      </select>
-                    </div>
+              {/* Scholarship Cards Grid */}
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+                {scholarships.map((scholarship, index) => (
+                  <React.Fragment key={scholarship.id}>
+                    {/* 1. Inject First Custom Banner EXACTLY after the 6th card (index 6) */}
+                    {index === 6 && (
+                      <div className="col-span-1 md:col-span-2 lg:col-span-3 w-full flex flex-col items-center mt-3 mb-5">
+                        {/* Banner Content */}
+                        <div className="w-full relative bg-linear-to-r from-white via-[#f0f6ff] to-[#e4f0ff] border border-[#dceaff] rounded-xl p-6 md:p-8 flex flex-col md:flex-row items-center justify-between overflow-hidden shadow-[0_2px_10px_-3px_rgba(0,0,0,0.05)]">
+                          <div className="absolute bottom-0 right-0 w-80 h-40 bg-blue-100 rounded-tl-full blur-3xl opacity-50 pointer-events-none"></div>
+                          <div className="absolute top-0 left-0 w-64 h-32 bg-white rounded-br-full blur-2xl opacity-70 pointer-events-none"></div>
 
-                    <div>
-                      <label className="mb-2 block text-sm font-bold text-slate-800">Your District</label>
-                      <select
-                        value={form.district}
-                        onChange={(e) => setForm((prev) => ({ ...prev, district: e.target.value }))}
-                        className="w-full rounded-xl border border-slate-300 bg-white px-4 py-3.5 shadow-sm focus:border-blue-500 focus:outline-none"
-                      >
-                        <option value="">Select District</option>
-                        {districts.map((item) => (
-                          <option key={item} value={item}>{item}</option>
-                        ))}
-                      </select>
-                    </div>
-                  </div>
+                          <span className="absolute top-4 right-5 text-[11px] font-semibold text-blue-400 italic">
+                            Sponsored
+                          </span>
 
-                  <div>
-                    <label className="mb-4 block text-sm font-bold text-slate-800">Are you planning to study:</label>
-                    <div className="space-y-3">
-                      {["Inside Nepal", "Abroad", "Both"].map((option) => (
-                        <button
-                          key={option}
-                          type="button"
-                          onClick={() => setForm((prev) => ({ ...prev, study_plan: option }))}
-                          className={`flex w-full items-center rounded-xl border p-4 text-left shadow-sm transition-all ${
-                            form.study_plan === option
-                              ? "border-blue-500 bg-blue-50"
-                              : "border-slate-300 bg-white hover:border-blue-400"
-                          }`}
-                        >
-                          <div className={`mr-4 h-5 w-5 rounded-full border-2 ${form.study_plan === option ? "border-blue-600 bg-blue-600" : "border-slate-300"}`}></div>
-                          <span className="font-semibold text-slate-700">{option}</span>
-                        </button>
-                      ))}
-                    </div>
-                  </div>
-                </div>
-              </>
-            )}
+                          <div className="flex flex-col items-center gap-2 z-10 shrink-0 mb-6 md:mb-0 md:ml-4">
+                            <div className="w-16 h-16 bg-white border border-gray-100 rounded-xl shadow-sm flex items-center justify-center p-2">
+                              <span className="font-bold text-blue-900 text-sm tracking-tight text-center">
+                                alorica
+                              </span>
+                            </div>
+                            <span className="text-[13px] font-semibold text-slate-600">Alorica</span>
+                          </div>
 
-            {step === 4 && (
-              <>
-                <h1 className="mb-3 text-[2.3rem] font-bold leading-tight text-slate-800">Tell us a bit more about yourself</h1>
-                <p className="mb-8 max-w-md text-lg font-medium text-slate-600">
-                  In Nepal, many scholarships are reserved for specific groups. This helps us match you with opportunities you're actually eligible for.
-                </p>
+                          <div className="flex flex-col items-center md:items-start text-center md:text-left z-10 max-w-2xl px-0 md:px-10 grow">
+                            <h3 className="text-[20px] md:text-[24px] font-extrabold text-[#1e293b] mb-4 tracking-tight leading-snug">
+                              Stability, growth, and job security - our promises to you
+                            </h3>
+                            <button className="bg-[#514df0] hover:bg-[#4338ca] text-white text-[14px] font-semibold px-6 py-2.5 rounded-full transition-colors flex items-center gap-2 shadow-md shadow-blue-500/20">
+                              Unlock new opportunities
+                              <ArrowUpRight className="w-4 h-4" />
+                            </button>
+                          </div>
 
-                <div className="space-y-7">
-                  <div>
-                    <label className="mb-3 block text-sm font-bold text-slate-800">Do you belong to any of these categories?</label>
-                    <div className="flex flex-wrap gap-3">
-                      {categoryOptions.map((option) => {
-                        const selected = form.categories.includes(option);
-                        return (
-                          <button
-                            key={option}
-                            type="button"
-                            onClick={() => toggleCategory(option)}
-                            className={`rounded-full border px-5 py-2.5 text-sm font-medium transition-all ${
-                              selected
-                                ? "border-blue-500 bg-blue-50 text-blue-700"
-                                : "border-slate-300 bg-white text-slate-700 hover:border-slate-400"
-                            }`}
-                          >
-                            {option}
+                          <div className="hidden md:flex relative z-10 shrink-0 mr-8 items-center justify-center">
+                            <div className="w-25 h-27.5 bg-blue-100/60 rounded-b-full rounded-t-lg flex items-center justify-center relative border border-white">
+                              <div className="bg-blue-200/50 p-4 rounded-full">
+                                <User className="w-8 h-8 text-[#514df0] fill-[#514df0]/20" />
+                              </div>
+                              <div className="absolute top-1 right-1 w-3.5 h-3.5 bg-gray-400 rounded-full border-2 border-white shadow-sm"></div>
+                            </div>
+                          </div>
+                        </div>
+
+                        {/* Carousel Indicators */}
+                        <div className="flex items-center gap-3 mt-5">
+                          <button className="w-7 h-7 rounded-full border border-gray-200 flex items-center justify-center text-gray-400 hover:text-gray-600 hover:bg-gray-50 transition-colors">
+                            <ChevronLeft className="w-4 h-4" />
                           </button>
-                        );
-                      })}
-                    </div>
-                  </div>
+                          <div className="flex items-center gap-2">
+                            <span className="w-1.5 h-1.5 rounded-full bg-gray-200"></span>
+                            <span className="w-4 h-1.5 rounded-full bg-slate-500"></span>
+                            <span className="w-1.5 h-1.5 rounded-full bg-gray-200"></span>
+                            <span className="w-1.5 h-1.5 rounded-full bg-gray-200"></span>
+                            <span className="w-1.5 h-1.5 rounded-full bg-gray-200"></span>
+                          </div>
+                          <button className="w-7 h-7 rounded-full border border-gray-200 flex items-center justify-center text-gray-400 hover:text-gray-600 hover:bg-gray-50 transition-colors">
+                            <ChevronRight className="w-4 h-4" />
+                          </button>
+                        </div>
+                      </div>
+                    )}
 
-                  <div>
-                    <label className="mb-2 block text-sm font-bold text-slate-800">Gender</label>
-                    <select
-                      value={form.gender}
-                      onChange={(e) => setForm((prev) => ({ ...prev, gender: e.target.value }))}
-                      className="w-full max-w-sm rounded-xl border border-slate-300 bg-white px-4 py-3.5 shadow-sm focus:border-blue-500 focus:outline-none"
-                    >
-                      <option value="">Select gender</option>
-                      {genders.map((item) => (
-                        <option key={item} value={item}>{item}</option>
-                      ))}
-                    </select>
-                  </div>
+                    {/* 2. Inject the Two Horizontal Cards EXACTLY after the 12th card (index 12) */}
+                    {index === 12 && (
+                      <div className="col-span-1 md:col-span-2 lg:col-span-3 w-full flex flex-col md:flex-row gap-5 my-3">
+                        {[1, 2].map((cardNum) => (
+                          <div
+                            key={cardNum}
+                            className="flex-1 min-h-45 bg-linear-to-br from-[#ebe5f6] to-[#d8d0ea] rounded-xl flex overflow-hidden shadow-sm flex-col sm:flex-row"
+                          >
+                            <div className="bg-white w-full sm:w-37.5 shrink-0 flex flex-col items-center justify-center text-center p-5 rounded-none sm:rounded-r-[60px] z-10">
+                              <div className="w-12.5 h-12.5 bg-white border border-gray-100 rounded-lg shadow-sm flex flex-col items-center justify-center mb-3 overflow-hidden relative">
+                                <div className="flex gap-0.75 rotate-45">
+                                  <div className="w-1 h-7.5 rounded-full bg-[#e9234b]"></div>
+                                  <div className="w-1 h-7.5 rounded-full bg-[#1a2749]"></div>
+                                  <div className="w-1 h-7.5 rounded-full bg-[#e9234b]"></div>
+                                </div>
+                              </div>
+                              <p className="text-[#4a5173] text-[13px] font-semibold leading-tight">
+                                Sutherland Global
+                                <br />
+                                Services
+                              </p>
+                            </div>
+                            <div className="flex-1 p-6 sm:p-6 sm:pl-10 flex flex-col justify-center items-center sm:items-start">
+                              <h2 className="text-[#212543] text-[18px] font-bold mb-4 leading-tight">
+                                Unlock new horizons for your career through skill enrichment with us.
+                              </h2>
+                              <button
+                                onClick={() => handleExploreClick(`Card ${cardNum}`)}
+                                className="bg-[#556cfe] hover:bg-[#4358db] text-white px-5 py-2 rounded-full text-[13px] font-semibold flex items-center gap-1.5 transition-all active:scale-95"
+                              >
+                                Explore opportunities
+                                <ArrowUpRight className="w-3.5 h-3.5" />
+                              </button>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    )}
 
-                  <div>
-                    <label className="mb-1 block text-sm font-bold text-slate-800">Annual Family Income</label>
-                    <p className="mb-3 text-xs text-slate-500">(This helps match need-based scholarships)</p>
-                    <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-                      {incomes.map((income) => (
-                        <button
-                          key={income}
-                          type="button"
-                          onClick={() => setForm((prev) => ({ ...prev, income }))}
-                          className={`flex items-center rounded-xl border p-4 text-left shadow-sm transition-all ${
-                            form.income === income
-                              ? "border-blue-500 bg-blue-50"
-                              : "border-slate-300 bg-white hover:border-blue-400"
-                          }`}
-                        >
-                          <div className={`mr-4 h-5 w-5 rounded-full border-2 ${form.income === income ? "border-blue-600 bg-blue-600" : "border-slate-300"}`}></div>
-                          <span className="font-semibold text-slate-700">{income}</span>
-                        </button>
-                      ))}
-                    </div>
-                  </div>
-                </div>
-              </>
-            )}
+                    <ScholarshipCard scholarship={scholarship} />
+                  </React.Fragment>
+                ))}
+              </div>
 
-            {step === 5 && (
-              <>
-                <h1 className="mb-3 text-[2.5rem] font-bold tracking-tight text-gray-900">Experience & Achievements</h1>
-                <p className="mb-8 text-[1.1rem] font-medium text-gray-500">Optional but improves matching</p>
-
-                <div className="max-w-md space-y-8">
-                  <div>
-                    <div className="mb-2 flex items-end justify-between">
-                      <label className="text-[0.95rem] font-bold text-gray-800">Talents / Skills</label>
-                      <span className="text-xs font-semibold text-gray-400">(optional)</span>
-                    </div>
-                    <select
-                      value={form.talent}
-                      onChange={(e) => setForm((prev) => ({ ...prev, talent: e.target.value }))}
-                      className="w-full rounded-lg border border-gray-300 bg-white px-4 py-3 text-gray-700 focus:border-indigo-500 focus:outline-none"
-                    >
-                      <option value="">Select an option</option>
-                      {talents.map((item) => (
-                        <option key={item} value={item}>{item}</option>
-                      ))}
-                    </select>
-                  </div>
-
-                  <div>
-                    <div className="mb-2 flex items-end justify-between">
-                      <label className="text-[0.95rem] font-bold text-gray-800">Achievements</label>
-                      <span className="text-xs font-semibold text-gray-400">(optional)</span>
-                    </div>
-                    <select
-                      value={form.achievement}
-                      onChange={(e) => setForm((prev) => ({ ...prev, achievement: e.target.value }))}
-                      className="w-full rounded-lg border border-gray-300 bg-white px-4 py-3 text-gray-700 focus:border-indigo-500 focus:outline-none"
-                    >
-                      <option value="">Select an option</option>
-                      {achievements.map((item) => (
-                        <option key={item} value={item}>{item}</option>
-                      ))}
-                    </select>
-                  </div>
-
-                  <div>
-                    <label className="mb-4 block text-[0.95rem] font-bold text-gray-800">Are you involved in:</label>
-                    <div className="space-y-3">
-                      {involvements.map((item) => (
-                        <label key={item} className="flex cursor-pointer items-center gap-3">
-                          <input
-                            type="checkbox"
-                            checked={form.involvements.includes(item)}
-                            onChange={() => toggleInvolvement(item)}
-                            className="h-5 w-5 accent-indigo-600"
-                          />
-                          <span className="text-[0.95rem] font-medium text-gray-700">{item}</span>
-                        </label>
-                      ))}
-                    </div>
-                  </div>
-                </div>
-              </>
-            )}
-
-            <div className="pt-8">
-              <div className="flex items-center gap-3">
-                {step > 1 ? (
+              {/* Pagination */}
+              <div className="flex items-center justify-center gap-2 mt-12 mb-4">
+                <button className="px-4 py-2 text-[14px] font-medium text-gray-500 bg-white border border-gray-200 rounded-lg hover:bg-gray-50 hover:text-gray-800 transition-colors mr-2">
+                  Previous
+                </button>
+                <button className="w-10 h-10 flex items-center justify-center text-[14px] font-medium text-white bg-[#0000ff] rounded-lg shadow-sm shadow-blue-500/30">
+                  1
+                </button>
+                {[2, 3, 4, 5].map((page) => (
                   <button
-                    type="button"
-                    onClick={() => setStep((prev) => Math.max(1, prev - 1))}
-                    className="rounded-xl border border-slate-300 px-6 py-3 font-semibold text-slate-700"
+                    key={page}
+                    className="w-10 h-10 flex items-center justify-center text-[14px] font-medium text-gray-600 bg-white border border-gray-200 rounded-lg hover:bg-gray-50 hover:text-gray-900 transition-colors"
                   >
-                    Back
+                    {page}
                   </button>
-                ) : null}
-
-                {step < 5 ? (
-                  <button
-                    type="button"
-                    disabled={!canContinue}
-                    onClick={() => setStep((prev) => Math.min(5, prev + 1))}
-                    className={`rounded-xl px-8 py-3 font-semibold transition-all ${
-                      canContinue
-                        ? "bg-blue-600 text-white hover:bg-blue-700"
-                        : "cursor-not-allowed bg-slate-300 text-slate-500"
-                    }`}
-                  >
-                    Next
-                  </button>
-                ) : (
-                  <button
-                    type="button"
-                    onClick={handleShowResults}
-                    disabled={loading}
-                    className="rounded-xl bg-gray-900 px-6 py-3.5 font-semibold text-white transition-all hover:bg-gray-800"
-                  >
-                    {loading ? "Loading..." : "Show results"}
-                  </button>
-                )}
+                ))}
+                <button className="px-4 py-2 text-[14px] font-medium text-gray-700 bg-white border border-gray-200 rounded-lg hover:bg-gray-50 hover:text-gray-900 transition-colors ml-2">
+                  Next
+                </button>
               </div>
             </div>
           </div>
         </div>
+      </div>
 
-        <div className="hidden w-[45%] items-center justify-center p-8 lg:flex">
-          <img
-            src={stepImage[step]}
-            alt="Scholarship Finder"
-            className="h-auto w-full max-w-lg object-contain mix-blend-multiply"
-          />
+      {/* Toast Notification */}
+      {toast && (
+        <div className="fixed bottom-8 left-1/2 -translate-x-1/2 bg-[#212543] text-white px-6 py-3 rounded-lg text-sm font-medium shadow-lg z-1000 animate-in fade-in slide-in-from-bottom-10 duration-300">
+          {toast}
         </div>
-      </main>
+      )}
     </div>
   );
 };
 
-export default ScholarshipFinderPage;
+export default FeaturedScholarshipsPage;

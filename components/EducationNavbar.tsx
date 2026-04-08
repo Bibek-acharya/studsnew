@@ -4,20 +4,20 @@ import React, { useMemo, useRef, useState, useEffect } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { SearchBar } from "@/components/SearchBar";
-import { 
-  Bell, 
-  Clock, 
-  Archive, 
-  ArchiveRestore, 
-  Trash2, 
-  CheckCircle2, 
-  User, 
-  FileText, 
-  Bookmark, 
-  Sparkles, 
-  Settings, 
-  LogOut, 
-  MessageCircleQuestion, 
+import {
+  Bell,
+  Clock,
+  Archive,
+  ArchiveRestore,
+  Trash2,
+  CheckCircle2,
+  User,
+  FileText,
+  Bookmark,
+  Sparkles,
+  Settings,
+  LogOut,
+  MessageCircleQuestion,
   UserCheck,
   Award,
   Building,
@@ -25,7 +25,7 @@ import {
   ChevronDown,
   X,
   ChevronUp,
-  Menu
+  Menu,
 } from "lucide-react";
 
 interface EducationNavbarProps {
@@ -45,20 +45,19 @@ const routeMap: Record<string, string> = {
   compareColleges: "/compare-colleges",
   courseFinder: "/course-finder",
   bookCounselling: "/counseling",
+  scholarshipProviderZone: "/scholarship-provider",
+  scholarshipMain: "/",
   scholarshipFinderTool: "/scholarship-finder",
   collegeRecommenderTool: "/college-recommender",
-  scholarshipFinder: "/scholarship-finder",
-  scholarshipProviderZone: "/",
-  scholarshipMain: "/",
   campusForum: "/campus-forum",
   admissionsDiscovery: "/admissions",
   entranceDiscovery: "/entrance",
   universitiesPage: "/",
   rankingsPage: "/",
-  newsPage: "/",
-  blogPage: "/",
-  eventsPage: "/",
-  contact: "/",
+  newsPage: "/news",
+  blogPage: "/blogs",
+  eventsPage: "/events",
+  contact: "/contact-us",
   institutionZone: "/",
   studentDashboard: "/",
   writeReview: "/",
@@ -86,7 +85,11 @@ const DesktopDropdown: React.FC<{
   onToggle: () => void;
 }> = ({ label, children, alignRight = false, isOpen, onToggle }) => (
   <div className="menu-anchor relative h-full shrink-0">
-    <button type="button" onClick={onToggle} className="nav-link flex h-full items-center gap-1">
+    <button
+      type="button"
+      onClick={onToggle}
+      className="nav-link flex h-full items-center gap-1"
+    >
       <span>{label}</span>
       <svg
         width="14"
@@ -321,11 +324,7 @@ const EducationNavbar: React.FC<EducationNavbarProps> = ({
       prev.map((n) => {
         if (currentNotifTab === "all" && !n.isArchived)
           return { ...n, isRead: true };
-        if (
-          currentNotifTab === "following" &&
-          !n.isArchived &&
-          n.isFollowing
-        )
+        if (currentNotifTab === "following" && !n.isArchived && n.isFollowing)
           return { ...n, isRead: true };
         if (
           currentNotifTab === "system" &&
@@ -428,7 +427,6 @@ const EducationNavbar: React.FC<EducationNavbarProps> = ({
               <SearchBar />
             </div>
 
-
             <div className="flex items-center gap-1.5 xs:gap-2 sm:gap-3 shrink-0">
               {/* Write a Review - Desktop */}
               <button
@@ -456,14 +454,14 @@ const EducationNavbar: React.FC<EducationNavbarProps> = ({
                 <button
                   onClick={() =>
                     setActiveMenu((prev) =>
-                      prev === "notification-menu" ? null : "notification-menu"
+                      prev === "notification-menu" ? null : "notification-menu",
                     )
                   }
                   className="relative flex items-center justify-center w-9.5 h-9.5 rounded-full border border-gray-200 hover:bg-gray-50 transition-colors text-[#475569] shrink-0"
                 >
                   <Bell size={18} />
-                  {notifications.filter((n) => !n.isRead && !n.isArchived).length >
-                    0 && (
+                  {notifications.filter((n) => !n.isRead && !n.isArchived)
+                    .length > 0 && (
                     <span className="absolute -top-1.5 -right-1.5 flex h-5 w-5 items-center justify-center rounded-full border-2 border-white bg-[#f44336] text-[11px] font-bold text-white shadow-sm">
                       {
                         notifications.filter((n) => !n.isRead && !n.isArchived)
@@ -482,8 +480,9 @@ const EducationNavbar: React.FC<EducationNavbarProps> = ({
                           <h3 className="text-lg font-semibold text-gray-900">
                             Notifications
                           </h3>
-                          {notifications.filter((n) => !n.isRead && !n.isArchived)
-                            .length > 0 && (
+                          {notifications.filter(
+                            (n) => !n.isRead && !n.isArchived,
+                          ).length > 0 && (
                             <span className="rounded-full bg-blue-600 px-2 py-0.5 text-xs font-bold text-white shadow-sm">
                               {
                                 notifications.filter(
@@ -501,19 +500,21 @@ const EducationNavbar: React.FC<EducationNavbarProps> = ({
                         </button>
                       </div>
                       <div className="no-scrollbar flex gap-4 overflow-x-auto whitespace-nowrap border-b border-gray-50 bg-gray-50/50 px-4 py-2 text-sm">
-                        {["all", "following", "system", "archive"].map((tab) => (
-                          <button
-                            key={tab}
-                            onClick={() => setCurrentNotifTab(tab)}
-                            className={`pb-1 capitalize transition-all ${
-                              currentNotifTab === tab
-                                ? "border-b-2 border-blue-600 font-medium text-blue-600"
-                                : "text-gray-500 hover:text-gray-700"
-                            }`}
-                          >
-                            {tab}
-                          </button>
-                        ))}
+                        {["all", "following", "system", "archive"].map(
+                          (tab) => (
+                            <button
+                              key={tab}
+                              onClick={() => setCurrentNotifTab(tab)}
+                              className={`pb-1 capitalize transition-all ${
+                                currentNotifTab === tab
+                                  ? "border-b-2 border-blue-600 font-medium text-blue-600"
+                                  : "text-gray-500 hover:text-gray-700"
+                              }`}
+                            >
+                              {tab}
+                            </button>
+                          ),
+                        )}
                       </div>
                       <div className="no-scrollbar flex max-h-75 flex-col overflow-y-auto">
                         {notifications
@@ -523,7 +524,8 @@ const EducationNavbar: React.FC<EducationNavbarProps> = ({
                               return !n.isArchived && n.isFollowing;
                             if (currentNotifTab === "system")
                               return !n.isArchived && n.type === "system";
-                            if (currentNotifTab === "archive") return n.isArchived;
+                            if (currentNotifTab === "archive")
+                              return n.isArchived;
                             return true;
                           })
                           .map((notif) => (
@@ -570,7 +572,9 @@ const EducationNavbar: React.FC<EducationNavbarProps> = ({
                                   )}
                                 </button>
                                 <button
-                                  onClick={(e) => removeNotification(notif.id, e)}
+                                  onClick={(e) =>
+                                    removeNotification(notif.id, e)
+                                  }
                                   className="rounded-md p-1 px-1.5 text-gray-400 transition-colors hover:bg-red-50 hover:text-red-500"
                                 >
                                   <Trash2 size={16} />
@@ -593,13 +597,30 @@ const EducationNavbar: React.FC<EducationNavbarProps> = ({
               <div className="hidden lg:block w-px h-8 bg-gray-200"></div>
               <div className="hidden sm:flex items-center gap-3 cursor-pointer group relative py-1">
                 {!user ? (
-                   <div className="flex items-center overflow-hidden rounded-md text-[13px] font-medium shadow-sm">
-                    <button onClick={() => go("login")} className="border-r border-gray-200 bg-gray-100 px-3 py-2 text-[#334155] transition-colors hover:bg-gray-200">Login</button>
-                    <button onClick={() => go("signup")} className="bg-brand-blue px-3 py-2 text-white transition-colors hover:bg-brand-hover">Register</button>
+                  <div className="flex items-center overflow-hidden rounded-md text-[13px] font-medium shadow-sm">
+                    <button
+                      onClick={() => go("login")}
+                      className="border-r border-gray-200 bg-gray-100 px-3 py-2 text-[#334155] transition-colors hover:bg-gray-200"
+                    >
+                      Login
+                    </button>
+                    <button
+                      onClick={() => go("signup")}
+                      className="bg-brand-blue px-3 py-2 text-white transition-colors hover:bg-brand-hover"
+                    >
+                      Register
+                    </button>
                   </div>
                 ) : (
                   <>
-                    <button onClick={() => setActiveMenu(prev => prev === 'profile-menu' ? null : 'profile-menu')} className="flex items-center gap-3">
+                    <button
+                      onClick={() =>
+                        setActiveMenu((prev) =>
+                          prev === "profile-menu" ? null : "profile-menu",
+                        )
+                      }
+                      className="flex items-center gap-3"
+                    >
                       <div className="relative">
                         <div className="flex h-9 w-9 items-center justify-center rounded-full bg-brand-blue text-white font-bold text-sm shadow-sm ring-2 ring-white">
                           <span>{initials}</span>
@@ -608,23 +629,44 @@ const EducationNavbar: React.FC<EducationNavbarProps> = ({
                       </div>
                       <div className="hidden lg:flex flex-col text-left">
                         <div className="flex items-center gap-1">
-                          <span className="text-[14px] font-bold text-gray-800 leading-tight group-hover:text-primary transition-colors">{user.first_name} {user.last_name}</span>
-                          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="#0000FF"><path stroke="none" d="M0 0h24v24H0z" fill="none" /><path d="M12.01 2.011a3.2 3.2 0 0 1 2.113 .797l.154 .145l.698 .698a1.2 1.2 0 0 0 .71 .341l.135 .008h1a3.2 3.2 0 0 1 3.195 3.018l.005 .182v1c0 .27 .092 .533 .258 .743l.09 .1l.697 .698a3.2 3.2 0 0 1 .147 4.382l-.145 .154l-.698 .698a1.2 1.2 0 0 0 -.341 .71l-.008 .135v1a3.2 3.2 0 0 1 -3.018 3.195l-.182 .005h-1a1.2 1.2 0 0 0 -.743 .258l-.1 .09l-.698 .697a3.2 3.2 0 0 1 -4.382 .147l-.154 -.145l-.698 -.698a1.2 1.2 0 0 0 -.71 -.341l-.135 -.008h-1a3.2 3.2 0 0 1 -3.195 -3.018l-.005 -.182v-1a1.2 1.2 0 0 0 -.258 -.743l-.09 -.1l-.697 -.698a3.2 3.2 0 0 1 -.147 -4.382l.145 -.154l.698 -.698a1.2 1.2 0 0 0 .341 -.71l.008 -.135v-1l.005 -.182a3.2 3.2 0 0 1 3.013 -3.013l.182 -.005h1a1.2 1.2 0 0 0 .743 -.258l.1 -.09l.698 -.697a3.2 3.2 0 0 1 2.269 -.944zm3.697 7.282a1 1 0 0 0 -1.414 0l-3.293 3.292l-1.293 -1.292l-.094 -.083a1 1 0 0 0 -1.32 1.497l2 2l.094 .083a1 1 0 0 0 1.32 -.083l4 -4l.083 -.094a1 1 0 0 0 -.083 -1.32z" /></svg>
+                          <span className="text-[14px] font-bold text-gray-800 leading-tight group-hover:text-primary transition-colors">
+                            {user.first_name} {user.last_name}
+                          </span>
+                          <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            width="16"
+                            height="16"
+                            viewBox="0 0 24 24"
+                            fill="#0000FF"
+                          >
+                            <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+                            <path d="M12.01 2.011a3.2 3.2 0 0 1 2.113 .797l.154 .145l.698 .698a1.2 1.2 0 0 0 .71 .341l.135 .008h1a3.2 3.2 0 0 1 3.195 3.018l.005 .182v1c0 .27 .092 .533 .258 .743l.09 .1l.697 .698a3.2 3.2 0 0 1 .147 4.382l-.145 .154l-.698 .698a1.2 1.2 0 0 0 -.341 .71l-.008 .135v1a3.2 3.2 0 0 1 -3.018 3.195l-.182 .005h-1a1.2 1.2 0 0 0 -.743 .258l-.1 .09l-.698 .697a3.2 3.2 0 0 1 -4.382 .147l-.154 -.145l-.698 -.698a1.2 1.2 0 0 0 -.71 -.341l-.135 -.008h-1a3.2 3.2 0 0 1 -3.195 -3.018l-.005 -.182v-1a1.2 1.2 0 0 0 -.258 -.743l-.09 -.1l-.697 -.698a3.2 3.2 0 0 1 -.147 -4.382l.145 -.154l.698 -.698a1.2 1.2 0 0 0 .341 -.71l.008 -.135v-1l.005 -.182a3.2 3.2 0 0 1 3.013 -3.013l.182 -.005h1a1.2 1.2 0 0 0 .743 -.258l.1 -.09l.698 -.697a3.2 3.2 0 0 1 2.269 -.944zm3.697 7.282a1 1 0 0 0 -1.414 0l-3.293 3.292l-1.293 -1.292l-.094 -.083a1 1 0 0 0 -1.32 1.497l2 2l.094 .083a1 1 0 0 0 1.32 -.083l4 -4l.083 -.094a1 1 0 0 0 -.083 -1.32z" />
+                          </svg>
                         </div>
-                        <span className="text-[12px] text-gray-500 leading-tight font-semibold mt-0.5">{profileLabel}</span>
+                        <span className="text-[12px] text-gray-500 leading-tight font-semibold mt-0.5">
+                          {profileLabel}
+                        </span>
                       </div>
-                      <ChevronDown size={14} className="text-gray-400 group-hover:text-primary transition-colors ml-1 hidden lg:block" />
+                      <ChevronDown
+                        size={14}
+                        className="text-gray-400 group-hover:text-primary transition-colors ml-1 hidden lg:block"
+                      />
                     </button>
 
-                    {activeMenu === 'profile-menu' && (
+                    {activeMenu === "profile-menu" && (
                       <div className="absolute top-full right-0 pt-3 z-200 cursor-default font-inter">
                         <div className="w-67.5 bg-white rounded-[18px] border border-gray-100/80 p-2.5 text-[14px] text-gray-600 font-medium select-none shadow-[0_8px_30px_rgb(0,0,0,0.08)] relative">
                           <div className="absolute -top-1.5 right-6 w-3 h-3 bg-white border-t border-l border-gray-100/80 transform rotate-45"></div>
                           <div className="flex flex-col relative z-10 bg-white rounded-xl">
-                            <div onClick={() => go("studentDashboard")} className="flex flex-col px-3 py-3 bg-[#f4f4f5] rounded-xl cursor-pointer mb-1 hover:bg-gray-100 transition-all">
+                            <div
+                              onClick={() => go("studentDashboard")}
+                              className="flex flex-col px-3 py-3 bg-[#f4f4f5] rounded-xl cursor-pointer mb-1 hover:bg-gray-100 transition-all"
+                            >
                               <div className="flex items-center gap-3 text-gray-900">
                                 <User size={18} />
-                                <span className="font-semibold">View Profile</span>
+                                <span className="font-semibold">
+                                  View Profile
+                                </span>
                               </div>
                               <div className="mt-2.5 pl-7.5">
                                 <div className="flex justify-between items-center text-[11px] font-semibold text-gray-500 mb-1.5">
@@ -636,17 +678,28 @@ const EducationNavbar: React.FC<EducationNavbarProps> = ({
                                 </div>
                               </div>
                             </div>
-                            <button onClick={() => go("studentDashboard")} className="flex items-center gap-3 px-3 py-2.5 hover:bg-gray-50 rounded-xl transition-all">
+                            <button
+                              onClick={() => go("studentDashboard")}
+                              className="flex items-center gap-3 px-3 py-2.5 hover:bg-gray-50 rounded-xl transition-all"
+                            >
                               <FileText size={18} />
                               <span>My Application</span>
                             </button>
-                            <button onClick={() => go("studentDashboard")} className="flex items-center gap-3 px-3 py-2.5 hover:bg-gray-50 rounded-xl transition-all">
+                            <button
+                              onClick={() => go("studentDashboard")}
+                              className="flex items-center gap-3 px-3 py-2.5 hover:bg-gray-50 rounded-xl transition-all"
+                            >
                               <Bookmark size={18} />
                               <span>Saved College</span>
-                              <span className="ml-auto text-gray-400 text-xs font-semibold">12</span>
+                              <span className="ml-auto text-gray-400 text-xs font-semibold">
+                                12
+                              </span>
                             </button>
                             <div className="h-px bg-gray-100 my-1.5 mx-2"></div>
-                            <button onClick={onLogout} className="flex items-center gap-3 px-3 py-2.5 hover:bg-red-50 text-red-500 rounded-xl transition-all">
+                            <button
+                              onClick={onLogout}
+                              className="flex items-center gap-3 px-3 py-2.5 hover:bg-red-50 text-red-500 rounded-xl transition-all"
+                            >
                               <LogOut size={18} className="scale-x-[-1]" />
                               <span>Sign out</span>
                             </button>
@@ -666,17 +719,22 @@ const EducationNavbar: React.FC<EducationNavbarProps> = ({
                 {isMobileOpen ? <X size={20} /> : <Menu size={20} />}
               </button>
             </div>
-
           </div>
         </div>
 
         {/* Nav Links Row - Desktop */}
         <div className="relative hidden w-full border-b border-gray-200 px-3 xs:px-4 sm:px-6 lg:px-8 md:block">
-            <div className="mx-auto flex h-11 sm:h-11.5 w-full max-w-350 items-center gap-3 sm:gap-4 overflow-visible">
-              <nav className="no-scrollbar relative flex h-full min-w-0 flex-1 items-center gap-x-4 sm:gap-x-5 md:gap-x-6 lg:gap-x-7 xl:gap-x-8 overflow-visible whitespace-nowrap pr-2 text-[13px] sm:text-[14px] lg:text-[15px] font-medium text-[#212529]">
-                <NavItem onClick={() => go("findCollege")}>Find College</NavItem>
+          <div className="mx-auto flex h-11 sm:h-11.5 w-full max-w-350 items-center gap-3 sm:gap-4 overflow-visible">
+            <nav className="no-scrollbar relative flex h-full min-w-0 flex-1 items-center gap-x-4 sm:gap-x-5 md:gap-x-6 lg:gap-x-7 xl:gap-x-8 overflow-visible whitespace-nowrap pr-2 text-[13px] sm:text-[14px] lg:text-[15px] font-medium text-[#212529]">
+              <NavItem onClick={() => go("findCollege")}>Find College</NavItem>
 
-                <DesktopDropdown label="Tools" isOpen={activeMenu === "tools"} onToggle={() => setActiveMenu((prev) => prev === "tools" ? null : "tools")}>
+              <DesktopDropdown
+                label="Tools"
+                isOpen={activeMenu === "tools"}
+                onToggle={() =>
+                  setActiveMenu((prev) => (prev === "tools" ? null : "tools"))
+                }
+              >
                 <DropdownCard
                   icon="fa-shuffle"
                   color="text-blue-500"
@@ -702,7 +760,7 @@ const EducationNavbar: React.FC<EducationNavbarProps> = ({
                   icon="fa-award"
                   color="text-yellow-500"
                   title="Scholarship Finder"
-                  desc="Discover scholarships tailored to your academic profile and financial needs."
+                  desc="Find scholarships tailored to your profile and needs."
                   onClick={() => go("scholarshipFinderTool")}
                 />
                 <DropdownCard
@@ -714,14 +772,15 @@ const EducationNavbar: React.FC<EducationNavbarProps> = ({
                 />
               </DesktopDropdown>
 
-              <DesktopDropdown label="Scholarships" isOpen={activeMenu === "scholarships"} onToggle={() => setActiveMenu((prev) => prev === "scholarships" ? null : "scholarships")}>
-                <DropdownCard
-                  icon="fa-graduation-cap"
-                  color="text-yellow-500"
-                  title="Find Scholarship"
-                  desc="Browse available scholarships to fund your education."
-                  onClick={() => go("scholarshipFinder")}
-                />
+              <DesktopDropdown
+                label="Scholarships"
+                isOpen={activeMenu === "scholarships"}
+                onToggle={() =>
+                  setActiveMenu((prev) =>
+                    prev === "scholarships" ? null : "scholarships",
+                  )
+                }
+              >
                 <DropdownCard
                   icon="fa-building-ngo"
                   color="text-indigo-500"
@@ -733,7 +792,15 @@ const EducationNavbar: React.FC<EducationNavbarProps> = ({
 
               <NavItem onClick={() => go("campusForum")}>Campus Feed</NavItem>
 
-              <DesktopDropdown label="Admission" isOpen={activeMenu === "admission"} onToggle={() => setActiveMenu((prev) => prev === "admission" ? null : "admission")}>
+              <DesktopDropdown
+                label="Admission"
+                isOpen={activeMenu === "admission"}
+                onToggle={() =>
+                  setActiveMenu((prev) =>
+                    prev === "admission" ? null : "admission",
+                  )
+                }
+              >
                 <DropdownCard
                   icon="fa-school"
                   color="text-blue-500"
@@ -758,14 +825,23 @@ const EducationNavbar: React.FC<EducationNavbarProps> = ({
                   color="text-green-600"
                   title="Diploma / CTEVT"
                   desc="Explore skills-oriented technical and vocational education."
-                  onClick={() => go("admissionsDiscovery", { level: "diploma" })}
+                  onClick={() =>
+                    go("admissionsDiscovery", { level: "diploma" })
+                  }
                 />
               </DesktopDropdown>
 
               <NavItem onClick={() => go("entranceDiscovery")}>
                 Entrance
               </NavItem>
-              <DesktopDropdown label="More" alignRight isOpen={activeMenu === "more"} onToggle={() => setActiveMenu((prev) => prev === "more" ? null : "more")}>
+              <DesktopDropdown
+                label="More"
+                alignRight
+                isOpen={activeMenu === "more"}
+                onToggle={() =>
+                  setActiveMenu((prev) => (prev === "more" ? null : "more"))
+                }
+              >
                 <DropdownCard
                   icon="fa-newspaper"
                   color="text-blue-500"
@@ -845,210 +921,409 @@ const EducationNavbar: React.FC<EducationNavbarProps> = ({
         )}
 
         {/* Mobile Menu Dropdown (Visible only when toggled on smaller screens) */}
-        <div 
+        <div
           className={`${isMobileOpen ? "block" : "hidden"} md:hidden absolute top-full left-0 w-full bg-white border-t border-gray-200 shadow-lg px-4 py-4 z-200 max-h-[calc(100vh-70px)] overflow-y-auto no-scrollbar font-inter transition-all duration-300`}
         >
-            {/* Mobile Search */}
-            <div className="flex items-center border border-gray-300 rounded-full h-11 bg-white focus-within:border-brand-blue focus-within:ring-1 focus-within:ring-brand-blue overflow-hidden mb-5">
-                <div className="flex items-center gap-2 px-4 h-full flex-1 w-full text-gray-500">
-                    <Search size={16} className="text-gray-400" />
-                    <input 
-                      type="text" 
-                      placeholder="Search +2 science colleges..." 
-                      className="w-full h-full outline-none text-[14px] font-semibold text-gray-800 placeholder-gray-400 bg-transparent"
-                    />
-                </div>
+          {/* Mobile Search */}
+          <div className="flex items-center border border-gray-300 rounded-full h-11 bg-white focus-within:border-brand-blue focus-within:ring-1 focus-within:ring-brand-blue overflow-hidden mb-5">
+            <div className="flex items-center gap-2 px-4 h-full flex-1 w-full text-gray-500">
+              <Search size={16} className="text-gray-400" />
+              <input
+                type="text"
+                placeholder="Search +2 science colleges..."
+                className="w-full h-full outline-none text-[14px] font-semibold text-gray-800 placeholder-gray-400 bg-transparent"
+              />
             </div>
+          </div>
 
-            {/* Mobile Auth Profile */}
-            <div className="sm:hidden">
-                {!user ? (
-                  <div className="grid grid-cols-2 gap-3 mb-5">
-                    <button onClick={() => go("login")} className="flex items-center justify-center gap-2 rounded-xl border border-gray-200 bg-white py-3 text-sm font-semibold text-gray-700 transition-all active:scale-[0.98]">
-                       <User size={16} /> <span>Log in</span>
-                    </button>
-                    <button onClick={() => go("signup")} className="flex items-center justify-center gap-2 rounded-xl bg-blue-600 py-3 text-sm font-semibold text-white transition-all active:scale-[0.98]">
-                      <span>Join Now</span>
-                    </button>
-                  </div>
-                ) : (
-                  <>
-                    <div 
-                      className="flex items-center justify-between mb-5 p-3 rounded-lg border border-gray-200 bg-gray-50 cursor-pointer"
-                      onClick={() => toggleMobileMenu('profile')}
-                    >
-                        <div className="flex items-center gap-3">
-                            <div className="relative">
-                                <div className="flex h-10 w-10 items-center justify-center rounded-full bg-blue-600 text-white font-bold text-sm border border-gray-200">
-                                   <span>{initials}</span>
-                                </div>
-                                <div className="absolute bottom-0 right-0 w-2.5 h-2.5 bg-green-500 border-2 border-white rounded-full"></div>
-                            </div>
-                            <div className="flex flex-col justify-center text-left">
-                                <div className="flex items-center gap-1">
-                                    <span className="text-[15px] font-bold text-gray-800 leading-tight">{user.first_name} {user.last_name}</span>
-                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="#0040ff" className="icon icon-tabler icons-tabler-filled icon-tabler-rosette-discount-check"><path stroke="none" d="M0 0h24v24H0z" fill="none" /><path d="M12.01 2.011a3.2 3.2 0 0 1 2.113 .797l.154 .145l.698 .698a1.2 1.2 0 0 0 .71 .341l.135 .008h1a3.2 3.2 0 0 1 3.195 3.018l.005 .182v1c0 .27 .092 .533 .258 .743l.09 .1l.697 .698a3.2 3.2 0 0 1 .147 4.382l-.145 .154l-.698 .698a1.2 1.2 0 0 0 -.341 .71l-.008 .135v1a3.2 3.2 0 0 1 -3.018 3.195l-.182 .005h-1a1.2 1.2 0 0 0 -.743 .258l-.1 .09l-.698 .697a3.2 3.2 0 0 1 -4.382 .147l-.154 -.145l-.698 -.698a1.2 1.2 0 0 0 -.71 -.341l-.135 -.008h-1a3.2 3.2 0 0 1 -3.195 -3.018l-.005 -.182v-1a1.2 1.2 0 0 0 -.258 -.743l-.09 -.1l-.697 -.698a3.2 3.2 0 0 1 -.147 -4.382l.145 -.154l.698 -.698a1.2 1.2 0 0 0 .341 -.71l.008 -.135v-1l.005 -.182a3.2 3.2 0 0 1 3.013 -3.013l.182 -.005h1a1.2 1.2 0 0 0 .743 -.258l.1 -.09l.698 -.697a3.2 3.2 0 0 1 2.269 -.944zm3.697 7.282a1 1 0 0 0 -1.414 0l-3.293 3.292l-1.293 -1.292l-.094 -.083a1 1 0 0 0 -1.32 1.497l2 2l.094 .083a1 1 0 0 0 1.32 -.083l4 -4l.083 -.094a1 1 0 0 0 -.083 -1.32z" /></svg>
-                                </div>
-                                <span className="text-[13px] text-gray-500 leading-tight font-semibold mt-0.5">{profileLabel}</span>
-                            </div>
-                        </div>
-                        <ChevronDown size={14} className={`text-gray-400 transition-transform duration-200 ${mobileMenus['profile'] ? "rotate-180" : ""}`} />
-                    </div>
-
-                    <div className={`${mobileMenus['profile'] ? "flex" : "hidden"} flex-col mb-5 -mt-3`}>
-                        <div className="w-full bg-white rounded-[18px] border border-gray-100/80 p-2.5 text-[14px] text-gray-600 font-medium select-none shadow-sm">
-                            <div onClick={() => go("studentDashboard")} className="flex flex-col px-3 py-3 bg-[#f4f4f5] rounded-xl cursor-pointer mb-1 hover:bg-gray-100 transition-all duration-200">
-                                <div className="flex items-center gap-3 text-gray-900">
-                                    <User size={18} className="text-gray-500" />
-                                    <span className="font-semibold">View Profile</span>
-                                </div>
-                                <div className="mt-2.5 pl-7.5">
-                                    <div className="flex justify-between items-center text-[11px] font-semibold text-gray-500 mb-1.5">
-                                        <span>Profile Completion</span>
-                                        <span className="text-[#5468FF]">80%</span>
-                                    </div>
-                                    <div className="w-full bg-gray-200/80 rounded-full h-1.5 border border-gray-100 shadow-inner">
-                                        <div className="bg-brand-blue h-1.5 rounded-full w-[80%]"></div>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div onClick={() => go("studentDashboard")} className="flex items-center gap-3 px-3 py-2.5 hover:bg-gray-50 rounded-xl cursor-pointer mb-0.5 transition-all">
-                                <FileText size={18} className="text-gray-500" />
-                                <span>My Application</span>
-                                <span className="ml-auto w-2.5 h-2.5 bg-red-500 rounded-full shadow-sm"></span>
-                            </div>
-
-                            <div onClick={() => go("studentDashboard")} className="flex items-center gap-3 px-3 py-2.5 hover:bg-gray-50 rounded-xl cursor-pointer mb-0.5 transition-all">
-                                <Bookmark size={18} className="text-gray-500" />
-                                <span>Saved College</span>
-                                <span className="ml-auto text-gray-400 text-xs font-bold leading-none">12</span>
-                            </div>
-
-                            <div onClick={() => go("studentDashboard")} className="flex items-center gap-3 px-3 py-2.5 hover:bg-gray-50 rounded-xl cursor-pointer mb-0.5 transition-all">
-                                <Sparkles size={18} className="text-gray-500" />
-                                <span>Match</span>
-                                <span className="ml-auto bg-[#5468FF]/10 text-[#5468FF] text-[11px] font-bold px-2 py-0.5 rounded-full">3</span>
-                            </div>
-
-                            <div className="h-px bg-gray-100 my-1.5 mx-2"></div>
-
-                            <div onClick={() => go("studentDashboard")} className="flex items-center gap-3 px-3 py-2.5 hover:bg-gray-50 rounded-xl cursor-pointer mb-0.5 transition-all">
-                                <Bell size={18} className="text-gray-500" />
-                                <span>Notifications</span>
-                                <span className="ml-auto bg-red-500 text-white text-[10px] font-bold px-1.5 py-[1.5px] rounded-full leading-none">2</span>
-                            </div>
-
-                            <div onClick={() => go("studentDashboard")} className="flex items-center gap-3 px-3 py-2.5 hover:bg-gray-50 rounded-xl cursor-pointer transition-all">
-                                <Settings size={18} className="text-gray-500" />
-                                <span>Settings</span>
-                            </div>
-
-                            <div className="h-px bg-gray-100 my-1.5 mx-2"></div>
-
-                            <div onClick={() => go("contact")} className="flex items-center gap-3 px-3 py-2.5 hover:bg-gray-50 rounded-xl cursor-pointer transition-all">
-                                <MessageCircleQuestion size={18} className="text-gray-500" />
-                                <span>Help center</span>
-                            </div>
-
-                            <div onClick={onLogout} className="flex items-center gap-3 px-3 py-2.5 hover:bg-red-50 rounded-xl cursor-pointer mt-1 text-[#FF6B6B] transition-all">
-                                <LogOut size={18} className="scale-x-[-1]" />
-                                <span className="font-bold">Sign out</span>
-                            </div>
-                        </div>
-                    </div>
-                  </>
-                )}
-            </div>
-
-            {/* Mobile Links */}
-            <div className="flex flex-col gap-1 text-[15px] text-gray-700 font-semibold pb-4">
-                <button onClick={() => go("findCollege")} className="w-full text-left hover:text-blue-600 hover:bg-gray-50 p-2 rounded-lg transition-colors">Find College</button>
-                
-                {/* Mobile Tools Dropdown */}
-                <div>
-                    <button 
-                      className={`w-full text-left hover:text-blue-600 hover:bg-gray-50 p-2 rounded-lg transition-colors flex justify-between items-center ${mobileMenus['tools'] ? "text-blue-600" : ""}`}
-                      onClick={() => toggleMobileMenu('tools')}
-                    >
-                        Tools <ChevronDown size={14} className={`text-gray-400 transition-transform duration-200 ${mobileMenus['tools'] ? "rotate-180" : ""}`} />
-                    </button>
-                    <div className={`${mobileMenus['tools'] ? "flex" : "hidden"} flex-col gap-1 pl-4 py-2 ml-2 mt-1 font-medium`}>
-                        <button className="text-[14px] text-gray-400 p-2 rounded-lg flex items-center gap-3 cursor-not-allowed"><i className="fa-solid fa-shuffle w-4 text-center text-blue-500"></i> Compare College <span className="ml-auto text-[10px] font-bold text-gray-400">SOON</span></button>
-                        <button onClick={() => go("courseFinder")} className="text-[14px] text-gray-600 hover:text-blue-600 hover:bg-gray-50 p-2 rounded-lg transition-colors flex items-center gap-3"><i className="fa-solid fa-compass w-4 text-center text-green-500"></i> Course Finder</button>
-                        <button onClick={() => go("bookCounselling")} className="text-[14px] text-gray-600 hover:text-blue-600 hover:bg-gray-50 p-2 rounded-lg transition-colors flex items-center gap-3"><i className="fa-solid fa-headset w-4 text-center text-teal-600"></i> Get Counselling?</button>
-                        <button onClick={() => go("scholarshipFinderTool")} className="text-[14px] text-gray-600 hover:text-blue-600 hover:bg-gray-50 p-2 rounded-lg transition-colors flex items-center gap-3"><i className="fa-solid fa-award w-4 text-center text-yellow-500"></i> Scholarship Finder</button>
-                        <button onClick={() => go("collegeRecommenderTool")} className="text-[14px] text-gray-600 hover:text-blue-600 hover:bg-gray-50 p-2 rounded-lg transition-colors flex items-center gap-3"><i className="fa-solid fa-wand-magic-sparkles w-4 text-center text-emerald-500"></i> College Recommender</button>
-                    </div>
-                </div>
-
-                {/* Mobile Scholarships Dropdown */}
-                <div>
-                    <button 
-                      className={`w-full text-left hover:text-blue-600 hover:bg-gray-50 p-2 rounded-lg transition-colors flex justify-between items-center ${mobileMenus['scholarships'] ? "text-blue-600" : ""}`}
-                      onClick={() => toggleMobileMenu('scholarships')}
-                    >
-                        Scholarships <ChevronDown size={14} className={`text-gray-400 transition-transform duration-200 ${mobileMenus['scholarships'] ? "rotate-180" : ""}`} />
-                    </button>
-                    <div className={`${mobileMenus['scholarships'] ? "flex" : "hidden"} flex-col gap-1 pl-4 py-2 ml-2 mt-1 font-medium`}>
-                        <button onClick={() => go("scholarshipFinder")} className="text-[14px] text-gray-600 hover:text-blue-600 hover:bg-gray-50 p-2 rounded-lg transition-colors flex items-center gap-3"><i className="fa-solid fa-graduation-cap w-4 text-center text-yellow-500"></i> Find Scholarship</button>
-                        <button onClick={() => go("scholarshipProviderZone")} className="text-[14px] text-gray-600 hover:text-blue-600 hover:bg-gray-50 p-2 rounded-lg transition-colors flex items-center gap-3"><i className="fa-solid fa-building w-4 text-center text-indigo-500"></i> Scholarship Provider</button>
-                    </div>
-                </div>
-
-                <button onClick={() => go("campusForum")} className="w-full text-left hover:text-blue-600 hover:bg-gray-50 p-2 rounded-lg transition-colors flex items-center justify-between">
-                  Campus Feed <span className="bg-blue-600 text-white text-[10px] leading-none px-1.5 py-1 rounded font-bold tracking-wide">NEW</span>
+          {/* Mobile Auth Profile */}
+          <div className="sm:hidden">
+            {!user ? (
+              <div className="grid grid-cols-2 gap-3 mb-5">
+                <button
+                  onClick={() => go("login")}
+                  className="flex items-center justify-center gap-2 rounded-xl border border-gray-200 bg-white py-3 text-sm font-semibold text-gray-700 transition-all active:scale-[0.98]"
+                >
+                  <User size={16} /> <span>Log in</span>
                 </button>
-                
-                {/* Mobile Admission Dropdown */}
-                <div>
-                    <button 
-                      className={`w-full text-left hover:text-blue-600 hover:bg-gray-50 p-2 rounded-lg transition-colors flex justify-between items-center ${mobileMenus['admission'] ? "text-blue-600" : ""}`}
-                      onClick={() => toggleMobileMenu('admission')}
-                    >
-                        Admission <ChevronDown size={14} className={`text-gray-400 transition-transform duration-200 ${mobileMenus['admission'] ? "rotate-180" : ""}`} />
-                    </button>
-                    <div className={`${mobileMenus['admission'] ? "flex" : "hidden"} flex-col gap-1 pl-4 py-2 ml-2 mt-1 font-medium`}>
-                        <button onClick={() => go("admissionsDiscovery", { level: "high-school" })} className="text-[14px] text-gray-600 hover:text-blue-600 hover:bg-gray-50 p-2 rounded-lg transition-colors flex items-center gap-3"><i className="fa-solid fa-school w-4 text-center text-blue-500"></i> High School (+2)</button>
-                        <button onClick={() => go("admissionsDiscovery", { level: "a-level" })} className="text-[14px] text-gray-600 hover:text-blue-600 hover:bg-gray-50 p-2 rounded-lg transition-colors flex items-center gap-3"><i className="fa-solid fa-cubes w-4 text-center text-orange-500"></i> A-Level</button>
-                        <button onClick={() => go("admissionsDiscovery", { level: "diploma" })} className="text-[14px] text-gray-600 hover:text-blue-600 hover:bg-gray-50 p-2 rounded-lg transition-colors flex items-center gap-3"><i className="fa-solid fa-wrench w-4 text-center text-green-600"></i> Diploma / CTEVT</button>
+                <button
+                  onClick={() => go("signup")}
+                  className="flex items-center justify-center gap-2 rounded-xl bg-blue-600 py-3 text-sm font-semibold text-white transition-all active:scale-[0.98]"
+                >
+                  <span>Join Now</span>
+                </button>
+              </div>
+            ) : (
+              <>
+                <div
+                  className="flex items-center justify-between mb-5 p-3 rounded-lg border border-gray-200 bg-gray-50 cursor-pointer"
+                  onClick={() => toggleMobileMenu("profile")}
+                >
+                  <div className="flex items-center gap-3">
+                    <div className="relative">
+                      <div className="flex h-10 w-10 items-center justify-center rounded-full bg-blue-600 text-white font-bold text-sm border border-gray-200">
+                        <span>{initials}</span>
+                      </div>
+                      <div className="absolute bottom-0 right-0 w-2.5 h-2.5 bg-green-500 border-2 border-white rounded-full"></div>
                     </div>
-                </div>
-
-                <button onClick={() => go("entranceDiscovery")} className="w-full text-left hover:text-blue-600 hover:bg-gray-50 p-2 rounded-lg transition-colors">Entrance</button>
-                
-                {/* Mobile More Dropdown */}
-                <div>
-                    <button 
-                      className={`w-full text-left hover:text-blue-600 hover:bg-gray-50 p-2 rounded-lg transition-colors flex justify-between items-center ${mobileMenus['more'] ? "text-blue-600" : ""}`}
-                      onClick={() => toggleMobileMenu('more')}
-                    >
-                        More <ChevronDown size={14} className={`text-gray-400 transition-transform duration-200 ${mobileMenus['more'] ? "rotate-180" : ""}`} />
-                    </button>
-                    <div className={`${mobileMenus['more'] ? "flex" : "hidden"} flex-col gap-1 pl-4 py-2 ml-2 mt-1 font-medium`}>
-                        <button onClick={() => go("newsPage")} className="text-[14px] text-gray-600 hover:text-blue-600 hover:bg-gray-50 p-2 rounded-lg transition-colors flex items-center gap-3"><i className="fa-regular fa-newspaper w-4 text-center text-blue-500"></i> News</button>
-                        <button onClick={() => go("blogPage")} className="text-[14px] text-gray-600 hover:text-blue-600 hover:bg-gray-50 p-2 rounded-lg transition-colors flex items-center gap-3"><i className="fa-solid fa-pen w-4 text-center text-green-500"></i> Blogs</button>
-                        <button onClick={() => go("eventsPage")} className="text-[14px] text-gray-600 hover:text-blue-600 hover:bg-gray-50 p-2 rounded-lg transition-colors flex items-center gap-3"><i className="fa-regular fa-calendar w-4 text-center text-orange-500"></i> Events</button>
-                        <button onClick={() => go("contact")} className="text-[14px] text-gray-600 hover:text-blue-600 hover:bg-gray-50 p-2 rounded-lg transition-colors flex items-center gap-3"><i className="fa-solid fa-envelope w-4 text-center text-purple-600"></i> Contact Us</button>
-                    </div>
-                </div>
-
-                {/* Institution Zone - Partner Modules (Included for continuity) */}
-                {user && (
-                    <div>
-                        <button 
-                          className={`w-full text-left hover:text-blue-600 hover:bg-gray-50 p-2 rounded-lg transition-colors flex justify-between items-center ${mobileMenus['partners'] ? "text-blue-600" : ""}`}
-                          onClick={() => toggleMobileMenu('partners')}
+                    <div className="flex flex-col justify-center text-left">
+                      <div className="flex items-center gap-1">
+                        <span className="text-[15px] font-bold text-gray-800 leading-tight">
+                          {user.first_name} {user.last_name}
+                        </span>
+                        <svg
+                          xmlns="http://www.w3.org/2000/svg"
+                          width="16"
+                          height="16"
+                          viewBox="0 0 24 24"
+                          fill="#0040ff"
+                          className="icon icon-tabler icons-tabler-filled icon-tabler-rosette-discount-check"
                         >
-                            Partner Modules <ChevronDown size={14} className={`text-gray-400 transition-transform duration-200 ${mobileMenus['partners'] ? "rotate-180" : ""}`} />
-                        </button>
-                        <div className={`${mobileMenus['partners'] ? "flex" : "hidden"} flex-col gap-1 pl-4 py-2 ml-2 mt-1 font-medium`}>
-                            <button onClick={() => go("institutionZone")} className="text-[14px] text-gray-600 hover:text-blue-600 hover:bg-gray-50 p-2 rounded-lg transition-colors flex items-center gap-3"><Building size={16} className="text-blue-500" /> Institution Zone</button>
-                            <button onClick={() => go("scholarshipProviderZone")} className="text-[14px] text-gray-600 hover:text-blue-600 hover:bg-gray-50 p-2 rounded-lg transition-colors flex items-center gap-3"><Award size={16} className="text-indigo-500" /> Provider Zone</button>
-                        </div>
+                          <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+                          <path d="M12.01 2.011a3.2 3.2 0 0 1 2.113 .797l.154 .145l.698 .698a1.2 1.2 0 0 0 .71 .341l.135 .008h1a3.2 3.2 0 0 1 3.195 3.018l.005 .182v1c0 .27 .092 .533 .258 .743l.09 .1l.697 .698a3.2 3.2 0 0 1 .147 4.382l-.145 .154l-.698 .698a1.2 1.2 0 0 0 -.341 .71l-.008 .135v1a3.2 3.2 0 0 1 -3.018 3.195l-.182 .005h-1a1.2 1.2 0 0 0 -.743 .258l-.1 .09l-.698 .697a3.2 3.2 0 0 1 -4.382 .147l-.154 -.145l-.698 -.698a1.2 1.2 0 0 0 -.71 -.341l-.135 -.008h-1a3.2 3.2 0 0 1 -3.195 -3.018l-.005 -.182v-1a1.2 1.2 0 0 0 -.258 -.743l-.09 -.1l-.697 -.698a3.2 3.2 0 0 1 -.147 -4.382l.145 -.154l.698 -.698a1.2 1.2 0 0 0 .341 -.71l.008 -.135v-1l.005 -.182a3.2 3.2 0 0 1 3.013 -3.013l.182 -.005h1a1.2 1.2 0 0 0 .743 -.258l.1 -.09l.698 -.697a3.2 3.2 0 0 1 2.269 -.944zm3.697 7.282a1 1 0 0 0 -1.414 0l-3.293 3.292l-1.293 -1.292l-.094 -.083a1 1 0 0 0 -1.32 1.497l2 2l.094 .083a1 1 0 0 0 1.32 -.083l4 -4l.083 -.094a1 1 0 0 0 -.083 -1.32z" />
+                        </svg>
+                      </div>
+                      <span className="text-[13px] text-gray-500 leading-tight font-semibold mt-0.5">
+                        {profileLabel}
+                      </span>
                     </div>
-                )}
+                  </div>
+                  <ChevronDown
+                    size={14}
+                    className={`text-gray-400 transition-transform duration-200 ${mobileMenus["profile"] ? "rotate-180" : ""}`}
+                  />
+                </div>
+
+                <div
+                  className={`${mobileMenus["profile"] ? "flex" : "hidden"} flex-col mb-5 -mt-3`}
+                >
+                  <div className="w-full bg-white rounded-[18px] border border-gray-100/80 p-2.5 text-[14px] text-gray-600 font-medium select-none shadow-sm">
+                    <div
+                      onClick={() => go("studentDashboard")}
+                      className="flex flex-col px-3 py-3 bg-[#f4f4f5] rounded-xl cursor-pointer mb-1 hover:bg-gray-100 transition-all duration-200"
+                    >
+                      <div className="flex items-center gap-3 text-gray-900">
+                        <User size={18} className="text-gray-500" />
+                        <span className="font-semibold">View Profile</span>
+                      </div>
+                      <div className="mt-2.5 pl-7.5">
+                        <div className="flex justify-between items-center text-[11px] font-semibold text-gray-500 mb-1.5">
+                          <span>Profile Completion</span>
+                          <span className="text-[#5468FF]">80%</span>
+                        </div>
+                        <div className="w-full bg-gray-200/80 rounded-full h-1.5 border border-gray-100 shadow-inner">
+                          <div className="bg-brand-blue h-1.5 rounded-full w-[80%]"></div>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div
+                      onClick={() => go("studentDashboard")}
+                      className="flex items-center gap-3 px-3 py-2.5 hover:bg-gray-50 rounded-xl cursor-pointer mb-0.5 transition-all"
+                    >
+                      <FileText size={18} className="text-gray-500" />
+                      <span>My Application</span>
+                      <span className="ml-auto w-2.5 h-2.5 bg-red-500 rounded-full shadow-sm"></span>
+                    </div>
+
+                    <div
+                      onClick={() => go("studentDashboard")}
+                      className="flex items-center gap-3 px-3 py-2.5 hover:bg-gray-50 rounded-xl cursor-pointer mb-0.5 transition-all"
+                    >
+                      <Bookmark size={18} className="text-gray-500" />
+                      <span>Saved College</span>
+                      <span className="ml-auto text-gray-400 text-xs font-bold leading-none">
+                        12
+                      </span>
+                    </div>
+
+                    <div
+                      onClick={() => go("studentDashboard")}
+                      className="flex items-center gap-3 px-3 py-2.5 hover:bg-gray-50 rounded-xl cursor-pointer mb-0.5 transition-all"
+                    >
+                      <Sparkles size={18} className="text-gray-500" />
+                      <span>Match</span>
+                      <span className="ml-auto bg-[#5468FF]/10 text-[#5468FF] text-[11px] font-bold px-2 py-0.5 rounded-full">
+                        3
+                      </span>
+                    </div>
+
+                    <div className="h-px bg-gray-100 my-1.5 mx-2"></div>
+
+                    <div
+                      onClick={() => go("studentDashboard")}
+                      className="flex items-center gap-3 px-3 py-2.5 hover:bg-gray-50 rounded-xl cursor-pointer mb-0.5 transition-all"
+                    >
+                      <Bell size={18} className="text-gray-500" />
+                      <span>Notifications</span>
+                      <span className="ml-auto bg-red-500 text-white text-[10px] font-bold px-1.5 py-[1.5px] rounded-full leading-none">
+                        2
+                      </span>
+                    </div>
+
+                    <div
+                      onClick={() => go("studentDashboard")}
+                      className="flex items-center gap-3 px-3 py-2.5 hover:bg-gray-50 rounded-xl cursor-pointer transition-all"
+                    >
+                      <Settings size={18} className="text-gray-500" />
+                      <span>Settings</span>
+                    </div>
+
+                    <div className="h-px bg-gray-100 my-1.5 mx-2"></div>
+
+                    <div
+                      onClick={() => go("contact")}
+                      className="flex items-center gap-3 px-3 py-2.5 hover:bg-gray-50 rounded-xl cursor-pointer transition-all"
+                    >
+                      <MessageCircleQuestion
+                        size={18}
+                        className="text-gray-500"
+                      />
+                      <span>Help center</span>
+                    </div>
+
+                    <div
+                      onClick={onLogout}
+                      className="flex items-center gap-3 px-3 py-2.5 hover:bg-red-50 rounded-xl cursor-pointer mt-1 text-[#FF6B6B] transition-all"
+                    >
+                      <LogOut size={18} className="scale-x-[-1]" />
+                      <span className="font-bold">Sign out</span>
+                    </div>
+                  </div>
+                </div>
+              </>
+            )}
+          </div>
+
+          {/* Mobile Links */}
+          <div className="flex flex-col gap-1 text-[15px] text-gray-700 font-semibold pb-4">
+            <button
+              onClick={() => go("findCollege")}
+              className="w-full text-left hover:text-blue-600 hover:bg-gray-50 p-2 rounded-lg transition-colors"
+            >
+              Find College
+            </button>
+
+            {/* Mobile Tools Dropdown */}
+            <div>
+              <button
+                className={`w-full text-left hover:text-blue-600 hover:bg-gray-50 p-2 rounded-lg transition-colors flex justify-between items-center ${mobileMenus["tools"] ? "text-blue-600" : ""}`}
+                onClick={() => toggleMobileMenu("tools")}
+              >
+                Tools{" "}
+                <ChevronDown
+                  size={14}
+                  className={`text-gray-400 transition-transform duration-200 ${mobileMenus["tools"] ? "rotate-180" : ""}`}
+                />
+              </button>
+              <div
+                className={`${mobileMenus["tools"] ? "flex" : "hidden"} flex-col gap-1 pl-4 py-2 ml-2 mt-1 font-medium`}
+              >
+                <button className="text-[14px] text-gray-400 p-2 rounded-lg flex items-center gap-3 cursor-not-allowed">
+                  <i className="fa-solid fa-shuffle w-4 text-center text-blue-500"></i>{" "}
+                  Compare College{" "}
+                  <span className="ml-auto text-[10px] font-bold text-gray-400">
+                    SOON
+                  </span>
+                </button>
+                <button
+                  onClick={() => go("courseFinder")}
+                  className="text-[14px] text-gray-600 hover:text-blue-600 hover:bg-gray-50 p-2 rounded-lg transition-colors flex items-center gap-3"
+                >
+                  <i className="fa-solid fa-compass w-4 text-center text-green-500"></i>{" "}
+                  Course Finder
+                </button>
+                <button
+                  onClick={() => go("bookCounselling")}
+                  className="text-[14px] text-gray-600 hover:text-blue-600 hover:bg-gray-50 p-2 rounded-lg transition-colors flex items-center gap-3"
+                >
+                  <i className="fa-solid fa-headset w-4 text-center text-teal-600"></i>{" "}
+                  Get Counselling?
+                </button>
+                <button
+                  onClick={() => go("scholarshipFinderTool")}
+                  className="text-[14px] text-gray-600 hover:text-blue-600 hover:bg-gray-50 p-2 rounded-lg transition-colors flex items-center gap-3"
+                >
+                  <i className="fa-solid fa-award w-4 text-center text-yellow-500"></i>{" "}
+                  Scholarship Finder
+                </button>
+                <button
+                  onClick={() => go("collegeRecommenderTool")}
+                  className="text-[14px] text-gray-600 hover:text-blue-600 hover:bg-gray-50 p-2 rounded-lg transition-colors flex items-center gap-3"
+                >
+                  <i className="fa-solid fa-wand-magic-sparkles w-4 text-center text-emerald-500"></i>{" "}
+                  College Recommender
+                </button>
+              </div>
             </div>
+
+            {/* Mobile Scholarships Dropdown */}
+            <div>
+              <button
+                className={`w-full text-left hover:text-blue-600 hover:bg-gray-50 p-2 rounded-lg transition-colors flex justify-between items-center ${mobileMenus["scholarships"] ? "text-blue-600" : ""}`}
+                onClick={() => toggleMobileMenu("scholarships")}
+              >
+                Scholarships{" "}
+                <ChevronDown
+                  size={14}
+                  className={`text-gray-400 transition-transform duration-200 ${mobileMenus["scholarships"] ? "rotate-180" : ""}`}
+                />
+              </button>
+              <div
+                className={`${mobileMenus["scholarships"] ? "flex" : "hidden"} flex-col gap-1 pl-4 py-2 ml-2 mt-1 font-medium`}
+              >
+                <button
+                  onClick={() => go("scholarshipProviderZone")}
+                  className="text-[14px] text-gray-600 hover:text-blue-600 hover:bg-gray-50 p-2 rounded-lg transition-colors flex items-center gap-3"
+                >
+                  <i className="fa-solid fa-building w-4 text-center text-indigo-500"></i>{" "}
+                  Scholarship Provider
+                </button>
+              </div>
+            </div>
+
+            <button
+              onClick={() => go("campusForum")}
+              className="w-full text-left hover:text-blue-600 hover:bg-gray-50 p-2 rounded-lg transition-colors flex items-center justify-between"
+            >
+              Campus Feed{" "}
+              <span className="bg-blue-600 text-white text-[10px] leading-none px-1.5 py-1 rounded font-bold tracking-wide">
+                NEW
+              </span>
+            </button>
+
+            {/* Mobile Admission Dropdown */}
+            <div>
+              <button
+                className={`w-full text-left hover:text-blue-600 hover:bg-gray-50 p-2 rounded-lg transition-colors flex justify-between items-center ${mobileMenus["admission"] ? "text-blue-600" : ""}`}
+                onClick={() => toggleMobileMenu("admission")}
+              >
+                Admission{" "}
+                <ChevronDown
+                  size={14}
+                  className={`text-gray-400 transition-transform duration-200 ${mobileMenus["admission"] ? "rotate-180" : ""}`}
+                />
+              </button>
+              <div
+                className={`${mobileMenus["admission"] ? "flex" : "hidden"} flex-col gap-1 pl-4 py-2 ml-2 mt-1 font-medium`}
+              >
+                <button
+                  onClick={() =>
+                    go("admissionsDiscovery", { level: "high-school" })
+                  }
+                  className="text-[14px] text-gray-600 hover:text-blue-600 hover:bg-gray-50 p-2 rounded-lg transition-colors flex items-center gap-3"
+                >
+                  <i className="fa-solid fa-school w-4 text-center text-blue-500"></i>{" "}
+                  High School (+2)
+                </button>
+                <button
+                  onClick={() =>
+                    go("admissionsDiscovery", { level: "a-level" })
+                  }
+                  className="text-[14px] text-gray-600 hover:text-blue-600 hover:bg-gray-50 p-2 rounded-lg transition-colors flex items-center gap-3"
+                >
+                  <i className="fa-solid fa-cubes w-4 text-center text-orange-500"></i>{" "}
+                  A-Level
+                </button>
+                <button
+                  onClick={() =>
+                    go("admissionsDiscovery", { level: "diploma" })
+                  }
+                  className="text-[14px] text-gray-600 hover:text-blue-600 hover:bg-gray-50 p-2 rounded-lg transition-colors flex items-center gap-3"
+                >
+                  <i className="fa-solid fa-wrench w-4 text-center text-green-600"></i>{" "}
+                  Diploma / CTEVT
+                </button>
+              </div>
+            </div>
+
+            <button
+              onClick={() => go("entranceDiscovery")}
+              className="w-full text-left hover:text-blue-600 hover:bg-gray-50 p-2 rounded-lg transition-colors"
+            >
+              Entrance
+            </button>
+
+            {/* Mobile More Dropdown */}
+            <div>
+              <button
+                className={`w-full text-left hover:text-blue-600 hover:bg-gray-50 p-2 rounded-lg transition-colors flex justify-between items-center ${mobileMenus["more"] ? "text-blue-600" : ""}`}
+                onClick={() => toggleMobileMenu("more")}
+              >
+                More{" "}
+                <ChevronDown
+                  size={14}
+                  className={`text-gray-400 transition-transform duration-200 ${mobileMenus["more"] ? "rotate-180" : ""}`}
+                />
+              </button>
+              <div
+                className={`${mobileMenus["more"] ? "flex" : "hidden"} flex-col gap-1 pl-4 py-2 ml-2 mt-1 font-medium`}
+              >
+                <button
+                  onClick={() => go("newsPage")}
+                  className="text-[14px] text-gray-600 hover:text-blue-600 hover:bg-gray-50 p-2 rounded-lg transition-colors flex items-center gap-3"
+                >
+                  <i className="fa-regular fa-newspaper w-4 text-center text-blue-500"></i>{" "}
+                  News
+                </button>
+                <button
+                  onClick={() => go("blogPage")}
+                  className="text-[14px] text-gray-600 hover:text-blue-600 hover:bg-gray-50 p-2 rounded-lg transition-colors flex items-center gap-3"
+                >
+                  <i className="fa-solid fa-pen w-4 text-center text-green-500"></i>{" "}
+                  Blogs
+                </button>
+                <button
+                  onClick={() => go("eventsPage")}
+                  className="text-[14px] text-gray-600 hover:text-blue-600 hover:bg-gray-50 p-2 rounded-lg transition-colors flex items-center gap-3"
+                >
+                  <i className="fa-regular fa-calendar w-4 text-center text-orange-500"></i>{" "}
+                  Events
+                </button>
+                <button
+                  onClick={() => go("contact")}
+                  className="text-[14px] text-gray-600 hover:text-blue-600 hover:bg-gray-50 p-2 rounded-lg transition-colors flex items-center gap-3"
+                >
+                  <i className="fa-solid fa-envelope w-4 text-center text-purple-600"></i>{" "}
+                  Contact Us
+                </button>
+              </div>
+            </div>
+
+            {/* Institution Zone - Partner Modules (Included for continuity) */}
+            {user && (
+              <div>
+                <button
+                  className={`w-full text-left hover:text-blue-600 hover:bg-gray-50 p-2 rounded-lg transition-colors flex justify-between items-center ${mobileMenus["partners"] ? "text-blue-600" : ""}`}
+                  onClick={() => toggleMobileMenu("partners")}
+                >
+                  Partner Modules{" "}
+                  <ChevronDown
+                    size={14}
+                    className={`text-gray-400 transition-transform duration-200 ${mobileMenus["partners"] ? "rotate-180" : ""}`}
+                  />
+                </button>
+                <div
+                  className={`${mobileMenus["partners"] ? "flex" : "hidden"} flex-col gap-1 pl-4 py-2 ml-2 mt-1 font-medium`}
+                >
+                  <button
+                    onClick={() => go("institutionZone")}
+                    className="text-[14px] text-gray-600 hover:text-blue-600 hover:bg-gray-50 p-2 rounded-lg transition-colors flex items-center gap-3"
+                  >
+                    <Building size={16} className="text-blue-500" /> Institution
+                    Zone
+                  </button>
+                  <button
+                    onClick={() => go("scholarshipProviderZone")}
+                    className="text-[14px] text-gray-600 hover:text-blue-600 hover:bg-gray-50 p-2 rounded-lg transition-colors flex items-center gap-3"
+                  >
+                    <Award size={16} className="text-indigo-500" /> Provider
+                    Zone
+                  </button>
+                </div>
+              </div>
+            )}
+          </div>
         </div>
       </header>
     </>

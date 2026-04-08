@@ -13,7 +13,7 @@ export default function AdmissionsLevelPage({ params }: { params: Promise<{ leve
 
   const handleNavigate = (view: string, data?: any) => {
     if (view === "collegeDetails" && data?.id) {
-      router.push(`/find-college/${data.id}`);
+      router.push(`/admissions/${resolvedParams.level}/${data.id}`);
     } else {
       console.log("Navigate to:", view, data);
     }

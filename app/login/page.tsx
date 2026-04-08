@@ -21,16 +21,7 @@ export default function LoginPage() {
   const [otpIdentifier, setOtpIdentifier] = useState("");
   const router = useRouter();
 
-  const handleLoginSuccess = () => {
-    router.push("/");
-  };
-
-  const handleSignupSuccess = (email: string) => {
-    setOtpIdentifier(email);
-    setView("otp");
-  };
-
-  const handleOtpVerified = () => {
+  const handleSuccess = () => {
     router.push("/");
   };
 
@@ -49,21 +40,21 @@ export default function LoginPage() {
         {view === "login" && (
           <LoginView
             onSwitch={() => setView("signup")}
-            onSuccess={handleLoginSuccess}
+            onSuccess={handleSuccess}
             onForgotPassword={() => setView("forgot-password")}
           />
         )}
         {view === "signup" && (
           <SignupView
             onSwitch={() => setView("login")}
-            onSignupSuccess={handleSignupSuccess}
+            onSuccess={handleSuccess}
           />
         )}
         {view === "otp" && (
           <OtpView
             identifier={otpIdentifier}
             type="email"
-            onVerified={handleOtpVerified}
+            onVerified={handleSuccess}
             onBack={goBack}
           />
         )}

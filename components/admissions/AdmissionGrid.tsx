@@ -397,7 +397,9 @@ const AdmissionGrid: React.FC<AdmissionGridProps> = ({
         </div>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
           {filteredColleges.map((college, index) => (
-            <CollegeCard key={index} {...college} />
+            <div key={index} onClick={() => onNavigate("collegeDetails", { id: "kist-college" })} className="cursor-pointer">
+              <CollegeCard {...college} />
+            </div>
           ))}
         </div>
 

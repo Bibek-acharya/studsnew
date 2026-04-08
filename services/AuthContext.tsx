@@ -1,91 +1,122 @@
 "use client";
 
 import React, { createContext, useContext, useState, ReactNode, useEffect } from "react";
-import { apiService } from "./api";
+
+interface User {
+  id?: number;
+  first_name: string;
+  last_name: string;
+  email: string;
+  role: string;
+}
 
 interface AuthContextType {
   token: string | null;
-  user: any;
+  user: User | null;
   isAuthenticated: boolean;
   loading: boolean;
-  login: (email: string, password: string) => Promise<any>;
+  login: (email: string, password: string) => Promise<void>;
   logout: () => void;
-  register: (email: string, password: string, firstName: string, lastName: string, role: string, educationLevel: string) => Promise<any>;
-  verifyOTP: (email: string, otp: string) => Promise<any>;
-  sendOTP: (email: string) => Promise<any>;
-  setUser: (user: any) => void;
+  register: (email: string, password: string, firstName: string, lastName: string, role: string, educationLevel: string) => Promise<void>;
+  verifyOTP: (email: string, otp: string) => Promise<void>;
+  sendOTP: (email: string) => Promise<void>;
+  setUser: (user: User) => void;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
+const STORAGE_KEY = "studsphere_auth";
+
+const loadStoredAuth = (): { token: string; user: User } | null => {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (raw) return JSON.parse(raw);
+  } catch {
+    /* ignore */
+  }
+  return null;
+};
+
+const saveAuth = (token: string, user: User) => {
+  localStorage.setItem(STORAGE_KEY, JSON.stringify({ token, user }));
+};
+
+const clearAuth = () => {
+  localStorage.removeItem(STORAGE_KEY);
+};
+
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [token, setToken] = useState<string | null>(null);
-  const [user, setUserState] = useState<any>(null);
+  const [user, setUserState] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const initAuth = async () => {
-      const storedToken = apiService.getToken();
-      if (storedToken && storedToken !== "mock-token") {
-        try {
-          const response = await apiService.getProfile();
-          setToken(storedToken);
-          setUserState(response.data.user);
-        } catch {
-          apiService.setToken(null);
-          apiService.setUser(null);
-        }
-      }
-      setLoading(false);
-    };
-
-    initAuth();
+    const stored = loadStoredAuth();
+    if (stored) {
+      setToken(stored.token);
+      setUserState(stored.user);
+    }
+    setLoading(false);
   }, []);
 
-  const setUser = (userData: any) => {
+  const setUser = (userData: User) => {
     setUserState(userData);
-    apiService.setUser(userData);
+    if (token) saveAuth(token, userData);
   };
 
-  const login = async (email: string, password: string) => {
-    const response = await apiService.login(email, password);
-    const { token: newToken, user: userData } = response.data;
-    apiService.setToken(newToken);
-    apiService.setUser(userData);
-    setToken(newToken);
+  const login = async (email: string, _password: string) => {
+    const storedUsersRaw = localStorage.getItem("studsphere_users");
+    const storedUsers: Array<{ email: string; password: string; first_name: string; last_name: string; role: string }> = storedUsersRaw ? JSON.parse(storedUsersRaw) : [];
+
+    const found = storedUsers.find((u) => u.email === email && u.password === _password);
+
+    if (!found) {
+      throw new Error("Invalid email or password. Please try again.");
+    }
+
+    const mockToken = `tok_${Date.now()}_${Math.random().toString(36).slice(2)}`;
+    const userData: User = {
+      first_name: found.first_name,
+      last_name: found.last_name,
+      email: found.email,
+      role: found.role,
+    };
+
+    saveAuth(mockToken, userData);
+    setToken(mockToken);
     setUserState(userData);
-    return response;
   };
 
-  const register = async (email: string, password: string, firstName: string, lastName: string, role: string, educationLevel: string) => {
-    const response = await apiService.register({
-      email,
-      password,
-      first_name: firstName,
-      last_name: lastName,
-      role,
-      education_level: educationLevel,
-    });
-    return response;
-  };
+  const register = async (email: string, password: string, firstName: string, lastName: string, role: string, _educationLevel: string) => {
+    const storedUsersRaw = localStorage.getItem("studsphere_users");
+    const storedUsers: Array<{ email: string; password: string; first_name: string; last_name: string; role: string }> = storedUsersRaw ? JSON.parse(storedUsersRaw) : [];
 
-  const verifyOTP = async (email: string, otp: string) => {
-    const response = await apiService.verifyOTP(email, otp);
-    const { token: newToken, user: userData } = response.data;
-    apiService.setToken(newToken);
-    apiService.setUser(userData);
-    setToken(newToken);
+    const exists = storedUsers.find((u) => u.email === email);
+    if (exists) {
+      throw new Error("An account with this email already exists.");
+    }
+
+    storedUsers.push({ email, password, first_name: firstName, last_name: lastName, role });
+    localStorage.setItem("studsphere_users", JSON.stringify(storedUsers));
+
+    const mockToken = `tok_${Date.now()}_${Math.random().toString(36).slice(2)}`;
+    const userData: User = { first_name: firstName, last_name: lastName, email, role };
+
+    saveAuth(mockToken, userData);
+    setToken(mockToken);
     setUserState(userData);
-    return response;
   };
 
-  const sendOTP = async (email: string) => {
-    return apiService.sendOTP(email);
+  const verifyOTP = async (_email: string, _otp: string) => {
+    /* no-op for mock */
+  };
+
+  const sendOTP = async (_email: string) => {
+    /* no-op for mock */
   };
 
   const logout = () => {
-    apiService.setToken(null);
-    apiService.setUser(null);
+    clearAuth();
     setToken(null);
     setUserState(null);
   };

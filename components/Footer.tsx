@@ -9,8 +9,8 @@ interface FooterProps {
 
 const routeMap: Record<string, string> = {
   educationPage: "/",
-  about: "/",
-  contact: "/",
+  about: "/about-us",
+  contact: "/contact-us",
   courseFinder: "/",
   scholarshipMain: "/",
   bookCounselling: "/",
@@ -203,14 +203,6 @@ const Footer: React.FC<FooterProps> = ({ onNavigate }) => {
               </li>
               <li>
                 <button
-                  onClick={(event) => routeLink(event, "scholarshipMain")}
-                  className="text-left transition-colors hover:text-blue-400"
-                >
-                  Scholarships
-                </button>
-              </li>
-              <li>
-                <button
                   onClick={(event) => routeLink(event, "bookCounselling")}
                   className="text-left transition-colors hover:text-blue-400"
                 >
@@ -330,7 +322,7 @@ const Footer: React.FC<FooterProps> = ({ onNavigate }) => {
 
       {/* Bottom Bar */}
       <div className="relative z-10 border-t border-slate-800 bg-slate-950">
-        <div className="mx-auto max-w-[1400px] px-4 xs:px-5 sm:px-6 lg:px-8 py-4 xs:py-5 sm:py-6">
+        <div className="mx-auto max-w-350 px-4 xs:px-5 sm:px-6 lg:px-8 py-4 xs:py-5 sm:py-6">
           <div className="flex flex-col xs:flex-row items-center gap-3 xs:gap-4 text-center xs:text-left">
             <div className="flex items-center gap-1.5 xs:gap-2 text-[11px] xs:text-sm text-slate-500">
               <i className="fa-solid fa-shield-halved h-3.5 w-3.5 xs:h-4 xs:w-4 text-emerald-500" />

@@ -6,12 +6,12 @@ import { validators, useFieldValidation } from "@/utils/validation";
 
 interface SignupViewProps {
   onSwitch: () => void;
-  onSignupSuccess: (email: string) => void;
+  onSuccess: () => void;
 }
 
 const SignupView: React.FC<SignupViewProps> = ({
   onSwitch,
-  onSignupSuccess,
+  onSuccess,
 }) => {
   const [showPassword, setShowPassword] = useState(false);
   const [dropdownOpen, setDropdownOpen] = useState(false);
@@ -96,7 +96,7 @@ const SignupView: React.FC<SignupViewProps> = ({
     try {
       const [firstName, ...lastNameParts] = values.fullName.trim().split(" ");
       const lastName = lastNameParts.join(" ") || firstName;
-      const res = await register(
+      await register(
         values.email,
         values.password,
         firstName,
@@ -104,9 +104,6 @@ const SignupView: React.FC<SignupViewProps> = ({
         "student",
         values.educationLevel,
       );
-      if (res?.requires_otp) {
-        onSignupSuccess(values.email);
-      }
     } catch (err: any) {
       setError(err.message || "Registration failed. Please try again.");
     } finally {

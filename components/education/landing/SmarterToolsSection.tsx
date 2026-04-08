@@ -15,7 +15,7 @@ const SmarterToolsSection: React.FC<SmarterToolsSectionProps> = ({ onNavigate })
       Make better decisions with the right resources at your fingertips.
     </p>
   </div>
-  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-5 md:gap-6 xl:gap-8">
+  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-5 md:gap-6 xl:gap-8">
     <div
       className="bg-white rounded-2xl p-5 sm:p-6 md:p-7 flex flex-col h-full hover:-translate-y-1 border border-blue-500/20 transition-all duration-300 cursor-pointer"
       onClick={() => onNavigate("collegeRecommenderTool")}
@@ -49,24 +49,6 @@ const SmarterToolsSection: React.FC<SmarterToolsSectionProps> = ({ onNavigate })
       </p>
       <button className="w-full bg-[#0000FF] hover:bg-[#0000CC] text-white font-semibold py-3 sm:py-3.5 px-4 rounded-xl transition-colors duration-200 text-[13px] sm:text-[14px] md:text-[15px]">
         Start Comparison
-      </button>
-    </div>
-
-    <div
-      className="bg-white rounded-2xl p-5 sm:p-6 md:p-7 flex flex-col h-full hover:-translate-y-1 border border-blue-500/20 transition-all duration-300 cursor-pointer"
-      onClick={() => onNavigate("scholarshipFinderTool")}
-    >
-      <div className="w-12 h-12 sm:w-14 sm:h-14 rounded-2xl bg-[#fdf6e3] flex items-center justify-center mb-4 sm:mb-5 md:mb-6">
-        <svg className="w-6 h-6 sm:w-7 sm:h-7 text-[#dfac1d]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-        </svg>
-      </div>
-      <h3 className="text-lg sm:text-xl font-bold text-[#0f172a] mb-2 sm:mb-3">Scholarship Finder</h3>
-      <p className="text-gray-500 text-[13px] sm:text-[14px] md:text-[15px] leading-relaxed mb-6 sm:mb-8 flex-grow">
-        Filter thousands of institutions by location, major, tuition, and ranking to find your perfect match.
-      </p>
-      <button className="w-full bg-[#ebb316] hover:bg-[#d9a512] text-white font-semibold py-3 sm:py-3.5 px-4 rounded-xl transition-colors duration-200 text-[13px] sm:text-[14px] md:text-[15px]">
-        Search Funding
       </button>
     </div>
 

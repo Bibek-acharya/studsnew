@@ -1,6 +1,7 @@
-import React from "react";
+import React, { useState } from "react";
 import { EducationCourse } from "../../services/api";
 import { CourseFinderFilters, defaultCourseFinderFilters } from "./types";
+import Pagination from "@/components/ui/Pagination";
 
 interface CourseGridProps {
   onNavigate: (view: any, data?: any) => void;
@@ -282,23 +283,7 @@ const CourseGrid: React.FC<CourseGridProps> = ({
         </>
       )}
 
-      <div className="mt-10 flex items-center justify-center gap-2">
-        <button className="w-8 h-8 flex items-center justify-center rounded-lg border border-gray-200 text-gray-400 hover:bg-gray-50 transition-colors" disabled>
-          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 19l-7-7 7-7"></path>
-          </svg>
-        </button>
-        <button className="w-8 h-8 flex items-center justify-center rounded-lg bg-[#2563EB] text-white font-medium text-[13px] shadow-sm">1</button>
-        <button className="w-8 h-8 flex items-center justify-center rounded-lg border border-gray-200 text-gray-700 hover:bg-gray-50 font-medium text-[13px] transition-colors">2</button>
-        <button className="w-8 h-8 flex items-center justify-center rounded-lg border border-gray-200 text-gray-700 hover:bg-gray-50 font-medium text-[13px] transition-colors">3</button>
-        <span className="w-8 h-8 flex items-center justify-center text-gray-500 font-medium text-[13px]">...</span>
-        <button className="w-8 h-8 flex items-center justify-center rounded-lg border border-gray-200 text-gray-700 hover:bg-gray-50 font-medium text-[13px] transition-colors">10</button>
-        <button className="w-8 h-8 flex items-center justify-center rounded-lg border border-gray-200 text-gray-600 hover:bg-gray-50 transition-colors">
-          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5l7 7-7 7"></path>
-          </svg>
-        </button>
-      </div>
+      <Pagination currentPage={1} totalPages={1} onPageChange={() => {}} />
     </div>
   );
 };
