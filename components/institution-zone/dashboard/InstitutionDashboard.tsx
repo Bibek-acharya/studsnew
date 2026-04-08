@@ -63,7 +63,10 @@ ChartJS.register(
   Filler,
 );
 
+import ProgramManagement from "./ProgramManagement";
+
 const InstitutionDashboard = () => {
+  const [activeTab, setActiveTab] = useState("overview");
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [dropdowns, setDropdowns] = useState({
     admission: false,
@@ -228,17 +231,20 @@ const InstitutionDashboard = () => {
 
         {/* Sidebar Navigation */}
         <nav className="flex-1 overflow-y-auto py-4 px-3 space-y-1">
-          <div className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2 px-3 mt-2">
-            Menu
-          </div>
-
-          <a
-            href="#"
-            className="flex items-center gap-3 px-3 py-2.5 rounded-lg bg-blue-50 text-blue-600 font-medium"
+          <button
+            onClick={() => {
+              setActiveTab("overview");
+              setIsSidebarOpen(false);
+            }}
+            className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg font-medium transition-colors ${
+              activeTab === "overview"
+                ? "bg-blue-50 text-blue-600"
+                : "text-slate-600 hover:bg-slate-50 hover:text-slate-900"
+            }`}
           >
             <LayoutDashboard className="w-5 h-5" />
             <span>Overview</span>
-          </a>
+          </button>
 
           {/* Admission Dropdown */}
           <div>
@@ -302,13 +308,20 @@ const InstitutionDashboard = () => {
             <span>QMS</span>
           </a>
 
-          <a
-            href="#"
-            className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-slate-600 hover:bg-slate-50 hover:text-slate-900 font-medium transition-colors"
+          <button
+            onClick={() => {
+              setActiveTab("program");
+              setIsSidebarOpen(false);
+            }}
+            className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg font-medium transition-colors ${
+              activeTab === "program"
+                ? "bg-blue-50 text-blue-600"
+                : "text-slate-600 hover:bg-slate-50 hover:text-slate-900"
+            }`}
           >
             <BookOpen className="w-5 h-5" />
             <span>Program</span>
-          </a>
+          </button>
 
           {/* Scholarship Dropdown */}
           <div>
