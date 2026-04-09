@@ -14,11 +14,9 @@ import {
   Save,
   Plus,
   X,
-  Instagram,
-  Facebook,
-  Twitter,
-  Linkedin,
+ 
 } from "lucide-react";
+import { FacebookLogoIcon, InstagramLogoIcon, LinkedinLogoIcon, TwitterLogoIcon } from "@phosphor-icons/react";
 
 const CollegeProfilePage: React.FC = () => {
   const [profilePhoto, setProfilePhoto] = useState<string | null>(null);
@@ -226,7 +224,7 @@ const CollegeProfilePage: React.FC = () => {
             <div className="space-y-4">
               <div className="flex items-center gap-3">
                 <div className="w-10 h-10 rounded-xl bg-blue-50 flex items-center justify-center text-blue-600">
-                  <Facebook size={20} />
+                  <FacebookLogoIcon size={20} />
                 </div>
                 <input
                   type="text"
@@ -236,7 +234,7 @@ const CollegeProfilePage: React.FC = () => {
               </div>
               <div className="flex items-center gap-3">
                 <div className="w-10 h-10 rounded-xl bg-pink-50 flex items-center justify-center text-pink-600">
-                  <Instagram size={20} />
+                  <InstagramLogoIcon size={20} />
                 </div>
                 <input
                   type="text"
@@ -246,7 +244,7 @@ const CollegeProfilePage: React.FC = () => {
               </div>
               <div className="flex items-center gap-3">
                 <div className="w-10 h-10 rounded-xl bg-blue-50 flex items-center justify-center text-blue-400">
-                  <Twitter size={20} />
+                  <TwitterLogoIcon size={20} />
                 </div>
                 <input
                   type="text"
@@ -256,7 +254,7 @@ const CollegeProfilePage: React.FC = () => {
               </div>
               <div className="flex items-center gap-3">
                 <div className="w-10 h-10 rounded-xl bg-[#0077b5]/10 flex items-center justify-center text-[#0077b5]">
-                  <Linkedin size={20} />
+                  <LinkedinLogoIcon size={20} />
                 </div>
                 <input
                   type="text"
