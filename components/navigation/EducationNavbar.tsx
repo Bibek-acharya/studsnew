@@ -2,7 +2,7 @@
 
 import React, { useMemo, useRef, useState, useEffect } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { SearchBar } from "@/components/SearchBar";
 import {
   Bell,
@@ -54,6 +54,7 @@ const EducationNavbar: React.FC<EducationNavbarProps> = ({
   const [showMobileSearch, setShowMobileSearch] = useState(false);
   const lastScrollY = useRef(0);
   const router = useRouter();
+  const pathname = usePathname();
 
   const [mobileMenus, setMobileMenus] = useState<Record<string, boolean>>({});
   const toggleMobileMenu = (key: string) => {
@@ -145,6 +146,8 @@ const EducationNavbar: React.FC<EducationNavbarProps> = ({
     return () => document.removeEventListener("mousedown", handleOutside);
   }, []);
 
+  
+
   useEffect(() => {
     if (isMobileOpen || showMobileSearch) {
       document.body.style.overflow = "hidden";
@@ -224,6 +227,39 @@ const EducationNavbar: React.FC<EducationNavbarProps> = ({
   const mobileAdmissionSection = mobileMenuSections.find((section) => section.key === "admission");
   const mobileMoreSection = mobileMenuSections.find((section) => section.key === "more");
 
+  const normalizePath = (path: string) =>
+    path.length > 1 && path.endsWith("/") ? path.slice(0, -1) : path;
+
+  const currentPath = normalizePath(pathname || "/");
+
+  const isRouteActive = (path: string) => {
+    const normalizedPath = normalizePath(path);
+    if (normalizedPath === "/") return currentPath === "/";
+    return (
+      currentPath === normalizedPath ||
+      currentPath.startsWith(`${normalizedPath}/`)
+    );
+  };
+
+  const isViewActive = (viewKey?: ViewKey, data?: { level?: string }) => {
+    if (!viewKey) return false;
+
+    if (viewKey === "admissionsDiscovery") {
+      if (data?.level) return isRouteActive(`/admissions/${data.level}`);
+      return isRouteActive("/admissions");
+    }
+
+    const route = routeMap[viewKey];
+    if (!route) return false;
+    return isRouteActive(route);
+  };
+
+  const isSectionActive = (section?: { key: string; items: DropdownItem[] }) => {
+    if (!section) return false;
+    if (section.key === "admission" && isRouteActive("/admissions")) return true;
+    return section.items.some((item) => isViewActive(item.viewKey, item.data));
+  };
+
   return (
     <>
       <header
@@ -248,7 +284,7 @@ const EducationNavbar: React.FC<EducationNavbarProps> = ({
             </Link>
 
             {/* Desktop Search */}
-            <div className="hidden md:block flex-1 max-w-xl mx-4">
+            <div className="hidden md:block flex-1 max-w-3xl">
               <SearchBar />
             </div>
 
@@ -275,125 +311,127 @@ const EducationNavbar: React.FC<EducationNavbarProps> = ({
               </button>
 
               {/* Notification Bell */}
-              <div className="menu-anchor relative group/notif">
-                <button
-                  onClick={() =>
-                    setActiveMenu((prev) =>
-                      prev === "notification-menu" ? null : "notification-menu",
-                    )
-                  }
-                  className="relative flex items-center justify-center w-9.5 h-9.5 rounded-full border border-gray-200 hover:bg-gray-50 transition-colors text-[#475569] shrink-0"
-                >
-                  <Bell size={18} />
-                  {unreadNotificationCount > 0 && (
-                    <span className="absolute -top-1.5 -right-1.5 flex h-5 w-5 items-center justify-center rounded-full border-2 border-white bg-[#f44336] text-[11px] font-bold text-white shadow-sm">
-                      {unreadNotificationCount}
-                    </span>
-                  )}
-                </button>
+              {user && (
+                <div className="menu-anchor relative group/notif">
+                  <button
+                    onClick={() =>
+                      setActiveMenu((prev) =>
+                        prev === "notification-menu" ? null : "notification-menu",
+                      )
+                    }
+                    className="relative flex items-center justify-center w-9.5 h-9.5 rounded-full border border-gray-200 hover:bg-gray-50 transition-colors text-[#475569] shrink-0"
+                  >
+                    <Bell size={18} />
+                    {unreadNotificationCount > 0 && (
+                      <span className="absolute -top-1.5 -right-1.5 flex h-5 w-5 items-center justify-center rounded-full border-2 border-white bg-[#f44336] text-[11px] font-bold text-white shadow-sm">
+                        {unreadNotificationCount}
+                      </span>
+                    )}
+                  </button>
 
-                {activeMenu === "notification-menu" && (
-                  <div className="absolute top-full right-0 z-200 mt-2 cursor-default font-inter sm:-right-2">
-                    <div className="absolute -top-1.5 right-6 z-30 h-3 w-3 rotate-45 border-l border-t border-gray-200 bg-white"></div>
-                    <div className="relative z-20 flex w-[320px] flex-col overflow-hidden rounded-2xl border border-gray-200 bg-white text-left shadow-[0_8px_30px_rgb(0,0,0,0.12)] sm:w-95">
-                      <div className="z-10 flex items-center justify-between border-b border-gray-100 bg-white px-4 py-3">
-                        <div className="flex items-center gap-2">
-                          <h3 className="text-lg font-semibold text-gray-900">
-                            Notifications
-                          </h3>
-                          {unreadNotificationCount > 0 && (
-                            <span className="rounded-full bg-blue-600 px-2 py-0.5 text-xs font-bold text-white shadow-sm">
-                              {unreadNotificationCount}
-                            </span>
-                          )}
-                        </div>
-                        <button
-                          onClick={markAllAsRead}
-                          className="rounded-md px-2 py-1 text-xs font-medium text-blue-600 transition-colors hover:bg-blue-50 hover:text-blue-900"
-                        >
-                          Mark all as read
-                        </button>
-                      </div>
-                      <div className="no-scrollbar flex gap-4 overflow-x-auto whitespace-nowrap border-b border-gray-50 bg-gray-50/50 px-4 py-2 text-sm">
-                        {notificationTabs.map((tab) => (
+                  {activeMenu === "notification-menu" && (
+                    <div className="absolute top-full right-0 z-200 mt-2 cursor-default font-inter sm:-right-2">
+                      <div className="absolute -top-1.5 right-6 z-30 h-3 w-3 rotate-45 border-l border-t border-gray-200 bg-white"></div>
+                      <div className="relative z-20 flex w-[320px] flex-col overflow-hidden rounded-2xl border border-gray-200 bg-white text-left shadow-[0_8px_30px_rgb(0,0,0,0.12)] sm:w-95">
+                        <div className="z-10 flex items-center justify-between border-b border-gray-100 bg-white px-4 py-3">
+                          <div className="flex items-center gap-2">
+                            <h3 className="text-lg font-semibold text-gray-900">
+                              Notifications
+                            </h3>
+                            {unreadNotificationCount > 0 && (
+                              <span className="rounded-full bg-blue-600 px-2 py-0.5 text-xs font-bold text-white shadow-sm">
+                                {unreadNotificationCount}
+                              </span>
+                            )}
+                          </div>
                           <button
-                            key={tab}
-                            onClick={() => setCurrentNotifTab(tab)}
-                            className={`pb-1 capitalize transition-all ${
-                              currentNotifTab === tab
-                                ? "border-b-2 border-blue-600 font-medium text-blue-600"
-                                : "text-gray-500 hover:text-gray-700"
-                            }`}
+                            onClick={markAllAsRead}
+                            className="rounded-md px-2 py-1 text-xs font-medium text-blue-600 transition-colors hover:bg-blue-50 hover:text-blue-900"
                           >
-                            {tab}
+                            Mark all as read
                           </button>
-                        ))}
-                      </div>
-                      <div className="no-scrollbar flex max-h-75 flex-col overflow-y-auto">
-                        {visibleNotifications.map((notif) => (
-                            <div
-                              key={notif.id}
-                              className="group relative flex cursor-pointer items-start gap-3 border-b border-gray-50 bg-white p-3 transition-colors hover:bg-gray-50"
-                              onClick={() => markAsRead(notif.id)}
+                        </div>
+                        <div className="no-scrollbar flex gap-4 overflow-x-auto whitespace-nowrap border-b border-gray-50 bg-gray-50/50 px-4 py-2 text-sm">
+                          {notificationTabs.map((tab) => (
+                            <button
+                              key={tab}
+                              onClick={() => setCurrentNotifTab(tab)}
+                              className={`pb-1 capitalize transition-all ${
+                                currentNotifTab === tab
+                                  ? "border-b-2 border-blue-600 font-medium text-blue-600"
+                                  : "text-gray-500 hover:text-gray-700"
+                              }`}
                             >
-                              <div
-                                className={`mt-1 flex h-10 w-10 shrink-0 items-center justify-center rounded-full ${notif.bgColor} ${notif.color}`}
-                              >
-                                <i className="fa-solid fa-bell text-sm"></i>
-                              </div>
-                              <div className="flex-1 min-w-0 pr-10">
-                                <div className="mb-0.5 flex flex-wrap items-center gap-2">
-                                  <p className="truncate text-sm font-semibold text-black">
-                                    {notif.title}
-                                  </p>
-                                  {notif.isFollowing && (
-                                    <span className="rounded bg-blue-100 px-1.5 py-0.5 text-[10px] font-bold uppercase tracking-wide text-blue-600 whitespace-nowrap">
-                                      Following
-                                    </span>
-                                  )}
-                                </div>
-                                <p className="line-clamp-2 text-sm leading-relaxed text-gray-800">
-                                  {notif.message}
-                                </p>
-                                <p className="mt-1.5 flex items-center gap-1 text-xs text-gray-500">
-                                  <Clock size={12} /> {notif.time}
-                                </p>
-                              </div>
-                              {!notif.isRead && (
-                                <div className="absolute right-3 top-3 h-2 w-2 rounded-full bg-blue-500"></div>
-                              )}
-                              <div className="absolute bottom-3 right-3 flex gap-1 opacity-0 transition-all group-hover:opacity-100">
-                                <button
-                                  onClick={(e) => toggleArchive(notif.id, e)}
-                                  className="rounded-md p-1 px-1.5 text-gray-400 transition-colors hover:bg-blue-50 hover:text-blue-600"
-                                >
-                                  {notif.isArchived ? (
-                                    <ArchiveRestore size={16} />
-                                  ) : (
-                                    <Archive size={16} />
-                                  )}
-                                </button>
-                                <button
-                                  onClick={(e) =>
-                                    removeNotification(notif.id, e)
-                                  }
-                                  className="rounded-md p-1 px-1.5 text-gray-400 transition-colors hover:bg-red-50 hover:text-red-500"
-                                >
-                                  <Trash2 size={16} />
-                                </button>
-                              </div>
-                            </div>
+                              {tab}
+                            </button>
                           ))}
-                      </div>
-                      <div className="border-t border-gray-100 bg-gray-50/50 p-3">
-                        <button className="w-full rounded-lg py-2 text-center text-sm font-medium text-gray-600 transition-colors hover:text-blue-600">
-                          View all activity
-                        </button>
+                        </div>
+                        <div className="no-scrollbar flex max-h-75 flex-col overflow-y-auto">
+                          {visibleNotifications.map((notif) => (
+                              <div
+                                key={notif.id}
+                                className="group relative flex cursor-pointer items-start gap-3 border-b border-gray-50 bg-white p-3 transition-colors hover:bg-gray-50"
+                                onClick={() => markAsRead(notif.id)}
+                              >
+                                <div
+                                  className={`mt-1 flex h-10 w-10 shrink-0 items-center justify-center rounded-full ${notif.bgColor} ${notif.color}`}
+                                >
+                                  <i className="fa-solid fa-bell text-sm"></i>
+                                </div>
+                                <div className="flex-1 min-w-0 pr-10">
+                                  <div className="mb-0.5 flex flex-wrap items-center gap-2">
+                                    <p className="truncate text-sm font-semibold text-black">
+                                      {notif.title}
+                                    </p>
+                                    {notif.isFollowing && (
+                                      <span className="rounded bg-blue-100 px-1.5 py-0.5 text-[10px] font-bold uppercase tracking-wide text-blue-600 whitespace-nowrap">
+                                        Following
+                                      </span>
+                                    )}
+                                  </div>
+                                  <p className="line-clamp-2 text-sm leading-relaxed text-gray-800">
+                                    {notif.message}
+                                  </p>
+                                  <p className="mt-1.5 flex items-center gap-1 text-xs text-gray-500">
+                                    <Clock size={12} /> {notif.time}
+                                  </p>
+                                </div>
+                                {!notif.isRead && (
+                                  <div className="absolute right-3 top-3 h-2 w-2 rounded-full bg-blue-500"></div>
+                                )}
+                                <div className="absolute bottom-3 right-3 flex gap-1 opacity-0 transition-all group-hover:opacity-100">
+                                  <button
+                                    onClick={(e) => toggleArchive(notif.id, e)}
+                                    className="rounded-md p-1 px-1.5 text-gray-400 transition-colors hover:bg-blue-50 hover:text-blue-600"
+                                  >
+                                    {notif.isArchived ? (
+                                      <ArchiveRestore size={16} />
+                                    ) : (
+                                      <Archive size={16} />
+                                    )}
+                                  </button>
+                                  <button
+                                    onClick={(e) =>
+                                      removeNotification(notif.id, e)
+                                    }
+                                    className="rounded-md p-1 px-1.5 text-gray-400 transition-colors hover:bg-red-50 hover:text-red-500"
+                                  >
+                                    <Trash2 size={16} />
+                                  </button>
+                                </div>
+                              </div>
+                            ))}
+                        </div>
+                        <div className="border-t border-gray-100 bg-gray-50/50 p-3">
+                          <button className="w-full rounded-lg py-2 text-center text-sm font-medium text-gray-600 transition-colors hover:text-blue-600">
+                            View all activity
+                          </button>
+                        </div>
                       </div>
                     </div>
-                  </div>
-                )}
-              </div>
+                  )}
+                </div>
+              )}
 
               {/* User Profile - sm+ only */}
               <div className="hidden lg:block w-px h-8 bg-gray-200"></div>
@@ -528,7 +566,12 @@ const EducationNavbar: React.FC<EducationNavbarProps> = ({
         <div className="relative hidden w-full border-b border-gray-200 px-3 xs:px-4 sm:px-6 lg:px-8 md:block">
           <div className="mx-auto flex h-11 sm:h-11.5 w-full max-w-350 items-center gap-3 sm:gap-4 overflow-visible">
             <nav className="no-scrollbar relative flex h-full min-w-0 flex-1 items-center gap-x-4 sm:gap-x-5 md:gap-x-6 lg:gap-x-7 xl:gap-x-8 overflow-visible whitespace-nowrap pr-2 text-[13px] sm:text-[14px] lg:text-[15px] font-medium text-[#212529]">
-              <NavItem onClick={() => go("findCollege")}>Find College</NavItem>
+              <NavItem
+                onClick={() => go("findCollege")}
+                isActive={isViewActive("findCollege")}
+              >
+                Find College
+              </NavItem>
 
               {toolsSection && (
                 <DesktopDropdown
@@ -536,6 +579,7 @@ const EducationNavbar: React.FC<EducationNavbarProps> = ({
                   label={toolsSection.label}
                   alignRight={toolsSection.alignRight}
                   isOpen={activeMenu === toolsSection.key}
+                  isActive={isSectionActive(toolsSection)}
                   onToggle={() =>
                     setActiveMenu((prev) => (prev === toolsSection.key ? null : toolsSection.key))
                   }
@@ -559,6 +603,7 @@ const EducationNavbar: React.FC<EducationNavbarProps> = ({
                   label={scholarshipsSection.label}
                   alignRight={scholarshipsSection.alignRight}
                   isOpen={activeMenu === scholarshipsSection.key}
+                  isActive={isSectionActive(scholarshipsSection)}
                   onToggle={() =>
                     setActiveMenu((prev) =>
                       prev === scholarshipsSection.key ? null : scholarshipsSection.key,
@@ -578,7 +623,12 @@ const EducationNavbar: React.FC<EducationNavbarProps> = ({
                 </DesktopDropdown>
               )}
 
-              <NavItem onClick={() => go("campusForum")}>Campus Feed</NavItem>
+              <NavItem
+                onClick={() => go("campusForum")}
+                isActive={isViewActive("campusForum")}
+              >
+                Campus Feed
+              </NavItem>
 
               {admissionSection && (
                 <DesktopDropdown
@@ -586,6 +636,7 @@ const EducationNavbar: React.FC<EducationNavbarProps> = ({
                   label={admissionSection.label}
                   alignRight={admissionSection.alignRight}
                   isOpen={activeMenu === admissionSection.key}
+                  isActive={isSectionActive(admissionSection)}
                   onToggle={() =>
                     setActiveMenu((prev) =>
                       prev === admissionSection.key ? null : admissionSection.key,
@@ -605,7 +656,10 @@ const EducationNavbar: React.FC<EducationNavbarProps> = ({
                 </DesktopDropdown>
               )}
 
-              <NavItem onClick={() => go("entranceDiscovery")}>
+              <NavItem
+                onClick={() => go("entranceDiscovery")}
+                isActive={isViewActive("entranceDiscovery")}
+              >
                 Entrance
               </NavItem>
 
@@ -615,6 +669,7 @@ const EducationNavbar: React.FC<EducationNavbarProps> = ({
                   label={moreSection.label}
                   alignRight={moreSection.alignRight}
                   isOpen={activeMenu === moreSection.key}
+                  isActive={isSectionActive(moreSection)}
                   onToggle={() =>
                     setActiveMenu((prev) => (prev === moreSection.key ? null : moreSection.key))
                   }

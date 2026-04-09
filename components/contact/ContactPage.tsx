@@ -17,10 +17,10 @@ const initialFormData = {
 };
 
 const socialLinks = [
-  { icon: "fa-facebook-f", label: "Facebook" },
-  { icon: "fa-instagram", label: "Instagram" },
-  { icon: "fa-linkedin-in", label: "LinkedIn" },
-  { icon: "fa-x-twitter", label: "X" },
+  { icon: "fa-facebook-f", label: "Facebook", url: "https://www.facebook.com/share/1CEcyRH9ZZ/" },
+  { icon: "fa-instagram", label: "Instagram", url:"https://www.instagram.com/stud.sphere?igsh=NDM5Z29nc2ZqMmc=" },
+  { icon: "fa-tiktok", label: "TikTok", url: "https://www.tiktok.com/@stud.sphere?_r=1&_t=ZS-95OYyC0vodM" },
+  { icon: "fa-whatsapp", label: "WhatsApp", url: "https://wa.me/9779800000000" },
 ];
 
 const ContactPage: React.FC = () => {
@@ -90,10 +90,7 @@ const ContactPage: React.FC = () => {
           <h1 className="mb-3 text-3xl font-bold text-black md:text-4xl">
             Contact Us
           </h1>
-          <p className="text-sm font-medium text-gray-800">
-            Home/
-            <span className="text-[#1c64f2]">Contact Us</span>
-          </p>
+         
         </header>
 
         <main className="mx-auto max-w-7xl px-4 pb-16 sm:px-6 lg:px-8">
@@ -172,9 +169,8 @@ const ContactPage: React.FC = () => {
               <div className="flex h-full flex-col space-y-8 rounded-xl bg-[#1c64f2] p-8 text-white shadow-lg lg:p-10">
                 <InfoBlock title="Address">
                   <p className="text-sm leading-relaxed text-white/90">
-                    New Baneshwor,
-                    <br />
-                    Kathmandu 44600,Nepal
+                   Sallyan House, Baghbajar <br/> 
+                   Kathmandu, Nepal
                   </p>
                 </InfoBlock>
 
@@ -183,17 +179,15 @@ const ContactPage: React.FC = () => {
                     Tel : 01-456746 , 01-985647
                   </p>
                   <p className="text-sm leading-relaxed text-white/90">
-                    Email: hello@stusphere.com
+                    Email: info@stusphere.com
                   </p>
                 </InfoBlock>
 
                 <InfoBlock title="Open Time">
                   <p className="mb-1 text-sm leading-relaxed text-white/90">
-                    Tel : 01-456746 , 01-985647
+                    9:00 AM - 6:00 PM
                   </p>
-                  <p className="text-sm leading-relaxed text-white/90">
-                    Email: hello@stusphere.com
-                  </p>
+                  
                 </InfoBlock>
 
                 <div className="mt-auto pt-4">
@@ -202,8 +196,9 @@ const ContactPage: React.FC = () => {
                     {socialLinks.map((item) => (
                       <a
                         key={item.label}
-                        href="#"
+                        href={item.url}
                         aria-label={item.label}
+                        target="_blank"
                         className="flex h-10 w-10 items-center justify-center rounded-full bg-white text-[#1c64f2] shadow-sm transition-colors hover:bg-gray-100"
                       >
                         <i className={`fa-brands ${item.icon} text-sm`}></i>
@@ -217,7 +212,7 @@ const ContactPage: React.FC = () => {
 
           <div className="mt-12 h-96 w-full overflow-hidden rounded-2xl border border-gray-200 shadow-sm">
             <iframe
-              src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d14130.857353934944!2d85.3392436!3d27.6952226!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x39eb199042c161ab%3A0x6b29f0e1c2813583!2sNew%20Baneshwor%2C%20Kathmandu%2044600%2C%20Nepal!5e0!3m2!1sen!2snp!4v1700000000000!5m2!1sen!2snp"
+              src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d2677.2224901076906!2d85.31917056414895!3d27.705348891431424!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x39eb19004565cdeb%3A0xffa5eb3bc0b79d47!2sSallyan%20House!5e0!3m2!1sen!2snp!4v1775739754359!5m2!1sen!2snp"
               title="Location Map"
               className="h-full w-full border-0"
               loading="lazy"

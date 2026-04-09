@@ -592,7 +592,7 @@ const FilterSidebar: React.FC<FilterSidebarProps> = ({
   return (
     <>
       {/* ── Filter Card ───────────────────────────────────── */}
-      <div className="relative w-full rounded-[20px] border border-gray-100 bg-white p-6 shadow-[0_4px_24px_-8px_rgba(0,0,0,0.1)]">
+      <div className="relative w-full rounded-[20px] border border-gray-200 bg-white p-6 ">
         {/* Header */}
         <div className="mb-2 flex items-center justify-between">
           <div className="flex items-center gap-2.5">

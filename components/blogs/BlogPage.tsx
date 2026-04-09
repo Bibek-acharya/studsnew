@@ -35,7 +35,7 @@ const categoryFromBlog = (category: string): BlogCategoryFilter => {
 
 const badgeClassFromCategory = (category: BlogCategoryFilter) => {
   if (category === "Scholarship") return "bg-emerald-500";
-  if (category === "Admission") return "bg-blue-500";
+  if (category === "Admission") return "bg-blue-700";
   if (category === "Exams") return "bg-red-500";
   if (category === "Events") return "bg-purple-500";
   if (category === "Achievements") return "bg-amber-500";
@@ -64,7 +64,7 @@ const BlogPage: React.FC = () => {
     });
   }, [activeCategory, blogs, sortBy]);
 
-  const itemsPerPage = 8;
+  const itemsPerPage = 12;
   const totalPages = Math.max(1, Math.ceil(filteredBlogs.length / itemsPerPage));
   const paginatedBlogs = filteredBlogs.slice(
     (currentPage - 1) * itemsPerPage,
@@ -73,9 +73,9 @@ const BlogPage: React.FC = () => {
 
   return (
     <div className="bg-white text-gray-800 antialiased pb-16 min-h-screen">
-      <div className="max-w-[1400px] mx-auto py-8">
+      <div className="max-w-350 mx-auto py-8">
         <section className="mb-10">
-          <h2 className="text-2xl font-bold text-gray-900 mb-5">Browse by category</h2>
+          <h2 className="text-3xl font-bold text-gray-900 mb-5">Browse by category</h2>
           <div className="flex gap-3 overflow-x-auto pb-2 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
             {categoryPills.map((pill) => {
               const isActive = activeCategory === pill;
@@ -85,7 +85,7 @@ const BlogPage: React.FC = () => {
                   onClick={() => setActiveCategory(pill)}
                   className={`px-5 py-2 rounded-full text-sm font-medium whitespace-nowrap transition-colors ${
                     isActive
-                      ? "bg-blue-500 text-white shadow-sm"
+                      ? "bg-[#0000ff] text-white shadow-sm"
                       : "bg-white text-gray-700 border border-gray-200 hover:bg-gray-50"
                   }`}
                 >
@@ -98,10 +98,10 @@ const BlogPage: React.FC = () => {
 
         {featuredBlog && (
           <section className="mb-12">
-            <h2 className="text-2xl font-bold text-gray-900 mb-5">Featured Story of the Week</h2>
+            <h2 className="text-3xl font-bold text-gray-900 mb-5">Featured Story of the Week</h2>
             <Link
               href={`/blogs/${featuredBlog.id}`}
-              className="relative w-full h-[350px] sm:h-[400px] rounded-2xl overflow-hidden group cursor-pointer block"
+              className="relative w-full h-87.5 sm:h-100 rounded-lg overflow-hidden group cursor-pointer block"
             >
               <img
                 src={featuredBlog.image}
@@ -109,7 +109,7 @@ const BlogPage: React.FC = () => {
                 className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-700 ease-in-out"
               />
 
-              <div className="absolute inset-0 bg-gradient-to-t from-gray-900/90 via-gray-900/40 to-transparent"></div>
+              <div className="absolute inset-0 bg-linear-to-t from-gray-900/90 via-gray-900/40 to-transparent"></div>
 
               <div className="absolute inset-0 flex flex-col justify-end p-6 sm:p-8">
                 <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
@@ -137,7 +137,7 @@ const BlogPage: React.FC = () => {
 
         <section>
           <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
-            <h2 className="text-2xl font-bold text-gray-900">Latest Blogs</h2>
+            <h2 className="text-3xl font-bold text-gray-900">Latest Blogs</h2>
 
             <div className="flex items-center gap-2">
               <span className="text-sm font-medium text-gray-500">Sort by:</span>
@@ -166,10 +166,10 @@ const BlogPage: React.FC = () => {
               return (
                 <article
                   key={blog.id}
-                  className="bg-white rounded-2xl border border-gray-200 overflow-hidden flex flex-col hover:shadow-lg transition-shadow duration-300 cursor-pointer"
+                  className="bg-white rounded-2xl border border-gray-200 hover:border-blue-500/20 overflow-hidden flex flex-col duration-300 cursor-pointer"
                 >
-                  <Link href={`/blogs/${blog.id}`} className="h-48 w-full overflow-hidden">
-                    <img src={blog.image} alt={blog.title} className="w-full h-full object-cover" />
+                  <Link href={`/blogs/${blog.id}`} className="h-32 w-full overflow-hidden p-4 ">
+                    <img src={blog.image} alt={blog.title} className="w-full h-full object-cover rounded-lg" />
                   </Link>
 
                   <div className="p-5 flex-1 flex flex-col">
@@ -185,7 +185,7 @@ const BlogPage: React.FC = () => {
                       </div>
                     </div>
 
-                    <Link href={`/blogs/${blog.id}`} className="text-lg font-bold text-gray-900 leading-snug mb-2 line-clamp-2 hover:underline">
+                    <Link href={`/blogs/${blog.id}`} className="text-lg font-bold text-gray-900 leading-snug mb-2 line-clamp-2 hover:text-[#0000ff]">
                       {blog.title}
                     </Link>
                     <p className="text-sm text-gray-500 line-clamp-3 mb-5 flex-1">{blog.excerpt}</p>
@@ -202,9 +202,8 @@ const BlogPage: React.FC = () => {
                           <span className="text-[10px] text-gray-500 font-medium leading-none">Educator</span>
                         </div>
                       </div>
-                      <Link href={`/blogs/${blog.id}`} className="text-xs font-semibold text-blue-600 flex items-center hover:underline">
+                      <Link href={`/blogs/${blog.id}`} className="text-xs font-semibold text-[#0000ff] flex items-center ">
                         View Details
-                        <i className="fa-solid fa-chevron-right text-[10px] ml-1"></i>
                       </Link>
                     </div>
                   </div>

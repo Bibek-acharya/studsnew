@@ -95,7 +95,11 @@ body {
 }
 
 .nav-link:hover {
-  color: #4461f2;
+  color: #0000ff;
+}
+
+.nav-link-active {
+  color: #0000ff;
 }
 
 .menu-item {

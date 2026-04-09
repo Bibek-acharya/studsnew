@@ -28,6 +28,8 @@ const SEARCHABLE_FILTER_KEYS: Array<keyof CollegeFilters> = [
   "stream",
 ];
 
+const COLLEGES_PER_PAGE = 20;
+
 const CollegeGrid: React.FC<CollegeGridProps> = ({
   filters,
   setFilters,
@@ -58,7 +60,7 @@ const CollegeGrid: React.FC<CollegeGridProps> = ({
     queryFn: () => {
       const params: any = {
         page: currentPage,
-        pageSize: 18,
+        pageSize: COLLEGES_PER_PAGE,
         sort: "rating",
         order: "DESC",
       };
@@ -82,6 +84,8 @@ const CollegeGrid: React.FC<CollegeGridProps> = ({
   const colleges = data?.data?.colleges || [];
   const totalResults = data?.data?.pagination?.total || 0;
   const totalPages = data?.data?.pagination?.totalPages || 1;
+  const showingFrom = totalResults === 0 ? 0 : (currentPage - 1) * COLLEGES_PER_PAGE + 1;
+  const showingTo = Math.min((currentPage - 1) * COLLEGES_PER_PAGE + colleges.length, totalResults);
 
   const toggleSavedCollege = (collegeId: number) => {
     setSavedColleges((prev) =>
@@ -110,6 +114,7 @@ const CollegeGrid: React.FC<CollegeGridProps> = ({
       setSelectedForInquiry(toSelect);
     } else {
       setSelectedForInquiry([]);
+      setIsQuickInquiryMode(false);
     }
   };
 
@@ -140,8 +145,8 @@ const CollegeGrid: React.FC<CollegeGridProps> = ({
       <div className="mb-6">
         <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-center">
           <div className="flex flex-col justify-start">
-            <h1 className="mb-3 text-base font-bold text-gray-900">
-              Showing {totalResults.toLocaleString()} Colleges
+            <h1 className="mb-3 text-base text-gray-900">
+              Showing {showingFrom.toLocaleString()}-{showingTo.toLocaleString()} of {totalResults.toLocaleString()} <span className="font-bold">Colleges</span>
             </h1>
 
             {isLoading && (
@@ -181,7 +186,7 @@ const CollegeGrid: React.FC<CollegeGridProps> = ({
                   onChange={handleSelectAll}
                   className="peer sr-only"
                 />
-                <div className="absolute inset-0 rounded-[4px] border-[1.5px] border-slate-300 bg-white transition-colors group-hover:border-slate-400 peer-checked:border-[#0000FF] peer-checked:bg-[#0000FF]"></div>
+                <div className="absolute inset-0 rounded-sm border-[1.5px] border-slate-300 bg-white transition-colors group-hover:border-slate-400 peer-checked:border-[#0000FF] peer-checked:bg-[#0000FF]"></div>
                 <svg
                   className="pointer-events-none absolute z-10 h-3.5 w-3.5 text-white opacity-0 transition-opacity peer-checked:opacity-100"
                   fill="none"
@@ -218,7 +223,7 @@ const CollegeGrid: React.FC<CollegeGridProps> = ({
                   }))
                 }
                 placeholder="Search colleges, locations, courses..."
-                className="w-full rounded-lg border border-gray-200 bg-white py-2.5 pl-10 pr-4 text-sm shadow-sm transition-all placeholder-gray-400 focus:border-transparent focus:outline-none focus:ring-2 focus:ring-[#0000FF]"
+                className="w-full rounded-lg border border-gray-200 bg-white py-2.5 pl-10 pr-4 text-sm transition-all placeholder-gray-400 focus:border-transparent focus:outline-none focus:ring-1 focus:ring-brand-blue"
               />
             </div>
 
@@ -236,7 +241,7 @@ const CollegeGrid: React.FC<CollegeGridProps> = ({
                   }}
                   className="peer sr-only"
                 />
-                <div className="peer h-[20px] w-[34px] rounded-full bg-slate-300 transition-all after:absolute after:left-[2px] after:top-[2px] after:h-[16px] after:w-[16px] after:rounded-full after:border after:border-gray-300 after:bg-white after:transition-all after:content-[''] peer-checked:bg-[#0000FF] peer-checked:after:translate-x-[14px] peer-checked:after:border-white peer-focus:outline-none"></div>
+                <div className="peer h-5 w-8.5 rounded-full bg-slate-300 transition-all after:absolute after:left-0.5 after:top-0.5 after:h-4 after:w-4 after:rounded-full after:border after:border-gray-300 after:bg-white after:transition-all after:content-[''] peer-checked:bg-brand-blue peer-checked:after:translate-x-3.5 peer-checked:after:border-white peer-focus:outline-none"></div>
               </div>
             </label>
           </div>
@@ -254,14 +259,16 @@ const CollegeGrid: React.FC<CollegeGridProps> = ({
         )}
 
         {colleges.map((college: College, index: number) => {
-          const globalIndex = (currentPage - 1) * 18 + index;
+          const globalIndex = (currentPage - 1) * COLLEGES_PER_PAGE + index;
           const isAfter2Rows = (index + 1) % 6 === 0;
           const adCycleIndex = Math.floor(globalIndex / 6) % 3;
+          const isVerifiedSimulated = Number(college.id) % 2 === 0;
 
           return (
             <React.Fragment key={college.id}>
               <ProgramCard
                 college={college}
+                isVerified={isVerifiedSimulated}
                 isSaved={savedColleges.includes(college.id)}
                 isSelected={selectedForInquiry.includes(college.id)}
                 isQuickInquiryMode={isQuickInquiryMode}
@@ -401,6 +408,7 @@ const CollegeGrid: React.FC<CollegeGridProps> = ({
 
 const ProgramCard: React.FC<{
   college: College;
+  isVerified: boolean;
   isSaved: boolean;
   isSelected: boolean;
   isQuickInquiryMode: boolean;
@@ -410,6 +418,7 @@ const ProgramCard: React.FC<{
   onClaim: () => void;
 }> = ({
   college,
+  isVerified,
   isSaved,
   isSelected,
   isQuickInquiryMode,
@@ -433,41 +442,60 @@ const ProgramCard: React.FC<{
         <div className="absolute top-3 left-3 bg-blue-600 text-white text-[10px] font-bold px-2 py-0.5 rounded uppercase tracking-wider z-10 shadow-sm">
           Featured
         </div>
-        <img
-          src={
-            college.image_url ||
-            "https://images.unsplash.com/photo-1562774053-701939374585?q=80&w=1200&auto=format&fit=crop"
-          }
-          alt={college.name}
-          className="h-full w-full object-cover"
-        />
-        <label
-          className={`absolute right-2 top-2 z-10 cursor-pointer transition-opacity duration-300 ${isQuickInquiryMode || isSelected ? "opacity-100 pointer-events-auto" : "pointer-events-none opacity-0 group-hover:opacity-100 group-hover:pointer-events-auto"}`}
-          onClick={(e) => e.stopPropagation()}
-        >
-          <div className="relative flex h-6 w-6 items-center justify-center">
-            <input
-              type="checkbox"
-              checked={isSelected}
-              onChange={onToggleSelection}
-              className="peer sr-only"
-            />
-            <div className="absolute inset-0 rounded-[6px] border-[1.5px] border-slate-300 bg-white/90 shadow-sm backdrop-blur-sm transition-colors hover:border-slate-400 peer-checked:border-[#0000FF] peer-checked:bg-[#0000FF]"></div>
-            <svg
-              className="pointer-events-none absolute z-10 h-4 w-4 text-white opacity-0 transition-opacity peer-checked:opacity-100"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-              strokeWidth="3.5"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                d="M5 13l4 4L19 7"
-              />
-            </svg>
+        {college.image_url ? (
+          <img
+            src={college.image_url}
+            alt={college.name}
+            className="h-full w-full object-cover"
+          />
+        ) : (
+          <div className="flex h-full w-full items-center justify-center bg-[#0000ff]">
+            <span className="px-3 text-center text-sm font-semibold text-white">
+              No image available
+            </span>
           </div>
-        </label>
+        )}
+        {!isVerified && (
+          <button
+            type="button"
+            onClick={(e) => {
+              e.stopPropagation();
+              onClaim();
+            }}
+            className="absolute bottom-2 left-2 z-10 rounded-md bg-black/65 px-2.5 py-1 text-[11px] font-semibold text-white backdrop-blur-sm transition-colors hover:bg-black/75"
+          >
+            Is this your college? <span className="underline text-brand-blue">Claim now</span>
+          </button>
+        )}
+        {isQuickInquiryMode && (
+          <label
+            className="absolute right-2 top-2 z-10 cursor-pointer"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="relative flex h-6 w-6 items-center justify-center">
+              <input
+                type="checkbox"
+                checked={isSelected}
+                onChange={onToggleSelection}
+                className="peer sr-only"
+              />
+              <div className="absolute inset-0 rounded-[6px] border-[1.5px] border-slate-300 bg-white/90 shadow-sm backdrop-blur-sm transition-colors hover:border-slate-400 peer-checked:border-[#0000FF] peer-checked:bg-[#0000FF]"></div>
+              <svg
+                className="pointer-events-none absolute z-10 h-4 w-4 text-white opacity-0 transition-opacity peer-checked:opacity-100"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+                strokeWidth="3.5"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  d="M5 13l4 4L19 7"
+                />
+              </svg>
+            </div>
+          </label>
+        )}
       </div>
 
       <div className="flex flex-1 flex-col px-0 pt-3">
@@ -480,7 +508,7 @@ const ProgramCard: React.FC<{
           >
             {college.name}
           </button>
-          {college.verified && (
+          {isVerified && (
             <BadgeCheckIcon className="w-5 h-5 text-white fill-blue-500 shrink-0" />
           )}
         </div>
@@ -534,15 +562,20 @@ const ProgramCard: React.FC<{
         <div className="flex flex-col gap-3 mt-auto">
           <button
             type="button"
+            disabled={!isVerified}
             onClick={(e) => {
               e.stopPropagation();
-              if (college.verified) {
+              if (isVerified) {
                 onNavigate("bookCounselling", { collegeId: college.id });
               }
             }}
-            className="w-full bg-[#2563EB] hover:bg-blue-700 text-white font-medium text-[14px] py-2.5 px-4 rounded-md transition-colors flex items-center justify-center gap-1.5"
+            className={`w-full text-white font-medium text-[14px] py-2.5 px-4 rounded-md transition-colors flex items-center justify-center gap-1.5 ${
+              isVerified
+                ? "bg-brand-blue hover:bg-blue-700"
+                : "bg-brand-blue cursor-not-allowed"
+            }`}
           >
-            {!college.verified && <LockIcon size={14} />}
+            {!isVerified && <LockIcon size={14} />}
             Get counselling
           </button>
 
@@ -587,7 +620,7 @@ const ProgramCard: React.FC<{
               title={isSaved ? "Remove Bookmark" : "Bookmark"}
             >
               <Bookmark
-                className={`w-4 h-4 transition-all ${isSaved ? "text-[#0000ff] fill-[#0000ff]" : "text-[#0000ff]"}`}
+                className={`w-4 h-4 transition-all ${isSaved ? "text-[#0000ff] fill-[#0000ff]" : "text-gray-400"}`}
               />
             </button>
           </div>

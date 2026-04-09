@@ -3,10 +3,11 @@ import React from "react";
 export const NavItem: React.FC<{
   children: React.ReactNode;
   onClick?: () => void;
-}> = ({ children, onClick }) => (
+  isActive?: boolean;
+}> = ({ children, onClick, isActive = false }) => (
   <button
     onClick={onClick}
-    className="nav-link flex h-full shrink-0 items-center justify-center"
+    className={`nav-link flex h-full shrink-0 items-center justify-center ${isActive ? "nav-link-active" : ""}`}
   >
     {children}
   </button>
@@ -18,12 +19,13 @@ export const DesktopDropdown: React.FC<{
   alignRight?: boolean;
   isOpen: boolean;
   onToggle: () => void;
-}> = ({ label, children, alignRight = false, isOpen, onToggle }) => (
+  isActive?: boolean;
+}> = ({ label, children, alignRight = false, isOpen, onToggle, isActive = false }) => (
   <div className="menu-anchor relative h-full shrink-0">
     <button
       type="button"
       onClick={onToggle}
-      className="nav-link flex h-full items-center gap-1"
+      className={`nav-link flex h-full items-center gap-1 ${isActive ? "nav-link-active" : ""}`}
     >
       <span>{label}</span>
       <svg
@@ -35,7 +37,7 @@ export const DesktopDropdown: React.FC<{
         strokeWidth="2"
         strokeLinecap="round"
         strokeLinejoin="round"
-        className={`text-gray-400 transition-transform duration-200 ${isOpen ? "rotate-180 text-brand-blue" : ""}`}
+        className={`transition-transform duration-200 ${isOpen || isActive ? "rotate-180 text-[#0000ff]" : "text-gray-400"}`}
       >
         <path d="m6 9 6 6 6-6" />
       </svg>

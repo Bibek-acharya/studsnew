@@ -43,7 +43,7 @@ const FindCollegeHero: React.FC<FindCollegeHeroProps> = ({
                 <button
                   key={tab.key}
                   onClick={() => onTabChange(tab.key)}
-                  className={`rounded-full border px-4 py-1.5 text-sm font-semibold shadow-sm transition-colors ${
+                  className={`rounded-full border px-4 py-1.5 text-sm font-semibold transition-colors ${
                     isActive
                       ? "border-[#3b82f6] bg-[#3b82f6] text-white"
                       : "border-gray-200 bg-white text-gray-600 hover:bg-gray-50"
@@ -74,7 +74,7 @@ const FindCollegeHero: React.FC<FindCollegeHeroProps> = ({
               value={searchQuery}
               onChange={(event) => onSearchChange(event.target.value)}
               placeholder="Search courses, colleges..."
-              className="w-full rounded-xl border border-gray-200 py-2 pl-10 pr-4 text-sm shadow-sm transition-shadow focus:border-transparent focus:outline-none focus:ring-2 focus:ring-[#3b82f6]"
+              className="w-full rounded-lg border border-gray-200 py-2 pl-10 pr-4 text-sm focus:outline-none focus:ring-1 focus:ring-[#3b82f6]"
             />
           </form>
         </div>

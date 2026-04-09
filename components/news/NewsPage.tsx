@@ -76,7 +76,7 @@ const NewsPage: React.FC = () => {
   );
 
   return (
-    <main className="max-w-[1400px] mx-auto py-10 space-y-14 min-h-screen text-slate-800">
+    <main className="max-w-350 mx-auto py-10 space-y-14 min-h-screen text-slate-800">
       <section>
         <h1 className="text-3xl font-bold text-slate-900 mb-5">Browse by category</h1>
         <div className="flex items-center gap-3 overflow-x-auto pb-4 -mx-4 px-4 sm:mx-0 sm:px-0 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
@@ -104,7 +104,7 @@ const NewsPage: React.FC = () => {
           <h2 className="text-3xl font-bold text-slate-900 mb-5">Featured Story of the Week</h2>
           <Link
             href={`/news/${featuredNews.id}`}
-            className="relative w-full h-[450px] sm:h-[400px] rounded-2xl overflow-hidden shadow-lg group cursor-pointer block"
+            className="relative w-full h-112.5 sm:h-100 rounded-2xl overflow-hidden shadow-lg group cursor-pointer block"
           >
             <img
               src={featuredNews.image}
@@ -112,7 +112,7 @@ const NewsPage: React.FC = () => {
               className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-700 ease-in-out"
             />
 
-            <div className="absolute inset-0 bg-gradient-to-t from-slate-900/90 via-slate-900/50 to-transparent"></div>
+            <div className="absolute inset-0 bg-linear-to-t from-slate-900/90 via-slate-900/50 to-transparent"></div>
 
             <div className="absolute inset-0 flex flex-col justify-end p-6 sm:p-10">
               <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-6 w-full">
