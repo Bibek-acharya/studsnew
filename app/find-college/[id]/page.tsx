@@ -570,6 +570,8 @@ const CollegeDetailsPage: React.FC = () => {
   const [scholarshipFilter, setScholarshipFilter] =
     useState<LevelFilter>("all");
   const [isClaimModalOpen, setIsClaimModalOpen] = useState(false);
+  const [isShareModalOpen, setIsShareModalOpen] = useState(false);
+  const [shareUrl, setShareUrl] = useState("");
   const [college, setCollege] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const tabsScrollRef = useRef<HTMLDivElement | null>(null);
@@ -647,6 +649,10 @@ const CollegeDetailsPage: React.FC = () => {
     updateTabScrollState();
   }, [activeTab, updateTabScrollState]);
 
+  useEffect(() => {
+    setShareUrl(window.location.href);
+  }, [collegeId]);
+
   const name = college?.name || fallbackCollege.name;
   const locationText = college?.location || fallbackCollege.location;
   const rating = college?.rating ?? fallbackCollege.rating;
@@ -662,6 +668,8 @@ const CollegeDetailsPage: React.FC = () => {
   const banner = college?.image_url || fallbackCollege.banner;
   const description = college?.description || fallbackCollege.description;
   const isVerified = isCollegeVerified(college?.verified);
+  const shareTitle = `${name} - Studsphere`;
+  const shareText = `Check out ${name} on Studsphere`;
 
   const filteredCourses = useMemo(
     () =>
@@ -696,7 +704,7 @@ const CollegeDetailsPage: React.FC = () => {
   if (loading) {
     return (
       <div className="flex min-h-[60vh] items-center justify-center">
-        <div className="h-10 w-10 animate-spin rounded-full border-4 border-gray-200 border-t-[#0000FF]"></div>
+        <div className="h-10 w-10 animate-spin rounded-full border-4 border-gray-200 border-t-brand-blue"></div>
       </div>
     );
   }
@@ -704,22 +712,22 @@ const CollegeDetailsPage: React.FC = () => {
   return (
     <div className="w-full bg-white">
       <div
-        className="relative h-[220px] w-full bg-cover bg-center md:h-[360px]"
-        style={{ backgroundImage: `url('${banner}')` }}
+        className="relative h-55 w-full bg-blue-800 bg-center md:h-90"
+        // style={{ backgroundImage: `url('${banner}')` }}
       >
         <div className="absolute bottom-4 right-4 z-20 md:bottom-6 md:right-6">
           {isVerified ? (
-            <button className="flex items-center gap-2 rounded-full bg-[#0000FF] px-5 py-2.5 text-sm font-bold text-white shadow-lg transition-all duration-300 hover:bg-[#0000CC] md:px-6 md:py-3 md:text-base">
+            <button className="flex items-center gap-2 rounded-md bg-brand-blue px-5 py-2.5 text-sm font-bold text-white transition-all duration-300 hover:bg-brand-hover md:px-6 md:py-3 md:text-base">
               <i className="fa-regular fa-comments"></i>
               <span>Open Counselling</span>
             </button>
           ) : (
             <button
               onClick={() => setIsClaimModalOpen(true)}
-              className="flex items-center gap-2 rounded-full border border-gray-100 bg-white px-5 py-2.5 text-sm font-bold text-gray-800 shadow-lg transition-all duration-300 hover:bg-gray-50 md:px-6 md:py-3 md:text-base"
+              className="flex items-center gap-2 rounded-md bg-black/50 px-5 py-1 text-sm font-bold text-white transition-all duration-300 md:px-6 md:py-1 md:text-base"
             >
-              <i className="fa-solid fa-building-shield text-[#0000FF]"></i>
-              <span>Claim Now</span>
+              {/* <i className="fa-solid fa-building-shield text-brand-blue"></i> */}
+              Is this your college? <span className="underline hover:text-brand-blue cursor-pointer">Claim now</span>
             </button>
           )}
         </div>
@@ -727,7 +735,7 @@ const CollegeDetailsPage: React.FC = () => {
 
       <div className="relative bg-white">
         <div className="relative px-6 pb-8 md:px-12 lg:px-24 xl:px-32">
-          <div className="relative z-10 mr-auto -mt-12 flex h-[120px] w-[120px] items-center justify-center overflow-hidden rounded-xl border border-gray-100 bg-white p-2 shadow-[0_4px_20px_-3px_rgba(0,0,0,0.1)] md:absolute md:-top-4 md:left-12 md:mx-0 md:mt-0 md:h-[150px] md:w-[150px] lg:left-24 xl:left-32">
+          <div className="relative z-10 mr-auto -mt-12 flex h-30 w-30 items-center justify-center overflow-hidden rounded-xl border border-gray-200 bg-white p-2 md:absolute md:-top-4 md:left-12 md:mx-0 md:mt-0 md:h-37.5 md:w-37.5 lg:left-24 xl:left-32">
             <img
               src={fallbackCollege.logo}
               alt="College Logo"
@@ -735,13 +743,15 @@ const CollegeDetailsPage: React.FC = () => {
             />
           </div>
 
-          <div className="mt-4 flex flex-col items-center justify-between gap-6 lg:mt-0 lg:flex-row lg:items-end lg:gap-0 lg:pl-[170px]">
+          <div className="mt-4 flex flex-col items-center justify-between gap-6 lg:mt-0 lg:flex-row lg:items-end lg:gap-0 lg:pl-42.5">
             <div className="w-full space-y-3 text-left lg:w-auto">
-              <div className="flex items-center justify-start gap-2">
-                <h1 className="text-[24px] font-bold tracking-tight text-gray-900 md:text-3xl">
+              <div className="flex items-center justify-start gap-2 pt-4">
+                <h1 className="text-[24px] font-bold tracking-tight text-gray-900 md:text-3xl ">
                   {name}
                 </h1>
-                <BadgeCheckIcon className="text-white fill-[#0000FF]" />
+                {isVerified && (
+                  <BadgeCheckIcon className="text-white fill-brand-blue" />
+                )}
               </div>
               <div className="flex items-center justify-start gap-1.5 text-[14px] font-medium text-gray-600 md:text-[15px]">
                 <i className="fa-solid fa-location-dot text-gray-500"></i>
@@ -759,23 +769,27 @@ const CollegeDetailsPage: React.FC = () => {
                   href={websiteHref}
                   target="_blank"
                   rel="noreferrer"
-                  className="flex items-center gap-1 text-[13px] font-bold tracking-wide text-[#0000FF] transition-colors hover:text-[#0000CC]"
+                  className="flex items-center gap-1 text-[13px] font-medium tracking-wide text-brand-blue transition-colors hover:text-brand-hover"
                 >
-                  <i className="fa-solid fa-globe text-[12px]"></i>
+                  <i className="fa-solid fa-globe text-gray-500 text-[12px]"></i>
                   {website.toLowerCase()}
-                  <i className="fa-solid fa-arrow-up-right-from-square text-[11px]"></i>
                 </a>
               </div>
             </div>
 
             <div className="mt-8 flex w-full flex-nowrap items-center gap-2 overflow-x-auto pb-1 lg:mt-0 lg:w-auto lg:gap-3 lg:overflow-visible lg:pb-0">
-              <button className="shrink-0 flex items-center justify-center gap-2 rounded-xl border border-gray-200 bg-white px-4 py-2.5 text-[14px] font-semibold text-gray-700 shadow-sm transition-colors hover:bg-gray-50 lg:px-5 lg:py-3 lg:text-[15px]">
+              <button className="shrink-0 flex items-center justify-center gap-2 rounded-xl border border-gray-200 bg-white px-4 py-2.5 text-[14px] font-semibold text-gray-700 transition-colors hover:bg-gray-50 lg:px-5 lg:py-3 lg:text-[15px]">
                 <i className="fa-solid fa-download"></i>Brochure
               </button>
-              <button className="shrink-0 flex items-center justify-center gap-2 rounded-xl border border-gray-200 bg-white px-4 py-2.5 text-[14px] font-semibold text-gray-700 shadow-sm transition-colors hover:bg-gray-50 lg:px-5 lg:py-3 lg:text-[15px]">
+              <button className="shrink-0 flex items-center justify-center gap-2 rounded-xl border border-gray-200 bg-white px-4 py-2.5 text-[14px] font-semibold text-gray-700 transition-colors hover:bg-gray-50 lg:px-5 lg:py-3 lg:text-[15px]">
                 <i className="fa-regular fa-circle-question"></i>Ask Question
               </button>
-              <button className="shrink-0 flex items-center justify-center rounded-xl border border-gray-200 bg-white p-2.5 text-gray-700 shadow-sm transition-colors hover:bg-gray-50 lg:p-3">
+              <button
+                type="button"
+                onClick={() => setIsShareModalOpen(true)}
+                className="shrink-0 flex items-center justify-center rounded-xl border border-gray-200 bg-white p-2.5 text-gray-700 shadow-sm transition-colors hover:bg-gray-50 lg:p-3"
+                aria-label="Share college profile"
+              >
                 <i className="fa-solid fa-share-nodes"></i>
               </button>
             </div>
@@ -1600,6 +1614,15 @@ const CollegeDetailsPage: React.FC = () => {
         isOpen={isClaimModalOpen}
         onClose={() => setIsClaimModalOpen(false)}
       />
+
+      <ShareCollegeModal
+        collegeName={name}
+        isOpen={isShareModalOpen}
+        onClose={() => setIsShareModalOpen(false)}
+        shareUrl={shareUrl}
+        shareTitle={shareTitle}
+        shareText={shareText}
+      />
     </div>
   );
 };
@@ -1918,6 +1941,152 @@ const ClaimCollegeModal: React.FC<{
               </button>
             </div>
           </form>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+const ShareCollegeModal: React.FC<{
+  collegeName: string;
+  isOpen: boolean;
+  onClose: () => void;
+  shareUrl: string;
+  shareTitle: string;
+  shareText: string;
+}> = ({
+  collegeName,
+  isOpen,
+  onClose,
+  shareUrl,
+  shareTitle,
+  shareText,
+}) => {
+  const [copyLabel, setCopyLabel] = useState("Copy link");
+
+  useEffect(() => {
+    if (!isOpen) {
+      setCopyLabel("Copy link");
+    }
+  }, [isOpen]);
+
+  const encodedUrl = encodeURIComponent(shareUrl);
+  const encodedText = encodeURIComponent(shareText);
+
+  const socialLinks = [
+    {
+      name: "Facebook",
+      icon: "fa-brands fa-facebook-f",
+      color: "text-[#1877F2]",
+      href: `https://www.facebook.com/sharer/sharer.php?u=${encodedUrl}`,
+    },
+    {
+      name: "X",
+      icon: "fa-brands fa-x-twitter",
+      color: "text-black",
+      href: `https://twitter.com/intent/tweet?url=${encodedUrl}&text=${encodedText}`,
+    },
+    {
+      name: "WhatsApp",
+      icon: "fa-brands fa-whatsapp",
+      color: "text-[#25D366]",
+      href: `https://wa.me/?text=${encodedText}%20${encodedUrl}`,
+    },
+    {
+      name: "Instagram",
+      icon: "fa-brands fa-instagram",
+      color: "text-[#E4405F]",
+      href: `https://www.instagram.com/`,
+    },
+    {
+      name: "LinkedIn",
+      icon: "fa-brands fa-linkedin-in",
+      color: "text-[#0A66C2]",
+      href: `https://www.linkedin.com/sharing/share-offsite/?url=${encodedUrl}`,
+    },
+    {
+      name: "Telegram",
+      icon: "fa-brands fa-telegram",
+      color: "text-[#229ED9]",
+      href: `https://t.me/share/url?url=${encodedUrl}&text=${encodedText}`,
+    },
+  ];
+
+  const copyLink = async () => {
+    try {
+      await navigator.clipboard.writeText(shareUrl);
+      setCopyLabel("Copied");
+      window.setTimeout(() => setCopyLabel("Copy link"), 1600);
+    } catch {
+      setCopyLabel("Copy failed");
+      window.setTimeout(() => setCopyLabel("Copy link"), 1600);
+    }
+  };
+
+  return (
+    <div
+      className={`fixed inset-0 z-[60] flex items-center justify-center bg-slate-900/45 px-4 backdrop-blur-sm transition-opacity duration-300 ${isOpen ? "opacity-100" : "pointer-events-none opacity-0"}`}
+      onClick={onClose}
+    >
+      <div
+        className={`mx-auto w-full max-w-lg rounded-[24px] bg-white shadow-2xl transition-transform duration-300 ${isOpen ? "scale-100" : "scale-95"}`}
+        onClick={(event) => event.stopPropagation()}
+      >
+        <div className="flex items-center justify-between border-b border-gray-100 px-6 py-5">
+          <div>
+            <h3 className="text-lg font-bold text-gray-900">Share college</h3>
+            <p className="mt-1 text-sm text-gray-500">{collegeName}</p>
+          </div>
+          <button
+            type="button"
+            onClick={onClose}
+            className="rounded-full p-1.5 text-gray-400 transition-colors hover:bg-gray-100 hover:text-gray-700"
+            aria-label="Close share popup"
+          >
+            <i className="fa-solid fa-xmark text-[20px]"></i>
+          </button>
+        </div>
+
+        <div className="px-6 py-6">
+
+          <div className="mt-5 grid grid-cols-2 gap-3 sm:grid-cols-3">
+            {socialLinks.map((item) => (
+              <a
+                key={item.name}
+                href={item.href}
+                target="_blank"
+                rel="noreferrer"
+                className="flex flex-col items-center gap-2 rounded-2xl border border-gray-100 bg-gray-50 px-4 py-4 text-center transition hover:-translate-y-0.5 hover:bg-white"
+                aria-label={`Share on ${item.name}`}
+              >
+                <span className={`flex h-12 w-12 items-center justify-center rounded-full bg-white text-xl shadow-sm ${item.color}`}>
+                  <i className={item.icon}></i>
+                </span>
+                <span className="text-sm font-semibold text-gray-700">{item.name}</span>
+              </a>
+            ))}
+          </div>
+
+          <div className="mt-5 rounded-2xl border border-gray-100 bg-gray-50 p-4">
+            <p className="text-xs font-semibold uppercase tracking-wide text-gray-500">
+              Share link
+            </p>
+            <div className="mt-3 flex items-center gap-3 rounded-xl border border-gray-200 bg-white px-4 py-3">
+              <input
+                readOnly
+                value={shareUrl}
+                className="min-w-0 flex-1 bg-transparent text-sm text-gray-600 outline-none"
+              />
+              <button
+                type="button"
+                onClick={copyLink}
+                className="shrink-0 rounded-lg bg-[#0000FF] px-4 py-2 text-sm font-bold text-white transition-colors hover:bg-[#0000CC]"
+              >
+                {copyLabel}
+              </button>
+            </div>
+            <p className="mt-3 text-xs text-gray-500">{shareTitle}</p>
+          </div>
         </div>
       </div>
     </div>
