@@ -45,8 +45,8 @@ const InstitutionDashboard: React.FC = () => {
         return <EventsPage />;
       case "newsNotice":
         return <NewsNoticePage />;
-      case "qms":
-        return <QMSPage />;
+      // case "qms":
+      //   return <QMSPage />;
       case "scholarship":
         return <Placeholder title="Scholarship Applications" />;
       case "scholarshipManage":
