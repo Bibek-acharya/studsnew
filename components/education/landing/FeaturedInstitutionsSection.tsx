@@ -236,7 +236,7 @@ const CollegeCard: React.FC<{
           <button
             className={`w-10 flex items-center justify-center border rounded-md transition-colors shrink-0 ${
               isBookmarked
-                ? "border-blue-200 bg-blue-50"
+                ? "border-blue-50 bg-blue-50"
                 : "border-gray-200 hover:bg-gray-50"
             }`}
             title={isBookmarked ? "Remove Bookmark" : "Bookmark"}

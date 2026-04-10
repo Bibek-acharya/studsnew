@@ -114,7 +114,7 @@ const NewsStoriesSection: React.FC<NewsStoriesSectionProps> = ({ onNavigate }) =
             {newsData.map((card, index) => (
               <article
                 key={index}
-                className="min-w-65 xs:min-w-70 sm:min-w-75 md:min-w-[320px] max-w-75 xs:max-w-[320px] sm:max-w-85 w-full shrink-0 snap-start bg-white rounded-xl border border-blue-500/20 flex flex-col hover:-translate-y-1 transition-all duration-300 group cursor-pointer p-3.5 sm:p-4"
+                className="min-w-65 xs:min-w-70 sm:min-w-75 md:min-w-[320px] max-w-75 xs:max-w-[320px] sm:max-w-85 w-full shrink-0 snap-start bg-white rounded-xl border border-gray-200 hover:border-blue-500/20 flex flex-col hover:-translate-y-1 transition-all duration-300 group cursor-pointer p-3.5 sm:p-4"
                 onClick={() => onNavigate("newsDetails", card)}
               >
                 <div className="mb-2.5 sm:mb-3">

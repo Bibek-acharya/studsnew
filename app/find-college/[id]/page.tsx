@@ -11,6 +11,7 @@ import { useParams } from "next/navigation";
 import { apiService } from "@/services/api";
 import CollegeCard from "@/components/admissions/CollegeCard";
 import { BadgeCheckIcon, ChevronLeft, ChevronRight } from "lucide-react";
+import ShareCollegeModal from "./ShareCollegeModal";
 
 type TabKey =
   | "about"
@@ -103,7 +104,7 @@ const AboutVideoInteractive = () => {
 
   return (
     <div className="mx-auto mb-10 flex w-full max-w-212.5 flex-col items-center justify-center gap-6 xl:flex-row xl:gap-8">
-      <div className="relative h-[50vh] w-full max-w-125 shrink-0 overflow-hidden rounded-xl bg-gray-900 shadow-2xl ring-1 ring-gray-200/50 sm:h-[340px] sm:rounded-2xl">
+      <div className="relative h-[50vh] w-full max-w-125 shrink-0 overflow-hidden rounded-xl bg-gray-900 shadow-2xl ring-1 ring-gray-200/50 sm:h-85 sm:rounded-2xl">
         <video
           className="absolute inset-0 h-full w-full bg-gray-800 object-cover transition-opacity duration-300"
           src={mainData.video}
@@ -133,7 +134,7 @@ const AboutVideoInteractive = () => {
               <div
                 key={key}
                 onClick={() => handleSwap(key)}
-                className="group relative h-[50px] w-[70px] shrink-0 cursor-pointer transition-transform hover:scale-105 sm:h-[55px] sm:w-[85px] shadow-xl"
+                className="group relative h-12.5 w-[70px] shrink-0 cursor-pointer transition-transform hover:scale-105 sm:h-[55px] sm:w-[85px] shadow-xl"
               >
                 <div className="relative h-full w-full overflow-hidden rounded-lg border-[2px] border-white bg-gray-800 sm:rounded-xl">
                   <video
@@ -576,20 +577,33 @@ const CollegeDetailsPage: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const tabsScrollRef = useRef<HTMLDivElement | null>(null);
   const tabsNavRef = useRef<HTMLElement | null>(null);
+  const [isTabsOverflowing, setIsTabsOverflowing] = useState(false);
   const [canScrollTabsLeft, setCanScrollTabsLeft] = useState(false);
   const [canScrollTabsRight, setCanScrollTabsRight] = useState(false);
 
   const updateTabScrollState = useCallback(() => {
     const container = tabsScrollRef.current;
-    if (!container) {
+    const nav = tabsNavRef.current;
+    const firstTab = nav?.firstElementChild as HTMLElement | null;
+    const lastTab = nav?.lastElementChild as HTMLElement | null;
+
+    if (!container || !nav || !firstTab || !lastTab) {
+      setIsTabsOverflowing(false);
       setCanScrollTabsLeft(false);
       setCanScrollTabsRight(false);
       return;
     }
 
-    const maxScrollLeft = container.scrollWidth - container.clientWidth;
-    setCanScrollTabsLeft(container.scrollLeft > 4);
-    setCanScrollTabsRight(container.scrollLeft < maxScrollLeft - 4);
+    const containerRect = container.getBoundingClientRect();
+    const firstTabRect = firstTab.getBoundingClientRect();
+    const lastTabRect = lastTab.getBoundingClientRect();
+
+    const leftOverflow = firstTabRect.left < containerRect.left - 4;
+    const rightOverflow = lastTabRect.right > containerRect.right + 4;
+
+    setIsTabsOverflowing(leftOverflow || rightOverflow);
+    setCanScrollTabsLeft(leftOverflow);
+    setCanScrollTabsRight(rightOverflow);
   }, []);
 
   const scrollTabs = (direction: "left" | "right") => {
@@ -799,25 +813,27 @@ const CollegeDetailsPage: React.FC = () => {
 
       <div className="sticky top-0 z-40 border-b border-t border-gray-100 bg-white shadow-sm shadow-gray-100/50">
         <div className="relative overflow-hidden px-6 md:px-12 lg:px-24 xl:px-32">
-          <button
-            type="button"
-            onClick={() => scrollTabs("left")}
-            className={`absolute left-6 top-1/2 z-20 -translate-y-1/2 rounded-full border bg-white p-1.5 shadow-sm transition md:left-12 lg:left-24 xl:left-32 ${canScrollTabsLeft ? "border-gray-200 text-gray-700 hover:bg-gray-50" : "border-gray-100 text-gray-300"}`}
-            aria-label="Scroll tabs left"
-            aria-disabled={!canScrollTabsLeft}
-          >
-            <ChevronLeft className="h-4 w-4" />
-          </button>
+          {isTabsOverflowing && canScrollTabsLeft && (
+            <button
+              type="button"
+              onClick={() => scrollTabs("left")}
+              className="absolute left-6 top-1/2 z-20 -translate-y-1/2 rounded-full border border-gray-200 bg-white p-1.5 text-gray-700 shadow-sm transition hover:bg-gray-50 md:left-12 lg:left-24 xl:left-32"
+              aria-label="Scroll tabs left"
+            >
+              <ChevronLeft className="h-4 w-4" />
+            </button>
+          )}
 
-          <button
-            type="button"
-            onClick={() => scrollTabs("right")}
-            className={`absolute right-6 top-1/2 z-20 -translate-y-1/2 rounded-full border bg-white p-1.5 shadow-sm transition md:right-12 lg:right-24 xl:right-32 ${canScrollTabsRight ? "border-gray-200 text-gray-700 hover:bg-gray-50" : "border-gray-100 text-gray-300"}`}
-            aria-label="Scroll tabs right"
-            aria-disabled={!canScrollTabsRight}
-          >
-            <ChevronRight className="h-4 w-4" />
-          </button>
+          {isTabsOverflowing && canScrollTabsRight && (
+            <button
+              type="button"
+              onClick={() => scrollTabs("right")}
+              className="absolute right-6 top-1/2 z-20 -translate-y-1/2 rounded-full border border-gray-200 bg-white p-1.5 text-gray-700 shadow-sm transition hover:bg-gray-50 md:right-12 lg:right-24 xl:right-32"
+              aria-label="Scroll tabs right"
+            >
+              <ChevronRight className="h-4 w-4" />
+            </button>
+          )}
 
           <div
             ref={tabsScrollRef}
@@ -963,13 +979,13 @@ const CollegeDetailsPage: React.FC = () => {
           {activeTab === "courses" && (
             <div className="overflow-hidden rounded-[20px] border border-gray-100 bg-white shadow-sm">
               <div className="flex flex-wrap items-center justify-between gap-4 border-b border-gray-100 bg-[#f4f8fc] px-6 py-4">
-                <p className="text-[14px] font-semibold text-[#0000FF]">
+                <p className="text-[14px] font-semibold text-brand-blue">
                   Fees in NPR/year – filter by level
                 </p>
                 <FilterPills active={courseFilter} onChange={setCourseFilter} />
               </div>
               <div className="w-full overflow-x-auto">
-                <div className="min-w-[700px]">
+                <div className="min-w-175">
                   <div className="grid grid-cols-12 items-center gap-4 border-b border-gray-100 bg-white px-6 py-5">
                     <ProgTh className="col-span-4">COURSES NAME</ProgTh>
                     <ProgTh className="col-span-2">DURATION</ProgTh>
@@ -998,7 +1014,7 @@ const CollegeDetailsPage: React.FC = () => {
                         </p>
                       </div>
                       <div className="col-span-3">
-                        <h4 className="text-[15.5px] font-bold text-[#0000FF]">
+                        <h4 className="text-[15.5px] font-bold text-brand-blue">
                           {course.fees}
                         </h4>
                         <p className="text-[12px] text-gray-500">/ Year</p>
@@ -1875,8 +1891,8 @@ const ClaimCollegeModal: React.FC<{
           </button>
         </div>
         <div className="overflow-y-auto px-6 py-5">
-          <div className="mb-5 flex items-start gap-3 rounded-lg border border-[#0000FF]/20 bg-[#0000FF]/5 p-3.5">
-            <i className="fa-solid fa-circle-info mt-0.5 shrink-0 text-[18px] text-[#0000FF]"></i>
+          <div className="mb-5 flex items-start gap-3 rounded-lg border border-brand-blue/20 bg-brand-blue/5 p-3.5">
+            <i className="fa-solid fa-circle-info mt-0.5 shrink-0 text-[18px] text-brand-blue"></i>
             <p className="line-height-extra text-[13px] text-[#0000FF]">
               Provide official details to claim{" "}
               <span className="font-bold text-[#0000FF]">{collegeName}</span>.
@@ -1941,152 +1957,6 @@ const ClaimCollegeModal: React.FC<{
               </button>
             </div>
           </form>
-        </div>
-      </div>
-    </div>
-  );
-};
-
-const ShareCollegeModal: React.FC<{
-  collegeName: string;
-  isOpen: boolean;
-  onClose: () => void;
-  shareUrl: string;
-  shareTitle: string;
-  shareText: string;
-}> = ({
-  collegeName,
-  isOpen,
-  onClose,
-  shareUrl,
-  shareTitle,
-  shareText,
-}) => {
-  const [copyLabel, setCopyLabel] = useState("Copy link");
-
-  useEffect(() => {
-    if (!isOpen) {
-      setCopyLabel("Copy link");
-    }
-  }, [isOpen]);
-
-  const encodedUrl = encodeURIComponent(shareUrl);
-  const encodedText = encodeURIComponent(shareText);
-
-  const socialLinks = [
-    {
-      name: "Facebook",
-      icon: "fa-brands fa-facebook-f",
-      color: "text-[#1877F2]",
-      href: `https://www.facebook.com/sharer/sharer.php?u=${encodedUrl}`,
-    },
-    {
-      name: "X",
-      icon: "fa-brands fa-x-twitter",
-      color: "text-black",
-      href: `https://twitter.com/intent/tweet?url=${encodedUrl}&text=${encodedText}`,
-    },
-    {
-      name: "WhatsApp",
-      icon: "fa-brands fa-whatsapp",
-      color: "text-[#25D366]",
-      href: `https://wa.me/?text=${encodedText}%20${encodedUrl}`,
-    },
-    {
-      name: "Instagram",
-      icon: "fa-brands fa-instagram",
-      color: "text-[#E4405F]",
-      href: `https://www.instagram.com/`,
-    },
-    {
-      name: "LinkedIn",
-      icon: "fa-brands fa-linkedin-in",
-      color: "text-[#0A66C2]",
-      href: `https://www.linkedin.com/sharing/share-offsite/?url=${encodedUrl}`,
-    },
-    {
-      name: "Telegram",
-      icon: "fa-brands fa-telegram",
-      color: "text-[#229ED9]",
-      href: `https://t.me/share/url?url=${encodedUrl}&text=${encodedText}`,
-    },
-  ];
-
-  const copyLink = async () => {
-    try {
-      await navigator.clipboard.writeText(shareUrl);
-      setCopyLabel("Copied");
-      window.setTimeout(() => setCopyLabel("Copy link"), 1600);
-    } catch {
-      setCopyLabel("Copy failed");
-      window.setTimeout(() => setCopyLabel("Copy link"), 1600);
-    }
-  };
-
-  return (
-    <div
-      className={`fixed inset-0 z-[60] flex items-center justify-center bg-slate-900/45 px-4 backdrop-blur-sm transition-opacity duration-300 ${isOpen ? "opacity-100" : "pointer-events-none opacity-0"}`}
-      onClick={onClose}
-    >
-      <div
-        className={`mx-auto w-full max-w-lg rounded-[24px] bg-white shadow-2xl transition-transform duration-300 ${isOpen ? "scale-100" : "scale-95"}`}
-        onClick={(event) => event.stopPropagation()}
-      >
-        <div className="flex items-center justify-between border-b border-gray-100 px-6 py-5">
-          <div>
-            <h3 className="text-lg font-bold text-gray-900">Share college</h3>
-            <p className="mt-1 text-sm text-gray-500">{collegeName}</p>
-          </div>
-          <button
-            type="button"
-            onClick={onClose}
-            className="rounded-full p-1.5 text-gray-400 transition-colors hover:bg-gray-100 hover:text-gray-700"
-            aria-label="Close share popup"
-          >
-            <i className="fa-solid fa-xmark text-[20px]"></i>
-          </button>
-        </div>
-
-        <div className="px-6 py-6">
-
-          <div className="mt-5 grid grid-cols-2 gap-3 sm:grid-cols-3">
-            {socialLinks.map((item) => (
-              <a
-                key={item.name}
-                href={item.href}
-                target="_blank"
-                rel="noreferrer"
-                className="flex flex-col items-center gap-2 rounded-2xl border border-gray-100 bg-gray-50 px-4 py-4 text-center transition hover:-translate-y-0.5 hover:bg-white"
-                aria-label={`Share on ${item.name}`}
-              >
-                <span className={`flex h-12 w-12 items-center justify-center rounded-full bg-white text-xl shadow-sm ${item.color}`}>
-                  <i className={item.icon}></i>
-                </span>
-                <span className="text-sm font-semibold text-gray-700">{item.name}</span>
-              </a>
-            ))}
-          </div>
-
-          <div className="mt-5 rounded-2xl border border-gray-100 bg-gray-50 p-4">
-            <p className="text-xs font-semibold uppercase tracking-wide text-gray-500">
-              Share link
-            </p>
-            <div className="mt-3 flex items-center gap-3 rounded-xl border border-gray-200 bg-white px-4 py-3">
-              <input
-                readOnly
-                value={shareUrl}
-                className="min-w-0 flex-1 bg-transparent text-sm text-gray-600 outline-none"
-              />
-              <button
-                type="button"
-                onClick={copyLink}
-                className="shrink-0 rounded-lg bg-[#0000FF] px-4 py-2 text-sm font-bold text-white transition-colors hover:bg-[#0000CC]"
-              >
-                {copyLabel}
-              </button>
-            </div>
-            <p className="mt-3 text-xs text-gray-500">{shareTitle}</p>
-          </div>
         </div>
       </div>
     </div>
