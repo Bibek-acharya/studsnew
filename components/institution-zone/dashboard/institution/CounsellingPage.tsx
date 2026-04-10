@@ -1,213 +1,219 @@
 "use client";
-
 import React, { useState } from "react";
-import {
-  Plus,
-  Search,
-  Filter,
-  X,
-  CheckCircle2,
-  Clock,
-  Calendar,
-  User,
-  Video,
-  MoreVertical,
-  MessageSquare,
-  AlertCircle,
-} from "lucide-react";
+import { Search, Filter, CheckCircle, XCircle, Link2, Clock, Users, CalendarDays, Plus, Trash2, X } from "lucide-react";
 
-const COUNSELLING_SESSIONS = [
-  {
-    id: 1,
-    student: "Ankit Thapa",
-    date: "2024-04-10",
-    time: "10:00 AM",
-    mode: "Video Call",
-    status: "Upcoming",
-    interest: "BSc.CSIT",
-  },
-  {
-    id: 2,
-    student: "Sita Magar",
-    date: "2024-04-10",
-    time: "11:30 AM",
-    mode: "In-Person",
-    status: "Upcoming",
-    interest: "BBA",
-  },
-  {
-    id: 3,
-    student: "Rohan Gurung",
-    date: "2024-04-09",
-    time: "02:00 PM",
-    mode: "Video Call",
-    status: "Completed",
-    interest: "BCA",
-  },
-  {
-    id: 4,
-    student: "Priya Rai",
-    date: "2024-04-11",
-    time: "09:00 AM",
-    mode: "Video Call",
-    status: "Upcoming",
-    interest: "BIM",
-  },
+type RequestStatus = "Pending" | "Accepted" | "Link Sent" | "Rejected";
+type CounsellingMode = "Online" | "In-Person" | "Phone";
+
+interface CounsellingRequest {
+  id: number;
+  name: string;
+  program: string;
+  subject: string;
+  mode: CounsellingMode;
+  date: string;
+  status: RequestStatus;
+  urgent: boolean;
+}
+
+interface SlotItem {
+  id: number;
+  date: string;
+  start: string;
+  end: string;
+  capacity: number;
+  booked: number;
+}
+
+const REQUESTS: CounsellingRequest[] = [
+  { id: 1, name: "Rahul Sharma", program: "BSc CSIT", subject: "Admission Guidance", mode: "Online", date: "2024-03-12", status: "Pending", urgent: false },
+  { id: 2, name: "Priya Patel", program: "BBA", subject: "Scholarship Query", mode: "In-Person", date: "2024-03-14", status: "Accepted", urgent: false },
+  { id: 3, name: "Bikash Thapa", program: "+2 Science", subject: "Career Options", mode: "Online", date: "2024-03-15", status: "Link Sent", urgent: true },
+  { id: 4, name: "Sita Gurung", program: "MBA", subject: "Fee Structure", mode: "Phone", date: "2024-03-16", status: "Pending", urgent: false },
+  { id: 5, name: "Anita KC", program: "Diploma IT", subject: "Hostel Inquiry", mode: "Online", date: "2024-03-17", status: "Rejected", urgent: false },
 ];
 
+const DEFAULT_SLOTS: SlotItem[] = [
+  { id: 1, date: "2024-03-20", start: "09:00", end: "12:00", capacity: 5, booked: 3 },
+  { id: 2, date: "2024-03-22", start: "14:00", end: "17:00", capacity: 4, booked: 1 },
+];
+
+const statusColors: Record<RequestStatus, string> = {
+  Pending: "bg-yellow-100 text-yellow-700",
+  Accepted: "bg-green-100 text-green-700",
+  "Link Sent": "bg-blue-100 text-blue-700",
+  Rejected: "bg-red-100 text-red-700",
+};
+
 const CounsellingPage: React.FC = () => {
+  const [tab, setTab] = useState<"requests" | "slots">("requests");
+  const [requests, setRequests] = useState(REQUESTS);
+  const [slots, setSlots] = useState(DEFAULT_SLOTS);
+
+  /* filters */
+  const [search, setSearch] = useState("");
+  const [filterProgram, setFilterProgram] = useState("All");
+  const [filterMode, setFilterMode] = useState<"All" | CounsellingMode>("All");
+  const [filterStatus, setFilterStatus] = useState<"All" | RequestStatus>("All");
+
+  /* slot form */
+  const [slotDate, setSlotDate] = useState("");
+  const [slotStart, setSlotStart] = useState("");
+  const [slotEnd, setSlotEnd] = useState("");
+  const [slotCapacity, setSlotCapacity] = useState("5");
+
+  /* meeting link modal */
+  const [showLinkModal, setShowLinkModal] = useState(false);
+  const [linkTarget, setLinkTarget] = useState<number | null>(null);
+  const [platform, setPlatform] = useState("Google Meet");
+  const [meetUrl, setMeetUrl] = useState("");
+
+  const filtered = requests.filter(r => {
+    if (search && !r.name.toLowerCase().includes(search.toLowerCase()) && !r.subject.toLowerCase().includes(search.toLowerCase())) return false;
+    if (filterProgram !== "All" && r.program !== filterProgram) return false;
+    if (filterMode !== "All" && r.mode !== filterMode) return false;
+    if (filterStatus !== "All" && r.status !== filterStatus) return false;
+    return true;
+  });
+
+  const programs = ["All", ...Array.from(new Set(REQUESTS.map(r => r.program)))];
+
+  const updateStatus = (id: number, status: RequestStatus) => {
+    setRequests(prev => prev.map(r => r.id === id ? { ...r, status } : r));
+  };
+
+  const openLinkModal = (id: number) => { setLinkTarget(id); setMeetUrl(""); setShowLinkModal(true); };
+
+  const provideLink = () => {
+    if (linkTarget !== null) updateStatus(linkTarget, "Link Sent");
+    setShowLinkModal(false);
+  };
+
+  const addSlot = () => {
+    if (!slotDate || !slotStart || !slotEnd) return;
+    const newSlot: SlotItem = {
+      id: Math.max(0, ...slots.map(s => s.id)) + 1,
+      date: slotDate, start: slotStart, end: slotEnd,
+      capacity: parseInt(slotCapacity) || 5, booked: 0,
+    };
+    setSlots(prev => [...prev, newSlot]);
+    setSlotDate(""); setSlotStart(""); setSlotEnd(""); setSlotCapacity("5");
+  };
+
+  const totalStat = REQUESTS.length;
+  const pendingStat = REQUESTS.filter(r => r.status === "Pending").length;
+  const acceptedStat = REQUESTS.filter(r => r.status === "Accepted" || r.status === "Link Sent").length;
+
   return (
-    <div className="p-8 space-y-8 animate-in fade-in duration-500">
-      {/* Page Header */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-        <div>
-          <h1 className="text-2xl font-bold text-slate-900 tracking-tight">
-            Online Counselling
-          </h1>
-          <p className="text-slate-500 text-sm font-medium mt-1">
-            Manage student counselling requests and schedules
-          </p>
-        </div>
-        <button className="flex items-center gap-2 px-6 py-3 bg-blue-600 rounded-xl text-sm font-bold text-white hover:bg-blue-700 transition-all shadow-lg active:scale-95">
-          <Plus size={18} />
-          Schedule Manual Session
-        </button>
+    <div className="p-4 lg:p-8 space-y-6 max-w-[1600px] mx-auto">
+      <div>
+        <h1 className="text-2xl font-bold text-slate-900">Counselling Management</h1>
+        <p className="text-slate-500 text-sm mt-1">Manage student counselling requests and available time slots.</p>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-        {/* Main Schedule List */}
-        <div className="lg:col-span-2 space-y-6">
-          {/* Summary Cards */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <div className="bg-white p-6 rounded-3xl border border-slate-100 shadow-sm flex items-center justify-between">
-              <div>
-                <span className="text-xs font-black text-slate-400 uppercase tracking-widest">
-                  Today's Sessions
-                </span>
-                <div className="text-3xl font-black text-slate-900 mt-1">
-                  08
+      {/* Tabs */}
+      <div className="flex gap-1 bg-slate-100 rounded-xl p-1 w-fit">
+        {(["requests", "slots"] as const).map(t => (
+          <button
+            key={t}
+            onClick={() => setTab(t)}
+            className={`px-5 py-2 rounded-lg text-sm font-medium transition-colors ${tab === t ? "bg-white text-slate-900 shadow-sm" : "text-slate-500 hover:text-slate-700"}`}
+          >
+            {t === "requests" ? "Student Requests" : "Manage Slots"}
+          </button>
+        ))}
+      </div>
+
+      {tab === "requests" && (
+        <>
+          {/* Stat Cards */}
+          <div className="grid grid-cols-3 gap-4 max-w-2xl">
+            {[
+              { label: "Total Requests", value: totalStat, icon: <Users className="w-5 h-5" />, color: "text-blue-600 bg-blue-50" },
+              { label: "Pending", value: pendingStat, icon: <Clock className="w-5 h-5" />, color: "text-yellow-600 bg-yellow-50" },
+              { label: "Accepted / Linked", value: acceptedStat, icon: <CheckCircle className="w-5 h-5" />, color: "text-green-600 bg-green-50" },
+            ].map(c => (
+              <div key={c.label} className="bg-white rounded-xl border border-slate-200 p-4 flex items-center gap-3 shadow-sm">
+                <div className={`w-9 h-9 rounded-full flex items-center justify-center ${c.color}`}>{c.icon}</div>
+                <div>
+                  <p className="text-xs text-slate-500">{c.label}</p>
+                  <p className="text-xl font-bold text-slate-900">{c.value}</p>
                 </div>
               </div>
-              <div className="w-12 h-12 bg-blue-50 text-blue-600 rounded-2xl flex items-center justify-center">
-                <Calendar size={24} />
-              </div>
-            </div>
-            <div className="bg-white p-6 rounded-3xl border border-slate-100 shadow-sm flex items-center justify-between">
-              <div>
-                <span className="text-xs font-black text-slate-400 uppercase tracking-widest">
-                  Pending Requests
-                </span>
-                <div className="text-3xl font-black text-amber-500 mt-1">
-                  14
-                </div>
-              </div>
-              <div className="w-12 h-12 bg-amber-50 text-amber-500 rounded-2xl flex items-center justify-center">
-                <Clock size={24} />
-              </div>
-            </div>
+            ))}
           </div>
 
-          {/* Sessions Table */}
-          <div className="bg-white rounded-3xl border border-slate-100 shadow-sm overflow-hidden">
-            <div className="p-6 border-b border-slate-50 flex items-center justify-between">
-              <h2 className="text-lg font-bold text-slate-900">
-                Upcoming Schedule
-              </h2>
-              <div className="flex items-center gap-2">
-                <div className="relative">
-                  <Search
-                    size={14}
-                    className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"
-                  />
-                  <input
-                    type="text"
-                    placeholder="Search..."
-                    className="bg-slate-50 border-none rounded-lg py-2 pl-9 pr-3 text-xs focus:ring-1 focus:ring-blue-500/20 w-40 outline-none"
-                  />
-                </div>
-                <button className="p-2 bg-slate-50 rounded-lg text-slate-400 hover:text-slate-600 transition-colors">
-                  <Filter size={16} />
-                </button>
+          {/* Filters */}
+          <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
+            <div className="p-4 border-b border-slate-100 flex flex-wrap gap-3">
+              <div className="relative flex-1 min-w-[200px]">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+                <input value={search} onChange={e => setSearch(e.target.value)} placeholder="Search student or subject..." className="w-full pl-9 pr-4 py-2 border border-slate-200 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 outline-none" />
               </div>
+              <select value={filterProgram} onChange={e => setFilterProgram(e.target.value)} className="border border-slate-200 rounded-lg px-3 py-2 text-sm bg-white focus:ring-2 focus:ring-blue-500 outline-none">
+                {programs.map(p => <option key={p}>{p}</option>)}
+              </select>
+              <select value={filterMode} onChange={e => setFilterMode(e.target.value as typeof filterMode)} className="border border-slate-200 rounded-lg px-3 py-2 text-sm bg-white focus:ring-2 focus:ring-blue-500 outline-none">
+                <option value="All">All Modes</option>
+                <option>Online</option><option>In-Person</option><option>Phone</option>
+              </select>
+              <select value={filterStatus} onChange={e => setFilterStatus(e.target.value as typeof filterStatus)} className="border border-slate-200 rounded-lg px-3 py-2 text-sm bg-white focus:ring-2 focus:ring-blue-500 outline-none">
+                <option value="All">All Status</option>
+                <option>Pending</option><option>Accepted</option><option>Link Sent</option><option>Rejected</option>
+              </select>
             </div>
+
+            {/* Table */}
             <div className="overflow-x-auto">
-              <table className="w-full text-left">
-                <thead>
-                  <tr className="bg-slate-50/50">
-                    <th className="px-6 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest">
-                      Student
-                    </th>
-                    <th className="px-6 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest">
-                      Date & Time
-                    </th>
-                    <th className="px-6 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest">
-                      Mode
-                    </th>
-                    <th className="px-6 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest">
-                      Interest
-                    </th>
-                    <th className="px-6 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest">
-                      Status
-                    </th>
-                    <th className="px-6 py-4"></th>
+              <table className="w-full min-w-[800px] text-left">
+                <thead className="bg-slate-50 text-xs uppercase text-slate-500 border-b border-slate-100">
+                  <tr>
+                    {["Student", "Program", "Subject", "Mode", "Date", "Status", "Actions"].map(h => (
+                      <th key={h} className="p-3 font-semibold">{h}</th>
+                    ))}
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-slate-50/50">
-                  {COUNSELLING_SESSIONS.map((session) => (
-                    <tr
-                      key={session.id}
-                      className="hover:bg-slate-50/30 transition-colors"
-                    >
-                      <td className="px-6 py-4">
-                        <div className="flex items-center gap-3">
-                          <div className="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center text-blue-600 font-bold text-xs uppercase">
-                            {session.student.charAt(0)}
+                <tbody className="divide-y divide-slate-100">
+                  {filtered.length === 0 ? (
+                    <tr><td colSpan={7} className="p-8 text-center text-slate-400 text-sm">No requests found.</td></tr>
+                  ) : filtered.map(r => (
+                    <tr key={r.id} className="hover:bg-slate-50 transition-colors">
+                      <td className="p-3">
+                        <div className="flex items-center gap-2">
+                          <div className="w-8 h-8 rounded-full bg-indigo-100 flex items-center justify-center text-indigo-700 font-bold text-xs">
+                            {r.name.charAt(0)}
                           </div>
-                          <span className="text-[14px] font-bold text-slate-700">
-                            {session.student}
-                          </span>
+                          <div>
+                            <p className="text-sm font-medium text-slate-800">{r.name}</p>
+                            {r.urgent && <span className="text-xs bg-red-100 text-red-600 px-1.5 py-0.5 rounded font-medium">Urgent</span>}
+                          </div>
                         </div>
                       </td>
-                      <td className="px-6 py-4">
-                        <div className="flex flex-col">
-                          <span className="text-[13px] font-bold text-slate-900">
-                            {session.time}
-                          </span>
-                          <span className="text-[11px] text-slate-400 font-medium">
-                            {session.date}
-                          </span>
-                        </div>
+                      <td className="p-3 text-sm text-slate-600">{r.program}</td>
+                      <td className="p-3 text-sm text-slate-600">{r.subject}</td>
+                      <td className="p-3 text-sm text-slate-600">{r.mode}</td>
+                      <td className="p-3 text-sm text-slate-600">{r.date}</td>
+                      <td className="p-3">
+                        <span className={`px-2.5 py-1 rounded-full text-xs font-semibold ${statusColors[r.status]}`}>{r.status}</span>
                       </td>
-                      <td className="px-6 py-4">
-                        <div className="flex items-center gap-2 text-[12px] font-bold text-slate-600">
-                          {session.mode === "Video Call" ? (
-                            <Video size={14} className="text-blue-500" />
-                          ) : (
-                            <User size={14} className="text-slate-400" />
+                      <td className="p-3">
+                        <div className="flex gap-1.5 flex-wrap">
+                          {r.status === "Pending" && (
+                            <button onClick={() => updateStatus(r.id, "Accepted")} className="px-2.5 py-1.5 bg-green-500 hover:bg-green-600 text-white rounded-lg text-xs font-medium flex items-center gap-1 transition-colors">
+                              <CheckCircle className="w-3.5 h-3.5" /> Accept
+                            </button>
                           )}
-                          {session.mode}
+                          {(r.status === "Pending" || r.status === "Accepted") && r.mode === "Online" && (
+                            <button onClick={() => openLinkModal(r.id)} className="px-2.5 py-1.5 bg-blue-500 hover:bg-blue-600 text-white rounded-lg text-xs font-medium flex items-center gap-1 transition-colors">
+                              <Link2 className="w-3.5 h-3.5" /> Link
+                            </button>
+                          )}
+                          {r.status !== "Rejected" && (
+                            <button onClick={() => updateStatus(r.id, "Rejected")} className="px-2.5 py-1.5 bg-red-50 hover:bg-red-100 text-red-600 rounded-lg text-xs font-medium flex items-center gap-1 transition-colors">
+                              <XCircle className="w-3.5 h-3.5" /> Reject
+                            </button>
+                          )}
                         </div>
-                      </td>
-                      <td className="px-6 py-4">
-                        <span className="text-[12px] font-black text-blue-600/70">
-                          {session.interest}
-                        </span>
-                      </td>
-                      <td className="px-6 py-4">
-                        <span
-                          className={`px-2.5 py-1 rounded-lg text-[10px] font-black uppercase tracking-tight ${
-                            session.status === "Upcoming"
-                              ? "bg-blue-50 text-blue-600"
-                              : "bg-emerald-50 text-emerald-600"
-                          }`}
-                        >
-                          {session.status}
-                        </span>
-                      </td>
-                      <td className="px-6 py-4">
-                        <button className="p-2 text-slate-400 hover:text-slate-900">
-                          <MoreVertical size={18} />
-                        </button>
                       </td>
                     </tr>
                   ))}
@@ -215,74 +221,103 @@ const CounsellingPage: React.FC = () => {
               </table>
             </div>
           </div>
-        </div>
+        </>
+      )}
 
-        {/* Action Sidebar */}
-        <div className="space-y-6">
-          <div className="bg-white rounded-3xl border border-slate-100 shadow-sm p-8">
-            <h3 className="text-[14px] font-black uppercase text-slate-900 tracking-wider mb-6">
-              Counselling Settings
-            </h3>
-            <div className="space-y-6">
-              <div className="flex items-center justify-between">
-                <span className="text-sm font-bold text-slate-700">
-                  Allow Online Booking
-                </span>
-                <button className="w-10 h-6 bg-emerald-500 rounded-full relative p-1 shadow-inner shadow-black/10">
-                  <div className="absolute right-1 top-1 w-4 h-4 bg-white rounded-full" />
-                </button>
+      {tab === "slots" && (
+        <div className="grid grid-cols-1 lg:grid-cols-5 gap-6">
+          {/* Create Slot Form */}
+          <div className="lg:col-span-2 bg-white rounded-xl border border-slate-200 shadow-sm p-6 space-y-4 h-fit">
+            <h3 className="font-bold text-slate-800">Create New Slot</h3>
+            <div>
+              <label className="block text-sm font-medium text-slate-700 mb-1">Date</label>
+              <input type="date" value={slotDate} onChange={e => setSlotDate(e.target.value)} className="w-full border border-slate-200 rounded-lg p-2.5 text-sm focus:ring-2 focus:ring-blue-500 outline-none" />
+            </div>
+            <div className="grid grid-cols-2 gap-3">
+              <div>
+                <label className="block text-sm font-medium text-slate-700 mb-1">Start Time</label>
+                <input type="time" value={slotStart} onChange={e => setSlotStart(e.target.value)} className="w-full border border-slate-200 rounded-lg p-2.5 text-sm focus:ring-2 focus:ring-blue-500 outline-none" />
               </div>
-              <div className="flex items-center justify-between">
-                <span className="text-sm font-bold text-slate-700">
-                  Video Call Support
-                </span>
-                <button className="w-10 h-6 bg-blue-500 rounded-full relative p-1">
-                  <div className="absolute right-1 top-1 w-4 h-4 bg-white rounded-full" />
-                </button>
+              <div>
+                <label className="block text-sm font-medium text-slate-700 mb-1">End Time</label>
+                <input type="time" value={slotEnd} onChange={e => setSlotEnd(e.target.value)} className="w-full border border-slate-200 rounded-lg p-2.5 text-sm focus:ring-2 focus:ring-blue-500 outline-none" />
               </div>
-              <div className="space-y-3 pt-4 border-t border-slate-50">
-                <span className="text-[11px] font-black text-slate-400 uppercase tracking-widest">
-                  Consultant Profile
-                </span>
-                <div className="flex items-center gap-3 p-3 bg-slate-50 rounded-2xl">
-                  <div className="w-12 h-12 rounded-xl bg-slate-200 border-2 border-white shadow-sm" />
-                  <div className="flex flex-col">
-                    <span className="text-[13px] font-bold text-slate-900">
-                      Dr. Rajesh Adhikari
-                    </span>
-                    <span className="text-[11px] text-slate-400 font-medium">
-                      Head of Admissions
-                    </span>
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-slate-700 mb-1">Max Capacity</label>
+              <input type="number" min="1" max="50" value={slotCapacity} onChange={e => setSlotCapacity(e.target.value)} className="w-full border border-slate-200 rounded-lg p-2.5 text-sm focus:ring-2 focus:ring-blue-500 outline-none" />
+            </div>
+            <button onClick={addSlot} className="w-full py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-sm font-semibold transition-colors flex items-center justify-center gap-2">
+              <Plus className="w-4 h-4" /> Create Slot
+            </button>
+          </div>
+
+          {/* Available Slots */}
+          <div className="lg:col-span-3 space-y-3">
+            <h3 className="font-bold text-slate-800">Current Availability</h3>
+            {slots.length === 0 ? (
+              <div className="bg-white rounded-xl border border-slate-200 p-8 text-center text-slate-400 text-sm">
+                No slots created yet.
+              </div>
+            ) : slots.map(s => (
+              <div key={s.id} className="bg-white rounded-xl border border-slate-200 shadow-sm p-4 flex items-center justify-between gap-4">
+                <div className="flex items-center gap-4">
+                  <div className="w-10 h-10 bg-blue-50 rounded-xl flex items-center justify-center text-blue-600">
+                    <CalendarDays className="w-5 h-5" />
+                  </div>
+                  <div>
+                    <p className="font-semibold text-slate-800">{s.date}</p>
+                    <p className="text-sm text-slate-500">{s.start} — {s.end}</p>
                   </div>
                 </div>
-                <button className="w-full py-2.5 bg-slate-100 text-slate-500 rounded-xl text-xs font-bold hover:bg-slate-200 transition-all uppercase">
-                  Update Profile
+                <div className="text-center">
+                  <p className="text-lg font-bold text-slate-900">{s.booked}<span className="text-slate-400 font-normal text-sm">/{s.capacity}</span></p>
+                  <p className="text-xs text-slate-400">Booked</p>
+                </div>
+                <div className="w-24">
+                  <div className="h-2 bg-slate-100 rounded-full overflow-hidden">
+                    <div className="h-2 bg-blue-500 rounded-full" style={{ width: `${(s.booked / s.capacity) * 100}%` }} />
+                  </div>
+                  <p className="text-xs text-slate-400 mt-1 text-right">{s.capacity - s.booked} free</p>
+                </div>
+                <button onClick={() => setSlots(prev => prev.filter(x => x.id !== s.id))} className="text-slate-400 hover:text-red-500 p-1">
+                  <Trash2 className="w-4 h-4" />
+                </button>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* Meeting Link Modal */}
+      {showLinkModal && (
+        <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center backdrop-blur-sm">
+          <div className="bg-white w-full max-w-md rounded-xl shadow-2xl overflow-hidden m-4">
+            <div className="p-4 border-b bg-slate-50 flex justify-between items-center">
+              <h3 className="font-bold text-slate-800">Provide Online Meeting Link</h3>
+              <button onClick={() => setShowLinkModal(false)} className="text-slate-400 hover:text-slate-700"><X className="w-5 h-5" /></button>
+            </div>
+            <div className="p-5 space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-slate-700 mb-1">Platform</label>
+                <select value={platform} onChange={e => setPlatform(e.target.value)} className="w-full border border-slate-200 rounded-lg p-2.5 text-sm bg-white focus:ring-2 focus:ring-blue-500 outline-none">
+                  <option>Google Meet</option><option>Zoom</option><option>Microsoft Teams</option><option>Jitsi</option>
+                </select>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-slate-700 mb-1">Meeting URL</label>
+                <input value={meetUrl} onChange={e => setMeetUrl(e.target.value)} placeholder="https://meet.google.com/xxx" className="w-full border border-slate-200 rounded-lg p-2.5 text-sm focus:ring-2 focus:ring-blue-500 outline-none" />
+              </div>
+              <div className="flex gap-3 justify-end pt-2">
+                <button onClick={() => setShowLinkModal(false)} className="px-4 py-2 border rounded-lg text-slate-600 text-sm">Cancel</button>
+                <button onClick={provideLink} className="px-5 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-sm font-semibold flex items-center gap-2">
+                  <Link2 className="w-4 h-4" /> Send Link
                 </button>
               </div>
             </div>
           </div>
-
-          <div className="bg-[#2D68FE] p-8 rounded-3xl text-white shadow-xl shadow-blue-500/20 relative overflow-hidden">
-            <div className="relative z-10 flex flex-col items-center text-center">
-              <div className="w-12 h-12 bg-white/20 rounded-2xl flex items-center justify-center mb-4">
-                <MessageSquare size={24} />
-              </div>
-              <h3 className="text-lg font-black uppercase italic tracking-tighter mb-2">
-                Student Feedback
-              </h3>
-              <p className="text-white/70 text-sm font-medium leading-relaxed">
-                98% of students found the counselling session helpful. High
-                satisfaction increases enrollment rates!
-              </p>
-              <button className="w-full mt-6 py-3 bg-white text-[#2D68FE] rounded-xl font-bold text-sm shadow-xl shadow-black/10">
-                View Reviews
-              </button>
-            </div>
-            {/* Blobs */}
-            <div className="absolute -top-10 -left-10 w-32 h-32 bg-white/10 rounded-full blur-3xl" />
-          </div>
         </div>
-      </div>
+      )}
     </div>
   );
 };

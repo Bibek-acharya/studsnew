@@ -13,8 +13,8 @@ import CounsellingPage from "./institution/CounsellingPage";
 import EntrancePage from "./institution/EntrancePage";
 import EventsPage from "./institution/EventsPage";
 import NewsNoticePage from "./institution/NewsNoticePage";
-// import QMSPage from "./institution/QMSPage";
-// import ScholarshipSectionContainer from "./institution/ScholarshipSectionContainer";
+import QMSPage from "@/components/institution-zone/dashboard/institution/QMSPage";
+import ScholarshipSectionContainer from "@/components/institution-zone/dashboard/institution/ScholarshipSectionContainer";
 
 const Placeholder: React.FC<{ title: string }> = ({ title }) => (
   <div className="flex items-center justify-center h-full text-slate-400 text-lg font-medium">
@@ -49,10 +49,8 @@ const InstitutionDashboard: React.FC = () => {
       //   return <QMSPage />;
       case "scholarship":
         return <Placeholder title="Scholarship Applications" />;
-      // case "scholarshipManage":
-      //   return <ScholarshipSectionContainer />;
-      case "message":
-        return <Placeholder title="Messages" />;
+      case "scholarshipManage":
+        return <ScholarshipSectionContainer />;
       case "settings":
         return <Placeholder title="Settings" />;
       default:

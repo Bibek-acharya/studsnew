@@ -1,226 +1,252 @@
 "use client";
-
 import React, { useState } from "react";
-import {
-  Plus,
-  Search,
-  Filter,
-  MoreVertical,
-  Trash2,
-  Edit3,
-  Eye,
-  BookOpen,
-  GraduationCap,
-  Clock,
-  ChevronRight,
-  AlertCircle,
-} from "lucide-react";
+import { Plus, Pencil, Trash2, ChevronUp, ChevronDown, X, AlertTriangle } from "lucide-react";
 
-const PROGRAMS = [
-  {
-    id: 1,
-    name: "BSc.CSIT",
-    level: "Bachelor",
-    duration: "4 Years",
-    status: "Active",
-    intake: "Nov 2024",
-    seats: 48,
-    fee: "NPR 1,250,000",
-  },
-  {
-    id: 2,
-    name: "BBA",
-    level: "Bachelor",
-    duration: "4 Years",
-    status: "Active",
-    intake: "Nov 2024",
-    seats: 60,
-    fee: "NPR 1,100,000",
-  },
-  {
-    id: 3,
-    name: "BCA",
-    level: "Bachelor",
-    duration: "4 Years",
-    status: "Active",
-    intake: "Nov 2024",
-    seats: 35,
-    fee: "NPR 950,000",
-  },
-  {
-    id: 4,
-    name: "MBA",
-    level: "Master",
-    duration: "2 Years",
-    status: "Inactive",
-    intake: "Closed",
-    seats: 30,
-    fee: "NPR 850,000",
-  },
-  {
-    id: 5,
-    name: "+2 Science",
-    level: "+2 Level",
-    duration: "2 Years",
-    status: "Active",
-    intake: "Aug 2024",
-    seats: 120,
-    fee: "NPR 250,000",
-  },
+type Level = "All" | "+2" | "Bachelor" | "Master" | "Diploma" | "Training";
+type Status = "Active" | "Inactive" | "Pending";
+
+interface Program {
+  id: number;
+  name: string;
+  level: Exclude<Level, "All">;
+  affiliation: string;
+  status: Status;
+  duration: string;
+}
+
+const DEFAULT_PROGRAMS: Program[] = [
+  { id: 1, name: "BSc CSIT", level: "Bachelor", affiliation: "Tribhuvan University", status: "Active", duration: "4 Years" },
+  { id: 2, name: "BIM", level: "Bachelor", affiliation: "Tribhuvan University", status: "Active", duration: "4 Years" },
+  { id: 3, name: "BBA", level: "Bachelor", affiliation: "Pokhara University", status: "Active", duration: "4 Years" },
+  { id: 4, name: "MBA", level: "Master", affiliation: "Tribhuvan University", status: "Active", duration: "2 Years" },
+  { id: 5, name: "MSc IT", level: "Master", affiliation: "Kathmandu University", status: "Inactive", duration: "2 Years" },
+  { id: 6, name: "+2 Science", level: "+2", affiliation: "NEB", status: "Active", duration: "2 Years" },
+  { id: 7, name: "+2 Management", level: "+2", affiliation: "NEB", status: "Active", duration: "2 Years" },
+  { id: 8, name: "Diploma in IT", level: "Diploma", affiliation: "CTEVT", status: "Active", duration: "3 Years" },
+  { id: 9, name: "Web Development Bootcamp", level: "Training", affiliation: "Internal", status: "Pending", duration: "3 Months" },
 ];
 
+const LEVELS: Level[] = ["All", "+2", "Bachelor", "Master", "Diploma", "Training"];
+const AFFILIATIONS = ["Tribhuvan University", "Pokhara University", "Kathmandu University", "Purbanchal University", "NEB", "CTEVT", "Internal", "Other"];
+
+const statusColors: Record<Status, string> = {
+  Active: "bg-green-100 text-green-700",
+  Inactive: "bg-slate-100 text-slate-600",
+  Pending: "bg-yellow-100 text-yellow-700",
+};
+
+type SortKey = "name" | "level" | "affiliation" | "status";
+
+const emptyForm: Omit<Program, "id"> = {
+  name: "", level: "Bachelor", affiliation: "Tribhuvan University", status: "Active", duration: "4 Years",
+};
+
 const ProgramPage: React.FC = () => {
-  const [activeFilter, setActiveFilter] = useState("All Levels");
+  const [programs, setPrograms] = useState<Program[]>(DEFAULT_PROGRAMS);
+  const [activeLevel, setActiveLevel] = useState<Level>("All");
+  const [sortKey, setSortKey] = useState<SortKey>("name");
+  const [sortAsc, setSortAsc] = useState(true);
+  const [showModal, setShowModal] = useState(false);
+  const [editId, setEditId] = useState<number | null>(null);
+  const [form, setForm] = useState<Omit<Program, "id">>(emptyForm);
+  const [deleteId, setDeleteId] = useState<number | null>(null);
+
+  const filtered = programs
+    .filter(p => activeLevel === "All" || p.level === activeLevel)
+    .sort((a, b) => {
+      const av = a[sortKey], bv = b[sortKey];
+      return sortAsc ? (av < bv ? -1 : 1) : (av > bv ? -1 : 1);
+    });
+
+  const toggleSort = (key: SortKey) => {
+    if (sortKey === key) setSortAsc(prev => !prev);
+    else { setSortKey(key); setSortAsc(true); }
+  };
+
+  const SortIcon = ({ col }: { col: SortKey }) => {
+    if (sortKey !== col) return <ChevronUp className="w-3.5 h-3.5 opacity-30" />;
+    return sortAsc ? <ChevronUp className="w-3.5 h-3.5 text-indigo-600" /> : <ChevronDown className="w-3.5 h-3.5 text-indigo-600" />;
+  };
+
+  const openAdd = () => { setEditId(null); setForm(emptyForm); setShowModal(true); };
+  const openEdit = (p: Program) => { setEditId(p.id); setForm({ name: p.name, level: p.level, affiliation: p.affiliation, status: p.status, duration: p.duration }); setShowModal(true); };
+
+  const handleSave = () => {
+    if (!form.name.trim()) return;
+    if (editId !== null) {
+      setPrograms(prev => prev.map(p => p.id === editId ? { ...form, id: editId } : p));
+    } else {
+      const newId = Math.max(0, ...programs.map(p => p.id)) + 1;
+      setPrograms(prev => [...prev, { ...form, id: newId }]);
+    }
+    setShowModal(false);
+  };
+
+  const confirmDelete = () => {
+    if (deleteId !== null) setPrograms(prev => prev.filter(p => p.id !== deleteId));
+    setDeleteId(null);
+  };
 
   return (
-    <div className="p-8 space-y-8 animate-in fade-in duration-500">
-      {/* Page Header */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+    <div className="p-4 lg:p-8 space-y-6 max-w-[1600px] mx-auto">
+      <div className="flex items-center justify-between flex-wrap gap-3">
         <div>
-          <h1 className="text-2xl font-bold text-slate-900 tracking-tight">
-            Programs & Courses
-          </h1>
-          <p className="text-slate-500 text-sm font-medium mt-1">
-            Manage all your academic offerings in one place
-          </p>
+          <h1 className="text-2xl font-bold text-slate-900">Program Management</h1>
+          <p className="text-slate-500 text-sm mt-1">Add, edit and manage academic programs offered by your institution.</p>
         </div>
-        <button className="flex items-center gap-2 px-6 py-3 bg-blue-600 rounded-xl text-sm font-bold text-white hover:bg-blue-700 transition-all shadow-lg shadow-blue-500/20 active:scale-95">
-          <Plus size={18} />
-          Add New Program
+        <button
+          onClick={openAdd}
+          className="flex items-center gap-2 px-4 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg text-sm font-semibold transition-colors shadow-sm"
+        >
+          <Plus className="w-4 h-4" /> Add Program
         </button>
       </div>
 
-      {/* Info Banner */}
-      <div className="bg-amber-50 border border-amber-100 p-4 rounded-2xl flex items-start gap-4">
-        <div className="bg-amber-100 p-2 rounded-xl text-amber-600">
-          <AlertCircle size={20} />
-        </div>
-        <div>
-          <p className="text-amber-900 text-sm font-bold">Important Notice</p>
-          <p className="text-amber-700 text-[13px] font-medium mt-0.5">
-            Some programs have missing admission details. Please update them to
-            enable the "Apply Now" button for students.
-          </p>
-        </div>
-      </div>
-
-      {/* Filter Toolbar */}
-      <div className="flex flex-col md:flex-row items-center gap-4">
-        <div className="flex items-center gap-2 overflow-x-auto w-full md:w-auto p-1 bg-slate-100 rounded-xl">
-          {["All Levels", "Bachelor", "Master", "+2 Level"].map((level) => (
+      {/* Level Tabs */}
+      <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
+        <div className="flex gap-1 p-3 border-b border-slate-100 flex-wrap">
+          {LEVELS.map(level => (
             <button
               key={level}
-              onClick={() => setActiveFilter(level)}
-              className={`px-4 py-2 text-sm font-bold rounded-lg whitespace-nowrap transition-all ${
-                activeFilter === level
-                  ? "bg-white text-blue-600 shadow-sm"
-                  : "text-slate-500 hover:text-slate-700"
+              onClick={() => setActiveLevel(level)}
+              className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+                activeLevel === level ? "bg-indigo-600 text-white shadow-sm" : "text-slate-600 hover:bg-slate-100"
               }`}
             >
               {level}
             </button>
           ))}
         </div>
-        <div className="flex-1 relative w-full">
-          <Search
-            size={16}
-            className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"
-          />
-          <input
-            type="text"
-            placeholder="Search programs..."
-            className="w-full bg-white border border-slate-200 rounded-xl py-2.5 pl-10 pr-4 text-sm focus:ring-2 focus:ring-blue-500/20 outline-none"
-          />
+
+        {/* Table */}
+        <div className="overflow-x-auto">
+          <table className="w-full text-left min-w-[700px]">
+            <thead>
+              <tr className="bg-slate-50 text-slate-500 text-xs uppercase tracking-wide border-b border-slate-100">
+                <th className="p-3 font-semibold">#</th>
+                {(["name", "level", "affiliation", "status"] as SortKey[]).map(col => (
+                  <th key={col} className="p-3 font-semibold">
+                    <button
+                      onClick={() => toggleSort(col)}
+                      className="flex items-center gap-1 uppercase tracking-wide hover:text-slate-700 transition-colors"
+                    >
+                      {col === "name" ? "Program Name" : col.charAt(0).toUpperCase() + col.slice(1)}
+                      <SortIcon col={col} />
+                    </button>
+                  </th>
+                ))}
+                <th className="p-3 font-semibold">Duration</th>
+                <th className="p-3 font-semibold text-right">Actions</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-slate-100">
+              {filtered.length === 0 ? (
+                <tr><td colSpan={7} className="p-8 text-center text-slate-400 text-sm">No programs found for this level.</td></tr>
+              ) : filtered.map((p, idx) => (
+                <tr key={p.id} className="hover:bg-slate-50 transition-colors">
+                  <td className="p-3 text-sm text-slate-400">{idx + 1}</td>
+                  <td className="p-3 font-medium text-slate-800">{p.name}</td>
+                  <td className="p-3 text-sm">
+                    <span className="px-2.5 py-1 rounded-full bg-indigo-50 text-indigo-700 text-xs font-semibold">{p.level}</span>
+                  </td>
+                  <td className="p-3 text-sm text-slate-600">{p.affiliation}</td>
+                  <td className="p-3">
+                    <span className={`px-2.5 py-1 rounded-full text-xs font-semibold ${statusColors[p.status]}`}>{p.status}</span>
+                  </td>
+                  <td className="p-3 text-sm text-slate-600">{p.duration}</td>
+                  <td className="p-3 text-right">
+                    <div className="flex justify-end gap-2">
+                      <button onClick={() => openEdit(p)} className="p-1.5 rounded-lg hover:bg-indigo-50 text-slate-500 hover:text-indigo-600 transition-colors">
+                        <Pencil className="w-4 h-4" />
+                      </button>
+                      <button onClick={() => setDeleteId(p.id)} className="p-1.5 rounded-lg hover:bg-red-50 text-slate-500 hover:text-red-600 transition-colors">
+                        <Trash2 className="w-4 h-4" />
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+        <div className="p-4 border-t border-slate-100">
+          <p className="text-sm text-slate-400">Total: {filtered.length} program{filtered.length !== 1 ? "s" : ""}</p>
         </div>
       </div>
 
-      {/* Programs Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {PROGRAMS.map((program) => (
-          <div
-            key={program.id}
-            className="bg-white rounded-3xl border border-slate-100 overflow-hidden shadow-sm hover:shadow-xl transition-all group p-6 flex flex-col h-full"
-          >
-            <div className="flex items-start justify-between mb-6">
-              <div className="w-12 h-12 bg-blue-50 rounded-2xl flex items-center justify-center text-blue-600">
-                <BookOpen size={24} />
-              </div>
-              <div
-                className={`px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-tighter ${
-                  program.status === "Active"
-                    ? "bg-emerald-50 text-emerald-600"
-                    : "bg-slate-100 text-slate-400"
-                }`}
-              >
-                {program.status}
-              </div>
+      {/* Add / Edit Modal */}
+      {showModal && (
+        <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center backdrop-blur-sm">
+          <div className="bg-white w-full max-w-md rounded-xl shadow-2xl overflow-hidden m-4">
+            <div className="p-4 border-b bg-slate-50 flex justify-between items-center">
+              <h3 className="text-base font-bold text-slate-800">{editId ? "Edit Program" : "Add New Program"}</h3>
+              <button onClick={() => setShowModal(false)} className="text-slate-400 hover:text-slate-700"><X className="w-5 h-5" /></button>
             </div>
-
-            <div className="mb-8">
-              <h3 className="text-xl font-black text-slate-900 leading-tight mb-2 group-hover:text-blue-600 transition-colors">
-                {program.name}
-              </h3>
-              <div className="flex items-center gap-4 text-slate-400">
-                <div className="flex items-center gap-1.5 text-xs font-bold">
-                  <GraduationCap size={14} />
-                  {program.level}
+            <div className="p-5 space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-slate-700 mb-1">Program Name <span className="text-red-500">*</span></label>
+                <input
+                  value={form.name}
+                  onChange={e => setForm(f => ({ ...f, name: e.target.value }))}
+                  placeholder="e.g. BSc CSIT"
+                  className="w-full border border-slate-200 rounded-lg p-2.5 text-sm focus:ring-2 focus:ring-indigo-500 outline-none"
+                />
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-slate-700 mb-1">Academic Level</label>
+                  <select value={form.level} onChange={e => setForm(f => ({ ...f, level: e.target.value as Program["level"] }))} className="w-full border border-slate-200 rounded-lg p-2.5 text-sm focus:ring-2 focus:ring-indigo-500 outline-none bg-white">
+                    {(["+2", "Bachelor", "Master", "Diploma", "Training"] as Program["level"][]).map(l => <option key={l} value={l}>{l}</option>)}
+                  </select>
                 </div>
-                <div className="flex items-center gap-1.5 text-xs font-bold">
-                  <Clock size={14} />
-                  {program.duration}
+                <div>
+                  <label className="block text-sm font-medium text-slate-700 mb-1">Duration</label>
+                  <input value={form.duration} onChange={e => setForm(f => ({ ...f, duration: e.target.value }))} placeholder="e.g. 4 Years" className="w-full border border-slate-200 rounded-lg p-2.5 text-sm focus:ring-2 focus:ring-indigo-500 outline-none" />
                 </div>
               </div>
-            </div>
-
-            <div className="grid grid-cols-2 gap-4 mb-8 pt-6 border-t border-slate-50">
-              <div className="flex flex-col">
-                <span className="text-[10px] font-black uppercase text-slate-400 tracking-wider">
-                  Next Intake
-                </span>
-                <span className="text-sm font-bold text-slate-700">
-                  {program.intake}
-                </span>
+              <div>
+                <label className="block text-sm font-medium text-slate-700 mb-1">Affiliation</label>
+                <select value={form.affiliation} onChange={e => setForm(f => ({ ...f, affiliation: e.target.value }))} className="w-full border border-slate-200 rounded-lg p-2.5 text-sm focus:ring-2 focus:ring-indigo-500 outline-none bg-white">
+                  {AFFILIATIONS.map(a => <option key={a} value={a}>{a}</option>)}
+                </select>
               </div>
-              <div className="flex flex-col text-right">
-                <span className="text-[10px] font-black uppercase text-slate-400 tracking-wider">
-                  Total Seats
-                </span>
-                <span className="text-sm font-bold text-slate-700">
-                  {program.seats} Seats
-                </span>
-              </div>
-              <div className="flex flex-col mt-2">
-                <span className="text-[10px] font-black uppercase text-slate-400 tracking-wider">
-                  Tuition Fees
-                </span>
-                <span className="text-sm font-black text-blue-600">
-                  {program.fee}
-                </span>
+              <div>
+                <label className="block text-sm font-medium text-slate-700 mb-1">Status</label>
+                <select value={form.status} onChange={e => setForm(f => ({ ...f, status: e.target.value as Status }))} className="w-full border border-slate-200 rounded-lg p-2.5 text-sm focus:ring-2 focus:ring-indigo-500 outline-none bg-white">
+                  <option value="Active">Active</option>
+                  <option value="Inactive">Inactive</option>
+                  <option value="Pending">Pending</option>
+                </select>
               </div>
             </div>
-
-            <div className="mt-auto flex items-center gap-2">
-              <button className="flex-1 bg-slate-50 text-slate-600 py-3 rounded-xl font-bold text-[13px] hover:bg-slate-100 transition-all flex items-center justify-center gap-2 active:scale-95">
-                <Edit3 size={14} />
-                Edit
-              </button>
-              <button className="flex-1 bg-white border border-slate-200 text-slate-400 py-3 rounded-xl font-bold text-[13px] hover:text-blue-600 hover:border-blue-100 transition-all flex items-center justify-center gap-2 active:scale-95">
-                <Eye size={14} />
-                View
+            <div className="flex gap-3 justify-end p-4 border-t bg-slate-50">
+              <button onClick={() => setShowModal(false)} className="px-4 py-2 border rounded-lg text-slate-600 hover:bg-slate-100 text-sm">Cancel</button>
+              <button onClick={handleSave} className="px-5 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg text-sm font-semibold transition-colors">
+                {editId ? "Save Changes" : "Add Program"}
               </button>
             </div>
           </div>
-        ))}
-        {/* Placeholder for adding more */}
-        <button className="bg-slate-50 rounded-3xl border-2 border-dashed border-slate-200 h-full min-h-[300px] flex flex-col items-center justify-center group hover:bg-white hover:border-blue-200 transition-all duration-300">
-          <div className="w-14 h-14 bg-white rounded-2xl flex items-center justify-center text-slate-300 group-hover:bg-blue-600 group-hover:text-white group-hover:scale-110 shadow-sm transition-all duration-300">
-            <Plus size={28} />
+        </div>
+      )}
+
+      {/* Delete Confirmation Modal */}
+      {deleteId !== null && (
+        <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center backdrop-blur-sm">
+          <div className="bg-white w-full max-w-sm rounded-xl shadow-2xl overflow-hidden m-4">
+            <div className="p-6 text-center space-y-4">
+              <div className="w-14 h-14 bg-red-50 rounded-full flex items-center justify-center mx-auto">
+                <AlertTriangle className="w-7 h-7 text-red-500" />
+              </div>
+              <h3 className="text-lg font-bold text-slate-900">Delete Program?</h3>
+              <p className="text-sm text-slate-500">This action cannot be undone. The program and all associated data will be permanently deleted.</p>
+              <div className="flex gap-3 justify-center pt-2">
+                <button onClick={() => setDeleteId(null)} className="px-5 py-2 border rounded-lg text-slate-700 hover:bg-slate-50 text-sm font-medium">Cancel</button>
+                <button onClick={confirmDelete} className="px-5 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg text-sm font-semibold transition-colors">Delete</button>
+              </div>
+            </div>
           </div>
-          <p className="mt-4 text-slate-400 font-bold group-hover:text-blue-600 transition-colors">
-            Add New Program
-          </p>
-        </button>
-      </div>
+        </div>
+      )}
     </div>
   );
 };
