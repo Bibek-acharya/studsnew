@@ -1,215 +1,243 @@
 "use client";
-
 import React, { useState } from "react";
-import {
-  Plus,
-  Search,
-  Filter,
-  ExternalLink,
-  ClipboardList,
-  Calendar,
-  Clock,
-  Briefcase,
-  ChevronRight,
-  MoreVertical,
-  CheckCircle2,
-  AlertCircle,
-} from "lucide-react";
+import { Plus, Trash2, CheckCircle, BookOpen, CalendarDays, FileText, Table2, Download, Phone } from "lucide-react";
 
-const EXAMS = [
-  {
-    id: 1,
-    title: "Sagarmatha Entrance Exam (SEE) 2026",
-    program: "BSc.CSIT / BCA",
-    date: "2024-05-15",
-    time: "11:00 AM",
-    status: "Active",
-    applicants: 480,
-  },
-  {
-    id: 2,
-    title: "Scholarship Qualifier Test",
-    program: "All Bachelor",
-    date: "2024-05-20",
-    time: "10:00 AM",
-    status: "Active",
-    applicants: 1200,
-  },
-  {
-    id: 3,
-    title: "Management Aptitude Test",
-    program: "BBA / BBM",
-    date: "2024-04-30",
-    time: "01:00 PM",
-    status: "Expired",
-    applicants: 350,
-  },
-];
+interface SubjectRow { id: number; name: string; fullMarks: string; passMarks: string; syllabus: string; }
+interface PaperRow { id: number; year: string; label: string; }
+
+const mkSubject = (id: number): SubjectRow => ({ id, name: "", fullMarks: "", passMarks: "", syllabus: "" });
+const mkPaper = (id: number): PaperRow => ({ id, year: "", label: "" });
+const nextId = (arr: { id: number }[]) => Math.max(0, ...arr.map(a => a.id)) + 1;
+
+const SectionCard = ({ icon, title, children }: { icon: React.ReactNode; title: string; children: React.ReactNode }) => (
+  <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
+    <div className="bg-slate-50 px-6 py-4 border-b border-slate-200 flex items-center gap-2">
+      <span className="text-blue-600">{icon}</span>
+      <h3 className="text-base font-semibold text-slate-800">{title}</h3>
+    </div>
+    <div className="p-6">{children}</div>
+  </div>
+);
 
 const EntrancePage: React.FC = () => {
+  /* Section 1: Basic Info */
+  const [examName, setExamName] = useState("");
+  const [affiliation, setAffiliation] = useState("");
+  const [takenBy, setTakenBy] = useState("");
+  const [program, setProgram] = useState("");
+
+  /* Section 2: Dates & Links */
+  const [examDateAD, setExamDateAD] = useState("");
+  const [examDateBS, setExamDateBS] = useState("");
+  const [openDate, setOpenDate] = useState("");
+  const [deadline, setDeadline] = useState("");
+  const [formLink, setFormLink] = useState("");
+
+  /* Section 3: Descriptions */
+  const [aboutExam, setAboutExam] = useState("");
+  const [examProcess, setExamProcess] = useState("");
+  const [eligibility, setEligibility] = useState("");
+  const [requiredDocs, setRequiredDocs] = useState("");
+
+  /* Section 4: Exam Structure */
+  const [subjects, setSubjects] = useState<SubjectRow[]>([mkSubject(1)]);
+
+  /* Section 5: Past Papers */
+  const [papers, setPapers] = useState<PaperRow[]>([mkPaper(1)]);
+
+  /* Section 6: Contact */
+  const [contactEmail, setContactEmail] = useState("");
+  const [contactPhone, setContactPhone] = useState("");
+  const [contactWebsite, setContactWebsite] = useState("");
+
+  const [saved, setSaved] = useState(false);
+  const [showSuccess, setShowSuccess] = useState(false);
+
+  const handleSubmit = () => {
+    setShowSuccess(true);
+    setTimeout(() => setShowSuccess(false), 3000);
+  };
+
+  const updateSubject = (id: number, key: keyof SubjectRow, val: string) => {
+    setSubjects(prev => prev.map(s => s.id === id ? { ...s, [key]: val } : s));
+  };
+
+  const updatePaper = (id: number, key: keyof PaperRow, val: string) => {
+    setPapers(prev => prev.map(p => p.id === id ? { ...p, [key]: val } : p));
+  };
+
   return (
-    <div className="p-8 space-y-8 animate-in fade-in duration-500">
-      {/* Page Header */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-        <div>
-          <h1 className="text-2xl font-bold text-slate-900 tracking-tight">
-            Entrance Exams
-          </h1>
-          <p className="text-slate-500 text-sm font-medium mt-1">
-            Manage institutional entrance exams, notices and past papers
-          </p>
-        </div>
-        <button className="flex items-center gap-2 px-6 py-3 bg-blue-600 rounded-xl text-sm font-bold text-white hover:bg-blue-700 transition-all shadow-lg active:scale-95">
-          <Plus size={18} />
-          Create Exam Notice
-        </button>
+    <div className="p-4 lg:p-8 space-y-6 max-w-[900px] mx-auto">
+      <div>
+        <h1 className="text-2xl font-bold text-slate-900">Add Entrance Exam</h1>
+        <p className="text-slate-500 text-sm mt-1">Create and publish entrance exam details for student applications.</p>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-        <div className="lg:col-span-2 space-y-6">
-          {/* Section List */}
-          <div className="bg-white rounded-3xl border border-slate-100 shadow-sm overflow-hidden min-h-[400px]">
-            <div className="p-6 border-b border-slate-50 flex items-center justify-between">
-              <h2 className="text-lg font-bold text-slate-900">
-                Active Entrance Notices
-              </h2>
-              <div className="flex items-center gap-2">
-                <button className="p-2.5 bg-slate-50 rounded-xl text-slate-400 hover:text-slate-600 transition-colors">
-                  <Filter size={18} />
-                </button>
-              </div>
+      {showSuccess && (
+        <div className="flex items-center gap-3 bg-green-50 border border-green-200 text-green-800 rounded-xl px-4 py-3 text-sm font-medium">
+          <CheckCircle className="w-5 h-5 text-green-600" /> Entrance exam published successfully!
+        </div>
+      )}
+
+      {/* Section 1: Basic Info */}
+      <SectionCard icon={<BookOpen className="w-5 h-5" />} title="Basic Information">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div className="sm:col-span-2">
+            <label className="block text-sm font-medium text-slate-700 mb-1">Exam Name <span className="text-red-500">*</span></label>
+            <input value={examName} onChange={e => setExamName(e.target.value)} placeholder="e.g. CSIT Entrance Examination 2024" className="w-full border border-slate-200 rounded-lg p-2.5 text-sm focus:ring-2 focus:ring-blue-500 outline-none" />
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-slate-700 mb-1">Affiliated University / Board</label>
+            <input value={affiliation} onChange={e => setAffiliation(e.target.value)} placeholder="e.g. Tribhuvan University" className="w-full border border-slate-200 rounded-lg p-2.5 text-sm focus:ring-2 focus:ring-blue-500 outline-none" />
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-slate-700 mb-1">Taken By</label>
+            <input value={takenBy} onChange={e => setTakenBy(e.target.value)} placeholder="e.g. +2 Pass Students" className="w-full border border-slate-200 rounded-lg p-2.5 text-sm focus:ring-2 focus:ring-blue-500 outline-none" />
+          </div>
+          <div className="sm:col-span-2">
+            <label className="block text-sm font-medium text-slate-700 mb-1">For Program</label>
+            <input value={program} onChange={e => setProgram(e.target.value)} placeholder="e.g. B.Sc CSIT, BCA, BIT..." className="w-full border border-slate-200 rounded-lg p-2.5 text-sm focus:ring-2 focus:ring-blue-500 outline-none" />
+          </div>
+        </div>
+      </SectionCard>
+
+      {/* Section 2: Dates & Links */}
+      <SectionCard icon={<CalendarDays className="w-5 h-5" />} title="Dates & Links">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div>
+            <label className="block text-sm font-medium text-slate-700 mb-1">Exam Date (AD)</label>
+            <input type="date" value={examDateAD} onChange={e => setExamDateAD(e.target.value)} className="w-full border border-slate-200 rounded-lg p-2.5 text-sm focus:ring-2 focus:ring-blue-500 outline-none" />
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-slate-700 mb-1">Exam Date (BS)</label>
+            <input value={examDateBS} onChange={e => setExamDateBS(e.target.value)} placeholder="e.g. 2081 Chaitra 15" className="w-full border border-slate-200 rounded-lg p-2.5 text-sm focus:ring-2 focus:ring-blue-500 outline-none" />
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-slate-700 mb-1">Form Open Date</label>
+            <input type="date" value={openDate} onChange={e => setOpenDate(e.target.value)} className="w-full border border-slate-200 rounded-lg p-2.5 text-sm focus:ring-2 focus:ring-blue-500 outline-none" />
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-slate-700 mb-1">Application Deadline</label>
+            <input type="date" value={deadline} onChange={e => setDeadline(e.target.value)} className="w-full border border-slate-200 rounded-lg p-2.5 text-sm focus:ring-2 focus:ring-blue-500 outline-none" />
+          </div>
+          <div className="sm:col-span-2">
+            <label className="block text-sm font-medium text-slate-700 mb-1">Online Form Link</label>
+            <input value={formLink} onChange={e => setFormLink(e.target.value)} placeholder="https://forms.tribhuvan.edu.np/..." className="w-full border border-slate-200 rounded-lg p-2.5 text-sm focus:ring-2 focus:ring-blue-500 outline-none" />
+          </div>
+        </div>
+      </SectionCard>
+
+      {/* Section 3: Descriptions */}
+      <SectionCard icon={<FileText className="w-5 h-5" />} title="Detailed Information">
+        <div className="space-y-4">
+          {[
+            { label: "About the Exam", value: aboutExam, setter: setAboutExam, placeholder: "Overview of the entrance examination..." },
+            { label: "Exam Process", value: examProcess, setter: setExamProcess, placeholder: "Step by step examination procedure..." },
+            { label: "Eligibility Requirements", value: eligibility, setter: setEligibility, placeholder: "Who can apply and minimum qualifications..." },
+            { label: "Required Documents", value: requiredDocs, setter: setRequiredDocs, placeholder: "List of documents needed for admission..." },
+          ].map(f => (
+            <div key={f.label}>
+              <label className="block text-sm font-medium text-slate-700 mb-1">{f.label}</label>
+              <textarea rows={3} value={f.value} onChange={e => f.setter(e.target.value)} placeholder={f.placeholder} className="w-full border border-slate-200 rounded-lg p-3 text-sm focus:ring-2 focus:ring-blue-500 outline-none resize-none" />
             </div>
-            <div className="divide-y divide-slate-50">
-              {EXAMS.map((exam) => (
-                <div
-                  key={exam.id}
-                  className="p-6 flex flex-col md:flex-row md:items-center justify-between gap-6 hover:bg-slate-50/50 transition-colors group"
-                >
-                  <div className="flex items-start gap-4">
-                    <div
-                      className={`w-12 h-12 rounded-2xl flex items-center justify-center shrink-0 ${
-                        exam.status === "Active"
-                          ? "bg-blue-50 text-blue-600"
-                          : "bg-slate-100 text-slate-400"
-                      }`}
-                    >
-                      <ClipboardList size={24} />
-                    </div>
-                    <div className="flex flex-col">
-                      <h3 className="text-base font-bold text-slate-900 group-hover:text-blue-600 transition-colors uppercase tracking-tight">
-                        {exam.title}
-                      </h3>
-                      <div className="flex items-center gap-4 mt-2">
-                        <span className="text-[12px] font-black text-slate-400 uppercase tracking-widest">
-                          {exam.program}
-                        </span>
-                        <div className="flex items-center gap-1.5 text-[12px] text-slate-500 font-medium">
-                          <Calendar size={14} />
-                          {exam.date}
-                        </div>
-                        <div className="flex items-center gap-1.5 text-[12px] text-slate-500 font-medium">
-                          <Clock size={14} />
-                          {exam.time}
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                  <div className="flex items-center justify-between md:justify-end gap-8 bg-slate-50 md:bg-transparent p-4 md:p-0 rounded-2xl">
-                    <div className="flex flex-col text-center">
-                      <span className="text-[10px] font-black uppercase text-slate-400 tracking-wider">
-                        Applicants
-                      </span>
-                      <span className="text-base font-black text-slate-900">
-                        {exam.applicants}
-                      </span>
-                    </div>
-                    <button className="p-2 text-slate-400 hover:text-slate-900 transition-colors">
-                      <MoreVertical size={20} />
+          ))}
+        </div>
+      </SectionCard>
+
+      {/* Section 4: Exam Structure */}
+      <SectionCard icon={<Table2 className="w-5 h-5" />} title="Exam Structure">
+        <div className="overflow-x-auto">
+          <table className="w-full min-w-[600px] text-left border border-slate-200 rounded-lg overflow-hidden mb-3">
+            <thead className="bg-slate-50 text-xs uppercase text-slate-500">
+              <tr>
+                {["Subject / Section", "Full Marks", "Pass Marks", "Syllabus Link", ""].map(h => (
+                  <th key={h} className="px-4 py-3 font-semibold">{h}</th>
+                ))}
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-slate-100">
+              {subjects.map(s => (
+                <tr key={s.id} className="hover:bg-slate-50">
+                  <td className="px-4 py-2">
+                    <input value={s.name} onChange={e => updateSubject(s.id, "name", e.target.value)} placeholder="e.g. Mathematics" className="w-full border-0 border-b border-slate-200 focus:border-blue-400 p-1 text-sm outline-none bg-transparent" />
+                  </td>
+                  <td className="px-4 py-2 w-28">
+                    <input value={s.fullMarks} onChange={e => updateSubject(s.id, "fullMarks", e.target.value)} placeholder="100" className="w-full border-0 border-b border-slate-200 focus:border-blue-400 p-1 text-sm outline-none bg-transparent text-center" />
+                  </td>
+                  <td className="px-4 py-2 w-28">
+                    <input value={s.passMarks} onChange={e => updateSubject(s.id, "passMarks", e.target.value)} placeholder="40" className="w-full border-0 border-b border-slate-200 focus:border-blue-400 p-1 text-sm outline-none bg-transparent text-center" />
+                  </td>
+                  <td className="px-4 py-2">
+                    <input value={s.syllabus} onChange={e => updateSubject(s.id, "syllabus", e.target.value)} placeholder="https://..." className="w-full border-0 border-b border-slate-200 focus:border-blue-400 p-1 text-sm outline-none bg-transparent" />
+                  </td>
+                  <td className="px-4 py-2 text-right">
+                    <button onClick={() => setSubjects(prev => prev.filter(x => x.id !== s.id))} className="text-red-400 hover:text-red-600 p-1">
+                      <Trash2 className="w-4 h-4" />
                     </button>
-                  </div>
-                </div>
+                  </td>
+                </tr>
               ))}
-            </div>
-          </div>
-
-          {/* Archive Row */}
-          <div className="bg-white rounded-3xl border border-slate-100 shadow-sm p-8 flex items-center justify-between">
-            <div className="flex items-center gap-4">
-              <div className="w-12 h-12 bg-purple-50 text-purple-600 rounded-2xl flex items-center justify-center">
-                <Briefcase size={24} />
-              </div>
-              <div>
-                <h3 className="text-base font-bold text-slate-900 uppercase">
-                  Model Question Archive
-                </h3>
-                <p className="text-sm text-slate-400 font-medium">
-                  Upload and manage entrance preparation materials
-                </p>
-              </div>
-            </div>
-            <button className="flex items-center gap-2 text-blue-600 font-bold hover:gap-3 transition-all">
-              Review Repository
-              <ChevronRight size={18} />
-            </button>
-          </div>
+            </tbody>
+          </table>
+          <button
+            onClick={() => setSubjects(prev => [...prev, mkSubject(nextId(prev))])}
+            className="text-sm text-blue-600 hover:text-blue-800 font-medium flex items-center gap-1"
+          >
+            <Plus className="w-4 h-4" /> Add Subject
+          </button>
         </div>
+      </SectionCard>
 
-        {/* Sidebar */}
-        <div className="space-y-6">
-          <div className="bg-amber-50 border border-amber-100 p-8 rounded-3xl">
-            <div className="flex items-center gap-3 mb-4">
-              <div className="w-10 h-10 bg-amber-100 rounded-xl flex items-center justify-center text-amber-600">
-                <AlertCircle size={24} />
-              </div>
-              <h3 className="text-base font-black text-amber-900 tracking-tighter italic uppercase">
-                Entrance Guide
-              </h3>
-            </div>
-            <p className="text-amber-700/80 text-[13px] font-medium leading-relaxed">
-              Sharing past entrance questions increases leads by up to 40%.
-              Upload last year&apos;s papers to the repository.
-            </p>
-            <button className="w-full mt-6 py-3 bg-white border border-amber-200 text-amber-700 rounded-xl font-bold text-sm hover:bg-amber-100 transition-all active:scale-95 flex items-center justify-center gap-2">
-              <Plus size={14} />
-              Upload Past Papers
-            </button>
-          </div>
-
-          <div className="bg-white rounded-3xl border border-slate-100 shadow-sm p-8">
-            <h3 className="text-[14px] font-black uppercase text-slate-900 tracking-wider mb-6 pb-3 border-b border-slate-50">
-              Quick Actions
-            </h3>
-            <div className="space-y-4">
-              <button className="w-full flex items-center justify-between p-4 bg-slate-50 rounded-2xl hover:bg-slate-100 transition-all group">
-                <span className="text-[13px] font-bold text-slate-700">
-                  Exam Admit Cards
-                </span>
-                <ExternalLink
-                  size={16}
-                  className="text-slate-300 group-hover:text-blue-500 transition-colors"
-                />
-              </button>
-              <button className="w-full flex items-center justify-between p-4 bg-slate-50 rounded-2xl hover:bg-slate-100 transition-all group">
-                <span className="text-[13px] font-bold text-slate-700">
-                  Publish Exam Result
-                </span>
-                <CheckCircle2
-                  size={16}
-                  className="text-slate-300 group-hover:text-emerald-500 transition-colors"
-                />
-              </button>
-              <button className="w-full flex items-center justify-between p-4 bg-slate-50 rounded-2xl hover:bg-slate-100 transition-all group">
-                <span className="text-[13px] font-bold text-slate-700">
-                  Online Exams Portal
-                </span>
-                <ExternalLink
-                  size={16}
-                  className="text-slate-300 group-hover:text-blue-500 transition-colors"
-                />
+      {/* Section 5: Past Papers */}
+      <SectionCard icon={<Download className="w-5 h-5" />} title="Past Papers & Materials">
+        <div className="space-y-3 mb-3">
+          {papers.map(p => (
+            <div key={p.id} className="flex gap-2 items-center">
+              <input value={p.year} onChange={e => updatePaper(p.id, "year", e.target.value)} placeholder="Year (e.g. 2023)" className="w-32 border border-slate-200 rounded-lg p-2.5 text-sm focus:ring-2 focus:ring-blue-500 outline-none" />
+              <input value={p.label} onChange={e => updatePaper(p.id, "label", e.target.value)} placeholder="Label (e.g. BSc CSIT Past Paper)" className="flex-1 border border-slate-200 rounded-lg p-2.5 text-sm focus:ring-2 focus:ring-blue-500 outline-none" />
+              <label className="px-3 py-2.5 border border-slate-200 rounded-lg text-sm text-slate-500 hover:bg-slate-50 cursor-pointer whitespace-nowrap">
+                <input type="file" accept=".pdf" className="hidden" /> Upload PDF
+              </label>
+              <button onClick={() => setPapers(prev => prev.filter(x => x.id !== p.id))} className="text-red-400 hover:text-red-600 p-2">
+                <Trash2 className="w-4 h-4" />
               </button>
             </div>
-          </div>
+          ))}
         </div>
+        <button
+          onClick={() => setPapers(prev => [...prev, mkPaper(nextId(prev))])}
+          className="text-sm text-blue-600 hover:text-blue-800 font-medium flex items-center gap-1"
+        >
+          <Plus className="w-4 h-4" /> Add Paper Year
+        </button>
+      </SectionCard>
+
+      {/* Section 6: Contact */}
+      <SectionCard icon={<Phone className="w-5 h-5" />} title="Contact & Support">
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+          {[
+            { label: "Contact Email", value: contactEmail, setter: setContactEmail, placeholder: "exam@college.edu.np", type: "email" },
+            { label: "Contact Phone", value: contactPhone, setter: setContactPhone, placeholder: "+977-01-XXXXXXX", type: "tel" },
+            { label: "Exam Website", value: contactWebsite, setter: setContactWebsite, placeholder: "https://exam.college.edu.np", type: "url" },
+          ].map(f => (
+            <div key={f.label}>
+              <label className="block text-sm font-medium text-slate-700 mb-1">{f.label}</label>
+              <input type={f.type} value={f.value} onChange={e => f.setter(e.target.value)} placeholder={f.placeholder} className="w-full border border-slate-200 rounded-lg p-2.5 text-sm focus:ring-2 focus:ring-blue-500 outline-none" />
+            </div>
+          ))}
+        </div>
+      </SectionCard>
+
+      {/* Action Buttons */}
+      <div className="flex gap-3 justify-end pb-6">
+        <button className="px-5 py-2.5 border border-slate-200 rounded-lg text-slate-700 hover:bg-slate-50 text-sm font-medium">Cancel</button>
+        <button className="px-5 py-2.5 border border-slate-200 rounded-lg text-slate-700 hover:bg-slate-50 text-sm font-medium">Save as Draft</button>
+        <button
+          onClick={handleSubmit}
+          className="px-6 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-sm font-semibold transition-colors shadow-sm flex items-center gap-2"
+        >
+          <CheckCircle className="w-4 h-4" /> Publish Exam
+        </button>
       </div>
     </div>
   );

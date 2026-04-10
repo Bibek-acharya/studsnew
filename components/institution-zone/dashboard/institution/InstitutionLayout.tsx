@@ -1,256 +1,241 @@
 "use client";
-
 import React, { useState } from "react";
 import {
-  BarChart3,
-  Users,
-  FileText,
-  Settings,
-  MessageSquare,
-  GraduationCap,
-  ClipboardList,
-  BookOpen,
-  Building2,
-  Stethoscope,
-  Calendar,
-  Newspaper,
-  LayoutDashboard,
-  Menu,
-  X,
-  Bell,
-  Search,
-  ChevronRight,
+  LayoutDashboard, GraduationCap, HelpCircle, BookOpen, Award, Building2, Users, FileText,
+  Megaphone, Calendar, Mail, Settings, LogOut, X, Menu, Search, Bell, ChevronDown, TrendingUp,
 } from "lucide-react";
 
 export type InstitutionPage =
   | "overview"
   | "admission"
   | "admissionManage"
-  | "program"
-  | "collegeProfile"
-  | "counselling"
-  | "entrance"
-  | "events"
-  | "newsNotice"
   | "qms"
+  | "program"
   | "scholarship"
   | "scholarshipManage"
-  | "message"
+  | "collegeProfile"
+  | "counselling"
+  | "counsellingSlots"
+  | "entrance"
+  | "newsNotice"
+  | "events"
   | "settings";
 
-interface NavItem {
-  id: InstitutionPage;
-  label: string;
-  icon: React.ElementType;
-  category?: string;
-}
-
-const NAV_ITEMS: NavItem[] = [
-  { id: "overview", label: "Dashboard Overview", icon: LayoutDashboard },
-  { id: "collegeProfile", label: "College Profile", icon: Building2 },
-  { id: "program", label: "Programs & Courses", icon: BookOpen },
-  {
-    id: "admission",
-    label: "Admission Leads",
-    icon: Users,
-    category: "Admissions",
-  },
-  {
-    id: "admissionManage",
-    label: "Manage Admissions",
-    icon: GraduationCap,
-    category: "Admissions",
-  },
-  {
-    id: "scholarship",
-    label: "Scholarship Apps",
-    icon: FileText,
-    category: "Admissions",
-  },
-  {
-    id: "scholarshipManage",
-    label: "Manage Scholarships",
-    icon: BarChart3,
-    category: "Admissions",
-  },
-  {
-    id: "entrance",
-    label: "Entrance Exams",
-    icon: ClipboardList,
-    category: "Tools",
-  },
-  {
-    id: "counselling",
-    label: "Online Counselling",
-    icon: Stethoscope,
-    category: "Tools",
-  },
-  {
-    id: "qms",
-    label: "Query Management",
-    icon: MessageSquare,
-    category: "Engagement",
-  },
-  {
-    id: "events",
-    label: "Events & Activities",
-    icon: Calendar,
-    category: "Engagement",
-  },
-  {
-    id: "newsNotice",
-    label: "News & Notices",
-    icon: Newspaper,
-    category: "Engagement",
-  },
-  { id: "message", label: "Messages", icon: MessageSquare, category: "System" },
-  { id: "settings", label: "Settings", icon: Settings, category: "System" },
-];
-
-interface InstitutionLayoutProps {
-  children: React.ReactNode;
+interface Props {
   activePage: InstitutionPage;
   onNavigate: (page: InstitutionPage) => void;
+  children: React.ReactNode;
 }
 
-const InstitutionLayout: React.FC<InstitutionLayoutProps> = ({
-  children,
-  activePage,
-  onNavigate,
-}) => {
-  const [isSidebarOpen, setIsSidebarOpen] = useState(true);
+const InstitutionLayout: React.FC<Props> = ({ activePage, onNavigate, children }) => {
+  const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [openDropdowns, setOpenDropdowns] = useState<Record<string, boolean>>({});
 
-  const groupedNavItems = NAV_ITEMS.reduce(
-    (acc, item) => {
-      const category = item.category || "Main";
-      if (!acc[category]) acc[category] = [];
-      acc[category].push(item);
-      return acc;
-    },
-    {} as Record<string, NavItem[]>,
-  );
+  const toggleDropdown = (key: string) => {
+    setOpenDropdowns((prev) => ({ ...prev, [key]: !prev[key] }));
+  };
+
+  const navItem = (
+    page: InstitutionPage,
+    icon: React.ReactNode,
+    label: string,
+    badge?: string
+  ) => {
+    const isActive = activePage === page;
+    return (
+      <button
+        onClick={() => { onNavigate(page); setSidebarOpen(false); }}
+        className={`w-full flex items-center justify-between px-3 py-2.5 rounded-lg font-medium transition-colors ${
+          isActive
+            ? "bg-blue-50 text-blue-600"
+            : "text-slate-600 hover:bg-slate-50 hover:text-slate-900"
+        }`}
+      >
+        <div className="flex items-center gap-3">
+          {icon}
+          <span>{label}</span>
+        </div>
+        {badge && (
+          <span className="bg-blue-100 text-blue-700 py-0.5 px-2 rounded-full text-xs font-bold">{badge}</span>
+        )}
+      </button>
+    );
+  };
+
+  const dropdownSection = (
+    key: string,
+    icon: React.ReactNode,
+    label: string,
+    items: { page: InstitutionPage; label: string }[]
+  ) => {
+    const isOpen = openDropdowns[key] || items.some((i) => i.page === activePage);
+    return (
+      <div>
+        <button
+          onClick={() => toggleDropdown(key)}
+          className="w-full flex items-center justify-between px-3 py-2.5 rounded-lg text-slate-600 hover:bg-slate-50 hover:text-slate-900 font-medium transition-colors"
+        >
+          <div className="flex items-center gap-3">{icon}<span>{label}</span></div>
+          <ChevronDown
+            className={`w-4 h-4 transition-transform duration-300 ${isOpen ? "rotate-180" : ""}`}
+          />
+        </button>
+        {isOpen && (
+          <ul className="pl-11 pr-3 py-1 space-y-1">
+            {items.map((item) => (
+              <li key={item.page}>
+                <button
+                  onClick={() => { onNavigate(item.page); setSidebarOpen(false); }}
+                  className={`w-full text-left block px-3 py-2 rounded-md text-sm transition-colors ${
+                    activePage === item.page
+                      ? "text-blue-600 bg-blue-50 font-semibold"
+                      : "text-slate-500 hover:text-blue-600 hover:bg-blue-50"
+                  }`}
+                >
+                  {item.label}
+                </button>
+              </li>
+            ))}
+          </ul>
+        )}
+      </div>
+    );
+  };
 
   return (
-    <div className="flex h-screen bg-[#F8FAFC]">
+    <div className="bg-slate-50 text-slate-800 font-sans h-screen flex overflow-hidden selection:bg-blue-500 selection:text-white">
+      {/* Mobile Overlay */}
+      {sidebarOpen && (
+        <div
+          className="fixed inset-0 bg-slate-900/50 z-40 lg:hidden"
+          onClick={() => setSidebarOpen(false)}
+        />
+      )}
+
       {/* Sidebar */}
       <aside
-        className={`${
-          isSidebarOpen ? "w-72" : "w-20"
-        } transition-all duration-300 bg-white border-r border-slate-200 flex flex-col z-50`}
+        className={`fixed lg:relative top-0 left-0 z-50 w-72 h-full bg-white border-r border-slate-200 flex flex-col transition-transform duration-300 ease-in-out shadow-xl lg:shadow-none ${
+          sidebarOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0"
+        }`}
       >
-        <div className="p-6 flex items-center justify-between">
-          {isSidebarOpen ? (
-            <span className="text-xl font-bold text-blue-600 tracking-tight">
-              StudSphere{" "}
-              <span className="text-slate-400 font-medium text-sm">Inst.</span>
-            </span>
-          ) : (
-            <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center text-white font-bold ml-1">
+        {/* Sidebar Header */}
+        <div className="h-16 flex items-center justify-between px-6 border-b border-slate-200">
+          <div className="flex items-center gap-2">
+            <div className="w-8 h-8 rounded-lg bg-blue-600 flex items-center justify-center text-white font-bold text-xl">
               S
             </div>
-          )}
+            <span className="text-xl font-bold text-slate-900 tracking-tight">Studsphere</span>
+          </div>
           <button
-            onClick={() => setIsSidebarOpen(!isSidebarOpen)}
-            className="p-1.5 rounded-lg hover:bg-slate-100 text-slate-500"
+            onClick={() => setSidebarOpen(false)}
+            className="text-slate-500 hover:text-slate-700 p-1 rounded-md bg-slate-100 lg:hidden"
           >
-            {isSidebarOpen ? <X size={18} /> : <Menu size={18} />}
+            <X className="w-5 h-5" />
           </button>
         </div>
 
-        <div className="flex-1 overflow-y-auto px-4 py-2 space-y-6">
-          {Object.entries(groupedNavItems).map(([category, items]) => (
-            <div key={category} className="space-y-1">
-              {isSidebarOpen && (
-                <h3 className="px-3 text-[11px] font-bold text-slate-400 uppercase tracking-widest mb-2">
-                  {category}
-                </h3>
-              )}
-              {items.map((item) => (
-                <button
-                  key={item.id}
-                  onClick={() => onNavigate(item.id)}
-                  className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all ${
-                    activePage === item.id
-                      ? "bg-blue-50 text-blue-600 font-semibold"
-                      : "text-slate-500 hover:bg-slate-50 hover:text-slate-900"
-                  }`}
-                >
-                  <item.icon
-                    size={20}
-                    className={
-                      activePage === item.id
-                        ? "text-blue-600"
-                        : "text-slate-400"
-                    }
-                  />
-                  {isSidebarOpen && (
-                    <span className="text-[14px] truncate">{item.label}</span>
-                  )}
-                  {isSidebarOpen && activePage === item.id && (
-                    <div className="ml-auto w-1.5 h-1.5 rounded-full bg-blue-600" />
-                  )}
-                </button>
-              ))}
-            </div>
-          ))}
-        </div>
-
-        <div className="p-4 border-t border-slate-100">
-          <div
-            className={`flex items-center gap-3 ${isSidebarOpen ? "px-2" : "justify-center"}`}
-          >
-            <div className="w-10 h-10 rounded-full bg-slate-100 flex items-center justify-center text-slate-500 font-bold border border-slate-200 overflow-hidden">
-              <Building2 size={24} />
-            </div>
-            {isSidebarOpen && (
-              <div className="flex flex-col min-w-0">
-                <span className="text-sm font-bold text-slate-900 truncate">
-                  Sagarmatha College
-                </span>
-                <span className="text-[11px] text-slate-400 font-medium">
-                  Premium Member
-                </span>
-              </div>
-            )}
+        {/* Navigation */}
+        <nav className="flex-1 overflow-y-auto py-4 px-3 space-y-1">
+          <div className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2 px-3 mt-2">
+            Menu
           </div>
+
+          {navItem("overview", <LayoutDashboard className="w-5 h-5" />, "Overview")}
+
+          {dropdownSection("admission", <GraduationCap className="w-5 h-5" />, "Admission", [
+            { page: "admission", label: "Overview" },
+            { page: "admissionManage", label: "Manage Program" },
+          ])}
+
+          {navItem("qms", <HelpCircle className="w-5 h-5" />, "QMS")}
+          {navItem("program", <BookOpen className="w-5 h-5" />, "Program")}
+
+          {dropdownSection("scholarship", <Award className="w-5 h-5" />, "Scholarship", [
+            { page: "scholarship", label: "Manage Students" },
+            { page: "scholarshipManage", label: "Manage Scholarship" },
+          ])}
+
+          {navItem("collegeProfile", <Building2 className="w-5 h-5" />, "College Profile")}
+
+          {dropdownSection("counselling", <Users className="w-5 h-5" />, "Counselling", [
+            { page: "counselling", label: "Manage Students" },
+            { page: "counsellingSlots", label: "Manage Slots" },
+          ])}
+
+          {dropdownSection("entrance", <FileText className="w-5 h-5" />, "Entrance / Exam", [
+            { page: "entrance", label: "Add Entrance" },
+          ])}
+
+          <div className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2 px-3 mt-6">
+            Updates &amp; Comms
+          </div>
+          {navItem("newsNotice", <Megaphone className="w-5 h-5" />, "News & Notice")}
+          {navItem("events", <Calendar className="w-5 h-5" />, "Events")}
+
+          <div className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2 px-3 mt-6">
+            System
+          </div>
+          {navItem("settings", <Settings className="w-5 h-5" />, "Settings")}
+        </nav>
+
+        <div className="p-4 border-t border-slate-200">
+          <button
+            onClick={() => {
+              localStorage.removeItem("institutionAuthToken");
+              localStorage.removeItem("institutionAuthUser");
+              window.location.href = "/institutionZone";
+            }}
+            className="w-full flex items-center justify-center gap-2 px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg font-medium transition-colors"
+          >
+            <LogOut className="w-4 h-4" />
+            <span>Logout</span>
+          </button>
         </div>
       </aside>
 
-      {/* Main Content */}
-      <main className="flex-1 flex flex-col min-w-0 overflow-hidden">
-        {/* Top Header */}
-        <header className="h-16 bg-white border-b border-slate-200 flex items-center justify-between px-8 shrink-0">
-          <div className="flex items-center gap-4 flex-1">
-            <div className="relative max-w-md w-full hidden md:block">
-              <Search
-                className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"
-                size={16}
-              />
+      {/* Main Content Wrapper */}
+      <div className="flex-1 flex flex-col min-w-0 bg-slate-50 overflow-hidden">
+        {/* Top Navbar */}
+        <header className="h-16 bg-white border-b border-slate-200 flex items-center justify-between px-4 lg:px-8 z-10 shrink-0">
+          <div className="flex items-center flex-1 gap-4 lg:gap-8">
+            <button
+              onClick={() => setSidebarOpen(true)}
+              className="lg:hidden p-2 -ml-2 text-slate-500 hover:bg-slate-100 rounded-lg"
+            >
+              <Menu className="w-6 h-6" />
+            </button>
+            <div className="flex-1 max-w-md hidden sm:block relative">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
               <input
                 type="text"
-                placeholder="Search leads, applications..."
-                className="w-full bg-slate-50 border-none rounded-lg py-2 pl-10 pr-4 text-sm focus:ring-2 focus:ring-blue-500/20 outline-none"
+                placeholder="Search across all modules..."
+                className="w-full pl-10 pr-4 py-2 bg-slate-100 border-transparent rounded-lg text-sm focus:bg-white focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none transition-all"
               />
             </div>
           </div>
-          <div className="flex items-center gap-4">
-            <button className="relative p-2 rounded-lg hover:bg-slate-50 text-slate-500">
-              <Bell size={20} />
-              <div className="absolute top-2 right-2 w-2 h-2 bg-red-500 rounded-full border-2 border-white" />
+
+          <div className="flex items-center gap-2 sm:gap-4 ml-4">
+            <button className="relative p-2 text-slate-500 hover:bg-slate-100 rounded-full transition-colors">
+              <Bell className="w-5 h-5" />
+              <span className="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full border border-white" />
             </button>
-            <div className="h-8 w-px bg-slate-200 mx-1" />
-            <button className="flex items-center gap-2 px-3 py-1.5 rounded-lg border border-slate-200 hover:bg-slate-50 transition-colors">
-              <span className="text-sm font-medium text-slate-700">
-                Live Website
-              </span>
-              <ChevronRight size={14} className="text-slate-400" />
+            <div className="hidden sm:block w-px h-6 bg-slate-200 mx-2" />
+            <button className="flex items-center gap-3 p-1 pr-2 rounded-full hover:bg-slate-100 transition-colors border border-transparent hover:border-slate-200">
+              <div className="w-8 h-8 rounded-full bg-blue-900 flex items-center justify-center text-white font-bold text-sm">
+                A
+              </div>
+              <div className="hidden md:flex flex-col items-start">
+                <span className="text-sm font-bold text-slate-800 leading-none">Admin User</span>
+                <span className="text-xs text-slate-500 mt-1">Super Admin</span>
+              </div>
+              <TrendingUp className="w-4 h-4 text-slate-400 hidden md:block" />
             </button>
           </div>
         </header>
 
         {/* Page Content */}
-        <div className="flex-1 overflow-y-auto">{children}</div>
-      </main>
+        <main className="flex-1 overflow-y-auto">{children}</main>
+      </div>
     </div>
   );
 };

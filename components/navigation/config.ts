@@ -26,8 +26,9 @@ export const routeMap: Record<ViewKey, string> = {
   eventsPage: "/events",
   contact: "/contact-us",
   institutionZone: "/institution-zone",
-  studentDashboard: "/",
-  writeReview: "/",
+  studentDashboard: "/user/dashboard",
+  userDashboard: "/user/dashboard",
+  writeReview: "/write-review",
   login: "/login",
   signup: "/login",
 };

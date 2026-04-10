@@ -28,6 +28,7 @@ export type ViewKey =
   | "contact"
   | "institutionZone"
   | "studentDashboard"
+  | "userDashboard"
   | "writeReview"
   | "login"
   | "signup"

@@ -11,6 +11,7 @@ import {
   ArchiveRestore,
   Trash2,
   User,
+  LayoutDashboard,
   FileText,
   Bookmark,
   Sparkles,
@@ -61,14 +62,17 @@ const EducationNavbar: React.FC<EducationNavbarProps> = ({
     setMobileMenus((prev) => ({ ...prev, [key]: !prev[key] }));
   };
 
-  const [currentNotifTab, setCurrentNotifTab] = useState<NotificationTab>("all");
+  const [currentNotifTab, setCurrentNotifTab] =
+    useState<NotificationTab>("all");
   const [notifications, setNotifications] = useState(initialNotifications);
 
   const visibleNotifications = useMemo(() => {
     return notifications.filter((n) => {
       if (currentNotifTab === "all") return !n.isArchived;
-      if (currentNotifTab === "following") return !n.isArchived && n.isFollowing;
-      if (currentNotifTab === "system") return !n.isArchived && n.type === "system";
+      if (currentNotifTab === "following")
+        return !n.isArchived && n.isFollowing;
+      if (currentNotifTab === "system")
+        return !n.isArchived && n.type === "system";
       if (currentNotifTab === "archive") return n.isArchived;
       return true;
     });
@@ -146,8 +150,6 @@ const EducationNavbar: React.FC<EducationNavbarProps> = ({
     return () => document.removeEventListener("mousedown", handleOutside);
   }, []);
 
-  
-
   useEffect(() => {
     if (isMobileOpen || showMobileSearch) {
       document.body.style.overflow = "hidden";
@@ -200,7 +202,11 @@ const EducationNavbar: React.FC<EducationNavbarProps> = ({
             : "text-gray-600 hover:bg-gray-50 hover:text-blue-600"
         }`}
       >
-        {item.icon && <i className={`fa-solid ${item.icon} w-4 text-center ${item.color ?? "text-gray-400"}`}></i>}
+        {item.icon && (
+          <i
+            className={`fa-solid ${item.icon} w-4 text-center ${item.color ?? "text-gray-400"}`}
+          ></i>
+        )}
         <span>{item.label}</span>
         {item.badge && (
           <span className="ml-auto text-[10px] font-bold text-gray-400">
@@ -217,15 +223,31 @@ const EducationNavbar: React.FC<EducationNavbarProps> = ({
     return () => go(viewKey, item.data);
   };
 
-  const toolsSection = desktopMenuSections.find((section) => section.key === "tools");
-  const scholarshipsSection = desktopMenuSections.find((section) => section.key === "scholarships");
-  const admissionSection = desktopMenuSections.find((section) => section.key === "admission");
-  const moreSection = desktopMenuSections.find((section) => section.key === "more");
+  const toolsSection = desktopMenuSections.find(
+    (section) => section.key === "tools",
+  );
+  const scholarshipsSection = desktopMenuSections.find(
+    (section) => section.key === "scholarships",
+  );
+  const admissionSection = desktopMenuSections.find(
+    (section) => section.key === "admission",
+  );
+  const moreSection = desktopMenuSections.find(
+    (section) => section.key === "more",
+  );
 
-  const mobileToolsSection = mobileMenuSections.find((section) => section.key === "tools");
-  const mobileScholarshipsSection = mobileMenuSections.find((section) => section.key === "scholarships");
-  const mobileAdmissionSection = mobileMenuSections.find((section) => section.key === "admission");
-  const mobileMoreSection = mobileMenuSections.find((section) => section.key === "more");
+  const mobileToolsSection = mobileMenuSections.find(
+    (section) => section.key === "tools",
+  );
+  const mobileScholarshipsSection = mobileMenuSections.find(
+    (section) => section.key === "scholarships",
+  );
+  const mobileAdmissionSection = mobileMenuSections.find(
+    (section) => section.key === "admission",
+  );
+  const mobileMoreSection = mobileMenuSections.find(
+    (section) => section.key === "more",
+  );
 
   const normalizePath = (path: string) =>
     path.length > 1 && path.endsWith("/") ? path.slice(0, -1) : path;
@@ -254,9 +276,13 @@ const EducationNavbar: React.FC<EducationNavbarProps> = ({
     return isRouteActive(route);
   };
 
-  const isSectionActive = (section?: { key: string; items: DropdownItem[] }) => {
+  const isSectionActive = (section?: {
+    key: string;
+    items: DropdownItem[];
+  }) => {
     if (!section) return false;
-    if (section.key === "admission" && isRouteActive("/admissions")) return true;
+    if (section.key === "admission" && isRouteActive("/admissions"))
+      return true;
     return section.items.some((item) => isViewActive(item.viewKey, item.data));
   };
 
@@ -316,7 +342,9 @@ const EducationNavbar: React.FC<EducationNavbarProps> = ({
                   <button
                     onClick={() =>
                       setActiveMenu((prev) =>
-                        prev === "notification-menu" ? null : "notification-menu",
+                        prev === "notification-menu"
+                          ? null
+                          : "notification-menu",
                       )
                     }
                     className="relative flex items-center justify-center w-9.5 h-9.5 rounded-full border border-gray-200 hover:bg-gray-50 transition-colors text-[#475569] shrink-0"
@@ -368,59 +396,59 @@ const EducationNavbar: React.FC<EducationNavbarProps> = ({
                         </div>
                         <div className="no-scrollbar flex max-h-75 flex-col overflow-y-auto">
                           {visibleNotifications.map((notif) => (
+                            <div
+                              key={notif.id}
+                              className="group relative flex cursor-pointer items-start gap-3 border-b border-gray-50 bg-white p-3 transition-colors hover:bg-gray-50"
+                              onClick={() => markAsRead(notif.id)}
+                            >
                               <div
-                                key={notif.id}
-                                className="group relative flex cursor-pointer items-start gap-3 border-b border-gray-50 bg-white p-3 transition-colors hover:bg-gray-50"
-                                onClick={() => markAsRead(notif.id)}
+                                className={`mt-1 flex h-10 w-10 shrink-0 items-center justify-center rounded-full ${notif.bgColor} ${notif.color}`}
                               >
-                                <div
-                                  className={`mt-1 flex h-10 w-10 shrink-0 items-center justify-center rounded-full ${notif.bgColor} ${notif.color}`}
-                                >
-                                  <i className="fa-solid fa-bell text-sm"></i>
-                                </div>
-                                <div className="flex-1 min-w-0 pr-10">
-                                  <div className="mb-0.5 flex flex-wrap items-center gap-2">
-                                    <p className="truncate text-sm font-semibold text-black">
-                                      {notif.title}
-                                    </p>
-                                    {notif.isFollowing && (
-                                      <span className="rounded bg-blue-100 px-1.5 py-0.5 text-[10px] font-bold uppercase tracking-wide text-blue-600 whitespace-nowrap">
-                                        Following
-                                      </span>
-                                    )}
-                                  </div>
-                                  <p className="line-clamp-2 text-sm leading-relaxed text-gray-800">
-                                    {notif.message}
-                                  </p>
-                                  <p className="mt-1.5 flex items-center gap-1 text-xs text-gray-500">
-                                    <Clock size={12} /> {notif.time}
-                                  </p>
-                                </div>
-                                {!notif.isRead && (
-                                  <div className="absolute right-3 top-3 h-2 w-2 rounded-full bg-blue-500"></div>
-                                )}
-                                <div className="absolute bottom-3 right-3 flex gap-1 opacity-0 transition-all group-hover:opacity-100">
-                                  <button
-                                    onClick={(e) => toggleArchive(notif.id, e)}
-                                    className="rounded-md p-1 px-1.5 text-gray-400 transition-colors hover:bg-blue-50 hover:text-blue-600"
-                                  >
-                                    {notif.isArchived ? (
-                                      <ArchiveRestore size={16} />
-                                    ) : (
-                                      <Archive size={16} />
-                                    )}
-                                  </button>
-                                  <button
-                                    onClick={(e) =>
-                                      removeNotification(notif.id, e)
-                                    }
-                                    className="rounded-md p-1 px-1.5 text-gray-400 transition-colors hover:bg-red-50 hover:text-red-500"
-                                  >
-                                    <Trash2 size={16} />
-                                  </button>
-                                </div>
+                                <i className="fa-solid fa-bell text-sm"></i>
                               </div>
-                            ))}
+                              <div className="flex-1 min-w-0 pr-10">
+                                <div className="mb-0.5 flex flex-wrap items-center gap-2">
+                                  <p className="truncate text-sm font-semibold text-black">
+                                    {notif.title}
+                                  </p>
+                                  {notif.isFollowing && (
+                                    <span className="rounded bg-blue-100 px-1.5 py-0.5 text-[10px] font-bold uppercase tracking-wide text-blue-600 whitespace-nowrap">
+                                      Following
+                                    </span>
+                                  )}
+                                </div>
+                                <p className="line-clamp-2 text-sm leading-relaxed text-gray-800">
+                                  {notif.message}
+                                </p>
+                                <p className="mt-1.5 flex items-center gap-1 text-xs text-gray-500">
+                                  <Clock size={12} /> {notif.time}
+                                </p>
+                              </div>
+                              {!notif.isRead && (
+                                <div className="absolute right-3 top-3 h-2 w-2 rounded-full bg-blue-500"></div>
+                              )}
+                              <div className="absolute bottom-3 right-3 flex gap-1 opacity-0 transition-all group-hover:opacity-100">
+                                <button
+                                  onClick={(e) => toggleArchive(notif.id, e)}
+                                  className="rounded-md p-1 px-1.5 text-gray-400 transition-colors hover:bg-blue-50 hover:text-blue-600"
+                                >
+                                  {notif.isArchived ? (
+                                    <ArchiveRestore size={16} />
+                                  ) : (
+                                    <Archive size={16} />
+                                  )}
+                                </button>
+                                <button
+                                  onClick={(e) =>
+                                    removeNotification(notif.id, e)
+                                  }
+                                  className="rounded-md p-1 px-1.5 text-gray-400 transition-colors hover:bg-red-50 hover:text-red-500"
+                                >
+                                  <Trash2 size={16} />
+                                </button>
+                              </div>
+                            </div>
+                          ))}
                         </div>
                         <div className="border-t border-gray-100 bg-gray-50/50 p-3">
                           <button className="w-full rounded-lg py-2 text-center text-sm font-medium text-gray-600 transition-colors hover:text-blue-600">
@@ -498,8 +526,15 @@ const EducationNavbar: React.FC<EducationNavbarProps> = ({
                         <div className="w-67.5 bg-white rounded-[18px] border border-gray-100/80 p-2.5 text-[14px] text-gray-600 font-medium select-none shadow-[0_8px_30px_rgb(0,0,0,0.08)] relative">
                           <div className="absolute -top-1.5 right-6 w-3 h-3 bg-white border-t border-l border-gray-100/80 transform rotate-45"></div>
                           <div className="flex flex-col relative z-10 bg-white rounded-xl">
+                            <button
+                              onClick={() => go("dashboard")}
+                              className="flex items-center gap-3 px-3 py-2.5 hover:bg-gray-50 rounded-xl transition-all"
+                            >
+                              <LayoutDashboard size={18} />
+                              <span>Dashboard</span>
+                            </button>
                             <div
-                              onClick={() => go("studentDashboard")}
+                              onClick={() => go("userDashboard")}
                               className="flex flex-col px-3 py-3 bg-[#f4f4f5] rounded-xl cursor-pointer mb-1 hover:bg-gray-100 transition-all"
                             >
                               <div className="flex items-center gap-3 text-gray-900">
@@ -519,14 +554,14 @@ const EducationNavbar: React.FC<EducationNavbarProps> = ({
                               </div>
                             </div>
                             <button
-                              onClick={() => go("studentDashboard")}
+                              onClick={() => go("userDashboard")}
                               className="flex items-center gap-3 px-3 py-2.5 hover:bg-gray-50 rounded-xl transition-all"
                             >
                               <FileText size={18} />
                               <span>My Application</span>
                             </button>
                             <button
-                              onClick={() => go("studentDashboard")}
+                              onClick={() => go("userDashboard")}
                               className="flex items-center gap-3 px-3 py-2.5 hover:bg-gray-50 rounded-xl transition-all"
                             >
                               <Bookmark size={18} />
@@ -537,8 +572,11 @@ const EducationNavbar: React.FC<EducationNavbarProps> = ({
                             </button>
                             <div className="h-px bg-gray-100 my-1.5 mx-2"></div>
                             <button
-                              onClick={onLogout}
-                              className="flex items-center gap-3 px-3 py-2.5 hover:bg-red-50 text-red-500 rounded-xl transition-all"
+                              onClick={() => {
+                                onLogout?.();
+                                setActiveMenu(null);
+                              }}
+                              className="flex items-center gap-3 px-3 py-2.5 hover:bg-red-50 text-red-500 rounded-xl transition-all w-full text-left"
                             >
                               <LogOut size={18} className="scale-x-[-1]" />
                               <span>Sign out</span>
@@ -581,7 +619,9 @@ const EducationNavbar: React.FC<EducationNavbarProps> = ({
                   isOpen={activeMenu === toolsSection.key}
                   isActive={isSectionActive(toolsSection)}
                   onToggle={() =>
-                    setActiveMenu((prev) => (prev === toolsSection.key ? null : toolsSection.key))
+                    setActiveMenu((prev) =>
+                      prev === toolsSection.key ? null : toolsSection.key,
+                    )
                   }
                 >
                   {toolsSection.items.map((item) => (
@@ -606,7 +646,9 @@ const EducationNavbar: React.FC<EducationNavbarProps> = ({
                   isActive={isSectionActive(scholarshipsSection)}
                   onToggle={() =>
                     setActiveMenu((prev) =>
-                      prev === scholarshipsSection.key ? null : scholarshipsSection.key,
+                      prev === scholarshipsSection.key
+                        ? null
+                        : scholarshipsSection.key,
                     )
                   }
                 >
@@ -639,7 +681,9 @@ const EducationNavbar: React.FC<EducationNavbarProps> = ({
                   isActive={isSectionActive(admissionSection)}
                   onToggle={() =>
                     setActiveMenu((prev) =>
-                      prev === admissionSection.key ? null : admissionSection.key,
+                      prev === admissionSection.key
+                        ? null
+                        : admissionSection.key,
                     )
                   }
                 >
@@ -671,7 +715,9 @@ const EducationNavbar: React.FC<EducationNavbarProps> = ({
                   isOpen={activeMenu === moreSection.key}
                   isActive={isSectionActive(moreSection)}
                   onToggle={() =>
-                    setActiveMenu((prev) => (prev === moreSection.key ? null : moreSection.key))
+                    setActiveMenu((prev) =>
+                      prev === moreSection.key ? null : moreSection.key,
+                    )
                   }
                 >
                   {moreSection.items.map((item) => (
@@ -814,7 +860,7 @@ const EducationNavbar: React.FC<EducationNavbarProps> = ({
                 >
                   <div className="w-full bg-white rounded-[18px] border border-gray-100/80 p-2.5 text-[14px] text-gray-600 font-medium select-none shadow-sm">
                     <div
-                      onClick={() => go("studentDashboard")}
+                      onClick={() => go("userDashboard")}
                       className="flex flex-col px-3 py-3 bg-[#f4f4f5] rounded-xl cursor-pointer mb-1 hover:bg-gray-100 transition-all duration-200"
                     >
                       <div className="flex items-center gap-3 text-gray-900">
@@ -833,7 +879,7 @@ const EducationNavbar: React.FC<EducationNavbarProps> = ({
                     </div>
 
                     <div
-                      onClick={() => go("studentDashboard")}
+                      onClick={() => go("userDashboard")}
                       className="flex items-center gap-3 px-3 py-2.5 hover:bg-gray-50 rounded-xl cursor-pointer mb-0.5 transition-all"
                     >
                       <FileText size={18} className="text-gray-500" />
@@ -842,7 +888,7 @@ const EducationNavbar: React.FC<EducationNavbarProps> = ({
                     </div>
 
                     <div
-                      onClick={() => go("studentDashboard")}
+                      onClick={() => go("userDashboard")}
                       className="flex items-center gap-3 px-3 py-2.5 hover:bg-gray-50 rounded-xl cursor-pointer mb-0.5 transition-all"
                     >
                       <Bookmark size={18} className="text-gray-500" />
@@ -853,7 +899,7 @@ const EducationNavbar: React.FC<EducationNavbarProps> = ({
                     </div>
 
                     <div
-                      onClick={() => go("studentDashboard")}
+                      onClick={() => go("userDashboard")}
                       className="flex items-center gap-3 px-3 py-2.5 hover:bg-gray-50 rounded-xl cursor-pointer mb-0.5 transition-all"
                     >
                       <Sparkles size={18} className="text-gray-500" />
@@ -866,7 +912,7 @@ const EducationNavbar: React.FC<EducationNavbarProps> = ({
                     <div className="h-px bg-gray-100 my-1.5 mx-2"></div>
 
                     <div
-                      onClick={() => go("studentDashboard")}
+                      onClick={() => go("userDashboard")}
                       className="flex items-center gap-3 px-3 py-2.5 hover:bg-gray-50 rounded-xl cursor-pointer mb-0.5 transition-all"
                     >
                       <Bell size={18} className="text-gray-500" />
@@ -877,7 +923,7 @@ const EducationNavbar: React.FC<EducationNavbarProps> = ({
                     </div>
 
                     <div
-                      onClick={() => go("studentDashboard")}
+                      onClick={() => go("userDashboard")}
                       className="flex items-center gap-3 px-3 py-2.5 hover:bg-gray-50 rounded-xl cursor-pointer transition-all"
                     >
                       <Settings size={18} className="text-gray-500" />
@@ -943,7 +989,9 @@ const EducationNavbar: React.FC<EducationNavbarProps> = ({
               <div>
                 <button
                   className={`flex w-full items-center justify-between rounded-lg p-2 text-left transition-colors hover:bg-gray-50 hover:text-blue-600 ${mobileMenus[mobileScholarshipsSection.key] ? "text-blue-600" : ""}`}
-                  onClick={() => toggleMobileMenu(mobileScholarshipsSection.key)}
+                  onClick={() =>
+                    toggleMobileMenu(mobileScholarshipsSection.key)
+                  }
                 >
                   <span>{mobileScholarshipsSection.label}</span>
                   <ChevronDown
