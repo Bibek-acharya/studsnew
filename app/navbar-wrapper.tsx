@@ -12,7 +12,8 @@ export default function NavbarWrapper() {
   // Hide the global navbar for specific routes
   const hideGlobalNavbar =
     pathname.startsWith("/scholarship-provider") ||
-    pathname.startsWith("/institution-zone");
+    pathname.startsWith("/institution-zone") ||
+    pathname.startsWith("/user/dashboard");
 
   if (hideGlobalNavbar) {
     return null;

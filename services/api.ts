@@ -636,4 +636,11 @@ export const apiService = {
       },
     };
   },
+
+  async scholarshipProviderLogin(email: string, password: string): Promise<AuthResponse> {
+    return apiRequest<AuthResponse>("/api/v1/scholarship-provider/login", {
+      method: "POST",
+      body: JSON.stringify({ email, password }),
+    });
+  },
 };
