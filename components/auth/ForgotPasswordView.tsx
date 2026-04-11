@@ -3,6 +3,7 @@
 import React, { useState } from "react";
 import { apiService } from "../../services/api";
 import { validators, useFieldValidation } from "@/utils/validation";
+import { Mail } from "lucide-react";
 
 interface ForgotPasswordViewProps {
   onBack: () => void;
@@ -68,12 +69,7 @@ const ForgotPasswordView: React.FC<ForgotPasswordViewProps> = ({
         Back to Login
       </button>
 
-      <div className="flex items-center gap-2 mb-6">
-        <div className="bg-blue-600 text-white w-7 h-7 rounded-lg flex items-center justify-center flex-shrink-0">
-          <div className="w-2 h-2 bg-white rounded-full"></div>
-        </div>
-        <span className="text-lg font-bold tracking-tight text-gray-900">StudSphere</span>
-      </div>
+      
 
       <h1 className="text-xl font-bold text-gray-900 mb-1">Reset Password</h1>
       <p className="text-gray-500 text-sm mb-6">
@@ -90,9 +86,7 @@ const ForgotPasswordView: React.FC<ForgotPasswordViewProps> = ({
         <div>
           <div className="relative">
             <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none">
-              <svg className="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M16 12a4 4 0 10-8 0 4 4 0 008 0zm0 0v1.5a2.5 2.5 0 005 0V12a9 9 0 10-9 9m4.5-1.206a8.959 8.959 0 01-4.5 1.207" />
-              </svg>
+              <Mail className="w-5 h-5 text-gray-400" />
             </div>
             <input
               type="email"

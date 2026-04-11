@@ -188,7 +188,7 @@ const AboutPage: React.FC = () => {
       </style>
 
       <main className="flex flex-col items-center px-4 overflow-x-hidden pt-8 md:pt-12">
-        <div className="flex flex-col gap-4 w-full max-w-[1400px] items-center mb-16 md:mb-24">
+        <div className="flex flex-col gap-4 w-full max-w-350 items-center mb-16 md:mb-24">
           <div className="flex flex-wrap justify-center gap-4 w-full">
             {photoRow1.map((photo, idx) => (
               <div
@@ -294,7 +294,7 @@ const AboutPage: React.FC = () => {
           </div>
         </section>
 
-        <section className="w-full max-w-[1400px] mb-20 md:mb-24 px-2">
+        <section className="w-full max-w-350 mb-20 md:mb-24 px-2">
           <h2 className="text-3xl md:text-4xl font-bold text-center text-slate-900 mb-8 md:mb-12 scroll-fade-in">
             Our Story, Mission &amp; Vision
           </h2>

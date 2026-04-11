@@ -306,7 +306,7 @@ const CollegesAndCoursesPage: React.FC<CollegesAndCoursesPageProps> = ({
         .carousel-slide { min-width: 100%; height: 100%; position: relative; }
       `}</style>
 
-      <div className="max-w-[1400px] mx-auto">
+      <div className="max-w-350 mx-auto">
         <div className="mb-8">
           <h1 className="text-[24px] font-bold text-gray-900 tracking-tight mb-4">Colleges and Courses</h1>
 

@@ -505,7 +505,7 @@ const newsCards = [
   },
   {
     badge: "Admission",
-    badgeClass: "bg-[#0000FF]/5 text-[#0000FF]",
+    badgeClass: "bg-brand-blue/5 text-[#0000FF]",
     image:
       "https://images.unsplash.com/photo-1541339907198-e08756dedf3f?q=80&w=800&auto=format&fit=crop",
     title: "MBA Admission Open 2025",
@@ -527,26 +527,26 @@ const downloads = [
   {
     title: "Prospectus 2025",
     size: "PDF, 8.2 MB",
-    color: "bg-[#0000FF]/5 text-[#0000FF]",
-    btn: "bg-[#0000FF] hover:bg-[#0000CC]",
+    color: "bg-brand-blue/5 text-[#0000FF]",
+    btn: "bg-brand-blue hover:bg-[#0000CC]",
   },
   {
     title: "Application Form",
     size: "PDF, 2.1 MB",
-    color: "bg-[#0000FF]/5 text-[#0000FF]",
-    btn: "bg-[#0000FF] hover:bg-[#0000CC]",
+    color: "bg-brand-blue/5 text-[#0000FF]",
+    btn: "bg-brand-blue hover:bg-[#0000CC]",
   },
   {
     title: "Scholarship Guidelines",
     size: "PDF, 1.5 MB",
-    color: "bg-[#0000FF]/5 text-[#0000FF]",
-    btn: "bg-[#0000FF] hover:bg-[#0000CC]",
+    color: "bg-brand-blue/5 text-[#0000FF]",
+    btn: "bg-brand-blue hover:bg-[#0000CC]",
   },
   {
     title: "Course Catalogue 2025",
     size: "PDF, 12.0 MB",
-    color: "bg-[#0000FF]/5 text-[#0000FF]",
-    btn: "bg-[#0000FF] hover:bg-[#0000CC]",
+    color: "bg-brand-blue/5 text-[#0000FF]",
+    btn: "bg-brand-blue hover:bg-[#0000CC]",
   },
 ];
 
@@ -1129,7 +1129,7 @@ const CollegeDetailsPage: React.FC = () => {
                         </span>
                       </div>
                       <div className="col-span-2">
-                        <button className="rounded-lg bg-[#0000FF]/5 px-4 py-2 text-xs font-bold text-[#0000FF] hover:bg-[#0000FF]/10">
+                        <button className="rounded-lg bg-brand-blue/5 px-4 py-2 text-xs font-bold text-[#0000FF] hover:bg-brand-blue/10">
                           View Details
                         </button>
                       </div>
@@ -1156,7 +1156,7 @@ const CollegeDetailsPage: React.FC = () => {
                     key={facility.title}
                     className="flex items-start gap-4 rounded-2xl border border-gray-100 bg-white p-5 shadow-sm"
                   >
-                    <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[#0000FF]/5 text-[#0000FF]">
+                    <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-brand-blue/5 text-[#0000FF]">
                       <i className={`fa-solid ${facility.icon}`}></i>
                     </div>
                     <div>
@@ -1250,7 +1250,7 @@ const CollegeDetailsPage: React.FC = () => {
                       </div>
                       <div className="col-span-3">{scholarship.audience}</div>
                       <div className="col-span-3">
-                        <button className="rounded-lg bg-[#0000FF] px-5 py-2 text-xs font-bold text-white hover:bg-[#0000CC]">
+                        <button className="rounded-lg bg-brand-blue px-5 py-2 text-xs font-bold text-white hover:bg-[#0000CC]">
                           Get Scholarship
                         </button>
                       </div>
@@ -1291,7 +1291,7 @@ const CollegeDetailsPage: React.FC = () => {
                         {person.batch}
                       </p>
                     </div>
-                    <button className="flex h-10 w-10 items-center justify-center rounded-full bg-[#0000FF]/5 text-[#0000FF] hover:bg-[#0000FF]/10">
+                    <button className="flex h-10 w-10 items-center justify-center rounded-full bg-brand-blue/5 text-[#0000FF] hover:bg-brand-blue/10">
                       <i className="fa-brands fa-linkedin-in"></i>
                     </button>
                   </div>
@@ -1501,7 +1501,7 @@ const CollegeDetailsPage: React.FC = () => {
                 icon="fa-solid fa-location-dot"
                 title="Address"
                 value={locationText}
-                badge="bg-[#0000FF]/5 text-[#0000FF]"
+                badge="bg-brand-blue/5 text-[#0000FF]"
               />
               <ContactInfoRowV2
                 icon="fa-solid fa-phone"
@@ -1616,7 +1616,7 @@ const CollegeDetailsPage: React.FC = () => {
               </select>
               <button
                 type="button"
-                className="mt-2 w-full rounded-xl bg-[#0000FF] py-3.5 text-[14px] font-bold text-white shadow-sm shadow-[#0000FF]/20 transition-colors hover:bg-[#0000CC]"
+                className="mt-2 w-full rounded-xl bg-brand-blue py-3.5 text-[14px] font-bold text-white shadow-sm shadow-[#0000FF]/20 transition-colors hover:bg-[#0000CC]"
               >
                 Submit Request
               </button>
@@ -1656,7 +1656,7 @@ const FilterPills: React.FC<{
           <button
             key={level}
             onClick={() => onChange(level)}
-            className={`rounded-full px-4 py-1.5 ${selected ? "bg-[#0000FF] text-white shadow-sm" : "border border-gray-200 bg-white text-gray-700 hover:bg-gray-100"}`}
+            className={`rounded-full px-4 py-1.5 ${selected ? "bg-brand-blue text-white shadow-sm" : "border border-gray-200 bg-white text-gray-700 hover:bg-gray-100"}`}
           >
             {level === "all" ? "All" : level}
           </button>
@@ -1684,7 +1684,7 @@ const InfoBlock: React.FC<{
   <div className="rounded-[20px] border border-gray-100 bg-white p-8 shadow-sm">
     <div className="mb-4 flex items-center gap-3.5">
       <div
-        className={`flex h-10 w-10 items-center justify-center rounded-full ${color === "blue" ? "bg-[#0000FF]/10 text-[#0000FF]" : "bg-[#0000FF]/10 text-[#0000FF]"}`}
+        className={`flex h-10 w-10 items-center justify-center rounded-full ${color === "blue" ? "bg-brand-blue/10 text-[#0000FF]" : "bg-brand-blue/10 text-[#0000FF]"}`}
       >
         <i className={icon}></i>
       </div>
@@ -1745,7 +1745,7 @@ const ReviewCard: React.FC<{
     <div className="mb-4 flex items-start justify-between">
       <div className="flex items-center gap-3">
         <div
-          className={`flex h-10 w-10 items-center justify-center rounded-full font-bold ${tone === "blue" ? "bg-[#0000FF]/10 text-[#0000FF]" : "bg-[#0000FF]/10 text-[#0000FF]"}`}
+          className={`flex h-10 w-10 items-center justify-center rounded-full font-bold ${tone === "blue" ? "bg-brand-blue/10 text-[#0000FF]" : "bg-brand-blue/10 text-[#0000FF]"}`}
         >
           {initials}
         </div>
@@ -1951,7 +1951,7 @@ const ClaimCollegeModal: React.FC<{
               </button>
               <button
                 type="submit"
-                className="flex w-full items-center justify-center gap-2 rounded-xl bg-[#0000FF] px-6 py-2.5 text-[14px] font-bold text-white shadow-[0_4px_12px_rgba(0,0,255,0.2)] transition-all hover:-translate-y-0.5 hover:bg-[#0000CC] sm:w-auto"
+                className="flex w-full items-center justify-center gap-2 rounded-xl bg-brand-blue px-6 py-2.5 text-[14px] font-bold text-white shadow-[0_4px_12px_rgba(0,0,255,0.2)] transition-all hover:-translate-y-0.5 hover:bg-[#0000CC] sm:w-auto"
               >
                 Submit Claim Request
               </button>

@@ -123,7 +123,7 @@ const EventsPage: React.FC = () => {
                   onClick={() => setActiveFilter(pill)}
                   className={`px-5 py-2 rounded-full text-sm font-medium whitespace-nowrap transition-colors  ${
                     isActive
-                      ? "bg-[#0000ff] text-white shadow-sm"
+                      ? "bg-brand-blue text-white shadow-sm"
                       : "bg-white text-gray-700 border border-gray-200 hover:bg-gray-50"
                   }`}
                 >
@@ -231,7 +231,7 @@ const EventsPage: React.FC = () => {
                       >
                         Details
                       </Link>
-                      <button className={`flex-1 text-white text-sm font-bold py-2 rounded-lg transition bg-[#0000ff] cursor-pointer hover:bg-blue-600`}>
+                      <button className={`flex-1 text-white text-sm font-bold py-2 rounded-lg transition bg-brand-blue cursor-pointer hover:bg-blue-600`}>
                         Register Now
                       </button>
                       <button

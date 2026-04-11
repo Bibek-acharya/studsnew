@@ -280,7 +280,7 @@ const BookCounsellingPage: React.FC<BookCounsellingPageProps> = () => {
                             isDisabled
                               ? "cursor-not-allowed border-gray-100 bg-gray-50 opacity-60"
                               : isSelected
-                                ? "border-[#0000FF] bg-[#0000FF] shadow-md"
+                                ? "border-[#0000FF] bg-brand-blue shadow-md"
                                 : "border-gray-200 bg-white hover:border-[#0000FF]"
                           }`}
                         >
@@ -321,7 +321,7 @@ const BookCounsellingPage: React.FC<BookCounsellingPageProps> = () => {
                           onClick={() => setSelectedTime(item)}
                           className={`rounded-lg border px-4 py-2 text-sm transition-all ${
                             isSelected
-                              ? "border-[#0000FF] bg-[#0000FF] text-white shadow-md"
+                              ? "border-[#0000FF] bg-brand-blue text-white shadow-md"
                               : "border-gray-200 bg-white text-gray-700 hover:border-[#0000FF]"
                           }`}
                         >
@@ -493,7 +493,7 @@ const BookCounsellingPage: React.FC<BookCounsellingPageProps> = () => {
                     className={`flex w-full items-center justify-center gap-2 rounded-lg px-4 py-3.5 font-medium text-white shadow-sm transition-colors disabled:cursor-not-allowed disabled:opacity-50 ${
                       isConfirmed
                         ? "bg-green-600 hover:bg-green-700"
-                        : "bg-[#0000FF] hover:bg-[#0000CC]"
+                        : "bg-brand-blue hover:bg-[#0000CC]"
                     }`}
                   >
                     {isBooking ? (

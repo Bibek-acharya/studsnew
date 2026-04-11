@@ -1,0 +1,482 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>College Card Component</title>
+    
+    <!-- Google Fonts: Plus Jakarta Sans -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <!-- FontAwesome for the Form -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Custom Tailwind Config -->
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['"Plus Jakarta Sans"', 'sans-serif'],
+                    },
+                    colors: {
+                        primary: '#0000ff',
+                        primaryHover: '#0000cc',
+                    }
+                }
+            }
+        }
+    </script>
+    
+    <script src="https://unpkg.com/lucide@latest"></script>
+
+    <style>
+        /* Custom styles for form focus states to ensure a smooth transition */
+        .input-field {
+            transition: all 0.2s ease-in-out;
+        }
+        .input-field:focus {
+            transform: translateY(-1px);
+        }
+        
+        /* Modal scrollbar styling */
+        .modal-scroll::-webkit-scrollbar {
+            width: 4px;
+        }
+        .modal-scroll::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        .modal-scroll::-webkit-scrollbar-thumb {
+            background-color: #cbd5e1;
+            border-radius: 20px;
+        }
+    </style>
+</head>
+<body class="bg-slate-50 min-h-screen flex items-center justify-center p-6 font-sans antialiased">
+
+    <!-- Container for College Cards -->
+    <div class="flex flex-col md:flex-row flex-wrap justify-center gap-6 w-full max-w-[1040px]">
+        
+        <div class="w-full max-w-[320px] college-card mx-auto">
+            <!-- CARD 1 (Verified) -->
+            <div class="bg-white rounded-[16px] p-2.5 border border-gray-100 shadow-[0_2px_15px_rgb(0,0,0,0.04)] transition-all hover:shadow-[0_8px_25px_rgb(0,0,0,0.08)] duration-300 flex flex-col cursor-pointer h-full">
+                <div class="relative h-[140px] rounded-[12px] overflow-hidden shrink-0">
+                    <img src="https://kist-edu-np.s3.ap-south-1.amazonaws.com/uploads/album/value/363e8c1b1d1740446f4753c95dbfadd91d8b20cd1753700695.jpg" alt="College Campus" class="w-full h-full object-cover" />
+                </div>
+                
+                <div class="px-1.5 pt-3 pb-1 flex-grow flex flex-col">
+                    <div class="flex justify-between items-center">
+                        <div class="flex items-center gap-1.5 w-full">
+                            <h3 class="font-bold text-[15px] text-gray-900 truncate hover:text-[#0000ff] transition-colors">Islington College</h3>
+                            <i data-lucide="badge-check" class="w-[14px] h-[14px] shrink-0 text-white fill-[#0000ff]"></i>
+                        </div>
+                    </div>
+                    
+                    <div class="flex flex-wrap items-center gap-x-2 gap-y-1.5 mt-1.5 text-gray-500 text-[11.5px] font-medium leading-none">
+                        <div class="flex items-center gap-1 text-gray-700">
+                            <i data-lucide="star" class="w-3.5 h-3.5 text-[#f59e0b] fill-[#f59e0b]"></i>
+                            <span class="font-bold">4.5</span>
+                        </div>
+                        <div class="w-[1px] h-3 bg-gray-300"></div>
+                        <div class="flex items-center gap-1">
+                            <i data-lucide="building-2" class="w-3.5 h-3.5 text-gray-400"></i> Private
+                        </div>
+                        <div class="w-[1px] h-3 bg-gray-300"></div>
+                        <div class="flex items-center gap-1 truncate max-w-[90px]">
+                            <i data-lucide="map-pin" class="w-3.5 h-3.5 text-gray-400 shrink-0"></i> <span class="truncate">Kamalpokhari</span>
+                        </div>
+                        <div class="flex items-start gap-1 w-full mt-1.5 text-gray-600">
+                            <i data-lucide="award" class="w-3.5 h-3.5 shrink-0 mt-[2px] text-gray-400"></i>
+                            <span class="leading-tight">NEB, Tribhuwan University, Purbanchal University</span>
+                        </div>
+                    </div>
+
+                    <p class="text-[11.5px] text-gray-600 mt-3 leading-relaxed">
+                        The Institute of Engineering (IOE) entrance exam is tough. Learn the strategies,
+                    </p>
+
+                    <div class="mt-auto pt-4">
+                        <div class="border-t-2 border-dotted border-gray-200 mb-2.5"></div>
+
+                        <button class="w-full mb-1.5 bg-[#0000ff] text-white font-bold text-[11.5px] h-[36px] px-1 rounded-[4px] shadow-sm hover:bg-[#0000cc] transition-colors truncate flex items-center justify-center" onclick="event.stopPropagation()">
+                            Get counselling
+                        </button>
+
+                        <div class="flex gap-1.5">
+                            <button class="flex-1 bg-white border border-gray-200 text-gray-800 font-bold text-[11px] h-[32px] px-1 rounded-[4px] hover:bg-gray-50 transition-colors flex items-center justify-center gap-1" onclick="event.stopPropagation()">
+                                <i data-lucide="message-circle" class="w-3.5 h-3.5 shrink-0 text-gray-500"></i>
+                                <span class="truncate">Ask a question</span>
+                            </button>
+                            <button class="flex-1 bg-yellow-500 text-white font-bold text-[11.5px] h-[32px] px-1 rounded-[4px] shadow-sm hover:bg-yellow-600 transition-colors truncate flex items-center justify-center" onclick="event.stopPropagation()">
+                                Compare now
+                            </button>
+                            <button class="w-[32px] h-[32px] shrink-0 bg-white border border-gray-200 text-gray-600 rounded-[4px] flex items-center justify-center hover:bg-gray-50 transition-colors group toggle-heart" onclick="event.stopPropagation()">
+                                <i data-lucide="heart" class="w-[14px] h-[14px] group-hover:text-red-500 transition-colors heart-icon"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="w-full max-w-[320px] college-card mx-auto">
+            <!-- CARD 2 (Unverified / Unclaimed) -->
+            <div class="bg-white rounded-[16px] p-2.5 border border-gray-100 shadow-[0_2px_15px_rgb(0,0,0,0.04)] transition-all hover:shadow-[0_8px_25px_rgb(0,0,0,0.08)] duration-300 flex flex-col cursor-pointer h-full">
+                <div class="relative h-[140px] rounded-[12px] overflow-hidden shrink-0">
+                    <img src="https://www.solidbackgrounds.com/images/1920x1080/1920x1080-blue-solid-color-background.jpg" alt="College Campus" class="w-full h-full object-cover" />
+                    
+                    <!-- Claim Now Overlay in Hero Section -->
+                    <div class="absolute bottom-2 left-2 flex items-center gap-1.5 bg-black/60 backdrop-blur-md px-2 py-1 rounded-[6px] z-10 shadow-sm">
+                        <span class="text-[10px] text-gray-100 font-medium">Is this your college?</span>
+                        <a href="#" onclick="event.preventDefault(); event.stopPropagation(); openClaimModal();" class="text-[10px] font-bold text-[#0000ff] hover:text-[#0000cc] hover:underline transition-colors">Claim now</a>
+                    </div>
+                </div>
+                
+                <div class="px-1.5 pt-3 pb-1 flex-grow flex flex-col">
+                    <div class="flex justify-between items-center">
+                        <div class="flex items-center gap-1.5 w-full">
+                            <h3 class="font-bold text-[15px] text-gray-900 truncate hover:text-[#0000ff] transition-colors">Himalayan Engineering</h3>
+                            <!-- No blue tick -->
+                        </div>
+                    </div>
+                    
+                    <div class="flex flex-wrap items-center gap-x-2 gap-y-1.5 mt-1.5 text-gray-500 text-[11.5px] font-medium leading-none">
+                        <div class="flex items-center gap-1 text-gray-700">
+                            <i data-lucide="star" class="w-3.5 h-3.5 text-[#f59e0b] fill-[#f59e0b]"></i>
+                            <span class="font-bold">4.2</span>
+                        </div>
+                        <div class="w-[1px] h-3 bg-gray-300"></div>
+                        <div class="flex items-center gap-1">
+                            <i data-lucide="building-2" class="w-3.5 h-3.5 text-gray-400"></i> Private
+                        </div>
+                        <div class="w-[1px] h-3 bg-gray-300"></div>
+                        <div class="flex items-center gap-1 truncate max-w-[90px]">
+                            <i data-lucide="map-pin" class="w-3.5 h-3.5 text-gray-400 shrink-0"></i> <span class="truncate">Chyasal</span>
+                        </div>
+                    </div>
+
+                    <p class="text-[11.5px] text-gray-600 mt-3 leading-relaxed">
+                        Known for excellent civil engineering and architecture faculties with state-of-the-art practical labs.
+                    </p>
+
+                    <div class="mt-auto pt-4">
+                        <div class="border-t-2 border-dotted border-gray-200 mb-2.5"></div>
+
+                        <!-- Button with Lock -->
+                        <button class="w-full mb-1.5 bg-[#0000ff] text-white font-bold text-[11.5px] h-[36px] px-1 rounded-[4px] shadow-sm hover:bg-[#0000cc] transition-colors truncate flex items-center justify-center" onclick="event.stopPropagation()">
+                            <i data-lucide="lock" class="w-3.5 h-3.5 mr-1.5"></i> Get counselling
+                        </button>
+
+                        <div class="flex gap-1.5">
+                            <button class="flex-1 bg-white border border-gray-200 text-gray-800 font-bold text-[11px] h-[32px] px-1 rounded-[4px] hover:bg-gray-50 transition-colors flex items-center justify-center gap-1" onclick="event.stopPropagation()">
+                                <i data-lucide="message-circle" class="w-3.5 h-3.5 shrink-0 text-gray-500"></i>
+                                <span class="truncate">Ask a question</span>
+                            </button>
+                            <button class="flex-1 bg-yellow-500 text-white font-bold text-[11.5px] h-[32px] px-1 rounded-[4px] shadow-sm hover:bg-yellow-600 transition-colors truncate flex items-center justify-center" onclick="event.stopPropagation()">
+                                Compare now
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Claim Modal Overlay -->
+    <div id="claimModalOverlay" class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm hidden opacity-0 transition-opacity duration-300 p-4" onclick="closeClaimModal(event)">
+        
+        <!-- COMPACT Modal Content Container (Max width reduced to 400px) -->
+        <main id="claimModalContent" class="w-full max-w-[400px] bg-white rounded-xl border border-gray-200 overflow-y-auto max-h-[95vh] modal-scroll relative transform scale-95 transition-transform duration-300" onclick="event.stopPropagation()">
+            
+            <!-- Close Button -->
+            <button id="closeModalBtn" onclick="closeClaimModal()" class="absolute top-3.5 right-4 text-white/80 hover:text-white z-20 transition-colors">
+                <i data-lucide="x" class="w-5 h-5"></i>
+            </button>
+
+            <!-- Header Section (Compact) -->
+            <div id="formHeader" class="bg-primary px-5 py-5 text-white text-center relative z-10">
+                <h1 class="text-xl font-bold mb-1 tracking-tight">College Registration</h1>
+                <p class="text-white/80 text-[11px] font-medium">Please fill out the form below.</p>
+            </div>
+
+            <!-- Form Section (Reduced Padding & Spacing) -->
+            <div id="formSection" class="p-5">
+                <form id="registrationForm" class="space-y-3.5">
+                    
+                    <!-- Full Name -->
+                    <div>
+                        <label for="fullName" class="block text-xs font-semibold text-gray-700 mb-1">Full Name <span class="text-red-500">*</span></label>
+                        <div class="relative">
+                            <div class="absolute inset-y-0 left-0 pl-2.5 flex items-center pointer-events-none z-10">
+                                <i class="fa-regular fa-user text-gray-400 text-[13px]"></i>
+                            </div>
+                            <input type="text" id="fullName" name="fullName" required placeholder="John Doe"
+                                class="input-field block w-full pl-8 pr-3 py-2 bg-gray-50 border border-transparent rounded-lg focus:border-primary focus:ring-0 focus:bg-white text-sm outline-none placeholder-gray-400">
+                        </div>
+                    </div>
+
+                    <!-- Designation -->
+                    <div>
+                        <label for="designationBtn" class="block text-xs font-semibold text-gray-700 mb-1">Designation <span class="text-red-500">*</span></label>
+                        <div class="relative" id="designationWrapper">
+                            <select id="designation" name="designation" required class="absolute bottom-0 left-1/2 -translate-x-1/2 opacity-0 w-1 h-1 z-[-1]">
+                                <option value="" disabled selected></option>
+                                <option value="Admin">Admin</option>
+                                <option value="Marketing">Marketing</option>
+                                <option value="IT Officer">IT Officer</option>
+                                <option value="Principal">Principal</option>
+                            </select>
+                            
+                            <button type="button" id="designationBtn"
+                                class="input-field block w-full pl-8 pr-8 py-2 bg-gray-50 border border-transparent rounded-lg focus:border-primary focus:ring-0 focus:bg-white text-sm outline-none appearance-none cursor-pointer text-left text-gray-400">
+                                <span id="designationText">Select role</span>
+                            </button>
+                            
+                            <div class="absolute inset-y-0 left-0 pl-2.5 flex items-center pointer-events-none z-10">
+                                <i class="fa-solid fa-briefcase text-gray-400 text-[13px]"></i>
+                            </div>
+                            <div class="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none z-10">
+                                <i class="fa-solid fa-chevron-down text-gray-400 text-[10px] transition-transform duration-200" id="designationIcon"></i>
+                            </div>
+
+                            <div id="designationMenu" class="hidden absolute z-50 w-full mt-1 bg-white border border-gray-100 rounded-lg shadow-lg py-1.5 text-sm opacity-0 transform scale-95 transition-all duration-200 origin-top">
+                                <div class="px-3 py-1.5 hover:bg-primary/5 hover:text-primary cursor-pointer transition-colors mx-1.5 rounded-md font-medium text-gray-700" data-value="Admin">Admin</div>
+                                <div class="px-3 py-1.5 hover:bg-primary/5 hover:text-primary cursor-pointer transition-colors mx-1.5 rounded-md font-medium text-gray-700" data-value="Marketing">Marketing</div>
+                                <div class="px-3 py-1.5 hover:bg-primary/5 hover:text-primary cursor-pointer transition-colors mx-1.5 rounded-md font-medium text-gray-700" data-value="IT Officer">IT Officer</div>
+                                <div class="px-3 py-1.5 hover:bg-primary/5 hover:text-primary cursor-pointer transition-colors mx-1.5 rounded-md font-medium text-gray-700" data-value="Principal">Principal</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Official Email Address -->
+                    <div>
+                        <label for="email" class="block text-xs font-semibold text-gray-700 mb-1">Official Email <span class="text-red-500">*</span></label>
+                        <div class="relative">
+                            <div class="absolute inset-y-0 left-0 pl-2.5 flex items-center pointer-events-none z-10">
+                                <i class="fa-regular fa-envelope text-gray-400 text-[13px]"></i>
+                            </div>
+                            <input type="email" id="email" name="email" required placeholder="you@college.edu"
+                                class="input-field block w-full pl-8 pr-3 py-2 bg-gray-50 border border-transparent rounded-lg focus:border-primary focus:ring-0 focus:bg-white text-sm outline-none placeholder-gray-400">
+                        </div>
+                    </div>
+
+                    <!-- Contact Numbers Row (Tighter Grid) -->
+                    <div class="grid grid-cols-2 gap-3">
+                        <!-- Phone Number -->
+                        <div>
+                            <label for="phone" class="block text-xs font-semibold text-gray-700 mb-1">Phone <span class="text-red-500">*</span></label>
+                            <div class="relative flex bg-gray-50 border border-transparent rounded-lg focus-within:border-primary focus-within:bg-white transition-all duration-200">
+                                <span class="inline-flex items-center px-2 text-gray-500 text-[11px] font-bold border-r border-gray-200/50 z-10">
+                                    +977
+                                </span>
+                                <input type="tel" id="phone" name="phone" required placeholder="98XXXXXXXX" pattern="[0-9]{10}" title="10-digit number"
+                                    class="input-field flex-1 block w-full min-w-0 bg-transparent border-0 px-2 py-2 text-sm outline-none focus:ring-0 placeholder-gray-400">
+                            </div>
+                        </div>
+
+                        <!-- WhatsApp Number -->
+                        <div>
+                            <label for="whatsapp" class="block text-xs font-semibold text-gray-700 mb-1">WhatsApp <span class="text-gray-400 font-normal text-[10px]">(Opt)</span></label>
+                            <div class="relative flex bg-gray-50 border border-transparent rounded-lg focus-within:border-primary focus-within:bg-white transition-all duration-200">
+                                <span class="inline-flex items-center px-2 text-green-600 text-[11px] font-bold border-r border-gray-200/50 z-10">
+                                    <i class="fa-brands fa-whatsapp mr-1 text-[13px]"></i>
+                                </span>
+                                <input type="tel" id="whatsapp" name="whatsapp" placeholder="98XXXXXXXX" pattern="[0-9]{10}" title="10-digit number"
+                                    class="input-field flex-1 block w-full min-w-0 bg-transparent border-0 px-2 py-2 text-sm outline-none focus:ring-0 placeholder-gray-400">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Work Department -->
+                    <div>
+                        <label for="department" class="block text-xs font-semibold text-gray-700 mb-1">Department <span class="text-red-500">*</span></label>
+                        <div class="relative">
+                            <div class="absolute inset-y-0 left-0 pl-2.5 flex items-center pointer-events-none z-10">
+                                <i class="fa-solid fa-building text-gray-400 text-[13px]"></i>
+                            </div>
+                            <input type="text" id="department" name="department" required placeholder="e.g. Administration"
+                                class="input-field block w-full pl-8 pr-3 py-2 bg-gray-50 border border-transparent rounded-lg focus:border-primary focus:ring-0 focus:bg-white text-sm outline-none placeholder-gray-400">
+                        </div>
+                    </div>
+
+                    <!-- Submit Button -->
+                    <div class="pt-2">
+                        <button type="submit" id="submitBtn"
+                            class="w-full flex justify-center items-center gap-2 py-2.5 px-4 border border-transparent rounded-lg text-sm font-bold tracking-wide text-white bg-primary hover:bg-primaryHover focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary transition-all duration-200">
+                            <i class="fa-solid fa-paper-plane text-[12px]"></i>
+                            Submit Request
+                        </button>
+                    </div>
+                </form>
+            </div>
+
+            <!-- Thank You Card (Compact) -->
+            <div id="thankYouCard" class="hidden relative p-6 py-10 text-center flex flex-col items-center justify-center">
+                
+                <div class="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center mb-4 shadow-sm">
+                    <i class="fa-solid fa-check text-2xl text-green-500"></i>
+                </div>
+                <h2 class="text-lg font-bold text-gray-900 mb-1">Request Received!</h2>
+                <p class="text-xs text-gray-600 mb-5 leading-relaxed max-w-[200px]">
+                    We will review your details and get back to you shortly.
+                </p>
+                
+                <div class="mb-6">
+                    <a href="mailto:info@studsphere.com" class="inline-block px-3 py-1.5 bg-primary/10 text-primary font-bold text-xs rounded hover:bg-primary/20 transition-colors">
+                        info@studsphere.com
+                    </a>
+                </div>
+                
+                <button type="button" id="goHomeBtn" class="w-full max-w-[200px] mx-auto py-2.5 px-4 bg-primary text-white font-bold text-sm rounded-lg flex items-center justify-center gap-2 hover:bg-primaryHover transition-colors shadow-sm">
+                    Close Window
+                </button>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        // Modal State Variables
+        const modalOverlay = document.getElementById('claimModalOverlay');
+        const modalContent = document.getElementById('claimModalContent');
+        
+        function openClaimModal() {
+            modalOverlay.classList.remove('hidden');
+            void modalOverlay.offsetWidth; // Trigger reflow
+            modalOverlay.classList.remove('opacity-0');
+            modalContent.classList.remove('scale-95');
+        }
+
+        function closeClaimModal(event) {
+            if (event && event.target !== modalOverlay && event.target.tagName !== 'BUTTON' && !event.target.closest('button')) return;
+
+            modalOverlay.classList.add('opacity-0');
+            modalContent.classList.add('scale-95');
+            
+            setTimeout(() => {
+                modalOverlay.classList.add('hidden');
+                
+                // Reset form and views
+                const form = document.getElementById('registrationForm');
+                const formHeader = document.getElementById('formHeader');
+                const formSection = document.getElementById('formSection');
+                const thankYouCard = document.getElementById('thankYouCard');
+                const closeModalBtn = document.getElementById('closeModalBtn');
+                const designationText = document.getElementById('designationText');
+
+                if(form) {
+                    form.reset();
+                    if(designationText) {
+                        designationText.textContent = 'Select role';
+                        designationText.classList.add('text-gray-400');
+                        designationText.classList.remove('text-gray-800');
+                    }
+                }
+                
+                if(thankYouCard) thankYouCard.classList.add('hidden');
+                if(formHeader) formHeader.classList.remove('hidden');
+                if(formSection) formSection.classList.remove('hidden');
+                if(closeModalBtn) closeModalBtn.classList.remove('hidden');
+
+            }, 300);
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            lucide.createIcons();
+
+            // Form Logic
+            const formHeader = document.getElementById('formHeader');
+            const formSection = document.getElementById('formSection');
+            const form = document.getElementById('registrationForm');
+            const thankYouCard = document.getElementById('thankYouCard');
+            const submitBtn = document.getElementById('submitBtn');
+            const goHomeBtn = document.getElementById('goHomeBtn');
+            const closeModalBtn = document.getElementById('closeModalBtn');
+
+            // Dropdown Logic
+            const designationBtn = document.getElementById('designationBtn');
+            const designationMenu = document.getElementById('designationMenu');
+            const designationText = document.getElementById('designationText');
+            const designationSelect = document.getElementById('designation');
+            const designationIcon = document.getElementById('designationIcon');
+
+            designationBtn.addEventListener('click', () => {
+                const isHidden = designationMenu.classList.contains('hidden');
+                if (isHidden) {
+                    designationMenu.classList.remove('hidden');
+                    setTimeout(() => {
+                        designationMenu.classList.remove('opacity-0', 'scale-95');
+                        designationIcon.classList.add('rotate-180');
+                    }, 10);
+                } else {
+                    closeDropdown();
+                }
+            });
+
+            function closeDropdown() {
+                designationMenu.classList.add('opacity-0', 'scale-95');
+                designationIcon.classList.remove('rotate-180');
+                setTimeout(() => {
+                    designationMenu.classList.add('hidden');
+                }, 200);
+            }
+
+            const options = designationMenu.querySelectorAll('[data-value]');
+            options.forEach(option => {
+                option.addEventListener('click', (e) => {
+                    const value = e.target.getAttribute('data-value');
+                    designationSelect.value = value;
+                    designationText.textContent = value;
+                    designationText.classList.remove('text-gray-400');
+                    designationText.classList.add('text-gray-800');
+                    closeDropdown();
+                });
+            });
+
+            document.addEventListener('click', (e) => {
+                if (!designationBtn.contains(e.target) && !designationMenu.contains(e.target)) {
+                    if (!designationMenu.classList.contains('hidden')) {
+                        closeDropdown();
+                    }
+                }
+            });
+
+            // Submit Simulation
+            form.addEventListener('submit', (e) => {
+                e.preventDefault();
+
+                const originalBtnText = submitBtn.innerHTML;
+                submitBtn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin text-[12px]"></i> Sending...';
+                submitBtn.disabled = true;
+                submitBtn.classList.add('opacity-75', 'cursor-not-allowed');
+
+                setTimeout(() => {
+                    formHeader.classList.add('hidden');
+                    formSection.classList.add('hidden');
+                    closeModalBtn.classList.add('hidden');
+                    thankYouCard.classList.remove('hidden');
+                    
+                    form.reset();
+                    designationText.textContent = 'Select role';
+                    designationText.classList.add('text-gray-400');
+                    designationText.classList.remove('text-gray-800');
+
+                    submitBtn.innerHTML = originalBtnText;
+                    submitBtn.disabled = false;
+                    submitBtn.classList.remove('opacity-75', 'cursor-not-allowed');
+
+                    modalContent.scrollTo({ top: 0, behavior: 'smooth' });
+                }, 800); 
+            });
+
+            // Close modal button on success card
+            goHomeBtn.addEventListener('click', () => {
+                closeClaimModal();
+            });
+        });
+    </script>
+</body>
+</html>

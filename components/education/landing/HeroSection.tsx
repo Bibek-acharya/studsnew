@@ -47,14 +47,16 @@ const HeroSection: React.FC<HeroSectionProps> = ({ onNavigate }) => {
 
   useEffect(() => {
     const interval = setInterval(() => {
-      setFade(false);
-      setTimeout(() => {
-        setCurrentSlide((prev) => (prev + 1) % heroSlides.length);
-        setFade(true);
-      }, 300);
+      setCurrentSlide((prev) => (prev + 1) % heroSlides.length);
     }, 5000);
     return () => clearInterval(interval);
   }, [heroSlides.length]);
+
+  useEffect(() => {
+    setFade(false);
+    const timeout = setTimeout(() => setFade(true), 120);
+    return () => clearTimeout(timeout);
+  }, [currentSlide]);
 
   const handleSearch = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -67,16 +69,19 @@ const HeroSection: React.FC<HeroSectionProps> = ({ onNavigate }) => {
     <div className="w-full  pt-2 pb-6 md:pb-4 flex justify-center max-w-350 mx-auto">
       <main className="relative w-full h-85 sm:h-105 md:h-auto md:min-h-120 lg:h-135 flex items-center justify-center overflow-hidden rounded-lg md:rounded-xl">
         {/* Background Slider Container */}
-        <div id="slider-container" className="absolute inset-0 z-0">
-          {heroSlides.map((slide, index) => (
-            <div
-              key={index}
-              className={`slide absolute inset-0 bg-cover bg-center transition-opacity duration-1000 ${
-                currentSlide === index ? "opacity-100" : "opacity-0"
-              }`}
-              style={{ backgroundImage: `url('${slide.image}')` }}
-            ></div>
-          ))}
+        <div id="slider-container" className="absolute inset-0 z-0 overflow-hidden">
+          <div
+            className="flex h-full w-full transition-transform duration-700 ease-out"
+            style={{ transform: `translateX(-${currentSlide * 100}%)` }}
+          >
+            {heroSlides.map((slide, index) => (
+              <div
+                key={index}
+                className="h-full w-full shrink-0 bg-cover bg-center"
+                style={{ backgroundImage: `url('${slide.image}')` }}
+              ></div>
+            ))}
+          </div>
         </div>
 
         {/* Dark Overlays */}

@@ -22,12 +22,7 @@ export default function ResultsGrid({
     <div className="min-h-screen text-gray-900 antialiased pb-32 bg-[#fafaf9]">
       <div className="max-w-350 mx-auto px-6 py-10 lg:px-12">
         <div className="mb-8">
-          <div className="flex items-center text-sm text-gray-500 font-medium mb-4">
-            <span className="hover:text-blue-600 transition-colors">Scholarships</span>
-            <span className="mx-2">/</span>
-            <span className="text-gray-900">AI Recommendations</span>
-          </div>
-
+    
           <h1 className="text-[2rem] md:text-[2.5rem] leading-tight font-bold text-gray-900 mb-3">
             Scholarships that fit you best
           </h1>

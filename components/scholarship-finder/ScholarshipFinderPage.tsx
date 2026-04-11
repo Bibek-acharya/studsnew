@@ -433,7 +433,7 @@ const ScholarshipCard = ({ scholarship }: { scholarship: ScholarshipData }) => {
           <button className="flex-1 py-2 text-[13px] font-semibold text-gray-700 bg-white border border-gray-200 rounded-md hover:bg-gray-50 transition-colors">
             Details
           </button>
-          <button className="flex-[1.2] py-2 text-[13px] font-semibold text-white bg-[#0000ff] rounded-md hover:bg-[#0000cc] transition-colors">
+          <button className="flex-[1.2] py-2 text-[13px] font-semibold text-white bg-brand-blue rounded-md hover:bg-[#0000cc] transition-colors">
             Apply
           </button>
           <button className="p-2 border border-gray-200 rounded-md text-gray-400 hover:text-gray-600 hover:bg-gray-50 transition-colors flex items-center justify-center">
@@ -599,7 +599,7 @@ const FeaturedScholarshipsPage = () => {
                     <span className="text-[15px] font-semibold text-slate-900">Quick Apply</span>
                     <label className="relative inline-flex items-center cursor-pointer">
                       <input type="checkbox" className="sr-only peer" />
-                      <div className="w-11 h-6 bg-[#cbd5e1] peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-0.5 after:left-0.5 after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-[#0000ff]"></div>
+                      <div className="w-11 h-6 bg-[#cbd5e1] peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-0.5 after:left-0.5 after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-brand-blue"></div>
                     </label>
                   </div>
                 </div>
@@ -720,7 +720,7 @@ const FeaturedScholarshipsPage = () => {
                 <button className="px-4 py-2 text-[14px] font-medium text-gray-500 bg-white border border-gray-200 rounded-lg hover:bg-gray-50 hover:text-gray-800 transition-colors mr-2">
                   Previous
                 </button>
-                <button className="w-10 h-10 flex items-center justify-center text-[14px] font-medium text-white bg-[#0000ff] rounded-lg shadow-sm shadow-blue-500/30">
+                <button className="w-10 h-10 flex items-center justify-center text-[14px] font-medium text-white bg-brand-blue rounded-lg shadow-sm shadow-blue-500/30">
                   1
                 </button>
                 {[2, 3, 4, 5].map((page) => (

@@ -236,7 +236,7 @@ const OverviewPage: React.FC = () => {
   };
 
   return (
-    <div className="p-4 lg:p-8 max-w-[1600px] mx-auto space-y-6">
+    <div className="p-4 lg:p-8 max-w-400 mx-auto space-y-6">
       {/* Page Header */}
       <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4">
         <div>
@@ -247,9 +247,7 @@ const OverviewPage: React.FC = () => {
             Real-time data visualization across all operational modules.
           </p>
         </div>
-        <button className="px-4 py-2 bg-blue-600 text-white hover:bg-blue-700 rounded-lg text-sm font-medium transition-colors shadow-sm flex items-center gap-2 w-max">
-          <RefreshCw className="w-4 h-4" /> Sync Data
-        </button>
+       
       </div>
 
       {/* KPI Stat Cards */}
@@ -330,7 +328,7 @@ const OverviewPage: React.FC = () => {
           <p className="text-xs text-slate-400 mb-4">
             Monthly enrollment trends
           </p>
-          <div className="relative h-[220px]">
+          <div className="relative h-55">
             <Bar data={admissionData} options={chartOptions} />
           </div>
         </div>
@@ -345,7 +343,7 @@ const OverviewPage: React.FC = () => {
           <p className="text-xs text-slate-400 mb-4">
             Query resolution breakdown
           </p>
-          <div className="relative h-[220px]">
+          <div className="relative h-55">
             <Doughnut data={qmsData} options={doughnutOptions} />
           </div>
         </div>
@@ -360,7 +358,7 @@ const OverviewPage: React.FC = () => {
           <p className="text-xs text-slate-400 mb-4">
             Distribution by academic level
           </p>
-          <div className="relative h-[220px]">
+          <div className="relative h-55">
             <Pie data={programData} options={pieOptions} />
           </div>
         </div>
@@ -373,7 +371,7 @@ const OverviewPage: React.FC = () => {
             </span>
           </div>
           <p className="text-xs text-slate-400 mb-4">By scholarship category</p>
-          <div className="relative h-[220px]">
+          <div className="relative h-55">
             <Doughnut data={scholarshipData} options={doughnutOptions} />
           </div>
         </div>
@@ -386,7 +384,7 @@ const OverviewPage: React.FC = () => {
             </span>
           </div>
           <p className="text-xs text-slate-400 mb-4">Sessions by program</p>
-          <div className="relative h-[220px]">
+          <div className="relative h-55">
             <Bar data={counsellingData} options={horizontalBarOptions} />
           </div>
         </div>
@@ -401,7 +399,7 @@ const OverviewPage: React.FC = () => {
           <p className="text-xs text-slate-400 mb-4">
             Applicant growth this year
           </p>
-          <div className="relative h-[220px]">
+          <div className="relative h-55">
             <Line data={entranceData} options={lineOptions} />
           </div>
         </div>
@@ -553,7 +551,7 @@ const OverviewPage: React.FC = () => {
             ].map((act, i) => (
               <li key={i} className="ml-4">
                 <span
-                  className={`absolute -left-1.5 w-3 h-3 rounded-full flex-shrink-0 ${act.color}`}
+                  className={`absolute -left-1.5 w-3 h-3 rounded-full shrink-0 ${act.color}`}
                 />
                 <p className="text-xs text-slate-400">{act.time}</p>
                 <p className="text-sm text-slate-700 mt-0.5">{act.text}</p>
@@ -564,7 +562,7 @@ const OverviewPage: React.FC = () => {
       </div>
 
       {/* Studsphere Support Banner */}
-      <div className="bg-gradient-to-r from-blue-600 to-indigo-700 rounded-2xl p-6 text-white flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 shadow-lg">
+      <div className="bg-linear-to-r from-blue-600 to-indigo-700 rounded-2xl p-6 text-white flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 shadow-lg">
         <div>
           <h3 className="text-lg font-bold">Need Help with Studsphere?</h3>
           <p className="text-blue-100 text-sm mt-1">

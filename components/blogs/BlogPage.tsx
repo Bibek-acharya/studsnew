@@ -85,7 +85,7 @@ const BlogPage: React.FC = () => {
                   onClick={() => setActiveCategory(pill)}
                   className={`px-5 py-2 rounded-full text-sm font-medium whitespace-nowrap transition-colors ${
                     isActive
-                      ? "bg-[#0000ff] text-white shadow-sm"
+                      ? "bg-brand-blue text-white shadow-sm"
                       : "bg-white text-gray-700 border border-gray-200 hover:bg-gray-50"
                   }`}
                 >

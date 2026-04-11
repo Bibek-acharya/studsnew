@@ -10,7 +10,7 @@ const collegeTypes = [
 
 const ByTypeAd: React.FC = () => {
   return (
-    <div className="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-[24px] p-8 w-full border border-blue-100 shadow-xl shadow-blue-900/5 my-2 lg:my-4">
+    <div className="bg-linear-to-br from-blue-50 to-indigo-50 rounded-3xl p-8 w-full border border-blue-100 shadow-xl shadow-blue-900/5 my-2 lg:my-4">
       <h2 className="text-indigo-950 text-2xl font-bold mb-8 tracking-tight text-center md:text-left">
         View colleges by the types
       </h2>

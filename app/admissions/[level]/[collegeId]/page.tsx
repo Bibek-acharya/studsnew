@@ -72,7 +72,7 @@ export default function AdmissionDetailPage() {
   return (
     <div className="min-h-screen bg-white text-[#111827] antialiased pb-20">
       {/* Main Container */}
-      <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12">
+      <div className="max-w-350 mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12">
         {/* Banner Section */}
         <div className="relative w-full h-40 sm:h-48 md:h-64 bg-gray-50 rounded-2xl flex items-center justify-center overflow-hidden mb-8 sm:mb-12 shadow-sm">
           <img
@@ -169,7 +169,7 @@ export default function AdmissionDetailPage() {
                 <div className="flex justify-center mt-4">
                   <button
                     onClick={() => setShowNotificationModal(true)}
-                    className="bg-[#0000ff] hover:bg-[#0000cc] text-white font-semibold py-3 px-8 rounded-full flex items-center transition-all shadow-blue-200 shadow-lg text-[15px]"
+                    className="bg-brand-blue hover:bg-[#0000cc] text-white font-semibold py-3 px-8 rounded-full flex items-center transition-all shadow-blue-200 shadow-lg text-[15px]"
                   >
                     <Bell className="w-4 h-4 mr-2" />
                     Keep Me Notified
@@ -562,7 +562,7 @@ export default function AdmissionDetailPage() {
                     placeholder="Ask about admissions, fees, environment..."
                     className="flex-1 text-[16px] text-gray-700 placeholder-gray-400 focus:outline-none bg-transparent"
                   />
-                  <button className="bg-[#0000ff] hover:bg-[#0000cc] text-white text-sm font-bold py-2.5 px-6 rounded-xl transition-all shadow-blue-100 shadow-md">
+                  <button className="bg-brand-blue hover:bg-[#0000cc] text-white text-sm font-bold py-2.5 px-6 rounded-xl transition-all shadow-blue-100 shadow-md">
                     Submit
                   </button>
                 </div>
@@ -647,7 +647,7 @@ export default function AdmissionDetailPage() {
                   Apply Now
                   <ArrowRight className="w-5 h-5 ml-2 group-hover:translate-x-1 transition-transform" />
                 </button>
-                <button className="w-full flex items-center justify-center bg-[#0000ff] hover:bg-[#0000cc] text-white font-bold py-4 px-6 rounded-2xl transition-all shadow-blue-100 shadow-lg group">
+                <button className="w-full flex items-center justify-center bg-brand-blue hover:bg-[#0000cc] text-white font-bold py-4 px-6 rounded-2xl transition-all shadow-blue-100 shadow-lg group">
                   Download Brochure
                   <Download className="w-5 h-5 ml-2 group-hover:translate-y-1 transition-transform" />
                 </button>
@@ -901,7 +901,7 @@ export default function AdmissionDetailPage() {
 
             <button
               onClick={() => setShowNotificationModal(false)}
-              className="w-full mt-8 bg-[#0000ff] text-white font-bold py-4 rounded-2xl shadow-blue-200 shadow-xl hover:bg-[#0000cc] transition-all"
+              className="w-full mt-8 bg-brand-blue text-white font-bold py-4 rounded-2xl shadow-blue-200 shadow-xl hover:bg-[#0000cc] transition-all"
             >
               Notify Me
             </button>

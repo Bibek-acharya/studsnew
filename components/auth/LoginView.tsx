@@ -9,12 +9,14 @@ interface LoginViewProps {
   onSwitch: () => void;
   onSuccess: () => void;
   onForgotPassword: () => void;
+  onClose?: () => void;
 }
 
 const LoginView: React.FC<LoginViewProps> = ({
   onSwitch,
   onSuccess,
   onForgotPassword,
+  onClose,
 }) => {
   const router = useRouter();
   const [email, setEmail] = useState("");
@@ -45,10 +47,10 @@ const LoginView: React.FC<LoginViewProps> = ({
   };
 
   return (
-    <div className="relative w-full max-w-90 mx-auto flex flex-col py-4">
+    <div className="relative w-full max-w-110 mx-auto flex flex-col justify-center py-4 px-4">
       <button
         type="button"
-        onClick={() => router.push("/")}
+        onClick={() => (onClose ? onClose() : router.push("/"))}
         aria-label="Close login view"
         className="absolute -right-6 -top-4 flex h-9 w-9 items-center justify-center rounded-full text-gray-400 transition-colors hover:bg-gray-100 hover:text-red-500"
       >

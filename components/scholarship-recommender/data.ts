@@ -3,6 +3,7 @@ import { RecommenderState, ScholarshipCardItem } from "./types";
 export const initialRecommenderState: RecommenderState = {
   educationLevel: "",
   studyMode: "",
+  academicScoreType: "gpa",
   academicScore: "",
   fieldOfStudy: "",
   willingEssay: "",

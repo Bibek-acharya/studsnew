@@ -46,10 +46,10 @@ const Footer: React.FC<FooterProps> = ({ onNavigate }) => {
 
   return (
     <footer className="relative overflow-hidden border-t border-slate-800 bg-slate-900 text-slate-300">
-      <div className="pointer-events-none absolute left-0 top-0 h-64 xs:h-80 sm:h-100 md:h-125 w-64 xs:w-80 sm:w-100 md:w-125 -translate-x-1/2 -translate-y-1/2 rounded-full bg-[#0000FF]/10 blur-[80px] xs:blur-[100px] md:blur-[120px]" />
+      <div className="pointer-events-none absolute left-0 top-0 h-64 xs:h-80 sm:h-100 md:h-125 w-64 xs:w-80 sm:w-100 md:w-125 -translate-x-1/2 -translate-y-1/2 rounded-full bg-brand-blue/10 blur-[80px] xs:blur-[100px] md:blur-[120px]" />
       <div className="pointer-events-none absolute bottom-0 right-0 h-56 xs:h-72 sm:h-88 md:h-105 w-56 xs:w-72 sm:w-88 md:w-105 translate-x-1/3 translate-y-1/3 rounded-full bg-indigo-500/10 blur-[70px] xs:blur-[80px] md:blur-[100px]" />
 
-      <div className="relative z-10 mx-auto max-w-[1400px] px-4 xs:px-5 sm:px-6 lg:px-8 pb-10 xs:pb-12 sm:pb-14 md:pb-16 pt-10 xs:pt-12 sm:pt-16 md:pt-20">
+      <div className="relative z-10 mx-auto max-w-350 px-4 xs:px-5 sm:px-6 lg:px-8 pb-10 xs:pb-12 sm:pb-14 md:pb-16 pt-10 xs:pt-12 sm:pt-16 md:pt-20">
         <div className="grid grid-cols-1 xs:grid-cols-2 sm:grid-cols-2 md:grid-cols-12 gap-8 xs:gap-10 sm:gap-12 md:gap-8">
           {/* Brand Column */}
           <div className="flex flex-col xs:col-span-2 md:col-span-4 md:pr-6 lg:pr-8">
@@ -57,7 +57,7 @@ const Footer: React.FC<FooterProps> = ({ onNavigate }) => {
               onClick={(event) => routeLink(event, "educationPage")}
               className="mb-5 xs:mb-6 flex w-fit items-center space-x-2.5 xs:space-x-3"
             >
-              <div className="rounded-lg xs:rounded-xl bg-[#0000FF] p-2 xs:p-2.5 shadow-lg shadow-blue-500/25">
+              <div className="rounded-lg xs:rounded-xl bg-brand-blue p-2 xs:p-2.5 shadow-lg shadow-blue-500/25">
                 <i className="fa-solid fa-graduation-cap h-5 w-5 xs:h-6 xs:w-6 text-white" />
               </div>
               <span className="text-xl xs:text-2xl font-bold tracking-tight text-white">
@@ -87,11 +87,11 @@ const Footer: React.FC<FooterProps> = ({ onNavigate }) => {
                   required
                   value={email}
                   onChange={(event) => setEmail(event.target.value)}
-                  className="w-full rounded-full border border-slate-700 bg-slate-900/50 pl-9 xs:pl-10 pr-20 xs:pr-24 py-2.5 xs:py-3 text-xs xs:text-sm text-white outline-none transition-all placeholder:text-slate-600 focus:border-transparent focus:ring-2 focus:ring-[#0000FF]"
+                  className="w-full rounded-full border border-slate-700 bg-slate-900/50 pl-9 xs:pl-10 pr-20 xs:pr-24 py-2.5 xs:py-3 text-xs xs:text-sm text-white outline-none transition-all placeholder:text-slate-600 focus:border-transparent focus:ring-2 focus:ring-brand-blue"
                 />
                 <button
                   type="submit"
-                  className="absolute bottom-1 xs:bottom-1.5 right-1 xs:right-1.5 top-1 xs:top-1.5 rounded-full bg-[#0000FF] px-3 xs:px-4 text-white transition-colors hover:bg-[#0000CC]"
+                  className="absolute bottom-1 xs:bottom-1.5 right-1 xs:right-1.5 top-1 xs:top-1.5 rounded-full bg-brand-blue px-3 xs:px-4 text-white transition-colors hover:bg-brand-hover"
                 >
                   <span className="text-[10px] xs:text-xs font-semibold">
                     Subscribe
@@ -115,7 +115,7 @@ const Footer: React.FC<FooterProps> = ({ onNavigate }) => {
                 href="https://facebook.com"
                 target="_blank"
                 rel="noreferrer"
-                className="flex h-9 w-9 xs:h-10 xs:w-10 items-center justify-center rounded-full bg-slate-800 text-slate-400 transition-all hover:-translate-y-1 hover:bg-[#0000FF] hover:text-white"
+                className="flex h-9 w-9 xs:h-10 xs:w-10 items-center justify-center rounded-full bg-slate-800 text-slate-400 transition-all hover:-translate-y-1 hover:bg-brand-blue hover:text-white"
               >
                 <i className="fa-brands fa-facebook-f text-sm xs:text-base" />
               </a>

@@ -1,9 +1,16 @@
 import React, { useState, useMemo, useEffect } from "react";
+import { useQuery } from "@tanstack/react-query";
 import {
   CollegeFilters,
   DEFAULT_COLLEGE_FILTERS,
 } from "@/app/find-college/types";
+import { apiService } from "@/services/api";
 import GlobalFilterSection from "@/components/ui/GlobalFilterSection";
+import { FaSliders } from "react-icons/fa6";
+import {
+  NEPAL_DISTRICTS,
+  NEPAL_PROVINCES,
+} from "@/lib/location-data";
 
 interface FilterSidebarProps {
   filters: CollegeFilters;
@@ -15,8 +22,6 @@ interface FilterSidebarProps {
 const ACADEMIC_LEVELS = [
   { id: "plus2", label: "+2 / Higher Secondary", count: 3200 },
   { id: "alevel", label: "A Level", count: 85 },
-  { id: "bachelor", label: "Bachelor", count: 1250 },
-  { id: "master", label: "Master", count: 480 },
   { id: "diploma", label: "Diploma / CTEVT", count: 410 },
 ];
 
@@ -34,20 +39,6 @@ const PROGRAMS: Record<
   alevel: [
     { id: "al_sci", label: "A Level - Science", count: 45 },
     { id: "al_nonsci", label: "A Level - Non-Science/Mgmt", count: 40 },
-  ],
-  bachelor: [
-    { id: "b_it", label: "Information Technology & CS", count: 300 },
-    { id: "b_eng", label: "Engineering", count: 180 },
-    { id: "b_biz", label: "Business & Management", count: 450 },
-    { id: "b_med", label: "Medical & Healthcare", count: 150 },
-    { id: "b_hum", label: "Humanities & Social Sciences", count: 120 },
-    { id: "b_agr", label: "Agriculture & Forestry", count: 50 },
-  ],
-  master: [
-    { id: "m_biz", label: "Business & Management", count: 120 },
-    { id: "m_it", label: "IT & Computer Science", count: 60 },
-    { id: "m_eng", label: "Engineering", count: 40 },
-    { id: "m_hum", label: "Humanities & Social Sciences", count: 80 },
   ],
   diploma: [
     { id: "d_eng", label: "Engineering (CTEVT)", count: 150 },
@@ -108,55 +99,129 @@ const COURSES: Record<
   ],
 };
 
-const PROVINCES = [
-  { id: "prov_koshi", label: "Koshi", count: 420 },
-  { id: "prov_madhesh", label: "Madhesh", count: 310 },
-  { id: "prov_bagmati", label: "Bagmati", count: 1250 },
-  { id: "prov_gandaki", label: "Gandaki", count: 380 },
-  { id: "prov_lumbini", label: "Lumbini", count: 450 },
-  { id: "prov_karnali", label: "Karnali", count: 120 },
-  { id: "prov_sudur", label: "Sudurpashchim", count: 180 },
-];
-
-const DISTRICTS: Record<
-  string,
-  Array<{ id: string; label: string; count: number }>
-> = {
-  prov_koshi: [
-    { id: "d_jhapa", label: "Jhapa", count: 80 },
-    { id: "d_morang", label: "Morang", count: 110 },
-    { id: "d_sunsari", label: "Sunsari", count: 90 },
-  ],
-  prov_madhesh: [
-    { id: "d_dhanusha", label: "Dhanusha", count: 60 },
-    { id: "d_parsa", label: "Parsa", count: 55 },
-  ],
-  prov_bagmati: [
-    { id: "d_bhaktapur", label: "Bhaktapur", count: 120 },
-    { id: "d_chitwan", label: "Chitwan", count: 150 },
-    { id: "d_kathmandu", label: "Kathmandu", count: 650 },
-    { id: "d_lalitpur", label: "Lalitpur", count: 180 },
-    { id: "d_kavre", label: "Kavrepalanchok", count: 45 },
-  ],
-  prov_gandaki: [
-    { id: "d_kaski", label: "Kaski", count: 210 },
-    { id: "d_nawalpur", label: "Nawalpur", count: 40 },
-    { id: "d_tanahun", label: "Tanahun", count: 25 },
-  ],
-  prov_lumbini: [
-    { id: "d_banke", label: "Banke", count: 60 },
-    { id: "d_rupandehi", label: "Rupandehi", count: 160 },
-    { id: "d_dang", label: "Dang", count: 45 },
-  ],
-  prov_karnali: [
-    { id: "d_surkhet", label: "Surkhet", count: 55 },
-    { id: "d_jumla", label: "Jumla", count: 10 },
-  ],
-  prov_sudur: [
-    { id: "d_kailali", label: "Kailali", count: 85 },
-    { id: "d_kanchanpur", label: "Kanchanpur", count: 45 },
-  ],
+const provinceIdMap: Record<string, string> = {
+  "Koshi Province": "prov_koshi",
+  "Madhesh Province": "prov_madhesh",
+  "Bagmati Province": "prov_bagmati",
+  "Gandaki Province": "prov_gandaki",
+  "Lumbini Province": "prov_lumbini",
+  "Karnali Province": "prov_karnali",
+  "Sudurpashchim Province": "prov_sudur",
 };
+
+const districtIdMap: Record<string, string> = {
+  Bhojpur: "d_bhojpur",
+  Dhankuta: "d_dhankuta",
+  Ilam: "d_ilam",
+  Jhapa: "d_jhapa",
+  Khotang: "d_khotang",
+  Morang: "d_morang",
+  Okhaldhunga: "d_okhaldhunga",
+  Panchthar: "d_panchthar",
+  Sankhuwasabha: "d_sankhuwasabha",
+  Solukhumbu: "d_solukhumbu",
+  Sunsari: "d_sunsari",
+  Taplejung: "d_taplejung",
+  Terhathum: "d_terhathum",
+  Udayapur: "d_udayapur",
+  Bara: "d_bara",
+  Dhanusha: "d_dhanusha",
+  Mahottari: "d_mahottari",
+  Parsa: "d_parsa",
+  Rautahat: "d_rautahat",
+  Saptari: "d_saptari",
+  Sarlahi: "d_sarlahi",
+  Siraha: "d_siraha",
+  Bhaktapur: "d_bhaktapur",
+  Chitwan: "d_chitwan",
+  Dhading: "d_dhading",
+  Dolakha: "d_dolakha",
+  Kathmandu: "d_kathmandu",
+  Kavrepalanchok: "d_kavre",
+  Lalitpur: "d_lalitpur",
+  Makwanpur: "d_makwanpur",
+  Nuwakot: "d_nuwakot",
+  Ramechhap: "d_ramechhap",
+  Rasuwa: "d_rasuwa",
+  Sindhuli: "d_sindhuli",
+  Sindhupalchok: "d_sindhupalchok",
+  Baglung: "d_baglung",
+  Gorkha: "d_gorkha",
+  Kaski: "d_kaski",
+  Lamjung: "d_lamjung",
+  Manang: "d_manang",
+  Mustang: "d_mustang",
+  Myagdi: "d_myagdi",
+  Nawalpur: "d_nawalpur",
+  Parbat: "d_parbat",
+  Syangja: "d_syangja",
+  Tanahun: "d_tanahun",
+  Arghakhanchi: "d_arghakhanchi",
+  Banke: "d_banke",
+  Bardiya: "d_bardiya",
+  Dang: "d_dang",
+  Gulmi: "d_gulmi",
+  Kapilvastu: "d_kapilvastu",
+  Palpa: "d_palpa",
+  Parasi: "d_parasi",
+  Pyuthan: "d_pyuthan",
+  Rolpa: "d_rolpa",
+  "Rukum Purba": "d_rukum_purba",
+  Rupandehi: "d_rupandehi",
+  Dailekh: "d_dailekh",
+  Dolpa: "d_dolpa",
+  Humla: "d_humla",
+  Jajarkot: "d_jajarkot",
+  Jumla: "d_jumla",
+  Kalikot: "d_kalikot",
+  Mugu: "d_mugu",
+  "Rukum Paschim": "d_rukum_paschim",
+  Salyan: "d_salyan",
+  Surkhet: "d_surkhet",
+  Achham: "d_achham",
+  Baitadi: "d_baitadi",
+  Bajhang: "d_bajhang",
+  Bajura: "d_bajura",
+  Dadeldhura: "d_dadeldhura",
+  Darchula: "d_darchula",
+  Doti: "d_doti",
+  Kailali: "d_kailali",
+  Kanchanpur: "d_kanchanpur",
+};
+
+type DistrictOption = {
+  id: string;
+  label: string;
+};
+
+type ProvinceOption = {
+  id: string;
+  label: string;
+  districts: DistrictOption[];
+};
+
+type ProvinceName = keyof typeof NEPAL_DISTRICTS;
+
+const provinceOptions: ProvinceOption[] = NEPAL_PROVINCES.map(
+  (provinceName, index) => {
+    const provinceKey = provinceName as ProvinceName;
+    const provinceId = provinceIdMap[provinceName] || `prov_${index}`;
+    const districts = (NEPAL_DISTRICTS[provinceKey] || []).map(
+      (districtName: string) => ({
+        id:
+          districtIdMap[districtName] ||
+          `d_${districtName.toLowerCase().replace(/[^a-z0-9]+/g, "_").replace(/^_+|_+$/g, "")}`,
+        label: districtName,
+      }),
+    );
+
+    return {
+      id: provinceId,
+      label: provinceName.replace(/\s+Province$/, ""),
+      districts,
+    };
+  },
+);
 
 const DOMESTIC_UNIVERSITIES = [
   { id: "u_tu", label: "Tribhuvan University (TU)", count: 1050 },
@@ -196,6 +261,7 @@ const COURSE_DURATIONS = [
 const SORT_OPTIONS = [
   { id: "popularity", label: "Popularity" },
   { id: "rating", label: "Highest Rating" },
+  { id: "verified", label: "Verified First" },
   { id: "fee_low", label: "Fee: Low to High" },
   { id: "fee_high", label: "Fee: High to Low" },
 ];
@@ -229,7 +295,49 @@ function formatFee(val: number) {
 
 // ── Sub-Components ────────────────────────────────────────────────────────────
 
+const SelectInput: React.FC<{
+  placeholder: string;
+  value: string;
+  options: Array<{ id: string; label: string }>;
+  onChange: (v: string) => void;
+  disabled?: boolean;
+}> = ({ placeholder, value, options, onChange, disabled }) => (
+  <div className="relative mb-3">
+    <select
+      value={value}
+      onChange={(e) => onChange(e.target.value)}
+      disabled={disabled}
+      className="block w-full appearance-none rounded-md border border-gray-200 bg-[#f8fafc] py-2 px-3 pr-9 text-[13.5px] text-gray-900 outline-none transition disabled:bg-gray-100 disabled:text-gray-400 focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+    >
+      <option value="" disabled={value !== ""}>
+        {placeholder}
+      </option>
+      {options.map((opt) => (
+        <option key={opt.id} value={opt.id}>
+          {opt.label}
+        </option>
+      ))}
+    </select>
+    <div className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-gray-400">
+      <svg
+        xmlns="http://www.w3.org/2000/svg"
+        width="12"
+        height="12"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="2.5"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      >
+        <path d="m6 9 6 6 6-6" />
+      </svg>
+    </div>
+  </div>
+);
+
 const SearchInput: React.FC<{
+
   placeholder: string;
   value: string;
   onChange: (v: string) => void;
@@ -250,7 +358,7 @@ const SearchInput: React.FC<{
       value={value}
       onChange={(e) => onChange(e.target.value)}
       placeholder={placeholder}
-      className="block w-full rounded-[8px] border border-gray-200 bg-[#f8fafc] py-2 pl-9 pr-3 text-[13.5px] text-gray-900 outline-none transition placeholder:text-gray-400 focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+      className="block w-full rounded-lg border border-gray-200 bg-[#f8fafc] py-2 pl-9 pr-3 text-[13.5px] text-gray-900 outline-none transition placeholder:text-gray-400 focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
     />
   </div>
 );
@@ -331,14 +439,23 @@ const FilterSidebar: React.FC<FilterSidebarProps> = ({
   filters,
   setFilters,
 }) => {
+  const { data: collegeFilterCounts } = useQuery({
+    queryKey: ["collegeFilterCounts"],
+    queryFn: () => apiService.getCollegeFilterCounts(),
+    staleTime: 5 * 60 * 1000,
+  });
+
   const [locating, setLocating] = useState(false);
   const [showAppliedDropdown, setShowAppliedDropdown] = useState(false);
   const [programSearch, setProgramSearch] = useState("");
   const [courseSearch, setCourseSearch] = useState("");
-  const [provinceSearch, setProvinceSearch] = useState("");
-  const [districtSearch, setDistrictSearch] = useState("");
   const [universitySearch, setUniversitySearch] = useState("");
   const [navLocString, setNavLocString] = useState("");
+
+  const getFacetCount = (id: string): number | undefined => {
+    if (!collegeFilterCounts?.data?.facet_counts_by_id) return undefined;
+    return collegeFilterCounts.data.facet_counts_by_id[id] ?? 0;
+  };
 
   useEffect(() => {
     const updateLocation = (cityStr: string) => {
@@ -369,32 +486,28 @@ const FilterSidebar: React.FC<FilterSidebarProps> = ({
 
   // Derived cascade data
   const availablePrograms = useMemo(() => {
-    const progs = filters.academic.flatMap((a) => PROGRAMS[a] || []);
+    const progs = filters.academic
+      .flatMap((a) => PROGRAMS[a] || [])
+      .map((p) => ({ ...p, count: getFacetCount(p.id) }));
     if (!programSearch) return progs;
     return progs.filter((p) =>
       p.label.toLowerCase().includes(programSearch.toLowerCase()),
     );
-  }, [filters.academic, programSearch]);
+  }, [filters.academic, programSearch, collegeFilterCounts]);
 
   const availableCourses = useMemo(() => {
     const showCourse = filters.academic.some((a) =>
-      ["bachelor", "master", "diploma"].includes(a),
+      ["diploma"].includes(a),
     );
     if (!showCourse) return [];
-    const courses = filters.program.flatMap((p) => COURSES[p] || []);
+    const courses = filters.program
+      .flatMap((p) => COURSES[p] || [])
+      .map((c) => ({ ...c, count: getFacetCount(c.id) }));
     if (!courseSearch) return courses;
     return courses.filter((c) =>
       c.label.toLowerCase().includes(courseSearch.toLowerCase()),
     );
-  }, [filters.academic, filters.program, courseSearch]);
-
-  const availableDistricts = useMemo(() => {
-    const dists = filters.province.flatMap((p) => DISTRICTS[p] || []);
-    if (!districtSearch) return dists;
-    return dists.filter((d) =>
-      d.label.toLowerCase().includes(districtSearch.toLowerCase()),
-    );
-  }, [filters.province, districtSearch]);
+  }, [filters.academic, filters.program, courseSearch, collegeFilterCounts]);
 
   const availableUniversities = useMemo(() => {
     const showForeign = filters.type.includes("ct_foreign");
@@ -408,21 +521,24 @@ const FilterSidebar: React.FC<FilterSidebarProps> = ({
       list = list.filter((u) =>
         u.label.toLowerCase().includes(universitySearch.toLowerCase()),
       );
-    return list;
-  }, [filters.type, universitySearch]);
+    return list.map((u) => ({ ...u, count: getFacetCount(u.id) }));
+  }, [filters.type, universitySearch, collegeFilterCounts]);
 
   const showCourseSection = filters.academic.some((a) =>
-    ["bachelor", "master", "diploma"].includes(a),
+    ["diploma"].includes(a),
   );
   const showUniversitySection = filters.academic.some((a) =>
-    ["bachelor", "master"].includes(a),
+    ["plus2", "alevel", "diploma"].includes(a),
   );
 
   const filterLabelMap = useMemo(() => {
     const map = new Map<string, string>();
 
     ACADEMIC_LEVELS.forEach((item) => map.set(item.id, item.label));
-    PROVINCES.forEach((item) => map.set(item.id, item.label));
+    provinceOptions.forEach((province) => {
+      map.set(province.id, province.label);
+      province.districts.forEach((district) => map.set(district.id, district.label));
+    });
     COLLEGE_TYPES.forEach((item) => map.set(item.id, item.label));
     DOMESTIC_UNIVERSITIES.forEach((item) => map.set(item.id, item.label));
     FOREIGN_UNIVERSITIES.forEach((item) => map.set(item.id, item.label));
@@ -434,10 +550,6 @@ const FilterSidebar: React.FC<FilterSidebarProps> = ({
     });
 
     Object.values(COURSES).forEach((group) => {
-      group.forEach((item) => map.set(item.id, item.label));
-    });
-
-    Object.values(DISTRICTS).forEach((group) => {
       group.forEach((item) => map.set(item.id, item.label));
     });
 
@@ -461,6 +573,7 @@ const FilterSidebar: React.FC<FilterSidebarProps> = ({
   }, [filters, filterLabelMap]);
 
   const isFeeApplied = filters.feeMax < DEFAULT_COLLEGE_FILTERS.feeMax;
+  const hasActiveFilters = appliedFilters.length > 0 || isFeeApplied;
 
   const toggle = (key: keyof CollegeFilters, value: string) => {
     setFilters((prev) => {
@@ -469,6 +582,41 @@ const FilterSidebar: React.FC<FilterSidebarProps> = ({
         ? current.filter((v) => v !== value)
         : [...current, value];
       return { ...prev, [key]: next };
+    });
+  };
+
+  const toggleProvince = (provinceId: string) => {
+    const provinceDistrictIds =
+      provinceOptions.find((province) => province.id === provinceId)?.districts.map((district) => district.id) || [];
+
+    setFilters((prev) => {
+      const isSelected = prev.province.includes(provinceId);
+      return {
+        ...prev,
+        province: isSelected
+          ? prev.province.filter((value) => value !== provinceId)
+          : [...prev.province, provinceId],
+        district: isSelected
+          ? prev.district.filter((value) => !provinceDistrictIds.includes(value))
+          : prev.district,
+      };
+    });
+  };
+
+  const toggleDistrict = (provinceId: string, districtId: string) => {
+    setFilters((prev) => {
+      const districtSelected = prev.district.includes(districtId);
+      return {
+        ...prev,
+        province: districtSelected
+          ? prev.province
+          : prev.province.includes(provinceId)
+          ? prev.province
+          : [...prev.province, provinceId],
+        district: districtSelected
+          ? prev.district.filter((value) => value !== districtId)
+          : [...prev.district, districtId],
+      };
     });
   };
 
@@ -519,22 +667,22 @@ const FilterSidebar: React.FC<FilterSidebarProps> = ({
           let foundDistId = "";
 
           // Match Province
-          for (const prov of PROVINCES) {
+          for (const prov of provinceOptions) {
             if (normalizedSearch.includes(prov.label.toLowerCase())) {
               foundProvId = prov.id;
             }
           }
 
           // Match District
-          for (const [provKey, districts] of Object.entries(DISTRICTS)) {
-            for (const dist of districts) {
+          for (const prov of provinceOptions) {
+            for (const dist of prov.districts) {
               const distLower = dist.label.toLowerCase();
               if (
                 normalizedSearch.includes(distLower) ||
                 distLower.includes(normalizedSearch)
               ) {
                 foundDistId = dist.id;
-                foundProvId = provKey; // Auto-select parent province
+                foundProvId = prov.id; // Auto-select parent province
               }
             }
           }
@@ -582,12 +730,33 @@ const FilterSidebar: React.FC<FilterSidebarProps> = ({
       resolveLocation(); // Fallback instantly if geolocation unavailable
     }
   };
+  
+  const academicLevelsWithCounts = useMemo(
 
-  const filteredProvinces = provinceSearch
-    ? PROVINCES.filter((p) =>
-        p.label.toLowerCase().includes(provinceSearch.toLowerCase()),
-      )
-    : PROVINCES;
+    () => ACADEMIC_LEVELS.map((item) => ({ ...item, count: getFacetCount(item.id) })),
+    [collegeFilterCounts],
+  );
+
+  const collegeTypesWithCounts = useMemo(
+    () =>
+      COLLEGE_TYPES.map((item) => ({
+        ...item,
+        count: collegeFilterCounts?.data?.type_counts_by_id
+          ? (collegeFilterCounts.data.type_counts_by_id[item.id] ?? 0)
+          : undefined,
+      })),
+    [collegeFilterCounts],
+  );
+
+  const courseDurationsWithCounts = useMemo(
+    () =>
+      COURSE_DURATIONS.map((duration) => ({
+        id: duration,
+        label: duration,
+        count: getFacetCount(duration),
+      })),
+    [collegeFilterCounts],
+  );
 
   return (
     <>
@@ -595,36 +764,28 @@ const FilterSidebar: React.FC<FilterSidebarProps> = ({
       <div className="relative w-full rounded-[20px] border border-gray-200 bg-white p-6 ">
         {/* Header */}
         <div className="mb-2 flex items-center justify-between">
-          <div className="flex items-center gap-2.5">
-            <svg
-              viewBox="0 0 24 24"
-              fill="currentColor"
-              className="h-6 w-6 text-blue-600"
+          <div className="flex items-center gap-3">
+                    <FaSliders size={18} className="text-black" />
+                    <h3 className="font-black text-xl text-slate-900 tracking-tight">
+                      Filters
+                    </h3>
+                  </div>
+          {hasActiveFilters && (
+            <button
+              type="button"
+              onClick={() => setShowAppliedDropdown((prev) => !prev)}
+              className="inline-flex items-center gap-2 rounded-md px-3 py-1.5 text-[12px] font-semibold text-blue-700 transition-colors"
             >
-              <path
-                fillRule="evenodd"
-                clipRule="evenodd"
-                d="M3 4a1 1 0 011-1h16a1 1 0 01.7 1.7L14 11.414V17a1 1 0 01-.293.707l-3 3A1 1 0 019 20v-8.586L3.3 4.7A1 1 0 013 4z"
-              />
-            </svg>
-            <h2 className="text-[20px] font-bold tracking-tight text-gray-900">
-              Filters
-            </h2>
-          </div>
-          <button
-            type="button"
-            onClick={() => setShowAppliedDropdown((prev) => !prev)}
-            className="inline-flex items-center gap-2 rounded-md border border-blue-100 bg-blue-50 px-3 py-1.5 text-[12px] font-semibold text-blue-700 transition-colors hover:bg-blue-100"
-          >
-            Applied ({appliedFilters.length + (isFeeApplied ? 1 : 0)})
-            <i
-              className={`fa-solid fa-chevron-down text-[10px] transition-transform ${showAppliedDropdown ? "rotate-180" : ""}`}
-            ></i>
-          </button>
+              Applied ({appliedFilters.length + (isFeeApplied ? 1 : 0)})
+              <i
+                className={`fa-solid fa-chevron-down text-[10px] transition-transform ${showAppliedDropdown ? "rotate-180" : ""}`}
+              ></i>
+            </button>
+          )}
         </div>
 
-        {showAppliedDropdown && (
-          <div className="absolute right-6 top-16 z-30 w-[min(520px,calc(100%-3rem))] rounded-xl border border-gray-200 bg-white p-3 shadow-lg">
+        {hasActiveFilters && showAppliedDropdown && (
+          <div className="absolute right-6 top-16 z-30 w-[min(520px,calc(100%-3rem))] rounded-lg border border-gray-200 bg-white p-3 shadow-lg">
             {appliedFilters.length === 0 && !isFeeApplied ? (
               <p className="px-1 py-2 text-[13px] italic text-gray-400">
                 No filters selected yet.
@@ -732,7 +893,7 @@ const FilterSidebar: React.FC<FilterSidebarProps> = ({
         {/* 1. Academic Level */}
         <Accordion title="Academic Level" defaultOpen>
           <div className="flex flex-col gap-3.5 pt-1">
-            {ACADEMIC_LEVELS.map((item) => (
+            {academicLevelsWithCounts.map((item) => (
               <CheckboxItem
                 key={item.id}
                 id={`acad-${item.id}`}
@@ -756,7 +917,7 @@ const FilterSidebar: React.FC<FilterSidebarProps> = ({
             value={programSearch}
             onChange={setProgramSearch}
           />
-          <div className="custom-scrollbar flex max-h-[220px] flex-col gap-3.5 overflow-y-auto pr-1">
+          <div className="custom-scrollbar flex max-h-55 flex-col gap-3.5 overflow-y-auto pr-1">
             {availablePrograms.length === 0 ? (
               <p className="px-1 text-[13px] italic text-gray-400">
                 {filters.academic.length === 0
@@ -786,7 +947,7 @@ const FilterSidebar: React.FC<FilterSidebarProps> = ({
               value={courseSearch}
               onChange={setCourseSearch}
             />
-            <div className="custom-scrollbar flex max-h-[220px] flex-col gap-3.5 overflow-y-auto pr-1">
+            <div className="custom-scrollbar flex max-h-55 flex-col gap-3.5 overflow-y-auto pr-1">
               {availableCourses.length === 0 ? (
                 <p className="px-1 text-[13px] italic text-gray-400">
                   {filters.program.length === 0
@@ -809,63 +970,45 @@ const FilterSidebar: React.FC<FilterSidebarProps> = ({
           </Accordion>
         )}
 
-        {/* 4. Province */}
-        <Accordion title="Province">
-          <SearchInput
-            placeholder="Search province..."
-            value={provinceSearch}
-            onChange={setProvinceSearch}
-          />
-          <div className="custom-scrollbar flex max-h-[220px] flex-col gap-3.5 overflow-y-auto pr-1">
-            {filteredProvinces.map((item) => (
-              <CheckboxItem
-                key={item.id}
-                id={`prov-${item.id}`}
-                label={item.label}
-                count={item.count}
-                checked={filters.province.includes(item.id)}
-                onChange={() => {
-                  toggle("province", item.id);
-                  setFilters((prev) => ({ ...prev, district: [] }));
-                }}
-              />
-            ))}
+        {/* 4. Location (Province/District) */}
+        <Accordion title="Location" defaultOpen>
+          <div className="flex flex-col gap-2 pt-1">
+            <SelectInput
+              placeholder="Select Province"
+              value={filters.province[0] || ""}
+              options={provinceOptions}
+              onChange={(val) => {
+                setFilters((prev) => ({
+                  ...prev,
+                  province: val ? [val] : [],
+                  district: [],
+                }));
+              }}
+            />
+            <SelectInput
+              placeholder="Select District"
+              value={filters.district[0] || ""}
+              options={
+                filters.province[0]
+                  ? provinceOptions.find((p) => p.id === filters.province[0])?.districts || []
+                  : []
+              }
+              onChange={(val) => {
+                setFilters((prev) => ({
+                  ...prev,
+                  district: val ? [val] : [],
+                }));
+              }}
+              disabled={!filters.province[0]}
+            />
           </div>
         </Accordion>
 
-        {/* 5. District */}
-        <Accordion title="District">
-          <SearchInput
-            placeholder="Search district..."
-            value={districtSearch}
-            onChange={setDistrictSearch}
-          />
-          <div className="custom-scrollbar flex max-h-[220px] flex-col gap-3.5 overflow-y-auto pr-1">
-            {availableDistricts.length === 0 ? (
-              <p className="px-1 text-[13px] italic text-gray-400">
-                {filters.province.length === 0
-                  ? "Select a Province first."
-                  : "No districts found."}
-              </p>
-            ) : (
-              availableDistricts.map((item) => (
-                <CheckboxItem
-                  key={item.id}
-                  id={`dist-${item.id}`}
-                  label={item.label}
-                  count={item.count}
-                  checked={filters.district.includes(item.id)}
-                  onChange={() => toggle("district", item.id)}
-                />
-              ))
-            )}
-          </div>
-        </Accordion>
 
         {/* 6. College Type */}
         <Accordion title="Colleges Type">
           <div className="flex flex-col gap-3.5 pt-1">
-            {COLLEGE_TYPES.map((item) => (
+            {collegeTypesWithCounts.map((item) => (
               <CheckboxItem
                 key={item.id}
                 id={`type-${item.id}`}
@@ -886,7 +1029,7 @@ const FilterSidebar: React.FC<FilterSidebarProps> = ({
               value={universitySearch}
               onChange={setUniversitySearch}
             />
-            <div className="custom-scrollbar flex max-h-[220px] flex-col gap-3.5 overflow-y-auto pr-1">
+            <div className="custom-scrollbar flex max-h-55 flex-col gap-3.5 overflow-y-auto pr-1">
               {availableUniversities.length === 0 ? (
                 <p className="px-1 text-[13px] italic text-gray-400">
                   No universities found.
@@ -938,29 +1081,22 @@ const FilterSidebar: React.FC<FilterSidebarProps> = ({
         {/* 9. Course Duration */}
         <Accordion title="Course Duration">
           <div className="flex flex-col gap-3.5 pt-1">
-            {COURSE_DURATIONS.map((dur) => (
+            {courseDurationsWithCounts.map((dur) => (
               <CheckboxItem
-                key={dur}
-                id={`dur-${dur}`}
-                label={dur}
-                checked={filters.courseDuration.includes(dur)}
-                onChange={() => toggle("courseDuration", dur)}
+                key={dur.id}
+                id={`dur-${dur.id}`}
+                label={dur.label}
+                count={dur.count}
+                checked={filters.courseDuration.includes(dur.id)}
+                onChange={() => toggle("courseDuration", dur.id)}
               />
             ))}
           </div>
         </Accordion>
 
         {/* 10. Sort By */}
-        <div>
-          <button
-            type="button"
-            className="group flex w-full items-center justify-between bg-white py-4"
-          >
-            <span className="text-[15px] font-semibold text-gray-900">
-              Sort By
-            </span>
-          </button>
-          <div className="flex flex-col gap-3.5 pb-4 pt-1">
+        <Accordion title="Sort By" defaultOpen>
+          <div className="flex flex-col gap-3.5 pt-1">
             {SORT_OPTIONS.map((opt) => (
               <RadioItem
                 key={opt.id}
@@ -974,7 +1110,7 @@ const FilterSidebar: React.FC<FilterSidebarProps> = ({
               />
             ))}
           </div>
-        </div>
+        </Accordion>
       </div>
 
       <style>{`

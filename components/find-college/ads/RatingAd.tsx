@@ -38,7 +38,7 @@ const RatingAd: React.FC = () => {
 
   return (
     <>
-      <div className="bg-white rounded-[24px] shadow-[0_4px_24px_rgba(0,0,0,0.06)] border border-gray-100 w-full p-5 md:p-6 flex flex-col md:flex-row items-center justify-center lg:justify-start gap-4 md:gap-8 transition-all my-2 lg:my-4">
+      <div className="bg-white rounded-3xl shadow-[0_4px_24px_rgba(0,0,0,0.06)] border border-gray-100 w-full p-5 md:p-6 flex flex-col md:flex-row items-center justify-center lg:justify-start gap-4 md:gap-8 transition-all my-2 lg:my-4">
         <div className="shrink-0 flex justify-center">
             <img 
                 src="https://i.pinimg.com/1200x/31/bb/5b/31bb5b12e99840c5a1571878f30b69ef.jpg" 
@@ -76,8 +76,8 @@ const RatingAd: React.FC = () => {
         </div>
       </div>
 
-      <div className={`fixed inset-0 bg-black/50 flex items-center justify-center z-[100] p-4 transition-opacity ${isModalOpen ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'}`} onClick={() => setIsModalOpen(false)}>
-        <div className={`bg-white rounded-[20px] shadow-2xl max-w-[480px] w-full p-8 relative transition-transform duration-300 ${isModalOpen ? 'scale-100' : 'scale-95'}`} onClick={e => e.stopPropagation()}>
+      <div className={`fixed inset-0 bg-black/50 flex items-center justify-center z-100 p-4 transition-opacity ${isModalOpen ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'}`} onClick={() => setIsModalOpen(false)}>
+        <div className={`bg-white rounded-[20px] shadow-2xl max-w-120 w-full p-8 relative transition-transform duration-300 ${isModalOpen ? 'scale-100' : 'scale-95'}`} onClick={e => e.stopPropagation()}>
             <button onClick={() => setIsModalOpen(false)} className="absolute top-5 right-5 text-gray-400 hover:text-gray-700 transition-colors">
                 <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12"></path>
@@ -127,7 +127,7 @@ const RatingAd: React.FC = () => {
             <div>
                 <p className="text-[15px] font-medium text-gray-800 mb-3">Please provide your feedback so that we can improve your experience.</p>
                 <textarea 
-                    className="w-full border border-gray-300 rounded-[12px] p-3 text-[15px] text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-1 focus:ring-[#1E3A8A] focus:border-[#1E3A8A] resize-none h-24" 
+                    className="w-full border border-gray-300 rounded-xl p-3 text-[15px] text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-1 focus:ring-[#1E3A8A] focus:border-[#1E3A8A] resize-none h-24" 
                     placeholder="Write here..."
                 ></textarea>
             </div>

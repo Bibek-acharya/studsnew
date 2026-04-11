@@ -132,7 +132,7 @@ const ScholarshipManagePage: React.FC<Props> = ({ onCreateNew, onEdit }) => {
   const filteredScholarships = scholarships.filter(s => s.status === currentTab);
 
   return (
-    <div className="p-4 lg:p-8 w-full max-w-[1400px] mx-auto min-h-full font-sans">
+    <div className="p-4 lg:p-8 w-full max-w-350 mx-auto min-h-full font-sans">
       {/* Toast Notification */}
       {toastMessage && (
         <div className="fixed bottom-6 right-6 z-50 bg-white border border-gray-200 shadow-lg rounded-lg p-4 flex items-center gap-3 min-w-[250px] animate-in slide-in-from-bottom-5">

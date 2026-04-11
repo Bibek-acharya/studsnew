@@ -29,8 +29,8 @@ export const routeMap: Record<ViewKey, string> = {
   studentDashboard: "/user/dashboard",
   userDashboard: "/user/dashboard",
   writeReview: "/write-review",
-  login: "/login",
-  signup: "/login",
+  login: "/",
+  signup: "/",
 };
 
 export const notificationTabs: NotificationTab[] = [

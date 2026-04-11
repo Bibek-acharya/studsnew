@@ -138,6 +138,12 @@ const BackToTop: React.FC = () => {
   );
 };
 
+const openAuthModal = (view: "login" | "signup" = "login") => {
+  window.dispatchEvent(
+    new CustomEvent("studsphere:open-auth-modal", { detail: { view } }),
+  );
+};
+
 const CampusForumPage: React.FC = () => {
   const { user, isAuthenticated } = useAuth();
   const [posts, setPosts] = useState<ForumPost[]>([]);
@@ -614,7 +620,7 @@ const CampusForumPage: React.FC = () => {
         />
       )}
 
-      <div className={`mx-auto w-full gap-8 px-4 ${selectedCommunity ? "max-w-[1200px] grid grid-cols-1 lg:grid-cols-3 py-4" : "max-w-[1400px] flex justify-center py-6"}`}>
+      <div className={`mx-auto w-full gap-8 px-4 ${selectedCommunity ? "max-w-[1200px] grid grid-cols-1 lg:grid-cols-3 py-4" : "max-w-350 flex justify-center py-6"}`}>
         
         {!selectedCommunity && (
           <div className="sticky top-6 hidden shrink-0 space-y-6 lg:block w-[280px]">
@@ -625,9 +631,13 @@ const CampusForumPage: React.FC = () => {
               <h2 className="text-lg font-bold text-gray-900">{user ? `${user.first_name} ${user.last_name}` : "Guest User"}</h2>
               <p className="text-[11px] font-bold text-gray-400 mb-2 uppercase tracking-widest">{user?.role || "STUDENT"}</p>
               {!isAuthenticated && (
-                <a href="/login" className="mt-1 text-sm font-bold text-blue-600 hover:underline">
+                <button
+                  type="button"
+                  onClick={() => openAuthModal("login")}
+                  className="mt-1 text-sm font-bold text-blue-600 hover:underline"
+                >
                   Login / Register
-                </a>
+                </button>
               )}
             </div>
 

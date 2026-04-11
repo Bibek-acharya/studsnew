@@ -2,10 +2,12 @@ export type StepIndex = 1 | 2 | 3 | 4 | 5 | 6;
 
 export type StudyMode = "full-time" | "part-time" | "either" | "not-sure";
 export type BinaryChoice = "yes" | "no";
+export type AcademicScoreType = "gpa" | "percentage" | "";
 
 export interface RecommenderState {
   educationLevel: string;
   studyMode: StudyMode | "";
+  academicScoreType: AcademicScoreType;
   academicScore: string;
   fieldOfStudy: string;
   willingEssay: BinaryChoice | "";

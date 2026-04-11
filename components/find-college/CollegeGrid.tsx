@@ -14,8 +14,9 @@ import {
 import Pagination from "@/components/ui/Pagination";
 
 import LocationAd from "./ads/LocationAd";
-import ByTypeAd from "./ads/ByTypeAd";
 import RatingAd from "./ads/RatingAd";
+import TrendingCollegesAd from "./ads/TrendingCollegesAd";
+import ClaimCollegeModal from "./ClaimCollegeModal";
 
 interface CollegeGridProps {
   filters: CollegeFilters;
@@ -23,10 +24,113 @@ interface CollegeGridProps {
   onNavigate: (view: any, data?: any) => void;
 }
 
-const SEARCHABLE_FILTER_KEYS: Array<keyof CollegeFilters> = [
-  "academic",
+type ArrayFilterKey = {
+  [K in keyof CollegeFilters]: CollegeFilters[K] extends string[] ? K : never;
+}[keyof CollegeFilters];
+
+const SEARCHABLE_FILTER_KEYS: Array<ArrayFilterKey> = [
   "stream",
+  "facilities",
+  "feeRange",
+  "duration",
+  "popularity",
+  "quick",
 ];
+
+const FILTER_LABELS: Record<string, string> = {
+  plus2: "+2 / Higher Secondary",
+  alevel: "A Level",
+  bachelor: "Bachelor",
+  master: "Master",
+  diploma: "Diploma / CTEVT",
+  p2_sci: "Science",
+  p2_mgmt: "Management",
+  p2_hum: "Humanities",
+  p2_edu: "Education",
+  p2_law: "Law",
+  al_sci: "A Level - Science",
+  al_nonsci: "A Level - Non-Science/Mgmt",
+  b_it: "Information Technology & CS",
+  b_eng: "Engineering",
+  b_biz: "Business & Management",
+  b_med: "Medical & Healthcare",
+  b_hum: "Humanities & Social Sciences",
+  b_agr: "Agriculture & Forestry",
+  m_biz: "Business & Management",
+  m_it: "IT & Computer Science",
+  m_eng: "Engineering",
+  m_hum: "Humanities & Social Sciences",
+  d_eng: "Engineering (CTEVT)",
+  d_med: "Medical & Nursing (CTEVT)",
+  d_hm: "Hotel Management & Tourism",
+  d_agr: "Agriculture & Forestry (CTEVT)",
+  c_bsc_csit: "BSc CSIT",
+  c_bca: "BCA",
+  c_bit: "BIT",
+  c_bim: "BIM",
+  c_civil: "BE Civil Engineering",
+  c_comp: "BE Computer Engineering",
+  c_arch: "B. Architecture",
+  c_elec: "BE Electrical/Electronics",
+  c_bba: "BBA",
+  c_bbs: "BBS",
+  c_bbm: "BBM",
+  c_bhm: "BHM",
+  c_mbbs: "MBBS",
+  c_bds: "BDS",
+  c_nursing: "BSc. Nursing",
+  c_pharma: "B. Pharmacy",
+  c_bsc_ag: "BSc. Agriculture",
+  c_bsc_forestry: "BSc. Forestry",
+  c_mba: "MBA",
+  c_mbs: "MBS",
+  c_msc_csit: "MSc. CSIT",
+  c_mca: "MCA",
+  c_mit: "MIT",
+  c_dip_civil: "Diploma in Civil Eng.",
+  c_dip_comp: "Diploma in Computer Eng.",
+  c_pcl_nurs: "PCL Nursing",
+  c_ha: "HA (General Medicine)",
+  prov_koshi: "Koshi",
+  prov_madhesh: "Madhesh",
+  prov_bagmati: "Bagmati",
+  prov_gandaki: "Gandaki",
+  prov_lumbini: "Lumbini",
+  prov_karnali: "Karnali",
+  prov_sudur: "Sudurpashchim",
+  d_jhapa: "Jhapa",
+  d_morang: "Morang",
+  d_sunsari: "Sunsari",
+  d_dhanusha: "Dhanusha",
+  d_parsa: "Parsa",
+  d_bhaktapur: "Bhaktapur",
+  d_chitwan: "Chitwan",
+  d_kathmandu: "Kathmandu",
+  d_lalitpur: "Lalitpur",
+  d_kavre: "Kavrepalanchok",
+  d_kaski: "Kaski",
+  d_nawalpur: "Nawalpur",
+  d_tanahun: "Tanahun",
+  d_banke: "Banke",
+  d_rupandehi: "Rupandehi",
+  d_dang: "Dang",
+  d_surkhet: "Surkhet",
+  d_jumla: "Jumla",
+  d_kailali: "Kailali",
+  d_kanchanpur: "Kanchanpur",
+  u_tu: "Tribhuvan University",
+  u_ku: "Kathmandu University",
+  u_pu: "Pokhara University",
+  u_purbanchal: "Purbanchal University",
+  u_mwu: "Mid-Western University",
+  u_fwu: "Far-Western University",
+  u_afu: "Agriculture & Forestry University",
+  u_lincoln: "Lincoln University",
+  u_london_met: "London Metropolitan University",
+  u_west_england: "University of the West of England",
+};
+
+const toFilterLabel = (value: string): string => FILTER_LABELS[value] || value;
 
 const COLLEGES_PER_PAGE = 20;
 
@@ -49,20 +153,46 @@ const CollegeGrid: React.FC<CollegeGridProps> = ({
 
   const searchTerms = useMemo(
     () =>
-      [filters.search, ...SEARCHABLE_FILTER_KEYS.flatMap((key) => filters[key])]
+      [
+        filters.search,
+        ...filters.academic.map(toFilterLabel),
+        ...filters.program.map(toFilterLabel),
+        ...filters.course.map(toFilterLabel),
+        ...filters.courseDuration.map(toFilterLabel),
+        ...SEARCHABLE_FILTER_KEYS.flatMap((key) => filters[key]).map(toFilterLabel),
+      ]
         .map((value) => String(value).trim())
         .filter(Boolean),
     [filters],
   );
 
+  const locationTerms = useMemo(
+    () => [...filters.province, ...filters.district, ...filters.location].map(toFilterLabel),
+    [filters],
+  );
+
+  const universityTerms = useMemo(
+    () => filters.university.map(toFilterLabel),
+    [filters.university],
+  );
+
   const { data, isLoading, error } = useQuery({
     queryKey: ["colleges", currentPage, filters, isQuickInquiryMode],
     queryFn: () => {
+      const sortConfig: Record<string, { sort: string; order: "ASC" | "DESC" }> = {
+        popularity: { sort: "rating", order: "DESC" },
+        rating: { sort: "rating", order: "DESC" },
+        verified: { sort: "verified", order: "DESC" },
+        fee_low: { sort: "rating", order: "ASC" },
+        fee_high: { sort: "rating", order: "DESC" },
+      };
+      const selectedSort = sortConfig[filters.sortBy] || sortConfig.popularity;
+
       const params: any = {
         page: currentPage,
         pageSize: COLLEGES_PER_PAGE,
-        sort: "rating",
-        order: "DESC",
+        sort: selectedSort.sort,
+        order: selectedSort.order,
       };
 
       if (filters.quick.includes("Verified")) params.verified = true;
@@ -73,6 +203,9 @@ const CollegeGrid: React.FC<CollegeGridProps> = ({
         params.popular = true;
       }
       if (filters.type.length > 0) params.type = filters.type.join(",");
+      if (locationTerms.length > 0) params.location = locationTerms.join(",");
+      if (universityTerms.length > 0) params.affiliation = universityTerms.join(",");
+      if (filters.feeMax < 2000000) params.feeMax = filters.feeMax;
 
       if (searchTerms.length > 0) params.search = searchTerms.join(" ");
 
@@ -176,7 +309,7 @@ const CollegeGrid: React.FC<CollegeGridProps> = ({
             )}
 
             <label className="group mt-auto flex cursor-pointer items-center gap-2.5">
-              <div className="relative flex h-[20px] w-[20px] items-center justify-center">
+              <div className="relative flex h-5 w-5 items-center justify-center">
                 <input
                   type="checkbox"
                   checked={
@@ -186,7 +319,7 @@ const CollegeGrid: React.FC<CollegeGridProps> = ({
                   onChange={handleSelectAll}
                   className="peer sr-only"
                 />
-                <div className="absolute inset-0 rounded-sm border-[1.5px] border-slate-300 bg-white transition-colors group-hover:border-slate-400 peer-checked:border-[#0000FF] peer-checked:bg-[#0000FF]"></div>
+                <div className="absolute inset-0 rounded-sm border-[1.5px] border-slate-300 bg-white transition-colors group-hover:border-slate-400 peer-checked:border-brand-blue peer-checked:bg-brand-blue"></div>
                 <svg
                   className="pointer-events-none absolute z-10 h-3.5 w-3.5 text-white opacity-0 transition-opacity peer-checked:opacity-100"
                   fill="none"
@@ -253,7 +386,7 @@ const CollegeGrid: React.FC<CollegeGridProps> = ({
         id="card-grid"
       >
         {isLoading && colleges.length === 0 && (
-          <div className="col-span-1 rounded-[16px] border border-gray-100 bg-white py-16 text-center text-gray-500 shadow-[0_2px_15px_rgb(0,0,0,0.04)] md:col-span-2 xl:col-span-3">
+          <div className="col-span-1 rounded-2xl border border-gray-100 bg-white py-16 text-center text-gray-500 shadow-[0_2px_15px_rgb(0,0,0,0.04)] md:col-span-2 xl:col-span-3">
             Loading colleges...
           </div>
         )}
@@ -262,13 +395,12 @@ const CollegeGrid: React.FC<CollegeGridProps> = ({
           const globalIndex = (currentPage - 1) * COLLEGES_PER_PAGE + index;
           const isAfter2Rows = (index + 1) % 6 === 0;
           const adCycleIndex = Math.floor(globalIndex / 6) % 3;
-          const isVerifiedSimulated = Number(college.id) % 2 === 0;
 
           return (
             <React.Fragment key={college.id}>
               <ProgramCard
                 college={college}
-                isVerified={isVerifiedSimulated}
+                isVerified={Boolean(college.verified)}
                 isSaved={savedColleges.includes(college.id)}
                 isSelected={selectedForInquiry.includes(college.id)}
                 isQuickInquiryMode={isQuickInquiryMode}
@@ -279,8 +411,8 @@ const CollegeGrid: React.FC<CollegeGridProps> = ({
               />
               {isAfter2Rows && (
                 <div className="col-span-1 md:col-span-2 xl:col-span-3 w-full">
-                  {adCycleIndex === 0 && <LocationAd />}
-                  {adCycleIndex === 1 && <ByTypeAd />}
+                  {adCycleIndex === 0 && <TrendingCollegesAd />}
+                  {adCycleIndex === 1 && <LocationAd />}
                   {adCycleIndex === 2 && <RatingAd />}
                 </div>
               )}
@@ -289,7 +421,7 @@ const CollegeGrid: React.FC<CollegeGridProps> = ({
         })}
 
         {!isLoading && colleges.length === 0 && (
-          <div className="col-span-1 rounded-[16px] border border-gray-100 bg-white py-16 text-center text-gray-500 shadow-[0_2px_15px_rgb(0,0,0,0.04)] md:col-span-2 xl:col-span-3">
+          <div className="col-span-1 rounded-2xl border border-gray-100 bg-white py-16 text-center text-gray-500 shadow-[0_2px_15px_rgb(0,0,0,0.04)] md:col-span-2 xl:col-span-3">
             No colleges found matching your filters.
           </div>
         )}
@@ -307,19 +439,19 @@ const CollegeGrid: React.FC<CollegeGridProps> = ({
       <div
         className={`fixed bottom-0 left-0 z-40 flex w-full transform justify-center border-t border-slate-200 bg-white px-4 py-4 shadow-[0_-4px_15px_rgb(0,0,0,0.05)] transition-transform duration-300 sm:px-6 ${selectedForInquiry.length > 0 ? "translate-y-0" : "translate-y-full"}`}
       >
-        <div className="flex w-full max-w-[1400px] items-center justify-end gap-4 sm:gap-6">
+        <div className="flex w-full max-w-350 items-center justify-end gap-4 sm:gap-6">
           <button
             onClick={() => setSelectedForInquiry([])}
-            className="cursor-pointer border-none bg-transparent text-[14px] font-semibold text-[#0000FF] hover:underline sm:text-[15px]"
+            className="cursor-pointer border-none bg-transparent text-[14px] font-semibold text-brand-blue hover:underline sm:text-[15px]"
           >
             Clear Selection
           </button>
           <button
             onClick={() => setIsModalOpen(true)}
-            className="flex items-center gap-2 rounded-full bg-[#0000FF] px-5 py-2.5 text-[14px] font-semibold text-white shadow-md transition-colors hover:bg-[#0000CC] sm:px-6 sm:text-[15px]"
+            className="flex items-center gap-2 rounded-full bg-brand-blue px-5 py-2.5 text-[14px] font-semibold text-white shadow-md transition-colors hover:bg-brand-hover sm:px-6 sm:text-[15px]"
           >
             Quick Apply{" "}
-            <span className="flex h-5 w-5 items-center justify-center rounded-full bg-white text-[12px] font-bold text-[#0000FF]">
+            <span className="flex h-5 w-5 items-center justify-center rounded-full bg-white text-[12px] font-bold text-brand-blue">
               {selectedForInquiry.length}
             </span>
           </button>
@@ -337,7 +469,7 @@ const CollegeGrid: React.FC<CollegeGridProps> = ({
         >
           <div className="flex shrink-0 items-center justify-between border-b border-gray-100 px-6 py-5">
             <h3 className="flex items-center gap-2 text-lg font-bold text-gray-900">
-              <i className="fa-solid fa-paper-plane text-[20px] text-[#0000FF]"></i>
+              <i className="fa-solid fa-paper-plane text-[20px] text-brand-blue"></i>
               Quick Apply to Colleges
             </h3>
             <button
@@ -374,7 +506,7 @@ const CollegeGrid: React.FC<CollegeGridProps> = ({
                   rows={4}
                   value={inquiryMessage}
                   onChange={(e) => setInquiryMessage(e.target.value)}
-                  className="w-full resize-none rounded-[12px] border border-gray-200 bg-gray-50 px-4 py-3 text-[14px] text-gray-800 shadow-sm transition-all focus:border-transparent focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#0000FF]"
+                  className="w-full resize-none rounded-xl border border-gray-200 bg-gray-50 px-4 py-3 text-[14px] text-gray-800 shadow-sm transition-all focus:border-transparent focus:bg-white focus:outline-none focus:ring-2 focus:ring-brand-blue"
                   placeholder="E.g., What are the admission requirements, fee structures, and scholarship options for the upcoming intake?"
                 ></textarea>
               </div>
@@ -388,7 +520,7 @@ const CollegeGrid: React.FC<CollegeGridProps> = ({
                 </button>
                 <button
                   type="submit"
-                  className="flex w-full items-center justify-center gap-2 rounded-xl bg-[#0000FF] px-6 py-2.5 text-[14px] font-bold text-white shadow-[0_4px_12px_rgba(0,0,255,0.2)] transition-all hover:-translate-y-0.5 hover:bg-[#0000CC] sm:w-auto"
+                  className="flex w-full items-center justify-center gap-2 rounded-xl bg-brand-blue px-6 py-2.5 text-[14px] font-bold text-white shadow-[0_4px_12px_rgba(0,0,255,0.2)] transition-all hover:-translate-y-0.5 hover:bg-brand-hover sm:w-auto"
                 >
                   Submit Application
                 </button>
@@ -427,32 +559,30 @@ const ProgramCard: React.FC<{
   onToggleSelection,
   onClaim,
 }) => {
-  const [isExpanded, setIsExpanded] = useState(false);
   const description =
     (typeof college.description === "string" && college.description) ||
     "Explore academics, facilities, and counselling support for this college.";
-  const shortDesc = description.slice(0, 80) + "... ";
 
   return (
-    <div className="flex h-full cursor-pointer flex-col rounded-2xl border border-gray-100 bg-white p-4 transition-all duration-300 hover:border-gray-200">
+    <div className="flex h-full cursor-pointer flex-col rounded-2xl border border-gray-200 bg-white p-4 transition-all duration-300 hover:border-blue-500/20">
       <div
         onClick={() => onNavigate("collegeDetails", { id: college.id })}
-        className="group relative h-[140px] shrink-0 overflow-hidden rounded-xl"
+        className="group relative h-35 shrink-0 overflow-hidden rounded-xl"
       >
-        <div className="absolute top-3 left-3 bg-blue-600 text-white text-[10px] font-bold px-2 py-0.5 rounded uppercase tracking-wider z-10 shadow-sm">
-          Featured
-        </div>
-        {college.image_url ? (
+        {college.featured && (
+          <div className="absolute top-3 left-3 z-10 rounded bg-blue-600 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-white shadow-sm">
+            Featured
+          </div>
+        )}
+        {isVerified && college.image_url ? (
           <img
             src={college.image_url}
             alt={college.name}
             className="h-full w-full object-cover"
           />
         ) : (
-          <div className="flex h-full w-full items-center justify-center bg-[#0000ff]">
-            <span className="px-3 text-center text-sm font-semibold text-white">
-              No image available
-            </span>
+          <div className="flex h-full w-full items-center justify-center bg-brand-blue">
+            
           </div>
         )}
         {!isVerified && (
@@ -479,7 +609,7 @@ const ProgramCard: React.FC<{
                 onChange={onToggleSelection}
                 className="peer sr-only"
               />
-              <div className="absolute inset-0 rounded-[6px] border-[1.5px] border-slate-300 bg-white/90 shadow-sm backdrop-blur-sm transition-colors hover:border-slate-400 peer-checked:border-[#0000FF] peer-checked:bg-[#0000FF]"></div>
+              <div className="absolute inset-0 rounded-md border border-slate-300 bg-white/90 shadow-sm backdrop-blur-sm transition-colors hover:border-slate-400 peer-checked:border-brand-blue peer-checked:bg-brand-blue"></div>
               <svg
                 className="pointer-events-none absolute z-10 h-4 w-4 text-white opacity-0 transition-opacity peer-checked:opacity-100"
                 fill="none"
@@ -513,49 +643,53 @@ const ProgramCard: React.FC<{
           )}
         </div>
 
-        <div className="flex items-center text-[14px] text-gray-500 mb-2">
+        <div className="mb-2 flex min-w-0 items-center text-[14px] text-gray-500">
           <div className="flex items-center gap-1 font-bold text-slate-700">
             <Star className="w-4 h-4 text-amber-500 fill-amber-500" />
             <span>{Number(college.rating || 0).toFixed(1)}</span>
           </div>
           <span className="mx-3 text-gray-300 font-light">|</span>
           <div className="flex items-center gap-1.5">
-            <Award className="w-[18px] h-[18px] text-gray-400" />
+            <Award className="w-4.5 h-4.5 text-gray-400" />
             <span className="font-semibold text-slate-700">
               {college.type || "College"}
             </span>
           </div>
           <span className="mx-3 text-gray-300 font-light">|</span>
-          <div className="flex items-center gap-1.5">
-            <MapPin className="w-[18px] h-[18px] text-gray-400" />
-            <span className="font-semibold text-slate-700">
+          <div className="flex min-w-0 flex-1 items-center gap-1.5">
+            <MapPin className="w-4.5 h-4.5 text-gray-400" />
+            <span
+              className="block min-w-0 truncate font-semibold text-slate-700"
+              title={college.location || "Kathmandu"}
+            >
               {college.location || "Kathmandu"}
             </span>
           </div>
         </div>
 
         <div className="flex items-start gap-2 text-[14px] text-gray-500 mb-2">
-          <Award className="w-[18px] h-[18px] text-gray-400 shrink-0 mt-[3px]" />
+          <Award className="w-4.5 h-4.5 text-gray-400 shrink-0 mt-0.75" />
           <p className="leading-snug pr-4 font-semibold text-slate-700 line-clamp-1">
             {college.affiliation ||
               "NEB, Tribhuvan University, Purbanchal University"}
           </p>
         </div>
 
-        <p className="text-[14px] text-gray-500 leading-relaxed mb-4 pr-2">
-          <span>{isExpanded ? description : shortDesc}</span>
-          {description.length > 80 && (
-            <span
-              className="font-semibold text-blue-600 cursor-pointer hover:underline ml-1"
-              onClick={(e) => {
-                e.stopPropagation();
-                setIsExpanded(!isExpanded);
-              }}
-            >
-              {isExpanded ? "Show less" : "Read more"}
-            </span>
-          )}
-        </p>
+        <div className="mb-4 pr-2">
+          <p className="line-clamp-2 text-[14px] leading-relaxed text-gray-500">
+            {description}
+          </p>
+          <button
+            type="button"
+            className="mt-1 text-[14px] font-semibold text-blue-600 hover:underline"
+            onClick={(e) => {
+              e.stopPropagation();
+              onNavigate("collegeDetails", { id: college.id });
+            }}
+          >
+            Read more
+          </button>
+        </div>
 
         <div className="border-t border-dashed border-gray-200 mb-4" />
 
@@ -591,7 +725,7 @@ const ProgramCard: React.FC<{
               }}
               className="flex-1 flex items-center justify-center gap-1.5 border border-gray-200 hover:bg-gray-50 text-slate-600 font-medium py-2 px-2 rounded-md transition-colors text-[13px]"
             >
-              <MessageSquare className="w-[16px] h-[16px] text-gray-500" />
+              <MessageSquare className="w-4 h-4 text-gray-500" />
               Inquiry
             </button>
 
@@ -624,131 +758,6 @@ const ProgramCard: React.FC<{
               />
             </button>
           </div>
-        </div>
-      </div>
-    </div>
-  );
-};
-
-const ClaimCollegeModal: React.FC<{
-  college: College | null;
-  onClose: () => void;
-}> = ({ college, onClose }) => {
-  const [institutionName, setInstitutionName] = useState(college?.name || "");
-  const [registrationNumber, setRegistrationNumber] = useState("");
-  const [email, setEmail] = useState("");
-  const [contactPerson, setContactPerson] = useState("");
-  const [contactNumber, setContactNumber] = useState("");
-
-  useEffect(() => {
-    if (college) {
-      setInstitutionName(college.name);
-      setRegistrationNumber("");
-      setEmail("");
-      setContactPerson("");
-      setContactNumber("");
-    }
-  }, [college]);
-
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    alert(
-      "Claim request submitted successfully! Our team will verify and grant you access.",
-    );
-    onClose();
-  };
-
-  const isOpen = college !== null;
-
-  return (
-    <div
-      className={`fixed inset-0 z-[60] flex items-center justify-center bg-slate-900/40 backdrop-blur-sm transition-opacity duration-300 ${isOpen ? "opacity-100" : "pointer-events-none opacity-0"}`}
-      onClick={onClose}
-    >
-      <div
-        className={`mx-4 flex max-h-[90vh] w-full max-w-md flex-col rounded-[20px] bg-white shadow-2xl transition-transform duration-300 ${isOpen ? "scale-100" : "scale-95"}`}
-        onClick={(e) => e.stopPropagation()}
-      >
-        <div className="flex shrink-0 items-center justify-between border-b border-gray-100 px-6 py-5">
-          <h3 className="flex items-center gap-2 text-lg font-bold text-gray-900">
-            <i className="fa-solid fa-building-shield text-[20px] text-[#0000FF]"></i>
-            Claim Institution
-          </h3>
-          <button
-            type="button"
-            onClick={onClose}
-            className="rounded-full p-1.5 text-gray-400 transition-colors hover:bg-gray-100 hover:text-gray-700"
-          >
-            <i className="fa-solid fa-xmark text-[20px]"></i>
-          </button>
-        </div>
-        <div className="overflow-y-auto px-6 py-5">
-          <div className="mb-5 flex items-start gap-3 rounded-lg border border-blue-100 bg-blue-50 p-3.5">
-            <i className="fa-solid fa-circle-info mt-0.5 shrink-0 text-[18px] text-blue-600"></i>
-            <p className="line-height-extra text-[13px] text-blue-800">
-              Provide official details to claim{" "}
-              <span className="font-bold text-blue-700">{college?.name}</span>.
-              Upon verification, you will receive full control over this
-              profile.
-            </p>
-          </div>
-          <form onSubmit={handleSubmit} className="space-y-4">
-            <input
-              type="text"
-              placeholder="College name"
-              required
-              value={institutionName}
-              onChange={(event) => setInstitutionName(event.target.value)}
-              className="w-full rounded-xl border border-[#D5DCE8] bg-[#EEF2F6] px-4 py-3 text-[14px] shadow-sm outline-none transition focus:border-[#0000FF] focus:bg-white"
-            />
-            <input
-              type="text"
-              placeholder="Institution registration number"
-              required
-              value={registrationNumber}
-              onChange={(event) => setRegistrationNumber(event.target.value)}
-              className="w-full rounded-xl border border-[#D5DCE8] bg-[#EEF2F6] px-4 py-3 text-[14px] shadow-sm outline-none transition focus:border-[#0000FF] focus:bg-white"
-            />
-            <input
-              type="email"
-              placeholder="Work email"
-              required
-              value={email}
-              onChange={(event) => setEmail(event.target.value)}
-              className="w-full rounded-xl border border-[#D5DCE8] bg-[#EEF2F6] px-4 py-3 text-[14px] shadow-sm outline-none transition focus:border-[#0000FF] focus:bg-white"
-            />
-            <input
-              type="text"
-              placeholder="Contact Person Full Name"
-              required
-              value={contactPerson}
-              onChange={(event) => setContactPerson(event.target.value)}
-              className="w-full rounded-xl border border-[#D5DCE8] bg-[#EEF2F6] px-4 py-3 text-[14px] shadow-sm outline-none transition focus:border-[#0000FF] focus:bg-white"
-            />
-            <input
-              type="tel"
-              placeholder="Contact Number"
-              required
-              value={contactNumber}
-              onChange={(event) => setContactNumber(event.target.value)}
-              className="w-full rounded-xl border border-[#D5DCE8] bg-[#EEF2F6] px-4 py-3 text-[14px] shadow-sm outline-none transition focus:border-[#0000FF] focus:bg-white"
-            />
-            <div className="mt-8 flex flex-col justify-end gap-3 pt-4 sm:flex-row">
-              <button
-                type="button"
-                onClick={onClose}
-                className="w-full rounded-xl border border-gray-200 bg-white px-5 py-2.5 text-[14px] font-bold text-gray-600 transition-colors hover:bg-gray-50 sm:w-auto"
-              >
-                Cancel
-              </button>
-              <button
-                type="submit"
-                className="flex w-full items-center justify-center gap-2 rounded-xl bg-[#0000FF] px-6 py-2.5 text-[14px] font-bold text-white shadow-[0_4px_12px_rgba(0,0,255,0.2)] transition-all hover:-translate-y-0.5 hover:bg-[#0000CC] sm:w-auto"
-              >
-                Submit Claim Request
-              </button>
-            </div>
-          </form>
         </div>
       </div>
     </div>

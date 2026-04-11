@@ -21,7 +21,7 @@ const LocationAd: React.FC = () => {
       </h2>
       <div className="flex flex-wrap justify-center md:justify-start gap-4">
         {nepalLocations.map((location, idx) => (
-          <div key={idx} className="bg-white px-5 py-2.5 rounded-full shadow-sm text-[15px] cursor-pointer border border-green-50 flex items-center hover:-translate-y-[2px] hover:shadow-[0_4px_6px_-1px_rgba(22,101,52,0.1),0_2px_4px_-1px_rgba(22,101,52,0.06)] transition-all duration-200 ease-in-out">
+          <div key={idx} className="bg-white px-5 py-2.5 rounded-full shadow-sm text-[15px] cursor-pointer border border-green-50 flex items-center hover:-translate-y-0.5 hover:shadow-[0_4px_6px_-1px_rgba(22,101,52,0.1),0_2px_4px_-1px_rgba(22,101,52,0.06)] transition-all duration-200 ease-in-out">
             <span className="text-gray-800 font-medium mr-1.5">{location.name}</span>
             <span className="text-gray-400">({location.count})</span>
           </div>

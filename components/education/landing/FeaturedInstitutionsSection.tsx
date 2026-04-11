@@ -128,7 +128,7 @@ const CollegeCard: React.FC<{
       onClick={() => onNavigate("collegeDetails", college)}
     >
       <div className="w-full h-30 rounded-lg overflow-hidden mb-4 relative">
-        <div className="absolute top-3 left-3 bg-[#0000ff] text-white text-[10px] font-bold px-2 py-0.5 rounded uppercase tracking-wider z-10 shadow-sm">
+        <div className="absolute top-3 left-3 bg-brand-blue text-white text-[10px] font-bold px-2 py-0.5 rounded uppercase tracking-wider z-10 shadow-sm">
           Featured
         </div>
         <img
@@ -211,7 +211,7 @@ const CollegeCard: React.FC<{
 
       <div className="flex flex-col gap-3 mt-auto">
         <button
-          className="w-full bg-[#0000ff] hover:bg-blue-700 text-white font-medium text-[14px] py-2.5 px-4 rounded-lg transition-colors"
+          className="w-full bg-brand-blue hover:bg-blue-700 text-white font-medium text-[14px] py-2.5 px-4 rounded-lg transition-colors"
           onClick={(e) => { e.stopPropagation(); onNavigate("bookCounselling", { collegeId: college.id }); }}
         >
           Get counselling

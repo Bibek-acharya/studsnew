@@ -120,7 +120,7 @@ const FinancialAidSection: React.FC<FinancialAidSectionProps> = ({ onNavigate })
                 >
                   Details
                 </button>
-                <button className="flex-1 bg-[#0000FF] text-white rounded-lg py-2 sm:py-2.5 text-[12px] sm:text-[13px] md:text-[14px] font-semibold hover:bg-[#0000CC] hover:shadow-md transition-all duration-200">
+                <button className="flex-1 bg-brand-blue text-white rounded-lg py-2 sm:py-2.5 text-[12px] sm:text-[13px] md:text-[14px] font-semibold hover:bg-[#0000CC] hover:shadow-md transition-all duration-200">
                   Apply
                 </button>
                 <button

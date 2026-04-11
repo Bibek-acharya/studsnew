@@ -135,7 +135,7 @@ const EventShowcaseSection: React.FC<EventShowcaseSectionProps> = ({ onNavigate 
                     <button
                       type="button"
                       onClick={() => onNavigate("events", slide)}
-                      className="inline-flex items-center justify-center bg-[#0000FF] hover:bg-[#0000CC] text-white font-semibold py-2.5 sm:py-3 md:py-3.5 px-5 sm:px-6 md:px-8 rounded-lg transition-colors shadow-sm text-[13px] sm:text-[14px] md:text-[15px]"
+                      className="inline-flex items-center justify-center bg-brand-blue hover:bg-[#0000CC] text-white font-semibold py-2.5 sm:py-3 md:py-3.5 px-5 sm:px-6 md:px-8 rounded-lg transition-colors shadow-sm text-[13px] sm:text-[14px] md:text-[15px]"
                     >
                       Apply Now
                     </button>
@@ -166,7 +166,7 @@ const EventShowcaseSection: React.FC<EventShowcaseSectionProps> = ({ onNavigate 
                 key={index}
                 onClick={() => setCurrentSlide(index)}
                 className={`pill h-2 rounded-full transition-all duration-300 ${
-                  currentSlide === index ? "w-7 sm:w-8 bg-[#0000FF]" : "w-3 sm:w-4 bg-gray-200 hover:bg-gray-300"
+                  currentSlide === index ? "w-7 sm:w-8 bg-brand-blue" : "w-3 sm:w-4 bg-gray-200 hover:bg-gray-300"
                 }`}
               />
             ))}

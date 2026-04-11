@@ -118,7 +118,7 @@ const CampusEventsSection: React.FC<CampusEventsSectionProps> = ({ onNavigate })
               onClick={() => onNavigate("eventDetails", event)}
             >
               {/* Top Banner */}
-              <div className="bg-[#0000ff] relative h-17.5 xs:h-20 sm:h-22.5 flex items-center px-4 sm:px-5">
+              <div className="bg-brand-blue relative h-17.5 xs:h-20 sm:h-22.5 flex items-center px-4 sm:px-5">
                 <span className="absolute top-0 right-0 bg-gray-50 text-gray-600 text-[10px] xs:text-[11px] sm:text-[11px] font-semibold tracking-wide px-2 sm:px-3 py-1 sm:py-1.5 uppercase rounded-bl-md border-l border-b border-gray-200">
                   {event.tag}
                 </span>

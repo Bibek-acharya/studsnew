@@ -34,7 +34,7 @@ const Pagination: React.FC<PaginationProps> = ({
           onClick={() => onPageChange(page)}
           className={`flex h-9 w-9 items-center justify-center rounded-[8px] text-sm font-medium transition-colors ${
             page === currentPage
-              ? "bg-[#0000FF] text-white shadow-sm hover:bg-[#0000CC]"
+              ? "bg-brand-blue text-white shadow-sm hover:bg-[#0000CC]"
               : "border border-gray-200 bg-white text-gray-600 hover:bg-gray-50"
           }`}
         >
@@ -53,7 +53,7 @@ const Pagination: React.FC<PaginationProps> = ({
           onClick={() => onPageChange(totalPages)}
           className={`flex h-9 w-9 items-center justify-center rounded-[8px] text-sm font-medium transition-colors ${
             currentPage === totalPages
-              ? "bg-[#0000FF] text-white shadow-sm hover:bg-[#0000CC]"
+              ? "bg-brand-blue text-white shadow-sm hover:bg-[#0000CC]"
               : "border border-gray-200 bg-white text-gray-600 hover:bg-gray-50"
           }`}
         >

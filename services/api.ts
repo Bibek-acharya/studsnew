@@ -78,6 +78,19 @@ export interface College {
   location?: string;
   affiliation?: string;
   verified?: boolean;
+  featured?: boolean;
+}
+
+export interface CollegeFilterCountsResponse {
+  data: {
+    total: number;
+    type_counts: Record<string, number>;
+    type_counts_by_id: Record<string, number>;
+    facet_counts_by_id: Record<string, number>;
+    featured: number;
+    verified: number;
+    popular: number;
+  };
 }
 
 export interface CollegeRecommendation {
@@ -248,34 +261,40 @@ export const apiService = {
     return { success: true, message: "Password reset successfully" };
   },
 
-  async getColleges(params: any): Promise<CollegesResponse> {
-    console.log("Fetching colleges with params:", params);
-    await new Promise(resolve => setTimeout(resolve, 500));
-    
-    const mockColleges: College[] = Array.from({ length: 16 }, (_, i) => ({
-      id: i + 1,
-      name: `College ${i + 1}`,
-      image_url: "https://images.unsplash.com/photo-1562774053-701939374585?q=80&w=1200&auto=format&fit=crop",
-      description: "Explore academics, facilities, and counselling support for this college.",
-      rating: 4.0 + Math.random(),
-      reviews: Math.floor(Math.random() * 500) + 50,
-      type: i % 3 === 0 ? "Private" : i % 3 === 1 ? "Government" : "Affiliated",
-      location: "Kathmandu",
-      affiliation: params.affiliation || (i % 2 === 0 ? "Tribhuvan University" : "Pokhara University"),
-      verified: i % 4 === 0,
-    }));
-
-    return {
-      data: {
-        colleges: mockColleges,
-        pagination: {
-          total: 150,
-          totalPages: 10,
-          page: params.page || 1,
-          pageSize: 16,
-        },
-      },
+  async getColleges(params: Record<string, any>): Promise<CollegesResponse> {
+    const typeIdToBackendValue: Record<string, string> = {
+      ct_private: "Private",
+      ct_public: "Public / Govt",
+      ct_community: "Community",
+      ct_constituent: "Constituent",
+      ct_foreign: "Foreign Affiliated",
     };
+
+    const normalizedParams: Record<string, string> = {};
+    Object.entries(params || {}).forEach(([key, value]) => {
+      if (value === undefined || value === null || value === "") return;
+
+      if (key === "type" && typeof value === "string") {
+        const normalizedTypes = value
+          .split(",")
+          .map((type) => type.trim())
+          .filter(Boolean)
+          .map((type) => typeIdToBackendValue[type] || type);
+        if (normalizedTypes.length > 0) {
+          normalizedParams[key] = normalizedTypes.join(",");
+        }
+        return;
+      }
+
+      normalizedParams[key] = String(value);
+    });
+
+    const query = new URLSearchParams(normalizedParams).toString();
+    return apiRequest<CollegesResponse>(`/api/v1/colleges${query ? `?${query}` : ""}`);
+  },
+
+  async getCollegeFilterCounts(): Promise<CollegeFilterCountsResponse> {
+    return apiRequest<CollegeFilterCountsResponse>("/api/v1/colleges/filter-counts");
   },
 
   async getEducationCourses(): Promise<{ data: { courses: EducationCourse[] } }> {
@@ -565,21 +584,7 @@ export const apiService = {
   },
 
   async getCollegeById(id: number): Promise<{ data: College }> {
-    await new Promise(resolve => setTimeout(resolve, 400));
-    return {
-      data: {
-        id,
-        name: "GoldenGate International College",
-        image_url: "https://goldengateintl.com/wp-content/uploads/2023/05/Untitled-design-1.png",
-        description: "The B.Sc. in Data Science & Artificial Intelligence is designed to bridge the gap between theoretical mathematics and practical engineering. Students will dive deep into machine learning algorithms, big data analytics, and neural networks.",
-        rating: 4.5,
-        reviews: 1024,
-        type: "Private",
-        location: "Kamalpokhari, Kathmandu",
-        affiliation: "Tribhuvan University",
-        verified: true,
-      },
-    };
+    return apiRequest<{ data: College }>(`/api/v1/colleges/${id}`);
   },
 
   async uploadForumMedia(token: string, files: File[]): Promise<string[]> {

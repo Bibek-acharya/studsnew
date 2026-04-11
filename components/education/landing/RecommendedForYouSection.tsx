@@ -40,14 +40,14 @@ const RecommendedForYouSection: React.FC<RecommendedForYouSectionProps> = ({ onN
             <div className="flex flex-col w-full max-w-[280px] xs:max-w-[300px] sm:max-w-[320px] gap-2.5 sm:gap-3">
               <button
                 onClick={() => onNavigate("collegeQuiz")}
-                className="bg-[#0000FF] hover:bg-[#0000CC] text-white font-medium py-2.5 sm:py-3 px-5 sm:px-6 rounded-xl w-full text-sm xs:text-base sm:text-base md:text-lg shadow-sm hover:shadow-md active:scale-[0.98] transition-all"
+                className="bg-brand-blue hover:bg-[#0000CC] text-white font-medium py-2.5 sm:py-3 px-5 sm:px-6 rounded-xl w-full text-sm xs:text-base sm:text-base md:text-lg shadow-sm hover:shadow-md active:scale-[0.98] transition-all"
               >
                 Take our College Quiz
               </button>
 
               <button
                 onClick={() => onNavigate("collegeRecommenderTool")}
-                className="bg-[#0000FF] hover:bg-[#0000CC] text-white font-medium py-2.5 sm:py-3 px-5 sm:px-6 rounded-xl w-full text-sm xs:text-base sm:text-base md:text-lg shadow-sm hover:shadow-md active:scale-[0.98] transition-all"
+                className="bg-brand-blue hover:bg-[#0000CC] text-white font-medium py-2.5 sm:py-3 px-5 sm:px-6 rounded-xl w-full text-sm xs:text-base sm:text-base md:text-lg shadow-sm hover:shadow-md active:scale-[0.98] transition-all"
               >
                 Try College Recommender
               </button>
