@@ -9,7 +9,8 @@ export default function FooterWrapper() {
   // Hide the global footer for specific routes
   const hideGlobalFooter =
     pathname.startsWith("/scholarship-provider") ||
-    pathname.startsWith("/institution-zone");
+    pathname.startsWith("/institution-zone") ||
+    pathname.startsWith("/user/dashboard");
 
   if (hideGlobalFooter) {
     return null;

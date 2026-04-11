@@ -527,7 +527,7 @@ const EducationNavbar: React.FC<EducationNavbarProps> = ({
                           <div className="absolute -top-1.5 right-6 w-3 h-3 bg-white border-t border-l border-gray-100/80 transform rotate-45"></div>
                           <div className="flex flex-col relative z-10 bg-white rounded-xl">
                             <button
-                              onClick={() => go("dashboard")}
+                              onClick={() => go("userDashboard")}
                               className="flex items-center gap-3 px-3 py-2.5 hover:bg-gray-50 rounded-xl transition-all"
                             >
                               <LayoutDashboard size={18} />
