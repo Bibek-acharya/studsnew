@@ -819,7 +819,7 @@ const CourseFinderPage: React.FC<CourseFinderPageProps> = ({ onNavigate }) => {
                         </div>
 
                         <h3
-                          className={`text-base font-bold text-gray-900 mb-3 ${theme.hover} transition-colors line-clamp-2 leading-snug`}
+                          className={`text-base font-bold text-gray-900 mb-3 hover:text-[#0000ff] transition-colors line-clamp-2 leading-snug`}
                         >
                           {course.title}
                         </h3>
