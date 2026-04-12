@@ -3,6 +3,7 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import { apiService } from "../../services/api";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 
 import ScholarshipProviderDashboard from "@/components/scholarship-provider/ScholarshipProviderDashboard";
 
@@ -601,6 +602,19 @@ const ScholarshipProviderZone: React.FC<ScholarshipProviderZoneProps> = ({
                 Join Nepal's largest scholarship network and connect with
                 deserving students nationwide.
               </p>
+              <div className="mt-8 flex flex-wrap gap-4 justify-center lg:justify-start">
+                <Link 
+                  href="/scholarship-apply"
+                  className="bg-white text-[#6366F1] font-bold px-8 py-4 rounded-2xl shadow-xl shadow-black/10 hover:bg-indigo-50 transition-all flex items-center gap-2"
+                >
+                  <i className="fa-solid fa-file-signature"></i>
+                  Preview Entrance Form
+                </Link>
+                <button className="bg-indigo-500/30 text-white border border-white/20 font-bold px-8 py-4 rounded-2xl hover:bg-indigo-500/50 transition-all flex items-center gap-2">
+                  <i className="fa-solid fa-play"></i>
+                  Watch Demo
+                </button>
+              </div>
             </div>
 
             <div className="w-full max-w-[460px]">

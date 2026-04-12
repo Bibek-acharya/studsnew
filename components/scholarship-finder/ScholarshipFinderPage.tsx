@@ -1,8 +1,8 @@
 "use client";
 
 import React, { useState } from "react";
+import GlobalFilterSection from "@/components/ui/GlobalFilterSection";
 import {
-  SlidersHorizontal,
   ChevronDown,
   Search,
   ArrowUpRight,
@@ -17,6 +17,10 @@ import {
   Calendar,
   Bookmark,
 } from "lucide-react";
+import { FaSliders } from "react-icons/fa6";
+import { useQuery } from "@tanstack/react-query";
+import { apiService } from "@/services/api";
+import Link from "next/link";
 
 // Types
 interface ScholarshipData {
@@ -310,52 +314,97 @@ const scholarships: ScholarshipData[] = [
   },
 ];
 
-const FilterSection = ({
-  title,
-  icon,
-  children,
-  isOpenDefault = false,
-}: {
+const Accordion: React.FC<{
   title: string;
-  icon?: React.ReactNode;
+  defaultOpen?: boolean;
   children: React.ReactNode;
-  isOpenDefault?: boolean;
-}) => {
+}> = ({ title, defaultOpen = false, children }) => {
+  const [open, setOpen] = useState(defaultOpen);
   return (
-    <details className="group mb-4 border-b border-gray-100 pb-4" open={isOpenDefault}>
-      <summary className="flex justify-between items-center font-semibold text-[14px] text-slate-800 cursor-pointer list-none">
-        <span className="flex items-center gap-2">
-          {icon}
-          {title}
-        </span>
-        <ChevronDown className="w-4 h-4 text-gray-500 transition-transform group-open:rotate-180" />
-      </summary>
-      <div className="mt-3">{children}</div>
-    </details>
+    <GlobalFilterSection
+      title={title}
+      isOpen={open}
+      onToggle={() => setOpen((o) => !o)}
+    >
+      {children}
+    </GlobalFilterSection>
   );
 };
 
-const CheckboxLabel = ({ label, checked = false }: { label: string; checked?: boolean }) => (
-  <label className="flex items-center gap-3 cursor-pointer group/label mb-3">
-    <input
-      type="checkbox"
-      defaultChecked={checked}
-      className="w-4 h-4 accent-[#0000ff] border-gray-300 rounded cursor-pointer"
-    />
-    <span className="text-[14px] text-gray-600 group-hover/label:text-gray-900 transition-colors">
-      {label}
-    </span>
+const CheckboxItem: React.FC<{
+  id: string;
+  label: string;
+  count?: number;
+  checked: boolean;
+  onChange: () => void;
+}> = ({ id, label, count, checked, onChange }) => (
+  <label
+    htmlFor={id}
+    className="group flex w-full cursor-pointer items-center justify-between mt-3"
+  >
+    <div className="flex items-center gap-3">
+      <input
+        id={id}
+        type="checkbox"
+        checked={checked}
+        onChange={onChange}
+        className="custom-checkbox"
+      />
+      <span className="text-[14.5px] text-[#475569] transition-colors group-hover:text-gray-900">
+        {label}
+      </span>
+    </div>
+    {count !== undefined && (
+      <span className="rounded-md bg-slate-50 px-2 py-0.5 text-[12px] font-medium text-slate-500">
+        {count.toLocaleString()}
+      </span>
+    )}
   </label>
 );
 
-const SearchInput = ({ placeholder }: { placeholder: string }) => (
-  <div className="relative mb-3">
-    <Search className="w-3.5 h-3.5 absolute left-2.5 top-1/2 -translate-y-1/2 text-gray-400" />
+const SearchInput: React.FC<{
+  placeholder: string;
+  value: string;
+  onChange: (v: string) => void;
+}> = ({ placeholder, value, onChange }) => (
+  <div className="relative mb-3 mt-4">
+    <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
     <input
       type="text"
+      value={value}
+      onChange={(e) => onChange(e.target.value)}
       placeholder={placeholder}
-      className="w-full pl-8 pr-3 py-1.5 bg-gray-50 border border-gray-200 rounded-lg text-[12px] focus:outline-none focus:ring-1 focus:ring-blue-500/50 focus:border-blue-500 focus:bg-white transition-all placeholder:text-gray-400"
+      className="block w-full rounded-lg border border-gray-200 bg-[#f8fafc] py-2 pl-9 pr-3 text-[13.5px] text-gray-900 outline-none transition placeholder:text-gray-400 focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
     />
+  </div>
+);
+
+const SelectInput: React.FC<{
+  placeholder: string;
+  value: string;
+  options: Array<{ id: string; label: string }>;
+  onChange: (v: string) => void;
+  disabled?: boolean;
+}> = ({ placeholder, value, options, onChange, disabled }) => (
+  <div className="relative mb-3 mt-4">
+    <select
+      value={value}
+      onChange={(e) => onChange(e.target.value)}
+      disabled={disabled}
+      className="block w-full appearance-none rounded-md border border-gray-200 bg-[#f8fafc] py-2 px-3 pr-9 text-[13.5px] text-gray-900 outline-none transition disabled:bg-gray-100 disabled:text-gray-400 focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+    >
+      <option value="" disabled={value !== ""}>
+        {placeholder}
+      </option>
+      {options.map((opt) => (
+        <option key={opt.id} value={opt.id}>
+          {opt.label}
+        </option>
+      ))}
+    </select>
+    <div className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-gray-400">
+      <ChevronDown className="w-4 h-4" />
+    </div>
   </div>
 );
 
@@ -430,12 +479,18 @@ const ScholarshipCard = ({ scholarship }: { scholarship: ScholarshipData }) => {
 
         {/* Action Buttons */}
         <div className="flex items-center gap-2">
-          <button className="flex-1 py-2 text-[13px] font-semibold text-gray-700 bg-white border border-gray-200 rounded-md hover:bg-gray-50 transition-colors">
+          <Link 
+            href={`/scholarship-finder/${scholarship.id}`}
+            className="flex-1 py-2 text-[13px] font-semibold text-gray-700 bg-white border border-gray-200 rounded-md hover:bg-gray-50 transition-colors text-center"
+          >
             Details
-          </button>
-          <button className="flex-[1.2] py-2 text-[13px] font-semibold text-white bg-brand-blue rounded-md hover:bg-[#0000cc] transition-colors">
+          </Link>
+          <Link 
+            href="/scholarship-apply"
+            className="flex-[1.2] py-2 text-[13px] font-semibold text-white bg-brand-blue rounded-md hover:bg-[#0000cc] transition-colors text-center"
+          >
             Apply
-          </button>
+          </Link>
           <button className="p-2 border border-gray-200 rounded-md text-gray-400 hover:text-gray-600 hover:bg-gray-50 transition-colors flex items-center justify-center">
             <Bookmark className="w-4.5 h-4.5" />
           </button>
@@ -447,6 +502,69 @@ const ScholarshipCard = ({ scholarship }: { scholarship: ScholarshipData }) => {
 
 const FeaturedScholarshipsPage = () => {
   const [toast, setToast] = useState<string | null>(null);
+  const [showAppliedDropdown, setShowAppliedDropdown] = useState(false);
+  const [locating, setLocating] = useState(false);
+  const [navLocString, setNavLocString] = useState("");
+  const [filters, setFilters] = useState({
+    studyLevel: [] as string[],
+    stream: [] as string[],
+    location: { province: "", district: "" },
+    type: [] as string[],
+    provider: [] as string[],
+    coverage: [] as string[],
+    gpa: "" as string,
+    entrance: [] as string[],
+    deadline: [] as string[],
+    category: [] as string[],
+  });
+
+  const [courseSearch, setCourseSearch] = useState("");
+
+  const handleLocate = () => {
+    setLocating(true);
+    setTimeout(() => {
+      setNavLocString("Kathmandu");
+      setLocating(false);
+    }, 1500);
+  };
+
+  const toggleFilter = (key: keyof typeof filters, value: string) => {
+    setFilters((prev) => {
+      const current = prev[key];
+      if (Array.isArray(current)) {
+        return {
+          ...prev,
+          [key]: current.includes(value)
+            ? current.filter((v) => v !== value)
+            : [...current, value],
+        };
+      }
+      return { ...prev, [key]: value };
+    });
+  };
+
+  const clearAll = () => {
+    setFilters({
+      studyLevel: [],
+      stream: [],
+      location: { province: "", district: "" },
+      type: [],
+      provider: [],
+      coverage: [],
+      gpa: "",
+      entrance: [],
+      deadline: [],
+      category: [],
+    });
+  };
+
+  const appliedFiltersCount = Object.values(filters).reduce((acc, val) => {
+    if (Array.isArray(val)) return acc + val.length;
+    if (typeof val === "object" && val !== null) {
+      return acc + (val.province ? 1 : 0) + (val.district ? 1 : 0);
+    }
+    return acc + (val ? 1 : 0);
+  }, 0);
 
   const handleExploreClick = (cardName: string) => {
     setToast(`Redirecting to opportunities from ${cardName}...`);
@@ -460,109 +578,317 @@ const FeaturedScholarshipsPage = () => {
           {/* Main Layout: Sidebar + Grid */}
           <div className="flex flex-col lg:flex-row gap-8 items-start">
             {/* Filters Sidebar (Left Side) */}
-            <aside className="w-full lg:w-1/4 bg-white rounded-2xl border border-gray-200/80 p-5 shrink-0 sticky top-8">
-              <div className="flex items-center justify-between mb-6 pb-4 border-b border-gray-100">
-                <h3 className="font-bold text-[18px] text-slate-900 flex items-center gap-2">
-                  <SlidersHorizontal className="w-5 h-5 text-gray-500" />
-                  Filters
-                </h3>
-                <button className="text-[13px] font-semibold text-blue-600 hover:text-blue-800 transition-colors">
-                  Applied
-                </button>
+            <aside className="w-full lg:w-1/4 shrink-0 sticky top-8">
+              <div className="relative w-full rounded-[20px] border border-gray-200 bg-white p-6">
+                {/* Header */}
+                <div className="mb-2 flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <FaSliders size={18} className="text-black" />
+                    <h3 className="font-black text-xl text-slate-900 tracking-tight">
+                      Filters
+                    </h3>
+                  </div>
+                  {appliedFiltersCount > 0 && (
+                    <button
+                      type="button"
+                      onClick={() => setShowAppliedDropdown((prev) => !prev)}
+                      className="inline-flex items-center gap-2 rounded-md px-3 py-1.5 text-[12px] font-semibold text-blue-700 transition-colors"
+                    >
+                      Applied ({appliedFiltersCount})
+                      <ChevronDown
+                        className={`w-3 h-3 transition-transform ${showAppliedDropdown ? "rotate-180" : ""}`}
+                      />
+                    </button>
+                  )}
+                </div>
+
+                {appliedFiltersCount > 0 && showAppliedDropdown && (
+                  <div className="absolute left-0 right-0 top-16 z-30 mx-6 rounded-lg border border-gray-200 bg-white p-3 shadow-lg">
+                    <div className="flex flex-wrap gap-2 pb-3">
+                      {Object.entries(filters).map(([key, value]) => {
+                        if (Array.isArray(value)) {
+                          return value.map((v) => (
+                            <button
+                              key={`${key}-${v}`}
+                              onClick={() => toggleFilter(key as any, v)}
+                              className="inline-flex items-center gap-1.5 rounded-full border border-blue-100 bg-blue-50 px-3 py-1.5 text-[11px] font-medium text-blue-700 transition-colors hover:border-red-100 hover:bg-red-50 hover:text-red-700"
+                            >
+                              {v}
+                              <i className="fa-solid fa-xmark text-[10px]"></i>
+                            </button>
+                          ));
+                        }
+                        if (typeof value === "object" && value !== null) {
+                          return Object.entries(value).map(([subKey, subVal]) =>
+                            subVal ? (
+                              <button
+                                key={`${key}-${subVal}`}
+                                onClick={() =>
+                                  setFilters((prev) => ({
+                                    ...prev,
+                                    location: {
+                                      ...prev.location,
+                                      [subKey]: "",
+                                    },
+                                  }))
+                                }
+                                className="inline-flex items-center gap-1.5 rounded-full border border-blue-100 bg-blue-50 px-3 py-1.5 text-[11px] font-medium text-blue-700 transition-colors hover:border-red-100 hover:bg-red-50 hover:text-red-700"
+                              >
+                                {subVal}
+                                <i className="fa-solid fa-xmark text-[10px]"></i>
+                              </button>
+                            ) : null,
+                          );
+                        }
+                        return value ? (
+                          <button
+                            key={`${key}-${value}`}
+                            onClick={() => setFilters((prev) => ({ ...prev, [key]: "" }))}
+                            className="inline-flex items-center gap-1.5 rounded-full border border-blue-100 bg-blue-50 px-3 py-1.5 text-[11px] font-medium text-blue-700 transition-colors hover:border-red-100 hover:bg-red-50 hover:text-red-700"
+                          >
+                            {value}
+                            <i className="fa-solid fa-xmark text-[10px]"></i>
+                          </button>
+                        ) : null;
+                      })}
+                    </div>
+                    <div className="border-t border-gray-100 pt-2 text-center">
+                      <button
+                        type="button"
+                        onClick={() => {
+                          clearAll();
+                          setShowAppliedDropdown(false);
+                        }}
+                        className="text-[12px] font-semibold text-red-600 transition-colors hover:text-red-700"
+                      >
+                        Reset Filters
+                      </button>
+                    </div>
+                  </div>
+                )}
+
+                {/* Scholarship Near Me */}
+                <div className="border-b border-gray-100 py-3">
+                  <button
+                    type="button"
+                    onClick={handleLocate}
+                    className="flex w-full items-center justify-center gap-2 rounded-md border border-blue-500 bg-blue-50 px-4 py-3 text-blue-500 outline-none transition-all duration-200 hover:bg-blue-100 active:bg-blue-200"
+                  >
+                    {locating ? (
+                      <svg
+                        className="animate-spin"
+                        width="18"
+                        height="18"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth="2"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                      >
+                        <circle cx="12" cy="12" r="3" />
+                        <circle cx="12" cy="12" r="7" />
+                        <line x1="12" y1="1" x2="12" y2="5" />
+                        <line x1="12" y1="19" x2="12" y2="23" />
+                        <line x1="1" y1="12" x2="5" y2="12" />
+                        <line x1="19" y1="12" x2="23" y2="12" />
+                      </svg>
+                    ) : (
+                      <i
+                        className={`fa-solid ${navLocString ? "fa-location-dot" : "fa-location-crosshairs"} text-[16px]`}
+                      ></i>
+                    )}
+                    <span className="text-[15px] font-medium">
+                      {locating
+                        ? "Locating..."
+                        : navLocString
+                          ? navLocString
+                          : "Scholarship Near Me"}
+                    </span>
+                  </button>
+                </div>
+
+                {/* 1. Study Level */}
+                <Accordion title="Study Level" defaultOpen>
+                  {["+2", "Bachelor", "Master", "A Level", "CTEVT"].map((level) => (
+                    <CheckboxItem
+                      key={level}
+                      id={`level-${level}`}
+                      label={level}
+                      checked={filters.studyLevel.includes(level)}
+                      onChange={() => toggleFilter("studyLevel", level)}
+                    />
+                  ))}
+                </Accordion>
+
+                {/* 2. Course / Stream */}
+                <Accordion title="Course / Stream" defaultOpen>
+                  <SearchInput
+                    placeholder="Search course..."
+                    value={courseSearch}
+                    onChange={setCourseSearch}
+                  />
+                  {["Science", "Management", "IT", "Medical", "Humanities", "Engineering"].map(
+                    (stream) => (
+                      <CheckboxItem
+                        key={stream}
+                        id={`stream-${stream}`}
+                        label={stream}
+                        checked={filters.stream.includes(stream)}
+                        onChange={() => toggleFilter("stream", stream)}
+                      />
+                    ),
+                  )}
+                </Accordion>
+
+                {/* 3. Location */}
+                <Accordion title="Location">
+                  <SelectInput
+                    placeholder="Select Province"
+                    value={filters.location.province}
+                    options={[
+                      { id: "Bagmati", label: "Bagmati" },
+                      { id: "Gandaki", label: "Gandaki" },
+                      { id: "Lumbini", label: "Lumbini" },
+                    ]}
+                    onChange={(val) =>
+                      setFilters((prev) => ({
+                        ...prev,
+                        location: { ...prev.location, province: val, district: "" },
+                      }))
+                    }
+                  />
+                  <SelectInput
+                    placeholder="Select District"
+                    value={filters.location.district}
+                    options={
+                      filters.location.province === "Bagmati"
+                        ? [
+                            { id: "Kathmandu", label: "Kathmandu" },
+                            { id: "Lalitpur", label: "Lalitpur" },
+                            { id: "Bhaktapur", label: "Bhaktapur" },
+                          ]
+                        : []
+                    }
+                    onChange={(val) =>
+                      setFilters((prev) => ({
+                        ...prev,
+                        location: { ...prev.location, district: val },
+                      }))
+                    }
+                    disabled={!filters.location.province}
+                  />
+                </Accordion>
+
+                {/* 4. Scholarship Type */}
+                <Accordion title="Scholarship Type">
+                  {[
+                    "Merit Based",
+                    "Need Based",
+                    "Entrance Based",
+                    "Quota Based",
+                    "Talent Based",
+                  ].map((type) => (
+                    <CheckboxItem
+                      key={type}
+                      id={`type-${type}`}
+                      label={type}
+                      checked={filters.type.includes(type)}
+                      onChange={() => toggleFilter("type", type)}
+                    />
+                  ))}
+                </Accordion>
+
+                {/* 5. Provider Type */}
+                <Accordion title="Provider Type">
+                  {[
+                    "Government",
+                    "College",
+                    "University",
+                    "NGO",
+                    "INGO",
+                    "Private Organization",
+                  ].map((provider) => (
+                    <CheckboxItem
+                      key={provider}
+                      id={`provider-${provider}`}
+                      label={provider}
+                      checked={filters.provider.includes(provider)}
+                      onChange={() => toggleFilter("provider", provider)}
+                    />
+                  ))}
+                </Accordion>
+
+                {/* 6. Scholarship Coverage */}
+                <Accordion title="Scholarship Coverage">
+                  {["Full Scholarship", "75%", "50%", "25%", "Tuition Only"].map((cov) => (
+                    <CheckboxItem
+                      key={cov}
+                      id={`cov-${cov}`}
+                      label={cov}
+                      checked={filters.coverage.includes(cov)}
+                      onChange={() => toggleFilter("coverage", cov)}
+                    />
+                  ))}
+                </Accordion>
+
+                {/* 7. GPA Requirement */}
+                <Accordion title="GPA Requirement">
+                  {["No GPA Required", "2.0+", "2.5+", "3.0+", "3.5+"].map((gpa) => (
+                    <label key={gpa} className="flex items-center gap-3 cursor-pointer mt-3">
+                      <input
+                        type="radio"
+                        name="gpa"
+                        className="custom-radio"
+                        checked={filters.gpa === gpa}
+                        onChange={() => setFilters((prev) => ({ ...prev, gpa }))}
+                      />
+                      <span className="text-[14.5px] text-[#475569]">{gpa}</span>
+                    </label>
+                  ))}
+                </Accordion>
+
+                {/* 8. Entrance Requirement */}
+                <Accordion title="Entrance Requirement">
+                  {["Entrance Required", "No Entrance", "Interview Only"].map((ent) => (
+                    <CheckboxItem
+                      key={ent}
+                      id={`ent-${ent}`}
+                      label={ent}
+                      checked={filters.entrance.includes(ent)}
+                      onChange={() => toggleFilter("entrance", ent)}
+                    />
+                  ))}
+                </Accordion>
+
+                {/* 9. Deadline */}
+                <Accordion title="Deadline">
+                  {["Ending Soon", "This Week", "This Month", "Ongoing"].map((dl) => (
+                    <CheckboxItem
+                      key={dl}
+                      id={`dl-${dl}`}
+                      label={dl}
+                      checked={filters.deadline.includes(dl)}
+                      onChange={() => toggleFilter("deadline", dl)}
+                    />
+                  ))}
+                </Accordion>
+
+                {/* 10. Special Category */}
+                <Accordion title="Special Category">
+                  {["Girls", "Dalit", "Remote Area", "Underprivileged", "Local Resident"].map(
+                    (cat) => (
+                      <CheckboxItem
+                        key={cat}
+                        id={`cat-${cat}`}
+                        label={cat}
+                        checked={filters.category.includes(cat)}
+                        onChange={() => toggleFilter("category", cat)}
+                      />
+                    ),
+                  )}
+                </Accordion>
               </div>
-
-              {/* 1. Study Level */}
-              <FilterSection title="Study Level">
-                <CheckboxLabel label="+2" />
-                <CheckboxLabel label="Bachelor" />
-                <CheckboxLabel label="Master" />
-                <CheckboxLabel label="A Level" />
-                <CheckboxLabel label="CTEVT" />
-              </FilterSection>
-
-              {/* 2. Course / Stream */}
-              <FilterSection title="Course / Stream">
-                <SearchInput placeholder="Search course..." />
-                <CheckboxLabel label="Science" />
-                <CheckboxLabel label="Management" />
-                <CheckboxLabel label="IT" />
-                <CheckboxLabel label="Medical" />
-                <CheckboxLabel label="Humanities" />
-                <CheckboxLabel label="Engineering" />
-              </FilterSection>
-
-              {/* 3. Location */}
-              <FilterSection title="Location">
-                <SearchInput placeholder="Search province, district, city..." />
-                <CheckboxLabel label="All Nepal" />
-                <CheckboxLabel label="Province" />
-                <CheckboxLabel label="District" />
-                <CheckboxLabel label="City" />
-              </FilterSection>
-
-              {/* 4. Scholarship Type */}
-              <FilterSection title="Scholarship Type">
-                <SearchInput placeholder="Search type..." />
-                <CheckboxLabel label="Merit Based" />
-                <CheckboxLabel label="Need Based" />
-                <CheckboxLabel label="Entrance Based" />
-                <CheckboxLabel label="Quota Based" />
-                <CheckboxLabel label="Talent Based" />
-              </FilterSection>
-
-              {/* 5. Provider Type */}
-              <FilterSection title="Provider Type">
-                <SearchInput placeholder="Search provider..." />
-                <CheckboxLabel label="Government" />
-                <CheckboxLabel label="College" />
-                <CheckboxLabel label="University" />
-                <CheckboxLabel label="NGO" />
-                <CheckboxLabel label="INGO" />
-                <CheckboxLabel label="Private Organization" />
-              </FilterSection>
-
-              {/* 6. Scholarship Coverage */}
-              <FilterSection title="Scholarship Coverage">
-                <CheckboxLabel label="Full Scholarship" checked={true} />
-                <CheckboxLabel label="75%" />
-                <CheckboxLabel label="50%" />
-                <CheckboxLabel label="25%" />
-                <CheckboxLabel label="Tuition Only" />
-              </FilterSection>
-
-              {/* 7. GPA Requirement */}
-              <FilterSection title="GPA Requirement">
-                <CheckboxLabel label="No GPA Required" />
-                <CheckboxLabel label="2.0+" />
-                <CheckboxLabel label="2.5+" />
-                <CheckboxLabel label="3.0+" />
-                <CheckboxLabel label="3.5+" />
-              </FilterSection>
-
-              {/* 8. Entrance Requirement */}
-              <FilterSection title="Entrance Requirement">
-                <CheckboxLabel label="Entrance Required" />
-                <CheckboxLabel label="No Entrance" />
-                <CheckboxLabel label="Interview Only" />
-              </FilterSection>
-
-              {/* 9. Deadline */}
-              <FilterSection title="Deadline">
-                <CheckboxLabel label="Ending Soon" />
-                <CheckboxLabel label="This Week" />
-                <CheckboxLabel label="This Month" />
-                <CheckboxLabel label="Ongoing" />
-              </FilterSection>
-
-              {/* 10. Special Category */}
-              <FilterSection title="Special Category">
-                <SearchInput placeholder="Search category..." />
-                <CheckboxLabel label="Girls" />
-                <CheckboxLabel label="Dalit" />
-                <CheckboxLabel label="Remote Area" />
-                <CheckboxLabel label="Underprivileged" />
-                <CheckboxLabel label="Local Resident" />
-              </FilterSection>
             </aside>
 
             {/* Grid Container (Right Side) */}
@@ -746,6 +1072,76 @@ const FeaturedScholarshipsPage = () => {
           {toast}
         </div>
       )}
+
+      <style jsx global>{`
+        .custom-checkbox {
+          appearance: none;
+          background-color: #fff;
+          margin: 0;
+          width: 1.15em;
+          height: 1.15em;
+          border: 1px solid #94a3b8;
+          border-radius: 0.35rem;
+          display: grid;
+          place-content: center;
+          cursor: pointer;
+          transition: all 0.2s ease-in-out;
+          flex-shrink: 0;
+        }
+        .custom-checkbox::before {
+          content: "";
+          width: 0.65em;
+          height: 0.65em;
+          transform: scale(0);
+          transition: 120ms transform ease-in-out;
+          box-shadow: inset 1em 1em white;
+          clip-path: polygon(14% 44%, 0 65%, 50% 100%, 100% 16%, 80% 0%, 43% 62%);
+        }
+        .custom-checkbox:checked {
+          background-color: #2563eb;
+          border-color: #2563eb;
+        }
+        .custom-checkbox:checked::before {
+          transform: scale(1);
+        }
+        .custom-checkbox:hover {
+          border-color: #64748b;
+        }
+
+        .custom-radio {
+          appearance: none;
+          background-color: #fff;
+          margin: 0;
+          width: 1.15em;
+          height: 1.15em;
+          border: 1px solid #94a3b8;
+          border-radius: 50%;
+          display: grid;
+          place-content: center;
+          cursor: pointer;
+          transition: all 0.2s ease-in-out;
+          flex-shrink: 0;
+        }
+        .custom-radio::before {
+          content: "";
+          width: 0.5em;
+          height: 0.5em;
+          border-radius: 50%;
+          transform: scale(0);
+          transition: 120ms transform ease-in-out;
+          background-color: white;
+        }
+        .custom-radio:checked {
+          background-color: #2563eb;
+          border-color: #2563eb;
+        }
+        .custom-radio:checked::before {
+          transform: scale(1);
+        }
+        .custom-radio:hover {
+          border-color: #64748b;
+        }
+      `}</style>
     </div>
   );
 };

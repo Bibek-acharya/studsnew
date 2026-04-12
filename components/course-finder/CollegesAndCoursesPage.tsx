@@ -7,6 +7,7 @@ import {
   College as ApiCollege,
   EducationCourse,
 } from "../../services/api";
+import GlobalFilterSection from "../ui/GlobalFilterSection";
 
 interface SelectedCourseContext {
   id?: string;
@@ -51,19 +52,24 @@ const CollegesAndCoursesPage: React.FC<CollegesAndCoursesPageProps> = ({
   const [page, setPage] = useState(1);
 
   const [openFilters, setOpenFilters] = useState<Record<string, boolean>>({
-    academic: true,
+    level: true,
     stream: true,
+    affiliation: false,
     location: true,
     type: true,
-    facilities: true,
-    fee: true,
-    duration: true,
-    popularity: true,
+    fee: false,
+    status: false,
   });
 
   const [verifiedOnly, setVerifiedOnly] = useState(false);
   const [popularOnly, setPopularOnly] = useState(false);
+  const [selectedLevels, setSelectedLevels] = useState<string[]>([]);
+  const [selectedStreams, setSelectedStreams] = useState<string[]>([]);
+  const [selectedAffiliations, setSelectedAffiliations] = useState<string[]>([]);
+  const [selectedStatuses, setSelectedStatuses] = useState<string[]>([]);
+  const [selectedFeeRanges, setSelectedFeeRanges] = useState<string[]>([]);
   const [streamSearch, setStreamSearch] = useState("");
+  const [affiliationSearch, setAffiliationSearch] = useState("");
   const [province, setProvince] = useState("All Provinces");
   const [nationalWide, setNationalWide] = useState(false);
   const [selectedCollegeType, setSelectedCollegeType] = useState("");
@@ -291,7 +297,7 @@ const CollegesAndCoursesPage: React.FC<CollegesAndCoursesPageProps> = ({
         <h3 className="text-[13px] font-bold text-gray-900">{title}</h3>
         <svg className={`w-4 h-4 text-gray-400 transition-transform duration-200 ${openFilters[key] ? "rotate-180" : ""}`} fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7"></path></svg>
       </div>
-      {!openFilters[key] ? null : <div className="filter-content">{content}</div>}
+      {openFilters[key] ? <div className="filter-content">{content}</div> : null}
     </div>
   );
 
@@ -342,130 +348,271 @@ const CollegesAndCoursesPage: React.FC<CollegesAndCoursesPageProps> = ({
         </div>
 
         <div className="flex flex-col lg:flex-row gap-8 items-start">
-          <aside className="w-[280px] flex-shrink-0 hidden lg:flex flex-col bg-white border border-gray-100 rounded-xl p-5 shadow-sm h-fit">
-            <div className="flex justify-between items-center mb-6">
-              <h2 className="text-[16px] font-bold text-gray-900 flex items-center gap-2">
-                <svg className="w-4 h-4 text-blue-600" fill="currentColor" viewBox="0 0 24 24"><path d="M10 18h4v-2h-4v2zM3 6v2h18V6H3zm3 7h12v-2H6v2z"></path></svg>
-                Filters
-              </h2>
+          <aside className="w-full lg:w-75 h-fit sticky top-24 rounded-2xl border border-[#e9edf2] bg-white shadow-[0_2px_15px_rgb(0,0,0,0.04)] overflow-hidden">
+            <div className="flex items-center justify-between border-b border-gray-100 px-5 py-4">
+              <h3 className="text-[17px] font-bold text-gray-900 tracking-tight flex items-center gap-2">
+                <i className="fa-solid fa-sliders text-[14px]"></i> Filters
+              </h3>
               <button
                 onClick={() => {
                   setVerifiedOnly(false);
                   setPopularOnly(false);
+                  setSelectedLevels([]);
+                  setSelectedStreams([]);
+                  setSelectedAffiliations([]);
+                  setSelectedStatuses([]);
+                  setSelectedFeeRanges([]);
                   setStreamSearch("");
+                  setAffiliationSearch("");
                   setProvince("All Provinces");
                   setNationalWide(false);
                   setSelectedCollegeType("");
                 }}
-                className="text-[13px] text-gray-500 hover:text-gray-800 flex items-center gap-1 font-medium transition-colors"
+                className="text-[12px] font-semibold text-brand-blue transition-colors hover:text-brand-hover"
               >
-                <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg>
-                Reset
+                <span className="inline-flex items-center gap-2 rounded-md border border-red-100 bg-red-50 px-3 py-1.5 text-red-700">
+                  <i className="fa-solid fa-xmark text-[10px]"></i>
+                  Reset
+                </span>
               </button>
             </div>
 
-            <div className="mb-5 border-b border-gray-100 pb-5">
-              <h3 className="text-[11px] font-bold text-gray-400 uppercase tracking-wider mb-3">Quick Filters</h3>
-              <div className="flex flex-wrap gap-2">
-                <button onClick={() => setVerifiedOnly((prev) => !prev)} className={`border text-[11px] px-2.5 py-1.5 rounded flex items-center gap-1 font-medium ${verifiedOnly ? "border-green-300 bg-green-100 text-green-800" : "border-green-200 bg-green-50 text-green-700"}`}><svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd"></path></svg>Verified</button>
-                <button onClick={() => setPopularOnly((prev) => !prev)} className={`border text-[11px] px-2.5 py-1.5 rounded flex items-center gap-1 font-medium ${popularOnly ? "border-blue-300 bg-blue-100 text-blue-800" : "border-blue-200 bg-blue-50 text-blue-700"}`}><svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>New</button>
-                <button className="border border-red-200 bg-red-50 text-red-700 text-[11px] px-2.5 py-1.5 rounded flex items-center gap-1 font-medium"><svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>Closing</button>
+            <div className="px-5 pb-4">
+              <div className="mb-5 border-b border-gray-100 pb-5">
+                <h3 className="text-[11px] font-bold text-gray-400 uppercase tracking-wider mb-3">Quick Filters</h3>
+                <div className="flex flex-wrap gap-2">
+                  <button onClick={() => setVerifiedOnly((prev: boolean) => !prev)} className={`border text-[11px] px-2.5 py-1.5 rounded flex items-center gap-1 font-medium ${verifiedOnly ? "border-green-300 bg-green-100 text-green-800" : "border-green-200 bg-green-50 text-green-700"}`}><i className="fa-solid fa-check w-3 h-3"></i>Verified</button>
+                  <button onClick={() => setPopularOnly((prev: boolean) => !prev)} className={`border text-[11px] px-2.5 py-1.5 rounded flex items-center gap-1 font-medium ${popularOnly ? "border-blue-300 bg-blue-100 text-blue-800" : "border-blue-200 bg-blue-50 text-blue-700"}`}><i className="fa-solid fa-bolt w-3 h-3"></i>New</button>
+                </div>
               </div>
-            </div>
 
-            {renderFilterSection("academic", "Academic Level / Program", (
-              <div className="space-y-2.5">
-                <label className="flex items-center justify-between group cursor-pointer"><div className="flex items-center gap-2.5 text-[13px] text-gray-600 group-hover:text-gray-900"><input type="checkbox" defaultChecked className="custom-checkbox w-4 h-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500" />+2 / Higher Secondary</div><span className="text-[10px] text-blue-500 font-medium bg-blue-50 px-1.5 py-0.5 rounded">3220 Colleges</span></label>
-                <label className="flex items-center justify-between group cursor-pointer"><div className="flex items-center gap-2.5 text-[13px] text-gray-600 group-hover:text-gray-900"><input type="checkbox" className="custom-checkbox w-4 h-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500" />Bachelor</div><span className="text-[10px] text-blue-500 font-medium bg-blue-50 px-1.5 py-0.5 rounded">200 Colleges</span></label>
-                <label className="flex items-center justify-between group cursor-pointer"><div className="flex items-center gap-2.5 text-[13px] text-gray-600 group-hover:text-gray-900"><input type="checkbox" className="custom-checkbox w-4 h-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500" />Master</div><span className="text-[10px] text-blue-500 font-medium bg-blue-50 px-1.5 py-0.5 rounded">200 Colleges</span></label>
-                <label className="flex items-center justify-between group cursor-pointer"><div className="flex items-center gap-2.5 text-[13px] text-gray-600 group-hover:text-gray-900"><input type="checkbox" className="custom-checkbox w-4 h-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500" />Diploma / CTEVT</div><span className="text-[10px] text-blue-500 font-medium bg-blue-50 px-1.5 py-0.5 rounded">200 Colleges</span></label>
-                <label className="flex items-center justify-between group cursor-pointer"><div className="flex items-center gap-2.5 text-[13px] text-gray-600 group-hover:text-gray-900"><input type="checkbox" className="custom-checkbox w-4 h-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500" />Other</div><span className="text-[10px] text-blue-500 font-medium bg-blue-50 px-1.5 py-0.5 rounded">200 Colleges</span></label>
-              </div>
-            ))}
+              <GlobalFilterSection
+                title="Education Level"
+                isOpen={openFilters.level}
+                onToggle={() => setOpenFilters((prev) => ({ ...prev, level: !prev.level }))}
+                contentClassName="pb-4 space-y-3"
+              >
+                {["+2 (NEB)", "Bachelor", "Master", "Diploma"].map((level) => (
+                  <label className="group flex items-center gap-3 cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={selectedLevels.includes(level)}
+                      onChange={() =>
+                        setSelectedLevels((prev) =>
+                          prev.includes(level)
+                            ? prev.filter((v) => v !== level)
+                            : [...prev, level],
+                        )
+                      }
+                      className="h-[1.15em] w-[1.15em] rounded-xs border border-slate-300 text-blue-600 focus:ring-blue-500"
+                    />
+                    <span className="text-[14.5px] text-[#475569] transition-colors group-hover:text-gray-900">
+                      {level}
+                    </span>
+                  </label>
+                ))}
+              </GlobalFilterSection>
 
-            {renderFilterSection("stream", "Stream / Faculty", (
-              <>
+              <GlobalFilterSection
+                title="Field of Study"
+                isOpen={openFilters.stream}
+                onToggle={() => setOpenFilters((prev) => ({ ...prev, stream: !prev.stream }))}
+                contentClassName="pb-4 space-y-3"
+              >
                 <div className="relative mb-3">
-                  <svg className="w-4 h-4 text-gray-400 absolute left-3 top-1/2 -translate-y-1/2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
-                  <input value={streamSearch} onChange={(event) => setStreamSearch(event.target.value)} type="text" placeholder="Filter Fields..." className="w-full bg-gray-50 border border-gray-200 rounded-lg pl-9 pr-3 py-1.5 text-[12px] focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500" />
+                  <i className="fa-solid fa-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"></i>
+                  <input
+                    type="text"
+                    value={streamSearch}
+                    onChange={(e) => setStreamSearch(e.target.value)}
+                    placeholder="Search fields..."
+                    className="w-full bg-gray-50 border border-gray-200 text-sm font-medium rounded-md pl-9 pr-3 h-10 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
+                  />
                 </div>
-                <div className="space-y-2.5">
-                  <label className="flex items-center justify-between group cursor-pointer"><div className="flex items-center gap-2.5 text-[13px] text-gray-600 group-hover:text-gray-900"><input type="checkbox" className="custom-checkbox w-4 h-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500" />Science</div><span className="text-[10px] text-blue-500 font-medium bg-blue-50 px-1.5 py-0.5 rounded">200 Colleges</span></label>
-                  <label className="flex items-center justify-between group cursor-pointer"><div className="flex items-center gap-2.5 text-[13px] text-gray-600 group-hover:text-gray-900"><input type="checkbox" className="custom-checkbox w-4 h-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500" />Management</div><span className="text-[10px] text-blue-500 font-medium bg-blue-50 px-1.5 py-0.5 rounded">200 Colleges</span></label>
-                  <label className="flex items-center justify-between group cursor-pointer"><div className="flex items-center gap-2.5 text-[13px] text-gray-600 group-hover:text-gray-900"><input type="checkbox" className="custom-checkbox w-4 h-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500" />Medical</div><span className="text-[10px] text-blue-500 font-medium bg-blue-50 px-1.5 py-0.5 rounded">200 Colleges</span></label>
-                  <label className="flex items-center justify-between group cursor-pointer"><div className="flex items-center gap-2.5 text-[13px] text-gray-600 group-hover:text-gray-900"><input type="checkbox" className="custom-checkbox w-4 h-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500" />Computer Science</div><span className="text-[10px] text-blue-500 font-medium bg-blue-50 px-1.5 py-0.5 rounded">200 Colleges</span></label>
-                </div>
-              </>
-            ))}
+                {["Science", "Management", "IT / Computer Science", "Engineering", "Medical", "Law", "Humanities", "Education"].map((stream) => (
+                  <label className="group flex items-center gap-3 cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={selectedStreams.includes(stream)}
+                      onChange={() =>
+                        setSelectedStreams((prev) =>
+                          prev.includes(stream)
+                            ? prev.filter((v) => v !== stream)
+                            : [...prev, stream],
+                        )
+                      }
+                      className="h-[1.15em] w-[1.15em] rounded-xs border border-slate-300 text-blue-600 focus:ring-blue-500"
+                    />
+                    <span className="text-[14.5px] text-[#475569] transition-colors group-hover:text-gray-900">
+                      {stream}
+                    </span>
+                  </label>
+                ))}
+              </GlobalFilterSection>
 
-            {renderFilterSection("location", "Location", (
-              <>
-                <select value={province} onChange={(event) => setProvince(event.target.value)} className="w-full bg-white border border-gray-200 text-gray-600 text-[13px] rounded-lg px-3 py-2 focus:outline-none focus:border-blue-500 mb-3 appearance-none">
+              <GlobalFilterSection
+                title="Affiliation / University"
+                isOpen={openFilters.affiliation}
+                onToggle={() => setOpenFilters((prev) => ({ ...prev, affiliation: !prev.affiliation }))}
+                contentClassName="pb-4 space-y-3"
+              >
+                <div className="relative mb-3">
+                  <i className="fa-solid fa-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"></i>
+                  <input
+                    type="text"
+                    value={affiliationSearch}
+                    onChange={(e) => setAffiliationSearch(e.target.value)}
+                    placeholder="Search university..."
+                    className="w-full bg-gray-50 border border-gray-200 text-sm font-medium rounded-md pl-9 pr-3 h-10 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
+                  />
+                </div>
+                {["TU Affiliation", "IOE", "PU", "KU"].map((affiliation) => (
+                  <label className="group flex items-center gap-3 cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={selectedAffiliations.includes(affiliation)}
+                      onChange={() =>
+                        setSelectedAffiliations((prev) =>
+                          prev.includes(affiliation)
+                            ? prev.filter((v) => v !== affiliation)
+                            : [...prev, affiliation],
+                        )
+                      }
+                      className="h-[1.15em] w-[1.15em] rounded-xs border border-slate-300 text-blue-600 focus:ring-blue-500"
+                    />
+                    <span className="text-[14.5px] text-[#475569] transition-colors group-hover:text-gray-900">
+                      {affiliation}
+                    </span>
+                  </label>
+                ))}
+              </GlobalFilterSection>
+
+              <GlobalFilterSection
+                title="Location"
+                isOpen={openFilters.location}
+                onToggle={() => setOpenFilters((prev) => ({ ...prev, location: !prev.location }))}
+                contentClassName="pb-4 space-y-3"
+              >
+                <select
+                  value={province}
+                  onChange={(e) => setProvince(e.target.value)}
+                  className="w-full bg-white border border-gray-200 text-gray-600 text-sm rounded-lg px-3 py-2 focus:outline-none focus:border-blue-500 mb-3 appearance-none"
+                >
                   <option>All Provinces</option>
                   <option>Bagmati Province</option>
                   <option>Gandaki Province</option>
                   <option>Koshi Province</option>
+                  <option>Lumbini Province</option>
+                  <option>Sudurpashchim Province</option>
                 </select>
-                <label className="flex items-center gap-2.5 text-[13px] text-gray-600 group hover:text-gray-900 cursor-pointer"><input checked={nationalWide} onChange={(event) => setNationalWide(event.target.checked)} type="checkbox" className="custom-checkbox w-4 h-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500" />National Wide</label>
-              </>
-            ))}
+                <label className="flex items-center gap-2.5 text-[14px] text-gray-600 group hover:text-gray-900 cursor-pointer">
+                  <input
+                    checked={nationalWide}
+                    onChange={(e) => setNationalWide(e.target.checked)}
+                    type="checkbox"
+                    className="h-[1.15em] w-[1.15em] rounded-xs border border-slate-300 text-blue-600 focus:ring-blue-500"
+                  />
+                  <span>National Wide</span>
+                </label>
+              </GlobalFilterSection>
 
-            {renderFilterSection("type", "Colleges Type", (
-              <>
-                <div className="relative mb-3">
-                  <svg className="w-4 h-4 text-gray-400 absolute left-3 top-1/2 -translate-y-1/2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
-                  <input type="text" placeholder="Filter Fields..." className="w-full bg-gray-50 border border-gray-200 rounded-lg pl-9 pr-3 py-1.5 text-[12px] focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500" />
+              <GlobalFilterSection
+                title="Colleges Type"
+                isOpen={openFilters.type}
+                onToggle={() => setOpenFilters((prev) => ({ ...prev, type: !prev.type }))}
+                contentClassName="pb-4 space-y-3"
+              >
+                {["Government", "Private", "Community", "CTEVT"].map((type) => (
+                  <label className="group flex items-center gap-3 cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={selectedCollegeType === type}
+                      onChange={() =>
+                        setSelectedCollegeType((prev) => (prev === type ? "" : type))
+                      }
+                      className="h-[1.15em] w-[1.15em] rounded-xs border border-slate-300 text-blue-600 focus:ring-blue-500"
+                    />
+                    <span className="text-[14.5px] text-[#475569] transition-colors group-hover:text-gray-900">
+                      {type === "CTEVT" ? "CTEVT / Gov. Training" : `${type} College`}
+                    </span>
+                  </label>
+                ))}
+              </GlobalFilterSection>
+
+              <GlobalFilterSection
+                title="Fee Range"
+                isOpen={openFilters.fee}
+                onToggle={() => setOpenFilters((prev) => ({ ...prev, fee: !prev.fee }))}
+                contentClassName="pb-4 space-y-3"
+              >
+                <div className="px-1 space-y-4">
+                  <div className="flex justify-between text-xs text-gray-500 font-medium mb-2">
+                    <span>Max Fee</span>
+                    <span className="text-blue-600 font-bold">NPR 50,00,000</span>
+                  </div>
+                  <input
+                    type="range"
+                    min={0}
+                    max={5000000}
+                    step={100000}
+                    defaultValue={5000000}
+                    className="w-full"
+                  />
                 </div>
-                <div className="space-y-2.5">
-                  <label className="flex items-center justify-between group cursor-pointer"><div className="flex items-center gap-2.5 text-[13px] text-gray-600 group-hover:text-gray-900"><input checked={selectedCollegeType === "Government"} onChange={() => setSelectedCollegeType((prev) => prev === "Government" ? "" : "Government")} type="checkbox" className="custom-checkbox w-4 h-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500" />Government College</div><span className="text-[10px] text-blue-500 font-medium bg-blue-50 px-1.5 py-0.5 rounded">200 Colleges</span></label>
-                  <label className="flex items-center justify-between group cursor-pointer"><div className="flex items-center gap-2.5 text-[13px] text-gray-600 group-hover:text-gray-900"><input checked={selectedCollegeType === "Private"} onChange={() => setSelectedCollegeType((prev) => prev === "Private" ? "" : "Private")} type="checkbox" className="custom-checkbox w-4 h-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500" />Private College</div><span className="text-[10px] text-blue-500 font-medium bg-blue-50 px-1.5 py-0.5 rounded">200 Colleges</span></label>
-                  <label className="flex items-center justify-between group cursor-pointer"><div className="flex items-start gap-2.5 text-[13px] text-gray-600 group-hover:text-gray-900"><input checked={selectedCollegeType === "Affiliated"} onChange={() => setSelectedCollegeType((prev) => prev === "Affiliated" ? "" : "Affiliated")} type="checkbox" className="custom-checkbox w-4 h-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500 mt-0.5" /><span className="leading-tight">University-affiliated<br /><span className="text-[11px] text-gray-500">(TU, KU, PU, Purbanchal)</span></span></div><span className="text-[10px] text-blue-500 font-medium bg-blue-50 px-1.5 py-0.5 rounded mt-1">200 Colleges</span></label>
-                  <label className="flex items-center justify-between group cursor-pointer"><div className="flex items-center gap-2.5 text-[13px] text-gray-600 group-hover:text-gray-900"><input checked={selectedCollegeType === "Community"} onChange={() => setSelectedCollegeType((prev) => prev === "Community" ? "" : "Community")} type="checkbox" className="custom-checkbox w-4 h-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500" />Community</div><span className="text-[10px] text-blue-500 font-medium bg-blue-50 px-1.5 py-0.5 rounded">200 Colleges</span></label>
-                  <label className="flex items-center justify-between group cursor-pointer"><div className="flex items-center gap-2.5 text-[13px] text-gray-600 group-hover:text-gray-900"><input checked={selectedCollegeType === "CTEVT"} onChange={() => setSelectedCollegeType((prev) => prev === "CTEVT" ? "" : "CTEVT")} type="checkbox" className="custom-checkbox w-4 h-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500" />CTEVT / Gov. Training Center</div><span className="text-[10px] text-blue-500 font-medium bg-blue-50 px-1.5 py-0.5 rounded">200 Colleges</span></label>
-                </div>
-              </>
-            ))}
+                <div className="h-px bg-gray-100 my-2"></div>
+                {[
+                  { key: "below1", label: "Below 1 Lakh" },
+                  { key: "1to3", label: "1–3 Lakhs" },
+                  { key: "3to6", label: "3–6 Lakhs" },
+                  { key: "6plus", label: "6+ Lakhs" },
+                ].map((range) => (
+                  <label className="group flex items-center gap-3 cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={selectedFeeRanges.includes(range.key)}
+                      onChange={() =>
+                        setSelectedFeeRanges((prev) =>
+                          prev.includes(range.key)
+                            ? prev.filter((v) => v !== range.key)
+                            : [...prev, range.key],
+                        )
+                      }
+                      className="h-[1.15em] w-[1.15em] rounded-xs border border-slate-300 text-blue-600 focus:ring-blue-500"
+                    />
+                    <span className="text-[14.5px] text-[#475569] transition-colors group-hover:text-gray-900">
+                      {range.label}
+                    </span>
+                  </label>
+                ))}
+              </GlobalFilterSection>
 
-            {renderFilterSection("facilities", "Facilities / Amenities", (
-              <div className="space-y-2.5">
-                <label className="flex items-center gap-2.5 text-[13px] text-gray-600 group hover:text-gray-900 cursor-pointer"><input type="checkbox" className="custom-checkbox w-4 h-4 rounded border-gray-300 text-blue-600" />Hostel</label>
-                <label className="flex items-center gap-2.5 text-[13px] text-gray-600 group hover:text-gray-900 cursor-pointer"><input type="checkbox" className="custom-checkbox w-4 h-4 rounded border-gray-300 text-blue-600" />Library</label>
-                <label className="flex items-center gap-2.5 text-[13px] text-gray-600 group hover:text-gray-900 cursor-pointer"><input type="checkbox" className="custom-checkbox w-4 h-4 rounded border-gray-300 text-blue-600" />Computer Lab</label>
-                <label className="flex items-center gap-2.5 text-[13px] text-gray-600 group hover:text-gray-900 cursor-pointer"><input type="checkbox" className="custom-checkbox w-4 h-4 rounded border-gray-300 text-blue-600" />Canteen</label>
-                <label className="flex items-center gap-2.5 text-[13px] text-gray-600 group hover:text-gray-900 cursor-pointer"><input type="checkbox" className="custom-checkbox w-4 h-4 rounded border-gray-300 text-blue-600" />Play Ground</label>
-              </div>
-            ))}
-
-            {renderFilterSection("fee", "Total Fee Range (NPR)", (
-              <div className="space-y-2.5">
-                <label className="flex items-center gap-2.5 text-[13px] text-gray-600 group hover:text-gray-900 cursor-pointer"><input type="checkbox" className="custom-checkbox w-4 h-4 rounded border-gray-300 text-blue-600" />Free / Government Funded</label>
-                <label className="flex items-center gap-2.5 text-[13px] text-gray-600 group hover:text-gray-900 cursor-pointer"><input type="checkbox" className="custom-checkbox w-4 h-4 rounded border-gray-300 text-blue-600" />Under NPR 50,000</label>
-                <label className="flex items-center gap-2.5 text-[13px] text-gray-600 group hover:text-gray-900 cursor-pointer"><input type="checkbox" className="custom-checkbox w-4 h-4 rounded border-gray-300 text-blue-600" />NPR 50,000 – 1,00,000</label>
-                <label className="flex items-center gap-2.5 text-[13px] text-gray-600 group hover:text-gray-900 cursor-pointer"><input type="checkbox" className="custom-checkbox w-4 h-4 rounded border-gray-300 text-blue-600" />NPR 1,00,000 – 2,00,000</label>
-                <label className="flex items-center gap-2.5 text-[13px] text-gray-600 group hover:text-gray-900 cursor-pointer"><input type="checkbox" className="custom-checkbox w-4 h-4 rounded border-gray-300 text-blue-600" />Above NPR 2,00,000</label>
-              </div>
-            ))}
-
-            {renderFilterSection("duration", "Course Duration", (
-              <div className="space-y-2.5">
-                <label className="flex items-center gap-2.5 text-[13px] text-gray-600 group hover:text-gray-900 cursor-pointer"><input type="checkbox" className="custom-checkbox w-4 h-4 rounded border-gray-300 text-blue-600" />&lt; 1 month</label>
-                <label className="flex items-center gap-2.5 text-[13px] text-gray-600 group hover:text-gray-900 cursor-pointer"><input type="checkbox" className="custom-checkbox w-4 h-4 rounded border-gray-300 text-blue-600" />1–3 months</label>
-                <label className="flex items-center gap-2.5 text-[13px] text-gray-600 group hover:text-gray-900 cursor-pointer"><input type="checkbox" className="custom-checkbox w-4 h-4 rounded border-gray-300 text-blue-600" />3–6 months</label>
-                <label className="flex items-center gap-2.5 text-[13px] text-gray-600 group hover:text-gray-900 cursor-pointer"><input type="checkbox" className="custom-checkbox w-4 h-4 rounded border-gray-300 text-blue-600" />6 months–1 year</label>
-                <label className="flex items-center gap-2.5 text-[13px] text-gray-600 group hover:text-gray-900 cursor-pointer"><input type="checkbox" className="custom-checkbox w-4 h-4 rounded border-gray-300 text-blue-600" />1–2 years</label>
-                <label className="flex items-center gap-2.5 text-[13px] text-gray-600 group hover:text-gray-900 cursor-pointer"><input type="checkbox" className="custom-checkbox w-4 h-4 rounded border-gray-300 text-blue-600" />3–4 years</label>
-                <label className="flex items-center gap-2.5 text-[13px] text-gray-600 group hover:text-gray-900 cursor-pointer"><input type="checkbox" className="custom-checkbox w-4 h-4 rounded border-gray-300 text-blue-600" />4+ years</label>
-              </div>
-            ))}
-
-            {renderFilterSection("popularity", "Popularity", (
-              <div className="space-y-2.5">
-                <label className="flex items-center gap-2.5 text-[13px] text-gray-600 group hover:text-gray-900 cursor-pointer"><input type="checkbox" className="custom-checkbox w-4 h-4 rounded border-gray-300 text-blue-600" />Most Enrolled</label>
-                <label className="flex items-center gap-2.5 text-[13px] text-gray-600 group hover:text-gray-900 cursor-pointer"><input type="checkbox" className="custom-checkbox w-4 h-4 rounded border-gray-300 text-blue-600" />Trending Programs</label>
-                <label className="flex items-center gap-2.5 text-[13px] text-gray-600 group hover:text-gray-900 cursor-pointer"><input type="checkbox" className="custom-checkbox w-4 h-4 rounded border-gray-300 text-blue-600" />Recommended</label>
-                <label className="flex items-center gap-2.5 text-[13px] text-gray-600 group hover:text-gray-900 cursor-pointer"><input type="checkbox" className="custom-checkbox w-4 h-4 rounded border-gray-300 text-blue-600" />New Programs</label>
-              </div>
-            ), false)}
+              <GlobalFilterSection
+                title="Admission Status"
+                isOpen={openFilters.status}
+                onToggle={() => setOpenFilters((prev) => ({ ...prev, status: !prev.status }))}
+                contentClassName="pb-4 space-y-3"
+              >
+                {(["Admission Open", "Entrance Ongoing", "Closed"] as const).map((status) => (
+                  <label className="group flex items-center gap-3 cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={selectedStatuses.includes(status)}
+                      onChange={() =>
+                        setSelectedStatuses((prev) =>
+                          prev.includes(status)
+                            ? prev.filter((v) => v !== status)
+                            : [...prev, status],
+                        )
+                      }
+                      className="h-[1.15em] w-[1.15em] rounded-xs border border-slate-300 text-blue-600 focus:ring-blue-500"
+                    />
+                    <span className="text-[14.5px] text-[#475569] transition-colors group-hover:text-gray-900">
+                      {status}
+                    </span>
+                  </label>
+                ))}
+              </GlobalFilterSection>
+            </div>
           </aside>
 
           <main className={`flex-1 min-w-0 ${quickApplyMode ? "quick-apply-active" : ""}`} id="main-content">
