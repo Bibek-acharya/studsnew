@@ -210,9 +210,21 @@ export const apiService = {
       localStorage.removeItem("scholarshipProviderUser");
     }
   },
+  getScholarshipProviderUser(): any | null {
+    if (typeof window === "undefined") return null;
+    const stored = localStorage.getItem("scholarshipProviderUser");
+    if (stored) {
+      try { return JSON.parse(stored); } catch { return null; }
+    }
+    return null;
+  },
   getToken(): string | null {
     if (typeof window === "undefined") return null;
     return localStorage.getItem("token") || "mock-token";
+  },
+  getScholarshipProviderToken(): string | null {
+    if (typeof window === "undefined") return null;
+    return localStorage.getItem("scholarshipProviderToken");
   },
   setToken(token: string | null): void {
     if (typeof window === "undefined") return;
@@ -669,5 +681,10 @@ export const apiService = {
       method: "POST",
       body: JSON.stringify(data),
     });
+  },
+  scholarshipProviderLogout(): void {
+    if (typeof window === "undefined") return;
+    localStorage.removeItem("scholarshipProviderToken");
+    localStorage.removeItem("scholarshipProviderUser");
   },
 };

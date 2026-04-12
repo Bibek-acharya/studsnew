@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { apiService } from '../../../services/api';
-import { scholarshipProviderApi } from '../../../services/scholarshipProviderApi';
+import { apiService } from '@/services/api';
+import { scholarshipProviderApi } from '@/services/scholarshipProviderApi';
 import DashboardSidebar from './DashboardSidebar';
 import DashboardHeader from './DashboardHeader';
 import DashboardOverview from './DashboardOverview';

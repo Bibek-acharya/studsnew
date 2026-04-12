@@ -353,7 +353,7 @@ const FeaturedScholarshipsPage = () => {
 
   const handleSelectAll = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.checked) {
-      if (!filters.scholarshipType.length > 0) {
+      if (filters.scholarshipType.length === 0) {
         setShowCategoryAlert(true);
         e.target.checked = false;
         return;

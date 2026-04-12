@@ -122,7 +122,7 @@ export default function Analytics() {
                   </div>
                 ) : (
                   <button className={`w-full py-4 bg-${report.color}-600 text-white rounded-2xl hover:shadow-lg transition-all font-black text-xs uppercase tracking-widest shadow-md shadow-${report.color}-500/20 flex items-center justify-center gap-2`}>
-                    <i className={`fa-solid ${report.action.includes('CSV') ? 'fa-file-csv' : 'fa-file-pdf'}`}></i> {report.action}
+                    <i className={`fa-solid ${report.action?.includes('CSV') ? 'fa-file-csv' : 'fa-file-pdf'}`}></i> {report.action}
                   </button>
                 )}
               </div>

@@ -19,7 +19,7 @@ const ScholarshipProviderDashboard: React.FC = () => {
   }, [navigate]);
 
   const handleLogout = () => {
-    apiService.removeScholarshipProviderToken();
+    apiService.scholarshipProviderLogout();
     navigate("/scholarshipProviderZone");
   };
 

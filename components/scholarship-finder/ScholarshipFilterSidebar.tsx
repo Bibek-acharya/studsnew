@@ -96,7 +96,7 @@ const ScholarshipFilterSidebar: React.FC<ScholarshipFilterSidebarProps> = ({
     const savedLoc = sessionStorage.getItem("navLocation");
     if (savedLoc) updateLocation(savedLoc);
     const savedCoords = sessionStorage.getItem("navLocationCoords");
-    if (savedCoords) {
+    if (savedLoc && savedCoords) {
       try {
         const coords = JSON.parse(savedCoords);
         onLocationDetect?.(savedLoc, coords.lat, coords.lng);

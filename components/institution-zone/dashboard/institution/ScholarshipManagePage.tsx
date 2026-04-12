@@ -257,7 +257,7 @@ const ScholarshipManagePage: React.FC<Props> = ({ onCreateNew, onEdit }) => {
                   </button>
                 )}
                 <button 
-                  onClick={() => onEdit(item.id)} 
+                  onClick={() => onEdit?.(item.id)} 
                   className="flex-1 py-2.5 px-3 bg-blue-600 rounded-[10px] text-white font-semibold text-[14px] hover:bg-blue-700 transition-colors flex items-center justify-center gap-1.5"
                 >
                   <i className="fa-solid fa-pen text-[16px]"></i> Edit

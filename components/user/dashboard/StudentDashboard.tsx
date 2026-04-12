@@ -459,14 +459,14 @@ function NotificationsSection() {
     { id: 4, type: 'opportunity', icon: 'fa-star', title: 'New Scholarship Opportunity', message: 'Harvard Merit Scholarship opens for applications.', time: '2 days ago', read: true },
   ]
 
-  const getStyles = (type) => {
+  const getStyles = (type: string) => {
     const styles = {
       deadline: { bg: 'bg-orange-50', icon: 'text-orange-500' },
       message: { bg: 'bg-blue-50', icon: 'text-blue-500' },
       achievement: { bg: 'bg-green-50', icon: 'text-green-500' },
       opportunity: { bg: 'bg-purple-50', icon: 'text-purple-500' },
     }
-    return styles[type] || styles.message
+    return styles[type as keyof typeof styles] || styles.message
   }
 
   return (
@@ -682,7 +682,7 @@ function SphereInvitesSection() {
 
   const filtered = filterType === 'all' ? invites : invites.filter(i => i.type === filterType)
 
-  const getPriorityColor = (priority) => {
+  const getPriorityColor = (priority: string) => {
     switch(priority) {
       case 'high': return 'bg-red-50 text-red-700 border-red-200'
       case 'medium': return 'bg-yellow-50 text-yellow-700 border-yellow-200'
@@ -691,7 +691,7 @@ function SphereInvitesSection() {
     }
   }
 
-  const getTypeIcon = (type) => {
+  const getTypeIcon = (type: string) => {
     switch(type) {
       case 'scholarship': return 'fa-graduation-cap'
       case 'admission': return 'fa-file-check'
