@@ -420,10 +420,10 @@ const ScholarshipProviderZone: React.FC<ScholarshipProviderZoneProps> = ({
 
     setAuthLoading(true);
     try {
-      const response = await apiService.scholarshipProviderLogin({
-        email: loginEmail.trim(),
-        password: loginPassword,
-      });
+      const response = await apiService.scholarshipProviderLogin(
+        loginEmail.trim(),
+        loginPassword,
+      );
 
       const token = response.data?.token;
       const user = response.data?.user;
@@ -555,18 +555,18 @@ const ScholarshipProviderZone: React.FC<ScholarshipProviderZoneProps> = ({
                 </svg>
               </button>
               {isContactOpen && (
-                <div className="absolute left-1/2 -translate-x-1/2 top-[2.2rem] z-50 w-[480px]">
-                  <div className="absolute -top-[6px] left-1/2 -translate-x-1/2 w-4 h-4 bg-white rotate-45 rounded-tl-[3px] border-l border-t border-gray-100"></div>
-                  <div className="relative bg-white rounded-[16px] p-2 border border-gray-100 shadow-xl">
+                <div className="absolute left-1/2 -translate-x-1/2 top-[2.2rem] z-50 w-120">
+                  <div className="absolute -top-1.5 left-1/2 -translate-x-1/2 w-4 h-4 bg-white rotate-45 rounded-tl-[3px] border-l border-t border-gray-100"></div>
+                  <div className="relative bg-white rounded-2xl p-2 border border-gray-100 shadow-xl">
                     <div className="flex items-start gap-4 p-4 rounded-xl hover:bg-[#f8f9fa] transition-colors group mb-1">
-                      <div className="w-16 h-16 rounded-full overflow-hidden flex-shrink-0 bg-gray-100 border border-gray-200">
+                      <div className="w-16 h-16 rounded-full overflow-hidden shrink-0 bg-gray-100 border border-gray-200">
                         <img
                           src="https://i.pravatar.cc/150?img=33"
                           alt="Advisor"
                           className="w-full h-full object-cover"
                         />
                       </div>
-                      <div className="flex flex-col flex-grow pt-0.5">
+                      <div className="flex flex-col grow pt-0.5">
                         <h3 className="text-[16px] font-semibold text-[#202124]">
                           Emma Wilson
                         </h3>
@@ -617,8 +617,8 @@ const ScholarshipProviderZone: React.FC<ScholarshipProviderZoneProps> = ({
               </div>
             </div>
 
-            <div className="w-full max-w-[460px]">
-              <div className="bg-white rounded-[2rem] p-8 sm:p-10 relative shadow-2xl shadow-black/10 text-gray-800">
+            <div className="w-full max-w-115">
+              <div className="bg-white rounded-4xl p-8 sm:p-10 relative shadow-2xl shadow-black/10 text-gray-800">
                 <div className="flex p-1.5 bg-[#F1F3F5] rounded-full mb-8 relative">
                   <button
                     type="button"
@@ -842,7 +842,7 @@ const ScholarshipProviderZone: React.FC<ScholarshipProviderZoneProps> = ({
           {services.map((service) => (
             <div
               key={service.title}
-              className="bg-white rounded-xl p-8 shadow-sm hover:translate-y-[-5px] transition-all border border-gray-50"
+              className="bg-white rounded-xl p-8 shadow-sm hover:-translate-y-1.25 transition-all border border-gray-50"
             >
               <div className="relative w-16 h-16 mb-6">
                 <div

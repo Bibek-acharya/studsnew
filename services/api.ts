@@ -202,6 +202,14 @@ export const apiService = {
       localStorage.removeItem("user");
     }
   },
+  setScholarshipProviderUser(user: any | null): void {
+    if (typeof window === "undefined") return;
+    if (user) {
+      localStorage.setItem("scholarshipProviderUser", JSON.stringify(user));
+    } else {
+      localStorage.removeItem("scholarshipProviderUser");
+    }
+  },
   getToken(): string | null {
     if (typeof window === "undefined") return null;
     return localStorage.getItem("token") || "mock-token";
@@ -212,6 +220,14 @@ export const apiService = {
       localStorage.setItem("token", token);
     } else {
       localStorage.removeItem("token");
+    }
+  },
+  setScholarshipProviderToken(token: string | null): void {
+    if (typeof window === "undefined") return;
+    if (token) {
+      localStorage.setItem("scholarshipProviderToken", token);
+    } else {
+      localStorage.removeItem("scholarshipProviderToken");
     }
   },
   isAuthenticated(): boolean {
@@ -641,6 +657,17 @@ export const apiService = {
     return apiRequest<AuthResponse>("/api/v1/scholarship-provider/login", {
       method: "POST",
       body: JSON.stringify({ email, password }),
+    });
+  },
+  async scholarshipProviderRegister(data: {
+    provider_name: string;
+    registration_number: string;
+    email: string;
+    password: string;
+  }): Promise<AuthResponse> {
+    return apiRequest<AuthResponse>("/api/v1/scholarship-provider/register", {
+      method: "POST",
+      body: JSON.stringify(data),
     });
   },
 };
