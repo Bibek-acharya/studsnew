@@ -1,0 +1,437 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Recommendation Feedback</title>
+    <!-- Include Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Include Plus Jakarta Sans Font -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        /* Apply font globally to the whole page including modal */
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+        }
+
+        /* Custom font and coloring to match the image closely */
+        .feedback-text {
+            color: #0c1844; /* Dark navy/indigo color from the image */
+            letter-spacing: -0.01em;
+        }
+        
+        .btn-icon {
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+            color: #374151; /* Default gray outline color */
+        }
+        
+        /* Hover states */
+        .btn-icon:hover {
+            background-color: #f3f4f6;
+            transform: scale(1.05);
+        }
+        
+        /* Active (click) effect */
+        .btn-icon:active {
+            transform: scale(0.95);
+        }
+
+        /* Selected states handled by JS */
+        .selected-up {
+            background-color: #eff6ff !important; /* light blue bg */
+            color: #0000ff !important; /* pure blue */
+        }
+        
+        .selected-up svg {
+            fill: currentColor;
+        }
+
+        .selected-down {
+            background-color: #fef2f2 !important; /* light red bg */
+            color: #ff0000 !important; /* pure red */
+        }
+        
+        .selected-down svg {
+            fill: currentColor;
+        }
+
+        /* Subtle toast notification styles */
+        .toast {
+            visibility: hidden;
+            opacity: 0;
+            transform: translateX(20px);
+            transition: visibility 0s linear 0.3s, opacity 0.3s linear, transform 0.3s ease-out;
+            z-index: 9999;
+        }
+        
+        .toast.show {
+            visibility: visible;
+            opacity: 1;
+            transform: translateX(0);
+            transition-delay: 0s;
+        }
+
+        .progress-animate {
+            animation: progress 2.5s linear forwards;
+        }
+
+        @keyframes progress {
+            0% { width: 100%; }
+            100% { width: 0%; }
+        }
+    </style>
+</head>
+<body class="bg-gray-50 flex flex-col items-center justify-center min-h-screen p-4 antialiased selection:bg-blue-100 selection:text-blue-900">
+    
+    <!-- Main Feedback Container -->
+    <div class="bg-white px-6 sm:px-8 py-5 w-full max-w-[600px] rounded-2xl shadow-[0_2px_10px_-3px_rgba(6,81,237,0.1)] border border-gray-100 flex flex-col sm:flex-row items-center justify-between gap-4 transition-all hover:shadow-[0_8px_30px_rgb(0,0,0,0.04)]">
+        
+        <!-- Text Question -->
+        <span class="feedback-text font-semibold text-[16px] text-center sm:text-left leading-snug">Are these colleges relevant to your location and interests?</span>
+        
+        <!-- Action Buttons -->
+        <div class="flex items-center space-x-3 shrink-0">
+            
+            <!-- Thumbs Down Button -->
+            <button id="thumb-down" class="btn-icon flex items-center justify-center w-[38px] h-[38px] rounded-full border border-gray-300 bg-white focus:outline-none focus:ring-2 focus:ring-red-400 focus:border-transparent" aria-label="Not relevant">
+                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M17 14V2"/>
+                    <path d="M9 18.12 10 14H4.17a2 2 0 0 1-1.92-2.56l2.33-8A2 2 0 0 1 6.5 2H20a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2h-2.76a2 2 0 0 0-1.79 1.11L12 22h0a3.13 3.13 0 0 1-3-3.88Z"/>
+                </svg>
+            </button>
+
+            <!-- Thumbs Up Button -->
+            <button id="thumb-up" class="btn-icon flex items-center justify-center w-[38px] h-[38px] rounded-full border border-gray-300 bg-white focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-transparent" aria-label="Relevant">
+                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M7 10v12"/>
+                    <path d="M15 5.88 14 10h5.83a2 2 0 0 1 1.92 2.56l-2.33 8A2 2 0 0 1 17.5 22H4a2 2 0 0 1-2-2v-8a2 2 0 0 1 2-2h2.76a2 2 0 0 0 1.79-1.11L12 2h0a3.13 3.13 0 0 1 3 3.88Z"/>
+                </svg>
+            </button>
+
+        </div>
+    </div>
+
+    <!-- Feedback Modal -->
+    <div id="modal-backdrop" class="fixed inset-0 bg-gray-900/30 backdrop-blur-[2px] hidden items-center justify-center z-50 opacity-0 transition-opacity duration-300" role="dialog" aria-modal="true">
+        <div id="modal-content" class="bg-white rounded-2xl shadow-[0_20px_50px_-12px_rgba(0,0,0,0.25)] w-[550px] max-w-[95vw] p-6 sm:p-8 transform scale-95 transition-all duration-300">
+            <!-- Modal Header -->
+            <div class="flex justify-between items-center mb-4">
+                <h2 class="text-[20px] font-bold tracking-tight" style="color: #0c1844;">What went wrong?</h2>
+                <button id="close-modal" class="text-gray-400 hover:text-red-500 bg-gray-50 hover:bg-red-50 p-2 rounded-full transition-all focus:outline-none focus:ring-2 focus:ring-red-200" aria-label="Close">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
+                </button>
+            </div>
+            
+            <!-- Modal Options -->
+            <div class="mt-2 space-y-0">
+                <label class="flex items-center space-x-4 cursor-pointer py-3.5 border-b border-gray-100 group">
+                    <input type="checkbox" class="w-4.5 h-4.5 rounded border-gray-300 text-[#0000ff] focus:ring-[#0000ff]/20 focus:ring-4 accent-[#0000ff] cursor-pointer transition-all">
+                    <span class="text-gray-700 text-[15px] group-hover:text-gray-900 transition-colors">I am not interested in this Course / Degree</span>
+                </label>
+                <label class="flex items-center space-x-4 cursor-pointer py-3.5 border-b border-gray-100 group">
+                    <input type="checkbox" class="w-4.5 h-4.5 rounded border-gray-300 text-[#0000ff] focus:ring-[#0000ff]/20 focus:ring-4 accent-[#0000ff] cursor-pointer transition-all">
+                    <span class="text-gray-700 text-[15px] group-hover:text-gray-900 transition-colors">Colleges shown are not in my location of preference</span>
+                </label>
+                <label class="flex items-center space-x-4 cursor-pointer py-3.5 border-b border-gray-100 group">
+                    <input type="checkbox" class="w-4.5 h-4.5 rounded border-gray-300 text-[#0000ff] focus:ring-[#0000ff]/20 focus:ring-4 accent-[#0000ff] cursor-pointer transition-all">
+                    <span class="text-gray-700 text-[15px] group-hover:text-gray-900 transition-colors">The fees for colleges are out of my budget</span>
+                </label>
+                <label class="flex items-center space-x-4 cursor-pointer py-3.5 border-b border-gray-100 group">
+                    <input type="checkbox" class="w-4.5 h-4.5 rounded border-gray-300 text-[#0000ff] focus:ring-[#0000ff]/20 focus:ring-4 accent-[#0000ff] cursor-pointer transition-all">
+                    <span class="text-gray-700 text-[15px] group-hover:text-gray-900 transition-colors">I have already taken admission/shortlisted colleges</span>
+                </label>
+                <label class="flex items-center space-x-4 cursor-pointer py-3.5 group">
+                    <input type="checkbox" id="other-checkbox" class="w-4.5 h-4.5 rounded border-gray-300 text-[#0000ff] focus:ring-[#0000ff]/20 focus:ring-4 accent-[#0000ff] cursor-pointer transition-all">
+                    <span class="text-gray-700 text-[15px] group-hover:text-gray-900 transition-colors">Other</span>
+                </label>
+                
+                <!-- Hidden Input Field for 'Other' -->
+                <div id="other-input-container" class="hidden pb-2">
+                    <textarea id="other-input" rows="3" class="w-full text-[15px] p-4 border border-gray-200 rounded-xl focus:outline-none focus:border-[#0000ff] focus:ring-4 focus:ring-[#0000ff]/10 resize-none transition-all shadow-none placeholder-gray-400" placeholder="Please describe what went wrong..."></textarea>
+                </div>
+            </div>
+
+            <!-- Modal Footer -->
+            <div class="flex justify-end items-center mt-6 space-x-4">
+                <button id="cancel-modal" class="text-[15px] text-gray-600 font-medium hover:text-gray-900 hover:bg-gray-100 px-4 py-2 rounded-lg transition-all">Cancel</button>
+                <button id="submit-feedback" class="px-6 py-2.5 rounded-xl bg-gray-200 text-gray-500 text-[15px] font-semibold transition-all shadow-none" disabled>Send feedback</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Like Feedback Modal -->
+    <div id="like-modal-backdrop" class="fixed inset-0 bg-gray-900/30 backdrop-blur-[2px] hidden items-center justify-center z-50 opacity-0 transition-opacity duration-300" role="dialog" aria-modal="true">
+        <div id="like-modal-content" class="bg-white rounded-2xl shadow-[0_20px_50px_-12px_rgba(0,0,0,0.25)] w-[550px] max-w-[95vw] p-6 sm:p-8 transform scale-95 transition-all duration-300">
+            <!-- Modal Header -->
+            <div class="flex justify-between items-center mb-4">
+                <h2 class="text-[20px] font-bold tracking-tight" style="color: #0c1844;">Thanks! We value your feedback</h2>
+                <button id="close-like-modal" class="text-gray-400 hover:text-red-500 bg-gray-50 hover:bg-red-50 p-2 rounded-full transition-all focus:outline-none focus:ring-2 focus:ring-red-200" aria-label="Close">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
+                </button>
+            </div>
+            
+            <!-- Modal Options -->
+            <div class="mt-2">
+                <textarea id="like-textarea" rows="4" class="w-full text-[15px] p-4 border border-gray-200 rounded-xl focus:outline-none focus:border-[#0000ff] focus:ring-4 focus:ring-[#0000ff]/10 resize-none transition-all shadow-none placeholder-gray-400" placeholder="Write anything else you'd want us to know"></textarea>
+            </div>
+
+            <!-- Modal Footer -->
+            <div class="flex justify-end items-center mt-6 space-x-4">
+                <button id="cancel-like-modal" class="text-[15px] text-gray-600 font-medium hover:text-gray-900 hover:bg-gray-100 px-4 py-2 rounded-lg transition-all">Cancel</button>
+                <button id="submit-like-feedback" class="px-6 py-2.5 rounded-xl bg-gray-200 text-gray-500 text-[15px] font-semibold transition-all shadow-none" disabled>Send feedback</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Interactive Toast Notification -->
+    <div id="toast" class="toast fixed bottom-6 right-6 sm:bottom-8 sm:right-8 bg-[#0000ff] text-white px-6 py-3.5 rounded-xl shadow-[0_10px_30px_-10px_rgba(0,0,255,0.5)] text-[15px] font-medium overflow-hidden min-w-[280px] flex items-center gap-3">
+        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="opacity-90"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><path d="m9 11 3 3L22 4"/></svg>
+        <span id="toast-message">Thank you, we value your feedback</span>
+        <div id="toast-progress" class="absolute bottom-0 left-0 h-[4px] bg-white opacity-40 w-full"></div>
+    </div>
+
+    <script>
+        const thumbDown = document.getElementById('thumb-down');
+        const thumbUp = document.getElementById('thumb-up');
+        const toast = document.getElementById('toast');
+        const toastMessage = document.getElementById('toast-message');
+        const toastProgress = document.getElementById('toast-progress');
+        let toastTimeout;
+
+        // Modal Elements
+        const modalBackdrop = document.getElementById('modal-backdrop');
+        const modalContent = document.getElementById('modal-content');
+        const closeModalBtn = document.getElementById('close-modal');
+        const cancelModalBtn = document.getElementById('cancel-modal');
+        const submitFeedbackBtn = document.getElementById('submit-feedback');
+        const checkboxes = document.querySelectorAll('#modal-content input[type="checkbox"]');
+        
+        // Other Option Elements
+        const otherCheckbox = document.getElementById('other-checkbox');
+        const otherInputContainer = document.getElementById('other-input-container');
+        const otherInput = document.getElementById('other-input');
+
+        // Like Modal Elements
+        const likeModalBackdrop = document.getElementById('like-modal-backdrop');
+        const likeModalContent = document.getElementById('like-modal-content');
+        const closeLikeModalBtn = document.getElementById('close-like-modal');
+        const cancelLikeModalBtn = document.getElementById('cancel-like-modal');
+        const submitLikeFeedbackBtn = document.getElementById('submit-like-feedback');
+        const likeTextarea = document.getElementById('like-textarea');
+
+        // Function to show notification on selection
+        function showToast(message) {
+            toastMessage.textContent = message;
+            toast.classList.add('show');
+            
+            // Restart progress animation
+            toastProgress.classList.remove('progress-animate');
+            void toastProgress.offsetWidth; // Trigger reflow to restart animation
+            toastProgress.classList.add('progress-animate');
+            
+            // Reset the timeout if triggered rapidly
+            clearTimeout(toastTimeout);
+            toastTimeout = setTimeout(() => {
+                toast.classList.remove('show');
+            }, 2500);
+        }
+
+        // --- GLOBAL LOGIC ---
+        // Close modals on Escape key
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') {
+                if (!modalBackdrop.classList.contains('hidden')) closeModal();
+                if (!likeModalBackdrop.classList.contains('hidden')) closeLikeModal();
+            }
+        });
+
+        // Prevent body scrolling when a modal is active
+        function toggleBodyScroll(disable) {
+            document.body.style.overflow = disable ? 'hidden' : '';
+        }
+
+        // Modal Logic
+        function openModal() {
+            modalBackdrop.classList.remove('hidden');
+            modalBackdrop.classList.add('flex');
+            toggleBodyScroll(true);
+            // Small delay to allow flex to apply before transitioning opacity
+            setTimeout(() => {
+                modalBackdrop.classList.remove('opacity-0');
+                modalContent.classList.remove('scale-95');
+            }, 10);
+        }
+
+        function closeModal() {
+            modalBackdrop.classList.add('opacity-0');
+            modalContent.classList.add('scale-95');
+            setTimeout(() => {
+                modalBackdrop.classList.add('hidden');
+                modalBackdrop.classList.remove('flex');
+                toggleBodyScroll(false);
+            }, 300);
+        }
+
+        // Close events
+        closeModalBtn.addEventListener('click', closeModal);
+        cancelModalBtn.addEventListener('click', closeModal);
+        modalBackdrop.addEventListener('click', (e) => {
+            if (e.target === modalBackdrop) closeModal();
+        });
+
+        // --- LIKE MODAL LOGIC ---
+        function openLikeModal() {
+            likeModalBackdrop.classList.remove('hidden');
+            likeModalBackdrop.classList.add('flex');
+            toggleBodyScroll(true);
+            setTimeout(() => {
+                likeModalBackdrop.classList.remove('opacity-0');
+                likeModalContent.classList.remove('scale-95');
+            }, 10);
+        }
+
+        function closeLikeModal() {
+            likeModalBackdrop.classList.add('opacity-0');
+            likeModalContent.classList.add('scale-95');
+            setTimeout(() => {
+                likeModalBackdrop.classList.add('hidden');
+                likeModalBackdrop.classList.remove('flex');
+                toggleBodyScroll(false);
+            }, 300);
+        }
+
+        closeLikeModalBtn.addEventListener('click', closeLikeModal);
+        cancelLikeModalBtn.addEventListener('click', closeLikeModal);
+        likeModalBackdrop.addEventListener('click', (e) => {
+            if (e.target === likeModalBackdrop) closeLikeModal();
+        });
+
+        // Enable Submit Button only if there is text in the textarea
+        likeTextarea.addEventListener('input', () => {
+            if (likeTextarea.value.trim().length > 0) {
+                submitLikeFeedbackBtn.disabled = false;
+                submitLikeFeedbackBtn.classList.remove('bg-gray-200', 'text-gray-500');
+                submitLikeFeedbackBtn.classList.add('bg-[#0000ff]', 'text-white', 'shadow-md', 'hover:bg-blue-800');
+            } else {
+                submitLikeFeedbackBtn.disabled = true;
+                submitLikeFeedbackBtn.classList.add('bg-gray-200', 'text-gray-500');
+                submitLikeFeedbackBtn.classList.remove('bg-[#0000ff]', 'text-white', 'shadow-md', 'hover:bg-blue-800');
+            }
+        });
+
+        submitLikeFeedbackBtn.addEventListener('click', () => {
+            closeLikeModal();
+            showToast("Thank you, we value your feedback");
+            
+            // Reset textarea and button state after submission
+            setTimeout(() => {
+                likeTextarea.value = '';
+                submitLikeFeedbackBtn.disabled = true;
+                submitLikeFeedbackBtn.classList.add('bg-gray-200', 'text-gray-500');
+                submitLikeFeedbackBtn.classList.remove('bg-[#0000ff]', 'text-white', 'shadow-md', 'hover:bg-blue-800');
+            }, 300);
+        });
+        // --- END LIKE MODAL LOGIC ---
+
+
+        // Toggle 'Other' Input Field Visibility
+        otherCheckbox.addEventListener('change', () => {
+            if (otherCheckbox.checked) {
+                otherInputContainer.classList.remove('hidden');
+                otherInput.focus();
+            } else {
+                otherInputContainer.classList.add('hidden');
+                otherInput.value = ''; // Clear text if unchecked
+            }
+        });
+
+        // Group the specific checkboxes (everything except 'other')
+        const specificCheckboxes = Array.from(checkboxes).filter(cb => cb.id !== 'other-checkbox');
+
+        // Enable Submit Button only if a checkbox is checked & Handle mutual exclusion
+        checkboxes.forEach(cb => {
+            cb.addEventListener('change', () => {
+                
+                // 1. Mutual Exclusivity Logic
+                const isAnySpecificChecked = specificCheckboxes.some(c => c.checked);
+                const isOtherChecked = otherCheckbox.checked;
+
+                // If a specific question is checked, disable "Other"
+                if (isAnySpecificChecked) {
+                    otherCheckbox.disabled = true;
+                    otherCheckbox.parentElement.classList.add('opacity-50', 'cursor-not-allowed');
+                    otherCheckbox.classList.add('cursor-not-allowed');
+                } else {
+                    otherCheckbox.disabled = false;
+                    otherCheckbox.parentElement.classList.remove('opacity-50', 'cursor-not-allowed');
+                    otherCheckbox.classList.remove('cursor-not-allowed');
+                }
+
+                // If "Other" is checked, disable specific questions
+                if (isOtherChecked) {
+                    specificCheckboxes.forEach(scb => {
+                        scb.disabled = true;
+                        scb.parentElement.classList.add('opacity-50', 'cursor-not-allowed');
+                        scb.classList.add('cursor-not-allowed');
+                    });
+                } else {
+                    specificCheckboxes.forEach(scb => {
+                        scb.disabled = false;
+                        scb.parentElement.classList.remove('opacity-50', 'cursor-not-allowed');
+                        scb.classList.remove('cursor-not-allowed');
+                    });
+                }
+
+                // 2. Submit Button Logic
+                const isAnyChecked = Array.from(checkboxes).some(c => c.checked);
+                if (isAnyChecked) {
+                    submitFeedbackBtn.disabled = false;
+                    submitFeedbackBtn.classList.remove('bg-gray-200', 'text-gray-500');
+                    submitFeedbackBtn.classList.add('bg-[#0000ff]', 'text-white', 'shadow-md', 'hover:bg-blue-800');
+                } else {
+                    submitFeedbackBtn.disabled = true;
+                    submitFeedbackBtn.classList.add('bg-gray-200', 'text-gray-500');
+                    submitFeedbackBtn.classList.remove('bg-[#0000ff]', 'text-white', 'shadow-md', 'hover:bg-blue-800');
+                }
+            });
+        });
+
+        submitFeedbackBtn.addEventListener('click', () => {
+            closeModal();
+            showToast("Thank you, we value your feedback");
+        });
+
+        // Logic for Thumbs Down
+        thumbDown.addEventListener('click', () => {
+            if (thumbDown.classList.contains('selected-down')) {
+                // Deselect if already selected
+                thumbDown.classList.remove('selected-down');
+            } else {
+                // Select down, deselect up
+                thumbDown.classList.add('selected-down');
+                thumbUp.classList.remove('selected-up');
+                
+                // Open the modal to get specific reasons
+                openModal();
+            }
+        });
+
+        // Logic for Thumbs Up
+        thumbUp.addEventListener('click', () => {
+            if (thumbUp.classList.contains('selected-up')) {
+                // Deselect if already selected
+                thumbUp.classList.remove('selected-up');
+            } else {
+                // Select up, deselect down
+                thumbUp.classList.add('selected-up');
+                thumbDown.classList.remove('selected-down');
+                
+                // Open the modal to get specific positive feedback
+                openLikeModal();
+            }
+        });
+    </script>
+</body>
+</html>

@@ -21,11 +21,12 @@ import {
   Lock,
   Archive,
   X,
-  PaperPlane,
+  
   AlertCircle,
   TrendingUp,
   Image as ImageIcon
 } from "lucide-react";
+import { PaperPlaneIcon } from "@phosphor-icons/react";
 
 // --- TYPES ---
 type NewsStatus = 'Published' | 'Draft' | 'Open' | 'Closed' | 'Scheduled';
@@ -624,7 +625,7 @@ export default function NewsNoticePage() {
                             Save as Draft
                         </button>
                         <button className="px-8 py-3 text-sm font-bold text-white bg-blue-600 hover:bg-blue-700 rounded-xl shadow-xl shadow-blue-500/20 transition-all flex items-center gap-2 active:scale-95">
-                            <PaperPlane size={18} />
+                            <PaperPlaneIcon size={18} />
                             Publish Now
                         </button>
                     </div>
