@@ -1,11 +1,7 @@
-"use client";
-
 import React from "react";
-import { useRouter } from "next/navigation";
-
-interface FooterProps {
-  onNavigate?: (view: string) => void;
-}
+import Link from "next/link";
+import Image from "next/image";
+import Newsletter from "./Newsletter";
 
 const routeMap: Record<string, string> = {
   educationPage: "/",
@@ -16,326 +12,165 @@ const routeMap: Record<string, string> = {
   bookCounselling: "/",
   campusForum: "/",
   studyResources: "/",
-  institutionZone: "/",
-  signup: "/",
+  institutionZone: "/institution-zone",
+  signup: "/institution-zone",
+  providerZone: "/scholarship-provider",
+  postScholarship: "/scholarship-provider",
+  partner: "/scholarship-provider",
 };
 
-const Footer: React.FC<FooterProps> = ({ onNavigate }) => {
-  const [email, setEmail] = React.useState("");
-  const [showSubscribed, setShowSubscribed] = React.useState(false);
-  const router = useRouter();
-
-  const handleNewsletterSubmit = (event: React.FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
-    if (!email.trim()) return;
-    setShowSubscribed(true);
-    setEmail("");
-    window.setTimeout(() => setShowSubscribed(false), 3000);
-  };
-
-  const routeLink = (
-    event: React.MouseEvent<HTMLButtonElement>,
-    view: string,
-  ) => {
-    event.preventDefault();
-    onNavigate?.(view);
-    router.push(routeMap[view] ?? "/");
-  };
-
+const Footer = () => {
   const currentYear = new Date().getFullYear();
 
   return (
-    <footer className="relative overflow-hidden border-t border-slate-800 bg-slate-900 text-slate-300">
-      <div className="pointer-events-none absolute left-0 top-0 h-64 xs:h-80 sm:h-100 md:h-125 w-64 xs:w-80 sm:w-100 md:w-125 -translate-x-1/2 -translate-y-1/2 rounded-full bg-brand-blue/10 blur-[80px] xs:blur-[100px] md:blur-[120px]" />
-      <div className="pointer-events-none absolute bottom-0 right-0 h-56 xs:h-72 sm:h-88 md:h-105 w-56 xs:w-72 sm:w-88 md:w-105 translate-x-1/3 translate-y-1/3 rounded-full bg-indigo-500/10 blur-[70px] xs:blur-[80px] md:blur-[100px]" />
+    <div className="bg-[#F5F6F8] rounded-2xl p-4 sm:p-6 lg:p-8 w-full max-w-[1400px] mx-auto flex flex-col gap-16 lg:gap-24 shadow-sm border border-gray-50 mb-8 mt-16">
+      <Newsletter />
 
-      <div className="relative z-10 mx-auto max-w-350 px-4 xs:px-5 sm:px-6 lg:px-8 pb-10 xs:pb-12 sm:pb-14 md:pb-16 pt-10 xs:pt-12 sm:pt-16 md:pt-20">
-        <div className="grid grid-cols-1 xs:grid-cols-2 sm:grid-cols-2 md:grid-cols-12 gap-8 xs:gap-10 sm:gap-12 md:gap-8">
-          {/* Brand Column */}
-          <div className="flex flex-col xs:col-span-2 md:col-span-4 md:pr-6 lg:pr-8">
-            <button
-              onClick={(event) => routeLink(event, "educationPage")}
-              className="mb-5 xs:mb-6 flex w-fit items-center space-x-2.5 xs:space-x-3"
+      {/* Footer Section */}
+      <footer className="flex flex-col gap-12 lg:gap-16 px-4 sm:px-8 lg:px-10 pb-4 sm:pb-8">
+        <div className="flex flex-col lg:flex-row justify-between items-start gap-12 lg:gap-8 w-full">
+          {/* Brand Info */}
+          <div className="flex flex-col items-center lg:items-start text-center lg:text-left gap-4 w-full lg:w-1/4">
+            {/* Logo */}
+            <Link
+              href={routeMap.educationPage}
+              className="group w-fit transition-transform hover:scale-[1.02]"
             >
-              <div className="rounded-lg xs:rounded-xl bg-brand-blue p-2 xs:p-2.5 shadow-lg shadow-blue-500/25">
-                <i className="fa-solid fa-graduation-cap h-5 w-5 xs:h-6 xs:w-6 text-white" />
-              </div>
-              <span className="text-xl xs:text-2xl font-bold tracking-tight text-white">
-                StudSphere
-              </span>
-            </button>
-
-            <p className="mb-6 xs:mb-8 text-xs xs:text-sm leading-relaxed text-slate-400">
-              Empowering learners globally with advanced tools, community
-              support, and career-defining opportunities. Join our growing
-              ecosystem today.
+              <Image 
+                src="/studsphere.png" 
+                alt="Studsphere Logo" 
+                width={180} 
+                height={45} 
+                className="h-auto w-auto max-w-[160px] sm:max-w-[180px]"
+                priority
+              />
+            </Link>
+            
+            {/* Contact Info */}
+            <p className="text-gray-500 text-sm leading-relaxed mt-2 mb-2 max-w-[240px]">
+              Empowering learners globally with advanced tools and career opportunities.
             </p>
-
-            {/* Newsletter */}
-            <div className="mb-6 xs:mb-8 w-full max-w-sm">
-              <h4 className="mb-2.5 xs:mb-3 text-[10px] xs:text-[11px] font-bold uppercase tracking-[0.2em] text-slate-500">
-                Stay Updated
-              </h4>
-              <form
-                onSubmit={handleNewsletterSubmit}
-                className="relative flex items-center"
-              >
-                <i className="fa-solid fa-envelope pointer-events-none absolute left-3 xs:left-4 h-3.5 w-3.5 xs:h-4 xs:w-4 text-slate-500" />
-                <input
-                  type="email"
-                  placeholder="Enter your email"
-                  required
-                  value={email}
-                  onChange={(event) => setEmail(event.target.value)}
-                  className="w-full rounded-full border border-slate-700 bg-slate-900/50 pl-9 xs:pl-10 pr-20 xs:pr-24 py-2.5 xs:py-3 text-xs xs:text-sm text-white outline-none transition-all placeholder:text-slate-600 focus:border-transparent focus:ring-2 focus:ring-brand-blue"
-                />
-                <button
-                  type="submit"
-                  className="absolute bottom-1 xs:bottom-1.5 right-1 xs:right-1.5 top-1 xs:top-1.5 rounded-full bg-brand-blue px-3 xs:px-4 text-white transition-colors hover:bg-brand-hover"
-                >
-                  <span className="text-[10px] xs:text-xs font-semibold">
-                    Subscribe
-                  </span>
-                </button>
-              </form>
-              <p
-                className={`mt-1.5 xs:mt-2 text-[10px] xs:text-xs text-emerald-400 transition-opacity ${
-                  showSubscribed
-                    ? "opacity-100"
-                    : "h-0 overflow-hidden opacity-0"
-                }`}
-              >
-                Thanks for subscribing!
-              </p>
+            
+            <div className="flex flex-col gap-2">
+              <a href="tel:+9779848406409" className="text-gray-500 hover:text-[#0000ff] text-sm transition-colors flex items-center justify-center lg:justify-start gap-2">
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"></path>
+                </svg>
+                +977-9848406409
+              </a>
+              <a href="mailto:support@studsphere.com" className="text-gray-500 hover:text-[#0000ff] text-sm transition-colors flex items-center justify-center lg:justify-start gap-2">
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path>
+                </svg>
+                support@studsphere.com
+              </a>
             </div>
-
-            {/* Social Icons */}
-            <div className="flex flex-wrap gap-2 xs:gap-3">
-              <a
-                href="https://facebook.com"
-                target="_blank"
-                rel="noreferrer"
-                className="flex h-9 w-9 xs:h-10 xs:w-10 items-center justify-center rounded-full bg-slate-800 text-slate-400 transition-all hover:-translate-y-1 hover:bg-brand-blue hover:text-white"
-              >
-                <i className="fa-brands fa-facebook-f text-sm xs:text-base" />
+            
+            {/* Social Media Icons */}
+            <div className="flex items-center justify-center lg:justify-start gap-3 mt-4">
+              {/* Facebook */}
+              <a href="#" className="w-10 h-10 flex items-center justify-center rounded-md bg-gray-100 text-gray-500 hover:bg-[#0000ff] hover:text-white transition-all transform hover:-translate-y-1">
+                <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                  <path fillRule="evenodd" d="M22 12c0-5.523-4.477-10-10-10S2 6.477 2 12c0 4.991 3.657 9.128 8.438 9.878v-6.987h-2.54V12h2.54V9.797c0-2.506 1.492-3.89 3.777-3.89 1.094 0 2.238.195 2.238.195v2.46h-1.26c-1.243 0-1.63.771-1.63 1.562V12h2.773l-.443 2.89h-2.33v6.988C18.343 21.128 22 16.991 22 12z" clipRule="evenodd" />
+                </svg>
               </a>
-              <a
-                href="https://x.com"
-                target="_blank"
-                rel="noreferrer"
-                className="flex h-9 w-9 xs:h-10 xs:w-10 items-center justify-center rounded-full bg-slate-800 text-slate-400 transition-all hover:-translate-y-1 hover:bg-sky-500 hover:text-white"
-              >
-                <i className="fa-brands fa-x-twitter text-sm xs:text-base" />
+              {/* X (Twitter) */}
+              <a href="#" className="w-10 h-10 flex items-center justify-center rounded-md bg-gray-100 text-gray-500 hover:bg-[#0000ff] hover:text-white transition-all transform hover:-translate-y-1">
+                <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                  <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z" />
+                </svg>
               </a>
-              <a
-                href="https://linkedin.com"
-                target="_blank"
-                rel="noreferrer"
-                className="flex h-9 w-9 xs:h-10 xs:w-10 items-center justify-center rounded-full bg-slate-800 text-slate-400 transition-all hover:-translate-y-1 hover:bg-indigo-600 hover:text-white"
-              >
-                <i className="fa-brands fa-linkedin-in text-sm xs:text-base" />
+              {/* Instagram */}
+              <a href="#" className="w-10 h-10 flex items-center justify-center rounded-md bg-gray-100 text-gray-500 hover:bg-[#0000ff] hover:text-white transition-all transform hover:-translate-y-1">
+                <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                  <path fillRule="evenodd" d="M12.315 2c2.43 0 2.784.013 3.808.06 1.064.049 1.791.218 2.427.465a4.902 4.902 0 011.772 1.153 4.902 4.902 0 011.153 1.772c.247.636.416 1.363.465 2.427.048 1.067.06 1.407.06 4.123v.08c0 2.643-.012 2.987-.06 4.043-.049 1.064-.218 1.791-.465 2.427a4.902 4.902 0 01-1.153 1.772 4.902 4.902 0 01-1.772 1.153c-.636.247-1.363.416-2.427.465-1.067.048-1.407.06-4.123.06h-.08c-2.643 0-2.987-.012-4.043-.06-1.064-.049-1.791-.218-2.427-.465a4.902 4.902 0 01-1.772-1.153 4.902 4.902 0 01-1.153-1.772c-.247-.636-.416-1.363-.465-2.427-.047-1.024-.06-1.379-.06-3.808v-.63c0-2.43.013-2.784.06-3.808.049-1.064.218-1.791.465-2.427a4.902 4.902 0 011.153-1.772A4.902 4.902 0 015.45 2.525c.636-.247 1.363-.416 2.427-.465C8.901 2.013 9.256 2 11.685 2h.63zm-.081 1.802h-.468c-2.456 0-2.784.011-3.807.058-.975.045-1.504.207-1.857.344-.467.182-.8.398-1.15.748-.35.35-.566.683-.748 1.15-.137.353-.3.882-.344 1.857-.047 1.023-.058 1.351-.058 3.807v.468c0 2.456.011 2.784.058 3.807.045.975.207 1.504.344 1.857.182.466.399.8.748 1.15.35.35.683.566 1.15.748.353.137.882.3 1.857.344 1.054.048 1.37.058 4.041.058h.08c2.597 0 2.917-.01 3.96-.058.976-.045 1.505-.207 1.858-.344.466-.182.8-.398 1.15-.748.35-.35.566-.683.748-1.15.137-.353.3-.882.344-1.857.048-1.055.058-1.37.058-4.041v-.08c0-2.597-.01-2.917-.058-3.96-.045-.976-.207-1.505-.344-1.858a3.097 3.097 0 00-.748-1.15 3.098 3.098 0 00-1.15-.748c-.353-.137-.882-.3-1.857-.344-1.023-.047-1.351-.058-3.807-.058zM12 6.865a5.135 5.135 0 110 10.27 5.135 5.135 0 010-10.27zm0 1.802a3.333 3.333 0 100 6.666 3.333 3.333 0 000-6.666zm5.338-3.205a1.2 1.2 0 110 2.4 1.2 1.2 0 010-2.4z" clipRule="evenodd" />
+                </svg>
               </a>
-              <a
-                href="https://instagram.com"
-                target="_blank"
-                rel="noreferrer"
-                className="flex h-9 w-9 xs:h-10 xs:w-10 items-center justify-center rounded-full bg-slate-800 text-slate-400 transition-all hover:-translate-y-1 hover:bg-pink-600 hover:text-white"
-              >
-                <i className="fa-brands fa-instagram text-sm xs:text-base" />
+              {/* LinkedIn */}
+              <a href="#" className="w-10 h-10 flex items-center justify-center rounded-md bg-gray-100 text-gray-500 hover:bg-[#0000ff] hover:text-white transition-all transform hover:-translate-y-1">
+                <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                  <path fillRule="evenodd" d="M19 0h-14c-2.761 0-5 2.239-5 5v14c0 2.761 2.239 5 5 5h14c2.762 0 5-2.239 5-5v-14c0-2.761-2.238-5-5-5zm-11 19h-3v-11h3v11zm-1.5-12.268c-.966 0-1.75-.79-1.75-1.764s.784-1.764 1.75-1.764 1.75.79 1.75 1.764-.783 1.764-1.75 1.764zm13.5 12.268h-3v-5.604c0-3.368-4-3.113-4 0v5.604h-3v-11h3v1.765c1.396-2.586 7-2.777 7 2.476v6.759z" clipRule="evenodd" />
+                </svg>
+              </a>
+              {/* TikTok */}
+              <a href="#" className="w-10 h-10 flex items-center justify-center rounded-md bg-gray-100 text-gray-500 hover:bg-[#0000ff] hover:text-white transition-all transform hover:-translate-y-1">
+                <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                  <path d="M19.59 6.69a4.83 4.83 0 0 1-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 0 1-5.2 1.74 2.89 2.89 0 0 1 2.31-4.64 2.93 2.93 0 0 1 .88.13V9.4a6.84 6.84 0 0 0-1-.05A6.33 6.33 0 0 0 5 20.1a6.34 6.34 0 0 0 10.86-4.43v-7a8.16 8.16 0 0 0 4.77 1.52v-3.4a4.85 4.85 0 0 1-1-.1z"/>
+                </svg>
               </a>
             </div>
           </div>
 
-          {/* Company */}
-          <div className="xs:col-span-1 md:col-span-2">
-            <h3 className="mb-4 xs:mb-5 md:mb-6 text-xs xs:text-sm font-bold text-white">
-              Company
-            </h3>
-            <ul className="space-y-3 xs:space-y-3.5 md:space-y-4 text-xs xs:text-sm text-slate-400">
-              <li>
-                <button
-                  onClick={(event) => routeLink(event, "about")}
-                  className="text-left transition-colors hover:text-blue-400"
-                >
-                  About Us
-                </button>
-              </li>
-              <li>
-                <button
-                  onClick={(event) => routeLink(event, "about")}
-                  className="text-left transition-colors hover:text-blue-400"
-                >
-                  Our Team
-                </button>
-              </li>
-              <li>
-                <button
-                  onClick={(event) => routeLink(event, "about")}
-                  className="text-left transition-colors hover:text-blue-400"
-                >
-                  Careers
-                </button>
-              </li>
-              <li>
-                <button
-                  onClick={(event) => routeLink(event, "contact")}
-                  className="text-left transition-colors hover:text-blue-400"
-                >
-                  Contact Us
-                </button>
-              </li>
-            </ul>
-          </div>
+          {/* Footer Links Grid */}
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-8 sm:gap-10 w-full lg:w-3/4 lg:pl-8">
+            
+            {/* Company Column */}
+            <div className="flex flex-col">
+              <h4 className="font-semibold text-[#0000ff] mb-5 text-sm sm:text-base">Company</h4>
+              <ul className="flex flex-col gap-4">
+                <li><Link href={routeMap.about} className="text-gray-500 hover:text-[#0000ff] text-sm transition-colors text-left">About Us</Link></li>
+                <li><Link href={routeMap.about} className="text-gray-500 hover:text-[#0000ff] text-sm transition-colors text-left">Our Team</Link></li>
+                <li><Link href={routeMap.about} className="text-gray-500 hover:text-[#0000ff] text-sm transition-colors text-left">Careers</Link></li>
+                <li><Link href={routeMap.contact} className="text-gray-500 hover:text-[#0000ff] text-sm transition-colors text-left">Contact Us</Link></li>
+              </ul>
+            </div>
 
-          {/* Students */}
-          <div className="xs:col-span-1 md:col-span-2">
-            <h3 className="mb-4 xs:mb-5 md:mb-6 text-xs xs:text-sm font-bold text-white">
-              Students
-            </h3>
-            <ul className="space-y-3 xs:space-y-3.5 md:space-y-4 text-xs xs:text-sm text-slate-400">
-              <li>
-                <button
-                  onClick={(event) => routeLink(event, "courseFinder")}
-                  className="text-left transition-colors hover:text-blue-400"
-                >
-                  All Courses
-                </button>
-              </li>
-              <li>
-                <button
-                  onClick={(event) => routeLink(event, "bookCounselling")}
-                  className="text-left transition-colors hover:text-blue-400"
-                >
-                  Career Counseling
-                </button>
-              </li>
-              <li>
-                <button
-                  onClick={(event) => routeLink(event, "campusForum")}
-                  className="text-left transition-colors hover:text-blue-400"
-                >
-                  Community Hub
-                </button>
-              </li>
-              <li className="hidden xs:block">
-                <button
-                  onClick={(event) => routeLink(event, "studyResources")}
-                  className="text-left transition-colors hover:text-blue-400"
-                >
-                  Study Materials
-                </button>
-              </li>
-            </ul>
-          </div>
+            {/* Students Column */}
+            <div className="flex flex-col">
+              <h4 className="font-semibold text-[#0000ff] mb-5 text-sm sm:text-base">Students</h4>
+              <ul className="flex flex-col gap-4">
+                <li><Link href={routeMap.courseFinder} className="text-gray-500 hover:text-[#0000ff] text-sm transition-colors text-left">All Courses</Link></li>
+                <li><Link href={routeMap.bookCounselling} className="text-gray-500 hover:text-[#0000ff] text-sm transition-colors text-left">Career Counseling</Link></li>
+                <li><Link href={routeMap.campusForum} className="text-gray-500 hover:text-[#0000ff] text-sm transition-colors text-left">Community Hub</Link></li>
+                <li><Link href={routeMap.studyResources} className="text-gray-500 hover:text-[#0000ff] text-sm transition-colors text-left">Study Materials</Link></li>
+              </ul>
+            </div>
 
-          {/* Institutions */}
-          <div className="xs:col-span-1 md:col-span-2">
-            <h3 className="mb-4 xs:mb-5 md:mb-6 text-xs xs:text-sm font-bold text-white">
-              For Institutions
-            </h3>
-            <ul className="space-y-3 xs:space-y-3.5 md:space-y-4 text-xs xs:text-sm text-slate-400">
-              <li>
-                <button
-                  onClick={(event) => routeLink(event, "institutionZone")}
-                  className="text-left transition-colors hover:text-blue-400"
-                >
-                  Institution Login
-                </button>
-              </li>
-              <li>
-                <button
-                  onClick={(event) => routeLink(event, "institutionZone")}
-                  className="text-left transition-colors hover:text-blue-400"
-                >
-                  Dashboard
-                </button>
-              </li>
-              <li className="hidden xs:block">
-                <button
-                  onClick={(event) => routeLink(event, "institutionZone")}
-                  className="text-left transition-colors hover:text-blue-400"
-                >
-                  Pricing
-                </button>
-              </li>
-              <li>
-                <button
-                  onClick={(event) => routeLink(event, "signup")}
-                  className="text-left transition-colors hover:text-blue-400"
-                >
-                  Become a Member
-                </button>
-              </li>
-              <li className="hidden xs:block">
-                <button
-                  onClick={(event) => routeLink(event, "contact")}
-                  className="text-left transition-colors hover:text-blue-400"
-                >
-                  Advertise With Us
-                </button>
-              </li>
-            </ul>
-          </div>
+            {/* For Institutions Column */}
+            <div className="flex flex-col">
+              <h4 className="font-semibold text-[#0000ff] mb-5 text-sm sm:text-base">For Institutions</h4>
+              <ul className="flex flex-col gap-4">
+                <li><Link href={routeMap.institutionZone} className="text-gray-500 hover:text-[#0000ff] text-sm transition-colors text-left">Institution Login</Link></li>
+                <li><Link href={routeMap.institutionZone} className="text-gray-500 hover:text-[#0000ff] text-sm transition-colors text-left">Dashboard</Link></li>
+                <li><Link href={routeMap.institutionZone} className="text-gray-500 hover:text-[#0000ff] text-sm transition-colors text-left">Pricing</Link></li>
+                <li><Link href={routeMap.signup} className="text-gray-500 hover:text-[#0000ff] text-sm transition-colors text-left">Become a Member</Link></li>
+                <li><Link href={routeMap.contact} className="text-gray-500 hover:text-[#0000ff] text-sm transition-colors text-left">Advertise With Us</Link></li>
+              </ul>
+            </div>
 
-          {/* Legal */}
-          <div className="xs:col-span-1 md:col-span-2">
-            <h3 className="mb-4 xs:mb-5 md:mb-6 text-xs xs:text-sm font-bold text-white">
-              Legal &amp; Help
-            </h3>
-            <ul className="space-y-3 xs:space-y-3.5 md:space-y-4 text-xs xs:text-sm text-slate-400">
-              <li>
-                <button
-                  onClick={(event) => routeLink(event, "educationPage")}
-                  className="text-left transition-colors hover:text-blue-400"
-                >
-                  FAQs
-                </button>
-              </li>
-              <li>
-                <button
-                  onClick={(event) => routeLink(event, "about")}
-                  className="text-left transition-colors hover:text-blue-400"
-                >
-                  Terms of Use
-                </button>
-              </li>
-              <li>
-                <button
-                  onClick={(event) => routeLink(event, "about")}
-                  className="text-left transition-colors hover:text-blue-400"
-                >
-                  Privacy Policy
-                </button>
-              </li>
-              <li className="hidden xs:block">
-                <button
-                  onClick={(event) => routeLink(event, "contact")}
-                  className="text-left transition-colors hover:text-blue-400"
-                >
-                  Advertising Policy
-                </button>
-              </li>
-            </ul>
+            {/* For Scholarship Provider Column */}
+            <div className="flex flex-col">
+              <h4 className="font-semibold text-[#0000ff] mb-5 text-sm sm:text-base whitespace-nowrap">For Providers</h4>
+              <ul className="flex flex-col gap-4">
+                <li><Link href={routeMap.partner} className="text-gray-500 hover:text-[#0000ff] text-sm transition-colors text-left">Partner With Us</Link></li>
+                <li><Link href={routeMap.providerZone} className="text-gray-500 hover:text-[#0000ff] text-sm transition-colors text-left">Provider Login</Link></li>
+                <li><Link href={routeMap.postScholarship} className="text-gray-500 hover:text-[#0000ff] text-sm transition-colors text-left">Post a Scholarship</Link></li>
+                <li><Link href={routeMap.providerZone} className="text-gray-500 hover:text-[#0000ff] text-sm transition-colors text-left">Pricing & Plans</Link></li>
+              </ul>
+            </div>
+
+            {/* Legal & Help Column */}
+            <div className="flex flex-col">
+              <h4 className="font-semibold text-[#0000ff] mb-5 text-sm sm:text-base">Legal & Help</h4>
+              <ul className="flex flex-col gap-4">
+                <li><Link href={routeMap.educationPage} className="text-gray-500 hover:text-[#0000ff] text-sm transition-colors text-left">FAQs</Link></li>
+                <li><Link href={routeMap.about} className="text-gray-500 hover:text-[#0000ff] text-sm transition-colors text-left">Terms of Use</Link></li>
+                <li><Link href={routeMap.about} className="text-gray-500 hover:text-[#0000ff] text-sm transition-colors text-left">Privacy Policy</Link></li>
+                <li><Link href={routeMap.contact} className="text-gray-500 hover:text-[#0000ff] text-sm transition-colors text-left">Advertising Policy</Link></li>
+              </ul>
+            </div>
+
           </div>
         </div>
-      </div>
 
-      {/* Bottom Bar */}
-      <div className="relative z-10 border-t border-slate-800 bg-slate-950">
-        <div className="mx-auto max-w-350 px-4 xs:px-5 sm:px-6 lg:px-8 py-4 xs:py-5 sm:py-6">
-          <div className="flex flex-col xs:flex-row items-center gap-3 xs:gap-4 text-center xs:text-left">
-            <div className="flex items-center gap-1.5 xs:gap-2 text-[11px] xs:text-sm text-slate-500">
-              <i className="fa-solid fa-shield-halved h-3.5 w-3.5 xs:h-4 xs:w-4 text-emerald-500" />
-              <span>Secure Platform</span>
-            </div>
-            <span className="hidden xs:inline-block text-slate-700">|</span>
-            <p className="text-[11px] xs:text-sm text-slate-500">
-              &copy; {currentYear} StudSphere Global Ltd. All rights reserved.
-            </p>
-          </div>
+        {/* Copyright Line */}
+        <div className="w-full border-t border-gray-200 pt-8 mt-4 flex flex-col sm:flex-row items-center justify-center">
+          <p className="text-gray-500 text-sm">
+            Copyright &copy; {currentYear} Studsphere. All Rights Reserved.
+          </p>
         </div>
-      </div>
-    </footer>
+      </footer>
+    </div>
   );
 };
 

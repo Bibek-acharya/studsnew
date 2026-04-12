@@ -45,7 +45,7 @@ const EducationPage: React.FC<EducationPageProps> = ({ onNavigate }) => {
       {/* Section 11: What Our Students Say */}
       <TestimonialsSection onNavigate={onNavigate} />
       {/* Section 12: Not sure where to start? */}
-      <RecommendedForYouSection onNavigate={onNavigate} />
+      {/* <RecommendedForYouSection onNavigate={onNavigate} /> */}
       {/* Floating Popups */}
       <LandingPopups />
     </div>

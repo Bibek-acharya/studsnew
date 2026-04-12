@@ -92,8 +92,8 @@ const initialScholarships: ScholarshipMock[] = [
 ];
 
 interface Props {
-  onCreateNew: () => void;
-  onEdit: (id: number) => void;
+  onCreateNew?: () => void;
+  onEdit?: (id: number) => void;
 }
 
 const ScholarshipManagePage: React.FC<Props> = ({ onCreateNew, onEdit }) => {

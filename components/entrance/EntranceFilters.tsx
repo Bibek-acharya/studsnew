@@ -3,6 +3,8 @@ import {
   EntranceFilterState,
   DEFAULT_ENTRANCE_FILTERS,
 } from "@/app/entrance/types";
+import GlobalFilterSection from "@/components/ui/GlobalFilterSection";
+import { FaSliders } from "react-icons/fa6";
 
 interface EntranceFiltersProps {
   filters: EntranceFilterState;
@@ -77,7 +79,7 @@ const SearchInput: React.FC<{
       value={value}
       onChange={(e) => onChange(e.target.value)}
       placeholder={placeholder}
-      className="block w-full rounded-[8px] border border-gray-200 bg-[#f8fafc] py-2 pl-9 pr-3 text-[13.5px] text-gray-900 outline-none transition placeholder:text-gray-400 focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+      className="block w-full rounded-lg border border-gray-200 bg-[#f8fafc] py-2 pl-9 pr-3 text-[13.5px] text-gray-900 outline-none transition placeholder:text-gray-400 focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
     />
   </div>
 );
@@ -136,34 +138,13 @@ const Accordion: React.FC<{
 }> = ({ title, defaultOpen = false, children }) => {
   const [open, setOpen] = useState(defaultOpen);
   return (
-    <div className="border-b border-gray-100">
-      <button
-        type="button"
-        onClick={() => setOpen((o) => !o)}
-        className="group flex w-full items-center justify-between bg-white py-4"
-      >
-        <span className="text-[15px] font-semibold text-gray-900 transition-colors group-hover:text-blue-600">
-          {title}
-        </span>
-        <svg
-          className={`h-4 w-4 text-gray-500 transition-transform duration-300 ${open ? "rotate-180" : ""}`}
-          fill="none"
-          stroke="currentColor"
-          strokeWidth="2"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-          viewBox="0 0 24 24"
-        >
-          <polyline points="6 9 12 15 18 9" />
-        </svg>
-      </button>
-      <div
-        className="overflow-hidden transition-all duration-300 ease-in-out"
-        style={{ maxHeight: open ? "600px" : "0px", opacity: open ? 1 : 0 }}
-      >
-        <div className="pb-4">{children}</div>
-      </div>
-    </div>
+    <GlobalFilterSection
+      title={title}
+      isOpen={open}
+      onToggle={() => setOpen((o) => !o)}
+    >
+      {children}
+    </GlobalFilterSection>
   );
 };
 
@@ -234,40 +215,34 @@ const EntranceFilters: React.FC<EntranceFiltersProps> = ({
     return tags;
   }, [filters, filterLabelMap]);
 
+  const hasActiveFilters = appliedFilters.length > 0;
+
   return (
     <>
-      <div className="relative w-full rounded-[20px] border border-gray-100 bg-white p-6 shadow-[0_4px_24px_-8px_rgba(0,0,0,0.1)]">
+      <div className="relative w-full rounded-[20px] border border-gray-200 bg-white p-6">
         <div className="mb-2 flex items-center justify-between">
-          <div className="flex items-center gap-2.5">
-            <svg
-              viewBox="0 0 24 24"
-              fill="currentColor"
-              className="h-6 w-6 text-blue-600"
-            >
-              <path
-                fillRule="evenodd"
-                clipRule="evenodd"
-                d="M3 4a1 1 0 011-1h16a1 1 0 01.7 1.7L14 11.414V17a1 1 0 01-.293.707l-3 3A1 1 0 019 20v-8.586L3.3 4.7A1 1 0 013 4z"
-              />
-            </svg>
-            <h2 className="text-[20px] font-bold tracking-tight text-gray-900">
+          <div className="flex items-center gap-3">
+            <FaSliders size={18} className="text-black" />
+            <h3 className="font-black text-xl text-slate-900 tracking-tight">
               Filters
-            </h2>
+            </h3>
           </div>
-          <button
-            type="button"
-            onClick={() => setShowAppliedDropdown((prev) => !prev)}
-            className="inline-flex items-center gap-2 rounded-md border border-blue-100 bg-blue-50 px-3 py-1.5 text-[12px] font-semibold text-blue-700 transition-colors hover:bg-blue-100"
-          >
-            Applied ({appliedFilters.length})
-            <i
-              className={`fa-solid fa-chevron-down text-[10px] transition-transform ${showAppliedDropdown ? "rotate-180" : ""}`}
-            ></i>
-          </button>
+          {hasActiveFilters && (
+            <button
+              type="button"
+              onClick={() => setShowAppliedDropdown((prev) => !prev)}
+              className="inline-flex items-center gap-2 rounded-md px-3 py-1.5 text-[12px] font-semibold text-blue-700 transition-colors"
+            >
+              Applied ({appliedFilters.length})
+              <i
+                className={`fa-solid fa-chevron-down text-[10px] transition-transform ${showAppliedDropdown ? "rotate-180" : ""}`}
+              ></i>
+            </button>
+          )}
         </div>
 
-        {showAppliedDropdown && (
-          <div className="absolute right-6 top-16 z-30 w-[min(520px,calc(100%-3rem))] rounded-xl border border-gray-200 bg-white p-3 shadow-lg">
+        {hasActiveFilters && showAppliedDropdown && (
+          <div className="absolute right-6 top-16 z-30 w-[min(520px,calc(100%-3rem))] rounded-lg border border-gray-200 bg-white p-3 shadow-lg">
             {appliedFilters.length === 0 ? (
               <p className="px-1 py-2 text-[13px] italic text-gray-400">
                 No filters selected yet.
@@ -326,7 +301,7 @@ const EntranceFilters: React.FC<EntranceFiltersProps> = ({
           </div>
         </Accordion>
 
-        <Accordion title="Stream / Faculty" defaultOpen>
+        <Accordion title="Stream / Faculty">
           <SearchInput
             placeholder="Search streams..."
             value={streamSearch}
@@ -397,16 +372,8 @@ const EntranceFilters: React.FC<EntranceFiltersProps> = ({
           </div>
         </Accordion>
 
-        <div>
-          <button
-            type="button"
-            className="group flex w-full items-center justify-between bg-white py-4"
-          >
-            <span className="text-[15px] font-semibold text-gray-900">
-              Sort By
-            </span>
-          </button>
-          <div className="flex flex-col gap-3.5 pb-4 pt-1">
+        <Accordion title="Sort By">
+          <div className="flex flex-col gap-3.5 pt-1">
             {SORT_OPTIONS.map((opt) => (
               <RadioItem
                 key={opt.id}
@@ -420,7 +387,7 @@ const EntranceFilters: React.FC<EntranceFiltersProps> = ({
               />
             ))}
           </div>
-        </div>
+        </Accordion>
       </div>
 
       <style>{`

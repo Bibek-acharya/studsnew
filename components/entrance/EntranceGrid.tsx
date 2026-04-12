@@ -1,8 +1,9 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
+import { useQuery } from "@tanstack/react-query";
 import { EntranceFilterState } from "@/app/entrance/types";
 import { Exam } from "@/components/entrance/types";
-import { MOCK_EXAMS } from "@/components/entrance/Constants";
+import { entranceService, EntranceFilters } from "@/services/entrance.api";
 import Pagination from "@/components/ui/Pagination";
 import {
   BadgeCheck,
@@ -36,82 +37,27 @@ const EntranceGrid: React.FC<EntranceGridProps> = ({ filters, setFilters }) => {
     setCurrentPage(1);
   }, [filters]);
 
-  const statusMap: Record<string, Exam["status"]> = {
-    ongoing: "Ongoing",
-    upcoming: "Upcoming",
-    closing: "Closing Soon",
+  const apiFilters: EntranceFilters = {
+    search: filters.search || undefined,
+    academicLevel: filters.academicLevel.length > 0 ? filters.academicLevel : undefined,
+    stream: filters.stream.length > 0 ? filters.stream : undefined,
+    programName: filters.programName.length > 0 ? filters.programName : undefined,
+    university: filters.university.length > 0 ? filters.university : undefined,
+    status: filters.status.length > 0 ? filters.status : undefined,
+    quick: filters.quick.length > 0 ? filters.quick : undefined,
+    sortBy: filters.sortBy || undefined,
   };
 
-  const filteredExams = useMemo(() => {
-    return MOCK_EXAMS.filter((exam) => {
-      const searchable =
-        `${exam.title} ${exam.institution} ${exam.location} ${exam.affiliation}`.toLowerCase();
+  const { data, isLoading } = useQuery({
+    queryKey: ["entrances", apiFilters, currentPage],
+    queryFn: () => entranceService.getEntrances(apiFilters, currentPage, 12),
+    staleTime: 5 * 60 * 1000,
+  });
 
-      if (filters.search) {
-        const terms = filters.search.toLowerCase().split(" ");
-        const matchesSearch = terms.every((term) => searchable.includes(term));
-        if (!matchesSearch) return false;
-      }
-
-      if (filters.academicLevel.length > 0) {
-        const text = `${exam.title} ${exam.affiliation}`.toLowerCase();
-        const hasLevel = filters.academicLevel.some((level) => {
-          if (level === "plus2")
-            return /\+2|higher secondary|intermediate|class 12|neb/.test(text);
-          if (level === "bachelor")
-            return /bachelor|bsc|bba|be|entrance|cmat|cee/.test(text);
-          if (level === "master") return /master|mba|mbs|msc|ma/.test(text);
-          if (level === "diploma") return /diploma|ctevt|pcl/.test(text);
-          return true;
-        });
-        if (!hasLevel) return false;
-      }
-
-      if (filters.stream.length > 0) {
-        const hasStream = filters.stream.some((s) =>
-          searchable.includes(s.toLowerCase()),
-        );
-        if (!hasStream) return false;
-      }
-
-      if (filters.programName.length > 0) {
-        const hasProgram = filters.programName.some((p) =>
-          searchable.includes(p.toLowerCase()),
-        );
-        if (!hasProgram) return false;
-      }
-
-      if (filters.university.length > 0) {
-        const uni = exam.institution.toLowerCase();
-        const hasUni = filters.university.some((u) =>
-          uni.includes(u.toLowerCase()),
-        );
-        if (!hasUni) return false;
-      }
-
-      if (filters.status.length > 0) {
-        const mappedStatus = statusMap[filters.status[0]];
-        const hasStatus = filters.status.some((s) => {
-          const mapped = statusMap[s];
-          return exam.status === mapped;
-        });
-        if (!hasStatus) return false;
-      }
-
-      return true;
-    });
-  }, [filters]);
-
-  const itemsPerPage = 3;
-  const totalPages = Math.max(
-    1,
-    Math.ceil(filteredExams.length / itemsPerPage),
-  );
-
-  const pagedExams = useMemo(() => {
-    const startIndex = (currentPage - 1) * itemsPerPage;
-    return filteredExams.slice(startIndex, startIndex + itemsPerPage);
-  }, [filteredExams, currentPage]);
+  const filteredExams = useMemo(() => data?.data?.entrances || [], [data]);
+  const total = data?.data?.total || 0;
+  const totalPages = Math.max(1, Math.ceil(total / 12));
+  const pagedExams = filteredExams;
 
   return (
     <>
@@ -119,7 +65,7 @@ const EntranceGrid: React.FC<EntranceGridProps> = ({ filters, setFilters }) => {
         <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-center">
           <div className="flex flex-col justify-start">
             <h1 className="mb-3 text-base font-bold text-gray-900">
-              Showing {filteredExams.length} Entrance Exams
+              {isLoading ? "Loading..." : `Showing ${total} Entrance Exams`}
             </h1>
           </div>
 
@@ -136,7 +82,7 @@ const EntranceGrid: React.FC<EntranceGridProps> = ({ filters, setFilters }) => {
                   }))
                 }
                 placeholder="Search exams, universities..."
-                className="w-full rounded-lg border border-gray-200 bg-white py-2.5 pl-10 pr-4 text-sm shadow-sm transition-all placeholder-gray-400 focus:border-transparent focus:outline-none focus:ring-2 focus:ring-[#0000FF]"
+                className="w-full rounded-lg border border-gray-200 bg-white py-2.5 pl-10 pr-4 text-sm transition-all placeholder-gray-400 focus:border-transparent focus:outline-none focus:ring-2 focus:ring-brand-blue"
               />
             </div>
           </div>
@@ -145,7 +91,7 @@ const EntranceGrid: React.FC<EntranceGridProps> = ({ filters, setFilters }) => {
 
       <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4 sm:gap-5 md:gap-6">
         {filteredExams.length === 0 && (
-          <div className="col-span-1 md:col-span-2 xl:col-span-3 rounded-[16px] border border-gray-100 bg-white py-16 text-center text-gray-500 shadow-[0_2px_15px_rgb(0,0,0,0.04)]">
+          <div className="col-span-1 md:col-span-2 xl:col-span-3 rounded-2xl border border-gray-100 bg-white py-16 text-center text-gray-500 shadow-[0_2px_15px_rgb(0,0,0,0.04)]">
             No entrance exams found matching your filters.
           </div>
         )}
@@ -176,6 +122,11 @@ const iconMap: Record<string, React.ReactNode> = {
   "badge-check": <BadgeCheck className="w-3 h-3" />,
 };
 
+const truncateText = (text: string, maxLength: number) => {
+  if (text.length <= maxLength) return text;
+  return text.slice(0, maxLength) + "...";
+};
+
 const EntranceCard: React.FC<{ exam: Exam }> = ({ exam }) => {
   const router = useRouter();
   const [bookmarked, setBookmarked] = useState(false);
@@ -186,31 +137,31 @@ const EntranceCard: React.FC<{ exam: Exam }> = ({ exam }) => {
   };
 
   return (
-    <article className="bg-white rounded-2xl p-4 sm:p-5 border border-gray-100 flex flex-col h-full hover:border-gray-200 transition-all duration-300">
+    <article className="bg-white rounded-2xl p-4 sm:p-5 border border-gray-200 flex flex-col h-full hover:border-blue-500/20 transition-all duration-300">
       <header className="flex justify-between items-start mb-4 sm:mb-5">
         <div className="flex gap-2.5 sm:gap-3">
-          <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl border border-gray-100 flex items-center justify-center p-1 bg-white shadow-sm shrink-0">
+          <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl border border-gray-100 flex items-center justify-center bg-white shrink-0">
             <img
               src={exam.logo}
               alt={exam.institution}
-              className="max-w-full max-h-full object-contain"
+              className="w-full h-full rounded-lg object-contain"
             />
           </div>
           <div className="flex flex-col min-w-0">
-            <h3 className="text-[13px] xs:text-[14px] sm:text-[15px] font-bold text-[#111827] flex items-center gap-1 sm:gap-1.5 truncate">
-              {exam.institution}
+            <h3 className="text-[13px] xs:text-[14px] sm:text-[15px] font-bold text-[#111827] flex items-center gap-1 sm:gap-1.5 min-w-0" title={exam.institution}>
+              <span className="truncate">{truncateText(exam.institution, 20)}</span>
               {exam.verified && (
                 <BadgeCheckIcon className="w-3.25 h-3.25 sm:w-3.75 sm:h-3.75 text-white fill-blue-500 ml-0.5 sm:ml-1 shrink-0" />
               )}
             </h3>
-            <div className="flex items-center gap-1.5 sm:gap-2 text-[10px] xs:text-[11px] sm:text-[11px] text-[#6b7280] mt-0.5 flex-wrap">
+            <div className="flex flex-col gap-1 text-[10px] xs:text-[11px] sm:text-[11px] text-[#6b7280] mt-0.5">
               <span className="flex items-center gap-1">
-                <MapPin className="w-2.5 h-2.5 sm:w-3 sm:h-3" /> {exam.location}
+                <MapPin className="w-2.5 h-2.5 sm:w-3 sm:h-3 shrink-0" />
+                <span className="truncate" title={exam.location}>{exam.location}</span>
               </span>
-              <span className="w-1 h-1 rounded-full bg-gray-300 hidden xs:inline"></span>
               <span className="flex items-center gap-1">
-                <Award className="w-2.5 h-2.5 sm:w-3 sm:h-3" />{" "}
-                {exam.affiliation}
+                <Award className="w-2.5 h-2.5 sm:w-3 sm:h-3 shrink-0" />
+                <span className="truncate" title={exam.affiliation}>{exam.affiliation}</span>
               </span>
             </div>
             <a
@@ -227,8 +178,9 @@ const EntranceCard: React.FC<{ exam: Exam }> = ({ exam }) => {
 
       <main className="grow">
         <h4
-          className="text-[15px] xs:text-[16px] sm:text-[17px] font-bold text-[#111827] mb-2.5 sm:mb-3 leading-tight cursor-pointer hover:text-blue-600 transition-colors"
+          className="text-[15px] xs:text-[16px] sm:text-[17px] font-bold text-[#111827] mb-2.5 sm:mb-3 leading-tight cursor-pointer hover:text-brand-blue transition-colors truncate"
           onClick={() => router.push(`/entrance/${exam.id}`)}
+          title={exam.title}
         >
           {exam.title}
         </h4>
