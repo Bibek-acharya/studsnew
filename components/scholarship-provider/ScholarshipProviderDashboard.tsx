@@ -129,10 +129,20 @@ const ScholarshipProviderDashboard: React.FC = () => {
             You haven't added any scholarships to the platform yet. Set up your
             first scholarship to start receiving applications.
           </p>
-          <button className="bg-indigo-600 text-white font-bold py-3 px-6 rounded-xl shadow-sm hover:bg-indigo-700 transition-colors flex items-center gap-2">
-            <i className="fa-solid fa-plus"></i>
-            Create Scholarship
-          </button>
+          <div className="flex flex-col sm:flex-row gap-4">
+            <button className="bg-indigo-600 text-white font-bold py-3 px-8 rounded-xl shadow-lg shadow-indigo-500/20 hover:bg-indigo-700 transition-all flex items-center justify-center gap-2">
+              <i className="fa-solid fa-plus"></i>
+              Create Scholarship
+            </button>
+            <a 
+              href="/scholarship-apply" 
+              target="_blank" 
+              className="bg-white text-indigo-600 border border-indigo-100 font-bold py-3 px-8 rounded-xl shadow-sm hover:bg-indigo-50 transition-all flex items-center justify-center gap-2"
+            >
+              <i className="fa-solid fa-eye"></i>
+              Preview Entrance Form
+            </a>
+          </div>
         </div>
       </main>
     </div>

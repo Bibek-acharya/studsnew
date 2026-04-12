@@ -716,18 +716,18 @@ const CourseFinderPage: React.FC<CourseFinderPageProps> = ({ onNavigate }) => {
         <section className="flex-1 w-full min-w-0 flex flex-col">
           <div className="mb-1 flex flex-col md:flex-row md:items-end justify-between gap-4 border-b border-gray-200 pb-5">
             <div>
-              <h1 className="text-base font-bold text-gray-900">
-                Showing{" "}
-                {paginatedCourses.length > 0
-                  ? (currentPage - 1) * COURSES_PER_PAGE + 1
-                  : 0}
-                -
-                {Math.min(
-                  currentPage * COURSES_PER_PAGE,
-                  filteredCourses.length,
-                )}{" "}
-                of {filteredCourses.length.toLocaleString()} Courses
-              </h1>
+               <h1 className="text-base font-normal text-gray-900">
+                 Showing{" "}
+                 {paginatedCourses.length > 0
+                   ? (currentPage - 1) * COURSES_PER_PAGE + 1
+                   : 0}
+                 -
+                 {Math.min(
+                   currentPage * COURSES_PER_PAGE,
+                   filteredCourses.length,
+                 )}{" "}
+                 of {filteredCourses.length.toLocaleString()} <span className="font-bold">Courses</span>
+               </h1>
               <p className="mt-1 text-[13px] text-gray-500 font-medium">
                 Explore and compare the best colleges tailored for you.
               </p>
@@ -818,11 +818,12 @@ const CourseFinderPage: React.FC<CourseFinderPageProps> = ({ onNavigate }) => {
                           </div>
                         </div>
 
-                        <h3
-                          className={`text-base font-bold text-gray-900 mb-3 hover:text-[#0000ff] transition-colors line-clamp-2 leading-snug`}
-                        >
-                          {course.title}
-                        </h3>
+                         <h3
+                           title={course.title}
+                           className={`text-base font-bold text-gray-900 mb-3 hover:text-[#0000ff] transition-colors truncate leading-snug`}
+                         >
+                           {course.title}
+                         </h3>
 
                         <div className="space-y-1.5 mb-5 text-xs font-medium text-gray-600 flex-1">
                           <div className="flex items-start gap-2">
@@ -858,9 +859,9 @@ const CourseFinderPage: React.FC<CourseFinderPageProps> = ({ onNavigate }) => {
                               <span className="font-bold text-gray-800">
                                 Est. Fee:
                               </span>{" "}
-                              <span className="text-green-600 font-bold">
-                                {course.feeDisplay}
-                              </span>
+                               <span className="text-[#0000ff] font-bold">
+                                 {course.feeDisplay}
+                               </span>
                             </p>
                           </div>
                           <div className="flex items-start gap-2">
