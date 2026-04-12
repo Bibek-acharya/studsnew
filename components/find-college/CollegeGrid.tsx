@@ -14,8 +14,8 @@ import {
 import Pagination from "@/components/ui/Pagination";
 
 import LocationAd from "./ads/LocationAd";
-import RatingAd from "./ads/RatingAd";
 import TrendingCollegesAd from "./ads/TrendingCollegesAd";
+import RecommendationFeedback from "./ads/RecommendationFeedback";
 import ClaimCollegeModal from "./ClaimCollegeModal";
 
 interface CollegeGridProps {
@@ -132,7 +132,7 @@ const FILTER_LABELS: Record<string, string> = {
 
 const toFilterLabel = (value: string): string => FILTER_LABELS[value] || value;
 
-const COLLEGES_PER_PAGE = 20;
+const COLLEGES_PER_PAGE = 18;
 
 const CollegeGrid: React.FC<CollegeGridProps> = ({
   filters,
@@ -412,8 +412,7 @@ const CollegeGrid: React.FC<CollegeGridProps> = ({
               {isAfter2Rows && (
                 <div className="col-span-1 md:col-span-2 xl:col-span-3 w-full">
                   {adCycleIndex === 0 && <TrendingCollegesAd />}
-                  {adCycleIndex === 1 && <LocationAd />}
-                  {adCycleIndex === 2 && <RatingAd />}
+                  {adCycleIndex === 1 && <RecommendationFeedback />}
                 </div>
               )}
             </React.Fragment>

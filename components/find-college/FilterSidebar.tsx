@@ -851,7 +851,7 @@ const FilterSidebar: React.FC<FilterSidebarProps> = ({
           <button
             type="button"
             onClick={handleLocate}
-            className="flex w-full items-center justify-center gap-2 rounded-md border border-blue-500 bg-blue-50 px-4 py-3 text-blue-500 outline-none transition-all duration-200 hover:bg-blue-100 active:bg-blue-200"
+            className="flex w-full items-center justify-start gap-2 rounded-md border border-black/20  px-4 py-3 text-gray-700 hover:text-brand-blue outline-none transition-all duration-200"
           >
             {locating ? (
               <svg
