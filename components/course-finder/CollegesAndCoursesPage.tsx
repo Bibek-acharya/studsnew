@@ -173,8 +173,8 @@ const CollegesAndCoursesPage: React.FC<CollegesAndCoursesPageProps> = ({
     pagination?.total ||
     Number(activeCourse?.colleges || selectedCourse.collegesCount || 0);
 
-  const firstGrid = cards.slice(0, 8);
-  const secondGrid = cards.slice(8, 16);
+  const showingFrom = totalResults === 0 ? 0 : (page - 1) * 16 + 1;
+  const showingTo = Math.min((page - 1) * 16 + cards.length, totalResults);
   const allVisibleIds = cards.map((item: CollegeCardItem) => item.id);
 
   useEffect(() => {
@@ -241,48 +241,89 @@ const CollegesAndCoursesPage: React.FC<CollegesAndCoursesPageProps> = ({
   const renderCard = (college: CollegeCardItem) => {
     const selected = selectedIds.has(college.id);
     return (
-      <label
+      <div
         key={college.id}
-        className={`bg-white border rounded-[16px] p-4 sm:p-5 flex items-center justify-between cursor-pointer hover:border-blue-200 hover:shadow-[0_4px_20px_-4px_rgba(37,99,235,0.08)] transition-all duration-200 group relative ${selected ? "border-blue-500 bg-blue-50/30" : "border-gray-100"}`}
+        className={`flex h-full flex-col rounded-2xl border bg-white p-4 transition-all duration-300 hover:border-blue-500/20 group relative shadow-sm ${selected ? "border-blue-500 ring-1 ring-blue-500/10" : "border-gray-200"}`}
       >
-        <div className="flex items-center w-full">
-          <input
-            type="checkbox"
-            checked={selected}
-            onChange={(event) => {
-              event.stopPropagation();
-              toggleCollegeSelection(college.id);
-            }}
-            className={`qa-checkbox custom-checkbox rounded border-gray-300 text-blue-600 focus:ring-blue-500 cursor-pointer ${quickApplyMode ? "opacity-100 w-5 mr-4 pointer-events-auto" : "opacity-0 w-0 mr-0 pointer-events-none"}`}
-          />
-
-          <div className="w-[72px] h-[72px] rounded-[14px] border border-gray-100 bg-white p-2 flex items-center justify-center flex-shrink-0 shadow-sm overflow-hidden">
-            <img src={college.logo} alt={college.name} className="w-full h-full object-contain" />
+        <div className="group relative h-40 shrink-0 overflow-hidden rounded-xl bg-gray-50">
+          <img src={college.logo} alt={college.name} className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105" />
+          
+          <div className="absolute top-3 left-3 z-10 flex gap-2">
+            <span className="rounded bg-blue-600 px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider text-white shadow-sm">
+              Featured
+            </span>
           </div>
 
-          <div className="flex flex-col ml-4">
-            <h3 className="font-bold text-[16px] text-gray-900 leading-tight mb-1.5 group-hover:text-blue-600 transition-colors line-clamp-1">
+          {quickApplyMode && (
+            <label className="absolute right-3 top-3 z-10 cursor-pointer" onClick={(e) => e.stopPropagation()}>
+              <div className="relative flex h-6 w-6 items-center justify-center">
+                <input
+                  type="checkbox"
+                  checked={selected}
+                  onChange={() => toggleCollegeSelection(college.id)}
+                  className="peer sr-only"
+                />
+                <div className="absolute inset-0 rounded-md border border-slate-300 bg-white/90 shadow-sm backdrop-blur-sm transition-colors hover:border-blue-500 peer-checked:border-blue-600 peer-checked:bg-blue-600"></div>
+                <svg className="pointer-events-none absolute z-10 h-4 w-4 text-white opacity-0 transition-opacity peer-checked:opacity-100" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="3.5">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                </svg>
+              </div>
+            </label>
+          )}
+        </div>
+
+        <div className="flex flex-1 flex-col pt-4">
+          <div className="flex items-center gap-1.5 mb-2">
+            <h3 className="truncate text-left text-[19px] font-bold text-slate-800 tracking-tight transition-colors group-hover:text-blue-600">
               {college.name}
             </h3>
-            <div className="flex items-center mb-3">
-              <div className="flex items-center gap-1">
-                <svg className="w-3.5 h-3.5 text-[#2563EB] fill-current" viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" /></svg>
-                <span className="text-[12px] font-bold text-gray-700 mt-0.5">{college.rating.toFixed(1)}</span>
-              </div>
-              <div className="w-[1px] h-3.5 bg-gray-300 mx-2.5"></div>
-              <span className="text-[11px] text-gray-500 font-medium mt-0.5">{college.reviews} reviews</span>
+            <svg className="w-5 h-5 text-blue-500 fill-blue-500 shrink-0" viewBox="0 0 24 24"><path d="M12 22C6.477 22 2 17.523 2 12S6.477 2 12 2s10 4.477 10 10-4.477 10-10 10zm-1.106-6.103L8.293 13.3a1 1 0 0 1 1.414-1.414l1.193 1.193 4.407-4.407a1 1 0 0 1 1.414 1.414l-5.114 5.114a1 1 0 0 1-1.414 0z"/></svg>
+          </div>
+
+          <div className="mb-3 flex items-center text-[13.5px] text-gray-500 font-medium">
+            <div className="flex items-center gap-1 text-amber-500">
+              <i className="fa-solid fa-star"></i>
+              <span className="text-slate-700 font-bold">{college.rating.toFixed(1)}</span>
             </div>
-            <div className="flex flex-wrap gap-2">
-              <span className="border border-gray-100 bg-white text-gray-600 text-[10px] sm:text-[11px] px-3 py-1 rounded-full font-medium shadow-sm">{college.affiliation || "TU Affiliation"}</span>
-              <span className="border border-gray-100 bg-white text-gray-600 text-[10px] sm:text-[11px] px-3 py-1 rounded-full font-medium shadow-sm">NEB</span>
-              <span className="border border-gray-100 bg-white text-gray-600 text-[10px] sm:text-[11px] px-3 py-1 rounded-full font-medium shadow-sm">{college.type || "Private"}</span>
+            <span className="mx-2.5 text-gray-300">|</span>
+            <span className="text-slate-600">{college.type || "Private"}</span>
+            <span className="mx-2.5 text-gray-300">|</span>
+            <div className="flex min-w-0 flex-1 items-center gap-1.5 truncate">
+              <i className="fa-solid fa-location-dot text-gray-400"></i>
+              <span>Kathmandu</span>
+            </div>
+          </div>
+
+          <div className="mb-4">
+            <div className="flex items-start gap-2 text-[13.5px] text-gray-600">
+              <i className="fa-solid fa-award mt-1 text-gray-400"></i>
+              <p className="line-clamp-2 font-medium leading-relaxed">
+                {college.affiliation || "TU Affiliation, NEB, Kathmandu University"}
+              </p>
+            </div>
+          </div>
+
+          <div className="mt-auto pt-4 border-t border-dashed border-gray-100">
+            <button
+              className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-2.5 rounded-xl transition-all shadow-md shadow-blue-100 text-[14px]"
+              onClick={(e) => {
+                e.preventDefault();
+                window.location.href = `/find-college/${college.id}`;
+              }}
+            >
+              Get Counselling
+            </button>
+            <div className="flex gap-2 mt-2">
+              <button className="flex-1 border border-gray-200 hover:bg-gray-50 text-gray-700 font-bold py-2 rounded-xl transition-all text-[13px]">
+                Inquiry
+              </button>
+              <button className="flex-1 bg-yellow-500 hover:bg-yellow-600 text-white font-bold py-2 rounded-xl transition-all text-[13px] shadow-sm">
+                Compare
+              </button>
             </div>
           </div>
         </div>
-        <div className={`pr-1 pl-2 card-chevron transition-opacity duration-300 ${quickApplyMode ? "opacity-0 pointer-events-none" : "opacity-100"}`}>
-          <svg className="w-4 h-4 text-gray-400 group-hover:text-blue-500 group-hover:translate-x-1 transition-all duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M9 5l7 7-7 7" /></svg>
-        </div>
-      </label>
+      </div>
     );
   };
 
@@ -348,43 +389,56 @@ const CollegesAndCoursesPage: React.FC<CollegesAndCoursesPageProps> = ({
         </div>
 
         <div className="flex flex-col lg:flex-row gap-8 items-start">
-          <aside className="w-full lg:w-75 h-fit sticky top-24 rounded-2xl border border-[#e9edf2] bg-white shadow-[0_2px_15px_rgb(0,0,0,0.04)] overflow-hidden">
-            <div className="flex items-center justify-between border-b border-gray-100 px-5 py-4">
-              <h3 className="text-[17px] font-bold text-gray-900 tracking-tight flex items-center gap-2">
-                <i className="fa-solid fa-sliders text-[14px]"></i> Filters
-              </h3>
-              <button
-                onClick={() => {
-                  setVerifiedOnly(false);
-                  setPopularOnly(false);
-                  setSelectedLevels([]);
-                  setSelectedStreams([]);
-                  setSelectedAffiliations([]);
-                  setSelectedStatuses([]);
-                  setSelectedFeeRanges([]);
-                  setStreamSearch("");
-                  setAffiliationSearch("");
-                  setProvince("All Provinces");
-                  setNationalWide(false);
-                  setSelectedCollegeType("");
-                }}
-                className="text-[12px] font-semibold text-brand-blue transition-colors hover:text-brand-hover"
-              >
-                <span className="inline-flex items-center gap-2 rounded-md border border-red-100 bg-red-50 px-3 py-1.5 text-red-700">
-                  <i className="fa-solid fa-xmark text-[10px]"></i>
-                  Reset
-                </span>
-              </button>
-            </div>
-
-            <div className="px-5 pb-4">
-              <div className="mb-5 border-b border-gray-100 pb-5">
-                <h3 className="text-[11px] font-bold text-gray-400 uppercase tracking-wider mb-3">Quick Filters</h3>
-                <div className="flex flex-wrap gap-2">
-                  <button onClick={() => setVerifiedOnly((prev: boolean) => !prev)} className={`border text-[11px] px-2.5 py-1.5 rounded flex items-center gap-1 font-medium ${verifiedOnly ? "border-green-300 bg-green-100 text-green-800" : "border-green-200 bg-green-50 text-green-700"}`}><i className="fa-solid fa-check w-3 h-3"></i>Verified</button>
-                  <button onClick={() => setPopularOnly((prev: boolean) => !prev)} className={`border text-[11px] px-2.5 py-1.5 rounded flex items-center gap-1 font-medium ${popularOnly ? "border-blue-300 bg-blue-100 text-blue-800" : "border-blue-200 bg-blue-50 text-blue-700"}`}><i className="fa-solid fa-bolt w-3 h-3"></i>New</button>
+          <aside className="w-full shrink-0 lg:w-75">
+            <div className="relative w-full rounded-[20px] border border-gray-200 bg-white p-6 shadow-sm">
+              <div className="mb-6 flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <svg className="w-5 h-5 text-gray-900" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M3 4h13M3 8h9m-9 4h6m4 0l4-4m0 0l4 4m-4-4v12" /></svg>
+                  <h3 className="text-xl font-black tracking-tight text-slate-900">
+                    Filters
+                  </h3>
                 </div>
+                <button
+                  onClick={() => {
+                    setVerifiedOnly(false);
+                    setPopularOnly(false);
+                    setSelectedLevels([]);
+                    setSelectedStreams([]);
+                    setSelectedAffiliations([]);
+                    setSelectedStatuses([]);
+                    setSelectedFeeRanges([]);
+                    setStreamSearch("");
+                    setAffiliationSearch("");
+                    setProvince("All Provinces");
+                    setNationalWide(false);
+                    setSelectedCollegeType("");
+                  }}
+                  className="text-xs font-bold text-blue-600 hover:text-blue-700 transition-colors"
+                >
+                  Reset All
+                </button>
               </div>
+
+              <div className="space-y-6">
+                <div>
+                  <h4 className="mb-3 text-[11px] font-bold uppercase tracking-wider text-gray-400">Quick Filters</h4>
+                  <div className="flex flex-wrap gap-2">
+                    <button 
+                      onClick={() => setVerifiedOnly((prev: boolean) => !prev)} 
+                      className={`flex items-center gap-1.5 rounded-md border px-3 py-1.5 text-[11.5px] font-semibold transition-all ${verifiedOnly ? "border-green-200 bg-green-50 text-green-700" : "border-gray-100 bg-gray-50 text-gray-600 hover:border-green-100 hover:bg-green-50/50"}`}
+                    >
+                      <i className="fa-solid fa-circle-check"></i>
+                      Verified
+                    </button>
+                    <button 
+                      onClick={() => setPopularOnly((prev: boolean) => !prev)} 
+                      className={`flex items-center gap-1.5 rounded-md border px-3 py-1.5 text-[11.5px] font-semibold transition-all ${popularOnly ? "border-blue-200 bg-blue-50 text-blue-700" : "border-gray-100 bg-gray-50 text-gray-600 hover:border-blue-100 hover:bg-blue-50/50"}`}
+                    >
+                      <i className="fa-solid fa-fire"></i>
+                      Popular
+                    </button>
+                  </div>
+                </div>
 
               <GlobalFilterSection
                 title="Education Level"
@@ -613,32 +667,73 @@ const CollegesAndCoursesPage: React.FC<CollegesAndCoursesPageProps> = ({
                 ))}
               </GlobalFilterSection>
             </div>
-          </aside>
+          </div>
+        </aside>
 
           <main className={`flex-1 min-w-0 ${quickApplyMode ? "quick-apply-active" : ""}`} id="main-content">
-            <div className="flex flex-col md:flex-row md:items-center justify-between mb-4 border-b border-gray-200 pb-4 gap-3">
-              <p className="text-[13px] text-gray-600 font-medium">Showing {totalResults} results for colleges and courses</p>
+            <div className="mb-6">
+              <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-center">
+                <div className="flex flex-col justify-start">
+                  <h1 className="mb-2 text-base text-gray-900 font-medium">
+                    Showing <span className="font-bold">{showingFrom}-{showingTo}</span> of <span className="font-bold">{totalResults}</span> Colleges
+                  </h1>
 
-              <div className="flex items-center gap-6">
-                <label className="flex items-center gap-2 text-[13px] text-gray-900 cursor-pointer group">
-                  <input
-                    type="checkbox"
-                    checked={isAllSelected}
-                    disabled={!quickApplyMode || cards.length === 0}
-                    onChange={(event) => handleSelectAll(event.target.checked)}
-                    className="custom-checkbox w-4 h-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500 cursor-pointer transition-opacity"
-                    style={{ opacity: quickApplyMode ? 1 : 0.5 }}
-                  />
-                  <span className="font-medium group-hover:text-blue-600 transition-colors">Select all</span>
-                  <span className="text-gray-500 font-normal hidden sm:inline">(up to 5 - quick apply courses)</span>
-                </label>
-                <button
-                  onClick={toggleQuickApply}
-                  className={`text-[13px] font-medium px-4 py-1.5 rounded-full transition-all flex items-center gap-1.5 group shadow-sm ${quickApplyMode ? "bg-blue-600 border border-transparent text-white hover:bg-blue-700" : "bg-white border border-gray-300 text-gray-900 hover:text-blue-600 hover:border-blue-500"}`}
-                >
-                  <svg className={`w-4 h-4 ${quickApplyMode ? "text-white" : "text-blue-500"}`} fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
-                  <span>{quickApplyText}</span>
-                </button>
+                  <label className="group mt-2 flex cursor-pointer items-center gap-2.5">
+                    <div className="relative flex h-5 w-5 items-center justify-center">
+                      <input
+                        type="checkbox"
+                        checked={isAllSelected}
+                        disabled={!quickApplyMode || cards.length === 0}
+                        onChange={(event) => handleSelectAll(event.target.checked)}
+                        className="peer sr-only"
+                      />
+                      <div className="absolute inset-0 rounded-sm border-[1.5px] border-slate-300 bg-white transition-colors group-hover:border-slate-400 peer-checked:border-blue-600 peer-checked:bg-blue-600"></div>
+                      <svg
+                        className="pointer-events-none absolute z-10 h-3.5 w-3.5 text-white opacity-0 transition-opacity peer-checked:opacity-100"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        stroke="currentColor"
+                        strokeWidth="3.5"
+                      >
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                      </svg>
+                    </div>
+                    <div className="flex items-baseline gap-1.5 text-[14px]">
+                      <span className="font-semibold text-slate-900">Select all</span>
+                      <span className="hidden text-[12.5px] text-slate-500 sm:inline">
+                        (up to 5 quick apply colleges)
+                      </span>
+                    </div>
+                  </label>
+                </div>
+
+                <div className="mt-2 flex w-full shrink-0 flex-col gap-3 sm:mt-0 sm:w-[320px] sm:items-end">
+                  <div className="relative w-full">
+                    <i className="fa-solid fa-magnifying-glass absolute left-3.5 top-1/2 -translate-y-1/2 text-sm text-gray-400"></i>
+                    <input
+                      type="text"
+                      value={streamSearch}
+                      onChange={(e) => setStreamSearch(e.target.value)}
+                      placeholder="Search colleges, courses..."
+                      className="w-full rounded-lg border border-gray-200 bg-white py-2.5 pl-10 pr-4 text-sm transition-all placeholder-gray-400 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 shadow-sm"
+                    />
+                  </div>
+
+                  <label className="group flex cursor-pointer items-center gap-2">
+                    <span className="text-[13px] font-semibold text-slate-800">
+                      Quick Apply
+                    </span>
+                    <div className="relative inline-flex cursor-pointer items-center" onClick={toggleQuickApply}>
+                      <input
+                        type="checkbox"
+                        checked={quickApplyMode}
+                        readOnly
+                        className="peer sr-only"
+                      />
+                      <div className="peer h-5 w-9 rounded-full bg-slate-200 transition-all after:absolute after:left-[2px] after:top-[2px] after:h-4 after:w-4 after:rounded-full after:border after:border-gray-200 after:bg-white after:transition-all after:content-[''] peer-checked:bg-blue-600 peer-checked:after:translate-x-4 peer-checked:after:border-white peer-focus:outline-none shadow-inner"></div>
+                    </div>
+                  </label>
+                </div>
               </div>
             </div>
 
@@ -648,7 +743,7 @@ const CollegesAndCoursesPage: React.FC<CollegesAndCoursesPageProps> = ({
               <div className="py-10 text-center text-slate-500 font-semibold">No colleges found.</div>
             ) : (
               <>
-                <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-2 gap-4 lg:gap-5" id="colleges-grid-1">{firstGrid.map(renderCard)}</div>
+                <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-2 gap-4 lg:gap-5" id="colleges-grid-1">{cards.slice(0, 8).map(renderCard)}</div>
 
                 <div className="my-6 w-full h-[140px] md:h-[180px] rounded-[16px] overflow-hidden relative shadow-sm group">
                   <div className="carousel-track" style={{ transform: `translateX(-${slideIndex * 100}%)` }}>
@@ -695,7 +790,7 @@ const CollegesAndCoursesPage: React.FC<CollegesAndCoursesPageProps> = ({
                   </div>
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-2 gap-4 lg:gap-5" id="colleges-grid-2">{secondGrid.map(renderCard)}</div>
+                <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-2 gap-4 lg:gap-5" id="colleges-grid-2">{cards.slice(8, 16).map(renderCard)}</div>
               </>
             )}
 
