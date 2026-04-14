@@ -1,12 +1,10 @@
 export interface CourseFinderFilters {
   academicLevels: string[];
   fields: string[];
-  providerTypes: string[];
-  location: string[];
+  maxFee: number;
   feeRanges: string[];
-  scholarships: string[];
-  durations: string[];
-  admissions: string[];
+  admissionStatus: string[];
+  location: string[];
   popularity: string[];
   province: string;
   nationalWide: boolean;
@@ -18,12 +16,10 @@ export interface CourseFinderFilters {
 export const defaultCourseFinderFilters: CourseFinderFilters = {
   academicLevels: [],
   fields: [],
-  providerTypes: [],
-  location: [],
+  maxFee: 1000000, // Default 10 Lakhs
   feeRanges: [],
-  scholarships: [],
-  durations: [],
-  admissions: [],
+  admissionStatus: [],
+  location: [],
   popularity: [],
   province: "All Provinces",
   nationalWide: false,

@@ -1,6 +1,4 @@
 import React, { useState, useMemo } from "react";
-import { EducationCourse } from "../../services/api";
-import { CourseFinderFilters } from "./types";
 import {
   Clock,
   Building2,
@@ -8,7 +6,11 @@ import {
   ClipboardCheck,
   CreditCard,
   Briefcase,
+  Bookmark,
+  Search,
 } from "lucide-react";
+import { EducationCourse, apiService } from "../../services/api";
+import { CourseFinderFilters } from "./types";
 import Pagination from "@/components/ui/Pagination";
 
 interface CourseGridProps {
@@ -28,6 +30,13 @@ const CourseGrid: React.FC<CourseGridProps> = ({
   isLoading,
 }) => {
   const [currentPage, setCurrentPage] = useState(1);
+  const [savedCourseIds, setSavedCourseIds] = useState<string[]>([]);
+
+  const toggleBookmark = (id: string) => {
+    setSavedCourseIds(prev =>
+      prev.includes(id) ? prev.filter(i => i !== id) : [...prev, id]
+    );
+  };
 
   // Use the provided courses but ensure we have enough for the grid demo if none provided
   const allCourses = useMemo(() => {
@@ -266,16 +275,17 @@ const CourseGrid: React.FC<CourseGridProps> = ({
                   </div>
                 </div>
 
-                {/* Action Buttons */}
-                <div className="flex gap-2 pt-2.5 mt-auto">
+                {/* Action Buttons - All in a single row */}
+                <div className="flex gap-2 mt-auto pt-4 border-t border-dashed border-gray-200">
                   <button
                     onClick={() =>
                       onNavigate("courseDetails", { id: course.id })
                     }
-                    className="flex-1 bg-white border border-gray-200 text-gray-700 text-[13px] font-semibold py-1.5 rounded-md hover:bg-gray-50 transition-colors focus:ring-2 focus:ring-gray-200 focus:outline-none"
+                    className="flex-[1.5] flex items-center justify-center border border-gray-200 hover:bg-gray-50 text-slate-600 font-medium py-2 rounded-md transition-colors text-[12px] whitespace-nowrap"
                   >
                     Details
                   </button>
+
                   <button
                     onClick={() =>
                       onNavigate("universitiesPage", {
@@ -283,9 +293,30 @@ const CourseGrid: React.FC<CourseGridProps> = ({
                         courseTitle: course.title,
                       })
                     }
-                    className="flex-1 bg-[#0000ff] text-white text-[13px] font-semibold py-1.5 rounded-md hover:bg-blue-800 transition-colors focus:ring-2 focus:ring-[#0000ff] focus:ring-offset-1 focus:outline-none flex justify-center items-center gap-1"
+                    className="flex-[2.5] bg-[#0014f4] hover:bg-blue-800 text-white font-semibold py-2 rounded-md shadow-sm text-[12px] flex items-center justify-center transition-colors whitespace-nowrap"
                   >
                     View Colleges
+                  </button>
+                  
+                  <button
+                    type="button"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      toggleBookmark(String(course.id));
+                    }}
+                    className={`shrink-0 w-10 flex items-center justify-center border rounded-md transition-colors ${
+                      savedCourseIds.includes(String(course.id))
+                        ? "border-blue-200 bg-blue-50"
+                        : "border-gray-200 hover:bg-gray-50"
+                    }`}
+                  >
+                    <Bookmark
+                      className={`w-4 h-4 transition-all ${
+                        savedCourseIds.includes(String(course.id))
+                          ? "text-[#0000ff] fill-[#0000ff]"
+                          : "text-gray-400"
+                      }`}
+                    />
                   </button>
                 </div>
               </div>
