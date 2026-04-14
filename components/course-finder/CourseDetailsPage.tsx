@@ -184,67 +184,130 @@ const CourseDetailsPage: React.FC<CourseDetailsPageProps> = ({
         .animate-fade-in { animation: fadeIn 0.4s ease-in-out; }
       `}</style>
       <div className="bg-white text-gray-900 antialiased selection:bg-blue-100 selection:text-blue-900 pb-20">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 sm:py-16">
-          {/* Top Navigation */}
-          <div className="flex justify-between items-center mb-6">
-            <button
-              onClick={onBack}
-              className="inline-flex items-center text-gray-500 hover:text-gray-900 transition-colors text-sm font-medium group cursor-pointer bg-transparent border-none appearance-none outline-none"
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12 flex flex-col gap-6">
+          {/* Outer Breadcrumbs */}
+          <nav className="flex items-center space-x-2 text-sm text-gray-500 px-2 font-medium">
+            <button 
+              onClick={() => onNavigate("finder")}
+              className="hover:text-blue-600 transition-colors bg-transparent border-none p-0 cursor-pointer"
             >
-              <ArrowLeft className="w-4 h-4 mr-2 group-hover:-translate-x-1 transition-transform" />
-              Back to Programs
+              Home
             </button>
-          </div>
+            <ArrowRight size={10} className="text-gray-400" />
+            <button 
+              onClick={onBack}
+              className="hover:text-blue-600 transition-colors bg-transparent border-none p-0 cursor-pointer"
+            >
+              Course Finder
+            </button>
+            <ArrowRight size={10} className="text-gray-400" />
+            <span className="text-gray-900 font-semibold">{courseField}</span>
+          </nav>
 
-          {/* Banner/Hero Section */}
-          <header className="banner-bg relative w-full min-h-[240px] md:min-h-[280px] rounded-2xl overflow-hidden flex items-center justify-center py-10 mb-12 shadow-sm">
-            {/* Background Decorations */}
-            <div className="ring-decor-1 w-[250px] h-[250px] md:w-[400px] md:h-[400px] -top-[80px] md:-top-[150px] -right-[50px] md:-right-[50px]"></div>
-            <div className="ring-decor-1 w-[350px] h-[350px] md:w-[500px] md:h-[500px] -top-[130px] md:-top-[200px] -right-[100px] md:-right-[100px] border-[0.5px]"></div>
+          {/* Banner/Hero Section - Upgraded Design */}
+          <header className="w-full bg-[#0000ff] rounded-2xl relative overflow-hidden flex flex-col justify-between shadow-sm min-h-[320px] md:min-h-[400px]">
+            {/* Background Overlay / Pattern */}
+            <div className="absolute inset-0 z-0">
+              <div className="absolute bottom-0 left-0 -mb-20 -ml-20 w-72 h-72 bg-indigo-400 rounded-full mix-blend-multiply filter blur-3xl opacity-20"></div>
+            </div>
 
-            <div className="absolute bottom-0 left-0 w-[60%] md:w-[40%] h-[150%] bg-[#128cf4] opacity-20 rounded-tr-full mix-blend-screen pointer-events-none transform -translate-x-10 translate-y-10 md:translate-y-16"></div>
-
-            {/* Content */}
-            <div className="relative z-10 px-6 md:px-10 w-full flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
-              {/* Left Side: Course Info */}
-              <div className="flex flex-col gap-4">
-                <h1 className="text-white text-4xl md:text-5xl font-bold tracking-tight">
+            <div className="relative z-10 px-8 py-10 md:px-14 md:py-16 flex flex-col lg:flex-row items-center gap-12 lg:gap-8 h-full">
+              {/* Left Column: Content */}
+              <div className="flex-1 text-white w-full max-w-2xl">
+                {/* Headings */}
+                <h1 className="text-4xl md:text-5xl lg:text-[54px] font-extrabold leading-tight mb-2 tracking-tight">
                   {courseTitle}
                 </h1>
-                <div className="flex flex-wrap items-center gap-2 text-sm font-medium text-white/90">
-                  <span className="bg-white/20 px-4 py-1.5 rounded-full backdrop-blur-sm border border-white/10 flex items-center">
-                    <Clock className="w-4 h-4 mr-2 opacity-80" />
-                    {courseDuration} Duration
-                  </span>
-                  <span className="bg-white/20 px-4 py-1.5 rounded-full backdrop-blur-sm border border-white/10 flex items-center">
-                    <GraduationCap className="w-4 h-4 mr-2 opacity-80" />
-                    {courseLevel} Equivalent
-                  </span>
-                  <span className="bg-white/20 px-4 py-1.5 rounded-full backdrop-blur-sm border border-white/10 flex items-center">
-                    <BookOpen className="w-4 h-4 mr-2 opacity-80" />
-                    {courseField} Faculty
-                  </span>
+                
+                {/* Subtitle / Affiliation */}
+                <p className="text-blue-200 font-semibold text-base md:text-lg mb-6 flex items-center gap-3">
+                  NEB Affiliated <span className="w-1.5 h-1.5 rounded-full bg-blue-400"></span> Available Nationwide
+                </p>
+
+                {/* Course Meta Info Badges */}
+                <div className="flex flex-col sm:flex-row sm:items-center gap-3 mb-6 text-sm md:text-sm font-medium flex-wrap">
+                  <div className="flex items-center space-x-2 text-blue-50 bg-white/10 px-3 py-1.5 rounded-md backdrop-blur-sm border border-white/10">
+                    <Clock className="w-4 h-4 text-blue-200" />
+                    <span>{courseDuration}</span>
+                  </div>
+                  <div className="flex items-center space-x-2 text-blue-50 bg-white/10 px-3 py-1.5 rounded-md backdrop-blur-sm border border-white/10">
+                    <Award className="w-4 h-4 text-blue-200" />
+                    <span>{courseLevel} Equivalent</span>
+                  </div>
+                  <div className="flex items-center space-x-2 text-blue-50 bg-white/10 px-3 py-1.5 rounded-md backdrop-blur-sm border border-white/10">
+                    <BookOpen className="w-4 h-4 text-blue-200" />
+                    <span>{courseField} Faculty</span>
+                  </div>
+                </div>
+
+                {/* Main Description */}
+                <p className="text-blue-50 text-base md:text-lg leading-relaxed mb-6 max-w-xl">
+                  A foundational {courseField.toLowerCase()} program for careers in engineering, medicine, and technology.
+                </p>
+
+                {/* Eligibility & Fee Grid */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 mb-8 max-w-xl">
+                  <div>
+                    <p className="text-blue-200 text-xs font-bold mb-1.5 uppercase tracking-wider">Eligibility</p>
+                    <p className="text-white font-semibold">SEE Passed (2.0+ GPA)</p>
+                  </div>
+                  <div>
+                    <p className="text-blue-200 text-xs font-bold mb-1.5 uppercase tracking-wider">Avg Fee</p>
+                    <p className="text-white font-semibold">NPR 1.5L – 5L</p>
+                  </div>
+                </div>
+
+                {/* Call to Action Buttons */}
+                <div className="flex flex-col sm:flex-row items-center gap-4 mt-4">
+                  <button 
+                    onClick={() => setActiveTab("admission")}
+                    className="w-full sm:w-auto bg-[#10b981] hover:bg-[#059669] text-white px-8 py-3.5 rounded-lg font-bold text-sm transition-all flex items-center justify-center border-none cursor-pointer"
+                  >
+                    View Admissions
+                  </button>
+                  <button 
+                    onClick={() =>
+                      onNavigate("universitiesPage", {
+                        courseId,
+                        courseTitle,
+                        collegesCount: courseField,
+                      })
+                    }
+                    className="w-full sm:w-auto bg-white/10 hover:bg-white/20 text-white px-6 py-3.5 rounded-lg font-semibold text-sm transition-all flex items-center justify-center backdrop-blur-sm border border-white/20 cursor-pointer"
+                  >
+                    View Colleges
+                  </button>
                 </div>
               </div>
 
-              {/* Right Side: Action Buttons */}
-              <div className="flex flex-col sm:flex-row gap-3 w-full md:w-auto">
-                <button className="bg-white text-[#0b71d1] font-semibold px-6 py-3 rounded-xl shadow-sm hover:bg-gray-50 transition-colors whitespace-nowrap outline-none focus:ring-4 focus:ring-white/20 cursor-pointer border-none">
-                  View Admissions
-                </button>
-                <button
-                  onClick={() =>
-                    onNavigate("universitiesPage", {
-                      courseId,
-                      courseTitle,
-                      collegesCount: courseField,
-                    })
-                  }
-                  className="bg-transparent border border-white/50 text-white font-semibold px-6 py-3 rounded-xl hover:bg-white/10 hover:border-white transition-all whitespace-nowrap outline-none focus:ring-4 focus:ring-white/20 cursor-pointer flex items-center justify-center"
-                >
-                  <LayoutGrid className="w-4 h-4 mr-2 opacity-80" />
-                  Explore All Colleges
-                </button>
+              {/* Right Column: Science Visual */}
+              <div className="hidden lg:flex flex-1 justify-center items-center relative w-full h-full">
+                <div className="relative w-72 h-72 lg:w-80 lg:h-80 xl:w-96 xl:h-96">
+                  {/* Floating Animation for Science Illustration */}
+                  <div className="animate-[bounce_6s_ease-in-out_infinite]">
+                    <svg viewBox="0 0 200 200" className="w-full h-full text-blue-200 drop-shadow-2xl" fill="none" xmlns="http://www.w3.org/2000/svg">
+                      {/* Orbit 1 */}
+                      <ellipse cx="100" cy="100" rx="40" ry="90" transform="rotate(30 100 100)" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeOpacity="0.6"></ellipse>
+                      {/* Orbit 2 */}
+                      <ellipse cx="100" cy="100" rx="40" ry="90" transform="rotate(-30 100 100)" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeOpacity="0.6"></ellipse>
+                      {/* Orbit 3 */}
+                      <ellipse cx="100" cy="100" rx="40" ry="90" transform="rotate(90 100 100)" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeOpacity="0.6"></ellipse>
+                      
+                      {/* Electrons */}
+                      <circle cx="100" cy="10" r="6" fill="#ff4a17" transform="rotate(30 100 100)"></circle>
+                      <circle cx="100" cy="190" r="4" fill="#60a5fa" transform="rotate(-30 100 100)"></circle>
+                      <circle cx="10" cy="100" r="5" fill="#a78bfa" transform="rotate(90 100 100)"></circle>
+
+                      {/* Core */}
+                      <circle cx="100" cy="100" r="16" fill="currentColor" className="animate-pulse"></circle>
+                      <circle cx="100" cy="100" r="24" stroke="currentColor" strokeWidth="2" strokeOpacity="0.3" strokeDasharray="4 4"></circle>
+                    </svg>
+                  </div>
+                  
+                  {/* Decorative Stars */}
+                  <Star className="absolute top-0 right-10 w-6 h-6 text-yellow-400 fill-yellow-400 animate-pulse" />
+                  <Star className="absolute bottom-10 left-0 w-8 h-8 text-blue-300 opacity-50 fill-blue-300" />
+                </div>
               </div>
             </div>
           </header>
