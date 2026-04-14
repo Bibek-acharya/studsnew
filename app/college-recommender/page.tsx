@@ -5,12 +5,14 @@ import CollegeRecommenderToolPage from "@/components/college-recommender/College
 
 export default function CollegeRecommenderRoute() {
   const handleNavigate = (view: string, data?: any) => {
-    if (view === "educationPage") {
-      window.location.href = "/";
-    } else if (view === "collegeProfile") {
+    if (view === 1 || view === 'step1') {
+      window.location.reload();
+    } else if (view === 'educationPage') {
+      window.location.href = '/';
+    } else if (view === 'collegeProfile') {
       window.location.href = `/find-college/${data.id}`;
     } else {
-      console.log("Navigating to", view, data);
+      console.log('Navigating to', view, data);
     }
   };
 

@@ -94,6 +94,7 @@ export interface CollegeFilterCountsResponse {
 }
 
 export interface CollegeRecommendation {
+  tuition: string;
   id: number;
   name: string;
   location: string;
