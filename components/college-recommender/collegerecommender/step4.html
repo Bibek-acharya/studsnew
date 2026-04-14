@@ -1,0 +1,454 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>College Recommender - Distance</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary-blue: #3b82f6;
+            --primary-hover: #2563eb;
+            --disabled-btn: #b0bbcd;
+            --text-main: #1e293b;
+            --text-muted: #64748b;
+            --border-light: #e2e8f0;
+            --border-active: #3b82f6;
+            --bg-body: #f8fafc;
+            --bg-card: #ffffff;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Inter', sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-body);
+            display: flex;
+            min-height: 100vh;
+        }
+
+        /* Layout */
+        .layout-container {
+            display: flex;
+            width: 100%;
+            background-color: var(--bg-card);
+            min-height: 100vh;
+        }
+
+        /* Left Panel (Decorative) */
+        .left-panel {
+            flex: 1.3;
+            background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%);
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 3rem;
+            border-right: 1px solid var(--border-light);
+            display: none;
+        }
+
+        @media (min-width: 768px) {
+            .left-panel {
+                display: flex;
+            }
+        }
+
+        .left-panel h2 {
+            color: var(--primary-blue);
+            font-size: 2rem;
+            margin-bottom: 1rem;
+            text-align: center;
+        }
+
+        .left-panel p {
+            color: var(--text-muted);
+            font-size: 1.1rem;
+            line-height: 1.6;
+            text-align: center;
+        }
+
+        /* SVG responsiveness */
+        .left-panel svg {
+            width: 100%;
+            max-width: 380px;
+            height: auto;
+            filter: drop-shadow(0 10px 15px rgba(0,0,0,0.05));
+        }
+
+        /* Right Panel (Content) */
+        .right-panel {
+            flex: 1.5;
+            padding: 2rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background-color: var(--bg-card);
+        }
+
+        @media (min-width: 768px) {
+            .right-panel {
+                padding: 4rem;
+            }
+        }
+
+        .content-area {
+            width: 100%;
+            max-width: 500px;
+        }
+
+        .content-area h1 {
+            color: var(--text-main);
+            font-size: 1.75rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+        }
+
+        .subtitle {
+            color: var(--text-muted);
+            font-size: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        /* Options Form */
+        .options-container {
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+            margin-bottom: 2.5rem;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+            width: 100%;
+        }
+
+        .form-label {
+            color: var(--text-main);
+            font-size: 1.05rem;
+            font-weight: 600;
+        }
+
+        /* --- Custom Dropdown UI Styling --- */
+        .custom-dropdown-container {
+            position: relative;
+            width: 100%;
+        }
+
+        /* Hide the native select */
+        .custom-select-hidden {
+            display: none;
+        }
+
+        /* Style the visible "select" box */
+        .select-selected {
+            width: 100%;
+            padding: 1.1rem 1.25rem;
+            border: 2px solid var(--border-light);
+            border-radius: 0.75rem;
+            font-size: 1.05rem;
+            color: var(--text-main);
+            background-color: var(--bg-card);
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: all 0.2s ease;
+            user-select: none;
+        }
+
+        .select-selected:hover {
+            border-color: #cbd5e1;
+            background-color: #f8fafc;
+        }
+
+        .select-selected.select-arrow-active {
+            border-color: var(--border-active);
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+            background-color: #ffffff;
+        }
+
+        .placeholder-text {
+            color: var(--text-muted);
+        }
+
+        /* Arrow Icon Styling */
+        .select-selected .arrow {
+            transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .select-selected.select-arrow-active .arrow {
+            transform: rotate(-180deg);
+            stroke: var(--primary-blue);
+        }
+
+        /* Style the dropdown menu items */
+        .select-items {
+            position: absolute;
+            background-color: var(--bg-card);
+            top: calc(100% + 0.5rem);
+            left: 0;
+            right: 0;
+            z-index: 99;
+            border: 1px solid var(--border-light);
+            border-radius: 0.75rem;
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
+            max-height: 250px;
+            overflow-y: auto;
+            
+            /* Animation properties */
+            opacity: 0;
+            visibility: hidden;
+            transform: translateY(-10px);
+            transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .select-items.select-show {
+            opacity: 1;
+            visibility: visible;
+            transform: translateY(0);
+        }
+
+        .select-items div {
+            color: var(--text-main);
+            padding: 0.875rem 1.25rem;
+            cursor: pointer;
+            font-size: 1.05rem;
+            transition: background-color 0.2s ease, color 0.2s ease;
+        }
+
+        .select-items div:hover {
+            background-color: #f1f5f9;
+        }
+
+        .select-items div.same-as-selected {
+            background-color: #eff6ff;
+            color: var(--primary-blue);
+            font-weight: 600;
+        }
+
+        /* Custom Scrollbar for the dropdown */
+        .select-items::-webkit-scrollbar {
+            width: 8px;
+        }
+        .select-items::-webkit-scrollbar-track {
+            background: transparent;
+            margin: 0.5rem 0;
+        }
+        .select-items::-webkit-scrollbar-thumb {
+            background-color: #cbd5e1;
+            border-radius: 10px;
+            border: 2px solid var(--bg-card); /* Creates padding around thumb */
+        }
+        .select-items::-webkit-scrollbar-thumb:hover {
+            background-color: #94a3b8;
+        }
+
+        /* Buttons */
+        .button-group {
+            display: flex;
+            justify-content: flex-start;
+            gap: 1rem;
+        }
+
+        button {
+            padding: 0.75rem 2rem;
+            border: none;
+            border-radius: 0.5rem;
+            font-size: 1.05rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .next-btn {
+            background-color: var(--primary-blue); 
+            color: white;
+            padding: 0.75rem 2.5rem; 
+        }
+
+        .next-btn:hover:not(:disabled) {
+            background-color: var(--primary-hover);
+            transform: translateY(-1px);
+        }
+
+        .next-btn:disabled {
+            background-color: var(--disabled-btn); 
+            cursor: not-allowed;
+            opacity: 1; 
+        }
+
+        .secondary-btn {
+            background-color: #ffffff;
+            color: #4b5563; 
+            border: 1px solid #cbd5e1; 
+        }
+
+        .secondary-btn:hover {
+            background-color: #f8fafc;
+        }
+
+    </style>
+</head>
+<body>
+
+    <div class="layout-container">
+        <!-- Left Panel -->
+        <div class="left-panel">
+           <svg xmlns="http://www.w3.org/2000/svg" width="800" height="869.357" viewBox="0 0 800 869.357" xmlns:xlink="http://www.w3.org/1999/xlink" role="img" artist="Katerina Limpitsouni" source="https://undraw.co/"><g transform="translate(-642.945 -180.73)"><g transform="translate(642.945 210.961)"><g transform="translate(59.639 93.195)"><path d="M398.388,162.052a35.656,35.656,0,0,1-13.582,9.954l-15.058,16.957-42.65,51.5-28.815,17.43L284.9,234.859l63.157-61.523,17.6-17.906a35.632,35.632,0,0,1,7.911-14.871c9.323-10.768,22.44-14.691,29.293-8.756s4.849,19.479-4.477,30.247Z" transform="translate(-140.599 -129.034)" fill="#ed9da0"/><path d="M215.757,194.454,243.493,148.3l118,50.7,64.5-52.7,26.5,22.83c.913.788-65.042,92.14-69.725,92.032s-167.016-66.706-167.016-66.706Z" transform="translate(-215.756 -110.266)" fill="#1877F2"/></g><rect width="41.012" height="79.611" transform="translate(69.274 97.298)" fill="#ed9da0"/><path d="M335.163,241.068l-98.91-7.238s-41.015,94.085-9.65,154.4l21.714,125.448-8.59,206.477h44.926l69.811-331.925Z" transform="translate(-157.168 78.068)" fill="#090814"/><path d="M275.785,287.792l38.6,33.6L295.086,650.43H251.662Z" transform="translate(-117.092 136.719)" fill="#090814"/><circle cx="51.273" cy="51.273" r="51.273" transform="translate(37.954 10.404)" fill="#ed9da0"/><path d="M236.936,443.381l52.964,8.371,9.955,37.991s43.006,16.184,22.284,33.769-97.276,8.493-103.325-4.121S236.936,443.381,236.936,443.381Z" transform="translate(-153.851 305.835)" fill="#090814"/><path d="M257.744,443.382l52.966,8.368,9.955,37.991s43.006,16.184,22.284,33.769S245.673,532,239.624,519.388s18.123-76.01,18.123-76.01Z" transform="translate(-131.235 305.834)" fill="#090814"/><path d="M389.761,253.422a35.654,35.654,0,0,1-16.406-3.794l-22.675-.342-66.855,1.295-32.013-10.456,8.72-25.166,87.838,7.7,25.053,1.648a35.632,35.632,0,0,1,16.43-3.712c14.246.034,25.771,7.414,25.753,16.479s-11.591,16.386-25.842,16.349Z" transform="translate(-116.929 57.553)" fill="#ed9da0"/><path d="M277.019,145.4h-50.76l-16.791,50.662,32.568,133.891,98.91,7.238-6.031-54.28h0a54.972,54.972,0,0,0-2.359-61.143Z" transform="translate(-162.953 -18.052)" fill="#1877F2"/><path d="M218.717,160.548l53.073-9.112,38.6,122.5,82.024,14.475v34.98c0,1.21-112.26,10.856-115.235,7.238s-58.461-170.077-58.461-170.077Z" transform="translate(-152.901 -11.489)" fill="#1877F2"/><path d="M302.008,116.326c6.3,10.219.491,23.678-7.268,32.837s-17.765,17.2-21.229,28.691c-3.106,10.3-.281,21.415,3.372,31.541s8.195,20.217,8.571,30.973S280.735,263,270.608,266.632c-10.4,3.726-22.688-2.129-32.7,2.529-13.043,6.066-16,27.071-30.218,29.249-8.751,1.341-16.861-6.247-19.306-14.761s-.69-17.589,1.079-26.264l14.532-71.3,12.092-59.327c2.406-11.807,5.262-24.44,14.135-32.59,10.843-9.961,27.188-10.2,41.9-9.6,13.517.548,27.586,1.474,39.347,8.147s20.411,20.86,16.334,33.756c-3.8-9.074-15.166-14.174-24.475-10.971" transform="translate(-187.179 -84.376)" fill="#090814"/></g><g transform="translate(937.617 180.73)"><path d="M10.106,0H495.221a10.106,10.106,0,0,1,10.106,10.106V293.09A10.106,10.106,0,0,1,495.221,303.2H30.426L15.741,331.239,6.248,342.505C.667,342.505,0,298.672,0,293.09V10.106A10.106,10.106,0,0,1,10.106,0Z" fill="#090814"/><path d="M10.032,0H490.295A9.982,9.982,0,0,1,500.3,9.957V288.77a9.982,9.982,0,0,1-10.006,9.957l-464.261-.194L12.47,325.2,4.3,336.109c-5.527,0-4.277-41.839-4.277-47.338V9.957A9.982,9.982,0,0,1,10.032,0Z" transform="translate(2.5 2.526)" fill="#f2f2f2"/></g><g transform="translate(1131.032 210.96)"><path d="M714.424,151.154a59.25,59.25,0,0,0-59.25,59.25h0c0,32.72,62.08,153.43,62.08,153.43s56.42-120.693,56.42-153.421A59.252,59.252,0,0,0,714.424,151.154Zm0,98.761a31.04,31.04,0,1,1,31.04-31.04h0A31.04,31.04,0,0,1,714.424,249.915Z" transform="translate(-655.174 -151.154)" fill="#1877F2"/><path d="M14.519,0A14.519,14.519,0,1,1,0,14.519,14.519,14.519,0,0,1,14.519,0Z" transform="translate(46.753 221.755)" fill="#1877F2"/></g></g></svg>
+        </div>
+
+        <!-- Right Panel -->
+        <div class="right-panel">
+            <div class="content-area">
+                <h1>Location Preference</h1>
+                <p class="subtitle">Where would you prefer to study?</p>
+                
+                <form id="locationForm">
+                    <div class="options-container">
+                        
+                        <!-- Custom Dropdown 1 -->
+                        <div class="form-group">
+                            <label class="form-label" for="province">Which province do you prefer?</label>
+                            <div class="custom-dropdown-container">
+                                <select id="province" name="province" class="custom-select-hidden" required>
+                                    <option value="" disabled selected>Search or select your province</option>
+                                    <option value="Bagmati">Bagmati</option>
+                                    <option value="Province 1">Province 1</option>
+                                    <option value="Madhesh">Madhesh</option>
+                                    <option value="Gandaki">Gandaki</option>
+                                    <option value="Lumbini">Lumbini</option>
+                                    <option value="Karnali">Karnali</option>
+                                    <option value="Sudurpashchim">Sudurpashchim</option>
+                                    <option value="No preference">No preference</option>
+                                </select>
+                                <div class="select-selected">
+                                    <span class="selected-text placeholder-text">Search or select your province</span>
+                                    <svg class="arrow" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#64748b" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
+                                </div>
+                                <div class="select-items"></div>
+                            </div>
+                        </div>
+
+                        <!-- Custom Dropdown 2 -->
+                        <div class="form-group">
+                            <label class="form-label" for="setting">Do you prefer:</label>
+                            <div class="custom-dropdown-container">
+                                <select id="setting" name="setting" class="custom-select-hidden" required>
+                                    <option value="" disabled selected>Search or select your setting</option>
+                                    <option value="Kathmandu Valley">Kathmandu Valley</option>
+                                    <option value="Outside Valley but city area">Outside Valley but city area</option>
+                                    <option value="Near my hometown">Near my hometown</option>
+                                    <option value="Anywhere">Anywhere</option>
+                                </select>
+                                <div class="select-selected">
+                                    <span class="selected-text placeholder-text">Search or select your setting</span>
+                                    <svg class="arrow" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#64748b" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
+                                </div>
+                                <div class="select-items"></div>
+                            </div>
+                        </div>
+
+                    </div>
+
+                    <div class="button-group">
+                        <button type="button" class="secondary-btn">Back</button>
+                        <button type="button" class="next-btn" id="nextBtn" disabled>Continue</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const hiddenSelects = document.querySelectorAll('.custom-select-hidden');
+            const nextBtn = document.getElementById('nextBtn');
+            const customDropdowns = document.querySelectorAll('.custom-dropdown-container');
+
+            // Form validation helper
+            const checkFormValidity = () => {
+                const allSelected = Array.from(hiddenSelects).every(s => s.value !== "");
+                nextBtn.disabled = !allSelected;
+            };
+
+            // Build custom UI for each dropdown
+            customDropdowns.forEach(container => {
+                const nativeSelect = container.querySelector('select');
+                const selectedDiv = container.querySelector('.select-selected');
+                const itemsDiv = container.querySelector('.select-items');
+                const textSpan = selectedDiv.querySelector('.selected-text');
+                
+                // Create custom options based on native options
+                Array.from(nativeSelect.options).forEach((option, index) => {
+                    if (index === 0) return; // Skip the placeholder disabled option
+                    
+                    const optionDiv = document.createElement('div');
+                    optionDiv.innerHTML = option.innerHTML;
+                    
+                    // Option click event
+                    optionDiv.addEventListener('click', function(e) {
+                        e.stopPropagation();
+                        // Update native select
+                        nativeSelect.value = option.value;
+                        
+                        // Update UI text and color
+                        textSpan.innerHTML = option.innerHTML;
+                        textSpan.classList.remove('placeholder-text');
+                        
+                        // Update active state in list
+                        const currentlySelected = itemsDiv.querySelector('.same-as-selected');
+                        if (currentlySelected) currentlySelected.classList.remove('same-as-selected');
+                        this.classList.add('same-as-selected');
+                        
+                        // Close dropdown and check validation
+                        closeAllSelect(null);
+                        checkFormValidity();
+                    });
+                    itemsDiv.appendChild(optionDiv);
+                });
+
+                // Toggle dropdown event
+                selectedDiv.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                    closeAllSelect(this);
+                    this.classList.toggle('select-arrow-active');
+                    itemsDiv.classList.toggle('select-show');
+                });
+            });
+
+            // Helper to close all dropdowns in the document
+            function closeAllSelect(elmnt) {
+                const items = document.querySelectorAll('.select-items');
+                const selected = document.querySelectorAll('.select-selected');
+                for (let i = 0; i < selected.length; i++) {
+                    if (elmnt !== selected[i]) {
+                        selected[i].classList.remove('select-arrow-active');
+                        items[i].classList.remove('select-show');
+                    }
+                }
+            }
+
+            // Close dropdowns when clicking outside
+            document.addEventListener('click', function() {
+                closeAllSelect(null);
+            });
+
+            // Handle continue button click
+            nextBtn.addEventListener('click', () => {
+                const province = document.getElementById('province').value;
+                const setting = document.getElementById('setting').value;
+                console.log('Selected province:', province);
+                console.log('Selected setting:', setting);
+                // Ready for the next step!
+            });
+        });
+    </script>
+
+</body>
+</html>

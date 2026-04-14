@@ -1,9 +1,10 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { ChevronDown } from "lucide-react";
 import { initialRecommenderState, recommendations } from "./data";
 import ResultsGrid from "@/components/scholarship-recommender/ResultsGrid";
+import CustomSelect from "@/components/scholarship-recommender/CustomSelect";
+import MultiSelect from "@/components/scholarship-recommender/MultiSelect";
 import { RecommenderState, StepIndex } from "./types";
 
 const stepTitles: Record<number, { title: string; subtitle: string }> = {
@@ -85,12 +86,12 @@ function StepShell({
 
   const leftWrapperClass =
     step === 1 || step === 2
-      ? "hidden md:flex md:w-1/2 bg-[#e0f2fe] items-center justify-center p-12 border-r border-blue-100"
+      ? "hidden md:flex md:w-1/2 items-center justify-center p-12"
       : isStep3
-        ? "hidden md:flex md:w-1/2 bg-[#e0f2fe] items-center justify-center p-12 border-r border-blue-100"
+        ? "hidden md:flex md:w-1/2 items-center justify-center p-12"
         : isStep4
-          ? "hidden md:flex md:w-1/2 relative bg-[#ebf3ff] items-center justify-center p-12 border-r border-blue-100 overflow-hidden"
-        : "hidden md:flex md:w-1/2 relative bg-[#e0f2fe] items-center justify-center p-12 border-r border-blue-100 overflow-hidden";
+          ? "hidden md:flex md:w-1/2 relative items-center justify-center p-12  overflow-hidden"
+        : "hidden md:flex md:w-1/2 relative items-center justify-center p-12  overflow-hidden";
 
   const rightWrapperClass =
     step === 1 || step === 2
@@ -110,39 +111,15 @@ function StepShell({
       <aside className={leftWrapperClass}>
         {(isStep3 || isStep4 || isStep5) && (
           <div className="pointer-events-none absolute top-0 left-0 w-full h-full">
-            <div className="absolute w-125 h-125 bg-blue-400/20 rounded-full blur-3xl -top-20 -left-20" />
-            <div className="absolute w-100 h-100 bg-indigo-400/20 rounded-full blur-3xl bottom-10 right-10" />
+            <div className="absolute w-125 h-125 rounded-full blur-3xl -top-20 -left-20" />
+            <div className="absolute w-100 h-100 rounded-full blur-3xl bottom-10 right-10" />
           </div>
         )}
 
         <div className="w-full text-center relative z-10">
-          {step === 1 && (
-            <img src={illustrationPath} alt="Education journey illustration" className="w-full max-w-125 h-auto mx-auto mb-8" />
-          )}
-
-          {step === 2 && (
-            <div className="max-w-4/5 max-h-[70vh] flex items-center justify-center mx-auto">
-              <img src={illustrationPath} alt="Study preferences illustration" className="w-full h-auto" />
-            </div>
-          )}
-
-          {step === 3 && (
-            <div className="relative z-10 w-full max-w-65 lg:max-w-80 flex items-center justify-center mx-auto">
-              <img src={illustrationPath} alt="Location and citizenship illustration" className="w-full h-auto drop-shadow-xl" />
-            </div>
-          )}
-
-          {step === 4 && (
-            <div className="relative z-10 w-full max-w-80 lg:max-w-105 flex items-center justify-center mx-auto">
-              <img src={illustrationPath} alt="Demographics illustration" className="w-full h-auto drop-shadow-xl" />
-            </div>
-          )}
-
-          {step === 5 && (
-            <div className="relative z-10 w-full max-w-70 lg:max-w-90 flex items-center justify-center mx-auto">
-              <img src={illustrationPath} alt="Experience and achievements illustration" className="w-full h-auto drop-shadow-xl" />
-            </div>
-          )}
+          <div className="w-full max-w-80 lg:max-w-105 mx-auto flex items-center justify-center">
+            <img src={illustrationPath} alt={`Step ${step} illustration`} className="w-full h-auto drop-shadow-xl" />
+          </div>
         </div>
       </aside>
 
@@ -166,13 +143,6 @@ export default function ScholarshipRecommenderPage() {
   const [state, setState] = useState<RecommenderState>(initialRecommenderState);
   const [selectedIds, setSelectedIds] = useState<number[]>([]);
   const [academicScoreError, setAcademicScoreError] = useState("");
-  const [openOptionGroups, setOpenOptionGroups] = useState<
-    Record<"talents" | "achievements" | "involvement", boolean>
-  >({
-    talents: true,
-    achievements: false,
-    involvement: false,
-  });
 
   const canContinue = useMemo(() => isStepValid(step, state), [step, state]);
 
@@ -196,17 +166,6 @@ export default function ScholarshipRecommenderPage() {
     }
   };
 
-  const toggleArrayField = (field: "talents" | "achievements" | "involvement", value: string) => {
-    setState((prev) => {
-      const list = prev[field];
-      const exists = list.includes(value);
-      return {
-        ...prev,
-        [field]: exists ? list.filter((item) => item !== value) : [...list, value],
-      };
-    });
-  };
-
   const handleSelectAll = (checked: boolean) => {
     setSelectedIds(checked ? recommendations.map((item) => item.id) : []);
   };
@@ -217,10 +176,6 @@ export default function ScholarshipRecommenderPage() {
 
   const handleYesNoChange = (field: "willingEssay" | "willingInterview" | "willingGpa", value: "yes" | "no") => {
     updateState(field, value);
-  };
-
-  const toggleOptionGroup = (groupKey: "talents" | "achievements" | "involvement") => {
-    setOpenOptionGroups((prev) => ({ ...prev, [groupKey]: !prev[groupKey] }));
   };
 
   const validateAcademicScore = (
@@ -260,6 +215,7 @@ export default function ScholarshipRecommenderPage() {
         selectedIds={selectedIds}
         onToggleAll={handleSelectAll}
         onToggleOne={handleToggleCard}
+        onNavigateToStep={(step) => setStep(step as StepIndex)}
       />
     );
   }
@@ -279,68 +235,13 @@ export default function ScholarshipRecommenderPage() {
         onClick={next}
         disabled={!commonContinueEnabled}
         className={`inline-flex items-center justify-center h-12 rounded-lg text-[18px] font-semibold text-white w-43.75 ${
-          commonContinueEnabled ? "bg-[#2563eb] hover:bg-[#1d4ed8] shadow-[0_4px_14px_0_rgba(37,99,235,0.25)]" : "bg-[#afbacc]"
+          commonContinueEnabled ? "bg-brand-blue hover:bg-brand-hover shadow-[0_4px_14px_0_rgba(37,99,235,0.25)]" : "bg-[#afbacc]"
         }`}
       >
         Continue
       </button>
     </div>
   );
-
-  const renderCheckboxBlock = (group: {
-    key: "talents" | "achievements" | "involvement";
-    label: string;
-    values: string[];
-    optional?: boolean;
-  }) => {
-    const selectedCount = state[group.key].length;
-    const isOpen = openOptionGroups[group.key];
-
-    return (
-      <div className="flex flex-col gap-2" key={group.key}>
-      <label className="text-[15px] font-semibold text-slate-700">
-        {group.label} {group.optional && <span className="text-slate-400 font-normal">(optional)</span>}
-      </label>
-      <div className="rounded-lg border border-slate-200 bg-white shadow-sm overflow-hidden">
-        <button
-          type="button"
-          onClick={() => toggleOptionGroup(group.key)}
-          className="w-full flex items-center justify-between px-4 py-3 text-left hover:bg-slate-50 transition-colors"
-        >
-          <span className="text-[14px] font-medium text-slate-600">
-            {selectedCount > 0 ? `${selectedCount} selected` : "Select options"}
-          </span>
-          <ChevronDown
-            className={`h-4 w-4 text-slate-500 transition-transform ${isOpen ? "rotate-180" : ""}`}
-          />
-        </button>
-
-        <div className={`${isOpen ? "block" : "hidden"} border-t border-slate-100 p-2`}>
-          <div className="grid grid-cols-1 gap-1">
-            {group.values.map((item) => {
-              const isChecked = state[group.key].includes(item);
-
-              return (
-                <label
-                  key={item}
-                  className="flex items-center px-3 py-2 hover:bg-slate-50 cursor-pointer transition-colors rounded-md"
-                >
-                  <input
-                    type="checkbox"
-                    checked={isChecked}
-                    onChange={() => toggleArrayField(group.key, item)}
-                    className="w-4 h-4 accent-blue-600 cursor-pointer"
-                  />
-                  <span className="ml-3 text-[15px] text-slate-700">{item}</span>
-                </label>
-              );
-            })}
-          </div>
-        </div>
-      </div>
-    </div>
-    );
-  };
   const stepOneButtonEnabled = canContinue;
 
   return (
@@ -354,19 +255,19 @@ export default function ScholarshipRecommenderPage() {
             <button
               onClick={next}
               disabled={!canContinue}
-              className={`w-full md:w-auto md:min-w-50 px-10 py-3.5 text-white font-bold text-[17px] rounded-xl transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-blue-300 ${
-                canContinue ? "bg-[#2563eb] hover:bg-[#1d4ed8] cursor-pointer" : "bg-[#b0b8c6] cursor-not-allowed"
+              className={`w-full md:w-auto md:min-w-50 px-10 py-3.5 text-white font-bold text-[17px] rounded-lg transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-blue-300 ${
+                canContinue ? "bg-brand-blue hover:bg-brand-hover cursor-pointer" : "bg-[#b0b8c6] cursor-not-allowed"
               }`}
             >
               Continue
             </button>
           </div>
         ) : step === 5 ? (
-          <div className="mt-8">
+          <div className="mt-5">
             <button
               type="button"
               onClick={next}
-              className="w-full py-3 px-4 bg-blue-600 hover:bg-blue-700 text-white text-[1.125rem] font-medium rounded-xs transition-colors duration-200"
+              className="w-full py-3 px-4 bg-brand-blue hover:bg-brand-hover text-white text-[1.125rem] font-medium rounded-lg transition-colors duration-200"
             >
               Find Scholarship
             </button>
@@ -380,20 +281,17 @@ export default function ScholarshipRecommenderPage() {
         <form className="flex flex-col gap-6 mb-10">
           <div className="flex flex-col gap-2">
             <label className="text-[16px] font-semibold text-[#1e293b]">What level are you currently studying?</label>
-            <div className="relative">
-              <select
-                value={state.educationLevel}
-                onChange={(event) => updateState("educationLevel", event.target.value)}
-                className="w-full appearance-none p-3.5 pr-11 border-2 border-[#cbd5e1] rounded-lg focus:border-[#2563eb] focus:ring-2 focus:ring-[#bfdbfe] focus:outline-none transition-all text-[16px] text-[#1e293b] bg-white"
-              >
-                <option value="">Select your education level</option>
-                <option value="high_school">High School (10th/12th Grade)</option>
-                <option value="diploma">Diploma / Certificate</option>
-                <option value="undergraduate">Undergraduate (Bachelor&apos;s)</option>
-                <option value="postgraduate">Postgraduate (Master&apos;s / PhD)</option>
-              </select>
-              <ChevronDown className="pointer-events-none absolute right-3 top-1/2 h-5 w-5 -translate-y-1/2 text-slate-600" />
-            </div>
+            <CustomSelect
+              value={state.educationLevel}
+              onChange={(value) => updateState("educationLevel", value)}
+              placeholder="Select your education level"
+              options={[
+                { value: "high_school", label: "High School (10th/12th Grade)" },
+                { value: "diploma", label: "Diploma / Certificate" },
+                { value: "undergraduate", label: "Undergraduate (Bachelor's)" },
+                { value: "postgraduate", label: "Postgraduate (Master's / PhD)" },
+              ]}
+            />
           </div>
 
           <div className="flex flex-col gap-2">
@@ -425,15 +323,15 @@ export default function ScholarshipRecommenderPage() {
             <label className="text-[16px] font-semibold text-[#1e293b]">What is your academic score?</label>
             <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
               <div className="relative sm:col-span-1">
-                <select
+                <CustomSelect
                   value={state.academicScoreType}
-                  onChange={(event) => handleAcademicScoreTypeChange(event.target.value as RecommenderState["academicScoreType"])}
-                  className="w-full appearance-none p-3.5 pr-11 border-2 border-[#cbd5e1] rounded-lg focus:border-[#2563eb] focus:ring-2 focus:ring-[#bfdbfe] focus:outline-none transition-all text-[16px] text-[#1e293b] bg-white"
-                >
-                  <option value="gpa">GPA</option>
-                  <option value="percentage">Percentage</option>
-                </select>
-                <ChevronDown className="pointer-events-none absolute right-3 top-1/2 h-5 w-5 -translate-y-1/2 text-slate-600" />
+                  onChange={(value) => handleAcademicScoreTypeChange(value as RecommenderState["academicScoreType"])}
+                  options={[
+                    { value: "gpa", label: "GPA" },
+                    { value: "percentage", label: "Percentage" },
+                  ]}
+                  className="w-full"
+                />
               </div>
 
               <input
@@ -463,22 +361,19 @@ export default function ScholarshipRecommenderPage() {
         <form className="flex flex-col gap-8 mb-10">
           <div className="flex flex-col gap-3">
             <label className="text-[16px] font-semibold text-[#1e293b]">Intended Field of Study</label>
-            <div className="relative">
-              <select
-                value={state.fieldOfStudy}
-                onChange={(event) => updateState("fieldOfStudy", event.target.value)}
-                className="w-full appearance-none p-3.5 pr-11 border-2 border-[#cbd5e1] rounded-xl focus:border-[#2563eb] focus:ring-4 focus:ring-blue-50 focus:outline-none transition-all text-[16px] text-[#1e293b] bg-white"
-              >
-                <option value="">Select your prospective major</option>
-                <option value="cs">Computer Science & IT</option>
-                <option value="business">Business & Management</option>
-                <option value="engineering">Engineering</option>
-                <option value="medicine">Medicine & Health Sciences</option>
-                <option value="arts">Arts & Humanities</option>
-                <option value="law">Law & Social Sciences</option>
-              </select>
-              <ChevronDown className="pointer-events-none absolute right-3 top-1/2 h-5 w-5 -translate-y-1/2 text-slate-600" />
-            </div>
+            <CustomSelect
+              value={state.fieldOfStudy}
+              onChange={(value) => updateState("fieldOfStudy", value)}
+              placeholder="Select your prospective major"
+              options={[
+                { value: "cs", label: "Computer Science & IT" },
+                { value: "business", label: "Business & Management" },
+                { value: "engineering", label: "Engineering" },
+                { value: "medicine", label: "Medicine & Health Sciences" },
+                { value: "arts", label: "Arts & Humanities" },
+                { value: "law", label: "Law & Social Sciences" },
+              ]}
+            />
           </div>
 
           <div className="space-y-6">
@@ -522,42 +417,36 @@ export default function ScholarshipRecommenderPage() {
         <form className="flex flex-col gap-6 mb-10 ">
           <div className="flex flex-col gap-2">
             <label className="text-[16px] font-semibold text-[#1e293b]">Your Province</label>
-            <div className="relative">
-              <select
-                value={state.province}
-                onChange={(event) => updateState("province", event.target.value)}
-                className="w-full appearance-none p-3.5 pr-11 border-2 border-[#cbd5e1] rounded-lg focus:border-[#2563eb] focus:ring-2 focus:ring-[#bfdbfe] focus:outline-none transition-all text-[16px] text-[#1e293b] bg-white"
-              >
-                <option value="">Select Province</option>
-                <option value="koshi">Koshi Province</option>
-                <option value="madhesh">Madhesh Province</option>
-                <option value="bagmati">Bagmati Province</option>
-                <option value="gandaki">Gandaki Province</option>
-                <option value="lumbini">Lumbini Province</option>
-                <option value="karnali">Karnali Province</option>
-                <option value="sudurpashchim">Sudurpashchim Province</option>
-              </select>
-              <ChevronDown className="pointer-events-none absolute right-3 top-1/2 h-5 w-5 -translate-y-1/2 text-slate-600" />
-            </div>
+            <CustomSelect
+              value={state.province}
+              onChange={(value) => updateState("province", value)}
+              placeholder="Select Province"
+              options={[
+                { value: "koshi", label: "Koshi Province" },
+                { value: "madhesh", label: "Madhesh Province" },
+                { value: "bagmati", label: "Bagmati Province" },
+                { value: "gandaki", label: "Gandaki Province" },
+                { value: "lumbini", label: "Lumbini Province" },
+                { value: "karnali", label: "Karnali Province" },
+                { value: "sudurpashchim", label: "Sudurpashchim Province" },
+              ]}
+            />
           </div>
 
           <div className="flex flex-col gap-2">
             <label className="text-[16px] font-semibold text-[#1e293b]">Your District</label>
-            <div className="relative">
-              <select
-                value={state.district}
-                onChange={(event) => updateState("district", event.target.value)}
-                className="w-full appearance-none p-3.5 pr-11 border-2 border-[#cbd5e1] rounded-lg focus:border-[#2563eb] focus:ring-2 focus:ring-[#bfdbfe] focus:outline-none transition-all text-[16px] text-[#1e293b] bg-white"
-              >
-                <option value="">Select District</option>
-                <option value="kathmandu">Kathmandu</option>
-                <option value="bhaktapur">Bhaktapur</option>
-                <option value="lalitpur">Lalitpur</option>
-                <option value="kaski">Kaski</option>
-                <option value="chitwan">Chitwan</option>
-              </select>
-              <ChevronDown className="pointer-events-none absolute right-3 top-1/2 h-5 w-5 -translate-y-1/2 text-slate-600" />
-            </div>
+            <CustomSelect
+              value={state.district}
+              onChange={(value) => updateState("district", value)}
+              placeholder="Select District"
+              options={[
+                { value: "kathmandu", label: "Kathmandu" },
+                { value: "bhaktapur", label: "Bhaktapur" },
+                { value: "lalitpur", label: "Lalitpur" },
+                { value: "kaski", label: "Kaski" },
+                { value: "chitwan", label: "Chitwan" },
+              ]}
+            />
           </div>
 
           <div className="flex flex-col gap-2">
@@ -590,40 +479,34 @@ export default function ScholarshipRecommenderPage() {
         <form className="flex flex-col gap-6 mb-10">
           <div className="flex flex-col gap-2">
             <label className="text-[16px] font-semibold text-[#1e293b]">Do you belong to any category?</label>
-            <div className="relative">
-              <select
-                value={state.category}
-                onChange={(event) => updateState("category", event.target.value)}
-                className="w-full appearance-none p-3.5 pr-11 border-2 border-[#cbd5e1] rounded-lg focus:border-[#2563eb] focus:ring-2 focus:ring-[#bfdbfe] focus:outline-none transition-all text-[16px] text-[#1e293b] bg-white"
-              >
-                <option value="">Select Category</option>
-                <option value="none">None / General</option>
-                <option value="dalit">Dalit</option>
-                <option value="janajati">Adivasi / Janajati</option>
-                <option value="madhesi">Madhesi</option>
-                <option value="muslim">Muslim</option>
-                <option value="disabled">Person with Disability</option>
-              </select>
-              <ChevronDown className="pointer-events-none absolute right-3 top-1/2 h-5 w-5 -translate-y-1/2 text-slate-600" />
-            </div>
+            <CustomSelect
+              value={state.category}
+              onChange={(value) => updateState("category", value)}
+              placeholder="Select Category"
+              options={[
+                { value: "none", label: "None / General" },
+                { value: "dalit", label: "Dalit" },
+                { value: "janajati", label: "Adivasi / Janajati" },
+                { value: "madhesi", label: "Madhesi" },
+                { value: "muslim", label: "Muslim" },
+                { value: "disabled", label: "Person with Disability" },
+              ]}
+            />
           </div>
 
           <div className="flex flex-col gap-2">
             <label className="text-[16px] font-semibold text-[#1e293b]">Gender</label>
-            <div className="relative">
-              <select
-                value={state.gender}
-                onChange={(event) => updateState("gender", event.target.value)}
-                className="w-full appearance-none p-3.5 pr-11 border-2 border-[#cbd5e1] rounded-lg focus:border-[#2563eb] focus:ring-2 focus:ring-[#bfdbfe] focus:outline-none transition-all text-[16px] text-[#1e293b] bg-white"
-              >
-                <option value="">Select gender</option>
-                <option value="male">Male</option>
-                <option value="female">Female</option>
-                <option value="other">Other</option>
-                <option value="prefer_not_to_say">Prefer not to say</option>
-              </select>
-              <ChevronDown className="pointer-events-none absolute right-3 top-1/2 h-5 w-5 -translate-y-1/2 text-slate-600" />
-            </div>
+            <CustomSelect
+              value={state.gender}
+              onChange={(value) => updateState("gender", value)}
+              placeholder="Select gender"
+              options={[
+                { value: "male", label: "Male" },
+                { value: "female", label: "Female" },
+                { value: "other", label: "Other" },
+                { value: "prefer_not_to_say", label: "Prefer not to say" },
+              ]}
+            />
           </div>
 
           <div className="flex flex-col gap-2">
@@ -654,39 +537,50 @@ export default function ScholarshipRecommenderPage() {
       )}
 
       {step === 5 && (
-        <form className="space-y-8">
-          {renderCheckboxBlock({
-            key: "talents",
-            label: "Talents / Skills",
-            values: [
-              "Programming / IT",
-              "Public Speaking / Debate",
-              "Arts / Creative Writing",
-              "Athletics / Sports",
-              "Music / Performing Arts",
-              "Other Skills",
-            ],
-            optional: true,
-          })}
+        <form className="space-y-6">
+          <MultiSelect
+            label="Talents / Skills (optional)"
+            value={state.talents}
+            onChange={(value) => updateState("talents", value)}
+            options={[
+              { value: "Programming / IT", label: "Programming / IT" },
+              { value: "Public Speaking / Debate", label: "Public Speaking / Debate" },
+              { value: "Arts / Creative Writing", label: "Arts / Creative Writing" },
+              { value: "Athletics / Sports", label: "Athletics / Sports" },
+              { value: "Music / Performing Arts", label: "Music / Performing Arts" },
+              { value: "Other Skills", label: "Other Skills" },
+            ]}
+            placeholder="Select your talents"
+          />
 
-          {renderCheckboxBlock({
-            key: "achievements",
-            label: "Achievements",
-            values: [
-              "Academic Excellence Awards",
-              "National Level Sports",
-              "Student Leadership Award",
-              "Science / Math Olympiad",
-              "Other Achievements",
-            ],
-            optional: true,
-          })}
+          <MultiSelect
+            label="Achievements (optional)"
+            value={state.achievements}
+            onChange={(value) => updateState("achievements", value)}
+            options={[
+              { value: "Academic Excellence Awards", label: "Academic Excellence Awards" },
+              { value: "National Level Sports", label: "National Level Sports" },
+              { value: "Student Leadership Award", label: "Student Leadership Award" },
+              { value: "Science / Math Olympiad", label: "Science / Math Olympiad" },
+              { value: "Other Achievements", label: "Other Achievements" },
+            ]}
+            placeholder="Select your achievements"
+          />
 
-          {renderCheckboxBlock({
-            key: "involvement",
-            label: "Are you involved in:",
-            values: ["Community Service", "NGO Work", "Student Clubs", "Entrepreneurship", "Family Business", "None"],
-          })}
+          <MultiSelect
+            label="Are you involved in:"
+            value={state.involvement}
+            onChange={(value) => updateState("involvement", value)}
+            options={[
+              { value: "Community Service", label: "Community Service" },
+              { value: "NGO Work", label: "NGO Work" },
+              { value: "Student Clubs", label: "Student Clubs" },
+              { value: "Entrepreneurship", label: "Entrepreneurship" },
+              { value: "Family Business", label: "Family Business" },
+              { value: "None", label: "None" },
+            ]}
+            placeholder="Select your involvement"
+          />
         </form>
       )}
     </StepShell>

@@ -1,0 +1,369 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>College Recommender - Activities</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            /* Blue Theme Colors */
+            --bg-left-panel: #e0f2fe; 
+            --primary-blue: #2563eb;  
+            --primary-blue-hover: #1d4ed8;
+            --primary-blue-light: #eff6ff; 
+            --text-main: #0f172a;     
+            --text-secondary: #475569;
+            --border-color: #cbd5e1;  
+            --border-hover: #94a3b8;
+            --btn-disabled-bg: #94a3b8;
+            --btn-disabled-text: #f1f5f9;
+            --progress-track: #e2e8f0;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            display: flex;
+            min-height: 100vh;
+            background-color: #ffffff;
+            color: var(--text-main);
+            overflow-x: hidden;
+        }
+
+        /* Layout */
+        .left-panel {
+            width: 45%; /* Increased width */
+            background-color: var(--bg-left-panel);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 2rem;
+            border-right: 1px solid #e2e8f0;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .right-panel {
+            width: 55%; /* Decreased to compensate for the left panel */
+            padding: 10rem 10% 3rem; /* Increased top padding to push content down */
+            display: flex;
+            flex-direction: column;
+            position: relative;
+        }
+
+        /* SVG Illustration Styling */
+        .illustration {
+            width: 100%;
+            max-width: 250px;
+            height: auto;
+            mix-blend-mode: multiply;
+        }
+
+        /* Button Group & Secondary Button */
+        .button-group {
+            display: flex;
+            gap: 1rem;
+            align-items: center;
+        }
+
+        .secondary-btn {
+            padding: 1rem 2.5rem;
+            font-size: 1rem;
+            font-weight: 600;
+            border: 1.5px solid var(--border-color);
+            background-color: white;
+            color: var(--text-secondary);
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            font-family: inherit;
+        }
+
+        .secondary-btn:hover {
+            border-color: var(--text-main);
+            color: var(--text-main);
+        }
+
+        /* Main Content Area */
+        .content-area {
+            max-width: 600px;
+            animation: fadeIn 0.6s ease-out 0.2s both;
+        }
+
+        h1 {
+            font-size: 2rem;
+            font-weight: 700;
+            margin-bottom: 1.5rem;
+            letter-spacing: -0.02em;
+        }
+
+        .question-text {
+            font-size: 1rem;
+            color: var(--text-secondary);
+            font-weight: 600;
+            margin-bottom: 2rem;
+        }
+
+        /* Custom Radio Options */
+        .options-group {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+            margin-bottom: 2.5rem;
+        }
+
+        .option-label {
+            display: flex;
+            align-items: center;
+            padding: 1.25rem 1.5rem;
+            border: 1.5px solid var(--border-color);
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+            font-size: 1rem;
+            font-weight: 500;
+            color: var(--text-main);
+            background-color: white;
+        }
+
+        .option-label:hover {
+            border-color: var(--primary-blue);
+            transform: translateY(-2px);
+        }
+
+        /* Hide actual radio input */
+        .option-label input[type="radio"] {
+            display: none;
+        }
+
+        /* Custom visual square box */
+        .custom-radio-box {
+            width: 24px;
+            height: 24px;
+            border: 2px solid var(--border-color);
+            border-radius: 6px; /* Changed to rectangular with rounded corners */
+            margin-right: 1rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s ease;
+            background-color: transparent;
+            position: relative;
+        }
+
+        .custom-radio-box::after {
+            content: '';
+            position: absolute;
+            left: 7px;
+            top: 3px;
+            width: 6px;
+            height: 12px;
+            border: solid white;
+            border-width: 0 2.5px 2.5px 0;
+            transform: rotate(45deg) scale(0);
+            transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        /* Selected State Styling */
+        .option-label:has(input[type="radio"]:checked) {
+            border-color: var(--primary-blue);
+            background-color: var(--primary-blue-light);
+        }
+
+        .option-label input[type="radio"]:checked + .custom-radio-box {
+            background-color: var(--primary-blue);
+            border-color: var(--primary-blue);
+        }
+
+        .option-label input[type="radio"]:checked + .custom-radio-box::after {
+            transform: rotate(45deg) scale(1);
+        }
+
+        /* Keyboard Focus Outline */
+        .option-label input[type="radio"]:focus-visible + .custom-radio-box {
+            outline: 2px solid var(--primary-blue);
+            outline-offset: 4px;
+        }
+
+        /* Next Button */
+        .next-btn {
+            padding: 1rem 2.5rem;
+            font-size: 1rem;
+            font-weight: 600;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            font-family: inherit;
+        }
+
+        .next-btn:disabled {
+            background-color: var(--btn-disabled-bg);
+            color: var(--btn-disabled-text);
+            cursor: not-allowed;
+            opacity: 0.7;
+        }
+
+        .next-btn:not(:disabled) {
+            background-color: var(--primary-blue);
+            color: white;
+        }
+
+        .next-btn:not(:disabled):hover {
+            background-color: var(--primary-blue-hover);
+            transform: translateY(-1px);
+        }
+
+        /* Completion Screen (Hidden by default) */
+        .completion-screen {
+            display: none;
+            text-align: center;
+            animation: fadeIn 0.5s ease-out;
+            padding-top: 2rem;
+        }
+
+        .completion-icon {
+            width: 64px;
+            height: 64px;
+            background-color: #dcfce7;
+            color: #16a34a;
+            border-radius: 50%;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 1.5rem;
+        }
+
+        .completion-icon svg {
+            width: 32px;
+            height: 32px;
+            fill: currentColor;
+        }
+
+        /* Animations */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        @keyframes fadeInDown {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Responsive Design */
+        @media (max-width: 900px) {
+            body {
+                flex-direction: column;
+            }
+            .left-panel {
+                width: 100%;
+                min-height: 250px;
+                padding: 2rem 1rem;
+            }
+            .right-panel {
+                width: 100%;
+                flex-grow: 1;
+                padding: 2rem 5%;
+            }
+            .illustration {
+                max-width: 180px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="left-panel">
+        <svg class="illustration" xmlns="http://www.w3.org/2000/svg" width="440.731" height="640.46" viewBox="0 0 440.731 640.46" xmlns:xlink="http://www.w3.org/1999/xlink" role="img" artist="Katerina Limpitsouni" source="https://undraw.co/"><g transform="translate(-882.641 -515.08)"><g transform="matrix(0.799, 0.602, -0.602, 0.799, 932.785, 731.196)"><path d="M83.758,41.531v.674c0,.177,0,.362-.014.539a41.644,41.644,0,0,1-9.132,25.261c-.291.376-.6.738-.908,1.1-.469.554-.951,1.086-1.448,1.611-.043.043-.085.092-.135.135l-.021.021c-.057.057-.114.121-.17.177q-1.309,1.352-2.746,2.59c-.192.163-.39.333-.6.5a41.718,41.718,0,0,1-26.346,9.622c-.071.007-.149.007-.22.007h-.248c-.071,0-.142,0-.213-.007-.248,0-.49-.007-.738-.014a41.673,41.673,0,0,1-26.19-10.069c-.2-.163-.4-.333-.589-.511-.759-.667-1.49-1.37-2.193-2.093-.057-.057-.114-.121-.17-.177l-.021-.021c-.05-.042-.092-.092-.135-.135-.6-.624-1.171-1.27-1.724-1.93q-.458-.543-.894-1.107A41.592,41.592,0,0,1,.014,42.745C0,42.574,0,42.4,0,42.219v-.66c0-.078,0-.156.007-.234A41.646,41.646,0,0,1,8.742,16.263q.436-.564.894-1.107c.561-.681,1.15-1.341,1.753-1.987.043-.05.085-.092.135-.142,0-.007.007-.014.014-.021.057-.057.114-.121.177-.177q1.182-1.224,2.462-2.356c.192-.177.39-.348.589-.511A41.707,41.707,0,0,1,41.517.007C41.588,0,41.666,0,41.737,0H42.2A41.723,41.723,0,0,1,68.452,9.508c.2.17.4.333.6.5,1.036.88,2.029,1.817,2.973,2.8.057.057.113.121.17.177l.014.014c.05.043.1.1.142.142.525.553,1.029,1.128,1.519,1.71.312.362.61.724.908,1.1a41.644,41.644,0,0,1,8.976,25.374A2.032,2.032,0,0,1,83.758,41.531Z" transform="translate(0.334)" fill="#1877F2"/><rect width="1.419" height="83.729" transform="translate(41.155 0.17)" fill="#fff"/><rect width="84.091" height="1.419" transform="translate(0 41.325)" fill="#fff"/><path d="M15.036,26.169A32.59,32.59,0,0,0,.894,0Q.436.543,0,1.107A31.194,31.194,0,0,1,13.624,26.169c.007.234.007.468.007.709s0,.475-.007.71A31.224,31.224,0,0,1,.163,52.544q.436.564.894,1.107A32.611,32.611,0,0,0,15.036,27.588c.014-.234.014-.475.014-.71S15.05,26.4,15.036,26.169Z" transform="translate(9.075 15.156)" fill="#fff"/><path d="M1.426,27.893c-.007-.234-.007-.468-.007-.71s0-.475.007-.71A31.219,31.219,0,0,1,15.5,1.1c-.3-.376-.6-.738-.908-1.1A32.615,32.615,0,0,0,.014,26.474C0,26.708,0,26.949,0,27.184s0,.475.014.71a32.6,32.6,0,0,0,14.418,26.36c.312-.362.617-.724.908-1.1A31.208,31.208,0,0,1,1.426,27.893Z" transform="translate(59.604 14.851)" fill="#fff"/></g><path d="M916.662,413.792q27.649,29,61.7,9.254c-9.525-15.264-11.792-31.867-9.254-49.356H924.888C926.847,389.059,926.32,403.37,916.662,413.792Z" transform="translate(212.425 208.923)" fill="#ed9da0"/><path d="M813.5,658.682l23.651-12.338,10.282-130.589V446.861l-54.5-1.028,15.423,68.893Z" transform="translate(388.593 469.935)" fill="#ed9da0"/><path d="M772.758,658.682l-23.649-12.338L738.827,515.755V446.861l54.5-1.028L777.9,514.727Z" transform="translate(360.78 469.935)" fill="#ed9da0"/><path d="M898.052,634.643l57.583-5.141,9.254-52.441L976.2,628.473l62.724-4.113c1.37-24.985-2.11-50.7-10.282-77.119l-137.787-3.085Z" transform="translate(199.159 296.55)" fill="#090814"/><path d="M889.917,503.707,820.651,450.37a10.077,10.077,0,0,0-2.35-1.349l-10.068-4.1c-8.086-3.29-23.488-14.232-15.976-25.5,6.056-9.084,29.238,7.189,32.09,13.218a9.96,9.96,0,0,0,4.223,4.467l14.076,7.713a10.054,10.054,0,0,0,1.057.5l53.591,21.722c3.014,1.222,28.035-52.589,31.089-51.279s3.138.4,3.784,3.656l15.282,17.686c.954,4.818-14.477,55.327-47.8,68.028a10.074,10.074,0,0,1-9.735-1.431Z" transform="translate(147.444 230.54)" fill="#ed9da0"/><path d="M916.941,483.564l-16.662-80.67h0a29.983,29.983,0,0,0-19.757,18.092Z" transform="translate(193.848 223.935)" fill="#1877F2"/><path d="M888.137,625.4h144.984c-23.464-63.232-21.18-128.265-1.2-194.537a4.94,4.94,0,0,0-2.428-5.814L987.878,403.3c-16.336,10.629-33.892,7.363-52.441-7.2l-45.243,12.339C902.51,482.412,902.86,554.865,888.137,625.4Z" transform="translate(197.763 220.443)" fill="#1877F2"/><path d="M936.371,765.314l-60.421,2.561a10.666,10.666,0,0,1-11-9.079h0a10.666,10.666,0,0,1,8.01-11.938l10.248-2.512L923.487,721c5.967,6.179,14.185,11.4,24.23,15.854l.118,16.415a11.971,11.971,0,0,1-11.464,12.046Z" transform="translate(185.782 387.455)" fill="#090814"/><path d="M318.536,605.319H.321v-3.3H318.679Z" transform="translate(1004.693 550.22)" fill="#e6e6e6"/><path d="M975.962,764.708l60.421,2.561a10.666,10.666,0,0,0,11-9.079h0a10.666,10.666,0,0,0-8.01-11.938l-10.248-2.512-40.279-23.347c-5.967,6.179-14.185,11.4-24.23,15.854l-.118,16.415a11.971,11.971,0,0,0,11.464,12.046Z" transform="translate(237.015 387.143)" fill="#090814"/><circle cx="32.904" cy="32.904" r="32.904" transform="translate(1121.887 535.313)" fill="#ed9da0"/><path d="M983.469,364.1a31.637,31.637,0,0,0-6.916-24.85c-5.614-6.643-15.024-12.081-30.636-9.516-34.062,5.6-43.884,33.953-40.547,41.084s13.566,23.662,13.566,23.662-7.507-16.364.641-19.695,39.679-16.453,50.684-10.541a19.726,19.726,0,0,1,10.849,16.617Z" transform="translate(206.306 185.994)" fill="#090814"/><path d="M971.847,603.811l-10.871,21.137a14.864,14.864,0,0,0,8,20.716h0A14.864,14.864,0,0,0,988.9,633.891l4.537-31.109,16.452-78.147-15-106.532-23.441,40.382C982.671,487.548,981.616,557.49,971.847,603.811Z" transform="translate(234.359 231.753)" fill="#ed9da0"/></g></svg>
+    </div>
+
+    <div class="right-panel">
+        <div class="content-area" id="mainForm">
+            <h1>Activities & Sports</h1>
+            <p class="question-text">Are clubs, sports, and competitions important to you?</p>
+
+            <div class="options-group">
+                <!-- Option: Yes -->
+                <label class="option-label">
+                    <input type="radio" name="activity_importance" value="yes">
+                    <div class="custom-radio-box"></div>
+                    Yes, they are very important
+                </label>
+
+                <!-- Option: Somewhat -->
+                <label class="option-label">
+                    <input type="radio" name="activity_importance" value="somewhat">
+                    <div class="custom-radio-box"></div>
+                    Somewhat important
+                </label>
+
+                <!-- Option: No -->
+                <label class="option-label">
+                    <input type="radio" name="activity_importance" value="no">
+                    <div class="custom-radio-box"></div>
+                    No, I prefer to focus on academics
+                </label>
+            </div>
+
+            <div class="button-group">
+                <button class="secondary-btn" id="backBtn" onclick="console.log('Go Back')">Back</button>
+                <button class="next-btn" id="nextBtn" disabled>Continue</button>
+            </div>
+        </div>
+
+        <!-- Success/Next Step State -->
+        <div class="content-area completion-screen" id="completionScreen">
+            <div class="completion-icon">
+                <svg viewBox="0 0 24 24">
+                    <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41L9 16.17z"/>
+                </svg>
+            </div>
+            <h1>Preferences Saved</h1>
+            <p class="question-text">We've updated your college profile based on your activities preferences.</p>
+            <button class="next-btn" onclick="location.reload()" style="margin-top: 1rem;">Start Over</button>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const radioInputs = document.querySelectorAll('input[name="activity_importance"]');
+            const nextButton = document.getElementById('nextBtn');
+            const mainForm = document.getElementById('mainForm');
+            const completionScreen = document.getElementById('completionScreen');
+
+            // Listen for changes on any radio button
+            radioInputs.forEach(input => {
+                input.addEventListener('change', () => {
+                    // If any radio is checked, enable the Next button
+                    if (document.querySelector('input[name="activity_importance"]:checked')) {
+                        nextButton.disabled = false;
+                    }
+                });
+            });
+
+            // Handle Next Button Click (Simulate moving to next step)
+            nextButton.addEventListener('click', () => {
+                // Fade out current form
+                mainForm.style.opacity = '0';
+                mainForm.style.transition = 'opacity 0.3s ease';
+                
+                setTimeout(() => {
+                    mainForm.style.display = 'none';
+                    
+                    // Show completion screen
+                    completionScreen.style.display = 'block';
+                }, 300);
+            });
+        });
+    </script>
+</body>
+</html>
