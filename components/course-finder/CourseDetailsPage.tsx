@@ -283,8 +283,8 @@ const CourseDetailsPage: React.FC<CourseDetailsPageProps> = ({
               {/* Right Column: Science Visual */}
               <div className="hidden lg:flex flex-1 justify-center items-center relative w-full h-full">
                 <div className="relative w-72 h-72 lg:w-80 lg:h-80 xl:w-96 xl:h-96">
-                  {/* Floating Animation for Science Illustration */}
-                  <div className="animate-[bounce_6s_ease-in-out_infinite]">
+                  {/* Static Science Illustration */}
+                  <div>
                     <svg viewBox="0 0 200 200" className="w-full h-full text-blue-200 drop-shadow-2xl" fill="none" xmlns="http://www.w3.org/2000/svg">
                       {/* Orbit 1 */}
                       <ellipse cx="100" cy="100" rx="40" ry="90" transform="rotate(30 100 100)" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeOpacity="0.6"></ellipse>
@@ -299,13 +299,13 @@ const CourseDetailsPage: React.FC<CourseDetailsPageProps> = ({
                       <circle cx="10" cy="100" r="5" fill="#a78bfa" transform="rotate(90 100 100)"></circle>
 
                       {/* Core */}
-                      <circle cx="100" cy="100" r="16" fill="currentColor" className="animate-pulse"></circle>
+                      <circle cx="100" cy="100" r="16" fill="currentColor"></circle>
                       <circle cx="100" cy="100" r="24" stroke="currentColor" strokeWidth="2" strokeOpacity="0.3" strokeDasharray="4 4"></circle>
                     </svg>
                   </div>
                   
                   {/* Decorative Stars */}
-                  <Star className="absolute top-0 right-10 w-6 h-6 text-yellow-400 fill-yellow-400 animate-pulse" />
+                  <Star className="absolute top-0 right-10 w-6 h-6 text-yellow-400 fill-yellow-400" />
                   <Star className="absolute bottom-10 left-0 w-8 h-8 text-blue-300 opacity-50 fill-blue-300" />
                 </div>
               </div>
