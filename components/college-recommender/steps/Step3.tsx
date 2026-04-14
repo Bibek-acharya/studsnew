@@ -1,11 +1,19 @@
-"use client";
+'use client'
 
-import { CollegeRecommenderForm } from "../CollegeRecommenderToolPage";
-import Dropdown from "../Dropdown";
+import React from 'react'
+import { CollegeRecommenderForm } from '../CollegeRecommenderToolPage'
+import Dropdown from '../Dropdown'
+import StepWrapper from './StepWrapper'
 
 interface Step3Props {
-  form: CollegeRecommenderForm;
-  handleInputChange: (field: keyof CollegeRecommenderForm, value: string) => void;
+  step: number
+  stepImages: Record<number, string>
+  form: CollegeRecommenderForm
+  handleInputChange: (field: keyof CollegeRecommenderForm, value: string) => void
+  stepTitles: Record<number, string>
+  canContinue: (step: number) => boolean
+  setStep: (step: number) => void
+  stepCount?: number
 }
 
 const renderPillOption = (
@@ -14,84 +22,127 @@ const renderPillOption = (
   label: string,
 ) => (
   <button
-    type="button"
+    type='button'
     onClick={onClick}
-    className={`rounded-xl border-2 border-[#e2e8f0] bg-white px-5 py-3 text-base font-medium text-[#0f172a] transition-all duration-200 hover:border-[#cbd5e1] hover:bg-[#f8fafc] ${
+    className={`rounded-md border-2 border-[#e2e8f0] bg-white px-5 py-3 text-base font-medium text-[#0f172a] transition-all duration-200  ${
       checked
-        ? "border-brand-blue bg-brand-blue/10 text-brand-blue font-semibold"
-        : ""
+        ? 'border-brand-blue bg-brand-blue/10 text-black font-semibold'
+        : ''
     }`}
   >
     {label}
   </button>
-);
+)
 
-export default function Step3({ form, handleInputChange }: Step3Props) {
+export default function Step3({ step, stepImages, form, handleInputChange, stepTitles, canContinue, setStep, stepCount = 10 }: Step3Props) {
   return (
-    <div className="animate-in fade-in slide-in-from-bottom-6 duration-700">
-      <div className="mt-8 space-y-8">
-        <div className="space-y-4">
-          <p className="text-[17px] font-semibold text-[#0f172a]">
-            Do you know what you want to study?
-          </p>
-          <div className="flex flex-wrap gap-3">
-            {renderPillOption(
-              form.knows_course === "Yes",
-              () => handleInputChange("knows_course", "Yes"),
-              "Yes, I know my course",
-            )}
-            {renderPillOption(
-              form.knows_course === "Not sure",
-              () => handleInputChange("knows_course", "Not sure"),
-              "Not sure yet",
-            )}
+    <StepWrapper step={step} stepImages={stepImages} imageSize={500} maxWidth='max-w-100 lg:max-w-150'>
+      <div className='mb-6'>
+        <h1 className='mb-2 text-2xl font-bold leading-tight tracking-tight text-[#0f172a] sm:text-[2rem]'>
+          {stepTitles[step]}
+        </h1>
+      </div>
+
+      <div className='animate-in fade-in slide-in-from-bottom-6 duration-700'>
+        <div className='mt-4 space-y-8'>
+          <div className='space-y-4'>
+            <p className='text-[17px] font-semibold text-[#0f172a]'>
+              Do you know what you want to study?
+            </p>
+            <div className='flex flex-wrap gap-3'>
+              {renderPillOption(
+                form.knows_course === 'Yes',
+                () => handleInputChange('knows_course', 'Yes'),
+                'Yes, I know my course',
+              )}
+              {renderPillOption(
+                form.knows_course === 'Not sure',
+                () => handleInputChange('knows_course', 'Not sure'),
+                'Not sure yet',
+              )}
+            </div>
           </div>
-        </div>
 
-        <div className="space-y-4">
-          <p className="text-[17px] font-semibold text-[#0f172a]">
-            Select your preferred field:
-          </p>
-          <Dropdown
-            value={form.preferred_field || ""}
-            onChange={(val) => handleInputChange("preferred_field", val)}
-            options={[
-              "Science (+2 Science / BSc / BIT / CSIT / Engineering)",
-              "Management (BBS / BBA / BBM / BHM)",
-              "Humanities / Law",
-              "Medical / Nursing / Pharmacy",
-              "IT / Computer",
-              "Hotel Management",
-              "Education",
-              "Others",
-            ]}
-            placeholder="Search or select your preferred field"
-          />
-        </div>
+          <div className='space-y-4'>
+            <p className='text-[17px] font-semibold text-[#0f172a]'>
+              Select your preferred field:
+            </p>
+            <Dropdown
+              value={form.preferred_field || ''}
+              onChange={(val) => handleInputChange('preferred_field', val)}
+              options={[
+                'Science (+2 Science / BSc / BIT / CSIT / Engineering)',
+                'Management (BBS / BBA / BBM / BHM)',
+                'Humanities / Law',
+                'Medical / Nursing / Pharmacy',
+                'IT / Computer',
+                'Hotel Management',
+                'Education',
+                'Others',
+              ]}
+              placeholder='Search or select your preferred field'
+            />
+          </div>
 
-        <div className="space-y-4">
-          <p className="text-[17px] font-semibold text-[#0f172a]">
-            Is college reputation important to you?
-          </p>
-          <div className="flex flex-wrap gap-3">
-            {renderPillOption(
-              form.reputation_importance === "Yes",
-              () => handleInputChange("reputation_importance", "Yes"),
-              "Yes, very important",
-            )}
-            {renderPillOption(
-              form.reputation_importance === "Somewhat",
-              () => handleInputChange("reputation_importance", "Somewhat"),
-              "Somewhat",
-            )}
-            {renderPillOption(
-              form.reputation_importance === "No",
-              () => handleInputChange("reputation_importance", "No"),
-              "Not important",
-            )}
+          <div className='space-y-4'>
+            <p className='text-[17px] font-semibold text-[#0f172a]'>
+              Is college reputation important to you?
+            </p>
+            <div className='flex flex-wrap gap-3'>
+              {renderPillOption(
+                form.reputation_importance === 'Yes',
+                () => handleInputChange('reputation_importance', 'Yes'),
+                'Yes, very important',
+              )}
+              {renderPillOption(
+                form.reputation_importance === 'Somewhat',
+                () => handleInputChange('reputation_importance', 'Somewhat'),
+                'Somewhat',
+              )}
+              {renderPillOption(
+                form.reputation_importance === 'No',
+                () => handleInputChange('reputation_importance', 'No'),
+                'Not important',
+              )}
+            </div>
           </div>
         </div>
       </div>
-    </div>
-  );
+
+      <div className='mt-8 flex items-center gap-4'>
+        {step > 1 && (
+          <button
+            onClick={() => setStep(Math.max(1, step - 1))}
+            className='rounded-md border border-[#cbd5e1] bg-white px-8 py-3.5 text-sm font-semibold text-[#475569] transition-all duration-300 hover:border-[#0f172a] hover:text-[#0f172a]'
+          >
+            Back
+          </button>
+        )}
+        {step < stepCount ? (
+          <button
+            onClick={() => setStep(Math.min(stepCount, step + 1))}
+            disabled={!canContinue(step)}
+            className={`rounded-md px-8 py-3.5 text-sm font-semibold transition-all duration-300 ${
+              canContinue(step)
+                ? 'cursor-pointer bg-brand-blue text-white hover:bg-brand-hover'
+                : 'cursor-not-allowed bg-slate-100 text-slate-400'
+            }`}
+          >
+            Continue
+          </button>
+        ) : (
+          <button
+            disabled={!canContinue(step)}
+            className={`rounded-md px-8 py-3.5 text-sm font-bold text-white transition-all hover:bg-[#1d4ed8] ${
+              canContinue(step)
+                ? 'bg-brand-blue cursor-pointer'
+                : 'bg-slate-300 cursor-not-allowed'
+            }`}
+          >
+            Find Colleges
+          </button>
+        )}
+      </div>
+    </StepWrapper>
+  )
 }

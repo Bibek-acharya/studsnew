@@ -1,12 +1,21 @@
-"use client";
+'use client'
 
-import React from "react";
-import { Check } from "lucide-react";
-import { CollegeRecommenderForm } from "../CollegeRecommenderToolPage";
+import React from 'react'
+import { Check } from 'lucide-react'
+import { CollegeRecommenderForm } from '../CollegeRecommenderToolPage'
+import StepWrapper from './StepWrapper'
 
 interface StepProps {
-  form: CollegeRecommenderForm;
-  handleInputChange: (field: keyof CollegeRecommenderForm, value: string) => void;
+  step: number
+  stepImages: Record<number, string>
+  form: CollegeRecommenderForm
+  handleInputChange: (field: keyof CollegeRecommenderForm, value: string) => void
+  stepTitles: Record<number, string>
+  canContinue: (step: number) => boolean
+  setStep: (step: number) => void
+  fetchRecommendations: () => void
+  loading: boolean
+  stepCount?: number
 }
 
 const renderRadioOption = (
@@ -15,63 +24,93 @@ const renderRadioOption = (
   label: string,
 ) => (
   <button
-    type="button"
+    type='button'
     onClick={onClick}
-    className={`group relative flex w-full items-center rounded-lg border-2 border-slate-300 p-4 text-left transition-all duration-200 hover:border-brand-blue ${
+    className={`flex w-full cursor-pointer items-center rounded-md border-2 border-[#e2e8f0] bg-white p-5 transition-all duration-200 ${
       checked
-        ? "border-brand-blue bg-brand-blue/10"
-        : "border-slate-300 bg-white"
+        ? 'border-brand-blue bg-brand-blue/10'
+        : ''
     }`}
   >
     <div
-      className={`mr-4 flex h-6 w-6 shrink-0 items-center justify-center rounded border-2 transition-all duration-300 ${
-        checked ? "border-brand-blue bg-brand-blue" : "border-slate-400 bg-white"
+      className={`mr-4 flex h-5.5 w-5.5 shrink-0 items-center justify-center rounded-sm border-2 border-[#e2e8f0] transition-all duration-200 ${
+        checked ? 'border-brand-blue bg-brand-blue' : 'bg-white'
       }`}
     >
-      <Check
-        className={`h-4 w-4 text-white transition-all duration-300 ${
-          checked ? "scale-100 opacity-100" : "scale-50 opacity-0"
-        }`}
-      />
+      {checked && (
+        <div className='relative h-2.5 w-1 border-white border-r-2 border-b-2' style={{ transform: 'rotate(45deg)', marginBottom: '2px' }} />
+      )}
     </div>
-    <span className={`text-base font-medium transition-colors ${
-      checked ? "text-brand-blue" : "text-slate-700"
-    }`}>
+    <span
+      className={`text-[17px] font-medium text-brand-blue'`}
+    >
       {label}
     </span>
   </button>
-);
+)
 
-export default function Step10({ form, handleInputChange }: StepProps) {
+export default function Step10({ step, stepImages, form, handleInputChange, stepTitles, canContinue, setStep, fetchRecommendations, loading, stepCount = 10 }: StepProps) {
   return (
-    <div className="mt-8 space-y-4">
-      {renderRadioOption(
-        form.tuition_factor === "Yes, low cost is very important",
-        () =>
-          handleInputChange(
-            "tuition_factor",
-            "Yes, low cost is very important",
-          ),
-        "Yes, low cost is very important",
-      )}
-      {renderRadioOption(
-        form.tuition_factor === "I'm okay paying more for quality",
-        () =>
-          handleInputChange(
-            "tuition_factor",
+    <StepWrapper step={step} stepImages={stepImages}>
+      <div className='mb-6'>
+        <h1 className='mb-2 text-2xl font-bold leading-tight tracking-tight text-[#0f172a] sm:text-[2rem]'>
+          {stepTitles[step]}
+        </h1>
+      </div>
+
+      <div className='animate-in fade-in slide-in-from-bottom-6 duration-700'>
+        <div className='mt-8 space-y-4'>
+          {renderRadioOption(
+            form.tuition_factor === 'Yes, low cost is very important',
+            () =>
+              handleInputChange(
+                'tuition_factor',
+                'Yes, low cost is very important',
+              ),
+            'Yes, low cost is very important',
+          )}
+          {renderRadioOption(
+            form.tuition_factor === "I'm okay paying more for quality",
+            () =>
+              handleInputChange(
+                'tuition_factor',
+                "I'm okay paying more for quality",
+              ),
             "I'm okay paying more for quality",
-          ),
-        "I'm okay paying more for quality",
-      )}
-      {renderRadioOption(
-        form.tuition_factor === "Depends on scholarship availability",
-        () =>
-          handleInputChange(
-            "tuition_factor",
-            "Depends on scholarship availability",
-          ),
-        "Depends on scholarship availability",
-      )}
-    </div>
-  );
+          )}
+          {renderRadioOption(
+            form.tuition_factor === 'Depends on scholarship availability',
+            () =>
+              handleInputChange(
+                'tuition_factor',
+                'Depends on scholarship availability',
+              ),
+            'Depends on scholarship availability',
+          )}
+        </div>
+      </div>
+
+      <div className='mt-8 flex items-center gap-4'>
+        {step > 1 && (
+          <button
+            onClick={() => setStep(Math.max(1, step - 1))}
+            className='rounded-lg border border-[#cbd5e1] bg-white px-8 py-3.5 text-sm font-semibold text-[#475569] transition-all duration-300 hover:border-[#0f172a] hover:text-[#0f172a]'
+          >
+            Back
+          </button>
+        )}
+        <button
+          onClick={fetchRecommendations}
+          disabled={!canContinue(step) || loading}
+          className={`rounded-lg px-8 py-3.5 text-sm font-bold text-white transition-all hover:bg-[#1d4ed8] ${
+            canContinue(step) && !loading
+              ? 'bg-brand-blue cursor-pointer'
+              : 'bg-slate-300 cursor-not-allowed'
+          }`}
+        >
+          {loading ? 'Loading...' : 'Find Colleges'}
+        </button>
+      </div>
+    </StepWrapper>
+  )
 }

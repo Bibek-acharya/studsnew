@@ -10,7 +10,9 @@ export default function FooterWrapper() {
   const hideGlobalFooter =
     pathname.startsWith("/scholarship-provider") ||
     pathname.startsWith("/institution-zone") ||
-    pathname.startsWith("/user/dashboard");
+    pathname.startsWith("/user/dashboard") ||
+    pathname.startsWith("/college-recommender") ||
+    pathname.startsWith("/scholarship-recommender");
 
   if (hideGlobalFooter) {
     return null;
