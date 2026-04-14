@@ -1,10 +1,12 @@
-import React, { useState } from "react";
+import React, { useState, useMemo, useEffect } from "react";
 import {
   CourseFinderFilters,
   CourseFilterCounts,
   defaultCourseFinderFilters,
 } from "./types";
 import { FaSliders } from "react-icons/fa6";
+import GlobalFilterSection from "@/components/ui/GlobalFilterSection";
+import { NEPAL_PROVINCES, NEPAL_DISTRICTS } from "@/lib/location-data";
 
 interface CourseFiltersProps {
   filters: CourseFinderFilters;
@@ -12,31 +14,254 @@ interface CourseFiltersProps {
   onChange: (next: CourseFinderFilters) => void;
 }
 
+type DistrictOption = {
+  id: string;
+  label: string;
+};
+
+type ProvinceOption = {
+  id: string;
+  label: string;
+  districts: DistrictOption[];
+};
+
+type ProvinceName = keyof typeof NEPAL_DISTRICTS;
+
+// ── Nepal Data ────────────────────────────────────────────────────────────────
+
+const ACADEMIC_LEVELS = [
+  { id: "plus2", label: "+2 / Higher Secondary", count: 3200 },
+  { id: "alevel", label: "A Level", count: 85 },
+  { id: "diploma", label: "Diploma / CTEVT", count: 410 },
+  { id: "masters", label: "Masters", count: 210 },
+];
+
+const FIELDS: Record<
+  string,
+  Array<{ id: string; label: string; count: number }>
+> = {
+  plus2: [
+    { id: "p2_sci", label: "Science", count: 1200 },
+    { id: "p2_mgmt", label: "Management", count: 1500 },
+    { id: "p2_hum", label: "Humanities", count: 300 },
+    { id: "p2_edu", label: "Education", count: 150 },
+    { id: "p2_law", label: "Law", count: 50 },
+  ],
+  alevel: [
+    { id: "al_sci", label: "A Level - Science", count: 45 },
+    { id: "al_nonsci", label: "A Level - Non-Science/Mgmt", count: 40 },
+  ],
+  diploma: [
+    { id: "d_eng", label: "Engineering (CTEVT)", count: 150 },
+    { id: "d_med", label: "Medical & Nursing (CTEVT)", count: 120 },
+    { id: "d_hm", label: "Hotel Management & Tourism", count: 90 },
+    { id: "d_agr", label: "Agriculture & Forestry (CTEVT)", count: 50 },
+  ],
+  masters: [
+    { id: "m_mgmt", label: "Management (MBA/MBS)", count: 110 },
+    { id: "m_it", label: "IT & Computer Science", count: 60 },
+    { id: "m_edu", label: "Education", count: 40 },
+  ],
+};
+
+const provinceOptions: ProvinceOption[] = NEPAL_PROVINCES.map(
+  (provinceName, index) => {
+    const provinceKey = provinceName as ProvinceName;
+    const districts = (NEPAL_DISTRICTS[provinceKey] || []).map(
+      (districtName: string) => ({
+        id:
+          "d_" +
+          districtName
+            .toLowerCase()
+            .replace(/[^a-z0-9]+/g, "_")
+            .replace(/^_+|_+$/g, ""),
+        label: districtName,
+      }),
+    );
+
+    return {
+      id: provinceName,
+      label: provinceName.replace(/\s+Province$/, ""),
+      districts,
+    };
+  },
+);
+
+const PROVIDER_TYPES = [
+  { id: "private", label: "Private Institutions", count: 250 },
+  { id: "public", label: "Public / Government", count: 80 },
+  { id: "community", label: "Community", count: 45 },
+];
+
+const DURATIONS = [
+  { id: "1yr", label: "1 Year", count: 120 },
+  { id: "2yr", label: "2 Years", count: 1500 },
+  { id: "3yr", label: "3 Years", count: 410 },
+  { id: "4yr", label: "4 Years", count: 85 },
+];
+
+const SORT_OPTIONS = [
+  { id: "popularity", label: "Popularity" },
+  { id: "rating", label: "Highest Rating" },
+  { id: "fee_low", label: "Fee: Low to High" },
+  { id: "fee_high", label: "Fee: High to Low" },
+];
+
+// ── Sub-Components ────────────────────────────────────────────────────────────
+
+const SelectInput: React.FC<{
+  placeholder: string;
+  value: string;
+  options: Array<{ id: string; label: string }>;
+  onChange: (v: string) => void;
+  disabled?: boolean;
+}> = ({ placeholder, value, options, onChange, disabled }) => (
+  <div className="relative mb-3">
+    <select
+      value={value}
+      onChange={(e) => onChange(e.target.value)}
+      disabled={disabled}
+      className="block w-full appearance-none rounded-md border border-gray-200 bg-[#f8fafc] py-2 px-3 pr-9 text-[13.5px] text-gray-900 outline-none transition disabled:bg-gray-100 disabled:text-gray-400 focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+    >
+      <option value="" disabled={value !== ""}>
+        {placeholder}
+      </option>
+      {options.map((opt) => (
+        <option key={opt.id} value={opt.id}>
+          {opt.label}
+        </option>
+      ))}
+    </select>
+    <div className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-gray-400">
+      <svg
+        xmlns="http://www.w3.org/2000/svg"
+        width="12"
+        height="12"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="2.5"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      >
+        <path d="m6 9 6 6 6-6" />
+      </svg>
+    </div>
+  </div>
+);
+
+const CheckboxItem: React.FC<{
+  id: string;
+  label: string;
+  count?: number;
+  checked: boolean;
+  onChange: () => void;
+}> = ({ id, label, count, checked, onChange }) => (
+  <label
+    htmlFor={id}
+    className="group flex w-full cursor-pointer items-center justify-between"
+  >
+    <div className="flex items-center gap-3">
+      <input
+        id={id}
+        type="checkbox"
+        checked={checked}
+        onChange={onChange}
+        className="custom-checkbox"
+      />
+      <span className="text-[14.5px] text-[#475569] transition-colors group-hover:text-gray-900">
+        {label}
+      </span>
+    </div>
+    {count !== undefined && count > 0 && (
+      <span className="rounded-md bg-slate-50 px-2 py-0.5 text-[12px] font-medium text-slate-500">
+        {count.toLocaleString()}
+      </span>
+    )}
+  </label>
+);
+
+const RadioItem: React.FC<{
+  id: string;
+  label: string;
+  name: string;
+  checked: boolean;
+  onChange: () => void;
+}> = ({ id, label, name, checked, onChange }) => (
+  <label htmlFor={id} className="group flex cursor-pointer items-center gap-3">
+    <input
+      id={id}
+      type="radio"
+      name={name}
+      checked={checked}
+      onChange={onChange}
+      className="custom-radio"
+    />
+    <span className="text-[14.5px] text-[#475569] transition-colors group-hover:text-gray-900">
+      {label}
+    </span>
+  </label>
+);
+
+const Accordion: React.FC<{
+  title: string;
+  defaultOpen?: boolean;
+  children: React.ReactNode;
+}> = ({ title, defaultOpen = false, children }) => {
+  const [open, setOpen] = useState(defaultOpen);
+  return (
+    <GlobalFilterSection
+      title={title}
+      isOpen={open}
+      onToggle={() => setOpen((o) => !o)}
+    >
+      {children}
+    </GlobalFilterSection>
+  );
+};
+
 const CourseFilters: React.FC<CourseFiltersProps> = ({
   filters,
   counts,
   onChange,
 }) => {
-  const [openSections, setOpenSections] = useState({
-    academicLevel: true,
-    fieldOfStudy: true,
-    providerType: true,
-    location: true,
-    feeRange: true,
-    scholarship: true,
-    duration: true,
-    admission: true,
-    popularity: true,
-  });
+  const [showAppliedDropdown, setShowAppliedDropdown] = useState(false);
+  const [locating, setLocating] = useState(false);
+  const [navLocString, setNavLocString] = useState("");
 
-  const toggleSection = (section: keyof typeof openSections) => {
-    setOpenSections((prev) => ({ ...prev, [section]: !prev[section] }));
-  };
+  const availableFields = useMemo(() => {
+    if (filters.academicLevels.length === 0) return [];
+    return filters.academicLevels.flatMap((level) => FIELDS[level] || []);
+  }, [filters.academicLevels]);
 
-  const toggleArray = (
-    key: keyof CourseFinderFilters,
-    value: string,
-  ) => {
+  useEffect(() => {
+    const updateLocation = (cityStr: string) => {
+      if (
+        !cityStr ||
+        cityStr === "Detect Location" ||
+        cityStr === "Detecting..." ||
+        cityStr === "Location Found"
+      )
+        return;
+      setNavLocString(cityStr);
+    };
+
+    const savedLoc = sessionStorage.getItem("navLocation");
+    if (savedLoc) {
+      updateLocation(savedLoc);
+    }
+
+    const handleNavLocation = (e: Event) => {
+      const customEvent = e as CustomEvent<string>;
+      updateLocation(customEvent.detail);
+    };
+
+    window.addEventListener("navLocationChange", handleNavLocation);
+    return () =>
+      window.removeEventListener("navLocationChange", handleNavLocation);
+  }, []);
+
+  const toggleArray = (key: keyof CourseFinderFilters, value: string) => {
     const current = filters[key] as string[];
     const next = current.includes(value)
       ? current.filter((item) => item !== value)
@@ -44,233 +269,388 @@ const CourseFilters: React.FC<CourseFiltersProps> = ({
     onChange({ ...filters, [key]: next });
   };
 
+  const hasActiveFilters =
+    filters.academicLevels.length > 0 ||
+    filters.fields.length > 0 ||
+    filters.providerTypes.length > 0 ||
+    filters.feeRanges.length > 0 ||
+    filters.scholarships.length > 0 ||
+    filters.durations.length > 0 ||
+    filters.admissions.length > 0 ||
+    filters.popularity.length > 0 ||
+    filters.province !== "All Provinces" ||
+    filters.quickVerified ||
+    filters.quickNew ||
+    filters.quickClosing;
+
+  const appliedFilters = useMemo(() => {
+    const tags: Array<{ key: string; value: string; label: string }> = [];
+
+    if (filters.academicLevels.length > 0) {
+      filters.academicLevels.forEach((v) => {
+        const label = ACADEMIC_LEVELS.find((al) => al.id === v)?.label || v;
+        tags.push({ key: "academicLevels", value: v, label });
+      });
+    }
+    if (filters.fields.length > 0) {
+      filters.fields.forEach((v) => {
+        let label = v;
+        Object.values(FIELDS).forEach((group) => {
+          const found = group.find((f) => f.id === v);
+          if (found) label = found.label;
+        });
+        tags.push({ key: "fields", value: v, label });
+      });
+    }
+    if (filters.providerTypes.length > 0) {
+      filters.providerTypes.forEach((v) => {
+        const label = PROVIDER_TYPES.find((pt) => pt.id === v)?.label || v;
+        tags.push({ key: "providerTypes", value: v, label });
+      });
+    }
+    if (filters.durations.length > 0) {
+      filters.durations.forEach((v) => {
+        const label = DURATIONS.find((d) => d.id === v)?.label || v;
+        tags.push({ key: "durations", value: v, label });
+      });
+    }
+    if (filters.popularity.length > 0) {
+      filters.popularity.forEach((v) => {
+        const label = SORT_OPTIONS.find((s) => s.id === v)?.label || v;
+        tags.push({ key: "popularity", value: v, label });
+      });
+    }
+    if (filters.province !== "All Provinces") {
+      tags.push({
+        key: "province",
+        value: filters.province,
+        label: filters.province,
+      });
+    }
+    if (filters.quickVerified)
+      tags.push({
+        key: "quickVerified",
+        value: "quickVerified",
+        label: "Verified",
+      });
+    if (filters.quickNew)
+      tags.push({ key: "quickNew", value: "quickNew", label: "New" });
+    if (filters.quickClosing)
+      tags.push({
+        key: "quickClosing",
+        value: "quickClosing",
+        label: "Closing Soon",
+      });
+
+    return tags;
+  }, [filters]);
+
+  const handleLocate = () => {
+    if (locating) return;
+    setLocating(true);
+
+    const resolveLocation = async (lat?: number, lon?: number) => {
+      try {
+        let cityStr = "";
+
+        if (lat && lon) {
+          const res = await fetch(
+            "https://nominatim.openstreetmap.org/reverse?lat=" +
+              lat +
+              "&lon=" +
+              lon +
+              "&format=json&zoom=10&addressdetails=1",
+          );
+          if (res.ok) {
+            const data = await res.json();
+            if (data && data.address) {
+              cityStr =
+                data.address.county ||
+                data.address.city ||
+                data.address.state_district ||
+                "";
+            }
+          }
+        }
+
+        if (!cityStr) {
+          const res = await fetch(
+            "https://api.bigdatacloud.net/data/reverse-geocode-client?localityLanguage=en",
+          );
+          if (res.ok) {
+            const data = await res.json();
+            if (data) cityStr = data.city || data.principalSubdivision || "";
+          }
+        }
+
+        if (cityStr) {
+          const normalizedSearch = cityStr.toLowerCase();
+          let foundProvId = "";
+
+          for (const prov of provinceOptions) {
+            if (normalizedSearch.includes(prov.label.toLowerCase()))
+              foundProvId = prov.id;
+          }
+
+          if (foundProvId) {
+            const provLabel = provinceOptions.find(
+              (p) => p.id === foundProvId,
+            )?.label;
+            onChange({ ...filters, province: provLabel || foundProvId });
+          }
+
+          sessionStorage.setItem("navLocation", cityStr);
+          setNavLocString(cityStr);
+          window.dispatchEvent(
+            new CustomEvent("navLocationChange", { detail: cityStr }),
+          );
+        }
+      } catch (e) {
+        console.error(e);
+      } finally {
+        setLocating(false);
+      }
+    };
+
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(
+        (pos) => resolveLocation(pos.coords.latitude, pos.coords.longitude),
+        () => resolveLocation(),
+        { enableHighAccuracy: true, timeout: 5000, maximumAge: 0 },
+      );
+    } else {
+      resolveLocation();
+    }
+  };
+
+  const removeFilter = (key: string, value: string) => {
+    if (key === "quickVerified") onChange({ ...filters, quickVerified: false });
+    else if (key === "quickNew") onChange({ ...filters, quickNew: false });
+    else if (key === "quickClosing")
+      onChange({ ...filters, quickClosing: false });
+    else if (key === "province")
+      onChange({ ...filters, province: "All Provinces" });
+    else toggleArray(key as keyof CourseFinderFilters, value);
+  };
+
   return (
-    <div className="bg-white rounded-xl border border-slate-100 shadow-sm overflow-hidden font-sans">
-      <div className="p-8 border-b border-slate-50 flex justify-between items-center bg-slate-50/30">
-        <div className="flex items-center gap-3">
-          <FaSliders size={18} className="text-black" />
-          <h3 className="font-black text-xl text-slate-900 tracking-tight">
-            Filters
-          </h3>
-        </div>
-        <button
-          onClick={() => onChange(defaultCourseFinderFilters)}
-          className="text-[10px] font-black text-slate-400 uppercase tracking-widest hover:text-primary-600 transition-colors"
-        >
-          <i className="fa-solid fa-rotate-left mr-1"></i>
-          Reset
-        </button>
-      </div>
-
-      <div className="p-6 space-y-6">
-        {/* Quick Filters */}
-        <div className="pb-4">
-          <h4 className="text-[10px] font-black text-slate-300 uppercase tracking-[0.2em] mb-4">
-            Quick Filters
-          </h4>
-          <div className="flex flex-wrap gap-2">
-            <button className="px-3 py-1.5 rounded-full bg-green-50 text-green-600 border border-green-100 text-[10px] font-black uppercase tracking-wider hover:shadow-sm transition-all">
-              <span onClick={() => onChange({ ...filters, quickVerified: !filters.quickVerified })}>
-              Verified
-              </span>
-            </button>
-            <button className="px-3 py-1.5 rounded-full bg-blue-50 text-blue-600 border border-blue-100 text-[10px] font-black uppercase tracking-wider hover:shadow-sm transition-all">
-              <span onClick={() => onChange({ ...filters, quickNew: !filters.quickNew })}>
-              New
-              </span>
-            </button>
-            <button className="px-3 py-1.5 rounded-full bg-red-50 text-red-600 border border-red-100 text-[10px] font-black uppercase tracking-wider hover:shadow-sm transition-all">
-              <span onClick={() => onChange({ ...filters, quickClosing: !filters.quickClosing })}>
-              Closing
-              </span>
-            </button>
+    <>
+      <div className="relative w-full rounded-[20px] border border-gray-200 bg-white p-6 ">
+        <div className="mb-2 flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <FaSliders size={18} className="text-black" />
+            <h3 className="font-black text-xl text-slate-900 tracking-tight">
+              Filters
+            </h3>
           </div>
+          {hasActiveFilters && (
+            <button
+              type="button"
+              onClick={() => setShowAppliedDropdown((prev) => !prev)}
+              className="inline-flex items-center gap-2 rounded-md px-3 py-1.5 text-[12px] font-semibold text-blue-700 transition-colors"
+            >
+              Applied ({appliedFilters.length})
+              <i className="fa-solid fa-chevron-down text-[10px] transition-transform"></i>
+            </button>
+          )}
         </div>
 
-        {/* Academic Level / Program */}
-        <CollapsibleSection
-          title="Academic Level / Program"
-          isOpen={openSections.academicLevel}
-          onToggle={() => toggleSection('academicLevel')}
-        >
-          <FilterCheck id="plus2" label="+2 / Higher Secondary" checked={filters.academicLevels.includes("plus2")} count={counts.byAcademic.plus2 || 0} onToggle={() => toggleArray("academicLevels", "plus2")} />
-          <FilterCheck id="bachelor" label="Bachelor" checked={filters.academicLevels.includes("bachelor")} count={counts.byAcademic.bachelor || 0} onToggle={() => toggleArray("academicLevels", "bachelor")} />
-          <FilterCheck id="master" label="Master" checked={filters.academicLevels.includes("master")} count={counts.byAcademic.master || 0} onToggle={() => toggleArray("academicLevels", "master")} />
-          <FilterCheck id="diploma" label="Diploma / CTEVT" checked={filters.academicLevels.includes("diploma")} count={counts.byAcademic.diploma || 0} onToggle={() => toggleArray("academicLevels", "diploma")} />
-          <FilterCheck id="shortterm" label="Short-term Training" checked={filters.academicLevels.includes("shortterm")} count={counts.byAcademic.shortterm || 0} onToggle={() => toggleArray("academicLevels", "shortterm")} />
-          <FilterCheck id="cert" label="Professional Certification" checked={filters.academicLevels.includes("cert")} count={counts.byAcademic.cert || 0} onToggle={() => toggleArray("academicLevels", "cert")} />
-          <FilterCheck id="distance" label="Online / Distance Course" checked={filters.academicLevels.includes("distance")} count={counts.byAcademic.distance || 0} onToggle={() => toggleArray("academicLevels", "distance")} />
-        </CollapsibleSection>
-
-        {/* Field of Study */}
-        <CollapsibleSection
-          title="Field of study"
-          isOpen={openSections.fieldOfStudy}
-          onToggle={() => toggleSection('fieldOfStudy')}
-        >
-          <FilterCheck id="it" label="IT / Computer Science" checked={filters.fields.includes("it")} count={counts.byField.it || 0} onToggle={() => toggleArray("fields", "it")} />
-          <FilterCheck id="engineering" label="Engineering" checked={filters.fields.includes("engineering")} count={counts.byField.engineering || 0} onToggle={() => toggleArray("fields", "engineering")} />
-          <FilterCheck id="management" label="Management / Business" checked={filters.fields.includes("management")} count={counts.byField.management || 0} onToggle={() => toggleArray("fields", "management")} />
-          <FilterCheck id="medical" label="Medicine & Health" checked={filters.fields.includes("medical")} count={counts.byField.medical || 0} onToggle={() => toggleArray("fields", "medical")} />
-        </CollapsibleSection>
-
-        {/* Provider Type */}
-        <CollapsibleSection
-          title="Provider Type"
-          isOpen={openSections.providerType}
-          onToggle={() => toggleSection('providerType')}
-        >
-          <div className="space-y-4">
-            <FilterCheck id="govt" label="Government College" checked={filters.providerTypes.includes("govt")} count={counts.byProvider.govt || 0} onToggle={() => toggleArray("providerTypes", "govt")} />
-            <FilterCheck id="private" label="Private College" checked={filters.providerTypes.includes("private")} count={counts.byProvider.private || 0} onToggle={() => toggleArray("providerTypes", "private")} />
-            <FilterCheck
-              id="univ"
-              label="University-affiliated (TU, KU, PU, Purbanchal)"
-              checked={filters.providerTypes.includes("univ")}
-              count={counts.byProvider.univ || 0}
-              onToggle={() => toggleArray("providerTypes", "univ")}
-            />
-            <FilterCheck id="auto" label="Autonomous / Independent" checked={filters.providerTypes.includes("auto")} count={counts.byProvider.auto || 0} onToggle={() => toggleArray("providerTypes", "auto")} />
-            <FilterCheck
-              id="ctevt"
-              label="CTEVT / Gov. Training Center"
-              checked={filters.providerTypes.includes("ctevt")}
-              count={counts.byProvider.ctevt || 0}
-              onToggle={() => toggleArray("providerTypes", "ctevt")}
-            />
-            <FilterCheck id="onlinep" label="Online Platform / Institute" checked={filters.providerTypes.includes("onlinep")} count={counts.byProvider.onlinep || 0} onToggle={() => toggleArray("providerTypes", "onlinep")} />
+        {hasActiveFilters && showAppliedDropdown && (
+          <div className="absolute right-6 top-16 z-30 w-[min(520px,calc(100%-3rem))] rounded-lg border border-gray-200 bg-white p-3 shadow-lg">
+            <div className="flex flex-wrap gap-2 pb-3">
+              {appliedFilters.map((tag, index) => (
+                <button
+                  key={tag.key + "-" + tag.value + "-" + index}
+                  type="button"
+                  onClick={() => removeFilter(tag.key, tag.value)}
+                  className="inline-flex items-center gap-1.5 rounded-full border border-blue-100 bg-blue-50 px-3 py-1.5 text-[12px] font-medium text-blue-700 transition-colors hover:border-red-100 hover:bg-red-50 hover:text-red-700"
+                >
+                  {tag.label}
+                  <i className="fa-solid fa-xmark text-[10px]"></i>
+                </button>
+              ))}
+            </div>
+            <div className="border-t border-gray-100 pt-2">
+              <button
+                type="button"
+                onClick={() => {
+                  onChange(defaultCourseFinderFilters);
+                  setShowAppliedDropdown(false);
+                }}
+                className="text-[12px] font-semibold text-red-600 transition-colors hover:text-red-700"
+              >
+                Reset Filters
+              </button>
+            </div>
           </div>
-        </CollapsibleSection>
+        )}
 
-        {/* Location */}
-        <CollapsibleSection title="Location" isOpen={openSections.location} onToggle={() => toggleSection('location')}>
-          <div className="space-y-4">
-            <select value={filters.province} onChange={(event) => onChange({ ...filters, province: event.target.value })} className="w-full bg-slate-50 border border-slate-100 rounded-xl px-4 py-3 text-xs font-bold text-slate-700 outline-none focus:ring-2 focus:ring-primary-100 appearance-none bg-[url('data:image/svg+xml;charset=utf-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20fill%3D%22none%22%20viewBox%3D%220%200%2024%2024%22%20stroke%3D%22%2394a3b8%22%20stroke-width%3D%222%22%3E%3Cpath%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%20d%3D%22M19%209l-7%207-7-7%22%20%2F%3E%3C%2Fsvg%3E')] bg-[length:1em] bg-[right_1rem_center] bg-no-repeat">
-              <option>All Provinces</option>
-              <option>Bagmati Province</option>
-              <option>Gandaki Province</option>
-              <option>Lumbini Province</option>
-            </select>
-            <FilterCheck id="anywhere" label="National Wide" checked={filters.nationalWide} onToggle={() => onChange({ ...filters, nationalWide: !filters.nationalWide })} />
-          </div>
-        </CollapsibleSection>
+        <div className="border-b border-gray-100 py-3">
+          <button
+            type="button"
+            onClick={handleLocate}
+            className="flex w-full items-center justify-start gap-2 rounded-md border border-black/20 px-4 py-3 text-gray-700 hover:text-brand-blue outline-none transition-all duration-200"
+          >
+            {locating ? (
+              "Locating..."
+            ) : (
+              <i className="fa-solid fa-location-crosshairs text-[16px]"></i>
+            )}
+            <span className="text-[15px] font-medium">
+              {locating ? "Locating..." : navLocString || "Course Near Me"}
+            </span>
+          </button>
+        </div>
 
-        {/* Total Fee Range (NPR) */}
-        <CollapsibleSection
-          title="Total Fee Range (NPR)"
-          isOpen={openSections.feeRange}
-          onToggle={() => toggleSection('feeRange')}
-        >
-          <FilterCheck id="free" label="Free / Government Funded" checked={filters.feeRanges.includes("free")} onToggle={() => toggleArray("feeRanges", "free")} />
-          <FilterCheck id="under50" label="Under NPR 50,000" checked={filters.feeRanges.includes("under50")} onToggle={() => toggleArray("feeRanges", "under50")} />
-          <FilterCheck id="range50_100" label="NPR 50,000 – 1,00,000" checked={filters.feeRanges.includes("range50_100")} onToggle={() => toggleArray("feeRanges", "range50_100")} />
-          <FilterCheck id="range100_200" label="NPR 1,00,000 – 2,00,000" checked={filters.feeRanges.includes("range100_200")} onToggle={() => toggleArray("feeRanges", "range100_200")} />
-          <FilterCheck id="above200" label="Above NPR 2,00,000" checked={filters.feeRanges.includes("above200")} onToggle={() => toggleArray("feeRanges", "above200")} />
-        </CollapsibleSection>
+        <div className="space-y-4 pt-4">
+          <Accordion title="Academic Level" defaultOpen>
+            <div className="flex flex-col gap-3.5 pt-1">
+              {ACADEMIC_LEVELS.map((level) => (
+                <CheckboxItem
+                  key={level.id}
+                  id={"acad-" + level.id}
+                  label={level.label}
+                  count={level.count}
+                  checked={filters.academicLevels.includes(level.id)}
+                  onChange={() => {
+                    const current = filters.academicLevels;
+                    const next = current.includes(level.id)
+                      ? current.filter((id) => id !== level.id)
+                      : [...current, level.id];
+                    onChange({ ...filters, academicLevels: next, fields: [] });
+                  }}
+                />
+              ))}
+            </div>
+          </Accordion>
 
-        {/* Scholarship / Financial Aid */}
-        <CollapsibleSection
-          title="Scholarship / Financial Aid"
-          isOpen={openSections.scholarship}
-          onToggle={() => toggleSection('scholarship')}
-        >
-          <FilterCheck id="sch-avail" label="Scholarship Available" checked={filters.scholarships.includes("sch-avail")} onToggle={() => toggleArray("scholarships", "sch-avail")} />
-          <FilterCheck id="sch-govt" label="Government Scholarship" checked={filters.scholarships.includes("sch-govt")} onToggle={() => toggleArray("scholarships", "sch-govt")} />
-          <FilterCheck id="sch-college" label="College Scholarship" checked={filters.scholarships.includes("sch-college")} onToggle={() => toggleArray("scholarships", "sch-college")} />
-        </CollapsibleSection>
+          <Accordion title="Field of Study" defaultOpen>
+            <div className="flex flex-col gap-3.5 pt-1">
+              {availableFields.length === 0 ? (
+                <p className="px-1 text-[13px] italic text-gray-400">
+                  Select an Academic Level first.
+                </p>
+              ) : (
+                availableFields.map((field) => (
+                  <CheckboxItem
+                    key={field.id}
+                    id={"field-" + field.id}
+                    label={field.label}
+                    count={field.count}
+                    checked={filters.fields.includes(field.id)}
+                    onChange={() => toggleArray("fields", field.id)}
+                  />
+                ))
+              )}
+            </div>
+          </Accordion>
 
-        {/* Course Duration */}
-        <CollapsibleSection
-          title="Course Duration"
-          isOpen={openSections.duration}
-          onToggle={() => toggleSection('duration')}
-        >
-          <FilterCheck id="dur_lt1" label="< 1 month" checked={filters.durations.includes("dur_lt1")} count={counts.byDuration.dur_lt1 || 0} onToggle={() => toggleArray("durations", "dur_lt1")} />
-          <FilterCheck id="dur_1_3" label="1–3 months" checked={filters.durations.includes("dur_1_3")} count={counts.byDuration.dur_1_3 || 0} onToggle={() => toggleArray("durations", "dur_1_3")} />
-          <FilterCheck id="dur_3_6" label="3–6 months" checked={filters.durations.includes("dur_3_6")} count={counts.byDuration.dur_3_6 || 0} onToggle={() => toggleArray("durations", "dur_3_6")} />
-          <FilterCheck id="dur_6_1" label="6 months–1 year" checked={filters.durations.includes("dur_6_1")} count={counts.byDuration.dur_6_1 || 0} onToggle={() => toggleArray("durations", "dur_6_1")} />
-          <FilterCheck id="dur_1_2" label="1–2 years" checked={filters.durations.includes("dur_1_2")} count={counts.byDuration.dur_1_2 || 0} onToggle={() => toggleArray("durations", "dur_1_2")} />
-          <FilterCheck id="dur_3_4" label="3–4 years" checked={filters.durations.includes("dur_3_4")} count={counts.byDuration.dur_3_4 || 0} onToggle={() => toggleArray("durations", "dur_3_4")} />
-          <FilterCheck id="dur_4plus" label="4+ years" checked={filters.durations.includes("dur_4plus")} count={counts.byDuration.dur_4plus || 0} onToggle={() => toggleArray("durations", "dur_4plus")} />
-        </CollapsibleSection>
+          <Accordion title="Location" defaultOpen>
+            <div className="flex flex-col gap-2 pt-1">
+              <SelectInput
+                placeholder="Select Province"
+                value={
+                  filters.province === "All Provinces" ? "" : filters.province
+                }
+                options={provinceOptions}
+                onChange={(val) =>
+                  onChange({
+                    ...filters,
+                    province: val || "All Provinces",
+                    location: [],
+                  })
+                }
+              />
+              <SelectInput
+                placeholder="Select District"
+                value={filters.location[0] || ""}
+                options={
+                  filters.province && filters.province !== "All Provinces"
+                    ? provinceOptions.find((p) => p.id === filters.province)
+                        ?.districts || []
+                    : []
+                }
+                onChange={(val) =>
+                  onChange({ ...filters, location: val ? [val] : [] })
+                }
+                disabled={
+                  !filters.province || filters.province === "All Provinces"
+                }
+              />
+            </div>
+          </Accordion>
 
-        {/* Admission Requirement */}
-        <CollapsibleSection
-          title="Admission Requirement"
-          isOpen={openSections.admission}
-          onToggle={() => toggleSection('admission')}
-        >
-          <FilterCheck id="openMerit" label="Open Merit" checked={filters.admissions.includes("openMerit")} onToggle={() => toggleArray("admissions", "openMerit")} />
-          <FilterCheck id="entrance" label="Entrance Exam Required" checked={filters.admissions.includes("entrance")} onToggle={() => toggleArray("admissions", "entrance")} />
-          <FilterCheck id="interview" label="Interview Required" checked={filters.admissions.includes("interview")} onToggle={() => toggleArray("admissions", "interview")} />
-          <FilterCheck id="portfolio" label="Portfolio / Aptitude Test" checked={filters.admissions.includes("portfolio")} onToggle={() => toggleArray("admissions", "portfolio")} />
-        </CollapsibleSection>
+          <Accordion title="Institution Type">
+            <div className="flex flex-col gap-3.5 pt-1">
+              {PROVIDER_TYPES.map((type) => (
+                <CheckboxItem
+                  key={type.id}
+                  id={"type-" + type.id}
+                  label={type.label}
+                  count={type.count}
+                  checked={filters.providerTypes.includes(type.id)}
+                  onChange={() => toggleArray("providerTypes", type.id)}
+                />
+              ))}
+            </div>
+          </Accordion>
 
-        {/* Popularity */}
-        <CollapsibleSection
-          title="Popularity"
-          isOpen={openSections.popularity}
-          onToggle={() => toggleSection('popularity')}
-        >
-          <FilterCheck id="mostEnrolled" label="Most Enrolled" checked={filters.popularity.includes("mostEnrolled")} onToggle={() => toggleArray("popularity", "mostEnrolled")} />
-          <FilterCheck id="trending" label="Trending Programs" checked={filters.popularity.includes("trending")} onToggle={() => toggleArray("popularity", "trending")} />
-          <FilterCheck id="recommended" label="Recommended" checked={filters.popularity.includes("recommended")} onToggle={() => toggleArray("popularity", "recommended")} />
-          <FilterCheck id="newPrograms" label="New Programs" checked={filters.popularity.includes("newPrograms")} onToggle={() => toggleArray("popularity", "newPrograms")} />
-        </CollapsibleSection>
+          <Accordion title="Course Duration">
+            <div className="flex flex-col gap-3.5 pt-1">
+              {DURATIONS.map((dur) => (
+                <CheckboxItem
+                  key={dur.id}
+                  id={"dur-" + dur.id}
+                  label={dur.label}
+                  count={dur.count}
+                  checked={filters.durations.includes(dur.id)}
+                  onChange={() => toggleArray("durations", dur.id)}
+                />
+              ))}
+            </div>
+          </Accordion>
+
+          <Accordion title="Sort By" defaultOpen>
+            <div className="flex flex-col gap-3.5 pt-1">
+              {SORT_OPTIONS.map((opt) => (
+                <RadioItem
+                  key={opt.id}
+                  id={"sort-" + opt.id}
+                  name="sort"
+                  label={opt.label}
+                  checked={filters.popularity.includes(opt.id)}
+                  onChange={() =>
+                    onChange({ ...filters, popularity: [opt.id] })
+                  }
+                />
+              ))}
+            </div>
+          </Accordion>
+        </div>
       </div>
-    </div>
+
+      <style>
+        {
+          '\
+        .custom-checkbox { appearance: none; background-color: #fff; margin: 0; width: 1.15em; height: 1.15em; border: 1px solid #94a3b8; border-radius: 0.25em; display: grid; place-content: center; cursor: pointer; transition: all 0.2s ease-in-out; flex-shrink: 0; }\
+        .custom-checkbox::before { content: ""; width: 0.65em; height: 0.65em; transform: scale(0); transition: 120ms transform ease-in-out; box-shadow: inset 1em 1em white; clip-path: polygon(14% 44%, 0 65%, 50% 100%, 100% 16%, 80% 0%, 43% 62%); }\
+        .custom-checkbox:checked { background-color: #2563eb; border-color: #2563eb; }\
+        .custom-checkbox:checked::before { transform: scale(1); }\
+        .custom-checkbox:hover { border-color: #64748b; }\
+        .custom-radio { appearance: none; background-color: #fff; margin: 0; width: 1.15em; height: 1.15em; border: 1px solid #94a3b8; border-radius: 50%; display: grid; place-content: center; cursor: pointer; transition: all 0.2s ease-in-out; flex-shrink: 0; }\
+        .custom-radio::before { content: ""; width: 0.5em; height: 0.5em; border-radius: 50%; transform: scale(0); transition: 120ms transform ease-in-out; background-color: white; }\
+        .custom-radio:checked { background-color: #2563eb; border-color: #2563eb; }\
+        .custom-radio:checked::before { transform: scale(1); }\
+        .custom-radio:hover { border-color: #64748b; }\
+        .custom-scrollbar::-webkit-scrollbar { width: 4px; }\
+        .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }\
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }\
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #94a3b8; }\
+      '
+        }
+      </style>
+    </>
   );
 };
-
-const CollapsibleSection: React.FC<{
-  title: string;
-  isOpen: boolean;
-  onToggle: () => void;
-  children: React.ReactNode;
-}> = ({ title, isOpen, onToggle, children }) => (
-  <div className="border-b border-slate-50 last:border-0 pb-4">
-    <button
-      onClick={onToggle}
-      className="flex justify-between items-center w-full py-2 group"
-    >
-      <span
-        className={`text-[11px] font-black uppercase tracking-[0.15em] transition-colors ${isOpen ? "text-slate-900" : "text-slate-400 group-hover:text-slate-600"}`}
-      >
-        {title}
-      </span>
-      <i
-        className={`fa-solid fa-chevron-down text-[10px] text-slate-300 transition-transform duration-300 ${isOpen ? "rotate-180" : ""}`}
-      ></i>
-    </button>
-    {isOpen && (
-      <div className="pt-4 space-y-3 animate-fadeInDown">{children}</div>
-    )}
-  </div>
-);
-
-const FilterCheck: React.FC<{
-  id: string;
-  label: string;
-  checked?: boolean;
-  count?: number;
-  onToggle?: () => void;
-}> = ({ id, label, checked, count, onToggle }) => (
-  <label htmlFor={id} className="flex items-center gap-3 group cursor-pointer">
-    <div className="relative flex items-center">
-      <input
-        id={id}
-        type="checkbox"
-        checked={!!checked}
-        onChange={onToggle}
-        className="peer appearance-none w-5 h-5 border-2 border-slate-200 rounded-lg checked:bg-primary-600 checked:border-primary-600 transition-all cursor-pointer"
-      />
-      <i className="fa-solid fa-check absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-white text-[10px] opacity-0 peer-checked:opacity-100 transition-opacity pointer-events-none"></i>
-    </div>
-    <span className="text-xs font-bold text-slate-500 group-hover:text-slate-800 transition-colors">
-      {label}
-      {typeof count === "number" ? ` (${count})` : ""}
-    </span>
-  </label>
-);
 
 export default CourseFilters;
