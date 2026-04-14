@@ -563,7 +563,7 @@ const ProgramCard: React.FC<{
     "Explore academics, facilities, and counselling support for this college.";
 
   return (
-    <div className="flex h-full cursor-pointer flex-col rounded-2xl border border-gray-200 bg-white p-4 transition-all duration-300 hover:border-blue-500/20">
+    <div className="flex h-full cursor-pointer flex-col rounded-2xl border border-gray-200 bg-white p-4 transition-all duration-300 hover:border-blue-500/20 overflow-visible">
       <div
         onClick={() => onNavigate("collegeDetails", { id: college.id })}
         className="group relative h-35 shrink-0 overflow-hidden rounded-xl"
@@ -627,15 +627,18 @@ const ProgramCard: React.FC<{
         )}
       </div>
 
-      <div className="flex flex-1 flex-col px-0 pt-3">
+      <div className="flex flex-1 flex-col px-0 pt-3 overflow-visible">
         <div className="flex items-center gap-1.5 mb-2">
-          <button
+<button
             type="button"
             onClick={() => onNavigate("collegeDetails", { id: college.id })}
-            className="truncate text-left text-[20px] font-bold text-slate-800 tracking-tight transition-colors hover:text-blue-600"
-            title={college.name}
+            className="group/title relative truncate text-left text-[20px] font-bold text-slate-800 tracking-tight transition-colors hover:text-blue-600 line-clamp-2"
           >
-            {college.name}
+            <span className="truncate block" title={college.name}>{college.name}</span>
+            <span className="absolute bottom-full left-0 mb-2 invisible opacity-0 group-hover/title:visible group-hover/title:opacity-100 bg-gray-900 text-white text-[13px] font-medium py-1.5 px-3 rounded shadow-md whitespace-nowrap transition-all duration-200 z-50 pointer-events-none">
+              {college.name}
+              <span className="absolute top-full left-4 -mt-px border-[5px] border-transparent border-t-gray-900"></span>
+            </span>
           </button>
           {isVerified && (
             <BadgeCheckIcon className="w-5 h-5 text-white fill-blue-500 shrink-0" />
@@ -657,30 +660,38 @@ const ProgramCard: React.FC<{
           <span className="mx-3 text-gray-300 font-light">|</span>
           <div className="flex min-w-0 flex-1 items-center gap-1.5">
             <MapPin className="w-4.5 h-4.5 text-gray-400" />
-            <span
-              className="block min-w-0 truncate font-semibold text-slate-700"
-              title={college.location || "Kathmandu"}
-            >
-              {college.location || "Kathmandu"}
+<span className="group/location block min-w-0 truncate font-semibold text-slate-700 line-clamp-1" title={college.location || "Kathmandu"}>
+              <span className="truncate block">{college.location || "Kathmandu"}</span>
+              <span className="absolute bottom-full left-0 mb-2 invisible opacity-0 group-hover/location:visible group-hover/location:opacity-100 bg-gray-900 text-white text-[13px] font-medium py-1.5 px-3 rounded shadow-md whitespace-nowrap transition-all duration-200 z-50 pointer-events-none">
+                {college.location || "Kathmandu"}
+                <span className="absolute top-full left-4 -mt-px border-[5px] border-transparent border-t-gray-900"></span>
+              </span>
             </span>
           </div>
         </div>
 
         <div className="flex items-start gap-2 text-[14px] text-gray-500 mb-2">
           <Award className="w-4.5 h-4.5 text-gray-400 shrink-0 mt-0.75" />
-          <p className="leading-snug pr-4 font-semibold text-slate-700 line-clamp-1">
-            {college.affiliation ||
-              "NEB, Tribhuvan University, Purbanchal University"}
+<p className="group/affil leading-snug pr-4 font-semibold text-slate-700 line-clamp-1" title={college.affiliation || "NEB, Tribhuvan University, Purbanchal University"}>
+            <span className="truncate block">
+              {college.affiliation ||
+                "NEB, Tribhuvan University, Purbanchal University"}
+            </span>
+            <span className="absolute bottom-full left-0 mb-2 invisible opacity-0 group-hover/affil:visible group-hover/affil:opacity-100 bg-gray-900 text-white text-[13px] font-medium py-1.5 px-3 rounded shadow-md whitespace-nowrap transition-all duration-200 z-50 pointer-events-none">
+              {college.affiliation ||
+                "NEB, Tribhuvan University, Purbanchal University"}
+              <span className="absolute top-full left-4 -mt-px border-[5px] border-transparent border-t-gray-900"></span>
+            </span>
           </p>
         </div>
 
-        <div className="mb-4 pr-2">
+        <div className="mb-4 pr-2 relative h-[3rem]">
           <p className="line-clamp-2 text-[14px] leading-relaxed text-gray-500">
             {description}
           </p>
           <button
             type="button"
-            className="mt-1 text-[14px] font-semibold text-blue-600 hover:underline"
+            className="absolute bottom-0 right-0 text-[14px] font-semibold text-brand-blue hover:underline"
             onClick={(e) => {
               e.stopPropagation();
               onNavigate("collegeDetails", { id: college.id });
@@ -688,6 +699,47 @@ const ProgramCard: React.FC<{
           >
             Read more
           </button>
+        </div>
+
+        <div className="mt-2 flex items-center gap-4">
+          <a
+            href="#"
+            className="interaction-btn text-[12px] font-medium text-brand-blue hover:text-blue-800 flex items-center transition-colors"
+          >
+            Admission
+            <svg
+              className="w-3 h-3 ml-1"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2.5"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                d="M7 17L17 7M7 7h10v10"
+              />
+            </svg>
+          </a>
+          <a
+            href="#"
+            className="interaction-btn text-[12px] font-medium text-brand-blue hover:text-blue-800 flex items-center transition-colors"
+          >
+            Courses & Fees
+            <svg
+              className="w-3 h-3 ml-1"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2.5"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                d="M7 17L17 7M7 7h10v10"
+              />
+            </svg>
+          </a>
         </div>
 
         <div className="border-t border-dashed border-gray-200 mb-4" />

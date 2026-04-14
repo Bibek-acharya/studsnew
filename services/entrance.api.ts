@@ -27,11 +27,16 @@ export interface EntranceFilters {
   search?: string;
   academicLevel?: string[];
   stream?: string[];
-  programName?: string[];
-  university?: string[];
   status?: string[];
-  quick?: string[];
   sortBy?: string;
+  location?: string;
+  institutionType?: string[];
+  province?: string[];
+  district?: string[];
+  localLevel?: string[];
+  applicationFee?: string[];
+  scholarship?: string[];
+  gpa?: string[];
 }
 
 export interface EntrancesResponse {
@@ -484,26 +489,6 @@ export const entranceService = {
             (s) =>
               e.title.toLowerCase().includes(s.toLowerCase()) ||
               e.affiliation.toLowerCase().includes(s.toLowerCase())
-          )
-        );
-      }
-
-      if (filters.programName?.length) {
-        filtered = filtered.filter((e) =>
-          filters.programName?.some(
-            (p) =>
-              e.title.toLowerCase().includes(p.toLowerCase()) ||
-              e.affiliation.toLowerCase().includes(p.toLowerCase())
-          )
-        );
-      }
-
-      if (filters.university?.length) {
-        filtered = filtered.filter((e) =>
-          filters.university?.some(
-            (u) =>
-              e.institution.toLowerCase().includes(u.toLowerCase()) ||
-              e.affiliation.toLowerCase().includes(u.toLowerCase())
           )
         );
       }

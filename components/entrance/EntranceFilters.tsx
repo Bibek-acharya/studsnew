@@ -5,6 +5,7 @@ import {
 } from "@/app/entrance/types";
 import GlobalFilterSection from "@/components/ui/GlobalFilterSection";
 import { FaSliders } from "react-icons/fa6";
+import { NEPAL_PROVINCES, NEPAL_DISTRICTS, NEPAL_LOCAL_BODIES } from "@/lib/location-data";
 
 interface EntranceFiltersProps {
   filters: EntranceFilterState;
@@ -13,8 +14,7 @@ interface EntranceFiltersProps {
 
 const ACADEMIC_LEVELS = [
   { id: "plus2", label: "+2 / Higher Secondary" },
-  { id: "bachelor", label: "Bachelor" },
-  { id: "master", label: "Master" },
+  { id: "alevel", label: "A Level" },
   { id: "diploma", label: "Diploma / CTEVT" },
 ];
 
@@ -24,22 +24,6 @@ const STREAMS = [
   { id: "medical", label: "Medical" },
   { id: "cs", label: "Computer Science" },
   { id: "humanities", label: "Humanities" },
-];
-
-const PROGRAMS = [
-  { id: "ioe", label: "IOE Entrance" },
-  { id: "cee", label: "CEE Medical" },
-  { id: "cmat", label: "CMAT" },
-  { id: "kuumatt", label: "KUUMAT" },
-  { id: "gate", label: "GATE" },
-];
-
-const UNIVERSITIES = [
-  { id: "tu", label: "Tribhuvan University (TU)" },
-  { id: "ku", label: "Kathmandu University (KU)" },
-  { id: "pu", label: "Pokhara University (PU)" },
-  { id: "purbanchal", label: "Purbanchal University" },
-  { id: "mec", label: "Medical Education Commission" },
 ];
 
 const STATUSES = [
@@ -55,8 +39,69 @@ const SORT_OPTIONS = [
 ];
 
 const APPLIED_FILTER_KEYS: Array<
-  Exclude<keyof EntranceFilterState, "search" | "sortBy">
-> = ["academicLevel", "stream", "programName", "university", "status", "quick"];
+  Exclude<keyof EntranceFilterState, "search" | "sortBy" | "location" | "gpa">
+> = [
+  "academicLevel",
+  "stream",
+  "status",
+  "institutionType",
+  "province",
+  "district",
+  "localLevel",
+  "applicationFee",
+  "scholarship",
+];
+
+const APPLICATION_FEES = [
+  { id: "free", label: "Free" },
+  { id: "below500", label: "Below NPR 500" },
+  { id: "500to1000", label: "NPR 500 – 1000" },
+  { id: "above1000", label: "Above NPR 1000" },
+];
+
+const INSTITUTION_TYPES = [
+  { id: "public", label: "Public" },
+  { id: "private", label: "Private" },
+  { id: "community", label: "Community" },
+];
+
+type ProvinceName = keyof typeof NEPAL_DISTRICTS;
+type DistrictName = keyof typeof NEPAL_LOCAL_BODIES;
+
+const provinceOptions = NEPAL_PROVINCES.map((provinceName, index) => {
+  const provinceKey = provinceName as ProvinceName;
+  const provinceId = `province_${index + 1}`;
+  const districts = (NEPAL_DISTRICTS[provinceKey] || []).map(
+    (districtName: string) => {
+      const districtKey = districtName as DistrictName;
+      const localBodies = (NEPAL_LOCAL_BODIES[districtKey] || []).map(
+        (lb: { name: string; wards: number }) => ({
+          id: `lb_${lb.name.toLowerCase().replace(/[^a-z0-9]+/g, "_").replace(/^_+|_+$/g, "")}`,
+          label: lb.name,
+        }),
+      );
+      return {
+        id: `d_${districtName.toLowerCase().replace(/[^a-z0-9]+/g, "_").replace(/^_+|_+$/g, "")}`,
+        label: districtName,
+        localBodies,
+      };
+    },
+  );
+  return { id: provinceId, label: provinceName.replace(/\s+Province$/, ""), districts };
+});
+
+const SCHOLARSHIP_OPTIONS = [
+  { id: "available", label: "Available" },
+  { id: "notavailable", label: "Not Available" },
+];
+
+const GPA_OPTIONS = [
+  { id: "nogpa", label: "No GPA Required" },
+  { id: "2.0+", label: "2.0+" },
+  { id: "2.5+", label: "2.5+" },
+  { id: "3.0+", label: "3.0+" },
+  { id: "3.5+", label: "3.5+" },
+];
 
 const SearchInput: React.FC<{
   placeholder: string;
@@ -131,6 +176,47 @@ const RadioItem: React.FC<{
   </label>
 );
 
+const SelectInput: React.FC<{
+  placeholder: string;
+  value: string;
+  options: Array<{ id: string; label: string }>;
+  onChange: (v: string) => void;
+  disabled?: boolean;
+}> = ({ placeholder, value, options, onChange, disabled }) => (
+  <div className="relative mb-3">
+    <select
+      value={value}
+      onChange={(e) => onChange(e.target.value)}
+      disabled={disabled}
+      className="block w-full appearance-none rounded-md border border-gray-200 bg-[#f8fafc] py-2 px-3 pr-9 text-[13.5px] text-gray-900 outline-none transition disabled:bg-gray-100 disabled:text-gray-400 focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+    >
+      <option value="" disabled={value !== ""}>
+        {placeholder}
+      </option>
+      {options.map((opt) => (
+        <option key={opt.id} value={opt.id}>
+          {opt.label}
+        </option>
+      ))}
+    </select>
+    <div className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-gray-400">
+      <svg
+        xmlns="http://www.w3.org/2000/svg"
+        width="12"
+        height="12"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      >
+        <path d="m6 9 6 6 6-6" />
+      </svg>
+    </div>
+  </div>
+);
+
 const Accordion: React.FC<{
   title: string;
   defaultOpen?: boolean;
@@ -154,10 +240,10 @@ const EntranceFilters: React.FC<EntranceFiltersProps> = ({
 }) => {
   const [showAppliedDropdown, setShowAppliedDropdown] = useState(false);
   const [streamSearch, setStreamSearch] = useState("");
-  const [programSearch, setProgramSearch] = useState("");
-  const [universitySearch, setUniversitySearch] = useState("");
+  const [locating, setLocating] = useState(false);
 
   const toggle = (key: keyof EntranceFilterState, value: string) => {
+    if (key === "location") return;
     setFilters((prev) => {
       const current = prev[key] as string[];
       const next = current.includes(value)
@@ -175,26 +261,22 @@ const EntranceFilters: React.FC<EntranceFiltersProps> = ({
       )
     : STREAMS;
 
-  const filteredPrograms = programSearch
-    ? PROGRAMS.filter((p) =>
-        p.label.toLowerCase().includes(programSearch.toLowerCase()),
-      )
-    : PROGRAMS;
-
-  const filteredUniversities = universitySearch
-    ? UNIVERSITIES.filter((u) =>
-        u.label.toLowerCase().includes(universitySearch.toLowerCase()),
-      )
-    : UNIVERSITIES;
-
   const filterLabelMap = useMemo(() => {
     const map = new Map<string, string>();
 
     ACADEMIC_LEVELS.forEach((item) => map.set(item.id, item.label));
     STREAMS.forEach((item) => map.set(item.id, item.label));
-    PROGRAMS.forEach((item) => map.set(item.id, item.label));
-    UNIVERSITIES.forEach((item) => map.set(item.id, item.label));
     STATUSES.forEach((item) => map.set(item.id, item.label));
+    APPLICATION_FEES.forEach((item) => map.set(item.id, item.label));
+    INSTITUTION_TYPES.forEach((item) => map.set(item.id, item.label));
+    SCHOLARSHIP_OPTIONS.forEach((item) => map.set(item.id, item.label));
+    provinceOptions.forEach((p) => {
+      map.set(p.id, p.label);
+      p.districts.forEach((d) => {
+        map.set(d.id, d.label);
+        d.localBodies?.forEach((lb) => map.set(lb.id, lb.label));
+      });
+    });
 
     return map;
   }, []);
@@ -211,6 +293,22 @@ const EntranceFilters: React.FC<EntranceFiltersProps> = ({
         tags.push({ key, value, label: filterLabelMap.get(value) || value });
       });
     });
+
+    if (filters.location) {
+      tags.push({ key: "location", value: filters.location, label: filters.location });
+    }
+    if (filters.province?.[0]) {
+      tags.push({ key: "province", value: filters.province[0], label: filterLabelMap.get(filters.province[0]) || filters.province[0] });
+    }
+    if (filters.district?.[0]) {
+      tags.push({ key: "district", value: filters.district[0], label: filterLabelMap.get(filters.district[0]) || filters.district[0] });
+    }
+    filters.localLevel.forEach((value) => {
+      tags.push({ key: "localLevel", value, label: filterLabelMap.get(value) || value });
+    });
+    if (filters.gpa) {
+      tags.push({ key: "gpa", value: filters.gpa, label: `Min GPA: ${parseFloat(filters.gpa).toFixed(1)}` });
+    }
 
     return tags;
   }, [filters, filterLabelMap]);
@@ -254,38 +352,103 @@ const EntranceFilters: React.FC<EntranceFiltersProps> = ({
                     <button
                       key={`${tag.key}-${tag.value}-${index}`}
                       type="button"
-                      onClick={() =>
-                        setFilters((prev) => ({
-                          ...prev,
-                          [tag.key]: prev[tag.key].filter(
-                            (item) => item !== tag.value,
-                          ),
-                        }))
-                      }
-                      className="inline-flex items-center gap-1.5 rounded-full border border-blue-100 bg-blue-50 px-3 py-1.5 text-[12px] font-medium text-blue-700 transition-colors hover:border-red-100 hover:bg-red-50 hover:text-red-700"
+                      onClick={() => {
+                        if (tag.key === "location") {
+                          setFilters((prev) => ({ ...prev, location: "" }));
+                        } else if (tag.key === "province") {
+                          setFilters((prev) => ({ ...prev, province: [], district: [], localLevel: [] }));
+                        } else if (tag.key === "district") {
+                          setFilters((prev) => ({ ...prev, district: [], localLevel: [] }));
+                        } else if (tag.key === "localLevel") {
+                          setFilters((prev) => ({
+                            ...prev,
+                            localLevel: prev.localLevel.filter((item) => item !== tag.value),
+                          }));
+                        } else if (tag.key === "gpa") {
+                          setFilters((prev) => ({ ...prev, gpa: "" }));
+                        } else if (Array.isArray(filters[tag.key as keyof EntranceFilterState])) {
+                          setFilters((prev) => ({
+                            ...prev,
+                            [tag.key]: (prev[tag.key as keyof EntranceFilterState] as string[]).filter(
+                              (item: string) => item !== tag.value,
+                            ),
+                          }));
+                        }
+                      }}
+className="inline-flex items-center gap-1.5 rounded-full border border-blue-100 bg-blue-50 px-3 py-1.5 text-[12px] font-medium text-blue-700 transition-colors hover:border-red-100 hover:bg-red-50 hover:text-red-700"
                     >
                       {tag.label}
                       <i className="fa-solid fa-xmark text-[10px]"></i>
                     </button>
                   ))}
                 </div>
-
-                <div className="border-t border-gray-100 pt-2">
-                  <button
-                    type="button"
-                    onClick={() => {
-                      clearAll();
-                      setShowAppliedDropdown(false);
-                    }}
-                    className="text-[12px] font-semibold text-red-600 transition-colors hover:text-red-700"
-                  >
-                    Reset Filters
-                  </button>
-                </div>
               </>
             )}
           </div>
         )}
+
+        <div className="border-b border-gray-100 py-3">
+          <button
+            type="button"
+            onClick={() => {
+              if (locating) return;
+              setLocating(true);
+              
+              const resolveLocation = (lat?: number, lon?: number) => {
+                fetch(`https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${lat || "27.7172"}&longitude=${lon || "85.324"}&localityLanguage=en`)
+                  .then(res => res.json())
+                  .then(data => {
+                    const city = data.city || data.locality || "Kathmandu";
+                    setFilters((prev) => ({ ...prev, location: city }));
+                    sessionStorage.setItem("navLocation", city);
+                    window.dispatchEvent(new CustomEvent("navLocationChange", { detail: city }));
+                  })
+                  .catch(() => {
+                    setFilters((prev) => ({ ...prev, location: "Kathmandu" }));
+                  })
+                  .finally(() => setLocating(false));
+              };
+
+              if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(
+                  (pos) => resolveLocation(pos.coords.latitude, pos.coords.longitude),
+                  () => resolveLocation(),
+                  { enableHighAccuracy: true, timeout: 5000, maximumAge: 0 }
+                );
+              } else {
+                resolveLocation();
+              }
+            }}
+            className="flex w-full items-center justify-start gap-2 rounded-md border border-black/20 px-4 py-3 text-gray-700 hover:text-brand-blue outline-none transition-all duration-200"
+          >
+            {locating ? (
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="18"
+                height="18"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                className="animate-spin"
+              >
+                <circle cx="12" cy="12" r="3" />
+                <circle cx="12" cy="12" r="7" />
+                <line x1="12" y1="1" x2="12" y2="5" />
+                <line x1="12" y1="19" x2="12" y2="23" />
+                <line x1="1" y1="12" x2="5" y2="12" />
+                <line x1="19" y1="12" x2="23" y2="12" />
+              </svg>
+            ) : (
+              <i className={`fa-solid ${filters.location ? "fa-location-dot" : "fa-location-crosshairs"} text-[16px]`}></i>
+            )}
+            <span className="text-[15px] font-medium">
+              {locating ? "Locating..." : filters.location || "Exam Near Me"}
+            </span>
+          </button>
+        </div>
 
         <Accordion title="Academic Level" defaultOpen>
           <div className="flex flex-col gap-3.5 pt-1">
@@ -307,7 +470,7 @@ const EntranceFilters: React.FC<EntranceFiltersProps> = ({
             value={streamSearch}
             onChange={setStreamSearch}
           />
-          <div className="custom-scrollbar flex max-h-[220px] flex-col gap-3.5 overflow-y-auto pr-1">
+          <div className="custom-scrollbar flex max-h-55 flex-col gap-3.5 overflow-y-auto pr-1">
             {filteredStreams.map((item) => (
               <CheckboxItem
                 key={item.id}
@@ -315,44 +478,6 @@ const EntranceFilters: React.FC<EntranceFiltersProps> = ({
                 label={item.label}
                 checked={filters.stream.includes(item.id)}
                 onChange={() => toggle("stream", item.id)}
-              />
-            ))}
-          </div>
-        </Accordion>
-
-        <Accordion title="Program Name">
-          <SearchInput
-            placeholder="Search programs..."
-            value={programSearch}
-            onChange={setProgramSearch}
-          />
-          <div className="custom-scrollbar flex max-h-[220px] flex-col gap-3.5 overflow-y-auto pr-1">
-            {filteredPrograms.map((item) => (
-              <CheckboxItem
-                key={item.id}
-                id={`prog-${item.id}`}
-                label={item.label}
-                checked={filters.programName.includes(item.id)}
-                onChange={() => toggle("programName", item.id)}
-              />
-            ))}
-          </div>
-        </Accordion>
-
-        <Accordion title="University">
-          <SearchInput
-            placeholder="Search university..."
-            value={universitySearch}
-            onChange={setUniversitySearch}
-          />
-          <div className="custom-scrollbar flex max-h-[220px] flex-col gap-3.5 overflow-y-auto pr-1">
-            {filteredUniversities.map((item) => (
-              <CheckboxItem
-                key={item.id}
-                id={`uni-${item.id}`}
-                label={item.label}
-                checked={filters.university.includes(item.id)}
-                onChange={() => toggle("university", item.id)}
               />
             ))}
           </div>
@@ -369,6 +494,166 @@ const EntranceFilters: React.FC<EntranceFiltersProps> = ({
                 onChange={() => toggle("status", item.id)}
               />
             ))}
+          </div>
+        </Accordion>
+
+        <Accordion title="Application Fee">
+          <div className="flex flex-col gap-3.5 pt-1">
+            {APPLICATION_FEES.map((item) => (
+              <CheckboxItem
+                key={item.id}
+                id={`fee-${item.id}`}
+                label={item.label}
+                checked={filters.applicationFee.includes(item.id)}
+                onChange={() => toggle("applicationFee", item.id)}
+              />
+            ))}
+          </div>
+        </Accordion>
+
+        <Accordion title="Institution Type">
+          <div className="flex flex-col gap-3.5 pt-1">
+            {INSTITUTION_TYPES.map((item) => (
+              <CheckboxItem
+                key={item.id}
+                id={`inst-${item.id}`}
+                label={item.label}
+                checked={filters.institutionType.includes(item.id)}
+                onChange={() => toggle("institutionType", item.id)}
+              />
+            ))}
+          </div>
+        </Accordion>
+
+        <Accordion title="Location">
+          <div className="flex flex-col gap-2 pt-1">
+            <SelectInput
+              placeholder="Select Province"
+              value={filters.province?.[0] || ""}
+              options={provinceOptions.map(p => ({ id: p.id, label: p.label }))}
+              onChange={(val) => {
+                setFilters((prev) => ({
+                  ...prev,
+                  province: val ? [val] : [],
+                  district: [],
+                }));
+              }}
+            />
+            <SelectInput
+              placeholder="Select District"
+              value={filters.district?.[0] || ""}
+              options={
+                filters.province?.[0]
+                  ? provinceOptions.find((p) => p.id === filters.province?.[0])?.districts.map(d => ({ id: d.id, label: d.label })) || []
+                  : []
+              }
+              onChange={(val) => {
+                setFilters((prev) => ({
+                  ...prev,
+                  district: val ? [val] : [],
+                  localLevel: [],
+                }));
+              }}
+              disabled={!filters.province?.[0]}
+            />
+            <SelectInput
+              placeholder="Select Local Level"
+              value={filters.localLevel?.[0] || ""}
+              options={
+                filters.district?.[0]
+                  ? provinceOptions
+                      .find((p) => p.id === filters.province?.[0])
+                      ?.districts.find((d) => d.id === filters.district?.[0])
+                      ?.localBodies?.map(lb => ({ id: lb.id, label: lb.label })) || []
+                  : []
+              }
+              onChange={(val) => {
+                setFilters((prev) => ({
+                  ...prev,
+                  localLevel: val ? [val] : [],
+                }));
+              }}
+              disabled={!filters.district?.[0]}
+            />
+          </div>
+        </Accordion>
+
+        <Accordion title="Scholarship Availability">
+          <div className="flex flex-col gap-3.5 pt-1">
+            {SCHOLARSHIP_OPTIONS.map((item) => (
+              <CheckboxItem
+                key={item.id}
+                id={`sch-${item.id}`}
+                label={item.label}
+                checked={filters.scholarship.includes(item.id)}
+                onChange={() => toggle("scholarship", item.id)}
+              />
+            ))}
+          </div>
+        </Accordion>
+
+        <Accordion title="GPA Requirement">
+          <div className="flex flex-col gap-2 pt-1 px-1">
+            <div className="flex items-center justify-between mb-1">
+              <span className="text-sm text-gray-600">Minimum GPA</span>
+              <span className="text-sm font-semibold text-brand-blue">
+                {filters.gpa ? parseFloat(filters.gpa).toFixed(1) : "0.0"}
+              </span>
+            </div>
+            <div className="relative h-4">
+              <div className="absolute top-1/2 left-0 w-full h-0.5 -translate-y-1/2 bg-gray-200 rounded-full pointer-events-none" />
+              <div 
+                className="absolute top-1/2 h-0.5 -translate-y-1/2 bg-brand-blue rounded-full pointer-events-none"
+                style={{ width: `${((filters.gpa ? parseFloat(filters.gpa) : 0) / 4) * 100}%` }}
+              />
+              <input
+                type="range"
+                min="0"
+                max="4"
+                step="0.1"
+                value={filters.gpa ? parseFloat(filters.gpa) : 0}
+                onChange={(e) => {
+                  setFilters((prev) => ({
+                    ...prev,
+                    gpa: e.target.value,
+                  }));
+                }}
+                className="absolute top-0 left-0 w-full h-full appearance-none cursor-pointer bg-transparent z-10"
+                style={{
+                  WebkitAppearance: 'none',
+                  background: 'transparent'
+                }}
+              />
+            </div>
+            <style jsx>{`
+              input[type="range"]::-webkit-slider-thumb {
+                -webkit-appearance: none;
+                appearance: none;
+                width: 16px;
+                height: 16px;
+                border-radius: 50%;
+                background: white;
+                border: 2px solid #3B82F6;
+                cursor: pointer;
+                margin-top: -2px;
+              }
+              input[type="range"]::-moz-range-thumb {
+                width: 16px;
+                height: 16px;
+                border-radius: 50%;
+                background: white;
+                border: 2px solid #3B82F6;
+                cursor: pointer;
+              }
+              input[type="range"]::-webkit-slider-runnable-track {
+                height: 4px;
+                background: transparent;
+              }
+              input[type="range"]::-moz-range-track {
+                height: 4px;
+                background: transparent;
+              }
+            `}</style>
           </div>
         </Accordion>
 

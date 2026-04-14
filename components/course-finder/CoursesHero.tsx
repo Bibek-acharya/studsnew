@@ -45,7 +45,7 @@ const CoursesHero: React.FC = () => {
   }, []);
 
   return (
-    <section className="relative w-full overflow-hidden min-h-[600px] flex items-center">
+    <section className="relative w-full overflow-hidden min-h-150 flex items-center">
       {/* Background Image */}
       <div className="absolute inset-0">
         <img
@@ -128,7 +128,7 @@ const CoursesHero: React.FC = () => {
 
       {/* Floating Feedback Tab (Right Side) */}
       <div
-        className={`fixed right-0 top-1/2 -translate-y-1/2 z-[100] transition-all duration-500 ease-in-out transform ${isFeedbackExpanded ? "translate-x-0" : "translate-x-full"}`}
+        className={`fixed right-0 top-1/2 -translate-y-1/2 z-100 transition-all duration-500 ease-in-out transform ${isFeedbackExpanded ? "translate-x-0" : "translate-x-full"}`}
       >
         <div className="flex relative items-center">
           {/* Vertical Label Tab */}

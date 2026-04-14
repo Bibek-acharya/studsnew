@@ -123,7 +123,7 @@ const CourseGrid: React.FC<CourseGridProps> = ({
         {[...Array(COURSES_PER_PAGE)].map((_, i) => (
           <div
             key={i}
-            className="animate-pulse bg-white rounded-xl border border-gray-100 h-[380px]"
+            className="animate-pulse bg-white rounded-xl border border-gray-100 h-95"
           ></div>
         ))}
       </div>
