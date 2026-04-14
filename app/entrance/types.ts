@@ -2,22 +2,32 @@ export type EntranceFilterState = {
   search: string;
   academicLevel: string[];
   stream: string[];
-  programName: string[];
-  university: string[];
   status: string[];
-  quick: string[];
   sortBy: string;
+  location: string;
+  institutionType: string[];
+  province: string[];
+  district: string[];
+  localLevel: string[];
+  applicationFee: string[];
+  scholarship: string[];
+  gpa: string;
 };
 
 export const DEFAULT_ENTRANCE_FILTERS: EntranceFilterState = {
   search: "",
   academicLevel: [],
   stream: [],
-  programName: [],
-  university: [],
   status: [],
-  quick: [],
   sortBy: "popularity",
+  location: "",
+  institutionType: [],
+  province: [],
+  district: [],
+  localLevel: [],
+  applicationFee: [],
+  scholarship: [],
+  gpa: "",
 };
 
 export interface Exam {

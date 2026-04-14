@@ -5,6 +5,8 @@ import { EntranceFilterState } from "@/app/entrance/types";
 import { Exam } from "@/components/entrance/types";
 import { entranceService, EntranceFilters } from "@/services/entrance.api";
 import Pagination from "@/components/ui/Pagination";
+import { EntranceAds } from "./ads/EntranceAds";
+import { ApplicationAds } from "./ads/ApplicationAds";
 import {
   BadgeCheck,
   MapPin,
@@ -41,31 +43,48 @@ const EntranceGrid: React.FC<EntranceGridProps> = ({ filters, setFilters }) => {
     search: filters.search || undefined,
     academicLevel: filters.academicLevel.length > 0 ? filters.academicLevel : undefined,
     stream: filters.stream.length > 0 ? filters.stream : undefined,
-    programName: filters.programName.length > 0 ? filters.programName : undefined,
-    university: filters.university.length > 0 ? filters.university : undefined,
     status: filters.status.length > 0 ? filters.status : undefined,
-    quick: filters.quick.length > 0 ? filters.quick : undefined,
     sortBy: filters.sortBy || undefined,
+    location: filters.location || undefined,
+    institutionType: filters.institutionType.length > 0 ? filters.institutionType : undefined,
+    province: filters.province.length > 0 ? filters.province : undefined,
+    district: filters.district.length > 0 ? filters.district : undefined,
+    localLevel: filters.localLevel.length > 0 ? filters.localLevel : undefined,
+    applicationFee: filters.applicationFee.length > 0 ? filters.applicationFee : undefined,
+    scholarship: filters.scholarship.length > 0 ? filters.scholarship : undefined,
+    gpa: filters.gpa.length > 0 ? filters.gpa : undefined,
   };
 
   const { data, isLoading } = useQuery({
     queryKey: ["entrances", apiFilters, currentPage],
-    queryFn: () => entranceService.getEntrances(apiFilters, currentPage, 12),
+    queryFn: () => entranceService.getEntrances(apiFilters, currentPage, 18),
     staleTime: 5 * 60 * 1000,
   });
 
   const filteredExams = useMemo(() => data?.data?.entrances || [], [data]);
   const total = data?.data?.total || 0;
-  const totalPages = Math.max(1, Math.ceil(total / 12));
+  const totalPages = Math.max(1, Math.ceil(total / 18));
   const pagedExams = filteredExams;
+
+  const startItem = (currentPage - 1) * 18 + 1;
+  const endItem = Math.min(currentPage * 18, total);
+
+  const showEntranceAds = currentPage === 1 && filteredExams.length >= 6;
+  const showApplicationAds = currentPage === 1 && filteredExams.length >= 12;
 
   return (
     <>
       <div className="mb-6">
         <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-center">
           <div className="flex flex-col justify-start">
-            <h1 className="mb-3 text-base font-bold text-gray-900">
-              {isLoading ? "Loading..." : `Showing ${total} Entrance Exams`}
+            <h1 className="mb-3 text-base text-gray-900">
+              {isLoading ? "Loading..." : total === 0 ? (
+                <>0 of 0 <span className="font-bold">Entrance Exams</span></>
+              ) : (
+                <>
+                  Showing {startItem} to {endItem} of {total} <span className="font-bold">Entrance Exams</span>
+                </>
+              )}
             </h1>
           </div>
 
@@ -96,8 +115,20 @@ const EntranceGrid: React.FC<EntranceGridProps> = ({ filters, setFilters }) => {
           </div>
         )}
 
-        {pagedExams.map((exam) => (
-          <EntranceCard key={exam.id} exam={exam} />
+        {pagedExams.map((exam, index) => (
+          <React.Fragment key={exam.id}>
+            <EntranceCard exam={exam} />
+            {showEntranceAds && index === 5 && (
+              <div className="col-span-1 md:col-span-2 xl:col-span-3 -mx-2">
+                <EntranceAds />
+              </div>
+            )}
+            {showApplicationAds && index === 11 && (
+              <div className="col-span-1 md:col-span-2 xl:col-span-3 -mx-2">
+                <ApplicationAds />
+              </div>
+            )}
+          </React.Fragment>
         ))}
       </div>
 
@@ -137,7 +168,7 @@ const EntranceCard: React.FC<{ exam: Exam }> = ({ exam }) => {
   };
 
   return (
-    <article className="bg-white rounded-2xl p-4 sm:p-5 border border-gray-200 flex flex-col h-full hover:border-blue-500/20 transition-all duration-300">
+    <article className="bg-white rounded-2xl p-4 sm:p-5 border border-gray-200 flex flex-col h-full hover:border-blue-500/20 transition-all duration-300 overflow-visible">
       <header className="flex justify-between items-start mb-4 sm:mb-5">
         <div className="flex gap-2.5 sm:gap-3">
           <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl border border-gray-100 flex items-center justify-center bg-white shrink-0">
@@ -148,11 +179,15 @@ const EntranceCard: React.FC<{ exam: Exam }> = ({ exam }) => {
             />
           </div>
           <div className="flex flex-col min-w-0">
-            <h3 className="text-[13px] xs:text-[14px] sm:text-[15px] font-bold text-[#111827] flex items-center gap-1 sm:gap-1.5 min-w-0" title={exam.institution}>
+            <h3 className="group relative text-[13px] xs:text-[14px] sm:text-[15px] font-bold text-[#111827] flex items-center gap-1 sm:gap-1.5 min-w-0">
               <span className="truncate">{truncateText(exam.institution, 20)}</span>
               {exam.verified && (
                 <BadgeCheckIcon className="w-3.25 h-3.25 sm:w-3.75 sm:h-3.75 text-white fill-blue-500 ml-0.5 sm:ml-1 shrink-0" />
               )}
+              <div className="absolute bottom-full left-0 mb-2 invisible opacity-0 group-hover:visible group-hover:opacity-100 bg-gray-900 text-white text-[13px] font-medium py-1.5 px-3 rounded shadow-md whitespace-nowrap transition-all duration-200 z-100 pointer-events-none">
+                {exam.institution}
+                <div className="absolute top-full left-4 -mt-px border-[5px] border-transparent border-t-gray-900"></div>
+              </div>
             </h3>
             <div className="flex flex-col gap-1 text-[10px] xs:text-[11px] sm:text-[11px] text-[#6b7280] mt-0.5">
               <span className="flex items-center gap-1">
@@ -176,13 +211,16 @@ const EntranceCard: React.FC<{ exam: Exam }> = ({ exam }) => {
         <div className="w-8 h-8 opacity-0"></div>
       </header>
 
-      <main className="grow">
+      <main className="grow overflow-visible">
         <h4
-          className="text-[15px] xs:text-[16px] sm:text-[17px] font-bold text-[#111827] mb-2.5 sm:mb-3 leading-tight cursor-pointer hover:text-brand-blue transition-colors truncate"
+          className="group relative text-[15px] xs:text-[16px] sm:text-[17px] font-bold text-[#111827] mb-2.5 sm:mb-3 leading-tight cursor-pointer hover:text-brand-blue transition-colors"
           onClick={() => router.push(`/entrance/${exam.id}`)}
-          title={exam.title}
         >
-          {exam.title}
+          <span className="truncate block">{exam.title}</span>
+          <div className="absolute bottom-full left-0 mb-2 invisible opacity-0 group-hover:visible group-hover:opacity-100 bg-gray-900 text-white text-[13px] font-medium py-1.5 px-3 rounded shadow-md whitespace-nowrap transition-all duration-200 z-100 pointer-events-none">
+            {exam.title}
+            <div className="absolute top-full left-4 -mt-px border-[5px] border-transparent border-t-gray-900"></div>
+          </div>
         </h4>
 
         <div className="flex flex-wrap gap-1.5 sm:gap-2 mb-3 sm:mb-4">
