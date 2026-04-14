@@ -325,7 +325,7 @@ const MOCK_COLLEGES: ApiCollege[] = [
   {
     id: 101,
     name: "KIST Higher Secondary School & College",
-    rating: "4.8",
+    rating: 4.8,
     type: "Private",
     location: "Kamalpokhari, Kathmandu",
     affiliation: "NEB",
@@ -337,7 +337,7 @@ const MOCK_COLLEGES: ApiCollege[] = [
   {
     id: 102,
     name: "Kathmandu Model College (KMC)",
-    rating: "4.7",
+    rating: 4.7,
     type: "Private",
     location: "Balkumari, Lalitpur",
     affiliation: "Tribhuvan University",
@@ -346,10 +346,10 @@ const MOCK_COLLEGES: ApiCollege[] = [
     verified: true,
     featured: false,
   },
-  {
-    id: 103,
-    name: "St. Xavier's College",
-    rating: "4.9",
+    {
+      id: 103,
+      name: "St. Xavier's College",
+      rating: 4.9,
     type: "Public / Govt",
     location: "Maitighar, Kathmandu",
     affiliation: "Tribhuvan University",
@@ -358,10 +358,10 @@ const MOCK_COLLEGES: ApiCollege[] = [
     verified: true,
     featured: true,
   },
-  {
-    id: 104,
-    name: "British College",
-    rating: "4.5",
+    {
+      id: 104,
+      name: "British College",
+      rating: 4.5,
     type: "Private",
     location: "Thapathali, Kathmandu",
     affiliation: "UWE Bristol",
@@ -370,10 +370,10 @@ const MOCK_COLLEGES: ApiCollege[] = [
     verified: true,
     featured: false,
   },
-  {
-    id: 105,
-    name: "GoldenGate International College",
-    rating: "4.4",
+    {
+      id: 105,
+      name: "GoldenGate International College",
+      rating: 4.4,
     type: "Private",
     location: "Battisputali, Kathmandu",
     affiliation: "Tribhuvan University",
@@ -382,10 +382,10 @@ const MOCK_COLLEGES: ApiCollege[] = [
     verified: false,
     featured: false,
   },
-  {
-    id: 106,
-    name: "Trinity International College",
-    rating: "4.6",
+    {
+      id: 106,
+      name: "Trinity International College",
+      rating: 4.6,
     type: "Private",
     location: "Dillibazar, Kathmandu",
     affiliation: "NEB",

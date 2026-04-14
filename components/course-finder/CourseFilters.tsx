@@ -6,8 +6,10 @@ import {
   CourseFilterCounts,
   defaultCourseFinderFilters,
 } from "./types";
+
 import { FaSliders } from "react-icons/fa6";
 import GlobalFilterSection from "@/components/ui/GlobalFilterSection";
+import { NEPAL_DISTRICTS } from "@/lib/location-data";
 
 interface CourseFiltersProps {
   filters: CourseFinderFilters;
