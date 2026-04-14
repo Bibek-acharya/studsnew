@@ -1,11 +1,14 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useMemo } from "react";
+import { useQuery } from "@tanstack/react-query";
+import { apiService, EducationCourse } from "../../services/api";
+import CourseGrid from "./CourseGrid";
+import { CourseFinderFilters, defaultCourseFinderFilters } from "./types";
 import {
   ArrowLeft,
   Clock,
   GraduationCap,
-  Building,
   LayoutGrid,
   Info,
   ClipboardCheck,
@@ -20,11 +23,7 @@ import {
   FileCheck2,
   Download,
   AlertCircle,
-  Briefcase,
   CheckCircle2,
-  ChevronRight,
-  Mail,
-  Phone,
   ExternalLink,
   MapPin,
   Newspaper,
@@ -44,7 +43,8 @@ type TabKey =
   | "fee"
   | "scholarships"
   | "model-questions"
-  | "news";
+  | "news"
+  | "related-programs";
 
 const courseData: Record<
   string,
@@ -130,8 +130,26 @@ const CourseDetailsPage: React.FC<CourseDetailsPageProps> = ({
   onNavigate,
 }) => {
   const [activeTab, setActiveTab] = useState<TabKey>("overview");
+  const [filters, setFilters] = useState<CourseFinderFilters>(defaultCourseFinderFilters);
 
-  const course = courseData[String(courseId)] || courseData["1"];
+  const { data, isLoading: isCoursesLoading } = useQuery({
+    queryKey: ["education-courses"],
+    queryFn: () => apiService.getEducationCourses(),
+  });
+
+  const allCourses = useMemo(() => (data?.data?.courses || []) as EducationCourse[], [data]);
+
+  const course = useMemo(() => {
+    const found = allCourses.find(c => String(c.id) === String(courseId));
+    if (found) return {
+      title: found.title,
+      duration: found.duration || "2 Years",
+      level: found.level || "+2",
+      field: found.field || "Science",
+    };
+    return courseData[String(courseId)] || courseData["1"];
+  }, [allCourses, courseId]);
+
   const courseTitle = course.title;
   const courseDuration = course.duration;
   const courseLevel = course.level;
@@ -243,6 +261,7 @@ const CourseDetailsPage: React.FC<CourseDetailsPageProps> = ({
                 { id: "scholarships", label: "Scholarships" },
                 { id: "model-questions", label: "Model Questions" },
                 { id: "news", label: "News" },
+                { id: "related-programs", label: "Related Programs" },
               ].map((tab) => (
                 <button
                   key={tab.id}
@@ -822,6 +841,27 @@ const CourseDetailsPage: React.FC<CourseDetailsPageProps> = ({
                       </p>
                     </div>
                   </a>
+                </div>
+              </section>
+
+              {/* Related Programs Section using CourseGrid */}
+              <section
+                id="related-programs"
+                className={`content-section ${activeTab === "related-programs" ? "block animate-fade-in" : "hidden"}`}
+              >
+                <h2 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-6 flex items-center">
+                  <LayoutGrid className="w-6 h-6 mr-3 text-blue-600" />
+                  Related Programs
+                </h2>
+                <div className="mt-8">
+                  <CourseGrid 
+                    courses={allCourses.filter(c => String(c.id) !== String(courseId)).slice(0, 6)} 
+                    totalCourses={allCourses.length - 1}
+                    onNavigate={onNavigate}
+                    filters={filters}
+                    onFiltersChange={setFilters}
+                    isLoading={isCoursesLoading}
+                  />
                 </div>
               </section>
             </div>

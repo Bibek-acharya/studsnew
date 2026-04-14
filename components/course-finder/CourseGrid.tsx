@@ -1,6 +1,14 @@
-import React, { useState } from "react";
+import React, { useState, useMemo } from "react";
 import { EducationCourse } from "../../services/api";
-import { CourseFinderFilters, defaultCourseFinderFilters } from "./types";
+import { CourseFinderFilters } from "./types";
+import {
+  Clock,
+  Building2,
+  GraduationCap,
+  ClipboardCheck,
+  CreditCard,
+  Briefcase,
+} from "lucide-react";
 import Pagination from "@/components/ui/Pagination";
 
 interface CourseGridProps {
@@ -12,411 +20,288 @@ interface CourseGridProps {
   onFiltersChange: (next: CourseFinderFilters) => void;
 }
 
-interface CourseCardData {
-  id: string;
-  title: string;
-  colleges: number;
-  affiliation: string;
-  topBadge: string;
-  level: string;
-  field: string;
-  duration: string;
-  estFee: string;
-  highlights: string[];
-  careerPath: string;
-  applyBtnClass: string;
-}
-
-const mapCourseToCard = (
-  course: EducationCourse,
-  index: number,
-): CourseCardData => {
-  const badgeList = Array.isArray(course.badges) ? course.badges : [];
-  const highlightList = Array.isArray(course.highlights)
-    ? course.highlights
-    : [];
-
-  return {
-    id: String(course.id ?? index + 1),
-    title: course.title || "Untitled Course",
-    colleges: typeof course.colleges === "number" ? course.colleges : 0,
-    affiliation: course.affiliation || "Affiliation",
-    topBadge: badgeList[0] || "",
-    level: course.level || "-",
-    field: course.field || "-",
-    duration: course.duration || "-",
-    estFee: course.estFee || "-",
-    highlights: highlightList.length > 0 ? highlightList : [],
-    careerPath: course.careerPath || "-",
-    applyBtnClass: index === 1 ? "bg-[#3B82F6]" : "bg-[#0F172A]",
-  };
-};
-
-const CourseCard: React.FC<{
-  course: CourseCardData;
-  onNavigate: (view: any, data?: any) => void;
-}> = ({ course, onNavigate }) => {
-  const handleViewColleges = () => {
-    onNavigate("universitiesPage", {
-      courseId: course.id,
-      courseTitle: course.title,
-      collegesCount: course.colleges,
-    });
-  };
-
-  return (
-    <div className="bg-white border border-gray-100 rounded-md p-5 shadow-sm hover:shadow-md transition-shadow group">
-      <div className="flex gap-2 mb-4">
-        <span className="bg-[#EEF2FF] text-[#4F46E5] text-[10px] font-bold px-2.5 py-1 rounded uppercase tracking-wide">
-          {course.affiliation}
-        </span>
-        <span className="bg-[#ECFDF5] text-[#059669] text-[10px] font-bold px-2.5 py-1 rounded uppercase tracking-wide">
-          {course.topBadge}
-        </span>
-      </div>
-
-      <div className="flex items-center gap-4 mb-5">
-        <div className="w-12 h-12 bg-[#F1F5F9] rounded-xl flex-shrink-0"></div>
-        <div>
-          <h3 className="text-[16px] font-bold leading-tight mb-1 transition-colors group-hover:text-[#0000ff]">
-            {course.title}
-          </h3>
-          <button
-            type="button"
-            onClick={handleViewColleges}
-            className="inline-flex items-center gap-1 text-[13px] text-gray-500 font-medium hover:text-blue-600 transition-colors group"
-          >
-            View {course.colleges} colleges
-            <svg
-              className="w-3.5 h-3.5 group-hover:translate-x-0.5 transition-transform"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth="2"
-                d="M9 5l7 7-7 7"
-              ></path>
-            </svg>
-          </button>
-        </div>
-      </div>
-
-      <div className="grid grid-cols-2 gap-y-4 gap-x-2 mb-6">
-        <div className="flex flex-col">
-          <div className="flex items-center gap-1.5 mb-1">
-            <svg
-              className="w-4 h-4 text-blue-500"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth="2"
-                d="M12 14l9-5-9-5-9 5 9 5z"
-              ></path>
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth="2"
-                d="M12 14l6.16-3.422a12.083 12.083 0 01.665 6.479A11.952 11.952 0 0012 20.055a11.952 11.952 0 00-6.824-2.998 12.078 12.078 0 01.665-6.479L12 14z"
-              ></path>
-            </svg>
-            <span className="text-[11px] text-gray-500 font-bold uppercase tracking-wider">
-              Level
-            </span>
-          </div>
-          <span className="text-[13px] font-bold text-gray-900 ml-5.5 pl-5.5">
-            {course.level}
-          </span>
-        </div>
-        <div className="flex flex-col">
-          <div className="flex items-center gap-1.5 mb-1">
-            <svg
-              className="w-4 h-4 text-blue-500"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth="2"
-                d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"
-              ></path>
-            </svg>
-            <span className="text-[11px] text-gray-500 font-bold uppercase tracking-wider">
-              Field
-            </span>
-          </div>
-          <span className="text-[13px] font-bold text-gray-900 ml-5.5 pl-5.5">
-            {course.field}
-          </span>
-        </div>
-        <div className="flex flex-col">
-          <div className="flex items-center gap-1.5 mb-1">
-            <svg
-              className="w-4 h-4 text-blue-500"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth="2"
-                d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
-              ></path>
-            </svg>
-            <span className="text-[11px] text-gray-500 font-bold uppercase tracking-wider">
-              Duration
-            </span>
-          </div>
-          <span className="text-[13px] font-bold text-gray-900 ml-5.5 pl-5.5">
-            {course.duration}
-          </span>
-        </div>
-        <div className="flex flex-col">
-          <div className="flex items-center gap-1.5 mb-1">
-            <svg
-              className="w-4 h-4 text-blue-500"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth="2"
-                d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z"
-              ></path>
-            </svg>
-            <span className="text-[11px] text-gray-500 font-bold uppercase tracking-wider">
-              Est.Fee
-            </span>
-          </div>
-          <span className="text-[13px] font-bold text-gray-900 ml-5.5 pl-5.5">
-            {course.estFee}
-          </span>
-        </div>
-      </div>
-
-      <div className="mb-5">
-        <h4 className="text-[10px] text-gray-400 font-bold uppercase tracking-widest mb-3">
-          Scholarship & Highlights
-        </h4>
-        <ul className="space-y-2">
-          {course.highlights.map((highlight) => (
-            <li
-              key={highlight}
-              className="flex items-center gap-2 text-[13px] text-gray-700 font-medium"
-            >
-              <svg
-                className="w-4 h-4 text-green-500 shrink-0"
-                viewBox="0 0 20 20"
-                fill="currentColor"
-              >
-                <path
-                  fillRule="evenodd"
-                  d="M10 18a8 8 0 100-16 8 8 0 000 16zm-1.293-7.707a1 1 0 011.414 0L10 10.586l.293-.293a1 1 0 011.414 1.414l-1 1a1 1 0 01-1.414 0l-1-1a1 1 0 010-1.414z"
-                  clipRule="evenodd"
-                />
-              </svg>
-              {highlight}
-            </li>
-          ))}
-        </ul>
-      </div>
-
-      <div className="flex items-start gap-2 pt-4 border-t border-gray-100 mb-6">
-        <svg
-          className="w-4 h-4 text-yellow-500 mt-0.5 flex-shrink-0"
-          fill="currentColor"
-          viewBox="0 0 20 20"
-        >
-          <path
-            fillRule="evenodd"
-            d="M6 6V5a3 3 0 013-3h2a3 3 0 013 3v1h2a2 2 0 012 2v3.57A22.952 22.952 0 0110 13a22.95 22.95 0 01-8-1.43V8a2 2 0 012-2h2zm2-1a1 1 0 011-1h2a1 1 0 011 1v1H8V5zm1 5a1 1 0 011-1h.01a1 1 0 110 2H10a1 1 0 01-1-1z"
-            clipRule="evenodd"
-          />
-          <path d="M2 13.692V16a2 2 0 002 2h12a2 2 0 002-2v-2.308A24.974 24.974 0 0110 15c-2.796 0-5.487-.46-8-1.308z" />
-        </svg>
-        <p className="text-[13px] text-gray-700 leading-snug">
-          <span className="font-bold">Major Career Path:</span>{" "}
-          {course.careerPath}
-        </p>
-      </div>
-
-      <div className="flex gap-3">
-        <button
-          onClick={() => onNavigate("courseDetails", { id: course.id })}
-          className="flex-1 bg-white border border-gray-200 text-gray-700 text-[13px] font-medium py-2.5 rounded-lg hover:bg-gray-50 transition-colors"
-        >
-          Details
-        </button>
-        <button
-          className={`flex-1 ${course.applyBtnClass} text-white text-[13px] font-medium py-2.5 rounded-lg hover:opacity-90 transition-opacity shadow-sm`}
-        >
-          Apply Now
-        </button>
-        <button className="w-[42px] h-[42px] flex items-center justify-center bg-white border border-gray-200 text-gray-400 rounded-lg hover:text-red-500 hover:border-red-200 transition-colors flex-shrink-0">
-          <svg
-            className="w-5 h-5"
-            fill="none"
-            stroke="currentColor"
-            viewBox="0 0 24 24"
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth="2"
-              d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l.293-.293a1 1 0 011.414 1.414l-1 1a1 1 0 01-1.414 0l-1-1a1 1 0 010-1.414z"
-            ></path>
-          </svg>
-        </button>
-      </div>
-    </div>
-  );
-};
+const COURSES_PER_PAGE = 6;
 
 const CourseGrid: React.FC<CourseGridProps> = ({
   onNavigate,
   courses,
-  totalCourses,
   isLoading,
-  filters,
-  onFiltersChange,
 }) => {
-  const mappedCourses = courses.map((course, index) =>
-    mapCourseToCard(course, index),
-  );
-  const resolvedCourses = mappedCourses;
+  const [currentPage, setCurrentPage] = useState(1);
 
-  const activeFilters = [
-    ...filters.academicLevels,
-    ...filters.fields,
-    ...filters.providerTypes,
-    ...filters.durations,
-  ];
+  // Use the provided courses but ensure we have enough for the grid demo if none provided
+  const allCourses = useMemo(() => {
+    if (courses.length > 0) return courses;
+    return [
+      {
+        id: "1",
+        title: "10+2 Science (Physical Group)",
+        level: "+2 (plus two)",
+        duration: "2 Years",
+        affiliation: "NEB (National Examination Board)",
+        image:
+          "https://images.unsplash.com/photo-1532094349884-543bc11b234d?auto=format&fit=crop&w=400&q=200",
+        estFee: "Rs. 1,00,000 - 2,50,000",
+        careerPath: "Engineering, IT, Physical Sciences...",
+      },
+      {
+        id: "2",
+        title: "10+2 Science (Biology Group)",
+        level: "+2 (plus two)",
+        duration: "2 Years",
+        affiliation: "NEB (National Examination Board)",
+        image:
+          "https://images.unsplash.com/photo-1576091160550-2173dba999ef?auto=format&fit=crop&w=400&q=200",
+        estFee: "Rs. 1,10,000 - 2,60,000",
+        careerPath: "Medical (MBBS), Nursing, Agriculture...",
+      },
+      {
+        id: "3",
+        title: "10+2 Management",
+        level: "+2 (plus two)",
+        duration: "2 Years",
+        affiliation: "NEB (National Examination Board)",
+        image:
+          "https://images.unsplash.com/photo-1454165833762-02651d58d92c?auto=format&fit=crop&w=400&q=200",
+        estFee: "Rs. 80,000 - 1,80,000",
+        careerPath: "BBA, CA, Hotel Management, Banking...",
+      },
+      {
+        id: "4",
+        title: "Cambridge International A Levels (Science)",
+        level: "A Level",
+        duration: "2 Years",
+        affiliation: "Cambridge University",
+        image:
+          "https://images.unsplash.com/photo-1523050854058-8df90110c9f1?auto=format&fit=crop&w=400&q=200",
+        estFee: "Rs. 4,00,000 - 8,00,000",
+        careerPath: "International Admissions, Research...",
+      },
+      {
+        id: "5",
+        title: "10+2 Law",
+        level: "+2 (plus two)",
+        duration: "2 Years",
+        affiliation: "NEB (National Examination Board)",
+        image:
+          "https://images.unsplash.com/photo-1589829545856-d10d557cf95f?auto=format&fit=crop&w=400&q=200",
+        estFee: "Rs. 70,000 - 1,50,000",
+        careerPath: "Legal Practice, Advocacy, Civil Service...",
+      },
+      {
+        id: "6",
+        title: "10+2 Humanities",
+        level: "+2 (plus two)",
+        duration: "2 Years",
+        affiliation: "NEB (National Examination Board)",
+        image:
+          "https://images.unsplash.com/photo-1509062522246-3755977927d7?auto=format&fit=crop&w=400&q=200",
+        estFee: "Rs. 60,000 - 1,40,000",
+        careerPath: "Mass Communication, Sociology, Arts...",
+      },
+    ] as unknown as EducationCourse[];
+  }, [courses]);
 
-  const removeActiveFilter = (value: string) => {
-    const next = { ...filters };
-    next.academicLevels = next.academicLevels.filter((item) => item !== value);
-    next.fields = next.fields.filter((item) => item !== value);
-    next.providerTypes = next.providerTypes.filter((item) => item !== value);
-    next.durations = next.durations.filter((item) => item !== value);
-    onFiltersChange(next);
-  };
+  const totalPages = Math.ceil(allCourses.length / COURSES_PER_PAGE);
+  const currentCourses = useMemo(() => {
+    const start = (currentPage - 1) * COURSES_PER_PAGE;
+    return allCourses.slice(start, start + COURSES_PER_PAGE);
+  }, [allCourses, currentPage]);
+
+  if (isLoading) {
+    return (
+      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+        {[...Array(COURSES_PER_PAGE)].map((_, i) => (
+          <div
+            key={i}
+            className="animate-pulse bg-white rounded-xl border border-gray-100 h-[380px]"
+          ></div>
+        ))}
+      </div>
+    );
+  }
 
   return (
-    <div className="space-y-8">
-      <div className="flex flex-col mb-6 pb-2 gap-3">
-        <h1 className="text-[24px] font-bold text-gray-900 tracking-tight mb-2">
-          Colleges and Courses
-        </h1>
-        <div className="flex items-center gap-2 flex-wrap">
-          <span className="text-[12px] text-gray-500 font-medium mr-1">
-            Active :
-          </span>
-          {activeFilters.map((filter) => (
-            <span
-              key={`${filter}-active`}
-              className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded bg-white border border-gray-200 text-[12px] text-gray-700 font-medium"
+    <>
+      <style>{`
+        .custom-tooltip {
+          position: absolute;
+          bottom: 100%;
+          left: 0;
+          margin-bottom: 8px;
+          opacity: 0;
+          visibility: hidden;
+          transition: all 0.3s;
+          z-index: 20;
+          width: auto;
+          max-width: 200px;
+          background-color: #111827;
+          color: white;
+          font-size: 11px;
+          font-weight: 500;
+          padding: 6px 10px;
+          border-radius: 6px;
+          pointer-events: none;
+          transform: translateY(4px);
+        }
+        .group:hover .custom-tooltip {
+          opacity: 1;
+          visibility: visible;
+          transform: translateY(-4px);
+        }
+        .tooltip-arrow {
+          position: absolute;
+          top: 100%;
+          left: 16px;
+          border-width: 5px;
+          border-style: solid;
+          border-color: #111827 transparent transparent transparent;
+        }
+      `}</style>
+
+      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+        {currentCourses.map((course, index) => {
+          const levelText = course.level || "+2(plus two)";
+          const badgeStyle =
+            index % 3 === 0
+              ? "bg-[#7c3aed]/10 text-[#7c3aed]"
+              : index % 3 === 1
+                ? "bg-[#db2777]/10 text-[#db2777]"
+                : "bg-[#ea580c]/10 text-[#ea580c]";
+
+          return (
+            <div
+              key={course.id || index}
+              className="bg-white rounded-xl border border-gray-200 flex flex-col relative transition-all hover:border-blue-500/20 duration-300"
             >
-              {filter}
-              <button
-                onClick={() => removeActiveFilter(filter)}
-                className="text-blue-600 hover:text-blue-800 focus:outline-none"
-              >
-                <svg
-                  className="w-3.5 h-3.5"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth="2"
-                    d="M6 18L18 6M6 6l12 12"
-                  ></path>
-                </svg>
-              </button>
-            </span>
-          ))}
-          {activeFilters.length > 0 && (
-            <button
-              onClick={() => onFiltersChange(defaultCourseFinderFilters)}
-              className="text-[12px] text-blue-600 hover:underline font-medium ml-1"
-            >
-              Clear All
-            </button>
-          )}
-        </div>
-        <p className="text-[13px] text-gray-600">
-          Showing {resolvedCourses.length} results for courses (total{" "}
-          {totalCourses})
-        </p>
+              {/* Image Area - Reduced height and padding */}
+              <div className="relative h-28 w-full p-3 pb-2">
+                <img
+                  src={
+                    course.image ||
+                    `https://images.unsplash.com/photo-1517694712202-14dd9538aa97?auto=format&fit=crop&w=400&q=200`
+                  }
+                  alt={course.title}
+                  className="w-full h-full object-cover rounded-lg"
+                />
+              </div>
+
+              {/* Content Area - Reduced paddings */}
+              <div className="px-3 pb-3 pt-0 flex-1 flex flex-col">
+                {/* Level & Duration */}
+                <div className="flex justify-between items-center mb-1.5 text-[12px] font-bold">
+                  <span
+                    className={`${badgeStyle} px-2 py-0.5 rounded-md tracking-wide uppercase`}
+                  >
+                    {levelText}
+                  </span>
+                  <div className="flex items-center text-gray-500 gap-1 font-medium">
+                    <Clock className="w-3.5 h-3.5 text-gray-400" />
+                    {course.duration || "4 Years"}
+                  </div>
+                </div>
+
+                {/* Title with Custom Tooltip */}
+                <div className="relative group mb-1.5">
+                  <h2 className="text-base font-bold text-gray-900 group-hover:text-[#0000ff] cursor-pointer transition-colors truncate leading-tight">
+                    {course.title}
+                  </h2>
+                  <div className="custom-tooltip">
+                    {course.title}
+                    <div className="tooltip-arrow"></div>
+                  </div>
+                </div>
+
+                {/* Details List - Tighter spacing */}
+                <div className="space-y-1 text-[12px] flex-1">
+                  <div className="flex items-start gap-2">
+                    <Building2 className="w-3.75 h-3.75 text-gray-400 mt-px shrink-0" />
+                    <div>
+                      <span className="font-bold text-gray-700">
+                        Affiliation:
+                      </span>{" "}
+                      <span className="text-gray-600">
+                        {course.affiliation || "Tribhuvan University"}
+                      </span>
+                    </div>
+                  </div>
+                  <div className="flex items-start gap-2">
+                    <GraduationCap className="w-3.75 h-3.75 text-gray-400 mt-px shrink-0" />
+                    <div>
+                      <span className="font-bold text-gray-700">
+                        Eligibility:
+                      </span>{" "}
+                      <span className="text-gray-600">
+                        As per institution criteria
+                      </span>
+                    </div>
+                  </div>
+                  <div className="flex items-start gap-2">
+                    <ClipboardCheck className="w-3.75 h-3.75 text-gray-400 mt-px shrink-0" />
+                    <div>
+                      <span className="font-bold text-gray-700">Entrance:</span>{" "}
+                      <span className="text-gray-600">
+                        Entrance exam required
+                      </span>
+                    </div>
+                  </div>
+                  <div className="flex items-start gap-2">
+                    <CreditCard className="w-3.75 h-3.75 text-gray-400 mt-px shrink-0" />
+                    <div>
+                      <span className="font-bold text-gray-700">Est. Fee:</span>{" "}
+                      <span className="text-[#0000ff] font-bold">
+                        {course.estFee || "Rs. 5,00,000"}
+                      </span>
+                    </div>
+                  </div>
+                  <div className="flex items-start gap-2">
+                    <Briefcase className="w-3.75 h-3.75 text-gray-400 mt-px shrink-0" />
+                    <div>
+                      <span className="font-bold text-gray-700">Career:</span>{" "}
+                      <span className="text-gray-600 truncate inline-block max-w-37.5 align-bottom">
+                        {course.careerPath ||
+                          "Software Engineer, Web Developer, Sys..."}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Action Buttons */}
+                <div className="flex gap-2 pt-2.5 mt-auto">
+                  <button
+                    onClick={() =>
+                      onNavigate("courseDetails", { id: course.id })
+                    }
+                    className="flex-1 bg-white border border-gray-200 text-gray-700 text-[13px] font-semibold py-1.5 rounded-md hover:bg-gray-50 transition-colors focus:ring-2 focus:ring-gray-200 focus:outline-none"
+                  >
+                    Details
+                  </button>
+                  <button
+                    onClick={() =>
+                      onNavigate("universitiesPage", {
+                        courseId: course.id,
+                        courseTitle: course.title,
+                      })
+                    }
+                    className="flex-1 bg-[#0000ff] text-white text-[13px] font-semibold py-1.5 rounded-md hover:bg-blue-800 transition-colors focus:ring-2 focus:ring-[#0000ff] focus:ring-offset-1 focus:outline-none flex justify-center items-center gap-1"
+                  >
+                    View Colleges
+                  </button>
+                </div>
+              </div>
+            </div>
+          );
+        })}
       </div>
 
-      {isLoading ? (
-        <div className="rounded-xl border border-gray-200 bg-white p-8 text-center text-gray-500 font-medium">
-          Loading courses...
-        </div>
-      ) : resolvedCourses.length === 0 ? (
-        <div className="rounded-xl border border-gray-200 bg-white p-8 text-center text-gray-500 font-medium">
-          No courses available right now.
-        </div>
-      ) : (
-        <>
-          <div
-            className="grid grid-cols-1 md:grid-cols-2 gap-5"
-            id="courses-grid-1"
-          >
-            {resolvedCourses.slice(0, 4).map((course) => (
-              <CourseCard
-                key={course.id}
-                course={course}
-                onNavigate={onNavigate}
-              />
-            ))}
-          </div>
-
-          <div className="my-6 w-full h-[180px] md:h-[220px] rounded-xl overflow-hidden relative shadow-sm group">
-            <img
-              src="https://images.unsplash.com/photo-1562774053-701939374585?auto=format&fit=crop&w=1400&q=80"
-              alt="University Campus"
-              className="w-full h-full object-cover"
-            />
-            <div className="absolute inset-0 bg-black/20 group-hover:bg-black/10 transition-colors"></div>
-            <div className="absolute bottom-4 left-0 right-0 flex justify-center gap-2 z-10">
-              <button className="w-6 h-1 rounded-full bg-blue-600 transition-all"></button>
-              <button className="w-6 h-1 rounded-full bg-white transition-all"></button>
-              <button className="w-6 h-1 rounded-full bg-white transition-all"></button>
-            </div>
-          </div>
-
-          <div
-            className="grid grid-cols-1 md:grid-cols-2 gap-5"
-            id="courses-grid-2"
-          >
-            {resolvedCourses.slice(4, 6).map((course) => (
-              <CourseCard
-                key={course.id}
-                course={course}
-                onNavigate={onNavigate}
-              />
-            ))}
-          </div>
-        </>
-      )}
-
-      <Pagination currentPage={1} totalPages={1} onPageChange={() => {}} />
-    </div>
+      <div className="mt-8 flex justify-center">
+        <Pagination
+          currentPage={currentPage}
+          totalPages={totalPages}
+          onPageChange={setCurrentPage}
+        />
+      </div>
+    </>
   );
 };
 
