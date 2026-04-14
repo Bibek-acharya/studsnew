@@ -118,27 +118,35 @@ export default function FeaturedCollegeCard({
       </div>
 
       {/* Content */}
-      <div className="p-3.5 flex flex-col flex-grow">
-        {/* Header: Logo, Title, Rating */}
+      <div className="p-3.5 flex flex-col flex-grow relative">
+        {/* Rating - Fixed to right border */}
+        <div className="absolute top-3.5 right-3.5 z-10 flex items-center gap-1 bg-yellow-50 border border-yellow-100 text-yellow-700 px-1.5 py-0.5 rounded text-[11px] font-bold shrink-0 shadow-xs">
+          <svg className="w-3 h-3 fill-current" viewBox="0 0 20 20">
+            <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+          </svg>
+          {rating}
+        </div>
+
+        {/* Header: Logo, Title */}
         <div className="flex items-start gap-3 mb-3">
           <img src={logo} alt="Logo" className="w-10 h-10 object-contain rounded border border-gray-100 shadow-sm shrink-0 mt-0.5" />
-          <div className="flex-grow flex flex-col gap-1.5">
+          <div className="flex-grow flex flex-col gap-1.5 min-w-0 pr-12">
             <div className="flex items-center gap-1.5">
-              <span className="text-[14px] font-bold text-gray-900 leading-none truncate max-w-[130px]">{provider}</span>
+              <span className="text-[14px] font-bold text-gray-900 leading-none truncate" title={provider}>{provider}</span>
               <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="#0040ff" className="w-4 h-4 shrink-0">
                 <path fillRule="evenodd" d="M12.01 2.011a3.2 3.2 0 0 1 2.113 .797l.154 .145l.698 .698a1.2 1.2 0 0 0 .71 .341l.135 .008h1a3.2 3.2 0 0 1 3.195 3.018l.005 .182v1c0 .27 .092 .533 .258 .743l.09 .1l.697 .698a3.2 3.2 0 0 1 .147 4.382l-.145 .154l-.698 .698a1.2 1.2 0 0 0 -.341 .71l-.008 .135v1a3.2 3.2 0 0 1 -3.018 3.195l-.182 .005h-1a1.2 1.2 0 0 0 -.743 .258l-.1 .09l-.698 .697a3.2 3.2 0 0 1 -4.382 .147l-.154 -.145l-.698 -.698a1.2 1.2 0 0 0 -.71 -.341l-.135 -.008h-1a3.2 3.2 0 0 1 -3.195 -3.018l-.005 -.182v-1a1.2 1.2 0 0 0 -.258 -.743l-.09 -.1l-.697 -.698a3.2 3.2 0 0 1 -.147 -4.382l.145 -.154l.698 -.698a1.2 1.2 0 0 0 .341 -.71l.008 -.135v-1l.005 -.182a3.2 3.2 0 0 1 3.013 -3.013l.182 -.005h1a1.2 1.2 0 0 0 .743 -.258l.1 -.09l.698 -.697a3.2 3.2 0 0 1 2.269 -.944zm3.697 7.282a1 1 0 0 0 -1.414 0l-3.293 3.292l-1.293 -1.292l-.094 -.083a1 1 0 0 0 -1.32 1.497l2 2l.094 .083a1 1 0 0 0 1.32 -.083l4 -4l.083 -.094a1 1 0 0 0 -.083 -1.32z" clipRule="evenodd" />
               </svg>
             </div>
             <div className="flex items-center gap-2 text-[11px] text-gray-500 font-medium">
-              <div className="flex items-center gap-1">
-                <svg className="w-3.5 h-3.5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2">
+              <div className="flex items-center gap-1 min-w-0">
+                <svg className="w-3.5 h-3.5 text-gray-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2">
                   <path strokeLinecap="round" strokeLinejoin="round" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.243-4.243a8 8 0 1111.314 0z" />
                   <path strokeLinecap="round" strokeLinejoin="round" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
                 </svg>
-                <span className="truncate">{location}</span>
+                <span className="truncate" title={location}>{location}</span>
               </div>
               <span className="text-gray-300">•</span>
-              <div className="flex items-center gap-1">
+              <div className="flex items-center gap-1 shrink-0">
                 <svg className="w-3.5 h-3.5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2">
                   <path strokeLinecap="round" strokeLinejoin="round" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
                 </svg>
@@ -146,54 +154,42 @@ export default function FeaturedCollegeCard({
               </div>
             </div>
           </div>
-          {/* Rating */}
-          <div className="flex items-center gap-1 bg-yellow-50 border border-yellow-100 text-yellow-700 px-1.5 py-0.5 rounded text-[11px] font-bold shrink-0 mt-0.5">
-            <svg className="w-3 h-3 fill-current" viewBox="0 0 20 20">
-              <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
-            </svg>
-            {rating}
-          </div>
         </div>
 
-        {/* Website + Socials */}
+
+        {/* Website and WhatsApp | Viber text */}
         <div className="flex items-center justify-between mb-3">
-          <a href={`https://${website}`} target="_blank" className="flex items-center gap-1.5 text-[12px] text-[#1053F3] font-medium hover:underline">
+          <a href={`https://${website}`} target="_blank" rel="noopener noreferrer" className="flex items-center gap-1.5 text-[12px] text-[#1053F3] font-medium hover:underline">
             <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" />
             </svg>
             {website}
           </a>
-          <div className="flex items-center gap-2">
-            {/* WhatsApp */}
-            <div className="relative group/wa">
-              <a href="#" className="bg-green-50 text-green-500 p-1.5 rounded-full hover:bg-green-100 transition-colors">
-                <svg className="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 24 24">
-                  <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51a12.8 12.8 0 00-.57-.01c-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z" />
-                </svg>
-              </a>
-              <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 w-max px-3 py-1.5 bg-[#1053F3] text-white text-[11px] font-medium rounded-md shadow-lg opacity-0 invisible group-hover/wa:opacity-100 group-hover/wa:visible group-hover/wa:-translate-y-1 translate-y-0 transition-all duration-200 z-50 flex items-center gap-1.5 pointer-events-none">
-                Join WhatsApp Group
-                <div className="absolute top-full left-1/2 -translate-x-1/2 border-[5px] border-transparent border-t-[#1053F3]"></div>
-              </div>
-            </div>
-
-            {/* Viber */}
-            <div className="relative group/vi">
-              <a href="#" className="bg-purple-50 text-purple-600 p-1.5 rounded-full hover:bg-purple-100 transition-colors">
-                <svg className="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 24 24">
-                  <path d="M21.321 15.698c-.147-.282-1.326-2.126-1.558-2.486-.234-.359-.723-.553-1.077-.384l-2.007 1.059c-.443.21-.941.053-1.352-.26-.713-.541-2.071-1.89-2.922-2.85-.705-.794-1.229-1.564-1.467-1.928-.215-.327-.184-.755.038-1.066l1.203-1.831c.256-.367.144-.881-.137-1.21-1.38-1.616-2.31-2.946-2.583-3.23-.274-.284-.68-.31-1-.07l-1.92 1.517c-.502.39-1.075 1.156-1.096 2.374-.019 1.094.498 2.656 2.502 5.567 2.222 3.222 5.253 6.004 8.272 7.234 1.405.572 2.61.642 3.515.54.912-.102 1.631-.762 1.954-1.264l1.528-2.185c.245-.347.199-.81-.107-1.096-.289-.271-1.41-1.127-1.786-1.43zM15.424 7.25c1.171.391 2.05 1.282 2.457 2.449.117.335.485.513.82.398.334-.117.513-.484.397-.82-.533-1.528-1.684-2.69-3.227-3.242-.338-.121-.711.054-.833.391-.12.336.055.71.386.824zM14.62 9.473c.421.175.753.504.935.922.127.291.46.425.751.298.291-.127.425-.461.298-.752-.284-.654-.803-1.17-1.463-1.464-.29-.129-.625.002-.754.292-.128.29.003.626.293.754zM16.038 4.288c1.944.755 3.479 2.296 4.253 4.254.129.328.503.491.833.364.331-.128.495-.502.365-.832-1.023-2.585-3.047-4.618-5.65-5.656-.334-.132-.71.028-.842.36-.131.332.03.708.361.84.335.13.681.67z" />
-                </svg>
-              </a>
-              <div className="absolute bottom-full right-0 mb-2 w-max px-3 py-1.5 bg-[#1053F3] text-white text-[11px] font-medium rounded-md shadow-lg opacity-0 invisible group-hover/vi:opacity-100 group-hover/vi:visible group-hover/vi:-translate-y-1 translate-y-0 transition-all duration-200 z-50 flex items-center gap-1.5 pointer-events-none">
-                Join Viber Group
-                <div className="absolute top-full right-2 border-[5px] border-transparent border-t-[#1053F3]"></div>
-              </div>
-            </div>
-          </div>
+          <span className="flex items-center gap-1 text-[12px] font-semibold">
+            <a
+              href="https://wa.me/" // Add your WhatsApp group link here
+              target="_blank"
+              rel="noopener noreferrer"
+              style={{ color: '#25D366' }}
+              className="hover:underline"
+            >
+              WhatsApp
+            </a>
+            <span className="text-gray-400">|</span>
+            <a
+              href="https://invite.viber.com/" // Add your Viber group link here
+              target="_blank"
+              rel="noopener noreferrer"
+              style={{ color: '#7360F2' }}
+              className="hover:underline"
+            >
+              Viber
+            </a>
+          </span>
         </div>
 
         {/* Title */}
-        <h3 className="font-bold text-[14px] text-gray-800 leading-[1.3] mb-3 line-clamp-2 min-h-[36px]">
+        <h3 className="font-bold text-[14px] text-gray-800 leading-tight mb-3 truncate" title={title}>
           {title}
         </h3>
 

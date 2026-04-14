@@ -32,7 +32,7 @@ export default function DirectAdmissionCard({
   const [favorited, setFavorited] = useState(false);
 
   return (
-    <div className="bg-white rounded-[20px] shadow-sm border border-gray-100 overflow-hidden w-full max-w-[340px] flex flex-col transition-all duration-300 hover:shadow-md relative">
+    <div className="bg-white rounded-md shadow-sm border border-gray-100 overflow-hidden w-full max-w-[340px] flex flex-col transition-all duration-300 hover:shadow-md relative">
       {/* Image Section */}
       <div className="p-2.5 pb-0 shrink-0">
         <div className="relative h-28 w-full bg-gray-50 rounded-[14px] overflow-hidden flex items-center justify-center">
@@ -48,7 +48,7 @@ export default function DirectAdmissionCard({
 
           {/* Info Overlay */}
           <div className="absolute bottom-1.5 right-1.5 z-20 flex items-center gap-1 bg-black/50 backdrop-blur-md px-1.5 py-0.5 rounded border border-white/10">
-            <span className="text-white text-[8px] font-bold tracking-tight uppercase">No Entrance Required</span>
+            <span className="text-white text-[8px] font-bold tracking-tight uppercase">Direct Admission</span>
             <svg className="w-[9px] h-[9px] text-white" fill="currentColor" viewBox="0 0 20 20">
               <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
             </svg>
@@ -59,8 +59,13 @@ export default function DirectAdmissionCard({
       {/* Content Section */}
       <div className="p-3 pb-3 flex flex-col flex-grow">
         {/* Title and Verified Badge */}
-        <div className="flex items-center gap-1.5 mb-1.5">
-          <h2 className="text-[#0f172a] text-[18px] font-bold leading-tight">{collegeName}</h2>
+        <div className="flex items-center gap-1.5 mb-1.5 group/name relative">
+          <h2 
+            title={collegeName}
+            className="text-[#0f172a] text-[18px] font-bold leading-tight truncate transition-colors group-hover/name:text-brand-blue"
+          >
+            {collegeName}
+          </h2>
           <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="#6366f1" className="w-5 h-5 shrink-0">
             <path fillRule="evenodd" d="M8.603 3.799A4.49 4.49 0 0112 2.25c1.357 0 2.573.6 3.397 1.549a4.49 4.49 0 013.498 1.307 4.491 4.491 0 011.307 3.497A4.49 4.49 0 0121.75 12a4.49 4.49 0 01-1.549 3.397 4.491 4.491 0 01-1.307 3.497 4.491 4.491 0 01-3.497 1.307A4.49 4.49 0 0112 21.75a4.49 4.49 0 01-3.397-1.549 4.49 4.49 0 01-3.498-1.306 4.491 4.491 0 01-1.307-3.498A4.49 4.49 0 012.25 12c0-1.357.6-2.573 1.549-3.397a4.49 4.49 0 011.307-3.497 4.49 4.49 0 013.497-1.307zm7.007 6.387a.75.75 0 10-1.22-.872l-3.236 4.53L9.53 12.22a.75.75 0 00-1.06 1.06l2.25 2.25a.75.75 0 001.14-.094l3.75-5.25z" clipRule="evenodd" />
           </svg>
@@ -87,7 +92,7 @@ export default function DirectAdmissionCard({
               <path strokeLinecap="round" strokeLinejoin="round" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
               <path strokeLinecap="round" strokeLinejoin="round" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
             </svg>
-            <span className="truncate">{location}</span>
+            <span className="truncate" title={location}>{location}</span>
           </div>
         </div>
 
@@ -115,7 +120,7 @@ export default function DirectAdmissionCard({
             </svg>
             Fast-Track Process
           </div>
-          <p className="text-[11.5px] text-indigo-900/80 leading-relaxed">{description}</p>
+          <p className="text-[11.5px] text-indigo-900/80 leading-relaxed line-clamp-2" title={description}>{description}</p>
         </div>
 
         <div className="flex-grow"></div>
