@@ -12,7 +12,8 @@ export default function FooterWrapper() {
     pathname.startsWith("/institution-zone") ||
     pathname.startsWith("/user/dashboard") ||
     pathname.startsWith("/college-recommender") ||
-    pathname.startsWith("/scholarship-recommender");
+    pathname.startsWith("/scholarship-recommender") ||
+    pathname.startsWith("/superadmin");
 
   if (hideGlobalFooter) {
     return null;

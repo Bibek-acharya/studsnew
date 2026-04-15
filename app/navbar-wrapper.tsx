@@ -13,7 +13,8 @@ export default function NavbarWrapper() {
   const hideGlobalNavbar =
     pathname.startsWith("/scholarship-provider") ||
     pathname.startsWith("/institution-zone") ||
-    pathname.startsWith("/user/dashboard");
+    pathname.startsWith("/user/dashboard") ||
+    pathname.startsWith("/superadmin");
 
   if (hideGlobalNavbar) {
     return null;

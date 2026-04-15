@@ -732,4 +732,22 @@ export const apiService = {
     localStorage.removeItem("scholarshipProviderToken");
     localStorage.removeItem("scholarshipProviderUser");
   },
+  async superadminLogin(email: string, password: string): Promise<AuthResponse> {
+    return apiRequest<AuthResponse>("/api/v1/superadmin/auth/login", {
+      method: "POST",
+      body: JSON.stringify({ email, password }),
+    });
+  },
+  async superadminRegister(data: {
+    first_name: string;
+    last_name: string;
+    email: string;
+    password: string;
+    access_code: string;
+  }): Promise<AuthResponse> {
+    return apiRequest<AuthResponse>("/api/v1/superadmin/auth/register", {
+      method: "POST",
+      body: JSON.stringify(data),
+    });
+  },
 };

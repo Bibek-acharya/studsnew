@@ -12,7 +12,8 @@ export default function LayoutPaddingWrapper({
   // Route-specific exclusions for global navbar/padding
   const isDashboardRoute =
     pathname.startsWith("/institution-zone") ||
-    pathname.startsWith("/scholarship-provider");
+    pathname.startsWith("/scholarship-provider") ||
+    pathname.startsWith("/superadmin");
 
   return (
     <div

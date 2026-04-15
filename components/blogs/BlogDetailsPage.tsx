@@ -2,7 +2,7 @@
 
 import React, { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
-import { getBlogById, getRelatedBlogs } from "@/lib/blogs-data";
+import { fetchPublicBlogById, BlogEntry } from "@/services/blogApi";
 
 interface CommentItem {
   id: string;
@@ -15,13 +15,25 @@ interface CommentItem {
 
 const BlogDetailsPage: React.FC<{ params: Promise<{ id: string }> }> = ({ params }) => {
   const [id, setId] = useState<string | null>(null);
+  const [blog, setBlog] = useState<BlogEntry | null>(null);
+  const [related, setRelated] = useState<BlogEntry[]>([]);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     params.then((p) => setId(p.id));
   }, [params]);
 
-  const blog = id ? getBlogById(id) : undefined;
-  const related = blog && id ? getRelatedBlogs(id, blog.category) : [];
+  useEffect(() => {
+    if (!id) return;
+    setLoading(true);
+    fetchPublicBlogById(id).then((result) => {
+      if (result) {
+        setBlog(result.blog);
+        setRelated(result.related);
+      }
+      setLoading(false);
+    });
+  }, [id]);
 
   const [commentInput, setCommentInput] = useState("");
   const [comments, setComments] = useState<CommentItem[]>([
@@ -42,16 +54,16 @@ const BlogDetailsPage: React.FC<{ params: Promise<{ id: string }> }> = ({ params
 
   const topCategory = useMemo(() => {
     if (!blog) return "Admission";
-    if (blog.category === "Career Advice") return "Admission";
-    if (blog.category === "Study Tips") return "Exam";
-    return "Fee";
+    return blog.category || "Others";
   }, [blog]);
 
   const topCategoryClass = useMemo(() => {
     if (topCategory === "Admission") return "bg-[#1e3a8a]";
-    if (topCategory === "Exam") return "bg-red-500";
+    if (topCategory === "Exams") return "bg-red-500";
+    if (topCategory === "Scholarship") return "bg-emerald-600";
     return "bg-yellow-600";
   }, [topCategory]);
+
 
   const postComment = () => {
     const text = commentInput.trim();
@@ -71,7 +83,15 @@ const BlogDetailsPage: React.FC<{ params: Promise<{ id: string }> }> = ({ params
     setCommentInput("");
   };
 
-  if (!blog || !id) {
+  if (loading || !id) {
+    return (
+      <div className="min-h-[40vh] flex items-center justify-center">
+        <div className="w-8 h-8 border-3 border-blue-500 border-t-transparent rounded-full animate-spin" />
+      </div>
+    );
+  }
+
+  if (!blog) {
     return (
       <div className="min-h-[40vh] flex items-center justify-center text-slate-500 font-semibold">
         Blog post not found.
@@ -88,10 +108,10 @@ const BlogDetailsPage: React.FC<{ params: Promise<{ id: string }> }> = ({ params
               <i className="fa-solid fa-graduation-cap text-xs"></i> {topCategory}
             </span>
             <span className="text-gray-500 flex items-center gap-1.5">
-              <i className="fa-regular fa-clock"></i> 90 days ago
+              <i className="fa-regular fa-clock"></i> {new Date(blog.created_at).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}
             </span>
             <span className="text-gray-500 flex items-center gap-1.5 ml-auto sm:ml-0">
-              <i className="fa-regular fa-eye"></i> 200 views
+              <i className="fa-regular fa-eye"></i> {blog.views} views
             </span>
           </div>
 

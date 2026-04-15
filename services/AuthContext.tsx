@@ -1,6 +1,7 @@
 "use client";
 
 import React, { createContext, useContext, useState, ReactNode, useEffect } from "react";
+import { apiService } from "./api";
 
 interface User {
   id?: number;
@@ -19,6 +20,8 @@ interface AuthContextType {
   login: (email: string, password: string) => Promise<void>;
   logout: () => void;
   register: (email: string, password: string, firstName: string, lastName: string, role: string, educationLevel: string) => Promise<void>;
+  superadminLogin: (email: string, password: string) => Promise<void>;
+  superadminRegister: (data: { first_name: string; last_name: string; email: string; password: string; access_code: string }) => Promise<void>;
   verifyOTP: (email: string, otp: string) => Promise<void>;
   sendOTP: (email: string) => Promise<void>;
   setUser: (user: User) => void;
@@ -40,10 +43,13 @@ const loadStoredAuth = (): { token: string; user: User } | null => {
 
 const saveAuth = (token: string, user: User) => {
   localStorage.setItem(STORAGE_KEY, JSON.stringify({ token, user }));
+  // Also set in apiService just in case
+  apiService.setToken(token);
 };
 
 const clearAuth = () => {
   localStorage.removeItem(STORAGE_KEY);
+  apiService.setToken(null);
 };
 
 export function AuthProvider({ children }: { children: ReactNode }) {
@@ -65,55 +71,56 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     if (token) saveAuth(token, userData);
   };
 
-  const login = async (email: string, _password: string) => {
-    const storedUsersRaw = localStorage.getItem("studsphere_users");
-    const storedUsers: Array<{ email: string; password: string; first_name: string; last_name: string; role: string }> = storedUsersRaw ? JSON.parse(storedUsersRaw) : [];
-
-    const found = storedUsers.find((u) => u.email === email && u.password === _password);
-
-    if (!found) {
-      throw new Error("Invalid email or password. Please try again.");
-    }
-
-    const mockToken = `tok_${Date.now()}_${Math.random().toString(36).slice(2)}`;
-    const userData: User = {
-      first_name: found.first_name,
-      last_name: found.last_name,
-      email: found.email,
-      role: found.role,
-    };
-
-    saveAuth(mockToken, userData);
-    setToken(mockToken);
-    setUserState(userData);
+  const login = async (email: string, password: string) => {
+    const response = await apiService.login(email, password);
+    const { token: receivedToken, user: receivedUser } = response.data;
+    
+    saveAuth(receivedToken, receivedUser);
+    setToken(receivedToken);
+    setUserState(receivedUser);
   };
 
-  const register = async (email: string, password: string, firstName: string, lastName: string, role: string, _educationLevel: string) => {
-    const storedUsersRaw = localStorage.getItem("studsphere_users");
-    const storedUsers: Array<{ email: string; password: string; first_name: string; last_name: string; role: string }> = storedUsersRaw ? JSON.parse(storedUsersRaw) : [];
-
-    const exists = storedUsers.find((u) => u.email === email);
-    if (exists) {
-      throw new Error("An account with this email already exists.");
-    }
-
-    storedUsers.push({ email, password, first_name: firstName, last_name: lastName, role });
-    localStorage.setItem("studsphere_users", JSON.stringify(storedUsers));
-
-    const mockToken = `tok_${Date.now()}_${Math.random().toString(36).slice(2)}`;
-    const userData: User = { first_name: firstName, last_name: lastName, email, role };
-
-    saveAuth(mockToken, userData);
-    setToken(mockToken);
-    setUserState(userData);
+  const superadminLogin = async (email: string, password: string) => {
+    const response = await apiService.superadminLogin(email, password);
+    const { token: receivedToken, user: receivedUser } = response.data;
+    
+    saveAuth(receivedToken, receivedUser);
+    setToken(receivedToken);
+    setUserState(receivedUser);
   };
 
-  const verifyOTP = async (_email: string, _otp: string) => {
-    /* no-op for mock */
+  const register = async (email: string, password: string, firstName: string, lastName: string, role: string, educationLevel: string) => {
+    await apiService.register({
+      email,
+      password,
+      first_name: firstName,
+      last_name: lastName,
+      role,
+      education_level: educationLevel
+    });
+    // Registration might require OTP, but for now we proceed as if success leads to login or OTP flow
   };
 
-  const sendOTP = async (_email: string) => {
-    /* no-op for mock */
+  const superadminRegister = async (data: { first_name: string; last_name: string; email: string; password: string; access_code: string }) => {
+    const response = await apiService.superadminRegister(data);
+    const { token: receivedToken, user: receivedUser } = response.data;
+    
+    saveAuth(receivedToken, receivedUser);
+    setToken(receivedToken);
+    setUserState(receivedUser);
+  };
+
+  const verifyOTP = async (email: string, otp: string) => {
+    const response = await apiService.verifyOTP(email, otp);
+    const { token: receivedToken, user: receivedUser } = response.data;
+    
+    saveAuth(receivedToken, receivedUser);
+    setToken(receivedToken);
+    setUserState(receivedUser);
+  };
+
+  const sendOTP = async (email: string) => {
+    await apiService.sendOTP(email);
   };
 
   const logout = () => {
@@ -125,7 +132,20 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const isAuthenticated = !!token;
 
   return (
-    <AuthContext.Provider value={{ token, user, isAuthenticated, loading, login, logout, register, verifyOTP, sendOTP, setUser }}>
+    <AuthContext.Provider value={{ 
+      token, 
+      user, 
+      isAuthenticated, 
+      loading, 
+      login, 
+      logout, 
+      register, 
+      superadminLogin,
+      superadminRegister,
+      verifyOTP, 
+      sendOTP, 
+      setUser 
+    }}>
       {children}
     </AuthContext.Provider>
   );
