@@ -5,6 +5,7 @@ export interface CollegeFilters {
   course: string[];
   province: string[];
   district: string[];
+  localBody: string[];
   type: string[];
   university: string[];
   feeMax: number;
@@ -17,6 +18,7 @@ export interface CollegeFilters {
   feeRange: string[];
   duration: string[];
   popularity: string[];
+  rating: string[];
 }
 
 export const DEFAULT_COLLEGE_FILTERS: CollegeFilters = {
@@ -26,6 +28,7 @@ export const DEFAULT_COLLEGE_FILTERS: CollegeFilters = {
   course: [],
   province: [],
   district: [],
+  localBody: [],
   type: [],
   university: [],
   feeMax: 2000000,
@@ -38,4 +41,5 @@ export const DEFAULT_COLLEGE_FILTERS: CollegeFilters = {
   feeRange: [],
   duration: [],
   popularity: [],
+  rating: [],
 };

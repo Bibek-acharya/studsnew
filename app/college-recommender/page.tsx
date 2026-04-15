@@ -5,7 +5,7 @@ import CollegeRecommenderToolPage from "@/components/college-recommender/College
 
 export default function CollegeRecommenderRoute() {
   const handleNavigate = (view: string, data?: any) => {
-    if (view === 1 || view === 'step1') {
+    if (view === 'step1') {
       window.location.reload();
     } else if (view === 'educationPage') {
       window.location.href = '/';

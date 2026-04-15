@@ -18,7 +18,7 @@ export default function Dropdown({ value, onChange, options, placeholder }: Drop
       <button
         type="button"
         onClick={() => setIsOpen(!isOpen)}
-        className={`flex w-full items-center justify-between rounded-xl border-2 border-[#cbd5e1] bg-white px-5 py-[1.1rem] text-left text-[17px] font-medium transition-all duration-200 hover:border-[#cbd5e1] ${
+        className={`flex w-full items-center justify-between rounded-md border-2 border-[#cbd5e1] bg-white px-5 py-[1.1rem] text-left text-[17px] font-medium transition-all duration-200 hover:border-[#cbd5e1] ${
           isOpen
             ? "border-brand-blue ring-[3px] ring-brand-blue/10"
             : ""

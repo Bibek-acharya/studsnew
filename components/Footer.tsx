@@ -23,11 +23,11 @@ const Footer = () => {
   const currentYear = new Date().getFullYear();
 
   return (
-    <div className="bg-[#F5F6F8] rounded-2xl p-4 sm:p-6 lg:p-8 w-full max-w-[1400px] mx-auto flex flex-col gap-16 lg:gap-24 shadow-sm border border-gray-50 mb-8 mt-16">
+    <div className="bg-[#f8f9fc] rounded-2xl p-4 sm:p-6 lg:p-4 w-full max-w-[1400px] mx-auto flex flex-col gap-10 lg:gap-12 border border-gray-50 mb-4 mt-16">
       <Newsletter />
 
       {/* Footer Section */}
-      <footer className="flex flex-col gap-12 lg:gap-16 px-4 sm:px-8 lg:px-10 pb-4 sm:pb-8">
+      <footer className="flex flex-col gap-8 lg:gap-10 px-4 sm:px-8 lg:px-10 sm:pb-4">
         <div className="flex flex-col lg:flex-row justify-between items-start gap-12 lg:gap-8 w-full">
           {/* Brand Info */}
           <div className="flex flex-col items-center lg:items-start text-center lg:text-left gap-4 w-full lg:w-1/4">
@@ -151,7 +151,7 @@ const Footer = () => {
 
             {/* Legal & Help Column */}
             <div className="flex flex-col">
-              <h4 className="font-semibold text-[#0000ff] mb-5 text-sm sm:text-base">Legal & Help</h4>
+              <h4 className="font-semibold text-[#0000ff] mb- 5 text-sm sm:text-base">Legal & Help</h4>
               <ul className="flex flex-col gap-4">
                 <li><Link href={routeMap.educationPage} className="text-gray-500 hover:text-[#0000ff] text-sm transition-colors text-left">FAQs</Link></li>
                 <li><Link href={routeMap.about} className="text-gray-500 hover:text-[#0000ff] text-sm transition-colors text-left">Terms of Use</Link></li>
@@ -164,7 +164,7 @@ const Footer = () => {
         </div>
 
         {/* Copyright Line */}
-        <div className="w-full border-t border-gray-200 pt-8 mt-4 flex flex-col sm:flex-row items-center justify-center">
+        <div className="w-full border-t border-gray-200 pt-4 mt-2 flex flex-col sm:flex-row items-center justify-center">
           <p className="text-gray-500 text-sm">
             Copyright &copy; {currentYear} Studsphere. All Rights Reserved.
           </p>

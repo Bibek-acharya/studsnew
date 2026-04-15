@@ -6,6 +6,7 @@ import {
   DEFAULT_ADMISSION_FILTERS,
 } from "@/app/admissions/[level]/types";
 import GlobalFilterSection from "@/components/ui/GlobalFilterSection";
+import { FaSliders } from "react-icons/fa6";
 
 interface AdmissionFilterSidebarProps {
   filters: AdmissionFilters;
@@ -133,26 +134,83 @@ const DISTRICTS: Record<
 };
 
 const COLLEGE_TYPES = [
-  { id: "ct_private", label: "Private", count: 250 },
-  { id: "ct_public", label: "Public / Govt", count: 50 },
-  { id: "ct_community", label: "Community", count: 20 },
+  { id: "ct_private", label: "Private College" },
+  { id: "ct_community", label: "Community College" },
+  { id: "ct_government", label: "Government College" },
+];
+
+const SCHOLARSHIP_OPTIONS = [
+  { id: "sch_entrance", label: "Entrance Scholarship" },
+  { id: "sch_merit", label: "Merit Scholarship" },
+  { id: "sch_need", label: "Need-based Scholarship" },
+];
+
+const FACILITY_OPTIONS = [
+  { id: "fac_ac", label: "AC Classrooms" },
+  { id: "fac_library", label: "Digital Library" },
+  { id: "fac_sports", label: "Sports Complex" },
+  { id: "fac_wifi", label: "Wi-Fi Campus" },
+  { id: "fac_hostel", label: "Hostel Available" },
+  { id: "fac_cafeteria", label: "Cafeteria" },
 ];
 
 const SORT_OPTIONS = [
   { id: "popularity", label: "Popularity" },
-  { id: "rating", label: "Highest Rating" },
+  { id: "rating", label: "Rating: High to Low" },
   { id: "fee_low", label: "Fee: Low to High" },
   { id: "fee_high", label: "Fee: High to Low" },
 ];
 
 const APPLIED_FILTER_KEYS: Array<
   Exclude<keyof AdmissionFilters, "search" | "feeMax" | "sortBy" | "directAdmission">
-> = ["academic", "program", "province", "district", "type"];
+> = ["academic", "program", "province", "district", "type", "scholarship", "facilities"];
 
 function formatFee(val: number) {
-  if (val >= 2000000) return "NPR 20,00,000+";
+  if (val >= 1000000) return "NPR 10,00,000+";
+  if (val === 0) return "Free / No Fee";
   return `NPR ${val.toLocaleString("en-IN")}`;
 }
+
+const SelectInput: React.FC<{
+  placeholder: string;
+  value: string;
+  options: Array<{ id: string; label: string }>;
+  onChange: (v: string) => void;
+  disabled?: boolean;
+}> = ({ placeholder, value, options, onChange, disabled }) => (
+  <div className="relative mb-3">
+    <select
+      value={value}
+      onChange={(e) => onChange(e.target.value)}
+      disabled={disabled}
+      className="block w-full appearance-none rounded-md border border-gray-200 bg-[#f8fafc] py-2 px-3 pr-9 text-[13.5px] text-gray-900 outline-none transition disabled:bg-gray-100 disabled:text-gray-400 focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+    >
+      <option value="" disabled={value !== ""}>
+        {placeholder}
+      </option>
+      {options.map((opt) => (
+        <option key={opt.id} value={opt.id}>
+          {opt.label}
+        </option>
+      ))}
+    </select>
+    <div className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-gray-400">
+      <svg
+        xmlns="http://www.w3.org/2000/svg"
+        width="12"
+        height="12"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="2.5"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      >
+        <path d="m6 9 6 6 6-6" />
+      </svg>
+    </div>
+  </div>
+);
 
 const SearchInput: React.FC<{
   placeholder: string;
@@ -175,7 +233,7 @@ const SearchInput: React.FC<{
       value={value}
       onChange={(e) => onChange(e.target.value)}
       placeholder={placeholder}
-      className="block w-full rounded-[8px] border border-gray-200 bg-[#f8fafc] py-2 pl-9 pr-3 text-[13.5px] text-gray-900 outline-none transition placeholder:text-gray-400 focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+      className="block w-full rounded-lg border border-gray-200 bg-[#f8fafc] py-2 pl-9 pr-3 text-[13.5px] text-gray-900 outline-none transition placeholder:text-gray-400 focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
     />
   </div>
 );
@@ -199,7 +257,7 @@ const CheckboxItem: React.FC<{
         onChange={onChange}
         className="custom-checkbox"
       />
-      <span className="text-[14.5px] text-[#475569] transition-colors group-hover:text-gray-900">
+      <span className="text-[14.5px] text-[#475569] transition-colors group-hover:text-gray-900 leading-tight">
         {label}
       </span>
     </div>
@@ -227,7 +285,7 @@ const RadioItem: React.FC<{
       onChange={onChange}
       className="custom-radio"
     />
-    <span className="text-[14.5px] text-[#475569] transition-colors group-hover:text-gray-900">
+    <span className="text-[14.5px] text-[#475569] transition-colors group-hover:text-gray-900 leading-tight">
       {label}
     </span>
   </label>
@@ -250,6 +308,96 @@ const Accordion: React.FC<{
   );
 };
 
+const DirectAdmissionModal: React.FC<{ isOpen: boolean; onClose: () => void }> = ({ isOpen, onClose }) => {
+  if (!isOpen) return null;
+  return (
+    <div 
+      className="fixed inset-0 bg-gray-900/40 flex items-center justify-center p-4 z-1000" 
+      onClick={onClose}
+    >
+      <div 
+        className="bg-white rounded-xl shadow-2xl max-w-5xl w-full max-h-[95vh] overflow-hidden relative flex flex-col p-6 md:p-8" 
+        onClick={(e) => e.stopPropagation()}
+      >
+        <button 
+          onClick={onClose} 
+          className="absolute top-3 right-3 p-1.5 text-gray-400 hover:text-gray-900 transition-colors bg-white rounded-full"
+        >
+          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+        </button>
+
+        <div className="text-center mb-6 mt-2 md:mt-0">
+          <h2 className="font-poppins text-2xl md:text-3xl font-bold text-gray-900 mb-2 tracking-tight">How does College Direct Admission work?</h2>
+        </div>
+
+        <div className="relative flex flex-col md:flex-row justify-between w-full mx-auto mb-6 gap-y-6 md:gap-y-0 md:gap-x-3 overflow-y-auto custom-scrollbar">
+          <div className="absolute top-12 left-[10%] right-[10%] h-0.5 bg-gray-200 z-0 hidden md:block"></div>
+          <div className="absolute left-10 top-10 bottom-10 w-0.5 bg-gray-200 z-0 md:hidden"></div>
+          
+          {[
+            { 
+              step: "1. Create Profile", 
+              desc: "Build your academic profile in minutes by entering your SEE/+2 results, preferred faculty, and location.", 
+              img: "https://i.pinimg.com/1200x/8d/94/a9/8d94a9ab7d4cae915dcecd7cfe10484d.jpg" 
+            },
+            { 
+              step: "2. Get Matched", 
+              desc: "Our smart system instantly connects you with colleges and programs where you are eligible for direct admission.", 
+              img: "https://i.pinimg.com/1200x/77/26/ec/7726ecf44da329c20c215fca1982a5f9.jpg" 
+            },
+            { 
+              step: "3. Compare & Choose", 
+              desc: "Explore matched colleges, compare fees, facilities, scholarships, and locations — then choose your fit.", 
+              img: "https://i.pinimg.com/1200x/6b/14/ee/6b14ee22b8589497cd6cfcba2420af7f.jpg" 
+            },
+            { 
+              step: "4. Apply Instantly", 
+              desc: "Send your application directly to the college with one click. No need to visit multiple campuses.", 
+              img: "https://i.pinimg.com/1200x/f9/90/34/f99034c1ff77e20f8b97347bf96171df.jpg" 
+            },
+            { 
+              step: "5. Confirm Admission", 
+              desc: "Get quick confirmation from the college and secure your seat before it fills.", 
+              img: "https://i.pinimg.com/736x/61/9f/b2/619fb264043785065fc11519f5897cbb.jpg" 
+            }
+          ].map((item, idx) => (
+            <div key={idx} className="flex flex-row md:flex-col items-center flex-1 relative z-10 px-1 gap-4 md:gap-2">
+              <div className="w-16 h-16 md:w-24 md:h-24 flex items-center justify-center shrink-0 z-10 hover:-translate-y-0.5 transition-transform overflow-hidden bg-white">
+                <img src={item.img} alt={item.step} className="w-full h-full object-cover mix-blend-multiply" />
+              </div>
+              <div className="text-left md:text-center flex-1">
+                <h4 className="font-poppins font-bold text-gray-900 text-[13px] md:text-sm mb-1">{item.step}</h4>
+                <p className="text-gray-500 text-[11px] md:text-xs leading-snug">{item.desc}</p>
+              </div>
+            </div>
+          ))}
+        </div>
+
+        <div className="mt-2 bg-indigo-50/60 border border-indigo-100 rounded-2xl p-4 md:p-5 flex flex-col md:flex-row items-center justify-between gap-4 md:gap-6 w-full mx-auto shadow-sm">
+          <div className="flex-1 w-full order-2 md:order-1">
+            <h3 className="font-poppins font-bold text-gray-900 text-lg md:text-xl mb-1">Complete your profile now</h3>
+            <p className="text-gray-500 text-xs md:text-sm mb-4">You are just a few steps away from unlocking direct admission matches.</p>
+            <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 w-full">
+              <div className="flex items-center gap-3 w-full sm:max-w-45">
+                <div className="w-full bg-indigo-100/80 rounded-full h-2 overflow-hidden">
+                  <div className="bg-indigo-600 h-2 rounded-full" style={{ width: "40%" }}></div>
+                </div>
+                <span className="text-xs font-bold text-indigo-700">40%</span>
+              </div>
+              <button className="w-full sm:w-auto bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-semibold py-2 px-5 rounded-full transition-all duration-300 hover:shadow-lg hover:-translate-y-0.5 whitespace-nowrap">
+                Get direct admission
+              </button>
+            </div>
+          </div>
+          <div className="shrink-0 w-20 h-20 md:w-28 md:h-28 order-1 md:order-2 flex items-center justify-center">
+            <img src="https://i.pinimg.com/1200x/c0/a7/68/c0a7688c3212fe6d63227c3f23ce060a.jpg" alt="Profile Illustration" className="w-full h-full object-cover mix-blend-multiply" />
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
 export default function AdmissionFilterSidebar({
   filters,
   setFilters,
@@ -258,9 +406,8 @@ export default function AdmissionFilterSidebar({
   const [locating, setLocating] = useState(false);
   const [showAppliedDropdown, setShowAppliedDropdown] = useState(false);
   const [programSearch, setProgramSearch] = useState("");
-  const [provinceSearch, setProvinceSearch] = useState("");
-  const [districtSearch, setDistrictSearch] = useState("");
   const [navLocString, setNavLocString] = useState("");
+  const [showModal, setShowModal] = useState(false);
 
   useEffect(() => {
     const updateLocation = (cityStr: string) => {
@@ -297,19 +444,14 @@ export default function AdmissionFilterSidebar({
     );
   }, [filters.academic, programSearch]);
 
-  const availableDistricts = useMemo(() => {
-    const dists = filters.province.flatMap((p) => DISTRICTS[p] || []);
-    if (!districtSearch) return dists;
-    return dists.filter((d) =>
-      d.label.toLowerCase().includes(districtSearch.toLowerCase()),
-    );
-  }, [filters.province, districtSearch]);
+  const provinceOptions = useMemo(() => {
+    return PROVINCES.map(p => ({ id: p.id, label: p.label }));
+  }, []);
 
-  const filteredProvinces = provinceSearch
-    ? PROVINCES.filter((p) =>
-        p.label.toLowerCase().includes(provinceSearch.toLowerCase()),
-      )
-    : PROVINCES;
+  const districtOptions = useMemo(() => {
+    if (filters.province.length === 0) return [];
+    return filters.province.flatMap(p => DISTRICTS[p] || []);
+  }, [filters.province]);
 
   const filterLabelMap = useMemo(() => {
     const map = new Map<string, string>();
@@ -317,6 +459,8 @@ export default function AdmissionFilterSidebar({
     levels.forEach((item) => map.set(item.id, item.label));
     PROVINCES.forEach((item) => map.set(item.id, item.label));
     COLLEGE_TYPES.forEach((item) => map.set(item.id, item.label));
+    SCHOLARSHIP_OPTIONS.forEach((item) => map.set(item.id, item.label));
+    FACILITY_OPTIONS.forEach((item) => map.set(item.id, item.label));
     SORT_OPTIONS.forEach((item) => map.set(item.id, item.label));
     Object.values(PROGRAMS).forEach((group) => {
       group.forEach((item) => map.set(item.id, item.label));
@@ -344,6 +488,7 @@ export default function AdmissionFilterSidebar({
   }, [filters, filterLabelMap]);
 
   const isFeeApplied = filters.feeMax < DEFAULT_ADMISSION_FILTERS.feeMax;
+  const hasActiveFilters = appliedFilters.length > 0 || isFeeApplied;
 
   const toggle = (key: keyof AdmissionFilters, value: string) => {
     setFilters((prev) => {
@@ -465,94 +610,57 @@ export default function AdmissionFilterSidebar({
 
   return (
     <>
-      <div className="relative w-full rounded-[20px] border border-gray-100 bg-white p-6 shadow-[0_4px_24px_-8px_rgba(0,0,0,0.1)]">
+      <div className="relative w-full rounded-[20px] border border-gray-200 bg-white p-6">
         <div className="mb-2 flex items-center justify-between">
-          <div className="flex items-center gap-2.5">
-            <svg
-              viewBox="0 0 24 24"
-              fill="currentColor"
-              className="h-6 w-6 text-blue-600"
-            >
-              <path
-                fillRule="evenodd"
-                clipRule="evenodd"
-                d="M3 4a1 1 0 011-1h16a1 1 0 01.7 1.7L14 11.414V17a1 1 0 01-.293.707l-3 3A1 1 0 019 20v-8.586L3.3 4.7A1 1 0 013 4z"
-              />
-            </svg>
-            <h2 className="text-[20px] font-bold tracking-tight text-gray-900">
+          <div className="flex items-center gap-3">
+            <FaSliders size={18} className="text-black" />
+            <h3 className="font-black text-xl text-slate-900 tracking-tight">
               Filters
-            </h2>
+            </h3>
           </div>
           <button
             type="button"
-            onClick={() => setShowAppliedDropdown((prev) => !prev)}
-            className="inline-flex items-center gap-2 rounded-md border border-blue-100 bg-blue-50 px-3 py-1.5 text-[12px] font-semibold text-blue-700 transition-colors hover:bg-blue-100"
+            onClick={clearAll}
+            className="text-blue-600 font-bold text-sm hover:text-blue-800 transition-colors"
           >
-            Applied ({appliedFilters.length + (isFeeApplied ? 1 : 0)})
-            <i
-              className={`fa-solid fa-chevron-down text-[10px] transition-transform ${showAppliedDropdown ? "rotate-180" : ""}`}
-            ></i>
+            Reset
           </button>
         </div>
 
-        {showAppliedDropdown && (
-          <div className="absolute right-6 top-16 z-30 w-[min(520px,calc(100%-3rem))] rounded-xl border border-gray-200 bg-white p-3 shadow-lg">
-            {appliedFilters.length === 0 && !isFeeApplied ? (
-              <p className="px-1 py-2 text-[13px] italic text-gray-400">
-                No filters selected yet.
-              </p>
-            ) : (
-              <>
-                <div className="flex flex-wrap gap-2 pb-3">
-                  {appliedFilters.map((tag, index) => (
-                    <button
-                      key={`${tag.key}-${tag.value}-${index}`}
-                      type="button"
-                      onClick={() =>
-                        setFilters((prev) => ({
-                          ...prev,
-                          [tag.key]: prev[tag.key].filter(
-                            (item) => item !== tag.value,
-                          ),
-                        }))
-                      }
-                      className="inline-flex items-center gap-1.5 rounded-full border border-blue-100 bg-blue-50 px-3 py-1.5 text-[12px] font-medium text-blue-700 transition-colors hover:border-red-100 hover:bg-red-50 hover:text-red-700"
-                    >
-                      {tag.label}
-                      <i className="fa-solid fa-xmark text-[10px]"></i>
-                    </button>
-                  ))}
-
-                  {isFeeApplied && (
-                    <button
-                      type="button"
-                      onClick={() =>
-                        setFilters((prev) => ({
-                          ...prev,
-                          feeMax: DEFAULT_ADMISSION_FILTERS.feeMax,
-                        }))
-                      }
-                      className="inline-flex items-center gap-1.5 rounded-full border border-blue-100 bg-blue-50 px-3 py-1.5 text-[12px] font-medium text-blue-700 transition-colors hover:border-red-100 hover:bg-red-50 hover:text-red-700"
-                    >
-                      Max Fee: {formatFee(filters.feeMax)}
-                      <i className="fa-solid fa-xmark text-[10px]"></i>
-                    </button>
-                  )}
-                </div>
-
-                <div className="border-t border-gray-100 pt-2">
-                  <button
-                    type="button"
-                    onClick={() => {
-                      clearAll();
-                      setShowAppliedDropdown(false);
-                    }}
-                    className="text-[12px] font-semibold text-red-600 transition-colors hover:text-red-700"
-                  >
-                    Reset Filters
-                  </button>
-                </div>
-              </>
+        {hasActiveFilters && (
+          <div className="mb-4 flex flex-wrap gap-2">
+            {appliedFilters.map((tag, index) => (
+              <button
+                key={`${tag.key}-${tag.value}-${index}`}
+                type="button"
+                onClick={() =>
+                  setFilters((prev) => ({
+                    ...prev,
+                    [tag.key]: prev[tag.key].filter(
+                      (item) => item !== tag.value,
+                    ),
+                  }))
+                }
+                className="inline-flex items-center gap-1.5 rounded-full border border-blue-100 bg-blue-50 px-3 py-1.5 text-[12px] font-medium text-blue-700 transition-colors hover:border-red-100 hover:bg-red-50 hover:text-red-700"
+              >
+                {tag.label}
+                <i className="fa-solid fa-xmark text-[10px]"></i>
+              </button>
+            ))}
+            {isFeeApplied && (
+              <button
+                type="button"
+                onClick={() =>
+                  setFilters((prev) => ({
+                    ...prev,
+                    feeMax: DEFAULT_ADMISSION_FILTERS.feeMax,
+                  }))
+                }
+                className="inline-flex items-center gap-1.5 rounded-full border border-blue-100 bg-blue-50 px-3 py-1.5 text-[12px] font-medium text-blue-700 transition-colors hover:border-red-100 hover:bg-red-50 hover:text-red-700"
+              >
+                Max Fee: {formatFee(filters.feeMax)}
+                <i className="fa-solid fa-xmark text-[10px]"></i>
+              </button>
             )}
           </div>
         )}
@@ -561,7 +669,7 @@ export default function AdmissionFilterSidebar({
           <button
             type="button"
             onClick={handleLocate}
-            className="flex w-full items-center justify-center gap-2 rounded-md border border-blue-500 bg-blue-50 px-4 py-3 text-blue-500 outline-none transition-all duration-200 hover:bg-blue-100 active:bg-blue-200"
+            className="flex w-full items-center justify-start gap-2 rounded-md border border-black/20 px-4 py-3 text-gray-700 hover:text-brand-blue outline-none transition-all duration-200"
           >
             {locating ? (
               <svg
@@ -624,7 +732,7 @@ export default function AdmissionFilterSidebar({
             value={programSearch}
             onChange={setProgramSearch}
           />
-          <div className="custom-scrollbar flex max-h-[220px] flex-col gap-3.5 overflow-y-auto pr-1">
+          <div className="custom-scrollbar flex max-h-55 flex-col gap-3.5 overflow-y-auto pr-1">
             {availablePrograms.length === 0 ? (
               <p className="px-1 text-[13px] italic text-gray-400">
                 {filters.academic.length === 0
@@ -646,56 +754,33 @@ export default function AdmissionFilterSidebar({
           </div>
         </Accordion>
 
-        {/* Province */}
-        <Accordion title="Province">
-          <SearchInput
-            placeholder="Search province..."
-            value={provinceSearch}
-            onChange={setProvinceSearch}
-          />
-          <div className="custom-scrollbar flex max-h-[220px] flex-col gap-3.5 overflow-y-auto pr-1">
-            {filteredProvinces.map((item) => (
-              <CheckboxItem
-                key={item.id}
-                id={`prov-${item.id}`}
-                label={item.label}
-                count={item.count}
-                checked={filters.province.includes(item.id)}
-                onChange={() => {
-                  toggle("province", item.id);
-                  setFilters((prev) => ({ ...prev, district: [] }));
-                }}
-              />
-            ))}
-          </div>
-        </Accordion>
-
-        {/* District */}
-        <Accordion title="District">
-          <SearchInput
-            placeholder="Search district..."
-            value={districtSearch}
-            onChange={setDistrictSearch}
-          />
-          <div className="custom-scrollbar flex max-h-[220px] flex-col gap-3.5 overflow-y-auto pr-1">
-            {availableDistricts.length === 0 ? (
-              <p className="px-1 text-[13px] italic text-gray-400">
-                {filters.province.length === 0
-                  ? "Select a Province first."
-                  : "No districts found."}
-              </p>
-            ) : (
-              availableDistricts.map((item) => (
-                <CheckboxItem
-                  key={item.id}
-                  id={`dist-${item.id}`}
-                  label={item.label}
-                  count={item.count}
-                  checked={filters.district.includes(item.id)}
-                  onChange={() => toggle("district", item.id)}
-                />
-              ))
-            )}
+        {/* Location (Province/District) */}
+        <Accordion title="Location">
+          <div className="flex flex-col gap-2 pt-1">
+            <SelectInput
+              placeholder="Select Province"
+              value={filters.province[0] || ""}
+              options={provinceOptions}
+              onChange={(val) => {
+                setFilters((prev) => ({
+                  ...prev,
+                  province: val ? [val] : [],
+                  district: [],
+                }));
+              }}
+            />
+            <SelectInput
+              placeholder="Select District"
+              value={filters.district[0] || ""}
+              options={districtOptions}
+              onChange={(val) => {
+                setFilters((prev) => ({
+                  ...prev,
+                  district: val ? [val] : [],
+                }));
+              }}
+              disabled={filters.province.length === 0}
+            />
           </div>
         </Accordion>
 
@@ -707,7 +792,6 @@ export default function AdmissionFilterSidebar({
                 key={item.id}
                 id={`type-${item.id}`}
                 label={item.label}
-                count={item.count}
                 checked={filters.type.includes(item.id)}
                 onChange={() => toggle("type", item.id)}
               />
@@ -715,23 +799,53 @@ export default function AdmissionFilterSidebar({
           </div>
         </Accordion>
 
+        {/* Scholarship */}
+        <Accordion title="Scholarship">
+          <div className="flex flex-col gap-3.5 pt-1">
+            {SCHOLARSHIP_OPTIONS.map((item) => (
+              <CheckboxItem
+                key={item.id}
+                id={`scholar-${item.id}`}
+                label={item.label}
+                checked={filters.scholarship.includes(item.id)}
+                onChange={() => toggle("scholarship", item.id)}
+              />
+            ))}
+          </div>
+        </Accordion>
+
+        {/* Facilities */}
+        <Accordion title="Facilities">
+          <div className="flex flex-col gap-3.5 pt-1">
+            {FACILITY_OPTIONS.map((item) => (
+              <CheckboxItem
+                key={item.id}
+                id={`facility-${item.id}`}
+                label={item.label}
+                checked={filters.facilities.includes(item.id)}
+                onChange={() => toggle("facilities", item.id)}
+              />
+            ))}
+          </div>
+        </Accordion>
+
         {/* Fee Range */}
-        <Accordion title="Total Fee Range">
+        <Accordion title="Fee Range">
           <div className="px-2 pb-2 pt-2">
             <div className="mb-4 flex items-center justify-between">
               <span className="text-[13px] font-medium text-gray-400">
-                NPR 0
+                Max Fee:
               </span>
-              <span className="rounded-md bg-blue-50 px-2.5 py-1 text-[14px] font-bold text-blue-600">
+              <span className="text-[14px] font-bold text-blue-600">
                 {formatFee(filters.feeMax)}
               </span>
             </div>
             <input
               type="range"
               min={0}
-              max={2000000}
+              max={1000000}
               step={50000}
-              value={filters.feeMax}
+              value={filters.feeMax > 1000000 ? 1000000 : filters.feeMax}
               onChange={(e) =>
                 setFilters((prev) => ({
                   ...prev,
@@ -740,20 +854,16 @@ export default function AdmissionFilterSidebar({
               }
               className="fee-range w-full"
             />
+            <div className="flex justify-between text-[10px] text-slate-400 mt-2 font-medium">
+              <span>0</span>
+              <span>10L+</span>
+            </div>
           </div>
         </Accordion>
 
         {/* Sort By */}
-        <div>
-          <button
-            type="button"
-            className="group flex w-full items-center justify-between bg-white py-4"
-          >
-            <span className="text-[15px] font-semibold text-gray-900">
-              Sort By
-            </span>
-          </button>
-          <div className="flex flex-col gap-3.5 pb-4 pt-1">
+        <Accordion title="Sort By">
+          <div className="flex flex-col gap-3.5 pt-1">
             {SORT_OPTIONS.map((opt) => (
               <RadioItem
                 key={opt.id}
@@ -767,8 +877,38 @@ export default function AdmissionFilterSidebar({
               />
             ))}
           </div>
+        </Accordion>
+
+        {/* Direct Admission Toggle */}
+        <div className="mt-2 pt-5 border-t border-gray-100">
+          <div className="flex flex-col gap-2 w-full">
+            <div className={`py-2 px-3 rounded-lg flex items-center justify-between transition-colors duration-300 w-full ${filters.directAdmission ? 'bg-green-50' : 'bg-gray-100'}`}>
+              <span className="text-sm font-semibold text-slate-900 leading-tight">
+                Get college direct admission
+              </span>
+              <label className="toggle-switch shrink-0">
+                <input 
+                  type="checkbox" 
+                  checked={filters.directAdmission}
+                  onChange={(e) => setFilters(prev => ({ ...prev, directAdmission: e.target.checked }))}
+                />
+                <span className="slider"></span>
+              </label>
+            </div>
+            <div className="flex justify-end w-full px-1">
+              <button 
+                onClick={() => setShowModal(true)}
+                className="text-blue-600 text-xs hover:underline flex items-center gap-1"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"></circle><path d="M12 16v-4"></path><path d="M12 8h.01"></path></svg>
+                How it works?
+              </button>
+            </div>
+          </div>
         </div>
       </div>
+
+      <DirectAdmissionModal isOpen={showModal} onClose={() => setShowModal(false)} />
 
       <style>{`
         .custom-checkbox {
@@ -833,7 +973,7 @@ export default function AdmissionFilterSidebar({
           width: 100%;
           height: 4px;
           border-radius: 2px;
-          background: blue;
+          background: #e2e8f0;
         }
         .fee-range::-webkit-slider-thumb {
           -webkit-appearance: none;
@@ -842,19 +982,38 @@ export default function AdmissionFilterSidebar({
           border-radius: 50%;
           background: #2563eb;
           cursor: pointer;
-          margin-top: -6px;
-          box-shadow: 0 0 0 4px #eff6ff;
+          box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.1);
           transition: box-shadow 0.2s;
         }
-        .fee-range::-webkit-slider-thumb:hover { box-shadow: 0 0 0 6px #dbeafe; }
-        .fee-range::-webkit-slider-runnable-track {
-          width: 100%;
-          height: 4px;
-          cursor: pointer;
-          background: #e2e8f0;
-          border-radius: 2px;
+        .fee-range::-webkit-slider-thumb:hover { box-shadow: 0 0 0 6px rgba(37, 99, 235, 0.2); }
+
+        .toggle-switch {
+          position: relative;
+          display: inline-block;
+          width: 44px;
+          height: 24px;
         }
-        .fee-range:focus { outline: none; }
+        .toggle-switch input { opacity: 0; width: 0; height: 0; }
+        .slider {
+          position: absolute;
+          cursor: pointer;
+          top: 0; left: 0; right: 0; bottom: 0;
+          background-color: #8a949b;
+          transition: .3s ease-in-out;
+          border-radius: 34px;
+        }
+        .slider:before {
+          position: absolute;
+          content: "";
+          height: 18px; width: 18px;
+          left: 3px; bottom: 3px;
+          background-color: white;
+          transition: .3s ease-in-out;
+          border-radius: 50%;
+          box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+        }
+        input:checked + .slider { background-color: #0f7b1c; }
+        input:checked + .slider:before { transform: translateX(20px); }
 
         .custom-scrollbar::-webkit-scrollbar { width: 4px; }
         .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }

@@ -9,6 +9,7 @@ import GlobalFilterSection from "@/components/ui/GlobalFilterSection";
 import { FaSliders } from "react-icons/fa6";
 import {
   NEPAL_DISTRICTS,
+  NEPAL_LOCAL_BODIES,
   NEPAL_PROVINCES,
 } from "@/lib/location-data";
 
@@ -192,15 +193,34 @@ const districtIdMap: Record<string, string> = {
 type DistrictOption = {
   id: string;
   label: string;
+  localBodies?: LocalBodyOption[];
+};
+
+type LocalBodyOption = {
+  id: string;
+  label: string;
+  type: "Municipality" | "Sub-Metropolitan City" | "Metropolitan City" | "Gaunpalika";
 };
 
 type ProvinceOption = {
   id: string;
   label: string;
   districts: DistrictOption[];
+  localBodies?: LocalBodyOption[];
 };
 
 type ProvinceName = keyof typeof NEPAL_DISTRICTS;
+
+const localBodyIdMap: Record<string, string> = (() => {
+  const map: Record<string, string> = {};
+  Object.entries(NEPAL_LOCAL_BODIES).forEach(([district, bodies]) => {
+    bodies.forEach((body: { name: string; wards: number }) => {
+      const key = `${district}:${body.name}`;
+      map[key] = `lb_${body.name.toLowerCase().replace(/[^a-z0-9]+/g, "_").replace(/^_+|_+$/g, "")}`;
+    });
+  });
+  return map;
+})();
 
 const provinceOptions: ProvinceOption[] = NEPAL_PROVINCES.map(
   (provinceName, index) => {
@@ -212,6 +232,19 @@ const provinceOptions: ProvinceOption[] = NEPAL_PROVINCES.map(
           districtIdMap[districtName] ||
           `d_${districtName.toLowerCase().replace(/[^a-z0-9]+/g, "_").replace(/^_+|_+$/g, "")}`,
         label: districtName,
+        localBodies: ((NEPAL_LOCAL_BODIES as Record<string, { name: string; wards: number }[]>)[districtName] || []).map((body): LocalBodyOption => ({
+          id:
+            localBodyIdMap[`${districtName}:${body.name}`] ||
+            `lb_${body.name.toLowerCase().replace(/[^a-z0-9]+/g, "_").replace(/^_+|_+$/g, "")}`,
+          label: body.name,
+          type: (body.name.toLowerCase().includes("sub-metropolitan")
+            ? "Sub-Metropolitan City"
+            : body.name.toLowerCase().includes("metropolitan")
+            ? "Metropolitan City"
+            : body.name.toLowerCase().includes("municipality")
+            ? "Municipality"
+            : "Gaunpalika") as LocalBodyOption["type"],
+        })),
       }),
     );
 
@@ -222,26 +255,6 @@ const provinceOptions: ProvinceOption[] = NEPAL_PROVINCES.map(
     };
   },
 );
-
-const DOMESTIC_UNIVERSITIES = [
-  { id: "u_tu", label: "Tribhuvan University (TU)", count: 1050 },
-  { id: "u_ku", label: "Kathmandu University (KU)", count: 120 },
-  { id: "u_pu", label: "Pokhara University (PU)", count: 210 },
-  { id: "u_purbanchal", label: "Purbanchal University", count: 180 },
-  { id: "u_mwu", label: "Mid-Western University (MWU)", count: 65 },
-  { id: "u_fwu", label: "Far-Western University (FWU)", count: 55 },
-  { id: "u_afu", label: "Agriculture & Forestry University (AFU)", count: 25 },
-];
-
-const FOREIGN_UNIVERSITIES = [
-  { id: "u_lincoln", label: "Lincoln University", count: 45 },
-  { id: "u_london_met", label: "London Metropolitan University", count: 12 },
-  {
-    id: "u_west_england",
-    label: "University of the West of England",
-    count: 8,
-  },
-];
 
 const COLLEGE_TYPES = [
   { id: "ct_private", label: "Private", count: 250 },
@@ -274,8 +287,8 @@ const APPLIED_FILTER_KEYS: Array<
   "course",
   "province",
   "district",
+  "localBody",
   "type",
-  "university",
   "courseDuration",
   "quick",
   "stream",
@@ -295,46 +308,74 @@ function formatFee(val: number) {
 
 // ── Sub-Components ────────────────────────────────────────────────────────────
 
-const SelectInput: React.FC<{
+const CustomSelect: React.FC<{
   placeholder: string;
   value: string;
   options: Array<{ id: string; label: string }>;
   onChange: (v: string) => void;
   disabled?: boolean;
-}> = ({ placeholder, value, options, onChange, disabled }) => (
-  <div className="relative mb-3">
-    <select
-      value={value}
-      onChange={(e) => onChange(e.target.value)}
-      disabled={disabled}
-      className="block w-full appearance-none rounded-md border border-gray-200 bg-[#f8fafc] py-2 px-3 pr-9 text-[13.5px] text-gray-900 outline-none transition disabled:bg-gray-100 disabled:text-gray-400 focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
-    >
-      <option value="" disabled={value !== ""}>
-        {placeholder}
-      </option>
-      {options.map((opt) => (
-        <option key={opt.id} value={opt.id}>
-          {opt.label}
-        </option>
-      ))}
-    </select>
-    <div className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-gray-400">
-      <svg
-        xmlns="http://www.w3.org/2000/svg"
-        width="12"
-        height="12"
-        viewBox="0 0 24 24"
-        fill="none"
-        stroke="currentColor"
-        strokeWidth="2.5"
-        strokeLinecap="round"
-        strokeLinejoin="round"
+}> = ({ placeholder, value, options, onChange, disabled }) => {
+  const [isOpen, setIsOpen] = useState(false);
+  const ref = React.useRef<HTMLDivElement>(null);
+
+  const selectedLabel = options.find((o) => o.id === value)?.label || "";
+
+  useEffect(() => {
+    const handleClickOutside = (e: MouseEvent) => {
+      if (ref.current && !ref.current.contains(e.target as Node)) {
+        setIsOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
+  return (
+    <div ref={ref} className="relative mb-3">
+      <button
+        type="button"
+        onClick={() => !disabled && setIsOpen(!isOpen)}
+        disabled={disabled}
+        className="flex w-full items-center justify-between rounded-md border border-gray-200 bg-[#f8fafc] px-3 py-2 text-[13.5px] text-gray-900 outline-none transition disabled:bg-gray-100 disabled:text-gray-400 focus:border-blue-500"
       >
-        <path d="m6 9 6 6 6-6" />
-      </svg>
+        <span className={value ? "" : "text-gray-400"}>
+          {value ? selectedLabel : placeholder}
+        </span>
+        <svg
+          className={`h-4 w-4 text-gray-400 transition-transform ${isOpen ? "rotate-180" : ""}`}
+          fill="none"
+          stroke="currentColor"
+          viewBox="0 0 24 24"
+        >
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="m19 9-7 7-7-7" />
+        </svg>
+      </button>
+      {isOpen && (
+        <div className="absolute z-50 mt-1 max-h-60 w-full overflow-auto rounded-md border border-gray-200 bg-white shadow-lg">
+          {options.length === 0 ? (
+            <div className="px-3 py-2 text-[13px] text-gray-400">No options</div>
+          ) : (
+            options.map((opt) => (
+              <button
+                key={opt.id}
+                type="button"
+                onClick={() => {
+                  onChange(opt.id);
+                  setIsOpen(false);
+                }}
+                className={`flex w-full px-3 py-2 text-left text-[13.5px] hover:bg-gray-50 ${
+                  opt.id === value ? "bg-blue-50 text-blue-600" : "text-gray-900"
+                }`}
+              >
+                {opt.label}
+              </button>
+            ))
+          )}
+        </div>
+      )}
     </div>
-  </div>
-);
+  );
+};
 
 const SearchInput: React.FC<{
 
@@ -419,14 +460,16 @@ const RadioItem: React.FC<{
 const Accordion: React.FC<{
   title: string;
   defaultOpen?: boolean;
+  hideDivider?: boolean;
   children: React.ReactNode;
-}> = ({ title, defaultOpen = false, children }) => {
+}> = ({ title, defaultOpen = false, hideDivider = false, children }) => {
   const [open, setOpen] = useState(defaultOpen);
   return (
     <GlobalFilterSection
       title={title}
       isOpen={open}
       onToggle={() => setOpen((o) => !o)}
+      hideDivider={hideDivider}
     >
       {children}
     </GlobalFilterSection>
@@ -449,7 +492,6 @@ const FilterSidebar: React.FC<FilterSidebarProps> = ({
   const [showAppliedDropdown, setShowAppliedDropdown] = useState(false);
   const [programSearch, setProgramSearch] = useState("");
   const [courseSearch, setCourseSearch] = useState("");
-  const [universitySearch, setUniversitySearch] = useState("");
   const [navLocString, setNavLocString] = useState("");
 
   const getFacetCount = (id: string): number | undefined => {
@@ -509,26 +551,8 @@ const FilterSidebar: React.FC<FilterSidebarProps> = ({
     );
   }, [filters.academic, filters.program, courseSearch, collegeFilterCounts]);
 
-  const availableUniversities = useMemo(() => {
-    const showForeign = filters.type.includes("ct_foreign");
-    const showDomestic =
-      filters.type.length === 0 || filters.type.some((t) => t !== "ct_foreign");
-    let list = [
-      ...(showDomestic ? DOMESTIC_UNIVERSITIES : []),
-      ...(showForeign ? FOREIGN_UNIVERSITIES : []),
-    ];
-    if (universitySearch)
-      list = list.filter((u) =>
-        u.label.toLowerCase().includes(universitySearch.toLowerCase()),
-      );
-    return list.map((u) => ({ ...u, count: getFacetCount(u.id) }));
-  }, [filters.type, universitySearch, collegeFilterCounts]);
-
   const showCourseSection = filters.academic.some((a) =>
     ["diploma"].includes(a),
-  );
-  const showUniversitySection = filters.academic.some((a) =>
-    ["plus2", "alevel", "diploma"].includes(a),
   );
 
   const filterLabelMap = useMemo(() => {
@@ -537,11 +561,12 @@ const FilterSidebar: React.FC<FilterSidebarProps> = ({
     ACADEMIC_LEVELS.forEach((item) => map.set(item.id, item.label));
     provinceOptions.forEach((province) => {
       map.set(province.id, province.label);
-      province.districts.forEach((district) => map.set(district.id, district.label));
+      province.districts.forEach((district) => {
+        map.set(district.id, district.label);
+        district.localBodies?.forEach((lb) => map.set(lb.id, lb.label));
+      });
     });
     COLLEGE_TYPES.forEach((item) => map.set(item.id, item.label));
-    DOMESTIC_UNIVERSITIES.forEach((item) => map.set(item.id, item.label));
-    FOREIGN_UNIVERSITIES.forEach((item) => map.set(item.id, item.label));
     COURSE_DURATIONS.forEach((item) => map.set(item, item));
     SORT_OPTIONS.forEach((item) => map.set(item.id, item.label));
 
@@ -585,40 +610,7 @@ const FilterSidebar: React.FC<FilterSidebarProps> = ({
     });
   };
 
-  const toggleProvince = (provinceId: string) => {
-    const provinceDistrictIds =
-      provinceOptions.find((province) => province.id === provinceId)?.districts.map((district) => district.id) || [];
 
-    setFilters((prev) => {
-      const isSelected = prev.province.includes(provinceId);
-      return {
-        ...prev,
-        province: isSelected
-          ? prev.province.filter((value) => value !== provinceId)
-          : [...prev.province, provinceId],
-        district: isSelected
-          ? prev.district.filter((value) => !provinceDistrictIds.includes(value))
-          : prev.district,
-      };
-    });
-  };
-
-  const toggleDistrict = (provinceId: string, districtId: string) => {
-    setFilters((prev) => {
-      const districtSelected = prev.district.includes(districtId);
-      return {
-        ...prev,
-        province: districtSelected
-          ? prev.province
-          : prev.province.includes(provinceId)
-          ? prev.province
-          : [...prev.province, provinceId],
-        district: districtSelected
-          ? prev.district.filter((value) => value !== districtId)
-          : [...prev.district, districtId],
-      };
-    });
-  };
 
   const clearAll = () => setFilters(DEFAULT_COLLEGE_FILTERS);
 
@@ -970,10 +962,10 @@ const FilterSidebar: React.FC<FilterSidebarProps> = ({
           </Accordion>
         )}
 
-        {/* 4. Location (Province/District) */}
+        {/* 4. Location (Province/District/Local Body) */}
         <Accordion title="Location" defaultOpen>
           <div className="flex flex-col gap-2 pt-1">
-            <SelectInput
+            <CustomSelect
               placeholder="Select Province"
               value={filters.province[0] || ""}
               options={provinceOptions}
@@ -982,10 +974,11 @@ const FilterSidebar: React.FC<FilterSidebarProps> = ({
                   ...prev,
                   province: val ? [val] : [],
                   district: [],
+                  localBody: [],
                 }));
               }}
             />
-            <SelectInput
+            <CustomSelect
               placeholder="Select District"
               value={filters.district[0] || ""}
               options={
@@ -997,9 +990,29 @@ const FilterSidebar: React.FC<FilterSidebarProps> = ({
                 setFilters((prev) => ({
                   ...prev,
                   district: val ? [val] : [],
+                  localBody: [],
                 }));
               }}
               disabled={!filters.province[0]}
+            />
+            <CustomSelect
+              placeholder="Select Municipality / Gaunpalika"
+              value={filters.localBody[0] || ""}
+              options={
+                filters.district[0]
+                  ? provinceOptions
+                      .find((p) => p.id === filters.province[0])
+                      ?.districts.find((d) => d.id === filters.district[0])
+                      ?.localBodies || []
+                  : []
+              }
+              onChange={(val) => {
+                setFilters((prev) => ({
+                  ...prev,
+                  localBody: val ? [val] : [],
+                }));
+              }}
+              disabled={!filters.district[0]}
             />
           </div>
         </Accordion>
@@ -1021,36 +1034,7 @@ const FilterSidebar: React.FC<FilterSidebarProps> = ({
           </div>
         </Accordion>
 
-        {/* 7. University (conditional) */}
-        {showUniversitySection && (
-          <Accordion title="University">
-            <SearchInput
-              placeholder="Search university..."
-              value={universitySearch}
-              onChange={setUniversitySearch}
-            />
-            <div className="custom-scrollbar flex max-h-55 flex-col gap-3.5 overflow-y-auto pr-1">
-              {availableUniversities.length === 0 ? (
-                <p className="px-1 text-[13px] italic text-gray-400">
-                  No universities found.
-                </p>
-              ) : (
-                availableUniversities.map((item) => (
-                  <CheckboxItem
-                    key={item.id}
-                    id={`uni-${item.id}`}
-                    label={item.label}
-                    count={item.count}
-                    checked={filters.university.includes(item.id)}
-                    onChange={() => toggle("university", item.id)}
-                  />
-                ))
-              )}
-            </div>
-          </Accordion>
-        )}
-
-        {/* 8. Fee Range */}
+        {/* 7. Fee Range */}
         <Accordion title="Total Fee Range">
           <div className="px-2 pb-2 pt-2">
             <div className="mb-4 flex items-center justify-between">
@@ -1094,9 +1078,81 @@ const FilterSidebar: React.FC<FilterSidebarProps> = ({
           </div>
         </Accordion>
 
-        {/* 10. Sort By */}
-        <Accordion title="Sort By" defaultOpen>
+        {/* 10. Facilities */}
+        <Accordion title="Facilities">
           <div className="flex flex-col gap-3.5 pt-1">
+            <CheckboxItem
+              id="fac-hostel"
+              label="Hostel"
+              checked={filters.facilities.includes("hostel")}
+              onChange={() => toggle("facilities", "hostel")}
+            />
+            <CheckboxItem
+              id="fac-transport"
+              label="Transportation"
+              checked={filters.facilities.includes("transportation")}
+              onChange={() => toggle("facilities", "transportation")}
+            />
+            <CheckboxItem
+              id="fac-library"
+              label="Library"
+              checked={filters.facilities.includes("library")}
+              onChange={() => toggle("facilities", "library")}
+            />
+            <CheckboxItem
+              id="fac-lab"
+              label="Lab"
+              checked={filters.facilities.includes("lab")}
+              onChange={() => toggle("facilities", "lab")}
+            />
+            <CheckboxItem
+              id="fac-sports"
+              label="Sports"
+              checked={filters.facilities.includes("sports")}
+              onChange={() => toggle("facilities", "sports")}
+            />
+            <CheckboxItem
+              id="fac-cafeteria"
+              label="Cafeteria"
+              checked={filters.facilities.includes("cafeteria")}
+              onChange={() => toggle("facilities", "cafeteria")}
+            />
+          </div>
+        </Accordion>
+
+        {/* 11. Rating */}
+        <Accordion title="Rating">
+          <div className="flex flex-col gap-3.5 pt-1">
+            <CheckboxItem
+              id="rating-4.5"
+              label="⭐ 4.5 & above (Top Rated)"
+              checked={filters.rating?.includes("4.5")}
+              onChange={() => toggle("rating", "4.5")}
+            />
+            <CheckboxItem
+              id="rating-4.0"
+              label="⭐ 4.0 & above"
+              checked={filters.rating?.includes("4.0")}
+              onChange={() => toggle("rating", "4.0")}
+            />
+            <CheckboxItem
+              id="rating-3.5"
+              label="⭐ 3.5 & above"
+              checked={filters.rating?.includes("3.5")}
+              onChange={() => toggle("rating", "3.5")}
+            />
+            <CheckboxItem
+              id="rating-3.0"
+              label="⭐ 3.0 & above"
+              checked={filters.rating?.includes("3.0")}
+              onChange={() => toggle("rating", "3.0")}
+            />
+          </div>
+        </Accordion>
+
+        {/* 12. Sort By */}
+        <Accordion title="Sort By" defaultOpen hideDivider>
+          <div className="flex flex-col gap-3.5">
             {SORT_OPTIONS.map((opt) => (
               <RadioItem
                 key={opt.id}

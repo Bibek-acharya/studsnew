@@ -1,9 +1,9 @@
-import StudentDashboard from "@/components/user/dashboard/StudentDashboard";
+import DashboardSection from "@/components/user/dashboard/sections/DashboardSection";
 
 export const metadata = {
   title: "Dashboard | MeroCollege Student",
 };
 
 export default function Page() {
-  return <StudentDashboard />;
+  return <DashboardSection />;
 }

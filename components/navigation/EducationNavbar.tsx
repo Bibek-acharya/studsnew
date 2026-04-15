@@ -554,26 +554,17 @@ const EducationNavbar: React.FC<EducationNavbarProps> = ({
                     </button>
 
                     {activeMenu === "profile-menu" && (
-                      <div className="absolute top-full right-0 pt-3 z-200 cursor-default font-inter">
+                      <div className="menu-anchor absolute top-full right-0 pt-3 z-200 cursor-default font-inter">
                         <div className="w-67.5 bg-white rounded-[18px] border border-gray-100/80 p-2.5 text-[14px] text-gray-600 font-medium select-none shadow-[0_8px_30px_rgb(0,0,0,0.08)] relative">
                           <div className="absolute -top-1.5 right-6 w-3 h-3 bg-white border-t border-l border-gray-100/80 transform rotate-45"></div>
                           <div className="flex flex-col relative z-10 bg-white rounded-xl">
-                            <button
-                              onClick={() => go("userDashboard")}
-                              className="flex items-center gap-3 px-3 py-2.5 hover:bg-gray-50 rounded-xl transition-all"
-                            >
-                              <LayoutDashboard size={18} />
-                              <span>Dashboard</span>
-                            </button>
                             <div
                               onClick={() => go("userDashboard")}
-                              className="flex flex-col px-3 py-3 bg-[#f4f4f5] rounded-xl cursor-pointer mb-1 hover:bg-gray-100 transition-all"
+                              className="flex flex-col px-3 py-3 bg-[#f4f4f5] rounded-xl cursor-pointer mb-1 hover:bg-blue-50 transition-all"
                             >
                               <div className="flex items-center gap-3 text-gray-900">
                                 <User size={18} />
-                                <span className="font-semibold">
-                                  View Profile
-                                </span>
+                                <span className="font-bold">View Profile</span>
                               </div>
                               <div className="mt-2.5 pl-7.5">
                                 <div className="flex justify-between items-center text-[11px] font-semibold text-gray-500 mb-1.5">
@@ -587,31 +578,59 @@ const EducationNavbar: React.FC<EducationNavbarProps> = ({
                             </div>
                             <button
                               onClick={() => go("userDashboard")}
-                              className="flex items-center gap-3 px-3 py-2.5 hover:bg-gray-50 rounded-xl transition-all"
+                              className="flex items-center gap-3 px-3 py-2.5 hover:bg-blue-50 rounded-xl transition-all font-semibold"
                             >
                               <FileText size={18} />
                               <span>My Application</span>
+                              <span className="ml-auto bg-red-500 text-white text-[10px] font-bold px-1.5 py-[1.5px] rounded-full leading-none">2</span>
                             </button>
                             <button
                               onClick={() => go("userDashboard")}
-                              className="flex items-center gap-3 px-3 py-2.5 hover:bg-gray-50 rounded-xl transition-all"
+                              className="flex items-center gap-3 px-3 py-2.5 hover:bg-blue-50 rounded-xl transition-all font-semibold"
                             >
                               <Bookmark size={18} />
                               <span>Saved College</span>
-                              <span className="ml-auto text-gray-400 text-xs font-semibold">
-                                12
-                              </span>
+                              <span className="ml-auto text-gray-400 text-xs font-bold">12</span>
+                            </button>
+                            <button
+                              onClick={() => go("userDashboard")}
+                              className="flex items-center gap-3 px-3 py-2.5 hover:bg-blue-50 rounded-xl transition-all font-semibold"
+                            >
+                              <Sparkles size={18} />
+                              <span>Match</span>
+                              <span className="ml-auto bg-[#5468FF]/10 text-[#5468FF] text-[11px] font-bold px-2 py-0.5 rounded-full">3</span>
+                            </button>
+                            <button
+                              className="flex items-center gap-3 px-3 py-2.5 hover:bg-blue-50 rounded-xl transition-all font-semibold"
+                            >
+                              <Bell size={18} />
+                              <span>Notifications</span>
+                              <span className="ml-auto bg-red-500 text-white text-[10px] font-bold px-1.5 py-[1.5px] rounded-full leading-none">2</span>
+                            </button>
+                            <button
+                              className="flex items-center gap-3 px-3 py-2.5 hover:bg-blue-50 rounded-xl transition-all font-semibold"
+                            >
+                              <Settings size={18} />
+                              <span>Settings</span>
                             </button>
                             <div className="h-px bg-gray-100 my-1.5 mx-2"></div>
                             <button
-                              onClick={() => {
+                              onClick={() => go("contact")}
+                              className="flex items-center gap-3 px-3 py-2.5 hover:bg-blue-50 rounded-xl transition-all font-semibold"
+                            >
+                              <MessageCircleQuestion size={18} />
+                              <span>Help Center</span>
+                            </button>
+                            <button
+                              type="button"
+                              onClick={(e) => {
+                                e.stopPropagation();
                                 onLogout?.();
-                                setActiveMenu(null);
                               }}
                               className="flex items-center gap-3 px-3 py-2.5 hover:bg-red-50 text-red-500 rounded-xl transition-all w-full text-left"
                             >
                               <LogOut size={18} className="scale-x-[-1]" />
-                              <span>Sign out</span>
+                              <span>Log Out</span>
                             </button>
                           </div>
                         </div>
@@ -633,9 +652,9 @@ const EducationNavbar: React.FC<EducationNavbarProps> = ({
         </div>
 
         {/* Nav Links Row - Desktop */}
-        <div className="relative hidden w-full border-b border-gray-200 px-3 xs:px-4 sm:px-6 lg:px-8 md:block">
+        <div className="relative hidden w-full border-b border-gray-200 px-3 xs:px-4 sm:px-6 lg:px-8 md:block font-semibold">
           <div className="mx-auto flex h-11 sm:h-11.5 w-full max-w-350 items-center gap-3 sm:gap-4 overflow-visible">
-            <nav className="no-scrollbar relative flex h-full min-w-0 flex-1 items-center gap-x-4 sm:gap-x-5 md:gap-x-6 lg:gap-x-7 xl:gap-x-8 overflow-visible whitespace-nowrap pr-2 text-[13px] sm:text-[14px] lg:text-[15px] font-medium text-[#212529]">
+            <nav className="no-scrollbar relative flex h-full min-w-0 flex-1 items-center gap-x-4 sm:gap-x-5 md:gap-x-6 lg:gap-x-7 xl:gap-x-8 overflow-visible whitespace-nowrap pr-2 text-[13px] sm:text-[14px] lg:text-[15px] font-semibold text-[#212529]">
               <NavItem
                 onClick={() => go("findCollege")}
                 isActive={isViewActive("findCollege")}
@@ -893,11 +912,11 @@ const EducationNavbar: React.FC<EducationNavbarProps> = ({
                   <div className="w-full bg-white rounded-[18px] border border-gray-100/80 p-2.5 text-[14px] text-gray-600 font-medium select-none shadow-sm">
                     <div
                       onClick={() => go("userDashboard")}
-                      className="flex flex-col px-3 py-3 bg-[#f4f4f5] rounded-xl cursor-pointer mb-1 hover:bg-gray-100 transition-all duration-200"
+                      className="flex flex-col px-3 py-3 bg-[#f4f4f5] rounded-xl cursor-pointer mb-1 hover:bg-blue-50 transition-all duration-200"
                     >
                       <div className="flex items-center gap-3 text-gray-900">
                         <User size={18} className="text-gray-500" />
-                        <span className="font-semibold">View Profile</span>
+                        <span className="font-bold">View Profile</span>
                       </div>
                       <div className="mt-2.5 pl-7.5">
                         <div className="flex justify-between items-center text-[11px] font-semibold text-gray-500 mb-1.5">
@@ -910,13 +929,47 @@ const EducationNavbar: React.FC<EducationNavbarProps> = ({
                       </div>
                     </div>
 
-                    <div
+<div
                       onClick={() => go("userDashboard")}
-                      className="flex items-center gap-3 px-3 py-2.5 hover:bg-gray-50 rounded-xl cursor-pointer mb-0.5 transition-all"
+                      className="flex items-center gap-3 px-3 py-2.5 hover:bg-blue-50 rounded-xl cursor-pointer mb-0.5 transition-all"
                     >
                       <FileText size={18} className="text-gray-500" />
                       <span>My Application</span>
-                      <span className="ml-auto w-2.5 h-2.5 bg-red-500 rounded-full shadow-sm"></span>
+                      <span className="ml-auto bg-red-500 text-white text-[10px] font-bold px-1.5 py-[1.5px] rounded-full leading-none">2</span>
+                    </div>
+
+                    <div
+                      onClick={() => go("userDashboard")}
+                      className="flex items-center gap-3 px-3 py-2.5 hover:bg-blue-50 rounded-xl cursor-pointer mb-0.5 transition-all"
+                    >
+                      <Bookmark size={18} className="text-gray-500" />
+                      <span>Saved College</span>
+                      <span className="ml-auto text-gray-400 text-xs font-bold leading-none">
+                        12
+                      </span>
+                    </div>
+
+                    <div
+                      onClick={() => go("userDashboard")}
+                      className="flex items-center gap-3 px-3 py-2.5 hover:bg-blue-50 rounded-xl cursor-pointer mb-0.5 transition-all"
+                    >
+                      <Sparkles size={18} className="text-gray-500" />
+                      <span>Match</span>
+                      <span className="ml-auto bg-[#5468FF]/10 text-[#5468FF] text-[11px] font-bold px-2 py-0.5 rounded-full">
+                        3
+                      </span>
+                    </div>
+
+                    <div className="h-px bg-gray-100 my-1.5 mx-2"></div>
+
+                    <div
+                      className="flex items-center gap-3 px-3 py-2.5 hover:bg-blue-50 rounded-xl cursor-pointer mb-0.5 transition-all"
+                    >
+                      <Bell size={18} className="text-gray-500" />
+                      <span>Notifications</span>
+                      <span className="ml-auto bg-red-500 text-white text-[10px] font-bold px-1.5 py-[1.5px] rounded-full leading-none">
+                        2
+                      </span>
                     </div>
 
                     <div
@@ -976,11 +1029,14 @@ const EducationNavbar: React.FC<EducationNavbarProps> = ({
                     </div>
 
                     <div
-                      onClick={onLogout}
+                      onClick={(e) => {
+                        e.stopPropagation?.();
+                        onLogout?.();
+                      }}
                       className="flex items-center gap-3 px-3 py-2.5 hover:bg-red-50 rounded-xl cursor-pointer mt-1 text-[#FF6B6B] transition-all"
                     >
                       <LogOut size={18} className="scale-x-[-1]" />
-                      <span className="font-bold">Sign out</span>
+                      <span className="font-bold">Log Out</span>
                     </div>
                   </div>
                 </div>

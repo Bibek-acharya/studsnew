@@ -28,11 +28,13 @@ const AuthModal: React.FC<AuthModalProps> = ({
 }) => {
   const [view, setView] = useState<AuthModalView>(initialView);
   const [otpIdentifier, setOtpIdentifier] = useState("");
+  const [registerEmail, setRegisterEmail] = useState("");
 
   useEffect(() => {
     if (isOpen) {
       setView(initialView);
       setOtpIdentifier("");
+      setRegisterEmail("");
     }
   }, [isOpen, initialView]);
 
@@ -98,13 +100,18 @@ const AuthModal: React.FC<AuthModalProps> = ({
           <SignupView
             onSwitch={() => setView("login")}
             onSuccess={handleAuthSuccess}
+            onOTPRequired={(email) => {
+              setRegisterEmail(email);
+              setOtpIdentifier(email);
+              setView("otp");
+            }}
             onClose={onClose}
           />
         )}
 
         {view === "otp" && (
           <OtpView
-            identifier={otpIdentifier}
+            identifier={registerEmail || otpIdentifier}
             type="email"
             onVerified={handleAuthSuccess}
             onBack={goBackToLogin}

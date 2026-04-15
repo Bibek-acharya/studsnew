@@ -10,8 +10,20 @@ import React, {
 import { useParams } from "next/navigation";
 import { apiService } from "@/services/api";
 import CollegeCard from "@/components/admissions/CollegeCard";
-import { BadgeCheckIcon, ChevronLeft, ChevronRight } from "lucide-react";
+import { BadgeCheckIcon, ChevronLeft, ChevronRight, MessageSquarePlus } from "lucide-react";
 import ShareCollegeModal from "./ShareCollegeModal";
+import {
+  AboutVideoInteractive,
+  FilterPills,
+  ProgTh,
+  InfoBlock,
+  OverviewRow,
+  AdminRow,
+  RatingBar,
+  ReviewCard,
+  ContactInfoRow,
+} from "./components";
+import ClaimCollegeModal from "./components/ClaimCollegeModal";
 
 type TabKey =
   | "about"
@@ -28,171 +40,6 @@ type TabKey =
   | "download";
 
 type LevelFilter = "all" | "+2" | "Bachelor" | "Master";
-
-const cardData = {
-  "Samir Sharma": {
-    avatar:
-      "https://images.unsplash.com/photo-1480455624313-e29b44bbfde1?auto=format&fit=crop&w=150&h=150&q=80",
-    title: "Industry-Aligned<br/>Curriculum",
-    quote:
-      '"Our program bridges the gap between theoretical foundations and the practical skills needed in today\'s rapidly evolving tech landscape."',
-    author: "Prof. Michael Chen",
-    role: "Head of Computer Science",
-    video:
-      "https://storage.googleapis.com/gtv-videos-bucket/sample/TearsOfSteel.mp4",
-  },
-  "Deepak Khadka": {
-    avatar:
-      "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?auto=format&fit=crop&w=150&h=150&q=80",
-    title: "Seamless<br/>Admissions",
-    quote:
-      '"We ensure a smooth, transparent, and welcoming enrollment process for every prospective student joining our community."',
-    author: "Deepak Khadka",
-    role: "Admission Head",
-    video: "https://storage.googleapis.com/gtv-videos-bucket/sample/Sintel.mp4",
-  },
-  "Basanta Blown": {
-    avatar:
-      "https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?auto=format&fit=crop&w=150&h=150&q=80",
-    title: "Student-Centric<br/>Support",
-    quote:
-      '"Guiding students through their academic journey with personalized assistance, care, and continuous mentorship."',
-    author: "Basanta Blown",
-    role: "Asst Coordinator",
-    video:
-      "https://storage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4",
-  },
-  "Tribendra Timsina": {
-    avatar:
-      "https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?auto=format&fit=crop&w=150&h=150&q=80",
-    title: "Academic<br/>Excellence",
-    quote:
-      '"Maintaining rigorous standards in our curriculum to foster critical thinking, innovation, and professional growth."',
-    author: "Tribendra Timsina",
-    role: "Coordinator",
-    video:
-      "https://storage.googleapis.com/gtv-videos-bucket/sample/ElephantsDream.mp4",
-  },
-  "Kush Shrestha": {
-    avatar:
-      "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=150&h=150&q=80",
-    title: "Efficient<br/>Operations",
-    quote:
-      '"Behind every great institution is a dedicated administrative team ensuring smooth and efficient day-to-day operations."',
-    author: "Kush Shrestha",
-    role: "Administration",
-    video:
-      "https://storage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4",
-  },
-};
-
-const AboutVideoInteractive = () => {
-  const [mainKey, setMainKey] = useState("Samir Sharma");
-  const [fading, setFading] = useState(false);
-
-  const allKeys = Object.keys(cardData);
-  const others = allKeys.filter((k) => k !== mainKey);
-  const mainData = cardData[mainKey as keyof typeof cardData];
-
-  const handleSwap = (newKey: string) => {
-    setFading(true);
-    setTimeout(() => {
-      setMainKey(newKey);
-      setFading(false);
-    }, 150);
-  };
-
-  return (
-    <div className="mx-auto mb-10 flex w-full max-w-212.5 flex-col items-center justify-center gap-6 xl:flex-row xl:gap-8">
-      <div className="relative h-[50vh] w-full max-w-125 shrink-0 overflow-hidden rounded-xl bg-gray-900 shadow-2xl ring-1 ring-gray-200/50 sm:h-85 sm:rounded-2xl">
-        <video
-          className="absolute inset-0 h-full w-full bg-gray-800 object-cover transition-opacity duration-300"
-          src={mainData.video}
-          autoPlay
-          loop
-          muted
-          playsInline
-        />
-        <div className="absolute bottom-5 left-5 z-10 max-w-[70%]">
-          <div
-            className="flex flex-col rounded-lg border border-white/10 bg-black/60 px-4 py-2 text-white shadow-lg backdrop-blur-md sm:px-5 sm:py-3"
-            style={{ textShadow: "0 1px 2px rgba(0,0,0,0.8)" }}
-          >
-            <span className="text-sm font-semibold tracking-wide sm:text-base">
-              {mainKey}
-            </span>
-            <span className="mt-0.5 text-[10px] font-medium text-gray-300 sm:text-xs">
-              {mainData.role}
-            </span>
-          </div>
-        </div>
-
-        <div className="absolute right-5 top-5 z-20 flex max-h-[calc(100%-40px)] flex-col gap-2 overflow-y-auto pb-4 pr-1 [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
-          {others.map((key) => {
-            const data = cardData[key as keyof typeof cardData];
-            return (
-              <div
-                key={key}
-                onClick={() => handleSwap(key)}
-                className="group relative h-12.5 w-[70px] shrink-0 cursor-pointer transition-transform hover:scale-105 sm:h-[55px] sm:w-[85px] shadow-xl"
-              >
-                <div className="relative h-full w-full overflow-hidden rounded-lg border-[2px] border-white bg-gray-800 sm:rounded-xl">
-                  <video
-                    className="absolute inset-0 h-full w-full object-cover opacity-90 transition-opacity group-hover:opacity-100"
-                    src={data.video}
-                    autoPlay
-                    loop
-                    muted
-                    playsInline
-                  />
-                  <div className="absolute bottom-0 left-0 right-0 z-30 flex h-[80%] flex-col justify-end bg-gradient-to-t from-black/90 via-black/40 to-transparent p-1">
-                    <span
-                      className="truncate text-[8px] font-bold leading-tight text-white sm:text-[9px]"
-                      style={{ textShadow: "0 1px 2px rgba(0,0,0,0.8)" }}
-                    >
-                      {key}
-                    </span>
-                    <span
-                      className="mt-0.5 truncate text-[6px] font-medium leading-tight text-gray-300 sm:text-[7px]"
-                      style={{ textShadow: "0 1px 2px rgba(0,0,0,0.8)" }}
-                    >
-                      {data.role}
-                    </span>
-                  </div>
-                </div>
-              </div>
-            );
-          })}
-        </div>
-      </div>
-
-      <div className="relative h-[50vh] w-full max-w-[280px] shrink-0 overflow-hidden rounded-2xl border border-white/10 bg-[#0B1C38] p-5 shadow-xl sm:h-[340px] sm:p-6">
-        <div
-          className={`relative z-10 flex h-full flex-col justify-center transition-opacity duration-150 ${fading ? "opacity-50" : "opacity-100"}`}
-        >
-          <img
-            src={mainData.avatar}
-            alt="Avatar"
-            className="mb-3 h-12 w-12 rounded-xl border border-white/20 object-cover shadow-sm sm:mb-4 sm:h-14 sm:w-14"
-          />
-          <h2
-            dangerouslySetInnerHTML={{ __html: mainData.title }}
-            className="mb-2 text-[16px] font-bold leading-tight tracking-tight text-white sm:mb-3 sm:text-[18px]"
-          />
-          <p className="mb-4 text-[12px] leading-relaxed text-blue-100/80 sm:text-[13px]">
-            {mainData.quote}
-          </p>
-          <div className="mt-auto">
-            <h4 className="mb-1 text-[11px] font-bold uppercase tracking-wide text-white sm:text-[12px]">
-              {mainData.author}
-            </h4>
-            <p className="text-[12px] text-blue-200/60">{mainData.role}</p>
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-};
 
 const fallbackCollege = {
   name: "GoldenGate International College",
@@ -505,7 +352,7 @@ const newsCards = [
   },
   {
     badge: "Admission",
-    badgeClass: "bg-brand-blue/5 text-[#0000FF]",
+    badgeClass: "bg-brand-blue/5 text-brand-blue",
     image:
       "https://images.unsplash.com/photo-1541339907198-e08756dedf3f?q=80&w=800&auto=format&fit=crop",
     title: "MBA Admission Open 2025",
@@ -527,25 +374,25 @@ const downloads = [
   {
     title: "Prospectus 2025",
     size: "PDF, 8.2 MB",
-    color: "bg-brand-blue/5 text-[#0000FF]",
+    color: "bg-brand-blue/5 text-brand-blue",
     btn: "bg-brand-blue hover:bg-[#0000CC]",
   },
   {
     title: "Application Form",
     size: "PDF, 2.1 MB",
-    color: "bg-brand-blue/5 text-[#0000FF]",
+    color: "bg-brand-blue/5 text-brand-blue",
     btn: "bg-brand-blue hover:bg-[#0000CC]",
   },
   {
     title: "Scholarship Guidelines",
     size: "PDF, 1.5 MB",
-    color: "bg-brand-blue/5 text-[#0000FF]",
+    color: "bg-brand-blue/5 text-brand-blue",
     btn: "bg-brand-blue hover:bg-[#0000CC]",
   },
   {
     title: "Course Catalogue 2025",
     size: "PDF, 12.0 MB",
-    color: "bg-brand-blue/5 text-[#0000FF]",
+    color: "bg-brand-blue/5 text-brand-blue",
     btn: "bg-brand-blue hover:bg-[#0000CC]",
   },
 ];
@@ -572,6 +419,13 @@ const CollegeDetailsPage: React.FC = () => {
     useState<LevelFilter>("all");
   const [isClaimModalOpen, setIsClaimModalOpen] = useState(false);
   const [isShareModalOpen, setIsShareModalOpen] = useState(false);
+  const [isFollowed, setIsFollowed] = useState(false);
+  const [showUnfollowDialog, setShowUnfollowDialog] = useState(false);
+  const [selectedImageIndex, setSelectedImageIndex] = useState<number | null>(null);
+  const [visibleImageCount, setVisibleImageCount] = useState(9);
+  const [eventsPage, setEventsPage] = useState(1);
+  const [newsPage, setNewsPage] = useState(1);
+  const [admissionPage, setAdmissionPage] = useState(1);
   const [shareUrl, setShareUrl] = useState("");
   const [college, setCollege] = useState<any>(null);
   const [loading, setLoading] = useState(true);
@@ -615,6 +469,20 @@ const CollegeDetailsPage: React.FC = () => {
       left: direction === "left" ? -step : step,
       behavior: "smooth",
     });
+  };
+
+  const handlePrevImage = () => {
+    if (selectedImageIndex === null) return;
+    setSelectedImageIndex((prev) =>
+      prev === 0 ? galleryImages.length - 1 : (prev as number) - 1
+    );
+  };
+
+  const handleNextImage = () => {
+    if (selectedImageIndex === null) return;
+    setSelectedImageIndex((prev) =>
+      prev === galleryImages.length - 1 ? 0 : (prev as number) + 1
+    );
   };
 
   useEffect(() => {
@@ -679,7 +547,6 @@ const CollegeDetailsPage: React.FC = () => {
     website.startsWith("http://") || website.startsWith("https://")
       ? website
       : `https://${website}`;
-  const banner = college?.image_url || fallbackCollege.banner;
   const description = college?.description || fallbackCollege.description;
   const isVerified = isCollegeVerified(college?.verified);
   const shareTitle = `${name} - Studsphere`;
@@ -724,15 +591,15 @@ const CollegeDetailsPage: React.FC = () => {
   }
 
   return (
-    <div className="w-full bg-white">
+    <div className="w-full">
       <div
         className="relative h-55 w-full bg-blue-800 bg-center md:h-90"
         // style={{ backgroundImage: `url('${banner}')` }}
       >
         <div className="absolute bottom-4 right-4 z-20 md:bottom-6 md:right-6">
           {isVerified ? (
-            <button className="flex items-center gap-2 rounded-md bg-brand-blue px-5 py-2.5 text-sm font-bold text-white transition-all duration-300 hover:bg-brand-hover md:px-6 md:py-3 md:text-base">
-              <i className="fa-regular fa-comments"></i>
+            <button className="flex items-center gap-2 rounded-md bg-black/60 cursor-pointer px-5 py-2.5 text-sm font-bold text-white transition-all duration-300  md:px-6 md:py-3 md:text-base">
+              <MessageSquarePlus />
               <span>Open Counselling</span>
             </button>
           ) : (
@@ -767,11 +634,11 @@ const CollegeDetailsPage: React.FC = () => {
                   <BadgeCheckIcon className="text-white fill-brand-blue" />
                 )}
               </div>
-              <div className="flex items-center justify-start gap-1.5 text-[14px] font-medium text-gray-600 md:text-[15px]">
-                <i className="fa-solid fa-location-dot text-gray-500"></i>
-                <span>{locationText}</span>
-              </div>
-              <div className="flex items-center justify-start gap-5 pt-1 text-[14px] font-medium">
+              <div className="flex flex-wrap items-center justify-start gap-x-5 gap-y-1 text-[14px] font-medium">
+                <div className="flex items-center gap-1.5">
+                  <i className="fa-solid fa-location-dot text-gray-500"></i>
+                  <span className="text-gray-600">{locationText}</span>
+                </div>
                 <div className="flex items-center gap-1.5">
                   <i className="fa-solid fa-star text-yellow-400"></i>
                   <span className="font-bold text-gray-900">{rating}</span>
@@ -789,19 +656,41 @@ const CollegeDetailsPage: React.FC = () => {
                   {website.toLowerCase()}
                 </a>
               </div>
+              <button
+                type="button"
+                onClick={() => {
+                  if (isFollowed) {
+                    setShowUnfollowDialog(true);
+                  } else {
+                    setIsFollowed(true);
+                  }
+                }}
+                className={`flex items-center justify-center gap-1.5 rounded-full px-4 py-1.5 text-[13px] font-semibold transition-colors ${
+                  isFollowed
+                    ? "bg-green-300 text-gray-800 hover:bg-green-400"
+                    : "bg-brand-blue text-white hover:bg-brand-hover"
+                }`}
+              >
+                {isFollowed ? (
+                  <i className="fa-solid fa-check"></i>
+                ) : (
+                  <i className="fa-solid fa-plus"></i>
+                )}
+                {isFollowed ? "Following" : "Follow"}
+              </button>
             </div>
 
             <div className="mt-8 flex w-full flex-nowrap items-center gap-2 overflow-x-auto pb-1 lg:mt-0 lg:w-auto lg:gap-3 lg:overflow-visible lg:pb-0">
-              <button className="shrink-0 flex items-center justify-center gap-2 rounded-xl border border-gray-200 bg-white px-4 py-2.5 text-[14px] font-semibold text-gray-700 transition-colors hover:bg-gray-50 lg:px-5 lg:py-3 lg:text-[15px]">
+              <button className="shrink-0 flex items-center justify-center gap-2 rounded-md border border-gray-200 bg-white px-4 py-2.5 text-[14px] font-semibold text-gray-700 transition-colors hover:bg-gray-50 lg:px-5 lg:py-3 lg:text-[15px]">
                 <i className="fa-solid fa-download"></i>Brochure
               </button>
-              <button className="shrink-0 flex items-center justify-center gap-2 rounded-xl border border-gray-200 bg-white px-4 py-2.5 text-[14px] font-semibold text-gray-700 transition-colors hover:bg-gray-50 lg:px-5 lg:py-3 lg:text-[15px]">
+              <button className="shrink-0 flex items-center justify-center gap-2 rounded-md border border-gray-200 bg-white px-4 py-2.5 text-[14px] font-semibold text-gray-700 transition-colors hover:bg-gray-50 lg:px-5 lg:py-3 lg:text-[15px]">
                 <i className="fa-regular fa-circle-question"></i>Ask Question
               </button>
               <button
                 type="button"
                 onClick={() => setIsShareModalOpen(true)}
-                className="shrink-0 flex items-center justify-center rounded-xl border border-gray-200 bg-white p-2.5 text-gray-700 shadow-sm transition-colors hover:bg-gray-50 lg:p-3"
+                className="shrink-0 flex items-center justify-center rounded-md border border-gray-200 bg-white p-2.5 text-gray-700 shadow-sm transition-colors hover:bg-gray-50 lg:p-3"
                 aria-label="Share college profile"
               >
                 <i className="fa-solid fa-share-nodes"></i>
@@ -862,7 +751,7 @@ const CollegeDetailsPage: React.FC = () => {
                   <button
                     key={key}
                     onClick={() => setActiveTab(key as TabKey)}
-                    className={`shrink-0 border-b-2 py-4 text-[15px] ${selected ? "border-[#0000FF] font-bold text-gray-900" : "border-transparent font-semibold text-gray-500 hover:text-gray-900"}`}
+                    className={`shrink-0 border-b-2 bg-white py-4 text-[15px] ${selected ? "border-brand-blue font-bold text-gray-900" : "border-transparent font-semibold text-gray-500 hover:text-gray-900"}`}
                   >
                     {label}
                   </button>
@@ -899,7 +788,7 @@ const CollegeDetailsPage: React.FC = () => {
                 />
               </div>
 
-              <div className="space-y-6 rounded-[24px] border border-gray-100 bg-white p-8 shadow-sm">
+              <div className="space-y-6 rounded-md">
                 <h2 className="text-[22px] font-bold text-gray-900">
                   University Overview
                 </h2>
@@ -977,8 +866,8 @@ const CollegeDetailsPage: React.FC = () => {
           )}
 
           {activeTab === "courses" && (
-            <div className="overflow-hidden rounded-[20px] border border-gray-100 bg-white shadow-sm">
-              <div className="flex flex-wrap items-center justify-between gap-4 border-b border-gray-100 bg-[#f4f8fc] px-6 py-4">
+            <div className="overflow-hidden rounded-[20px] border border-gray-200">
+              <div className="flex flex-wrap items-center justify-between gap-4 border-b border-gray-100 px-6 py-4">
                 <p className="text-[14px] font-semibold text-brand-blue">
                   Fees in NPR/year – filter by level
                 </p>
@@ -986,7 +875,7 @@ const CollegeDetailsPage: React.FC = () => {
               </div>
               <div className="w-full overflow-x-auto">
                 <div className="min-w-175">
-                  <div className="grid grid-cols-12 items-center gap-4 border-b border-gray-100 bg-white px-6 py-5">
+                  <div className="grid grid-cols-12 items-center gap-4 border-b border-gray-200  px-6 py-5">
                     <ProgTh className="col-span-4">COURSES NAME</ProgTh>
                     <ProgTh className="col-span-2">DURATION</ProgTh>
                     <ProgTh className="col-span-3">FEES / YEAR</ProgTh>
@@ -1035,9 +924,9 @@ const CollegeDetailsPage: React.FC = () => {
           )}
 
           {activeTab === "admissions" && (
-            <div className="rounded-[20px] border border-gray-100 bg-white p-5 shadow-sm">
+            <div className="rounded-[20px] border border-gray-200 p-5 bg-white">
               <div className="mb-6 flex flex-wrap items-center justify-between gap-4">
-                <p className="text-[14px] font-semibold text-[#0000FF]">
+                <p className="text-[14px] font-semibold text-brand-blue">
                   Admission notices – filter by level
                 </p>
                 <FilterPills
@@ -1045,8 +934,8 @@ const CollegeDetailsPage: React.FC = () => {
                   onChange={setAdmissionFilter}
                 />
               </div>
-              <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
-                {filteredAdmissions.map((admission) => (
+              <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
+                {filteredAdmissions.slice((admissionPage - 1) * 9, admissionPage * 9).map((admission) => (
                   <CollegeCard
                     key={admission.title}
                     images={[admission.image, admission.image, admission.image]}
@@ -1078,13 +967,27 @@ const CollegeDetailsPage: React.FC = () => {
                   />
                 ))}
               </div>
+
+              {filteredAdmissions.length > 9 && (
+                <div className="mt-8 flex justify-center gap-2">
+                  {Array.from({ length: Math.ceil(filteredAdmissions.length / 9) }).map((_, idx) => (
+                    <button
+                      key={idx}
+                      className={`h-10 w-10 rounded-lg text-sm font-bold transition ${admissionPage === idx + 1 ? "bg-brand-blue text-white" : "bg-gray-100 text-gray-700 hover:bg-gray-200"}`}
+                      onClick={() => setAdmissionPage(idx + 1)}
+                    >
+                      {idx + 1}
+                    </button>
+                  ))}
+                </div>
+              )}
             </div>
           )}
 
           {activeTab === "offered" && (
-            <div className="overflow-hidden rounded-[20px] border border-gray-100 bg-white shadow-sm">
+            <div className="overflow-hidden rounded-[20px] border border-gray-200 bg-white">
               <div className="flex flex-wrap items-center justify-between gap-4 border-b border-gray-100 bg-[#f4f8fc] px-6 py-4">
-                <p className="text-[14px] font-semibold text-[#0000FF]">
+                <p className="text-[14px] font-semibold text-brand-blue">
                   Programs offered – filter by level
                 </p>
                 <FilterPills
@@ -1129,7 +1032,7 @@ const CollegeDetailsPage: React.FC = () => {
                         </span>
                       </div>
                       <div className="col-span-2">
-                        <button className="rounded-lg bg-brand-blue/5 px-4 py-2 text-xs font-bold text-[#0000FF] hover:bg-brand-blue/10">
+                        <button className="rounded-lg bg-brand-blue/5 px-4 py-2 text-xs font-bold text-brand-blue hover:bg-brand-blue/10">
                           View Details
                         </button>
                       </div>
@@ -1154,9 +1057,9 @@ const CollegeDetailsPage: React.FC = () => {
                 {facilities.map((facility) => (
                   <div
                     key={facility.title}
-                    className="flex items-start gap-4 rounded-2xl border border-gray-100 bg-white p-5 shadow-sm"
+                    className="flex items-start gap-4 rounded-2xl border border-gray-200 bg-white p-5"
                   >
-                    <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-brand-blue/5 text-[#0000FF]">
+                    <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-brand-blue/5 text-brand-blue">
                       <i className={`fa-solid ${facility.icon}`}></i>
                     </div>
                     <div>
@@ -1183,37 +1086,76 @@ const CollegeDetailsPage: React.FC = () => {
                   Happening around the campus – join the vibe.
                 </p>
               </div>
-              <div className="grid grid-cols-1 gap-5 md:grid-cols-2">
-                {events.map((event) => (
-                  <div
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {events.slice((eventsPage - 1) * 9, eventsPage * 9).map((event) => (
+                  <article
                     key={event.title}
-                    className="overflow-hidden rounded-xl border border-gray-100 bg-white shadow-sm"
+                    className="bg-white rounded-2xl border border-gray-200 hover:border-blue-500/20 overflow-hidden flex flex-col duration-300 cursor-pointer"
                   >
-                    <img
-                      src={event.image}
-                      className="h-40 w-full object-cover"
-                      alt={event.title}
-                    />
-                    <div className="p-4">
-                      <h4 className="text-[16px] font-bold text-gray-900">
+                    <div className="h-35 w-full overflow-hidden p-4">
+                      <img
+                        src={event.image}
+                        alt={event.title}
+                        className="w-full h-full object-cover rounded-lg"
+                      />
+                    </div>
+                    <div className="p-5 flex flex-col grow">
+                      <div className="flex justify-between items-center mb-3">
+                        <span className="bg-blue-500 text-white text-[10px] font-bold px-2 py-1 rounded-full uppercase tracking-wider">
+                          Event
+                        </span>
+                        <span className="flex items-center text-xs text-gray-500 font-semibold">
+                          <i className="fa-regular fa-calendar mr-1.5"></i>{" "}
+                          {event.date.split(" | ")[0]}
+                        </span>
+                      </div>
+
+                      <h4 className="font-bold text-lg mb-3 leading-tight text-gray-900">
                         {event.title}
                       </h4>
-                      <div className="my-1 flex items-center gap-2 text-[12px] text-gray-500">
-                        <i className="fa-regular fa-calendar"></i>
-                        {event.date}
+
+                      <div className="flex items-center text-xs text-gray-600 mb-2 font-semibold">
+                        <i className="fa-solid fa-location-dot mr-2 text-gray-500"></i>{" "}
+                        {event.date.split(" | ")[1] || "TBD"}
                       </div>
-                      <p className="text-[13px] text-gray-600">{event.desc}</p>
+
+                      <p className="text-xs text-gray-500 mb-5 line-clamp-3 leading-relaxed font-medium">
+                        {event.desc}
+                      </p>
+
+                      <div className="mt-auto flex gap-2">
+                        <button className="flex-1 bg-white border border-gray-300 text-gray-700 text-sm font-bold py-2 rounded-lg hover:bg-gray-50 transition text-center">
+                          Details
+                        </button>
+                        <button className="flex-1 text-white text-sm font-bold py-2 rounded-lg transition bg-brand-blue cursor-pointer hover:bg-blue-600">
+                          Register
+                        </button>
+                      </div>
                     </div>
-                  </div>
+                  </article>
                 ))}
               </div>
+
+              {events.length > 9 && (
+                <div className="mt-8 flex justify-center gap-2">
+                  {Array.from({ length: Math.ceil(events.length / 9) }).map((_, idx) => (
+                    <button
+                      key={idx}
+                      className={`h-10 w-10 rounded-lg text-sm font-bold transition ${eventsPage === idx + 1 ? "bg-brand-blue text-white" : "bg-gray-100 text-gray-700 hover:bg-gray-200"}`}
+                      onClick={() => setEventsPage(idx + 1)}
+                    >
+                      {idx + 1}
+                    </button>
+                  ))}
+                </div>
+              )}
             </div>
           )}
 
           {activeTab === "scholarship" && (
-            <div className="overflow-hidden rounded-[20px] border border-gray-100 bg-white shadow-sm">
+            <div className="overflow-hidden rounded-[20px] border border-gray-200 bg-white">
               <div className="flex flex-wrap items-center justify-between gap-4 border-b border-gray-100 bg-[#f4f8fc] px-6 py-4">
-                <p className="text-[14px] font-semibold text-[#0000FF]">
+                <p className="text-[14px] font-semibold text-brand-blue">
                   Scholarship opportunities – filter by level
                 </p>
                 <FilterPills
@@ -1250,7 +1192,7 @@ const CollegeDetailsPage: React.FC = () => {
                       </div>
                       <div className="col-span-3">{scholarship.audience}</div>
                       <div className="col-span-3">
-                        <button className="rounded-lg bg-brand-blue px-5 py-2 text-xs font-bold text-white hover:bg-[#0000CC]">
+                        <button className="rounded-lg bg-brand-blue px-5 py-2 text-xs font-bold text-white hover:bg-brand-hover">
                           Get Scholarship
                         </button>
                       </div>
@@ -1275,7 +1217,7 @@ const CollegeDetailsPage: React.FC = () => {
                 {alumni.map((person) => (
                   <div
                     key={person.name}
-                    className="flex items-center gap-4 rounded-2xl border border-gray-100 bg-white p-5 transition hover:-translate-y-1 hover:shadow-md"
+                    className="flex items-center gap-4 rounded-2xl border border-gray-200 bg-white p-5"
                   >
                     <img
                       src={person.image}
@@ -1291,7 +1233,7 @@ const CollegeDetailsPage: React.FC = () => {
                         {person.batch}
                       </p>
                     </div>
-                    <button className="flex h-10 w-10 items-center justify-center rounded-full bg-brand-blue/5 text-[#0000FF] hover:bg-brand-blue/10">
+                    <button className="flex h-10 w-10 items-center justify-center rounded-full bg-brand-blue/5 text-brand-blue hover:bg-brand-blue/10">
                       <i className="fa-brands fa-linkedin-in"></i>
                     </button>
                   </div>
@@ -1302,19 +1244,17 @@ const CollegeDetailsPage: React.FC = () => {
 
           {activeTab === "gallery" && (
             <div>
-              <div className="mb-6 flex items-center justify-between">
+              <div className="mb-6">
                 <h2 className="text-[20px] font-bold text-gray-900">
                   Campus Gallery
                 </h2>
-                <button className="text-[13.5px] font-bold text-[#0000FF]">
-                  View All
-                </button>
               </div>
               <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3">
-                {galleryImages.map((image) => (
+                {galleryImages.slice(0, visibleImageCount).map((image, index) => (
                   <div
                     key={image}
-                    className="aspect-[16/10] overflow-hidden rounded-lg"
+                    className="aspect-[16/10] overflow-hidden rounded-lg cursor-pointer"
+                    onClick={() => setSelectedImageIndex(index)}
                   >
                     <img
                       src={image}
@@ -1324,12 +1264,64 @@ const CollegeDetailsPage: React.FC = () => {
                   </div>
                 ))}
               </div>
+
+              {visibleImageCount < galleryImages.length && (
+                <div className="mt-8 text-center">
+                  <button
+                    className="rounded-lg bg-brand-blue px-8 py-3 text-sm font-bold text-white hover:bg-brand-hover transition"
+                    onClick={() => setVisibleImageCount((prev) => prev + 9)}
+                  >
+                    Load More
+                  </button>
+                </div>
+              )}
+
+              {selectedImageIndex !== null && (
+                <div
+                  className="fixed inset-0 z-50 flex items-center justify-center bg-black/90"
+                  onClick={() => setSelectedImageIndex(null)}
+                >
+                  <button
+                    className="absolute left-4 top-1/2 -translate-y-1/2 flex h-12 w-12 items-center justify-center rounded-full bg-white/10 text-white hover:bg-white/20 transition"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handlePrevImage();
+                    }}
+                  >
+                    <i className="fa-solid fa-chevron-left text-xl"></i>
+                  </button>
+
+                  <img
+                    src={galleryImages[selectedImageIndex]}
+                    alt="Gallery preview"
+                    className="max-h-[90vh] max-w-[90vw] object-contain"
+                    onClick={(e) => e.stopPropagation()}
+                  />
+
+                  <button
+                    className="absolute right-4 top-1/2 -translate-y-1/2 flex h-12 w-12 items-center justify-center rounded-full bg-white/10 text-white hover:bg-white/20 transition"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleNextImage();
+                    }}
+                  >
+                    <i className="fa-solid fa-chevron-right text-xl"></i>
+                  </button>
+
+                  <button
+                    className="absolute top-4 right-4 flex h-10 w-10 items-center justify-center rounded-full bg-white/10 text-white hover:bg-white/20 transition"
+                    onClick={() => setSelectedImageIndex(null)}
+                  >
+                    <i className="fa-solid fa-xmark text-xl"></i>
+                  </button>
+                </div>
+              )}
             </div>
           )}
 
           {activeTab === "review" && (
             <div>
-              <div className="mb-8 flex flex-col items-center gap-8 rounded-[24px] border border-gray-100 bg-white p-8 shadow-sm md:flex-row">
+              <div className="mb-8 flex flex-col items-center gap-8 rounded-md border border-gray-200 bg-white p-8 md:flex-row">
                 <div className="text-center md:border-r md:pr-8 md:text-left">
                   <h2 className="mb-2 text-5xl font-extrabold text-gray-900">
                     4.5
@@ -1403,48 +1395,64 @@ const CollegeDetailsPage: React.FC = () => {
           )}
 
           {activeTab === "news" && (
-            <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
-              {newsCards.map((news) => (
-                <div
-                  key={news.title}
-                  className="flex flex-col overflow-hidden rounded-2xl border border-gray-100 bg-white shadow-sm transition hover:shadow-md"
-                >
-                  <div className="flex-1 p-5">
-                    <div className="mb-4">
-                      <span
-                        className={`inline-block rounded-full px-3.5 py-1 text-[12px] font-bold ${news.badgeClass}`}
-                      >
-                        {news.badge}
-                      </span>
+            <div>
+              <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
+                {newsCards.slice((newsPage - 1) * 9, newsPage * 9).map((news) => (
+                  <div
+                    key={news.title}
+                    className="flex flex-col overflow-hidden rounded-md border border-gray-200 bg-white transition "
+                  >
+                    <div className="flex-1 p-5">
+                      <div className="mb-4">
+                        <span
+                          className={`inline-block rounded-full px-3.5 py-1 text-[12px] font-bold ${news.badgeClass}`}
+                        >
+                          {news.badge}
+                        </span>
+                      </div>
+                      <div className="mb-4 h-[140px] w-full overflow-hidden rounded-xl">
+                        <img
+                          src={news.image}
+                          className="h-full w-full object-cover transition hover:scale-105"
+                          alt={news.title}
+                        />
+                      </div>
+                      <h3 className="mb-2 text-[17px] font-bold text-gray-900">
+                        {news.title}
+                      </h3>
+                      <p className="line-clamp-2 text-[13.5px] text-gray-500">
+                        {news.desc}
+                      </p>
                     </div>
-                    <div className="mb-4 h-[140px] w-full overflow-hidden rounded-xl">
-                      <img
-                        src={news.image}
-                        className="h-full w-full object-cover transition hover:scale-105"
-                        alt={news.title}
-                      />
+                    <div className="flex items-center justify-between border-t border-gray-50 bg-white px-5 py-4">
+                      <div className="flex items-center gap-1.5 text-gray-400">
+                        <i className="fa-regular fa-clock"></i>
+                        <span className="text-[12.5px] font-medium">
+                          {news.time}
+                        </span>
+                      </div>
+                      <button className="flex items-center text-[13px] font-bold text-brand-blue hover:text-brand-hover">
+                        View Details
+                        <i className="fa-solid fa-chevron-right ml-1 text-[11px]"></i>
+                      </button>
                     </div>
-                    <h3 className="mb-2 text-[17px] font-bold text-gray-900">
-                      {news.title}
-                    </h3>
-                    <p className="line-clamp-2 text-[13.5px] text-gray-500">
-                      {news.desc}
-                    </p>
                   </div>
-                  <div className="flex items-center justify-between border-t border-gray-50 bg-white px-5 py-4">
-                    <div className="flex items-center gap-1.5 text-gray-400">
-                      <i className="fa-regular fa-clock"></i>
-                      <span className="text-[12.5px] font-medium">
-                        {news.time}
-                      </span>
-                    </div>
-                    <button className="flex items-center text-[13px] font-bold text-[#0000FF] hover:text-[#0000CC]">
-                      View Details
-                      <i className="fa-solid fa-chevron-right ml-1 text-[11px]"></i>
+                ))}
+              </div>
+
+              {newsCards.length > 9 && (
+                <div className="mt-8 flex justify-center gap-2">
+                  {Array.from({ length: Math.ceil(newsCards.length / 9) }).map((_, idx) => (
+                    <button
+                      key={idx}
+                      className={`h-10 w-10 rounded-lg text-sm font-bold transition ${newsPage === idx + 1 ? "bg-brand-blue text-white" : "bg-gray-100 text-gray-700 hover:bg-gray-200"}`}
+                      onClick={() => setNewsPage(idx + 1)}
+                    >
+                      {idx + 1}
                     </button>
-                  </div>
+                  ))}
                 </div>
-              ))}
+              )}
             </div>
           )}
 
@@ -1458,11 +1466,11 @@ const CollegeDetailsPage: React.FC = () => {
                   Access brochures, forms, and study materials.
                 </p>
               </div>
-              <div className="grid grid-cols-1 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 {downloads.map((download) => (
                   <div
                     key={download.title}
-                    className="flex items-center justify-between rounded-xl border border-gray-100 bg-white p-5 shadow-sm transition hover:shadow"
+                    className="flex items-center justify-between rounded-xl border border-gray-200 bg-white p-5 transition"
                   >
                     <div className="flex items-center gap-4">
                       <div
@@ -1491,25 +1499,25 @@ const CollegeDetailsPage: React.FC = () => {
           )}
         </div>
 
-        <div className="space-y-6 lg:col-span-1 lg:w-full lg:max-w-[420px] lg:justify-self-end">
-          <div className="w-full rounded-[2rem] border border-gray-100 bg-white p-8 shadow-sm sm:p-10">
+        <div className="space-y-6 lg:col-span-1 lg:w-full lg:max-w-[400px] lg:justify-self-end">
+          <div className="w-full rounded-xl border border-gray-200 bg-white p-4 sm:p-10">
             <h3 className="mb-8 text-2xl font-bold text-gray-900">
               Contact Information
             </h3>
             <div className="flex flex-col gap-6">
-              <ContactInfoRowV2
+            <ContactInfoRow
                 icon="fa-solid fa-location-dot"
                 title="Address"
                 value={locationText}
                 badge="bg-brand-blue/5 text-[#0000FF]"
               />
-              <ContactInfoRowV2
+              <ContactInfoRow
                 icon="fa-solid fa-phone"
                 title="Phone"
                 value={college?.phone || "+977-1-6680000"}
                 badge="bg-emerald-50 text-emerald-600"
               />
-              <ContactInfoRowV2
+              <ContactInfoRow
                 icon="fa-solid fa-envelope"
                 title="Email"
                 value={college?.email || "info@soe.ku.edu.np"}
@@ -1517,7 +1525,7 @@ const CollegeDetailsPage: React.FC = () => {
                 link
                 linkHref="mailto:info@soe.ku.edu.np"
               />
-              <ContactInfoRowV2
+              <ContactInfoRow
                 icon="fa-solid fa-globe"
                 title="Website"
                 value={website}
@@ -1567,7 +1575,7 @@ const CollegeDetailsPage: React.FC = () => {
                   </a>
                 </div>
               </div>
-              <div className="group relative mt-8 h-44 w-full cursor-pointer overflow-hidden rounded-2xl shadow-inner">
+              <div className="group relative mt-8 h-35 w-full cursor-pointer overflow-hidden rounded-md ">
                 <div
                   className="absolute inset-0 bg-cover bg-center transition-transform duration-500 group-hover:scale-105"
                   style={{
@@ -1585,7 +1593,7 @@ const CollegeDetailsPage: React.FC = () => {
             </div>
           </div>
 
-          <div className="rounded-[24px] border border-gray-100 bg-white p-6 shadow-sm">
+          <div className="rounded-md border border-gray-100 bg-white p-6">
             <h3 className="mb-2 text-[18px] font-bold text-gray-900">
               Request Information
             </h3>
@@ -1596,19 +1604,19 @@ const CollegeDetailsPage: React.FC = () => {
               <input
                 type="text"
                 placeholder="Full Name"
-                className="w-full rounded-xl border border-gray-200 bg-gray-50 px-4 py-3 text-[13.5px] focus:border-[#0000FF] focus:outline-none focus:ring-2 focus:ring-[#0000FF]/20"
+                className="w-full rounded-md border border-gray-200 bg-gray-50 px-4 py-3 text-[13.5px] focus:border-brand-blue focus:outline-none focus:ring-2 focus:ring-brand-blue/20"
               />
               <input
                 type="email"
                 placeholder="Email Address"
-                className="w-full rounded-xl border border-gray-200 bg-gray-50 px-4 py-3 text-[13.5px] focus:border-[#0000FF] focus:outline-none focus:ring-2 focus:ring-[#0000FF]/20"
+                className="w-full rounded-md border border-gray-200 bg-gray-50 px-4 py-3 text-[13.5px] focus:border-brand-blue focus:outline-none focus:ring-2 focus:ring-brand-blue/20"
               />
               <input
                 type="tel"
                 placeholder="Phone Number"
-                className="w-full rounded-xl border border-gray-200 bg-gray-50 px-4 py-3 text-[13.5px] focus:border-[#0000FF] focus:outline-none focus:ring-2 focus:ring-[#0000FF]/20"
+                className="w-full rounded-md border border-gray-200 bg-gray-50 px-4 py-3 text-[13.5px] focus:border-brand-blue focus:outline-none focus:ring-2 focus:ring-brand-blue/20"
               />
-              <select className="w-full rounded-xl border border-gray-200 bg-gray-50 px-4 py-3 text-[13.5px] text-gray-600 focus:border-[#0000FF] focus:outline-none focus:ring-2 focus:ring-[#0000FF]/20">
+              <select className="w-full rounded-md border border-gray-200 bg-gray-50 px-4 py-3 text-[13.5px] text-gray-600 focus:border-brand-blue focus:outline-none focus:ring-2 focus:ring-brand-blue/20">
                 <option>Select Course of Interest</option>
                 <option>B.Sc. CSIT</option>
                 <option>BBA Finance</option>
@@ -1616,7 +1624,7 @@ const CollegeDetailsPage: React.FC = () => {
               </select>
               <button
                 type="button"
-                className="mt-2 w-full rounded-xl bg-brand-blue py-3.5 text-[14px] font-bold text-white shadow-sm shadow-[#0000FF]/20 transition-colors hover:bg-[#0000CC]"
+                className="mt-2 w-full rounded-md bg-brand-blue py-3.5 text-[14px] font-bold text-white shadow-sm shadow-brand-blue/20 transition-colors hover:bg-brand-hover"
               >
                 Submit Request
               </button>
@@ -1639,326 +1647,34 @@ const CollegeDetailsPage: React.FC = () => {
         shareTitle={shareTitle}
         shareText={shareText}
       />
-    </div>
-  );
-};
 
-const FilterPills: React.FC<{
-  active: LevelFilter;
-  onChange: (value: LevelFilter) => void;
-}> = ({ active, onChange }) => {
-  const levels: LevelFilter[] = ["all", "+2", "Bachelor", "Master"];
-  return (
-    <div className="flex gap-2 text-xs font-medium">
-      {levels.map((level) => {
-        const selected = active === level;
-        return (
-          <button
-            key={level}
-            onClick={() => onChange(level)}
-            className={`rounded-full px-4 py-1.5 ${selected ? "bg-brand-blue text-white shadow-sm" : "border border-gray-200 bg-white text-gray-700 hover:bg-gray-100"}`}
-          >
-            {level === "all" ? "All" : level}
-          </button>
-        );
-      })}
-    </div>
-  );
-};
-
-const ProgTh: React.FC<{ className?: string; children?: React.ReactNode }> = ({
-  className = "",
-  children,
-}) => (
-  <div className={`text-[13px] font-bold uppercase text-gray-800 ${className}`}>
-    {children}
-  </div>
-);
-
-const InfoBlock: React.FC<{
-  title: string;
-  desc: string;
-  icon: string;
-  color: "blue" | "green";
-}> = ({ title, desc, icon, color }) => (
-  <div className="rounded-[20px] border border-gray-100 bg-white p-8 shadow-sm">
-    <div className="mb-4 flex items-center gap-3.5">
-      <div
-        className={`flex h-10 w-10 items-center justify-center rounded-full ${color === "blue" ? "bg-brand-blue/10 text-[#0000FF]" : "bg-brand-blue/10 text-[#0000FF]"}`}
-      >
-        <i className={icon}></i>
-      </div>
-      <h3 className="text-[16px] font-bold text-gray-900">{title}</h3>
-    </div>
-    <p className="text-[14.5px] leading-[1.7] text-gray-600">{desc}</p>
-  </div>
-);
-
-const OverviewRow: React.FC<{ label: string; value: string }> = ({
-  label,
-  value,
-}) => (
-  <tr>
-    <td className="w-1/3 bg-gray-50 px-4 py-3 font-semibold">{label}</td>
-    <td className="px-4 py-3">{value}</td>
-  </tr>
-);
-
-const AdminRow: React.FC<{
-  position: string;
-  role: string;
-  holder: string;
-}> = ({ position, role, holder }) => (
-  <tr>
-    <td className="px-4 py-3 font-medium">{position}</td>
-    <td className="px-4 py-3">{role}</td>
-    <td className="px-4 py-3">{holder}</td>
-  </tr>
-);
-
-const RatingBar: React.FC<{
-  label: string;
-  width: string;
-  color: string;
-  pct: string;
-}> = ({ label, width, color, pct }) => (
-  <div className="flex items-center text-[13px] font-medium text-gray-600">
-    <span className="w-3">{label}</span>
-    <i className="fa-solid fa-star mx-1.5 text-[10px] text-gray-400"></i>
-    <div className="relative mx-3 h-2 flex-grow rounded bg-[#f1f5f9]">
-      <div className={`h-full rounded ${color}`} style={{ width }}></div>
-    </div>
-    <span className="w-8 text-right text-gray-400">{pct}</span>
-  </div>
-);
-
-const ReviewCard: React.FC<{
-  initials: string;
-  name: string;
-  subtitle: string;
-  rating: number;
-  pros: string;
-  cons: string;
-  tone: "blue" | "purple";
-}> = ({ initials, name, subtitle, rating, pros, cons, tone }) => (
-  <div className="rounded-[20px] border border-gray-100 bg-white p-6 shadow-sm">
-    <div className="mb-4 flex items-start justify-between">
-      <div className="flex items-center gap-3">
-        <div
-          className={`flex h-10 w-10 items-center justify-center rounded-full font-bold ${tone === "blue" ? "bg-brand-blue/10 text-[#0000FF]" : "bg-brand-blue/10 text-[#0000FF]"}`}
-        >
-          {initials}
-        </div>
-        <div>
-          <h4 className="text-[14.5px] font-bold text-gray-900">{name}</h4>
-          <p className="text-[12px] text-gray-500">{subtitle}</p>
-        </div>
-      </div>
-      <div className="flex gap-0.5">
-        {Array.from({ length: 5 }).map((_, idx) => (
-          <i
-            key={idx}
-            className={`${idx < rating ? "fa-solid text-yellow-400" : "fa-regular text-gray-300"} fa-star text-[13px]`}
-          ></i>
-        ))}
-      </div>
-    </div>
-    <div className="mb-3 rounded-lg border border-gray-100 bg-[#fafafa] p-4">
-      <div className="mb-2 flex items-start gap-2">
-        <i className="fa-solid fa-thumbs-up mt-0.5 text-green-500"></i>
-        <p className="text-[13.5px] leading-relaxed text-gray-700">
-          <span className="font-bold text-gray-900">Pros:</span> {pros}
-        </p>
-      </div>
-      <div className="flex items-start gap-2">
-        <i className="fa-solid fa-thumbs-down mt-0.5 text-red-500"></i>
-        <p className="text-[13.5px] leading-relaxed text-gray-700">
-          <span className="font-bold text-gray-900">Cons:</span> {cons}
-        </p>
-      </div>
-    </div>
-  </div>
-);
-
-const ContactInfoRow: React.FC<{
-  icon: string;
-  title: string;
-  value: string;
-  badge: string;
-  link?: boolean;
-}> = ({ icon, title, value, badge, link = false }) => (
-  <li className="flex items-start gap-3">
-    <div
-      className={`mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-full ${badge}`}
-    >
-      <i className={icon}></i>
-    </div>
-    <div>
-      <p className="text-[13px] font-bold text-gray-900">{title}</p>
-      {link ? (
-        <a
-          href="#"
-          className="mt-0.5 block text-[13.5px] text-[#0000FF] hover:underline"
-        >
-          {value}
-        </a>
-      ) : (
-        <p className="mt-0.5 text-[13.5px] text-gray-600">{value}</p>
-      )}
-    </div>
-  </li>
-);
-
-const ContactInfoRowV2: React.FC<{
-  icon: string;
-  title: string;
-  value: string;
-  badge: string;
-  link?: boolean;
-  linkHref?: string;
-}> = ({ icon, title, value, badge, link = false, linkHref = "#" }) => (
-  <div className="flex items-start gap-4">
-    <div
-      className={`mt-0.5 flex h-11 w-11 shrink-0 items-center justify-center rounded-full ${badge}`}
-    >
-      <i className={`${icon} text-lg`}></i>
-    </div>
-    <div>
-      <h3 className="text-[15px] font-bold text-gray-900">{title}</h3>
-      {link ? (
-        <a
-          href={linkHref}
-          className="mt-0.5 inline-block text-sm text-gray-500 transition-colors hover:text-[#0000FF]"
-        >
-          {value}
-        </a>
-      ) : (
-        <p className="mt-0.5 text-sm text-gray-500">{value}</p>
-      )}
-    </div>
-  </div>
-);
-
-const ClaimCollegeModal: React.FC<{
-  collegeName: string;
-  isOpen: boolean;
-  onClose: () => void;
-}> = ({ collegeName, isOpen, onClose }) => {
-  const [institutionName, setInstitutionName] = useState("");
-  const [registrationNumber, setRegistrationNumber] = useState("");
-  const [email, setEmail] = useState("");
-  const [contactPerson, setContactPerson] = useState("");
-  const [contactNumber, setContactNumber] = useState("");
-
-  React.useEffect(() => {
-    if (isOpen) {
-      setInstitutionName(collegeName || "");
-      setRegistrationNumber("");
-      setEmail("");
-      setContactPerson("");
-      setContactNumber("");
-    }
-  }, [isOpen, collegeName]);
-
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    alert(
-      "Claim request submitted successfully! Our team will verify and grant you access.",
-    );
-    onClose();
-  };
-
-  return (
-    <div
-      className={`fixed inset-0 z-[60] flex items-center justify-center bg-slate-900/40 backdrop-blur-sm transition-opacity duration-300 ${isOpen ? "opacity-100" : "pointer-events-none opacity-0"}`}
-      onClick={onClose}
-    >
-      <div
-        className={`mx-4 flex max-h-[90vh] w-full max-w-md flex-col rounded-[20px] bg-white shadow-2xl transition-transform duration-300 ${isOpen ? "scale-100" : "scale-95"}`}
-        onClick={(e) => e.stopPropagation()}
-      >
-        <div className="flex shrink-0 items-center justify-between border-b border-gray-100 px-6 py-5">
-          <h3 className="flex items-center gap-2 text-lg font-bold text-gray-900">
-            <i className="fa-solid fa-building-shield text-[20px] text-[#0000FF]"></i>
-            Claim Institution
-          </h3>
-          <button
-            type="button"
-            onClick={onClose}
-            className="rounded-full p-1.5 text-gray-400 transition-colors hover:bg-gray-100 hover:text-gray-700"
-          >
-            <i className="fa-solid fa-xmark text-[20px]"></i>
-          </button>
-        </div>
-        <div className="overflow-y-auto px-6 py-5">
-          <div className="mb-5 flex items-start gap-3 rounded-lg border border-brand-blue/20 bg-brand-blue/5 p-3.5">
-            <i className="fa-solid fa-circle-info mt-0.5 shrink-0 text-[18px] text-brand-blue"></i>
-            <p className="line-height-extra text-[13px] text-[#0000FF]">
-              Provide official details to claim{" "}
-              <span className="font-bold text-[#0000FF]">{collegeName}</span>.
-              Upon verification, you will receive full control over this
-              profile.
+      {showUnfollowDialog && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
+          <div className="mx-4 w-full max-w-md rounded-2xl bg-white p-6 shadow-xl">
+            <h3 className="mb-2 text-lg font-bold text-gray-900">Unfollow College</h3>
+            <p className="mb-6 text-gray-600">
+              Are you sure you want to unfollow <strong>{name}</strong>?
             </p>
-          </div>
-          <form onSubmit={handleSubmit} className="space-y-4">
-            <input
-              type="text"
-              placeholder="College name"
-              required
-              value={institutionName}
-              onChange={(event) => setInstitutionName(event.target.value)}
-              className="w-full px-4 py-3 bg-[#EEF2F6] border border-[#D5DCE8] rounded-xl focus:bg-white focus:border-[#2D68FE] outline-none text-[14px] shadow-sm"
-            />
-            <input
-              type="text"
-              placeholder="Institution registration number"
-              required
-              value={registrationNumber}
-              onChange={(event) => setRegistrationNumber(event.target.value)}
-              className="w-full px-4 py-3 bg-[#EEF2F6] border border-[#D5DCE8] rounded-xl focus:bg-white focus:border-[#2D68FE] outline-none text-[14px] shadow-sm"
-            />
-            <input
-              type="email"
-              placeholder="Work email"
-              required
-              value={email}
-              onChange={(event) => setEmail(event.target.value)}
-              className="w-full px-4 py-3 bg-[#EEF2F6] border border-[#D5DCE8] rounded-xl focus:bg-white focus:border-[#2D68FE] outline-none text-[14px] shadow-sm"
-            />
-            <input
-              type="text"
-              placeholder="Contact Person Full Name"
-              required
-              value={contactPerson}
-              onChange={(event) => setContactPerson(event.target.value)}
-              className="w-full px-4 py-3 bg-[#EEF2F6] border border-[#D5DCE8] rounded-xl focus:bg-white focus:border-[#2D68FE] outline-none text-[14px] shadow-sm"
-            />
-            <input
-              type="tel"
-              placeholder="Contact Number"
-              required
-              value={contactNumber}
-              onChange={(event) => setContactNumber(event.target.value)}
-              className="w-full px-4 py-3 bg-[#EEF2F6] border border-[#D5DCE8] rounded-xl focus:bg-white focus:border-[#2D68FE] outline-none text-[14px] shadow-sm"
-            />
-            <div className="mt-8 flex flex-col justify-end gap-3 sm:flex-row pt-4">
+            <div className="flex gap-3">
               <button
-                type="button"
-                onClick={onClose}
-                className="w-full rounded-xl border border-gray-200 bg-white px-5 py-2.5 text-[14px] font-bold text-gray-600 transition-colors hover:bg-gray-50 sm:w-auto"
+                onClick={() => setShowUnfollowDialog(false)}
+                className="flex-1 rounded-lg border border-gray-200 px-4 py-2.5 font-semibold text-gray-700 transition-colors hover:bg-gray-50"
               >
                 Cancel
               </button>
               <button
-                type="submit"
-                className="flex w-full items-center justify-center gap-2 rounded-xl bg-brand-blue px-6 py-2.5 text-[14px] font-bold text-white shadow-[0_4px_12px_rgba(0,0,255,0.2)] transition-all hover:-translate-y-0.5 hover:bg-[#0000CC] sm:w-auto"
+                onClick={() => {
+                  setIsFollowed(false);
+                  setShowUnfollowDialog(false);
+                }}
+                className="flex-1 rounded-lg bg-red-500 px-4 py-2.5 font-semibold text-white transition-colors hover:bg-red-600"
               >
-                Submit Claim Request
+                Unfollow
               </button>
             </div>
-          </form>
+          </div>
         </div>
-      </div>
+      )}
     </div>
   );
 };

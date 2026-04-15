@@ -12,7 +12,6 @@ import NewsStoriesSection from "./landing/NewsStoriesSection";
 import AdWidgetsSection from "./landing/AdWidgetsSection";
 import CampusEventsSection from "./landing/CampusEventsSection";
 import TestimonialsSection from "./landing/TestimonialsSection";
-import RecommendedForYouSection from "./landing/RecommendedForYouSection";
 import LandingPopups from "./landing/LandingPopups";
 
 interface EducationPageProps {

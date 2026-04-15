@@ -1,7 +1,7 @@
 "use client";
 
-import React, { useState } from "react";
-import Image from "next/image";
+import React, { useState } from 'react'
+import Image from 'next/image'
 import {
   BookOpen,
   Music,
@@ -13,18 +13,28 @@ import {
   Star,
   Banknote,
   TrendingUp,
+  MapPin,
+  Filter,
   Building2,
   X,
-  Filter,
-} from "lucide-react";
+} from 'lucide-react'
+import Step1 from './steps/Step1'
+import Step2 from './steps/Step2'
+import Step3 from './steps/Step3'
+import Step4 from './steps/Step4'
+import Step5 from './steps/Step5'
+import Step6 from './steps/Step6'
+import Step7 from './steps/Step7'
+import Step8 from './steps/Step8'
+import Step9 from './steps/Step9'
+import Step10 from './steps/Step10'
+import ResultsPage from './ResultsPage'
+
 import {
   apiService,
   CollegeRecommendation,
   CollegeRecommenderPayload,
-} from "@/services/api";
-import LeftPanel from "./LeftPanel";
-import RightPanel from "./RightPanel";
-import ResultsPage from "./ResultsPage";
+} from '@/services/api'
 
 interface CollegeRecommenderToolPageProps {
   onNavigate: (view: any, data?: any) => void;
@@ -45,15 +55,15 @@ const stepTitles: Record<number, string> = {
 
 const stepImages: Record<number, string> = {
   1: "/college-recommender/one.svg",
-  2: "/growth.svg",
+  2: "/college-recommender/two.svg",
   3: "/mirror.svg",
-  4: "/location.svg",
-  5: "/home.svg",
+  4: "/college-recommender/four.svg",
+  5: "/college-recommender/five.svg",
   6: "/teacher.svg",
-  7: "/notes.svg",
-  8: "/sports.svg",
-  9: "/list.svg",
-  10: "/money.svg",
+  7: "/college-recommender/seven.svg",
+  8: "/college-recommender/eight.svg",
+  9: "/college-recommender/nine.svg",
+  10: "/college-recommender/ten.svg",
 };
 
 export const studentTypeOptions = [
@@ -237,21 +247,119 @@ const CollegeRecommenderToolPage: React.FC<CollegeRecommenderToolPageProps> = ({
   }
 
   return (
-    <div className="flex flex-col overflow-visible bg-white text-slate-800 lg:flex-row">
-      <div className="max-w-350 mx-auto flex w-full flex-col lg:flex-row">
-        <LeftPanel step={step} stepImages={stepImages} />
-        <RightPanel
+    <div className='flex flex-col overflow-visible bg-white text-slate-800 lg:flex-row'>
+      {step === 1 && (
+        <Step1
           step={step}
-          setStep={setStep}
+          stepImages={stepImages}
           form={form}
           handleInputChange={handleInputChange}
+          stepTitles={stepTitles}
           canContinue={canContinue}
+          setStep={setStep}
+        />
+      )}
+      {step === 2 && (
+        <Step2
+          step={step}
+          stepImages={stepImages}
+          form={form}
+          handleInputChange={handleInputChange}
+          stepTitles={stepTitles}
+          canContinue={canContinue}
+          setStep={setStep}
+        />
+      )}
+      {step === 3 && (
+        <Step3
+          step={step}
+          stepImages={stepImages}
+          form={form}
+          handleInputChange={handleInputChange}
+          stepTitles={stepTitles}
+          canContinue={canContinue}
+          setStep={setStep}
+        />
+      )}
+      {step === 4 && (
+        <Step4
+          step={step}
+          stepImages={stepImages}
+          form={form}
+          handleInputChange={handleInputChange}
+          stepTitles={stepTitles}
+          canContinue={canContinue}
+          setStep={setStep}
+        />
+      )}
+      {step === 5 && (
+        <Step5
+          step={step}
+          stepImages={stepImages}
+          form={form}
+          handleInputChange={handleInputChange}
+          stepTitles={stepTitles}
+          canContinue={canContinue}
+          setStep={setStep}
+        />
+      )}
+      {step === 6 && (
+        <Step6
+          step={step}
+          stepImages={stepImages}
+          form={form}
+          handleInputChange={handleInputChange}
+          stepTitles={stepTitles}
+          canContinue={canContinue}
+          setStep={setStep}
+        />
+      )}
+      {step === 7 && (
+        <Step7
+          step={step}
+          stepImages={stepImages}
+          form={form}
+          handleInputChange={handleInputChange}
+          stepTitles={stepTitles}
+          canContinue={canContinue}
+          setStep={setStep}
+        />
+      )}
+      {step === 8 && (
+        <Step8
+          step={step}
+          stepImages={stepImages}
+          form={form}
+          handleInputChange={handleInputChange}
+          stepTitles={stepTitles}
+          canContinue={canContinue}
+          setStep={setStep}
+        />
+      )}
+      {step === 9 && (
+        <Step9
+          step={step}
+          stepImages={stepImages}
+          form={form}
+          handleInputChange={handleInputChange}
+          stepTitles={stepTitles}
+          canContinue={canContinue}
+          setStep={setStep}
+        />
+      )}
+      {step === 10 && (
+        <Step10
+          step={step}
+          stepImages={stepImages}
+          form={form}
+          handleInputChange={handleInputChange}
+          stepTitles={stepTitles}
+          canContinue={canContinue}
+          setStep={setStep}
           fetchRecommendations={fetchRecommendations}
           loading={loading}
-          stepTitles={stepTitles}
-          onNavigate={onNavigate}
         />
-      </div>
+      )}
     </div>
   );
 };
