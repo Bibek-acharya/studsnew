@@ -13,7 +13,8 @@ export default function LayoutPaddingWrapper({
   const isDashboardRoute =
     pathname.startsWith("/institution-zone") ||
     pathname.startsWith("/scholarship-provider") ||
-    pathname.startsWith("/superadmin");
+    pathname.startsWith("/superadmin") ||
+    pathname.startsWith("/user/dashboard");
 
   return (
     <div

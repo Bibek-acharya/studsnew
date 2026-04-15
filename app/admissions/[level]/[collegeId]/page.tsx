@@ -72,9 +72,9 @@ export default function AdmissionDetailPage() {
   return (
     <div className="min-h-screen bg-white text-[#111827] antialiased pb-20">
       {/* Main Container */}
-      <div className="max-w-350 mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12">
+      <div className="max-w-350 mx-auto py-8 sm:py-12">
         {/* Banner Section */}
-        <div className="relative w-full h-40 sm:h-48 md:h-64 bg-gray-50 rounded-2xl flex items-center justify-center overflow-hidden mb-8 sm:mb-12 shadow-sm">
+        <div className="relative w-full h-[50vh] bg-gray-50 rounded-2xl flex items-center justify-center overflow-hidden mb-8 sm:mb-12 shadow-sm">
           <img
             src="https://kist-edu-np.s3.ap-south-1.amazonaws.com/uploads/album/value/c0374b68ef663e539f7e6aea4b84625b2a207a981656053172.jpg"
             alt="Cover Image"
@@ -113,7 +113,7 @@ export default function AdmissionDetailPage() {
           {/* Left Column: Main Content */}
           <article className="space-y-12">
             {/* What's New Section */}
-            <div className="border border-gray-100 bg-white rounded-2xl p-6 sm:p-8 shadow-sm">
+            <div className="border border-gray-200 bg-white rounded-2xl p-6 sm:p-8">
               <div className="flex items-start justify-between cursor-pointer">
                 <div className="flex items-center gap-4">
                   <div className="w-12 h-12 rounded-xl bg-[#f0f4ff] flex items-center justify-center relative flex-shrink-0">
@@ -169,7 +169,7 @@ export default function AdmissionDetailPage() {
                 <div className="flex justify-center mt-4">
                   <button
                     onClick={() => setShowNotificationModal(true)}
-                    className="bg-brand-blue hover:bg-[#0000cc] text-white font-semibold py-3 px-8 rounded-full flex items-center transition-all shadow-blue-200 shadow-lg text-[15px]"
+                    className="bg-brand-blue hover:bg-brand-hover text-white font-semibold py-3 px-8 rounded-md flex items-center transition-all text-[15px]"
                   >
                     <Bell className="w-4 h-4 mr-2" />
                     Keep Me Notified
@@ -241,11 +241,11 @@ export default function AdmissionDetailPage() {
               </p>
 
               <h3 className="text-lg font-bold text-gray-800 mb-4 inline-flex items-center gap-2">
-                <Clock className="w-4 h-4 text-blue-500" /> Full time Courses
+                Full time Courses
               </h3>
 
-              <div className="overflow-x-auto rounded-2xl border border-gray-100 shadow-sm bg-white">
-                <table className="w-full text-left border-collapse min-w-[800px]">
+              <div className="overflow-x-auto rounded-2xl border border-gray-200  bg-white">
+                <table className="w-full text-left border-collapse min-w-200">
                   <thead>
                     <tr className="bg-[#eff4fc] text-[15px]">
                       <th className="p-5 font-bold text-[#111827] w-[28%] border-r border-gray-100">
@@ -313,7 +313,7 @@ export default function AdmissionDetailPage() {
                         </td>
                         <td className="p-5 align-top">
                           <button className="text-[#2563eb] hover:underline flex items-center font-bold">
-                            Apply Now <ArrowRight className="w-4 h-4 ml-1" />
+                            Apply Now 
                           </button>
                         </td>
                       </tr>
@@ -324,7 +324,7 @@ export default function AdmissionDetailPage() {
             </section>
 
             {/* Admission Process Section */}
-            <section className="bg-[#f8fafc] rounded-3xl p-8 sm:p-10">
+            <section className="bg-[#f8fafc] rounded-md p-8 sm:p-10">
               <h2 className="text-2xl font-bold text-[#111827] mb-6">
                 KIST College Admission Process 2026
               </h2>
@@ -382,7 +382,7 @@ export default function AdmissionDetailPage() {
                     ].map((item, idx) => (
                       <li
                         key={idx}
-                        className="bg-white p-4 rounded-xl border border-gray-100 shadow-sm"
+                        className="bg-white p-4 rounded-xl border border-gray-200"
                       >
                         <span className="font-bold text-gray-900 block mb-1">
                           {item.title}
@@ -403,8 +403,8 @@ export default function AdmissionDetailPage() {
                 Scholarships Overview
               </h2>
 
-              <div className="overflow-x-auto rounded-2xl border border-gray-100 bg-white">
-                <table className="w-full text-left border-collapse min-w-[800px]">
+              <div className="overflow-x-auto rounded-md border border-gray-200 bg-white">
+                <table className="w-full text-left border-collapse min-w-200">
                   <thead>
                     <tr className="bg-[#eff4fc]">
                       <th className="p-5 font-bold text-gray-900 w-[20%] border-r border-gray-100">
@@ -496,7 +496,7 @@ export default function AdmissionDetailPage() {
               </h2>
               <div className="space-y-8 pl-4 relative">
                 {/* Vertical Line */}
-                <div className="absolute left-[33px] top-6 bottom-6 w-[2px] bg-gray-100" />
+                <div className="absolute left-8.25 top-6 bottom-6 w-0.5 bg-gray-100" />
 
                 <Step
                   number={1}
@@ -522,9 +522,9 @@ export default function AdmissionDetailPage() {
             </section>
 
             {/* Student Forum Section */}
-            <section className="bg-[#fffbeb] border border-[#fef3c7] rounded-[32px] p-8 sm:p-10 shadow-sm mt-12">
+            <section className="bg-[#fffbeb] border border-[#fef3c7] rounded-md p-8 sm:p-10 mt-12">
               <div className="flex items-center gap-4 mb-8">
-                <div className="w-14 h-14 rounded-2xl bg-white shadow-sm flex items-center justify-center relative flex-shrink-0 border border-amber-100">
+                <div className="w-14 h-14 rounded-md bg-white flex items-center justify-center relative shrink-0 border border-amber-200">
                   <div className="absolute top-2 left-2 text-amber-400">
                     <MessageCircle className="w-6 h-6 fill-current" />
                     <span className="absolute inset-0 flex items-center justify-center text-[10px] font-black text-white -mt-1">
@@ -549,7 +549,7 @@ export default function AdmissionDetailPage() {
               </div>
 
               {/* Input Card */}
-              <div className="bg-white rounded-2xl p-6 sm:p-8 shadow-sm border border-amber-50">
+              <div className="bg-white rounded-md p-6 sm:p-8 border border-amber-200">
                 <div className="flex items-center gap-3 mb-6">
                   <Search className="w-5 h-5 text-amber-500" />
                   <h3 className="text-lg font-bold text-gray-900">
@@ -562,7 +562,7 @@ export default function AdmissionDetailPage() {
                     placeholder="Ask about admissions, fees, environment..."
                     className="flex-1 text-[16px] text-gray-700 placeholder-gray-400 focus:outline-none bg-transparent"
                   />
-                  <button className="bg-brand-blue hover:bg-[#0000cc] text-white text-sm font-bold py-2.5 px-6 rounded-xl transition-all shadow-blue-100 shadow-md">
+                  <button className="bg-brand-blue hover:bg-[#0000cc] text-white text-sm font-bold py-2.5 px-6 rounded-md transition-all ">
                     Submit
                   </button>
                 </div>
@@ -590,7 +590,7 @@ export default function AdmissionDetailPage() {
                 ].map((post, idx) => (
                   <div
                     key={idx}
-                    className="bg-white rounded-2xl p-6 sm:p-8 border border-white shadow-sm hover:shadow-md transition-shadow"
+                    className="bg-white rounded-md p-6 sm:p-8 border border-gray-200 transition-shadow"
                   >
                     <h3 className="text-lg font-bold text-gray-900 mb-2 leading-tight uppercase tracking-tight">
                       {post.q}
@@ -608,7 +608,7 @@ export default function AdmissionDetailPage() {
 
                     <div className="border-t border-gray-50 pt-5 flex items-center justify-between">
                       <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 rounded-full bg-blue-50 flex items-center justify-center text-blue-600 font-bold shadow-sm">
+                        <div className="w-10 h-10 rounded-full bg-blue-50 flex items-center justify-center text-blue-600 font-bold">
                           {post.init}
                         </div>
                         <div>
@@ -638,16 +638,15 @@ export default function AdmissionDetailPage() {
           {/* Right Column: Sidebar */}
           <aside className="space-y-10 mt-8 lg:mt-0 sticky top-24">
             {/* Interest Card */}
-            <div className="bg-white rounded-3xl shadow-xl shadow-gray-100 border border-gray-50 p-8 space-y-6">
+            <div className="bg-white rounded-md border border-gray-200 p-8 space-y-6">
               <h3 className="text-xl font-bold text-gray-900 leading-tight">
                 Are You Interested in this College?
               </h3>
               <div className="space-y-4">
-                <button className="w-full flex items-center justify-center bg-[#0ba042] hover:bg-[#0a8b39] text-white font-bold py-4 px-6 rounded-2xl transition-all shadow-emerald-100 shadow-lg group">
+                <button className="w-full flex items-center justify-center bg-brand-blue hover:bg-brand-hover  text-white font-bold py-4 px-6 rounded-md transition-all shadow-emerald-100 group">
                   Apply Now
-                  <ArrowRight className="w-5 h-5 ml-2 group-hover:translate-x-1 transition-transform" />
                 </button>
-                <button className="w-full flex items-center justify-center bg-brand-blue hover:bg-[#0000cc] text-white font-bold py-4 px-6 rounded-2xl transition-all shadow-blue-100 shadow-lg group">
+                <button className="w-full flex items-center justify-center bg-brand-blue hover:bg-[#0000cc] text-white font-bold py-4 px-6 rounded-md transition-all shadow-blue-100 group">
                   Download Brochure
                   <Download className="w-5 h-5 ml-2 group-hover:translate-y-1 transition-transform" />
                 </button>
@@ -655,7 +654,7 @@ export default function AdmissionDetailPage() {
             </div>
 
             {/* Latest Updates Section */}
-            <div className="bg-white rounded-[32px] shadow-sm border border-gray-100 p-8">
+            <div className="bg-white rounded-md border border-gray-200 p-8">
               <div className="flex items-center justify-between mb-8">
                 <h3 className="text-xl font-bold text-gray-900">
                   Latest Updates
@@ -712,7 +711,7 @@ export default function AdmissionDetailPage() {
             </div>
 
             {/* Upcoming Events Section */}
-            <div className="bg-white rounded-[32px] shadow-sm border border-gray-100 p-8">
+            <div className="bg-white rounded-md border border-gray-200 p-8">
               <div className="flex items-center justify-between mb-8">
                 <h3 className="text-xl font-bold text-gray-900">
                   Upcoming Events
@@ -767,84 +766,84 @@ export default function AdmissionDetailPage() {
             </div>
 
             {/* Contact Information Section */}
-            <div className="bg-[#1e1b4b] rounded-[32px] shadow-xl text-white p-8">
-              <div className="mb-8">
-                <span className="text-blue-300 text-xs font-bold tracking-widest uppercase">
-                  Contact
-                </span>
-                <h3 className="text-2xl font-bold mt-1">Get in Touch</h3>
+            <div className="bg-white rounded-md border border-gray-200 p-5 sm:p-6">
+              <div className="mb-5">
+                <span className="text-[12px] text-gray-500 font-medium">KIST College</span>
+                <h3 className="text-[20px] font-bold text-[#1e1b4b] mt-0.5 leading-tight">
+                  Contact Information
+                </h3>
               </div>
 
-              <div className="space-y-6">
+              <div className="relative w-full h-[100px] rounded-lg overflow-hidden mb-6 border border-gray-100">
+                <img
+                  src="https://images.unsplash.com/photo-1524661135-423995f22d0b?ixlib=rb-1.2.1&auto=format&fit=crop&w=600&q=80"
+                  alt="Map Preview"
+                  className="w-full h-full object-cover opacity-80"
+                />
+                <div className="absolute inset-0 flex items-center justify-center bg-white/20">
+                  <button className="bg-[#6b5b7b]/95 hover:bg-[#5c4b6a] text-white text-[15px] font-semibold py-2.5 px-10 rounded-lg transition-colors shadow-sm">
+                    View On Map
+                  </button>
+                </div>
+              </div>
+
+              <div className="space-y-4 text-[14px]">
                 <div className="flex gap-4">
-                  <div className="p-3 bg-white/10 rounded-xl h-fit">
-                    <MapPin className="w-5 h-5 text-blue-400" />
+                  <div className="w-[60px] text-gray-500 shrink-0 mt-0.5">
+                    Address
                   </div>
-                  <div>
-                    <p className="text-sm font-bold mb-1">Location</p>
-                    <p className="text-sm text-blue-100/70 leading-relaxed font-medium">
-                      KIST College Campus, Kamalpokhari
-                      <br />
-                      Kathmandu, Nepal
-                    </p>
-                    <button className="flex items-center mt-3 text-blue-400 hover:text-blue-300 transition-colors text-sm font-bold">
-                      View on Map <ArrowRight className="w-4 h-4 ml-2" />
+                  <div className="text-[#1e1b4b] font-semibold leading-relaxed">
+                    KIST College Campus
+                    <br />
+                    Kamalpokhari, Kathmandu
+                    <br />
+                    Bagmati Province, Nepal
+                    <button className="inline-flex items-center mt-1.5 text-[#2563eb] hover:underline font-medium text-[13px]">
+                      <MapPin className="w-3.5 h-3.5 mr-1" />
+                      View on Map
+                      <ArrowRight className="w-3 h-3 ml-1" />
                     </button>
                   </div>
                 </div>
 
-                <div className="border-t border-white/10" />
+                <div className="border-t border-gray-100" />
 
                 <div className="flex gap-4">
-                  <div className="p-3 bg-white/10 rounded-xl h-fit">
-                    <Phone className="w-5 h-5 text-emerald-400" />
-                  </div>
-                  <div>
-                    <p className="text-sm font-bold mb-1">Phone Numbers</p>
-                    <p className="text-sm text-blue-100/70 font-medium">
-                      01-4434984, 4434985
-                    </p>
-                    <p className="text-xs text-blue-100/40 mt-1 uppercase tracking-widest">
-                      General Enquiries
-                    </p>
+                  <div className="w-[60px] text-gray-500 shrink-0 mt-0.5">Phone</div>
+                  <div className="text-[#1e1b4b] font-semibold space-y-4">
+                    <div>
+                      01-4112222, 4112233
+                      <div className="text-gray-600 font-medium mt-0.5">
+                        (For general query)
+                      </div>
+                    </div>
+                    <div>
+                      +977-9841000000
+                      <div className="text-gray-600 font-medium mt-0.5">
+                        (For admission query)
+                      </div>
+                    </div>
                   </div>
                 </div>
 
-                <div className="flex gap-4 mt-4">
-                  <div className="p-3 bg-white/0 rounded-xl h-fit invisible">
-                    <Phone className="w-5 h-5" />
-                  </div>
-                  <div>
-                    <p className="text-sm text-blue-100/70 font-medium">
-                      +977-9841234567
-                    </p>
-                    <p className="text-xs text-blue-100/40 mt-1 uppercase tracking-widest">
-                      Admission Helpdesk
-                    </p>
-                  </div>
-                </div>
-
-                <div className="border-t border-white/10" />
+                <div className="border-t border-gray-100" />
 
                 <div className="flex gap-4">
-                  <div className="p-3 bg-white/10 rounded-xl h-fit">
-                    <Mail className="w-5 h-5 text-rose-300" />
-                  </div>
-                  <div>
-                    <p className="text-sm font-bold mb-1">Email Address</p>
+                  <div className="w-[60px] text-gray-500 shrink-0 mt-0.5">Email</div>
+                  <div className="text-[#1e1b4b] font-semibold">
                     <a
-                      href="mailto:info@kist.edu.np"
-                      className="text-sm text-blue-100/70 hover:text-white transition-colors"
+                      href="mailto:admission@kist.edu.np"
+                      className="hover:text-[#2563eb] transition-colors"
                     >
-                      info@kist.edu.np
+                      admission@kist.edu.np
                     </a>
                   </div>
                 </div>
               </div>
 
-              <button className="mt-10 w-full bg-white text-[#1e1b4b] font-black py-4 rounded-2xl hover:bg-blue-50 transition-all flex items-center justify-center gap-2 group">
-                Visit Official Website{" "}
-                <ExternalLink className="w-4 h-4 group-hover:scale-110" />
+              <button className="mt-6 flex items-center justify-center w-full border cursor-pointer text-white font-bold py-3 rounded-md bg-brand-blue hover:bg-brand-hover transition-colors text-[15px]">
+                Visit Website
+                <ArrowRight className="w-4 h-4 ml-2" />
               </button>
             </div>
           </aside>
@@ -858,7 +857,7 @@ export default function AdmissionDetailPage() {
             className="absolute inset-0 bg-gray-900/40 backdrop-blur-sm transition-opacity"
             onClick={() => setShowNotificationModal(false)}
           />
-          <div className="relative bg-white rounded-3xl w-full max-w-sm mx-4 p-8 shadow-2xl animate-in fade-in zoom-in duration-300">
+          <div className="relative bg-white rounded-md w-full max-w-sm mx-4 p-8 shadow-2xl animate-in fade-in zoom-in duration-300">
             <button
               onClick={() => setShowNotificationModal(false)}
               className="absolute top-6 right-6 text-gray-400 hover:text-gray-600 transition-colors"
