@@ -21,7 +21,7 @@ export const DesktopDropdown: React.FC<{
   onToggle: () => void;
   isActive?: boolean;
 }> = ({ label, children, alignRight = false, isOpen, onToggle, isActive = false }) => (
-  <div className="menu-anchor relative h-full shrink-0">
+  <div className="menu-anchor relative font-semibold h-full shrink-0">
     <button
       type="button"
       onClick={onToggle}

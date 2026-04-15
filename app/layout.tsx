@@ -43,11 +43,11 @@ export default function RootLayout({
           href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.2.0/css/all.min.css"
         />
       </head>
-      <body className="min-h-full flex flex-col bg-white">
+      <body className="min-h-full flex flex-col">
         <Providers>
           <NavbarWrapper />
           <LayoutPaddingWrapper>
-            <main className="flex-1 bg-white">{children}</main>
+            <main className="flex-1">{children}</main>
             <FooterWrapper />
           </LayoutPaddingWrapper>
         </Providers>

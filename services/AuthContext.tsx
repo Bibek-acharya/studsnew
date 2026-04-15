@@ -1,7 +1,7 @@
 "use client";
 
-import React, { createContext, useContext, useState, ReactNode, useEffect } from "react";
-import { apiService } from "./api";
+import React, { createContext, useContext, useState, ReactNode, useEffect, useMemo } from "react";
+import { apiService, AuthResponse } from "./api";
 
 interface User {
   id?: number;
@@ -32,6 +32,7 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 const STORAGE_KEY = "studsphere_auth";
 
 const loadStoredAuth = (): { token: string; user: User } | null => {
+  if (typeof window === "undefined") return null;
   try {
     const raw = localStorage.getItem(STORAGE_KEY);
     if (raw) return JSON.parse(raw);
@@ -42,81 +43,89 @@ const loadStoredAuth = (): { token: string; user: User } | null => {
 };
 
 const saveAuth = (token: string, user: User) => {
+  if (typeof window === "undefined") return;
   localStorage.setItem(STORAGE_KEY, JSON.stringify({ token, user }));
   // Also set in apiService just in case
   apiService.setToken(token);
 };
 
 const clearAuth = () => {
+  if (typeof window === "undefined") return;
   localStorage.removeItem(STORAGE_KEY);
   apiService.setToken(null);
 };
 
 export function AuthProvider({ children }: { children: ReactNode }) {
-  const [token, setToken] = useState<string | null>(null);
-  const [user, setUserState] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
+  const [storedAuth, setStoredAuth] = useState<{ token: string; user: User } | null>(null);
 
   useEffect(() => {
     const stored = loadStoredAuth();
-    if (stored) {
-      setToken(stored.token);
-      setUserState(stored.user);
-    }
+    setStoredAuth(stored);
     setLoading(false);
   }, []);
 
+  const token = storedAuth?.token ?? null;
+  const user = storedAuth?.user ?? null;
+  const isAuthenticated = !!token;
+
   const setUser = (userData: User) => {
-    setUserState(userData);
-    if (token) saveAuth(token, userData);
+    const currentToken = storedAuth?.token || "";
+    saveAuth(currentToken, userData);
+    setStoredAuth({ token: currentToken, user: userData });
   };
 
   const login = async (email: string, password: string) => {
-    const response = await apiService.login(email, password);
-    const { token: receivedToken, user: receivedUser } = response.data;
+    const response: AuthResponse = await apiService.login(email, password);
     
-    saveAuth(receivedToken, receivedUser);
-    setToken(receivedToken);
-    setUserState(receivedUser);
-  };
+    if (!response.data?.token) {
+      throw new Error(response.message || "Login failed. Please try again.");
+    }
 
-  const superadminLogin = async (email: string, password: string) => {
-    const response = await apiService.superadminLogin(email, password);
-    const { token: receivedToken, user: receivedUser } = response.data;
-    
-    saveAuth(receivedToken, receivedUser);
-    setToken(receivedToken);
-    setUserState(receivedUser);
+    const userData: User = {
+      id: response.data.user.id,
+      first_name: response.data.user.first_name,
+      last_name: response.data.user.last_name,
+      email: response.data.user.email,
+      role: response.data.user.role,
+    };
+
+    saveAuth(response.data.token, userData);
+    setStoredAuth({ token: response.data.token, user: userData });
   };
 
   const register = async (email: string, password: string, firstName: string, lastName: string, role: string, educationLevel: string) => {
-    await apiService.register({
+    const response = await apiService.register({
       email,
       password,
       first_name: firstName,
       last_name: lastName,
-      role,
-      education_level: educationLevel
+      role: role || "student",
+      education_level: educationLevel,
     });
-    // Registration might require OTP, but for now we proceed as if success leads to login or OTP flow
-  };
 
-  const superadminRegister = async (data: { first_name: string; last_name: string; email: string; password: string; access_code: string }) => {
-    const response = await apiService.superadminRegister(data);
-    const { token: receivedToken, user: receivedUser } = response.data;
-    
-    saveAuth(receivedToken, receivedUser);
-    setToken(receivedToken);
-    setUserState(receivedUser);
+    if (!response.data?.requires_otp) {
+      throw new Error("Registration response invalid");
+    }
   };
 
   const verifyOTP = async (email: string, otp: string) => {
-    const response = await apiService.verifyOTP(email, otp);
-    const { token: receivedToken, user: receivedUser } = response.data;
+    const response: AuthResponse = await apiService.verifyOTP(email, otp);
     
-    saveAuth(receivedToken, receivedUser);
-    setToken(receivedToken);
-    setUserState(receivedUser);
+    if (!response.data?.token) {
+      throw new Error(response.message || "Verification failed");
+    }
+
+    const userData: User = {
+      id: response.data.user.id,
+      first_name: response.data.user.first_name,
+      last_name: response.data.user.last_name,
+      email: response.data.user.email,
+      role: response.data.user.role,
+    };
+
+    saveAuth(response.data.token, userData);
+    setStoredAuth({ token: response.data.token, user: userData });
   };
 
   const sendOTP = async (email: string) => {
@@ -125,27 +134,24 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const logout = () => {
     clearAuth();
-    setToken(null);
-    setUserState(null);
+    setStoredAuth(null);
   };
 
-  const isAuthenticated = !!token;
+  const value = useMemo(() => ({
+    token,
+    user,
+    isAuthenticated,
+    loading,
+    login,
+    logout,
+    register,
+    verifyOTP,
+    sendOTP,
+    setUser,
+  }), [token, user, isAuthenticated, loading]);
 
   return (
-    <AuthContext.Provider value={{ 
-      token, 
-      user, 
-      isAuthenticated, 
-      loading, 
-      login, 
-      logout, 
-      register, 
-      superadminLogin,
-      superadminRegister,
-      verifyOTP, 
-      sendOTP, 
-      setUser 
-    }}>
+    <AuthContext.Provider value={value}>
       {children}
     </AuthContext.Provider>
   );

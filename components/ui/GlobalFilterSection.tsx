@@ -8,6 +8,7 @@ interface GlobalFilterSectionProps {
   titleClassName?: string;
   sectionClassName?: string;
   contentClassName?: string;
+  hideDivider?: boolean;
 }
 
 const GlobalFilterSection: React.FC<GlobalFilterSectionProps> = ({
@@ -18,9 +19,10 @@ const GlobalFilterSection: React.FC<GlobalFilterSectionProps> = ({
   titleClassName,
   sectionClassName,
   contentClassName,
+  hideDivider = false,
 }) => {
   return (
-    <div className={sectionClassName || "border-b border-gray-100"}>
+    <div className={sectionClassName || (hideDivider ? "" : "border-b border-gray-100")}>
       <button
         type="button"
         onClick={onToggle}

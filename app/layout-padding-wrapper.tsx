@@ -17,7 +17,7 @@ export default function LayoutPaddingWrapper({
 
   return (
     <div
-      className={`flex min-h-screen flex-col bg-white ${
+      className={`flex min-h-screen flex-col ${
         isDashboardRoute ? "" : "pt-18 xs:pt-20 sm:pt-24 md:pt-27"
       }`}
     >

@@ -52,7 +52,7 @@ const EntranceGrid: React.FC<EntranceGridProps> = ({ filters, setFilters }) => {
     localLevel: filters.localLevel.length > 0 ? filters.localLevel : undefined,
     applicationFee: filters.applicationFee.length > 0 ? filters.applicationFee : undefined,
     scholarship: filters.scholarship.length > 0 ? filters.scholarship : undefined,
-    gpa: filters.gpa.length > 0 ? filters.gpa : undefined,
+    gpa: filters.gpa.length > 0 ? [filters.gpa] : undefined,
   };
 
   const { data, isLoading } = useQuery({

@@ -65,6 +65,7 @@ export interface EducationCourse {
   highlights?: string[];
   careerPath?: string;
   description?: string;
+  image?: string;
 }
 
 export interface College {
@@ -687,6 +688,7 @@ export const apiService = {
             location: "Lalitpur",
             type: "Engineering",
             match_score: 9,
+            tuition: "Rs. 50,000/year",
             reasons: ["Strong academics", "High placement rate", "Low tuition fees"],
           },
           {
@@ -695,6 +697,7 @@ export const apiService = {
             location: "Kathmandu",
             type: "Engineering",
             match_score: 8,
+            tuition: "Rs. 60,000/year",
             reasons: ["Good infrastructure", "Affordable fees", "Central location"],
           },
           {
@@ -703,6 +706,7 @@ export const apiService = {
             location: "Dhulikhel",
             type: "Engineering",
             match_score: 7,
+            tuition: "Rs. 1,20,000/year",
             reasons: ["Excellent campus life", "Modern labs", "International exposure"],
           },
         ],

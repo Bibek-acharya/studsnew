@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { Search, Link as LinkIcon } from "lucide-react";
+import FeedbackWidget from "@/components/FeedbackWidget";
 
 interface HeroSectionProps {
   onNavigate: (view: string, data?: any) => void;
@@ -195,6 +196,8 @@ const HeroSection: React.FC<HeroSectionProps> = ({ onNavigate }) => {
           <LinkIcon className="w-5 h-5 text-brand-blue group-hover:rotate-12 transition-transform" />
           <span className="text-base">{heroSlides[currentSlide].text}</span>
         </a>
+
+        <FeedbackWidget />
       </main>
     </div>
   );

@@ -110,7 +110,7 @@ const CourseFinderPage: React.FC<CourseFinderPageProps> = ({ onNavigate }) => {
   return (
     <div className="min-h-screen bg-gray-50 p-4 text-gray-800 md:p-6 lg:p-8 pt-24">
       <main className="mx-auto flex w-full max-w-350 flex-col gap-6 lg:flex-row lg:flex-nowrap lg:gap-8 items-start">
-        <aside className="w-full shrink-0 lg:w-85 h-fit sticky top-24">
+        <aside className="w-full shrink-0 lg:w-75 h-fit sticky top-24">
           <CourseFilters
             filters={filters}
             counts={defaultCourseFilterCounts}
@@ -122,7 +122,8 @@ const CourseFinderPage: React.FC<CourseFinderPageProps> = ({ onNavigate }) => {
           <div className="mb-6 flex flex-col md:flex-row md:items-end justify-between gap-4 pb-2">
             <div>
               <h1 className="text-base font-normal text-gray-900">
-                Showing 1-{filteredCourses.length} of {filteredCourses.length} <span className="font-bold">courses</span>
+                Showing 1-{filteredCourses.length} of {filteredCourses.length}{" "}
+                <span className="font-bold">courses</span>
               </h1>
               <p className="mt-1 text-[13px] text-gray-500 font-medium">
                 Tailored for your future.
