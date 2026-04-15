@@ -12,11 +12,12 @@ export default function LayoutPaddingWrapper({
   // Route-specific exclusions for global navbar/padding
   const isDashboardRoute =
     pathname.startsWith("/institution-zone") ||
-    pathname.startsWith("/scholarship-provider");
+    pathname.startsWith("/scholarship-provider") ||
+    pathname.startsWith("/user/dashboard");
 
   return (
     <div
-      className={`flex min-h-screen flex-col bg-white ${
+      className={`flex min-h-screen flex-col ${
         isDashboardRoute ? "" : "pt-18 xs:pt-20 sm:pt-24 md:pt-27"
       }`}
     >

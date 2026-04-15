@@ -1,6 +1,7 @@
 "use client";
 
-import React, { createContext, useContext, useState, ReactNode, useEffect } from "react";
+import React, { createContext, useContext, useState, ReactNode, useEffect, useMemo } from "react";
+import { apiService, AuthResponse } from "./api";
 
 interface User {
   id?: number;
@@ -29,6 +30,7 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 const STORAGE_KEY = "studsphere_auth";
 
 const loadStoredAuth = (): { token: string; user: User } | null => {
+  if (typeof window === "undefined") return null;
   try {
     const raw = localStorage.getItem(STORAGE_KEY);
     if (raw) return JSON.parse(raw);
@@ -39,93 +41,112 @@ const loadStoredAuth = (): { token: string; user: User } | null => {
 };
 
 const saveAuth = (token: string, user: User) => {
+  if (typeof window === "undefined") return;
   localStorage.setItem(STORAGE_KEY, JSON.stringify({ token, user }));
 };
 
 const clearAuth = () => {
+  if (typeof window === "undefined") return;
   localStorage.removeItem(STORAGE_KEY);
 };
 
 export function AuthProvider({ children }: { children: ReactNode }) {
-  const [token, setToken] = useState<string | null>(null);
-  const [user, setUserState] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
+  const [storedAuth, setStoredAuth] = useState<{ token: string; user: User } | null>(null);
 
   useEffect(() => {
     const stored = loadStoredAuth();
-    if (stored) {
-      setToken(stored.token);
-      setUserState(stored.user);
-    }
+    setStoredAuth(stored);
     setLoading(false);
   }, []);
 
+  const token = storedAuth?.token ?? null;
+  const user = storedAuth?.user ?? null;
+  const isAuthenticated = !!token;
+
   const setUser = (userData: User) => {
-    setUserState(userData);
-    if (token) saveAuth(token, userData);
+    const currentToken = storedAuth?.token || "";
+    saveAuth(currentToken, userData);
+    setStoredAuth({ token: currentToken, user: userData });
   };
 
-  const login = async (email: string, _password: string) => {
-    const storedUsersRaw = localStorage.getItem("studsphere_users");
-    const storedUsers: Array<{ email: string; password: string; first_name: string; last_name: string; role: string }> = storedUsersRaw ? JSON.parse(storedUsersRaw) : [];
-
-    const found = storedUsers.find((u) => u.email === email && u.password === _password);
-
-    if (!found) {
-      throw new Error("Invalid email or password. Please try again.");
+  const login = async (email: string, password: string) => {
+    const response: AuthResponse = await apiService.login(email, password);
+    
+    if (!response.data?.token) {
+      throw new Error(response.message || "Login failed. Please try again.");
     }
 
-    const mockToken = `tok_${Date.now()}_${Math.random().toString(36).slice(2)}`;
     const userData: User = {
-      first_name: found.first_name,
-      last_name: found.last_name,
-      email: found.email,
-      role: found.role,
+      id: response.data.user.id,
+      first_name: response.data.user.first_name,
+      last_name: response.data.user.last_name,
+      email: response.data.user.email,
+      role: response.data.user.role,
     };
 
-    saveAuth(mockToken, userData);
-    setToken(mockToken);
-    setUserState(userData);
+    saveAuth(response.data.token, userData);
+    setStoredAuth({ token: response.data.token, user: userData });
   };
 
-  const register = async (email: string, password: string, firstName: string, lastName: string, role: string, _educationLevel: string) => {
-    const storedUsersRaw = localStorage.getItem("studsphere_users");
-    const storedUsers: Array<{ email: string; password: string; first_name: string; last_name: string; role: string }> = storedUsersRaw ? JSON.parse(storedUsersRaw) : [];
+  const register = async (email: string, password: string, firstName: string, lastName: string, role: string, educationLevel: string) => {
+    const response = await apiService.register({
+      email,
+      password,
+      first_name: firstName,
+      last_name: lastName,
+      role: role || "student",
+      education_level: educationLevel,
+    });
 
-    const exists = storedUsers.find((u) => u.email === email);
-    if (exists) {
-      throw new Error("An account with this email already exists.");
+    if (!response.data?.requires_otp) {
+      throw new Error("Registration response invalid");
+    }
+  };
+
+  const verifyOTP = async (email: string, otp: string) => {
+    const response: AuthResponse = await apiService.verifyOTP(email, otp);
+    
+    if (!response.data?.token) {
+      throw new Error(response.message || "Verification failed");
     }
 
-    storedUsers.push({ email, password, first_name: firstName, last_name: lastName, role });
-    localStorage.setItem("studsphere_users", JSON.stringify(storedUsers));
+    const userData: User = {
+      id: response.data.user.id,
+      first_name: response.data.user.first_name,
+      last_name: response.data.user.last_name,
+      email: response.data.user.email,
+      role: response.data.user.role,
+    };
 
-    const mockToken = `tok_${Date.now()}_${Math.random().toString(36).slice(2)}`;
-    const userData: User = { first_name: firstName, last_name: lastName, email, role };
-
-    saveAuth(mockToken, userData);
-    setToken(mockToken);
-    setUserState(userData);
+    saveAuth(response.data.token, userData);
+    setStoredAuth({ token: response.data.token, user: userData });
   };
 
-  const verifyOTP = async (_email: string, _otp: string) => {
-    /* no-op for mock */
-  };
-
-  const sendOTP = async (_email: string) => {
-    /* no-op for mock */
+  const sendOTP = async (email: string) => {
+    await apiService.sendOTP(email);
   };
 
   const logout = () => {
     clearAuth();
-    setToken(null);
-    setUserState(null);
+    setStoredAuth(null);
   };
 
-  const isAuthenticated = !!token;
+  const value = useMemo(() => ({
+    token,
+    user,
+    isAuthenticated,
+    loading,
+    login,
+    logout,
+    register,
+    verifyOTP,
+    sendOTP,
+    setUser,
+  }), [token, user, isAuthenticated, loading]);
 
   return (
-    <AuthContext.Provider value={{ token, user, isAuthenticated, loading, login, logout, register, verifyOTP, sendOTP, setUser }}>
+    <AuthContext.Provider value={value}>
       {children}
     </AuthContext.Provider>
   );

@@ -1,15 +1,16 @@
 "use client";
 
 import { usePathname, useRouter } from "next/navigation";
+import { useCallback } from "react";
 import EducationNavbar from "@/components/navigation/EducationNavbar";
 import { useAuth } from "@/services/AuthContext";
+import { routeMap } from "@/components/navigation/config";
 
 export default function NavbarWrapper() {
   const pathname = usePathname();
   const { user, logout } = useAuth();
   const router = useRouter();
 
-  // Hide the global navbar for specific routes
   const hideGlobalNavbar =
     pathname.startsWith("/scholarship-provider") ||
     pathname.startsWith("/institution-zone") ||
@@ -19,14 +20,21 @@ export default function NavbarWrapper() {
     return null;
   }
 
-  const handleNavigate = (viewKey: string) => {
-    // If EducationNavbar calls onNavigate, we can handle it here or let it use its internal router
-  };
+  const handleNavigate = useCallback((viewKey: string) => {
+    const route = routeMap[viewKey as keyof typeof routeMap];
+    if (route) {
+      router.push(route);
+    }
+  }, [router]);
+
+  const handleLogout = useCallback(() => {
+    logout();
+  }, [logout]);
 
   return (
     <EducationNavbar
       user={user}
-      onLogout={logout}
+      onLogout={handleLogout}
       onNavigate={handleNavigate}
     />
   );

@@ -8,12 +8,14 @@ import { validators, useFieldValidation } from "@/utils/validation";
 interface SignupViewProps {
   onSwitch: () => void;
   onSuccess: () => void;
+  onOTPRequired?: (email: string) => void;
   onClose?: () => void;
 }
 
 const SignupView: React.FC<SignupViewProps> = ({
   onSwitch,
   onSuccess,
+  onOTPRequired,
   onClose,
 }) => {
   const router = useRouter();
@@ -97,7 +99,11 @@ const SignupView: React.FC<SignupViewProps> = ({
         "student",
         "",
       );
-      onSuccess();
+      if (onOTPRequired) {
+        onOTPRequired(values.email);
+      } else {
+        onSuccess();
+      }
     } catch (err: any) {
       setError(err.message || "Registration failed. Please try again.");
     } finally {
@@ -124,7 +130,7 @@ const SignupView: React.FC<SignupViewProps> = ({
   };
 
   const handleGoogleLogin = () => {
-    window.location.href = "/api/v1/auth/google";
+    window.location.href = `${process.env.NEXT_PUBLIC_API_URL}/api/v1/auth/google`;
   };
 
   return (

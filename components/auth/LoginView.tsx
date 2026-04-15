@@ -43,7 +43,7 @@ const LoginView: React.FC<LoginViewProps> = ({
   };
 
   const handleGoogleLogin = () => {
-    window.location.href = "/api/v1/auth/google";
+    window.location.href = `${process.env.NEXT_PUBLIC_API_URL}/api/v1/auth/google`;
   };
 
   return (

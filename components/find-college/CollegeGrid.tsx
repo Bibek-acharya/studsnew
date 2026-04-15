@@ -13,7 +13,6 @@ import {
 } from "lucide-react";
 import Pagination from "@/components/ui/Pagination";
 
-import LocationAd from "./ads/LocationAd";
 import TrendingCollegesAd from "./ads/TrendingCollegesAd";
 import RecommendationFeedback from "./ads/RecommendationFeedback";
 import ClaimCollegeModal from "./ClaimCollegeModal";
@@ -685,13 +684,13 @@ const ProgramCard: React.FC<{
           </p>
         </div>
 
-        <div className="mb-4 pr-2 relative h-[3rem]">
-          <p className="line-clamp-2 text-[14px] leading-relaxed text-gray-500">
-            {description}
+        <div className="mb-4 pr-2 h-14">
+          <p className="text-[14px] leading-relaxed text-gray-500 line-clamp-2">
+            {description.length > 80 ? description.slice(0, 80) + "..." : description}
           </p>
           <button
             type="button"
-            className="absolute bottom-0 right-0 text-[14px] font-semibold text-brand-blue hover:underline"
+            className="text-[14px] font-semibold text-brand-blue hover:underline"
             onClick={(e) => {
               e.stopPropagation();
               onNavigate("collegeDetails", { id: college.id });
