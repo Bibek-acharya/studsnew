@@ -1,278 +1,377 @@
 'use client'
 
 import { useState } from 'react'
-import { 
-  Search,
-  Filter,
+import {
   GraduationCap,
   Award,
   FileText,
-  CheckCircle,
-  Clock,
-  AlertCircle,
-  XCircle,
-  ChevronRight,
   X,
-  Users
+  MapPin,
+  Calendar,
+  Clock,
+  CheckCircle2,
+  Circle,
+  AlertCircle,
+  ChevronDown,
+  Eye,
+  User,
+  Mail,
+  Phone,
+  Globe
 } from 'lucide-react'
 
 type AppType = 'all' | 'admission' | 'entrance' | 'scholarship'
+
+type Status = 'applied' | 'shortlisted' | 'interview' | 'accepted' | 'rejected'
 
 interface Application {
   id: number
   institution: string
   program: string
-  type: 'admission' | 'entrance' | 'scholarship'
-  status: 'applied' | 'shortlisted' | 'interview' | 'accepted' | 'rejected'
+  type: AppType
+  status: Status
   appliedDate: string
   deadline: string
   location: string
+  logo?: string
+  user?: {
+    name: string
+    email: string
+    phone: string
+    avatar?: string
+  }
 }
 
-const STATUS_CONFIG = {
-  applied: { label: 'Applied', color: 'blue', bg: 'bg-blue-50', border: 'border-blue-200', icon: Clock },
-  shortlisted: { label: 'Shortlisted', color: 'purple', bg: 'bg-purple-50', border: 'border-purple-200', icon: Users },
-  interview: { label: 'Interview', color: 'orange', bg: 'bg-orange-50', border: 'border-orange-200', icon: AlertCircle },
-  accepted: { label: 'Accepted', color: 'green', bg: 'bg-green-50', border: 'border-green-200', icon: CheckCircle },
-  rejected: { label: 'Rejected', color: 'red', bg: 'bg-red-50', border: 'border-red-200', icon: XCircle }
+const TYPES: AppType[] = ['all', 'admission', 'entrance', 'scholarship']
+
+const STATUS_ORDER: Status[] = [
+  'applied',
+  'shortlisted',
+  'interview',
+  'accepted'
+]
+
+const STATUS_LABEL = {
+  applied: 'Applied',
+  shortlisted: 'Shortlisted',
+  interview: 'Interview',
+  accepted: 'Accepted',
+  rejected: 'Rejected'
 }
 
-const TYPE_CONFIG = {
-  admission: { label: 'Admission', icon: GraduationCap, color: 'blue' },
-  entrance: { label: 'Entrance', icon: FileText, color: 'orange' },
-  scholarship: { label: 'Scholarship', icon: Award, color: 'green' }
+const STATUS_COLOR = {
+  applied: 'bg-blue-100 text-blue-700',
+  shortlisted: 'bg-amber-100 text-amber-700',
+  interview: 'bg-purple-100 text-purple-700',
+  accepted: 'bg-green-100 text-green-700',
+  rejected: 'bg-red-100 text-red-700'
 }
 
-const initialApplications: Application[] = [
-  { id: 1, institution: 'Tribhuvan University', program: 'Engineering (IOE)', type: 'entrance', status: 'applied', appliedDate: '2026-03-15', deadline: '2026-04-30', location: 'Kathmandu' },
-  { id: 2, institution: 'Peking University', program: 'Computer Science', type: 'admission', status: 'shortlisted', appliedDate: '2026-02-10', deadline: '2026-04-01', location: 'Beijing, China' },
-  { id: 3, institution: 'ANII Scholarship', program: ' Merit Based Scholarship', type: 'scholarship', status: 'interview', appliedDate: '2026-01-20', deadline: '2026-03-01', location: 'Nepal' },
-  { id: 4, institution: 'MIT', program: 'Data Science', type: 'admission', status: 'applied', appliedDate: '2026-02-28', deadline: '2026-01-15', location: 'Boston, USA' },
-  { id: 5, institution: 'KU Entrance', program: 'Medical College', type: 'entrance', status: 'accepted', appliedDate: '2026-01-05', deadline: '2026-02-28', location: 'Kathmandu' },
-  { id: 6, institution: 'Fulbright Scholarship', program: 'Graduate Program', type: 'scholarship', status: 'rejected', appliedDate: '2025-12-10', deadline: '2025-12-15', location: 'USA' },
+const TYPE_COLOR: Record<string, string> = {
+  admission: 'bg-blue-600',
+  entrance: 'bg-indigo-600',
+  scholarship: 'bg-amber-500',
+  all: 'bg-slate-600'
+}
+
+const data: Application[] = [
+  { id: 1, institution: 'Tribhuvan University', program: 'Engineering', type: 'entrance', status: 'shortlisted', appliedDate: '2026-03-15', deadline: '2026-04-30', location: 'Kathmandu', user: { name: 'Alex Johnson', email: 'alex@example.com', phone: '+977 9812345678' } },
+  { id: 2, institution: 'Peking University', program: 'Computer Science', type: 'admission', status: 'interview', appliedDate: '2026-02-10', deadline: '2026-04-01', location: 'Beijing', user: { name: 'Alex Johnson', email: 'alex@example.com', phone: '+977 9812345678' } },
+  { id: 3, institution: 'Fulbright', program: 'Graduate Program', type: 'scholarship', status: 'applied', appliedDate: '2026-01-20', deadline: '2026-03-01', location: 'USA', user: { name: 'Alex Johnson', email: 'alex@example.com', phone: '+977 9812345678' } },
+  { id: 4, institution: 'Stanford University', program: 'Data Science', type: 'admission', status: 'accepted', appliedDate: '2025-12-15', deadline: '2026-01-05', location: 'California', user: { name: 'Alex Johnson', email: 'alex@example.com', phone: '+977 9812345678' } },
 ]
 
 export default function ApplicationsSection() {
   const [activeType, setActiveType] = useState<AppType>('all')
-  const [activeStatus, setActiveStatus] = useState<string>('all')
-  const [searchQuery, setSearchQuery] = useState('')
-  const [applications, setApplications] = useState<Application[]>(initialApplications)
-  const [selectedApp, setSelectedApp] = useState<Application | null>(null)
+  const [selected, setSelected] = useState<Application | null>(null)
+  const [sortKey, setSortKey] = useState<string>('deadline')
+  const [sortDir, setSortDir] = useState<'asc' | 'desc'>('asc')
 
-  const filteredApps = applications.filter(app => {
-    const matchesType = activeType === 'all' || app.type === activeType
-    const matchesStatus = activeStatus === 'all' || app.status === activeStatus
-    const matchesSearch = app.institution.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                       app.program.toLowerCase().includes(searchQuery.toLowerCase())
-    return matchesType && matchesStatus && matchesSearch
+  const filtered = data.filter(a =>
+    activeType === 'all' || a.type === activeType
+  )
+
+  const sorted = [...filtered].sort((a, b) => {
+    const aVal = a[sortKey as keyof Application]
+    const bVal = b[sortKey as keyof Application]
+    if (aVal! < bVal!) return sortDir === 'asc' ? -1 : 1
+    if (aVal! > bVal!) return sortDir === 'asc' ? 1 : -1
+    return 0
   })
 
-  const handleStatusChange = (appId: number, newStatus: Application['status']) => {
-    setApplications(applications.map(app => 
-      app.id === appId ? { ...app, status: newStatus } : app
-    ))
-    setSelectedApp(null)
+  const getInitials = (name: string) => {
+    return name.split(' ').map(w => w[0]).join('').slice(0, 2).toUpperCase()
   }
 
-  const getStats = () => {
-    const total = applications.length
-    const accepted = applications.filter(a => a.status === 'accepted').length
-    const pending = applications.filter(a => ['applied', 'shortlisted', 'interview'].includes(a.status)).length
-    const rejected = applications.filter(a => a.status === 'rejected').length
-    return { total, accepted, pending, rejected }
+  const handleSort = (key: string) => {
+    if (sortKey === key) {
+      setSortDir(sortDir === 'asc' ? 'desc' : 'asc')
+    } else {
+      setSortKey(key)
+      setSortDir('asc')
+    }
   }
-
-  const stats = getStats()
 
   return (
-    <div className="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
-      <div className="p-4 md:p-6 border-b border-slate-200">
-        <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
-          <div>
-            <h1 className="text-2xl md:text-3xl font-bold text-slate-900 tracking-tight">My Applications</h1>
-            <p className="text-sm text-slate-500 mt-1">Track your admission, entrance, and scholarship applications</p>
-          </div>
-          
-          <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2 w-full">
-            <div className="relative flex-1 w-full">
-              <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
-              <input 
-                type="text" 
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                placeholder="Search applications.." 
-                className="pl-9 pr-4 py-2 border border-slate-200 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-brand-blue w-full"
-              />
-            </div>
-            <select 
-              value={activeStatus}
-              onChange={(e) => setActiveStatus(e.target.value)}
-              className="px-3 py-2 border border-slate-200 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-brand-blue"
-            >
-              <option value="all">All Status</option>
-              <option value="applied">Applied</option>
-              <option value="shortlisted">Shortlisted</option>
-              <option value="interview">Interview</option>
-              <option value="accepted">Accepted</option>
-              <option value="rejected">Rejected</option>
-            </select>
-          </div>
-        </div>
+    <div className="relative">
+
+      {/* TABS */}
+      <div className="flex gap-1 bg-slate-100 p-1 rounded-lg mb-6 w-fit mt-6">
+        {TYPES.map(t => (
+          <button
+            key={t}
+            onClick={() => setActiveType(t)}
+            className={`px-4 py-2 text-sm font-semibold rounded-md transition-all ${
+              activeType === t
+                ? 'bg-white text-primary'
+                : 'text-slate-500 hover:text-slate-700'
+            }`}
+          >
+            {t === 'all' ? 'All' : t.charAt(0).toUpperCase() + t.slice(1)}
+          </button>
+        ))}
       </div>
 
-      <div className="grid grid-cols-2 md:grid-cols-4 border-b border-slate-200">
-        <button 
-          onClick={() => setActiveType('all')}
-          className={`p-4 text-center border-b-2 transition-colors ${activeType === 'all' ? 'border-brand-blue text-brand-blue' : 'border-transparent text-slate-500 hover:text-slate-700'}`}
-        >
-          <p className="text-2xl font-bold">{stats.total}</p>
-          <p className="text-xs text-slate-500">Total</p>
-        </button>
-        <button 
-          onClick={() => setActiveType('admission')}
-          className={`p-4 text-center border-b-2 transition-colors ${activeType === 'admission' ? 'border-brand-blue text-brand-blue' : 'border-transparent text-slate-500 hover:text-slate-700'}`}
-        >
-          <p className="text-2xl font-bold">{applications.filter(a => a.type === 'admission').length}</p>
-          <p className="text-xs text-slate-500">Admissions</p>
-        </button>
-        <button 
-          onClick={() => setActiveType('entrance')}
-          className={`p-4 text-center border-b-2 transition-colors ${activeType === 'entrance' ? 'border-brand-blue text-brand-blue' : 'border-transparent text-slate-500 hover:text-slate-700'}`}
-        >
-          <p className="text-2xl font-bold">{applications.filter(a => a.type === 'entrance').length}</p>
-          <p className="text-xs text-slate-500">Entrances</p>
-        </button>
-        <button 
-          onClick={() => setActiveType('scholarship')}
-          className={`p-4 text-center border-b-2 transition-colors ${activeType === 'scholarship' ? 'border-brand-blue text-brand-blue' : 'border-transparent text-slate-500 hover:text-slate-700'}`}
-        >
-          <p className="text-2xl font-bold">{applications.filter(a => a.type === 'scholarship').length}</p>
-          <p className="text-xs text-slate-500">Scholarships</p>
-        </button>
-      </div>
-
-      <div className="p-4 md:p-6">
-        {filteredApps.length === 0 ? (
-          <div className="text-center py-12">
-            <FileText className="w-12 h-12 text-slate-300 mx-auto mb-4" />
-            <p className="text-slate-600">No applications found</p>
-            <p className="text-sm text-slate-400">Try adjusting your search or filter</p>
-          </div>
-        ) : (
-          <div className="space-y-4">
-            {filteredApps.map(app => {
-              const statusConfig = STATUS_CONFIG[app.status]
-              const typeConfig = TYPE_CONFIG[app.type]
-              const StatusIcon = statusConfig.icon
-              const TypeIcon = typeConfig.icon
-
-              return (
-                <div 
-                  key={app.id}
-                  onClick={() => setSelectedApp(app)}
-                  className="border border-slate-200 rounded-lg p-4 hover:shadow-md transition-shadow cursor-pointer"
+      {/* TABLE */}
+      <div className="bg-white rounded-xl border border-slate-200 overflow-hidden">
+        <table className="w-full">
+          <thead>
+            <tr className="bg-slate-50 border-b border-slate-200">
+              <th className="text-left px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-wider">
+                <button 
+                  onClick={() => handleSort('institution')}
+                  className="flex items-center gap-1 hover:text-slate-700"
                 >
-                  <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-                    <div className="flex items-start gap-4">
-                      <div className={`w-12 h-12 rounded-lg ${typeConfig.color === 'blue' ? 'bg-blue-100 text-blue-600' : typeConfig.color === 'orange' ? 'bg-orange-100 text-orange-600' : 'bg-green-100 text-green-600'} flex items-center justify-center`}>
-                        <TypeIcon className="w-6 h-6" />
-                      </div>
-                      <div>
-                        <div className="flex items-center gap-2">
-                          <h3 className="font-semibold text-slate-900">{app.institution}</h3>
-                          <span className={`text-xs px-2 py-0.5 rounded-full ${statusConfig.bg} ${statusConfig.border} border`}>
-                            <StatusIcon className={`w-3 h-3 inline mr-1`} />
-                            {statusConfig.label}
-                          </span>
-                        </div>
-                        <p className="text-sm text-slate-600">{app.program}</p>
-                        <div className="flex items-center gap-4 mt-1 text-xs text-slate-400">
-                          <span>{app.location}</span>
-                          <span>•</span>
-                          <span>Applied: {new Date(app.appliedDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}</span>
-                        </div>
-                      </div>
-                    </div>
-                    <div className="flex items-center gap-2 text-slate-400">
-                      <ChevronRight className="w-5 h-5" />
-                    </div>
-                  </div>
-                </div>
-              )
-            })}
+                  Institution
+                  <ChevronDown className={`w-3 h-3 transition-transform ${sortKey === 'institution' && sortDir === 'desc' ? 'rotate-180' : ''}`} />
+                </button>
+              </th>
+              <th className="text-left px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-wider">Program</th>
+              <th className="text-center px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-wider">Type</th>
+              <th className="text-center px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-wider">
+                <button 
+                  onClick={() => handleSort('status')}
+                  className="flex items-center gap-1 hover:text-slate-700 mx-auto"
+                >
+                  Status
+                  <ChevronDown className={`w-3 h-3 transition-transform ${sortKey === 'status' && sortDir === 'desc' ? 'rotate-180' : ''}`} />
+                </button>
+              </th>
+              <th className="text-left px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-wider">
+                <button 
+                  onClick={() => handleSort('appliedDate')}
+                  className="flex items-center gap-1 hover:text-slate-700"
+                >
+                  Applied
+                  <ChevronDown className={`w-3 h-3 transition-transform ${sortKey === 'appliedDate' && sortDir === 'desc' ? 'rotate-180' : ''}`} />
+                </button>
+              </th>
+              <th className="text-left px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-wider">
+                <button 
+                  onClick={() => handleSort('deadline')}
+                  className="flex items-center gap-1 hover:text-slate-700"
+                >
+                  Deadline
+                  <ChevronDown className={`w-3 h-3 transition-transform ${sortKey === 'deadline' && sortDir === 'desc' ? 'rotate-180' : ''}`} />
+                </button>
+              </th>
+              <th className="text-center px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-wider">Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            {sorted.map(app => (
+              <tr 
+                key={app.id}
+                className="border-b border-slate-100 hover:bg-slate-50 transition-colors"
+              >
+                <td className="px-6 py-4 text-left">
+                  <span className="font-semibold text-slate-800">{app.institution}</span>
+                </td>
+                <td className="px-6 py-4 text-left text-sm text-slate-600">{app.program}</td>
+                <td className="px-6 py-4 text-center">
+                  <span className={`text-xs font-bold px-2 py-1 rounded-full capitalize ${
+                    app.type === 'admission' ? 'bg-blue-50 text-blue-600' :
+                    app.type === 'entrance' ? 'bg-indigo-50 text-indigo-600' :
+                    'bg-amber-50 text-amber-600'
+                  }`}>
+                    {app.type}
+                  </span>
+                </td>
+                <td className="px-6 py-4 text-center">
+                  <span className={`text-xs font-bold px-2 py-1 rounded-full ${STATUS_COLOR[app.status]} capitalize`}>
+                    {STATUS_LABEL[app.status]}
+                  </span>
+                </td>
+                <td className="px-6 py-4 text-left text-sm text-slate-500">
+                  {new Date(app.appliedDate).toLocaleDateString()}
+                </td>
+                <td className="px-6 py-4 text-left text-sm text-slate-500">
+                  {new Date(app.deadline).toLocaleDateString()}
+                </td>
+                <td className="px-6 py-4 text-center">
+                  <button 
+                    onClick={(e) => { e.stopPropagation(); setSelected(app); }}
+                    className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-primary bg-blue-50 hover:bg-blue-100 rounded-md transition-colors"
+                  >
+                    <Eye className="w-3.5 h-3.5" />
+                    View
+                  </button>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+
+        {sorted.length === 0 && (
+          <div className="text-center py-8 text-slate-500">
+            No applications found
           </div>
         )}
       </div>
 
-      {selectedApp && (
-        <div className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-          <div className="bg-white rounded-xl shadow-xl w-full max-w-lg overflow-hidden">
-            <div className="flex justify-between items-center p-4 md:p-6 border-b border-slate-100">
-              <h3 className="text-lg font-semibold text-slate-900">{selectedApp.institution}</h3>
-              <button onClick={() => setSelectedApp(null)} className="text-slate-400 hover:text-slate-600 p-1 rounded-full hover:bg-slate-100">
-                <X className="w-5 h-5" />
-              </button>
-            </div>
-            <div className="p-4 md:p-6 space-y-4">
-              <div className="flex items-center gap-3">
-                <div className={`w-10 h-10 rounded-lg ${TYPE_CONFIG[selectedApp.type].color === 'blue' ? 'bg-blue-100 text-blue-600' : TYPE_CONFIG[selectedApp.type].color === 'orange' ? 'bg-orange-100 text-orange-600' : 'bg-green-100 text-green-600'} flex items-center justify-center`}>
-                  {(() => {
-                    const Icon = TYPE_CONFIG[selectedApp.type].icon
-                    return <Icon className="w-5 h-5" />
-                  })()}
-                </div>
-                <div>
-                  <p className="font-medium text-slate-900">{selectedApp.program}</p>
-                  <p className="text-sm text-slate-500">{TYPE_CONFIG[selectedApp.type].label}</p>
-                </div>
-              </div>
+      {/* OVERLAY + DRAWER */}
+      {selected && (
+        <>
+          {/* BACKDROP */}
+          <div
+            onClick={() => setSelected(null)}
+            className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-[60] animate-in fade-in duration-200"
+          />
+
+          {/* DRAWER */}
+          <div className="fixed right-0 top-0 h-full w-full max-w-md bg-white border-l border-slate-200 z-[70] animate-in slide-in-from-right duration-300">
+            <div className="h-full flex flex-col">
               
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <p className="text-xs text-slate-500">Status</p>
-                  <div className={`inline-flex items-center gap-1 px-2 py-1 rounded-full text-sm mt-1 ${STATUS_CONFIG[selectedApp.status].bg} ${STATUS_CONFIG[selectedApp.status].border} border`}>
-                    {(() => {
-                      const Icon = STATUS_CONFIG[selectedApp.status].icon
-                      return <Icon className="w-3 h-3" />
-                    })()}
-                    <span>{STATUS_CONFIG[selectedApp.status].label}</span>
+              {/* HEADER */}
+              <div className="p-6 border-b border-slate-100">
+                <div className="flex justify-between items-start">
+                  <div className="flex items-center gap-4">
+                    <div className={`w-14 h-14 rounded-xl ${TYPE_COLOR[selected.type]} flex items-center justify-center`}>
+                      <span className="text-white font-bold text-xl">
+                        {getInitials(selected.institution)}
+                      </span>
+                    </div>
+                    <div>
+                      <h2 className="text-xl font-bold text-slate-800">
+                        {selected.institution}
+                      </h2>
+                      <p className="text-sm text-slate-500">{selected.program}</p>
+                    </div>
                   </div>
-                </div>
-                <div>
-                  <p className="text-xs text-slate-500">Applied Date</p>
-                  <p className="text-sm font-medium">{new Date(selectedApp.appliedDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}</p>
-                </div>
-                <div>
-                  <p className="text-xs text-slate-500">Deadline</p>
-                  <p className="text-sm font-medium">{new Date(selectedApp.deadline).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}</p>
-                </div>
-                <div>
-                  <p className="text-xs text-slate-500">Location</p>
-                  <p className="text-sm font-medium">{selectedApp.location}</p>
+                  <button
+                    onClick={() => setSelected(null)}
+                    className="p-2 rounded-full hover:bg-slate-100 transition"
+                  >
+                    <X className="w-5 h-5 text-slate-400" />
+                  </button>
                 </div>
               </div>
 
-              <div>
-                <p className="text-xs text-slate-500 mb-2">Update Status</p>
-                <div className="flex flex-wrap gap-2">
-                  {(['applied', 'shortlisted', 'interview', 'accepted', 'rejected'] as const).map(status => (
-                    <button
-                      key={status}
-                      onClick={() => handleStatusChange(selectedApp.id, status)}
-                      className={`px-3 py-1.5 text-sm rounded-md border transition-colors ${
-                        selectedApp.status === status 
-                          ? 'bg-brand-blue text-white border-brand-blue' 
-                          : 'bg-white text-slate-600 border-slate-200 hover:bg-slate-50'
-                      }`}
-                    >
-                      {STATUS_CONFIG[status].label}
-                    </button>
-                  ))}
+              {/* CONTENT */}
+              <div className="flex-1 overflow-y-auto p-6">
+                {/* USER INFO */}
+                {selected.user && (
+                  <div className="mb-6">
+                    <h3 className="text-sm font-bold text-slate-800 uppercase tracking-wider mb-4">Applicant Information</h3>
+                    <div className="bg-white border border-slate-200 rounded-xl p-4">
+                      <div className="flex items-center gap-4 mb-4">
+                        <div className="w-12 h-12 rounded-full bg-primary flex items-center justify-center">
+                          <span className="text-white font-bold">
+                            {selected.user.name.split(' ').map(n => n[0]).join('').toUpperCase()}
+                          </span>
+                        </div>
+                        <div>
+                          <p className="font-semibold text-slate-800">{selected.user.name}</p>
+                          <p className="text-xs text-slate-500">Applicant</p>
+                        </div>
+                      </div>
+                      <div className="space-y-3">
+                        <div className="flex items-center gap-3 text-sm">
+                          <Mail className="w-4 h-4 text-slate-400" />
+                          <span className="text-slate-600">{selected.user.email}</span>
+                        </div>
+                        <div className="flex items-center gap-3 text-sm">
+                          <Phone className="w-4 h-4 text-slate-400" />
+                          <span className="text-slate-600">{selected.user.phone}</span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {/* STATUS BADGE */}
+                <div className="mb-6">
+                  <span className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm font-bold ${STATUS_COLOR[selected.status]}`}>
+                    {selected.status === 'accepted' || selected.status === 'shortlisted' ? (
+                      <CheckCircle2 className="w-4 h-4" />
+                    ) : selected.status === 'rejected' ? (
+                      <AlertCircle className="w-4 h-4" />
+                    ) : (
+                      <Clock className="w-4 h-4" />
+                    )}
+                    {STATUS_LABEL[selected.status]}
+                  </span>
+                </div>
+
+                {/* DETAILS */}
+                <div className="bg-slate-50 rounded-xl p-4 mb-6 space-y-3">
+                  <div className="flex items-center gap-3 text-sm">
+                    <MapPin className="w-4 h-4 text-slate-400" />
+                    <span className="text-slate-600">{selected.location}</span>
+                  </div>
+                  <div className="flex items-center gap-3 text-sm">
+                    <Calendar className="w-4 h-4 text-slate-400" />
+                    <span className="text-slate-600">Applied: {new Date(selected.appliedDate).toLocaleDateString()}</span>
+                  </div>
+                  <div className="flex items-center gap-3 text-sm">
+                    <Clock className="w-4 h-4 text-slate-400" />
+                    <span className="text-slate-600">Deadline: {new Date(selected.deadline).toLocaleDateString()}</span>
+                  </div>
+                </div>
+
+                {/* TIMELINE */}
+                <div>
+                  <h3 className="text-sm font-bold text-slate-800 uppercase tracking-wider mb-4">Application Progress</h3>
+                  <div className="space-y-0">
+                    {STATUS_ORDER.map((s, i) => {
+                      const activeIndex = STATUS_ORDER.indexOf(selected.status)
+                      const isDone = i <= activeIndex
+                      const isCurrent = i === activeIndex
+
+                      return (
+                        <div key={s} className="flex gap-4 items-start relative">
+                          {i !== 0 && (
+                            <div className={`absolute left-1.5 top-6 w-[2px] h-6 ${isDone ? 'bg-primary' : 'bg-slate-200'}`} />
+                          )}
+                          <div className="relative z-10 flex flex-col items-center">
+                            <div
+                              className={`w-3 h-3 rounded-full transition-all ${
+                                isDone 
+                                  ? isCurrent 
+                                    ? 'bg-primary ring-4 ring-primary/20' 
+                                    : 'bg-primary' 
+                                  : 'bg-slate-200'
+                              }`}
+                            />
+                          </div>
+                          <div className="pb-4">
+                            <p className={`text-sm font-semibold ${isDone ? 'text-slate-800' : 'text-slate-400'}`}>
+                              {STATUS_LABEL[s]}
+                            </p>
+                            {isCurrent && (
+                              <p className="text-xs text-primary mt-0.5">Current status</p>
+                            )}
+                          </div>
+                        </div>
+                      )
+                    })}
+                  </div>
                 </div>
               </div>
+
             </div>
           </div>
-        </div>
+        </>
       )}
     </div>
   )

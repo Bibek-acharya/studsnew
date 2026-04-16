@@ -1,9 +1,10 @@
 "use client";
 
 import React, { useEffect, useRef, useState, useCallback } from "react";
+import { useRouter } from "next/navigation";
 import { apiService, ForumPost, ForumCommunity, ForumComment } from "@/services/api";
 import { useAuth } from "@/services/AuthContext";
-import { ForumPostCard, CommentItem, JoinButton, ImageGrid } from "./ForumPostCard";
+import { ForumPostCard, JoinButton, ImageGrid } from "./ForumPostCard";
 import { Image, BarChart2, Video, ChevronUp, X, CheckCircle, AlertTriangle, Info } from "lucide-react";
 
 const CommunityHeader: React.FC<{
@@ -18,7 +19,7 @@ const CommunityHeader: React.FC<{
     <header className="bg-white w-full border-b border-gray-100 pt-10 pb-8 px-4 sm:px-8 lg:px-12 mb-6">
       <div className="max-w-300 mx-auto">
         <div className="mb-5 flex items-center justify-between">
-          <div className="w-24 h-24 rounded-2xl overflow-hidden shadow-sm border border-gray-100 bg-white flex items-center justify-center text-4xl">
+          <div className="w-24 h-24 rounded-2xl overflow-hidden border border-gray-100 bg-white flex items-center justify-center text-4xl">
             {community.emoji || "🎓"}
           </div>
           {onBack && (
@@ -43,7 +44,7 @@ const CommunityHeader: React.FC<{
             <button
               onClick={() => onJoin(community.id)}
               disabled={isLoading}
-              className={`px-8 py-2.5 rounded-full font-bold text-[14px] transition-all duration-200 shadow-sm active:scale-95 flex items-center gap-2 ${
+              className={`px-8 py-2.5 rounded-full font-bold text-[14px] transition-all duration-200 active:scale-95 flex items-center gap-2 ${
                 community.is_member
                   ? "bg-gray-100 text-gray-500 hover:bg-red-50 hover:text-red-500 hover:border-red-200 group"
                   : "bg-[#5468ff] hover:bg-[#4355eb] text-white"
@@ -100,11 +101,11 @@ const ToastContainer: React.FC<{ toasts: Toast[]; onDismiss: (id: number) => voi
   };
 
   return (
-    <div className="fixed top-24 right-4 z-[200] flex flex-col gap-3 w-80">
+    <div className="fixed top-24 right-4 z-200 flex flex-col gap-3 w-80">
       {toasts.map((toast) => (
         <div
           key={toast.id}
-          className={`flex items-start gap-3 rounded-xl border px-4 py-3 shadow-lg backdrop-blur-sm animate-in fade-in slide-in-from-right duration-300 ${borderMap[toast.type]}`}
+          className={`flex items-start gap-3 rounded-xl border px-4 py-3 backdrop-blur-sm animate-in fade-in slide-in-from-right duration-300 ${borderMap[toast.type]}`}
         >
           {iconMap[toast.type]}
           <p className="flex-1 text-sm font-semibold text-gray-800">{toast.message}</p>
@@ -131,7 +132,7 @@ const BackToTop: React.FC = () => {
   return (
     <button
       onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
-      className="fixed bottom-8 right-8 z-[90] h-12 w-12 rounded-full bg-[#5468ff] text-white shadow-lg shadow-blue-500/30 flex items-center justify-center hover:bg-[#4355eb] transition-all active:scale-95"
+      className="fixed bottom-8 right-8 z-90 h-12 w-12 rounded-full bg-[#5468ff] text-white flex items-center justify-center hover:bg-[#4355eb] transition-all active:scale-95"
     >
       <ChevronUp className="h-6 w-6" />
     </button>
@@ -145,6 +146,7 @@ const openAuthModal = (view: "login" | "signup" = "login") => {
 };
 
 const CampusForumPage: React.FC = () => {
+  const router = useRouter()
   const { user, isAuthenticated } = useAuth();
   const [posts, setPosts] = useState<ForumPost[]>([]);
   const [communities, setCommunities] = useState<ForumCommunity[]>([]);
@@ -624,26 +626,29 @@ const CampusForumPage: React.FC = () => {
         
         {!selectedCommunity && (
           <div className="sticky top-6 hidden shrink-0 space-y-6 lg:block w-[280px]">
-             <div className="flex flex-col items-center rounded-xl border border-gray-100 bg-white p-5 text-center shadow-sm">
-              <div className="relative mb-3 h-20 w-20 overflow-hidden rounded-full border-4 border-white shadow-md">
-                <img src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${user?.first_name || "guest"}`} alt="Profile" className="h-full w-full object-cover" />
+              <div 
+                onClick={() => user && router.push(`/campus-forum/user/${user.id}`)}
+                className="flex flex-col items-center rounded-xl border border-gray-100 bg-white p-5 text-center  cursor-pointer hover:border-gray-200 transition"
+              >
+                <div className="relative mb-3 h-20 w-20 overflow-hidden rounded-full border-4 border-white ">
+                  <img src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${user?.first_name || "guest"}`} alt="Profile" className="h-full w-full object-cover" />
+                </div>
+                <h2 className="text-lg font-bold text-gray-900">{user ? `${user.first_name} ${user.last_name}` : "Guest User"}</h2>
+                <p className="text-[11px] font-bold text-gray-400 mb-2 uppercase tracking-widest">{user?.role || "STUDENT"}</p>
+                {!isAuthenticated && (
+                  <button
+                    type="button"
+                    onClick={(e) => { e.stopPropagation(); openAuthModal("login"); }}
+                    className="mt-1 text-sm font-bold text-blue-600 hover:underline"
+                  >
+                    Login / Register
+                  </button>
+                )}
               </div>
-              <h2 className="text-lg font-bold text-gray-900">{user ? `${user.first_name} ${user.last_name}` : "Guest User"}</h2>
-              <p className="text-[11px] font-bold text-gray-400 mb-2 uppercase tracking-widest">{user?.role || "STUDENT"}</p>
-              {!isAuthenticated && (
-                <button
-                  type="button"
-                  onClick={() => openAuthModal("login")}
-                  className="mt-1 text-sm font-bold text-blue-600 hover:underline"
-                >
-                  Login / Register
-                </button>
-              )}
-            </div>
 
-            <div className="rounded-xl border border-gray-100 bg-white p-5 shadow-sm">
+            <div className="rounded-xl border border-gray-100 bg-white p-5">
               <div className="flex items-center justify-between mb-4">
-                <h3 className="text-xs font-black uppercase tracking-[0.1em] text-gray-400">Student Communities</h3>
+                <h3 className="text-xs font-black uppercase tracking-widest text-gray-400">Student Communities</h3>
                 {selectedCommunityId && (
                   <button onClick={() => setSelectedCommunityId(null)} className="text-[10px] font-black text-blue-600 hover:underline">CLEAR</button>
                 )}
@@ -697,7 +702,7 @@ const CampusForumPage: React.FC = () => {
           )}
 
           {canPostInFeed ? (
-            <div className={`rounded-xl border shadow-sm p-4 ${selectedCommunity ? "bg-white border-gray-200" : "bg-white border-gray-100"}`}>
+            <div className={`rounded-xl border  p-4 ${selectedCommunity ? "bg-white border-gray-200" : "bg-white border-gray-100"}`}>
               <div className="mb-4 flex items-center gap-3" onClick={handleCreatePostClick}>
                 <span className="text-2xl leading-none">🎓</span>
                 <div className="text-[#8e98a8] text-[15px] flex-1 cursor-pointer">
@@ -796,7 +801,7 @@ const CampusForumPage: React.FC = () => {
         <div className={`sticky top-6 hidden h-fit shrink-0 space-y-6 lg:block ${selectedCommunity ? "w-[320px]" : "w-[300px]"}`}>
            {selectedCommunity ? (
               <div className="space-y-6">
-                <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-5">
+                <div className="bg-white rounded-xl border border-gray-200 p-5">
                   <h3 className="text-[16px] font-bold text-[#0f1d3a] mb-4 flex items-center gap-2">
                     <span>🔥</span> Trending {selectedCommunity.name}
                   </h3>
@@ -821,7 +826,7 @@ const CampusForumPage: React.FC = () => {
                   </button>
                 </div>
 
-                <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-5">
+                <div className="bg-white rounded-xl border border-gray-100 p-5">
                   <h3 className="text-[16px] font-bold text-[#0f1d3a] mb-4 flex items-center gap-2">
                     <span>📅</span> News & Events
                   </h3>
@@ -851,7 +856,7 @@ const CampusForumPage: React.FC = () => {
               </div>
            ) : (
              <div className="space-y-6">
-               <div className="rounded-xl border border-gray-100 bg-white p-5 shadow-sm">
+               <div className="rounded-xl border border-gray-100 bg-white p-5">
                  <div className="mb-4 flex items-center gap-2">
                    <span className="text-xl">🔥</span>
                    <h3 className="text-xs font-black uppercase tracking-widest text-gray-400">Trending Discussions</h3>
@@ -873,7 +878,7 @@ const CampusForumPage: React.FC = () => {
                  </div>
                </div>
 
-                <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-5">
+                <div className="bg-white rounded-xl border border-gray-100 p-5">
                   <h3 className="text-[14px] font-black text-gray-400 uppercase tracking-widest mb-4 flex items-center gap-2">
                     <span>📅</span> News & Events
                   </h3>
@@ -902,15 +907,15 @@ const CampusForumPage: React.FC = () => {
       </div>
 
       {isCreatePostModalOpen && (
-        <div className="fixed inset-0 z-[100] flex items-center mt-20 justify-center bg-black/50 backdrop-blur-sm px-3" onClick={() => setIsCreatePostModalOpen(false)}>
-          <div className="relative h-[75vh] w-full max-w-[620px] overflow-hidden rounded-3xl bg-white shadow-2xl flex flex-col" onClick={(e) => e.stopPropagation()}>
+        <div className="fixed inset-0 z-100 flex items-center mt-20 justify-center bg-black/50 backdrop-blur-sm px-3" onClick={() => setIsCreatePostModalOpen(false)}>
+          <div className="relative h-[75vh] w-full max-w-[620px] overflow-hidden rounded-3xl bg-white flex flex-col" onClick={(e) => e.stopPropagation()}>
             <div className="flex items-center justify-between border-b border-gray-100 px-6 py-5">
               <button onClick={() => setIsCreatePostModalOpen(false)} className="flex items-center gap-2 text-gray-900 group">
                 <div className="flex h-8 w-8 items-center justify-center rounded-full bg-slate-50 group-hover:bg-slate-100 transition"><span className="text-lg">←</span></div>
                 <span className="text-xl font-black tracking-tight">Create Post</span>
               </button>
               <button onClick={handlePostSubmit} disabled={!modalCommunityId || !modalTitle.trim() || isSubmitting}
-                className={`rounded-full px-7 py-2.5 text-sm font-black uppercase tracking-widest transition-all ${modalCommunityId && modalTitle.trim() && !isSubmitting ? "bg-blue-600 text-white shadow-lg shadow-blue-500/30 hover:bg-blue-700 active:scale-95" : "bg-gray-100 text-gray-400"}`}>
+                className={`rounded-full px-7 py-2.5 text-sm font-black uppercase tracking-widest transition-all ${modalCommunityId && modalTitle.trim() && !isSubmitting ? "bg-blue-600 text-white  hover:bg-blue-700 active:scale-95" : "bg-gray-100 text-gray-400"}`}>
                 {isSubmitting ? "Posting..." : "Post"}
               </button>
             </div>
@@ -931,7 +936,7 @@ const CampusForumPage: React.FC = () => {
                   </div>
                 </div>
                 {communities.filter((c) => c.is_member).length === 0 && (
-                  <p className="mt-2 text-xs text-orange-500 font-bold">⚠ You haven't joined any communities yet. Join one from the sidebar to post.</p>
+                  <p className="mt-2 text-xs text-orange-500 font-bold">⚠ You haven&apos;t joined any communities yet. Join one from the sidebar to post.</p>
                 )}
               </div>
 
@@ -1011,11 +1016,11 @@ const CampusForumPage: React.FC = () => {
 
       {editPostId !== null && (
         <div
-          className="fixed inset-0 z-[110] flex items-center justify-center bg-black/50 backdrop-blur-sm px-4"
+          className="fixed inset-0 z-110 flex items-center justify-center bg-black/50 backdrop-blur-sm px-4"
           onClick={() => setEditPostId(null)}
         >
           <div
-            className="w-full max-w-lg rounded-3xl bg-white shadow-2xl overflow-hidden"
+            className="w-full max-w-lg rounded-3xl bg-white overflow-hidden"
             onClick={(e) => e.stopPropagation()}
           >
             <div className="flex items-center justify-between px-6 pt-6 pb-4 border-b border-gray-100">
@@ -1057,7 +1062,7 @@ const CampusForumPage: React.FC = () => {
               <button
                 onClick={handleEditSubmit}
                 disabled={!editTitle.trim() || isEditSubmitting}
-                className="flex-1 rounded-2xl bg-blue-600 py-3 text-sm font-black text-white shadow-lg shadow-blue-500/20 transition hover:bg-blue-700 active:scale-[0.98] disabled:opacity-40"
+                className="flex-1 rounded-2xl bg-blue-600 py-3 text-sm font-black text-white transition hover:bg-blue-700 active:scale-[0.98] disabled:opacity-40"
               >
                 {isEditSubmitting ? 'Saving...' : 'Save Changes'}
               </button>
@@ -1068,11 +1073,11 @@ const CampusForumPage: React.FC = () => {
 
       {deletePostId !== null && (
         <div
-          className="fixed inset-0 z-[110] flex items-center justify-center bg-black/50 backdrop-blur-sm px-4"
+          className="fixed inset-0 z-110 flex items-center justify-center bg-black/50 backdrop-blur-sm px-4"
           onClick={() => setDeletePostId(null)}
         >
           <div
-            className="w-full max-w-sm rounded-3xl bg-white shadow-2xl p-8 text-center"
+            className="w-full max-w-sm rounded-3xl bg-white p-8 text-center"
             onClick={(e) => e.stopPropagation()}
           >
             <div className="flex h-16 w-16 items-center justify-center rounded-full bg-red-100 mx-auto mb-4">
@@ -1092,7 +1097,7 @@ const CampusForumPage: React.FC = () => {
               <button
                 onClick={handleDeleteConfirm}
                 disabled={isDeleting}
-                className="flex-1 rounded-2xl bg-red-600 py-3 text-sm font-black text-white shadow-lg shadow-red-500/20 transition hover:bg-red-700 active:scale-[0.98] disabled:opacity-50"
+                className="flex-1 rounded-2xl bg-red-600 py-3 text-sm font-black text-white transition hover:bg-red-700 active:scale-[0.98] disabled:opacity-50"
               >
                 {isDeleting ? 'Deleting...' : 'Delete'}
               </button>
@@ -1103,11 +1108,11 @@ const CampusForumPage: React.FC = () => {
 
       {sharePostId !== null && (
       <div
-        className="fixed inset-0 z-[110] flex items-end sm:items-center justify-center bg-black/40 backdrop-blur-sm px-4"
+        className="fixed inset-0 z-110 flex items-end sm:items-center justify-center bg-black/40 backdrop-blur-sm px-4"
         onClick={() => setSharePostId(null)}
       >
         <div
-          className="w-full max-w-sm rounded-3xl bg-white shadow-2xl overflow-hidden"
+          className="w-full max-w-sm rounded-3xl bg-white overflow-hidden"
           onClick={(e) => e.stopPropagation()}
         >
           <div className="flex items-center justify-between px-6 pt-6 pb-4 border-b border-gray-100">
@@ -1184,8 +1189,8 @@ const CampusForumPage: React.FC = () => {
 
 
       {confirmLeaveId !== null && (
-        <div className="fixed inset-0 z-[130] flex items-center justify-center bg-black/50 backdrop-blur-sm px-4">
-          <div className="w-full max-w-sm rounded-[32px] bg-white shadow-2xl overflow-hidden p-8 text-center animate-in fade-in zoom-in duration-300">
+        <div className="fixed inset-0 z-130 flex items-center justify-center bg-black/50 backdrop-blur-sm px-4">
+          <div className="w-full max-w-sm rounded-[32px] bg-white overflow-hidden p-8 text-center animate-in fade-in zoom-in duration-300">
             <div className="w-20 h-20 bg-red-50 text-red-500 rounded-3xl flex items-center justify-center text-4xl mx-auto mb-6">👋</div>
             <h3 className="text-2xl font-black text-gray-900 mb-2">Leave Community?</h3>
             <p className="text-gray-500 text-sm font-medium mb-8">
@@ -1194,7 +1199,7 @@ const CampusForumPage: React.FC = () => {
             <div className="flex flex-col gap-3">
               <button 
                 onClick={() => handleJoinToggle(confirmLeaveId)}
-                className="w-full py-4 rounded-xl bg-red-600 text-sm font-black text-white hover:bg-red-700 active:scale-95 shadow-lg shadow-red-500/20 transition-all uppercase tracking-widest"
+                className="w-full py-4 rounded-xl bg-red-600 text-sm font-black text-white hover:bg-red-700 active:scale-95 transition-all uppercase tracking-widest"
               >
                 Yes, Leave
               </button>
@@ -1210,8 +1215,8 @@ const CampusForumPage: React.FC = () => {
       )}
 
       {isInviteModalOpen && inviteCommunityId !== null && (
-        <div className="fixed inset-0 z-[120] flex items-center justify-center bg-black/40 backdrop-blur-sm px-4" onClick={() => setIsInviteModalOpen(false)}>
-          <div className="w-full max-w-sm rounded-[32px] bg-white shadow-2xl overflow-hidden" onClick={e => e.stopPropagation()}>
+        <div className="fixed inset-0 z-120 flex items-center justify-center bg-black/40 backdrop-blur-sm px-4" onClick={() => setIsInviteModalOpen(false)}>
+          <div className="w-full max-w-sm rounded-[32px] bg-white overflow-hidden" onClick={e => e.stopPropagation()}>
             <div className="p-8 text-center">
               <div className="w-20 h-20 bg-blue-50 text-blue-600 rounded-3xl flex items-center justify-center text-4xl mx-auto mb-6">🤝</div>
               <h3 className="text-2xl font-black text-gray-900 mb-2">Invite Friends</h3>
@@ -1245,11 +1250,11 @@ const CampusForumPage: React.FC = () => {
 
       {reportPostId !== null && (
         <div
-          className="fixed inset-0 z-[110] flex items-end sm:items-center justify-center bg-black/40 backdrop-blur-sm px-4"
+          className="fixed inset-0 z-110 flex items-end sm:items-center justify-center bg-black/40 backdrop-blur-sm px-4"
           onClick={() => setReportPostId(null)}
         >
           <div
-            className="w-full max-w-sm rounded-3xl bg-white shadow-2xl overflow-hidden"
+            className="w-full max-w-sm rounded-3xl bg-white overflow-hidden"
             onClick={(e) => e.stopPropagation()}
           >
             {!reportSubmitted ? (
@@ -1308,7 +1313,7 @@ const CampusForumPage: React.FC = () => {
                   <button
                     onClick={handleReportSubmit}
                     disabled={!reportReason || (reportReason === 'Other' && !reportOther.trim())}
-                    className="w-full rounded-2xl bg-red-600 py-3.5 text-sm font-black uppercase tracking-widest text-white shadow-lg shadow-red-500/20 transition hover:bg-red-700 active:scale-[0.98] disabled:opacity-40 disabled:cursor-not-allowed"
+                    className="w-full rounded-2xl bg-red-600 py-3.5 text-sm font-black uppercase tracking-widest text-white transition hover:bg-red-700 active:scale-[0.98] disabled:opacity-40 disabled:cursor-not-allowed"
                   >
                     Submit Report
                   </button>
@@ -1322,7 +1327,7 @@ const CampusForumPage: React.FC = () => {
                   </svg>
                 </div>
                 <h3 className="text-lg font-black text-gray-900">Report Submitted</h3>
-                <p className="text-sm text-gray-500">Thank you for helping keep our community safe. We'll review this post.</p>
+                <p className="text-sm text-gray-500">Thank you for helping keep our community safe. We&apos;ll review this post.</p>
               </div>
             )}
           </div>

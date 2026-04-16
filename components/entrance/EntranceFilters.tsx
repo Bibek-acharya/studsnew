@@ -382,6 +382,19 @@ className="inline-flex items-center gap-1.5 rounded-full border border-blue-100 
                     </button>
                   ))}
                 </div>
+
+                <div className="border-t border-gray-100 pt-2">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      clearAll();
+                      setShowAppliedDropdown(false);
+                    }}
+                    className="text-[12px] font-semibold text-red-600 transition-colors hover:text-red-700"
+                  >
+                    Reset Filters
+                  </button>
+                </div>
               </>
             )}
           </div>

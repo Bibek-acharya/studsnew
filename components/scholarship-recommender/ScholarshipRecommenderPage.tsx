@@ -6,6 +6,7 @@ import ResultsGrid from "@/components/scholarship-recommender/ResultsGrid";
 import CustomSelect from "@/components/scholarship-recommender/CustomSelect";
 import MultiSelect from "@/components/scholarship-recommender/MultiSelect";
 import { RecommenderState, StepIndex } from "./types";
+import ShortlistView from "./ShortlistView";
 
 const stepTitles: Record<number, { title: string; subtitle: string }> = {
   1: {
@@ -142,6 +143,7 @@ export default function ScholarshipRecommenderPage() {
   const [step, setStep] = useState<StepIndex>(1);
   const [state, setState] = useState<RecommenderState>(initialRecommenderState);
   const [selectedIds, setSelectedIds] = useState<number[]>([]);
+  const [shortlistedIds, setShortlistedIds] = useState<number[]>([]);
   const [academicScoreError, setAcademicScoreError] = useState("");
 
   const canContinue = useMemo(() => isStepValid(step, state), [step, state]);
@@ -216,6 +218,25 @@ export default function ScholarshipRecommenderPage() {
         onToggleAll={handleSelectAll}
         onToggleOne={handleToggleCard}
         onNavigateToStep={(step) => setStep(step as StepIndex)}
+        onShortlist={() => {
+          setShortlistedIds((prev) => Array.from(new Set([...prev, ...selectedIds])));
+          setStep(7);
+        }}
+      />
+    );
+  }
+
+  if (step === 7) {
+    return (
+      <ShortlistView
+        recommendedItems={recommendations}
+        shortlistedIds={shortlistedIds}
+        onToggleShortlist={(id) => {
+          setShortlistedIds((prev) =>
+            prev.includes(id) ? prev.filter((item) => item !== id) : [...prev, id]
+          );
+        }}
+        onBack={() => setStep(6)}
       />
     );
   }
@@ -242,7 +263,6 @@ export default function ScholarshipRecommenderPage() {
       </button>
     </div>
   );
-  const stepOneButtonEnabled = canContinue;
 
   return (
     <StepShell

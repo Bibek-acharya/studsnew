@@ -174,7 +174,7 @@ export default function ProfileSection() {
   const completion = calculateCompletion()
 
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
+    <div className="grid grid-cols-1 lg:grid-cols-4 gap-8 pt-8">
       <div className="lg:col-span-1">
         <div className="bg-white p-6 rounded-md border border-slate-200 text-center">
           <div className="relative inline-block">
@@ -202,31 +202,6 @@ export default function ProfileSection() {
               <div className="bg-brand-blue h-2 rounded-full" style={{ width: `${completion}%` }}></div>
             </div>
           </div>
-        </div>
-        
-        <div className="bg-white p-4 rounded-md border border-slate-200 mt-6">
-          <h4 className="font-bold text-slate-800 mb-3">Bio</h4>
-          {editMode ? (
-            <div>
-              <textarea
-                value={personalData.bio}
-                onChange={(e) => setPersonalData({...personalData, bio: e.target.value})}
-                maxLength={500}
-                rows={4}
-                className={`w-full px-3 py-2 border rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent ${personalData.bio?.length === 500 ? 'border-red-500' : 'border-slate-200'}`}
-                placeholder="Tell us about yourself..."
-              />
-              {personalData.bio?.length === 500 && (
-                <p className="text-xs text-red-500 mt-1">Character limit reached</p>
-              )}
-            </div>
-          ) : (
-            <div>
-              <div className="text-sm text-slate-600 whitespace-pre-wrap">
-                {personalData.bio || 'No bio added yet. Click Edit to add your bio.'}
-              </div>
-            </div>
-          )}
         </div>
       </div>
 
@@ -284,7 +259,7 @@ export default function ProfileSection() {
                     <User className="w-5 h-5 text-blue-600" />
                     Basic Info
                   </h3>
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-4">
                     <div>
                       <label className="block text-xs font-semibold text-slate-500 mb-1">First Name</label>
                       {editMode ? (
@@ -374,7 +349,7 @@ export default function ProfileSection() {
                     <Phone className="w-5 h-5 text-blue-600" />
                     Contact Info
                   </h3>
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-4">
                     <div>
                       <label className="block text-xs font-semibold text-slate-500 mb-1">Email</label>
                       {editMode ? (
@@ -519,7 +494,7 @@ export default function ProfileSection() {
                           </button>
                         )}
                       </div>
-                      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-4">
                         <div>
                           <label className="block text-xs font-semibold text-slate-500 mb-1">Level</label>
                           {editMode ? (
@@ -659,7 +634,7 @@ export default function ProfileSection() {
                     <Award className="w-5 h-5 text-blue-600" />
                     Study Goal
                   </h3>
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
                       <label className="block text-xs font-semibold text-slate-500 mb-1">Target Level</label>
                       {editMode ? (
@@ -756,7 +731,7 @@ export default function ProfileSection() {
                     <DollarSign className="w-5 h-5 text-blue-600" />
                     Budget & Funding
                   </h3>
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
                       <label className="block text-xs font-semibold text-slate-500 mb-1">Budget Range (per year)</label>
                       {editMode ? (

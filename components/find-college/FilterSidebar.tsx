@@ -6,7 +6,7 @@ import {
 } from "@/app/find-college/types";
 import { apiService } from "@/services/api";
 import GlobalFilterSection from "@/components/ui/GlobalFilterSection";
-import { FaSliders } from "react-icons/fa6";
+import { FaSliders, FaStar } from "react-icons/fa6";
 import {
   NEPAL_DISTRICTS,
   NEPAL_LOCAL_BODIES,
@@ -535,7 +535,7 @@ const FilterSidebar: React.FC<FilterSidebarProps> = ({
     return progs.filter((p) =>
       p.label.toLowerCase().includes(programSearch.toLowerCase()),
     );
-  }, [filters.academic, programSearch, collegeFilterCounts]);
+  }, [filters.academic, programSearch, getFacetCount]);
 
   const availableCourses = useMemo(() => {
     const showCourse = filters.academic.some((a) =>
@@ -549,7 +549,7 @@ const FilterSidebar: React.FC<FilterSidebarProps> = ({
     return courses.filter((c) =>
       c.label.toLowerCase().includes(courseSearch.toLowerCase()),
     );
-  }, [filters.academic, filters.program, courseSearch, collegeFilterCounts]);
+  }, [filters.academic, filters.program, courseSearch, getFacetCount]);
 
   const showCourseSection = filters.academic.some((a) =>
     ["diploma"].includes(a),
@@ -726,7 +726,7 @@ const FilterSidebar: React.FC<FilterSidebarProps> = ({
   const academicLevelsWithCounts = useMemo(
 
     () => ACADEMIC_LEVELS.map((item) => ({ ...item, count: getFacetCount(item.id) })),
-    [collegeFilterCounts],
+    [getFacetCount],
   );
 
   const collegeTypesWithCounts = useMemo(
@@ -747,7 +747,7 @@ const FilterSidebar: React.FC<FilterSidebarProps> = ({
         label: duration,
         count: getFacetCount(duration),
       })),
-    [collegeFilterCounts],
+    [getFacetCount],
   );
 
   return (
@@ -1125,25 +1125,25 @@ const FilterSidebar: React.FC<FilterSidebarProps> = ({
           <div className="flex flex-col gap-3.5 pt-1">
             <CheckboxItem
               id="rating-4.5"
-              label="⭐ 4.5 & above (Top Rated)"
+              label={<><FaStar className="inline text-yellow-500" /> 4.5 & above (Top Rated)</>}
               checked={filters.rating?.includes("4.5")}
               onChange={() => toggle("rating", "4.5")}
             />
             <CheckboxItem
               id="rating-4.0"
-              label="⭐ 4.0 & above"
+              label={<><FaStar className="inline text-yellow-500" /> 4.0 & above</>}
               checked={filters.rating?.includes("4.0")}
               onChange={() => toggle("rating", "4.0")}
             />
             <CheckboxItem
               id="rating-3.5"
-              label="⭐ 3.5 & above"
+              label={<><FaStar className="inline text-yellow-500" /> 3.5 & above</>}
               checked={filters.rating?.includes("3.5")}
               onChange={() => toggle("rating", "3.5")}
             />
             <CheckboxItem
               id="rating-3.0"
-              label="⭐ 3.0 & above"
+              label={<><FaStar className="inline text-yellow-500" /> 3.0 & above</>}
               checked={filters.rating?.includes("3.0")}
               onChange={() => toggle("rating", "3.0")}
             />

@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
+import { useRouter } from "next/navigation";
 import { ForumPost, ForumComment } from "@/services/api";
 import { ArrowUp, ArrowDown, MessageSquare, MoreVertical, EyeOff, Flag, Share2 } from "lucide-react";
 
@@ -251,9 +252,11 @@ const ForumPostCard: React.FC<ForumPostCardProps> = ({
   onLoadMoreComments,
   onJoinToggle,
 }) => {
+  const router = useRouter()
   const imageUrls = parseImageUrls(post.image_url);
   const postCommunityId = post.community_id ?? post.community?.id;
   const isPostCommunityMember = postCommunityId ? true : true;
+  const userId = post.user?.id || post.user_id;
 
   return (
     <div className="rounded-xl border border-gray-100 bg-white p-4 shadow-sm sm:p-5 overflow-hidden hover:border-gray-200 transition">

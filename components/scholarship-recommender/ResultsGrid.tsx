@@ -10,6 +10,7 @@ interface ResultsGridProps {
   onToggleOne: (id: number) => void;
   onToggleAll: (checked: boolean) => void;
   onNavigateToStep?: (step: number) => void;
+  onShortlist?: () => void;
 }
 
 export default function ResultsGrid({
@@ -18,6 +19,7 @@ export default function ResultsGrid({
   onToggleOne,
   onToggleAll,
   onNavigateToStep,
+  onShortlist,
 }: ResultsGridProps) {
   const [savedIds, setSavedIds] = useState<number[]>([]);
   const [showDialog, setShowDialog] = useState(false);
@@ -35,10 +37,10 @@ export default function ResultsGrid({
   };
 
   return (
-    <div className="min-h-screen text-gray-900 antialiased pb-32 bg-[#fafaf9]">
+    <div className="min-h-screen text-gray-900 antialiased pb-32 bg-white">
       <div className="max-w-350 mx-auto mt-8">
         <div className="mb-8">
-    
+
           <h1 className="text-[2rem] md:text-[2.5rem] leading-tight font-bold text-gray-900 mb-3">
             Scholarships that fit you best
           </h1>
@@ -132,11 +134,10 @@ export default function ResultsGrid({
                   <div className="flex gap-2">
                     <button
                       onClick={() => toggleSave(item.id)}
-                      className={`p-2 rounded-lg transition-colors border ${
-                        savedIds.includes(item.id)
-                          ? "bg-blue-100 text-brand-blue border-blue-200"
-                          : "bg-gray-50 text-gray-400 hover:text-brand-blue hover:bg-blue-100 border-gray-200"
-                      }`}
+                      className={`p-2 rounded-lg transition-colors border ${savedIds.includes(item.id)
+                        ? "bg-blue-100 text-brand-blue border-blue-200"
+                        : "bg-gray-50 text-gray-400 hover:text-brand-blue hover:bg-blue-100 border-gray-200"
+                        }`}
                       title="Save"
                     >
                       <svg
@@ -179,11 +180,10 @@ export default function ResultsGrid({
         </div>
 
         <button
-          className={`px-6 py-3 rounded-lg font-bold transition-colors shadow-sm text-white ${
-            selectedCount > 0 ? "bg-brand-blue hover:bg-brand-hover" : "bg-gray-400 hover:bg-brand-blue"
-          }`}
+          onClick={onShortlist}
+          className={`px-6 py-3 rounded-lg font-bold transition-colors shadow-sm text-white bg-brand-blue hover:bg-brand-hover`}
         >
-          Add to shortlist
+          {selectedCount > 0 ? `Add to shortlist (${selectedCount})` : "View Shortlist"}
         </button>
       </div>
 

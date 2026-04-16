@@ -16,6 +16,7 @@ import Pagination from "@/components/ui/Pagination";
 import TrendingCollegesAd from "./ads/TrendingCollegesAd";
 import RecommendationFeedback from "./ads/RecommendationFeedback";
 import ClaimCollegeModal from "./ClaimCollegeModal";
+import Image from "next/image";
 
 interface CollegeGridProps {
   filters: CollegeFilters;
@@ -573,7 +574,9 @@ const ProgramCard: React.FC<{
           </div>
         )}
         {isVerified && college.image_url ? (
-          <img
+          <Image
+            height={200}
+            width={200}
             src={college.image_url}
             alt={college.name}
             className="h-full w-full object-cover"
@@ -684,23 +687,25 @@ const ProgramCard: React.FC<{
           </p>
         </div>
 
-        <div className="mb-4 pr-2 h-14">
-          <p className="text-[14px] leading-relaxed text-gray-500 line-clamp-2">
-            {description.length > 80 ? description.slice(0, 80) + "..." : description}
+        <div className="mb-2 pr-1">
+          <p className="text-[14px] leading-relaxed text-gray-500 inline">
+            {/* Truncate text to 70 chars with ellipsis if longer, otherwise show full text */}
+            {description.length > 65 ? `${description.substring(0, 65)}...` : description}
+
+            <button
+              type="button"
+              className="text-brand-blue cursor-pointer font-medium hover:underline text-[14px] ml-1 inline align-baseline"
+              onClick={(e) => {
+                e.stopPropagation();
+                onNavigate("collegeDetails", { id: college.id });
+              }}
+            >
+              Read more
+            </button>
           </p>
-          <button
-            type="button"
-            className="text-[14px] font-semibold text-brand-blue hover:underline"
-            onClick={(e) => {
-              e.stopPropagation();
-              onNavigate("collegeDetails", { id: college.id });
-            }}
-          >
-            Read more
-          </button>
         </div>
 
-        <div className="mt-2 flex items-center gap-4">
+        <div className="mt-2 flex items-center gap-4 mb-2">
           <a
             href="#"
             className="interaction-btn text-[12px] font-medium text-brand-blue hover:text-blue-800 flex items-center transition-colors"
@@ -741,7 +746,7 @@ const ProgramCard: React.FC<{
           </a>
         </div>
 
-        <div className="border-t border-dashed border-gray-200 mb-4" />
+        <div className="border-t border-dashed border-gray-200 mb-2" />
 
         <div className="flex flex-col gap-3 mt-auto">
           <button

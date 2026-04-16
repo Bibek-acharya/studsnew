@@ -1,4 +1,4 @@
-export type StepIndex = 1 | 2 | 3 | 4 | 5 | 6;
+export type StepIndex = 1 | 2 | 3 | 4 | 5 | 6 | 7;
 
 export type StudyMode = "full-time" | "part-time" | "either" | "not-sure";
 export type BinaryChoice = "yes" | "no";

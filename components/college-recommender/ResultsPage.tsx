@@ -15,7 +15,6 @@ import {
   Filter,
 } from "lucide-react";
 import { CollegeRecommendation } from "@/services/api";
-import { on } from "events";
 
 interface ResultsPageProps {
   results: CollegeRecommendation[];
@@ -30,6 +29,7 @@ interface ResultsPageProps {
   toggleSelection: (id: number | string) => void;
   onNavigate: (view: any, data?: any) => void;
   onRefine: () => void;
+  onShortlist?: () => void;
   tution: string;
 }
 
@@ -45,14 +45,12 @@ export default function ResultsPage({
   setIsRefineModalOpen,
   toggleSelection,
   onNavigate,
-  onRefine,
-  tution
-}: ResultsPageProps) {
+  onShortlist}: ResultsPageProps) {
   const selectedCount = selectedIds.size;
   const previewItem = results.find((r) => r.id === previewId) || results[0];
 
 return (
-    <div className="min-h-screen bg-slate-50 text-slate-800 antialiased font-sans overflow-x-hidden relative">
+    <div className="min-h-screen bg-white text-slate-800 antialiased font-sans overflow-x-hidden relative">
       {/* Backdrop */}
       {previewId && (
         <div 
@@ -73,145 +71,115 @@ return (
             <div className="flex flex-col items-center justify-center h-[60vh] text-slate-400">
               <Building2 className="w-16 h-16 mb-4 opacity-20" />
               <p className="font-medium text-slate-500">
-                Select a college to see details
+                Select a college to see details 
               </p>
             </div>
           ) : (
-            <div className="space-y-6 animate-in fade-in slide-in-from-right-4 duration-300">
+            <div className="animate-in fade-in slide-in-from-right-4 duration-300">
               <div
-                className="flex items-center gap-2 mb-6 cursor-pointer group"
+                className="flex items-center gap-2 mb-8 cursor-pointer group"
                 onClick={() => setPreviewId(null)}
               >
-                <ChevronLeft className="w-4 h-4 text-slate-700 group-hover:-translate-x-1 transition-transform" />
-                <span className="font-bold text-slate-700 text-base">
-                  Close Preview
+                <ChevronLeft className="w-5 h-5 text-slate-700" />
+                <span className="font-bold text-slate-900 text-lg">
+                  Preview
                 </span>
               </div>
 
-              <div className="flex items-start justify-between">
+              <div className="flex items-center justify-between gap-4 mb-8">
                 <div className="flex items-center gap-4">
-                  <div className="w-14 h-14 rounded-lg border border-slate-200 flex items-center justify-center font-extrabold text-xl bg-white text-slate-700 shrink-0">
+                  <div className="w-16 h-16 rounded-lg border border-slate-100 bg-white flex items-center justify-center font-extrabold text-2xl text-slate-800 shrink-0 shadow-sm shadow-slate-100">
                     {previewItem?.name?.[0]}
                   </div>
                   <div>
-                    <h2 className="text-xl font-extrabold text-slate-900 leading-tight">
+                    <h2 className="text-2xl font-bold text-slate-900 leading-tight tracking-tight">
                       {previewItem?.name}
                     </h2>
-                    <p className="text-slate-500 font-bold text-sm mt-1">
+                    <p className="text-slate-500 font-bold text-sm mt-0.5">
                       {previewItem?.location}
                     </p>
                   </div>
                 </div>
+                
               </div>
 
-              <hr className="border-slate-200 my-5" />
-
-              <div className="grid grid-cols-2 gap-y-6 gap-x-4">
+              <div className="border-t border-slate-50 pt-8 grid grid-cols-2 gap-y-10 gap-x-6">
                 <div>
-                  <div className="flex items-center gap-1.5 text-slate-500 font-bold mb-1 text-xs">
-                    <TrendingUp className="w-4 h-4 text-brand-blue" />
+                  <div className="flex items-center gap-2 text-slate-500 font-extrabold mb-2 text-[13px] uppercase tracking-wide">
+                    <svg className="w-4 h-4 text-brand-blue" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                    </svg>
                     Status
                   </div>
-                  <div className="text-brand-blue font-bold text-base">
+                  <div className="text-brand-blue font-bold text-[1.05rem]">
                     Target
                   </div>
                 </div>
 
                 <div>
-                  <div className="flex items-center gap-1.5 text-slate-500 font-bold mb-1 text-xs">
+                  <div className="flex items-center gap-2 text-slate-500 font-extrabold mb-2 text-[13px] uppercase tracking-wide">
                     <Building2 className="w-4 h-4 text-slate-700" />
                     Institution type
                   </div>
-                  <div className="font-bold text-slate-900 text-base">
+                  <div className="font-bold text-slate-900 text-[1.05rem]">
                     University
                   </div>
                 </div>
 
                 <div>
-                  <div className="flex items-center gap-1.5 text-slate-500 font-bold mb-1 text-xs">
-                    <MapPin className="w-4 h-4 text-slate-700" />
+                  <div className="flex items-center gap-2 text-slate-500 font-extrabold mb-2 text-[13px] uppercase tracking-wide">
+                    <svg className="w-4 h-4 text-slate-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                    </svg>
                     Application Fee
                   </div>
-                  <div className="font-bold text-slate-900 text-base">
-                    Rs. 2,000/year
+                  <div className="font-bold text-slate-900 text-[1.05rem]">
+                    Rs. 1,000/year
                   </div>
                 </div>
 
                 <div>
-                  <div className="flex items-center gap-1.5 text-slate-500 font-bold mb-1 text-xs">
+                  <div className="flex items-center gap-2 text-slate-500 font-extrabold mb-2 text-[13px] uppercase tracking-wide">
                     <Banknote className="w-4 h-4 text-slate-700" />
                     Tuition cost
                   </div>
-                  <div className="font-bold text-slate-900 text-base">
-                    Rs. 3,80,000/year
+                  <div className="font-bold text-slate-900 text-[1.05rem]">
+                    Rs. {previewItem?.tuition}
                   </div>
                 </div>
 
                 <div>
-                  <div className="flex items-center gap-1.5 text-slate-500 font-bold mb-1 text-xs">
-                    <TrendingUp className="w-4 h-4 text-slate-700" />
+                  <div className="flex items-center gap-2 text-slate-500 font-extrabold mb-2 text-[13px] uppercase tracking-wide">
+                    <svg className="w-4 h-4 text-slate-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
                     Admission rate
                   </div>
-                  <div className="font-bold text-slate-900 text-base">
-                    22% admission rate
+                  <div className="font-bold text-slate-900 text-[1.05rem]">
+                    45% admission rate
                   </div>
                 </div>
 
                 <div>
-                  <div className="flex items-center gap-1.5 text-slate-500 font-bold mb-1 text-xs">
-                    <Banknote className="w-4 h-4 text-slate-700" />
+                  <div className="flex items-center gap-2 text-slate-500 font-extrabold mb-2 text-[13px] uppercase tracking-wide">
+                    <svg className="w-4 h-4 text-slate-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
+                    </svg>
                     Avg. cost after aid
                   </div>
-                  <div className="font-bold text-slate-900 text-base">
-                    Rs. 1,50,000/year
+                  <div className="font-bold text-slate-900 text-[1.05rem]">
+                    Rs. 80,000/year
                   </div>
                 </div>
               </div>
 
-              <hr className="border-slate-200 my-5" />
-
-              <div>
-                <h3 className="text-lg font-bold text-slate-900 mb-2">
+              <div className="border-t border-slate-100 mt-10 pt-8">
+                <h3 className="text-xl font-bold text-slate-900 mb-4 tracking-tight">
                   About
                 </h3>
-                <p className="text-slate-600 font-medium leading-relaxed text-sm">
-                  {previewItem?.name} is recognized for its commitment to
-                  academic excellence and holistic student development in{" "}
-                  {previewItem?.location}. It provides a modern learning
-                  environment with focus on career readiness.
+                <p className="text-slate-600 font-medium leading-relaxed text-[15px]">
+                  A dynamic university located in the scenic city of Pokhara offering diverse programs. It focuses on higher education and research, particularly in business, science, and technology. For more information, visit http://www.edu.np.
                 </p>
-              </div>
-
-              <hr className="border-slate-200 my-5" />
-
-              <div>
-                <h3 className="text-lg font-bold mb-4 text-brand-blue">
-                  Why it matches you
-                </h3>
-                  <div className="space-y-4">
-                    {previewItem?.reasons?.map((reason, idx) => (
-                      <div key={idx} className="flex items-start gap-3">
-                        <div className="mt-1 w-5 h-5 rounded-full bg-brand-blue/10 flex items-center justify-center shrink-0">
-                          <Check className="w-3 h-3 text-brand-blue stroke-[3px]" />
-                        </div>
-                        <div className="font-bold text-slate-700 text-sm leading-relaxed">
-                          {reason}
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-              </div>
-
-              <div className="pt-6">
-                <button
-                  onClick={() =>
-                    onNavigate("collegeProfile", { id: previewItem.id })
-                  }
-                  className="w-full rounded-lg bg-brand-blue py-4 text-white font-bold hover:bg-brand-hover transition-all flex items-center justify-center gap-2"
-                >
-                  View Full Profile
-                  <ChevronRight className="w-4 h-4" />
-                </button>
               </div>
             </div>
           )}
@@ -247,7 +215,9 @@ return (
               const isExpanded = expandedMatchId === item.id;
 
               return (
-                <div className="bg-white rounded-lg border border-slate-200 overflow-hidden cursor-pointer flex flex-col transition-all duration-200 hover:border-brand-blue"
+                <div
+                  key={item.id}
+                  className="bg-white rounded-lg border border-slate-200 overflow-hidden cursor-pointer flex flex-col transition-all duration-200 hover:border-brand-blue"
                   onClick={() => setPreviewId(item.id)}
                 >
                   <div className="p-6 grow">
@@ -397,14 +367,10 @@ return (
             </span>
           </div>
           <button
-            disabled={selectedCount === 0}
-            className={`w-full sm:w-auto px-6 py-2.5 rounded-lg font-bold text-white transition-all duration-300 ${
-              selectedCount > 0
-                ? "bg-brand-blue hover:bg-brand-hover cursor-pointer"
-                : "bg-slate-300 cursor-not-allowed"
-            }`}
+            onClick={onShortlist}
+            className={`w-full sm:w-auto px-6 py-2.5 rounded-lg font-bold text-white transition-all duration-300 bg-brand-blue hover:bg-brand-hover cursor-pointer`}
           >
-            Add to shortlist
+            {selectedCount > 0 ? `Add to shortlist (${selectedCount})` : "View Shortlist"}
           </button>
         </div>
       </div>
