@@ -105,6 +105,7 @@ export interface CollegeRecommenderForm {
   financial_support: string;
   yearly_budget: string;
   province: string;
+  district: string;
   setting: string;
   distance_from_home: string;
   class_size: string;
@@ -122,6 +123,7 @@ export const initialForm: CollegeRecommenderForm = {
   financial_support: "",
   yearly_budget: "",
   province: "",
+  district: "",
   setting: "",
   distance_from_home: "",
   class_size: "",
@@ -172,7 +174,10 @@ const CollegeRecommenderToolPage: React.FC<CollegeRecommenderToolPageProps> = ({
       case 3:
         return !!form.knows_course && !!form.preferred_field && !!form.reputation_importance;
       case 4:
-        return !!form.province && !!form.setting;
+        return (
+          !!form.province &&
+          (form.province === 'No preference' || !!form.district)
+        );
       case 5:
         return !!form.distance_from_home;
       case 6:
@@ -196,7 +201,9 @@ const CollegeRecommenderToolPage: React.FC<CollegeRecommenderToolPageProps> = ({
       const payload: CollegeRecommenderPayload = {
         student_type: form.student_type,
         program_interest: form.preferred_field,
-        preferred_location: `${form.province}, ${form.setting}, ${form.distance_from_home}`,
+        preferred_location: form.province === 'No preference'
+          ? `${form.setting}, ${form.distance_from_home}`
+          : `${form.province}, ${form.district ? `${form.district}, ` : ''}${form.setting}, ${form.distance_from_home}`,
         budget_preference: `${form.yearly_budget}; ${form.tuition_factor}`,
         campus_life_priority: `${form.academics_vs_campus}; ${form.activities_importance}; ${form.facility_choice}`,
         career_goal: form.reputation_importance,

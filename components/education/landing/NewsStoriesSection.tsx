@@ -2,12 +2,23 @@
 
 import { useRef } from "react";
 import { ChevronLeft, ChevronRight, Clock, ArrowRight } from "lucide-react";
+import { EducationNewsItem } from "@/services/api";
 
 interface NewsStoriesSectionProps {
   onNavigate: (view: string, data?: any) => void;
+  newsArticles?: EducationNewsItem[];
 }
 
-const newsData = [
+type NewsCard = {
+  badgeText: string;
+  badgeColorClass: string;
+  imgSrc: string;
+  title: string;
+  description: string;
+  timeAgo: string;
+};
+
+const newsData: NewsCard[] = [
   {
     badgeText: "Admission",
     badgeColorClass: "bg-blue-50 text-blue-600",
@@ -57,8 +68,25 @@ const partnerLogos = [
   "https://kist.edu.np/resources/assets/img/logo_small.jpg",
 ];
 
-const NewsStoriesSection: React.FC<NewsStoriesSectionProps> = ({ onNavigate }) => {
+const NewsStoriesSection: React.FC<NewsStoriesSectionProps> = ({ onNavigate, newsArticles }) => {
   const containerRef = useRef<HTMLDivElement | null>(null);
+  const data: NewsCard[] = newsArticles?.length
+    ? newsArticles.map((item) => ({
+        badgeText: item.category || "News",
+        badgeColorClass:
+          item.category?.toLowerCase().includes("exam")
+            ? "bg-orange-50 text-orange-600"
+            : item.category?.toLowerCase().includes("scholarship")
+            ? "bg-purple-50 text-purple-600"
+            : item.category?.toLowerCase().includes("admission")
+            ? "bg-blue-50 text-blue-600"
+            : "bg-emerald-50 text-emerald-600",
+        imgSrc: item.image || "https://placehold.co/600x400/f1f5f9/94a3b8?text=News",
+        title: item.title,
+        description: item.excerpt || item.content || "Stay updated with the latest education announcements.",
+        timeAgo: item.date || "Today",
+      }))
+    : newsData;
 
   const scrollByWidth = (direction: -1 | 1) => {
     const container = containerRef.current;
@@ -111,7 +139,7 @@ const NewsStoriesSection: React.FC<NewsStoriesSectionProps> = ({ onNavigate }) =
             ref={containerRef}
             className="carousel-track flex gap-4 sm:gap-5 md:gap-6 overflow-x-auto snap-x snap-mandatory no-scrollbar pb-6 pt-2"
           >
-            {newsData.map((card, index) => (
+            {data.map((card, index) => (
               <article
                 key={index}
                 className="min-w-65 xs:min-w-70 sm:min-w-75 md:min-w-[320px] max-w-75 xs:max-w-[320px] sm:max-w-85 w-full shrink-0 snap-start bg-white rounded-xl border border-gray-200 hover:border-blue-500/20 flex flex-col hover:-translate-y-1 transition-all duration-300 group cursor-pointer p-3.5 sm:p-4"

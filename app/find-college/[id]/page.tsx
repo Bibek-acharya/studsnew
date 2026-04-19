@@ -429,6 +429,8 @@ const CollegeDetailsPage: React.FC = () => {
   const [shareUrl, setShareUrl] = useState("");
   const [college, setCollege] = useState<any>(null);
   const [loading, setLoading] = useState(true);
+  const [reviewsData, setReviewsData] = useState<any>(null);
+  const [reviewsLoading, setReviewsLoading] = useState(false);
   const tabsScrollRef = useRef<HTMLDivElement | null>(null);
   const tabsNavRef = useRef<HTMLElement | null>(null);
   const [isTabsOverflowing, setIsTabsOverflowing] = useState(false);
@@ -497,6 +499,20 @@ const CollegeDetailsPage: React.FC = () => {
         .catch(() => setLoading(false));
     }
   }, [collegeId]);
+
+  useEffect(() => {
+    if (activeTab === "review" && collegeId && !reviewsData) {
+      setReviewsLoading(true);
+      apiService.getCollegeReviews(collegeId, { page: 1, limit: 10 })
+        .then((res) => {
+          if (res?.data) {
+            setReviewsData(res.data);
+          }
+        })
+        .catch(console.error)
+        .finally(() => setReviewsLoading(false));
+    }
+  }, [activeTab, collegeId]);
 
   useEffect(() => {
     const container = tabsScrollRef.current;
@@ -1321,76 +1337,92 @@ const CollegeDetailsPage: React.FC = () => {
 
           {activeTab === "review" && (
             <div>
-              <div className="mb-8 flex flex-col items-center gap-8 rounded-md border border-gray-200 bg-white p-8 md:flex-row">
-                <div className="text-center md:border-r md:pr-8 md:text-left">
-                  <h2 className="mb-2 text-5xl font-extrabold text-gray-900">
-                    4.5
-                  </h2>
-                  <div className="mb-2 flex items-center justify-center gap-1 md:justify-start">
-                    {Array.from({ length: 4 }).map((_, idx) => (
-                      <i
-                        key={`full-${idx}`}
-                        className="fa-solid fa-star text-[14px] text-yellow-400"
-                      ></i>
-                    ))}
-                    <i className="fa-solid fa-star-half-stroke text-[14px] text-yellow-400"></i>
+              {reviewsLoading ? (
+                <div className="flex items-center justify-center py-12">
+                  <div className="h-8 w-8 animate-spin rounded-full border-4 border-gray-200 border-t-brand-blue"></div>
+                </div>
+              ) : (
+                <>
+                  <div className="mb-8 flex flex-col items-center gap-8 rounded-md border border-gray-200 bg-white p-8 md:flex-row">
+                    <div className="text-center md:border-r md:pr-8 md:text-left">
+                      <h2 className="mb-2 text-5xl font-extrabold text-gray-900">
+                        {reviewsData?.overallRating?.toFixed(1) || "0.0"}
+                      </h2>
+                      <div className="mb-2 flex items-center justify-center gap-1 md:justify-start">
+                        {Array.from({ length: 5 }).map((_, idx) => (
+                          <i
+                            key={idx}
+                            className={`fa-solid fa-star text-[14px] ${idx < Math.round(reviewsData?.overallRating || 0) ? "text-yellow-400" : "text-gray-300"}`}
+                          ></i>
+                        ))}
+                      </div>
+                      <p className="text-[13px] font-medium text-gray-500">
+                        Based on {reviewsData?.reviewCount || 0} reviews
+                      </p>
+                    </div>
+                    <div className="w-full flex-1 space-y-2.5">
+                      {[5, 4, 3, 2, 1].map((star) => {
+                        const count = reviewsData?.reviews?.filter((r: any) => {
+                          const avg = Object.values(r.ratings || {}).reduce((s: number, v: any) => s + v, 0) / 10;
+                          return Math.round(avg) === star;
+                        }).length || 0;
+                        const pct = reviewsData?.reviewCount ? Math.round((count / reviewsData.reviewCount) * 100) : 0;
+                        return (
+                          <RatingBar
+                            key={star}
+                            label={String(star)}
+                            width={`${pct}%`}
+                            color={star >= 4 ? "bg-green-500" : star >= 3 ? "bg-yellow-400" : "bg-orange-400"}
+                            pct={`${pct}%`}
+                          />
+                        );
+                      })}
+                    </div>
                   </div>
-                  <p className="text-[13px] font-medium text-gray-500">
-                    Based on {reviewsCount} reviews
-                  </p>
-                </div>
-                <div className="w-full flex-1 space-y-2.5">
-                  <RatingBar
-                    label="5"
-                    width="70%"
-                    color="bg-green-500"
-                    pct="70%"
-                  />
-                  <RatingBar
-                    label="4"
-                    width="20%"
-                    color="bg-green-400"
-                    pct="20%"
-                  />
-                  <RatingBar
-                    label="3"
-                    width="7%"
-                    color="bg-yellow-400"
-                    pct="7%"
-                  />
-                  <RatingBar
-                    label="2"
-                    width="2%"
-                    color="bg-orange-400"
-                    pct="2%"
-                  />
-                  <RatingBar label="1" width="1%" color="bg-red-500" pct="1%" />
-                </div>
-              </div>
 
-              <div className="space-y-5">
-                <h3 className="text-[18px] font-bold text-gray-900">
-                  Recent Reviews
-                </h3>
-                <ReviewCard
-                  initials="AS"
-                  name="Amit Sharma"
-                  subtitle="B.Sc. CSIT · Batch 2022"
-                  rating={5}
-                  pros="Excellent faculty with real-world industry experience. The labs are well-equipped with the latest tech."
-                  cons="Canteen food could be better. Parking space is quite limited during peak hours."
-                  tone="blue"
-                />
-                <ReviewCard
-                  initials="SM"
-                  name="Sita Maharjan"
-                  subtitle="BBA · Batch 2021"
-                  rating={4}
-                  pros="Great focus on extracurricular activities and business competitions. Very supportive administration."
-                  cons="The library space is somewhat small for a growing number of students."
-                  tone="purple"
-                />
-              </div>
+                  <div className="mb-4 flex justify-between items-center">
+                    <h3 className="text-[18px] font-bold text-gray-900">
+                      Recent Reviews
+                    </h3>
+                    <a
+                      href="/write-review"
+                      className="text-sm font-medium text-brand-blue hover:text-brand-hover"
+                    >
+                      Write a Review
+                    </a>
+                  </div>
+
+                  {reviewsData?.reviews?.length > 0 ? (
+                    <div className="space-y-5">
+                      {reviewsData.reviews.map((review: any, idx: number) => {
+                        const avgRating = Object.values(review.ratings || {}).reduce((s: number, v: any) => s + v, 0) / 10;
+                        return (
+                          <ReviewCard
+                            key={review.id}
+                            initials={review.userInitials || "U"}
+                            name={review.userName || "Anonymous"}
+                            subtitle={`${review.course} · Batch ${review.batchYear}`}
+                            rating={Math.round(avgRating)}
+                            pros={review.pros}
+                            cons={review.cons}
+                            tone={idx % 2 === 0 ? "blue" : "purple"}
+                          />
+                        );
+                      })}
+                    </div>
+                  ) : (
+                    <div className="text-center py-12">
+                      <p className="text-gray-500 mb-4">No reviews yet. Be the first to review!</p>
+                      <a
+                        href="/write-review"
+                        className="inline-block px-6 py-3 bg-brand-blue text-white rounded-lg font-medium hover:bg-brand-hover transition-colors"
+                      >
+                        Write a Review
+                      </a>
+                    </div>
+                  )}
+                </>
+              )}
             </div>
           )}
 

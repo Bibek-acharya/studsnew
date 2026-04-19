@@ -4,6 +4,7 @@ export interface AdmissionFilters {
   program: string[];
   province: string[];
   district: string[];
+  local: string[];
   type: string[];
   scholarship: string[];
   facilities: string[];
@@ -18,6 +19,7 @@ export const DEFAULT_ADMISSION_FILTERS: AdmissionFilters = {
   program: [],
   province: [],
   district: [],
+  local: [],
   type: [],
   scholarship: [],
   facilities: [],

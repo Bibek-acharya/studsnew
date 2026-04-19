@@ -2,12 +2,11 @@
 
 import { Suspense } from "react";
 import { useEffect, useState } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useSearchParams } from "next/navigation";
 
 const STORAGE_KEY = "studsphere_auth";
 
 function GoogleAuthCallbackContent() {
-  const router = useRouter();
   const searchParams = useSearchParams();
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(true);
@@ -34,8 +33,15 @@ function GoogleAuthCallbackContent() {
         const user = data.data;
         if (user?.id) {
           localStorage.setItem(STORAGE_KEY, JSON.stringify({ token, user }));
+          localStorage.setItem("token", token);
+          sessionStorage.setItem("token", token);
           setProcessed(true);
-          window.location.href = "/";
+          
+          if (user.preferences && user.preferences.education_level) {
+            window.location.href = "/user/dashboard";
+          } else {
+            window.location.href = "/onboarding";
+          }
         } else {
           setError("No user in response");
         }

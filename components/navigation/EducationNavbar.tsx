@@ -42,7 +42,6 @@ import {
   ViewKey,
 } from "./types";
 import Image from "next/image";
-import AuthModal from "@/components/auth/AuthModal";
 
 const EducationNavbar: React.FC<EducationNavbarProps> = ({
   onNavigate,
@@ -54,10 +53,6 @@ const EducationNavbar: React.FC<EducationNavbarProps> = ({
   const [activeMenu, setActiveMenu] = useState<string | null>(null);
   const [isVisible, setIsVisible] = useState(true);
   const [showMobileSearch, setShowMobileSearch] = useState(false);
-  const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
-  const [initialAuthView, setInitialAuthView] = useState<"login" | "signup">(
-    "login",
-  );
   const lastScrollY = useRef(0);
   const router = useRouter();
   const pathname = usePathname();
@@ -156,7 +151,7 @@ const EducationNavbar: React.FC<EducationNavbarProps> = ({
   }, []);
 
   useEffect(() => {
-    if (isMobileOpen || showMobileSearch || isAuthModalOpen) {
+    if (isMobileOpen || showMobileSearch) {
       document.body.style.overflow = "hidden";
     } else {
       document.body.style.overflow = "";
@@ -164,25 +159,17 @@ const EducationNavbar: React.FC<EducationNavbarProps> = ({
     return () => {
       document.body.style.overflow = "";
     };
-  }, [isAuthModalOpen, isMobileOpen, showMobileSearch]);
+  }, [isMobileOpen, showMobileSearch]);
 
   useEffect(() => {
-    const handleOpenAuthModal = (event: Event) => {
-      const customEvent = event as CustomEvent<{ view?: "login" | "signup" }>;
-      setInitialAuthView(customEvent.detail?.view ?? "login");
-      setIsAuthModalOpen(true);
-      setIsMobileOpen(false);
-      setActiveMenu(null);
-      setShowMobileSearch(false);
+    const handleOpenAuthModal = () => {
+      router.push("/login");
     };
 
     window.addEventListener("studsphere:open-auth-modal", handleOpenAuthModal);
     return () =>
-      window.removeEventListener(
-        "studsphere:open-auth-modal",
-        handleOpenAuthModal,
-      );
-  }, []);
+      window.removeEventListener("studsphere:open-auth-modal", handleOpenAuthModal);
+  }, [router]);
 
   const initials = useMemo(() => {
     if (!user) return "SS";
@@ -198,9 +185,15 @@ const EducationNavbar: React.FC<EducationNavbarProps> = ({
   }, [user]);
 
   const go = (viewKey: ViewKey, data?: { level?: string }) => {
-    if (viewKey === "login" || viewKey === "signup") {
-      setInitialAuthView(viewKey === "signup" ? "signup" : "login");
-      setIsAuthModalOpen(true);
+    if (viewKey === "login") {
+      router.push("/login");
+      setIsMobileOpen(false);
+      setActiveMenu(null);
+      setShowMobileSearch(false);
+      return;
+    }
+    if (viewKey === "signup") {
+      router.push("/register");
       setIsMobileOpen(false);
       setActiveMenu(null);
       setShowMobileSearch(false);
@@ -1175,11 +1168,6 @@ const EducationNavbar: React.FC<EducationNavbarProps> = ({
         </div>
       </header>
 
-      <AuthModal
-        isOpen={isAuthModalOpen}
-        initialView={initialAuthView}
-        onClose={() => setIsAuthModalOpen(false)}
-      />
     </>
   );
 };

@@ -590,4 +590,58 @@ export const entranceService = {
       return { data: exam };
     }
   },
+
+  // ─── Institution Entrance Management ─────────────────────────────────
+
+  async createEntrance(data: {
+    title: string;
+    description: string;
+    level: string;
+    stream: string;
+    date: string;
+    deadline: string;
+    status: string;
+    location: string;
+  }): Promise<{ data: { id: number }; message: string }> {
+    const token = localStorage.getItem("token");
+    return apiRequest<{ data: { id: number }; message: string }>("/api/v1/institution/entrances", {
+      method: "POST",
+      headers: token ? { Authorization: `Bearer ${token}` } : {},
+      body: JSON.stringify(data),
+    });
+  },
+
+  async updateEntrance(id: string, data: {
+    title?: string;
+    description?: string;
+    level?: string;
+    stream?: string;
+    date?: string;
+    deadline?: string;
+    status?: string;
+    location?: string;
+  }): Promise<{ data: { id: number }; message: string }> {
+    const token = localStorage.getItem("token");
+    return apiRequest<{ data: { id: number }; message: string }>(`/api/v1/institution/entrances/${id}`, {
+      method: "PUT",
+      headers: token ? { Authorization: `Bearer ${token}` } : {},
+      body: JSON.stringify(data),
+    });
+  },
+
+  async deleteEntrance(id: string): Promise<{ message: string }> {
+    const token = localStorage.getItem("token");
+    return apiRequest<{ message: string }>(`/api/v1/institution/entrances/${id}`, {
+      method: "DELETE",
+      headers: token ? { Authorization: `Bearer ${token}` } : {},
+    });
+  },
+
+  async getMyEntrances(): Promise<{ data: { entrances: any[] }; message: string }> {
+    const token = localStorage.getItem("token");
+    return apiRequest<{ data: { entrances: any[] }; message: string }>("/api/v1/institution/entrances", {
+      method: "GET",
+      headers: token ? { Authorization: `Bearer ${token}` } : {},
+    });
+  },
 };

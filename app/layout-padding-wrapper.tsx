@@ -16,10 +16,15 @@ export default function LayoutPaddingWrapper({
     pathname.startsWith("/superadmin") ||
     pathname.startsWith("/user/dashboard");
 
+  const hidePaddingRoute =
+    pathname === "/login" ||
+    pathname === "/register" ||
+    pathname === "/forgot-password";
+
   return (
     <div
       className={`flex min-h-screen flex-col ${
-        isDashboardRoute ? "" : "pt-18 xs:pt-20 sm:pt-24 md:pt-27"
+        isDashboardRoute || hidePaddingRoute ? "" : "pt-18 xs:pt-20 sm:pt-24 md:pt-27"
       }`}
     >
       {children}

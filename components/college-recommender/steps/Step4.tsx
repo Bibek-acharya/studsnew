@@ -4,6 +4,7 @@ import React from 'react'
 import { CollegeRecommenderForm } from '../CollegeRecommenderToolPage'
 import Dropdown from '../Dropdown'
 import StepWrapper from './StepWrapper'
+import { NEPAL_PROVINCES, NEPAL_DISTRICTS } from '@/lib/location-data'
 
 interface Step4Props {
   step: number
@@ -33,37 +34,35 @@ export default function Step4({ step, stepImages, form, handleInputChange, stepT
             </p>
             <Dropdown
               value={form.province || ''}
-              onChange={(val) => handleInputChange('province', val)}
-              options={[
-                'Bagmati',
-                'Province 1',
-                'Madhesh',
-                'Gandaki',
-                'Lumbini',
-                'Karnali',
-                'Sudurpashchim',
-                'No preference',
-              ]}
+              onChange={(val) => {
+                handleInputChange('province', val)
+                handleInputChange('district', '')
+              }}
+              options={[...NEPAL_PROVINCES, 'No preference']}
               placeholder='Search or select your province'
             />
           </div>
 
           <div className='space-y-4'>
             <p className='text-[17px] font-semibold text-[#0f172a]'>
-              Do you prefer:
+              Which district is closest to your preference?
             </p>
             <Dropdown
-              value={form.setting || ''}
-              onChange={(val) => handleInputChange('setting', val)}
-              options={[
-                'Kathmandu Valley',
-                'Outside Valley but city area',
-                'Near my hometown',
-                'Anywhere',
-              ]}
-              placeholder='Search or select your setting'
+              value={form.district || ''}
+              onChange={(val) => handleInputChange('district', val)}
+              options={
+                form.province && form.province !== 'No preference'
+                  ? NEPAL_DISTRICTS[form.province as keyof typeof NEPAL_DISTRICTS] || []
+                  : []
+              }
+              placeholder={
+                form.province && form.province !== 'No preference'
+                  ? 'Search or select your district'
+                  : 'Select province first'
+              }
             />
           </div>
+
         </div>
       </div>
 

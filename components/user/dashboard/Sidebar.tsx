@@ -1,7 +1,7 @@
 'use client'
 
 import Link from 'next/link'
-import { usePathname } from 'next/navigation'
+import { usePathname, useRouter } from 'next/navigation'
 import { 
   LayoutDashboard, 
   MessageSquare, 
@@ -14,6 +14,7 @@ import {
   Star, 
   Bell, 
   Settings,
+  BadgeQuestionMark,
   LogOut,
   X
 } from 'lucide-react'
@@ -25,6 +26,7 @@ interface SidebarProps {
 
 export default function Sidebar({ sidebarOpen, setSidebarOpen }: SidebarProps) {
   const pathname = usePathname()
+  const router = useRouter()
 
   const navItems = [
     { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard, href: '/user/dashboard' },
@@ -36,6 +38,7 @@ export default function Sidebar({ sidebarOpen, setSidebarOpen }: SidebarProps) {
     { id: 'bookmarks', label: 'Bookmarks', icon: Bookmark, href: '/user/dashboard/bookmarks' },
     { id: 'reviews', label: 'My Reviews', icon: Star, href: '/user/dashboard/reviews' },
     { id: 'notifications', label: 'Notifications', icon: Bell, href: '/user/dashboard/notifications', badge: '16' },
+    { id: 'faq', label: 'FAQ', icon: BadgeQuestionMark, href: '/user/dashboard/faq' },
     { id: 'settings', label: 'Settings', icon: Settings, href: '/user/dashboard/settings' },
   ]
 
@@ -64,12 +67,12 @@ export default function Sidebar({ sidebarOpen, setSidebarOpen }: SidebarProps) {
       >
         {/* Logo Area */}
         <div className="h-16 flex items-center px-6 border-b border-gray-200 shrink-0">
-          <div className="flex items-center gap-2 text-[#0000ff] font-bold text-xl">
+          <Link href="/" onClick={() => setSidebarOpen(false)} className="flex items-center gap-2 text-[#0000ff] font-bold text-xl">
             <div className="w-8 h-8 bg-[#0000ff] rounded-md flex items-center justify-center text-white">
               S
             </div>
             StudentPortal
-          </div>
+          </Link>
           <button 
             id="close-sidebar" 
             onClick={() => setSidebarOpen(false)}
@@ -114,7 +117,11 @@ export default function Sidebar({ sidebarOpen, setSidebarOpen }: SidebarProps) {
 
         {/* Logout */}
         <div className="p-4 border-t border-gray-200 shrink-0">
-          <button className="w-full flex items-center gap-3 px-4 py-3 text-red-500 hover:bg-red-50 rounded-md transition-colors">
+          <button
+            type="button"
+            onClick={() => router.push('/')}
+            className="w-full flex items-center gap-3 px-4 py-3 text-red-500 hover:bg-red-50 rounded-md transition-colors"
+          >
             <LogOut className="w-5 h-5" />
             <span className="font-medium text-sm">Logout</span>
           </button>

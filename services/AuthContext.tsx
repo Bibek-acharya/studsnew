@@ -17,7 +17,7 @@ interface AuthContextType {
   user: User | null;
   isAuthenticated: boolean;
   loading: boolean;
-  login: (email: string, password: string) => Promise<void>;
+  login: (email: string, password: string, rememberMe?: boolean) => Promise<void>;
   logout: () => void;
   register: (email: string, password: string, firstName: string, lastName: string, role: string, educationLevel: string) => Promise<void>;
   superadminLogin: (email: string, password: string) => Promise<void>;
@@ -30,11 +30,12 @@ interface AuthContextType {
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 const STORAGE_KEY = "studsphere_auth";
+const SESSION_STORAGE_KEY = "studsphere_auth_session";
 
 const loadStoredAuth = (): { token: string; user: User } | null => {
   if (typeof window === "undefined") return null;
   try {
-    const raw = localStorage.getItem(STORAGE_KEY);
+    const raw = localStorage.getItem(STORAGE_KEY) || sessionStorage.getItem(SESSION_STORAGE_KEY);
     if (raw) return JSON.parse(raw);
   } catch {
     /* ignore */
@@ -42,16 +43,28 @@ const loadStoredAuth = (): { token: string; user: User } | null => {
   return null;
 };
 
-const saveAuth = (token: string, user: User) => {
+const saveAuth = (token: string, user: User, rememberMe = false) => {
   if (typeof window === "undefined") return;
-  localStorage.setItem(STORAGE_KEY, JSON.stringify({ token, user }));
-  // Also set in apiService just in case
-  apiService.setToken(token);
+
+  const serialized = JSON.stringify({ token, user });
+
+  if (rememberMe) {
+    localStorage.setItem(STORAGE_KEY, serialized);
+    sessionStorage.removeItem(SESSION_STORAGE_KEY);
+    apiService.setToken(token);
+  } else {
+    sessionStorage.setItem(SESSION_STORAGE_KEY, serialized);
+    localStorage.removeItem(STORAGE_KEY);
+    sessionStorage.setItem("token", token);
+  }
 };
 
 const clearAuth = () => {
   if (typeof window === "undefined") return;
   localStorage.removeItem(STORAGE_KEY);
+  sessionStorage.removeItem(SESSION_STORAGE_KEY);
+  localStorage.removeItem("token");
+  sessionStorage.removeItem("token");
   apiService.setToken(null);
 };
 
@@ -71,11 +84,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const setUser = (userData: User) => {
     const currentToken = storedAuth?.token || "";
-    saveAuth(currentToken, userData);
+    const rememberMe = !!localStorage.getItem(STORAGE_KEY);
+    saveAuth(currentToken, userData, rememberMe);
     setStoredAuth({ token: currentToken, user: userData });
   };
 
-  const login = async (email: string, password: string) => {
+  const login = async (email: string, password: string, rememberMe = false) => {
     const response: AuthResponse = await apiService.login(email, password);
     
     if (!response.data?.token) {
@@ -90,7 +104,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       role: response.data.user.role,
     };
 
-    saveAuth(response.data.token, userData);
+    saveAuth(response.data.token, userData, rememberMe);
     setStoredAuth({ token: response.data.token, user: userData });
   };
 

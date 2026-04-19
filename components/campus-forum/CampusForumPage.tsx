@@ -140,9 +140,8 @@ const BackToTop: React.FC = () => {
 };
 
 const openAuthModal = (view: "login" | "signup" = "login") => {
-  window.dispatchEvent(
-    new CustomEvent("studsphere:open-auth-modal", { detail: { view } }),
-  );
+  const path = view === "signup" ? "/register" : "/login";
+  window.location.href = path;
 };
 
 const CampusForumPage: React.FC = () => {

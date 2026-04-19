@@ -1,90 +1,16 @@
 "use client";
 
 import React, { useMemo, useState } from "react";
-
-interface WriteReviewPageProps {
-  onNavigate?: (view: any, data?: any) => void;
-}
+import { submitReviewAction } from "@/actions/review-actions";
+import { getCollegesBySearch } from "@/lib/college-suggestions";
+import { courseDataByLevel, searchCourses } from "@/lib/course-suggestions";
+import { ratingCategories, ratingStatusLabels } from "@/lib/review-types";
 
 type StudentType = "current" | "alumni" | null;
 
-const collegeSuggestions = [
-  "Amrit Science Campus",
-  "Apex College",
-  "Asian College of Higher Studies",
-  "Birendra Multiple Campus",
-  "British College",
-  "Deerwalk Institute of Technology",
-  "Global College of Management",
-  "Islington College",
-  "Kathmandu University",
-  "Nepal College of Information Technology (NCIT)",
-  "Nepal Engineering College",
-  "Patan Multiple Campus",
-  "Pokhara University",
-  "Pulchowk Campus",
-  "St. Xavier's College",
-  "Thapathali Campus",
-  "Tribhuvan University",
-];
+const popularColleges = getCollegesBySearch("");
 
-const courseDataMap: Record<string, string[]> = {
-  "+2 / High School": [
-    "Science",
-    "Management",
-    "Humanities",
-    "Law",
-    "Education",
-  ],
-  "Bachelor's Degree": [
-    "BCA",
-    "BSc.CSIT",
-    "BIT",
-    "BIM",
-    "BBA",
-    "BBM",
-    "BBS",
-    "BE Civil",
-    "BE Computer",
-    "BE Electronics",
-    "MBBS",
-    "BDS",
-    "BSc. Nursing",
-    "BA",
-  ],
-  "Master's Degree": [
-    "MCA",
-    "MSc.CSIT",
-    "MBA",
-    "MBS",
-    "ME Computer",
-    "ME Civil",
-    "MSc. Physics",
-    "MA",
-  ],
-  Diploma: [
-    "Diploma in Computer Engineering",
-    "Diploma in Civil Engineering",
-    "Diploma in Architecture",
-    "Diploma in Agriculture",
-    "Diploma in Pharmacy",
-  ],
-};
-
-const ratingCategories = [
-  "Teaching Quality & Faculty Support",
-  "Infrastructure & Lab Facilities",
-  "Social & Campus Life",
-  "Placement & Internships",
-  "Value for Money",
-  "Hostels & Accommodation",
-  "Student Clubs & Activities",
-  "Administration & Management",
-  "Library & Resources",
-  "Overall Experience",
-];
-
-const ratingStatusLabels = ["Terrible", "Bad", "Okay", "Good", "Excellent"];
+const courseDataMap: Record<string, string[]> = courseDataByLevel;
 
 const WriteReviewPage: React.FC<WriteReviewPageProps> = () => {
   const currentYear = new Date().getFullYear();
@@ -119,14 +45,11 @@ const WriteReviewPage: React.FC<WriteReviewPageProps> = () => {
   }>({ open: false, title: "", message: "", type: "success" });
 
   const filteredColleges = useMemo(() => {
-    const q = collegeInput.toLowerCase();
-    return collegeSuggestions.filter((item) => item.toLowerCase().includes(q));
+    return getCollegesBySearch(collegeInput);
   }, [collegeInput]);
 
   const currentCourseSuggestions = useMemo(() => {
-    const source = level ? courseDataMap[level] || [] : [];
-    const q = courseInput.toLowerCase();
-    return source.filter((item) => item.toLowerCase().includes(q));
+    return searchCourses(courseInput, level);
   }, [level, courseInput]);
 
   const averageRating = useMemo(() => {
@@ -190,7 +113,7 @@ const WriteReviewPage: React.FC<WriteReviewPageProps> = () => {
     setRatings({});
   };
 
-  const handleSubmit = (event: React.FormEvent) => {
+  const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
 
     if (!studentType) {
@@ -228,12 +151,41 @@ const WriteReviewPage: React.FC<WriteReviewPageProps> = () => {
       return;
     }
 
-    showMessage(
-      "success",
-      "Review Submitted!",
-      "Thank you for sharing your experience. Your review will help future students make better choices.",
+    const selectedCollege = popularColleges.find(
+      c => c.name.toLowerCase() === collegeInput.toLowerCase()
     );
-    resetForm();
+
+    const result = await submitReviewAction({
+      collegeId: selectedCollege?.id || Math.floor(Math.random() * 1000),
+      collegeName: collegeInput,
+      studentType,
+      course: courseInput,
+      level,
+      batchYear: parseInt(batchYear),
+      ratings,
+      pros,
+      cons,
+      summaryTitle,
+      yearlyFee: yearlyFee ? parseInt(yearlyFee) : undefined,
+      scholarship: scholarship === "yes",
+      internshipOutcome: internshipOutcome || undefined,
+      email,
+    });
+
+    if (result.success) {
+      showMessage(
+        "success",
+        "Review Submitted!",
+        "Thank you for sharing your experience. Your review will help future students make better choices.",
+      );
+      resetForm();
+    } else {
+      showMessage(
+        "error",
+        "Submission Failed",
+        result.error || "Something went wrong. Please try again.",
+      );
+    }
   };
 
   return (
@@ -299,17 +251,18 @@ const WriteReviewPage: React.FC<WriteReviewPageProps> = () => {
                   {showCollegeList && filteredColleges.length > 0 && (
                     <ul className="absolute left-0 top-full z-20 mt-1 max-h-52 w-full overflow-y-auto rounded-lg border border-slate-200 bg-white shadow-lg">
                       {filteredColleges.map((item) => (
-                        <li key={item}>
+                        <li key={item.id}>
                           <button
                             type="button"
                             className="w-full border-b border-slate-50 px-4 py-3 text-left text-sm font-medium text-slate-700 transition-colors last:border-0 hover:bg-blue-50"
                             onMouseDown={(event) => {
                               event.preventDefault();
-                              setCollegeInput(item);
+                              setCollegeInput(item.name);
                               setShowCollegeList(false);
                             }}
                           >
-                            {item}
+                            <div className="font-medium">{item.name}</div>
+                            <div className="text-xs text-slate-500">{item.location} • {item.type}</div>
                           </button>
                         </li>
                       ))}

@@ -167,7 +167,7 @@ export default function NotificationsSection() {
   const unreadCount = notifications.filter(n => n.unread && !n.archived).length
 
   return (
-    <div className="w-full max-w-3xl mx-auto">
+    <div className="w-full max-w-7xl mx-auto">
       <header className="flex items-center justify-between px-6 py-5 border-b border-gray-200 sticky top-0 z-10 bg-white/90 backdrop-blur-sm">
         <div className="flex items-center gap-4">
           <h2 className="text-2xl font-bold text-slate-800">Notifications</h2>

@@ -1,7 +1,9 @@
+import { fetchCourses, fetchCourseFilterCounts } from "./course-api";
+
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080";
 
-async function apiRequest<T>(path: string, options: RequestInit = {}): Promise<T> {
-  const token = typeof window !== "undefined" ? localStorage.getItem("token") : null;
+export async function apiRequest<T>(path: string, options: RequestInit = {}): Promise<T> {
+  const token = typeof window !== "undefined" ? apiService.getToken() : null;
   const headers: Record<string, string> = {
     "Content-Type": "application/json",
     ...(token ? { Authorization: `Bearer ${token}` } : {}),
@@ -47,6 +49,194 @@ export interface RegisterResponse {
 
 export interface OTPResponse {
   data: any;
+  message: string;
+}
+
+export interface ContactInquiryResponse {
+  data: {
+    id: number;
+    name: string;
+    email: string;
+    phone: string;
+    subject: string;
+    message: string;
+    type: string;
+    status: string;
+    created_at: string;
+    updated_at: string;
+  };
+  message: string;
+}
+
+export interface EducationEvent {
+  id: number;
+  title: string;
+  excerpt: string;
+  description: string;
+  category: string;
+  organizer: string;
+  location: string;
+  date: string;
+  time: string;
+  registrationFee: string;
+  image: string;
+  interested: number;
+  trending: boolean;
+}
+
+export interface EducationEventsResponse {
+  data: {
+    events: EducationEvent[];
+  };
+  message: string;
+}
+
+export interface EducationEventResponse {
+  data: {
+    event: EducationEvent;
+  };
+  message: string;
+}
+
+export interface ScholarshipItem {
+  id: number;
+  title: string;
+  provider: string;
+  location: string;
+  value?: string;
+  amount?: string;
+  deadline: string;
+  degree_level?: string;
+  funding_type?: string;
+  scholarship_type?: string;
+  description?: string;
+  image?: string;
+  status?: string;
+  eligibility?: string;
+  category?: string;
+  tags?: string[];
+}
+
+export interface ScholarshipsResponse {
+  data: {
+    scholarships: ScholarshipItem[];
+    total?: number;
+    page?: number;
+    limit?: number;
+  };
+  message: string;
+}
+
+export interface EducationNewsItem {
+  id: number;
+  category: string;
+  title: string;
+  excerpt: string;
+  content: string;
+  image: string;
+  author: string;
+  date: string;
+  readTime?: string;
+  source?: string;
+  tags?: string[];
+}
+
+export interface EducationNewsResponse {
+  data: {
+    news: EducationNewsItem[];
+  };
+  message: string;
+}
+
+export interface BookmarkItem {
+  id: number;
+  user_id: number;
+  item_id: number;
+  item_type: string;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface BookmarksResponse {
+  data: {
+    bookmarks: BookmarkItem[];
+  };
+  message: string;
+}
+
+export interface CreateBookmarkResponse {
+  data: BookmarkItem;
+  message: string;
+}
+
+export interface CounsellingBookingPayload {
+  college: string;
+  program_level: string;
+  interested_course: string;
+  session_mode: "online" | "in_person";
+  session_date: string;
+  session_time: string;
+  student_name: string;
+  student_phone: string;
+  student_email: string;
+  student_notes?: string;
+}
+
+export interface CounsellingBookingItem {
+  id: number;
+  college: string;
+  program_level: string;
+  interested_course: string;
+  session_mode: string;
+  session_date: string;
+  session_time: string;
+  student_name: string;
+  student_phone: string;
+  student_email: string;
+  student_notes?: string;
+  status: string;
+  created_at: string;
+}
+
+export interface MyCounsellingBookingsResponse {
+  data: {
+    bookings: CounsellingBookingItem[];
+  };
+  message: string;
+}
+
+export interface CounsellingSessionItem {
+  id: number;
+  created_at: string;
+  updated_at: string;
+  institution_id: number;
+  title: string;
+  description: string;
+  scheduled_at: string;
+  duration: number;
+  max_seats: number;
+  booked_seats: number;
+  status: string;
+}
+
+export interface InstitutionCounsellingBookingItem {
+  id: number;
+  created_at: string;
+  updated_at: string;
+  session_id: number;
+  user_id: number;
+  status: string;
+  notes: string;
+  session?: CounsellingSessionItem;
+}
+
+export interface InstitutionCounsellingSessionsResponse {
+  data: CounsellingSessionItem[];
+  message: string;
+}
+
+export interface InstitutionCounsellingBookingsResponse {
+  data: InstitutionCounsellingBookingItem[];
   message: string;
 }
 
@@ -222,7 +412,7 @@ export const apiService = {
   },
   getToken(): string | null {
     if (typeof window === "undefined") return null;
-    return localStorage.getItem("token") || "mock-token";
+    return localStorage.getItem("token") || sessionStorage.getItem("token") || "mock-token";
   },
   getScholarshipProviderToken(): string | null {
     if (typeof window === "undefined") return null;
@@ -232,8 +422,10 @@ export const apiService = {
     if (typeof window === "undefined") return;
     if (token) {
       localStorage.setItem("token", token);
+      sessionStorage.setItem("token", token);
     } else {
       localStorage.removeItem("token");
+      sessionStorage.removeItem("token");
     }
   },
   setScholarshipProviderToken(token: string | null): void {
@@ -286,9 +478,141 @@ export const apiService = {
     return apiRequest<AuthResponse>("/api/v1/profile");
   },
 
+  async getEducationEvents(params?: {
+    page?: number;
+    limit?: number;
+    category?: string;
+    search?: string;
+    sort?: string;
+  }): Promise<EducationEventsResponse> {
+    const query = new URLSearchParams();
+    if (params?.page) query.set("page", String(params.page));
+    if (params?.limit) query.set("limit", String(params.limit));
+    if (params?.category) query.set("category", params.category);
+    if (params?.search) query.set("search", params.search);
+    if (params?.sort) query.set("sort", params.sort);
+
+    const queryStr = query.toString();
+    return apiRequest<EducationEventsResponse>(`/api/v1/education/events${queryStr ? `?${queryStr}` : ""}`);
+  },
+
+  async getEducationEventFilterCounts(): Promise<any> {
+    return apiRequest<any>("/api/v1/education/events/filter-counts");
+  },
+
+  async getEducationEventById(id: number): Promise<EducationEventResponse> {
+    return apiRequest<EducationEventResponse>(`/api/v1/education/events/${id}`);
+  },
+
+  async getEducationNews(params?: {
+    page?: number;
+    limit?: number;
+    category?: string;
+    search?: string;
+    sort?: string;
+  }): Promise<EducationNewsResponse> {
+    const query = new URLSearchParams();
+    if (params?.page) query.set("page", String(params.page));
+    if (params?.limit) query.set("limit", String(params.limit));
+    if (params?.category) query.set("category", params.category);
+    if (params?.search) query.set("search", params.search);
+    if (params?.sort) query.set("sort", params.sort);
+
+    const queryStr = query.toString();
+    return apiRequest<EducationNewsResponse>(`/api/v1/education/news${queryStr ? `?${queryStr}` : ""}`);
+  },
+
+  async getEducationNewsFilterCounts(): Promise<any> {
+    return apiRequest<any>("/api/v1/education/news/filter-counts");
+  },
+
+  async getEducationScholarships(params: { page?: number; limit?: number; degree_level?: string; funding_type?: string; search?: string; category?: string; status?: string; sort?: string } = {}): Promise<ScholarshipsResponse> {
+    const query = new URLSearchParams();
+    if (params.page) query.set("page", String(params.page));
+    if (params.limit) query.set("limit", String(params.limit));
+    if (params.degree_level) query.set("degree_level", params.degree_level);
+    if (params.funding_type) query.set("funding_type", params.funding_type);
+    if (params.search) query.set("search", params.search);
+    if (params.category) query.set("category", params.category);
+    if (params.status) query.set("status", params.status);
+    if (params.sort) query.set("sort", params.sort);
+
+    const queryStr = query.toString();
+    return apiRequest<ScholarshipsResponse>(`/api/v1/education/scholarships${queryStr ? `?${queryStr}` : ""}`);
+  },
+
+  async getFeaturedColleges(limit = 4): Promise<CollegesResponse> {
+    const query = new URLSearchParams();
+    query.set("limit", String(limit));
+    return apiRequest<CollegesResponse>(`/api/v1/colleges/featured?${query.toString()}`);
+  },
+
+  async getBookmarksByType(type: string): Promise<BookmarksResponse> {
+    return apiRequest<BookmarksResponse>(`/api/v1/bookmarks/${type}`);
+  },
+
+  async createBookmark(item_id: number, item_type: string): Promise<CreateBookmarkResponse> {
+    return apiRequest<CreateBookmarkResponse>("/api/v1/bookmarks", {
+      method: "POST",
+      body: JSON.stringify({ item_id, item_type }),
+    });
+  },
+
+  async deleteBookmark(bookmarkId: number): Promise<{ message: string }> {
+    return apiRequest<{ message: string }>(`/api/v1/bookmarks/${bookmarkId}`, {
+      method: "DELETE",
+    });
+  },
+
+  async submitContactInquiry(data: {
+    name: string;
+    email: string;
+    phone: string;
+    message: string;
+    type?: string;
+    subject?: string;
+  }): Promise<ContactInquiryResponse> {
+    return apiRequest<ContactInquiryResponse>("/api/v1/system/contact", {
+      method: "POST",
+      body: JSON.stringify(data),
+    });
+  },
+
   async resetPassword(email: string, _password: string): Promise<any> {
     await new Promise(resolve => setTimeout(resolve, 500));
     return { success: true, message: "Password reset successfully" };
+  },
+
+  async createCounsellingBooking(
+    token: string,
+    data: CounsellingBookingPayload,
+  ): Promise<{ data: any; message: string }> {
+    return apiRequest<{ data: any; message: string }>("/api/v1/counselling/bookings", {
+      method: "POST",
+      body: JSON.stringify(data),
+    });
+  },
+
+  async getMyCounsellingBookings(): Promise<MyCounsellingBookingsResponse> {
+    return apiRequest<MyCounsellingBookingsResponse>("/api/v1/counselling/bookings/my");
+  },
+
+  async getInstitutionCounsellingSessions(): Promise<InstitutionCounsellingSessionsResponse> {
+    return apiRequest<InstitutionCounsellingSessionsResponse>("/api/v1/institution/counselling/sessions");
+  },
+
+  async getInstitutionCounsellingBookings(): Promise<InstitutionCounsellingBookingsResponse> {
+    return apiRequest<InstitutionCounsellingBookingsResponse>("/api/v1/institution/counselling/bookings");
+  },
+
+  async updateInstitutionBookingStatus(
+    id: number,
+    status: string,
+  ): Promise<{ data: InstitutionCounsellingBookingItem; message: string }> {
+    return apiRequest<{ data: InstitutionCounsellingBookingItem; message: string }>(`/api/v1/institution/counselling/bookings/${id}/status`, {
+      method: "PUT",
+      body: JSON.stringify({ status }),
+    });
   },
 
   async getColleges(params: Record<string, any>): Promise<CollegesResponse> {
@@ -327,112 +651,29 @@ export const apiService = {
     return apiRequest<CollegeFilterCountsResponse>("/api/v1/colleges/filter-counts");
   },
 
-  async getEducationCourses(): Promise<{ data: { courses: EducationCourse[] } }> {
-    await new Promise(resolve => setTimeout(resolve, 600));
-    const mockCourses: EducationCourse[] = [
-      {
-        id: 1,
-        title: "Science (+2)",
-        colleges: 145,
-        affiliation: "NEB",
-        badges: ["Popular", "Science"],
-        level: "+2 (Plus Two)",
-        field: "Science",
-        duration: "2 Years",
-        estFee: "Rs. 1,50,000 - 3,50,000",
-        highlights: ["Practical based learning", "Scholarship for top students"],
-        careerPath: "Medicine, Engineering, IT, Research",
-        description: "The Plus Two Science program is a two-year foundation course.",
-      },
-      {
-        id: 2,
-        title: "Management (+2)",
-        colleges: 210,
-        affiliation: "NEB",
-        badges: ["Best Seller"],
-        level: "+2 (Plus Two)",
-        field: "Management",
-        duration: "2 Years",
-        estFee: "Rs. 80,000 - 2,00,000",
-        highlights: ["Entrepreneurship focus", "Practical accounting"],
-        careerPath: "BBA, BBS, CA, Hotel Management",
-        description: "Focuses on business, administration and financial management.",
-      },
-      {
-        id: 3,
-        title: "A Level Science",
-        colleges: 25,
-        affiliation: "Cambridge University",
-        badges: ["International"],
-        level: "A Level",
-        field: "Science",
-        duration: "2 Years",
-        estFee: "Rs. 4,00,000 - 8,00,000",
-        highlights: ["Global recognition", "Flexible subject choice"],
-        careerPath: "International Admissions, Research, Medical",
-        description: "Cambridge International A Level is recognized worldwide.",
-      },
-      {
-        id: 4,
-        title: "Diploma in Civil Engineering",
-        colleges: 45,
-        affiliation: "CTEVT",
-        badges: ["Technical"],
-        level: "Diploma",
-        field: "Engineering",
-        duration: "3 Years",
-        estFee: "Rs. 2,50,-000 - 4,50,000",
-        highlights: ["Job oriented", "Technical skill focused"],
-        careerPath: "Sub-Engineer, Project Supervisor, Contractor",
-        description: "Technical diploma program under CTEVT for engineering aspirants.",
-      },
-      {
-        id: 5,
-        title: "Masters in Business Administration (MBA)",
-        colleges: 12,
-        affiliation: "Tribhuvan University",
-        badges: ["Professional"],
-        level: "Masters",
-        field: "Management",
-        duration: "2 Years",
-        estFee: "Rs. 5,00,000 - 9,00,000",
-        highlights: ["Leadership training", "Network building"],
-        careerPath: "CEO, Manager, Entrepreneur, Consultant",
-        description: "Advanced degree for business leadership and management.",
-      },
-      {
-        id: 6,
-        title: "Humanities (+2)",
-        colleges: 85,
-        affiliation: "NEB",
-        badges: ["Traditional"],
-        level: "+2 (Plus Two)",
-        field: "Humanities",
-        duration: "2 Years",
-        estFee: "Rs. 50,000 - 1,20,000",
-        highlights: ["Social science focus", "Creative thinking"],
-        careerPath: "Social Work, Law, Journalism, Arts",
-        description: "Foundation for social sciences and arts.",
-      }
-    ];
-
-    const duplicated = Array.from({ length: 42 }, (_, i) => ({
-      ...mockCourses[i % mockCourses.length],
-      id: i + 1,
-      title: i < mockCourses.length ? mockCourses[i].title : `${mockCourses[i % mockCourses.length].title} ${i + 1}`
-    }));
+  async getEducationCourses(params?: {
+    page?: number;
+    limit?: number;
+    search?: string;
+    level?: string;
+    field?: string;
+    affiliation?: string;
+  }): Promise<{ data: { courses: EducationCourse[] } }> {
+    // Use course-api.ts with backend integration
+    const { courses } = await fetchCourses({
+      page: params?.page,
+      limit: params?.limit,
+      search: params?.search,
+      level: params?.level,
+      field: params?.field,
+      affiliation: params?.affiliation,
+    });
 
     return {
       data: {
-        courses: duplicated,
+        courses: courses as unknown as EducationCourse[],
       },
     };
-  },
-
-  async createCounsellingBooking(token: string, data: any): Promise<any> {
-    console.log("Mock booking with token:", token, data);
-    await new Promise(resolve => setTimeout(resolve, 800));
-    return { success: true };
   },
 
   async getEducationScholarships(params: any): Promise<any> {
@@ -677,6 +918,24 @@ export const apiService = {
     return data.data?.urls || data.urls || [];
   },
 
+  async savePreferences(data: {
+    preference_role: string;
+    preference_flow: string;
+    preferences: Record<string, any>;
+  }, token: string): Promise<any> {
+    const response = await fetch(`${API_BASE_URL}/api/v1/auth/preferences`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify(data),
+    });
+    if (!response.ok) throw new Error("Failed to save preferences");
+    const result = await response.json();
+    return result.data || result;
+  },
+
   async getCollegeRecommenderRecommendations(payload: CollegeRecommenderPayload): Promise<{ data: { recommendations: CollegeRecommendation[] } }> {
     await new Promise(resolve => setTimeout(resolve, 1200));
     return {
@@ -752,6 +1011,85 @@ export const apiService = {
     return apiRequest<AuthResponse>("/api/v1/superadmin/auth/register", {
       method: "POST",
       body: JSON.stringify(data),
+    });
+  },
+
+  async getCollegeReviews(collegeId: number, params?: {
+    page?: number;
+    limit?: number;
+    sort?: string;
+  }): Promise<any> {
+    const query = new URLSearchParams();
+    if (params?.page) query.set("page", String(params.page));
+    if (params?.limit) query.set("limit", String(params.limit));
+    if (params?.sort) query.set("sort", params.sort);
+
+    const queryStr = query.toString();
+    return apiRequest<any>(`/api/v1/education/reviews/college/${collegeId}${queryStr ? `?${queryStr}` : ""}`);
+  },
+
+  async submitReview(data: {
+    collegeId: number;
+    collegeName?: string;
+    studentType: "current" | "alumni";
+    course: string;
+    level: string;
+    batchYear: number;
+    ratings: Record<string, number>;
+    pros: string;
+    cons: string;
+    summaryTitle: string;
+    yearlyFee?: number;
+    scholarship?: boolean;
+    internshipOutcome?: string;
+    email: string;
+  }): Promise<any> {
+    return apiRequest<any>("/api/v1/user/reviews", {
+      method: "POST",
+      body: JSON.stringify(data),
+    });
+  },
+
+  async getUserReviews(params?: {
+    page?: number;
+    limit?: number;
+  }): Promise<any> {
+    const query = new URLSearchParams();
+    if (params?.page) query.set("page", String(params.page));
+    if (params?.limit) query.set("limit", String(params.limit));
+
+    const queryStr = query.toString();
+    return apiRequest<any>(`/api/v1/user/reviews${queryStr ? `?${queryStr}` : ""}`);
+  },
+
+  async updateReview(reviewId: number, data: Partial<{
+    pros: string;
+    cons: string;
+    summaryTitle: string;
+    ratings: Record<string, number>;
+  }>): Promise<any> {
+    return apiRequest<any>(`/api/v1/user/reviews/${reviewId}`, {
+      method: "PUT",
+      body: JSON.stringify(data),
+    });
+  },
+
+  async deleteReview(reviewId: number): Promise<any> {
+    return apiRequest<any>(`/api/v1/user/reviews/${reviewId}`, {
+      method: "DELETE",
+    });
+  },
+
+  async markReviewHelpful(reviewId: number): Promise<any> {
+    return apiRequest<any>(`/api/v1/education/reviews/${reviewId}/helpful`, {
+      method: "POST",
+    });
+  },
+
+  async reportReview(reviewId: number, reason: string): Promise<any> {
+    return apiRequest<any>(`/api/v1/user/reviews/${reviewId}/report`, {
+      method: "POST",
+      body: JSON.stringify({ reason }),
     });
   },
 };

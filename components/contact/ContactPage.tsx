@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
+import { apiService } from "@/services/api";
 
 type ToastState = {
   id: number;
@@ -25,6 +26,7 @@ const socialLinks = [
 
 const ContactPage: React.FC = () => {
   const [formData, setFormData] = useState(initialFormData);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [toasts, setToasts] = useState<ToastState[]>([]);
 
   const handleChange = (
@@ -55,10 +57,30 @@ const ContactPage: React.FC = () => {
     window.setTimeout(() => dismissToast(id), 4000);
   };
 
-  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    showToast("Success!", "Your quote request has been sent successfully.");
-    setFormData(initialFormData);
+
+    setIsSubmitting(true);
+
+    try {
+      const payload = {
+        name: formData.name,
+        email: formData.email,
+        phone: formData.phone,
+        message: formData.message,
+        type: "quote",
+        subject: "Quote request from contact page",
+      };
+
+      const response = await apiService.submitContactInquiry(payload);
+      showToast("Success!", response.message || "Your quote request has been sent successfully.");
+      setFormData(initialFormData);
+    } catch (error) {
+      const message = error instanceof Error ? error.message : "Failed to send request. Please try again.";
+      showToast("Error", message);
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -157,9 +179,10 @@ const ContactPage: React.FC = () => {
                 <div>
                   <button
                     type="submit"
-                    className="rounded-lg bg-[#1c64f2] px-8 py-3 font-medium text-white transition-colors hover:bg-[#1655ce] focus:outline-none focus:ring-2 focus:ring-[#1c64f2] focus:ring-offset-2"
+                    disabled={isSubmitting}
+                    className="rounded-lg bg-[#1c64f2] px-8 py-3 font-medium text-white transition-colors hover:bg-[#1655ce] focus:outline-none focus:ring-2 focus:ring-[#1c64f2] focus:ring-offset-2 disabled:cursor-not-allowed disabled:bg-slate-400"
                   >
-                    Send Now
+                    {isSubmitting ? "Sending..." : "Send Now"}
                   </button>
                 </div>
               </form>

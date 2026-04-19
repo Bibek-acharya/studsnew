@@ -183,12 +183,16 @@ export async function fetchPublicBlogs(params: {
   limit?: number;
   category?: string;
   search?: string;
+  sort?: "newest" | "oldest" | "popular" | "title";
+  tags?: string;
 } = {}): Promise<{ blogs: BlogEntry[]; meta: BlogMeta }> {
   const query = new URLSearchParams();
   if (params.page) query.set("page", String(params.page));
   if (params.limit) query.set("limit", String(params.limit));
   if (params.category) query.set("category", params.category);
   if (params.search) query.set("search", params.search);
+  if (params.sort) query.set("sort", params.sort);
+  if (params.tags) query.set("tags", params.tags);
 
   const result = await apiFetch<{ data: { blogs: BlogEntry[]; meta: BlogMeta } }>(
     `/api/v1/education/blogs?${query.toString()}`
@@ -198,13 +202,24 @@ export async function fetchPublicBlogs(params: {
     return result.data;
   }
 
-  // Offline fallback
+  // Offline fallback with sort support
   const allBlogs = getLocalBlogs().filter(b => b.published);
-  const filtered = allBlogs.filter(b => {
+  let filtered = allBlogs.filter(b => {
     if (params.category && b.category !== params.category) return false;
     if (params.search && !b.title.toLowerCase().includes(params.search.toLowerCase())) return false;
     return true;
   });
+
+  // Sort locally for offline fallback
+  if (params.sort === "oldest") {
+    filtered.sort((a, b) => new Date(a.created_at).getTime() - new Date(b.created_at).getTime());
+  } else if (params.sort === "popular") {
+    filtered.sort((a, b) => b.views - a.views);
+  } else if (params.sort === "title") {
+    filtered.sort((a, b) => a.title.localeCompare(b.title));
+  } else { // newest (default)
+    filtered.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
+  }
 
   const page = params.page || 1;
   const limit = params.limit || 12;
@@ -239,6 +254,33 @@ export async function fetchPublicBlogById(id: string): Promise<{ blog: BlogEntry
   return { blog, related };
 }
 
+export async function fetchBlogFilterCounts(): Promise<{ category_counts: Record<string, number>; total: number } | null> {
+  const result = await apiFetch<{ data: { category_counts: Record<string, number>; total: number } }>(
+    "/api/v1/education/blogs/filter-counts"
+  );
+
+  if (result?.data) {
+    return result.data;
+  }
+
+  // Offline fallback
+  const allBlogs = getLocalBlogs().filter(b => b.published);
+  const counts: Record<string, number> = {};
+  for (const blog of allBlogs) {
+    counts[blog.category] = (counts[blog.category] || 0) + 1;
+  }
+  return { category_counts: counts, total: allBlogs.length };
+}
+
+export async function incrementBlogView(id: string): Promise<boolean> {
+  const result = await apiFetch<{ success: boolean }>(
+    `/api/v1/education/blogs/${id}/view`,
+    { method: "POST" }
+  );
+
+  return !!result;
+}
+
 // ─── Admin API (used by superadmin blog management) ──────────────────────────
 
 export async function fetchAdminBlogs(params: {
@@ -246,6 +288,7 @@ export async function fetchAdminBlogs(params: {
   limit?: number;
   category?: string;
   search?: string;
+  sort?: "newest" | "oldest" | "popular" | "title";
 } = {}): Promise<{ blogs: BlogEntry[]; meta: BlogMeta }> {
   const token = getAdminToken();
   const query = new URLSearchParams();
@@ -253,6 +296,7 @@ export async function fetchAdminBlogs(params: {
   if (params.limit) query.set("limit", String(params.limit));
   if (params.category) query.set("category", params.category);
   if (params.search) query.set("search", params.search);
+  if (params.sort) query.set("sort", params.sort);
 
   const result = await apiFetch<{ data: { blogs: BlogEntry[]; meta: BlogMeta } }>(
     `/api/v1/superadmin/blogs?${query.toString()}`,

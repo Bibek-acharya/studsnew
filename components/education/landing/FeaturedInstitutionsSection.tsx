@@ -1,31 +1,20 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { Star, MapPin, Award, MessageSquare, Bookmark, BadgeCheckIcon, Globe } from "lucide-react";
-
-interface College {
-  id: string | number;
-  name: string;
-  image_url: string;
-  rating?: string | number;
-  location?: string;
-  affiliation?: string;
-  description?: string;
-  type?: string;
-  website?: string;
-}
+import { College } from "@/services/api";
 
 interface FeaturedInstitutionsSectionProps {
   onNavigate: (view: string, data?: any) => void;
+  featuredColleges?: College[];
 }
 
-const FeaturedInstitutionsSection: React.FC<FeaturedInstitutionsSectionProps> = ({ onNavigate }) => {
-  const [featuredColleges, setFeaturedColleges] = useState<College[]>([]);
-  const [loading, setLoading] = useState(true);
+const FeaturedInstitutionsSection: React.FC<FeaturedInstitutionsSectionProps> = ({ onNavigate, featuredColleges = [] }) => {
   const [bookmarked, setBookmarked] = useState<Set<string | number>>(new Set());
 
-  useEffect(() => {
-    setFeaturedColleges([
+  const colleges = featuredColleges.length
+    ? featuredColleges
+    : [
       {
         id: 1,
         name: "KIST College & SS",
@@ -70,9 +59,7 @@ const FeaturedInstitutionsSection: React.FC<FeaturedInstitutionsSectionProps> = 
         affiliation: "Tribhuvan University, CTEVT",
         website: "https://nami.edu.np"
       }
-    ]);
-    setLoading(false);
-  }, []);
+    ];
 
   const toggleBookmark = (e: React.MouseEvent, id: string | number) => {
     e.stopPropagation();
@@ -83,8 +70,6 @@ const FeaturedInstitutionsSection: React.FC<FeaturedInstitutionsSectionProps> = 
       return next;
     });
   };
-
-  if (loading) return null;
 
   return (
     <section className="mt-4 sm:mt-8 md:mt-12 lg:mt-16 w-full">
@@ -99,7 +84,7 @@ const FeaturedInstitutionsSection: React.FC<FeaturedInstitutionsSectionProps> = 
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-5 md:gap-6">
-        {featuredColleges.map((college) => (
+        {colleges.map((college) => (
           <CollegeCard
             key={college.id}
             college={college}

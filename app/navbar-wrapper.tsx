@@ -15,7 +15,9 @@ export default function NavbarWrapper() {
     pathname.startsWith("/scholarship-provider") ||
     pathname.startsWith("/institution-zone") ||
     pathname.startsWith("/user/dashboard") ||
-    pathname.startsWith("/superadmin");
+    pathname.startsWith("/superadmin") ||
+    pathname === "/login" ||
+    pathname === "/register";
 
   if (hideGlobalNavbar) {
     return null;

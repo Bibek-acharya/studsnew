@@ -2,17 +2,48 @@
 
 import React, { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
-import { getEventById, getRelatedEvents } from "@/lib/events-data";
+import { apiService, EducationEvent } from "@/services/api";
 
 const EventDetailsPage: React.FC<{ params: Promise<{ id: string }> }> = ({ params }) => {
   const [id, setId] = useState<string | null>(null);
+  const [event, setEvent] = useState<EducationEvent | null>(null);
+  const [related, setRelated] = useState<EducationEvent[]>([]);
+  const [notFound, setNotFound] = useState(false);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     params.then((p) => setId(p.id));
   }, [params]);
 
-  const event = id ? getEventById(id) : undefined;
-  const related = event && id ? getRelatedEvents(id, event.category) : [];
+  useEffect(() => {
+    const loadEvent = async () => {
+      if (!id) return;
+      setLoading(true);
+      setNotFound(false);
+
+      try {
+        const eventResponse = await apiService.getEducationEventById(Number(id));
+        setEvent(eventResponse.data.event);
+
+        const eventsResponse = await apiService.getEducationEvents();
+        const relatedEvents = eventsResponse.data.events
+          .filter((item) => item.id !== Number(id) && item.category === eventResponse.data.event.category)
+          .slice(0, 3);
+
+        setRelated(
+          relatedEvents.length > 0
+            ? relatedEvents
+            : eventsResponse.data.events.filter((item) => item.id !== Number(id)).slice(0, 3),
+        );
+      } catch (err) {
+        setNotFound(true);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadEvent();
+  }, [id]);
 
   useEffect(() => {
     window.scrollTo(0, 0);
@@ -25,7 +56,15 @@ const EventDetailsPage: React.FC<{ params: Promise<{ id: string }> }> = ({ param
     return event.category;
   }, [event]);
 
-  if (!event || !id) {
+  if (loading) {
+    return (
+      <div className="min-h-[40vh] flex items-center justify-center text-slate-500 font-semibold">
+        Loading event details...
+      </div>
+    );
+  }
+
+  if (notFound || !event) {
     return (
       <div className="min-h-[40vh] flex items-center justify-center text-slate-500 font-semibold">
         Event not found.
@@ -35,9 +74,9 @@ const EventDetailsPage: React.FC<{ params: Promise<{ id: string }> }> = ({ param
 
   return (
     <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-6 pb-10 lg:pb-14 bg-white min-h-screen">
-      <div className="relative w-full h-[250px] sm:h-[300px] lg:h-[360px] rounded-2xl lg:rounded-[2rem] overflow-hidden shadow-xl mb-10 lg:mb-16">
+      <div className="relative w-full h-62.5 sm:h-75 lg:h-90 rounded-2xl lg:rounded-4xl overflow-hidden shadow-xl mb-10 lg:mb-16">
         <img src={event.image} alt={event.title} className="absolute inset-0 w-full h-full object-cover" />
-        <div className="absolute inset-0 bg-gradient-to-t from-gray-900 via-gray-900/60 to-transparent"></div>
+        <div className="absolute inset-0 bg-linear-to-t from-gray-900 via-gray-900/60 to-transparent"></div>
 
         <div className="absolute bottom-0 left-0 w-full p-6 sm:p-10 lg:p-12">
           <div className="flex flex-wrap items-center gap-3 mb-3 sm:mb-4">

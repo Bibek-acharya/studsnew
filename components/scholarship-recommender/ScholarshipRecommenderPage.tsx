@@ -5,6 +5,7 @@ import { initialRecommenderState, recommendations } from "./data";
 import ResultsGrid from "@/components/scholarship-recommender/ResultsGrid";
 import CustomSelect from "@/components/scholarship-recommender/CustomSelect";
 import MultiSelect from "@/components/scholarship-recommender/MultiSelect";
+import { NEPAL_PROVINCES, NEPAL_DISTRICTS } from "@/lib/location-data";
 import { RecommenderState, StepIndex } from "./types";
 import ShortlistView from "./ShortlistView";
 
@@ -18,7 +19,7 @@ const stepTitles: Record<number, { title: string; subtitle: string }> = {
     subtitle: "Help us find opportunities relevant to your intended field and preferences.",
   },
   3: {
-    title: "Location & Citizenship",
+    title: "Location",
     subtitle: "Many scholarships depend on province, district, and preferred study location.",
   },
   4: {
@@ -439,17 +440,15 @@ export default function ScholarshipRecommenderPage() {
             <label className="text-[16px] font-semibold text-[#1e293b]">Your Province</label>
             <CustomSelect
               value={state.province}
-              onChange={(value) => updateState("province", value)}
+              onChange={(value) => {
+                updateState("province", value);
+                updateState("district", "");
+              }}
               placeholder="Select Province"
-              options={[
-                { value: "koshi", label: "Koshi Province" },
-                { value: "madhesh", label: "Madhesh Province" },
-                { value: "bagmati", label: "Bagmati Province" },
-                { value: "gandaki", label: "Gandaki Province" },
-                { value: "lumbini", label: "Lumbini Province" },
-                { value: "karnali", label: "Karnali Province" },
-                { value: "sudurpashchim", label: "Sudurpashchim Province" },
-              ]}
+              options={NEPAL_PROVINCES.map((province) => ({
+                value: province,
+                label: province,
+              }))}
             />
           </div>
 
@@ -459,13 +458,13 @@ export default function ScholarshipRecommenderPage() {
               value={state.district}
               onChange={(value) => updateState("district", value)}
               placeholder="Select District"
-              options={[
-                { value: "kathmandu", label: "Kathmandu" },
-                { value: "bhaktapur", label: "Bhaktapur" },
-                { value: "lalitpur", label: "Lalitpur" },
-                { value: "kaski", label: "Kaski" },
-                { value: "chitwan", label: "Chitwan" },
-              ]}
+              options={
+                state.province
+                  ? (NEPAL_DISTRICTS[state.province as keyof typeof NEPAL_DISTRICTS] || []).map(
+                      (district) => ({ value: district, label: district }),
+                    )
+                  : []
+              }
             />
           </div>
 
