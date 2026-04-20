@@ -69,9 +69,7 @@ const ForgotPasswordView: React.FC<ForgotPasswordViewProps> = ({
         Back to Login
       </button>
 
-      
-
-      <h1 className="text-xl font-bold text-gray-900 mb-1">Reset Password</h1>
+      <h1 className="text-xl font-bold text-gray-900 mb-1">Forgot Password</h1>
       <p className="text-gray-500 text-sm mb-6">
         Enter your email and we&apos;ll send you a 6-digit code to reset your password.
       </p>

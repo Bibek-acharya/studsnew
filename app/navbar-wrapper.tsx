@@ -17,7 +17,8 @@ export default function NavbarWrapper() {
     pathname.startsWith("/user/dashboard") ||
     pathname.startsWith("/superadmin") ||
     pathname === "/login" ||
-    pathname === "/register";
+    pathname === "/register" ||
+    pathname === "/forgot-password";
 
   if (hideGlobalNavbar) {
     return null;

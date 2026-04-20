@@ -15,7 +15,8 @@ export default function FooterWrapper() {
     pathname.startsWith("/scholarship-recommender") ||
     pathname.startsWith("/superadmin") ||
     pathname === "/login" ||
-    pathname === "/register";
+    pathname === "/register" ||
+    pathname === "/forgot-password";
 
   if (hideGlobalFooter) {
     return null;

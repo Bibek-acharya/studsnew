@@ -15,7 +15,14 @@ export async function apiRequest<T>(path: string, options: RequestInit = {}): Pr
     headers,
   });
 
-  const data = await response.json();
+  const text = await response.text();
+  let data;
+  try {
+    data = JSON.parse(text);
+  } catch (e) {
+    console.error(`API Error: ${path} - Non-JSON response:`, text);
+    throw new Error(`Unexpected response from server: ${text.substring(0, 100)}`);
+  }
 
   if (!response.ok) {
     throw new Error(data.message || data.error || "Request failed");
@@ -468,8 +475,15 @@ export const apiService = {
     });
   },
 
-  async sendOTP(email: string): Promise<OTPResponse> {
+  async sendOTP(email: string, type: "verification" | "password_reset" = "verification"): Promise<OTPResponse> {
     return apiRequest<OTPResponse>("/api/v1/auth/send-otp", {
+      method: "POST",
+      body: JSON.stringify({ email, type }),
+    });
+  },
+
+  async checkEmailExists(email: string): Promise<{ exists: boolean }> {
+    return apiRequest<{ exists: boolean }>("/api/v1/auth/check-email", {
       method: "POST",
       body: JSON.stringify({ email }),
     });
@@ -579,9 +593,11 @@ export const apiService = {
     });
   },
 
-  async resetPassword(email: string, _password: string): Promise<any> {
-    await new Promise(resolve => setTimeout(resolve, 500));
-    return { success: true, message: "Password reset successfully" };
+  async resetPassword(email: string, password: string): Promise<any> {
+    return apiRequest<any>("/api/v1/auth/reset-password", {
+      method: "POST",
+      body: JSON.stringify({ email, password }),
+    });
   },
 
   async createCounsellingBooking(

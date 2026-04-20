@@ -37,7 +37,12 @@ export default function LoginForm() {
       await login(email.trim(), password, rememberMe);
       router.push("/user/dashboard");
     } catch (err: any) {
-      setError(err?.message || "Login failed. Please try again.");
+      const errorMsg = err?.message?.toLowerCase() || "";
+      if (errorMsg.includes("invalid") || errorMsg.includes("wrong") || errorMsg.includes(" credentials") || errorMsg.includes("failed") || errorMsg.includes("401") || errorMsg.includes("403")) {
+        setError("Invalid email or password");
+      } else {
+        setError(err?.message || "Login failed. Please try again.");
+      }
     } finally {
       setLoading(false);
     }
@@ -65,22 +70,16 @@ export default function LoginForm() {
         <div className="absolute inset-x-0 top-1/2 h-px bg-gray-200" />
       </div>
 
-      {error && (
-        <div className="rounded-md border border-red-200 bg-red-50 p-3 text-sm text-red-700">
-          {error}
-        </div>
-      )}
-
       <form onSubmit={handleSubmit} className="space-y-4">
         <div className="space-y-2">
           <label className="text-sm font-medium text-[#111827]">Email Address</label>
           <div className="relative">
             <input
               value={email}
-              onChange={(e) => setEmail(e.target.value)}
+              onChange={(e) => { setEmail(e.target.value); setError(""); }}
               type="email"
               placeholder="Email Address"
-              className="w-full rounded-md border border-gray-200 bg-white px-4 py-3 text-sm text-gray-900 outline-none transition-all focus:border-[#0000ff] focus:ring-0 focus:ring-[#0000ff]"
+              className={`w-full rounded-md border border-gray-200 bg-white px-4 py-3 text-sm text-gray-900 outline-none transition-all focus:border-[#0000ff] focus:ring-0 focus:ring-[#0000ff] ${error ? "border-red-500" : ""}`}
             />
           </div>
         </div>
@@ -127,6 +126,9 @@ export default function LoginForm() {
         >
           {loading ? "Signing in..." : "Sign In"}
         </button>
+        {error && (
+          <p className="text-[13px] text-red-500 text-center font-medium">{error}</p>
+        )}
       </form>
     </div>
   );
