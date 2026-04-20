@@ -53,7 +53,7 @@ export default function ResultsGrid({
         </div>
 
         <div className="flex flex-col sm:flex-row justify-between items-center gap-4 mb-8">
-          <button onClick={handleRefineAnswers} className="flex items-center gap-2 border border-gray-300 bg-white hover:bg-gray-50 text-gray-800 font-semibold py-2.5 px-5 rounded-lg transition-colors w-full sm:w-auto">
+          <button onClick={handleRefineAnswers} className="flex items-center gap-2 border border-gray-300 bg-white hover:bg-gray-50 text-gray-800 font-semibold py-2.5 px-5 rounded-md transition-colors w-full sm:w-auto">
             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path
                 strokeLinecap="round"
@@ -67,7 +67,7 @@ export default function ResultsGrid({
 
           <div className="flex gap-3 w-full sm:w-auto">
             <div className="relative w-full sm:w-48">
-              <select className="w-full appearance-none border border-gray-300 bg-white text-gray-700 py-2.5 pl-4 pr-10 rounded-lg font-medium focus:outline-none focus:ring-2 focus:ring-brand-blue cursor-pointer">
+              <select className="w-full appearance-none border border-gray-300 bg-white text-gray-700 py-2.5 pl-4 pr-10 rounded-md font-medium focus:outline-none focus:ring-2 focus:ring-brand-blue cursor-pointer">
                 <option>Deadline (Nearest)</option>
                 <option>Deadline (Furthest)</option>
                 <option>Amount (Highest)</option>
@@ -80,7 +80,7 @@ export default function ResultsGrid({
             </div>
 
             <div className="relative w-full sm:w-40">
-              <select className="w-full appearance-none border border-gray-300 bg-white text-gray-700 py-2.5 pl-4 pr-10 rounded-lg font-medium focus:outline-none focus:ring-2 focus:ring-brand-blue cursor-pointer">
+              <select className="w-full appearance-none border border-gray-300 bg-white text-gray-700 py-2.5 pl-4 pr-10 rounded-md font-medium focus:outline-none focus:ring-2 focus:ring-brand-blue cursor-pointer">
                 <option>Sort By</option>
                 <option>Relevance</option>
                 <option>Newest</option>
@@ -101,7 +101,7 @@ export default function ResultsGrid({
             return (
               <article
                 key={item.id}
-                className="bg-white border border-gray-200 rounded-lg p-5 transition-all flex flex-col h-full relative group"
+                className="bg-white border border-gray-200 rounded-md p-5 transition-all flex flex-col h-full relative group"
               >
                 <div className="flex justify-between items-start mb-3 gap-3">
                   <h3 className="font-bold text-gray-900 text-[1.05rem] leading-snug group-hover:text-brand-hover transition-colors truncate" title={item.title}>
@@ -134,7 +134,7 @@ export default function ResultsGrid({
                   <div className="flex gap-2">
                     <button
                       onClick={() => toggleSave(item.id)}
-                      className={`p-2 rounded-lg transition-colors border ${savedIds.includes(item.id)
+                      className={`p-2 rounded-md transition-colors border ${savedIds.includes(item.id)
                         ? "bg-blue-100 text-brand-blue border-blue-200"
                         : "bg-gray-50 text-gray-400 hover:text-brand-blue hover:bg-blue-100 border-gray-200"
                         }`}
@@ -149,7 +149,7 @@ export default function ResultsGrid({
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z" />
                       </svg>
                     </button>
-                    <button className="bg-brand-blue hover:bg-brand-hover text-white px-3.5 py-1.5 rounded-lg text-sm font-semibold transition-colors shadow-sm">
+                    <button className="bg-brand-blue hover:bg-brand-hover text-white px-3.5 py-1.5 rounded-md text-sm font-semibold transition-colors ">
                       Apply
                     </button>
                   </div>
@@ -160,7 +160,7 @@ export default function ResultsGrid({
         </div>
       </div>
 
-      <div className="fixed bottom-6 left-1/2 transform -translate-x-1/2 w-[90%] max-w-4xl bg-white border border-gray-200 rounded-lg shadow-[0_10px_40px_-10px_rgba(0,0,0,0.15)] p-4 flex items-center justify-between z-50">
+      <div className="fixed bottom-6 left-1/2 transform -translate-x-1/2 w-[90%] max-w-4xl bg-white border border-gray-200 rounded-md shadow-[0_10px_40px_-10px_rgba(0,0,0,0.15)] p-4 flex items-center justify-between z-50">
         <div className="flex items-center gap-4">
           <span className="text-[0.95rem] font-bold text-gray-800">Select all</span>
 
@@ -181,7 +181,7 @@ export default function ResultsGrid({
 
         <button
           onClick={onShortlist}
-          className={`px-6 py-3 rounded-lg font-bold transition-colors shadow-sm text-white bg-brand-blue hover:bg-brand-hover`}
+          className={`px-6 py-3 rounded-md font-bold transition-colors  text-white bg-brand-blue hover:bg-brand-hover`}
         >
           {selectedCount > 0 ? `Add to shortlist (${selectedCount})` : "View Shortlist"}
         </button>

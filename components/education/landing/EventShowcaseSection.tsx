@@ -102,7 +102,7 @@ const EventShowcaseSection: React.FC<EventShowcaseSectionProps> = ({ onNavigate,
                     <img
                       src={slide.image}
                       alt={slide.alt}
-                      className="w-full h-[200px] xs:h-[260px] sm:h-[320px] md:h-[380px] lg:h-[420px] object-cover rounded-lg md:rounded-2xl shadow-sm"
+                      className="w-full h-[200px] xs:h-[260px] sm:h-[320px] md:h-[380px] lg:h-[420px] object-cover rounded-md md:rounded-md "
                     />
                   </div>
 
@@ -141,7 +141,7 @@ const EventShowcaseSection: React.FC<EventShowcaseSectionProps> = ({ onNavigate,
                       <button
                         type="button"
                         onClick={() => onNavigate("events", slide)}
-                        className="inline-flex items-center justify-center bg-brand-blue hover:bg-[#0000CC] text-white font-semibold py-2.5 sm:py-3 md:py-3.5 px-5 sm:px-6 md:px-8 rounded-lg transition-colors shadow-sm text-[13px] sm:text-[14px] md:text-[15px]"
+                        className="inline-flex items-center justify-center bg-brand-blue hover:bg-[#0000CC] text-white font-semibold py-2.5 sm:py-3 md:py-3.5 px-5 sm:px-6 md:px-8 rounded-md transition-colors  text-[13px] sm:text-[14px] md:text-[15px]"
                       >
                         Apply Now
                       </button>
@@ -149,7 +149,7 @@ const EventShowcaseSection: React.FC<EventShowcaseSectionProps> = ({ onNavigate,
                       <button
                         type="button"
                         onClick={() => onNavigate("eventsPage", slide)}
-                        className="inline-flex items-center justify-center bg-white border border-gray-200 hover:bg-gray-50 hover:border-blue-100 text-gray-700 font-semibold py-2.5 sm:py-3 md:py-3.5 px-5 sm:px-6 md:px-8 rounded-lg transition-colors text-[13px] sm:text-[14px] md:text-[15px]"
+                        className="inline-flex items-center justify-center bg-white border border-gray-200 hover:bg-gray-50 hover:border-blue-100 text-gray-700 font-semibold py-2.5 sm:py-3 md:py-3.5 px-5 sm:px-6 md:px-8 rounded-md transition-colors text-[13px] sm:text-[14px] md:text-[15px]"
                       >
                         View Details
                       </button>

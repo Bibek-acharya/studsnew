@@ -62,9 +62,9 @@ export default function InstitutionHeader() {
                 ></div>
                 <div className="absolute left-1/2 -translate-x-1/2 top-10 z-50 w-120 animate-in fade-in slide-in-from-top-2 duration-200">
                   <div className="absolute -top-1.5 left-1/2 -translate-x-1/2 w-4 h-4 bg-white transform rotate-45 rounded-tl-[3px] border-l border-t border-gray-100"></div>
-                  <div className="relative bg-white rounded-2xl p-2 border border-gray-100 shadow-2xl">
-                    <div className="flex items-start gap-4 p-4 rounded-xl hover:bg-[#f8f9fa] transition-colors group mb-1">
-                      <div className="w-16 h-16 rounded-full overflow-hidden shrink-0 bg-gray-100 border border-gray-200 shadow-sm relative">
+                  <div className="relative bg-white rounded-md p-2 border border-gray-100 shadow-2xl">
+                    <div className="flex items-start gap-4 p-4 rounded-md hover:bg-[#f8f9fa] transition-colors group mb-1">
+                      <div className="w-16 h-16 rounded-full overflow-hidden shrink-0 bg-gray-100 border border-gray-200  relative">
                         <Image
                           src="https://i.pravatar.cc/150?img=47"
                           alt="Sarah Jenkins"
@@ -115,8 +115,8 @@ export default function InstitutionHeader() {
                       </div>
                     </div>
                     <div className="h-px bg-gray-100 mx-3 my-1"></div>
-                    <div className="flex items-start gap-4 p-4 rounded-xl hover:bg-[#f8f9fa] transition-colors group mt-1">
-                      <div className="w-16 h-16 rounded-full overflow-hidden shrink-0 bg-gray-100 border border-gray-200 shadow-sm relative">
+                    <div className="flex items-start gap-4 p-4 rounded-md hover:bg-[#f8f9fa] transition-colors group mt-1">
+                      <div className="w-16 h-16 rounded-full overflow-hidden shrink-0 bg-gray-100 border border-gray-200  relative">
                         <Image
                           src="https://i.pravatar.cc/150?img=11"
                           alt="Michael Chen"

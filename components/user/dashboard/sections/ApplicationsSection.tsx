@@ -116,7 +116,7 @@ export default function ApplicationsSection() {
     <div className="relative">
 
       {/* TABS */}
-      <div className="flex gap-1 bg-slate-100 p-1 rounded-lg mb-6 w-fit mt-6">
+      <div className="flex gap-1 bg-slate-100 p-1 rounded-md mb-6 w-fit mt-6">
         {TYPES.map(t => (
           <button
             key={t}
@@ -133,7 +133,7 @@ export default function ApplicationsSection() {
       </div>
 
       {/* TABLE */}
-      <div className="bg-white rounded-xl border border-slate-200 overflow-hidden">
+      <div className="bg-white rounded-md border border-slate-200 overflow-hidden">
         <table className="w-full">
           <thead>
             <tr className="bg-slate-50 border-b border-slate-200">
@@ -246,7 +246,7 @@ export default function ApplicationsSection() {
               <div className="p-6 border-b border-slate-100">
                 <div className="flex justify-between items-start">
                   <div className="flex items-center gap-4">
-                    <div className={`w-14 h-14 rounded-xl ${TYPE_COLOR[selected.type]} flex items-center justify-center`}>
+                    <div className={`w-14 h-14 rounded-md ${TYPE_COLOR[selected.type]} flex items-center justify-center`}>
                       <span className="text-white font-bold text-xl">
                         {getInitials(selected.institution)}
                       </span>
@@ -273,7 +273,7 @@ export default function ApplicationsSection() {
                 {selected.user && (
                   <div className="mb-6">
                     <h3 className="text-sm font-bold text-slate-800 uppercase tracking-wider mb-4">Applicant Information</h3>
-                    <div className="bg-white border border-slate-200 rounded-xl p-4">
+                    <div className="bg-white border border-slate-200 rounded-md p-4">
                       <div className="flex items-center gap-4 mb-4">
                         <div className="w-12 h-12 rounded-full bg-primary flex items-center justify-center">
                           <span className="text-white font-bold">
@@ -314,7 +314,7 @@ export default function ApplicationsSection() {
                 </div>
 
                 {/* DETAILS */}
-                <div className="bg-slate-50 rounded-xl p-4 mb-6 space-y-3">
+                <div className="bg-slate-50 rounded-md p-4 mb-6 space-y-3">
                   <div className="flex items-center gap-3 text-sm">
                     <MapPin className="w-4 h-4 text-slate-400" />
                     <span className="text-slate-600">{selected.location}</span>

@@ -160,7 +160,7 @@ const CoursesHero: React.FC = () => {
                     setSelectedRating(idx);
                     handleInteraction();
                   }}
-                  className={`w-12 h-12 rounded-full ${rating.color} flex items-center justify-center text-2xl transition-all hover:scale-110 shadow-sm ${selectedRating === idx ? "ring-4 ring-blue-500 ring-offset-2 scale-110" : ""}`}
+                  className={`w-12 h-12 rounded-full ${rating.color} flex items-center justify-center text-2xl transition-all hover:scale-110  ${selectedRating === idx ? "ring-4 ring-blue-500 ring-offset-2 scale-110" : ""}`}
                 >
                   {rating.emoji}
                 </button>
@@ -172,7 +172,7 @@ const CoursesHero: React.FC = () => {
             </div>
             <button
               onClick={() => setIsFeedbackExpanded(false)}
-              className="w-full py-4 bg-slate-900 text-white rounded-xl font-black text-[10px] uppercase tracking-widest shadow-xl hover:bg-black transition-all active:scale-95"
+              className="w-full py-4 bg-slate-900 text-white rounded-md font-black text-[10px] uppercase tracking-widest shadow-xl hover:bg-black transition-all active:scale-95"
             >
               Next Step
             </button>

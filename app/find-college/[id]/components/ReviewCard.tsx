@@ -33,7 +33,7 @@ const ReviewCard: React.FC<{
         ))}
       </div>
     </div>
-    <div className="mb-3 rounded-lg border border-gray-100 bg-[#fafafa] p-4">
+    <div className="mb-3 rounded-md border border-gray-100 bg-[#fafafa] p-4">
       <div className="mb-2 flex items-start gap-2">
         <i className="fa-solid fa-thumbs-up mt-0.5 text-green-500"></i>
         <p className="text-[13.5px] leading-relaxed text-gray-700">

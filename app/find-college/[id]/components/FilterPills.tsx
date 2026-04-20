@@ -17,7 +17,7 @@ const FilterPills: React.FC<{
           <button
             key={level}
             onClick={() => onChange(level)}
-            className={`rounded-full px-4 py-1.5 ${selected ? "bg-brand-blue text-white shadow-sm" : "border border-gray-200 bg-white text-gray-700 hover:bg-gray-100"}`}
+            className={`rounded-full px-4 py-1.5 ${selected ? "bg-brand-blue text-white " : "border border-gray-200 bg-white text-gray-700 hover:bg-gray-100"}`}
           >
             {level === "all" ? "All" : level}
           </button>

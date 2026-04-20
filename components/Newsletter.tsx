@@ -45,7 +45,7 @@ const Newsletter: React.FC<NewsletterProps> = ({ className = "" }) => {
   };
 
   return (
-    <section className={`bg-[#0000ff] rounded-xl p-4 sm:p-8 lg:p-12 flex flex-col lg:flex-row justify-between gap-12 lg:gap-8 w-full ${className}`}>
+    <section className={`bg-[#0000ff] rounded-md p-4 sm:p-8 lg:p-12 flex flex-col lg:flex-row justify-between gap-12 lg:gap-8 w-full ${className}`}>
       {/* Left Text Content */}
       <div className="flex-1 max-w-lg flex flex-col justify-center">
         <h2 className="text-white text-4xl sm:text-5xl font-semibold leading-tight tracking-tight mb-5">

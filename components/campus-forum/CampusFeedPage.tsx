@@ -122,10 +122,10 @@ const PostCard: React.FC<{
   }, []);
 
   return (
-    <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-4 sm:p-5">
+    <div className="bg-white rounded-md  border border-gray-100 p-4 sm:p-5">
       <div className="flex items-start justify-between mb-3">
         <div className="flex items-center gap-3">
-          <div className={`w-10 h-10 ${communityAvatar} rounded-lg flex items-center justify-center text-white font-bold shrink-0`}>
+          <div className={`w-10 h-10 ${communityAvatar} rounded-md flex items-center justify-center text-white font-bold shrink-0`}>
             {communityName.substring(0, 3).toUpperCase()}
           </div>
           <div>
@@ -151,7 +151,7 @@ const PostCard: React.FC<{
             </button>
 
             {isDropdownOpen && (
-              <div className="absolute right-0 mt-1 w-56 bg-white rounded-xl shadow-lg border border-gray-100 z-50 py-2">
+              <div className="absolute right-0 mt-1 w-56 bg-white rounded-md shadow-lg border border-gray-100 z-50 py-2">
                 <button className="w-full text-left px-4 py-2.5 text-[15px] font-medium text-gray-700 hover:bg-gray-50 flex items-center gap-3 transition">
                   <Share className="w-5 h-5 text-gray-400" /> Share via...
                 </button>
@@ -174,7 +174,7 @@ const PostCard: React.FC<{
       </p>
 
       {imageUrl && (
-        <div className="rounded-xl overflow-hidden border border-gray-100 bg-gray-50 h-48 md:h-64 relative">
+        <div className="rounded-md overflow-hidden border border-gray-100 bg-gray-50 h-48 md:h-64 relative">
           <img src={imageUrl} alt="Post" className="w-full h-full object-cover" />
         </div>
       )}
@@ -271,10 +271,10 @@ const PollPost: React.FC<{
   }, []);
 
   return (
-    <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-4 sm:p-5">
+    <div className="bg-white rounded-md  border border-gray-100 p-4 sm:p-5">
       <div className="flex items-start justify-between mb-3">
         <div className="flex items-center gap-3">
-          <div className={`w-10 h-10 ${communityAvatar} rounded-lg flex items-center justify-center text-white font-bold shrink-0`}>
+          <div className={`w-10 h-10 ${communityAvatar} rounded-md flex items-center justify-center text-white font-bold shrink-0`}>
             {communityName.substring(0, 3).toUpperCase()}
           </div>
           <div>
@@ -295,7 +295,7 @@ const PollPost: React.FC<{
           </button>
 
           {isDropdownOpen && (
-            <div className="absolute right-0 mt-1 w-56 bg-white rounded-xl shadow-lg border border-gray-100 z-50 py-2">
+            <div className="absolute right-0 mt-1 w-56 bg-white rounded-md shadow-lg border border-gray-100 z-50 py-2">
               <button className="w-full text-left px-4 py-2.5 text-[15px] font-medium text-gray-700 hover:bg-gray-50 flex items-center gap-3 transition">
                 <Share className="w-5 h-5 text-gray-400" /> Share via...
               </button>
@@ -317,7 +317,7 @@ const PollPost: React.FC<{
         {options.map((option, idx) => (
           <div
             key={idx}
-            className="relative bg-gray-50 border border-gray-200 rounded-lg p-3 overflow-hidden cursor-pointer hover:bg-gray-100 transition"
+            className="relative bg-gray-50 border border-gray-200 rounded-md p-3 overflow-hidden cursor-pointer hover:bg-gray-100 transition"
           >
             <div
               className="absolute left-0 top-0 bottom-0 bg-blue-100 z-0 rounded-l-lg"
@@ -387,8 +387,8 @@ const CampusFeedPage: React.FC = () => {
         {/* ================= LEFT SIDEBAR ================= */}
         <div className="hidden lg:block w-[280px] shrink-0 space-y-6 sticky top-6 h-fit">
           {/* Profile Card */}
-          <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-5 flex flex-col items-center text-center">
-            <div className="relative w-20 h-20 rounded-full overflow-hidden mb-3 border-4 border-white shadow-md">
+          <div className="bg-white rounded-md  border border-gray-100 p-5 flex flex-col items-center text-center">
+            <div className="relative w-20 h-20 rounded-full overflow-hidden mb-3 border-4 border-white ">
               <img
                 src="https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=256&q=80"
                 alt="Profile"
@@ -402,35 +402,35 @@ const CampusFeedPage: React.FC = () => {
           </div>
 
           {/* Discover Communities */}
-          <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-5">
+          <div className="bg-white rounded-md  border border-gray-100 p-5">
             <h3 className="font-bold text-gray-900 mb-4 text-sm uppercase tracking-wider">Student Communities</h3>
             <div className="space-y-4">
               <a href="#" className="flex items-center gap-3 group">
-                <div className="w-10 h-10 rounded-lg bg-orange-100 flex items-center justify-center overflow-hidden shrink-0">
+                <div className="w-10 h-10 rounded-md bg-orange-100 flex items-center justify-center overflow-hidden shrink-0">
                   <span className="text-xl">📐</span>
                 </div>
                 <span className="text-sm font-medium text-gray-700 group-hover:text-blue-600 transition">IOE Engineering Prep</span>
               </a>
               <a href="#" className="flex items-center gap-3 group">
-                <div className="w-10 h-10 rounded-lg bg-blue-100 flex items-center justify-center overflow-hidden shrink-0">
+                <div className="w-10 h-10 rounded-md bg-blue-100 flex items-center justify-center overflow-hidden shrink-0">
                   <span className="text-xl">💻</span>
                 </div>
                 <span className="text-sm font-medium text-gray-700 group-hover:text-blue-600 transition">IT (CSIT/BCA/BIT)</span>
               </a>
               <a href="#" className="flex items-center gap-3 group">
-                <div className="w-10 h-10 rounded-lg bg-green-100 flex items-center justify-center overflow-hidden shrink-0">
+                <div className="w-10 h-10 rounded-md bg-green-100 flex items-center justify-center overflow-hidden shrink-0">
                   <span className="text-xl">🩺</span>
                 </div>
                 <span className="text-sm font-medium text-gray-700 group-hover:text-blue-600 transition">CEE Medical Prep</span>
               </a>
               <a href="#" className="flex items-center gap-3 group">
-                <div className="w-10 h-10 rounded-lg bg-purple-100 flex items-center justify-center overflow-hidden shrink-0 text-xl">
+                <div className="w-10 h-10 rounded-md bg-purple-100 flex items-center justify-center overflow-hidden shrink-0 text-xl">
                   🏛️
                 </div>
                 <span className="text-sm font-medium text-gray-700 group-hover:text-blue-600 transition">Kathmandu University</span>
               </a>
               <a href="#" className="flex items-center gap-3 group">
-                <div className="w-10 h-10 rounded-lg bg-yellow-100 flex items-center justify-center overflow-hidden shrink-0 text-xl">
+                <div className="w-10 h-10 rounded-md bg-yellow-100 flex items-center justify-center overflow-hidden shrink-0 text-xl">
                   🎒
                 </div>
                 <span className="text-sm font-medium text-gray-700 group-hover:text-blue-600 transition">Tribhuvan University</span>
@@ -443,7 +443,7 @@ const CampusFeedPage: React.FC = () => {
         {/* ================= MAIN FEED ================= */}
         <div className="w-full max-w-[600px] space-y-4">
           {/* Create Post Box */}
-          <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-4">
+          <div className="bg-white rounded-md  border border-gray-100 p-4">
             <div className="flex items-center gap-3 mb-4">
               <span className="text-2xl shrink-0">🎓</span>
               <input
@@ -508,7 +508,7 @@ const CampusFeedPage: React.FC = () => {
         {/* ================= RIGHT SIDEBAR ================= */}
         <div className="hidden xl:block w-[300px] shrink-0 space-y-6 sticky top-6 h-fit">
           {/* Trending Discussions */}
-          <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-5">
+          <div className="bg-white rounded-md  border border-gray-100 p-5">
             <div className="flex items-center gap-2 mb-4">
               <span className="text-orange-500 text-xl">🔥</span>
               <h3 className="font-bold text-gray-900 text-sm">Trending Discussions</h3>
@@ -538,20 +538,20 @@ const CampusFeedPage: React.FC = () => {
                 </div>
               </div>
             </div>
-            <button className="w-full mt-4 py-2 text-center text-blue-600 font-bold text-xs tracking-wider hover:bg-blue-50 rounded-lg transition uppercase">
+            <button className="w-full mt-4 py-2 text-center text-blue-600 font-bold text-xs tracking-wider hover:bg-blue-50 rounded-md transition uppercase">
               VIEW ALL DISCUSSIONS
             </button>
           </div>
 
           {/* Upcoming Events */}
-          <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-5">
+          <div className="bg-white rounded-md  border border-gray-100 p-5">
             <div className="flex items-center gap-2 mb-4">
               <Calendar className="w-5 h-5 text-blue-600" />
               <h3 className="font-bold text-gray-900 text-sm">Upcoming Events</h3>
             </div>
             <div className="space-y-4">
               <div className="flex gap-3 items-center">
-                <div className="bg-blue-50 border border-blue-100 rounded-lg p-2 text-center min-w-[3rem]">
+                <div className="bg-blue-50 border border-blue-100 rounded-md p-2 text-center min-w-[3rem]">
                   <div className="text-blue-600 text-[10px] font-bold uppercase">MAY</div>
                   <div className="text-blue-900 font-bold text-lg leading-none mt-0.5">15</div>
                 </div>
@@ -563,7 +563,7 @@ const CampusFeedPage: React.FC = () => {
                 </div>
               </div>
               <div className="flex gap-3 items-center">
-                <div className="bg-orange-50 border border-orange-100 rounded-lg p-2 text-center min-w-[3rem]">
+                <div className="bg-orange-50 border border-orange-100 rounded-md p-2 text-center min-w-[3rem]">
                   <div className="text-orange-600 text-[10px] font-bold uppercase">JUN</div>
                   <div className="text-orange-900 font-bold text-lg leading-none mt-0.5">10</div>
                 </div>

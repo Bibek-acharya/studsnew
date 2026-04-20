@@ -279,7 +279,7 @@ export default function CalendarSection() {
           <div 
             key={event.id}
             onClick={(e) => editEvent(event, e)}
-            className={`absolute left-1 right-1 ${theme.bg} border-t-2 ${theme.border} rounded-md px-2 py-1.5 overflow-hidden transition-all hover:scale-[1.02] hover:z-30 cursor-pointer shadow-sm hover:shadow`}
+            className={`absolute left-1 right-1 ${theme.bg} border-t-2 ${theme.border} rounded-md px-2 py-1.5 overflow-hidden transition-all hover:scale-[1.02] hover:z-30 cursor-pointer  hover:shadow`}
             style={{ top: top, height: height - 2 }}
           >
             <div className={`text-[9px] md:text-[10px] font-medium ${theme.label} mb-0.5 whitespace-nowrap overflow-hidden text-ellipsis`}>
@@ -376,7 +376,7 @@ export default function CalendarSection() {
   }
 
   return (
-    <div className="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden flex flex-col min-h-[calc(100vh-8rem)]">
+    <div className="bg-white rounded-md  border border-slate-200 overflow-hidden flex flex-col min-h-[calc(100vh-8rem)]">
       <div className="p-4 md:p-6 md:pb-4 flex flex-col md:flex-row justify-between items-start md:items-center gap-4 shrink-0">
         <div>
           <h1 className="text-2xl md:text-3xl font-bold text-slate-900 tracking-tight">Calendar</h1>
@@ -415,7 +415,7 @@ export default function CalendarSection() {
           </div>
           <button 
             onClick={() => openModal()}
-            className="flex items-center gap-1.5 px-3 md:px-4 py-1.5 bg-brand-blue text-white rounded-md text-sm font-medium hover:bg-blue-700 transition-colors shadow-sm whitespace-nowrap"
+            className="flex items-center gap-1.5 px-3 md:px-4 py-1.5 bg-brand-blue text-white rounded-md text-sm font-medium hover:bg-blue-700 transition-colors  whitespace-nowrap"
           >
             <Plus className="w-4 h-4" />
             New
@@ -449,7 +449,7 @@ export default function CalendarSection() {
                   key={v}
                   onClick={() => handleSetView(v)} 
                   className={`px-3 py-1 text-sm font-medium rounded-md transition-all ${
-                    view === v ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-500 hover:text-slate-700'
+                    view === v ? 'bg-white text-slate-900 ' : 'text-slate-500 hover:text-slate-700'
                   }`}
                 >
                   {v}
@@ -460,14 +460,14 @@ export default function CalendarSection() {
           </div>
         </div>
 
-        <div className="border border-slate-200 rounded-xl overflow-hidden bg-white shadow-sm flex-1 flex flex-col min-h-0">
+        <div className="border border-slate-200 rounded-md overflow-hidden bg-white  flex-1 flex flex-col min-h-0">
           {view === 'Month' ? renderMonthView() : renderWeekDayView()}
         </div>
       </div>
 
       {showModal && (
         <div className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-          <div className="bg-white rounded-xl shadow-xl w-full max-w-md overflow-hidden">
+          <div className="bg-white rounded-md shadow-xl w-full max-w-md overflow-hidden">
             <div className="flex justify-between items-center p-4 md:p-6 border-b border-slate-100">
               <h3 className="text-lg font-semibold text-slate-900">
                 {editingEvent ? 'Edit Event' : 'New Event'}
@@ -546,7 +546,7 @@ export default function CalendarSection() {
                   <button 
                     type="button" 
                     onClick={deleteEvent}
-                    className="text-red-600 hover:bg-red-50 p-2 rounded-lg transition-colors"
+                    className="text-red-600 hover:bg-red-50 p-2 rounded-md transition-colors"
                   >
                     <Trash2 className="w-5 h-5" />
                   </button>
@@ -562,7 +562,7 @@ export default function CalendarSection() {
                   </button>
                   <button 
                     type="submit" 
-                    className="px-4 py-2 text-sm font-medium text-white bg-brand-blue rounded-md hover:bg-blue-700 transition-colors shadow-sm"
+                    className="px-4 py-2 text-sm font-medium text-white bg-brand-blue rounded-md hover:bg-blue-700 transition-colors "
                   >
                     Save Event
                   </button>

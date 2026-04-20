@@ -114,7 +114,7 @@ const CampusEventsSection: React.FC<CampusEventsSectionProps> = ({ onNavigate })
           {events.map((event, index) => (
             <div
               key={index}
-              className="w-[80vw] xs:w-[70vw] sm:w-[calc(50%-10px)] md:w-[calc(50%-12px)] lg:w-[calc(25%-18px)] shrink-0 rounded-lg border border-gray-200 bg-white overflow-hidden flex flex-col snap-start transition-shadow duration-300 group cursor-pointer"
+              className="w-[80vw] xs:w-[70vw] sm:w-[calc(50%-10px)] md:w-[calc(50%-12px)] lg:w-[calc(25%-18px)] shrink-0 rounded-md border border-gray-200 bg-white overflow-hidden flex flex-col snap-start transition-shadow duration-300 group cursor-pointer"
               onClick={() => onNavigate("eventDetails", event)}
             >
               {/* Top Banner */}

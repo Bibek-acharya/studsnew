@@ -45,7 +45,7 @@ export default function CustomSelect({
         <button
           type="button"
           onClick={() => setIsOpen(!isOpen)}
-          className="w-full flex items-center justify-between p-3.5 pr-11 border-2 border-[#cbd5e1] rounded-lg bg-white text-[16px] text-[#1e293b] transition-all hover:border-[#2563eb] focus:border-[#2563eb] focus:ring-2 focus:ring-[#bfdbfe] focus:outline-none"
+          className="w-full flex items-center justify-between p-3.5 pr-11 border-2 border-[#cbd5e1] rounded-md bg-white text-[16px] text-[#1e293b] transition-all hover:border-[#2563eb] focus:border-[#2563eb] focus:ring-2 focus:ring-[#bfdbfe] focus:outline-none"
         >
           <span className={selectedOption ? "text-[#1e293b]" : "text-slate-400"}>
             {selectedOption?.label || placeholder}
@@ -57,7 +57,7 @@ export default function CustomSelect({
           />
         </button>
         {isOpen && (
-          <div className="absolute z-50 w-full mt-1 bg-white border-2 border-[#cbd5e1] rounded-lg shadow-lg overflow-hidden">
+          <div className="absolute z-50 w-full mt-1 bg-white border-2 border-[#cbd5e1] rounded-md shadow-lg overflow-hidden">
             <div className="max-h-60 overflow-y-auto">
               {options.map((option, index) => (
                 <button

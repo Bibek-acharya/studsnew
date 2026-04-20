@@ -16,10 +16,10 @@ const Button: React.FC<ButtonProps> = ({
   children,
   ...props
 }) => {
-  const baseStyles = "inline-flex items-center justify-center font-bold transition-all active:scale-[0.98] disabled:opacity-50 disabled:pointer-events-none rounded-xl";
+  const baseStyles = "inline-flex items-center justify-center font-bold transition-all active:scale-[0.98] disabled:opacity-50 disabled:pointer-events-none rounded-md";
   
   const variants = {
-    primary: "bg-brand-blue text-white hover:bg-[#0000CC] shadow-md shadow-blue-500/20",
+    primary: "bg-brand-blue text-white hover:bg-[#0000CC]  shadow-blue-500/20",
     secondary: "bg-gray-100 text-gray-900 hover:bg-gray-200",
     outline: "border-2 border-[#0000FF] text-[#0000FF] hover:bg-blue-50",
     ghost: "text-[#0000FF] hover:bg-blue-50",

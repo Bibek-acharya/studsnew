@@ -124,7 +124,7 @@ const SearchInput: React.FC<{
       value={value}
       onChange={(e) => onChange(e.target.value)}
       placeholder={placeholder}
-      className="block w-full rounded-lg border border-gray-200 bg-[#f8fafc] py-2 pl-9 pr-3 text-[13.5px] text-gray-900 outline-none transition placeholder:text-gray-400 focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+      className="block w-full rounded-md border border-gray-200 bg-[#f8fafc] py-2 pl-9 pr-3 text-[13.5px] text-gray-900 outline-none transition placeholder:text-gray-400 focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
     />
   </div>
 );
@@ -340,7 +340,7 @@ const EntranceFilters: React.FC<EntranceFiltersProps> = ({
         </div>
 
         {hasActiveFilters && showAppliedDropdown && (
-          <div className="absolute right-6 top-16 z-30 w-[min(520px,calc(100%-3rem))] rounded-lg border border-gray-200 bg-white p-3 shadow-lg">
+          <div className="absolute right-6 top-16 z-30 w-[min(520px,calc(100%-3rem))] rounded-md border border-gray-200 bg-white p-3 shadow-lg">
             {appliedFilters.length === 0 ? (
               <p className="px-1 py-2 text-[13px] italic text-gray-400">
                 No filters selected yet.

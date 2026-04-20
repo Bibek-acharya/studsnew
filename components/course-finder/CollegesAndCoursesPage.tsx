@@ -142,7 +142,7 @@ const SelectInput: React.FC<{
 const SearchInput: React.FC<{ placeholder: string; value: string; onChange: (v: string) => void }> = ({ placeholder, value, onChange }) => (
   <div className="relative mb-3">
     <Search size={16} className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
-    <input type="text" value={value} onChange={(e) => onChange(e.target.value)} placeholder={placeholder} className="block w-full rounded-lg border border-gray-200 bg-[#f8fafc] py-2 pl-9 pr-3 text-[13.5px] text-gray-900 outline-none transition focus:border-blue-500 focus:ring-1 focus:ring-blue-500" />
+    <input type="text" value={value} onChange={(e) => onChange(e.target.value)} placeholder={placeholder} className="block w-full rounded-md border border-gray-200 bg-[#f8fafc] py-2 pl-9 pr-3 text-[13.5px] text-gray-900 outline-none transition focus:border-blue-500 focus:ring-1 focus:ring-blue-500" />
   </div>
 );
 
@@ -215,10 +215,10 @@ const ProgramCard: React.FC<{
     "Explore academics, facilities, and counselling support for this college.";
 
   return (
-    <div className="flex h-full cursor-pointer flex-col rounded-2xl border border-gray-200 bg-white p-4 transition-all duration-300 hover:border-blue-500/20">
-      <div className="group relative h-35 shrink-0 overflow-hidden rounded-xl">
+    <div className="flex h-full cursor-pointer flex-col rounded-md border border-gray-200 bg-white p-4 transition-all duration-300 hover:border-blue-500/20">
+      <div className="group relative h-35 shrink-0 overflow-hidden rounded-md">
         {college.featured && (
-          <div className="absolute top-3 left-3 z-10 rounded bg-blue-600 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-white shadow-sm">
+          <div className="absolute top-3 left-3 z-10 rounded bg-blue-600 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-white ">
             Featured
           </div>
         )}
@@ -235,7 +235,7 @@ const ProgramCard: React.FC<{
           <label className="absolute right-2 top-2 z-10 cursor-pointer" onClick={(e) => e.stopPropagation()}>
             <div className="relative flex h-6 w-6 items-center justify-center">
               <input type="checkbox" checked={isSelected} onChange={onToggleSelection} className="peer sr-only" />
-              <div className="absolute inset-0 rounded-md border border-slate-300 bg-white/90 shadow-sm backdrop-blur-sm transition-colors hover:border-slate-400 peer-checked:border-blue-600 peer-checked:bg-blue-600"></div>
+              <div className="absolute inset-0 rounded-md border border-slate-300 bg-white/90  backdrop-blur-sm transition-colors hover:border-slate-400 peer-checked:border-blue-600 peer-checked:bg-blue-600"></div>
               <Check size={16} className="pointer-events-none absolute z-10 text-white opacity-0 transition-opacity peer-checked:opacity-100" />
             </div>
           </label>
@@ -500,14 +500,14 @@ const CollegesAndCoursesPage: React.FC<CollegesAndCoursesPageProps> = ({
   return (
     <div className="min-h-screen bg-slate-50 flex flex-col items-center justify-start p-4 sm:p-8 gap-8 md:gap-10 font-sans">
       {/* Top Bar for Courses */}
-      <div className="bg-blue-50 w-full max-w-[1440px] rounded-lg py-5 px-6 md:py-6 md:px-8 overflow-hidden shadow-sm border border-blue-100">
+      <div className="bg-blue-50 w-full max-w-[1440px] rounded-md py-5 px-6 md:py-6 md:px-8 overflow-hidden  border border-blue-100">
         <div className="flex gap-4 md:gap-5 overflow-x-auto snap-x pb-2 no-scrollbar">
           {backendCourses.map((course: any) => {
             const isSelected = String(course.id) === String(activeCourseId);
             return (
               <div
                 key={course.id} onClick={() => setActiveCourseId(String(course.id))}
-                className={`relative flex-shrink-0 w-[190px] sm:w-[220px] bg-white rounded-md px-4 py-3.5 border-[1.5px] transition-all duration-200 cursor-pointer snap-start flex flex-col justify-between min-h-[92px] shadow-sm hover:shadow-md ${isSelected ? "border-blue-600" : "border-transparent hover:border-gray-200"}`}
+                className={`relative flex-shrink-0 w-[190px] sm:w-[220px] bg-white rounded-md px-4 py-3.5 border-[1.5px] transition-all duration-200 cursor-pointer snap-start flex flex-col justify-between min-h-[92px]  hover: ${isSelected ? "border-blue-600" : "border-transparent hover:border-gray-200"}`}
                 title={course.title}
               >
                 <h3 className="text-slate-900 font-semibold text-[13px] leading-[18px] truncate pr-6">{course.title}</h3>
@@ -521,12 +521,12 @@ const CollegesAndCoursesPage: React.FC<CollegesAndCoursesPageProps> = ({
 
       <div className="w-full max-w-[1440px] flex flex-col lg:flex-row gap-6 md:gap-8 items-start">
         {/* Sidebar */}
-        <aside className="w-full lg:w-[280px] shrink-0 bg-white rounded-3xl p-5 md:p-6 border border-gray-100 shadow-sm self-start">
+        <aside className="w-full lg:w-[280px] shrink-0 bg-white rounded-md p-5 md:p-6 border border-gray-100  self-start">
           <div className="mb-2 flex items-center justify-between">
             <div className="flex items-center gap-3"><FaSliders size={18} className="text-black" /><h3 className="font-black text-xl text-slate-900 tracking-tight">Filters</h3></div>
           </div>
           <div className="border-b border-gray-100 py-3">
-            <button type="button" onClick={handleLocate} className="flex w-full items-center justify-start gap-2 rounded-md border border-gray-200 px-4 py-3 text-gray-700 hover:text-blue-600 outline-none transition-all duration-200 shadow-sm">
+            <button type="button" onClick={handleLocate} className="flex w-full items-center justify-start gap-2 rounded-md border border-gray-200 px-4 py-3 text-gray-700 hover:text-blue-600 outline-none transition-all duration-200 ">
               {locating ? <LocateFixed size={18} className="animate-spin" /> : <LocateFixed size={18} />}
               <span className="text-[15px] font-medium">{locating ? "Locating..." : "College Near Me"}</span>
             </button>
@@ -597,7 +597,7 @@ const CollegesAndCoursesPage: React.FC<CollegesAndCoursesPageProps> = ({
           </div>
 
           <div className="w-full grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6 md:gap-8">
-            {collegesLoading ? Array.from({ length: 6 }).map((_, i) => (<div key={i} className="max-w-[380px] w-full bg-white rounded-xl p-3.5 border border-gray-100 shadow-sm animate-pulse h-[400px]" />))
+            {collegesLoading ? Array.from({ length: 6 }).map((_, i) => (<div key={i} className="max-w-[380px] w-full bg-white rounded-md p-3.5 border border-gray-100  animate-pulse h-[400px]" />))
               : colleges.map((college) => (
                 <ProgramCard
                   key={college.id}

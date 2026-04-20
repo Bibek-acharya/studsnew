@@ -91,7 +91,7 @@ export default function Testimonials({ className }: TestimonialsProps) {
         <div className="w-full bg-transparent flex flex-col md:flex-row items-center gap-8 lg:gap-12">
           <div className="w-full md:w-[45%] lg:w-[40%] flex flex-col relative">
             <div
-              className={`w-full h-62.5 md:h-80 lg:h-95 rounded-xl overflow-hidden relative transition-opacity duration-300 ${
+              className={`w-full h-62.5 md:h-80 lg:h-95 rounded-md overflow-hidden relative transition-opacity duration-300 ${
                 isFading ? "opacity-0" : "opacity-100"
               }`}
             >

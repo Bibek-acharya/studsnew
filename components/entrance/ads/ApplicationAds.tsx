@@ -119,7 +119,7 @@ const ArrowRightIcon: React.FC<{ className?: string }> = ({ className }) => (
 );
 
 const CollegeApplicationCard: React.FC<{ college: College }> = ({ college }) => (
-  <div className="bg-white rounded-xl border border-gray-200 min-w-70 w-70 flex-none flex flex-col relative overflow-hidden snap-start transition-shadow group">
+  <div className="bg-white rounded-md border border-gray-200 min-w-70 w-70 flex-none flex flex-col relative overflow-hidden snap-start transition-shadow group">
     <div className="relative h-37.5 w-full flex-none p-3">
       <img
         src={college.imageUrl}
@@ -143,7 +143,7 @@ const CollegeApplicationCard: React.FC<{ college: College }> = ({ college }) => 
           {college.name}
         </span>
         <VerifiedIcon className="w-4.5 h-4.5 shrink-0" />
-        <div className="absolute bottom-full left-0 mb-2 invisible opacity-0 group-hover/title:visible group-hover/title:opacity-100 bg-gray-900 text-white text-[13px] font-medium py-1.5 px-3 rounded shadow-md whitespace-nowrap transition-all duration-200 z-50 pointer-events-none">
+        <div className="absolute bottom-full left-0 mb-2 invisible opacity-0 group-hover/title:visible group-hover/title:opacity-100 bg-gray-900 text-white text-[13px] font-medium py-1.5 px-3 rounded  whitespace-nowrap transition-all duration-200 z-50 pointer-events-none">
           {college.name}
           <div className="absolute top-full left-4 -mt-px border-[5px] border-transparent border-t-gray-900"></div>
         </div>
@@ -202,7 +202,7 @@ export const ApplicationAds: React.FC = () => {
   };
 
   return (
-    <div className="bg-[#fef7f0] w-full max-w-6xl p-6 md:p-8 rounded-lg border border-orange-50/50">
+    <div className="bg-[#fef7f0] w-full max-w-6xl p-6 md:p-8 rounded-md border border-orange-50/50">
       <div className="flex justify-between items-center mb-6">
         <h2 className="text-2xl font-bold text-gray-900">
           College Application Forms 2026 (+2 & A-Levels)

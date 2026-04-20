@@ -70,7 +70,7 @@ export default function CollegeShortlistView({
 
               <div className="flex items-center justify-between gap-4 mb-8">
                 <div className="flex items-center gap-4">
-                  <div className="w-16 h-16 rounded-lg border border-slate-100 bg-white flex items-center justify-center font-extrabold text-2xl text-slate-800 shrink-0 shadow-sm shadow-slate-100">
+                  <div className="w-16 h-16 rounded-md border border-slate-100 bg-white flex items-center justify-center font-extrabold text-2xl text-slate-800 shrink-0  shadow-slate-100">
                     {previewItem?.name?.[0]}
                   </div>
                   <div>
@@ -85,7 +85,7 @@ export default function CollegeShortlistView({
                 <div className="shrink-0">
                    <button
                      onClick={() => previewItem && onToggleShortlist(previewItem.id)}
-                     className={`w-10 h-10 rounded-lg border-2 transition-all flex items-center justify-center ${
+                     className={`w-10 h-10 rounded-md border-2 transition-all flex items-center justify-center ${
                        previewItem && shortlistedIds.has(previewItem.id)
                         ? "bg-brand-blue border-brand-blue text-white"
                         : "bg-white border-slate-200 text-transparent hover:border-brand-blue"
@@ -180,7 +180,7 @@ export default function CollegeShortlistView({
                   onClick={() =>
                     onNavigate("collegeProfile", { id: previewItem?.id })
                   }
-                  className="w-full rounded-lg bg-brand-blue py-4 text-white font-bold hover:bg-brand-hover transition-all flex items-center justify-center gap-2 shadow-lg shadow-brand-blue/10 transform hover:-translate-y-0.5 active:translate-y-0"
+                  className="w-full rounded-md bg-brand-blue py-4 text-white font-bold hover:bg-brand-hover transition-all flex items-center justify-center gap-2 shadow-lg shadow-brand-blue/10 transform hover:-translate-y-0.5 active:translate-y-0"
                 >
                   View Full Profile
                   <ChevronRight className="w-4 h-4" />
@@ -229,7 +229,7 @@ export default function CollegeShortlistView({
                   placeholder="Search for colleges..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  className="w-full bg-white border border-gray-200 rounded-lg py-3 pl-12 pr-6 text-[15px] focus:outline-none focus:ring-1 focus:ring-brand-blue transition-all"
+                  className="w-full bg-white border border-gray-200 rounded-md py-3 pl-12 pr-6 text-[15px] focus:outline-none focus:ring-1 focus:ring-brand-blue transition-all"
                 />
                 <div className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-brand-blue transition-colors">
                   <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -239,7 +239,7 @@ export default function CollegeShortlistView({
               </div>
               
               <div className="relative min-w-[200px]">
-                <select className="w-full appearance-none bg-white border border-gray-200 rounded-lg py-3 pl-6 pr-12 text-[15px] font-bold text-slate-800 focus:outline-none focus:ring-1 focus:ring-brand-blue cursor-pointer">
+                <select className="w-full appearance-none bg-white border border-gray-200 rounded-md py-3 pl-6 pr-12 text-[15px] font-bold text-slate-800 focus:outline-none focus:ring-1 focus:ring-brand-blue cursor-pointer">
                   <option>Sort By: Match %</option>
                   <option>Tuition: Low to High</option>
                   <option>Tuition: High to Low</option>
@@ -260,12 +260,12 @@ export default function CollegeShortlistView({
                   <div 
                     key={item.id} 
                     onClick={() => setPreviewId(item.id)}
-                    className="bg-white rounded-lg border border-slate-200 overflow-hidden cursor-pointer flex flex-col transition-all duration-200 hover:border-brand-blue group"
+                    className="bg-white rounded-md border border-slate-200 overflow-hidden cursor-pointer flex flex-col transition-all duration-200 hover:border-brand-blue group"
                   >
                     <div className="p-6 grow">
                       <div className="flex justify-between items-start gap-4 mb-5">
                         <div className="flex items-center gap-3">
-                          <div className="w-12 h-12 rounded-lg bg-brand-blue/10 text-brand-blue flex items-center justify-center font-extrabold border border-brand-blue/20 shrink-0 text-xs tracking-tighter">
+                          <div className="w-12 h-12 rounded-md bg-brand-blue/10 text-brand-blue flex items-center justify-center font-extrabold border border-brand-blue/20 shrink-0 text-xs tracking-tighter">
                             {item.name?.[0]}
                           </div>
                           <h3 className="font-bold text-slate-800 text-lg leading-tight tracking-tight">
@@ -359,7 +359,7 @@ export default function CollegeShortlistView({
                            e.stopPropagation();
                            onNavigate("collegeProfile", { id: item.id });
                          }}
-                         className="w-full py-2 bg-white border border-slate-200 rounded-lg text-xs font-bold text-slate-700 hover:bg-brand-blue hover:text-white hover:border-brand-blue transition-all"
+                         className="w-full py-2 bg-white border border-slate-200 rounded-md text-xs font-bold text-slate-700 hover:bg-brand-blue hover:text-white hover:border-brand-blue transition-all"
                        >
                          Full details
                        </button>

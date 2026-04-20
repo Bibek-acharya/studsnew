@@ -14,7 +14,7 @@ const ForumSidebar: React.FC<ForumSidebarProps> = ({
   return (
     <div className="space-y-4">
       {/* MY FEED Section */}
-      <div className="bg-white rounded-2xl p-4 shadow-sm border border-slate-100">
+      <div className="bg-white rounded-md p-4  border border-slate-100">
         <h3 className="px-3 text-sm font-black text-slate-700 uppercase tracking-tight mb-4 mt-1">
           MY FEED
         </h3>
@@ -47,7 +47,7 @@ const ForumSidebar: React.FC<ForumSidebarProps> = ({
       </div>
 
       {/* CATEGORIES Section */}
-      <div className="bg-white rounded-2xl p-4 shadow-sm border border-slate-100">
+      <div className="bg-white rounded-md p-4  border border-slate-100">
         <h3 className="px-3 text-sm font-black text-slate-700 uppercase tracking-tight mb-4 mt-1">
           CATEGORIES
         </h3>
@@ -66,7 +66,7 @@ const ForumSidebar: React.FC<ForumSidebarProps> = ({
           ].map((cat) => (
             <button
               key={cat.label}
-              className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-slate-600 hover:bg-slate-50 transition-all font-bold group"
+              className="w-full flex items-center gap-3 px-3 py-2.5 rounded-md text-slate-600 hover:bg-slate-50 transition-all font-bold group"
             >
               <i
                 className={`${cat.icon} text-lg text-slate-900 group-hover:scale-110 transition-transform`}
@@ -78,7 +78,7 @@ const ForumSidebar: React.FC<ForumSidebarProps> = ({
       </div>
 
       {/* Analytics Graphic placeholder */}
-      <div className="h-32 bg-[#1D63FF] rounded-2xl shadow-xl relative overflow-hidden group">
+      <div className="h-32 bg-[#1D63FF] rounded-md shadow-xl relative overflow-hidden group">
         <div className="absolute inset-0 bg-gradient-to-br from-white/10 to-transparent"></div>
         <div className="absolute top-1/2 left-0 w-full h-px bg-white/20"></div>
         <div className="absolute top-[60%] left-0 w-full h-px bg-white/20"></div>
@@ -95,7 +95,7 @@ const SidebarItem: React.FC<{
 }> = ({ icon, label, active, onClick }) => (
   <button
     onClick={onClick}
-    className={`w-full flex items-center gap-4 px-3 py-2.5 rounded-xl transition-all font-bold group ${active ? "text-[#2563EB] bg-blue-50/50 shadow-sm" : "text-slate-600 hover:bg-slate-50"}`}
+    className={`w-full flex items-center gap-4 px-3 py-2.5 rounded-md transition-all font-bold group ${active ? "text-[#2563EB] bg-blue-50/50 " : "text-slate-600 hover:bg-slate-50"}`}
   >
     <i
       className={`${icon} text-lg ${active ? "text-[#2563EB]" : "text-slate-900"} group-hover:scale-110 transition-transform`}

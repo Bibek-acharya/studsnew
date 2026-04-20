@@ -179,7 +179,7 @@ const EventsPage: React.FC = () => {
                   onClick={() => setActiveFilter(pill)}
                   className={`px-5 py-2 rounded-full text-sm font-medium whitespace-nowrap transition-colors  ${
                     isActive
-                      ? "bg-brand-blue text-white shadow-sm"
+                      ? "bg-brand-blue text-white "
                       : "bg-white text-gray-700 border border-gray-200 hover:bg-gray-50"
                   }`}
                 >
@@ -202,7 +202,7 @@ const EventsPage: React.FC = () => {
             <h2 className="text-3xl font-bold mb-4">Featured Story of the Week</h2>
             <Link
               href={`/events/${featured.id}`}
-              className="relative rounded-lg overflow-hidden  h-87.5 sm:h-100 group shadow-sm cursor-pointer block"
+              className="relative rounded-md overflow-hidden  h-87.5 sm:h-100 group  cursor-pointer block"
             >
               <img src={featured.image} alt={featured.title} className="absolute inset-0 w-full h-full object-cover" />
               <div className="absolute inset-0 bg-linear-to-t from-black/80 via-black/40 to-transparent"></div>
@@ -220,7 +220,7 @@ const EventsPage: React.FC = () => {
                   <h3 className="text-3xl font-bold mb-2">{featured.title}</h3>
                   <p className="text-gray-200 text-base font-medium line-clamp-2">{featured.excerpt}</p>
                 </div>
-                <button className="bg-white text-black px-6 py-3 rounded-lg font-bold hover:bg-gray-100 transition whitespace-nowrap shadow-sm">
+                <button className="bg-white text-black px-6 py-3 rounded-md font-bold hover:bg-gray-100 transition whitespace-nowrap ">
                   Read Full Story
                 </button>
               </div>
@@ -238,7 +238,7 @@ const EventsPage: React.FC = () => {
                 onChange={(event) =>
                   setSortBy(event.target.value as "Newest First" | "Oldest First" | "Popular")
                 }
-                className="border border-gray-300 rounded-md px-3 py-1.5 bg-white text-gray-800 font-semibold outline-none focus:border-blue-500 shadow-sm cursor-pointer"
+                className="border border-gray-300 rounded-md px-3 py-1.5 bg-white text-gray-800 font-semibold outline-none focus:border-blue-500  cursor-pointer"
               >
                 <option>Newest First</option>
                 <option>Oldest First</option>
@@ -254,10 +254,10 @@ const EventsPage: React.FC = () => {
               return (
                 <article
                   key={event.id}
-                  className="bg-white rounded-2xl border border-gray-200 hover:border-blue-500/20 overflow-hidden flex flex-col duration-300 cursor-pointer"
+                  className="bg-white rounded-md border border-gray-200 hover:border-blue-500/20 overflow-hidden flex flex-col duration-300 cursor-pointer"
                 >
                   <div className="h-35 w-full overflow-hidden p-4">
-                  <img src={event.image} alt={event.title} className="w-full h-full object-cover rounded-lg" />
+                  <img src={event.image} alt={event.title} className="w-full h-full object-cover rounded-md" />
                   </div>
                   <div className="p-5 flex flex-col grow">
                     <div className="flex justify-between items-center mb-3">
@@ -290,11 +290,11 @@ const EventsPage: React.FC = () => {
                     <div className="mt-auto flex gap-2">
                       <Link
                         href={`/events/${event.id}`}
-                        className="flex-1 bg-white border border-gray-300 text-gray-700 text-sm font-bold py-2 rounded-lg hover:bg-gray-50 transition text-center"
+                        className="flex-1 bg-white border border-gray-300 text-gray-700 text-sm font-bold py-2 rounded-md hover:bg-gray-50 transition text-center"
                       >
                         Details
                       </Link>
-                      <button className={`flex-1 text-white text-sm font-bold py-2 rounded-lg transition bg-brand-blue cursor-pointer hover:bg-blue-600`}>
+                      <button className={`flex-1 text-white text-sm font-bold py-2 rounded-md transition bg-brand-blue cursor-pointer hover:bg-blue-600`}>
                         Register Now
                       </button>
                       <button
@@ -320,7 +320,7 @@ const EventsPage: React.FC = () => {
           </div>
 
           {visibleEvents.length === 0 && (
-            <div className="text-center py-10 text-slate-500 bg-white border border-gray-200 rounded-2xl mt-6">
+            <div className="text-center py-10 text-slate-500 bg-white border border-gray-200 rounded-md mt-6">
               No events available for this category.
             </div>
           )}

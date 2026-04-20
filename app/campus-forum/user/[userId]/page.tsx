@@ -65,7 +65,7 @@ export default function UserProfilePage() {
           <ArrowLeft className="w-4 h-4" /> Back
         </button>
 
-        <div className="bg-white rounded-xl border border-gray-100 shadow-sm overflow-hidden">
+        <div className="bg-white rounded-md border border-gray-100  overflow-hidden">
           <div className="bg-gradient-to-r from-blue-600 to-indigo-600 p-8">
             <div className="flex flex-col items-center">
               <div className="w-24 h-24 rounded-full bg-white shadow-lg flex items-center justify-center mb-4">
@@ -117,7 +117,7 @@ export default function UserProfilePage() {
                   </div>
                 ) : (
                   mockUserPosts.map(post => (
-                    <div key={post.id} className="border border-gray-100 rounded-xl p-4 hover:border-gray-200 transition">
+                    <div key={post.id} className="border border-gray-100 rounded-md p-4 hover:border-gray-200 transition">
                       <div className="flex items-center gap-2 mb-2">
                         <span className="text-lg">{post.community.emoji}</span>
                         <span className="text-xs font-bold text-gray-500">{post.community.name}</span>
@@ -148,9 +148,9 @@ export default function UserProfilePage() {
                   </div>
                 ) : (
                   mockFollowing.map(community => (
-                    <div key={community.id} className="flex items-center justify-between p-4 border border-gray-100 rounded-xl hover:bg-gray-50 transition">
+                    <div key={community.id} className="flex items-center justify-between p-4 border border-gray-100 rounded-md hover:bg-gray-50 transition">
                       <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 rounded-lg bg-blue-100 flex items-center justify-center text-xl">
+                        <div className="w-10 h-10 rounded-md bg-blue-100 flex items-center justify-center text-xl">
                           {community.emoji}
                         </div>
                         <div>

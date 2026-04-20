@@ -117,14 +117,14 @@ const NewsStoriesSection: React.FC<NewsStoriesSectionProps> = ({ onNavigate, new
           <div className="flex sm:flex items-center gap-2 sm:gap-3 shrink-0">
             <button
               onClick={() => scrollByWidth(-1)}
-              className="w-9 h-9 sm:w-11 sm:h-11 md:w-12 md:h-12 rounded-full border border-gray-200 flex items-center justify-center hover:bg-gray-50 hover:shadow-sm transition-all focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-9 h-9 sm:w-11 sm:h-11 md:w-12 md:h-12 rounded-full border border-gray-200 flex items-center justify-center hover:bg-gray-50 hover: transition-all focus:outline-none focus:ring-2 focus:ring-blue-500"
               aria-label="Previous"
             >
               <ChevronLeft className="w-4 h-4 sm:w-5 sm:h-5 text-gray-600" />
             </button>
             <button
               onClick={() => scrollByWidth(1)}
-              className="w-9 h-9 sm:w-11 sm:h-11 md:w-12 md:h-12 rounded-full border border-gray-200 flex items-center justify-center hover:bg-gray-50 hover:shadow-sm transition-all focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-9 h-9 sm:w-11 sm:h-11 md:w-12 md:h-12 rounded-full border border-gray-200 flex items-center justify-center hover:bg-gray-50 hover: transition-all focus:outline-none focus:ring-2 focus:ring-blue-500"
               aria-label="Next"
             >
               <ChevronRight className="w-4 h-4 sm:w-5 sm:h-5 text-gray-600" />
@@ -142,7 +142,7 @@ const NewsStoriesSection: React.FC<NewsStoriesSectionProps> = ({ onNavigate, new
             {data.map((card, index) => (
               <article
                 key={index}
-                className="min-w-65 xs:min-w-70 sm:min-w-75 md:min-w-[320px] max-w-75 xs:max-w-[320px] sm:max-w-85 w-full shrink-0 snap-start bg-white rounded-xl border border-gray-200 hover:border-blue-500/20 flex flex-col hover:-translate-y-1 transition-all duration-300 group cursor-pointer p-3.5 sm:p-4"
+                className="min-w-65 xs:min-w-70 sm:min-w-75 md:min-w-[320px] max-w-75 xs:max-w-[320px] sm:max-w-85 w-full shrink-0 snap-start bg-white rounded-md border border-gray-200 hover:border-blue-500/20 flex flex-col hover:-translate-y-1 transition-all duration-300 group cursor-pointer p-3.5 sm:p-4"
                 onClick={() => onNavigate("newsDetails", card)}
               >
                 <div className="mb-2.5 sm:mb-3">
@@ -150,7 +150,7 @@ const NewsStoriesSection: React.FC<NewsStoriesSectionProps> = ({ onNavigate, new
                     {card.badgeText}
                   </span>
                 </div>
-                <div className="overflow-hidden rounded-xl mb-3 sm:mb-4">
+                <div className="overflow-hidden rounded-md mb-3 sm:mb-4">
                   <img
                     src={card.imgSrc}
                     alt={card.title}
@@ -186,7 +186,7 @@ const NewsStoriesSection: React.FC<NewsStoriesSectionProps> = ({ onNavigate, new
                   {partnerLogos.map((logo, lIdx) => (
                     <div
                       key={lIdx}
-                      className="w-10 h-10 sm:w-11 sm:h-11 md:w-12 md:h-12 shrink-0 rounded-xl border border-gray-100 flex items-center justify-center p-1 sm:p-1.5 shadow-sm bg-white hover:border-gray-300 transition-colors"
+                      className="w-10 h-10 sm:w-11 sm:h-11 md:w-12 md:h-12 shrink-0 rounded-md border border-gray-100 flex items-center justify-center p-1 sm:p-1.5  bg-white hover:border-gray-300 transition-colors"
                     >
                       <img
                         src={logo}

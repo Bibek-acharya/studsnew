@@ -1,4 +1,5 @@
 @import "tailwindcss";
+@import "react-quill-new/dist/quill.snow.css";
 
 :root {
   --background: #ffffff;
@@ -145,6 +146,52 @@ body {
 
 .sliding-text {
   animation: slideWords 10s linear infinite;
+}
+
+/* React Quill - inherit container border */
+.ql-container {
+  border: none !important;
+  font-family: inherit;
+}
+
+.ql-toolbar {
+  border: none !important;
+  border-bottom: 1px solid #e2e8f0 !important;
+  background: #f8fafc !important;
+}
+
+.ql-editor {
+  min-height: 120px;
+  padding: 12px;
+}
+
+.ql-editor.ql-blank::before {
+  color: #94a3b8;
+  font-style: normal;
+}
+
+.ql-snow .ql-icon { width: 16px; height: 16px; }
+
+.ql-editor {
+  min-height: 120px;
+}
+
+.ql-editor.ql-blank::before {
+  color: #94a3b8;
+  font-style: normal;
+}
+
+.ql-snow .ql-icon {
+  width: 16px;
+  height: 16px;
+}
+
+.ql-snow .ql-picker {
+  height: 28px;
+}
+
+.ql-snow .ql-picker-label {
+  padding: 2px 4px;
 }
 
 @keyframes slideWords {

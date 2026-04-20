@@ -171,17 +171,17 @@ export default function DashboardSection() {
         {/* Right Column (Calendar Component) */}
         <div className="w-full xl:w-90 shrink-0 space-y-4">
           {/* Main Calendar Card */}
-          <div className="bg-white border border-gray-200 rounded-2xl p-6">
+          <div className="bg-white border border-gray-200 rounded-md p-6">
             {/* Header */}
             <div className="flex items-center justify-between mb-6">
-              <button className="w-10 h-10 rounded-2xl border border-gray-200 flex items-center justify-center text-gray-500 hover:bg-gray-50 hover:text-gray-800 transition-colors">
+              <button className="w-10 h-10 rounded-md border border-gray-200 flex items-center justify-center text-gray-500 hover:bg-gray-50 hover:text-gray-800 transition-colors">
                 <ChevronLeft className="w-5 h-5" />
               </button>
               <div className="flex items-center gap-2 font-bold text-gray-800 text-lg">
                 <CalendarIcon className="w-5 h-5" />
                 August 2023
               </div>
-              <button className="w-10 h-10 rounded-2xl border border-gray-200 flex items-center justify-center text-gray-500 hover:bg-gray-50 hover:text-gray-800 transition-colors">
+              <button className="w-10 h-10 rounded-md border border-gray-200 flex items-center justify-center text-gray-500 hover:bg-gray-50 hover:text-gray-800 transition-colors">
                 <ChevronRight className="w-5 h-5" />
               </button>
             </div>
@@ -222,7 +222,7 @@ export default function DashboardSection() {
               <div className="flex justify-center"><span className="w-8 h-8 flex items-center justify-center rounded-full bg-green-100 text-green-600 font-bold">15</span></div>
               <div className="flex justify-center"><span className="w-8 h-8 flex items-center justify-center rounded-full bg-orange-100 text-orange-400 font-bold">16</span></div>
               <div className="flex justify-center"><span className="w-8 h-8 flex items-center justify-center rounded-full bg-orange-100 text-orange-400 font-bold">17</span></div>
-              <div className="flex justify-center"><span className="w-8 h-8 flex items-center justify-center rounded-full bg-[#0000ff] text-white font-bold shadow-md shadow-blue-500/30">18</span></div>
+              <div className="flex justify-center"><span className="w-8 h-8 flex items-center justify-center rounded-full bg-[#0000ff] text-white font-bold  shadow-blue-500/30">18</span></div>
               <div className="flex justify-center"><span className="w-8 h-8 flex items-center justify-center text-gray-700">19</span></div>
               <div className="flex justify-center"><span className="w-8 h-8 flex items-center justify-center text-gray-700">20</span></div>
 

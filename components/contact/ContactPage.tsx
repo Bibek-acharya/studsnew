@@ -133,7 +133,7 @@ const ContactPage: React.FC = () => {
                       value={formData.name}
                       onChange={handleChange}
                       placeholder="Ex.Jagdish Dhami"
-                      className="w-full rounded-lg border border-gray-300 px-4 py-3 text-sm transition-colors placeholder-gray-400 focus:border-[#1c64f2] focus:outline-none focus:ring-1 focus:ring-[#1c64f2]"
+                      className="w-full rounded-md border border-gray-300 px-4 py-3 text-sm transition-colors placeholder-gray-400 focus:border-[#1c64f2] focus:outline-none focus:ring-1 focus:ring-[#1c64f2]"
                     />
                   </FormField>
 
@@ -146,7 +146,7 @@ const ContactPage: React.FC = () => {
                       value={formData.email}
                       onChange={handleChange}
                       placeholder="jagdishdhami@200"
-                      className="w-full rounded-lg border border-gray-300 px-4 py-3 text-sm transition-colors placeholder-gray-400 focus:border-[#1c64f2] focus:outline-none focus:ring-1 focus:ring-[#1c64f2]"
+                      className="w-full rounded-md border border-gray-300 px-4 py-3 text-sm transition-colors placeholder-gray-400 focus:border-[#1c64f2] focus:outline-none focus:ring-1 focus:ring-[#1c64f2]"
                     />
                   </FormField>
 
@@ -159,7 +159,7 @@ const ContactPage: React.FC = () => {
                       value={formData.phone}
                       onChange={handleChange}
                       placeholder="+977-9809890000"
-                      className="w-full rounded-lg border border-gray-300 px-4 py-3 text-sm transition-colors placeholder-gray-400 focus:border-[#1c64f2] focus:outline-none focus:ring-1 focus:ring-[#1c64f2]"
+                      className="w-full rounded-md border border-gray-300 px-4 py-3 text-sm transition-colors placeholder-gray-400 focus:border-[#1c64f2] focus:outline-none focus:ring-1 focus:ring-[#1c64f2]"
                     />
                   </FormField>
                 </div>
@@ -172,7 +172,7 @@ const ContactPage: React.FC = () => {
                     value={formData.message}
                     onChange={handleChange}
                     placeholder="enter here..."
-                    className="w-full resize-none rounded-lg border border-gray-300 px-4 py-3 text-sm transition-colors placeholder-gray-400 focus:border-[#1c64f2] focus:outline-none focus:ring-1 focus:ring-[#1c64f2]"
+                    className="w-full resize-none rounded-md border border-gray-300 px-4 py-3 text-sm transition-colors placeholder-gray-400 focus:border-[#1c64f2] focus:outline-none focus:ring-1 focus:ring-[#1c64f2]"
                   />
                 </FormField>
 
@@ -180,7 +180,7 @@ const ContactPage: React.FC = () => {
                   <button
                     type="submit"
                     disabled={isSubmitting}
-                    className="rounded-lg bg-[#1c64f2] px-8 py-3 font-medium text-white transition-colors hover:bg-[#1655ce] focus:outline-none focus:ring-2 focus:ring-[#1c64f2] focus:ring-offset-2 disabled:cursor-not-allowed disabled:bg-slate-400"
+                    className="rounded-md bg-[#1c64f2] px-8 py-3 font-medium text-white transition-colors hover:bg-[#1655ce] focus:outline-none focus:ring-2 focus:ring-[#1c64f2] focus:ring-offset-2 disabled:cursor-not-allowed disabled:bg-slate-400"
                   >
                     {isSubmitting ? "Sending..." : "Send Now"}
                   </button>
@@ -189,7 +189,7 @@ const ContactPage: React.FC = () => {
             </section>
 
             <aside className="lg:col-span-1">
-              <div className="flex h-full flex-col space-y-8 rounded-xl bg-[#1c64f2] p-8 text-white shadow-lg lg:p-10">
+              <div className="flex h-full flex-col space-y-8 rounded-md bg-[#1c64f2] p-8 text-white shadow-lg lg:p-10">
                 <InfoBlock title="Address">
                   <p className="text-sm leading-relaxed text-white/90">
                    Sallyan House, Baghbajar <br/> 
@@ -222,7 +222,7 @@ const ContactPage: React.FC = () => {
                         href={item.url}
                         aria-label={item.label}
                         target="_blank"
-                        className="flex h-10 w-10 items-center justify-center rounded-full bg-white text-[#1c64f2] shadow-sm transition-colors hover:bg-gray-100"
+                        className="flex h-10 w-10 items-center justify-center rounded-full bg-white text-[#1c64f2]  transition-colors hover:bg-gray-100"
                       >
                         <i className={`fa-brands ${item.icon} text-sm`}></i>
                       </a>
@@ -233,7 +233,7 @@ const ContactPage: React.FC = () => {
             </aside>
           </div>
 
-          <div className="mt-12 h-96 w-full overflow-hidden rounded-2xl border border-gray-200 shadow-sm">
+          <div className="mt-12 h-96 w-full overflow-hidden rounded-md border border-gray-200 ">
             <iframe
               src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d2677.2224901076906!2d85.31917056414895!3d27.705348891431424!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x39eb19004565cdeb%3A0xffa5eb3bc0b79d47!2sSallyan%20House!5e0!3m2!1sen!2snp!4v1775739754359!5m2!1sen!2snp"
               title="Location Map"

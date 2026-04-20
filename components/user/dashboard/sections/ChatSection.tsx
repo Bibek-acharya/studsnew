@@ -180,13 +180,13 @@ export default function ChatSection() {
 
   return (
     <div className="h-[calc(100vh-140px)] mt-6">
-      <div className="flex h-full bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
+      <div className="flex h-full bg-white rounded-md  border border-slate-200 overflow-hidden">
         {/* LEFT PANEL: Conversation List */}
         <aside className="w-full md:w-[380px] bg-white border-r border-slate-100 flex flex-col h-full shrink-0 hidden md:flex">
           {/* Header */}
           {/* <div className="p-5 border-b border-slate-100 bg-slate-900 text-white flex flex-col gap-4">
             <div className="flex items-center gap-2">
-              <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center font-bold text-white">
+              <div className="w-8 h-8 bg-primary rounded-md flex items-center justify-center font-bold text-white">
                 S
               </div>
               <h1 className="text-lg font-bold tracking-tight">StudSphere</h1>
@@ -202,7 +202,7 @@ export default function ChatSection() {
                 placeholder="Search conversations..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full pl-9 pr-4 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm focus:outline-none focus:border-primary focus:bg-white transition-colors"
+                className="w-full pl-9 pr-4 py-2 bg-slate-50 border border-slate-200 rounded-md text-sm focus:outline-none focus:border-primary focus:bg-white transition-colors"
               />
             </div>
             <div className="flex gap-2 overflow-x-auto pb-1">
@@ -241,7 +241,7 @@ export default function ChatSection() {
                       }`}
                   >
                     <div className="flex gap-3">
-                      <img src={other?.avatar} className="w-10 h-10 rounded-full object-cover shadow-sm bg-white" alt="Avatar" />
+                      <img src={other?.avatar} className="w-10 h-10 rounded-full object-cover  bg-white" alt="Avatar" />
                       <div className="flex-1 min-w-0">
                         <div className="flex justify-between items-start mb-0.5">
                           <h4 className={`text-sm font-bold text-slate-900 truncate ${unread > 0 ? 'text-black' : ''}`}>
@@ -304,7 +304,7 @@ export default function ChatSection() {
               <div className="flex items-center gap-3">
                 <button
                   onClick={() => setShowContactInfo(!showContactInfo)}
-                  className={`p-2 rounded-lg transition-colors ${showContactInfo ? 'bg-primary text-white' : 'text-slate-400 hover:text-primary hover:bg-blue-50'}`}
+                  className={`p-2 rounded-md transition-colors ${showContactInfo ? 'bg-primary text-white' : 'text-slate-400 hover:text-primary hover:bg-blue-50'}`}
                 >
                   <Info className="w-5 h-5" />
                 </button>
@@ -335,9 +335,9 @@ export default function ChatSection() {
                   return (
                     <div key={msg.id} className={`flex ${isMine ? 'justify-end' : 'justify-start'} mb-4`}>
                       <div className={`max-w-[75%] md:max-w-[60%] flex flex-col ${isMine ? 'items-end' : 'items-start'}`}>
-                        <div className={`p-3.5 rounded-2xl shadow-sm ${isMine ? 'bg-primary text-white rounded-br-sm' : 'bg-white border border-slate-200 text-slate-800 rounded-bl-sm'}`}>
+                        <div className={`p-3.5 rounded-md  ${isMine ? 'bg-primary text-white rounded-br-sm' : 'bg-white border border-slate-200 text-slate-800 rounded-bl-sm'}`}>
                           {msg.messageType === 'document' && (
-                            <div className="flex items-center gap-2 mb-2 p-2 bg-slate-200 rounded-lg">
+                            <div className="flex items-center gap-2 mb-2 p-2 bg-slate-200 rounded-md">
                               <FileText className="w-5 h-5" />
                               <span className="text-sm font-medium underline cursor-pointer">Attachment.pdf</span>
                             </div>
@@ -365,7 +365,7 @@ export default function ChatSection() {
                 <button className="p-3 text-slate-400 hover:text-primary transition-colors rounded-full hover:bg-blue-50 shrink-0">
                   <Paperclip className="w-5 h-5" />
                 </button>
-                <div className="flex-1 bg-slate-50 border border-slate-200 rounded-2xl focus-within:bg-white focus-within:border-primary focus-within:ring-2 focus-within:ring-blue-100 transition-all p-1">
+                <div className="flex-1 bg-slate-50 border border-slate-200 rounded-md focus-within:bg-white focus-within:border-primary focus-within:ring-2 focus-within:ring-blue-100 transition-all p-1">
                   <textarea
                     value={messageInput}
                     onChange={(e) => setMessageInput(e.target.value)}
@@ -384,7 +384,7 @@ export default function ChatSection() {
                 <button
                   onClick={handleSend}
                   disabled={!messageInput.trim()}
-                  className="p-3 bg-primary text-white hover:bg-primary-hover transition-colors rounded-full shadow-sm shrink-0 disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="p-3 bg-primary text-white hover:bg-primary-hover transition-colors rounded-full  shrink-0 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   <Send className="w-5 h-5 ml-0.5" />
                 </button>

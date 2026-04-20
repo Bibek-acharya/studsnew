@@ -142,7 +142,7 @@ function VerifyPageContent() {
   return (
     <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
       <div className="w-full max-w-md">
-        <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 sm:p-8">
+        <div className="bg-white rounded-md  border border-gray-200 p-6 sm:p-8">
           <button 
             onClick={() => router.push("/register")}
             className="mb-4 text-sm font-medium text-gray-500 hover:text-gray-700 flex items-center gap-1"
@@ -158,7 +158,7 @@ function VerifyPageContent() {
           </div>
 
           {error && (
-            <div className="rounded-lg border border-red-200 bg-red-50 p-3 text-sm text-red-700 mb-4">
+            <div className="rounded-md border border-red-200 bg-red-50 p-3 text-sm text-red-700 mb-4">
               {error}
             </div>
           )}

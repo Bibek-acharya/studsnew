@@ -109,11 +109,11 @@ const CollegeCard: React.FC<{
 
   return (
     <div
-      className="bg-white rounded-2xl p-4 border border-gray-100 flex flex-col h-full hover:border-blue-500/20 transition-all duration-300 cursor-pointer"
+      className="bg-white rounded-md p-4 border border-gray-100 flex flex-col h-full hover:border-blue-500/20 transition-all duration-300 cursor-pointer"
       onClick={() => onNavigate("collegeDetails", college)}
     >
-      <div className="w-full h-30 rounded-lg overflow-hidden mb-4 relative">
-        <div className="absolute top-3 left-3 bg-brand-blue text-white text-[10px] font-bold px-2 py-0.5 rounded uppercase tracking-wider z-10 shadow-sm">
+      <div className="w-full h-30 rounded-md overflow-hidden mb-4 relative">
+        <div className="absolute top-3 left-3 bg-brand-blue text-white text-[10px] font-bold px-2 py-0.5 rounded uppercase tracking-wider z-10 ">
           Featured
         </div>
         <img

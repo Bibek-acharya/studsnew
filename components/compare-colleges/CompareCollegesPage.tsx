@@ -164,7 +164,7 @@ const CompareCollegesPage: React.FC<CompareCollegesPageProps> = ({ onNavigate })
 
                 <main className="relative z-10 flex-1 flex flex-col items-center justify-center px-4">
                     <div className="text-center mb-10 max-w-3xl">
-                        <h1 className="text-white text-4xl md:text-5xl lg:text-[52px] font-bold leading-tight tracking-tight mb-4 drop-shadow-sm">
+                        <h1 className="text-white text-4xl md:text-5xl lg:text-[52px] font-bold leading-tight tracking-tight mb-4 drop-">
                             Compare colleges to<br />find the best fit
                         </h1>
                         <p className="text-white text-lg md:text-xl font-medium opacity-95">
@@ -193,7 +193,7 @@ const CompareCollegesPage: React.FC<CompareCollegesPageProps> = ({ onNavigate })
                             />
 
                             {showDropdown1 && (
-                                <ul className="absolute top-full left-0 w-full bg-white mt-2 rounded-2xl shadow-[0_10px_40px_-10px_rgba(0,0,0,0.2)] border border-gray-100 max-h-[260px] overflow-y-auto custom-scrollbar z-50 text-left py-2">
+                                <ul className="absolute top-full left-0 w-full bg-white mt-2 rounded-md shadow-[0_10px_40px_-10px_rgba(0,0,0,0.2)] border border-gray-100 max-h-[260px] overflow-y-auto custom-scrollbar z-50 text-left py-2">
                                     {filtered1.length === 0 ? (
                                         <li className="px-5 py-3 text-gray-500 text-sm italic">No colleges found</li>
                                     ) : (
@@ -215,7 +215,7 @@ const CompareCollegesPage: React.FC<CompareCollegesPageProps> = ({ onNavigate })
                         </div>
 
                         <div className="flex-shrink-0 flex items-center justify-center py-2 md:py-0">
-                            <span className="text-white font-bold text-xl lowercase tracking-wide drop-shadow-md">vs</span>
+                            <span className="text-white font-bold text-xl lowercase tracking-wide drop-">vs</span>
                         </div>
 
                         <div className="relative w-full md:w-[420px] input-focus-ring rounded-full" ref={wrapperRef2}>
@@ -238,7 +238,7 @@ const CompareCollegesPage: React.FC<CompareCollegesPageProps> = ({ onNavigate })
                             />
 
                             {showDropdown2 && (
-                                <ul className="absolute top-full left-0 w-full bg-white mt-2 rounded-2xl shadow-[0_10px_40px_-10px_rgba(0,0,0,0.2)] border border-gray-100 max-h-[260px] overflow-y-auto custom-scrollbar z-50 text-left py-2">
+                                <ul className="absolute top-full left-0 w-full bg-white mt-2 rounded-md shadow-[0_10px_40px_-10px_rgba(0,0,0,0.2)] border border-gray-100 max-h-[260px] overflow-y-auto custom-scrollbar z-50 text-left py-2">
                                     {filtered2.length === 0 ? (
                                         <li className="px-5 py-3 text-gray-500 text-sm italic">No colleges found</li>
                                     ) : (
@@ -284,7 +284,7 @@ const CompareCollegesPage: React.FC<CompareCollegesPageProps> = ({ onNavigate })
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                     <div
                         onClick={() => onNavigate("compareCollegesResult", { college1: { name: "Pulchowk Campus" }, college2: { name: "Kathmandu University" } })}
-                        className="bg-white rounded-xl border border-gray-100 shadow-[0_2px_12px_rgba(0,0,0,0.04)] p-6 pt-8 pb-8 relative flex justify-between items-center cursor-pointer card-hover"
+                        className="bg-white rounded-md border border-gray-100 shadow-[0_2px_12px_rgba(0,0,0,0.04)] p-6 pt-8 pb-8 relative flex justify-between items-center cursor-pointer card-hover"
                     >
                         <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 bg-[#f1f3f6] text-gray-500 text-[11px] font-bold rounded-full w-8 h-8 flex items-center justify-center border-4 border-white z-10">VS</div>
                         <div className="absolute left-1/2 top-1/4 bottom-1/4 w-px bg-gray-100 -translate-x-1/2 z-0"></div>
@@ -296,7 +296,7 @@ const CompareCollegesPage: React.FC<CompareCollegesPageProps> = ({ onNavigate })
                                     <path d="M20 10L10 28H30L20 10Z" fill="#3182CE" />
                                 </svg>
                             </div>
-                            <div className="rating-green text-white text-[12px] font-bold px-2 py-0.5 rounded flex items-center gap-1 mb-2 shadow-sm">
+                            <div className="rating-green text-white text-[12px] font-bold px-2 py-0.5 rounded flex items-center gap-1 mb-2 ">
                                 <svg className="w-2.5 h-2.5" viewBox="0 0 24 24" fill="currentColor"><path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z" /></svg>
                                 3.9
                             </div>
@@ -307,7 +307,7 @@ const CompareCollegesPage: React.FC<CompareCollegesPageProps> = ({ onNavigate })
                             <div className="h-14 flex items-center justify-center mb-3">
                                 <span className="text-xl font-bold text-[#2B6CB0] tracking-wider">KU</span>
                             </div>
-                            <div className="rating-green text-white text-[12px] font-bold px-2 py-0.5 rounded flex items-center gap-1 mb-2 shadow-sm">
+                            <div className="rating-green text-white text-[12px] font-bold px-2 py-0.5 rounded flex items-center gap-1 mb-2 ">
                                 <svg className="w-2.5 h-2.5" viewBox="0 0 24 24" fill="currentColor"><path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z" /></svg>
                                 4.0
                             </div>
@@ -317,7 +317,7 @@ const CompareCollegesPage: React.FC<CompareCollegesPageProps> = ({ onNavigate })
 
                     <div
                         onClick={() => onNavigate("compareCollegesResult", { college1: { name: "KUSOM" }, college2: { name: "Apex College" } })}
-                        className="bg-white rounded-xl border border-gray-100 shadow-[0_2px_12px_rgba(0,0,0,0.04)] p-6 pt-8 pb-8 relative flex justify-between items-center cursor-pointer card-hover"
+                        className="bg-white rounded-md border border-gray-100 shadow-[0_2px_12px_rgba(0,0,0,0.04)] p-6 pt-8 pb-8 relative flex justify-between items-center cursor-pointer card-hover"
                     >
                         <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 bg-[#f1f3f6] text-gray-500 text-[11px] font-bold rounded-full w-8 h-8 flex items-center justify-center border-4 border-white z-10">VS</div>
                         <div className="absolute left-1/2 top-1/4 bottom-1/4 w-px bg-gray-100 -translate-x-1/2 z-0"></div>
@@ -325,7 +325,7 @@ const CompareCollegesPage: React.FC<CompareCollegesPageProps> = ({ onNavigate })
                             <div className="h-14 flex items-center justify-center mb-3">
                                 <span className="text-xl font-bold text-[#DD6B20]">KUSOM</span>
                             </div>
-                            <div className="rating-green text-white text-[12px] font-bold px-2 py-0.5 rounded flex items-center gap-1 mb-2 shadow-sm">
+                            <div className="rating-green text-white text-[12px] font-bold px-2 py-0.5 rounded flex items-center gap-1 mb-2 ">
                                 <svg className="w-2.5 h-2.5" viewBox="0 0 24 24" fill="currentColor"><path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z" /></svg>
                                 4.2
                             </div>
@@ -338,7 +338,7 @@ const CompareCollegesPage: React.FC<CompareCollegesPageProps> = ({ onNavigate })
                                     <path d="M20 12L12 26H28L20 12Z" fill="#38B2AC" />
                                 </svg>
                             </div>
-                            <div className="rating-green text-white text-[12px] font-bold px-2 py-0.5 rounded flex items-center gap-1 mb-2 shadow-sm">
+                            <div className="rating-green text-white text-[12px] font-bold px-2 py-0.5 rounded flex items-center gap-1 mb-2 ">
                                 <svg className="w-2.5 h-2.5" viewBox="0 0 24 24" fill="currentColor"><path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z" /></svg>
                                 3.9
                             </div>
@@ -348,7 +348,7 @@ const CompareCollegesPage: React.FC<CompareCollegesPageProps> = ({ onNavigate })
 
                     <div
                         onClick={() => onNavigate("compareCollegesResult", { college1: { name: "St. Xavier's College" }, college2: { name: "Trinity International College" } })}
-                        className="bg-white rounded-xl border border-gray-100 shadow-[0_2px_12px_rgba(0,0,0,0.04)] p-6 pt-8 pb-8 relative flex justify-between items-center cursor-pointer card-hover"
+                        className="bg-white rounded-md border border-gray-100 shadow-[0_2px_12px_rgba(0,0,0,0.04)] p-6 pt-8 pb-8 relative flex justify-between items-center cursor-pointer card-hover"
                     >
                         <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 bg-[#f1f3f6] text-gray-500 text-[11px] font-bold rounded-full w-8 h-8 flex items-center justify-center border-4 border-white z-10">VS</div>
                         <div className="absolute left-1/2 top-1/4 bottom-1/4 w-px bg-gray-100 -translate-x-1/2 z-0"></div>
@@ -358,7 +358,7 @@ const CompareCollegesPage: React.FC<CompareCollegesPageProps> = ({ onNavigate })
                                     <span className="text-white font-bold text-sm">SXC</span>
                                 </div>
                             </div>
-                            <div className="rating-green text-white text-[12px] font-bold px-2 py-0.5 rounded flex items-center gap-1 mb-2 shadow-sm">
+                            <div className="rating-green text-white text-[12px] font-bold px-2 py-0.5 rounded flex items-center gap-1 mb-2 ">
                                 <svg className="w-2.5 h-2.5" viewBox="0 0 24 24" fill="currentColor"><path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z" /></svg>
                                 4.1
                             </div>
@@ -368,7 +368,7 @@ const CompareCollegesPage: React.FC<CompareCollegesPageProps> = ({ onNavigate })
                             <div className="h-14 flex items-center justify-center mb-3">
                                 <span className="text-xl font-bold text-[#C53030]">Trinity</span>
                             </div>
-                            <div className="rating-green text-white text-[12px] font-bold px-2 py-0.5 rounded flex items-center gap-1 mb-2 shadow-sm">
+                            <div className="rating-green text-white text-[12px] font-bold px-2 py-0.5 rounded flex items-center gap-1 mb-2 ">
                                 <svg className="w-2.5 h-2.5" viewBox="0 0 24 24" fill="currentColor"><path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z" /></svg>
                                 3.8
                             </div>
@@ -378,7 +378,7 @@ const CompareCollegesPage: React.FC<CompareCollegesPageProps> = ({ onNavigate })
 
                     <div
                         onClick={() => onNavigate("compareCollegesResult", { college1: { name: "NCIT" }, college2: { name: "Kantipur Engineering College" } })}
-                        className="bg-white rounded-xl border border-gray-100 shadow-[0_2px_12px_rgba(0,0,0,0.04)] p-6 pt-8 pb-8 relative flex justify-between items-center cursor-pointer card-hover"
+                        className="bg-white rounded-md border border-gray-100 shadow-[0_2px_12px_rgba(0,0,0,0.04)] p-6 pt-8 pb-8 relative flex justify-between items-center cursor-pointer card-hover"
                     >
                         <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 bg-[#f1f3f6] text-gray-500 text-[11px] font-bold rounded-full w-8 h-8 flex items-center justify-center border-4 border-white z-10">VS</div>
                         <div className="absolute left-1/2 top-1/4 bottom-1/4 w-px bg-gray-100 -translate-x-1/2 z-0"></div>
@@ -386,7 +386,7 @@ const CompareCollegesPage: React.FC<CompareCollegesPageProps> = ({ onNavigate })
                             <div className="h-14 flex items-center justify-center mb-3">
                                 <span className="text-xl font-bold text-[#2C5282] tracking-tight">NCIT</span>
                             </div>
-                            <div className="rating-yellow text-white text-[12px] font-bold px-2 py-0.5 rounded flex items-center gap-1 mb-2 shadow-sm">
+                            <div className="rating-yellow text-white text-[12px] font-bold px-2 py-0.5 rounded flex items-center gap-1 mb-2 ">
                                 <svg className="w-2.5 h-2.5" viewBox="0 0 24 24" fill="currentColor"><path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z" /></svg>
                                 3.5
                             </div>
@@ -398,7 +398,7 @@ const CompareCollegesPage: React.FC<CompareCollegesPageProps> = ({ onNavigate })
                                     <span className="text-[#1A365D] font-bold text-xs">KEC</span>
                                 </div>
                             </div>
-                            <div className="rating-yellow text-white text-[12px] font-bold px-2 py-0.5 rounded flex items-center gap-1 mb-2 shadow-sm">
+                            <div className="rating-yellow text-white text-[12px] font-bold px-2 py-0.5 rounded flex items-center gap-1 mb-2 ">
                                 <svg className="w-2.5 h-2.5" viewBox="0 0 24 24" fill="currentColor"><path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z" /></svg>
                                 3.6
                             </div>
@@ -408,7 +408,7 @@ const CompareCollegesPage: React.FC<CompareCollegesPageProps> = ({ onNavigate })
 
                     <div
                         onClick={() => onNavigate("compareCollegesResult", { college1: { name: "British College" }, college2: { name: "Islington College" } })}
-                        className="bg-white rounded-xl border border-gray-100 shadow-[0_2px_12px_rgba(0,0,0,0.04)] p-6 pt-8 pb-8 relative flex justify-between items-center cursor-pointer card-hover"
+                        className="bg-white rounded-md border border-gray-100 shadow-[0_2px_12px_rgba(0,0,0,0.04)] p-6 pt-8 pb-8 relative flex justify-between items-center cursor-pointer card-hover"
                     >
                         <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 bg-[#f1f3f6] text-gray-500 text-[11px] font-bold rounded-full w-8 h-8 flex items-center justify-center border-4 border-white z-10">VS</div>
                         <div className="absolute left-1/2 top-1/4 bottom-1/4 w-px bg-gray-100 -translate-x-1/2 z-0"></div>
@@ -418,7 +418,7 @@ const CompareCollegesPage: React.FC<CompareCollegesPageProps> = ({ onNavigate })
                                     <path d="M5 20L20 5L35 20L20 35L5 20Z" fill="#2B6CB0" />
                                 </svg>
                             </div>
-                            <div className="rating-green text-white text-[12px] font-bold px-2 py-0.5 rounded flex items-center gap-1 mb-2 shadow-sm">
+                            <div className="rating-green text-white text-[12px] font-bold px-2 py-0.5 rounded flex items-center gap-1 mb-2 ">
                                 <svg className="w-2.5 h-2.5" viewBox="0 0 24 24" fill="currentColor"><path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z" /></svg>
                                 3.8
                             </div>
@@ -428,7 +428,7 @@ const CompareCollegesPage: React.FC<CompareCollegesPageProps> = ({ onNavigate })
                             <div className="h-14 flex items-center justify-center mb-3">
                                 <span className="text-[18px] font-bold text-[#4A5568]">Islington</span>
                             </div>
-                            <div className="rating-green text-white text-[12px] font-bold px-2 py-0.5 rounded flex items-center gap-1 mb-2 shadow-sm">
+                            <div className="rating-green text-white text-[12px] font-bold px-2 py-0.5 rounded flex items-center gap-1 mb-2 ">
                                 <svg className="w-2.5 h-2.5" viewBox="0 0 24 24" fill="currentColor"><path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z" /></svg>
                                 3.9
                             </div>
@@ -438,7 +438,7 @@ const CompareCollegesPage: React.FC<CompareCollegesPageProps> = ({ onNavigate })
 
                     <div
                         onClick={() => onNavigate("compareCollegesResult", { college1: { name: "NATHM" }, college2: { name: "Silver Mountain" } })}
-                        className="bg-white rounded-xl border border-gray-100 shadow-[0_2px_12px_rgba(0,0,0,0.04)] p-6 pt-8 pb-8 relative flex justify-between items-center cursor-pointer card-hover"
+                        className="bg-white rounded-md border border-gray-100 shadow-[0_2px_12px_rgba(0,0,0,0.04)] p-6 pt-8 pb-8 relative flex justify-between items-center cursor-pointer card-hover"
                     >
                         <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 bg-[#f1f3f6] text-gray-500 text-[11px] font-bold rounded-full w-8 h-8 flex items-center justify-center border-4 border-white z-10">VS</div>
                         <div className="absolute left-1/2 top-1/4 bottom-1/4 w-px bg-gray-100 -translate-x-1/2 z-0"></div>
@@ -446,7 +446,7 @@ const CompareCollegesPage: React.FC<CompareCollegesPageProps> = ({ onNavigate })
                             <div className="h-14 flex items-center justify-center mb-3">
                                 <span className="text-xl font-bold text-[#1a2b4c]">NATHM</span>
                             </div>
-                            <div className="rating-green text-white text-[12px] font-bold px-2 py-0.5 rounded flex items-center gap-1 mb-2 shadow-sm">
+                            <div className="rating-green text-white text-[12px] font-bold px-2 py-0.5 rounded flex items-center gap-1 mb-2 ">
                                 <svg className="w-2.5 h-2.5" viewBox="0 0 24 24" fill="currentColor"><path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z" /></svg>
                                 4.0
                             </div>
@@ -458,7 +458,7 @@ const CompareCollegesPage: React.FC<CompareCollegesPageProps> = ({ onNavigate })
                                     <span className="text-gray-600 font-bold text-sm">SM</span>
                                 </div>
                             </div>
-                            <div className="rating-green text-white text-[12px] font-bold px-2 py-0.5 rounded flex items-center gap-1 mb-2 shadow-sm">
+                            <div className="rating-green text-white text-[12px] font-bold px-2 py-0.5 rounded flex items-center gap-1 mb-2 ">
                                 <svg className="w-2.5 h-2.5" viewBox="0 0 24 24" fill="currentColor"><path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z" /></svg>
                                 3.9
                             </div>
@@ -475,12 +475,12 @@ const CompareCollegesPage: React.FC<CompareCollegesPageProps> = ({ onNavigate })
             </section>
 
             <section className="content-section !mt-8 mb-16 flex flex-col md:flex-row justify-between gap-[19px]">
-                <div className="bg-white rounded-xl shadow-sm w-full md:w-[681px] h-[151px] relative overflow-hidden group hover:shadow-md transition-shadow flex-shrink-0">
+                <div className="bg-white rounded-md  w-full md:w-[681px] h-[151px] relative overflow-hidden group hover: transition-shadow flex-shrink-0">
                     <span className="absolute top-2 right-2 text-[9px] text-white/90 font-bold uppercase tracking-widest bg-black/40 backdrop-blur-sm px-2 py-1 rounded z-10">Advertisement</span>
                     <img src="https://images.unsplash.com/photo-1523240795612-9a054b0db644?auto=format&fit=crop&w=681&h=151&q=80" alt="Ad 1" className="w-full h-full object-cover" />
                 </div>
 
-                <div className="bg-white rounded-xl shadow-sm w-full md:w-[681px] h-[151px] relative overflow-hidden group hover:shadow-md transition-shadow flex-shrink-0">
+                <div className="bg-white rounded-md  w-full md:w-[681px] h-[151px] relative overflow-hidden group hover: transition-shadow flex-shrink-0">
                     <span className="absolute top-2 right-2 text-[9px] text-white/90 font-bold uppercase tracking-widest bg-black/40 backdrop-blur-sm px-2 py-1 rounded z-10">Advertisement</span>
                     <img src="https://images.unsplash.com/photo-1517486808906-6ca8b3f04846?auto=format&fit=crop&w=681&h=151&q=80" alt="Ad 2" className="w-full h-full object-cover" />
                 </div>

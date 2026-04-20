@@ -5,7 +5,7 @@ import React from "react";
 const SudsphereBannerAd: React.FC = () => {
   return (
     <div
-      className="relative w-full h-auto md:h-[220px] rounded-lg overflow-hidden flex items-center"
+      className="relative w-full h-auto md:h-[220px] rounded-md overflow-hidden flex items-center"
       style={{
         backgroundColor: "#0b71d1",
         backgroundImage: `
@@ -27,7 +27,7 @@ const SudsphereBannerAd: React.FC = () => {
 
         <div className="flex flex-col items-center md:items-end gap-3 w-full md:w-auto">
           <div className="flex flex-col sm:flex-row gap-4 w-full sm:w-auto">
-            <button className="flex items-center justify-center gap-3 bg-white text-[#333333] font-bold px-6 py-3 rounded-md shadow-sm hover:bg-gray-50 hover:shadow-md transition-all duration-200 min-w-[240px]">
+            <button className="flex items-center justify-center gap-3 bg-white text-[#333333] font-bold px-6 py-3 rounded-md  hover:bg-gray-50 hover: transition-all duration-200 min-w-[240px]">
               <svg className="w-5 h-5" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                 <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4" />
                 <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853" />
@@ -37,7 +37,7 @@ const SudsphereBannerAd: React.FC = () => {
               Continue with Google
             </button>
 
-            <button className="flex items-center justify-center gap-3 bg-[#0c519d] text-white font-bold px-6 py-3 rounded-md shadow-sm hover:bg-[#0a4485] hover:shadow-md transition-all duration-200 border border-[#0d5ba6] min-w-[240px]">
+            <button className="flex items-center justify-center gap-3 bg-[#0c519d] text-white font-bold px-6 py-3 rounded-md  hover:bg-[#0a4485] hover: transition-all duration-200 border border-[#0d5ba6] min-w-[240px]">
               <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
               </svg>

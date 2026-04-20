@@ -196,7 +196,7 @@ export default function RegisterForm() {
       <form onSubmit={handleEmailSubmit} className="space-y-5">
         <button
           type="button"
-          className="w-full bg-white border border-gray-200 rounded-lg py-3 px-4 flex items-center justify-center gap-3 font-semibold text-gray-800 transition-colors hover:bg-gray-50"
+          className="w-full bg-white border border-gray-200 rounded-md py-3 px-4 flex items-center justify-center gap-3 font-semibold text-gray-800 transition-colors hover:bg-gray-50"
         >
           <svg className="w-5 h-5" viewBox="0 0 24 24">
             <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
@@ -225,7 +225,7 @@ export default function RegisterForm() {
               required
               value={email}
               onChange={(e) => { setEmail(e.target.value); setError(""); }}
-              className={`w-full pl-10 pr-4 py-3 border border-gray-200 rounded-lg text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-0 transition-colors ${error ? "border-red-500 focus:border-red-500 focus:ring-red-500" : "focus:border-brand-blue"}`}
+              className={`w-full pl-10 pr-4 py-3 border border-gray-200 rounded-md text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-0 transition-colors ${error ? "border-red-500 focus:border-red-500 focus:ring-red-500" : "focus:border-brand-blue"}`}
             />
           </div>
           {error && (
@@ -256,7 +256,7 @@ export default function RegisterForm() {
         <button
           type="submit"
           disabled={!isStep1Valid || loading}
-          className={`w-full py-3.5 rounded-lg font-bold text-white text-[15px] transition-colors ${isStep1Valid ? "bg-brand-blue hover:bg-blue-700 cursor-pointer" : "bg-gray-400 cursor-not-allowed"}`}
+          className={`w-full py-3.5 rounded-md font-bold text-white text-[15px] transition-colors ${isStep1Valid ? "bg-brand-blue hover:bg-blue-700 cursor-pointer" : "bg-gray-400 cursor-not-allowed"}`}
         >
           {loading ? "Sending..." : "Continue"}
         </button>
@@ -293,7 +293,7 @@ export default function RegisterForm() {
               placeholder="Enter first name"
               value={firstName}
               onChange={(e) => setFirstName(e.target.value)}
-              className="w-full border border-gray-200 rounded-lg py-3 px-4 text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-0 focus:border-brand-blue transition-colors"
+              className="w-full border border-gray-200 rounded-md py-3 px-4 text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-0 focus:border-brand-blue transition-colors"
             />
           </div>
           <div className="w-1/2">
@@ -303,7 +303,7 @@ export default function RegisterForm() {
               placeholder="Enter last name"
               value={lastName}
               onChange={(e) => setLastName(e.target.value)}
-              className="w-full border border-gray-200 rounded-lg py-3 px-4 text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-0 focus:border-brand-blue transition-colors"
+              className="w-full border border-gray-200 rounded-md py-3 px-4 text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-0 focus:border-brand-blue transition-colors"
             />
           </div>
         </div>
@@ -315,7 +315,7 @@ export default function RegisterForm() {
             placeholder="Enter password"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
-            className="w-full border border-gray-200 rounded-lg py-3 px-4 pr-10 text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-0 focus:border-brand-blue transition-colors"
+            className="w-full border border-gray-200 rounded-md py-3 px-4 pr-10 text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-0 focus:border-brand-blue transition-colors"
           />
           <button
             type="button"
@@ -333,7 +333,7 @@ export default function RegisterForm() {
             placeholder="Confirm password"
             value={confirmPassword}
             onChange={(e) => setConfirmPassword(e.target.value)}
-            className="w-full border border-gray-200 rounded-lg py-3 px-4 pr-10 text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-0 focus:border-brand-blue transition-colors"
+            className="w-full border border-gray-200 rounded-md py-3 px-4 pr-10 text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-0 focus:border-brand-blue transition-colors"
           />
           <button
             type="button"
@@ -348,7 +348,7 @@ export default function RegisterForm() {
           type="button"
           onClick={handleDetailsSubmit}
           disabled={!isStep2Valid || loading}
-          className={`w-full py-3.5 rounded-lg font-bold text-white text-[15px] transition-colors ${isStep2Valid ? "bg-brand-blue hover:bg-blue-700 cursor-pointer" : "bg-gray-800 cursor-not-allowed"}`}
+          className={`w-full py-3.5 rounded-md font-bold text-white text-[15px] transition-colors ${isStep2Valid ? "bg-brand-blue hover:bg-blue-700 cursor-pointer" : "bg-gray-800 cursor-not-allowed"}`}
         >
           {loading ? "Please wait..." : "Verify Account"}
         </button>
@@ -393,7 +393,7 @@ export default function RegisterForm() {
               value={digit}
               onChange={(e) => { handleOtpChange(idx, e.target.value); setError(""); }}
               onKeyDown={(e) => handleOtpKeyDown(idx, e)}
-              className={`w-14 h-16 text-center text-2xl font-bold text-gray-900 border border-gray-200 rounded-xl focus:outline-none focus:ring-0 transition-colors bg-white ${error ? "border-red-500 focus:border-red-500" : "focus:border-brand-blue"}`}
+              className={`w-14 h-16 text-center text-2xl font-bold text-gray-900 border border-gray-200 rounded-md focus:outline-none focus:ring-0 transition-colors bg-white ${error ? "border-red-500 focus:border-red-500" : "focus:border-brand-blue"}`}
             />
           ))}
         </div>
@@ -405,7 +405,7 @@ export default function RegisterForm() {
           type="button"
           onClick={handleVerifySubmit}
           disabled={otp.join("").length !== 6 || loading}
-          className={`w-full py-3.5 rounded-lg font-bold text-white text-[15px] transition-colors ${otp.join("").length === 6 ? "bg-brand-blue hover:bg-blue-700 cursor-pointer" : "bg-gray-800 cursor-not-allowed"}`}
+          className={`w-full py-3.5 rounded-md font-bold text-white text-[15px] transition-colors ${otp.join("").length === 6 ? "bg-brand-blue hover:bg-blue-700 cursor-pointer" : "bg-gray-800 cursor-not-allowed"}`}
         >
           {loading ? "Verifying..." : "Verify Code"}
         </button>

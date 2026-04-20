@@ -65,7 +65,7 @@ export default function ShortlistView({
                   placeholder="Search for scholarships"
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  className="w-full bg-white border border-gray-200 rounded-lg py-3 pl-6 pr-12 text-[15px] focus:outline-none focus:ring-1 focus:ring-brand-blue transition-all"
+                  className="w-full bg-white border border-gray-200 rounded-md py-3 pl-6 pr-12 text-[15px] focus:outline-none focus:ring-1 focus:ring-brand-blue transition-all"
                 />
                 <div className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-brand-blue transition-colors">
                   <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -75,7 +75,7 @@ export default function ShortlistView({
               </div>
 
               <div className="relative min-w-[240px]">
-                <select className="w-full appearance-none bg-white border border-gray-200 rounded-lg py-3 pl-6 pr-12 text-[15px] font-bold text-gray-800 focus:outline-none focus:ring-1 focus:ring-brand-blue cursor-pointer">
+                <select className="w-full appearance-none bg-white border border-gray-200 rounded-md py-3 pl-6 pr-12 text-[15px] font-bold text-gray-800 focus:outline-none focus:ring-1 focus:ring-brand-blue cursor-pointer">
                   <option>Deadline (Nearest)</option>
                   <option>Amount (Highest)</option>
                   <option>Amount (Lowest)</option>
@@ -99,7 +99,7 @@ export default function ShortlistView({
                 return (
                   <article
                     key={item.id}
-                    className="bg-white border border-gray-200 rounded-lg p-5 transition-all flex flex-col h-full relative group hover:border-gray-300"
+                    className="bg-white border border-gray-200 rounded-md p-5 transition-all flex flex-col h-full relative group hover:border-gray-300"
                   >
                     <div className="flex justify-between items-start mb-3 gap-3">
                       <h3 className="font-bold text-gray-900 text-[1.05rem] leading-snug group-hover:text-brand-blue transition-colors truncate" title={item.title}>
@@ -134,7 +134,7 @@ export default function ShortlistView({
                         <span className="text-brand-blue font-bold text-[0.95rem]">{item.deadline}</span>
                       </div>
                       <div className="flex gap-2">
-                        <button className="bg-brand-blue hover:bg-brand-hover text-white px-3.5 py-1.5 rounded-lg text-sm font-semibold transition-colors shadow-sm">
+                        <button className="bg-brand-blue hover:bg-brand-hover text-white px-3.5 py-1.5 rounded-md text-sm font-semibold transition-colors ">
                           Apply
                         </button>
                       </div>

@@ -348,7 +348,7 @@ export default function BookmarksSection() {
       `}</style>
 
       {/* Tab Navigation */}
-      <div className="flex gap-1 bg-slate-100 p-1 rounded-lg mb-6 w-fit mt-6">
+      <div className="flex gap-1 bg-slate-100 p-1 rounded-md mb-6 w-fit mt-6">
         {TABS.map(tab => (
           <button
             key={tab}
@@ -370,9 +370,9 @@ export default function BookmarksSection() {
           {filteredBookmarks.map((item) => (
             <div key={item.id} className="fade-in card-stagger h-full">
               {item.type === 'Colleges' && (
-                <div className="flex h-full cursor-pointer flex-col rounded-2xl border border-gray-200 bg-white p-4 transition-all duration-300 hover:border-blue-500/20 overflow-visible">
+                <div className="flex h-full cursor-pointer flex-col rounded-md border border-gray-200 bg-white p-4 transition-all duration-300 hover:border-blue-500/20 overflow-visible">
                   <div
-                    className="group relative h-35 shrink-0 overflow-hidden rounded-xl"
+                    className="group relative h-35 shrink-0 overflow-hidden rounded-md"
                   >
                     
                     {(item as CollegeBookmark).isVerified && item.imageUrl ? (
@@ -395,7 +395,7 @@ export default function BookmarksSection() {
                         className="group/title relative truncate text-left text-[20px] font-bold text-slate-800 tracking-tight transition-colors hover:text-blue-600 line-clamp-2"
                       >
                         <span className="truncate block" title={item.name}>{item.name}</span>
-                        <span className="absolute bottom-full left-0 mb-2 invisible opacity-0 group-hover/title:visible group-hover/title:opacity-100 bg-gray-900 text-white text-[13px] font-medium py-1.5 px-3 rounded shadow-md whitespace-nowrap transition-all duration-200 z-50 pointer-events-none">
+                        <span className="absolute bottom-full left-0 mb-2 invisible opacity-0 group-hover/title:visible group-hover/title:opacity-100 bg-gray-900 text-white text-[13px] font-medium py-1.5 px-3 rounded  whitespace-nowrap transition-all duration-200 z-50 pointer-events-none">
                           {item.name}
                           <span className="absolute top-full left-4 -mt-px border-[5px] border-transparent border-t-gray-900"></span>
                         </span>
@@ -422,7 +422,7 @@ export default function BookmarksSection() {
                         <MapPin className="w-4.5 h-4.5 text-gray-400" />
                         <span className="group/location block min-w-0 truncate font-semibold text-slate-700 line-clamp-1" title={(item as CollegeBookmark).location}>
                           <span className="truncate block">{(item as CollegeBookmark).location.split(',')[0]}</span>
-                          <span className="absolute bottom-full left-0 mb-2 invisible opacity-0 group-hover/location:visible group-hover/location:opacity-100 bg-gray-900 text-white text-[13px] font-medium py-1.5 px-3 rounded shadow-md whitespace-nowrap transition-all duration-200 z-50 pointer-events-none">
+                          <span className="absolute bottom-full left-0 mb-2 invisible opacity-0 group-hover/location:visible group-hover/location:opacity-100 bg-gray-900 text-white text-[13px] font-medium py-1.5 px-3 rounded  whitespace-nowrap transition-all duration-200 z-50 pointer-events-none">
                             {(item as CollegeBookmark).location}
                             <span className="absolute top-full left-4 -mt-px border-[5px] border-transparent border-t-gray-900"></span>
                           </span>
@@ -436,7 +436,7 @@ export default function BookmarksSection() {
                         <span className="truncate block">
                           {(item as CollegeBookmark).affiliation}
                         </span>
-                        <span className="absolute bottom-full left-0 mb-2 invisible opacity-0 group-hover/affil:visible group-hover/affil:opacity-100 bg-gray-900 text-white text-[13px] font-medium py-1.5 px-3 rounded shadow-md whitespace-nowrap transition-all duration-200 z-50 pointer-events-none">
+                        <span className="absolute bottom-full left-0 mb-2 invisible opacity-0 group-hover/affil:visible group-hover/affil:opacity-100 bg-gray-900 text-white text-[13px] font-medium py-1.5 px-3 rounded  whitespace-nowrap transition-all duration-200 z-50 pointer-events-none">
                           {(item as CollegeBookmark).affiliation}
                           <span className="absolute top-full left-4 -mt-px border-[5px] border-transparent border-t-gray-900"></span>
                         </span>
@@ -555,7 +555,7 @@ export default function BookmarksSection() {
               )}
 
               {item.type === 'Courses' && (
-                <div className="bg-white rounded-xl border border-gray-200 flex flex-col h-full transition-all hover:border-blue-500/20 duration-300">
+                <div className="bg-white rounded-md border border-gray-200 flex flex-col h-full transition-all hover:border-blue-500/20 duration-300">
                   <div className="relative h-28 w-full p-3 pb-2">
                     <img
                       src={
@@ -563,7 +563,7 @@ export default function BookmarksSection() {
                         `https://images.unsplash.com/photo-1517694712202-14dd9538aa97?auto=format&fit=crop&w=400&q=200`
                       }
                       alt={item.name}
-                      className="w-full h-full object-cover rounded-lg"
+                      className="w-full h-full object-cover rounded-md"
                     />
                   </div>
 
@@ -648,7 +648,7 @@ export default function BookmarksSection() {
                       </button>
 
                       <button
-                        className="flex-[2.5] bg-[#0014f4] hover:bg-blue-800 text-white font-semibold py-2 rounded-md shadow-sm text-[12px] flex items-center justify-center transition-colors whitespace-nowrap"
+                        className="flex-[2.5] bg-[#0014f4] hover:bg-blue-800 text-white font-semibold py-2 rounded-md  text-[12px] flex items-center justify-center transition-colors whitespace-nowrap"
                       >
                         View Colleges
                       </button>
@@ -679,8 +679,8 @@ export default function BookmarksSection() {
               )}
 
               {item.type === 'Scholarships' && (
-                <div className="relative flex flex-col bg-white rounded-2xl border border-gray-200/80 transition-all duration-300 p-3">
-                  <div className="h-31.25 w-full bg-gray-100 relative overflow-hidden rounded-xl mb-3">
+                <div className="relative flex flex-col bg-white rounded-md border border-gray-200/80 transition-all duration-300 p-3">
+                  <div className="h-31.25 w-full bg-gray-100 relative overflow-hidden rounded-md mb-3">
                     {(item as ScholarshipBookmark).imageUrl ? (
                       <img src={item.imageUrl} alt={item.name} className="w-full h-full object-cover" />
                     ) : (
@@ -717,7 +717,7 @@ export default function BookmarksSection() {
                       <BadgeCheck className="w-3.5 h-3.5 text-white fill-[#2563eb]" />
                     </div>
 
-                    <div className="bg-[#f9fafb] rounded-xl p-3.5 border border-gray-100 mb-4 mt-auto flex flex-col gap-2.5">
+                    <div className="bg-[#f9fafb] rounded-md p-3.5 border border-gray-100 mb-4 mt-auto flex flex-col gap-2.5">
                       <div className="grid grid-cols-2 gap-x-2">
                         <div className="flex items-center gap-1.5 text-[12px] text-gray-600 font-medium">
                           <DollarSign className="w-3.5 h-3.5 text-gray-400 shrink-0" />
@@ -763,9 +763,9 @@ export default function BookmarksSection() {
               )}
 
               {item.type === 'Events' && (
-                <div className="bg-white rounded-2xl border border-gray-200 hover:border-blue-500/20 overflow-hidden flex flex-col duration-300 cursor-pointer">
+                <div className="bg-white rounded-md border border-gray-200 hover:border-blue-500/20 overflow-hidden flex flex-col duration-300 cursor-pointer">
                   <div className="h-35 w-full overflow-hidden p-4">
-                    <img src={item.imageUrl} alt={item.name} className="w-full h-full object-cover rounded-lg" />
+                    <img src={item.imageUrl} alt={item.name} className="w-full h-full object-cover rounded-md" />
                   </div>
                   <div className="p-5 flex flex-col grow">
                     <div className="flex justify-between items-center mb-3">
@@ -798,11 +798,11 @@ export default function BookmarksSection() {
                     <div className="mt-auto flex gap-2">
                       <Link
                         href="#"
-                        className="flex-1 bg-white border border-gray-300 text-gray-700 text-sm font-bold py-2 rounded-lg hover:bg-gray-50 transition text-center"
+                        className="flex-1 bg-white border border-gray-300 text-gray-700 text-sm font-bold py-2 rounded-md hover:bg-gray-50 transition text-center"
                       >
                         Details
                       </Link>
-                      <button className={`flex-1 text-white text-sm font-bold py-2 rounded-lg transition bg-brand-blue cursor-pointer hover:bg-blue-600`}>
+                      <button className={`flex-1 text-white text-sm font-bold py-2 rounded-md transition bg-brand-blue cursor-pointer hover:bg-blue-600`}>
                         Register Now
                       </button>
                       <button
@@ -829,7 +829,7 @@ export default function BookmarksSection() {
               )}
 
               {item.type === 'Entrance' && (
-                <div className="bg-white rounded-2xl p-4 sm:p-5 border border-gray-200 flex flex-col h-full hover:border-blue-500/20 transition-all duration-300 overflow-visible">
+                <div className="bg-white rounded-md p-4 sm:p-5 border border-gray-200 flex flex-col h-full hover:border-blue-500/20 transition-all duration-300 overflow-visible">
                   <header className="flex justify-between items-start mb-4 sm:mb-5">
                     <div className="flex gap-2.5 sm:gap-3">
                       <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-md border border-gray-100 flex items-center justify-center bg-white shrink-0">
@@ -845,7 +845,7 @@ export default function BookmarksSection() {
                           {(item as EntranceBookmark).verified && (
                             <BadgeCheck className="w-3.25 h-3.25 sm:w-3.75 sm:h-3.75 text-white fill-blue-500 ml-0.5 sm:ml-1 shrink-0" />
                           )}
-                          <div className="absolute bottom-full left-0 mb-2 invisible opacity-0 group-hover:visible group-hover:opacity-100 bg-gray-900 text-white text-[13px] font-medium py-1.5 px-3 rounded shadow-md whitespace-nowrap transition-all duration-200 z-100 pointer-events-none">
+                          <div className="absolute bottom-full left-0 mb-2 invisible opacity-0 group-hover:visible group-hover:opacity-100 bg-gray-900 text-white text-[13px] font-medium py-1.5 px-3 rounded  whitespace-nowrap transition-all duration-200 z-100 pointer-events-none">
                             {(item as EntranceBookmark).institution}
                             <div className="absolute top-full left-4 -mt-px border-[5px] border-transparent border-t-gray-900"></div>
                           </div>
@@ -877,7 +877,7 @@ export default function BookmarksSection() {
                       className="group relative text-[15px] xs:text-[16px] sm:text-[17px] font-bold text-[#111827] mb-2.5 sm:mb-3 leading-tight cursor-pointer hover:text-brand-blue transition-colors"
                     >
                       <span className="truncate block">{item.name}</span>
-                      <div className="absolute bottom-full left-0 mb-2 invisible opacity-0 group-hover:visible group-hover:opacity-100 bg-gray-900 text-white text-[13px] font-medium py-1.5 px-3 rounded shadow-md whitespace-nowrap transition-all duration-200 z-100 pointer-events-none">
+                      <div className="absolute bottom-full left-0 mb-2 invisible opacity-0 group-hover:visible group-hover:opacity-100 bg-gray-900 text-white text-[13px] font-medium py-1.5 px-3 rounded  whitespace-nowrap transition-all duration-200 z-100 pointer-events-none">
                         {item.name}
                         <div className="absolute top-full left-4 -mt-px border-[5px] border-transparent border-t-gray-900"></div>
                       </div>
@@ -904,7 +904,7 @@ export default function BookmarksSection() {
                       ))}
                     </div>
 
-                    <div className="bg-[#f8fafc] rounded-lg sm:rounded-xl p-2 sm:p-2.5 flex flex-col gap-1.5 sm:gap-2 mt-auto border border-[#f1f5f9]">
+                    <div className="bg-[#f8fafc] rounded-md sm:rounded-md p-2 sm:p-2.5 flex flex-col gap-1.5 sm:gap-2 mt-auto border border-[#f1f5f9]">
                       <div className="flex items-center gap-2 sm:gap-2.5 text-[11px] xs:text-[12px] sm:text-[13px] text-[#475569]">
                         <Clock className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-[#94a3b8] shrink-0" />
                         <span className="truncate font-medium text-red-500 text-[11px] sm:text-[12px]">
@@ -940,21 +940,21 @@ export default function BookmarksSection() {
 
                   <div className="mt-3 sm:mt-4 pt-1 flex flex-col gap-2 sm:gap-2.5">
                     <button
-                      className="w-full flex items-center justify-center gap-2 py-2 sm:py-2.5 px-3 bg-brand-blue text-white font-bold text-[12px] sm:text-[13px] rounded-lg hover:bg-brand-hover transition-colors shadow-sm"
+                      className="w-full flex items-center justify-center gap-2 py-2 sm:py-2.5 px-3 bg-brand-blue text-white font-bold text-[12px] sm:text-[13px] rounded-md hover:bg-brand-hover transition-colors "
                     >
                       <PlayCircle className="w-4 h-4" /> Start Mock Test
                     </button>
                     <div className="grid grid-cols-[1fr_1fr_auto] gap-2 sm:gap-2.5">
-                      <button className="flex items-center justify-center gap-1.5 py-1.5 sm:py-2 px-2 sm:px-3 border border-[#e2e8f0] text-[#475569] font-bold text-[11px] xs:text-[12px] rounded-lg hover:bg-gray-50 transition-colors">
+                      <button className="flex items-center justify-center gap-1.5 py-1.5 sm:py-2 px-2 sm:px-3 border border-[#e2e8f0] text-[#475569] font-bold text-[11px] xs:text-[12px] rounded-md hover:bg-gray-50 transition-colors">
                         <Bell className="w-3.5 h-3.5" /> <span>Notify</span>
                       </button>
                       <button
-                        className="flex items-center justify-center gap-1.5 py-1.5 sm:py-2 px-2 sm:px-3 border border-[#e2e8f0] text-[#475569] font-bold text-[11px] xs:text-[12px] rounded-lg hover:bg-gray-50 transition-colors"
+                        className="flex items-center justify-center gap-1.5 py-1.5 sm:py-2 px-2 sm:px-3 border border-[#e2e8f0] text-[#475569] font-bold text-[11px] xs:text-[12px] rounded-md hover:bg-gray-50 transition-colors"
                       >
                         <Send className="w-3.5 h-3.5" /> Apply
                       </button>
                       <button
-                        className={`w-9 sm:w-10 shrink-0 rounded-lg flex items-center justify-center transition-all duration-200 ${
+                        className={`w-9 sm:w-10 shrink-0 rounded-md flex items-center justify-center transition-all duration-200 ${
                           true
                             ? "border-blue-200 bg-blue-50"
                             : "bg-white border border-[#e2e8f0] text-[#94a3b8] hover:bg-[#f8fafc] hover:text-[#64748b]"
@@ -1080,7 +1080,7 @@ export default function BookmarksSection() {
           ))}
         </div>
       ) : (
-        <div id="empty-state" className="flex flex-col items-center justify-center py-24 px-4 text-center fade-in bg-white rounded-3xl border border-slate-200 shadow-sm">
+        <div id="empty-state" className="flex flex-col items-center justify-center py-24 px-4 text-center fade-in bg-white rounded-md border border-slate-200 ">
           <div className="w-24 h-24 bg-slate-50 rounded-full flex items-center justify-center mb-6 shadow-inner">
             <Bookmark className="w-10 h-10 text-slate-400" />
           </div>
@@ -1088,7 +1088,7 @@ export default function BookmarksSection() {
           <p className="text-slate-500 max-w-md mx-auto text-base">
             You haven't saved any items here yet. Keep exploring the directory to build your perfect application shortlist.
           </p>
-          <button className="mt-8 px-8 py-3 bg-indigo-600 text-white font-semibold rounded-xl hover:bg-indigo-700 hover:-translate-y-0.5 transition-all shadow-lg shadow-indigo-200">
+          <button className="mt-8 px-8 py-3 bg-indigo-600 text-white font-semibold rounded-md hover:bg-indigo-700 hover:-translate-y-0.5 transition-all shadow-lg shadow-indigo-200">
             Explore Directory
           </button>
         </div>

@@ -45,7 +45,7 @@ const ImageGrid: React.FC<{ urls: string[] }> = ({ urls }) => {
 
   if (urls.length === 1) {
     return (
-      <div className="mb-3 overflow-hidden rounded-xl border border-gray-100">
+      <div className="mb-3 overflow-hidden rounded-md border border-gray-100">
         <img src={urls[0]} alt="Post" className="w-full max-h-80 object-cover" />
       </div>
     );
@@ -53,7 +53,7 @@ const ImageGrid: React.FC<{ urls: string[] }> = ({ urls }) => {
 
   if (urls.length === 2) {
     return (
-      <div className="mb-3 grid grid-cols-2 gap-1 overflow-hidden rounded-xl">
+      <div className="mb-3 grid grid-cols-2 gap-1 overflow-hidden rounded-md">
         {urls.map((u, i) => (
           <img key={i} src={u} alt={`Post ${i + 1}`} className="h-52 w-full object-cover" />
         ))}
@@ -63,7 +63,7 @@ const ImageGrid: React.FC<{ urls: string[] }> = ({ urls }) => {
 
   if (urls.length === 3) {
     return (
-      <div className="mb-3 grid grid-cols-[1fr_1fr] gap-1 overflow-hidden rounded-xl h-52">
+      <div className="mb-3 grid grid-cols-[1fr_1fr] gap-1 overflow-hidden rounded-md h-52">
         <img src={urls[0]} alt="Post 1" className="h-full w-full object-cover row-span-2" />
         <img src={urls[1]} alt="Post 2" className="h-[102px] w-full object-cover" />
         <img src={urls[2]} alt="Post 3" className="h-[102px] w-full object-cover" />
@@ -74,7 +74,7 @@ const ImageGrid: React.FC<{ urls: string[] }> = ({ urls }) => {
   const visible = urls.slice(0, 4);
   const extra = urls.length - 4;
   return (
-    <div className="mb-3 grid grid-cols-2 gap-1 overflow-hidden rounded-xl">
+    <div className="mb-3 grid grid-cols-2 gap-1 overflow-hidden rounded-md">
       {visible.map((u, i) => (
         <div key={i} className="relative h-36">
           <img src={u} alt={`Post ${i + 1}`} className="h-full w-full object-cover" />
@@ -102,7 +102,7 @@ const CommentItem: React.FC<CommentItemProps> = ({ comment, postId, depth = 0, o
 
   return (
     <div className="flex gap-2.5 items-start">
-      <div className="h-8 w-8 shrink-0 overflow-hidden rounded-full bg-slate-100 border border-white shadow-sm">
+      <div className="h-8 w-8 shrink-0 overflow-hidden rounded-full bg-slate-100 border border-white ">
         <img
           src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${comment.user.first_name}`}
           className="h-full w-full object-cover"
@@ -111,7 +111,7 @@ const CommentItem: React.FC<CommentItemProps> = ({ comment, postId, depth = 0, o
       </div>
 
       <div className="flex-1 min-w-0">
-        <div className="rounded-2xl bg-gray-50 px-4 py-2.5 group">
+        <div className="rounded-md bg-gray-50 px-4 py-2.5 group">
           <div className="flex items-center gap-2 mb-0.5">
             <span className="text-[12px] font-black text-gray-900 leading-none">
               {comment.user.first_name} {comment.user.last_name}
@@ -259,11 +259,11 @@ const ForumPostCard: React.FC<ForumPostCardProps> = ({
   const userId = post.user?.id || post.user_id;
 
   return (
-    <div className="rounded-xl border border-gray-100 bg-white p-4 shadow-sm sm:p-5 overflow-hidden hover:border-gray-200 transition">
+    <div className="rounded-md border border-gray-100 bg-white p-4  sm:p-5 overflow-hidden hover:border-gray-200 transition">
 
       <div className="mb-3 flex items-start justify-between">
         <div className="flex items-center gap-3">
-          <div className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-lg ${post.community?.bg_color || "bg-blue-600"} text-lg`}>
+          <div className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-md ${post.community?.bg_color || "bg-blue-600"} text-lg`}>
             {post.community?.emoji || "✨"}
           </div>
           <div>
@@ -288,7 +288,7 @@ const ForumPostCard: React.FC<ForumPostCardProps> = ({
             <MoreVertical className="h-5 w-5" />
           </button>
           {openDropdown === post.id && (
-            <div className="absolute right-0 z-50 mt-1 w-56 rounded-xl border border-gray-100 bg-white py-2 shadow-xl" onClick={(e) => e.stopPropagation()}>
+            <div className="absolute right-0 z-50 mt-1 w-56 rounded-md border border-gray-100 bg-white py-2 shadow-xl" onClick={(e) => e.stopPropagation()}>
               {isAuthenticated && user && post.user_id === user.id && (
                 <>
                   <button
@@ -345,7 +345,7 @@ const ForumPostCard: React.FC<ForumPostCardProps> = ({
       <ImageGrid urls={imageUrls} />
 
       {post.video_url && (
-        <div className="mb-3 overflow-hidden rounded-xl border border-gray-100">
+        <div className="mb-3 overflow-hidden rounded-md border border-gray-100">
           <video
             src={post.video_url}
             controls
@@ -368,7 +368,7 @@ const ForumPostCard: React.FC<ForumPostCardProps> = ({
                   <div
                     key={`${post.id}-p${index}`}
                     onClick={() => !isSelected && onPollVote(post.id, index)}
-                    className={`relative cursor-pointer overflow-hidden rounded-xl border p-3 transition-all duration-300 ${hasVoted
+                    className={`relative cursor-pointer overflow-hidden rounded-md border p-3 transition-all duration-300 ${hasVoted
                         ? isSelected ? "border-blue-500 bg-blue-50" : "border-gray-100 bg-white"
                         : "border-gray-200 bg-gray-50 hover:bg-gray-100"
                       }`}
@@ -428,7 +428,7 @@ const ForumPostCard: React.FC<ForumPostCardProps> = ({
         <div className="mt-4 border-t border-gray-100 pt-4 space-y-4">
 
           {replyingTo[post.id] && (
-            <div className="flex items-center justify-between rounded-lg bg-blue-50 px-3 py-2 text-[11px] font-bold text-blue-600">
+            <div className="flex items-center justify-between rounded-md bg-blue-50 px-3 py-2 text-[11px] font-bold text-blue-600">
               <span>↩ Replying to <strong>{replyingTo[post.id]?.user.first_name}</strong></span>
               <button onClick={() => onCancelReply(post.id)}>✕ Cancel</button>
             </div>
@@ -445,7 +445,7 @@ const ForumPostCard: React.FC<ForumPostCardProps> = ({
                 onChange={(e) => onCommentInputChange(post.id, e.target.value)}
                 onKeyDown={(e) => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); onCommentSubmit(post.id); } }}
                 placeholder={replyingTo[post.id] ? `Reply to ${replyingTo[post.id]?.user.first_name}…` : "Write a comment…"}
-                className="w-full rounded-xl border border-gray-100 bg-gray-50 px-4 py-2 pr-10 text-sm font-medium text-gray-700 outline-none focus:border-blue-200 focus:bg-white transition"
+                className="w-full rounded-md border border-gray-100 bg-gray-50 px-4 py-2 pr-10 text-sm font-medium text-gray-700 outline-none focus:border-blue-200 focus:bg-white transition"
                 rows={1}
               />
               <button
@@ -481,7 +481,7 @@ const ForumPostCard: React.FC<ForumPostCardProps> = ({
             {(totalCommentsMap[post.id] || 0) > (commentsMap[post.id]?.length || 0) && !isCommentsLoading[post.id] && (
               <button
                 onClick={() => onLoadMoreComments(post.id)}
-                className="w-full rounded-xl border border-slate-100 bg-slate-50 py-2 text-center text-xs font-black uppercase tracking-widest text-blue-600 hover:bg-blue-50 transition"
+                className="w-full rounded-md border border-slate-100 bg-slate-50 py-2 text-center text-xs font-black uppercase tracking-widest text-blue-600 hover:bg-blue-50 transition"
               >
                 Show More Comments ({(totalCommentsMap[post.id] || 0) - (commentsMap[post.id]?.length || 0)} more)
               </button>

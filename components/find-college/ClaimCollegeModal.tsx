@@ -72,7 +72,7 @@ const ClaimCollegeModal: React.FC<ClaimCollegeModalProps> = ({ college, onClose 
       onClick={onClose}
     >
       <main
-        className="relative max-h-[95vh] w-full max-w-105 overflow-y-auto rounded-xl  bg-white"
+        className="relative max-h-[95vh] w-full max-w-105 overflow-y-auto rounded-md  bg-white"
         onClick={(e) => e.stopPropagation()}
       >
         {!isSubmitted && (
@@ -109,7 +109,7 @@ const ClaimCollegeModal: React.FC<ClaimCollegeModalProps> = ({ college, onClose 
                     value={formData.fullName}
                     onChange={(e) => handleChange("fullName", e.target.value)}
                     placeholder="Enter your full name"
-                    className="w-full rounded-lg border border-gray-200 bg-gray-50 py-2 pl-8 pr-3 text-sm outline-none transition focus:border-brand-blue focus:bg-white"
+                    className="w-full rounded-md border border-gray-200 bg-gray-50 py-2 pl-8 pr-3 text-sm outline-none transition focus:border-brand-blue focus:bg-white"
                   />
                 </div>
               </div>
@@ -126,7 +126,7 @@ const ClaimCollegeModal: React.FC<ClaimCollegeModalProps> = ({ college, onClose 
                     value={formData.designation}
                     onChange={(e) => handleChange("designation", e.target.value)}
                     placeholder="Enter your designation (e.g. Principal)"
-                    className="w-full rounded-lg border border-gray-200 bg-gray-50 py-2 pl-8 pr-3 text-sm text-gray-700 outline-none transition focus:border-brand-blue focus:bg-white"
+                    className="w-full rounded-md border border-gray-200 bg-gray-50 py-2 pl-8 pr-3 text-sm text-gray-700 outline-none transition focus:border-brand-blue focus:bg-white"
                   />
                 </div>
               </div>
@@ -143,7 +143,7 @@ const ClaimCollegeModal: React.FC<ClaimCollegeModalProps> = ({ college, onClose 
                     value={formData.email}
                     onChange={(e) => handleChange("email", e.target.value)}
                     placeholder="Enter your official email address"
-                    className="w-full rounded-lg border border-gray-200 bg-gray-50 py-2 pl-8 pr-3 text-sm outline-none transition focus:border-brand-blue focus:bg-white"
+                    className="w-full rounded-md border border-gray-200 bg-gray-50 py-2 pl-8 pr-3 text-sm outline-none transition focus:border-brand-blue focus:bg-white"
                   />
                 </div>
               </div>
@@ -153,7 +153,7 @@ const ClaimCollegeModal: React.FC<ClaimCollegeModalProps> = ({ college, onClose 
                   <label className="mb-1 block text-xs font-semibold text-gray-700">
                     Phone <span className="text-red-500">*</span>
                   </label>
-                  <div className="flex rounded-lg border border-gray-200 bg-gray-50 transition focus-within:border-brand-blue focus-within:bg-white">
+                  <div className="flex rounded-md border border-gray-200 bg-gray-50 transition focus-within:border-brand-blue focus-within:bg-white">
                     <span className="inline-flex items-center border-r border-gray-200/50 px-2 text-[11px] font-bold text-gray-500">
                       +977
                     </span>
@@ -173,7 +173,7 @@ const ClaimCollegeModal: React.FC<ClaimCollegeModalProps> = ({ college, onClose 
                   <label className="mb-1 block text-xs font-semibold text-gray-700">
                     WhatsApp <span className="text-[10px] font-normal text-gray-400">(Opt)</span>
                   </label>
-                  <div className="flex rounded-lg border border-gray-200 bg-gray-50 transition focus-within:border-brand-blue focus-within:bg-white">
+                  <div className="flex rounded-md border border-gray-200 bg-gray-50 transition focus-within:border-brand-blue focus-within:bg-white">
                     <span className="inline-flex items-center border-r border-gray-200/50 px-2 text-[11px] font-bold text-green-600">
                       <RiWhatsappFill className="h-3.5 w-3.5" />
                     </span>
@@ -201,7 +201,7 @@ const ClaimCollegeModal: React.FC<ClaimCollegeModalProps> = ({ college, onClose 
                     value={formData.department}
                     onChange={(e) => handleChange("department", e.target.value)}
                     placeholder="e.g. Administration"
-                    className="w-full rounded-lg border border-gray-200 bg-gray-50 py-2 pl-8 pr-3 text-sm outline-none transition focus:border-brand-blue focus:bg-white"
+                    className="w-full rounded-md border border-gray-200 bg-gray-50 py-2 pl-8 pr-3 text-sm outline-none transition focus:border-brand-blue focus:bg-white"
                   />
                 </div>
               </div>
@@ -210,7 +210,7 @@ const ClaimCollegeModal: React.FC<ClaimCollegeModalProps> = ({ college, onClose 
                 <button
                   type="submit"
                   disabled={isSubmitting}
-                  className="flex w-full items-center justify-center gap-2 rounded-lg bg-brand-blue px-4 py-2.5 text-sm font-bold text-white transition-colors hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-75"
+                  className="flex w-full items-center justify-center gap-2 rounded-md bg-brand-blue px-4 py-2.5 text-sm font-bold text-white transition-colors hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-75"
                 >
                   {isSubmitting ? (
                     <>
@@ -229,7 +229,7 @@ const ClaimCollegeModal: React.FC<ClaimCollegeModalProps> = ({ college, onClose 
           </div>
         ) : (
           <div className="flex flex-col items-center justify-center p-6 py-10 text-center">
-            <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-green-100 shadow-sm">
+            <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-green-100 ">
               <Check className="h-7 w-7 text-green-500" />
             </div>
             <h3 className="mb-1 text-lg font-bold text-gray-900">Request Received!</h3>
@@ -245,7 +245,7 @@ const ClaimCollegeModal: React.FC<ClaimCollegeModalProps> = ({ college, onClose 
             <button
               type="button"
               onClick={onClose}
-              className="flex w-full max-w-55 items-center justify-center gap-2 rounded-lg bg-brand-blue px-4 py-2.5 text-sm font-bold text-white transition-colors hover:bg-blue-700"
+              className="flex w-full max-w-55 items-center justify-center gap-2 rounded-md bg-brand-blue px-4 py-2.5 text-sm font-bold text-white transition-colors hover:bg-blue-700"
             >
               Close Window
             </button>

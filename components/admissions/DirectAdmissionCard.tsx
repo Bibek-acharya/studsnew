@@ -32,14 +32,14 @@ export default function DirectAdmissionCard({
   const [favorited, setFavorited] = useState(false);
 
   return (
-    <div className="bg-white rounded-md shadow-sm border border-gray-100 overflow-hidden w-full max-w-[340px] flex flex-col transition-all duration-300 hover:shadow-md relative">
+    <div className="bg-white rounded-md  border border-gray-100 overflow-hidden w-full max-w-[340px] flex flex-col transition-all duration-300 hover: relative">
       {/* Image Section */}
       <div className="p-2.5 pb-0 shrink-0">
         <div className="relative h-28 w-full bg-gray-50 rounded-[14px] overflow-hidden flex items-center justify-center">
           <img src={image} alt={collegeName} className="w-full h-full object-cover" />
 
           {/* Direct Admission Badge */}
-          <div className="absolute top-2 left-0 bg-indigo-600 text-white text-[9px] font-bold px-2 py-0.5 tracking-wide rounded-r-sm z-10 uppercase flex items-center gap-1 shadow-sm">
+          <div className="absolute top-2 left-0 bg-indigo-600 text-white text-[9px] font-bold px-2 py-0.5 tracking-wide rounded-r-sm z-10 uppercase flex items-center gap-1 ">
             <svg className="w-[10px] h-[10px]" fill="currentColor" viewBox="0 0 20 20">
               <path fillRule="evenodd" d="M11.3 1.046A1 1 0 0112 2v5h4a1 1 0 01.82 1.573l-7 10A1 1 0 018 18v-5H4a1 1 0 01-.82-1.573l7-10a1 1 0 011.12-.38z" clipRule="evenodd" />
             </svg>
@@ -113,7 +113,7 @@ export default function DirectAdmissionCard({
         </div>
 
         {/* Fast Track Highlight */}
-        <div className="bg-indigo-50/50 rounded-lg p-2.5 mb-3 border border-indigo-100/50">
+        <div className="bg-indigo-50/50 rounded-md p-2.5 mb-3 border border-indigo-100/50">
           <div className="text-[11px] text-indigo-700 font-bold uppercase tracking-wider mb-1 flex items-center gap-1">
             <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2.5">
               <path strokeLinecap="round" strokeLinejoin="round" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
@@ -152,7 +152,7 @@ export default function DirectAdmissionCard({
         <div className="flex items-center gap-1.5">
           <button
             onClick={onApply}
-            className="flex-1 py-2 px-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-md text-[12px] font-bold transition-all shadow-sm flex items-center justify-center gap-2"
+            className="flex-1 py-2 px-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-md text-[12px] font-bold transition-all  flex items-center justify-center gap-2"
           >
             Secure Spot
           </button>

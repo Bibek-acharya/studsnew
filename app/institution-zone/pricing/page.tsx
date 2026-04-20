@@ -327,13 +327,13 @@ export default function PricingPage() {
             </p>
 
             <div className="flex justify-center mt-10">
-              <div className="bg-slate-100 p-1.5 rounded-xl inline-flex border border-slate-200">
+              <div className="bg-slate-100 p-1.5 rounded-md inline-flex border border-slate-200">
                 {(["monthly", "semiAnnually", "annually"] as BillingCycle[]).map(
                   (cycle) => (
                     <button
                       key={cycle}
                       onClick={() => setBillingCycle(cycle)}
-                      className={`w-28 sm:w-32 py-2.5 text-sm font-bold rounded-lg transition-all ${
+                      className={`w-28 sm:w-32 py-2.5 text-sm font-bold rounded-md transition-all ${
                         billingCycle === cycle
                           ? "bg-white text-slate-900 border border-slate-200/50"
                           : "text-slate-500 hover:text-slate-900"
@@ -386,7 +386,7 @@ export default function PricingPage() {
                 </div>
                 <button
                   onClick={() => setSelectedPlanModal(tier.name)}
-                  className={`w-full py-4 rounded-xl font-bold text-sm tracking-wide transition-all ${
+                  className={`w-full py-4 rounded-md font-bold text-sm tracking-wide transition-all ${
                     tier.highlighted
                       ? "bg-brand-blue text-white hover:bg-[#4b4dd6]"
                       : "bg-brand-blue/8 text-brand-blue hover:bg-[#dadaff]"
@@ -537,7 +537,7 @@ export default function PricingPage() {
                   id="collegeName"
                   required
                   placeholder="e.g. Oxford University"
-                  className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:border-brand-blue focus:bg-white focus:ring-1 focus:ring-brand-blue transition-all"
+                  className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-md text-sm focus:outline-none focus:border-brand-blue focus:bg-white focus:ring-1 focus:ring-brand-blue transition-all"
                 />
               </div>
               <div>
@@ -553,7 +553,7 @@ export default function PricingPage() {
                   id="registrationNumber"
                   required
                   placeholder="Registration ID / Code"
-                  className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:border-brand-blue focus:bg-white focus:ring-1 focus:ring-brand-blue transition-all"
+                  className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-md text-sm focus:outline-none focus:border-brand-blue focus:bg-white focus:ring-1 focus:ring-brand-blue transition-all"
                 />
               </div>
               <div>
@@ -568,7 +568,7 @@ export default function PricingPage() {
                   id="contactNumber"
                   required
                   placeholder="+977- 98XXXXXXXX"
-                  className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:border-brand-blue focus:bg-white focus:ring-1 focus:ring-brand-blue transition-all"
+                  className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-md text-sm focus:outline-none focus:border-brand-blue focus:bg-white focus:ring-1 focus:ring-brand-blue transition-all"
                 />
               </div>
               <div>
@@ -583,12 +583,12 @@ export default function PricingPage() {
                   id="emailAddress"
                   required
                   placeholder="admissions@college.edu"
-                  className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:border-brand-blue focus:bg-white focus:ring-1 focus:ring-brand-blue transition-all"
+                  className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-md text-sm focus:outline-none focus:border-brand-blue focus:bg-white focus:ring-1 focus:ring-brand-blue transition-all"
                 />
               </div>
               <button
                 type="submit"
-                className="w-full mt-4 bg-brand-blue hover:bg-[#4b4dd6] text-white py-3 rounded-xl font-bold transition-colors flex justify-center items-center"
+                className="w-full mt-4 bg-brand-blue hover:bg-[#4b4dd6] text-white py-3 rounded-md font-bold transition-colors flex justify-center items-center"
               >
                 Submit Request
               </button>

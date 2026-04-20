@@ -11,13 +11,13 @@ const RecommendedForYouSection: React.FC<RecommendedForYouSectionProps> = ({ onN
     <section className="mt-16 sm:mt-20 md:mt-24 w-full mb-8 sm:mb-10 md:mb-12">
       <div className="max-w-350 mx-auto w-full ">
         {/* Banner Container */}
-        <div className="bg-white border border-gray-200 rounded-xl md:rounded-2xl shadow-sm p-5 xs:p-6 sm:p-7 md:p-8 lg:p-10 flex flex-col md:flex-row items-center justify-between gap-6 sm:gap-8 md:gap-10 lg:gap-12">
+        <div className="bg-white border border-gray-200 rounded-md md:rounded-md  p-5 xs:p-6 sm:p-7 md:p-8 lg:p-10 flex flex-col md:flex-row items-center justify-between gap-6 sm:gap-8 md:gap-10 lg:gap-12">
           {/* Left Column: Illustration */}
           <div className="w-full md:w-1/2 flex justify-center items-center order-2 md:order-1">
             <img
               src="https://i.pinimg.com/736x/b7/50/a5/b750a5280219942bd8d163bc262ec95e.jpg"
               alt="Student with bags"
-              className="w-full max-w-[220px] xs:max-w-[250px] sm:max-w-[280px] lg:max-w-[380px] h-auto object-contain rounded-2xl"
+              className="w-full max-w-[220px] xs:max-w-[250px] sm:max-w-[280px] lg:max-w-[380px] h-auto object-contain rounded-md"
               onError={(e: any) => {
                 e.target.src = "https://placehold.co/400x400/f1f5f9/94a3b8?text=Illustration";
               }}
@@ -40,14 +40,14 @@ const RecommendedForYouSection: React.FC<RecommendedForYouSectionProps> = ({ onN
             <div className="flex flex-col w-full max-w-[280px] xs:max-w-[300px] sm:max-w-[320px] gap-2.5 sm:gap-3">
               <button
                 onClick={() => onNavigate("collegeQuiz")}
-                className="bg-brand-blue hover:bg-[#0000CC] text-white font-medium py-2.5 sm:py-3 px-5 sm:px-6 rounded-xl w-full text-sm xs:text-base sm:text-base md:text-lg shadow-sm hover:shadow-md active:scale-[0.98] transition-all"
+                className="bg-brand-blue hover:bg-[#0000CC] text-white font-medium py-2.5 sm:py-3 px-5 sm:px-6 rounded-md w-full text-sm xs:text-base sm:text-base md:text-lg  hover: active:scale-[0.98] transition-all"
               >
                 Take our College Quiz
               </button>
 
               <button
                 onClick={() => onNavigate("collegeRecommenderTool")}
-                className="bg-brand-blue hover:bg-[#0000CC] text-white font-medium py-2.5 sm:py-3 px-5 sm:px-6 rounded-xl w-full text-sm xs:text-base sm:text-base md:text-lg shadow-sm hover:shadow-md active:scale-[0.98] transition-all"
+                className="bg-brand-blue hover:bg-[#0000CC] text-white font-medium py-2.5 sm:py-3 px-5 sm:px-6 rounded-md w-full text-sm xs:text-base sm:text-base md:text-lg  hover: active:scale-[0.98] transition-all"
               >
                 Try College Recommender
               </button>

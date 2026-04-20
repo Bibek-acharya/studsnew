@@ -111,10 +111,10 @@ const DashboardHeader = ({ toggleSidebar, activeTab, onNavigate, onNotificationU
   const { title, subtitle } = getHeaderInfo();
 
   return (
-    <header className="h-20 bg-white border-b border-slate-200 flex items-center justify-between px-4 sm:px-8 z-30 shadow-sm shrink-0">
+    <header className="h-20 bg-white border-b border-slate-200 flex items-center justify-between px-4 sm:px-8 z-30  shrink-0">
       <div className="flex items-center gap-4">
         <button
-          className="md:hidden text-slate-500 hover:text-primary-600 focus:outline-none bg-slate-50 p-2 rounded-lg"
+          className="md:hidden text-slate-500 hover:text-primary-600 focus:outline-none bg-slate-50 p-2 rounded-md"
           onClick={toggleSidebar}
         >
           <i className="fa-solid fa-bars text-xl"></i>
@@ -162,7 +162,7 @@ const DashboardHeader = ({ toggleSidebar, activeTab, onNavigate, onNotificationU
             </button>
 
             {showNotifDropdown && (
-              <div className="absolute right-0 mt-2 w-80 bg-white rounded-2xl shadow-2xl border border-slate-200 overflow-hidden z-50">
+              <div className="absolute right-0 mt-2 w-80 bg-white rounded-md shadow-2xl border border-slate-200 overflow-hidden z-50">
                 <div className="p-4 border-b border-slate-100 bg-slate-50/50 flex justify-between items-center">
                   <h3 className="font-black text-slate-800 text-sm uppercase tracking-wider">Notifications</h3>
                   {unreadCount > 0 && (
@@ -194,7 +194,7 @@ const DashboardHeader = ({ toggleSidebar, activeTab, onNavigate, onNotificationU
                           !notif.read ? 'bg-blue-50/30' : ''
                         }`}
                       >
-                        <div className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 ${
+                        <div className={`w-10 h-10 rounded-md flex items-center justify-center shrink-0 ${
                           !notif.read ? 'bg-primary-100' : 'bg-slate-100'
                         }`}>
                           <i className={`fa-solid ${getNotifIcon(notif.type)} text-sm`}></i>

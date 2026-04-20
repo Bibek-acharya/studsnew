@@ -45,9 +45,9 @@ const FinancialAidSection: React.FC<FinancialAidSectionProps> = ({ onNavigate, s
       {/* Grid Container for Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-5 md:gap-6">
         {items.map((scholarship) => (
-          <div key={scholarship.id} className="bg-white rounded-[14px] sm:rounded-xl p-3 sm:p-3.5 border border-[#e2e8f0] flex flex-col h-full group hover:border-blue-500/20 transition-all duration-300">
+          <div key={scholarship.id} className="bg-white rounded-[14px] sm:rounded-md p-3 sm:p-3.5 border border-[#e2e8f0] flex flex-col h-full group hover:border-blue-500/20 transition-all duration-300">
             {/* Image Area */}
-            <div className="w-full h-30 rounded-[10px] sm:rounded-xl overflow-hidden mb-3 sm:mb-4 relative">
+            <div className="w-full h-30 rounded-[10px] sm:rounded-md overflow-hidden mb-3 sm:mb-4 relative">
               <img 
                 src={scholarship.image || "https://images.unsplash.com/photo-1498050108023-c5249f4df085?q=80&w=600&auto=format&fit=crop"} 
                 alt={scholarship.title} 
@@ -83,7 +83,7 @@ const FinancialAidSection: React.FC<FinancialAidSectionProps> = ({ onNavigate, s
               </div>
 
               {/* Details Box */}
-              <div className="bg-[#f8fafc] rounded-lg sm:rounded-xl p-2.5 sm:p-3 md:p-3.5 flex flex-col gap-2 sm:gap-3 mt-auto border border-[#f1f5f9]">
+              <div className="bg-[#f8fafc] rounded-md sm:rounded-md p-2.5 sm:p-3 md:p-3.5 flex flex-col gap-2 sm:gap-3 mt-auto border border-[#f1f5f9]">
                 {/* Row 1: Split */}
                 <div className="grid grid-cols-2 gap-1.5 sm:gap-2 text-[11px] xs:text-[12px] sm:text-[13px] text-[#475569]">
                   <div className="flex items-center gap-1.5 sm:gap-2">
@@ -113,15 +113,15 @@ const FinancialAidSection: React.FC<FinancialAidSectionProps> = ({ onNavigate, s
               <div className="flex gap-2 sm:gap-2.5 mt-4 sm:mt-5 mb-1">
                 <button 
                   onClick={() => onNavigate("scholarshipDetails", scholarship)}
-                  className="flex-1 bg-white border border-[#cbd5e1] text-[#334155] rounded-lg py-2 sm:py-2.5 text-[12px] sm:text-[13px] md:text-[14px] font-semibold hover:bg-[#f8fafc] hover:text-[#0f172a] transition-all duration-200"
+                  className="flex-1 bg-white border border-[#cbd5e1] text-[#334155] rounded-md py-2 sm:py-2.5 text-[12px] sm:text-[13px] md:text-[14px] font-semibold hover:bg-[#f8fafc] hover:text-[#0f172a] transition-all duration-200"
                 >
                   Details
                 </button>
-                <button className="flex-1 bg-brand-blue text-white rounded-lg py-2 sm:py-2.5 text-[12px] sm:text-[13px] md:text-[14px] font-semibold hover:bg-brand-hover hover:shadow-md transition-all duration-200">
+                <button className="flex-1 bg-brand-blue text-white rounded-md py-2 sm:py-2.5 text-[12px] sm:text-[13px] md:text-[14px] font-semibold hover:bg-brand-hover hover: transition-all duration-200">
                   Apply
                 </button>
                 <button
-                  className={`w-9 sm:w-10 md:w-11 shrink-0 rounded-lg flex items-center justify-center transition-all duration-200 ${
+                  className={`w-9 sm:w-10 md:w-11 shrink-0 rounded-md flex items-center justify-center transition-all duration-200 ${
                     bookmarked.has(scholarship.id)
                       ? "border-blue-200 bg-blue-50"
                       : "bg-white border border-[#cbd5e1] text-[#94a3b8] hover:bg-[#f8fafc] hover:text-[#64748b]"

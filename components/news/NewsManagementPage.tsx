@@ -400,7 +400,7 @@ const NewsManagementPage = () => {
 
       {/* Left Sidebar */}
       <aside
-        className={`bg-white w-64 h-full border-r border-gray-200 flex flex-col fixed lg:static transform ${isSidebarOpen ? "translate-x-0" : "-translate-x-full"} lg:translate-x-0 transition-transform duration-300 z-30 shadow-sm lg:shadow-none`}
+        className={`bg-white w-64 h-full border-r border-gray-200 flex flex-col fixed lg:static transform ${isSidebarOpen ? "translate-x-0" : "-translate-x-full"} lg:translate-x-0 transition-transform duration-300 z-30  lg:shadow-none`}
       >
         <div className="h-16 flex items-center px-6 border-b border-gray-100">
           <div className="flex items-center gap-2 text-blue-600">
@@ -418,7 +418,7 @@ const NewsManagementPage = () => {
         <nav className="flex-1 overflow-y-auto py-6 px-4 space-y-2">
           <a
             href="#"
-            className="flex items-center justify-between px-4 py-3.5 rounded-xl bg-blue-50 text-blue-700 border border-blue-100 shadow-sm transition-all relative group hover:bg-blue-100"
+            className="flex items-center justify-between px-4 py-3.5 rounded-md bg-blue-50 text-blue-700 border border-blue-100  transition-all relative group hover:bg-blue-100"
           >
             <div className="flex items-center gap-3">
               <Newspaper
@@ -427,18 +427,18 @@ const NewsManagementPage = () => {
               />
               <span className="font-semibold text-sm">News Management</span>
             </div>
-            <span className="bg-blue-600 text-white text-xs font-bold px-2.5 py-0.5 rounded-full shadow-sm">
+            <span className="bg-blue-600 text-white text-xs font-bold px-2.5 py-0.5 rounded-full ">
               {mockData.length}
             </span>
           </a>
         </nav>
 
         <div className="p-4 border-t border-gray-100 bg-gray-50/50">
-          <div className="flex items-center gap-3 hover:bg-white p-2 rounded-lg transition-colors cursor-pointer border border-transparent hover:border-gray-200 hover:shadow-sm">
+          <div className="flex items-center gap-3 hover:bg-white p-2 rounded-md transition-colors cursor-pointer border border-transparent hover:border-gray-200 hover:">
             <img
               src="https://i.pravatar.cc/150?u=admin"
               alt="Admin"
-              className="w-10 h-10 rounded-full border border-gray-200 shadow-sm"
+              className="w-10 h-10 rounded-full border border-gray-200 "
             />
             <div className="flex-1 min-w-0">
               <p className="text-sm font-semibold text-gray-900 truncate">
@@ -453,10 +453,10 @@ const NewsManagementPage = () => {
 
       {/* Main Content Area */}
       <div className="flex-1 flex flex-col h-full min-w-0 bg-gray-50/50">
-        <header className="h-16 bg-white border-b border-gray-200 flex items-center justify-between px-4 sm:px-6 z-10 sticky top-0 shadow-sm">
+        <header className="h-16 bg-white border-b border-gray-200 flex items-center justify-between px-4 sm:px-6 z-10 sticky top-0 ">
           <div className="flex items-center gap-4 flex-1">
             <button
-              className="lg:hidden text-gray-500 hover:text-gray-700 p-1.5 rounded-lg hover:bg-gray-100 transition-colors"
+              className="lg:hidden text-gray-500 hover:text-gray-700 p-1.5 rounded-md hover:bg-gray-100 transition-colors"
               onClick={() => setIsSidebarOpen(true)}
             >
               <List className="text-2xl" />
@@ -466,7 +466,7 @@ const NewsManagementPage = () => {
               <input
                 type="text"
                 placeholder="Search news, categories, or authors..."
-                className="w-full pl-10 pr-4 py-2 bg-gray-50 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:bg-white transition-all shadow-sm"
+                className="w-full pl-10 pr-4 py-2 bg-gray-50 border border-gray-200 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:bg-white transition-all "
               />
             </div>
           </div>
@@ -478,7 +478,7 @@ const NewsManagementPage = () => {
             <div className="h-6 w-px bg-gray-200 hidden sm:block"></div>
             <button
               onClick={() => handleOpenEdit()}
-              className="hidden sm:flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2.5 rounded-lg text-sm font-medium shadow-sm transition-all shadow-blue-500/20 active:scale-95"
+              className="hidden sm:flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2.5 rounded-md text-sm font-medium  transition-all shadow-blue-500/20 active:scale-95"
             >
               <PlusCircle className="text-xl" />
               Create News
@@ -497,7 +497,7 @@ const NewsManagementPage = () => {
               </p>
             </div>
 
-            <div className="bg-white p-4 rounded-xl border border-gray-200 shadow-sm flex flex-col xl:flex-row xl:items-center justify-between gap-4">
+            <div className="bg-white p-4 rounded-md border border-gray-200  flex flex-col xl:flex-row xl:items-center justify-between gap-4">
               <div className="flex flex-wrap items-center gap-3 flex-1">
                 <div className="relative w-full sm:w-auto sm:min-w-[240px]">
                   <MagnifyingGlass className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
@@ -506,13 +506,13 @@ const NewsManagementPage = () => {
                     value={search}
                     onChange={(e) => setSearch(e.target.value)}
                     placeholder="Search titles..."
-                    className="w-full pl-9 pr-3 py-2 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none shadow-sm"
+                    className="w-full pl-9 pr-3 py-2 border border-gray-200 rounded-md text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none "
                   />
                 </div>
                 <select
                   value={statusFilter}
                   onChange={(e) => setStatusFilter(e.target.value)}
-                  className="py-2 pl-3 pr-8 border border-gray-200 rounded-lg text-sm bg-gray-50 focus:ring-2 focus:ring-blue-500 outline-none appearance-none cursor-pointer shadow-sm hover:bg-white transition-colors"
+                  className="py-2 pl-3 pr-8 border border-gray-200 rounded-md text-sm bg-gray-50 focus:ring-2 focus:ring-blue-500 outline-none appearance-none cursor-pointer  hover:bg-white transition-colors"
                 >
                   <option value="all">All Statuses</option>
                   <option value="Published">Published</option>
@@ -524,7 +524,7 @@ const NewsManagementPage = () => {
                 <select
                   value={categoryFilter}
                   onChange={(e) => setCategoryFilter(e.target.value)}
-                  className="py-2 pl-3 pr-8 border border-gray-200 rounded-lg text-sm bg-gray-50 focus:ring-2 focus:ring-blue-500 outline-none appearance-none cursor-pointer shadow-sm hover:bg-white transition-colors"
+                  className="py-2 pl-3 pr-8 border border-gray-200 rounded-md text-sm bg-gray-50 focus:ring-2 focus:ring-blue-500 outline-none appearance-none cursor-pointer  hover:bg-white transition-colors"
                 >
                   <option value="all">All Categories</option>
                   <option value="Academics">Academics</option>
@@ -534,10 +534,10 @@ const NewsManagementPage = () => {
                 </select>
               </div>
 
-              <div className="flex items-center gap-2 bg-gray-100 p-1 rounded-lg self-start xl:self-auto border border-gray-200">
+              <div className="flex items-center gap-2 bg-gray-100 p-1 rounded-md self-start xl:self-auto border border-gray-200">
                 <button
                   onClick={() => setView("grid")}
-                  className={`p-1.5 rounded transition-all ${view === "grid" ? "bg-white shadow-sm text-blue-600" : "text-gray-500 hover:text-gray-900"}`}
+                  className={`p-1.5 rounded transition-all ${view === "grid" ? "bg-white  text-blue-600" : "text-gray-500 hover:text-gray-900"}`}
                 >
                   {view === "grid" ? (
                     <SquaresFour weight="fill" className="text-xl" />
@@ -547,7 +547,7 @@ const NewsManagementPage = () => {
                 </button>
                 <button
                   onClick={() => setView("table")}
-                  className={`p-1.5 rounded transition-all ${view === "table" ? "bg-white shadow-sm text-blue-600" : "text-gray-500 hover:text-gray-900"}`}
+                  className={`p-1.5 rounded transition-all ${view === "table" ? "bg-white  text-blue-600" : "text-gray-500 hover:text-gray-900"}`}
                 >
                   {view === "table" ? (
                     <ListDashes weight="fill" className="text-xl" />
@@ -559,9 +559,9 @@ const NewsManagementPage = () => {
             </div>
 
             {selectedItems.size > 0 && (
-              <div className="flex items-center justify-between bg-blue-50 border border-blue-200 rounded-xl p-4 shadow-sm transition-all">
+              <div className="flex items-center justify-between bg-blue-50 border border-blue-200 rounded-md p-4  transition-all">
                 <div className="flex items-center gap-3">
-                  <span className="flex items-center justify-center w-6 h-6 bg-blue-600 text-white rounded text-xs font-bold shadow-sm">
+                  <span className="flex items-center justify-center w-6 h-6 bg-blue-600 text-white rounded text-xs font-bold ">
                     {selectedItems.size}
                   </span>
                   <span className="text-sm font-medium text-blue-800">
@@ -571,19 +571,19 @@ const NewsManagementPage = () => {
                 <div className="flex items-center gap-3">
                   <button
                     onClick={() => handleBulkAction("Published")}
-                    className="px-3 py-1.5 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors shadow-sm active:scale-95 flex items-center gap-2"
+                    className="px-3 py-1.5 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 transition-colors  active:scale-95 flex items-center gap-2"
                   >
                     <PaperPlaneTilt /> Bulk Publish
                   </button>
                   <button
                     onClick={() => handleBulkAction("Closed")}
-                    className="px-3 py-1.5 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors shadow-sm active:scale-95 flex items-center gap-2"
+                    className="px-3 py-1.5 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 transition-colors  active:scale-95 flex items-center gap-2"
                   >
                     <Archive /> Archive
                   </button>
                   <button
                     onClick={() => setIsConfirmOpen(true)}
-                    className="px-3 py-1.5 text-sm font-medium text-red-600 bg-white border border-red-200 rounded-lg hover:bg-red-50 transition-colors shadow-sm active:scale-95 flex items-center gap-2"
+                    className="px-3 py-1.5 text-sm font-medium text-red-600 bg-white border border-red-200 rounded-md hover:bg-red-50 transition-colors  active:scale-95 flex items-center gap-2"
                   >
                     <Trash /> Delete
                   </button>
@@ -594,7 +594,7 @@ const NewsManagementPage = () => {
 
           <div id="data-container">
             {filteredData.length === 0 ? (
-              <div className="flex flex-col items-center justify-center py-16 bg-white rounded-xl border border-dashed border-gray-300">
+              <div className="flex flex-col items-center justify-center py-16 bg-white rounded-md border border-dashed border-gray-300">
                 <Newspaper className="text-6xl text-gray-300 mb-4" />
                 <h3 className="text-lg font-medium text-gray-900">
                   No news found
@@ -608,7 +608,7 @@ const NewsManagementPage = () => {
                     setStatusFilter("all");
                     setCategoryFilter("all");
                   }}
-                  className="mt-4 px-4 py-2 bg-blue-50 text-blue-600 rounded-lg font-medium hover:bg-blue-100 transition-colors"
+                  className="mt-4 px-4 py-2 bg-blue-50 text-blue-600 rounded-md font-medium hover:bg-blue-100 transition-colors"
                 >
                   Clear all filters
                 </button>
@@ -621,7 +621,7 @@ const NewsManagementPage = () => {
                   return (
                     <div
                       key={item.id}
-                      className={`bg-white rounded-2xl shadow-sm border ${isSelected ? "border-blue-400 ring-2 ring-blue-400" : "border-gray-200"} p-5 hover:shadow-md transition-all group flex flex-col h-full relative`}
+                      className={`bg-white rounded-md  border ${isSelected ? "border-blue-400 ring-2 ring-blue-400" : "border-gray-200"} p-5 hover: transition-all group flex flex-col h-full relative`}
                     >
                       <div
                         className={`absolute top-5 right-5 z-20 opacity-0 group-hover:opacity-100 ${isSelected ? "opacity-100" : ""} transition-opacity`}
@@ -630,7 +630,7 @@ const NewsManagementPage = () => {
                           type="checkbox"
                           checked={isSelected}
                           onChange={() => toggleSelect(item.id)}
-                          className="w-5 h-5 rounded border-gray-300 text-blue-600 focus:ring-blue-500 cursor-pointer shadow-sm bg-white"
+                          className="w-5 h-5 rounded border-gray-300 text-blue-600 focus:ring-blue-500 cursor-pointer  bg-white"
                         />
                       </div>
                       <div className="mb-4">
@@ -644,9 +644,9 @@ const NewsManagementPage = () => {
                         <img
                           src={item.image}
                           alt={item.title}
-                          className="w-full h-full object-cover rounded-xl transition-transform duration-500"
+                          className="w-full h-full object-cover rounded-md transition-transform duration-500"
                         />
-                        <div className="absolute inset-0 rounded-xl ring-1 ring-inset ring-black/5 pointer-events-none"></div>
+                        <div className="absolute inset-0 rounded-md ring-1 ring-inset ring-black/5 pointer-events-none"></div>
                       </div>
                       <h3 className="font-bold text-gray-900 text-lg leading-tight mb-2 line-clamp-2">
                         {item.title}
@@ -660,24 +660,24 @@ const NewsManagementPage = () => {
                             {item.date}
                           </div>
                           <div className="flex items-center gap-1">
-                            <button className="p-1.5 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors">
+                            <button className="p-1.5 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-md transition-colors">
                               <Eye className="text-lg" />
                             </button>
                             <button
                               onClick={() => handleOpenEdit(item.id)}
-                              className="p-1.5 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
+                              className="p-1.5 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-md transition-colors"
                             >
                               <PencilSimple className="text-lg" />
                             </button>
                             <button
                               onClick={() => handleDuplicate(item.id)}
-                              className="p-1.5 text-gray-400 hover:text-green-600 hover:bg-green-50 rounded-lg transition-colors"
+                              className="p-1.5 text-gray-400 hover:text-green-600 hover:bg-green-50 rounded-md transition-colors"
                             >
                               <Copy className="text-lg" />
                             </button>
                             <button
                               onClick={() => handleDelete(item.id)}
-                              className="p-1.5 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                              className="p-1.5 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-md transition-colors"
                             >
                               <Trash className="text-lg" />
                             </button>
@@ -689,7 +689,7 @@ const NewsManagementPage = () => {
                 })}
               </div>
             ) : (
-              <div className="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
+              <div className="bg-white rounded-md border border-gray-200  overflow-hidden">
                 <div className="overflow-x-auto">
                   <table className="w-full text-left border-collapse">
                     <thead>
@@ -736,7 +736,7 @@ const NewsManagementPage = () => {
                                 <img
                                   src={item.image}
                                   alt=""
-                                  className="w-14 h-14 rounded-lg object-cover border border-gray-200 flex-shrink-0 shadow-sm"
+                                  className="w-14 h-14 rounded-md object-cover border border-gray-200 flex-shrink-0 "
                                 />
                                 <div>
                                   <p className="text-sm font-bold text-gray-900 line-clamp-1 mb-0.5">
@@ -792,24 +792,24 @@ const NewsManagementPage = () => {
                             </td>
                             <td className="px-5 py-4 text-right">
                               <div className="flex items-center justify-end gap-1">
-                                <button className="p-2 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors">
+                                <button className="p-2 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-md transition-colors">
                                   <Eye className="text-xl" />
                                 </button>
                                 <button
                                   onClick={() => handleOpenEdit(item.id)}
-                                  className="p-2 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
+                                  className="p-2 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-md transition-colors"
                                 >
                                   <PencilSimple className="text-xl" />
                                 </button>
                                 <button
                                   onClick={() => handleDuplicate(item.id)}
-                                  className="p-2 text-gray-400 hover:text-green-600 hover:bg-green-50 rounded-lg transition-colors"
+                                  className="p-2 text-gray-400 hover:text-green-600 hover:bg-green-50 rounded-md transition-colors"
                                 >
                                   <Copy className="text-xl" />
                                 </button>
                                 <button
                                   onClick={() => handleDelete(item.id)}
-                                  className="p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                                  className="p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-md transition-colors"
                                 >
                                   <Trash className="text-xl" />
                                 </button>
@@ -831,7 +831,7 @@ const NewsManagementPage = () => {
       {isModalOpen && (
         <div className="fixed inset-0 bg-gray-900/60 z-50 backdrop-blur-sm overflow-y-auto">
           <div className="min-h-screen px-4 text-center">
-            <div className="inline-block w-full max-w-6xl my-8 text-left align-middle transition-all transform bg-white shadow-2xl rounded-lg overflow-hidden relative">
+            <div className="inline-block w-full max-w-6xl my-8 text-left align-middle transition-all transform bg-white shadow-2xl rounded-md overflow-hidden relative">
               <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100 bg-gray-50/80 sticky top-0 z-10">
                 <h3 className="text-lg font-bold text-gray-900 flex items-center gap-2">
                   <Article weight="fill" className="text-blue-600" />{" "}
@@ -839,7 +839,7 @@ const NewsManagementPage = () => {
                 </h3>
                 <button
                   onClick={() => setIsModalOpen(false)}
-                  className="text-gray-400 hover:bg-gray-200 hover:text-gray-700 p-2 rounded-lg transition-colors"
+                  className="text-gray-400 hover:bg-gray-200 hover:text-gray-700 p-2 rounded-md transition-colors"
                 >
                   <X className="text-lg" />
                 </button>
@@ -864,10 +864,10 @@ const NewsManagementPage = () => {
                       onChange={(e) =>
                         setFormData({ ...formData, desc: e.target.value })
                       }
-                      className="w-full text-sm text-gray-600 placeholder-gray-400 border border-gray-200 rounded-lg p-3 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none resize-none shadow-sm"
+                      className="w-full text-sm text-gray-600 placeholder-gray-400 border border-gray-200 rounded-md p-3 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none resize-none "
                     ></textarea>
 
-                    <div className="border border-gray-200 rounded-xl overflow-hidden shadow-sm">
+                    <div className="border border-gray-200 rounded-md overflow-hidden ">
                       <div className="bg-gray-50 border-b border-gray-200 p-2 flex flex-wrap items-center gap-1">
                         <button className="p-1.5 text-gray-600 hover:bg-gray-200 rounded">
                           <TextB className="text-lg" />
@@ -910,7 +910,7 @@ const NewsManagementPage = () => {
                       <label className="block text-sm font-semibold text-gray-700 mb-2">
                         Featured Image
                       </label>
-                      <div className="border-2 border-dashed border-gray-300 rounded-xl p-6 text-center hover:bg-gray-100 transition-colors cursor-pointer bg-white shadow-sm">
+                      <div className="border-2 border-dashed border-gray-300 rounded-md p-6 text-center hover:bg-gray-100 transition-colors cursor-pointer bg-white ">
                         <UploadSimple className="text-3xl text-gray-400 mx-auto mb-2" />
                         <p className="text-sm text-blue-600 font-medium">
                           Click to upload{" "}
@@ -924,7 +924,7 @@ const NewsManagementPage = () => {
                       </div>
                     </div>
 
-                    <div className="bg-white border border-gray-200 rounded-xl p-5 space-y-5 shadow-sm">
+                    <div className="bg-white border border-gray-200 rounded-md p-5 space-y-5 ">
                       <div>
                         <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">
                           Publishing
@@ -942,7 +942,7 @@ const NewsManagementPage = () => {
                                   status: e.target.value,
                                 })
                               }
-                              className="w-full p-2.5 border border-gray-200 rounded-lg text-sm outline-none focus:border-blue-500"
+                              className="w-full p-2.5 border border-gray-200 rounded-md text-sm outline-none focus:border-blue-500"
                             >
                               <option value="Draft">Draft</option>
                               <option value="Published">Published</option>
@@ -965,7 +965,7 @@ const NewsManagementPage = () => {
                                     date: e.target.value,
                                   })
                                 }
-                                className="w-full p-2 border border-gray-200 rounded-lg text-sm outline-none focus:border-blue-500"
+                                className="w-full p-2 border border-gray-200 rounded-md text-sm outline-none focus:border-blue-500"
                               />
                             </div>
                             <div>
@@ -981,7 +981,7 @@ const NewsManagementPage = () => {
                                     deadline: e.target.value,
                                   })
                                 }
-                                className="w-full p-2 border border-gray-200 rounded-lg text-sm outline-none focus:border-blue-500"
+                                className="w-full p-2 border border-gray-200 rounded-md text-sm outline-none focus:border-blue-500"
                               />
                             </div>
                           </div>
@@ -1005,7 +1005,7 @@ const NewsManagementPage = () => {
                                   category: e.target.value,
                                 })
                               }
-                              className="w-full p-2.5 border border-gray-200 rounded-lg text-sm outline-none focus:border-blue-500"
+                              className="w-full p-2.5 border border-gray-200 rounded-md text-sm outline-none focus:border-blue-500"
                             >
                               <option value="Academics">Academics</option>
                               <option value="Events">Events</option>
@@ -1042,20 +1042,20 @@ const NewsManagementPage = () => {
               <div className="px-6 py-4 border-t border-gray-200 bg-gray-50 flex items-center justify-between rounded-b-lg">
                 <button
                   onClick={() => setIsModalOpen(false)}
-                  className="px-4 py-2 text-sm font-medium text-red-600 hover:bg-red-50 rounded-lg transition-colors border border-transparent hover:border-red-100"
+                  className="px-4 py-2 text-sm font-medium text-red-600 hover:bg-red-50 rounded-md transition-colors border border-transparent hover:border-red-100"
                 >
                   Discard
                 </button>
                 <div className="flex gap-3">
                   <button
                     onClick={() => handleSave("Draft")}
-                    className="px-5 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 shadow-sm transition-colors active:scale-95"
+                    className="px-5 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50  transition-colors active:scale-95"
                   >
                     Save Draft
                   </button>
                   <button
                     onClick={() => handleSave("Published")}
-                    className="px-5 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 shadow-sm shadow-blue-500/30 transition-transform active:scale-95 flex items-center gap-2"
+                    className="px-5 py-2 text-sm font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700  shadow-blue-500/30 transition-transform active:scale-95 flex items-center gap-2"
                   >
                     <PaperPlaneTilt weight="fill" className="text-lg" /> Publish
                     Now
@@ -1070,7 +1070,7 @@ const NewsManagementPage = () => {
       {/* Confirmation Modal */}
       {isConfirmOpen && (
         <div className="fixed inset-0 bg-gray-900/70 z-[60] backdrop-blur-sm flex items-center justify-center p-4 transition-opacity">
-          <div className="bg-white rounded-xl shadow-2xl max-w-md w-full overflow-hidden transform transition-all">
+          <div className="bg-white rounded-md shadow-2xl max-w-md w-full overflow-hidden transform transition-all">
             <div className="p-6 text-center">
               <div className="flex items-center justify-center w-12 h-12 rounded-full bg-red-100 mx-auto mb-4">
                 <WarningCircle className="text-2xl text-red-600" />
@@ -1086,7 +1086,7 @@ const NewsManagementPage = () => {
             <div className="px-6 py-4 bg-gray-50 flex justify-end gap-3 border-t border-gray-100">
               <button
                 onClick={() => setIsConfirmOpen(false)}
-                className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-100 transition-colors"
+                className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-100 transition-colors"
               >
                 Cancel
               </button>
@@ -1099,7 +1099,7 @@ const NewsManagementPage = () => {
                   setIsConfirmOpen(false);
                   showToast("Selected items deleted");
                 }}
-                className="px-4 py-2 text-sm font-medium text-white bg-red-600 rounded-lg hover:bg-red-700 transition-colors shadow-sm"
+                className="px-4 py-2 text-sm font-medium text-white bg-red-600 rounded-md hover:bg-red-700 transition-colors "
               >
                 Confirm Delete
               </button>
@@ -1130,7 +1130,7 @@ const NewsManagementPage = () => {
           return (
             <div
               key={toast.id}
-              className={`flex items-center gap-3 px-4 py-3 border rounded-xl shadow-lg animate-in slide-in-from-right-full ${colors[toast.type]}`}
+              className={`flex items-center gap-3 px-4 py-3 border rounded-md shadow-lg animate-in slide-in-from-right-full ${colors[toast.type]}`}
             >
               <Icon
                 weight="fill"

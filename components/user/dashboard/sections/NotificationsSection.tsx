@@ -234,7 +234,7 @@ export default function NotificationsSection() {
                     <div className="absolute left-0 top-0 bottom-0 w-0.75 bg-blue-600 rounded-r" />
                   )}
                   
-                  <div className={`w-11 h-11 rounded-xl flex items-center justify-center flex-shrink-0 ${iconStyles.bg} ${iconStyles.text}`}>
+                  <div className={`w-11 h-11 rounded-md flex items-center justify-center flex-shrink-0 ${iconStyles.bg} ${iconStyles.text}`}>
                     {getIconComponent(notif.icon)}
                   </div>
                   
@@ -260,14 +260,14 @@ export default function NotificationsSection() {
                   <div className="absolute right-6 top-1/2 -translate-y-1/2 flex gap-1 opacity-0 group-hover:opacity-100 transition-all">
                     <button
                       onClick={(e) => toggleArchive(notif.id, e)}
-                      className="w-9 h-9 rounded-full bg-white border border-slate-200 text-slate-500 hover:text-slate-800 hover:border-slate-300 flex items-center justify-center transition-all shadow-sm"
+                      className="w-9 h-9 rounded-full bg-white border border-slate-200 text-slate-500 hover:text-slate-800 hover:border-slate-300 flex items-center justify-center transition-all "
                       title={notif.archived ? "Unarchive" : "Archive"}
                     >
                       {notif.archived ? <ArchiveRestore className="w-4 h-4" /> : <Archive className="w-4 h-4" />}
                     </button>
                     <button
                       onClick={(e) => deleteNotification(notif.id, e)}
-                      className="w-9 h-9 rounded-full bg-white border border-slate-200 text-slate-500 hover:text-red-600 hover:border-red-300 flex items-center justify-center transition-all shadow-sm"
+                      className="w-9 h-9 rounded-full bg-white border border-slate-200 text-slate-500 hover:text-red-600 hover:border-red-300 flex items-center justify-center transition-all "
                       title="Delete"
                     >
                       <Trash2 className="w-4 h-4" />

@@ -10,10 +10,10 @@ export default function FAQSection() {
 
   return (
     <div className="space-y-6 animate-in fade-in slide-in-from-bottom-2 duration-300 mt-6">
-      <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-6">
+      <div className="bg-white rounded-md  border border-slate-200 p-6">
         <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between mb-6 text-slate-800">
           <div className="flex items-center gap-3">
-            <div className="rounded-2xl bg-indigo-50 p-3 text-indigo-600">
+            <div className="rounded-md bg-indigo-50 p-3 text-indigo-600">
               <HelpCircle className="w-5 h-5" />
             </div>
             <div>
@@ -21,7 +21,7 @@ export default function FAQSection() {
               <p className="text-sm text-slate-500">Answers to common questions about your student dashboard and account settings.</p>
             </div>
           </div>
-          <div className="flex flex-wrap gap-2 bg-slate-100 p-1 rounded-lg w-fit">
+          <div className="flex flex-wrap gap-2 bg-slate-100 p-1 rounded-md w-fit">
             {faqCategories.map((categoryItem) => (
               <button
                 key={categoryItem.id}
@@ -29,7 +29,7 @@ export default function FAQSection() {
                 onClick={() => setActiveCategory(categoryItem.id)}
                 className={`px-4 py-2 text-sm font-semibold rounded-md transition-all ${
                   activeCategory === categoryItem.id
-                    ? 'bg-white text-primary shadow-sm'
+                    ? 'bg-white text-primary '
                     : 'text-slate-500 hover:text-slate-700 hover:bg-slate-50'
                 }`}
               >
@@ -39,7 +39,7 @@ export default function FAQSection() {
           </div>
         </div>
 
-        <div className="mb-6 rounded-2xl bg-slate-50 px-5 py-4 border border-slate-200">
+        <div className="mb-6 rounded-md bg-slate-50 px-5 py-4 border border-slate-200">
           <p className="text-sm text-slate-600">{category.description}</p>
         </div>
 

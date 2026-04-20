@@ -115,7 +115,7 @@ const RecommendationFeedback: React.FC = () => {
 
   return (
     <>
-      <div className="bg-white px-6 sm:px-8 py-5 w-full rounded-xl border border-gray-200 flex flex-col sm:flex-row items-center justify-between gap-4 transition-all">
+      <div className="bg-white px-6 sm:px-8 py-5 w-full rounded-md border border-gray-200 flex flex-col sm:flex-row items-center justify-between gap-4 transition-all">
         <span className="text-[#0c1844] font-semibold text-[16px] text-center sm:text-left leading-snug tracking-tight">
           Are these colleges relevant to your location and interests?
         </span>
@@ -186,7 +186,7 @@ const RecommendationFeedback: React.FC = () => {
           onClick={() => setShowModal(false)}
         >
           <div
-            className="bg-white rounded-2xl shadow-[0_20px_50px_-12px_rgba(0,0,0,0.25)] w-[550px] max-w-[95vw] p-6 sm:p-8"
+            className="bg-white rounded-md shadow-[0_20px_50px_-12px_rgba(0,0,0,0.25)] w-[550px] max-w-[95vw] p-6 sm:p-8"
             onClick={(e) => e.stopPropagation()}
           >
             <div className="flex justify-between items-center mb-4">
@@ -302,7 +302,7 @@ const RecommendationFeedback: React.FC = () => {
                     value={otherText}
                     onChange={(e) => setOtherText(e.target.value)}
                     rows={3}
-                    className="w-full text-[15px] p-4 border border-gray-200 rounded-xl focus:outline-none focus:border-[#0000ff] focus:ring-4 focus:ring-[#0000ff]/10 resize-none transition-all placeholder-gray-400"
+                    className="w-full text-[15px] p-4 border border-gray-200 rounded-md focus:outline-none focus:border-[#0000ff] focus:ring-4 focus:ring-[#0000ff]/10 resize-none transition-all placeholder-gray-400"
                     placeholder="Please describe what went wrong..."
                   />
                 </div>
@@ -312,16 +312,16 @@ const RecommendationFeedback: React.FC = () => {
             <div className="flex justify-end items-center mt-6 space-x-4">
               <button
                 onClick={() => setShowModal(false)}
-                className="text-[15px] text-gray-600 font-medium hover:text-gray-900 hover:bg-gray-100 px-4 py-2 rounded-lg transition-all"
+                className="text-[15px] text-gray-600 font-medium hover:text-gray-900 hover:bg-gray-100 px-4 py-2 rounded-md transition-all"
               >
                 Cancel
               </button>
               <button
                 onClick={handleSubmitFeedback}
                 disabled={!canSubmit}
-                className={`px-6 py-2.5 rounded-xl text-[15px] font-semibold transition-all ${
+                className={`px-6 py-2.5 rounded-md text-[15px] font-semibold transition-all ${
                   canSubmit
-                    ? "bg-[#0000ff] text-white shadow-md hover:bg-blue-800"
+                    ? "bg-[#0000ff] text-white  hover:bg-blue-800"
                     : "bg-gray-200 text-gray-500"
                 }`}
               >
@@ -339,7 +339,7 @@ const RecommendationFeedback: React.FC = () => {
           onClick={() => setShowLikeModal(false)}
         >
           <div
-            className="bg-white rounded-xl w-[550px] max-w-[95vw] p-6 sm:p-8"
+            className="bg-white rounded-md w-[550px] max-w-[95vw] p-6 sm:p-8"
             onClick={(e) => e.stopPropagation()}
           >
             <div className="flex justify-between items-center mb-4">
@@ -372,7 +372,7 @@ const RecommendationFeedback: React.FC = () => {
                 value={likeText}
                 onChange={(e) => setLikeText(e.target.value)}
                 rows={4}
-                className="w-full text-[15px] p-4 border border-gray-200 rounded-xl focus:outline-none focus:border-[#0000ff]  resize-none transition-all placeholder-gray-400"
+                className="w-full text-[15px] p-4 border border-gray-200 rounded-md focus:outline-none focus:border-[#0000ff]  resize-none transition-all placeholder-gray-400"
                 placeholder="Write anything else you'd want us to know"
               />
             </div>
@@ -380,14 +380,14 @@ const RecommendationFeedback: React.FC = () => {
             <div className="flex justify-end items-center mt-6 space-x-4">
               <button
                 onClick={() => setShowLikeModal(false)}
-                className="text-[15px] text-gray-600 font-medium hover:text-gray-900 hover:bg-gray-100 px-4 py-2 rounded-lg transition-all"
+                className="text-[15px] text-gray-600 font-medium hover:text-gray-900 hover:bg-gray-100 px-4 py-2 rounded-md transition-all"
               >
                 Cancel
               </button>
               <button
                 onClick={handleSubmitLike}
                 disabled={likeText.trim().length === 0}
-                className={`px-6 py-2.5 rounded-lg text-[15px] font-semibold transition-all ${
+                className={`px-6 py-2.5 rounded-md text-[15px] font-semibold transition-all ${
                   likeText.trim().length > 0
                     ? "bg-[#0000ff] text-white hover:bg-blue-800"
                     : "bg-gray-200 text-gray-500"
@@ -402,7 +402,7 @@ const RecommendationFeedback: React.FC = () => {
 
       {/* Toast */}
       {toast.show && (
-        <div className="fixed bottom-6 right-6 sm:bottom-8 sm:right-8 bg-[#0000ff] text-white px-6 py-3.5 rounded-xl text-[15px] font-medium overflow-hidden min-w-[280px] flex items-center gap-3">
+        <div className="fixed bottom-6 right-6 sm:bottom-8 sm:right-8 bg-[#0000ff] text-white px-6 py-3.5 rounded-md text-[15px] font-medium overflow-hidden min-w-[280px] flex items-center gap-3">
           <FaCheckCircle/>
           <span>{toast.message}</span>
           <div className="absolute bottom-0 left-0 h-1 bg-white opacity-40 w-full animate-pulse" />

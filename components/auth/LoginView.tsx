@@ -76,7 +76,7 @@ const LoginView: React.FC<LoginViewProps> = ({
         <button
           type="button"
           onClick={handleGoogleLogin}
-          className="w-full flex items-center justify-center gap-2 border border-gray-200 rounded-lg py-2 px-4 hover:bg-gray-50 transition-colors focus:ring-2 focus:ring-blue-600 focus:outline-none"
+          className="w-full flex items-center justify-center gap-2 border border-gray-200 rounded-md py-2 px-4 hover:bg-gray-50 transition-colors focus:ring-2 focus:ring-blue-600 focus:outline-none"
         >
           <svg className="w-5 h-5" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
             <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
@@ -96,7 +96,7 @@ const LoginView: React.FC<LoginViewProps> = ({
       </div>
 
       {error && (
-        <div className="mb-3 p-3 bg-red-50 border border-red-200 rounded-lg">
+        <div className="mb-3 p-3 bg-red-50 border border-red-200 rounded-md">
           <p className="text-red-700 text-sm">{error}</p>
         </div>
       )}
@@ -111,7 +111,7 @@ const LoginView: React.FC<LoginViewProps> = ({
             placeholder="Email"
             required
             disabled={loading}
-            className="w-full pl-11 pr-4 py-2.5 border border-gray-200 rounded-lg text-sm focus:border-blue-600 focus:ring-1 focus:ring-blue-600 outline-none transition-colors placeholder:text-gray-400 disabled:bg-gray-50"
+            className="w-full pl-11 pr-4 py-2.5 border border-gray-200 rounded-md text-sm focus:border-blue-600 focus:ring-1 focus:ring-blue-600 outline-none transition-colors placeholder:text-gray-400 disabled:bg-gray-50"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
           />
@@ -138,7 +138,7 @@ const LoginView: React.FC<LoginViewProps> = ({
             placeholder="Password"
             required
             disabled={loading}
-            className="w-full pl-11 pr-11 py-2.5 border border-gray-200 rounded-lg text-sm focus:border-blue-600 focus:ring-1 focus:ring-blue-600 outline-none transition-colors placeholder:text-gray-400 disabled:bg-gray-50"
+            className="w-full pl-11 pr-11 py-2.5 border border-gray-200 rounded-md text-sm focus:border-blue-600 focus:ring-1 focus:ring-blue-600 outline-none transition-colors placeholder:text-gray-400 disabled:bg-gray-50"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
           />

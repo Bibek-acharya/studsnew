@@ -45,7 +45,7 @@ const InstitutionLayout: React.FC<Props> = ({ activePage, onNavigate, children }
     return (
       <button
         onClick={() => { onNavigate(page); setSidebarOpen(false); }}
-        className={`w-full flex items-center justify-between px-3 py-2.5 rounded-lg font-medium transition-colors ${
+        className={`w-full flex items-center justify-between px-3 py-2.5 rounded-md font-medium transition-colors ${
           isActive
             ? "bg-blue-50 text-blue-600"
             : "text-slate-600 hover:bg-slate-50 hover:text-slate-900"
@@ -73,7 +73,7 @@ const InstitutionLayout: React.FC<Props> = ({ activePage, onNavigate, children }
       <div>
         <button
           onClick={() => toggleDropdown(key)}
-          className="w-full flex items-center justify-between px-3 py-2.5 rounded-lg text-slate-600 hover:bg-slate-50 hover:text-slate-900 font-medium transition-colors"
+          className="w-full flex items-center justify-between px-3 py-2.5 rounded-md text-slate-600 hover:bg-slate-50 hover:text-slate-900 font-medium transition-colors"
         >
           <div className="flex items-center gap-3">{icon}<span>{label}</span></div>
           <ChevronDown
@@ -121,7 +121,7 @@ const InstitutionLayout: React.FC<Props> = ({ activePage, onNavigate, children }
         {/* Sidebar Header */}
         <div className="h-16 flex items-center justify-between px-6 border-b border-slate-200">
           <div className="flex items-center gap-2">
-            <div className="w-8 h-8 rounded-lg bg-blue-600 flex items-center justify-center text-white font-bold text-xl">
+            <div className="w-8 h-8 rounded-md bg-blue-600 flex items-center justify-center text-white font-bold text-xl">
               S
             </div>
             <span className="text-xl font-bold text-slate-900 tracking-tight">Studsphere</span>
@@ -185,7 +185,7 @@ const InstitutionLayout: React.FC<Props> = ({ activePage, onNavigate, children }
               localStorage.removeItem("institutionAuthUser");
               window.location.href = "/institutionZone";
             }}
-            className="w-full flex items-center justify-center gap-2 px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg font-medium transition-colors"
+            className="w-full flex items-center justify-center gap-2 px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-md font-medium transition-colors"
           >
             <LogOut className="w-4 h-4" />
             <span>Logout</span>
@@ -200,7 +200,7 @@ const InstitutionLayout: React.FC<Props> = ({ activePage, onNavigate, children }
           <div className="flex items-center flex-1 gap-4 lg:gap-8">
             <button
               onClick={() => setSidebarOpen(true)}
-              className="lg:hidden p-2 -ml-2 text-slate-500 hover:bg-slate-100 rounded-lg"
+              className="lg:hidden p-2 -ml-2 text-slate-500 hover:bg-slate-100 rounded-md"
             >
               <Menu className="w-6 h-6" />
             </button>
@@ -209,7 +209,7 @@ const InstitutionLayout: React.FC<Props> = ({ activePage, onNavigate, children }
               <input
                 type="text"
                 placeholder="Search across all modules..."
-                className="w-full pl-10 pr-4 py-2 bg-slate-100 border-transparent rounded-lg text-sm focus:bg-white focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none transition-all"
+                className="w-full pl-10 pr-4 py-2 bg-slate-100 border-transparent rounded-md text-sm focus:bg-white focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none transition-all"
               />
             </div>
           </div>

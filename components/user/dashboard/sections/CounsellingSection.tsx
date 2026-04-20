@@ -55,7 +55,7 @@ export default function CounsellingSection() {
         </div>
         <button
           onClick={() => router.push('/counseling')}
-          className="bg-blue-600 text-white px-5 py-2.5 rounded-xl text-sm font-semibold hover:bg-blue-700 shadow-md shadow-blue-500/20 transition-all flex items-center gap-2"
+          className="bg-blue-600 text-white px-5 py-2.5 rounded-md text-sm font-semibold hover:bg-blue-700  shadow-blue-500/20 transition-all flex items-center gap-2"
         >
           <i className="fas fa-calendar-plus"></i> Book Session
         </button>
@@ -82,16 +82,16 @@ export default function CounsellingSection() {
       {counsellingTab === 'upcoming' && (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {isLoading ? (
-            <div className="col-span-full rounded-xl border border-slate-200 bg-white p-8 text-center text-slate-500">
+            <div className="col-span-full rounded-md border border-slate-200 bg-white p-8 text-center text-slate-500">
               Loading counselling bookings...
             </div>
           ) : upcomingSessions.length === 0 ? (
-            <div className="col-span-full rounded-xl border border-slate-200 bg-white p-8 text-center text-slate-500">
+            <div className="col-span-full rounded-md border border-slate-200 bg-white p-8 text-center text-slate-500">
               No upcoming counselling sessions found.
             </div>
           ) : (
             upcomingSessions.map((session) => (
-              <div key={session.id} className="bg-white rounded-xl border border-slate-200 p-5 shadow-sm hover:shadow-md transition-all flex flex-col justify-between h-full relative overflow-hidden group">
+              <div key={session.id} className="bg-white rounded-md border border-slate-200 p-5  hover: transition-all flex flex-col justify-between h-full relative overflow-hidden group">
                 <div className="absolute top-0 right-0 w-16 h-16 bg-blue-50 rounded-bl-full -mr-8 -mt-8 transition-transform group-hover:scale-150" />
                 <div className="flex items-start justify-between mb-4 relative z-10">
                   <div>
@@ -115,7 +115,7 @@ export default function CounsellingSection() {
                 <div className="truncate text-sm text-slate-500 mb-4">{session.student_notes || 'No additional notes provided.'}</div>
                 <button
                   onClick={() => router.push('/counseling')}
-                  className="w-full py-2.5 bg-blue-600 text-white text-xs font-bold rounded-lg hover:bg-blue-700 shadow-lg shadow-blue-200 transition-all flex items-center justify-center gap-2 relative z-10"
+                  className="w-full py-2.5 bg-blue-600 text-white text-xs font-bold rounded-md hover:bg-blue-700 shadow-lg shadow-blue-200 transition-all flex items-center justify-center gap-2 relative z-10"
                 >
                   <i className="fas fa-calendar-day"></i> View Booking
                 </button>
@@ -128,16 +128,16 @@ export default function CounsellingSection() {
       {counsellingTab === 'booked' && (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {isLoading ? (
-            <div className="col-span-full rounded-xl border border-slate-200 bg-white p-8 text-center text-slate-500">
+            <div className="col-span-full rounded-md border border-slate-200 bg-white p-8 text-center text-slate-500">
               Loading new counselling requests...
             </div>
           ) : newRequests.length === 0 ? (
-            <div className="col-span-full rounded-xl border border-slate-200 bg-white p-8 text-center text-slate-500">
+            <div className="col-span-full rounded-md border border-slate-200 bg-white p-8 text-center text-slate-500">
               No new counselling requests available.
             </div>
           ) : (
             newRequests.map((session) => (
-              <div key={session.id} className="bg-white rounded-xl border border-slate-200 p-5 shadow-sm hover:shadow-md transition-all flex flex-col justify-between h-full relative overflow-hidden group">
+              <div key={session.id} className="bg-white rounded-md border border-slate-200 p-5  hover: transition-all flex flex-col justify-between h-full relative overflow-hidden group">
                 <div className="absolute top-0 right-0 w-16 h-16 bg-amber-50 rounded-bl-full -mr-8 -mt-8 transition-transform group-hover:scale-150" />
                 <div className="flex items-start justify-between mb-4 relative z-10">
                   <div>
@@ -161,7 +161,7 @@ export default function CounsellingSection() {
                 <div className="truncate text-sm text-slate-500 mb-4">{session.student_notes || 'No additional notes provided.'}</div>
                 <button
                   onClick={() => router.push('/counseling')}
-                  className="w-full py-2.5 bg-blue-600 text-white text-xs font-bold rounded-lg hover:bg-blue-700 shadow-lg shadow-blue-200 transition-all flex items-center justify-center gap-2 relative z-10"
+                  className="w-full py-2.5 bg-blue-600 text-white text-xs font-bold rounded-md hover:bg-blue-700 shadow-lg shadow-blue-200 transition-all flex items-center justify-center gap-2 relative z-10"
                 >
                   <i className="fas fa-calendar-day"></i> View Booking
                 </button>
@@ -174,16 +174,16 @@ export default function CounsellingSection() {
       {counsellingTab === 'past' && (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {isLoading ? (
-            <div className="col-span-full rounded-xl border border-slate-200 bg-white p-8 text-center text-slate-500">
+            <div className="col-span-full rounded-md border border-slate-200 bg-white p-8 text-center text-slate-500">
               Loading past sessions...
             </div>
           ) : pastSessions.length === 0 ? (
-            <div className="col-span-full rounded-xl border border-slate-200 bg-white p-8 text-center text-slate-500">
+            <div className="col-span-full rounded-md border border-slate-200 bg-white p-8 text-center text-slate-500">
               No past sessions available.
             </div>
           ) : (
             pastSessions.map((session) => (
-              <div key={session.id} className="bg-white rounded-xl border border-slate-200 p-5 shadow-sm hover:shadow-md transition-all flex flex-col justify-between h-full relative overflow-hidden group">
+              <div key={session.id} className="bg-white rounded-md border border-slate-200 p-5  hover: transition-all flex flex-col justify-between h-full relative overflow-hidden group">
                 <div className="absolute top-0 right-0 w-16 h-16 bg-slate-50 rounded-bl-full -mr-8 -mt-8 transition-transform group-hover:scale-150" />
                 <div className="flex items-start justify-between mb-4 relative z-10">
                   <div>
@@ -214,16 +214,16 @@ export default function CounsellingSection() {
       {counsellingTab === 'explore' && (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {colleges.map((college, idx) => (
-            <div key={idx} className="bg-white rounded-xl border border-slate-200 p-5 shadow-sm hover:shadow-md transition-all group flex flex-col h-full">
+            <div key={idx} className="bg-white rounded-md border border-slate-200 p-5  hover: transition-all group flex flex-col h-full">
               <div className="flex justify-between items-start mb-4">
-                <div className={`w-10 h-10 rounded-lg bg-${college.color}-50 flex items-center justify-center text-${college.color}-600 font-bold border border-${college.color}-100`}>
+                <div className={`w-10 h-10 rounded-md bg-${college.color}-50 flex items-center justify-center text-${college.color}-600 font-bold border border-${college.color}-100`}>
                   {college.name.charAt(0)}
                 </div>
                 <button className="text-slate-300 hover:text-red-500 transition-colors"><i className="far fa-heart"></i></button>
               </div>
               <div className="mb-4 text-center">
                 <div className="relative inline-block">
-                  <div className={`w-20 h-20 rounded-full bg-slate-50 border-2 border-white shadow-sm mx-auto mb-2 flex items-center justify-center text-2xl font-bold text-slate-400`}>
+                  <div className={`w-20 h-20 rounded-full bg-slate-50 border-2 border-white  mx-auto mb-2 flex items-center justify-center text-2xl font-bold text-slate-400`}>
                     <i className={`fas ${college.icon}`}></i>
                   </div>
                   <div className="absolute bottom-0 right-0 bg-blue-500 text-white text-[10px] w-5 h-5 flex items-center justify-center rounded-full border-2 border-white"><i className="fas fa-check"></i></div>
@@ -243,8 +243,8 @@ export default function CounsellingSection() {
                   <span className="text-green-600">9:00 AM - 4:00 PM</span>
                 </div>
                 <div className="grid grid-cols-2 gap-2">
-                  <button className="py-2 border border-slate-200 text-slate-600 rounded-lg text-xs font-bold hover:bg-slate-50 transition-colors">View Profile</button>
-                  <button className="py-2 bg-blue-600 text-white rounded-lg text-xs font-bold hover:bg-blue-700 transition-colors">Book Now</button>
+                  <button className="py-2 border border-slate-200 text-slate-600 rounded-md text-xs font-bold hover:bg-slate-50 transition-colors">View Profile</button>
+                  <button className="py-2 bg-blue-600 text-white rounded-md text-xs font-bold hover:bg-blue-700 transition-colors">Book Now</button>
                 </div>
               </div>
             </div>

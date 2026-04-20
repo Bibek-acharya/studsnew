@@ -189,7 +189,7 @@ const SearchInput: React.FC<{
       value={value}
       onChange={(e) => onChange(e.target.value)}
       placeholder={placeholder}
-      className="block w-full rounded-lg border border-gray-200 bg-[#f8fafc] py-2 pl-9 pr-3 text-[13.5px] text-gray-900 outline-none transition placeholder:text-gray-400 focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+      className="block w-full rounded-md border border-gray-200 bg-[#f8fafc] py-2 pl-9 pr-3 text-[13.5px] text-gray-900 outline-none transition placeholder:text-gray-400 focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
     />
   </div>
 );
@@ -272,7 +272,7 @@ const DirectAdmissionModal: React.FC<{ isOpen: boolean; onClose: () => void }> =
       onClick={onClose}
     >
       <div 
-        className="bg-white rounded-xl shadow-2xl max-w-5xl w-full max-h-[95vh] overflow-hidden relative flex flex-col p-6 md:p-8" 
+        className="bg-white rounded-md shadow-2xl max-w-5xl w-full max-h-[95vh] overflow-hidden relative flex flex-col p-6 md:p-8" 
         onClick={(e) => e.stopPropagation()}
       >
         <button 
@@ -329,7 +329,7 @@ const DirectAdmissionModal: React.FC<{ isOpen: boolean; onClose: () => void }> =
           ))}
         </div>
 
-        <div className="mt-2 bg-indigo-50/60 border border-indigo-100 rounded-2xl p-4 md:p-5 flex flex-col md:flex-row items-center justify-between gap-4 md:gap-6 w-full mx-auto shadow-sm">
+        <div className="mt-2 bg-indigo-50/60 border border-indigo-100 rounded-md p-4 md:p-5 flex flex-col md:flex-row items-center justify-between gap-4 md:gap-6 w-full mx-auto ">
           <div className="flex-1 w-full order-2 md:order-1">
             <h3 className="font-poppins font-bold text-gray-900 text-lg md:text-xl mb-1">Complete your profile now</h3>
             <p className="text-gray-500 text-xs md:text-sm mb-4">You are just a few steps away from unlocking direct admission matches.</p>
@@ -638,7 +638,7 @@ export default function AdmissionFilterSidebar({
         </div>
 
         {hasActiveFilters && showAppliedDropdown && (
-          <div className="absolute right-6 top-16 z-30 w-[min(520px,calc(100%-3rem))] rounded-lg border border-gray-200 bg-white p-3 shadow-lg">
+          <div className="absolute right-6 top-16 z-30 w-[min(520px,calc(100%-3rem))] rounded-md border border-gray-200 bg-white p-3 shadow-lg">
             {appliedFilters.length === 0 && !isFeeApplied ? (
               <p className="px-1 py-2 text-[13px] italic text-gray-400">
                 No filters selected yet.
@@ -929,7 +929,7 @@ export default function AdmissionFilterSidebar({
         {/* Direct Admission Toggle */}
         <div className="mt-2 pt-5 border-t border-gray-100">
           <div className="flex flex-col gap-2 w-full">
-            <div className={`py-2 px-3 rounded-lg flex items-center justify-between transition-colors duration-300 w-full ${filters.directAdmission ? 'bg-green-50' : 'bg-gray-100'}`}>
+            <div className={`py-2 px-3 rounded-md flex items-center justify-between transition-colors duration-300 w-full ${filters.directAdmission ? 'bg-green-50' : 'bg-gray-100'}`}>
               <span className="text-sm font-semibold text-slate-900 leading-tight">
                 Get college direct admission
               </span>

@@ -63,7 +63,7 @@ const AdCard: React.FC<{ slides: AdSlide[]; carouselIndex: number }> = ({ slides
 
   return (
     <div
-      className="relative w-full h-50 xs:h-57.5 sm:h-62.5 md:h-65 rounded-lg overflow-hidden group shadow-sm bg-gray-900 cursor-pointer"
+      className="relative w-full h-50 xs:h-57.5 sm:h-62.5 md:h-65 rounded-md overflow-hidden group  bg-gray-900 cursor-pointer"
     >
       <img
         src={activeSlide.image}

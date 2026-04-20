@@ -97,35 +97,35 @@ export default function TrustedPartners({ className }: TrustedPartnersProps) {
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 h-auto lg:h-[220px]">
-          <div className="lg:col-span-2 bg-gradient-to-r from-black via-slate-900 to-blue-900 rounded-3xl p-8 sm:p-12 flex flex-col sm:flex-row items-center justify-between shadow-sm relative overflow-hidden h-full">
+          <div className="lg:col-span-2 bg-gradient-to-r from-black via-slate-900 to-blue-900 rounded-md p-8 sm:p-12 flex flex-col sm:flex-row items-center justify-between  relative overflow-hidden h-full">
             <div className="flex -space-x-5 mb-6 sm:mb-0 z-10">
               <Image
                 src="https://images.unsplash.com/photo-1560250097-0b93528c311a?w=120&h=120&fit=crop&crop=faces"
                 alt="Graduate 1"
                 width={84}
                 height={84}
-                className="w-[76px] h-[76px] sm:w-[84px] sm:h-[84px] rounded-full border-[3px] border-gray-200 object-cover shadow-sm"
+                className="w-[76px] h-[76px] sm:w-[84px] sm:h-[84px] rounded-full border-[3px] border-gray-200 object-cover "
               />
               <Image
                 src="https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=120&h=120&fit=crop&crop=faces"
                 alt="Graduate 2"
                 width={84}
                 height={84}
-                className="w-[76px] h-[76px] sm:w-[84px] sm:h-[84px] rounded-full border-[3px] border-blue-200 object-cover shadow-sm"
+                className="w-[76px] h-[76px] sm:w-[84px] sm:h-[84px] rounded-full border-[3px] border-blue-200 object-cover "
               />
               <Image
                 src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=120&h=120&fit=crop&crop=faces"
                 alt="Graduate 3"
                 width={84}
                 height={84}
-                className="w-[76px] h-[76px] sm:w-[84px] sm:h-[84px] rounded-full border-[3px] border-blue-300 object-cover shadow-sm"
+                className="w-[76px] h-[76px] sm:w-[84px] sm:h-[84px] rounded-full border-[3px] border-blue-300 object-cover "
               />
               <Image
                 src="https://images.unsplash.com/photo-1580489944761-15a19d654956?w=120&h=120&fit=crop&crop=faces"
                 alt="Graduate 4"
                 width={84}
                 height={84}
-                className="w-[76px] h-[76px] sm:w-[84px] sm:h-[84px] rounded-full border-[3px] border-blue-100 object-cover shadow-sm"
+                className="w-[76px] h-[76px] sm:w-[84px] sm:h-[84px] rounded-full border-[3px] border-blue-100 object-cover "
               />
             </div>
             <div className="text-center sm:text-left z-10 sm:pr-4 flex flex-col justify-center">
@@ -136,7 +136,7 @@ export default function TrustedPartners({ className }: TrustedPartnersProps) {
             </div>
           </div>
 
-          <div className="lg:col-span-1 bg-blue-50 rounded-3xl p-8 flex flex-col items-center justify-center text-center relative overflow-hidden h-full shadow-sm">
+          <div className="lg:col-span-1 bg-blue-50 rounded-md p-8 flex flex-col items-center justify-center text-center relative overflow-hidden h-full ">
             <svg
               className="absolute -bottom-10 -right-10 w-64 h-64 text-black opacity-[0.04] pointer-events-none"
               viewBox="0 0 100 100"
@@ -155,7 +155,7 @@ export default function TrustedPartners({ className }: TrustedPartnersProps) {
             </div>
           </div>
 
-          <div className="lg:col-span-1 bg-blue-600 rounded-3xl p-8 flex flex-col items-center justify-center text-center relative overflow-hidden h-full shadow-sm">
+          <div className="lg:col-span-1 bg-blue-600 rounded-md p-8 flex flex-col items-center justify-center text-center relative overflow-hidden h-full ">
             <svg
               className="absolute -top-4 -left-4 w-40 h-40 text-white opacity-[0.15] pointer-events-none"
               viewBox="0 0 100 100"

@@ -74,7 +74,7 @@ export default function AdmissionDetailPage() {
       {/* Main Container */}
       <div className="max-w-350 mx-auto py-8 sm:py-12">
         {/* Banner Section */}
-        <div className="relative w-full h-[50vh] bg-gray-50 rounded-2xl flex items-center justify-center overflow-hidden mb-8 sm:mb-12 shadow-sm">
+        <div className="relative w-full h-[50vh] bg-gray-50 rounded-md flex items-center justify-center overflow-hidden mb-8 sm:mb-12 ">
           <img
             src="https://kist-edu-np.s3.ap-south-1.amazonaws.com/uploads/album/value/c0374b68ef663e539f7e6aea4b84625b2a207a981656053172.jpg"
             alt="Cover Image"
@@ -113,10 +113,10 @@ export default function AdmissionDetailPage() {
           {/* Left Column: Main Content */}
           <article className="space-y-12">
             {/* What's New Section */}
-            <div className="border border-gray-200 bg-white rounded-2xl p-6 sm:p-8">
+            <div className="border border-gray-200 bg-white rounded-md p-6 sm:p-8">
               <div className="flex items-start justify-between cursor-pointer">
                 <div className="flex items-center gap-4">
-                  <div className="w-12 h-12 rounded-xl bg-[#f0f4ff] flex items-center justify-center relative flex-shrink-0">
+                  <div className="w-12 h-12 rounded-md bg-[#f0f4ff] flex items-center justify-center relative flex-shrink-0">
                     <Bell className="w-6 h-6 text-[#226ee7]" />
                     <span className="absolute -top-1 -left-1 text-[#60a5fa] text-[16px]">
                       ✨
@@ -199,10 +199,10 @@ export default function AdmissionDetailPage() {
             <section>
               <div className="flex items-center gap-3 mb-6">
                 <div className="relative w-10 h-10 flex-shrink-0">
-                  <div className="absolute top-0 left-0 w-7 h-7 bg-[#fbd38d] rounded-lg flex items-center justify-center font-bold text-[#dd6b20] text-sm">
+                  <div className="absolute top-0 left-0 w-7 h-7 bg-[#fbd38d] rounded-md flex items-center justify-center font-bold text-[#dd6b20] text-sm">
                     Q
                   </div>
-                  <div className="absolute bottom-0 right-0 w-7 h-7 bg-[#fca5a5] rounded-lg flex items-center justify-center font-bold text-[#b91c1c] text-sm shadow-sm">
+                  <div className="absolute bottom-0 right-0 w-7 h-7 bg-[#fca5a5] rounded-md flex items-center justify-center font-bold text-[#b91c1c] text-sm ">
                     A
                   </div>
                 </div>
@@ -244,7 +244,7 @@ export default function AdmissionDetailPage() {
                 Full time Courses
               </h3>
 
-              <div className="overflow-x-auto rounded-2xl border border-gray-200  bg-white">
+              <div className="overflow-x-auto rounded-md border border-gray-200  bg-white">
                 <table className="w-full text-left border-collapse min-w-200">
                   <thead>
                     <tr className="bg-[#eff4fc] text-[15px]">
@@ -382,7 +382,7 @@ export default function AdmissionDetailPage() {
                     ].map((item, idx) => (
                       <li
                         key={idx}
-                        className="bg-white p-4 rounded-xl border border-gray-200"
+                        className="bg-white p-4 rounded-md border border-gray-200"
                       >
                         <span className="font-bold text-gray-900 block mb-1">
                           {item.title}
@@ -477,7 +477,7 @@ export default function AdmissionDetailPage() {
                           {s.seats}
                         </td>
                         <td className="p-5 align-top">
-                          <button className="p-2 rounded-lg border hover:bg-gray-50 transition-colors tooltip flex items-center gap-2 text-blue-600 font-bold">
+                          <button className="p-2 rounded-md border hover:bg-gray-50 transition-colors tooltip flex items-center gap-2 text-blue-600 font-bold">
                             <Download className="w-4 h-4" />
                             File
                           </button>
@@ -685,7 +685,7 @@ export default function AdmissionDetailPage() {
                     key={idx}
                     className="group cursor-pointer flex gap-4 items-start"
                   >
-                    <div className="relative shrink-0 overflow-hidden rounded-2xl w-20 h-20 shadow-sm">
+                    <div className="relative shrink-0 overflow-hidden rounded-md w-20 h-20 ">
                       <img
                         src={update.img}
                         alt={update.tag}
@@ -743,7 +743,7 @@ export default function AdmissionDetailPage() {
                     className="group cursor-pointer flex gap-5 items-center"
                   >
                     <div
-                      className={`flex flex-col items-center justify-center rounded-2xl w-16 h-16 shrink-0 ${ev.color} shadow-sm border border-white`}
+                      className={`flex flex-col items-center justify-center rounded-md w-16 h-16 shrink-0 ${ev.color}  border border-white`}
                     >
                       <span className="text-[11px] font-black uppercase leading-none mb-1 tracking-widest">
                         {ev.month}
@@ -774,14 +774,14 @@ export default function AdmissionDetailPage() {
                 </h3>
               </div>
 
-              <div className="relative w-full h-[100px] rounded-lg overflow-hidden mb-6 border border-gray-100">
+              <div className="relative w-full h-[100px] rounded-md overflow-hidden mb-6 border border-gray-100">
                 <img
                   src="https://images.unsplash.com/photo-1524661135-423995f22d0b?ixlib=rb-1.2.1&auto=format&fit=crop&w=600&q=80"
                   alt="Map Preview"
                   className="w-full h-full object-cover opacity-80"
                 />
                 <div className="absolute inset-0 flex items-center justify-center bg-white/20">
-                  <button className="bg-[#6b5b7b]/95 hover:bg-[#5c4b6a] text-white text-[15px] font-semibold py-2.5 px-10 rounded-lg transition-colors shadow-sm">
+                  <button className="bg-[#6b5b7b]/95 hover:bg-[#5c4b6a] text-white text-[15px] font-semibold py-2.5 px-10 rounded-md transition-colors ">
                     View On Map
                   </button>
                 </div>
@@ -871,7 +871,7 @@ export default function AdmissionDetailPage() {
 
             <div className="space-y-5">
               <div className="relative">
-                <select className="w-full px-4 py-4 bg-gray-50 border border-gray-100 rounded-2xl text-[15px] appearance-none focus:outline-none focus:ring-2 focus:ring-blue-500/20 font-medium">
+                <select className="w-full px-4 py-4 bg-gray-50 border border-gray-100 rounded-md text-[15px] appearance-none focus:outline-none focus:ring-2 focus:ring-blue-500/20 font-medium">
                   <option value="" disabled selected hidden>
                     Choose your field of interest
                   </option>
@@ -888,19 +888,19 @@ export default function AdmissionDetailPage() {
               <input
                 type="email"
                 placeholder="Your Gmail address"
-                className="w-full px-4 py-4 bg-gray-50 border border-gray-100 rounded-2xl text-[15px] focus:outline-none focus:ring-2 focus:ring-blue-500/20 font-medium"
+                className="w-full px-4 py-4 bg-gray-50 border border-gray-100 rounded-md text-[15px] focus:outline-none focus:ring-2 focus:ring-blue-500/20 font-medium"
               />
 
               <input
                 type="tel"
                 placeholder="Contact Number (WhatsApp)"
-                className="w-full px-4 py-4 bg-gray-50 border border-gray-100 rounded-2xl text-[15px] focus:outline-none focus:ring-2 focus:ring-blue-500/20 font-medium"
+                className="w-full px-4 py-4 bg-gray-50 border border-gray-100 rounded-md text-[15px] focus:outline-none focus:ring-2 focus:ring-blue-500/20 font-medium"
               />
             </div>
 
             <button
               onClick={() => setShowNotificationModal(false)}
-              className="w-full mt-8 bg-brand-blue text-white font-bold py-4 rounded-2xl shadow-blue-200 shadow-xl hover:bg-[#0000cc] transition-all"
+              className="w-full mt-8 bg-brand-blue text-white font-bold py-4 rounded-md shadow-blue-200 shadow-xl hover:bg-[#0000cc] transition-all"
             >
               Notify Me
             </button>

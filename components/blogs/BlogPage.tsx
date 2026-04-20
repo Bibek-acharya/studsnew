@@ -98,7 +98,7 @@ const BlogPage: React.FC = () => {
                   onClick={() => { setActiveCategory(pill); setCurrentPage(1); }}
                   className={`px-5 py-2 rounded-full text-sm font-medium whitespace-nowrap transition-colors ${
                     isActive
-                      ? "bg-brand-blue text-white shadow-sm"
+                      ? "bg-brand-blue text-white "
                       : "bg-white text-gray-700 border border-gray-200 hover:bg-gray-50"
                   }`}
                 >
@@ -120,7 +120,7 @@ const BlogPage: React.FC = () => {
             <h2 className="text-3xl font-bold text-gray-900 mb-5">Featured Story of the Week</h2>
             <Link
               href={`/blogs/${featuredBlog.id}`}
-              className="relative w-full h-87.5 sm:h-100 rounded-lg overflow-hidden group cursor-pointer block"
+              className="relative w-full h-87.5 sm:h-100 rounded-md overflow-hidden group cursor-pointer block"
             >
               <img
                 src={featuredBlog.image}
@@ -143,7 +143,7 @@ const BlogPage: React.FC = () => {
                     </h3>
                     <p className="text-gray-200 text-sm sm:text-base line-clamp-2">{featuredBlog.excerpt}</p>
                   </div>
-                  <button className="bg-white text-gray-900 font-semibold px-6 py-2.5 rounded-lg hover:bg-gray-100 transition-colors whitespace-nowrap shadow-sm self-start md:self-auto">
+                  <button className="bg-white text-gray-900 font-semibold px-6 py-2.5 rounded-md hover:bg-gray-100 transition-colors whitespace-nowrap  self-start md:self-auto">
                     Read Full Story
                   </button>
                 </div>
@@ -164,7 +164,7 @@ const BlogPage: React.FC = () => {
                     onChange={(event) =>
                       setSortBy(event.target.value as "Newest" | "Oldest" | "Most Popular")
                     }
-                    className="appearance-none bg-white border border-gray-200 text-gray-700 text-sm font-medium rounded-lg px-4 py-2 pr-9 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-colors cursor-pointer shadow-sm"
+                    className="appearance-none bg-white border border-gray-200 text-gray-700 text-sm font-medium rounded-md px-4 py-2 pr-9 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-colors cursor-pointer "
                   >
                     <option value="Newest">Newest</option>
                     <option value="Oldest">Oldest</option>
@@ -181,10 +181,10 @@ const BlogPage: React.FC = () => {
               {paginatedBlogs.map((blog) => (
                 <article
                   key={blog.id}
-                  className="bg-white rounded-2xl border border-gray-200 hover:border-blue-500/20 overflow-hidden flex flex-col duration-300 cursor-pointer"
+                  className="bg-white rounded-md border border-gray-200 hover:border-blue-500/20 overflow-hidden flex flex-col duration-300 cursor-pointer"
                 >
                   <Link href={`/blogs/${blog.id}`} className="h-32 w-full overflow-hidden p-4 ">
-                    <img src={blog.image} alt={blog.title} className="w-full h-full object-cover rounded-lg" />
+                    <img src={blog.image} alt={blog.title} className="w-full h-full object-cover rounded-md" />
                   </Link>
 
                   <div className="p-5 flex-1 flex flex-col">
@@ -227,7 +227,7 @@ const BlogPage: React.FC = () => {
             </div>
 
             {sortedBlogs.length === 0 && (
-              <div className="text-center py-10 text-slate-500 bg-white border border-gray-200 rounded-2xl mt-6">
+              <div className="text-center py-10 text-slate-500 bg-white border border-gray-200 rounded-md mt-6">
                 No blogs available for this category.
               </div>
             )}

@@ -115,20 +115,20 @@ export default function ManageScholarships({ onNavigate, onEdit }: ManageScholar
           <p className="text-sm text-slate-500 mt-1 font-medium">Manage active, closed, and drafted programs.</p>
         </div>
         <div className="flex gap-3">
-          <div className="bg-white border border-slate-200 rounded-lg p-1 hidden md:flex shadow-sm">
-            <button className="px-3 py-1.5 rounded bg-slate-100 text-slate-800 shadow-sm text-xs font-black uppercase tracking-widest"><i className="fa-solid fa-grip mr-1"></i> Grid</button>
+          <div className="bg-white border border-slate-200 rounded-md p-1 hidden md:flex ">
+            <button className="px-3 py-1.5 rounded bg-slate-100 text-slate-800  text-xs font-black uppercase tracking-widest"><i className="fa-solid fa-grip mr-1"></i> Grid</button>
             <button className="px-3 py-1.5 rounded text-slate-400 hover:text-slate-800 text-xs font-black uppercase tracking-widest transition-colors"><i className="fa-solid fa-list mr-1"></i> List</button>
           </div>
           <button
             onClick={() => onNavigate('sec-create-scholarship')}
-            className="px-5 py-2.5 bg-primary-600 text-white rounded-xl hover:bg-primary-700 font-black text-xs uppercase tracking-widest shadow-lg shadow-primary-500/20 transition flex items-center border border-primary-500"
+            className="px-5 py-2.5 bg-primary-600 text-white rounded-md hover:bg-primary-700 font-black text-xs uppercase tracking-widest shadow-lg shadow-primary-500/20 transition flex items-center border border-primary-500"
           >
             <i className="fa-solid fa-plus mr-2"></i> Create New
           </button>
         </div>
       </div>
 
-      <div className="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm mb-6 flex flex-wrap gap-4 items-center">
+      <div className="bg-white p-4 rounded-md border border-slate-200  mb-6 flex flex-wrap gap-4 items-center">
         <div className="relative flex-1 min-w-[200px]">
           <i className="fa-solid fa-search absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"></i>
           <input
@@ -136,20 +136,20 @@ export default function ManageScholarships({ onNavigate, onEdit }: ManageScholar
             value={searchTerm}
             onChange={e => { setSearchTerm(e.target.value); setPage(1); }}
             placeholder="Search portfolio..."
-            className="w-full pl-11 pr-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm outline-none focus:border-primary-500 focus:bg-white transition shadow-inner placeholder:font-medium"
+            className="w-full pl-11 pr-4 py-2.5 bg-slate-50 border border-slate-200 rounded-md text-sm outline-none focus:border-primary-500 focus:bg-white transition shadow-inner placeholder:font-medium"
           />
         </div>
         <select
           value={statusFilter}
           onChange={e => { setStatusFilter(e.target.value); setPage(1); }}
-          className="border border-slate-200 bg-white rounded-xl px-4 py-2.5 text-sm outline-none focus:border-primary-500 font-bold shadow-sm cursor-pointer"
+          className="border border-slate-200 bg-white rounded-md px-4 py-2.5 text-sm outline-none focus:border-primary-500 font-bold  cursor-pointer"
         >
           <option>All Statuses</option>
           <option value="active">Active</option>
           <option value="closed">Closed</option>
           <option value="draft">Draft</option>
         </select>
-        <select className="border border-slate-200 bg-white rounded-xl px-4 py-2.5 text-sm outline-none focus:border-primary-500 font-bold shadow-sm cursor-pointer">
+        <select className="border border-slate-200 bg-white rounded-md px-4 py-2.5 text-sm outline-none focus:border-primary-500 font-bold  cursor-pointer">
           <option>Sort: Newest First</option>
           <option>Sort: Closing Soon</option>
           <option>Sort: Most Applicants</option>
@@ -157,7 +157,7 @@ export default function ManageScholarships({ onNavigate, onEdit }: ManageScholar
       </div>
 
       {error && (
-        <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-xl text-red-700 text-sm font-bold">
+        <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-md text-red-700 text-sm font-bold">
           {error}
         </div>
       )}
@@ -167,12 +167,12 @@ export default function ManageScholarships({ onNavigate, onEdit }: ManageScholar
           <i className="fa-solid fa-spinner fa-spin text-3xl text-primary-600"></i>
         </div>
       ) : filtered.length === 0 ? (
-        <div className="text-center py-20 bg-white rounded-2xl border border-slate-200">
+        <div className="text-center py-20 bg-white rounded-md border border-slate-200">
           <i className="fa-solid fa-graduation-cap text-5xl text-slate-300 mb-4"></i>
           <p className="text-lg font-bold text-slate-500">No scholarships found</p>
           <button
             onClick={() => onNavigate('sec-create-scholarship')}
-            className="mt-4 px-6 py-2.5 bg-primary-600 text-white rounded-xl hover:bg-primary-700 font-bold text-sm transition"
+            className="mt-4 px-6 py-2.5 bg-primary-600 text-white rounded-md hover:bg-primary-700 font-bold text-sm transition"
           >
             Create your first scholarship
           </button>
@@ -180,7 +180,7 @@ export default function ManageScholarships({ onNavigate, onEdit }: ManageScholar
       ) : (
         <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
           {filtered.map(s => (
-            <div key={s.id} className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden group hover:shadow-xl hover:border-primary-200 transition-all duration-300 transform hover:-translate-y-1">
+            <div key={s.id} className="bg-white rounded-md border border-slate-200  overflow-hidden group hover:shadow-xl hover:border-primary-200 transition-all duration-300 transform hover:-translate-y-1">
               <div className="h-40 relative overflow-hidden">
                 {s.image_url ? (
                   <img src={s.image_url} alt={s.title} className="w-full h-full object-cover group-hover:scale-105 transition duration-500" />
@@ -189,20 +189,20 @@ export default function ManageScholarships({ onNavigate, onEdit }: ManageScholar
                 )}
                 <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent"></div>
                 <div className="absolute top-4 left-4 flex gap-2">
-                  <span className="bg-white/90 backdrop-blur text-primary-600 px-3 py-1 rounded-lg text-[10px] font-black uppercase tracking-tighter shadow-sm border border-white">
+                  <span className="bg-white/90 backdrop-blur text-primary-600 px-3 py-1 rounded-md text-[10px] font-black uppercase tracking-tighter  border border-white">
                     {s.funding_type || 'N/A'}
                   </span>
-                  <span className={`px-3 py-1 rounded-lg text-[10px] font-black uppercase tracking-tighter shadow-sm border border-white ${getStatusClass(s.status)}`}>
+                  <span className={`px-3 py-1 rounded-md text-[10px] font-black uppercase tracking-tighter  border border-white ${getStatusClass(s.status)}`}>
                     {getStatusLabel(s.status)}
                   </span>
                 </div>
                 <div className="absolute bottom-4 left-4 right-4 text-white">
-                  <h3 className="text-lg font-black leading-tight drop-shadow-md">{s.title}</h3>
+                  <h3 className="text-lg font-black leading-tight drop-">{s.title}</h3>
                 </div>
               </div>
 
               <div className="p-5 space-y-4">
-                <div className="flex justify-between items-center bg-slate-50 p-3 rounded-xl border border-slate-100 shadow-inner">
+                <div className="flex justify-between items-center bg-slate-50 p-3 rounded-md border border-slate-100 shadow-inner">
                   <div>
                     <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-0.5">Deadline</p>
                     <p className="text-xs font-bold text-slate-700">{formatDate(s.deadline)}</p>
@@ -223,14 +223,14 @@ export default function ManageScholarships({ onNavigate, onEdit }: ManageScholar
                 <div className="flex gap-2 pt-2">
                   <button
                     onClick={() => handleEdit(s.id)}
-                    className="flex-1 py-2.5 bg-slate-800 text-white rounded-xl hover:bg-slate-900 transition-colors font-black text-[10px] uppercase tracking-widest shadow-lg"
+                    className="flex-1 py-2.5 bg-slate-800 text-white rounded-md hover:bg-slate-900 transition-colors font-black text-[10px] uppercase tracking-widest shadow-lg"
                   >
                     <i className="fa-solid fa-pen mr-1"></i> Edit
                   </button>
                   <button
                     onClick={() => handleToggleStatus(s)}
                     disabled={togglingId === s.id}
-                    className={`px-3 py-2.5 rounded-xl transition-colors shadow-sm text-[10px] font-black uppercase tracking-widest disabled:opacity-50 ${
+                    className={`px-3 py-2.5 rounded-md transition-colors  text-[10px] font-black uppercase tracking-widest disabled:opacity-50 ${
                       s.status === 'active'
                         ? 'bg-amber-50 text-amber-600 hover:bg-amber-100 hover:text-amber-700'
                         : 'bg-green-50 text-green-600 hover:bg-green-100 hover:text-green-700'
@@ -246,7 +246,7 @@ export default function ManageScholarships({ onNavigate, onEdit }: ManageScholar
                   </button>
                   <button
                     onClick={() => handleDelete(s.id)}
-                    className="px-3 py-2.5 bg-red-50 text-red-500 rounded-xl hover:bg-red-100 hover:text-red-700 transition-colors shadow-sm"
+                    className="px-3 py-2.5 bg-red-50 text-red-500 rounded-md hover:bg-red-100 hover:text-red-700 transition-colors "
                   >
                     <i className="fa-solid fa-trash"></i>
                   </button>
@@ -262,7 +262,7 @@ export default function ManageScholarships({ onNavigate, onEdit }: ManageScholar
           <button
             disabled={page <= 1}
             onClick={() => setPage(p => p - 1)}
-            className="w-10 h-10 rounded-lg border border-slate-200 bg-white text-slate-600 hover:bg-slate-50 disabled:opacity-40 disabled:cursor-not-allowed flex items-center justify-center"
+            className="w-10 h-10 rounded-md border border-slate-200 bg-white text-slate-600 hover:bg-slate-50 disabled:opacity-40 disabled:cursor-not-allowed flex items-center justify-center"
           >
             <i className="fa-solid fa-chevron-left"></i>
           </button>
@@ -270,7 +270,7 @@ export default function ManageScholarships({ onNavigate, onEdit }: ManageScholar
             <button
               key={p}
               onClick={() => setPage(p)}
-              className={`w-10 h-10 rounded-lg font-bold text-sm ${
+              className={`w-10 h-10 rounded-md font-bold text-sm ${
                 p === page
                   ? 'bg-primary-600 text-white'
                   : 'border border-slate-200 bg-white text-slate-600 hover:bg-slate-50'
@@ -282,7 +282,7 @@ export default function ManageScholarships({ onNavigate, onEdit }: ManageScholar
           <button
             disabled={page >= totalPages}
             onClick={() => setPage(p => p + 1)}
-            className="w-10 h-10 rounded-lg border border-slate-200 bg-white text-slate-600 hover:bg-slate-50 disabled:opacity-40 disabled:cursor-not-allowed flex items-center justify-center"
+            className="w-10 h-10 rounded-md border border-slate-200 bg-white text-slate-600 hover:bg-slate-50 disabled:opacity-40 disabled:cursor-not-allowed flex items-center justify-center"
           >
             <i className="fa-solid fa-chevron-right"></i>
           </button>

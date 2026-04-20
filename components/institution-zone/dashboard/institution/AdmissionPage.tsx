@@ -248,7 +248,7 @@ const AdmissionPage: React.FC = () => {
   return (
     <div className="p-4 lg:p-8 space-y-6 bg-slate-50 min-h-full">
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-        <div className="bg-white rounded-lg p-1 shadow-sm border border-slate-200 inline-flex overflow-x-auto max-w-full">
+        <div className="bg-white rounded-md p-1  border border-slate-200 inline-flex overflow-x-auto max-w-full">
           {levels.map((level) => (
             <button
               key={level}
@@ -280,17 +280,17 @@ const AdmissionPage: React.FC = () => {
         </div>
 
         <div className="flex gap-2">
-          <button className="px-4 py-2 bg-white border border-slate-200 text-slate-700 rounded-lg text-sm font-medium shadow-sm hover:bg-slate-50 transition-colors flex items-center gap-2">
+          <button className="px-4 py-2 bg-white border border-slate-200 text-slate-700 rounded-md text-sm font-medium  hover:bg-slate-50 transition-colors flex items-center gap-2">
             <Download className="w-4 h-4" /> Export CSV
           </button>
-          <button className="px-4 py-2 bg-green-600 text-white rounded-lg text-sm font-medium shadow-sm hover:bg-green-700 transition-colors flex items-center gap-2">
+          <button className="px-4 py-2 bg-green-600 text-white rounded-md text-sm font-medium  hover:bg-green-700 transition-colors flex items-center gap-2">
             <Plus className="w-4 h-4" /> Manual Entry
           </button>
         </div>
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 lg:gap-6">
-        <div className="bg-white rounded-xl p-5 shadow-sm border border-slate-200">
+        <div className="bg-white rounded-md p-5  border border-slate-200">
           <div className="flex justify-between items-start">
             <div>
               <p className="text-sm font-medium text-slate-500 mb-1">Total Applications</p>
@@ -306,7 +306,7 @@ const AdmissionPage: React.FC = () => {
           </div>
         </div>
 
-        <div className="bg-white rounded-xl p-5 shadow-sm border border-slate-200">
+        <div className="bg-white rounded-md p-5  border border-slate-200">
           <div className="flex justify-between items-start">
             <div>
               <p className="text-sm font-medium text-slate-500 mb-1">Shortlisted</p>
@@ -323,7 +323,7 @@ const AdmissionPage: React.FC = () => {
           </div>
         </div>
 
-        <div className="bg-white rounded-xl p-5 shadow-sm border border-slate-200">
+        <div className="bg-white rounded-md p-5  border border-slate-200">
           <div className="flex justify-between items-start">
             <div>
               <p className="text-sm font-medium text-slate-500 mb-1">Pending Review</p>
@@ -336,7 +336,7 @@ const AdmissionPage: React.FC = () => {
           <div className="mt-4 text-sm text-slate-500">Requires immediate action</div>
         </div>
 
-        <div className="bg-white rounded-xl p-5 shadow-sm border border-slate-200">
+        <div className="bg-white rounded-md p-5  border border-slate-200">
           <div className="flex justify-between items-start">
             <div>
               <p className="text-sm font-medium text-slate-500 mb-1">Rejected</p>
@@ -355,45 +355,45 @@ const AdmissionPage: React.FC = () => {
 
       {activeLevel !== "ShortlistedOnly" && (
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-5">
+          <div className="bg-white rounded-md  border border-slate-200 p-5">
             <h3 className="text-base font-semibold text-slate-800 mb-4">Applications by Program</h3>
             <div className="h-64"><Bar data={programChartData} options={barOptions} /></div>
           </div>
-          <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-5">
+          <div className="bg-white rounded-md  border border-slate-200 p-5">
             <h3 className="text-base font-semibold text-slate-800 mb-4">Applicant Origin (Province)</h3>
             <div className="h-64"><Doughnut data={provinceChartData} options={doughnutOptions} /></div>
           </div>
         </div>
       )}
 
-      <div className="bg-white rounded-xl shadow-sm border border-slate-200 mb-8 flex flex-col overflow-hidden">
+      <div className="bg-white rounded-md  border border-slate-200 mb-8 flex flex-col overflow-hidden">
         <div className="p-4 border-b border-slate-200 flex flex-wrap gap-4 items-end bg-slate-50/50">
           <div className="flex-1 min-w-[200px]">
             <label className="block text-xs font-medium text-slate-500 mb-1">Search Applicants</label>
             <div className="relative">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 w-4 h-4" />
-              <input value={search} onChange={(event) => { setSearch(event.target.value); setPage(1); }} placeholder="Name, Email, Phone..." className="w-full pl-9 pr-4 py-2 text-sm border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 bg-white shadow-sm" />
+              <input value={search} onChange={(event) => { setSearch(event.target.value); setPage(1); }} placeholder="Name, Email, Phone..." className="w-full pl-9 pr-4 py-2 text-sm border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500 bg-white " />
             </div>
           </div>
           <div className="flex-1 min-w-[150px]">
             <label className="block text-xs font-medium text-slate-500 mb-1">Province</label>
-            <select value={province} onChange={(event) => { const value = event.target.value as "All" | Province; setProvince(value); setDistrict("All"); setPage(1); }} className="w-full text-sm rounded-lg border-slate-300 border py-2 px-3 focus:outline-none focus:ring-2 focus:ring-green-500 bg-white">
+            <select value={province} onChange={(event) => { const value = event.target.value as "All" | Province; setProvince(value); setDistrict("All"); setPage(1); }} className="w-full text-sm rounded-md border-slate-300 border py-2 px-3 focus:outline-none focus:ring-2 focus:ring-green-500 bg-white">
               <option value="All">All Provinces</option>
               {(Object.keys(NEPAL_LOCATIONS) as Province[]).map((prov) => <option key={prov} value={prov}>{prov}</option>)}
             </select>
           </div>
           <div className="flex-1 min-w-[200px]">
             <label className="block text-xs font-medium text-slate-500 mb-1">District</label>
-            <select value={district} onChange={(event) => { setDistrict(event.target.value); setPage(1); }} className="w-full text-sm rounded-lg border-slate-300 border py-2 px-3 focus:outline-none focus:ring-2 focus:ring-green-500 bg-white">
+            <select value={district} onChange={(event) => { setDistrict(event.target.value); setPage(1); }} className="w-full text-sm rounded-md border-slate-300 border py-2 px-3 focus:outline-none focus:ring-2 focus:ring-green-500 bg-white">
               {districtOptions.map((dist) => <option key={dist} value={dist}>{dist}</option>)}
             </select>
           </div>
           <div className="flex-1 min-w-[100px]">
             <label className="block text-xs font-medium text-slate-500 mb-1">Min GPA</label>
-            <input type="number" value={minGpa} onChange={(event) => { const val = event.target.value; setMinGpa(val === "" ? "" : Number.parseFloat(val)); setPage(1); }} step="0.1" min="0" max="4" placeholder="e.g. 2.5" className="w-full text-sm rounded-lg border-slate-300 border py-2 px-3 focus:outline-none focus:ring-2 focus:ring-green-500 bg-white" />
+            <input type="number" value={minGpa} onChange={(event) => { const val = event.target.value; setMinGpa(val === "" ? "" : Number.parseFloat(val)); setPage(1); }} step="0.1" min="0" max="4" placeholder="e.g. 2.5" className="w-full text-sm rounded-md border-slate-300 border py-2 px-3 focus:outline-none focus:ring-2 focus:ring-green-500 bg-white" />
           </div>
           <div>
-            <button onClick={resetFilters} className="py-2 px-4 bg-white border border-slate-300 text-slate-600 rounded-lg text-sm hover:bg-slate-50 transition-colors flex items-center gap-2">
+            <button onClick={resetFilters} className="py-2 px-4 bg-white border border-slate-300 text-slate-600 rounded-md text-sm hover:bg-slate-50 transition-colors flex items-center gap-2">
               <RotateCcw className="w-4 h-4" /> Reset
             </button>
           </div>
@@ -405,10 +405,10 @@ const AdmissionPage: React.FC = () => {
               <Check className="w-4 h-4" /> {selected.length} applicants selected
             </span>
             <div className="flex gap-2">
-              <button onClick={() => bulkAction("Shortlisted")} className="px-3 py-1.5 text-xs font-semibold bg-blue-600 text-white rounded shadow-sm hover:bg-blue-700 transition-colors flex items-center gap-1"><Bookmark className="w-3.5 h-3.5" /> Shortlist</button>
-              <button onClick={() => bulkAction("Approved")} className="px-3 py-1.5 text-xs font-semibold bg-green-600 text-white rounded shadow-sm hover:bg-green-700 transition-colors flex items-center gap-1"><Check className="w-3.5 h-3.5" /> Approve</button>
-              <button onClick={() => bulkAction("Rejected")} className="px-3 py-1.5 text-xs font-semibold bg-red-600 text-white rounded shadow-sm hover:bg-red-700 transition-colors flex items-center gap-1"><X className="w-3.5 h-3.5" /> Reject</button>
-              <button onClick={openBulkMessage} className="px-3 py-1.5 text-xs font-semibold bg-slate-700 text-white rounded shadow-sm hover:bg-slate-800 transition-colors flex items-center gap-1"><MessageSquare className="w-3.5 h-3.5" /> Message</button>
+              <button onClick={() => bulkAction("Shortlisted")} className="px-3 py-1.5 text-xs font-semibold bg-blue-600 text-white rounded  hover:bg-blue-700 transition-colors flex items-center gap-1"><Bookmark className="w-3.5 h-3.5" /> Shortlist</button>
+              <button onClick={() => bulkAction("Approved")} className="px-3 py-1.5 text-xs font-semibold bg-green-600 text-white rounded  hover:bg-green-700 transition-colors flex items-center gap-1"><Check className="w-3.5 h-3.5" /> Approve</button>
+              <button onClick={() => bulkAction("Rejected")} className="px-3 py-1.5 text-xs font-semibold bg-red-600 text-white rounded  hover:bg-red-700 transition-colors flex items-center gap-1"><X className="w-3.5 h-3.5" /> Reject</button>
+              <button onClick={openBulkMessage} className="px-3 py-1.5 text-xs font-semibold bg-slate-700 text-white rounded  hover:bg-slate-800 transition-colors flex items-center gap-1"><MessageSquare className="w-3.5 h-3.5" /> Message</button>
             </div>
           </div>
         )}
@@ -491,7 +491,7 @@ const AdmissionPage: React.FC = () => {
 
       {showMessageModal && (
         <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center backdrop-blur-sm p-4">
-          <div className="bg-white w-full max-w-lg rounded-xl shadow-2xl overflow-hidden">
+          <div className="bg-white w-full max-w-lg rounded-md shadow-2xl overflow-hidden">
             <div className="px-6 py-4 border-b border-slate-200 flex justify-between items-center bg-slate-50">
               <h3 className="text-lg font-semibold text-slate-800 flex items-center gap-2"><MessageSquare className="w-5 h-5 text-green-600" /> Message Applicant</h3>
               <button onClick={() => setShowMessageModal(false)} className="text-slate-400 hover:text-slate-700">
@@ -502,7 +502,7 @@ const AdmissionPage: React.FC = () => {
               <p className="text-sm text-slate-600">Send a direct message or SMS to <strong className="text-slate-800">{messageTargetName}</strong>.</p>
               <div>
                 <label className="block text-sm font-medium text-slate-700 mb-1">Template</label>
-                <select value={msgTemplate} onChange={(event) => onTemplateChange(event.target.value as "" | "shortlist" | "interview" | "reject" | "missing")} className="w-full border-slate-300 rounded-lg text-sm focus:ring-green-500 focus:border-green-500 py-2 px-3 border">
+                <select value={msgTemplate} onChange={(event) => onTemplateChange(event.target.value as "" | "shortlist" | "interview" | "reject" | "missing")} className="w-full border-slate-300 rounded-md text-sm focus:ring-green-500 focus:border-green-500 py-2 px-3 border">
                   <option value="">-- Custom Message --</option>
                   <option value="shortlist">Shortlist Notification</option>
                   <option value="interview">Interview Invitation</option>
@@ -512,7 +512,7 @@ const AdmissionPage: React.FC = () => {
               </div>
               <div>
                 <label className="block text-sm font-medium text-slate-700 mb-1">Message <span className="text-red-500">*</span></label>
-                <textarea rows={4} value={msgText} onChange={(event) => setMsgText(event.target.value)} placeholder="Type your message here..." className="w-full border-slate-300 rounded-lg text-sm focus:ring-green-500 focus:border-green-500 py-2 px-3 border" />
+                <textarea rows={4} value={msgText} onChange={(event) => setMsgText(event.target.value)} placeholder="Type your message here..." className="w-full border-slate-300 rounded-md text-sm focus:ring-green-500 focus:border-green-500 py-2 px-3 border" />
               </div>
               <div className="flex items-center gap-4 text-sm">
                 <label className="flex items-center gap-2 cursor-pointer">
@@ -525,8 +525,8 @@ const AdmissionPage: React.FC = () => {
                 </label>
               </div>
               <div className="pt-2 border-t border-slate-200 flex justify-end gap-3">
-                <button onClick={() => setShowMessageModal(false)} className="px-4 py-2 text-sm font-medium text-slate-600 bg-white border border-slate-300 rounded-lg hover:bg-slate-50 transition-colors">Cancel</button>
-                <button onClick={() => setShowMessageModal(false)} className="px-4 py-2 text-sm font-medium text-white bg-green-600 rounded-lg hover:bg-green-700 shadow-sm transition-colors flex items-center gap-2">
+                <button onClick={() => setShowMessageModal(false)} className="px-4 py-2 text-sm font-medium text-slate-600 bg-white border border-slate-300 rounded-md hover:bg-slate-50 transition-colors">Cancel</button>
+                <button onClick={() => setShowMessageModal(false)} className="px-4 py-2 text-sm font-medium text-white bg-green-600 rounded-md hover:bg-green-700  transition-colors flex items-center gap-2">
                   <Send className="w-4 h-4" /> Send Message
                 </button>
               </div>

@@ -45,7 +45,7 @@ export default function NotFound() {
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             placeholder="Search colleges, courses, scholarships..."
-            className="w-full rounded-full border border-gray-200 bg-white py-3.5 pl-12 pr-4 text-[15px] shadow-sm transition-all focus:border-transparent focus:outline-none focus:ring-2 focus:ring-brand-blue"
+            className="w-full rounded-full border border-gray-200 bg-white py-3.5 pl-12 pr-4 text-[15px]  transition-all focus:border-transparent focus:outline-none focus:ring-2 focus:ring-brand-blue"
           />
         </form>
       </div>

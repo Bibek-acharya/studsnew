@@ -39,10 +39,10 @@ const SuperadminLogin = () => {
 
       <div className="relative z-10 w-full max-w-[440px]">
         {/* Card */}
-        <div className="bg-slate-900/60 backdrop-blur-xl border border-slate-800 rounded-3xl shadow-2xl p-8 md:p-10">
+        <div className="bg-slate-900/60 backdrop-blur-xl border border-slate-800 rounded-md shadow-2xl p-8 md:p-10">
           {/* Header */}
           <div className="flex flex-col items-center mb-8 text-center">
-            <div className="w-16 h-16 bg-blue-600/10 rounded-2xl flex items-center justify-center border border-blue-500/20 mb-4 shadow-[0_0_40px_rgba(59,130,246,0.1)]">
+            <div className="w-16 h-16 bg-blue-600/10 rounded-md flex items-center justify-center border border-blue-500/20 mb-4 shadow-[0_0_40px_rgba(59,130,246,0.1)]">
               <ShieldCheck className="w-8 h-8 text-blue-500" />
             </div>
             <h1 className="text-3xl font-bold text-white tracking-tight">Super Control</h1>
@@ -53,7 +53,7 @@ const SuperadminLogin = () => {
 
           {/* Error */}
           {error && (
-            <div className="mb-6 p-4 bg-red-500/10 border border-red-500/20 rounded-xl text-red-400 text-sm flex items-start gap-3">
+            <div className="mb-6 p-4 bg-red-500/10 border border-red-500/20 rounded-md text-red-400 text-sm flex items-start gap-3">
               <svg className="w-4 h-4 mt-0.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
               </svg>
@@ -80,7 +80,7 @@ const SuperadminLogin = () => {
                   disabled={loading}
                   onChange={(e) => setEmail(e.target.value)}
                   placeholder="admin@studsphere.com"
-                  className="w-full bg-slate-950/50 border border-slate-800 focus:border-blue-600/60 focus:ring-4 focus:ring-blue-600/10 focus:outline-none rounded-2xl py-3.5 pl-12 pr-4 text-white placeholder:text-slate-600 transition-all text-sm"
+                  className="w-full bg-slate-950/50 border border-slate-800 focus:border-blue-600/60 focus:ring-4 focus:ring-blue-600/10 focus:outline-none rounded-md py-3.5 pl-12 pr-4 text-white placeholder:text-slate-600 transition-all text-sm"
                 />
               </div>
             </div>
@@ -102,7 +102,7 @@ const SuperadminLogin = () => {
                   disabled={loading}
                   onChange={(e) => setPassword(e.target.value)}
                   placeholder="••••••••"
-                  className="w-full bg-slate-950/50 border border-slate-800 focus:border-blue-600/60 focus:ring-4 focus:ring-blue-600/10 focus:outline-none rounded-2xl py-3.5 pl-12 pr-12 text-white placeholder:text-slate-600 transition-all text-sm"
+                  className="w-full bg-slate-950/50 border border-slate-800 focus:border-blue-600/60 focus:ring-4 focus:ring-blue-600/10 focus:outline-none rounded-md py-3.5 pl-12 pr-12 text-white placeholder:text-slate-600 transition-all text-sm"
                 />
                 <button
                   type="button"
@@ -120,7 +120,7 @@ const SuperadminLogin = () => {
                 <div className="relative flex items-center justify-center">
                   <input
                     type="checkbox"
-                    className="peer appearance-none w-5 h-5 border border-slate-800 rounded-lg bg-slate-950 checked:bg-blue-600 checked:border-blue-600 focus:outline-none transition-all"
+                    className="peer appearance-none w-5 h-5 border border-slate-800 rounded-md bg-slate-950 checked:bg-blue-600 checked:border-blue-600 focus:outline-none transition-all"
                   />
                   <svg className="absolute w-3.5 h-3.5 text-white opacity-0 peer-checked:opacity-100 transition-opacity pointer-events-none" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
@@ -138,7 +138,7 @@ const SuperadminLogin = () => {
               id="superadmin-login-btn"
               type="submit"
               disabled={loading}
-              className="w-full relative group overflow-hidden bg-blue-600 hover:bg-blue-500 disabled:bg-slate-800 disabled:text-slate-600 text-white font-bold py-4 rounded-2xl shadow-xl shadow-blue-900/20 transition-all active:scale-[0.98] flex items-center justify-center gap-2"
+              className="w-full relative group overflow-hidden bg-blue-600 hover:bg-blue-500 disabled:bg-slate-800 disabled:text-slate-600 text-white font-bold py-4 rounded-md shadow-xl shadow-blue-900/20 transition-all active:scale-[0.98] flex items-center justify-center gap-2"
             >
               <div className="absolute inset-0 w-0 bg-gradient-to-r from-white/5 to-transparent group-hover:w-full transition-all duration-700 ease-out" />
               {loading ? (

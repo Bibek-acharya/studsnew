@@ -135,7 +135,7 @@ const ScholarshipManagePage: React.FC<Props> = ({ onCreateNew, onEdit }) => {
     <div className="p-4 lg:p-8 w-full max-w-350 mx-auto min-h-full font-sans">
       {/* Toast Notification */}
       {toastMessage && (
-        <div className="fixed bottom-6 right-6 z-50 bg-white border border-gray-200 shadow-lg rounded-lg p-4 flex items-center gap-3 min-w-[250px] animate-in slide-in-from-bottom-5">
+        <div className="fixed bottom-6 right-6 z-50 bg-white border border-gray-200 shadow-lg rounded-md p-4 flex items-center gap-3 min-w-[250px] animate-in slide-in-from-bottom-5">
           <i className="fa-solid fa-check-circle text-green-500 text-xl"></i>
           <span className="text-sm font-medium text-gray-800">{toastMessage}</span>
         </div>
@@ -150,12 +150,12 @@ const ScholarshipManagePage: React.FC<Props> = ({ onCreateNew, onEdit }) => {
         <div className="flex gap-2">
           <button 
             onClick={onCreateNew} 
-            className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium py-2 px-4 rounded-lg transition-colors shadow-sm"
+            className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium py-2 px-4 rounded-md transition-colors "
           >
             <i className="fa-solid fa-plus-circle text-lg"></i>
             Create Scholarship
           </button>
-          <button className="flex items-center gap-2 px-4 py-2 bg-white border border-gray-200 text-gray-700 rounded-lg text-sm font-medium shadow-sm hover:bg-gray-50">
+          <button className="flex items-center gap-2 px-4 py-2 bg-white border border-gray-200 text-gray-700 rounded-md text-sm font-medium  hover:bg-gray-50">
             <i className="fa-solid fa-filter text-base"></i> Filter
           </button>
         </div>
@@ -190,10 +190,10 @@ const ScholarshipManagePage: React.FC<Props> = ({ onCreateNew, onEdit }) => {
       {filteredScholarships.length > 0 ? (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 pb-12">
           {filteredScholarships.map(item => (
-            <div key={item.id} className="bg-white rounded-[20px] border border-gray-200/80 shadow-sm p-4 flex flex-col hover:shadow-md transition-shadow">
+            <div key={item.id} className="bg-white rounded-[20px] border border-gray-200/80  p-4 flex flex-col hover: transition-shadow">
               
               {/* Image Area */}
-              <div className="h-[140px] bg-gradient-to-b from-gray-200 to-gray-300 rounded-xl mb-4 relative flex items-center justify-center overflow-hidden">
+              <div className="h-[140px] bg-gradient-to-b from-gray-200 to-gray-300 rounded-md mb-4 relative flex items-center justify-center overflow-hidden">
                 {item.image && (
                   <img src={item.image} alt={item.title} className="absolute inset-0 w-full h-full object-cover opacity-30 mix-blend-overlay" />
                 )}
@@ -218,7 +218,7 @@ const ScholarshipManagePage: React.FC<Props> = ({ onCreateNew, onEdit }) => {
               </div>
 
               {/* Details Box */}
-              <div className="bg-slate-50 rounded-xl p-3.5 mb-5 space-y-3 text-[13px] text-gray-700 font-medium">
+              <div className="bg-slate-50 rounded-md p-3.5 mb-5 space-y-3 text-[13px] text-gray-700 font-medium">
                 <div className="flex items-center gap-5">
                   <div className="flex items-center gap-2 w-1/2">
                     <i className="fa-solid fa-money-bill text-gray-400 text-[16px]"></i>

@@ -23,7 +23,7 @@ const Footer = () => {
   const currentYear = new Date().getFullYear();
 
   return (
-    <div className="bg-[#f8f9fc] rounded-2xl p-4 sm:p-6 lg:p-4 w-full max-w-[1400px] mx-auto flex flex-col gap-10 lg:gap-12 border border-gray-50 mb-4 mt-16">
+    <div className="bg-[#f8f9fc] rounded-md p-4 sm:p-6 lg:p-4 w-full max-w-[1400px] mx-auto flex flex-col gap-10 lg:gap-12 border border-gray-50 mb-4 mt-16">
       <Newsletter />
 
       {/* Footer Section */}
@@ -110,7 +110,6 @@ const Footer = () => {
               <ul className="flex flex-col gap-4">
                 <li><Link href={routeMap.about} className="text-gray-500 hover:text-[#0000ff] text-sm transition-colors text-left">About Us</Link></li>
                 <li><Link href={routeMap.about} className="text-gray-500 hover:text-[#0000ff] text-sm transition-colors text-left">Our Team</Link></li>
-                <li><Link href={routeMap.about} className="text-gray-500 hover:text-[#0000ff] text-sm transition-colors text-left">Careers</Link></li>
                 <li><Link href={routeMap.contact} className="text-gray-500 hover:text-[#0000ff] text-sm transition-colors text-left">Contact Us</Link></li>
               </ul>
             </div>
@@ -122,7 +121,6 @@ const Footer = () => {
                 <li><Link href={routeMap.courseFinder} className="text-gray-500 hover:text-[#0000ff] text-sm transition-colors text-left">All Courses</Link></li>
                 <li><Link href={routeMap.bookCounselling} className="text-gray-500 hover:text-[#0000ff] text-sm transition-colors text-left">Career Counseling</Link></li>
                 <li><Link href={routeMap.campusForum} className="text-gray-500 hover:text-[#0000ff] text-sm transition-colors text-left">Community Hub</Link></li>
-                <li><Link href={routeMap.studyResources} className="text-gray-500 hover:text-[#0000ff] text-sm transition-colors text-left">Study Materials</Link></li>
               </ul>
             </div>
 
@@ -151,7 +149,7 @@ const Footer = () => {
 
             {/* Legal & Help Column */}
             <div className="flex flex-col">
-              <h4 className="font-semibold text-[#0000ff] mb- 5 text-sm sm:text-base">Legal & Help</h4>
+              <h4 className="font-semibold text-[#0000ff] mb-5 text-sm sm:text-base">Legal & Help</h4>
               <ul className="flex flex-col gap-4">
                 <li><Link href={routeMap.educationPage} className="text-gray-500 hover:text-[#0000ff] text-sm transition-colors text-left">FAQs</Link></li>
                 <li><Link href={routeMap.about} className="text-gray-500 hover:text-[#0000ff] text-sm transition-colors text-left">Terms of Use</Link></li>

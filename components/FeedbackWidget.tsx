@@ -19,7 +19,7 @@ const FaceIcon = ({ face, selected }: { face: typeof faces[0]; selected: boolean
   const happySmile = <path d="M 28 62 Q 50 80 72 62" stroke="#000" strokeWidth="4.5" strokeLinecap="round" fill="none" />;
 
   return (
-    <svg viewBox="0 0 100 100" className={`w-10 h-10 transition-all duration-200 ${selected ? "scale-115 drop-shadow-md" : ""}`}>
+    <svg viewBox="0 0 100 100" className={`w-10 h-10 transition-all duration-200 ${selected ? "scale-115 drop-" : ""}`}>
       <circle cx="50" cy="50" r="50" fill={face.color} />
       <circle cx="33" cy="42" r="5.5" fill="#000" />
       <circle cx="67" cy="42" r="5.5" fill="#000" />
@@ -96,7 +96,7 @@ export default function FeedbackWidget() {
                   <button
                     key={face.value}
                     onClick={() => handleRating(face.value)}
-                    className={`transition-all duration-200 ${rating === face.value ? "scale-115 drop-shadow-md" : rating ? "opacity-40 grayscale-[80%] scale-95" : ""}`}
+                    className={`transition-all duration-200 ${rating === face.value ? "scale-115 drop-" : rating ? "opacity-40 grayscale-[80%] scale-95" : ""}`}
                     aria-label={face.label}
                   >
                     <FaceIcon face={face} selected={rating === face.value} />

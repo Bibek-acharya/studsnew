@@ -161,7 +161,7 @@ const BookCounsellingPage: React.FC<BookCounsellingPageProps> = () => {
 
       <div className="relative z-10 mx-auto max-w-7xl px-4 py-8 md:py-12">
         <div className="flex flex-col items-start gap-6 lg:flex-row">
-          <div className="w-full overflow-hidden rounded-xl border border-gray-100 bg-white shadow-sm lg:w-2/3">
+          <div className="w-full overflow-hidden rounded-md border border-gray-100 bg-white  lg:w-2/3">
             <div className="border-b border-gray-100 p-6">
               <h1 className="text-2xl font-bold text-gray-900">Book Counseling Session</h1>
             </div>
@@ -185,11 +185,11 @@ const BookCounsellingPage: React.FC<BookCounsellingPageProps> = () => {
                         setShowSuggestions(true);
                       }}
                       onFocus={() => setShowSuggestions(true)}
-                      className="w-full rounded-lg border border-gray-200 bg-gray-50 py-3 pl-10 pr-4 text-sm transition-all focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      className="w-full rounded-md border border-gray-200 bg-gray-50 py-3 pl-10 pr-4 text-sm transition-all focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-500"
                     />
 
                     {showSuggestions && filteredColleges.length > 0 && (
-                      <ul className="absolute z-20 mt-1 max-h-48 w-full overflow-y-auto rounded-lg border border-gray-200 bg-white shadow-lg">
+                      <ul className="absolute z-20 mt-1 max-h-48 w-full overflow-y-auto rounded-md border border-gray-200 bg-white shadow-lg">
                         {filteredColleges.map((item) => (
                           <li key={item}>
                             <button
@@ -218,7 +218,7 @@ const BookCounsellingPage: React.FC<BookCounsellingPageProps> = () => {
                     <select
                       value={program}
                       onChange={(event) => setProgram(event.target.value)}
-                      className="w-full appearance-none rounded-lg border border-gray-200 bg-gray-50 p-3 text-sm focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      className="w-full appearance-none rounded-md border border-gray-200 bg-gray-50 p-3 text-sm focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-500"
                     >
                       <option value="" disabled>
                         Select Program
@@ -237,7 +237,7 @@ const BookCounsellingPage: React.FC<BookCounsellingPageProps> = () => {
                     <select
                       value={course}
                       onChange={(event) => setCourse(event.target.value)}
-                      className="w-full appearance-none rounded-lg border border-gray-200 bg-gray-50 p-3 text-sm focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      className="w-full appearance-none rounded-md border border-gray-200 bg-gray-50 p-3 text-sm focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-500"
                     >
                       <option value="" disabled>
                         Select Course
@@ -276,11 +276,11 @@ const BookCounsellingPage: React.FC<BookCounsellingPageProps> = () => {
                           type="button"
                           disabled={isDisabled}
                           onClick={() => setSelectedDate(item)}
-                          className={`w-[78px] flex-shrink-0 rounded-xl border p-3 transition-all ${
+                          className={`w-[78px] flex-shrink-0 rounded-md border p-3 transition-all ${
                             isDisabled
                               ? "cursor-not-allowed border-gray-100 bg-gray-50 opacity-60"
                               : isSelected
-                                ? "border-[#0000FF] bg-brand-blue shadow-md"
+                                ? "border-[#0000FF] bg-brand-blue "
                                 : "border-gray-200 bg-white hover:border-[#0000FF]"
                           }`}
                         >
@@ -319,9 +319,9 @@ const BookCounsellingPage: React.FC<BookCounsellingPageProps> = () => {
                           key={item}
                           type="button"
                           onClick={() => setSelectedTime(item)}
-                          className={`rounded-lg border px-4 py-2 text-sm transition-all ${
+                          className={`rounded-md border px-4 py-2 text-sm transition-all ${
                             isSelected
-                              ? "border-[#0000FF] bg-brand-blue text-white shadow-md"
+                              ? "border-[#0000FF] bg-brand-blue text-white "
                               : "border-gray-200 bg-white text-gray-700 hover:border-[#0000FF]"
                           }`}
                         >
@@ -336,7 +336,7 @@ const BookCounsellingPage: React.FC<BookCounsellingPageProps> = () => {
               <hr className="border-gray-100" />
 
               <div 
-                className={`flex items-start gap-4 rounded-lg border transition-all p-4 cursor-pointer ${isOnline ? 'border-purple-200 bg-purple-50/50' : 'border-blue-100 bg-blue-50/50'}`}
+                className={`flex items-start gap-4 rounded-md border transition-all p-4 cursor-pointer ${isOnline ? 'border-purple-200 bg-purple-50/50' : 'border-blue-100 bg-blue-50/50'}`}
                 onClick={() => setIsOnline(!isOnline)}
               >
                 <div className="pt-0.5" onClick={(e) => e.stopPropagation()}>
@@ -372,7 +372,7 @@ const BookCounsellingPage: React.FC<BookCounsellingPageProps> = () => {
                         value={studentName}
                         onChange={(event) => setStudentName(event.target.value)}
                         placeholder="e.g. John Doe"
-                        className="w-full rounded-lg border border-gray-200 bg-gray-50 py-3 pl-10 pr-4 text-sm focus:outline-none focus:ring-2 focus:ring-[#0000FF] transition-all focus:bg-white"
+                        className="w-full rounded-md border border-gray-200 bg-gray-50 py-3 pl-10 pr-4 text-sm focus:outline-none focus:ring-2 focus:ring-[#0000FF] transition-all focus:bg-white"
                       />
                     </div>
                   </div>
@@ -388,7 +388,7 @@ const BookCounsellingPage: React.FC<BookCounsellingPageProps> = () => {
                         value={studentPhone}
                         onChange={(event) => setStudentPhone(event.target.value)}
                         placeholder="e.g. +977-98XXXXXXXX"
-                        className="w-full rounded-lg border border-gray-200 bg-gray-50 py-3 pl-10 pr-4 text-sm focus:outline-none focus:ring-2 focus:ring-[#0000FF] transition-all focus:bg-white"
+                        className="w-full rounded-md border border-gray-200 bg-gray-50 py-3 pl-10 pr-4 text-sm focus:outline-none focus:ring-2 focus:ring-[#0000FF] transition-all focus:bg-white"
                       />
                     </div>
                   </div>
@@ -402,7 +402,7 @@ const BookCounsellingPage: React.FC<BookCounsellingPageProps> = () => {
                         value={studentEmail}
                         onChange={(event) => setStudentEmail(event.target.value)}
                         placeholder="e.g. student@college.edu"
-                        className="w-full rounded-lg border border-gray-200 bg-gray-50 py-3 pl-10 pr-4 text-sm focus:outline-none focus:ring-2 focus:ring-[#0000FF] transition-all focus:bg-white"
+                        className="w-full rounded-md border border-gray-200 bg-gray-50 py-3 pl-10 pr-4 text-sm focus:outline-none focus:ring-2 focus:ring-[#0000FF] transition-all focus:bg-white"
                       />
                     </div>
                   </div>
@@ -416,7 +416,7 @@ const BookCounsellingPage: React.FC<BookCounsellingPageProps> = () => {
                         value={studentNotes}
                         onChange={(event) => setStudentNotes(event.target.value)}
                         placeholder="Any specific notes or questions for the counselor? (Optional)"
-                        className="w-full resize-none rounded-lg border border-gray-200 bg-gray-50 py-3 pl-10 pr-4 text-sm focus:outline-none focus:ring-2 focus:ring-[#0000FF] transition-all focus:bg-white"
+                        className="w-full resize-none rounded-md border border-gray-200 bg-gray-50 py-3 pl-10 pr-4 text-sm focus:outline-none focus:ring-2 focus:ring-[#0000FF] transition-all focus:bg-white"
                       />
                     </div>
                   </div>
@@ -426,7 +426,7 @@ const BookCounsellingPage: React.FC<BookCounsellingPageProps> = () => {
           </div>
 
           <div className="sticky top-28 w-full space-y-6 lg:w-1/3">
-            <div className="overflow-hidden rounded-xl border border-gray-100 bg-white shadow-sm">
+            <div className="overflow-hidden rounded-md border border-gray-100 bg-white ">
               <div className="border-b border-gray-100 bg-gray-50/50 p-5">
                 <h2 className="font-bold text-gray-900">Booking Details</h2>
               </div>
@@ -490,7 +490,7 @@ const BookCounsellingPage: React.FC<BookCounsellingPageProps> = () => {
                     type="button"
                     disabled={!isFormValid || isBooking || isConfirmed}
                     onClick={handleConfirmBooking}
-                    className={`flex w-full items-center justify-center gap-2 rounded-lg px-4 py-3.5 font-medium text-white shadow-sm transition-colors disabled:cursor-not-allowed disabled:opacity-50 ${
+                    className={`flex w-full items-center justify-center gap-2 rounded-md px-4 py-3.5 font-medium text-white  transition-colors disabled:cursor-not-allowed disabled:opacity-50 ${
                       isConfirmed
                         ? "bg-green-600 hover:bg-green-700"
                         : "bg-brand-blue hover:bg-[#0000CC]"
@@ -524,7 +524,7 @@ const BookCounsellingPage: React.FC<BookCounsellingPageProps> = () => {
               </div>
             </div>
 
-            <div className="flex items-start gap-4 rounded-xl border border-gray-100 bg-white p-5 shadow-sm">
+            <div className="flex items-start gap-4 rounded-md border border-gray-100 bg-white p-5 ">
               <div className="mt-1 flex-shrink-0 rounded-full bg-blue-50 p-2">
                 <i className="fa-solid fa-headset text-[#0000FF]"></i>
               </div>

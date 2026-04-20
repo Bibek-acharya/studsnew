@@ -192,7 +192,7 @@ export default function ReviewsSection() {
           <p className="text-gray-500 mb-6">{error}</p>
           <button
             onClick={fetchReviews}
-            className="px-4 py-2 bg-indigo-600 text-white rounded-lg font-medium hover:bg-indigo-700 transition-colors"
+            className="px-4 py-2 bg-indigo-600 text-white rounded-md font-medium hover:bg-indigo-700 transition-colors"
           >
             Try Again
           </button>
@@ -208,7 +208,7 @@ export default function ReviewsSection() {
         <p className="text-gray-500 mt-1">Manage and track your college reviews and feedback.</p>
       </header>
 
-      <section className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
+      <section className="bg-white rounded-md  border border-gray-100 p-6">
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4 border-b border-gray-100 pb-4">
           <div className="text-lg font-semibold text-gray-900">
             All Reviews ({filteredReviews.length})
@@ -219,7 +219,7 @@ export default function ReviewsSection() {
             <select
               value={ratingFilter}
               onChange={(e) => setRatingFilter(e.target.value)}
-              className="w-full md:w-40 bg-gray-50 border border-gray-200 text-gray-700 text-sm rounded-lg focus:ring-indigo-500 focus:border-indigo-500 block p-2.5 outline-none transition-shadow"
+              className="w-full md:w-40 bg-gray-50 border border-gray-200 text-gray-700 text-sm rounded-md focus:ring-indigo-500 focus:border-indigo-500 block p-2.5 outline-none transition-shadow"
             >
               <option value="all">All Ratings</option>
               <option value="5">5 Stars</option>
@@ -240,7 +240,7 @@ export default function ReviewsSection() {
             <p className="text-gray-500 mb-6 max-w-sm">Share your experience to help other students make informed decisions about their future.</p>
             <a
               href="/write-review"
-              className="px-6 py-3 bg-indigo-600 text-white rounded-lg font-medium hover:bg-indigo-700 transition-colors"
+              className="px-6 py-3 bg-indigo-600 text-white rounded-md font-medium hover:bg-indigo-700 transition-colors"
             >
               Write a Review
             </a>
@@ -250,7 +250,7 @@ export default function ReviewsSection() {
             {filteredReviews.map((review) => (
               <div
                 key={review.id}
-                className="bg-white rounded-xl border border-gray-100 shadow-sm hover:-translate-y-1 hover:shadow-lg transition-all duration-300 flex flex-col h-full overflow-hidden group"
+                className="bg-white rounded-md border border-gray-100  hover:-translate-y-1 hover:shadow-lg transition-all duration-300 flex flex-col h-full overflow-hidden group"
               >
                 <div className="p-5 flex-grow">
                   <div className="flex justify-between items-start mb-3">
@@ -298,13 +298,13 @@ export default function ReviewsSection() {
                   <div className="flex items-center gap-2">
                     <button
                       onClick={() => handleEdit(review)}
-                      className="w-8 h-8 rounded-full bg-white border border-gray-200 text-gray-500 hover:text-indigo-600 hover:border-indigo-200 flex items-center justify-center transition-all shadow-sm"
+                      className="w-8 h-8 rounded-full bg-white border border-gray-200 text-gray-500 hover:text-indigo-600 hover:border-indigo-200 flex items-center justify-center transition-all "
                     >
                       <Pencil className="w-4 h-4" />
                     </button>
                     <button
                       onClick={() => handleDelete(review)}
-                      className="w-8 h-8 rounded-full bg-white border border-gray-200 text-gray-500 hover:text-red-600 hover:border-red-200 flex items-center justify-center transition-all shadow-sm"
+                      className="w-8 h-8 rounded-full bg-white border border-gray-200 text-gray-500 hover:text-red-600 hover:border-red-200 flex items-center justify-center transition-all "
                     >
                       <Trash2 className="w-4 h-4" />
                     </button>
@@ -318,7 +318,7 @@ export default function ReviewsSection() {
 
       {viewModalOpen && selectedReview && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-gray-900/40 backdrop-blur-sm">
-          <div className="bg-white rounded-2xl shadow-xl w-full max-w-2xl max-h-[90vh] overflow-y-auto relative">
+          <div className="bg-white rounded-md shadow-xl w-full max-w-2xl max-h-[90vh] overflow-y-auto relative">
             <button
               onClick={() => setViewModalOpen(false)}
               className="absolute top-4 right-4 text-gray-400 hover:text-gray-700 p-1 rounded-full hover:bg-gray-100 transition-colors"
@@ -344,7 +344,7 @@ export default function ReviewsSection() {
                 </div>
               </div>
 
-              <div className="bg-gray-50 rounded-xl p-5 mb-6 border border-gray-100">
+              <div className="bg-gray-50 rounded-md p-5 mb-6 border border-gray-100">
                 <h3 className="text-lg font-bold text-gray-900 mb-2">{selectedReview.title}</h3>
                 {selectedReview.ratings && (
                   <div className="mt-3 grid grid-cols-2 gap-2 text-xs text-gray-600">
@@ -376,19 +376,19 @@ export default function ReviewsSection() {
               <div className="flex justify-end gap-3 pt-4 border-t border-gray-100">
                 <button
                   onClick={() => setViewModalOpen(false)}
-                  className="px-4 py-2 rounded-lg text-gray-600 font-medium hover:bg-gray-100 transition-colors"
+                  className="px-4 py-2 rounded-md text-gray-600 font-medium hover:bg-gray-100 transition-colors"
                 >
                   Close
                 </button>
                 <button
                   onClick={() => { setViewModalOpen(false); handleEdit(selectedReview); }}
-                  className="px-4 py-2 rounded-lg bg-gray-100 text-gray-800 font-medium hover:bg-gray-200 transition-colors flex items-center gap-2"
+                  className="px-4 py-2 rounded-md bg-gray-100 text-gray-800 font-medium hover:bg-gray-200 transition-colors flex items-center gap-2"
                 >
                   <Pencil className="w-4 h-4" /> Edit
                 </button>
                 <button
                   onClick={() => { setViewModalOpen(false); handleDelete(selectedReview); }}
-                  className="px-4 py-2 rounded-lg bg-red-50 text-red-600 font-medium hover:bg-red-100 transition-colors flex items-center gap-2"
+                  className="px-4 py-2 rounded-md bg-red-50 text-red-600 font-medium hover:bg-red-100 transition-colors flex items-center gap-2"
                 >
                   <Trash2 className="w-4 h-4" /> Delete
                 </button>
@@ -400,7 +400,7 @@ export default function ReviewsSection() {
 
       {editModalOpen && selectedReview && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-gray-900/40 backdrop-blur-sm">
-          <div className="bg-white rounded-2xl shadow-xl w-full max-w-2xl max-h-[90vh] overflow-y-auto relative">
+          <div className="bg-white rounded-md shadow-xl w-full max-w-2xl max-h-[90vh] overflow-y-auto relative">
             <button
               onClick={() => setEditModalOpen(false)}
               className="absolute top-4 right-4 text-gray-400 hover:text-gray-700 p-1 rounded-full hover:bg-gray-100 transition-colors"
@@ -421,7 +421,7 @@ export default function ReviewsSection() {
                       step="0.5"
                       value={editForm.rating}
                       onChange={(e) => setEditForm({ ...editForm, rating: parseFloat(e.target.value) || 1 })}
-                      className="w-16 border border-gray-300 rounded-lg p-2 text-center font-semibold focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none"
+                      className="w-16 border border-gray-300 rounded-md p-2 text-center font-semibold focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none"
                     />
                     <span className="text-gray-500">/ 5</span>
                   </div>
@@ -433,7 +433,7 @@ export default function ReviewsSection() {
                     type="text"
                     value={editForm.title}
                     onChange={(e) => setEditForm({ ...editForm, title: e.target.value })}
-                    className="w-full border border-gray-300 rounded-lg p-2.5 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition-shadow"
+                    className="w-full border border-gray-300 rounded-md p-2.5 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition-shadow"
                   />
                 </div>
 
@@ -444,7 +444,7 @@ export default function ReviewsSection() {
                     onChange={(e) => setEditForm({ ...editForm, pros: e.target.value })}
                     rows={3}
                     placeholder="What are the best things about this college?"
-                    className="w-full border border-gray-300 rounded-lg p-2.5 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition-shadow"
+                    className="w-full border border-gray-300 rounded-md p-2.5 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition-shadow"
                   />
                 </div>
 
@@ -455,7 +455,7 @@ export default function ReviewsSection() {
                     onChange={(e) => setEditForm({ ...editForm, cons: e.target.value })}
                     rows={3}
                     placeholder="What could be improved?"
-                    className="w-full border border-gray-300 rounded-lg p-2.5 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition-shadow"
+                    className="w-full border border-gray-300 rounded-md p-2.5 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition-shadow"
                   />
                 </div>
               </div>
@@ -463,14 +463,14 @@ export default function ReviewsSection() {
               <div className="mt-8 flex justify-end gap-3 pt-4 border-t border-gray-100">
                 <button
                   onClick={() => setEditModalOpen(false)}
-                  className="px-5 py-2.5 rounded-lg text-gray-700 font-medium hover:bg-gray-100 transition-colors"
+                  className="px-5 py-2.5 rounded-md text-gray-700 font-medium hover:bg-gray-100 transition-colors"
                 >
                   Cancel
                 </button>
                 <button
                   onClick={saveEdit}
                   disabled={saving}
-                  className="px-5 py-2.5 rounded-lg bg-indigo-600 text-white font-medium hover:bg-indigo-700 transition-colors shadow-sm disabled:opacity-50 flex items-center gap-2"
+                  className="px-5 py-2.5 rounded-md bg-indigo-600 text-white font-medium hover:bg-indigo-700 transition-colors  disabled:opacity-50 flex items-center gap-2"
                 >
                   {saving && <Loader2 className="w-4 h-4 animate-spin" />}
                   Save Changes
@@ -483,7 +483,7 @@ export default function ReviewsSection() {
 
       {deleteModalOpen && selectedReview && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-gray-900/40 backdrop-blur-sm">
-          <div className="bg-white rounded-2xl shadow-xl w-full max-w-sm text-center p-6 md:p-8">
+          <div className="bg-white rounded-md shadow-xl w-full max-w-sm text-center p-6 md:p-8">
             <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4 text-red-600">
               <Trash2 className="w-8 h-8" />
             </div>
@@ -494,14 +494,14 @@ export default function ReviewsSection() {
             <div className="flex justify-center gap-3">
               <button
                 onClick={() => setDeleteModalOpen(false)}
-                className="flex-1 px-4 py-2 rounded-lg text-gray-700 font-medium bg-gray-100 hover:bg-gray-200 transition-colors"
+                className="flex-1 px-4 py-2 rounded-md text-gray-700 font-medium bg-gray-100 hover:bg-gray-200 transition-colors"
               >
                 Cancel
               </button>
               <button
                 onClick={confirmDelete}
                 disabled={deleting}
-                className="flex-1 px-4 py-2 rounded-lg bg-red-600 text-white font-medium hover:bg-red-700 transition-colors shadow-sm disabled:opacity-50 flex items-center justify-center gap-2"
+                className="flex-1 px-4 py-2 rounded-md bg-red-600 text-white font-medium hover:bg-red-700 transition-colors  disabled:opacity-50 flex items-center justify-center gap-2"
               >
                 {deleting && <Loader2 className="w-4 h-4 animate-spin" />}
                 Yes, Delete

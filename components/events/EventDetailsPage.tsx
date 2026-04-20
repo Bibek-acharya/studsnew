@@ -74,13 +74,13 @@ const EventDetailsPage: React.FC<{ params: Promise<{ id: string }> }> = ({ param
 
   return (
     <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-6 pb-10 lg:pb-14 bg-white min-h-screen">
-      <div className="relative w-full h-62.5 sm:h-75 lg:h-90 rounded-2xl lg:rounded-4xl overflow-hidden shadow-xl mb-10 lg:mb-16">
+      <div className="relative w-full h-62.5 sm:h-75 lg:h-90 rounded-md lg:rounded-md overflow-hidden shadow-xl mb-10 lg:mb-16">
         <img src={event.image} alt={event.title} className="absolute inset-0 w-full h-full object-cover" />
         <div className="absolute inset-0 bg-linear-to-t from-gray-900 via-gray-900/60 to-transparent"></div>
 
         <div className="absolute bottom-0 left-0 w-full p-6 sm:p-10 lg:p-12">
           <div className="flex flex-wrap items-center gap-3 mb-3 sm:mb-4">
-            <span className="bg-blue-600 text-white text-xs font-bold px-3 py-1 rounded-full uppercase tracking-wider shadow-sm">
+            <span className="bg-blue-600 text-white text-xs font-bold px-3 py-1 rounded-full uppercase tracking-wider ">
               {badgeLabel}
             </span>
             <span className="bg-white/20 backdrop-blur-md text-white text-xs font-semibold px-3 py-1 rounded-full flex items-center gap-1.5 border border-white/20">
@@ -114,7 +114,7 @@ const EventDetailsPage: React.FC<{ params: Promise<{ id: string }> }> = ({ param
               </p>
             </div>
 
-            <div className="mt-8 bg-[#f4f7ff] rounded-xl p-6 md:p-8">
+            <div className="mt-8 bg-[#f4f7ff] rounded-md p-6 md:p-8">
               <h3 className="font-bold text-gray-900 mb-6">Key Highlights & Objectives</h3>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-y-4 gap-x-6">
                 {[1, 2, 3, 4].map((item) => (
@@ -144,7 +144,7 @@ const EventDetailsPage: React.FC<{ params: Promise<{ id: string }> }> = ({ param
               ].map((entry, index) => (
                 <div
                   key={`${entry.icon}-${index}`}
-                  className="bg-gray-50/80 rounded-xl p-6 flex flex-col items-center justify-center text-center gap-2"
+                  className="bg-gray-50/80 rounded-md p-6 flex flex-col items-center justify-center text-center gap-2"
                 >
                   <i className={`fa-solid ${entry.icon} ${entry.color} mb-1`}></i>
                   <h4 className="font-bold text-gray-900 text-sm">Students</h4>
@@ -188,7 +188,7 @@ const EventDetailsPage: React.FC<{ params: Promise<{ id: string }> }> = ({ param
               ].map((resource) => (
                 <button
                   key={resource.title}
-                  className="border border-gray-100 rounded-xl p-4 flex items-center justify-between shadow-sm hover:shadow-md transition-shadow cursor-pointer group text-left"
+                  className="border border-gray-100 rounded-md p-4 flex items-center justify-between  hover: transition-shadow cursor-pointer group text-left"
                 >
                   <div className="flex items-center gap-4">
                     <div className={`w-10 h-10 rounded flex items-center justify-center ${resource.color}`}>
@@ -248,7 +248,7 @@ const EventDetailsPage: React.FC<{ params: Promise<{ id: string }> }> = ({ param
                 </div>
               </div>
 
-              <div className="mt-6 rounded-lg overflow-hidden h-32 relative border border-gray-100 shadow-sm">
+              <div className="mt-6 rounded-md overflow-hidden h-32 relative border border-gray-100 ">
                 <img
                   src="https://images.unsplash.com/photo-1524661135-423995f22d0b?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80"
                   alt="Map Placeholder"
@@ -257,14 +257,14 @@ const EventDetailsPage: React.FC<{ params: Promise<{ id: string }> }> = ({ param
               </div>
 
               <div className="mt-6 space-y-3">
-                <button className="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-3 px-4 rounded-lg transition-colors text-sm shadow-sm">
+                <button className="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-3 px-4 rounded-md transition-colors text-sm ">
                   Register Now
                 </button>
                 <div className="grid grid-cols-2 gap-3">
-                  <button className="flex items-center justify-center gap-2 border border-gray-200 hover:bg-gray-50 text-gray-700 font-medium py-2.5 px-4 rounded-lg transition-colors text-xs shadow-sm">
+                  <button className="flex items-center justify-center gap-2 border border-gray-200 hover:bg-gray-50 text-gray-700 font-medium py-2.5 px-4 rounded-md transition-colors text-xs ">
                     <i className="fa-regular fa-calendar"></i> Calendar
                   </button>
-                  <button className="flex items-center justify-center gap-2 border border-gray-200 hover:bg-gray-50 text-gray-700 font-medium py-2.5 px-4 rounded-lg transition-colors text-xs shadow-sm">
+                  <button className="flex items-center justify-center gap-2 border border-gray-200 hover:bg-gray-50 text-gray-700 font-medium py-2.5 px-4 rounded-md transition-colors text-xs ">
                     <i className="fa-solid fa-share-nodes"></i> Share
                   </button>
                 </div>
@@ -332,7 +332,7 @@ const EventDetailsPage: React.FC<{ params: Promise<{ id: string }> }> = ({ param
             return (
               <article
                 key={`${rel.id}-${idx}`}
-                className="bg-white border border-gray-200 rounded-2xl overflow-hidden hover:shadow-lg transition-shadow duration-300"
+                className="bg-white border border-gray-200 rounded-md overflow-hidden hover:shadow-lg transition-shadow duration-300"
               >
                 <img src={rel.image} alt={rel.title} className="w-full h-44 object-cover" />
                 <div className="p-5">
@@ -365,18 +365,18 @@ const EventDetailsPage: React.FC<{ params: Promise<{ id: string }> }> = ({ param
                   <div className="flex items-center gap-3">
                     <Link
                       href={`/events/${rel.id}`}
-                      className="flex-1 border border-gray-200 text-gray-700 text-[13px] font-semibold py-2.5 rounded-lg hover:bg-gray-50 transition-colors text-center"
+                      className="flex-1 border border-gray-200 text-gray-700 text-[13px] font-semibold py-2.5 rounded-md hover:bg-gray-50 transition-colors text-center"
                     >
                       Details
                     </Link>
                     <button
-                      className={`flex-[1.5] text-white text-[13px] font-semibold py-2.5 rounded-lg transition-colors ${
+                      className={`flex-[1.5] text-white text-[13px] font-semibold py-2.5 rounded-md transition-colors ${
                         idx === 1 ? "bg-[#1a233a] hover:bg-gray-900" : "bg-blue-500 hover:bg-blue-600"
                       }`}
                     >
                       Register Now
                     </button>
-                    <button className="border border-gray-200 p-2.5 rounded-lg hover:bg-gray-50 text-gray-600 transition-colors group">
+                    <button className="border border-gray-200 p-2.5 rounded-md hover:bg-gray-50 text-gray-600 transition-colors group">
                       <i className="fa-regular fa-heart w-4 h-4 group-hover:text-red-500 transition-colors"></i>
                     </button>
                   </div>

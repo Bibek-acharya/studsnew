@@ -33,13 +33,13 @@ export default function ForgotPasswordPage() {
   const [otpTouched, setOtpTouched] = useState(false);
   const otpInputRefs = useRef<(HTMLInputElement | null)[]>([]);
 
-  const getBorderClass = (field: string, touched: boolean, errors: Record<string, string>, values: Record<string, string>) => {
+  const getBorderClass = (field: string, touched: boolean, errors: Record<string, string>, values: Record<string, any>) => {
     if (!touched) return "border-gray-200";
     if (errors[field]) return "border-red-400";
     return "border-green-400";
   };
 
-  const getFocusClasses = (field: string, touched: boolean, errors: Record<string, string>, values: Record<string, string>) => {
+  const getFocusClasses = (field: string, touched: boolean, errors: Record<string, string>, values: Record<string, any>) => {
     if (touched && !errors[field] && values[field as keyof typeof values]) return "focus:border-green-400 focus:ring-green-400";
     if (touched && errors[field]) return "focus:border-red-400 focus:ring-red-400";
     return "focus:border-blue-600 focus:ring-blue-600";
@@ -89,15 +89,7 @@ export default function ForgotPasswordPage() {
 
     if (otp.some((v) => !v)) return;
 
-    setLoading(true);
-    try {
-      await apiService.verifyOTP(email, otp.join(""));
-      setStep("newPassword");
-    } catch (err: any) {
-      setError(err.message || "Invalid or expired code. Please try again.");
-    } finally {
-      setLoading(false);
-    }
+    setStep("newPassword");
   };
 
   const handleNewPasswordSubmit = async (e: React.FormEvent) => {
@@ -110,7 +102,7 @@ export default function ForgotPasswordPage() {
 
     setLoading(true);
     try {
-      await apiService.resetPassword(email, passwordValues.password);
+      await apiService.resetPassword(email, otp.join(""), passwordValues.password);
       setSuccessMessage("Password reset successfully! Redirecting to login...");
       setTimeout(() => {
         router.push("/login");
@@ -151,7 +143,7 @@ if (step === "email") {
                 placeholder="Email Address"
                 required
                 disabled={loading}
-                className={`w-full pl-10 pr-4 py-3 border rounded-lg text-sm outline-none transition-all placeholder:text-gray-400 disabled:bg-gray-50 ${error ? "border-red-500 focus:border-red-500 focus:ring-red-500" : getBorderClass("email", emailTouched.email, emailErrors, emailValues) + " " + getFocusClasses("email", emailTouched.email, emailErrors, emailValues)}`}
+                className={`w-full pl-10 pr-4 py-3 border rounded-md text-sm outline-none transition-all placeholder:text-gray-400 disabled:bg-gray-50 ${error ? "border-red-500 focus:border-red-500 focus:ring-red-500" : getBorderClass("email", emailTouched.email, emailErrors, emailValues) + " " + getFocusClasses("email", emailTouched.email, emailErrors, emailValues)}`}
                 value={emailValues.email}
                 onChange={(e) => { setEmailValue("email", e.target.value); setError(""); }}
                 onBlur={() => { touchEmailField("email"); validateEmailField("email", emailValues.email, validators.email); }}
@@ -165,7 +157,7 @@ if (step === "email") {
           <button
             type="submit"
             disabled={loading}
-            className="w-full bg-brand-blue hover:bg-brand-hover disabled:bg-blue-400 text-white font-semibold rounded-lg py-3 transition-all disabled:cursor-not-allowed disabled:opacity-60"
+            className="w-full bg-brand-blue hover:bg-brand-hover disabled:bg-blue-400 text-white font-semibold rounded-md py-3 transition-all disabled:cursor-not-allowed disabled:opacity-60"
           >
             {loading ? "Sending..." : "Send Reset Code"}
           </button>
@@ -216,7 +208,7 @@ if (step === "email") {
           <button
             type="submit"
             disabled={loading || otp.some((v) => !v)}
-            className="w-full bg-brand-blue hover:bg-brand-hover disabled:bg-blue-400 text-white font-semibold rounded-lg py-3 transition-all disabled:cursor-not-allowed disabled:opacity-60"
+            className="w-full bg-brand-blue hover:bg-brand-hover disabled:bg-blue-400 text-white font-semibold rounded-md py-3 transition-all disabled:cursor-not-allowed disabled:opacity-60"
           >
             {loading ? "Verifying..." : "Verify Code"}
           </button>
@@ -258,7 +250,7 @@ if (step === "email") {
                 placeholder="New Password"
                 required
                 disabled={loading}
-                className={`w-full pl-10 pr-14 py-3 border rounded-lg text-sm outline-none transition-all placeholder:text-gray-400 disabled:bg-gray-50 ${error ? "border-red-500 focus:border-red-500 focus:ring-red-500" : getBorderClass("password", passwordTouched.password, passwordErrors, passwordValues) + " " + getFocusClasses("password", passwordTouched.password, passwordErrors, passwordValues)}`}
+                className={`w-full pl-10 pr-14 py-3 border rounded-md text-sm outline-none transition-all placeholder:text-gray-400 disabled:bg-gray-50 ${error ? "border-red-500 focus:border-red-500 focus:ring-red-500" : getBorderClass("password", passwordTouched.password, passwordErrors, passwordValues) + " " + getFocusClasses("password", passwordTouched.password, passwordErrors, passwordValues)}`}
                 value={passwordValues.password}
                 onChange={(e) => { setPasswordValue("password", e.target.value); setError(""); }}
                 onBlur={() => { touchPasswordField("password"); validatePasswordField("password", passwordValues.password, validators.password); }}
@@ -286,7 +278,7 @@ if (step === "email") {
                 placeholder="Confirm Password"
                 required
                 disabled={loading}
-                className={`w-full pl-10 pr-4 py-3 border rounded-lg text-sm outline-none transition-all placeholder:text-gray-400 disabled:bg-gray-50 ${(error || confirmPasswordError) ? "border-red-500 focus:border-red-500 focus:ring-red-500" : getBorderClass("confirmPassword", passwordTouched.confirmPassword, passwordErrors, passwordValues) + " " + getFocusClasses("confirmPassword", passwordTouched.confirmPassword, passwordErrors, passwordValues)}`}
+                className={`w-full pl-10 pr-4 py-3 border rounded-md text-sm outline-none transition-all placeholder:text-gray-400 disabled:bg-gray-50 ${(error || confirmPasswordError) ? "border-red-500 focus:border-red-500 focus:ring-red-500" : getBorderClass("confirmPassword", passwordTouched.confirmPassword, passwordErrors, passwordValues) + " " + getFocusClasses("confirmPassword", passwordTouched.confirmPassword, passwordErrors, passwordValues)}`}
                 value={passwordValues.confirmPassword}
                 onChange={(e) => { setPasswordValue("confirmPassword", e.target.value); setError(""); setConfirmPasswordError(""); }}
                 onBlur={() => { touchPasswordField("confirmPassword"); if (passwordValues.confirmPassword !== passwordValues.password) setConfirmPasswordError("Passwords do not match"); }}
@@ -300,7 +292,7 @@ if (step === "email") {
           <button
             type="submit"
             disabled={loading}
-            className="w-full bg-brand-blue hover:bg-brand-hover disabled:bg-blue-400 text-white font-semibold rounded-lg py-3 transition-all disabled:cursor-not-allowed disabled:opacity-60"
+            className="w-full bg-brand-blue hover:bg-brand-hover disabled:bg-blue-400 text-white font-semibold rounded-md py-3 transition-all disabled:cursor-not-allowed disabled:opacity-60"
           >
             {loading ? "Resetting..." : "Reset Password"}
           </button>
@@ -320,7 +312,7 @@ if (step === "email") {
       footerHref="/login"
     >
       {successMessage && (
-        <div className="p-3 bg-green-50 border border-green-200 rounded-lg mb-4">
+        <div className="p-3 bg-green-50 border border-green-200 rounded-md mb-4">
           <p className="text-green-700 text-sm">{successMessage}</p>
         </div>
       )}

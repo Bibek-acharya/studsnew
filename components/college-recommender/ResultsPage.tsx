@@ -88,7 +88,7 @@ return (
 
               <div className="flex items-center justify-between gap-4 mb-8">
                 <div className="flex items-center gap-4">
-                  <div className="w-16 h-16 rounded-lg border border-slate-100 bg-white flex items-center justify-center font-extrabold text-2xl text-slate-800 shrink-0 shadow-sm shadow-slate-100">
+                  <div className="w-16 h-16 rounded-md border border-slate-100 bg-white flex items-center justify-center font-extrabold text-2xl text-slate-800 shrink-0  shadow-slate-100">
                     {previewItem?.name?.[0]}
                   </div>
                   <div>
@@ -201,7 +201,7 @@ return (
 
           <button
             onClick={() => setIsRefineModalOpen(true)}
-            className="inline-flex items-center gap-2 px-4 py-2 bg-white border border-slate-300 rounded-lg text-sm font-bold text-slate-700 hover:bg-slate-50 transition-all focus:outline-none"
+            className="inline-flex items-center gap-2 px-4 py-2 bg-white border border-slate-300 rounded-md text-sm font-bold text-slate-700 hover:bg-slate-50 transition-all focus:outline-none"
           >
             <Filter className="w-4 h-4" />
             Refine your answers
@@ -217,13 +217,13 @@ return (
               return (
                 <div
                   key={item.id}
-                  className="bg-white rounded-lg border border-slate-200 overflow-hidden cursor-pointer flex flex-col transition-all duration-200 hover:border-brand-blue"
+                  className="bg-white rounded-md border border-slate-200 overflow-hidden cursor-pointer flex flex-col transition-all duration-200 hover:border-brand-blue"
                   onClick={() => setPreviewId(item.id)}
                 >
                   <div className="p-6 grow">
                     <div className="flex justify-between items-start gap-4 mb-5">
                       <div className="flex items-center gap-3">
-                        <div className="w-12 h-12 rounded-lg bg-brand-blue/10 text-brand-blue flex items-center justify-center font-extrabold border border-brand-blue/20 shrink-0 text-xs tracking-tighter">
+                        <div className="w-12 h-12 rounded-md bg-brand-blue/10 text-brand-blue flex items-center justify-center font-extrabold border border-brand-blue/20 shrink-0 text-xs tracking-tighter">
                           {item.name?.[0]}
                         </div>
                         <h3 className="font-bold text-slate-800 text-lg leading-tight tracking-tight">
@@ -368,7 +368,7 @@ return (
           </div>
           <button
             onClick={onShortlist}
-            className={`w-full sm:w-auto px-6 py-2.5 rounded-lg font-bold text-white transition-all duration-300 bg-brand-blue hover:bg-brand-hover cursor-pointer`}
+            className={`w-full sm:w-auto px-6 py-2.5 rounded-md font-bold text-white transition-all duration-300 bg-brand-blue hover:bg-brand-hover cursor-pointer`}
           >
             {selectedCount > 0 ? `Add to shortlist (${selectedCount})` : "View Shortlist"}
           </button>
@@ -379,7 +379,7 @@ return (
       {isRefineModalOpen && (
         <div className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-210 flex items-center justify-center p-4">
           <div
-            className="bg-white rounded-lg border border-slate-200 w-full max-w-md overflow-hidden relative"
+            className="bg-white rounded-md border border-slate-200 w-full max-w-md overflow-hidden relative"
             onClick={(e) => e.stopPropagation()}
           >
             <div className="p-8">
@@ -401,7 +401,7 @@ return (
                     setIsRefineModalOpen(false);
                     onNavigate(1);
                   }}
-                  className='px-6 py-3 rounded-lg bg-slate-50 text-slate-900 font-semibold text-md hover:bg-blue-100 transition-all'
+                  className='px-6 py-3 rounded-md bg-slate-50 text-slate-900 font-semibold text-md hover:bg-blue-100 transition-all'
                 >
                   Leave Page
                 </button>
@@ -410,7 +410,7 @@ return (
                     setIsRefineModalOpen(false);
                     
                   }}
-                  className="px-6 py-3 rounded-lg bg-slate-50 text-slate-900 font-semibold text-md hover:bg-blue-100 transition-all"
+                  className="px-6 py-3 rounded-md bg-slate-50 text-slate-900 font-semibold text-md hover:bg-blue-100 transition-all"
                 >
                   Back to Page
                 </button>

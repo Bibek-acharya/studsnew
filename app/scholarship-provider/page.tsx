@@ -5,7 +5,7 @@ import { apiService } from "../../services/api";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 
-import ScholarshipProviderDashboard from "@/components/scholarship-provider/ScholarshipProviderDashboard";
+import ScholarshipProviderDashboard from "@/components/ScholarshipProvider/ScholarshipProviderDashboard";
 
 interface ScholarshipProviderZoneProps {
   onNavigate?: (view: any, data?: any) => void;
@@ -14,6 +14,7 @@ interface ScholarshipProviderZoneProps {
 type BillingCycle = "monthly" | "semiAnnually" | "annually";
 type HeroTab = "advertise" | "login";
 type AuthSubTab = "login" | "register";
+type ViewState = "landing" | "dashboard";
 
 interface ServiceCard {
   title: string;
@@ -282,7 +283,7 @@ const categories: FeatureCategory[] = [
 
 const checkIconPurple = (
   <div className="flex justify-center">
-    <div className="bg-[#f0edff] rounded-full p-1 shadow-sm">
+    <div className="bg-[#f0edff] rounded-full p-1 ">
       <svg
         xmlns="http://www.w3.org/2000/svg"
         viewBox="0 0 24 24"
@@ -357,6 +358,15 @@ const ScholarshipProviderZone: React.FC<ScholarshipProviderZoneProps> = ({
   const [authLoading, setAuthLoading] = useState(false);
   const [authError, setAuthError] = useState<string | null>(null);
   const [authSuccess, setAuthSuccess] = useState<string | null>(null);
+  const [currentView, setCurrentView] = useState<ViewState>("landing");
+
+  useEffect(() => {
+    const token = apiService.getScholarshipProviderToken();
+    const user = apiService.getScholarshipProviderUser();
+    if (token && user) {
+      setCurrentView("dashboard");
+    }
+  }, []);
 
   const contactDropdownRef = useRef<HTMLDivElement | null>(null);
 
@@ -433,9 +443,9 @@ const ScholarshipProviderZone: React.FC<ScholarshipProviderZoneProps> = ({
 
       apiService.setScholarshipProviderToken(token);
       apiService.setScholarshipProviderUser(user);
+      setCurrentView("dashboard");
       setAuthSuccess("Login successful. Connecting to your dashboard...");
       setLoginPassword("");
-      onNavigate?.("scholarshipProviderDashboard");
     } catch (error) {
       setAuthError(
         error instanceof Error
@@ -494,9 +504,7 @@ const ScholarshipProviderZone: React.FC<ScholarshipProviderZoneProps> = ({
       setAuthSuccess("Registration successful. Setting up your account...");
       setRegisterPassword("");
       setRegisterConfirmPassword("");
-      setAuthSubTab("login");
-      setLoginEmail(user.email);
-      onNavigate?.("scholarshipProviderDashboard");
+      setCurrentView("dashboard");
     } catch (error) {
       setAuthError(
         error instanceof Error
@@ -511,6 +519,10 @@ const ScholarshipProviderZone: React.FC<ScholarshipProviderZoneProps> = ({
   const handleLoginClick = () => {
     onNavigate?.("scholarshipProviderDashboard");
   };
+
+  if (currentView === "dashboard") {
+    return <ScholarshipProviderDashboard onLogout={() => setCurrentView("landing")} />;
+  }
 
   return (
     <div className="text-gray-800 antialiased overflow-x-hidden bg-[#fcfcfc] min-h-screen font-sans">
@@ -557,8 +569,8 @@ const ScholarshipProviderZone: React.FC<ScholarshipProviderZoneProps> = ({
               {isContactOpen && (
                 <div className="absolute left-1/2 -translate-x-1/2 top-[2.2rem] z-50 w-120">
                   <div className="absolute -top-1.5 left-1/2 -translate-x-1/2 w-4 h-4 bg-white rotate-45 rounded-tl-[3px] border-l border-t border-gray-100"></div>
-                  <div className="relative bg-white rounded-2xl p-2 border border-gray-100 shadow-xl">
-                    <div className="flex items-start gap-4 p-4 rounded-xl hover:bg-[#f8f9fa] transition-colors group mb-1">
+                  <div className="relative bg-white rounded-md p-2 border border-gray-100 shadow-xl">
+                    <div className="flex items-start gap-4 p-4 rounded-md hover:bg-[#f8f9fa] transition-colors group mb-1">
                       <div className="w-16 h-16 rounded-full overflow-hidden shrink-0 bg-gray-100 border border-gray-200">
                         <img
                           src="https://i.pravatar.cc/150?img=33"
@@ -605,12 +617,12 @@ const ScholarshipProviderZone: React.FC<ScholarshipProviderZoneProps> = ({
               <div className="mt-8 flex flex-wrap gap-4 justify-center lg:justify-start">
                 <Link 
                   href="/scholarship-apply"
-                  className="bg-white text-[#6366F1] font-bold px-8 py-4 rounded-2xl shadow-xl shadow-black/10 hover:bg-indigo-50 transition-all flex items-center gap-2"
+                  className="bg-white text-[#6366F1] font-bold px-8 py-4 rounded-md shadow-xl shadow-black/10 hover:bg-indigo-50 transition-all flex items-center gap-2"
                 >
                   <i className="fa-solid fa-file-signature"></i>
                   Preview Entrance Form
                 </Link>
-                <button className="bg-indigo-500/30 text-white border border-white/20 font-bold px-8 py-4 rounded-2xl hover:bg-indigo-500/50 transition-all flex items-center gap-2">
+                <button className="bg-indigo-500/30 text-white border border-white/20 font-bold px-8 py-4 rounded-md hover:bg-indigo-500/50 transition-all flex items-center gap-2">
                   <i className="fa-solid fa-play"></i>
                   Watch Demo
                 </button>
@@ -618,19 +630,19 @@ const ScholarshipProviderZone: React.FC<ScholarshipProviderZoneProps> = ({
             </div>
 
             <div className="w-full max-w-115">
-              <div className="bg-white rounded-4xl p-8 sm:p-10 relative shadow-2xl shadow-black/10 text-gray-800">
+              <div className="bg-white rounded-md p-8 sm:p-10 relative shadow-2xl shadow-black/10 text-gray-800">
                 <div className="flex p-1.5 bg-[#F1F3F5] rounded-full mb-8 relative">
                   <button
                     type="button"
                     onClick={() => handleHeroTab("advertise")}
-                    className={`flex-1 py-2.5 text-[15px] rounded-full transition-all ${heroTab === "advertise" ? "font-bold text-gray-900 bg-white shadow-sm z-10" : "font-semibold text-gray-500 hover:text-gray-700"}`}
+                    className={`flex-1 py-2.5 text-[15px] rounded-full transition-all ${heroTab === "advertise" ? "font-bold text-gray-900 bg-white  z-10" : "font-semibold text-gray-500 hover:text-gray-700"}`}
                   >
                     Partner with us
                   </button>
                   <button
                     type="button"
                     onClick={() => handleHeroTab("login")}
-                    className={`flex-1 py-2.5 text-[15px] rounded-full transition-all ${heroTab === "login" ? "font-bold text-gray-900 bg-white shadow-sm z-10" : "font-semibold text-gray-500 hover:text-gray-700"}`}
+                    className={`flex-1 py-2.5 text-[15px] rounded-full transition-all ${heroTab === "login" ? "font-bold text-gray-900 bg-white  z-10" : "font-semibold text-gray-500 hover:text-gray-700"}`}
                   >
                     Register/Log in
                   </button>
@@ -645,21 +657,21 @@ const ScholarshipProviderZone: React.FC<ScholarshipProviderZoneProps> = ({
                       <input
                         type="text"
                         placeholder="Full name"
-                        className="w-full px-4 py-3.5 border border-gray-200 rounded-xl focus:border-[#6366F1] outline-none"
+                        className="w-full px-4 py-3.5 border border-gray-200 rounded-md focus:border-[#6366F1] outline-none"
                       />
                       <input
                         type="tel"
                         placeholder="Contact number"
-                        className="w-full px-4 py-3.5 border border-gray-200 rounded-xl focus:border-[#6366F1] outline-none"
+                        className="w-full px-4 py-3.5 border border-gray-200 rounded-md focus:border-[#6366F1] outline-none"
                       />
                       <input
                         type="email"
                         placeholder="Organization email"
-                        className="w-full px-4 py-3.5 border border-gray-200 rounded-xl focus:border-[#6366F1] outline-none"
+                        className="w-full px-4 py-3.5 border border-gray-200 rounded-md focus:border-[#6366F1] outline-none"
                       />
                       <button
                         type="submit"
-                        className="w-full mt-4 bg-white border-2 border-[#6366F1] text-[#6366F1] font-semibold py-3.5 rounded-xl hover:bg-indigo-50"
+                        className="w-full mt-4 bg-white border-2 border-[#6366F1] text-[#6366F1] font-semibold py-3.5 rounded-md hover:bg-indigo-50"
                       >
                         Request callback
                       </button>
@@ -673,7 +685,7 @@ const ScholarshipProviderZone: React.FC<ScholarshipProviderZoneProps> = ({
                         placeholder="Enter your email"
                         value={loginEmail}
                         onChange={(e) => setLoginEmail(e.target.value)}
-                        className="w-full px-4 py-3.5 bg-[#EEF2F6] border border-[#D5DCE8] rounded-xl focus:bg-white focus:border-[#6366F1] outline-none"
+                        className="w-full px-4 py-3.5 bg-[#EEF2F6] border border-[#D5DCE8] rounded-md focus:bg-white focus:border-[#6366F1] outline-none"
                       />
                       <div className="relative">
                         <input
@@ -681,7 +693,7 @@ const ScholarshipProviderZone: React.FC<ScholarshipProviderZoneProps> = ({
                           placeholder="Enter your password"
                           value={loginPassword}
                           onChange={(e) => setLoginPassword(e.target.value)}
-                          className="w-full px-4 py-3.5 pr-12 bg-[#EEF2F6] border border-[#D5DCE8] rounded-xl focus:bg-white focus:border-[#6366F1] outline-none"
+                          className="w-full px-4 py-3.5 pr-12 bg-[#EEF2F6] border border-[#D5DCE8] rounded-md focus:bg-white focus:border-[#6366F1] outline-none"
                         />
                         <button
                           type="button"
@@ -712,7 +724,7 @@ const ScholarshipProviderZone: React.FC<ScholarshipProviderZoneProps> = ({
                       <button
                         type="submit"
                         disabled={authLoading}
-                        className="w-full bg-[#6366F1] text-white font-bold py-3.5 rounded-xl hover:bg-indigo-700 disabled:opacity-50"
+                        className="w-full bg-[#6366F1] text-white font-bold py-3.5 rounded-md hover:bg-indigo-700 disabled:opacity-50"
                       >
                         {authLoading ? "Logging in..." : "Log in"}
                       </button>
@@ -741,21 +753,21 @@ const ScholarshipProviderZone: React.FC<ScholarshipProviderZoneProps> = ({
                         onChange={(e) =>
                           setRegisterProviderName(e.target.value)
                         }
-                        className="w-full px-4 py-3.5 bg-[#EEF2F6] rounded-xl outline-none"
+                        className="w-full px-4 py-3.5 bg-[#EEF2F6] rounded-md outline-none"
                       />
                       <input
                         type="text"
                         placeholder="Tax/Registration number"
                         value={registerNumber}
                         onChange={(e) => setRegisterNumber(e.target.value)}
-                        className="w-full px-4 py-3.5 bg-[#EEF2F6] rounded-xl"
+                        className="w-full px-4 py-3.5 bg-[#EEF2F6] rounded-md"
                       />
                       <input
                         type="email"
                         placeholder="Official email"
                         value={registerEmail}
                         onChange={(e) => setRegisterEmail(e.target.value)}
-                        className="w-full px-4 py-3.5 bg-[#EEF2F6] rounded-xl"
+                        className="w-full px-4 py-3.5 bg-[#EEF2F6] rounded-md"
                       />
                       <div className="relative">
                         <input
@@ -763,7 +775,7 @@ const ScholarshipProviderZone: React.FC<ScholarshipProviderZoneProps> = ({
                           placeholder="Create password"
                           value={registerPassword}
                           onChange={(e) => setRegisterPassword(e.target.value)}
-                          className="w-full px-4 py-3.5 pr-12 bg-[#EEF2F6] rounded-xl"
+                          className="w-full px-4 py-3.5 pr-12 bg-[#EEF2F6] rounded-md"
                         />
                         <button
                           type="button"
@@ -785,7 +797,7 @@ const ScholarshipProviderZone: React.FC<ScholarshipProviderZoneProps> = ({
                           onChange={(e) =>
                             setRegisterConfirmPassword(e.target.value)
                           }
-                          className="w-full px-4 py-3.5 pr-12 bg-[#EEF2F6] rounded-xl"
+                          className="w-full px-4 py-3.5 pr-12 bg-[#EEF2F6] rounded-md"
                         />
                         <button
                           type="button"
@@ -805,7 +817,7 @@ const ScholarshipProviderZone: React.FC<ScholarshipProviderZoneProps> = ({
                       <button
                         type="submit"
                         disabled={authLoading}
-                        className="w-full mt-4 bg-[#6366F1] text-white font-bold py-3.5 rounded-xl hover:bg-indigo-700"
+                        className="w-full mt-4 bg-[#6366F1] text-white font-bold py-3.5 rounded-md hover:bg-indigo-700"
                       >
                         {authLoading ? "Creating account..." : "Sign up"}
                       </button>
@@ -842,7 +854,7 @@ const ScholarshipProviderZone: React.FC<ScholarshipProviderZoneProps> = ({
           {services.map((service) => (
             <div
               key={service.title}
-              className="bg-white rounded-xl p-8 shadow-sm hover:-translate-y-1.25 transition-all border border-gray-50"
+              className="bg-white rounded-md p-8  hover:-translate-y-1.25 transition-all border border-gray-50"
             >
               <div className="relative w-16 h-16 mb-6">
                 <div
@@ -866,7 +878,7 @@ const ScholarshipProviderZone: React.FC<ScholarshipProviderZoneProps> = ({
       <div className="flex justify-center items-center h-screen">
         <button
           onClick={handleLoginClick}
-          className="bg-indigo-600 text-white font-bold py-3 px-6 rounded-xl shadow-sm hover:bg-indigo-700 transition-colors"
+          className="bg-indigo-600 text-white font-bold py-3 px-6 rounded-md  hover:bg-indigo-700 transition-colors"
         >
           Login
         </button>

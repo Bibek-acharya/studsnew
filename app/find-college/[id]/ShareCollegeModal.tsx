@@ -140,7 +140,7 @@ const ShareCollegeModal: React.FC<ShareCollegeModalProps> = ({
                 aria-label={`Share on ${item.name}`}
               >
                 <span
-                  className={`flex h-[60px] w-[60px] items-center justify-center rounded-full text-[26px] shadow-sm transition-transform group-hover:scale-105 ${item.iconColor} ${item.iconBg}`}
+                  className={`flex h-[60px] w-[60px] items-center justify-center rounded-full text-[26px]  transition-transform group-hover:scale-105 ${item.iconColor} ${item.iconBg}`}
                 >
                   <i className={item.icon}></i>
                 </span>
@@ -152,7 +152,7 @@ const ShareCollegeModal: React.FC<ShareCollegeModalProps> = ({
             Or copy link
           </p>
 
-          <div className="mt-4 flex items-center gap-3 rounded-xl border border-gray-200 bg-[#F8FAFC] px-4 py-3">
+          <div className="mt-4 flex items-center gap-3 rounded-md border border-gray-200 bg-[#F8FAFC] px-4 py-3">
             <i className="fa-solid fa-link text-[18px] text-gray-500"></i>
             <p className="min-w-0 flex-1 truncate text-sm text-gray-600 sm:text-base">
               {displayUrl}
@@ -160,7 +160,7 @@ const ShareCollegeModal: React.FC<ShareCollegeModalProps> = ({
             <button
               type="button"
               onClick={copyLink}
-              className="shrink-0 rounded-xl bg-[#0A0DFF] px-6 py-2.5 text-base font-semibold text-white transition-colors hover:bg-brand-hover"
+              className="shrink-0 rounded-md bg-[#0A0DFF] px-6 py-2.5 text-base font-semibold text-white transition-colors hover:bg-brand-hover"
             >
               {copyLabel === "Copy link" ? "Copy" : copyLabel}
             </button>

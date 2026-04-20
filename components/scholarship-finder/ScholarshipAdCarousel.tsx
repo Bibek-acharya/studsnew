@@ -24,7 +24,7 @@ interface ScholarshipCarouselProps {
 const ScholarshipCarouselCard: React.FC<{
   scholarship: CollegeScholarship;
 }> = ({ scholarship }) => (
-  <div className="bg-white rounded-xl border border-gray-200 min-w-70 w-70 flex-none flex flex-col relative snap-start  transition-shadow group">
+  <div className="bg-white rounded-md border border-gray-200 min-w-70 w-70 flex-none flex flex-col relative snap-start  transition-shadow group">
     <div className="relative h-30 w-full flex-none p-3 pointer-events-none">
       <img 
         src={scholarship.imageUrl} 
@@ -195,7 +195,7 @@ export const ScholarshipBasedOnCollege: React.FC<{ scholarships?: CollegeScholar
   };
 
   return (
-    <div className="bg-blue-100 w-full max-w-6xl p-6 md:p-8 rounded-lg border border-blue-100 shadow-sm">
+    <div className="bg-blue-100 w-full max-w-6xl p-6 md:p-8 rounded-md border border-blue-100 ">
       <div className="flex justify-between items-end mb-6">
         <div>
           <h2 className="text-2xl md:text-3xl font-bold text-gray-900 tracking-tight">Sponsored College Based Scholarship</h2>
@@ -342,7 +342,7 @@ export const RecommendedScholarship: React.FC<{ scholarships?: CollegeScholarshi
   };
 
   return (
-    <div className="bg-[#fef7f0] w-full max-w-6xl p-6 md:p-8 rounded-lg border border-orange-50/50 shadow-sm">
+    <div className="bg-[#fef7f0] w-full max-w-6xl p-6 md:p-8 rounded-md border border-orange-50/50 ">
       <div className="flex justify-between items-end mb-6">
         <h2 className="text-2xl md:text-3xl font-bold text-gray-900 tracking-tight">Recommended Scholarships for You</h2>
         <div className="hidden md:flex gap-2">

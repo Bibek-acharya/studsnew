@@ -47,8 +47,8 @@ export default function SphereInvitesSection() {
 
       {/* Stats Overview */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-        <div className="bg-white p-5 rounded-xl shadow-sm border border-slate-100 flex items-center gap-4">
-          <div className="h-12 w-12 rounded-lg bg-blue-50 flex items-center justify-center text-blue-600 text-xl">
+        <div className="bg-white p-5 rounded-md  border border-slate-100 flex items-center gap-4">
+          <div className="h-12 w-12 rounded-md bg-blue-50 flex items-center justify-center text-blue-600 text-xl">
             <i className="fas fa-inbox"></i>
           </div>
           <div>
@@ -56,8 +56,8 @@ export default function SphereInvitesSection() {
             <p className="text-xs text-slate-500 font-medium uppercase">Total Invites</p>
           </div>
         </div>
-        <div className="bg-white p-5 rounded-xl shadow-sm border border-slate-100 flex items-center gap-4">
-          <div className="h-12 w-12 rounded-lg bg-green-50 flex items-center justify-center text-green-600 text-xl">
+        <div className="bg-white p-5 rounded-md  border border-slate-100 flex items-center gap-4">
+          <div className="h-12 w-12 rounded-md bg-green-50 flex items-center justify-center text-green-600 text-xl">
             <i className="fas fa-check-circle"></i>
           </div>
           <div>
@@ -65,8 +65,8 @@ export default function SphereInvitesSection() {
             <p className="text-xs text-slate-500 font-medium uppercase">Accepted</p>
           </div>
         </div>
-        <div className="bg-white p-5 rounded-xl shadow-sm border border-slate-100 flex items-center gap-4">
-          <div className="h-12 w-12 rounded-lg bg-purple-50 flex items-center justify-center text-purple-600 text-xl">
+        <div className="bg-white p-5 rounded-md  border border-slate-100 flex items-center gap-4">
+          <div className="h-12 w-12 rounded-md bg-purple-50 flex items-center justify-center text-purple-600 text-xl">
             <i className="fas fa-bookmark"></i>
           </div>
           <div>
@@ -74,7 +74,7 @@ export default function SphereInvitesSection() {
             <p className="text-xs text-slate-500 font-medium uppercase">Saved</p>
           </div>
         </div>
-        <div className="bg-gradient-to-r from-blue-600 to-blue-800 p-5 rounded-xl shadow-md text-white flex flex-col justify-center relative overflow-hidden">
+        <div className="bg-gradient-to-r from-blue-600 to-blue-800 p-5 rounded-md  text-white flex flex-col justify-center relative overflow-hidden">
           <div className="absolute right-[-10px] top-[-10px] opacity-10 text-9xl">
             <i className="fas fa-bolt"></i>
           </div>
@@ -91,7 +91,7 @@ export default function SphereInvitesSection() {
 
       {/* Filter & Sort */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-6 gap-4">
-        <div className="flex bg-white p-1 rounded-lg border border-slate-200 shadow-sm overflow-x-auto">
+        <div className="flex bg-white p-1 rounded-md border border-slate-200  overflow-x-auto">
           <button onClick={() => setFilterType('all')} className={`px-4 py-2 text-sm font-medium rounded-md transition-colors whitespace-nowrap ${filterType === 'all' ? 'bg-blue-600 text-white' : 'text-slate-600 hover:text-blue-600'}`}>All Invites</button>
           <button onClick={() => setFilterType('scholarship')} className={`px-4 py-2 text-sm font-medium rounded-md transition-colors whitespace-nowrap ${filterType === 'scholarship' ? 'bg-blue-600 text-white' : 'text-slate-600 hover:text-blue-600'}`}>Scholarships</button>
           <button onClick={() => setFilterType('admission')} className={`px-4 py-2 text-sm font-medium rounded-md transition-colors whitespace-nowrap ${filterType === 'admission' ? 'bg-blue-600 text-white' : 'text-slate-600 hover:text-blue-600'}`}>Admissions</button>
@@ -102,9 +102,9 @@ export default function SphereInvitesSection() {
       {/* Invites Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
         {filtered.map(invite => (
-          <div key={invite.id} className="bg-white rounded-xl shadow-sm border border-slate-200 p-6 hover:shadow-md transition-all flex flex-col h-full">
+          <div key={invite.id} className="bg-white rounded-md  border border-slate-200 p-6 hover: transition-all flex flex-col h-full">
             <div className="flex items-start justify-between mb-4">
-              <div className="h-12 w-12 rounded-lg bg-blue-50 flex items-center justify-center text-blue-600 text-lg">
+              <div className="h-12 w-12 rounded-md bg-blue-50 flex items-center justify-center text-blue-600 text-lg">
                 <i className={`fas ${getTypeIcon(invite.type)}`}></i>
               </div>
               <span className={`text-xs px-2 py-1 rounded-full font-medium border ${getPriorityColor(invite.priority)}`}>
@@ -119,8 +119,8 @@ export default function SphereInvitesSection() {
               <span className="text-xs font-bold text-blue-600 bg-blue-50 px-2 py-1 rounded">{invite.amount}</span>
             </div>
             <div className="mt-auto flex gap-2">
-              <button className="flex-1 px-3 py-2 text-xs font-bold text-blue-600 bg-blue-50 rounded-lg hover:bg-blue-100 transition-colors">View Details</button>
-              <button className="px-3 py-2 text-xs font-bold text-slate-600 bg-slate-50 rounded-lg hover:bg-slate-100 transition-colors"><i className="fas fa-bookmark"></i></button>
+              <button className="flex-1 px-3 py-2 text-xs font-bold text-blue-600 bg-blue-50 rounded-md hover:bg-blue-100 transition-colors">View Details</button>
+              <button className="px-3 py-2 text-xs font-bold text-slate-600 bg-slate-50 rounded-md hover:bg-slate-100 transition-colors"><i className="fas fa-bookmark"></i></button>
             </div>
           </div>
         ))}
@@ -134,7 +134,7 @@ export default function SphereInvitesSection() {
           </h3>
         </div>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-          <div className="bg-gradient-to-br from-indigo-600 to-purple-700 rounded-xl p-6 text-white relative overflow-hidden group cursor-pointer shadow-md hover:shadow-lg transition-all">
+          <div className="bg-gradient-to-br from-indigo-600 to-purple-700 rounded-md p-6 text-white relative overflow-hidden group cursor-pointer  hover:shadow-lg transition-all">
             <div className="relative z-10">
               <div className="flex items-start justify-between">
                 <div>
@@ -144,15 +144,15 @@ export default function SphereInvitesSection() {
                 </div>
                 <div className="h-10 w-10 bg-white/10 rounded-full flex items-center justify-center text-xl">✈️</div>
               </div>
-              <button className="bg-white text-indigo-700 text-xs font-bold px-4 py-2 rounded-lg shadow hover:bg-slate-50 transition-colors">
+              <button className="bg-white text-indigo-700 text-xs font-bold px-4 py-2 rounded-md shadow hover:bg-slate-50 transition-colors">
                 Check Eligibility
               </button>
             </div>
             <div className="absolute -right-8 -bottom-8 w-40 h-40 bg-white/10 rounded-full group-hover:scale-125 transition-transform duration-700"></div>
           </div>
-          <div className="bg-white border border-slate-200 rounded-xl overflow-hidden shadow-sm hover:border-blue-300 transition-colors group cursor-pointer flex flex-col">
+          <div className="bg-white border border-slate-200 rounded-md overflow-hidden  hover:border-blue-300 transition-colors group cursor-pointer flex flex-col">
             <div className="p-5 flex-1 flex items-center gap-4">
-              <div className="h-16 w-16 bg-orange-50 rounded-xl flex-shrink-0 flex items-center justify-center text-3xl border border-orange-100">
+              <div className="h-16 w-16 bg-orange-50 rounded-md flex-shrink-0 flex items-center justify-center text-3xl border border-orange-100">
                 💻
               </div>
               <div>

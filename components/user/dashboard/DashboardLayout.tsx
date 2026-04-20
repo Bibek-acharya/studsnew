@@ -182,7 +182,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
               >
                 <Bell className="w-5 h-5" />
                 {unreadNotificationCount > 0 && (
-                  <span className="absolute -top-1.5 -right-1.5 flex h-5 w-5 items-center justify-center rounded-full border-2 border-white bg-red-500 text-[11px] font-bold text-white shadow-sm">
+                  <span className="absolute -top-1.5 -right-1.5 flex h-5 w-5 items-center justify-center rounded-full border-2 border-white bg-red-500 text-[11px] font-bold text-white ">
                     {unreadNotificationCount}
                   </span>
                 )}
@@ -191,12 +191,12 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
               {notificationsOpen && (
                 <div className="absolute top-full right-0 z-50 mt-2 cursor-default font-sans">
                   <div className="absolute -top-1.5 right-5 z-30 h-3 w-3 rotate-45 border-l border-t border-gray-200 bg-white" />
-                  <div className="relative z-20 flex w-[320px] flex-col overflow-hidden rounded-2xl border border-gray-200 bg-white text-left shadow-[0_8px_30px_rgba(0,0,0,0.12)]">
+                  <div className="relative z-20 flex w-[320px] flex-col overflow-hidden rounded-md border border-gray-200 bg-white text-left shadow-[0_8px_30px_rgba(0,0,0,0.12)]">
                     <div className="z-10 flex items-center justify-between border-b border-gray-100 bg-white px-4 py-3">
                       <div className="flex items-center gap-2">
                         <h3 className="text-lg font-semibold text-gray-900">Notifications</h3>
                         {unreadNotificationCount > 0 && (
-                          <span className="rounded-full bg-blue-600 px-2 py-0.5 text-xs font-bold text-white shadow-sm">
+                          <span className="rounded-full bg-blue-600 px-2 py-0.5 text-xs font-bold text-white ">
                             {unreadNotificationCount}
                           </span>
                         )}
@@ -283,7 +283,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
                     </div>
 
                     <div className="border-t border-gray-100 bg-gray-50/50 p-3">
-                      <button className="w-full rounded-lg py-2 text-center text-sm font-medium text-gray-600 transition-colors hover:text-blue-600">
+                      <button className="w-full rounded-md py-2 text-center text-sm font-medium text-gray-600 transition-colors hover:text-blue-600">
                         View all activity
                       </button>
                     </div>
@@ -295,11 +295,11 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
             <div className="flex items-center gap-3 pl-4 border-l border-gray-200">
               <button
                 type="button"
-                className="relative flex items-center justify-center w-10 h-10 rounded-full bg-blue-600 text-white shadow-sm border border-blue-700 transition-colors hover:bg-blue-700"
+                className="relative flex items-center justify-center w-10 h-10 rounded-full bg-blue-600 text-white  border border-blue-700 transition-colors hover:bg-blue-700"
                 aria-label="User profile"
               >
                 <span className="text-sm font-semibold">KS</span>
-                <span className="absolute -bottom-0.5 -right-0.5 h-3 w-3 rounded-full border-2 border-white bg-emerald-400 shadow-sm" />
+                <span className="absolute -bottom-0.5 -right-0.5 h-3 w-3 rounded-full border-2 border-white bg-emerald-400 " />
               </button>
               <div className="text-left hidden sm:block">
                 <p className="text-sm font-bold text-gray-800 transition-colors">Katie Smith</p>

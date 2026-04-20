@@ -13,7 +13,7 @@ const mkId = (arr: { id: number }[]) => Math.max(0, ...arr.map(i => i.id)) + 1;
 
 /* ─── Section Wrapper ────────────────────────────────────────────── */
 const Section = ({ icon, title, children, action }: { icon: React.ReactNode; title: string; children: React.ReactNode; action?: React.ReactNode }) => (
-  <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden mb-6">
+  <div className="bg-white rounded-md border border-slate-200  overflow-hidden mb-6">
     <div className="bg-slate-50 px-6 py-4 border-b border-slate-200 flex justify-between items-center">
       <h3 className="text-base font-semibold text-slate-800 flex items-center gap-2">
         <span className="text-blue-600">{icon}</span> {title}
@@ -144,7 +144,7 @@ const CollegeProfilePage: React.FC = () => {
       </div>
 
       {/* Progress Bar */}
-      <div className="bg-white rounded-xl border border-slate-200 shadow-sm p-4 mb-6 flex items-center gap-4">
+      <div className="bg-white rounded-md border border-slate-200  p-4 mb-6 flex items-center gap-4">
         <div className="flex-1">
           <div className="flex justify-between text-sm mb-1.5">
             <span className="font-medium text-slate-700">Profile Completion</span>
@@ -165,7 +165,7 @@ const CollegeProfilePage: React.FC = () => {
       </div>
 
       {saved && (
-        <div className="flex items-center gap-3 bg-green-50 border border-green-200 text-green-800 rounded-xl px-4 py-3 text-sm font-medium mb-6">
+        <div className="flex items-center gap-3 bg-green-50 border border-green-200 text-green-800 rounded-md px-4 py-3 text-sm font-medium mb-6">
           <CheckCircle className="w-5 h-5 text-green-600" /> Profile saved successfully!
         </div>
       )}
@@ -177,7 +177,7 @@ const CollegeProfilePage: React.FC = () => {
           <div className="relative">
             <div
               onClick={() => coverRef.current?.click()}
-              className="w-full h-40 rounded-xl border-2 border-dashed border-slate-200 bg-slate-50 hover:bg-slate-100 cursor-pointer flex items-center justify-center overflow-hidden transition-colors"
+              className="w-full h-40 rounded-md border-2 border-dashed border-slate-200 bg-slate-50 hover:bg-slate-100 cursor-pointer flex items-center justify-center overflow-hidden transition-colors"
             >
               {coverUrl ? <img src={coverUrl} alt="Cover" className="w-full h-full object-cover" /> : (
                 <div className="text-center text-slate-400">
@@ -189,7 +189,7 @@ const CollegeProfilePage: React.FC = () => {
             <input ref={coverRef} type="file" accept="image/*" className="hidden" onChange={e => handleImageChange(e, setCoverUrl)} />
             <div
               onClick={() => logoRef.current?.click()}
-              className="absolute bottom-0 translate-y-1/2 left-6 w-20 h-20 rounded-xl border-4 border-white shadow-md bg-white cursor-pointer overflow-hidden flex items-center justify-center"
+              className="absolute bottom-0 translate-y-1/2 left-6 w-20 h-20 rounded-md border-4 border-white  bg-white cursor-pointer overflow-hidden flex items-center justify-center"
             >
               {logoUrl ? <img src={logoUrl} alt="Logo" className="w-full h-full object-cover" /> : (
                 <div className="text-center text-slate-400">
@@ -203,15 +203,15 @@ const CollegeProfilePage: React.FC = () => {
           <div className="pt-8 grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div className="sm:col-span-2">
               <label className="block text-sm font-medium text-slate-700 mb-1">College Name <span className="text-red-500">*</span></label>
-              <input value={collegeName} onChange={e => setCollegeName(e.target.value)} placeholder="e.g. KIST College of Technology" className="w-full border border-slate-200 rounded-lg p-2.5 text-sm focus:ring-2 focus:ring-blue-500 outline-none" />
+              <input value={collegeName} onChange={e => setCollegeName(e.target.value)} placeholder="e.g. KIST College of Technology" className="w-full border border-slate-200 rounded-md p-2.5 text-sm focus:ring-2 focus:ring-blue-500 outline-none" />
             </div>
             <div>
               <label className="block text-sm font-medium text-slate-700 mb-1">Address</label>
-              <input value={address} onChange={e => setAddress(e.target.value)} placeholder="City, District" className="w-full border border-slate-200 rounded-lg p-2.5 text-sm focus:ring-2 focus:ring-blue-500 outline-none" />
+              <input value={address} onChange={e => setAddress(e.target.value)} placeholder="City, District" className="w-full border border-slate-200 rounded-md p-2.5 text-sm focus:ring-2 focus:ring-blue-500 outline-none" />
             </div>
             <div>
               <label className="block text-sm font-medium text-slate-700 mb-1">Website</label>
-              <input value={website} onChange={e => setWebsite(e.target.value)} placeholder="https://www.college.edu.np" className="w-full border border-slate-200 rounded-lg p-2.5 text-sm focus:ring-2 focus:ring-blue-500 outline-none" />
+              <input value={website} onChange={e => setWebsite(e.target.value)} placeholder="https://www.college.edu.np" className="w-full border border-slate-200 rounded-md p-2.5 text-sm focus:ring-2 focus:ring-blue-500 outline-none" />
             </div>
           </div>
         </div>
@@ -223,25 +223,25 @@ const CollegeProfilePage: React.FC = () => {
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
               <label className="block text-sm font-medium text-slate-700 mb-1">Chairman's Message Video Link</label>
-              <input value={chairmanVideo} onChange={e => setChairmanVideo(e.target.value)} placeholder="https://youtube.com/..." className="w-full border border-slate-200 rounded-lg p-2.5 text-sm focus:ring-2 focus:ring-blue-500 outline-none" />
+              <input value={chairmanVideo} onChange={e => setChairmanVideo(e.target.value)} placeholder="https://youtube.com/..." className="w-full border border-slate-200 rounded-md p-2.5 text-sm focus:ring-2 focus:ring-blue-500 outline-none" />
             </div>
             <div>
               <label className="block text-sm font-medium text-slate-700 mb-1">College Tour Video Link</label>
-              <input value={tourVideo} onChange={e => setTourVideo(e.target.value)} placeholder="https://youtube.com/..." className="w-full border border-slate-200 rounded-lg p-2.5 text-sm focus:ring-2 focus:ring-blue-500 outline-none" />
+              <input value={tourVideo} onChange={e => setTourVideo(e.target.value)} placeholder="https://youtube.com/..." className="w-full border border-slate-200 rounded-md p-2.5 text-sm focus:ring-2 focus:ring-blue-500 outline-none" />
             </div>
           </div>
           <div>
             <label className="block text-sm font-medium text-slate-700 mb-1">About the College</label>
-            <textarea rows={4} value={about} onChange={e => setAbout(e.target.value)} placeholder="Write a detailed description of your college..." className="w-full border border-slate-200 rounded-lg p-3 text-sm focus:ring-2 focus:ring-blue-500 outline-none resize-none" />
+            <textarea rows={4} value={about} onChange={e => setAbout(e.target.value)} placeholder="Write a detailed description of your college..." className="w-full border border-slate-200 rounded-md p-3 text-sm focus:ring-2 focus:ring-blue-500 outline-none resize-none" />
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
               <label className="block text-sm font-medium text-slate-700 mb-1">Mission</label>
-              <textarea rows={3} value={mission} onChange={e => setMission(e.target.value)} placeholder="Our mission is..." className="w-full border border-slate-200 rounded-lg p-3 text-sm focus:ring-2 focus:ring-blue-500 outline-none resize-none" />
+              <textarea rows={3} value={mission} onChange={e => setMission(e.target.value)} placeholder="Our mission is..." className="w-full border border-slate-200 rounded-md p-3 text-sm focus:ring-2 focus:ring-blue-500 outline-none resize-none" />
             </div>
             <div>
               <label className="block text-sm font-medium text-slate-700 mb-1">Vision</label>
-              <textarea rows={3} value={vision} onChange={e => setVision(e.target.value)} placeholder="Our vision is..." className="w-full border border-slate-200 rounded-lg p-3 text-sm focus:ring-2 focus:ring-blue-500 outline-none resize-none" />
+              <textarea rows={3} value={vision} onChange={e => setVision(e.target.value)} placeholder="Our vision is..." className="w-full border border-slate-200 rounded-md p-3 text-sm focus:ring-2 focus:ring-blue-500 outline-none resize-none" />
             </div>
           </div>
         </div>
@@ -261,19 +261,19 @@ const CollegeProfilePage: React.FC = () => {
               ].map(f => (
                 <div key={f.label}>
                   <label className="block text-sm font-medium text-slate-700 mb-1">{f.label}</label>
-                  <input value={f.value} onChange={e => f.setter(e.target.value)} placeholder={f.placeholder} className="w-full border border-slate-200 rounded-lg p-2.5 text-sm focus:ring-2 focus:ring-blue-500 outline-none" />
+                  <input value={f.value} onChange={e => f.setter(e.target.value)} placeholder={f.placeholder} className="w-full border border-slate-200 rounded-md p-2.5 text-sm focus:ring-2 focus:ring-blue-500 outline-none" />
                 </div>
               ))}
               <div>
                 <label className="block text-sm font-medium text-slate-700 mb-1">Institution Type</label>
-                <select value={instType} onChange={e => setInstType(e.target.value)} className="w-full border border-slate-200 rounded-lg p-2.5 text-sm focus:ring-2 focus:ring-blue-500 outline-none bg-white">
+                <select value={instType} onChange={e => setInstType(e.target.value)} className="w-full border border-slate-200 rounded-md p-2.5 text-sm focus:ring-2 focus:ring-blue-500 outline-none bg-white">
                   <option value="">Select type</option>
                   <option>Public</option><option>Private</option><option>Autonomous</option>
                 </select>
               </div>
               <div>
                 <label className="block text-sm font-medium text-slate-700 mb-1">Status</label>
-                <select value={instStatus} onChange={e => setInstStatus(e.target.value)} className="w-full border border-slate-200 rounded-lg p-2.5 text-sm focus:ring-2 focus:ring-blue-500 outline-none bg-white">
+                <select value={instStatus} onChange={e => setInstStatus(e.target.value)} className="w-full border border-slate-200 rounded-md p-2.5 text-sm focus:ring-2 focus:ring-blue-500 outline-none bg-white">
                   <option value="">Select status</option>
                   <option>Affiliated</option><option>Deemed University</option><option>Autonomous</option>
                 </select>
@@ -290,7 +290,7 @@ const CollegeProfilePage: React.FC = () => {
               ].map(f => (
                 <div key={f.label}>
                   <label className="block text-sm font-medium text-slate-700 mb-1">{f.label}</label>
-                  <input value={f.value} onChange={e => f.setter(e.target.value)} placeholder={f.placeholder} className="w-full border border-slate-200 rounded-lg p-2.5 text-sm focus:ring-2 focus:ring-blue-500 outline-none" />
+                  <input value={f.value} onChange={e => f.setter(e.target.value)} placeholder={f.placeholder} className="w-full border border-slate-200 rounded-md p-2.5 text-sm focus:ring-2 focus:ring-blue-500 outline-none" />
                 </div>
               ))}
             </div>
@@ -303,33 +303,33 @@ const CollegeProfilePage: React.FC = () => {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div className="col-span-1 md:col-span-2">
             <label className="block text-sm font-medium text-slate-700 mb-1">Full Communication Address</label>
-            <input value={fullAddress} onChange={e => setFullAddress(e.target.value)} placeholder="Street, Building, Landmark, City, State, ZIP" className="w-full border border-slate-200 rounded-lg p-2.5 text-sm focus:ring-2 focus:ring-blue-500 outline-none" />
+            <input value={fullAddress} onChange={e => setFullAddress(e.target.value)} placeholder="Street, Building, Landmark, City, State, ZIP" className="w-full border border-slate-200 rounded-md p-2.5 text-sm focus:ring-2 focus:ring-blue-500 outline-none" />
           </div>
           <div>
             <label className="block text-sm font-medium text-slate-700 mb-1">Phone Number</label>
-            <input value={phone} onChange={e => setPhone(e.target.value)} placeholder="+977-01-XXXXXXX" className="w-full border border-slate-200 rounded-lg p-2.5 text-sm focus:ring-2 focus:ring-blue-500 outline-none" />
+            <input value={phone} onChange={e => setPhone(e.target.value)} placeholder="+977-01-XXXXXXX" className="w-full border border-slate-200 rounded-md p-2.5 text-sm focus:ring-2 focus:ring-blue-500 outline-none" />
           </div>
           <div>
             <label className="block text-sm font-medium text-slate-700 mb-1">Email Address</label>
-            <input type="email" value={email} onChange={e => setEmail(e.target.value)} placeholder="admissions@college.edu.np" className="w-full border border-slate-200 rounded-lg p-2.5 text-sm focus:ring-2 focus:ring-blue-500 outline-none" />
+            <input type="email" value={email} onChange={e => setEmail(e.target.value)} placeholder="admissions@college.edu.np" className="w-full border border-slate-200 rounded-md p-2.5 text-sm focus:ring-2 focus:ring-blue-500 outline-none" />
           </div>
           <div>
             <label className="block text-sm font-medium text-slate-700 mb-1">Official Website</label>
-            <div className="flex rounded-lg overflow-hidden border border-slate-200 focus-within:ring-2 focus-within:ring-blue-500">
+            <div className="flex rounded-md overflow-hidden border border-slate-200 focus-within:ring-2 focus-within:ring-blue-500">
               <span className="px-3 bg-slate-50 text-slate-500 text-sm flex items-center border-r border-slate-200">https://</span>
               <input value={officialSite} onChange={e => setOfficialSite(e.target.value)} placeholder="www.college.edu.np" className="flex-1 p-2.5 text-sm outline-none" />
             </div>
           </div>
           <div>
             <label className="block text-sm font-medium text-slate-700 mb-1">Google Maps Link</label>
-            <input value={mapsLink} onChange={e => setMapsLink(e.target.value)} placeholder="https://maps.google.com/..." className="w-full border border-slate-200 rounded-lg p-2.5 text-sm focus:ring-2 focus:ring-blue-500 outline-none" />
+            <input value={mapsLink} onChange={e => setMapsLink(e.target.value)} placeholder="https://maps.google.com/..." className="w-full border border-slate-200 rounded-md p-2.5 text-sm focus:ring-2 focus:ring-blue-500 outline-none" />
           </div>
         </div>
       </Section>
 
       {/* Section 5: Courses & Fees */}
       <Section icon={<BookOpen className="w-5 h-5" />} title="Courses & Fees" action={
-        <button onClick={addCourseRow} className="text-xs bg-white border border-slate-300 px-3 py-1.5 rounded-lg text-slate-700 hover:bg-slate-50 flex items-center gap-1">
+        <button onClick={addCourseRow} className="text-xs bg-white border border-slate-300 px-3 py-1.5 rounded-md text-slate-700 hover:bg-slate-50 flex items-center gap-1">
           <Plus className="w-3.5 h-3.5" /> Add Course
         </button>
       }>
@@ -342,7 +342,7 @@ const CollegeProfilePage: React.FC = () => {
           {courses[courseTab].length === 0 ? (
             <p className="text-center text-slate-400 py-8 text-sm">No courses added for this level yet. Click "Add Course" to begin.</p>
           ) : (
-            <table className="w-full text-left min-w-[700px] border border-slate-200 rounded-lg overflow-hidden">
+            <table className="w-full text-left min-w-[700px] border border-slate-200 rounded-md overflow-hidden">
               <thead className="bg-slate-50 text-xs uppercase text-slate-500">
                 <tr>{["Course Name","Duration","Fees","Eligibility","Seats",""].map(h => <th key={h} className="px-4 py-3 font-semibold">{h}</th>)}</tr>
               </thead>
@@ -370,13 +370,13 @@ const CollegeProfilePage: React.FC = () => {
       {/* Section 6: Facilities */}
       <Section icon={<Building2 className="w-5 h-5" />} title="College Facilities">
         <div className="flex flex-col sm:flex-row gap-3 mb-5 pb-5 border-b border-slate-100">
-          <input value={facilityHeading} onChange={e => setFacilityHeading(e.target.value)} placeholder="Facility Heading (e.g. Modern Library)" className="flex-1 border border-slate-200 rounded-lg p-2.5 text-sm focus:ring-2 focus:ring-blue-500 outline-none" />
-          <input value={facilityDesc} onChange={e => setFacilityDesc(e.target.value)} placeholder="Short Description" className="flex-1 border border-slate-200 rounded-lg p-2.5 text-sm focus:ring-2 focus:ring-blue-500 outline-none" />
-          <button onClick={addFacility} className="px-4 py-2.5 bg-slate-900 hover:bg-slate-800 text-white rounded-lg text-sm font-medium whitespace-nowrap">Add Facility</button>
+          <input value={facilityHeading} onChange={e => setFacilityHeading(e.target.value)} placeholder="Facility Heading (e.g. Modern Library)" className="flex-1 border border-slate-200 rounded-md p-2.5 text-sm focus:ring-2 focus:ring-blue-500 outline-none" />
+          <input value={facilityDesc} onChange={e => setFacilityDesc(e.target.value)} placeholder="Short Description" className="flex-1 border border-slate-200 rounded-md p-2.5 text-sm focus:ring-2 focus:ring-blue-500 outline-none" />
+          <button onClick={addFacility} className="px-4 py-2.5 bg-slate-900 hover:bg-slate-800 text-white rounded-md text-sm font-medium whitespace-nowrap">Add Facility</button>
         </div>
         <div className="space-y-3">
           {facilities.map(f => (
-            <div key={f.id} className="flex items-center justify-between p-4 bg-slate-50 border border-slate-100 rounded-xl">
+            <div key={f.id} className="flex items-center justify-between p-4 bg-slate-50 border border-slate-100 rounded-md">
               <div>
                 <h4 className="font-semibold text-slate-800 text-sm">{f.heading}</h4>
                 <p className="text-sm text-slate-500">{f.desc}</p>
@@ -398,14 +398,14 @@ const CollegeProfilePage: React.FC = () => {
           ].map(f => (
             <div key={f.key}>
               <label className="block text-xs font-medium text-slate-600 mb-1">{f.label}</label>
-              <input value={f.value} onChange={e => setAlumniForm(prev => ({ ...prev, [f.key]: e.target.value }))} placeholder={f.placeholder} className="w-full border border-slate-200 rounded-lg p-2 text-sm focus:ring-2 focus:ring-blue-500 outline-none" />
+              <input value={f.value} onChange={e => setAlumniForm(prev => ({ ...prev, [f.key]: e.target.value }))} placeholder={f.placeholder} className="w-full border border-slate-200 rounded-md p-2 text-sm focus:ring-2 focus:ring-blue-500 outline-none" />
             </div>
           ))}
-          <button onClick={addAlumni} className="px-4 py-2 bg-slate-900 hover:bg-slate-800 text-white rounded-lg text-sm font-medium">Add Alumni</button>
+          <button onClick={addAlumni} className="px-4 py-2 bg-slate-900 hover:bg-slate-800 text-white rounded-md text-sm font-medium">Add Alumni</button>
         </div>
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
           {alumni.map(a => (
-            <div key={a.id} className="flex items-center gap-4 p-4 bg-slate-50 border border-slate-200 rounded-xl relative group">
+            <div key={a.id} className="flex items-center gap-4 p-4 bg-slate-50 border border-slate-200 rounded-md relative group">
               <button onClick={() => setAlumni(prev => prev.filter(x => x.id !== a.id))} className="absolute top-2 right-2 text-red-400 opacity-0 group-hover:opacity-100 transition-opacity">
                 <X className="w-4 h-4" />
               </button>
@@ -424,7 +424,7 @@ const CollegeProfilePage: React.FC = () => {
 
       {/* Section 8: Gallery */}
       <Section icon={<Image className="w-5 h-5" />} title="Campus Gallery">
-        <label className="block w-full border-2 border-dashed border-slate-300 rounded-xl p-8 text-center hover:bg-slate-50 cursor-pointer mb-5 transition-colors">
+        <label className="block w-full border-2 border-dashed border-slate-300 rounded-md p-8 text-center hover:bg-slate-50 cursor-pointer mb-5 transition-colors">
           <input type="file" multiple accept="image/*" className="hidden" onChange={handleGalleryUpload} />
           <Upload className="w-8 h-8 text-slate-400 mx-auto mb-2" />
           <p className="text-slate-600 font-medium">Click to upload or drag & drop images</p>
@@ -432,7 +432,7 @@ const CollegeProfilePage: React.FC = () => {
         </label>
         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3">
           {gallery.map(g => (
-            <div key={g.id} className="relative group rounded-xl overflow-hidden aspect-square bg-slate-200">
+            <div key={g.id} className="relative group rounded-md overflow-hidden aspect-square bg-slate-200">
               <img src={g.url} alt="Gallery" className="w-full h-full object-cover" />
               <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
                 <button onClick={() => setGallery(prev => prev.filter(x => x.id !== g.id))} className="text-white hover:text-red-400">
@@ -447,14 +447,14 @@ const CollegeProfilePage: React.FC = () => {
       {/* Section 9: Downloads */}
       <Section icon={<Download className="w-5 h-5" />} title="Downloads / Resources">
         <div className="flex flex-col sm:flex-row gap-3 mb-5 pb-5 border-b border-slate-100 items-center">
-          <input value={docTitle} onChange={e => setDocTitle(e.target.value)} placeholder="Document Title (e.g. Academic Calendar 2024)" className="flex-1 border border-slate-200 rounded-lg p-2.5 text-sm focus:ring-2 focus:ring-blue-500 outline-none" />
-          <label className="flex-1 w-full border border-slate-200 rounded-lg p-2.5 text-sm text-slate-500 cursor-pointer hover:bg-slate-50 text-center">
+          <input value={docTitle} onChange={e => setDocTitle(e.target.value)} placeholder="Document Title (e.g. Academic Calendar 2024)" className="flex-1 border border-slate-200 rounded-md p-2.5 text-sm focus:ring-2 focus:ring-blue-500 outline-none" />
+          <label className="flex-1 w-full border border-slate-200 rounded-md p-2.5 text-sm text-slate-500 cursor-pointer hover:bg-slate-50 text-center">
             <input type="file" accept=".pdf,.doc,.docx" className="hidden" />
             Choose file (PDF, DOC)
           </label>
           <button
             onClick={() => { if (docTitle.trim()) { setDocs(prev => [...prev, { id: mkId(prev), title: docTitle, size: "—", type: "PDF" }]); setDocTitle(""); } }}
-            className="px-5 py-2.5 bg-slate-900 hover:bg-slate-800 text-white rounded-lg text-sm font-medium whitespace-nowrap"
+            className="px-5 py-2.5 bg-slate-900 hover:bg-slate-800 text-white rounded-md text-sm font-medium whitespace-nowrap"
           >Upload</button>
         </div>
         <ul className="divide-y divide-slate-100">
@@ -477,8 +477,8 @@ const CollegeProfilePage: React.FC = () => {
 
       {/* Action Buttons */}
       <div className="flex gap-3 justify-end pb-8">
-        <button className="px-5 py-2.5 border border-slate-200 rounded-lg text-slate-700 hover:bg-slate-50 text-sm font-medium">Cancel</button>
-        <button onClick={handleSave} className="px-6 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-sm font-semibold transition-colors shadow-sm flex items-center gap-2">
+        <button className="px-5 py-2.5 border border-slate-200 rounded-md text-slate-700 hover:bg-slate-50 text-sm font-medium">Cancel</button>
+        <button onClick={handleSave} className="px-6 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-md text-sm font-semibold transition-colors  flex items-center gap-2">
           <CheckCircle className="w-4 h-4" /> Save Profile
         </button>
       </div>

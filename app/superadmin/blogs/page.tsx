@@ -169,7 +169,7 @@ const BlogManagement: React.FC = () => {
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 mb-10">
         <div>
           <div className="flex items-center gap-3 mb-2">
-            <Link href="/superadmin" className="p-2 hover:bg-slate-800 rounded-lg transition-colors text-slate-400 hover:text-white">
+            <Link href="/superadmin" className="p-2 hover:bg-slate-800 rounded-md transition-colors text-slate-400 hover:text-white">
               <ChevronLeft className="w-5 h-5" />
             </Link>
             <h1 className="text-3xl font-bold text-white tracking-tight">News & Blog Console</h1>
@@ -179,7 +179,7 @@ const BlogManagement: React.FC = () => {
 
         <button
           onClick={handleCreate}
-          className="flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-500 text-white px-6 py-3 rounded-xl font-bold transition-all active:scale-[0.98] shadow-lg shadow-blue-900/20"
+          className="flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-500 text-white px-6 py-3 rounded-md font-bold transition-all active:scale-[0.98] shadow-lg shadow-blue-900/20"
         >
           <Plus className="w-5 h-5" />
           <span>Compose New Post</span>
@@ -194,8 +194,8 @@ const BlogManagement: React.FC = () => {
           { label: "Drafts", value: blogs.filter(b => !b.published).length, icon: Edit2, color: "text-amber-500" },
           { label: "Total Views", value: blogs.reduce((s, b) => s + (b.views || 0), 0).toLocaleString(), icon: User, color: "text-purple-500" },
         ].map((stat, i) => (
-          <div key={i} className="bg-slate-900/40 backdrop-blur-md border border-slate-800 p-5 rounded-2xl flex items-center gap-4">
-            <div className={`w-12 h-12 rounded-xl bg-slate-800/50 flex items-center justify-center ${stat.color}`}>
+          <div key={i} className="bg-slate-900/40 backdrop-blur-md border border-slate-800 p-5 rounded-md flex items-center gap-4">
+            <div className={`w-12 h-12 rounded-md bg-slate-800/50 flex items-center justify-center ${stat.color}`}>
               <stat.icon className="w-6 h-6" />
             </div>
             <div>
@@ -207,28 +207,28 @@ const BlogManagement: React.FC = () => {
       </div>
 
       {/* Filters Bar */}
-      <div className="bg-slate-900/60 backdrop-blur-xl border border-slate-800 rounded-2xl p-4 mb-8 flex flex-col md:flex-row items-center gap-4 justify-between">
+      <div className="bg-slate-900/60 backdrop-blur-xl border border-slate-800 rounded-md p-4 mb-8 flex flex-col md:flex-row items-center gap-4 justify-between">
         <div className="flex items-center gap-4 w-full md:w-auto">
           <div className="relative flex-1 md:w-80">
             <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500" />
             <input
               type="text"
               placeholder="Search by title or author..."
-              className="w-full bg-slate-950/50 border border-slate-800 rounded-xl py-2.5 pl-10 pr-4 text-sm focus:outline-none focus:border-blue-500/50 transition-colors"
+              className="w-full bg-slate-950/50 border border-slate-800 rounded-md py-2.5 pl-10 pr-4 text-sm focus:outline-none focus:border-blue-500/50 transition-colors"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
             />
           </div>
-          <div className="flex items-center bg-slate-950/50 border border-slate-800 rounded-xl p-1">
+          <div className="flex items-center bg-slate-950/50 border border-slate-800 rounded-md p-1">
             <button
               onClick={() => setViewMode("list")}
-              className={`p-2 rounded-lg transition-all ${viewMode === "list" ? "bg-slate-800 text-white shadow-sm" : "text-slate-500"}`}
+              className={`p-2 rounded-md transition-all ${viewMode === "list" ? "bg-slate-800 text-white " : "text-slate-500"}`}
             >
               <List className="w-4 h-4" />
             </button>
             <button
               onClick={() => setViewMode("grid")}
-              className={`p-2 rounded-lg transition-all ${viewMode === "grid" ? "bg-slate-800 text-white shadow-sm" : "text-slate-500"}`}
+              className={`p-2 rounded-md transition-all ${viewMode === "grid" ? "bg-slate-800 text-white " : "text-slate-500"}`}
             >
               <LayoutGrid className="w-4 h-4" />
             </button>
@@ -240,7 +240,7 @@ const BlogManagement: React.FC = () => {
             <button
               key={cat}
               onClick={() => setSelectedCategory(cat)}
-              className={`px-4 py-2 rounded-lg text-xs font-bold whitespace-nowrap transition-all ${
+              className={`px-4 py-2 rounded-md text-xs font-bold whitespace-nowrap transition-all ${
                 selectedCategory === cat
                   ? "bg-blue-600/10 text-blue-500 border border-blue-500/20"
                   : "text-slate-500 hover:text-slate-300 border border-transparent"
@@ -274,10 +274,10 @@ const BlogManagement: React.FC = () => {
             </thead>
             <tbody>
               {filteredBlogs.map(blog => (
-                <tr key={blog.id} className="group bg-slate-900/40 hover:bg-slate-900/60 backdrop-blur-md border border-slate-800 rounded-2xl transition-all">
+                <tr key={blog.id} className="group bg-slate-900/40 hover:bg-slate-900/60 backdrop-blur-md border border-slate-800 rounded-md transition-all">
                   <td className="px-6 py-4 first:rounded-l-2xl">
                     <div className="flex items-center gap-4 max-w-md">
-                      <div className="w-16 h-12 rounded-lg overflow-hidden shrink-0 border border-slate-800">
+                      <div className="w-16 h-12 rounded-md overflow-hidden shrink-0 border border-slate-800">
                         <img src={blog.image || "https://via.placeholder.com/100"} className="w-full h-full object-cover" alt="" />
                       </div>
                       <div className="overflow-hidden">
@@ -305,13 +305,13 @@ const BlogManagement: React.FC = () => {
                     <div className="flex items-center justify-end gap-2">
                       <button
                         onClick={() => handleEdit(blog)}
-                        className="p-2.5 bg-slate-800 hover:bg-blue-600/20 text-slate-400 hover:text-blue-400 rounded-xl transition-all border border-slate-700 hover:border-blue-500/30 shadow-sm"
+                        className="p-2.5 bg-slate-800 hover:bg-blue-600/20 text-slate-400 hover:text-blue-400 rounded-md transition-all border border-slate-700 hover:border-blue-500/30 "
                       >
                         <Edit2 className="w-4 h-4" />
                       </button>
                       <button
                         onClick={() => handleDelete(blog.id)}
-                        className="p-2.5 bg-slate-800 hover:bg-red-600/20 text-slate-400 hover:text-red-400 rounded-xl transition-all border border-slate-700 hover:border-red-500/30 shadow-sm"
+                        className="p-2.5 bg-slate-800 hover:bg-red-600/20 text-slate-400 hover:text-red-400 rounded-md transition-all border border-slate-700 hover:border-red-500/30 "
                       >
                         <Trash2 className="w-4 h-4" />
                       </button>
@@ -328,7 +328,7 @@ const BlogManagement: React.FC = () => {
       {!loading && viewMode === "grid" && (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
           {filteredBlogs.map(blog => (
-            <div key={blog.id} className="group flex flex-col bg-slate-900/40 backdrop-blur-md border border-slate-800 rounded-3xl overflow-hidden hover:border-blue-500/30 transition-all shadow-xl shadow-black/20 relative">
+            <div key={blog.id} className="group flex flex-col bg-slate-900/40 backdrop-blur-md border border-slate-800 rounded-md overflow-hidden hover:border-blue-500/30 transition-all shadow-xl shadow-black/20 relative">
               <div className="h-48 overflow-hidden relative">
                 <img src={blog.image || "https://via.placeholder.com/400"} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" alt="" />
                 <div className="absolute top-4 left-4 flex items-center gap-2">
@@ -364,8 +364,8 @@ const BlogManagement: React.FC = () => {
 
       {/* Empty State */}
       {!loading && filteredBlogs.length === 0 && (
-        <div className="flex flex-col items-center justify-center py-20 bg-slate-900/20 border border-slate-800 border-dashed rounded-3xl">
-          <div className="w-16 h-16 bg-slate-800/50 rounded-2xl flex items-center justify-center text-slate-600 mb-4">
+        <div className="flex flex-col items-center justify-center py-20 bg-slate-900/20 border border-slate-800 border-dashed rounded-md">
+          <div className="w-16 h-16 bg-slate-800/50 rounded-md flex items-center justify-center text-slate-600 mb-4">
             <Filter className="w-8 h-8" />
           </div>
           <p className="text-slate-400 font-bold uppercase tracking-widest text-sm">No articles found</p>
@@ -377,7 +377,7 @@ const BlogManagement: React.FC = () => {
       {isFormOpen && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
           <div className="absolute inset-0 bg-slate-950/80 backdrop-blur-sm" onClick={() => setIsFormOpen(false)} />
-          <div className="relative w-full max-w-4xl bg-slate-900 border border-slate-800 rounded-3xl overflow-hidden shadow-2xl">
+          <div className="relative w-full max-w-4xl bg-slate-900 border border-slate-800 rounded-md overflow-hidden shadow-2xl">
             {/* Modal Header */}
             <div className="p-6 border-b border-slate-800 flex items-center justify-between">
               <div>
@@ -386,7 +386,7 @@ const BlogManagement: React.FC = () => {
               </div>
               <button
                 onClick={() => setIsFormOpen(false)}
-                className="p-2 hover:bg-slate-800 rounded-xl text-slate-500 hover:text-white transition-all"
+                className="p-2 hover:bg-slate-800 rounded-md text-slate-500 hover:text-white transition-all"
               >
                 <X className="w-6 h-6" />
               </button>
@@ -403,7 +403,7 @@ const BlogManagement: React.FC = () => {
                       type="text"
                       value={formTitle}
                       onChange={(e) => setFormTitle(e.target.value)}
-                      className="w-full bg-slate-950/50 border border-slate-800 rounded-xl py-3 px-4 text-white focus:outline-none focus:border-blue-500 transition-all font-bold tracking-tight text-lg"
+                      className="w-full bg-slate-950/50 border border-slate-800 rounded-md py-3 px-4 text-white focus:outline-none focus:border-blue-500 transition-all font-bold tracking-tight text-lg"
                       placeholder="Headline of the update..."
                     />
                   </div>
@@ -414,7 +414,7 @@ const BlogManagement: React.FC = () => {
                       <select
                         value={formCategory}
                         onChange={(e) => setFormCategory(e.target.value)}
-                        className="w-full bg-slate-950/50 border border-slate-800 rounded-xl py-3 px-4 text-white focus:outline-none focus:border-blue-500 transition-all text-sm appearance-none cursor-pointer"
+                        className="w-full bg-slate-950/50 border border-slate-800 rounded-md py-3 px-4 text-white focus:outline-none focus:border-blue-500 transition-all text-sm appearance-none cursor-pointer"
                       >
                         {CATEGORIES.map(c => <option key={c} value={c}>{c}</option>)}
                       </select>
@@ -424,7 +424,7 @@ const BlogManagement: React.FC = () => {
                       <select
                         value={formPublished ? "published" : "draft"}
                         onChange={(e) => setFormPublished(e.target.value === "published")}
-                        className="w-full bg-slate-950/50 border border-slate-800 rounded-xl py-3 px-4 text-white focus:outline-none focus:border-blue-500 transition-all text-sm appearance-none cursor-pointer"
+                        className="w-full bg-slate-950/50 border border-slate-800 rounded-md py-3 px-4 text-white focus:outline-none focus:border-blue-500 transition-all text-sm appearance-none cursor-pointer"
                       >
                         <option value="published">Published</option>
                         <option value="draft">Draft</option>
@@ -438,7 +438,7 @@ const BlogManagement: React.FC = () => {
                       rows={3}
                       value={formExcerpt}
                       onChange={(e) => setFormExcerpt(e.target.value)}
-                      className="w-full bg-slate-950/50 border border-slate-800 rounded-xl py-3 px-4 text-white focus:outline-none focus:border-blue-500 transition-all text-sm resize-none"
+                      className="w-full bg-slate-950/50 border border-slate-800 rounded-md py-3 px-4 text-white focus:outline-none focus:border-blue-500 transition-all text-sm resize-none"
                       placeholder="A short hook for the feed..."
                     ></textarea>
                   </div>
@@ -454,11 +454,11 @@ const BlogManagement: React.FC = () => {
                         type="text"
                         value={formImage}
                         onChange={(e) => setFormImage(e.target.value)}
-                        className="w-full bg-slate-950/50 border border-slate-800 rounded-xl py-3 pl-11 pr-4 text-white focus:outline-none focus:border-blue-500 transition-all text-sm"
+                        className="w-full bg-slate-950/50 border border-slate-800 rounded-md py-3 pl-11 pr-4 text-white focus:outline-none focus:border-blue-500 transition-all text-sm"
                         placeholder="https://images.unsplash.com/..."
                       />
                     </div>
-                    <div className="w-full h-32 rounded-xl border border-slate-800 border-dashed bg-slate-950/30 overflow-hidden mt-3 relative flex items-center justify-center">
+                    <div className="w-full h-32 rounded-md border border-slate-800 border-dashed bg-slate-950/30 overflow-hidden mt-3 relative flex items-center justify-center">
                       {formImage ? <img src={formImage} className="w-full h-full object-cover opacity-50" alt="" /> : <p className="text-[10px] text-slate-600 font-bold uppercase tracking-[0.2em]">Asset Preview</p>}
                     </div>
                   </div>
@@ -471,7 +471,7 @@ const BlogManagement: React.FC = () => {
                         type="text"
                         value={formAuthor}
                         onChange={(e) => setFormAuthor(e.target.value)}
-                        className="w-full bg-slate-950/50 border border-slate-800 rounded-xl py-3 pl-11 pr-4 text-white focus:outline-none focus:border-blue-500 transition-all text-sm"
+                        className="w-full bg-slate-950/50 border border-slate-800 rounded-md py-3 pl-11 pr-4 text-white focus:outline-none focus:border-blue-500 transition-all text-sm"
                         placeholder="System Administrator"
                       />
                     </div>
@@ -495,7 +495,7 @@ const BlogManagement: React.FC = () => {
                     rows={8}
                     value={formContent}
                     onChange={(e) => setFormContent(e.target.value)}
-                    className="w-full bg-slate-950/50 border border-slate-800 rounded-2xl py-5 px-6 text-white focus:outline-none focus:border-blue-500 transition-all text-sm leading-7 custom-scrollbar"
+                    className="w-full bg-slate-950/50 border border-slate-800 rounded-md py-5 px-6 text-white focus:outline-none focus:border-blue-500 transition-all text-sm leading-7 custom-scrollbar"
                     placeholder="Describe the full story here..."
                   ></textarea>
                 </div>
@@ -511,14 +511,14 @@ const BlogManagement: React.FC = () => {
               <div className="flex items-center gap-4">
                 <button
                   onClick={() => setIsFormOpen(false)}
-                  className="px-6 py-2.5 rounded-xl text-slate-400 hover:text-white font-bold transition-colors"
+                  className="px-6 py-2.5 rounded-md text-slate-400 hover:text-white font-bold transition-colors"
                 >
                   Discard
                 </button>
                 <button
                   onClick={handleSubmit}
                   disabled={saving || !formTitle.trim()}
-                  className="flex items-center gap-2 bg-blue-600 hover:bg-blue-500 disabled:bg-slate-800 disabled:text-slate-600 text-white px-8 py-2.5 rounded-xl font-bold transition-all shadow-lg shadow-blue-900/40"
+                  className="flex items-center gap-2 bg-blue-600 hover:bg-blue-500 disabled:bg-slate-800 disabled:text-slate-600 text-white px-8 py-2.5 rounded-md font-bold transition-all shadow-lg shadow-blue-900/40"
                 >
                   {saving ? (
                     <Loader2 className="w-5 h-5 animate-spin" />

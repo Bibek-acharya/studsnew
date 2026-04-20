@@ -44,7 +44,7 @@ export default function Dropdown({ value, onChange, options, placeholder }: Drop
             className="fixed inset-0 z-60"
             onClick={() => setIsOpen(false)}
           ></div>
-          <div className="absolute top-[calc(100%+8px)] left-0 z-70 w-full overflow-hidden rounded-xl border border-[#cbd5e1] bg-white shadow-xl animate-in fade-in slide-in-from-top-2 duration-200">
+          <div className="absolute top-[calc(100%+8px)] left-0 z-70 w-full overflow-hidden rounded-md border border-[#cbd5e1] bg-white shadow-xl animate-in fade-in slide-in-from-top-2 duration-200">
             <div className="max-h-64 overflow-y-auto py-2">
               {options.map((opt) => (
                 <button

@@ -593,10 +593,10 @@ export const apiService = {
     });
   },
 
-  async resetPassword(email: string, password: string): Promise<any> {
+  async resetPassword(email: string, otp: string, password: string): Promise<any> {
     return apiRequest<any>("/api/v1/auth/reset-password", {
       method: "POST",
-      body: JSON.stringify({ email, password }),
+      body: JSON.stringify({ email, otp, password }),
     });
   },
 
@@ -964,7 +964,7 @@ export const apiService = {
   },
 
   async scholarshipProviderLogin(email: string, password: string): Promise<AuthResponse> {
-    return apiRequest<AuthResponse>("/api/v1/scholarship-provider/login", {
+    return apiRequest<AuthResponse>("/api/v1/scholarship-providers/auth/login", {
       method: "POST",
       body: JSON.stringify({ email, password }),
     });
@@ -975,7 +975,7 @@ export const apiService = {
     email: string;
     password: string;
   }): Promise<AuthResponse> {
-    return apiRequest<AuthResponse>("/api/v1/scholarship-provider/register", {
+    return apiRequest<AuthResponse>("/api/v1/scholarship-providers/auth/register", {
       method: "POST",
       body: JSON.stringify(data),
     });

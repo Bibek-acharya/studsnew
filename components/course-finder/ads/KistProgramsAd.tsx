@@ -59,10 +59,10 @@ const KistProgramsAd: React.FC = () => {
           <p className="text-[13px] text-green-700 font-medium">on best colleges</p>
         </div>
         <div className="flex items-center gap-2">
-          <button onClick={() => scroll(-1)} className="w-8 h-8 rounded-full bg-white border border-gray-200 shadow-sm text-gray-600 hover:bg-gray-50 flex items-center justify-center">
+          <button onClick={() => scroll(-1)} className="w-8 h-8 rounded-full bg-white border border-gray-200  text-gray-600 hover:bg-gray-50 flex items-center justify-center">
             <ChevronLeft className="w-3.5 h-3.5" />
           </button>
-          <button onClick={() => scroll(1)} className="w-8 h-8 rounded-full bg-white border border-gray-200 shadow-sm text-gray-600 hover:bg-gray-50 flex items-center justify-center">
+          <button onClick={() => scroll(1)} className="w-8 h-8 rounded-full bg-white border border-gray-200  text-gray-600 hover:bg-gray-50 flex items-center justify-center">
             <ChevronRight className="w-3.5 h-3.5" />
           </button>
         </div>
@@ -73,7 +73,7 @@ const KistProgramsAd: React.FC = () => {
           {programs.map((program, idx) => (
             <div
               key={idx}
-              className="w-[290px] flex-shrink-0 bg-white rounded-[16px] shadow-sm border border-gray-100 p-4 snap-center flex flex-col justify-between"
+              className="w-[290px] flex-shrink-0 bg-white rounded-[16px]  border border-gray-100 p-4 snap-center flex flex-col justify-between"
             >
               <div>
                 <div className="flex justify-between items-start mb-3 gap-2">
@@ -81,7 +81,7 @@ const KistProgramsAd: React.FC = () => {
                     <h3 className="text-[17px] font-bold text-gray-900 leading-tight tracking-tight mb-0.5">{program.title}</h3>
                     <p className="text-[12px] font-normal text-slate-500">{program.subtitle}</p>
                   </div>
-                  <div className="w-10 h-auto flex items-center justify-center flex-shrink-0 bg-white rounded-[6px] p-1 border border-gray-100 shadow-sm">
+                  <div className="w-10 h-auto flex items-center justify-center flex-shrink-0 bg-white rounded-[6px] p-1 border border-gray-100 ">
                     <img src={program.logo} alt="KIST Logo" className="w-full object-contain rounded-[4px]" />
                   </div>
                 </div>

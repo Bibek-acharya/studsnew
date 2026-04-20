@@ -63,7 +63,7 @@ const rightCourseOptions = [
 ];
 
 const renderComparisonRows = (rows: CompareRow[]) => (
-  <div className="border border-gray-200 rounded-xl overflow-hidden bg-white shadow-sm">
+  <div className="border border-gray-200 rounded-md overflow-hidden bg-white ">
     {rows.map((row, index) => {
       const isLast = index === rows.length - 1;
       return (
@@ -548,8 +548,8 @@ const CollegeComparisonResultPage: React.FC<CollegeComparisonResultPageProps> = 
           </button>
         </div>
 
-        <div className="relative border border-gray-200 rounded-xl bg-white shadow-sm flex flex-col md:flex-row overflow-visible">
-          <div className="absolute left-1/2 top-[100px] md:top-24 transform -translate-x-1/2 -translate-y-1/2 bg-[#1b254b] text-white rounded-full w-8 h-8 items-center justify-center text-[10px] font-bold z-10 border-[3px] border-white shadow-sm hidden md:flex">
+        <div className="relative border border-gray-200 rounded-md bg-white  flex flex-col md:flex-row overflow-visible">
+          <div className="absolute left-1/2 top-[100px] md:top-24 transform -translate-x-1/2 -translate-y-1/2 bg-[#1b254b] text-white rounded-full w-8 h-8 items-center justify-center text-[10px] font-bold z-10 border-[3px] border-white  hidden md:flex">
             VS
           </div>
 
@@ -562,7 +562,7 @@ const CollegeComparisonResultPage: React.FC<CollegeComparisonResultPageProps> = 
                 <i className="fa-solid fa-pen text-[11px]"></i>
               </button>
 
-              <div className="w-[72px] h-[72px] border border-gray-200 rounded-xl flex items-center justify-center p-1 flex-shrink-0 bg-white shadow-sm overflow-hidden">
+              <div className="w-[72px] h-[72px] border border-gray-200 rounded-md flex items-center justify-center p-1 flex-shrink-0 bg-white  overflow-hidden">
                 {college1Obj.logo ? (
                   <img src={college1Obj.logo} alt={c1Name} className="w-full h-full object-contain" />
                 ) : (
@@ -589,7 +589,7 @@ const CollegeComparisonResultPage: React.FC<CollegeComparisonResultPageProps> = 
           </div>
 
           <div className="flex-1 flex flex-col relative border-t md:border-t-0 border-gray-200">
-            <div className="absolute left-1/2 top-0 transform -translate-x-1/2 -translate-y-1/2 bg-[#1b254b] text-white rounded-full w-8 h-8 flex items-center justify-center text-[10px] font-bold z-10 border-[3px] border-white shadow-sm md:hidden">
+            <div className="absolute left-1/2 top-0 transform -translate-x-1/2 -translate-y-1/2 bg-[#1b254b] text-white rounded-full w-8 h-8 flex items-center justify-center text-[10px] font-bold z-10 border-[3px] border-white  md:hidden">
               VS
             </div>
 
@@ -601,7 +601,7 @@ const CollegeComparisonResultPage: React.FC<CollegeComparisonResultPageProps> = 
                 <i className="fa-solid fa-pen text-[11px]"></i>
               </button>
 
-              <div className="w-[72px] h-[72px] border border-gray-200 rounded-xl flex items-center justify-center p-1 flex-shrink-0 bg-white shadow-sm overflow-hidden">
+              <div className="w-[72px] h-[72px] border border-gray-200 rounded-md flex items-center justify-center p-1 flex-shrink-0 bg-white  overflow-hidden">
                 {college2Obj.logo ? (
                   <img src={college2Obj.logo} alt={c2Name} className="w-full h-full object-contain" />
                 ) : (
@@ -718,7 +718,7 @@ const CollegeComparisonResultPage: React.FC<CollegeComparisonResultPageProps> = 
                 <h3 className="text-[19px] font-bold text-[#1b254b]">Reviews</h3>
               </div>
 
-              <div className="border border-gray-200 rounded-xl overflow-hidden bg-white shadow-sm flex flex-col md:flex-row">
+              <div className="border border-gray-200 rounded-md overflow-hidden bg-white  flex flex-col md:flex-row">
                 <div className="flex-1 flex flex-col md:border-r border-gray-200">
                   <div className="p-5 flex-1">
                     <div className="flex justify-between items-start gap-3">
@@ -813,7 +813,7 @@ const CollegeComparisonResultPage: React.FC<CollegeComparisonResultPageProps> = 
           )}
 
           {activeTab === "photos" && (
-            <div className="p-8 text-center text-gray-500 bg-white border border-gray-200 rounded-xl">
+            <div className="p-8 text-center text-gray-500 bg-white border border-gray-200 rounded-md">
               Photos & Video content goes here...
             </div>
           )}

@@ -482,7 +482,7 @@ export default function ProfileSection() {
                 </div>
                 <div className="space-y-4">
                   {education.map((entry, index) => (
-                    <div key={entry.id} className="border border-slate-200 rounded-lg p-4">
+                    <div key={entry.id} className="border border-slate-200 rounded-md p-4">
                       <div className="flex justify-between items-start mb-3">
                         <span className="text-xs font-semibold text-slate-500">Entry {index + 1}</span>
                         {editMode && (
@@ -799,7 +799,7 @@ export default function ProfileSection() {
                       { key: 'bachelorTranscript', label: 'Bachelor Transcript', uploaded: false },
                       { key: 'certificates', label: 'Certificates', uploaded: true }
                     ].map(doc => (
-                      <div key={doc.key} className="border border-slate-200 rounded-lg p-4 flex items-center gap-3">
+                      <div key={doc.key} className="border border-slate-200 rounded-md p-4 flex items-center gap-3">
                         <div className={`w-10 h-10 rounded flex items-center justify-center ${doc.uploaded ? 'bg-green-50 text-green-500' : 'bg-slate-100 text-slate-400'}`}>
                           {doc.uploaded ? <Award className="w-5 h-5" /> : <FileText className="w-5 h-5" />}
                         </div>
@@ -830,7 +830,7 @@ export default function ProfileSection() {
                     Identity Documents
                   </h3>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div className="border border-slate-200 rounded-lg p-4 flex items-center gap-3">
+                    <div className="border border-slate-200 rounded-md p-4 flex items-center gap-3">
                       <div className="w-10 h-10 rounded bg-slate-100 text-slate-400 flex items-center justify-center">
                         <FileText className="w-5 h-5" />
                       </div>
@@ -858,7 +858,7 @@ export default function ProfileSection() {
                       { key: 'recommendationLetter', label: 'Recommendation Letter', uploaded: false },
                       { key: 'cv', label: 'CV/Resume', uploaded: true }
                     ].map(doc => (
-                      <div key={doc.key} className="border border-slate-200 rounded-lg p-4 flex items-center gap-3">
+                      <div key={doc.key} className="border border-slate-200 rounded-md p-4 flex items-center gap-3">
                         <div className={`w-10 h-10 rounded flex items-center justify-center ${doc.uploaded ? 'bg-green-50 text-green-500' : 'bg-slate-100 text-slate-400'}`}>
                           {doc.uploaded ? <Award className="w-5 h-5" /> : <FileText className="w-5 h-5" />}
                         </div>

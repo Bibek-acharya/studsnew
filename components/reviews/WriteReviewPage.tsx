@@ -206,7 +206,7 @@ const WriteReviewPage: React.FC = () => {
           onSubmit={handleSubmit}
         >
           <div className="flex flex-col gap-6 lg:col-span-8">
-            <section className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm md:p-8">
+            <section className="rounded-md border border-slate-200 bg-white p-6  md:p-8">
               <SectionHeader
                 icon="fa-graduation-cap"
                 iconWrap="bg-blue-50 text-blue-600"
@@ -246,10 +246,10 @@ const WriteReviewPage: React.FC = () => {
                     }
                     onChange={(event) => setCollegeInput(event.target.value)}
                     placeholder="Search Your Campus/college Name"
-                    className="w-full rounded-lg border border-slate-200 bg-white py-3 pl-10 pr-4 text-sm placeholder-slate-400 focus:border-transparent focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className="w-full rounded-md border border-slate-200 bg-white py-3 pl-10 pr-4 text-sm placeholder-slate-400 focus:border-transparent focus:outline-none focus:ring-2 focus:ring-blue-500"
                   />
                   {showCollegeList && filteredColleges.length > 0 && (
-                    <ul className="absolute left-0 top-full z-20 mt-1 max-h-52 w-full overflow-y-auto rounded-lg border border-slate-200 bg-white shadow-lg">
+                    <ul className="absolute left-0 top-full z-20 mt-1 max-h-52 w-full overflow-y-auto rounded-md border border-slate-200 bg-white shadow-lg">
                       {filteredColleges.map((item) => (
                         <li key={item.id}>
                           <button
@@ -282,7 +282,7 @@ const WriteReviewPage: React.FC = () => {
                       setLevel(event.target.value);
                       setCourseInput("");
                     }}
-                    className="w-full cursor-pointer appearance-none rounded-lg border border-slate-200 bg-white px-4 py-3 text-sm text-slate-700 focus:border-transparent focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className="w-full cursor-pointer appearance-none rounded-md border border-slate-200 bg-white px-4 py-3 text-sm text-slate-700 focus:border-transparent focus:outline-none focus:ring-2 focus:ring-blue-500"
                   >
                     <option value="">Select Level</option>
                     <option value="+2 / High School">+2 / High School</option>
@@ -310,10 +310,10 @@ const WriteReviewPage: React.FC = () => {
                           ? "Search your courses and program"
                           : "Select Level first"
                       }
-                      className="w-full rounded-lg border border-slate-200 bg-white py-3 pl-10 pr-4 text-sm placeholder-slate-400 focus:border-transparent focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      className="w-full rounded-md border border-slate-200 bg-white py-3 pl-10 pr-4 text-sm placeholder-slate-400 focus:border-transparent focus:outline-none focus:ring-2 focus:ring-blue-500"
                     />
                     {showCourseList && currentCourseSuggestions.length > 0 && (
-                      <ul className="absolute left-0 top-full z-20 mt-1 max-h-52 w-full overflow-y-auto rounded-lg border border-slate-200 bg-white shadow-lg">
+                      <ul className="absolute left-0 top-full z-20 mt-1 max-h-52 w-full overflow-y-auto rounded-md border border-slate-200 bg-white shadow-lg">
                         {currentCourseSuggestions.map((item) => (
                           <li key={item}>
                             <button
@@ -341,7 +341,7 @@ const WriteReviewPage: React.FC = () => {
                   <select
                     value={batchYear}
                     onChange={(event) => setBatchYear(event.target.value)}
-                    className="w-full cursor-pointer appearance-none rounded-lg border border-slate-200 bg-white px-4 py-3 text-sm text-slate-700 focus:border-transparent focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className="w-full cursor-pointer appearance-none rounded-md border border-slate-200 bg-white px-4 py-3 text-sm text-slate-700 focus:border-transparent focus:outline-none focus:ring-2 focus:ring-blue-500"
                   >
                     <option value="">Select Year</option>
                     {years.map((year) => (
@@ -354,7 +354,7 @@ const WriteReviewPage: React.FC = () => {
               </div>
             </section>
 
-            <section className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm md:p-8">
+            <section className="rounded-md border border-slate-200 bg-white p-6  md:p-8">
               <SectionHeader
                 icon="fa-face-smile"
                 iconWrap="bg-amber-50 text-amber-500"
@@ -399,7 +399,7 @@ const WriteReviewPage: React.FC = () => {
               </div>
             </section>
 
-            <section className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm md:p-8">
+            <section className="rounded-md border border-slate-200 bg-white p-6  md:p-8">
               <SectionHeader
                 icon="fa-pen"
                 iconWrap="bg-green-50 text-green-600"
@@ -435,12 +435,12 @@ const WriteReviewPage: React.FC = () => {
                   value={summaryTitle}
                   onChange={(event) => setSummaryTitle(event.target.value)}
                   placeholder="Eg. Great learning environment but needs better infrastructure"
-                  className="w-full rounded-lg border border-slate-200 bg-white p-4 text-sm placeholder-slate-400 focus:border-transparent focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-full rounded-md border border-slate-200 bg-white p-4 text-sm placeholder-slate-400 focus:border-transparent focus:outline-none focus:ring-2 focus:ring-blue-500"
                 />
               </div>
             </section>
 
-            <section className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm md:p-8">
+            <section className="rounded-md border border-slate-200 bg-white p-6  md:p-8">
               <SectionHeader
                 icon="fa-book-open"
                 iconWrap="bg-purple-50 text-purple-600"
@@ -456,14 +456,14 @@ const WriteReviewPage: React.FC = () => {
                     value={yearlyFee}
                     onChange={(event) => setYearlyFee(event.target.value)}
                     placeholder="e.g. 150000"
-                    className="w-full rounded-lg border border-slate-200 bg-white p-4 text-sm placeholder-slate-400 focus:border-transparent focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className="w-full rounded-md border border-slate-200 bg-white p-4 text-sm placeholder-slate-400 focus:border-transparent focus:outline-none focus:ring-2 focus:ring-blue-500"
                   />
                 </Field>
                 <Field label="Scholarship Received?">
                   <select
                     value={scholarship}
                     onChange={(event) => setScholarship(event.target.value)}
-                    className="w-full cursor-pointer appearance-none rounded-lg border border-slate-200 bg-white p-4 text-sm text-slate-600 focus:border-transparent focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className="w-full cursor-pointer appearance-none rounded-md border border-slate-200 bg-white p-4 text-sm text-slate-600 focus:border-transparent focus:outline-none focus:ring-2 focus:ring-blue-500"
                   >
                     <option value="">Select Option</option>
                     <option value="yes">Yes</option>
@@ -476,7 +476,7 @@ const WriteReviewPage: React.FC = () => {
                 <select
                   value={internshipOutcome}
                   onChange={(event) => setInternshipOutcome(event.target.value)}
-                  className="w-full cursor-pointer appearance-none rounded-lg border border-slate-200 bg-white p-4 text-sm text-slate-600 focus:border-transparent focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-full cursor-pointer appearance-none rounded-md border border-slate-200 bg-white p-4 text-sm text-slate-600 focus:border-transparent focus:outline-none focus:ring-2 focus:ring-blue-500"
                 >
                   <option value="">Select outcome</option>
                   <option value="excellent">Excellent Placements</option>
@@ -489,7 +489,7 @@ const WriteReviewPage: React.FC = () => {
               </Field>
             </section>
 
-            <section className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm md:p-8">
+            <section className="rounded-md border border-slate-200 bg-white p-6  md:p-8">
               <SectionHeader
                 icon="fa-lock"
                 iconWrap="bg-slate-100 text-blue-600"
@@ -517,7 +517,7 @@ const WriteReviewPage: React.FC = () => {
                   value={email}
                   onChange={(event) => setEmail(event.target.value)}
                   placeholder="example@gmail.com"
-                  className="w-full rounded-lg border border-slate-200 bg-white p-4 text-sm placeholder-slate-400 focus:border-transparent focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-full rounded-md border border-slate-200 bg-white p-4 text-sm placeholder-slate-400 focus:border-transparent focus:outline-none focus:ring-2 focus:ring-blue-500"
                 />
                 <p className="mt-2 text-xs font-medium text-slate-400">
                   We may send a verification link to this email.
@@ -544,7 +544,7 @@ const WriteReviewPage: React.FC = () => {
               <div className="flex justify-end">
                 <button
                   type="submit"
-                  className="flex items-center justify-center gap-2 rounded-lg bg-blue-600 px-8 py-3 font-bold text-white transition-colors hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+                  className="flex items-center justify-center gap-2 rounded-md bg-blue-600 px-8 py-3 font-bold text-white transition-colors hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
                 >
                   <span>Submit Review</span>
                 </button>
@@ -553,7 +553,7 @@ const WriteReviewPage: React.FC = () => {
           </div>
 
           <div className="lg:col-span-4">
-            <div className="sticky top-6 overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
+            <div className="sticky top-6 overflow-hidden rounded-md border border-slate-200 bg-white ">
               <div className="rounded-t-2xl bg-[#111827] p-8 text-center text-white">
                 <h3 className="mb-4 text-sm font-bold uppercase tracking-wider text-slate-200">
                   Live Rating Preview
@@ -597,7 +597,7 @@ const WriteReviewPage: React.FC = () => {
 
       {modal.open && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/50 p-4 backdrop-blur-sm">
-          <div className="w-full max-w-sm rounded-2xl bg-white p-6 text-center shadow-xl">
+          <div className="w-full max-w-sm rounded-md bg-white p-6 text-center shadow-xl">
             <div
               className={`mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full ${modal.type === "error" ? "bg-red-100 text-red-600" : "bg-green-100 text-green-600"}`}
             >
@@ -612,7 +612,7 @@ const WriteReviewPage: React.FC = () => {
             <button
               type="button"
               onClick={() => setModal((prev) => ({ ...prev, open: false }))}
-              className="w-full rounded-xl bg-slate-900 px-4 py-3 font-semibold text-white transition-colors hover:bg-slate-800"
+              className="w-full rounded-md bg-slate-900 px-4 py-3 font-semibold text-white transition-colors hover:bg-slate-800"
             >
               Got it
             </button>
@@ -650,7 +650,7 @@ const TypeButton: React.FC<{
   <button
     type="button"
     onClick={onClick}
-    className={`flex flex-col items-center justify-center rounded-xl border-2 px-4 py-8 transition-all ${active ? "border-blue-600 bg-blue-50 text-blue-700 shadow-sm" : "border-slate-100 text-slate-700 hover:border-slate-200 hover:bg-slate-50"}`}
+    className={`flex flex-col items-center justify-center rounded-md border-2 px-4 py-8 transition-all ${active ? "border-blue-600 bg-blue-50 text-blue-700 " : "border-slate-100 text-slate-700 hover:border-slate-200 hover:bg-slate-50"}`}
   >
     <i
       className={`fa-solid fa-graduation-cap mb-3 text-2xl ${active ? "text-blue-600" : "text-slate-800"}`}
@@ -684,7 +684,7 @@ const ReviewTextarea: React.FC<{
       value={value}
       onChange={(event) => onChange(event.target.value)}
       placeholder={placeholder}
-      className="w-full resize-none rounded-lg border border-slate-200 bg-white p-4 text-sm placeholder-slate-400 focus:border-transparent focus:outline-none focus:ring-2 focus:ring-blue-500"
+      className="w-full resize-none rounded-md border border-slate-200 bg-white p-4 text-sm placeholder-slate-400 focus:border-transparent focus:outline-none focus:ring-2 focus:ring-blue-500"
     />
   </div>
 );

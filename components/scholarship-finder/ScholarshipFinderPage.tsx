@@ -57,7 +57,7 @@ const SearchInput = ({ placeholder }: { placeholder: string }) => (
     <input
       type="text"
       placeholder={placeholder}
-      className="w-full pl-8 pr-3 py-1.5 bg-gray-50 border border-gray-200 rounded-lg text-[12px] focus:outline-none focus:ring-1 focus:ring-blue-500/50 focus:border-blue-500 focus:bg-white transition-all placeholder:text-gray-400"
+      className="w-full pl-8 pr-3 py-1.5 bg-gray-50 border border-gray-200 rounded-md text-[12px] focus:outline-none focus:ring-1 focus:ring-blue-500/50 focus:border-blue-500 focus:bg-white transition-all placeholder:text-gray-400"
     />
   </div>
 );
@@ -121,7 +121,7 @@ const ScholarshipCard = ({
 
   return (
     <div
-      className="relative flex flex-col bg-white rounded-2xl border border-gray-200/80 transition-all duration-300 p-3"
+      className="relative flex flex-col bg-white rounded-md border border-gray-200/80 transition-all duration-300 p-3"
     >
       {/* Selection Checkbox */}
       {isQuickApplyMode && (
@@ -155,7 +155,7 @@ const ScholarshipCard = ({
       )}
 
       {/* Image Area */}
-      <div className="h-31.25 w-full bg-gray-100 relative overflow-hidden rounded-xl mb-3">
+      <div className="h-31.25 w-full bg-gray-100 relative overflow-hidden rounded-md mb-3">
         {imageHtml}
       </div>
 
@@ -184,7 +184,7 @@ const ScholarshipCard = ({
         </div>
 
         {/* Details Box */}
-        <div className="bg-[#f9fafb] rounded-xl p-3.5 border border-gray-100 mb-4 mt-auto flex flex-col gap-2.5">
+        <div className="bg-[#f9fafb] rounded-md p-3.5 border border-gray-100 mb-4 mt-auto flex flex-col gap-2.5">
           <div className="grid grid-cols-2 gap-x-2">
             {/* Amount */}
             <div className="flex items-center gap-1.5 text-[12px] text-gray-600 font-medium">
@@ -466,7 +466,7 @@ const FeaturedScholarshipsPage = () => {
                       value={searchQuery}
                       onChange={handleSearchChange}
                       placeholder="Search scholarships, locations, courses..."
-                      className="w-full pl-9 pr-4 py-2.5 bg-white border border-gray-200 rounded-lg text-[14px] focus:outline-none focus:ring-1 focus:ring-blue-500/50 focus:border-blue-500 transition-all placeholder:text-gray-400 "
+                      className="w-full pl-9 pr-4 py-2.5 bg-white border border-gray-200 rounded-md text-[14px] focus:outline-none focus:ring-1 focus:ring-blue-500/50 focus:border-blue-500 transition-all placeholder:text-gray-400 "
                     />
                   </div>
                 </div>
@@ -550,7 +550,7 @@ const FeaturedScholarshipsPage = () => {
                 <button 
                   onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
                   disabled={currentPage === 1}
-                  className="px-4 py-2 text-[14px] font-medium text-gray-500 bg-white border border-gray-200 rounded-lg hover:bg-gray-50 hover:text-gray-800 transition-colors mr-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="px-4 py-2 text-[14px] font-medium text-gray-500 bg-white border border-gray-200 rounded-md hover:bg-gray-50 hover:text-gray-800 transition-colors mr-2 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   Previous
                 </button>
@@ -558,9 +558,9 @@ const FeaturedScholarshipsPage = () => {
                   <button
                     key={page}
                     onClick={() => setCurrentPage(page)}
-                    className={`w-10 h-10 flex items-center justify-center text-[14px] font-medium rounded-lg transition-colors ${
+                    className={`w-10 h-10 flex items-center justify-center text-[14px] font-medium rounded-md transition-colors ${
                       page === currentPage
-                        ? "text-white bg-brand-blue shadow-sm shadow-blue-500/30"
+                        ? "text-white bg-brand-blue  shadow-blue-500/30"
                         : "text-gray-600 bg-white border border-gray-200 hover:bg-gray-50 hover:text-gray-900"
                     }`}
                   >
@@ -570,7 +570,7 @@ const FeaturedScholarshipsPage = () => {
                 <button 
                   onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
                   disabled={currentPage === totalPages}
-                  className="px-4 py-2 text-[14px] font-medium text-gray-700 bg-white border border-gray-200 rounded-lg hover:bg-gray-50 hover:text-gray-900 transition-colors ml-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="px-4 py-2 text-[14px] font-medium text-gray-700 bg-white border border-gray-200 rounded-md hover:bg-gray-50 hover:text-gray-900 transition-colors ml-2 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   Next
                 </button>
@@ -602,7 +602,7 @@ const FeaturedScholarshipsPage = () => {
                 setIsModalOpen(true);
               }
             }}
-            className="flex items-center gap-2 rounded-full bg-brand-blue px-5 py-2.5 text-[14px] font-semibold text-white shadow-md transition-colors hover:bg-brand-hover sm:px-6 sm:text-[15px]"
+            className="flex items-center gap-2 rounded-full bg-brand-blue px-5 py-2.5 text-[14px] font-semibold text-white  transition-colors hover:bg-brand-hover sm:px-6 sm:text-[15px]"
           >
             Quick Apply{" "}
             <span className="flex h-5 w-5 items-center justify-center rounded-full bg-white text-[12px] font-bold text-brand-blue">
@@ -638,7 +638,7 @@ const FeaturedScholarshipsPage = () => {
             </button>
           </div>
           <div className="overflow-y-auto px-6 py-5">
-            <div className="mb-5 flex items-start gap-3 rounded-lg border border-blue-100 bg-blue-50 p-3.5">
+            <div className="mb-5 flex items-start gap-3 rounded-md border border-blue-100 bg-blue-50 p-3.5">
               <svg className="w-4.5 h-4.5 shrink-0 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                 <path strokeLinecap="round" strokeLinejoin="round" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
               </svg>
@@ -652,7 +652,7 @@ const FeaturedScholarshipsPage = () => {
             </div>
             
             {isAuthenticated && user && (
-              <div className="mb-5 p-4 bg-gray-50 rounded-lg border border-gray-200">
+              <div className="mb-5 p-4 bg-gray-50 rounded-md border border-gray-200">
                 <h4 className="text-[14px] font-bold text-gray-800 mb-3">Applicant Information</h4>
                 <div className="grid grid-cols-2 gap-3 text-[13px]">
                   <div>
@@ -685,7 +685,7 @@ const FeaturedScholarshipsPage = () => {
                   onChange={(e) => setApplyMessage(e.target.value)}
                   placeholder="Write your message to the scholarship providers..."
                   rows={4}
-                  className="w-full rounded-lg border border-gray-200 p-3 text-[14px] transition-all placeholder-gray-400 focus:border-transparent focus:outline-none focus:ring-1 focus:ring-brand-blue"
+                  className="w-full rounded-md border border-gray-200 p-3 text-[14px] transition-all placeholder-gray-400 focus:border-transparent focus:outline-none focus:ring-1 focus:ring-brand-blue"
                 />
               </div>
               <button
@@ -720,7 +720,7 @@ const FeaturedScholarshipsPage = () => {
           onClick={() => setShowLoginAlert(false)}
         >
           <div
-            className="mx-4 w-full max-w-md rounded-xl bg-white shadow-2xl"
+            className="mx-4 w-full max-w-md rounded-md bg-white shadow-2xl"
             onClick={(e) => e.stopPropagation()}
           >
             <div className="p-6 text-center">
@@ -734,20 +734,20 @@ const FeaturedScholarshipsPage = () => {
               <div className="flex gap-2">
                 <button
                   onClick={() => { setShowLoginAlert(false); setShowAuthModal(true); }}
-                  className="flex-1 rounded-lg bg-brand-blue px-4 py-2 text-sm font-semibold text-white hover:bg-brand-hover transition-colors"
+                  className="flex-1 rounded-md bg-brand-blue px-4 py-2 text-sm font-semibold text-white hover:bg-brand-hover transition-colors"
                 >
                   Login
                 </button>
                 <button
                   onClick={() => { setShowLoginAlert(false); setShowAuthModal(true); }}
-                  className="flex-1 rounded-lg border border-gray-200 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors"
+                  className="flex-1 rounded-md border border-gray-200 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors"
                 >
                   Register
                 </button>
               </div>
               <button
                 onClick={() => setShowLoginAlert(false)}
-                className="mt-3 w-full rounded-lg border border-gray-200 bg-white px-4 py-2 text-sm font-medium text-gray-600 hover:bg-gray-50 transition-colors"
+                className="mt-3 w-full rounded-md border border-gray-200 bg-white px-4 py-2 text-sm font-medium text-gray-600 hover:bg-gray-50 transition-colors"
               >
                 Cancel
               </button>
@@ -767,7 +767,7 @@ const FeaturedScholarshipsPage = () => {
 
       {/* Toast Notification */}
       {toast && (
-        <div className="fixed bottom-8 left-1/2 -translate-x-1/2 bg-[#212543] text-white px-6 py-3 rounded-lg text-sm font-medium shadow-lg z-1000 animate-in fade-in slide-in-from-bottom-10 duration-300">
+        <div className="fixed bottom-8 left-1/2 -translate-x-1/2 bg-[#212543] text-white px-6 py-3 rounded-md text-sm font-medium shadow-lg z-1000 animate-in fade-in slide-in-from-bottom-10 duration-300">
           {toast}
         </div>
       )}

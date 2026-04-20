@@ -86,7 +86,7 @@ const AuthModal: React.FC<AuthModalProps> = ({
         onClick={onClose}
       />
 
-      <div className="relative z-10 w-full max-w-125 rounded-xl border border-gray-200 bg-white p-6 shadow-2xl">
+      <div className="relative z-10 w-full max-w-125 rounded-md border border-gray-200 bg-white p-6 shadow-2xl">
         {view === "login" && (
           <LoginView
             onSwitch={() => setView("signup")}

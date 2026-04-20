@@ -86,7 +86,7 @@ const NewsDetailsPage: React.FC<{ params: Promise<{ id: string }> }> = ({ params
       <div className="max-w-[1280px] mx-auto px-4 sm:px-6 lg:px-8 py-8 flex flex-col lg:flex-row gap-10 lg:gap-16">
         <main className="w-full lg:w-[68%]">
           <div className="flex items-center gap-4 text-sm font-medium text-gray-500 mb-6 border-b border-gray-100 pb-4">
-            <span className={`${categoryBadgeClass} text-white px-3 py-1 rounded-full flex items-center gap-1.5 shadow-sm`}>
+            <span className={`${categoryBadgeClass} text-white px-3 py-1 rounded-full flex items-center gap-1.5 `}>
               <i className="fa-solid fa-graduation-cap text-sm"></i> {categoryUi}
             </span>
             <span className="flex items-center gap-1.5">
@@ -116,7 +116,7 @@ const NewsDetailsPage: React.FC<{ params: Promise<{ id: string }> }> = ({ params
             </div>
           </div>
 
-          <div className="mb-8 rounded-xl overflow-hidden shadow-sm border border-gray-100">
+          <div className="mb-8 rounded-md overflow-hidden  border border-gray-100">
             <img
               src={article.image}
               alt={article.title}
@@ -175,7 +175,7 @@ const NewsDetailsPage: React.FC<{ params: Promise<{ id: string }> }> = ({ params
               <h2 className="text-2xl font-bold text-gray-900">Comments & Discussion</h2>
             </div>
 
-            <div className="mb-8 bg-white border border-gray-200 rounded-xl shadow-sm overflow-hidden focus-within:border-blue-500 focus-within:ring-1 focus-within:ring-blue-500 transition-all">
+            <div className="mb-8 bg-white border border-gray-200 rounded-md  overflow-hidden focus-within:border-blue-500 focus-within:ring-1 focus-within:ring-blue-500 transition-all">
               <textarea
                 value={commentInput}
                 onChange={(event) => setCommentInput(event.target.value)}
@@ -190,7 +190,7 @@ const NewsDetailsPage: React.FC<{ params: Promise<{ id: string }> }> = ({ params
                 </div>
                 <button
                   onClick={postComment}
-                  className="bg-blue-600 hover:bg-blue-700 text-white px-5 py-2 rounded-lg text-sm font-semibold transition-colors shadow-sm active:scale-95"
+                  className="bg-blue-600 hover:bg-blue-700 text-white px-5 py-2 rounded-md text-sm font-semibold transition-colors  active:scale-95"
                 >
                   Post Comment
                 </button>
@@ -200,7 +200,7 @@ const NewsDetailsPage: React.FC<{ params: Promise<{ id: string }> }> = ({ params
             <div className="space-y-6">
               {comments.map((comment) => (
                 <div key={comment.id} className="relative">
-                  <div className="border border-gray-200 rounded-lg p-5 bg-white shadow-sm">
+                  <div className="border border-gray-200 rounded-md p-5 bg-white ">
                     <div className="flex items-start gap-3 mb-3">
                       <div className={`w-10 h-10 rounded-full ${comment.author.startsWith("You") ? "bg-green-100 text-green-600" : "bg-blue-100 text-blue-600"} flex items-center justify-center font-bold text-sm shrink-0`}>
                         {comment.avatar}
@@ -247,7 +247,7 @@ const NewsDetailsPage: React.FC<{ params: Promise<{ id: string }> }> = ({ params
                   return (
                     <div key={rel.id}>
                       <Link href={`/news/${rel.id}`} className="group cursor-pointer block">
-                        <div className="rounded-lg overflow-hidden mb-3">
+                        <div className="rounded-md overflow-hidden mb-3">
                           <img
                             src={rel.image}
                             alt={rel.title}
