@@ -490,7 +490,7 @@ const EducationNavbar: React.FC<EducationNavbarProps> = ({
               <div className="hidden lg:block w-px h-8 bg-gray-200"></div>
               <div className="hidden sm:flex items-center gap-3 cursor-pointer group relative py-1">
                 {!user ? (
-                  <div className="flex items-center overflow-hidden rounded-md text-[13px] font-medium shadow-sm">
+                  <div className="flex items-center overflow-hidden rounded-md text-[13px] font-medium">
                     <button
                       onClick={() => go("login")}
                       className="border-r border-gray-200 bg-gray-100 px-3 py-2 text-[#334155] transition-colors hover:bg-gray-200"

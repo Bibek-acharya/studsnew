@@ -61,7 +61,7 @@ export default function LoginForm() {
       </div>
 
       <div className="relative flex items-center text-center text-xs text-gray-400">
-        <span className="mx-auto bg-white px-3">or continue with</span>
+        <span className="mx-auto bg-white px-3 z-10">or continue with</span>
         <div className="absolute inset-x-0 top-1/2 h-px bg-gray-200" />
       </div>
 
