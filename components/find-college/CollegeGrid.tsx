@@ -10,6 +10,7 @@ import {
   Award,
   MessageSquare,
   Bookmark,
+  Globe,
 } from "lucide-react";
 import Pagination from "@/components/ui/Pagination";
 
@@ -146,6 +147,9 @@ const CollegeGrid: React.FC<CollegeGridProps> = ({
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [inquiryMessage, setInquiryMessage] = useState("");
   const [collegeToClaim, setCollegeToClaim] = useState<College | null>(null);
+  const [collegeForInquiry, setCollegeForInquiry] = useState<College | null>(null);
+  const [isInquiryModalOpen, setIsInquiryModalOpen] = useState(false);
+  const [inquiryMessageSingle, setInquiryMessageSingle] = useState("");
 
   useEffect(() => {
     setCurrentPage(1);
@@ -263,6 +267,14 @@ const CollegeGrid: React.FC<CollegeGridProps> = ({
     setIsModalOpen(false);
     setInquiryMessage("");
     setSelectedForInquiry([]);
+  };
+
+  const handleSingleInquirySubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    alert(`Success! Your inquiry for ${collegeForInquiry?.name} has been sent.`);
+    setIsInquiryModalOpen(false);
+    setInquiryMessageSingle("");
+    setCollegeForInquiry(null);
   };
 
   if (error) {
@@ -408,6 +420,10 @@ const CollegeGrid: React.FC<CollegeGridProps> = ({
                 onToggleSaved={() => toggleSavedCollege(college.id)}
                 onToggleSelection={() => toggleSelection(college.id)}
                 onClaim={() => setCollegeToClaim(college)}
+                onSingleInquiry={() => {
+                  setCollegeForInquiry(college);
+                  setIsInquiryModalOpen(true);
+                }}
               />
               {isAfter2Rows && (
                 <div className="col-span-1 md:col-span-2 xl:col-span-3 w-full">
@@ -505,7 +521,7 @@ const CollegeGrid: React.FC<CollegeGridProps> = ({
                   rows={4}
                   value={inquiryMessage}
                   onChange={(e) => setInquiryMessage(e.target.value)}
-                  className="w-full resize-none rounded-xl border border-gray-200 bg-gray-50 px-4 py-3 text-[14px] text-gray-800 shadow-sm transition-all focus:border-transparent focus:bg-white focus:outline-none focus:ring-2 focus:ring-brand-blue"
+                  className="w-full resize-none rounded-md border border-gray-200 bg-gray-50 px-4 py-3 text-[14px] text-gray-800 shadow-sm transition-all focus:border-transparent focus:bg-white focus:outline-none focus:ring-2 focus:ring-brand-blue"
                   placeholder="E.g., What are the admission requirements, fee structures, and scholarship options for the upcoming intake?"
                 ></textarea>
               </div>
@@ -513,7 +529,7 @@ const CollegeGrid: React.FC<CollegeGridProps> = ({
                 <button
                   type="button"
                   onClick={() => setIsModalOpen(false)}
-                  className="w-full rounded-xl border border-gray-200 bg-white px-5 py-2.5 text-[14px] font-bold text-gray-600 transition-colors hover:bg-gray-50 sm:w-auto"
+                  className="w-full rounded-md border border-gray-200 bg-white px-5 py-2.5 text-[14px] font-bold text-gray-600 transition-colors hover:bg-gray-50 sm:w-auto"
                 >
                   Cancel
                 </button>
@@ -533,6 +549,67 @@ const CollegeGrid: React.FC<CollegeGridProps> = ({
         college={collegeToClaim}
         onClose={() => setCollegeToClaim(null)}
       />
+
+      {/* Single College Inquiry Modal */}
+      <div
+        className={`fixed inset-0 z-210 flex items-center justify-center bg-slate-900/40 backdrop-blur-sm transition-opacity duration-300 ${isInquiryModalOpen ? "opacity-100" : "pointer-events-none opacity-0"}`}
+        onClick={() => setIsInquiryModalOpen(false)}
+      >
+        <div
+          className={`mx-4 flex max-h-[90vh] w-full max-w-lg flex-col rounded-md bg-white transition-transform duration-300 ${isInquiryModalOpen ? "scale-100" : "scale-95"}`}
+          onClick={(e) => e.stopPropagation()}
+        >
+          <div className="flex shrink-0 items-center justify-between border-b border-gray-100 px-6 py-5">
+            <h3 className="flex items-center gap-2 text-lg font-bold text-gray-900">
+              <i className="fa-solid fa-paper-plane text-[20px] text-brand-blue"></i>
+              Inquiry for {collegeForInquiry?.name}
+            </h3>
+            <button
+              onClick={() => setIsInquiryModalOpen(false)}
+              className="rounded-full p-1.5 text-gray-400 transition-colors hover:bg-gray-100 hover:text-gray-700"
+            >
+              <i className="fa-solid fa-xmark text-[20px]"></i>
+            </button>
+          </div>
+          <div className="overflow-y-auto px-6 py-5">
+            <form onSubmit={handleSingleInquirySubmit}>
+              <div className="mb-5">
+                <label
+                  htmlFor="inquiryMessageSingle"
+                  className="mb-2 block text-[14px] font-bold text-gray-800"
+                >
+                  Your Question / Message{" "}
+                  <span className="text-red-500">*</span>
+                </label>
+                <textarea
+                  id="inquiryMessageSingle"
+                  required
+                  rows={4}
+                  value={inquiryMessageSingle}
+                  onChange={(e) => setInquiryMessageSingle(e.target.value)}
+                  className="w-full resize-none rounded-md border border-gray-200 bg-gray-50 px-4 py-3 text-[14px] text-gray-800 transition-all focus:border-transparent focus:bg-white focus:outline-none focus:ring-2 focus:ring-brand-blue"
+                  placeholder="E.g., What are the admission requirements, fee structures, and scholarship options for the upcoming intake?"
+                ></textarea>
+              </div>
+              <div className="mt-8 flex flex-col justify-end gap-3 sm:flex-row">
+                <button
+                  type="button"
+                  onClick={() => setIsInquiryModalOpen(false)}
+                  className="w-full rounded-md border border-gray-200 bg-white px-5 py-2.5 text-[14px] font-bold text-gray-600 transition-colors hover:bg-gray-50 sm:w-auto"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  className="flex w-full items-center justify-center gap-2 rounded-md bg-brand-blue px-6 py-2.5 text-[14px] font-bold text-white transition-all  hover:bg-brand-hover sm:w-auto"
+                >
+                  Submit Inquiry
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
     </>
   );
 };
@@ -547,6 +624,7 @@ const ProgramCard: React.FC<{
   onToggleSaved: () => void;
   onToggleSelection: () => void;
   onClaim: () => void;
+  onSingleInquiry: () => void;
 }> = ({
   college,
   isVerified,
@@ -557,6 +635,7 @@ const ProgramCard: React.FC<{
   onToggleSaved,
   onToggleSelection,
   onClaim,
+  onSingleInquiry,
 }) => {
   const description =
     (typeof college.description === "string" && college.description) ||
@@ -687,23 +766,20 @@ const ProgramCard: React.FC<{
           </p>
         </div>
 
-        <div className="mb-2 pr-1">
-          <p className="text-[14px] leading-relaxed text-gray-500 inline">
-            {/* Truncate text to 70 chars with ellipsis if longer, otherwise show full text */}
-            {description.length > 65 ? `${description.substring(0, 65)}...` : description}
-
-            <button
-              type="button"
-              className="text-brand-blue cursor-pointer font-medium hover:underline text-[14px] ml-1 inline align-baseline"
-              onClick={(e) => {
-                e.stopPropagation();
-                onNavigate("collegeDetails", { id: college.id });
-              }}
-            >
-              Read more
-            </button>
-          </p>
+       {college.website && (
+        <div className="flex items-center gap-2 text-[14px] text-gray-500 mb-3">
+          <Globe className="w-4.5 h-4.5 text-gray-400 shrink-0" />
+          <a
+            href={college.website}
+            target="_blank"
+            rel="noopener noreferrer"
+            onClick={(e) => e.stopPropagation()}
+            className="text-blue-600 hover:underline font-medium truncate"
+          >
+            {college.website.replace(/^https?:\/\//, "")}
+          </a>
         </div>
+      )}
 
         <div className="mt-2 flex items-center gap-4 mb-2">
           <a
@@ -749,50 +825,31 @@ const ProgramCard: React.FC<{
         <div className="border-t border-dashed border-gray-200 mb-2" />
 
         <div className="flex flex-col gap-3 mt-auto">
-          <button
-            type="button"
-            disabled={!isVerified}
-            onClick={(e) => {
-              e.stopPropagation();
-              if (isVerified) {
-                onNavigate("bookCounselling", { collegeId: college.id });
-              }
-            }}
-            className={`w-full text-white font-medium text-[14px] py-2.5 px-4 rounded-md transition-colors flex items-center justify-center gap-1.5 ${
-              isVerified
-                ? "bg-brand-blue hover:bg-blue-700"
-                : "bg-brand-blue cursor-not-allowed"
-            }`}
-          >
-            {!isVerified && <LockIcon size={14} />}
-            Get counselling
-          </button>
+          
 
           <div className="flex gap-2">
+
             <button
               type="button"
               onClick={(e) => {
                 e.stopPropagation();
-                onNavigate("campusForum", {
-                  collegeId: college.id,
-                  collegeName: college.name,
-                });
+                onNavigate("collegeDetails", { id: college.id });
               }}
-              className="flex-1 flex items-center justify-center gap-1.5 border border-gray-200 hover:bg-gray-50 text-slate-600 font-medium py-2 px-2 rounded-md transition-colors text-[13px]"
+              className="bg-brand-blue flex-1 flex items-center justify-center gap-1.5 border border-gray-200 hover:bg-brand-hover text-white font-medium py-2 px-2 rounded-md transition-colors text-[13px] cursor-pointer"
             >
-              <MessageSquare className="w-4 h-4 text-gray-500" />
-              Inquiry
+              View Details
             </button>
 
             <button
               type="button"
               onClick={(e) => {
                 e.stopPropagation();
-                onNavigate("compareColleges", { collegeName: college.name });
+                onSingleInquiry();
               }}
-              className="flex-1 bg-[#EAB308] hover:bg-yellow-500 text-white font-semibold py-2 px-2 rounded-md transition-colors text-[13px]"
+              className="flex-1 flex items-center justify-center gap-1.5 border border-gray-200 hover:bg-gray-50 text-slate-600 font-medium py-2 px-2 rounded-md transition-colors text-[13px] cursor-pointer"
             >
-              Compare now
+              <MessageSquare className="w-4 h-4 text-gray-500" />
+              Inquiry
             </button>
 
             <button

@@ -25,6 +25,34 @@ const nextConfig: NextConfig = {
         protocol: "https",
         hostname: "images.unsplash.com",
       },
+      {
+        protocol: "https",
+        hostname: "kist.edu.np",
+      },
+      {
+        protocol: "https",
+        hostname: "trinity.edu.np",
+      },
+      {
+        protocol: "https",
+        hostname: "www.trinity.edu.np",
+      },
+      {
+        protocol: "https",
+        hostname: "advancefoundation.edu.np",
+      },
+      {
+        protocol: "https",
+        hostname: "goldengateintl.com",
+      },
+      {
+        protocol: "https",
+        hostname: "www.goldengateintl.com",
+      },
+      {
+        protocol: "https",
+        hostname: "media.w3.org",
+      },
     ],
   },
 };

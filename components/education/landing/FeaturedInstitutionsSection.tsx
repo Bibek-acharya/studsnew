@@ -173,36 +173,13 @@ const CollegeCard: React.FC<{
         </div>
       )}
 
-      <p className="text-[14px] text-gray-500 leading-relaxed pr-2 line-clamp-2">
-        {college.description || ""}
-      </p>
-
-      {hasLongDescription && (
-        <button
-          type="button"
-          className="w-fit text-[14px] font-semibold text-blue-600 hover:underline mb-4"
-          onClick={(e) => {
-            e.stopPropagation();
-            onNavigate("collegeDetails", college);
-          }}
-        >
-          Read more
-        </button>
-      )}
-
-      {!hasLongDescription && <div className="mb-4" />}
-
-      <div className="border-t border-dashed border-gray-200 mb-4" />
-
       <div className="flex flex-col gap-3 mt-auto">
-        <button
-          className="w-full bg-brand-blue hover:bg-blue-700 text-white font-medium text-[14px] py-2.5 px-4 rounded-lg transition-colors"
-          onClick={(e) => { e.stopPropagation(); onNavigate("bookCounselling", { collegeId: college.id }); }}
-        >
-          Get counselling
-        </button>
+     
 
         <div className="flex gap-2">
+          <button className="bg-brand-blue flex-1 flex items-center justify-center gap-1.5 border border-gray-200 hover:bg-brand-hover text-white font-medium py-2 px-2 rounded-md transition-colors text-[13px] cursor-pointer" onClick={(e) => { e.stopPropagation(); onNavigate("collegeDetails", college); }}>
+            View Detail
+          </button>
           <button
             className="flex-1 flex items-center justify-center gap-1.5 border border-gray-200 hover:bg-gray-50 text-slate-600 font-medium py-2 px-2 rounded-md transition-colors text-[13px]"
             onClick={(e) => { e.stopPropagation(); onNavigate("campusForum", { collegeId: college.id, collegeName: college.name }); }}
@@ -210,14 +187,6 @@ const CollegeCard: React.FC<{
             <MessageSquare className="w-4 h-4 text-gray-500" />
             Inquiry
           </button>
-
-          <button
-            className="flex-1 bg-[#EAB308] hover:bg-yellow-500 text-white font-semibold py-2 px-2 rounded-md transition-colors text-[13px]"
-            onClick={(e) => { e.stopPropagation(); onNavigate("compareColleges", { collegeName: college.name }); }}
-          >
-            Compare now
-          </button>
-
           <button
             className={`w-10 flex items-center justify-center border rounded-md transition-colors shrink-0 ${
               isBookmarked

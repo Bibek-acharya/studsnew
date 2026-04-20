@@ -19,6 +19,8 @@ import {
   TrendingUp,
   Building,
   BadgeCheckIcon,
+  Paperclip,
+  FileText,
 } from "lucide-react";
 
 interface ExamAnnouncementsSectionProps {
@@ -272,14 +274,14 @@ const ExamAnnouncementsSection: React.FC<ExamAnnouncementsSectionProps> = ({
               {/* Action buttons */}
               <div className="mt-3 sm:mt-4 pt-1 flex flex-col gap-2 sm:gap-2.5">
                 <button className="w-full flex items-center justify-center gap-2 py-2 sm:py-2.5 px-3 bg-brand-blue text-white font-bold text-[12px] sm:text-[13px] rounded-md hover:bg-brand-hover transition-colors">
-                  <PlayCircle className="w-4 h-4" /> Start Mock Test
+                  <Send className="w-4 h-4" /> Apply Now
                 </button>
                 <div className="grid grid-cols-[1fr_1fr_auto] gap-2 sm:gap-2.5">
                   <button className="flex items-center justify-center gap-1.5 py-1.5 sm:py-2 px-2 sm:px-3 border border-[#e2e8f0] text-[#475569] font-bold text-[11px] xs:text-[12px] rounded-md hover:bg-gray-50 transition-colors">
-                    <Bell className="w-3.5 h-3.5" /> <span>Notify</span>
+                    <FileText className="w-3.5 h-3.5" /> <span>View Detail</span>
                   </button>
                   <button className="flex items-center justify-center gap-1.5 py-1.5 sm:py-2 px-2 sm:px-3 border border-[#e2e8f0] text-[#475569] font-bold text-[11px] xs:text-[12px] rounded-md hover:bg-gray-50 transition-colors">
-                    <Send className="w-3.5 h-3.5" /> Apply
+                    <Bell className="w-3.5 h-3.5" /> Notify
                   </button>
                   <button
                     className={`w-9 sm:w-10 shrink-0 rounded-md flex items-center justify-center transition-all duration-200 ${
