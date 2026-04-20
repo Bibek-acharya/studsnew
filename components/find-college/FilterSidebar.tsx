@@ -406,7 +406,7 @@ const SearchInput: React.FC<{
 
 const CheckboxItem: React.FC<{
   id: string;
-  label: string;
+  label: React.ReactNode;
   count?: number;
   checked: boolean;
   onChange: () => void;

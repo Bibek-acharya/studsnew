@@ -57,9 +57,9 @@ const mockConversations: Conversation[] = [
 ]
 
 const mockMessages: Message[] = [
-  { id: 'msg_1', senderId: 'usr_student_1', senderRole: 'student', messageType: 'text', content: 'Hi, I submitted my documents. Could you verify?', timestamp: Date.now() - 3600000, readStatus: true },
-  { id: 'msg_2', senderId: 'usr_college_1', senderRole: 'college', messageType: 'system', content: 'Application #8492 submitted successfully.', timestamp: Date.now() - 3500000, readStatus: true },
-  { id: 'msg_3', senderId: 'usr_college_1', senderRole: 'college', messageType: 'text', content: 'Your application is under review. We will get back to you shortly.', timestamp: Date.now() - 100000, readStatus: false }
+  { id: 'msg_1', conversationId: 'conv_1', senderId: 'usr_student_1', senderRole: 'student', messageType: 'text', content: 'Hi, I submitted my documents. Could you verify?', timestamp: Date.now() - 3600000, readStatus: true },
+  { id: 'msg_2', conversationId: 'conv_1', senderId: 'usr_college_1', senderRole: 'college', messageType: 'system', content: 'Application #8492 submitted successfully.', timestamp: Date.now() - 3500000, readStatus: true },
+  { id: 'msg_3', conversationId: 'conv_1', senderId: 'usr_college_1', senderRole: 'college', messageType: 'text', content: 'Your application is under review. We will get back to you shortly.', timestamp: Date.now() - 100000, readStatus: false }
 ]
 
 const mockDetails: Record<string, { title: string; role: string; items: { icon: string; label: string; value: string; copy?: boolean }[] }> = {
@@ -133,6 +133,7 @@ export default function ChatSection() {
 
     const newMessage: Message = {
       id: 'msg_' + Date.now(),
+      conversationId: activeConvId,
       senderId: currentUserId,
       senderRole: 'student',
       messageType: 'text',

@@ -52,44 +52,7 @@ useEffect(() => {
 Stop writing React SPA code inside Next.js.
 
 ---
-
-## Server Actions > API Routes
-
-Prefer **Server Actions** over API routes when:
-
-* It's internal (form submission, mutations)
-* No external client needs it
-
-### Example
-
-```ts
-"use server";
-
-export async function createStudent(data: FormData) {
-  // DB call
-}
-```
-
-### Use API routes ONLY when:
-
-* External systems need access
-* You’re building a public API
-
----
-
-## Folder Structure (STRICT)
-
-```
-/app
-  /(routes)
-  /(auth)
-  /dashboard
-/components
-/features
-/lib
-/services
-/actions
-```
+ 
 
 ### Rules
 

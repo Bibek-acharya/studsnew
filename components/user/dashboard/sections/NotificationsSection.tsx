@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import React, { useState } from 'react'
 import { GraduationCap, CalendarCheck, Sparkle, Banknote, ChartBar, CheckCircle, Moon, Bell, Archive, Trash2, X, BellOff, Inbox, ArchiveRestore } from 'lucide-react'
 
 interface Notification {
@@ -88,7 +88,7 @@ const mockNotifications: Notification[] = [
 ]
 
 function getIconComponent(iconName: string) {
-  const icons: Record<string, JSX.Element> = {
+  const icons: Record<string, React.ReactElement> = {
     'ph-graduation-cap': <GraduationCap className="w-5 h-5" />,
     'ph-calendar-check': <CalendarCheck className="w-5 h-5" />,
     'ph-sparkle': <Sparkle className="w-5 h-5" />,
@@ -100,7 +100,7 @@ function getIconComponent(iconName: string) {
   return icons[iconName] || <Bell className="w-5 h-5" />
 }
 
-function getIconStyles(category: string) {
+function getIconStyles(category: Notification['category']) {
   const styles = {
     following: { bg: 'bg-sky-100', text: 'text-sky-600' },
     system: { bg: 'bg-gray-100', text: 'text-gray-600' },

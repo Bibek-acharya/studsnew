@@ -83,10 +83,10 @@ export default function CollegeShortlistView({
                   </div>
                 </div>
                 <div className="shrink-0">
-                  <button
-                    onClick={() => onToggleShortlist(previewItem.id)}
-                    className={`w-10 h-10 rounded-lg border-2 transition-all flex items-center justify-center ${
-                      shortlistedIds.has(previewItem.id)
+                   <button
+                     onClick={() => previewItem && onToggleShortlist(previewItem.id)}
+                     className={`w-10 h-10 rounded-lg border-2 transition-all flex items-center justify-center ${
+                       previewItem && shortlistedIds.has(previewItem.id)
                         ? "bg-brand-blue border-brand-blue text-white"
                         : "bg-white border-slate-200 text-transparent hover:border-brand-blue"
                     }`}

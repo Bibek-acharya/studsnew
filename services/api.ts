@@ -270,6 +270,7 @@ export interface College {
   affiliation?: string;
   verified?: boolean;
   featured?: boolean;
+  website?: string;
 }
 
 export interface CollegeFilterCountsResponse {
@@ -673,33 +674,6 @@ export const apiService = {
       data: {
         courses: courses as unknown as EducationCourse[],
       },
-    };
-  },
-
-  async getEducationScholarships(params: any): Promise<any> {
-    await new Promise(resolve => setTimeout(resolve, 500));
-    return {
-      data: {
-        scholarships: [
-          {
-            id: 1,
-            title: "National IT Excellence Scholarship (BSc. CSIT)",
-            provider: "Tribhuvan University, Nepal",
-            type: "Merit-Based",
-            status: "OPEN",
-            amount: "100% Tuition",
-            location: "Bagmati",
-            eligibility: "Bachelor (+2 Sci: 2.8+ GPA)",
-            deadline: "Aug 15, 2026",
-            image: "https://images.unsplash.com/photo-1517694712202-14dd9538aa97?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80",
-            verified: true,
-          }
-        ],
-        categories: [
-          { id: 1, name: "College Based", count: 150 },
-          { id: 2, name: "Merit Based", count: 340 }
-        ]
-      }
     };
   },
 

@@ -327,7 +327,7 @@ export default function RegisterForm() {
             {otp.map((digit, i) => (
               <input
                 key={i}
-                ref={el => otpInputRefs.current[i] = el}
+                ref={el => { otpInputRefs.current[i] = el; }}
                 type="text"
                 inputMode="numeric"
                 maxLength={1}

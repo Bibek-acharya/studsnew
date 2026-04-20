@@ -12,7 +12,7 @@ const popularColleges = getCollegesBySearch("");
 
 const courseDataMap: Record<string, string[]> = courseDataByLevel;
 
-const WriteReviewPage: React.FC<WriteReviewPageProps> = () => {
+const WriteReviewPage: React.FC = () => {
   const currentYear = new Date().getFullYear();
   const years = Array.from(
     { length: currentYear - 1989 },
