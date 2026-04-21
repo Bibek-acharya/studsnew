@@ -913,7 +913,7 @@ export const apiService = {
     preference_flow: string;
     preferences: Record<string, any>;
   }, token: string): Promise<any> {
-    const response = await fetch(`${API_BASE_URL}/api/v1/auth/preferences`, {
+    const response = await fetch(`${API_BASE_URL}/api/v1/preferences`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",

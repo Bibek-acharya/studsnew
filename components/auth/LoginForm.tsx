@@ -35,7 +35,7 @@ export default function LoginForm() {
     setLoading(true);
     try {
       await login(email.trim(), password, rememberMe);
-      router.push("/user/dashboard");
+      router.push("/");
     } catch (err: any) {
       const errorMsg = err?.message?.toLowerCase() || "";
       if (errorMsg.includes("invalid") || errorMsg.includes("wrong") || errorMsg.includes(" credentials") || errorMsg.includes("failed") || errorMsg.includes("401") || errorMsg.includes("403")) {

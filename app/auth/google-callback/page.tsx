@@ -37,11 +37,7 @@ function GoogleAuthCallbackContent() {
           sessionStorage.setItem("token", token);
           setProcessed(true);
           
-          if (user.preferences && user.preferences.education_level) {
-            window.location.href = "/user/dashboard";
-          } else {
-            window.location.href = "/onboarding";
-          }
+          window.location.href = "/";
         } else {
           setError("No user in response");
         }

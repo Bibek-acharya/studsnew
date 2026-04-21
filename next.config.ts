@@ -53,6 +53,18 @@ const nextConfig: NextConfig = {
         protocol: "https",
         hostname: "media.w3.org",
       },
+      {
+        protocol: "https",
+        hostname: "projectshiksha.hundredgroupnepal.org",
+      },
+      {
+        protocol: "https",
+        hostname: "sowersaction.org.np",
+      },
+      {
+        protocol: "https",
+        hostname: "api.qrserver.com",
+      },
     ],
   },
 };
