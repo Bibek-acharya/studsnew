@@ -2,8 +2,8 @@
 
 import React, { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
-import { Bookmark } from "lucide-react";
-import { getAllEvents } from "@/lib/events-data";
+import { Bookmark, Loader2 } from "lucide-react";
+import { fetchPublicEvents } from "@/services/eventApi";
 import Pagination from "@/components/ui/Pagination";
 
 type EventFilter =
@@ -41,13 +41,28 @@ const badgeClass = (filter: EventFilter) => {
   return "bg-blue-500";
 };
 
-
-
 const EventsPage: React.FC = () => {
   const [activeFilter, setActiveFilter] = useState<EventFilter>("All News");
   const [sortBy, setSortBy] = useState<"Newest First" | "Oldest First" | "Popular">("Newest First");
   const [currentPage, setCurrentPage] = useState(1);
   const [bookmarkedEventIds, setBookmarkedEventIds] = useState<Set<string>>(new Set());
+  const [events, setEvents] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const loadEvents = async () => {
+      setLoading(true);
+      try {
+        const result = await fetchPublicEvents({ limit: 50 });
+        setEvents(result.events);
+      } catch {
+        setEvents([]);
+      } finally {
+        setLoading(false);
+      }
+    };
+    loadEvents();
+  }, []);
 
   useEffect(() => {
     const stored = window.localStorage.getItem("events-bookmarks");
@@ -86,7 +101,7 @@ const EventsPage: React.FC = () => {
     });
   };
 
-  const allEvents = getAllEvents();
+  const allEvents = events;
   const featured = allEvents[0];
 
   const visibleEvents = useMemo(() => {
@@ -109,9 +124,19 @@ const EventsPage: React.FC = () => {
     currentPage * itemsPerPage,
   );
 
+  if (loading) {
+    return (
+      <div className="bg-white text-gray-900 antialiased min-h-screen max-w-350 mx-auto py-8">
+        <div className="mx-auto py-8 flex items-center justify-center py-20">
+          <Loader2 className="w-8 h-8 text-[#0000ff] animate-spin" />
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="bg-white text-gray-900 antialiased min-h-screen max-w-350 mx-auto py-8">
-      <div className=" mx-auto py-8">
+      <div className="mx-auto py-8">
         <section className="mb-10">
           <h2 className="text-3xl font-bold mb-4">Browse by category</h2>
           <div className="flex flex-wrap gap-2 text-sm font-semibold items-center">

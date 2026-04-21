@@ -171,7 +171,9 @@ const NewsManagementPage = () => {
     featured: false,
     date: "",
     deadline: "",
+    image: "",
   });
+  const [uploading, setUploading] = useState(false);
 
   // --- UTILS ---
   const showToast = (
@@ -256,6 +258,7 @@ const NewsManagementPage = () => {
             item.deadline === "-"
               ? ""
               : new Date(item.deadline).toISOString().split("T")[0],
+          image: item.image,
         });
       }
     } else {
@@ -267,9 +270,38 @@ const NewsManagementPage = () => {
         featured: false,
         date: "",
         deadline: "",
+        image: "",
       });
     }
     setIsModalOpen(true);
+  };
+
+  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    
+    setUploading(true);
+    try {
+      const formData = new FormData();
+      formData.append("image", file);
+      
+      const res = await fetch("/api/v1/admin/news/upload-image", {
+        method: "POST",
+        body: formData,
+      });
+      
+      if (!res.ok) {
+        throw new Error("Upload failed");
+      }
+      
+      const data = await res.json();
+      setFormData((prev) => ({ ...prev, image: data.data.url }));
+      showToast("Image uploaded successfully", "success");
+    } catch (err) {
+      showToast("Failed to upload image", "error");
+    } finally {
+      setUploading(false);
+    }
   };
 
   const handleSave = (overrideStatus: string | null = null) => {
@@ -315,9 +347,9 @@ const NewsManagementPage = () => {
             year: "numeric",
           })
         : mockData.find((d) => d.id === currentEditId)?.created || "-",
-      image: isNew
+      image: formData.image || (isNew
         ? `https://images.unsplash.com/photo-${1500000000000 + Math.floor(Math.random() * 100000000)}?w=600&q=80`
-        : mockData.find((d) => d.id === currentEditId)?.image || "",
+        : mockData.find((d) => d.id === currentEditId)?.image || ""),
     };
 
     if (isNew) {
@@ -910,18 +942,61 @@ const NewsManagementPage = () => {
                       <label className="block text-sm font-semibold text-gray-700 mb-2">
                         Featured Image
                       </label>
-                      <div className="border-2 border-dashed border-gray-300 rounded-xl p-6 text-center hover:bg-gray-100 transition-colors cursor-pointer bg-white shadow-sm">
-                        <UploadSimple className="text-3xl text-gray-400 mx-auto mb-2" />
-                        <p className="text-sm text-blue-600 font-medium">
-                          Click to upload{" "}
-                          <span className="text-gray-500 font-normal">
-                            or drag and drop
-                          </span>
-                        </p>
-                        <p className="text-xs text-gray-400 mt-1">
-                          PNG, JPG, WEBP up to 5MB
-                        </p>
-                      </div>
+                      <input
+                        type="file"
+                        accept="image/*"
+                        onChange={handleImageUpload}
+                        className="hidden"
+                        id="news-image-upload"
+                      />
+                      <label
+                        htmlFor="news-image-upload"
+                        className="border-2 border-dashed border-gray-300 rounded-xl p-6 text-center hover:bg-gray-100 transition-colors cursor-pointer bg-white shadow-sm block"
+                      >
+                        {formData.image ? (
+                          <div className="relative">
+                            <img
+                              src={formData.image}
+                              alt="Featured"
+                              className="w-full h-40 object-cover rounded-lg"
+                            />
+                            <div className="absolute inset-0 bg-black/50 flex items-center justify-center opacity-0 hover:opacity-100 transition-opacity rounded-lg">
+                              <UploadSimple className="text-3xl text-white" />
+                            </div>
+                          </div>
+                        ) : (
+                          <>
+                            {uploading ? (
+                              <div className="flex items-center justify-center gap-2">
+                                <div className="w-5 h-5 border-2 border-blue-600 border-t-transparent rounded-full animate-spin"></div>
+                                <p className="text-sm text-blue-600 font-medium">Uploading...</p>
+                              </div>
+                            ) : (
+                              <>
+                                <UploadSimple className="text-3xl text-gray-400 mx-auto mb-2" />
+                                <p className="text-sm text-blue-600 font-medium">
+                                  Click to upload{" "}
+                                  <span className="text-gray-500 font-normal">
+                                    or drag and drop
+                                  </span>
+                                </p>
+                                <p className="text-xs text-gray-400 mt-1">
+                                  PNG, JPG, WEBP up to 5MB
+                                </p>
+                              </>
+                            )}
+                          </>
+                        )}
+                      </label>
+                      {formData.image && (
+                        <button
+                          type="button"
+                          onClick={() => setFormData((prev) => ({ ...prev, image: "" }))}
+                          className="mt-2 text-sm text-red-600 hover:text-red-700"
+                        >
+                          Remove image
+                        </button>
+                      )}
                     </div>
 
                     <div className="bg-white border border-gray-200 rounded-xl p-5 space-y-5 shadow-sm">

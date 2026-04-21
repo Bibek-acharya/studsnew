@@ -261,6 +261,7 @@ export const apiService = {
     last_name: string;
     role?: string;
     education_level?: string;
+    access_code?: string;
   }): Promise<RegisterResponse> {
     return apiRequest<RegisterResponse>("/api/v1/auth/register", {
       method: "POST",

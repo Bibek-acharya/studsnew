@@ -2,17 +2,35 @@
 
 import React, { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
-import { getEventById, getRelatedEvents } from "@/lib/events-data";
+import { fetchPublicEventById, fetchPublicEvents, EventEntry } from "@/services/eventApi";
 
 const EventDetailsPage: React.FC<{ params: Promise<{ id: string }> }> = ({ params }) => {
   const [id, setId] = useState<string | null>(null);
+  const [event, setEvent] = useState<EventEntry | null>(null);
+  const [related, setRelated] = useState<EventEntry[]>([]);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    params.then((p) => setId(p.id));
+    params.then(async (p) => {
+      setId(p.id);
+      try {
+        const eventData = await fetchPublicEventById(p.id);
+        setEvent(eventData);
+        
+        if (eventData) {
+          const eventsResult = await fetchPublicEvents({ limit: 10 });
+          const relatedEvents = eventsResult.events
+            .filter((e) => e.id !== p.id && e.category === eventData.category)
+            .slice(0, 3);
+          setRelated(relatedEvents);
+        }
+      } catch {
+        setEvent(null);
+      } finally {
+        setLoading(false);
+      }
+    });
   }, [params]);
-
-  const event = id ? getEventById(id) : undefined;
-  const related = event && id ? getRelatedEvents(id, event.category) : [];
 
   useEffect(() => {
     window.scrollTo(0, 0);
@@ -24,6 +42,14 @@ const EventDetailsPage: React.FC<{ params: Promise<{ id: string }> }> = ({ param
     if (event.category === "Hackathon") return "Competitions";
     return event.category;
   }, [event]);
+
+  if (loading) {
+    return (
+      <div className="min-h-[40vh] flex items-center justify-center text-slate-500 font-semibold">
+        Loading...
+      </div>
+    );
+  }
 
   if (!event || !id) {
     return (

@@ -1,9 +1,22 @@
 "use client";
 
-import React, { useMemo, useState } from "react";
+import React, { useMemo, useState, useEffect } from "react";
 import Link from "next/link";
-import { getAllNews, NewsArticle } from "@/lib/news-data";
 import Pagination from "@/components/ui/Pagination";
+
+interface NewsArticle {
+  id: string;
+  title: string;
+  excerpt: string;
+  content: string;
+  category: string;
+  image: string;
+  author: string;
+  date: string;
+  readTime: string;
+  source: string;
+  tags: string[];
+}
 
 type NewsCategoryFilter =
   | "All News"
@@ -26,14 +39,6 @@ const categoryPills: NewsCategoryFilter[] = [
   "Others",
 ];
 
-const mapNewsToUiCategory = (article: NewsArticle): NewsCategoryFilter => {
-  if (article.category === "Academic") return "Admission";
-  if (article.category === "Policy") return "Notice";
-  if (article.category === "Tech") return "Exams";
-  if (article.category === "Jobs") return "Others";
-  return "Others";
-};
-
 const categoryBadgeClass = (category: NewsCategoryFilter) => {
   if (category === "Exams") return "bg-orange-100 text-orange-700";
   if (category === "Admission") return "bg-blue-100 text-blue-700";
@@ -44,12 +49,59 @@ const categoryBadgeClass = (category: NewsCategoryFilter) => {
   return "bg-slate-100 text-slate-700";
 };
 
+const mapNewsToUiCategory = (article: NewsArticle): NewsCategoryFilter => {
+  if (article.category === "Academic") return "Admission";
+  if (article.category === "Policy") return "Notice";
+  if (article.category === "Tech") return "Exams";
+  if (article.category === "Jobs") return "Others";
+  if (article.category === "Events") return "Events";
+  if (article.category === "Announcements") return "Notice";
+  if (article.category === "Academics") return "Admission";
+  if (article.category === "Sports") return "Events";
+  return "Others";
+};
+
 const NewsPage: React.FC = () => {
   const [activeCategory, setActiveCategory] = useState<NewsCategoryFilter>("All News");
   const [sortBy, setSortBy] = useState<"Newest First" | "Oldest First">("Newest First");
   const [currentPage, setCurrentPage] = useState(1);
+  const [allNews, setAllNews] = useState<NewsArticle[]>([]);
+  const [loading, setLoading] = useState(true);
 
-  const allNews = getAllNews();
+  useEffect(() => {
+    async function fetchNews() {
+      try {
+        const res = await fetch("/api/v1/news");
+        const data = await res.json();
+        if (data?.data?.news && data.data.news.length > 0) {
+          // Convert admin news format to public format
+          const news = data.data.news.map((n: any): NewsArticle => ({
+            id: String(n.id),
+            title: n.title,
+            excerpt: n.desc || n.title,
+            content: n.content || n.desc || "",
+            category: n.category,
+            image: n.image,
+            author: n.author,
+            date: n.date,
+            readTime: "3 min",
+            source: n.author,
+            tags: [],
+          }));
+          setAllNews(news);
+        } else {
+          setAllNews([]);
+        }
+      } catch (e) {
+        console.error("Failed to fetch news:", e);
+        setAllNews([]);
+      } finally {
+        setLoading(false);
+      }
+    }
+    fetchNews();
+  }, []);
+
   const featuredNews = allNews[0];
 
   const processedNews = useMemo(() => {

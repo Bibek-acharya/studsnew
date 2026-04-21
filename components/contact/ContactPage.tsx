@@ -55,10 +55,23 @@ const ContactPage: React.FC = () => {
     window.setTimeout(() => dismissToast(id), 4000);
   };
 
-  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    showToast("Success!", "Your quote request has been sent successfully.");
-    setFormData(initialFormData);
+    try {
+      const res = await fetch("/api/v1/contact", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(formData),
+      });
+      if (res.ok) {
+        showToast("Success!", "Your message has been sent successfully. We'll get back to you soon!");
+        setFormData(initialFormData);
+      } else {
+        showToast("Error", "Failed to send message. Please try again.");
+      }
+    } catch (error) {
+      showToast("Error", "Failed to send message. Please try again.");
+    }
   };
 
   return (

@@ -2,6 +2,7 @@
 
 import React, { createContext, useContext, useState, ReactNode, useEffect, useMemo } from "react";
 import { apiService, AuthResponse } from "./api";
+import { setBlogToken as setBlogApiToken } from "./blogApi";
 
 interface User {
   id?: number;
@@ -10,6 +11,7 @@ interface User {
   email: string;
   phone?: string;
   role: string;
+  image_url?: string;
 }
 
 interface AuthContextType {
@@ -45,8 +47,8 @@ const loadStoredAuth = (): { token: string; user: User } | null => {
 const saveAuth = (token: string, user: User) => {
   if (typeof window === "undefined") return;
   localStorage.setItem(STORAGE_KEY, JSON.stringify({ token, user }));
-  // Also set in apiService just in case
   apiService.setToken(token);
+  setBlogApiToken(token);
 };
 
 const clearAuth = () => {
@@ -137,6 +139,44 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setStoredAuth(null);
   };
 
+  const superadminLogin = async (email: string, password: string) => {
+    const response: AuthResponse = await apiService.login(email, password);
+    
+    if (!response.data?.token) {
+      throw new Error(response.message || "Login failed. Please try again.");
+    }
+
+    const userData: User = {
+      id: response.data.user.id,
+      first_name: response.data.user.first_name,
+      last_name: response.data.user.last_name,
+      email: response.data.user.email,
+      role: response.data.user.role,
+    };
+
+    if (typeof window !== "undefined") {
+      localStorage.setItem("studsphere_superadmin_auth", JSON.stringify({ token: response.data.token, user: userData }));
+    }
+    setBlogApiToken(response.data.token);
+    saveAuth(response.data.token, userData);
+    setStoredAuth({ token: response.data.token, user: userData });
+  };
+
+  const superadminRegister = async (data: { first_name: string; last_name: string; email: string; password: string; access_code: string }) => {
+    const response = await apiService.register({
+      email: data.email,
+      password: data.password,
+      first_name: data.first_name,
+      last_name: data.last_name,
+      role: "superadmin",
+      access_code: data.access_code,
+    });
+
+    if (!response.data?.requires_otp) {
+      throw new Error("Registration response invalid");
+    }
+  };
+
   const value = useMemo(() => ({
     token,
     user,
@@ -148,6 +188,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     verifyOTP,
     sendOTP,
     setUser,
+    superadminLogin,
+    superadminRegister,
   }), [token, user, isAuthenticated, loading]);
 
   return (

@@ -30,32 +30,45 @@ const SuperadminLogin = () => {
   };
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-[#0f172a] p-4 selection:bg-blue-500/30">
+    <div className="flex min-h-screen items-center justify-center bg-white p-4 selection:bg-[#0000ff]/10">
       {/* Glow blobs */}
-      <div className="pointer-events-none fixed inset-0 overflow-hidden">
-        <div className="absolute -top-32 -right-32 w-[500px] h-[500px] bg-blue-600/10 rounded-full blur-[120px]" />
-        <div className="absolute -bottom-32 -left-32 w-[500px] h-[500px] bg-indigo-600/10 rounded-full blur-[120px]" />
+      <div className="pointer-events-none fixed inset-0 overflow-hidden opacity-20">
+        <div className="absolute -top-32 -right-32 w-[600px] h-[600px] bg-[#0000ff]/5 rounded-full blur-[120px]" />
+        <div className="absolute -bottom-32 -left-32 w-[600px] h-[600px] bg-[#0000cc]/5 rounded-full blur-[120px]" />
       </div>
 
       <div className="relative z-10 w-full max-w-[440px]">
         {/* Card */}
-        <div className="bg-slate-900/60 backdrop-blur-xl border border-slate-800 rounded-3xl shadow-2xl p-8 md:p-10">
+        <div className="bg-white border border-slate-200 rounded-md p-8 md:p-10">
           {/* Header */}
           <div className="flex flex-col items-center mb-8 text-center">
-            <div className="w-16 h-16 bg-blue-600/10 rounded-2xl flex items-center justify-center border border-blue-500/20 mb-4 shadow-[0_0_40px_rgba(59,130,246,0.1)]">
-              <ShieldCheck className="w-8 h-8 text-blue-500" />
+            <div className="w-16 h-16 bg-[#0000ff]/10 rounded-2xl flex items-center justify-center border border-[#0000ff]/20 mb-4 shadow-sm">
+              <ShieldCheck className="w-8 h-8 text-[#0000ff]" />
             </div>
-            <h1 className="text-3xl font-bold text-white tracking-tight">Super Control</h1>
-            <p className="text-slate-400 mt-2 text-sm leading-relaxed max-w-xs">
-              Authorized personnel only. Enter your administrative credentials to access the nexus.
+            <h1 className="text-3xl font-bold text-slate-900 tracking-tight">
+              Super Control
+            </h1>
+            <p className="text-slate-500 mt-2 text-sm leading-relaxed max-w-xs font-medium">
+              Authorized personnel only. Enter your administrative credentials
+              to access the nexus.
             </p>
           </div>
 
           {/* Error */}
           {error && (
-            <div className="mb-6 p-4 bg-red-500/10 border border-red-500/20 rounded-xl text-red-400 text-sm flex items-start gap-3">
-              <svg className="w-4 h-4 mt-0.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+            <div className="mb-6 p-4 bg-red-50 border border-red-100 rounded-xl text-red-600 text-sm flex items-start gap-3">
+              <svg
+                className="w-4 h-4 mt-0.5 shrink-0"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"
+                />
               </svg>
               <span>{error}</span>
             </div>
@@ -65,12 +78,12 @@ const SuperadminLogin = () => {
           <form onSubmit={handleSubmit} className="space-y-5">
             {/* Email */}
             <div className="space-y-2">
-              <label className="block text-xs font-semibold text-slate-400 uppercase tracking-widest ml-1">
+              <label className="block text-xs font-bold text-slate-500 uppercase tracking-widest ml-1">
                 Admin Email
               </label>
               <div className="relative group">
                 <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                  <Mail className="w-5 h-5 text-slate-500 group-focus-within:text-blue-500 transition-colors" />
+                  <Mail className="w-5 h-5 text-slate-400 group-focus-within:text-[#0000ff] transition-colors" />
                 </div>
                 <input
                   id="superadmin-email"
@@ -80,19 +93,19 @@ const SuperadminLogin = () => {
                   disabled={loading}
                   onChange={(e) => setEmail(e.target.value)}
                   placeholder="admin@studsphere.com"
-                  className="w-full bg-slate-950/50 border border-slate-800 focus:border-blue-600/60 focus:ring-4 focus:ring-blue-600/10 focus:outline-none rounded-2xl py-3.5 pl-12 pr-4 text-white placeholder:text-slate-600 transition-all text-sm"
+                  className="w-full bg-slate-50 border border-slate-200 focus:border-[#0000ff] focus:ring-4 focus:ring-[#0000ff]/5 focus:outline-none rounded-md py-3.5 pl-12 pr-4 text-slate-900 placeholder:text-slate-400 font-medium transition-all text-sm"
                 />
               </div>
             </div>
 
             {/* Password */}
             <div className="space-y-2">
-              <label className="block text-xs font-semibold text-slate-400 uppercase tracking-widest ml-1">
+              <label className="block text-xs font-bold text-slate-500 uppercase tracking-widest ml-1">
                 Access Key
               </label>
               <div className="relative group">
                 <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                  <Lock className="w-5 h-5 text-slate-500 group-focus-within:text-blue-500 transition-colors" />
+                  <Lock className="w-5 h-5 text-slate-400 group-focus-within:text-[#0000ff] transition-colors" />
                 </div>
                 <input
                   id="superadmin-password"
@@ -102,14 +115,18 @@ const SuperadminLogin = () => {
                   disabled={loading}
                   onChange={(e) => setPassword(e.target.value)}
                   placeholder="••••••••"
-                  className="w-full bg-slate-950/50 border border-slate-800 focus:border-blue-600/60 focus:ring-4 focus:ring-blue-600/10 focus:outline-none rounded-2xl py-3.5 pl-12 pr-12 text-white placeholder:text-slate-600 transition-all text-sm"
+                  className="w-full bg-slate-50 border border-slate-200 focus:border-[#0000ff] focus:ring-4 focus:ring-[#0000ff]/5 focus:outline-none rounded-md py-3.5 pl-12 pr-12 text-slate-900 placeholder:text-slate-400 font-medium transition-all text-sm"
                 />
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute inset-y-0 right-0 pr-4 flex items-center text-slate-600 hover:text-slate-400 transition-colors"
+                  className="absolute inset-y-0 right-0 pr-4 flex items-center text-slate-400 hover:text-[#0000ff] transition-colors"
                 >
-                  {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+                  {showPassword ? (
+                    <EyeOff className="w-5 h-5" />
+                  ) : (
+                    <Eye className="w-5 h-5" />
+                  )}
                 </button>
               </div>
             </div>
@@ -120,15 +137,30 @@ const SuperadminLogin = () => {
                 <div className="relative flex items-center justify-center">
                   <input
                     type="checkbox"
-                    className="peer appearance-none w-5 h-5 border border-slate-800 rounded-lg bg-slate-950 checked:bg-blue-600 checked:border-blue-600 focus:outline-none transition-all"
+                    className="peer appearance-none w-5 h-5 border border-slate-200 rounded-lg bg-slate-50 checked:bg-[#0000ff] checked:border-[#0000ff] focus:outline-none transition-all"
                   />
-                  <svg className="absolute w-3.5 h-3.5 text-white opacity-0 peer-checked:opacity-100 transition-opacity pointer-events-none" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
+                  <svg
+                    className="absolute w-3.5 h-3.5 text-white opacity-0 peer-checked:opacity-100 transition-opacity pointer-events-none"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={3}
+                      d="M5 13l4 4L19 7"
+                    />
                   </svg>
                 </div>
-                <span className="text-sm text-slate-400 group-hover:text-slate-300 transition-colors">Keep me authenticated</span>
+                <span className="text-sm text-slate-500 font-medium group-hover:text-slate-700 transition-colors">
+                  Keep me authenticated
+                </span>
               </label>
-              <button type="button" className="text-sm font-medium text-blue-500 hover:text-blue-400 transition-colors">
+              <button
+                type="button"
+                className="text-sm font-bold text-[#0000ff] hover:text-[#0000cc] transition-colors"
+              >
                 Lost Access?
               </button>
             </div>
@@ -138,9 +170,9 @@ const SuperadminLogin = () => {
               id="superadmin-login-btn"
               type="submit"
               disabled={loading}
-              className="w-full relative group overflow-hidden bg-blue-600 hover:bg-blue-500 disabled:bg-slate-800 disabled:text-slate-600 text-white font-bold py-4 rounded-2xl shadow-xl shadow-blue-900/20 transition-all active:scale-[0.98] flex items-center justify-center gap-2"
+              className="w-full relative group overflow-hidden bg-gradient-to-r from-[#0000ff] to-[#0000cc] hover:from-[#0000cc] hover:to-[#0000ff] disabled:bg-slate-100 disabled:text-slate-400 text-white font-bold py-4 rounded-md shadow-lg shadow-[#0000ff]/20 transition-all active:scale-[0.98] flex items-center justify-center gap-2"
             >
-              <div className="absolute inset-0 w-0 bg-gradient-to-r from-white/5 to-transparent group-hover:w-full transition-all duration-700 ease-out" />
+              <div className="absolute inset-0 w-0 bg-gradient-to-r from-white/10 to-transparent group-hover:w-full transition-all duration-700 ease-out" />
               {loading ? (
                 <div className="w-6 h-6 border-2 border-white/30 border-t-white rounded-full animate-spin" />
               ) : (
@@ -153,12 +185,12 @@ const SuperadminLogin = () => {
           </form>
 
           {/* Footer Link */}
-          <div className="mt-8 pt-6 border-t border-slate-800 text-center">
-            <p className="text-slate-500 text-sm">
+          <div className="mt-8 pt-6 border-t border-slate-100 text-center">
+            <p className="text-slate-500 text-sm font-medium">
               New administrator?{" "}
               <button
                 onClick={() => router.push("/superadmin/signup")}
-                className="text-blue-500 font-semibold hover:text-blue-400 transition-colors hover:underline underline-offset-4"
+                className="text-[#0000ff] font-bold hover:text-[#0000cc] transition-colors hover:underline underline-offset-4"
               >
                 Register Credentials
               </button>
@@ -166,7 +198,7 @@ const SuperadminLogin = () => {
           </div>
         </div>
 
-        <p className="text-center text-slate-600 text-[10px] mt-8 uppercase tracking-[0.2em]">
+        <p className="text-center text-slate-400 text-[10px] mt-8 uppercase tracking-[0.2em] font-bold">
           Internal Systems &copy; 2026 StudSphere Global Security
         </p>
       </div>

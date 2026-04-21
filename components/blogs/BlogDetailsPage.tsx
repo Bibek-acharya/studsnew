@@ -2,22 +2,25 @@
 
 import React, { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
-import { fetchPublicBlogById, BlogEntry } from "@/services/blogApi";
+import {
+  fetchPublicBlogById,
+  fetchBlogComments,
+  postBlogComment,
+  BlogEntry,
+  BlogComment,
+} from "@/services/blogApi";
+import { useAuth } from "@/services/AuthContext";
 
-interface CommentItem {
-  id: string;
-  author: string;
-  avatar: string;
-  time: string;
-  message: string;
-  likes: number;
-}
-
-const BlogDetailsPage: React.FC<{ params: Promise<{ id: string }> }> = ({ params }) => {
+const BlogDetailsPage: React.FC<{ params: Promise<{ id: string }> }> = ({
+  params,
+}) => {
+  const { user } = useAuth();
   const [id, setId] = useState<string | null>(null);
   const [blog, setBlog] = useState<BlogEntry | null>(null);
   const [related, setRelated] = useState<BlogEntry[]>([]);
+  const [comments, setComments] = useState<BlogComment[]>([]);
   const [loading, setLoading] = useState(true);
+  const [postingComment, setPostingComment] = useState(false);
 
   useEffect(() => {
     params.then((p) => setId(p.id));
@@ -26,27 +29,22 @@ const BlogDetailsPage: React.FC<{ params: Promise<{ id: string }> }> = ({ params
   useEffect(() => {
     if (!id) return;
     setLoading(true);
-    fetchPublicBlogById(id).then((result) => {
-      if (result) {
-        setBlog(result.blog);
-        setRelated(result.related);
-      }
+    Promise.all([fetchPublicBlogById(id), fetchBlogComments(id)]).then(
+      ([blogResult, commentsData]) => {
+        if (blogResult) {
+          setBlog(blogResult.blog);
+          setRelated(blogResult.related);
+        }
+        setComments(commentsData || []);
+        setLoading(false);
+      },
+    ).catch((err) => {
+      console.error("Error fetching blog:", err);
       setLoading(false);
     });
   }, [id]);
 
   const [commentInput, setCommentInput] = useState("");
-  const [comments, setComments] = useState<CommentItem[]>([
-    {
-      id: "seed-1",
-      author: "Rohan Sharma",
-      avatar: "R",
-      time: "2 days ago",
-      message:
-        "This extension is really helpful. I was having issues with document upload due to internet connectivity problems in my area.",
-      likes: 6,
-    },
-  ]);
 
   useEffect(() => {
     window.scrollTo(0, 0);
@@ -64,23 +62,33 @@ const BlogDetailsPage: React.FC<{ params: Promise<{ id: string }> }> = ({ params
     return "bg-yellow-600";
   }, [topCategory]);
 
-
-  const postComment = () => {
+  const postComment = async () => {
     const text = commentInput.trim();
-    if (!text) return;
+    if (!text || !id) return;
 
-    setComments((prev) => [
-      {
-        id: `${Date.now()}`,
-        author: "You (Guest)",
-        avatar: "Y",
-        time: "Just now",
+    setPostingComment(true);
+    try {
+      const authorName = user
+        ? `${user.first_name} ${user.last_name}`
+        : "Guest User";
+      const initial = authorName.charAt(0).toUpperCase();
+      const avatarUrl =
+        user?.image_url ||
+        `https://ui-avatars.com/api/?name=${encodeURIComponent(authorName)}&background=random`;
+
+      const newComment = await postBlogComment(id, {
+        author: authorName,
+        avatar: avatarUrl,
         message: text,
-        likes: 0,
-      },
-      ...prev,
-    ]);
-    setCommentInput("");
+      });
+      setComments([newComment, ...comments]);
+      setCommentInput("");
+    } catch (err) {
+      console.error("Failed to post comment:", err);
+      alert("Failed to post comment. Please try again.");
+    } finally {
+      setPostingComment(false);
+    }
   };
 
   if (loading || !id) {
@@ -104,30 +112,44 @@ const BlogDetailsPage: React.FC<{ params: Promise<{ id: string }> }> = ({ params
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 lg:py-12 flex flex-col lg:flex-row gap-8 lg:gap-12">
         <main className="lg:w-2/3">
           <div className="flex items-center gap-4 text-sm mb-4">
-            <span className={`${topCategoryClass} text-white px-3 py-1 rounded-full font-medium flex items-center gap-1.5`}>
-              <i className="fa-solid fa-graduation-cap text-xs"></i> {topCategory}
+            <span
+              className={`${topCategoryClass} text-white px-3 py-1 rounded-full font-medium flex items-center gap-1.5`}
+            >
+              <i className="fa-solid fa-graduation-cap text-xs"></i>{" "}
+              {topCategory}
             </span>
             <span className="text-gray-500 flex items-center gap-1.5">
-              <i className="fa-regular fa-clock"></i> {new Date(blog.created_at).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}
+              <i className="fa-regular fa-clock"></i>{" "}
+              {new Date(blog.created_at).toLocaleDateString("en-US", {
+                month: "short",
+                day: "numeric",
+                year: "numeric",
+              })}
             </span>
             <span className="text-gray-500 flex items-center gap-1.5 ml-auto sm:ml-0">
               <i className="fa-regular fa-eye"></i> {blog.views} views
             </span>
           </div>
 
-          <h1 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-6 leading-tight">{blog.title}</h1>
+          <h1 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-6 leading-tight">
+            {blog.title}
+          </h1>
 
           <div className="flex flex-wrap items-center gap-y-2 gap-x-6 text-sm text-gray-600 border-b border-gray-100 pb-6 mb-6">
             <div className="flex items-center gap-2">
               <i className="fa-solid fa-user text-gray-400"></i>
               <span>
-                Published by: <strong className="text-gray-900 font-semibold">{blog.author}</strong>
+                Published by:{" "}
+                <strong className="text-gray-900 font-semibold">
+                  {blog.author}
+                </strong>
               </span>
             </div>
             <div className="flex items-center gap-2">
               <i className="fa-regular fa-calendar text-gray-400"></i>
               <span>
-                Latest Update: <strong className="text-gray-900 font-semibold">Today</strong>
+                Latest Update:{" "}
+                <strong className="text-gray-900 font-semibold">Today</strong>
               </span>
             </div>
           </div>
@@ -143,38 +165,9 @@ const BlogDetailsPage: React.FC<{ params: Promise<{ id: string }> }> = ({ params
           </div>
 
           <div className="prose max-w-none text-gray-700">
-            <h2 className="text-xl font-bold text-gray-900 mb-4">Revised Schedule</h2>
-            <p className="mb-4">
-              The previous deadline for counseling registration was set for December 10th, 2024. The new revised schedule is as follows:
-            </p>
-
-            <ul className="list-disc pl-5 mb-8 space-y-2 marker:text-gray-400">
-              <li>
-                <strong>New Registration Deadline:</strong> December 20th, 2024 (5:00 PM NST)
-              </li>
-              <li>
-                <strong>Choice Filling Deadline:</strong> December 20th, 2024
-              </li>
-              <li>
-                <strong>Seat Allotment (Round 1):</strong> December 25th, 2024
-              </li>
-              <li>
-                <strong>Fee Payment & Document Verification:</strong> December 26th - 28th, 2024
-              </li>
-            </ul>
-
-            <h2 className="text-xl font-bold text-gray-900 mb-4">Instructions for Applicants</h2>
-            <p className="mb-4">All registered candidates must follow these steps:</p>
-
-            <ol className="list-decimal pl-5 mb-8 space-y-2">
-              <li>Log in to the admission portal using your credentials</li>
-              <li>Verify and update your personal information if needed</li>
-              <li>Complete the choice filling process carefully</li>
-              <li>Submit the application before the deadline</li>
-              <li>Keep your documents ready for verification</li>
-            </ol>
-
-            <div className="text-gray-700 whitespace-pre-line mb-8">{blog.content}</div>
+            <div className="text-gray-700 whitespace-pre-line mb-8">
+              {blog.content}
+            </div>
           </div>
 
           <div className="mt-8 mb-6 flex flex-wrap items-center gap-3">
@@ -190,18 +183,32 @@ const BlogDetailsPage: React.FC<{ params: Promise<{ id: string }> }> = ({ params
           </div>
 
           <div className="flex items-center justify-between border-t border-b border-gray-100 py-4 mb-10">
-            <span className="text-gray-900 font-medium">Share this announcement:</span>
+            <span className="text-gray-900 font-medium">
+              Share this announcement:
+            </span>
             <div className="flex items-center gap-2">
-              <button className="w-8 h-8 rounded-full bg-blue-500 text-white flex items-center justify-center hover:bg-blue-600 transition-colors" aria-label="Share on Facebook">
+              <button
+                className="w-8 h-8 rounded-full bg-blue-500 text-white flex items-center justify-center hover:bg-blue-600 transition-colors"
+                aria-label="Share on Facebook"
+              >
                 <i className="fa-brands fa-facebook-f text-sm"></i>
               </button>
-              <button className="w-8 h-8 rounded-full bg-blue-400 text-white flex items-center justify-center hover:bg-blue-500 transition-colors" aria-label="Share on Instagram">
+              <button
+                className="w-8 h-8 rounded-full bg-blue-400 text-white flex items-center justify-center hover:bg-blue-500 transition-colors"
+                aria-label="Share on Instagram"
+              >
                 <i className="fa-brands fa-instagram text-sm"></i>
               </button>
-              <button className="w-8 h-8 rounded-full bg-blue-600 text-white flex items-center justify-center hover:bg-blue-700 transition-colors" aria-label="Share on LinkedIn">
+              <button
+                className="w-8 h-8 rounded-full bg-blue-600 text-white flex items-center justify-center hover:bg-blue-700 transition-colors"
+                aria-label="Share on LinkedIn"
+              >
                 <i className="fa-brands fa-linkedin-in text-sm"></i>
               </button>
-              <button className="w-8 h-8 rounded-full bg-blue-400 text-white flex items-center justify-center hover:bg-blue-500 transition-colors" aria-label="Copy Link">
+              <button
+                className="w-8 h-8 rounded-full bg-blue-400 text-white flex items-center justify-center hover:bg-blue-500 transition-colors"
+                aria-label="Copy Link"
+              >
                 <i className="fa-solid fa-link text-sm"></i>
               </button>
             </div>
@@ -210,7 +217,9 @@ const BlogDetailsPage: React.FC<{ params: Promise<{ id: string }> }> = ({ params
           <section>
             <div className="flex items-center gap-2 mb-6">
               <i className="fa-solid fa-comments text-blue-600 text-xl"></i>
-              <h2 className="text-xl font-bold text-gray-900">Comments & Discussion</h2>
+              <h2 className="text-xl font-bold text-gray-900">
+                Comments & Discussion
+              </h2>
             </div>
 
             <div className="mb-10">
@@ -223,13 +232,15 @@ const BlogDetailsPage: React.FC<{ params: Promise<{ id: string }> }> = ({ params
               ></textarea>
               <div className="flex justify-between items-center mt-3">
                 <span className="text-xs text-gray-500 flex items-center gap-1">
-                  <i className="fa-solid fa-circle-info text-gray-400"></i> Please keep comments respectful
+                  <i className="fa-solid fa-circle-info text-gray-400"></i>{" "}
+                  Please keep comments respectful
                 </span>
                 <button
                   onClick={postComment}
-                  className="bg-[#2563eb] hover:bg-blue-700 text-white font-medium py-2 px-6 rounded-lg text-sm transition-colors"
+                  disabled={postingComment || !commentInput.trim()}
+                  className="bg-[#2563eb] hover:bg-blue-700 disabled:bg-gray-400 text-white font-medium py-2 px-6 rounded-lg text-sm transition-colors"
                 >
-                  Post Comment
+                  {postingComment ? "Posting..." : "Post Comment"}
                 </button>
               </div>
             </div>
@@ -240,22 +251,39 @@ const BlogDetailsPage: React.FC<{ params: Promise<{ id: string }> }> = ({ params
                   <div className="absolute left-0 top-0 bottom-0 w-1 bg-[#1e3a8a] rounded-full"></div>
 
                   <div className="flex-shrink-0 pl-4">
-                    <div
-                      className={`w-10 h-10 rounded-full ${
-                        comment.author.startsWith("You")
-                          ? "bg-green-100 text-green-600"
-                          : "bg-blue-100 text-blue-600"
-                      } flex items-center justify-center font-bold text-sm`}
-                    >
-                      {comment.avatar}
+                    <div className="w-10 h-10 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center font-bold text-sm">
+                      {comment.avatar && comment.avatar.startsWith("http") ? (
+                        <img
+                          src={comment.avatar}
+                          alt={comment.author}
+                          className="w-full h-full rounded-full object-cover"
+                          onError={(e) => {
+                            (e.target as HTMLImageElement).style.display =
+                              "none";
+                            (
+                              e.target as HTMLImageElement
+                            ).parentElement!.innerText = comment.author
+                              .charAt(0)
+                              .toUpperCase();
+                          }}
+                        />
+                      ) : (
+                        comment.avatar || comment.author.charAt(0).toUpperCase()
+                      )}
                     </div>
                   </div>
                   <div className="flex-1 pb-4">
                     <div className="mb-1">
-                      <h4 className="font-bold text-sm text-gray-900 inline-block mr-2">{comment.author}</h4>
-                      <span className="text-xs text-gray-400">{comment.time}</span>
+                      <h4 className="font-bold text-sm text-gray-900 inline-block mr-2">
+                        {comment.author}
+                      </h4>
+                      <span className="text-xs text-gray-400">
+                        {comment.time}
+                      </span>
                     </div>
-                    <p className="text-sm text-gray-700 leading-relaxed mb-3 whitespace-pre-wrap">{comment.message}</p>
+                    <p className="text-sm text-gray-700 leading-relaxed mb-3 whitespace-pre-wrap">
+                      {comment.message}
+                    </p>
                     <div className="flex items-center gap-4 text-xs text-gray-500">
                       <button className="flex items-center gap-1 hover:text-blue-600 transition-colors">
                         <i className="fa-regular fa-heart"></i> {comment.likes}
@@ -275,12 +303,19 @@ const BlogDetailsPage: React.FC<{ params: Promise<{ id: string }> }> = ({ params
           <div className="sticky top-8">
             <div className="flex items-center gap-2 mb-6 border-b border-gray-100 pb-2">
               <i className="fa-regular fa-copy text-blue-600 text-lg"></i>
-              <h3 className="text-lg font-bold text-gray-900">Related Articles</h3>
+              <h3 className="text-lg font-bold text-gray-900">
+                Related Articles
+              </h3>
             </div>
 
             <div className="space-y-8">
               {related.map((rel, idx) => {
-                const tag = idx % 3 === 0 ? "Scholarship" : idx % 3 === 1 ? "Exam" : "Fee";
+                const tag =
+                  idx % 3 === 0
+                    ? "Scholarship"
+                    : idx % 3 === 1
+                      ? "Exam"
+                      : "Fee";
                 const tagClass =
                   tag === "Scholarship"
                     ? "bg-green-100 text-green-700"
@@ -300,7 +335,11 @@ const BlogDetailsPage: React.FC<{ params: Promise<{ id: string }> }> = ({ params
                       className="w-full h-40 object-cover rounded-xl mb-3"
                     />
                     <div className="flex justify-between items-center mb-2">
-                      <span className={`${tagClass} text-xs font-semibold px-2 py-0.5 rounded`}>{tag}</span>
+                      <span
+                        className={`${tagClass} text-xs font-semibold px-2 py-0.5 rounded`}
+                      >
+                        {tag}
+                      </span>
                       <span className="text-xs text-gray-500 flex items-center gap-1">
                         <i className="fa-regular fa-clock"></i> 90 days ago
                       </span>
@@ -308,7 +347,9 @@ const BlogDetailsPage: React.FC<{ params: Promise<{ id: string }> }> = ({ params
                     <h4 className="font-bold text-sm text-gray-900 group-hover:text-blue-600 transition-colors mb-2 line-clamp-2">
                       {rel.title}
                     </h4>
-                    <p className="text-xs text-gray-500 line-clamp-2">{rel.excerpt}</p>
+                    <p className="text-xs text-gray-500 line-clamp-2">
+                      {rel.excerpt}
+                    </p>
                   </Link>
                 );
               })}
@@ -319,7 +360,8 @@ const BlogDetailsPage: React.FC<{ params: Promise<{ id: string }> }> = ({ params
                 href="/blogs"
                 className="inline-flex items-center gap-2 text-sm font-semibold text-blue-600 hover:text-blue-800 transition-colors"
               >
-                View all articles <i className="fa-solid fa-arrow-right text-xs"></i>
+                View all articles{" "}
+                <i className="fa-solid fa-arrow-right text-xs"></i>
               </Link>
             </div>
           </div>
