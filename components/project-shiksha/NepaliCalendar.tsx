@@ -50,14 +50,14 @@ export default function NepaliCalendar({ value, onChange, error, minAge = 14 }: 
     
     const adDateStr = adDate.toISOString().split('T')[0];
     
-    if (age < minAge) {
+    if (parseInt(age) < minAge) {
       setAgeError(`You must be at least ${minAge} years old to apply`);
     } else {
       setAgeError(null);
     }
     
     setSelectedDate({ year: currentYear, month: currentMonth, day });
-    onChange(bsDateStr, adDateStr, age.toString());
+    onChange(bsDateStr, adDateStr, age);
     setIsOpen(false);
   }, [currentYear, currentMonth, onChange, minAge]);
 
@@ -110,7 +110,7 @@ export default function NepaliCalendar({ value, onChange, error, minAge = 14 }: 
         
         const adDate = bsToAd(year, month, day);
         const age = calculateAge(adDate);
-        if (age < minAge) {
+        if (parseInt(age) < minAge) {
           setAgeError(`You must be at least ${minAge} years old to apply`);
         } else {
           setAgeError(null);
