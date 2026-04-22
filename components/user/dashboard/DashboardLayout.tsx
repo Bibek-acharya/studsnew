@@ -2,7 +2,7 @@
 
 import { useState, useMemo, useEffect, useRef, ReactNode } from 'react'
 import Sidebar from './Sidebar'
-import PreferenceModal from './PreferenceModal'
+// import PreferenceModal from './PreferenceModal'
 import { Menu, Search, Bell, User, Archive, ArchiveRestore, Trash2, Clock, Settings } from 'lucide-react'
 
 interface DashboardLayoutProps {
@@ -325,7 +325,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
         </main>
       </div>
 
-      <PreferenceModal isOpen={preferenceModalOpen} onClose={() => setPreferenceModalOpen(false)} />
+      {/* <PreferenceModal isOpen={preferenceModalOpen} onClose={() => setPreferenceModalOpen(false)} /> */}
     </div>
   )
 }

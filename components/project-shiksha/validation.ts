@@ -10,6 +10,9 @@ export function validateForm(data: ProjectShikshaFormData): {
   if (!data.fullName.trim()) errors.fullName = "Full name is required";
   if (!data.gender) errors.gender = "Gender is required";
   if (!data.dobBS) errors.dobBS = "Date of birth is required";
+  if (data.dobBS && data.age && parseInt(data.age) < 14) {
+    errors.dobBS = "You must be at least 14 years old to apply";
+  }
   if (!data.phone || data.phone.length !== 10) {
     errors.phone = "Valid 10-digit phone number is required";
   }

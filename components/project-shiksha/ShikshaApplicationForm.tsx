@@ -3,10 +3,12 @@
 import { useState, useCallback, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
-import { Upload, User, Phone, Mail, MapPin, Users, FileText, CheckCircle } from "lucide-react";
+import { Upload, User, Phone, Mail, MapPin, Users, FileText, CheckCircle, Calendar } from "lucide-react";
 import NepaliCalendar from "./NepaliCalendar";
-import { ProjectShikshaFormData, provinces, schoolTypes, occupations } from "./types";
+import { ProjectShikshaFormData, schoolTypes, occupations } from "./types";
 import { validateForm } from "./validation";
+import { adToBs, formatNepaliDate, calculateAge } from "@/utils/nepali-date-converter";
+import { NEPAL_PROVINCES, NEPAL_DISTRICTS, NEPAL_LOCAL_BODIES } from "@/lib/location-data";
 
 const initialFormData: ProjectShikshaFormData = {
   // Personal Details
@@ -61,11 +63,52 @@ export default function ShikshaApplicationForm() {
 
   const handleInputChange = useCallback((field: keyof ProjectShikshaFormData, value: string | boolean | File | null) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
-    // Clear error when field is modified
     if (errors[field]) {
       setErrors((prev) => ({ ...prev, [field]: undefined }));
     }
   }, [errors]);
+
+  const handleDobBsChange = useCallback((bsDate: string, adDate: string, age: string) => {
+    setFormData((prev) => ({ ...prev, dobBS: bsDate, dobAD: adDate, age }));
+    if (errors.dobBS) {
+      setErrors((prev) => ({ ...prev, dobBS: undefined }));
+    }
+    if (parseInt(age) < 14) {
+      setErrors((prev) => ({ ...prev, dobBS: "You must be at least 14 years old to apply" }));
+    } else {
+      setErrors((prev) => ({ ...prev, dobBS: undefined }));
+    }
+  }, [errors.dobBS]);
+
+  const handleDobAdChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+    const adDateStr = e.target.value;
+    
+    if (!adDateStr) {
+      setFormData((prev) => ({ ...prev, dobAD: "", dobBS: "", age: "" }));
+      return;
+    }
+    
+    const adDate = new Date(adDateStr);
+    
+    if (!isNaN(adDate.getTime())) {
+      const bsDate = adToBs(adDate);
+      const bsDateFormatted = formatNepaliDate(bsDate.year, bsDate.month, bsDate.day);
+      const age = calculateAge(adDate);
+      
+      setFormData((prev) => ({ 
+        ...prev, 
+        dobAD: adDateStr,
+        dobBS: bsDateFormatted,
+        age
+      }));
+      
+      if (parseInt(age) < 14) {
+        setErrors((prev) => ({ ...prev, dobAD: "You must be at least 14 years old to apply", dobBS: "You must be at least 14 years old to apply" }));
+      } else {
+        setErrors((prev) => ({ ...prev, dobAD: undefined, dobBS: undefined }));
+      }
+    }
+  }, []);
 
   const handleFileChange = useCallback((field: "seeMarksheet" | "citizenship" | "photo", file: File | null) => {
     handleInputChange(field, file);
@@ -124,6 +167,32 @@ export default function ShikshaApplicationForm() {
 
   const showOtherSchoolType = formData.seeSchoolType === "Other";
   const showSchoolName = formData.seeSchoolType && formData.seeSchoolType !== "";
+
+  const getAvailableDistricts = (province: string) => {
+    if (!province) return [];
+    return NEPAL_DISTRICTS[province as keyof typeof NEPAL_DISTRICTS] || [];
+  };
+
+  const getAvailableMunicipalities = (district: string) => {
+    if (!district) return [];
+    return NEPAL_LOCAL_BODIES[district as keyof typeof NEPAL_LOCAL_BODIES] || [];
+  };
+
+  const getAvailableWards = (district: string, municipality: string) => {
+    if (!district || !municipality) return [];
+    const localBody = NEPAL_LOCAL_BODIES[district as keyof typeof NEPAL_LOCAL_BODIES]?.find(
+      (lb) => lb.name === municipality
+    );
+    return localBody ? Array.from({ length: localBody.wards }, (_, i) => i + 1) : [];
+  };
+
+  const permDistricts = getAvailableDistricts(formData.permProvince);
+  const permMunicipalities = getAvailableMunicipalities(formData.permDistrict);
+  const permWards = getAvailableWards(formData.permDistrict, formData.permMunicipality);
+
+  const tempDistricts = getAvailableDistricts(formData.tempProvince);
+  const tempMunicipalities = getAvailableMunicipalities(formData.tempDistrict);
+  const tempWards = getAvailableWards(formData.tempDistrict, formData.tempMunicipality);
 
   return (
     <div className="min-h-screen bg-[#0000ff] flex flex-col items-center pt-8 pb-20 px-4 sm:px-6">
@@ -223,8 +292,14 @@ export default function ShikshaApplicationForm() {
                       handleInputChange("dobBS", value);
                       handleInputChange("dobAD", adDate);
                       handleInputChange("age", age);
+                      if (parseInt(age) < 14) {
+                        setErrors((prev) => ({ ...prev, dobBS: "You must be at least 14 years old to apply" }));
+                      } else {
+                        setErrors((prev) => ({ ...prev, dobBS: undefined }));
+                      }
                     }}
                     error={errors.dobBS}
+                    minAge={14}
                   />
                 </div>
 
@@ -232,13 +307,15 @@ export default function ShikshaApplicationForm() {
                   <label className="block text-[14px] font-semibold text-gray-700 mb-1.5">
                     Date of Birth (AD) <span className="text-red-500">*</span>
                   </label>
-                  <input
-                    type="text"
-                    value={formData.dobAD}
-                    readOnly
-                    className="w-full bg-gray-100 border border-gray-300 rounded-lg py-3 px-4 text-[15px] text-gray-800 outline-none cursor-not-allowed"
-                    placeholder="Auto-calculated"
-                  />
+                  <div className="relative">
+                    <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+                    <input
+                      type="date"
+                      value={formData.dobAD}
+                      onChange={handleDobAdChange}
+                      className="w-full border border-gray-300 rounded-lg py-3 pl-10 pr-4 text-[15px] text-gray-800 outline-none focus:ring-0 focus:border-[#0000ff] transition-all bg-white"
+                    />
+                  </div>
                 </div>
 
                 <div>
@@ -390,11 +467,16 @@ export default function ShikshaApplicationForm() {
                   <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
                   <select
                     value={formData.permProvince}
-                    onChange={(e) => handleInputChange("permProvince", e.target.value)}
+                    onChange={(e) => {
+                      handleInputChange("permProvince", e.target.value);
+                      handleInputChange("permDistrict", "");
+                      handleInputChange("permMunicipality", "");
+                      handleInputChange("permWard", "");
+                    }}
                     className="w-full border border-gray-300 rounded-lg py-3 pl-10 pr-4 text-[15px] text-gray-800 outline-none focus:ring-0 focus:border-[#0000ff] transition-all bg-white cursor-pointer appearance-none bg-[url('data:image/svg+xml;charset=UTF-8,%3csvg xmlns=%27http://www.w3.org/2000/svg%27 fill=%27none%27 viewBox=%270 0 24 24%27 stroke=%27%23111827%27%3e%3cpath stroke-linecap=%27round%27 stroke-linejoin=%27round%27 stroke-width=%272%27 d=%27M19 9l-7 7-7-7%27/%3e%3c/svg%3e')] bg-no-repeat bg-[right_1rem_center] bg-[length:1.25em]"
                   >
                     <option value="" disabled>Select Province</option>
-                    {provinces.map((p) => (
+                    {NEPAL_PROVINCES.map((p) => (
                       <option key={p} value={p}>{p}</option>
                     ))}
                   </select>
@@ -406,13 +488,21 @@ export default function ShikshaApplicationForm() {
                 <label className="block text-[14px] font-semibold text-gray-700 mb-1.5">
                   District <span className="text-red-500">*</span>
                 </label>
-                <input
-                  type="text"
+                <select
                   value={formData.permDistrict}
-                  onChange={(e) => handleInputChange("permDistrict", e.target.value)}
-                  className="w-full border border-gray-300 rounded-lg py-3 px-4 text-[15px] text-gray-800 outline-none focus:ring-0 focus:border-[#0000ff] transition-all bg-white"
-                  placeholder="District name"
-                />
+                  onChange={(e) => {
+                    handleInputChange("permDistrict", e.target.value);
+                    handleInputChange("permMunicipality", "");
+                    handleInputChange("permWard", "");
+                  }}
+                  disabled={!formData.permProvince}
+                  className="w-full border border-gray-300 rounded-lg py-3 px-4 text-[15px] text-gray-800 outline-none focus:ring-0 focus:border-[#0000ff] transition-all bg-white cursor-pointer appearance-none bg-[url('data:image/svg+xml;charset=UTF-8,%3csvg xmlns=%27http://www.w3.org/2000/svg%27 fill=%27none%27 viewBox=%270 0 24 24%27 stroke=%27%23111827%27%3e%3cpath stroke-linecap=%27round%27 stroke-linejoin=%27round%27 stroke-width=%272%27 d=%27M19 9l-7 7-7-7%27/%3e%3c/svg%3e')] bg-no-repeat bg-[right_1rem_center] bg-[length:1.25em] disabled:bg-gray-100 disabled:cursor-not-allowed"
+                >
+                  <option value="" disabled>Select province first</option>
+                  {permDistricts.map((d) => (
+                    <option key={d} value={d}>{d}</option>
+                  ))}
+                </select>
                 {errors.permDistrict && <p className="text-red-500 text-[12px] mt-1">{errors.permDistrict}</p>}
               </div>
 
@@ -420,13 +510,20 @@ export default function ShikshaApplicationForm() {
                 <label className="block text-[14px] font-semibold text-gray-700 mb-1.5">
                   Municipality / RM <span className="text-red-500">*</span>
                 </label>
-                <input
-                  type="text"
+                <select
                   value={formData.permMunicipality}
-                  onChange={(e) => handleInputChange("permMunicipality", e.target.value)}
-                  className="w-full border border-gray-300 rounded-lg py-3 px-4 text-[15px] text-gray-800 outline-none focus:ring-0 focus:border-[#0000ff] transition-all bg-white"
-                  placeholder="Municipality Name"
-                />
+                  onChange={(e) => {
+                    handleInputChange("permMunicipality", e.target.value);
+                    handleInputChange("permWard", "");
+                  }}
+                  disabled={!formData.permDistrict}
+                  className="w-full border border-gray-300 rounded-lg py-3 px-4 text-[15px] text-gray-800 outline-none focus:ring-0 focus:border-[#0000ff] transition-all bg-white cursor-pointer appearance-none bg-[url('data:image/svg+xml;charset=UTF-8,%3csvg xmlns=%27http://www.w3.org/2000/svg%27 fill=%27none%27 viewBox=%270 0 24 24%27 stroke=%27%23111827%27%3e%3cpath stroke-linecap=%27round%27 stroke-linejoin=%27round%27 stroke-width=%272%27 d=%27M19 9l-7 7-7-7%27/%3e%3c/svg%3e')] bg-no-repeat bg-[right_1rem_center] bg-[length:1.25em] disabled:bg-gray-100 disabled:cursor-not-allowed"
+                >
+                  <option value="" disabled>Select district first</option>
+                  {permMunicipalities.map((m) => (
+                    <option key={m.name} value={m.name}>{m.name}</option>
+                  ))}
+                </select>
                 {errors.permMunicipality && <p className="text-red-500 text-[12px] mt-1">{errors.permMunicipality}</p>}
               </div>
 
@@ -434,14 +531,17 @@ export default function ShikshaApplicationForm() {
                 <label className="block text-[14px] font-semibold text-gray-700 mb-1.5">
                   Ward No. <span className="text-red-500">*</span>
                 </label>
-                <input
-                  type="number"
+                <select
                   value={formData.permWard}
                   onChange={(e) => handleInputChange("permWard", e.target.value)}
-                  className="w-full border border-gray-300 rounded-lg py-3 px-4 text-[15px] text-gray-800 outline-none focus:ring-0 focus:border-[#0000ff] transition-all bg-white"
-                  placeholder="Ward Number"
-                  min={1}
-                />
+                  disabled={!formData.permMunicipality}
+                  className="w-full border border-gray-300 rounded-lg py-3 px-4 text-[15px] text-gray-800 outline-none focus:ring-0 focus:border-[#0000ff] transition-all bg-white cursor-pointer appearance-none bg-[url('data:image/svg+xml;charset=UTF-8,%3csvg xmlns=%27http://www.w3.org/2000/svg%27 fill=%27none%27 viewBox=%270 0 24 24%27 stroke=%27%23111827%27%3e%3cpath stroke-linecap=%27round%27 stroke-linejoin=%27round%27 stroke-width=%272%27 d=%27M19 9l-7 7-7-7%27/%3e%3c/svg%3e')] bg-no-repeat bg-[right_1rem_center] bg-[length:1.25em] disabled:bg-gray-100 disabled:cursor-not-allowed"
+                >
+                  <option value="" disabled>Select municipality first</option>
+                  {permWards.map((w) => (
+                    <option key={w} value={w}>{w}</option>
+                  ))}
+                </select>
                 {errors.permWard && <p className="text-red-500 text-[12px] mt-1">{errors.permWard}</p>}
               </div>
 
@@ -479,12 +579,17 @@ export default function ShikshaApplicationForm() {
                   <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
                   <select
                     value={formData.tempProvince}
-                    onChange={(e) => handleInputChange("tempProvince", e.target.value)}
+                    onChange={(e) => {
+                      handleInputChange("tempProvince", e.target.value);
+                      handleInputChange("tempDistrict", "");
+                      handleInputChange("tempMunicipality", "");
+                      handleInputChange("tempWard", "");
+                    }}
                     disabled={sameAsPermanent}
                     className="w-full border border-gray-300 rounded-lg py-3 pl-10 pr-4 text-[15px] text-gray-800 outline-none focus:ring-0 focus:border-[#0000ff] transition-all bg-white cursor-pointer appearance-none bg-[url('data:image/svg+xml;charset=UTF-8,%3csvg xmlns=%27http://www.w3.org/2000/svg%27 fill=%27none%27 viewBox=%270 0 24 24%27 stroke=%27%23111827%27%3e%3cpath stroke-linecap=%27round%27 stroke-linejoin=%27round%27 stroke-width=%272%27 d=%27M19 9l-7 7-7-7%27/%3e%3c/svg%3e')] bg-no-repeat bg-[right_1rem_center] bg-[length:1.25em] disabled:bg-gray-100 disabled:cursor-not-allowed"
                   >
                     <option value="" disabled>Select Province</option>
-                    {provinces.map((p) => (
+                    {NEPAL_PROVINCES.map((p) => (
                       <option key={p} value={p}>{p}</option>
                     ))}
                   </select>
@@ -496,14 +601,21 @@ export default function ShikshaApplicationForm() {
                 <label className="block text-[14px] font-semibold text-gray-700 mb-1.5">
                   District <span className="text-red-500">*</span>
                 </label>
-                <input
-                  type="text"
+                <select
                   value={formData.tempDistrict}
-                  onChange={(e) => handleInputChange("tempDistrict", e.target.value)}
-                  disabled={sameAsPermanent}
-                  className="w-full border border-gray-300 rounded-lg py-3 px-4 text-[15px] text-gray-800 outline-none focus:ring-0 focus:border-[#0000ff] transition-all bg-white disabled:bg-gray-100 disabled:cursor-not-allowed"
-                  placeholder="District name"
-                />
+                  onChange={(e) => {
+                    handleInputChange("tempDistrict", e.target.value);
+                    handleInputChange("tempMunicipality", "");
+                    handleInputChange("tempWard", "");
+                  }}
+                  disabled={sameAsPermanent || !formData.tempProvince}
+                  className="w-full border border-gray-300 rounded-lg py-3 px-4 text-[15px] text-gray-800 outline-none focus:ring-0 focus:border-[#0000ff] transition-all bg-white cursor-pointer appearance-none bg-[url('data:image/svg+xml;charset=UTF-8,%3csvg xmlns=%27http://www.w3.org/2000/svg%27 fill=%27none%27 viewBox=%270 0 24 24%27 stroke=%27%23111827%27%3e%3cpath stroke-linecap=%27round%27 stroke-linejoin=%27round%27 stroke-width=%272%27 d=%27M19 9l-7 7-7-7%27/%3e%3c/svg%3e')] bg-no-repeat bg-[right_1rem_center] bg-[length:1.25em] disabled:bg-gray-100 disabled:cursor-not-allowed"
+                >
+                  <option value="" disabled>Select province first</option>
+                  {tempDistricts.map((d) => (
+                    <option key={d} value={d}>{d}</option>
+                  ))}
+                </select>
                 {errors.tempDistrict && <p className="text-red-500 text-[12px] mt-1">{errors.tempDistrict}</p>}
               </div>
 
@@ -511,14 +623,20 @@ export default function ShikshaApplicationForm() {
                 <label className="block text-[14px] font-semibold text-gray-700 mb-1.5">
                   Municipality / RM <span className="text-red-500">*</span>
                 </label>
-                <input
-                  type="text"
+                <select
                   value={formData.tempMunicipality}
-                  onChange={(e) => handleInputChange("tempMunicipality", e.target.value)}
-                  disabled={sameAsPermanent}
-                  className="w-full border border-gray-300 rounded-lg py-3 px-4 text-[15px] text-gray-800 outline-none focus:ring-0 focus:border-[#0000ff] transition-all bg-white disabled:bg-gray-100 disabled:cursor-not-allowed"
-                  placeholder="Municipality Name"
-                />
+                  onChange={(e) => {
+                    handleInputChange("tempMunicipality", e.target.value);
+                    handleInputChange("tempWard", "");
+                  }}
+                  disabled={sameAsPermanent || !formData.tempDistrict}
+                  className="w-full border border-gray-300 rounded-lg py-3 px-4 text-[15px] text-gray-800 outline-none focus:ring-0 focus:border-[#0000ff] transition-all bg-white cursor-pointer appearance-none bg-[url('data:image/svg+xml;charset=UTF-8,%3csvg xmlns=%27http://www.w3.org/2000/svg%27 fill=%27none%27 viewBox=%270 0 24 24%27 stroke=%27%23111827%27%3e%3cpath stroke-linecap=%27round%27 stroke-linejoin=%27round%27 stroke-width=%272%27 d=%27M19 9l-7 7-7-7%27/%3e%3c/svg%3e')] bg-no-repeat bg-[right_1rem_center] bg-[length:1.25em] disabled:bg-gray-100 disabled:cursor-not-allowed"
+                >
+                  <option value="" disabled>Select district first</option>
+                  {tempMunicipalities.map((m) => (
+                    <option key={m.name} value={m.name}>{m.name}</option>
+                  ))}
+                </select>
                 {errors.tempMunicipality && <p className="text-red-500 text-[12px] mt-1">{errors.tempMunicipality}</p>}
               </div>
 
@@ -526,15 +644,17 @@ export default function ShikshaApplicationForm() {
                 <label className="block text-[14px] font-semibold text-gray-700 mb-1.5">
                   Ward No. <span className="text-red-500">*</span>
                 </label>
-                <input
-                  type="number"
+                <select
                   value={formData.tempWard}
                   onChange={(e) => handleInputChange("tempWard", e.target.value)}
-                  disabled={sameAsPermanent}
-                  className="w-full border border-gray-300 rounded-lg py-3 px-4 text-[15px] text-gray-800 outline-none focus:ring-0 focus:border-[#0000ff] transition-all bg-white disabled:bg-gray-100 disabled:cursor-not-allowed"
-                  placeholder="Ward Number"
-                  min={1}
-                />
+                  disabled={sameAsPermanent || !formData.tempMunicipality}
+                  className="w-full border border-gray-300 rounded-lg py-3 px-4 text-[15px] text-gray-800 outline-none focus:ring-0 focus:border-[#0000ff] transition-all bg-white cursor-pointer appearance-none bg-[url('data:image/svg+xml;charset=UTF-8,%3csvg xmlns=%27http://www.w3.org/2000/svg%27 fill=%27none%27 viewBox=%270 0 24 24%27 stroke=%27%23111827%27%3e%3cpath stroke-linecap=%27round%27 stroke-linejoin=%27round%27 stroke-width=%272%27 d=%27M19 9l-7 7-7-7%27/%3e%3c/svg%3e')] bg-no-repeat bg-[right_1rem_center] bg-[length:1.25em] disabled:bg-gray-100 disabled:cursor-not-allowed"
+                >
+                  <option value="" disabled>Select municipality first</option>
+                  {tempWards.map((w) => (
+                    <option key={w} value={w}>{w}</option>
+                  ))}
+                </select>
                 {errors.tempWard && <p className="text-red-500 text-[12px] mt-1">{errors.tempWard}</p>}
               </div>
 

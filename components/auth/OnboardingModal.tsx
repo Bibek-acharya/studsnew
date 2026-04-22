@@ -109,6 +109,7 @@ const OnboardingModal: React.FC<OnboardingModalProps> = ({ isOpen, onClose }) =>
       const preferences: any = {
         contact_number: contactNumber,
         current_status: currentStatus,
+        onboarding_completed: true,
       };
 
       if (currentStatus === "see_graduate") {
@@ -139,6 +140,8 @@ const OnboardingModal: React.FC<OnboardingModalProps> = ({ isOpen, onClose }) =>
         },
         token
       );
+
+      sessionStorage.setItem("onboarding_completed", "true");
 
       onClose();
       router.push("/");

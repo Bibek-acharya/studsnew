@@ -155,7 +155,7 @@ const iconMap: Record<string, React.ReactNode> = {
 };
 
 const truncateText = (text: string, maxLength: number) => {
-  if (text.length <= maxLength) return text;
+  if (!text || text.length <= maxLength) return text || "";
   return text.slice(0, maxLength) + "...";
 };
 
@@ -225,7 +225,7 @@ const EntranceCard: React.FC<{ exam: Exam }> = ({ exam }) => {
         </h4>
 
         <div className="flex flex-wrap gap-1.5 sm:gap-2 mb-3 sm:mb-4">
-          {exam.tags.map((tag, tIdx) => (
+          {(exam.tags || []).map((tag, tIdx) => (
             <span
               key={tIdx}
               className={`px-1.5 sm:px-2 py-0.5 sm:py-1 rounded-md text-[9px] xs:text-[10px] sm:text-[10px] font-bold flex items-center gap-1 sm:gap-1.5 ${

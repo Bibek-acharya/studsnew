@@ -2,8 +2,8 @@
 
 import { useState, useEffect } from "react";
 import { useAuth } from "@/services/AuthContext";
+import { apiService } from "@/services/api";
 import OnboardingModal from "@/components/auth/OnboardingModal";
-import PreferenceModal from "@/components/user/dashboard/PreferenceModal";
 import ProjectShikshaPopup from "@/components/project-shiksha/ShikshaPopup";
 
 const ONBOARDING_KEY = "onboarding_completed";
@@ -13,26 +13,45 @@ interface HomeClientWrapperProps {
 }
 
 export default function HomeClientWrapper({ children }: HomeClientWrapperProps) {
-  const { isAuthenticated, loading } = useAuth();
+  const { isAuthenticated, loading, token } = useAuth();
   const [showOnboarding, setShowOnboarding] = useState(false);
-  const [showPreference, setShowPreference] = useState(false);
+  const [checkedBackend, setCheckedBackend] = useState(false);
 
   useEffect(() => {
     if (loading) return;
-    if (!isAuthenticated) return;
-
-    const onboardingCompleted = sessionStorage.getItem(ONBOARDING_KEY);
-    if (!onboardingCompleted) {
-      setShowOnboarding(true);
-    } else {
-      setShowPreference(true);
+    if (!isAuthenticated || !token) {
+      setCheckedBackend(true);
+      return;
     }
-  }, [isAuthenticated, loading]);
+
+    const checkOnboardingStatus = async () => {
+      try {
+        const response = await apiService.getProfile();
+        const profileData = response.data;
+        const onboardingCompleted = profileData?.preferences?.onboarding_completed || false;
+        
+        if (!onboardingCompleted) {
+          setShowOnboarding(true);
+        }
+      } catch (err) {
+        console.error("Failed to fetch profile:", err);
+        setShowOnboarding(true);
+      } finally {
+        setCheckedBackend(true);
+      }
+    };
+
+    checkOnboardingStatus();
+  }, [isAuthenticated, loading, token]);
 
   const handleOnboardingClose = () => {
     sessionStorage.setItem(ONBOARDING_KEY, "true");
     setShowOnboarding(false);
   };
+
+  if (!checkedBackend && loading) {
+    return <>{children}</>;
+  }
 
   return (
     <>
@@ -42,10 +61,7 @@ export default function HomeClientWrapper({ children }: HomeClientWrapperProps) 
         isOpen={showOnboarding}
         onClose={handleOnboardingClose}
       />
-      <PreferenceModal
-        isOpen={showPreference && !showOnboarding}
-        onClose={() => setShowPreference(false)}
-      />
     </>
   );
 }
+

@@ -65,6 +65,7 @@ const clearAuth = () => {
   sessionStorage.removeItem(SESSION_STORAGE_KEY);
   localStorage.removeItem("token");
   sessionStorage.removeItem("token");
+  sessionStorage.removeItem("onboarding_completed");
   apiService.setToken(null);
 };
 

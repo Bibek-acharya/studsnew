@@ -33,6 +33,7 @@ export async function apiRequest<T>(path: string, options: RequestInit = {}): Pr
 
 export interface AuthResponse {
   data: {
+    preferences: any;
     user: {
       id: number;
       email: string;

@@ -41,16 +41,6 @@ export interface ProjectShikshaFormData {
   declaration: boolean;
 }
 
-export const provinces = [
-  "Koshi",
-  "Madhesh",
-  "Bagmati",
-  "Gandaki",
-  "Lumbini",
-  "Karnali",
-  "Sudurpashchim",
-];
-
 export const schoolTypes = [
   "Private",
   "Government",
@@ -68,22 +58,3 @@ export const occupations = [
   "Foreign Employment",
   "Other",
 ];
-
-// Nepali months
-export const nepaliMonths = [
-  "Baisakh",
-  "Jestha",
-  "Ashad",
-  "Shrawan",
-  "Bhadra",
-  "Ashwin",
-  "Kartik",
-  "Mangsir",
-  "Poush",
-  "Magh",
-  "Falgun",
-  "Chaitra",
-];
-
-// Days in each Nepali month (approximate for BS 2080-2082)
-export const nepaliMonthDays = [31, 31, 31, 32, 31, 31, 30, 29, 30, 29, 30, 30];
