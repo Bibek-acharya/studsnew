@@ -4,12 +4,12 @@ import { useState, useEffect, useCallback, useRef } from "react";
 import { ChevronLeft, ChevronRight, Calendar } from "lucide-react";
 import {
   bsToAd,
-  formatEnglishDate,
   calculateAge,
   getNepaliMonths,
   getDaysInMonth,
   adToBs,
   formatNepaliDate,
+  formatDateInput,
 } from "@/utils/nepali-date-converter";
 
 interface NepaliCalendarProps {
@@ -48,7 +48,7 @@ export default function NepaliCalendar({ value, onChange, error, minAge = 14 }: 
     const adDate = bsToAd(currentYear, currentMonth, day);
     const age = calculateAge(adDate);
     
-    const adDateStr = adDate.toISOString().split('T')[0];
+    const adDateStr = formatDateInput(adDate);
     
     if (parseInt(age) < minAge) {
       setAgeError(`You must be at least ${minAge} years old to apply`);

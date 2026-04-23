@@ -150,8 +150,8 @@ const ExamAnnouncementsSection: React.FC<ExamAnnouncementsSectionProps> = ({
   };
 
   return (
-    <section className="mt-16 sm:mt-20 md:mt-24 w-full">
-      <div className="max-w-350 mx-auto w-full">
+<section className="mt-16 sm:mt-20 md:mt-24 w-full px-4 sm:px-6 md:px-8">
+  <div className="max-w-350 mx-auto w-full">
         {/* New Heading and Subheading */}
         <div className="text-center mb-8 sm:mb-10 md:mb-12">
           <h2 className="text-[26px] xs:text-[30px] sm:text-3xl md:text-[40px] font-bold text-[#111827] mb-2 sm:mb-3 tracking-tight px-2">

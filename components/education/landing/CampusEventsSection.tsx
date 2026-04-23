@@ -1,10 +1,11 @@
 "use client";
 
+import type { SyntheticEvent } from "react";
 import { useRef } from "react";
 import { ChevronLeft, ChevronRight, Calendar, Users, Gift, BadgeCheck, Briefcase } from "lucide-react";
 
 interface CampusEventsSectionProps {
-  onNavigate: (view: string, data?: any) => void;
+  onNavigate: (view: string, data?: { [key: string]: unknown }) => void;
 }
 
 const events = [
@@ -76,11 +77,11 @@ const CampusEventsSection: React.FC<CampusEventsSectionProps> = ({ onNavigate })
   };
 
   return (
-    <section className="mt-16 sm:mt-20 md:mt-24 w-full">
-      <div className="max-w-350 mx-auto w-full">
+<section className="mt-16 sm:mt-20 md:mt-24 w-full px-4 sm:px-6 md:px-8">
+  <div className="max-w-350 mx-auto w-full">
         {/* Header Area */}
-        <div className="flex flex-col md:flex-row md:items-end justify-between mb-8 sm:mb-10 md:mb-12 gap-4">
-          <div>
+        <div className="flex items-start justify-between gap-4 mb-4 sm:mb-6 md:mb-12">
+          <div className="max-w-3xl">
             <h2 className="text-[24px] xs:text-[28px] sm:text-3xl md:text-[40px] font-bold text-gray-900 tracking-tight mb-1.5 sm:mb-2">
               Top College Events
             </h2>
@@ -90,7 +91,7 @@ const CampusEventsSection: React.FC<CampusEventsSectionProps> = ({ onNavigate })
           </div>
 
           {/* Navigation Arrows */}
-          <div className="flex sm:flex items-center gap-2 sm:gap-3">
+          <div className="flex shrink-0 items-center gap-2 sm:gap-3">
             <button
               onClick={() => scrollSlider(-1)}
               className="w-9 h-9 sm:w-11 sm:h-11 md:w-12 md:h-12 rounded-full border border-gray-200 flex items-center justify-center bg-white text-gray-600 hover:bg-gray-50 hover:text-gray-900 transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500"
@@ -136,7 +137,10 @@ const CampusEventsSection: React.FC<CampusEventsSectionProps> = ({ onNavigate })
                       src={event.logo}
                       alt={event.location}
                       className="w-full h-full object-contain rounded-md"
-                      onError={(e: any) => { e.target.src = "https://placehold.co/48x48/f1f5f9/94a3b8?text=Logo"; }}
+                      onError={(e: SyntheticEvent<HTMLImageElement>) => {
+                        e.currentTarget.src =
+                          "https://placehold.co/48x48/f1f5f9/94a3b8?text=Logo";
+                      }}
                     />
                   </div>
                   <div>

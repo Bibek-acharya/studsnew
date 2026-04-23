@@ -10,19 +10,74 @@ import {
   trendingSearches,
 } from "@/utils/searchDatabase";
 
-export const SearchBar: React.FC<{ isMobile?: boolean }> = ({ isMobile }) => {
+export const SearchBar: React.FC<{
+  isMobile?: boolean;
+  defaultSearchOpen?: boolean;
+  showSuggestionDropdown?: boolean;
+  onQueryStateChange?: (query: string, suggestions: SearchItem[]) => void;
+}> = ({
+  isMobile,
+  defaultSearchOpen = false,
+  showSuggestionDropdown = true,
+  onQueryStateChange,
+}) => {
   const [locationText, setLocationText] = useState(() => {
     if (typeof window === "undefined") return "Detect Location";
     return sessionStorage.getItem("navLocation") || "Detect Location";
   });
   const [isLocationOpen, setIsLocationOpen] = useState(false);
-  const [isSearchOpen, setIsSearchOpen] = useState(false);
+  const [isSearchOpen, setIsSearchOpen] = useState(defaultSearchOpen);
   const [searchQuery, setSearchQuery] = useState("");
   const [searchResults, setSearchResults] = useState<SearchItem[]>([]);
 
   const router = useRouter();
   const searchContainerRef = useRef<HTMLDivElement>(null);
   const locContainerRef = useRef<HTMLDivElement>(null);
+  const searchInputRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    if (!defaultSearchOpen) return;
+    requestAnimationFrame(() => searchInputRef.current?.focus());
+  }, [defaultSearchOpen]);
+
+  const buildSuggestions = (query: string) => {
+    if (query.trim() === "") return trendingSearches;
+
+    const keywords = query
+      .toLowerCase()
+      .split(" ")
+      .filter((k) => k.length > 0);
+
+    const filtered = searchDatabase.filter((item) => {
+      const searchableText = `${item.title} ${item.type}`.toLowerCase();
+      return keywords.every((keyword) => searchableText.includes(keyword));
+    });
+
+    const locMatchStr =
+      locationText !== "Detect Location" ? locationText.toLowerCase() : "";
+    if (locMatchStr) {
+      const locParts = locMatchStr
+        .split(",")
+        .map((s) => s.trim())
+        .filter((s) => s.length > 0);
+
+      filtered.sort((a, b) => {
+        const aTitle = a.title.toLowerCase();
+        const bTitle = b.title.toLowerCase();
+        let aScore = 0;
+        let bScore = 0;
+
+        locParts.forEach((part) => {
+          if (aTitle.includes(part)) aScore += 1;
+          if (bTitle.includes(part)) bScore += 1;
+        });
+
+        return bScore - aScore;
+      });
+    }
+
+    return filtered.slice(0, 10);
+  };
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -60,44 +115,9 @@ export const SearchBar: React.FC<{ isMobile?: boolean }> = ({ isMobile }) => {
     setSearchQuery(query);
     setIsSearchOpen(true);
 
-    if (query.trim() === "") {
-      setSearchResults([]);
-      return;
-    }
-
-    const keywords = query
-      .toLowerCase()
-      .split(" ")
-      .filter((k) => k.length > 0);
-    const filtered = searchDatabase.filter((item) => {
-      const searchableText = `${item.title} ${item.type}`.toLowerCase();
-      return keywords.every((keyword) => searchableText.includes(keyword));
-    });
-
-    const locMatchStr =
-      locationText !== "Detect Location" ? locationText.toLowerCase() : "";
-    if (locMatchStr) {
-      const locParts = locMatchStr
-        .split(",")
-        .map((s) => s.trim())
-        .filter((s) => s.length > 0);
-
-      filtered.sort((a, b) => {
-        const aTitle = a.title.toLowerCase();
-        const bTitle = b.title.toLowerCase();
-        let aScore = 0;
-        let bScore = 0;
-
-        locParts.forEach((part) => {
-          if (aTitle.includes(part)) aScore += 1;
-          if (bTitle.includes(part)) bScore += 1;
-        });
-
-        return bScore - aScore;
-      });
-    }
-
-    setSearchResults(filtered.slice(0, 10));
+    const suggestions = buildSuggestions(query);
+    setSearchResults(suggestions);
+    onQueryStateChange?.(query, suggestions);
   };
 
   const handleSearchExecute = (query: string) => {
@@ -223,22 +243,36 @@ export const SearchBar: React.FC<{ isMobile?: boolean }> = ({ isMobile }) => {
             </svg>
             {!isMobile && (
               <span
-                className={`max-w-35 truncate whitespace-nowrap text-[15px] rounded-l-md${
-                  locationText !== "Detect Location" ? "text-gray-900" : ""
+                className={`max-w-35 truncate whitespace-nowrap text-[15px] rounded-l-md ${
+                  locationText !== "Detect Location"
+                    ? "text-gray-900"
+                    : "text-gray-400"
                 }`}
               >
                 {locationText}
               </span>
             )}
-            {isMobile && locationText !== "Detect Location" && (
-              <span className="max-w-20 truncate whitespace-nowrap text-[14px] text-gray-900 ml-1">
+            {isMobile && (
+              <span
+                className={`ml-1 max-w-20 truncate whitespace-nowrap text-[14px] ${
+                  locationText !== "Detect Location"
+                    ? "text-gray-900"
+                    : "text-gray-400"
+                }`}
+              >
                 {locationText}
               </span>
             )}
           </button>
 
           {isLocationOpen && (
-            <div className="custom-scrollbar absolute left-1/2 -translate-x-1/2 top-[calc(100%+8px)] z-200 max-h-80 w-75 overflow-y-auto rounded-md border border-gray-100 bg-white py-2 shadow-xl">
+            <div
+              className={`custom-scrollbar absolute top-[calc(100%+8px)] z-[10001] max-h-80 overflow-y-auto rounded-md border border-gray-100 bg-white py-2 shadow-xl ${
+                isMobile
+                  ? "left-0 w-[calc(100vw-2rem)] max-w-full"
+                  : "left-1/2 w-75 -translate-x-1/2"
+              }`}
+            >
               <button
                 onClick={autoDetectLocation}
                 className="flex w-full items-center gap-3 px-5 py-3 text-left rounded-full text-[15px] font-medium text-brand-blue transition-colors hover:bg-gray-50"
@@ -273,6 +307,7 @@ export const SearchBar: React.FC<{ isMobile?: boolean }> = ({ isMobile }) => {
           ref={searchContainerRef}
         >
           <input
+            ref={searchInputRef}
             type="text"
             value={searchQuery}
             onChange={handleSearchInput}
@@ -313,8 +348,8 @@ export const SearchBar: React.FC<{ isMobile?: boolean }> = ({ isMobile }) => {
             </div>
           )}
 
-          {isSearchOpen && (
-            <div className="custom-scrollbar absolute left-0 top-[calc(100%+8px)] z-200 max-h-105 w-full overflow-y-auto rounded-md border border-gray-100 bg-white py-2 shadow-xl">
+          {isSearchOpen && showSuggestionDropdown && (
+            <div className="custom-scrollbar absolute left-0 top-[calc(100%+8px)] z-[10001] max-h-105 w-full overflow-y-auto rounded-md border border-gray-100 bg-white py-2 shadow-xl">
               {searchQuery.trim() === "" ? (
                 <>
                   <div className="px-5 pb-2 pt-3">

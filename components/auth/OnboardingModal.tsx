@@ -174,7 +174,7 @@ const OnboardingModal: React.FC<OnboardingModalProps> = ({ isOpen, onClose }) =>
           onClick={onClose}
           className="absolute top-6 right-6 text-gray-400 hover:text-gray-900 transition-colors"
         >
-          <X className="w-6 h-6" />
+          {/* <X className="w-6 h-6" /> */}
         </button>
 
         {step === 1 && (

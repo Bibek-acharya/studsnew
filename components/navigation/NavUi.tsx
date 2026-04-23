@@ -43,7 +43,7 @@ export const DesktopDropdown: React.FC<{
       </svg>
     </button>
     <div
-      className={`absolute top-11 sm:top-11.5 z-200 mt-1 transition-all duration-200 ${isOpen ? "visible translate-y-0 opacity-100" : "invisible translate-y-2 opacity-0"} ${
+      className={`absolute top-11 sm:top-11.5 z-[200] mt-1 transition-all duration-200 ${isOpen ? "visible translate-y-0 opacity-100" : "invisible translate-y-2 opacity-0"} ${
         alignRight ? "right-0" : "left-0"
       }`}
     >

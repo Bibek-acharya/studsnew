@@ -5,8 +5,8 @@ interface SmarterToolsSectionProps {
 }
 
 const SmarterToolsSection: React.FC<SmarterToolsSectionProps> = ({ onNavigate }) => (
-<section className="w-full py-8 sm:py-10 md:py-12 lg:py-14">
-  <div className="max-w-350 mx-auto">
+<section className="w-full py-8 sm:py-10 md:py-12 lg:py-14 px-4 sm:px-6 md:px-8">
+  <div className="max-w-350 mx-auto w-full">
   <div className="text-center mb-4 sm:mb-10 md:mb-12 lg:mb-16">
     <h2 className="text-[24px] xs:text-[28px] sm:text-3xl md:text-[36px] lg:text-[40px] font-bold text-[#0f172a] mb-3 sm:mb-4 tracking-tight">
       Smarter Tools, Greater Success

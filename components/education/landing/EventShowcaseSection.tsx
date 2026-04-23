@@ -84,8 +84,8 @@ const EventShowcaseSection: React.FC<EventShowcaseSectionProps> = ({ onNavigate,
   };
 
   return (
-    <section className="w-full py-8 sm:py-10 md:py-12 lg:py-14 my-2 sm:my-4 relative">
-      <div className="max-w-350 mx-auto w-full">
+<section className="w-full py-8 sm:py-10 md:py-12 lg:py-14 my-2 sm:my-4 relative px-4 sm:px-6 md:px-8">
+  <div className="max-w-350 mx-auto w-full">
         <div className="relative w-full mx-auto">
           <div className="overflow-hidden w-full relative">
             <div
