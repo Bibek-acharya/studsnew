@@ -1,13 +1,13 @@
 "use client";
 
-import React, { useState, useMemo, useEffect } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { AdmissionFilters } from "@/app/admissions/[level]/types";
-import DirectAdmissionCard from "@/components/admissions/DirectAdmissionCard";
 import CollegeCard from "@/components/admissions/CollegeCard";
 import FeaturedAdmissionAd from "@/components/admissions/FeaturedAdmissionAd";
 import DirectAdmissionAd from "@/components/admissions/DirectAdmissionAd";
 import Pagination from "@/components/ui/Pagination";
-import { sampleColleges, sampleFeaturedColleges, sampleDirectAdmissions, levelConfig } from "./data";
+import { admissionService, AdmissionCollegeItem } from "@/services/admission.api";
+import { sampleFeaturedColleges, sampleDirectAdmissions, levelConfig } from "./data";
 
 interface AdmissionGridProps {
   filters: AdmissionFilters;
@@ -16,10 +16,9 @@ interface AdmissionGridProps {
   level: string;
 }
 
-const SEARCHABLE_FILTER_KEYS: Array<keyof AdmissionFilters> = [
-  "academic",
-  "program",
-];
+const COLS_PER_ROW = 3;
+const ROWS_BEFORE_FEATURED = 3;
+const COLLEGES_PER_PAGE = 18;
 
 const AdmissionGrid: React.FC<AdmissionGridProps> = ({
   filters,
@@ -27,127 +26,62 @@ const AdmissionGrid: React.FC<AdmissionGridProps> = ({
   onNavigate,
   level,
 }) => {
-  const COLS_PER_ROW = 3;
-  const ROWS_BEFORE_FEATURED = 3; // Adjusted to spread them out more if only 2 per page
-  const ITEMS_PER_AD = COLS_PER_ROW * ROWS_BEFORE_FEATURED;
-  const COLLEGES_PER_PAGE = 18;
   const [currentPage, setCurrentPage] = useState(1);
+  const [colleges, setColleges] = useState<AdmissionCollegeItem[]>([]);
+  const [pagination, setPagination] = useState({
+    page: 1,
+    pageSize: COLLEGES_PER_PAGE,
+    total: 0,
+    totalPages: 1,
+  });
+  const [isLoading, setIsLoading] = useState(false);
+  const [fetchError, setFetchError] = useState<string | null>(null);
 
   useEffect(() => {
     setCurrentPage(1);
-  }, [filters]);
+  }, [filters, level]);
 
-  const searchTerms = useMemo(
-    () =>
-      [
-        filters.search,
-        ...SEARCHABLE_FILTER_KEYS.flatMap((key) => filters[key] as string[]),
-      ]
-        .map((value) => (typeof value === "string" ? value.trim() : ""))
-        .filter(Boolean),
-    [filters],
-  );
+  useEffect(() => {
+    const fetchColleges = async () => {
+      setIsLoading(true);
+      setFetchError(null);
+      try {
+        const response = await admissionService.getAdmissionColleges(level, {
+          search: filters.search,
+          academic: filters.academic,
+          program: filters.program,
+          province: filters.province,
+          district: filters.district,
+          local: filters.local,
+          type: filters.type,
+          scholarship: filters.scholarship,
+          facilities: filters.facilities,
+          feeMax: filters.feeMax,
+          sortBy: filters.sortBy,
+          directAdmission: filters.directAdmission,
+        }, currentPage, COLLEGES_PER_PAGE);
 
-  const filteredColleges = useMemo(() => {
-    // Merge colleges and direct admissions, marking direct ones
-    let results = [
-      ...sampleColleges.map(c => ({ ...c, isDirect: false })),
-      ...sampleDirectAdmissions.map(d => ({ ...d, isDirect: true }))
-    ];
-
-    // When directAdmission filter is ON, only show direct ones
-    if (filters.directAdmission) {
-      results = results.filter(c => c.isDirect);
-    }
-
-    if (filters.academic.length > 0) {
-      results = results.filter((c) => {
-        if (c.isDirect) return true; // Keep direct ones for now or add specific logic
-        const college = c as any;
-        return college.programs.some((p: any) =>
-          filters.academic.some((a) =>
-            p.name.toLowerCase().includes(a.toLowerCase()),
-          ),
-        );
-      });
-    }
-
-    if (filters.program.length > 0) {
-      results = results.filter((c) => {
-        if (c.isDirect) return true;
-        const college = c as any;
-        return college.programs.some((p: any) =>
-          filters.program.some((pr) =>
-            p.name.toLowerCase().includes(pr.toLowerCase()),
-          ),
-        );
-      });
-    }
-
-    if (filters.province.length > 0) {
-      results = results.filter((c) =>
-        filters.province.some((p) =>
-          c.location
-            .toLowerCase()
-            .includes(p.replace("prov_", "").toLowerCase()),
-        ),
-      );
-    }
-
-    if (filters.district.length > 0) {
-      results = results.filter((c) =>
-        filters.district.some((d) =>
-          c.location.toLowerCase().includes(d.replace("d_", "").toLowerCase()),
-        ),
-      );
-    }
-
-    if (filters.type.length > 0) {
-      const typeMap: Record<string, string> = {
-        ct_private: "Private",
-        ct_public: "Public",
-        ct_community: "Community",
-      };
-      const allowedTypes = filters.type.map((t) => typeMap[t]).filter(Boolean);
-      if (allowedTypes.length > 0) {
-        results = results.filter((c) => allowedTypes.includes(c.type));
+        setColleges(response.data.colleges);
+        setPagination(response.data.pagination);
+      } catch (error) {
+        setFetchError(error instanceof Error ? error.message : "Failed to load admission colleges");
+        setColleges([]);
+        setPagination({ page: 1, pageSize: COLLEGES_PER_PAGE, total: 0, totalPages: 1 });
+      } finally {
+        setIsLoading(false);
       }
-    }
+    };
 
-    if (searchTerms.length > 0) {
-      const terms = searchTerms.map((t) => t.toLowerCase());
-      results = results.filter(
-        (c) =>
-          terms.some((t) => c.collegeName.toLowerCase().includes(t)) ||
-          terms.some((t) => c.location.toLowerCase().includes(t)) ||
-          (!c.isDirect && terms.some((t) =>
-            (c as any).programs.some((p: any) => p.name.toLowerCase().includes(t)),
-          )),
-      );
-    }
-
-    return results;
-  }, [filters, searchTerms]);
+    fetchColleges();
+  }, [filters, level, currentPage]);
 
   const filteredFeatured = useMemo(() => {
     let results = [...sampleFeaturedColleges];
 
-    if (filters.academic.length > 0) {
-      results = results.filter((c) =>
-        c.programs.some((p) =>
-          filters.academic.some((a) =>
-            p.toLowerCase().includes(a.toLowerCase()),
-          ),
-        ),
-      );
-    }
-
     if (filters.province.length > 0) {
       results = results.filter((c) =>
         filters.province.some((p) =>
-          c.location
-            .toLowerCase()
-            .includes(p.replace("prov_", "").toLowerCase()),
+          c.location.toLowerCase().includes(p.replace("prov_", "").toLowerCase()),
         ),
       );
     }
@@ -164,54 +98,38 @@ const AdmissionGrid: React.FC<AdmissionGridProps> = ({
       }
     }
 
-    if (searchTerms.length > 0) {
-      const terms = searchTerms.map((t) => t.toLowerCase());
-      results = results.filter(
-        (c) =>
-          terms.some((t) => c.provider.toLowerCase().includes(t)) ||
-          terms.some((t) => c.location.toLowerCase().includes(t)),
-      );
-    }
-
     return results;
-  }, [filters, searchTerms]);
+  }, [filters]);
 
-  const totalResults = filteredColleges.length;
-  const totalPages = Math.ceil(totalResults / COLLEGES_PER_PAGE) || 1;
-  const showingFrom = totalResults === 0 ? 0 : (currentPage - 1) * COLLEGES_PER_PAGE + 1;
-  const showingTo = Math.min((currentPage - 1) * COLLEGES_PER_PAGE + COLLEGES_PER_PAGE, totalResults);
-
-  const paginatedColleges = useMemo(() => {
-    const start = (currentPage - 1) * COLLEGES_PER_PAGE;
-    return filteredColleges.slice(start, start + COLLEGES_PER_PAGE);
-  }, [filteredColleges, currentPage]);
+  const totalResults = pagination.total;
+  const totalPages = Math.max(1, pagination.totalPages);
+  const showingFrom = totalResults === 0 ? 0 : (pagination.page - 1) * pagination.pageSize + 1;
+  const showingTo = Math.min(pagination.page * pagination.pageSize, totalResults);
 
   const getAdType = (index: number) => {
-    // Show Featured Admission Ad at index 5 (end of 2nd row)
     if (index === 5) return "featured";
-    
-    // Show Direct Admission Ad at index 11 (end of 4th row)
     if (index === 11) return "direct";
-    
-    // Fallback for very few items on page 1
-    if (currentPage === 1 && paginatedColleges.length < 6 && index === paginatedColleges.length - 1) {
+    if (pagination.page === 1 && colleges.length < 6 && index === colleges.length - 1) {
       return "featured";
     }
-
     return null;
   };
 
   const config = levelConfig[level] || levelConfig["high-school"];
 
+  const handleSearchChange = (value: string) => {
+    setFilters((prev) => ({ ...prev, search: value }));
+  };
+
   return (
     <>
-      {/* Header Bar */}
       <div className="mb-6">
         <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-center">
           <div className="flex flex-col justify-start">
             <h1 className="mb-3 text-base text-gray-900">
               Showing {showingFrom.toLocaleString()}-{showingTo.toLocaleString()} of {totalResults.toLocaleString()} <span className="font-bold">{config.title}</span>
             </h1>
+            {fetchError && <p className="text-sm text-red-600">{fetchError}</p>}
           </div>
 
           <div className="mt-2 flex w-full shrink-0 flex-col gap-3 sm:mt-0 sm:w-[320px] sm:items-end">
@@ -220,12 +138,7 @@ const AdmissionGrid: React.FC<AdmissionGridProps> = ({
               <input
                 type="text"
                 value={filters.search}
-                onChange={(event) =>
-                  setFilters((prev) => ({
-                    ...prev,
-                    search: event.target.value,
-                  }))
-                }
+                onChange={(event) => handleSearchChange(event.target.value)}
                 placeholder="Search colleges, locations, courses..."
                 className="w-full rounded-md border border-gray-200 bg-white py-2.5 pl-10 pr-4 text-sm transition-all placeholder-gray-400 focus:border-transparent focus:outline-none focus:ring-2 focus:ring-brand-blue"
               />
@@ -234,44 +147,53 @@ const AdmissionGrid: React.FC<AdmissionGridProps> = ({
         </div>
       </div>
 
-      {/* All Colleges Grid */}
       <section>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-          {paginatedColleges.map((college, index) => {
-            const adType = getAdType(index);
-            return (
-              <React.Fragment key={index}>
-                {college.isDirect ? (
-                  <DirectAdmissionCard 
-                    {...(college as any)} 
-                  />
-                ) : (
-                  <CollegeCard
-                    {...(college as any)}
-                    onNavigate={() => onNavigate("collegeDetails", { id: college.collegeName })}
-                  />
-                )}
-                
-                {adType === "featured" && filteredFeatured.length > 0 && (
-                  <FeaturedAdmissionAd colleges={filteredFeatured} />
-                )}
-
-                {adType === "direct" && sampleDirectAdmissions.length > 0 && (
-                  <DirectAdmissionAd colleges={sampleDirectAdmissions} />
-                )}
-              </React.Fragment>
-            );
-          })}
-        </div>
-
-        {filteredColleges.length === 0 && (
-            <div className="col-span-1 rounded-md border border-gray-100 bg-white py-16 text-center text-gray-500  md:col-span-2 xl:col-span-3">
+          {isLoading ? (
+            <div className="col-span-1 md:col-span-2 xl:col-span-3 rounded-md border border-gray-100 bg-white py-16 text-center text-gray-500">
+              Loading admission colleges...
+            </div>
+          ) : colleges.length === 0 ? (
+            <div className="col-span-1 md:col-span-2 xl:col-span-3 rounded-md border border-gray-100 bg-white py-16 text-center text-gray-500">
               No colleges found matching your filters.
             </div>
+          ) : (
+            colleges.map((college, index) => {
+              const adType = getAdType(index);
+              return (
+                <React.Fragment key={college.id}>
+                  <CollegeCard
+                    images={college.image_url ? [college.image_url] : ["/images/college-placeholder.png"]}
+                    tag={{
+                      text: college.verified ? "Verified" : "Admission",
+                      color: college.verified ? "bg-blue-600" : "bg-slate-500",
+                    }}
+                    collegeName={college.name}
+                    rating={college.rating ?? 4.0}
+                    type={college.type || "College"}
+                    location={college.location}
+                    website={college.website || college.affiliation}
+                    programs={Array.isArray(college.featured_programs)
+                      ? (college.featured_programs as string[]).slice(0, 3).map((name) => ({ name, status: "Seats Available" }))
+                      : [{ name: college.affiliation || "Admission Open", status: "Seats Available" }]}
+                    moreProgramsCount={college.programs}
+                    onNavigate={() => onNavigate("collegeDetails", { id: college.id })}
+                  />
+
+                  {adType === "featured" && filteredFeatured.length > 0 && (
+                    <FeaturedAdmissionAd colleges={filteredFeatured} />
+                  )}
+
+                  {adType === "direct" && sampleDirectAdmissions.length > 0 && (
+                    <DirectAdmissionAd colleges={sampleDirectAdmissions} />
+                  )}
+                </React.Fragment>
+              );
+            })
           )}
+        </div>
       </section>
 
-      {/* Always show pagination even if only one page */}
       <Pagination
         currentPage={currentPage}
         totalPages={totalPages}

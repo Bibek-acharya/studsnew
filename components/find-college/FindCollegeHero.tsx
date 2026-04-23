@@ -74,7 +74,7 @@ const FindCollegeHero: React.FC<FindCollegeHeroProps> = ({
               value={searchQuery}
               onChange={(event) => onSearchChange(event.target.value)}
               placeholder="Search courses, colleges..."
-              className="w-full rounded-lg border border-gray-200 py-2 pl-10 pr-4 text-sm focus:outline-none focus:ring-1 focus:ring-[#3b82f6]"
+              className="w-full rounded-md border border-gray-200 py-2 pl-10 pr-4 text-sm focus:outline-none focus:ring-1 focus:ring-[#3b82f6]"
             />
           </form>
         </div>

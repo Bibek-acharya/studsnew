@@ -10,12 +10,14 @@ import {
   Award,
   MessageSquare,
   Bookmark,
+  Globe,
 } from "lucide-react";
 import Pagination from "@/components/ui/Pagination";
 
 import TrendingCollegesAd from "./ads/TrendingCollegesAd";
 import RecommendationFeedback from "./ads/RecommendationFeedback";
 import ClaimCollegeModal from "./ClaimCollegeModal";
+import Image from "next/image";
 
 interface CollegeGridProps {
   filters: CollegeFilters;
@@ -145,6 +147,9 @@ const CollegeGrid: React.FC<CollegeGridProps> = ({
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [inquiryMessage, setInquiryMessage] = useState("");
   const [collegeToClaim, setCollegeToClaim] = useState<College | null>(null);
+  const [collegeForInquiry, setCollegeForInquiry] = useState<College | null>(null);
+  const [isInquiryModalOpen, setIsInquiryModalOpen] = useState(false);
+  const [inquiryMessageSingle, setInquiryMessageSingle] = useState("");
 
   useEffect(() => {
     setCurrentPage(1);
@@ -264,9 +269,17 @@ const CollegeGrid: React.FC<CollegeGridProps> = ({
     setSelectedForInquiry([]);
   };
 
+  const handleSingleInquirySubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    alert(`Success! Your inquiry for ${collegeForInquiry?.name} has been sent.`);
+    setIsInquiryModalOpen(false);
+    setInquiryMessageSingle("");
+    setCollegeForInquiry(null);
+  };
+
   if (error) {
     return (
-      <div className="rounded-lg border border-red-200 bg-red-50 p-6 text-center">
+      <div className="rounded-md border border-red-200 bg-red-50 p-6 text-center">
         <p className="font-semibold text-red-700">{(error as Error).message}</p>
       </div>
     );
@@ -355,7 +368,7 @@ const CollegeGrid: React.FC<CollegeGridProps> = ({
                   }))
                 }
                 placeholder="Search colleges, locations, courses..."
-                className="w-full rounded-lg border border-gray-200 bg-white py-2.5 pl-10 pr-4 text-sm transition-all placeholder-gray-400 focus:border-transparent focus:outline-none focus:ring-1 focus:ring-brand-blue"
+                className="w-full rounded-md border border-gray-200 bg-white py-2.5 pl-10 pr-4 text-sm transition-all placeholder-gray-400 focus:border-transparent focus:outline-none focus:ring-1 focus:ring-brand-blue"
               />
             </div>
 
@@ -385,7 +398,7 @@ const CollegeGrid: React.FC<CollegeGridProps> = ({
         id="card-grid"
       >
         {isLoading && colleges.length === 0 && (
-          <div className="col-span-1 rounded-2xl border border-gray-100 bg-white py-16 text-center text-gray-500 shadow-[0_2px_15px_rgb(0,0,0,0.04)] md:col-span-2 xl:col-span-3">
+          <div className="col-span-1 rounded-md border border-gray-100 bg-white py-16 text-center text-gray-500 shadow-[0_2px_15px_rgb(0,0,0,0.04)] md:col-span-2 xl:col-span-3">
             Loading colleges...
           </div>
         )}
@@ -407,6 +420,10 @@ const CollegeGrid: React.FC<CollegeGridProps> = ({
                 onToggleSaved={() => toggleSavedCollege(college.id)}
                 onToggleSelection={() => toggleSelection(college.id)}
                 onClaim={() => setCollegeToClaim(college)}
+                onSingleInquiry={() => {
+                  setCollegeForInquiry(college);
+                  setIsInquiryModalOpen(true);
+                }}
               />
               {isAfter2Rows && (
                 <div className="col-span-1 md:col-span-2 xl:col-span-3 w-full">
@@ -419,7 +436,7 @@ const CollegeGrid: React.FC<CollegeGridProps> = ({
         })}
 
         {!isLoading && colleges.length === 0 && (
-          <div className="col-span-1 rounded-2xl border border-gray-100 bg-white py-16 text-center text-gray-500 shadow-[0_2px_15px_rgb(0,0,0,0.04)] md:col-span-2 xl:col-span-3">
+          <div className="col-span-1 rounded-md border border-gray-100 bg-white py-16 text-center text-gray-500 shadow-[0_2px_15px_rgb(0,0,0,0.04)] md:col-span-2 xl:col-span-3">
             No colleges found matching your filters.
           </div>
         )}
@@ -446,7 +463,7 @@ const CollegeGrid: React.FC<CollegeGridProps> = ({
           </button>
           <button
             onClick={() => setIsModalOpen(true)}
-            className="flex items-center gap-2 rounded-full bg-brand-blue px-5 py-2.5 text-[14px] font-semibold text-white shadow-md transition-colors hover:bg-brand-hover sm:px-6 sm:text-[15px]"
+            className="flex items-center gap-2 rounded-full bg-brand-blue px-5 py-2.5 text-[14px] font-semibold text-white  transition-colors hover:bg-brand-hover sm:px-6 sm:text-[15px]"
           >
             Quick Apply{" "}
             <span className="flex h-5 w-5 items-center justify-center rounded-full bg-white text-[12px] font-bold text-brand-blue">
@@ -478,7 +495,7 @@ const CollegeGrid: React.FC<CollegeGridProps> = ({
             </button>
           </div>
           <div className="overflow-y-auto px-6 py-5">
-            <div className="mb-5 flex items-start gap-3 rounded-lg border border-blue-100 bg-blue-50 p-3.5">
+            <div className="mb-5 flex items-start gap-3 rounded-md border border-blue-100 bg-blue-50 p-3.5">
               <i className="fa-solid fa-circle-info mt-0.5 shrink-0 text-[18px] text-blue-600"></i>
               <p className="line-height-extra text-[13px] text-blue-800">
                 You are applying to{" "}
@@ -504,7 +521,7 @@ const CollegeGrid: React.FC<CollegeGridProps> = ({
                   rows={4}
                   value={inquiryMessage}
                   onChange={(e) => setInquiryMessage(e.target.value)}
-                  className="w-full resize-none rounded-xl border border-gray-200 bg-gray-50 px-4 py-3 text-[14px] text-gray-800 shadow-sm transition-all focus:border-transparent focus:bg-white focus:outline-none focus:ring-2 focus:ring-brand-blue"
+                  className="w-full resize-none rounded-md border border-gray-200 bg-gray-50 px-4 py-3 text-[14px] text-gray-800  transition-all focus:border-transparent focus:bg-white focus:outline-none focus:ring-2 focus:ring-brand-blue"
                   placeholder="E.g., What are the admission requirements, fee structures, and scholarship options for the upcoming intake?"
                 ></textarea>
               </div>
@@ -512,13 +529,13 @@ const CollegeGrid: React.FC<CollegeGridProps> = ({
                 <button
                   type="button"
                   onClick={() => setIsModalOpen(false)}
-                  className="w-full rounded-xl border border-gray-200 bg-white px-5 py-2.5 text-[14px] font-bold text-gray-600 transition-colors hover:bg-gray-50 sm:w-auto"
+                  className="w-full rounded-md border border-gray-200 bg-white px-5 py-2.5 text-[14px] font-bold text-gray-600 transition-colors hover:bg-gray-50 sm:w-auto"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
-                  className="flex w-full items-center justify-center gap-2 rounded-xl bg-brand-blue px-6 py-2.5 text-[14px] font-bold text-white shadow-[0_4px_12px_rgba(0,0,255,0.2)] transition-all hover:-translate-y-0.5 hover:bg-brand-hover sm:w-auto"
+                  className="flex w-full items-center justify-center gap-2 rounded-md bg-brand-blue px-6 py-2.5 text-[14px] font-bold text-white shadow-[0_4px_12px_rgba(0,0,255,0.2)] transition-all hover:-translate-y-0.5 hover:bg-brand-hover sm:w-auto"
                 >
                   Submit Application
                 </button>
@@ -532,6 +549,67 @@ const CollegeGrid: React.FC<CollegeGridProps> = ({
         college={collegeToClaim}
         onClose={() => setCollegeToClaim(null)}
       />
+
+      {/* Single College Inquiry Modal */}
+      <div
+        className={`fixed inset-0 z-210 flex items-center justify-center bg-slate-900/40 backdrop-blur-sm transition-opacity duration-300 ${isInquiryModalOpen ? "opacity-100" : "pointer-events-none opacity-0"}`}
+        onClick={() => setIsInquiryModalOpen(false)}
+      >
+        <div
+          className={`mx-4 flex max-h-[90vh] w-full max-w-lg flex-col rounded-md bg-white transition-transform duration-300 ${isInquiryModalOpen ? "scale-100" : "scale-95"}`}
+          onClick={(e) => e.stopPropagation()}
+        >
+          <div className="flex shrink-0 items-center justify-between border-b border-gray-100 px-6 py-5">
+            <h3 className="flex items-center gap-2 text-lg font-bold text-gray-900">
+              <i className="fa-solid fa-paper-plane text-[20px] text-brand-blue"></i>
+              Inquiry for {collegeForInquiry?.name}
+            </h3>
+            <button
+              onClick={() => setIsInquiryModalOpen(false)}
+              className="rounded-full p-1.5 text-gray-400 transition-colors hover:bg-gray-100 hover:text-gray-700"
+            >
+              <i className="fa-solid fa-xmark text-[20px]"></i>
+            </button>
+          </div>
+          <div className="overflow-y-auto px-6 py-5">
+            <form onSubmit={handleSingleInquirySubmit}>
+              <div className="mb-5">
+                <label
+                  htmlFor="inquiryMessageSingle"
+                  className="mb-2 block text-[14px] font-bold text-gray-800"
+                >
+                  Your Question / Message{" "}
+                  <span className="text-red-500">*</span>
+                </label>
+                <textarea
+                  id="inquiryMessageSingle"
+                  required
+                  rows={4}
+                  value={inquiryMessageSingle}
+                  onChange={(e) => setInquiryMessageSingle(e.target.value)}
+                  className="w-full resize-none rounded-md border border-gray-200 bg-gray-50 px-4 py-3 text-[14px] text-gray-800 transition-all focus:border-transparent focus:bg-white focus:outline-none focus:ring-2 focus:ring-brand-blue"
+                  placeholder="E.g., What are the admission requirements, fee structures, and scholarship options for the upcoming intake?"
+                ></textarea>
+              </div>
+              <div className="mt-8 flex flex-col justify-end gap-3 sm:flex-row">
+                <button
+                  type="button"
+                  onClick={() => setIsInquiryModalOpen(false)}
+                  className="w-full rounded-md border border-gray-200 bg-white px-5 py-2.5 text-[14px] font-bold text-gray-600 transition-colors hover:bg-gray-50 sm:w-auto"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  className="flex w-full items-center justify-center gap-2 rounded-md bg-brand-blue px-6 py-2.5 text-[14px] font-bold text-white transition-all  hover:bg-brand-hover sm:w-auto"
+                >
+                  Submit Inquiry
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
     </>
   );
 };
@@ -546,6 +624,7 @@ const ProgramCard: React.FC<{
   onToggleSaved: () => void;
   onToggleSelection: () => void;
   onClaim: () => void;
+  onSingleInquiry: () => void;
 }> = ({
   college,
   isVerified,
@@ -556,24 +635,27 @@ const ProgramCard: React.FC<{
   onToggleSaved,
   onToggleSelection,
   onClaim,
+  onSingleInquiry,
 }) => {
   const description =
     (typeof college.description === "string" && college.description) ||
     "Explore academics, facilities, and counselling support for this college.";
 
   return (
-    <div className="flex h-full cursor-pointer flex-col rounded-2xl border border-gray-200 bg-white p-4 transition-all duration-300 hover:border-blue-500/20 overflow-visible">
+    <div className="flex h-full cursor-pointer flex-col rounded-md border border-gray-200 bg-white p-4 transition-all duration-300 hover:border-blue-500/20 overflow-visible">
       <div
         onClick={() => onNavigate("collegeDetails", { id: college.id })}
-        className="group relative h-35 shrink-0 overflow-hidden rounded-xl"
+        className="group relative h-35 shrink-0 overflow-hidden rounded-md"
       >
         {college.featured && (
-          <div className="absolute top-3 left-3 z-10 rounded bg-blue-600 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-white shadow-sm">
+          <div className="absolute top-3 left-3 z-10 rounded bg-blue-600 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-white ">
             Featured
           </div>
         )}
         {isVerified && college.image_url ? (
-          <img
+          <Image
+            height={200}
+            width={200}
             src={college.image_url}
             alt={college.name}
             className="h-full w-full object-cover"
@@ -607,7 +689,7 @@ const ProgramCard: React.FC<{
                 onChange={onToggleSelection}
                 className="peer sr-only"
               />
-              <div className="absolute inset-0 rounded-md border border-slate-300 bg-white/90 shadow-sm backdrop-blur-sm transition-colors hover:border-slate-400 peer-checked:border-brand-blue peer-checked:bg-brand-blue"></div>
+              <div className="absolute inset-0 rounded-md border border-slate-300 bg-white/90  backdrop-blur-sm transition-colors hover:border-slate-400 peer-checked:border-brand-blue peer-checked:bg-brand-blue"></div>
               <svg
                 className="pointer-events-none absolute z-10 h-4 w-4 text-white opacity-0 transition-opacity peer-checked:opacity-100"
                 fill="none"
@@ -634,7 +716,7 @@ const ProgramCard: React.FC<{
             className="group/title relative truncate text-left text-[20px] font-bold text-slate-800 tracking-tight transition-colors hover:text-blue-600 line-clamp-2"
           >
             <span className="truncate block" title={college.name}>{college.name}</span>
-            <span className="absolute bottom-full left-0 mb-2 invisible opacity-0 group-hover/title:visible group-hover/title:opacity-100 bg-gray-900 text-white text-[13px] font-medium py-1.5 px-3 rounded shadow-md whitespace-nowrap transition-all duration-200 z-50 pointer-events-none">
+            <span className="absolute bottom-full left-0 mb-2 invisible opacity-0 group-hover/title:visible group-hover/title:opacity-100 bg-gray-900 text-white text-[13px] font-medium py-1.5 px-3 rounded  whitespace-nowrap transition-all duration-200 z-50 pointer-events-none">
               {college.name}
               <span className="absolute top-full left-4 -mt-px border-[5px] border-transparent border-t-gray-900"></span>
             </span>
@@ -661,7 +743,7 @@ const ProgramCard: React.FC<{
             <MapPin className="w-4.5 h-4.5 text-gray-400" />
 <span className="group/location block min-w-0 truncate font-semibold text-slate-700 line-clamp-1" title={college.location || "Kathmandu"}>
               <span className="truncate block">{college.location || "Kathmandu"}</span>
-              <span className="absolute bottom-full left-0 mb-2 invisible opacity-0 group-hover/location:visible group-hover/location:opacity-100 bg-gray-900 text-white text-[13px] font-medium py-1.5 px-3 rounded shadow-md whitespace-nowrap transition-all duration-200 z-50 pointer-events-none">
+              <span className="absolute bottom-full left-0 mb-2 invisible opacity-0 group-hover/location:visible group-hover/location:opacity-100 bg-gray-900 text-white text-[13px] font-medium py-1.5 px-3 rounded  whitespace-nowrap transition-all duration-200 z-50 pointer-events-none">
                 {college.location || "Kathmandu"}
                 <span className="absolute top-full left-4 -mt-px border-[5px] border-transparent border-t-gray-900"></span>
               </span>
@@ -676,7 +758,7 @@ const ProgramCard: React.FC<{
               {college.affiliation ||
                 "NEB, Tribhuvan University, Purbanchal University"}
             </span>
-            <span className="absolute bottom-full left-0 mb-2 invisible opacity-0 group-hover/affil:visible group-hover/affil:opacity-100 bg-gray-900 text-white text-[13px] font-medium py-1.5 px-3 rounded shadow-md whitespace-nowrap transition-all duration-200 z-50 pointer-events-none">
+            <span className="absolute bottom-full left-0 mb-2 invisible opacity-0 group-hover/affil:visible group-hover/affil:opacity-100 bg-gray-900 text-white text-[13px] font-medium py-1.5 px-3 rounded  whitespace-nowrap transition-all duration-200 z-50 pointer-events-none">
               {college.affiliation ||
                 "NEB, Tribhuvan University, Purbanchal University"}
               <span className="absolute top-full left-4 -mt-px border-[5px] border-transparent border-t-gray-900"></span>
@@ -684,23 +766,22 @@ const ProgramCard: React.FC<{
           </p>
         </div>
 
-        <div className="mb-4 pr-2 h-14">
-          <p className="text-[14px] leading-relaxed text-gray-500 line-clamp-2">
-            {description.length > 80 ? description.slice(0, 80) + "..." : description}
-          </p>
-          <button
-            type="button"
-            className="text-[14px] font-semibold text-brand-blue hover:underline"
-            onClick={(e) => {
-              e.stopPropagation();
-              onNavigate("collegeDetails", { id: college.id });
-            }}
+       {college.website && (
+        <div className="flex items-center gap-2 text-[14px] text-gray-500 mb-3">
+          <Globe className="w-4.5 h-4.5 text-gray-400 shrink-0" />
+          <a
+            href={college.website}
+            target="_blank"
+            rel="noopener noreferrer"
+            onClick={(e) => e.stopPropagation()}
+            className="text-brand-blue hover:underline font-medium truncate"
           >
-            Read more
-          </button>
+            {college.website.replace(/^https?:\/\//, "")}
+          </a>
         </div>
+      )}
 
-        <div className="mt-2 flex items-center gap-4">
+        <div className="mt-2 flex items-center gap-4 mb-2">
           <a
             href="#"
             className="interaction-btn text-[12px] font-medium text-brand-blue hover:text-blue-800 flex items-center transition-colors"
@@ -741,53 +822,34 @@ const ProgramCard: React.FC<{
           </a>
         </div>
 
-        <div className="border-t border-dashed border-gray-200 mb-4" />
+        <div className="border-t border-dashed border-gray-200 mb-2" />
 
         <div className="flex flex-col gap-3 mt-auto">
-          <button
-            type="button"
-            disabled={!isVerified}
-            onClick={(e) => {
-              e.stopPropagation();
-              if (isVerified) {
-                onNavigate("bookCounselling", { collegeId: college.id });
-              }
-            }}
-            className={`w-full text-white font-medium text-[14px] py-2.5 px-4 rounded-md transition-colors flex items-center justify-center gap-1.5 ${
-              isVerified
-                ? "bg-brand-blue hover:bg-blue-700"
-                : "bg-brand-blue cursor-not-allowed"
-            }`}
-          >
-            {!isVerified && <LockIcon size={14} />}
-            Get counselling
-          </button>
+          
 
           <div className="flex gap-2">
+
             <button
               type="button"
               onClick={(e) => {
                 e.stopPropagation();
-                onNavigate("campusForum", {
-                  collegeId: college.id,
-                  collegeName: college.name,
-                });
+                onNavigate("collegeDetails", { id: college.id });
               }}
-              className="flex-1 flex items-center justify-center gap-1.5 border border-gray-200 hover:bg-gray-50 text-slate-600 font-medium py-2 px-2 rounded-md transition-colors text-[13px]"
+              className="bg-brand-blue flex-1 flex items-center justify-center gap-1.5 border border-gray-200 hover:bg-brand-hover text-white font-medium py-2 px-2 rounded-md transition-colors text-[13px] cursor-pointer"
             >
-              <MessageSquare className="w-4 h-4 text-gray-500" />
-              Inquiry
+              View Details
             </button>
 
             <button
               type="button"
               onClick={(e) => {
                 e.stopPropagation();
-                onNavigate("compareColleges", { collegeName: college.name });
+                onSingleInquiry();
               }}
-              className="flex-1 bg-[#EAB308] hover:bg-yellow-500 text-white font-semibold py-2 px-2 rounded-md transition-colors text-[13px]"
+              className="flex-1 flex items-center justify-center gap-1.5 border border-gray-200 hover:bg-gray-50 text-slate-600 font-medium py-2 px-2 rounded-md transition-colors text-[13px] cursor-pointer"
             >
-              Compare now
+              <MessageSquare className="w-4 h-4 text-gray-500" />
+              Inquiry
             </button>
 
             <button

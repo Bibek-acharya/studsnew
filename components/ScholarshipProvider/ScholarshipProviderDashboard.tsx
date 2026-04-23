@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useRouter } from 'next/navigation';
 import { apiService } from '@/services/api';
 import { scholarshipProviderApi } from '@/services/scholarshipProviderApi';
 import DashboardSidebar from './DashboardSidebar';
@@ -15,8 +15,12 @@ import Messages from './Messages';
 import Analytics from './Analytics';
 import Settings from './Settings';
 
-const ScholarshipProviderDashboard = () => {
-  const navigate = useNavigate();
+interface DashboardProps {
+  onLogout?: () => void;
+}
+
+const ScholarshipProviderDashboard: React.FC<DashboardProps> = ({ onLogout }) => {
+  const router = useRouter();
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [activeTab, setActiveTab] = useState('sec-dashboard');
   const [selectedStudentId, setSelectedStudentId] = useState<string | null>(null);
@@ -29,13 +33,17 @@ const ScholarshipProviderDashboard = () => {
     const user = apiService.getScholarshipProviderUser();
 
     if (!token || !user) {
-      navigate('/scholarshipProviderZone');
+      if (onLogout) {
+        onLogout();
+      } else {
+        router.push('/scholarship-provider');
+      }
       return;
     }
 
     setProviderUser(user);
     loadUnreadMessages();
-  }, [navigate]);
+  }, [router, onLogout]);
 
   async function loadUnreadMessages() {
     try {
@@ -48,7 +56,11 @@ const ScholarshipProviderDashboard = () => {
 
   const handleLogout = () => {
     apiService.scholarshipProviderLogout();
-    navigate('/scholarshipProviderZone');
+    if (onLogout) {
+      onLogout();
+    } else {
+      router.push('/scholarship-provider');
+    }
   };
 
   if (!providerUser) return null;

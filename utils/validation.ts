@@ -42,7 +42,7 @@ export const validators = {
 export function useFieldValidation<T extends Record<string, any>>(initialValues: T) {
   const [values, setValues] = useState<T>(initialValues);
   const [touched, setTouched] = useState<Record<string, boolean>>({});
-  const [errors, setErrors] = useState<Record<string, string | null>>({});
+  const [errors, setErrors] = useState<Record<string, string>>({});
 
   const setValue = (key: string, value: any) => {
     setValues((prev) => ({ ...prev, [key]: value }));
@@ -54,16 +54,16 @@ export function useFieldValidation<T extends Record<string, any>>(initialValues:
 
   const validateField = (key: string, value: any, validator: (val: any) => string | null) => {
     const error = validator(value);
-    setErrors((prev) => ({ ...prev, [key]: error }));
+    setErrors((prev) => ({ ...prev, [key]: error || '' }));
     return error;
   };
 
   const validateAll = (fields: { key: string; validator: (val: any) => string | null }[]): boolean => {
-    const newErrors: Record<string, string | null> = {};
+    const newErrors: Record<string, string> = {};
     let isValid = true;
     for (const { key, validator } of fields) {
       const error = validator(values[key]);
-      newErrors[key] = error;
+      newErrors[key] = error || '';
       if (error) isValid = false;
     }
     setErrors(newErrors);

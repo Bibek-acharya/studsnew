@@ -25,6 +25,7 @@ import {
   TrendingUp,
   Building,
   BadgeCheckIcon,
+  FileText,
 } from "lucide-react";
 
 interface EntranceGridProps {
@@ -101,7 +102,7 @@ const EntranceGrid: React.FC<EntranceGridProps> = ({ filters, setFilters }) => {
                   }))
                 }
                 placeholder="Search exams, universities..."
-                className="w-full rounded-lg border border-gray-200 bg-white py-2.5 pl-10 pr-4 text-sm transition-all placeholder-gray-400 focus:border-transparent focus:outline-none focus:ring-2 focus:ring-brand-blue"
+                className="w-full rounded-md border border-gray-200 bg-white py-2.5 pl-10 pr-4 text-sm transition-all placeholder-gray-400 focus:border-transparent focus:outline-none focus:ring-2 focus:ring-brand-blue"
               />
             </div>
           </div>
@@ -110,7 +111,7 @@ const EntranceGrid: React.FC<EntranceGridProps> = ({ filters, setFilters }) => {
 
       <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4 sm:gap-5 md:gap-6">
         {filteredExams.length === 0 && (
-          <div className="col-span-1 md:col-span-2 xl:col-span-3 rounded-2xl border border-gray-100 bg-white py-16 text-center text-gray-500 shadow-[0_2px_15px_rgb(0,0,0,0.04)]">
+          <div className="col-span-1 md:col-span-2 xl:col-span-3 rounded-md border border-gray-100 bg-white py-16 text-center text-gray-500 shadow-[0_2px_15px_rgb(0,0,0,0.04)]">
             No entrance exams found matching your filters.
           </div>
         )}
@@ -168,14 +169,14 @@ const EntranceCard: React.FC<{ exam: Exam }> = ({ exam }) => {
   };
 
   return (
-    <article className="bg-white rounded-2xl p-4 sm:p-5 border border-gray-200 flex flex-col h-full hover:border-blue-500/20 transition-all duration-300 overflow-visible">
+    <article className="bg-white rounded-md p-4 sm:p-5 border border-gray-200 flex flex-col h-full hover:border-blue-500/20 transition-all duration-300 overflow-visible">
       <header className="flex justify-between items-start mb-4 sm:mb-5">
         <div className="flex gap-2.5 sm:gap-3">
-          <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl border border-gray-100 flex items-center justify-center bg-white shrink-0">
+          <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-md border border-gray-100 flex items-center justify-center bg-white shrink-0">
             <img
               src={exam.logo}
               alt={exam.institution}
-              className="w-full h-full rounded-lg object-contain"
+              className="w-full h-full rounded-md object-contain"
             />
           </div>
           <div className="flex flex-col min-w-0">
@@ -184,7 +185,7 @@ const EntranceCard: React.FC<{ exam: Exam }> = ({ exam }) => {
               {exam.verified && (
                 <BadgeCheckIcon className="w-3.25 h-3.25 sm:w-3.75 sm:h-3.75 text-white fill-blue-500 ml-0.5 sm:ml-1 shrink-0" />
               )}
-              <div className="absolute bottom-full left-0 mb-2 invisible opacity-0 group-hover:visible group-hover:opacity-100 bg-gray-900 text-white text-[13px] font-medium py-1.5 px-3 rounded shadow-md whitespace-nowrap transition-all duration-200 z-100 pointer-events-none">
+              <div className="absolute bottom-full left-0 mb-2 invisible opacity-0 group-hover:visible group-hover:opacity-100 bg-gray-900 text-white text-[13px] font-medium py-1.5 px-3 rounded  whitespace-nowrap transition-all duration-200 z-100 pointer-events-none">
                 {exam.institution}
                 <div className="absolute top-full left-4 -mt-px border-[5px] border-transparent border-t-gray-900"></div>
               </div>
@@ -217,7 +218,7 @@ const EntranceCard: React.FC<{ exam: Exam }> = ({ exam }) => {
           onClick={() => router.push(`/entrance/${exam.id}`)}
         >
           <span className="truncate block">{exam.title}</span>
-          <div className="absolute bottom-full left-0 mb-2 invisible opacity-0 group-hover:visible group-hover:opacity-100 bg-gray-900 text-white text-[13px] font-medium py-1.5 px-3 rounded shadow-md whitespace-nowrap transition-all duration-200 z-100 pointer-events-none">
+          <div className="absolute bottom-full left-0 mb-2 invisible opacity-0 group-hover:visible group-hover:opacity-100 bg-gray-900 text-white text-[13px] font-medium py-1.5 px-3 rounded  whitespace-nowrap transition-all duration-200 z-100 pointer-events-none">
             {exam.title}
             <div className="absolute top-full left-4 -mt-px border-[5px] border-transparent border-t-gray-900"></div>
           </div>
@@ -244,7 +245,7 @@ const EntranceCard: React.FC<{ exam: Exam }> = ({ exam }) => {
           ))}
         </div>
 
-        <div className="bg-[#f8fafc] rounded-lg sm:rounded-xl p-2 sm:p-2.5 flex flex-col gap-1.5 sm:gap-2 mt-auto border border-[#f1f5f9]">
+        <div className="bg-[#f8fafc] rounded-md sm:rounded-md p-2 sm:p-2.5 flex flex-col gap-1.5 sm:gap-2 mt-auto border border-[#f1f5f9]">
           <div className="flex items-center gap-2 sm:gap-2.5 text-[11px] xs:text-[12px] sm:text-[13px] text-[#475569]">
             <Clock className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-[#94a3b8] shrink-0" />
             <span className="truncate font-medium text-red-500 text-[11px] sm:text-[12px]">
@@ -281,22 +282,22 @@ const EntranceCard: React.FC<{ exam: Exam }> = ({ exam }) => {
       <div className="mt-3 sm:mt-4 pt-1 flex flex-col gap-2 sm:gap-2.5">
         <button
           onClick={() => router.push(`/entrance/${exam.id}`)}
-          className="w-full flex items-center justify-center gap-2 py-2 sm:py-2.5 px-3 bg-brand-blue text-white font-bold text-[12px] sm:text-[13px] rounded-lg hover:bg-brand-hover transition-colors shadow-sm"
+          className="w-full flex items-center justify-center gap-2 py-2 sm:py-2.5 px-3 bg-brand-blue text-white font-bold text-[12px] sm:text-[13px] rounded-md hover:bg-brand-hover transition-colors"
         >
-          <PlayCircle className="w-4 h-4" /> Start Mock Test
+          <Send className="w-4 h-4" /> Apply Now
         </button>
         <div className="grid grid-cols-[1fr_1fr_auto] gap-2 sm:gap-2.5">
-          <button className="flex items-center justify-center gap-1.5 py-1.5 sm:py-2 px-2 sm:px-3 border border-[#e2e8f0] text-[#475569] font-bold text-[11px] xs:text-[12px] rounded-lg hover:bg-gray-50 transition-colors">
-            <Bell className="w-3.5 h-3.5" /> <span>Notify</span>
+          <button className="flex items-center justify-center gap-1.5 py-1.5 sm:py-2 px-2 sm:px-3 border border-[#e2e8f0] text-[#475569] font-bold text-[11px] xs:text-[12px] rounded-md hover:bg-gray-50 transition-colors">
+            <FileText className="w-3.5 h-3.5" /> <span>View Detail</span>
           </button>
           <button
             onClick={() => router.push(`/entrance/${exam.id}`)}
-            className="flex items-center justify-center gap-1.5 py-1.5 sm:py-2 px-2 sm:px-3 border border-[#e2e8f0] text-[#475569] font-bold text-[11px] xs:text-[12px] rounded-lg hover:bg-gray-50 transition-colors"
+            className="flex items-center justify-center gap-1.5 py-1.5 sm:py-2 px-2 sm:px-3 border border-[#e2e8f0] text-[#475569] font-bold text-[11px] xs:text-[12px] rounded-md hover:bg-gray-50 transition-colors"
           >
-            <Send className="w-3.5 h-3.5" /> Apply
+            <Bell className="w-3.5 h-3.5" /> Notify
           </button>
           <button
-            className={`w-9 sm:w-10 shrink-0 rounded-lg flex items-center justify-center transition-all duration-200 ${
+            className={`w-9 sm:w-10 shrink-0 rounded-md flex items-center justify-center transition-all duration-200 ${
               bookmarked
                 ? "border-blue-200 bg-blue-50"
                 : "bg-white border border-[#e2e8f0] text-[#94a3b8] hover:bg-[#f8fafc] hover:text-[#64748b]"

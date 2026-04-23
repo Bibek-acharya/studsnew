@@ -64,7 +64,7 @@ const CourseGrid: React.FC<CourseGridProps> = ({
         {[...Array(COURSES_PER_PAGE)].map((_, i) => (
           <div
             key={i}
-            className="animate-pulse bg-white rounded-xl border border-gray-100 h-95"
+            className="animate-pulse bg-white rounded-md border border-gray-100 h-95"
           ></div>
         ))}
       </div>
@@ -121,7 +121,7 @@ const CourseGrid: React.FC<CourseGridProps> = ({
 
           return (
             <React.Fragment key={course.id || index}>
-              <div className="bg-white rounded-xl border border-gray-200 flex flex-col relative transition-all hover:border-blue-500/20 duration-300">
+              <div className="bg-white rounded-md border border-gray-200 flex flex-col relative transition-all hover:border-blue-500/20 duration-300">
                 {/* Image Area - Reduced height and padding */}
                 <div className="relative h-28 w-full p-3 pb-2">
                   <img
@@ -130,7 +130,7 @@ const CourseGrid: React.FC<CourseGridProps> = ({
                       `https://images.unsplash.com/photo-1517694712202-14dd9538aa97?auto=format&fit=crop&w=400&q=200`
                     }
                     alt={course.title}
-                    className="w-full h-full object-cover rounded-lg"
+                    className="w-full h-full object-cover rounded-md"
                   />
                 </div>
 
@@ -236,7 +236,7 @@ const CourseGrid: React.FC<CourseGridProps> = ({
                           courseTitle: course.title,
                         })
                       }
-                      className="flex-[2.5] bg-[#0014f4] hover:bg-blue-800 text-white font-semibold py-2 rounded-md shadow-sm text-[12px] flex items-center justify-center transition-colors whitespace-nowrap"
+                      className="flex-[2.5] bg-[#0014f4] hover:bg-blue-800 text-white font-semibold py-2 rounded-md  text-[12px] flex items-center justify-center transition-colors whitespace-nowrap"
                     >
                       View Colleges
                     </button>

@@ -429,6 +429,8 @@ const CollegeDetailsPage: React.FC = () => {
   const [shareUrl, setShareUrl] = useState("");
   const [college, setCollege] = useState<any>(null);
   const [loading, setLoading] = useState(true);
+  const [reviewsData, setReviewsData] = useState<any>(null);
+  const [reviewsLoading, setReviewsLoading] = useState(false);
   const tabsScrollRef = useRef<HTMLDivElement | null>(null);
   const tabsNavRef = useRef<HTMLElement | null>(null);
   const [isTabsOverflowing, setIsTabsOverflowing] = useState(false);
@@ -497,6 +499,20 @@ const CollegeDetailsPage: React.FC = () => {
         .catch(() => setLoading(false));
     }
   }, [collegeId]);
+
+  useEffect(() => {
+    if (activeTab === "review" && collegeId && !reviewsData) {
+      setReviewsLoading(true);
+      apiService.getCollegeReviews(collegeId, { page: 1, limit: 10 })
+        .then((res) => {
+          if (res?.data) {
+            setReviewsData(res.data);
+          }
+        })
+        .catch(console.error)
+        .finally(() => setReviewsLoading(false));
+    }
+  }, [activeTab, collegeId]);
 
   useEffect(() => {
     const container = tabsScrollRef.current;
@@ -616,7 +632,7 @@ const CollegeDetailsPage: React.FC = () => {
 
       <div className="relative bg-white">
         <div className="relative px-6 pb-8 md:px-12 lg:px-24 xl:px-32">
-          <div className="relative z-10 mr-auto -mt-12 flex h-30 w-30 items-center justify-center overflow-hidden rounded-xl border border-gray-200 bg-white p-2 md:absolute md:-top-4 md:left-12 md:mx-0 md:mt-0 md:h-37.5 md:w-37.5 lg:left-24 xl:left-32">
+          <div className="relative z-10 mr-auto -mt-12 flex h-30 w-30 items-center justify-center overflow-hidden rounded-md border border-gray-200 bg-white p-2 md:absolute md:-top-4 md:left-12 md:mx-0 md:mt-0 md:h-37.5 md:w-37.5 lg:left-24 xl:left-32">
             <img
               src={fallbackCollege.logo}
               alt="College Logo"
@@ -690,7 +706,7 @@ const CollegeDetailsPage: React.FC = () => {
               <button
                 type="button"
                 onClick={() => setIsShareModalOpen(true)}
-                className="shrink-0 flex items-center justify-center rounded-md border border-gray-200 bg-white p-2.5 text-gray-700 shadow-sm transition-colors hover:bg-gray-50 lg:p-3"
+                className="shrink-0 flex items-center justify-center rounded-md border border-gray-200 bg-white p-2.5 text-gray-700  transition-colors hover:bg-gray-50 lg:p-3"
                 aria-label="Share college profile"
               >
                 <i className="fa-solid fa-share-nodes"></i>
@@ -700,13 +716,13 @@ const CollegeDetailsPage: React.FC = () => {
         </div>
       </div>
 
-      <div className="sticky top-0 z-40 border-b border-t border-gray-100 bg-white shadow-sm shadow-gray-100/50">
+      <div className="sticky top-0 z-40 border-b border-t border-gray-100 bg-white  shadow-gray-100/50">
         <div className="relative overflow-hidden px-6 md:px-12 lg:px-24 xl:px-32">
           {isTabsOverflowing && canScrollTabsLeft && (
             <button
               type="button"
               onClick={() => scrollTabs("left")}
-              className="absolute left-6 top-1/2 z-20 -translate-y-1/2 rounded-full border border-gray-200 bg-white p-1.5 text-gray-700 shadow-sm transition hover:bg-gray-50 md:left-12 lg:left-24 xl:left-32"
+              className="absolute left-6 top-1/2 z-20 -translate-y-1/2 rounded-full border border-gray-200 bg-white p-1.5 text-gray-700  transition hover:bg-gray-50 md:left-12 lg:left-24 xl:left-32"
               aria-label="Scroll tabs left"
             >
               <ChevronLeft className="h-4 w-4" />
@@ -717,7 +733,7 @@ const CollegeDetailsPage: React.FC = () => {
             <button
               type="button"
               onClick={() => scrollTabs("right")}
-              className="absolute right-6 top-1/2 z-20 -translate-y-1/2 rounded-full border border-gray-200 bg-white p-1.5 text-gray-700 shadow-sm transition hover:bg-gray-50 md:right-12 lg:right-24 xl:right-32"
+              className="absolute right-6 top-1/2 z-20 -translate-y-1/2 rounded-full border border-gray-200 bg-white p-1.5 text-gray-700  transition hover:bg-gray-50 md:right-12 lg:right-24 xl:right-32"
               aria-label="Scroll tabs right"
             >
               <ChevronRight className="h-4 w-4" />
@@ -793,7 +809,7 @@ const CollegeDetailsPage: React.FC = () => {
                   University Overview
                 </h2>
                 <div className="overflow-x-auto">
-                  <table className="w-full rounded-xl border border-gray-200 text-left text-sm">
+                  <table className="w-full rounded-md border border-gray-200 text-left text-sm">
                     <tbody className="divide-y divide-gray-200 text-gray-600">
                       <OverviewRow label="Established" value="1959" />
                       <OverviewRow
@@ -824,7 +840,7 @@ const CollegeDetailsPage: React.FC = () => {
                   Leadership & Administration
                 </h2>
                 <div className="overflow-x-auto">
-                  <table className="w-full rounded-xl border border-gray-200 text-left text-sm">
+                  <table className="w-full rounded-md border border-gray-200 text-left text-sm">
                     <thead className="bg-gray-50 text-[13px] font-bold uppercase text-gray-700">
                       <tr>
                         <th className="px-4 py-3">Position</th>
@@ -973,7 +989,7 @@ const CollegeDetailsPage: React.FC = () => {
                   {Array.from({ length: Math.ceil(filteredAdmissions.length / 9) }).map((_, idx) => (
                     <button
                       key={idx}
-                      className={`h-10 w-10 rounded-lg text-sm font-bold transition ${admissionPage === idx + 1 ? "bg-brand-blue text-white" : "bg-gray-100 text-gray-700 hover:bg-gray-200"}`}
+                      className={`h-10 w-10 rounded-md text-sm font-bold transition ${admissionPage === idx + 1 ? "bg-brand-blue text-white" : "bg-gray-100 text-gray-700 hover:bg-gray-200"}`}
                       onClick={() => setAdmissionPage(idx + 1)}
                     >
                       {idx + 1}
@@ -1032,7 +1048,7 @@ const CollegeDetailsPage: React.FC = () => {
                         </span>
                       </div>
                       <div className="col-span-2">
-                        <button className="rounded-lg bg-brand-blue/5 px-4 py-2 text-xs font-bold text-brand-blue hover:bg-brand-blue/10">
+                        <button className="rounded-md bg-brand-blue/5 px-4 py-2 text-xs font-bold text-brand-blue hover:bg-brand-blue/10">
                           View Details
                         </button>
                       </div>
@@ -1057,9 +1073,9 @@ const CollegeDetailsPage: React.FC = () => {
                 {facilities.map((facility) => (
                   <div
                     key={facility.title}
-                    className="flex items-start gap-4 rounded-2xl border border-gray-200 bg-white p-5"
+                    className="flex items-start gap-4 rounded-md border border-gray-200 bg-white p-5"
                   >
-                    <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-brand-blue/5 text-brand-blue">
+                    <div className="flex h-10 w-10 items-center justify-center rounded-md bg-brand-blue/5 text-brand-blue">
                       <i className={`fa-solid ${facility.icon}`}></i>
                     </div>
                     <div>
@@ -1090,13 +1106,13 @@ const CollegeDetailsPage: React.FC = () => {
                 {events.slice((eventsPage - 1) * 9, eventsPage * 9).map((event) => (
                   <article
                     key={event.title}
-                    className="bg-white rounded-2xl border border-gray-200 hover:border-blue-500/20 overflow-hidden flex flex-col duration-300 cursor-pointer"
+                    className="bg-white rounded-md border border-gray-200 hover:border-blue-500/20 overflow-hidden flex flex-col duration-300 cursor-pointer"
                   >
                     <div className="h-35 w-full overflow-hidden p-4">
                       <img
                         src={event.image}
                         alt={event.title}
-                        className="w-full h-full object-cover rounded-lg"
+                        className="w-full h-full object-cover rounded-md"
                       />
                     </div>
                     <div className="p-5 flex flex-col grow">
@@ -1124,10 +1140,10 @@ const CollegeDetailsPage: React.FC = () => {
                       </p>
 
                       <div className="mt-auto flex gap-2">
-                        <button className="flex-1 bg-white border border-gray-300 text-gray-700 text-sm font-bold py-2 rounded-lg hover:bg-gray-50 transition text-center">
+                        <button className="flex-1 bg-white border border-gray-300 text-gray-700 text-sm font-bold py-2 rounded-md hover:bg-gray-50 transition text-center">
                           Details
                         </button>
-                        <button className="flex-1 text-white text-sm font-bold py-2 rounded-lg transition bg-brand-blue cursor-pointer hover:bg-blue-600">
+                        <button className="flex-1 text-white text-sm font-bold py-2 rounded-md transition bg-brand-blue cursor-pointer hover:bg-blue-600">
                           Register
                         </button>
                       </div>
@@ -1141,7 +1157,7 @@ const CollegeDetailsPage: React.FC = () => {
                   {Array.from({ length: Math.ceil(events.length / 9) }).map((_, idx) => (
                     <button
                       key={idx}
-                      className={`h-10 w-10 rounded-lg text-sm font-bold transition ${eventsPage === idx + 1 ? "bg-brand-blue text-white" : "bg-gray-100 text-gray-700 hover:bg-gray-200"}`}
+                      className={`h-10 w-10 rounded-md text-sm font-bold transition ${eventsPage === idx + 1 ? "bg-brand-blue text-white" : "bg-gray-100 text-gray-700 hover:bg-gray-200"}`}
                       onClick={() => setEventsPage(idx + 1)}
                     >
                       {idx + 1}
@@ -1192,7 +1208,7 @@ const CollegeDetailsPage: React.FC = () => {
                       </div>
                       <div className="col-span-3">{scholarship.audience}</div>
                       <div className="col-span-3">
-                        <button className="rounded-lg bg-brand-blue px-5 py-2 text-xs font-bold text-white hover:bg-brand-hover">
+                        <button className="rounded-md bg-brand-blue px-5 py-2 text-xs font-bold text-white hover:bg-brand-hover">
                           Get Scholarship
                         </button>
                       </div>
@@ -1217,7 +1233,7 @@ const CollegeDetailsPage: React.FC = () => {
                 {alumni.map((person) => (
                   <div
                     key={person.name}
-                    className="flex items-center gap-4 rounded-2xl border border-gray-200 bg-white p-5"
+                    className="flex items-center gap-4 rounded-md border border-gray-200 bg-white p-5"
                   >
                     <img
                       src={person.image}
@@ -1253,7 +1269,7 @@ const CollegeDetailsPage: React.FC = () => {
                 {galleryImages.slice(0, visibleImageCount).map((image, index) => (
                   <div
                     key={image}
-                    className="aspect-[16/10] overflow-hidden rounded-lg cursor-pointer"
+                    className="aspect-[16/10] overflow-hidden rounded-md cursor-pointer"
                     onClick={() => setSelectedImageIndex(index)}
                   >
                     <img
@@ -1268,7 +1284,7 @@ const CollegeDetailsPage: React.FC = () => {
               {visibleImageCount < galleryImages.length && (
                 <div className="mt-8 text-center">
                   <button
-                    className="rounded-lg bg-brand-blue px-8 py-3 text-sm font-bold text-white hover:bg-brand-hover transition"
+                    className="rounded-md bg-brand-blue px-8 py-3 text-sm font-bold text-white hover:bg-brand-hover transition"
                     onClick={() => setVisibleImageCount((prev) => prev + 9)}
                   >
                     Load More
@@ -1321,76 +1337,92 @@ const CollegeDetailsPage: React.FC = () => {
 
           {activeTab === "review" && (
             <div>
-              <div className="mb-8 flex flex-col items-center gap-8 rounded-md border border-gray-200 bg-white p-8 md:flex-row">
-                <div className="text-center md:border-r md:pr-8 md:text-left">
-                  <h2 className="mb-2 text-5xl font-extrabold text-gray-900">
-                    4.5
-                  </h2>
-                  <div className="mb-2 flex items-center justify-center gap-1 md:justify-start">
-                    {Array.from({ length: 4 }).map((_, idx) => (
-                      <i
-                        key={`full-${idx}`}
-                        className="fa-solid fa-star text-[14px] text-yellow-400"
-                      ></i>
-                    ))}
-                    <i className="fa-solid fa-star-half-stroke text-[14px] text-yellow-400"></i>
+              {reviewsLoading ? (
+                <div className="flex items-center justify-center py-12">
+                  <div className="h-8 w-8 animate-spin rounded-full border-4 border-gray-200 border-t-brand-blue"></div>
+                </div>
+              ) : (
+                <>
+                  <div className="mb-8 flex flex-col items-center gap-8 rounded-md border border-gray-200 bg-white p-8 md:flex-row">
+                    <div className="text-center md:border-r md:pr-8 md:text-left">
+                      <h2 className="mb-2 text-5xl font-extrabold text-gray-900">
+                        {reviewsData?.overallRating?.toFixed(1) || "0.0"}
+                      </h2>
+                      <div className="mb-2 flex items-center justify-center gap-1 md:justify-start">
+                        {Array.from({ length: 5 }).map((_, idx) => (
+                          <i
+                            key={idx}
+                            className={`fa-solid fa-star text-[14px] ${idx < Math.round(reviewsData?.overallRating || 0) ? "text-yellow-400" : "text-gray-300"}`}
+                          ></i>
+                        ))}
+                      </div>
+                      <p className="text-[13px] font-medium text-gray-500">
+                        Based on {reviewsData?.reviewCount || 0} reviews
+                      </p>
+                    </div>
+                    <div className="w-full flex-1 space-y-2.5">
+                      {[5, 4, 3, 2, 1].map((star) => {
+                        const count = reviewsData?.reviews?.filter((r: any) => {
+                          const avg = Object.values(r.ratings || {}).reduce((s: number, v: any) => s + v, 0) / 10;
+                          return Math.round(avg) === star;
+                        }).length || 0;
+                        const pct = reviewsData?.reviewCount ? Math.round((count / reviewsData.reviewCount) * 100) : 0;
+                        return (
+                          <RatingBar
+                            key={star}
+                            label={String(star)}
+                            width={`${pct}%`}
+                            color={star >= 4 ? "bg-green-500" : star >= 3 ? "bg-yellow-400" : "bg-orange-400"}
+                            pct={`${pct}%`}
+                          />
+                        );
+                      })}
+                    </div>
                   </div>
-                  <p className="text-[13px] font-medium text-gray-500">
-                    Based on {reviewsCount} reviews
-                  </p>
-                </div>
-                <div className="w-full flex-1 space-y-2.5">
-                  <RatingBar
-                    label="5"
-                    width="70%"
-                    color="bg-green-500"
-                    pct="70%"
-                  />
-                  <RatingBar
-                    label="4"
-                    width="20%"
-                    color="bg-green-400"
-                    pct="20%"
-                  />
-                  <RatingBar
-                    label="3"
-                    width="7%"
-                    color="bg-yellow-400"
-                    pct="7%"
-                  />
-                  <RatingBar
-                    label="2"
-                    width="2%"
-                    color="bg-orange-400"
-                    pct="2%"
-                  />
-                  <RatingBar label="1" width="1%" color="bg-red-500" pct="1%" />
-                </div>
-              </div>
 
-              <div className="space-y-5">
-                <h3 className="text-[18px] font-bold text-gray-900">
-                  Recent Reviews
-                </h3>
-                <ReviewCard
-                  initials="AS"
-                  name="Amit Sharma"
-                  subtitle="B.Sc. CSIT · Batch 2022"
-                  rating={5}
-                  pros="Excellent faculty with real-world industry experience. The labs are well-equipped with the latest tech."
-                  cons="Canteen food could be better. Parking space is quite limited during peak hours."
-                  tone="blue"
-                />
-                <ReviewCard
-                  initials="SM"
-                  name="Sita Maharjan"
-                  subtitle="BBA · Batch 2021"
-                  rating={4}
-                  pros="Great focus on extracurricular activities and business competitions. Very supportive administration."
-                  cons="The library space is somewhat small for a growing number of students."
-                  tone="purple"
-                />
-              </div>
+                  <div className="mb-4 flex justify-between items-center">
+                    <h3 className="text-[18px] font-bold text-gray-900">
+                      Recent Reviews
+                    </h3>
+                    <a
+                      href="/write-review"
+                      className="text-sm font-medium text-brand-blue hover:text-brand-hover"
+                    >
+                      Write a Review
+                    </a>
+                  </div>
+
+                  {reviewsData?.reviews?.length > 0 ? (
+                    <div className="space-y-5">
+                      {reviewsData.reviews.map((review: any, idx: number) => {
+                        const avgRating = Object.values(review.ratings || {}).reduce((s: number, v: any) => s + v, 0) / 10;
+                        return (
+                          <ReviewCard
+                            key={review.id}
+                            initials={review.userInitials || "U"}
+                            name={review.userName || "Anonymous"}
+                            subtitle={`${review.course} · Batch ${review.batchYear}`}
+                            rating={Math.round(avgRating)}
+                            pros={review.pros}
+                            cons={review.cons}
+                            tone={idx % 2 === 0 ? "blue" : "purple"}
+                          />
+                        );
+                      })}
+                    </div>
+                  ) : (
+                    <div className="text-center py-12">
+                      <p className="text-gray-500 mb-4">No reviews yet. Be the first to review!</p>
+                      <a
+                        href="/write-review"
+                        className="inline-block px-6 py-3 bg-brand-blue text-white rounded-md font-medium hover:bg-brand-hover transition-colors"
+                      >
+                        Write a Review
+                      </a>
+                    </div>
+                  )}
+                </>
+              )}
             </div>
           )}
 
@@ -1410,7 +1442,7 @@ const CollegeDetailsPage: React.FC = () => {
                           {news.badge}
                         </span>
                       </div>
-                      <div className="mb-4 h-[140px] w-full overflow-hidden rounded-xl">
+                      <div className="mb-4 h-[140px] w-full overflow-hidden rounded-md">
                         <img
                           src={news.image}
                           className="h-full w-full object-cover transition hover:scale-105"
@@ -1445,7 +1477,7 @@ const CollegeDetailsPage: React.FC = () => {
                   {Array.from({ length: Math.ceil(newsCards.length / 9) }).map((_, idx) => (
                     <button
                       key={idx}
-                      className={`h-10 w-10 rounded-lg text-sm font-bold transition ${newsPage === idx + 1 ? "bg-brand-blue text-white" : "bg-gray-100 text-gray-700 hover:bg-gray-200"}`}
+                      className={`h-10 w-10 rounded-md text-sm font-bold transition ${newsPage === idx + 1 ? "bg-brand-blue text-white" : "bg-gray-100 text-gray-700 hover:bg-gray-200"}`}
                       onClick={() => setNewsPage(idx + 1)}
                     >
                       {idx + 1}
@@ -1470,11 +1502,11 @@ const CollegeDetailsPage: React.FC = () => {
                 {downloads.map((download) => (
                   <div
                     key={download.title}
-                    className="flex items-center justify-between rounded-xl border border-gray-200 bg-white p-5 transition"
+                    className="flex items-center justify-between rounded-md border border-gray-200 bg-white p-5 transition"
                   >
                     <div className="flex items-center gap-4">
                       <div
-                        className={`flex h-12 w-12 items-center justify-center rounded-xl ${download.color}`}
+                        className={`flex h-12 w-12 items-center justify-center rounded-md ${download.color}`}
                       >
                         <i className="fa-regular fa-file-lines text-xl"></i>
                       </div>
@@ -1488,7 +1520,7 @@ const CollegeDetailsPage: React.FC = () => {
                       </div>
                     </div>
                     <button
-                      className={`flex items-center gap-2 rounded-lg px-5 py-2.5 text-sm font-bold text-white shadow-sm ${download.btn}`}
+                      className={`flex items-center gap-2 rounded-md px-5 py-2.5 text-sm font-bold text-white  ${download.btn}`}
                     >
                       <i className="fa-solid fa-download"></i>Download
                     </button>
@@ -1500,7 +1532,7 @@ const CollegeDetailsPage: React.FC = () => {
         </div>
 
         <div className="space-y-6 lg:col-span-1 lg:w-full lg:max-w-[400px] lg:justify-self-end">
-          <div className="w-full rounded-xl border border-gray-200 bg-white p-4 sm:p-10">
+          <div className="w-full rounded-md border border-gray-200 bg-white p-4 sm:p-10">
             <h3 className="mb-8 text-2xl font-bold text-gray-900">
               Contact Information
             </h3>
@@ -1540,35 +1572,35 @@ const CollegeDetailsPage: React.FC = () => {
                 <div className="mt-3 flex gap-5 text-[26px]">
                   <a
                     href="#"
-                    className="text-[#1877F2] drop-shadow-sm transition-transform hover:scale-110"
+                    className="text-[#1877F2] drop- transition-transform hover:scale-110"
                     title="Facebook"
                   >
                     <i className="fa-brands fa-facebook"></i>
                   </a>
                   <a
                     href="#"
-                    className="text-[#E4405F] drop-shadow-sm transition-transform hover:scale-110"
+                    className="text-[#E4405F] drop- transition-transform hover:scale-110"
                     title="Instagram"
                   >
                     <i className="fa-brands fa-instagram"></i>
                   </a>
                   <a
                     href="#"
-                    className="text-black drop-shadow-sm transition-transform hover:scale-110"
+                    className="text-black drop- transition-transform hover:scale-110"
                     title="TikTok"
                   >
                     <i className="fa-brands fa-tiktok"></i>
                   </a>
                   <a
                     href="#"
-                    className="text-[#FF0000] drop-shadow-sm transition-transform hover:scale-110"
+                    className="text-[#FF0000] drop- transition-transform hover:scale-110"
                     title="YouTube"
                   >
                     <i className="fa-brands fa-youtube"></i>
                   </a>
                   <a
                     href="#"
-                    className="text-[#0A66C2] drop-shadow-sm transition-transform hover:scale-110"
+                    className="text-[#0A66C2] drop- transition-transform hover:scale-110"
                     title="LinkedIn"
                   >
                     <i className="fa-brands fa-linkedin"></i>
@@ -1585,7 +1617,7 @@ const CollegeDetailsPage: React.FC = () => {
                   }}
                 ></div>
                 <div className="absolute inset-0 bg-white/20"></div>
-                <button className="absolute left-1/2 top-1/2 flex -translate-x-1/2 -translate-y-1/2 transform items-center gap-2 rounded-xl bg-white px-5 py-2.5 text-[14px] font-bold text-gray-900 shadow-md transition-all hover:bg-gray-50 hover:shadow-lg active:scale-95">
+                <button className="absolute left-1/2 top-1/2 flex -translate-x-1/2 -translate-y-1/2 transform items-center gap-2 rounded-md bg-white px-5 py-2.5 text-[14px] font-bold text-gray-900  transition-all hover:bg-gray-50 hover:shadow-lg active:scale-95">
                   <i className="fa-solid fa-arrow-up-right-from-square text-sm"></i>
                   Get Directions
                 </button>
@@ -1624,7 +1656,7 @@ const CollegeDetailsPage: React.FC = () => {
               </select>
               <button
                 type="button"
-                className="mt-2 w-full rounded-md bg-brand-blue py-3.5 text-[14px] font-bold text-white shadow-sm shadow-brand-blue/20 transition-colors hover:bg-brand-hover"
+                className="mt-2 w-full rounded-md bg-brand-blue py-3.5 text-[14px] font-bold text-white  shadow-brand-blue/20 transition-colors hover:bg-brand-hover"
               >
                 Submit Request
               </button>
@@ -1650,7 +1682,7 @@ const CollegeDetailsPage: React.FC = () => {
 
       {showUnfollowDialog && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
-          <div className="mx-4 w-full max-w-md rounded-2xl bg-white p-6 shadow-xl">
+          <div className="mx-4 w-full max-w-md rounded-md bg-white p-6 shadow-xl">
             <h3 className="mb-2 text-lg font-bold text-gray-900">Unfollow College</h3>
             <p className="mb-6 text-gray-600">
               Are you sure you want to unfollow <strong>{name}</strong>?
@@ -1658,7 +1690,7 @@ const CollegeDetailsPage: React.FC = () => {
             <div className="flex gap-3">
               <button
                 onClick={() => setShowUnfollowDialog(false)}
-                className="flex-1 rounded-lg border border-gray-200 px-4 py-2.5 font-semibold text-gray-700 transition-colors hover:bg-gray-50"
+                className="flex-1 rounded-md border border-gray-200 px-4 py-2.5 font-semibold text-gray-700 transition-colors hover:bg-gray-50"
               >
                 Cancel
               </button>
@@ -1667,7 +1699,7 @@ const CollegeDetailsPage: React.FC = () => {
                   setIsFollowed(false);
                   setShowUnfollowDialog(false);
                 }}
-                className="flex-1 rounded-lg bg-red-500 px-4 py-2.5 font-semibold text-white transition-colors hover:bg-red-600"
+                className="flex-1 rounded-md bg-red-500 px-4 py-2.5 font-semibold text-white transition-colors hover:bg-red-600"
               >
                 Unfollow
               </button>

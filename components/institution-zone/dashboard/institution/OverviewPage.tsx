@@ -252,7 +252,7 @@ const OverviewPage: React.FC = () => {
 
       {/* KPI Stat Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-        <div className="bg-white rounded-2xl border border-slate-200 p-5 flex items-center gap-4 shadow-sm hover:shadow-md transition-shadow">
+        <div className="bg-white rounded-md border border-slate-200 p-5 flex items-center gap-4  hover: transition-shadow">
           <div className="w-12 h-12 rounded-full bg-blue-50 flex items-center justify-center text-blue-600 shrink-0">
             <GraduationCap className="w-6 h-6" />
           </div>
@@ -268,7 +268,7 @@ const OverviewPage: React.FC = () => {
             </p>
           </div>
         </div>
-        <div className="bg-white rounded-2xl border border-slate-200 p-5 flex items-center gap-4 shadow-sm hover:shadow-md transition-shadow">
+        <div className="bg-white rounded-md border border-slate-200 p-5 flex items-center gap-4  hover: transition-shadow">
           <div className="w-12 h-12 rounded-full bg-amber-50 flex items-center justify-center text-amber-500 shrink-0">
             <HelpCircle className="w-6 h-6" />
           </div>
@@ -284,7 +284,7 @@ const OverviewPage: React.FC = () => {
             </p>
           </div>
         </div>
-        <div className="bg-white rounded-2xl border border-slate-200 p-5 flex items-center gap-4 shadow-sm hover:shadow-md transition-shadow">
+        <div className="bg-white rounded-md border border-slate-200 p-5 flex items-center gap-4  hover: transition-shadow">
           <div className="w-12 h-12 rounded-full bg-indigo-50 flex items-center justify-center text-indigo-500 shrink-0">
             <Users className="w-6 h-6" />
           </div>
@@ -300,7 +300,7 @@ const OverviewPage: React.FC = () => {
             </p>
           </div>
         </div>
-        <div className="bg-white rounded-2xl border border-slate-200 p-5 flex items-center gap-4 shadow-sm hover:shadow-md transition-shadow">
+        <div className="bg-white rounded-md border border-slate-200 p-5 flex items-center gap-4  hover: transition-shadow">
           <div className="w-12 h-12 rounded-full bg-rose-50 flex items-center justify-center text-rose-500 shrink-0">
             <FileText className="w-6 h-6" />
           </div>
@@ -319,7 +319,7 @@ const OverviewPage: React.FC = () => {
       {/* Charts Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
         {/* Admission Chart */}
-        <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-5 hover:shadow-md transition-shadow flex flex-col">
+        <div className="bg-white rounded-md border border-slate-200  p-5 hover: transition-shadow flex flex-col">
           <div className="flex items-center justify-between mb-1">
             <span className="text-sm font-semibold text-blue-600 flex items-center gap-1.5">
               <GraduationCap className="w-4 h-4" /> Admission
@@ -334,7 +334,7 @@ const OverviewPage: React.FC = () => {
         </div>
 
         {/* QMS Chart */}
-        <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-5 hover:shadow-md transition-shadow flex flex-col">
+        <div className="bg-white rounded-md border border-slate-200  p-5 hover: transition-shadow flex flex-col">
           <div className="flex items-center justify-between mb-1">
             <span className="text-sm font-semibold text-amber-600 flex items-center gap-1.5">
               <HelpCircle className="w-4 h-4" /> QMS Status
@@ -349,7 +349,7 @@ const OverviewPage: React.FC = () => {
         </div>
 
         {/* Program Chart */}
-        <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-5 hover:shadow-md transition-shadow flex flex-col">
+        <div className="bg-white rounded-md border border-slate-200  p-5 hover: transition-shadow flex flex-col">
           <div className="flex items-center justify-between mb-1">
             <span className="text-sm font-semibold text-indigo-600 flex items-center gap-1.5">
               <BookOpen className="w-4 h-4" /> Programs
@@ -364,7 +364,7 @@ const OverviewPage: React.FC = () => {
         </div>
 
         {/* Scholarship Chart */}
-        <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-5 hover:shadow-md transition-shadow flex flex-col">
+        <div className="bg-white rounded-md border border-slate-200  p-5 hover: transition-shadow flex flex-col">
           <div className="flex items-center justify-between mb-1">
             <span className="text-sm font-semibold text-purple-600 flex items-center gap-1.5">
               <Award className="w-4 h-4" /> Scholarships
@@ -377,7 +377,7 @@ const OverviewPage: React.FC = () => {
         </div>
 
         {/* Counselling Chart */}
-        <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-5 hover:shadow-md transition-shadow flex flex-col">
+        <div className="bg-white rounded-md border border-slate-200  p-5 hover: transition-shadow flex flex-col">
           <div className="flex items-center justify-between mb-1">
             <span className="text-sm font-semibold text-indigo-600 flex items-center gap-1.5">
               <Users className="w-4 h-4" /> Counselling
@@ -390,7 +390,7 @@ const OverviewPage: React.FC = () => {
         </div>
 
         {/* Entrance Chart */}
-        <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-5 hover:shadow-md transition-shadow flex flex-col">
+        <div className="bg-white rounded-md border border-slate-200  p-5 hover: transition-shadow flex flex-col">
           <div className="flex items-center justify-between mb-1">
             <span className="text-sm font-semibold text-blue-600 flex items-center gap-1.5">
               <FileText className="w-4 h-4" /> Entrance
@@ -408,7 +408,7 @@ const OverviewPage: React.FC = () => {
       {/* Bottom Section: Updates + Calendar + Activities */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Recent Updates */}
-        <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-5">
+        <div className="bg-white rounded-md border border-slate-200  p-5">
           <h3 className="font-semibold text-slate-800 mb-4 flex items-center gap-2">
             <Bell className="w-4 h-4 text-blue-600" /> Recent Updates
           </h3>
@@ -455,7 +455,7 @@ const OverviewPage: React.FC = () => {
         </div>
 
         {/* Calendar */}
-        <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-5">
+        <div className="bg-white rounded-md border border-slate-200  p-5">
           <h3 className="font-semibold text-slate-800 mb-2 flex items-center gap-2">
             <CalendarCheck className="w-4 h-4 text-blue-600" /> March 2026
           </h3>
@@ -508,7 +508,7 @@ const OverviewPage: React.FC = () => {
             ].map((ev) => (
               <div
                 key={ev.day}
-                className={`flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-medium ${ev.color}`}
+                className={`flex items-center gap-2 px-3 py-1.5 rounded-md text-xs font-medium ${ev.color}`}
               >
                 <span className="font-bold">Mar {ev.day}</span> — {ev.label}
               </div>
@@ -517,7 +517,7 @@ const OverviewPage: React.FC = () => {
         </div>
 
         {/* Recent Activities */}
-        <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-5">
+        <div className="bg-white rounded-md border border-slate-200  p-5">
           <h3 className="font-semibold text-slate-800 mb-4 flex items-center gap-2">
             <CheckCircle2 className="w-4 h-4 text-blue-600" /> Recent Activities
           </h3>
@@ -562,7 +562,7 @@ const OverviewPage: React.FC = () => {
       </div>
 
       {/* Studsphere Support Banner */}
-      <div className="bg-linear-to-r from-blue-600 to-indigo-700 rounded-2xl p-6 text-white flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 shadow-lg">
+      <div className="bg-linear-to-r from-blue-600 to-indigo-700 rounded-md p-6 text-white flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 shadow-lg">
         <div>
           <h3 className="text-lg font-bold">Need Help with Studsphere?</h3>
           <p className="text-blue-100 text-sm mt-1">
@@ -570,7 +570,7 @@ const OverviewPage: React.FC = () => {
             onboarding, data issues, or feature requests.
           </p>
         </div>
-        <button className="bg-white text-blue-700 hover:bg-blue-50 font-semibold px-5 py-2.5 rounded-xl text-sm transition-colors shadow shrink-0">
+        <button className="bg-white text-blue-700 hover:bg-blue-50 font-semibold px-5 py-2.5 rounded-md text-sm transition-colors shadow shrink-0">
           Contact Support
         </button>
       </div>

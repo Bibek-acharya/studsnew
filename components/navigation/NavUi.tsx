@@ -47,7 +47,7 @@ export const DesktopDropdown: React.FC<{
         alignRight ? "right-0" : "left-0"
       }`}
     >
-      <div className="relative w-80 xs:w-96 sm:w-100 whitespace-normal rounded-xl border border-gray-100 bg-white p-2.5 sm:p-3 shadow-[0_10px_40px_-10px_rgba(0,0,0,0.1)]">
+      <div className="relative w-80 xs:w-96 sm:w-100 whitespace-normal rounded-md border border-gray-100 bg-white p-2.5 sm:p-3 shadow-[0_10px_40px_-10px_rgba(0,0,0,0.1)]">
         <div
           className={`absolute -top-1.5 h-3 w-3 rotate-45 border-l border-t border-gray-100 bg-white ${
             alignRight ? "right-6" : "left-6"
@@ -71,10 +71,10 @@ export const DropdownCard: React.FC<{
   <button
     onClick={onClick}
     disabled={!onClick}
-    className="group/card flex w-full min-w-0 items-start whitespace-normal rounded-xl border border-transparent p-2.5 text-left transition-colors hover:border-blue-100 hover:bg-blue-50/50 disabled:cursor-not-allowed disabled:opacity-70 sm:p-3"
+    className="group/card flex w-full min-w-0 items-start whitespace-normal rounded-md border border-transparent p-2.5 text-left transition-colors hover:border-blue-100 hover:bg-blue-50/50 disabled:cursor-not-allowed disabled:opacity-70 sm:p-3"
   >
     <div
-      className={`flex h-10 w-10 sm:h-12 sm:w-12 shrink-0 items-center justify-center rounded-lg border border-gray-100 bg-gray-50 transition-colors group-hover/card:bg-white ${color}`}
+      className={`flex h-10 w-10 sm:h-12 sm:w-12 shrink-0 items-center justify-center rounded-md border border-gray-100 bg-gray-50 transition-colors group-hover/card:bg-white ${color}`}
     >
       <i className={`fa-solid ${icon} text-base sm:text-lg`}></i>
     </div>

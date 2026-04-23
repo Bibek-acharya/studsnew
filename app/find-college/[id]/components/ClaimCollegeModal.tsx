@@ -60,7 +60,7 @@ const ClaimCollegeModal: React.FC<ClaimCollegeModalProps> = ({
           </button>
         </div>
         <div className="overflow-y-auto px-6 py-5">
-          <div className="mb-5 flex items-start gap-3 rounded-lg border border-brand-blue/20 bg-brand-blue/5 p-3.5">
+          <div className="mb-5 flex items-start gap-3 rounded-md border border-brand-blue/20 bg-brand-blue/5 p-3.5">
             <i className="fa-solid fa-circle-info mt-0.5 shrink-0 text-[18px] text-brand-blue"></i>
             <p className="line-height-extra text-[13px] text-brand-blue">
               Provide official details to claim{" "}
@@ -76,7 +76,7 @@ const ClaimCollegeModal: React.FC<ClaimCollegeModalProps> = ({
               required
               value={institutionName}
               onChange={(event) => setInstitutionName(event.target.value)}
-              className="w-full px-4 py-3 bg-[#EEF2F6] border border-[#D5DCE8] rounded-xl focus:bg-white focus:border-[#2D68FE] outline-none text-[14px] shadow-sm"
+              className="w-full px-4 py-3 bg-[#EEF2F6] border border-[#D5DCE8] rounded-md focus:bg-white focus:border-[#2D68FE] outline-none text-[14px] "
             />
             <input
               type="text"
@@ -84,7 +84,7 @@ const ClaimCollegeModal: React.FC<ClaimCollegeModalProps> = ({
               required
               value={registrationNumber}
               onChange={(event) => setRegistrationNumber(event.target.value)}
-              className="w-full px-4 py-3 bg-[#EEF2F6] border border-[#D5DCE8] rounded-xl focus:bg-white focus:border-[#2D68FE] outline-none text-[14px] shadow-sm"
+              className="w-full px-4 py-3 bg-[#EEF2F6] border border-[#D5DCE8] rounded-md focus:bg-white focus:border-[#2D68FE] outline-none text-[14px] "
             />
             <input
               type="email"
@@ -92,7 +92,7 @@ const ClaimCollegeModal: React.FC<ClaimCollegeModalProps> = ({
               required
               value={email}
               onChange={(event) => setEmail(event.target.value)}
-              className="w-full px-4 py-3 bg-[#EEF2F6] border border-[#D5DCE8] rounded-xl focus:bg-white focus:border-[#2D68FE] outline-none text-[14px] shadow-sm"
+              className="w-full px-4 py-3 bg-[#EEF2F6] border border-[#D5DCE8] rounded-md focus:bg-white focus:border-[#2D68FE] outline-none text-[14px] "
             />
             <input
               type="text"
@@ -100,7 +100,7 @@ const ClaimCollegeModal: React.FC<ClaimCollegeModalProps> = ({
               required
               value={contactPerson}
               onChange={(event) => setContactPerson(event.target.value)}
-              className="w-full px-4 py-3 bg-[#EEF2F6] border border-[#D5DCE8] rounded-xl focus:bg-white focus:border-[#2D68FE] outline-none text-[14px] shadow-sm"
+              className="w-full px-4 py-3 bg-[#EEF2F6] border border-[#D5DCE8] rounded-md focus:bg-white focus:border-[#2D68FE] outline-none text-[14px] "
             />
             <input
               type="tel"
@@ -108,19 +108,19 @@ const ClaimCollegeModal: React.FC<ClaimCollegeModalProps> = ({
               required
               value={contactNumber}
               onChange={(event) => setContactNumber(event.target.value)}
-              className="w-full px-4 py-3 bg-[#EEF2F6] border border-[#D5DCE8] rounded-xl focus:bg-white focus:border-[#2D68FE] outline-none text-[14px] shadow-sm"
+              className="w-full px-4 py-3 bg-[#EEF2F6] border border-[#D5DCE8] rounded-md focus:bg-white focus:border-[#2D68FE] outline-none text-[14px] "
             />
             <div className="mt-8 flex flex-col justify-end gap-3 sm:flex-row pt-4">
               <button
                 type="button"
                 onClick={onClose}
-                className="w-full rounded-xl border border-gray-200 bg-white px-5 py-2.5 text-[14px] font-bold text-gray-600 transition-colors hover:bg-gray-50 sm:w-auto"
+                className="w-full rounded-md border border-gray-200 bg-white px-5 py-2.5 text-[14px] font-bold text-gray-600 transition-colors hover:bg-gray-50 sm:w-auto"
               >
                 Cancel
               </button>
               <button
                 type="submit"
-                className="flex w-full items-center justify-center gap-2 rounded-xl bg-brand-blue px-6 py-2.5 text-[14px] font-bold text-white shadow-[0_4px_12px_rgba(0,0,255,0.2)] transition-all hover:-translate-y-0.5 hover:bg-brand-hover sm:w-auto"
+                className="flex w-full items-center justify-center gap-2 rounded-md bg-brand-blue px-6 py-2.5 text-[14px] font-bold text-white shadow-[0_4px_12px_rgba(0,0,255,0.2)] transition-all hover:-translate-y-0.5 hover:bg-brand-hover sm:w-auto"
               >
                 Submit Claim Request
               </button>

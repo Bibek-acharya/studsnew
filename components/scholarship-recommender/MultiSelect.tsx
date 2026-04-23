@@ -62,7 +62,7 @@ export default function MultiSelect({
         <button
           type="button"
           onClick={() => setIsOpen(!isOpen)}
-          className="w-full flex items-center justify-between p-3.5 pr-11 border-2 border-[#cbd5e1] rounded-lg bg-white text-[16px] text-[#1e293b] transition-all hover:border-[#2563eb] focus:border-[#2563eb] focus:ring-2 focus:ring-[#bfdbfe] focus:outline-none"
+          className="w-full flex items-center justify-between p-3.5 pr-11 border-2 border-[#cbd5e1] rounded-md bg-white text-[16px] text-[#1e293b] transition-all hover:border-[#2563eb] focus:border-[#2563eb] focus:ring-2 focus:ring-[#bfdbfe] focus:outline-none"
         >
           <span className={value.length > 0 ? "text-[#1e293b]" : "text-slate-400"}>
             {displayText}
@@ -74,7 +74,7 @@ export default function MultiSelect({
           />
         </button>
         {isOpen && (
-          <div className="absolute z-50 w-full mt-1 bg-white border-2 border-[#cbd5e1] rounded-lg shadow-lg overflow-hidden">
+          <div className="absolute z-50 w-full mt-1 bg-white border-2 border-[#cbd5e1] rounded-md shadow-lg overflow-hidden">
             {value.length > 0 && (
               <div className="px-4 py-3 border-b border-dashed border-slate-300 flex flex-wrap gap-2">
                 {selectedLabels.map((label) => (

@@ -53,7 +53,7 @@ const ForumHero: React.FC = () => {
         <img
           src="https://images.unsplash.com/photo-1611162617474-5b21e879e113?q=80&w=1074&auto=format&fit=crop"
           alt="App UI"
-          className="w-full h-full object-contain rounded-3xl shadow-2xl"
+          className="w-full h-full object-contain rounded-md shadow-2xl"
         />
       </div>
 
@@ -115,11 +115,11 @@ const ForumHero: React.FC = () => {
             </div>
 
             <div className="flex flex-wrap items-center gap-6">
-              <button className="bg-[#334155] hover:bg-[#1e293b] text-white px-10 py-5 rounded-xl font-black text-sm flex items-center gap-4 transition-all shadow-xl shadow-black/10 active:scale-95">
+              <button className="bg-[#334155] hover:bg-[#1e293b] text-white px-10 py-5 rounded-md font-black text-sm flex items-center gap-4 transition-all shadow-xl shadow-black/10 active:scale-95">
                 <i className="fa-solid fa-file-invoice text-xl opacity-80"></i>
                 Ask & Share
               </button>
-              <button className="bg-white hover:bg-slate-50 text-[#2563EB] px-10 py-5 rounded-xl font-black text-sm flex items-center gap-4 transition-all shadow-xl active:scale-95">
+              <button className="bg-white hover:bg-slate-50 text-[#2563EB] px-10 py-5 rounded-md font-black text-sm flex items-center gap-4 transition-all shadow-xl active:scale-95">
                 <i className="fa-solid fa-square-plus text-xl opacity-80"></i>
                 Create a Poll
               </button>

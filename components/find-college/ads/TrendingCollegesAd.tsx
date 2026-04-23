@@ -83,7 +83,7 @@ const adData: {
 
 const ColumnCard: React.FC<{ item: CollegeAdItem }> = ({ item }) => {
   return (
-    <div className="cursor-pointer rounded-[10px] border border-transparent bg-white p-2.5 shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:border-blue-200 hover:shadow-md">
+    <div className="cursor-pointer rounded-[10px] border border-transparent bg-white p-2.5  transition-all duration-200 hover:-translate-y-0.5 hover:border-blue-200 hover:">
       <div className="flex gap-3">
         <div className="flex h-14 w-14 shrink-0 items-center justify-center overflow-hidden rounded-md border border-gray-100 bg-white p-1">
           <img src={item.image} alt={item.title} className="h-full w-full object-contain" />
@@ -134,7 +134,7 @@ const TrendingCollegesAd: React.FC = () => {
   return (
     <div className="w-full max-w-300">
       <div className="grid grid-cols-1 gap-4 lg:grid-cols-2 lg:gap-6">
-        <div className="my-2 rounded-2xl bg-[radial-gradient(circle_at_center,#0044ff_0%,#0011bb_100%)] p-3 text-white md:p-4 lg:my-4">
+        <div className="my-2 rounded-md bg-[radial-gradient(circle_at_center,#0044ff_0%,#0011bb_100%)] p-3 text-white md:p-4 lg:my-4">
           <h3 className="mb-3 text-[17px] font-medium">Monthly spotlight</h3>
           <div className="flex flex-col gap-2">
             {adData.monthlySpotlight.map((item) => (
@@ -143,7 +143,7 @@ const TrendingCollegesAd: React.FC = () => {
           </div>
         </div>
 
-        <div className="my-2 rounded-2xl bg-[radial-gradient(circle_at_center,#0044ff_0%,#0011bb_100%)] p-3 text-white md:p-4 lg:my-4">
+        <div className="my-2 rounded-md bg-[radial-gradient(circle_at_center,#0044ff_0%,#0011bb_100%)] p-3 text-white md:p-4 lg:my-4">
           <h3 className="mb-3 text-[17px] font-medium">Most searched</h3>
           <div className="flex flex-col gap-2">
             {adData.mostSearched.map((item) => (

@@ -1,6 +1,7 @@
 'use client'
 
 import React from 'react'
+import Link from 'next/link'
 import { 
   Send, 
   Bookmark, 
@@ -18,10 +19,28 @@ import {
 
 export default function DashboardSection() {
   return (
-    <div id="view-dashboard" className="max-w-[1400px] mx-auto">
+    <div id="view-dashboard" className="max-w-350 mx-auto mt-6">
       <div className="flex flex-col xl:flex-row gap-6">
         {/* Left Column (Main Content) */}
         <div className="flex-1 space-y-6">
+            <div className="bg-white border border-gray-200 rounded-md p-5">
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+              <div>
+                <p className="text-sm font-semibold text-slate-600 uppercase tracking-widest">Profile completion</p>
+                <h2 className="text-xl font-bold text-slate-900 mt-2">85% complete</h2>
+              </div>
+              <div className="flex items-center gap-3">
+                <Link href="/user/dashboard/profile" className="rounded-full bg-[#0000ff] px-4 py-2 text-sm font-semibold text-white hover:bg-[#0000e6] transition-colors">
+                  Complete your profile
+                </Link>
+                <span className="text-sm text-slate-500">Add missing details to unlock personalized recommendations.</span>
+              </div>
+            </div>
+            <div className="mt-4 overflow-hidden rounded-full bg-slate-100 h-3">
+              <div className="h-3 rounded-full bg-[#0000ff]" style={{ width: '85%' }} />
+            </div>
+          </div>
+
           {/* Banner Section */}
           <div className="bg-[#4444ff] rounded-md overflow-hidden relative border border-[#0000ff]">
             <div className="p-8 md:p-10 lg:w-2/3 relative z-10">
@@ -36,7 +55,7 @@ export default function DashboardSection() {
 
             {/* SVG Illustration */}
             <div className="hidden lg:block absolute right-0 bottom-0 top-0 w-1/3 pointer-events-none">
-              <svg viewBox="0 0 300 200" fill="none" xmlns="http://www.w3.org/2000/svg" className="absolute right-8 bottom-0 h-[110%] object-contain origin-bottom object-right-bottom">
+              <svg viewBox="0 0 300 200" fill="none" xmlns="http://www.w3.org/2000/svg" className="absolute right-8 bottom-0 h-[110%] object-contain origin-bottom object-bottom-right">
                 {/* Girl's Body / Shirt */}
                 <path d="M120 200 C120 120 160 80 220 80 C260 80 290 110 300 200 Z" fill="#FFE5EC" />
                 {/* Neck */}
@@ -146,68 +165,23 @@ export default function DashboardSection() {
               </div>
             </div>
 
-            {/* Upcoming Tasks */}
-            <div className="bg-white border border-gray-200 rounded-md flex flex-col">
-              <div className="p-5 border-b border-gray-200 flex justify-between items-center">
-                <h3 className="font-bold text-gray-800">To-Do List</h3>
-                <button className="text-sm text-[#0000ff] hover:underline font-medium">+ Add Task</button>
-              </div>
-              <div className="p-5 space-y-4">
-                <div className="flex items-start gap-4">
-                  <button className="mt-0.5 text-gray-300 hover:text-[#0000ff] transition-colors">
-                    <CheckCircle2 className="w-5 h-5" />
-                  </button>
-                  <div>
-                    <p className="font-medium text-gray-900">Upload Transcripts for MIT</p>
-                    <div className="flex items-center gap-1.5 mt-1 text-xs text-gray-500">
-                      <Clock className="w-3 h-3" />
-                      <span className="text-red-500 font-medium">Today, 5:00 PM</span>
-                    </div>
-                  </div>
-                </div>
-                <div className="flex items-start gap-4">
-                  <button className="mt-0.5 text-gray-300 hover:text-[#0000ff] transition-colors">
-                    <CheckCircle2 className="w-5 h-5" />
-                  </button>
-                  <div>
-                    <p className="font-medium text-gray-700">Schedule mock interview</p>
-                    <div className="flex items-center gap-1.5 mt-1 text-xs text-gray-500">
-                      <Clock className="w-3 h-3" />
-                      <span>Tomorrow, 10:00 AM</span>
-                    </div>
-                  </div>
-                </div>
-                <div className="flex items-start gap-4">
-                  <button className="mt-0.5 text-gray-300 hover:text-[#0000ff] transition-colors">
-                    <CheckCircle2 className="w-5 h-5" />
-                  </button>
-                  <div>
-                    <p className="font-medium text-gray-700">Review Personal Statement</p>
-                    <div className="flex items-center gap-1.5 mt-1 text-xs text-gray-500">
-                      <Clock className="w-3 h-3" />
-                      <span>Oct 24, 2023</span>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
           </div>
         </div>
 
         {/* Right Column (Calendar Component) */}
-        <div className="w-full xl:w-[360px] shrink-0 space-y-4">
+        <div className="w-full xl:w-90 shrink-0 space-y-4">
           {/* Main Calendar Card */}
-          <div className="bg-white border border-gray-200 rounded-2xl p-6">
+          <div className="bg-white border border-gray-200 rounded-md p-6">
             {/* Header */}
             <div className="flex items-center justify-between mb-6">
-              <button className="w-10 h-10 rounded-2xl border border-gray-200 flex items-center justify-center text-gray-500 hover:bg-gray-50 hover:text-gray-800 transition-colors">
+              <button className="w-10 h-10 rounded-md border border-gray-200 flex items-center justify-center text-gray-500 hover:bg-gray-50 hover:text-gray-800 transition-colors">
                 <ChevronLeft className="w-5 h-5" />
               </button>
               <div className="flex items-center gap-2 font-bold text-gray-800 text-lg">
                 <CalendarIcon className="w-5 h-5" />
                 August 2023
               </div>
-              <button className="w-10 h-10 rounded-2xl border border-gray-200 flex items-center justify-center text-gray-500 hover:bg-gray-50 hover:text-gray-800 transition-colors">
+              <button className="w-10 h-10 rounded-md border border-gray-200 flex items-center justify-center text-gray-500 hover:bg-gray-50 hover:text-gray-800 transition-colors">
                 <ChevronRight className="w-5 h-5" />
               </button>
             </div>
@@ -248,7 +222,7 @@ export default function DashboardSection() {
               <div className="flex justify-center"><span className="w-8 h-8 flex items-center justify-center rounded-full bg-green-100 text-green-600 font-bold">15</span></div>
               <div className="flex justify-center"><span className="w-8 h-8 flex items-center justify-center rounded-full bg-orange-100 text-orange-400 font-bold">16</span></div>
               <div className="flex justify-center"><span className="w-8 h-8 flex items-center justify-center rounded-full bg-orange-100 text-orange-400 font-bold">17</span></div>
-              <div className="flex justify-center"><span className="w-8 h-8 flex items-center justify-center rounded-full bg-[#0000ff] text-white font-bold shadow-md shadow-blue-500/30">18</span></div>
+              <div className="flex justify-center"><span className="w-8 h-8 flex items-center justify-center rounded-full bg-[#0000ff] text-white font-bold  shadow-blue-500/30">18</span></div>
               <div className="flex justify-center"><span className="w-8 h-8 flex items-center justify-center text-gray-700">19</span></div>
               <div className="flex justify-center"><span className="w-8 h-8 flex items-center justify-center text-gray-700">20</span></div>
 
@@ -272,49 +246,6 @@ export default function DashboardSection() {
             </div>
           </div>
 
-          {/* Stats Grid Below Calendar */}
-          <div className="grid grid-cols-2 gap-4">
-            {/* Completed */}
-            <div className="border border-gray-200 bg-white rounded-2xl p-4 flex flex-col justify-center">
-              <h4 className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-3">Completed</h4>
-              <div className="flex items-center gap-2.5">
-                <div className="w-6 h-6 rounded-full bg-green-50 flex items-center justify-center text-green-500 border border-green-100">
-                  <Check className="w-4 h-4 stroke-[3]" />
-                </div>
-                <span className="text-xl font-extrabold text-gray-800">10 day</span>
-              </div>
-            </div>
-            {/* Failed */}
-            <div className="border border-gray-200 bg-white rounded-2xl p-4 flex flex-col justify-center">
-              <h4 className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-3">Failed</h4>
-              <div className="flex items-center gap-2.5">
-                <div className="w-6 h-6 rounded-full bg-red-50 flex items-center justify-center text-red-500 border border-red-100">
-                  <X className="w-4 h-4 stroke-[3]" />
-                </div>
-                <span className="text-xl font-extrabold text-gray-800">2 day</span>
-              </div>
-            </div>
-            {/* Skipped */}
-            <div className="border border-gray-200 bg-white rounded-2xl p-4 flex flex-col justify-center">
-              <h4 className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-3">Skipped</h4>
-              <div className="flex items-center gap-2.5">
-                <div className="w-6 h-6 rounded-full bg-orange-50 flex items-center justify-center text-orange-400 border border-orange-100">
-                  <SkipForward className="w-3.5 h-3.5 stroke-[3]" />
-                </div>
-                <span className="text-xl font-extrabold text-gray-800">3 day</span>
-              </div>
-            </div>
-            {/* Unfinished */}
-            <div className="border border-gray-200 bg-white rounded-2xl p-4 flex flex-col justify-center">
-              <h4 className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-3">Unfinished</h4>
-              <div className="flex items-center gap-2.5">
-                <div className="w-6 h-6 rounded-full bg-blue-50 flex items-center justify-center text-blue-500 border border-blue-100">
-                  <PieChart className="w-4 h-4 stroke-[3]" />
-                </div>
-                <span className="text-xl font-extrabold text-gray-800">2 day</span>
-              </div>
-            </div>
-          </div>
         </div>
       </div>
     </div>

@@ -69,7 +69,7 @@ export default function ScholarshipDetailsPage({ params }: { params: Promise<{ i
             <div className="w-full flex flex-col md:flex-row gap-[10px] h-auto md:h-[420px]">
                 
                 {/* Left Panel (Main Image) */}
-                <div className="relative w-full md:w-[66%] h-[300px] md:h-full rounded-lg overflow-hidden cursor-pointer shadow-sm group">
+                <div className="relative w-full md:w-[66%] h-[300px] md:h-full rounded-md overflow-hidden cursor-pointer  group">
                     <img 
                         src={scholarship.image_url || "https://i.pinimg.com/1200x/dc/d6/08/dcd608a6e3100512a81e676442e02380.jpg"} 
                         alt={scholarship.title} 
@@ -78,10 +78,10 @@ export default function ScholarshipDetailsPage({ params }: { params: Promise<{ i
                 </div>
 
                 {/* Right Panel (Secondary Image / Notice) */}
-                <div className="relative w-full md:w-[34%] h-[250px] md:h-full rounded-lg overflow-hidden cursor-pointer shadow-sm bg-gray-50 border border-gray-200 group p-2">
+                <div className="relative w-full md:w-[34%] h-[250px] md:h-full rounded-md overflow-hidden cursor-pointer  bg-gray-50 border border-gray-200 group p-2">
                     
                     {/* Official Notice Badge */}
-                    <div className="absolute top-3 left-3 z-10 bg-red-600 text-white text-[11px] font-bold px-2.5 py-1 rounded uppercase tracking-wider shadow-sm">
+                    <div className="absolute top-3 left-3 z-10 bg-red-600 text-white text-[11px] font-bold px-2.5 py-1 rounded uppercase tracking-wider ">
                         Official Notice
                     </div>
                     
@@ -93,12 +93,12 @@ export default function ScholarshipDetailsPage({ params }: { params: Promise<{ i
                     />
 
                     {/* Website Link */}
-                    <a href={scholarship.provider_website || "https://nast.gov.np"} target="_blank" className="absolute bottom-4 left-4 z-10 bg-white px-3 py-1.5 rounded shadow-md text-xs font-bold text-gray-700 hover:text-blue-600 transition-symbols border border-gray-100 uppercase tracking-tight">
+                    <a href={scholarship.provider_website || "https://nast.gov.np"} target="_blank" className="absolute bottom-4 left-4 z-10 bg-white px-3 py-1.5 rounded  text-xs font-bold text-gray-700 hover:text-blue-600 transition-symbols border border-gray-100 uppercase tracking-tight">
                         {scholarship.provider_domain || "nast.gov.np"}
                     </a>
                     
                     {/* Download Button */}
-                    <a href={scholarship.official_notice_url || "#"} className="absolute bottom-4 right-4 z-10 bg-white p-2.5 rounded-full shadow-md text-blue-600 hover:bg-blue-50 hover:scale-105 transition-all border border-gray-100" title="Download Notice">
+                    <a href={scholarship.official_notice_url || "#"} className="absolute bottom-4 right-4 z-10 bg-white p-2.5 rounded-full  text-blue-600 hover:bg-blue-50 hover:scale-105 transition-all border border-gray-100" title="Download Notice">
                         <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" x2="12" y1="15" y2="3"/></svg>
                     </a>
                 </div>
@@ -245,7 +245,7 @@ export default function ScholarshipDetailsPage({ params }: { params: Promise<{ i
                         <section className="flex-1">
                             <h3 className="text-lg font-bold text-gray-700 mb-3">Selection Process</h3>
                             <p className="text-gray-600 mb-3 text-sm">Proposals will undergo a double-blind peer review. Key evaluation weightings:</p>
-                            <div className="bg-white p-4 rounded-lg border border-gray-100 shadow-sm">
+                            <div className="bg-white p-4 rounded-md border border-gray-100 ">
                                 <ul className="space-y-2 text-sm text-gray-700">
                                     <li className="flex justify-between items-center border-b border-gray-50 pb-2">
                                         <span>Scientific merit and originality</span>
@@ -271,7 +271,7 @@ export default function ScholarshipDetailsPage({ params }: { params: Promise<{ i
                         <section className="flex-1">
                             <h3 className="text-lg font-bold text-gray-700 mb-3">Timeline</h3>
                             <p className="text-gray-600 mb-3 text-sm">Please adhere to the following schedule for the grant application and award process:</p>
-                            <div className="bg-gray-50 p-4 rounded-lg border border-gray-100">
+                            <div className="bg-gray-50 p-4 rounded-md border border-gray-100">
                                 <div className="space-y-3 text-sm">
                                     <div className="flex justify-between border-b border-gray-200 pb-2">
                                         <span className="text-gray-600 font-medium">Proposal Submission Deadline</span>
@@ -318,7 +318,7 @@ export default function ScholarshipDetailsPage({ params }: { params: Promise<{ i
                 <section>
                     <h2 className="text-xl font-bold text-gray-800 mb-4">Attachments & Downloads</h2>
                     <div className="flex flex-col sm:flex-row flex-wrap gap-4">
-                        <a href="#" className="flex items-center justify-between gap-4 text-blue-700 hover:text-blue-900 transition-colors bg-blue-50 hover:bg-blue-100 px-4 py-3 rounded-lg border border-blue-200 shadow-sm sm:w-auto w-full group">
+                        <a href="#" className="flex items-center justify-between gap-4 text-blue-700 hover:text-blue-900 transition-colors bg-blue-50 hover:bg-blue-100 px-4 py-3 rounded-md border border-blue-200  sm:w-auto w-full group">
                             <div className="flex items-center gap-2">
                                 <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/><polyline points="14 2 14 8 20 8"/><line x1="16" x2="8" y1="13" y2="13"/><line x1="16" x2="8" y1="17" y2="17"/><line x1="10" x2="8" y1="9" y2="9"/></svg>
                                 <span className="font-medium text-sm">Proposal_Format.docx</span>
@@ -326,7 +326,7 @@ export default function ScholarshipDetailsPage({ params }: { params: Promise<{ i
                             <svg className="w-4 h-4 opacity-70 group-hover:opacity-100 transition-opacity" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" x2="12" y1="15" y2="3"/></svg>
                         </a>
                         
-                        <a href="#" className="flex items-center justify-between gap-4 text-blue-700 hover:text-blue-900 transition-colors bg-blue-50 hover:bg-blue-100 px-4 py-3 rounded-lg border border-blue-200 shadow-sm sm:w-auto w-full group">
+                        <a href="#" className="flex items-center justify-between gap-4 text-blue-700 hover:text-blue-900 transition-colors bg-blue-50 hover:bg-blue-100 px-4 py-3 rounded-md border border-blue-200  sm:w-auto w-full group">
                             <div className="flex items-center gap-2">
                                 <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/><polyline points="14 2 14 8 20 8"/><path d="M8 13h2"/><path d="M8 17h2"/><path d="M14 13h2"/><path d="M14 17h2"/></svg>
                                 <span className="font-medium text-sm">Budget_Template.xlsx</span>
@@ -334,7 +334,7 @@ export default function ScholarshipDetailsPage({ params }: { params: Promise<{ i
                             <svg className="w-4 h-4 opacity-70 group-hover:opacity-100 transition-opacity" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" x2="12" y1="15" y2="3"/></svg>
                         </a>
                         
-                        <a href="#" className="flex items-center justify-between gap-4 text-blue-700 hover:text-blue-900 transition-colors bg-blue-50 hover:bg-blue-100 px-4 py-3 rounded-lg border border-blue-200 shadow-sm sm:w-auto w-full group">
+                        <a href="#" className="flex items-center justify-between gap-4 text-blue-700 hover:text-blue-900 transition-colors bg-blue-50 hover:bg-blue-100 px-4 py-3 rounded-md border border-blue-200  sm:w-auto w-full group">
                             <div className="flex items-center gap-2">
                                 <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/><polyline points="14 2 14 8 20 8"/><path d="M10 12v6"/><path d="M14 12v6"/><path d="M10 12l4 6"/><path d="M14 12l-4 6"/></svg>
                                 <span className="font-medium text-sm">Guidelines.pdf</span>
@@ -353,7 +353,7 @@ export default function ScholarshipDetailsPage({ params }: { params: Promise<{ i
                     </div>
                     <Link 
                       href="/scholarship-apply"
-                      className="w-full sm:w-auto px-8 py-3.5 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-lg shadow-lg shadow-blue-500/10 transition-all duration-200 text-center"
+                      className="w-full sm:w-auto px-8 py-3.5 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-md shadow-lg shadow-blue-500/10 transition-all duration-200 text-center"
                     >
                         Apply for Scholarship
                     </Link>
@@ -366,7 +366,7 @@ export default function ScholarshipDetailsPage({ params }: { params: Promise<{ i
         <aside className="w-full xl:w-[350px] 2xl:w-[380px] flex-shrink-0 flex flex-col gap-6 xl:mt-[76px] pb-12 overflow-visible">
             
             {/* Contact Information */}
-            <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
+            <div className="bg-white p-6 rounded-md  border border-gray-100">
                 <h2 className="text-xl font-bold text-gray-900 mb-4">Contact Information</h2>
                 <div className="space-y-4 text-[14px] text-gray-600 font-medium tracking-tight">
                     <div className="flex items-start gap-3">
@@ -389,16 +389,16 @@ export default function ScholarshipDetailsPage({ params }: { params: Promise<{ i
             </div>
 
             {/* Request Information Form */}
-            <div className="bg-white p-6 sm:p-7 rounded-[20px] shadow-sm border border-gray-100">
+            <div className="bg-white p-6 sm:p-7 rounded-[20px]  border border-gray-100">
                 <h2 className="text-[22px] font-bold text-gray-900 mb-2">Request Information</h2>
                 <p className="text-[15px] text-gray-500 mb-6 leading-snug font-medium">Fill the form and our admission counselor will contact you.</p>
 
                 <form className="space-y-4">
-                    <input type="text" placeholder="Full Name" className="w-full px-4 py-3.5 rounded-lg border border-gray-200 focus:outline-none focus:border-[#0000ff] focus:ring-1 focus:ring-[#0000ff] text-sm placeholder-gray-400 bg-white font-medium shadow-xs" />
-                    <input type="email" placeholder="Email Address" className="w-full px-4 py-3.5 rounded-lg border border-gray-200 focus:outline-none focus:border-[#0000ff] focus:ring-1 focus:ring-[#0000ff] text-sm placeholder-gray-400 bg-white font-medium shadow-xs" />
-                    <input type="tel" placeholder="Phone Number" className="w-full px-4 py-3.5 rounded-lg border border-gray-200 focus:outline-none focus:border-[#0000ff] focus:ring-1 focus:ring-[#0000ff] text-sm placeholder-gray-400 bg-white font-medium shadow-xs" />
+                    <input type="text" placeholder="Full Name" className="w-full px-4 py-3.5 rounded-md border border-gray-200 focus:outline-none focus:border-[#0000ff] focus:ring-1 focus:ring-[#0000ff] text-sm placeholder-gray-400 bg-white font-medium shadow-xs" />
+                    <input type="email" placeholder="Email Address" className="w-full px-4 py-3.5 rounded-md border border-gray-200 focus:outline-none focus:border-[#0000ff] focus:ring-1 focus:ring-[#0000ff] text-sm placeholder-gray-400 bg-white font-medium shadow-xs" />
+                    <input type="tel" placeholder="Phone Number" className="w-full px-4 py-3.5 rounded-md border border-gray-200 focus:outline-none focus:border-[#0000ff] focus:ring-1 focus:ring-[#0000ff] text-sm placeholder-gray-400 bg-white font-medium shadow-xs" />
                     <div className="relative">
-                        <select className="w-full px-4 py-3.5 rounded-lg border border-gray-200 focus:outline-none focus:border-[#0000ff] focus:ring-1 focus:ring-[#0000ff] text-sm text-gray-500 appearance-none bg-white font-medium shadow-xs">
+                        <select className="w-full px-4 py-3.5 rounded-md border border-gray-200 focus:outline-none focus:border-[#0000ff] focus:ring-1 focus:ring-[#0000ff] text-sm text-gray-500 appearance-none bg-white font-medium shadow-xs">
                             <option value="" disabled selected>Select Course of Interest</option>
                             <option>Research Grant Inquiry</option>
                             <option>Facility Access</option>
@@ -409,7 +409,7 @@ export default function ScholarshipDetailsPage({ params }: { params: Promise<{ i
                         </div>
                     </div>
                     <div className="pt-2">
-                        <button type="button" className="w-full bg-[#0000ff] hover:bg-blue-800 text-white font-bold py-4 rounded-xl transition-all text-[15px] flex items-center justify-center gap-2.5 shadow-xl shadow-blue-500/10">
+                        <button type="button" className="w-full bg-[#0000ff] hover:bg-blue-800 text-white font-bold py-4 rounded-md transition-all text-[15px] flex items-center justify-center gap-2.5 shadow-xl shadow-blue-500/10">
                             <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                                 <path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"></path>
                                 <path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"></path>
@@ -425,7 +425,7 @@ export default function ScholarshipDetailsPage({ params }: { params: Promise<{ i
                 <h2 className="text-xl font-bold text-gray-800">Related Scholarships</h2>
                 
                 {similarScholarships.length > 0 ? similarScholarships.map((item: any) => (
-                    <Link key={item.id} href={`/scholarship-finder/${item.id}`} className="bg-white p-5 rounded-lg shadow-sm border border-gray-100 hover:border-blue-200 hover:shadow-md transition-all group flex flex-col">
+                    <Link key={item.id} href={`/scholarship-finder/${item.id}`} className="bg-white p-5 rounded-md  border border-gray-100 hover:border-blue-200 hover: transition-all group flex flex-col">
                         <div className="flex items-center gap-2 mb-2">
                             <span className="text-[10px] font-bold uppercase tracking-wider bg-blue-50 text-blue-600 px-2.5 py-1 rounded">Grant</span>
                         </div>
@@ -436,7 +436,7 @@ export default function ScholarshipDetailsPage({ params }: { params: Promise<{ i
                         </p>
                     </Link>
                 )) : (
-                  <div className="p-10 text-center bg-gray-50 rounded-xl border border-dashed border-gray-200">
+                  <div className="p-10 text-center bg-gray-50 rounded-md border border-dashed border-gray-200">
                     <p className="text-xs text-gray-400 font-bold">No similar scholarship found.</p>
                   </div>
                 )}

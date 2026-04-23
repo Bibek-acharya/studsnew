@@ -69,15 +69,13 @@ const ForgotPasswordView: React.FC<ForgotPasswordViewProps> = ({
         Back to Login
       </button>
 
-      
-
-      <h1 className="text-xl font-bold text-gray-900 mb-1">Reset Password</h1>
+      <h1 className="text-xl font-bold text-gray-900 mb-1">Forgot Password</h1>
       <p className="text-gray-500 text-sm mb-6">
         Enter your email and we&apos;ll send you a 6-digit code to reset your password.
       </p>
 
       {error && (
-        <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg">
+        <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-md">
           <p className="text-red-700 text-sm">{error}</p>
         </div>
       )}
@@ -93,7 +91,7 @@ const ForgotPasswordView: React.FC<ForgotPasswordViewProps> = ({
               placeholder="Email Address"
               required
               disabled={loading}
-              className={`w-full pl-11 pr-10 py-2.5 border rounded-lg text-sm focus:ring-1 outline-none transition-colors placeholder:text-gray-400 disabled:bg-gray-50 ${getBorderClass("email")} ${getFocusClasses("email")}`}
+              className={`w-full pl-11 pr-10 py-2.5 border rounded-md text-sm focus:ring-1 outline-none transition-colors placeholder:text-gray-400 disabled:bg-gray-50 ${getBorderClass("email")} ${getFocusClasses("email")}`}
               value={values.email}
               onChange={handleEmailChange}
               onBlur={() => { touch("email"); validateField("email", values.email, validators.email); }}
@@ -121,7 +119,7 @@ const ForgotPasswordView: React.FC<ForgotPasswordViewProps> = ({
         <button
           type="submit"
           disabled={loading}
-          className="w-full bg-blue-600 hover:bg-blue-700 disabled:bg-blue-400 text-white font-medium rounded-lg py-2.5 transition-colors duration-200 mt-2 shadow-md shadow-blue-600/30 flex items-center justify-center gap-2"
+          className="w-full bg-blue-600 hover:bg-blue-700 disabled:bg-blue-400 text-white font-medium rounded-md py-2.5 transition-colors duration-200 mt-2  shadow-blue-600/30 flex items-center justify-center gap-2"
         >
           {loading ? (
             <svg className="w-5 h-5 animate-spin" fill="none" viewBox="0 0 24 24">

@@ -1,92 +1,18 @@
 "use client";
 
 import React, { useMemo, useState } from "react";
-
-interface WriteReviewPageProps {
-  onNavigate?: (view: any, data?: any) => void;
-}
+import { submitReviewAction } from "@/actions/review-actions";
+import { getCollegesBySearch } from "@/lib/college-suggestions";
+import { courseDataByLevel, searchCourses } from "@/lib/course-suggestions";
+import { ratingCategories, ratingStatusLabels } from "@/lib/review-types";
 
 type StudentType = "current" | "alumni" | null;
 
-const collegeSuggestions = [
-  "Amrit Science Campus",
-  "Apex College",
-  "Asian College of Higher Studies",
-  "Birendra Multiple Campus",
-  "British College",
-  "Deerwalk Institute of Technology",
-  "Global College of Management",
-  "Islington College",
-  "Kathmandu University",
-  "Nepal College of Information Technology (NCIT)",
-  "Nepal Engineering College",
-  "Patan Multiple Campus",
-  "Pokhara University",
-  "Pulchowk Campus",
-  "St. Xavier's College",
-  "Thapathali Campus",
-  "Tribhuvan University",
-];
+const popularColleges = getCollegesBySearch("");
 
-const courseDataMap: Record<string, string[]> = {
-  "+2 / High School": [
-    "Science",
-    "Management",
-    "Humanities",
-    "Law",
-    "Education",
-  ],
-  "Bachelor's Degree": [
-    "BCA",
-    "BSc.CSIT",
-    "BIT",
-    "BIM",
-    "BBA",
-    "BBM",
-    "BBS",
-    "BE Civil",
-    "BE Computer",
-    "BE Electronics",
-    "MBBS",
-    "BDS",
-    "BSc. Nursing",
-    "BA",
-  ],
-  "Master's Degree": [
-    "MCA",
-    "MSc.CSIT",
-    "MBA",
-    "MBS",
-    "ME Computer",
-    "ME Civil",
-    "MSc. Physics",
-    "MA",
-  ],
-  Diploma: [
-    "Diploma in Computer Engineering",
-    "Diploma in Civil Engineering",
-    "Diploma in Architecture",
-    "Diploma in Agriculture",
-    "Diploma in Pharmacy",
-  ],
-};
+const courseDataMap: Record<string, string[]> = courseDataByLevel;
 
-const ratingCategories = [
-  "Teaching Quality & Faculty Support",
-  "Infrastructure & Lab Facilities",
-  "Social & Campus Life",
-  "Placement & Internships",
-  "Value for Money",
-  "Hostels & Accommodation",
-  "Student Clubs & Activities",
-  "Administration & Management",
-  "Library & Resources",
-  "Overall Experience",
-];
-
-const ratingStatusLabels = ["Terrible", "Bad", "Okay", "Good", "Excellent"];
-
-const WriteReviewPage: React.FC<WriteReviewPageProps> = () => {
+const WriteReviewPage: React.FC = () => {
   const currentYear = new Date().getFullYear();
   const years = Array.from(
     { length: currentYear - 1989 },
@@ -119,14 +45,11 @@ const WriteReviewPage: React.FC<WriteReviewPageProps> = () => {
   }>({ open: false, title: "", message: "", type: "success" });
 
   const filteredColleges = useMemo(() => {
-    const q = collegeInput.toLowerCase();
-    return collegeSuggestions.filter((item) => item.toLowerCase().includes(q));
+    return getCollegesBySearch(collegeInput);
   }, [collegeInput]);
 
   const currentCourseSuggestions = useMemo(() => {
-    const source = level ? courseDataMap[level] || [] : [];
-    const q = courseInput.toLowerCase();
-    return source.filter((item) => item.toLowerCase().includes(q));
+    return searchCourses(courseInput, level);
   }, [level, courseInput]);
 
   const averageRating = useMemo(() => {
@@ -190,7 +113,7 @@ const WriteReviewPage: React.FC<WriteReviewPageProps> = () => {
     setRatings({});
   };
 
-  const handleSubmit = (event: React.FormEvent) => {
+  const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
 
     if (!studentType) {
@@ -228,12 +151,41 @@ const WriteReviewPage: React.FC<WriteReviewPageProps> = () => {
       return;
     }
 
-    showMessage(
-      "success",
-      "Review Submitted!",
-      "Thank you for sharing your experience. Your review will help future students make better choices.",
+    const selectedCollege = popularColleges.find(
+      c => c.name.toLowerCase() === collegeInput.toLowerCase()
     );
-    resetForm();
+
+    const result = await submitReviewAction({
+      collegeId: selectedCollege?.id || Math.floor(Math.random() * 1000),
+      collegeName: collegeInput,
+      studentType,
+      course: courseInput,
+      level,
+      batchYear: parseInt(batchYear),
+      ratings,
+      pros,
+      cons,
+      summaryTitle,
+      yearlyFee: yearlyFee ? parseInt(yearlyFee) : undefined,
+      scholarship: scholarship === "yes",
+      internshipOutcome: internshipOutcome || undefined,
+      email,
+    });
+
+    if (result.success) {
+      showMessage(
+        "success",
+        "Review Submitted!",
+        "Thank you for sharing your experience. Your review will help future students make better choices.",
+      );
+      resetForm();
+    } else {
+      showMessage(
+        "error",
+        "Submission Failed",
+        result.error || "Something went wrong. Please try again.",
+      );
+    }
   };
 
   return (
@@ -254,7 +206,7 @@ const WriteReviewPage: React.FC<WriteReviewPageProps> = () => {
           onSubmit={handleSubmit}
         >
           <div className="flex flex-col gap-6 lg:col-span-8">
-            <section className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm md:p-8">
+            <section className="rounded-md border border-slate-200 bg-white p-6  md:p-8">
               <SectionHeader
                 icon="fa-graduation-cap"
                 iconWrap="bg-blue-50 text-blue-600"
@@ -294,22 +246,23 @@ const WriteReviewPage: React.FC<WriteReviewPageProps> = () => {
                     }
                     onChange={(event) => setCollegeInput(event.target.value)}
                     placeholder="Search Your Campus/college Name"
-                    className="w-full rounded-lg border border-slate-200 bg-white py-3 pl-10 pr-4 text-sm placeholder-slate-400 focus:border-transparent focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className="w-full rounded-md border border-slate-200 bg-white py-3 pl-10 pr-4 text-sm placeholder-slate-400 focus:border-transparent focus:outline-none focus:ring-2 focus:ring-blue-500"
                   />
                   {showCollegeList && filteredColleges.length > 0 && (
-                    <ul className="absolute left-0 top-full z-20 mt-1 max-h-52 w-full overflow-y-auto rounded-lg border border-slate-200 bg-white shadow-lg">
+                    <ul className="absolute left-0 top-full z-20 mt-1 max-h-52 w-full overflow-y-auto rounded-md border border-slate-200 bg-white shadow-lg">
                       {filteredColleges.map((item) => (
-                        <li key={item}>
+                        <li key={item.id}>
                           <button
                             type="button"
                             className="w-full border-b border-slate-50 px-4 py-3 text-left text-sm font-medium text-slate-700 transition-colors last:border-0 hover:bg-blue-50"
                             onMouseDown={(event) => {
                               event.preventDefault();
-                              setCollegeInput(item);
+                              setCollegeInput(item.name);
                               setShowCollegeList(false);
                             }}
                           >
-                            {item}
+                            <div className="font-medium">{item.name}</div>
+                            <div className="text-xs text-slate-500">{item.location} • {item.type}</div>
                           </button>
                         </li>
                       ))}
@@ -329,7 +282,7 @@ const WriteReviewPage: React.FC<WriteReviewPageProps> = () => {
                       setLevel(event.target.value);
                       setCourseInput("");
                     }}
-                    className="w-full cursor-pointer appearance-none rounded-lg border border-slate-200 bg-white px-4 py-3 text-sm text-slate-700 focus:border-transparent focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className="w-full cursor-pointer appearance-none rounded-md border border-slate-200 bg-white px-4 py-3 text-sm text-slate-700 focus:border-transparent focus:outline-none focus:ring-2 focus:ring-blue-500"
                   >
                     <option value="">Select Level</option>
                     <option value="+2 / High School">+2 / High School</option>
@@ -357,10 +310,10 @@ const WriteReviewPage: React.FC<WriteReviewPageProps> = () => {
                           ? "Search your courses and program"
                           : "Select Level first"
                       }
-                      className="w-full rounded-lg border border-slate-200 bg-white py-3 pl-10 pr-4 text-sm placeholder-slate-400 focus:border-transparent focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      className="w-full rounded-md border border-slate-200 bg-white py-3 pl-10 pr-4 text-sm placeholder-slate-400 focus:border-transparent focus:outline-none focus:ring-2 focus:ring-blue-500"
                     />
                     {showCourseList && currentCourseSuggestions.length > 0 && (
-                      <ul className="absolute left-0 top-full z-20 mt-1 max-h-52 w-full overflow-y-auto rounded-lg border border-slate-200 bg-white shadow-lg">
+                      <ul className="absolute left-0 top-full z-20 mt-1 max-h-52 w-full overflow-y-auto rounded-md border border-slate-200 bg-white shadow-lg">
                         {currentCourseSuggestions.map((item) => (
                           <li key={item}>
                             <button
@@ -388,7 +341,7 @@ const WriteReviewPage: React.FC<WriteReviewPageProps> = () => {
                   <select
                     value={batchYear}
                     onChange={(event) => setBatchYear(event.target.value)}
-                    className="w-full cursor-pointer appearance-none rounded-lg border border-slate-200 bg-white px-4 py-3 text-sm text-slate-700 focus:border-transparent focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className="w-full cursor-pointer appearance-none rounded-md border border-slate-200 bg-white px-4 py-3 text-sm text-slate-700 focus:border-transparent focus:outline-none focus:ring-2 focus:ring-blue-500"
                   >
                     <option value="">Select Year</option>
                     {years.map((year) => (
@@ -401,7 +354,7 @@ const WriteReviewPage: React.FC<WriteReviewPageProps> = () => {
               </div>
             </section>
 
-            <section className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm md:p-8">
+            <section className="rounded-md border border-slate-200 bg-white p-6  md:p-8">
               <SectionHeader
                 icon="fa-face-smile"
                 iconWrap="bg-amber-50 text-amber-500"
@@ -446,7 +399,7 @@ const WriteReviewPage: React.FC<WriteReviewPageProps> = () => {
               </div>
             </section>
 
-            <section className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm md:p-8">
+            <section className="rounded-md border border-slate-200 bg-white p-6  md:p-8">
               <SectionHeader
                 icon="fa-pen"
                 iconWrap="bg-green-50 text-green-600"
@@ -482,12 +435,12 @@ const WriteReviewPage: React.FC<WriteReviewPageProps> = () => {
                   value={summaryTitle}
                   onChange={(event) => setSummaryTitle(event.target.value)}
                   placeholder="Eg. Great learning environment but needs better infrastructure"
-                  className="w-full rounded-lg border border-slate-200 bg-white p-4 text-sm placeholder-slate-400 focus:border-transparent focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-full rounded-md border border-slate-200 bg-white p-4 text-sm placeholder-slate-400 focus:border-transparent focus:outline-none focus:ring-2 focus:ring-blue-500"
                 />
               </div>
             </section>
 
-            <section className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm md:p-8">
+            <section className="rounded-md border border-slate-200 bg-white p-6  md:p-8">
               <SectionHeader
                 icon="fa-book-open"
                 iconWrap="bg-purple-50 text-purple-600"
@@ -503,14 +456,14 @@ const WriteReviewPage: React.FC<WriteReviewPageProps> = () => {
                     value={yearlyFee}
                     onChange={(event) => setYearlyFee(event.target.value)}
                     placeholder="e.g. 150000"
-                    className="w-full rounded-lg border border-slate-200 bg-white p-4 text-sm placeholder-slate-400 focus:border-transparent focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className="w-full rounded-md border border-slate-200 bg-white p-4 text-sm placeholder-slate-400 focus:border-transparent focus:outline-none focus:ring-2 focus:ring-blue-500"
                   />
                 </Field>
                 <Field label="Scholarship Received?">
                   <select
                     value={scholarship}
                     onChange={(event) => setScholarship(event.target.value)}
-                    className="w-full cursor-pointer appearance-none rounded-lg border border-slate-200 bg-white p-4 text-sm text-slate-600 focus:border-transparent focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className="w-full cursor-pointer appearance-none rounded-md border border-slate-200 bg-white p-4 text-sm text-slate-600 focus:border-transparent focus:outline-none focus:ring-2 focus:ring-blue-500"
                   >
                     <option value="">Select Option</option>
                     <option value="yes">Yes</option>
@@ -523,7 +476,7 @@ const WriteReviewPage: React.FC<WriteReviewPageProps> = () => {
                 <select
                   value={internshipOutcome}
                   onChange={(event) => setInternshipOutcome(event.target.value)}
-                  className="w-full cursor-pointer appearance-none rounded-lg border border-slate-200 bg-white p-4 text-sm text-slate-600 focus:border-transparent focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-full cursor-pointer appearance-none rounded-md border border-slate-200 bg-white p-4 text-sm text-slate-600 focus:border-transparent focus:outline-none focus:ring-2 focus:ring-blue-500"
                 >
                   <option value="">Select outcome</option>
                   <option value="excellent">Excellent Placements</option>
@@ -536,7 +489,7 @@ const WriteReviewPage: React.FC<WriteReviewPageProps> = () => {
               </Field>
             </section>
 
-            <section className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm md:p-8">
+            <section className="rounded-md border border-slate-200 bg-white p-6  md:p-8">
               <SectionHeader
                 icon="fa-lock"
                 iconWrap="bg-slate-100 text-blue-600"
@@ -564,7 +517,7 @@ const WriteReviewPage: React.FC<WriteReviewPageProps> = () => {
                   value={email}
                   onChange={(event) => setEmail(event.target.value)}
                   placeholder="example@gmail.com"
-                  className="w-full rounded-lg border border-slate-200 bg-white p-4 text-sm placeholder-slate-400 focus:border-transparent focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-full rounded-md border border-slate-200 bg-white p-4 text-sm placeholder-slate-400 focus:border-transparent focus:outline-none focus:ring-2 focus:ring-blue-500"
                 />
                 <p className="mt-2 text-xs font-medium text-slate-400">
                   We may send a verification link to this email.
@@ -591,7 +544,7 @@ const WriteReviewPage: React.FC<WriteReviewPageProps> = () => {
               <div className="flex justify-end">
                 <button
                   type="submit"
-                  className="flex items-center justify-center gap-2 rounded-lg bg-blue-600 px-8 py-3 font-bold text-white transition-colors hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+                  className="flex items-center justify-center gap-2 rounded-md bg-blue-600 px-8 py-3 font-bold text-white transition-colors hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
                 >
                   <span>Submit Review</span>
                 </button>
@@ -600,7 +553,7 @@ const WriteReviewPage: React.FC<WriteReviewPageProps> = () => {
           </div>
 
           <div className="lg:col-span-4">
-            <div className="sticky top-6 overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
+            <div className="sticky top-6 overflow-hidden rounded-md border border-slate-200 bg-white ">
               <div className="rounded-t-2xl bg-[#111827] p-8 text-center text-white">
                 <h3 className="mb-4 text-sm font-bold uppercase tracking-wider text-slate-200">
                   Live Rating Preview
@@ -644,7 +597,7 @@ const WriteReviewPage: React.FC<WriteReviewPageProps> = () => {
 
       {modal.open && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/50 p-4 backdrop-blur-sm">
-          <div className="w-full max-w-sm rounded-2xl bg-white p-6 text-center shadow-xl">
+          <div className="w-full max-w-sm rounded-md bg-white p-6 text-center shadow-xl">
             <div
               className={`mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full ${modal.type === "error" ? "bg-red-100 text-red-600" : "bg-green-100 text-green-600"}`}
             >
@@ -659,7 +612,7 @@ const WriteReviewPage: React.FC<WriteReviewPageProps> = () => {
             <button
               type="button"
               onClick={() => setModal((prev) => ({ ...prev, open: false }))}
-              className="w-full rounded-xl bg-slate-900 px-4 py-3 font-semibold text-white transition-colors hover:bg-slate-800"
+              className="w-full rounded-md bg-slate-900 px-4 py-3 font-semibold text-white transition-colors hover:bg-slate-800"
             >
               Got it
             </button>
@@ -697,7 +650,7 @@ const TypeButton: React.FC<{
   <button
     type="button"
     onClick={onClick}
-    className={`flex flex-col items-center justify-center rounded-xl border-2 px-4 py-8 transition-all ${active ? "border-blue-600 bg-blue-50 text-blue-700 shadow-sm" : "border-slate-100 text-slate-700 hover:border-slate-200 hover:bg-slate-50"}`}
+    className={`flex flex-col items-center justify-center rounded-md border-2 px-4 py-8 transition-all ${active ? "border-blue-600 bg-blue-50 text-blue-700 " : "border-slate-100 text-slate-700 hover:border-slate-200 hover:bg-slate-50"}`}
   >
     <i
       className={`fa-solid fa-graduation-cap mb-3 text-2xl ${active ? "text-blue-600" : "text-slate-800"}`}
@@ -731,7 +684,7 @@ const ReviewTextarea: React.FC<{
       value={value}
       onChange={(event) => onChange(event.target.value)}
       placeholder={placeholder}
-      className="w-full resize-none rounded-lg border border-slate-200 bg-white p-4 text-sm placeholder-slate-400 focus:border-transparent focus:outline-none focus:ring-2 focus:ring-blue-500"
+      className="w-full resize-none rounded-md border border-slate-200 bg-white p-4 text-sm placeholder-slate-400 focus:border-transparent focus:outline-none focus:ring-2 focus:ring-blue-500"
     />
   </div>
 );

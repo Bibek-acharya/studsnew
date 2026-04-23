@@ -5,7 +5,9 @@ import { initialRecommenderState, recommendations } from "./data";
 import ResultsGrid from "@/components/scholarship-recommender/ResultsGrid";
 import CustomSelect from "@/components/scholarship-recommender/CustomSelect";
 import MultiSelect from "@/components/scholarship-recommender/MultiSelect";
+import { NEPAL_PROVINCES, NEPAL_DISTRICTS } from "@/lib/location-data";
 import { RecommenderState, StepIndex } from "./types";
+import ShortlistView from "./ShortlistView";
 
 const stepTitles: Record<number, { title: string; subtitle: string }> = {
   1: {
@@ -17,7 +19,7 @@ const stepTitles: Record<number, { title: string; subtitle: string }> = {
     subtitle: "Help us find opportunities relevant to your intended field and preferences.",
   },
   3: {
-    title: "Location & Citizenship",
+    title: "Location",
     subtitle: "Many scholarships depend on province, district, and preferred study location.",
   },
   4: {
@@ -142,6 +144,7 @@ export default function ScholarshipRecommenderPage() {
   const [step, setStep] = useState<StepIndex>(1);
   const [state, setState] = useState<RecommenderState>(initialRecommenderState);
   const [selectedIds, setSelectedIds] = useState<number[]>([]);
+  const [shortlistedIds, setShortlistedIds] = useState<number[]>([]);
   const [academicScoreError, setAcademicScoreError] = useState("");
 
   const canContinue = useMemo(() => isStepValid(step, state), [step, state]);
@@ -216,6 +219,25 @@ export default function ScholarshipRecommenderPage() {
         onToggleAll={handleSelectAll}
         onToggleOne={handleToggleCard}
         onNavigateToStep={(step) => setStep(step as StepIndex)}
+        onShortlist={() => {
+          setShortlistedIds((prev) => Array.from(new Set([...prev, ...selectedIds])));
+          setStep(7);
+        }}
+      />
+    );
+  }
+
+  if (step === 7) {
+    return (
+      <ShortlistView
+        recommendedItems={recommendations}
+        shortlistedIds={shortlistedIds}
+        onToggleShortlist={(id) => {
+          setShortlistedIds((prev) =>
+            prev.includes(id) ? prev.filter((item) => item !== id) : [...prev, id]
+          );
+        }}
+        onBack={() => setStep(6)}
       />
     );
   }
@@ -227,14 +249,14 @@ export default function ScholarshipRecommenderPage() {
     <div className="flex gap-4.5 items-center mt-4">
       <button
         onClick={back}
-        className="inline-flex items-center justify-center h-12 rounded-lg text-[18px] font-semibold bg-white border border-[#d0d7e3] text-[#3f5474] w-32.5 hover:bg-[#f8fafc]"
+        className="inline-flex items-center justify-center h-12 rounded-md text-[18px] font-semibold bg-white border border-[#d0d7e3] text-[#3f5474] w-32.5 hover:bg-[#f8fafc]"
       >
         Back
       </button>
       <button
         onClick={next}
         disabled={!commonContinueEnabled}
-        className={`inline-flex items-center justify-center h-12 rounded-lg text-[18px] font-semibold text-white w-43.75 ${
+        className={`inline-flex items-center justify-center h-12 rounded-md text-[18px] font-semibold text-white w-43.75 ${
           commonContinueEnabled ? "bg-brand-blue hover:bg-brand-hover shadow-[0_4px_14px_0_rgba(37,99,235,0.25)]" : "bg-[#afbacc]"
         }`}
       >
@@ -242,7 +264,6 @@ export default function ScholarshipRecommenderPage() {
       </button>
     </div>
   );
-  const stepOneButtonEnabled = canContinue;
 
   return (
     <StepShell
@@ -255,7 +276,7 @@ export default function ScholarshipRecommenderPage() {
             <button
               onClick={next}
               disabled={!canContinue}
-              className={`w-full md:w-auto md:min-w-50 px-10 py-3.5 text-white font-bold text-[17px] rounded-lg transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-blue-300 ${
+              className={`w-full md:w-auto md:min-w-50 px-10 py-3.5 text-white font-bold text-[17px] rounded-md transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-blue-300 ${
                 canContinue ? "bg-brand-blue hover:bg-brand-hover cursor-pointer" : "bg-[#b0b8c6] cursor-not-allowed"
               }`}
             >
@@ -267,7 +288,7 @@ export default function ScholarshipRecommenderPage() {
             <button
               type="button"
               onClick={next}
-              className="w-full py-3 px-4 bg-brand-blue hover:bg-brand-hover text-white text-[1.125rem] font-medium rounded-lg transition-colors duration-200"
+              className="w-full py-3 px-4 bg-brand-blue hover:bg-brand-hover text-white text-[1.125rem] font-medium rounded-md transition-colors duration-200"
             >
               Find Scholarship
             </button>
@@ -307,7 +328,7 @@ export default function ScholarshipRecommenderPage() {
                   key={value}
                   type="button"
                   onClick={() => updateState("studyMode", value as RecommenderState["studyMode"])}
-                  className={`flex items-center justify-center p-3 border-2 rounded-lg cursor-pointer transition-colors text-center text-[15px] font-medium ${
+                  className={`flex items-center justify-center p-3 border-2 rounded-md cursor-pointer transition-colors text-center text-[15px] font-medium ${
                     state.studyMode === value
                       ? "border-[#2563eb] bg-blue-50/50 text-[#1e40af]"
                       : "border-[#cbd5e1] text-[#334155] hover:bg-slate-50"
@@ -346,7 +367,7 @@ export default function ScholarshipRecommenderPage() {
                 inputMode={state.academicScoreType === "percentage" ? "numeric" : "decimal"}
                 pattern={state.academicScoreType === "percentage" ? "[0-9]*" : "[0-9]*[.]?[0-9]*"}
                 disabled={!state.educationLevel}
-                className="sm:col-span-2 w-full p-3.5 border-2 border-[#cbd5e1] rounded-lg focus:border-[#2563eb] focus:ring-2 focus:ring-[#bfdbfe] focus:outline-none transition-all text-[16px] text-[#1e293b] bg-slate-50 disabled:opacity-60"
+                className="sm:col-span-2 w-full p-3.5 border-2 border-[#cbd5e1] rounded-md focus:border-[#2563eb] focus:ring-2 focus:ring-[#bfdbfe] focus:outline-none transition-all text-[16px] text-[#1e293b] bg-slate-50 disabled:opacity-60"
               />
             </div>
             {academicScoreError && (
@@ -395,7 +416,7 @@ export default function ScholarshipRecommenderPage() {
                       key={value}
                       type="button"
                       onClick={() => handleYesNoChange(field as "willingEssay" | "willingInterview" | "willingGpa", value as "yes" | "no")}
-                      className={`px-6 py-2 border-2 rounded-lg text-center cursor-pointer transition-all font-semibold ${
+                      className={`px-6 py-2 border-2 rounded-md text-center cursor-pointer transition-all font-semibold ${
                         state[field as keyof RecommenderState] === value
                           ? value === "yes"
                             ? "border-blue-600 bg-blue-50 text-blue-700"
@@ -419,17 +440,15 @@ export default function ScholarshipRecommenderPage() {
             <label className="text-[16px] font-semibold text-[#1e293b]">Your Province</label>
             <CustomSelect
               value={state.province}
-              onChange={(value) => updateState("province", value)}
+              onChange={(value) => {
+                updateState("province", value);
+                updateState("district", "");
+              }}
               placeholder="Select Province"
-              options={[
-                { value: "koshi", label: "Koshi Province" },
-                { value: "madhesh", label: "Madhesh Province" },
-                { value: "bagmati", label: "Bagmati Province" },
-                { value: "gandaki", label: "Gandaki Province" },
-                { value: "lumbini", label: "Lumbini Province" },
-                { value: "karnali", label: "Karnali Province" },
-                { value: "sudurpashchim", label: "Sudurpashchim Province" },
-              ]}
+              options={NEPAL_PROVINCES.map((province) => ({
+                value: province,
+                label: province,
+              }))}
             />
           </div>
 
@@ -439,13 +458,13 @@ export default function ScholarshipRecommenderPage() {
               value={state.district}
               onChange={(value) => updateState("district", value)}
               placeholder="Select District"
-              options={[
-                { value: "kathmandu", label: "Kathmandu" },
-                { value: "bhaktapur", label: "Bhaktapur" },
-                { value: "lalitpur", label: "Lalitpur" },
-                { value: "kaski", label: "Kaski" },
-                { value: "chitwan", label: "Chitwan" },
-              ]}
+              options={
+                state.province
+                  ? (NEPAL_DISTRICTS[state.province as keyof typeof NEPAL_DISTRICTS] || []).map(
+                      (district) => ({ value: district, label: district }),
+                    )
+                  : []
+              }
             />
           </div>
 
@@ -461,7 +480,7 @@ export default function ScholarshipRecommenderPage() {
                   key={value}
                   type="button"
                   onClick={() => updateState("studyLocation", value as RecommenderState["studyLocation"])}
-                  className={`flex items-center justify-center px-3 py-3.5 border-2 rounded-lg text-center cursor-pointer transition-all font-medium text-[15px] ${
+                  className={`flex items-center justify-center px-3 py-3.5 border-2 rounded-md text-center cursor-pointer transition-all font-medium text-[15px] ${
                     state.studyLocation === value
                       ? "border-[#2563eb] bg-blue-50/50 text-[#1e40af]"
                       : "border-[#cbd5e1] text-[#334155] hover:bg-slate-50"
@@ -522,7 +541,7 @@ export default function ScholarshipRecommenderPage() {
                   key={value}
                   type="button"
                   onClick={() => updateState("income", value as RecommenderState["income"])}
-                  className={`h-full px-3 py-3.5 border-2 rounded-lg flex items-center justify-center text-center cursor-pointer transition-all font-medium text-[15px] ${
+                  className={`h-full px-3 py-3.5 border-2 rounded-md flex items-center justify-center text-center cursor-pointer transition-all font-medium text-[15px] ${
                     state.income === value
                       ? "border-[#2563eb] bg-blue-50/50 text-[#1e40af]"
                       : "border-[#cbd5e1] text-[#334155] hover:bg-slate-50"

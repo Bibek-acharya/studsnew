@@ -25,7 +25,7 @@ const AlertDialog: React.FC<AlertDialogProps> = ({
       onClick={onClose}
     >
       <div
-        className="mx-4 w-full max-w-sm rounded-xl bg-white shadow-2xl"
+        className="mx-4 w-full max-w-sm rounded-md bg-white shadow-2xl"
         onClick={(e) => e.stopPropagation()}
       >
         <div className="flex flex-col items-center p-6 text-center">
@@ -48,7 +48,7 @@ const AlertDialog: React.FC<AlertDialogProps> = ({
           <p className="mb-6 text-sm text-gray-600">{message}</p>
           <button
             onClick={onClose}
-            className="w-full rounded-lg bg-[#0000ff] px-4 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-[#0000cc]"
+            className="w-full rounded-md bg-[#0000ff] px-4 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-[#0000cc]"
           >
             {confirmText}
           </button>

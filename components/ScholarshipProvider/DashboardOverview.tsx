@@ -68,7 +68,7 @@ export default function DashboardOverview({ onNavigate, onReviewStudent }: Dashb
   if (error) {
     return (
       <section className="fade-in">
-        <div className="bg-red-50 border border-red-200 rounded-xl p-6 text-red-700 font-bold">
+        <div className="bg-red-50 border border-red-200 rounded-md p-6 text-red-700 font-bold">
           {error}
         </div>
       </section>
@@ -125,7 +125,7 @@ export default function DashboardOverview({ onNavigate, onReviewStudent }: Dashb
   return (
     <section className="fade-in">
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-5 gap-6 mb-8">
-        <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm relative overflow-hidden group">
+        <div className="bg-white p-5 rounded-md border border-slate-200  relative overflow-hidden group">
           <div className="absolute -right-4 -top-4 w-24 h-24 bg-blue-50 rounded-full z-0 group-hover:scale-110 transition-transform"></div>
           <div className="relative z-10">
             <span className="text-slate-500 font-bold text-xs uppercase tracking-wider mb-1 block">Total Applications</span>
@@ -135,7 +135,7 @@ export default function DashboardOverview({ onNavigate, onReviewStudent }: Dashb
           </div>
         </div>
 
-        <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm relative overflow-hidden group">
+        <div className="bg-white p-5 rounded-md border border-slate-200  relative overflow-hidden group">
           <div className="absolute -right-4 -top-4 w-24 h-24 bg-purple-50 rounded-full z-0 group-hover:scale-110 transition-transform"></div>
           <div className="relative z-10">
             <span className="text-slate-500 font-bold text-xs uppercase tracking-wider mb-1 block">Active Scholarships</span>
@@ -145,7 +145,7 @@ export default function DashboardOverview({ onNavigate, onReviewStudent }: Dashb
           </div>
         </div>
 
-        <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm relative overflow-hidden group">
+        <div className="bg-white p-5 rounded-md border border-slate-200  relative overflow-hidden group">
           <div className="absolute -right-4 -top-4 w-24 h-24 bg-yellow-50 rounded-full z-0 group-hover:scale-110 transition-transform"></div>
           <div className="relative z-10">
             <span className="text-slate-500 font-bold text-xs uppercase tracking-wider mb-1 block">Shortlisted</span>
@@ -155,7 +155,7 @@ export default function DashboardOverview({ onNavigate, onReviewStudent }: Dashb
           </div>
         </div>
 
-        <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm relative overflow-hidden group">
+        <div className="bg-white p-5 rounded-md border border-slate-200  relative overflow-hidden group">
           <div className="absolute -right-4 -top-4 w-24 h-24 bg-green-50 rounded-full z-0 group-hover:scale-110 transition-transform"></div>
           <div className="relative z-10">
             <span className="text-slate-500 font-bold text-xs uppercase tracking-wider mb-1 block">Final Selected</span>
@@ -165,7 +165,7 @@ export default function DashboardOverview({ onNavigate, onReviewStudent }: Dashb
           </div>
         </div>
 
-        <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm relative overflow-hidden group hidden xl:block">
+        <div className="bg-white p-5 rounded-md border border-slate-200  relative overflow-hidden group hidden xl:block">
           <div className="absolute -right-4 -top-4 w-24 h-24 bg-red-50 rounded-full z-0 group-hover:scale-110 transition-transform"></div>
           <div className="relative z-10">
             <span className="text-slate-500 font-bold text-xs uppercase tracking-wider mb-1 block">Acceptance Rate</span>
@@ -177,13 +177,13 @@ export default function DashboardOverview({ onNavigate, onReviewStudent }: Dashb
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6 mb-8">
-        <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm xl:col-span-2 flex flex-col">
+        <div className="bg-white p-6 rounded-md border border-slate-200  xl:col-span-2 flex flex-col">
           <div className="flex justify-between items-center mb-6">
             <div>
               <h3 className="text-lg font-bold text-slate-800">Applications by Scholarship</h3>
               <p className="text-sm text-slate-500">Total applicants per scholarship program.</p>
             </div>
-            <button className="p-2 text-slate-400 hover:bg-slate-100 rounded-lg"><i className="fa-solid fa-download"></i></button>
+            <button className="p-2 text-slate-400 hover:bg-slate-100 rounded-md"><i className="fa-solid fa-download"></i></button>
           </div>
           <div className="flex-1 relative min-h-[300px] w-full">
             <Bar
@@ -201,7 +201,7 @@ export default function DashboardOverview({ onNavigate, onReviewStudent }: Dashb
           </div>
         </div>
 
-        <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm flex flex-col">
+        <div className="bg-white p-6 rounded-md border border-slate-200  flex flex-col">
           <div className="mb-4 text-center">
             <h3 className="text-lg font-bold text-slate-800">Current Pipeline Status</h3>
             <p className="text-sm text-slate-500">Breakdown of all active applications</p>
@@ -224,7 +224,7 @@ export default function DashboardOverview({ onNavigate, onReviewStudent }: Dashb
         </div>
       </div>
 
-      <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden flex flex-col">
+      <div className="bg-white rounded-md border border-slate-200  overflow-hidden flex flex-col">
         <div className="p-6 border-b border-slate-100 flex justify-between items-center bg-slate-50/50">
           <div>
             <h3 className="text-lg font-bold text-slate-800">Newest Applications</h3>
@@ -233,7 +233,7 @@ export default function DashboardOverview({ onNavigate, onReviewStudent }: Dashb
           {onNavigate && (
             <button
               onClick={() => onNavigate('sec-applications')}
-              className="text-sm font-semibold text-primary-600 hover:text-primary-800 bg-primary-50 px-3 py-1.5 rounded-lg transition"
+              className="text-sm font-semibold text-primary-600 hover:text-primary-800 bg-primary-50 px-3 py-1.5 rounded-md transition"
             >
               View All Directory
             </button>
@@ -259,7 +259,7 @@ export default function DashboardOverview({ onNavigate, onReviewStudent }: Dashb
                   <tr key={app.id} className="hover:bg-slate-50 group transition">
                     <td className="py-3 px-6">
                       <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 rounded-full bg-primary-100 text-primary-600 flex items-center justify-center font-black text-xs shadow-sm border border-slate-100">
+                        <div className="w-10 h-10 rounded-full bg-primary-100 text-primary-600 flex items-center justify-center font-black text-xs  border border-slate-100">
                           {app.first_name?.[0]}{app.last_name?.[0]}
                         </div>
                         <div>
@@ -280,7 +280,7 @@ export default function DashboardOverview({ onNavigate, onReviewStudent }: Dashb
                       {onReviewStudent && (
                         <button
                           onClick={() => onReviewStudent(String(app.id))}
-                          className="w-10 h-10 rounded-xl bg-slate-50 text-slate-400 hover:bg-primary-600 hover:text-white transition flex items-center justify-center mx-auto lg:ml-auto"
+                          className="w-10 h-10 rounded-md bg-slate-50 text-slate-400 hover:bg-primary-600 hover:text-white transition flex items-center justify-center mx-auto lg:ml-auto"
                         >
                           <i className="fa-solid fa-chevron-right"></i>
                         </button>

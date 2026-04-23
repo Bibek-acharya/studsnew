@@ -64,18 +64,18 @@ export default function Settings() {
       </div>
 
       {error && (
-        <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-xl text-red-700 text-sm font-bold">
+        <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-md text-red-700 text-sm font-bold">
           {error}
         </div>
       )}
       {success && (
-        <div className="mb-6 p-4 bg-green-50 border border-green-200 rounded-xl text-green-700 text-sm font-bold">
+        <div className="mb-6 p-4 bg-green-50 border border-green-200 rounded-md text-green-700 text-sm font-bold">
           {success}
         </div>
       )}
 
       <div className="space-y-6">
-        <div className="bg-white rounded-3xl shadow-sm border border-slate-200 p-8">
+        <div className="bg-white rounded-md  border border-slate-200 p-8">
           <h3 className="text-lg font-black border-b border-slate-100 pb-4 mb-8 text-slate-800 uppercase tracking-tighter">Notification Settings</h3>
           <div className="space-y-6 max-w-2xl">
             {[
@@ -103,7 +103,7 @@ export default function Settings() {
           </div>
         </div>
 
-        <div className="bg-white rounded-3xl shadow-sm border border-slate-200 p-8">
+        <div className="bg-white rounded-md  border border-slate-200 p-8">
           <h3 className="text-lg font-black border-b border-slate-100 pb-4 mb-8 text-slate-800 uppercase tracking-tighter">Preferences</h3>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-2xl">
             <div>
@@ -122,7 +122,7 @@ export default function Settings() {
                     language: updated.language,
                   });
                 }}
-                className="w-full border border-slate-300 rounded-xl px-4 py-3 bg-white outline-none font-medium cursor-pointer focus:border-primary-500"
+                className="w-full border border-slate-300 rounded-md px-4 py-3 bg-white outline-none font-medium cursor-pointer focus:border-primary-500"
               >
                 <option value="UTC">UTC</option>
                 <option value="Asia/Kathmandu">Asia/Kathmandu (NPT)</option>
@@ -147,7 +147,7 @@ export default function Settings() {
                     language: updated.language,
                   });
                 }}
-                className="w-full border border-slate-300 rounded-xl px-4 py-3 bg-white outline-none font-medium cursor-pointer focus:border-primary-500"
+                className="w-full border border-slate-300 rounded-md px-4 py-3 bg-white outline-none font-medium cursor-pointer focus:border-primary-500"
               >
                 <option value="en">English</option>
                 <option value="ne">Nepali</option>
@@ -157,22 +157,22 @@ export default function Settings() {
           </div>
         </div>
 
-        <div className="bg-white rounded-3xl shadow-sm border border-slate-200 p-8">
+        <div className="bg-white rounded-md  border border-slate-200 p-8">
           <h3 className="text-lg font-black border-b border-slate-100 pb-4 mb-8 text-slate-800 uppercase tracking-tighter">Security & Access</h3>
           <div className="flex flex-wrap gap-4">
-            <button className="px-6 py-3 border-2 border-slate-200 rounded-2xl font-bold text-slate-700 hover:bg-slate-50 hover:border-slate-300 transition shadow-sm flex items-center gap-2">
+            <button className="px-6 py-3 border-2 border-slate-200 rounded-md font-bold text-slate-700 hover:bg-slate-50 hover:border-slate-300 transition  flex items-center gap-2">
               <i className="fa-solid fa-key text-slate-400"></i> Change Password
             </button>
-            <button className="px-6 py-3 border-2 border-slate-200 rounded-2xl font-bold text-slate-700 hover:bg-slate-50 hover:border-slate-300 transition shadow-sm flex items-center gap-2">
+            <button className="px-6 py-3 border-2 border-slate-200 rounded-md font-bold text-slate-700 hover:bg-slate-50 hover:border-slate-300 transition  flex items-center gap-2">
               <i className="fa-solid fa-shield-halved text-slate-400"></i> Enable 2FA
             </button>
           </div>
         </div>
 
-        <div className="bg-red-50 rounded-3xl shadow-sm border border-red-100 p-8">
+        <div className="bg-red-50 rounded-md  border border-red-100 p-8">
           <h3 className="text-lg font-black border-b border-red-200 pb-4 mb-6 text-red-800 uppercase tracking-tighter">Danger Zone</h3>
           <p className="text-sm text-red-600 mb-6 font-medium">Once you delete your organization data, it cannot be undone. Please be certain.</p>
-          <button className="px-6 py-3 bg-red-600 text-white rounded-2xl font-black text-xs uppercase tracking-widest hover:bg-red-700 transition shadow-lg shadow-red-500/20">
+          <button className="px-6 py-3 bg-red-600 text-white rounded-md font-black text-xs uppercase tracking-widest hover:bg-red-700 transition shadow-lg shadow-red-500/20">
             Deactivate Account
           </button>
         </div>

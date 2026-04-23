@@ -86,7 +86,7 @@ const AboutVideoInteractive: React.FC = () => {
 
   return (
     <div className="mx-auto mb-10 flex w-full max-w-212.5 flex-col items-center justify-center gap-6 xl:flex-row xl:gap-8">
-      <div className="relative h-[50vh] w-full max-w-125 shrink-0 overflow-hidden rounded-xl bg-brand-blue ring-1 ring-gray-200/50 sm:h-85 sm:rounded-2xl">
+      <div className="relative h-[50vh] w-full max-w-125 shrink-0 overflow-hidden rounded-md bg-brand-blue ring-1 ring-gray-200/50 sm:h-85 sm:rounded-md">
         <video
           className="absolute inset-0 h-full w-full bg-brand-blue object-cover transition-opacity duration-300"
           src={mainData.video}
@@ -97,7 +97,7 @@ const AboutVideoInteractive: React.FC = () => {
         />
         <div className="absolute bottom-5 left-5 z-10 max-w-[70%]">
           <div
-            className="flex flex-col rounded-lg border border-white/10 bg-black/60 px-4 py-2 text-white backdrop-blur-md sm:px-5 sm:py-3"
+            className="flex flex-col rounded-md border border-white/10 bg-black/60 px-4 py-2 text-white backdrop-blur-md sm:px-5 sm:py-3"
             style={{ textShadow: "0 1px 2px rgba(0,0,0,0.8)" }}
           >
             <span className="text-sm font-semibold tracking-wide sm:text-base">
@@ -118,7 +118,7 @@ const AboutVideoInteractive: React.FC = () => {
                 onClick={() => handleSwap(key)}
                 className="group relative h-12.5 w-[70px] shrink-0 cursor-pointer transition-transform sm:h-[55px] sm:w-[85px]"
               >
-                <div className="relative h-full w-full overflow-hidden rounded-lg border-2 border-white bg-brand-blue sm:rounded-md">
+                <div className="relative h-full w-full overflow-hidden rounded-md border-2 border-white bg-brand-blue sm:rounded-md">
                   <video
                     className="absolute inset-0 h-full w-full object-cover opacity-90 transition-opacity group-hover:opacity-100"
                     src={data.video}
@@ -148,14 +148,14 @@ const AboutVideoInteractive: React.FC = () => {
         </div>
       </div>
 
-      <div className="relative h-[50vh] w-full max-w-[280px] shrink-0 overflow-hidden rounded-2xl border border-white/10 bg-brand-blue p-5 sm:h-[340px] sm:p-6">
+      <div className="relative h-[50vh] w-full max-w-[280px] shrink-0 overflow-hidden rounded-md border border-white/10 bg-brand-blue p-5 sm:h-[340px] sm:p-6">
         <div
           className={`relative z-10 flex h-full flex-col justify-center transition-opacity duration-150 ${fading ? "opacity-50" : "opacity-100"}`}
         >
           <img
             src={mainData.avatar}
             alt="Avatar"
-            className="mb-3 h-12 w-12 rounded-xl border border-white/20 object-cover sm:mb-4 sm:h-14 sm:w-14"
+            className="mb-3 h-12 w-12 rounded-md border border-white/20 object-cover sm:mb-4 sm:h-14 sm:w-14"
           />
           <h2
             dangerouslySetInnerHTML={{ __html: mainData.title }}

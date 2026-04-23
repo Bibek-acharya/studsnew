@@ -5,8 +5,14 @@ import {
   AdmissionFilters,
   DEFAULT_ADMISSION_FILTERS,
 } from "@/app/admissions/[level]/types";
+import {
+  NEPAL_PROVINCES,
+  NEPAL_DISTRICTS,
+  NEPAL_LOCAL_BODIES,
+} from "@/lib/location-data";
 import GlobalFilterSection from "@/components/ui/GlobalFilterSection";
 import { FaSliders } from "react-icons/fa6";
+import { admissionService, AdmissionFilterCountsResponse } from "@/services/admission.api";
 
 interface AdmissionFilterSidebarProps {
   filters: AdmissionFilters;
@@ -83,56 +89,6 @@ const PROGRAMS: Record<
   ],
 };
 
-const PROVINCES = [
-  { id: "prov_koshi", label: "Koshi", count: 420 },
-  { id: "prov_madhesh", label: "Madhesh", count: 310 },
-  { id: "prov_bagmati", label: "Bagmati", count: 1250 },
-  { id: "prov_gandaki", label: "Gandaki", count: 380 },
-  { id: "prov_lumbini", label: "Lumbini", count: 450 },
-  { id: "prov_karnali", label: "Karnali", count: 120 },
-  { id: "prov_sudur", label: "Sudurpashchim", count: 180 },
-];
-
-const DISTRICTS: Record<
-  string,
-  Array<{ id: string; label: string; count: number }>
-> = {
-  prov_koshi: [
-    { id: "d_jhapa", label: "Jhapa", count: 80 },
-    { id: "d_morang", label: "Morang", count: 110 },
-    { id: "d_sunsari", label: "Sunsari", count: 90 },
-  ],
-  prov_madhesh: [
-    { id: "d_dhanusha", label: "Dhanusha", count: 60 },
-    { id: "d_parsa", label: "Parsa", count: 55 },
-  ],
-  prov_bagmati: [
-    { id: "d_bhaktapur", label: "Bhaktapur", count: 120 },
-    { id: "d_chitwan", label: "Chitwan", count: 150 },
-    { id: "d_kathmandu", label: "Kathmandu", count: 650 },
-    { id: "d_lalitpur", label: "Lalitpur", count: 180 },
-    { id: "d_kavre", label: "Kavrepalanchok", count: 45 },
-  ],
-  prov_gandaki: [
-    { id: "d_kaski", label: "Kaski", count: 210 },
-    { id: "d_nawalpur", label: "Nawalpur", count: 40 },
-    { id: "d_tanahun", label: "Tanahun", count: 25 },
-  ],
-  prov_lumbini: [
-    { id: "d_banke", label: "Banke", count: 60 },
-    { id: "d_rupandehi", label: "Rupandehi", count: 160 },
-    { id: "d_dang", label: "Dang", count: 45 },
-  ],
-  prov_karnali: [
-    { id: "d_surkhet", label: "Surkhet", count: 55 },
-    { id: "d_jumla", label: "Jumla", count: 10 },
-  ],
-  prov_sudur: [
-    { id: "d_kailali", label: "Kailali", count: 85 },
-    { id: "d_kanchanpur", label: "Kanchanpur", count: 45 },
-  ],
-};
-
 const COLLEGE_TYPES = [
   { id: "ct_private", label: "Private College" },
   { id: "ct_community", label: "Community College" },
@@ -163,7 +119,7 @@ const SORT_OPTIONS = [
 
 const APPLIED_FILTER_KEYS: Array<
   Exclude<keyof AdmissionFilters, "search" | "feeMax" | "sortBy" | "directAdmission">
-> = ["academic", "program", "province", "district", "type", "scholarship", "facilities"];
+> = ["academic", "program", "province", "district", "local", "type", "scholarship", "facilities"];
 
 function formatFee(val: number) {
   if (val >= 1000000) return "NPR 10,00,000+";
@@ -233,7 +189,7 @@ const SearchInput: React.FC<{
       value={value}
       onChange={(e) => onChange(e.target.value)}
       placeholder={placeholder}
-      className="block w-full rounded-lg border border-gray-200 bg-[#f8fafc] py-2 pl-9 pr-3 text-[13.5px] text-gray-900 outline-none transition placeholder:text-gray-400 focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+      className="block w-full rounded-md border border-gray-200 bg-[#f8fafc] py-2 pl-9 pr-3 text-[13.5px] text-gray-900 outline-none transition placeholder:text-gray-400 focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
     />
   </div>
 );
@@ -316,7 +272,7 @@ const DirectAdmissionModal: React.FC<{ isOpen: boolean; onClose: () => void }> =
       onClick={onClose}
     >
       <div 
-        className="bg-white rounded-xl shadow-2xl max-w-5xl w-full max-h-[95vh] overflow-hidden relative flex flex-col p-6 md:p-8" 
+        className="bg-white rounded-md shadow-2xl max-w-5xl w-full max-h-[95vh] overflow-hidden relative flex flex-col p-6 md:p-8" 
         onClick={(e) => e.stopPropagation()}
       >
         <button 
@@ -373,7 +329,7 @@ const DirectAdmissionModal: React.FC<{ isOpen: boolean; onClose: () => void }> =
           ))}
         </div>
 
-        <div className="mt-2 bg-indigo-50/60 border border-indigo-100 rounded-2xl p-4 md:p-5 flex flex-col md:flex-row items-center justify-between gap-4 md:gap-6 w-full mx-auto shadow-sm">
+        <div className="mt-2 bg-indigo-50/60 border border-indigo-100 rounded-md p-4 md:p-5 flex flex-col md:flex-row items-center justify-between gap-4 md:gap-6 w-full mx-auto ">
           <div className="flex-1 w-full order-2 md:order-1">
             <h3 className="font-poppins font-bold text-gray-900 text-lg md:text-xl mb-1">Complete your profile now</h3>
             <p className="text-gray-500 text-xs md:text-sm mb-4">You are just a few steps away from unlocking direct admission matches.</p>
@@ -408,6 +364,31 @@ export default function AdmissionFilterSidebar({
   const [programSearch, setProgramSearch] = useState("");
   const [navLocString, setNavLocString] = useState("");
   const [showModal, setShowModal] = useState(false);
+  const [filterCounts, setFilterCounts] = useState<AdmissionFilterCountsResponse["data"] | null>(null);
+
+  useEffect(() => {
+    const loadFilterCounts = async () => {
+      try {
+        const response = await admissionService.getAdmissionFilterCounts(level);
+        setFilterCounts(response.data);
+      } catch (error) {
+        console.error("Failed to load admission filter counts:", error);
+        setFilterCounts(null);
+      }
+    };
+
+    loadFilterCounts();
+  }, [level]);
+
+  const getFilterCount = (key: string, defaultValue = 0) => {
+    if (!filterCounts) return defaultValue;
+    return (
+      filterCounts.facet_counts_by_id?.[key] ??
+      filterCounts.type_counts_by_id?.[key] ??
+      filterCounts.type_counts?.[key] ??
+      defaultValue
+    );
+  };
 
   useEffect(() => {
     const updateLocation = (cityStr: string) => {
@@ -445,19 +426,40 @@ export default function AdmissionFilterSidebar({
   }, [filters.academic, programSearch]);
 
   const provinceOptions = useMemo(() => {
-    return PROVINCES.map(p => ({ id: p.id, label: p.label }));
+    return NEPAL_PROVINCES.map((name) => ({ id: name, label: name }));
   }, []);
+
+  const getDistrictsForProvince = (province: string) =>
+    NEPAL_DISTRICTS[province as keyof typeof NEPAL_DISTRICTS] ?? [];
+
+  const getLocalsForDistrict = (district: string) =>
+    NEPAL_LOCAL_BODIES[district as keyof typeof NEPAL_LOCAL_BODIES] ?? [];
 
   const districtOptions = useMemo(() => {
     if (filters.province.length === 0) return [];
-    return filters.province.flatMap(p => DISTRICTS[p] || []);
+    return filters.province.flatMap((province) =>
+      getDistrictsForProvince(province).map((district: string) => ({
+        id: district,
+        label: district,
+      })),
+    );
   }, [filters.province]);
+
+  const localOptions = useMemo(() => {
+    if (filters.district.length === 0) return [];
+    return filters.district.flatMap((district) =>
+      getLocalsForDistrict(district).map((local) => ({
+        id: local.name,
+        label: local.name,
+      })),
+    );
+  }, [filters.district]);
 
   const filterLabelMap = useMemo(() => {
     const map = new Map<string, string>();
     const levels = ACADEMIC_LEVELS[level] || [];
     levels.forEach((item) => map.set(item.id, item.label));
-    PROVINCES.forEach((item) => map.set(item.id, item.label));
+    NEPAL_PROVINCES.forEach((name) => map.set(name, name));
     COLLEGE_TYPES.forEach((item) => map.set(item.id, item.label));
     SCHOLARSHIP_OPTIONS.forEach((item) => map.set(item.id, item.label));
     FACILITY_OPTIONS.forEach((item) => map.set(item.id, item.label));
@@ -465,8 +467,11 @@ export default function AdmissionFilterSidebar({
     Object.values(PROGRAMS).forEach((group) => {
       group.forEach((item) => map.set(item.id, item.label));
     });
-    Object.values(DISTRICTS).forEach((group) => {
-      group.forEach((item) => map.set(item.id, item.label));
+    Object.values(NEPAL_DISTRICTS).forEach((group) => {
+      group.forEach((districtName) => map.set(districtName, districtName));
+    });
+    Object.values(NEPAL_LOCAL_BODIES).forEach((group) => {
+      group.forEach((local) => map.set(local.name, local.name));
     });
     return map;
   }, [level]);
@@ -540,38 +545,38 @@ export default function AdmissionFilterSidebar({
 
         if (cityStr) {
           const normalizedSearch = cityStr.toLowerCase();
-          let foundProvId = "";
-          let foundDistId = "";
+          let foundProvince = "";
+          let foundDistrict = "";
 
-          for (const prov of PROVINCES) {
-            if (normalizedSearch.includes(prov.label.toLowerCase())) {
-              foundProvId = prov.id;
+          for (const province of NEPAL_PROVINCES) {
+            if (normalizedSearch.includes(province.toLowerCase())) {
+              foundProvince = province;
             }
           }
 
-          for (const [provKey, districts] of Object.entries(DISTRICTS)) {
-            for (const dist of districts) {
-              const distLower = dist.label.toLowerCase();
+          for (const [province, districts] of Object.entries(NEPAL_DISTRICTS)) {
+            for (const district of districts) {
+              const distLower = district.toLowerCase();
               if (
                 normalizedSearch.includes(distLower) ||
                 distLower.includes(normalizedSearch)
               ) {
-                foundDistId = dist.id;
-                foundProvId = provKey;
+                foundDistrict = district;
+                foundProvince = province;
               }
             }
           }
 
           setFilters((prev) => {
-            if (!foundProvId && !foundDistId) {
+            if (!foundProvince && !foundDistrict) {
               return { ...prev, search: cityStr };
             }
 
             const nextProv = new Set(prev.province);
             const nextDist = new Set(prev.district);
 
-            if (foundProvId) nextProv.add(foundProvId);
-            if (foundDistId) nextDist.add(foundDistId);
+            if (foundProvince) nextProv.add(foundProvince);
+            if (foundDistrict) nextDist.add(foundDistrict);
 
             return {
               ...prev,
@@ -618,49 +623,77 @@ export default function AdmissionFilterSidebar({
               Filters
             </h3>
           </div>
-          <button
-            type="button"
-            onClick={clearAll}
-            className="text-blue-600 font-bold text-sm hover:text-blue-800 transition-colors"
-          >
-            Reset
-          </button>
+          {hasActiveFilters && (
+            <button
+              type="button"
+              onClick={() => setShowAppliedDropdown((prev) => !prev)}
+              className="inline-flex items-center gap-2 rounded-md px-3 py-1.5 text-[12px] font-semibold text-blue-700 transition-colors"
+            >
+              Applied ({appliedFilters.length + (isFeeApplied ? 1 : 0)})
+              <i
+                className={`fa-solid fa-chevron-down text-[10px] transition-transform ${showAppliedDropdown ? "rotate-180" : ""}`}
+              ></i>
+            </button>
+          )}
         </div>
 
-        {hasActiveFilters && (
-          <div className="mb-4 flex flex-wrap gap-2">
-            {appliedFilters.map((tag, index) => (
-              <button
-                key={`${tag.key}-${tag.value}-${index}`}
-                type="button"
-                onClick={() =>
-                  setFilters((prev) => ({
-                    ...prev,
-                    [tag.key]: prev[tag.key].filter(
-                      (item) => item !== tag.value,
-                    ),
-                  }))
-                }
-                className="inline-flex items-center gap-1.5 rounded-full border border-blue-100 bg-blue-50 px-3 py-1.5 text-[12px] font-medium text-blue-700 transition-colors hover:border-red-100 hover:bg-red-50 hover:text-red-700"
-              >
-                {tag.label}
-                <i className="fa-solid fa-xmark text-[10px]"></i>
-              </button>
-            ))}
-            {isFeeApplied && (
-              <button
-                type="button"
-                onClick={() =>
-                  setFilters((prev) => ({
-                    ...prev,
-                    feeMax: DEFAULT_ADMISSION_FILTERS.feeMax,
-                  }))
-                }
-                className="inline-flex items-center gap-1.5 rounded-full border border-blue-100 bg-blue-50 px-3 py-1.5 text-[12px] font-medium text-blue-700 transition-colors hover:border-red-100 hover:bg-red-50 hover:text-red-700"
-              >
-                Max Fee: {formatFee(filters.feeMax)}
-                <i className="fa-solid fa-xmark text-[10px]"></i>
-              </button>
+        {hasActiveFilters && showAppliedDropdown && (
+          <div className="absolute right-6 top-16 z-30 w-[min(520px,calc(100%-3rem))] rounded-md border border-gray-200 bg-white p-3 shadow-lg">
+            {appliedFilters.length === 0 && !isFeeApplied ? (
+              <p className="px-1 py-2 text-[13px] italic text-gray-400">
+                No filters selected yet.
+              </p>
+            ) : (
+              <>
+                <div className="flex flex-wrap gap-2 pb-3">
+                  {appliedFilters.map((tag, index) => (
+                    <button
+                      key={`${tag.key}-${tag.value}-${index}`}
+                      type="button"
+                      onClick={() =>
+                        setFilters((prev) => ({
+                          ...prev,
+                          [tag.key]: prev[tag.key].filter(
+                            (item) => item !== tag.value,
+                          ),
+                        }))
+                      }
+                      className="inline-flex items-center gap-1.5 rounded-full border border-blue-100 bg-blue-50 px-3 py-1.5 text-[12px] font-medium text-blue-700 transition-colors hover:border-red-100 hover:bg-red-50 hover:text-red-700"
+                    >
+                      {tag.label}
+                      <i className="fa-solid fa-xmark text-[10px]"></i>
+                    </button>
+                  ))}
+                  {isFeeApplied && (
+                    <button
+                      type="button"
+                      onClick={() =>
+                        setFilters((prev) => ({
+                          ...prev,
+                          feeMax: DEFAULT_ADMISSION_FILTERS.feeMax,
+                        }))
+                      }
+                      className="inline-flex items-center gap-1.5 rounded-full border border-blue-100 bg-blue-50 px-3 py-1.5 text-[12px] font-medium text-blue-700 transition-colors hover:border-red-100 hover:bg-red-50 hover:text-red-700"
+                    >
+                      Max Fee: {formatFee(filters.feeMax)}
+                      <i className="fa-solid fa-xmark text-[10px]"></i>
+                    </button>
+                  )}
+                </div>
+
+                <div className="border-t border-gray-100 pt-2">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      clearAll();
+                      setShowAppliedDropdown(false);
+                    }}
+                    className="text-[12px] font-semibold text-red-600 transition-colors hover:text-red-700"
+                  >
+                    Reset Filters
+                  </button>
+                </div>
+              </>
             )}
           </div>
         )}
@@ -714,7 +747,7 @@ export default function AdmissionFilterSidebar({
                 key={item.id}
                 id={`stream-${item.id}`}
                 label={item.label}
-                count={item.count}
+                count={getFilterCount(item.id, item.count)}
                 checked={filters.academic.includes(item.id)}
                 onChange={() => {
                   toggle("academic", item.id);
@@ -745,7 +778,7 @@ export default function AdmissionFilterSidebar({
                   key={item.id}
                   id={`prog-${item.id}`}
                   label={item.label}
-                  count={item.count}
+                  count={getFilterCount(item.id, item.count)}
                   checked={filters.program.includes(item.id)}
                   onChange={() => toggle("program", item.id)}
                 />
@@ -754,7 +787,7 @@ export default function AdmissionFilterSidebar({
           </div>
         </Accordion>
 
-        {/* Location (Province/District) */}
+        {/* Location (Province/District/Locality) */}
         <Accordion title="Location">
           <div className="flex flex-col gap-2 pt-1">
             <SelectInput
@@ -766,6 +799,7 @@ export default function AdmissionFilterSidebar({
                   ...prev,
                   province: val ? [val] : [],
                   district: [],
+                  local: [],
                 }));
               }}
             />
@@ -777,9 +811,22 @@ export default function AdmissionFilterSidebar({
                 setFilters((prev) => ({
                   ...prev,
                   district: val ? [val] : [],
+                  local: [],
                 }));
               }}
               disabled={filters.province.length === 0}
+            />
+            <SelectInput
+              placeholder="Select Locality"
+              value={filters.local[0] || ""}
+              options={localOptions}
+              onChange={(val) => {
+                setFilters((prev) => ({
+                  ...prev,
+                  local: val ? [val] : [],
+                }));
+              }}
+              disabled={filters.district.length === 0}
             />
           </div>
         </Accordion>
@@ -882,7 +929,7 @@ export default function AdmissionFilterSidebar({
         {/* Direct Admission Toggle */}
         <div className="mt-2 pt-5 border-t border-gray-100">
           <div className="flex flex-col gap-2 w-full">
-            <div className={`py-2 px-3 rounded-lg flex items-center justify-between transition-colors duration-300 w-full ${filters.directAdmission ? 'bg-green-50' : 'bg-gray-100'}`}>
+            <div className={`py-2 px-3 rounded-md flex items-center justify-between transition-colors duration-300 w-full ${filters.directAdmission ? 'bg-green-50' : 'bg-gray-100'}`}>
               <span className="text-sm font-semibold text-slate-900 leading-tight">
                 Get college direct admission
               </span>

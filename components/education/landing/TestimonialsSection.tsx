@@ -91,7 +91,7 @@ const TestimonialsSection: React.FC<TestimonialsSectionProps> = ({ onNavigate })
           {testimonials.map((testimonial) => (
             <div
               key={testimonial.id}
-              className="bg-[#F8F9FC] rounded-2xl p-5 xs:p-6 sm:p-7 md:p-8 relative z-0"
+              className="bg-[#F8F9FC] rounded-md p-5 xs:p-6 sm:p-7 md:p-8 relative z-0"
             >
               <div className="absolute top-4 sm:top-5 md:top-6 left-20 xs:left-24 sm:left-28 text-[#E2E8F0] z-[-1] opacity-60">
                 <svg width="48" height="48" sm-width="56" sm-height="56" md-width="64" md-height="64" viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg" className="w-10 h-10 xs:w-12 xs:h-12 sm:w-14 sm:h-14 md:w-16 md:h-16">
@@ -104,7 +104,7 @@ const TestimonialsSection: React.FC<TestimonialsSectionProps> = ({ onNavigate })
                   <img
                     src={testimonial.image}
                     alt={testimonial.name}
-                    className="w-11 h-11 xs:w-12 xs:h-12 sm:w-13 sm:h-13 md:w-14 md:h-14 rounded-full bg-blue-100 object-cover border-2 border-white shadow-sm"
+                    className="w-11 h-11 xs:w-12 xs:h-12 sm:w-13 sm:h-13 md:w-14 md:h-14 rounded-full bg-blue-100 object-cover border-2 border-white "
                   />
                 </div>
                 <div>

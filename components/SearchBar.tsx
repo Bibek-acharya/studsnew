@@ -205,7 +205,7 @@ export const SearchBar: React.FC<{ isMobile?: boolean }> = ({ isMobile }) => {
               setIsLocationOpen(!isLocationOpen);
               setIsSearchOpen(false);
             }}
-            className="flex h-full items-center gap-2 rounded-l-md bg-transparent pl-4 pr-3 font-medium text-[#334155] outline-none transition-colors hover:bg-gray-50"
+            className="flex h-full items-center gap-2 rounded-l-md bg-transparent pl-4 pr-3 font-medium text-[#334155] outline-none transition-colors cursor-pointer"
           >
             <svg
               width="18"
@@ -223,7 +223,7 @@ export const SearchBar: React.FC<{ isMobile?: boolean }> = ({ isMobile }) => {
             </svg>
             {!isMobile && (
               <span
-                className={`max-w-35 truncate whitespace-nowrap text-[15px] ${
+                className={`max-w-35 truncate whitespace-nowrap text-[15px] rounded-l-md${
                   locationText !== "Detect Location" ? "text-gray-900" : ""
                 }`}
               >
@@ -238,10 +238,10 @@ export const SearchBar: React.FC<{ isMobile?: boolean }> = ({ isMobile }) => {
           </button>
 
           {isLocationOpen && (
-            <div className="custom-scrollbar absolute left-1/2 -translate-x-1/2 top-[calc(100%+8px)] z-200 max-h-80 w-75 overflow-y-auto rounded-lg border border-gray-100 bg-white py-2 shadow-xl">
+            <div className="custom-scrollbar absolute left-1/2 -translate-x-1/2 top-[calc(100%+8px)] z-200 max-h-80 w-75 overflow-y-auto rounded-md border border-gray-100 bg-white py-2 shadow-xl">
               <button
                 onClick={autoDetectLocation}
-                className="flex w-full items-center gap-3 px-5 py-3 text-left text-[15px] font-medium text-brand-blue transition-colors hover:bg-gray-50"
+                className="flex w-full items-center gap-3 px-5 py-3 text-left rounded-full text-[15px] font-medium text-brand-blue transition-colors hover:bg-gray-50"
               >
                 <Crosshair className="h-4 w-4" />
                 {isMobile ? "Location" : "Detect Location"}
@@ -314,7 +314,7 @@ export const SearchBar: React.FC<{ isMobile?: boolean }> = ({ isMobile }) => {
           )}
 
           {isSearchOpen && (
-            <div className="custom-scrollbar absolute left-0 top-[calc(100%+8px)] z-200 max-h-105 w-full overflow-y-auto rounded-lg border border-gray-100 bg-white py-2 shadow-xl">
+            <div className="custom-scrollbar absolute left-0 top-[calc(100%+8px)] z-200 max-h-105 w-full overflow-y-auto rounded-md border border-gray-100 bg-white py-2 shadow-xl">
               {searchQuery.trim() === "" ? (
                 <>
                   <div className="px-5 pb-2 pt-3">
@@ -329,7 +329,7 @@ export const SearchBar: React.FC<{ isMobile?: boolean }> = ({ isMobile }) => {
                       className="group flex w-full items-center gap-4 px-5 py-2.5 text-left transition-colors hover:bg-gray-50"
                     >
                       <div
-                        className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-gray-400 text-white shadow-sm transition-transform duration-200 group-hover:scale-105"
+                        className="flex h-10 w-10 shrink-0 items-center justify-center rounded-md bg-gray-400 text-white  transition-transform duration-200 group-hover:scale-105"
                         dangerouslySetInnerHTML={{
                           __html: searchIcons["Trending"],
                         }}
@@ -353,7 +353,7 @@ export const SearchBar: React.FC<{ isMobile?: boolean }> = ({ isMobile }) => {
                     className="group flex w-full items-center gap-4 px-5 py-2.5 text-left transition-colors hover:bg-gray-50"
                   >
                     <div
-                      className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-brand-blue text-white shadow-sm transition-transform duration-200 group-hover:scale-105"
+                      className="flex h-10 w-10 shrink-0 items-center justify-center rounded-md bg-brand-blue text-white  transition-transform duration-200 group-hover:scale-105"
                       dangerouslySetInnerHTML={{
                         __html: searchIcons[item.type] || searchIcons["Course"],
                       }}

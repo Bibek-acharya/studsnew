@@ -13,7 +13,7 @@ const DirectAdmissionAd: React.FC<DirectAdmissionAdProps> = ({ colleges }) => {
 
   return (
     <div className="col-span-1 sm:col-span-2 lg:col-span-3 my-2">
-      <div className="bg-linear-to-br from-indigo-600 to-violet-700 rounded-md p-5 md:p-7 flex flex-col gap-6 shadow-sm">
+      <div className="bg-linear-to-br from-indigo-600 to-violet-700 rounded-md p-5 md:p-7 flex flex-col gap-6 ">
         <div className="text-white w-full px-1 flex justify-between items-start">
           <div className="flex flex-col gap-1">
             <h2 className="text-xl md:text-2xl font-bold tracking-tight">

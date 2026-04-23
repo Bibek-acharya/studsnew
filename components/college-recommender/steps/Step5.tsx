@@ -84,7 +84,7 @@ export default function Step5({ step, stepImages, form, handleInputChange, stepT
         {step > 1 && (
           <button
             onClick={() => setStep(Math.max(1, step - 1))}
-            className='rounded-lg border border-[#cbd5e1] bg-white px-8 py-3.5 text-sm font-semibold text-[#475569] transition-all duration-300 hover:border-[#0f172a] hover:text-[#0f172a]'
+            className='rounded-md border border-[#cbd5e1] bg-white px-8 py-3.5 text-sm font-semibold text-[#475569] transition-all duration-300 hover:border-[#0f172a] hover:text-[#0f172a]'
           >
             Back
           </button>
@@ -93,7 +93,7 @@ export default function Step5({ step, stepImages, form, handleInputChange, stepT
           <button
             onClick={() => setStep(Math.min(stepCount, step + 1))}
             disabled={!canContinue(step)}
-            className={`rounded-lg px-8 py-3.5 text-sm font-semibold transition-all duration-300 ${
+            className={`rounded-md px-8 py-3.5 text-sm font-semibold transition-all duration-300 ${
               canContinue(step)
                 ? 'cursor-pointer bg-brand-blue text-white hover:bg-brand-hover'
                 : 'cursor-not-allowed bg-slate-100 text-slate-400'
@@ -104,7 +104,7 @@ export default function Step5({ step, stepImages, form, handleInputChange, stepT
         ) : (
           <button
             disabled={!canContinue(step)}
-            className={`rounded-lg px-8 py-3.5 text-sm font-bold text-white transition-all hover:bg-[#1d4ed8] ${
+            className={`rounded-md px-8 py-3.5 text-sm font-bold text-white transition-all hover:bg-[#1d4ed8] ${
               canContinue(step)
                 ? 'bg-brand-blue cursor-pointer'
                 : 'bg-slate-300 cursor-not-allowed'

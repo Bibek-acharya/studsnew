@@ -186,7 +186,7 @@ const CourseFilters: React.FC<CourseFiltersProps> = ({
         </div>
 
         {hasActiveFilters && showAppliedDropdown && (
-          <div className="absolute right-6 top-16 z-30 w-[min(520px,calc(100%-3rem))] rounded-lg border border-gray-200 bg-white p-3 shadow-lg">
+          <div className="absolute right-6 top-16 z-30 w-[min(520px,calc(100%-3rem))] rounded-md border border-gray-200 bg-white p-3 shadow-lg">
             <div className="flex flex-wrap gap-2 pb-3">
               {appliedFilters.map((tag, index) => (
                 <button
@@ -240,7 +240,7 @@ const CourseFilters: React.FC<CourseFiltersProps> = ({
                   placeholder="Search fields..."
                   value={fieldSearch}
                   onChange={(e) => setFieldSearch(e.target.value)}
-                  className="w-full bg-slate-50 border border-slate-200 rounded-lg px-3 py-2 text-[13px] text-slate-900 outline-none transition group-focus-within:border-blue-500 group-focus-within:ring-1 group-focus-within:ring-blue-500"
+                  className="w-full bg-slate-50 border border-slate-200 rounded-md px-3 py-2 text-[13px] text-slate-900 outline-none transition group-focus-within:border-blue-500 group-focus-within:ring-1 group-focus-within:ring-blue-500"
                 />
                 <i className="fa-solid fa-magnifying-glass absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 text-[11px]"></i>
               </div>
@@ -284,7 +284,7 @@ const CourseFilters: React.FC<CourseFiltersProps> = ({
                   style={{
                     background: `linear-gradient(to right, #2563eb 0%, #2563eb ${((filters.maxFee - 50000) / (2000000 - 50000)) * 100}%, #f1f5f9 ${((filters.maxFee - 50000) / (2000000 - 50000)) * 100}%, #f1f5f9 100%)`,
                   }}
-                  className="w-full h-2 rounded-lg appearance-none cursor-pointer accent-blue-600 transition-all"
+                  className="w-full h-2 rounded-md appearance-none cursor-pointer accent-blue-600 transition-all"
                 />
               </div>
 

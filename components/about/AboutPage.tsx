@@ -193,7 +193,7 @@ const AboutPage: React.FC = () => {
             {photoRow1.map((photo, idx) => (
               <div
                 key={photo.alt}
-                className={`group relative overflow-hidden rounded-2xl shadow-sm w-full sm:w-[calc(50%-8px)] ${photo.width} h-[205px] fade-in-up`}
+                className={`group relative overflow-hidden rounded-md  w-full sm:w-[calc(50%-8px)] ${photo.width} h-51.25 fade-in-up`}
                 style={{ animationDelay: `${0.1 * (idx + 1)}s` }}
               >
                 <img
@@ -209,7 +209,7 @@ const AboutPage: React.FC = () => {
             {photoRow2.map((photo, idx) => (
               <div
                 key={photo.alt}
-                className={`group relative overflow-hidden rounded-2xl shadow-sm w-full sm:w-[calc(50%-8px)] ${photo.width} h-[205px] fade-in-up`}
+                className={`group relative overflow-hidden rounded-md  w-full sm:w-[calc(50%-8px)] ${photo.width} h-51.25 fade-in-up`}
                 style={{ animationDelay: `${0.1 * (idx + 5)}s` }}
               >
                 <img
@@ -231,9 +231,9 @@ const AboutPage: React.FC = () => {
               <img
                 src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=300&q=80"
                 alt="Santosh"
-                className="w-[90px] h-[90px] rounded-full object-cover border-4 border-white shadow-lg z-10"
+                className="w-22.5 h-22.5 rounded-full object-cover border-4 border-white shadow-lg z-10"
               />
-              <div className="rounded-full relative mt-[-20px] z-20 px-4 py-1 text-sm font-semibold min-w-[110px] text-center text-white bg-[#0A61EF] shadow-md">
+              <div className="rounded-full relative -mt-5 z-20 px-4 py-1 text-sm font-semibold min-w-27.5 text-center text-white bg-[#0A61EF] ">
                 Santosh
               </div>
             </div>
@@ -247,13 +247,13 @@ const AboutPage: React.FC = () => {
               </p>
             </div>
 
-            <div className="hidden md:flex flex-col items-center order-3 mt-[-40px] animate-float" style={{ animationDelay: "1s" }}>
+            <div className="hidden md:flex flex-col items-center order-3 -mt-10 animate-float" style={{ animationDelay: "1s" }}>
               <img
                 src="https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=300&q=80"
                 alt="Jagdish"
-                className="w-[90px] h-[90px] rounded-full object-cover border-4 border-white shadow-lg z-10"
+                className="w-22.5 h-22.5 rounded-full object-cover border-4 border-white shadow-lg z-10"
               />
-              <div className="rounded-full relative mt-[-20px] z-20 px-4 py-1 text-sm font-semibold min-w-[110px] text-center text-white bg-[#8476F1] shadow-md">
+              <div className="rounded-full relative -mt-5 z-20 px-4 py-1 text-sm font-semibold min-w-27.5 text-center text-white bg-[#8476F1] ">
                 Jagdish
               </div>
             </div>
@@ -264,9 +264,9 @@ const AboutPage: React.FC = () => {
               <img
                 src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=300&q=80"
                 alt="Santosh"
-                className="w-[80px] h-[80px] rounded-full object-cover border-4 border-white shadow-lg z-10"
+                className="w-20 h-20 rounded-full object-cover border-4 border-white shadow-lg z-10"
               />
-              <div className="rounded-full relative mt-[-15px] z-20 px-3 py-1 text-xs font-semibold min-w-[100px] text-center text-white bg-[#0A61EF] shadow-md">
+              <div className="rounded-full relative -mt-3.75 z-20 px-3 py-1 text-xs font-semibold min-w-25 text-center text-white bg-[#0A61EF] ">
                 Santosh
               </div>
             </div>
@@ -274,9 +274,9 @@ const AboutPage: React.FC = () => {
               <img
                 src="https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=300&q=80"
                 alt="Jagdish"
-                className="w-[80px] h-[80px] rounded-full object-cover border-4 border-white shadow-lg z-10"
+                className="w-20 h-20 rounded-full object-cover border-4 border-white shadow-lg z-10"
               />
-              <div className="rounded-full relative mt-[-15px] z-20 px-3 py-1 text-xs font-semibold min-w-[100px] text-center text-white bg-[#8476F1] shadow-md">
+              <div className="rounded-full relative -mt-3.75 z-20 px-3 py-1 text-xs font-semibold min-w-25 text-center text-white bg-[#8476F1] ">
                 Jagdish
               </div>
             </div>
@@ -286,9 +286,9 @@ const AboutPage: React.FC = () => {
             <img
               src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?auto=format&fit=crop&w=300&q=80"
               alt="Badal"
-              className="w-[80px] h-[80px] md:w-[90px] md:h-[90px] rounded-full object-cover border-4 border-white shadow-lg z-10"
+              className="w-20 h-20 md:w-22.5 md:h-22.5 rounded-full object-cover border-4 border-white shadow-lg z-10"
             />
-            <div className="rounded-full relative mt-[-15px] md:mt-[-20px] z-20 px-4 py-1 text-xs md:text-sm font-semibold min-w-[100px] md:min-w-[110px] text-center text-white bg-[#EEAE85] shadow-md">
+            <div className="rounded-full relative -mt-3.75 md:-mt-5 z-20 px-4 py-1 text-xs md:text-sm font-semibold min-w-25 md:min-w-27.5 text-center text-white bg-[#EEAE85] ">
               Badal
             </div>
           </div>
@@ -300,13 +300,13 @@ const AboutPage: React.FC = () => {
           </h2>
           <div className="grid grid-cols-1 xl:grid-cols-12 gap-6 md:gap-8 items-start justify-center">
             <div className="xl:col-span-7 flex justify-center xl:justify-end scroll-fade-in" style={{ transitionDelay: "100ms" }}>
-              <div className="relative rounded-3xl overflow-hidden shadow-2xl group w-full h-[300px] md:h-[400px]">
+              <div className="relative rounded-md overflow-hidden shadow-2xl group w-full h-75 md:h-100">
                 <img
                   src="https://images.unsplash.com/photo-1552664730-d307ca884978?auto=format&fit=crop&w=1000&q=80"
                   alt="Our Story"
                   className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
                 />
-                <div className="absolute inset-0 bg-gradient-to-t from-[#0A61EF]/90 to-transparent"></div>
+                <div className="absolute inset-0 bg-linear-to-t from-[#0A61EF]/90 to-transparent"></div>
                 <div className="absolute bottom-0 left-0 p-6 md:p-8 text-white">
                   <h3 className="text-xl md:text-2xl font-bold mb-2">Our Story</h3>
                   <p className="text-sm md:text-base text-blue-50 max-w-md">
@@ -317,9 +317,9 @@ const AboutPage: React.FC = () => {
             </div>
 
             <div className="xl:col-span-5 flex flex-col gap-4 md:gap-6 justify-center items-center xl:items-start h-full">
-              <div className="w-full rounded-3xl p-6 md:p-8 text-white shadow-lg flex flex-col justify-center bg-emerald-600/95 scroll-fade-in" style={{ transitionDelay: "200ms" }}>
+              <div className="w-full rounded-md p-6 md:p-8 text-white shadow-lg flex flex-col justify-center bg-emerald-600/95 scroll-fade-in" style={{ transitionDelay: "200ms" }}>
                 <div className="flex items-center gap-3 mb-2">
-                  <div className="bg-white/20 p-2 rounded-lg">
+                  <div className="bg-white/20 p-2 rounded-md">
                     <i className="fa-solid fa-bullseye w-5 h-5 md:w-6 md:h-6"></i>
                   </div>
                   <h3 className="text-lg md:text-xl font-bold uppercase tracking-wider">Our Mission</h3>
@@ -329,9 +329,9 @@ const AboutPage: React.FC = () => {
                 </p>
               </div>
 
-              <div className="w-full rounded-3xl p-6 md:p-8 text-white shadow-lg flex flex-col justify-center bg-[#0A61EF] scroll-fade-in" style={{ transitionDelay: "300ms" }}>
+              <div className="w-full rounded-md p-6 md:p-8 text-white shadow-lg flex flex-col justify-center bg-[#0A61EF] scroll-fade-in" style={{ transitionDelay: "300ms" }}>
                 <div className="flex items-center gap-3 mb-2">
-                  <div className="bg-white/20 p-2 rounded-lg">
+                  <div className="bg-white/20 p-2 rounded-md">
                     <i className="fa-solid fa-eye w-5 h-5 md:w-6 md:h-6"></i>
                   </div>
                   <h3 className="text-lg md:text-xl font-bold uppercase tracking-wider">Our Vision</h3>
@@ -357,8 +357,8 @@ const AboutPage: React.FC = () => {
               { icon: "fa-location-dot", target: 25, label: "Districts Covered", iconWrap: "bg-yellow-50 text-yellow-600" },
               { icon: "fa-award", target: 150, label: "Mentors & Experts", iconWrap: "bg-purple-50 text-purple-600" },
             ].map((item, idx) => (
-              <div key={item.label} className="stat-card bg-white p-6 md:p-8 rounded-3xl text-center shadow-sm relative overflow-hidden group hover:-translate-y-1 hover:shadow-xl" style={{ transitionDelay: `${idx * 150}ms` }}>
-                <div className={`inline-flex items-center justify-center w-14 h-14 md:w-16 md:h-16 rounded-2xl mb-4 md:mb-6 group-hover:scale-110 transition-transform ${item.iconWrap}`}>
+              <div key={item.label} className="stat-card bg-white p-6 md:p-8 rounded-md text-center  relative overflow-hidden group hover:-translate-y-1 hover:shadow-xl" style={{ transitionDelay: `${idx * 150}ms` }}>
+                <div className={`inline-flex items-center justify-center w-14 h-14 md:w-16 md:h-16 rounded-md mb-4 md:mb-6 group-hover:scale-110 transition-transform ${item.iconWrap}`}>
                   <i className={`fa-solid ${item.icon} text-xl md:text-2xl`}></i>
                 </div>
                 <div className="text-3xl md:text-5xl font-extrabold text-slate-900 mb-2">
@@ -381,8 +381,8 @@ const AboutPage: React.FC = () => {
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10 lg:gap-14">
             {initiatives.map((item, idx) => (
               <div key={item.title} className="group flex flex-col reveal" style={{ transitionDelay: `${100 + idx * 100}ms` }}>
-                <div className="relative mb-6 bg-white rounded-[24px]">
-                  <div className="initiative-image-mask aspect-[4/3] shadow-sm bg-slate-200">
+                <div className="relative mb-6 bg-white rounded-md">
+                  <div className="initiative-image-mask aspect-4/3  bg-slate-200">
                     <img src={item.image} alt={item.title} className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" />
                   </div>
                   <button className={`absolute bottom-0 right-0 w-16 h-16 rounded-full flex items-center justify-center shadow-xl border-2 border-white transition-transform duration-300 group-hover:scale-110 group-hover:rotate-45 ${item.fabClass}`} aria-label="View more">
@@ -398,7 +398,7 @@ const AboutPage: React.FC = () => {
           </div>
         </section>
 
-        <section className="bg-gradient-to-br from-slate-50 to-indigo-50/50 py-20 px-6 w-full">
+        <section className="bg-linear-to-br from-slate-50 to-indigo-50/50 py-20 px-6 w-full">
           <div className="max-w-3xl w-full mx-auto">
             <div className="text-center mb-16">
               <h1 className="text-4xl md:text-5xl font-bold text-slate-900 tracking-tight mb-6">Frequently Asked Questions</h1>
@@ -415,8 +415,8 @@ const AboutPage: React.FC = () => {
                 return (
                   <div
                     key={item.question}
-                    className={`group bg-white border rounded-2xl transition-all duration-200 hover:border-indigo-300 ${
-                      isActive ? "border-indigo-300 shadow-sm" : "border-slate-200"
+                    className={`group bg-white border rounded-md transition-all duration-200 hover:border-indigo-300 ${
+                      isActive ? "border-indigo-300 " : "border-slate-200"
                     }`}
                   >
                     <button
@@ -425,7 +425,7 @@ const AboutPage: React.FC = () => {
                     >
                       <span className="text-lg font-semibold text-slate-900 pr-8 pt-1">{item.question}</span>
                       <span
-                        className={`flex-shrink-0 ml-4 h-8 w-8 rounded-full border flex items-center justify-center transition-all duration-300 ${
+                        className={`shrink-0 ml-4 h-8 w-8 rounded-full border flex items-center justify-center transition-all duration-300 ${
                           isActive
                             ? "bg-indigo-100 text-indigo-600 border-indigo-200 rotate-180"
                             : "border-slate-200 text-slate-500 group-hover:border-indigo-200 group-hover:text-indigo-600"
@@ -450,7 +450,7 @@ const AboutPage: React.FC = () => {
 
             <div className="mt-16 text-center">
               <p className="text-slate-600 mb-4">Still have questions?</p>
-              <button className="inline-flex items-center justify-center px-6 py-3 text-base font-semibold text-white bg-indigo-600 rounded-lg hover:bg-indigo-700 transition-colors">
+              <button className="inline-flex items-center justify-center px-6 py-3 text-base font-semibold text-white bg-brand-blue rounded-md hover:bg-brand-hover transition-colors">
                 Contact Support
               </button>
             </div>

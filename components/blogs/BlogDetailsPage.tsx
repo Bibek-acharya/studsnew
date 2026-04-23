@@ -157,7 +157,7 @@ const BlogDetailsPage: React.FC<{ params: Promise<{ id: string }> }> = ({
           <img
             src={blog.image}
             alt={blog.title}
-            className="w-full h-[300px] sm:h-[400px] object-cover rounded-xl mb-8"
+            className="w-full h-[300px] sm:h-[400px] object-cover rounded-md mb-8"
           />
 
           <div className="bg-blue-50 border-l-4 border-blue-500 p-5 rounded-r-xl mb-8 text-gray-700 text-sm sm:text-base leading-relaxed">
@@ -226,7 +226,7 @@ const BlogDetailsPage: React.FC<{ params: Promise<{ id: string }> }> = ({
               <textarea
                 value={commentInput}
                 onChange={(event) => setCommentInput(event.target.value)}
-                className="w-full border border-gray-200 rounded-lg p-4 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none text-sm placeholder-gray-400"
+                className="w-full border border-gray-200 rounded-md p-4 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none text-sm placeholder-gray-400"
                 rows={4}
                 placeholder="Join the discussion..."
               ></textarea>
@@ -332,7 +332,7 @@ const BlogDetailsPage: React.FC<{ params: Promise<{ id: string }> }> = ({
                     <img
                       src={rel.image}
                       alt={rel.title}
-                      className="w-full h-40 object-cover rounded-xl mb-3"
+                      className="w-full h-40 object-cover rounded-md mb-3"
                     />
                     <div className="flex justify-between items-center mb-2">
                       <span

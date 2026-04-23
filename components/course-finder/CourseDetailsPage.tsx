@@ -205,7 +205,7 @@ const CourseDetailsPage: React.FC<CourseDetailsPageProps> = ({
           </nav>
 
           {/* Banner/Hero Section - Upgraded Design */}
-          <header className="w-full bg-[#0000ff] rounded-2xl relative overflow-hidden flex flex-col justify-between shadow-sm min-h-[320px] md:min-h-[400px]">
+          <header className="w-full bg-[#0000ff] rounded-md relative overflow-hidden flex flex-col justify-between  min-h-[320px] md:min-h-[400px]">
             {/* Background Overlay / Pattern */}
             <div className="absolute inset-0 z-0">
               <div className="absolute bottom-0 left-0 -mb-20 -ml-20 w-72 h-72 bg-indigo-400 rounded-full mix-blend-multiply filter blur-3xl opacity-20"></div>
@@ -261,7 +261,7 @@ const CourseDetailsPage: React.FC<CourseDetailsPageProps> = ({
                 <div className="flex flex-col sm:flex-row items-center gap-4 mt-4">
                   <button 
                     onClick={() => setActiveTab("admission")}
-                    className="w-full sm:w-auto bg-[#10b981] hover:bg-[#059669] text-white px-8 py-3.5 rounded-lg font-bold text-sm transition-all flex items-center justify-center border-none cursor-pointer"
+                    className="w-full sm:w-auto bg-[#10b981] hover:bg-[#059669] text-white px-8 py-3.5 rounded-md font-bold text-sm transition-all flex items-center justify-center border-none cursor-pointer"
                   >
                     View Admissions
                   </button>
@@ -273,7 +273,7 @@ const CourseDetailsPage: React.FC<CourseDetailsPageProps> = ({
                         collegesCount: courseField,
                       })
                     }
-                    className="w-full sm:w-auto bg-white/10 hover:bg-white/20 text-white px-6 py-3.5 rounded-lg font-semibold text-sm transition-all flex items-center justify-center backdrop-blur-sm border border-white/20 cursor-pointer"
+                    className="w-full sm:w-auto bg-white/10 hover:bg-white/20 text-white px-6 py-3.5 rounded-md font-semibold text-sm transition-all flex items-center justify-center backdrop-blur-sm border border-white/20 cursor-pointer"
                   >
                     View Colleges
                   </button>
@@ -391,7 +391,7 @@ const CourseDetailsPage: React.FC<CourseDetailsPageProps> = ({
                   <ClipboardCheck className="w-6 h-6 mr-3 text-blue-600" />
                   Eligibility Criteria
                 </h2>
-                <div className="bg-blue-50 border border-blue-100 rounded-xl p-6 mb-8">
+                <div className="bg-blue-50 border border-blue-100 rounded-md p-6 mb-8">
                   <p className="text-gray-800 font-medium mb-2">
                     To be eligible for the {courseTitle} program, applicants
                     must meet the following criteria:
@@ -426,7 +426,7 @@ const CourseDetailsPage: React.FC<CourseDetailsPageProps> = ({
                   Admission Process
                 </h2>
 
-                <div className="bg-blue-50/50 border border-blue-100 rounded-xl p-5 mb-8 text-gray-700 leading-relaxed">
+                <div className="bg-blue-50/50 border border-blue-100 rounded-md p-5 mb-8 text-gray-700 leading-relaxed">
                   The admission is mainly open from{" "}
                   <strong className="text-gray-900">July to August</strong>{" "}
                   (shortly after SEE results), but the exact timeline is also
@@ -493,7 +493,7 @@ const CourseDetailsPage: React.FC<CourseDetailsPageProps> = ({
                   Grade 11 Subjects
                 </h3>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
-                  <div className="bg-white border border-gray-200 rounded-xl shadow-sm overflow-hidden">
+                  <div className="bg-white border border-gray-200 rounded-md  overflow-hidden">
                     <div className="bg-blue-50 border-b border-gray-200 px-6 py-3">
                       <h4 className="font-bold text-blue-900">
                         Physical Group
@@ -514,7 +514,7 @@ const CourseDetailsPage: React.FC<CourseDetailsPageProps> = ({
                       <li className="px-6 py-3">Computer Science (Optional)</li>
                     </ul>
                   </div>
-                  <div className="bg-white border border-gray-200 rounded-xl shadow-sm overflow-hidden">
+                  <div className="bg-white border border-gray-200 rounded-md  overflow-hidden">
                     <div className="bg-emerald-50 border-b border-gray-200 px-6 py-3">
                       <h4 className="font-bold text-emerald-900">
                         Biology Group
@@ -544,7 +544,7 @@ const CourseDetailsPage: React.FC<CourseDetailsPageProps> = ({
                   Grade 12 Subjects
                 </h3>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
-                  <div className="bg-white border border-gray-200 rounded-xl shadow-sm overflow-hidden">
+                  <div className="bg-white border border-gray-200 rounded-md  overflow-hidden">
                     <div className="bg-blue-50 border-b border-gray-200 px-6 py-3">
                       <h4 className="font-bold text-blue-900">
                         Physical Group
@@ -567,7 +567,7 @@ const CourseDetailsPage: React.FC<CourseDetailsPageProps> = ({
                       <li className="px-6 py-3">Computer Science (Optional)</li>
                     </ul>
                   </div>
-                  <div className="bg-white border border-gray-200 rounded-xl shadow-sm overflow-hidden">
+                  <div className="bg-white border border-gray-200 rounded-md  overflow-hidden">
                     <div className="bg-emerald-50 border-b border-gray-200 px-6 py-3">
                       <h4 className="font-bold text-emerald-900">
                         Biology Group
@@ -596,7 +596,7 @@ const CourseDetailsPage: React.FC<CourseDetailsPageProps> = ({
 
                 {/* Entrance Preparation & Careers */}
                 <div className="space-y-6 mb-8">
-                  <div className="bg-gray-50 border border-gray-200 p-5 rounded-xl">
+                  <div className="bg-gray-50 border border-gray-200 p-5 rounded-md">
                     <h3 className="text-lg font-bold text-gray-900 mb-2">
                       Physical Group Focus
                     </h3>
@@ -622,7 +622,7 @@ const CourseDetailsPage: React.FC<CourseDetailsPageProps> = ({
                     </div>
                   </div>
 
-                  <div className="bg-gray-50 border border-gray-200 p-5 rounded-xl">
+                  <div className="bg-gray-50 border border-gray-200 p-5 rounded-md">
                     <h3 className="text-lg font-bold text-gray-900 mb-2">
                       Biology Group Focus
                     </h3>
@@ -681,7 +681,7 @@ const CourseDetailsPage: React.FC<CourseDetailsPageProps> = ({
                   structure in the tables below for a standard program.
                 </p>
 
-                <div className="overflow-x-auto border border-gray-200 rounded-xl shadow-sm">
+                <div className="overflow-x-auto border border-gray-200 rounded-md ">
                   <table className="w-full text-left border-collapse">
                     <thead>
                       <tr className="bg-gray-50 text-gray-900">
@@ -736,7 +736,7 @@ const CourseDetailsPage: React.FC<CourseDetailsPageProps> = ({
                   Scholarships & Financial Aid
                 </h2>
 
-                <div className="bg-indigo-50 border border-indigo-100 rounded-xl p-5 mb-8">
+                <div className="bg-indigo-50 border border-indigo-100 rounded-md p-5 mb-8">
                   <p className="text-indigo-900 font-medium">
                     Many colleges provide scholarships based on the{" "}
                     <strong className="font-bold">SEE GPA</strong>,{" "}
@@ -753,7 +753,7 @@ const CourseDetailsPage: React.FC<CourseDetailsPageProps> = ({
                 </div>
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 mb-8">
-                  <div className="bg-yellow-50 border border-yellow-200 rounded-xl p-6">
+                  <div className="bg-yellow-50 border border-yellow-200 rounded-md p-6">
                     <h3 className="font-bold text-yellow-900 text-lg mb-2 flex items-center">
                       <Star className="w-5 h-5 mr-2" />
                       SEE Merit Scholarship
@@ -764,7 +764,7 @@ const CourseDetailsPage: React.FC<CourseDetailsPageProps> = ({
                       tuition fees.
                     </p>
                   </div>
-                  <div className="bg-blue-50 border border-blue-200 rounded-xl p-6">
+                  <div className="bg-blue-50 border border-blue-200 rounded-md p-6">
                     <h3 className="font-bold text-blue-900 text-lg mb-2 flex items-center">
                       <Trophy className="w-5 h-5 mr-2" />
                       Entrance Topper Award
@@ -777,7 +777,7 @@ const CourseDetailsPage: React.FC<CourseDetailsPageProps> = ({
                   </div>
                 </div>
 
-                <div className="flex flex-col sm:flex-row items-center justify-between bg-white border border-gray-200 p-6 rounded-xl shadow-sm">
+                <div className="flex flex-col sm:flex-row items-center justify-between bg-white border border-gray-200 p-6 rounded-md ">
                   <div className="mb-4 sm:mb-0">
                     <h3 className="text-lg font-bold text-gray-900">
                       Looking for Scholarships?
@@ -787,7 +787,7 @@ const CourseDetailsPage: React.FC<CourseDetailsPageProps> = ({
                       tailored to your scores.
                     </p>
                   </div>
-                  <button className="inline-flex items-center px-5 py-2.5 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 transition-colors focus:ring-4 focus:ring-blue-100 whitespace-nowrap">
+                  <button className="inline-flex items-center px-5 py-2.5 bg-blue-600 text-white font-medium rounded-md hover:bg-blue-700 transition-colors focus:ring-4 focus:ring-blue-100 whitespace-nowrap">
                     Scholarship Finder
                     <ArrowRight className="w-4 h-4 ml-2" />
                   </button>
@@ -810,9 +810,9 @@ const CourseDetailsPage: React.FC<CourseDetailsPageProps> = ({
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <a
                     href="#"
-                    className="flex items-center p-4 border border-gray-200 rounded-xl hover:border-blue-500 hover:bg-blue-50 transition-colors group"
+                    className="flex items-center p-4 border border-gray-200 rounded-md hover:border-blue-500 hover:bg-blue-50 transition-colors group"
                   >
-                    <div className="w-12 h-12 bg-red-100 text-red-600 rounded-lg flex items-center justify-center flex-shrink-0">
+                    <div className="w-12 h-12 bg-red-100 text-red-600 rounded-md flex items-center justify-center flex-shrink-0">
                       <FileCheck2 className="w-6 h-6" />
                     </div>
                     <div className="ml-4">
@@ -826,9 +826,9 @@ const CourseDetailsPage: React.FC<CourseDetailsPageProps> = ({
 
                   <a
                     href="#"
-                    className="flex items-center p-4 border border-gray-200 rounded-xl hover:border-blue-500 hover:bg-blue-50 transition-colors group"
+                    className="flex items-center p-4 border border-gray-200 rounded-md hover:border-blue-500 hover:bg-blue-50 transition-colors group"
                   >
-                    <div className="w-12 h-12 bg-red-100 text-red-600 rounded-lg flex items-center justify-center flex-shrink-0">
+                    <div className="w-12 h-12 bg-red-100 text-red-600 rounded-md flex items-center justify-center flex-shrink-0">
                       <FileCheck2 className="w-6 h-6" />
                     </div>
                     <div className="ml-4">
@@ -854,9 +854,9 @@ const CourseDetailsPage: React.FC<CourseDetailsPageProps> = ({
                 <div className="space-y-4">
                   <a
                     href="#"
-                    className="bg-white border border-gray-200 p-5 rounded-xl flex flex-col sm:flex-row gap-5 hover:border-blue-600 hover:shadow-md transition-all group block"
+                    className="bg-white border border-gray-200 p-5 rounded-md flex flex-col sm:flex-row gap-5 hover:border-blue-600 hover: transition-all group block"
                   >
-                    <div className="w-full sm:w-16 h-16 bg-blue-50 rounded-lg flex flex-col items-center justify-center shrink-0 text-blue-600 border border-blue-100">
+                    <div className="w-full sm:w-16 h-16 bg-blue-50 rounded-md flex flex-col items-center justify-center shrink-0 text-blue-600 border border-blue-100">
                       <span className="text-xl font-bold">12</span>
                       <span className="text-xs uppercase tracking-wider font-semibold">
                         Aug
@@ -881,9 +881,9 @@ const CourseDetailsPage: React.FC<CourseDetailsPageProps> = ({
 
                   <a
                     href="#"
-                    className="bg-white border border-gray-200 p-5 rounded-xl flex flex-col sm:flex-row gap-5 hover:border-blue-600 hover:shadow-md transition-all group block"
+                    className="bg-white border border-gray-200 p-5 rounded-md flex flex-col sm:flex-row gap-5 hover:border-blue-600 hover: transition-all group block"
                   >
-                    <div className="w-full sm:w-16 h-16 bg-blue-50 rounded-lg flex flex-col items-center justify-center shrink-0 text-blue-600 border border-blue-100">
+                    <div className="w-full sm:w-16 h-16 bg-blue-50 rounded-md flex flex-col items-center justify-center shrink-0 text-blue-600 border border-blue-100">
                       <span className="text-xl font-bold">05</span>
                       <span className="text-xs uppercase tracking-wider font-semibold">
                         Aug
@@ -951,10 +951,10 @@ const CourseDetailsPage: React.FC<CourseDetailsPageProps> = ({
                         href={college.url}
                         target="_blank"
                         rel="noreferrer"
-                        className="bg-white border border-gray-200 rounded-xl p-4 flex gap-4 w-full hover:border-blue-600 hover:shadow-md transition-all group block relative overflow-hidden"
+                        className="bg-white border border-gray-200 rounded-md p-4 flex gap-4 w-full hover:border-blue-600 hover: transition-all group block relative overflow-hidden"
                       >
                         <div
-                          className={`w-16 h-16 rounded-lg border border-gray-100 flex items-center justify-center shrink-0 p-1 ${college.logoFallbackColor || "bg-white"}`}
+                          className={`w-16 h-16 rounded-md border border-gray-100 flex items-center justify-center shrink-0 p-1 ${college.logoFallbackColor || "bg-white"}`}
                         >
                           {college.logo ? (
                             <img

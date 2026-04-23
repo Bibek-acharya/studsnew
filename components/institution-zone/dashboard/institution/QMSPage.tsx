@@ -174,7 +174,7 @@ const QMSPage: React.FC = () => {
 
   return (
     <div className="h-full flex flex-col lg:flex-row gap-6 p-4 md:p-6 bg-slate-50">
-      <div className="w-full lg:w-1/3 xl:w-1/4 bg-white rounded-2xl shadow-sm border border-slate-200 flex flex-col overflow-hidden shrink-0">
+      <div className="w-full lg:w-1/3 xl:w-1/4 bg-white rounded-md  border border-slate-200 flex flex-col overflow-hidden shrink-0">
         <div className="p-4 border-b border-slate-100 bg-white shrink-0">
           <h2 className="text-lg font-bold text-slate-800 mb-3 flex items-center">
             <Inbox className="w-5 h-5 mr-2 text-indigo-500" /> Admin Inbox
@@ -186,7 +186,7 @@ const QMSPage: React.FC = () => {
               value={searchQuery}
               onChange={(event) => setSearchQuery(event.target.value)}
               placeholder="Search students or messages..."
-              className="w-full text-sm border border-slate-200 rounded-xl pl-10 pr-4 py-2 focus:ring-2 focus:ring-indigo-500 outline-none bg-slate-50 transition-shadow"
+              className="w-full text-sm border border-slate-200 rounded-md pl-10 pr-4 py-2 focus:ring-2 focus:ring-indigo-500 outline-none bg-slate-50 transition-shadow"
             />
           </div>
 
@@ -197,13 +197,13 @@ const QMSPage: React.FC = () => {
                 <button
                   key={filter.id}
                   onClick={() => setActiveFilter(filter.id)}
-                  className={`px-3.5 py-1.5 rounded-xl text-xs font-semibold whitespace-nowrap transition-all flex items-center gap-1.5 border ${
-                    isActive ? "bg-indigo-600 text-white shadow-md border-indigo-600" : "bg-slate-50 text-slate-600 hover:bg-slate-100 border-slate-200"
+                  className={`px-3.5 py-1.5 rounded-md text-xs font-semibold whitespace-nowrap transition-all flex items-center gap-1.5 border ${
+                    isActive ? "bg-indigo-600 text-white  border-indigo-600" : "bg-slate-50 text-slate-600 hover:bg-slate-100 border-slate-200"
                   }`}
                 >
                   {filter.label}
                   <span
-                    className={`px-1.5 py-0.5 rounded-lg text-[10px] min-w-[20px] text-center ${
+                    className={`px-1.5 py-0.5 rounded-md text-[10px] min-w-[20px] text-center ${
                       isActive ? "bg-white/20 text-white" : tabCounts[filter.id] > 0 && filter.id === "unread" ? "bg-indigo-500 text-white" : "bg-slate-200 text-slate-500"
                     }`}
                   >
@@ -268,8 +268,8 @@ const QMSPage: React.FC = () => {
 
       <div className="w-full lg:w-2/3 xl:w-3/4 flex flex-col gap-4 overflow-hidden relative">
         {!activeQuery && (
-          <div className="absolute inset-0 flex flex-col items-center justify-center bg-slate-50 rounded-2xl border border-slate-200 z-10 text-slate-400">
-            <div className="w-20 h-20 bg-white shadow-sm border border-slate-100 rounded-full flex items-center justify-center mb-5">
+          <div className="absolute inset-0 flex flex-col items-center justify-center bg-slate-50 rounded-md border border-slate-200 z-10 text-slate-400">
+            <div className="w-20 h-20 bg-white  border border-slate-100 rounded-full flex items-center justify-center mb-5">
               <MousePointerClick className="w-8 h-8 text-indigo-300" />
             </div>
             <h2 className="text-xl font-semibold text-slate-700 mb-2">Select a Conversation</h2>
@@ -277,9 +277,9 @@ const QMSPage: React.FC = () => {
           </div>
         )}
 
-        <div className="bg-white rounded-2xl shadow-sm border border-slate-200 p-5 flex flex-wrap gap-6 items-center justify-between shrink-0">
+        <div className="bg-white rounded-md  border border-slate-200 p-5 flex flex-wrap gap-6 items-center justify-between shrink-0">
           <div className="flex items-center gap-4">
-            <div className="w-14 h-14 rounded-full bg-gradient-to-br from-indigo-100 to-purple-100 text-indigo-700 flex items-center justify-center font-bold text-xl border border-indigo-200 shadow-sm shrink-0">
+            <div className="w-14 h-14 rounded-full bg-gradient-to-br from-indigo-100 to-purple-100 text-indigo-700 flex items-center justify-center font-bold text-xl border border-indigo-200  shrink-0">
               {activeQuery ? initials(activeQuery.studentName) : "--"}
             </div>
             <div>
@@ -297,13 +297,13 @@ const QMSPage: React.FC = () => {
           </div>
 
           <div className="text-right flex flex-col items-end">
-            <span className="bg-indigo-50 text-indigo-700 text-xs px-3 py-1.5 rounded-lg font-bold border border-indigo-100 flex items-center mb-2 shadow-sm">
+            <span className="bg-indigo-50 text-indigo-700 text-xs px-3 py-1.5 rounded-md font-bold border border-indigo-100 flex items-center mb-2 ">
               <Building className="w-3.5 h-3.5 mr-1.5" /> {activeQuery?.college || "Department"}
             </span>
             <button
               onClick={markAsResolved}
               disabled={!activeQuery || activeQuery.status === "resolved"}
-              className={`text-sm px-4 py-2 rounded-xl border shadow-sm flex items-center transition-colors ${
+              className={`text-sm px-4 py-2 rounded-md border  flex items-center transition-colors ${
                 !activeQuery
                   ? "bg-slate-50 text-slate-400 border-slate-200 cursor-not-allowed"
                   : activeQuery.status === "resolved"
@@ -316,7 +316,7 @@ const QMSPage: React.FC = () => {
           </div>
         </div>
 
-        <div className="flex-1 bg-white rounded-2xl shadow-sm border border-slate-200 flex flex-col overflow-hidden">
+        <div className="flex-1 bg-white rounded-md  border border-slate-200 flex flex-col overflow-hidden">
           <div className="flex-1 p-6 overflow-y-auto flex flex-col gap-5 bg-[#f8fafc]">
             {!activeQuery ? null : activeQuery.messages.length === 0 ? (
               <div className="flex-1 flex items-center justify-center text-slate-400 text-sm font-medium">Awaiting first message...</div>
@@ -328,7 +328,7 @@ const QMSPage: React.FC = () => {
                     <span className="text-[11px] text-slate-400 mb-1.5 px-1 font-semibold tracking-wide">
                       {message.sender === "student" ? activeQuery.studentName : `${activeQuery.college} Support`} • {message.time}
                     </span>
-                    <div className={`px-5 py-3 text-sm leading-relaxed break-words rounded-2xl ${mine ? "bg-indigo-600 text-white rounded-tr-sm shadow-md" : "bg-white border border-slate-200 text-slate-800 rounded-tl-sm shadow-sm"}`}>
+                    <div className={`px-5 py-3 text-sm leading-relaxed break-words rounded-md ${mine ? "bg-indigo-600 text-white rounded-tr-sm " : "bg-white border border-slate-200 text-slate-800 rounded-tl-sm "}`}>
                       {message.text}
                     </div>
                   </div>
@@ -344,13 +344,13 @@ const QMSPage: React.FC = () => {
                 value={replyText}
                 onChange={(event) => setReplyText(event.target.value)}
                 placeholder="Type your response to the student..."
-                className="flex-1 text-sm border border-slate-200 rounded-2xl pl-5 pr-5 py-3.5 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none resize-none bg-slate-50 hover:bg-white transition-colors"
+                className="flex-1 text-sm border border-slate-200 rounded-md pl-5 pr-5 py-3.5 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none resize-none bg-slate-50 hover:bg-white transition-colors"
                 disabled={!activeQuery}
               />
               <button
                 type="submit"
                 disabled={!activeQuery || !replyText.trim()}
-                className="bg-indigo-600 hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed text-white px-6 py-4 rounded-2xl transition-all shadow-md flex items-center font-bold h-full"
+                className="bg-indigo-600 hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed text-white px-6 py-4 rounded-md transition-all  flex items-center font-bold h-full"
               >
                 <span>Reply</span>
                 <SendHorizonal className="w-4 h-4 ml-2" />

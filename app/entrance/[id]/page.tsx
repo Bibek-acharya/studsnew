@@ -55,7 +55,7 @@ const EntranceDetailsPage: React.FC = () => {
           <p className="text-gray-500 mb-4">The entrance exam you are looking for does not exist.</p>
           <button
             onClick={() => router.push("/entrance")}
-            className="bg-brand-blue text-white px-6 py-2.5 rounded-lg font-semibold hover:bg-brand-hover transition-colors"
+            className="bg-brand-blue text-white px-6 py-2.5 rounded-md font-semibold hover:bg-brand-hover transition-colors"
           >
             Back to Entrance Exams
           </button>
@@ -70,17 +70,17 @@ const EntranceDetailsPage: React.FC = () => {
         {/* LEFT COLUMN */}
         <div className="w-full lg:w-[68%] flex flex-col gap-8">
           {/* Top Header */}
-          <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 flex flex-col md:flex-row justify-between items-start md:items-center gap-4 relative overflow-hidden">
+          <div className="bg-white rounded-md  border border-gray-200 p-6 flex flex-col md:flex-row justify-between items-start md:items-center gap-4 relative overflow-hidden">
             <div className="flex-1">
               <h1 className="text-2xl font-bold text-gray-900 mb-2 leading-tight">
                 {exam.title}: Application ({exam.status}), Exam Date, Syllabus, Preparation, Admit Card, Admission
               </h1>
             </div>
             <div className="flex flex-col items-end gap-3 shrink-0">
-              <button className="bg-[#00a844] hover:bg-green-700 text-white px-5 py-2.5 rounded-lg font-semibold flex items-center gap-2 transition-all shadow-sm">
+              <button className="bg-[#00a844] hover:bg-green-700 text-white px-5 py-2.5 rounded-md font-semibold flex items-center gap-2 transition-all ">
                 <Download className="w-4 h-4" /> Download Notice
               </button>
-              <div className="border border-purple-200 rounded-lg px-4 py-1.5 text-sm bg-purple-50 flex items-center gap-2">
+              <div className="border border-purple-200 rounded-md px-4 py-1.5 text-sm bg-purple-50 flex items-center gap-2">
                 <Calendar className="w-4 h-4 text-purple-600" />
                 <span className="font-medium text-gray-800">Registration-</span> {exam.registrationStart} - {exam.registrationEnd}
               </div>
@@ -88,7 +88,7 @@ const EntranceDetailsPage: React.FC = () => {
           </div>
 
           {/* TABS */}
-          <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+          <div className="bg-white rounded-md  border border-gray-200 overflow-hidden">
             <div className="bg-white border-b border-gray-200 overflow-x-auto hide-scrollbar">
               <ul className="flex space-x-6 px-6">
                 {TABS.map((tab) => (
@@ -115,7 +115,7 @@ const EntranceDetailsPage: React.FC = () => {
                   <h2 className="text-xl font-bold text-gray-900 mb-4">{exam.title} Overview</h2>
                   <p className="text-gray-600 mb-4 leading-relaxed">{exam.description}</p>
 
-                  <div className="mt-6 border border-gray-200 rounded-lg overflow-hidden">
+                  <div className="mt-6 border border-gray-200 rounded-md overflow-hidden">
                     <table className="min-w-full divide-y divide-gray-200">
                       <tbody className="divide-y divide-gray-200 bg-white">
                         <tr>
@@ -151,7 +151,7 @@ const EntranceDetailsPage: React.FC = () => {
                   <h3 className="text-lg font-bold text-gray-800 mb-3 mt-6">Step-by-Step Registration</h3>
                   <div className="space-y-4">
                     {exam.applicationSteps.map((step, idx) => (
-                      <div key={idx} className="flex gap-4 p-4 border border-gray-100 rounded-lg bg-gray-50">
+                      <div key={idx} className="flex gap-4 p-4 border border-gray-100 rounded-md bg-gray-50">
                         <div className="bg-blue-100 text-brand-blue w-8 h-8 rounded-full flex items-center justify-center font-bold shrink-0">{idx + 1}</div>
                         <div>
                           <h4 className="font-semibold text-gray-900 text-sm mb-1">{step.title}</h4>
@@ -170,7 +170,7 @@ const EntranceDetailsPage: React.FC = () => {
                   <p className="text-gray-600 mb-4 leading-relaxed">
                     Candidates must meet the following mandatory eligibility criteria laid down by the Medical Education Commission (MEC) to appear for the {exam.title} examination.
                   </p>
-                  <div className="bg-blue-50/50 p-5 rounded-lg border border-blue-100 mt-4 space-y-4">
+                  <div className="bg-blue-50/50 p-5 rounded-md border border-blue-100 mt-4 space-y-4">
                     {exam.eligibility.map((item, idx) => (
                       <div key={idx}>
                         <h4 className="font-semibold text-gray-900 flex items-center gap-2">
@@ -192,7 +192,7 @@ const EntranceDetailsPage: React.FC = () => {
                   </p>
 
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-                    <div className="border border-gray-200 rounded-lg p-5 bg-white shadow-sm">
+                    <div className="border border-gray-200 rounded-md p-5 bg-white ">
                       <h3 className="font-bold text-gray-900 mb-3 border-b pb-2">Exam Pattern</h3>
                       <ul className="space-y-2 text-sm text-gray-600">
                         {exam.examPattern.map((item, idx) => (
@@ -204,7 +204,7 @@ const EntranceDetailsPage: React.FC = () => {
                       </ul>
                     </div>
 
-                    <div className="border border-gray-200 rounded-lg overflow-hidden shadow-sm">
+                    <div className="border border-gray-200 rounded-md overflow-hidden ">
                       <table className="min-w-full divide-y divide-gray-200">
                         <thead className="bg-gray-900 text-white">
                           <tr>
@@ -236,9 +236,9 @@ const EntranceDetailsPage: React.FC = () => {
 
                   <div className="space-y-3 mt-4">
                     {exam.modelSets.map((set, idx) => (
-                      <div key={idx} className="flex items-center justify-between p-4 border border-gray-200 rounded-lg hover:shadow-md transition-shadow bg-white">
+                      <div key={idx} className="flex items-center justify-between p-4 border border-gray-200 rounded-md hover: transition-shadow bg-white">
                         <div className="flex items-center gap-4">
-                          <div className="p-2 bg-red-50 text-red-600 rounded-lg"><FileText className="w-6 h-6" /></div>
+                          <div className="p-2 bg-red-50 text-red-600 rounded-md"><FileText className="w-6 h-6" /></div>
                           <div>
                             <h4 className="font-semibold text-gray-900 text-sm">{set.title}</h4>
                             <p className="text-xs text-gray-500 mt-0.5">PDF • {set.size} • {set.description}</p>
@@ -258,7 +258,7 @@ const EntranceDetailsPage: React.FC = () => {
                   <p className="text-gray-600 mb-4">Through {exam.title}, candidates can secure admissions to various undergraduate medical programs. The major courses include:</p>
                   <div className="flex flex-wrap gap-2 mb-6">
                     {exam.courses.map((course, idx) => (
-                      <span key={idx} className="bg-blue-50 text-blue-700 px-3 py-1.5 rounded-lg text-sm font-medium border border-blue-100">{course}</span>
+                      <span key={idx} className="bg-blue-50 text-blue-700 px-3 py-1.5 rounded-md text-sm font-medium border border-blue-100">{course}</span>
                     ))}
                   </div>
                   <h3 className="text-lg font-bold text-gray-800 mb-3">Admission Process</h3>
@@ -293,7 +293,7 @@ const EntranceDetailsPage: React.FC = () => {
           </div>
 
           {/* Exam Dates & Schedule */}
-          <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+          <div className="bg-white rounded-md  border border-gray-200 p-6">
             <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4 gap-4">
               <div>
                 <h2 className="text-xl font-bold text-gray-900">{exam.title} Exam Dates & Schedule</h2>
@@ -305,7 +305,7 @@ const EntranceDetailsPage: React.FC = () => {
             </div>
 
             {/* Upcoming Dates */}
-            <div className="border border-gray-200 rounded-lg overflow-hidden mb-6">
+            <div className="border border-gray-200 rounded-md overflow-hidden mb-6">
               <table className="min-w-full divide-y divide-gray-200">
                 <thead className="bg-[#f3f4fb]">
                   <tr>
@@ -330,7 +330,7 @@ const EntranceDetailsPage: React.FC = () => {
             </div>
 
             {/* Past Dates */}
-            <div className="border border-gray-200 rounded-lg overflow-hidden">
+            <div className="border border-gray-200 rounded-md overflow-hidden">
               <table className="min-w-full divide-y divide-gray-200 opacity-70">
                 <thead className="bg-gray-50">
                   <tr>
@@ -351,7 +351,7 @@ const EntranceDetailsPage: React.FC = () => {
           </div>
 
           {/* Explore Colleges */}
-          <div className="bg-gradient-to-br from-[#f5f0ff] to-[#f0f4ff] rounded-2xl p-6 border border-purple-100">
+          <div className="bg-gradient-to-br from-[#f5f0ff] to-[#f0f4ff] rounded-md p-6 border border-purple-100">
             <div className="flex justify-between items-start mb-6">
               <div>
                 <span className="inline-block bg-[#b6a3de] text-white text-xs font-semibold px-2.5 py-1 rounded mb-2">Popular Colleges</span>
@@ -363,7 +363,7 @@ const EntranceDetailsPage: React.FC = () => {
 
             <div className="flex gap-4 overflow-x-auto hide-scrollbar pb-2">
               {/* College Card */}
-              <div className="min-w-[280px] bg-white rounded-xl p-5 border border-gray-100 shadow-sm flex flex-col justify-between hover:shadow-md transition-shadow">
+              <div className="min-w-[280px] bg-white rounded-md p-5 border border-gray-100  flex flex-col justify-between hover: transition-shadow">
                 <div>
                   <div className="flex justify-between items-start mb-4">
                     <div>
@@ -386,15 +386,15 @@ const EntranceDetailsPage: React.FC = () => {
                   </div>
                 </div>
                 <div className="flex gap-2">
-                  <button className="p-2 border border-gray-200 rounded-lg text-gray-500 hover:bg-gray-50"><Bookmark className="w-5 h-5" /></button>
-                  <button className="flex-1 bg-[#00a844] hover:bg-green-700 text-white py-2 rounded-lg font-medium text-sm flex items-center justify-center gap-2 transition-colors">
+                  <button className="p-2 border border-gray-200 rounded-md text-gray-500 hover:bg-gray-50"><Bookmark className="w-5 h-5" /></button>
+                  <button className="flex-1 bg-[#00a844] hover:bg-green-700 text-white py-2 rounded-md font-medium text-sm flex items-center justify-center gap-2 transition-colors">
                     <Download className="w-4 h-4" /> Brochure
                   </button>
                 </div>
               </div>
 
               {/* Promo Card */}
-              <div className="min-w-[320px] bg-white rounded-xl p-5 border border-gray-100 shadow-sm flex flex-col justify-between relative overflow-hidden">
+              <div className="min-w-[320px] bg-white rounded-md p-5 border border-gray-100  flex flex-col justify-between relative overflow-hidden">
                 <div className="relative z-10">
                   <h3 className="font-bold text-gray-900 text-lg leading-tight mb-3 w-[70%]">Confused about which college or exam to opt for?</h3>
                   <ul className="space-y-2 mb-4">
@@ -409,13 +409,13 @@ const EntranceDetailsPage: React.FC = () => {
                 <div className="absolute top-4 right-4 opacity-80">
                   <Headset className="w-12 h-12 text-purple-200" />
                 </div>
-                <button className="w-full bg-[#2a1b41] hover:bg-[#1a1028] text-white py-2.5 rounded-lg font-medium text-sm transition-colors relative z-10">
+                <button className="w-full bg-[#2a1b41] hover:bg-[#1a1028] text-white py-2.5 rounded-md font-medium text-sm transition-colors relative z-10">
                   Get Free Counselling
                 </button>
               </div>
 
               {/* View All Card */}
-              <div className="min-w-[150px] bg-white rounded-xl p-5 border border-gray-100 shadow-sm flex flex-col items-center justify-center hover:bg-gray-50 transition-colors cursor-pointer group">
+              <div className="min-w-[150px] bg-white rounded-md p-5 border border-gray-100  flex flex-col items-center justify-center hover:bg-gray-50 transition-colors cursor-pointer group">
                 <div className="w-12 h-12 rounded-full border border-gray-200 flex items-center justify-center mb-3 group-hover:border-brand-blue group-hover:text-brand-blue transition-colors">
                   <ArrowRight className="w-6 h-6" />
                 </div>
@@ -434,7 +434,7 @@ const EntranceDetailsPage: React.FC = () => {
           </div>
 
           {/* FAQs */}
-          <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+          <div className="bg-white rounded-md  border border-gray-200 p-6">
             <div className="flex items-center gap-2 mb-6">
               <div className="relative flex h-8 w-8 items-center justify-center">
                 <MessageCircleQuestion className="w-6 h-6 text-orange-400" />
@@ -464,11 +464,11 @@ const EntranceDetailsPage: React.FC = () => {
         {/* RIGHT COLUMN (Sidebar) */}
         <div className="w-full lg:w-[32%] flex flex-col gap-6">
           {/* Quick Info Card */}
-          <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+          <div className="bg-white rounded-md  border border-gray-200 p-6">
             <h3 className="font-bold text-lg text-gray-900 mb-4">Exam Highlights</h3>
             <ul className="space-y-4">
               <li className="flex items-start gap-3">
-                <div className="bg-blue-50 p-2.5 rounded-lg text-brand-blue mt-0.5 shadow-sm border border-blue-100">
+                <div className="bg-blue-50 p-2.5 rounded-md text-brand-blue mt-0.5  border border-blue-100">
                   <Globe2 className="w-5 h-5" />
                 </div>
                 <div>
@@ -477,7 +477,7 @@ const EntranceDetailsPage: React.FC = () => {
                 </div>
               </li>
               <li className="flex items-start gap-3">
-                <div className="bg-orange-50 p-2.5 rounded-lg text-orange-500 mt-0.5 shadow-sm border border-orange-100">
+                <div className="bg-orange-50 p-2.5 rounded-md text-orange-500 mt-0.5  border border-orange-100">
                   <Timer className="w-5 h-5" />
                 </div>
                 <div>
@@ -486,7 +486,7 @@ const EntranceDetailsPage: React.FC = () => {
                 </div>
               </li>
               <li className="flex items-start gap-3">
-                <div className="bg-green-50 p-2.5 rounded-lg text-green-600 mt-0.5 shadow-sm border border-green-100">
+                <div className="bg-green-50 p-2.5 rounded-md text-green-600 mt-0.5  border border-green-100">
                   <FileCheck2 className="w-5 h-5" />
                 </div>
                 <div>
@@ -495,38 +495,38 @@ const EntranceDetailsPage: React.FC = () => {
                 </div>
               </li>
             </ul>
-            <button className="w-full mt-6 border-2 border-brand-blue text-brand-blue font-semibold py-2.5 rounded-lg hover:bg-brand-blue hover:text-white transition-colors">
+            <button className="w-full mt-6 border-2 border-brand-blue text-brand-blue font-semibold py-2.5 rounded-md hover:bg-brand-blue hover:text-white transition-colors">
               Official Website
             </button>
           </div>
 
           {/* Important Dates Widget */}
-          <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+          <div className="bg-white rounded-md  border border-gray-200 p-6">
             <h3 className="font-bold text-lg text-gray-900 mb-4">Important Dates</h3>
             <div className="relative border-l-2 border-gray-200 ml-2 space-y-6">
               <div className="relative">
-                <span className="absolute -left-[9px] top-1 bg-brand-blue w-4 h-4 rounded-full border-[3px] border-white ring-1 ring-gray-200 shadow-sm"></span>
+                <span className="absolute -left-[9px] top-1 bg-brand-blue w-4 h-4 rounded-full border-[3px] border-white ring-1 ring-gray-200 "></span>
                 <div className="pl-5">
                   <p className="text-sm font-semibold text-gray-900">Application Starts</p>
                   <p className="text-xs text-gray-500 mt-1">{exam.registrationStart}</p>
                 </div>
               </div>
               <div className="relative">
-                <span className="absolute -left-[9px] top-1 bg-gray-300 w-4 h-4 rounded-full border-[3px] border-white ring-1 ring-gray-200 shadow-sm"></span>
+                <span className="absolute -left-[9px] top-1 bg-gray-300 w-4 h-4 rounded-full border-[3px] border-white ring-1 ring-gray-200 "></span>
                 <div className="pl-5">
                   <p className="text-sm font-semibold text-gray-900">Last Date to Apply</p>
                   <p className="text-xs text-gray-500 mt-1">{exam.registrationEnd}</p>
                 </div>
               </div>
               <div className="relative">
-                <span className="absolute -left-[9px] top-1 bg-gray-300 w-4 h-4 rounded-full border-[3px] border-white ring-1 ring-gray-200 shadow-sm"></span>
+                <span className="absolute -left-[9px] top-1 bg-gray-300 w-4 h-4 rounded-full border-[3px] border-white ring-1 ring-gray-200 "></span>
                 <div className="pl-5">
                   <p className="text-sm font-semibold text-gray-900">Admit Card Release</p>
                   <p className="text-xs text-gray-500 mt-1">To be announced</p>
                 </div>
               </div>
               <div className="relative">
-                <span className="absolute -left-[9px] top-1 bg-gray-300 w-4 h-4 rounded-full border-[3px] border-white ring-1 ring-gray-200 shadow-sm"></span>
+                <span className="absolute -left-[9px] top-1 bg-gray-300 w-4 h-4 rounded-full border-[3px] border-white ring-1 ring-gray-200 "></span>
                 <div className="pl-5">
                   <p className="text-sm font-semibold text-gray-900">Exam Date</p>
                   <p className="text-xs text-gray-500 mt-1">{exam.examDate}</p>
@@ -536,7 +536,7 @@ const EntranceDetailsPage: React.FC = () => {
           </div>
 
           {/* Try Mock Test Free Ad */}
-          <div className="bg-gradient-to-br from-purple-600 to-gray-900 rounded-xl shadow-md p-6 text-white text-center relative overflow-hidden">
+          <div className="bg-gradient-to-br from-purple-600 to-gray-900 rounded-md  p-6 text-white text-center relative overflow-hidden">
             <div className="absolute top-0 right-0 p-4 opacity-10">
               <Target className="w-24 h-24" />
             </div>
@@ -546,7 +546,7 @@ const EntranceDetailsPage: React.FC = () => {
               </div>
               <h3 className="font-bold text-lg mb-2">Try Mock Test Free</h3>
               <p className="text-sm text-purple-100 mb-6 leading-relaxed">Assess your readiness with our full-length simulated {exam.title} exam environment.</p>
-              <button className="bg-white text-purple-700 font-bold py-2.5 px-6 rounded-lg w-full hover:bg-gray-50 transition-colors shadow-sm">
+              <button className="bg-white text-purple-700 font-bold py-2.5 px-6 rounded-md w-full hover:bg-gray-50 transition-colors ">
                 Start Free Test
               </button>
             </div>

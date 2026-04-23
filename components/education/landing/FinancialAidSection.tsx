@@ -1,26 +1,25 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { Bookmark, MapPin, GraduationCap, Calendar, Building, CheckCircle2, BadgeCheckIcon } from "lucide-react";
+import { ScholarshipItem } from "@/services/api";
 
 interface FinancialAidSectionProps {
   onNavigate: (view: string, data?: any) => void;
+  scholarships?: ScholarshipItem[];
 }
 
-const FinancialAidSection: React.FC<FinancialAidSectionProps> = ({ onNavigate }) => {
-  const [scholarships, setScholarships] = useState<any[]>([]);
-  const [loading, setLoading] = useState(true);
+const FinancialAidSection: React.FC<FinancialAidSectionProps> = ({ onNavigate, scholarships = [] }) => {
   const [bookmarked, setBookmarked] = useState<Set<number>>(new Set());
 
-  useEffect(() => {
-    setScholarships([
+  const items = scholarships.length
+    ? scholarships
+    : [
       { id: 1, title: "National IT Excellence Scholarship (BSc. CSIT)", provider: "Tribhuvan University, Nepal", type: "MERIT-BASED", status: "Open", amount: "100% Tuition", location: "Bagmati", eligibility: "Bachelor (+2 Sci: 2.8+ GPA)", deadline: "Aug 15, 2026", image: "https://images.unsplash.com/photo-1498050108023-c5249f4df085?q=80&w=600&auto=format&fit=crop" },
       { id: 2, title: "STEM Women Scholars Award", provider: "Kathmandu University", type: "MERIT-BASED", status: "Open", amount: "75% Scholarship", location: "Province 3", eligibility: "Female Students (3.0+ GPA)", deadline: "Sep 20, 2026", image: "https://images.unsplash.com/photo-1523240795612-9a054b0db644?q=80&w=600&auto=format&fit=crop" },
       { id: 3, title: "Social Impact Leadership Grant", provider: "Social Welfare Board", type: "NEED-BASED", status: "Closing", amount: "NRs. 50,000", location: "National", eligibility: "Community Service Record", deadline: "Jul 30, 2026", image: "https://images.unsplash.com/photo-1544652478-6653e09f18a2?q=80&w=600&auto=format&fit=crop" },
       { id: 4, title: "Future Educators Excellence Fund", provider: "Tribhuvan University", type: "MERIT-BASED", status: "Open", amount: "Full Ride", location: "Bagmati", eligibility: "Education Majors", deadline: "Oct 05, 2026", image: "https://images.unsplash.com/photo-1509062522246-3755977927d7?q=80&w=600&auto=format&fit=crop" }
-    ]);
-    setLoading(false);
-  }, []);
+    ];
 
   const toggleBookmark = (e: React.MouseEvent, id: number) => {
     e.stopPropagation();
@@ -31,8 +30,6 @@ const FinancialAidSection: React.FC<FinancialAidSectionProps> = ({ onNavigate })
       return next;
     });
   };
-
-  if (loading) return null;
 
   return (
     <section className="mt-16 sm:mt-20 md:mt-24 w-full">
@@ -47,10 +44,10 @@ const FinancialAidSection: React.FC<FinancialAidSectionProps> = ({ onNavigate })
 
       {/* Grid Container for Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-5 md:gap-6">
-        {scholarships.map((scholarship) => (
-          <div key={scholarship.id} className="bg-white rounded-[14px] sm:rounded-xl p-3 sm:p-3.5 border border-[#e2e8f0] flex flex-col h-full group hover:border-blue-500/20 transition-all duration-300">
+        {items.map((scholarship) => (
+          <div key={scholarship.id} className="bg-white rounded-[14px] sm:rounded-md p-3 sm:p-3.5 border border-[#e2e8f0] flex flex-col h-full group hover:border-blue-500/20 transition-all duration-300">
             {/* Image Area */}
-            <div className="w-full h-30 rounded-[10px] sm:rounded-xl overflow-hidden mb-3 sm:mb-4 relative">
+            <div className="w-full h-30 rounded-[10px] sm:rounded-md overflow-hidden mb-3 sm:mb-4 relative">
               <img 
                 src={scholarship.image || "https://images.unsplash.com/photo-1498050108023-c5249f4df085?q=80&w=600&auto=format&fit=crop"} 
                 alt={scholarship.title} 
@@ -60,11 +57,11 @@ const FinancialAidSection: React.FC<FinancialAidSectionProps> = ({ onNavigate })
             </div>
 
             {/* Content Area */}
-            <div className="flex flex-col flex-grow px-0.5 sm:px-1">
+            <div className="flex flex-col grow px-0.5 sm:px-1">
               {/* Tags */}
               <div className="flex items-center gap-2 sm:gap-2.5 mb-2.5 sm:mb-3">
                 <span className="text-[#2563eb] bg-[#eff6ff] px-2 py-0.5 sm:py-1 rounded text-[10px] sm:text-[11px] font-bold tracking-wider uppercase">
-                  {scholarship.type || "MERIT-BASED"}
+                  {"type" in scholarship ? scholarship.type : scholarship.scholarship_type || "MERIT-BASED"}
                 </span>
                 <span className={`px-2 py-0.5 sm:py-1 rounded text-[10px] sm:text-[11px] md:text-[12px] font-semibold flex items-center gap-1 sm:gap-1.5 ${scholarship.status === 'Open' ? 'text-[#16a34a] bg-[#f0fdf4]' : 'text-amber-600 bg-amber-50'}`}>
                   <span className={`w-1.5 h-1.5 rounded-full ${scholarship.status === 'Open' ? 'bg-[#16a34a]' : 'bg-amber-500'}`}></span>
@@ -86,7 +83,7 @@ const FinancialAidSection: React.FC<FinancialAidSectionProps> = ({ onNavigate })
               </div>
 
               {/* Details Box */}
-              <div className="bg-[#f8fafc] rounded-lg sm:rounded-xl p-2.5 sm:p-3 md:p-3.5 flex flex-col gap-2 sm:gap-3 mt-auto border border-[#f1f5f9]">
+              <div className="bg-[#f8fafc] rounded-md sm:rounded-md p-2.5 sm:p-3 md:p-3.5 flex flex-col gap-2 sm:gap-3 mt-auto border border-[#f1f5f9]">
                 {/* Row 1: Split */}
                 <div className="grid grid-cols-2 gap-1.5 sm:gap-2 text-[11px] xs:text-[12px] sm:text-[13px] text-[#475569]">
                   <div className="flex items-center gap-1.5 sm:gap-2">
@@ -116,15 +113,15 @@ const FinancialAidSection: React.FC<FinancialAidSectionProps> = ({ onNavigate })
               <div className="flex gap-2 sm:gap-2.5 mt-4 sm:mt-5 mb-1">
                 <button 
                   onClick={() => onNavigate("scholarshipDetails", scholarship)}
-                  className="flex-1 bg-white border border-[#cbd5e1] text-[#334155] rounded-lg py-2 sm:py-2.5 text-[12px] sm:text-[13px] md:text-[14px] font-semibold hover:bg-[#f8fafc] hover:text-[#0f172a] transition-all duration-200"
+                  className="flex-1 bg-white border border-[#cbd5e1] text-[#334155] rounded-md py-2 sm:py-2.5 text-[12px] sm:text-[13px] md:text-[14px] font-semibold hover:bg-[#f8fafc] hover:text-[#0f172a] transition-all duration-200"
                 >
                   Details
                 </button>
-                <button className="flex-1 bg-brand-blue text-white rounded-lg py-2 sm:py-2.5 text-[12px] sm:text-[13px] md:text-[14px] font-semibold hover:bg-[#0000CC] hover:shadow-md transition-all duration-200">
+                <button className="flex-1 bg-brand-blue text-white rounded-md py-2 sm:py-2.5 text-[12px] sm:text-[13px] md:text-[14px] font-semibold hover:bg-brand-hover hover: transition-all duration-200">
                   Apply
                 </button>
                 <button
-                  className={`w-[36px] sm:w-[40px] md:w-[44px] shrink-0 rounded-lg flex items-center justify-center transition-all duration-200 ${
+                  className={`w-9 sm:w-10 md:w-11 shrink-0 rounded-md flex items-center justify-center transition-all duration-200 ${
                     bookmarked.has(scholarship.id)
                       ? "border-blue-200 bg-blue-50"
                       : "bg-white border border-[#cbd5e1] text-[#94a3b8] hover:bg-[#f8fafc] hover:text-[#64748b]"
@@ -132,7 +129,7 @@ const FinancialAidSection: React.FC<FinancialAidSectionProps> = ({ onNavigate })
                   title={bookmarked.has(scholarship.id) ? "Remove Bookmark" : "Bookmark"}
                   onClick={(e) => toggleBookmark(e, scholarship.id)}
                 >
-                  <Bookmark className={`w-[14px] h-[14px] sm:w-[16px] sm:h-[16px] md:w-[18px] md:h-[18px] ${bookmarked.has(scholarship.id) ? "text-[#0000ff] fill-[#0000ff]" : ""}`} />
+                  <Bookmark className={`w-3.5 h-3.5 sm:w-4 sm:h-4 md:w-4.5 md:h-4.5 ${bookmarked.has(scholarship.id) ? "text-[#0000ff] fill-[#0000ff]" : ""}`} />
                 </button>
               </div>
             </div>

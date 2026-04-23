@@ -104,7 +104,7 @@ export default function Step1({ step, stepImages, form, handleInputChange, stepT
         ) : (
           <button
             disabled={!canContinue(step)}
-            className={`rounded-lg px-8 py-3.5 text-sm font-bold text-white transition-all hover:bg-[#1d4ed8] ${
+            className={`rounded-md px-8 py-3.5 text-sm font-bold text-white transition-all hover:bg-[#1d4ed8] ${
               canContinue(step)
                 ? 'bg-brand-blue cursor-pointer'
                 : 'bg-slate-300 cursor-not-allowed'

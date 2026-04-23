@@ -59,13 +59,13 @@ export default function FeaturedCollegeCard({
   }, [images.length]);
 
   return (
-    <div className="bg-white rounded-xl shadow-sm w-full flex flex-col border border-gray-100 hover:shadow-xl hover:shadow-blue-900/5 hover:-translate-y-1 transition-all duration-300 overflow-hidden group/card relative">
+    <div className="bg-white rounded-md  w-full flex flex-col border border-gray-100 hover:shadow-xl hover:shadow-blue-900/5 hover:-translate-y-1 transition-all duration-300 overflow-hidden group/card relative">
       {/* Image Carousel */}
       <div className="p-2 pb-0">
-        <div className="h-[120px] w-full bg-gray-100 overflow-hidden relative rounded-lg group/slider">
+        <div className="h-[120px] w-full bg-gray-100 overflow-hidden relative rounded-md group/slider">
           {/* Badges */}
           <div className="absolute top-2 left-2 z-20 flex flex-col gap-1">
-            <span className={`${badgeColor} text-white text-[10px] font-bold px-2 py-0.5 rounded uppercase tracking-wider shadow-sm`}>
+            <span className={`${badgeColor} text-white text-[10px] font-bold px-2 py-0.5 rounded uppercase tracking-wider `}>
               {secondaryBadge}
             </span>
           </div>
@@ -129,7 +129,7 @@ export default function FeaturedCollegeCard({
 
         {/* Header: Logo, Title */}
         <div className="flex items-start gap-3 mb-3">
-          <img src={logo} alt="Logo" className="w-10 h-10 object-contain rounded border border-gray-100 shadow-sm shrink-0 mt-0.5" />
+          <img src={logo} alt="Logo" className="w-10 h-10 object-contain rounded border border-gray-100  shrink-0 mt-0.5" />
           <div className="flex-grow flex flex-col gap-1.5 min-w-0 pr-12">
             <div className="flex items-center gap-1.5">
               <span className="text-[14px] font-bold text-gray-900 leading-none truncate" title={provider}>{provider}</span>
@@ -212,7 +212,7 @@ export default function FeaturedCollegeCard({
         <div className="mt-auto pt-3 border-t border-gray-100 flex flex-col gap-2">
           <button
             onClick={onApply}
-            className="w-full bg-[#1053F3] hover:bg-blue-700 text-white text-[13px] font-semibold py-2 rounded-md transition-colors shadow-sm"
+            className="w-full bg-[#1053F3] hover:bg-blue-700 text-white text-[13px] font-semibold py-2 rounded-md transition-colors "
           >
             Apply Now
           </button>

@@ -161,7 +161,7 @@ const SignupView: React.FC<SignupViewProps> = ({
         <button
           type="button"
           onClick={handleGoogleLogin}
-          className="w-full flex items-center justify-center gap-2 border border-gray-200 rounded-lg py-2 px-4 hover:bg-gray-50 transition-colors focus:ring-2 focus:ring-blue-600 focus:outline-none"
+          className="w-full flex items-center justify-center gap-2 border border-gray-200 rounded-md py-2 px-4 hover:bg-gray-50 transition-colors focus:ring-2 focus:ring-blue-600 focus:outline-none"
         >
           <svg className="w-5 h-5" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
             <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
@@ -182,7 +182,7 @@ const SignupView: React.FC<SignupViewProps> = ({
       
 
       {error && (
-        <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg">
+        <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-md">
           <p className="text-red-700 text-sm">{error}</p>
         </div>
       )}
@@ -211,7 +211,7 @@ const SignupView: React.FC<SignupViewProps> = ({
               placeholder="Full Name"
               required
               disabled={loading}
-              className={`w-full pl-11 pr-10 py-2.5 border rounded-lg text-sm focus:ring-1 outline-none transition-colors placeholder:text-gray-400 disabled:bg-gray-50 ${getBorderClass("fullName")} ${getFocusClasses("fullName")}`}
+              className={`w-full pl-11 pr-10 py-2.5 border rounded-md text-sm focus:ring-1 outline-none transition-colors placeholder:text-gray-400 disabled:bg-gray-50 ${getBorderClass("fullName")} ${getFocusClasses("fullName")}`}
               value={values.fullName}
               onChange={handleChange}
               onBlur={() => {
@@ -280,7 +280,7 @@ const SignupView: React.FC<SignupViewProps> = ({
               placeholder="Email Address"
               required
               disabled={loading}
-              className={`w-full pl-11 pr-10 py-2.5 border rounded-lg text-sm focus:ring-1 outline-none transition-colors placeholder:text-gray-400 disabled:bg-gray-50 ${getBorderClass("email")} ${getFocusClasses("email")}`}
+              className={`w-full pl-11 pr-10 py-2.5 border rounded-md text-sm focus:ring-1 outline-none transition-colors placeholder:text-gray-400 disabled:bg-gray-50 ${getBorderClass("email")} ${getFocusClasses("email")}`}
               value={values.email}
               onChange={handleChange}
               onBlur={() => {
@@ -351,7 +351,7 @@ const SignupView: React.FC<SignupViewProps> = ({
               pattern="[0-9]{10}"
               title="Please enter a valid 10-digit number"
               disabled={loading}
-              className={`w-full pl-22 pr-10 py-2.5 border rounded-lg text-sm focus:ring-1 outline-none transition-colors placeholder:text-gray-400 disabled:bg-gray-50 ${getBorderClass("phone")} ${getFocusClasses("phone")}`}
+              className={`w-full pl-22 pr-10 py-2.5 border rounded-md text-sm focus:ring-1 outline-none transition-colors placeholder:text-gray-400 disabled:bg-gray-50 ${getBorderClass("phone")} ${getFocusClasses("phone")}`}
               value={values.phone}
               onChange={handleChange}
               onBlur={() => {
@@ -420,7 +420,7 @@ const SignupView: React.FC<SignupViewProps> = ({
               title="Must contain at least one uppercase letter, one special character, and be at least 8 characters long."
               required
               disabled={loading}
-              className={`w-full pl-11 pr-11 py-2.5 border rounded-lg text-sm focus:ring-1 outline-none transition-colors placeholder:text-gray-400 disabled:bg-gray-50 ${getBorderClass("password")} ${getFocusClasses("password")}`}
+              className={`w-full pl-11 pr-11 py-2.5 border rounded-md text-sm focus:ring-1 outline-none transition-colors placeholder:text-gray-400 disabled:bg-gray-50 ${getBorderClass("password")} ${getFocusClasses("password")}`}
               value={values.password}
               onChange={handleChange}
               onBlur={() => {
@@ -505,7 +505,7 @@ const SignupView: React.FC<SignupViewProps> = ({
               placeholder="Re-enter Password"
               required
               disabled={loading}
-              className={`w-full pl-11 pr-11 py-2.5 border rounded-lg text-sm focus:ring-1 outline-none transition-colors placeholder:text-gray-400 disabled:bg-gray-50 ${getBorderClass("confirmPassword")} ${getFocusClasses("confirmPassword")}`}
+              className={`w-full pl-11 pr-11 py-2.5 border rounded-md text-sm focus:ring-1 outline-none transition-colors placeholder:text-gray-400 disabled:bg-gray-50 ${getBorderClass("confirmPassword")} ${getFocusClasses("confirmPassword")}`}
               value={values.confirmPassword}
               onChange={handleChange}
               onBlur={() => {
@@ -604,7 +604,7 @@ const SignupView: React.FC<SignupViewProps> = ({
         <button
           type="submit"
           disabled={loading}
-          className="w-full bg-brand-blue hover:bg-blue-700 disabled:bg-gray-400 text-white font-medium rounded-lg py-2.5 transition-colors duration-200 shadow-md flex items-center justify-center gap-2"
+          className="w-full bg-brand-blue hover:bg-blue-700 disabled:bg-gray-400 text-white font-medium rounded-md py-2.5 transition-colors duration-200  flex items-center justify-center gap-2"
         >
           {loading ? (
             <svg

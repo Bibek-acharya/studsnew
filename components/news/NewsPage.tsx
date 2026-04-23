@@ -138,7 +138,7 @@ const NewsPage: React.FC = () => {
               <button
                 key={pill}
                 onClick={() => setActiveCategory(pill)}
-                className={`whitespace-nowrap rounded-full px-5 py-2 text-sm font-medium transition-all shadow-sm ${
+                className={`whitespace-nowrap rounded-full px-5 py-2 text-sm font-medium transition-all  ${
                   isActive
                     ? "bg-blue-600 text-white hover:bg-blue-700"
                     : "bg-white border border-gray-200 text-slate-700 hover:bg-gray-50 hover:border-gray-300"
@@ -156,7 +156,7 @@ const NewsPage: React.FC = () => {
           <h2 className="text-3xl font-bold text-slate-900 mb-5">Featured Story of the Week</h2>
           <Link
             href={`/news/${featuredNews.id}`}
-            className="relative w-full h-112.5 sm:h-100 rounded-2xl overflow-hidden shadow-lg group cursor-pointer block"
+            className="relative w-full h-112.5 sm:h-100 rounded-md overflow-hidden shadow-lg group cursor-pointer block"
           >
             <img
               src={featuredNews.image}
@@ -187,7 +187,7 @@ const NewsPage: React.FC = () => {
                   </p>
                 </div>
 
-                <button className="w-full sm:w-auto bg-white text-slate-900 font-semibold px-6 py-3 rounded-lg hover:bg-blue-50 hover:text-blue-700 transition-all duration-200 shadow-sm whitespace-nowrap">
+                <button className="w-full sm:w-auto bg-white text-slate-900 font-semibold px-6 py-3 rounded-md hover:bg-blue-50 hover:text-blue-700 transition-all duration-200  whitespace-nowrap">
                   Read Full Story
                 </button>
               </div>
@@ -222,7 +222,7 @@ const NewsPage: React.FC = () => {
             return (
               <article
                 key={item.id}
-                className="bg-white border border-gray-100 hover:border-blue-500/20 rounded-2xl p-5 flex flex-col transition-all duration-300 group cursor-pointer"
+                className="bg-white border border-gray-100 hover:border-blue-500/20 rounded-md p-5 flex flex-col transition-all duration-300 group cursor-pointer"
               >
                 <div className="mb-4">
                   <span
@@ -234,7 +234,7 @@ const NewsPage: React.FC = () => {
                   </span>
                 </div>
 
-                <div className="rounded-xl overflow-hidden aspect-16/10 mb-5 bg-gray-100 h-30">
+                <div className="rounded-md overflow-hidden aspect-16/10 mb-5 bg-gray-100 h-30">
                   <img
                     src={item.image}
                     alt={item.title}
@@ -263,7 +263,7 @@ const NewsPage: React.FC = () => {
         </div>
 
         {processedNews.length === 0 && (
-          <div className="text-center py-10 text-slate-500 bg-white border border-gray-200 rounded-2xl mt-6">
+          <div className="text-center py-10 text-slate-500 bg-white border border-gray-200 rounded-md mt-6">
             No news available for this category.
           </div>
         )}

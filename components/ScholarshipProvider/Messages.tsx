@@ -86,12 +86,12 @@ export default function Messages() {
       </div>
 
       {error && (
-        <div className="mb-4 p-4 bg-red-50 border border-red-200 rounded-xl text-red-700 text-sm font-bold">
+        <div className="mb-4 p-4 bg-red-50 border border-red-200 rounded-md text-red-700 text-sm font-bold">
           {error}
         </div>
       )}
 
-      <div className="bg-white rounded-2xl shadow-sm border border-slate-200 flex flex-1 overflow-hidden min-h-[600px]">
+      <div className="bg-white rounded-md  border border-slate-200 flex flex-1 overflow-hidden min-h-[600px]">
         <div className="w-full md:w-80 lg:w-96 border-r border-slate-200 flex flex-col bg-slate-50 shrink-0">
           <div className="p-4 border-b border-slate-200 bg-white">
             <div className="relative">
@@ -101,7 +101,7 @@ export default function Messages() {
                 placeholder="Search conversations..."
                 value={searchTerm}
                 onChange={e => setSearchTerm(e.target.value)}
-                className="w-full pl-10 pr-4 py-2.5 bg-slate-100 border-none rounded-xl text-sm outline-none focus:ring-2 focus:ring-primary-500 transition font-medium shadow-inner"
+                className="w-full pl-10 pr-4 py-2.5 bg-slate-100 border-none rounded-md text-sm outline-none focus:ring-2 focus:ring-primary-500 transition font-medium shadow-inner"
               />
             </div>
           </div>
@@ -124,11 +124,11 @@ export default function Messages() {
                   key={chat.id}
                   onClick={() => setActiveChat(chat)}
                   className={`p-4 flex items-center gap-4 cursor-pointer transition-all hover:bg-white ${
-                    activeChat?.id === chat.id ? 'bg-white shadow-sm border-l-4 border-primary-600' : ''
+                    activeChat?.id === chat.id ? 'bg-white  border-l-4 border-primary-600' : ''
                   }`}
                 >
                   <div className="relative shrink-0">
-                    <div className="w-12 h-12 rounded-full bg-primary-100 text-primary-600 flex items-center justify-center font-black text-sm shadow-sm border border-slate-100">
+                    <div className="w-12 h-12 rounded-full bg-primary-100 text-primary-600 flex items-center justify-center font-black text-sm  border border-slate-100">
                       U{chat.user_id}
                     </div>
                     {!chat.read && <div className="absolute top-0 right-0 w-3.5 h-3.5 bg-danger border-2 border-white rounded-full"></div>}
@@ -151,9 +151,9 @@ export default function Messages() {
         <div className="flex-1 flex flex-col bg-slate-50 items-center justify-center relative">
           {activeChat ? (
             <>
-              <div className="absolute top-0 left-0 right-0 p-4 border-b border-slate-200 bg-white/95 backdrop-blur flex justify-between items-center shadow-sm z-10">
+              <div className="absolute top-0 left-0 right-0 p-4 border-b border-slate-200 bg-white/95 backdrop-blur flex justify-between items-center  z-10">
                 <div className="flex items-center gap-4">
-                  <div className="w-12 h-12 rounded-full bg-primary-100 text-primary-600 flex items-center justify-center font-black text-sm shadow-sm border-2 border-slate-100">
+                  <div className="w-12 h-12 rounded-full bg-primary-100 text-primary-600 flex items-center justify-center font-black text-sm  border-2 border-slate-100">
                     U{activeChat.user_id}
                   </div>
                   <div>
@@ -165,7 +165,7 @@ export default function Messages() {
 
               <div className="w-full flex-1 p-6 space-y-6 pt-24 overflow-y-auto no-scrollbar">
                 <div className="flex justify-start">
-                  <div className="bg-white p-4 rounded-2xl rounded-tl-none shadow-sm border border-slate-200 max-w-[70%]">
+                  <div className="bg-white p-4 rounded-md rounded-tl-none  border border-slate-200 max-w-[70%]">
                     <p className="text-sm font-medium text-slate-700 leading-relaxed">{activeChat.content}</p>
                     <span className="text-[10px] text-slate-400 font-bold mt-2 block">{formatTime(activeChat.created_at)}</span>
                   </div>
@@ -180,14 +180,14 @@ export default function Messages() {
                       value={newMessage}
                       onChange={e => setNewMessage(e.target.value)}
                       onKeyDown={e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); handleSend(); } }}
-                      className="w-full bg-slate-100 border-2 border-slate-100 rounded-2xl pl-4 pr-12 py-3 text-sm focus:outline-none focus:ring-0 focus:border-primary-500 focus:bg-white transition resize-none max-h-32 font-medium"
+                      className="w-full bg-slate-100 border-2 border-slate-100 rounded-md pl-4 pr-12 py-3 text-sm focus:outline-none focus:ring-0 focus:border-primary-500 focus:bg-white transition resize-none max-h-32 font-medium"
                       placeholder="Type a message..."
                     ></textarea>
                   </div>
                   <button
                     onClick={handleSend}
                     disabled={sending || !newMessage.trim()}
-                    className="bg-primary-600 text-white w-12 h-12 rounded-2xl flex items-center justify-center hover:bg-primary-700 transition shadow-lg shadow-primary-500/30 shrink-0 disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="bg-primary-600 text-white w-12 h-12 rounded-md flex items-center justify-center hover:bg-primary-700 transition shadow-lg shadow-primary-500/30 shrink-0 disabled:opacity-50 disabled:cursor-not-allowed"
                   >
                     {sending ? <i className="fa-solid fa-spinner fa-spin"></i> : <i className="fa-solid fa-paper-plane text-lg"></i>}
                   </button>
@@ -196,7 +196,7 @@ export default function Messages() {
             </>
           ) : (
             <div className="flex flex-col items-center justify-center text-slate-400 fade-in">
-              <div className="w-24 h-24 bg-white rounded-3xl flex items-center justify-center shadow-sm mb-4 text-4xl transform rotate-3"><i className="fa-regular fa-comments"></i></div>
+              <div className="w-24 h-24 bg-white rounded-md flex items-center justify-center  mb-4 text-4xl transform rotate-3"><i className="fa-regular fa-comments"></i></div>
               <p className="font-black text-slate-400 uppercase tracking-widest text-sm">Select a student to message</p>
               <p className="text-xs font-medium text-slate-300 mt-1 italic">Click on the left sidebar to start chatting</p>
             </div>

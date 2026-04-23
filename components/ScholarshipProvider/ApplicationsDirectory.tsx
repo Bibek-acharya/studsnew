@@ -90,16 +90,16 @@ export default function ApplicationsDirectory({ onReviewStudent }: ApplicationsD
           <p className="text-sm text-slate-500 mt-1">Review, filter, and manage all student submissions in one place.</p>
         </div>
         <div className="flex gap-2">
-          <button className="px-4 py-2 bg-white border border-slate-200 text-slate-700 rounded-lg hover:bg-slate-50 font-bold text-sm shadow-sm transition">
+          <button className="px-4 py-2 bg-white border border-slate-200 text-slate-700 rounded-md hover:bg-slate-50 font-bold text-sm  transition">
             <i className="fa-solid fa-filter mr-2"></i> Advanced Filters
           </button>
-          <button className="px-4 py-2 bg-success text-white rounded-lg hover:bg-green-600 font-bold text-sm shadow-sm shadow-green-500/20 transition">
+          <button className="px-4 py-2 bg-success text-white rounded-md hover:bg-green-600 font-bold text-sm  shadow-green-500/20 transition">
             <i className="fa-solid fa-download mr-2"></i> Export Data
           </button>
         </div>
       </div>
 
-      <div className="bg-white rounded-2xl shadow-sm border border-slate-200 flex flex-col flex-1 overflow-hidden min-h-[500px]">
+      <div className="bg-white rounded-md  border border-slate-200 flex flex-col flex-1 overflow-hidden min-h-[500px]">
         <div className="p-5 border-b border-slate-200 bg-slate-50/50 flex flex-wrap gap-4 items-center justify-between">
           <div className="flex flex-wrap gap-3 w-full lg:w-auto">
             <div className="relative w-full lg:w-64">
@@ -109,10 +109,10 @@ export default function ApplicationsDirectory({ onReviewStudent }: ApplicationsD
                 placeholder="Search by name, ID, email..."
                 value={searchTerm}
                 onChange={e => setSearchTerm(e.target.value)}
-                className="w-full pl-9 pr-4 py-2 bg-white border border-slate-300 rounded-lg text-sm outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent shadow-sm"
+                className="w-full pl-9 pr-4 py-2 bg-white border border-slate-300 rounded-md text-sm outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent "
               />
             </div>
-            <select className="border border-slate-300 rounded-lg px-3 py-2 text-sm bg-white outline-none focus:ring-2 focus:ring-primary-500 shadow-sm flex-1 lg:flex-none">
+            <select className="border border-slate-300 rounded-md px-3 py-2 text-sm bg-white outline-none focus:ring-2 focus:ring-primary-500  flex-1 lg:flex-none">
               <option value="All">All Programs</option>
               <option value="CS">Computer Science</option>
               <option value="SE">Software Engineering</option>
@@ -120,7 +120,7 @@ export default function ApplicationsDirectory({ onReviewStudent }: ApplicationsD
             <select
               value={statusFilter}
               onChange={e => { setStatusFilter(e.target.value); setPage(1); }}
-              className="border border-slate-300 rounded-lg px-3 py-2 text-sm bg-white outline-none focus:ring-2 focus:ring-primary-500 shadow-sm flex-1 lg:flex-none"
+              className="border border-slate-300 rounded-md px-3 py-2 text-sm bg-white outline-none focus:ring-2 focus:ring-primary-500  flex-1 lg:flex-none"
             >
               <option value="All">All Statuses</option>
               <option value="Pending">Pending Review</option>
@@ -169,7 +169,7 @@ export default function ApplicationsDirectory({ onReviewStudent }: ApplicationsD
                     <td className="py-4 px-5"><input type="checkbox" className="rounded border-slate-300 w-4 h-4 cursor-pointer" /></td>
                     <td className="py-4 px-5">
                       <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 rounded-full bg-primary-100 text-primary-600 flex items-center justify-center font-black text-sm shadow-sm">
+                        <div className="w-10 h-10 rounded-full bg-primary-100 text-primary-600 flex items-center justify-center font-black text-sm ">
                           {app.first_name?.[0]}{app.last_name?.[0]}
                         </div>
                         <div>
@@ -182,7 +182,7 @@ export default function ApplicationsDirectory({ onReviewStudent }: ApplicationsD
                     <td className="py-4 px-5 text-slate-600 font-medium">{app.phone_number}</td>
                     <td className="py-4 px-5 text-slate-600 font-bold">{formatDate(app.created_at)}</td>
                     <td className="py-4 px-5">
-                      <span className={`px-3 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-tighter ${getStatusClass(app.status)}`}>
+                      <span className={`px-3 py-1.5 rounded-md text-[10px] font-black uppercase tracking-tighter ${getStatusClass(app.status)}`}>
                         {getStatusLabel(app.status)}
                       </span>
                     </td>
@@ -190,14 +190,14 @@ export default function ApplicationsDirectory({ onReviewStudent }: ApplicationsD
                       <div className="flex gap-2 justify-end">
                         <button
                           onClick={() => onReviewStudent(String(app.id))}
-                          className="px-4 py-2 bg-slate-100 text-slate-700 rounded-lg hover:bg-primary-600 hover:text-white transition-all font-bold text-xs shadow-sm border border-slate-200"
+                          className="px-4 py-2 bg-slate-100 text-slate-700 rounded-md hover:bg-primary-600 hover:text-white transition-all font-bold text-xs  border border-slate-200"
                         >
                           Review File
                         </button>
                         <select
                           value={app.status}
                           onChange={e => handleStatusChange(app.id, e.target.value)}
-                          className="border border-slate-200 rounded-lg px-2 py-2 text-xs font-bold bg-white shadow-sm cursor-pointer focus:border-primary-500"
+                          className="border border-slate-200 rounded-md px-2 py-2 text-xs font-bold bg-white  cursor-pointer focus:border-primary-500"
                         >
                           <option value="pending">Pending</option>
                           <option value="under_review">Under Review</option>
@@ -223,7 +223,7 @@ export default function ApplicationsDirectory({ onReviewStudent }: ApplicationsD
               <button
                 disabled={page <= 1}
                 onClick={() => setPage(p => p - 1)}
-                className="w-8 h-8 flex items-center justify-center rounded-lg border border-slate-200 bg-white text-slate-400 hover:bg-slate-50 disabled:opacity-40 disabled:cursor-not-allowed"
+                className="w-8 h-8 flex items-center justify-center rounded-md border border-slate-200 bg-white text-slate-400 hover:bg-slate-50 disabled:opacity-40 disabled:cursor-not-allowed"
               >
                 <i className="fa-solid fa-chevron-left"></i>
               </button>
@@ -231,7 +231,7 @@ export default function ApplicationsDirectory({ onReviewStudent }: ApplicationsD
                 <button
                   key={p}
                   onClick={() => setPage(p)}
-                  className={`w-8 h-8 flex items-center justify-center rounded-lg font-bold text-xs ${
+                  className={`w-8 h-8 flex items-center justify-center rounded-md font-bold text-xs ${
                     p === page ? 'bg-primary-600 text-white' : 'border border-slate-200 bg-white text-slate-600 hover:bg-slate-50'
                   }`}
                 >
@@ -241,7 +241,7 @@ export default function ApplicationsDirectory({ onReviewStudent }: ApplicationsD
               <button
                 disabled={page >= totalPages}
                 onClick={() => setPage(p => p + 1)}
-                className="w-8 h-8 flex items-center justify-center rounded-lg border border-slate-200 bg-white text-slate-400 hover:bg-slate-50 disabled:opacity-40 disabled:cursor-not-allowed"
+                className="w-8 h-8 flex items-center justify-center rounded-md border border-slate-200 bg-white text-slate-400 hover:bg-slate-50 disabled:opacity-40 disabled:cursor-not-allowed"
               >
                 <i className="fa-solid fa-chevron-right"></i>
               </button>

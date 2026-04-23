@@ -1,20 +1,10 @@
 "use client";
-import React, { useState } from "react";
-import { Search, Filter, CheckCircle, XCircle, Link2, Clock, Users, CalendarDays, Plus, Trash2, X } from "lucide-react";
+import React, { useEffect, useState } from "react";
+import { Search, CheckCircle, XCircle, Link2, Clock, Users, CalendarDays, Plus, Trash2, X } from "lucide-react";
+import { apiService, InstitutionCounsellingBookingItem } from "@/services/api";
 
-type RequestStatus = "Pending" | "Accepted" | "Link Sent" | "Rejected";
+type RequestStatus = "pending" | "confirmed" | "cancelled" | "completed";
 type CounsellingMode = "Online" | "In-Person" | "Phone";
-
-interface CounsellingRequest {
-  id: number;
-  name: string;
-  program: string;
-  subject: string;
-  mode: CounsellingMode;
-  date: string;
-  status: RequestStatus;
-  urgent: boolean;
-}
 
 interface SlotItem {
   id: number;
@@ -25,35 +15,28 @@ interface SlotItem {
   booked: number;
 }
 
-const REQUESTS: CounsellingRequest[] = [
-  { id: 1, name: "Rahul Sharma", program: "BSc CSIT", subject: "Admission Guidance", mode: "Online", date: "2024-03-12", status: "Pending", urgent: false },
-  { id: 2, name: "Priya Patel", program: "BBA", subject: "Scholarship Query", mode: "In-Person", date: "2024-03-14", status: "Accepted", urgent: false },
-  { id: 3, name: "Bikash Thapa", program: "+2 Science", subject: "Career Options", mode: "Online", date: "2024-03-15", status: "Link Sent", urgent: true },
-  { id: 4, name: "Sita Gurung", program: "MBA", subject: "Fee Structure", mode: "Phone", date: "2024-03-16", status: "Pending", urgent: false },
-  { id: 5, name: "Anita KC", program: "Diploma IT", subject: "Hostel Inquiry", mode: "Online", date: "2024-03-17", status: "Rejected", urgent: false },
-];
-
 const DEFAULT_SLOTS: SlotItem[] = [
   { id: 1, date: "2024-03-20", start: "09:00", end: "12:00", capacity: 5, booked: 3 },
   { id: 2, date: "2024-03-22", start: "14:00", end: "17:00", capacity: 4, booked: 1 },
 ];
 
 const statusColors: Record<RequestStatus, string> = {
-  Pending: "bg-yellow-100 text-yellow-700",
-  Accepted: "bg-green-100 text-green-700",
-  "Link Sent": "bg-blue-100 text-blue-700",
-  Rejected: "bg-red-100 text-red-700",
+  pending: "bg-yellow-100 text-yellow-700",
+  confirmed: "bg-green-100 text-green-700",
+  cancelled: "bg-red-100 text-red-700",
+  completed: "bg-slate-100 text-slate-700",
 };
 
 const CounsellingPage: React.FC = () => {
   const [tab, setTab] = useState<"requests" | "slots">("requests");
-  const [requests, setRequests] = useState(REQUESTS);
+  const [bookings, setBookings] = useState<InstitutionCounsellingBookingItem[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [fetchError, setFetchError] = useState("");
   const [slots, setSlots] = useState(DEFAULT_SLOTS);
 
   /* filters */
   const [search, setSearch] = useState("");
   const [filterProgram, setFilterProgram] = useState("All");
-  const [filterMode, setFilterMode] = useState<"All" | CounsellingMode>("All");
   const [filterStatus, setFilterStatus] = useState<"All" | RequestStatus>("All");
 
   /* slot form */
@@ -68,24 +51,51 @@ const CounsellingPage: React.FC = () => {
   const [platform, setPlatform] = useState("Google Meet");
   const [meetUrl, setMeetUrl] = useState("");
 
-  const filtered = requests.filter(r => {
-    if (search && !r.name.toLowerCase().includes(search.toLowerCase()) && !r.subject.toLowerCase().includes(search.toLowerCase())) return false;
-    if (filterProgram !== "All" && r.program !== filterProgram) return false;
-    if (filterMode !== "All" && r.mode !== filterMode) return false;
-    if (filterStatus !== "All" && r.status !== filterStatus) return false;
+  useEffect(() => {
+    const loadCounsellingData = async () => {
+      setIsLoading(true);
+      setFetchError("");
+
+      try {
+        const bookingsResponse = await apiService.getInstitutionCounsellingBookings();
+        setBookings(bookingsResponse.data || []);
+      } catch (error) {
+        setFetchError(error instanceof Error ? error.message : "Failed to load counselling data");
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    loadCounsellingData();
+  }, []);
+
+  const filtered = bookings.filter((booking) => {
+    const title = booking.session?.title?.toLowerCase() || "";
+    const notes = (booking.notes || "").toLowerCase();
+    if (search && !title.includes(search.toLowerCase()) && !notes.includes(search.toLowerCase())) return false;
+    if (filterProgram !== "All" && title !== filterProgram) return false;
+    if (filterStatus !== "All" && booking.status !== filterStatus) return false;
     return true;
   });
 
-  const programs = ["All", ...Array.from(new Set(REQUESTS.map(r => r.program)))];
+  const programs = [
+    "All",
+    ...Array.from(new Set(bookings.map((booking) => booking.session?.title || "Untitled"))),
+  ];
 
-  const updateStatus = (id: number, status: RequestStatus) => {
-    setRequests(prev => prev.map(r => r.id === id ? { ...r, status } : r));
+  const updateStatus = async (id: number, status: RequestStatus) => {
+    try {
+      await apiService.updateInstitutionBookingStatus(id, status);
+      setBookings((prev) => prev.map((booking) => (booking.id === id ? { ...booking, status } : booking)));
+    } catch (error) {
+      console.error("Failed to update booking status:", error);
+    }
   };
 
   const openLinkModal = (id: number) => { setLinkTarget(id); setMeetUrl(""); setShowLinkModal(true); };
 
   const provideLink = () => {
-    if (linkTarget !== null) updateStatus(linkTarget, "Link Sent");
+    if (linkTarget !== null) updateStatus(linkTarget, "confirmed");
     setShowLinkModal(false);
   };
 
@@ -100,24 +110,24 @@ const CounsellingPage: React.FC = () => {
     setSlotDate(""); setSlotStart(""); setSlotEnd(""); setSlotCapacity("5");
   };
 
-  const totalStat = REQUESTS.length;
-  const pendingStat = REQUESTS.filter(r => r.status === "Pending").length;
-  const acceptedStat = REQUESTS.filter(r => r.status === "Accepted" || r.status === "Link Sent").length;
+  const totalStat = bookings.length;
+  const pendingStat = bookings.filter((booking) => booking.status === "pending").length;
+  const acceptedStat = bookings.filter((booking) => booking.status === "confirmed").length;
 
   return (
-    <div className="p-4 lg:p-8 space-y-6 max-w-[1600px] mx-auto">
+    <div className="p-4 lg:p-8 space-y-6 max-w-350 mx-auto">
       <div>
         <h1 className="text-2xl font-bold text-slate-900">Counselling Management</h1>
         <p className="text-slate-500 text-sm mt-1">Manage student counselling requests and available time slots.</p>
       </div>
 
       {/* Tabs */}
-      <div className="flex gap-1 bg-slate-100 rounded-xl p-1 w-fit">
+      <div className="flex gap-1 bg-slate-100 rounded-md p-1 w-fit">
         {(["requests", "slots"] as const).map(t => (
           <button
             key={t}
             onClick={() => setTab(t)}
-            className={`px-5 py-2 rounded-lg text-sm font-medium transition-colors ${tab === t ? "bg-white text-slate-900 shadow-sm" : "text-slate-500 hover:text-slate-700"}`}
+            className={`px-5 py-2 rounded-md text-sm font-medium transition-colors ${tab === t ? "bg-white text-slate-900 " : "text-slate-500 hover:text-slate-700"}`}
           >
             {t === "requests" ? "Student Requests" : "Manage Slots"}
           </button>
@@ -133,7 +143,7 @@ const CounsellingPage: React.FC = () => {
               { label: "Pending", value: pendingStat, icon: <Clock className="w-5 h-5" />, color: "text-yellow-600 bg-yellow-50" },
               { label: "Accepted / Linked", value: acceptedStat, icon: <CheckCircle className="w-5 h-5" />, color: "text-green-600 bg-green-50" },
             ].map(c => (
-              <div key={c.label} className="bg-white rounded-xl border border-slate-200 p-4 flex items-center gap-3 shadow-sm">
+              <div key={c.label} className="bg-white rounded-md border border-slate-200 p-4 flex items-center gap-3 ">
                 <div className={`w-9 h-9 rounded-full flex items-center justify-center ${c.color}`}>{c.icon}</div>
                 <div>
                   <p className="text-xs text-slate-500">{c.label}</p>
@@ -144,22 +154,21 @@ const CounsellingPage: React.FC = () => {
           </div>
 
           {/* Filters */}
-          <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
+          <div className="bg-white rounded-md border border-slate-200  overflow-hidden">
             <div className="p-4 border-b border-slate-100 flex flex-wrap gap-3">
               <div className="relative flex-1 min-w-[200px]">
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
-                <input value={search} onChange={e => setSearch(e.target.value)} placeholder="Search student or subject..." className="w-full pl-9 pr-4 py-2 border border-slate-200 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 outline-none" />
+                <input value={search} onChange={e => setSearch(e.target.value)} placeholder="Search session or notes..." className="w-full pl-9 pr-4 py-2 border border-slate-200 rounded-md text-sm focus:ring-2 focus:ring-blue-500 outline-none" />
               </div>
-              <select value={filterProgram} onChange={e => setFilterProgram(e.target.value)} className="border border-slate-200 rounded-lg px-3 py-2 text-sm bg-white focus:ring-2 focus:ring-blue-500 outline-none">
+              <select value={filterProgram} onChange={e => setFilterProgram(e.target.value)} className="border border-slate-200 rounded-md px-3 py-2 text-sm bg-white focus:ring-2 focus:ring-blue-500 outline-none">
                 {programs.map(p => <option key={p}>{p}</option>)}
               </select>
-              <select value={filterMode} onChange={e => setFilterMode(e.target.value as typeof filterMode)} className="border border-slate-200 rounded-lg px-3 py-2 text-sm bg-white focus:ring-2 focus:ring-blue-500 outline-none">
-                <option value="All">All Modes</option>
-                <option>Online</option><option>In-Person</option><option>Phone</option>
-              </select>
-              <select value={filterStatus} onChange={e => setFilterStatus(e.target.value as typeof filterStatus)} className="border border-slate-200 rounded-lg px-3 py-2 text-sm bg-white focus:ring-2 focus:ring-blue-500 outline-none">
+              <select value={filterStatus} onChange={e => setFilterStatus(e.target.value as typeof filterStatus)} className="border border-slate-200 rounded-md px-3 py-2 text-sm bg-white focus:ring-2 focus:ring-blue-500 outline-none">
                 <option value="All">All Status</option>
-                <option>Pending</option><option>Accepted</option><option>Link Sent</option><option>Rejected</option>
+                <option value="pending">Pending</option>
+                <option value="confirmed">Confirmed</option>
+                <option value="cancelled">Cancelled</option>
+                <option value="completed">Completed</option>
               </select>
             </div>
 
@@ -168,49 +177,33 @@ const CounsellingPage: React.FC = () => {
               <table className="w-full min-w-[800px] text-left">
                 <thead className="bg-slate-50 text-xs uppercase text-slate-500 border-b border-slate-100">
                   <tr>
-                    {["Student", "Program", "Subject", "Mode", "Date", "Status", "Actions"].map(h => (
+                    {["Booking", "Session", "Date", "Notes", "Status", "Actions"].map(h => (
                       <th key={h} className="p-3 font-semibold">{h}</th>
                     ))}
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-100">
                   {filtered.length === 0 ? (
-                    <tr><td colSpan={7} className="p-8 text-center text-slate-400 text-sm">No requests found.</td></tr>
-                  ) : filtered.map(r => (
-                    <tr key={r.id} className="hover:bg-slate-50 transition-colors">
+                    <tr><td colSpan={6} className="p-8 text-center text-slate-400 text-sm">No requests found.</td></tr>
+                  ) : filtered.map((booking) => (
+                    <tr key={booking.id} className="hover:bg-slate-50 transition-colors">
+                      <td className="p-3 text-sm text-slate-600">#{booking.id}</td>
+                      <td className="p-3 text-sm text-slate-600">{booking.session?.title || 'Untitled session'}</td>
+                      <td className="p-3 text-sm text-slate-600">{booking.session?.scheduled_at ? new Date(booking.session.scheduled_at).toLocaleDateString() : '-'}</td>
+                      <td className="p-3 text-sm text-slate-600">{booking.notes || '-'}</td>
                       <td className="p-3">
-                        <div className="flex items-center gap-2">
-                          <div className="w-8 h-8 rounded-full bg-indigo-100 flex items-center justify-center text-indigo-700 font-bold text-xs">
-                            {r.name.charAt(0)}
-                          </div>
-                          <div>
-                            <p className="text-sm font-medium text-slate-800">{r.name}</p>
-                            {r.urgent && <span className="text-xs bg-red-100 text-red-600 px-1.5 py-0.5 rounded font-medium">Urgent</span>}
-                          </div>
-                        </div>
-                      </td>
-                      <td className="p-3 text-sm text-slate-600">{r.program}</td>
-                      <td className="p-3 text-sm text-slate-600">{r.subject}</td>
-                      <td className="p-3 text-sm text-slate-600">{r.mode}</td>
-                      <td className="p-3 text-sm text-slate-600">{r.date}</td>
-                      <td className="p-3">
-                        <span className={`px-2.5 py-1 rounded-full text-xs font-semibold ${statusColors[r.status]}`}>{r.status}</span>
+                        <span className={`px-2.5 py-1 rounded-full text-xs font-semibold ${statusColors[booking.status as RequestStatus]}`}>{booking.status}</span>
                       </td>
                       <td className="p-3">
                         <div className="flex gap-1.5 flex-wrap">
-                          {r.status === "Pending" && (
-                            <button onClick={() => updateStatus(r.id, "Accepted")} className="px-2.5 py-1.5 bg-green-500 hover:bg-green-600 text-white rounded-lg text-xs font-medium flex items-center gap-1 transition-colors">
-                              <CheckCircle className="w-3.5 h-3.5" /> Accept
+                          {booking.status === 'pending' && (
+                            <button onClick={() => updateStatus(booking.id, 'confirmed')} className="px-2.5 py-1.5 bg-green-500 hover:bg-green-600 text-white rounded-md text-xs font-medium flex items-center gap-1 transition-colors">
+                              <CheckCircle className="w-3.5 h-3.5" /> Confirm
                             </button>
                           )}
-                          {(r.status === "Pending" || r.status === "Accepted") && r.mode === "Online" && (
-                            <button onClick={() => openLinkModal(r.id)} className="px-2.5 py-1.5 bg-blue-500 hover:bg-blue-600 text-white rounded-lg text-xs font-medium flex items-center gap-1 transition-colors">
-                              <Link2 className="w-3.5 h-3.5" /> Link
-                            </button>
-                          )}
-                          {r.status !== "Rejected" && (
-                            <button onClick={() => updateStatus(r.id, "Rejected")} className="px-2.5 py-1.5 bg-red-50 hover:bg-red-100 text-red-600 rounded-lg text-xs font-medium flex items-center gap-1 transition-colors">
-                              <XCircle className="w-3.5 h-3.5" /> Reject
+                          {booking.status !== 'cancelled' && booking.status !== 'completed' && (
+                            <button onClick={() => updateStatus(booking.id, 'cancelled')} className="px-2.5 py-1.5 bg-red-50 hover:bg-red-100 text-red-600 rounded-md text-xs font-medium flex items-center gap-1 transition-colors">
+                              <XCircle className="w-3.5 h-3.5" /> Cancel
                             </button>
                           )}
                         </div>
@@ -227,27 +220,27 @@ const CounsellingPage: React.FC = () => {
       {tab === "slots" && (
         <div className="grid grid-cols-1 lg:grid-cols-5 gap-6">
           {/* Create Slot Form */}
-          <div className="lg:col-span-2 bg-white rounded-xl border border-slate-200 shadow-sm p-6 space-y-4 h-fit">
+          <div className="lg:col-span-2 bg-white rounded-md border border-slate-200  p-6 space-y-4 h-fit">
             <h3 className="font-bold text-slate-800">Create New Slot</h3>
             <div>
               <label className="block text-sm font-medium text-slate-700 mb-1">Date</label>
-              <input type="date" value={slotDate} onChange={e => setSlotDate(e.target.value)} className="w-full border border-slate-200 rounded-lg p-2.5 text-sm focus:ring-2 focus:ring-blue-500 outline-none" />
+              <input type="date" value={slotDate} onChange={e => setSlotDate(e.target.value)} className="w-full border border-slate-200 rounded-md p-2.5 text-sm focus:ring-2 focus:ring-blue-500 outline-none" />
             </div>
             <div className="grid grid-cols-2 gap-3">
               <div>
                 <label className="block text-sm font-medium text-slate-700 mb-1">Start Time</label>
-                <input type="time" value={slotStart} onChange={e => setSlotStart(e.target.value)} className="w-full border border-slate-200 rounded-lg p-2.5 text-sm focus:ring-2 focus:ring-blue-500 outline-none" />
+                <input type="time" value={slotStart} onChange={e => setSlotStart(e.target.value)} className="w-full border border-slate-200 rounded-md p-2.5 text-sm focus:ring-2 focus:ring-blue-500 outline-none" />
               </div>
               <div>
                 <label className="block text-sm font-medium text-slate-700 mb-1">End Time</label>
-                <input type="time" value={slotEnd} onChange={e => setSlotEnd(e.target.value)} className="w-full border border-slate-200 rounded-lg p-2.5 text-sm focus:ring-2 focus:ring-blue-500 outline-none" />
+                <input type="time" value={slotEnd} onChange={e => setSlotEnd(e.target.value)} className="w-full border border-slate-200 rounded-md p-2.5 text-sm focus:ring-2 focus:ring-blue-500 outline-none" />
               </div>
             </div>
             <div>
               <label className="block text-sm font-medium text-slate-700 mb-1">Max Capacity</label>
-              <input type="number" min="1" max="50" value={slotCapacity} onChange={e => setSlotCapacity(e.target.value)} className="w-full border border-slate-200 rounded-lg p-2.5 text-sm focus:ring-2 focus:ring-blue-500 outline-none" />
+              <input type="number" min="1" max="50" value={slotCapacity} onChange={e => setSlotCapacity(e.target.value)} className="w-full border border-slate-200 rounded-md p-2.5 text-sm focus:ring-2 focus:ring-blue-500 outline-none" />
             </div>
-            <button onClick={addSlot} className="w-full py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-sm font-semibold transition-colors flex items-center justify-center gap-2">
+            <button onClick={addSlot} className="w-full py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-md text-sm font-semibold transition-colors flex items-center justify-center gap-2">
               <Plus className="w-4 h-4" /> Create Slot
             </button>
           </div>
@@ -256,13 +249,13 @@ const CounsellingPage: React.FC = () => {
           <div className="lg:col-span-3 space-y-3">
             <h3 className="font-bold text-slate-800">Current Availability</h3>
             {slots.length === 0 ? (
-              <div className="bg-white rounded-xl border border-slate-200 p-8 text-center text-slate-400 text-sm">
+              <div className="bg-white rounded-md border border-slate-200 p-8 text-center text-slate-400 text-sm">
                 No slots created yet.
               </div>
             ) : slots.map(s => (
-              <div key={s.id} className="bg-white rounded-xl border border-slate-200 shadow-sm p-4 flex items-center justify-between gap-4">
+              <div key={s.id} className="bg-white rounded-md border border-slate-200  p-4 flex items-center justify-between gap-4">
                 <div className="flex items-center gap-4">
-                  <div className="w-10 h-10 bg-blue-50 rounded-xl flex items-center justify-center text-blue-600">
+                  <div className="w-10 h-10 bg-blue-50 rounded-md flex items-center justify-center text-blue-600">
                     <CalendarDays className="w-5 h-5" />
                   </div>
                   <div>
@@ -292,7 +285,7 @@ const CounsellingPage: React.FC = () => {
       {/* Meeting Link Modal */}
       {showLinkModal && (
         <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center backdrop-blur-sm">
-          <div className="bg-white w-full max-w-md rounded-xl shadow-2xl overflow-hidden m-4">
+          <div className="bg-white w-full max-w-md rounded-md shadow-2xl overflow-hidden m-4">
             <div className="p-4 border-b bg-slate-50 flex justify-between items-center">
               <h3 className="font-bold text-slate-800">Provide Online Meeting Link</h3>
               <button onClick={() => setShowLinkModal(false)} className="text-slate-400 hover:text-slate-700"><X className="w-5 h-5" /></button>
@@ -300,17 +293,17 @@ const CounsellingPage: React.FC = () => {
             <div className="p-5 space-y-4">
               <div>
                 <label className="block text-sm font-medium text-slate-700 mb-1">Platform</label>
-                <select value={platform} onChange={e => setPlatform(e.target.value)} className="w-full border border-slate-200 rounded-lg p-2.5 text-sm bg-white focus:ring-2 focus:ring-blue-500 outline-none">
+                <select value={platform} onChange={e => setPlatform(e.target.value)} className="w-full border border-slate-200 rounded-md p-2.5 text-sm bg-white focus:ring-2 focus:ring-blue-500 outline-none">
                   <option>Google Meet</option><option>Zoom</option><option>Microsoft Teams</option><option>Jitsi</option>
                 </select>
               </div>
               <div>
                 <label className="block text-sm font-medium text-slate-700 mb-1">Meeting URL</label>
-                <input value={meetUrl} onChange={e => setMeetUrl(e.target.value)} placeholder="https://meet.google.com/xxx" className="w-full border border-slate-200 rounded-lg p-2.5 text-sm focus:ring-2 focus:ring-blue-500 outline-none" />
+                <input value={meetUrl} onChange={e => setMeetUrl(e.target.value)} placeholder="https://meet.google.com/xxx" className="w-full border border-slate-200 rounded-md p-2.5 text-sm focus:ring-2 focus:ring-blue-500 outline-none" />
               </div>
               <div className="flex gap-3 justify-end pt-2">
-                <button onClick={() => setShowLinkModal(false)} className="px-4 py-2 border rounded-lg text-slate-600 text-sm">Cancel</button>
-                <button onClick={provideLink} className="px-5 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-sm font-semibold flex items-center gap-2">
+                <button onClick={() => setShowLinkModal(false)} className="px-4 py-2 border rounded-md text-slate-600 text-sm">Cancel</button>
+                <button onClick={provideLink} className="px-5 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-md text-sm font-semibold flex items-center gap-2">
                   <Link2 className="w-4 h-4" /> Send Link
                 </button>
               </div>

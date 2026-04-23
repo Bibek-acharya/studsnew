@@ -68,7 +68,7 @@ const HeroSection: React.FC<HeroSectionProps> = ({ onNavigate }) => {
 
   return (
     <div className="w-full  pt-2 pb-6 md:pb-4 flex justify-center max-w-350 mx-auto">
-      <main className="relative w-full h-85 sm:h-105 md:h-auto md:min-h-120 lg:h-135 flex items-center justify-center overflow-hidden rounded-lg md:rounded-xl">
+      <main className="relative w-full h-85 sm:h-105 md:h-auto md:min-h-120 lg:h-135 flex items-center justify-center overflow-hidden rounded-md md:rounded-md">
         {/* Background Slider Container */}
         <div id="slider-container" className="absolute inset-0 z-0 overflow-hidden">
           <div
@@ -91,7 +91,7 @@ const HeroSection: React.FC<HeroSectionProps> = ({ onNavigate }) => {
 
         {/* MOBILE LAYOUT */}
         <div className="md:hidden relative z-20 w-full h-full flex flex-col justify-center items-center px-4 sm:px-6 pb-28 text-white text-center mt-4">
-          <h1 className="text-2xl sm:text-3xl font-bold tracking-tight mb-2 drop-shadow-md leading-tight">
+          <h1 className="text-2xl sm:text-3xl font-bold tracking-tight mb-2 drop- leading-tight">
             Find Your Perfect College
           </h1>
           <p className="text-[12px] sm:text-[13px] text-gray-200 max-w-[320px] mx-auto mb-5 drop-shadow leading-relaxed">
@@ -103,7 +103,7 @@ const HeroSection: React.FC<HeroSectionProps> = ({ onNavigate }) => {
 
         {/* DESKTOP LAYOUT */}
         <div className="hidden md:block relative z-20 w-full max-w-5xl mx-auto px-6 lg:px-8 text-center sm:pb-0 sm:-mt-10 text-white">
-          <h1 className="text-3xl md:text-4xl lg:text-5xl font-bold tracking-tight mb-3 drop-shadow-md leading-tight">
+          <h1 className="text-3xl md:text-4xl lg:text-5xl font-bold tracking-tight mb-3 drop- leading-tight">
             Find Your Perfect College
           </h1>
           <p className="text-[13px] md:text-sm lg:text-base text-gray-200 max-w-3xl mx-auto mb-6 drop-shadow px-0">
@@ -114,7 +114,7 @@ const HeroSection: React.FC<HeroSectionProps> = ({ onNavigate }) => {
 
           <form
             onSubmit={handleSearch}
-            className="max-w-3xl mx-auto bg-white rounded-lg p-2 flex flex-row items-center shadow-lg gap-2 transition-all duration-300"
+            className="max-w-3xl mx-auto bg-white rounded-md p-2 flex flex-row items-center shadow-lg gap-2 transition-all duration-300"
           >
             <div className="w-full grow flex items-center px-4 gap-2">
               <Search className="w-5 h-5 text-gray-400 shrink-0" />
@@ -128,13 +128,13 @@ const HeroSection: React.FC<HeroSectionProps> = ({ onNavigate }) => {
             </div>
             <button
               type="submit"
-              className="w-auto bg-brand-blue hover:bg-brand-hover text-white font-semibold py-2.5 px-8 rounded-md transition-colors duration-200 shadow-sm text-[15px] whitespace-nowrap"
+              className="w-auto bg-brand-blue hover:bg-brand-hover text-white font-semibold py-2.5 px-8 rounded-md transition-colors duration-200  text-[15px] whitespace-nowrap"
             >
               Search
             </button>
           </form>
 
-          <div className="mt-6 flex flex-wrap justify-center items-center gap-3 text-sm font-medium text-gray-200 drop-shadow-md">
+          <div className="mt-6 flex flex-wrap justify-center items-center gap-3 text-sm font-medium text-gray-200 drop-">
             <span className="font-bold text-white">Your recent visit:</span>
             <button
               onClick={() => onNavigate("findCollege", { search: "BIT" })}

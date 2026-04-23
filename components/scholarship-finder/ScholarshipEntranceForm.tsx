@@ -153,13 +153,13 @@ export default function ScholarshipEntranceForm() {
                 </svg>
                 <span className="text-white text-[24px] font-bold tracking-wide">StudSphere</span>
             </div>
-            <h1 className="text-[32px] sm:text-[40px] font-extrabold text-white mb-2 leading-tight drop-shadow-sm">Project Shiksha Entrance 2082</h1>
+            <h1 className="text-[32px] sm:text-[40px] font-extrabold text-white mb-2 leading-tight drop-">Project Shiksha Entrance 2082</h1>
             <p className="text-[18px] text-white/90 font-medium">Empowering Education, Shaping Futures.</p>
         </div>
       </header>
 
       {/* Form Container */}
-      <main className="w-full max-w-[900px] bg-white rounded-2xl shadow-2xl overflow-hidden relative min-h-[600px]">
+      <main className="w-full max-w-[900px] bg-white rounded-md shadow-2xl overflow-hidden relative min-h-[600px]">
         
         {/* Trust/Confidentiality Banner */}
         <div className={`bg-[#f0fdf4] border-b border-[#bbf7d0] py-3.5 px-6 flex justify-center items-center gap-3 text-[14px] text-[#166534] no-print ${view !== 'form' ? 'hidden' : ''}`}>
@@ -168,7 +168,7 @@ export default function ScholarshipEntranceForm() {
         </div>
 
         {/* Important Note */}
-        <div className={`bg-yellow-50 border-l-4 border-yellow-400 p-5 mt-6 mx-6 sm:mx-12 rounded-r-lg shadow-sm no-print ${view !== 'form' ? 'hidden' : ''}`}>
+        <div className={`bg-yellow-50 border-l-4 border-yellow-400 p-5 mt-6 mx-6 sm:mx-12 rounded-r-lg  no-print ${view !== 'form' ? 'hidden' : ''}`}>
             <p className="font-bold text-[14px] text-yellow-800 uppercase tracking-wide mb-1.5 flex items-center gap-2">
                 <AlertCircle className="w-5 h-5" />
                 Note:
@@ -187,7 +187,7 @@ export default function ScholarshipEntranceForm() {
             <h2 className="text-2xl font-bold text-gray-800 mb-2">Application Fee Payment</h2>
             <p className="text-gray-500 mb-6 text-sm">Please complete the payment to finalize your registration and generate your admit card.</p>
             
-            <div className="w-full max-w-sm bg-gray-50 border border-gray-200 rounded-xl p-5 mb-6 shadow-sm text-left">
+            <div className="w-full max-w-sm bg-gray-50 border border-gray-200 rounded-md p-5 mb-6  text-left">
                 <div className="flex justify-between items-center mb-3">
                     <span className="text-gray-600 font-medium">Entrance Exam Fee</span>
                     <span className="font-bold text-gray-800">Rs. 250.00</span>
@@ -203,11 +203,11 @@ export default function ScholarshipEntranceForm() {
             </div>
 
             <div className="w-full max-w-sm grid grid-cols-2 gap-3 mb-6">
-                <div className="border-2 border-[#0000ff] bg-blue-50 rounded-lg p-3 flex flex-col items-center cursor-pointer transition-colors">
+                <div className="border-2 border-[#0000ff] bg-blue-50 rounded-md p-3 flex flex-col items-center cursor-pointer transition-colors">
                     <span className="font-bold text-[#0000ff]">Online Payment</span>
                     <span className="text-[10px] text-gray-500">eSewa / Khalti / Banking</span>
                 </div>
-                <div className="border border-gray-200 rounded-lg p-3 flex flex-col items-center cursor-not-allowed opacity-50">
+                <div className="border border-gray-200 rounded-md p-3 flex flex-col items-center cursor-not-allowed opacity-50">
                     <span className="font-bold text-gray-500">Bank Voucher</span>
                     <span className="text-[10px] text-gray-400">Offline Upload</span>
                 </div>
@@ -216,7 +216,7 @@ export default function ScholarshipEntranceForm() {
             <button 
               onClick={processPayment}
               disabled={isLoading}
-              className="w-full max-w-sm bg-[#0000ff] hover:bg-[#0000cc] text-white font-bold text-[16px] py-4 px-6 rounded-xl transition-all shadow-md flex items-center justify-center gap-2"
+              className="w-full max-w-sm bg-[#0000ff] hover:bg-[#0000cc] text-white font-bold text-[16px] py-4 px-6 rounded-md transition-all  flex items-center justify-center gap-2"
             >
                 {isLoading ? (
                   <>
@@ -241,14 +241,14 @@ export default function ScholarshipEntranceForm() {
             <div className="flex flex-col sm:flex-row gap-4 w-full max-w-sm">
                 <button 
                   onClick={() => setView("admit")}
-                  className="flex-1 bg-[#0000ff] hover:bg-[#0000cc] text-white font-semibold py-3 px-6 rounded-lg transition-colors flex items-center justify-center gap-2 shadow-md"
+                  className="flex-1 bg-[#0000ff] hover:bg-[#0000cc] text-white font-semibold py-3 px-6 rounded-md transition-colors flex items-center justify-center gap-2 "
                 >
                     <Download className="w-5 h-5" />
                     Download Admit Card
                 </button>
                 <button 
                   onClick={() => window.location.reload()}
-                  className="flex-1 bg-gray-100 hover:bg-gray-200 text-gray-800 font-semibold py-3 px-6 rounded-lg transition-colors border border-gray-300"
+                  className="flex-1 bg-gray-100 hover:bg-gray-200 text-gray-800 font-semibold py-3 px-6 rounded-md transition-colors border border-gray-300"
                 >
                     Close
                 </button>
@@ -267,7 +267,7 @@ export default function ScholarshipEntranceForm() {
             </div>
 
             {/* The Printable Card */}
-            <div id="printable-admit-card" className="bg-white rounded-xl shadow-[0_8px_30px_rgb(0,0,0,0.12)] border border-gray-200 w-full max-w-lg overflow-hidden relative print:border-2 print:border-black print:shadow-none">
+            <div id="printable-admit-card" className="bg-white rounded-md shadow-[0_8px_30px_rgb(0,0,0,0.12)] border border-gray-200 w-full max-w-lg overflow-hidden relative print:border-2 print:border-black print:shadow-none">
                 <div className="h-3 bg-[#0000ff] w-full print:bg-black"></div>
                 <div className="p-8">
                     {/* Header */}
@@ -283,7 +283,7 @@ export default function ScholarshipEntranceForm() {
                                 <p className="text-[13px] text-gray-600 font-semibold tracking-widest uppercase mt-0.5 print:text-black">Entrance Exam 2082</p>
                             </div>
                         </div>
-                        <div className="text-right bg-blue-50 py-2 px-4 rounded-lg border border-blue-100 print:bg-white print:border-black">
+                        <div className="text-right bg-blue-50 py-2 px-4 rounded-md border border-blue-100 print:bg-white print:border-black">
                             <p className="text-[11px] font-bold text-[#0000ff] uppercase tracking-wider mb-1 print:text-black">Roll Number</p>
                             <p className="font-mono font-bold text-gray-900 text-[18px] print:text-black">{rollNumber}</p>
                         </div>
@@ -332,7 +332,7 @@ export default function ScholarshipEntranceForm() {
             <div className="w-full max-w-lg mt-6 no-print flex gap-4">
                 <button 
                   onClick={printAdmitCard}
-                  className="flex-1 bg-[#0000ff] hover:bg-[#0000cc] text-white font-bold text-[16px] py-4 px-6 rounded-xl transition-all shadow-md flex items-center justify-center gap-2"
+                  className="flex-1 bg-[#0000ff] hover:bg-[#0000cc] text-white font-bold text-[16px] py-4 px-6 rounded-md transition-all  flex items-center justify-center gap-2"
                 >
                     <Printer className="w-6 h-6" />
                     Print / Save as PDF
@@ -357,7 +357,7 @@ export default function ScholarshipEntranceForm() {
                             <label className="block text-[14px] font-semibold text-gray-700 mb-1.5">Student's Full Name <span className="text-red-500">*</span></label>
                             <input 
                               type="text" 
-                              className="w-full border border-gray-300 rounded-lg py-3 px-4 text-[15px] text-gray-800 outline-none focus:border-[#0000ff] transition-all bg-white" 
+                              className="w-full border border-gray-300 rounded-md py-3 px-4 text-[15px] text-gray-800 outline-none focus:border-[#0000ff] transition-all bg-white" 
                               placeholder="E.g. Ram Bahadur Thapa"
                               value={formData.fullName}
                               onChange={(e) => setFormData({...formData, fullName: e.target.value})}
@@ -369,7 +369,7 @@ export default function ScholarshipEntranceForm() {
                             <label className="block text-[14px] font-semibold text-gray-700 mb-1.5">Gender <span className="text-red-500">*</span></label>
                             <div className="relative">
                               <select 
-                                className="w-full border border-gray-300 rounded-lg py-3 px-4 text-[15px] text-gray-800 outline-none focus:border-[#0000ff] appearance-none bg-white cursor-pointer"
+                                className="w-full border border-gray-300 rounded-md py-3 px-4 text-[15px] text-gray-800 outline-none focus:border-[#0000ff] appearance-none bg-white cursor-pointer"
                                 value={formData.gender}
                                 onChange={(e) => setFormData({...formData, gender: e.target.value})}
                                 required
@@ -389,7 +389,7 @@ export default function ScholarshipEntranceForm() {
                                 <input 
                                   readOnly
                                   type="text" 
-                                  className="w-full border border-gray-300 rounded-lg py-3 px-4 text-[15px] text-gray-800 outline-none focus:border-[#0000ff] bg-white cursor-pointer" 
+                                  className="w-full border border-gray-300 rounded-md py-3 px-4 text-[15px] text-gray-800 outline-none focus:border-[#0000ff] bg-white cursor-pointer" 
                                   placeholder="Select from Calendar" 
                                   value={selectedBsDate}
                                   onClick={() => setShowCalendar(!showCalendar)}
@@ -399,7 +399,7 @@ export default function ScholarshipEntranceForm() {
                                 
                                 {/* Custom Nepali Calendar */}
                                 {showCalendar && (
-                                  <div className="absolute left-0 mt-2 z-[9999] bg-white rounded-xl shadow-2xl border border-gray-200 p-6 w-[340px]">
+                                  <div className="absolute left-0 mt-2 z-[9999] bg-white rounded-md shadow-2xl border border-gray-200 p-6 w-[340px]">
                                     <div className="flex justify-between items-center mb-6 px-1">
                                       <button type="button" onClick={() => setCalendarDate(new Date(calendarDate.setMonth(calendarDate.getMonth() - 1)))} className="p-2 hover:bg-gray-100 rounded-full transition-colors">
                                         <X className="w-4 h-4 rotate-45" /> {/* Using simplified nav icons */}
@@ -446,7 +446,7 @@ export default function ScholarshipEntranceForm() {
                             <label className="block text-[14px] font-semibold text-gray-700 mb-1.5">Date of Birth (AD) <span className="text-red-500">*</span></label>
                             <input 
                               type="text" 
-                              className="w-full bg-gray-50 border border-gray-300 rounded-lg py-3 px-4 text-[15px] text-gray-500 outline-none" 
+                              className="w-full bg-gray-50 border border-gray-300 rounded-md py-3 px-4 text-[15px] text-gray-500 outline-none" 
                               placeholder="Auto-calculated" 
                               value={selectedAdDate}
                               readOnly 
@@ -459,7 +459,7 @@ export default function ScholarshipEntranceForm() {
                             <div className="relative">
                                 <input 
                                   type="number" 
-                                  className="w-full bg-gray-50 border border-gray-300 rounded-lg py-3 px-4 pl-4 text-[15px] text-gray-500 outline-none font-medium" 
+                                  className="w-full bg-gray-50 border border-gray-300 rounded-md py-3 px-4 pl-4 text-[15px] text-gray-500 outline-none font-medium" 
                                   placeholder="Auto-calc" 
                                   value={age}
                                   readOnly 
@@ -472,7 +472,7 @@ export default function ScholarshipEntranceForm() {
                             <label className="block text-[14px] font-semibold text-gray-700 mb-1.5">Phone Number <span className="text-red-500">*</span></label>
                             <input 
                               type="tel" 
-                              className="w-full border border-gray-300 rounded-lg py-3 px-4 text-[15px] text-gray-800 outline-none focus:border-[#0000ff] transition-all bg-white" 
+                              className="w-full border border-gray-300 rounded-md py-3 px-4 text-[15px] text-gray-800 outline-none focus:border-[#0000ff] transition-all bg-white" 
                               placeholder="10-digit mobile number" 
                               maxLength={10}
                               value={formData.phone}
@@ -485,7 +485,7 @@ export default function ScholarshipEntranceForm() {
                             <label className="block text-[14px] font-semibold text-gray-700 mb-1.5">Email Address</label>
                             <input 
                               type="email" 
-                              className="w-full border border-gray-300 rounded-lg py-3 px-4 text-[15px] text-gray-800 outline-none focus:border-[#0000ff] bg-white" 
+                              className="w-full border border-gray-300 rounded-md py-3 px-4 text-[15px] text-gray-800 outline-none focus:border-[#0000ff] bg-white" 
                               placeholder="form@gmail.com"
                               value={formData.email}
                               onChange={(e) => setFormData({...formData, email: e.target.value})}
@@ -496,7 +496,7 @@ export default function ScholarshipEntranceForm() {
                             <label className="block text-[14px] font-semibold text-gray-700 mb-1.5">From where did you give SEE? <span className="text-red-500">*</span></label>
                             <div className="relative">
                               <select 
-                                className="w-full border border-gray-300 rounded-lg py-3 px-4 text-[15px] text-gray-800 outline-none focus:border-[#0000ff] appearance-none bg-white cursor-pointer"
+                                className="w-full border border-gray-300 rounded-md py-3 px-4 text-[15px] text-gray-800 outline-none focus:border-[#0000ff] appearance-none bg-white cursor-pointer"
                                 value={formData.seeSchoolType}
                                 onChange={(e) => setFormData({...formData, seeSchoolType: e.target.value})}
                                 required
@@ -515,7 +515,7 @@ export default function ScholarshipEntranceForm() {
                                   <label className="block text-[14px] font-semibold text-gray-700 mb-1.5">Please specify the reason/type <span className="text-red-500">*</span></label>
                                   <input 
                                     type="text" 
-                                    className="w-full border border-gray-300 rounded-lg py-3 px-4 text-[15px] text-gray-800 outline-none focus:border-[#0000ff] bg-white" 
+                                    className="w-full border border-gray-300 rounded-md py-3 px-4 text-[15px] text-gray-800 outline-none focus:border-[#0000ff] bg-white" 
                                     placeholder="Specify other type/reason"
                                     value={formData.otherReason}
                                     onChange={(e) => setFormData({...formData, otherReason: e.target.value})}
@@ -529,7 +529,7 @@ export default function ScholarshipEntranceForm() {
                                   <label className="block text-[14px] font-semibold text-gray-700 mb-1.5">School Name <span className="text-red-500">*</span></label>
                                   <input 
                                     type="text" 
-                                    className="w-full border border-gray-300 rounded-lg py-3 px-4 text-[15px] text-gray-800 outline-none focus:border-[#0000ff] bg-white" 
+                                    className="w-full border border-gray-300 rounded-md py-3 px-4 text-[15px] text-gray-800 outline-none focus:border-[#0000ff] bg-white" 
                                     placeholder="Enter your school's full name"
                                     value={formData.schoolName}
                                     onChange={(e) => setFormData({...formData, schoolName: e.target.value})}
@@ -545,10 +545,10 @@ export default function ScholarshipEntranceForm() {
                         <label className="block text-[14px] font-semibold text-gray-700 mb-2 w-full text-center md:text-left">Passport Photo <span className="text-red-500">*</span></label>
                         <div 
                           onClick={() => document.getElementById('photo-upload')?.click()}
-                          className="relative w-32 h-40 border-2 border-dashed border-gray-200 rounded-xl bg-gray-50 hover:bg-gray-100 transition-colors flex flex-col items-center justify-center cursor-pointer overflow-hidden group shadow-sm"
+                          className="relative w-32 h-40 border-2 border-dashed border-gray-200 rounded-md bg-gray-50 hover:bg-gray-100 transition-colors flex flex-col items-center justify-center cursor-pointer overflow-hidden group "
                         >
                             {photoPreview ? (
-                              <img src={photoPreview} className="absolute inset-0 w-full h-full object-cover rounded-xl" alt="Preview" />
+                              <img src={photoPreview} className="absolute inset-0 w-full h-full object-cover rounded-md" alt="Preview" />
                             ) : (
                               <div className="flex flex-col items-center justify-center text-gray-300 group-hover:text-gray-400 p-4 text-center">
                                   <User className="w-12 h-12 mb-2" />
@@ -580,7 +580,7 @@ export default function ScholarshipEntranceForm() {
                         <label className="block text-[14px] font-semibold text-gray-700 mb-1.5">Province <span className="text-red-500">*</span></label>
                         <div className="relative">
                           <select 
-                            className="w-full border border-gray-300 rounded-lg py-3 px-4 text-[15px] appearance-none bg-white font-medium"
+                            className="w-full border border-gray-300 rounded-md py-3 px-4 text-[15px] appearance-none bg-white font-medium"
                             value={formData.province}
                             onChange={(e) => setFormData({...formData, province: e.target.value})}
                             required
@@ -597,7 +597,7 @@ export default function ScholarshipEntranceForm() {
                         <label className="block text-[14px] font-semibold text-gray-700 mb-1.5">District <span className="text-red-500">*</span></label>
                         <input 
                           type="text" 
-                          className="w-full border border-gray-300 rounded-lg py-3 px-4 text-[15px] font-medium" 
+                          className="w-full border border-gray-300 rounded-md py-3 px-4 text-[15px] font-medium" 
                           placeholder="District name"
                           value={formData.district}
                           onChange={(e) => setFormData({...formData, district: e.target.value})}
@@ -608,7 +608,7 @@ export default function ScholarshipEntranceForm() {
                         <label className="block text-[14px] font-semibold text-gray-700 mb-1.5">Municipality / RM <span className="text-red-500">*</span></label>
                         <input 
                           type="text" 
-                          className="w-full border border-gray-300 rounded-lg py-3 px-4 text-[15px] font-medium" 
+                          className="w-full border border-gray-300 rounded-md py-3 px-4 text-[15px] font-medium" 
                           placeholder="Municipality Name"
                           value={formData.municipality}
                           onChange={(e) => setFormData({...formData, municipality: e.target.value})}
@@ -619,7 +619,7 @@ export default function ScholarshipEntranceForm() {
                         <label className="block text-[14px] font-semibold text-gray-700 mb-1.5">Ward No. <span className="text-red-500">*</span></label>
                         <input 
                           type="number" 
-                          className="w-full border border-gray-300 rounded-lg py-3 px-4 text-[15px] font-medium" 
+                          className="w-full border border-gray-300 rounded-md py-3 px-4 text-[15px] font-medium" 
                           placeholder="Ward Number"
                           value={formData.ward}
                           onChange={(e) => setFormData({...formData, ward: e.target.value})}
@@ -630,7 +630,7 @@ export default function ScholarshipEntranceForm() {
                         <label className="block text-[14px] font-semibold text-gray-700 mb-1.5">Tole / Village</label>
                         <input 
                           type="text" 
-                          className="w-full border border-gray-300 rounded-lg py-3 px-4 text-[15px] font-medium" 
+                          className="w-full border border-gray-300 rounded-md py-3 px-4 text-[15px] font-medium" 
                           placeholder="Tole or village name"
                           value={formData.tole}
                           onChange={(e) => setFormData({...formData, tole: e.target.value})}
@@ -656,7 +656,7 @@ export default function ScholarshipEntranceForm() {
                         <div className="relative">
                           <select 
                             disabled={copyAddress}
-                            className={`w-full border border-gray-300 rounded-lg py-3 px-4 text-[15px] appearance-none font-medium ${copyAddress ? 'bg-gray-50 text-gray-500' : 'bg-white'}`}
+                            className={`w-full border border-gray-300 rounded-md py-3 px-4 text-[15px] appearance-none font-medium ${copyAddress ? 'bg-gray-50 text-gray-500' : 'bg-white'}`}
                             value={formData.tempProvince}
                             onChange={(e) => setFormData({...formData, tempProvince: e.target.value})}
                             required
@@ -674,7 +674,7 @@ export default function ScholarshipEntranceForm() {
                         <input 
                           type="text" 
                           disabled={copyAddress}
-                          className={`w-full border border-gray-300 rounded-lg py-3 px-4 text-[15px] font-medium ${copyAddress ? 'bg-gray-50 text-gray-500' : 'bg-white'}`} 
+                          className={`w-full border border-gray-300 rounded-md py-3 px-4 text-[15px] font-medium ${copyAddress ? 'bg-gray-50 text-gray-500' : 'bg-white'}`} 
                           placeholder="District name"
                           value={formData.tempDistrict}
                           onChange={(e) => setFormData({...formData, tempDistrict: e.target.value})}
@@ -686,7 +686,7 @@ export default function ScholarshipEntranceForm() {
                         <input 
                           type="text" 
                           disabled={copyAddress}
-                          className={`w-full border border-gray-300 rounded-lg py-3 px-4 text-[15px] font-medium ${copyAddress ? 'bg-gray-50 text-gray-500' : 'bg-white'}`} 
+                          className={`w-full border border-gray-300 rounded-md py-3 px-4 text-[15px] font-medium ${copyAddress ? 'bg-gray-50 text-gray-500' : 'bg-white'}`} 
                           placeholder="Municipality Name"
                           value={formData.tempMunicipality}
                           onChange={(e) => setFormData({...formData, tempMunicipality: e.target.value})}
@@ -698,7 +698,7 @@ export default function ScholarshipEntranceForm() {
                         <input 
                           type="number" 
                           disabled={copyAddress}
-                          className={`w-full border border-gray-300 rounded-lg py-3 px-4 text-[15px] font-medium ${copyAddress ? 'bg-gray-50 text-gray-500' : 'bg-white'}`} 
+                          className={`w-full border border-gray-300 rounded-md py-3 px-4 text-[15px] font-medium ${copyAddress ? 'bg-gray-50 text-gray-500' : 'bg-white'}`} 
                           placeholder="Ward Number"
                           value={formData.tempWard}
                           onChange={(e) => setFormData({...formData, tempWard: e.target.value})}
@@ -710,7 +710,7 @@ export default function ScholarshipEntranceForm() {
                         <input 
                           type="text" 
                           disabled={copyAddress}
-                          className={`w-full border border-gray-300 rounded-lg py-3 px-4 text-[15px] font-medium ${copyAddress ? 'bg-gray-50 text-gray-500' : 'bg-white'}`} 
+                          className={`w-full border border-gray-300 rounded-md py-3 px-4 text-[15px] font-medium ${copyAddress ? 'bg-gray-50 text-gray-500' : 'bg-white'}`} 
                           placeholder="Tole or village name"
                           value={formData.tempTole}
                           onChange={(e) => setFormData({...formData, tempTole: e.target.value})}
@@ -730,7 +730,7 @@ export default function ScholarshipEntranceForm() {
                         <label className="block text-[14px] font-semibold text-gray-700 mb-1.5">Guardian's Name <span className="text-red-500">*</span></label>
                         <input 
                           type="text" 
-                          className="w-full border border-gray-300 rounded-lg py-3 px-4 text-[15px] font-medium" 
+                          className="w-full border border-gray-300 rounded-md py-3 px-4 text-[15px] font-medium" 
                           placeholder="E.g. Shyam Bahadur Thapa"
                           value={formData.guardianName}
                           onChange={(e) => setFormData({...formData, guardianName: e.target.value})}
@@ -741,7 +741,7 @@ export default function ScholarshipEntranceForm() {
                         <label className="block text-[14px] font-semibold text-gray-700 mb-1.5">Guardian's Phone <span className="text-red-500">*</span></label>
                         <input 
                           type="tel" 
-                          className="w-full border border-gray-300 rounded-lg py-3 px-4 text-[15px] font-medium" 
+                          className="w-full border border-gray-300 rounded-md py-3 px-4 text-[15px] font-medium" 
                           placeholder="10-digit mobile number"
                           maxLength={10}
                           value={formData.guardianPhone}
@@ -755,7 +755,7 @@ export default function ScholarshipEntranceForm() {
                             <label className="block text-[14px] font-semibold text-gray-700 mb-1.5">Father's Occupation <span className="text-red-500">*</span></label>
                             <div className="relative">
                               <select 
-                                className="w-full border border-gray-300 rounded-lg py-3 px-4 text-[15px] appearance-none font-medium bg-white"
+                                className="w-full border border-gray-300 rounded-md py-3 px-4 text-[15px] appearance-none font-medium bg-white"
                                 value={formData.fatherOccupation}
                                 onChange={(e) => setFormData({...formData, fatherOccupation: e.target.value})}
                                 required
@@ -774,7 +774,7 @@ export default function ScholarshipEntranceForm() {
                             <label className="block text-[14px] font-semibold text-gray-700 mb-1.5">Mother's Occupation <span className="text-red-500">*</span></label>
                             <div className="relative">
                               <select 
-                                className="w-full border border-gray-300 rounded-lg py-3 px-4 text-[15px] appearance-none font-medium bg-white"
+                                className="w-full border border-gray-300 rounded-md py-3 px-4 text-[15px] appearance-none font-medium bg-white"
                                 value={formData.motherOccupation}
                                 onChange={(e) => setFormData({...formData, motherOccupation: e.target.value})}
                                 required
@@ -794,7 +794,7 @@ export default function ScholarshipEntranceForm() {
                         <label className="block text-[14px] font-semibold text-gray-700 mb-2">Monthly Income (NPR) <span className="text-red-500">*</span></label>
                         <input 
                           type="number" 
-                          className="w-full border border-gray-300 rounded-lg py-3 px-4 text-[15px] font-bold text-gray-900" 
+                          className="w-full border border-gray-300 rounded-md py-3 px-4 text-[15px] font-bold text-gray-900" 
                           value={formData.monthlyIncome}
                           onChange={(e) => setFormData({...formData, monthlyIncome: parseInt(e.target.value) || 0})}
                           required 
@@ -805,7 +805,7 @@ export default function ScholarshipEntranceForm() {
                             min="0" 
                             max="500000" 
                             step="5000" 
-                            className="w-full h-1.5 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-[#0000ff]"
+                            className="w-full h-1.5 bg-gray-200 rounded-md appearance-none cursor-pointer accent-[#0000ff]"
                             value={formData.monthlyIncome}
                             onChange={(e) => setFormData({...formData, monthlyIncome: parseInt(e.target.value)})}
                           />
@@ -816,7 +816,7 @@ export default function ScholarshipEntranceForm() {
                         <label className="block text-[14px] font-semibold text-gray-700 mb-2">Family Members <span className="text-red-500">*</span></label>
                         <input 
                           type="number" 
-                          className="w-full border border-gray-300 rounded-lg py-3 px-4 text-[15px] font-bold text-gray-900" 
+                          className="w-full border border-gray-300 rounded-md py-3 px-4 text-[15px] font-bold text-gray-900" 
                           value={formData.familyCount}
                           onChange={(e) => setFormData({...formData, familyCount: parseInt(e.target.value) || 1})}
                           required 
@@ -827,7 +827,7 @@ export default function ScholarshipEntranceForm() {
                             min="1" 
                             max="20" 
                             step="1" 
-                            className="w-full h-1.5 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-[#0000ff]"
+                            className="w-full h-1.5 bg-gray-200 rounded-md appearance-none cursor-pointer accent-[#0000ff]"
                             value={formData.familyCount}
                             onChange={(e) => setFormData({...formData, familyCount: parseInt(e.target.value)})}
                           />
@@ -844,23 +844,23 @@ export default function ScholarshipEntranceForm() {
                 </div>
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-                    <div className="border border-gray-100 rounded-xl p-5 bg-gray-50 group hover:border-blue-200 transition-colors">
+                    <div className="border border-gray-100 rounded-md p-5 bg-gray-50 group hover:border-blue-200 transition-colors">
                         <label className="block text-[13px] font-extrabold text-[#0000ff] mb-2 uppercase tracking-wide">SEE Marksheet <span className="text-red-500">*</span></label>
                         <div className="relative">
                           <input 
                             type="file" 
-                            className="w-full text-xs text-gray-500 file:mr-4 file:py-2.5 file:px-4 file:rounded-lg file:border-0 file:text-[11px] file:font-bold file:bg-blue-100 file:text-[#0000ff] hover:file:bg-blue-200 cursor-pointer" 
+                            className="w-full text-xs text-gray-500 file:mr-4 file:py-2.5 file:px-4 file:rounded-md file:border-0 file:text-[11px] file:font-bold file:bg-blue-100 file:text-[#0000ff] hover:file:bg-blue-200 cursor-pointer" 
                             required 
                           />
                         </div>
                     </div>
 
-                    <div className="border border-gray-100 rounded-xl p-5 bg-gray-50 group hover:border-blue-200 transition-colors">
+                    <div className="border border-gray-100 rounded-md p-5 bg-gray-50 group hover:border-blue-200 transition-colors">
                         <label className="block text-[13px] font-extrabold text-[#0000ff] mb-2 uppercase tracking-wide">Citizenship / Birth Cert <span className="text-red-500">*</span></label>
                         <div className="relative">
                           <input 
                             type="file" 
-                            className="w-full text-xs text-gray-500 file:mr-4 file:py-2.5 file:px-4 file:rounded-lg file:border-0 file:text-[11px] file:font-bold file:bg-blue-100 file:text-[#0000ff] hover:file:bg-blue-200 cursor-pointer" 
+                            className="w-full text-xs text-gray-500 file:mr-4 file:py-2.5 file:px-4 file:rounded-md file:border-0 file:text-[11px] file:font-bold file:bg-blue-100 file:text-[#0000ff] hover:file:bg-blue-200 cursor-pointer" 
                             required 
                           />
                         </div>
@@ -889,7 +889,7 @@ export default function ScholarshipEntranceForm() {
             <div className="mt-10 flex justify-end">
                 <button 
                   type="submit" 
-                  className="w-full sm:w-auto bg-[#0000ff] hover:bg-[#0000cc] text-white font-bold text-[17px] py-4 px-16 rounded-xl transition-all shadow-xl shadow-blue-500/20 active:scale-95"
+                  className="w-full sm:w-auto bg-[#0000ff] hover:bg-[#0000cc] text-white font-bold text-[17px] py-4 px-16 rounded-md transition-all shadow-xl shadow-blue-500/20 active:scale-95"
                 >
                     Submit Application
                 </button>

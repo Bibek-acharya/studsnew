@@ -86,7 +86,7 @@
 <body class="bg-gray-50 flex flex-col items-center justify-center min-h-screen p-4 antialiased selection:bg-blue-100 selection:text-blue-900">
     
     <!-- Main Feedback Container -->
-    <div class="bg-white px-6 sm:px-8 py-5 w-full max-w-[600px] rounded-2xl shadow-[0_2px_10px_-3px_rgba(6,81,237,0.1)] border border-gray-100 flex flex-col sm:flex-row items-center justify-between gap-4 transition-all hover:shadow-[0_8px_30px_rgb(0,0,0,0.04)]">
+    <div class="bg-white px-6 sm:px-8 py-5 w-full max-w-[600px] rounded-md shadow-[0_2px_10px_-3px_rgba(6,81,237,0.1)] border border-gray-100 flex flex-col sm:flex-row items-center justify-between gap-4 transition-all hover:shadow-[0_8px_30px_rgb(0,0,0,0.04)]">
         
         <!-- Text Question -->
         <span class="feedback-text font-semibold text-[16px] text-center sm:text-left leading-snug">Are these colleges relevant to your location and interests?</span>
@@ -115,7 +115,7 @@
 
     <!-- Feedback Modal -->
     <div id="modal-backdrop" class="fixed inset-0 bg-gray-900/30 backdrop-blur-[2px] hidden items-center justify-center z-50 opacity-0 transition-opacity duration-300" role="dialog" aria-modal="true">
-        <div id="modal-content" class="bg-white rounded-2xl shadow-[0_20px_50px_-12px_rgba(0,0,0,0.25)] w-[550px] max-w-[95vw] p-6 sm:p-8 transform scale-95 transition-all duration-300">
+        <div id="modal-content" class="bg-white rounded-md shadow-[0_20px_50px_-12px_rgba(0,0,0,0.25)] w-[550px] max-w-[95vw] p-6 sm:p-8 transform scale-95 transition-all duration-300">
             <!-- Modal Header -->
             <div class="flex justify-between items-center mb-4">
                 <h2 class="text-[20px] font-bold tracking-tight" style="color: #0c1844;">What went wrong?</h2>
@@ -149,21 +149,21 @@
                 
                 <!-- Hidden Input Field for 'Other' -->
                 <div id="other-input-container" class="hidden pb-2">
-                    <textarea id="other-input" rows="3" class="w-full text-[15px] p-4 border border-gray-200 rounded-xl focus:outline-none focus:border-[#0000ff] focus:ring-4 focus:ring-[#0000ff]/10 resize-none transition-all shadow-none placeholder-gray-400" placeholder="Please describe what went wrong..."></textarea>
+                    <textarea id="other-input" rows="3" class="w-full text-[15px] p-4 border border-gray-200 rounded-md focus:outline-none focus:border-[#0000ff] focus:ring-4 focus:ring-[#0000ff]/10 resize-none transition-all shadow-none placeholder-gray-400" placeholder="Please describe what went wrong..."></textarea>
                 </div>
             </div>
 
             <!-- Modal Footer -->
             <div class="flex justify-end items-center mt-6 space-x-4">
-                <button id="cancel-modal" class="text-[15px] text-gray-600 font-medium hover:text-gray-900 hover:bg-gray-100 px-4 py-2 rounded-lg transition-all">Cancel</button>
-                <button id="submit-feedback" class="px-6 py-2.5 rounded-xl bg-gray-200 text-gray-500 text-[15px] font-semibold transition-all shadow-none" disabled>Send feedback</button>
+                <button id="cancel-modal" class="text-[15px] text-gray-600 font-medium hover:text-gray-900 hover:bg-gray-100 px-4 py-2 rounded-md transition-all">Cancel</button>
+                <button id="submit-feedback" class="px-6 py-2.5 rounded-md bg-gray-200 text-gray-500 text-[15px] font-semibold transition-all shadow-none" disabled>Send feedback</button>
             </div>
         </div>
     </div>
 
     <!-- Like Feedback Modal -->
     <div id="like-modal-backdrop" class="fixed inset-0 bg-gray-900/30 backdrop-blur-[2px] hidden items-center justify-center z-50 opacity-0 transition-opacity duration-300" role="dialog" aria-modal="true">
-        <div id="like-modal-content" class="bg-white rounded-2xl shadow-[0_20px_50px_-12px_rgba(0,0,0,0.25)] w-[550px] max-w-[95vw] p-6 sm:p-8 transform scale-95 transition-all duration-300">
+        <div id="like-modal-content" class="bg-white rounded-md shadow-[0_20px_50px_-12px_rgba(0,0,0,0.25)] w-[550px] max-w-[95vw] p-6 sm:p-8 transform scale-95 transition-all duration-300">
             <!-- Modal Header -->
             <div class="flex justify-between items-center mb-4">
                 <h2 class="text-[20px] font-bold tracking-tight" style="color: #0c1844;">Thanks! We value your feedback</h2>
@@ -174,19 +174,19 @@
             
             <!-- Modal Options -->
             <div class="mt-2">
-                <textarea id="like-textarea" rows="4" class="w-full text-[15px] p-4 border border-gray-200 rounded-xl focus:outline-none focus:border-[#0000ff] focus:ring-4 focus:ring-[#0000ff]/10 resize-none transition-all shadow-none placeholder-gray-400" placeholder="Write anything else you'd want us to know"></textarea>
+                <textarea id="like-textarea" rows="4" class="w-full text-[15px] p-4 border border-gray-200 rounded-md focus:outline-none focus:border-[#0000ff] focus:ring-4 focus:ring-[#0000ff]/10 resize-none transition-all shadow-none placeholder-gray-400" placeholder="Write anything else you'd want us to know"></textarea>
             </div>
 
             <!-- Modal Footer -->
             <div class="flex justify-end items-center mt-6 space-x-4">
-                <button id="cancel-like-modal" class="text-[15px] text-gray-600 font-medium hover:text-gray-900 hover:bg-gray-100 px-4 py-2 rounded-lg transition-all">Cancel</button>
-                <button id="submit-like-feedback" class="px-6 py-2.5 rounded-xl bg-gray-200 text-gray-500 text-[15px] font-semibold transition-all shadow-none" disabled>Send feedback</button>
+                <button id="cancel-like-modal" class="text-[15px] text-gray-600 font-medium hover:text-gray-900 hover:bg-gray-100 px-4 py-2 rounded-md transition-all">Cancel</button>
+                <button id="submit-like-feedback" class="px-6 py-2.5 rounded-md bg-gray-200 text-gray-500 text-[15px] font-semibold transition-all shadow-none" disabled>Send feedback</button>
             </div>
         </div>
     </div>
 
     <!-- Interactive Toast Notification -->
-    <div id="toast" class="toast fixed bottom-6 right-6 sm:bottom-8 sm:right-8 bg-[#0000ff] text-white px-6 py-3.5 rounded-xl shadow-[0_10px_30px_-10px_rgba(0,0,255,0.5)] text-[15px] font-medium overflow-hidden min-w-[280px] flex items-center gap-3">
+    <div id="toast" class="toast fixed bottom-6 right-6 sm:bottom-8 sm:right-8 bg-[#0000ff] text-white px-6 py-3.5 rounded-md shadow-[0_10px_30px_-10px_rgba(0,0,255,0.5)] text-[15px] font-medium overflow-hidden min-w-[280px] flex items-center gap-3">
         <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="opacity-90"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><path d="m9 11 3 3L22 4"/></svg>
         <span id="toast-message">Thank you, we value your feedback</span>
         <div id="toast-progress" class="absolute bottom-0 left-0 h-[4px] bg-white opacity-40 w-full"></div>
@@ -313,11 +313,11 @@
             if (likeTextarea.value.trim().length > 0) {
                 submitLikeFeedbackBtn.disabled = false;
                 submitLikeFeedbackBtn.classList.remove('bg-gray-200', 'text-gray-500');
-                submitLikeFeedbackBtn.classList.add('bg-[#0000ff]', 'text-white', 'shadow-md', 'hover:bg-blue-800');
+                submitLikeFeedbackBtn.classList.add('bg-[#0000ff]', 'text-white', '', 'hover:bg-blue-800');
             } else {
                 submitLikeFeedbackBtn.disabled = true;
                 submitLikeFeedbackBtn.classList.add('bg-gray-200', 'text-gray-500');
-                submitLikeFeedbackBtn.classList.remove('bg-[#0000ff]', 'text-white', 'shadow-md', 'hover:bg-blue-800');
+                submitLikeFeedbackBtn.classList.remove('bg-[#0000ff]', 'text-white', '', 'hover:bg-blue-800');
             }
         });
 
@@ -330,7 +330,7 @@
                 likeTextarea.value = '';
                 submitLikeFeedbackBtn.disabled = true;
                 submitLikeFeedbackBtn.classList.add('bg-gray-200', 'text-gray-500');
-                submitLikeFeedbackBtn.classList.remove('bg-[#0000ff]', 'text-white', 'shadow-md', 'hover:bg-blue-800');
+                submitLikeFeedbackBtn.classList.remove('bg-[#0000ff]', 'text-white', '', 'hover:bg-blue-800');
             }, 300);
         });
         // --- END LIKE MODAL LOGIC ---
@@ -389,11 +389,11 @@
                 if (isAnyChecked) {
                     submitFeedbackBtn.disabled = false;
                     submitFeedbackBtn.classList.remove('bg-gray-200', 'text-gray-500');
-                    submitFeedbackBtn.classList.add('bg-[#0000ff]', 'text-white', 'shadow-md', 'hover:bg-blue-800');
+                    submitFeedbackBtn.classList.add('bg-[#0000ff]', 'text-white', '', 'hover:bg-blue-800');
                 } else {
                     submitFeedbackBtn.disabled = true;
                     submitFeedbackBtn.classList.add('bg-gray-200', 'text-gray-500');
-                    submitFeedbackBtn.classList.remove('bg-[#0000ff]', 'text-white', 'shadow-md', 'hover:bg-blue-800');
+                    submitFeedbackBtn.classList.remove('bg-[#0000ff]', 'text-white', '', 'hover:bg-blue-800');
                 }
             });
         });

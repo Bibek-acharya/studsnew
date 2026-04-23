@@ -34,15 +34,15 @@ const programMap: Record<StudyLevel, string[]> = {
   Master: ["MBA", "MBS", "MSc.IT", "MA"],
 };
 
-const cardClass = "bg-white p-6 rounded-xl shadow-sm border border-gray-100";
-const inputClass = "w-full border border-gray-300 rounded-lg p-2.5 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition bg-white";
-const textareaClass = "w-full border border-gray-300 rounded-lg p-3 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition";
-const addButtonClass = "text-sm bg-blue-50 text-blue-600 border border-blue-200 px-3 py-1.5 rounded-lg hover:bg-blue-100 transition shadow-sm font-medium";
-const removeButtonClass = "text-red-400 hover:text-red-600 transition p-2 bg-white rounded shadow-sm border border-gray-200";
+const cardClass = "bg-white p-6 rounded-md  border border-gray-100";
+const inputClass = "w-full border border-gray-300 rounded-md p-2.5 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition bg-white";
+const textareaClass = "w-full border border-gray-300 rounded-md p-3 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition";
+const addButtonClass = "text-sm bg-blue-50 text-blue-600 border border-blue-200 px-3 py-1.5 rounded-md hover:bg-blue-100 transition  font-medium";
+const removeButtonClass = "text-red-400 hover:text-red-600 transition p-2 bg-white rounded  border border-gray-200";
 
 const sectionTitle = (icon: React.ReactNode, title: string) => (
   <h2 className="text-xl font-semibold mb-5 text-gray-800 border-b border-gray-200 pb-3 flex items-center">
-    <span className="bg-blue-100 text-blue-600 p-2 rounded-lg mr-3">{icon}</span>
+    <span className="bg-blue-100 text-blue-600 p-2 rounded-md mr-3">{icon}</span>
     {title}
   </h2>
 );
@@ -117,7 +117,7 @@ const AdmissionManagePage: React.FC = () => {
     <div className="bg-gray-50 p-6 lg:p-8">
       <div className="max-w-6xl mx-auto space-y-8 pb-12">
         {saved && (
-          <div className="bg-green-50 border border-green-200 text-green-700 rounded-xl px-4 py-3 text-sm font-medium shadow-sm">
+          <div className="bg-green-50 border border-green-200 text-green-700 rounded-md px-4 py-3 text-sm font-medium ">
             Program details saved successfully.
           </div>
         )}
@@ -128,7 +128,7 @@ const AdmissionManagePage: React.FC = () => {
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               <div className="col-span-1 md:col-span-2 lg:col-span-3">
                 <label className="block text-sm font-medium text-gray-700 mb-2">Cover Photo</label>
-                <div className="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-gray-300 border-dashed rounded-xl hover:border-blue-500 transition-colors bg-gray-50 relative group overflow-hidden">
+                <div className="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-gray-300 border-dashed rounded-md hover:border-blue-500 transition-colors bg-gray-50 relative group overflow-hidden">
                   {!coverPhoto && (
                     <div className="space-y-1 text-center relative z-10">
                       <Upload className="mx-auto h-12 w-12 text-gray-400 group-hover:text-blue-500 transition-colors" />
@@ -144,7 +144,7 @@ const AdmissionManagePage: React.FC = () => {
                   {coverPhoto && <img src={coverPhoto} alt="Cover preview" className="absolute inset-0 w-full h-full object-cover z-0" />}
                   <input ref={coverInputRef} type="file" accept="image/*" className="hidden" onChange={(event) => handleSingleImage(event, setCoverPhoto)} />
                   {coverPhoto && (
-                    <button type="button" className="absolute top-3 right-3 bg-red-500 text-white rounded-full w-8 h-8 flex items-center justify-center hover:bg-red-600 shadow-md z-20 transition" onClick={() => clearFileInput(coverInputRef.current, setCoverPhoto)}>
+                    <button type="button" className="absolute top-3 right-3 bg-red-500 text-white rounded-full w-8 h-8 flex items-center justify-center hover:bg-red-600  z-20 transition" onClick={() => clearFileInput(coverInputRef.current, setCoverPhoto)}>
                       <X className="w-4 h-4" />
                     </button>
                   )}
@@ -247,7 +247,7 @@ const AdmissionManagePage: React.FC = () => {
               </div>
               <div>
                 <label className="block text-sm font-bold text-gray-900 mb-1">Total Fee (Auto-calculated)</label>
-                <input type="number" value={totalFee} readOnly className="w-full border border-gray-300 rounded-lg p-2.5 bg-gray-50 font-bold text-blue-700 cursor-not-allowed" />
+                <input type="number" value={totalFee} readOnly className="w-full border border-gray-300 rounded-md p-2.5 bg-gray-50 font-bold text-blue-700 cursor-not-allowed" />
               </div>
             </div>
           </div>
@@ -260,9 +260,9 @@ const AdmissionManagePage: React.FC = () => {
               </div>
               <div className="space-y-3">
                 {curriculum.length === 0 ? (
-                  <p className="text-gray-400 text-sm italic text-center py-4 border border-dashed border-gray-200 rounded-lg">No curriculum subjects added yet.</p>
+                  <p className="text-gray-400 text-sm italic text-center py-4 border border-dashed border-gray-200 rounded-md">No curriculum subjects added yet.</p>
                 ) : curriculum.map((item) => (
-                  <div key={item.id} className="flex space-x-3 items-center bg-gray-50 p-2 rounded-lg border border-gray-200">
+                  <div key={item.id} className="flex space-x-3 items-center bg-gray-50 p-2 rounded-md border border-gray-200">
                     <input type="text" value={item.sem} onChange={(event) => setCurriculum((prev) => prev.map((row) => row.id === item.id ? { ...row, sem: event.target.value } : row))} placeholder="Sem/Year (e.g. 1st Sem)" className="w-1/3 border border-gray-300 p-2 rounded focus:ring-2 focus:ring-blue-500 outline-none text-sm bg-white" />
                     <input type="text" value={item.sub} onChange={(event) => setCurriculum((prev) => prev.map((row) => row.id === item.id ? { ...row, sub: event.target.value } : row))} placeholder="Subjects (comma separated)" className="w-2/3 border border-gray-300 p-2 rounded focus:ring-2 focus:ring-blue-500 outline-none text-sm bg-white" />
                     <button type="button" onClick={() => setCurriculum((prev) => prev.filter((row) => row.id !== item.id))} className={removeButtonClass} title="Remove"><Trash2 className="w-4 h-4" /></button>
@@ -278,9 +278,9 @@ const AdmissionManagePage: React.FC = () => {
               </div>
               <div className="space-y-3">
                 {scholarships.length === 0 ? (
-                  <p className="text-gray-400 text-sm italic text-center py-4 border border-dashed border-gray-200 rounded-lg">No scholarships added yet.</p>
+                  <p className="text-gray-400 text-sm italic text-center py-4 border border-dashed border-gray-200 rounded-md">No scholarships added yet.</p>
                 ) : scholarships.map((item) => (
-                  <div key={item.id} className="flex space-x-3 items-center bg-gray-50 p-2 rounded-lg border border-gray-200">
+                  <div key={item.id} className="flex space-x-3 items-center bg-gray-50 p-2 rounded-md border border-gray-200">
                     <input type="text" value={item.type} onChange={(event) => setScholarships((prev) => prev.map((row) => row.id === item.id ? { ...row, type: event.target.value } : row))} placeholder="Scholarship Type" className="w-1/4 border border-gray-300 p-2 rounded focus:ring-2 focus:ring-blue-500 outline-none text-sm bg-white" />
                     <input type="text" value={item.elig} onChange={(event) => setScholarships((prev) => prev.map((row) => row.id === item.id ? { ...row, elig: event.target.value } : row))} placeholder="Eligibility Criteria" className="w-2/4 border border-gray-300 p-2 rounded focus:ring-2 focus:ring-blue-500 outline-none text-sm bg-white" />
                     <input type="text" value={item.ben} onChange={(event) => setScholarships((prev) => prev.map((row) => row.id === item.id ? { ...row, ben: event.target.value } : row))} placeholder="Benefits" className="w-1/4 border border-gray-300 p-2 rounded focus:ring-2 focus:ring-blue-500 outline-none text-sm bg-white" />
@@ -297,9 +297,9 @@ const AdmissionManagePage: React.FC = () => {
               </div>
               <div className="space-y-3">
                 {pdfs.length === 0 ? (
-                  <p className="text-gray-400 text-sm italic text-center py-4 border border-dashed border-gray-200 rounded-lg">No PDFs added yet.</p>
+                  <p className="text-gray-400 text-sm italic text-center py-4 border border-dashed border-gray-200 rounded-md">No PDFs added yet.</p>
                 ) : pdfs.map((item) => (
-                  <div key={item.id} className="flex space-x-3 items-center bg-gray-50 p-2 rounded-lg border border-gray-200">
+                  <div key={item.id} className="flex space-x-3 items-center bg-gray-50 p-2 rounded-md border border-gray-200">
                     <input type="text" value={item.name} onChange={(event) => setPdfs((prev) => prev.map((row) => row.id === item.id ? { ...row, name: event.target.value } : row))} placeholder="PDF File Name / Heading" className="w-1/2 border border-gray-300 p-2 rounded focus:ring-2 focus:ring-blue-500 outline-none text-sm bg-white" />
                     <input type="url" value={item.link} onChange={(event) => setPdfs((prev) => prev.map((row) => row.id === item.id ? { ...row, link: event.target.value } : row))} placeholder="URL link to PDF" className="w-1/2 border border-gray-300 p-2 rounded focus:ring-2 focus:ring-blue-500 outline-none text-sm bg-white" />
                     <button type="button" onClick={() => setPdfs((prev) => prev.filter((row) => row.id !== item.id))} className={removeButtonClass} title="Remove"><Trash2 className="w-4 h-4" /></button>
@@ -315,9 +315,9 @@ const AdmissionManagePage: React.FC = () => {
               </div>
               <div className="space-y-3">
                 {facilities.length === 0 ? (
-                  <p className="text-gray-400 text-sm italic text-center py-4 border border-dashed border-gray-200 rounded-lg">No facilities added yet.</p>
+                  <p className="text-gray-400 text-sm italic text-center py-4 border border-dashed border-gray-200 rounded-md">No facilities added yet.</p>
                 ) : facilities.map((item) => (
-                  <div key={item.id} className="flex space-x-3 items-center bg-gray-50 p-2 rounded-lg border border-gray-200">
+                  <div key={item.id} className="flex space-x-3 items-center bg-gray-50 p-2 rounded-md border border-gray-200">
                     <input type="text" value={item.head} onChange={(event) => setFacilities((prev) => prev.map((row) => row.id === item.id ? { ...row, head: event.target.value } : row))} placeholder="Facility Heading" className="w-1/3 border border-gray-300 p-2 rounded focus:ring-2 focus:ring-blue-500 outline-none text-sm bg-white" />
                     <input type="text" value={item.sub} onChange={(event) => setFacilities((prev) => prev.map((row) => row.id === item.id ? { ...row, sub: event.target.value } : row))} placeholder="Short description / Sub-heading" className="w-2/3 border border-gray-300 p-2 rounded focus:ring-2 focus:ring-blue-500 outline-none text-sm bg-white" />
                     <button type="button" onClick={() => setFacilities((prev) => prev.filter((row) => row.id !== item.id))} className={removeButtonClass} title="Remove"><Trash2 className="w-4 h-4" /></button>
@@ -333,9 +333,9 @@ const AdmissionManagePage: React.FC = () => {
               </div>
               <div className="space-y-3">
                 {faculty.length === 0 ? (
-                  <p className="text-gray-400 text-sm italic text-center py-4 border border-dashed border-gray-200 rounded-lg">No faculty members added yet.</p>
+                  <p className="text-gray-400 text-sm italic text-center py-4 border border-dashed border-gray-200 rounded-md">No faculty members added yet.</p>
                 ) : faculty.map((item) => (
-                  <div key={item.id} className="flex space-x-3 items-center bg-gray-50 p-3 rounded-lg border border-gray-200 flex-wrap gap-y-2 md:flex-nowrap shadow-sm hover:shadow transition-shadow">
+                  <div key={item.id} className="flex space-x-3 items-center bg-gray-50 p-3 rounded-md border border-gray-200 flex-wrap gap-y-2 md:flex-nowrap  hover:shadow transition-shadow">
                     <label className="w-12 h-12 flex-shrink-0 relative group rounded overflow-hidden border border-gray-300 bg-white flex items-center justify-center cursor-pointer">
                       {item.photo ? <img src={item.photo} alt="Faculty" className="w-full h-full object-cover" /> : <div className="text-gray-400 text-xs"><ImageIcon className="w-4 h-4" /></div>}
                       <span className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"><Upload className="text-white w-3 h-3" /></span>
@@ -369,9 +369,9 @@ const AdmissionManagePage: React.FC = () => {
               </div>
               <div className="space-y-3">
                 {faqs.length === 0 ? (
-                  <p className="text-gray-400 text-sm italic text-center py-4 border border-dashed border-gray-200 rounded-lg">No FAQs added yet.</p>
+                  <p className="text-gray-400 text-sm italic text-center py-4 border border-dashed border-gray-200 rounded-md">No FAQs added yet.</p>
                 ) : faqs.map((item) => (
-                  <div key={item.id} className="flex space-x-3 items-start bg-gray-50 p-3 rounded-lg border border-gray-200">
+                  <div key={item.id} className="flex space-x-3 items-start bg-gray-50 p-3 rounded-md border border-gray-200">
                     <div className="flex-1 space-y-3">
                       <input type="text" value={item.q} onChange={(event) => setFaqs((prev) => prev.map((row) => row.id === item.id ? { ...row, q: event.target.value } : row))} placeholder="Question" className="w-full border border-gray-300 p-2 rounded focus:ring-2 focus:ring-blue-500 outline-none text-sm bg-white font-medium" />
                       <textarea rows={2} value={item.a} onChange={(event) => setFaqs((prev) => prev.map((row) => row.id === item.id ? { ...row, a: event.target.value } : row))} placeholder="Answer" className="w-full border border-gray-300 p-2 rounded focus:ring-2 focus:ring-blue-500 outline-none text-sm bg-white" />
@@ -419,7 +419,7 @@ const AdmissionManagePage: React.FC = () => {
           </div>
 
           <div className="flex justify-end">
-            <button type="button" onClick={handleSave} className="bg-blue-600 text-white px-5 py-2 rounded-lg shadow hover:bg-blue-700 transition font-medium flex items-center">
+            <button type="button" onClick={handleSave} className="bg-blue-600 text-white px-5 py-2 rounded-md shadow hover:bg-blue-700 transition font-medium flex items-center">
               <Save className="w-4 h-4 mr-2" /> Save Changes
             </button>
           </div>

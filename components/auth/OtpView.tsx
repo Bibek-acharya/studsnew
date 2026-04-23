@@ -114,13 +114,13 @@ const OtpView: React.FC<OtpViewProps> = ({
       </p>
 
       {error && (
-        <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg">
+        <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-md">
           <p className="text-red-700 text-sm">{error}</p>
         </div>
       )}
 
       {success && (
-        <div className="mb-4 p-3 bg-emerald-50 border border-emerald-200 rounded-lg">
+        <div className="mb-4 p-3 bg-emerald-50 border border-emerald-200 rounded-md">
           <p className="text-emerald-700 text-sm">{success}</p>
         </div>
       )}
@@ -137,7 +137,7 @@ const OtpView: React.FC<OtpViewProps> = ({
               onChange={(e) => handleChange(e.target.value, idx)}
               onKeyDown={(e) => handleKeyDown(e, idx)}
               onBlur={handleBlur}
-              className={`w-12 h-12 bg-white border rounded-lg text-center text-xl font-bold text-gray-900 outline-none transition-all ${
+              className={`w-12 h-12 bg-white border rounded-md text-center text-xl font-bold text-gray-900 outline-none transition-all ${
                 touched && otpError
                   ? "border-red-400 focus:border-red-400 focus:ring-2 focus:ring-red-400/20"
                   : digit
@@ -154,7 +154,7 @@ const OtpView: React.FC<OtpViewProps> = ({
         <button
           type="submit"
           disabled={loading || otp.some((v) => !v)}
-          className="w-full bg-blue-600 hover:bg-blue-700 disabled:bg-blue-300 text-white font-medium rounded-lg py-2.5 transition-colors duration-200 shadow-md shadow-blue-600/30 flex items-center justify-center gap-2 mt-2"
+          className="w-full bg-blue-600 hover:bg-blue-700 disabled:bg-blue-300 text-white font-medium rounded-md py-2.5 transition-colors duration-200  shadow-blue-600/30 flex items-center justify-center gap-2 mt-2"
         >
           {loading ? (
             <svg className="w-5 h-5 animate-spin" fill="none" viewBox="0 0 24 24">

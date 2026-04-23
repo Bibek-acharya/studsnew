@@ -1,14 +1,20 @@
+"use client";
+
 import React, { useEffect, useState } from 'react';
-import ReactQuill from 'react-quill-new';
-import 'react-quill-new/dist/quill.snow.css';
+import dynamic from 'next/dynamic';
 import { scholarshipProviderApi, CreateScholarshipPayload } from '@/services/scholarshipProviderApi';
+
+const ReactQuill = dynamic(() => import('react-quill-new'), {
+  ssr: false,
+  loading: () => <div className="h-32 bg-gray-100 animate-pulse rounded-md" />,
+});
 
 const quillModules = {
   toolbar: [
     [{ header: [1, 2, 3, false] }],
     ['bold', 'italic', 'underline', 'strike'],
     [{ color: [] }, { background: [] }],
-    [{ list: 'ordered' }, { list: 'bullet' }],
+    [{ list: 'ordered' }],
     ['blockquote', 'code-block'],
     ['link'],
     ['clean'],
@@ -19,7 +25,7 @@ const quillFormats = [
   'header',
   'bold', 'italic', 'underline', 'strike',
   'color', 'background',
-  'list', 'bullet',
+  'list',
   'blockquote', 'code-block',
   'link',
 ];
@@ -236,7 +242,7 @@ export default function CreateScholarship({ scholarshipId, onNavigate }: CreateS
 
   return (
     <section className="fade-in max-w-5xl mx-auto pb-20">
-      <div className="bg-white rounded-2xl shadow-lg border border-slate-200 overflow-hidden">
+      <div className="bg-white rounded-md shadow-lg border border-slate-200 overflow-hidden">
         <div className="bg-gradient-to-r from-primary-900 to-primary-700 p-8 text-white flex justify-between items-end">
           <div>
             <span className="bg-white/20 text-white text-xs font-black px-3 py-1 rounded-full uppercase tracking-widest mb-3 inline-block border border-white/10">
@@ -255,12 +261,12 @@ export default function CreateScholarship({ scholarshipId, onNavigate }: CreateS
         </div>
 
         {error && (
-          <div className="mx-8 mt-6 p-4 bg-red-50 border border-red-200 rounded-xl text-red-700 text-sm font-bold">
+          <div className="mx-8 mt-6 p-4 bg-red-50 border border-red-200 rounded-md text-red-700 text-sm font-bold">
             {error}
           </div>
         )}
         {success && (
-          <div className="mx-8 mt-6 p-4 bg-green-50 border border-green-200 rounded-xl text-green-700 text-sm font-bold">
+          <div className="mx-8 mt-6 p-4 bg-green-50 border border-green-200 rounded-md text-green-700 text-sm font-bold">
             {success}
             {success.includes('published') && !isEditMode && (
               <button
@@ -276,7 +282,7 @@ export default function CreateScholarship({ scholarshipId, onNavigate }: CreateS
         <form onSubmit={e => handleSubmit(e, 'active')} className="p-8 space-y-10">
           <div>
             <h3 className="text-xl font-bold text-slate-800 mb-5 pb-2 border-b border-slate-200 flex items-center gap-2">
-              <div className="w-8 h-8 bg-primary-100 text-primary-600 rounded-lg flex items-center justify-center text-sm font-black"><i className="fa-solid fa-1"></i></div> General Details
+              <div className="w-8 h-8 bg-primary-100 text-primary-600 rounded-md flex items-center justify-center text-sm font-black"><i className="fa-solid fa-1"></i></div> General Details
             </h3>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pl-0 md:pl-10">
               <div className="md:col-span-2">
@@ -287,7 +293,7 @@ export default function CreateScholarship({ scholarshipId, onNavigate }: CreateS
                   value={title}
                   onChange={e => setTitle(e.target.value)}
                   placeholder="e.g. NextGen Innovators Tech Scholarship 2026"
-                  className="w-full border-2 border-slate-200 rounded-xl px-4 py-3 focus:border-primary-500 focus:ring-0 outline-none text-lg font-bold transition placeholder:font-normal placeholder:text-slate-300 shadow-sm"
+                  className="w-full border-2 border-slate-200 rounded-md px-4 py-3 focus:border-primary-500 focus:ring-0 outline-none text-lg font-bold transition placeholder:font-normal placeholder:text-slate-300 "
                 />
               </div>
               <div>
@@ -295,7 +301,7 @@ export default function CreateScholarship({ scholarshipId, onNavigate }: CreateS
                 <select
                   value={category}
                   onChange={e => setCategory(e.target.value)}
-                  className="w-full border-2 border-slate-200 rounded-xl px-4 py-3 outline-none focus:border-primary-500 transition bg-white appearance-none cursor-pointer font-bold text-slate-800 shadow-sm"
+                  className="w-full border-2 border-slate-200 rounded-md px-4 py-3 outline-none focus:border-primary-500 transition bg-white appearance-none cursor-pointer font-bold text-slate-800 "
                 >
                   <option value="Full Ride">Full Ride (100% Covered)</option>
                   <option value="Partial">Partial Scholarship (Fixed Amount)</option>
@@ -308,7 +314,7 @@ export default function CreateScholarship({ scholarshipId, onNavigate }: CreateS
                 <select
                   value={educationLevel}
                   onChange={e => setEducationLevel(e.target.value)}
-                  className="w-full border-2 border-slate-200 rounded-xl px-4 py-3 outline-none focus:border-primary-500 transition bg-white appearance-none cursor-pointer font-bold text-slate-800 shadow-sm"
+                  className="w-full border-2 border-slate-200 rounded-md px-4 py-3 outline-none focus:border-primary-500 transition bg-white appearance-none cursor-pointer font-bold text-slate-800 "
                 >
                   <option>+2 / High School / A-Levels</option>
                   <option>Bachelor's Degree (Undergrad)</option>
@@ -323,7 +329,7 @@ export default function CreateScholarship({ scholarshipId, onNavigate }: CreateS
                   value={programs}
                   onChange={e => setPrograms(e.target.value)}
                   placeholder="e.g. Computer Science, Software Engineering, IT, AI"
-                  className="w-full border-2 border-slate-200 rounded-xl px-4 py-3 focus:border-primary-500 outline-none transition font-medium shadow-sm"
+                  className="w-full border-2 border-slate-200 rounded-md px-4 py-3 focus:border-primary-500 outline-none transition font-medium "
                 />
               </div>
             </div>
@@ -331,7 +337,7 @@ export default function CreateScholarship({ scholarshipId, onNavigate }: CreateS
 
           <div>
             <h3 className="text-xl font-bold text-slate-800 mb-5 pb-2 border-b border-slate-200 flex items-center gap-2">
-              <div className="w-8 h-8 bg-green-100 text-green-600 rounded-lg flex items-center justify-center text-sm font-black"><i className="fa-solid fa-2"></i></div> Funding & Timeline
+              <div className="w-8 h-8 bg-green-100 text-green-600 rounded-md flex items-center justify-center text-sm font-black"><i className="fa-solid fa-2"></i></div> Funding & Timeline
             </h3>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6 pl-0 md:pl-10">
               <div>
@@ -343,7 +349,7 @@ export default function CreateScholarship({ scholarshipId, onNavigate }: CreateS
                     value={value}
                     onChange={e => setValue(e.target.value)}
                     placeholder="e.g. 50,000 / yr"
-                    className="w-full border-2 border-slate-200 rounded-xl pl-14 pr-4 py-3 outline-none focus:border-green-500 transition font-bold shadow-sm"
+                    className="w-full border-2 border-slate-200 rounded-md pl-14 pr-4 py-3 outline-none focus:border-green-500 transition font-bold "
                   />
                 </div>
               </div>
@@ -354,11 +360,11 @@ export default function CreateScholarship({ scholarshipId, onNavigate }: CreateS
                   required
                   value={deadline}
                   onChange={e => setDeadline(e.target.value)}
-                  className="w-full border-2 border-slate-200 rounded-xl px-4 py-3 outline-none focus:border-danger transition font-bold shadow-sm"
+                  className="w-full border-2 border-slate-200 rounded-md px-4 py-3 outline-none focus:border-danger transition font-bold "
                 />
               </div>
 
-              <div className="md:col-span-3 bg-slate-50 p-6 rounded-2xl border border-slate-200 mt-2 shadow-inner">
+              <div className="md:col-span-3 bg-slate-50 p-6 rounded-md border border-slate-200 mt-2 shadow-inner">
                 <label className="block text-sm font-black text-slate-800 mb-4 uppercase tracking-wider">What expenses are covered?</label>
                 <div className="flex flex-wrap gap-6">
                   {expenseOptions.map(item => (
@@ -379,12 +385,12 @@ export default function CreateScholarship({ scholarshipId, onNavigate }: CreateS
 
           <div>
             <h3 className="text-xl font-bold text-slate-800 mb-5 pb-2 border-b border-slate-200 flex items-center gap-2">
-              <div className="w-8 h-8 bg-purple-100 text-purple-600 rounded-lg flex items-center justify-center text-sm font-black"><i className="fa-solid fa-3"></i></div> Requirements & Content
+              <div className="w-8 h-8 bg-purple-100 text-purple-600 rounded-md flex items-center justify-center text-sm font-black"><i className="fa-solid fa-3"></i></div> Requirements & Content
             </h3>
             <div className="space-y-6 pl-0 md:pl-10">
               <div>
                 <label className="block text-sm font-bold text-slate-700 mb-2 uppercase tracking-tight">Comprehensive Description</label>
-                <div className="border-2 border-slate-200 rounded-xl overflow-hidden shadow-sm [&_.ql-container]:min-h-[200px] [&_.ql-editor]:min-h-[200px]">
+                <div className="rounded-lg overflow-hidden">
                   <ReactQuill
                     theme="snow"
                     value={description}
@@ -392,14 +398,14 @@ export default function CreateScholarship({ scholarshipId, onNavigate }: CreateS
                     modules={quillModules}
                     formats={quillFormats}
                     placeholder="Write a compelling description explaining the purpose, benefits, and exact expectations of the scholars..."
-                    className="bg-white"
+                    className="rounded-lg"
                   />
                 </div>
               </div>
 
               <div>
                 <label className="block text-sm font-bold text-slate-700 mb-2 uppercase tracking-tight">Eligibility & Criteria</label>
-                <div className="border-2 border-slate-200 rounded-xl overflow-hidden shadow-sm [&_.ql-container]:min-h-[150px] [&_.ql-editor]:min-h-[150px]">
+                <div className="rounded-lg overflow-hidden">
                   <ReactQuill
                     theme="snow"
                     value={eligibility}
@@ -407,18 +413,18 @@ export default function CreateScholarship({ scholarshipId, onNavigate }: CreateS
                     modules={quillModules}
                     formats={quillFormats}
                     placeholder="- Minimum 3.5 GPA out of 4.0&#10;- Must be a citizen of a developing nation&#10;- Demonstrated financial need..."
-                    className="bg-white"
+                    className="rounded-lg"
                   />
                 </div>
               </div>
 
               <div>
                 <label className="block text-sm font-bold text-slate-700 mb-3 uppercase tracking-tight">Mandatory Documents from Applicant</label>
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 bg-slate-50 p-5 rounded-2xl border border-slate-200 shadow-inner">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 bg-slate-50 p-5 rounded-md border border-slate-200 shadow-inner">
                   {docOptions.map(doc => {
                     const isRequired = doc === 'Academic Transcripts' || doc === 'Govt. ID / Citizenship';
                     return (
-                      <label key={doc} className="flex items-center gap-2 cursor-pointer group bg-white p-3 rounded-xl shadow-sm border border-slate-100">
+                      <label key={doc} className="flex items-center gap-2 cursor-pointer group bg-white p-3 rounded-md  border border-slate-100">
                         <input
                           type="checkbox"
                           checked={requiredDocs.includes(doc)}
@@ -438,7 +444,7 @@ export default function CreateScholarship({ scholarshipId, onNavigate }: CreateS
               <div>
                 <label className="block text-sm font-bold text-slate-700 mb-2 uppercase tracking-tight">Promotional Banner Image</label>
                 <div
-                  className={`border-2 border-dashed rounded-2xl p-10 text-center transition-all cursor-pointer group bg-white shadow-sm ${
+                  className={`border-2 border-dashed rounded-md p-10 text-center transition-all cursor-pointer group bg-white  ${
                     isDragging
                       ? 'border-primary-500 bg-primary-50'
                       : 'border-slate-300 hover:bg-slate-50 hover:border-primary-400'
@@ -465,7 +471,7 @@ export default function CreateScholarship({ scholarshipId, onNavigate }: CreateS
                         <img
                           src={bannerPreview}
                           alt="Banner preview"
-                          className="max-h-48 mx-auto rounded-xl object-cover shadow-md"
+                          className="max-h-48 mx-auto rounded-md object-cover "
                         />
                         <button
                           type="button"
@@ -485,7 +491,7 @@ export default function CreateScholarship({ scholarshipId, onNavigate }: CreateS
                     </div>
                   ) : (
                     <>
-                      <div className="w-16 h-16 bg-slate-100 text-slate-400 rounded-2xl flex items-center justify-center mx-auto mb-4 group-hover:bg-primary-50 group-hover:text-primary-500 transition group-hover:scale-110">
+                      <div className="w-16 h-16 bg-slate-100 text-slate-400 rounded-md flex items-center justify-center mx-auto mb-4 group-hover:bg-primary-50 group-hover:text-primary-500 transition group-hover:scale-110">
                         <i className="fa-solid fa-cloud-arrow-up text-2xl"></i>
                       </div>
                       <p className="text-lg font-black text-slate-800">Drag and drop your banner image here</p>
@@ -507,7 +513,7 @@ export default function CreateScholarship({ scholarshipId, onNavigate }: CreateS
             <button
               type="button"
               onClick={() => onNavigate?.('sec-manage-scholarships')}
-              className="px-8 py-3 bg-white border-2 border-slate-200 text-slate-700 rounded-xl hover:bg-slate-50 font-bold transition shadow-sm"
+              className="px-8 py-3 bg-white border-2 border-slate-200 text-slate-700 rounded-md hover:bg-slate-50 font-bold transition "
             >
               Cancel
             </button>
@@ -515,7 +521,7 @@ export default function CreateScholarship({ scholarshipId, onNavigate }: CreateS
               type="button"
               onClick={e => handleSubmit(e, 'draft')}
               disabled={submitting}
-              className="px-8 py-3 bg-slate-800 text-white rounded-xl hover:bg-slate-900 font-bold shadow-lg transition disabled:opacity-50 disabled:cursor-not-allowed"
+              className="px-8 py-3 bg-slate-800 text-white rounded-md hover:bg-slate-900 font-bold shadow-lg transition disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {submitting ? (
                 <><i className="fa-solid fa-spinner fa-spin mr-2"></i>Saving...</>
@@ -526,7 +532,7 @@ export default function CreateScholarship({ scholarshipId, onNavigate }: CreateS
             <button
               type="submit"
               disabled={submitting}
-              className="px-8 py-3 bg-primary-600 text-white rounded-xl hover:bg-primary-700 font-black shadow-lg shadow-primary-500/30 transition transform hover:-translate-y-0.5 text-lg flex items-center justify-center gap-3 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
+              className="px-8 py-3 bg-primary-600 text-white rounded-md hover:bg-primary-700 font-black shadow-lg shadow-primary-500/30 transition transform hover:-translate-y-0.5 text-lg flex items-center justify-center gap-3 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
             >
               {submitting ? (
                 <>

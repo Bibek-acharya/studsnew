@@ -107,11 +107,11 @@ function SearchContent() {
                 <div
                   key={idx}
                   onClick={() => handleDetailedView(item)}
-                  className="group flex h-full cursor-pointer flex-col rounded-2xl border border-gray-100 bg-white p-6 shadow-sm transition-all duration-300 hover:shadow-lg"
+                  className="group flex h-full cursor-pointer flex-col rounded-md border border-gray-100 bg-white p-6  transition-all duration-300 hover:shadow-lg"
                 >
                   <div className="mb-4 flex items-start justify-between">
                     <div
-                      className="flex h-12 w-12 items-center justify-center rounded-xl bg-blue-50 text-blue-600 transition-colors group-hover:bg-blue-600 group-hover:text-white"
+                      className="flex h-12 w-12 items-center justify-center rounded-md bg-blue-50 text-blue-600 transition-colors group-hover:bg-blue-600 group-hover:text-white"
                       dangerouslySetInnerHTML={{
                         __html: searchIcons[item.type] || searchIcons["Course"],
                       }}

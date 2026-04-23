@@ -13,7 +13,10 @@ export default function FooterWrapper() {
     pathname.startsWith("/user/dashboard") ||
     pathname.startsWith("/college-recommender") ||
     pathname.startsWith("/scholarship-recommender") ||
-    pathname.startsWith("/superadmin");
+    pathname.startsWith("/superadmin") ||
+    pathname === "/login" ||
+    pathname === "/register" ||
+    pathname === "/forgot-password";
 
   if (hideGlobalFooter) {
     return null;

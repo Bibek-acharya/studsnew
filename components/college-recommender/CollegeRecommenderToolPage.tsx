@@ -1,22 +1,11 @@
 "use client";
 
 import React, { useState } from 'react'
-import Image from 'next/image'
 import {
   BookOpen,
   Music,
   Briefcase,
   Compass,
-  Check,
-  ChevronDown,
-  ChevronRight,
-  Star,
-  Banknote,
-  TrendingUp,
-  MapPin,
-  Filter,
-  Building2,
-  X,
 } from 'lucide-react'
 import Step1 from './steps/Step1'
 import Step2 from './steps/Step2'
@@ -29,6 +18,7 @@ import Step8 from './steps/Step8'
 import Step9 from './steps/Step9'
 import Step10 from './steps/Step10'
 import ResultsPage from './ResultsPage'
+import CollegeShortlistView from './CollegeShortlistView'
 
 import {
   apiService,
@@ -115,6 +105,7 @@ export interface CollegeRecommenderForm {
   financial_support: string;
   yearly_budget: string;
   province: string;
+  district: string;
   setting: string;
   distance_from_home: string;
   class_size: string;
@@ -132,6 +123,7 @@ export const initialForm: CollegeRecommenderForm = {
   financial_support: "",
   yearly_budget: "",
   province: "",
+  district: "",
   setting: "",
   distance_from_home: "",
   class_size: "",
@@ -149,6 +141,7 @@ const CollegeRecommenderToolPage: React.FC<CollegeRecommenderToolPageProps> = ({
   const [step, setStep] = useState(1);
   const [loading, setLoading] = useState(false);
   const [results, setResults] = useState<CollegeRecommendation[]>([]);
+  const [shortlistedIds, setShortlistedIds] = useState<Set<number | string>>(new Set());
 
   const [previewId, setPreviewId] = useState<number | string | null>(null);
   const [selectedIds, setSelectedIds] = useState<Set<number | string>>(
@@ -181,7 +174,10 @@ const CollegeRecommenderToolPage: React.FC<CollegeRecommenderToolPageProps> = ({
       case 3:
         return !!form.knows_course && !!form.preferred_field && !!form.reputation_importance;
       case 4:
-        return !!form.province && !!form.setting;
+        return (
+          !!form.province &&
+          (form.province === 'No preference' || !!form.district)
+        );
       case 5:
         return !!form.distance_from_home;
       case 6:
@@ -205,7 +201,9 @@ const CollegeRecommenderToolPage: React.FC<CollegeRecommenderToolPageProps> = ({
       const payload: CollegeRecommenderPayload = {
         student_type: form.student_type,
         program_interest: form.preferred_field,
-        preferred_location: `${form.province}, ${form.setting}, ${form.distance_from_home}`,
+        preferred_location: form.province === 'No preference'
+          ? `${form.setting}, ${form.distance_from_home}`
+          : `${form.province}, ${form.district ? `${form.district}, ` : ''}${form.setting}, ${form.distance_from_home}`,
         budget_preference: `${form.yearly_budget}; ${form.tuition_factor}`,
         campus_life_priority: `${form.academics_vs_campus}; ${form.activities_importance}; ${form.facility_choice}`,
         career_goal: form.reputation_importance,
@@ -241,7 +239,28 @@ const CollegeRecommenderToolPage: React.FC<CollegeRecommenderToolPageProps> = ({
         toggleSelection={toggleSelection}
         onNavigate={onNavigate}
         onRefine={() => setStep(10)}
+        onShortlist={() => {
+          setShortlistedIds(new Set([...shortlistedIds, ...selectedIds]));
+          setStep(12);
+        }}
         tution={form.yearly_budget}
+      />
+    );
+  }
+
+  if (step === 12) {
+    return (
+      <CollegeShortlistView
+        recommendedItems={results}
+        shortlistedIds={shortlistedIds}
+        onToggleShortlist={(id) => {
+          const next = new Set(shortlistedIds);
+          if (next.has(id)) next.delete(id);
+          else next.add(id);
+          setShortlistedIds(next);
+        }}
+        onBack={() => setStep(11)}
+        onNavigate={onNavigate}
       />
     );
   }

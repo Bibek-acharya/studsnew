@@ -36,7 +36,7 @@ export default function ConfirmDialog({ isOpen, onClose, onConfirm, onLeavePage 
 
   return (
     <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-100" onClick={handleOverlayClick}>
-      <div className="bg-white rounded-lg p-6 max-w-md w-full mx-4 shadow-xl">
+      <div className="bg-white rounded-md p-6 max-w-md w-full mx-4 shadow-xl">
         <div className="flex justify-end">
           <button
             onClick={onClose}

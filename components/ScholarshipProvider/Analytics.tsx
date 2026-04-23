@@ -45,7 +45,7 @@ export default function Analytics() {
       </div>
 
       {error && (
-        <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-xl text-red-700 text-sm font-bold">
+        <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-md text-red-700 text-sm font-bold">
           {error}
         </div>
       )}
@@ -56,7 +56,7 @@ export default function Analytics() {
         </div>
       ) : (
         <>
-          <div className="bg-white p-10 rounded-3xl border border-slate-200 shadow-sm mb-8 overflow-hidden relative">
+          <div className="bg-white p-10 rounded-md border border-slate-200  mb-8 overflow-hidden relative">
             <div className="absolute top-0 left-0 w-full h-2 bg-gradient-to-r from-slate-200 via-primary-400 to-green-400"></div>
             <h3 className="font-black text-slate-800 mb-12 text-xl text-center uppercase tracking-widest">Application Funnel Conversion</h3>
 
@@ -66,7 +66,7 @@ export default function Analytics() {
               {funnelSteps.map((step, index) => (
                 <React.Fragment key={step.label}>
                   <div className="flex flex-col items-center mb-10 md:mb-0 group">
-                    <div className={`w-28 h-28 rounded-3xl ${step.bg} flex flex-col items-center justify-center border-4 ${step.border} shadow-sm relative z-10 transition-transform group-hover:scale-110 duration-300 ${step.large ? 'scale-125 shadow-xl md:mx-6' : ''}`}>
+                    <div className={`w-28 h-28 rounded-md ${step.bg} flex flex-col items-center justify-center border-4 ${step.border}  relative z-10 transition-transform group-hover:scale-110 duration-300 ${step.large ? 'scale-125 shadow-xl md:mx-6' : ''}`}>
                       <span className={`text-3xl font-black ${step.text}`}>{step.value}</span>
                       <i className={`fa-solid ${step.icon} text-[10px] mt-1 opacity-40`}></i>
                     </div>
@@ -108,8 +108,8 @@ export default function Analytics() {
                 isMulti: true
               }
             ].map(report => (
-              <div key={report.title} className="bg-white p-8 rounded-3xl border border-slate-200 shadow-sm hover:shadow-xl transition-all group flex flex-col items-center text-center">
-                <div className={`w-20 h-20 bg-${report.color}-50 text-${report.color}-600 rounded-3xl flex items-center justify-center mb-6 text-3xl group-hover:scale-110 transition-transform duration-500 shadow-sm`}>
+              <div key={report.title} className="bg-white p-8 rounded-md border border-slate-200  hover:shadow-xl transition-all group flex flex-col items-center text-center">
+                <div className={`w-20 h-20 bg-${report.color}-50 text-${report.color}-600 rounded-md flex items-center justify-center mb-6 text-3xl group-hover:scale-110 transition-transform duration-500 `}>
                   <i className={`fa-solid ${report.icon}`}></i>
                 </div>
                 <h3 className="font-black text-xl text-slate-800 mb-3 uppercase tracking-tighter">{report.title}</h3>
@@ -117,11 +117,11 @@ export default function Analytics() {
 
                 {report.isMulti ? (
                   <div className="grid grid-cols-2 gap-3 w-full">
-                    <button className="py-4 bg-slate-50 text-slate-700 rounded-2xl hover:bg-slate-100 font-black text-xs uppercase transition shadow-sm border border-slate-100"><i className="fa-solid fa-file-csv mr-2"></i> CSV</button>
-                    <button className="py-4 bg-slate-50 text-slate-700 rounded-2xl hover:bg-slate-100 font-black text-xs uppercase transition shadow-sm border border-slate-100"><i className="fa-solid fa-file-powerpoint mr-2"></i> PPT</button>
+                    <button className="py-4 bg-slate-50 text-slate-700 rounded-md hover:bg-slate-100 font-black text-xs uppercase transition  border border-slate-100"><i className="fa-solid fa-file-csv mr-2"></i> CSV</button>
+                    <button className="py-4 bg-slate-50 text-slate-700 rounded-md hover:bg-slate-100 font-black text-xs uppercase transition  border border-slate-100"><i className="fa-solid fa-file-powerpoint mr-2"></i> PPT</button>
                   </div>
                 ) : (
-                  <button className={`w-full py-4 bg-${report.color}-600 text-white rounded-2xl hover:shadow-lg transition-all font-black text-xs uppercase tracking-widest shadow-md shadow-${report.color}-500/20 flex items-center justify-center gap-2`}>
+                  <button className={`w-full py-4 bg-${report.color}-600 text-white rounded-md hover:shadow-lg transition-all font-black text-xs uppercase tracking-widest  shadow-${report.color}-500/20 flex items-center justify-center gap-2`}>
                     <i className={`fa-solid ${report.action?.includes('CSV') ? 'fa-file-csv' : 'fa-file-pdf'}`}></i> {report.action}
                   </button>
                 )}

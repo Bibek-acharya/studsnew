@@ -288,10 +288,10 @@ const ProgramCard: React.FC<{
     "Explore academics, facilities, and counselling support for this college.";
 
   return (
-    <div className="flex h-full cursor-pointer flex-col rounded-2xl border border-gray-200 bg-white p-4 transition-all duration-300 hover:border-blue-500/20">
-      <div className="group relative h-35 shrink-0 overflow-hidden rounded-xl">
+    <div className="flex h-full cursor-pointer flex-col rounded-md border border-gray-200 bg-white p-4 transition-all duration-300 hover:border-blue-500/20">
+      <div className="group relative h-35 shrink-0 overflow-hidden rounded-md">
         {college.featured && (
-          <div className="absolute top-3 left-3 z-10 rounded bg-blue-600 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-white shadow-sm">
+          <div className="absolute top-3 left-3 z-10 rounded bg-blue-600 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-white ">
             Featured
           </div>
         )}
@@ -652,7 +652,7 @@ const CollegesAndCoursesPage: React.FC<CollegesAndCoursesPageProps> = ({
   return (
     <div className="min-h-screen bg-slate-50 flex flex-col items-center justify-start p-4 sm:p-8 gap-8 md:gap-10 font-sans">
       {/* Top Bar for Courses */}
-      <div className="bg-blue-50 w-full max-w-[1440px] rounded-lg py-5 px-6 md:py-6 md:px-8 overflow-hidden shadow-sm border border-blue-100">
+      <div className="bg-blue-50 w-full max-w-[1440px] rounded-md py-5 px-6 md:py-6 md:px-8 overflow-hidden  border border-blue-100">
         <div className="flex gap-4 md:gap-5 overflow-x-auto snap-x pb-2 no-scrollbar">
           {backendCourses.map((course: any) => {
             const isSelected = String(course.id) === String(activeCourseId);
@@ -686,7 +686,7 @@ const CollegesAndCoursesPage: React.FC<CollegesAndCoursesPageProps> = ({
 
       <div className="w-full max-w-[1440px] flex flex-col lg:flex-row gap-6 md:gap-8 items-start">
         {/* Sidebar */}
-        <aside className="w-full lg:w-[280px] shrink-0 bg-white rounded-3xl p-5 md:p-6 border border-gray-100 shadow-sm self-start">
+        <aside className="w-full lg:w-[280px] shrink-0 bg-white rounded-md p-5 md:p-6 border border-gray-100  self-start">
           <div className="mb-2 flex items-center justify-between">
             <div className="flex items-center gap-3">
               <FaSliders size={18} className="text-black" />

@@ -38,12 +38,12 @@ const RatingAd: React.FC = () => {
 
   return (
     <>
-      <div className="bg-white rounded-3xl shadow-[0_4px_24px_rgba(0,0,0,0.06)] border border-gray-100 w-full p-5 md:p-6 flex flex-col md:flex-row items-center justify-center lg:justify-start gap-4 md:gap-8 transition-all my-2 lg:my-4">
+      <div className="bg-white rounded-md shadow-[0_4px_24px_rgba(0,0,0,0.06)] border border-gray-100 w-full p-5 md:p-6 flex flex-col md:flex-row items-center justify-center lg:justify-start gap-4 md:gap-8 transition-all my-2 lg:my-4">
         <div className="shrink-0 flex justify-center">
             <img 
                 src="https://i.pinimg.com/1200x/31/bb/5b/31bb5b12e99840c5a1571878f30b69ef.jpg" 
                 alt="Feedback Illustration" 
-                className="w-32 md:w-44 h-auto object-contain rounded-xl"
+                className="w-32 md:w-44 h-auto object-contain rounded-md"
             />
         </div>
 
@@ -127,7 +127,7 @@ const RatingAd: React.FC = () => {
             <div>
                 <p className="text-[15px] font-medium text-gray-800 mb-3">Please provide your feedback so that we can improve your experience.</p>
                 <textarea 
-                    className="w-full border border-gray-300 rounded-xl p-3 text-[15px] text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-1 focus:ring-[#1E3A8A] focus:border-[#1E3A8A] resize-none h-24" 
+                    className="w-full border border-gray-300 rounded-md p-3 text-[15px] text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-1 focus:ring-[#1E3A8A] focus:border-[#1E3A8A] resize-none h-24" 
                     placeholder="Write here..."
                 ></textarea>
             </div>
@@ -137,7 +137,7 @@ const RatingAd: React.FC = () => {
                 alert("Thank you for your feedback!");
                 setIsModalOpen(false);
               }}
-              className="bg-[#1E3A8A] hover:bg-[#152860] text-white font-semibold py-2.5 px-10 rounded-full mt-8 mx-auto block transition-colors shadow-sm">
+              className="bg-[#1E3A8A] hover:bg-[#152860] text-white font-semibold py-2.5 px-10 rounded-full mt-8 mx-auto block transition-colors ">
                 Submit
             </button>
         </div>

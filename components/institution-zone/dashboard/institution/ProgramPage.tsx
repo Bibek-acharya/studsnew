@@ -96,21 +96,21 @@ const ProgramPage: React.FC = () => {
         </div>
         <button
           onClick={openAdd}
-          className="flex items-center gap-2 px-4 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg text-sm font-semibold transition-colors shadow-sm"
+          className="flex items-center gap-2 px-4 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-md text-sm font-semibold transition-colors "
         >
           <Plus className="w-4 h-4" /> Add Program
         </button>
       </div>
 
       {/* Level Tabs */}
-      <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
+      <div className="bg-white rounded-md border border-slate-200  overflow-hidden">
         <div className="flex gap-1 p-3 border-b border-slate-100 flex-wrap">
           {LEVELS.map(level => (
             <button
               key={level}
               onClick={() => setActiveLevel(level)}
-              className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
-                activeLevel === level ? "bg-indigo-600 text-white shadow-sm" : "text-slate-600 hover:bg-slate-100"
+              className={`px-4 py-2 rounded-md text-sm font-medium transition-colors ${
+                activeLevel === level ? "bg-indigo-600 text-white " : "text-slate-600 hover:bg-slate-100"
               }`}
             >
               {level}
@@ -156,10 +156,10 @@ const ProgramPage: React.FC = () => {
                   <td className="p-3 text-sm text-slate-600">{p.duration}</td>
                   <td className="p-3 text-right">
                     <div className="flex justify-end gap-2">
-                      <button onClick={() => openEdit(p)} className="p-1.5 rounded-lg hover:bg-indigo-50 text-slate-500 hover:text-indigo-600 transition-colors">
+                      <button onClick={() => openEdit(p)} className="p-1.5 rounded-md hover:bg-indigo-50 text-slate-500 hover:text-indigo-600 transition-colors">
                         <Pencil className="w-4 h-4" />
                       </button>
-                      <button onClick={() => setDeleteId(p.id)} className="p-1.5 rounded-lg hover:bg-red-50 text-slate-500 hover:text-red-600 transition-colors">
+                      <button onClick={() => setDeleteId(p.id)} className="p-1.5 rounded-md hover:bg-red-50 text-slate-500 hover:text-red-600 transition-colors">
                         <Trash2 className="w-4 h-4" />
                       </button>
                     </div>
@@ -177,7 +177,7 @@ const ProgramPage: React.FC = () => {
       {/* Add / Edit Modal */}
       {showModal && (
         <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center backdrop-blur-sm">
-          <div className="bg-white w-full max-w-md rounded-xl shadow-2xl overflow-hidden m-4">
+          <div className="bg-white w-full max-w-md rounded-md shadow-2xl overflow-hidden m-4">
             <div className="p-4 border-b bg-slate-50 flex justify-between items-center">
               <h3 className="text-base font-bold text-slate-800">{editId ? "Edit Program" : "Add New Program"}</h3>
               <button onClick={() => setShowModal(false)} className="text-slate-400 hover:text-slate-700"><X className="w-5 h-5" /></button>
@@ -189,30 +189,30 @@ const ProgramPage: React.FC = () => {
                   value={form.name}
                   onChange={e => setForm(f => ({ ...f, name: e.target.value }))}
                   placeholder="e.g. BSc CSIT"
-                  className="w-full border border-slate-200 rounded-lg p-2.5 text-sm focus:ring-2 focus:ring-indigo-500 outline-none"
+                  className="w-full border border-slate-200 rounded-md p-2.5 text-sm focus:ring-2 focus:ring-indigo-500 outline-none"
                 />
               </div>
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm font-medium text-slate-700 mb-1">Academic Level</label>
-                  <select value={form.level} onChange={e => setForm(f => ({ ...f, level: e.target.value as Program["level"] }))} className="w-full border border-slate-200 rounded-lg p-2.5 text-sm focus:ring-2 focus:ring-indigo-500 outline-none bg-white">
+                  <select value={form.level} onChange={e => setForm(f => ({ ...f, level: e.target.value as Program["level"] }))} className="w-full border border-slate-200 rounded-md p-2.5 text-sm focus:ring-2 focus:ring-indigo-500 outline-none bg-white">
                     {(["+2", "Bachelor", "Master", "Diploma", "Training"] as Program["level"][]).map(l => <option key={l} value={l}>{l}</option>)}
                   </select>
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-slate-700 mb-1">Duration</label>
-                  <input value={form.duration} onChange={e => setForm(f => ({ ...f, duration: e.target.value }))} placeholder="e.g. 4 Years" className="w-full border border-slate-200 rounded-lg p-2.5 text-sm focus:ring-2 focus:ring-indigo-500 outline-none" />
+                  <input value={form.duration} onChange={e => setForm(f => ({ ...f, duration: e.target.value }))} placeholder="e.g. 4 Years" className="w-full border border-slate-200 rounded-md p-2.5 text-sm focus:ring-2 focus:ring-indigo-500 outline-none" />
                 </div>
               </div>
               <div>
                 <label className="block text-sm font-medium text-slate-700 mb-1">Affiliation</label>
-                <select value={form.affiliation} onChange={e => setForm(f => ({ ...f, affiliation: e.target.value }))} className="w-full border border-slate-200 rounded-lg p-2.5 text-sm focus:ring-2 focus:ring-indigo-500 outline-none bg-white">
+                <select value={form.affiliation} onChange={e => setForm(f => ({ ...f, affiliation: e.target.value }))} className="w-full border border-slate-200 rounded-md p-2.5 text-sm focus:ring-2 focus:ring-indigo-500 outline-none bg-white">
                   {AFFILIATIONS.map(a => <option key={a} value={a}>{a}</option>)}
                 </select>
               </div>
               <div>
                 <label className="block text-sm font-medium text-slate-700 mb-1">Status</label>
-                <select value={form.status} onChange={e => setForm(f => ({ ...f, status: e.target.value as Status }))} className="w-full border border-slate-200 rounded-lg p-2.5 text-sm focus:ring-2 focus:ring-indigo-500 outline-none bg-white">
+                <select value={form.status} onChange={e => setForm(f => ({ ...f, status: e.target.value as Status }))} className="w-full border border-slate-200 rounded-md p-2.5 text-sm focus:ring-2 focus:ring-indigo-500 outline-none bg-white">
                   <option value="Active">Active</option>
                   <option value="Inactive">Inactive</option>
                   <option value="Pending">Pending</option>
@@ -220,8 +220,8 @@ const ProgramPage: React.FC = () => {
               </div>
             </div>
             <div className="flex gap-3 justify-end p-4 border-t bg-slate-50">
-              <button onClick={() => setShowModal(false)} className="px-4 py-2 border rounded-lg text-slate-600 hover:bg-slate-100 text-sm">Cancel</button>
-              <button onClick={handleSave} className="px-5 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg text-sm font-semibold transition-colors">
+              <button onClick={() => setShowModal(false)} className="px-4 py-2 border rounded-md text-slate-600 hover:bg-slate-100 text-sm">Cancel</button>
+              <button onClick={handleSave} className="px-5 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-md text-sm font-semibold transition-colors">
                 {editId ? "Save Changes" : "Add Program"}
               </button>
             </div>
@@ -232,7 +232,7 @@ const ProgramPage: React.FC = () => {
       {/* Delete Confirmation Modal */}
       {deleteId !== null && (
         <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center backdrop-blur-sm">
-          <div className="bg-white w-full max-w-sm rounded-xl shadow-2xl overflow-hidden m-4">
+          <div className="bg-white w-full max-w-sm rounded-md shadow-2xl overflow-hidden m-4">
             <div className="p-6 text-center space-y-4">
               <div className="w-14 h-14 bg-red-50 rounded-full flex items-center justify-center mx-auto">
                 <AlertTriangle className="w-7 h-7 text-red-500" />
@@ -240,8 +240,8 @@ const ProgramPage: React.FC = () => {
               <h3 className="text-lg font-bold text-slate-900">Delete Program?</h3>
               <p className="text-sm text-slate-500">This action cannot be undone. The program and all associated data will be permanently deleted.</p>
               <div className="flex gap-3 justify-center pt-2">
-                <button onClick={() => setDeleteId(null)} className="px-5 py-2 border rounded-lg text-slate-700 hover:bg-slate-50 text-sm font-medium">Cancel</button>
-                <button onClick={confirmDelete} className="px-5 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg text-sm font-semibold transition-colors">Delete</button>
+                <button onClick={() => setDeleteId(null)} className="px-5 py-2 border rounded-md text-slate-700 hover:bg-slate-50 text-sm font-medium">Cancel</button>
+                <button onClick={confirmDelete} className="px-5 py-2 bg-red-600 hover:bg-red-700 text-white rounded-md text-sm font-semibold transition-colors">Delete</button>
               </div>
             </div>
           </div>

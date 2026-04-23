@@ -162,12 +162,12 @@ const PostCard: React.FC<PostCardProps> = ({
   const isOwner = user?.id === userId;
 
   return (
-    <article className="bg-white p-8 rounded-[2rem] shadow-sm border border-slate-100 hover:shadow-xl transition-all duration-500 group animate-fadeInUp mb-6">
+    <article className="bg-white p-8 rounded-[2rem]  border border-slate-100 hover:shadow-xl transition-all duration-500 group animate-fadeInUp mb-6">
       <div className="flex items-center justify-between mb-6">
         <div className="flex items-center gap-4">
           <img
             src={avatar}
-            className="w-14 h-14 rounded-full bg-slate-50 border border-slate-100 shadow-sm"
+            className="w-14 h-14 rounded-full bg-slate-50 border border-slate-100 "
             alt="User"
           />
           <div>
@@ -218,18 +218,18 @@ const PostCard: React.FC<PostCardProps> = ({
               type="text"
               value={editTitle}
               onChange={(e) => setEditTitle(e.target.value)}
-              className="w-full bg-slate-50 py-3 px-6 rounded-xl text-xl font-bold border-2 border-slate-100 focus:border-blue-500 outline-none transition-all"
+              className="w-full bg-slate-50 py-3 px-6 rounded-md text-xl font-bold border-2 border-slate-100 focus:border-blue-500 outline-none transition-all"
             />
             <textarea
               value={editContent}
               onChange={(e) => setEditContent(e.target.value)}
-              className="w-full bg-slate-50 py-4 px-6 rounded-xl text-base font-medium border-2 border-slate-100 focus:border-blue-500 outline-none transition-all min-h-[150px] resize-none"
+              className="w-full bg-slate-50 py-4 px-6 rounded-md text-base font-medium border-2 border-slate-100 focus:border-blue-500 outline-none transition-all min-h-[150px] resize-none"
             />
             <div className="flex gap-4">
               <button
                 onClick={handleSaveEdit}
                 disabled={updateMutation.isPending}
-                className="bg-[#2563EB] text-white px-6 py-2 rounded-xl font-bold text-sm uppercase tracking-widest hover:bg-blue-700 transition-all disabled:opacity-50"
+                className="bg-[#2563EB] text-white px-6 py-2 rounded-md font-bold text-sm uppercase tracking-widest hover:bg-blue-700 transition-all disabled:opacity-50"
               >
                 {updateMutation.isPending ? "Saving..." : "Save Changes"}
               </button>
@@ -239,7 +239,7 @@ const PostCard: React.FC<PostCardProps> = ({
                   setEditTitle(title);
                   setEditContent(content);
                 }}
-                className="bg-slate-100 text-slate-600 px-6 py-2 rounded-xl font-bold text-sm uppercase tracking-widest hover:bg-slate-200 transition-all"
+                className="bg-slate-100 text-slate-600 px-6 py-2 rounded-md font-bold text-sm uppercase tracking-widest hover:bg-slate-200 transition-all"
               >
                 Cancel
               </button>
@@ -316,9 +316,9 @@ const PostCard: React.FC<PostCardProps> = ({
                   value={newComment}
                   onChange={(e) => setNewComment(e.target.value)}
                   placeholder="Shared your thoughts..." 
-                  className="w-full bg-slate-50 border border-slate-100 rounded-xl py-2.5 px-4 text-sm font-medium outline-none focus:border-blue-500 transition-all"
+                  className="w-full bg-slate-50 border border-slate-100 rounded-md py-2.5 px-4 text-sm font-medium outline-none focus:border-blue-500 transition-all"
                 />
-                <button type="submit" className="absolute right-2 top-1.5 text-blue-600 hover:bg-blue-50 p-1 rounded-lg transition-all">
+                <button type="submit" className="absolute right-2 top-1.5 text-blue-600 hover:bg-blue-50 p-1 rounded-md transition-all">
                   <i className="fa-solid fa-paper-plane"></i>
                 </button>
               </div>
@@ -328,7 +328,7 @@ const PostCard: React.FC<PostCardProps> = ({
               {isLoadingComments ? (
                 <div className="flex justify-center py-4"><div className="w-6 h-6 border-2 border-blue-600 border-t-transparent rounded-full animate-spin"></div></div>
               ) : comments?.comments?.map((comment: any) => (
-                <div key={comment.id} className="flex gap-4 p-4 rounded-2xl bg-slate-50/50 border border-slate-50">
+                <div key={comment.id} className="flex gap-4 p-4 rounded-md bg-slate-50/50 border border-slate-50">
                   <img src={`https://api.dicebear.com/7.x/notionists/svg?seed=${comment.user.first_name}`} className="w-8 h-8 rounded-full" alt={comment.user.first_name} />
                   <div>
                     <div className="flex items-center gap-2 mb-1">

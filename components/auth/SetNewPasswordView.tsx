@@ -53,7 +53,7 @@ const SetNewPasswordView: React.FC<SetNewPasswordViewProps> = ({
 
     setLoading(true);
     try {
-      await apiService.resetPassword(identifier, values.newPassword);
+      await apiService.resetPassword(identifier, "", values.newPassword);
       onSuccess();
     } catch (err: any) {
       setError(err.message || "Failed to reset password. Please try again.");
@@ -92,7 +92,7 @@ const SetNewPasswordView: React.FC<SetNewPasswordViewProps> = ({
       </p>
 
       {error && (
-        <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg">
+        <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-md">
           <p className="text-red-700 text-sm">{error}</p>
         </div>
       )}
@@ -110,7 +110,7 @@ const SetNewPasswordView: React.FC<SetNewPasswordViewProps> = ({
               placeholder="New Password"
               required
               disabled={loading}
-              className={`w-full pl-11 pr-11 py-2.5 border rounded-lg text-sm focus:ring-1 outline-none transition-colors placeholder:text-gray-400 disabled:bg-gray-50 ${getBorderClass("newPassword")} ${getFocusClasses("newPassword")}`}
+              className={`w-full pl-11 pr-11 py-2.5 border rounded-md text-sm focus:ring-1 outline-none transition-colors placeholder:text-gray-400 disabled:bg-gray-50 ${getBorderClass("newPassword")} ${getFocusClasses("newPassword")}`}
               value={values.newPassword}
               onChange={handleNewPasswordChange}
               onBlur={() => { touch("newPassword"); validateField("newPassword", values.newPassword, validators.password); }}
@@ -152,7 +152,7 @@ const SetNewPasswordView: React.FC<SetNewPasswordViewProps> = ({
               placeholder="Confirm Password"
               required
               disabled={loading}
-              className={`w-full pl-11 pr-11 py-2.5 border rounded-lg text-sm focus:ring-1 outline-none transition-colors placeholder:text-gray-400 disabled:bg-gray-50 ${getBorderClass("confirmPassword")} ${getFocusClasses("confirmPassword")}`}
+              className={`w-full pl-11 pr-11 py-2.5 border rounded-md text-sm focus:ring-1 outline-none transition-colors placeholder:text-gray-400 disabled:bg-gray-50 ${getBorderClass("confirmPassword")} ${getFocusClasses("confirmPassword")}`}
               value={values.confirmPassword}
               onChange={handleConfirmPasswordChange}
               onBlur={() => { touch("confirmPassword"); validateField("confirmPassword", values.confirmPassword, (v) => validators.confirmPassword(v, values.newPassword)); }}
@@ -182,7 +182,7 @@ const SetNewPasswordView: React.FC<SetNewPasswordViewProps> = ({
         <button
           type="submit"
           disabled={loading}
-          className="w-full bg-blue-600 hover:bg-blue-700 disabled:bg-blue-400 text-white font-medium rounded-lg py-2.5 transition-colors duration-200 mt-2 shadow-md shadow-blue-600/30 flex items-center justify-center gap-2"
+          className="w-full bg-blue-600 hover:bg-blue-700 disabled:bg-blue-400 text-white font-medium rounded-md py-2.5 transition-colors duration-200 mt-2  shadow-blue-600/30 flex items-center justify-center gap-2"
         >
           {loading ? (
             <svg className="w-5 h-5 animate-spin" fill="none" viewBox="0 0 24 24">

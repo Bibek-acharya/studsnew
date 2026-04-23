@@ -109,19 +109,19 @@ const CourseCarouselAd: React.FC = () => {
   };
 
   return (
-    <div className="bg-[#0000ff] rounded-2xl p-5" style={{ boxShadow: "0 10px 30px rgba(0, 0, 255, 0.2)" }}>
+    <div className="bg-[#0000ff] rounded-md p-5" style={{ boxShadow: "0 10px 30px rgba(0, 0, 255, 0.2)" }}>
       <div className="flex justify-between items-center mb-4 gap-3 flex-wrap">
         <h2 className="text-lg font-extrabold text-white tracking-tight">Courses within different colleges</h2>
         <div className="flex gap-2">
           <button
             onClick={() => scroll(-1)}
-            className="w-9 h-9 rounded-full bg-white text-[#0000ff] border-none cursor-pointer flex items-center justify-center shadow-md hover:bg-gray-50 hover:scale-105 transition-all"
+            className="w-9 h-9 rounded-full bg-white text-[#0000ff] border-none cursor-pointer flex items-center justify-center  hover:bg-gray-50 hover:scale-105 transition-all"
           >
             <ChevronLeft className="w-4 h-4" />
           </button>
           <button
             onClick={() => scroll(1)}
-            className="w-9 h-9 rounded-full bg-white text-[#0000ff] border-none cursor-pointer flex items-center justify-center shadow-md hover:bg-gray-50 hover:scale-105 transition-all"
+            className="w-9 h-9 rounded-full bg-white text-[#0000ff] border-none cursor-pointer flex items-center justify-center  hover:bg-gray-50 hover:scale-105 transition-all"
           >
             <ChevronRight className="w-4 h-4" />
           </button>
@@ -133,7 +133,7 @@ const CourseCarouselAd: React.FC = () => {
           {courses.map((course, idx) => (
             <div
               key={idx}
-              className="bg-white rounded-2xl p-4 min-w-[220px] max-w-[240px] flex-shrink-0 shadow-sm border border-gray-100 flex flex-col transition-transform hover:-translate-y-1"
+              className="bg-white rounded-md p-4 min-w-[220px] max-w-[240px] flex-shrink-0  border border-gray-100 flex flex-col transition-transform hover:-translate-y-1"
               style={{ scrollSnapAlign: "start" }}
             >
               <h3 className="text-[15px] font-bold text-slate-800 mb-1">{course.title}</h3>

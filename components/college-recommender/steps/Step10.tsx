@@ -94,7 +94,7 @@ export default function Step10({ step, stepImages, form, handleInputChange, step
         {step > 1 && (
           <button
             onClick={() => setStep(Math.max(1, step - 1))}
-            className='rounded-lg border border-[#cbd5e1] bg-white px-8 py-3.5 text-sm font-semibold text-[#475569] transition-all duration-300 hover:border-[#0f172a] hover:text-[#0f172a]'
+            className='rounded-md border border-[#cbd5e1] bg-white px-8 py-3.5 text-sm font-semibold text-[#475569] transition-all duration-300 hover:border-[#0f172a] hover:text-[#0f172a]'
           >
             Back
           </button>
@@ -102,7 +102,7 @@ export default function Step10({ step, stepImages, form, handleInputChange, step
         <button
           onClick={fetchRecommendations}
           disabled={!canContinue(step) || loading}
-          className={`rounded-lg px-8 py-3.5 text-sm font-bold text-white transition-all hover:bg-[#1d4ed8] ${
+          className={`rounded-md px-8 py-3.5 text-sm font-bold text-white transition-all hover:bg-[#1d4ed8] ${
             canContinue(step) && !loading
               ? 'bg-brand-blue cursor-pointer'
               : 'bg-slate-300 cursor-not-allowed'

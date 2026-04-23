@@ -1,36 +1,25 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { Star, MapPin, Award, MessageSquare, Bookmark, BadgeCheckIcon, Globe } from "lucide-react";
-
-interface College {
-  id: string | number;
-  name: string;
-  image_url: string;
-  rating?: string | number;
-  location?: string;
-  affiliation?: string;
-  description?: string;
-  type?: string;
-  website?: string;
-}
+import { College } from "@/services/api";
 
 interface FeaturedInstitutionsSectionProps {
   onNavigate: (view: string, data?: any) => void;
+  featuredColleges?: College[];
 }
 
-const FeaturedInstitutionsSection: React.FC<FeaturedInstitutionsSectionProps> = ({ onNavigate }) => {
-  const [featuredColleges, setFeaturedColleges] = useState<College[]>([]);
-  const [loading, setLoading] = useState(true);
+const FeaturedInstitutionsSection: React.FC<FeaturedInstitutionsSectionProps> = ({ onNavigate, featuredColleges = [] }) => {
   const [bookmarked, setBookmarked] = useState<Set<string | number>>(new Set());
 
-  useEffect(() => {
-    setFeaturedColleges([
+  const colleges = featuredColleges.length
+    ? featuredColleges
+    : [
       {
         id: 1,
         name: "KIST College & SS",
         image_url: "https://www.collegenp.com/uploads/2025/02/kist-college-building.jpg",
-        rating: "4.5",
+        rating: 4.5,
         type: "Private",
         location: "Kamalpokhari",
         description: "The Institute of Engineering (IOE) entrance exam is tough. Learn the strategies, tips, and tricks to crack the exam with our expert guidance and comprehensive study materials. Get personalized counselling and find the right program for your career goals.",
@@ -41,7 +30,7 @@ const FeaturedInstitutionsSection: React.FC<FeaturedInstitutionsSectionProps> = 
         id: 2,
         name: "Islington College",
         image_url: "https://kist-edu-np.s3.ap-south-1.amazonaws.com/uploads/album/value/e71ee13b2c733ac02f8709c49f3677c3d0f2d9d01766569944.jpg",
-        rating: "4.3",
+        rating: 4.3,
         type: "Private",
         location: "Kamalpokhari",
         description: "Leading IT and business education institution affiliated with London Metropolitan University. Offering internationally recognized programs with modern facilities and industry connections.",
@@ -52,7 +41,7 @@ const FeaturedInstitutionsSection: React.FC<FeaturedInstitutionsSectionProps> = 
         id: 3,
         name: "Kathmandu University",
         image_url: "https://www.collegenp.com/uploads/2025/02/kist-college-building.jpg",
-        rating: "4.7",
+        rating: 4.7,
         type: "Public",
         location: "Dhulikhel",
         description: "Premier autonomous university known for engineering, science, and management programs. Ranked among the top universities in Nepal with world-class research facilities.",
@@ -63,16 +52,14 @@ const FeaturedInstitutionsSection: React.FC<FeaturedInstitutionsSectionProps> = 
         id: 4,
         name: "NAMI College",
         image_url: "https://www.collegenp.com/uploads/2025/02/kist-college-building.jpg",
-        rating: "4.2",
+        rating: 4.2,
         type: "Private",
         location: "Lainchaur",
         description: "Specialized in healthcare and management education with hands-on clinical training. Partnered with leading hospitals for practical experience and job placement support.",
         affiliation: "Tribhuvan University, CTEVT",
         website: "https://nami.edu.np"
       }
-    ]);
-    setLoading(false);
-  }, []);
+    ];
 
   const toggleBookmark = (e: React.MouseEvent, id: string | number) => {
     e.stopPropagation();
@@ -83,8 +70,6 @@ const FeaturedInstitutionsSection: React.FC<FeaturedInstitutionsSectionProps> = 
       return next;
     });
   };
-
-  if (loading) return null;
 
   return (
     <section className="mt-4 sm:mt-8 md:mt-12 lg:mt-16 w-full">
@@ -99,7 +84,7 @@ const FeaturedInstitutionsSection: React.FC<FeaturedInstitutionsSectionProps> = 
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-5 md:gap-6">
-        {featuredColleges.map((college) => (
+        {colleges.map((college) => (
           <CollegeCard
             key={college.id}
             college={college}
@@ -124,11 +109,11 @@ const CollegeCard: React.FC<{
 
   return (
     <div
-      className="bg-white rounded-2xl p-4 border border-gray-100 flex flex-col h-full hover:border-blue-500/20 transition-all duration-300 cursor-pointer"
+      className="bg-white rounded-md p-4 border border-gray-100 flex flex-col h-full hover:border-blue-500/20 transition-all duration-300 cursor-pointer"
       onClick={() => onNavigate("collegeDetails", college)}
     >
-      <div className="w-full h-30 rounded-lg overflow-hidden mb-4 relative">
-        <div className="absolute top-3 left-3 bg-brand-blue text-white text-[10px] font-bold px-2 py-0.5 rounded uppercase tracking-wider z-10 shadow-sm">
+      <div className="w-full h-30 rounded-md overflow-hidden mb-4 relative">
+        <div className="absolute top-3 left-3 bg-brand-blue text-white text-[10px] font-bold px-2 py-0.5 rounded uppercase tracking-wider z-10 ">
           Featured
         </div>
         <img
@@ -188,36 +173,13 @@ const CollegeCard: React.FC<{
         </div>
       )}
 
-      <p className="text-[14px] text-gray-500 leading-relaxed pr-2 line-clamp-2">
-        {college.description || ""}
-      </p>
-
-      {hasLongDescription && (
-        <button
-          type="button"
-          className="w-fit text-[14px] font-semibold text-blue-600 hover:underline mb-4"
-          onClick={(e) => {
-            e.stopPropagation();
-            onNavigate("collegeDetails", college);
-          }}
-        >
-          Read more
-        </button>
-      )}
-
-      {!hasLongDescription && <div className="mb-4" />}
-
-      <div className="border-t border-dashed border-gray-200 mb-4" />
-
       <div className="flex flex-col gap-3 mt-auto">
-        <button
-          className="w-full bg-brand-blue hover:bg-blue-700 text-white font-medium text-[14px] py-2.5 px-4 rounded-lg transition-colors"
-          onClick={(e) => { e.stopPropagation(); onNavigate("bookCounselling", { collegeId: college.id }); }}
-        >
-          Get counselling
-        </button>
+     
 
         <div className="flex gap-2">
+          <button className="bg-brand-blue flex-1 flex items-center justify-center gap-1.5 border border-gray-200 hover:bg-brand-hover text-white font-medium py-2 px-2 rounded-md transition-colors text-[13px] cursor-pointer" onClick={(e) => { e.stopPropagation(); onNavigate("collegeDetails", college); }}>
+            View Detail
+          </button>
           <button
             className="flex-1 flex items-center justify-center gap-1.5 border border-gray-200 hover:bg-gray-50 text-slate-600 font-medium py-2 px-2 rounded-md transition-colors text-[13px]"
             onClick={(e) => { e.stopPropagation(); onNavigate("campusForum", { collegeId: college.id, collegeName: college.name }); }}
@@ -225,14 +187,6 @@ const CollegeCard: React.FC<{
             <MessageSquare className="w-4 h-4 text-gray-500" />
             Inquiry
           </button>
-
-          <button
-            className="flex-1 bg-[#EAB308] hover:bg-yellow-500 text-white font-semibold py-2 px-2 rounded-md transition-colors text-[13px]"
-            onClick={(e) => { e.stopPropagation(); onNavigate("compareColleges", { collegeName: college.name }); }}
-          >
-            Compare now
-          </button>
-
           <button
             className={`w-10 flex items-center justify-center border rounded-md transition-colors shrink-0 ${
               isBookmarked

@@ -26,10 +26,10 @@ const LandingPopups = () => {
       {showCommunity && (
         <div
           id="community-card"
-          className="fixed bottom-4 left-3 z-50 w-full max-w-75 rounded-lg bg-white border border-gray-200 transition-all duration-300 animate-[slideUpLeft_0.5s_cubic-bezier(0.16,1,0.3,1)_forwards] xs:max-w-80 sm:bottom-6 sm:left-4 sm:max-w-85 md:left-6"
+          className="fixed bottom-4 left-3 z-50 w-full max-w-75 rounded-md bg-white border border-gray-200 transition-all duration-300 animate-[slideUpLeft_0.5s_cubic-bezier(0.16,1,0.3,1)_forwards] xs:max-w-80 sm:bottom-6 sm:left-4 sm:max-w-85 md:left-6"
         >
           <div className="absolute -top-2.5 sm:-top-3 -left-1.5 sm:-left-2 z-20">
-            <span className="relative block overflow-hidden rounded-lg bg-[#2563EB] px-2.5 py-1 text-[11px] font-bold tracking-wider text-white shadow-sm xs:text-[12px] sm:px-3.5 sm:py-1.5 sm:text-[13px]">
+            <span className="relative block overflow-hidden rounded-md bg-[#2563EB] px-2.5 py-1 text-[11px] font-bold tracking-wider text-white  xs:text-[12px] sm:px-3.5 sm:py-1.5 sm:text-[13px]">
               Join the Community!
               <span className="absolute top-0 left-0 h-1/2 w-1/2 animate-[shimmer_2s_infinite] bg-white/40 blur-xl"></span>
             </span>

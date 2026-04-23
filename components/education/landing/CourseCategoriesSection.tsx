@@ -81,7 +81,7 @@ const CourseCategoriesSection: React.FC<CourseCategoriesSectionProps> = ({ onNav
           {courseCategories.map((course, idx) => (
             <div
               key={idx}
-              className="course-category-card flex-none w-70 xs:w-75 sm:w-80 bg-white rounded-xl snap-start group cursor-pointer border border-blue-500/20 hover:shadow-xs transition-all duration-300 p-3.5 sm:p-4"
+              className="course-category-card flex-none w-70 xs:w-75 sm:w-80 bg-white rounded-md snap-start group cursor-pointer border border-blue-500/20 hover:shadow-xs transition-all duration-300 p-3.5 sm:p-4"
               onClick={() => onNavigate("courseCategory", { category: course.title })}
             >
               <div className="flex justify-between items-start mb-1">
@@ -97,7 +97,7 @@ const CourseCategoriesSection: React.FC<CourseCategoriesSectionProps> = ({ onNav
                 {partnerLogos.map((logo, lIdx) => (
                   <div
                     key={lIdx}
-                    className="w-10 h-10 sm:w-11 sm:h-11 md:w-12 md:h-12 shrink-0 rounded-xl border border-gray-100 flex items-center justify-center p-1 sm:p-1.5 shadow-sm bg-white hover:border-gray-300 transition-colors"
+                    className="w-10 h-10 sm:w-11 sm:h-11 md:w-12 md:h-12 shrink-0 rounded-md border border-gray-100 flex items-center justify-center p-1 sm:p-1.5  bg-white hover:border-gray-300 transition-colors"
                   >
                     <img
                       src={logo}

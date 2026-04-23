@@ -6,7 +6,7 @@ import {
 } from "@/app/find-college/types";
 import { apiService } from "@/services/api";
 import GlobalFilterSection from "@/components/ui/GlobalFilterSection";
-import { FaSliders } from "react-icons/fa6";
+import { FaSliders, FaStar } from "react-icons/fa6";
 import {
   NEPAL_DISTRICTS,
   NEPAL_LOCAL_BODIES,
@@ -399,14 +399,14 @@ const SearchInput: React.FC<{
       value={value}
       onChange={(e) => onChange(e.target.value)}
       placeholder={placeholder}
-      className="block w-full rounded-lg border border-gray-200 bg-[#f8fafc] py-2 pl-9 pr-3 text-[13.5px] text-gray-900 outline-none transition placeholder:text-gray-400 focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+      className="block w-full rounded-md border border-gray-200 bg-[#f8fafc] py-2 pl-9 pr-3 text-[13.5px] text-gray-900 outline-none transition placeholder:text-gray-400 focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
     />
   </div>
 );
 
 const CheckboxItem: React.FC<{
   id: string;
-  label: string;
+  label: React.ReactNode;
   count?: number;
   checked: boolean;
   onChange: () => void;
@@ -535,7 +535,7 @@ const FilterSidebar: React.FC<FilterSidebarProps> = ({
     return progs.filter((p) =>
       p.label.toLowerCase().includes(programSearch.toLowerCase()),
     );
-  }, [filters.academic, programSearch, collegeFilterCounts]);
+  }, [filters.academic, programSearch, getFacetCount]);
 
   const availableCourses = useMemo(() => {
     const showCourse = filters.academic.some((a) =>
@@ -549,7 +549,7 @@ const FilterSidebar: React.FC<FilterSidebarProps> = ({
     return courses.filter((c) =>
       c.label.toLowerCase().includes(courseSearch.toLowerCase()),
     );
-  }, [filters.academic, filters.program, courseSearch, collegeFilterCounts]);
+  }, [filters.academic, filters.program, courseSearch, getFacetCount]);
 
   const showCourseSection = filters.academic.some((a) =>
     ["diploma"].includes(a),
@@ -726,7 +726,7 @@ const FilterSidebar: React.FC<FilterSidebarProps> = ({
   const academicLevelsWithCounts = useMemo(
 
     () => ACADEMIC_LEVELS.map((item) => ({ ...item, count: getFacetCount(item.id) })),
-    [collegeFilterCounts],
+    [getFacetCount],
   );
 
   const collegeTypesWithCounts = useMemo(
@@ -747,7 +747,7 @@ const FilterSidebar: React.FC<FilterSidebarProps> = ({
         label: duration,
         count: getFacetCount(duration),
       })),
-    [collegeFilterCounts],
+    [getFacetCount],
   );
 
   return (
@@ -777,7 +777,7 @@ const FilterSidebar: React.FC<FilterSidebarProps> = ({
         </div>
 
         {hasActiveFilters && showAppliedDropdown && (
-          <div className="absolute right-6 top-16 z-30 w-[min(520px,calc(100%-3rem))] rounded-lg border border-gray-200 bg-white p-3 shadow-lg">
+          <div className="absolute right-6 top-16 z-30 w-[min(520px,calc(100%-3rem))] rounded-md border border-gray-200 bg-white p-3 shadow-lg">
             {appliedFilters.length === 0 && !isFeeApplied ? (
               <p className="px-1 py-2 text-[13px] italic text-gray-400">
                 No filters selected yet.
@@ -1125,25 +1125,25 @@ const FilterSidebar: React.FC<FilterSidebarProps> = ({
           <div className="flex flex-col gap-3.5 pt-1">
             <CheckboxItem
               id="rating-4.5"
-              label="⭐ 4.5 & above (Top Rated)"
+              label={<><FaStar className="inline text-yellow-500" /> 4.5 & above (Top Rated)</>}
               checked={filters.rating?.includes("4.5")}
               onChange={() => toggle("rating", "4.5")}
             />
             <CheckboxItem
               id="rating-4.0"
-              label="⭐ 4.0 & above"
+              label={<><FaStar className="inline text-yellow-500" /> 4.0 & above</>}
               checked={filters.rating?.includes("4.0")}
               onChange={() => toggle("rating", "4.0")}
             />
             <CheckboxItem
               id="rating-3.5"
-              label="⭐ 3.5 & above"
+              label={<><FaStar className="inline text-yellow-500" /> 3.5 & above</>}
               checked={filters.rating?.includes("3.5")}
               onChange={() => toggle("rating", "3.5")}
             />
             <CheckboxItem
               id="rating-3.0"
-              label="⭐ 3.0 & above"
+              label={<><FaStar className="inline text-yellow-500" /> 3.0 & above</>}
               checked={filters.rating?.includes("3.0")}
               onChange={() => toggle("rating", "3.0")}
             />

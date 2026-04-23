@@ -104,6 +104,8 @@ export async function fetchPublicBlogs(params: {
   limit?: number;
   category?: string;
   search?: string;
+  sort?: "newest" | "oldest" | "popular" | "title";
+  tags?: string;
 } = {}): Promise<{ blogs: BlogEntry[]; meta: BlogMeta }> {
   try {
     const query = new URLSearchParams();
@@ -155,6 +157,7 @@ export async function fetchAdminBlogs(params: {
   limit?: number;
   category?: string;
   search?: string;
+  sort?: "newest" | "oldest" | "popular" | "title";
 } = {}): Promise<{ blogs: BlogEntry[]; meta: BlogMeta }> {
   try {
     const query = new URLSearchParams();

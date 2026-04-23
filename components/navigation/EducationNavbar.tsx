@@ -42,7 +42,6 @@ import {
   ViewKey,
 } from "./types";
 import Image from "next/image";
-import AuthModal from "@/components/auth/AuthModal";
 
 const EducationNavbar: React.FC<EducationNavbarProps> = ({
   onNavigate,
@@ -54,10 +53,6 @@ const EducationNavbar: React.FC<EducationNavbarProps> = ({
   const [activeMenu, setActiveMenu] = useState<string | null>(null);
   const [isVisible, setIsVisible] = useState(true);
   const [showMobileSearch, setShowMobileSearch] = useState(false);
-  const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
-  const [initialAuthView, setInitialAuthView] = useState<"login" | "signup">(
-    "login",
-  );
   const lastScrollY = useRef(0);
   const router = useRouter();
   const pathname = usePathname();
@@ -156,7 +151,7 @@ const EducationNavbar: React.FC<EducationNavbarProps> = ({
   }, []);
 
   useEffect(() => {
-    if (isMobileOpen || showMobileSearch || isAuthModalOpen) {
+    if (isMobileOpen || showMobileSearch) {
       document.body.style.overflow = "hidden";
     } else {
       document.body.style.overflow = "";
@@ -164,25 +159,17 @@ const EducationNavbar: React.FC<EducationNavbarProps> = ({
     return () => {
       document.body.style.overflow = "";
     };
-  }, [isAuthModalOpen, isMobileOpen, showMobileSearch]);
+  }, [isMobileOpen, showMobileSearch]);
 
   useEffect(() => {
-    const handleOpenAuthModal = (event: Event) => {
-      const customEvent = event as CustomEvent<{ view?: "login" | "signup" }>;
-      setInitialAuthView(customEvent.detail?.view ?? "login");
-      setIsAuthModalOpen(true);
-      setIsMobileOpen(false);
-      setActiveMenu(null);
-      setShowMobileSearch(false);
+    const handleOpenAuthModal = () => {
+      router.push("/login");
     };
 
     window.addEventListener("studsphere:open-auth-modal", handleOpenAuthModal);
     return () =>
-      window.removeEventListener(
-        "studsphere:open-auth-modal",
-        handleOpenAuthModal,
-      );
-  }, []);
+      window.removeEventListener("studsphere:open-auth-modal", handleOpenAuthModal);
+  }, [router]);
 
   const initials = useMemo(() => {
     if (!user) return "SS";
@@ -198,9 +185,15 @@ const EducationNavbar: React.FC<EducationNavbarProps> = ({
   }, [user]);
 
   const go = (viewKey: ViewKey, data?: { level?: string }) => {
-    if (viewKey === "login" || viewKey === "signup") {
-      setInitialAuthView(viewKey === "signup" ? "signup" : "login");
-      setIsAuthModalOpen(true);
+    if (viewKey === "login") {
+      router.push("/login");
+      setIsMobileOpen(false);
+      setActiveMenu(null);
+      setShowMobileSearch(false);
+      return;
+    }
+    if (viewKey === "signup") {
+      router.push("/register");
       setIsMobileOpen(false);
       setActiveMenu(null);
       setShowMobileSearch(false);
@@ -228,7 +221,7 @@ const EducationNavbar: React.FC<EducationNavbarProps> = ({
           isDisabled ? undefined : () => go(item.viewKey as ViewKey, item.data)
         }
         disabled={isDisabled}
-        className={`flex items-center gap-3 rounded-lg p-2 text-[14px] transition-colors ${
+        className={`flex items-center gap-3 rounded-md p-2 text-[14px] transition-colors ${
           isDisabled
             ? "cursor-not-allowed text-gray-400"
             : "text-gray-600 hover:bg-gray-50 hover:text-blue-600"
@@ -323,7 +316,7 @@ const EducationNavbar: React.FC<EducationNavbarProps> = ({
       <header
         className={`fixed left-0 top-0 z-110 w-full bg-white transition-transform duration-300 ${
           isVisible ? "translate-y-0" : "-translate-y-full"
-        } ${isScrolled ? "shadow-sm" : ""}`}
+        } ${isScrolled ? "" : ""}`}
       >
         <div className="w-full px-3 xs:px-4 sm:px-6 lg:px-8">
           <div className="mx-auto flex w-full max-w-350 items-center justify-between gap-1.5 xs:gap-2 sm:gap-4 py-2.5 sm:py-3">
@@ -383,7 +376,7 @@ const EducationNavbar: React.FC<EducationNavbarProps> = ({
                   >
                     <Bell size={18} />
                     {unreadNotificationCount > 0 && (
-                      <span className="absolute -top-1.5 -right-1.5 flex h-5 w-5 items-center justify-center rounded-full border-2 border-white bg-[#f44336] text-[11px] font-bold text-white shadow-sm">
+                      <span className="absolute -top-1.5 -right-1.5 flex h-5 w-5 items-center justify-center rounded-full border-2 border-white bg-[#f44336] text-[11px] font-bold text-white ">
                         {unreadNotificationCount}
                       </span>
                     )}
@@ -392,14 +385,14 @@ const EducationNavbar: React.FC<EducationNavbarProps> = ({
                   {activeMenu === "notification-menu" && (
                     <div className="absolute top-full right-0 z-200 mt-2 cursor-default font-inter sm:-right-2">
                       <div className="absolute -top-1.5 right-6 z-30 h-3 w-3 rotate-45 border-l border-t border-gray-200 bg-white"></div>
-                      <div className="relative z-20 flex w-[320px] flex-col overflow-hidden rounded-2xl border border-gray-200 bg-white text-left shadow-[0_8px_30px_rgb(0,0,0,0.12)] sm:w-95">
+                      <div className="relative z-20 flex w-[320px] flex-col overflow-hidden rounded-md border border-gray-200 bg-white text-left shadow-[0_8px_30px_rgb(0,0,0,0.12)] sm:w-95">
                         <div className="z-10 flex items-center justify-between border-b border-gray-100 bg-white px-4 py-3">
                           <div className="flex items-center gap-2">
                             <h3 className="text-lg font-semibold text-gray-900">
                               Notifications
                             </h3>
                             {unreadNotificationCount > 0 && (
-                              <span className="rounded-full bg-blue-600 px-2 py-0.5 text-xs font-bold text-white shadow-sm">
+                              <span className="rounded-full bg-blue-600 px-2 py-0.5 text-xs font-bold text-white ">
                                 {unreadNotificationCount}
                               </span>
                             )}
@@ -483,7 +476,7 @@ const EducationNavbar: React.FC<EducationNavbarProps> = ({
                           ))}
                         </div>
                         <div className="border-t border-gray-100 bg-gray-50/50 p-3">
-                          <button className="w-full rounded-lg py-2 text-center text-sm font-medium text-gray-600 transition-colors hover:text-blue-600">
+                          <button className="w-full rounded-md py-2 text-center text-sm font-medium text-gray-600 transition-colors hover:text-blue-600">
                             View all activity
                           </button>
                         </div>
@@ -497,7 +490,7 @@ const EducationNavbar: React.FC<EducationNavbarProps> = ({
               <div className="hidden lg:block w-px h-8 bg-gray-200"></div>
               <div className="hidden sm:flex items-center gap-3 cursor-pointer group relative py-1">
                 {!user ? (
-                  <div className="flex items-center overflow-hidden rounded-md text-[13px] font-medium shadow-sm">
+                  <div className="flex items-center overflow-hidden rounded-md text-[13px] font-medium">
                     <button
                       onClick={() => go("login")}
                       className="border-r border-gray-200 bg-gray-100 px-3 py-2 text-[#334155] transition-colors hover:bg-gray-200"
@@ -522,7 +515,7 @@ const EducationNavbar: React.FC<EducationNavbarProps> = ({
                       className="flex items-center gap-3"
                     >
                       <div className="relative">
-                        <div className="flex h-9 w-9 items-center justify-center rounded-full bg-brand-blue text-white font-bold text-sm shadow-sm ring-2 ring-white">
+                        <div className="flex h-9 w-9 items-center justify-center rounded-full bg-brand-blue text-white font-bold text-sm  ring-2 ring-white">
                           <span>{initials}</span>
                         </div>
                         <div className="absolute bottom-0 right-0 w-2.5 h-2.5 bg-green-500 border-2 border-white rounded-full"></div>
@@ -557,10 +550,10 @@ const EducationNavbar: React.FC<EducationNavbarProps> = ({
                       <div className="menu-anchor absolute top-full right-0 pt-3 z-200 cursor-default font-inter">
                         <div className="w-67.5 bg-white rounded-[18px] border border-gray-100/80 p-2.5 text-[14px] text-gray-600 font-medium select-none shadow-[0_8px_30px_rgb(0,0,0,0.08)] relative">
                           <div className="absolute -top-1.5 right-6 w-3 h-3 bg-white border-t border-l border-gray-100/80 transform rotate-45"></div>
-                          <div className="flex flex-col relative z-10 bg-white rounded-xl">
+                          <div className="flex flex-col relative z-10 bg-white rounded-md">
                             <div
                               onClick={() => go("userDashboard")}
-                              className="flex flex-col px-3 py-3 bg-[#f4f4f5] rounded-xl cursor-pointer mb-1 hover:bg-blue-50 transition-all"
+                              className="flex flex-col px-3 py-3 bg-[#f4f4f5] rounded-md cursor-pointer mb-1 hover:bg-blue-50 transition-all"
                             >
                               <div className="flex items-center gap-3 text-gray-900">
                                 <User size={18} />
@@ -578,7 +571,7 @@ const EducationNavbar: React.FC<EducationNavbarProps> = ({
                             </div>
                             <button
                               onClick={() => go("userDashboard")}
-                              className="flex items-center gap-3 px-3 py-2.5 hover:bg-blue-50 rounded-xl transition-all font-semibold"
+                              className="flex items-center gap-3 px-3 py-2.5 hover:bg-blue-50 rounded-md transition-all font-semibold"
                             >
                               <FileText size={18} />
                               <span>My Application</span>
@@ -586,7 +579,7 @@ const EducationNavbar: React.FC<EducationNavbarProps> = ({
                             </button>
                             <button
                               onClick={() => go("userDashboard")}
-                              className="flex items-center gap-3 px-3 py-2.5 hover:bg-blue-50 rounded-xl transition-all font-semibold"
+                              className="flex items-center gap-3 px-3 py-2.5 hover:bg-blue-50 rounded-md transition-all font-semibold"
                             >
                               <Bookmark size={18} />
                               <span>Saved College</span>
@@ -594,21 +587,21 @@ const EducationNavbar: React.FC<EducationNavbarProps> = ({
                             </button>
                             <button
                               onClick={() => go("userDashboard")}
-                              className="flex items-center gap-3 px-3 py-2.5 hover:bg-blue-50 rounded-xl transition-all font-semibold"
+                              className="flex items-center gap-3 px-3 py-2.5 hover:bg-blue-50 rounded-md transition-all font-semibold"
                             >
                               <Sparkles size={18} />
                               <span>Match</span>
                               <span className="ml-auto bg-[#5468FF]/10 text-[#5468FF] text-[11px] font-bold px-2 py-0.5 rounded-full">3</span>
                             </button>
                             <button
-                              className="flex items-center gap-3 px-3 py-2.5 hover:bg-blue-50 rounded-xl transition-all font-semibold"
+                              className="flex items-center gap-3 px-3 py-2.5 hover:bg-blue-50 rounded-md transition-all font-semibold"
                             >
                               <Bell size={18} />
                               <span>Notifications</span>
                               <span className="ml-auto bg-red-500 text-white text-[10px] font-bold px-1.5 py-[1.5px] rounded-full leading-none">2</span>
                             </button>
                             <button
-                              className="flex items-center gap-3 px-3 py-2.5 hover:bg-blue-50 rounded-xl transition-all font-semibold"
+                              className="flex items-center gap-3 px-3 py-2.5 hover:bg-blue-50 rounded-md transition-all font-semibold"
                             >
                               <Settings size={18} />
                               <span>Settings</span>
@@ -616,7 +609,7 @@ const EducationNavbar: React.FC<EducationNavbarProps> = ({
                             <div className="h-px bg-gray-100 my-1.5 mx-2"></div>
                             <button
                               onClick={() => go("contact")}
-                              className="flex items-center gap-3 px-3 py-2.5 hover:bg-blue-50 rounded-xl transition-all font-semibold"
+                              className="flex items-center gap-3 px-3 py-2.5 hover:bg-blue-50 rounded-md transition-all font-semibold"
                             >
                               <MessageCircleQuestion size={18} />
                               <span>Help Center</span>
@@ -627,7 +620,7 @@ const EducationNavbar: React.FC<EducationNavbarProps> = ({
                                 e.stopPropagation();
                                 onLogout?.();
                               }}
-                              className="flex items-center gap-3 px-3 py-2.5 hover:bg-red-50 text-red-500 rounded-xl transition-all w-full text-left"
+                              className="flex items-center gap-3 px-3 py-2.5 hover:bg-red-50 text-red-500 rounded-md transition-all w-full text-left"
                             >
                               <LogOut size={18} className="scale-x-[-1]" />
                               <span>Log Out</span>
@@ -824,7 +817,7 @@ const EducationNavbar: React.FC<EducationNavbarProps> = ({
             onClick={() => setShowMobileSearch(false)}
           >
             <div
-              className="mx-4 mt-20 rounded-2xl border border-gray-200 bg-white p-3 shadow-xl"
+              className="mx-4 mt-20 rounded-md border border-gray-200 bg-white p-3 shadow-xl"
               onClick={(e) => e.stopPropagation()}
             >
               <SearchBar isMobile />
@@ -854,13 +847,13 @@ const EducationNavbar: React.FC<EducationNavbarProps> = ({
               <div className="grid grid-cols-2 gap-3 mb-5">
                 <button
                   onClick={() => go("login")}
-                  className="flex items-center justify-center gap-2 rounded-xl border border-gray-200 bg-white py-3 text-sm font-semibold text-gray-700 transition-all active:scale-[0.98]"
+                  className="flex items-center justify-center gap-2 rounded-md border border-gray-200 bg-white py-3 text-sm font-semibold text-gray-700 transition-all active:scale-[0.98]"
                 >
                   <User size={16} /> <span>Log in</span>
                 </button>
                 <button
                   onClick={() => go("signup")}
-                  className="flex items-center justify-center gap-2 rounded-xl bg-blue-600 py-3 text-sm font-semibold text-white transition-all active:scale-[0.98]"
+                  className="flex items-center justify-center gap-2 rounded-md bg-blue-600 py-3 text-sm font-semibold text-white transition-all active:scale-[0.98]"
                 >
                   <span>Join Now</span>
                 </button>
@@ -868,7 +861,7 @@ const EducationNavbar: React.FC<EducationNavbarProps> = ({
             ) : (
               <>
                 <div
-                  className="flex items-center justify-between mb-5 p-3 rounded-lg border border-gray-200 bg-gray-50 cursor-pointer"
+                  className="flex items-center justify-between mb-5 p-3 rounded-md border border-gray-200 bg-gray-50 cursor-pointer"
                   onClick={() => toggleMobileMenu("profile")}
                 >
                   <div className="flex items-center gap-3">
@@ -909,10 +902,10 @@ const EducationNavbar: React.FC<EducationNavbarProps> = ({
                 <div
                   className={`${mobileMenus["profile"] ? "flex" : "hidden"} flex-col mb-5 -mt-3`}
                 >
-                  <div className="w-full bg-white rounded-[18px] border border-gray-100/80 p-2.5 text-[14px] text-gray-600 font-medium select-none shadow-sm">
+                  <div className="w-full bg-white rounded-[18px] border border-gray-100/80 p-2.5 text-[14px] text-gray-600 font-medium select-none ">
                     <div
                       onClick={() => go("userDashboard")}
-                      className="flex flex-col px-3 py-3 bg-[#f4f4f5] rounded-xl cursor-pointer mb-1 hover:bg-blue-50 transition-all duration-200"
+                      className="flex flex-col px-3 py-3 bg-[#f4f4f5] rounded-md cursor-pointer mb-1 hover:bg-blue-50 transition-all duration-200"
                     >
                       <div className="flex items-center gap-3 text-gray-900">
                         <User size={18} className="text-gray-500" />
@@ -931,7 +924,7 @@ const EducationNavbar: React.FC<EducationNavbarProps> = ({
 
 <div
                       onClick={() => go("userDashboard")}
-                      className="flex items-center gap-3 px-3 py-2.5 hover:bg-blue-50 rounded-xl cursor-pointer mb-0.5 transition-all"
+                      className="flex items-center gap-3 px-3 py-2.5 hover:bg-blue-50 rounded-md cursor-pointer mb-0.5 transition-all"
                     >
                       <FileText size={18} className="text-gray-500" />
                       <span>My Application</span>
@@ -940,7 +933,7 @@ const EducationNavbar: React.FC<EducationNavbarProps> = ({
 
                     <div
                       onClick={() => go("userDashboard")}
-                      className="flex items-center gap-3 px-3 py-2.5 hover:bg-blue-50 rounded-xl cursor-pointer mb-0.5 transition-all"
+                      className="flex items-center gap-3 px-3 py-2.5 hover:bg-blue-50 rounded-md cursor-pointer mb-0.5 transition-all"
                     >
                       <Bookmark size={18} className="text-gray-500" />
                       <span>Saved College</span>
@@ -951,7 +944,7 @@ const EducationNavbar: React.FC<EducationNavbarProps> = ({
 
                     <div
                       onClick={() => go("userDashboard")}
-                      className="flex items-center gap-3 px-3 py-2.5 hover:bg-blue-50 rounded-xl cursor-pointer mb-0.5 transition-all"
+                      className="flex items-center gap-3 px-3 py-2.5 hover:bg-blue-50 rounded-md cursor-pointer mb-0.5 transition-all"
                     >
                       <Sparkles size={18} className="text-gray-500" />
                       <span>Match</span>
@@ -963,7 +956,7 @@ const EducationNavbar: React.FC<EducationNavbarProps> = ({
                     <div className="h-px bg-gray-100 my-1.5 mx-2"></div>
 
                     <div
-                      className="flex items-center gap-3 px-3 py-2.5 hover:bg-blue-50 rounded-xl cursor-pointer mb-0.5 transition-all"
+                      className="flex items-center gap-3 px-3 py-2.5 hover:bg-blue-50 rounded-md cursor-pointer mb-0.5 transition-all"
                     >
                       <Bell size={18} className="text-gray-500" />
                       <span>Notifications</span>
@@ -974,7 +967,7 @@ const EducationNavbar: React.FC<EducationNavbarProps> = ({
 
                     <div
                       onClick={() => go("userDashboard")}
-                      className="flex items-center gap-3 px-3 py-2.5 hover:bg-gray-50 rounded-xl cursor-pointer mb-0.5 transition-all"
+                      className="flex items-center gap-3 px-3 py-2.5 hover:bg-gray-50 rounded-md cursor-pointer mb-0.5 transition-all"
                     >
                       <Bookmark size={18} className="text-gray-500" />
                       <span>Saved College</span>
@@ -985,7 +978,7 @@ const EducationNavbar: React.FC<EducationNavbarProps> = ({
 
                     <div
                       onClick={() => go("userDashboard")}
-                      className="flex items-center gap-3 px-3 py-2.5 hover:bg-gray-50 rounded-xl cursor-pointer mb-0.5 transition-all"
+                      className="flex items-center gap-3 px-3 py-2.5 hover:bg-gray-50 rounded-md cursor-pointer mb-0.5 transition-all"
                     >
                       <Sparkles size={18} className="text-gray-500" />
                       <span>Match</span>
@@ -998,7 +991,7 @@ const EducationNavbar: React.FC<EducationNavbarProps> = ({
 
                     <div
                       onClick={() => go("userDashboard")}
-                      className="flex items-center gap-3 px-3 py-2.5 hover:bg-gray-50 rounded-xl cursor-pointer mb-0.5 transition-all"
+                      className="flex items-center gap-3 px-3 py-2.5 hover:bg-gray-50 rounded-md cursor-pointer mb-0.5 transition-all"
                     >
                       <Bell size={18} className="text-gray-500" />
                       <span>Notifications</span>
@@ -1009,7 +1002,7 @@ const EducationNavbar: React.FC<EducationNavbarProps> = ({
 
                     <div
                       onClick={() => go("userDashboard")}
-                      className="flex items-center gap-3 px-3 py-2.5 hover:bg-gray-50 rounded-xl cursor-pointer transition-all"
+                      className="flex items-center gap-3 px-3 py-2.5 hover:bg-gray-50 rounded-md cursor-pointer transition-all"
                     >
                       <Settings size={18} className="text-gray-500" />
                       <span>Settings</span>
@@ -1019,7 +1012,7 @@ const EducationNavbar: React.FC<EducationNavbarProps> = ({
 
                     <div
                       onClick={() => go("contact")}
-                      className="flex items-center gap-3 px-3 py-2.5 hover:bg-gray-50 rounded-xl cursor-pointer transition-all"
+                      className="flex items-center gap-3 px-3 py-2.5 hover:bg-gray-50 rounded-md cursor-pointer transition-all"
                     >
                       <MessageCircleQuestion
                         size={18}
@@ -1033,7 +1026,7 @@ const EducationNavbar: React.FC<EducationNavbarProps> = ({
                         e.stopPropagation?.();
                         onLogout?.();
                       }}
-                      className="flex items-center gap-3 px-3 py-2.5 hover:bg-red-50 rounded-xl cursor-pointer mt-1 text-[#FF6B6B] transition-all"
+                      className="flex items-center gap-3 px-3 py-2.5 hover:bg-red-50 rounded-md cursor-pointer mt-1 text-[#FF6B6B] transition-all"
                     >
                       <LogOut size={18} className="scale-x-[-1]" />
                       <span className="font-bold">Log Out</span>
@@ -1048,7 +1041,7 @@ const EducationNavbar: React.FC<EducationNavbarProps> = ({
           <div className="flex flex-col gap-1 text-[15px] text-gray-700 font-semibold pb-4">
             <button
               onClick={() => go("findCollege")}
-              className="flex w-full items-center justify-between rounded-lg p-2 text-left transition-colors hover:bg-gray-50 hover:text-blue-600"
+              className="flex w-full items-center justify-between rounded-md p-2 text-left transition-colors hover:bg-gray-50 hover:text-blue-600"
             >
               <span>Find College</span>
             </button>
@@ -1056,7 +1049,7 @@ const EducationNavbar: React.FC<EducationNavbarProps> = ({
             {mobileToolsSection && (
               <div>
                 <button
-                  className={`flex w-full items-center justify-between rounded-lg p-2 text-left transition-colors hover:bg-gray-50 hover:text-blue-600 ${mobileMenus[mobileToolsSection.key] ? "text-blue-600" : ""}`}
+                  className={`flex w-full items-center justify-between rounded-md p-2 text-left transition-colors hover:bg-gray-50 hover:text-blue-600 ${mobileMenus[mobileToolsSection.key] ? "text-blue-600" : ""}`}
                   onClick={() => toggleMobileMenu(mobileToolsSection.key)}
                 >
                   <span>{mobileToolsSection.label}</span>
@@ -1076,7 +1069,7 @@ const EducationNavbar: React.FC<EducationNavbarProps> = ({
             {mobileScholarshipsSection && (
               <div>
                 <button
-                  className={`flex w-full items-center justify-between rounded-lg p-2 text-left transition-colors hover:bg-gray-50 hover:text-blue-600 ${mobileMenus[mobileScholarshipsSection.key] ? "text-blue-600" : ""}`}
+                  className={`flex w-full items-center justify-between rounded-md p-2 text-left transition-colors hover:bg-gray-50 hover:text-blue-600 ${mobileMenus[mobileScholarshipsSection.key] ? "text-blue-600" : ""}`}
                   onClick={() =>
                     toggleMobileMenu(mobileScholarshipsSection.key)
                   }
@@ -1097,7 +1090,7 @@ const EducationNavbar: React.FC<EducationNavbarProps> = ({
 
             <button
               onClick={() => go("campusForum")}
-              className="flex w-full items-center justify-between rounded-lg p-2 text-left transition-colors hover:bg-gray-50 hover:text-blue-600"
+              className="flex w-full items-center justify-between rounded-md p-2 text-left transition-colors hover:bg-gray-50 hover:text-blue-600"
             >
               <span>Campus Feed</span>
               <span className="bg-blue-600 text-white text-[10px] leading-none px-1.5 py-1 rounded font-bold tracking-wide">
@@ -1108,7 +1101,7 @@ const EducationNavbar: React.FC<EducationNavbarProps> = ({
             {mobileAdmissionSection && (
               <div key={mobileAdmissionSection.key}>
                 <button
-                  className={`flex w-full items-center justify-between rounded-lg p-2 text-left transition-colors hover:bg-gray-50 hover:text-blue-600 ${mobileMenus[mobileAdmissionSection.key] ? "text-blue-600" : ""}`}
+                  className={`flex w-full items-center justify-between rounded-md p-2 text-left transition-colors hover:bg-gray-50 hover:text-blue-600 ${mobileMenus[mobileAdmissionSection.key] ? "text-blue-600" : ""}`}
                   onClick={() => toggleMobileMenu(mobileAdmissionSection.key)}
                 >
                   <span>{mobileAdmissionSection.label}</span>
@@ -1127,7 +1120,7 @@ const EducationNavbar: React.FC<EducationNavbarProps> = ({
 
             <button
               onClick={() => go("entranceDiscovery")}
-              className="flex w-full items-center justify-between rounded-lg p-2 text-left transition-colors hover:bg-gray-50 hover:text-blue-600"
+              className="flex w-full items-center justify-between rounded-md p-2 text-left transition-colors hover:bg-gray-50 hover:text-blue-600"
             >
               <span>Entrance</span>
             </button>
@@ -1135,7 +1128,7 @@ const EducationNavbar: React.FC<EducationNavbarProps> = ({
             {mobileMoreSection && (
               <div>
                 <button
-                  className={`flex w-full items-center justify-between rounded-lg p-2 text-left transition-colors hover:bg-gray-50 hover:text-blue-600 ${mobileMenus[mobileMoreSection.key] ? "text-blue-600" : ""}`}
+                  className={`flex w-full items-center justify-between rounded-md p-2 text-left transition-colors hover:bg-gray-50 hover:text-blue-600 ${mobileMenus[mobileMoreSection.key] ? "text-blue-600" : ""}`}
                   onClick={() => toggleMobileMenu(mobileMoreSection.key)}
                 >
                   <span>{mobileMoreSection.label}</span>
@@ -1155,7 +1148,7 @@ const EducationNavbar: React.FC<EducationNavbarProps> = ({
             {user && (
               <div>
                 <button
-                  className={`flex w-full items-center justify-between rounded-lg p-2 text-left transition-colors hover:bg-gray-50 hover:text-blue-600 ${mobileMenus["partners"] ? "text-blue-600" : ""}`}
+                  className={`flex w-full items-center justify-between rounded-md p-2 text-left transition-colors hover:bg-gray-50 hover:text-blue-600 ${mobileMenus["partners"] ? "text-blue-600" : ""}`}
                   onClick={() => toggleMobileMenu("partners")}
                 >
                   <span>Partner Modules</span>
@@ -1175,11 +1168,6 @@ const EducationNavbar: React.FC<EducationNavbarProps> = ({
         </div>
       </header>
 
-      <AuthModal
-        isOpen={isAuthModalOpen}
-        initialView={initialAuthView}
-        onClose={() => setIsAuthModalOpen(false)}
-      />
     </>
   );
 };
