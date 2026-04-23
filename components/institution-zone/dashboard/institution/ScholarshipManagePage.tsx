@@ -51,7 +51,7 @@ const initialScholarships: ScholarshipMock[] = [
     tags: [
       { label: "Merit Based", bg: "bg-green-50", text: "text-green-700" }
     ],
-    amount: "$10,000 USD",
+    amount: "NPR. 10,000",
     location: "Remote / Global",
     level: "Bachelors / Masters",
     deadline: "May 15, 2026",

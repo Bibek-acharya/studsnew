@@ -1,4 +1,5 @@
 import EducationPage from "@/components/education/EducationPage";
+import HomeClientWrapper from "@/components/education/HomeClientWrapper";
 import { apiService } from "@/services/api";
 
 export const revalidate = 300;
@@ -12,11 +13,13 @@ export default async function Home() {
   ]);
 
   return (
-    <EducationPage
-      featuredColleges={featuredColleges}
-      scholarships={scholarshipResponse}
-      eventSlides={eventsResponse}
-      newsArticles={newsResponse}
-    />
+    <HomeClientWrapper>
+      <EducationPage
+        featuredColleges={featuredColleges}
+        scholarships={scholarshipResponse}
+        eventSlides={eventsResponse}
+        newsArticles={newsResponse}
+      />
+    </HomeClientWrapper>
   );
 }

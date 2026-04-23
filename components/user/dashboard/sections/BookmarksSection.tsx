@@ -139,7 +139,7 @@ const INITIAL_BOOKMARKS: BookmarkItem[] = [
     name: 'Global Tech Innovators Grant', 
     eligibility: 'Undergraduate STEM students', 
     deadline: 'May 30, 2026', 
-    amount: '$10,000',
+    amount: 'NPR. 10,000',
     org: 'Silicon Valley Foundation',
     status: 'OPEN',
     badgeType: 'MERIT BASED',

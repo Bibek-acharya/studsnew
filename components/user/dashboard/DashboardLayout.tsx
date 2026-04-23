@@ -2,7 +2,8 @@
 
 import { useState, useMemo, useEffect, useRef, ReactNode } from 'react'
 import Sidebar from './Sidebar'
-import { Menu, Search, Bell, User, Archive, ArchiveRestore, Trash2, Clock } from 'lucide-react'
+// import PreferenceModal from './PreferenceModal'
+import { Menu, Search, Bell, User, Archive, ArchiveRestore, Trash2, Clock, Settings } from 'lucide-react'
 
 interface DashboardLayoutProps {
   children: ReactNode
@@ -27,6 +28,7 @@ const notificationTabs: NotificationTab[] = ['all', 'following', 'system', 'arch
 
 export default function DashboardLayout({ children }: DashboardLayoutProps) {
   const [sidebarOpen, setSidebarOpen] = useState(false)
+  const [preferenceModalOpen, setPreferenceModalOpen] = useState(false)
   const [notificationsOpen, setNotificationsOpen] = useState(false)
   const [currentNotifTab, setCurrentNotifTab] = useState<NotificationTab>('all')
   const [notifications, setNotifications] = useState<NotificationItem[]>([
@@ -173,6 +175,14 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
           </div>
 
           <div className="flex items-center gap-4 lg:gap-6">
+            <button
+              onClick={() => setPreferenceModalOpen(true)}
+              className="hidden sm:flex items-center gap-2 px-3 py-1.5 bg-blue-50 text-blue-600 text-sm font-medium rounded-md hover:bg-blue-100 transition-colors"
+              title="Update Preferences"
+            >
+              <Settings className="w-4 h-4" />
+              <span className="hidden lg:inline">Preferences</span>
+            </button>
             <div ref={notificationsRef} className="relative">
               <button
                 onClick={() => setNotificationsOpen((prev) => !prev)}
@@ -314,6 +324,8 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
           {children}
         </main>
       </div>
+
+      {/* <PreferenceModal isOpen={preferenceModalOpen} onClose={() => setPreferenceModalOpen(false)} /> */}
     </div>
   )
 }

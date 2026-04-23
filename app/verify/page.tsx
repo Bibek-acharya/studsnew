@@ -2,6 +2,7 @@
 
 import React, { useState, useRef, useEffect, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
+import OnboardingModal from "@/components/auth/OnboardingModal";
 
 function VerifyPageContent() {
   const router = useRouter();
@@ -13,6 +14,7 @@ function VerifyPageContent() {
   const [loading, setLoading] = useState(false);
   const [timer, setTimer] = useState(120);
   const [resendDisabled, setResendDisabled] = useState(true);
+  const [showOnboarding, setShowOnboarding] = useState(false);
   
   const inputRefs = useRef<(HTMLInputElement | null)[]>([]);
 
@@ -88,10 +90,13 @@ function VerifyPageContent() {
           user: data.data.user,
         }));
         
-        if (data.data.user?.preferences?.education_level) {
-          router.push("/user/dashboard");
+        const user = data.data.user;
+        const hasCompletedOnboarding = user?.preferences?.onboarding_completed || false;
+        
+        if (!hasCompletedOnboarding) {
+          setShowOnboarding(true);
         } else {
-          router.push("/onboarding");
+          router.push("/");
         }
       }
     } catch (err: any) {
@@ -126,6 +131,10 @@ function VerifyPageContent() {
     return `${mins.toString().padStart(2, "0")}:${secs.toString().padStart(2, "0")}`;
   };
 
+  const handleCloseOnboarding = () => {
+    setShowOnboarding(false);
+  };
+
   if (!email) {
     return (
       <div className="min-h-screen flex items-center justify-center p-4">
@@ -140,76 +149,80 @@ function VerifyPageContent() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
-      <div className="w-full max-w-md">
-        <div className="bg-white rounded-md  border border-gray-200 p-6 sm:p-8">
-          <button 
-            onClick={() => router.push("/register")}
-            className="mb-4 text-sm font-medium text-gray-500 hover:text-gray-700 flex items-center gap-1"
-          >
-            ← Back
-          </button>
+    <>
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
+        <div className="w-full max-w-md">
+          <div className="bg-white rounded-md  border border-gray-200 p-6 sm:p-8">
+            <button 
+              onClick={() => router.push("/register")}
+              className="mb-4 text-sm font-medium text-gray-500 hover:text-gray-700 flex items-center gap-1"
+            >
+              ← Back
+            </button>
 
-          <div className="mb-6">
-            <h1 className="text-2xl font-bold text-gray-900">Check your email</h1>
-            <p className="text-sm text-gray-500 mt-1">
-              We've sent a 6-digit code to your email.
-            </p>
-          </div>
-
-          {error && (
-            <div className="rounded-md border border-red-200 bg-red-50 p-3 text-sm text-red-700 mb-4">
-              {error}
-            </div>
-          )}
-
-          <form onSubmit={handleSubmit} className="space-y-6">
-            <div className="flex justify-start gap-3" onPaste={handlePaste}>
-              {otp.map((digit, i) => (
-                <input
-                  key={i}
-                  ref={el => { inputRefs.current[i] = el; }}
-                  type="text"
-                  inputMode="numeric"
-                  maxLength={1}
-                  value={digit}
-                  onChange={(e) => handleChange(i, e.target.value)}
-                  onKeyDown={(e) => handleKeyDown(i, e)}
-                  className="w-12 h-14 text-center text-xl font-bold rounded-md border border-gray-200 text-gray-900 focus:border-blue-600 focus:ring-0"
-                />
-              ))}
+            <div className="mb-6">
+              <h1 className="text-2xl font-bold text-gray-900">Check your email</h1>
+              <p className="text-sm text-gray-500 mt-1">
+                We've sent a 6-digit code to your email.
+              </p>
             </div>
 
-            <button
-              type="submit"
-              disabled={loading || otp.join("").length !== 6}
-              className="w-full rounded-md bg-blue-600 px-4 py-3 text-sm font-semibold text-white transition-all hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-60"
-            >
-              {loading ? "Verifying..." : "Verify Code"}
-            </button>
-          </form>
+            {error && (
+              <div className="rounded-md border border-red-200 bg-red-50 p-3 text-sm text-red-700 mb-4">
+                {error}
+              </div>
+            )}
 
-          <div className="mt-6 text-center">
-            <p className="text-sm text-gray-500">
-              Code expires in{" "}
-              <span className="font-bold text-blue-600">{formatTimer(timer)}</span>
-            </p>
-            <button
-              type="button"
-              onClick={handleResend}
-              disabled={resendDisabled}
-              className={`mt-2 text-sm font-medium ${
-                resendDisabled 
-                  ? "text-gray-400 cursor-not-allowed" 
-                  : "text-blue-600 hover:text-blue-800"
-              }`}
-            >
-              Resend Code
-            </button>
+            <form onSubmit={handleSubmit} className="space-y-6">
+              <div className="flex justify-start gap-3" onPaste={handlePaste}>
+                {otp.map((digit, i) => (
+                  <input
+                    key={i}
+                    ref={el => { inputRefs.current[i] = el; }}
+                    type="text"
+                    inputMode="numeric"
+                    maxLength={1}
+                    value={digit}
+                    onChange={(e) => handleChange(i, e.target.value)}
+                    onKeyDown={(e) => handleKeyDown(i, e)}
+                    className="w-12 h-14 text-center text-xl font-bold rounded-md border border-gray-200 text-gray-900 focus:border-blue-600 focus:ring-0"
+                  />
+                ))}
+              </div>
+
+              <button
+                type="submit"
+                disabled={loading || otp.join("").length !== 6}
+                className="w-full rounded-md bg-blue-600 px-4 py-3 text-sm font-semibold text-white transition-all hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-60"
+              >
+                {loading ? "Verifying..." : "Verify Code"}
+              </button>
+            </form>
+
+            <div className="mt-6 text-center">
+              <p className="text-sm text-gray-500">
+                Code expires in{" "}
+                <span className="font-bold text-blue-600">{formatTimer(timer)}</span>
+              </p>
+              <button
+                type="button"
+                onClick={handleResend}
+                disabled={resendDisabled}
+                className={`mt-2 text-sm font-medium ${
+                  resendDisabled 
+                    ? "text-gray-400 cursor-not-allowed" 
+                    : "text-blue-600 hover:text-blue-800"
+                }`}
+              >
+                Resend Code
+              </button>
+            </div>
           </div>
         </div>
       </div>
-    </div>
+
+      <OnboardingModal isOpen={showOnboarding} onClose={handleCloseOnboarding} />
+    </>
   );
 }
 

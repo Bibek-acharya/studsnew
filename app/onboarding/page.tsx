@@ -69,7 +69,7 @@ export default function OnboardingPage() {
         },
       }, token);
 
-      router.push("/user/dashboard");
+      router.push("/");
     } catch (err: any) {
       setError(err?.message || "Failed to save preferences. Please try again.");
     } finally {
