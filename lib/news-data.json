@@ -1,0 +1,73 @@
+[
+  {
+    "id": 1776360070268,
+    "title": "this is the title of the news ",
+    "desc": "this is the desctalkdlaknsdflnadsf",
+    "content": "<p>sdfadsfadsfadsfadsf</p><p><strong>adsfadsfadsfasdf</strong></p><p>adsfadsfasdfdsaf</p><p>asdfadsfads<em>adfdsafadsf</em></p><ol><li>dsafasdfasdfsadf</li><li>adsfadsfasdf</li><li>asdfasdfadsf</li></ol><ul><li>asdfasdf</li><li>asdfasdf</li><li>asdfasd</li><li>fadsfadsf</li><li></li></ul>",
+    "image": "/uploads/news/1776360048921-ilproke.png",
+    "author": "Jane Doe",
+    "category": "Scholarship",
+    "status": "Published",
+    "featured": false,
+    "date": "2026-04-16T17:21:10.172Z",
+    "views": 0,
+    "created": "Apr 16, 2026",
+    "deadline": "-"
+  },
+  {
+    "id": 1776357285624,
+    "title": "this is the news ",
+    "desc": "news",
+    "image": "/uploads/news/1776357284262-iyrpuha.png",
+    "author": "Sarah Jenkins",
+    "category": "Events",
+    "status": "Published",
+    "featured": false,
+    "date": "2026-04-30",
+    "deadline": "2026-05-01",
+    "views": 0,
+    "created": "Apr 16, 2026"
+  },
+  {
+    "id": 1776356953015,
+    "title": "asdcadcadf",
+    "desc": "thisis the new s section amke this  as the news ",
+    "image": "/uploads/news/1776356917688-nls66i9.png",
+    "author": "Sarah Jenkins",
+    "category": "Events",
+    "status": "Published",
+    "featured": true,
+    "date": "Apr 16, 2026",
+    "deadline": "-",
+    "views": 0,
+    "created": "Apr 16, 2026"
+  },
+  {
+    "id": 1776352226298,
+    "title": "afsasadsfa",
+    "desc": "asdfasdfadsfadsfasdfadsfadsfadsf",
+    "image": "/uploads/news/1776352217877-6iosoa9.png",
+    "author": "Sarah Jenkins",
+    "category": "Events",
+    "status": "Draft",
+    "featured": false,
+    "date": "2026-04-23",
+    "deadline": "2026-05-08",
+    "views": 0,
+    "created": "Apr 16, 2026"
+  },
+  {
+    "id": 1776352089970,
+    "title": "avasdfadsf",
+    "desc": "adsfadsfadsfadsfadsf",
+    "image": "/uploads/news/1776352079347-d1donfl.png",
+    "author": "Sarah Jenkins",
+    "category": "Events",
+    "status": "Draft",
+    "featured": true,
+    "date": "2026-04-24",
+    "deadline": "2026-05-08",
+    "views": 0,
+    "created": "Apr 16, 2026"
+  }
+]

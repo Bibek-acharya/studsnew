@@ -2,7 +2,6 @@
 
 import React, { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
-import { getNewsById, getRelatedNews } from "@/lib/news-data";
 
 interface CommentItem {
   id: string;
@@ -15,13 +14,39 @@ interface CommentItem {
 
 const NewsDetailsPage: React.FC<{ params: Promise<{ id: string }> }> = ({ params }) => {
   const [id, setId] = useState<string | null>(null);
+  const [article, setArticle] = useState<any>(null);
+  const [related, setRelated] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     params.then((p) => setId(p.id));
   }, [params]);
 
-  const article = id ? getNewsById(id) : undefined;
-  const related = article && id ? getRelatedNews(id, article.category) : [];
+  useEffect(() => {
+    if (!id) return;
+    
+    async function fetchNews() {
+      try {
+        const res = await fetch(`/api/v1/news/${id}`);
+        const data = await res.json();
+        if (data?.data) {
+          setArticle(data.data);
+          
+          // Fetch related news
+          const relatedRes = await fetch(`/api/v1/news?category=${data.data.category}`);
+          const relatedData = await relatedRes.json();
+          if (relatedData?.data?.news) {
+            setRelated(relatedData.data.news.filter((n: any) => String(n.id) !== id).slice(0, 3));
+          }
+        }
+      } catch (e) {
+        console.error("Failed to fetch news:", e);
+      } finally {
+        setLoading(false);
+      }
+    }
+    fetchNews();
+  }, [id]);
 
   const [commentInput, setCommentInput] = useState("");
   const [comments, setComments] = useState<CommentItem[]>([
@@ -46,6 +71,10 @@ const NewsDetailsPage: React.FC<{ params: Promise<{ id: string }> }> = ({ params
     if (article.category === "Tech") return "Exam";
     if (article.category === "Jobs") return "Fee";
     if (article.category === "Policy") return "Notice";
+    if (article.category === "Events") return "Events";
+    if (article.category === "Announcements") return "Notice";
+    if (article.category === "Academics") return "Admission";
+    if (article.category === "Sports") return "Events";
     return "Notice";
   }, [article]);
 
@@ -72,6 +101,14 @@ const NewsDetailsPage: React.FC<{ params: Promise<{ id: string }> }> = ({ params
     setComments((prev) => [newComment, ...prev]);
     setCommentInput("");
   };
+
+  if (loading) {
+    return (
+      <div className="min-h-[40vh] flex items-center justify-center">
+        <div className="animate-spin w-8 h-8 border-4 border-blue-600 border-t-transparent rounded-full"></div>
+      </div>
+    );
+  }
 
   if (!article || !id) {
     return (
@@ -129,7 +166,7 @@ const NewsDetailsPage: React.FC<{ params: Promise<{ id: string }> }> = ({ params
           </div>
 
           <div className="prose prose-slate max-w-none mb-12 text-gray-700 leading-relaxed text-[1.05rem]">
-            {article.content.split("\n").map((paragraph, idx) => (
+            {(article.content || "").split("\n").map((paragraph: string, idx: number) => (
               <p key={idx} className="mb-4">{paragraph}</p>
             ))}
           </div>
@@ -139,7 +176,7 @@ const NewsDetailsPage: React.FC<{ params: Promise<{ id: string }> }> = ({ params
           <div className="mb-10">
             <h3 className="text-lg font-bold mb-4 text-gray-900">Tags:</h3>
             <div className="flex flex-wrap gap-2.5">
-              {(article.tags || []).map((tag) => (
+              {(article.tags || []).map((tag: string) => (
                 <button
                   key={tag}
                   className="bg-gray-100 hover:bg-gray-200 text-gray-600 px-4 py-1.5 rounded-full text-sm font-medium transition-colors"

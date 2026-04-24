@@ -35,11 +35,15 @@ const CourseGrid: React.FC<CourseGridProps> = ({
   const [currentPage, setCurrentPage] = useState(1);
   const [savedCourseIds, setSavedCourseIds] = useState<string[]>([]);
 
-  const ads = [<CourseCarouselAd key="0" />, <KistProgramsAd key="1" />, <SudsphereBannerAd key="2" />];
+  const ads = [
+    <CourseCarouselAd key="0" />,
+    <KistProgramsAd key="1" />,
+    <SudsphereBannerAd key="2" />,
+  ];
 
   const toggleBookmark = (id: string) => {
-    setSavedCourseIds(prev =>
-      prev.includes(id) ? prev.filter(i => i !== id) : [...prev, id]
+    setSavedCourseIds((prev) =>
+      prev.includes(id) ? prev.filter((i) => i !== id) : [...prev, id],
     );
   };
 
@@ -183,7 +187,9 @@ const CourseGrid: React.FC<CourseGridProps> = ({
                     <div className="flex items-start gap-2">
                       <ClipboardCheck className="w-3.75 h-3.75 text-gray-400 mt-px shrink-0" />
                       <div>
-                        <span className="font-bold text-gray-700">Entrance:</span>{" "}
+                        <span className="font-bold text-gray-700">
+                          Entrance:
+                        </span>{" "}
                         <span className="text-gray-600">
                           Entrance exam required
                         </span>
@@ -192,7 +198,9 @@ const CourseGrid: React.FC<CourseGridProps> = ({
                     <div className="flex items-start gap-2">
                       <CreditCard className="w-3.75 h-3.75 text-gray-400 mt-px shrink-0" />
                       <div>
-                        <span className="font-bold text-gray-700">Est. Fee:</span>{" "}
+                        <span className="font-bold text-gray-700">
+                          Est. Fee:
+                        </span>{" "}
                         <span className="text-[#0000ff] font-bold">
                           {course.estFee || "Rs. 5,00,000"}
                         </span>
@@ -211,7 +219,7 @@ const CourseGrid: React.FC<CourseGridProps> = ({
                   </div>
 
                   {/* Action Buttons - All in a single row */}
-                  <div className="flex gap-2 mt-auto pt-6 border-t border-dashed border-gray-200">
+                  <div className="flex gap-2 mt-3 -mb-3 py-5 border-t border-dashed border-gray-200">
                     <button
                       onClick={() =>
                         onNavigate("courseDetails", { id: course.id })
@@ -232,7 +240,7 @@ const CourseGrid: React.FC<CourseGridProps> = ({
                     >
                       View Colleges
                     </button>
-                    
+
                     <button
                       type="button"
                       onClick={(e) => {

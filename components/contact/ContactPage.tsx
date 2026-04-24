@@ -58,28 +58,22 @@ const ContactPage: React.FC = () => {
   };
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-
-    setIsSubmitting(true);
-
     try {
-      const payload = {
-        name: formData.name,
-        email: formData.email,
-        phone: formData.phone,
-        message: formData.message,
-        type: "quote",
-        subject: "Quote request from contact page",
-      };
-
-      const response = await apiService.submitContactInquiry(payload);
-      showToast("Success!", response.message || "Your quote request has been sent successfully.");
-      setFormData(initialFormData);
+      const res = await fetch("/api/v1/contact", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(formData),
+      });
+      if (res.ok) {
+        showToast("Success!", "Your message has been sent successfully. We'll get back to you soon!");
+        setFormData(initialFormData);
+      } else {
+        showToast("Error", "Failed to send message. Please try again.");
+      }
     } catch (error) {
-      const message = error instanceof Error ? error.message : "Failed to send request. Please try again.";
-      showToast("Error", message);
-    } finally {
-      setIsSubmitting(false);
+      showToast("Error", "Failed to send message. Please try again.");
     }
   };
 

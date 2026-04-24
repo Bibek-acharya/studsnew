@@ -2,6 +2,7 @@
 
 import React, { createContext, useContext, useState, ReactNode, useEffect, useMemo } from "react";
 import { apiService, AuthResponse } from "./api";
+import { setBlogToken as setBlogApiToken } from "./blogApi";
 
 interface User {
   id?: number;
@@ -10,6 +11,7 @@ interface User {
   email: string;
   phone?: string;
   role: string;
+  image_url?: string;
 }
 
 interface AuthContextType {
@@ -203,6 +205,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     verifyOTP,
     sendOTP,
     setUser,
+    superadminLogin,
+    superadminRegister,
   }), [token, user, isAuthenticated, loading]);
 
   return (

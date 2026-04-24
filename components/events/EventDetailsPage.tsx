@@ -2,48 +2,35 @@
 
 import React, { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
-import { apiService, EducationEvent } from "@/services/api";
+import { fetchPublicEventById, fetchPublicEvents, EventEntry } from "@/services/eventApi";
 
 const EventDetailsPage: React.FC<{ params: Promise<{ id: string }> }> = ({ params }) => {
   const [id, setId] = useState<string | null>(null);
-  const [event, setEvent] = useState<EducationEvent | null>(null);
-  const [related, setRelated] = useState<EducationEvent[]>([]);
-  const [notFound, setNotFound] = useState(false);
+  const [event, setEvent] = useState<EventEntry | null>(null);
+  const [related, setRelated] = useState<EventEntry[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    params.then((p) => setId(p.id));
-  }, [params]);
-
-  useEffect(() => {
-    const loadEvent = async () => {
-      if (!id) return;
-      setLoading(true);
-      setNotFound(false);
-
+    params.then(async (p) => {
+      setId(p.id);
       try {
-        const eventResponse = await apiService.getEducationEventById(Number(id));
-        setEvent(eventResponse.data.event);
-
-        const eventsResponse = await apiService.getEducationEvents();
-        const relatedEvents = eventsResponse.data.events
-          .filter((item) => item.id !== Number(id) && item.category === eventResponse.data.event.category)
-          .slice(0, 3);
-
-        setRelated(
-          relatedEvents.length > 0
-            ? relatedEvents
-            : eventsResponse.data.events.filter((item) => item.id !== Number(id)).slice(0, 3),
-        );
-      } catch (err) {
-        setNotFound(true);
+        const eventData = await fetchPublicEventById(p.id);
+        setEvent(eventData);
+        
+        if (eventData) {
+          const eventsResult = await fetchPublicEvents({ limit: 10 });
+          const relatedEvents = eventsResult.events
+            .filter((e) => e.id !== p.id && e.category === eventData.category)
+            .slice(0, 3);
+          setRelated(relatedEvents);
+        }
+      } catch {
+        setEvent(null);
       } finally {
         setLoading(false);
       }
-    };
-
-    loadEvent();
-  }, [id]);
+    });
+  }, [params]);
 
   useEffect(() => {
     window.scrollTo(0, 0);
@@ -59,12 +46,12 @@ const EventDetailsPage: React.FC<{ params: Promise<{ id: string }> }> = ({ param
   if (loading) {
     return (
       <div className="min-h-[40vh] flex items-center justify-center text-slate-500 font-semibold">
-        Loading event details...
+        Loading...
       </div>
     );
   }
 
-  if (notFound || !event) {
+  if (!event || !id) {
     return (
       <div className="min-h-[40vh] flex items-center justify-center text-slate-500 font-semibold">
         Event not found.
