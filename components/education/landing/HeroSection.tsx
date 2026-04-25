@@ -5,7 +5,10 @@ import { Search, Link as LinkIcon } from "lucide-react";
 import FeedbackWidget from "@/components/FeedbackWidget";
 
 interface HeroSectionProps {
-  onNavigate: (view: string, data?: any) => void;
+  onNavigate: (
+    view: string,
+    data?: { search?: string; [key: string]: unknown },
+  ) => void;
 }
 
 const HeroSection: React.FC<HeroSectionProps> = ({ onNavigate }) => {
@@ -54,9 +57,15 @@ const HeroSection: React.FC<HeroSectionProps> = ({ onNavigate }) => {
   }, [heroSlides.length]);
 
   useEffect(() => {
-    setFade(false);
-    const timeout = setTimeout(() => setFade(true), 120);
-    return () => clearTimeout(timeout);
+    let timeoutId: ReturnType<typeof setTimeout> | undefined;
+    const frame = requestAnimationFrame(() => {
+      setFade(false);
+      timeoutId = setTimeout(() => setFade(true), 120);
+    });
+    return () => {
+      cancelAnimationFrame(frame);
+      if (timeoutId) clearTimeout(timeoutId);
+    };
   }, [currentSlide]);
 
   const handleSearch = (e: React.FormEvent<HTMLFormElement>) => {
@@ -67,8 +76,8 @@ const HeroSection: React.FC<HeroSectionProps> = ({ onNavigate }) => {
   };
 
   return (
-    <div className="w-full  pt-2 pb-6 md:pb-4 flex justify-center max-w-350 mx-auto">
-      <main className="relative w-full h-85 sm:h-105 md:h-auto md:min-h-120 lg:h-135 flex items-center justify-center overflow-hidden rounded-md md:rounded-md">
+    <div className="w-full pt-2 pb-6 md:pb-4 flex justify-center px-4 sm:px-6 md:px-8">
+        <main className="relative w-full max-w-350 h-85 sm:h-105 md:h-auto md:min-h-120 lg:h-135 flex items-center justify-center overflow-hidden rounded-md md:rounded-md">
         {/* Background Slider Container */}
         <div id="slider-container" className="absolute inset-0 z-0 overflow-hidden">
           <div
@@ -90,7 +99,7 @@ const HeroSection: React.FC<HeroSectionProps> = ({ onNavigate }) => {
         <div className="absolute inset-0 bg-linear-to-b from-black/60 via-transparent to-black/70 z-10"></div>
 
         {/* MOBILE LAYOUT */}
-        <div className="md:hidden relative z-20 w-full h-full flex flex-col justify-center items-center px-4 sm:px-6 pb-28 text-white text-center mt-4">
+        <div className="md:hidden relative z-20 w-full h-full flex flex-col justify-center items-center px-4 sm:px-6 pb-18 sm:pb-20 text-white text-center mt-0 sm:mt-1">
           <h1 className="text-2xl sm:text-3xl font-bold tracking-tight mb-2 drop- leading-tight">
             Find Your Perfect College
           </h1>

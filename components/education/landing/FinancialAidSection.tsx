@@ -32,8 +32,8 @@ const FinancialAidSection: React.FC<FinancialAidSectionProps> = ({ onNavigate, s
   };
 
   return (
-    <section className="mt-16 sm:mt-20 md:mt-24 w-full">
-      <div className="max-w-350 mx-auto w-full">
+<section className="mt-16 sm:mt-20 md:mt-24 w-full px-4 sm:px-6 md:px-8">
+  <div className="max-w-350 mx-auto w-full">
       {/* Header Section */}
       <div className="text-center mb-8 sm:mb-10 md:mb-12">
         <h2 className="text-[26px] xs:text-3xl sm:text-4xl md:text-[40px] font-bold text-[#0f172a] mb-3 sm:mb-4 tracking-tight px-2">Featured Financial Aid</h2>

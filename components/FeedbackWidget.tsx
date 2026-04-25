@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useAuth } from "@/services/AuthContext";
 
 const faces = [
@@ -40,16 +40,6 @@ export default function FeedbackWidget() {
   const [experience, setExperience] = useState("");
   const [email, setEmail] = useState("");
 
-  useEffect(() => {
-    if (!isAuthenticated) {
-      setIsOpen(false);
-      setStep(1);
-      setRating(null);
-      setExperience("");
-      setEmail("");
-    }
-  }, [isAuthenticated]);
-
   const handleRating = (value: number) => {
     setRating(value);
   };
@@ -73,13 +63,6 @@ export default function FeedbackWidget() {
 
   const closeWidget = () => {
     setIsOpen(false);
-  };
-
-  const resetForm = () => {
-    setStep(1);
-    setRating(null);
-    setExperience("");
-    setEmail("");
   };
 
   const renderStep = () => {
@@ -191,11 +174,11 @@ export default function FeedbackWidget() {
   }
 
   return (
-    <div className="absolute left-0 top-1/2 -translate-y-1/2 z-50">
+    <div className="absolute left-0 top-1/2 z-50 -translate-y-1/2 scale-90 sm:scale-100 origin-left">
       <div className="flex items-stretch">
         <button
           onClick={() => setIsOpen(!isOpen)}
-          className="bg-brand-blue hover:bg-brand-hover text-white flex flex-col items-center justify-center w-[42px] rounded-r-md cursor-pointer transition-colors shadow-[4px_0_15px_rgba(0,0,0,0.1)] relative z-20 focus:outline-none py-4"
+          className="relative z-20 flex w-[36px] flex-col items-center justify-center rounded-r-md bg-brand-blue py-3 text-white cursor-pointer transition-colors shadow-[4px_0_15px_rgba(0,0,0,0.1)] hover:bg-brand-hover focus:outline-none sm:w-[42px] sm:py-4"
         >
           <svg
             xmlns="http://www.w3.org/2000/svg"
@@ -208,19 +191,19 @@ export default function FeedbackWidget() {
             <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
           </svg>
           <span
-            className="vertical-text font-medium text-[15px] tracking-wide mt-1"
+            className="vertical-text mt-1 text-[13px] font-medium tracking-wide sm:text-[15px]"
             style={{ writingMode: "vertical-rl", textOrientation: "mixed", transform: "rotate(180deg)" }}
           >
             Feedback
           </span>
         </button>
-
+        
         <div 
-          className={`bg-white transition-all duration-300 ease-in-out overflow-hidden rounded-r-lg shadow-xl relative z-10 flex items-stretch -ml-[2px] ${
-            isOpen ? "w-[340px] opacity-100" : "w-0 opacity-0"
+          className={`relative z-10 -ml-[2px] flex items-stretch overflow-hidden rounded-r-lg bg-white shadow-xl transition-all duration-300 ease-in-out ${
+            isOpen ? "w-[280px] opacity-100 sm:w-[340px]" : "w-0 opacity-0"
           }`}
         >
-          <div className="w-[340px] min-w-[340px] py-3 px-5 flex flex-col h-full">
+          <div className="flex h-full w-[280px] min-w-[280px] flex-col px-4 py-2.5 sm:w-[340px] sm:min-w-[340px] sm:px-5 sm:py-3">
             {renderStep()}
           </div>
         </div>

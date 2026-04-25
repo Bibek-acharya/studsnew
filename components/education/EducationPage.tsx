@@ -31,7 +31,8 @@ const EducationPage: React.FC<EducationPageProps> = ({
 }) => {
   const router = useRouter();
 
-  const handleNavigate = useCallback((view: string, data?: any) => {
+  const handleNavigate = useCallback(
+    (view: string, data?: { search?: string; [key: string]: unknown }) => {
     if (view.startsWith("search")) {
       router.push(`/${view}`);
     } else if (view === "compareColleges") {
@@ -45,9 +46,11 @@ const EducationPage: React.FC<EducationPageProps> = ({
     } else {
       console.log("Navigate to:", view, data);
     }
-  }, [router]);
+    },
+    [router],
+  );
   return (
-    <div className="bg-white min-h-screen font-sans text-[#111827] antialiased pt-12">
+    <div className="bg-white min-h-screen font-sans text-[#111827] antialiased pt-4 sm:pt-6 overflow-x-hidden">
       {/* Section 1: Hero */}
       <HeroSection onNavigate={handleNavigate} />
       {/* Section 2: Smarter Tools, Greater Success */}

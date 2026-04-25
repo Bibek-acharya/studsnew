@@ -1,11 +1,12 @@
 "use client";
 
+import type { SyntheticEvent } from "react";
 import { useRef } from "react";
-import { ChevronLeft, ChevronRight, Clock, ArrowRight } from "lucide-react";
+import { ChevronLeft, ChevronRight, Clock } from "lucide-react";
 import { EducationNewsItem } from "@/services/api";
 
 interface NewsStoriesSectionProps {
-  onNavigate: (view: string, data?: any) => void;
+  onNavigate: (view: string, data?: { [key: string]: unknown }) => void;
   newsArticles?: EducationNewsItem[];
 }
 
@@ -61,13 +62,6 @@ const newsData: NewsCard[] = [
   },
 ];
 
-const partnerLogos = [
-  "https://kist.edu.np/resources/assets/img/logo_small.jpg",
-  "https://www.trinity.edu.np/assets/backend/uploads/Logo/trinity%20college%20logo.jpg",
-  "https://advancefoundation.edu.np/public/assets/img/logo.jpg",
-  "https://kist.edu.np/resources/assets/img/logo_small.jpg",
-];
-
 const NewsStoriesSection: React.FC<NewsStoriesSectionProps> = ({ onNavigate, newsArticles }) => {
   const containerRef = useRef<HTMLDivElement | null>(null);
   const data: NewsCard[] = newsArticles?.length
@@ -100,10 +94,10 @@ const NewsStoriesSection: React.FC<NewsStoriesSectionProps> = ({ onNavigate, new
   };
 
   return (
-    <section className="mt-16 sm:mt-20 md:mt-24 w-full">
-      <div className="max-w-350 mx-auto w-full ">
+    <section className="mt-16 sm:mt-20 md:mt-24 w-full px-4 sm:px-6 md:px-8">
+      <div className="max-w-350 mx-auto w-full">
         {/* Header & Controls */}
-        <div className="flex flex-col md:flex-row md:items-end justify-between mb-8 sm:mb-10 md:mb-12 gap-4 sm:gap-6">
+        <div className="flex items-start justify-between gap-4 sm:gap-6 mb-4 sm:mb-6 md:mb-12">
           <div className="max-w-3xl">
             <h2 className="text-[24px] xs:text-[28px] sm:text-3xl md:text-[36px] lg:text-[40px] font-bold text-[#111827] mb-2 sm:mb-3 leading-tight tracking-tight">
               Latest News & Stories
@@ -114,7 +108,7 @@ const NewsStoriesSection: React.FC<NewsStoriesSectionProps> = ({ onNavigate, new
           </div>
 
           {/* Navigation Buttons */}
-          <div className="flex sm:flex items-center gap-2 sm:gap-3 shrink-0">
+          <div className="flex shrink-0 items-center gap-2 sm:gap-3">
             <button
               onClick={() => scrollByWidth(-1)}
               className="w-9 h-9 sm:w-11 sm:h-11 md:w-12 md:h-12 rounded-full border border-gray-200 flex items-center justify-center hover:bg-gray-50 hover: transition-all focus:outline-none focus:ring-2 focus:ring-blue-500"
@@ -155,7 +149,10 @@ const NewsStoriesSection: React.FC<NewsStoriesSectionProps> = ({ onNavigate, new
                     src={card.imgSrc}
                     alt={card.title}
                     className="w-full h-28 xs:h-32 sm:h-36 object-cover group-hover:scale-105 transition-transform duration-500"
-                    onError={(e: any) => { e.target.src = "https://placehold.co/600x400/f1f5f9/94a3b8?text=News"; }}
+                    onError={(e: SyntheticEvent<HTMLImageElement>) => {
+                      e.currentTarget.src =
+                        "https://placehold.co/600x400/f1f5f9/94a3b8?text=News";
+                    }}
                   />
                 </div>
                 <h3 className="text-[17px] xs:text-[18px] sm:text-[19px] font-semibold text-gray-900 group-hover:text-brand-blue transition-all duration-300 tracking-tight mb-1 sm:mb-2 leading-snug line-clamp-2">

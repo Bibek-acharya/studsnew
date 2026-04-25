@@ -4,7 +4,7 @@ import { useRef } from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 
 interface TestimonialsSectionProps {
-  onNavigate: (view: string, data?: any) => void;
+  onNavigate: (view: string, data?: { [key: string]: unknown }) => void;
 }
 
 const testimonials = [
@@ -43,6 +43,7 @@ const testimonials = [
 ];
 
 const TestimonialsSection: React.FC<TestimonialsSectionProps> = ({ onNavigate }) => {
+  void onNavigate;
   const containerRef = useRef<HTMLDivElement | null>(null);
 
   const scrollByWidth = (direction: -1 | 1) => {
@@ -56,10 +57,10 @@ const TestimonialsSection: React.FC<TestimonialsSectionProps> = ({ onNavigate })
   };
 
   return (
-    <section className="mt-16 sm:mt-20 md:mt-24 w-full">
-      <div className="max-w-350 mx-auto w-full">
+<section className="mt-16 sm:mt-20 md:mt-24 w-full px-4 sm:px-6 md:px-8">
+  <div className="max-w-350 mx-auto w-full">
         {/* Header & Navigation */}
-        <div className="flex flex-col md:flex-row md:items-end justify-between mb-8 sm:mb-10 md:mb-12 gap-4 sm:gap-6">
+        <div className="flex items-start justify-between gap-4 sm:gap-6 mb-4 sm:mb-6 md:mb-12">
           <div className="max-w-2xl">
             <h2 className="text-[#1A1F36] text-[26px] xs:text-3xl sm:text-4xl md:text-[40px] font-bold tracking-tight mb-2 sm:mb-3 md:mb-4">
               What Our Students Say
@@ -70,7 +71,7 @@ const TestimonialsSection: React.FC<TestimonialsSectionProps> = ({ onNavigate })
           </div>
 
           {/* Carousel Buttons */}
-          <div className="flex gap-2 sm:gap-3 md:gap-4 pb-2">
+          <div className="flex shrink-0 gap-2 sm:gap-3 md:gap-4 pb-2">
             <button
               onClick={() => scrollByWidth(-1)}
               className="w-9 h-9 sm:w-11 sm:h-11 md:w-12 md:h-12 rounded-full border border-gray-200 flex items-center justify-center text-gray-500 hover:bg-gray-50 hover:text-[#1A1F36] transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#0000ff]"
@@ -86,12 +87,12 @@ const TestimonialsSection: React.FC<TestimonialsSectionProps> = ({ onNavigate })
           </div>
         </div>
 
-        {/* Testimonial Cards Grid */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-5 md:gap-6">
+        {/* Testimonial Cards Grid / Rail */}
+        <div className="flex gap-4 overflow-x-auto no-scrollbar snap-x snap-mandatory pb-4 md:grid md:grid-cols-4 md:gap-4 md:overflow-visible md:pb-0">
           {testimonials.map((testimonial) => (
             <div
               key={testimonial.id}
-              className="bg-[#F8F9FC] rounded-md p-5 xs:p-6 sm:p-7 md:p-8 relative z-0"
+              className="relative z-0 w-[82vw] shrink-0 snap-start rounded-md bg-[#F8F9FC] p-5 xs:w-[74vw] xs:p-6 sm:w-[46vw] sm:p-7 md:w-auto md:p-8"
             >
               <div className="absolute top-4 sm:top-5 md:top-6 left-20 xs:left-24 sm:left-28 text-[#E2E8F0] z-[-1] opacity-60">
                 <svg width="48" height="48" sm-width="56" sm-height="56" md-width="64" md-height="64" viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg" className="w-10 h-10 xs:w-12 xs:h-12 sm:w-14 sm:h-14 md:w-16 md:h-16">
@@ -99,30 +100,30 @@ const TestimonialsSection: React.FC<TestimonialsSectionProps> = ({ onNavigate })
                 </svg>
               </div>
 
-              <div className="flex items-center gap-3 sm:gap-3.5 md:gap-4 mb-4 sm:mb-5 md:mb-6">
+              <div className="mb-4 flex items-center gap-3 sm:mb-5 sm:gap-3.5 md:mb-6 md:gap-4">
                 <div>
                   <img
                     src={testimonial.image}
                     alt={testimonial.name}
-                    className="w-11 h-11 xs:w-12 xs:h-12 sm:w-13 sm:h-13 md:w-14 md:h-14 rounded-full bg-blue-100 object-cover border-2 border-white "
+                    className="h-11 w-11 rounded-full border-2 border-white object-cover bg-blue-100 xs:h-12 xs:w-12 sm:h-13 sm:w-13 md:h-14 md:w-14 "
                   />
                 </div>
                 <div>
-                    <h3 className="font-bold text-[#1A1F36] text-sm xs:text-base sm:text-lg">{testimonial.name}</h3>
-                    <p className="text-[#5551FF] text-[10px] xs:text-xs sm:text-sm font-medium leading-tight mt-0.5">{testimonial.role}</p>
+                    <h3 className="text-sm font-bold text-[#1A1F36] xs:text-base sm:text-lg">{testimonial.name}</h3>
+                    <p className="mt-0.5 text-[10px] font-medium leading-tight text-[#5551FF] xs:text-xs sm:text-sm">{testimonial.role}</p>
                 </div>
               </div>
 
-              <div className="flex gap-0.5 sm:gap-1 mb-3 sm:mb-4 text-[#FACC15]">
+              <div className="mb-3 flex gap-0.5 text-[#FACC15] sm:mb-4 sm:gap-1">
                 {[...Array(5)].map((_, i) => (
-                  <svg key={i} className={`w-3.5 h-3.5 xs:w-4 xs:h-4 sm:w-4 sm:h-4 md:w-5 md:h-5 fill-current ${i < testimonial.rating ? 'text-[#FACC15]' : 'text-[#CBD5E1]'}`} viewBox="0 0 20 20">
+                  <svg key={i} className={`h-3.5 w-3.5 fill-current xs:h-4 xs:w-4 sm:h-4 sm:w-4 md:h-5 md:w-5 ${i < testimonial.rating ? 'text-[#FACC15]' : 'text-[#CBD5E1]'}`} viewBox="0 0 20 20">
                     <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
                   </svg>
                 ))}
               </div>
 
-              <p className="text-[#4A5568] text-xs xs:text-sm sm:text-[14px] md:text-[15px] leading-relaxed">
-                "{testimonial.quote}"
+              <p className="text-xs leading-relaxed text-[#4A5568] xs:text-sm sm:text-[14px] md:text-[15px]">
+                &quot;{testimonial.quote}&quot;
               </p>
             </div>
           ))}
