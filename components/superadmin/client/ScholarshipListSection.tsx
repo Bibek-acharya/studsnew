@@ -6,43 +6,47 @@ import { GraduationCap, Plus, Award, CheckCircle, FileText, X, Eye } from "lucid
 export default function ScholarshipListSection({ setActiveSection }: { setActiveSection: (s: string) => void }) {
   return (
     <div className="space-y-6">
-      <div className="rounded-xl border border-gray-100 bg-white p-8">
+      <div className="rounded-md border border-gray-200 bg-white p-8">
         <div className="mb-8 flex items-center justify-between">
-          <h2 className="flex items-center gap-2 text-xl font-bold text-gray-900">
-            <GraduationCap size={24} className="text-blue-600" /> Manage Scholarship
+          <h2 className="flex items-center gap-2 text-lg font-bold text-gray-900">
+            <GraduationCap size={20} className="text-blue-600" /> Manage Scholarship
           </h2>
-          <button type="button" onClick={() => setActiveSection("create-scholarship")} className="flex items-center gap-2 rounded-md bg-blue-600 px-4 py-2.5 text-sm font-bold text-white">
-            <Plus size={18} /> Create Scholarship
+          <button
+            type="button"
+            onClick={() => setActiveSection("create-scholarship")}
+            className="flex items-center gap-2 rounded-md bg-blue-600 px-4 py-2.5 text-sm font-medium text-white"
+          >
+            <Plus size={16} /> Create Scholarship
           </button>
         </div>
         <div className="mb-8 grid grid-cols-1 gap-4 md:grid-cols-4">
-          <SimpleStatCard icon={<Award size={20} />} value="24" label="Total Scholarships" bg="bg-blue-100" />
-          <SimpleStatCard icon={<CheckCircle size={20} />} value="18" label="Active" bg="bg-green-100" />
-          <SimpleStatCard icon={<FileText size={20} />} value="3" label="Draft" bg="bg-gray-100" />
-          <SimpleStatCard icon={<X size={20} />} value="6" label="Closed" bg="bg-red-100" />
+          <SimpleStatCard icon={<Award size={18} />} value="24" label="Total Scholarships" bg="bg-blue-100" />
+          <SimpleStatCard icon={<CheckCircle size={18} />} value="18" label="Active" bg="bg-green-100" />
+          <SimpleStatCard icon={<FileText size={18} />} value="3" label="Draft" bg="bg-gray-100" />
+          <SimpleStatCard icon={<X size={18} />} value="6" label="Closed" bg="bg-red-100" />
         </div>
-        <div className="overflow-x-auto rounded-xl border border-gray-100">
+        <div className="overflow-x-auto rounded-md border border-gray-200">
           <table className="w-full text-sm">
-            <thead className="border-b border-gray-100 bg-gray-50">
+            <thead className="border-b border-gray-200 bg-gray-50">
               <tr>
-                <th className="px-6 py-4 text-left font-bold text-gray-600">Scholarship Name</th>
-                <th className="px-6 py-4 text-center font-bold text-gray-600">Type</th>
-                <th className="px-6 py-4 text-center font-bold text-gray-600">Seats</th>
-                <th className="px-6 py-4 text-center font-bold text-gray-600">Deadline</th>
-                <th className="px-6 py-4 text-center font-bold text-gray-600">Status</th>
-                <th className="px-6 py-4 text-center font-bold text-gray-600">Actions</th>
+                <th className="px-6 py-4 text-left font-semibold text-gray-600">Scholarship Name</th>
+                <th className="px-6 py-4 text-center font-semibold text-gray-600">Type</th>
+                <th className="px-6 py-4 text-center font-semibold text-gray-600">Seats</th>
+                <th className="px-6 py-4 text-center font-semibold text-gray-600">Deadline</th>
+                <th className="px-6 py-4 text-center font-semibold text-gray-600">Status</th>
+                <th className="px-6 py-4 text-center font-semibold text-gray-600">Actions</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-gray-50">
+            <tbody className="divide-y divide-gray-100">
               <tr className="hover:bg-gray-50">
-                <td className="px-6 py-4 font-bold text-gray-900">Merit Scholarship 2026</td>
+                <td className="px-6 py-4 font-medium text-gray-900">Merit Scholarship 2026</td>
                 <td className="px-6 py-4 text-center">
-                  <span className="rounded-full bg-blue-50 px-3 py-1 text-[10px] font-bold uppercase tracking-wider text-blue-600">Merit</span>
+                  <span className="rounded-md bg-blue-50 px-3 py-1 text-[10px] font-semibold uppercase tracking-wider text-blue-600">Merit</span>
                 </td>
-                <td className="px-6 py-4 text-center font-bold text-gray-500">50</td>
+                <td className="px-6 py-4 text-center font-medium text-gray-500">50</td>
                 <td className="px-6 py-4 text-center font-medium text-gray-400">May 15, 2026</td>
                 <td className="px-6 py-4 text-center">
-                  <span className="rounded-full bg-green-50 px-3 py-1 text-[10px] font-bold uppercase tracking-wider text-green-600">Active</span>
+                  <span className="rounded-md bg-green-50 px-3 py-1 text-[10px] font-semibold uppercase tracking-wider text-green-600">Active</span>
                 </td>
                 <td className="px-6 py-4">
                   <div className="flex justify-center gap-2">
@@ -71,10 +75,10 @@ function SimpleStatCard({
   bg: string;
 }) {
   return (
-    <div className="rounded-xl border border-gray-100 bg-white p-5 shadow-sm transition-all hover:shadow-md">
-      <div className={`mb-3 flex h-10 w-10 items-center justify-center rounded-lg ${bg}`}>{icon}</div>
-      <p className="text-2xl font-extrabold text-gray-900">{value}</p>
-      <p className="text-xs font-bold uppercase tracking-wider text-gray-400">{label}</p>
+    <div className="rounded-md border border-gray-200 bg-white p-5">
+      <div className={`mb-3 flex h-10 w-10 items-center justify-center rounded-md ${bg}`}>{icon}</div>
+      <p className="text-2xl font-bold text-gray-900">{value}</p>
+      <p className="text-xs font-medium uppercase tracking-wider text-gray-400">{label}</p>
     </div>
   );
 }
@@ -87,7 +91,7 @@ function ActionBtn({ icon, color }: { icon: React.ReactNode; color: "blue" | "gr
     red: "text-red-600 hover:bg-red-50",
   };
   return (
-    <button type="button" className={`rounded-lg p-2 transition-all ${colors[color]}`}>
+    <button type="button" className={`rounded-md p-2 transition-all ${colors[color]}`}>
       {icon}
     </button>
   );

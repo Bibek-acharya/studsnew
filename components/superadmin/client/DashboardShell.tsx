@@ -25,7 +25,6 @@ import {
   LogOut,
   Search,
   ChevronRight,
-  UserPlus,
 } from "lucide-react";
 
 const OverviewSection = lazy(() => import("./OverviewSection"));
@@ -35,10 +34,27 @@ const CourseListSection = lazy(() => import("./CourseListSection"));
 const AddCourseSection = lazy(() => import("./AddCourseSection"));
 const ScholarshipListSection = lazy(() => import("./ScholarshipListSection"));
 const CreateScholarshipSection = lazy(() => import("./CreateScholarshipSection"));
+const EntranceListSection = lazy(() => import("./EntranceListSection"));
+const AddEntranceSection = lazy(() => import("./AddEntranceSection"));
+const MessageInquirySection = lazy(() => import("./MessageInquirySection"));
+const NewsListSection = lazy(() => import("./NewsListSection"));
+const CreateNewsSection = lazy(() => import("./CreateNewsSection"));
+const BlogListSection = lazy(() => import("./BlogListSection"));
+const CreateBlogSection = lazy(() => import("./CreateBlogSection"));
+const EventListSection = lazy(() => import("./EventListSection"));
+const CreateEventSection = lazy(() => import("./CreateEventSection"));
+const CampusFeedSection = lazy(() => import("./CampusFeedSection"));
+const NotificationSection = lazy(() => import("./NotificationSection"));
+const AccessControlSection = lazy(() => import("./AccessControlSection"));
+const PaymentSection = lazy(() => import("./PaymentSection"));
+const OrganizationProfileSection = lazy(() => import("./OrganizationProfileSection"));
+const OrganizationSettingsSection = lazy(() => import("./OrganizationSettingsSection"));
+const HistorySection = lazy(() => import("./HistorySection"));
+const BackupSection = lazy(() => import("./BackupSection"));
+const SettingsSection = lazy(() => import("./SettingsSection"));
 const UserListSection = lazy(() => import("./UserListSection"));
 const AddUserSection = lazy(() => import("./AddUserSection"));
 const AnalyticsSection = lazy(() => import("./AnalyticsSection"));
-const ManagementPlaceholder = lazy(() => import("./ManagementPlaceholder"));
 
 type SectionType =
   | "overview"
@@ -101,30 +117,70 @@ export default function DashboardShell() {
     setDropdowns((prev) => ({ ...prev, [name]: !prev[name] }));
   };
 
+  const navigateTo = (section: string) => {
+    setActiveSection(section as SectionType);
+  };
+
   const renderSection = () => {
     switch (activeSection) {
       case "overview":
-        return <OverviewSection setActiveSection={setActiveSection} />;
+        return <OverviewSection setActiveSection={navigateTo} />;
       case "manage-college":
-        return <CollegeListSection setActiveSection={setActiveSection} />;
+        return <CollegeListSection setActiveSection={navigateTo} />;
       case "add-college":
-        return <AddCollegeSection setActiveSection={setActiveSection} lockedSections={lockedSections} setLockedSections={setLockedSections} />;
+        return <AddCollegeSection setActiveSection={navigateTo} lockedSections={lockedSections} setLockedSections={setLockedSections} />;
       case "manage-course":
-        return <CourseListSection setActiveSection={setActiveSection} />;
+        return <CourseListSection setActiveSection={navigateTo} />;
       case "add-course":
-        return <AddCourseSection setActiveSection={setActiveSection} />;
+        return <AddCourseSection setActiveSection={navigateTo} lockedSections={lockedSections} setLockedSections={setLockedSections} />;
       case "manage-scholarship":
-        return <ScholarshipListSection setActiveSection={setActiveSection} />;
+        return <ScholarshipListSection setActiveSection={navigateTo} />;
       case "create-scholarship":
-        return <CreateScholarshipSection setActiveSection={setActiveSection} />;
+        return <CreateScholarshipSection setActiveSection={navigateTo} lockedSections={lockedSections} setLockedSections={setLockedSections} />;
+      case "manage-entrance":
+        return <EntranceListSection setActiveSection={navigateTo} />;
+      case "add-entrance":
+        return <AddEntranceSection setActiveSection={navigateTo} />;
+      case "message-inquiry":
+        return <MessageInquirySection />;
+      case "manage-news":
+        return <NewsListSection setActiveSection={navigateTo} />;
+      case "create-news":
+        return <CreateNewsSection setActiveSection={navigateTo} />;
+      case "manage-blog":
+        return <BlogListSection setActiveSection={navigateTo} />;
+      case "create-blog":
+        return <CreateBlogSection setActiveSection={navigateTo} />;
+      case "manage-events":
+        return <EventListSection setActiveSection={navigateTo} />;
+      case "create-event":
+        return <CreateEventSection setActiveSection={navigateTo} />;
+      case "manage-campus-feed":
+        return <CampusFeedSection />;
+      case "manage-notification":
+        return <NotificationSection />;
+      case "access-control":
+        return <AccessControlSection />;
+      case "payment":
+        return <PaymentSection />;
+      case "organization-profile":
+        return <OrganizationProfileSection />;
+      case "organization-settings":
+        return <OrganizationSettingsSection />;
+      case "history":
+        return <HistorySection />;
+      case "backup":
+        return <BackupSection />;
+      case "settings":
+        return <SettingsSection />;
       case "user-management":
-        return <UserListSection setActiveSection={setActiveSection} />;
+        return <UserListSection setActiveSection={navigateTo} />;
       case "add-user":
-        return <AddUserSection setActiveSection={setActiveSection} />;
+        return <AddUserSection setActiveSection={navigateTo} />;
       case "analytics":
         return <AnalyticsSection />;
       default:
-        return <ManagementPlaceholder title={getSectionTitle(activeSection)} icon={getSectionIcon(activeSection)} />;
+        return <div className="flex h-60 items-center justify-center text-gray-400">Section not found</div>;
     }
   };
 
@@ -172,15 +228,14 @@ export default function DashboardShell() {
               ),
             )}
 
-            <div className="mt-4 border-t border-gray-100 pt-4">
-              <NavItem
-                icon={<LogOut size={20} />}
-                label="Logout"
-                active={false}
-                onClick={() => undefined}
-                className="text-red-500 hover:bg-red-50 hover:text-red-600"
-              />
-            </div>
+            <button
+              type="button"
+              onClick={() => undefined}
+              className="mt-4 flex w-full items-center gap-3 rounded-lg px-4 py-3 text-left text-sm font-medium text-red-500 transition-colors hover:bg-red-50 hover:text-red-600"
+            >
+              <LogOut size={20} />
+              <span>Logout</span>
+            </button>
           </nav>
         </aside>
 
@@ -211,7 +266,7 @@ export default function DashboardShell() {
 function Header() {
   return (
     <header className="sticky top-0 z-40 flex items-center justify-between border-b border-[#e2e8f0] bg-white px-8 py-3">
-      <div className="flex items-center border border-[#e2e8f0] bg-gray-50 px-4 py-2 transition-all focus-within:border-blue-600 focus-within:bg-white rounded-lg w-[500px]">
+      <div className="flex items-center border border-[#e2e8f0] bg-gray-50 px-4 py-2 transition-all focus-within:border-blue-600 focus-within:bg-white rounded-md w-[500px]">
         <Search size={18} className="text-gray-400" />
         <input
           type="text"
@@ -228,7 +283,7 @@ function Header() {
             <p className="text-sm font-semibold leading-tight text-gray-900">Superadmin</p>
             <p className="text-[10px] font-bold uppercase tracking-wider text-gray-500">Super Administrator</p>
           </div>
-          <div className="flex h-10 w-10 items-center justify-center rounded-full bg-blue-600 text-sm font-bold text-white shadow-md transition-transform group-hover:scale-105">
+          <div className="flex h-10 w-10 items-center justify-center rounded-full bg-blue-600 text-sm font-medium text-white transition-transform group-hover:scale-105">
             SA
           </div>
         </div>
@@ -254,8 +309,8 @@ function NavItem({
     <button
       type="button"
       onClick={onClick}
-      className={`flex w-full items-center gap-3 rounded-lg px-4 py-3 text-left text-sm font-bold transition-colors ${
-        active ? "bg-blue-50 text-blue-600" : "text-gray-700 hover:bg-gray-50 hover:text-blue-600"
+      className={`flex w-full items-center gap-3 rounded-lg px-4 py-3 text-left text-sm font-medium transition-colors ${
+        active ? "bg-blue-50 text-blue-600" : "text-slate-500 hover:bg-blue-50 hover:text-blue-600"
       } ${className}`}
     >
       {icon}
@@ -282,8 +337,8 @@ function NavDropdown({
       <button
         type="button"
         onClick={onToggle}
-        className={`flex w-full items-center justify-between rounded-lg px-4 py-3 text-left text-sm font-bold transition-colors ${
-          isOpen ? "text-blue-600" : "text-gray-700 hover:bg-gray-50 hover:text-blue-600"
+        className={`flex w-full items-center justify-between rounded-lg px-4 py-3 text-left text-sm font-medium transition-colors ${
+          isOpen ? "text-blue-600" : "text-slate-500 hover:bg-blue-50 hover:text-blue-600"
         }`}
       >
         <span className="flex items-center gap-3">
@@ -295,9 +350,9 @@ function NavDropdown({
       <motion.div
         initial={false}
         animate={{ height: isOpen ? "auto" : 0, opacity: isOpen ? 1 : 0 }}
-        className="mx-2 overflow-hidden rounded-lg bg-gray-50/50"
+        className="overflow-hidden"
       >
-        <div className="ml-6 space-y-1 px-4 py-1">{children}</div>
+        <div className="space-y-0.5 px-4 pl-10 py-1">{children}</div>
       </motion.div>
     </div>
   );
@@ -316,8 +371,8 @@ function SubNavItem({
     <button
       type="button"
       onClick={onClick}
-      className={`w-full rounded-md px-3 py-2 text-left text-xs font-bold transition-all ${
-        active ? "bg-blue-100/50 text-blue-600" : "text-gray-500 hover:bg-white hover:text-blue-600"
+      className={`w-full rounded-lg px-4 py-2 text-left text-sm font-medium transition-all ${
+        active ? "bg-blue-50 text-blue-600" : "text-slate-500 hover:bg-blue-50 hover:text-blue-600"
       }`}
     >
       {label}
@@ -327,7 +382,7 @@ function SubNavItem({
 
 function IconButton({ icon, badge }: { icon: React.ReactNode; badge?: number }) {
   return (
-    <button type="button" className="relative rounded-lg p-2.5 text-gray-500 transition-all hover:bg-gray-100 hover:text-blue-600">
+    <button type="button" className="relative rounded-md p-2.5 text-gray-500 transition-all hover:bg-gray-100 hover:text-blue-600">
       {icon}
       {typeof badge === "number" ? (
         <span className="absolute -right-1 -top-1 flex h-5 w-5 items-center justify-center rounded-full border-2 border-white bg-red-500 text-[10px] font-bold text-white">
@@ -363,74 +418,6 @@ function prettyLabel(section: SectionType) {
     "organization-settings": "Organization Settings",
   };
   return map[section] || section.replace(/-/g, " ");
-}
-
-function getSectionTitle(section: SectionType): string {
-  const titles: Record<SectionType, string> = {
-    "manage-news": "Manage News",
-    "create-news": "Create News",
-    "manage-blog": "Manage Blogs",
-    "create-blog": "Create Blog",
-    "manage-events": "Manage Events",
-    "create-event": "Create Event",
-    "manage-campus-feed": "Campus Feed",
-    "message-inquiry": "Message / Inquiry",
-    "manage-entrance": "Manage Entrance",
-    "add-entrance": "Add Entrance",
-    "manage-notification": "Notifications",
-    "access-control": "Access Control",
-    payment: "Payment",
-    "organization-profile": "Organization Profile",
-    "organization-settings": "Organization Settings",
-    history: "History",
-    backup: "Backup",
-    settings: "Settings",
-    overview: "Overview",
-    "add-college": "Add College",
-    "manage-college": "College List",
-    "add-course": "Add Course",
-    "manage-course": "Course List",
-    "create-scholarship": "Create Scholarship",
-    "manage-scholarship": "Scholarship List",
-    "add-user": "Add User",
-    "user-management": "User Management",
-    analytics: "Analytics",
-  };
-  return titles[section];
-}
-
-function getSectionIcon(section: SectionType) {
-  const icons: Record<SectionType, React.ReactNode> = {
-    "manage-news": <Newspaper className="h-6 w-6 text-blue-600" />,
-    "create-news": <Newspaper className="h-6 w-6 text-blue-600" />,
-    "manage-blog": <FileText className="h-6 w-6 text-blue-600" />,
-    "create-blog": <FileText className="h-6 w-6 text-blue-600" />,
-    "manage-events": <Calendar className="h-6 w-6 text-blue-600" />,
-    "create-event": <Calendar className="h-6 w-6 text-blue-600" />,
-    "manage-campus-feed": <Building className="h-6 w-6 text-blue-600" />,
-    "message-inquiry": <MessageSquare className="h-6 w-6 text-blue-600" />,
-    "manage-entrance": <ClipboardList className="h-6 w-6 text-blue-600" />,
-    "add-entrance": <ClipboardList className="h-6 w-6 text-blue-600" />,
-    "manage-notification": <Bell className="h-6 w-6 text-blue-600" />,
-    "access-control": <ShieldCheck className="h-6 w-6 text-blue-600" />,
-    payment: <CreditCard className="h-6 w-6 text-blue-600" />,
-    "organization-profile": <Building2 className="h-6 w-6 text-blue-600" />,
-    "organization-settings": <Settings className="h-6 w-6 text-blue-600" />,
-    history: <Clock className="h-6 w-6 text-blue-600" />,
-    backup: <Database className="h-6 w-6 text-blue-600" />,
-    settings: <Settings className="h-6 w-6 text-blue-600" />,
-    overview: <LayoutDashboard className="h-6 w-6 text-blue-600" />,
-    "add-college": <Building2 className="h-6 w-6 text-blue-600" />,
-    "manage-college": <Building2 className="h-6 w-6 text-blue-600" />,
-    "add-course": <BookOpen className="h-6 w-6 text-blue-600" />,
-    "manage-course": <BookOpen className="h-6 w-6 text-blue-600" />,
-    "create-scholarship": <GraduationCap className="h-6 w-6 text-blue-600" />,
-    "manage-scholarship": <GraduationCap className="h-6 w-6 text-blue-600" />,
-    "add-user": <UserPlus className="h-6 w-6 text-blue-600" />,
-    "user-management": <Users className="h-6 w-6 text-blue-600" />,
-    analytics: <BarChart3 className="h-6 w-6 text-blue-600" />,
-  };
-  return icons[section];
 }
 
 function SectionLoader() {

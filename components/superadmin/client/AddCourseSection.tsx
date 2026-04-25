@@ -1,64 +1,70 @@
 "use client";
 
 import React from "react";
-import { BookOpen, Plus } from "lucide-react";
+import { BasicInfoCard, DescriptionCard, FeesCard, FeaturesCard, StreamsCard, ScholarshipsOverviewCard, AdmissionProcessCard, FaqCard, MediaCard } from "./create-course/basic-info";
 
-export default function AddCourseSection({ setActiveSection }: { setActiveSection: (s: string) => void }) {
+export default function AddCourseSection({
+  setActiveSection,
+  lockedSections,
+  setLockedSections,
+}: {
+  setActiveSection: (s: string) => void;
+  lockedSections: Record<string, boolean>;
+  setLockedSections: React.Dispatch<React.SetStateAction<Record<string, boolean>>>;
+}) {
+  const toggleLock = (sid: string) => {
+    setLockedSections((prev) => ({ ...prev, [sid]: !prev[sid] }));
+  };
+
   return (
-    <div className="mx-auto max-w-4xl py-8">
-      <div className="rounded-2xl border border-gray-100 bg-white p-8 shadow-sm">
-        <h2 className="mb-8 flex items-center gap-3 text-xl font-extrabold text-gray-900">
-          <Plus size={24} className="text-blue-600" /> Add New Course
-        </h2>
-        <div className="mb-8 grid grid-cols-1 gap-6 md:grid-cols-2">
-          <FormInput label="Course Name" placeholder="e.g., BBA" required />
-          <FormInput label="College" type="select" options={["Sowers College"]} required />
-          <FormInput label="Duration" type="select" options={["4 Years", "3 Years", "2 Years"]} required />
-          <FormInput label="Semester" type="select" options={["8 Semester", "6 Semester", "4 Semester"]} required />
+    <div className="mx-auto max-w-5xl space-y-8 pb-12">
+      <div className="flex items-center justify-between">
+        <div>
+          <h2 className="text-lg font-bold text-gray-900">Add New Course</h2>
+          <p className="mt-1 text-sm text-gray-500">Register a new academic course to the system</p>
         </div>
-        <div className="flex justify-end gap-3 border-t border-gray-50 pt-6">
-          <button type="button" onClick={() => setActiveSection("manage-course")} className="rounded-md border border-gray-200 px-4 py-2.5 text-sm font-bold text-gray-700 hover:bg-gray-50">
+        <div className="flex gap-3">
+          <button
+            type="button"
+            onClick={() => setActiveSection("manage-course")}
+            className="rounded-md border border-gray-200 px-4 py-2.5 text-sm font-medium text-gray-700 hover:bg-gray-50"
+          >
             Cancel
           </button>
-          <button type="button" className="rounded-md bg-blue-600 px-6 py-2.5 text-sm font-bold text-white">
-            Add Course
+          <button
+            type="button"
+            className="rounded-md bg-blue-600 px-4 py-2.5 text-sm font-medium text-white"
+          >
+            Save Course
           </button>
         </div>
       </div>
-    </div>
-  );
-}
 
-function FormInput({
-  label,
-  type = "text",
-  placeholder,
-  options,
-  required,
-}: {
-  label: string;
-  type?: string;
-  placeholder?: string;
-  options?: string[];
-  required?: boolean;
-}) {
-  return (
-    <div className="space-y-2">
-      <label className="block text-sm font-bold text-gray-700">
-        {label} {required ? <span className="text-red-500">*</span> : null}
-      </label>
-      {type === "select" ? (
-        <select className="input-field font-medium">
-          <option value="">Select {label}</option>
-          {(options || []).map((option) => (
-            <option key={option} value={option}>
-              {option}
-            </option>
-          ))}
-        </select>
-      ) : (
-        <input type={type} className="input-field" placeholder={placeholder} />
-      )}
+      <BasicInfoCard locked={!!lockedSections.basic} onToggleLock={() => toggleLock("basic")} />
+      <DescriptionCard locked={!!lockedSections.desc} onToggleLock={() => toggleLock("desc")} />
+      <FeesCard locked={!!lockedSections.fees} onToggleLock={() => toggleLock("fees")} />
+      <FeaturesCard locked={!!lockedSections.features} onToggleLock={() => toggleLock("features")} />
+      <StreamsCard locked={!!lockedSections.streams} onToggleLock={() => toggleLock("streams")} />
+      <ScholarshipsOverviewCard locked={!!lockedSections.scholarships} onToggleLock={() => toggleLock("scholarships")} />
+      <AdmissionProcessCard locked={!!lockedSections.admission} onToggleLock={() => toggleLock("admission")} />
+      <FaqCard locked={!!lockedSections.faq} onToggleLock={() => toggleLock("faq")} />
+      <MediaCard locked={!!lockedSections.media} onToggleLock={() => toggleLock("media")} />
+
+      <div className="flex justify-end gap-4">
+        <button
+          type="button"
+          onClick={() => setActiveSection("manage-course")}
+          className="rounded-md border border-gray-200 px-6 py-2.5 text-sm font-medium text-gray-700 hover:bg-gray-50"
+        >
+          Cancel
+        </button>
+        <button
+          type="button"
+          className="rounded-md bg-blue-600 px-6 py-2.5 text-sm font-medium text-white"
+        >
+          Publish Course
+        </button>
+      </div>
     </div>
   );
 }
