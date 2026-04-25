@@ -268,7 +268,9 @@ export interface EducationCourse {
 
 export interface College {
   id: number;
+  university_id?: number;
   name: string;
+  full_name?: string;
   image_url?: string;
   description?: string;
   rating?: number;
@@ -278,7 +280,41 @@ export interface College {
   affiliation?: string;
   verified?: boolean;
   featured?: boolean;
+  popular?: boolean;
   website?: string;
+  email?: string;
+  phone?: string;
+  established?: string;
+  students?: string;
+  programs?: number;
+  featured_programs?: string[];
+  amenities?: string[];
+  profile_tags?: string[];
+  academic_fit_score?: number;
+  campus_life_score?: number;
+  career_fit_score?: number;
+  balanced_fit_score?: number;
+  about?: any;
+  admissions?: any;
+  admission_cards?: any;
+  offered_programs?: any;
+  alumni?: any;
+  gallery?: any;
+}
+
+export interface University {
+  id: number;
+  name: string;
+  logo?: string;
+  location?: string;
+  type?: string;
+  rank?: number;
+  rating?: number;
+  review_count?: number;
+  verified?: boolean;
+  popular?: boolean;
+  website?: string;
+  cover?: string;
 }
 
 export interface CollegeFilterCountsResponse {
@@ -421,6 +457,15 @@ export const apiService = {
   },
   getToken(): string | null {
     if (typeof window === "undefined") return null;
+    try {
+      const superadminRaw = localStorage.getItem("studsphere_superadmin_auth");
+      if (superadminRaw) {
+        const parsed = JSON.parse(superadminRaw);
+        if (parsed?.token) return parsed.token;
+      }
+    } catch {
+      // ignore malformed storage
+    }
     return localStorage.getItem("token") || sessionStorage.getItem("token") || "mock-token";
   },
   getScholarshipProviderToken(): string | null {
@@ -668,6 +713,138 @@ export const apiService = {
 
   async getCollegeFilterCounts(): Promise<CollegeFilterCountsResponse> {
     return apiRequest<CollegeFilterCountsResponse>("/api/v1/colleges/filter-counts");
+  },
+
+  async getUniversities(params?: {
+    search?: string;
+    type?: string;
+    popular?: boolean;
+  }): Promise<{ data: { universities: University[] } }> {
+    const query = new URLSearchParams();
+    if (params?.search) query.set("search", params.search);
+    if (params?.type) query.set("type", params.type);
+    if (params?.popular) query.set("popular", "true");
+
+    return apiRequest<{ data: { universities: University[] } }>(`/api/v1/universities${query.toString() ? `?${query.toString()}` : ""}`);
+  },
+
+  async getAdminColleges(params?: Record<string, any>): Promise<CollegesResponse> {
+    const query = new URLSearchParams();
+    Object.entries(params || {}).forEach(([key, value]) => {
+      if (value === undefined || value === null || value === "") return;
+      query.set(key, String(value));
+    });
+
+    return apiRequest<CollegesResponse>(`/api/v1/admin/colleges${query.toString() ? `?${query.toString()}` : ""}`);
+  },
+
+  async getAdminCollegeById(id: number): Promise<{ data: College }> {
+    return apiRequest<{ data: College }>(`/api/v1/admin/colleges/${id}`);
+  },
+
+  async createCollege(data: {
+    university_id: number;
+    name: string;
+    full_name?: string;
+    location: string;
+    affiliation?: string;
+    type?: string;
+    verified?: boolean;
+    popular?: boolean;
+    rating?: number;
+    reviews?: number;
+    programs?: number;
+    established?: string;
+    students?: string;
+    description?: string;
+    website?: string;
+    email?: string;
+    phone?: string;
+    image_url?: string;
+    featured_programs?: string[];
+    amenities?: string[];
+    academic_fit_score?: number;
+    campus_life_score?: number;
+    career_fit_score?: number;
+    balanced_fit_score?: number;
+    profile_tags?: string[];
+  }): Promise<{ data: College }> {
+    return apiRequest<{ data: College }>("/api/v1/admin/colleges", {
+      method: "POST",
+      body: JSON.stringify(data),
+    });
+  },
+
+  async updateCollege(id: number, data: Partial<{
+    university_id: number;
+    name: string;
+    full_name: string;
+    location: string;
+    affiliation: string;
+    type: string;
+    verified: boolean;
+    popular: boolean;
+    rating: number;
+    reviews: number;
+    programs: number;
+    established: string;
+    students: string;
+    description: string;
+    website: string;
+    email: string;
+    phone: string;
+    image_url: string;
+    featured_programs: string[];
+    amenities: string[];
+    academic_fit_score: number;
+    campus_life_score: number;
+    career_fit_score: number;
+    balanced_fit_score: number;
+    profile_tags: string[];
+  }>): Promise<{ data: College }> {
+    return apiRequest<{ data: College }>(`/api/v1/admin/colleges/${id}`, {
+      method: "PUT",
+      body: JSON.stringify(data),
+    });
+  },
+
+  async deleteCollege(id: number): Promise<void> {
+    await apiRequest(`/api/v1/admin/colleges/${id}`, {
+      method: "DELETE",
+    });
+  },
+
+  async approveCollege(id: number): Promise<{ data: College }> {
+    return apiRequest<{ data: College }>(`/api/v1/admin/colleges/${id}/approve`, {
+      method: "PUT",
+    });
+  },
+
+  async toggleCollegeFeatured(id: number): Promise<{ data: College }> {
+    return apiRequest<{ data: College }>(`/api/v1/admin/colleges/${id}/featured`, {
+      method: "PUT",
+    });
+  },
+
+  async uploadCollegeImage(file: File): Promise<string> {
+    const token = this.getToken();
+    const formData = new FormData();
+    formData.append("image", file);
+
+    const response = await fetch(`${API_BASE_URL}/api/v1/admin/colleges/upload-image`, {
+      method: "POST",
+      headers: {
+        ...(token ? { Authorization: `Bearer ${token}` } : {}),
+      },
+      body: formData,
+    });
+
+    const data = await response.json().catch(() => ({}));
+    if (!response.ok) {
+      throw new Error(data?.error || data?.message || "Failed to upload image");
+    }
+
+    return data?.data?.url || data?.url;
   },
 
   async getEducationCourses(params?: {

@@ -1,6 +1,7 @@
 "use client";
 
 import React, { createContext, useContext, useState, useEffect, ReactNode } from "react";
+import { apiService } from "./api";
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080";
 const SUPERADMIN_STORAGE_KEY = "studsphere_superadmin_auth";
@@ -45,17 +46,25 @@ const SuperadminAuthContext = createContext<SuperadminAuthContextType | undefine
 function loadStoredAdmin(): { token: string; admin: SuperadminUser } | null {
   try {
     const raw = localStorage.getItem(SUPERADMIN_STORAGE_KEY);
-    if (raw) return JSON.parse(raw);
+    if (raw) {
+      const parsed = JSON.parse(raw);
+      if (parsed?.token) {
+        apiService.setToken(parsed.token);
+      }
+      return parsed;
+    }
   } catch { /* ignore */ }
   return null;
 }
 
 function saveAdminAuth(token: string, admin: SuperadminUser) {
   localStorage.setItem(SUPERADMIN_STORAGE_KEY, JSON.stringify({ token, admin }));
+  apiService.setToken(token);
 }
 
 function clearAdminAuth() {
   localStorage.removeItem(SUPERADMIN_STORAGE_KEY);
+  apiService.setToken(null);
 }
 
 // ─── Local admin "database" (for offline / no-DB mode) ───────────────────────
@@ -94,13 +103,13 @@ async function tryBackendLogin(
     }
     const data = await res.json();
     return data.data as { token: string; user: SuperadminUser };
-  } catch (err: any) {
+  } catch (err: unknown) {
+    const message = err instanceof Error ? err.message : "";
     // Network / connection errors — signal to caller to use offline fallback
     if (
-      err.name === "TypeError" ||
-      err.name === "AbortError" ||
-      err.message?.includes("Failed to fetch") ||
-      err.message?.includes("ERR_CONNECTION_REFUSED")
+      (err instanceof Error && (err.name === "TypeError" || err.name === "AbortError")) ||
+      message.includes("Failed to fetch") ||
+      message.includes("ERR_CONNECTION_REFUSED")
     ) {
       return null; // backend unavailable
     }
@@ -128,12 +137,12 @@ async function tryBackendRegister(data: {
     }
     const resData = await res.json();
     return resData.data as { token: string; user: SuperadminUser };
-  } catch (err: any) {
+  } catch (err: unknown) {
+    const message = err instanceof Error ? err.message : "";
     if (
-      err.name === "TypeError" ||
-      err.name === "AbortError" ||
-      err.message?.includes("Failed to fetch") ||
-      err.message?.includes("ERR_CONNECTION_REFUSED")
+      (err instanceof Error && (err.name === "TypeError" || err.name === "AbortError")) ||
+      message.includes("Failed to fetch") ||
+      message.includes("ERR_CONNECTION_REFUSED")
     ) {
       return null; // backend unavailable
     }
@@ -201,6 +210,7 @@ export function SuperadminAuthProvider({ children }: { children: ReactNode }) {
   const [admin, setAdmin] = useState<SuperadminUser | null>(null);
   const [loading, setLoading] = useState(true);
 
+  /* eslint-disable react-hooks/set-state-in-effect */
   useEffect(() => {
     const stored = loadStoredAdmin();
     if (stored) {
@@ -209,6 +219,7 @@ export function SuperadminAuthProvider({ children }: { children: ReactNode }) {
     }
     setLoading(false);
   }, []);
+  /* eslint-enable react-hooks/set-state-in-effect */
 
   const login = async (email: string, password: string) => {
     // Try real backend first

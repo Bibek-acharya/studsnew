@@ -6,8 +6,7 @@ import { usePathname } from "next/navigation";
 import {
   X,
   SquaresFour,
-  Student,
-  GraduationCap,
+  Bank,
   CalendarStar,
   Newspaper,
   Gear,
@@ -29,14 +28,9 @@ const SuperadminSidebar = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
       path: "/superadmin",
     },
     {
-      title: "Admissions",
-      icon: Student,
-      path: "/superadmin/admissions",
-    },
-    {
-      title: "Scholarships",
-      icon: GraduationCap,
-      path: "/superadmin/scholarships",
+      title: "Colleges",
+      icon: Bank,
+      path: "/superadmin/colleges",
     },
     {
       title: "Events",
