@@ -26,7 +26,7 @@ const TopBar: React.FC<TopBarProps> = ({
   return (
     <div className="bg-white border-b border-slate-200 px-6 py-3 flex items-center justify-between sticky top-0 z-40">
       <div className="flex items-center gap-4 flex-1">
-        <div className="flex items-center border border-slate-200 rounded-lg px-3 py-2 w-[500px] focus-within:border-blue-600 transition-colors">
+        <div className="flex items-center border border-slate-200 rounded-lg px-3 py-2 w-125 focus-within:border-blue-600 transition-colors">
           <Search className="w-4 h-4 text-slate-400" />
           <input
             type="text"
@@ -58,7 +58,7 @@ const TopBar: React.FC<TopBarProps> = ({
             </p>
             <p className="text-xs text-slate-500">Administrator</p>
           </div>
-          <div className="w-10 h-10 rounded-full bg-gradient-to-br from-blue-600 to-blue-500 text-white flex items-center justify-center font-semibold text-sm">
+          <div className="w-10 h-10 rounded-full bg-linear-to-br from-blue-600 to-blue-500 text-white flex items-center justify-center font-semibold text-sm">
             {getInitials(providerUser?.provider_name || "Admin User")}
           </div>
         </div>

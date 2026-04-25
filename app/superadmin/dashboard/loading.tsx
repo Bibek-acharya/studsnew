@@ -1,15 +1,4 @@
-import SuperadminDashboard from "@/components/superadmin/client/DashboardShell";
-import { Suspense } from "react";
-
-export default function SuperadminDashboardPage() {
-  return (
-    <Suspense fallback={<DashboardFallback />}>
-      <SuperadminDashboard />
-    </Suspense>
-  );
-}
-
-function DashboardFallback() {
+export default function DashboardLoading() {
   return (
     <div className="flex h-screen w-full items-center justify-center bg-[#f8fafc]">
       <div className="flex flex-col items-center gap-4">
