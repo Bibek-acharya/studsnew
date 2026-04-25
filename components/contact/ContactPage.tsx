@@ -57,7 +57,7 @@ const ContactPage: React.FC = () => {
     window.setTimeout(() => dismissToast(id), 4000);
   };
 
-const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     try {
       const res = await fetch("/api/v1/contact", {

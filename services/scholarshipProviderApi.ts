@@ -155,6 +155,84 @@ export interface AnalyticsData {
   scholarship_stats: { id: number; title: string; applications: number; status: string }[];
 }
 
+export interface ProviderNews {
+  id: number;
+  provider_id: number;
+  title: string;
+  content: string;
+  image_url: string | null;
+  status: string;
+  published_at: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface ProviderEvent {
+  id: number;
+  provider_id: number;
+  name: string;
+  description: string;
+  image_url: string | null;
+  event_type: string;
+  start_date: string;
+  end_date: string;
+  location: string;
+  status: string;
+  attendees: number;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface ProviderBlog {
+  id: number;
+  provider_id: number;
+  title: string;
+  content: string;
+  image_url: string | null;
+  author: string;
+  status: string;
+  published_at: string | null;
+  views: number;
+  likes: number;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface ProviderCalendarEvent {
+  id: number;
+  provider_id: number;
+  title: string;
+  description: string;
+  start_date: string;
+  end_date: string;
+  color: string;
+  is_all_day: boolean;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface ProviderResult {
+  id: number;
+  provider_id: number;
+  scholarship_id: number;
+  title: string;
+  status: string;
+  published_at: string | null;
+  results: any;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface ProviderAccess {
+  id: number;
+  provider_id: number;
+  email: string;
+  role: string;
+  status: string;
+  created_at: string;
+  updated_at: string;
+}
+
 export const scholarshipProviderApi = {
   async login(data: { email: string; password: string }): Promise<ScholarshipProviderAuthResponse> {
     const res = await request<any>({
@@ -369,6 +447,257 @@ export const scholarshipProviderApi = {
     await request<any>({
       method: "PUT",
       url: "/scholarship-providers/notifications/read-all",
+    });
+  },
+
+  async createNews(data: { title: string; content: string; image_url?: string; status?: string }): Promise<ProviderNews> {
+    const res = await request<any>({
+      method: "POST",
+      url: "/scholarship-providers/news",
+      data,
+    });
+    return res.data;
+  },
+
+  async getNews(page = 1, limit = 10): Promise<{ news: ProviderNews[]; meta: { total: number; page: number; limit: number } }> {
+    const res = await request<any>({
+      method: "GET",
+      url: "/scholarship-providers/news",
+      params: { page, limit },
+    });
+    return res.data;
+  },
+
+  async getNewsById(id: number): Promise<ProviderNews> {
+    const res = await request<any>({
+      method: "GET",
+      url: `/scholarship-providers/news/${id}`,
+    });
+    return res.data;
+  },
+
+  async updateNews(id: number, data: { title: string; content: string; image_url?: string; status?: string }): Promise<ProviderNews> {
+    const res = await request<any>({
+      method: "PUT",
+      url: `/scholarship-providers/news/${id}`,
+      data,
+    });
+    return res.data;
+  },
+
+  async deleteNews(id: number): Promise<void> {
+    await request<any>({
+      method: "DELETE",
+      url: `/scholarship-providers/news/${id}`,
+    });
+  },
+
+  async createEvent(data: { name: string; description: string; image_url?: string; event_type?: string; start_date: string; end_date?: string; location?: string; status?: string }): Promise<ProviderEvent> {
+    const res = await request<any>({
+      method: "POST",
+      url: "/scholarship-providers/events",
+      data,
+    });
+    return res.data;
+  },
+
+  async getEvents(page = 1, limit = 10): Promise<{ events: ProviderEvent[]; meta: { total: number; page: number; limit: number } }> {
+    const res = await request<any>({
+      method: "GET",
+      url: "/scholarship-providers/events",
+      params: { page, limit },
+    });
+    return res.data;
+  },
+
+  async getEventById(id: number): Promise<ProviderEvent> {
+    const res = await request<any>({
+      method: "GET",
+      url: `/scholarship-providers/events/${id}`,
+    });
+    return res.data;
+  },
+
+  async updateEvent(id: number, data: { name: string; description: string; image_url?: string; event_type?: string; start_date: string; end_date?: string; location?: string; status?: string }): Promise<ProviderEvent> {
+    const res = await request<any>({
+      method: "PUT",
+      url: `/scholarship-providers/events/${id}`,
+      data,
+    });
+    return res.data;
+  },
+
+  async deleteEvent(id: number): Promise<void> {
+    await request<any>({
+      method: "DELETE",
+      url: `/scholarship-providers/events/${id}`,
+    });
+  },
+
+  async createBlog(data: { title: string; content: string; image_url?: string; author?: string; status?: string }): Promise<ProviderBlog> {
+    const res = await request<any>({
+      method: "POST",
+      url: "/scholarship-providers/blogs",
+      data,
+    });
+    return res.data;
+  },
+
+  async getBlogs(page = 1, limit = 10): Promise<{ blogs: ProviderBlog[]; meta: { total: number; page: number; limit: number } }> {
+    const res = await request<any>({
+      method: "GET",
+      url: "/scholarship-providers/blogs",
+      params: { page, limit },
+    });
+    return res.data;
+  },
+
+  async getBlogById(id: number): Promise<ProviderBlog> {
+    const res = await request<any>({
+      method: "GET",
+      url: `/scholarship-providers/blogs/${id}`,
+    });
+    return res.data;
+  },
+
+  async updateBlog(id: number, data: { title: string; content: string; image_url?: string; author?: string; status?: string }): Promise<ProviderBlog> {
+    const res = await request<any>({
+      method: "PUT",
+      url: `/scholarship-providers/blogs/${id}`,
+      data,
+    });
+    return res.data;
+  },
+
+  async deleteBlog(id: number): Promise<void> {
+    await request<any>({
+      method: "DELETE",
+      url: `/scholarship-providers/blogs/${id}`,
+    });
+  },
+
+  async createCalendarEvent(data: { title: string; description?: string; start_date: string; end_date?: string; color?: string; is_all_day?: boolean }): Promise<ProviderCalendarEvent> {
+    const res = await request<any>({
+      method: "POST",
+      url: "/scholarship-providers/calendar-events",
+      data,
+    });
+    return res.data;
+  },
+
+  async getCalendarEvents(): Promise<ProviderCalendarEvent[]> {
+    const res = await request<any>({
+      method: "GET",
+      url: "/scholarship-providers/calendar-events",
+    });
+    return res.data;
+  },
+
+  async getCalendarEventById(id: number): Promise<ProviderCalendarEvent> {
+    const res = await request<any>({
+      method: "GET",
+      url: `/scholarship-providers/calendar-events/${id}`,
+    });
+    return res.data;
+  },
+
+  async updateCalendarEvent(id: number, data: { title: string; description?: string; start_date: string; end_date?: string; color?: string; is_all_day?: boolean }): Promise<ProviderCalendarEvent> {
+    const res = await request<any>({
+      method: "PUT",
+      url: `/scholarship-providers/calendar-events/${id}`,
+      data,
+    });
+    return res.data;
+  },
+
+  async deleteCalendarEvent(id: number): Promise<void> {
+    await request<any>({
+      method: "DELETE",
+      url: `/scholarship-providers/calendar-events/${id}`,
+    });
+  },
+
+  async createResult(data: { scholarship_id: number; title: string; status?: string; results?: any }): Promise<ProviderResult> {
+    const res = await request<any>({
+      method: "POST",
+      url: "/scholarship-providers/results",
+      data,
+    });
+    return res.data;
+  },
+
+  async getResults(page = 1, limit = 10): Promise<{ results: ProviderResult[]; meta: { total: number; page: number; limit: number } }> {
+    const res = await request<any>({
+      method: "GET",
+      url: "/scholarship-providers/results",
+      params: { page, limit },
+    });
+    return res.data;
+  },
+
+  async getResultById(id: number): Promise<ProviderResult> {
+    const res = await request<any>({
+      method: "GET",
+      url: `/scholarship-providers/results/${id}`,
+    });
+    return res.data;
+  },
+
+  async updateResult(id: number, data: { scholarship_id: number; title: string; status?: string; results?: any }): Promise<ProviderResult> {
+    const res = await request<any>({
+      method: "PUT",
+      url: `/scholarship-providers/results/${id}`,
+      data,
+    });
+    return res.data;
+  },
+
+  async deleteResult(id: number): Promise<void> {
+    await request<any>({
+      method: "DELETE",
+      url: `/scholarship-providers/results/${id}`,
+    });
+  },
+
+  async createAccess(data: { email: string; role?: string }): Promise<ProviderAccess> {
+    const res = await request<any>({
+      method: "POST",
+      url: "/scholarship-providers/access",
+      data,
+    });
+    return res.data;
+  },
+
+  async getAccess(page = 1, limit = 10): Promise<{ access: ProviderAccess[]; meta: { total: number; page: number; limit: number } }> {
+    const res = await request<any>({
+      method: "GET",
+      url: "/scholarship-providers/access",
+      params: { page, limit },
+    });
+    return res.data;
+  },
+
+  async getAccessById(id: number): Promise<ProviderAccess> {
+    const res = await request<any>({
+      method: "GET",
+      url: `/scholarship-providers/access/${id}`,
+    });
+    return res.data;
+  },
+
+  async updateAccess(id: number, data: { email: string; role?: string }): Promise<ProviderAccess> {
+    const res = await request<any>({
+      method: "PUT",
+      url: `/scholarship-providers/access/${id}`,
+      data,
+    });
+    return res.data;
+  },
+
+  async deleteAccess(id: number): Promise<void> {
+    await request<any>({
+      method: "DELETE",
+      url: `/scholarship-providers/access/${id}`,
     });
   },
 };

@@ -107,26 +107,38 @@ export default function Analytics() {
                 color: 'indigo',
                 isMulti: true
               }
-            ].map(report => (
-              <div key={report.title} className="bg-white p-8 rounded-md border border-slate-200  hover:shadow-xl transition-all group flex flex-col items-center text-center">
-                <div className={`w-20 h-20 bg-${report.color}-50 text-${report.color}-600 rounded-md flex items-center justify-center mb-6 text-3xl group-hover:scale-110 transition-transform duration-500 `}>
-                  <i className={`fa-solid ${report.icon}`}></i>
-                </div>
-                <h3 className="font-black text-xl text-slate-800 mb-3 uppercase tracking-tighter">{report.title}</h3>
-                <p className="text-sm text-slate-500 mb-8 flex-1 leading-relaxed font-medium">{report.desc}</p>
+            ].map(report => {
+              const colorMap: Record<string, { bg: string; text: string; btn: string; shadow: string }> = {
+                blue: { bg: 'bg-blue-50', text: 'text-blue-600', btn: 'bg-blue-600', shadow: 'shadow-blue-500/20' },
+                green: { bg: 'bg-green-50', text: 'text-green-600', btn: 'bg-green-600', shadow: 'shadow-green-500/20' },
+                purple: { bg: 'bg-purple-50', text: 'text-purple-600', btn: 'bg-purple-600', shadow: 'shadow-purple-500/20' },
+                orange: { bg: 'bg-orange-50', text: 'text-orange-600', btn: 'bg-orange-600', shadow: 'shadow-orange-500/20' },
+                red: { bg: 'bg-red-50', text: 'text-red-600', btn: 'bg-red-600', shadow: 'shadow-red-500/20' },
+                indigo: { bg: 'bg-indigo-50', text: 'text-indigo-600', btn: 'bg-indigo-600', shadow: 'shadow-indigo-500/20' },
+              };
+              const colors = colorMap[report.color] || colorMap.blue;
 
-                {report.isMulti ? (
-                  <div className="grid grid-cols-2 gap-3 w-full">
-                    <button className="py-4 bg-slate-50 text-slate-700 rounded-md hover:bg-slate-100 font-black text-xs uppercase transition  border border-slate-100"><i className="fa-solid fa-file-csv mr-2"></i> CSV</button>
-                    <button className="py-4 bg-slate-50 text-slate-700 rounded-md hover:bg-slate-100 font-black text-xs uppercase transition  border border-slate-100"><i className="fa-solid fa-file-powerpoint mr-2"></i> PPT</button>
+              return (
+                <div key={report.title} className="bg-white p-8 rounded-md border border-slate-200 hover:shadow-xl transition-all group flex flex-col items-center text-center">
+                  <div className={`w-20 h-20 ${colors.bg} ${colors.text} rounded-md flex items-center justify-center mb-6 text-3xl group-hover:scale-110 transition-transform duration-500`}>
+                    <i className={`fa-solid ${report.icon}`}></i>
                   </div>
-                ) : (
-                  <button className={`w-full py-4 bg-${report.color}-600 text-white rounded-md hover:shadow-lg transition-all font-black text-xs uppercase tracking-widest  shadow-${report.color}-500/20 flex items-center justify-center gap-2`}>
-                    <i className={`fa-solid ${report.action?.includes('CSV') ? 'fa-file-csv' : 'fa-file-pdf'}`}></i> {report.action}
-                  </button>
-                )}
-              </div>
-            ))}
+                  <h3 className="font-black text-xl text-slate-800 mb-3 uppercase tracking-tighter">{report.title}</h3>
+                  <p className="text-sm text-slate-500 mb-8 flex-1 leading-relaxed font-medium">{report.desc}</p>
+
+                  {report.isMulti ? (
+                    <div className="grid grid-cols-2 gap-3 w-full">
+                      <button className="py-4 bg-slate-50 text-slate-700 rounded-md hover:bg-slate-100 font-black text-xs uppercase transition border border-slate-100"><i className="fa-solid fa-file-csv mr-2"></i> CSV</button>
+                      <button className="py-4 bg-slate-50 text-slate-700 rounded-md hover:bg-slate-100 font-black text-xs uppercase transition border border-slate-100"><i className="fa-solid fa-file-powerpoint mr-2"></i> PPT</button>
+                    </div>
+                  ) : (
+                    <button className={`w-full py-4 ${colors.btn} text-white rounded-md hover:shadow-lg transition-all font-black text-xs uppercase tracking-widest shadow-lg ${colors.shadow} flex items-center justify-center gap-2`}>
+                      <i className={`fa-solid ${report.action?.includes('CSV') ? 'fa-file-csv' : 'fa-file-pdf'}`}></i> {report.action}
+                    </button>
+                  )}
+                </div>
+              );
+            })}
           </div>
         </>
       )}

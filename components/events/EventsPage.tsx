@@ -45,27 +45,10 @@ const EventsPage: React.FC = () => {
   const [activeFilter, setActiveFilter] = useState<EventFilter>("All News");
   const [sortBy, setSortBy] = useState<"Newest First" | "Oldest First" | "Popular">("Newest First");
   const [currentPage, setCurrentPage] = useState(1);
-  const [events, setEvents] = useState<EducationEvent[]>([]);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const [bookmarkedEventIds, setBookmarkedEventIds] = useState<Set<string>>(new Set());
   const [events, setEvents] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    const loadEvents = async () => {
-      setLoading(true);
-      try {
-        const result = await fetchPublicEvents({ limit: 50 });
-        setEvents(result.events);
-      } catch {
-        setEvents([]);
-      } finally {
-        setLoading(false);
-      }
-    };
-    loadEvents();
-  }, []);
+  const [error, setError] = useState<string | null>(null);
+  const [bookmarkedEventIds, setBookmarkedEventIds] = useState<Set<string>>(new Set());
 
   useEffect(() => {
     const loadEvents = async () => {
@@ -73,33 +56,18 @@ const EventsPage: React.FC = () => {
       setError(null);
 
       try {
-        const response = await apiService.getEducationEvents();
-        setEvents(response.data.events || []);
+        const result = await fetchPublicEvents({ limit: 50 });
+        setEvents(result.events || []);
 
-        if (apiService.isAuthenticated()) {
-          const bookmarks = await apiService.getBookmarksByType("event");
-          const ids = new Set<string>();
-          const idMap: Record<string, number> = {};
-
-          bookmarks.data.bookmarks.forEach((bookmark) => {
-            const key = String(bookmark.item_id);
-            ids.add(key);
-            idMap[key] = bookmark.id;
-          });
-
-          setBookmarkedEventIds(ids);
-          setBookmarkIdMap(idMap);
-        } else {
-          const stored = window.localStorage.getItem("events-bookmarks");
-          if (stored) {
-            try {
-              const parsed = JSON.parse(stored) as string[];
-              if (Array.isArray(parsed)) {
-                setBookmarkedEventIds(new Set(parsed));
-              }
-            } catch {
-              // Ignore invalid local storage and continue with empty bookmarks.
+        const stored = window.localStorage.getItem("events-bookmarks");
+        if (stored) {
+          try {
+            const parsed = JSON.parse(stored) as string[];
+            if (Array.isArray(parsed)) {
+              setBookmarkedEventIds(new Set(parsed));
             }
+          } catch {
+            // Ignore invalid local storage and continue with empty bookmarks.
           }
         }
       } catch (err) {
@@ -113,9 +81,7 @@ const EventsPage: React.FC = () => {
   }, []);
 
   useEffect(() => {
-    if (!apiService.isAuthenticated()) {
-      window.localStorage.setItem("events-bookmarks", JSON.stringify(Array.from(bookmarkedEventIds)));
-    }
+    window.localStorage.setItem("events-bookmarks", JSON.stringify(Array.from(bookmarkedEventIds)));
   }, [bookmarkedEventIds]);
 
   const toggleBookmark = async (e: React.MouseEvent, id: string | number) => {
@@ -123,28 +89,6 @@ const EventsPage: React.FC = () => {
     e.stopPropagation();
 
     const key = String(id);
-
-    if (apiService.isAuthenticated()) {
-      const existingBookmarkId = bookmarkIdMap[key];
-      if (existingBookmarkId) {
-        await apiService.deleteBookmark(existingBookmarkId);
-        setBookmarkIdMap((prev) => {
-          const next = { ...prev };
-          delete next[key];
-          return next;
-        });
-        setBookmarkedEventIds((prev) => {
-          const next = new Set(prev);
-          next.delete(key);
-          return next;
-        });
-      } else {
-        const response = await apiService.createBookmark(Number(id), "event");
-        setBookmarkIdMap((prev) => ({ ...prev, [key]: response.data.id }));
-        setBookmarkedEventIds((prev) => new Set(prev).add(key));
-      }
-      return;
-    }
 
     setBookmarkedEventIds((prev) => {
       const next = new Set(prev);
