@@ -1,11 +1,11 @@
 /**
  * Blog API Service
- * Handles all blog operations for both the public site and superadmin panel.
+ * Handles all blog operations for the public site and admin panel.
  * Falls back to local storage when the backend is unreachable.
  */
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080";
-const SUPERADMIN_STORAGE_KEY = "studsphere_superadmin_auth";
+const ADMIN_STORAGE_KEY = "studsphere_admin_auth";
 
 let blogToken: string | null = null;
 
@@ -42,7 +42,7 @@ export interface BlogMeta {
 function getAdminToken(): string | null {
   if (blogToken) return blogToken;
   try {
-    const raw = localStorage.getItem(SUPERADMIN_STORAGE_KEY);
+    const raw = localStorage.getItem(ADMIN_STORAGE_KEY);
     if (raw) {
       const parsed = JSON.parse(raw);
       return parsed.token || null;
@@ -150,7 +150,7 @@ export async function fetchPublicBlogById(id: string): Promise<{ blog: BlogEntry
   }
 }
 
-// ─── Admin API (used by superadmin blog management) ──────────────────────────
+// ─── Admin API ────────────────────────────────────────────────────────────────
 
 export async function fetchAdminBlogs(params: {
   page?: number;

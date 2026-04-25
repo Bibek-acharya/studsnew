@@ -1,12 +1,17 @@
 import React from "react";
 import DirectAdmissionCard from "./DirectAdmissionCard";
+import { getAdPlacement } from "@/lib/ad-controller";
+
+type DirectAdmissionCardProps = React.ComponentProps<typeof DirectAdmissionCard>;
 
 interface DirectAdmissionAdProps {
-  colleges: any[];
+  colleges: DirectAdmissionCardProps[];
 }
 
 const DirectAdmissionAd: React.FC<DirectAdmissionAdProps> = ({ colleges }) => {
-  if (colleges.length === 0) return null;
+  const placement = getAdPlacement("admissions-direct");
+
+  if (!placement.enabled || colleges.length === 0) return null;
 
   // Take latest 3 as requested
   const latestColleges = colleges.slice(0, 3);
@@ -16,9 +21,7 @@ const DirectAdmissionAd: React.FC<DirectAdmissionAdProps> = ({ colleges }) => {
       <div className="bg-linear-to-br from-indigo-600 to-violet-700 rounded-md p-5 md:p-7 flex flex-col gap-6 ">
         <div className="text-white w-full px-1 flex justify-between items-start">
           <div className="flex flex-col gap-1">
-            <h2 className="text-xl md:text-2xl font-bold tracking-tight">
-              Skip the queue: Apply directly
-            </h2>
+            <h2 className="text-xl md:text-2xl font-bold tracking-tight">{placement.headline}</h2>
           </div>
           <div className="hidden md:block">
              <span className="bg-white/20 backdrop-blur-sm text-white text-[10px] font-bold px-3 py-1 rounded-full uppercase tracking-widest border border-white/20">

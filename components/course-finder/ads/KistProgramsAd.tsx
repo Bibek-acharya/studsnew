@@ -1,7 +1,8 @@
 "use client";
 
 import React, { useRef } from "react";
-import { ChevronLeft, ChevronRight, Star, MapPin, Calendar, Briefcase } from "lucide-react";
+import { ChevronLeft, ChevronRight, Star, MapPin, Calendar } from "lucide-react";
+import { getAdPlacement } from "@/lib/ad-controller";
 
 interface KistProgram {
   title: string;
@@ -35,7 +36,9 @@ const companies = [
 
 const KistProgramsAd: React.FC = () => {
   const carouselRef = useRef<HTMLDivElement>(null);
-  const [activeDot, setActiveDot] = React.useState(0);
+  const placement = getAdPlacement("course-kist-programs");
+
+  if (!placement.enabled) return null;
 
   const scroll = (direction: number) => {
     if (carouselRef.current) {
@@ -43,20 +46,16 @@ const KistProgramsAd: React.FC = () => {
     }
   };
 
-  const handleScroll = () => {
-    if (carouselRef.current) {
-      const scrollPos = carouselRef.current.scrollLeft;
-      const index = Math.round(scrollPos / 306);
-      setActiveDot(index);
-    }
-  };
-
   return (
     <div className="w-full bg-[#ebfbf1] border border-[#c6f6d5] rounded-[20px] p-5">
       <div className="flex justify-between items-center mb-4 flex-wrap gap-3">
-        <div>
-          <h2 className="text-lg md:text-[22px] font-bold text-green-900 tracking-tight leading-snug">Best bachelor degree</h2>
-          <p className="text-[13px] text-green-700 font-medium">on best colleges</p>
+          <div>
+          <h2 className="text-lg md:text-[22px] font-bold text-green-900 tracking-tight leading-snug">
+            {placement.headline}
+          </h2>
+          <p className="text-[13px] text-green-700 font-medium">
+            {placement.description}
+          </p>
         </div>
         <div className="flex items-center gap-2">
           <button onClick={() => scroll(-1)} className="w-8 h-8 rounded-full bg-white border border-gray-200  text-gray-600 hover:bg-gray-50 flex items-center justify-center">
@@ -68,7 +67,7 @@ const KistProgramsAd: React.FC = () => {
         </div>
       </div>
 
-      <div className="overflow-x-auto snap-x snap-mandatory" ref={carouselRef} onScroll={handleScroll} style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}>
+      <div className="overflow-x-auto snap-x snap-mandatory" ref={carouselRef} style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}>
         <div className="flex gap-4 pb-2">
           {programs.map((program, idx) => (
             <div

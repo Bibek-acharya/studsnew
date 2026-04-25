@@ -27,6 +27,11 @@ function saveAll(records: Record<number, CollegeSubscriptionRecord>) {
   localStorage.setItem(STORAGE_KEY, JSON.stringify(records));
 }
 
+export function listCollegeSubscriptions(): CollegeSubscriptionRecord[] {
+  const records = loadAll();
+  return Object.values(records).sort((a, b) => b.updatedAt.localeCompare(a.updatedAt));
+}
+
 export function getCollegeSubscription(collegeId: number): CollegeSubscriptionRecord | null {
   const records = loadAll();
   return records[collegeId] || null;
@@ -49,3 +54,6 @@ export function clearCollegeSubscription(collegeId: number): void {
   saveAll(records);
 }
 
+export function clearAllCollegeSubscriptions(): void {
+  saveAll({});
+}

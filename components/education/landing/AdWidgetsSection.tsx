@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect, useCallback } from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
+import { getAdPlacement } from "@/lib/ad-controller";
 
 interface AdSlide {
   image: string;
@@ -69,8 +70,8 @@ const AdCard: React.FC<{ slides: AdSlide[]; carouselIndex: number }> = ({ slides
         src={activeSlide.image}
         alt={activeSlide.title}
         className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
-        onError={(e: any) => {
-          e.target.src = "https://placehold.co/800x400/1e293b/94a3b8?text=Ad";
+        onError={(e: React.SyntheticEvent<HTMLImageElement>) => {
+          e.currentTarget.src = "https://placehold.co/800x400/1e293b/94a3b8?text=Ad";
         }}
       />
 
@@ -134,6 +135,10 @@ const AdCard: React.FC<{ slides: AdSlide[]; carouselIndex: number }> = ({ slides
 };
 
 const AdWidgetsSection = () => {
+  const placement = getAdPlacement("home-ad-widgets");
+
+  if (!placement.enabled) return null;
+
   return (
 <section className="mt-16 sm:mt-20 md:mt-24 w-full px-4 sm:px-6 md:px-8">
   <div className="max-w-350 mx-auto w-full">

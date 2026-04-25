@@ -1,4 +1,5 @@
 import React from "react";
+import { getAdPlacement } from "@/lib/ad-controller";
 
 type CollegeAdItem = {
   title: string;
@@ -131,11 +132,15 @@ const ColumnCard: React.FC<{ item: CollegeAdItem }> = ({ item }) => {
 };
 
 const TrendingCollegesAd: React.FC = () => {
+  const placement = getAdPlacement("find-college-trending");
+
+  if (!placement.enabled) return null;
+
   return (
     <div className="w-full max-w-300">
       <div className="grid grid-cols-1 gap-4 lg:grid-cols-2 lg:gap-6">
         <div className="my-2 rounded-md bg-[radial-gradient(circle_at_center,#0044ff_0%,#0011bb_100%)] p-3 text-white md:p-4 lg:my-4">
-          <h3 className="mb-3 text-[17px] font-medium">Monthly spotlight</h3>
+          <h3 className="mb-3 text-[17px] font-medium">{placement.headline}</h3>
           <div className="flex flex-col gap-2">
             {adData.monthlySpotlight.map((item) => (
               <ColumnCard key={`spotlight-${item.title}`} item={item} />
@@ -144,7 +149,9 @@ const TrendingCollegesAd: React.FC = () => {
         </div>
 
         <div className="my-2 rounded-md bg-[radial-gradient(circle_at_center,#0044ff_0%,#0011bb_100%)] p-3 text-white md:p-4 lg:my-4">
-          <h3 className="mb-3 text-[17px] font-medium">Most searched</h3>
+          <h3 className="mb-3 text-[17px] font-medium">
+            {placement.description || "Most searched"}
+          </h3>
           <div className="flex flex-col gap-2">
             {adData.mostSearched.map((item) => (
               <ColumnCard key={`searched-${item.title}`} item={item} />

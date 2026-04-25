@@ -1,5 +1,5 @@
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080";
-const SUPERADMIN_STORAGE_KEY = "studsphere_superadmin_auth";
+const ADMIN_STORAGE_KEY = "studsphere_admin_auth";
 
 let eventToken: string | null = null;
 
@@ -34,7 +34,7 @@ export interface EventMeta {
 function getAdminToken(): string | null {
   if (eventToken) return eventToken;
   try {
-    const raw = localStorage.getItem(SUPERADMIN_STORAGE_KEY);
+    const raw = localStorage.getItem(ADMIN_STORAGE_KEY);
     if (raw) {
       const parsed = JSON.parse(raw);
       return parsed.token || null;

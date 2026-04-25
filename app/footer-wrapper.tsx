@@ -11,9 +11,9 @@ export default function FooterWrapper() {
     pathname.startsWith("/scholarship-provider") ||
     pathname.startsWith("/institution-zone") ||
     pathname.startsWith("/user/dashboard") ||
+    pathname.startsWith("/superadmin") ||
     pathname.startsWith("/college-recommender") ||
     pathname.startsWith("/scholarship-recommender") ||
-    pathname.startsWith("/superadmin") ||
     pathname === "/login" ||
     pathname === "/register" ||
     pathname === "/forgot-password";

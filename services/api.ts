@@ -457,15 +457,6 @@ export const apiService = {
   },
   getToken(): string | null {
     if (typeof window === "undefined") return null;
-    try {
-      const superadminRaw = localStorage.getItem("studsphere_superadmin_auth");
-      if (superadminRaw) {
-        const parsed = JSON.parse(superadminRaw);
-        if (parsed?.token) return parsed.token;
-      }
-    } catch {
-      // ignore malformed storage
-    }
     return localStorage.getItem("token") || sessionStorage.getItem("token") || "mock-token";
   },
   getScholarshipProviderToken(): string | null {
@@ -743,7 +734,7 @@ export const apiService = {
   },
 
   async createCollege(data: {
-    university_id: number;
+    university_id?: number;
     name: string;
     full_name?: string;
     location: string;
@@ -1163,24 +1154,6 @@ export const apiService = {
     if (typeof window === "undefined") return;
     localStorage.removeItem("scholarshipProviderToken");
     localStorage.removeItem("scholarshipProviderUser");
-  },
-  async superadminLogin(email: string, password: string): Promise<AuthResponse> {
-    return apiRequest<AuthResponse>("/api/v1/superadmin/auth/login", {
-      method: "POST",
-      body: JSON.stringify({ email, password }),
-    });
-  },
-  async superadminRegister(data: {
-    first_name: string;
-    last_name: string;
-    email: string;
-    password: string;
-    access_code: string;
-  }): Promise<AuthResponse> {
-    return apiRequest<AuthResponse>("/api/v1/superadmin/auth/register", {
-      method: "POST",
-      body: JSON.stringify(data),
-    });
   },
 
   async getCollegeReviews(collegeId: number, params?: {

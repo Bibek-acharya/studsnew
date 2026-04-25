@@ -1,8 +1,13 @@
 "use client";
 
 import React from "react";
+import { getAdPlacement } from "@/lib/ad-controller";
 
 const SudsphereBannerAd: React.FC = () => {
+  const placement = getAdPlacement("course-banner");
+
+  if (!placement.enabled) return null;
+
   return (
     <div
       className="relative w-full h-auto md:h-[220px] rounded-md overflow-hidden flex items-center"
@@ -21,8 +26,11 @@ const SudsphereBannerAd: React.FC = () => {
       <div className="relative z-10 w-full px-6 py-10 md:px-16 flex flex-col md:flex-row justify-between items-center gap-8">
         <div className="text-center md:text-left flex-1">
           <h1 className="text-white text-3xl md:text-[36px] font-extrabold leading-tight tracking-tight">
-            Empower your career with<br />Sudsphere today
+            {placement.headline}
           </h1>
+          <p className="mt-2 text-white/80 text-sm md:text-base max-w-xl">
+            {placement.description}
+          </p>
         </div>
 
         <div className="flex flex-col items-center md:items-end gap-3 w-full md:w-auto">

@@ -22,8 +22,6 @@ interface AuthContextType {
   login: (email: string, password: string, rememberMe?: boolean) => Promise<void>;
   logout: () => void;
   register: (email: string, password: string, firstName: string, lastName: string, role: string, educationLevel: string) => Promise<void>;
-  superadminLogin: (email: string, password: string) => Promise<void>;
-  superadminRegister: (data: { first_name: string; last_name: string; email: string; password: string; access_code: string }) => Promise<void>;
   verifyOTP: (email: string, otp: string) => Promise<void>;
   sendOTP: (email: string) => Promise<void>;
   setUser: (user: User) => void;
@@ -154,44 +152,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setStoredAuth(null);
   };
 
-  const superadminLogin = async (email: string, password: string) => {
-    const response: AuthResponse = await apiService.superadminLogin(email, password);
-    
-    if (!response.data?.token) {
-      throw new Error(response.message || "Superadmin login failed");
-    }
-
-    const userData: User = {
-      id: response.data.user.id,
-      first_name: response.data.user.first_name,
-      last_name: response.data.user.last_name,
-      email: response.data.user.email,
-      role: response.data.user.role,
-    };
-
-    saveAuth(response.data.token, userData);
-    setStoredAuth({ token: response.data.token, user: userData });
-  };
-
-  const superadminRegister = async (data: { first_name: string; last_name: string; email: string; password: string; access_code: string }) => {
-    const response: AuthResponse = await apiService.superadminRegister(data);
-    
-    if (!response.data?.token) {
-      throw new Error(response.message || "Superadmin registration failed");
-    }
-
-    const userData: User = {
-      id: response.data.user.id,
-      first_name: response.data.user.first_name,
-      last_name: response.data.user.last_name,
-      email: response.data.user.email,
-      role: response.data.user.role,
-    };
-
-    saveAuth(response.data.token, userData);
-    setStoredAuth({ token: response.data.token, user: userData });
-  };
-
   const value = useMemo(() => ({
     token,
     user,
@@ -200,13 +160,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     login,
     logout,
     register,
-    superadminLogin,
-    superadminRegister,
     verifyOTP,
     sendOTP,
     setUser,
-    superadminLogin,
-    superadminRegister,
   }), [token, user, isAuthenticated, loading]);
 
   return (

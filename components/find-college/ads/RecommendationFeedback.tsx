@@ -1,10 +1,11 @@
 "use client";
 
-import { Check, CheckCheck, CheckCircle } from "lucide-react";
 import { useEffect, useState, useCallback } from "react";
 import { FaCheckCircle } from "react-icons/fa";
+import { getAdPlacement } from "@/lib/ad-controller";
 
 const RecommendationFeedback: React.FC = () => {
+  const placement = getAdPlacement("find-college-feedback");
   const [selection, setSelection] = useState<"up" | "down" | null>(null);
   const [showModal, setShowModal] = useState(false);
   const [showLikeModal, setShowLikeModal] = useState(false);
@@ -55,6 +56,8 @@ const RecommendationFeedback: React.FC = () => {
       toggleBodyScroll(false);
     }
   }, [showModal, showLikeModal, toggleBodyScroll]);
+
+  if (!placement.enabled) return null;
 
   const showToast = (message: string) => {
     setToast({ show: true, message });
@@ -117,7 +120,7 @@ const RecommendationFeedback: React.FC = () => {
     <>
       <div className="bg-white px-6 sm:px-8 py-5 w-full rounded-md border border-gray-200 flex flex-col sm:flex-row items-center justify-between gap-4 transition-all">
         <span className="text-[#0c1844] font-semibold text-[16px] text-center sm:text-left leading-snug tracking-tight">
-          Are these colleges relevant to your location and interests?
+          {placement.headline}
         </span>
 
         <div className="flex items-center space-x-3 shrink-0">

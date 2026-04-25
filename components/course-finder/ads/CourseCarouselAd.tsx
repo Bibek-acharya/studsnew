@@ -2,6 +2,7 @@
 
 import React, { useRef } from "react";
 import { ChevronLeft, ChevronRight, Star, MapPin, Calendar, GraduationCap } from "lucide-react";
+import { getAdPlacement } from "@/lib/ad-controller";
 
 interface Course {
   title: string;
@@ -89,7 +90,9 @@ const courses: Course[] = [
 
 const CourseCarouselAd: React.FC = () => {
   const carouselRef = useRef<HTMLDivElement>(null);
-  const [activeDot, setActiveDot] = React.useState(0);
+  const placement = getAdPlacement("course-carousel");
+
+  if (!placement.enabled) return null;
 
   const scroll = (direction: number) => {
     if (carouselRef.current) {
@@ -100,18 +103,12 @@ const CourseCarouselAd: React.FC = () => {
     }
   };
 
-  const handleScroll = () => {
-    if (carouselRef.current) {
-      const scrollPos = carouselRef.current.scrollLeft;
-      const index = Math.round(scrollPos / 300);
-      setActiveDot(index);
-    }
-  };
-
   return (
     <div className="bg-[#0000ff] rounded-md p-5" style={{ boxShadow: "0 10px 30px rgba(0, 0, 255, 0.2)" }}>
       <div className="flex justify-between items-center mb-4 gap-3 flex-wrap">
-        <h2 className="text-lg font-extrabold text-white tracking-tight">Courses within different colleges</h2>
+        <h2 className="text-lg font-extrabold text-white tracking-tight">
+          {placement.headline}
+        </h2>
         <div className="flex gap-2">
           <button
             onClick={() => scroll(-1)}
@@ -128,9 +125,18 @@ const CourseCarouselAd: React.FC = () => {
         </div>
       </div>
 
-      <div className="overflow-x-auto" ref={carouselRef} onScroll={handleScroll} style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}>
+      <div className="overflow-x-auto" ref={carouselRef} style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}>
         <div className="flex gap-4 pb-3" style={{ scrollSnapType: "x mandatory" }}>
-          {courses.map((course, idx) => (
+          {(placement.slides?.map((slide) => ({
+            title: slide.title,
+            subtitle: slide.description || placement.description,
+            rating: "4.8+",
+            university: "Top partners",
+            degree: "Bachelor's Degree",
+            location: "Kathmandu",
+            duration: "4 Years (8 Semesters)",
+            logos: [{ name: slide.title, url: slide.image }],
+          })) || courses).map((course, idx) => (
             <div
               key={idx}
               className="bg-white rounded-md p-4 min-w-[220px] max-w-[240px] flex-shrink-0  border border-gray-100 flex flex-col transition-transform hover:-translate-y-1"

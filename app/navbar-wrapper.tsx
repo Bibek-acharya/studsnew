@@ -20,10 +20,6 @@ export default function NavbarWrapper() {
     pathname === "/register" ||
     pathname === "/forgot-password";
 
-  if (hideGlobalNavbar) {
-    return null;
-  }
-
   const handleNavigate = useCallback((viewKey: string) => {
     const route = routeMap[viewKey as keyof typeof routeMap];
     if (route) {
@@ -34,6 +30,10 @@ export default function NavbarWrapper() {
   const handleLogout = useCallback(() => {
     logout();
   }, [logout]);
+
+  if (hideGlobalNavbar) {
+    return null;
+  }
 
   return (
     <EducationNavbar

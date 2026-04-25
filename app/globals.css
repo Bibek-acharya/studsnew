@@ -194,6 +194,36 @@ body {
   padding: 2px 4px;
 }
 
+.hide-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+.hide-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
+.input-field {
+  width: 100%;
+  border: 1px solid #e5e7eb;
+  border-radius: 0.75rem;
+  padding: 0.75rem 1rem;
+  font-size: 0.875rem;
+  outline: none;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+  background: #fff;
+}
+
+.input-field:focus {
+  border-color: #0000ff;
+  box-shadow: 0 0 0 3px rgba(0, 0, 255, 0.08);
+}
+
+.section-lock-toggle {
+  display: inline-flex;
+  align-items: center;
+}
+
 @keyframes slideWords {
   0%,
   18% {
@@ -216,4 +246,3 @@ body {
     transform: translateY(-80px);
   }
 }
-
