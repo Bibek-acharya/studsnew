@@ -25,7 +25,15 @@ export async function apiRequest<T>(path: string, options: RequestInit = {}): Pr
   }
 
   if (!response.ok) {
-    throw new Error(data.message || data.error || "Request failed");
+    const errorMessage = data.message || data.error || "Request failed";
+    if (response.status === 401 && typeof window !== "undefined") {
+      localStorage.removeItem("token");
+      sessionStorage.removeItem("token");
+      localStorage.removeItem("studsphere_auth");
+      sessionStorage.removeItem("studsphere_auth_session");
+      window.dispatchEvent(new CustomEvent("auth-expired"));
+    }
+    throw new Error(errorMessage);
   }
 
   return data as T;

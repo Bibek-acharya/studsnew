@@ -350,7 +350,7 @@ const EducationNavbar: React.FC<EducationNavbarProps> = ({
           <div className="mx-auto flex w-full max-w-350 items-center justify-between gap-2 sm:gap-4 py-2.5 sm:py-3">
             {!user ? (
               <>
-                {/* Not Logged In: Hamburger Left, Logo Center, Login/Register Right */}
+                {/* Not Logged In: Hamburger Left, Logo Center, Search + Login/Register Right */}
                 <button
                   type="button"
                   className="flex h-10 w-10 items-center justify-center rounded-md text-gray-600 transition-colors hover:bg-gray-100 md:hidden shrink-0 z-10"
@@ -374,11 +374,15 @@ const EducationNavbar: React.FC<EducationNavbarProps> = ({
                   />
                 </Link>
 
-                <div className="flex items-center gap-2 shrink-0 z-10">
+                <div className="hidden md:block flex-1 max-w-3xl mx-4">
+                  <SearchBar />
+                </div>
+
+                <div className="flex items-center shrink-0 z-10">
                   {/* Mobile Search Button */}
                   <button
                     type="button"
-                    className="flex h-10 w-10 items-center justify-center rounded-md text-gray-600 transition-colors hover:bg-gray-100"
+                    className="flex h-10 w-10 items-center justify-center rounded-md text-gray-600 transition-colors hover:bg-gray-100 sm:hidden"
                     onClick={toggleMobileSearch}
                     aria-label="Toggle mobile search"
                   >
@@ -386,9 +390,15 @@ const EducationNavbar: React.FC<EducationNavbarProps> = ({
                   </button>
                   <button
                     onClick={() => go("login")}
-                    className="rounded-md bg-brand-blue px-4 py-2 text-white font-semibold transition-colors hover:bg-brand-hover"
+                    className="rounded-md sm:rounded-l-md bg-brand-blue sm:bg-[#f3f4f6] text-white sm:text-black px-3 sm:px-4 py-2 font-semibold transition-colors sm:hover:bg-gray-200 text-sm"
                   >
                     Login
+                  </button>
+                  <button
+                    onClick={() => go("signup")}
+                    className="hidden sm:block rounded-r-md bg-brand-blue text-white px-3 sm:px-4 py-2 font-semibold transition-colors hover:bg-brand-hover text-sm"
+                  >
+                    Register
                   </button>
                 </div>
               </>
@@ -409,7 +419,7 @@ const EducationNavbar: React.FC<EducationNavbarProps> = ({
                   />
                 </Link>
 
-                <div className="hidden md:block flex-1 max-w-3xl mx-4">
+                <div className="block flex-1 max-w-3xl mx-4">
                   <SearchBar />
                 </div>
 

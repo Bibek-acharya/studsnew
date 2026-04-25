@@ -57,7 +57,7 @@ const Newsletter: React.FC<NewsletterProps> = ({ className = "" }) => {
       </div>
 
       {/* Right Form Content */}
-      <div className="flex-1 max-w-md flex flex-col justify-center w-full lg:ml-auto">
+      <div className="flex-1 max-w-md flex flex-col justify-center w-full lg:ml-auto" suppressHydrationWarning>
         <label htmlFor="email" className="text-[#b3b3ff] text-sm mb-3 block">
           Stay up to date
         </label>

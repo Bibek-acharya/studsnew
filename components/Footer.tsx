@@ -42,6 +42,7 @@ const Footer = () => {
                 width={180} 
                 height={45} 
                 className="h-auto w-auto max-w-[160px] sm:max-w-[180px]"
+                style={{ height: 'auto' }}
                 priority
               />
             </Link>

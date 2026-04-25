@@ -35,7 +35,10 @@ export default function HomeClientWrapper({ children }: HomeClientWrapperProps) 
         }
       } catch (err) {
         console.error("Failed to fetch profile:", err);
-        setShowOnboarding(true);
+        const onboardingSession = sessionStorage.getItem(ONBOARDING_KEY);
+        if (!onboardingSession) {
+          setShowOnboarding(true);
+        }
       } finally {
         setCheckedBackend(true);
       }

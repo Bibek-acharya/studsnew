@@ -79,6 +79,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const stored = loadStoredAuth();
     setStoredAuth(stored);
     setLoading(false);
+
+    const handleAuthExpired = () => {
+      clearAuth();
+      setStoredAuth(null);
+      window.location.href = "/login";
+    };
+
+    window.addEventListener("auth-expired", handleAuthExpired);
+    return () => window.removeEventListener("auth-expired", handleAuthExpired);
   }, []);
 
   const token = storedAuth?.token ?? null;
@@ -205,8 +214,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     verifyOTP,
     sendOTP,
     setUser,
-    superadminLogin,
-    superadminRegister,
   }), [token, user, isAuthenticated, loading]);
 
   return (
