@@ -29,6 +29,10 @@ export const routeMap: Record<ViewKey, string> = {
   studentDashboard: "/user/dashboard",
   userDashboard: "/user/dashboard",
   writeReview: "/write-review",
+  myApplications: "/user/dashboard/applications",
+  savedColleges: "/user/dashboard/bookmarks",
+  notificationSettings: "/user/dashboard/notifications",
+  userSettings: "/user/dashboard/settings",
   login: "/login",
   signup: "/register",
 };
@@ -45,13 +49,6 @@ export const desktopMenuSections: DesktopMenuSection[] = [
     key: "tools",
     label: "Tools",
     items: [
-      {
-        icon: "fa-shuffle",
-        color: "text-blue-500",
-        title: "Compare College",
-        desc: "Launching Soon",
-        disabled: true,
-      },
       {
         icon: "fa-compass",
         color: "text-green-500",
@@ -174,13 +171,6 @@ export const mobileMenuSections: MobileMenuSection[] = [
     key: "tools",
     label: "Tools",
     items: [
-      {
-        label: "Compare College",
-        icon: "fa-shuffle",
-        color: "text-blue-500",
-        disabled: true,
-        badge: "SOON",
-      },
       {
         label: "Course Finder",
         icon: "fa-compass",

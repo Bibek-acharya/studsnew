@@ -3,7 +3,6 @@
 import React, { useEffect, useState, useMemo, useCallback } from "react";
 import { FileText, Clock, CheckCircle, Users, XCircle, Search, Download, Mail, Trash2, Eye, Check, X, Star } from "lucide-react";
 import SectionCard from "./common/SectionCard";
-import Avatar from "./common/Avatar";
 import { scholarshipProviderApi, ProviderApplication, ProviderScholarship } from "@/services/scholarshipProviderApi";
 
 interface ApplicationsDirectoryProps {
@@ -194,52 +193,54 @@ export default function ApplicationsDirectory({ onReviewStudent }: ApplicationsD
               <table className="w-full text-sm">
                 <thead className="bg-slate-50 border-b border-slate-200">
                   <tr>
-                    <th className="text-left py-3 px-4 font-semibold text-slate-700"><input type="checkbox" className="rounded" /></th>
-                    <th className="text-left py-3 px-4 font-semibold text-slate-700">Applicant</th>
-                    <th className="text-left py-3 px-4 font-semibold text-slate-700">Application ID</th>
-                    <th className="text-left py-3 px-4 font-semibold text-slate-700">Scholarship</th>
-                    <th className="text-center py-3 px-4 font-semibold text-slate-700">Province</th>
-                    <th className="text-center py-3 px-4 font-semibold text-slate-700">Stream</th>
-                    <th className="text-center py-3 px-4 font-semibold text-slate-700">GPA</th>
-                    <th className="text-center py-3 px-4 font-semibold text-slate-700">Submitted</th>
-                    <th className="text-center py-3 px-4 font-semibold text-slate-700">Status</th>
-                    <th className="text-center py-3 px-4 font-semibold text-slate-700">Actions</th>
+                    <th className="text-center py-3 px-3 font-semibold text-slate-700 w-10">S.N.</th>
+                    <th className="text-left py-3 px-3 font-semibold text-slate-700">Name</th>
+                    <th className="text-center py-3 px-3 font-semibold text-slate-700">Gender</th>
+                    <th className="text-center py-3 px-3 font-semibold text-slate-700">Age</th>
+                    <th className="text-left py-3 px-3 font-semibold text-slate-700">Email</th>
+                    <th className="text-center py-3 px-3 font-semibold text-slate-700">School Type</th>
+                    <th className="text-center py-3 px-3 font-semibold text-slate-700">GPA</th>
+                    <th className="text-center py-3 px-3 font-semibold text-slate-700">Stream</th>
+                    <th className="text-center py-3 px-3 font-semibold text-slate-700">Exam Center</th>
+                    <th className="text-left py-3 px-3 font-semibold text-slate-700">Scholarship</th>
+                    <th className="text-center py-3 px-3 font-semibold text-slate-700">Actions</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-100">
                   {applications.length === 0 ? (
-                    <tr><td colSpan={10} className="py-8 text-center text-slate-500">No applications found</td></tr>
-                  ) : applications.map((app) => {
-                    const initials = `${app.first_name?.[0] || ""}${app.last_name?.[0] || ""}`;
+                    <tr><td colSpan={11} className="py-8 text-center text-slate-500">No applications found</td></tr>
+                  ) : applications.map((app, idx) => {
+                    const pageIdx = (page - 1) * limit + idx + 1;
                     return (
                       <tr key={app.id} className="hover:bg-slate-50">
-                        <td className="py-3 px-4"><input type="checkbox" className="rounded" /></td>
-                        <td className="py-3 px-4">
-                          <div className="flex items-center gap-3">
-                            <div className="w-8 h-8 rounded-full bg-gradient-to-br from-purple-400 to-purple-600 flex items-center justify-center text-white text-xs font-semibold">{initials}</div>
-                            <div>
-                              <p className="font-medium text-slate-900">{app.first_name} {app.last_name}</p>
-                              <p className="text-xs text-slate-500">{app.email}</p>
-                            </div>
-                          </div>
+                        <td className="text-center py-3 px-3 text-slate-500 text-xs font-medium">{pageIdx}</td>
+                        <td className="py-3 px-3">
+                          <p className="font-medium text-slate-900 text-sm">{app.first_name} {app.last_name}</p>
                         </td>
-                        <td className="py-3 px-4 text-slate-600">#SCH-2026-{String(app.id).padStart(3, "0")}</td>
-                        <td className="py-3 px-4">
-                          <span className="font-medium text-slate-900">{app.scholarship?.title || "N/A"}</span>
+                        <td className="text-center py-3 px-3">
+                          <span className="text-xs font-medium text-slate-700">{app.gender || "N/A"}</span>
                         </td>
-                        <td className="text-center py-3 px-4">
-                          <span className="text-xs bg-slate-100 text-slate-700 px-2 py-1 rounded">{(app as any).province || "N/A"}</span>
+                        <td className="text-center py-3 px-3">
+                          <span className="text-xs font-medium text-slate-700">{app.age ?? "N/A"}</span>
                         </td>
-                        <td className="text-center py-3 px-4">
-                          <span className="text-xs bg-blue-100 text-blue-700 px-2 py-1 rounded">{(app as any).stream || "N/A"}</span>
+                        <td className="py-3 px-3">
+                          <span className="text-xs text-slate-600">{app.email}</span>
                         </td>
-                        <td className="text-center py-3 px-4 font-bold text-slate-900">{(app as any).gpa ? (app as any).gpa.toFixed(2) : "N/A"}</td>
-                        <td className="text-center py-3 px-4 text-slate-500">{app.created_at ? new Date(app.created_at).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" }) : "N/A"}</td>
-                        <td className="text-center py-3 px-4">
-                          <span className={`${statusBadge(app.status)} px-3 py-1 rounded-full text-xs font-semibold`}>{statusLabel(app.status)}</span>
+                        <td className="text-center py-3 px-3">
+                          <span className="text-xs bg-indigo-50 text-indigo-700 px-2 py-1 rounded font-medium">{app.school_type || "N/A"}</span>
                         </td>
-                        <td className="text-center py-3 px-4">
-                          <div className="flex items-center justify-center gap-2">
+                        <td className="text-center py-3 px-3 font-bold text-slate-900 text-sm">{app.gpa ? app.gpa.toFixed(2) : "N/A"}</td>
+                        <td className="text-center py-3 px-3">
+                          <span className="text-xs bg-blue-100 text-blue-700 px-2 py-1 rounded font-medium">{app.stream || "N/A"}</span>
+                        </td>
+                        <td className="text-center py-3 px-3">
+                          <span className="text-xs bg-amber-50 text-amber-700 px-2 py-1 rounded font-medium">{app.exam_center || "N/A"}</span>
+                        </td>
+                        <td className="py-3 px-3">
+                          <span className="text-xs font-semibold text-slate-900">{app.scholarship?.title || "N/A"}</span>
+                        </td>
+                        <td className="text-center py-3 px-3">
+                          <div className="flex items-center justify-center gap-1">
                             <button className="p-1.5 hover:bg-blue-50 rounded text-blue-600" title="View Details" onClick={() => onReviewStudent(String(app.id))}>
                               <Eye className="w-4 h-4" />
                             </button>

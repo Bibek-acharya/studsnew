@@ -548,7 +548,10 @@ const EducationNavbar: React.FC<EducationNavbarProps> = ({
                             ))}
                           </div>
                           <div className="border-t border-gray-100 bg-gray-50/50 p-3">
-                            <button className="w-full rounded-md py-2 text-center text-sm font-medium text-gray-600 transition-colors hover:text-blue-600">
+                            <button
+                              onClick={() => go("notificationSettings")}
+                              className="w-full rounded-md py-2 text-center text-sm font-medium text-gray-600 transition-colors hover:text-blue-600"
+                            >
                               View all activity
                             </button>
                           </div>
@@ -693,7 +696,7 @@ const EducationNavbar: React.FC<EducationNavbarProps> = ({
                             </div>
                             <button
                               type="button"
-                              onClick={() => go("userDashboard")}
+                              onClick={() => go("myApplications")}
                               className="flex items-center gap-3 rounded-md px-3 py-2.5 font-semibold transition-all hover:bg-blue-50"
                             >
                               <FileText size={18} />
@@ -702,7 +705,7 @@ const EducationNavbar: React.FC<EducationNavbarProps> = ({
                             </button>
                             <button
                               type="button"
-                              onClick={() => go("userDashboard")}
+                              onClick={() => go("savedColleges")}
                               className="flex items-center gap-3 rounded-md px-3 py-2.5 font-semibold transition-all hover:bg-blue-50"
                             >
                               <Bookmark size={18} />
@@ -711,6 +714,7 @@ const EducationNavbar: React.FC<EducationNavbarProps> = ({
                             </button>
                             <button
                               type="button"
+                              onClick={() => go("notificationSettings")}
                               className="flex items-center gap-3 rounded-md px-3 py-2.5 font-semibold transition-all hover:bg-blue-50"
                             >
                               <Bell size={18} />
@@ -719,6 +723,7 @@ const EducationNavbar: React.FC<EducationNavbarProps> = ({
                             </button>
                             <button
                               type="button"
+                              onClick={() => go("userSettings")}
                               className="flex items-center gap-3 rounded-md px-3 py-2.5 font-semibold transition-all hover:bg-blue-50"
                             >
                               <Settings size={18} />
@@ -827,7 +832,7 @@ const EducationNavbar: React.FC<EducationNavbarProps> = ({
                               </div>
                             </div>
                             <button
-                              onClick={() => go("userDashboard")}
+                              onClick={() => go("myApplications")}
                               className="flex items-center gap-3 px-3 py-2.5 hover:bg-blue-50 rounded-md transition-all font-semibold"
                             >
                               <FileText size={18} />
@@ -835,7 +840,7 @@ const EducationNavbar: React.FC<EducationNavbarProps> = ({
                               <span className="ml-auto bg-red-500 text-white text-[10px] font-bold px-1.5 py-[1.5px] rounded-full leading-none">2</span>
                             </button>
                             <button
-                              onClick={() => go("userDashboard")}
+                              onClick={() => go("savedColleges")}
                               className="flex items-center gap-3 px-3 py-2.5 hover:bg-blue-50 rounded-md transition-all font-semibold"
                             >
                               <Bookmark size={18} />
@@ -843,6 +848,7 @@ const EducationNavbar: React.FC<EducationNavbarProps> = ({
                               <span className="ml-auto text-gray-400 text-xs font-bold">12</span>
                             </button>
                             <button
+                              onClick={() => go("notificationSettings")}
                               className="flex items-center gap-3 px-3 py-2.5 hover:bg-blue-50 rounded-md transition-all font-semibold"
                             >
                               <Bell size={18} />
@@ -850,6 +856,7 @@ const EducationNavbar: React.FC<EducationNavbarProps> = ({
                               <span className="ml-auto bg-red-500 text-white text-[10px] font-bold px-1.5 py-[1.5px] rounded-full leading-none">2</span>
                             </button>
                             <button
+                              onClick={() => go("userSettings")}
                               className="flex items-center gap-3 px-3 py-2.5 hover:bg-blue-50 rounded-md transition-all font-semibold"
                             >
                               <Settings size={18} />

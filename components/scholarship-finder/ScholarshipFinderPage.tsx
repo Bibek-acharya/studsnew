@@ -1,16 +1,66 @@
 "use client";
 
 import React, { useState, useEffect, useMemo } from "react";
+import { useRouter } from "next/navigation";
 import { Search, Image as ImageIcon, BadgeCheck, Banknote, MapPin, GraduationCap, Calendar, Bookmark, ChevronDown } from "lucide-react";
-import { scholarshipApi, Scholarship } from "@/services/scholarship.api";
+import { apiService, ScholarshipItem } from "@/services/api";
+import type { Scholarship } from "@/services/scholarship.api";
 import { useAuth } from "@/services/AuthContext";
 import AlertDialog from "@/components/ui/AlertDialog";
 import { ScholarshipBasedOnCollege, RecommendedScholarship } from "./ScholarshipAdCarousel";
 import ScholarshipFilterSidebar from "./ScholarshipFilterSidebar";
-import LoginView from "@/components/auth/LoginView";
-import SignupView from "@/components/auth/SignupView";
 import AuthModal from "@/components/auth/AuthModal";
 import SelectScholarshipTypeModal from "./SelectScholarshipTypeModal";
+
+const SCHOLARSHIPS_PER_PAGE = 18;
+
+function mapBackendItem(item: ScholarshipItem): Scholarship {
+  return {
+    id: item.id,
+    title: item.title,
+    org: item.provider,
+    amount: item.value || item.amount || "",
+    location: item.location,
+    studyLevel: item.degree_level || "",
+    deadline: item.deadline,
+    badgeType: (item.scholarship_type || item.funding_type || item.category || "").toUpperCase(),
+    status: item.status || "OPEN",
+    imageUrl: item.image || undefined,
+    imagePlaceholder: item.title,
+    courseStream: "",
+    providerType: "",
+    coverage: "",
+    gpaRequirement: "",
+    entranceRequired: false,
+    deadlineType: "",
+    eligibility: item.eligibility || item.degree_level || "",
+  };
+}
+
+function applyFilters(items: Scholarship[], filters: Record<string, string[]>, searchQuery: string, userLocation: { lat?: number; lng?: number }): Scholarship[] {
+  return items.filter((s) => {
+    if (filters.studyLevel?.length && !filters.studyLevel.includes(s.studyLevel)) return false;
+    if (filters.courseStream?.length && !filters.courseStream.some((c) => s.courseStream.toLowerCase().includes(c.toLowerCase()))) return false;
+    if (filters.location?.length && !filters.location.some((loc) => s.location.toLowerCase().includes(loc.toLowerCase()))) return false;
+    if (filters.scholarshipType?.length && !filters.scholarshipType.some((t) => s.badgeType.includes(t))) return false;
+    if (filters.providerType?.length && !filters.providerType.some((t) => s.providerType.toLowerCase().includes(t.toLowerCase()))) return false;
+    if (filters.coverage?.length && !filters.coverage.some((c) => s.coverage.includes(c))) return false;
+    if (filters.gpaRequirement?.length && !filters.gpaRequirement.includes(s.gpaRequirement)) return false;
+    if (filters.deadlineType?.length && !filters.deadlineType.includes(s.deadlineType)) return false;
+    if (searchQuery) {
+      const q = searchQuery.toLowerCase();
+      if (!s.title.toLowerCase().includes(q) && !s.org.toLowerCase().includes(q) && !s.location.toLowerCase().includes(q)) return false;
+    }
+    return true;
+  });
+}
+
+function paginate<T>(items: T[], page: number, perPage: number): { items: T[]; total: number; totalPages: number } {
+  const total = items.length;
+  const totalPages = Math.ceil(total / perPage) || 1;
+  const start = (page - 1) * perPage;
+  return { items: items.slice(start, start + perPage), total, totalPages };
+}
 
 const FilterSection = ({
   title,
@@ -106,6 +156,7 @@ const ScholarshipCard = ({
   onToggleSelection?: () => void;
   onToggleSaved?: () => void;
 }) => {
+  const router = useRouter();
   const statusStyle = getStatusStyle(scholarship.status);
   
   const imageHtml = scholarship.imageUrl ? (
@@ -213,10 +264,13 @@ const ScholarshipCard = ({
 
         {/* Action Buttons */}
         <div className="flex items-center gap-2">
-          <button className="flex-1 py-2 text-[13px] font-semibold text-gray-700 bg-white border border-gray-200 rounded-md hover:bg-gray-50 transition-colors">
+          <button
+            onClick={() => router.push(`/scholarship-finder/${scholarship.id}`)}
+            className="flex-1 py-2 text-[13px] font-semibold text-gray-700 bg-white border border-gray-200 rounded-md hover:bg-gray-50 transition-colors"
+          >
             Details
           </button>
-          <button className="flex-[1.2] py-2 text-[13px] font-semibold text-white bg-brand-blue rounded-md hover:bg-[#0000cc] transition-colors">
+          <button onClick={() => router.push(`/scholarship-finder/apply/${scholarship.id}`)} className="flex-[1.2] py-2 text-[13px] font-semibold text-white bg-brand-blue rounded-md hover:bg-[#0000cc] transition-colors">
             Apply
           </button>
           <button 
@@ -304,23 +358,25 @@ const FeaturedScholarshipsPage = () => {
 
   useEffect(() => {
     const loadScholarships = async () => {
-      const response = await scholarshipApi.getScholarships({
-        studyLevel: filters.studyLevel.length ? filters.studyLevel : undefined,
-        location: filters.location.length ? filters.location : undefined,
-        courseStream: filters.courseStream.length ? filters.courseStream : undefined,
-        scholarshipType: filters.scholarshipType.length ? filters.scholarshipType : undefined,
-        providerType: filters.providerType.length ? filters.providerType : undefined,
-        coverage: filters.coverage.length ? filters.coverage : undefined,
-        gpaRequirement: filters.gpaRequirement.length ? filters.gpaRequirement : undefined,
-        deadlineType: filters.deadlineType.length ? filters.deadlineType : undefined,
-        userLat: userLocation.lat,
-        userLng: userLocation.lng,
-      }, currentPage);
-      setScholarships(response.scholarships);
-      setTotalPages(response.pagination.totalPages);
+      try {
+        const response = await apiService.getEducationScholarships({
+          search: searchQuery || undefined,
+          status: filters.scholarshipType.length > 0 ? undefined : undefined,
+          limit: 100,
+        });
+        const apiItems: ScholarshipItem[] = response.data?.scholarships || [];
+        const mapped = apiItems.map(mapBackendItem);
+        const filtered = applyFilters(mapped, filters, searchQuery, userLocation);
+        const { items, totalPages } = paginate(filtered, currentPage, SCHOLARSHIPS_PER_PAGE);
+        setScholarships(items);
+        setTotalPages(totalPages);
+      } catch {
+        setScholarships([]);
+        setTotalPages(1);
+      }
     };
     loadScholarships();
-  }, [filters, userLocation, currentPage]);
+  }, [filters, userLocation, currentPage, searchQuery]);
 
   const toggleFilter = (key: keyof typeof filters, value: string) => {
     setFilters((prev) => ({
@@ -394,23 +450,21 @@ const FeaturedScholarshipsPage = () => {
     }));
     setShowCategoryAlert(false);
     
-    const response = await scholarshipApi.getScholarships({
-      studyLevel: filters.studyLevel.length ? filters.studyLevel : undefined,
-      location: filters.location.length ? filters.location : undefined,
-      courseStream: filters.courseStream.length ? filters.courseStream : undefined,
-      scholarshipType: [badgeType],
-      providerType: filters.providerType.length ? filters.providerType : undefined,
-      coverage: filters.coverage.length ? filters.coverage : undefined,
-      gpaRequirement: filters.gpaRequirement.length ? filters.gpaRequirement : undefined,
-      deadlineType: filters.deadlineType.length ? filters.deadlineType : undefined,
-    }, 1);
-    
-    setScholarships(response.scholarships);
-    setTotalPages(response.pagination.totalPages);
-    setCurrentPage(1);
-    
-    const toSelect = response.scholarships.slice(0, 5).map((s) => s.id);
-    setSelectedForApply(toSelect);
+    try {
+      const response = await apiService.getEducationScholarships({ limit: 100 });
+      const apiItems: ScholarshipItem[] = response.data?.scholarships || [];
+      const mapped = apiItems.map(mapBackendItem);
+      const filtered = applyFilters(mapped, { ...filters, scholarshipType: [badgeType] }, searchQuery, userLocation);
+      const { items, totalPages } = paginate(filtered, 1, SCHOLARSHIPS_PER_PAGE);
+      setScholarships(items);
+      setTotalPages(totalPages);
+      setCurrentPage(1);
+      const toSelect = items.slice(0, 5).map((s) => s.id);
+      setSelectedForApply(toSelect);
+    } catch {
+      setScholarships([]);
+      setTotalPages(1);
+    }
     setIsQuickApplyMode(true);
   };
 

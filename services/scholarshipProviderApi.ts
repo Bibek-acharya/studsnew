@@ -37,27 +37,152 @@ export interface ScholarshipProviderAuthResponse {
   token: string;
 }
 
+export interface ScholarshipType {
+  type: string;
+  seats: string;
+  coverage: string;
+  eligibility: string;
+}
+
+export interface SelectionRubric {
+  criteria: string;
+  description: string;
+  weight: string;
+  marks: string;
+  pass_mark: string;
+}
+
+export interface SelectionProcessStep {
+  step: number;
+  title: string;
+  description: string;
+}
+
+export interface TimelineEvent {
+  title: string;
+  date: string;
+  description: string;
+}
+
+export interface JourneyTimelineItem {
+  year: string;
+  title: string;
+  description: string;
+}
+
+export interface ExamCenter {
+  province: string;
+  city: string;
+  venue: string;
+  contact: string;
+  phone: string;
+}
+
+export interface FAQ {
+  question: string;
+  answer: string;
+}
+
+export interface Partner {
+  name: string;
+  logo_url: string;
+  website: string;
+}
+
+export interface Achievement {
+  title: string;
+  description: string;
+  tags: string[];
+  link?: string;
+}
+
+export interface NewsItem {
+  title: string;
+  description: string;
+  date: string;
+  category: string;
+  link?: string;
+}
+
+export interface SocialLinks {
+  facebook?: string;
+  instagram?: string;
+  youtube?: string;
+}
+
 export interface CreateScholarshipPayload {
   title: string;
   provider: string;
+  provider_email?: string;
+  provider_phone?: string;
+  provider_website?: string;
+  provider_domain?: string;
   location: string;
   value: string;
   deadline: string;
-  degree_level: string;
-  funding_type: string;
+  degree_level?: string;
+  funding_type?: string;
   scholarship_type: string;
   description: string;
+  short_description?: string;
+  important_notes?: string;
   image_url?: string;
+  banner_image?: string;
   field_of_study: string[];
   status?: 'draft' | 'active';
+  total_seats?: number;
+  amount_per_student?: number;
+  disbursement_type?: string;
+  coverage?: string;
+  application_start_date?: string;
+  application_end_date?: string;
+  result_publication_date?: string;
+  eligible_grades?: string;
+  min_gpa?: string;
+  streams?: string[];
+  age_min?: number;
+  age_max?: number;
+  gender?: string;
+  marital_status?: string;
+  eligible_provinces?: string[];
+  additional_requirements?: string[];
+  selection_criteria?: string;
+  interview_rounds?: number;
+  interview_location?: string;
+  scholarship_types?: ScholarshipType[];
+  selection_rubric?: SelectionRubric[];
+  eligibility_criteria?: string[];
+  fully_funded_criteria?: string[];
+  partially_funded_criteria?: string[];
+  selection_process?: SelectionProcessStep[];
+  required_documents?: string[];
+  timeline?: TimelineEvent[];
+  journey_timeline?: JourneyTimelineItem[];
+  exam_centers?: ExamCenter[];
+  faqs?: FAQ[];
+  partners?: Partner[];
+  achievements?: Achievement[];
+  gallery_images?: string[];
+  guidelines_url?: string;
+  news_items?: NewsItem[];
+  map_embed_url?: string;
+  social_links?: SocialLinks;
 }
 
 export interface ProviderScholarship {
   id: number;
   provider_id: number;
   title: string;
+  provider: string;
+  provider_email?: string;
+  provider_phone?: string;
+  provider_website?: string;
+  provider_domain?: string;
   description: string;
-  image_url: string | null;
+  short_description?: string;
+  important_notes?: string;
+  image_url?: string | null;
+  banner_image?: string;
   location: string;
   value: string;
   deadline: string;
@@ -65,9 +190,44 @@ export interface ProviderScholarship {
   funding_type: string;
   scholarship_type: string;
   field_of_study: string[];
-  eligibility_criteria: any;
-  required_documents: any;
   status: string;
+  total_seats?: number;
+  amount_per_student?: number;
+  disbursement_type?: string;
+  coverage?: string;
+  application_start_date?: string;
+  application_end_date?: string;
+  result_publication_date?: string;
+  eligible_grades?: string;
+  min_gpa?: string;
+  streams?: string[];
+  age_min?: number;
+  age_max?: number;
+  gender?: string;
+  marital_status?: string;
+  eligible_provinces?: string[];
+  additional_requirements?: string[];
+  selection_criteria?: string;
+  interview_rounds?: number;
+  interview_location?: string;
+  scholarship_types?: ScholarshipType[];
+  selection_rubric?: SelectionRubric[];
+  eligibility_criteria?: string[];
+  fully_funded_criteria?: string[];
+  partially_funded_criteria?: string[];
+  selection_process?: SelectionProcessStep[];
+  required_documents?: string[];
+  timeline?: TimelineEvent[];
+  journey_timeline?: JourneyTimelineItem[];
+  exam_centers?: ExamCenter[];
+  faqs?: FAQ[];
+  partners?: Partner[];
+  achievements?: Achievement[];
+  gallery_images?: string[];
+  guidelines_url?: string;
+  news_items?: NewsItem[];
+  map_embed_url?: string;
+  social_links?: SocialLinks;
   applications_count: number;
   created_at: string;
   updated_at: string;
@@ -87,6 +247,13 @@ export interface ProviderApplication {
   personal_statement: string;
   scholarship?: ProviderScholarship;
   created_at: string;
+  province?: string;
+  stream?: string;
+  gpa?: number;
+  gender?: string;
+  age?: number;
+  school_type?: string;
+  exam_center?: string;
 }
 
 export interface ProviderInterview {

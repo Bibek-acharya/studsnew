@@ -11,7 +11,7 @@ const CreateScholarship = dynamic(() => import('./CreateScholarship'));
 const ManageScholarships = dynamic(() => import('./ManageScholarships'));
 const ScholarshipDirectory = dynamic(() => import('./ScholarshipDirectory'));
 const ApplicationsDirectory = dynamic(() => import('./ApplicationsDirectory'));
-const StudentEvaluation = dynamic(() => import('./StudentEvaluation'));
+const ApplicationDetails = dynamic(() => import('./ApplicationDetails'));
 const Interviews = dynamic(() => import('./Interviews'));
 const Messages = dynamic(() => import('./Messages'));
 const Analytics = dynamic(() => import('./Analytics'));
@@ -102,7 +102,7 @@ const ScholarshipProviderDashboard: React.FC<DashboardProps> = ({ onLogout }) =>
       case 'sec-create-scholarship':
         return <CreateScholarship onNavigate={navigateTo} />;
       case 'sec-scholarship-directory':
-        return <ScholarshipDirectory />;
+        return <ScholarshipDirectory onEdit={handleEditScholarship} />;
       case 'sec-edit-scholarship':
         return <CreateScholarship scholarshipId={editingScholarshipId} onNavigate={navigateTo} />;
       case 'sec-manage-scholarships':
@@ -110,7 +110,7 @@ const ScholarshipProviderDashboard: React.FC<DashboardProps> = ({ onLogout }) =>
       case 'sec-applications':
         return <ApplicationsDirectory onReviewStudent={handleReviewStudent} />;
       case 'sec-student-profile':
-        return <StudentEvaluation applicationId={selectedStudentId || ''} onBack={() => setActiveTab('sec-applications')} />;
+        return <ApplicationDetails applicationId={selectedStudentId || ''} onBack={() => setActiveTab('sec-applications')} />;
       case 'sec-interviews':
         return <Interviews />;
       case 'sec-messages':

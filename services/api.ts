@@ -143,6 +143,11 @@ export interface ScholarshipsResponse {
   message: string;
 }
 
+export interface ScholarshipDetailResponse {
+  data: any;
+  message: string;
+}
+
 export interface EducationNewsItem {
   id: number;
   category: string;
@@ -872,42 +877,26 @@ export const apiService = {
   },
 
   async getEducationScholarshipById(id: any): Promise<any> {
-    await new Promise(resolve => setTimeout(resolve, 500));
-    return {
-      data: {
-        id: Number(id),
-        title: "Global Future Leaders Scholarship 2026",
-        provider: "Cambridge University, UK",
-        location: "Cambridge, UK",
-        value: "$30,000 / Year",
-        deadline: "May 15, 2026",
-        degree_level: "Masters",
-        funding_type: "Fully Funded",
-        scholarship_type: "Merit Based",
-        description: "Designed for high-achieving international students with leadership potential.",
-        image_url: "https://images.unsplash.com/photo-1523050854058-8df90110c9f1?ixlib=rb-1.2.1&auto=format&fit=crop&w=1200&q=80",
-        status: "OPEN",
-        field_of_study: ["IT", "Business"],
-        benefits: [{ title: "Full Tuition", description: "Covers all semester fees" }]
-      }
-    };
+    return apiRequest<ScholarshipDetailResponse>(`/api/v1/education/scholarships/${id}`, {
+      cache: "no-store",
+    });
   },
 
   async getEducationSimilarScholarships(id: any): Promise<any> {
-    await new Promise(resolve => setTimeout(resolve, 500));
-    return {
-      data: {
-        scholarships: [
-          {
-            id: 101,
-            title: "Oxford Tech Award",
-            provider: "Oxford University",
-            amount: "$25,000",
-            image_url: "https://images.unsplash.com/photo-1517694712202-14dd9538aa97?q=80&w=1200&auto=format&fit=crop",
-          }
-        ]
-      }
-    };
+    return apiRequest<ScholarshipDetailResponse>(`/api/v1/education/scholarships/${id}/similar`, {
+      cache: "no-store",
+    });
+  },
+
+  async applyScholarship(scholarshipId: number, data: any): Promise<any> {
+    const headers: Record<string, string> = { "Content-Type": "application/json" };
+    const token = this.getToken();
+    if (token) headers.Authorization = `Bearer ${token}`;
+    return apiRequest<any>(`/api/v1/education/scholarships/${scholarshipId}/apply`, {
+      method: "POST",
+      body: JSON.stringify(data),
+      headers,
+    });
   },
 
   async getForumCommunities(token?: string): Promise<ForumCommunity[]> {
@@ -1151,11 +1140,31 @@ export const apiService = {
     provider_name: string;
     registration_number: string;
     email: string;
-    password: string;
-  }): Promise<AuthResponse> {
-    return apiRequest<AuthResponse>("/api/v1/scholarship-providers/auth/register", {
+    contact_number?: string;
+    pan_number?: string;
+    website_url?: string;
+  }): Promise<RegisterResponse> {
+    return apiRequest<RegisterResponse>("/api/v1/scholarship-providers/auth/register", {
       method: "POST",
       body: JSON.stringify(data),
+    });
+  },
+
+  async listPendingProviders(): Promise<{ data: any[]; message: string }> {
+    return apiRequest<{ data: any[]; message: string }>("/api/v1/superadmin/pending-providers");
+  },
+
+  async approveProvider(providerId: number): Promise<{ message: string }> {
+    return apiRequest<{ message: string }>("/api/v1/superadmin/providers/approve", {
+      method: "POST",
+      body: JSON.stringify({ provider_id: providerId, action: "approved" }),
+    });
+  },
+
+  async rejectProvider(providerId: number): Promise<{ message: string }> {
+    return apiRequest<{ message: string }>("/api/v1/superadmin/providers/approve", {
+      method: "POST",
+      body: JSON.stringify({ provider_id: providerId, action: "rejected" }),
     });
   },
   scholarshipProviderLogout(): void {

@@ -6,7 +6,11 @@ import { GraduationCap, Search, Edit, Trash2, Eye, Users, Calendar, CheckCircle,
 import SectionCard from "./common/SectionCard";
 import { scholarshipProviderApi, ProviderScholarship } from "@/services/scholarshipProviderApi";
 
-const ScholarshipDirectory: React.FC = memo(() => {
+interface ScholarshipDirectoryProps {
+  onEdit?: (id: number) => void;
+}
+
+const ScholarshipDirectory: React.FC<ScholarshipDirectoryProps> = memo(({ onEdit }) => {
   const router = useRouter();
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
@@ -186,7 +190,7 @@ const ScholarshipDirectory: React.FC = memo(() => {
                     <td className="text-center py-3 px-4">
                       <div className="flex items-center justify-center gap-2">
                         <button className="p-1.5 hover:bg-blue-50 rounded text-blue-600" title="View"><Eye className="w-4 h-4" /></button>
-                        <button className="p-1.5 hover:bg-slate-100 rounded text-slate-600" title="Edit"><Edit className="w-4 h-4" /></button>
+                        <button className="p-1.5 hover:bg-slate-100 rounded text-slate-600" title="Edit" onClick={() => onEdit?.(sch.id)}><Edit className="w-4 h-4" /></button>
                         <button className="p-1.5 hover:bg-red-50 rounded text-red-600" title="Delete" onClick={() => handleDelete(sch.id)}><Trash2 className="w-4 h-4" /></button>
                       </div>
                     </td>

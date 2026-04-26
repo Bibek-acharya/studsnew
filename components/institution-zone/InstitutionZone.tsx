@@ -15,7 +15,7 @@ export default function InstitutionZone() {
   const router = useRouter();
 
   return (
-    <div className="min-h-screen bg-[#fcfcfc] font-sans selection:bg-blue-100 selection:text-blue-900 overflow-x-hidden">
+    <div className="min-h-screen bg-[#fcfcfc] font-sans selection:bg-blue-100 selection:text-blue-900 overflow-x-hidden max-w-350 mx-auto">
       {/* --- HERO SECTION --- */}
       <div className="bg-white min-h-screen flex flex-col relative">
         <InstitutionHeader />
@@ -35,7 +35,7 @@ export default function InstitutionZone() {
 
             {/* Form Container */}
             <div className="w-full max-w-115">
-              <div className="bg-white rounded-md p-8 sm:p-10 relative text-gray-800 animate-in fade-in slide-in-from-bottom-4 duration-500 border border-gray-200">
+              <div className="bg-white rounded-md p-8 sm:p-10  mt-6 relative text-gray-800 animate-in fade-in slide-in-from-bottom-4 duration-500 border border-gray-200">
                 <div className="flex p-1.5 bg-[#F1F3F5] rounded-md mb-8 relative">
                   <button
                     onClick={() => setActiveTab("advertise")}

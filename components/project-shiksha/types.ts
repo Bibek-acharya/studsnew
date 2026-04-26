@@ -10,7 +10,7 @@ export interface ProjectShikshaFormData {
   seeSchoolType: string;
   otherSchoolType: string;
   schoolName: string;
-  
+
   // Address
   permProvince: string;
   permDistrict: string;
@@ -22,7 +22,7 @@ export interface ProjectShikshaFormData {
   tempMunicipality: string;
   tempWard: string;
   tempTole: string;
-  
+
   // Family
   guardianName: string;
   guardianPhone: string;
@@ -31,21 +31,27 @@ export interface ProjectShikshaFormData {
   motherOccupation: string;
   familyIncome: string;
   familyMembers: string;
-  
+
+  // Education
+  seeGpa: string;
+
   // Documents
   seeMarksheet: File | null;
   citizenship: File | null;
   photo: File | null;
-  
+
+  // Admit Card
+  stream: string;
+  examCenter: string;
+
   // Declaration
   declaration: boolean;
 }
 
 export const schoolTypes = [
   "Private",
-  "Government",
+  "Public",
   "Community",
-  "Other",
 ];
 
 export const occupations = [
@@ -57,4 +63,28 @@ export const occupations = [
   "Teaching/Education",
   "Foreign Employment",
   "Other",
+];
+
+export const streams = ["Science", "Management"];
+
+export const examCenters = [
+  "Advance Academy Lalitpur",
+  "Himalayan White House",
+  "Nobel College",
+  "Golden Gate International College",
+  "Kathmandu",
+  "Lalitpur",
+  "Bhaktapur",
+  "Pokhara",
+  "Chitwan",
+  "Rupandehi",
+  "Jhapa",
+  "Morang",
+  "Sunsari",
+  "Banke",
+  "Kailali",
+  "Dharan",
+  "Birgunj",
+  "Biratnagar",
+  "Nepalgunj",
 ];

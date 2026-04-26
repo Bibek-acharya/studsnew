@@ -1,9 +1,11 @@
 "use client";
 
-import React, { useEffect, useMemo, useRef, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import { apiService } from "../../services/api";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+import Image from "next/image";
+import { BadgeCheck, Eye, EyeOff, Loader2 } from "lucide-react";
 
 import ScholarshipProviderDashboard from "@/components/ScholarshipProvider/ScholarshipProviderDashboard";
 
@@ -11,354 +13,42 @@ interface ScholarshipProviderZoneProps {
   onNavigate?: (view: any, data?: any) => void;
 }
 
-type BillingCycle = "monthly" | "semiAnnually" | "annually";
-type HeroTab = "advertise" | "login";
-type AuthSubTab = "login" | "register";
-type ViewState = "landing" | "dashboard";
+type ViewState = "landing" | "dashboard" | "pending-approval";
 
-interface ServiceCard {
-  title: string;
-  description: string;
-  icon: string;
-  blobClass: string;
-  iconClass: string;
+function formatTimer(seconds: number) {
+  const m = Math.floor(seconds / 60);
+  const s = seconds % 60;
+  return `${m}:${s.toString().padStart(2, "0")}`;
 }
-
-interface Tier {
-  name: string;
-  description: string;
-  price: Record<BillingCycle, string>;
-  period: Record<BillingCycle, string>;
-  buttonText: string;
-  highlighted: boolean;
-  badge?: string;
-  cardFeatures: string[];
-}
-
-interface CategoryFeature {
-  name: string;
-  free: string | boolean;
-  standard: string | boolean;
-  premium: string | boolean;
-}
-
-interface FeatureCategory {
-  name: string;
-  features: CategoryFeature[];
-}
-
-const services: ServiceCard[] = [
-  {
-    title: "Application Management",
-    description:
-      "Steamline and track all scholarship applications in one place.",
-    icon: "fa-file-signature",
-    blobClass: "bg-[#eef2ff]",
-    iconClass: "text-blue-800",
-  },
-  {
-    title: "Eligibility Verification",
-    description:
-      "Filter and verify candidates based on your specific criteria.",
-    icon: "fa-user-check",
-    blobClass: "bg-[#fff7ed]",
-    iconClass: "text-orange-400",
-  },
-  {
-    title: "Direct Inquiry Support",
-    description:
-      "Handle student questions directly through our messaging system.",
-    icon: "fa-headset",
-    blobClass: "bg-[#f3e8ff]",
-    iconClass: "text-purple-600",
-  },
-  {
-    title: "Featured Listings",
-    description: "Get maximum visibility for your scholarship programs.",
-    icon: "fa-crown",
-    blobClass: "bg-[#ecfdf5]",
-    iconClass: "text-emerald-400",
-  },
-  {
-    title: "Verified Provider Badge",
-    description:
-      "Build trust with students through a verified scholarship badge.",
-    icon: "fa-certificate",
-    blobClass: "bg-[#fef2f2]",
-    iconClass: "text-red-500",
-  },
-  {
-    title: "Document Verification",
-    description: "Securely review and verify academic and financial documents.",
-    icon: "fa-shield-halved",
-    blobClass: "bg-[#f7fee7]",
-    iconClass: "text-lime-500",
-  },
-  {
-    title: "Impact Analytics",
-    description:
-      "Get detailed insights into your scholarship reach and impact.",
-    icon: "fa-chart-pie",
-    blobClass: "bg-[#eef2ff]",
-    iconClass: "text-blue-500",
-  },
-  {
-    title: "Recipient Management",
-    description:
-      "Maintain a database of past and present scholarship recipients.",
-    icon: "fa-users-gear",
-    blobClass: "bg-[#fff7ed]",
-    iconClass: "text-orange-500",
-  },
-  {
-    title: "Automated Notifications",
-    description: "Keep applicants updated with automated status notifications.",
-    icon: "fa-bell",
-    blobClass: "bg-[#f3e8ff]",
-    iconClass: "text-purple-500",
-  },
-  {
-    title: "Content Marketing",
-    description: "Share success stories and news about your organization.",
-    icon: "fa-newspaper",
-    blobClass: "bg-[#ecfdf5]",
-    iconClass: "text-emerald-500",
-  },
-  {
-    title: "Global Outreach",
-    description:
-      "Connect with students from across the globe or specific regions.",
-    icon: "fa-globe",
-    blobClass: "bg-[#fef2f2]",
-    iconClass: "text-red-500",
-  },
-  {
-    title: "Success Tracking",
-    description: "Follow the academic progress of your scholarship winners.",
-    icon: "fa-graduation-cap",
-    blobClass: "bg-[#eef2ff]",
-    iconClass: "text-blue-600",
-  },
-];
-
-const tiers: Tier[] = [
-  {
-    name: "Starter Provider",
-    description: "Basic tools for small organizations and individuals.",
-    price: { monthly: "Free", semiAnnually: "Free", annually: "Free" },
-    period: { monthly: "/month", semiAnnually: "/6 months", annually: "/year" },
-    buttonText: "Start for Free",
-    highlighted: false,
-    cardFeatures: [
-      "Up to 2 scholarship listings",
-      "Basic applicant dashboard",
-      "Email notifications",
-      "Standard search placement",
-    ],
-  },
-  {
-    name: "Professional Provider",
-    description: "Advanced features for established scholarship bodies.",
-    price: {
-      monthly: "NPR 3,500",
-      semiAnnually: "NPR 18,000",
-      annually: "NPR 32,000",
-    },
-    period: { monthly: "/month", semiAnnually: "/6 months", annually: "/year" },
-    buttonText: "Get Professional",
-    highlighted: true,
-    badge: "Recommended",
-    cardFeatures: [
-      "Unlimited scholarship listings",
-      "Advanced filtering & ELV",
-      "Bulk application management",
-      "Priority search placement",
-      "Verified Provider Badge",
-    ],
-  },
-  {
-    name: "Enterprise Partner",
-    description: "Full-scale solution with managed support and analytics.",
-    price: {
-      monthly: "NPR 7,500",
-      semiAnnually: "NPR 38,000",
-      annually: "NPR 68,000",
-    },
-    period: { monthly: "/month", semiAnnually: "/6 months", annually: "/year" },
-    buttonText: "Get Enterprise",
-    highlighted: false,
-    cardFeatures: [
-      "Managed application portal",
-      "Document verification service",
-      "Detailed impact reporting",
-      "Dedicated account manager",
-      "Custom marketing campaigns",
-    ],
-  },
-];
-
-const categories: FeatureCategory[] = [
-  {
-    name: "Visibility & Branding",
-    features: [
-      {
-        name: "Scholarship Indexing",
-        free: "Standard Listing",
-        standard: "Priority Listing",
-        premium: "Top Placement & Featured",
-      },
-      {
-        name: "Verified Provider Badge",
-        free: false,
-        standard: true,
-        premium: true,
-      },
-      {
-        name: "Brand Page",
-        free: "Basic Information",
-        standard: "Detailed Portfolio",
-        premium: "Premium Media-rich Page",
-      },
-      {
-        name: "SEO Optimization",
-        free: false,
-        standard: "Standard SEO",
-        premium: "Advanced SEO & Link-building",
-      },
-    ],
-  },
-  {
-    name: "Application & Management",
-    features: [
-      {
-        name: "Applicant Filtering",
-        free: "Basic (GPA, Region)",
-        standard: "Advanced (Skills, Need)",
-        premium: "AI-based Matching",
-      },
-      {
-        name: "Document Collection",
-        free: "Up to 3 docs/applicant",
-        standard: "Unlimited docs",
-        premium: "Managed Verification",
-      },
-      {
-        name: "In-Portal Messaging",
-        free: false,
-        standard: "Standard Chat",
-        premium: "Priority Chat & Notifications",
-      },
-      {
-        name: "Workflow Management",
-        free: "Basic status update",
-        standard: "Custom workflows",
-        premium: "Automated Workflows",
-      },
-    ],
-  },
-  {
-    name: "Analytics & Reporting",
-    features: [
-      {
-        name: "Applicant Demographics",
-        free: "Basic stats",
-        standard: "Detailed reports",
-        premium: "Advanced BI Dashboards",
-      },
-      {
-        name: "Financial Tracking",
-        free: false,
-        standard: "Disbursement log",
-        premium: "Full financial management",
-      },
-      {
-        name: "Impact Assessment",
-        free: false,
-        standard: "Annual report",
-        premium: "Real-time impact tracking",
-      },
-    ],
-  },
-];
-
-const checkIconPurple = (
-  <div className="flex justify-center">
-    <div className="bg-[#f0edff] rounded-full p-1 ">
-      <svg
-        xmlns="http://www.w3.org/2000/svg"
-        viewBox="0 0 24 24"
-        fill="none"
-        stroke="currentColor"
-        strokeWidth="3"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-        className="w-4 h-4 text-[#5f61eb]"
-      >
-        <path d="M20 6 9 17l-5-5" />
-      </svg>
-    </div>
-  </div>
-);
-
-const checkIconWhite = (
-  <svg
-    xmlns="http://www.w3.org/2000/svg"
-    viewBox="0 0 24 24"
-    fill="none"
-    stroke="currentColor"
-    strokeWidth="3"
-    strokeLinecap="round"
-    strokeLinejoin="round"
-    className="w-3 h-3 text-white"
-  >
-    <path d="M20 6 9 17l-5-5" />
-  </svg>
-);
-
-const crossIconGrey = (
-  <div className="flex justify-center">
-    <div className="rounded-full p-1">
-      <svg
-        xmlns="http://www.w3.org/2000/svg"
-        viewBox="0 0 24 24"
-        fill="none"
-        stroke="currentColor"
-        strokeWidth="3"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-        className="w-4 h-4 text-slate-300"
-      >
-        <path d="M18 6 6 18" />
-        <path d="m6 6 12 12" />
-      </svg>
-    </div>
-  </div>
-);
 
 const ScholarshipProviderZone: React.FC<ScholarshipProviderZoneProps> = ({
   onNavigate,
 }) => {
-  const [heroTab, setHeroTab] = useState<HeroTab>("login");
-  const [authSubTab, setAuthSubTab] = useState<AuthSubTab>("login");
-  const [billingCycle, setBillingCycle] = useState<BillingCycle>("annually");
-  const [isContactOpen, setIsContactOpen] = useState(false);
-  const [showPricingOverlay, setShowPricingOverlay] = useState(false);
-  const [selectedPlan, setSelectedPlan] = useState<string | null>(null);
+  const [activeTab, setActiveTab] = useState<"register" | "login">("register");
   const [showLoginPassword, setShowLoginPassword] = useState(false);
-  const [showRegisterPassword, setShowRegisterPassword] = useState(false);
-  const [showRegisterConfirmPassword, setShowRegisterConfirmPassword] =
-    useState(false);
   const [loginEmail, setLoginEmail] = useState("");
   const [loginPassword, setLoginPassword] = useState("");
+  const [registerStep, setRegisterStep] = useState(1);
   const [registerProviderName, setRegisterProviderName] = useState("");
-  const [registerNumber, setRegisterNumber] = useState("");
   const [registerEmail, setRegisterEmail] = useState("");
-  const [registerPassword, setRegisterPassword] = useState("");
-  const [registerConfirmPassword, setRegisterConfirmPassword] = useState("");
+  const [registerContact, setRegisterContact] = useState("");
+  const [registerNumber, setRegisterNumber] = useState("");
+  const [registerPAN, setRegisterPAN] = useState("");
+  const [registerWebsite, setRegisterWebsite] = useState("");
   const [authLoading, setAuthLoading] = useState(false);
   const [authError, setAuthError] = useState<string | null>(null);
   const [authSuccess, setAuthSuccess] = useState<string | null>(null);
   const [currentView, setCurrentView] = useState<ViewState>("landing");
+  const router = useRouter();
+
+  const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
+
+  // OTP state
+  const [showOtpStep, setShowOtpStep] = useState(false);
+  const [otp, setOtp] = useState(["", "", "", "", "", ""]);
+  const [otpTimer, setOtpTimer] = useState(120);
+  const [otpResendDisabled, setOtpResendDisabled] = useState(false);
+  const otpInputRefs = useRef<(HTMLInputElement | null)[]>([]);
 
   useEffect(() => {
     const token = apiService.getScholarshipProviderToken();
@@ -368,58 +58,28 @@ const ScholarshipProviderZone: React.FC<ScholarshipProviderZoneProps> = ({
     }
   }, []);
 
-  const contactDropdownRef = useRef<HTMLDivElement | null>(null);
-
   useEffect(() => {
-    const closeOnOutside = (event: MouseEvent) => {
-      if (!contactDropdownRef.current) return;
-      if (!contactDropdownRef.current.contains(event.target as Node)) {
-        setIsContactOpen(false);
-      }
-    };
-    document.addEventListener("mousedown", closeOnOutside);
-    return () => document.removeEventListener("mousedown", closeOnOutside);
-  }, []);
-
-  useEffect(() => {
-    document.body.style.overflow =
-      showPricingOverlay || Boolean(selectedPlan) ? "hidden" : "auto";
-    return () => {
-      document.body.style.overflow = "auto";
-    };
-  }, [showPricingOverlay, selectedPlan]);
-
-  const processedTiers = useMemo(
-    () =>
-      tiers.map((tier) => {
-        const price = tier.price[billingCycle];
-        const period = tier.period[billingCycle];
-        const priceSize =
-          price === "Free"
-            ? "text-5xl"
-            : price.length > 8
-              ? "text-3xl"
-              : "text-[32px]";
-        return { ...tier, price, period, priceSize };
-      }),
-    [billingCycle],
-  );
-
-  const handleHeroTab = (tab: HeroTab) => {
-    setHeroTab(tab);
-    if (tab === "advertise") {
-      setAuthSubTab("login");
+    if (showOtpStep) {
+      const interval = setInterval(() => {
+        setOtpTimer((t) => {
+          if (t <= 1) { clearInterval(interval); return 0; }
+          return t - 1;
+        });
+      }, 1000);
+      return () => clearInterval(interval);
     }
-  };
+  }, [showOtpStep]);
 
   const clearAuthMessages = () => {
     setAuthError(null);
     setAuthSuccess(null);
+    setFieldErrors({});
   };
 
-  const handleProviderLogin = async (
-    event: React.FormEvent<HTMLFormElement>,
-  ) => {
+  const validateEmail = (email: string) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+  const validatePhone = (phone: string) => /^\d{10}$/.test(phone);
+
+  const handleProviderLogin = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     clearAuthMessages();
 
@@ -438,8 +98,7 @@ const ScholarshipProviderZone: React.FC<ScholarshipProviderZoneProps> = ({
       const token = response.data?.token;
       const user = response.data?.user;
 
-      if (!token || !user)
-        throw new Error("Invalid login response from server");
+      if (!token || !user) throw new Error("Invalid login response from server");
 
       apiService.setScholarshipProviderToken(token);
       apiService.setScholarshipProviderUser(user);
@@ -448,244 +107,209 @@ const ScholarshipProviderZone: React.FC<ScholarshipProviderZoneProps> = ({
       setLoginPassword("");
     } catch (error) {
       setAuthError(
-        error instanceof Error
-          ? error.message
-          : "Login failed. Please try again.",
+        error instanceof Error ? error.message : "Login failed. Please try again.",
       );
     } finally {
       setAuthLoading(false);
     }
   };
 
-  const handleProviderRegister = async (
-    event: React.FormEvent<HTMLFormElement>,
-  ) => {
+  const handleContinueStep2 = () => {
+    clearAuthMessages();
+    const errors: Record<string, string> = {};
+
+    if (!registerProviderName.trim()) errors.providerName = "Organization name is required.";
+    if (!validateEmail(registerEmail.trim())) errors.email = "Please enter a valid email address.";
+    if (!validatePhone(registerContact.trim())) errors.contact = "Please enter a valid 10-digit phone number.";
+
+    setFieldErrors(errors);
+    if (Object.keys(errors).length === 0) {
+      setRegisterStep(2);
+    }
+  };
+
+  const handleProviderRegister = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     clearAuthMessages();
 
-    if (
-      !registerProviderName.trim() ||
-      !registerNumber.trim() ||
-      !registerEmail.trim() ||
-      !registerPassword.trim() ||
-      !registerConfirmPassword.trim()
-    ) {
+    if (!registerNumber.trim() || !registerPAN.trim() || !registerWebsite.trim()) {
       setAuthError("Please fill all required fields.");
-      return;
-    }
-
-    if (registerPassword.length < 6) {
-      setAuthError("Password must be at least 6 characters.");
-      return;
-    }
-
-    if (registerPassword !== registerConfirmPassword) {
-      setAuthError("Passwords do not match.");
       return;
     }
 
     setAuthLoading(true);
     try {
-      const response = await apiService.scholarshipProviderRegister({
+      await apiService.scholarshipProviderRegister({
         provider_name: registerProviderName.trim(),
         registration_number: registerNumber.trim(),
         email: registerEmail.trim(),
-        password: registerPassword,
+        contact_number: registerContact.trim(),
+        pan_number: registerPAN.trim(),
+        website_url: registerWebsite.trim(),
       });
 
-      const token = response.data?.token;
-      const user = response.data?.user;
+      await apiService.sendOTP(registerEmail.trim(), "verification");
 
-      if (!token || !user)
-        throw new Error("Invalid registration response from server");
-
-      apiService.setScholarshipProviderToken(token);
-      apiService.setScholarshipProviderUser(user);
-      setAuthSuccess("Registration successful. Setting up your account...");
-      setRegisterPassword("");
-      setRegisterConfirmPassword("");
-      setCurrentView("dashboard");
+      setAuthSuccess("Verification code sent to your email.");
+      setShowOtpStep(true);
+      setOtpTimer(120);
+      setOtp(["", "", "", "", "", ""]);
+      setTimeout(() => otpInputRefs.current[0]?.focus(), 100);
     } catch (error) {
       setAuthError(
-        error instanceof Error
-          ? error.message
-          : "Registration failed. Please try again.",
+        error instanceof Error ? error.message : "Registration failed. Please try again.",
       );
     } finally {
       setAuthLoading(false);
     }
   };
 
-  const handleLoginClick = () => {
-    onNavigate?.("scholarshipProviderDashboard");
+  const handleOtpChange = (index: number, value: string) => {
+    if (!/^\d*$/.test(value)) return;
+    const newOtp = [...otp];
+    newOtp[index] = value.slice(-1);
+    setOtp(newOtp);
+    setAuthError(null);
+    if (value && index < 5) otpInputRefs.current[index + 1]?.focus();
+  };
+
+  const handleOtpKeyDown = (index: number, e: React.KeyboardEvent) => {
+    if (e.key === "Backspace" && !otp[index] && index > 0) {
+      otpInputRefs.current[index - 1]?.focus();
+    }
+  };
+
+  const handleOtpPaste = (e: React.ClipboardEvent) => {
+    e.preventDefault();
+    const paste = e.clipboardData.getData("text").slice(0, 6).replace(/\D/g, "");
+    const newOtp = Array(6).fill("").map((_, i) => paste[i] || "");
+    setOtp(newOtp);
+    if (paste[5]) otpInputRefs.current[5]?.focus();
+    else if (paste.length) otpInputRefs.current[paste.length]?.focus();
+  };
+
+  const handleVerifyOtp = async () => {
+    const otpCode = otp.join("");
+    if (otpCode.length !== 6) {
+      setAuthError("Please enter the full 6-digit code");
+      return;
+    }
+
+    setAuthLoading(true);
+    try {
+      await apiService.verifyOTP(registerEmail.trim(), otpCode);
+      setCurrentView("pending-approval");
+    } catch (error) {
+      setAuthError(
+        error instanceof Error ? error.message : "Verification failed. Please try again.",
+      );
+    } finally {
+      setAuthLoading(false);
+    }
+  };
+
+  const handleResendOtp = async () => {
+    setOtpResendDisabled(true);
+    try {
+      await apiService.sendOTP(registerEmail.trim(), "verification");
+      setOtpTimer(120);
+      setOtp(["", "", "", "", "", ""]);
+      setAuthError(null);
+      setTimeout(() => otpInputRefs.current[0]?.focus(), 100);
+    } catch (error) {
+      setAuthError("Failed to resend code. Please try again.");
+    } finally {
+      setOtpResendDisabled(false);
+    }
   };
 
   if (currentView === "dashboard") {
     return <ScholarshipProviderDashboard onLogout={() => setCurrentView("landing")} />;
   }
 
+  if (currentView === "pending-approval") {
+    return (
+      <div className="min-h-screen bg-[#fcfcfc] font-sans flex items-center justify-center p-4">
+        <div className="bg-white max-w-[420px] w-full rounded-xl shadow-[0_8px_30px_rgb(0,0,0,0.08)] border border-gray-100 p-6 sm:p-8 text-center">
+          <div className="w-20 h-20 bg-green-50 text-green-500 rounded-2xl flex items-center justify-center mx-auto mb-5">
+          <BadgeCheck className="w-16 h-16 text-green-500 mx-auto mb-5" />
+          </div>
+          <h2 className="text-2xl font-bold text-gray-900 mb-2">Application Submitted Successfully!</h2>
+          <div className="bg-blue-50 border border-blue-100 rounded-xl p-5 mt-6 mb-6 text-left">
+            <div className="flex items-start gap-3">
+              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-brand-blue mt-0.5 flex-shrink-0">
+                <circle cx="12" cy="12" r="10"/><line x1="12" x2="12" y1="8" y2="12"/><line x1="12" x2="12.01" y1="16" y2="16"/>
+              </svg>
+              <p className="text-[14px] text-gray-700 font-medium leading-relaxed">
+                Your account is currently under review by our admin team. You will receive an email notification with your login credentials once your account is approved.
+              </p>
+            </div>
+          </div>
+          <button
+            type="button"
+            onClick={() => { setCurrentView("landing"); setActiveTab("login"); }}
+            className="w-full bg-brand-blue hover:bg-brand-hover cursor-pointer text-white font-bold py-3 rounded-md transition-colors"
+          >
+            Back to Sign In
+          </button>
+        </div>
+      </div>
+    );
+  }
+
   return (
-    <div className="text-gray-800 antialiased overflow-x-hidden bg-[#fcfcfc] min-h-screen font-sans">
+    <div className="min-h-screen bg-[#fcfcfc] font-sans selection:bg-blue-100 selection:text-blue-900 overflow-x-hidden max-w-350 mx-auto">
       <style>{`
         input[type="password"] { letter-spacing: 0.2em; }
         input[type="password"]::placeholder { letter-spacing: normal; font-size: 15px; font-weight: 500; }
-        .fade-in { animation: fadeIn 0.4s ease-out; }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
       `}</style>
 
-      <div className="bg-[#6366F1] min-h-screen flex flex-col selection:bg-white selection:text-[#6366F1]">
-        <header className="w-full max-w-7xl mx-auto px-6 py-6 lg:py-8 flex items-center justify-between text-white relative">
-          <div className="lg:flex-1 text-2xl font-bold tracking-tight">
-            StudSphere
-          </div>
-          <nav className="hidden lg:flex lg:flex-1 justify-center items-center gap-8 text-[15px] font-medium relative">
-            <button
-              type="button"
-              className="hover:text-white/80 transition-colors"
-            >
-              Services
-            </button>
-            <div className="relative" ref={contactDropdownRef}>
-              <button
-                type="button"
-                onClick={() => setIsContactOpen((prev) => !prev)}
-                className="hover:text-white/80 transition-colors focus:outline-none flex items-center gap-1"
-              >
-                Contact us
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  className="h-4 w-4"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    d="M19 9l-7 7-7-7"
-                  />
-                </svg>
-              </button>
-              {isContactOpen && (
-                <div className="absolute left-1/2 -translate-x-1/2 top-[2.2rem] z-50 w-120">
-                  <div className="absolute -top-1.5 left-1/2 -translate-x-1/2 w-4 h-4 bg-white rotate-45 rounded-tl-[3px] border-l border-t border-gray-100"></div>
-                  <div className="relative bg-white rounded-md p-2 border border-gray-100 shadow-xl">
-                    <div className="flex items-start gap-4 p-4 rounded-md hover:bg-[#f8f9fa] transition-colors group mb-1">
-                      <div className="w-16 h-16 rounded-full overflow-hidden shrink-0 bg-gray-100 border border-gray-200">
-                        <img
-                          src="https://i.pravatar.cc/150?img=33"
-                          alt="Advisor"
-                          className="w-full h-full object-cover"
-                        />
-                      </div>
-                      <div className="flex flex-col grow pt-0.5">
-                        <h3 className="text-[16px] font-semibold text-[#202124]">
-                          Emma Wilson
-                        </h3>
-                        <p className="text-[13px] text-[#6366F1] font-medium mt-1">
-                          Partnerships Manager
-                        </p>
-                        <div className="mt-2 space-y-1.5">
-                          <a
-                            href="mailto:emma.wilson@studsphere.com"
-                            className="flex items-center gap-2 text-[13px] text-[#5f6368] hover:text-[#6366F1]"
-                          >
-                            <i className="fa-regular fa-envelope"></i>{" "}
-                            emma.wilson@studsphere.com
-                          </a>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              )}
-            </div>
-          </nav>
-          <div className="lg:flex-1 flex justify-end"></div>
-        </header>
-
-        <main className="flex-1 flex items-center justify-center w-full pb-12 lg:pb-20 pt-4">
-          <div className="max-w-7xl w-full mx-auto px-6 flex flex-col lg:flex-row items-center justify-between gap-12 lg:gap-24">
-            <div className="flex-1 text-white w-full max-w-2xl text-center lg:text-left pt-6 lg:pt-0">
-              <h1 className="text-4xl lg:text-[3.5rem] font-bold leading-[1.15] mb-6">
-                Empower the Next Generation – List Your Scholarships
+      <div className="bg-white min-h-screen flex flex-col relative">
+        <main className="flex-1 flex items-center justify-center w-full pb-12 lg:pb-20 pt-24">
+          <div className="max-w-350 w-full mx-auto px-6 flex flex-col lg:flex-row items-center justify-between gap-12 lg:gap-24">
+            <div className="flex-1 text-black w-full max-w-2xl text-center lg:text-left pt-6 lg:pt-0">
+              <h1 className="text-4xl lg:text-[4rem] font-bold leading-[1.15] mb-6">
+                Empower the Next Generation<span className="text-brand-blue"> – List Your Scholarships</span>
               </h1>
-              <p className="text-white/90 text-lg lg:text-xl leading-relaxed max-w-lg mx-auto lg:mx-0 font-light">
-                Join Nepal's largest scholarship network and connect with
-                deserving students nationwide.
+              <p className="text-gray-600 text-lg lg:text-xl leading-relaxed max-w-lg mx-auto lg:mx-0 font-semibold">
+                Join Nepal&rsquo;s largest scholarship network and connect with deserving students nationwide.
               </p>
-              <div className="mt-8 flex flex-wrap gap-4 justify-center lg:justify-start">
-                <Link 
-                  href="/scholarship-apply"
-                  className="bg-white text-[#6366F1] font-bold px-8 py-4 rounded-md shadow-xl shadow-black/10 hover:bg-indigo-50 transition-all flex items-center gap-2"
-                >
-                  <i className="fa-solid fa-file-signature"></i>
-                  Preview Entrance Form
-                </Link>
-                <button className="bg-indigo-500/30 text-white border border-white/20 font-bold px-8 py-4 rounded-md hover:bg-indigo-500/50 transition-all flex items-center gap-2">
-                  <i className="fa-solid fa-play"></i>
-                  Watch Demo
-                </button>
-              </div>
             </div>
 
             <div className="w-full max-w-115">
-              <div className="bg-white rounded-md p-8 sm:p-10 relative shadow-2xl shadow-black/10 text-gray-800">
-                <div className="flex p-1.5 bg-[#F1F3F5] rounded-full mb-8 relative">
+              <div className="bg-white rounded-md p-5 sm:p-6 mt-6 relative text-gray-800 animate-in fade-in slide-in-from-bottom-4 duration-500 border border-gray-200">
+                <div className="flex p-1 bg-[#F1F3F5] rounded-md mb-5">
                   <button
-                    type="button"
-                    onClick={() => handleHeroTab("advertise")}
-                    className={`flex-1 py-2.5 text-[15px] rounded-full transition-all ${heroTab === "advertise" ? "font-bold text-gray-900 bg-white  z-10" : "font-semibold text-gray-500 hover:text-gray-700"}`}
+                    onClick={() => { setActiveTab("register"); setShowOtpStep(false); }}
+                    className={`flex-1 py-3 text-[16px] font-bold transition-all rounded-md ${
+                      activeTab === "register"
+                        ? "text-white bg-brand-blue z-10 shadow-sm"
+                        : "text-gray-500 hover:text-gray-700"
+                    }`}
                   >
-                    Partner with us
+                    Register
                   </button>
                   <button
-                    type="button"
-                    onClick={() => handleHeroTab("login")}
-                    className={`flex-1 py-2.5 text-[15px] rounded-full transition-all ${heroTab === "login" ? "font-bold text-gray-900 bg-white  z-10" : "font-semibold text-gray-500 hover:text-gray-700"}`}
+                    onClick={() => { setActiveTab("login"); setShowOtpStep(false); }}
+                    className={`flex-1 py-3 text-[16px] font-bold transition-all rounded-md ${
+                      activeTab === "login"
+                        ? "text-white bg-brand-blue z-10 shadow-sm"
+                        : "text-gray-500 hover:text-gray-700"
+                    }`}
                   >
-                    Register/Log in
+                    Log in
                   </button>
                 </div>
 
-                {heroTab === "advertise" ? (
-                  <div className="fade-in">
-                    <form
-                      className="space-y-4"
-                      onSubmit={(e) => e.preventDefault()}
-                    >
-                      <input
-                        type="text"
-                        placeholder="Full name"
-                        className="w-full px-4 py-3.5 border border-gray-200 rounded-md focus:border-[#6366F1] outline-none"
-                      />
-                      <input
-                        type="tel"
-                        placeholder="Contact number"
-                        className="w-full px-4 py-3.5 border border-gray-200 rounded-md focus:border-[#6366F1] outline-none"
-                      />
-                      <input
-                        type="email"
-                        placeholder="Organization email"
-                        className="w-full px-4 py-3.5 border border-gray-200 rounded-md focus:border-[#6366F1] outline-none"
-                      />
-                      <button
-                        type="submit"
-                        className="w-full mt-4 bg-white border-2 border-[#6366F1] text-[#6366F1] font-semibold py-3.5 rounded-md hover:bg-indigo-50"
-                      >
-                        Request callback
-                      </button>
-                    </form>
-                  </div>
-                ) : authSubTab === "login" ? (
-                  <div className="fade-in">
-                    <form onSubmit={handleProviderLogin} className="space-y-4">
+                {activeTab === "login" && (
+                  <div className="animate-in fade-in duration-300">
+                    <form onSubmit={handleProviderLogin} className="space-y-3 mt-4">
                       <input
                         type="email"
                         placeholder="Enter your email"
                         value={loginEmail}
                         onChange={(e) => setLoginEmail(e.target.value)}
-                        className="w-full px-4 py-3.5 bg-[#EEF2F6] border border-[#D5DCE8] rounded-md focus:bg-white focus:border-[#6366F1] outline-none"
+                        className="w-full px-4 py-2.5 border border-[#D5DCE8] rounded-md focus:border-brand-blue outline-none"
                       />
                       <div className="relative">
                         <input
@@ -693,143 +317,214 @@ const ScholarshipProviderZone: React.FC<ScholarshipProviderZoneProps> = ({
                           placeholder="Enter your password"
                           value={loginPassword}
                           onChange={(e) => setLoginPassword(e.target.value)}
-                          className="w-full px-4 py-3.5 pr-12 bg-[#EEF2F6] border border-[#D5DCE8] rounded-md focus:bg-white focus:border-[#6366F1] outline-none"
+                          className="w-full px-4 py-2.5 pr-12 border border-[#D5DCE8] rounded-md focus:border-brand-blue outline-none"
                         />
                         <button
                           type="button"
+                          onClick={() => setShowLoginPassword(!showLoginPassword)}
                           className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400"
-                          onClick={() => setShowLoginPassword((p) => !p)}
                         >
-                          <i
-                            className={`fa-solid ${showLoginPassword ? "fa-eye-slash" : "fa-eye"}`}
-                          ></i>
+                          {showLoginPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
                         </button>
                       </div>
                       <div className="flex justify-end pt-1">
-                        <button
-                          type="button"
-                          className="text-[14px] text-[#6366F1] font-semibold hover:underline"
+                        <Link
+                          href="#"
+                          className="text-[15px] text-brand-blue font-semibold hover:text-brand-hover transition-colors"
                         >
                           Forgot password?
-                        </button>
+                        </Link>
                       </div>
-                      {authError && (
-                        <p className="text-sm text-red-500">{authError}</p>
-                      )}
-                      {authSuccess && (
-                        <p className="text-sm text-emerald-600">
-                          {authSuccess}
-                        </p>
-                      )}
+                      {authError && <p className="text-sm text-red-500">{authError}</p>}
+                      {authSuccess && <p className="text-sm text-emerald-600">{authSuccess}</p>}
                       <button
                         type="submit"
                         disabled={authLoading}
-                        className="w-full bg-[#6366F1] text-white font-bold py-3.5 rounded-md hover:bg-indigo-700 disabled:opacity-50"
+                        className="w-full bg-brand-blue hover:bg-brand-hover cursor-pointer text-white font-bold py-3 rounded-md transition-colors disabled:opacity-50"
                       >
                         {authLoading ? "Logging in..." : "Log in"}
                       </button>
-                    </form>
-                    <div className="mt-8 text-center text-[15px] text-gray-500">
-                      New provider?{" "}
+
+                      <div className="flex items-center my-6">
+                        <div className="grow border-t border-gray-200"></div>
+                        <span className="px-4 text-xs text-gray-400 font-semibold uppercase">Or</span>
+                        <div className="grow border-t border-gray-200"></div>
+                      </div>
+
                       <button
                         type="button"
-                        onClick={() => setAuthSubTab("register")}
-                        className="text-[#6366F1] font-semibold hover:underline"
+                        className="w-full flex items-center justify-center gap-3 bg-white border border-gray-200 hover:bg-gray-50 text-[15px] font-semibold text-gray-700 py-3.5 rounded-md cursor-pointer hover:text-brand-blue transition-all"
                       >
-                        Create account
+                        <Image
+                          src="/google-icon.svg"
+                          alt="Google"
+                          width={18}
+                          height={18}
+                          className="w-4.5 h-4.5"
+                        />
+                        Log in with Google
                       </button>
+                    </form>
+                  </div>
+                )}
+
+                {activeTab === "register" && !showOtpStep && registerStep === 1 && (
+                  <div className="animate-in fade-in duration-300">
+                    <div className="text-center mb-4 mt-4">
+                      <h2 className="text-lg font-bold text-gray-900">Create Account</h2>
+                      <p className="text-[13px] text-gray-500 font-medium">Enter your organization details</p>
+                    </div>
+                    <div className="space-y-3">
+                      <div>
+                        <input
+                          type="text"
+                          placeholder="Organization name"
+                          value={registerProviderName}
+                          onChange={(e) => setRegisterProviderName(e.target.value)}
+                          className={`w-full px-4 py-2.5 border rounded-md focus:border-brand-blue outline-none ${fieldErrors.providerName ? 'border-red-500' : 'border-[#D5DCE8]'}`}
+                        />
+                        {fieldErrors.providerName && <p className="text-xs text-red-500 mt-1">{fieldErrors.providerName}</p>}
+                      </div>
+                      <div>
+                        <input
+                          type="email"
+                          placeholder="Official email"
+                          value={registerEmail}
+                          onChange={(e) => setRegisterEmail(e.target.value)}
+                          className={`w-full px-4 py-2.5 border rounded-md focus:border-brand-blue outline-none ${fieldErrors.email ? 'border-red-500' : 'border-[#D5DCE8]'}`}
+                        />
+                        {fieldErrors.email && <p className="text-xs text-red-500 mt-1">{fieldErrors.email}</p>}
+                      </div>
+                      <div>
+                        <input
+                          type="tel"
+                          placeholder="Contact number (10-digit)"
+                          value={registerContact}
+                          onChange={(e) => {
+                            const val = e.target.value.replace(/[^0-9]/g, '').slice(0, 10);
+                            setRegisterContact(val);
+                          }}
+                          className={`w-full px-4 py-2.5 border rounded-md focus:border-brand-blue outline-none ${fieldErrors.contact ? 'border-red-500' : 'border-[#D5DCE8]'}`}
+                        />
+                        {fieldErrors.contact && <p className="text-xs text-red-500 mt-1">{fieldErrors.contact}</p>}
+                      </div>
+                      {authError && <p className="text-sm text-red-500">{authError}</p>}
+                      <button
+                        type="button"
+                        onClick={handleContinueStep2}
+                        className="w-full bg-brand-blue hover:bg-brand-hover cursor-pointer text-white font-bold py-3 rounded-md transition-colors"
+                      >
+                        Continue
+                      </button>
+                      <div className="text-center text-[13px] text-gray-500 font-medium">
+                        Already have an account?{' '}
+                        <button type="button" onClick={() => setActiveTab("login")} className="text-brand-blue font-semibold hover:underline">
+                          Sign in
+                        </button>
+                      </div>
                     </div>
                   </div>
-                ) : (
-                  <div className="fade-in">
-                    <form
-                      onSubmit={handleProviderRegister}
-                      className="space-y-4"
-                    >
+                )}
+
+                {activeTab === "register" && !showOtpStep && registerStep === 2 && (
+                  <div className="animate-in fade-in duration-300">
+                    <div className="text-center mb-4 mt-4">
+                      <h2 className="text-lg font-bold text-gray-900">Organization Information</h2>
+                      <p className="text-[13px] text-gray-500 font-medium">Complete your registration</p>
+                    </div>
+                    <form onSubmit={handleProviderRegister} className="space-y-3">
                       <input
                         type="text"
-                        placeholder="Organization name"
-                        value={registerProviderName}
-                        onChange={(e) =>
-                          setRegisterProviderName(e.target.value)
-                        }
-                        className="w-full px-4 py-3.5 bg-[#EEF2F6] rounded-md outline-none"
+                        placeholder="PAN number"
+                        value={registerPAN}
+                        onChange={(e) => setRegisterPAN(e.target.value)}
+                        className="w-full px-4 py-2.5 border border-[#D5DCE8] rounded-md focus:border-brand-blue outline-none"
                       />
                       <input
                         type="text"
-                        placeholder="Tax/Registration number"
+                        placeholder="Registration number"
                         value={registerNumber}
                         onChange={(e) => setRegisterNumber(e.target.value)}
-                        className="w-full px-4 py-3.5 bg-[#EEF2F6] rounded-md"
+                        className="w-full px-4 py-2.5 border border-[#D5DCE8] rounded-md focus:border-brand-blue outline-none"
                       />
                       <input
-                        type="email"
-                        placeholder="Official email"
-                        value={registerEmail}
-                        onChange={(e) => setRegisterEmail(e.target.value)}
-                        className="w-full px-4 py-3.5 bg-[#EEF2F6] rounded-md"
+                        type="url"
+                        placeholder="Website URL"
+                        value={registerWebsite}
+                        onChange={(e) => setRegisterWebsite(e.target.value)}
+                        className="w-full px-4 py-2.5 border border-[#D5DCE8] rounded-md focus:border-brand-blue outline-none"
                       />
-                      <div className="relative">
-                        <input
-                          type={showRegisterPassword ? "text" : "password"}
-                          placeholder="Create password"
-                          value={registerPassword}
-                          onChange={(e) => setRegisterPassword(e.target.value)}
-                          className="w-full px-4 py-3.5 pr-12 bg-[#EEF2F6] rounded-md"
-                        />
-                        <button
-                          type="button"
-                          className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400"
-                          onClick={() => setShowRegisterPassword((p) => !p)}
-                        >
-                          <i
-                            className={`fa-solid ${showRegisterPassword ? "fa-eye-slash" : "fa-eye"}`}
-                          ></i>
-                        </button>
-                      </div>
-                      <div className="relative">
-                        <input
-                          type={
-                            showRegisterConfirmPassword ? "text" : "password"
-                          }
-                          placeholder="Re-enter password"
-                          value={registerConfirmPassword}
-                          onChange={(e) =>
-                            setRegisterConfirmPassword(e.target.value)
-                          }
-                          className="w-full px-4 py-3.5 pr-12 bg-[#EEF2F6] rounded-md"
-                        />
-                        <button
-                          type="button"
-                          className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400"
-                          onClick={() =>
-                            setShowRegisterConfirmPassword((p) => !p)
-                          }
-                        >
-                          <i
-                            className={`fa-solid ${showRegisterConfirmPassword ? "fa-eye-slash" : "fa-eye"}`}
-                          ></i>
-                        </button>
-                      </div>
-                      {authError && (
-                        <p className="text-sm text-red-500">{authError}</p>
-                      )}
+                      {authError && <p className="text-sm text-red-500">{authError}</p>}
                       <button
                         type="submit"
                         disabled={authLoading}
-                        className="w-full mt-4 bg-[#6366F1] text-white font-bold py-3.5 rounded-md hover:bg-indigo-700"
+                        className="w-full bg-brand-blue hover:bg-brand-hover cursor-pointer text-white font-bold py-3 rounded-md transition-colors disabled:opacity-50"
                       >
-                        {authLoading ? "Creating account..." : "Sign up"}
+                        {authLoading ? "Submitting..." : "Submit for Verification"}
                       </button>
-                    </form>
-                    <div className="mt-8 text-center text-[15px] text-gray-500">
-                      Already registered?{" "}
                       <button
                         type="button"
-                        onClick={() => setAuthSubTab("login")}
-                        className="text-[#6366F1] font-semibold hover:underline"
+                        onClick={() => { setRegisterStep(1); clearAuthMessages(); }}
+                        className="w-full text-[13px] text-gray-400 hover:text-gray-700 font-semibold py-2 transition-colors"
                       >
-                        Log in
+                        Back to Basic Info
+                      </button>
+                    </form>
+                  </div>
+                )}
+
+                {activeTab === "register" && showOtpStep && (
+                  <div className="animate-in fade-in duration-300 mt-4">
+                    <div className="text-center mb-6">
+                      <h3 className="text-lg font-bold text-gray-900 mb-1">Verify Your Email</h3>
+                      <p className="text-sm text-gray-500">
+                        Enter the 6-digit code sent to <span className="font-semibold text-gray-700">{registerEmail}</span>
+                      </p>
+                    </div>
+
+                    <div className="flex gap-3 justify-center" onPaste={handleOtpPaste}>
+                      {otp.map((digit, idx) => (
+                        <input
+                          key={idx}
+                          ref={(el) => { otpInputRefs.current[idx] = el; }}
+                          type="text"
+                          inputMode="numeric"
+                          maxLength={1}
+                          value={digit}
+                          onChange={(e) => handleOtpChange(idx, e.target.value)}
+                          onKeyDown={(e) => handleOtpKeyDown(idx, e)}
+                          className={`w-12 h-14 text-center text-xl font-bold text-gray-900 border border-gray-200 rounded-md focus:outline-none focus:ring-0 transition-colors bg-white ${
+                            authError ? "border-red-500 focus:border-red-500" : "focus:border-brand-blue"
+                          }`}
+                        />
+                      ))}
+                    </div>
+
+                    {authError && (
+                      <p className="text-sm text-red-500 text-center mt-4">{authError}</p>
+                    )}
+
+                    <button
+                      type="button"
+                      disabled={otp.join("").length !== 6 || authLoading}
+                      onClick={handleVerifyOtp}
+                      className="w-full mt-6 bg-brand-blue hover:bg-brand-hover text-white font-bold py-3 rounded-md transition-colors disabled:opacity-50"
+                    >
+                      {authLoading ? "Verifying..." : "Verify Code"}
+                    </button>
+
+                    <div className="flex justify-between items-center mt-4 text-sm">
+                      <span className="text-gray-500">
+                        Code expires in{" "}
+                        <span className="font-semibold text-gray-800">{formatTimer(otpTimer)}</span>
+                      </span>
+                      <button
+                        type="button"
+                        disabled={otpTimer > 0 || otpResendDisabled}
+                        onClick={handleResendOtp}
+                        className="text-brand-blue font-semibold hover:underline disabled:text-gray-400 disabled:no-underline disabled:cursor-not-allowed transition-colors"
+                      >
+                        {otpResendDisabled ? "Sending..." : "Resend Code"}
                       </button>
                     </div>
                   </div>
@@ -838,50 +533,6 @@ const ScholarshipProviderZone: React.FC<ScholarshipProviderZoneProps> = ({
             </div>
           </div>
         </main>
-      </div>
-
-      <section className="py-20 px-6 max-w-7xl mx-auto">
-        <div className="text-center mb-16">
-          <h2 className="text-3xl md:text-4xl font-bold text-gray-900">
-            Comprehensive Solutions for Providers
-          </h2>
-          <p className="mt-4 text-lg text-gray-500 max-w-2xl mx-auto">
-            Tools built to help you reach the right candidates and manage your
-            scholarship programs efficiently.
-          </p>
-        </div>
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
-          {services.map((service) => (
-            <div
-              key={service.title}
-              className="bg-white rounded-md p-8  hover:-translate-y-1.25 transition-all border border-gray-50"
-            >
-              <div className="relative w-16 h-16 mb-6">
-                <div
-                  className={`absolute top-0 right-2 w-10 h-10 rounded-full ${service.blobClass}`}
-                ></div>
-                <div
-                  className={`relative z-10 flex items-center justify-center w-full h-full text-3xl ${service.iconClass}`}
-                >
-                  <i className={`fa-solid ${service.icon}`}></i>
-                </div>
-              </div>
-              <h3 className="text-lg font-bold mb-3">{service.title}</h3>
-              <p className="text-gray-500 text-sm leading-relaxed">
-                {service.description}
-              </p>
-            </div>
-          ))}
-        </div>
-      </section>
-
-      <div className="flex justify-center items-center h-screen">
-        <button
-          onClick={handleLoginClick}
-          className="bg-indigo-600 text-white font-bold py-3 px-6 rounded-md  hover:bg-indigo-700 transition-colors"
-        >
-          Login
-        </button>
       </div>
     </div>
   );

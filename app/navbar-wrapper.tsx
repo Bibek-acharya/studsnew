@@ -12,8 +12,8 @@ export default function NavbarWrapper() {
   const router = useRouter();
 
   const hideGlobalNavbar =
-    pathname.startsWith("/scholarship-provider") ||
     pathname.startsWith("/institution-zone") ||
+    pathname.startsWith("/scholarship-provider") ||
     pathname.startsWith("/user/dashboard") ||
     pathname.startsWith("/superadmin") ||
     pathname === "/login" ||

@@ -17,12 +17,13 @@ interface NepaliCalendarProps {
   onChange: (bsDate: string, adDate: string, age: string) => void;
   error?: string;
   minAge?: number;
+  showIcon?: boolean;
 }
 
 const nepaliMonths = getNepaliMonths();
 const YEARS = Array.from({ length: 41 }, (_, i) => 2050 + i);
 
-export default function NepaliCalendar({ value, onChange, error, minAge = 14 }: NepaliCalendarProps) {
+export default function NepaliCalendar({ value, onChange, error, minAge = 14, showIcon = true }: NepaliCalendarProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [currentYear, setCurrentYear] = useState(2082);
   const [currentMonth, setCurrentMonth] = useState(0);
@@ -136,16 +137,16 @@ export default function NepaliCalendar({ value, onChange, error, minAge = 14 }: 
   return (
     <div className="relative" ref={containerRef}>
       <div className="relative">
-        <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+        {showIcon && <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />}
         <input
           type="text"
           value={value}
           readOnly
           onClick={() => setIsOpen(!isOpen)}
-          className={`w-full border rounded-lg py-3 pl-10 pr-4 text-[15px] text-gray-800 outline-none focus:ring-0 transition-all bg-white cursor-pointer ${
+          className={`w-full border rounded py-3 ${showIcon ? "pl-10" : "pl-4"} pr-4 text-[15px] text-gray-800 outline-none focus:ring-0 transition-all bg-white cursor-pointer ${
             error || ageError ? "border-red-500" : "border-gray-300 focus:border-[#0000ff]"
           }`}
-          placeholder="YYYY-MM-DD (BS)"
+          placeholder="Select from Calendar"
         />
       </div>
       {error && <p className="text-red-500 text-[12px] mt-1">{error}</p>}

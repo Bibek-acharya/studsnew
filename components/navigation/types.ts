@@ -33,6 +33,10 @@ export type ViewKey =
   | "login"
   | "signup"
   | "scholarshipRecommenderTool"
+  | "myApplications"
+  | "savedColleges"
+  | "notificationSettings"
+  | "userSettings"
   ;
 
 export type NotificationTab = "all" | "following" | "system" | "archive";

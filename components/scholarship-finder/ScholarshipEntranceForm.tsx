@@ -19,7 +19,7 @@ import {
 
 type ViewState = "form" | "payment" | "success" | "admit";
 
-export default function ScholarshipEntranceForm() {
+export default function ScholarshipEntranceForm({ scholarshipTitle, onClose }: { scholarshipTitle?: string; onClose?: () => void }) {
   const [view, setView] = useState<ViewState>("form");
   const [isLoading, setIsLoading] = useState(false);
   const [showCalendar, setShowCalendar] = useState(false);
@@ -140,11 +140,25 @@ export default function ScholarshipEntranceForm() {
   };
 
   return (
-    <div className="min-h-screen flex flex-col items-center pt-8 pb-20 px-4 sm:px-6 bg-[#0000ff] font-['Inter',sans-serif] selection:bg-blue-100 selection:text-blue-900">
+    <div className={"min-h-screen flex flex-col items-center pt-8 pb-20 px-4 sm:px-6 font-['Inter',sans-serif] selection:bg-blue-100 selection:text-blue-900 " + (onClose ? "bg-white" : "bg-[#0000ff]")}>
       
       {/* Header Section */}
       <header className="w-full max-w-[900px] mb-8 text-center sm:text-left flex flex-col sm:flex-row items-center justify-between gap-6 no-print">
         <div>
+            {onClose && (
+              <div className="flex items-center justify-between mb-4">
+                <div className="flex items-center gap-2">
+                    <svg width="28" height="28" viewBox="0 0 24 24" fill="#0000ff" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M12 2L2 7l10 5 10-5-10-5z" opacity="0.9"/>
+                        <path d="M2 7v10l10 5V12L2 7z" opacity="0.6"/>
+                        <path d="M22 7v10l-10 5V12l10-5z"/>
+                    </svg>
+                    <span className="text-[24px] font-bold tracking-wide text-blue-600">StudSphere</span>
+                </div>
+                <button onClick={onClose} className="p-2 hover:bg-gray-100 rounded-full transition-colors"><X size={24} /></button>
+              </div>
+            )}
+            {!onClose && (
             <div className="flex items-center justify-center sm:justify-start gap-2 mb-4">
                 <svg width="28" height="28" viewBox="0 0 24 24" fill="white" xmlns="http://www.w3.org/2000/svg">
                     <path d="M12 2L2 7l10 5 10-5-10-5z" opacity="0.9"/>
@@ -153,8 +167,11 @@ export default function ScholarshipEntranceForm() {
                 </svg>
                 <span className="text-white text-[24px] font-bold tracking-wide">StudSphere</span>
             </div>
-            <h1 className="text-[32px] sm:text-[40px] font-extrabold text-white mb-2 leading-tight drop-">Project Shiksha Entrance 2082</h1>
-            <p className="text-[18px] text-white/90 font-medium">Empowering Education, Shaping Futures.</p>
+            )}
+            <h1 className={"text-[32px] sm:text-[40px] font-extrabold mb-2 leading-tight " + (onClose ? "text-gray-900" : "text-white")}>
+              {scholarshipTitle || "Project Shiksha Entrance 2082"}
+            </h1>
+            <p className={"text-[18px] font-medium " + (onClose ? "text-gray-500" : "text-white/90")}>Empowering Education, Shaping Futures.</p>
         </div>
       </header>
 

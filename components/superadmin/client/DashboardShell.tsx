@@ -25,6 +25,7 @@ import {
   LogOut,
   Search,
   ChevronRight,
+  UserCheck,
 } from "lucide-react";
 
 const OverviewSection = lazy(() => import("./OverviewSection"));
@@ -55,6 +56,7 @@ const SettingsSection = lazy(() => import("./SettingsSection"));
 const UserListSection = lazy(() => import("./UserListSection"));
 const AddUserSection = lazy(() => import("./AddUserSection"));
 const AnalyticsSection = lazy(() => import("./AnalyticsSection"));
+const PendingProvidersSection = lazy(() => import("./PendingProvidersSection"));
 
 type SectionType =
   | "overview"
@@ -84,7 +86,8 @@ type SectionType =
   | "organization-settings"
   | "history"
   | "backup"
-  | "settings";
+  | "settings"
+  | "pending-providers";
 
 const navItems = [
   { icon: LayoutDashboard, label: "Overview", section: "overview" as SectionType },
@@ -98,6 +101,7 @@ const navItems = [
   { icon: Calendar, label: "Manage Events", section: "manage-events" as SectionType, children: ["create-event", "manage-events"] as SectionType[] },
   { icon: Building, label: "Manage Campus Feed", section: "manage-campus-feed" as SectionType },
   { icon: Users, label: "User Management", section: "user-management" as SectionType, children: ["add-user", "user-management"] as SectionType[] },
+  { icon: UserCheck, label: "Pending Providers", section: "pending-providers" as SectionType },
   { icon: BarChart3, label: "Analytics", section: "analytics" as SectionType },
   { icon: Bell, label: "Manage Notification", section: "manage-notification" as SectionType },
   { icon: ShieldCheck, label: "Access Control", section: "access-control" as SectionType },
@@ -177,6 +181,8 @@ export default function DashboardShell() {
         return <UserListSection setActiveSection={navigateTo} />;
       case "add-user":
         return <AddUserSection setActiveSection={navigateTo} />;
+      case "pending-providers":
+        return <PendingProvidersSection />;
       case "analytics":
         return <AnalyticsSection />;
       default:
@@ -412,6 +418,7 @@ function prettyLabel(section: SectionType) {
     "manage-campus-feed": "Campus Feed",
     "add-user": "Add User",
     "user-management": "User List",
+    "pending-providers": "Pending Providers",
     "manage-notification": "Manage Notification",
     "access-control": "Access Control",
     "organization-profile": "Organization Profile",

@@ -15,16 +15,21 @@ export function validateForm(data: ProjectShikshaFormData): {
   }
   if (!data.phone || data.phone.length !== 10) {
     errors.phone = "Valid 10-digit phone number is required";
+  } else if (!data.phone.startsWith("9")) {
+    errors.phone = "Phone number must start with 9";
   }
   if (data.email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(data.email)) {
     errors.email = "Invalid email format";
   }
   if (!data.seeSchoolType) errors.seeSchoolType = "School type is required";
-  if (data.seeSchoolType === "Other" && !data.otherSchoolType.trim()) {
-    (errors as Record<string, string>).otherSchoolType = "Please specify the school type";
-  }
   if (data.seeSchoolType && !data.schoolName.trim()) {
     errors.schoolName = "School name is required";
+  }
+
+  // Education
+  if (!data.seeGpa.trim()) errors.seeGpa = "SEE GPA is required";
+  if (data.seeGpa.trim() && (isNaN(parseFloat(data.seeGpa)) || parseFloat(data.seeGpa) < 0 || parseFloat(data.seeGpa) > 4)) {
+    errors.seeGpa = "GPA must be between 0 and 4";
   }
 
   // Address
@@ -32,7 +37,7 @@ export function validateForm(data: ProjectShikshaFormData): {
   if (!data.permDistrict.trim()) errors.permDistrict = "District is required";
   if (!data.permMunicipality.trim()) errors.permMunicipality = "Municipality is required";
   if (!data.permWard) errors.permWard = "Ward number is required";
-  
+
   if (!data.tempProvince) errors.tempProvince = "Province is required";
   if (!data.tempDistrict.trim()) errors.tempDistrict = "District is required";
   if (!data.tempMunicipality.trim()) errors.tempMunicipality = "Municipality is required";
@@ -42,6 +47,8 @@ export function validateForm(data: ProjectShikshaFormData): {
   if (!data.guardianName.trim()) errors.guardianName = "Guardian name is required";
   if (!data.guardianPhone || data.guardianPhone.length !== 10) {
     errors.guardianPhone = "Valid 10-digit phone number is required";
+  } else if (!data.guardianPhone.startsWith("9")) {
+    errors.guardianPhone = "Phone number must start with 9";
   }
   if (data.guardianEmail && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(data.guardianEmail)) {
     errors.guardianEmail = "Invalid email format";
@@ -59,6 +66,10 @@ export function validateForm(data: ProjectShikshaFormData): {
   if (!data.seeMarksheet) errors.seeMarksheet = "SEE marksheet is required";
   if (!data.citizenship) errors.citizenship = "Citizenship/Birth certificate is required";
   if (!data.photo) errors.photo = "Passport photo is required";
+
+  // Admit Card
+  if (!data.stream) errors.stream = "Stream is required";
+  if (!data.examCenter) errors.examCenter = "Exam center is required";
 
   // Declaration
   if (!data.declaration) errors.declaration = "You must accept the declaration";

@@ -7,16 +7,16 @@ import { generateId } from "@/lib/superadmin/constants";
 
 export function AchievementsCard({ locked, onToggleLock }: { locked: boolean; onToggleLock: () => void }) {
   const [items, setItems] = useState([
-    { id: generateId(), title: "Successful Scholarship Program", badge: "Success", desc: "95% of scholarship holders achieving distinction.", tags: "95% Pass, 85% Distinction" },
+    { id: generateId(), title: "Successful Scholarship Program", badge: "Success", desc: "95% of scholarship holders achieving distinction.", tags: "95% Pass, 85% Distinction", link: "" },
   ]);
 
-  const addItem = () => setItems((prev) => [...prev, { id: generateId(), title: "", badge: "Achievement", desc: "", tags: "" }]);
+  const addItem = () => setItems((prev) => [...prev, { id: generateId(), title: "", badge: "Achievement", desc: "", tags: "", link: "" }]);
   const removeItem = (id: string) => setItems((prev) => prev.filter((x) => x.id !== id));
   const updateItem = (id: string, field: string, val: string) =>
     setItems((prev) => prev.map((x) => (x.id === id ? { ...x, [field]: val } : x)));
 
   return (
-    <FormCard icon={<Trophy size={24} className="text-yellow-600" />} title="Achievements" sub="Milestones and success stories" locked={locked} onToggleLock={onToggleLock} action={
+    <FormCard icon={<Trophy size={24} className="text-yellow-600" />} title="Achievements" sub="Milestones and success stories (shown in Achievements tab)" locked={locked} onToggleLock={onToggleLock} action={
       <button type="button" onClick={addItem} className="flex items-center gap-2 rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-blue-700">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M5 12h14" /><path d="M12 5v14" /></svg> Add Achievement
       </button>
@@ -45,9 +45,13 @@ export function AchievementsCard({ locked, onToggleLock }: { locked: boolean; on
               <label className="block text-xs font-medium text-gray-600">Description</label>
               <textarea className="input-field min-h-[60px] text-sm" rows={2} placeholder="Brief description..." defaultValue={item.desc} onChange={(e) => updateItem(item.id, "desc", e.target.value)} />
             </div>
-            <div className="space-y-2">
+            <div className="mb-3 space-y-2">
               <label className="block text-xs font-medium text-gray-600">Tags (comma separated)</label>
               <input type="text" className="input-field text-sm" placeholder="e.g., 95% Pass, 85% Distinction" defaultValue={item.tags} onChange={(e) => updateItem(item.id, "tags", e.target.value)} />
+            </div>
+            <div className="space-y-2">
+              <label className="block text-xs font-medium text-gray-600">Link / URL (optional)</label>
+              <input type="url" className="input-field text-sm" placeholder="https://example.com/achievement" defaultValue={item.link} onChange={(e) => updateItem(item.id, "link", e.target.value)} />
             </div>
           </div>
         ))}

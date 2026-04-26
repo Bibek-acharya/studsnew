@@ -1,12 +1,13 @@
 "use client";
 
 import React from "react";
-import { BasicInfoCard, FinancialCard, DescriptionCard, TimelineCard, MediaCard, ContactCard } from "./create-scholarship/basic-info";
+import { BasicInfoCard, FinancialCard, DescriptionCard, TimelineCard, JourneyTimelineCard, MediaCard, ContactCard } from "./create-scholarship/basic-info";
 import { EligibilityCard } from "./create-scholarship/eligibility";
 import { ExamCentersCard } from "./create-scholarship/exam-centers";
 import { FaqCard, PartnersCard } from "./create-scholarship/faq-partners";
 import { AchievementsCard, GalleryCard } from "./create-scholarship/achievements-gallery";
 import { NewsNoticeCard } from "./create-scholarship/news-notice";
+import { ScholarshipTypesCard, SelectionRubricCard } from "./create-scholarship/scholarship-table";
 
 export default function CreateScholarshipSection({
   setActiveSection,
@@ -49,6 +50,9 @@ export default function CreateScholarshipSection({
       <FinancialCard locked={!!lockedSections.financial} onToggleLock={() => toggleLock("financial")} />
       <DescriptionCard locked={!!lockedSections.desc} onToggleLock={() => toggleLock("desc")} />
       <TimelineCard locked={!!lockedSections.timeline} onToggleLock={() => toggleLock("timeline")} />
+      <JourneyTimelineCard locked={!!lockedSections.journey} onToggleLock={() => toggleLock("journey")} />
+      <ScholarshipTypesCard locked={!!lockedSections.types} onToggleLock={() => toggleLock("types")} />
+      <SelectionRubricCard locked={!!lockedSections.rubric} onToggleLock={() => toggleLock("rubric")} />
       <MediaCard locked={!!lockedSections.media} onToggleLock={() => toggleLock("media")} />
       <ContactCard locked={!!lockedSections.contact} onToggleLock={() => toggleLock("contact")} />
       <EligibilityCard locked={!!lockedSections.eligibility} onToggleLock={() => toggleLock("eligibility")} />

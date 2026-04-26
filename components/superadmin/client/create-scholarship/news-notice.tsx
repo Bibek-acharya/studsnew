@@ -15,16 +15,16 @@ const NEWS_CATEGORIES = [
 
 export function NewsNoticeCard({ locked, onToggleLock }: { locked: boolean; onToggleLock: () => void }) {
   const [items, setItems] = useState([
-    { id: generateId(), title: "Entrance Examination Schedule Published", category: "Notice", desc: "The entrance examination will be held on Shrawan 1, 2082.", date: "" },
+    { id: generateId(), title: "Entrance Examination Schedule Published", category: "Notice", desc: "The entrance examination will be held on Shrawan 1, 2082.", date: "", link: "" },
   ]);
 
-  const addItem = () => setItems((prev) => [...prev, { id: generateId(), title: "", category: "Notice", desc: "", date: "" }]);
+  const addItem = () => setItems((prev) => [...prev, { id: generateId(), title: "", category: "Notice", desc: "", date: "", link: "" }]);
   const removeItem = (id: string) => setItems((prev) => prev.filter((x) => x.id !== id));
   const updateItem = (id: string, field: string, val: string) =>
     setItems((prev) => prev.map((x) => (x.id === id ? { ...x, [field]: val } : x)));
 
   return (
-    <FormCard icon={<Newspaper size={24} className="text-cyan-600" />} title="News & Notice" sub="Announcements and updates for the scholarship" locked={locked} onToggleLock={onToggleLock} action={
+    <FormCard icon={<Newspaper size={24} className="text-cyan-600" />} title="News & Notice" sub="Announcements and updates (shown in News & Notice tab)" locked={locked} onToggleLock={onToggleLock} action={
       <button type="button" onClick={addItem} className="flex items-center gap-2 rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-blue-700">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M5 12h14" /><path d="M12 5v14" /></svg> Add News
       </button>
@@ -55,9 +55,13 @@ export function NewsNoticeCard({ locked, onToggleLock }: { locked: boolean; onTo
               <label className="block text-xs font-medium text-gray-600">Description</label>
               <textarea className="input-field min-h-[60px] text-sm" rows={2} placeholder="Brief description..." defaultValue={item.desc} onChange={(e) => updateItem(item.id, "desc", e.target.value)} />
             </div>
-            <div className="space-y-2">
+            <div className="mb-3 space-y-2">
               <label className="block text-xs font-medium text-gray-600">Published Date</label>
               <input type="date" className="input-field text-sm" defaultValue={item.date} onChange={(e) => updateItem(item.id, "date", e.target.value)} />
+            </div>
+            <div className="space-y-2">
+              <label className="block text-xs font-medium text-gray-600">Link / URL (optional)</label>
+              <input type="url" className="input-field text-sm" placeholder="https://example.com/news" defaultValue={item.link} onChange={(e) => updateItem(item.id, "link", e.target.value)} />
             </div>
           </div>
         ))}

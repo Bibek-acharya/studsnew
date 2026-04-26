@@ -1,4 +1,5 @@
 import React, { useState, useMemo } from "react";
+import { useRouter } from "next/navigation";
 import {
   Clock,
   Building2,
@@ -32,6 +33,7 @@ const CourseGrid: React.FC<CourseGridProps> = ({
   courses,
   isLoading,
 }) => {
+  const router = useRouter();
   const [currentPage, setCurrentPage] = useState(1);
   const [savedCourseIds, setSavedCourseIds] = useState<string[]>([]);
 
@@ -222,7 +224,7 @@ const CourseGrid: React.FC<CourseGridProps> = ({
                   <div className="flex gap-2 mt-3 -mb-3 py-5 border-t border-dashed border-gray-200">
                     <button
                       onClick={() =>
-                        onNavigate("courseDetails", { id: course.id })
+                        router.push(`/course-finder/${course.id}`)
                       }
                       className="flex-[1.5] flex items-center justify-center border border-gray-200 hover:bg-gray-50 text-slate-600 font-medium py-2 rounded-md transition-colors text-[12px] whitespace-nowrap"
                     >

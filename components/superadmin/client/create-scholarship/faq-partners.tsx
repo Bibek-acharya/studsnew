@@ -41,19 +41,28 @@ export function FaqCard({ locked, onToggleLock }: { locked: boolean; onToggleLoc
   );
 }
 
+const PARTNER_ROLES = [
+  { value: "lead_organizer", label: "Lead Organizer" },
+  { value: "academic_partner", label: "Academic Partner" },
+  { value: "technical_partner", label: "Technical Partner" },
+  { value: "financial_partner", label: "Financial Partner" },
+  { value: "media_partner", label: "Media Partner" },
+  { value: "other", label: "Other" },
+];
+
 export function PartnersCard({ locked, onToggleLock }: { locked: boolean; onToggleLock: () => void }) {
   const [partners, setPartners] = useState([
-    { id: generateId(), name: "100 Group", logoUrl: "", website: "" },
-    { id: generateId(), name: "Sowers Action Nepal", logoUrl: "", website: "" },
+    { id: generateId(), name: "100 Group", role: "lead_organizer", logoUrl: "", website: "" },
+    { id: generateId(), name: "Sowers Action Nepal", role: "lead_organizer", logoUrl: "", website: "" },
   ]);
 
-  const addPartner = () => setPartners((prev) => [...prev, { id: generateId(), name: "", logoUrl: "", website: "" }]);
+  const addPartner = () => setPartners((prev) => [...prev, { id: generateId(), name: "", role: "other", logoUrl: "", website: "" }]);
   const removePartner = (id: string) => setPartners((prev) => prev.filter((p) => p.id !== id));
-  const updatePartner = (id: string, field: "name" | "logoUrl" | "website", val: string) =>
+  const updatePartner = (id: string, field: "name" | "role" | "logoUrl" | "website", val: string) =>
     setPartners((prev) => prev.map((p) => (p.id === id ? { ...p, [field]: val } : p)));
 
   return (
-    <FormCard icon={<Handshake size={24} className="text-purple-600" />} title="Partners" sub="Organizations supporting the scholarship" locked={locked} onToggleLock={onToggleLock} action={
+    <FormCard icon={<Handshake size={24} className="text-purple-600" />} title="Partners" sub="Organizations supporting the scholarship (shown in Partners tab grouped by role)" locked={locked} onToggleLock={onToggleLock} action={
       <button type="button" onClick={addPartner} className="flex items-center gap-2 rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-blue-700">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M5 12h14" /><path d="M12 5v14" /></svg> Add Partner
       </button>
@@ -65,6 +74,12 @@ export function PartnersCard({ locked, onToggleLock }: { locked: boolean; onTogg
             <div className="flex-1 space-y-2">
               <label className="block text-xs font-medium text-gray-600">Partner {i + 1} Name</label>
               <input type="text" className="input-field text-sm" placeholder="Organization name" defaultValue={p.name} onChange={(e) => updatePartner(p.id, "name", e.target.value)} />
+            </div>
+            <div className="w-full space-y-2 md:w-48">
+              <label className="block text-xs font-medium text-gray-600">Role / Category</label>
+              <select className="input-field text-sm" defaultValue={p.role} onChange={(e) => updatePartner(p.id, "role", e.target.value)}>
+                {PARTNER_ROLES.map((r) => <option key={r.value} value={r.value}>{r.label}</option>)}
+              </select>
             </div>
             <div className="flex-1 space-y-2">
               <label className="block text-xs font-medium text-gray-600">Logo URL</label>

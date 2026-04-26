@@ -1,10 +1,11 @@
 "use client";
 
 import React from "react";
-import { GraduationCap } from "lucide-react";
+import { GraduationCap, Clock, Image } from "lucide-react";
 import { FormCard } from "../add-college/FormCard";
 import { FormInput } from "../add-college/FormInput";
 import { generateId } from "@/lib/superadmin/constants";
+import RichTextEditor from "@/components/ScholarshipProvider/common/RichTextEditor";
 
 const DEGREE_LEVELS = [
   { value: "+2", label: "+2 / Higher Secondary" },
@@ -84,8 +85,18 @@ export function DescriptionCard({ locked, onToggleLock }: { locked: boolean; onT
     <FormCard icon={<GraduationCap size={24} className="text-amber-600" />} title="Description & Details" sub="Program overview, eligibility, and terms" locked={locked} onToggleLock={onToggleLock}>
       <div className="space-y-6">
         <div>
-          <label className="mb-2 block text-sm font-medium text-gray-700">Program Description</label>
-          <textarea className="input-field min-h-[120px]" rows={4} placeholder="Describe the scholarship program, its mission, and what makes it unique..." />
+          <label className="mb-2 block text-sm font-medium text-gray-700">Program Description (About Tab)</label>
+          <RichTextEditor placeholder="Describe the scholarship program, its mission, and what makes it unique..." minHeight={200} />
+        </div>
+        <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
+          <div>
+            <label className="mb-2 block text-sm font-medium text-gray-700">Scholarship Subtitle (shown below heading in Scholarship tab)</label>
+            <input type="text" className="input-field" placeholder="e.g., Fully funded higher secondary education for SEE graduates across Nepal" />
+          </div>
+          <div>
+            <label className="mb-2 block text-sm font-medium text-gray-700">Scholarship Tab Description</label>
+            <textarea className="input-field min-h-[80px]" rows={3} placeholder="This scholarship is based on financial need and academic performance of candidates." />
+          </div>
         </div>
         <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
           <div>
@@ -99,40 +110,125 @@ export function DescriptionCard({ locked, onToggleLock }: { locked: boolean; onT
         </div>
         <div>
           <label className="mb-2 block text-sm font-medium text-gray-700">Terms & Conditions</label>
-          <textarea className="input-field min-h-[100px]" rows={3} placeholder="Terms, conditions, and any special notes..." />
+          <RichTextEditor placeholder="Terms, conditions, and any special notes..." minHeight={100} />
         </div>
       </div>
     </FormCard>
   );
 }
 
+const EVENT_COLORS = [
+  { value: "bg-blue-600", label: "Blue" },
+  { value: "bg-green-600", label: "Green" },
+  { value: "bg-orange-600", label: "Orange" },
+  { value: "bg-purple-600", label: "Purple" },
+  { value: "bg-red-600", label: "Red" },
+  { value: "bg-pink-600", label: "Pink" },
+  { value: "bg-indigo-600", label: "Indigo" },
+  { value: "bg-teal-600", label: "Teal" },
+  { value: "bg-yellow-600", label: "Yellow" },
+  { value: "bg-gray-600", label: "Gray" },
+];
+
 export function TimelineCard({ locked, onToggleLock }: { locked: boolean; onToggleLock: () => void }) {
   const [dates, setDates] = React.useState([
-    { id: generateId(), event: "Application Opens", date: "" },
-    { id: generateId(), event: "Application Deadline", date: "" },
-    { id: generateId(), event: "Entrance Examination", date: "" },
+    { id: generateId(), event: "Application Opens", date: "", dateText: "", desc: "", color: "bg-blue-600" },
+    { id: generateId(), event: "Application Deadline", date: "", dateText: "", desc: "", color: "bg-blue-600" },
+    { id: generateId(), event: "Entrance Examination", date: "", dateText: "", desc: "", color: "bg-green-600" },
   ]);
 
   return (
-    <FormCard icon={<GraduationCap size={24} className="text-purple-600" />} title="Timeline & Important Dates" sub="Key dates for the scholarship program" locked={locked} onToggleLock={onToggleLock} action={
-      <button type="button" onClick={() => setDates((prev) => [...prev, { id: generateId(), event: "", date: "" }])} className="flex items-center gap-2 rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-blue-700">
+    <FormCard icon={<GraduationCap size={24} className="text-purple-600" />} title="Timeline & Important Dates" sub="Key dates for the scholarship program (shown in Timeline tab)" locked={locked} onToggleLock={onToggleLock} action={
+      <button type="button" onClick={() => setDates((prev) => [...prev, { id: generateId(), event: "", date: "", dateText: "", desc: "", color: "bg-blue-600" }])} className="flex items-center gap-2 rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-blue-700">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M5 12h14" /><path d="M12 5v14" /></svg> Add Date
       </button>
     }>
       <div className="space-y-4">
         {dates.map((d) => (
-          <div key={d.id} className="grid grid-cols-1 items-end gap-4 md:grid-cols-12 md:gap-6">
-            <div className="md:col-span-8">
-              <input type="text" className="input-field" placeholder="e.g., Application Opens" defaultValue={d.event} />
+          <div key={d.id} className="rounded-md border border-gray-200 p-4">
+            <div className="mb-3 grid grid-cols-1 items-end gap-4 md:grid-cols-12 md:gap-6">
+              <div className="md:col-span-3">
+                <label className="mb-1 block text-xs font-medium text-gray-600">Event Name</label>
+                <input type="text" className="input-field" placeholder="e.g., Application Opens" defaultValue={d.event} />
+              </div>
+              <div className="md:col-span-2">
+                <label className="mb-1 block text-xs font-medium text-gray-600">Color</label>
+                <select className="input-field" defaultValue={d.color}>
+                  {EVENT_COLORS.map((c) => <option key={c.value} value={c.value}>{c.label}</option>)}
+                </select>
+              </div>
+              <div className="md:col-span-2">
+                <label className="mb-1 block text-xs font-medium text-gray-600">Date</label>
+                <input type="date" className="input-field" defaultValue={d.date} />
+              </div>
+              <div className="md:col-span-4">
+                <label className="mb-1 block text-xs font-medium text-gray-600">Date Text (shown on timeline)</label>
+                <input type="text" className="input-field" placeholder="e.g., Ashad 21, 2082 (Saturday)" defaultValue={d.dateText} />
+              </div>
+              <div className="md:col-span-1">
+                <button type="button" onClick={() => setDates((prev) => prev.filter((x) => x.id !== d.id))} className="w-full rounded-md p-2 text-red-500 transition-colors hover:bg-red-50 hover:text-red-700">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M3 6h18" /><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6" /><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2" /></svg>
+                </button>
+              </div>
             </div>
-            <div className="md:col-span-3">
-              <input type="date" className="input-field" defaultValue={d.date} />
+            <div>
+              <label className="mb-1 block text-xs font-medium text-gray-600">Description</label>
+              <textarea className="input-field min-h-[60px]" rows={2} placeholder="Brief description of this event..." defaultValue={d.desc} />
             </div>
-            <div className="md:col-span-1">
-              <button type="button" onClick={() => setDates((prev) => prev.filter((x) => x.id !== d.id))} className="w-full rounded-md p-2 text-red-500 transition-colors hover:bg-red-50 hover:text-red-700">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M3 6h18" /><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6" /><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2" /></svg>
-              </button>
+          </div>
+        ))}
+      </div>
+    </FormCard>
+  );
+}
+
+const YEAR_COLORS = [
+  { value: "bg-blue-600", label: "Blue" },
+  { value: "bg-green-600", label: "Green" },
+  { value: "bg-purple-600", label: "Purple" },
+  { value: "bg-orange-600", label: "Orange" },
+  { value: "bg-red-600", label: "Red" },
+  { value: "bg-pink-600", label: "Pink" },
+  { value: "bg-indigo-600", label: "Indigo" },
+  { value: "bg-teal-600", label: "Teal" },
+];
+
+export function JourneyTimelineCard({ locked, onToggleLock }: { locked: boolean; onToggleLock: () => void }) {
+  const [entries, setEntries] = React.useState([
+    { id: generateId(), year: "2022", color: "bg-blue-600", title: "Project Shiksha Launched", desc: "Project Shiksha was founded by 100 Group..." },
+    { id: generateId(), year: "2023", color: "bg-green-600", title: "First Batch of Scholars", desc: "Successfully enrolled the first batch..." },
+  ]);
+
+  return (
+    <FormCard icon={<Clock size={24} className="text-indigo-600" />} title="Journey Timeline" sub="Historical timeline entries shown in the About tab" locked={locked} onToggleLock={onToggleLock} action={
+      <button type="button" onClick={() => setEntries((prev) => [...prev, { id: generateId(), year: "", color: "bg-blue-600", title: "", desc: "" }])} className="flex items-center gap-2 rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-blue-700">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M5 12h14" /><path d="M12 5v14" /></svg> Add Entry
+      </button>
+    }>
+      <div className="space-y-4">
+        {entries.map((e) => (
+          <div key={e.id} className="rounded-md border border-gray-200 p-4">
+            <div className="mb-3 grid grid-cols-1 gap-4 md:grid-cols-4">
+              <div className="space-y-2">
+                <label className="block text-xs font-medium text-gray-600">Year</label>
+                <input type="text" className="input-field text-sm" placeholder="e.g., 2022" defaultValue={e.year} />
+              </div>
+              <div className="space-y-2">
+                <label className="block text-xs font-medium text-gray-600">Color</label>
+                <select className="input-field text-sm" defaultValue={e.color}>
+                  {YEAR_COLORS.map((c) => <option key={c.value} value={c.value}>{c.label}</option>)}
+                </select>
+              </div>
+              <div className="space-y-2 md:col-span-2">
+                <label className="block text-xs font-medium text-gray-600">Title</label>
+                <input type="text" className="input-field text-sm" placeholder="e.g., Project Shiksha Launched" defaultValue={e.title} />
+              </div>
             </div>
+            <div className="space-y-2">
+              <label className="block text-xs font-medium text-gray-600">Description</label>
+              <textarea className="input-field min-h-[60px] text-sm" rows={2} placeholder="Brief description..." defaultValue={e.desc} />
+            </div>
+            <button type="button" onClick={() => setEntries((prev) => prev.filter((x) => x.id !== e.id))} className="mt-3 rounded-md px-2 py-1 text-xs text-red-500 transition-colors hover:bg-red-50">Remove</button>
           </div>
         ))}
       </div>
