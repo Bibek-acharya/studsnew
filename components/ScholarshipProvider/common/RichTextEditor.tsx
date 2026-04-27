@@ -24,7 +24,6 @@ const quillFormats = [
   "underline",
   "strike",
   "list",
-  "bullet",
   "align",
   "link",
   "image",

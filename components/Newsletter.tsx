@@ -62,7 +62,7 @@ const Newsletter: React.FC<NewsletterProps> = ({ className = "" }) => {
           Stay up to date
         </label>
         
-        <form onSubmit={handleSubmit} className="flex flex-col sm:flex-row gap-3 w-full" noValidate>
+        <form onSubmit={handleSubmit} className="flex flex-col sm:flex-row gap-3 w-full" noValidate autoComplete="off">
           <div className="relative flex-1 w-full sm:w-auto group">
             <input 
               type="email" 
@@ -70,6 +70,7 @@ const Newsletter: React.FC<NewsletterProps> = ({ className = "" }) => {
               value={email}
               onChange={handleInputChange}
               placeholder="Enter your email address" 
+              suppressHydrationWarning
               className={`w-full bg-transparent border-2 ${
                 error 
                   ? "border-[#ff8080] bg-[#ff8080]/10" 
@@ -90,6 +91,7 @@ const Newsletter: React.FC<NewsletterProps> = ({ className = "" }) => {
           </div>
           <button 
             type="submit" 
+            suppressHydrationWarning
             className={`${
               isSubscribed ? "bg-green-500 text-white" : "bg-white text-[#0000ff] hover:bg-gray-100"
             } font-semibold px-8 py-4 rounded-full focus:ring-4 focus:ring-white/50 transition-all whitespace-nowrap text-sm sm:text-base active:scale-95 transform`}

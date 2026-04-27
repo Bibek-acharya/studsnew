@@ -23,7 +23,7 @@ export const metadata: Metadata = {
   description:
     "Discover and compare colleges, courses, and scholarships in Nepal.",
   icons: {
-    icon: "/globe.svg",
+    icon: "/icon.png",
   },
 };
 

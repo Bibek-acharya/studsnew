@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
 import { Eye, EyeOff } from "lucide-react";
@@ -30,6 +31,7 @@ export default function SuperAdminLoginPage() {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email: email.trim(), password }),
+        credentials: "include",
       });
 
       const data = await response.json();
@@ -38,26 +40,16 @@ export default function SuperAdminLoginPage() {
         throw new Error(data.message || data.error || "Login failed");
       }
 
-      const token = data.data?.token;
       const user = data.data?.user;
-
-      if (!token) throw new Error("No token received");
-
-      localStorage.setItem("token", token);
-      sessionStorage.setItem("token", token);
-
-      const authData = JSON.stringify({
-        token,
-        user: {
-          id: user?.id,
-          first_name: user?.first_name || "Super",
-          last_name: user?.last_name || "Admin",
-          email: user?.email || email,
+      if (user) {
+        localStorage.setItem("studsphere_user", JSON.stringify({
+          id: user.id,
+          first_name: user.first_name || "Super",
+          last_name: user.last_name || "Admin",
+          email: user.email || email,
           role: "superadmin",
-        },
-      });
-      localStorage.setItem("studsphere_auth", authData);
-      sessionStorage.setItem("studsphere_auth_session", authData);
+        }));
+      }
 
       router.push("/superadmin/dashboard");
     } catch (err) {
@@ -71,13 +63,15 @@ export default function SuperAdminLoginPage() {
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-blue-50 flex items-center justify-center p-4">
       <div className="bg-white w-full max-w-[400px] rounded-xl shadow-[0_8px_30px_rgb(0,0,0,0.08)] border border-gray-100 p-8">
         <div className="text-center mb-8">
-          <Image
-            src="/studsphere.png"
-            alt="StudSphere"
-            width={160}
-            height={40}
-            className="h-10 w-auto mx-auto mb-4"
-          />
+          <Link href="/">
+            <Image
+              src="/studsphere.png"
+              alt="StudSphere"
+              width={160}
+              height={40}
+              className="h-10 w-auto mx-auto mb-4 cursor-pointer"
+            />
+          </Link>
           <h1 className="text-xl font-bold text-gray-900">Super Admin Login</h1>
           <p className="text-sm text-gray-500 mt-1">Enter your credentials to access the admin panel</p>
         </div>

@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, lazy, Suspense } from "react";
+import React, { useState, lazy, Suspense, useCallback } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import Image from "next/image";
 import {
@@ -57,6 +57,7 @@ const UserListSection = lazy(() => import("./UserListSection"));
 const AddUserSection = lazy(() => import("./AddUserSection"));
 const AnalyticsSection = lazy(() => import("./AnalyticsSection"));
 const PendingProvidersSection = lazy(() => import("./PendingProvidersSection"));
+const VerifiedProvidersSection = lazy(() => import("./VerifiedProvidersSection"));
 
 type SectionType =
   | "overview"
@@ -87,13 +88,14 @@ type SectionType =
   | "history"
   | "backup"
   | "settings"
-  | "pending-providers";
+  | "pending-providers"
+  | "scholarship-provider";
 
 const navItems = [
   { icon: LayoutDashboard, label: "Overview", section: "overview" as SectionType },
   { icon: Building2, label: "Manage College", section: "manage-college" as SectionType, children: ["add-college", "manage-college"] as SectionType[] },
   { icon: BookOpen, label: "Manage Course", section: "manage-course" as SectionType, children: ["add-course", "manage-course"] as SectionType[] },
-  { icon: GraduationCap, label: "Manage Scholarship", section: "manage-scholarship" as SectionType, children: ["create-scholarship", "manage-scholarship"] as SectionType[] },
+  { icon: GraduationCap, label: "Manage Scholarship", section: "manage-scholarship" as SectionType, children: ["create-scholarship", "manage-scholarship", "scholarship-provider", "pending-providers"] as SectionType[] },
   { icon: ClipboardList, label: "Manage Entrance", section: "manage-entrance" as SectionType, children: ["add-entrance", "manage-entrance"] as SectionType[] },
   { icon: MessageSquare, label: "Message/Inquiry", section: "message-inquiry" as SectionType },
   { icon: Newspaper, label: "Manage News", section: "manage-news" as SectionType, children: ["create-news", "manage-news"] as SectionType[] },
@@ -101,7 +103,6 @@ const navItems = [
   { icon: Calendar, label: "Manage Events", section: "manage-events" as SectionType, children: ["create-event", "manage-events"] as SectionType[] },
   { icon: Building, label: "Manage Campus Feed", section: "manage-campus-feed" as SectionType },
   { icon: Users, label: "User Management", section: "user-management" as SectionType, children: ["add-user", "user-management"] as SectionType[] },
-  { icon: UserCheck, label: "Pending Providers", section: "pending-providers" as SectionType },
   { icon: BarChart3, label: "Analytics", section: "analytics" as SectionType },
   { icon: Bell, label: "Manage Notification", section: "manage-notification" as SectionType },
   { icon: ShieldCheck, label: "Access Control", section: "access-control" as SectionType },
@@ -124,6 +125,19 @@ export default function DashboardShell() {
   const navigateTo = (section: string) => {
     setActiveSection(section as SectionType);
   };
+
+  const handleLogout = useCallback(async () => {
+    try {
+      const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080";
+      await fetch(`${API_BASE_URL}/api/v1/auth/logout`, { credentials: "include" });
+    } catch {
+    } finally {
+      localStorage.removeItem("token");
+      sessionStorage.removeItem("token");
+      localStorage.removeItem("studsphere_user");
+      window.location.href = "/superadmin/login";
+    }
+  }, []);
 
   const renderSection = () => {
     switch (activeSection) {
@@ -183,6 +197,8 @@ export default function DashboardShell() {
         return <AddUserSection setActiveSection={navigateTo} />;
       case "pending-providers":
         return <PendingProvidersSection />;
+      case "scholarship-provider":
+        return <VerifiedProvidersSection />;
       case "analytics":
         return <AnalyticsSection />;
       default:
@@ -236,7 +252,7 @@ export default function DashboardShell() {
 
             <button
               type="button"
-              onClick={() => undefined}
+              onClick={handleLogout}
               className="mt-4 flex w-full items-center gap-3 rounded-lg px-4 py-3 text-left text-sm font-medium text-red-500 transition-colors hover:bg-red-50 hover:text-red-600"
             >
               <LogOut size={20} />
@@ -419,6 +435,7 @@ function prettyLabel(section: SectionType) {
     "add-user": "Add User",
     "user-management": "User List",
     "pending-providers": "Pending Providers",
+    "scholarship-provider": "Scholarship Provider",
     "manage-notification": "Manage Notification",
     "access-control": "Access Control",
     "organization-profile": "Organization Profile",

@@ -275,7 +275,6 @@ export default function ScholarshipDetailPage({ scholarship, similarScholarships
           <PartnerMessageCarousel />
           <ContactSidebar scholarship={scholarship} />
           <RequestInfoForm />
-          <RelatedScholarships scholarships={similarScholarships} />
         </aside>
       </div>
 

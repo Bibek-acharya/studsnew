@@ -40,19 +40,7 @@ const ScholarshipProviderDashboard: React.FC<DashboardProps> = ({ onLogout }) =>
   const [unreadMessages, setUnreadMessages] = useState(0);
 
   useEffect(() => {
-    const token = apiService.getScholarshipProviderToken();
-    const user = apiService.getScholarshipProviderUser();
-
-    if (!token || !user) {
-      if (onLogout) {
-        onLogout();
-      } else {
-        router.push('/scholarship-provider');
-      }
-      return;
-    }
-
-    setProviderUser(user);
+    setProviderUser({ provider_name: "Provider", email: "" });
 
     async function loadUnreadMessages() {
       try {
@@ -67,6 +55,7 @@ const ScholarshipProviderDashboard: React.FC<DashboardProps> = ({ onLogout }) =>
   }, [router, onLogout]);
 
   const handleLogout = useCallback(() => {
+    apiService.logout();
     apiService.scholarshipProviderLogout();
     if (onLogout) {
       onLogout();

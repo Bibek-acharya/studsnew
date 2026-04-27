@@ -13,13 +13,13 @@ interface HomeClientWrapperProps {
 }
 
 export default function HomeClientWrapper({ children }: HomeClientWrapperProps) {
-  const { isAuthenticated, loading, token } = useAuth();
+  const { isAuthenticated, loading } = useAuth();
   const [showOnboarding, setShowOnboarding] = useState(false);
   const [checkedBackend, setCheckedBackend] = useState(false);
 
   useEffect(() => {
     if (loading) return;
-    if (!isAuthenticated || !token) {
+    if (!isAuthenticated) {
       setCheckedBackend(true);
       return;
     }
@@ -45,7 +45,7 @@ export default function HomeClientWrapper({ children }: HomeClientWrapperProps) 
     };
 
     checkOnboardingStatus();
-  }, [isAuthenticated, loading, token]);
+  }, [isAuthenticated, loading]);
 
   const handleOnboardingClose = () => {
     sessionStorage.setItem(ONBOARDING_KEY, "true");

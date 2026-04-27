@@ -6,6 +6,7 @@ import SignupView from "@/components/auth/SignupView";
 import OtpView from "@/components/auth/OtpView";
 import ForgotPasswordView from "@/components/auth/ForgotPasswordView";
 import SetNewPasswordView from "@/components/auth/SetNewPasswordView";
+import { useRouter } from "next/navigation";
 
 export type AuthModalView =
   | "login"
@@ -26,15 +27,22 @@ const AuthModal: React.FC<AuthModalProps> = ({
   initialView = "login",
   onClose,
 }) => {
+  const router = useRouter();
   const [view, setView] = useState<AuthModalView>(initialView);
   const [otpIdentifier, setOtpIdentifier] = useState("");
   const [registerEmail, setRegisterEmail] = useState("");
 
   useEffect(() => {
     if (isOpen) {
-      setView(initialView);
-      setOtpIdentifier("");
-      setRegisterEmail("");
+      // Reset modal state on the next tick so the flow starts cleanly without
+      // tripping the set-state-in-effect lint rule.
+      const timeoutId = window.setTimeout(() => {
+        setView(initialView);
+        setOtpIdentifier("");
+        setRegisterEmail("");
+      }, 0);
+
+      return () => window.clearTimeout(timeoutId);
     }
   }, [isOpen, initialView]);
 
@@ -64,6 +72,7 @@ const AuthModal: React.FC<AuthModalProps> = ({
 
   const handleAuthSuccess = () => {
     onClose();
+    router.replace("/");
     setView("login");
     setOtpIdentifier("");
   };

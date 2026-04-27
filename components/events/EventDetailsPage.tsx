@@ -60,7 +60,7 @@ const EventDetailsPage: React.FC<{ params: Promise<{ id: string }> }> = ({ param
   }
 
   return (
-    <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-6 pb-10 lg:pb-14 bg-white min-h-screen">
+    <main className="max-w-350 mx-auto pt-6 pb-10 lg:pb-14 bg-white min-h-screen">
       <div className="relative w-full h-62.5 sm:h-75 lg:h-90 rounded-md lg:rounded-md overflow-hidden shadow-xl mb-10 lg:mb-16">
         <img src={event.image} alt={event.title} className="absolute inset-0 w-full h-full object-cover" />
         <div className="absolute inset-0 bg-linear-to-t from-gray-900 via-gray-900/60 to-transparent"></div>
@@ -91,8 +91,8 @@ const EventDetailsPage: React.FC<{ params: Promise<{ id: string }> }> = ({ param
               <h2 className="text-xl font-bold text-gray-900">Events Description</h2>
             </div>
 
-            <div className="space-y-4 text-[15px] leading-relaxed text-gray-600 whitespace-pre-line">
-              <p>{event.description}</p>
+            <div className="space-y-4 text-[15px] leading-relaxed text-gray-600 [&_pre]:overflow-x-auto [&_pre]:whitespace-pre-wrap [&_pre]:break-words [&_code]:break-words [&_img]:max-w-full">
+              <div className="break-words" dangerouslySetInnerHTML={{ __html: event.description || "" }} />
               <p>
                 This seminar provides a comprehensive overview of fully funded and partial scholarships available for Nepalese students in Australia, USA, UK, and Europe. We bring together expert counselors, past scholarship winners, and university representatives to guide you through the application process.
               </p>

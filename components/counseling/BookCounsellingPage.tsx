@@ -49,7 +49,7 @@ const times = [
 ];
 
 const BookCounsellingPage: React.FC<BookCounsellingPageProps> = () => {
-  const { token } = useAuth();
+  const { isAuthenticated } = useAuth();
   const [collegeInput, setCollegeInput] = useState("");
   const [showSuggestions, setShowSuggestions] = useState(false);
 
@@ -114,7 +114,7 @@ const BookCounsellingPage: React.FC<BookCounsellingPageProps> = () => {
 
   const handleConfirmBooking = async () => {
     if (!isFormValid || isBooking) return;
-    if (!token) {
+    if (!isAuthenticated) {
       setSubmitError("Please login to book counselling.");
       return;
     }
@@ -123,7 +123,7 @@ const BookCounsellingPage: React.FC<BookCounsellingPageProps> = () => {
     setIsBooking(true);
 
     try {
-      await apiService.createCounsellingBooking(token, {
+      await apiService.createCounsellingBooking("", {
         college: collegeInput,
         program_level: program,
         interested_course: course,

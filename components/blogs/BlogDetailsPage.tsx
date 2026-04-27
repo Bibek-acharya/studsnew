@@ -109,7 +109,7 @@ const BlogDetailsPage: React.FC<{ params: Promise<{ id: string }> }> = ({
 
   return (
     <div className="text-gray-800 antialiased selection:bg-blue-200 selection:text-blue-900 bg-white">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 lg:py-12 flex flex-col lg:flex-row gap-8 lg:gap-12">
+      <div className="max-w-350 mx-auto py-8 lg:py-12 flex flex-col lg:flex-row gap-8 lg:gap-12">
         <main className="lg:w-2/3">
           <div className="flex items-center gap-4 text-sm mb-4">
             <span
@@ -164,10 +164,8 @@ const BlogDetailsPage: React.FC<{ params: Promise<{ id: string }> }> = ({
             {blog.excerpt}
           </div>
 
-          <div className="prose max-w-none text-gray-700">
-            <div className="text-gray-700 whitespace-pre-line mb-8">
-              {blog.content}
-            </div>
+          <div className="prose max-w-none text-gray-700 [&_pre]:overflow-x-auto [&_pre]:whitespace-pre-wrap [&_pre]:break-words [&_code]:break-words [&_img]:max-w-full">
+            <div className="text-gray-700 mb-8 break-words" dangerouslySetInnerHTML={{ __html: blog.content }} />
           </div>
 
           <div className="mt-8 mb-6 flex flex-wrap items-center gap-3">

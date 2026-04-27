@@ -39,6 +39,7 @@ import {
 } from "./types";
 import Image from "next/image";
 import { trendingSearches } from "@/utils/searchDatabase";
+import { apiService } from "@/services/api";
 
 const EducationNavbar: React.FC<EducationNavbarProps> = ({
   onNavigate,
@@ -51,6 +52,7 @@ const EducationNavbar: React.FC<EducationNavbarProps> = ({
   const [isVisible, setIsVisible] = useState(true);
   const [showMobileSearch, setShowMobileSearch] = useState(false);
   const lastScrollY = useRef(0);
+  const hoverTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const router = useRouter();
   const pathname = usePathname();
 
@@ -60,6 +62,28 @@ const EducationNavbar: React.FC<EducationNavbarProps> = ({
   const [mobileLiveSuggestions, setMobileLiveSuggestions] = useState(
     mobileSearchSuggestions,
   );
+
+  const handleDropdownMouseEnter = (key: string) => {
+    if (hoverTimeoutRef.current) {
+      clearTimeout(hoverTimeoutRef.current);
+      hoverTimeoutRef.current = null;
+    }
+    setActiveMenu(key);
+  };
+
+  const handleDropdownMouseLeave = () => {
+    hoverTimeoutRef.current = setTimeout(() => {
+      setActiveMenu(null);
+    }, 200);
+  };
+
+  useEffect(() => {
+    return () => {
+      if (hoverTimeoutRef.current) {
+        clearTimeout(hoverTimeoutRef.current);
+      }
+    };
+  }, []);
 
   const toggleMobileMenu = (key: string) => {
     setMobileMenus((prev) => ({ ...prev, [key]: !prev[key] }));
@@ -90,6 +114,34 @@ const EducationNavbar: React.FC<EducationNavbarProps> = ({
   const [currentNotifTab, setCurrentNotifTab] =
     useState<NotificationTab>("all");
   const [notifications, setNotifications] = useState(initialNotifications);
+  const [studentNotifLoaded, setStudentNotifLoaded] = useState(false);
+
+  useEffect(() => {
+    if (!user) return;
+    apiService.getStudentNotifications(1, 50).then((res) => {
+      const list = res?.data?.notifications;
+      if (Array.isArray(list) && list.length > 0) {
+        setNotifications(
+          list.map((n: any) => ({
+            id: String(n.id),
+            type: n.type || "system",
+            title: n.title,
+            message: n.message,
+            time: n.created_at
+              ? new Date(n.created_at).toLocaleDateString()
+              : "",
+            isRead: n.read,
+            isArchived: false,
+            isFollowing: false,
+            icon: "fa-bell",
+            color: "text-gray-500",
+            bgColor: "bg-gray-100",
+          })),
+        );
+      }
+      setStudentNotifLoaded(true);
+    }).catch(() => setStudentNotifLoaded(true));
+  }, [user]);
 
   const visibleNotifications = useMemo(() => {
     return notifications.filter((n) => {
@@ -108,10 +160,38 @@ const EducationNavbar: React.FC<EducationNavbarProps> = ({
     [notifications],
   );
 
+  const [publicNotifList, setPublicNotifList] = useState<
+    { id: number; title: string; message: string; type: string; icon: string; color: string; bgColor: string }[]
+  >([]);
+
+  const unreadPublicCount = publicNotifList.length;
+
+  useEffect(() => {
+    apiService.getPublicNotifications().then((res) => {
+      const data = res?.data;
+      if (Array.isArray(data)) {
+        setPublicNotifList(
+          data.map((n: any) => ({
+            id: n.id,
+            title: n.title,
+            message: n.message,
+            type: n.type,
+            icon: n.icon || "fa-bell",
+            color: n.color || "text-gray-500",
+            bgColor: n.bgColor || "bg-gray-100",
+          })),
+        );
+      }
+    }).catch(() => {});
+  }, []);
+
   const markAsRead = (id: string) => {
     setNotifications((prev) =>
       prev.map((n) => (n.id === id ? { ...n, isRead: true } : n)),
     );
+    if (user) {
+      apiService.markNotificationRead(Number(id)).catch(() => {});
+    }
   };
 
   const toggleArchive = (id: string, e: React.MouseEvent) => {
@@ -144,6 +224,9 @@ const EducationNavbar: React.FC<EducationNavbarProps> = ({
         return n;
       }),
     );
+    if (user) {
+      apiService.markAllNotificationsRead().catch(() => {});
+    }
   };
 
   useEffect(() => {
@@ -378,28 +461,101 @@ const EducationNavbar: React.FC<EducationNavbarProps> = ({
                   <SearchBar />
                 </div>
 
-                <div className="flex items-center shrink-0 z-10">
-                  {/* Mobile Search Button */}
-                  <button
-                    type="button"
-                    className="flex h-10 w-10 items-center justify-center rounded-md text-gray-600 transition-colors hover:bg-gray-100 sm:hidden"
-                    onClick={toggleMobileSearch}
-                    aria-label="Toggle mobile search"
-                  >
-                    <Search size={18} />
-                  </button>
+                <div className="flex items-center gap-1.5 xs:gap-2 sm:gap-3 shrink-0 z-10">
+                  {/* Write a Review - Desktop */}
                   <button
                     onClick={() => go("login")}
-                    className="rounded-md sm:rounded-l-md bg-brand-blue sm:bg-[#f3f4f6] text-white sm:text-black px-3 sm:px-4 py-2 font-semibold transition-colors sm:hover:bg-gray-200 text-sm"
+                    className="hidden md:flex items-center gap-2 bg-brand-blue hover:bg-brand-hover text-white px-4 py-2.5 rounded-md text-[14px] font-semibold transition-colors shrink-0"
                   >
-                    Login
+                    <i className="fa-solid fa-pen-to-square text-sm"></i>
+                    <span>Write a Review</span>
                   </button>
-                  <button
-                    onClick={() => go("signup")}
-                    className="hidden sm:block rounded-r-md bg-brand-blue text-white px-3 sm:px-4 py-2 font-semibold transition-colors hover:bg-brand-hover text-sm"
-                  >
-                    Register
-                  </button>
+
+                  {/* Notification Bell - Desktop (Public) */}
+                  <div className="menu-anchor relative hidden md:block">
+                    <button
+                      onClick={() =>
+                        setActiveMenu((prev) =>
+                          prev === "public-notifications"
+                            ? null
+                            : "public-notifications"
+                        )
+                      }
+                      className="relative flex items-center justify-center w-9.5 h-9.5 rounded-full border border-gray-200 hover:bg-gray-50 transition-colors text-[#475569] shrink-0"
+                    >
+                      <Bell size={18} />
+                      {unreadPublicCount > 0 && (
+                        <span className="absolute -top-1.5 -right-1.5 flex h-5 w-5 items-center justify-center rounded-full border-2 border-white bg-[#f44336] text-[11px] font-bold text-white">
+                          {unreadPublicCount}
+                        </span>
+                      )}
+                    </button>
+
+                    {activeMenu === "public-notifications" && (
+                      <div className="absolute top-full right-0 z-[200] mt-2 cursor-default font-inter sm:-right-2">
+                        <div className="absolute -top-1.5 right-6 z-30 h-3 w-3 rotate-45 border-l border-t border-gray-200 bg-white"></div>
+                        <div className="relative z-20 flex w-[320px] flex-col overflow-hidden rounded-md border border-gray-200 bg-white text-left shadow-[0_8px_30px_rgb(0,0,0,0.12)] sm:w-95">
+                          <div className="z-10 flex items-center justify-between border-b border-gray-100 bg-white px-4 py-3">
+                            <h3 className="text-lg font-semibold text-gray-900">
+                              Notifications
+                            </h3>
+                          </div>
+                          <div className="no-scrollbar flex max-h-75 flex-col overflow-y-auto">
+                            {publicNotifList.length === 0 ? (
+                              <div className="flex flex-col items-center justify-center py-10 text-gray-400">
+                                <Bell size={32} className="mb-2 opacity-50" />
+                                <p className="text-sm">No notifications</p>
+                              </div>
+                            ) : (
+                              publicNotifList.map((notif) => (
+                                <div
+                                  key={notif.id}
+                                  className="group relative flex cursor-pointer items-start gap-3 border-b border-gray-50 bg-white p-3 transition-colors hover:bg-gray-50"
+                                >
+                                  <div
+                                    className={`mt-1 flex h-10 w-10 shrink-0 items-center justify-center rounded-full ${notif.bgColor} ${notif.color}`}
+                                  >
+                                    <i className={`fa-solid ${notif.icon || "fa-bell"} text-sm`}></i>
+                                  </div>
+                                  <div className="flex-1 min-w-0">
+                                    <p className="mb-0.5 text-sm font-semibold text-black">
+                                      {notif.title}
+                                    </p>
+                                    <p className="line-clamp-2 text-sm leading-relaxed text-gray-800">
+                                      {notif.message}
+                                    </p>
+                                  </div>
+                                </div>
+                              ))
+                            )}
+                          </div>
+                          <div className="border-t border-gray-100 bg-gray-50/50 p-3">
+                            <button
+                              onClick={() => go("login")}
+                              className="w-full rounded-md py-2 text-center text-sm font-medium text-gray-600 transition-colors hover:text-blue-600"
+                            >
+                              View all activity
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+
+                  <div className="flex items-center">
+                    <button
+                      onClick={() => go("login")}
+                      className="rounded-md sm:rounded-l-md bg-brand-blue sm:bg-[#f3f4f6] text-white sm:text-black px-3 sm:px-4 py-2 font-semibold transition-colors sm:hover:bg-gray-200 text-sm"
+                    >
+                      Login
+                    </button>
+                    <button
+                      onClick={() => go("signup")}
+                      className="hidden sm:block rounded-r-md bg-brand-blue text-white px-3 sm:px-4 py-2 font-semibold transition-colors hover:bg-brand-hover text-sm"
+                    >
+                      Register
+                    </button>
+                  </div>
                 </div>
               </>
             ) : (
@@ -759,7 +915,7 @@ const EducationNavbar: React.FC<EducationNavbarProps> = ({
                   {/* Write a Review - Desktop */}
                   <button
                     onClick={() => go("writeReview")}
-                    className="hidden lg:flex items-center gap-2 bg-brand-blue hover:bg-brand-hover text-white px-4 py-2.5 rounded-md text-[14px] font-semibold transition-colors shrink-0"
+                    className="hidden md:flex items-center gap-2 bg-brand-blue hover:bg-brand-hover text-white px-4 py-2.5 rounded-md text-[14px] font-semibold transition-colors shrink-0"
                   >
                     <i className="fa-solid fa-pen-to-square text-sm"></i>
                     <span>Write a Review</span>
@@ -915,6 +1071,8 @@ const EducationNavbar: React.FC<EducationNavbarProps> = ({
                       prev === toolsSection.key ? null : toolsSection.key,
                     )
                   }
+                  onMouseEnter={() => handleDropdownMouseEnter(toolsSection.key)}
+                  onMouseLeave={handleDropdownMouseLeave}
                 >
                   {toolsSection.items.map((item) => (
                     <DropdownCard
@@ -943,6 +1101,8 @@ const EducationNavbar: React.FC<EducationNavbarProps> = ({
                         : scholarshipsSection.key,
                     )
                   }
+                  onMouseEnter={() => handleDropdownMouseEnter(scholarshipsSection.key)}
+                  onMouseLeave={handleDropdownMouseLeave}
                 >
                   {scholarshipsSection.items.map((item) => (
                     <DropdownCard
@@ -978,6 +1138,8 @@ const EducationNavbar: React.FC<EducationNavbarProps> = ({
                         : admissionSection.key,
                     )
                   }
+                  onMouseEnter={() => handleDropdownMouseEnter(admissionSection.key)}
+                  onMouseLeave={handleDropdownMouseLeave}
                 >
                   {admissionSection.items.map((item) => (
                     <DropdownCard
@@ -1011,6 +1173,8 @@ const EducationNavbar: React.FC<EducationNavbarProps> = ({
                       prev === moreSection.key ? null : moreSection.key,
                     )
                   }
+                  onMouseEnter={() => handleDropdownMouseEnter(moreSection.key)}
+                  onMouseLeave={handleDropdownMouseLeave}
                 >
                   {moreSection.items.map((item) => (
                     <DropdownCard
@@ -1314,15 +1478,9 @@ const EducationNavbar: React.FC<EducationNavbarProps> = ({
                           key={item.title}
                           type="button"
                           onClick={() => {
-                            const storedLocation =
-                              typeof window !== "undefined"
-                                ? window.sessionStorage.getItem("navLocation")
-                                : null;
-                            const locationQuery =
-                              storedLocation || "Detect Location";
                             setShowMobileSearch(false);
                             router.push(
-                              `/search?q=${encodeURIComponent(item.title)}&loc=${encodeURIComponent(locationQuery)}`,
+                              `/search?q=${encodeURIComponent(item.title)}`,
                             );
                           }}
                           className="flex items-center justify-between rounded-xl bg-white px-4 py-3 text-left transition-colors hover:bg-blue-50/60"

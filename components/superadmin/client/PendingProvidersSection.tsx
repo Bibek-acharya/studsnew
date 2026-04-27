@@ -17,20 +17,13 @@ interface PendingProvider {
   created_at: string;
 }
 
-function getToken(): string | null {
-  if (typeof window === "undefined") return null;
-  return localStorage.getItem("token") || sessionStorage.getItem("token") || null;
-}
-
 async function superadminFetch<T>(path: string, options: RequestInit = {}): Promise<T> {
-  const token = getToken();
   const headers: Record<string, string> = {
     "Content-Type": "application/json",
-    ...(token ? { Authorization: `Bearer ${token}` } : {}),
     ...(options.headers as Record<string, string> || {}),
   };
 
-  const response = await fetch(`${API_BASE_URL}${path}`, { ...options, headers });
+  const response = await fetch(`${API_BASE_URL}${path}`, { ...options, headers, credentials: "include" });
 
   if (response.status === 401 || response.status === 403) {
     throw new Error("auth_required");

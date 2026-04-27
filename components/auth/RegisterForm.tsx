@@ -5,13 +5,13 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/services/AuthContext";
 import { apiService } from "@/services/api";
-import { Eye, EyeOff, Mail, Lock, ArrowLeft } from "lucide-react";
+import { Eye, EyeOff, Mail, ArrowLeft } from "lucide-react";
 
 type Step = "email" | "details" | "verify";
 
 export default function RegisterForm() {
   const router = useRouter();
-  const { register } = useAuth();
+  const { verifyOTP } = useAuth();
   
   const [step, setStep] = useState<Step>("email");
   const [email, setEmail] = useState("");
@@ -87,9 +87,14 @@ export default function RegisterForm() {
         last_name: lastName.trim(),
       });
       accountCreated = true;
-    } catch (err: any) {
-      const errorMsg = err?.message?.toLowerCase() || "";
-      if (errorMsg.includes("exists") || errorMsg.includes("already") || err?.status === 409) {
+    } catch (err: unknown) {
+      const errorMsg =
+        err instanceof Error ? err.message.toLowerCase() : "";
+      const status = typeof err === "object" && err !== null && "status" in err
+        ? Number((err as { status?: unknown }).status)
+        : undefined;
+
+      if (errorMsg.includes("exists") || errorMsg.includes("already") || status === 409) {
         setError("An account with this email already exists. Please log in.");
         setLoading(false);
         return;
@@ -104,7 +109,7 @@ export default function RegisterForm() {
     
     try {
       await apiService.sendOTP(email.trim(), "verification");
-    } catch (otpErr: any) {
+    } catch {
       // OTP API returns error but email IS sent (per backend logs)
     }
     
@@ -148,19 +153,10 @@ export default function RegisterForm() {
     setError("");
 
     try {
-      const result = await apiService.verifyOTP(email.trim(), otpCode);
-      if (result.data?.token) {
-        localStorage.setItem("token", result.data.token);
-        localStorage.setItem("studsphere_auth", JSON.stringify({
-          token: result.data.token,
-          user: result.data.user,
-        }));
-        router.push("/user/dashboard");
-      } else {
-        setError("Verification failed. Please try again.");
-      }
-    } catch (err: any) {
-      setError(err?.message || "Verification failed. Please try again.");
+      await verifyOTP(email.trim(), otpCode);
+      router.replace("/");
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : "Verification failed. Please try again.");
     } finally {
       setLoading(false);
     }
@@ -172,10 +168,10 @@ export default function RegisterForm() {
     try {
       await apiService.sendOTP(email.trim(), "verification");
       setOtpTimer(120);
-      setOtp(["", "", "", ""]);
+      setOtp(["", "", "", "", "", ""]);
       setTimeout(() => otpInputRefs.current[0]?.focus(), 100);
-    } catch (err: any) {
-      setError(err.message || "Failed to resend code.");
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : "Failed to resend code.");
     } finally {
       setOtpResendDisabled(false);
     }
@@ -224,7 +220,7 @@ export default function RegisterForm() {
             </div>
             <input
               type="email"
-              placeholder="jagdishdhami10@gmail.com"
+              placeholder="Enter your email address"
               required
               value={email}
               onChange={(e) => { setEmail(e.target.value); setError(""); }}
@@ -279,14 +275,7 @@ export default function RegisterForm() {
   if (step === "details") {
     return (
       <form onSubmit={handleDetailsSubmit} className="space-y-5">
-        <button
-          type="button"
-          onClick={handleBackToEmail}
-          className="text-gray-500 hover:text-gray-800 flex items-center text-sm font-medium transition-colors focus:outline-none mb-2"
-        >
-          <ArrowLeft className="w-4 h-4 mr-1" />
-          Back
-        </button>
+        
 
         <div className="flex gap-4">
           <div className="w-1/2">
@@ -363,7 +352,16 @@ export default function RegisterForm() {
               Log in
             </Link>
           </p>
+          <button
+          type="button"
+          onClick={handleBackToEmail}
+          className="text-gray-500 hover:text-gray-800 flex items-center text-sm font-medium transition-colors focus:outline-none mb-2 cursor-pointer"
+        >
+          <ArrowLeft className="w-4 h-4 mr-1" />
+          Back to Email
+        </button>
         </div>
+        
       </form>
     );
   }
@@ -425,7 +423,9 @@ export default function RegisterForm() {
           >
             {otpResendDisabled ? "Sending..." : "Resend Code"}
           </button>
+          
         </div>
+        
       </div>
     );
   }

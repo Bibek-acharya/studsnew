@@ -77,7 +77,7 @@ const HeroSection: React.FC<HeroSectionProps> = ({ onNavigate }) => {
 
   return (
     <div className="w-full pt-2 pb-6 md:pb-4 flex justify-center px-4 sm:px-6 md:px-8">
-        <main className="relative w-full max-w-350 h-85 sm:h-105 md:h-auto md:min-h-120 lg:h-135 flex items-center justify-center overflow-hidden rounded-md md:rounded-md">
+        <main className="relative w-full max-w-350 h-85 sm:h-105 md:h-auto md:min-h-120 lg:h-135 flex items-center justify-center overflow-hidden rounded-xl md:rounded-2xl">
         {/* Background Slider Container */}
         <div id="slider-container" className="absolute inset-0 z-0 overflow-hidden">
           <div

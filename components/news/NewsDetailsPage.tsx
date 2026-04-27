@@ -120,7 +120,7 @@ const NewsDetailsPage: React.FC<{ params: Promise<{ id: string }> }> = ({ params
 
   return (
     <div className="bg-white text-gray-800 antialiased selection:bg-blue-200 selection:text-blue-900">
-      <div className="max-w-[1280px] mx-auto px-4 sm:px-6 lg:px-8 py-8 flex flex-col lg:flex-row gap-10 lg:gap-16">
+      <div className="max-w-350 mx-auto py-8 flex flex-col lg:flex-row gap-10 lg:gap-16">
         <main className="w-full lg:w-[68%]">
           <div className="flex items-center gap-4 text-sm font-medium text-gray-500 mb-6 border-b border-gray-100 pb-4">
             <span className={`${categoryBadgeClass} text-white px-3 py-1 rounded-full flex items-center gap-1.5 `}>
@@ -165,10 +165,8 @@ const NewsDetailsPage: React.FC<{ params: Promise<{ id: string }> }> = ({ params
             {article.excerpt}
           </div>
 
-          <div className="prose prose-slate max-w-none mb-12 text-gray-700 leading-relaxed text-[1.05rem]">
-            {(article.content || "").split("\n").map((paragraph: string, idx: number) => (
-              <p key={idx} className="mb-4">{paragraph}</p>
-            ))}
+          <div className="prose prose-slate max-w-none mb-12 text-gray-700 leading-relaxed text-[1.05rem] [&_pre]:overflow-x-auto [&_pre]:whitespace-pre-wrap [&_pre]:break-words [&_code]:break-words [&_img]:max-w-full">
+            <div className="break-words" dangerouslySetInnerHTML={{ __html: article.content || "" }} />
           </div>
 
           <hr className="border-gray-100 mb-8" />

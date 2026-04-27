@@ -3,16 +3,15 @@ import { fetchCourses, fetchCourseFilterCounts } from "./course-api";
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080";
 
 export async function apiRequest<T>(path: string, options: RequestInit = {}): Promise<T> {
-  const token = typeof window !== "undefined" ? apiService.getToken() : null;
   const headers: Record<string, string> = {
     "Content-Type": "application/json",
-    ...(token ? { Authorization: `Bearer ${token}` } : {}),
     ...(options.headers as Record<string, string> || {}),
   };
 
   const response = await fetch(`${API_BASE_URL}${path}`, {
     ...options,
     headers,
+    credentials: "include",
   });
 
   const text = await response.text();
@@ -26,11 +25,12 @@ export async function apiRequest<T>(path: string, options: RequestInit = {}): Pr
 
   if (!response.ok) {
     const errorMessage = data.message || data.error || "Request failed";
-    if (response.status === 401 && typeof window !== "undefined") {
-      localStorage.removeItem("token");
-      sessionStorage.removeItem("token");
-      localStorage.removeItem("studsphere_auth");
-      sessionStorage.removeItem("studsphere_auth_session");
+    if (
+      response.status === 401 &&
+      typeof window !== "undefined" &&
+      !path.includes("/auth/login") &&
+      !path.includes("/auth/register")
+    ) {
       window.dispatchEvent(new CustomEvent("auth-expired"));
     }
     throw new Error(errorMessage);
@@ -80,6 +80,48 @@ export interface ContactInquiryResponse {
     status: string;
     created_at: string;
     updated_at: string;
+  };
+  message: string;
+}
+
+export interface PublicNotificationItem {
+  id: number;
+  created_at: string;
+  title: string;
+  message: string;
+  type: string;
+  link: string;
+  icon: string;
+  color: string;
+  bg_color: string;
+}
+
+export interface PublicNotificationsResponse {
+  data: PublicNotificationItem[];
+  message: string;
+}
+
+export interface StudentNotificationItem {
+  id: number;
+  user_id: number;
+  title: string;
+  message: string;
+  type: string;
+  read: boolean;
+  link: string;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface StudentNotificationsResponse {
+  data: {
+    notifications: StudentNotificationItem[];
+    unread_count: number;
+    meta: {
+      total: number;
+      page: number;
+      limit: number;
+    };
   };
   message: string;
 }
@@ -452,51 +494,35 @@ export const apiService = {
       localStorage.removeItem("user");
     }
   },
-  setScholarshipProviderUser(user: any | null): void {
-    if (typeof window === "undefined") return;
-    if (user) {
-      localStorage.setItem("scholarshipProviderUser", JSON.stringify(user));
-    } else {
-      localStorage.removeItem("scholarshipProviderUser");
-    }
+  setScholarshipProviderUser(_user: any | null): void {
+    // Auth handled via HttpOnly cookie
   },
   getScholarshipProviderUser(): any | null {
-    if (typeof window === "undefined") return null;
-    const stored = localStorage.getItem("scholarshipProviderUser");
-    if (stored) {
-      try { return JSON.parse(stored); } catch { return null; }
-    }
+    // Auth handled via HttpOnly cookie
     return null;
   },
   getToken(): string | null {
-    if (typeof window === "undefined") return null;
-    return localStorage.getItem("token") || sessionStorage.getItem("token") || "mock-token";
+    // Token is handled via HttpOnly cookie
+    return null;
   },
   getScholarshipProviderToken(): string | null {
-    if (typeof window === "undefined") return null;
-    return localStorage.getItem("scholarshipProviderToken");
+    // Auth handled via HttpOnly cookie
+    return null;
   },
-  setToken(token: string | null): void {
-    if (typeof window === "undefined") return;
-    if (token) {
-      localStorage.setItem("token", token);
-      sessionStorage.setItem("token", token);
-    } else {
-      localStorage.removeItem("token");
-      sessionStorage.removeItem("token");
-    }
+  setToken(_token: string | null): void {
+    // Token is handled via HttpOnly cookie - no client-side storage needed
   },
-  setScholarshipProviderToken(token: string | null): void {
-    if (typeof window === "undefined") return;
-    if (token) {
-      localStorage.setItem("scholarshipProviderToken", token);
-    } else {
-      localStorage.removeItem("scholarshipProviderToken");
-    }
+  setScholarshipProviderToken(_token: string | null): void {
+    // Auth handled via HttpOnly cookie
   },
   isAuthenticated(): boolean {
-    return !!this.getToken();
+    // Auth handled via HttpOnly cookie. Check by calling /profile.
+    return false;
   },
+  async logout(): Promise<void> {
+    await apiRequest("/api/v1/auth/logout", { method: "POST" });
+  },
+
   async login(email: string, password: string): Promise<AuthResponse> {
     return apiRequest<AuthResponse>("/api/v1/auth/login", {
       method: "POST",
@@ -642,6 +668,22 @@ export const apiService = {
       method: "POST",
       body: JSON.stringify(data),
     });
+  },
+
+  async getPublicNotifications(): Promise<PublicNotificationsResponse> {
+    return apiRequest<PublicNotificationsResponse>("/api/v1/system/notifications");
+  },
+
+  async getStudentNotifications(page = 1, limit = 20): Promise<StudentNotificationsResponse> {
+    return apiRequest<StudentNotificationsResponse>(`/api/v1/notifications?page=${page}&limit=${limit}`);
+  },
+
+  async markNotificationRead(id: number): Promise<void> {
+    return apiRequest<void>(`/api/v1/notifications/${id}/read`, { method: "PUT" });
+  },
+
+  async markAllNotificationsRead(): Promise<void> {
+    return apiRequest<void>("/api/v1/notifications/read-all", { method: "PUT" });
   },
 
   async resetPassword(email: string, otp: string, password: string): Promise<any> {
@@ -899,38 +941,36 @@ export const apiService = {
     });
   },
 
-  async getForumCommunities(token?: string): Promise<ForumCommunity[]> {
-    const headers: Record<string, string> = { "Content-Type": "application/json" };
-    if (token) headers.Authorization = `Bearer ${token}`;
-
-    const response = await fetch(`${API_BASE_URL}/api/v1/forum/communities`, { headers });
+  async getForumCommunities(_token?: string): Promise<ForumCommunity[]> {
+    const response = await fetch(`${API_BASE_URL}/api/v1/forum/communities`, {
+      headers: { "Content-Type": "application/json" },
+      credentials: "include",
+    });
     if (!response.ok) throw new Error("Failed to fetch communities");
     const data = await response.json();
     return data.data || data;
   },
 
-  async getForumPosts(limit?: number, token?: string, communityId?: number, page?: number): Promise<{ posts: ForumPost[]; has_more: boolean }> {
+  async getForumPosts(limit?: number, _token?: string, communityId?: number, page?: number): Promise<{ posts: ForumPost[]; has_more: boolean }> {
     const params = new URLSearchParams();
     if (limit) params.set("limit", String(limit));
     if (communityId) params.set("community_id", String(communityId));
     if (page) params.set("page", String(page));
 
-    const headers: Record<string, string> = { "Content-Type": "application/json" };
-    if (token) headers.Authorization = `Bearer ${token}`;
-
-    const response = await fetch(`${API_BASE_URL}/api/v1/forum/posts?${params.toString()}`, { headers });
+    const response = await fetch(`${API_BASE_URL}/api/v1/forum/posts?${params.toString()}`, {
+      headers: { "Content-Type": "application/json" },
+      credentials: "include",
+    });
     if (!response.ok) throw new Error("Failed to fetch posts");
     const data = await response.json();
     return data.data || data;
   },
 
-  async joinForumCommunity(token: string, id: number): Promise<any> {
+  async joinForumCommunity(_token: string, id: number): Promise<any> {
     const response = await fetch(`${API_BASE_URL}/api/v1/forum/communities/${id}/join`, {
       method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`,
-      },
+      headers: { "Content-Type": "application/json" },
+      credentials: "include",
     });
     if (!response.ok) throw new Error("Failed to join community");
     const data = await response.json();
@@ -942,19 +982,19 @@ export const apiService = {
     if (limit) params.set("limit", String(limit));
     if (offset) params.set("offset", String(offset));
 
-    const response = await fetch(`${API_BASE_URL}/api/v1/forum/posts/${postId}/comments?${params.toString()}`);
+    const response = await fetch(`${API_BASE_URL}/api/v1/forum/posts/${postId}/comments?${params.toString()}`, {
+      credentials: "include",
+    });
     if (!response.ok) throw new Error("Failed to fetch comments");
     const data = await response.json();
     return data.data || data;
   },
 
-  async createForumComment(token: string, postId: number, data: any): Promise<ForumComment> {
+  async createForumComment(_token: string, postId: number, data: any): Promise<ForumComment> {
     const response = await fetch(`${API_BASE_URL}/api/v1/forum/posts/${postId}/comments`, {
       method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`,
-      },
+      headers: { "Content-Type": "application/json" },
+      credentials: "include",
       body: JSON.stringify(data),
     });
     if (!response.ok) throw new Error("Failed to create comment");
@@ -962,13 +1002,11 @@ export const apiService = {
     return result.data || result;
   },
 
-  async voteForumPoll(token: string, postId: number, optionIdx: number): Promise<any> {
+  async voteForumPoll(_token: string, postId: number, optionIdx: number): Promise<any> {
     const response = await fetch(`${API_BASE_URL}/api/v1/forum/posts/${postId}/poll/vote`, {
       method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`,
-      },
+      headers: { "Content-Type": "application/json" },
+      credentials: "include",
       body: JSON.stringify({ option_index: optionIdx }),
     });
     if (!response.ok) throw new Error("Failed to vote");
@@ -976,52 +1014,44 @@ export const apiService = {
     return data.data || data;
   },
 
-  async likeForumPost(token: string, postId: number): Promise<any> {
+  async likeForumPost(_token: string, postId: number): Promise<any> {
     const response = await fetch(`${API_BASE_URL}/api/v1/forum/posts/${postId}/like`, {
       method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`,
-      },
+      headers: { "Content-Type": "application/json" },
+      credentials: "include",
     });
     if (!response.ok) throw new Error("Failed to like post");
     const data = await response.json();
     return data.data || data;
   },
 
-  async dislikeForumPost(token: string, postId: number): Promise<any> {
+  async dislikeForumPost(_token: string, postId: number): Promise<any> {
     const response = await fetch(`${API_BASE_URL}/api/v1/forum/posts/${postId}/dislike`, {
       method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`,
-      },
+      headers: { "Content-Type": "application/json" },
+      credentials: "include",
     });
     if (!response.ok) throw new Error("Failed to dislike post");
     const data = await response.json();
     return data.data || data;
   },
 
-  async saveForumPost(token: string, postId: number): Promise<any> {
+  async saveForumPost(_token: string, postId: number): Promise<any> {
     const response = await fetch(`${API_BASE_URL}/api/v1/forum/posts/${postId}/save`, {
       method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`,
-      },
+      headers: { "Content-Type": "application/json" },
+      credentials: "include",
     });
     if (!response.ok) throw new Error("Failed to save post");
     const data = await response.json();
     return data.data || data;
   },
 
-  async createForumPost(token: string, data: any): Promise<ForumPost> {
+  async createForumPost(_token: string, data: any): Promise<ForumPost> {
     const response = await fetch(`${API_BASE_URL}/api/v1/forum/posts`, {
       method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`,
-      },
+      headers: { "Content-Type": "application/json" },
+      credentials: "include",
       body: JSON.stringify(data),
     });
     if (!response.ok) throw new Error("Failed to create post");
@@ -1029,13 +1059,11 @@ export const apiService = {
     return result.data || result;
   },
 
-  async updateForumPost(token: string, id: number, data: any): Promise<ForumPost> {
+  async updateForumPost(_token: string, id: number, data: any): Promise<ForumPost> {
     const response = await fetch(`${API_BASE_URL}/api/v1/forum/posts/${id}`, {
       method: "PUT",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`,
-      },
+      headers: { "Content-Type": "application/json" },
+      credentials: "include",
       body: JSON.stringify(data),
     });
     if (!response.ok) throw new Error("Failed to update post");
@@ -1043,13 +1071,11 @@ export const apiService = {
     return result.data || result;
   },
 
-  async deleteForumPost(token: string, id: number): Promise<any> {
+  async deleteForumPost(_token: string, id: number): Promise<any> {
     const response = await fetch(`${API_BASE_URL}/api/v1/forum/posts/${id}`, {
       method: "DELETE",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`,
-      },
+      headers: { "Content-Type": "application/json" },
+      credentials: "include",
     });
     if (!response.ok) throw new Error("Failed to delete post");
     return response.json();
@@ -1059,16 +1085,14 @@ export const apiService = {
     return apiRequest<{ data: College }>(`/api/v1/colleges/${id}`);
   },
 
-  async uploadForumMedia(token: string, files: File[]): Promise<string[]> {
+  async uploadForumMedia(_token: string, files: File[]): Promise<string[]> {
     const formData = new FormData();
     files.forEach((file) => formData.append("files", file));
 
     const response = await fetch(`${API_BASE_URL}/api/v1/forum/upload`, {
       method: "POST",
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
       body: formData,
+      credentials: "include",
     });
     if (!response.ok) throw new Error("Failed to upload media");
     const data = await response.json();
@@ -1079,13 +1103,11 @@ export const apiService = {
     preference_role: string;
     preference_flow: string;
     preferences: Record<string, any>;
-  }, token: string): Promise<any> {
+  }, _token: string): Promise<any> {
     const response = await fetch(`${API_BASE_URL}/api/v1/preferences`, {
       method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`,
-      },
+      headers: { "Content-Type": "application/json" },
+      credentials: "include",
       body: JSON.stringify(data),
     });
     if (!response.ok) throw new Error("Failed to save preferences");

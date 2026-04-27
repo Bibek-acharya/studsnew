@@ -2,7 +2,7 @@
 
 import React, { createContext, useContext, useState, ReactNode, useEffect, useMemo } from "react";
 import { apiService, AuthResponse } from "./api";
-import { setBlogToken as setBlogApiToken } from "./blogApi";
+import { clearAuthSession, persistAuthSession } from "./authSession";
 
 interface User {
   id?: number;
@@ -15,7 +15,6 @@ interface User {
 }
 
 interface AuthContextType {
-  token: string | null;
   user: User | null;
   isAuthenticated: boolean;
   loading: boolean;
@@ -29,58 +28,26 @@ interface AuthContextType {
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-const STORAGE_KEY = "studsphere_auth";
-const SESSION_STORAGE_KEY = "studsphere_auth_session";
-
-const loadStoredAuth = (): { token: string; user: User } | null => {
-  if (typeof window === "undefined") return null;
-  try {
-    const raw = localStorage.getItem(STORAGE_KEY) || sessionStorage.getItem(SESSION_STORAGE_KEY);
-    if (raw) return JSON.parse(raw);
-  } catch {
-    /* ignore */
-  }
-  return null;
-};
-
-const saveAuth = (token: string, user: User, rememberMe = false) => {
-  if (typeof window === "undefined") return;
-
-  const serialized = JSON.stringify({ token, user });
-
-  if (rememberMe) {
-    localStorage.setItem(STORAGE_KEY, serialized);
-    sessionStorage.removeItem(SESSION_STORAGE_KEY);
-    apiService.setToken(token);
-  } else {
-    sessionStorage.setItem(SESSION_STORAGE_KEY, serialized);
-    localStorage.removeItem(STORAGE_KEY);
-    sessionStorage.setItem("token", token);
-  }
-};
-
-const clearAuth = () => {
-  if (typeof window === "undefined") return;
-  localStorage.removeItem(STORAGE_KEY);
-  sessionStorage.removeItem(SESSION_STORAGE_KEY);
-  localStorage.removeItem("token");
-  sessionStorage.removeItem("token");
-  sessionStorage.removeItem("onboarding_completed");
-  apiService.setToken(null);
-};
+const USER_STORAGE_KEY = "studsphere_user";
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [loading, setLoading] = useState(true);
-  const [storedAuth, setStoredAuth] = useState<{ token: string; user: User } | null>(null);
+  const [user, setUserState] = useState<User | null>(null);
 
   useEffect(() => {
-    const stored = loadStoredAuth();
-    setStoredAuth(stored);
+    const stored = typeof window !== "undefined" ? localStorage.getItem(USER_STORAGE_KEY) : null;
+    if (stored) {
+      try {
+        // Stored auth state is restored only on the client after hydration.
+        // eslint-disable-next-line react-hooks/set-state-in-effect
+        setUserState(JSON.parse(stored));
+      } catch { /* ignore */ }
+    }
     setLoading(false);
 
     const handleAuthExpired = () => {
-      clearAuth();
-      setStoredAuth(null);
+      clearAuthSession(localStorage);
+      setUserState(null);
       window.location.href = "/login";
     };
 
@@ -88,20 +55,19 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     return () => window.removeEventListener("auth-expired", handleAuthExpired);
   }, []);
 
-  const token = storedAuth?.token ?? null;
-  const user = storedAuth?.user ?? null;
-  const isAuthenticated = !!token;
+  const isAuthenticated = !!user;
 
   const setUser = (userData: User) => {
-    const currentToken = storedAuth?.token || "";
-    const rememberMe = !!localStorage.getItem(STORAGE_KEY);
-    saveAuth(currentToken, userData, rememberMe);
-    setStoredAuth({ token: currentToken, user: userData });
+    if (typeof window !== "undefined") {
+      localStorage.setItem(USER_STORAGE_KEY, JSON.stringify(userData));
+    }
+    setUserState(userData);
   };
 
-  const login = async (email: string, password: string, rememberMe = false) => {
+  const login = async (email: string, password: string, _rememberMe = false) => {
+    void _rememberMe;
     const response: AuthResponse = await apiService.login(email, password);
-    
+
     if (!response.data?.token) {
       throw new Error(response.message || "Login failed. Please try again.");
     }
@@ -114,8 +80,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       role: response.data.user.role,
     };
 
-    saveAuth(response.data.token, userData, rememberMe);
-    setStoredAuth({ token: response.data.token, user: userData });
+    if (typeof window !== "undefined") {
+      persistAuthSession(localStorage, userData, response.data.token);
+    }
+    setUserState(userData);
   };
 
   const register = async (email: string, password: string, firstName: string, lastName: string, role: string, educationLevel: string) => {
@@ -135,7 +103,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const verifyOTP = async (email: string, otp: string) => {
     const response: AuthResponse = await apiService.verifyOTP(email, otp);
-    
+
     if (!response.data?.token) {
       throw new Error(response.message || "Verification failed");
     }
@@ -148,21 +116,31 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       role: response.data.user.role,
     };
 
-    saveAuth(response.data.token, userData);
-    setStoredAuth({ token: response.data.token, user: userData });
+    if (typeof window !== "undefined") {
+      persistAuthSession(localStorage, userData, response.data.token);
+    }
+    setUserState(userData);
   };
 
   const sendOTP = async (email: string) => {
     await apiService.sendOTP(email);
   };
 
-  const logout = () => {
-    clearAuth();
-    setStoredAuth(null);
+  const logout = async () => {
+    try {
+      await apiService.logout();
+    } catch {
+      // ignore
+    }
+    if (typeof window !== "undefined") {
+      clearAuthSession(localStorage);
+      localStorage.removeItem("onboarding_completed");
+    }
+    setUserState(null);
+    window.location.href = "/login";
   };
 
   const value = useMemo(() => ({
-    token,
     user,
     isAuthenticated,
     loading,
@@ -172,7 +150,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     verifyOTP,
     sendOTP,
     setUser,
-  }), [token, user, isAuthenticated, loading]);
+  }), [user, isAuthenticated, loading]);
 
   return (
     <AuthContext.Provider value={value}>
