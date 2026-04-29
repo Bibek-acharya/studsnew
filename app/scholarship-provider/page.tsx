@@ -357,23 +357,22 @@ const ScholarshipProviderZone: React.FC<ScholarshipProviderZoneProps> = ({
   }
 
   return (
-    <div className="min-h-screen bg-[#fcfcfc] font-sans selection:bg-blue-100 selection:text-blue-900 overflow-x-hidden max-w-350 mx-auto">
-      <div className="bg-white min-h-screen flex flex-col relative">
-        <main className="flex-1 flex items-center justify-center w-full pb-12 lg:pb-20 pt-24">
-          <div className="max-w-350 w-full mx-auto px-6 flex flex-col lg:flex-row items-center justify-between gap-12 lg:gap-24">
-            <div className="flex-1 text-black w-full max-w-2xl text-center lg:text-left pt-6 lg:pt-0">
-              <h1 className="text-4xl lg:text-[4rem] font-bold leading-[1.15] mb-6">
-                Empower Students Through{" "}
-                <span className="text-brand-blue">Scholarships</span>
-              </h1>
-              <p className="text-gray-600 text-lg lg:text-xl leading-relaxed max-w-lg mx-auto lg:mx-0 font-semibold">
-                Manage applications, award funding, and track student progress &mdash;
-                all from one powerful dashboard.
-              </p>
-            </div>
+    <><div className="min-h-screen w-full font-sans selection:bg-brandBlue selection:text-white bg-gray-50 flex items-center justify-center p-4 md:p-8 lg:p-12">
+      <div className="w-full max-w-[1400px] bg-[#0000ff] rounded-2xl p-6 sm:p-10 lg:py-10 lg:px-16 xl:px-20 relative overflow-hidden">
+        <div className="relative z-10 grid grid-cols-1 lg:grid-cols-2 gap-10 lg:gap-12 items-center w-full">
+          <div className="order-2 lg:order-1 flex flex-col justify-center text-center lg:text-left space-y-5 mx-auto lg:mx-0 max-w-xl">
+            <h1 className="text-4xl sm:text-5xl lg:text-6xl leading-[1.15] font-extrabold tracking-tight text-white">
+              Empower Students<br />
+              Through <span className="text-blue-200">Scholarships</span>
+            </h1>
+            <p className="text-base sm:text-lg text-blue-50/90 leading-relaxed font-medium">
+              Manage applications, award funding, and track student progress — all from one powerful dashboard.
+            </p>
+          </div>
+          <div className="order-1 lg:order-2 flex justify-center lg:justify-end">
 
-            <div className="w-full max-w-115">
-              <div className="bg-white rounded-xl p-8 sm:p-10 mt-6 relative text-gray-800 animate-in fade-in slide-in-from-bottom-4 duration-500 border border-gray-200">
+            <div className="w-full max-w-md">
+              <div className="bg-white border border-gray-200 rounded-xl p-8 sm:p-10 shadow-lg">
                 <a href="/" className="flex justify-center mb-6">
                   <Image src="/studsphere.png" alt="StudSphere" width={160} height={42} className="h-10 w-auto" />
                 </a>
@@ -785,17 +784,17 @@ placeholder="Enter Registration Number (e.g. XXXX-XXX-XXX)"
               </div>
             </div>
           </div>
-        </main>
+        </div>
       </div>
-
-      <style>{`
-        @keyframes fadeIn {
-          from { opacity: 0; transform: translateY(8px); }
-          to { opacity: 1; transform: translateY(0); }
-        }
-      `}</style>
     </div>
-  );
+
+    <style>{`
+      @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(8px); }
+        to { opacity: 1; transform: translateY(0); }
+      }
+    `}</style>
+  </>);
 };
 
 export default ScholarshipProviderZone;

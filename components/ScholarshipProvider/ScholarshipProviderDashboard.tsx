@@ -40,18 +40,21 @@ const ScholarshipProviderDashboard: React.FC<DashboardProps> = ({ onLogout }) =>
   const [unreadMessages, setUnreadMessages] = useState(0);
 
   useEffect(() => {
-    setProviderUser({ provider_name: "Provider", email: "" });
-
-    async function loadUnreadMessages() {
+    async function loadProviderData() {
       try {
-        const dashboard = await scholarshipProviderApi.getDashboard();
+        const [profile, dashboard] = await Promise.all([
+          scholarshipProviderApi.getProfile(),
+          scholarshipProviderApi.getDashboard(),
+        ]);
+        setProviderUser(profile);
         setUnreadMessages(dashboard.unread_messages);
       } catch {
+        setProviderUser({ provider_name: "Provider", email: "" });
         setUnreadMessages(0);
       }
     }
 
-    loadUnreadMessages();
+    loadProviderData();
   }, [router, onLogout]);
 
   const handleLogout = useCallback(() => {

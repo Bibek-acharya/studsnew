@@ -103,6 +103,63 @@ export interface SocialLinks {
   youtube?: string;
 }
 
+export interface VideoTutorial {
+  url: string;
+  title: string;
+  description: string;
+}
+
+export interface ScholarshipTypeItem {
+  type: string;
+  seats: string;
+  coverage: string;
+}
+
+export interface SelectionRubricItem {
+  criteria: string;
+  description: string;
+  weight: string;
+}
+
+export interface SelectionProcessStepItem {
+  step: number;
+  title: string;
+  description: string;
+}
+
+export interface FAQItem {
+  question: string;
+  answer: string;
+}
+
+export interface GalleryImageItem {
+  title: string;
+  url: string;
+}
+
+export interface PartnerOrganization {
+  name: string;
+  website: string;
+}
+
+export interface PartnerGroup {
+  heading: string;
+  partners: PartnerOrganization[];
+}
+
+export interface ExamCenterItem {
+  province: string;
+  center_name: string;
+  contact_person: string;
+  phone_number: string;
+  map_coordinates: string;
+}
+
+export interface DownloadItem {
+  title: string;
+  description: string;
+}
+
 export interface CreateScholarshipPayload {
   title: string;
   provider: string;
@@ -160,6 +217,27 @@ export interface CreateScholarshipPayload {
   news_items?: NewsItem[];
   map_embed_url?: string;
   social_links?: SocialLinks;
+
+  // Prototype fields
+  banner_background_image_url?: string;
+  about_paragraph_1?: string;
+  about_paragraph_2?: string;
+  video_tutorials?: VideoTutorial[];
+  scholarship_section_title?: string;
+  scholarship_subtitle?: string;
+  scholarship_description_1?: string;
+  scholarship_description_2?: string;
+  scholarship_types_new?: ScholarshipTypeItem[];
+  selection_rubric_new?: SelectionRubricItem[];
+  eligibility_section_title?: string;
+  eligibility_subtitle?: string;
+  basic_eligibility_criteria?: string[];
+  selection_process_steps?: SelectionProcessStepItem[];
+  faqs_new?: FAQItem[];
+  gallery_images_new?: GalleryImageItem[];
+  partner_groups?: PartnerGroup[];
+  exam_centers_new?: ExamCenterItem[];
+  downloads?: DownloadItem[];
 }
 
 export interface ProviderScholarship {
@@ -224,6 +302,27 @@ export interface ProviderScholarship {
   applications_count: number;
   created_at: string;
   updated_at: string;
+
+  // Prototype fields
+  banner_background_image_url?: string | null;
+  about_paragraph_1?: string;
+  about_paragraph_2?: string;
+  video_tutorials?: VideoTutorial[];
+  scholarship_section_title?: string;
+  scholarship_subtitle?: string;
+  scholarship_description_1?: string;
+  scholarship_description_2?: string;
+  scholarship_types_new?: ScholarshipTypeItem[];
+  selection_rubric_new?: SelectionRubricItem[];
+  eligibility_section_title?: string;
+  eligibility_subtitle?: string;
+  basic_eligibility_criteria?: string[];
+  selection_process_steps?: SelectionProcessStepItem[];
+  faqs_new?: FAQItem[];
+  gallery_images_new?: GalleryImageItem[];
+  partner_groups?: PartnerGroup[];
+  exam_centers_new?: ExamCenterItem[];
+  downloads?: DownloadItem[];
 }
 
 export interface ProviderApplication {

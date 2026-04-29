@@ -33,6 +33,7 @@ const PageLayout: React.FC<PageLayoutProps> = ({
         <TopBar
           providerUser={providerUser}
           unreadMessages={unreadMessages}
+          onNavigate={onNavigate}
         />
 
         <main className="flex-1 overflow-y-auto p-8 pb-24 max-w-[1600px] w-full mx-auto">

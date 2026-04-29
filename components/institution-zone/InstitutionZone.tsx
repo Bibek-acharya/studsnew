@@ -15,27 +15,28 @@ export default function InstitutionZone() {
   const router = useRouter();
 
   return (
-    <div className="min-h-screen bg-[#fcfcfc] font-sans selection:bg-blue-100 selection:text-blue-900 overflow-x-hidden max-w-350 mx-auto">
-      {/* --- HERO SECTION --- */}
-      <div className="bg-white min-h-screen flex flex-col relative">
-        <InstitutionHeader />
+    <div className="min-h-screen font-sans selection:bg-brandBlue selection:text-white bg-white">
+      <InstitutionHeader />
 
-        {/* Hero Content */}
-        <main className="flex-1 flex items-center justify-center w-full pb-12 lg:pb-20 pt-24">
-          <div className="max-w-350 w-full mx-auto px-6 flex flex-col lg:flex-row items-center justify-between gap-12 lg:gap-24">
-            <div className="flex-1 text-black w-full max-w-2xl text-center lg:text-left pt-6 lg:pt-0">
-              <h1 className="text-4xl lg:text-[4rem] font-bold leading-[1.15] mb-6">
-                Simplify Admissions, Applications<span className="text-brand-blue"> & Student Engagement </span>
+      {/* --- HERO SECTION --- */}
+      <div className="flex items-center justify-center px-4 md:px-8 lg:px-12 pb-4 md:pb-6 pt-36 lg:pt-44">
+        <div className="w-full max-w-[1400px] bg-[#0000ff] rounded-2xl p-6 sm:p-10 lg:py-10 lg:px-16 xl:px-20 relative overflow-hidden">
+          <div className="relative z-10 grid grid-cols-1 lg:grid-cols-2 gap-10 lg:gap-12 items-center w-full">
+            <div className="order-2 lg:order-1 flex flex-col justify-center text-center lg:text-left space-y-5 mx-auto lg:mx-0 max-w-xl">
+              <h1 className="text-4xl sm:text-5xl lg:text-6xl leading-[1.15] font-extrabold tracking-tight text-white">
+                Simplify Admissions,<br />
+                Applications<span className="text-blue-200"> & Student Engagement </span>
               </h1>
-              <p className="text-gray-600 text-lg lg:text-xl leading-relaxed max-w-lg mx-auto lg:mx-0 font-semibold">
+              <p className="text-base sm:text-lg text-blue-50/90 leading-relaxed font-medium">
                 Promote your programs, facilities, and opportunities to students
                 across Nepal and beyond.
               </p>
             </div>
 
             {/* Form Container */}
-            <div className="w-full max-w-115">
-              <div className="bg-white rounded-md p-8 sm:p-10  mt-6 relative text-gray-800 animate-in fade-in slide-in-from-bottom-4 duration-500 border border-gray-200">
+            <div className="order-1 lg:order-2 flex justify-center lg:justify-end">
+              <div className="w-full max-w-md">
+                <div className="bg-white border border-gray-200 rounded-xl p-8 sm:p-10 shadow-lg">
                 <div className="flex p-1.5 bg-[#F1F3F5] rounded-md mb-8 relative">
                   <button
                     onClick={() => setActiveTab("advertise")}
@@ -153,28 +154,6 @@ export default function InstitutionZone() {
                       >
                         Log in
                       </button>
-
-                      <div className="flex items-center my-6">
-                        <div className="grow border-t border-gray-200"></div>
-                        <span className="px-4 text-xs text-gray-400 font-semibold uppercase">
-                          Or
-                        </span>
-                        <div className="grow border-t border-gray-200"></div>
-                      </div>
-
-                      <button
-                        type="button"
-                        className="w-full flex items-center justify-center gap-3 bg-white border border-gray-200 hover:bg-gray-50 text-[15px] font-semibold text-gray-700 py-3.5 rounded-md cursor-pointer hover:text-brand-blue transition-all"
-                      >
-                        <Image
-                          src="/google-icon.svg"
-                          alt="Google"
-                          width={18}
-                          height={18}
-                          className="w-4.5 h-4.5"
-                        />
-                        Log in with Google
-                      </button>
                     </form>
                     <div className="mt-8 text-center text-[15px] text-gray-500 font-medium">
                       Don&rsquo;t have a registered email?{" "}
@@ -252,8 +231,9 @@ export default function InstitutionZone() {
               </div>
             </div>
           </div>
-        </main>
+        </div>
       </div>
+    </div>
     </div>
   );
 }

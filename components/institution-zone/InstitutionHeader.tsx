@@ -3,10 +3,11 @@
 import { useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { ChevronDown, Mail, Phone } from "lucide-react";
+import { ChevronDown, Mail, Phone, X } from "lucide-react";
 
 export default function InstitutionHeader() {
   const [showContactDropdown, setShowContactDropdown] = useState(false);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   return (
     <header className="fixed top-0 left-0 right-0 z-100 bg-white py-6 lg:py-8">
@@ -174,22 +175,42 @@ export default function InstitutionHeader() {
         </nav>
 
         <div className="lg:flex-1 flex justify-end">
-          <button className="lg:hidden text-white hover:text-white/80">
-            <svg
-              width="28"
-              height="28"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-            >
-              <line x1="3" y1="12" x2="21" y2="12" />
-              <line x1="3" y1="6" x2="21" y2="6" />
-              <line x1="3" y1="18" x2="21" y2="18" />
-            </svg>
+          <button onClick={() => setMobileMenuOpen(!mobileMenuOpen)} className="lg:hidden text-gray-700 hover:text-brand-blue">
+            {mobileMenuOpen ? <X size={28} /> : (
+              <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <line x1="3" y1="12" x2="21" y2="12" />
+                <line x1="3" y1="6" x2="21" y2="6" />
+                <line x1="3" y1="18" x2="21" y2="18" />
+              </svg>
+            )}
           </button>
         </div>
       </div>
+
+      {mobileMenuOpen && (
+        <div className="lg:hidden bg-white border-t border-gray-100 shadow-lg">
+          <nav className="max-w-350 mx-auto px-6 py-4 flex flex-col gap-3 text-[15px] font-medium">
+            <Link href="/institution-zone#services" onClick={() => setMobileMenuOpen(false)} className="py-2 hover:text-brand-blue transition-colors">Services</Link>
+            <Link href="/institution-zone#testimonials" onClick={() => setMobileMenuOpen(false)} className="py-2 hover:text-brand-blue transition-colors">Testimonials</Link>
+            <Link href="/institution-zone/pricing" onClick={() => setMobileMenuOpen(false)} className="py-2 hover:text-brand-blue transition-colors">Pricing</Link>
+            <div className="py-2 text-gray-500 font-medium">Contact us</div>
+            <div className="pl-4 space-y-3 pb-2">
+              <a href="mailto:sarah.jenkins@studsphere.edu" className="flex items-center gap-2 text-sm text-gray-600 hover:text-brand-blue">
+                <Mail size={16} /> sarah.jenkins@studsphere.edu
+              </a>
+              <a href="tel:+9779800000000" className="flex items-center gap-2 text-sm text-gray-600 hover:text-brand-blue">
+                <Phone size={16} /> +977-9800000000
+              </a>
+              <a href="mailto:michael.chen@studsphere.edu" className="flex items-center gap-2 text-sm text-gray-600 hover:text-brand-blue">
+                <Mail size={16} /> michael.chen@studsphere.edu
+              </a>
+              <a href="tel:+9779800000001" className="flex items-center gap-2 text-sm text-gray-600 hover:text-brand-blue">
+                <Phone size={16} /> +977-9800000001
+              </a>
+            </div>
+          </nav>
+        </div>
+      )}
     </header>
   );
 }
