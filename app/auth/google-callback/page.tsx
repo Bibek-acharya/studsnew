@@ -2,13 +2,32 @@
 
 import { useEffect } from "react";
 import { useRouter } from "next/navigation";
+import { useAuth } from "@/services/AuthContext";
+import { apiService } from "@/services/api";
 
 export default function GoogleAuthCallbackPage() {
   const router = useRouter();
+  const { setUser } = useAuth();
 
   useEffect(() => {
-    window.location.href = "/";
-  }, [router]);
+    const finishLogin = async () => {
+      try {
+        const res = await apiService.getProfile();
+        const profile = res.data;
+        setUser({
+          id: profile.id,
+          first_name: profile.first_name,
+          last_name: profile.last_name,
+          email: profile.email,
+          role: profile.role,
+        });
+      } catch {
+        // ignore — will redirect to home anyway
+      }
+      router.push("/");
+    };
+    finishLogin();
+  }, [router, setUser]);
 
   return (
     <div className="min-h-screen flex items-center justify-center">

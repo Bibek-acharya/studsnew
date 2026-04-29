@@ -137,7 +137,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       localStorage.removeItem("onboarding_completed");
     }
     setUserState(null);
-    window.location.href = "/login";
+    window.location.href = "/";
   };
 
   const value = useMemo(() => ({

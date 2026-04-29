@@ -1,28 +1,68 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
+import { Loader2, AlertCircle } from 'lucide-react'
+import { apiService, InviteItem } from '@/services/api'
 
 export default function SphereInvitesSection() {
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
   const [filterType, setFilterType] = useState('all')
+  const [invites, setInvites] = useState<InviteItem[]>([])
+  const [toast, setToast] = useState<{message: string; type: 'success' | 'error'} | null>(null)
 
-  const invites = [
-    { id: 1, type: 'scholarship', title: 'Harvard Merit Scholarship 2026', organization: 'Harvard University', deadline: 'Apr 30, 2026', priority: 'high', amount: '$50,000+', description: 'Full merit-based scholarship for international students' },
-    { id: 2, type: 'admission', title: 'Stanford Admission Interview', organization: 'Stanford University', deadline: 'Apr 20, 2026', priority: 'high', amount: 'Review', description: 'You have been shortlisted for the final round' },
-    { id: 3, type: 'event', title: 'MIT Campus Tour & Workshop', organization: 'MIT', deadline: 'Apr 15, 2026', priority: 'medium', amount: 'Free', description: 'Exclusive workshop for prospective students' },
-    { id: 4, type: 'scholarship', title: 'Yale Global Scholarship', organization: 'Yale University', deadline: 'May 05, 2026', priority: 'medium', amount: '$30,000', description: 'Financial aid for exceptional candidates' },
-    { id: 5, type: 'admission', title: 'Princeton Ivy Plus Program', organization: 'Princeton University', deadline: 'Apr 25, 2026', priority: 'high', amount: 'Opportunity', description: 'Join our summer leadership program' },
-    { id: 6, type: 'event', title: 'Columbia Pre-College Program', organization: 'Columbia University', deadline: 'May 10, 2026', priority: 'low', amount: '$5,000 aid', description: 'Explore academic interests and university life' },
-  ]
+  const fetchInvites = async () => {
+    try {
+      setLoading(true)
+      setError(null)
+      const res = await apiService.getInvites()
+      setInvites(res.data?.invites || [])
+    } catch (err: any) {
+      setError(err.message || 'Failed to load invites')
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  useEffect(() => {
+    fetchInvites()
+  }, [])
 
   const filtered = filterType === 'all' ? invites : invites.filter(i => i.type === filterType)
 
-  const getPriorityColor = (priority: string) => {
-    switch(priority) {
-      case 'high': return 'bg-red-50 text-red-700 border-red-200'
-      case 'medium': return 'bg-yellow-50 text-yellow-700 border-yellow-200'
-      case 'low': return 'bg-blue-50 text-blue-700 border-blue-200'
-      default: return 'bg-slate-50 text-slate-700'
-    }
+  const handleAccept = async (id: number) => {
+    try {
+      await apiService.acceptInvite(id)
+      fetchInvites()
+      setToast({ message: 'Invite accepted', type: 'success' })
+      setTimeout(() => setToast(null), 3000)
+    } catch { /* ignore */ }
+  }
+
+  const handleSave = async (id: number) => {
+    try {
+      await apiService.saveInvite(id)
+      fetchInvites()
+      setToast({ message: 'Invite saved', type: 'success' })
+      setTimeout(() => setToast(null), 3000)
+    } catch { /* ignore */ }
+  }
+
+  const handleDecline = async (id: number) => {
+    try {
+      await apiService.declineInvite(id)
+      fetchInvites()
+      setToast({ message: 'Invite declined', type: 'success' })
+      setTimeout(() => setToast(null), 3000)
+    } catch { /* ignore */ }
+  }
+
+  const totalCount = invites.length
+  const acceptedCount = invites.filter(i => i.status === 'accepted').length
+  const savedCount = invites.filter(i => i.status === 'saved').length
+
+  const getPriorityColor = (_status: string) => {
+    return 'bg-blue-50 text-blue-700 border-blue-200'
   }
 
   const getTypeIcon = (type: string) => {
@@ -32,6 +72,29 @@ export default function SphereInvitesSection() {
       case 'event': return 'fa-calendar-days'
       default: return 'fa-envelope'
     }
+  }
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center py-20">
+        <div className="flex flex-col items-center gap-3">
+          <Loader2 className="w-8 h-8 animate-spin text-primary" />
+          <p className="text-sm text-slate-500">Loading invites...</p>
+        </div>
+      </div>
+    )
+  }
+
+  if (error) {
+    return (
+      <div className="flex items-center justify-center py-20">
+        <div className="flex flex-col items-center gap-3 text-center">
+          <AlertCircle className="w-8 h-8 text-red-500" />
+          <p className="text-sm text-red-600">{error}</p>
+          <button onClick={() => window.location.reload()} className="text-sm text-primary hover:underline">Retry</button>
+        </div>
+      </div>
+    )
   }
 
   return (
@@ -52,7 +115,7 @@ export default function SphereInvitesSection() {
             <i className="fas fa-inbox"></i>
           </div>
           <div>
-            <p className="text-2xl font-bold text-slate-800">{invites.length}</p>
+            <p className="text-2xl font-bold text-slate-800">{totalCount}</p>
             <p className="text-xs text-slate-500 font-medium uppercase">Total Invites</p>
           </div>
         </div>
@@ -61,7 +124,7 @@ export default function SphereInvitesSection() {
             <i className="fas fa-check-circle"></i>
           </div>
           <div>
-            <p className="text-2xl font-bold text-slate-800">3</p>
+            <p className="text-2xl font-bold text-slate-800">{acceptedCount}</p>
             <p className="text-xs text-slate-500 font-medium uppercase">Accepted</p>
           </div>
         </div>
@@ -70,7 +133,7 @@ export default function SphereInvitesSection() {
             <i className="fas fa-bookmark"></i>
           </div>
           <div>
-            <p className="text-2xl font-bold text-slate-800">2</p>
+            <p className="text-2xl font-bold text-slate-800">{savedCount}</p>
             <p className="text-xs text-slate-500 font-medium uppercase">Saved</p>
           </div>
         </div>
@@ -99,7 +162,19 @@ export default function SphereInvitesSection() {
         </div>
       </div>
 
+      {/* Empty State */}
+      {filtered.length === 0 && !loading && (
+        <div className="flex flex-col items-center justify-center py-20 text-center">
+          <div className="w-20 h-20 bg-slate-50 rounded-full flex items-center justify-center mb-4">
+            <i className="fas fa-envelope-open-text text-3xl text-slate-300"></i>
+          </div>
+          <h3 className="text-lg font-semibold text-slate-800 mb-2">No invites yet</h3>
+          <p className="text-sm text-slate-500 max-w-sm">We&apos;ll notify you when opportunities match your profile.</p>
+        </div>
+      )}
+
       {/* Invites Grid */}
+      {filtered.length > 0 && (
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
         {filtered.map(invite => (
           <div key={invite.id} className="bg-white rounded-md  border border-slate-200 p-6 hover: transition-all flex flex-col h-full">
@@ -107,24 +182,38 @@ export default function SphereInvitesSection() {
               <div className="h-12 w-12 rounded-md bg-blue-50 flex items-center justify-center text-blue-600 text-lg">
                 <i className={`fas ${getTypeIcon(invite.type)}`}></i>
               </div>
-              <span className={`text-xs px-2 py-1 rounded-full font-medium border ${getPriorityColor(invite.priority)}`}>
-                {invite.priority.charAt(0).toUpperCase() + invite.priority.slice(1)} Priority
+              <span className={`text-xs px-2 py-1 rounded-full font-medium border ${getPriorityColor(invite.status)}`}>
+                {invite.status.charAt(0).toUpperCase() + invite.status.slice(1)}
               </span>
             </div>
             <h3 className="font-bold text-slate-800 mb-1">{invite.title}</h3>
-            <p className="text-sm text-slate-600 mb-2">{invite.organization}</p>
-            <p className="text-xs text-slate-500 mb-4 line-clamp-2">{invite.description}</p>
+            <p className="text-sm text-slate-600 mb-2 line-clamp-2">{invite.message}</p>
             <div className="flex items-center justify-between mb-4 pb-4 border-b border-slate-100">
-              <span className="text-xs font-semibold text-slate-500"><i className="fas fa-calendar mr-1"></i> {invite.deadline}</span>
-              <span className="text-xs font-bold text-blue-600 bg-blue-50 px-2 py-1 rounded">{invite.amount}</span>
+              <span className="text-xs font-semibold text-slate-500"><i className="fas fa-calendar mr-1"></i> {invite.created_at ? new Date(invite.created_at).toLocaleDateString() : 'N/A'}</span>
+              <span className="text-xs font-bold text-blue-600 bg-blue-50 px-2 py-1 rounded">{invite.type}</span>
             </div>
             <div className="mt-auto flex gap-2">
-              <button className="flex-1 px-3 py-2 text-xs font-bold text-blue-600 bg-blue-50 rounded-md hover:bg-blue-100 transition-colors">View Details</button>
-              <button className="px-3 py-2 text-xs font-bold text-slate-600 bg-slate-50 rounded-md hover:bg-slate-100 transition-colors"><i className="fas fa-bookmark"></i></button>
+              {invite.status === 'pending' && (
+                <>
+                  <button onClick={() => handleAccept(invite.id)} className="flex-1 px-3 py-2 text-xs font-bold text-white bg-green-600 rounded-md hover:bg-green-700 transition-colors">Accept</button>
+                  <button onClick={() => handleSave(invite.id)} className="px-3 py-2 text-xs font-bold text-purple-600 bg-purple-50 rounded-md hover:bg-purple-100 transition-colors"><i className="fas fa-bookmark"></i></button>
+                  <button onClick={() => handleDecline(invite.id)} className="px-3 py-2 text-xs font-bold text-red-600 bg-red-50 rounded-md hover:bg-red-100 transition-colors"><i className="fas fa-times"></i></button>
+                </>
+              )}
+              {invite.status === 'accepted' && (
+                <span className="flex-1 text-center px-3 py-2 text-xs font-bold text-green-600 bg-green-50 rounded-md">Accepted</span>
+              )}
+              {invite.status === 'saved' && (
+                <span className="flex-1 text-center px-3 py-2 text-xs font-bold text-purple-600 bg-purple-50 rounded-md">Saved</span>
+              )}
+              {invite.status === 'declined' && (
+                <span className="flex-1 text-center px-3 py-2 text-xs font-bold text-red-600 bg-red-50 rounded-md">Declined</span>
+              )}
             </div>
           </div>
         ))}
       </div>
+      )}
 
       {/* Sponsored Section */}
       <div className="mt-12 border-t border-slate-200 pt-8 pb-8">
@@ -172,6 +261,11 @@ export default function SphereInvitesSection() {
           </div>
         </div>
       </div>
+      {toast && (
+        <div className="fixed bottom-4 right-4 z-50 rounded-lg bg-green-600 px-4 py-3 text-sm font-semibold text-white shadow-lg">
+          {toast.message}
+        </div>
+      )}
     </div>
   )
 }

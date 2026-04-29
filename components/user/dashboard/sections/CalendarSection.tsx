@@ -12,8 +12,11 @@ import {
   GraduationCap,
   Award,
   CalendarDays,
-  CheckSquare
+  CheckSquare,
+  Loader2,
+  AlertCircle
 } from 'lucide-react'
+import { apiService } from "@/services/api"
 
 interface CalendarEvent {
   id: number
@@ -61,40 +64,39 @@ export default function CalendarSection() {
     end: ''
   })
 
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
+  const [toast, setToast] = useState<{message: string; type: 'success' | 'error'} | null>(null)
+
+  const fetchEvents = () => {
+    apiService.getCalendarEvents()
+      .then(res => {
+        const items = res.data || []
+        const mapped: CalendarEvent[] = items.map(ev => ({
+          id: ev.id,
+          title: ev.title,
+          start: new Date(ev.start_date),
+          end: ev.end_date ? new Date(ev.end_date) : new Date(ev.start_date),
+          type: (ev.type || 'events') as CalendarEvent['type'],
+        }))
+        setEvents(mapped)
+        setError(null)
+      })
+      .catch((err: Error) => {
+        setError(err.message)
+        console.error('Failed to fetch calendar events:', err)
+      })
+      .finally(() => setLoading(false))
+  }
+
   useEffect(() => {
-    generateInitialEvents()
+    fetchEvents()
   }, [])
 
   useEffect(() => {
     const timer = setInterval(() => setCurrentTime(new Date()), 60000)
     return () => clearInterval(timer)
   }, [])
-
-  const generateInitialEvents = () => {
-    const today = new Date()
-    const start = getStartOfWeek(today)
-    
-    const createEvent = (id: number, dayOffset: number, startH: number, startM: number, endH: number, endM: number, title: string, type: 'admission' | 'entrance' | 'counselling' | 'scholarship' | 'events' | 'tasks') => {
-      const d = new Date(start)
-      d.setDate(d.getDate() + dayOffset)
-      const startObj = new Date(d); startObj.setHours(startH, startM, 0, 0)
-      const endObj = new Date(d); endObj.setHours(endH, endM, 0, 0)
-      return { id, title, start: startObj, end: endObj, type }
-    }
-
-    setEvents([
-      createEvent(1, 0, 8, 0, 9, 0, 'MIT Application Deadline', 'admission'),
-      createEvent(2, 0, 9, 0, 10, 30, 'IOE Entrance Form', 'entrance'),
-      createEvent(3, 0, 11, 0, 12, 0, 'Career Counselling', 'counselling'),
-      createEvent(4, 1, 9, 0, 10, 0, 'Scholarship Interview', 'scholarship'),
-      createEvent(5, 1, 11, 0, 12, 30, 'Open House Event', 'events'),
-      createEvent(6, 2, 8, 0, 9, 0, 'Submit Documents', 'tasks'),
-      createEvent(7, 2, 10, 0, 11, 0, 'Entrance Prep', 'tasks'),
-      createEvent(8, 3, 9, 0, 10, 0, 'Campus Tour', 'events'),
-      createEvent(9, 3, 12, 0, 13, 30, 'Visa Appointment', 'admission'),
-      createEvent(10, 4, 8, 30, 10, 0, 'Application Review', 'tasks'),
-    ])
-  }
 
   const getStartOfWeek = (date: Date) => {
     const result = new Date(date)
@@ -180,32 +182,48 @@ export default function CalendarSection() {
     setFormData({ title: '', type: 'admission', date: '', start: '', end: '' })
   }
 
-  const deleteEvent = () => {
+  const deleteEvent = async () => {
     if (editingEvent) {
-      setEvents(events.filter(ev => ev.id !== editingEvent.id))
-      closeModal()
+      try {
+        await apiService.deleteCalendarEvent(editingEvent.id)
+        fetchEvents()
+        closeModal()
+        setToast({ message: 'Event deleted', type: 'success' })
+        setTimeout(() => setToast(null), 3000)
+      } catch (err) {
+        setError(err instanceof Error ? err.message : 'Failed to delete event')
+      }
     }
   }
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    const startDate = new Date(`${formData.date}T${formData.start}`)
-    const endDate = new Date(`${formData.date}T${formData.end}`)
+    const startDateStr = `${formData.date}T${formData.start}:00`
+    const endDateStr = `${formData.date}T${formData.end}:00`
 
-    if (editingEvent) {
-      setEvents(events.map(ev => 
-        ev.id === editingEvent.id ? { ...ev, title: formData.title, type: formData.type as CalendarEvent['type'], start: startDate, end: endDate } : ev
-      ))
-    } else {
-      setEvents([...events, {
-        id: Date.now(),
-        title: formData.title,
-        type: formData.type as CalendarEvent['type'],
-        start: startDate,
-        end: endDate
-      }])
+    try {
+      if (editingEvent) {
+        await apiService.updateCalendarEvent(editingEvent.id, {
+          title: formData.title,
+          type: formData.type,
+          start_date: startDateStr,
+          end_date: endDateStr,
+        })
+      } else {
+        await apiService.createCalendarEvent({
+          title: formData.title,
+          type: formData.type,
+          start_date: startDateStr,
+          end_date: endDateStr,
+        })
+      }
+      fetchEvents()
+      closeModal()
+      setToast({ message: editingEvent ? 'Event updated' : 'Event created', type: 'success' })
+      setTimeout(() => setToast(null), 3000)
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to save event')
     }
-    closeModal()
   }
 
   const navigateFromMonthToDay = (dateStr: string) => {
@@ -423,6 +441,40 @@ export default function CalendarSection() {
         </div>
       </div>
 
+      {/* Loading State */}
+      {loading && (
+        <div className="flex items-center justify-center py-24 flex-1">
+          <Loader2 className="w-6 h-6 animate-spin text-primary" />
+        </div>
+      )}
+
+      {/* Error State */}
+      {!loading && error && (
+        <div className="flex flex-col items-center justify-center py-24 flex-1 text-center px-4">
+          <AlertCircle className="w-10 h-10 text-red-400 mb-3" />
+          <p className="text-sm text-red-600 font-medium">{error}</p>
+        </div>
+      )}
+
+      {/* Empty State */}
+      {!loading && !error && events.length === 0 && (
+        <div className="flex flex-col items-center justify-center py-24 flex-1 text-center px-4">
+          <div className="w-20 h-20 bg-slate-50 rounded-full flex items-center justify-center mb-4">
+            <CalendarDays className="w-10 h-10 text-slate-300" />
+          </div>
+          <h3 className="text-lg font-semibold text-slate-800 mb-2">No events scheduled</h3>
+          <p className="text-sm text-slate-500 max-w-sm">Add your first event to get started.</p>
+          <button
+            onClick={() => openModal()}
+            className="mt-6 flex items-center gap-1.5 px-4 py-2 bg-brand-blue text-white rounded-md text-sm font-medium hover:bg-blue-700 transition-colors"
+          >
+            <Plus className="w-4 h-4" />
+            Add Event
+          </button>
+        </div>
+      )}
+
+      {!loading && !error && events.length > 0 && (
       <div className="p-4 md:p-6 flex-1 flex flex-col min-h-0">
         <div className="flex flex-col sm:flex-row justify-between items-center mb-4 md:mb-6 gap-4 shrink-0">
           <div className="flex items-center gap-4 w-full sm:w-auto justify-between sm:justify-start">
@@ -464,6 +516,7 @@ export default function CalendarSection() {
           {view === 'Month' ? renderMonthView() : renderWeekDayView()}
         </div>
       </div>
+      )}
 
       {showModal && (
         <div className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-50 flex items-center justify-center p-4">
@@ -570,6 +623,12 @@ export default function CalendarSection() {
               </div>
             </form>
           </div>
+        </div>
+      )}
+
+      {toast && (
+        <div className="fixed bottom-4 right-4 z-50 rounded-lg bg-green-600 px-4 py-3 text-sm font-semibold text-white shadow-lg">
+          {toast.message}
         </div>
       )}
     </div>

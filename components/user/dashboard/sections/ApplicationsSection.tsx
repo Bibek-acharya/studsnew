@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import {
   GraduationCap,
   Award,
@@ -17,8 +17,10 @@ import {
   User,
   Mail,
   Phone,
-  Globe
+  Globe,
+  Loader2
 } from 'lucide-react'
+import { apiService } from "@/services/api"
 
 type AppType = 'all' | 'admission' | 'entrance' | 'scholarship'
 
@@ -40,6 +42,13 @@ interface Application {
     phone: string
     avatar?: string
   }
+}
+
+const STATUS_MAP: Record<string, Status> = {
+  submitted: 'applied',
+  pending: 'shortlisted',
+  approved: 'accepted',
+  rejected: 'rejected',
 }
 
 const TYPES: AppType[] = ['all', 'admission', 'entrance', 'scholarship']
@@ -74,20 +83,39 @@ const TYPE_COLOR: Record<string, string> = {
   all: 'bg-slate-600'
 }
 
-const data: Application[] = [
-  { id: 1, institution: 'Tribhuvan University', program: 'Engineering', type: 'entrance', status: 'shortlisted', appliedDate: '2026-03-15', deadline: '2026-04-30', location: 'Kathmandu', user: { name: 'Alex Johnson', email: 'alex@example.com', phone: '+977 9812345678' } },
-  { id: 2, institution: 'Peking University', program: 'Computer Science', type: 'admission', status: 'interview', appliedDate: '2026-02-10', deadline: '2026-04-01', location: 'Beijing', user: { name: 'Alex Johnson', email: 'alex@example.com', phone: '+977 9812345678' } },
-  { id: 3, institution: 'Fulbright', program: 'Graduate Program', type: 'scholarship', status: 'applied', appliedDate: '2026-01-20', deadline: '2026-03-01', location: 'USA', user: { name: 'Alex Johnson', email: 'alex@example.com', phone: '+977 9812345678' } },
-  { id: 4, institution: 'Stanford University', program: 'Data Science', type: 'admission', status: 'accepted', appliedDate: '2025-12-15', deadline: '2026-01-05', location: 'California', user: { name: 'Alex Johnson', email: 'alex@example.com', phone: '+977 9812345678' } },
-]
-
 export default function ApplicationsSection() {
   const [activeType, setActiveType] = useState<AppType>('all')
   const [selected, setSelected] = useState<Application | null>(null)
   const [sortKey, setSortKey] = useState<string>('deadline')
   const [sortDir, setSortDir] = useState<'asc' | 'desc'>('asc')
+  const [applications, setApplications] = useState<Application[]>([])
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
 
-  const filtered = data.filter(a =>
+  useEffect(() => {
+    apiService.getMyApplications({ page: 1, limit: 50 })
+      .then(res => {
+        const mapped = res.data.applications.map(app => ({
+          id: app.id,
+          institution: app.institution,
+          program: app.program,
+          type: app.type as AppType,
+          status: STATUS_MAP[app.status] || 'applied',
+          appliedDate: app.applied_date,
+          deadline: app.deadline,
+          location: app.location,
+        }))
+        setApplications(mapped)
+        setError(null)
+      })
+      .catch(err => {
+        setError(err.message)
+        setApplications([])
+      })
+      .finally(() => setLoading(false))
+  }, [])
+
+  const filtered = applications.filter(a =>
     activeType === 'all' || a.type === activeType
   )
 
@@ -134,98 +162,115 @@ export default function ApplicationsSection() {
 
       {/* TABLE */}
       <div className="bg-white rounded-md border border-slate-200 overflow-hidden">
-        <table className="w-full">
-          <thead>
-            <tr className="bg-slate-50 border-b border-slate-200">
-              <th className="text-left px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-wider">
-                <button 
-                  onClick={() => handleSort('institution')}
-                  className="flex items-center gap-1 hover:text-slate-700"
-                >
-                  Institution
-                  <ChevronDown className={`w-3 h-3 transition-transform ${sortKey === 'institution' && sortDir === 'desc' ? 'rotate-180' : ''}`} />
-                </button>
-              </th>
-              <th className="text-left px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-wider">Program</th>
-              <th className="text-center px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-wider">Type</th>
-              <th className="text-center px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-wider">
-                <button 
-                  onClick={() => handleSort('status')}
-                  className="flex items-center gap-1 hover:text-slate-700 mx-auto"
-                >
-                  Status
-                  <ChevronDown className={`w-3 h-3 transition-transform ${sortKey === 'status' && sortDir === 'desc' ? 'rotate-180' : ''}`} />
-                </button>
-              </th>
-              <th className="text-left px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-wider">
-                <button 
-                  onClick={() => handleSort('appliedDate')}
-                  className="flex items-center gap-1 hover:text-slate-700"
-                >
-                  Applied
-                  <ChevronDown className={`w-3 h-3 transition-transform ${sortKey === 'appliedDate' && sortDir === 'desc' ? 'rotate-180' : ''}`} />
-                </button>
-              </th>
-              <th className="text-left px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-wider">
-                <button 
-                  onClick={() => handleSort('deadline')}
-                  className="flex items-center gap-1 hover:text-slate-700"
-                >
-                  Deadline
-                  <ChevronDown className={`w-3 h-3 transition-transform ${sortKey === 'deadline' && sortDir === 'desc' ? 'rotate-180' : ''}`} />
-                </button>
-              </th>
-              <th className="text-center px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-wider">Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            {sorted.map(app => (
-              <tr 
-                key={app.id}
-                className="border-b border-slate-100 hover:bg-slate-50 transition-colors"
-              >
-                <td className="px-6 py-4 text-left">
-                  <span className="font-semibold text-slate-800">{app.institution}</span>
-                </td>
-                <td className="px-6 py-4 text-left text-sm text-slate-600">{app.program}</td>
-                <td className="px-6 py-4 text-center">
-                  <span className={`text-xs font-bold px-2 py-1 rounded-full capitalize ${
-                    app.type === 'admission' ? 'bg-blue-50 text-blue-600' :
-                    app.type === 'entrance' ? 'bg-indigo-50 text-indigo-600' :
-                    'bg-amber-50 text-amber-600'
-                  }`}>
-                    {app.type}
-                  </span>
-                </td>
-                <td className="px-6 py-4 text-center">
-                  <span className={`text-xs font-bold px-2 py-1 rounded-full ${STATUS_COLOR[app.status]} capitalize`}>
-                    {STATUS_LABEL[app.status]}
-                  </span>
-                </td>
-                <td className="px-6 py-4 text-left text-sm text-slate-500">
-                  {new Date(app.appliedDate).toLocaleDateString()}
-                </td>
-                <td className="px-6 py-4 text-left text-sm text-slate-500">
-                  {new Date(app.deadline).toLocaleDateString()}
-                </td>
-                <td className="px-6 py-4 text-center">
-                  <button 
-                    onClick={(e) => { e.stopPropagation(); setSelected(app); }}
-                    className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-primary bg-blue-50 hover:bg-blue-100 rounded-md transition-colors"
-                  >
-                    <Eye className="w-3.5 h-3.5" />
-                    View
-                  </button>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-
-        {sorted.length === 0 && (
-          <div className="text-center py-8 text-slate-500">
-            No applications found
+        {loading ? (
+          <div className="flex items-center justify-center py-16">
+            <Loader2 className="w-6 h-6 animate-spin text-primary" />
           </div>
+        ) : error ? (
+          <div className="flex flex-col items-center justify-center py-16 text-center px-4">
+            <AlertCircle className="w-10 h-10 text-red-400 mb-3" />
+            <p className="text-sm text-red-600 font-medium">{error}</p>
+          </div>
+        ) : (
+          <>
+            <table className="w-full">
+              <thead>
+                <tr className="bg-slate-50 border-b border-slate-200">
+                  <th className="text-left px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-wider">
+                    <button 
+                      onClick={() => handleSort('institution')}
+                      className="flex items-center gap-1 hover:text-slate-700"
+                    >
+                      Institution
+                      <ChevronDown className={`w-3 h-3 transition-transform ${sortKey === 'institution' && sortDir === 'desc' ? 'rotate-180' : ''}`} />
+                    </button>
+                  </th>
+                  <th className="text-left px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-wider">Program</th>
+                  <th className="text-center px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-wider">Type</th>
+                  <th className="text-center px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-wider">
+                    <button 
+                      onClick={() => handleSort('status')}
+                      className="flex items-center gap-1 hover:text-slate-700 mx-auto"
+                    >
+                      Status
+                      <ChevronDown className={`w-3 h-3 transition-transform ${sortKey === 'status' && sortDir === 'desc' ? 'rotate-180' : ''}`} />
+                    </button>
+                  </th>
+                  <th className="text-left px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-wider">
+                    <button 
+                      onClick={() => handleSort('appliedDate')}
+                      className="flex items-center gap-1 hover:text-slate-700"
+                    >
+                      Applied
+                      <ChevronDown className={`w-3 h-3 transition-transform ${sortKey === 'appliedDate' && sortDir === 'desc' ? 'rotate-180' : ''}`} />
+                    </button>
+                  </th>
+                  <th className="text-left px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-wider">
+                    <button 
+                      onClick={() => handleSort('deadline')}
+                      className="flex items-center gap-1 hover:text-slate-700"
+                    >
+                      Deadline
+                      <ChevronDown className={`w-3 h-3 transition-transform ${sortKey === 'deadline' && sortDir === 'desc' ? 'rotate-180' : ''}`} />
+                    </button>
+                  </th>
+                  <th className="text-center px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-wider">Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                {sorted.map(app => (
+                  <tr 
+                    key={app.id}
+                    className="border-b border-slate-100 hover:bg-slate-50 transition-colors"
+                  >
+                    <td className="px-6 py-4 text-left">
+                      <span className="font-semibold text-slate-800">{app.institution}</span>
+                    </td>
+                    <td className="px-6 py-4 text-left text-sm text-slate-600">{app.program}</td>
+                    <td className="px-6 py-4 text-center">
+                      <span className={`text-xs font-bold px-2 py-1 rounded-full capitalize ${
+                        app.type === 'admission' ? 'bg-blue-50 text-blue-600' :
+                        app.type === 'entrance' ? 'bg-indigo-50 text-indigo-600' :
+                        'bg-amber-50 text-amber-600'
+                      }`}>
+                        {app.type}
+                      </span>
+                    </td>
+                    <td className="px-6 py-4 text-center">
+                      <span className={`text-xs font-bold px-2 py-1 rounded-full ${STATUS_COLOR[app.status]} capitalize`}>
+                        {STATUS_LABEL[app.status]}
+                      </span>
+                    </td>
+                    <td className="px-6 py-4 text-left text-sm text-slate-500">
+                      {new Date(app.appliedDate).toLocaleDateString()}
+                    </td>
+                    <td className="px-6 py-4 text-left text-sm text-slate-500">
+                      {new Date(app.deadline).toLocaleDateString()}
+                    </td>
+                    <td className="px-6 py-4 text-center">
+                      <button 
+                        onClick={(e) => { e.stopPropagation(); setSelected(app); }}
+                        className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-primary bg-blue-50 hover:bg-blue-100 rounded-md transition-colors"
+                      >
+                        <Eye className="w-3.5 h-3.5" />
+                        View
+                      </button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+
+            {sorted.length === 0 && (
+              <div className="flex flex-col items-center justify-center py-20 text-center">
+                <div className="w-20 h-20 bg-slate-50 rounded-full flex items-center justify-center mb-4">
+                  <FileText className="w-10 h-10 text-slate-300" />
+                </div>
+                <h3 className="text-lg font-semibold text-slate-800 mb-2">No applications yet</h3>
+                <p className="text-sm text-slate-500 max-w-sm">Start by exploring colleges and scholarships.</p>
+              </div>
+            )}
+          </>
         )}
       </div>
 

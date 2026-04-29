@@ -2,6 +2,8 @@
 
 import Link from 'next/link'
 import { useState, type ReactNode } from 'react'
+import { apiService } from '@/services/api'
+import { useAuth } from '@/services/AuthContext'
 import {
   AlertTriangle,
   Bell,
@@ -27,7 +29,11 @@ const tabs: { id: TabId; label: string; icon: LucideIcon }[] = [
 ]
 
 export default function SettingsSection() {
+  const { user } = useAuth()
   const [activeTab, setActiveTab] = useState<TabId>('security')
+  const [currentPassword, setCurrentPassword] = useState('')
+  const [newPassword, setNewPassword] = useState('')
+  const [confirmNewPassword, setConfirmNewPassword] = useState('')
   const [settings, setSettings] = useState({
     emailNotifications: true,
     smsNotifications: false,
@@ -67,16 +73,60 @@ export default function SettingsSection() {
     setActiveModal(null)
   }
 
-  const submitHelpForm = (modal: 'contact' | 'report') => {
-    closeModal()
-    if (modal === 'contact') {
-      setContactSubject('')
-      setContactMessage('')
-      showToast('Message sent to support successfully!')
-    } else {
-      setReportArea('Dashboard')
-      setReportMessage('')
-      showToast('Bug report submitted successfully!')
+  const handleChangePassword = async () => {
+    if (newPassword !== confirmNewPassword) {
+      showToast('Passwords do not match')
+      return
+    }
+    try {
+      await apiService.changePassword({
+        current_password: currentPassword,
+        new_password: newPassword
+      })
+      setCurrentPassword('')
+      setNewPassword('')
+      setConfirmNewPassword('')
+      showToast('Password updated successfully!')
+    } catch (err: any) {
+      showToast(err.message || 'Failed to update password')
+    }
+  }
+
+  const submitHelpForm = async (modal: 'contact' | 'report') => {
+    try {
+      const name = `${user?.first_name || ''} ${user?.last_name || ''}`.trim() || 'Anonymous'
+      const email = user?.email || ''
+      if (modal === 'contact') {
+        await apiService.submitContactInquiry({
+          name,
+          email,
+          phone: user?.phone || '',
+          subject: contactSubject,
+          message: contactMessage,
+          type: 'support'
+        })
+      } else {
+        await apiService.submitContactInquiry({
+          name,
+          email,
+          phone: user?.phone || '',
+          subject: reportArea,
+          message: reportMessage,
+          type: 'bug'
+        })
+      }
+      closeModal()
+      if (modal === 'contact') {
+        setContactSubject('')
+        setContactMessage('')
+        showToast('Message sent to support successfully!')
+      } else {
+        setReportArea('Dashboard')
+        setReportMessage('')
+        showToast('Bug report submitted successfully!')
+      }
+    } catch (err: any) {
+      showToast(err.message || 'Failed to submit. Please try again.')
     }
   }
 
@@ -108,18 +158,40 @@ export default function SettingsSection() {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="md:col-span-2">
                   <label className="block text-sm font-medium text-slate-700 mb-1.5">Current Password</label>
-                  <input type="password" placeholder="Enter current password" className="w-full px-3 py-2.5 border border-slate-200 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all" />
+                  <input
+                    type="password"
+                    value={currentPassword}
+                    onChange={(e) => setCurrentPassword(e.target.value)}
+                    placeholder="Enter current password"
+                    className="w-full px-3 py-2.5 border border-slate-200 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all"
+                  />
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-slate-700 mb-1.5">New Password</label>
-                  <input type="password" placeholder="Create new password" className="w-full px-3 py-2.5 border border-slate-200 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all" />
+                  <input
+                    type="password"
+                    value={newPassword}
+                    onChange={(e) => setNewPassword(e.target.value)}
+                    placeholder="Create new password"
+                    className="w-full px-3 py-2.5 border border-slate-200 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all"
+                  />
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-slate-700 mb-1.5">Confirm New Password</label>
-                  <input type="password" placeholder="Confirm new password" className="w-full px-3 py-2.5 border border-slate-200 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all" />
+                  <input
+                    type="password"
+                    value={confirmNewPassword}
+                    onChange={(e) => setConfirmNewPassword(e.target.value)}
+                    placeholder="Confirm new password"
+                    className="w-full px-3 py-2.5 border border-slate-200 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all"
+                  />
                 </div>
               </div>
-              <button className="mt-4 bg-indigo-600 text-white px-4 py-2.5 rounded-md text-sm font-semibold hover:bg-indigo-700 transition-colors">
+              <button
+                type="button"
+                onClick={handleChangePassword}
+                className="mt-4 bg-indigo-600 text-white px-4 py-2.5 rounded-md text-sm font-semibold hover:bg-indigo-700 transition-colors"
+              >
                 Update Password
               </button>
             </div>

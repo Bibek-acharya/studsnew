@@ -477,6 +477,275 @@ export interface ForumPost {
   community?: ForumCommunity;
 }
 
+// === Dashboard Stats ===
+export interface DashboardStats {
+  applications_submitted: number;
+  saved_colleges: number;
+  scholarships_applied: number;
+  profile_completion: number;
+}
+
+export interface DashboardStatsResponse {
+  success: boolean;
+  data: DashboardStats;
+  message: string;
+}
+
+export interface RecentApplicationItem {
+  id: number;
+  institution: string;
+  program: string;
+  type: string;
+  status: string;
+  updated_at: string;
+}
+
+export interface RecentApplicationsResponse {
+  success: boolean;
+  data: {
+    applications: RecentApplicationItem[];
+  };
+  message: string;
+}
+
+// === My Applications ===
+export interface MyApplicationItem {
+  id: number;
+  institution: string;
+  program: string;
+  type: "admission" | "entrance" | "scholarship";
+  status: string;
+  applied_date: string;
+  deadline: string;
+  location: string;
+}
+
+export interface MyApplicationsResponse {
+  success: boolean;
+  data: {
+    applications: MyApplicationItem[];
+    meta: {
+      total: number;
+      page: number;
+      limit: number;
+    };
+  };
+  message: string;
+}
+
+// === Messages ===
+export interface MessageItem {
+  id: number;
+  created_at: string;
+  updated_at: string;
+  sender_id: number;
+  receiver_id: number;
+  subject: string;
+  content: string;
+  read: boolean;
+  direction: "incoming" | "outgoing";
+}
+
+export interface MessagesResponse {
+  success: boolean;
+  data: {
+    messages: MessageItem[];
+    meta: {
+      total: number;
+      page: number;
+      limit: number;
+    };
+  };
+  message: string;
+}
+
+export interface MessageResponse {
+  success: boolean;
+  data: MessageItem;
+  message: string;
+}
+
+export interface CreateMessagePayload {
+  receiver_id: number;
+  subject: string;
+  content: string;
+}
+
+export interface MessageContactItem {
+  user_id: number;
+  name: string;
+  last_message: string;
+  unread: number;
+}
+
+export interface MessageContactsResponse {
+  success: boolean;
+  data: MessageContactItem[];
+  message: string;
+}
+
+// === Calendar Events ===
+export interface CalendarEventItem {
+  id: number;
+  created_at: string;
+  updated_at: string;
+  user_id: number;
+  title: string;
+  description: string;
+  start_date: string;
+  end_date: string;
+  location: string;
+  link: string;
+  color: string;
+  reminder: boolean;
+  type: string;
+}
+
+export interface CalendarEventsResponse {
+  success: boolean;
+  data: CalendarEventItem[];
+  message: string;
+}
+
+export interface CalendarEventResponse {
+  success: boolean;
+  data: CalendarEventItem;
+  message: string;
+}
+
+export interface CreateEventPayload {
+  title: string;
+  description?: string;
+  start_date: string;
+  end_date?: string;
+  location?: string;
+  link?: string;
+  color?: string;
+  reminder?: boolean;
+  type?: string;
+}
+
+export interface UpdateEventPayload {
+  title?: string;
+  description?: string;
+  start_date?: string;
+  end_date?: string;
+  location?: string;
+  link?: string;
+  color?: string;
+  reminder?: boolean;
+  type?: string;
+}
+
+// === Invites ===
+export interface InviteItem {
+  id: number;
+  user_id: number;
+  institution_id: number;
+  title: string;
+  message: string;
+  status: "pending" | "accepted" | "declined" | "saved";
+  type: string;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface InvitesResponse {
+  success: boolean;
+  data: {
+    invites: InviteItem[];
+    meta: {
+      total: number;
+      page: number;
+      limit: number;
+    };
+  };
+  message: string;
+}
+
+// === Profile ===
+export interface ProfileData {
+  id: number;
+  email: string;
+  first_name: string;
+  last_name: string;
+  phone: string;
+  date_of_birth: string;
+  gender: string;
+  nationality: string;
+  address: string;
+  bio: string;
+  role: string;
+  preferences?: {
+    id: number;
+    role: string;
+    preference_flow: string;
+    preferences: Record<string, any>;
+    onboarding_completed: boolean;
+    completed_at: string;
+  };
+}
+
+export interface ProfileResponse {
+  success: boolean;
+  data: ProfileData;
+  message: string;
+}
+
+export interface UpdateProfilePayload {
+  first_name?: string;
+  last_name?: string;
+  phone?: string;
+  date_of_birth?: string;
+  gender?: string;
+  nationality?: string;
+  address?: string;
+  bio?: string;
+}
+
+export interface ChangePasswordPayload {
+  current_password: string;
+  new_password: string;
+}
+
+// === Education Entries ===
+export interface EducationEntryItem {
+  id: number;
+  level: string;
+  institution_name: string;
+  board_university: string;
+  country: string;
+  stream: string;
+  start_year: string;
+  end_year: string;
+  grading_system: string;
+  grade: string;
+}
+
+export interface EducationEntryPayload {
+  level: string;
+  institution_name: string;
+  board_university: string;
+  country: string;
+  stream?: string;
+  start_year: string;
+  end_year: string;
+  grading_system?: string;
+  grade?: string;
+}
+
+export interface EducationEntriesResponse {
+  success: boolean;
+  data: EducationEntryItem[];
+  message: string;
+}
+
+export interface EducationEntryResponse {
+  success: boolean;
+  data: EducationEntryItem;
+  message: string;
+}
+
 export const apiService = {
   getUser(): ForumUser | null {
     if (typeof window === "undefined") return null;
@@ -566,8 +835,8 @@ export const apiService = {
     });
   },
 
-  async getProfile(): Promise<AuthResponse> {
-    return apiRequest<AuthResponse>("/api/v1/profile");
+  async getProfile(): Promise<ProfileResponse> {
+    return apiRequest<ProfileResponse>("/api/v1/profile");
   },
 
   async getEducationEvents(params?: {
@@ -1271,6 +1540,145 @@ export const apiService = {
     return apiRequest<any>(`/api/v1/user/reviews/${reviewId}/report`, {
       method: "POST",
       body: JSON.stringify({ reason }),
+    });
+  },
+
+  // === Dashboard ===
+  async getDashboardStats(): Promise<DashboardStatsResponse> {
+    return apiRequest<DashboardStatsResponse>("/api/v1/dashboard/stats");
+  },
+
+  async getRecentApplications(): Promise<RecentApplicationsResponse> {
+    return apiRequest<RecentApplicationsResponse>("/api/v1/dashboard/recent-applications");
+  },
+
+  // === My Applications ===
+  async getMyApplications(params?: { page?: number; limit?: number }): Promise<MyApplicationsResponse> {
+    const query = new URLSearchParams();
+    if (params?.page) query.set("page", String(params.page));
+    if (params?.limit) query.set("limit", String(params.limit));
+    const qs = query.toString();
+    return apiRequest<MyApplicationsResponse>(`/api/v1/my-applications${qs ? `?${qs}` : ""}`);
+  },
+
+  // === Messages ===
+  async getMessages(params?: { page?: number; limit?: number }): Promise<MessagesResponse> {
+    const query = new URLSearchParams();
+    if (params?.page) query.set("page", String(params.page));
+    if (params?.limit) query.set("limit", String(params.limit));
+    const qs = query.toString();
+    return apiRequest<MessagesResponse>(`/api/v1/messages${qs ? `?${qs}` : ""}`);
+  },
+
+  async getMessageById(id: number): Promise<MessageResponse> {
+    return apiRequest<MessageResponse>(`/api/v1/messages/${id}`);
+  },
+
+  async createMessage(data: CreateMessagePayload): Promise<MessageResponse> {
+    return apiRequest<MessageResponse>("/api/v1/messages", {
+      method: "POST",
+      body: JSON.stringify(data),
+    });
+  },
+
+  async replyToMessage(id: number, content: string): Promise<MessageResponse> {
+    return apiRequest<MessageResponse>(`/api/v1/messages/${id}/reply`, {
+      method: "POST",
+      body: JSON.stringify({ content }),
+    });
+  },
+
+  async getMessageContacts(): Promise<MessageContactsResponse> {
+    return apiRequest<MessageContactsResponse>("/api/v1/messages/contacts");
+  },
+
+  // === Calendar Events ===
+  async getCalendarEvents(): Promise<CalendarEventsResponse> {
+    return apiRequest<CalendarEventsResponse>("/api/v1/calendar/events");
+  },
+
+  async getCalendarEventById(id: number): Promise<CalendarEventResponse> {
+    return apiRequest<CalendarEventResponse>(`/api/v1/calendar/events/${id}`);
+  },
+
+  async createCalendarEvent(data: CreateEventPayload): Promise<CalendarEventResponse> {
+    return apiRequest<CalendarEventResponse>("/api/v1/calendar/events", {
+      method: "POST",
+      body: JSON.stringify(data),
+    });
+  },
+
+  async updateCalendarEvent(id: number, data: UpdateEventPayload): Promise<CalendarEventResponse> {
+    return apiRequest<CalendarEventResponse>(`/api/v1/calendar/events/${id}`, {
+      method: "PUT",
+      body: JSON.stringify(data),
+    });
+  },
+
+  async deleteCalendarEvent(id: number): Promise<void> {
+    return apiRequest<void>(`/api/v1/calendar/events/${id}`, {
+      method: "DELETE",
+    });
+  },
+
+  // === Invites ===
+  async getInvites(params?: { page?: number; limit?: number }): Promise<InvitesResponse> {
+    const query = new URLSearchParams();
+    if (params?.page) query.set("page", String(params.page));
+    if (params?.limit) query.set("limit", String(params.limit));
+    const qs = query.toString();
+    return apiRequest<InvitesResponse>(`/api/v1/invites${qs ? `?${qs}` : ""}`);
+  },
+
+  async acceptInvite(id: number): Promise<void> {
+    return apiRequest<void>(`/api/v1/invites/${id}/accept`, { method: "PUT" });
+  },
+
+  async declineInvite(id: number): Promise<void> {
+    return apiRequest<void>(`/api/v1/invites/${id}/decline`, { method: "PUT" });
+  },
+
+  async saveInvite(id: number): Promise<void> {
+    return apiRequest<void>(`/api/v1/invites/${id}/save`, { method: "PUT" });
+  },
+
+  // === Profile ===
+  async updateProfile(data: UpdateProfilePayload): Promise<ProfileResponse> {
+    return apiRequest<ProfileResponse>("/api/v1/profile", {
+      method: "PUT",
+      body: JSON.stringify(data),
+    });
+  },
+
+  async changePassword(data: ChangePasswordPayload): Promise<void> {
+    return apiRequest<void>("/api/v1/auth/change-password", {
+      method: "PUT",
+      body: JSON.stringify(data),
+    });
+  },
+
+  // === Education Entries ===
+  async getEducationEntries(): Promise<EducationEntriesResponse> {
+    return apiRequest<EducationEntriesResponse>("/api/v1/profile/education");
+  },
+
+  async createEducationEntry(data: EducationEntryPayload): Promise<EducationEntryResponse> {
+    return apiRequest<EducationEntryResponse>("/api/v1/profile/education", {
+      method: "POST",
+      body: JSON.stringify(data),
+    });
+  },
+
+  async updateEducationEntry(id: number, data: EducationEntryPayload): Promise<EducationEntryResponse> {
+    return apiRequest<EducationEntryResponse>(`/api/v1/profile/education/${id}`, {
+      method: "PUT",
+      body: JSON.stringify(data),
+    });
+  },
+
+  async deleteEducationEntry(id: number): Promise<void> {
+    return apiRequest<void>(`/api/v1/profile/education/${id}`, {
+      method: "DELETE",
     });
   },
 };

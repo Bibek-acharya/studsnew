@@ -12,6 +12,7 @@ export default function ScholarshipApplyPage({ params }: { params: Promise<{ id:
   const { data: detailRes, isLoading } = useQuery({
     queryKey: ["scholarship", id],
     queryFn: () => apiService.getEducationScholarshipById(id),
+    retry: false,
   });
 
   const scholarship = detailRes?.data;
@@ -26,14 +27,12 @@ export default function ScholarshipApplyPage({ params }: { params: Promise<{ id:
 
   if (!scholarship) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-[#f8fafc] p-4 text-center">
-        <div>
-          <h2 className="mb-4 text-xl font-bold text-gray-800">Scholarship Not Found</h2>
-          <Link href="/scholarship-finder" className="font-bold text-blue-600 underline">Back to Finder</Link>
-        </div>
-      </div>
+      <ShikshaApplicationForm
+        scholarshipTitle="Project Shiksha Scholarship"
+        scholarshipId={Number(id) || undefined}
+      />
     );
   }
 
-  return <ShikshaApplicationForm scholarshipTitle={scholarship.title} scholarshipId={Number(id)} />;
+  return <ShikshaApplicationForm scholarshipTitle={scholarship.title} scholarshipId={Number(id) || undefined} />;
 }

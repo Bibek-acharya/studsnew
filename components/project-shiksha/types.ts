@@ -2,14 +2,22 @@ export interface ProjectShikshaFormData {
   // Personal Details
   fullName: string;
   gender: string;
+  ethnicity: string;
+  ethnicityOther: string;
   dobBS: string;
   dobAD: string;
   age: string;
   phone: string;
   email: string;
+
+  // Education
   seeSchoolType: string;
-  otherSchoolType: string;
   schoolName: string;
+  seeGpa: string;
+  schoolProvince: string;
+  schoolDistrict: string;
+  schoolMunicipality: string;
+  schoolTole: string;
 
   // Address
   permProvince: string;
@@ -28,16 +36,17 @@ export interface ProjectShikshaFormData {
   guardianPhone: string;
   guardianEmail: string;
   fatherOccupation: string;
+  fatherOccupationOther: string;
   motherOccupation: string;
+  motherOccupationOther: string;
   familyIncome: string;
   familyMembers: string;
 
-  // Education
-  seeGpa: string;
-
   // Documents
+  birthCertificate: File | null;
   seeMarksheet: File | null;
-  citizenship: File | null;
+  class8Marksheet: File | null;
+  class9Marksheet: File | null;
   photo: File | null;
 
   // Admit Card
@@ -47,6 +56,25 @@ export interface ProjectShikshaFormData {
   // Declaration
   declaration: boolean;
 }
+
+export const ethnicities = [
+  "Bahun (Brahmin)",
+  "Chhetri",
+  "Newar",
+  "Magar",
+  "Tamang",
+  "Gurung",
+  "Rai",
+  "Limbu",
+  "Tharu",
+  "Sherpa",
+  "Thakuri",
+  "Madhesi",
+  "Muslim",
+  "Dalit",
+  "Janajati",
+  "Other",
+];
 
 export const schoolTypes = [
   "Private",

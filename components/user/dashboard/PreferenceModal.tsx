@@ -7,8 +7,10 @@ import {
   MapPin,
   DollarSign,
   Save,
+  CheckCircle2,
 } from "lucide-react";
 import { NEPAL_PROVINCES, NEPAL_DISTRICTS } from "@/lib/location-data";
+import { apiService } from "@/services/api";
 
 interface PreferenceModalProps {
   isOpen: boolean;
@@ -37,6 +39,38 @@ const PreferenceModal: React.FC<PreferenceModalProps> = ({ isOpen, onClose }) =>
     scholarshipRequired: "Yes",
     scholarshipType: "Merit Based",
   });
+  const [saving, setSaving] = useState(false);
+  const [toast, setToast] = useState<string | null>(null);
+
+  const handleSave = async () => {
+    try {
+      setSaving(true);
+      await apiService.savePreferences({
+        preference_role: "student",
+        preference_flow: "profile",
+        preferences: {
+          target_level: preferredStudy.targetLevel,
+          preferred_field: preferredStudy.preferredField,
+          preferred_specialization: preferredStudy.preferredSpecialization,
+          preferred_province: preferredStudy.preferredProvince,
+          preferred_district: preferredStudy.preferredDistrict,
+          budget_range: preferredStudy.budgetRange,
+          scholarship_required: preferredStudy.scholarshipRequired,
+          scholarship_type: preferredStudy.scholarshipType,
+        },
+      }, "");
+      setToast("Preferences saved successfully!");
+      setTimeout(() => {
+        setToast(null);
+        onClose();
+      }, 1500);
+    } catch (err: any) {
+      setToast(err.message || "Failed to save preferences");
+      setTimeout(() => setToast(null), 3000);
+    } finally {
+      setSaving(false);
+    }
+  };
 
   if (!isOpen) return null;
 
@@ -202,14 +236,24 @@ const PreferenceModal: React.FC<PreferenceModalProps> = ({ isOpen, onClose }) =>
             Cancel
           </button>
           <button
-            onClick={onClose}
-            className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-md hover:bg-blue-700 transition-colors"
+            onClick={handleSave}
+            disabled={saving}
+            className={`flex items-center gap-2 px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-md hover:bg-blue-700 transition-colors ${saving ? 'opacity-50 cursor-not-allowed' : ''}`}
           >
             <Save className="w-4 h-4" />
-            Save Preferences
+            {saving ? "Saving..." : "Save Preferences"}
           </button>
         </div>
       </div>
+
+      {toast && (
+        <div className="fixed bottom-6 right-6 z-50 rounded-md border border-emerald-100 bg-white px-5 py-4 shadow-2xl">
+          <div className="flex items-center gap-3 text-sm text-slate-800">
+            <CheckCircle2 className="w-5 h-5 text-emerald-500" />
+            <span>{toast}</span>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

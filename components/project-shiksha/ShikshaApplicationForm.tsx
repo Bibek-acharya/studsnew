@@ -3,7 +3,7 @@
 import { useState, useCallback, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import NepaliCalendar from "./NepaliCalendar";
-import { ProjectShikshaFormData, schoolTypes, occupations, streams, examCenters } from "./types";
+import { ProjectShikshaFormData, schoolTypes, occupations, streams, examCenters, ethnicities } from "./types";
 import { validateForm } from "./validation";
 import { NEPAL_PROVINCES, NEPAL_DISTRICTS, NEPAL_LOCAL_BODIES } from "@/lib/location-data";
 import { apiService } from "@/services/api";
@@ -24,14 +24,21 @@ function SelectArrow({ className = "", children, ...props }: React.SelectHTMLAtt
 const initialFormData: ProjectShikshaFormData = {
   fullName: "",
   gender: "",
+  ethnicity: "",
+  ethnicityOther: "",
   dobBS: "",
   dobAD: "",
   age: "",
   phone: "",
   email: "",
+
   seeSchoolType: "",
-  otherSchoolType: "",
   schoolName: "",
+  seeGpa: "",
+  schoolProvince: "",
+  schoolDistrict: "",
+  schoolMunicipality: "",
+  schoolTole: "",
 
   permProvince: "",
   permDistrict: "",
@@ -48,14 +55,16 @@ const initialFormData: ProjectShikshaFormData = {
   guardianPhone: "",
   guardianEmail: "",
   fatherOccupation: "",
+  fatherOccupationOther: "",
   motherOccupation: "",
+  motherOccupationOther: "",
   familyIncome: "",
   familyMembers: "",
 
-  seeGpa: "",
-
+  birthCertificate: null,
   seeMarksheet: null,
-  citizenship: null,
+  class8Marksheet: null,
+  class9Marksheet: null,
   photo: null,
 
   stream: "",
@@ -101,7 +110,7 @@ export default function ShikshaApplicationForm({ scholarshipTitle, scholarshipId
     }
   }, [errors.dobBS]);
 
-  const handleFileChange = useCallback((field: "seeMarksheet" | "citizenship" | "photo", file: File | null) => {
+  const handleFileChange = useCallback((field: "birthCertificate" | "seeMarksheet" | "class8Marksheet" | "class9Marksheet" | "photo", file: File | null) => {
     handleInputChange(field, file);
     if (field === "photo" && file) {
       const reader = new FileReader();
@@ -144,26 +153,50 @@ export default function ShikshaApplicationForm({ scholarshipTitle, scholarshipId
         return;
       }
 
-      const nameParts = formData.fullName.trim().split(/\s+/);
       const payload = {
-        national_id: formData.citizenship ? "uploaded" : "",
-        first_name: nameParts[0] || "",
-        last_name: nameParts.slice(1).join(" ") || nameParts[0] || "",
-        date_of_birth: formData.dobAD || "",
+        full_name: formData.fullName,
         gender: formData.gender,
-        street_address: [formData.permTole, formData.permMunicipality].filter(Boolean).join(", "),
-        city: formData.permDistrict || "",
-        post_code: formData.permWard || "",
-        country: "Nepal",
-        phone_code: "977",
+        ethnicity: formData.ethnicity,
+        ethnicity_other: formData.ethnicity === "Other" ? formData.ethnicityOther : "",
+        date_of_birth_bs: formData.dobBS || "",
+        date_of_birth_ad: formData.dobAD || "",
+        age: parseInt(formData.age) || 0,
         phone_number: formData.phone || "",
         email: formData.email || "",
-        latest_institution: formData.schoolName || "",
-        level_completed: "SEE",
-        gpa_percentage: formData.seeGpa || "",
-        annual_family_income: formData.familyIncome || "",
-        primary_income_source: formData.fatherOccupation || "",
-        personal_statement: `Guardian: ${formData.guardianName}, Phone: ${formData.guardianPhone}`,
+        photo_url: "",
+
+        see_gpa: formData.seeGpa || "",
+        school_type: formData.seeSchoolType,
+        school_name: formData.schoolName || "",
+        school_province: formData.schoolProvince || formData.permProvince,
+        school_district: formData.schoolDistrict || formData.permDistrict,
+        school_municipality: formData.schoolMunicipality || formData.permMunicipality,
+        school_tole: formData.schoolTole || formData.permTole,
+
+        permanent_province: formData.permProvince,
+        permanent_district: formData.permDistrict,
+        permanent_municipality: formData.permMunicipality,
+        permanent_ward: formData.permWard,
+        permanent_tole: formData.permTole,
+
+        temporary_province: formData.tempProvince,
+        temporary_district: formData.tempDistrict,
+        temporary_municipality: formData.tempMunicipality,
+        temporary_ward: formData.tempWard,
+        temporary_tole: formData.tempTole,
+
+        guardian_name: formData.guardianName,
+        guardian_phone: formData.guardianPhone,
+        guardian_email: formData.guardianEmail || "",
+        father_occupation: formData.fatherOccupation,
+        father_occupation_other: formData.fatherOccupation === "Other" ? formData.fatherOccupationOther : "",
+        mother_occupation: formData.motherOccupation,
+        mother_occupation_other: formData.motherOccupation === "Other" ? formData.motherOccupationOther : "",
+        family_monthly_income: parseFloat(formData.familyIncome) || 0,
+        family_members_count: parseInt(formData.familyMembers) || 0,
+
+        stream: formData.stream,
+        exam_center: formData.examCenter,
       };
 
       await apiService.applyScholarship(scholarshipId, payload);
@@ -271,6 +304,34 @@ export default function ShikshaApplicationForm({ scholarshipTitle, scholarshipId
 
                 <div>
                   <label className="block text-[14px] font-semibold text-gray-700 mb-1.5">
+                    Ethnicity <span className="text-red-500">*</span>
+                  </label>
+                  <SelectArrow
+                    id="ethnicity"
+                    value={formData.ethnicity}
+                    onChange={(e) => handleInputChange("ethnicity", e.target.value)}
+                    className="w-full border border-gray-300 rounded py-3 px-4 text-[15px] text-gray-800 outline-none focus:ring-0 focus:border-[#0000ff] transition-all bg-white cursor-pointer"
+                  >
+                    <option value="" disabled>Select Ethnicity</option>
+                    {ethnicities.map((e) => (
+                      <option key={e} value={e}>{e}</option>
+                    ))}
+                  </SelectArrow>
+                  {formData.ethnicity === "Other" && (
+                    <input
+                      type="text"
+                      id="ethnicityOther"
+                      value={formData.ethnicityOther}
+                      onChange={(e) => handleInputChange("ethnicityOther", e.target.value)}
+                      className="mt-2 w-full border border-gray-300 rounded py-3 px-4 text-[15px] text-gray-800 outline-none focus:ring-0 focus:border-[#0000ff] transition-all bg-white"
+                      placeholder="Please specify ethnicity"
+                    />
+                  )}
+                  {errors.ethnicity && <p className="text-red-500 text-[12px] mt-1">{errors.ethnicity}</p>}
+                </div>
+
+                <div>
+                  <label className="block text-[14px] font-semibold text-gray-700 mb-1.5">
                     Date of Birth (BS) <span className="text-red-500">*</span>
                   </label>
                   <NepaliCalendar
@@ -289,7 +350,7 @@ export default function ShikshaApplicationForm({ scholarshipTitle, scholarshipId
                   <input
                     type="text"
                     id="dobAD"
-                  value={formData.dobBS}
+                  value={formData.dobAD}
                     readOnly
                     className="w-full bg-gray-100 border border-gray-300 rounded py-3 px-4 text-[15px] text-gray-800 outline-none cursor-not-allowed"
                     placeholder="Auto-calculated"
@@ -438,13 +499,92 @@ export default function ShikshaApplicationForm({ scholarshipTitle, scholarshipId
                   type="text"
                   id="seeGpa"
                   value={formData.seeGpa}
-                  onChange={(e) => handleInputChange("seeGpa", e.target.value.replace(/[^0-9.]/g, "").slice(0, 4))}
+                  onChange={(e) => {
+                    const raw = e.target.value.replace(/[^0-9.]/g, "").slice(0, 4);
+                    if (raw && raw !== "." && parseFloat(raw) > 4.0) return;
+                    handleInputChange("seeGpa", raw);
+                  }}
                   className="w-full border border-gray-300 rounded py-3 px-4 text-[15px] text-gray-800 outline-none focus:ring-0 focus:border-[#0000ff] transition-all bg-white"
                   placeholder="E.g. 3.85"
                 />
                 {errors.seeGpa && <p className="text-red-500 text-[12px] mt-1">{errors.seeGpa}</p>}
               </div>
-            </div>
+              <div>
+                <label className="block text-[14px] font-semibold text-gray-700 mb-1.5">
+                  School Province <span className="text-red-500">*</span>
+                </label>
+                <SelectArrow
+                  id="schoolProvince"
+                  value={formData.schoolProvince}
+                  onChange={(e) => {
+                    handleInputChange("schoolProvince", e.target.value);
+                    handleInputChange("schoolDistrict", "");
+                    handleInputChange("schoolMunicipality", "");
+                  }}
+                  className="w-full border border-gray-300 rounded py-3 px-4 text-[15px] text-gray-800 outline-none focus:ring-0 focus:border-[#0000ff] transition-all bg-white cursor-pointer"
+                >
+                  <option value="" disabled>Select Province</option>
+                  {NEPAL_PROVINCES.map((p) => (
+                    <option key={p} value={p}>{p}</option>
+                  ))}
+                </SelectArrow>
+                {errors.schoolProvince && <p className="text-red-500 text-[12px] mt-1">{errors.schoolProvince}</p>}
+              </div>
+
+              <div>
+                <label className="block text-[14px] font-semibold text-gray-700 mb-1.5">
+                  School District <span className="text-red-500">*</span>
+                </label>
+                <SelectArrow
+                  id="schoolDistrict"
+                  value={formData.schoolDistrict}
+                  onChange={(e) => {
+                    handleInputChange("schoolDistrict", e.target.value);
+                    handleInputChange("schoolMunicipality", "");
+                  }}
+                  disabled={!formData.schoolProvince}
+                  className="w-full border border-gray-300 rounded py-3 px-4 text-[15px] text-gray-800 outline-none focus:ring-0 focus:border-[#0000ff] transition-all bg-white cursor-pointer disabled:bg-gray-100 disabled:cursor-not-allowed"
+                >
+                  <option value="" disabled>Select province first</option>
+                  {getAvailableDistricts(formData.schoolProvince).map((d) => (
+                    <option key={d} value={d}>{d}</option>
+                  ))}
+                </SelectArrow>
+                {errors.schoolDistrict && <p className="text-red-500 text-[12px] mt-1">{errors.schoolDistrict}</p>}
+              </div>
+
+              <div>
+                <label className="block text-[14px] font-semibold text-gray-700 mb-1.5">
+                  School Municipality / RM <span className="text-red-500">*</span>
+                </label>
+                <SelectArrow
+                  id="schoolMunicipality"
+                  value={formData.schoolMunicipality}
+                  onChange={(e) => handleInputChange("schoolMunicipality", e.target.value)}
+                  disabled={!formData.schoolDistrict}
+                  className="w-full border border-gray-300 rounded py-3 px-4 text-[15px] text-gray-800 outline-none focus:ring-0 focus:border-[#0000ff] transition-all bg-white cursor-pointer disabled:bg-gray-100 disabled:cursor-not-allowed"
+                >
+                  <option value="" disabled>Select district first</option>
+                  {getAvailableMunicipalities(formData.schoolDistrict).map((m) => (
+                    <option key={m.name} value={m.name}>{m.name}</option>
+                  ))}
+                </SelectArrow>
+                {errors.schoolMunicipality && <p className="text-red-500 text-[12px] mt-1">{errors.schoolMunicipality}</p>}
+              </div>
+
+              <div>
+                <label className="block text-[14px] font-semibold text-gray-700 mb-1.5">School Tole / Village <span className="text-red-500">*</span></label>
+                <input
+                  type="text"
+                  id="schoolTole"
+                  value={formData.schoolTole}
+                  onChange={(e) => handleInputChange("schoolTole", e.target.value)}
+                  className="w-full border border-gray-300 rounded py-3 px-4 text-[15px] text-gray-800 outline-none focus:ring-0 focus:border-[#0000ff] transition-all bg-white"
+                  placeholder="Tole or village name"
+                />
+                {errors.schoolTole && <p className="text-red-500 text-[12px] mt-1">{errors.schoolTole}</p>}
+              </div>
+              </div>
 
             <div className="mt-6">
               <label className="block text-[14px] font-semibold text-gray-700 mb-3">
@@ -457,12 +597,12 @@ export default function ShikshaApplicationForm({ scholarshipTitle, scholarshipId
                   </label>
                   <input
                     type="file"
-                    id="citizenship"
+                    id="birthCertificate"
                     accept=".pdf,image/*"
-                    onChange={(e) => handleFileChange("citizenship", e.target.files?.[0] || null)}
+                    onChange={(e) => handleFileChange("birthCertificate", e.target.files?.[0] || null)}
                     className="file-upload-arrow w-full text-sm text-gray-600 file:mr-4 file:py-2.5 file:px-4 file:rounded file:border-0 file:text-sm file:font-semibold file:bg-gray-200 file:text-gray-800 hover:file:bg-gray-300 cursor-pointer"
                   />
-                  {errors.citizenship && <p className="text-red-500 text-[12px] mt-1">{errors.citizenship}</p>}
+                  {errors.birthCertificate && <p className="text-red-500 text-[12px] mt-1">{errors.birthCertificate}</p>}
                 </div>
 
                 <div className="border border-gray-200 rounded-xl p-4 bg-gray-50 flex flex-col justify-center">
@@ -477,6 +617,34 @@ export default function ShikshaApplicationForm({ scholarshipTitle, scholarshipId
                     className="file-upload-arrow w-full text-sm text-gray-600 file:mr-4 file:py-2.5 file:px-4 file:rounded file:border-0 file:text-sm file:font-semibold file:bg-gray-200 file:text-gray-800 hover:file:bg-gray-300 cursor-pointer"
                   />
                   {errors.seeMarksheet && <p className="text-red-500 text-[12px] mt-1">{errors.seeMarksheet}</p>}
+                </div>
+
+                <div className="border border-gray-200 rounded-xl p-4 bg-gray-50 flex flex-col justify-center">
+                  <label className="block text-[14px] font-semibold text-gray-800 mb-2">
+                    Class 8 Marksheet <span className="text-red-500">*</span>
+                  </label>
+                  <input
+                    type="file"
+                    id="class8Marksheet"
+                    accept=".pdf,image/*"
+                    onChange={(e) => handleFileChange("class8Marksheet", e.target.files?.[0] || null)}
+                    className="file-upload-arrow w-full text-sm text-gray-600 file:mr-4 file:py-2.5 file:px-4 file:rounded file:border-0 file:text-sm file:font-semibold file:bg-gray-200 file:text-gray-800 hover:file:bg-gray-300 cursor-pointer"
+                  />
+                  {errors.class8Marksheet && <p className="text-red-500 text-[12px] mt-1">{errors.class8Marksheet}</p>}
+                </div>
+
+                <div className="border border-gray-200 rounded-xl p-4 bg-gray-50 flex flex-col justify-center">
+                  <label className="block text-[14px] font-semibold text-gray-800 mb-2">
+                    Class 9 Marksheet <span className="text-red-500">*</span>
+                  </label>
+                  <input
+                    type="file"
+                    id="class9Marksheet"
+                    accept=".pdf,image/*"
+                    onChange={(e) => handleFileChange("class9Marksheet", e.target.files?.[0] || null)}
+                    className="file-upload-arrow w-full text-sm text-gray-600 file:mr-4 file:py-2.5 file:px-4 file:rounded file:border-0 file:text-sm file:font-semibold file:bg-gray-200 file:text-gray-800 hover:file:bg-gray-300 cursor-pointer"
+                  />
+                  {errors.class9Marksheet && <p className="text-red-500 text-[12px] mt-1">{errors.class9Marksheet}</p>}
                 </div>
               </div>
             </div>
@@ -781,6 +949,16 @@ export default function ShikshaApplicationForm({ scholarshipTitle, scholarshipId
                       <option key={occ} value={occ}>{occ}</option>
                     ))}
                   </SelectArrow>
+                  {formData.fatherOccupation === "Other" && (
+                    <input
+                      type="text"
+                      id="fatherOccupationOther"
+                      value={formData.fatherOccupationOther}
+                      onChange={(e) => handleInputChange("fatherOccupationOther", e.target.value)}
+                      className="mt-2 w-full border border-gray-300 rounded py-3 px-4 text-[15px] text-gray-800 outline-none focus:ring-0 focus:border-[#0000ff] transition-all bg-white"
+                      placeholder="Please specify occupation"
+                    />
+                  )}
                   {errors.fatherOccupation && <p className="text-red-500 text-[12px] mt-1">{errors.fatherOccupation}</p>}
                 </div>
 
@@ -799,6 +977,16 @@ export default function ShikshaApplicationForm({ scholarshipTitle, scholarshipId
                       <option key={occ} value={occ}>{occ}</option>
                     ))}
                   </SelectArrow>
+                  {formData.motherOccupation === "Other" && (
+                    <input
+                      type="text"
+                      id="motherOccupationOther"
+                      value={formData.motherOccupationOther}
+                      onChange={(e) => handleInputChange("motherOccupationOther", e.target.value)}
+                      className="mt-2 w-full border border-gray-300 rounded py-3 px-4 text-[15px] text-gray-800 outline-none focus:ring-0 focus:border-[#0000ff] transition-all bg-white"
+                      placeholder="Please specify occupation"
+                    />
+                  )}
                   {errors.motherOccupation && <p className="text-red-500 text-[12px] mt-1">{errors.motherOccupation}</p>}
                 </div>
               </div>

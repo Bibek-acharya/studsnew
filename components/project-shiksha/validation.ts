@@ -64,7 +64,7 @@ export function validateForm(data: ProjectShikshaFormData): {
 
   // Documents
   if (!data.seeMarksheet) errors.seeMarksheet = "SEE marksheet is required";
-  if (!data.citizenship) errors.citizenship = "Citizenship/Birth certificate is required";
+  if (!data.birthCertificate) errors.birthCertificate = "Citizenship/Birth certificate is required";
   if (!data.photo) errors.photo = "Passport photo is required";
 
   // Admit Card

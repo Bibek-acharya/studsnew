@@ -1,7 +1,8 @@
 'use client'
 
-import React, { useState } from 'react'
-import { GraduationCap, CalendarCheck, Sparkle, Banknote, ChartBar, CheckCircle, Moon, Bell, Archive, Trash2, X, BellOff, Inbox, ArchiveRestore } from 'lucide-react'
+import React, { useState, useEffect } from 'react'
+import { GraduationCap, CalendarCheck, Sparkle, Banknote, ChartBar, CheckCircle, Moon, Bell, Archive, Trash2, X, BellOff, Inbox, ArchiveRestore, Loader2, AlertCircle } from 'lucide-react'
+import { apiService, StudentNotificationItem } from '@/services/api'
 
 interface Notification {
   id: number
@@ -14,90 +15,27 @@ interface Notification {
   icon: string
 }
 
-const mockNotifications: Notification[] = [
-  {
-    id: 1,
-    title: "Application Status Update",
-    category: "following",
-    message: "Stanford University has updated your application status. View portal for details.",
-    time: "10m ago",
-    unread: true,
-    archived: false,
-    icon: "ph-graduation-cap"
-  },
-  {
-    id: 2,
-    title: "Midterm Exam Reminder",
-    category: "following",
-    message: "AP Physics 1 regular exam is in 3 days. Make sure you are prepared!",
-    time: "1h ago",
-    unread: true,
-    archived: false,
-    icon: "ph-calendar-check"
-  },
-  {
-    id: 3,
-    title: "New College Match!",
-    category: "match",
-    message: "Based on your profile, you are a 95% match for Cornell University.",
-    time: "3h ago",
-    unread: false,
-    archived: false,
-    icon: "ph-sparkle"
-  },
-  {
-    id: 4,
-    title: "Scholarship Match!",
-    category: "match",
-    message: "You match the criteria for the National Merit Scholarship program.",
-    time: "Yesterday",
-    unread: false,
-    archived: false,
-    icon: "ph-money"
-  },
-  {
-    id: 5,
-    title: "New Poll in Student Hub",
-    category: "following",
-    message: "Vote for the next virtual campus tour destination.",
-    time: "2 days ago",
-    unread: false,
-    archived: false,
-    icon: "ph-chart-bar"
-  },
-  {
-    id: 6,
-    title: "Configuration Complete",
-    category: "system",
-    message: "Congratulations! You have successfully created your Studsphere account.",
-    time: "3 days ago",
-    unread: false,
-    archived: false,
-    icon: "ph-check-circle"
-  },
-  {
-    id: 7,
-    title: "New Feature Added",
-    category: "system",
-    message: "Dark mode is now available. Check your settings to toggle your theme.",
-    time: "4 days ago",
-    unread: false,
-    archived: false,
-    icon: "ph-moon-stars"
-  }
-]
+function computeRelativeTime(dateStr: string): string {
+  const now = Date.now()
+  const then = new Date(dateStr).getTime()
+  const diffMs = now - then
+  const diffSec = Math.floor(diffMs / 1000)
+  if (diffSec < 60) return 'just now'
+  const diffMin = Math.floor(diffSec / 60)
+  if (diffMin < 60) return `${diffMin}m ago`
+  const diffHour = Math.floor(diffMin / 60)
+  if (diffHour < 24) return `${diffHour}h ago`
+  const diffDay = Math.floor(diffHour / 24)
+  if (diffDay < 7) return `${diffDay}d ago`
+  return new Date(dateStr).toLocaleDateString()
+}
 
-function getIconComponent(iconName: string) {
+function getIconComponent(category: string) {
   const icons: Record<string, React.ReactElement> = {
-    'ph-graduation-cap': <GraduationCap className="w-5 h-5" />,
-    'ph-calendar-check': <CalendarCheck className="w-5 h-5" />,
-    'ph-sparkle': <Sparkle className="w-5 h-5" />,
-    'ph-money': <Banknote className="w-5 h-5" />,
-    'ph-chart-bar': <ChartBar className="w-5 h-5" />,
-    'ph-check-circle': <CheckCircle className="w-5 h-5" />,
-    'ph-moon-stars': <Moon className="w-5 h-5" />,
+    system: <CheckCircle className="w-5 h-5" />,
+    following: <Bell className="w-5 h-5" />,
   }
-  return icons[iconName] || <Bell className="w-5 h-5" />
+  return icons[category] || <Bell className="w-5 h-5" />
 }
 
 function getIconStyles(category: Notification['category']) {
@@ -120,19 +58,73 @@ function getCategoryTag(category: string) {
 
 type TabType = 'all' | 'following' | 'system' | 'archive'
 
-export default function NotificationsSection() {
-  const [notifications, setNotifications] = useState<Notification[]>(mockNotifications)
-  const [currentTab, setCurrentTab] = useState<TabType>('all')
+const ARCHIVE_STORAGE_KEY = 'studsphere_archived_notifications'
 
-  const markAsRead = (id: number) => {
-    setNotifications(prev => prev.map(n => 
+function getArchivedIds(): number[] {
+  if (typeof window === 'undefined') return []
+  try {
+    const stored = localStorage.getItem(ARCHIVE_STORAGE_KEY)
+    return stored ? JSON.parse(stored) : []
+  } catch { return [] }
+}
+
+function setArchivedIds(ids: number[]) {
+  if (typeof window === 'undefined') return
+  localStorage.setItem(ARCHIVE_STORAGE_KEY, JSON.stringify(ids))
+}
+
+export default function NotificationsSection() {
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
+  const [notifications, setNotifications] = useState<Notification[]>([])
+  const [currentTab, setCurrentTab] = useState<TabType>('all')
+  const [archivedIds, setArchivedIdsState] = useState<number[]>(getArchivedIds)
+
+  useEffect(() => {
+    const fetchNotifications = async () => {
+      try {
+        setLoading(true)
+        setError(null)
+        const res = await apiService.getStudentNotifications(1, 50)
+        const items: StudentNotificationItem[] = res.data?.notifications || []
+        setNotifications(items.map(n => ({
+          id: n.id,
+          title: n.title,
+          category: n.type === 'system' ? 'system' as const : 'following' as const,
+          message: n.message,
+          time: computeRelativeTime(n.created_at),
+          unread: !n.read,
+          archived: archivedIds.includes(n.id),
+          icon: n.type === 'system' ? 'system' : 'following',
+        })))
+      } catch (err: any) {
+        setError(err.message || 'Failed to load notifications')
+      } finally {
+        setLoading(false)
+      }
+    }
+    fetchNotifications()
+  }, [])
+
+  useEffect(() => {
+    setArchivedIds(archivedIds)
+  }, [archivedIds])
+
+  const markAsRead = async (id: number) => {
+    setNotifications(prev => prev.map(n =>
       n.id === id ? { ...n, unread: false } : n
     ))
+    try {
+      await apiService.markNotificationRead(id)
+    } catch { /* ignore */ }
   }
 
   const toggleArchive = (id: number, e: React.MouseEvent) => {
     e.stopPropagation()
-    setNotifications(prev => prev.map(n => 
+    setArchivedIdsState(prev =>
+      prev.includes(id) ? prev.filter(a => a !== id) : [...prev, id]
+    )
+    setNotifications(prev => prev.map(n =>
       n.id === id ? { ...n, archived: !n.archived } : n
     ))
   }
@@ -142,7 +134,7 @@ export default function NotificationsSection() {
     setNotifications(prev => prev.filter(n => n.id !== id))
   }
 
-  const markAllAsRead = () => {
+  const markAllAsRead = async () => {
     const currentNotifications = getFilteredNotifications()
     setNotifications(prev => prev.map(n => {
       if (currentNotifications.some(cn => cn.id === n.id)) {
@@ -150,6 +142,9 @@ export default function NotificationsSection() {
       }
       return n
     }))
+    try {
+      await apiService.markAllNotificationsRead()
+    } catch { /* ignore */ }
   }
 
   const getFilteredNotifications = () => {
@@ -165,6 +160,29 @@ export default function NotificationsSection() {
 
   const filteredNotifications = getFilteredNotifications()
   const unreadCount = notifications.filter(n => n.unread && !n.archived).length
+
+  if (loading) {
+    return (
+      <div className="w-full max-w-7xl mx-auto flex items-center justify-center py-20">
+        <div className="flex flex-col items-center gap-3">
+          <Loader2 className="w-8 h-8 animate-spin text-primary" />
+          <p className="text-sm text-slate-500">Loading notifications...</p>
+        </div>
+      </div>
+    )
+  }
+
+  if (error) {
+    return (
+      <div className="w-full max-w-7xl mx-auto flex items-center justify-center py-20">
+        <div className="flex flex-col items-center gap-3 text-center">
+          <AlertCircle className="w-8 h-8 text-red-500" />
+          <p className="text-sm text-red-600">{error}</p>
+          <button onClick={() => window.location.reload()} className="text-sm text-primary hover:underline">Retry</button>
+        </div>
+      </div>
+    )
+  }
 
   return (
     <div className="w-full max-w-7xl mx-auto">
@@ -212,9 +230,9 @@ export default function NotificationsSection() {
             <div className="w-20 h-20 bg-slate-100 rounded-full flex items-center justify-center mb-5">
               <BellOff className="w-10 h-10 text-slate-300" />
             </div>
-            <h3 className="text-lg font-semibold text-slate-800 mb-2">All caught up!</h3>
+            <h3 className="text-lg font-semibold text-slate-800 mb-2">No notifications</h3>
             <p className="text-sm text-slate-500 max-w-[260px]">
-              There are no {currentTab === 'archive' ? 'archived' : 'new'} notifications for you to review right now.
+              You&apos;re all caught up!
             </p>
           </div>
         ) : (
@@ -235,7 +253,7 @@ export default function NotificationsSection() {
                   )}
                   
                   <div className={`w-11 h-11 rounded-md flex items-center justify-center flex-shrink-0 ${iconStyles.bg} ${iconStyles.text}`}>
-                    {getIconComponent(notif.icon)}
+                    {getIconComponent(notif.category)}
                   </div>
                   
                   <div className="flex-1 flex flex-col justify-center gap-1.5 min-w-0">

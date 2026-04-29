@@ -906,8 +906,8 @@ function RequestInfoForm() {
         <input type="email" placeholder="Email Address" className="w-full rounded-md border border-gray-200 bg-white px-4 py-3.5 text-sm font-medium text-gray-900 placeholder-gray-400 transition-colors focus:border-blue-600 focus:outline-none focus:ring-1 focus:ring-blue-600" />
         <input type="tel" placeholder="Phone Number" className="w-full rounded-md border border-gray-200 bg-white px-4 py-3.5 text-sm font-medium text-gray-900 placeholder-gray-400 transition-colors focus:border-blue-600 focus:outline-none focus:ring-1 focus:ring-blue-600" />
         <div className="relative">
-          <select className="w-full appearance-none rounded-md border border-gray-200 bg-white px-4 py-3.5 text-sm font-medium text-gray-500 transition-colors focus:border-blue-600 focus:outline-none focus:ring-1 focus:ring-blue-600">
-            <option value="" disabled selected>Select Course of Interest</option>
+          <select defaultValue="" className="w-full appearance-none rounded-md border border-gray-200 bg-white px-4 py-3.5 text-sm font-medium text-gray-500 transition-colors focus:border-blue-600 focus:outline-none focus:ring-1 focus:ring-blue-600">
+            <option value="" disabled>Select Course of Interest</option>
             <option>Research Grant Inquiry</option>
             <option>Facility Access</option>
             <option>Other Information</option>

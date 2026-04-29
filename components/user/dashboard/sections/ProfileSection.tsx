@@ -1,6 +1,7 @@
 'use client'
 
-import { useState, useMemo } from 'react'
+import { useState, useMemo, useEffect } from 'react'
+import { apiService, type EducationEntryItem } from '@/services/api'
 import { 
   User, 
   Mail, 
@@ -38,50 +39,36 @@ interface EducationEntry {
   grade: string
 }
 
-const initialEducation: EducationEntry[] = [
-  {
-    id: 1,
-    level: '+2',
-    institutionName: 'St. Xavier College',
-    boardUniversity: 'NEB',
-    country: 'Nepal',
-    stream: 'Science',
-    startYear: '2020',
-    endYear: '2022',
-    gradingSystem: 'GPA',
-    grade: '3.8'
-  }
-]
-
 export default function ProfileSection() {
   const [profileTab, setProfileTab] = useState('personal')
   const [editMode, setEditMode] = useState(false)
   const [profileImage, setProfileImage] = useState<string | null>(null)
+  const [rawPreferences, setRawPreferences] = useState<Record<string, any>>({})
   
   const [personalData, setPersonalData] = useState({
-    firstName: 'Alex',
-    lastName: 'Student',
+    firstName: '',
+    lastName: '',
     middleName: '',
-    dateOfBirth: '2002-05-15',
-    gender: 'Male',
-    nationality: 'Nepalese',
-    email: 'alex@university.edu',
-    phone: '+977-9841234567',
+    dateOfBirth: '',
+    gender: '',
+    nationality: '',
+    email: '',
+    phone: '',
     alternatePhone: '',
-    province: 'Bagmati',
-    district: 'Kathmandu',
-    localLevel: 'Kathmandu Metropolitan',
+    province: '',
+    district: '',
+    localLevel: '',
     bio: ''
   })
 
-  const [education, setEducation] = useState<EducationEntry[]>(initialEducation)
+  const [education, setEducation] = useState<EducationEntry[]>([])
   const [preferredStudy, setPreferredStudy] = useState({
-    targetLevel: 'Bachelor',
-    preferredField: 'Computer Science',
-    preferredSpecialization: 'Artificial Intelligence',
-    preferredProvince: 'Bagmati',
-    preferredDistrict: 'Kathmandu',
-    budgetRange: '500000-1000000',
+    targetLevel: '',
+    preferredField: '',
+    preferredSpecialization: '',
+    preferredProvince: '',
+    preferredDistrict: '',
+    budgetRange: '',
     scholarshipRequired: 'Yes',
     scholarshipType: 'Merit Based'
   })
@@ -96,10 +83,14 @@ export default function ProfileSection() {
     recommendationLetter: null,
     cv: null
   })
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
+  const [saving, setSaving] = useState(false)
+  const [toast, setToast] = useState<{message: string; type: 'success' | 'error'} | null>(null)
 
   const handleEducationAdd = () => {
     const newEntry: EducationEntry = {
-      id: Date.now(),
+      id: -Date.now(),
       level: '',
       institutionName: '',
       boardUniversity: '',
@@ -113,7 +104,15 @@ export default function ProfileSection() {
     setEducation([...education, newEntry])
   }
 
-  const handleEducationRemove = (id: number) => {
+  const handleEducationRemove = async (id: number) => {
+    if (id > 0) {
+      try {
+        await apiService.deleteEducationEntry(id)
+      } catch (err: any) {
+        setError(err.message || 'Failed to delete education entry')
+        return
+      }
+    }
     setEducation(education.filter(e => e.id !== id))
   }
 
@@ -121,8 +120,73 @@ export default function ProfileSection() {
     setEducation(education.map(e => e.id === id ? { ...e, [field]: value } : e))
   }
 
-  const handleSave = () => {
-    setEditMode(false)
+  const handleSave = async () => {
+    try {
+      setSaving(true)
+
+      await apiService.updateProfile({
+        first_name: personalData.firstName,
+        last_name: personalData.lastName,
+        phone: personalData.phone,
+        date_of_birth: personalData.dateOfBirth,
+        gender: personalData.gender,
+        nationality: personalData.nationality,
+        address: JSON.stringify({
+          province: personalData.province,
+          district: personalData.district,
+          localLevel: personalData.localLevel
+        }),
+        bio: personalData.bio
+      })
+
+      const updatedEducation = await Promise.all(
+        education.map(async (entry) => {
+          const payload = {
+            level: entry.level,
+            institution_name: entry.institutionName,
+            board_university: entry.boardUniversity,
+            country: entry.country,
+            stream: entry.stream,
+            start_year: entry.startYear,
+            end_year: entry.endYear,
+            grading_system: entry.gradingSystem,
+            grade: entry.grade
+          }
+          if (entry.id > 0) {
+            await apiService.updateEducationEntry(entry.id, payload)
+            return entry
+          } else {
+            const res = await apiService.createEducationEntry(payload)
+            return { ...entry, id: res.data.id }
+          }
+        })
+      )
+      setEducation(updatedEducation)
+
+      await apiService.savePreferences({
+        preference_role: 'student',
+        preference_flow: 'profile',
+        preferences: {
+          target_level: preferredStudy.targetLevel,
+          preferred_field: preferredStudy.preferredField,
+          preferred_specialization: preferredStudy.preferredSpecialization,
+          preferred_province: preferredStudy.preferredProvince,
+          preferred_district: preferredStudy.preferredDistrict,
+          budget_range: preferredStudy.budgetRange,
+          scholarship_required: preferredStudy.scholarshipRequired,
+          scholarship_type: preferredStudy.scholarshipType
+        }
+      }, '')
+
+      setEditMode(false)
+      setToast({ message: 'Profile saved', type: 'success' })
+      setTimeout(() => setToast(null), 3000)
+    } catch (err: any) {
+      setToast({ message: err.message || 'Failed to save profile', type: 'error' })
+      setTimeout(() => setToast(null), 3000)
+    } finally {
+      setSaving(false)
+    }
   }
 
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -136,8 +200,84 @@ export default function ProfileSection() {
     }
   }
 
-  const [selectedProvince, setSelectedProvince] = useState(personalData.province || 'Bagmati Province')
-  const [selectedDistrict, setSelectedDistrict] = useState(personalData.district || 'Kathmandu')
+  useEffect(() => {
+    const fetchProfileData = async () => {
+      try {
+        setLoading(true)
+        const [profileRes, educationRes] = await Promise.all([
+          apiService.getProfile(),
+          apiService.getEducationEntries()
+        ])
+
+        const profile = profileRes.data
+        let province = '', district = '', localLevel = ''
+        if (profile.address) {
+          try {
+            const parsed = JSON.parse(profile.address)
+            province = parsed.province || ''
+            district = parsed.district || ''
+            localLevel = parsed.localLevel || ''
+          } catch { }
+        }
+
+        const prefs = profile.preferences?.preferences || {}
+
+        setPersonalData({
+          firstName: profile.first_name || '',
+          lastName: profile.last_name || '',
+          middleName: '',
+          dateOfBirth: profile.date_of_birth || '',
+          gender: profile.gender || '',
+          nationality: profile.nationality || '',
+          email: profile.email || '',
+          phone: profile.phone || prefs.contact_number || '',
+          alternatePhone: '',
+          province,
+          district,
+          localLevel,
+          bio: profile.bio || ''
+        })
+
+        if (educationRes.data) {
+          setEducation(educationRes.data.map((entry: EducationEntryItem) => ({
+            id: entry.id,
+            level: entry.level,
+            institutionName: entry.institution_name,
+            boardUniversity: entry.board_university,
+            country: entry.country,
+            stream: entry.stream,
+            startYear: entry.start_year,
+            endYear: entry.end_year,
+            gradingSystem: entry.grading_system,
+            grade: entry.grade
+          })))
+        }
+
+        setRawPreferences(prefs)
+        setPreferredStudy({
+          targetLevel: prefs.target_level || prefs.course || prefs.education_level || '',
+          preferredField: prefs.preferred_field || prefs.course || prefs.field || '',
+          preferredSpecialization: prefs.preferred_specialization || '',
+          preferredProvince: prefs.preferred_province || prefs.province || '',
+          preferredDistrict: prefs.preferred_district || prefs.district || '',
+          budgetRange: prefs.budget_range || prefs.budget || '',
+          scholarshipRequired: prefs.scholarship_required || prefs.scholarship || 'No',
+          scholarshipType: prefs.scholarship_type || 'Merit Based'
+        })
+
+        setSelectedProvince(province || '')
+        setSelectedDistrict(district || '')
+      } catch (err: any) {
+        setError(err.message || 'Failed to load profile')
+      } finally {
+        setLoading(false)
+      }
+    }
+    fetchProfileData()
+  }, [])
+
+  const [selectedProvince, setSelectedProvince] = useState('')
+  const [selectedDistrict, setSelectedDistrict] = useState('')
   
   const localBodies = useMemo(() => {
     return NEPAL_LOCAL_BODIES[selectedDistrict as keyof typeof NEPAL_LOCAL_BODIES] || []
@@ -172,6 +312,47 @@ export default function ProfileSection() {
   }
 
   const completion = calculateCompletion()
+
+  if (loading) {
+    return (
+      <div className="grid grid-cols-1 lg:grid-cols-4 gap-8 pt-8">
+        <div className="lg:col-span-1">
+          <div className="bg-white p-6 rounded-md border border-slate-200 text-center animate-pulse">
+            <div className="w-24 h-24 rounded-full mx-auto bg-slate-200" />
+            <div className="h-5 bg-slate-200 rounded mt-4 w-3/4 mx-auto" />
+            <div className="h-4 bg-slate-200 rounded mt-2 w-1/2 mx-auto" />
+          </div>
+        </div>
+        <div className="lg:col-span-3">
+          <div className="bg-white rounded-md border border-slate-200 min-h-[600px] animate-pulse p-6">
+            <div className="h-8 bg-slate-200 rounded w-1/3 mb-6" />
+            <div className="space-y-4">
+              <div className="h-10 bg-slate-200 rounded" />
+              <div className="h-10 bg-slate-200 rounded" />
+              <div className="h-10 bg-slate-200 rounded" />
+            </div>
+          </div>
+        </div>
+      </div>
+    )
+  }
+
+  if (error) {
+    return (
+      <div className="pt-8">
+        <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-md">
+          <p className="font-medium">Error loading profile</p>
+          <p className="text-sm mt-1">{error}</p>
+          <button
+            onClick={() => window.location.reload()}
+            className="mt-2 text-sm font-medium text-red-700 underline hover:no-underline"
+          >
+            Try again
+          </button>
+        </div>
+      </div>
+    )
+  }
 
   return (
     <div className="grid grid-cols-1 lg:grid-cols-4 gap-8 pt-8">
@@ -232,15 +413,16 @@ export default function ProfileSection() {
               </nav>
               <button
                 onClick={() => editMode ? handleSave() : setEditMode(true)}
+                disabled={saving}
                 className={`flex items-center gap-2 px-3 py-1.5 rounded-md text-sm font-medium transition-colors ${
                   editMode 
                     ? 'bg-brand-blue text-white hover:bg-blue-700' 
                     : 'bg-blue-50 text-blue-600 hover:bg-blue-100'
-                }`}
+                } ${saving ? 'opacity-50 cursor-not-allowed' : ''}`}
               >
                 {editMode ? (
                   <>
-                    <Save className="w-4 h-4" /> Save Changes
+                    <Save className="w-4 h-4" /> {saving ? 'Saving...' : 'Save Changes'}
                   </>
                 ) : (
                   <>
@@ -782,6 +964,31 @@ export default function ProfileSection() {
                     </div>
                   </div>
                 </div>
+
+                {Object.keys(rawPreferences).length > 0 && (
+                  <div>
+                    <h3 className="text-lg font-bold text-slate-800 mb-4 flex items-center gap-2">
+                      <Award className="w-5 h-5 text-blue-600" />
+                      Additional Preferences
+                    </h3>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      {Object.entries(rawPreferences)
+                          .filter(([key]) => !['target_level', 'preferred_field', 'preferred_specialization', 'preferred_province', 'preferred_district', 'budget_range', 'scholarship_required', 'scholarship_type', 'onboarding_completed', 'course', 'field', 'education_level', 'budget', 'scholarship', 'province', 'district', 'contact_number'].includes(key))
+                        .map(([key, value]) => {
+                          const displayVal = String(value)
+                            .split('_')
+                            .map(w => w.charAt(0).toUpperCase() + w.slice(1))
+                            .join(' ')
+                          return (
+                            <div key={key} className="border border-slate-200 rounded-md p-4">
+                              <p className="text-xs font-semibold text-slate-500 mb-1 capitalize">{key.replace(/_/g, ' ')}</p>
+                              <p className="text-sm font-medium text-slate-800">{displayVal}</p>
+                            </div>
+                          )
+                        })}
+                    </div>
+                  </div>
+                )}
               </div>
             )}
 
@@ -887,6 +1094,12 @@ export default function ProfileSection() {
           </div>
         </div>
       </div>
+
+      {toast && (
+        <div className={`fixed bottom-4 right-4 z-50 rounded-lg px-4 py-3 text-sm font-semibold text-white shadow-lg ${toast.type === 'error' ? 'bg-red-600' : 'bg-green-600'}`}>
+          {toast.message}
+        </div>
+      )}
     </div>
   )
 }

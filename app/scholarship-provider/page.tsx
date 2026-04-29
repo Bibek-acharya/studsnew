@@ -2,9 +2,10 @@
 
 import React, { useEffect, useState, useRef } from "react";
 import { apiService } from "../../services/api";
+import { scholarshipProviderApi } from "../../services/scholarshipProviderApi";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
-import { BadgeCheck, Eye, EyeOff, Loader2 } from "lucide-react";
+import { BadgeCheck, Eye, EyeOff, Loader2, ArrowLeft } from "lucide-react";
 
 import ScholarshipProviderDashboard from "@/components/ScholarshipProvider/ScholarshipProviderDashboard";
 
@@ -49,17 +50,38 @@ const ScholarshipProviderZone: React.FC<ScholarshipProviderZoneProps> = ({
   const [otpResendDisabled, setOtpResendDisabled] = useState(false);
   const otpInputRefs = useRef<(HTMLInputElement | null)[]>([]);
 
+  const [showForgotPassword, setShowForgotPassword] = useState(false);
+  const [fpStep, setFpStep] = useState<"email" | "otp" | "newPassword">("email");
+  const [fpEmail, setFpEmail] = useState("");
+  const [fpOtp, setFpOtp] = useState(["", "", "", "", "", ""]);
+  const [fpNewPassword, setFpNewPassword] = useState("");
+  const [fpConfirmPassword, setFpConfirmPassword] = useState("");
+  const [fpLoading, setFpLoading] = useState(false);
+  const [fpError, setFpError] = useState<string | null>(null);
+  const [fpSuccess, setFpSuccess] = useState<string | null>(null);
+  const fpOtpInputRefs = useRef<(HTMLInputElement | null)[]>([]);
+
+  const [fpOtpTimer, setFpOtpTimer] = useState(120);
+
   useEffect(() => {
-    if (showOtpStep) {
+    if (showOtpStep || fpStep === "otp") {
       const interval = setInterval(() => {
-        setOtpTimer((t) => {
-          if (t <= 1) { clearInterval(interval); return 0; }
-          return t - 1;
-        });
+        if (showOtpStep) {
+          setOtpTimer((t) => {
+            if (t <= 1) { clearInterval(interval); return 0; }
+            return t - 1;
+          });
+        }
+        if (fpStep === "otp") {
+          setFpOtpTimer((t) => {
+            if (t <= 1) { clearInterval(interval); return 0; }
+            return t - 1;
+          });
+        }
       }, 1000);
       return () => clearInterval(interval);
     }
-  }, [showOtpStep]);
+  }, [showOtpStep, fpStep]);
 
   const clearAuthMessages = () => {
     setAuthError(null);
@@ -218,6 +240,84 @@ const ScholarshipProviderZone: React.FC<ScholarshipProviderZoneProps> = ({
     }
   };
 
+  const handleFpSendOtp = async () => {
+    setFpError(null);
+    if (!fpEmail.trim() || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(fpEmail.trim())) {
+      setFpError("Please enter a valid email address");
+      return;
+    }
+    setFpLoading(true);
+    try {
+      await scholarshipProviderApi.sendOTP(fpEmail.trim(), "password_reset");
+      setFpStep("otp");
+      setFpOtpTimer(120);
+      setTimeout(() => fpOtpInputRefs.current[0]?.focus(), 100);
+    } catch (error) {
+      setFpError(error instanceof Error ? error.message : "Failed to send OTP");
+    } finally {
+      setFpLoading(false);
+    }
+  };
+
+  const handleFpOtpChange = (index: number, value: string) => {
+    if (!/^\d*$/.test(value)) return;
+    const newOtp = [...fpOtp];
+    newOtp[index] = value.slice(-1);
+    setFpOtp(newOtp);
+    setFpError(null);
+    if (value && index < 5) fpOtpInputRefs.current[index + 1]?.focus();
+  };
+
+  const handleFpOtpKeyDown = (index: number, e: React.KeyboardEvent) => {
+    if (e.key === "Backspace" && !fpOtp[index] && index > 0) {
+      fpOtpInputRefs.current[index - 1]?.focus();
+    }
+  };
+
+  const handleFpOtpPaste = (e: React.ClipboardEvent) => {
+    e.preventDefault();
+    const paste = e.clipboardData.getData("text").slice(0, 6).replace(/\D/g, "");
+    const newOtp = Array(6).fill("").map((_, i) => paste[i] || "");
+    setFpOtp(newOtp);
+    if (paste[5]) fpOtpInputRefs.current[5]?.focus();
+    else if (paste.length) fpOtpInputRefs.current[paste.length]?.focus();
+  };
+
+  const handleFpResetPassword = async () => {
+    setFpError(null);
+    const otpCode = fpOtp.join("");
+    if (otpCode.length !== 6) {
+      setFpError("Please enter the full 6-digit code");
+      return;
+    }
+    if (!fpNewPassword || fpNewPassword.length < 6) {
+      setFpError("Password must be at least 6 characters");
+      return;
+    }
+    if (fpNewPassword !== fpConfirmPassword) {
+      setFpError("Passwords do not match");
+      return;
+    }
+    setFpLoading(true);
+    try {
+      await scholarshipProviderApi.resetPassword(fpEmail.trim(), otpCode, fpNewPassword);
+      setFpSuccess("Password reset successful! You can now sign in.");
+      setTimeout(() => {
+        setShowForgotPassword(false);
+        setFpStep("email");
+        setFpEmail("");
+        setFpOtp(["", "", "", "", "", ""]);
+        setFpNewPassword("");
+        setFpConfirmPassword("");
+        setFpSuccess(null);
+      }, 2000);
+    } catch (error) {
+      setFpError(error instanceof Error ? error.message : "Failed to reset password");
+    } finally {
+      setFpLoading(false);
+    }
+  };
+
   if (currentView === "dashboard") {
     return <ScholarshipProviderDashboard onLogout={() => setCurrentView("landing")} />;
   }
@@ -277,7 +377,7 @@ const ScholarshipProviderZone: React.FC<ScholarshipProviderZoneProps> = ({
                 <a href="/" className="flex justify-center mb-6">
                   <Image src="/studsphere.png" alt="StudSphere" width={160} height={42} className="h-10 w-auto" />
                 </a>
-                {activeTab === "login" && (
+                {activeTab === "login" && !showForgotPassword && (
                   <div className="animate-[fadeIn_0.4s_cubic-bezier(0.16,1,0.3,1)_forwards]">
                     <div className="text-center mb-5">
                       <h1 className="text-xl font-bold text-gray-900 mb-1.5">Sign in to StudSphere</h1>
@@ -320,7 +420,7 @@ const ScholarshipProviderZone: React.FC<ScholarshipProviderZoneProps> = ({
                           <input type="checkbox" className="appearance-none bg-white w-[1.15em] h-[1.15em] border border-gray-300 rounded grid place-content-center before:content-[''] before:w-[0.65em] before:h-[0.65em] before:scale-0 before:transition-transform before:shadow-[inset_1em_1em_white] before:bg-white before:origin-bottom-left before:[clip-path:polygon(14%_44%,0_65%,50%_100%,100%_16%,80%_0%,43%_62%)] checked:bg-[#0000ff] checked:border-[#0000ff] checked:before:scale-100 cursor-pointer" />
                           <span className="text-[13px] text-gray-500 font-medium group-hover:text-gray-800 transition-colors">Remember me</span>
                         </label>
-                        <button type="button" className="text-[13px] font-semibold text-[#0000ff] hover:text-[#0000cc] hover:underline transition-colors">
+                        <button type="button" onClick={() => { setShowForgotPassword(true); setFpStep("email"); setFpError(null); setFpSuccess(null); }} className="text-[13px] font-semibold text-[#0000ff] hover:text-[#0000cc] hover:underline transition-colors">
                           Forgot password?
                         </button>
                       </div>
@@ -340,6 +440,153 @@ const ScholarshipProviderZone: React.FC<ScholarshipProviderZoneProps> = ({
                         Register here
                       </button>
                     </div>
+                  </div>
+                )}
+
+                {showForgotPassword && (
+                  <div className="animate-[fadeIn_0.4s_cubic-bezier(0.16,1,0.3,1)_forwards]">
+                    {fpSuccess ? (
+                      <div className="text-center py-8">
+                        <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                          <BadgeCheck className="w-8 h-8 text-green-600" />
+                        </div>
+                        <p className="text-green-700 font-semibold">{fpSuccess}</p>
+                      </div>
+                    ) : fpStep === "email" ? (
+                      <>
+                        <div className="text-center mb-5">
+                          <h2 className="text-xl font-bold text-gray-900 mb-1.5">Reset Password</h2>
+                          <p className="text-[13px] text-gray-500 font-medium">Enter your email to receive a verification code.</p>
+                        </div>
+                        <div className="space-y-4">
+                          <div>
+                            <label className="block text-[13px] font-semibold text-gray-700 mb-1.5">Email</label>
+                            <input
+                              type="email"
+                              placeholder="Enter your registered email"
+                              value={fpEmail}
+                              onChange={(e) => setFpEmail(e.target.value)}
+                              className="w-full px-4 py-3 rounded-lg border border-gray-200 bg-white text-sm focus:outline-none focus:border-[#0000ff] focus:ring-1 focus:ring-[#0000ff] transition-all placeholder:text-gray-400 font-medium text-gray-900"
+                            />
+                          </div>
+                          {fpError && <p className="text-sm text-red-500">{fpError}</p>}
+                          <button
+                            type="button"
+                            onClick={handleFpSendOtp}
+                            disabled={fpLoading}
+                            className="w-full bg-[#0000ff] hover:bg-[#0000cc] active:scale-[0.98] text-white text-sm font-semibold py-3 rounded-lg transition-all disabled:opacity-50"
+                          >
+                            {fpLoading ? "Sending..." : "Send Code"}
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => { setShowForgotPassword(false); setFpError(null); }}
+                            className="w-full text-center text-[13px] text-gray-500 font-medium hover:text-gray-800 transition-colors"
+                          >
+                            Back to Sign In
+                          </button>
+                        </div>
+                      </>
+                    ) : fpStep === "otp" ? (
+                      <>
+                        <div className="text-center mb-5">
+                          <h2 className="text-xl font-bold text-gray-900 mb-1.5">Enter Verification Code</h2>
+                          <p className="text-[13px] text-gray-500 font-medium">A 6-digit code was sent to {fpEmail}</p>
+                        </div>
+                        <div className="flex items-center justify-center gap-2 mb-4">
+                          {fpOtp.map((digit, i) => (
+                            <input
+                              key={i}
+                              ref={(el) => { fpOtpInputRefs.current[i] = el; }}
+                              type="text"
+                              inputMode="numeric"
+                              maxLength={1}
+                              value={digit}
+                              onChange={(e) => handleFpOtpChange(i, e.target.value)}
+                              onKeyDown={(e) => handleFpOtpKeyDown(i, e)}
+                              onPaste={i === 0 ? handleFpOtpPaste : undefined}
+                              className="w-10 h-12 text-center border border-gray-300 rounded-lg text-sm font-semibold text-gray-900 focus:outline-none focus:border-[#0000ff] focus:ring-1 focus:ring-[#0000ff]"
+                            />
+                          ))}
+                        </div>
+                        <div className="text-center mb-4">
+                          <span className="text-[12px] text-gray-500">
+                            {fpOtpTimer > 0 ? (
+                              <>Resend code in <span className="font-semibold text-gray-700">{formatTimer(fpOtpTimer)}</span></>
+                            ) : (
+                              <button
+                                type="button"
+                                onClick={handleFpSendOtp}
+                                className="text-[#0000ff] font-semibold hover:underline"
+                              >
+                                Resend Code
+                              </button>
+                            )}
+                          </span>
+                        </div>
+                        {fpError && <p className="text-sm text-red-500 text-center mb-2">{fpError}</p>}
+                        <button
+                          type="button"
+                          onClick={() => setFpStep("newPassword")}
+                          disabled={fpOtp.join("").length !== 6}
+                          className="w-full bg-[#0000ff] hover:bg-[#0000cc] active:scale-[0.98] text-white text-sm font-semibold py-3 rounded-lg transition-all disabled:opacity-50"
+                        >
+                          Verify Code
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => setFpStep("email")}
+                          className="w-full text-center text-[13px] text-gray-500 font-medium hover:text-gray-800 transition-colors mt-2"
+                        >
+                          Back
+                        </button>
+                      </>
+                    ) : (
+                      <>
+                        <div className="text-center mb-5">
+                          <h2 className="text-xl font-bold text-gray-900 mb-1.5">Create New Password</h2>
+                          <p className="text-[13px] text-gray-500 font-medium">Enter your new password below.</p>
+                        </div>
+                        <div className="space-y-4">
+                          <div>
+                            <label className="block text-[13px] font-semibold text-gray-700 mb-1.5">New Password</label>
+                            <input
+                              type="password"
+                              placeholder="At least 6 characters"
+                              value={fpNewPassword}
+                              onChange={(e) => setFpNewPassword(e.target.value)}
+                              className="w-full px-4 py-3 rounded-lg border border-gray-200 bg-white text-sm focus:outline-none focus:border-[#0000ff] focus:ring-1 focus:ring-[#0000ff] transition-all placeholder:text-gray-400 font-medium text-gray-900"
+                            />
+                          </div>
+                          <div>
+                            <label className="block text-[13px] font-semibold text-gray-700 mb-1.5">Confirm Password</label>
+                            <input
+                              type="password"
+                              placeholder="Re-enter your password"
+                              value={fpConfirmPassword}
+                              onChange={(e) => setFpConfirmPassword(e.target.value)}
+                              className="w-full px-4 py-3 rounded-lg border border-gray-200 bg-white text-sm focus:outline-none focus:border-[#0000ff] focus:ring-1 focus:ring-[#0000ff] transition-all placeholder:text-gray-400 font-medium text-gray-900"
+                            />
+                          </div>
+                          {fpError && <p className="text-sm text-red-500">{fpError}</p>}
+                          <button
+                            type="button"
+                            onClick={handleFpResetPassword}
+                            disabled={fpLoading}
+                            className="w-full bg-[#0000ff] hover:bg-[#0000cc] active:scale-[0.98] text-white text-sm font-semibold py-3 rounded-lg transition-all disabled:opacity-50"
+                          >
+                            {fpLoading ? "Resetting..." : "Reset Password"}
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => setFpStep("otp")}
+                            className="w-full text-center text-[13px] text-gray-500 font-medium hover:text-gray-800 transition-colors"
+                          >
+                            Back
+                          </button>
+                        </div>
+                      </>
+                    )}
                   </div>
                 )}
 

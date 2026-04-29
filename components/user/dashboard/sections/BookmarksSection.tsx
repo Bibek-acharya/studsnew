@@ -1,7 +1,7 @@
 'use client'
 
 import Link from 'next/link'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { 
   Bookmark, 
   MapPin, 
@@ -34,8 +34,10 @@ import {
   Monitor,
   TrendingUp,
   Flame,
-  Image as ImageIcon
+  Image as ImageIcon,
+  Loader2
 } from 'lucide-react'
+import { apiService } from "@/services/api"
 
 type BookmarkType = 'Colleges' | 'Courses' | 'Scholarships' | 'Events' | 'Entrance' | 'Admissions'
 
@@ -120,128 +122,6 @@ type BookmarkItem =
   | EntranceBookmark 
   | AdmissionBookmark
 
-const INITIAL_BOOKMARKS: BookmarkItem[] = [
-  { 
-    id: 1, 
-    type: 'Colleges', 
-    name: 'Stanford University', 
-    location: 'Stanford, California', 
-    rating: '4.9', 
-    affiliation: 'WASC, Ivy League', 
-    collegeType: 'Private Research',
-    isVerified: true,
-    featured: true,
-    imageUrl: 'https://images.unsplash.com/photo-1541339907198-e08756ebafe3?auto=format&fit=crop&w=800&q=80'
-  },
-  { 
-    id: 2, 
-    type: 'Scholarships', 
-    name: 'Global Tech Innovators Grant', 
-    eligibility: 'Undergraduate STEM students', 
-    deadline: 'May 30, 2026', 
-    amount: 'NPR. 10,000',
-    org: 'Silicon Valley Foundation',
-    status: 'OPEN',
-    badgeType: 'MERIT BASED',
-    imageUrl: 'https://images.unsplash.com/photo-1523240795612-9a054b0db644?auto=format&fit=crop&w=800&q=80'
-  },
-  { 
-    id: 3, 
-    type: 'Courses', 
-    name: 'B.S. Artificial Intelligence', 
-    duration: '4 Years', 
-    offeredBy: 'Mass. Institute of Technology',
-    affiliation: 'MIT',
-    level: 'Bachelor',
-    estFee: '$55,000/yr',
-    imageUrl: 'https://images.unsplash.com/photo-1517694712202-14dd9538aa97?auto=format&fit=crop&w=800&q=80'
-  },
-  { 
-    id: 4, 
-    type: 'Events', 
-    name: 'Ivy League Virtual Campus Tour', 
-    date: 'April 20, 2026', 
-    time: '10:00 AM EST',
-    organizer: 'Ivy League Consortium',
-    location: 'Online / Zoom',
-    category: 'Seminar & Workshop',
-    excerpt: 'Join us for an exclusive virtual tour of the most prestigious universities in the world.',
-    imageUrl: 'https://images.unsplash.com/photo-1523580494863-6f3031224c94?auto=format&fit=crop&w=800&q=80'
-  },
-  { 
-    id: 5, 
-    type: 'Entrance', 
-    name: 'SAT Subject Test - Math Level 2', 
-    date: 'June 5, 2026', 
-    format: 'In-person / Online',
-    institution: 'College Board',
-    affiliation: 'College Board',
-    location: 'Kathmandu',
-    website: 'collegeboard.org',
-    whatsapp: 'https://wa.me/1234567890',
-    viber: 'viber://chat?number=1234567890',
-    deadline: 'May 15, 2026',
-    eligibility: 'High School Seniors',
-    verified: true,
-    tags: [
-      { text: 'Trending', icon: 'trending-up', type: 'purple' },
-      { text: 'Limited Seats', icon: 'flame', type: 'alert' }
-    ],
-    imageUrl: 'https://upload.wikimedia.org/wikipedia/en/9/97/College_Board_logo.png'
-  },
-  { 
-    id: 6, 
-    type: 'Admissions', 
-    name: 'Harvard Business School', 
-    program: 'MBA Fall 2026', 
-    deadline: 'Round 1: Sep 4, 2026',
-    location: 'Boston, MA',
-    rating: 4.9,
-    collegeType: 'Private',
-    website: 'www.hbs.edu',
-    programs: [
-      { name: 'MBA', status: 'Opening Soon' },
-      { name: 'Doctoral Programs', status: 'Seats Available' }
-    ],
-    imageUrl: 'https://images.unsplash.com/photo-1592280771190-3e2e4d571952?auto=format&fit=crop&w=800&q=80'
-  },
-  { 
-    id: 7, 
-    type: 'Colleges', 
-    name: 'University of Oxford', 
-    location: 'Oxford, UK', 
-    rating: '4.8',
-    affiliation: 'Oxford University',
-    collegeType: 'Public Research',
-    isVerified: true,
-    featured: false,
-    imageUrl: 'https://images.unsplash.com/photo-1544144433-d50aff500b91?auto=format&fit=crop&w=800&q=80'
-  },
-  { 
-    id: 8, 
-    type: 'Courses', 
-    name: 'M.Sc. Data Science', 
-    duration: '2 Years', 
-    offeredBy: 'Imperial College London',
-    affiliation: 'Imperial College',
-    level: 'Master',
-    estFee: '£35,000/yr',
-    imageUrl: 'https://images.unsplash.com/photo-1551288049-bbbda536339a?auto=format&fit=crop&w=800&q=80'
-  },
-  { 
-    id: 9, 
-    type: 'Scholarships', 
-    name: 'Women in Engineering Scholarship', 
-    eligibility: 'Female High School Seniors', 
-    deadline: 'June 15, 2026', 
-    amount: '$5,000',
-    org: 'Global Engineering Society',
-    status: 'OPEN',
-    badgeType: 'NEED BASED',
-    imageUrl: 'https://images.unsplash.com/photo-1541339907198-e08756ebafe3?auto=format&fit=crop&w=400&q=80'
-  },
-]
-
 const TABS: BookmarkType[] = ['Colleges', 'Courses', 'Scholarships', 'Events', 'Entrance', 'Admissions']
 
 const iconMap: Record<string, React.ReactNode> = {
@@ -256,12 +136,34 @@ const iconMap: Record<string, React.ReactNode> = {
 
 export default function BookmarksSection() {
   const [activeTab, setActiveTab] = useState<BookmarkType>('Colleges')
-  const [bookmarks, setBookmarks] = useState<BookmarkItem[]>(INITIAL_BOOKMARKS)
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const [bookmarks, setBookmarks] = useState<any[]>([])
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
+  const [toast, setToast] = useState<{message: string; type: 'success' | 'error'} | null>(null)
+
+  useEffect(() => {
+    apiService.getBookmarksByType(activeTab.toLowerCase())
+      .then(res => {
+        const items = res.data?.bookmarks || []
+        setBookmarks(items.map(b => ({ ...b, type: activeTab })))
+        setError(null)
+      })
+      .catch((err: Error) => setError(err.message))
+      .finally(() => setLoading(false))
+  }, [activeTab])
 
   const filteredBookmarks = bookmarks.filter(b => b.type === activeTab)
 
-  const removeBookmark = (id: number) => {
-    setBookmarks(prev => prev.filter(b => b.id !== id))
+  const removeBookmark = async (id: number) => {
+    try {
+      await apiService.deleteBookmark(id)
+      setBookmarks(prev => prev.filter(b => b.id !== id))
+      setToast({ message: 'Bookmark removed', type: 'success' })
+      setTimeout(() => setToast(null), 3000)
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to remove bookmark')
+    }
   }
 
   const getStatusStyle = (status: string) => {
@@ -352,7 +254,7 @@ export default function BookmarksSection() {
         {TABS.map(tab => (
           <button
             key={tab}
-            onClick={() => setActiveTab(tab)}
+            onClick={() => { setLoading(true); setActiveTab(tab); }}
             className={`px-4 py-2 text-sm font-semibold rounded-md transition-all ${
               activeTab === tab
                 ? 'bg-white text-primary'
@@ -364,8 +266,23 @@ export default function BookmarksSection() {
         ))}
       </div>
 
+      {/* Loading State */}
+      {loading && (
+        <div className="flex items-center justify-center py-24">
+          <Loader2 className="w-6 h-6 animate-spin text-primary" />
+        </div>
+      )}
+
+      {/* Error State */}
+      {!loading && error && (
+        <div className="flex flex-col items-center justify-center py-24 text-center px-4 bg-white rounded-md border border-slate-200">
+          <AlertCircle className="w-10 h-10 text-red-400 mb-3" />
+          <p className="text-sm text-red-600 font-medium">{error}</p>
+        </div>
+      )}
+
       {/* Cards Grid */}
-      {filteredBookmarks.length > 0 ? (
+      {!loading && !error && filteredBookmarks.length > 0 ? (
         <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6 sm:gap-8">
           {filteredBookmarks.map((item) => (
             <div key={item.id} className="fade-in card-stagger h-full">
@@ -1079,18 +996,24 @@ export default function BookmarksSection() {
             </div>
           ))}
         </div>
-      ) : (
-        <div id="empty-state" className="flex flex-col items-center justify-center py-24 px-4 text-center fade-in bg-white rounded-md border border-slate-200 ">
+      ) : !loading && !error && (
+          <div id="empty-state" className="flex flex-col items-center justify-center py-24 px-4 text-center fade-in bg-white rounded-md border border-slate-200 ">
           <div className="w-24 h-24 bg-slate-50 rounded-full flex items-center justify-center mb-6 shadow-inner">
             <Bookmark className="w-10 h-10 text-slate-400" />
           </div>
-          <h3 className="text-2xl font-bold text-slate-800 mb-3">No bookmarks in this category</h3>
+          <h3 className="text-2xl font-bold text-slate-800 mb-3">No bookmarks yet</h3>
           <p className="text-slate-500 max-w-md mx-auto text-base">
-            You haven't saved any items here yet. Keep exploring the directory to build your perfect application shortlist.
+            Save colleges, courses, and scholarships to find them later.
           </p>
           <button className="mt-8 px-8 py-3 bg-indigo-600 text-white font-semibold rounded-md hover:bg-indigo-700 hover:-translate-y-0.5 transition-all shadow-lg shadow-indigo-200">
             Explore Directory
           </button>
+        </div>
+      )}
+
+      {toast && (
+        <div className="fixed bottom-4 right-4 z-50 rounded-lg bg-green-600 px-4 py-3 text-sm font-semibold text-white shadow-lg">
+          {toast.message}
         </div>
       )}
     </div>

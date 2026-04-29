@@ -1,7 +1,11 @@
 'use client'
 
+import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
+import Image from 'next/image'
+import { useAuth } from '@/services/AuthContext'
+import { apiService } from '@/services/api'
 import { 
   LayoutDashboard, 
   MessageSquare, 
@@ -27,17 +31,36 @@ interface SidebarProps {
 export default function Sidebar({ sidebarOpen, setSidebarOpen }: SidebarProps) {
   const pathname = usePathname()
   const router = useRouter()
+  const { logout } = useAuth()
+  const [unreadMessages, setUnreadMessages] = useState(0)
+  const [unreadNotifications, setUnreadNotifications] = useState(0)
+
+  useEffect(() => {
+    const fetchCounts = async () => {
+      try {
+        const [msgRes, notifRes] = await Promise.all([
+          apiService.getMessages(),
+          apiService.getStudentNotifications(),
+        ])
+        setUnreadMessages(msgRes.data.messages.filter(m => !m.read).length)
+        setUnreadNotifications(notifRes.data.unread_count)
+      } catch {
+        // keep defaults (0)
+      }
+    }
+    fetchCounts()
+  }, [])
 
   const navItems = [
     { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard, href: '/user/dashboard' },
-    { id: 'messages', label: 'Message/Inquiry', icon: MessageSquare, href: '/user/dashboard/chat', badge: '3' },
+    { id: 'messages', label: 'Message/Inquiry', icon: MessageSquare, href: '/user/dashboard/chat', badge: unreadMessages > 0 ? String(unreadMessages) : undefined },
     { id: 'calendar', label: 'My Calendar', icon: Calendar, href: '/user/dashboard/calendar' },
     { id: 'applications', label: 'My Applications', icon: FileText, href: '/user/dashboard/applications' },
     { id: 'counselling', label: 'Counselling', icon: Users, href: '/user/dashboard/counselling' },
     { id: 'profile', label: 'My Profile', icon: User, href: '/user/dashboard/profile' },
     { id: 'bookmarks', label: 'Bookmarks', icon: Bookmark, href: '/user/dashboard/bookmarks' },
     { id: 'reviews', label: 'My Reviews', icon: Star, href: '/user/dashboard/reviews' },
-    { id: 'notifications', label: 'Notifications', icon: Bell, href: '/user/dashboard/notifications', badge: '16' },
+    { id: 'notifications', label: 'Notifications', icon: Bell, href: '/user/dashboard/notifications', badge: unreadNotifications > 0 ? String(unreadNotifications) : undefined },
     { id: 'faq', label: 'FAQ', icon: BadgeQuestionMark, href: '/user/dashboard/faq' },
     { id: 'settings', label: 'Settings', icon: Settings, href: '/user/dashboard/settings' },
   ]
@@ -67,11 +90,8 @@ export default function Sidebar({ sidebarOpen, setSidebarOpen }: SidebarProps) {
       >
         {/* Logo Area */}
         <div className="h-16 flex items-center px-6 border-b border-gray-200 shrink-0">
-          <Link href="/" onClick={() => setSidebarOpen(false)} className="flex items-center gap-2 text-[#0000ff] font-bold text-xl">
-            <div className="w-8 h-8 bg-[#0000ff] rounded-md flex items-center justify-center text-white">
-              S
-            </div>
-            StudentPortal
+          <Link href="/" onClick={() => setSidebarOpen(false)} className="flex items-center">
+            <Image src="/studsphere.png" alt="StudSphere" width={160} height={40} className="h-10 w-auto" />
           </Link>
           <button 
             id="close-sidebar" 
@@ -119,7 +139,7 @@ export default function Sidebar({ sidebarOpen, setSidebarOpen }: SidebarProps) {
         <div className="p-4 border-t border-gray-200 shrink-0">
           <button
             type="button"
-            onClick={() => router.push('/')}
+            onClick={() => logout()}
             className="w-full flex items-center gap-3 px-4 py-3 text-red-500 hover:bg-red-50 rounded-md transition-colors"
           >
             <LogOut className="w-5 h-5" />

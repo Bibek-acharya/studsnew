@@ -463,34 +463,26 @@ const SCHOLARSHIPS_PER_PAGE = 18;
 
 export const scholarshipApi = {
   async getScholarships(filters: ScholarshipFilters = {}, page: number = 1): Promise<ScholarshipListResponse> {
-    return new Promise((resolve) => {
-      setTimeout(() => {
-        const filtered = filterScholarships(seedScholarships, filters);
-        const total = filtered.length;
-        const totalPages = Math.ceil(total / SCHOLARSHIPS_PER_PAGE);
-        const start = (page - 1) * SCHOLARSHIPS_PER_PAGE;
-        const paginatedScholarships = filtered.slice(start, start + SCHOLARSHIPS_PER_PAGE);
-        
-        resolve({
-          scholarships: paginatedScholarships,
-          pagination: {
-            total,
-            page,
-            pageSize: SCHOLARSHIPS_PER_PAGE,
-            totalPages,
-          },
-        });
-      }, 100);
-    });
+    const filtered = filterScholarships(seedScholarships, filters);
+    const total = filtered.length;
+    const totalPages = Math.ceil(total / SCHOLARSHIPS_PER_PAGE);
+    const start = (page - 1) * SCHOLARSHIPS_PER_PAGE;
+    const paginatedScholarships = filtered.slice(start, start + SCHOLARSHIPS_PER_PAGE);
+
+    return {
+      scholarships: paginatedScholarships,
+      pagination: {
+        total,
+        page,
+        pageSize: SCHOLARSHIPS_PER_PAGE,
+        totalPages,
+      },
+    };
   },
 
   async getScholarshipDetails(id: string | number): Promise<Scholarship | undefined> {
-    return new Promise((resolve) => {
-      setTimeout(() => {
-        const scholarship = seedScholarships.find((s) => s.id === id);
-        resolve(scholarship);
-      }, 100);
-    });
+    const scholarship = seedScholarships.find((s) => s.id === id);
+    return scholarship;
   },
 
   getSeedScholarships(): Scholarship[] {

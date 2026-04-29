@@ -1,12 +1,14 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import {
   Search, MessageSquare, Send, Paperclip, Info,
   GraduationCap, Link2, FileText, Phone, Mail,
   Building2, MapPin, Calendar, ChevronRight, CheckCheck,
-  X, Copy
+  X, Copy, Loader2, AlertCircle
 } from 'lucide-react'
+import { apiService, MessageContactItem, MessageItem } from '@/services/api'
+import { useAuth } from '@/services/AuthContext'
 
 interface Message {
   id: string
@@ -28,39 +30,6 @@ interface Conversation {
   updatedAt: number
   unreadCount: Record<string, number>
 }
-
-const mockConversations: Conversation[] = [
-  {
-    id: 'conv_1',
-    participants: [
-      { id: 'usr_student_1', name: 'Alex Johnson', avatar: 'https://i.pravatar.cc/150?img=11', role: 'student' },
-      { id: 'usr_college_1', name: 'Stanford University', avatar: 'https://i.pravatar.cc/150?img=20', role: 'college' }
-    ],
-    type: 'Admission',
-    status: 'Active',
-    lastMessage: 'Your application is under review.',
-    updatedAt: Date.now(),
-    unreadCount: { usr_student_1: 1, usr_college_1: 0 }
-  },
-  {
-    id: 'conv_2',
-    participants: [
-      { id: 'usr_student_1', name: 'Alex Johnson', avatar: 'https://i.pravatar.cc/150?img=11', role: 'student' },
-      { id: 'usr_college_2', name: 'MIT Engineering', avatar: 'https://i.pravatar.cc/150?img=15', role: 'college' }
-    ],
-    type: 'Inquiry',
-    status: 'Resolved',
-    lastMessage: 'Thank you for the information.',
-    updatedAt: Date.now() - 86400000,
-    unreadCount: { usr_student_1: 0, usr_college_2: 0 }
-  }
-]
-
-const mockMessages: Message[] = [
-  { id: 'msg_1', conversationId: 'conv_1', senderId: 'usr_student_1', senderRole: 'student', messageType: 'text', content: 'Hi, I submitted my documents. Could you verify?', timestamp: Date.now() - 3600000, readStatus: true },
-  { id: 'msg_2', conversationId: 'conv_1', senderId: 'usr_college_1', senderRole: 'college', messageType: 'system', content: 'Application #8492 submitted successfully.', timestamp: Date.now() - 3500000, readStatus: true },
-  { id: 'msg_3', conversationId: 'conv_1', senderId: 'usr_college_1', senderRole: 'college', messageType: 'text', content: 'Your application is under review. We will get back to you shortly.', timestamp: Date.now() - 100000, readStatus: false }
-]
 
 const mockDetails: Record<string, { title: string; role: string; items: { icon: string; label: string; value: string; copy?: boolean }[] }> = {
   'usr_college_1': {
@@ -87,7 +56,6 @@ const mockDetails: Record<string, { title: string; role: string; items: { icon: 
   }
 }
 
-const currentUserId = 'usr_student_1'
 const filters = ['All', 'Admission', 'Inquiry', 'Counseling']
 
 const iconMap: Record<string, React.ComponentType<{ className?: string }>> = {
@@ -102,24 +70,73 @@ const iconMap: Record<string, React.ComponentType<{ className?: string }>> = {
 }
 
 export default function ChatSection() {
+  const { user } = useAuth()
+  const currentUserId = user?.id?.toString() || ''
+
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
   const [activeConvId, setActiveConvId] = useState<string | null>(null)
   const [searchQuery, setSearchQuery] = useState('')
   const [activeFilter, setActiveFilter] = useState('All')
-  const [conversations, setConversations] = useState<Conversation[]>(mockConversations)
-  const [messages, setMessages] = useState<Message[]>(mockMessages)
+  const [contacts, setContacts] = useState<MessageContactItem[]>([])
+  const [allMessages, setAllMessages] = useState<MessageItem[]>([])
   const [messageInput, setMessageInput] = useState('')
   const [showContactInfo, setShowContactInfo] = useState(false)
+  const [toast, setToast] = useState<{message: string; type: 'success' | 'error'} | null>(null)
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        setLoading(true)
+        setError(null)
+        const [contactsRes, messagesRes] = await Promise.all([
+          apiService.getMessageContacts(),
+          apiService.getMessages({ page: 1, limit: 100 })
+        ])
+        setContacts(contactsRes.data || [])
+        setAllMessages(messagesRes.data?.messages || [])
+      } catch (err: any) {
+        setError(err.message || 'Failed to load messages')
+      } finally {
+        setLoading(false)
+      }
+    }
+    fetchData()
+  }, [])
+
+  // Build conversations from contacts
+  const conversations: Conversation[] = contacts.map(c => ({
+    id: `conv_${c.user_id}`,
+    participants: [
+      { id: currentUserId, name: 'Me', avatar: '', role: '' },
+      { id: c.user_id.toString(), name: c.name, avatar: `https://i.pravatar.cc/150?u=${c.user_id}`, role: '' }
+    ],
+    type: 'Inquiry',
+    status: 'Active',
+    lastMessage: c.last_message,
+    updatedAt: Date.now(),
+    unreadCount: { [currentUserId]: c.unread }
+  }))
+
+  // Build messages per conversation from all messages
+  const messages: Message[] = allMessages.map(m => ({
+    id: m.id.toString(),
+    conversationId: `conv_${m.sender_id === (user?.id || 0) ? m.receiver_id : m.sender_id}`,
+    senderId: m.sender_id.toString(),
+    senderRole: m.direction === 'outgoing' ? 'student' : 'college',
+    messageType: 'text',
+    content: m.content,
+    timestamp: new Date(m.created_at).getTime(),
+    readStatus: m.read
+  }))
 
   const filteredConversations = conversations
-    .filter(c => c.participants.some(p => p.id === currentUserId))
-    .filter(c => {
-      if (searchQuery) {
-        const other = c.participants.find(p => p.id !== currentUserId)
-        return other?.name.toLowerCase().includes(searchQuery.toLowerCase()) || c.lastMessage.toLowerCase().includes(searchQuery.toLowerCase())
-      }
-      return true
-    })
     .filter(c => activeFilter === 'All' || c.type === activeFilter)
+    .filter(c => {
+      if (!searchQuery) return true
+      const other = c.participants.find(p => p.id !== currentUserId)
+      return other?.name.toLowerCase().includes(searchQuery.toLowerCase()) || c.lastMessage.toLowerCase().includes(searchQuery.toLowerCase())
+    })
     .sort((a, b) => b.updatedAt - a.updatedAt)
 
   const activeConversation = conversations.find(c => c.id === activeConvId)
@@ -128,39 +145,45 @@ export default function ChatSection() {
     ? messages.filter(m => m.conversationId === activeConvId).sort((a, b) => a.timestamp - b.timestamp)
     : []
 
-  const handleSend = () => {
-    if (!messageInput.trim() || !activeConvId) return
+  const handleSend = async () => {
+    if (!messageInput.trim() || !activeConvId || !otherParticipant) return
+    const receiverId = parseInt(otherParticipant.id)
+    if (isNaN(receiverId)) return
 
-    const newMessage: Message = {
-      id: 'msg_' + Date.now(),
-      conversationId: activeConvId,
-      senderId: currentUserId,
-      senderRole: 'student',
-      messageType: 'text',
-      content: messageInput,
-      timestamp: Date.now(),
-      readStatus: false
-    }
+    try {
+      await apiService.createMessage({ receiver_id: receiverId, subject: '', content: messageInput })
 
-    setMessages(prev => [...prev, newMessage])
-    setMessageInput('')
-
-    const conv = conversations.find(c => c.id === activeConvId)
-    if (conv) {
-      const otherUserId = conv.participants.find(p => p.id !== currentUserId)?.id || ''
-      setConversations(prev => prev.map(c =>
-        c.id === activeConvId
-          ? { ...c, lastMessage: messageInput, updatedAt: Date.now(), unreadCount: { ...c.unreadCount, [otherUserId]: (c.unreadCount[otherUserId] || 0) + 1 } }
-          : c
-      ))
+      const newMessage: Message = {
+        id: 'msg_' + Date.now(),
+        conversationId: activeConvId,
+        senderId: currentUserId,
+        senderRole: 'student',
+        messageType: 'text',
+        content: messageInput,
+        timestamp: Date.now(),
+        readStatus: false
+      }
+      setAllMessages(prev => [...prev, {
+        id: Date.now(),
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+        sender_id: user?.id || 0,
+        receiver_id: receiverId,
+        subject: '',
+        content: messageInput,
+        read: false,
+        direction: 'outgoing'
+      }])
+      setMessageInput('')
+      setToast({ message: 'Message sent', type: 'success' })
+      setTimeout(() => setToast(null), 3000)
+    } catch (err: any) {
+      setError(err.message || 'Failed to send message')
     }
   }
 
   const selectConversation = (id: string) => {
     setActiveConvId(id)
-    setConversations(prev => prev.map(c =>
-      c.id === id ? { ...c, unreadCount: { ...c.unreadCount, [currentUserId]: 0 } } : c
-    ))
     setShowContactInfo(false)
   }
 
@@ -178,21 +201,45 @@ export default function ChatSection() {
     return 'bg-gray-100 text-gray-600'
   }
 
+  if (loading) {
+    return (
+      <div className="h-[calc(100vh-140px)] mt-6 flex items-center justify-center">
+        <div className="flex flex-col items-center gap-3">
+          <Loader2 className="w-8 h-8 animate-spin text-primary" />
+          <p className="text-sm text-slate-500">Loading messages...</p>
+        </div>
+      </div>
+    )
+  }
+
+  if (error) {
+    return (
+      <div className="h-[calc(100vh-140px)] mt-6 flex items-center justify-center">
+        <div className="flex flex-col items-center gap-3 text-center">
+          <AlertCircle className="w-8 h-8 text-red-500" />
+          <p className="text-sm text-red-600">{error}</p>
+          <button onClick={() => window.location.reload()} className="text-sm text-primary hover:underline">Retry</button>
+        </div>
+      </div>
+    )
+  }
+
   return (
-    <div className="h-[calc(100vh-140px)] mt-6">
+    <div className="h-[calc(100vh-140px)] mt-6 relative">
       <div className="flex h-full bg-white rounded-md  border border-slate-200 overflow-hidden">
+        {/* Empty state when no contacts */}
+        {contacts.length === 0 && !loading && !error && (
+          <div className="absolute inset-0 flex flex-col items-center justify-center bg-white z-20">
+            <div className="w-20 h-20 bg-blue-50 text-primary rounded-full flex items-center justify-center mb-4">
+              <MessageSquare className="w-10 h-10" />
+            </div>
+            <h2 className="text-xl font-bold text-slate-800 mb-2">No messages yet</h2>
+            <p className="text-slate-500 text-sm max-w-sm text-center">Start a conversation with a college or counselor.</p>
+          </div>
+        )}
+
         {/* LEFT PANEL: Conversation List */}
         <aside className="w-full md:w-[380px] bg-white border-r border-slate-100 flex flex-col h-full shrink-0 hidden md:flex">
-          {/* Header */}
-          {/* <div className="p-5 border-b border-slate-100 bg-slate-900 text-white flex flex-col gap-4">
-            <div className="flex items-center gap-2">
-              <div className="w-8 h-8 bg-primary rounded-md flex items-center justify-center font-bold text-white">
-                S
-              </div>
-              <h1 className="text-lg font-bold tracking-tight">StudSphere</h1>
-            </div>
-          </div> */}
-
           {/* Search */}
           <div className="p-4 border-b border-slate-100 bg-white">
             <div className="relative mb-3">
@@ -446,6 +493,12 @@ export default function ChatSection() {
           </aside>
         )}
       </div>
+
+      {toast && (
+        <div className="fixed bottom-4 right-4 z-50 rounded-lg bg-green-600 px-4 py-3 text-sm font-semibold text-white shadow-lg">
+          {toast.message}
+        </div>
+      )}
     </div>
   )
 }

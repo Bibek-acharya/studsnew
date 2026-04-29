@@ -53,7 +53,16 @@ export default function RegisterForm() {
 
   const isValidEmail = (email: string) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim());
   const isStep1Valid = isValidEmail(email) && agreeTerms;
-  const isStep2Valid = firstName.trim() !== "" && lastName.trim() !== "" && password.length >= 8 && confirmPassword === password;
+
+  const passwordChecks = {
+    minLength: password.length >= 8,
+    uppercase: /[A-Z]/.test(password),
+    lowercase: /[a-z]/.test(password),
+    number: /[0-9]/.test(password),
+    special: /[^A-Za-z0-9]/.test(password),
+  };
+  const isPasswordStrong = Object.values(passwordChecks).every(Boolean);
+  const isStep2Valid = firstName.trim() !== "" && lastName.trim() !== "" && isPasswordStrong && confirmPassword === password;
 
   const handleEmailSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -74,6 +83,11 @@ export default function RegisterForm() {
       return;
     }
 
+    if (!isPasswordStrong) {
+      setError("Password must include uppercase, lowercase, a number, and a special character.");
+      return;
+    }
+
     setLoading(true);
     setError("");
     
@@ -88,17 +102,10 @@ export default function RegisterForm() {
       });
       accountCreated = true;
     } catch (err: unknown) {
-      const errorMsg =
-        err instanceof Error ? err.message.toLowerCase() : "";
-      const status = typeof err === "object" && err !== null && "status" in err
-        ? Number((err as { status?: unknown }).status)
-        : undefined;
-
-      if (errorMsg.includes("exists") || errorMsg.includes("already") || status === 409) {
-        setError("An account with this email already exists. Please log in.");
-        setLoading(false);
-        return;
-      }
+      const message = err instanceof Error ? err.message : "Failed to create account. Please try again.";
+      setError(message);
+      setLoading(false);
+      return;
     }
     
     if (!accountCreated) {
@@ -318,6 +325,23 @@ export default function RegisterForm() {
           </button>
         </div>
 
+        {password && (
+          <div className="space-y-1.5 -mt-2">
+            {[
+              { check: passwordChecks.minLength, label: "At least 8 characters" },
+              { check: passwordChecks.uppercase, label: "One uppercase letter" },
+              { check: passwordChecks.lowercase, label: "One lowercase letter" },
+              { check: passwordChecks.number, label: "One number" },
+              { check: passwordChecks.special, label: "One special character" },
+            ].map(({ check, label }) => (
+              <p key={label} className={`text-[12px] font-medium flex items-center gap-1.5 ${check ? "text-emerald-600" : "text-gray-400"}`}>
+                <span className={check ? "text-emerald-500" : "text-gray-300"}>{check ? "✓" : "○"}</span>
+                {label}
+              </p>
+            ))}
+          </div>
+        )}
+
         <div className="relative">
           <label className="block text-sm font-medium text-gray-900 mb-2">Confirm Password</label>
           <input
@@ -335,6 +359,10 @@ export default function RegisterForm() {
             {showConfirmPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
           </button>
         </div>
+
+        {error && (
+          <p className="text-[13px] text-red-500 font-medium text-center">{error}</p>
+        )}
 
         <button
           type="button"

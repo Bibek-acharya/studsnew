@@ -860,4 +860,21 @@ export const scholarshipProviderApi = {
       url: `/scholarship-providers/access/${id}`,
     });
   },
+
+  async sendOTP(email: string, type: "verification" | "password_reset"): Promise<void> {
+    await request<any>({
+      method: "POST",
+      url: "/scholarship-providers/auth/send-otp",
+      data: { email, type },
+    });
+  },
+
+  async resetPassword(email: string, otp: string, password: string): Promise<void> {
+    const res = await request<any>({
+      method: "POST",
+      url: "/scholarship-providers/auth/reset-password",
+      data: { email, otp, password },
+    });
+    return res.data;
+  },
 };

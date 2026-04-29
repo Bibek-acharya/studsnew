@@ -50,6 +50,7 @@ export default function ReviewsSection() {
   const [editForm, setEditForm] = useState({ title: '', rating: 0, pros: '', cons: '' })
   const [deleting, setDeleting] = useState(false)
   const [saving, setSaving] = useState(false)
+  const [toast, setToast] = useState<{message: string; type: 'success' | 'error'} | null>(null)
 
   const fetchReviews = useCallback(async () => {
     setLoading(true)
@@ -126,11 +127,15 @@ export default function ReviewsSection() {
         setReviews(prev => prev.filter(r => r.id !== selectedReview.id))
         setDeleteModalOpen(false)
         setSelectedReview(null)
+        setToast({ message: 'Review deleted', type: 'success' })
+        setTimeout(() => setToast(null), 3000)
       } else {
-        alert(result.error || 'Failed to delete review')
+        setToast({ message: result.error || 'Failed to delete review', type: 'error' })
+        setTimeout(() => setToast(null), 3000)
       }
     } catch (err) {
-      alert('Failed to delete review')
+      setToast({ message: 'Failed to delete review', type: 'error' })
+      setTimeout(() => setToast(null), 3000)
     } finally {
       setDeleting(false)
     }
@@ -153,11 +158,15 @@ export default function ReviewsSection() {
         ))
         setEditModalOpen(false)
         setSelectedReview(null)
+        setToast({ message: 'Review updated', type: 'success' })
+        setTimeout(() => setToast(null), 3000)
       } else {
-        alert(result.error || 'Failed to update review')
+        setToast({ message: result.error || 'Failed to update review', type: 'error' })
+        setTimeout(() => setToast(null), 3000)
       }
     } catch (err) {
-      alert('Failed to update review')
+      setToast({ message: 'Failed to update review', type: 'error' })
+      setTimeout(() => setToast(null), 3000)
     } finally {
       setSaving(false)
     }
@@ -508,6 +517,12 @@ export default function ReviewsSection() {
               </button>
             </div>
           </div>
+        </div>
+      )}
+
+      {toast && (
+        <div className={`fixed bottom-4 right-4 z-50 rounded-lg px-4 py-3 text-sm font-semibold text-white shadow-lg ${toast.type === 'error' ? 'bg-red-600' : 'bg-green-600'}`}>
+          {toast.message}
         </div>
       )}
     </div>
