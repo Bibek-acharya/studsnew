@@ -89,8 +89,8 @@ const Newsletter: React.FC<NewsletterProps> = ({ className = "" }) => {
               <span>{error}</span>
             </div>
           </div>
-          <button 
-            type="submit" 
+          <button
+            type="submit"
             suppressHydrationWarning
             className={`${
               isSubscribed ? "bg-green-500 text-white" : "bg-white text-[#0000ff] hover:bg-gray-100"

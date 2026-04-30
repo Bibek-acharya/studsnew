@@ -119,7 +119,7 @@ const FinancialAidSection: React.FC<FinancialAidSectionProps> = ({ onNavigate, s
               {/* Action Buttons */}
               <div className="flex gap-2 sm:gap-2.5 mt-4 sm:mt-5 mb-1">
                 <button 
-                  onClick={() => onNavigate("scholarshipDetails", scholarship)}
+                  onClick={() => onNavigate("scholarshipDetails", scholarship as { [key: string]: unknown })}
                   className="flex-1 bg-white border border-[#cbd5e1] text-[#334155] rounded-md py-2 sm:py-2.5 text-[12px] sm:text-[13px] md:text-[14px] font-semibold hover:bg-[#f8fafc] hover:text-[#0f172a] transition-all duration-200"
                 >
                   Details

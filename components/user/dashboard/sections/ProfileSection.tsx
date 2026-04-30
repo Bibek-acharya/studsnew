@@ -383,6 +383,32 @@ export default function ProfileSection() {
               <div className="bg-brand-blue h-2 rounded-full" style={{ width: `${completion}%` }}></div>
             </div>
           </div>
+
+          {(preferredStudy.targetLevel || preferredStudy.preferredField || preferredStudy.budgetRange) && (
+            <div className="mt-6 text-left border-t border-slate-100 pt-4">
+              <h3 className="text-xs font-semibold text-slate-500 mb-3">Preferences</h3>
+              <div className="space-y-3">
+                {preferredStudy.targetLevel && (
+                  <div>
+                    <p className="text-xs text-slate-500">Target Level</p>
+                    <p className="text-sm font-medium text-slate-800">{preferredStudy.targetLevel}</p>
+                  </div>
+                )}
+                {preferredStudy.preferredField && (
+                  <div>
+                    <p className="text-xs text-slate-500">Preferred Field</p>
+                    <p className="text-sm font-medium text-slate-800">{preferredStudy.preferredField}</p>
+                  </div>
+                )}
+                {preferredStudy.budgetRange && (
+                  <div>
+                    <p className="text-xs text-slate-500">Budget Range</p>
+                    <p className="text-sm font-medium text-slate-800">Rs. {preferredStudy.budgetRange.replace('-', ' - Rs. ')}</p>
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
         </div>
       </div>
 

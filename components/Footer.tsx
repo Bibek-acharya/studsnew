@@ -1,7 +1,9 @@
-import React from "react";
+"use client";
+
+import React, { useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
-import Newsletter from "./Newsletter";
+import dynamic from "next/dynamic";
 
 const routeMap: Record<string, string> = {
   educationPage: "/",
@@ -19,8 +21,10 @@ const routeMap: Record<string, string> = {
   partner: "/scholarship-provider",
 };
 
-const Footer = () => {
-  const currentYear = new Date().getFullYear();
+const Newsletter = dynamic(() => import("./Newsletter"), { ssr: false });
+
+export default function Footer() {
+  const [currentYear] = useState(() => new Date().getFullYear());
 
   return (
     <div className="bg-[#f8f9fc] rounded-md p-4 sm:p-6 lg:p-4 w-full max-w-[1400px] mx-auto flex flex-col gap-10 lg:gap-12 border border-gray-50 mb-4 mt-16">
@@ -171,6 +175,4 @@ const Footer = () => {
       </footer>
     </div>
   );
-};
-
-export default Footer;
+}

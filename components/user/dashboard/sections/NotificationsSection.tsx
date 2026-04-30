@@ -186,9 +186,8 @@ export default function NotificationsSection() {
 
   return (
     <div className="w-full max-w-7xl mx-auto">
-      <header className="flex items-center justify-between px-6 py-5 border-b border-gray-200 sticky top-0 z-10 bg-white/90 backdrop-blur-sm">
+      <header className="flex items-center justify-between py-5 sticky top-0 z-10">
         <div className="flex items-center gap-4">
-          <h2 className="text-2xl font-bold text-slate-800">Notifications</h2>
           {unreadCount > 0 && (
             <span className="bg-blue-600 text-white text-sm font-semibold px-2.5 py-0.5 rounded-full min-w-[28px] flex items-center justify-center">
               {unreadCount}
@@ -205,24 +204,21 @@ export default function NotificationsSection() {
         )}
       </header>
 
-      <nav className="flex gap-8 px-6 border-b border-gray-200 sticky top-[73px] z-10 bg-white/90 backdrop-blur-sm">
+      <div className="flex gap-1 bg-slate-100 p-1 rounded-md mb-6 w-fit">
         {(['all', 'following', 'system', 'archive'] as TabType[]).map((tab) => (
           <button
             key={tab}
             onClick={() => setCurrentTab(tab)}
-            className={`py-4 text-sm font-medium relative transition-colors ${
+            className={`px-4 py-2 text-sm font-semibold rounded-md transition-all ${
               currentTab === tab 
-                ? 'text-slate-900 font-semibold' 
-                : 'text-slate-500 hover:text-slate-900'
+                ? 'bg-white text-primary'
+                : 'text-slate-500 hover:text-slate-700'
             }`}
           >
             {tab.charAt(0).toUpperCase() + tab.slice(1)}
-            {currentTab === tab && (
-              <div className="absolute bottom-0 left-0 right-0 h-0.75 bg-blue-600 rounded-t" />
-            )}
           </button>
         ))}
-      </nav>
+      </div>
 
       <div className="flex-1 overflow-y-auto">
         {filteredNotifications.length === 0 ? (

@@ -48,39 +48,33 @@ export default function CounsellingSection() {
 
   return (
     <div>
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4">
-        <div>
-          <h2 className="text-2xl font-bold text-slate-800">Counselling & Mentorship</h2>
-          <p className="text-slate-500 mt-1">Expert guidance for your academic and personal growth.</p>
-        </div>
+      <div className="flex justify-end mb-6">
         <button
           onClick={() => router.push('/counseling')}
-          className="bg-blue-600 text-white px-5 py-2.5 rounded-md text-sm font-semibold hover:bg-blue-700  shadow-blue-500/20 transition-all flex items-center gap-2"
+          className="bg-blue-600 text-white px-5 py-2.5 rounded-md text-sm font-semibold hover:bg-blue-700 shadow-blue-500/20 transition-all flex items-center gap-2"
         >
           <i className="fas fa-calendar-plus"></i> Book Session
         </button>
       </div>
 
-      <div className="border-b border-slate-200 mb-6">
-        <nav className="flex gap-6 overflow-x-auto pb-0">
-          {['New Requests', 'Upcoming Sessions', 'Past Sessions', 'Explore Counselors'].map((tab, idx) => (
-            <button
-              key={idx}
-              onClick={() => setCounsellingTab(idx === 0 ? 'booked' : idx === 1 ? 'upcoming' : idx === 2 ? 'past' : 'explore')}
-              className={`pb-3 border-b-2 transition-colors whitespace-nowrap text-sm font-medium ${
-                counsellingTab === (idx === 0 ? 'booked' : idx === 1 ? 'upcoming' : idx === 2 ? 'past' : 'explore')
-                  ? 'border-blue-500 text-blue-600'
-                  : 'border-transparent text-slate-500 hover:text-slate-700'
-              }`}
-            >
-              {tab}
-            </button>
-          ))}
-        </nav>
+      <div className="flex gap-1 bg-slate-100 p-1 rounded-md mb-6 w-fit">
+        {['New Requests', 'Upcoming Sessions', 'Past Sessions', 'Explore Counselors'].map((tab, idx) => (
+          <button
+            key={idx}
+            onClick={() => setCounsellingTab(idx === 0 ? 'booked' : idx === 1 ? 'upcoming' : idx === 2 ? 'past' : 'explore')}
+            className={`px-4 py-2 text-sm font-semibold rounded-md transition-all ${
+              counsellingTab === (idx === 0 ? 'booked' : idx === 1 ? 'upcoming' : idx === 2 ? 'past' : 'explore')
+                ? 'bg-white text-primary'
+                : 'text-slate-500 hover:text-slate-700'
+            }`}
+          >
+            {tab}
+          </button>
+        ))}
       </div>
 
       {counsellingTab === 'upcoming' && (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6">
           {isLoading ? (
             <div className="col-span-full rounded-md border border-slate-200 bg-white p-8 text-center text-slate-500">
               Loading counselling bookings...
@@ -126,7 +120,7 @@ export default function CounsellingSection() {
       )}
 
       {counsellingTab === 'booked' && (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6">
           {isLoading ? (
             <div className="col-span-full rounded-md border border-slate-200 bg-white p-8 text-center text-slate-500">
               Loading new counselling requests...
@@ -172,7 +166,7 @@ export default function CounsellingSection() {
       )}
 
       {counsellingTab === 'past' && (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6">
           {isLoading ? (
             <div className="col-span-full rounded-md border border-slate-200 bg-white p-8 text-center text-slate-500">
               Loading past sessions...
@@ -212,7 +206,7 @@ export default function CounsellingSection() {
       )}
 
       {counsellingTab === 'explore' && (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6">
           {colleges.map((college, idx) => (
             <div key={idx} className="bg-white rounded-md border border-slate-200 p-5  hover: transition-all group flex flex-col h-full">
               <div className="flex justify-between items-start mb-4">
