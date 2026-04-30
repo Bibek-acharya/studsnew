@@ -1,4 +1,4 @@
-import { scholarshipProviderApi, getCalendarEvents } from '../scholarshipProviderApi';
+import { scholarshipProviderApi, getCalendarEvents, createCalendarEvent, updateCalendarEvent, deleteCalendarEvent } from '../scholarshipProviderApi';
 import apiService from '../apiService';
 jest.mock('../apiService');
 
@@ -127,11 +127,59 @@ describe('scholarshipProviderApi.updateScholarship', () => {
 });
 
 describe('getCalendarEvents', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
   it('calls correct endpoint and returns events', async () => {
     const mockEvents = [{ id: 1, title: 'Test Event' }];
     (apiService.get as jest.Mock).mockResolvedValue({ data: { data: mockEvents } });
     const result = await getCalendarEvents();
     expect(apiService.get).toHaveBeenCalledWith('/scholarship-providers/calendar-events');
     expect(result).toEqual(mockEvents);
+  });
+});
+
+describe('createCalendarEvent', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
+  it('calls correct endpoint with data', async () => {
+    const mockData = { title: 'New Event', start_date: '2025-01-01' };
+    const mockEvent = { id: 1, ...mockData };
+    (apiService.post as jest.Mock).mockResolvedValue({ data: mockEvent });
+    const result = await createCalendarEvent(mockData);
+    expect(apiService.post).toHaveBeenCalledWith('/scholarship-providers/calendar-events', mockData);
+    expect(result).toEqual(mockEvent);
+  });
+});
+
+describe('updateCalendarEvent', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
+  it('calls correct endpoint with id and data', async () => {
+    const id = 1;
+    const mockData = { title: 'Updated Event' };
+    const mockEvent = { id, ...mockData };
+    (apiService.put as jest.Mock).mockResolvedValue({ data: mockEvent });
+    const result = await updateCalendarEvent(id, mockData);
+    expect(apiService.put).toHaveBeenCalledWith(`/scholarship-providers/calendar-events/${id}`, mockData);
+    expect(result).toEqual(mockEvent);
+  });
+});
+
+describe('deleteCalendarEvent', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
+  it('calls correct endpoint with id', async () => {
+    const id = 1;
+    (apiService.delete as jest.Mock).mockResolvedValue({ data: {} });
+    await deleteCalendarEvent(id);
+    expect(apiService.delete).toHaveBeenCalledWith(`/scholarship-providers/calendar-events/${id}`);
   });
 });

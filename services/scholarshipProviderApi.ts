@@ -823,47 +823,6 @@ export const scholarshipProviderApi = {
     });
   },
 
-  async createCalendarEvent(data: { title: string; description?: string; start_date: string; end_date?: string; color?: string; is_all_day?: boolean }): Promise<ProviderCalendarEvent> {
-    const res = await request<any>({
-      method: "POST",
-      url: "/scholarship-providers/calendar-events",
-      data,
-    });
-    return res.data;
-  },
-
-  async getCalendarEvents(): Promise<ProviderCalendarEvent[]> {
-    const res = await request<any>({
-      method: "GET",
-      url: "/scholarship-providers/calendar-events",
-    });
-    return res.data;
-  },
-
-  async getCalendarEventById(id: number): Promise<ProviderCalendarEvent> {
-    const res = await request<any>({
-      method: "GET",
-      url: `/scholarship-providers/calendar-events/${id}`,
-    });
-    return res.data;
-  },
-
-  async updateCalendarEvent(id: number, data: { title: string; description?: string; start_date: string; end_date?: string; color?: string; is_all_day?: boolean }): Promise<ProviderCalendarEvent> {
-    const res = await request<any>({
-      method: "PUT",
-      url: `/scholarship-providers/calendar-events/${id}`,
-      data,
-    });
-    return res.data;
-  },
-
-  async deleteCalendarEvent(id: number): Promise<void> {
-    await request<any>({
-      method: "DELETE",
-      url: `/scholarship-providers/calendar-events/${id}`,
-    });
-  },
-
   async createResult(data: { scholarship_id: number; title: string; status?: string; results?: any }): Promise<ProviderResult> {
     const res = await request<any>({
       method: "POST",
