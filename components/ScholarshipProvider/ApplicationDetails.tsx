@@ -193,6 +193,29 @@ export default function ApplicationDetails({ applicationId, onBack, onStatusUpda
             </div>
           )}
 
+          {/* Documents */}
+          {application.documents && application.documents.length > 0 && (
+            <div className="bg-white rounded-xl border border-slate-200 p-6">
+              <h4 className="text-sm font-bold text-slate-400 uppercase tracking-wider mb-4 flex items-center gap-2">
+                <FileText className="w-4 h-4" /> Documents
+              </h4>
+              <div className="space-y-2">
+                {application.documents.map((doc: any, index: number) => (
+                  <a
+                    key={index}
+                    href={doc.url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex items-center gap-2 p-2 rounded-lg hover:bg-slate-50 text-blue-600 hover:text-blue-700"
+                  >
+                    <FileText className="w-4 h-4" />
+                    <span className="text-sm font-medium">{doc.name}</span>
+                  </a>
+                ))}
+              </div>
+            </div>
+          )}
+
           {/* Quick Actions */}
           <div className="bg-white rounded-xl border border-slate-200 p-6">
             <h4 className="text-sm font-bold text-slate-400 uppercase tracking-wider mb-4">Quick Actions</h4>
