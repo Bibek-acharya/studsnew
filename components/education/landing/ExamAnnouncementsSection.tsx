@@ -1,6 +1,7 @@
 "use client";
 
-import { useState } from "react";
+import { useState, type MouseEvent, type SyntheticEvent } from "react";
+import Image from "next/image";
 import {
   BadgeCheck,
   MapPin,
@@ -12,19 +13,18 @@ import {
   Users,
   Bell,
   Send,
-  PlayCircle,
   Flame,
   Monitor,
   Globe,
   TrendingUp,
   Building,
   BadgeCheckIcon,
-  Paperclip,
   FileText,
 } from "lucide-react";
+import HoverTooltip from "./HoverTooltip";
 
 interface ExamAnnouncementsSectionProps {
-  onNavigate: (view: string, data?: any) => void;
+  onNavigate: (view: string, data?: { [key: string]: unknown }) => void;
 }
 
 const exams = [
@@ -135,11 +135,12 @@ const exams = [
 ];
 
 const ExamAnnouncementsSection: React.FC<ExamAnnouncementsSectionProps> = ({
-  onNavigate,
+  onNavigate: _onNavigate,
 }) => {
+  void _onNavigate;
   const [bookmarked, setBookmarked] = useState<Set<number>>(new Set());
 
-  const toggleBookmark = (e: React.MouseEvent, id: number) => {
+  const toggleBookmark = (e: MouseEvent<HTMLButtonElement>, id: number) => {
     e.stopPropagation();
     setBookmarked((prev) => {
       const next = new Set(prev);
@@ -168,15 +169,22 @@ const ExamAnnouncementsSection: React.FC<ExamAnnouncementsSectionProps> = ({
           {exams.map((exam) => (
             <article
               key={exam.id}
-              className="bg-white rounded-md p-4 sm:p-5 border border-gray-200 flex flex-col h-full hover:border-blue-500/20 transition-all duration-300"
+              className="bg-white rounded-xl p-4 sm:p-5 border border-gray-200 flex flex-col h-full hover:border-blue-500/20 transition-all duration-300"
             >
               <header className="flex justify-between items-start mb-4 sm:mb-5">
                 <div className="flex gap-2.5 sm:gap-3">
                   <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-md border border-gray-200 flex items-center justify-center bg-white shrink-0">
-                    <img
+                    <Image
                       src={exam.logo}
                       alt={exam.institution}
+                      width={48}
+                      height={48}
+                      unoptimized
                       className="max-w-full max-h-full object-contain rounded-md"
+                      onError={(e: SyntheticEvent<HTMLImageElement>) => {
+                        e.currentTarget.src =
+                          "https://placehold.co/48x48/f1f5f9/94a3b8?text=Logo";
+                      }}
                     />
                   </div>
                   <div className="flex flex-col min-w-0">
@@ -211,9 +219,11 @@ const ExamAnnouncementsSection: React.FC<ExamAnnouncementsSectionProps> = ({
               </header>
 
               <main className="grow">
-                <h4 className="text-[15px] xs:text-[16px] sm:text-[17px] font-bold text-[#111827] mb-2.5 sm:mb-3 leading-tight hover:text-[#0000ff]">
-                  {exam.title}
-                </h4>
+                <HoverTooltip label={exam.title}>
+                  <h4 className="text-[15px] xs:text-[16px] sm:text-[17px] font-bold text-[#111827] mb-2.5 sm:mb-3 leading-tight hover:text-[#0000ff]">
+                    {exam.title}
+                  </h4>
+                </HoverTooltip>
 
                 <div className="flex flex-wrap gap-1.5 sm:gap-2 mb-3 sm:mb-4">
                   {exam.tags.map((tag, tIdx) => (
@@ -283,21 +293,23 @@ const ExamAnnouncementsSection: React.FC<ExamAnnouncementsSectionProps> = ({
                   <button className="flex items-center justify-center gap-1.5 py-1.5 sm:py-2 px-2 sm:px-3 border border-[#e2e8f0] text-[#475569] font-bold text-[11px] xs:text-[12px] rounded-md hover:bg-gray-50 transition-colors">
                     <Bell className="w-3.5 h-3.5" /> Notify
                   </button>
-                  <button
-                    className={`w-9 sm:w-10 shrink-0 rounded-md flex items-center justify-center transition-all duration-200 ${
-                      bookmarked.has(exam.id)
-                        ? "border-blue-200 bg-blue-50"
-                        : "bg-white border border-[#e2e8f0] text-[#94a3b8] hover:bg-[#f8fafc] hover:text-[#64748b]"
-                    }`}
-                    title={
-                      bookmarked.has(exam.id) ? "Remove Bookmark" : "Bookmark"
-                    }
-                    onClick={(e) => toggleBookmark(e, exam.id)}
+                  <HoverTooltip
+                    label={bookmarked.has(exam.id) ? "Remove Bookmark" : "Bookmark"}
                   >
-                    <Bookmark
-                      className={`w-3.5 h-3.5 sm:w-4 sm:h-4 ${bookmarked.has(exam.id) ? "text-[#0000ff] fill-[#0000ff]" : ""}`}
-                    />
-                  </button>
+                    <button
+                      className={`w-9 sm:w-10 shrink-0 rounded-md flex items-center justify-center transition-all duration-200 ${
+                        bookmarked.has(exam.id)
+                          ? "border-blue-200 bg-blue-50"
+                          : "bg-white border border-[#e2e8f0] text-[#94a3b8] hover:bg-[#f8fafc] hover:text-[#64748b]"
+                      }`}
+                      onClick={(e) => toggleBookmark(e, exam.id)}
+                      aria-label={bookmarked.has(exam.id) ? "Remove Bookmark" : "Bookmark"}
+                    >
+                      <Bookmark
+                        className={`w-3.5 h-3.5 sm:w-4 sm:h-4 ${bookmarked.has(exam.id) ? "text-[#0000ff] fill-[#0000ff]" : ""}`}
+                      />
+                    </button>
+                  </HoverTooltip>
                 </div>
               </div>
             </article>

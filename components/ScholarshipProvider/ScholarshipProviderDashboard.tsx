@@ -26,6 +26,9 @@ const BlogDirectory = dynamic(() => import('./BlogDirectory'));
 const Calendar = dynamic(() => import('./Calendar'));
 const ResultPublish = dynamic(() => import('./ResultPublish'));
 const ShortlistManagement = dynamic(() => import('./ShortlistManagement'));
+const CustomizeForm = dynamic(() => import('./CustomizeForm'));
+const DraftScholarship = dynamic(() => import('./DraftScholarship'));
+const WrittenExam = dynamic(() => import('./WrittenExam'));
 
 interface DashboardProps {
   onLogout?: () => void;
@@ -133,6 +136,12 @@ const ScholarshipProviderDashboard: React.FC<DashboardProps> = ({ onLogout }) =>
         return <ResultPublish />;
       case 'sec-shortlist':
         return <ShortlistManagement />;
+      case 'sec-written-exam':
+        return <WrittenExam />;
+      case 'sec-customize-form':
+        return <CustomizeForm />;
+      case 'sec-draft-scholarship':
+        return <DraftScholarship onEdit={handleEditScholarship} onNavigate={navigateTo} />;
       default:
         return <DashboardOverview onNavigate={navigateTo} />;
     }

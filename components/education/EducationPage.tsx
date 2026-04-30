@@ -41,6 +41,10 @@ const EducationPage: React.FC<EducationPageProps> = ({
       router.push("/counseling");
     } else if (view === "collegeRecommenderTool") {
       router.push("/college-recommender");
+    } else if (view === "scholarshipRecommenderTool") {
+      router.push("/scholarship-recommender");
+    } else if (view === "collegeDetails" && data?.id) {
+      router.push(`/find-college/${data.id}`);
     } else if (view.startsWith("http")) {
       window.open(view, "_blank");
     } else {

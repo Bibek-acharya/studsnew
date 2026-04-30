@@ -8,6 +8,7 @@ import {
   Handshake, Buildings, Download, Plus, Trash,
 } from "@phosphor-icons/react";
 import { scholarshipProviderApi } from "../../services/scholarshipProviderApi";
+import FileUpload from "./common/FileUpload";
 import type {
   VideoTutorial, JourneyTimelineItem, ScholarshipTypeItem,
   SelectionRubricItem, SelectionProcessStepItem, FAQItem,
@@ -52,6 +53,7 @@ const emptyDownload = (): DownloadItem => ({ title: "", description: "" });
 const CreateScholarship: React.FC<CreateScholarshipProps> = memo(({ scholarshipId, onNavigate }: CreateScholarshipProps) => {
   const [pageTitle, setPageTitle] = useState("");
   const [bannerBgUrl, setBannerBgUrl] = useState("");
+  const [bannerBgPreview, setBannerBgPreview] = useState("");
   const [aboutParagraph1, setAboutParagraph1] = useState("");
   const [aboutParagraph2, setAboutParagraph2] = useState("");
   const [videoTutorials, setVideoTutorials] = useState<VideoTutorial[]>([]);
@@ -89,6 +91,7 @@ const CreateScholarship: React.FC<CreateScholarshipProps> = memo(({ scholarshipI
     scholarshipProviderApi.getScholarshipById(scholarshipId).then((s) => {
       setPageTitle(s.title || "");
       setBannerBgUrl(s.banner_background_image_url || "");
+      setBannerBgPreview(s.banner_background_image_url || "");
       setAboutParagraph1(s.about_paragraph_1 || "");
       setAboutParagraph2(s.about_paragraph_2 || "");
       setVideoTutorials(s.video_tutorials || []);
@@ -134,6 +137,16 @@ const CreateScholarship: React.FC<CreateScholarshipProps> = memo(({ scholarshipI
 
   const addStringItem = (setter: React.Dispatch<React.SetStateAction<string[]>>, value: string) => {
     if (value.trim()) setter((prev) => [...prev, value.trim()]);
+  };
+
+  const handleBannerFileSelect = (file: File) => {
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      const dataUrl = e.target?.result as string;
+      setBannerBgPreview(dataUrl);
+      setBannerBgUrl(dataUrl);
+    };
+    reader.readAsDataURL(file);
   };
 
   const handleSave = useCallback(async (draft: boolean = false) => {
@@ -281,9 +294,14 @@ const CreateScholarship: React.FC<CreateScholarshipProps> = memo(({ scholarshipI
               value={pageTitle} onChange={(e) => setPageTitle(e.target.value)} />
           </div>
           <div>
-            <label className="input-label">Banner Background Image URL</label>
-            <input type="url" className="input-field" placeholder="https://example.com/banner.jpg"
-              value={bannerBgUrl} onChange={(e) => setBannerBgUrl(e.target.value)} />
+            <label className="input-label">Banner Background Image</label>
+            <FileUpload
+              accept="image/*"
+              maxSize="5MB"
+              recommendedSize="1920x400"
+              onFileSelect={handleBannerFileSelect}
+              previewUrl={bannerBgPreview}
+            />
           </div>
         </div>
       </div>

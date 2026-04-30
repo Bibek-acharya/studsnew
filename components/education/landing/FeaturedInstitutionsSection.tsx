@@ -1,18 +1,20 @@
 "use client";
 
-import { useState } from "react";
+import { useState, type MouseEvent, type SyntheticEvent } from "react";
+import Image from "next/image";
 import { Star, MapPin, Award, MessageSquare, Bookmark, BadgeCheckIcon, Globe } from "lucide-react";
 import { College } from "@/services/api";
+import HoverTooltip from "./HoverTooltip";
 
 interface FeaturedInstitutionsSectionProps {
-  onNavigate: (view: string, data?: any) => void;
+  onNavigate: (view: string, data?: { [key: string]: unknown }) => void;
   featuredColleges?: College[];
 }
 
 const FeaturedInstitutionsSection: React.FC<FeaturedInstitutionsSectionProps> = ({ onNavigate, featuredColleges = [] }) => {
   const [bookmarked, setBookmarked] = useState<Set<string | number>>(new Set());
 
-  const colleges = featuredColleges.length
+  const colleges: College[] = featuredColleges.length
     ? featuredColleges
     : [
       {
@@ -61,7 +63,7 @@ const FeaturedInstitutionsSection: React.FC<FeaturedInstitutionsSectionProps> = 
       }
     ];
 
-  const toggleBookmark = (e: React.MouseEvent, id: string | number) => {
+  const toggleBookmark = (e: MouseEvent<HTMLButtonElement>, id: string | number) => {
     e.stopPropagation();
     setBookmarked(prev => {
       const next = new Set(prev);
@@ -102,37 +104,43 @@ const FeaturedInstitutionsSection: React.FC<FeaturedInstitutionsSectionProps> = 
 const CollegeCard: React.FC<{
   college: College;
   isBookmarked: boolean;
-  onNavigate: (view: string, data?: any) => void;
-  onToggleBookmark: (e: React.MouseEvent, id: string | number) => void;
+  onNavigate: (view: string, data?: { [key: string]: unknown }) => void;
+  onToggleBookmark: (e: MouseEvent<HTMLButtonElement>, id: string | number) => void;
 }> = ({ college, isBookmarked, onNavigate, onToggleBookmark }) => {
-  const hasLongDescription = (college.description?.length ?? 0) > 80;
 
   return (
     <div
-      className="bg-white rounded-md p-4 border border-gray-100 flex flex-col h-full hover:border-blue-500/20 transition-all duration-300 cursor-pointer"
-      onClick={() => onNavigate("collegeDetails", college)}
+      className="bg-white rounded-xl p-4 border border-gray-200 flex flex-col h-full hover:border-blue-500/20 transition-all duration-300 cursor-pointer"
+      onClick={() => onNavigate("collegeDetails", { id: college.id, name: college.name })}
     >
-      <div className="w-full h-30 rounded-md overflow-hidden mb-4 relative">
-        <div className="absolute top-3 left-3 bg-brand-blue text-white text-[10px] font-bold px-2 py-0.5 rounded uppercase tracking-wider z-10 ">
+        <div className="w-full h-30 rounded-md overflow-hidden mb-4 relative">
+          <div className="absolute top-3 left-3 bg-brand-blue text-white text-[10px] font-bold px-2 py-0.5 rounded uppercase tracking-wider z-10 ">
           Featured
-        </div>
-        <img
-          src={college.image_url}
+          </div>
+        <Image
+          src={college.image_url || "https://placehold.co/600x400/f1f5f9/94a3b8?text=Image+Unavailable"}
           alt={college.name}
-          className="w-full h-full object-cover"
-          onError={(e: any) => { e.target.src = 'https://placehold.co/600x400/f1f5f9/94a3b8?text=Image+Unavailable' }}
+          fill
+          unoptimized
+          sizes="(max-width: 768px) 100vw, 25vw"
+          className="object-cover"
+          onError={(e: SyntheticEvent<HTMLImageElement>) => {
+            e.currentTarget.src = "https://placehold.co/600x400/f1f5f9/94a3b8?text=Image+Unavailable";
+          }}
         />
       </div>
 
-      <div className="flex items-center gap-1.5 mb-2">
-        <h2
-          className="text-[20px] font-bold text-slate-800 tracking-tight hover:text-blue-600 transition-colors line-clamp-1"
-          onClick={(e) => e.stopPropagation()}
-        >
-          {college.name}
-        </h2>
-        <BadgeCheckIcon className="w-5 h-5 text-white fill-blue-500 shrink-0" />
-      </div>
+      <HoverTooltip label={college.name}>
+        <div className="flex items-center gap-1.5 mb-2">
+          <h2
+            className="text-[20px] font-bold text-slate-800 tracking-tight hover:text-blue-600 transition-colors line-clamp-1"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {college.name}
+          </h2>
+          <BadgeCheckIcon className="w-5 h-5 text-white fill-blue-500 shrink-0" />
+        </div>
+      </HoverTooltip>
 
       <div className="flex items-center text-[14px] text-gray-500 mb-2">
         <div className="flex items-center gap-1 font-bold text-slate-700">
@@ -177,7 +185,7 @@ const CollegeCard: React.FC<{
      
 
         <div className="flex gap-2">
-          <button className="bg-brand-blue flex-1 flex items-center justify-center gap-1.5 border border-gray-200 hover:bg-brand-hover text-white font-medium py-2 px-2 rounded-md transition-colors text-[13px] cursor-pointer" onClick={(e) => { e.stopPropagation(); onNavigate("collegeDetails", college); }}>
+          <button className="bg-brand-blue flex-1 flex items-center justify-center gap-1.5 border border-gray-200 hover:bg-brand-hover text-white font-medium py-2 px-2 rounded-md transition-colors text-[13px] cursor-pointer" onClick={(e) => { e.stopPropagation(); onNavigate("collegeDetails", { id: college.id, name: college.name }); }}>
             View Detail
           </button>
           <button
@@ -187,17 +195,19 @@ const CollegeCard: React.FC<{
             <MessageSquare className="w-4 h-4 text-gray-500" />
             Inquiry
           </button>
-          <button
-            className={`w-10 flex items-center justify-center border rounded-md transition-colors shrink-0 ${
-              isBookmarked
-                ? "border-blue-50 bg-blue-50"
-                : "border-gray-200 hover:bg-gray-50"
-            }`}
-            title={isBookmarked ? "Remove Bookmark" : "Bookmark"}
-            onClick={(e) => onToggleBookmark(e, college.id)}
-          >
-            <Bookmark className={`w-4 h-4 transition-all ${isBookmarked ? "text-[#0000ff] fill-[#0000ff]" : "text-gray-400"}`} />
-          </button>
+          <HoverTooltip label={isBookmarked ? "Remove Bookmark" : "Bookmark"}>
+            <button
+              className={`w-10 flex items-center justify-center border rounded-md transition-colors shrink-0 ${
+                isBookmarked
+                  ? "border-blue-50 bg-blue-50"
+                  : "border-gray-200 hover:bg-gray-50"
+              }`}
+              onClick={(e) => onToggleBookmark(e, college.id)}
+              aria-label={isBookmarked ? "Remove Bookmark" : "Bookmark"}
+            >
+              <Bookmark className={`w-4 h-4 transition-all ${isBookmarked ? "text-[#0000ff] fill-[#0000ff]" : "text-gray-400"}`} />
+            </button>
+          </HoverTooltip>
         </div>
       </div>
     </div>

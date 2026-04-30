@@ -1372,7 +1372,7 @@ export const apiService = {
     preference_role: string;
     preference_flow: string;
     preferences: Record<string, any>;
-  }, _token: string): Promise<any> {
+  }, _token?: string): Promise<any> {
     const response = await fetch(`${API_BASE_URL}/api/v1/preferences`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },

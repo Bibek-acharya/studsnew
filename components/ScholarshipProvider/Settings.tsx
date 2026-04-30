@@ -1,143 +1,165 @@
 "use client";
 
-import React, { useState, useEffect, useCallback } from "react";
-import { Settings as SettingsIcon, Mail, Shield, Key } from "lucide-react";
-import SectionCard from "./common/SectionCard";
-import InputField from "./common/InputField";
-import ToggleSwitch from "./common/ToggleSwitch";
-import Button from "./common/Button";
-import { scholarshipProviderApi, ProviderSettings } from "@/services/scholarshipProviderApi";
+import React, { useState, memo } from "react";
+import { Home, Mail, Key, Bell } from "lucide-react";
 
-export default function Settings() {
-  const [settings, setSettings] = useState<ProviderSettings | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [currentPassword, setCurrentPassword] = useState("");
+const Settings: React.FC = memo(() => {
+  const [currentEmail, setCurrentEmail] = useState("admin@sowersaction.org.np");
+  const [newEmail, setNewEmail] = useState("");
+  const [confirmPass, setConfirmPass] = useState("");
+  const [curPassword, setCurPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
-  const [confirmPassword, setConfirmPassword] = useState("");
-  const [success, setSuccess] = useState("");
-  const [error, setError] = useState("");
-  const [saving, setSaving] = useState(false);
+  const [conNewPassword, setConNewPassword] = useState("");
+  const [notifs, setNotifs] = useState({ email: true, newApp: true, payment: true, deadline: true, result: true });
+  const [twoFA, setTwoFA] = useState(false);
 
-  useEffect(() => {
-    async function fetchSettings() {
-      try {
-        const res = await scholarshipProviderApi.getSettings();
-        setSettings(res);
-      } catch {
-        setSettings(null);
-      } finally {
-        setLoading(false);
-      }
-    }
-    fetchSettings();
-  }, []);
-
-  const updateSetting = useCallback(async (key: keyof ProviderSettings, value: any) => {
-    if (!settings) return;
-    const updated = { ...settings, [key]: value };
-    try {
-      await scholarshipProviderApi.updateSettings({
-        email_notifications: updated.email_notifications,
-        sms_notifications: updated.sms_notifications,
-        auto_reject_expired: updated.auto_reject_expired,
-        timezone: updated.timezone,
-        language: updated.language,
-      });
-      setSettings(updated);
-      setSuccess("Settings updated!");
-      setTimeout(() => setSuccess(""), 2000);
-    } catch {
-      setError("Failed to update settings");
-      setTimeout(() => setError(""), 2000);
-    }
-  }, [settings]);
-
-  const handlePasswordUpdate = useCallback(() => {
-    if (!currentPassword || !newPassword || !confirmPassword) {
-      setError("All password fields are required.");
-      return;
-    }
-    if (newPassword !== confirmPassword) {
-      setError("New passwords do not match.");
-      return;
-    }
-    if (newPassword.length < 6) {
-      setError("Password must be at least 6 characters.");
-      return;
-    }
-    setError("");
-    setSuccess("Password updated successfully!");
-    setCurrentPassword("");
-    setNewPassword("");
-    setConfirmPassword("");
-    setTimeout(() => setSuccess(""), 3000);
-  }, [currentPassword, newPassword, confirmPassword]);
-
-  if (loading) {
-    return <div className="py-12 text-center text-slate-500">Loading settings...</div>;
-  }
+  const Toggle = ({ checked, onChange }: { checked: boolean; onChange: (v: boolean) => void }) => (
+    <label className="relative inline-flex items-center cursor-pointer flex-shrink-0">
+      <input type="checkbox" className="sr-only peer" checked={checked} onChange={(e) => onChange(e.target.checked)} />
+      <div className="w-11 h-6 bg-gray-300 rounded-full peer peer-checked:bg-blue-600 after:content-[''] after:absolute after:top-0.5 after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:after:translate-x-full"></div>
+    </label>
+  );
 
   return (
     <div className="space-y-6">
-      {/* General Settings */}
-      <SectionCard>
-        <h2 className="text-lg font-bold text-slate-900 mb-6 flex items-center gap-2">
-          <SettingsIcon className="w-5 h-5 text-blue-600" /> General Settings
-        </h2>
-        <div className="space-y-4">
-          <ToggleSwitch
-            checked={settings?.email_notifications ?? true}
-            onChange={(v) => updateSetting("email_notifications", v)}
-            label="Email Notifications"
-            description="Receive email updates"
-          />
-          <ToggleSwitch
-            checked={settings?.sms_notifications ?? false}
-            onChange={(v) => updateSetting("sms_notifications", v)}
-            label="SMS Notifications"
-            description="Receive SMS alerts"
-          />
-          <ToggleSwitch
-            checked={settings?.auto_reject_expired ?? false}
-            onChange={(v) => updateSetting("auto_reject_expired", v)}
-            label="Auto-reject Expired"
-            description="Automatically reject expired applications"
-          />
-          <div className="flex items-center justify-between p-4 bg-slate-50 rounded-lg">
-            <div>
-              <p className="font-medium text-slate-900">Two-Factor Authentication</p>
-              <p className="text-sm text-slate-500">Extra security for your account</p>
-            </div>
-            <button className="text-blue-600 font-medium text-sm hover:underline">Enable</button>
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-2">
+        <h1 className="text-2xl font-bold text-gray-800">Settings</h1>
+        <div className="flex items-center text-sm text-gray-500 mt-2 sm:mt-0 gap-2">
+          <Home className="w-4 h-4" />
+          <span>Dashboard</span>
+          <span>-</span>
+          <span className="text-gray-800 font-medium">Settings</span>
+        </div>
+      </div>
+
+      {/* Change Email */}
+      <div className="bg-white rounded-lg p-8 border border-slate-100">
+        <div className="flex justify-between items-center mb-6">
+          <h2 className="text-lg font-bold text-gray-900 flex items-center gap-2">
+            <Mail className="w-5 h-5 text-blue-600" /> Change Email
+          </h2>
+          <button onClick={() => alert("Email updated successfully!")} className="px-4 py-2 bg-blue-600 text-white rounded-lg text-sm font-semibold hover:bg-blue-700 transition-colors">Update Email</button>
+        </div>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1.5">Current Email</label>
+            <input type="email" className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm bg-gray-50" value={currentEmail} disabled />
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1.5">New Email Address</label>
+            <input type="email" className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:border-blue-500" placeholder="Enter new email address" value={newEmail} onChange={(e) => setNewEmail(e.target.value)} />
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1.5">Confirm Password</label>
+            <input type="password" className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:border-blue-500" placeholder="Enter current password to confirm" value={confirmPass} onChange={(e) => setConfirmPass(e.target.value)} />
           </div>
         </div>
-      </SectionCard>
+      </div>
 
       {/* Change Password */}
-      <SectionCard>
-        <h2 className="text-lg font-bold text-slate-900 mb-6 flex items-center gap-2">
-          <Key className="w-5 h-5 text-blue-600" /> Change Password
-        </h2>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <div className="bg-white rounded-lg p-8 border border-slate-100">
+        <div className="flex justify-between items-center mb-6">
+          <h2 className="text-lg font-bold text-gray-900 flex items-center gap-2">
+            <Key className="w-5 h-5 text-indigo-600" /> Change Password
+          </h2>
+          <button onClick={() => alert("Password changed successfully!")} className="px-4 py-2 bg-blue-600 text-white rounded-lg text-sm font-semibold hover:bg-blue-700 transition-colors">Update Password</button>
+        </div>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
           <div>
-            <InputField label="Current Password" type="password" value={currentPassword} onChange={(e) => setCurrentPassword(e.target.value)} />
+            <label className="block text-sm font-medium text-gray-700 mb-1.5">Current Password</label>
+            <input type="password" className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:border-blue-500" placeholder="Enter current password" value={curPassword} onChange={(e) => setCurPassword(e.target.value)} />
           </div>
-          <div></div>
           <div>
-            <InputField label="New Password" type="password" value={newPassword} onChange={(e) => setNewPassword(e.target.value)} />
+            <label className="block text-sm font-medium text-gray-700 mb-1.5">New Password</label>
+            <input type="password" className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:border-blue-500" placeholder="Enter new password" value={newPassword} onChange={(e) => setNewPassword(e.target.value)} />
           </div>
           <div>
-            <InputField label="Confirm Password" type="password" value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} />
+            <label className="block text-sm font-medium text-gray-700 mb-1.5">Confirm New Password</label>
+            <input type="password" className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:border-blue-500" placeholder="Re-enter new password" value={conNewPassword} onChange={(e) => setConNewPassword(e.target.value)} />
           </div>
         </div>
+      </div>
 
-        {error && <div className="mt-4 p-4 bg-red-50 border border-red-200 rounded-lg text-red-700 text-sm">{error}</div>}
-        {success && <div className="mt-4 p-4 bg-green-50 border border-green-200 rounded-lg text-green-700 text-sm">{success}</div>}
+      {/* Notification Settings */}
+      <div className="bg-white rounded-lg p-8 border border-slate-100">
+        <div className="flex justify-between items-center mb-6">
+          <h2 className="text-lg font-bold text-gray-900 flex items-center gap-2">
+            <Bell className="w-5 h-5 text-yellow-600" /> Notification Settings
+          </h2>
+          <button onClick={() => alert("Notification settings saved!")} className="px-4 py-2 bg-blue-600 text-white rounded-lg text-sm font-semibold hover:bg-blue-700 transition-colors">Save Changes</button>
+        </div>
+        <div className="space-y-3">
+          {[
+            { key: "email", label: "Email Notifications", desc: "Send updates to providers and applicants via email" },
+            { key: "newApp", label: "New Application Alert", desc: "Get notified when a new application is submitted" },
+            { key: "payment", label: "Payment Confirmation Alert", desc: "Notify when application fee is received" },
+            { key: "deadline", label: "Deadline Reminder", desc: "Auto-remind applicants 3 days before deadline" },
+            { key: "result", label: "Result Publish Alert", desc: "Notify all applicants when results are published" },
+          ].map((n) => (
+            <div key={n.key} className="flex items-center justify-between p-3 border border-gray-200 rounded-lg">
+              <div>
+                <p className="text-sm font-medium text-gray-900">{n.label}</p>
+                <p className="text-xs text-gray-500">{n.desc}</p>
+              </div>
+              <Toggle checked={(notifs as any)[n.key]} onChange={(v) => setNotifs((prev) => ({ ...prev, [n.key]: v }))} />
+            </div>
+          ))}
+        </div>
+      </div>
 
-        <Button className="mt-4" onClick={handlePasswordUpdate}>
-          <Shield className="w-4 h-4" /> Update Password
-        </Button>
-      </SectionCard>
+      {/* Privacy & Security */}
+      <div className="bg-white rounded-lg p-8 border border-slate-100">
+        <div className="flex justify-between items-center mb-6">
+          <h2 className="text-lg font-bold text-gray-900 flex items-center gap-2">
+            Privacy & Security
+          </h2>
+          <button onClick={() => alert("Security settings saved!")} className="px-4 py-2 bg-blue-600 text-white rounded-lg text-sm font-semibold hover:bg-blue-700 transition-colors">Save Changes</button>
+        </div>
+        <div className="space-y-4">
+          <div className="flex items-center justify-between p-3 border border-gray-200 rounded-lg">
+            <div>
+              <p className="text-sm font-medium text-gray-900">Two-Factor Authentication (2FA)</p>
+              <p className="text-xs text-gray-500">Require OTP for admin logins</p>
+            </div>
+            <Toggle checked={twoFA} onChange={setTwoFA} />
+          </div>
+        </div>
+      </div>
+
+      {/* Maintenance & Data */}
+      <div className="bg-white rounded-lg p-8 border border-slate-100">
+        <div className="flex justify-between items-center mb-6">
+          <h2 className="text-lg font-bold text-gray-900 flex items-center gap-2">
+            Maintenance & Data
+          </h2>
+          <button onClick={() => alert("Maintenance settings saved!")} className="px-4 py-2 bg-blue-600 text-white rounded-lg text-sm font-semibold hover:bg-blue-700 transition-colors">Save Changes</button>
+        </div>
+        <div className="space-y-4">
+          <div className="flex items-center justify-between p-3 border border-gray-200 rounded-lg">
+            <div>
+              <p className="text-sm font-medium text-gray-900">Export All Data</p>
+              <p className="text-xs text-gray-500">Download applications, scholarships, and analytics</p>
+            </div>
+            <button onClick={() => alert("Exporting data...")} className="px-4 py-2 border border-gray-300 rounded-lg text-sm text-gray-700 hover:bg-gray-50 transition-colors">Export CSV</button>
+          </div>
+          <div className="flex items-center justify-between p-3 border border-red-200 rounded-lg bg-red-50">
+            <div>
+              <p className="text-sm font-medium text-red-700">Delete All Data</p>
+              <p className="text-xs text-red-500">Permanently remove all scholarship and application data</p>
+            </div>
+            <button
+              onClick={() => { if (confirm("Are you absolutely sure? This action cannot be undone.")) alert("Data deleted successfully!"); }}
+              className="px-4 py-2 bg-red-600 text-white rounded-lg text-sm hover:bg-red-700 transition-colors"
+            >
+              Delete All
+            </button>
+          </div>
+        </div>
+      </div>
     </div>
   );
-}
+});
+
+Settings.displayName = "Settings";
+
+export default Settings;

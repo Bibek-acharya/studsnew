@@ -1,27 +1,30 @@
 "use client";
 
-import { useState } from "react";
-import { Bookmark, MapPin, GraduationCap, Calendar, Building, CheckCircle2, BadgeCheckIcon } from "lucide-react";
+import { useState, type MouseEvent, type SyntheticEvent } from "react";
+import Image from "next/image";
+import { Bookmark, MapPin, GraduationCap, Calendar, Building, BadgeCheckIcon } from "lucide-react";
 import { ScholarshipItem } from "@/services/api";
+import HoverTooltip from "./HoverTooltip";
 
 interface FinancialAidSectionProps {
-  onNavigate: (view: string, data?: any) => void;
+  onNavigate: (view: string, data?: { [key: string]: unknown }) => void;
   scholarships?: ScholarshipItem[];
 }
 
 const FinancialAidSection: React.FC<FinancialAidSectionProps> = ({ onNavigate, scholarships = [] }) => {
   const [bookmarked, setBookmarked] = useState<Set<number>>(new Set());
 
-  const items = scholarships.length
+  const items = (scholarships.length
     ? scholarships
     : [
       { id: 1, title: "National IT Excellence Scholarship (BSc. CSIT)", provider: "Tribhuvan University, Nepal", type: "MERIT-BASED", status: "Open", amount: "100% Tuition", location: "Bagmati", eligibility: "Bachelor (+2 Sci: 2.8+ GPA)", deadline: "Aug 15, 2026", image: "https://images.unsplash.com/photo-1498050108023-c5249f4df085?q=80&w=600&auto=format&fit=crop" },
       { id: 2, title: "STEM Women Scholars Award", provider: "Kathmandu University", type: "MERIT-BASED", status: "Open", amount: "75% Scholarship", location: "Province 3", eligibility: "Female Students (3.0+ GPA)", deadline: "Sep 20, 2026", image: "https://images.unsplash.com/photo-1523240795612-9a054b0db644?q=80&w=600&auto=format&fit=crop" },
       { id: 3, title: "Social Impact Leadership Grant", provider: "Social Welfare Board", type: "NEED-BASED", status: "Closing", amount: "NRs. 50,000", location: "National", eligibility: "Community Service Record", deadline: "Jul 30, 2026", image: "https://images.unsplash.com/photo-1544652478-6653e09f18a2?q=80&w=600&auto=format&fit=crop" },
       { id: 4, title: "Future Educators Excellence Fund", provider: "Tribhuvan University", type: "MERIT-BASED", status: "Open", amount: "Full Ride", location: "Bagmati", eligibility: "Education Majors", deadline: "Oct 05, 2026", image: "https://images.unsplash.com/photo-1509062522246-3755977927d7?q=80&w=600&auto=format&fit=crop" }
-    ];
+    ])
+    .slice(0, 4);
 
-  const toggleBookmark = (e: React.MouseEvent, id: number) => {
+  const toggleBookmark = (e: MouseEvent<HTMLButtonElement>, id: number) => {
     e.stopPropagation();
     setBookmarked(prev => {
       const next = new Set(prev);
@@ -45,14 +48,19 @@ const FinancialAidSection: React.FC<FinancialAidSectionProps> = ({ onNavigate, s
       {/* Grid Container for Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-5 md:gap-6">
         {items.map((scholarship) => (
-          <div key={scholarship.id} className="bg-white rounded-[14px] sm:rounded-md p-3 sm:p-3.5 border border-[#e2e8f0] flex flex-col h-full group hover:border-blue-500/20 transition-all duration-300">
+          <div key={scholarship.id} className="bg-white rounded-xl sm:rounded-xl p-3 sm:p-3.5 border border-[#e2e8f0] flex flex-col h-full group hover:border-blue-500/20 transition-all duration-300">
             {/* Image Area */}
             <div className="w-full h-30 rounded-[10px] sm:rounded-md overflow-hidden mb-3 sm:mb-4 relative">
-              <img 
-                src={scholarship.image || "https://images.unsplash.com/photo-1498050108023-c5249f4df085?q=80&w=600&auto=format&fit=crop"} 
-                alt={scholarship.title} 
+              <Image
+                src={scholarship.image || "https://images.unsplash.com/photo-1498050108023-c5249f4df085?q=80&w=600&auto=format&fit=crop"}
+                alt={scholarship.title}
+                width={600}
+                height={400}
+                unoptimized
                 className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
-                onError={(e: any) => { e.target.src = "https://placehold.co/600x400/f1f5f9/94a3b8?text=Scholarship"; }} 
+                onError={(e: SyntheticEvent<HTMLImageElement>) => {
+                  e.currentTarget.src = "https://placehold.co/600x400/f1f5f9/94a3b8?text=Scholarship";
+                }}
               />
             </div>
 
@@ -70,12 +78,11 @@ const FinancialAidSection: React.FC<FinancialAidSectionProps> = ({ onNavigate, s
               </div>
 
               {/* Title & Institution */}
-              <h3
-                className="text-[15px] xs:text-[16px] sm:text-[17px] font-bold text-[#0f172a] leading-[1.35] mb-1 sm:mb-1.5 truncate hover:text-[#0000ff]"
-                title={scholarship.title || "Scholarship"}
-              >
-                {scholarship.title || "Scholarship"}
-              </h3>
+              <HoverTooltip label={scholarship.title || "Scholarship"}>
+                <h3 className="text-[15px] xs:text-[16px] sm:text-[17px] font-bold text-[#0f172a] leading-[1.35] mb-1 sm:mb-1.5 truncate hover:text-[#0000ff]">
+                  {scholarship.title || "Scholarship"}
+                </h3>
+              </HoverTooltip>
               <div className="flex items-center text-[12px] xs:text-[13px] sm:text-[13.5px] text-[#64748b] mb-4 sm:mb-5">
                 <Building className="w-3.5 h-3.5 sm:w-4 sm:h-4 mr-1 sm:mr-1.5 shrink-0" />
                 <span className="truncate">{scholarship.provider || "Tribhuvan University, Nepal"}</span>
@@ -120,17 +127,21 @@ const FinancialAidSection: React.FC<FinancialAidSectionProps> = ({ onNavigate, s
                 <button className="flex-1 bg-brand-blue text-white rounded-md py-2 sm:py-2.5 text-[12px] sm:text-[13px] md:text-[14px] font-semibold hover:bg-brand-hover hover: transition-all duration-200">
                   Apply
                 </button>
-                <button
-                  className={`w-9 sm:w-10 md:w-11 shrink-0 rounded-md flex items-center justify-center transition-all duration-200 ${
-                    bookmarked.has(scholarship.id)
-                      ? "border-blue-200 bg-blue-50"
-                      : "bg-white border border-[#cbd5e1] text-[#94a3b8] hover:bg-[#f8fafc] hover:text-[#64748b]"
-                  }`}
-                  title={bookmarked.has(scholarship.id) ? "Remove Bookmark" : "Bookmark"}
-                  onClick={(e) => toggleBookmark(e, scholarship.id)}
+                <HoverTooltip
+                  label={bookmarked.has(scholarship.id) ? "Remove Bookmark" : "Bookmark"}
                 >
-                  <Bookmark className={`w-3.5 h-3.5 sm:w-4 sm:h-4 md:w-4.5 md:h-4.5 ${bookmarked.has(scholarship.id) ? "text-[#0000ff] fill-[#0000ff]" : ""}`} />
-                </button>
+                  <button
+                    className={`w-9 sm:w-10 md:w-11 shrink-0 rounded-md flex items-center justify-center transition-all duration-200 ${
+                      bookmarked.has(scholarship.id)
+                        ? "border-blue-200 bg-blue-50"
+                        : "bg-white border border-[#cbd5e1] text-[#94a3b8] hover:bg-[#f8fafc] hover:text-[#64748b]"
+                    }`}
+                    onClick={(e) => toggleBookmark(e, scholarship.id)}
+                    aria-label={bookmarked.has(scholarship.id) ? "Remove Bookmark" : "Bookmark"}
+                  >
+                    <Bookmark className={`w-3.5 h-3.5 sm:w-4 sm:h-4 md:w-4.5 md:h-4.5 ${bookmarked.has(scholarship.id) ? "text-[#0000ff] fill-[#0000ff]" : ""}`} />
+                  </button>
+                </HoverTooltip>
               </div>
             </div>
           </div>

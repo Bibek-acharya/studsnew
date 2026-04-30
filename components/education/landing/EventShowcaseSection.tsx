@@ -102,7 +102,7 @@ const EventShowcaseSection: React.FC<EventShowcaseSectionProps> = ({ onNavigate,
                     <img
                       src={slide.image}
                       alt={slide.alt}
-                      className="w-full h-[200px] xs:h-[260px] sm:h-[320px] md:h-[380px] lg:h-[420px] object-cover rounded-md md:rounded-md "
+                      className="w-full h-[200px] xs:h-[260px] sm:h-[320px] md:h-[380px] lg:h-[420px] object-cover rounded-xl md:rounded-xl "
                     />
                   </div>
 

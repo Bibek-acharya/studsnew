@@ -12,6 +12,7 @@ interface User {
   phone?: string;
   role: string;
   image_url?: string;
+  current_status?: string;
 }
 
 interface AuthContextType {

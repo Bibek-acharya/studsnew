@@ -2,7 +2,9 @@
 
 import type { SyntheticEvent } from "react";
 import { useRef } from "react";
+import Image from "next/image";
 import { ChevronLeft, ChevronRight } from "lucide-react";
+import HoverTooltip from "./HoverTooltip";
 
 interface CourseCategoriesSectionProps {
   onNavigate: (view: string, data?: { [key: string]: unknown }) => void;
@@ -18,10 +20,26 @@ const courseCategories = [
 ];
 
 const partnerLogos = [
-  "https://kist.edu.np/resources/assets/img/logo_small.jpg",
-  "https://www.trinity.edu.np/assets/backend/uploads/Logo/trinity%20college%20logo.jpg",
-  "https://advancefoundation.edu.np/public/assets/img/logo.jpg",
-  "https://kist.edu.np/resources/assets/img/logo_small.jpg",
+  {
+    id: 1,
+    name: "KIST College",
+    logo: "https://kist.edu.np/resources/assets/img/logo_small.jpg",
+  },
+  {
+    id: 2,
+    name: "Trinity International College",
+    logo: "https://www.trinity.edu.np/assets/backend/uploads/Logo/trinity%20college%20logo.jpg",
+  },
+  {
+    id: 3,
+    name: "Advance Foundation",
+    logo: "https://advancefoundation.edu.np/public/assets/img/logo.jpg",
+  },
+  {
+    id: 4,
+    name: "KIST College",
+    logo: "https://kist.edu.np/resources/assets/img/logo_small.jpg",
+  },
 ];
 
 const CourseCategoriesSection: React.FC<CourseCategoriesSectionProps> = ({ onNavigate }) => {
@@ -82,7 +100,7 @@ const CourseCategoriesSection: React.FC<CourseCategoriesSectionProps> = ({ onNav
           {courseCategories.map((course, idx) => (
             <div
               key={idx}
-              className="course-category-card flex-none w-70 xs:w-75 sm:w-80 bg-white rounded-md snap-start group cursor-pointer border border-blue-500/20 hover:shadow-xs transition-all duration-300 p-3.5 sm:p-4"
+              className="course-category-card flex-none w-70 xs:w-75 sm:w-80 bg-white rounded-xl snap-start group cursor-pointer border border-blue-500/20 hover:shadow-xs transition-all duration-300 p-3.5 sm:p-4"
               onClick={() => onNavigate("courseCategory", { category: course.title })}
             >
               <div className="flex justify-between items-start mb-1">
@@ -96,20 +114,34 @@ const CourseCategoriesSection: React.FC<CourseCategoriesSectionProps> = ({ onNav
               </p>
               <div className="flex gap-1.5 sm:gap-2">
                 {partnerLogos.map((logo, lIdx) => (
-                  <div
-                    key={lIdx}
-                    className="w-10 h-10 sm:w-11 sm:h-11 md:w-12 md:h-12 shrink-0 rounded-md border border-gray-100 flex items-center justify-center p-1 sm:p-1.5  bg-white hover:border-gray-300 transition-colors"
+                  <HoverTooltip
+                    key={`${logo.id}-${lIdx}`}
+                    label={logo.name}
+                    className="w-10 h-10 sm:w-11 sm:h-11 md:w-12 md:h-12 shrink-0"
                   >
-                    <img
-                      src={logo}
-                      alt={`Partner ${lIdx + 1}`}
-                      className="max-w-full max-h-full object-contain mix-blend-multiply rounded-sm"
-                      onError={(e: SyntheticEvent<HTMLImageElement>) => {
-                        e.currentTarget.src =
-                          "https://placehold.co/48x48/f1f5f9/94a3b8?text=Logo";
+                    <button
+                      type="button"
+                      className="w-10 h-10 sm:w-11 sm:h-11 md:w-12 md:h-12 shrink-0 rounded-md border border-gray-100 flex items-center justify-center p-1 sm:p-1.5 bg-white hover:border-gray-300 hover:shadow-sm transition-all cursor-pointer"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        onNavigate("collegeDetails", { id: logo.id });
                       }}
-                    />
-                  </div>
+                      aria-label={`View ${logo.name} details`}
+                    >
+                      <Image
+                        src={logo.logo}
+                        alt={logo.name}
+                        width={48}
+                        height={48}
+                        unoptimized
+                        className="max-w-full max-h-full object-contain mix-blend-multiply rounded-sm"
+                        onError={(e: SyntheticEvent<HTMLImageElement>) => {
+                          e.currentTarget.src =
+                            "https://placehold.co/48x48/f1f5f9/94a3b8?text=Logo";
+                        }}
+                      />
+                    </button>
+                  </HoverTooltip>
                 ))}
               </div>
             </div>

@@ -2,19 +2,13 @@
 
 import React, { useState, useCallback, memo } from "react";
 import dynamic from "next/dynamic";
-import { useRouter } from "next/navigation";
-import { Calendar, Save, UploadCloud, MapPin, Link } from "lucide-react";
-import SectionCard from "./common/SectionCard";
-import InputField from "./common/InputField";
-import SelectField from "./common/SelectField";
-import Button from "./common/Button";
+import { Home, CalendarPlus, UploadCloud } from "lucide-react";
 import { scholarshipProviderApi } from "@/services/scholarshipProviderApi";
 
 const ReactQuill = dynamic(() => import("react-quill-new"), { ssr: false });
 
 const quillModules = {
   toolbar: [
-    [{ header: [1, 2, 3, false] }],
     ["bold", "italic", "underline", "strike"],
     [{ list: "ordered" }, { list: "bullet" }],
     [{ align: [] }],
@@ -23,113 +17,220 @@ const quillModules = {
   ],
 };
 
-const quillFormats = ["header", "bold", "italic", "underline", "strike", "list", "align", "link", "image"];
+const quillFormats = ["bold", "italic", "underline", "strike", "list", "align", "link", "image"];
 
-const EVENT_TYPE_OPTIONS = [
+const EVENT_TYPES = [
   { value: "workshop", label: "Workshop" },
+  { value: "training", label: "Training" },
   { value: "seminar", label: "Seminar" },
-  { value: "webinar", label: "Webinar" },
   { value: "conference", label: "Conference" },
-  { value: "deadline", label: "Deadline" },
+  { value: "program", label: "Program" },
+  { value: "ceremony", label: "Ceremony" },
+  { value: "webinar", label: "Webinar" },
+  { value: "meeting", label: "Meeting" },
+];
+
+const CATEGORIES = [
+  { value: "education", label: "Education" },
+  { value: "leadership", label: "Leadership" },
+  { value: "community", label: "Community" },
+  { value: "health", label: "Health" },
+  { value: "fundraising", label: "Fundraising" },
 ];
 
 const CreateEvent: React.FC = memo(() => {
-  const router = useRouter();
   const [title, setTitle] = useState("");
   const [eventType, setEventType] = useState("");
-  const [date, setDate] = useState("");
-  const [time, setTime] = useState("");
-  const [location, setLocation] = useState("");
-  const [registrationLink, setRegistrationLink] = useState("");
+  const [category, setCategory] = useState("");
+  const [eventDate, setEventDate] = useState("");
+  const [startTime, setStartTime] = useState("");
+  const [endTime, setEndTime] = useState("");
+  const [maxParticipants, setMaxParticipants] = useState("");
+  const [venue, setVenue] = useState("");
+  const [onlineLink, setOnlineLink] = useState("");
+  const [organizedBy, setOrganizedBy] = useState("Sowers Action Nepal");
+  const [contactPerson, setContactPerson] = useState("");
+  const [contactEmail, setContactEmail] = useState("");
+  const [shortDesc, setShortDesc] = useState("");
   const [description, setDescription] = useState("");
+  const [tags, setTags] = useState("");
+  const [enableRegistration, setEnableRegistration] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
 
   const handleSave = useCallback(async (draft: boolean) => {
-    if (!title.trim() || !date) return;
+    if (!title.trim() || !eventDate) { setError("Title and date are required"); return; }
     setSubmitting(true);
     setError("");
     setSuccess("");
     try {
-      const startDateTime = time ? `${date}T${time}:00` : `${date}T00:00:00`;
+      const startDateTime = startTime ? `${eventDate}T${startTime}:00` : `${eventDate}T00:00:00`;
+      const endDateTime = endTime ? `${eventDate}T${endTime}:00` : startDateTime;
       await scholarshipProviderApi.createEvent({
         name: title,
-        description,
+        description: description || shortDesc,
         event_type: eventType,
         start_date: startDateTime,
-        end_date: startDateTime,
-        location,
+        end_date: endDateTime,
+        location: venue,
         status: draft ? "draft" : "upcoming",
       });
       setSuccess(draft ? "Draft saved!" : "Event published!");
-      setTimeout(() => router.push("/scholarship-provider"), 1500);
     } catch (err: any) {
       setError(err.message || "Failed to save event");
     } finally {
       setSubmitting(false);
     }
-  }, [title, date, time, eventType, description, location, router]);
+  }, [title, eventDate, startTime, endTime, eventType, venue, description, shortDesc]);
 
   return (
     <div className="space-y-6">
-      <SectionCard>
-        <h2 className="text-lg font-bold text-slate-900 mb-6 flex items-center gap-2">
-          <Calendar className="w-5 h-5 text-blue-600" /> Create Event
-        </h2>
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-2">
+        <h1 className="text-2xl font-bold text-gray-800">Create Event</h1>
+        <div className="flex items-center text-sm text-gray-500 mt-2 sm:mt-0 gap-2">
+          <Home className="w-4 h-4" />
+          <span>Dashboard</span>
+          <span>-</span>
+          <span className="text-gray-800 font-medium">Create Event</span>
+        </div>
+      </div>
+
+      <div className="bg-white rounded-lg p-8 border border-slate-100">
+        <div className="flex justify-between items-center mb-6">
+          <h2 className="text-lg font-bold text-gray-900 flex items-center gap-2">
+            <CalendarPlus className="w-5 h-5 text-blue-600" /> Create Event
+          </h2>
+          <div className="flex gap-2">
+            <button
+              onClick={() => handleSave(true)}
+              disabled={submitting}
+              className="px-4 py-2 bg-slate-100 text-slate-700 border border-slate-200 rounded-lg text-sm font-semibold hover:bg-slate-200 transition-colors"
+            >
+              Draft
+            </button>
+            <button
+              onClick={() => handleSave(false)}
+              disabled={submitting || !title.trim() || !eventDate}
+              className="px-4 py-2 bg-blue-600 text-white rounded-lg text-sm font-semibold hover:bg-blue-700 transition-colors"
+            >
+              Publish
+            </button>
+          </div>
+        </div>
 
         <div className="space-y-6">
-          <InputField label="Event Name" required placeholder="Enter event name" value={title} onChange={(e) => setTitle(e.target.value)} />
-
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <SelectField label="Event Type" required value={eventType} onChange={(e) => setEventType(e.target.value)} options={EVENT_TYPE_OPTIONS} />
-            <InputField label="Date" required type="date" value={date} onChange={(e) => setDate(e.target.value)} />
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <InputField label="Time" type="time" value={time} onChange={(e) => setTime(e.target.value)} />
+            <div className="md:col-span-2">
+              <label className="block text-sm font-medium text-gray-700 mb-1.5">Event Title <span className="text-red-500">*</span></label>
+              <input type="text" className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:border-blue-500" placeholder="Enter event title" value={title} onChange={(e) => setTitle(e.target.value)} />
+            </div>
             <div>
-              <label className="block text-sm font-medium text-slate-700 mb-1.5">Location</label>
-              <div className="relative">
-                <MapPin className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
-                <input type="text" className="w-full pl-10 pr-3.5 py-2.5 border border-slate-200 rounded-md text-sm focus:outline-none focus:border-blue-600" placeholder="Event location" value={location} onChange={(e) => setLocation(e.target.value)} />
-              </div>
+              <label className="block text-sm font-medium text-gray-700 mb-1.5">Event Type <span className="text-red-500">*</span></label>
+              <select className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:border-blue-500" value={eventType} onChange={(e) => setEventType(e.target.value)}>
+                <option value="">Select Type</option>
+                {EVENT_TYPES.map((t) => <option key={t.value} value={t.value}>{t.label}</option>)}
+              </select>
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1.5">Category</label>
+              <select className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:border-blue-500" value={category} onChange={(e) => setCategory(e.target.value)}>
+                <option value="">Select Category</option>
+                {CATEGORIES.map((c) => <option key={c.value} value={c.value}>{c.label}</option>)}
+              </select>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1.5">Event Date <span className="text-red-500">*</span></label>
+              <input type="date" className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:border-blue-500" value={eventDate} onChange={(e) => setEventDate(e.target.value)} />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1.5">Start Time</label>
+              <input type="time" className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:border-blue-500" value={startTime} onChange={(e) => setStartTime(e.target.value)} />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1.5">End Time</label>
+              <input type="time" className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:border-blue-500" value={endTime} onChange={(e) => setEndTime(e.target.value)} />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1.5">Maximum Participants</label>
+              <input type="number" className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:border-blue-500" placeholder="e.g., 50" value={maxParticipants} onChange={(e) => setMaxParticipants(e.target.value)} />
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1.5">Venue/Location <span className="text-red-500">*</span></label>
+              <input type="text" className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:border-blue-500" placeholder="e.g., Sowers Action Nepal Office, Kathmandu" value={venue} onChange={(e) => setVenue(e.target.value)} />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1.5">Online Meeting Link</label>
+              <input type="url" className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:border-blue-500" placeholder="https://zoom.us/j/..." value={onlineLink} onChange={(e) => setOnlineLink(e.target.value)} />
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1.5">Organized By <span className="text-red-500">*</span></label>
+              <input type="text" className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:border-blue-500" placeholder="e.g., Sowers Action Nepal" value={organizedBy} onChange={(e) => setOrganizedBy(e.target.value)} />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1.5">Contact Person</label>
+              <input type="text" className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:border-blue-500" placeholder="Contact name" value={contactPerson} onChange={(e) => setContactPerson(e.target.value)} />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1.5">Contact Email</label>
+              <input type="email" className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:border-blue-500" placeholder="events@example.com" value={contactEmail} onChange={(e) => setContactEmail(e.target.value)} />
             </div>
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-slate-700 mb-1.5">Registration Link</label>
-            <div className="relative">
-              <Link className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
-              <input type="url" className="w-full pl-10 pr-3.5 py-2.5 border border-slate-200 rounded-md text-sm focus:outline-none focus:border-blue-600" placeholder="https://..." value={registrationLink} onChange={(e) => setRegistrationLink(e.target.value)} />
+            <label className="block text-sm font-medium text-gray-700 mb-1.5">Featured Image <span className="text-red-500">*</span></label>
+            <div className="border-2 border-dashed border-gray-200 rounded-lg py-6 text-center cursor-pointer hover:border-blue-500 hover:bg-blue-50 transition-all">
+              <UploadCloud className="w-8 h-8 text-gray-400 mx-auto mb-2" />
+              <p className="text-sm text-gray-600">Click to upload or drag and drop</p>
+              <p className="text-xs text-gray-400 mt-1">PNG, JPG up to 5MB (1200x630 recommended)</p>
             </div>
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-slate-700 mb-1.5">Featured Image</label>
-            <div className="border-2 border-dashed border-slate-200 rounded-md py-6 flex flex-col items-center justify-center cursor-pointer hover:border-blue-600 hover:bg-blue-50 transition-all">
-              <UploadCloud className="w-12 h-12 text-slate-400 mx-auto mb-3" />
-              <p className="text-sm font-medium text-slate-700">Click to upload or drag and drop</p>
-              <p className="text-xs text-slate-500 mt-1">PNG, JPG up to 5MB (1200x630 recommended)</p>
+            <label className="block text-sm font-medium text-gray-700 mb-1.5">Short Description / Summary <span className="text-red-500">*</span></label>
+            <div className="border border-gray-200 rounded-lg overflow-hidden">
+              <ReactQuill theme="snow" value={shortDesc} onChange={setShortDesc} modules={quillModules} formats={quillFormats} className="bg-white" />
             </div>
+            <p className="text-xs text-gray-500 text-right mt-1">{shortDesc.replace(/<[^>]*>/g, "").length}/300 characters</p>
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-slate-700 mb-1.5">Description</label>
-            <div className="border border-slate-200 rounded-lg overflow-hidden">
+            <label className="block text-sm font-medium text-gray-700 mb-1.5">Full Event Description <span className="text-red-500">*</span></label>
+            <div className="border border-gray-200 rounded-lg overflow-hidden">
               <ReactQuill theme="snow" value={description} onChange={setDescription} modules={quillModules} formats={quillFormats} className="bg-white" />
             </div>
           </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1.5">Tags</label>
+              <input type="text" className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:border-blue-500" placeholder="event, workshop, nepal (comma separated)" value={tags} onChange={(e) => setTags(e.target.value)} />
+            </div>
+            <div className="flex items-center justify-between p-4 border border-gray-200 rounded-lg">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-0">Enable Registration</label>
+                <p className="text-xs text-gray-500">Allow users to register for this event</p>
+              </div>
+              <label className="relative inline-flex items-center cursor-pointer">
+                <input type="checkbox" className="sr-only peer" checked={enableRegistration} onChange={(e) => setEnableRegistration(e.target.checked)} />
+                <div className="w-11 h-6 bg-gray-200 peer-focus:ring-4 peer-focus:ring-blue-100 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
+              </label>
+            </div>
+          </div>
         </div>
-      </SectionCard>
+      </div>
 
       {error && <div className="p-4 bg-red-50 border border-red-200 rounded-lg text-red-700 text-sm">{error}</div>}
       {success && <div className="p-4 bg-green-50 border border-green-200 rounded-lg text-green-700 text-sm">{success}</div>}
-
-      <div className="flex justify-end gap-4">
-        <Button variant="outline" onClick={() => handleSave(true)} disabled={submitting}><Save className="w-4 h-4" /> Save Draft</Button>
-        <Button onClick={() => handleSave(false)} disabled={submitting || !title.trim() || !date}><Calendar className="w-4 h-4" /> Publish Event</Button>
-      </div>
     </div>
   );
 });

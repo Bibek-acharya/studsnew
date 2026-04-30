@@ -5,6 +5,7 @@ export interface EducationNavbarProps {
     last_name: string;
     email: string;
     role: string;
+    current_status?: string;
   } | null;
   onLogout?: () => void;
 }

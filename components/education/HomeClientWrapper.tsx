@@ -13,7 +13,7 @@ interface HomeClientWrapperProps {
 }
 
 export default function HomeClientWrapper({ children }: HomeClientWrapperProps) {
-  const { isAuthenticated, loading } = useAuth();
+  const { isAuthenticated, loading, setUser, user } = useAuth();
   const [showOnboarding, setShowOnboarding] = useState(false);
   const [checkedBackend, setCheckedBackend] = useState(false);
 
@@ -29,7 +29,12 @@ export default function HomeClientWrapper({ children }: HomeClientWrapperProps) 
         const response = await apiService.getProfile();
         const profileData = response.data;
         const onboardingCompleted = profileData?.preferences?.onboarding_completed || false;
-        
+        const currentStatus = profileData?.preferences?.preferences?.current_status;
+
+        if (currentStatus && user) {
+          setUser({ ...user, current_status: currentStatus as string });
+        }
+
         if (!onboardingCompleted) {
           setShowOnboarding(true);
         }

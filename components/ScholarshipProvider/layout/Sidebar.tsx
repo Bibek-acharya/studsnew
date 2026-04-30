@@ -15,6 +15,7 @@ import {
   ShieldCheck,
   Settings,
   LogOut,
+  Award,
 } from "lucide-react";
 
 interface SidebarProps {
@@ -29,6 +30,7 @@ const Sidebar: React.FC<SidebarProps> = ({ activeTab, onNavigate, onLogout }) =>
     news: false,
     events: false,
     blog: false,
+    evaluation: false,
   });
 
   const toggleDropdown = (key: string) => {
@@ -61,10 +63,10 @@ const Sidebar: React.FC<SidebarProps> = ({ activeTab, onNavigate, onLogout }) =>
               onNavigate(section);
             }
           }}
-          className={`flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium transition-all cursor-pointer mb-1 ${
+          className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all cursor-pointer ${
             isActive
               ? "bg-blue-50 text-blue-600"
-              : "text-slate-500 hover:bg-blue-50 hover:text-blue-600"
+              : "text-gray-700 hover:bg-blue-50 hover:text-blue-600"
           }`}
         >
           <Icon className="w-5 h-5" />
@@ -96,7 +98,7 @@ const Sidebar: React.FC<SidebarProps> = ({ activeTab, onNavigate, onLogout }) =>
         className={`pl-10 pr-4 py-2 text-sm transition-all cursor-pointer ${
           isActive
             ? "text-blue-600 font-medium"
-            : "text-slate-500 hover:text-blue-600"
+            : "text-gray-500 hover:text-blue-600"
         }`}
       >
         {label}
@@ -105,16 +107,16 @@ const Sidebar: React.FC<SidebarProps> = ({ activeTab, onNavigate, onLogout }) =>
   };
 
   return (
-    <aside className="w-[280px] bg-white border-r border-slate-200 fixed left-0 top-0 bottom-0 overflow-y-auto z-50">
-      <div className="p-5 border-b border-slate-200 flex items-center justify-center">
+    <aside className="w-[280px] bg-white border-r border-gray-200 fixed left-0 top-0 bottom-0 overflow-y-auto z-50">
+      <div className="h-16 flex items-center px-6 border-b border-gray-50">
         <img
           src="https://test.studsphere.com/_next/image?url=%2Fstudsphere.png&w=3840&q=75"
           alt="StudSphere Logo"
-          className="h-12 w-auto"
+          className="h-10 w-auto"
         />
       </div>
 
-      <nav className="p-4">
+      <nav className="py-4 px-4 flex flex-col gap-1">
         <NavItem
           icon={LayoutDashboard}
           label="Dashboard"
@@ -127,22 +129,12 @@ const Sidebar: React.FC<SidebarProps> = ({ activeTab, onNavigate, onLogout }) =>
           section="sec-scholarship-dropdown"
           dropdown="scholarship"
         >
-          <DropdownItem
-            label="Create Scholarship"
-            section="sec-create-scholarship"
-          />
-          <DropdownItem
-            label="Scholarship Directory"
-            section="sec-scholarship-directory"
-          />
-          <DropdownItem
-            label="Manage Application"
-            section="sec-applications"
-          />
-          <DropdownItem
-            label="Manage Shortlist"
-            section="sec-shortlist"
-          />
+          <DropdownItem label="Create Scholarship" section="sec-create-scholarship" />
+          <DropdownItem label="Customize Form" section="sec-customize-form" />
+          <DropdownItem label="Draft Scholarship" section="sec-draft-scholarship" />
+          <DropdownItem label="Scholarship Directory" section="sec-scholarship-directory" />
+          <DropdownItem label="Manage Application" section="sec-applications" />
+          <DropdownItem label="Manage Shortlist" section="sec-shortlist" />
         </NavItem>
 
         <NavItem
@@ -199,10 +191,15 @@ const Sidebar: React.FC<SidebarProps> = ({ activeTab, onNavigate, onLogout }) =>
         <NavItem icon={BarChart3} label="Analytics" section="sec-reports" />
 
         <NavItem
-          icon={FileCheck}
-          label="Result Publish"
-          section="sec-results"
-        />
+          icon={Award}
+          label="Evaluation & Results"
+          section="sec-evaluation-dropdown"
+          dropdown="evaluation"
+        >
+          <DropdownItem label="Written Exam" section="sec-written-exam" />
+          <DropdownItem label="Interview" section="sec-interviews" />
+          <DropdownItem label="Final Result" section="sec-results" />
+        </NavItem>
 
         <NavItem
           icon={ShieldCheck}

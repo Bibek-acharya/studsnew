@@ -30,13 +30,13 @@ const SmarterToolsSection: React.FC<SmarterToolsSectionProps> = ({ onNavigate })
       <p className="text-gray-500 text-[13px] sm:text-[14px] md:text-[15px] leading-relaxed mb-6 sm:mb-8 grow">
         Filter thousands of institutions by location, major, tuition, and ranking to find your perfect match.
       </p>
-      <button className="w-full bg-[#24c75e] hover:bg-[#1fb354] text-white font-semibold py-3 sm:py-3.5 px-4 rounded-md transition-colors duration-200 text-[13px] sm:text-[14px] md:text-[15px]">
+      <button className="w-full bg-[#24c75e] hover:bg-[#1fb354] text-white font-semibold py-3 sm:py-3.5 px-4 rounded-md cursor-pointer transition-colors duration-200 text-[13px] sm:text-[14px] md:text-[15px]">
         Find My Match
       </button>
     </div>
 
     <div
-      className="bg-white rounded-xl p-7 card-shadow flex flex-col h-full hover:-translate-y-1 border border-gray-200 hover:border-blue-500/20 transition-transform duration-300"
+      className="bg-white rounded-xl p-7 card-shadow flex flex-col h-full hover:-translate-y-1 border border-gray-200 hover:border-blue-500/20 cursor-pointer transition-transform duration-300"
       onClick={() => onNavigate("scholarshipFinderTool")}
     >
       <div className="w-14 h-14 rounded-xl bg-[#fdf6e3] flex items-center justify-center mb-6">
@@ -82,7 +82,7 @@ const SmarterToolsSection: React.FC<SmarterToolsSectionProps> = ({ onNavigate })
       <p className="text-gray-500 text-[13px] sm:text-[14px] md:text-[15px] leading-relaxed mb-6 sm:mb-8 grow">
         Get personalized scholarship recommendations based on your profile and preferences.
       </p>
-      <button className="w-full bg-brand-blue hover:bg-brand-hover text-white font-semibold py-3 sm:py-3.5 px-4 rounded-md transition-colors duration-200 text-[13px] sm:text-[14px] md:text-[15px]">
+      <button className="w-full bg-brand-blue hover:bg-brand-hover text-white font-semibold py-3 sm:py-3.5 px-4 cursor-pointer rounded-md transition-colors duration-200 text-[13px] sm:text-[14px] md:text-[15px]">
         Find My Scholarship
       </button>
     </div>

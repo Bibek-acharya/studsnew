@@ -4,6 +4,7 @@ import type { SyntheticEvent } from "react";
 import { useRef } from "react";
 import { ChevronLeft, ChevronRight, Clock } from "lucide-react";
 import { EducationNewsItem } from "@/services/api";
+import HoverTooltip from "./HoverTooltip";
 
 interface NewsStoriesSectionProps {
   onNavigate: (view: string, data?: { [key: string]: unknown }) => void;
@@ -136,7 +137,7 @@ const NewsStoriesSection: React.FC<NewsStoriesSectionProps> = ({ onNavigate, new
             {data.map((card, index) => (
               <article
                 key={index}
-                className="min-w-65 xs:min-w-70 sm:min-w-75 md:min-w-[320px] max-w-75 xs:max-w-[320px] sm:max-w-85 w-full shrink-0 snap-start bg-white rounded-md border border-gray-200 hover:border-blue-500/20 flex flex-col hover:-translate-y-1 transition-all duration-300 group cursor-pointer p-3.5 sm:p-4"
+                className="min-w-65 xs:min-w-70 sm:min-w-75 md:min-w-[320px] max-w-75 xs:max-w-[320px] sm:max-w-85 w-full shrink-0 snap-start bg-white rounded-xl border border-gray-200 hover:border-blue-500/20 flex flex-col hover:-translate-y-1 transition-all duration-300 group cursor-pointer p-3.5 sm:p-4"
                 onClick={() => onNavigate("newsDetails", card)}
               >
                 <div className="mb-2.5 sm:mb-3">
@@ -155,9 +156,11 @@ const NewsStoriesSection: React.FC<NewsStoriesSectionProps> = ({ onNavigate, new
                     }}
                   />
                 </div>
-                <h3 className="text-[17px] xs:text-[18px] sm:text-[19px] font-semibold text-gray-900 group-hover:text-brand-blue transition-all duration-300 tracking-tight mb-1 sm:mb-2 leading-snug line-clamp-2">
-                  {card.title}
-                </h3>
+                <HoverTooltip label={card.title}>
+                  <h3 className="text-[17px] xs:text-[18px] sm:text-[19px] font-semibold text-gray-900 group-hover:text-brand-blue transition-all duration-300 tracking-tight mb-1 sm:mb-2 leading-snug line-clamp-2">
+                    {card.title}
+                  </h3>
+                </HoverTooltip>
                 <p className="text-xs sm:text-sm text-gray-500 mb-5 sm:mb-6 grow line-clamp-3 leading-relaxed">
                   {card.description}
                 </p>

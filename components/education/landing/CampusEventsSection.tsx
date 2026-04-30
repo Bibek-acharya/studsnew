@@ -3,6 +3,7 @@
 import type { SyntheticEvent } from "react";
 import { useRef } from "react";
 import { ChevronLeft, ChevronRight, Calendar, Users, Gift, BadgeCheck, Briefcase } from "lucide-react";
+import HoverTooltip from "./HoverTooltip";
 
 interface CampusEventsSectionProps {
   onNavigate: (view: string, data?: { [key: string]: unknown }) => void;
@@ -115,7 +116,7 @@ const CampusEventsSection: React.FC<CampusEventsSectionProps> = ({ onNavigate })
           {events.map((event, index) => (
             <div
               key={index}
-              className="w-[80vw] xs:w-[70vw] sm:w-[calc(50%-10px)] md:w-[calc(50%-12px)] lg:w-[calc(25%-18px)] shrink-0 rounded-md border border-gray-200 bg-white overflow-hidden flex flex-col snap-start transition-shadow duration-300 group cursor-pointer"
+              className="w-[80vw] xs:w-[70vw] sm:w-[calc(50%-10px)] md:w-[calc(50%-12px)] lg:w-[calc(25%-18px)] shrink-0 rounded-xl border border-gray-200 bg-white overflow-hidden flex flex-col snap-start transition-shadow duration-300 group cursor-pointer"
               onClick={() => onNavigate("eventDetails", event)}
             >
               {/* Top Banner */}
@@ -144,10 +145,14 @@ const CampusEventsSection: React.FC<CampusEventsSectionProps> = ({ onNavigate })
                     />
                   </div>
                   <div>
-                    <h4 className="font-bold text-gray-900 text-sm xs:text-base sm:text-base md:text-base leading-tight group-hover:text-[#0000ff] transition-colors">
-                      {event.title}
-                    </h4>
-                    <p className="text-[11px] xs:text-[12px] sm:text-[13px] text-gray-500 mt-0.5">{event.location}</p>
+                    <HoverTooltip label={event.title}>
+                      <h4 className="font-bold text-gray-900 text-sm xs:text-base sm:text-base md:text-base leading-tight group-hover:text-[#0000ff] transition-colors">
+                        {event.title}
+                      </h4>
+                    </HoverTooltip>
+                    <HoverTooltip label={event.location}>
+                      <p className="text-[11px] xs:text-[12px] sm:text-[13px] text-gray-500 mt-0.5">{event.location}</p>
+                    </HoverTooltip>
                   </div>
                 </div>
 

@@ -1,174 +1,127 @@
 "use client";
 
-import React, { useState, useEffect, useCallback, memo } from "react";
-import { ShieldCheck, Users, Save, Edit, Trash2 } from "lucide-react";
-import SectionCard from "./common/SectionCard";
-import SelectField from "./common/SelectField";
-import ToggleSwitch from "./common/ToggleSwitch";
-import Button from "./common/Button";
-import Avatar from "./common/Avatar";
-import Badge from "./common/Badge";
-import { scholarshipProviderApi, ProviderAccess } from "@/services/scholarshipProviderApi";
+import React, { useState, memo } from "react";
+import { Home, Users, Plus, Pencil, Trash2, Search, X, ShieldCheck, UserPlus } from "lucide-react";
 
-const ROLE_OPTIONS = [
-  { value: "", label: "Select role" },
-  { value: "admin", label: "Administrator" },
-  { value: "editor", label: "Editor" },
-  { value: "viewer", label: "Viewer" },
-  { value: "scholarship_manager", label: "Scholarship Manager" },
-  { value: "content_manager", label: "Content Manager" },
+interface AccessUser {
+  id: number;
+  name: string;
+  email: string;
+  role: string;
+  roleLabel: string;
+  status: string;
+  lastActive: string;
+  avatar: string;
+}
+
+const INITIAL_USERS: AccessUser[] = [
+  { id: 1, name: "Rajesh Hamal", email: "rajesh@sowersaction.org.np", role: "admin", roleLabel: "Admin", status: "Active", lastActive: "2 min ago", avatar: "https://i.pravatar.cc/150?img=11" },
+  { id: 2, name: "Anita Sharma", email: "anita@sowersaction.org.np", role: "manager", roleLabel: "Manager", status: "Active", lastActive: "1 hour ago", avatar: "https://i.pravatar.cc/150?img=5" },
+  { id: 3, name: "Bikash Gurung", email: "bikash@sowersaction.org.np", role: "editor", roleLabel: "Editor", status: "Active", lastActive: "3 hours ago", avatar: "https://i.pravatar.cc/150?img=12" },
+  { id: 4, name: "Sunita Lama", email: "sunita@sowersaction.org.np", role: "viewer", roleLabel: "Viewer", status: "Pending", lastActive: "Never", avatar: "https://i.pravatar.cc/150?img=32" },
 ];
 
-const roleVariant = (role: string) => {
-  if (role === "admin") return "purple";
-  if (role === "editor") return "blue";
-  if (role === "scholarship_manager") return "indigo";
-  return "gray";
+
+const STATUS_COLORS: Record<string, string> = {
+  Active: "bg-green-100 text-green-700",
+  Pending: "bg-yellow-100 text-yellow-700",
+  Inactive: "bg-red-100 text-red-700",
 };
 
-const statusVariant = (status: string) => (status === "active" ? "green" : "yellow");
+const PERMISSIONS = [
+  { id: "scholarships", label: "Manage Scholarships", desc: "Create, edit, and delete scholarships" },
+  { id: "applications", label: "Manage Applications", desc: "View, approve, and reject applications" },
+  { id: "shortlists", label: "Manage Shortlists", desc: "Add and remove shortlisted applicants" },
+  { id: "messages", label: "Message", desc: "Send and receive messages" },
+  { id: "news", label: "Manage News", desc: "Create, edit, and publish news" },
+  { id: "events", label: "Manage Events", desc: "Create, edit, and manage events" },
+  { id: "blogs", label: "Manage Blogs", desc: "Create, edit, and publish blog posts" },
+  { id: "profile", label: "Manage Profile", desc: "Edit organization profile details" },
+  { id: "analytics", label: "Analytics", desc: "View analytics and reports" },
+  { id: "evaluation", label: "Evaluation & Results", desc: "Manage written exam, interview, and final results" },
+  { id: "access", label: "Assign Access", desc: "Manage user permissions and roles" },
+  { id: "settings", label: "Settings", desc: "Configure system settings" },
+];
 
 const AssignAccess: React.FC = memo(() => {
-  const [email, setEmail] = useState("");
-  const [selectedRole, setSelectedRole] = useState("");
-  const [permissions, setPermissions] = useState({
-    scholarship: true,
-    application: true,
-    content: false,
-    user: false,
-    analytics: true,
-    settings: false,
-  });
-  const [success, setSuccess] = useState("");
-  const [error, setError] = useState("");
-  const [accessList, setAccessList] = useState<ProviderAccess[]>([]);
+  const [users, setUsers] = useState(INITIAL_USERS);
+  const [search, setSearch] = useState("");
+  const [addModalOpen, setAddModalOpen] = useState(false);
+  const [permModalOpen, setPermModalOpen] = useState(false);
+  const [permUserName, setPermUserName] = useState("");
+  const [newName, setNewName] = useState("");
+  const [newEmail, setNewEmail] = useState("");
+  const [newPassword, setNewPassword] = useState("");
+  const [permissions, setPermissions] = useState<Record<string, boolean>>({});
 
-  useEffect(() => {
-    async function fetchAccess() {
-      try {
-        const res = await scholarshipProviderApi.getAccess(1, 50);
-        setAccessList(res.access);
-      } catch {
-        setAccessList([]);
-      }
-    }
-    fetchAccess();
-  }, []);
+  const filtered = search ? users.filter((u) => u.name.toLowerCase().includes(search.toLowerCase()) || u.email.includes(search)) : users;
 
-  const handlePermissionChange = useCallback((key: keyof typeof permissions) => (value: boolean) => {
-    setPermissions((prev) => ({ ...prev, [key]: value }));
-  }, []);
-
-  const handleAssign = useCallback(async () => {
-    if (!email.trim() || !selectedRole) return;
-    setError("");
-    setSuccess("");
-    try {
-      const created = await scholarshipProviderApi.createAccess({
-        email: email.trim(),
-        role: selectedRole,
-      });
-      setAccessList((prev) => [...prev, created]);
-      setSuccess("Access assigned successfully!");
-      setEmail("");
-      setSelectedRole("");
-      setTimeout(() => setSuccess(""), 3000);
-    } catch (err: any) {
-      setError(err.message || "Failed to assign access");
-    }
-  }, [email, selectedRole]);
-
-  const handleDelete = useCallback(async (id: number) => {
-    if (!confirm("Remove this access?")) return;
-    try {
-      await scholarshipProviderApi.deleteAccess(id);
-      setAccessList((prev) => prev.filter((a) => a.id !== id));
-    } catch {
-      alert("Failed to remove access");
-    }
-  }, []);
+  const openPermModal = (name: string) => {
+    setPermUserName(name);
+    setPermModalOpen(true);
+  };
 
   return (
     <div className="space-y-6">
-      <SectionCard>
-        <h2 className="text-lg font-bold text-slate-900 mb-6 flex items-center gap-2">
-          <ShieldCheck className="w-5 h-5 text-blue-600" /> Assign Access
-        </h2>
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-2">
+        <h1 className="text-2xl font-bold text-gray-800">Assign Access</h1>
+        <div className="flex items-center text-sm text-gray-500 mt-2 sm:mt-0 gap-2">
+          <Home className="w-4 h-4" />
+          <span>Dashboard</span>
+          <span>-</span>
+          <span className="text-gray-800 font-medium">Assign Access</span>
+        </div>
+      </div>
 
-        <div className="space-y-6">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div>
-              <label className="block text-sm font-medium text-slate-700 mb-1.5">Email</label>
-              <input type="email" className="w-full px-3.5 py-2.5 border border-slate-200 rounded-md text-sm focus:outline-none focus:border-blue-600" placeholder="user@example.com" value={email} onChange={(e) => setEmail(e.target.value)} />
+      <div className="bg-white rounded-lg p-8 border border-slate-100">
+        <div className="flex justify-between items-center mb-6">
+          <h2 className="text-lg font-bold text-gray-900 flex items-center gap-2">
+            <Users className="w-5 h-5 text-purple-600" /> Users with Access
+          </h2>
+          <div className="flex items-center gap-3">
+            <div className="relative w-64">
+              <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                <Search className="w-4 h-4 text-gray-400" />
+              </div>
+              <input type="text" className="w-full pl-10 pr-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:border-blue-500" placeholder="Search users..." value={search} onChange={(e) => setSearch(e.target.value)} />
             </div>
-            <SelectField label="Role" required value={selectedRole} onChange={(e) => setSelectedRole(e.target.value)} options={ROLE_OPTIONS} />
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium text-slate-700 mb-3">Permissions</label>
-            <div className="border border-slate-200 rounded-lg divide-y divide-slate-100">
-              {[
-                { key: "scholarship" as const, title: "Scholarship Management", desc: "Create, edit, and manage scholarships" },
-                { key: "application" as const, title: "Application Review", desc: "Review and approve scholarship applications" },
-                { key: "content" as const, title: "Content Management", desc: "Manage news, blogs, and events" },
-                { key: "user" as const, title: "User Management", desc: "Manage users and assign roles" },
-                { key: "analytics" as const, title: "Analytics & Reports", desc: "View analytics and generate reports" },
-                { key: "settings" as const, title: "Settings Management", desc: "Modify system settings and configurations" },
-              ].map(({ key, title, desc }) => (
-                <div key={key} className="p-4">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="font-medium text-slate-900">{title}</p>
-                      <p className="text-sm text-slate-500">{desc}</p>
-                    </div>
-                    <ToggleSwitch checked={permissions[key]} onChange={handlePermissionChange(key)} />
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-
-          {error && <div className="p-4 bg-red-50 border border-red-200 rounded-lg text-red-700 text-sm font-medium">{error}</div>}
-          {success && <div className="p-4 bg-green-50 border border-green-200 rounded-lg text-green-700 text-sm font-medium">{success}</div>}
-
-          <div className="flex justify-end gap-4">
-            <Button variant="outline">Cancel</Button>
-            <Button onClick={handleAssign} disabled={!email.trim() || !selectedRole}><ShieldCheck className="w-4 h-4" /> Assign Access</Button>
+            <button onClick={() => setAddModalOpen(true)} className="px-4 py-2 bg-blue-600 text-white rounded-lg text-sm font-semibold hover:bg-blue-700 transition-colors flex items-center gap-1">
+              <Plus className="w-4 h-4" /> Add User
+            </button>
           </div>
         </div>
-      </SectionCard>
 
-      <SectionCard>
-        <h2 className="text-lg font-bold text-slate-900 mb-6 flex items-center gap-2">
-          <Users className="w-5 h-5 text-blue-600" /> Current Access Holders
-        </h2>
-        <div className="bg-white rounded-lg border border-slate-200 overflow-hidden">
-          <table className="w-full text-sm">
-            <thead className="bg-slate-50 border-b border-slate-200">
+        <div className="overflow-x-auto" style={{ maxWidth: "100%" }}>
+          <table className="w-full text-sm" style={{ minWidth: "700px" }}>
+            <thead className="bg-gray-50 border-b border-gray-200">
               <tr>
-                <th className="text-left py-3 px-4 font-semibold text-slate-700">Email</th>
-                <th className="text-center py-3 px-4 font-semibold text-slate-700">Role</th>
-                <th className="text-center py-3 px-4 font-semibold text-slate-700">Status</th>
-                <th className="text-center py-3 px-4 font-semibold text-slate-700">Actions</th>
+                <th className="text-left py-3 px-4 font-semibold text-gray-700">User</th>
+                <th className="text-left py-3 px-4 font-semibold text-gray-700">Email</th>
+                <th className="text-center py-3 px-4 font-semibold text-gray-700">Status</th>
+                <th className="text-center py-3 px-4 font-semibold text-gray-700">Last Active</th>
+                <th className="text-center py-3 px-4 font-semibold text-gray-700">Actions</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-100">
-              {accessList.length === 0 ? (
-                <tr><td colSpan={4} className="py-8 text-center text-slate-500">No access holders</td></tr>
-              ) : accessList.map((holder) => (
-                <tr key={holder.id} className="hover:bg-slate-50">
+            <tbody className="divide-y divide-gray-100">
+              {filtered.length === 0 ? (
+                <tr><td colSpan={5} className="py-8 text-center text-gray-500">No users found</td></tr>
+              ) : filtered.map((u) => (
+                <tr key={u.id} className="hover:bg-gray-50">
                   <td className="py-3 px-4">
                     <div className="flex items-center gap-3">
-                      <Avatar name={holder.email} size="sm" />
-                      <span className="font-medium text-slate-900">{holder.email}</span>
+                      <img className="h-8 w-8 rounded-full object-cover border border-gray-200" src={u.avatar} alt={u.name} />
+                      <p className="font-medium text-gray-900">{u.name}</p>
                     </div>
                   </td>
-                  <td className="text-center py-3 px-4"><Badge variant={roleVariant(holder.role) as any}>{holder.role}</Badge></td>
-                  <td className="text-center py-3 px-4"><Badge variant={statusVariant(holder.status) as any}>{holder.status}</Badge></td>
+                  <td className="py-3 px-4 text-gray-600">{u.email}</td>
+                  <td className="text-center py-3 px-4">
+                    <span className={`px-2 py-1 rounded text-xs font-semibold ${STATUS_COLORS[u.status] || "bg-gray-100 text-gray-700"}`}>{u.status}</span>
+                  </td>
+                  <td className="text-center py-3 px-4 text-gray-500">{u.lastActive}</td>
                   <td className="text-center py-3 px-4">
                     <div className="flex items-center justify-center gap-2">
-                      <button className="p-1.5 hover:bg-blue-50 rounded text-blue-600 transition-colors"><Edit className="w-4 h-4" /></button>
-                      <button className="p-1.5 hover:bg-red-50 rounded text-red-600 transition-colors" onClick={() => handleDelete(holder.id)}><Trash2 className="w-4 h-4" /></button>
+                      <button onClick={() => openPermModal(u.name)} className="p-1.5 hover:bg-blue-50 rounded text-blue-600" title="Edit Access"><Pencil className="w-4 h-4" /></button>
+                      <button onClick={() => setUsers((prev) => prev.filter((x) => x.id !== u.id))} className="p-1.5 hover:bg-red-50 rounded text-red-600" title="Remove"><Trash2 className="w-4 h-4" /></button>
                     </div>
                   </td>
                 </tr>
@@ -176,7 +129,73 @@ const AssignAccess: React.FC = memo(() => {
             </tbody>
           </table>
         </div>
-      </SectionCard>
+        <div className="flex items-center justify-between mt-6">
+          <p className="text-sm text-gray-500">Showing <span className="font-medium">{filtered.length}</span> users</p>
+        </div>
+      </div>
+
+      {addModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
+          <div className="bg-white rounded-lg max-w-md w-full overflow-hidden shadow-xl">
+            <div className="flex items-center justify-between px-6 py-4 border-b border-gray-200">
+              <h2 className="text-lg font-bold text-gray-900 flex items-center gap-2"><UserPlus className="w-5 h-5 text-blue-600" /> Add New User</h2>
+              <button onClick={() => setAddModalOpen(false)} className="p-2 hover:bg-gray-100 rounded-lg"><X className="w-5 h-5" /></button>
+            </div>
+            <div className="p-6 space-y-5">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1.5">Full Name <span className="text-red-500">*</span></label>
+                <input type="text" className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Enter full name" value={newName} onChange={(e) => setNewName(e.target.value)} />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1.5">Email Address <span className="text-red-500">*</span></label>
+                <input type="email" className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="user@example.com" value={newEmail} onChange={(e) => setNewEmail(e.target.value)} />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1.5">Password <span className="text-red-500">*</span></label>
+                <input type="password" className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Enter password" value={newPassword} onChange={(e) => setNewPassword(e.target.value)} />
+              </div>
+            </div>
+            <div className="flex justify-end gap-3 px-6 py-4 border-t border-gray-200">
+              <button onClick={() => setAddModalOpen(false)} className="px-6 py-2.5 border border-gray-300 rounded-lg text-gray-700 font-medium hover:bg-gray-50">Cancel</button>
+              <button onClick={() => { setAddModalOpen(false); openPermModal(newName || "New User"); }} className="px-6 py-2.5 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700">Continue</button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {permModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
+          <div className="bg-white rounded-lg max-w-2xl w-full max-h-[85vh] overflow-y-auto shadow-xl">
+            <div className="flex items-center justify-between px-6 py-4 border-b border-gray-200">
+              <h2 className="text-lg font-bold text-gray-900 flex items-center gap-2"><ShieldCheck className="w-5 h-5 text-green-600" /> Assign Permissions</h2>
+              <button onClick={() => setPermModalOpen(false)} className="p-2 hover:bg-gray-100 rounded-lg"><X className="w-5 h-5" /></button>
+            </div>
+            <div className="p-6">
+              <div className="bg-blue-50 rounded-lg p-4 mb-6">
+                <p className="text-sm text-gray-700">Assigning permissions for: <span className="font-bold text-blue-700">{permUserName}</span></p>
+              </div>
+              <div className="space-y-3">
+                {PERMISSIONS.map((perm) => (
+                  <div key={perm.id} className="flex items-center justify-between p-3 border border-gray-200 rounded-lg hover:bg-gray-50">
+                    <div>
+                      <p className="font-medium text-gray-900 text-sm">{perm.label}</p>
+                      <p className="text-xs text-gray-500">{perm.desc}</p>
+                    </div>
+                    <label className="relative inline-flex items-center cursor-pointer flex-shrink-0">
+                      <input type="checkbox" className="sr-only peer" checked={permissions[perm.id] || false} onChange={(e) => setPermissions((prev) => ({ ...prev, [perm.id]: e.target.checked }))} />
+                      <div className="w-11 h-6 bg-gray-300 rounded-full peer peer-checked:bg-blue-600 peer-focus:ring-2 peer-focus:ring-blue-300 after:content-[''] after:absolute after:top-0.5 after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:after:translate-x-full"></div>
+                    </label>
+                  </div>
+                ))}
+              </div>
+              <div className="flex justify-end gap-3 mt-6 pt-4 border-t border-gray-200">
+                <button onClick={() => setPermModalOpen(false)} className="px-6 py-2.5 border border-gray-300 rounded-lg text-gray-700 font-medium hover:bg-gray-50">Cancel</button>
+                <button onClick={() => { setPermModalOpen(false); alert("Permissions saved!"); }} className="px-6 py-2.5 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700">Save Permissions</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 });

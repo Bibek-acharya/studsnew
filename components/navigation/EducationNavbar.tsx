@@ -286,9 +286,18 @@ const EducationNavbar: React.FC<EducationNavbarProps> = ({
     return `${first}${last}`.toUpperCase();
   }, [user]);
 
+  const statusLabels: Record<string, string> = {
+    see_graduate: "SEE Graduate",
+    plus_two_running: "+2 Running",
+    plus_two_graduate: "+2 Graduate",
+  };
+
   const profileLabel = useMemo(() => {
     if (!user) return "Student";
     if (user.role === "admin") return "Admin";
+    if (user.current_status && statusLabels[user.current_status]) {
+      return statusLabels[user.current_status];
+    }
     return "Student";
   }, [user]);
 

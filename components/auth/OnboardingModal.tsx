@@ -1,9 +1,10 @@
 "use client";
 
 import React, { useState } from "react";
-import { X } from "lucide-react";
+import { X, Plus } from "lucide-react";
 import { apiService } from "@/services/api";
 import { useRouter } from "next/navigation";
+import { useAuth } from "@/services/AuthContext";
 import { NEPAL_PROVINCES, NEPAL_DISTRICTS, NEPAL_LOCAL_BODIES } from "@/lib/location-data";
 
 interface OnboardingModalProps {
@@ -13,6 +14,7 @@ interface OnboardingModalProps {
 
 const OnboardingModal: React.FC<OnboardingModalProps> = ({ isOpen, onClose }) => {
   const router = useRouter();
+  const { setUser, user } = useAuth();
   const [loading, setLoading] = useState(false);
   const [step, setStep] = useState(1);
   const [currentStatus, setCurrentStatus] = useState("");
@@ -33,7 +35,6 @@ const OnboardingModal: React.FC<OnboardingModalProps> = ({ isOpen, onClose }) =>
   const [interestedSubjectGrad, setInterestedSubjectGrad] = useState("");
   const [interestedCityGrad, setInterestedCityGrad] = useState("");
   const [dropdowns, setDropdowns] = useState<{ [key: string]: boolean }>({});
-  const [selectedProvinceForDistrict, setSelectedProvinceForDistrict] = useState("");
   const [elective, setElective] = useState("");
 
   const toggleDropdown = (id: string) => {
@@ -63,7 +64,6 @@ const OnboardingModal: React.FC<OnboardingModalProps> = ({ isOpen, onClose }) =>
 
   const handleProvinceSeeSelect = (value: string) => {
     setProvinceSee(value);
-    setSelectedProvinceForDistrict(value);
     setDistrictSee("");
     setLocalLevelSee("");
     closeAllDropdowns();
@@ -101,12 +101,7 @@ const OnboardingModal: React.FC<OnboardingModalProps> = ({ isOpen, onClose }) =>
 
     setLoading(true);
     try {
-      const token = localStorage.getItem("token");
-      if (!token) {
-        return;
-      }
-
-      const preferences: any = {
+      const preferences: Record<string, string | boolean> = {
         contact_number: contactNumber,
         current_status: currentStatus,
         onboarding_completed: true,
@@ -132,20 +127,28 @@ const OnboardingModal: React.FC<OnboardingModalProps> = ({ isOpen, onClose }) =>
         preferences.interested_city = interestedCityGrad;
       }
 
-      await apiService.savePreferences(
+      const response = await apiService.savePreferences(
         {
           preference_role: "student",
           preference_flow: "onboarding",
           preferences,
-        },
-        token
+        }
       );
 
       sessionStorage.setItem("onboarding_completed", "true");
 
+      if (response?.user) {
+        setUser({
+          ...response.user,
+          current_status: response.user.preferences?.preferences?.current_status || currentStatus,
+        });
+      } else if (user) {
+        setUser({ ...user, current_status: currentStatus });
+      }
+
       onClose();
       router.push("/");
-    } catch (err: any) {
+    } catch (err) {
       console.error(err);
     } finally {
       setLoading(false);
@@ -167,8 +170,8 @@ const OnboardingModal: React.FC<OnboardingModalProps> = ({ isOpen, onClose }) =>
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 bg-gray-900/60 backdrop-blur-sm z-120 flex items-center justify-center p-4 sm:p-8">
-      <div className={`bg-white rounded-xl shadow-2xl w-full p-8 sm:p-12 transform transition-all duration-300 relative ${step === 1 ? 'max-w-md' : 'max-w-3xl'}`}>
+    <div className="fixed inset-0 bg-gray-900/60 backdrop-blur-sm z-120 flex items-center justify-center py-3 sm:py-8 px-2 sm:px-8">
+      <div className={`bg-white rounded-xl shadow-2xl w-full ${step === 1 ? '' : 'overflow-hidden'} px-3 py-3 transform transition-all duration-300 relative ${step === 1 ? 'max-w-md' : 'max-w-4xl'}`}>
         <button
           type="button"
           onClick={onClose}
@@ -183,7 +186,7 @@ const OnboardingModal: React.FC<OnboardingModalProps> = ({ isOpen, onClose }) =>
               Welcome to studsphere
             </h2>
             <p className="text-gray-500 text-[15px] mb-10 leading-relaxed text-center">
-              Don't worry, we're not judging—just tailoring your experience!
+              Don&apos;t worry, we&apos;re not judging—just tailoring your experience!
             </p>
 
             <div className="w-full mb-8 relative">
@@ -201,11 +204,15 @@ const OnboardingModal: React.FC<OnboardingModalProps> = ({ isOpen, onClose }) =>
                    currentStatus === 'plus_two_graduate' ? '+2 Graduate' : 
                    'Select your current status'}
                 </span>
-                <X className={`w-4 h-4 text-gray-500 transition-transform duration-200 ${dropdowns['status'] ? 'rotate-45' : ''}`} />
+                {dropdowns['status'] ? (
+                  <X className="w-4 h-4 text-gray-500 transition-transform" />
+                ) : (
+                  <Plus className="w-4 h-4 text-gray-500 transition-transform" />
+                )}
               </div>
               
               {dropdowns['status'] && (
-                <ul className="absolute z-50 w-full mt-2 bg-white border border-gray-200 rounded-lg shadow-lg flex-col overflow-hidden">
+                <ul className="absolute z-[200] w-full mt-2 bg-white border border-gray-200 rounded-lg shadow-lg flex-col overflow-hidden">
                   <li
                     className="px-4 py-3.5 hover:bg-gray-50 cursor-pointer text-gray-800 text-[15px] transition-colors"
                     onClick={() => handleStatusSelect('see_graduate')}
@@ -245,8 +252,8 @@ const OnboardingModal: React.FC<OnboardingModalProps> = ({ isOpen, onClose }) =>
 
         {step === 2 && (
           <div className="w-full animate-fade-in">
-            <div className="flex items-center mb-6 border-b border-gray-100 pb-4">
-              <h3 className="text-xl font-bold text-gray-900">
+            <div className="flex items-center mb-2 sm:mb-6 border-b border-gray-100 pb-1.5 sm:pb-4">
+              <h3 className="text-base sm:text-xl font-bold text-gray-900">
                 {currentStatus === 'see_graduate' ? 'SEE Graduate Details' :
                  currentStatus === 'plus_two_running' ? '+2 Running Details' :
                  '+2 Graduate Details'}
@@ -255,9 +262,9 @@ const OnboardingModal: React.FC<OnboardingModalProps> = ({ isOpen, onClose }) =>
 
             {currentStatus === 'see_graduate' && (
               <div className="w-full animate-fade-in">
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-1 sm:gap-3 lg:gap-3.5">
                   <div className="w-full sm:col-span-2">
-                    <label htmlFor="recentSchoolName" className="block text-sm font-medium text-gray-900 mb-2">
+                    <label htmlFor="recentSchoolName" className="block text-[13px] sm:text-sm font-medium text-gray-900 mb-0.5 sm:mb-2">
                       Recent graduate school name
                     </label>
                     <input
@@ -266,16 +273,16 @@ const OnboardingModal: React.FC<OnboardingModalProps> = ({ isOpen, onClose }) =>
                       placeholder="Enter school name"
                       value={recentSchoolName}
                       onChange={(e) => setRecentSchoolName(e.target.value)}
-                      className="w-full border border-gray-200 rounded-lg py-3 px-4 text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-0 focus:border-brand-blue transition-colors"
+                      className="w-full border border-gray-200 rounded-lg py-1 sm:py-2.5 px-3 sm:px-4 text-[13px] sm:text-[15px] text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-0 focus:border-brand-blue transition-colors"
                     />
                   </div>
 
                   <div className="w-full relative">
-                    <label className="block text-sm font-medium text-gray-900 mb-2">
+                    <label className="block text-[13px] sm:text-sm font-medium text-gray-900 mb-0.5 sm:mb-2">
                       Select school type
                     </label>
                     <div
-                      className="w-full border border-gray-200 rounded-lg py-3 px-4 text-gray-800 flex justify-between items-center cursor-pointer bg-white transition-colors hover:border-brand-blue"
+                      className="w-full border border-gray-200 rounded-lg py-1 sm:py-2.5 px-3 sm:px-4 text-[13px] sm:text-[15px] text-gray-800 flex justify-between items-center cursor-pointer bg-white transition-colors hover:border-brand-blue"
                       onClick={() => toggleDropdown('schoolType')}
                     >
                       <span className={schoolType ? 'text-gray-900' : 'text-gray-400'}>
@@ -283,18 +290,22 @@ const OnboardingModal: React.FC<OnboardingModalProps> = ({ isOpen, onClose }) =>
                          schoolType === 'private' ? 'Private' : 
                          'E.g., Government or Private'}
                       </span>
-                      <X className={`w-4 h-4 text-gray-500 transition-transform duration-200 ${dropdowns['schoolType'] ? 'rotate-45' : ''}`} />
+                      {dropdowns['schoolType'] ? (
+  <X className="w-4 h-4 text-gray-500 transition-transform" />
+) : (
+  <Plus className="w-4 h-4 text-gray-500 transition-transform" />
+)}
                     </div>
                     {dropdowns['schoolType'] && (
-                      <ul className="absolute z-50 w-full mt-2 bg-white border border-gray-200 rounded-lg shadow-lg flex-col overflow-hidden">
+                      <ul className="absolute z-[200] w-full mt-1 sm:mt-2 bg-white border border-gray-200 rounded-lg shadow-lg flex-col overflow-hidden">
                         <li
-                          className="px-4 py-3 hover:bg-gray-50 cursor-pointer text-gray-800 text-[15px] transition-colors"
+                          className="px-3 sm:px-4 py-1.5 sm:py-3 hover:bg-gray-50 cursor-pointer text-gray-800 text-[13px] sm:text-[15px] transition-colors"
                           onClick={() => handleSchoolTypeSelect('government')}
                         >
                           Government
                         </li>
                         <li
-                          className="px-4 py-3 hover:bg-gray-50 cursor-pointer text-gray-800 text-[15px] transition-colors border-t border-gray-50"
+                          className="px-3 sm:px-4 py-1.5 sm:py-3 hover:bg-gray-50 cursor-pointer text-gray-800 text-[13px] sm:text-[15px] transition-colors border-t border-gray-50"
                           onClick={() => handleSchoolTypeSelect('private')}
                         >
                           Private
@@ -304,11 +315,11 @@ const OnboardingModal: React.FC<OnboardingModalProps> = ({ isOpen, onClose }) =>
                   </div>
 
                   <div className="w-full relative">
-                    <label className="block text-sm font-medium text-gray-900 mb-2">
+                    <label className="block text-[13px] sm:text-sm font-medium text-gray-900 mb-0.5 sm:mb-2">
                       Elective
                     </label>
                     <div
-                      className="w-full border border-gray-200 rounded-lg py-3 px-4 text-gray-800 flex justify-between items-center cursor-pointer bg-white transition-colors hover:border-brand-blue"
+                      className="w-full border border-gray-200 rounded-lg py-1 sm:py-2.5 px-3 sm:px-4 text-[13px] sm:text-[15px] text-gray-800 flex justify-between items-center cursor-pointer bg-white transition-colors hover:border-brand-blue"
                       onClick={() => toggleDropdown('elective')}
                     >
                       <span className={elective ? 'text-gray-900' : 'text-gray-400'}>
@@ -317,24 +328,28 @@ const OnboardingModal: React.FC<OnboardingModalProps> = ({ isOpen, onClose }) =>
                          elective === 'math' ? 'Math' : 
                          'Select elective'}
                       </span>
-                      <X className={`w-4 h-4 text-gray-500 transition-transform duration-200 ${dropdowns['elective'] ? 'rotate-45' : ''}`} />
+                      {dropdowns['elective'] ? (
+  <X className="w-4 h-4 text-gray-500 transition-transform" />
+) : (
+  <Plus className="w-4 h-4 text-gray-500 transition-transform" />
+)}
                     </div>
                     {dropdowns['elective'] && (
-                      <ul className="absolute z-50 w-full mt-2 bg-white border border-gray-200 rounded-lg shadow-lg flex-col overflow-hidden">
+                      <ul className="absolute z-[200] w-full mt-1 sm:mt-2 bg-white border border-gray-200 rounded-lg shadow-lg flex-col overflow-hidden">
                         <li
-                          className="px-4 py-3 hover:bg-gray-50 cursor-pointer text-gray-800 text-[15px] transition-colors"
+                          className="px-3 sm:px-4 py-1.5 sm:py-3 hover:bg-gray-50 cursor-pointer text-gray-800 text-[13px] sm:text-[15px] transition-colors"
                           onClick={() => handleElectiveSelect('account')}
                         >
                           Account
                         </li>
                         <li
-                          className="px-4 py-3 hover:bg-gray-50 cursor-pointer text-gray-800 text-[15px] transition-colors border-t border-gray-50"
+                          className="px-3 sm:px-4 py-1.5 sm:py-3 hover:bg-gray-50 cursor-pointer text-gray-800 text-[13px] sm:text-[15px] transition-colors border-t border-gray-50"
                           onClick={() => handleElectiveSelect('computer')}
                         >
                           Computer
                         </li>
                         <li
-                          className="px-4 py-3 hover:bg-gray-50 cursor-pointer text-gray-800 text-[15px] transition-colors border-t border-gray-50"
+                          className="px-3 sm:px-4 py-1.5 sm:py-3 hover:bg-gray-50 cursor-pointer text-gray-800 text-[13px] sm:text-[15px] transition-colors border-t border-gray-50"
                           onClick={() => handleElectiveSelect('math')}
                         >
                           Math
@@ -344,24 +359,28 @@ const OnboardingModal: React.FC<OnboardingModalProps> = ({ isOpen, onClose }) =>
                   </div>
 
                   <div className="w-full relative">
-                    <label className="block text-sm font-medium text-gray-900 mb-2">
+                    <label className="block text-[13px] sm:text-sm font-medium text-gray-900 mb-0.5 sm:mb-2">
                       Province
                     </label>
                     <div
-                      className="w-full border border-gray-200 rounded-lg py-3 px-4 text-gray-800 flex justify-between items-center cursor-pointer bg-white transition-colors hover:border-brand-blue"
+                      className="w-full border border-gray-200 rounded-lg py-1 sm:py-2.5 px-3 sm:px-4 text-[13px] sm:text-[15px] text-gray-800 flex justify-between items-center cursor-pointer bg-white transition-colors hover:border-brand-blue"
                       onClick={() => toggleDropdown('provinceSee')}
                     >
                       <span className={provinceSee ? 'text-gray-900' : 'text-gray-400'}>
                         {provinceSee || 'Select province'}
                       </span>
-                      <X className={`w-4 h-4 text-gray-500 transition-transform duration-200 ${dropdowns['provinceSee'] ? 'rotate-45' : ''}`} />
+                      {dropdowns['provinceSee'] ? (
+  <X className="w-4 h-4 text-gray-500 transition-transform" />
+) : (
+  <Plus className="w-4 h-4 text-gray-500 transition-transform" />
+)}
                     </div>
                     {dropdowns['provinceSee'] && (
-                      <ul className="absolute z-50 w-full mt-2 bg-white border border-gray-200 rounded-lg shadow-lg flex-col overflow-hidden max-h-48 overflow-y-auto">
+                      <ul className="absolute z-[200] w-full mt-1 sm:mt-2 bg-white border border-gray-200 rounded-lg shadow-lg flex-col overflow-hidden max-h-48 overflow-y-auto overscroll-contain">
                         {NEPAL_PROVINCES.map((prov) => (
                           <li
                             key={prov}
-                            className="px-4 py-3 hover:bg-gray-50 cursor-pointer text-gray-800 text-[15px] transition-colors"
+                            className="px-3 sm:px-4 py-1.5 sm:py-3 hover:bg-gray-50 cursor-pointer text-gray-800 text-[13px] sm:text-[15px] transition-colors"
                             onClick={() => handleProvinceSeeSelect(prov)}
                           >
                             {prov}
@@ -372,24 +391,28 @@ const OnboardingModal: React.FC<OnboardingModalProps> = ({ isOpen, onClose }) =>
                   </div>
 
                   <div className="w-full relative">
-                    <label className="block text-sm font-medium text-gray-900 mb-2">
+                    <label className="block text-[13px] sm:text-sm font-medium text-gray-900 mb-0.5 sm:mb-2">
                       District
                     </label>
                     <div
-                      className="w-full border border-gray-200 rounded-lg py-3 px-4 text-gray-800 flex justify-between items-center cursor-pointer bg-white transition-colors hover:border-brand-blue disabled:opacity-50 disabled:cursor-not-allowed"
+                      className="w-full border border-gray-200 rounded-lg py-1.5 sm:py-3 px-3 sm:px-4 text-[13px] sm:text-[15px] text-gray-800 flex justify-between items-center cursor-pointer bg-white transition-colors hover:border-brand-blue disabled:opacity-50 disabled:cursor-not-allowed"
                       onClick={() => provinceSee && toggleDropdown('districtSee')}
                     >
                       <span className={districtSee ? 'text-gray-900' : 'text-gray-400'}>
                         {districtSee || (provinceSee ? 'Select district' : 'Select province first')}
                       </span>
-                      <X className={`w-4 h-4 text-gray-500 transition-transform duration-200 ${dropdowns['districtSee'] ? 'rotate-45' : ''}`} />
+                      {dropdowns['districtSee'] ? (
+  <X className="w-4 h-4 text-gray-500 transition-transform" />
+) : (
+  <Plus className="w-4 h-4 text-gray-500 transition-transform" />
+)}
                     </div>
                     {dropdowns['districtSee'] && provinceSee && (
-                      <ul className="absolute z-50 w-full mt-2 bg-white border border-gray-200 rounded-lg shadow-lg flex-col overflow-hidden max-h-48 overflow-y-auto">
+                      <ul className="absolute z-[200] w-full mt-1 sm:mt-2 bg-white border border-gray-200 rounded-lg shadow-lg flex-col overflow-hidden max-h-48 overflow-y-auto overscroll-contain">
                         {NEPAL_DISTRICTS[provinceSee as keyof typeof NEPAL_DISTRICTS]?.map((dist) => (
                           <li
                             key={dist}
-                            className="px-4 py-3 hover:bg-gray-50 cursor-pointer text-gray-800 text-[15px] transition-colors"
+                            className="px-3 sm:px-4 py-1.5 sm:py-3 hover:bg-gray-50 cursor-pointer text-gray-800 text-[13px] sm:text-[15px] transition-colors"
                             onClick={() => handleDistrictSeeSelect(dist)}
                           >
                             {dist}
@@ -400,24 +423,28 @@ const OnboardingModal: React.FC<OnboardingModalProps> = ({ isOpen, onClose }) =>
                   </div>
 
                   <div className="w-full relative">
-                    <label className="block text-sm font-medium text-gray-900 mb-2">
+                    <label className="block text-[13px] sm:text-sm font-medium text-gray-900 mb-0.5 sm:mb-2">
                       Local Level
                     </label>
                     <div
-                      className="w-full border border-gray-200 rounded-lg py-3 px-4 text-gray-800 flex justify-between items-center cursor-pointer bg-white transition-colors hover:border-brand-blue disabled:opacity-50 disabled:cursor-not-allowed"
+                      className="w-full border border-gray-200 rounded-lg py-1.5 sm:py-3 px-3 sm:px-4 text-[13px] sm:text-[15px] text-gray-800 flex justify-between items-center cursor-pointer bg-white transition-colors hover:border-brand-blue disabled:opacity-50 disabled:cursor-not-allowed"
                       onClick={() => districtSee && toggleDropdown('localLevelSee')}
                     >
                       <span className={localLevelSee ? 'text-gray-900' : 'text-gray-400'}>
                         {localLevelSee || (districtSee ? 'Select local level' : 'Select district first')}
                       </span>
-                      <X className={`w-4 h-4 text-gray-500 transition-transform duration-200 ${dropdowns['localLevelSee'] ? 'rotate-45' : ''}`} />
+                      {dropdowns['localLevelSee'] ? (
+  <X className="w-4 h-4 text-gray-500 transition-transform" />
+) : (
+  <Plus className="w-4 h-4 text-gray-500 transition-transform" />
+)}
                     </div>
                     {dropdowns['localLevelSee'] && districtSee && (
-                      <ul className="absolute z-50 w-full mt-2 bg-white border border-gray-200 rounded-lg shadow-lg flex-col overflow-hidden max-h-48 overflow-y-auto">
+                      <ul className="absolute z-[200] w-full mt-1 sm:mt-2 bg-white border border-gray-200 rounded-lg shadow-lg flex-col overflow-hidden max-h-48 overflow-y-auto overscroll-contain">
                         {NEPAL_LOCAL_BODIES[districtSee as keyof typeof NEPAL_LOCAL_BODIES]?.map((local) => (
                           <li
                             key={local.name}
-                            className="px-4 py-3 hover:bg-gray-50 cursor-pointer text-gray-800 text-[15px] transition-colors"
+                            className="px-3 sm:px-4 py-1.5 sm:py-3 hover:bg-gray-50 cursor-pointer text-gray-800 text-[13px] sm:text-[15px] transition-colors"
                             onClick={() => setLocalLevelSee(local.name)}
                           >
                             {local.name}
@@ -428,7 +455,7 @@ const OnboardingModal: React.FC<OnboardingModalProps> = ({ isOpen, onClose }) =>
                   </div>
 
                   <div className="w-full">
-                    <label htmlFor="interestedSubjectSee" className="block text-sm font-medium text-gray-900 mb-2">
+                    <label htmlFor="interestedSubjectSee" className="block text-[13px] sm:text-sm font-medium text-gray-900 mb-0.5 sm:mb-2">
                       Interested subject/course
                     </label>
                     <input
@@ -437,12 +464,12 @@ const OnboardingModal: React.FC<OnboardingModalProps> = ({ isOpen, onClose }) =>
                       placeholder="E.g., Science, Management, CTEVT"
                       value={interestedSubjectSee}
                       onChange={(e) => setInterestedSubjectSee(e.target.value)}
-                      className="w-full border border-gray-200 rounded-lg py-3 px-4 text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-0 focus:border-brand-blue transition-colors"
+                      className="w-full border border-gray-200 rounded-lg py-1 sm:py-2.5 px-3 sm:px-4 text-[13px] sm:text-[15px] text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-0 focus:border-brand-blue transition-colors"
                     />
                   </div>
 
                   <div className="w-full">
-                    <label htmlFor="interestedCitySee" className="block text-sm font-medium text-gray-900 mb-2">
+                    <label htmlFor="interestedCitySee" className="block text-[13px] sm:text-sm font-medium text-gray-900 mb-0.5 sm:mb-2">
                       Interested city or district
                     </label>
                     <input
@@ -451,17 +478,17 @@ const OnboardingModal: React.FC<OnboardingModalProps> = ({ isOpen, onClose }) =>
                       placeholder="E.g., Kathmandu, Pokhara"
                       value={interestedCitySee}
                       onChange={(e) => setInterestedCitySee(e.target.value)}
-                      className="w-full border border-gray-200 rounded-lg py-3 px-4 text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-0 focus:border-brand-blue transition-colors"
+                      className="w-full border border-gray-200 rounded-lg py-1 sm:py-2.5 px-3 sm:px-4 text-[13px] sm:text-[15px] text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-0 focus:border-brand-blue transition-colors"
                     />
                   </div>
 
                   <div className="w-full sm:col-span-2">
-                    <label htmlFor="contactNumberSee" className="block text-sm font-medium text-gray-900 mb-2">
+                    <label htmlFor="contactNumberSee" className="block text-[13px] sm:text-sm font-medium text-gray-900 mb-0.5 sm:mb-2">
                       Contact number
                     </label>
                     <div className="relative flex items-center w-full">
-                      <div className="absolute inset-y-0 left-0 flex items-center pl-4 pointer-events-none">
-                        <span className="text-gray-500 font-medium">+977-</span>
+                      <div className="absolute inset-y-0 left-0 flex items-center pl-3 sm:pl-4 pointer-events-none">
+                        <span className="text-gray-500 font-medium text-[13px] sm:text-[15px]">+977-</span>
                       </div>
                       <input
                         type="tel"
@@ -476,13 +503,13 @@ const OnboardingModal: React.FC<OnboardingModalProps> = ({ isOpen, onClose }) =>
                             setPhoneError('');
                           }
                         }}
-                        className={`w-full border rounded-lg py-3 pl-16 pr-4 text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-0 transition-colors ${
+                        className={`w-full border rounded-lg py-1 sm:py-2.5 pl-14 sm:pl-16 pr-3 sm:pr-4 text-[13px] sm:text-[15px] text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-0 transition-colors ${
                           phoneError ? 'border-red-500 focus:border-red-500' : 'border-gray-200 focus:border-brand-blue'
                         }`}
                       />
                     </div>
                     {phoneError && (
-                      <p className="text-red-500 text-sm mt-1">{phoneError}</p>
+                      <p className="text-red-500 text-[13px] sm:text-sm mt-0.5 sm:mt-1">{phoneError}</p>
                     )}
                   </div>
                 </div>
@@ -491,14 +518,14 @@ const OnboardingModal: React.FC<OnboardingModalProps> = ({ isOpen, onClose }) =>
 
             {currentStatus === 'plus_two_running' && (
               <div className="w-full animate-fade-in">
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-                  <div className="w-full">
-                    <label htmlFor="contactNumberRunning" className="block text-sm font-medium text-gray-900 mb-2">
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-1 sm:gap-3 lg:gap-3.5">
+                  <div className="w-full lg:col-span-2">
+                    <label htmlFor="contactNumberRunning" className="block text-[13px] sm:text-sm font-medium text-gray-900 mb-0.5 sm:mb-2">
                       Contact number
                     </label>
                     <div className="relative flex items-center w-full">
-                      <div className="absolute inset-y-0 left-0 flex items-center pl-4 pointer-events-none">
-                        <span className="text-gray-500 font-medium">+977-</span>
+                      <div className="absolute inset-y-0 left-0 flex items-center pl-3 sm:pl-4 pointer-events-none">
+                        <span className="text-gray-500 font-medium text-[13px] sm:text-[15px]">+977-</span>
                       </div>
                       <input
                         type="tel"
@@ -513,18 +540,18 @@ const OnboardingModal: React.FC<OnboardingModalProps> = ({ isOpen, onClose }) =>
                             setPhoneError('');
                           }
                         }}
-                        className={`w-full border rounded-lg py-3 pl-16 pr-4 text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-0 transition-colors ${
+                        className={`w-full border rounded-lg py-1.5 sm:py-3 pl-14 sm:pl-16 pr-3 sm:pr-4 text-[13px] sm:text-[15px] text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-0 transition-colors ${
                           phoneError ? 'border-red-500 focus:border-red-500' : 'border-gray-200 focus:border-brand-blue'
                         }`}
                       />
                     </div>
                     {phoneError && (
-                      <p className="text-red-500 text-sm mt-1">{phoneError}</p>
+                      <p className="text-red-500 text-[13px] sm:text-sm mt-0.5 sm:mt-1">{phoneError}</p>
                     )}
                   </div>
 
-                  <div className="w-full">
-                    <label htmlFor="collegeNameRunning" className="block text-sm font-medium text-gray-900 mb-2">
+                  <div className="w-full lg:col-span-2">
+                    <label htmlFor="collegeNameRunning" className="block text-[13px] sm:text-sm font-medium text-gray-900 mb-0.5 sm:mb-2">
                       Your college name
                     </label>
                     <input
@@ -533,12 +560,12 @@ const OnboardingModal: React.FC<OnboardingModalProps> = ({ isOpen, onClose }) =>
                       placeholder="Enter college name"
                       value={collegeNameRunning}
                       onChange={(e) => setCollegeNameRunning(e.target.value)}
-                      className="w-full border border-gray-200 rounded-lg py-3 px-4 text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-0 focus:border-brand-blue transition-colors"
+                      className="w-full border border-gray-200 rounded-lg py-1 sm:py-2.5 px-3 sm:px-4 text-[13px] sm:text-[15px] text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-0 focus:border-brand-blue transition-colors"
                     />
                   </div>
 
-                  <div className="w-full">
-                    <label htmlFor="courseRunning" className="block text-sm font-medium text-gray-900 mb-2">
+                  <div className="w-full lg:col-span-2">
+                    <label htmlFor="courseRunning" className="block text-[13px] sm:text-sm font-medium text-gray-900 mb-0.5 sm:mb-2">
                       Course
                     </label>
                     <input
@@ -547,16 +574,16 @@ const OnboardingModal: React.FC<OnboardingModalProps> = ({ isOpen, onClose }) =>
                       placeholder="E.g., Science, Management, Humanities"
                       value={courseRunning}
                       onChange={(e) => setCourseRunning(e.target.value)}
-                      className="w-full border border-gray-200 rounded-lg py-3 px-4 text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-0 focus:border-brand-blue transition-colors"
+                      className="w-full border border-gray-200 rounded-lg py-1 sm:py-2.5 px-3 sm:px-4 text-[13px] sm:text-[15px] text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-0 focus:border-brand-blue transition-colors"
                     />
                   </div>
 
                   <div className="w-full relative">
-                    <label className="block text-sm font-medium text-gray-900 mb-2">
+                    <label className="block text-[13px] sm:text-sm font-medium text-gray-900 mb-0.5 sm:mb-2">
                       College type
                     </label>
                     <div
-                      className="w-full border border-gray-200 rounded-lg py-3 px-4 text-gray-800 flex justify-between items-center cursor-pointer bg-white transition-colors hover:border-brand-blue"
+                      className="w-full border border-gray-200 rounded-lg py-1.5 sm:py-3 px-3 sm:px-4 text-[13px] sm:text-[15px] text-gray-800 flex justify-between items-center cursor-pointer bg-white transition-colors hover:border-brand-blue"
                       onClick={() => toggleDropdown('collegeTypeRunning')}
                     >
                       <span className={collegeTypeRunning ? 'text-gray-900' : 'text-gray-400'}>
@@ -564,18 +591,22 @@ const OnboardingModal: React.FC<OnboardingModalProps> = ({ isOpen, onClose }) =>
                          collegeTypeRunning === 'private' ? 'Private' : 
                          'E.g., Government or Private'}
                       </span>
-                      <X className={`w-4 h-4 text-gray-500 transition-transform duration-200 ${dropdowns['collegeTypeRunning'] ? 'rotate-45' : ''}`} />
+                      {dropdowns['collegeTypeRunning'] ? (
+  <X className="w-4 h-4 text-gray-500 transition-transform" />
+) : (
+  <Plus className="w-4 h-4 text-gray-500 transition-transform" />
+)}
                     </div>
                     {dropdowns['collegeTypeRunning'] && (
-                      <ul className="absolute z-50 w-full mt-2 bg-white border border-gray-200 rounded-lg shadow-lg flex-col overflow-hidden">
+                      <ul className="absolute z-[200] w-full mt-1 sm:mt-2 bg-white border border-gray-200 rounded-lg shadow-lg flex-col overflow-hidden">
                         <li
-                          className="px-4 py-3 hover:bg-gray-50 cursor-pointer text-gray-800 text-[15px] transition-colors"
+                          className="px-3 sm:px-4 py-1.5 sm:py-3 hover:bg-gray-50 cursor-pointer text-gray-800 text-[13px] sm:text-[15px] transition-colors"
                           onClick={() => handleCollegeTypeRunningSelect('government')}
                         >
                           Government
                         </li>
                         <li
-                          className="px-4 py-3 hover:bg-gray-50 cursor-pointer text-gray-800 text-[15px] transition-colors border-t border-gray-50"
+                          className="px-3 sm:px-4 py-1.5 sm:py-3 hover:bg-gray-50 cursor-pointer text-gray-800 text-[13px] sm:text-[15px] transition-colors border-t border-gray-50"
                           onClick={() => handleCollegeTypeRunningSelect('private')}
                         >
                           Private
@@ -589,14 +620,28 @@ const OnboardingModal: React.FC<OnboardingModalProps> = ({ isOpen, onClose }) =>
 
             {currentStatus === 'plus_two_graduate' && (
               <div className="w-full animate-fade-in">
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-1 sm:gap-4">
                   <div className="w-full">
-                    <label htmlFor="contactNumberGrad" className="block text-sm font-medium text-gray-900 mb-2">
+                    <label htmlFor="collegeNameGrad" className="block text-[13px] sm:text-sm font-medium text-gray-900 mb-0.5 sm:mb-2">
+                      Recent college name
+                    </label>
+                    <input
+                      type="text"
+                      id="collegeNameGrad"
+                      placeholder="Enter college name"
+                      value={collegeNameGrad}
+                      onChange={(e) => setCollegeNameGrad(e.target.value)}
+                      className="w-full border border-gray-200 rounded-lg py-1.5 sm:py-3 px-3 sm:px-4 text-[13px] sm:text-[15px] text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-0 focus:border-brand-blue transition-colors"
+                    />
+                  </div>
+
+                  <div className="w-full">
+                    <label htmlFor="contactNumberGrad" className="block text-[13px] sm:text-sm font-medium text-gray-900 mb-0.5 sm:mb-2">
                       Contact number
                     </label>
                     <div className="relative flex items-center w-full">
-                      <div className="absolute inset-y-0 left-0 flex items-center pl-4 pointer-events-none">
-                        <span className="text-gray-500 font-medium">+977-</span>
+                      <div className="absolute inset-y-0 left-0 flex items-center pl-3 sm:pl-4 pointer-events-none">
+                        <span className="text-gray-500 font-medium text-[13px] sm:text-[15px]">+977-</span>
                       </div>
                       <input
                         type="tel"
@@ -611,32 +656,18 @@ const OnboardingModal: React.FC<OnboardingModalProps> = ({ isOpen, onClose }) =>
                             setPhoneError('');
                           }
                         }}
-                        className={`w-full border rounded-lg py-3 pl-16 pr-4 text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-0 transition-colors ${
+                        className={`w-full border rounded-lg py-1.5 sm:py-3 pl-14 sm:pl-16 pr-3 sm:pr-4 text-[13px] sm:text-[15px] text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-0 transition-colors ${
                           phoneError ? 'border-red-500 focus:border-red-500' : 'border-gray-200 focus:border-brand-blue'
                         }`}
                       />
                     </div>
                     {phoneError && (
-                      <p className="text-red-500 text-sm mt-1">{phoneError}</p>
+                      <p className="text-red-500 text-[13px] sm:text-sm mt-0.5 sm:mt-1">{phoneError}</p>
                     )}
                   </div>
 
                   <div className="w-full">
-                    <label htmlFor="collegeNameGrad" className="block text-sm font-medium text-gray-900 mb-2">
-                      Recent college name
-                    </label>
-                    <input
-                      type="text"
-                      id="collegeNameGrad"
-                      placeholder="Enter college name"
-                      value={collegeNameGrad}
-                      onChange={(e) => setCollegeNameGrad(e.target.value)}
-                      className="w-full border border-gray-200 rounded-lg py-3 px-4 text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-0 focus:border-brand-blue transition-colors"
-                    />
-                  </div>
-
-                  <div className="w-full">
-                    <label htmlFor="courseGrad" className="block text-sm font-medium text-gray-900 mb-2">
+                    <label htmlFor="courseGrad" className="block text-[13px] sm:text-sm font-medium text-gray-900 mb-0.5 sm:mb-2">
                       Course completed
                     </label>
                     <input
@@ -645,13 +676,13 @@ const OnboardingModal: React.FC<OnboardingModalProps> = ({ isOpen, onClose }) =>
                       placeholder="E.g., Science, Management"
                       value={courseGrad}
                       onChange={(e) => setCourseGrad(e.target.value)}
-                      className="w-full border border-gray-200 rounded-lg py-3 px-4 text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-0 focus:border-brand-blue transition-colors"
+                      className="w-full border border-gray-200 rounded-lg py-1.5 sm:py-3 px-3 sm:px-4 text-[13px] sm:text-[15px] text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-0 focus:border-brand-blue transition-colors"
                     />
                   </div>
 
                   <div className="w-full">
-                    <label htmlFor="interestedSubjectGrad" className="block text-sm font-medium text-gray-900 mb-2">
-                      Interested Bachelor's course
+                    <label htmlFor="interestedSubjectGrad" className="block text-[13px] sm:text-sm font-medium text-gray-900 mb-0.5 sm:mb-2">
+                      Interested Bachelor&apos;s course
                     </label>
                     <input
                       type="text"
@@ -659,12 +690,12 @@ const OnboardingModal: React.FC<OnboardingModalProps> = ({ isOpen, onClose }) =>
                       placeholder="E.g., BIT, BBA, MBBS"
                       value={interestedSubjectGrad}
                       onChange={(e) => setInterestedSubjectGrad(e.target.value)}
-                      className="w-full border border-gray-200 rounded-lg py-3 px-4 text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-0 focus:border-brand-blue transition-colors"
+                      className="w-full border border-gray-200 rounded-lg py-1.5 sm:py-3 px-3 sm:px-4 text-[13px] sm:text-[15px] text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-0 focus:border-brand-blue transition-colors"
                     />
                   </div>
 
                   <div className="w-full">
-                    <label htmlFor="interestedCityGrad" className="block text-sm font-medium text-gray-900 mb-2">
+                    <label htmlFor="interestedCityGrad" className="block text-[13px] sm:text-sm font-medium text-gray-900 mb-0.5 sm:mb-2">
                       Interested city or country
                     </label>
                     <input
@@ -673,18 +704,18 @@ const OnboardingModal: React.FC<OnboardingModalProps> = ({ isOpen, onClose }) =>
                       placeholder="E.g., Kathmandu, USA, Australia"
                       value={interestedCityGrad}
                       onChange={(e) => setInterestedCityGrad(e.target.value)}
-                      className="w-full border border-gray-200 rounded-lg py-3 px-4 text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-0 focus:border-brand-blue transition-colors"
+                      className="w-full border border-gray-200 rounded-lg py-1.5 sm:py-3 px-3 sm:px-4 text-[13px] sm:text-[15px] text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-0 focus:border-brand-blue transition-colors"
                     />
                   </div>
                 </div>
               </div>
             )}
 
-            <div className="w-full flex justify-end gap-4 mt-10">
+            <div className="w-full flex justify-end gap-3 sm:gap-4 mt-3 sm:mt-8">
               <button
                 type="button"
                 onClick={handleBack}
-                className="w-full sm:w-auto px-8 py-3.5 rounded-lg font-bold text-white bg-gray-900 hover:bg-brand-blue cursor-pointer text-[15px] transition-colors"
+                className="w-full sm:w-auto px-6 sm:px-8 py-2 sm:py-3.5 rounded-lg font-bold text-white bg-gray-900 hover:bg-brand-blue cursor-pointer text-[13px] sm:text-[15px] transition-colors"
               >
                 Back
               </button>
@@ -692,7 +723,7 @@ const OnboardingModal: React.FC<OnboardingModalProps> = ({ isOpen, onClose }) =>
                 type="button"
                 onClick={handleSubmit}
                 disabled={loading}
-                className="w-full sm:w-auto px-10 py-3.5 rounded-lg font-bold text-white bg-brand-blue hover:bg-brand-hover cursor-pointer text-[15px] transition-colors disabled:opacity-60"
+                className="w-full sm:w-auto px-8 sm:px-10 py-2 sm:py-3.5 rounded-lg font-bold text-white bg-brand-blue hover:bg-brand-hover cursor-pointer text-[13px] sm:text-[15px] transition-colors disabled:opacity-60"
               >
                 {loading ? 'Saving...' : 'Complete Profile'}
               </button>
