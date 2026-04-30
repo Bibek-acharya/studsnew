@@ -3,14 +3,16 @@ import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 
 describe('middleware', () => {
-  it('redirects unauthenticated users from /scholarship-provider/* to login', () => {
+  it('redirects unauthenticated users from /scholarship-provider/* to login with redirect param', () => {
     const req = {
       url: 'http://localhost/scholarship-provider/dashboard',
       nextUrl: { pathname: '/scholarship-provider/dashboard' },
       cookies: { get: () => undefined },
     } as unknown as NextRequest;
     const res = middleware(req);
-    expect(res).toEqual(NextResponse.redirect(new URL('/scholarship-provider', req.url)));
+    const expectedUrl = new URL('/scholarship-provider', req.url);
+    expectedUrl.searchParams.set('redirect', '/scholarship-provider/dashboard');
+    expect(res).toEqual(NextResponse.redirect(expectedUrl));
   });
 
   it('allows authenticated users to access /scholarship-provider/*', () => {

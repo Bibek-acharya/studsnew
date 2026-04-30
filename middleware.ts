@@ -8,7 +8,9 @@ export function middleware(request: NextRequest) {
   // Protect scholarship provider routes
   if (pathname.startsWith("/scholarship-provider/")) {
     if (!token) {
-      return NextResponse.redirect(new URL("/scholarship-provider", request.url));
+      const providerLoginUrl = new URL("/scholarship-provider", request.url);
+      providerLoginUrl.searchParams.set("redirect", pathname);
+      return NextResponse.redirect(providerLoginUrl);
     }
   }
 
