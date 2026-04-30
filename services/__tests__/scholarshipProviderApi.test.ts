@@ -1,0 +1,127 @@
+import { scholarshipProviderApi } from '../scholarshipProviderApi';
+import apiService from '../apiService';
+jest.mock('../apiService');
+
+describe('scholarshipProviderApi.createScholarship', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
+  it('maps _new suffix fields to backend fields without suffix', async () => {
+    const mockData = {
+      scholarship_types_new: [{ type: 'Merit' }],
+      selection_rubric_new: [{ criteria: 'GPA' }],
+      faqs_new: [{ question: 'Test?' }],
+      gallery_images_new: [{ url: 'test.jpg' }],
+      exam_centers_new: [{ province: 'Province 1' }],
+    };
+
+    (apiService.post as jest.Mock).mockResolvedValue({ data: {} });
+    await scholarshipProviderApi.createScholarship(mockData);
+
+    expect(apiService.post).toHaveBeenCalledWith(
+      '/scholarship-providers/scholarships',
+      expect.objectContaining({
+        scholarship_types: mockData.scholarship_types_new,
+        selection_rubric: mockData.selection_rubric_new,
+        faqs: mockData.faqs_new,
+        gallery_images: mockData.gallery_images_new,
+        exam_centers: mockData.exam_centers_new,
+      })
+    );
+    const calledWith = (apiService.post as jest.Mock).mock.calls[0][1];
+    expect(calledWith).not.toHaveProperty('scholarship_types_new');
+    expect(calledWith).not.toHaveProperty('selection_rubric_new');
+  });
+
+  it('handles missing _new fields without crashing', async () => {
+    const mockData = {
+      title: 'Test Scholarship',
+      value: '1000',
+    };
+
+    (apiService.post as jest.Mock).mockResolvedValue({ data: {} });
+    await expect(scholarshipProviderApi.createScholarship(mockData)).resolves.not.toThrow();
+
+    expect(apiService.post).toHaveBeenCalledWith(
+      '/scholarship-providers/scholarships',
+      expect.objectContaining(mockData)
+    );
+  });
+
+  it('maps falsy _new values (empty arrays)', async () => {
+    const mockData = {
+      scholarship_types_new: [],
+      selection_rubric_new: [],
+      faqs_new: [],
+      gallery_images_new: [],
+      exam_centers_new: [],
+    };
+
+    (apiService.post as jest.Mock).mockResolvedValue({ data: {} });
+    await scholarshipProviderApi.createScholarship(mockData);
+
+    const calledWith = (apiService.post as jest.Mock).mock.calls[0][1];
+    expect(calledWith.scholarship_types).toEqual([]);
+    expect(calledWith.selection_rubric).toEqual([]);
+    expect(calledWith).not.toHaveProperty('scholarship_types_new');
+  });
+
+  it('handles conflicts between _new and legacy fields (_new wins)', async () => {
+    const mockData = {
+      scholarship_types_new: [{ type: 'New' }],
+      scholarship_types: [{ type: 'Legacy' }],
+    };
+
+    (apiService.post as jest.Mock).mockResolvedValue({ data: {} });
+    await scholarshipProviderApi.createScholarship(mockData);
+
+    const calledWith = (apiService.post as jest.Mock).mock.calls[0][1];
+    expect(calledWith.scholarship_types).toEqual([{ type: 'New' }]);
+    expect(calledWith).not.toHaveProperty('scholarship_types_new');
+  });
+});
+
+describe('scholarshipProviderApi.updateScholarship', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
+  it('maps _new suffix fields and calls put with correct URL and data', async () => {
+    const id = 123;
+    const mockData = {
+      scholarship_types_new: [{ type: 'Merit' }],
+      selection_rubric_new: [{ criteria: 'GPA' }],
+      faqs_new: [{ question: 'Test?' }],
+      gallery_images_new: [{ url: 'test.jpg' }],
+      exam_centers_new: [{ province: 'Province 1' }],
+    };
+
+    (apiService.put as jest.Mock).mockResolvedValue({ data: {} });
+    await scholarshipProviderApi.updateScholarship(id, mockData);
+
+    expect(apiService.put).toHaveBeenCalledWith(
+      `/scholarship-providers/scholarships/${id}`,
+      expect.objectContaining({
+        scholarship_types: mockData.scholarship_types_new,
+        selection_rubric: mockData.selection_rubric_new,
+        faqs: mockData.faqs_new,
+        gallery_images: mockData.gallery_images_new,
+        exam_centers: mockData.exam_centers_new,
+      })
+    );
+    const calledWith = (apiService.put as jest.Mock).mock.calls[0][1];
+    expect(calledWith).not.toHaveProperty('scholarship_types_new');
+    expect(calledWith).not.toHaveProperty('selection_rubric_new');
+  });
+
+  it('handles missing _new fields without crashing', async () => {
+    const id = 123;
+    const mockData = {
+      title: 'Updated Scholarship',
+    };
+
+    (apiService.put as jest.Mock).mockResolvedValue({ data: {} });
+    await expect(scholarshipProviderApi.updateScholarship(id, mockData)).resolves.not.toThrow();
+  });
+});

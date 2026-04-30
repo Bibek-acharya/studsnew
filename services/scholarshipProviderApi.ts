@@ -1,28 +1,24 @@
-import axios, { AxiosInstance, AxiosRequestConfig } from "axios";
+import apiService from './apiService';
 
-const API_BASE_URL = (process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080") + "/api/v1";
+const FIELD_MAPPINGS = {
+  scholarship_types_new: 'scholarship_types',
+  selection_rubric_new: 'selection_rubric',
+  faqs_new: 'faqs',
+  gallery_images_new: 'gallery_images',
+  exam_centers_new: 'exam_centers',
+} as const;
 
-const api: AxiosInstance = axios.create({
-  baseURL: API_BASE_URL,
-  headers: {
-    "Content-Type": "application/json",
-  },
-  withCredentials: true,
-});
+function mapScholarshipFields(data: Partial<CreateScholarshipPayload>) {
+  const mapped = { ...data };
 
-api.interceptors.response.use(
-  (response) => response,
-  (error) => {
-    const message =
-      error.response?.data?.message ||
-      error.response?.data?.error ||
-      "An unexpected error occurred";
-    return Promise.reject(new Error(message));
-  }
-);
+  Object.entries(FIELD_MAPPINGS).forEach(([newField, oldField]) => {
+    if (newField in mapped) {
+      mapped[oldField as keyof CreateScholarshipPayload] = mapped[newField as keyof CreateScholarshipPayload];
+      delete mapped[newField as keyof CreateScholarshipPayload];
+    }
+  });
 
-function request<T>(config: AxiosRequestConfig): Promise<T> {
-  return api.request<T>(config).then((res) => res.data as T);
+  return mapped;
 }
 
 export interface ScholarshipProviderAuthResponse {
@@ -519,12 +515,8 @@ export const scholarshipProviderApi = {
   },
 
   async createScholarship(data: CreateScholarshipPayload): Promise<ProviderScholarship> {
-    const res = await request<any>({
-      method: "POST",
-      url: "/scholarship-providers/scholarships",
-      data,
-    });
-    return res.data;
+    const mappedData = mapScholarshipFields(data);
+    return apiService.post('/scholarship-providers/scholarships', mappedData);
   },
 
   async getScholarships(page = 1, limit = 10): Promise<{ scholarships: ProviderScholarship[]; meta: { total: number; page: number; limit: number } }> {
@@ -545,12 +537,8 @@ export const scholarshipProviderApi = {
   },
 
   async updateScholarship(id: number, data: CreateScholarshipPayload): Promise<ProviderScholarship> {
-    const res = await request<any>({
-      method: "PUT",
-      url: `/scholarship-providers/scholarships/${id}`,
-      data,
-    });
-    return res.data;
+    const mappedData = mapScholarshipFields(data);
+    return apiService.put(`/scholarship-providers/scholarships/${id}`, mappedData);
   },
 
   async deleteScholarship(id: number): Promise<void> {
