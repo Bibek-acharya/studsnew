@@ -1,4 +1,4 @@
-import { scholarshipProviderApi } from '../scholarshipProviderApi';
+import { scholarshipProviderApi, getCalendarEvents } from '../scholarshipProviderApi';
 import apiService from '../apiService';
 jest.mock('../apiService');
 
@@ -123,5 +123,15 @@ describe('scholarshipProviderApi.updateScholarship', () => {
 
     (apiService.put as jest.Mock).mockResolvedValue({ data: {} });
     await expect(scholarshipProviderApi.updateScholarship(id, mockData)).resolves.not.toThrow();
+  });
+});
+
+describe('getCalendarEvents', () => {
+  it('calls correct endpoint and returns events', async () => {
+    const mockEvents = [{ id: 1, title: 'Test Event' }];
+    (apiService.get as jest.Mock).mockResolvedValue({ data: { data: mockEvents } });
+    const result = await getCalendarEvents();
+    expect(apiService.get).toHaveBeenCalledWith('/scholarship-providers/calendar-events');
+    expect(result).toEqual(mockEvents);
   });
 });

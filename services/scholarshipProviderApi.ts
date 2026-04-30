@@ -965,3 +965,23 @@ export const scholarshipProviderApi = {
     return res.data;
   },
 };
+
+export const getCalendarEvents = async () => {
+  const res = await apiService.get('/scholarship-providers/calendar-events');
+  return res.data.data;
+};
+
+export const createCalendarEvent = async (data: any) => {
+  const res = await apiService.post('/scholarship-providers/calendar-events', data);
+  return res.data;
+};
+
+export const updateCalendarEvent = async (id: number, data: any) => {
+  const res = await apiService.put(`/scholarship-providers/calendar-events/${id}`, data);
+  return res.data;
+};
+
+export const deleteCalendarEvent = async (id: number) => {
+  const res = await apiService.delete(`/scholarship-providers/calendar-events/${id}`);
+  return res.data;
+};
