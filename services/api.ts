@@ -1719,3 +1719,93 @@ export const apiService = {
     });
   },
 };
+
+export const callApi = async <T>(path: string): Promise<T> => {
+  return apiRequest<T>(path);
+};
+
+export const scholarshipApi = {
+  async getScholarships() {
+    return callApi<{ scholarships: any[] }>('/api/v1/scholarships');
+  },
+  
+  async getScholarshipById(id: number) {
+    return callApi<any>(`/api/v1/scholarships/${id}`);
+  },
+  
+  async applyScholarship(scholarshipId: number, data: any) {
+    return apiRequest(`/api/v1/scholarships/${scholarshipId}/apply`, {
+      method: 'POST',
+      body: JSON.stringify(data),
+    });
+  },
+  
+  async initiatePayment(scholarshipId: number, data: { method: string; amount: number }) {
+    return apiRequest(`/api/v1/scholarships/${scholarshipId}/pay`, {
+      method: 'POST',
+      body: JSON.stringify(data),
+    });
+  },
+  
+  async confirmPayment(paymentId: number, transactionId: string) {
+    return apiRequest(`/api/v1/scholarships/pay/${paymentId}/confirm`, {
+      method: 'POST',
+      body: JSON.stringify({ transaction_id: transactionId }),
+    });
+  },
+  
+  async uploadBankReceipt(paymentId: number, receiptImage: string) {
+    return apiRequest(`/api/v1/scholarships/pay/${paymentId}/receipt`, {
+      method: 'POST',
+      body: JSON.stringify({ receipt_image: receiptImage }),
+    });
+  },
+};
+
+export const scholarshipProviderApi = {
+  async getScholarships() {
+    return apiRequest<any[]>('/api/v1/scholarship-providers/scholarships');
+  },
+  
+  async createScholarship(data: any) {
+    return apiRequest('/api/v1/scholarship-providers/scholarships', {
+      method: 'POST',
+      body: JSON.stringify(data),
+    });
+  },
+  
+  async updateScholarship(id: number, data: any) {
+    return apiRequest(`/api/v1/scholarship-providers/scholarships/${id}`, {
+      method: 'PUT',
+      body: JSON.stringify(data),
+    });
+  },
+  
+  async publishScholarship(id: number) {
+    return apiRequest(`/api/v1/scholarship-providers/scholarships/${id}`, {
+      method: 'PUT',
+      body: JSON.stringify({ status: 'published' }),
+    });
+  },
+  
+  async saveFormConfig(scholarshipId: number, formConfig: any) {
+    return apiRequest(`/api/v1/scholarship-providers/scholarships/${scholarshipId}`, {
+      method: 'PUT',
+      body: JSON.stringify({ form_config: formConfig }),
+    });
+  },
+  
+  async savePaymentConfig(scholarshipId: number, paymentConfig: any) {
+    return apiRequest(`/api/v1/scholarship-providers/scholarships/${scholarshipId}`, {
+      method: 'PUT',
+      body: JSON.stringify({ payment_config: paymentConfig }),
+    });
+  },
+  
+  async approvePayment(paymentId: number, approve: boolean, reason?: string) {
+    return apiRequest(`/api/v1/scholarship-providers/payments/${paymentId}/approve`, {
+      method: 'POST',
+      body: JSON.stringify({ approve, reason: reason || '' }),
+    });
+  },
+};

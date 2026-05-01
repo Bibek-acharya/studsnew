@@ -488,4 +488,9 @@ export const scholarshipApi = {
   getSeedScholarships(): Scholarship[] {
     return seedScholarships;
   },
+
+  async getScholarshipById(id: number): Promise<Scholarship | undefined> {
+    const scholarship = seedScholarships.find((s) => s.id === id);
+    return scholarship;
+  },
 };

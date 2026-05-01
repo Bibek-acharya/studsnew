@@ -186,7 +186,7 @@ export interface CreateScholarshipPayload {
   image_url?: string;
   banner_image?: string;
   field_of_study: string[];
-  status?: 'draft' | 'active';
+  status?: 'draft' | 'published';
   total_seats?: number;
   amount_per_student?: number;
   disbursement_type?: string;

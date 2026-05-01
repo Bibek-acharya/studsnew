@@ -90,6 +90,17 @@ const CreateScholarship: React.FC<CreateScholarshipProps> = memo(({ scholarshipI
   const [success, setSuccess] = useState("");
   const [error, setError] = useState("");
   const [loadingData, setLoadingData] = useState(false);
+  const [status, setStatus] = useState<'draft' | 'published'>('draft');
+  const [paymentFeeAmount, setPaymentFeeAmount] = useState(0);
+  const [enableEsewa, setEnableEsewa] = useState(true);
+  const [enableKhalti, setEnableKhalti] = useState(true);
+  const [enableBank, setEnableBank] = useState(false);
+  const [bankDetails, setBankDetails] = useState({
+    bankName: '',
+    accountName: '',
+    accountNumber: '',
+    branch: '',
+  });
   const isEditing = Boolean(scholarshipId);
 
   useEffect(() => {
@@ -189,7 +200,7 @@ const CreateScholarship: React.FC<CreateScholarshipProps> = memo(({ scholarshipI
       scholarship_type: scholarshipType || "",
       description: aboutParagraph1 || "",
       field_of_study: scholarshipFieldOfStudy.length > 0 ? scholarshipFieldOfStudy : [],
-      status: (draft ? 'draft' : 'active') as 'draft' | 'active',
+      status: (draft ? 'draft' : status) as 'draft' | 'published',
       total_seats: totalSeats || undefined,
       amount_per_student: amountPerStudent || undefined,
       application_start_date: applicationStartDate ? new Date(applicationStartDate).toISOString() : undefined,
@@ -217,6 +228,15 @@ const CreateScholarship: React.FC<CreateScholarshipProps> = memo(({ scholarshipI
       partner_groups: partnerGroups.length > 0 ? partnerGroups : undefined,
       exam_centers_new: examCenters.length > 0 ? examCenters : undefined,
       downloads: downloads.length > 0 ? downloads : undefined,
+      payment_config: {
+        fee_amount: paymentFeeAmount,
+        methods: [
+          ...(enableEsewa ? ['esewa'] : []),
+          ...(enableKhalti ? ['khalti'] : []),
+          ...(enableBank ? ['bank'] : []),
+        ],
+        ...(enableBank ? { bank_details: bankDetails } : {}),
+      },
     };
 
     try {
@@ -232,12 +252,13 @@ const CreateScholarship: React.FC<CreateScholarshipProps> = memo(({ scholarshipI
     } finally {
       setSubmitting(false);
     }
-  }, [pageTitle, bannerBgUrl, aboutParagraph1, aboutParagraph2, videoTutorials,
-      journeyTimeline, scholarshipSectionTitle, scholarshipSubtitle, scholarshipDesc1,
-      scholarshipDesc2, scholarshipTypes, selectionRubric, eligibilitySectionTitle,
-      eligibilitySubtitle, basicEligibility, fullyFundedCriteria, partiallyFundedCriteria,
-      selectionProcessSteps, requiredDocs, faqs, galleryImages, partnerGroups,
-      examCenters, downloads, scholarshipId, isEditing, onNavigate]);
+}, [pageTitle, bannerBgUrl, aboutParagraph1, aboutParagraph2, videoTutorials,
+       journeyTimeline, scholarshipSectionTitle, scholarshipSubtitle, scholarshipDesc1,
+       scholarshipDesc2, scholarshipTypes, selectionRubric, eligibilitySectionTitle,
+       eligibilitySubtitle, basicEligibility, fullyFundedCriteria, partiallyFundedCriteria,
+       selectionProcessSteps, requiredDocs, faqs, galleryImages, partnerGroups,
+       examCenters, downloads, scholarshipId, isEditing, onNavigate, status,
+       paymentFeeAmount, enableEsewa, enableKhalti, enableBank, bankDetails]);
 
   const renderStringList = (label: string, items: string[], setter: React.Dispatch<React.SetStateAction<string[]>>) => {
     const [input, setInput] = useState("");
@@ -866,6 +887,108 @@ const CreateScholarship: React.FC<CreateScholarshipProps> = memo(({ scholarshipI
           onClick={() => addArrayItem(setDownloads, emptyDownload)}>
           <Plus size={16} /> Add Download
         </button>
+      </div>
+
+      {/* Payment Configuration */}
+      <div className="section-card">
+        <h3 className="font-bold mb-4">Payment Configuration</h3>
+        
+        <div className="mb-4">
+          <label className="input-label">Application Fee (NPR)</label>
+          <input
+            type="number"
+            value={paymentFeeAmount}
+            onChange={(e) => setPaymentFeeAmount(Number(e.target.value))}
+            className="input-field"
+            placeholder="0 for free"
+          />
+        </div>
+        
+        <div className="mb-4">
+          <label className="input-label">Payment Methods</label>
+          <div className="flex gap-4 mt-2">
+            <label className="flex items-center gap-2">
+              <input type="checkbox" checked={enableEsewa} onChange={(e) => setEnableEsewa(e.target.checked)} />
+              <span>eSewa</span>
+            </label>
+            <label className="flex items-center gap-2">
+              <input type="checkbox" checked={enableKhalti} onChange={(e) => setEnableKhalti(e.target.checked)} />
+              <span>Khalti</span>
+            </label>
+            <label className="flex items-center gap-2">
+              <input type="checkbox" checked={enableBank} onChange={(e) => setEnableBank(e.target.checked)} />
+              <span>Bank Transfer</span>
+            </label>
+          </div>
+        </div>
+        
+        {enableBank && (
+          <div className="grid grid-cols-2 gap-4 mt-4">
+            <div>
+              <label className="input-label text-xs">Bank Name</label>
+              <input
+                className="input-field text-sm"
+                placeholder="Bank Name"
+                value={bankDetails.bankName}
+                onChange={(e) => setBankDetails({ ...bankDetails, bankName: e.target.value })}
+              />
+            </div>
+            <div>
+              <label className="input-label text-xs">Account Name</label>
+              <input
+                className="input-field text-sm"
+                placeholder="Account Name"
+                value={bankDetails.accountName}
+                onChange={(e) => setBankDetails({ ...bankDetails, accountName: e.target.value })}
+              />
+            </div>
+            <div>
+              <label className="input-label text-xs">Account Number</label>
+              <input
+                className="input-field text-sm"
+                placeholder="Account Number"
+                value={bankDetails.accountNumber}
+                onChange={(e) => setBankDetails({ ...bankDetails, accountNumber: e.target.value })}
+              />
+            </div>
+            <div>
+              <label className="input-label text-xs">Branch</label>
+              <input
+                className="input-field text-sm"
+                placeholder="Branch"
+                value={bankDetails.branch}
+                onChange={(e) => setBankDetails({ ...bankDetails, branch: e.target.value })}
+              />
+            </div>
+          </div>
+        )}
+      </div>
+
+      {/* Publication Status */}
+      <div className="section-card">
+        <h3 className="font-bold mb-4">Publication Status</h3>
+        <div className="flex gap-4">
+          <label className="flex items-center gap-2">
+            <input
+              type="radio"
+              name="status"
+              value="draft"
+              checked={status === 'draft'}
+              onChange={() => setStatus('draft')}
+            />
+            <span>Draft (Hidden from public)</span>
+          </label>
+          <label className="flex items-center gap-2">
+            <input
+              type="radio"
+              name="status"
+              value="active"
+              checked={status === 'published'}
+              onChange={() => setStatus('published')}
+            />
+            <span>Published (Visible to public)</span>
+          </label>
+        </div>
       </div>
 
       {/* Bottom Actions */}
