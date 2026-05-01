@@ -365,7 +365,7 @@ const ScholarshipProviderZone: React.FC<ScholarshipProviderZoneProps> = ({
   }
 
   return (
-    <><div className="min-h-screen w-full font-sans selection:bg-brandBlue selection:text-white bg-gray-50 flex items-center justify-center p-4 md:p-8 lg:p-12">
+    <><div suppressHydrationWarning className="min-h-screen w-full font-sans selection:bg-brandBlue selection:text-white bg-gray-50 flex items-center justify-center p-4 md:p-8 lg:p-12">
       <div className="w-full max-w-[1400px] bg-[#0000ff] rounded-2xl p-6 sm:p-10 lg:py-10 lg:px-16 xl:px-20 relative overflow-hidden">
         <div className="relative z-10 grid grid-cols-1 lg:grid-cols-2 gap-10 lg:gap-12 items-center w-full">
           <div className="order-2 lg:order-1 flex flex-col justify-center text-center lg:text-left space-y-5 mx-auto lg:mx-0 max-w-xl">
@@ -390,8 +390,8 @@ const ScholarshipProviderZone: React.FC<ScholarshipProviderZoneProps> = ({
                       <h1 className="text-xl font-bold text-gray-900 mb-1.5">Sign in to StudSphere</h1>
                       <p className="text-[13px] text-gray-500 font-medium">Welcome back! Enter your details to access your dashboard.</p>
                     </div>
-                    <form onSubmit={handleProviderLogin} className="space-y-4">
-                      <div>
+                    <form suppressHydrationWarning onSubmit={handleProviderLogin} className="space-y-4">
+                      <div suppressHydrationWarning>
                         <label className="block text-[13px] font-semibold text-gray-700 mb-1.5">Email</label>
                         <input
                           type="email"
@@ -414,6 +414,7 @@ const ScholarshipProviderZone: React.FC<ScholarshipProviderZoneProps> = ({
                           />
                           <button
                             type="button"
+                            suppressHydrationWarning
                             onClick={() => setShowLoginPassword(!showLoginPassword)}
                             className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-[#0000ff] transition-colors"
                           >
@@ -423,8 +424,8 @@ const ScholarshipProviderZone: React.FC<ScholarshipProviderZoneProps> = ({
                         {loginFieldErrors.password && <p className="text-red-500 text-[12px] mt-1">{loginFieldErrors.password}</p>}
                       </div>
                       <div className="flex items-center justify-between pt-1">
-                        <label className="flex items-center gap-2 cursor-pointer group">
-                          <input type="checkbox" className="appearance-none bg-white w-[1.15em] h-[1.15em] border border-gray-300 rounded grid place-content-center before:content-[''] before:w-[0.65em] before:h-[0.65em] before:scale-0 before:transition-transform before:shadow-[inset_1em_1em_white] before:bg-white before:origin-bottom-left before:[clip-path:polygon(14%_44%,0_65%,50%_100%,100%_16%,80%_0%,43%_62%)] checked:bg-[#0000ff] checked:border-[#0000ff] checked:before:scale-100 cursor-pointer" />
+<label className="flex items-center gap-2 cursor-pointer group">
+                           <input type="checkbox" className="w-4 h-4 rounded border-gray-300 cursor-pointer accent-[#0000ff]" />
                           <span className="text-[13px] text-gray-500 font-medium group-hover:text-gray-800 transition-colors">Remember me</span>
                         </label>
                         <button type="button" onClick={() => { setShowForgotPassword(true); setFpStep("email"); setFpError(null); setFpSuccess(null); }} className="text-[13px] font-semibold text-[#0000ff] hover:text-[#0000cc] hover:underline transition-colors">

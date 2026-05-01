@@ -52,6 +52,16 @@ const emptyDownload = (): DownloadItem => ({ title: "", description: "" });
 
 const CreateScholarship: React.FC<CreateScholarshipProps> = memo(({ scholarshipId, onNavigate }: CreateScholarshipProps) => {
   const [pageTitle, setPageTitle] = useState("");
+  const [scholarshipValue, setScholarshipValue] = useState("");
+  const [scholarshipLocation, setScholarshipLocation] = useState("");
+  const [scholarshipDegreeLevel, setScholarshipDegreeLevel] = useState("");
+  const [scholarshipFundingType, setScholarshipFundingType] = useState("");
+  const [scholarshipType, setScholarshipType] = useState("");
+  const [scholarshipFieldOfStudy, setScholarshipFieldOfStudy] = useState<string[]>([]);
+  const [totalSeats, setTotalSeats] = useState<number>(0);
+  const [amountPerStudent, setAmountPerStudent] = useState<number>(0);
+  const [applicationStartDate, setApplicationStartDate] = useState("");
+  const [applicationEndDate, setApplicationEndDate] = useState("");
   const [bannerBgUrl, setBannerBgUrl] = useState("");
   const [bannerBgPreview, setBannerBgPreview] = useState("");
   const [aboutParagraph1, setAboutParagraph1] = useState("");
@@ -90,9 +100,19 @@ const CreateScholarship: React.FC<CreateScholarshipProps> = memo(({ scholarshipI
     setLoadingData(true);
     scholarshipProviderApi.getScholarshipById(scholarshipId).then((s) => {
       setPageTitle(s.title || "");
+      setScholarshipValue(s.value || "");
+      setScholarshipLocation(s.location || "");
+      setScholarshipDegreeLevel(s.degree_level || "");
+      setScholarshipFundingType(s.funding_type || "");
+      setScholarshipType(s.scholarship_type || "");
+      setScholarshipFieldOfStudy(s.field_of_study || []);
+      setTotalSeats(s.total_seats || 0);
+      setAmountPerStudent(s.amount_per_student || 0);
+      setApplicationStartDate(s.application_start_date?.split('T')[0] || "");
+      setApplicationEndDate(s.application_end_date?.split('T')[0] || "");
       setBannerBgUrl(s.banner_background_image_url || "");
       setBannerBgPreview(s.banner_background_image_url || "");
-      setAboutParagraph1(s.about_paragraph_1 || "");
+      setAboutParagraph1(s.about_paragraph_1 || s.description || "");
       setAboutParagraph2(s.about_paragraph_2 || "");
       setVideoTutorials(s.video_tutorials || []);
       setJourneyTimeline(s.journey_timeline || []);
@@ -100,7 +120,7 @@ const CreateScholarship: React.FC<CreateScholarshipProps> = memo(({ scholarshipI
       setScholarshipSubtitle(s.scholarship_subtitle || "");
       setScholarshipDesc1(s.scholarship_description_1 || "");
       setScholarshipDesc2(s.scholarship_description_2 || "");
-      setScholarshipTypes(s.scholarship_types_new || []);
+      setScholarshipTypes(s.scholarship_types_new || (s.scholarship_types || []).map((t: any) => ({ type: t.type || "", seats: t.seats || "", coverage: t.coverage || "" })));
       setSelectionRubric(s.selection_rubric_new || []);
       setEligibilitySectionTitle(s.eligibility_section_title || "");
       setEligibilitySubtitle(s.eligibility_subtitle || "");
@@ -109,8 +129,8 @@ const CreateScholarship: React.FC<CreateScholarshipProps> = memo(({ scholarshipI
       setPartiallyFundedCriteria(s.partially_funded_criteria || []);
       setSelectionProcessSteps(s.selection_process_steps || []);
       setRequiredDocs(s.required_documents || []);
-      setFaqs(s.faqs_new || []);
-      setGalleryImages(s.gallery_images_new || []);
+      setFaqs(s.faqs_new || (s.faqs || []).map((f: any) => ({ question: f.question || "", answer: f.answer || "" })));
+      setGalleryImages(s.gallery_images_new || (s.gallery_images || []).map((img: string) => ({ title: "", url: img })));
       setPartnerGroups(s.partner_groups || []);
       setExamCenters(s.exam_centers_new || []);
       setDownloads(s.downloads || []);
@@ -161,15 +181,19 @@ const CreateScholarship: React.FC<CreateScholarshipProps> = memo(({ scholarshipI
     const payload = {
       title: pageTitle,
       provider: pageTitle,
-      location: "",
-      value: "",
-      deadline: "",
-      degree_level: "",
-      funding_type: "",
-      scholarship_type: "",
-      description: aboutParagraph1,
-      field_of_study: [],
-      status: draft ? 'draft' as const : 'active' as const,
+      location: scholarshipLocation || "",
+      value: scholarshipValue || "",
+      deadline: applicationEndDate ? new Date(applicationEndDate).toISOString() : "",
+      degree_level: scholarshipDegreeLevel || "",
+      funding_type: scholarshipFundingType || "",
+      scholarship_type: scholarshipType || "",
+      description: aboutParagraph1 || "",
+      field_of_study: scholarshipFieldOfStudy.length > 0 ? scholarshipFieldOfStudy : [],
+      status: (draft ? 'draft' : 'active') as 'draft' | 'active',
+      total_seats: totalSeats || undefined,
+      amount_per_student: amountPerStudent || undefined,
+      application_start_date: applicationStartDate ? new Date(applicationStartDate).toISOString() : undefined,
+      application_end_date: applicationEndDate ? new Date(applicationEndDate).toISOString() : undefined,
       banner_background_image_url: bannerBgUrl || undefined,
       about_paragraph_1: aboutParagraph1,
       about_paragraph_2: aboutParagraph2,
@@ -302,6 +326,70 @@ const CreateScholarship: React.FC<CreateScholarshipProps> = memo(({ scholarshipI
               onFileSelect={handleBannerFileSelect}
               previewUrl={bannerBgPreview}
             />
+          </div>
+        </div>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 mt-5">
+          <div>
+            <label className="input-label">Value (Amount)</label>
+            <input type="text" className="input-field" placeholder="e.g., 50000 or NPR 50,000"
+              value={scholarshipValue} onChange={(e) => setScholarshipValue(e.target.value)} />
+          </div>
+          <div>
+            <label className="input-label">Location</label>
+            <input type="text" className="input-field" placeholder="e.g., Kathmandu, Nepal"
+              value={scholarshipLocation} onChange={(e) => setScholarshipLocation(e.target.value)} />
+          </div>
+          <div>
+            <label className="input-label">Degree Level</label>
+            <select className="input-field" value={scholarshipDegreeLevel} onChange={(e) => setScholarshipDegreeLevel(e.target.value)}>
+              <option value="">Select Degree Level</option>
+              <option value="+2">+2 / Grade 11-12</option>
+              <option value="diploma">Diploma</option>
+              <option value="bachelor">Bachelor's</option>
+              <option value="masters">Master's</option>
+              <option value="phd">PhD</option>
+            </select>
+          </div>
+          <div>
+            <label className="input-label">Funding Type</label>
+            <select className="input-field" value={scholarshipFundingType} onChange={(e) => setScholarshipFundingType(e.target.value)}>
+              <option value="">Select Funding Type</option>
+              <option value="FULLY FUNDED">Fully Funded</option>
+              <option value="PARTIAL TUITION">Partial Tuition</option>
+              <option value="MERIT-BASED">Merit-Based</option>
+              <option value="NEED-BASED">Need-Based</option>
+            </select>
+          </div>
+          <div>
+            <label className="input-label">Scholarship Type</label>
+            <select className="input-field" value={scholarshipType} onChange={(e) => setScholarshipType(e.target.value)}>
+              <option value="">Select Type</option>
+              <option value="merit-based">Merit Based</option>
+              <option value="need-based">Need Based</option>
+              <option value="sports">Sports</option>
+              <option value="arts">Arts</option>
+              <option value="research">Research</option>
+            </select>
+          </div>
+          <div>
+            <label className="input-label">Total Seats</label>
+            <input type="number" className="input-field" placeholder="e.g., 25"
+              value={totalSeats || ""} onChange={(e) => setTotalSeats(parseInt(e.target.value) || 0)} />
+          </div>
+          <div>
+            <label className="input-label">Amount Per Student</label>
+            <input type="number" className="input-field" placeholder="e.g., 50000"
+              value={amountPerStudent || ""} onChange={(e) => setAmountPerStudent(parseInt(e.target.value) || 0)} />
+          </div>
+          <div>
+            <label className="input-label">Application Start Date</label>
+            <input type="date" className="input-field"
+              value={applicationStartDate} onChange={(e) => setApplicationStartDate(e.target.value)} />
+          </div>
+          <div>
+            <label className="input-label">Application End Date</label>
+            <input type="date" className="input-field"
+              value={applicationEndDate} onChange={(e) => setApplicationEndDate(e.target.value)} />
           </div>
         </div>
       </div>

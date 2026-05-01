@@ -28,6 +28,7 @@ const DraftScholarship: React.FC<DraftScholarshipProps> = memo(({ onEdit, onNavi
   const [drafts, setDrafts] = useState<ProviderScholarship[]>(DRAFT_FALLBACKS);
   const [loading, setLoading] = useState(true);
   const [page, setPage] = useState(1);
+  const [publishing, setPublishing] = useState<number | null>(null);
   const perPage = 8;
 
   useEffect(() => {
@@ -44,6 +45,20 @@ const DraftScholarship: React.FC<DraftScholarshipProps> = memo(({ onEdit, onNavi
     }
     fetchDrafts();
   }, []);
+
+  const handlePublish = async (id: number) => {
+    if (!confirm("Are you sure you want to publish this scholarship? It will be visible to students.")) return;
+    setPublishing(id);
+    try {
+      await scholarshipProviderApi.publishScholarship(id);
+      setDrafts((prev) => prev.filter((d) => d.id !== id));
+      alert("Scholarship published successfully!");
+    } catch (err) {
+      alert("Failed to publish scholarship");
+    } finally {
+      setPublishing(null);
+    }
+  };
 
   const totalPages = Math.ceil(drafts.length / perPage);
   const pagedDrafts = drafts.slice((page - 1) * perPage, page * perPage);
@@ -136,8 +151,12 @@ const DraftScholarship: React.FC<DraftScholarshipProps> = memo(({ onEdit, onNavi
                   >
                     Edit Draft
                   </button>
-                  <button className="flex-[1] py-2 px-2 bg-blue-700 text-white font-semibold rounded-md hover:bg-blue-800 transition-colors text-[11px]">
-                    Publish
+                  <button
+                    onClick={() => handlePublish(sch.id)}
+                    disabled={publishing === sch.id}
+                    className="flex-[1] py-2 px-2 bg-blue-700 text-white font-semibold rounded-md hover:bg-blue-800 transition-colors text-[11px] disabled:opacity-50"
+                  >
+                    {publishing === sch.id ? 'Publishing...' : 'Publish'}
                   </button>
                 </div>
               </div>

@@ -10,9 +10,13 @@ async function callApi<T>(path: string, options: RequestInit = {}): Promise<T> {
 const FIELD_MAPPINGS = {
   scholarship_types_new: 'scholarship_types',
   selection_rubric_new: 'selection_rubric',
-  faqs_new: 'faqs',
+  faqs_new: 'fa_qs',
   gallery_images_new: 'gallery_images',
   exam_centers_new: 'exam_centers',
+  about_paragraph_1: 'about_paragraph1',
+  about_paragraph_2: 'about_paragraph2',
+  scholarship_description_1: 'scholarship_description1',
+  scholarship_description_2: 'scholarship_description2',
 } as const;
 
 function mapScholarshipFields(data: Partial<CreateScholarshipPayload>) {
@@ -538,6 +542,13 @@ export const scholarshipProviderApi = {
 
   async deleteScholarship(id: number): Promise<void> {
     await apiRequest(`/api/v1/scholarship-providers/scholarships/${id}`, { method: "DELETE" });
+  },
+
+  async publishScholarship(id: number): Promise<ProviderScholarship> {
+    return callApi<ProviderScholarship>(`/api/v1/scholarship-providers/scholarships/${id}`, {
+      method: 'PUT',
+      body: JSON.stringify({ status: 'active' }),
+    });
   },
 
   async getApplications(params?: { page?: number; limit?: number; status?: string; scholarship_id?: string }): Promise<{ applications: ProviderApplication[]; meta: { total: number; page: number; limit: number } }> {

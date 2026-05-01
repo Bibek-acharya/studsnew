@@ -55,9 +55,10 @@ const ScholarshipDirectory: React.FC<ScholarshipDirectoryProps> = memo(({ onEdit
     async function fetchData() {
       try {
         const res = await scholarshipProviderApi.getScholarships(1, 50);
-        setScholarships(res.scholarships.length > 0 ? res.scholarships : FALLBACKS);
+        const nonDrafts = (res.scholarships.length > 0 ? res.scholarships : FALLBACKS).filter((s) => s.status !== 'draft');
+        setScholarships(nonDrafts);
       } catch {
-        setScholarships(FALLBACKS);
+        setScholarships(FALLBACKS.filter((s) => s.status !== 'draft'));
       } finally {
         setLoading(false);
       }
