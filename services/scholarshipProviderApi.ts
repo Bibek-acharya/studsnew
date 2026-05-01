@@ -332,6 +332,13 @@ export interface ProviderScholarship {
   downloads?: DownloadItem[];
 }
 
+export interface ProviderPayment {
+  status: 'pending' | 'pending_approval' | 'completed' | 'rejected';
+  receipt_url?: string;
+  amount?: number;
+  processed_at?: string;
+}
+
 export interface ProviderApplication {
   id: number;
   scholarship_id: number;
@@ -353,6 +360,9 @@ export interface ProviderApplication {
   age?: number;
   school_type?: string;
   exam_center?: string;
+  ethnicity?: string;
+  district?: string;
+  payment?: ProviderPayment;
 }
 
 export interface ProviderInterview {
@@ -780,6 +790,13 @@ export const scholarshipProviderApi = {
 
   async deleteAccess(id: number): Promise<void> {
     await apiRequest(`/api/v1/scholarship-providers/access/${id}`, { method: "DELETE" });
+  },
+
+  async approvePayment(applicationId: number, approve: boolean, reason?: string): Promise<{ success: boolean }> {
+    return apiRequest<{ success: boolean }>(`/api/v1/scholarship-providers/applications/${applicationId}/payment`, {
+      method: "PUT",
+      body: JSON.stringify({ approve, reason }),
+    });
   },
 
   async sendOTP(email: string, type: "verification" | "password_reset"): Promise<void> {

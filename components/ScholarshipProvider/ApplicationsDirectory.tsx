@@ -29,6 +29,15 @@ export default function ApplicationsDirectory({ onReviewStudent }: ApplicationsD
   const [filterDistrict, setFilterDistrict] = useState("");
   const [filterSchool, setFilterSchool] = useState("");
   const [filterStatus, setFilterStatus] = useState("");
+  const [paymentStatusFilter, setPaymentStatusFilter] = useState<'all' | 'pending' | 'completed' | 'pending_approval'>('all');
+  const [selectedReceipt, setSelectedReceipt] = useState<string | null>(null);
+  const [showRejectModal, setShowRejectModal] = useState(false);
+  const [showConfirmModal, setShowConfirmModal] = useState(false);
+  const [selectedAppId, setSelectedAppId] = useState<number | null>(null);
+  const [isApproveAction, setIsApproveAction] = useState(true);
+  const [rejectionReason, setRejectionReason] = useState('');
+  const [error, setError] = useState<string | null>(null);
+  const [success, setSuccess] = useState<string | null>(null);
 
   useEffect(() => {
     async function fetchData() {
@@ -46,12 +55,44 @@ export default function ApplicationsDirectory({ onReviewStudent }: ApplicationsD
     fetchData();
   }, [page]);
 
+  const handlePaymentAction = (applicationId: number, approve: boolean) => {
+    setSelectedAppId(applicationId);
+    setIsApproveAction(approve);
+    if (approve) {
+      setShowConfirmModal(true);
+    } else {
+      setRejectionReason('');
+      setShowRejectModal(true);
+    }
+  };
+
+  const handleConfirmPayment = async () => {
+    if (!selectedAppId) return;
+    try {
+      await scholarshipProviderApi.approvePayment(selectedAppId, isApproveAction, rejectionReason);
+      setApplications((prev) => prev.map((app) => 
+        app.id === selectedAppId ? { 
+          ...app, 
+          payment: { ...app.payment, status: isApproveAction ? 'completed' : 'rejected' }
+        } : app
+      ));
+      setSuccess(isApproveAction ? 'Payment approved' : 'Payment rejected');
+      setShowConfirmModal(false);
+      setShowRejectModal(false);
+      setSelectedAppId(null);
+      setRejectionReason('');
+    } catch (err) {
+      setError('Failed to process payment');
+    }
+  };
+
   const handleStatusChange = useCallback(async (id: number, newStatus: string) => {
     try {
       await scholarshipProviderApi.updateApplicationStatus(id, newStatus);
       setApplications((prev) => prev.map((app) => (app.id === id ? { ...app, status: newStatus } : app)));
+      setSuccess('Status updated successfully');
     } catch {
-      alert("Failed to update status");
+      setError('Failed to update status');
     }
   }, []);
 
@@ -59,11 +100,15 @@ export default function ApplicationsDirectory({ onReviewStudent }: ApplicationsD
     const name = `${a.first_name} ${a.last_name}`.toLowerCase();
     if (search && !name.includes(search.toLowerCase())) return false;
     if (filterGender && a.gender !== filterGender) return false;
-    if (filterEthnicity && (a as any).ethnicity !== filterEthnicity) return false;
+    if (filterEthnicity && a.ethnicity !== filterEthnicity) return false;
     if (filterProvince && a.province !== filterProvince) return false;
-    if (filterDistrict && (a as any).district !== filterDistrict) return false;
+    if (filterDistrict && a.district !== filterDistrict) return false;
     if (filterSchool && a.school_type !== filterSchool) return false;
     if (filterStatus && a.status !== filterStatus.toLowerCase()) return false;
+    if (paymentStatusFilter !== 'all') {
+      const paymentStatus = a.payment?.status;
+      if (paymentStatus !== paymentStatusFilter) return false;
+    }
     return true;
   });
 
@@ -75,6 +120,7 @@ export default function ApplicationsDirectory({ onReviewStudent }: ApplicationsD
     setFilterDistrict("");
     setFilterSchool("");
     setFilterStatus("");
+    setPaymentStatusFilter("all");
   };
 
   const totalPages = Math.ceil(total / limit);
@@ -150,6 +196,12 @@ export default function ApplicationsDirectory({ onReviewStudent }: ApplicationsD
             <option value="">All Status</option>
             {STATUS_OPTIONS.map((o) => <option key={o} value={o}>{o}</option>)}
           </select>
+          <select value={paymentStatusFilter} onChange={(e) => setPaymentStatusFilter(e.target.value as 'all' | 'pending' | 'completed' | 'pending_approval')} className="px-3 py-1.5 border border-gray-200 rounded-lg text-xs bg-white focus:outline-none focus:border-blue-500">
+            <option value="all">All Payment</option>
+            <option value="pending">Pending</option>
+            <option value="completed">Completed</option>
+            <option value="pending_approval">Pending Approval</option>
+          </select>
           <button onClick={clearFilters} className="text-xs text-blue-600 font-medium hover:underline">Clear All</button>
           <span className="text-xs text-gray-400 ml-auto">{filtered.length} of {total} applications</span>
         </div>
@@ -190,9 +242,9 @@ export default function ApplicationsDirectory({ onReviewStudent }: ApplicationsD
                       <td className="text-center py-3 px-3">
                         <span className={`px-2 py-1 rounded text-xs font-semibold ${app.gender === "Female" ? "bg-pink-100 text-pink-700" : "bg-blue-100 text-blue-700"}`}>{app.gender || "N/A"}</span>
                       </td>
-                      <td className="text-center py-3 px-3 text-gray-600">{(app as any).ethnicity || "-"}</td>
+                      <td className="text-center py-3 px-3 text-gray-600">{app.ethnicity || "-"}</td>
                       <td className="text-center py-3 px-3 text-gray-600">{app.province || "-"}</td>
-                      <td className="text-center py-3 px-3 text-gray-600">{(app as any).district || "-"}</td>
+                      <td className="text-center py-3 px-3 text-gray-600">{app.district || "-"}</td>
                       <td className="text-center py-3 px-3">
                         <span className={`px-2 py-1 rounded text-xs font-semibold ${app.stream === "Management" ? "bg-indigo-100 text-indigo-700" : "bg-cyan-100 text-cyan-700"}`}>{app.stream || "N/A"}</span>
                       </td>
@@ -209,7 +261,20 @@ export default function ApplicationsDirectory({ onReviewStudent }: ApplicationsD
                         <span className="bg-green-100 text-green-700 px-2 py-1 rounded text-xs font-semibold">Sent</span>
                       </td>
                       <td className="text-center py-3 px-3">
-                        <span className="bg-blue-100 text-blue-700 px-2 py-1 rounded text-xs font-semibold">eSewa</span>
+                        {(() => {
+                          const status = app.payment?.status;
+                          const colors: Record<string, string> = {
+                            pending: 'bg-yellow-100 text-yellow-800',
+                            completed: 'bg-green-100 text-green-800',
+                            pending_approval: 'bg-blue-100 text-blue-800',
+                            rejected: 'bg-red-100 text-red-800',
+                          };
+                          return status ? (
+                            <span className={`px-2 py-1 rounded text-xs font-medium ${colors[status] || 'bg-gray-100'}`}>
+                              {status.replace('_', ' ')}
+                            </span>
+                          ) : '-';
+                        })()}
                       </td>
                       <td className="text-center py-3 px-3">
                         <span className={`${statusBadge(app.status)} px-2 py-1 rounded text-xs font-semibold`}>{statusLabel(app.status)}</span>
@@ -229,6 +294,30 @@ export default function ApplicationsDirectory({ onReviewStudent }: ApplicationsD
                             <XCircle className="w-4 h-4" />
                           </button>
                         </div>
+                        {app.payment?.status === 'pending_approval' && (
+                          <div className="flex items-center justify-center gap-1 mt-1">
+                            <button
+                              onClick={() => handlePaymentAction(app.id, true)}
+                              className="px-2 py-1 bg-green-600 text-white rounded text-xs"
+                            >
+                              Approve
+                            </button>
+                            <button
+                              onClick={() => handlePaymentAction(app.id, false)}
+                              className="px-2 py-1 bg-red-600 text-white rounded text-xs"
+                            >
+                              Reject
+                            </button>
+                            {app.payment?.receipt_url && (
+                              <button
+                                onClick={() => setSelectedReceipt(app.payment?.receipt_url || null)}
+                                className="px-2 py-1 bg-blue-600 text-white rounded text-xs"
+                              >
+                                View Receipt
+                              </button>
+                            )}
+                          </div>
+                        )}
                       </td>
                     </tr>
                   ))}
@@ -255,6 +344,67 @@ export default function ApplicationsDirectory({ onReviewStudent }: ApplicationsD
           </>
         )}
       </div>
+
+      {selectedReceipt && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50" onClick={() => setSelectedReceipt(null)}>
+          <div className="bg-white p-4 rounded max-w-2xl" onClick={(e) => e.stopPropagation()}>
+            <img src={selectedReceipt} alt="Receipt" className="max-h-96" />
+            <button onClick={() => setSelectedReceipt(null)} className="mt-4 px-4 py-2 bg-gray-600 text-white rounded">
+              Close
+            </button>
+          </div>
+        </div>
+      )}
+
+      {showConfirmModal && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+          <div className="bg-white p-6 rounded-lg shadow-xl max-w-md">
+            <h3 className="text-lg font-semibold mb-4">Confirm Payment Approval</h3>
+            <p className="text-gray-600 mb-6">Are you sure you want to approve this payment?</p>
+            <div className="flex justify-end gap-3">
+              <button onClick={() => setShowConfirmModal(false)} className="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50">
+                Cancel
+              </button>
+              <button onClick={handleConfirmPayment} className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700">
+                Confirm
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {showRejectModal && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+          <div className="bg-white p-6 rounded-lg shadow-xl max-w-md">
+            <h3 className="text-lg font-semibold mb-4">Reject Payment</h3>
+            <p className="text-gray-600 mb-4">Please provide a reason for rejection:</p>
+            <textarea
+              value={rejectionReason}
+              onChange={(e) => setRejectionReason(e.target.value)}
+              placeholder="Reason for rejection..."
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg mb-6 focus:outline-none focus:border-blue-500"
+              rows={3}
+            />
+            <div className="flex justify-end gap-3">
+              <button onClick={() => setShowRejectModal(false)} className="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50">
+                Cancel
+              </button>
+              <button onClick={handleConfirmPayment} className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700">
+                Confirm Reject
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {(error || success) && (
+        <div className={`${error ? 'bg-red-100 text-red-800 border border-red-200' : 'bg-green-100 text-green-800 border border-green-200'} px-4 py-3 rounded-lg shadow-lg z-50`}>
+          {error || success}
+          <button onClick={() => { setError(null); setSuccess(null); }} className="ml-3 text-sm underline">
+            Dismiss
+          </button>
+        </div>
+      )}
     </div>
   );
 }
