@@ -97,6 +97,7 @@ export default function ScholarshipDetailPage({ scholarship, similarScholarships
   const galleryImages = Array.isArray(scholarship.gallery_images) && scholarship.gallery_images.length > 0
     ? scholarship.gallery_images
     : [];
+  const bannerImage = scholarship.banner_background_image_url || scholarship.image_url || galleryImages[0] || "";
 
   const changeImage = (dir: number) => {
     if (lightboxIndex === null) return;
@@ -201,10 +202,8 @@ export default function ScholarshipDetailPage({ scholarship, similarScholarships
               ]).map((item: any, i: number) => {
                 const yearColors = ["bg-blue-600", "bg-green-600", "bg-purple-600", "bg-orange-600", "bg-red-600"];
                 const color = yearColors[i % yearColors.length];
-                const isLast = i === 4;
-const bannerImage = scholarship.banner_background_image_url || scholarship.image_url || defaultImages[0];
-
-  return (
+                const isLast = i === (Array.isArray(scholarship.journey_timeline) && scholarship.journey_timeline.length > 0 ? scholarship.journey_timeline.length - 1 : 4);
+                return (
                   <div key={i} className="flex gap-4">
                     <div className="flex flex-col items-center">
                       <div className={`flex h-10 w-10 items-center justify-center rounded-full ${color} text-white text-[13px] font-bold`}>{item.year}</div>

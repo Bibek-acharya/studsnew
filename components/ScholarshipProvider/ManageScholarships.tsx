@@ -48,6 +48,8 @@ export default function ManageScholarships({ onNavigate, onEdit }: ManageScholar
 
   async function handleToggleStatus(s: ProviderScholarship) {
     const newStatus = s.status === 'active' ? 'draft' : 'active';
+    // API expects 'published' | 'draft' while UI uses 'active' | 'draft'
+    const apiStatus = newStatus === 'active' ? 'published' : newStatus;
     setTogglingId(s.id);
     try {
       await scholarshipProviderApi.updateScholarship(s.id, {
@@ -62,7 +64,7 @@ export default function ManageScholarships({ onNavigate, onEdit }: ManageScholar
         description: s.description,
         image_url: s.image_url || '',
         field_of_study: Array.isArray(s.field_of_study) ? s.field_of_study : [],
-        status: newStatus,
+        status: apiStatus,
       });
       setScholarships(prev => prev.map(item => item.id === s.id ? { ...item, status: newStatus } : item));
     } catch (err) {

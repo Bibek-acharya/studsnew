@@ -4,19 +4,19 @@ import { useRouter } from "next/navigation";
 import { scholarshipApi } from "@/services/api";
 
 interface PaymentConfig {
-  fee_ amount: number;
+  feeAmount: number;
   methods: string[];
-  bank_ details?: {
-    bank_ name: string;
-    account_ name: string;
-    account_ number: string;
+  bankDetails?: {
+    bankName: string;
+    accountName: string;
+    accountNumber: string;
     branch: string;
   };
 }
 
 interface Scholarship {
   title: string;
-  payment_ config: PaymentConfig;
+  paymentConfig: PaymentConfig;
 }
 
 export default function ScholarshipPaymentPage({ scholarshipId }: { scholarshipId: number }) {
@@ -37,11 +37,11 @@ export default function ScholarshipPaymentPage({ scholarshipId }: { scholarshipI
   }, [scholarshipId]);
 
   const handlePayment = async () => {
-    if (!contactNumber. trim()) return;
+    if (!contactNumber.trim()) return;
 
     setIsProcessing(true);
     try {
-      const amount = scholarship?.payment_ config?.fee_ amount || 0;
+      const amount = scholarship?.paymentConfig?.feeAmount || 0;
 
       if (paymentMethod === "bank") {
         if (!paymentScreenshot) {
@@ -51,22 +51,22 @@ export default function ScholarshipPaymentPage({ scholarshipId }: { scholarshipI
         }
         const reader = new FileReader();
         reader.onloadend = async () => {
-          await scholarshipApi. uploadBankReceipt(scholarshipId, reader.result as string);
-          router.push("/scholarship- success/" + scholarshipId + "?status=pending");
+          await scholarshipApi.uploadBankReceipt(scholarshipId, reader.result as string);
+          router.push("/scholarship-success/" + scholarshipId + "?status=pending");
         };
-        reader. readAsDataURL(paymentScreenshot);
+        reader.readAsDataURL(paymentScreenshot);
       } else {
-        await scholarshipApi. initiatePayment(scholarshipId, { method: paymentMethod, amount });
-        router.push("/scholarship- success/" + scholarshipId + "?status=success");
+        await scholarshipApi.initiatePayment(scholarshipId, { method: paymentMethod, amount });
+        router.push("/scholarship-success/" + scholarshipId + "?status=success");
       }
     } catch (error) {
-      console. error("Payment error:", error);
+      console.error("Payment error:", error);
     } finally {
       setIsProcessing(false);
     }
   };
 
-  if (!scholarship?.payment_ config) {
+  if (!scholarship?.paymentConfig) {
     return (
       <div className="min- h- screen bg- gray-50 flex items- center justify- center">
         <p className="text- gray-500">Loading...</p>
@@ -74,9 +74,9 @@ export default function ScholarshipPaymentPage({ scholarshipId }: { scholarshipI
     );
   }
 
-  const paymentConfig = scholarship.payment_ config;
-  const feeAmount = paymentConfig.fee_ amount || 0;
-  const methods = paymentConfig. methods || ["esewa"];
+  const paymentConfig = scholarship.paymentConfig;
+  const feeAmount = paymentConfig.feeAmount || 0;
+  const methods = paymentConfig.methods || ["esewa"];
 
   return (
     <div className="min- h- screen bg- gray-50 py-8">
@@ -87,7 +87,7 @@ export default function ScholarshipPaymentPage({ scholarshipId }: { scholarshipI
         <div className="mb-6">
           <label className="block text- sm font- medium mb-2 text- gray-700">Payment Method</label>
           <div className="flex flex- wrap gap-3">
-            {methods. includes("esewa") && (
+            {methods.includes("esewa") && (
               <label className="cursor- pointer flex items- center gap-2">
                 <input
                   type="radio"
@@ -98,7 +98,7 @@ export default function ScholarshipPaymentPage({ scholarshipId }: { scholarshipI
                 <span className="border-2 rounded- lg p-3">eSewa</span>
               </label>
             )}
-            {methods. includes("khalti") && (
+            {methods.includes("khalti") && (
               <label className="cursor- pointer flex items- center gap-2">
                 <input
                   type="radio"
@@ -109,7 +109,7 @@ export default function ScholarshipPaymentPage({ scholarshipId }: { scholarshipI
                 <span className="border-2 rounded- lg p-3">Khalti</span>
               </label>
             )}
-            {methods. includes("bank") && (
+            {methods.includes("bank") && (
               <label className="cursor- pointer flex items- center gap-2">
                 <input
                   type="radio"
@@ -123,17 +123,17 @@ export default function ScholarshipPaymentPage({ scholarshipId }: { scholarshipI
           </div>
         </div>
 
-        {paymentMethod === "bank" && paymentConfig.bank_ details && (
+        {paymentMethod === "bank" && paymentConfig.bankDetails && (
           <div className="mb-6 p-4 bg- gray-50 rounded- lg">
-            <p><strong>Bank:</strong> {paymentConfig.bank_ details.bank_ name}</p>
-            <p><strong>Account:</strong> {paymentConfig.bank_ details.account_ number}</p>
-            <p><strong>Name:</strong> {paymentConfig.bank_ details.account_ name}</p>
+            <p><strong>Bank:</strong> {paymentConfig.bankDetails.bankName}</p>
+            <p><strong>Account:</strong> {paymentConfig.bankDetails.accountNumber}</p>
+            <p><strong>Name:</strong> {paymentConfig.bankDetails.accountName}</p>
             <div className="mt-3">
               <label className="block text- sm font- medium mb-1">Upload Receipt</label>
               <input
                 type="file"
                 accept="image/*"
-                onChange={(e) => setPaymentScreenshot(e.target. files?.[0] || null)}
+                onChange={(e) => setPaymentScreenshot(e.target.files?.[0] || null)}
                 className="w- full"
               />
             </div>
@@ -152,7 +152,7 @@ export default function ScholarshipPaymentPage({ scholarshipId }: { scholarshipI
           <input
             type="text"
             value={applicantName}
-            onChange={(e) => setApplicantName(e.target. value)}
+            onChange={(e) => setApplicantName(e.target.value)}
             className="w- full border border- gray-300 rounded- md py-2 px-3"
           />
         </div>
@@ -162,7 +162,7 @@ export default function ScholarshipPaymentPage({ scholarshipId }: { scholarshipI
           <input
             type="text"
             value={contactNumber}
-            onChange={(e) => setContactNumber(e.target. value)}
+            onChange={(e) => setContactNumber(e.target.value)}
             className="w- full border border- gray-300 rounded- md py-2 px-3"
           />
         </div>

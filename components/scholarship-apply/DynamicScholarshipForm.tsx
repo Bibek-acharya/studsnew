@@ -24,7 +24,7 @@ interface DynamicScholarshipFormProps {
   formConfig: { sections: FormSection[] };
 }
 
-type FormDataValue = string | number | boolean | File | null;
+type FormDataValue = string | number | null;
 
 export default function DynamicScholarshipForm({
   scholarshipId,
@@ -54,9 +54,14 @@ export default function DynamicScholarshipForm({
     if (file) {
       const reader = new FileReader();
       reader.onloadend = () => {
-        setFormData((prev) => ({ ...prev, [fieldId]: reader.result }));
+        setFormData((prev) => ({
+          ...prev,
+          [fieldId]: typeof reader.result === "string" ? reader.result : null,
+        }));
       };
       reader.readAsDataURL(file);
+    } else {
+      handleChange(fieldId, null);
     }
   };
 

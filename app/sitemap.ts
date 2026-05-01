@@ -99,7 +99,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
 
 function readJsonFile<T>(relativePath: string): T[] {
   try {
-    const fullPath = path.join(process.cwd(), relativePath)
+    const fullPath = path.join(/*turbopackIgnore: true*/ process.cwd(), relativePath)
     if (!existsSync(fullPath)) return []
     const raw = readFileSync(fullPath, "utf-8")
     return JSON.parse(raw) as T[]
