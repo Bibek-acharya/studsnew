@@ -343,6 +343,7 @@ export interface ProviderApplication {
   id: number;
   scholarship_id: number;
   user_id: number;
+  full_name?: string;
   first_name: string;
   last_name: string;
   email: string;
@@ -353,15 +354,45 @@ export interface ProviderApplication {
   personal_statement: string;
   scholarship?: ProviderScholarship;
   created_at: string;
+  updated_at?: string;
   province?: string;
+  district?: string;
   stream?: string;
   gpa?: number;
   gender?: string;
   age?: number;
+  ethnicity?: string;
+  ethnicity_other?: string;
+  date_of_birth_bs?: string;
+  date_of_birth_ad?: string;
+  photo_url?: string;
+  see_gpa?: string;
+  school_name?: string;
+  school_province?: string;
+  school_district?: string;
+  school_municipality?: string;
+  school_tole?: string;
+  permanent_province?: string;
+  permanent_district?: string;
+  permanent_municipality?: string;
+  permanent_ward?: string;
+  permanent_tole?: string;
+  temporary_province?: string;
+  temporary_district?: string;
+  temporary_municipality?: string;
+  temporary_ward?: string;
+  temporary_tole?: string;
+  guardian_name?: string;
+  guardian_phone?: string;
+  guardian_email?: string;
+  father_occupation?: string;
+  father_occupation_other?: string;
+  mother_occupation?: string;
+  mother_occupation_other?: string;
+  family_monthly_income?: number;
+  family_members_count?: number;
   school_type?: string;
   exam_center?: string;
-  ethnicity?: string;
-  district?: string;
   payment?: ProviderPayment;
 }
 
@@ -567,11 +598,11 @@ export const scholarshipProviderApi = {
     queryParams.set('limit', String(params?.limit || 10));
     if (params?.status) queryParams.set('status', params.status);
     if (params?.scholarship_id) queryParams.set('scholarship_id', params.scholarship_id);
-    return apiRequest(`/api/v1/scholarship-providers/applications?${queryParams}`);
+    return callApi(`/api/v1/scholarship-providers/applications?${queryParams}`);
   },
 
   async getApplicationById(id: number): Promise<ProviderApplication> {
-    return apiRequest<ProviderApplication>(`/api/v1/scholarship-providers/applications/${id}`);
+    return callApi<ProviderApplication>(`/api/v1/scholarship-providers/applications/${id}`);
   },
 
   async updateApplicationStatus(id: number, status: string): Promise<ProviderApplication> {

@@ -148,14 +148,34 @@ export default function ApplicationDetails({ applicationId, onBack, onStatusUpda
             </div>
           </div>
 
+          {/* Application Form Data */}
+          <div className="bg-white rounded-xl border border-slate-200 p-6">
+            <h4 className="text-sm font-bold text-slate-400 uppercase tracking-wider mb-4 flex items-center gap-2">
+              <FileText className="w-4 h-4" /> Application Form Data
+            </h4>
+            <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+              <DetailField label="Full Name" value={application.full_name || `${application.first_name} ${application.last_name}`} />
+              <DetailField label="Ethnicity" value={application.ethnicity || "N/A"} />
+              <DetailField label="Ethnicity Other" value={application.ethnicity_other || "N/A"} />
+              <DetailField label="DOB (BS)" value={application.date_of_birth_bs || "N/A"} />
+              <DetailField label="DOB (AD)" value={application.date_of_birth_ad || "N/A"} />
+              <DetailField label="Photo" value={application.photo_url ? "Uploaded" : "N/A"} />
+            </div>
+          </div>
+
           {/* Education Information */}
           <div className="bg-white rounded-xl border border-slate-200 p-6">
             <h4 className="text-sm font-bold text-slate-400 uppercase tracking-wider mb-4 flex items-center gap-2">
               <GraduationCap className="w-4 h-4" /> Education Information
             </h4>
             <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+              <DetailField label="School Name" value={application.school_name || "N/A"} />
               <DetailField label="School Type" value={application.school_type || "N/A"} />
               <DetailField label="GPA" value={application.gpa != null ? application.gpa.toFixed(2) : "N/A"} />
+              <DetailField label="School Province" value={application.school_province || "N/A"} />
+              <DetailField label="School District" value={application.school_district || "N/A"} />
+              <DetailField label="School Municipality" value={application.school_municipality || "N/A"} />
+              <DetailField label="School Tole" value={application.school_tole || "N/A"} />
             </div>
           </div>
 
@@ -168,6 +188,34 @@ export default function ApplicationDetails({ applicationId, onBack, onStatusUpda
               <DetailField label="Stream" value={application.stream || "N/A"} />
               <DetailField label="Exam Center" value={application.exam_center || "N/A"} />
               <DetailField label="Province" value={application.province || "N/A"} />
+            </div>
+          </div>
+
+          {/* Family & Address */}
+          <div className="bg-white rounded-xl border border-slate-200 p-6">
+            <h4 className="text-sm font-bold text-slate-400 uppercase tracking-wider mb-4 flex items-center gap-2">
+              <Users className="w-4 h-4" /> Family & Address
+            </h4>
+            <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+              <DetailField label="Permanent Province" value={application.permanent_province || "N/A"} />
+              <DetailField label="Permanent District" value={application.permanent_district || "N/A"} />
+              <DetailField label="Permanent Municipality" value={application.permanent_municipality || "N/A"} />
+              <DetailField label="Permanent Ward" value={application.permanent_ward || "N/A"} />
+              <DetailField label="Permanent Tole" value={application.permanent_tole || "N/A"} />
+              <DetailField label="Temporary Province" value={application.temporary_province || "N/A"} />
+              <DetailField label="Temporary District" value={application.temporary_district || "N/A"} />
+              <DetailField label="Temporary Municipality" value={application.temporary_municipality || "N/A"} />
+              <DetailField label="Temporary Ward" value={application.temporary_ward || "N/A"} />
+              <DetailField label="Temporary Tole" value={application.temporary_tole || "N/A"} />
+              <DetailField label="Guardian Name" value={application.guardian_name || "N/A"} />
+              <DetailField label="Guardian Phone" value={application.guardian_phone || "N/A"} />
+              <DetailField label="Guardian Email" value={application.guardian_email || "N/A"} />
+              <DetailField label="Father Occupation" value={application.father_occupation || "N/A"} />
+              <DetailField label="Father Occupation Other" value={application.father_occupation_other || "N/A"} />
+              <DetailField label="Mother Occupation" value={application.mother_occupation || "N/A"} />
+              <DetailField label="Mother Occupation Other" value={application.mother_occupation_other || "N/A"} />
+              <DetailField label="Family Income" value={application.family_monthly_income != null ? `Rs. ${application.family_monthly_income.toLocaleString()}` : "N/A"} />
+              <DetailField label="Family Members" value={application.family_members_count != null ? String(application.family_members_count) : "N/A"} />
             </div>
           </div>
 

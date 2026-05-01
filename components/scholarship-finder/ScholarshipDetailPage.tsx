@@ -141,7 +141,7 @@ export default function ScholarshipDetailPage({ scholarship, similarScholarships
         </div>
         <div
           className="relative h-[280px] w-full overflow-hidden rounded-md bg-cover bg-center md:h-[380px]"
-          style={{ backgroundImage: `url('https://sowersaction.org.np/wp-content/uploads/2025/02/WhatsApp-Image-2025-04-02-at-12.30.05_e9d62468.jpg')`, backgroundPosition: "center 20%" }}
+          style={{ backgroundImage: `url('${bannerImage}')`, backgroundPosition: "center 20%" }}
         >
           <div className="absolute inset-0 bg-black/10" />
         </div>
@@ -202,7 +202,9 @@ export default function ScholarshipDetailPage({ scholarship, similarScholarships
                 const yearColors = ["bg-blue-600", "bg-green-600", "bg-purple-600", "bg-orange-600", "bg-red-600"];
                 const color = yearColors[i % yearColors.length];
                 const isLast = i === 4;
-                return (
+const bannerImage = scholarship.banner_background_image_url || scholarship.image_url || defaultImages[0];
+
+  return (
                   <div key={i} className="flex gap-4">
                     <div className="flex flex-col items-center">
                       <div className={`flex h-10 w-10 items-center justify-center rounded-full ${color} text-white text-[13px] font-bold`}>{item.year}</div>
