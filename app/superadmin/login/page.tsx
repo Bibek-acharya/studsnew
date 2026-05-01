@@ -41,6 +41,7 @@ export default function SuperAdminLoginPage() {
       }
 
       const user = data.data?.user;
+      const token = data.data?.token;
       if (user) {
         localStorage.setItem("studsphere_user", JSON.stringify({
           id: user.id,
@@ -49,6 +50,10 @@ export default function SuperAdminLoginPage() {
           email: user.email || email,
           role: "superadmin",
         }));
+      }
+      // Store token for API requests (production fix for cross-domain cookies)
+      if (token) {
+        localStorage.setItem("token", token);
       }
 
       router.push("/superadmin/dashboard");

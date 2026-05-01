@@ -49,7 +49,10 @@ export default function LoginForm() {
   };
 
   const handleGoogle = () => {
-    window.location.href = `${process.env.NEXT_PUBLIC_API_URL}/api/v1/auth/google`;
+    // Pass current URL as redirect parameter to preserve destination after OAuth
+    const currentPath = window.location.pathname + window.location.search;
+    const redirectParam = encodeURIComponent(currentPath);
+    window.location.href = `${process.env.NEXT_PUBLIC_API_URL}/api/v1/auth/google?redirect=${redirectParam}`;
   };
 
   return (
