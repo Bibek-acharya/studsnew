@@ -111,8 +111,17 @@ const ScholarshipProviderZone: React.FC<ScholarshipProviderZoneProps> = ({
         loginPassword,
       );
 
+      // Store token in localStorage for API requests (production fix for cross-domain cookies)
+      const token = (response as any).data?.token || (response as any).token;
+      const user = (response as any).data?.user || (response as any).user;
+      if (token) {
+        localStorage.setItem("scholarshipProviderToken", token);
+      }
+      if (user) {
+        localStorage.setItem("scholarshipProviderUser", JSON.stringify(user));
+      }
+
       setCurrentView("dashboard");
-      setAuthSuccess("Login successful. Connecting to your dashboard...");
       setLoginPassword("");
     } catch (error) {
       const msg = error instanceof Error ? error.message : "Login failed. Please try again.";
@@ -167,7 +176,6 @@ const ScholarshipProviderZone: React.FC<ScholarshipProviderZoneProps> = ({
 
       await apiService.sendOTP(registerEmail.trim(), "verification");
 
-      setAuthSuccess("Verification code sent to your email.");
       setShowOtpStep(true);
       setOtpTimer(120);
       setOtp(["", "", "", "", "", ""]);

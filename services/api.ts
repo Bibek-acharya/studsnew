@@ -9,8 +9,15 @@ if (typeof window !== "undefined") {
 }
 
 export async function apiRequest<T>(path: string, options: RequestInit = {}): Promise<T> {
+  // Get token from localStorage for production (cookie won't be sent to API domain)
+  let token: string | null = null;
+  if (typeof window !== "undefined") {
+    token = localStorage.getItem("token");
+  }
+
   const headers: Record<string, string> = {
     "Content-Type": "application/json",
+    ...(token ? { Authorization: `Bearer ${token}` } : {}),
     ...(options.headers as Record<string, string> || {}),
   };
 
@@ -777,18 +784,42 @@ export const apiService = {
     return null;
   },
   getToken(): string | null {
-    // Token is handled via HttpOnly cookie
+    // In production, cookie is set on frontend domain, not API domain
+    // Read token from localStorage for API requests
+    if (typeof window !== "undefined") {
+      return localStorage.getItem("token");
+    }
     return null;
   },
   getScholarshipProviderToken(): string | null {
-    // Auth handled via HttpOnly cookie
+    // In production, cookie is set on frontend domain, not API domain
+    // Read token from localStorage for API requests
+    if (typeof window !== "undefined") {
+      return localStorage.getItem("scholarshipProviderToken");
+    }
     return null;
   },
-  setToken(_token: string | null): void {
-    // Token is handled via HttpOnly cookie - no client-side storage needed
+  setToken(token: string | null): void {
+    // Store token in localStorage for API requests
+    // In production, HttpOnly cookie won't be sent to API domain
+    if (typeof window !== "undefined") {
+      if (token) {
+        localStorage.setItem("token", token);
+      } else {
+        localStorage.removeItem("token");
+      }
+    }
   },
-  setScholarshipProviderToken(_token: string | null): void {
-    // Auth handled via HttpOnly cookie
+  setScholarshipProviderToken(token: string | null): void {
+    // Store scholarship provider token in localStorage for API requests
+    // In production, HttpOnly cookie won't be sent to API domain
+    if (typeof window !== "undefined") {
+      if (token) {
+        localStorage.setItem("scholarshipProviderToken", token);
+      } else {
+        localStorage.removeItem("scholarshipProviderToken");
+      }
+    }
   },
   isAuthenticated(): boolean {
     // Auth handled via HttpOnly cookie. Check by calling /profile.

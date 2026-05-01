@@ -39,7 +39,7 @@ import {
 } from "./types";
 import Image from "next/image";
 import { trendingSearches } from "@/utils/searchDatabase";
-import { apiService } from "@/services/api";
+import { apiService, DashboardStats } from "@/services/api";
 
 const EducationNavbar: React.FC<EducationNavbarProps> = ({
   onNavigate,
@@ -62,6 +62,18 @@ const EducationNavbar: React.FC<EducationNavbarProps> = ({
   const [mobileLiveSuggestions, setMobileLiveSuggestions] = useState(
     mobileSearchSuggestions,
   );
+
+  const [dashboardStats, setDashboardStats] = useState<DashboardStats | null>(null);
+
+  useEffect(() => {
+    if (user) {
+      apiService.getDashboardStats().then((res) => {
+        if (res?.data) {
+          setDashboardStats(res.data);
+        }
+      }).catch(() => {});
+    }
+  }, [user]);
 
   const handleDropdownMouseEnter = (key: string) => {
     if (hoverTimeoutRef.current) {
@@ -852,10 +864,10 @@ const EducationNavbar: React.FC<EducationNavbarProps> = ({
                               <div className="mt-2.5 pl-7.5">
                                 <div className="mb-1.5 flex items-center justify-between text-[11px] font-semibold text-gray-500">
                                   <span>Profile Completion</span>
-                                  <span className="text-[#5468FF]">80%</span>
+                                  <span className="text-[#5468FF]">{dashboardStats?.profile_completion ?? 0}%</span>
                                 </div>
                                 <div className="h-1.5 w-full rounded-full bg-gray-200/80">
-                                  <div className="h-1.5 w-[80%] rounded-full bg-brand-blue"></div>
+                                  <div className="h-1.5 rounded-full bg-brand-blue" style={{ width: `${dashboardStats?.profile_completion ?? 0}%` }}></div>
                                 </div>
                               </div>
                             </div>
@@ -866,7 +878,9 @@ const EducationNavbar: React.FC<EducationNavbarProps> = ({
                             >
                               <FileText size={18} />
                               <span>My Application</span>
-                              <span className="ml-auto rounded-full bg-red-500 px-1.5 py-[1.5px] text-[10px] font-bold leading-none text-white">2</span>
+                              {dashboardStats?.applications_submitted ? (
+                                <span className="ml-auto rounded-full bg-red-500 px-1.5 py-[1.5px] text-[10px] font-bold leading-none text-white">{dashboardStats.applications_submitted}</span>
+                              ) : null}
                             </button>
                             <button
                               type="button"
@@ -875,7 +889,9 @@ const EducationNavbar: React.FC<EducationNavbarProps> = ({
                             >
                               <Bookmark size={18} />
                               <span>Saved College</span>
-                              <span className="ml-auto text-xs font-bold text-gray-400">12</span>
+                              {dashboardStats?.saved_colleges ? (
+                                <span className="ml-auto text-xs font-bold text-gray-400">{dashboardStats.saved_colleges}</span>
+                              ) : null}
                             </button>
                             <button
                               type="button"
@@ -884,7 +900,9 @@ const EducationNavbar: React.FC<EducationNavbarProps> = ({
                             >
                               <Bell size={18} />
                               <span>Notifications</span>
-                              <span className="ml-auto rounded-full bg-red-500 px-1.5 py-[1.5px] text-[10px] font-bold leading-none text-white">2</span>
+                              {unreadNotificationCount > 0 && (
+                                <span className="ml-auto rounded-full bg-red-500 px-1.5 py-[1.5px] text-[10px] font-bold leading-none text-white">{unreadNotificationCount}</span>
+                              )}
                             </button>
                             <button
                               type="button"
@@ -952,16 +970,18 @@ const EducationNavbar: React.FC<EducationNavbarProps> = ({
                           <span className="text-[14px] font-bold text-gray-800 leading-tight group-hover:text-primary transition-colors">
                             {user.first_name} {user.last_name}
                           </span>
-                          <svg
-                            xmlns="http://www.w3.org/2000/svg"
-                            width="16"
-                            height="16"
-                            viewBox="0 0 24 24"
-                            fill="#0000FF"
-                          >
-                            <path stroke="none" d="M0 0h24v24H0z" fill="none" />
-                            <path d="M12.01 2.011a3.2 3.2 0 0 1 2.113 .797l.154 .145l.698 .698a1.2 1.2 0 0 0 .71 .341l.135 .008h1a3.2 3.2 0 0 1 3.195 3.018l.005 .182v1c0 .27 .092 .533 .258 .743l.09 .1l.697 .698a3.2 3.2 0 0 1 .147 4.382l-.145 .154l-.698 .698a1.2 1.2 0 0 0 -.341 .71l-.008 .135v1a3.2 3.2 0 0 1 -3.018 3.195l-.182 .005h-1a1.2 1.2 0 0 0 -.743 .258l-.1 .09l-.698 .697a3.2 3.2 0 0 1 -4.382 .147l-.154 -.145l-.698 -.698a1.2 1.2 0 0 0 -.71 -.341l-.135 -.008h-1a3.2 3.2 0 0 1 -3.195 -3.018l-.005 -.182v-1a1.2 1.2 0 0 0 -.258 -.743l-.09 -.1l-.697 -.698a3.2 3.2 0 0 1 -.147 -4.382l.145 -.154l.698 -.698a1.2 1.2 0 0 0 .341 -.71l.008 -.135v-1l.005 -.182a3.2 3.2 0 0 1 3.013 -3.013l.182 -.005h1a1.2 1.2 0 0 0 .743 -.258l.1 -.09l.698 -.697a3.2 3.2 0 0 1 2.269 -.944zm3.697 7.282a1 1 0 0 0 -1.414 0l-3.293 3.292l-1.293 -1.292l-.094 -.083a1 1 0 0 0 -1.32 1.497l2 2l.094 .083a1 1 0 0 0 1.32 -.083l4 -4l.083 -.094a1 1 0 0 0 -.083 -1.32z" />
-                          </svg>
+                          {dashboardStats?.profile_completion === 100 && (
+                            <svg
+                              xmlns="http://www.w3.org/2000/svg"
+                              width="16"
+                              height="16"
+                              viewBox="0 0 24 24"
+                              fill="#0000FF"
+                            >
+                              <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+                              <path d="M12.01 2.011a3.2 3.2 0 0 1 2.113 .797l.154 .145l.698 .698a1.2 1.2 0 0 0 .71 .341l.135 .008h1a3.2 3.2 0 0 1 3.195 3.018l.005 .182v1c0 .27 .092 .533 .258 .743l.09 .1l.697 .698a3.2 3.2 0 0 1 .147 4.382l-.145 .154l-.698 .698a1.2 1.2 0 0 0 -.341 .71l-.008 .135v1a3.2 3.2 0 0 1 -3.018 3.195l-.182 .005h-1a1.2 1.2 0 0 0 -.743 .258l-.1 .09l-.698 .697a3.2 3.2 0 0 1 -4.382 .147l-.154 -.145l-.698 -.698a1.2 1.2 0 0 0 -.71 -.341l-.135 -.008h-1a3.2 3.2 0 0 1 -3.195 -3.018l-.005 -.182v-1a1.2 1.2 0 0 0 -.258 -.743l-.09 -.1l-.697 -.698a3.2 3.2 0 0 1 -.147 -4.382l.145 -.154l.698 -.698a1.2 1.2 0 0 0 .341 -.71l.008 -.135v-1l.005 -.182a3.2 3.2 0 0 1 3.013 -3.013l.182 -.005h1a1.2 1.2 0 0 0 .743 -.258l.1 -.09l.698 -.697a3.2 3.2 0 0 1 2.269 -.944zm3.697 7.282a1 1 0 0 0 -1.414 0l-3.293 3.292l-1.293 -1.292l-.094 -.083a1 1 0 0 0 -1.32 1.497l2 2l.094 .083a1 1 0 0 0 1.32 -.083l4 -4l.083 -.094a1 1 0 0 0 -.083 -1.32z" />
+                            </svg>
+                          )}
                         </div>
                         <span className="text-[12px] text-gray-500 leading-tight font-semibold mt-0.5">
                           {profileLabel}
@@ -989,10 +1009,10 @@ const EducationNavbar: React.FC<EducationNavbarProps> = ({
                               <div className="mt-2.5 pl-7.5">
                                 <div className="flex justify-between items-center text-[11px] font-semibold text-gray-500 mb-1.5">
                                   <span>Profile Completion</span>
-                                  <span className="text-[#5468FF]">80%</span>
+                                  <span className="text-[#5468FF]">{dashboardStats?.profile_completion ?? 0}%</span>
                                 </div>
                                 <div className="w-full bg-gray-200/80 rounded-full h-1.5">
-                                  <div className="bg-brand-blue h-1.5 rounded-full w-[80%]"></div>
+                                  <div className="bg-brand-blue h-1.5 rounded-full" style={{ width: `${dashboardStats?.profile_completion ?? 0}%` }}></div>
                                 </div>
                               </div>
                             </div>
@@ -1002,7 +1022,9 @@ const EducationNavbar: React.FC<EducationNavbarProps> = ({
                             >
                               <FileText size={18} />
                               <span>My Application</span>
-                              <span className="ml-auto bg-red-500 text-white text-[10px] font-bold px-1.5 py-[1.5px] rounded-full leading-none">2</span>
+                              {dashboardStats?.applications_submitted ? (
+                                <span className="ml-auto bg-red-500 text-white text-[10px] font-bold px-1.5 py-[1.5px] rounded-full leading-none">{dashboardStats.applications_submitted}</span>
+                              ) : null}
                             </button>
                             <button
                               onClick={() => go("savedColleges")}
@@ -1010,7 +1032,9 @@ const EducationNavbar: React.FC<EducationNavbarProps> = ({
                             >
                               <Bookmark size={18} />
                               <span>Saved College</span>
-                              <span className="ml-auto text-gray-400 text-xs font-bold">12</span>
+                              {dashboardStats?.saved_colleges ? (
+                                <span className="ml-auto text-gray-400 text-xs font-bold">{dashboardStats.saved_colleges}</span>
+                              ) : null}
                             </button>
                             <button
                               onClick={() => go("notificationSettings")}
@@ -1018,7 +1042,9 @@ const EducationNavbar: React.FC<EducationNavbarProps> = ({
                             >
                               <Bell size={18} />
                               <span>Notifications</span>
-                              <span className="ml-auto bg-red-500 text-white text-[10px] font-bold px-1.5 py-[1.5px] rounded-full leading-none">2</span>
+                              {unreadNotificationCount > 0 && (
+                                <span className="ml-auto bg-red-500 text-white text-[10px] font-bold px-1.5 py-[1.5px] rounded-full leading-none">{unreadNotificationCount}</span>
+                              )}
                             </button>
                             <button
                               onClick={() => go("userSettings")}

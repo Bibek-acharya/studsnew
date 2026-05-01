@@ -14,7 +14,7 @@ export default function ProjectShikshaPopup() {
       sessionStorage.getItem("studsphere_scholarship_dismissed") ||
       document.cookie.includes("studsphere_scholarship_dismissed=true");
     if (!dismissed) {
-      const timer = setTimeout(() => setIsOpen(true), 2000);
+      const timer = setTimeout(() => setIsOpen(true), 200);
       return () => clearTimeout(timer);
     }
   }, []);
