@@ -10,7 +10,9 @@ export default function ProjectShikshaPopup() {
   const router = useRouter();
 
   useEffect(() => {
-    const dismissed = sessionStorage.getItem("studsphere_scholarship_dismissed");
+    const dismissed =
+      sessionStorage.getItem("studsphere_scholarship_dismissed") ||
+      document.cookie.includes("studsphere_scholarship_dismissed=true");
     if (!dismissed) {
       const timer = setTimeout(() => setIsOpen(true), 2000);
       return () => clearTimeout(timer);
@@ -19,7 +21,11 @@ export default function ProjectShikshaPopup() {
 
   const handleClose = useCallback(() => {
     setIsOpen(false);
-    sessionStorage.setItem("studsphere_scholarship_dismissed", "true");
+    try {
+      sessionStorage.setItem("studsphere_scholarship_dismissed", "true");
+    } catch (e) {}
+    // also set a session cookie so dismissal survives OAuth redirects/new tabs
+    document.cookie = "studsphere_scholarship_dismissed=true; path=/";
   }, []);
 
   const handleEscape = useCallback((e: KeyboardEvent) => {

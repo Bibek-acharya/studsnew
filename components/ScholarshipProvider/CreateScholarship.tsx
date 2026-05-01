@@ -202,7 +202,7 @@ const CreateScholarship: React.FC<CreateScholarshipProps> = memo(({ scholarshipI
         await scholarshipProviderApi.createScholarship(payload);
       }
       setSuccess(draft ? "Draft saved successfully!" : "Scholarship published successfully!");
-      if (onNavigate) setTimeout(() => onNavigate("sec-manage-scholarships"), 1500);
+      if (onNavigate) setTimeout(() => onNavigate("sec-scholarship-directory"), 1500);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to save scholarship");
     } finally {
@@ -312,10 +312,6 @@ const CreateScholarship: React.FC<CreateScholarshipProps> = memo(({ scholarshipI
           <h2 className="text-lg font-bold text-gray-900 flex items-center gap-2">
             <FileText size={20} className="text-blue-600" /> About Tab - Description
           </h2>
-          <div className="section-actions">
-            <button type="button" className="btn-draft" onClick={() => handleSave(true)} disabled={submitting}>Draft</button>
-            <button type="button" className="btn-save" onClick={() => handleSave(false)} disabled={submitting}>Save</button>
-          </div>
         </div>
         <div className="space-y-5">
           <div>
@@ -341,10 +337,6 @@ const CreateScholarship: React.FC<CreateScholarshipProps> = memo(({ scholarshipI
           <h2 className="text-lg font-bold text-gray-900 flex items-center gap-2">
             <Video size={20} className="text-blue-600" /> Video Tutorials
           </h2>
-          <div className="flex gap-2">
-            <button type="button" className="btn-draft" onClick={() => handleSave(true)} disabled={submitting}>Draft</button>
-            <button type="button" className="btn-save" onClick={() => handleSave(false)} disabled={submitting}>Save</button>
-          </div>
         </div>
         <div className="space-y-4">
           {videoTutorials.map((v, i) => (
@@ -384,10 +376,6 @@ const CreateScholarship: React.FC<CreateScholarshipProps> = memo(({ scholarshipI
           <h2 className="text-lg font-bold text-gray-900 flex items-center gap-2">
             <ClockClockwise size={20} className="text-blue-600" /> Journey Timeline
           </h2>
-          <div className="flex gap-2">
-            <button type="button" className="btn-draft" onClick={() => handleSave(true)} disabled={submitting}>Draft</button>
-            <button type="button" className="btn-save" onClick={() => handleSave(false)} disabled={submitting}>Save</button>
-          </div>
         </div>
         <div className="space-y-3">
           {journeyTimeline.map((jt, i) => (
@@ -420,10 +408,6 @@ const CreateScholarship: React.FC<CreateScholarshipProps> = memo(({ scholarshipI
           <h2 className="text-lg font-bold text-gray-900 flex items-center gap-2">
             <GraduationCap size={20} className="text-blue-600" /> Scholarship Tab - General Info
           </h2>
-          <div className="flex gap-2">
-            <button type="button" className="btn-draft" onClick={() => handleSave(true)} disabled={submitting}>Draft</button>
-            <button type="button" className="btn-save" onClick={() => handleSave(false)} disabled={submitting}>Save</button>
-          </div>
         </div>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-5 mb-5">
           <div><label className="input-label">Section Title</label><input className="input-field"
@@ -482,10 +466,6 @@ const CreateScholarship: React.FC<CreateScholarshipProps> = memo(({ scholarshipI
           <h2 className="text-lg font-bold text-gray-900 flex items-center gap-2">
             <ClipboardText size={20} className="text-blue-600" /> Selection Process & Rubric
           </h2>
-          <div className="flex gap-2">
-            <button type="button" className="btn-draft" onClick={() => handleSave(true)} disabled={submitting}>Draft</button>
-            <button type="button" className="btn-save" onClick={() => handleSave(false)} disabled={submitting}>Save</button>
-          </div>
         </div>
         <div className="space-y-3">
           {selectionRubric.map((r, i) => (
@@ -519,10 +499,6 @@ const CreateScholarship: React.FC<CreateScholarshipProps> = memo(({ scholarshipI
           <h2 className="text-lg font-bold text-gray-900 flex items-center gap-2">
             <CheckSquare size={20} className="text-blue-600" /> Eligibility & Criteria
           </h2>
-          <div className="flex gap-2">
-            <button type="button" className="btn-draft" onClick={() => handleSave(true)} disabled={submitting}>Draft</button>
-            <button type="button" className="btn-save" onClick={() => handleSave(false)} disabled={submitting}>Save</button>
-          </div>
         </div>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-5 mb-5">
           <div><label className="input-label">Section Title</label><input className="input-field"
@@ -585,10 +561,6 @@ const CreateScholarship: React.FC<CreateScholarshipProps> = memo(({ scholarshipI
           <h2 className="text-lg font-bold text-gray-900 flex items-center gap-2">
             <Files size={20} className="text-blue-600" /> Required Documents
           </h2>
-          <div className="flex gap-2">
-            <button type="button" className="btn-draft" onClick={() => handleSave(true)} disabled={submitting}>Draft</button>
-            <button type="button" className="btn-save" onClick={() => handleSave(false)} disabled={submitting}>Save</button>
-          </div>
         </div>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
           {requiredDocs.map((doc, i) => (
@@ -613,10 +585,6 @@ const CreateScholarship: React.FC<CreateScholarshipProps> = memo(({ scholarshipI
           <h2 className="text-lg font-bold text-gray-900 flex items-center gap-2">
             <Question size={20} className="text-blue-600" /> Frequently Asked Questions
           </h2>
-          <div className="flex gap-2">
-            <button type="button" className="btn-draft" onClick={() => handleSave(true)} disabled={submitting}>Draft</button>
-            <button type="button" className="btn-save" onClick={() => handleSave(false)} disabled={submitting}>Save</button>
-          </div>
         </div>
         <div className="space-y-3">
           {faqs.map((faq, i) => (
@@ -649,10 +617,6 @@ const CreateScholarship: React.FC<CreateScholarshipProps> = memo(({ scholarshipI
           <h2 className="text-lg font-bold text-gray-900 flex items-center gap-2">
             <Image size={20} className="text-blue-600" /> Gallery Images
           </h2>
-          <div className="flex gap-2">
-            <button type="button" className="btn-draft" onClick={() => handleSave(true)} disabled={submitting}>Draft</button>
-            <button type="button" className="btn-save" onClick={() => handleSave(false)} disabled={submitting}>Save</button>
-          </div>
         </div>
         <div className="space-y-3">
           {galleryImages.map((img, i) => (
@@ -681,10 +645,6 @@ const CreateScholarship: React.FC<CreateScholarshipProps> = memo(({ scholarshipI
           <h2 className="text-lg font-bold text-gray-900 flex items-center gap-2">
             <Handshake size={20} className="text-blue-600" /> Partners
           </h2>
-          <div className="flex gap-2">
-            <button type="button" className="btn-draft" onClick={() => handleSave(true)} disabled={submitting}>Draft</button>
-            <button type="button" className="btn-save" onClick={() => handleSave(false)} disabled={submitting}>Save</button>
-          </div>
         </div>
         <div className="space-y-4">
           {partnerGroups.map((group, gi) => (
@@ -712,7 +672,7 @@ const CreateScholarship: React.FC<CreateScholarshipProps> = memo(({ scholarshipI
                         updateArrayItem(setPartnerGroups, gi, "partners", newPartners);
                       }} />
                     <button type="button" className="icon-btn-circle mt-0" onClick={() => {
-                      const newPartners = group.partners.filter((_, j) => j !== pi);
+                      const newPartners = group.partners.filter((_: any, j: any) => j !== pi);
                       const updated = { ...group, partners: newPartners };
                       setPartnerGroups((prev) => prev.map((g, j) => j === gi ? updated : g));
                     }}>
@@ -743,10 +703,6 @@ const CreateScholarship: React.FC<CreateScholarshipProps> = memo(({ scholarshipI
           <h2 className="text-lg font-bold text-gray-900 flex items-center gap-2">
             <Buildings size={20} className="text-blue-600" /> Exam Centers
           </h2>
-          <div className="flex gap-2">
-            <button type="button" className="btn-draft" onClick={() => handleSave(true)} disabled={submitting}>Draft</button>
-            <button type="button" className="btn-save" onClick={() => handleSave(false)} disabled={submitting}>Save</button>
-          </div>
         </div>
         <div className="space-y-4">
           {examCenters.map((ec, i) => (
@@ -798,10 +754,6 @@ const CreateScholarship: React.FC<CreateScholarshipProps> = memo(({ scholarshipI
           <h2 className="text-lg font-bold text-gray-900 flex items-center gap-2">
             <Download size={20} className="text-blue-600" /> Downloads
           </h2>
-          <div className="flex gap-2">
-            <button type="button" className="btn-draft" onClick={() => handleSave(true)} disabled={submitting}>Draft</button>
-            <button type="button" className="btn-save" onClick={() => handleSave(false)} disabled={submitting}>Save</button>
-          </div>
         </div>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
           {downloads.map((d, i) => (
