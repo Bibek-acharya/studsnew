@@ -129,7 +129,11 @@ export default function DashboardShell() {
   const handleLogout = useCallback(async () => {
     try {
       const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080";
-      await fetch(`${API_BASE_URL}/api/v1/auth/logout`, { credentials: "include" });
+      const token = typeof window !== "undefined" ? localStorage.getItem("token") : null;
+      await fetch(`${API_BASE_URL}/api/v1/auth/logout`, {
+        credentials: "include",
+        headers: token ? { Authorization: `Bearer ${token}` } : undefined,
+      });
     } catch {
     } finally {
       localStorage.removeItem("token");

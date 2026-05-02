@@ -23,6 +23,13 @@ async function superadminFetch<T>(path: string, options: RequestInit = {}): Prom
     ...(options.headers as Record<string, string> || {}),
   };
 
+  if (typeof window !== "undefined") {
+    const token = localStorage.getItem("token");
+    if (token) {
+      headers.Authorization = `Bearer ${token}`;
+    }
+  }
+
   const response = await fetch(`${API_BASE_URL}${path}`, { ...options, headers, credentials: "include" });
 
   if (response.status === 401 || response.status === 403) {
