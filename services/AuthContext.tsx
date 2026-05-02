@@ -39,8 +39,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     let isMounted = true;
 
     const bootstrapAuth = async () => {
+      const storedToken = typeof window !== "undefined" ? localStorage.getItem("token") : null;
       const stored = typeof window !== "undefined" ? localStorage.getItem(USER_STORAGE_KEY) : null;
-      if (stored) {
+
+      // Only trust cached user state when a real auth token is also present.
+      // This prevents stale superadmin/user records from being shown after logout.
+      if (stored && storedToken) {
         try {
           // Stored auth state is restored only on the client after hydration.
           setUserState(JSON.parse(stored));
@@ -51,6 +55,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         } catch {
           // Fall through and try to hydrate from the backend cookie.
         }
+      } else if (stored && !storedToken && typeof window !== "undefined") {
+        clearAllAuthSessions();
       }
 
       try {
