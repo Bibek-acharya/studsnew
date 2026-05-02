@@ -1,7 +1,10 @@
 "use client";
 
 import React from "react";
+import { format, addDays } from "date-fns";
 import FileUpload from "../common/FileUpload";
+import DatePicker from "../common/DatePicker";
+import Dropdown from "@/components/college-recommender/Dropdown";
 
 interface GeneralSettingsSectionProps {
   mainTitle: string;
@@ -26,6 +29,8 @@ interface GeneralSettingsSectionProps {
   setStartDate: (v: string) => void;
   endDate: string;
   setEndDate: (v: string) => void;
+  startDateError?: string;
+  endDateError?: string;
   applyLink: string;
   setApplyLink: (v: string) => void;
   bannerBgUrl: string;
@@ -66,7 +71,6 @@ const EDUCATION_LEVELS = [
 ];
 
 const formInputClass = "w-full px-4 py-2.5 rounded-lg border border-gray-200 bg-white text-gray-900 focus:outline-none focus:border-blue-500";
-const formSelectClass = "w-full px-4 py-2.5 rounded-lg border border-gray-200 bg-white text-gray-900 focus:outline-none focus:border-blue-500 appearance-none cursor-pointer";
 
 export const GeneralSettingsSection: React.FC<GeneralSettingsSectionProps> = ({
   mainTitle, setMainTitle,
@@ -80,11 +84,15 @@ export const GeneralSettingsSection: React.FC<GeneralSettingsSectionProps> = ({
   location, setLocation,
   startDate, setStartDate,
   endDate, setEndDate,
+  startDateError,
+  endDateError,
   applyLink, setApplyLink,
   bannerBgUrl,
   bannerBgPreview,
   onBannerSelect,
 }) => {
+  const tomorrow = format(addDays(new Date(), 1), "yyyy-MM-dd");
+
   return (
     <div className="bg-white rounded-xl border border-gray-200 overflow-hidden mb-8">
       <div className="border-b border-gray-200 bg-gray-50/50 px-6 py-4 flex items-center gap-3">
@@ -131,16 +139,12 @@ export const GeneralSettingsSection: React.FC<GeneralSettingsSectionProps> = ({
             <label className="block text-sm font-medium text-gray-700">
               Funding Type <span className="text-red-500">*</span>
             </label>
-            <select
-              className={formSelectClass}
+            <Dropdown
               value={fundingType}
-              onChange={(e) => setFundingType(e.target.value)}
-            >
-              <option value="">Select Funding Type</option>
-              {FUNDING_TYPES.map((ft) => (
-                <option key={ft.value} value={ft.value}>{ft.label}</option>
-              ))}
-            </select>
+              onChange={setFundingType}
+              options={FUNDING_TYPES}
+              placeholder="Select Funding Type"
+            />
             {fundingType === "Other" && (
               <input
                 type="text"
@@ -156,16 +160,12 @@ export const GeneralSettingsSection: React.FC<GeneralSettingsSectionProps> = ({
             <label className="block text-sm font-medium text-gray-700">
               Scholarship Type <span className="text-red-500">*</span>
             </label>
-            <select
-              className={formSelectClass}
+            <Dropdown
               value={scholarshipType}
-              onChange={(e) => setScholarshipType(e.target.value)}
-            >
-              <option value="">Select Scholarship Type</option>
-              {SCHOLARSHIP_TYPES.map((st) => (
-                <option key={st.value} value={st.value}>{st.label}</option>
-              ))}
-            </select>
+              onChange={setScholarshipType}
+              options={SCHOLARSHIP_TYPES}
+              placeholder="Select Scholarship Type"
+            />
             {scholarshipType === "Other" && (
               <input
                 type="text"
@@ -181,16 +181,12 @@ export const GeneralSettingsSection: React.FC<GeneralSettingsSectionProps> = ({
             <label className="block text-sm font-medium text-gray-700">
               Education Level <span className="text-red-500">*</span>
             </label>
-            <select
-              className={formSelectClass}
+            <Dropdown
               value={educationLevel}
-              onChange={(e) => setEducationLevel(e.target.value)}
-            >
-              <option value="">Select Level</option>
-              {EDUCATION_LEVELS.map((el) => (
-                <option key={el.value} value={el.value}>{el.label}</option>
-              ))}
-            </select>
+              onChange={setEducationLevel}
+              options={EDUCATION_LEVELS}
+              placeholder="Select Level"
+            />
             {educationLevel === "Other" && (
               <input
                 type="text"
@@ -219,11 +215,13 @@ export const GeneralSettingsSection: React.FC<GeneralSettingsSectionProps> = ({
             <label className="block text-sm font-medium text-gray-700">
               Starting Date <span className="text-red-500">*</span>
             </label>
-            <input
-              type="date"
-              className={formInputClass}
+            <DatePicker
               value={startDate}
-              onChange={(e) => setStartDate(e.target.value)}
+              onChange={setStartDate}
+              placeholder="Select start date"
+              required
+              minDate={tomorrow}
+              error={startDateError}
             />
           </div>
 
@@ -231,11 +229,13 @@ export const GeneralSettingsSection: React.FC<GeneralSettingsSectionProps> = ({
             <label className="block text-sm font-medium text-gray-700">
               Ending Date <span className="text-red-500">*</span>
             </label>
-            <input
-              type="date"
-              className={formInputClass}
+            <DatePicker
               value={endDate}
-              onChange={(e) => setEndDate(e.target.value)}
+              onChange={setEndDate}
+              placeholder="Select end date"
+              required
+              minDate={startDate || undefined}
+              error={endDateError}
             />
           </div>
 

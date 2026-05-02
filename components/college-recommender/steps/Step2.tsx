@@ -84,10 +84,10 @@ export default function Step2({ step, stepImages, form, handleInputChange, stepT
               value={form.yearly_budget || ''}
               onChange={(val) => handleInputChange('yearly_budget', val)}
               options={[
-                'Under NPR. 10,000 / year',
-                'NPR. 10,000 - NPR. 30,000 / year',
-                'NPR. 30,000 - NPR. 50,000 / year',
-                'Over NPR. 50,000 / year',
+                { value: 'Under NPR. 10,000 / year', label: 'Under NPR. 10,000 / year' },
+                { value: 'NPR. 10,000 - NPR. 30,000 / year', label: 'NPR. 10,000 - NPR. 30,000 / year' },
+                { value: 'NPR. 30,000 - NPR. 50,000 / year', label: 'NPR. 30,000 - NPR. 50,000 / year' },
+                { value: 'Over NPR. 50,000 / year', label: 'Over NPR. 50,000 / year' },
               ]}
               placeholder='Select budget'
             />

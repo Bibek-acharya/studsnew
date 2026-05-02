@@ -18,7 +18,6 @@ import {
   subMonths,
 } from "date-fns";
 import { Calendar, ChevronLeft, ChevronRight } from "lucide-react";
-import Dropdown from "../../college-recommender/Dropdown";
 
 interface DatePickerProps {
   value: string;
@@ -59,6 +58,8 @@ const MONTHS = [
   "December",
 ];
 
+const toDropdownOptions = (arr: string[]) => arr.map(v => ({ value: v, label: v }));
+
 const DatePicker: React.FC<DatePickerProps> = ({
   value,
   onChange,
@@ -70,6 +71,7 @@ const DatePicker: React.FC<DatePickerProps> = ({
   error,
 }) => {
   const [isOpen, setIsOpen] = useState(false);
+  const [popoverPosition, setPopoverPosition] = useState({ top: 0, left: 0 });
   const buttonRef = useRef<HTMLButtonElement | null>(null);
   const popoverRef = useRef<HTMLDivElement | null>(null);
   const selectedDate = useMemo(() => parseDateValue(value), [value]);
@@ -79,6 +81,22 @@ const DatePicker: React.FC<DatePickerProps> = ({
   const [currentMonth, setCurrentMonth] = useState(startOfMonth(initialMonth));
   const currentYear = currentMonth.getFullYear();
   const currentMonthIndex = currentMonth.getMonth();
+
+  const updatePopoverPosition = () => {
+    if (buttonRef.current) {
+      const rect = buttonRef.current.getBoundingClientRect();
+      setPopoverPosition({
+        top: rect.bottom + 10,
+        left: rect.left,
+      });
+    }
+  };
+
+  useEffect(() => {
+    if (isOpen) {
+      updatePopoverPosition();
+    }
+  }, [isOpen]);
 
   const availableYears = useMemo(() => {
     const now = new Date();
@@ -185,9 +203,18 @@ const DatePicker: React.FC<DatePickerProps> = ({
         </button>
 
         {isOpen && (
+          <div className="fixed inset-0 z-40" onClick={() => setIsOpen(false)} />
+        )}
+        {isOpen && (
           <div
             ref={popoverRef}
-            className="absolute left-0 top-[calc(100%+10px)] z-50 w-full min-w-[320px] max-w-[360px] rounded-2xl border border-slate-200 bg-white p-4 shadow-2xl"
+            className="fixed z-50 rounded-2xl border border-slate-200 bg-white p-4 shadow-2xl"
+            style={{
+              top: popoverPosition.top,
+              left: popoverPosition.left,
+              width: buttonRef.current ? buttonRef.current.offsetWidth : '100%',
+              maxWidth: '360px',
+            }}
           >
             <div className="mb-4 flex items-center gap-2">
               <button
@@ -199,21 +226,8 @@ const DatePicker: React.FC<DatePickerProps> = ({
                 <ChevronLeft className="h-4 w-4" />
               </button>
 
-              <div className="grid flex-1 grid-cols-2 gap-2">
-                <Dropdown
-                  value={MONTHS[currentMonthIndex]}
-                  onChange={(monthName) => handleMonthChange(MONTHS.indexOf(monthName))}
-                  options={MONTHS}
-                  placeholder="Month"
-                  size="sm"
-                />
-                <Dropdown
-                  value={String(currentYear)}
-                  onChange={(year) => handleYearChange(Number(year))}
-                  options={availableYears.map((year) => String(year))}
-                  placeholder="Year"
-                  size="sm"
-                />
+              <div className="flex-1 text-center font-semibold text-slate-700">
+                {MONTHS[currentMonthIndex]} {currentYear}
               </div>
 
               <button

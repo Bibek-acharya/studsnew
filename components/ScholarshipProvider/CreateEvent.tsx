@@ -92,12 +92,21 @@ const CreateEvent: React.FC = memo(() => {
       const endDateTime = endTime ? `${eventDate}T${endTime}:00` : startDateTime;
       await scholarshipProviderApi.createEvent({
         name: title,
-        description: description || shortDesc,
+        short_desc: shortDesc,
+        description: description,
+        image_url: featuredImageUrl,
         event_type: eventType,
+        category: category,
+        max_participants: maxParticipants ? parseInt(maxParticipants) : undefined,
+        online_link: onlineLink,
+        organized_by: organizedBy,
+        contact_person: contactPerson,
+        contact_email: contactEmail,
         start_date: startDateTime,
         end_date: endDateTime,
         location: venue,
-        image_url: featuredImageUrl,
+        tags: tags ? tags.split(',').map(t => t.trim()) : [],
+        enable_registration: enableRegistration,
         status: draft ? "draft" : "upcoming",
       });
       setSuccess(draft ? "Draft saved!" : "Event published!");
@@ -106,7 +115,7 @@ const CreateEvent: React.FC = memo(() => {
     } finally {
       setSubmitting(false);
     }
-  }, [title, eventDate, startTime, endTime, eventType, venue, description, shortDesc, featuredImageUrl]);
+  }, [title, eventDate, startTime, endTime, eventType, category, maxParticipants, onlineLink, organizedBy, contactPerson, contactEmail, shortDesc, description, tags, enableRegistration, venue, featuredImageUrl]);
 
   return (
     <div className="space-y-6">

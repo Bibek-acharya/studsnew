@@ -71,14 +71,14 @@ export default function Step3({ step, stepImages, form, handleInputChange, stepT
               value={form.preferred_field || ''}
               onChange={(val) => handleInputChange('preferred_field', val)}
               options={[
-                'Science (+2 Science / BSc / BIT / CSIT / Engineering)',
-                'Management (BBS / BBA / BBM / BHM)',
-                'Humanities / Law',
-                'Medical / Nursing / Pharmacy',
-                'IT / Computer',
-                'Hotel Management',
-                'Education',
-                'Others',
+                { value: 'Science (+2 Science / BSc / BIT / CSIT / Engineering)', label: 'Science (+2 Science / BSc / BIT / CSIT / Engineering)' },
+                { value: 'Management (BBS / BBA / BBM / BHM)', label: 'Management (BBS / BBA / BBM / BHM)' },
+                { value: 'Humanities / Law', label: 'Humanities / Law' },
+                { value: 'Medical / Nursing / Pharmacy', label: 'Medical / Nursing / Pharmacy' },
+                { value: 'IT / Computer', label: 'IT / Computer' },
+                { value: 'Hotel Management', label: 'Hotel Management' },
+                { value: 'Education', label: 'Education' },
+                { value: 'Others', label: 'Others' },
               ]}
               placeholder='Search or select your preferred field'
             />

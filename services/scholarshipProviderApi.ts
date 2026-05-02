@@ -519,8 +519,14 @@ export interface ProviderNews {
   id: number;
   provider_id: number;
   title: string;
+  short_desc: string;
   content: string;
   image_url: string | null;
+  news_type: string;
+  published_by: string;
+  publish_date: string | null;
+  tags: string[];
+  allow_comments: boolean;
   status: string;
   published_at: string | null;
   created_at: string;
@@ -531,12 +537,21 @@ export interface ProviderEvent {
   id: number;
   provider_id: number;
   name: string;
+  short_desc: string;
   description: string;
   image_url: string | null;
   event_type: string;
+  category: string;
+  max_participants: number;
+  online_link: string;
+  organized_by: string;
+  contact_person: string;
+  contact_email: string;
   start_date: string;
   end_date: string;
   location: string;
+  tags: string[];
+  enable_registration: boolean;
   status: string;
   attendees: number;
   created_at: string;
@@ -756,7 +771,18 @@ export const scholarshipProviderApi = {
     await apiRequest("/api/v1/scholarship-providers/notifications/read-all", { method: "PUT" });
   },
 
-  async createNews(data: { title: string; content: string; image_url?: string; status?: string }): Promise<ProviderNews> {
+  async createNews(data: {
+    title: string;
+    short_desc?: string;
+    content: string;
+    image_url?: string;
+    news_type?: string;
+    published_by?: string;
+    publish_date?: string;
+    tags?: string[];
+    allow_comments?: boolean;
+    status?: string;
+  }): Promise<ProviderNews> {
     return apiRequest<ProviderNews>("/api/v1/scholarship-providers/news", {
       method: "POST",
       body: JSON.stringify(data),
@@ -772,7 +798,18 @@ export const scholarshipProviderApi = {
     return apiRequest<ProviderNews>(`/api/v1/scholarship-providers/news/${id}`);
   },
 
-  async updateNews(id: number, data: { title: string; content: string; image_url?: string; status?: string }): Promise<ProviderNews> {
+  async updateNews(id: number, data: {
+    title: string;
+    short_desc?: string;
+    content: string;
+    image_url?: string;
+    news_type?: string;
+    published_by?: string;
+    publish_date?: string;
+    tags?: string[];
+    allow_comments?: boolean;
+    status?: string;
+  }): Promise<ProviderNews> {
     return apiRequest<ProviderNews>(`/api/v1/scholarship-providers/news/${id}`, {
       method: "PUT",
       body: JSON.stringify(data),
@@ -783,7 +820,25 @@ export const scholarshipProviderApi = {
     await apiRequest(`/api/v1/scholarship-providers/news/${id}`, { method: "DELETE" });
   },
 
-  async createEvent(data: { name: string; description: string; image_url?: string; event_type?: string; start_date: string; end_date?: string; location?: string; status?: string }): Promise<ProviderEvent> {
+  async createEvent(data: {
+    name: string;
+    short_desc?: string;
+    description: string;
+    image_url?: string;
+    event_type?: string;
+    category?: string;
+    max_participants?: number;
+    online_link?: string;
+    organized_by?: string;
+    contact_person?: string;
+    contact_email?: string;
+    start_date: string;
+    end_date?: string;
+    location?: string;
+    tags?: string[];
+    enable_registration?: boolean;
+    status?: string;
+  }): Promise<ProviderEvent> {
     return apiRequest<ProviderEvent>("/api/v1/scholarship-providers/events", {
       method: "POST",
       body: JSON.stringify(data),
@@ -799,7 +854,25 @@ export const scholarshipProviderApi = {
     return apiRequest<ProviderEvent>(`/api/v1/scholarship-providers/events/${id}`);
   },
 
-  async updateEvent(id: number, data: { name: string; description: string; image_url?: string; event_type?: string; start_date?: string; end_date?: string; location?: string; status?: string }): Promise<ProviderEvent> {
+  async updateEvent(id: number, data: {
+    name: string;
+    short_desc?: string;
+    description: string;
+    image_url?: string;
+    event_type?: string;
+    category?: string;
+    max_participants?: number;
+    online_link?: string;
+    organized_by?: string;
+    contact_person?: string;
+    contact_email?: string;
+    start_date?: string;
+    end_date?: string;
+    location?: string;
+    tags?: string[];
+    enable_registration?: boolean;
+    status?: string;
+  }): Promise<ProviderEvent> {
     return apiRequest<ProviderEvent>(`/api/v1/scholarship-providers/events/${id}`, {
       method: "PUT",
       body: JSON.stringify(data),
@@ -935,4 +1008,18 @@ export const updateCalendarEvent = async (id: number, data: any) => {
 
 export const deleteCalendarEvent = async (id: number) => {
   return apiRequest(`/api/v1/scholarship-providers/calendar-events/${id}`, { method: 'DELETE' });
+};
+
+export const getPublicNews = async (page = 1, limit = 12) => {
+  const res = await apiRequest<{ data: { news: ProviderNews[]; meta: any } }>(
+    `/api/v1/public/news?page=${page}&limit=${limit}`
+  );
+  return res.data;
+};
+
+export const getPublicEvents = async (page = 1, limit = 12) => {
+  const res = await apiRequest<{ data: { events: ProviderEvent[]; meta: any } }>(
+    `/api/v1/public/events?page=${page}&limit=${limit}`
+  );
+  return res.data;
 };

@@ -3,6 +3,7 @@
 import React, { useMemo, useState, useEffect } from "react";
 import Link from "next/link";
 import Pagination from "@/components/ui/Pagination";
+import { getPublicNews } from "@/services/scholarshipProviderApi";
 
 interface NewsArticle {
   id: string;
@@ -71,12 +72,15 @@ const NewsPage: React.FC = () => {
   useEffect(() => {
     async function fetchNews() {
       try {
+        // Fetch admin news
         const res = await fetch("/api/v1/news");
         const data = await res.json();
+        let news: NewsArticle[] = [];
+        
         if (data?.data?.news && data.data.news.length > 0) {
           // Convert admin news format to public format
-          const news = data.data.news.map((n: any): NewsArticle => ({
-            id: String(n.id),
+          news = data.data.news.map((n: any): NewsArticle => ({
+            id: `admin-${n.id}`,
             title: n.title,
             excerpt: n.desc || n.title,
             content: n.content || n.desc || "",
@@ -88,10 +92,32 @@ const NewsPage: React.FC = () => {
             source: n.author,
             tags: [],
           }));
-          setAllNews(news);
-        } else {
-          setAllNews([]);
         }
+
+        // Also fetch provider news from Go backend
+        try {
+          const providerData = await getPublicNews(1, 20);
+          if (providerData?.news && providerData.news.length > 0) {
+            const providerNews = providerData.news.map((n: any): NewsArticle => ({
+              id: `provider-${n.id}`,
+              title: n.title,
+              excerpt: n.short_desc || n.content || "",
+              content: n.content || n.short_desc || "",
+              category: n.news_type || "News",
+              image: n.image_url || "",
+              author: n.published_by || "Provider",
+              date: n.publish_date || new Date(n.created_at).toLocaleDateString(),
+              readTime: "3 min",
+              source: n.published_by || "Provider",
+              tags: n.tags || [],
+            }));
+            news = [...news, ...providerNews];
+          }
+        } catch (providerErr) {
+          console.warn("Failed to fetch provider news:", providerErr);
+        }
+
+        setAllNews(news);
       } catch (e) {
         console.error("Failed to fetch news:", e);
         setAllNews([]);

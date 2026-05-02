@@ -63,11 +63,48 @@ export async function fetchPublicEvents(params: {
     }
 
     const result = await res.json();
+    let events: EventEntry[] = [];
+    let total = 0;
+
     if (result?.data) {
-      return result.data;
+      events = result.data.events || [];
+      total = result.data.meta?.total || 0;
     }
 
-    return { events: [], meta: { total: 0, page: 1, limit: 12, pages: 0 } };
+    // Also fetch provider events from Go backend
+    try {
+      const providerRes = await fetch(`${API_BASE_URL}/api/v1/public/events?page=1&limit=50`);
+      if (providerRes.ok) {
+        const providerResult = await providerRes.json();
+        if (providerResult?.data?.events && providerResult.data.events.length > 0) {
+          const providerEvents = providerResult.data.events.map((e: any): EventEntry => ({
+            id: `provider-${e.id}`,
+            title: e.name,
+            excerpt: e.short_desc || "",
+            description: e.description || "",
+            category: e.category || e.event_type || "Event",
+            image: e.image_url || "",
+            organizer: e.organized_by || "",
+            location: e.location || "",
+            date: e.start_date ? new Date(e.start_date).toLocaleDateString() : "",
+            time: e.start_date ? new Date(e.start_date).toLocaleTimeString() : "",
+            registrationFee: "",
+            interestedCount: 0,
+            published: true,
+            created_at: e.created_at,
+          }));
+          events = [...events, ...providerEvents];
+          total += providerResult.data.meta?.total || 0;
+        }
+      }
+    } catch (providerErr) {
+      console.warn("Failed to fetch provider events:", providerErr);
+    }
+
+    return { 
+      events, 
+      meta: { total, page: params.page || 1, limit: params.limit || 12, pages: Math.ceil(total / (params.limit || 12)) } 
+    };
   } catch {
     return { events: [], meta: { total: 0, page: 1, limit: 12, pages: 0 } };
   }

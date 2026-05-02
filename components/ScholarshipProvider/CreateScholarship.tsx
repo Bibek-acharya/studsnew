@@ -1,6 +1,8 @@
 "use client";
 
-import React, { useState, useCallback, useEffect, memo } from "react";
+import React, { useState, useCallback, useEffect, useRef, memo } from "react";
+import { toast } from "sonner";
+import { format, addDays, isAfter, parseISO, isValid } from "date-fns";
 import {
   Gear, FloppyDisk, PaperPlaneTilt
 } from "@phosphor-icons/react";
@@ -140,6 +142,8 @@ const CreateScholarship: React.FC<CreateScholarshipProps> = memo(({ scholarshipI
   const [location, setLocation] = useState("");
   const [startDate, setStartDate] = useState("");
   const [endDate, setEndDate] = useState("");
+  const [startDateError, setStartDateError] = useState("");
+  const [endDateError, setEndDateError] = useState("");
   const [applyLink, setApplyLink] = useState("");
   const [bannerBgUrl, setBannerBgUrl] = useState("");
   const [bannerBgPreview, setBannerBgPreview] = useState("");
@@ -218,7 +222,7 @@ const CreateScholarship: React.FC<CreateScholarshipProps> = memo(({ scholarshipI
   const [status, setStatus] = useState<'draft' | 'published'>('draft');
 
   const isEditing = Boolean(scholarshipId);
-  const isBusy = submitting || uploadingBanner;
+  const isBusy = submitting;
   const pageTitleRef = useRef<HTMLInputElement | null>(null);
   const bannerRef = useRef<HTMLDivElement | null>(null);
   const locationRef = useRef<HTMLInputElement | null>(null);
@@ -358,12 +362,86 @@ const CreateScholarship: React.FC<CreateScholarshipProps> = memo(({ scholarshipI
     }).catch(() => setLoadingData(false));
   }, [scholarshipId]);
 
+  const validateDates = useCallback(() => {
+    let isValidDate = true;
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    // Clear previous errors
+    setStartDateError("");
+    setEndDateError("");
+
+    // Validate start date - must be in the future
+    if (startDate) {
+      const start = parseISO(startDate);
+      if (!isValid(start)) {
+        setStartDateError("Invalid date format");
+        isValidDate = false;
+      } else if (!isAfter(start, today)) {
+        setStartDateError("Start date must be in the future");
+        isValidDate = false;
+      }
+    }
+
+    // Validate end date - must be after start date
+    if (endDate) {
+      const end = parseISO(endDate);
+      if (!isValid(end)) {
+        setEndDateError("Invalid date format");
+        isValidDate = false;
+      } else if (startDate) {
+        const start = parseISO(startDate);
+        if (!isAfter(end, start)) {
+          setEndDateError("End date must be after start date");
+          isValidDate = false;
+        }
+      }
+    }
+
+    return isValidDate;
+  }, [startDate, endDate]);
+
+  const validateScholarship = useCallback((mode: string) => {
+    return { message: "", field: "" };
+  }, []);
+
+  const scrollToField = useCallback((field: string) => {
+    const element = document.getElementById(field);
+    if (element) {
+      element.scrollIntoView({ behavior: "smooth", block: "center" });
+      element.focus();
+    }
+  }, []);
+
+  const handleStartDateChange = useCallback((value: string) => {
+    setStartDate(value);
+    setStartDateError("");
+    if (endDate && value) {
+      const start = parseISO(value);
+      const end = parseISO(endDate);
+      if (isValid(start) && isValid(end) && !isAfter(end, start)) {
+        setEndDateError("End date must be after start date");
+      }
+    }
+  }, [endDate]);
+
+  const handleEndDateChange = useCallback((value: string) => {
+    setEndDate(value);
+    setEndDateError("");
+  }, []);
+
   const handleSave = useCallback(async (draft: boolean = false) => {
     if (!mainTitle.trim()) {
       setError("Page Title is required.");
       return;
     }
 
+    // Validate dates
+    if (!validateDates()) {
+      return;
+    }
+
+    const mode = draft ? "draft" : "published";
     const validationError = validateScholarship(mode);
     if (validationError.message) {
       toast.error(validationError.message);
@@ -474,7 +552,7 @@ const CreateScholarship: React.FC<CreateScholarshipProps> = memo(({ scholarshipI
   }
 
   return (
-    <div className="max-w-7xl mx-auto px-6 py-8 pb-32">
+    <div className="max-w-[1600px] mx-auto px-6 py-8 pb-32">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-6">
         <h1 className="text-2xl font-bold text-gray-800">
           {isEditing ? "Edit Scholarship" : "Create Scholarship"}
@@ -515,9 +593,11 @@ const CreateScholarship: React.FC<CreateScholarshipProps> = memo(({ scholarshipI
         location={location}
         setLocation={setLocation}
         startDate={startDate}
-        setStartDate={setStartDate}
+        setStartDate={handleStartDateChange}
         endDate={endDate}
-        setEndDate={setEndDate}
+        setEndDate={handleEndDateChange}
+        startDateError={startDateError}
+        endDateError={endDateError}
         applyLink={applyLink}
         setApplyLink={setApplyLink}
         bannerBgUrl={bannerBgUrl}

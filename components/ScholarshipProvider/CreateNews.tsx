@@ -71,8 +71,14 @@ const CreateNews: React.FC = memo(() => {
     try {
       await scholarshipProviderApi.createNews({
         title,
-        content: content || shortDesc,
+        short_desc: shortDesc,
+        content: content,
         image_url: featuredImageUrl,
+        news_type: newsType,
+        published_by: publishedBy,
+        publish_date: publishDate,
+        tags: tags ? tags.split(',').map(t => t.trim()) : [],
+        allow_comments: allowComments,
         status: draft ? "draft" : "published",
       });
       setSuccess(draft ? "Draft saved!" : "News published!");
@@ -81,7 +87,7 @@ const CreateNews: React.FC = memo(() => {
     } finally {
       setSubmitting(false);
     }
-  }, [title, content, shortDesc, featuredImageUrl]);
+  }, [title, shortDesc, content, featuredImageUrl, newsType, publishedBy, publishDate, tags, allowComments]);
 
   return (
     <div className="space-y-6">

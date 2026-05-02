@@ -38,7 +38,7 @@ export default function Step4({ step, stepImages, form, handleInputChange, stepT
                 handleInputChange('province', val)
                 handleInputChange('district', '')
               }}
-              options={[...NEPAL_PROVINCES, 'No preference']}
+              options={[...NEPAL_PROVINCES.map(p => ({ value: p, label: p })), { value: 'No preference', label: 'No preference' }]}
               placeholder='Search or select your province'
             />
           </div>
@@ -52,7 +52,7 @@ export default function Step4({ step, stepImages, form, handleInputChange, stepT
               onChange={(val) => handleInputChange('district', val)}
               options={
                 form.province && form.province !== 'No preference'
-                  ? NEPAL_DISTRICTS[form.province as keyof typeof NEPAL_DISTRICTS] || []
+                  ? (NEPAL_DISTRICTS[form.province as keyof typeof NEPAL_DISTRICTS] || []).map(d => ({ value: d, label: d }))
                   : []
               }
               placeholder={
