@@ -36,15 +36,45 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUserState] = useState<User | null>(null);
 
   useEffect(() => {
-    const stored = typeof window !== "undefined" ? localStorage.getItem(USER_STORAGE_KEY) : null;
-    if (stored) {
+    let isMounted = true;
+
+    const bootstrapAuth = async () => {
+      const stored = typeof window !== "undefined" ? localStorage.getItem(USER_STORAGE_KEY) : null;
+      if (stored) {
+        try {
+          // Stored auth state is restored only on the client after hydration.
+          setUserState(JSON.parse(stored));
+          if (isMounted) {
+            setLoading(false);
+          }
+          return;
+        } catch {
+          // Fall through and try to hydrate from the backend cookie.
+        }
+      }
+
       try {
-        // Stored auth state is restored only on the client after hydration.
-        // eslint-disable-next-line react-hooks/set-state-in-effect
-        setUserState(JSON.parse(stored));
-      } catch { /* ignore */ }
-    }
-    setLoading(false);
+        const res = await apiService.getProfile();
+        const profile = res.data;
+        if (!isMounted || !profile) return;
+
+        setUser({
+          id: profile.id,
+          first_name: profile.first_name,
+          last_name: profile.last_name,
+          email: profile.email,
+          role: profile.role,
+        });
+      } catch {
+        // Not logged in or cookie not present; keep anonymous state.
+      } finally {
+        if (isMounted) {
+          setLoading(false);
+        }
+      }
+    };
+
+    void bootstrapAuth();
 
     const handleAuthExpired = () => {
       clearAuthSession(localStorage);
@@ -53,7 +83,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     };
 
     window.addEventListener("auth-expired", handleAuthExpired);
-    return () => window.removeEventListener("auth-expired", handleAuthExpired);
+    return () => {
+      isMounted = false;
+      window.removeEventListener("auth-expired", handleAuthExpired);
+    };
   }, []);
 
   const isAuthenticated = !!user;

@@ -518,8 +518,8 @@ const OnboardingModal: React.FC<OnboardingModalProps> = ({ isOpen, onClose }) =>
 
             {currentStatus === 'plus_two_running' && (
               <div className="w-full animate-fade-in">
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-1 sm:gap-3 lg:gap-3.5">
-                  <div className="w-full lg:col-span-2">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-1 sm:gap-3 lg:gap-3.5">
+                  <div className="w-full">
                     <label htmlFor="contactNumberRunning" className="block text-[13px] sm:text-sm font-medium text-gray-900 mb-0.5 sm:mb-2">
                       Contact number
                     </label>
@@ -550,7 +550,7 @@ const OnboardingModal: React.FC<OnboardingModalProps> = ({ isOpen, onClose }) =>
                     )}
                   </div>
 
-                  <div className="w-full lg:col-span-2">
+                  <div className="w-full">
                     <label htmlFor="collegeNameRunning" className="block text-[13px] sm:text-sm font-medium text-gray-900 mb-0.5 sm:mb-2">
                       Your college name
                     </label>
@@ -564,7 +564,7 @@ const OnboardingModal: React.FC<OnboardingModalProps> = ({ isOpen, onClose }) =>
                     />
                   </div>
 
-                  <div className="w-full lg:col-span-2">
+                  <div className="w-full">
                     <label htmlFor="courseRunning" className="block text-[13px] sm:text-sm font-medium text-gray-900 mb-0.5 sm:mb-2">
                       Course
                     </label>

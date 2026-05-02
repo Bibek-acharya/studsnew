@@ -130,7 +130,7 @@ const SignupView: React.FC<SignupViewProps> = ({
   };
 
   const handleGoogleLogin = () => {
-    window.location.href = `${process.env.NEXT_PUBLIC_API_URL}/api/v1/auth/google`;
+    window.location.href = `${process.env.NEXT_PUBLIC_API_URL}/api/v1/auth/google?prompt=select_account`;
   };
 
   return (

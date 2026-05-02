@@ -200,7 +200,7 @@ export default function RegisterForm() {
         <button
           type="button"
           onClick={() => {
-            window.location.href = `${process.env.NEXT_PUBLIC_API_URL}/api/v1/auth/google`;
+            window.location.href = `${process.env.NEXT_PUBLIC_API_URL}/api/v1/auth/google?prompt=select_account`;
           }}
           className="w-full bg-white border border-gray-200 rounded-md py-3 px-4 flex items-center justify-center gap-3 font-semibold text-gray-800 transition-colors hover:bg-gray-50"
         >

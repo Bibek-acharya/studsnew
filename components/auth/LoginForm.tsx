@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { useAuth } from "@/services/AuthContext";
 import { Eye, EyeOff } from "lucide-react";
@@ -10,6 +10,7 @@ const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 export default function LoginForm() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const { login } = useAuth();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -36,6 +37,7 @@ export default function LoginForm() {
     try {
       await login(email.trim(), password, rememberMe);
       router.push("/");
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (err: any) {
       const errorMsg = err?.message?.toLowerCase() || "";
       if (errorMsg.includes("invalid") || errorMsg.includes("wrong") || errorMsg.includes(" credentials") || errorMsg.includes("failed") || errorMsg.includes("401") || errorMsg.includes("403")) {
@@ -49,10 +51,13 @@ export default function LoginForm() {
   };
 
   const handleGoogle = () => {
-    // Pass current URL as redirect parameter to preserve destination after OAuth
-    const currentPath = window.location.pathname + window.location.search;
-    const redirectParam = encodeURIComponent(currentPath);
-    window.location.href = `${process.env.NEXT_PUBLIC_API_URL}/api/v1/auth/google?redirect=${redirectParam}`;
+    const requestedRedirect = searchParams.get("redirect");
+    const redirectPath =
+      requestedRedirect && requestedRedirect !== "/login"
+        ? requestedRedirect
+        : "/";
+    const redirectParam = encodeURIComponent(redirectPath);
+    window.location.href = `${process.env.NEXT_PUBLIC_API_URL}/api/v1/auth/google?redirect=${redirectParam}&prompt=select_account`;
   };
 
   return (
