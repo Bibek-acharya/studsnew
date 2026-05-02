@@ -179,6 +179,21 @@ export interface DownloadItem {
   description: string;
 }
 
+export interface BankDetails {
+  bank_name: string;
+  account_name: string;
+  account_number: string;
+  branch: string;
+}
+
+export interface PaymentConfig {
+  enabled: boolean;
+  fee_amount?: number;
+  methods: string[];
+  bank_details?: BankDetails;
+  qr_code?: string;
+}
+
 export interface CreateScholarshipPayload {
   title: string;
   provider?: string;
@@ -257,16 +272,22 @@ export interface CreateScholarshipPayload {
   partner_groups?: PartnerGroup[];
   exam_centers_new?: ExamCenterItem[];
   downloads?: DownloadItem[];
-  payment_config?: {
-    fee_amount: number;
-    methods: string[];
-    bank_details?: {
-      bankName: string;
-      accountName: string;
-      accountNumber: string;
-      branch: string;
-    };
-  };
+
+  // New fields from prototype
+  provider_name?: string;
+  funding_type_other?: string;
+  scholarship_type_other?: string;
+  education_level?: string;
+  education_level_other?: string;
+  apply_link?: string;
+  coverage_area?: string;
+  contact_email?: string;
+  primary_phone?: string;
+  secondary_phone?: string;
+  website_url?: string;
+  office_address?: string;
+  map_url?: string;
+  payment_config?: PaymentConfig;
 }
 
 export interface ProviderScholarship {

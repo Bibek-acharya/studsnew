@@ -1,0 +1,14 @@
+export { default as GeneralSettingsSection } from "./GeneralSettingsSection";
+export { default as ContactDetailsSection } from "./ContactDetailsSection";
+export { default as AboutSection } from "./AboutSection";
+export { default as VideoTutorialsSection } from "./VideoTutorialsSection";
+export { default as JourneyTimelineSection } from "./JourneyTimelineSection";
+export { default as ScholarshipTimelineSection } from "./ScholarshipTimelineSection";
+export { default as ScholarshipDetailsSection } from "./ScholarshipDetailsSection";
+export { default as EligibilitySection } from "./EligibilitySection";
+export { default as FAQSection } from "./FAQSection";
+export { default as GallerySection } from "./GallerySection";
+export { default as PartnersSection } from "./PartnersSection";
+export { default as ExamCentersSection } from "./ExamCentersSection";
+export { default as DownloadsSection } from "./DownloadsSection";
+export { default as PaymentConfigSection } from "./PaymentConfigSection";
