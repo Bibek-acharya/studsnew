@@ -151,12 +151,15 @@ const CreateScholarship: React.FC<CreateScholarshipProps> = memo(({ scholarshipI
   // Contact Details
   const [coverageArea, setCoverageArea] = useState("");
   const [contactEmail, setContactEmail] = useState("");
+  const [contactEmailError, setContactEmailError] = useState("");
   const [primaryPhone, setPrimaryPhone] = useState("");
+  const [primaryPhoneError, setPrimaryPhoneError] = useState("");
   const [secondaryPhone, setSecondaryPhone] = useState("");
+  const [secondaryPhoneError, setSecondaryPhoneError] = useState("");
   const [websiteUrl, setWebsiteUrl] = useState("");
+  const [websiteUrlError, setWebsiteUrlError] = useState("");
   const [officeAddress, setOfficeAddress] = useState("");
   const [mapUrl, setMapUrl] = useState("");
-  const [mapPreview, setMapPreview] = useState("");
 
   // About
   const [aboutOverview, setAboutOverview] = useState("");
@@ -249,15 +252,9 @@ const CreateScholarship: React.FC<CreateScholarshipProps> = memo(({ scholarshipI
     reader.readAsDataURL(file);
   };
 
-  // Map file handler
-  const handleMapFileSelect = (file: File) => {
-    const reader = new FileReader();
-    reader.onload = (e) => {
-      const dataUrl = e.target?.result as string;
-      setMapPreview(dataUrl);
-      setMapUrl(dataUrl);
-    };
-    reader.readAsDataURL(file);
+  // Map URL handler
+  const handleMapUrlChange = (value: string) => {
+    setMapUrl(value);
   };
 
   // QR Code file handler
@@ -302,6 +299,7 @@ const CreateScholarship: React.FC<CreateScholarshipProps> = memo(({ scholarshipI
       setSecondaryPhone((s as any).secondary_phone || "");
       setWebsiteUrl((s as any).website_url || "");
       setOfficeAddress((s as any).office_address || "");
+      setMapUrl((s as any).map_url || "");
 
       // About
       setAboutOverview(s.about_paragraph_1 || s.description || "");
@@ -317,6 +315,7 @@ const CreateScholarship: React.FC<CreateScholarshipProps> = memo(({ scholarshipI
       setScholarshipSubtitle(s.scholarship_subtitle || "");
       setScholarshipDescription(s.scholarship_description_1 || "");
       setScholarshipTypes((s.scholarship_types_new as ScholarshipTypeItem[]) || (s.scholarship_types || []).map((t: any) => ({ type: t.type || "", seats: t.seats || "", coverage: t.coverage || "", eligibility: t.eligibility || "" })) as ScholarshipTypeItem[]);
+      setTimelineEvents((s as any).timeline || []);
       setSelectionRubric(s.selection_rubric_new || []);
 
       // Eligibility
@@ -402,8 +401,62 @@ const CreateScholarship: React.FC<CreateScholarshipProps> = memo(({ scholarshipI
   }, [startDate, endDate]);
 
   const validateScholarship = useCallback((mode: string) => {
+    // Email validation
+    if (!contactEmail) {
+      return { message: "Contact email is required", field: "contactEmail" };
+    }
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(contactEmail)) {
+      return { message: "Invalid contact email format", field: "contactEmail" };
+    }
+
+    // Phone validation - exactly 10 digits starting with 9
+    if (!primaryPhone || !/^9\d{9}$/.test(primaryPhone)) {
+      return { message: "Primary phone must be exactly 10 digits and start with 9", field: "primaryPhone" };
+    }
+
+    // Secondary phone validation (optional but if provided must be valid)
+    if (secondaryPhone && !/^9\d{9}$/.test(secondaryPhone)) {
+      return { message: "Secondary phone must be exactly 10 digits and start with 9", field: "secondaryPhone" };
+    }
+
+    // Website URL validation
+    if (!websiteUrl) {
+      return { message: "Website URL is required", field: "websiteUrl" };
+    }
+    try {
+      new URL(websiteUrl);
+      if (!websiteUrl.startsWith('http://') && !websiteUrl.startsWith('https://')) {
+        return { message: "Website URL must start with http:// or https://", field: "websiteUrl" };
+      }
+    } catch {
+      return { message: "Invalid website URL", field: "websiteUrl" };
+    }
+
+    // Coverage area validation
+    if (!coverageArea.trim()) {
+      return { message: "Coverage area is required", field: "coverageArea" };
+    }
+
+    // Office address validation
+    if (!officeAddress.trim()) {
+      return { message: "Office address is required", field: "officeAddress" };
+    }
+
+    // Map URL validation
+    if (!mapUrl.trim()) {
+      return { message: "Map URL is required", field: "mapUrl" };
+    }
+    try {
+      new URL(mapUrl);
+      if (!mapUrl.startsWith('http://') && !mapUrl.startsWith('https://')) {
+        return { message: "Map URL must start with http:// or https://", field: "mapUrl" };
+      }
+    } catch {
+      return { message: "Invalid map URL", field: "mapUrl" };
+    }
+
     return { message: "", field: "" };
-  }, []);
+  }, [contactEmail, primaryPhone, secondaryPhone, websiteUrl, coverageArea, officeAddress, mapUrl]);
 
   const scrollToField = useCallback((field: string) => {
     const element = document.getElementById(field);
@@ -469,39 +522,39 @@ const CreateScholarship: React.FC<CreateScholarshipProps> = memo(({ scholarshipI
       funding_type: finalFundingType,
       scholarship_type: finalScholarshipType,
       field_of_study: [],
-      status: (draft ? 'draft' : status) as 'draft' | 'published',
+      status: (draft ? 'draft' : 'published') as 'draft' | 'published',
       application_start_date: startDate ? new Date(startDate).toISOString() : undefined,
       application_end_date: endDate ? new Date(endDate).toISOString() : undefined,
-      apply_link: applyLink,
+      apply_link: applyLink || undefined,
       banner_background_image_url: bannerBgUrl || undefined,
-      coverage_area: coverageArea,
-      contact_email: contactEmail,
-      primary_phone: primaryPhone,
-      secondary_phone: secondaryPhone,
-      website_url: websiteUrl,
-      office_address: officeAddress,
-      map_url: mapUrl,
+      coverage_area: coverageArea || undefined,
+      contact_email: contactEmail || undefined,
+      primary_phone: primaryPhone || undefined,
+      secondary_phone: secondaryPhone || undefined,
+      website_url: websiteUrl || undefined,
+      office_address: officeAddress || undefined,
+      map_url: mapUrl || undefined,
       about_paragraph_1: aboutOverview,
-      video_tutorials: videoTutorials.length > 0 ? videoTutorials : undefined,
-      journey_timeline: journeyTimeline.length > 0 ? journeyTimeline : undefined,
-      timeline_events: timelineEvents.length > 0 ? timelineEvents : undefined,
+      video_tutorials: videoTutorials,
+      journey_timeline: journeyTimeline,
       scholarship_section_title: scholarshipSectionTitle || undefined,
       scholarship_subtitle: scholarshipSubtitle || undefined,
       scholarship_description_1: scholarshipDescription || undefined,
-      scholarship_types_new: scholarshipTypes.length > 0 ? scholarshipTypes as unknown as any : undefined,
-      selection_rubric_new: selectionRubric.length > 0 ? selectionRubric as unknown as any : undefined,
+      timeline: timelineEvents,
+      scholarship_types_new: scholarshipTypes,
+      selection_rubric_new: selectionRubric,
       eligibility_section_title: eligibilitySectionTitle || undefined,
       eligibility_subtitle: eligibilitySubtitle || undefined,
-      basic_eligibility_criteria: basicRequirements.length > 0 ? basicRequirements : undefined,
-      fully_funded_criteria: fullyFundedConditions.length > 0 ? fullyFundedConditions : undefined,
-      partially_funded_criteria: partiallyFundedConditions.length > 0 ? partiallyFundedConditions : undefined,
-      selection_process_steps: selectionProcessSteps.length > 0 ? selectionProcessSteps : undefined,
-      required_documents: requiredDocuments.length > 0 ? requiredDocuments : undefined,
-      faqs_new: faqs.length > 0 ? faqs : undefined,
-      gallery_images_new: galleryImages.length > 0 ? galleryImages : undefined,
-      partner_groups: partnerGroups.length > 0 ? partnerGroups : undefined,
-      exam_centers_new: examCenters.length > 0 ? examCenters as unknown as any : undefined,
-      downloads: downloads.length > 0 ? downloads : undefined,
+      basic_eligibility_criteria: basicRequirements,
+      fully_funded_criteria: fullyFundedConditions,
+      partially_funded_criteria: partiallyFundedConditions,
+      selection_process_steps: selectionProcessSteps,
+      required_documents: requiredDocuments,
+      faqs_new: faqs,
+      gallery_images_new: galleryImages,
+      partner_groups: partnerGroups,
+      exam_centers_new: examCenters as unknown as any,
+      downloads: downloads,
       payment_config: {
         enabled: enablePayment,
         fee_amount: enablePayment ? paymentFeeAmount : 0,
@@ -611,17 +664,24 @@ const CreateScholarship: React.FC<CreateScholarshipProps> = memo(({ scholarshipI
         setCoverageArea={setCoverageArea}
         contactEmail={contactEmail}
         setContactEmail={setContactEmail}
+        contactEmailError={contactEmailError}
+        setContactEmailError={setContactEmailError}
         primaryPhone={primaryPhone}
         setPrimaryPhone={setPrimaryPhone}
+        primaryPhoneError={primaryPhoneError}
+        setPrimaryPhoneError={setPrimaryPhoneError}
         secondaryPhone={secondaryPhone}
         setSecondaryPhone={setSecondaryPhone}
+        secondaryPhoneError={secondaryPhoneError}
+        setSecondaryPhoneError={setSecondaryPhoneError}
         websiteUrl={websiteUrl}
         setWebsiteUrl={setWebsiteUrl}
+        websiteUrlError={websiteUrlError}
+        setWebsiteUrlError={setWebsiteUrlError}
         officeAddress={officeAddress}
         setOfficeAddress={setOfficeAddress}
         mapUrl={mapUrl}
-        mapPreview={mapPreview}
-        onMapSelect={handleMapFileSelect}
+        setMapUrl={setMapUrl}
       />
 
       {/* About Section */}

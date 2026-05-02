@@ -1,40 +1,91 @@
 "use client";
 
 import React from "react";
-import FileUpload from "../common/FileUpload";
 
 interface ContactDetailsSectionProps {
   coverageArea: string;
   setCoverageArea: (v: string) => void;
   contactEmail: string;
   setContactEmail: (v: string) => void;
+  contactEmailError?: string;
+  setContactEmailError?: (v: string) => void;
   primaryPhone: string;
   setPrimaryPhone: (v: string) => void;
+  primaryPhoneError?: string;
+  setPrimaryPhoneError?: (v: string) => void;
   secondaryPhone: string;
   setSecondaryPhone: (v: string) => void;
+  secondaryPhoneError?: string;
+  setSecondaryPhoneError?: (v: string) => void;
   websiteUrl: string;
   setWebsiteUrl: (v: string) => void;
+  websiteUrlError?: string;
+  setWebsiteUrlError?: (v: string) => void;
   officeAddress: string;
   setOfficeAddress: (v: string) => void;
   mapUrl: string;
-  mapPreview: string;
-  onMapSelect: (file: File) => void;
+  setMapUrl: (v: string) => void;
+  mapUrlError?: string;
+  setMapUrlError?: (v: string) => void;
 }
 
 const formInputClass = "w-full px-4 py-2.5 rounded-lg border border-gray-200 bg-white text-gray-900 focus:outline-none focus:border-blue-500";
 
+const isValidEmail = (email: string): boolean => {
+  if (!email) return false;
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  return emailRegex.test(email);
+};
+
+const isValidUrl = (url: string): boolean => {
+  if (!url) return false;
+  try {
+    new URL(url);
+    return url.startsWith('http://') || url.startsWith('https://');
+  } catch {
+    return false;
+  }
+};
+
+const isValidPhone = (phone: string): boolean => {
+  return /^9\d{9}$/.test(phone);
+};
+
 export const ContactDetailsSection: React.FC<ContactDetailsSectionProps> = ({
   coverageArea, setCoverageArea,
-  contactEmail, setContactEmail,
-  primaryPhone, setPrimaryPhone,
-  secondaryPhone, setSecondaryPhone,
-  websiteUrl, setWebsiteUrl,
+  contactEmail, setContactEmail, contactEmailError, setContactEmailError,
+  primaryPhone, setPrimaryPhone, primaryPhoneError, setPrimaryPhoneError,
+  secondaryPhone, setSecondaryPhone, secondaryPhoneError, setSecondaryPhoneError,
+  websiteUrl, setWebsiteUrl, websiteUrlError, setWebsiteUrlError,
   officeAddress, setOfficeAddress,
-  mapUrl, mapPreview, onMapSelect,
+  mapUrl, setMapUrl, mapUrlError, setMapUrlError,
 }) => {
-  const handlePhoneInput = (value: string, setter: (v: string) => void) => {
-    const numericValue = value.replace(/[^0-9]/g, "");
+  const handlePhoneInput = (value: string, setter: (v: string) => void, setError?: (v: string) => void) => {
+    const numericValue = value.replace(/[^0-9]/g, "").slice(0, 10);
     setter(numericValue);
+    if (numericValue.length > 0 && !/^9\d{9}$/.test(numericValue)) {
+      setError?.("Must be exactly 10 digits and start with 9");
+    } else {
+      setError?.("");
+    }
+  };
+
+  const handleUrlChange = (value: string, setter: (v: string) => void, setError?: (v: string) => void) => {
+    setter(value);
+    if (value && !isValidUrl(value)) {
+      setError?.("Must be a valid URL starting with http:// or https://");
+    } else {
+      setError?.("");
+    }
+  };
+
+  const handleEmailChange = (value: string, setter: (v: string) => void, setError?: (v: string) => void) => {
+    setter(value);
+    if (value && !isValidEmail(value)) {
+      setError?.("Invalid email format");
+    } else {
+      setError?.("");
+    }
   };
 
   return (
@@ -71,11 +122,12 @@ export const ContactDetailsSection: React.FC<ContactDetailsSectionProps> = ({
             </label>
             <input
               type="email"
-              className={formInputClass}
-              placeholder="Email for support inquiries"
+              className={`${formInputClass} ${contactEmailError ? 'border-red-500' : ''}`}
+              placeholder="contact@example.com"
               value={contactEmail}
-              onChange={(e) => setContactEmail(e.target.value)}
+              onChange={(e) => handleEmailChange(e.target.value, setContactEmail, setContactEmailError)}
             />
+            {contactEmailError && <p className="text-xs text-red-500">{contactEmailError}</p>}
           </div>
           <div className="space-y-1.5">
             <label className="block text-sm font-medium text-gray-700">
@@ -83,11 +135,12 @@ export const ContactDetailsSection: React.FC<ContactDetailsSectionProps> = ({
             </label>
             <input
               type="text"
-              className={formInputClass}
-              placeholder="Main contact number"
+              className={`${formInputClass} ${primaryPhoneError ? 'border-red-500' : ''}`}
+              placeholder="98XXXXXXXX (10 digits starting with 9)"
               value={primaryPhone}
-              onChange={(e) => handlePhoneInput(e.target.value, setPrimaryPhone)}
+              onChange={(e) => handlePhoneInput(e.target.value, setPrimaryPhone, setPrimaryPhoneError)}
             />
+            {primaryPhoneError && <p className="text-xs text-red-500">{primaryPhoneError}</p>}
           </div>
           <div className="space-y-1.5">
             <label className="block text-sm font-medium text-gray-700">
@@ -95,11 +148,12 @@ export const ContactDetailsSection: React.FC<ContactDetailsSectionProps> = ({
             </label>
             <input
               type="text"
-              className={formInputClass}
-              placeholder="Alternative contact number"
+              className={`${formInputClass} ${secondaryPhoneError ? 'border-red-500' : ''}`}
+              placeholder="98XXXXXXXX (10 digits starting with 9)"
               value={secondaryPhone}
-              onChange={(e) => handlePhoneInput(e.target.value, setSecondaryPhone)}
+              onChange={(e) => handlePhoneInput(e.target.value, setSecondaryPhone, setSecondaryPhoneError)}
             />
+            {secondaryPhoneError && <p className="text-xs text-red-500">{secondaryPhoneError}</p>}
           </div>
           <div className="space-y-1.5">
             <label className="block text-sm font-medium text-gray-700">
@@ -107,11 +161,12 @@ export const ContactDetailsSection: React.FC<ContactDetailsSectionProps> = ({
             </label>
             <input
               type="text"
-              className={formInputClass}
-              placeholder="https://"
+              className={`${formInputClass} ${websiteUrlError ? 'border-red-500' : ''}`}
+              placeholder="https://example.com"
               value={websiteUrl}
-              onChange={(e) => setWebsiteUrl(e.target.value)}
+              onChange={(e) => handleUrlChange(e.target.value, setWebsiteUrl, setWebsiteUrlError)}
             />
+            {websiteUrlError && <p className="text-xs text-red-500">{websiteUrlError}</p>}
           </div>
           <div className="space-y-1.5">
             <label className="block text-sm font-medium text-gray-700">
@@ -125,16 +180,18 @@ export const ContactDetailsSection: React.FC<ContactDetailsSectionProps> = ({
               onChange={(e) => setOfficeAddress(e.target.value)}
             />
           </div>
-          <div className="md:col-span-2 space-y-1.5">
+          <div className="space-y-1.5">
             <label className="block text-sm font-medium text-gray-700">
-              Upload Map <span className="text-red-500">*</span>
+              Map Embed URL <span className="text-red-500">*</span>
             </label>
-            <FileUpload
-              accept="image/*"
-              maxSize="2MB"
-              onFileSelect={onMapSelect}
-              previewUrl={mapPreview}
+            <input
+              type="text"
+              className={`${formInputClass} ${mapUrlError ? 'border-red-500' : ''}`}
+              placeholder="https://www.google.com/maps/embed?pb..."
+              value={mapUrl}
+              onChange={(e) => handleUrlChange(e.target.value, setMapUrl, setMapUrlError)}
             />
+            {mapUrlError && <p className="text-xs text-red-500">{mapUrlError}</p>}
           </div>
         </div>
       </div>

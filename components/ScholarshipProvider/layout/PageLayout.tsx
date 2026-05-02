@@ -11,6 +11,7 @@ interface PageLayoutProps {
   onLogout: () => void;
   providerUser: any;
   unreadMessages: number;
+  permissions?: string[];
 }
 
 const PageLayout: React.FC<PageLayoutProps> = ({
@@ -20,6 +21,7 @@ const PageLayout: React.FC<PageLayoutProps> = ({
   onLogout,
   providerUser,
   unreadMessages,
+  permissions = [],
 }) => {
   return (
     <div className="flex h-screen bg-slate-50 antialiased overflow-hidden font-sans text-slate-800">
@@ -27,6 +29,7 @@ const PageLayout: React.FC<PageLayoutProps> = ({
         activeTab={activeTab}
         onNavigate={onNavigate}
         onLogout={onLogout}
+        permissions={permissions}
       />
 
       <div className="flex-1 flex flex-col h-full overflow-hidden" style={{ marginLeft: "280px" }}>

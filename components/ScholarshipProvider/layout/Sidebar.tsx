@@ -22,9 +22,12 @@ interface SidebarProps {
   activeTab: string;
   onNavigate: (section: string) => void;
   onLogout: () => void;
+  permissions?: string[];
 }
 
-const Sidebar: React.FC<SidebarProps> = ({ activeTab, onNavigate, onLogout }) => {
+const Sidebar: React.FC<SidebarProps> = ({ activeTab, onNavigate, onLogout, permissions = [] }) => {
+  const hasPermission = (permId: string) => permissions.includes(permId);
+
   const [openDropdowns, setOpenDropdowns] = useState<Record<string, boolean>>({
     scholarship: false,
     news: false,
@@ -42,14 +45,18 @@ const Sidebar: React.FC<SidebarProps> = ({ activeTab, onNavigate, onLogout }) =>
     label,
     section,
     dropdown,
+    requiredPerm,
     children,
   }: {
     icon: any;
     label: string;
     section: string;
     dropdown?: string;
+    requiredPerm?: string;
     children?: React.ReactNode;
   }) => {
+    if (requiredPerm && !hasPermission(requiredPerm)) return null;
+
     const isActive = activeTab === section;
     const hasDropdown = !!dropdown;
 
@@ -121,6 +128,7 @@ const Sidebar: React.FC<SidebarProps> = ({ activeTab, onNavigate, onLogout }) =>
           icon={LayoutDashboard}
           label="Dashboard"
           section="sec-dashboard"
+          requiredPerm="scholarships"
         />
 
         <NavItem
@@ -128,6 +136,7 @@ const Sidebar: React.FC<SidebarProps> = ({ activeTab, onNavigate, onLogout }) =>
           label="Manage Scholarship"
           section="sec-scholarship-dropdown"
           dropdown="scholarship"
+          requiredPerm="scholarships"
         >
           <DropdownItem label="Create Scholarship" section="sec-create-scholarship" />
           <DropdownItem label="Customize Form" section="sec-customize-form" />
@@ -137,16 +146,19 @@ const Sidebar: React.FC<SidebarProps> = ({ activeTab, onNavigate, onLogout }) =>
           <DropdownItem label="Manage Shortlist" section="sec-shortlist" />
         </NavItem>
 
+        {/* Hidden for now
         <NavItem
           icon={Calendar}
           label="Calendar"
           section="sec-calendar"
         />
+        */}
 
         <NavItem
           icon={MessageSquare}
           label="Message"
           section="sec-messages"
+          requiredPerm="messages"
         />
 
         <NavItem
@@ -154,6 +166,7 @@ const Sidebar: React.FC<SidebarProps> = ({ activeTab, onNavigate, onLogout }) =>
           label="Manage News"
           section="sec-news-dropdown"
           dropdown="news"
+          requiredPerm="news"
         >
           <DropdownItem label="Create News" section="sec-create-news" />
           <DropdownItem label="News Directory" section="sec-news-directory" />
@@ -164,6 +177,7 @@ const Sidebar: React.FC<SidebarProps> = ({ activeTab, onNavigate, onLogout }) =>
           label="Manage Events"
           section="sec-events-dropdown"
           dropdown="events"
+          requiredPerm="events"
         >
           <DropdownItem label="Create Event" section="sec-create-event" />
           <DropdownItem
@@ -177,6 +191,7 @@ const Sidebar: React.FC<SidebarProps> = ({ activeTab, onNavigate, onLogout }) =>
           label="Manage Blogs"
           section="sec-blog-dropdown"
           dropdown="blog"
+          requiredPerm="blogs"
         >
           <DropdownItem label="Create Blog" section="sec-create-blog" />
           <DropdownItem label="Blog Directory" section="sec-blog-directory" />
@@ -186,15 +201,17 @@ const Sidebar: React.FC<SidebarProps> = ({ activeTab, onNavigate, onLogout }) =>
           icon={UserCog}
           label="Manage Profile"
           section="sec-org-profile"
+          requiredPerm="profile"
         />
 
-        <NavItem icon={BarChart3} label="Analytics" section="sec-reports" />
+        <NavItem icon={BarChart3} label="Analytics" section="sec-reports" requiredPerm="analytics" />
 
         <NavItem
           icon={Award}
           label="Evaluation & Results"
           section="sec-evaluation-dropdown"
           dropdown="evaluation"
+          requiredPerm="evaluation"
         >
           <DropdownItem label="Written Exam" section="sec-written-exam" />
           <DropdownItem label="Interview" section="sec-interviews" />
@@ -205,9 +222,10 @@ const Sidebar: React.FC<SidebarProps> = ({ activeTab, onNavigate, onLogout }) =>
           icon={ShieldCheck}
           label="Assign Access"
           section="sec-assign-access"
+          requiredPerm="access"
         />
 
-        <NavItem icon={Settings} label="Settings" section="sec-settings" />
+        <NavItem icon={Settings} label="Settings" section="sec-settings" requiredPerm="settings" />
 
         <div
           onClick={onLogout}

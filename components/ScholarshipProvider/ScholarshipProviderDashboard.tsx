@@ -3,7 +3,9 @@ import { useRouter } from 'next/navigation';
 import dynamic from 'next/dynamic';
 import { apiService } from '@/services/api';
 import { scholarshipProviderApi } from '@/services/scholarshipProviderApi';
+import { getStoredPermissions, PERMISSIONS_LIST } from "@/services/providerRbac";
 import PageLayout from './layout/PageLayout';
+import Unauthorized from './layout/Unauthorized';
 
 const DashboardOverview = dynamic(() => import('./DashboardOverview'));
 const OrganizationProfile = dynamic(() => import('./OrganizationProfile'));
@@ -41,6 +43,7 @@ const ScholarshipProviderDashboard: React.FC<DashboardProps> = ({ onLogout }) =>
   const [editingScholarshipId, setEditingScholarshipId] = useState<number | null>(null);
   const [providerUser, setProviderUser] = useState<any>(null);
   const [unreadMessages, setUnreadMessages] = useState(0);
+  const [rbacPermissions, setRbacPermissions] = useState<string[]>([]);
 
   useEffect(() => {
     async function loadProviderData() {
@@ -59,6 +62,53 @@ const ScholarshipProviderDashboard: React.FC<DashboardProps> = ({ onLogout }) =>
 
     loadProviderData();
   }, [router, onLogout]);
+
+  useEffect(() => {
+    const stored = localStorage.getItem("scholarshipProviderUser");
+    if (stored) {
+      const user = JSON.parse(stored);
+      if (user.isSubUser && user.id) {
+        // Sub-user - load specific permissions
+        const perms = getStoredPermissions();
+        const userPerm = perms.find((p: { userId: number }) => p.userId === user.id);
+        setRbacPermissions(userPerm?.permissions || []);
+      } else {
+        // Main provider admin - has all permissions
+        setRbacPermissions(PERMISSIONS_LIST.map(p => p.id));
+      }
+    }
+  }, []);
+
+  const PERMISSION_MAP: Record<string, string> = {
+    "sec-create-scholarship": "scholarships",
+    "sec-scholarship-directory": "scholarships",
+    "sec-manage-scholarships": "scholarships",
+    "sec-applications": "applications",
+    "sec-student-profile": "applications",
+    "sec-interviews": "evaluation",
+    "sec-messages": "messages",
+    "sec-reports": "analytics",
+    "sec-settings": "settings",
+    "sec-assign-access": "access",
+    "sec-create-news": "news",
+    "sec-news-directory": "news",
+    "sec-create-event": "events",
+    "sec-events-directory": "events",
+    "sec-create-blog": "blogs",
+    "sec-blog-directory": "blogs",
+    "sec-org-profile": "profile",
+    "sec-shortlist": "shortlists",
+    "sec-written-exam": "evaluation",
+    "sec-results": "evaluation",
+    "sec-customize-form": "scholarships",
+    "sec-draft-scholarship": "scholarships",
+  };
+
+  const canAccess = (section: string): boolean => {
+    const required = PERMISSION_MAP[section];
+    if (!required) return true;
+    return rbacPermissions.includes(required);
+  };
 
   const handleLogout = useCallback(() => {
     apiService.logout();
@@ -89,6 +139,10 @@ const ScholarshipProviderDashboard: React.FC<DashboardProps> = ({ onLogout }) =>
   if (!providerUser) return null;
 
   const renderContent = () => {
+    if (!canAccess(activeTab)) {
+      return <Unauthorized />;
+    }
+
     switch (activeTab) {
       case 'sec-dashboard':
         return <DashboardOverview onNavigate={navigateTo} />;
@@ -154,6 +208,7 @@ const ScholarshipProviderDashboard: React.FC<DashboardProps> = ({ onLogout }) =>
       onLogout={handleLogout}
       providerUser={providerUser}
       unreadMessages={unreadMessages}
+      permissions={rbacPermissions}
     >
       {renderContent()}
     </PageLayout>

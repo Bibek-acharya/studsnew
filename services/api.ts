@@ -5,7 +5,7 @@ const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080";
 
 if (typeof window !== "undefined") {
   // log base URL in browser console to help debugging routing to backend
-  // eslint-disable-next-line no-console
+   
   console.info("API_BASE_URL:", API_BASE_URL);
 }
 

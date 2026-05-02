@@ -1,25 +1,15 @@
 "use client";
 
-import React, { useState, memo } from "react";
+import React, { useState, useEffect, memo } from "react";
 import { Home, Users, Plus, Pencil, Trash2, Search, X, ShieldCheck, UserPlus } from "lucide-react";
-
-interface AccessUser {
-  id: number;
-  name: string;
-  email: string;
-  role: string;
-  roleLabel: string;
-  status: string;
-  lastActive: string;
-  avatar: string;
-}
-
-const INITIAL_USERS: AccessUser[] = [
-  { id: 1, name: "Rajesh Hamal", email: "rajesh@sowersaction.org.np", role: "admin", roleLabel: "Admin", status: "Active", lastActive: "2 min ago", avatar: "https://i.pravatar.cc/150?img=11" },
-  { id: 2, name: "Anita Sharma", email: "anita@sowersaction.org.np", role: "manager", roleLabel: "Manager", status: "Active", lastActive: "1 hour ago", avatar: "https://i.pravatar.cc/150?img=5" },
-  { id: 3, name: "Bikash Gurung", email: "bikash@sowersaction.org.np", role: "editor", roleLabel: "Editor", status: "Active", lastActive: "3 hours ago", avatar: "https://i.pravatar.cc/150?img=12" },
-  { id: 4, name: "Sunita Lama", email: "sunita@sowersaction.org.np", role: "viewer", roleLabel: "Viewer", status: "Pending", lastActive: "Never", avatar: "https://i.pravatar.cc/150?img=32" },
-];
+import {
+  providerRbacApi,
+  ProviderUser,
+  getStoredUsers,
+  saveUsers,
+  getStoredPermissions,
+  savePermissions,
+} from "@/services/providerRbac";
 
 
 const STATUS_COLORS: Record<string, string> = {
@@ -44,21 +34,69 @@ const PERMISSIONS = [
 ];
 
 const AssignAccess: React.FC = memo(() => {
-  const [users, setUsers] = useState(INITIAL_USERS);
+  const [users, setUsers] = useState<ProviderUser[]>([]);
   const [search, setSearch] = useState("");
   const [addModalOpen, setAddModalOpen] = useState(false);
   const [permModalOpen, setPermModalOpen] = useState(false);
   const [permUserName, setPermUserName] = useState("");
+  const [permUserId, setPermUserId] = useState<number>(0);
   const [newName, setNewName] = useState("");
   const [newEmail, setNewEmail] = useState("");
   const [newPassword, setNewPassword] = useState("");
   const [permissions, setPermissions] = useState<Record<string, boolean>>({});
 
+  useEffect(() => {
+    const stored = getStoredUsers();
+    setUsers(stored);
+  }, []);
+
   const filtered = search ? users.filter((u) => u.name.toLowerCase().includes(search.toLowerCase()) || u.email.includes(search)) : users;
 
-  const openPermModal = (name: string) => {
-    setPermUserName(name);
+  const openPermModal = (user: ProviderUser) => {
+    setPermUserName(user.name);
+    setPermUserId(user.id);
+    const storedPerms = getStoredPermissions();
+    const userPerms = storedPerms.find(p => p.userId === user.id)?.permissions || [];
+    setPermissions(userPerms.reduce((acc: Record<string, boolean>, p: string) => ({...acc, [p]: true}), {}));
     setPermModalOpen(true);
+  };
+
+  const handleAddUser = () => {
+    const newUser: ProviderUser = {
+      id: Date.now(),
+      name: newName,
+      email: newEmail,
+      password: newPassword,
+      role: "user",
+      roleLabel: "User",
+      status: "Active",
+      lastActive: "Never",
+      avatar: `https://i.pravatar.cc/150?u=${Date.now()}`,
+      providerId: 0,
+      permissions: [],
+    };
+    const updatedUsers = [...users, newUser];
+    saveUsers(updatedUsers);
+    setUsers(updatedUsers);
+    setAddModalOpen(false);
+    setNewName("");
+    setNewEmail("");
+    setNewPassword("");
+    openPermModal(newUser);
+  };
+
+  const handleDeleteUser = (u: ProviderUser) => {
+    providerRbacApi.deleteUser(u.id);
+    setUsers(prev => prev.filter(x => x.id !== u.id));
+  };
+
+  const handleSavePermissions = () => {
+    const selectedPerms = Object.entries(permissions)
+      .filter(([, v]) => v)
+      .map(([k]) => k);
+
+    savePermissions(permUserId, selectedPerms);
+    setPermModalOpen(false);
   };
 
   return (
@@ -85,7 +123,7 @@ const AssignAccess: React.FC = memo(() => {
               </div>
               <input type="text" className="w-full pl-10 pr-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:border-blue-500" placeholder="Search users..." value={search} onChange={(e) => setSearch(e.target.value)} />
             </div>
-            <button onClick={() => setAddModalOpen(true)} className="px-4 py-2 bg-blue-600 text-white rounded-lg text-sm font-semibold hover:bg-blue-700 transition-colors flex items-center gap-1">
+            <button onClick={() => { setAddModalOpen(true); setNewName(""); setNewEmail(""); setNewPassword(""); }} className="px-4 py-2 bg-blue-600 text-white rounded-lg text-sm font-semibold hover:bg-blue-700 transition-colors flex items-center gap-1">
               <Plus className="w-4 h-4" /> Add User
             </button>
           </div>
@@ -120,8 +158,8 @@ const AssignAccess: React.FC = memo(() => {
                   <td className="text-center py-3 px-4 text-gray-500">{u.lastActive}</td>
                   <td className="text-center py-3 px-4">
                     <div className="flex items-center justify-center gap-2">
-                      <button onClick={() => openPermModal(u.name)} className="p-1.5 hover:bg-blue-50 rounded text-blue-600" title="Edit Access"><Pencil className="w-4 h-4" /></button>
-                      <button onClick={() => setUsers((prev) => prev.filter((x) => x.id !== u.id))} className="p-1.5 hover:bg-red-50 rounded text-red-600" title="Remove"><Trash2 className="w-4 h-4" /></button>
+                      <button onClick={() => openPermModal(u)} className="p-1.5 hover:bg-blue-50 rounded text-blue-600" title="Edit Access"><Pencil className="w-4 h-4" /></button>
+                      <button onClick={() => handleDeleteUser(u)} className="p-1.5 hover:bg-red-50 rounded text-red-600" title="Remove"><Trash2 className="w-4 h-4" /></button>
                     </div>
                   </td>
                 </tr>
@@ -157,7 +195,7 @@ const AssignAccess: React.FC = memo(() => {
             </div>
             <div className="flex justify-end gap-3 px-6 py-4 border-t border-gray-200">
               <button onClick={() => setAddModalOpen(false)} className="px-6 py-2.5 border border-gray-300 rounded-lg text-gray-700 font-medium hover:bg-gray-50">Cancel</button>
-              <button onClick={() => { setAddModalOpen(false); openPermModal(newName || "New User"); }} className="px-6 py-2.5 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700">Continue</button>
+              <button onClick={handleAddUser} className="px-6 py-2.5 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700">Continue</button>
             </div>
           </div>
         </div>
@@ -190,7 +228,7 @@ const AssignAccess: React.FC = memo(() => {
               </div>
               <div className="flex justify-end gap-3 mt-6 pt-4 border-t border-gray-200">
                 <button onClick={() => setPermModalOpen(false)} className="px-6 py-2.5 border border-gray-300 rounded-lg text-gray-700 font-medium hover:bg-gray-50">Cancel</button>
-                <button onClick={() => { setPermModalOpen(false); alert("Permissions saved!"); }} className="px-6 py-2.5 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700">Save Permissions</button>
+                <button onClick={handleSavePermissions} className="px-6 py-2.5 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700">Save Permissions</button>
               </div>
             </div>
           </div>

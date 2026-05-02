@@ -3,6 +3,7 @@
 import React, { useEffect, useState, useRef } from "react";
 import { apiService } from "../../services/api";
 import { scholarshipProviderApi } from "../../services/scholarshipProviderApi";
+import { getStoredUsers } from "@/services/providerRbac";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
 import { BadgeCheck, Eye, EyeOff, Loader2, ArrowLeft } from "lucide-react";
@@ -93,6 +94,19 @@ const ScholarshipProviderZone: React.FC<ScholarshipProviderZoneProps> = ({
   const validateEmail = (email: string) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
   const validatePhone = (phone: string) => /^\d{10}$/.test(phone);
 
+  const loginProviderUser = (email: string, password: string) => {
+    const users = getStoredUsers();
+    const user = users.find(
+      (u) => u.email === email && u.password === password && u.status === "Active"
+    );
+    if (user) {
+      user.lastActive = "Just now";
+      const updatedUsers = users.map(u => u.id === user.id ? user : u);
+      localStorage.setItem("scholarshipProviderUsers", JSON.stringify(updatedUsers));
+    }
+    return user || null;
+  };
+
   const handleProviderLogin = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     clearAuthMessages();
@@ -106,6 +120,19 @@ const ScholarshipProviderZone: React.FC<ScholarshipProviderZoneProps> = ({
 
     setAuthLoading(true);
     try {
+      // FIRST: Check for sub-user login
+      const subUser = loginProviderUser(loginEmail.trim(), loginPassword);
+      if (subUser) {
+        localStorage.setItem("scholarshipProviderUser", JSON.stringify({
+          ...subUser,
+          isSubUser: true,
+        }));
+        setCurrentView("dashboard");
+        setLoginPassword("");
+        return;
+      }
+
+      // If not sub-user, proceed with main provider login
       const response = await apiService.scholarshipProviderLogin(
         loginEmail.trim(),
         loginPassword,
@@ -327,7 +354,15 @@ const ScholarshipProviderZone: React.FC<ScholarshipProviderZoneProps> = ({
   };
 
   if (currentView === "dashboard") {
-    return <ScholarshipProviderDashboard onLogout={() => setCurrentView("landing")} />;
+    return <ScholarshipProviderDashboard onLogout={() => {
+      const userStr = localStorage.getItem("scholarshipProviderUser");
+      const user = userStr ? JSON.parse(userStr) : null;
+      if (user?.isSubUser) {
+        localStorage.removeItem("scholarshipProviderUser");
+      }
+      apiService.scholarshipProviderLogout();
+      setCurrentView("landing");
+    }} />;
   }
 
   if (currentView === "pending-approval") {
