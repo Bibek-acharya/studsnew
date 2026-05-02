@@ -4,7 +4,7 @@ import React, { useState, useRef, useEffect } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/services/AuthContext";
-import { apiService } from "@/services/api";
+import { API_BASE_URL, apiService } from "@/services/api";
 import { Eye, EyeOff, Mail, ArrowLeft } from "lucide-react";
 
 type Step = "email" | "details" | "verify";
@@ -193,7 +193,7 @@ export default function RegisterForm() {
         <button
           type="button"
           onClick={() => {
-            window.location.href = `${process.env.NEXT_PUBLIC_API_URL}/api/v1/auth/google`;
+            window.location.href = `${API_BASE_URL}/api/v1/auth/google`;
           }}
           className="w-full bg-white border border-gray-200 rounded-md py-3 px-4 flex items-center justify-center gap-3 font-semibold text-gray-800 transition-colors hover:bg-gray-50"
         >

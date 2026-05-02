@@ -1,9 +1,10 @@
 "use client";
 
-import React, { useState, useRef, useEffect } from "react";
+import React, { useState } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "../../services/AuthContext";
 import { validators, useFieldValidation } from "@/utils/validation";
+import { API_BASE_URL } from "@/services/api";
 
 interface SignupViewProps {
   onSwitch: () => void;
@@ -104,8 +105,8 @@ const SignupView: React.FC<SignupViewProps> = ({
       } else {
         onSuccess();
       }
-    } catch (err: any) {
-      setError(err.message || "Registration failed. Please try again.");
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : "Registration failed. Please try again.");
     } finally {
       setLoading(false);
     }
@@ -130,7 +131,7 @@ const SignupView: React.FC<SignupViewProps> = ({
   };
 
   const handleGoogleLogin = () => {
-    window.location.href = `${process.env.NEXT_PUBLIC_API_URL}/api/v1/auth/google`;
+    window.location.href = `${API_BASE_URL}/api/v1/auth/google`;
   };
 
   return (

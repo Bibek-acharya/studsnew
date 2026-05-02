@@ -4,6 +4,7 @@ import React, { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { useAuth } from "@/services/AuthContext";
+import { API_BASE_URL } from "@/services/api";
 import { Eye, EyeOff } from "lucide-react";
 
 const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -36,12 +37,12 @@ export default function LoginForm() {
     try {
       await login(email.trim(), password, rememberMe);
       router.push("/");
-    } catch (err: any) {
-      const errorMsg = err?.message?.toLowerCase() || "";
+    } catch (err: unknown) {
+      const errorMsg = err instanceof Error ? err.message.toLowerCase() : "";
       if (errorMsg.includes("invalid") || errorMsg.includes("wrong") || errorMsg.includes(" credentials") || errorMsg.includes("failed") || errorMsg.includes("401") || errorMsg.includes("403")) {
         setError("Invalid email or password");
       } else {
-        setError(err?.message || "Login failed. Please try again.");
+        setError(err instanceof Error ? err.message : "Login failed. Please try again.");
       }
     } finally {
       setLoading(false);
@@ -49,7 +50,7 @@ export default function LoginForm() {
   };
 
   const handleGoogle = () => {
-    window.location.href = `${process.env.NEXT_PUBLIC_API_URL}/api/v1/auth/google`;
+    window.location.href = `${API_BASE_URL}/api/v1/auth/google`;
   };
 
   return (

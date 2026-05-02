@@ -3,6 +3,7 @@
 import React, { useState } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "../../services/AuthContext";
+import { API_BASE_URL } from "@/services/api";
 import { Mail } from "lucide-react";
 
 interface LoginViewProps {
@@ -35,15 +36,15 @@ const LoginView: React.FC<LoginViewProps> = ({
     try {
       await login(email, password);
       onSuccess();
-    } catch (err: any) {
-      setError(err.message || "Login failed. Please try again.");
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : "Login failed. Please try again.");
     } finally {
       setLoading(false);
     }
   };
 
   const handleGoogleLogin = () => {
-    window.location.href = `${process.env.NEXT_PUBLIC_API_URL}/api/v1/auth/google`;
+    window.location.href = `${API_BASE_URL}/api/v1/auth/google`;
   };
 
   return (

@@ -1,6 +1,286 @@
 import { fetchCourses, fetchCourseFilterCounts } from "./course-api";
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080";
+export const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080";
+type CollegeQueryValue = string | number | boolean | undefined | null;
+
+const FALLBACK_COLLEGES: College[] = [
+  {
+    id: 1,
+    name: "Pulchowk Campus (IOE)",
+    full_name: "Pulchowk Campus, Institute of Engineering",
+    image_url: "https://images.unsplash.com/photo-1523050854058-8df90110c9f1?auto=format&fit=crop&q=80&w=1200&h=800",
+    description: "Premier engineering campus with strong industry recognition and long-standing academic reputation.",
+    rating: 4.8,
+    reviews: 245,
+    type: "Public / Govt",
+    location: "Lalitpur",
+    affiliation: "Tribhuvan University",
+    verified: true,
+    featured: true,
+    popular: true,
+    website: "https://ioe.edu.np",
+    programs: 18,
+  },
+  {
+    id: 2,
+    name: "Kathmandu University",
+    full_name: "Kathmandu University",
+    image_url: "https://images.unsplash.com/photo-1562774053-701939374585?auto=format&fit=crop&q=80&w=1200&h=800",
+    description: "Autonomous university offering engineering, science, management, and health programs.",
+    rating: 4.7,
+    reviews: 312,
+    type: "Public / Govt",
+    location: "Dhulikhel",
+    affiliation: "Kathmandu University",
+    verified: true,
+    featured: true,
+    popular: true,
+    website: "https://ku.edu.np",
+    programs: 21,
+  },
+  {
+    id: 3,
+    name: "St. Xavier's College",
+    full_name: "St. Xavier's College, Maitighar",
+    image_url: "https://images.unsplash.com/photo-1588072432836-e10032774350?auto=format&fit=crop&q=80&w=1200&h=800",
+    description: "Well-known college for science, management, and humanities programs in Kathmandu.",
+    rating: 4.6,
+    reviews: 189,
+    type: "Private",
+    location: "Maitighar, Kathmandu",
+    affiliation: "Tribhuvan University",
+    verified: true,
+    featured: true,
+    popular: true,
+    website: "https://sxc.edu.np",
+    programs: 15,
+  },
+  {
+    id: 4,
+    name: "KIST College",
+    full_name: "KIST College & SS",
+    image_url: "https://images.unsplash.com/photo-1564981797816-1043664bf78d?auto=format&fit=crop&q=80&w=1200&h=800",
+    description: "Modern college offering IT, business, and +2 programs with a strong campus environment.",
+    rating: 4.5,
+    reviews: 167,
+    type: "Private",
+    location: "Kamalpokhari, Kathmandu",
+    affiliation: "Tribhuvan University",
+    verified: true,
+    featured: true,
+    popular: true,
+    website: "https://kist.edu.np",
+    programs: 14,
+  },
+  {
+    id: 5,
+    name: "Islington College",
+    full_name: "Islington College",
+    image_url: "https://images.unsplash.com/photo-1529390079861-591de354faf5?auto=format&fit=crop&q=80&w=1200&h=800",
+    description: "IT-focused college with international affiliations and industry-aligned programs.",
+    rating: 4.4,
+    reviews: 134,
+    type: "Private",
+    location: "Kamalpokhari, Kathmandu",
+    affiliation: "London Metropolitan University",
+    verified: true,
+    featured: false,
+    popular: true,
+    website: "https://islington.edu.np",
+    programs: 10,
+  },
+  {
+    id: 6,
+    name: "Tribhuvan University",
+    full_name: "Tribhuvan University",
+    image_url: "https://images.unsplash.com/photo-1592066575517-58df903152f2?auto=format&fit=crop&q=80&w=1200&h=800",
+    description: "The country's largest public university with campuses and affiliated colleges nationwide.",
+    rating: 4.3,
+    reviews: 567,
+    type: "Public / Govt",
+    location: "Kirtipur, Kathmandu",
+    affiliation: "Tribhuvan University",
+    verified: true,
+    featured: false,
+    popular: true,
+    website: "https://tu.edu.np",
+    programs: 32,
+  },
+  {
+    id: 7,
+    name: "Advance College of Engineering",
+    full_name: "Advance College of Engineering and Management",
+    image_url: "https://images.unsplash.com/photo-1523240795612-9a054b0db644?auto=format&fit=crop&q=80&w=1200&h=800",
+    description: "Engineering and management programs with practical, project-based learning.",
+    rating: 4.2,
+    reviews: 96,
+    type: "Private",
+    location: "Putalisadak, Kathmandu",
+    affiliation: "Tribhuvan University",
+    verified: true,
+    featured: false,
+    popular: false,
+    website: "https://advancefoundation.edu.np",
+    programs: 11,
+  },
+  {
+    id: 8,
+    name: "Pokhara University",
+    full_name: "Pokhara University",
+    image_url: "https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?auto=format&fit=crop&q=80&w=1200&h=800",
+    description: "Public university known for management, engineering, and health-science programs.",
+    rating: 4.4,
+    reviews: 178,
+    type: "Public / Govt",
+    location: "Pokhara",
+    affiliation: "Pokhara University",
+    verified: true,
+    featured: false,
+    popular: true,
+    website: "https://pu.edu.np",
+    programs: 19,
+  },
+];
+
+const FALLBACK_COLLEGE_FILTER_COUNTS = {
+  total: FALLBACK_COLLEGES.length,
+  type_counts: {
+    Private: 4,
+    "Public / Govt": 4,
+  },
+  type_counts_by_id: {
+    ct_private: 4,
+    ct_public: 4,
+    ct_community: 0,
+    ct_constituent: 0,
+    ct_foreign: 0,
+  },
+  facet_counts_by_id: {
+    plus2: 4,
+    alevel: 2,
+    diploma: 2,
+    prov_bagmati: 6,
+    prov_gandaki: 1,
+    d_kathmandu: 5,
+    d_lalitpur: 1,
+    d_kaski: 1,
+  },
+  featured: 4,
+  verified: 8,
+  popular: 6,
+};
+
+function isNetworkLikeError(error: unknown): boolean {
+  if (!(error instanceof Error)) return false;
+  const message = error.message.toLowerCase();
+  return (
+    error.name === "TypeError" ||
+    error.name === "AbortError" ||
+    message.includes("failed to fetch") ||
+    message.includes("networkerror") ||
+    message.includes("network request failed") ||
+    message.includes("fetch failed") ||
+    message.includes("network")
+  );
+}
+
+function buildFallbackCollegeList(params: Record<string, CollegeQueryValue> = {}): CollegesResponse {
+  const page = Math.max(Number(params.page) || 1, 1);
+  const pageSize = Math.min(Math.max(Number(params.pageSize) || 18, 1), 100);
+
+  const search = String(params.search || "").trim().toLowerCase();
+  const type = String(params.type || "").trim().toLowerCase();
+  const affiliation = String(params.affiliation || "").trim().toLowerCase();
+  const location = String(params.location || "").trim().toLowerCase();
+  const verified = params.verified === true || params.verified === "true";
+  const popular = params.popular === true || params.popular === "true";
+  const feeMax = Number(params.feeMax);
+
+  let colleges = FALLBACK_COLLEGES.filter((college) => {
+    if (search) {
+      const haystack = [
+        college.name,
+        college.full_name,
+        college.location,
+        college.affiliation,
+        college.type,
+      ]
+        .filter(Boolean)
+        .join(" ")
+        .toLowerCase();
+      if (!haystack.includes(search)) return false;
+    }
+
+    if (type) {
+      const normalizedType = college.type?.toLowerCase() || "";
+      if (!normalizedType.includes(type)) return false;
+    }
+
+    if (affiliation) {
+      const normalizedAffiliation = college.affiliation?.toLowerCase() || "";
+      if (!normalizedAffiliation.includes(affiliation)) return false;
+    }
+
+    if (location) {
+      const normalizedLocation = college.location?.toLowerCase() || "";
+      if (!normalizedLocation.includes(location)) return false;
+    }
+
+    if (verified && !college.verified) return false;
+    if (popular && !college.popular) return false;
+
+    if (!Number.isNaN(feeMax) && feeMax > 0) {
+      const estimatedFee = college.type === "Private" ? 180000 : 90000;
+      if (estimatedFee > feeMax) return false;
+    }
+
+    return true;
+  });
+
+  const sort = String(params.sort || "rating").toLowerCase();
+  const order = String(params.order || "DESC").toUpperCase();
+  colleges = [...colleges].sort((a, b) => {
+    const ratingA = a.rating ?? 0;
+    const ratingB = b.rating ?? 0;
+    const reviewsA = a.reviews ?? 0;
+    const reviewsB = b.reviews ?? 0;
+    let comparison = 0;
+
+    if (sort === "verified") {
+      comparison = Number(Boolean(a.verified)) - Number(Boolean(b.verified));
+    } else if (sort === "name") {
+      comparison = a.name.localeCompare(b.name);
+    } else if (sort === "reviews") {
+      comparison = reviewsA - reviewsB;
+    } else {
+      comparison = ratingA - ratingB;
+    }
+
+    return order === "ASC" ? comparison : -comparison;
+  });
+
+  const total = colleges.length;
+  const totalPages = Math.max(1, Math.ceil(total / pageSize));
+  const start = (page - 1) * pageSize;
+
+  return {
+    data: {
+      colleges: colleges.slice(start, start + pageSize),
+      pagination: {
+        total,
+        totalPages,
+        page,
+        pageSize,
+      },
+    },
+  };
+}
+
+function buildFallbackCollegeFilterCounts(): CollegeFilterCountsResponse {
+  return {
+    data: FALLBACK_COLLEGE_FILTER_COUNTS,
+  };
+}
 
 export async function apiRequest<T>(path: string, options: RequestInit = {}): Promise<T> {
   const headers: Record<string, string> = {
@@ -11,7 +291,7 @@ export async function apiRequest<T>(path: string, options: RequestInit = {}): Pr
   const response = await fetch(`${API_BASE_URL}${path}`, {
     ...options,
     headers,
-    credentials: "include",
+    credentials: options.credentials ?? "include",
   });
 
   const text = await response.text();
@@ -541,6 +821,7 @@ export const apiService = {
   }): Promise<RegisterResponse> {
     return apiRequest<RegisterResponse>("/api/v1/auth/register", {
       method: "POST",
+      credentials: "omit",
       body: JSON.stringify(data),
     });
   },
@@ -555,6 +836,7 @@ export const apiService = {
   async sendOTP(email: string, type: "verification" | "password_reset" = "verification"): Promise<OTPResponse> {
     return apiRequest<OTPResponse>("/api/v1/auth/send-otp", {
       method: "POST",
+      credentials: "omit",
       body: JSON.stringify({ email, type }),
     });
   },
@@ -562,6 +844,7 @@ export const apiService = {
   async checkEmailExists(email: string): Promise<{ exists: boolean }> {
     return apiRequest<{ exists: boolean }>("/api/v1/auth/check-email", {
       method: "POST",
+      credentials: "omit",
       body: JSON.stringify({ email }),
     });
   },
@@ -636,7 +919,14 @@ export const apiService = {
   async getFeaturedColleges(limit = 4): Promise<CollegesResponse> {
     const query = new URLSearchParams();
     query.set("limit", String(limit));
-    return apiRequest<CollegesResponse>(`/api/v1/colleges/featured?${query.toString()}`);
+    try {
+      return await apiRequest<CollegesResponse>(`/api/v1/colleges/featured?${query.toString()}`);
+    } catch (error) {
+      if (isNetworkLikeError(error)) {
+        return buildFallbackCollegeList({ page: 1, pageSize: limit });
+      }
+      throw error;
+    }
   },
 
   async getBookmarksByType(type: string): Promise<BookmarksResponse> {
@@ -689,6 +979,7 @@ export const apiService = {
   async resetPassword(email: string, otp: string, password: string): Promise<any> {
     return apiRequest<any>("/api/v1/auth/reset-password", {
       method: "POST",
+      credentials: "omit",
       body: JSON.stringify({ email, otp, password }),
     });
   },
@@ -754,11 +1045,25 @@ export const apiService = {
     });
 
     const query = new URLSearchParams(normalizedParams).toString();
-    return apiRequest<CollegesResponse>(`/api/v1/colleges${query ? `?${query}` : ""}`);
+    try {
+      return await apiRequest<CollegesResponse>(`/api/v1/colleges${query ? `?${query}` : ""}`);
+    } catch (error) {
+      if (isNetworkLikeError(error)) {
+        return buildFallbackCollegeList(normalizedParams);
+      }
+      throw error;
+    }
   },
 
   async getCollegeFilterCounts(): Promise<CollegeFilterCountsResponse> {
-    return apiRequest<CollegeFilterCountsResponse>("/api/v1/colleges/filter-counts");
+    try {
+      return await apiRequest<CollegeFilterCountsResponse>("/api/v1/colleges/filter-counts");
+    } catch (error) {
+      if (isNetworkLikeError(error)) {
+        return buildFallbackCollegeFilterCounts();
+      }
+      throw error;
+    }
   },
 
   async getUniversities(params?: {
@@ -1082,7 +1387,17 @@ export const apiService = {
   },
 
   async getCollegeById(id: number): Promise<{ data: College }> {
-    return apiRequest<{ data: College }>(`/api/v1/colleges/${id}`);
+    try {
+      return await apiRequest<{ data: College }>(`/api/v1/colleges/${id}`);
+    } catch (error) {
+      if (isNetworkLikeError(error)) {
+        const college = FALLBACK_COLLEGES.find((item) => item.id === id);
+        if (college) {
+          return { data: college };
+        }
+      }
+      throw error;
+    }
   },
 
   async uploadForumMedia(_token: string, files: File[]): Promise<string[]> {
