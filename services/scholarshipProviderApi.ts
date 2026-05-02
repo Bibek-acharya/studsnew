@@ -1,6 +1,8 @@
 import apiService from './apiService';
 import { apiRequest } from './api';
 
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080";
+
 async function callApi<T>(path: string, options: RequestInit = {}): Promise<T> {
   const res = await apiRequest<any>(path, options);
   if (res && typeof res === 'object' && 'data' in res) return res.data as T;
@@ -30,6 +32,16 @@ function mapScholarshipFields(data: Partial<CreateScholarshipPayload>) {
   });
 
   return mapped as Partial<CreateScholarshipPayload>;
+}
+
+async function extractUploadedUrl<T extends { data?: { url?: string }; url?: string }>(promise: Promise<T>): Promise<string> {
+  const response = await promise;
+  const rawUrl = response?.data?.url || response?.url || "";
+  if (!rawUrl) return "";
+  if (rawUrl.startsWith("http://") || rawUrl.startsWith("https://")) {
+    return rawUrl;
+  }
+  return `${API_BASE_URL}${rawUrl.startsWith("/") ? "" : "/"}${rawUrl}`;
 }
 
 export interface ScholarshipProviderAuthResponse {
@@ -184,7 +196,7 @@ export interface PaymentConfig {
 
 export interface CreateScholarshipPayload {
   title: string;
-  provider: string;
+  provider?: string;
   provider_email?: string;
   provider_phone?: string;
   provider_website?: string;
@@ -361,6 +373,16 @@ export interface ProviderScholarship {
   partner_groups?: PartnerGroup[];
   exam_centers_new?: ExamCenterItem[];
   downloads?: DownloadItem[];
+  payment_config?: {
+    fee_amount: number;
+    methods: string[];
+    bank_details?: {
+      bankName: string;
+      accountName: string;
+      accountNumber: string;
+      branch: string;
+    };
+  };
 }
 
 export interface ProviderPayment {
@@ -619,7 +641,7 @@ export const scholarshipProviderApi = {
   async publishScholarship(id: number): Promise<ProviderScholarship> {
     return callApi<ProviderScholarship>(`/api/v1/scholarship-providers/scholarships/${id}`, {
       method: 'PUT',
-      body: JSON.stringify({ status: 'active' }),
+      body: JSON.stringify({ status: 'published' }),
     });
   },
 
@@ -697,6 +719,21 @@ export const scholarshipProviderApi = {
 
   async getSettings(): Promise<ProviderSettings> {
     return apiRequest<ProviderSettings>("/api/v1/scholarship-providers/settings");
+  },
+
+  async uploadImage(file: File, folder: string): Promise<string> {
+    const formData = new FormData();
+    formData.append("file", file);
+
+    return extractUploadedUrl(
+      apiRequest<{ data?: { url?: string }; url?: string }>(
+        `/api/v1/scholarship-providers/uploads?folder=${encodeURIComponent(folder)}`,
+        {
+          method: "POST",
+          body: formData,
+        },
+      ),
+    );
   },
 
   async updateSettings(data: { email_notifications: boolean; sms_notifications: boolean; auto_reject_expired: boolean; timezone: string; language: string }): Promise<ProviderSettings> {

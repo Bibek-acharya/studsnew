@@ -2,7 +2,9 @@
 
 import React, { useState, memo } from "react";
 import dynamic from "next/dynamic";
-import { Home, Image, Building2, MapPin, FileText, UploadCloud } from "lucide-react";
+import { Home, Image, Building2, MapPin, FileText } from "lucide-react";
+import FileUpload from "./common/FileUpload";
+import { scholarshipProviderApi } from "@/services/scholarshipProviderApi";
 
 const ReactQuill = dynamic(() => import("react-quill-new"), { ssr: false });
 
@@ -41,6 +43,40 @@ const ORG_TYPES = [
 const OrganizationProfile: React.FC = memo(() => {
   const [shortDesc, setShortDesc] = useState("");
   const [fullDesc, setFullDesc] = useState("");
+  const [coverUrl, setCoverUrl] = useState("");
+  const [coverPreview, setCoverPreview] = useState("");
+  const [logoUrl, setLogoUrl] = useState("");
+  const [logoPreview, setLogoPreview] = useState("");
+  const [uploadingCover, setUploadingCover] = useState(false);
+  const [uploadingLogo, setUploadingLogo] = useState(false);
+
+  const handleCoverSelect = async (file: File) => {
+    setCoverPreview(URL.createObjectURL(file));
+    setUploadingCover(true);
+    try {
+      const url = await scholarshipProviderApi.uploadImage(file, "profile");
+      setCoverUrl(url);
+      setCoverPreview(url);
+    } catch {
+      setCoverUrl("");
+    } finally {
+      setUploadingCover(false);
+    }
+  };
+
+  const handleLogoSelect = async (file: File) => {
+    setLogoPreview(URL.createObjectURL(file));
+    setUploadingLogo(true);
+    try {
+      const url = await scholarshipProviderApi.uploadImage(file, "logos");
+      setLogoUrl(url);
+      setLogoPreview(url);
+    } catch {
+      setLogoUrl("");
+    } finally {
+      setUploadingLogo(false);
+    }
+  };
 
   return (
     <div className="space-y-6">
@@ -68,21 +104,29 @@ const OrganizationProfile: React.FC = memo(() => {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1.5">Cover Photo</label>
-            <div className="border-2 border-dashed border-gray-200 rounded-lg cursor-pointer hover:border-blue-500 hover:bg-blue-50 transition-all flex flex-col items-center justify-center" style={{ height: "200px" }}>
-              <UploadCloud className="w-8 h-8 text-gray-400 mx-auto mb-2" />
-              <p className="text-sm text-gray-600">Click to upload or drag and drop</p>
-              <p className="text-xs text-gray-400 mt-1">PNG, JPG up to 5MB (1920x500 recommended)</p>
-            </div>
+            <FileUpload
+              accept="image/*"
+              maxSize="5MB"
+              recommendedSize="1920x500"
+              onFileSelect={handleCoverSelect}
+              previewUrl={coverPreview}
+              previewClassName="w-full h-[200px] object-cover rounded-lg mt-2"
+            />
+            {uploadingCover && <p className="mt-2 text-xs text-blue-600">Uploading cover photo...</p>}
+            {coverUrl && <input type="hidden" value={coverUrl} readOnly />}
           </div>
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1.5">Organization Logo</label>
-            <div className="border-2 border-dashed border-gray-200 rounded-lg cursor-pointer hover:border-blue-500 hover:bg-blue-50 transition-all flex flex-col items-center justify-center" style={{ height: "200px" }}>
-              <div className="w-[50px] h-[50px] mx-auto mb-3 border-2 border-dashed border-gray-300 rounded-lg flex items-center justify-center">
-                <UploadCloud className="w-5 h-5 text-gray-400" />
-              </div>
-              <p className="text-sm text-gray-600">Click to upload or drag and drop</p>
-              <p className="text-xs text-gray-400 mt-1">PNG, SVG up to 2MB (500x500 recommended)</p>
-            </div>
+            <FileUpload
+              accept="image/*"
+              maxSize="2MB"
+              recommendedSize="500x500"
+              onFileSelect={handleLogoSelect}
+              previewUrl={logoPreview}
+              previewClassName="w-[120px] h-[120px] object-contain rounded-lg mt-2 mx-auto border border-slate-200 bg-white"
+            />
+            {uploadingLogo && <p className="mt-2 text-xs text-blue-600">Uploading logo...</p>}
+            {logoUrl && <input type="hidden" value={logoUrl} readOnly />}
           </div>
         </div>
       </div>

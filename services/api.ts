@@ -21,11 +21,20 @@ export async function apiRequest<T>(path: string, options: ApiRequestOptions = {
     token = localStorage.getItem("token");
   }
 
+  const isFormData =
+    typeof FormData !== "undefined" && requestOptions.body instanceof FormData;
+
   const headers: Record<string, string> = {
-    "Content-Type": "application/json",
     ...(token ? { Authorization: `Bearer ${token}` } : {}),
-    ...(options.headers as Record<string, string> || {}),
+    ...((options.headers as Record<string, string>) || {}),
   };
+
+  if (!isFormData) {
+    headers["Content-Type"] = headers["Content-Type"] || "application/json";
+  } else {
+    delete headers["Content-Type"];
+    delete headers["content-type"];
+  }
 
   const response = await fetch(`${API_BASE_URL}${path}`, {
     ...requestOptions,

@@ -355,13 +355,13 @@ GET /api/v1/profile
 | `dateOfBirth`, `gender`, `nationality`, `phone`, `address` | Not in current User model — add fields OR store in `preferences.preferences` JSONB | Need backend changes |
 | `education` entries | No Education model — create OR store in preferences | Need backend changes |
 | `preferredStudy` fields | `preferences.preferences` map | `POST /api/v1/preferences` |
-| `documents` (files) | No document upload endpoint — use MinIO | Need backend changes |
+| `documents` (files) | Use authenticated direct upload to backend `/uploads` endpoint | Need backend changes |
 
 **Required backend model changes:**
 - Add `phone`, `date_of_birth`, `gender`, `nationality`, `address` fields to User model
 - Create Education model (user_id, level, institution, board, stream, start_year, end_year, grade)
 - Create Education CRUD endpoints: `GET/POST/PUT/DELETE /api/v1/profile/education`
-- Create document upload endpoint (MinIO)
+- Create document upload endpoint (direct backend storage)
 
 ---
 

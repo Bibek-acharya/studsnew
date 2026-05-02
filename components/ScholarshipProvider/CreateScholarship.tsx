@@ -109,6 +109,23 @@ const emptyPartnerOrg = (): PartnerOrganization => ({ name: "", website: "" });
 const emptyPartnerGroup = (): PartnerGroup => ({ heading: "", partners: [] });
 const emptyExamCenter = (): ExamCenterItem => ({ province: "", centerName: "", contactPerson: "", phoneNumber: "", mapCoordinates: "" });
 const emptyDownload = (): DownloadItem => ({ title: "", description: "" });
+type ScholarshipSaveMode = "draft" | "published";
+type ValidationField =
+  | "pageTitle"
+  | "banner"
+  | "location"
+  | "degreeLevel"
+  | "fundingType"
+  | "scholarshipType"
+  | "applicationStartDate"
+  | "applicationEndDate";
+
+const toLocalDateString = (date: Date) => {
+  const year = date.getFullYear();
+  const month = `${date.getMonth() + 1}`.padStart(2, "0");
+  const day = `${date.getDate()}`.padStart(2, "0");
+  return `${year}-${month}-${day}`;
+};
 
 const CreateScholarship: React.FC<CreateScholarshipProps> = memo(({ scholarshipId, onNavigate }: CreateScholarshipProps) => {
   // General Settings
@@ -201,6 +218,21 @@ const CreateScholarship: React.FC<CreateScholarshipProps> = memo(({ scholarshipI
   const [status, setStatus] = useState<'draft' | 'published'>('draft');
 
   const isEditing = Boolean(scholarshipId);
+  const isBusy = submitting || uploadingBanner;
+  const pageTitleRef = useRef<HTMLInputElement | null>(null);
+  const bannerRef = useRef<HTMLDivElement | null>(null);
+  const locationRef = useRef<HTMLInputElement | null>(null);
+  const degreeLevelRef = useRef<HTMLDivElement | null>(null);
+  const fundingTypeRef = useRef<HTMLDivElement | null>(null);
+  const scholarshipTypeRef = useRef<HTMLDivElement | null>(null);
+  const applicationStartDateRef = useRef<HTMLInputElement | null>(null);
+  const applicationEndDateRef = useRef<HTMLInputElement | null>(null);
+  const degreeLevelOptions = ["+2 / Grade 11-12", "Diploma", "Bachelor's", "Master's", "PhD"];
+  const fundingTypeOptions = ["Fully Funded", "Partial Tuition", "Merit-Based", "Need-Based"];
+  const scholarshipTypeOptions = ["Merit Based", "Need Based", "Sports", "Arts", "Research"];
+  const provinceOptions = ["Koshi", "Madhesh", "Bagmati", "Gandaki", "Lumbini", "Karnali", "Sudurpashchim"];
+  const today = toLocalDateString(new Date());
+  const tomorrow = toLocalDateString(new Date(Date.now() + 24 * 60 * 60 * 1000));
 
   // Banner file handler
   const handleBannerFileSelect = (file: File) => {
@@ -331,9 +363,17 @@ const CreateScholarship: React.FC<CreateScholarshipProps> = memo(({ scholarshipI
       setError("Page Title is required.");
       return;
     }
+
+    const validationError = validateScholarship(mode);
+    if (validationError.message) {
+      toast.error(validationError.message);
+      if (validationError.field) {
+        scrollToField(validationError.field);
+      }
+      return;
+    }
+
     setSubmitting(true);
-    setError("");
-    setSuccess("");
 
     const finalFundingType = fundingType === "Other" ? fundingTypeOther : fundingType;
     const finalScholarshipType = scholarshipType === "Other" ? scholarshipTypeOther : scholarshipType;
@@ -406,10 +446,13 @@ const CreateScholarship: React.FC<CreateScholarshipProps> = memo(({ scholarshipI
       } else {
         await scholarshipProviderApi.createScholarship(payload);
       }
-      setSuccess(draft ? "Draft saved successfully!" : "Scholarship published successfully!");
-      if (onNavigate) setTimeout(() => onNavigate("sec-scholarship-directory"), 1500);
+      toast.success(mode === "draft" ? "Draft saved successfully!" : "Scholarship published successfully!");
+      if (onNavigate) {
+        const nextSection = mode === "draft" ? "sec-draft-scholarship" : "sec-scholarship-directory";
+        setTimeout(() => onNavigate(nextSection), 1500);
+      }
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to save scholarship");
+      toast.error(err instanceof Error ? err.message : "Failed to save scholarship");
     } finally {
       setSubmitting(false);
     }

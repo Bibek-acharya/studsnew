@@ -2,8 +2,9 @@
 
 import React, { useState, useCallback, memo } from "react";
 import dynamic from "next/dynamic";
-import { Home, Feather, UploadCloud } from "lucide-react";
+import { Home, Feather } from "lucide-react";
 import { scholarshipProviderApi } from "@/services/scholarshipProviderApi";
+import FileUpload from "./common/FileUpload";
 
 const ReactQuill = dynamic(() => import("react-quill-new"), { ssr: false });
 
@@ -59,12 +60,34 @@ const CreateBlog: React.FC = memo(() => {
   const [content, setContent] = useState("");
   const [tags, setTags] = useState("");
   const [status, setStatus] = useState("draft");
+  const [featuredImageUrl, setFeaturedImageUrl] = useState("");
+  const [featuredImagePreview, setFeaturedImagePreview] = useState("");
+  const [uploadingImage, setUploadingImage] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
 
+  const handleImageSelect = useCallback(async (file: File) => {
+    const localPreview = URL.createObjectURL(file);
+    setFeaturedImagePreview(localPreview);
+    setUploadingImage(true);
+    setError("");
+
+    try {
+      const url = await scholarshipProviderApi.uploadImage(file, "blogs");
+      setFeaturedImageUrl(url);
+      setFeaturedImagePreview(url);
+    } catch (err: any) {
+      setFeaturedImageUrl("");
+      setError(err?.message || "Failed to upload featured image");
+    } finally {
+      setUploadingImage(false);
+    }
+  }, []);
+
   const handleSave = useCallback(async (draft: boolean) => {
     if (!title.trim()) { setError("Title is required"); return; }
+    if (!featuredImageUrl) { setError("Featured image is required"); return; }
     setSubmitting(true);
     setError("");
     setSuccess("");
@@ -73,7 +96,7 @@ const CreateBlog: React.FC = memo(() => {
         title,
         content: content || shortDesc,
         author: PUBLISHED_BY.find((p) => p.value === publishedBy)?.label || "Admin",
-        image_url: undefined,
+        image_url: featuredImageUrl,
         status: draft ? "draft" : status,
       });
       setSuccess(draft ? "Draft saved!" : "Blog published!");
@@ -82,7 +105,7 @@ const CreateBlog: React.FC = memo(() => {
     } finally {
       setSubmitting(false);
     }
-  }, [title, content, shortDesc, publishedBy, status]);
+  }, [title, content, shortDesc, publishedBy, status, featuredImageUrl]);
 
   return (
     <div className="space-y-6">
@@ -104,14 +127,14 @@ const CreateBlog: React.FC = memo(() => {
           <div className="flex gap-2">
             <button
               onClick={() => handleSave(true)}
-              disabled={submitting}
+              disabled={submitting || uploadingImage}
               className="px-4 py-2 bg-slate-100 text-slate-700 border border-slate-200 rounded-lg text-sm font-semibold hover:bg-slate-200 transition-colors"
             >
               Draft
             </button>
             <button
               onClick={() => handleSave(false)}
-              disabled={submitting || !title.trim()}
+              disabled={submitting || uploadingImage || !title.trim() || !featuredImageUrl}
               className="px-4 py-2 bg-blue-600 text-white rounded-lg text-sm font-semibold hover:bg-blue-700 transition-colors"
             >
               Publish
@@ -160,11 +183,14 @@ const CreateBlog: React.FC = memo(() => {
 
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1.5">Featured Image <span className="text-red-500">*</span></label>
-            <div className="border-2 border-dashed border-gray-200 rounded-lg py-6 text-center cursor-pointer hover:border-blue-500 hover:bg-blue-50 transition-all">
-              <UploadCloud className="w-8 h-8 text-gray-400 mx-auto mb-2" />
-              <p className="text-sm text-gray-600">Click to upload or drag and drop</p>
-              <p className="text-xs text-gray-400 mt-1">PNG, JPG up to 5MB (1200x630 recommended)</p>
-            </div>
+            <FileUpload
+              accept="image/*"
+              maxSize="5MB"
+              recommendedSize="1200x630"
+              onFileSelect={handleImageSelect}
+              previewUrl={featuredImagePreview}
+            />
+            {uploadingImage && <p className="mt-2 text-xs text-blue-600">Uploading featured image...</p>}
           </div>
 
           <div>
