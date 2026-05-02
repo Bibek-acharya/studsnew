@@ -1,3 +1,4 @@
+import { Suspense } from "react";
 import AuthPageLayout from "@/components/auth/AuthPageLayout";
 import LoginForm from "@/components/auth/LoginForm";
 
@@ -10,7 +11,9 @@ export default function LoginPage() {
       footerLinkText="Register Now"
       footerHref="/register"
     >
-      <LoginForm />
+      <Suspense fallback={<div className="py-8 text-center text-sm text-gray-500">Loading sign in form...</div>}>
+        <LoginForm />
+      </Suspense>
     </AuthPageLayout>
   );
 }
