@@ -40,9 +40,26 @@ export default function SuperAdminLoginPage() {
 
       const user = data.data?.user;
       const token = data.data?.token;
-      // Store token for API requests (production fix for cross-domain cookies)
+      // Store superadmin auth separately from the main user session.
       if (token) {
-        localStorage.setItem("token", token);
+        localStorage.setItem("superadmin_token", token);
+        if (user) {
+          localStorage.setItem("superadmin_user", JSON.stringify({
+            id: user.id,
+            first_name: user.first_name || "Super",
+            last_name: user.last_name || "Admin",
+            email: user.email || email,
+            role: user.role || "superadmin",
+          }));
+        }
+
+        const secure = window.location.protocol === "https:";
+        document.cookie = [
+          `superadmin_token=${encodeURIComponent(token)}`,
+          "path=/",
+          "SameSite=Lax",
+          secure ? "Secure" : "",
+        ].filter(Boolean).join("; ");
       }
 
       window.location.assign("/superadmin/dashboard");

@@ -3,7 +3,7 @@
 import React, { useState, lazy, Suspense, useCallback } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import Image from "next/image";
-import { clearAllAuthSessions } from "@/services/authSession";
+import { clearAllAuthSessions, clearCookie } from "@/services/authSession";
 import {
   LayoutDashboard,
   Building2,
@@ -130,7 +130,7 @@ export default function DashboardShell() {
   const handleLogout = useCallback(async () => {
     try {
       const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080";
-      const token = typeof window !== "undefined" ? localStorage.getItem("token") : null;
+      const token = typeof window !== "undefined" ? localStorage.getItem("superadmin_token") : null;
       await fetch(`${API_BASE_URL}/api/v1/auth/logout`, {
         credentials: "include",
         headers: token ? { Authorization: `Bearer ${token}` } : undefined,
@@ -138,6 +138,7 @@ export default function DashboardShell() {
     } catch {
     } finally {
       clearAllAuthSessions();
+      clearCookie("superadmin_token");
       window.location.href = "/superadmin/login";
     }
   }, []);

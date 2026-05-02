@@ -26,7 +26,8 @@ function isPublicRoute(pathname: string): boolean {
 }
 
 export function middleware(request: NextRequest) {
-  const token = request.cookies.get("token")?.value;
+  const userToken = request.cookies.get("token")?.value;
+  const superadminToken = request.cookies.get("superadmin_token")?.value;
   const { pathname } = request.nextUrl;
 
   // Allow public routes without authentication
@@ -36,7 +37,7 @@ export function middleware(request: NextRequest) {
 
   // Protect superadmin routes
   if (pathname.startsWith("/superadmin/")) {
-    if (!token) {
+    if (!superadminToken) {
       return NextResponse.redirect(new URL("/superadmin/login", request.url));
     }
     // Superadmin routes should have superadmin role - validated by backend
@@ -44,7 +45,7 @@ export function middleware(request: NextRequest) {
 
   // Protect scholarship provider routes
   if (pathname.startsWith("/scholarship-provider/")) {
-    if (!token) {
+    if (!userToken) {
       const providerLoginUrl = new URL("/scholarship-provider", request.url);
       providerLoginUrl.searchParams.set("redirect", pathname);
       return NextResponse.redirect(providerLoginUrl);
@@ -53,7 +54,7 @@ export function middleware(request: NextRequest) {
 
   // Protect institution routes
   if (pathname.startsWith("/institutions/")) {
-    if (!token) {
+    if (!userToken) {
       const institutionLoginUrl = new URL("/institutions/login", request.url);
       institutionLoginUrl.searchParams.set("redirect", pathname);
       return NextResponse.redirect(institutionLoginUrl);
@@ -62,7 +63,7 @@ export function middleware(request: NextRequest) {
 
   // Protect user dashboard routes
   if (pathname.startsWith("/user/dashboard")) {
-    if (!token) {
+    if (!userToken) {
       const loginUrl = new URL("/login", request.url);
       loginUrl.searchParams.set("redirect", request.nextUrl.pathname);
       return NextResponse.redirect(loginUrl);

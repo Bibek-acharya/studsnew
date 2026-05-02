@@ -25,7 +25,7 @@ async function superadminFetch<T>(path: string, options: RequestInit = {}): Prom
   };
 
   if (typeof window !== "undefined") {
-    const token = localStorage.getItem("token");
+    const token = localStorage.getItem("superadmin_token");
     if (token) {
       headers.Authorization = `Bearer ${token}`;
     }

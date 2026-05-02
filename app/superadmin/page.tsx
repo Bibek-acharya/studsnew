@@ -7,10 +7,12 @@ export default function SuperadminEntryPage() {
   const router = useRouter();
 
   useEffect(() => {
-    const token =
-      typeof window !== "undefined"
-        ? localStorage.getItem("token") || sessionStorage.getItem("token")
-        : null;
+    const token = typeof window !== "undefined"
+      ? localStorage.getItem("superadmin_token")
+        || sessionStorage.getItem("superadmin_token")
+        || document.cookie.split("; ").find((entry) => entry.startsWith("superadmin_token="))
+          ?.split("=")[1]
+      : null;
     if (token) {
       router.replace("/superadmin/dashboard");
     } else {
@@ -24,4 +26,3 @@ export default function SuperadminEntryPage() {
     </div>
   );
 }
-
