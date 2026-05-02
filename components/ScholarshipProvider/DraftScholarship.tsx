@@ -158,6 +158,11 @@ const DraftScholarship: React.FC<DraftScholarshipProps> = memo(({ onEdit, onNavi
     return map[type] || "bg-gray-50 text-gray-600";
   };
 
+  const getDraftImage = (scholarship: ProviderScholarship) =>
+    scholarship.banner_background_image_url ||
+    scholarship.image_url ||
+    "https://images.unsplash.com/photo-1513258496099-48168024aec0?auto=format&fit=crop&w=800&q=80";
+
   if (loading) {
     return <div className="py-12 text-center text-slate-500">Loading drafts...</div>;
   }
@@ -212,7 +217,7 @@ const DraftScholarship: React.FC<DraftScholarshipProps> = memo(({ onEdit, onNavi
                 <div key={sch.id} className="bg-white rounded-lg border border-gray-200 p-3.5 shadow-sm">
                   <div className="w-full h-28 rounded-lg overflow-hidden mb-3 bg-gray-100">
                     <img
-                      src={sch.image_url || "https://images.unsplash.com/photo-1513258496099-48168024aec0?auto=format&fit=crop&w=800&q=80"}
+                      src={getDraftImage(sch)}
                       alt={sch.title}
                       className="w-full h-full object-cover"
                     />

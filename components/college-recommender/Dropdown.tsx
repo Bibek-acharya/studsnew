@@ -8,32 +8,34 @@ interface DropdownProps {
   onChange: (val: string) => void;
   options: string[];
   placeholder: string;
+  size?: "sm" | "md";
 }
 
-export default function Dropdown({ value, onChange, options, placeholder }: DropdownProps) {
+export default function Dropdown({ value, onChange, options, placeholder, size = "md" }: DropdownProps) {
   const [isOpen, setIsOpen] = useState(false);
+  const isSmall = size === "sm";
 
   return (
     <div className="relative w-full">
       <button
         type="button"
         onClick={() => setIsOpen(!isOpen)}
-        className={`flex w-full items-center justify-between rounded-md border-2 border-[#cbd5e1] bg-white px-5 py-[1.1rem] text-left text-[17px] font-medium transition-all duration-200 hover:border-[#cbd5e1] ${
-          isOpen
-            ? "border-brand-blue ring-[3px] ring-brand-blue/10"
-            : ""
+        className={`flex w-full items-center justify-between rounded-xl border border-slate-200 bg-white text-left transition-all duration-200 focus:outline-none focus:border-blue-600 focus:ring-[3px] focus:ring-blue-100 hover:border-slate-200 ${
+          isSmall ? "px-4 py-3 text-sm" : "px-4 py-3 text-sm"
+        } ${
+          isOpen ? "border-blue-600 ring-[3px] ring-blue-100" : ""
         }`}
       >
         <span
           className={`transition-colors ${
-            value ? "text-[#0f172a]" : "text-[#475569]"
+            value ? "text-slate-900" : "text-slate-500"
           }`}
         >
           {value || placeholder}
         </span>
         <ChevronDown
-          className={`h-5 w-5 text-[#475569] transition-all duration-300 ${
-            isOpen ? "rotate-180 text-brand-blue" : ""
+          className={`h-4 w-4 text-slate-500 transition-all duration-300 ${
+            isOpen ? "rotate-180 text-blue-600" : ""
           }`}
         />
       </button>
@@ -44,7 +46,7 @@ export default function Dropdown({ value, onChange, options, placeholder }: Drop
             className="fixed inset-0 z-60"
             onClick={() => setIsOpen(false)}
           ></div>
-          <div className="absolute top-[calc(100%+8px)] left-0 z-70 w-full overflow-hidden rounded-md border border-[#cbd5e1] bg-white shadow-xl animate-in fade-in slide-in-from-top-2 duration-200">
+          <div className="absolute top-[calc(100%+8px)] left-0 z-70 w-full overflow-hidden rounded-xl border border-slate-200 bg-white shadow-xl animate-in fade-in slide-in-from-top-2 duration-200">
             <div className="max-h-64 overflow-y-auto py-2">
               {options.map((opt) => (
                 <button
@@ -54,16 +56,18 @@ export default function Dropdown({ value, onChange, options, placeholder }: Drop
                     onChange(opt);
                     setIsOpen(false);
                   }}
-                  className={`w-full px-5 py-3.5 text-left text-base transition-all hover:bg-[#f1f5f9] ${
+                  className={`w-full text-left transition-all hover:bg-slate-50 ${
+                    isSmall ? "px-4 py-2.5 text-sm" : "px-4 py-3 text-sm"
+                  } ${
                     value === opt
-                      ? "bg-brand-blue/10 font-semibold text-brand-blue"
-                      : "text-[#0f172a] font-medium hover:text-[#0f172a]"
+                      ? "bg-blue-50 font-semibold text-blue-600"
+                      : "text-slate-900 font-medium hover:text-slate-900"
                   }`}
                 >
                   <div className="flex items-center justify-between">
                     {opt}
                     {value === opt && (
-                      <Check className="h-4 w-4 text-brand-blue" />
+                      <Check className="h-4 w-4 text-blue-600" />
                     )}
                   </div>
                 </button>

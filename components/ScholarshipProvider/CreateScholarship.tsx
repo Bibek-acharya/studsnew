@@ -1,7 +1,8 @@
 "use client";
 
-import React, { useState, useCallback, useEffect, memo } from "react";
+import React, { useState, useCallback, useEffect, useRef, memo } from "react";
 import dynamic from "next/dynamic";
+import { toast } from "sonner";
 import {
   Gear, FileText, Video, ClockClockwise, GraduationCap,
   ClipboardText, CheckSquare, Files, Question, Image,
@@ -9,6 +10,8 @@ import {
 } from "@phosphor-icons/react";
 import { scholarshipProviderApi } from "../../services/scholarshipProviderApi";
 import FileUpload from "./common/FileUpload";
+import DatePicker from "./common/DatePicker";
+import Dropdown from "../college-recommender/Dropdown";
 import type {
   VideoTutorial, JourneyTimelineItem, ScholarshipTypeItem,
   SelectionRubricItem, SelectionProcessStepItem, FAQItem,
@@ -49,6 +52,23 @@ const emptyPartnerOrg = (): PartnerOrganization => ({ name: "", website: "" });
 const emptyPartnerGroup = (): PartnerGroup => ({ heading: "", partners: [] });
 const emptyExamCenter = (): ExamCenterItem => ({ province: "", center_name: "", contact_person: "", phone_number: "", map_coordinates: "" });
 const emptyDownload = (): DownloadItem => ({ title: "", description: "" });
+type ScholarshipSaveMode = "draft" | "published";
+type ValidationField =
+  | "pageTitle"
+  | "banner"
+  | "location"
+  | "degreeLevel"
+  | "fundingType"
+  | "scholarshipType"
+  | "applicationStartDate"
+  | "applicationEndDate";
+
+const toLocalDateString = (date: Date) => {
+  const year = date.getFullYear();
+  const month = `${date.getMonth() + 1}`.padStart(2, "0");
+  const day = `${date.getDate()}`.padStart(2, "0");
+  return `${year}-${month}-${day}`;
+};
 
 const CreateScholarship: React.FC<CreateScholarshipProps> = memo(({ scholarshipId, onNavigate }: CreateScholarshipProps) => {
   const [pageTitle, setPageTitle] = useState("");
@@ -64,6 +84,7 @@ const CreateScholarship: React.FC<CreateScholarshipProps> = memo(({ scholarshipI
   const [applicationEndDate, setApplicationEndDate] = useState("");
   const [bannerBgUrl, setBannerBgUrl] = useState("");
   const [bannerBgPreview, setBannerBgPreview] = useState("");
+  const [uploadingBanner, setUploadingBanner] = useState(false);
   const [aboutParagraph1, setAboutParagraph1] = useState("");
   const [aboutParagraph2, setAboutParagraph2] = useState("");
   const [videoTutorials, setVideoTutorials] = useState<VideoTutorial[]>([]);
@@ -87,10 +108,7 @@ const CreateScholarship: React.FC<CreateScholarshipProps> = memo(({ scholarshipI
   const [examCenters, setExamCenters] = useState<ExamCenterItem[]>([]);
   const [downloads, setDownloads] = useState<DownloadItem[]>([]);
   const [submitting, setSubmitting] = useState(false);
-  const [success, setSuccess] = useState("");
-  const [error, setError] = useState("");
   const [loadingData, setLoadingData] = useState(false);
-  const [status, setStatus] = useState<'draft' | 'published'>('draft');
   const [paymentFeeAmount, setPaymentFeeAmount] = useState(0);
   const [enableEsewa, setEnableEsewa] = useState(true);
   const [enableKhalti, setEnableKhalti] = useState(true);
@@ -102,6 +120,21 @@ const CreateScholarship: React.FC<CreateScholarshipProps> = memo(({ scholarshipI
     branch: '',
   });
   const isEditing = Boolean(scholarshipId);
+  const isBusy = submitting || uploadingBanner;
+  const pageTitleRef = useRef<HTMLInputElement | null>(null);
+  const bannerRef = useRef<HTMLDivElement | null>(null);
+  const locationRef = useRef<HTMLInputElement | null>(null);
+  const degreeLevelRef = useRef<HTMLDivElement | null>(null);
+  const fundingTypeRef = useRef<HTMLDivElement | null>(null);
+  const scholarshipTypeRef = useRef<HTMLDivElement | null>(null);
+  const applicationStartDateRef = useRef<HTMLInputElement | null>(null);
+  const applicationEndDateRef = useRef<HTMLInputElement | null>(null);
+  const degreeLevelOptions = ["+2 / Grade 11-12", "Diploma", "Bachelor's", "Master's", "PhD"];
+  const fundingTypeOptions = ["Fully Funded", "Partial Tuition", "Merit-Based", "Need-Based"];
+  const scholarshipTypeOptions = ["Merit Based", "Need Based", "Sports", "Arts", "Research"];
+  const provinceOptions = ["Koshi", "Madhesh", "Bagmati", "Gandaki", "Lumbini", "Karnali", "Sudurpashchim"];
+  const today = toLocalDateString(new Date());
+  const tomorrow = toLocalDateString(new Date(Date.now() + 24 * 60 * 60 * 1000));
 
   useEffect(() => {
     if (!scholarshipId) {
@@ -145,6 +178,26 @@ const CreateScholarship: React.FC<CreateScholarshipProps> = memo(({ scholarshipI
       setPartnerGroups(s.partner_groups || []);
       setExamCenters(s.exam_centers_new || []);
       setDownloads(s.downloads || []);
+      const paymentConfig = s.payment_config as {
+        fee_amount?: number;
+        methods?: string[];
+        bank_details?: {
+          bankName?: string;
+          accountName?: string;
+          accountNumber?: string;
+          branch?: string;
+        };
+      } | undefined;
+      setPaymentFeeAmount(paymentConfig?.fee_amount || 0);
+      setEnableEsewa(paymentConfig?.methods?.includes("esewa") ?? true);
+      setEnableKhalti(paymentConfig?.methods?.includes("khalti") ?? true);
+      setEnableBank(paymentConfig?.methods?.includes("bank") ?? false);
+      setBankDetails({
+        bankName: paymentConfig?.bank_details?.bankName || "",
+        accountName: paymentConfig?.bank_details?.accountName || "",
+        accountNumber: paymentConfig?.bank_details?.accountNumber || "",
+        branch: paymentConfig?.bank_details?.branch || "",
+      });
       setLoadingData(false);
     }).catch(() => setLoadingData(false));
   }, [scholarshipId]);
@@ -170,41 +223,99 @@ const CreateScholarship: React.FC<CreateScholarshipProps> = memo(({ scholarshipI
     if (value.trim()) setter((prev) => [...prev, value.trim()]);
   };
 
-  const handleBannerFileSelect = (file: File) => {
-    const reader = new FileReader();
-    reader.onload = (e) => {
-      const dataUrl = e.target?.result as string;
-      setBannerBgPreview(dataUrl);
-      setBannerBgUrl(dataUrl);
-    };
-    reader.readAsDataURL(file);
-  };
+  const handleBannerFileSelect = useCallback(async (file: File) => {
+    const localPreview = URL.createObjectURL(file);
+    setBannerBgPreview(localPreview);
+    setUploadingBanner(true);
 
-  const handleSave = useCallback(async (draft: boolean = false) => {
-    if (!pageTitle.trim()) {
-      setError("Page Title is required.");
+    try {
+      const uploadedUrl = await scholarshipProviderApi.uploadImage(file, "scholarship-banners");
+      setBannerBgUrl(uploadedUrl);
+      setBannerBgPreview(uploadedUrl);
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Failed to upload banner image");
+      setBannerBgUrl("");
+    } finally {
+      setUploadingBanner(false);
+    }
+  }, []);
+
+  const scrollToField = useCallback((field: ValidationField) => {
+    const targetMap: Record<ValidationField, HTMLElement | null> = {
+      pageTitle: pageTitleRef.current,
+      banner: bannerRef.current,
+      location: locationRef.current,
+      degreeLevel: degreeLevelRef.current,
+      fundingType: fundingTypeRef.current,
+      scholarshipType: scholarshipTypeRef.current,
+      applicationStartDate: applicationStartDateRef.current,
+      applicationEndDate: applicationEndDateRef.current,
+    };
+
+    const target = targetMap[field];
+    if (!target) return;
+
+    window.requestAnimationFrame(() => {
+      target.scrollIntoView({ behavior: "smooth", block: "center" });
+      if ("focus" in target && typeof (target as HTMLElement).focus === "function") {
+        (target as HTMLElement).focus();
+      }
+    });
+  }, []);
+
+  const validateScholarship = useCallback((mode: ScholarshipSaveMode): { message: string; field?: ValidationField } => {
+    if (!pageTitle.trim()) return { message: "Scholarship title is required.", field: "pageTitle" };
+    if (applicationStartDate.trim() && applicationStartDate <= today) {
+      return { message: "Application start date must be in the future.", field: "applicationStartDate" };
+    }
+    if (applicationStartDate.trim() && applicationEndDate.trim() && applicationEndDate < applicationStartDate) {
+      return { message: "Application end date must be after the start date.", field: "applicationEndDate" };
+    }
+
+    if (mode === "published") {
+      if (!bannerBgUrl.trim()) return { message: "Banner image is required before publishing.", field: "banner" };
+      if (!scholarshipLocation.trim()) return { message: "Location is required before publishing.", field: "location" };
+      if (!scholarshipDegreeLevel.trim()) return { message: "Degree level is required before publishing.", field: "degreeLevel" };
+      if (!scholarshipFundingType.trim()) return { message: "Funding type is required before publishing.", field: "fundingType" };
+      if (!scholarshipType.trim()) return { message: "Scholarship type is required before publishing.", field: "scholarshipType" };
+      if (!applicationStartDate.trim()) return { message: "Application start date is required before publishing.", field: "applicationStartDate" };
+      if (!applicationEndDate.trim()) return { message: "Application end date is required before publishing.", field: "applicationEndDate" };
+    }
+    return { message: "" };
+  }, [applicationEndDate, applicationStartDate, bannerBgUrl, pageTitle, scholarshipDegreeLevel, scholarshipFundingType, scholarshipLocation, scholarshipType, today]);
+
+  const handleSave = useCallback(async (mode: ScholarshipSaveMode) => {
+    if (uploadingBanner) {
+      toast.error("Please wait for the banner upload to finish before saving.");
       return;
     }
+
+    const validationError = validateScholarship(mode);
+    if (validationError.message) {
+      toast.error(validationError.message);
+      if (validationError.field) {
+        scrollToField(validationError.field);
+      }
+      return;
+    }
+
     setSubmitting(true);
-    setError("");
-    setSuccess("");
 
     const payload = {
       title: pageTitle,
-      provider: pageTitle,
       location: scholarshipLocation || "",
       value: scholarshipValue || "",
-      deadline: applicationEndDate ? new Date(applicationEndDate).toISOString() : "",
+      deadline: applicationEndDate || "",
       degree_level: scholarshipDegreeLevel || "",
       funding_type: scholarshipFundingType || "",
       scholarship_type: scholarshipType || "",
       description: aboutParagraph1 || "",
       field_of_study: scholarshipFieldOfStudy.length > 0 ? scholarshipFieldOfStudy : [],
-      status: (draft ? 'draft' : status) as 'draft' | 'published',
+      status: mode,
       total_seats: totalSeats || undefined,
       amount_per_student: amountPerStudent || undefined,
-      application_start_date: applicationStartDate ? new Date(applicationStartDate).toISOString() : undefined,
-      application_end_date: applicationEndDate ? new Date(applicationEndDate).toISOString() : undefined,
+      application_start_date: applicationStartDate || undefined,
+      application_end_date: applicationEndDate || undefined,
       banner_background_image_url: bannerBgUrl || undefined,
       about_paragraph_1: aboutParagraph1,
       about_paragraph_2: aboutParagraph2,
@@ -245,10 +356,13 @@ const CreateScholarship: React.FC<CreateScholarshipProps> = memo(({ scholarshipI
       } else {
         await scholarshipProviderApi.createScholarship(payload);
       }
-      setSuccess(draft ? "Draft saved successfully!" : "Scholarship published successfully!");
-      if (onNavigate) setTimeout(() => onNavigate("sec-scholarship-directory"), 1500);
+      toast.success(mode === "draft" ? "Draft saved successfully!" : "Scholarship published successfully!");
+      if (onNavigate) {
+        const nextSection = mode === "draft" ? "sec-draft-scholarship" : "sec-scholarship-directory";
+        setTimeout(() => onNavigate(nextSection), 1500);
+      }
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to save scholarship");
+      toast.error(err instanceof Error ? err.message : "Failed to save scholarship");
     } finally {
       setSubmitting(false);
     }
@@ -257,8 +371,7 @@ const CreateScholarship: React.FC<CreateScholarshipProps> = memo(({ scholarshipI
        scholarshipDesc2, scholarshipTypes, selectionRubric, eligibilitySectionTitle,
        eligibilitySubtitle, basicEligibility, fullyFundedCriteria, partiallyFundedCriteria,
        selectionProcessSteps, requiredDocs, faqs, galleryImages, partnerGroups,
-       examCenters, downloads, scholarshipId, isEditing, onNavigate, status,
-       paymentFeeAmount, enableEsewa, enableKhalti, enableBank, bankDetails]);
+       examCenters, downloads, scholarshipId, isEditing, onNavigate, validateScholarship, scrollToField, uploadingBanner, scholarshipLocation, scholarshipDegreeLevel, scholarshipFundingType, scholarshipType, scholarshipValue, totalSeats, amountPerStudent, applicationStartDate, applicationEndDate, scholarshipFieldOfStudy, paymentFeeAmount, enableEsewa, enableKhalti, enableBank, bankDetails]);
 
   const renderStringList = (label: string, items: string[], setter: React.Dispatch<React.SetStateAction<string[]>>) => {
     const [input, setInput] = useState("");
@@ -312,41 +425,33 @@ const CreateScholarship: React.FC<CreateScholarshipProps> = memo(({ scholarshipI
         </div>
       </div>
 
-      {error && (
-        <div className="p-4 bg-red-50 border border-red-200 rounded-lg text-red-700 text-sm">{error}</div>
-      )}
-      {success && (
-        <div className="p-4 bg-green-50 border border-green-200 rounded-lg text-green-700 text-sm">{success}</div>
-      )}
-
       {/* General Settings */}
       <div className="section-card">
         <div className="flex justify-between items-center mb-6">
           <h2 className="text-lg font-bold text-gray-900 flex items-center gap-2">
-            <Gear size={20} className="text-blue-600" /> General Settings
+            <Gear size={20} className="text-blue-600" /> General Details
           </h2>
-          <div className="section-actions">
-            <button type="button" className="btn-draft" onClick={() => handleSave(true)} disabled={submitting}>Draft</button>
-            <button type="button" className="btn-save" onClick={() => handleSave(false)} disabled={submitting}>
-              {submitting ? "Saving..." : "Save"}
-            </button>
-          </div>
         </div>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
           <div>
-            <label className="input-label">Page Title</label>
-            <input type="text" className="input-field" placeholder="e.g., Project Shiksha Scholarship 2025"
+            <label className="input-label">Main Title (Scholarship Name)<span className="text-red-500">*</span></label>
+            <input ref={pageTitleRef} type="text" className="input-field" placeholder="e.g., Project Shiksha Scholarship 2025"
               value={pageTitle} onChange={(e) => setPageTitle(e.target.value)} />
           </div>
-          <div>
-            <label className="input-label">Banner Background Image</label>
+          <div ref={bannerRef}>
+            <label className="input-label">Scholarship Banner</label>
             <FileUpload
               accept="image/*"
               maxSize="5MB"
               recommendedSize="1920x400"
               onFileSelect={handleBannerFileSelect}
               previewUrl={bannerBgPreview}
+              onClearPreview={() => {
+                setBannerBgUrl("");
+                setBannerBgPreview("");
+              }}
             />
+            {uploadingBanner && <p className="mt-2 text-xs text-blue-600">Uploading banner image...</p>}
           </div>
         </div>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 mt-5">
@@ -357,40 +462,38 @@ const CreateScholarship: React.FC<CreateScholarshipProps> = memo(({ scholarshipI
           </div>
           <div>
             <label className="input-label">Location</label>
-            <input type="text" className="input-field" placeholder="e.g., Kathmandu, Nepal"
+            <input ref={locationRef} type="text" className="input-field" placeholder="e.g., Kathmandu, Nepal"
               value={scholarshipLocation} onChange={(e) => setScholarshipLocation(e.target.value)} />
           </div>
-          <div>
+          <div ref={degreeLevelRef}>
             <label className="input-label">Degree Level</label>
-            <select className="input-field" value={scholarshipDegreeLevel} onChange={(e) => setScholarshipDegreeLevel(e.target.value)}>
-              <option value="">Select Degree Level</option>
-              <option value="+2">+2 / Grade 11-12</option>
-              <option value="diploma">Diploma</option>
-              <option value="bachelor">Bachelor's</option>
-              <option value="masters">Master's</option>
-              <option value="phd">PhD</option>
-            </select>
+            <Dropdown
+              value={scholarshipDegreeLevel}
+              onChange={setScholarshipDegreeLevel}
+              options={degreeLevelOptions}
+              placeholder="Select Degree Level"
+              size="sm"
+            />
           </div>
-          <div>
+          <div ref={fundingTypeRef}>
             <label className="input-label">Funding Type</label>
-            <select className="input-field" value={scholarshipFundingType} onChange={(e) => setScholarshipFundingType(e.target.value)}>
-              <option value="">Select Funding Type</option>
-              <option value="FULLY FUNDED">Fully Funded</option>
-              <option value="PARTIAL TUITION">Partial Tuition</option>
-              <option value="MERIT-BASED">Merit-Based</option>
-              <option value="NEED-BASED">Need-Based</option>
-            </select>
+            <Dropdown
+              value={scholarshipFundingType}
+              onChange={setScholarshipFundingType}
+              options={fundingTypeOptions}
+              placeholder="Select Funding Type"
+              size="sm"
+            />
           </div>
-          <div>
+          <div ref={scholarshipTypeRef}>
             <label className="input-label">Scholarship Type</label>
-            <select className="input-field" value={scholarshipType} onChange={(e) => setScholarshipType(e.target.value)}>
-              <option value="">Select Type</option>
-              <option value="merit-based">Merit Based</option>
-              <option value="need-based">Need Based</option>
-              <option value="sports">Sports</option>
-              <option value="arts">Arts</option>
-              <option value="research">Research</option>
-            </select>
+            <Dropdown
+              value={scholarshipType}
+              onChange={setScholarshipType}
+              options={scholarshipTypeOptions}
+              placeholder="Select Type"
+              size="sm"
+            />
           </div>
           <div>
             <label className="input-label">Total Seats</label>
@@ -404,13 +507,25 @@ const CreateScholarship: React.FC<CreateScholarshipProps> = memo(({ scholarshipI
           </div>
           <div>
             <label className="input-label">Application Start Date</label>
-            <input type="date" className="input-field"
-              value={applicationStartDate} onChange={(e) => setApplicationStartDate(e.target.value)} />
+            <div ref={applicationStartDateRef}>
+              <DatePicker
+                value={applicationStartDate}
+                onChange={setApplicationStartDate}
+                placeholder="Select start date"
+                minDate={tomorrow}
+              />
+            </div>
           </div>
           <div>
             <label className="input-label">Application End Date</label>
-            <input type="date" className="input-field"
-              value={applicationEndDate} onChange={(e) => setApplicationEndDate(e.target.value)} />
+            <div ref={applicationEndDateRef}>
+              <DatePicker
+                value={applicationEndDate}
+                onChange={setApplicationEndDate}
+                placeholder="Select end date"
+                minDate={applicationStartDate || tomorrow}
+              />
+            </div>
           </div>
         </div>
       </div>
@@ -492,7 +607,7 @@ const CreateScholarship: React.FC<CreateScholarshipProps> = memo(({ scholarshipI
               <div className="flex items-start gap-3">
                 <div><label className="input-label text-xs">Year</label><input className="input-field text-sm w-24"
                   placeholder="2024" value={jt.year} onChange={(e) => updateArrayItem(setJourneyTimeline, i, "year", e.target.value)} /></div>
-                <div className="flex-grow"><label className="input-label text-xs">Title</label><input className="input-field text-sm"
+                <div className="grow"><label className="input-label text-xs">Title</label><input className="input-field text-sm"
                   placeholder="Milestone title" value={jt.title} onChange={(e) => updateArrayItem(setJourneyTimeline, i, "title", e.target.value)} /></div>
                 <button type="button" className="icon-btn-circle mt-5" onClick={() => removeArrayItem(setJourneyTimeline, i)}>
                   <Trash size={14} />
@@ -818,18 +933,15 @@ const CreateScholarship: React.FC<CreateScholarshipProps> = memo(({ scholarshipI
             <div key={i} className="border border-slate-200 rounded-lg p-4 bg-slate-50">
               <div className="flex justify-between items-start gap-3">
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-3 flex-grow">
-                  <div><label className="input-label text-xs">Province</label>
-                    <select className="input-field text-sm" value={ec.province}
-                      onChange={(e) => updateArrayItem(setExamCenters, i, "province", e.target.value)}>
-                      <option value="">Select Province</option>
-                      <option value="Koshi">Koshi</option>
-                      <option value="Madhesh">Madhesh</option>
-                      <option value="Bagmati">Bagmati</option>
-                      <option value="Gandaki">Gandaki</option>
-                      <option value="Lumbini">Lumbini</option>
-                      <option value="Karnali">Karnali</option>
-                      <option value="Sudurpashchim">Sudurpashchim</option>
-                    </select>
+                  <div className="md:col-span-1">
+                    <label className="input-label text-xs">Province</label>
+                    <Dropdown
+                      value={ec.province}
+                      onChange={(val) => updateArrayItem(setExamCenters, i, "province", val)}
+                      options={provinceOptions}
+                      placeholder="Select Province"
+                      size="sm"
+                    />
                   </div>
                   <div><label className="input-label text-xs">Center Name</label><input className="input-field text-sm"
                     placeholder="Advance Academy Biratnagar" value={ec.center_name}
@@ -964,39 +1076,12 @@ const CreateScholarship: React.FC<CreateScholarshipProps> = memo(({ scholarshipI
         )}
       </div>
 
-      {/* Publication Status */}
-      <div className="section-card">
-        <h3 className="font-bold mb-4">Publication Status</h3>
-        <div className="flex gap-4">
-          <label className="flex items-center gap-2">
-            <input
-              type="radio"
-              name="status"
-              value="draft"
-              checked={status === 'draft'}
-              onChange={() => setStatus('draft')}
-            />
-            <span>Draft (Hidden from public)</span>
-          </label>
-          <label className="flex items-center gap-2">
-            <input
-              type="radio"
-              name="status"
-              value="active"
-              checked={status === 'published'}
-              onChange={() => setStatus('published')}
-            />
-            <span>Published (Visible to public)</span>
-          </label>
-        </div>
-      </div>
-
       {/* Bottom Actions */}
       <div className="flex justify-end gap-4">
-        <button type="button" className="btn-draft" onClick={() => handleSave(true)} disabled={submitting}>
+        <button type="button" className="btn-draft" onClick={() => handleSave("draft")} disabled={isBusy}>
           Save as Draft
         </button>
-        <button type="button" className="btn-save" onClick={() => handleSave(false)} disabled={submitting}>
+        <button type="button" className="btn-save" onClick={() => handleSave("published")} disabled={isBusy}>
           {submitting ? "Publishing..." : "Publish Scholarship"}
         </button>
       </div>
@@ -1027,7 +1112,7 @@ function EligibilityList({ label, items, onAdd, onRemove }: {
         ))}
       </div>
       <div className="flex gap-3 mt-2">
-        <input className="input-field text-sm flex-grow" placeholder="Add criteria..."
+        <input className="input-field text-sm grow" placeholder="Add criteria..."
           value={input} onChange={(e) => setInput(e.target.value)}
           onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); onAdd(input); setInput(""); } }} />
         <button type="button" className="px-3 py-2 bg-blue-50 text-blue-600 rounded-md text-sm font-medium hover:bg-blue-100"
