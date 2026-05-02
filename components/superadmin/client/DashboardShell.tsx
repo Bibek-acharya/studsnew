@@ -3,6 +3,7 @@
 import React, { useState, lazy, Suspense, useCallback } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import Image from "next/image";
+import { clearAllAuthSessions } from "@/services/authSession";
 import {
   LayoutDashboard,
   Building2,
@@ -136,9 +137,7 @@ export default function DashboardShell() {
       });
     } catch {
     } finally {
-      localStorage.removeItem("token");
-      sessionStorage.removeItem("token");
-      localStorage.removeItem("studsphere_user");
+      clearAllAuthSessions();
       window.location.href = "/superadmin/login";
     }
   }, []);

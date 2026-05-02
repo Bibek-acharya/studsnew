@@ -1,4 +1,5 @@
 import { fetchCourses, fetchCourseFilterCounts } from "./course-api";
+import { clearAllAuthSessions } from "./authSession";
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080";
 
@@ -1503,8 +1504,7 @@ export const apiService = {
   },
   scholarshipProviderLogout(): void {
     if (typeof window === "undefined") return;
-    localStorage.removeItem("scholarshipProviderToken");
-    localStorage.removeItem("scholarshipProviderUser");
+    clearAllAuthSessions();
   },
 
   async getCollegeReviews(collegeId: number, params?: {

@@ -2,7 +2,7 @@
 
 import React, { createContext, useContext, useState, ReactNode, useEffect, useMemo } from "react";
 import { apiService, AuthResponse } from "./api";
-import { clearAuthSession, persistAuthSession } from "./authSession";
+import { clearAllAuthSessions, persistAuthSession } from "./authSession";
 
 interface User {
   id?: number;
@@ -77,7 +77,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     void bootstrapAuth();
 
     const handleAuthExpired = () => {
-      clearAuthSession(localStorage);
+      clearAllAuthSessions();
       setUserState(null);
       window.location.href = "/";
     };
@@ -167,8 +167,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       // ignore
     }
     if (typeof window !== "undefined") {
-      clearAuthSession(localStorage);
-      localStorage.removeItem("onboarding_completed");
+      clearAllAuthSessions();
     }
     setUserState(null);
     window.location.href = "/";
