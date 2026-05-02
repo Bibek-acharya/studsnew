@@ -773,7 +773,7 @@ export const apiService = {
     if (stored) {
       try { return JSON.parse(stored); } catch { return null; }
     }
-    return { id: 1, first_name: "John", last_name: "Doe", email: "john@example.com", role: "Student" };
+    return null;
   },
   setUser(user: ForumUser | null): void {
     if (typeof window === "undefined") return;

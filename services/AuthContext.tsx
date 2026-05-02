@@ -53,30 +53,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           }
           return;
         } catch {
-          // Fall through and try to hydrate from the backend cookie.
+          clearAllAuthSessions();
+          if (isMounted) {
+            setLoading(false);
+          }
         }
       } else if (stored && !storedToken && typeof window !== "undefined") {
         clearAllAuthSessions();
-      }
-
-      try {
-        const res = await apiService.getProfile({ suppressAuthExpired: true });
-        const profile = res.data;
-        if (!isMounted || !profile) return;
-
-        setUser({
-          id: profile.id,
-          first_name: profile.first_name,
-          last_name: profile.last_name,
-          email: profile.email,
-          role: profile.role,
-        });
-      } catch {
-        // Not logged in or cookie not present; keep anonymous state.
-      } finally {
-        if (isMounted) {
-          setLoading(false);
-        }
+      } else if (isMounted) {
+        setLoading(false);
       }
     };
 
