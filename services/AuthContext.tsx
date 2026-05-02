@@ -54,7 +54,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       }
 
       try {
-        const res = await apiService.getProfile();
+        const res = await apiService.getProfile({ suppressAuthExpired: true });
         const profile = res.data;
         if (!isMounted || !profile) return;
 
@@ -79,7 +79,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const handleAuthExpired = () => {
       clearAuthSession(localStorage);
       setUserState(null);
-      window.location.href = "/login";
+      window.location.href = "/";
     };
 
     window.addEventListener("auth-expired", handleAuthExpired);

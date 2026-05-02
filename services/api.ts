@@ -8,7 +8,12 @@ if (typeof window !== "undefined") {
   console.info("API_BASE_URL:", API_BASE_URL);
 }
 
-export async function apiRequest<T>(path: string, options: RequestInit = {}): Promise<T> {
+type ApiRequestOptions = RequestInit & {
+  suppressAuthExpired?: boolean;
+};
+
+export async function apiRequest<T>(path: string, options: ApiRequestOptions = {}): Promise<T> {
+  const { suppressAuthExpired, ...requestOptions } = options;
   // Get token from localStorage for production (cookie won't be sent to API domain)
   let token: string | null = null;
   if (typeof window !== "undefined") {
@@ -22,7 +27,7 @@ export async function apiRequest<T>(path: string, options: RequestInit = {}): Pr
   };
 
   const response = await fetch(`${API_BASE_URL}${path}`, {
-    ...options,
+    ...requestOptions,
     headers,
     credentials: "include",
   });
@@ -41,6 +46,7 @@ export async function apiRequest<T>(path: string, options: RequestInit = {}): Pr
     if (
       response.status === 401 &&
       typeof window !== "undefined" &&
+      !suppressAuthExpired &&
       !path.includes("/auth/login") &&
       !path.includes("/auth/register")
     ) {
@@ -826,7 +832,7 @@ export const apiService = {
     return false;
   },
   async logout(): Promise<void> {
-    await apiRequest("/api/v1/auth/logout", { method: "POST" });
+    await apiRequest("/api/v1/auth/logout", { method: "POST", suppressAuthExpired: true });
   },
 
   async login(email: string, password: string): Promise<AuthResponse> {
@@ -872,8 +878,8 @@ export const apiService = {
     });
   },
 
-  async getProfile(): Promise<ProfileResponse> {
-    return apiRequest<ProfileResponse>("/api/v1/profile");
+  async getProfile(options: { suppressAuthExpired?: boolean } = {}): Promise<ProfileResponse> {
+    return apiRequest<ProfileResponse>("/api/v1/profile", options);
   },
 
   async getEducationEvents(params?: {
