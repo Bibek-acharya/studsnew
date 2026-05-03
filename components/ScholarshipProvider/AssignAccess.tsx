@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect, memo } from "react";
-import { Home, Users, Plus, Pencil, Trash2, Search, X, ShieldCheck, UserPlus, AlertTriangle } from "lucide-react";
+import { Home, Users, Plus, Pencil, Trash2, Search, X, ShieldCheck, UserPlus, AlertTriangle, Eye, EyeOff, ChevronRight } from "lucide-react";
 import { toast } from "sonner";
 import {
   providerRbacApi,
@@ -33,87 +33,87 @@ const PERMISSIONS = [
 const AssignAccess: React.FC = memo(() => {
   const [users, setUsers] = useState<ProviderUser[]>([]);
   const [search, setSearch] = useState("");
-  const [addModalOpen, setAddModalOpen] = useState(false);
-  const [permModalOpen, setPermModalOpen] = useState(false);
-  const [permUserName, setPermUserName] = useState("");
-  const [permUserId, setPermUserId] = useState<number>(0);
+
+  // Wizard state
+  const [wizardOpen, setWizardOpen] = useState(false);
+  const [wizardStep, setWizardStep] = useState<1 | 2>(1);
+  const [createdUser, setCreatedUser] = useState<ProviderUser | null>(null);
+
+  // Step 1 fields
   const [newName, setNewName] = useState("");
   const [newEmail, setNewEmail] = useState("");
   const [newPassword, setNewPassword] = useState("");
-  const [permissions, setPermissions] = useState<Record<string, boolean>>({});
-  const [deleteModalOpen, setDeleteModalOpen] = useState(false);
-  const [userToDelete, setUserToDelete] = useState<ProviderUser | null>(null);
+  const [showPassword, setShowPassword] = useState(false);
   const [addError, setAddError] = useState("");
   const [nameError, setNameError] = useState("");
   const [emailError, setEmailError] = useState("");
   const [passwordError, setPasswordError] = useState("");
+  const [addLoading, setAddLoading] = useState(false);
+
+  // Step 2 - permissions
+  const [wizardPermissions, setWizardPermissions] = useState<Record<string, boolean>>({});
+  const [permSaving, setPermSaving] = useState(false);
+
+  // Edit permissions (for existing users)
+  const [permModalOpen, setPermModalOpen] = useState(false);
+  const [permUserName, setPermUserName] = useState("");
+  const [permUserId, setPermUserId] = useState<number>(0);
+  const [permissions, setPermissions] = useState<Record<string, boolean>>({});
+
+  // Delete
+  const [deleteModalOpen, setDeleteModalOpen] = useState(false);
+  const [userToDelete, setUserToDelete] = useState<ProviderUser | null>(null);
 
   useEffect(() => {
     let mounted = true;
-
     async function loadUsers() {
       try {
         const res = await providerRbacApi.getUsers();
         if (!mounted) return;
-
         setUsers(res.users || []);
       } catch {
-        if (mounted) {
-          setUsers([]);
-        }
+        if (mounted) setUsers([]);
       }
     }
-
     loadUsers();
-
-    return () => {
-      mounted = false;
-    };
+    return () => { mounted = false; };
   }, []);
 
-  const filtered = search ? users.filter((u) => u.name.toLowerCase().includes(search.toLowerCase()) || u.email.includes(search)) : users;
+  const filtered = search
+    ? users.filter((u) => u.name.toLowerCase().includes(search.toLowerCase()) || u.email.includes(search))
+    : users;
 
-  const openPermModal = (user: ProviderUser) => {
-    setPermUserName(user.name);
-    setPermUserId(user.id);
-    const userPerms = user.permissions || [];
-    setPermissions(userPerms.reduce((acc: Record<string, boolean>, p: string) => ({...acc, [p]: true}), {}));
-    setPermModalOpen(true);
+  const openWizard = () => {
+    setWizardOpen(true);
+    setWizardStep(1);
+    setCreatedUser(null);
+    setNewName(""); setNewEmail(""); setNewPassword("");
+    setShowPassword(false);
+    setAddError(""); setNameError(""); setEmailError(""); setPasswordError("");
+    setWizardPermissions({});
   };
 
-  const handleAddUser = async () => {
-    setAddError("");
-    setNameError("");
-    setEmailError("");
-    setPasswordError("");
-    
+  const closeWizard = () => {
+    setWizardOpen(false);
+    setWizardStep(1);
+    setCreatedUser(null);
+  };
+
+  // Step 1: validate and create user
+  const handleStep1 = async () => {
+    setAddError(""); setNameError(""); setEmailError(""); setPasswordError("");
     let hasError = false;
-    if (!newName.trim()) {
-      setNameError("Full name is required");
+    if (!newName.trim()) { setNameError("Full name is required"); hasError = true; }
+    if (!newEmail.trim()) { setEmailError("Email address is required"); hasError = true; }
+    else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(newEmail)) { setEmailError("Please enter a valid email address"); hasError = true; }
+    if (!newPassword.trim()) { setPasswordError("Password is required"); hasError = true; }
+    else if (!/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/.test(newPassword)) {
+      setPasswordError("Password must be at least 8 characters, include uppercase, lowercase, a number, and a special character.");
       hasError = true;
     }
-    
-    if (!newEmail.trim()) {
-      setEmailError("Email address is required");
-      hasError = true;
-    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(newEmail)) {
-      setEmailError("Please enter a valid email address");
-      hasError = true;
-    }
-
-    if (!newPassword.trim()) {
-      setPasswordError("Password is required");
-      hasError = true;
-    } else {
-      const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
-      if (!passwordRegex.test(newPassword)) {
-        setPasswordError("Password must be at least 8 characters, include uppercase, lowercase, a number, and a special character.");
-        hasError = true;
-      }
-    }
-
     if (hasError) return;
 
+    setAddLoading(true);
     try {
       const created = await providerRbacApi.createUser({
         name: newName,
@@ -123,22 +123,43 @@ const AssignAccess: React.FC = memo(() => {
         roleLabel: "User",
         permissions: [],
       });
+      setCreatedUser(created);
       setUsers((prev) => [...prev, created]);
-      toast.success(`Access has been granted to ${newEmail}.`);
-      setAddModalOpen(false);
-      setNewName("");
-      setNewEmail("");
-      setNewPassword("");
-      openPermModal(created);
+      setWizardStep(2);
     } catch (err: any) {
       setAddError(err.message || "Failed to create user. Email might already be in use.");
+    } finally {
+      setAddLoading(false);
     }
   };
 
-  const handleDeleteUser = (u: ProviderUser) => {
-    setUserToDelete(u);
-    setDeleteModalOpen(true);
+  // Step 2: save permissions and finish
+  const handleStep2 = async () => {
+    if (!createdUser) return;
+    const selectedPerms = Object.entries(wizardPermissions).filter(([, v]) => v).map(([k]) => k);
+    setPermSaving(true);
+    try {
+      await providerRbacApi.updatePermissions(createdUser.id, selectedPerms);
+      setUsers((prev) => prev.map((u) => u.id === createdUser.id ? { ...u, permissions: selectedPerms } : u));
+      toast.success(`User ${createdUser.email} added with permissions.`);
+      closeWizard();
+    } catch {
+      toast.error("User created but failed to save permissions. You can edit them from the table.");
+      closeWizard();
+    } finally {
+      setPermSaving(false);
+    }
   };
+
+  const openPermModal = (user: ProviderUser) => {
+    setPermUserName(user.name);
+    setPermUserId(user.id);
+    const userPerms = user.permissions || [];
+    setPermissions(userPerms.reduce((acc: Record<string, boolean>, p: string) => ({ ...acc, [p]: true }), {}));
+    setPermModalOpen(true);
+  };
+
+  const handleDeleteUser = (u: ProviderUser) => { setUserToDelete(u); setDeleteModalOpen(true); };
 
   const confirmDelete = async () => {
     if (!userToDelete) return;
@@ -154,10 +175,7 @@ const AssignAccess: React.FC = memo(() => {
   };
 
   const handleSavePermissions = async () => {
-    const selectedPerms = Object.entries(permissions)
-      .filter(([, v]) => v)
-      .map(([k]) => k);
-
+    const selectedPerms = Object.entries(permissions).filter(([, v]) => v).map(([k]) => k);
     try {
       await providerRbacApi.updatePermissions(permUserId, selectedPerms);
       setUsers((prev) => prev.map((user) => (user.id === permUserId ? { ...user, permissions: selectedPerms } : user)));
@@ -192,7 +210,7 @@ const AssignAccess: React.FC = memo(() => {
               </div>
               <input type="text" className="w-full pl-10 pr-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:border-blue-500" placeholder="Search users..." value={search} onChange={(e) => setSearch(e.target.value)} />
             </div>
-            <button onClick={() => { setAddModalOpen(true); setNewName(""); setNewEmail(""); setNewPassword(""); }} className="px-4 py-2 bg-blue-600 text-white rounded-lg text-sm font-semibold hover:bg-blue-700 transition-colors flex items-center gap-1">
+            <button onClick={openWizard} className="px-4 py-2 bg-blue-600 text-white rounded-lg text-sm font-semibold hover:bg-blue-700 transition-colors flex items-center gap-1">
               <Plus className="w-4 h-4" /> Add User
             </button>
           </div>
@@ -227,7 +245,7 @@ const AssignAccess: React.FC = memo(() => {
                   <td className="text-center py-3 px-4 text-gray-500">{u.lastActive}</td>
                   <td className="text-center py-3 px-4">
                     <div className="flex items-center justify-center gap-2">
-                      <button onClick={() => openPermModal(u)} className="p-1.5 hover:bg-blue-50 rounded text-blue-600" title="Edit Access"><Pencil className="w-4 h-4" /></button>
+                      <button onClick={() => openPermModal(u)} className="p-1.5 hover:bg-blue-50 rounded text-blue-600" title="Edit Permissions"><ShieldCheck className="w-4 h-4" /></button>
                       <button onClick={() => handleDeleteUser(u)} className="p-1.5 hover:bg-red-50 rounded text-red-600" title="Remove"><Trash2 className="w-4 h-4" /></button>
                     </div>
                   </td>
@@ -241,67 +259,139 @@ const AssignAccess: React.FC = memo(() => {
         </div>
       </div>
 
-      {addModalOpen && (
+      {/* ── Add User Wizard ── */}
+      {wizardOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
-          <div className="bg-white rounded-lg max-w-md w-full overflow-hidden shadow-xl">
-            <div className="flex items-center justify-between px-6 py-4 border-b border-gray-200">
-              <h2 className="text-lg font-bold text-gray-900 flex items-center gap-2"><UserPlus className="w-5 h-5 text-blue-600" /> Add New User</h2>
-              <button onClick={() => setAddModalOpen(false)} className="p-2 hover:bg-gray-100 rounded-lg"><X className="w-5 h-5" /></button>
-            </div>
-            <div className="p-6 space-y-5">
-              {addError && (
-                <div className="p-3 bg-red-50 border border-red-100 rounded-lg text-red-600 text-xs font-medium flex items-center gap-2 animate-in fade-in slide-in-from-top-1">
-                  <AlertTriangle className="w-4 h-4" /> {addError}
+          <div className="bg-white rounded-xl max-w-lg w-full overflow-hidden shadow-2xl">
+
+            {/* Header with step indicator */}
+            <div className="px-6 py-4 border-b border-gray-200">
+              <div className="flex items-center justify-between mb-3">
+                <h2 className="text-lg font-bold text-gray-900 flex items-center gap-2">
+                  <UserPlus className="w-5 h-5 text-blue-600" />
+                  {wizardStep === 1 ? "Add New User" : "Assign Permissions"}
+                </h2>
+                <button onClick={closeWizard} className="p-2 hover:bg-gray-100 rounded-lg"><X className="w-5 h-5" /></button>
+              </div>
+              {/* Steps */}
+              <div className="flex items-center gap-2">
+                <div className={`flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 rounded-full ${wizardStep === 1 ? 'bg-blue-600 text-white' : 'bg-green-100 text-green-700'}`}>
+                  <span>1</span><span>User Details</span>
                 </div>
-              )}
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1.5">Full Name <span className="text-red-500">*</span></label>
-                <input 
-                  type="text" 
-                  className={`w-full px-3 py-2 border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors ${nameError ? "border-red-500 bg-red-50/10" : "border-gray-300"}`} 
-                  placeholder="Enter full name" 
-                  value={newName} 
-                  onChange={(e) => { setNewName(e.target.value); if(nameError) setNameError(""); }} 
-                />
-                {nameError && <p className="text-red-500 text-xs mt-1">{nameError}</p>}
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1.5">Email Address <span className="text-red-500">*</span></label>
-                <input 
-                  type="email" 
-                  className={`w-full px-3 py-2 border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors ${emailError ? "border-red-500 bg-red-50/10" : "border-gray-300"}`} 
-                  placeholder="user@example.com" 
-                  value={newEmail} 
-                  onChange={(e) => { setNewEmail(e.target.value); if(emailError) setEmailError(""); }} 
-                />
-                {emailError && <p className="text-red-500 text-xs mt-1">{emailError}</p>}
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1.5">Password <span className="text-red-500">*</span></label>
-                <input 
-                  type="password" 
-                  className={`w-full px-3 py-2 border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors ${passwordError ? "border-red-500 bg-red-50/10" : "border-gray-300"}`} 
-                  placeholder="Enter password" 
-                  value={newPassword} 
-                  onChange={(e) => { setNewPassword(e.target.value); if(passwordError) setPasswordError(""); }} 
-                />
-                {passwordError && <p className="text-red-500 text-xs mt-1">{passwordError}</p>}
+                <ChevronRight className="w-4 h-4 text-gray-400" />
+                <div className={`flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 rounded-full ${wizardStep === 2 ? 'bg-blue-600 text-white' : 'bg-gray-100 text-gray-500'}`}>
+                  <span>2</span><span>Permissions</span>
+                </div>
               </div>
             </div>
-            <div className="flex justify-end gap-3 px-6 py-4 border-t border-gray-200">
-              <button onClick={() => setAddModalOpen(false)} className="px-6 py-2.5 border border-gray-300 rounded-lg text-gray-700 font-medium hover:bg-gray-50">Cancel</button>
-              <button 
-                onClick={handleAddUser} 
-                disabled={!newName.trim() || !newEmail.trim() || !newPassword.trim()}
-                className="px-6 py-2.5 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
-              >
-                Continue
-              </button>
-            </div>
+
+            {/* Step 1: User Info */}
+            {wizardStep === 1 && (
+              <>
+                <div className="p-6 space-y-5">
+                  {addError && (
+                    <div className="p-3 bg-red-50 border border-red-100 rounded-lg text-red-600 text-xs font-medium flex items-center gap-2">
+                      <AlertTriangle className="w-4 h-4" /> {addError}
+                    </div>
+                  )}
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1.5">Full Name <span className="text-red-500">*</span></label>
+                    <input
+                      type="text"
+                      className={`w-full px-3 py-2 border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors ${nameError ? "border-red-500" : "border-gray-300"}`}
+                      placeholder="Enter full name"
+                      value={newName}
+                      onChange={(e) => { setNewName(e.target.value); if (nameError) setNameError(""); }}
+                    />
+                    {nameError && <p className="text-red-500 text-xs mt-1">{nameError}</p>}
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1.5">Email Address <span className="text-red-500">*</span></label>
+                    <input
+                      type="email"
+                      className={`w-full px-3 py-2 border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors ${emailError ? "border-red-500" : "border-gray-300"}`}
+                      placeholder="user@example.com"
+                      value={newEmail}
+                      onChange={(e) => { setNewEmail(e.target.value); if (emailError) setEmailError(""); }}
+                    />
+                    {emailError && <p className="text-red-500 text-xs mt-1">{emailError}</p>}
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1.5">Password <span className="text-red-500">*</span></label>
+                    <div className="relative">
+                      <input
+                        type={showPassword ? "text" : "password"}
+                        className={`w-full px-3 py-2 pr-10 border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors ${passwordError ? "border-red-500" : "border-gray-300"}`}
+                        placeholder="Min 8 chars, upper, lower, number, special char"
+                        value={newPassword}
+                        onChange={(e) => { setNewPassword(e.target.value); if (passwordError) setPasswordError(""); }}
+                      />
+                      <button
+                        type="button"
+                        onClick={() => setShowPassword(!showPassword)}
+                        className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-600"
+                      >
+                        {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                      </button>
+                    </div>
+                    {passwordError && <p className="text-red-500 text-xs mt-1">{passwordError}</p>}
+                  </div>
+                </div>
+                <div className="flex justify-end gap-3 px-6 py-4 border-t border-gray-200">
+                  <button onClick={closeWizard} className="px-5 py-2.5 border border-gray-300 rounded-lg text-gray-700 font-medium hover:bg-gray-50">Cancel</button>
+                  <button
+                    onClick={handleStep1}
+                    disabled={addLoading || !newName.trim() || !newEmail.trim() || !newPassword.trim()}
+                    className="px-5 py-2.5 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all flex items-center gap-2"
+                  >
+                    {addLoading ? <><span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />Creating...</> : <>Next: Set Permissions <ChevronRight className="w-4 h-4" /></>}
+                  </button>
+                </div>
+              </>
+            )}
+
+            {/* Step 2: Permissions */}
+            {wizardStep === 2 && (
+              <>
+                <div className="p-6">
+                  <div className="bg-blue-50 rounded-lg p-3 mb-5 text-sm text-gray-700">
+                    Setting permissions for: <span className="font-bold text-blue-700">{createdUser?.name}</span> (<span className="text-gray-500">{createdUser?.email}</span>)
+                  </div>
+                  <div className="space-y-2 max-h-[40vh] overflow-y-auto pr-1">
+                    {PERMISSIONS.map((perm) => (
+                      <div key={perm.id} className="flex items-center justify-between p-3 border border-gray-200 rounded-lg hover:bg-gray-50">
+                        <div>
+                          <p className="font-medium text-gray-900 text-sm">{perm.label}</p>
+                          <p className="text-xs text-gray-500">{perm.desc}</p>
+                        </div>
+                        <label className="relative inline-flex items-center cursor-pointer flex-shrink-0">
+                          <input type="checkbox" className="sr-only peer" checked={wizardPermissions[perm.id] || false} onChange={(e) => setWizardPermissions((prev) => ({ ...prev, [perm.id]: e.target.checked }))} />
+                          <div className="w-11 h-6 bg-gray-300 rounded-full peer peer-checked:bg-blue-600 peer-focus:ring-2 peer-focus:ring-blue-300 after:content-[''] after:absolute after:top-0.5 after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:after:translate-x-full"></div>
+                        </label>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+                <div className="flex justify-between gap-3 px-6 py-4 border-t border-gray-200">
+                  <p className="text-xs text-gray-500 self-center">You can always edit permissions later.</p>
+                  <div className="flex gap-3">
+                    <button onClick={closeWizard} className="px-5 py-2.5 border border-gray-300 rounded-lg text-gray-700 font-medium hover:bg-gray-50">Skip</button>
+                    <button
+                      onClick={handleStep2}
+                      disabled={permSaving}
+                      className="px-5 py-2.5 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700 disabled:opacity-50 flex items-center gap-2"
+                    >
+                      {permSaving ? <><span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />Saving...</> : <><ShieldCheck className="w-4 h-4" />Save & Finish</>}
+                    </button>
+                  </div>
+                </div>
+              </>
+            )}
           </div>
         </div>
       )}
 
+      {/* Edit Permissions Modal (for existing users) */}
       {permModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
           <div className="bg-white rounded-lg max-w-2xl w-full max-h-[85vh] overflow-y-auto shadow-xl">
@@ -335,31 +425,23 @@ const AssignAccess: React.FC = memo(() => {
           </div>
         </div>
       )}
+
+      {/* Delete Confirmation */}
       {deleteModalOpen && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/50 p-4 animate-in fade-in duration-200">
-          <div className="bg-white rounded-xl max-w-sm w-full overflow-hidden shadow-2xl animate-in zoom-in-95 duration-200">
+        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/50 p-4">
+          <div className="bg-white rounded-xl max-w-sm w-full overflow-hidden shadow-2xl">
             <div className="p-6 text-center">
               <div className="w-16 h-16 bg-red-50 text-red-600 rounded-full flex items-center justify-center mx-auto mb-4">
                 <AlertTriangle className="w-8 h-8" />
               </div>
               <h3 className="text-xl font-bold text-gray-900 mb-2">Confirm Delete</h3>
               <p className="text-gray-500 text-sm leading-relaxed mb-6">
-                Are you sure you want to remove <span className="font-bold text-gray-900">"{userToDelete?.name}"</span>? 
+                Are you sure you want to remove <span className="font-bold text-gray-900">"{userToDelete?.name}"</span>?
                 This action will revoke all their access and cannot be undone.
               </p>
               <div className="flex flex-col gap-3">
-                <button 
-                  onClick={confirmDelete}
-                  className="w-full py-3 bg-red-600 text-white rounded-lg font-semibold hover:bg-red-700 active:scale-[0.98] transition-all"
-                >
-                  Yes, Remove User
-                </button>
-                <button 
-                  onClick={() => { setDeleteModalOpen(false); setUserToDelete(null); }}
-                  className="w-full py-3 bg-gray-50 text-gray-700 rounded-lg font-semibold hover:bg-gray-100 active:scale-[0.98] transition-all border border-gray-200"
-                >
-                  Cancel
-                </button>
+                <button onClick={confirmDelete} className="w-full py-3 bg-red-600 text-white rounded-lg font-semibold hover:bg-red-700 transition-all">Yes, Remove User</button>
+                <button onClick={() => { setDeleteModalOpen(false); setUserToDelete(null); }} className="w-full py-3 bg-gray-50 text-gray-700 rounded-lg font-semibold hover:bg-gray-100 transition-all border border-gray-200">Cancel</button>
               </div>
             </div>
           </div>
