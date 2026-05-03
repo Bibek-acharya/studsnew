@@ -512,6 +512,30 @@ export interface AnalyticsData {
   scholarship_stats: { id: number; title: string; applications: number; status: string }[];
 }
 
+export interface MetricCount {
+  label: string;
+  count: number;
+}
+
+export interface DetailedAnalyticsData {
+  total_applicants: number;
+  gender: MetricCount[];
+  ethnicity: MetricCount[];
+  gpa_breakdown: MetricCount[];
+  school_type: MetricCount[];
+  stream: MetricCount[];
+  province: MetricCount[];
+  district: MetricCount[];
+  status: MetricCount[];
+}
+
+export interface DetailedAnalyticsFilters {
+  province?: string;
+  district?: string;
+  school_type?: string;
+  scholarship_status?: string;
+}
+
 export interface ProviderNews {
   id: number;
   provider_id: number;
@@ -619,6 +643,16 @@ export const scholarshipProviderApi = {
 
   async getAnalytics(): Promise<AnalyticsData> {
     return callApi<AnalyticsData>("/api/v1/scholarship-providers/analytics");
+  },
+
+  async getDetailedAnalytics(filters: DetailedAnalyticsFilters = {}): Promise<DetailedAnalyticsData> {
+    const params = new URLSearchParams();
+    if (filters.province) params.append('province', filters.province);
+    if (filters.district) params.append('district', filters.district);
+    if (filters.school_type) params.append('school_type', filters.school_type);
+    if (filters.scholarship_status) params.append('scholarship_status', filters.scholarship_status);
+    
+    return callApi<DetailedAnalyticsData>(`/api/v1/scholarship-providers/analytics/detailed?${params.toString()}`);
   },
 
   async createScholarship(data: CreateScholarshipPayload): Promise<ProviderScholarship> {

@@ -186,7 +186,7 @@ const Sidebar: React.FC<SidebarProps> = ({ activeTab, onNavigate, onLogout, perm
           requiredPerm="scholarships"
         >
           <DropdownItem label="Create Scholarship" section="sec-create-scholarship" />
-          <DropdownItem label="Customize Form" section="sec-customize-form" />
+          {/* <DropdownItem label="Customize Form" section="sec-customize-form" /> */}
           <DropdownItem label="Draft Scholarship" section="sec-draft-scholarship" />
           <DropdownItem label="Scholarship Directory" section="sec-scholarship-directory" />
           <DropdownItem label="Manage Application" section="sec-applications" />

@@ -1,147 +1,476 @@
-import React, { useEffect, useState } from 'react';
-import { scholarshipProviderApi, AnalyticsData } from '@/services/scholarshipProviderApi';
+import React, { useEffect, useState, useMemo, useRef } from 'react';
+import { scholarshipProviderApi, DetailedAnalyticsData, DetailedAnalyticsFilters, MetricCount } from '@/services/scholarshipProviderApi';
+import { NEPAL_PROVINCES, NEPAL_DISTRICTS } from '@/lib/location-data';
+import {
+  Chart as ChartJS,
+  CategoryScale,
+  LinearScale,
+  BarElement,
+  Title,
+  Tooltip,
+  Legend,
+  ArcElement,
+  PointElement,
+  LineElement,
+} from 'chart.js';
+import { Bar, Pie, Line } from 'react-chartjs-2';
+import { 
+  Download, 
+  Filter, 
+  FileText, 
+  Table, 
+  Users, 
+  MapPin, 
+  GraduationCap, 
+  RefreshCcw,
+  LayoutDashboard,
+  ChevronDown,
+  Activity
+} from 'lucide-react';
+import { toast } from 'sonner';
+
+ChartJS.register(
+  CategoryScale,
+  LinearScale,
+  BarElement,
+  Title,
+  Tooltip,
+  Legend,
+  ArcElement,
+  PointElement,
+  LineElement
+);
 
 export default function Analytics() {
-  const [analytics, setAnalytics] = useState<AnalyticsData | null>(null);
+  const [data, setData] = useState<DetailedAnalyticsData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const [filters, setFilters] = useState<DetailedAnalyticsFilters>({
+    province: '',
+    district: '',
+    school_type: '',
+    scholarship_status: 'all',
+  });
+
+  const dashboardRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    loadAnalytics();
-  }, []);
+    loadDetailedAnalytics();
+  }, [filters]);
 
-  async function loadAnalytics() {
+  async function loadDetailedAnalytics() {
     setLoading(true);
-    setError('');
     try {
-      const data = await scholarshipProviderApi.getAnalytics();
-      setAnalytics(data);
+      const res = await scholarshipProviderApi.getDetailedAnalytics(filters);
+      setData(res);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to load analytics');
+      toast.error('Could not fetch analytics data');
     } finally {
       setLoading(false);
     }
   }
 
-  const total = analytics?.total_applications || 0;
-  const statusBreakdown = analytics?.status_breakdown || {};
-  const pending = statusBreakdown.pending || 0;
-  const underReview = statusBreakdown.under_review || 0;
-  const shortlisted = statusBreakdown.shortlisted || 0;
-  const approved = statusBreakdown.approved || 0;
+  const districts = useMemo(() => {
+    if (!filters.province) return [];
+    return NEPAL_DISTRICTS[filters.province as keyof typeof NEPAL_DISTRICTS] || [];
+  }, [filters.province]);
 
-  const funnelSteps = [
-    { label: 'Total Apps', value: String(total), icon: 'fa-table-list', bg: 'bg-slate-50', border: 'border-slate-200', text: 'text-slate-700' },
-    { label: 'Under Review', value: String(underReview), icon: 'fa-magnifying-glass', bg: 'bg-blue-50', border: 'border-blue-200', text: 'text-primary-600' },
-    { label: 'Shortlisted', value: String(shortlisted), icon: 'fa-star', bg: 'bg-yellow-50', border: 'border-yellow-300', text: 'text-warning' },
-    { label: 'Selected', value: String(approved), icon: 'fa-check-circle', bg: 'bg-green-50', border: 'border-green-400', text: 'text-success', large: approved > 0 }
+  const handleProvinceChange = (province: string) => {
+    setFilters(prev => ({ ...prev, province, district: '' }));
+  };
+
+  const COLORS = [
+    'rgba(59, 130, 246, 0.8)',   // Blue 500
+    'rgba(16, 185, 129, 0.8)',   // Emerald 500
+    'rgba(245, 158, 11, 0.8)',   // Amber 500
+    'rgba(239, 68, 68, 0.8)',    // Red 500
+    'rgba(139, 92, 246, 0.8)',   // Violet 500
+    'rgba(236, 72, 153, 0.8)',   // Pink 500
+    'rgba(14, 165, 233, 0.8)',   // Sky 500
+    'rgba(20, 184, 166, 0.8)',   // Teal 500
   ];
 
+  const BORDER_COLORS = COLORS.map(c => c.replace('0.8', '1'));
+
+  const getChartData = (metrics: MetricCount[] = [], label: string, type: 'pie' | 'bar' = 'bar') => {
+    const labels = metrics.map(m => m.label || 'Unknown');
+    const values = metrics.map(m => m.count);
+
+    return {
+      labels,
+      datasets: [
+        {
+          label,
+          data: values,
+          backgroundColor: type === 'pie' ? COLORS : COLORS[0],
+          borderColor: type === 'pie' ? BORDER_COLORS : BORDER_COLORS[0],
+          borderWidth: 1,
+        },
+      ],
+    };
+  };
+
+  const exportCSV = () => {
+    if (!data) return;
+    
+    let csvContent = "data:text/csv;charset=utf-8,";
+    csvContent += "Metric,Label,Count\n";
+    
+    const sections: (keyof DetailedAnalyticsData)[] = ['gender', 'ethnicity', 'gpa_breakdown', 'school_type', 'stream', 'province', 'district', 'status'];
+    
+    sections.forEach(section => {
+      const metrics = data[section] as MetricCount[];
+      if (Array.isArray(metrics)) {
+        metrics.forEach(m => {
+          csvContent += `${section},"${m.label}",${m.count}\n`;
+        });
+      }
+    });
+
+    const encodedUri = encodeURI(csvContent);
+    const link = document.createElement("a");
+    link.setAttribute("href", encodedUri);
+    link.setAttribute("download", `analytics_report_${new Date().toISOString().split('T')[0]}.csv`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    toast.success('CSV Export Started');
+  };
+
+  const exportPDF = () => {
+    window.print();
+    toast.success('Generating PDF via Print');
+  };
+
+  if (error) return <div className="p-8 text-red-500 font-bold">{error}</div>;
+
   return (
-    <section className="fade-in max-w-7xl mx-auto pb-20">
-      <div className="mb-8">
-        <h2 className="text-2xl font-black text-slate-800">Analytics & Data Export</h2>
-        <p className="text-sm text-slate-500 mt-1 font-medium">Deep insights and report generation for stakeholders.</p>
+    <section className="fade-in max-w-7xl mx-auto pb-20 px-4">
+      {/* Header & Controls */}
+      <div className="flex flex-col md:flex-row md:items-center justify-between mb-8 gap-4 no-print">
+        <div>
+          <div className="flex items-center gap-2 mb-1">
+            <LayoutDashboard className="w-6 h-6 text-blue-600" />
+            <h2 className="text-2xl font-black text-slate-800 uppercase tracking-tight">Applicant Analytics</h2>
+          </div>
+          <p className="text-sm text-slate-500 font-medium italic">Advanced demographic and academic insights</p>
+        </div>
+        
+        <div className="flex items-center gap-3">
+          <button 
+            onClick={exportCSV}
+            className="flex items-center gap-2 px-4 py-2 bg-emerald-50 text-emerald-700 border border-emerald-200 rounded-lg hover:bg-emerald-100 transition-all font-bold text-sm shadow-sm"
+          >
+            <Table className="w-4 h-4" /> Export CSV
+          </button>
+          <button 
+            onClick={exportPDF}
+            className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-all font-bold text-sm shadow-md"
+          >
+            <Download className="w-4 h-4" /> Export PDF
+          </button>
+        </div>
       </div>
 
-      {error && (
-        <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-md text-red-700 text-sm font-bold">
-          {error}
+      {/* Cascading Filters */}
+      <div className="bg-white p-6 rounded-xl border border-slate-200 shadow-sm mb-8 no-print">
+        <div className="flex items-center gap-2 mb-6 border-b border-slate-100 pb-4">
+          <Filter className="w-4 h-4 text-slate-400" />
+          <span className="font-black text-slate-700 uppercase text-xs tracking-widest">Global Filters</span>
         </div>
-      )}
-
-      {loading ? (
-        <div className="flex items-center justify-center py-20">
-          <i className="fa-solid fa-spinner fa-spin text-3xl text-primary-600"></i>
-        </div>
-      ) : (
-        <>
-          <div className="bg-white p-10 rounded-md border border-slate-200  mb-8 overflow-hidden relative">
-            <div className="absolute top-0 left-0 w-full h-2 bg-gradient-to-r from-slate-200 via-primary-400 to-green-400"></div>
-            <h3 className="font-black text-slate-800 mb-12 text-xl text-center uppercase tracking-widest">Application Funnel Conversion</h3>
-
-            <div className="flex flex-col md:flex-row items-center justify-between text-center max-w-5xl mx-auto relative px-4">
-              <div className="hidden md:block absolute top-1/2 left-20 right-20 h-1.5 bg-slate-100 -z-10 -translate-y-1/2 rounded-full"></div>
-
-              {funnelSteps.map((step, index) => (
-                <React.Fragment key={step.label}>
-                  <div className="flex flex-col items-center mb-10 md:mb-0 group">
-                    <div className={`w-28 h-28 rounded-md ${step.bg} flex flex-col items-center justify-center border-4 ${step.border}  relative z-10 transition-transform group-hover:scale-110 duration-300 ${step.large ? 'scale-125 shadow-xl md:mx-6' : ''}`}>
-                      <span className={`text-3xl font-black ${step.text}`}>{step.value}</span>
-                      <i className={`fa-solid ${step.icon} text-[10px] mt-1 opacity-40`}></i>
-                    </div>
-                    <span className={`text-[10px] font-black mt-6 uppercase tracking-widest ${step.large ? 'text-green-700 bg-green-100 px-4 py-1.5 rounded-full' : 'text-slate-500'}`}>
-                      {step.label}
-                    </span>
-                  </div>
-                  {index < funnelSteps.length - 1 && (
-                    <div className="text-slate-200 text-2xl hidden md:block transform transition-transform group-hover:translate-x-2">
-                      <i className="fa-solid fa-chevron-right"></i>
-                    </div>
-                  )}
-                </React.Fragment>
-              ))}
+        
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+          <div className="space-y-2">
+            <label className="text-[11px] font-black text-slate-400 uppercase tracking-wider ml-1">Province</label>
+            <div className="relative">
+              <select 
+                value={filters.province}
+                onChange={(e) => handleProvinceChange(e.target.value)}
+                className="w-full appearance-none bg-slate-50 border border-slate-200 rounded-lg px-4 py-3 text-sm focus:ring-2 focus:ring-blue-500/20 outline-none transition-all font-medium"
+              >
+                <option value="">All Provinces</option>
+                {NEPAL_PROVINCES.map(p => <option key={p} value={p}>{p}</option>)}
+              </select>
+              <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
             </div>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {[
-              {
-                title: 'Master Applicant List',
-                desc: 'A complete raw data dump of all applicants, their demographic data, GPA, and current pipeline status.',
-                icon: 'fa-table-list',
-                color: 'emerald',
-                action: 'Download CSV (.csv)'
-              },
-              {
-                title: 'Financial Needs Report',
-                desc: 'Anonymized report detailing the average family income, dependents, and financial need statements for audit.',
-                icon: 'fa-file-invoice-dollar',
-                color: 'rose',
-                action: 'Generate PDF (.pdf)'
-              },
-              {
-                title: 'Diversity & Demographics',
-                desc: 'Breakdown by gender, province, and rural vs. urban background to ensure equitable distribution.',
-                icon: 'fa-earth-asia',
-                color: 'indigo',
-                isMulti: true
-              }
-            ].map(report => {
-              const colorMap: Record<string, { bg: string; text: string; btn: string; shadow: string }> = {
-                blue: { bg: 'bg-blue-50', text: 'text-blue-600', btn: 'bg-blue-600', shadow: 'shadow-blue-500/20' },
-                green: { bg: 'bg-green-50', text: 'text-green-600', btn: 'bg-green-600', shadow: 'shadow-green-500/20' },
-                purple: { bg: 'bg-purple-50', text: 'text-purple-600', btn: 'bg-purple-600', shadow: 'shadow-purple-500/20' },
-                orange: { bg: 'bg-orange-50', text: 'text-orange-600', btn: 'bg-orange-600', shadow: 'shadow-orange-500/20' },
-                red: { bg: 'bg-red-50', text: 'text-red-600', btn: 'bg-red-600', shadow: 'shadow-red-500/20' },
-                indigo: { bg: 'bg-indigo-50', text: 'text-indigo-600', btn: 'bg-indigo-600', shadow: 'shadow-indigo-500/20' },
-              };
-              const colors = colorMap[report.color] || colorMap.blue;
-
-              return (
-                <div key={report.title} className="bg-white p-8 rounded-md border border-slate-200 hover:shadow-xl transition-all group flex flex-col items-center text-center">
-                  <div className={`w-20 h-20 ${colors.bg} ${colors.text} rounded-md flex items-center justify-center mb-6 text-3xl group-hover:scale-110 transition-transform duration-500`}>
-                    <i className={`fa-solid ${report.icon}`}></i>
-                  </div>
-                  <h3 className="font-black text-xl text-slate-800 mb-3 uppercase tracking-tighter">{report.title}</h3>
-                  <p className="text-sm text-slate-500 mb-8 flex-1 leading-relaxed font-medium">{report.desc}</p>
-
-                  {report.isMulti ? (
-                    <div className="grid grid-cols-2 gap-3 w-full">
-                      <button className="py-4 bg-slate-50 text-slate-700 rounded-md hover:bg-slate-100 font-black text-xs uppercase transition border border-slate-100"><i className="fa-solid fa-file-csv mr-2"></i> CSV</button>
-                      <button className="py-4 bg-slate-50 text-slate-700 rounded-md hover:bg-slate-100 font-black text-xs uppercase transition border border-slate-100"><i className="fa-solid fa-file-powerpoint mr-2"></i> PPT</button>
-                    </div>
-                  ) : (
-                    <button className={`w-full py-4 ${colors.btn} text-white rounded-md hover:shadow-lg transition-all font-black text-xs uppercase tracking-widest shadow-lg ${colors.shadow} flex items-center justify-center gap-2`}>
-                      <i className={`fa-solid ${report.action?.includes('CSV') ? 'fa-file-csv' : 'fa-file-pdf'}`}></i> {report.action}
-                    </button>
-                  )}
-                </div>
-              );
-            })}
+          <div className="space-y-2">
+            <label className="text-[11px] font-black text-slate-400 uppercase tracking-wider ml-1">District</label>
+            <div className="relative">
+              <select 
+                value={filters.district}
+                disabled={!filters.province}
+                onChange={(e) => setFilters(prev => ({ ...prev, district: e.target.value }))}
+                className="w-full appearance-none bg-slate-50 border border-slate-200 rounded-lg px-4 py-3 text-sm focus:ring-2 focus:ring-blue-500/20 outline-none transition-all font-medium disabled:opacity-50"
+              >
+                <option value="">All Districts</option>
+                {districts.map(d => <option key={d} value={d}>{d}</option>)}
+              </select>
+              <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
+            </div>
           </div>
-        </>
+
+          <div className="space-y-2">
+            <label className="text-[11px] font-black text-slate-400 uppercase tracking-wider ml-1">School Type</label>
+            <div className="relative">
+              <select 
+                value={filters.school_type}
+                onChange={(e) => setFilters(prev => ({ ...prev, school_type: e.target.value }))}
+                className="w-full appearance-none bg-slate-50 border border-slate-200 rounded-lg px-4 py-3 text-sm focus:ring-2 focus:ring-blue-500/20 outline-none transition-all font-medium"
+              >
+                <option value="">All Types</option>
+                <option value="Government">Government</option>
+                <option value="Private">Private</option>
+              </select>
+              <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
+            </div>
+          </div>
+
+          <div className="space-y-2">
+            <label className="text-[11px] font-black text-slate-400 uppercase tracking-wider ml-1">Scholarship Status</label>
+            <div className="relative">
+              <select 
+                value={filters.scholarship_status}
+                onChange={(e) => setFilters(prev => ({ ...prev, scholarship_status: e.target.value }))}
+                className="w-full appearance-none bg-slate-50 border border-slate-200 rounded-lg px-4 py-3 text-sm focus:ring-2 focus:ring-blue-500/20 outline-none transition-all font-medium"
+              >
+                <option value="all">All Applicants</option>
+                <option value="recipients">Recipients Only</option>
+                <option value="non-recipients">Non-Recipients Only</option>
+              </select>
+              <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {loading ? (
+        <div className="flex flex-col items-center justify-center py-32 space-y-4">
+          <RefreshCcw className="w-10 h-10 text-blue-600 animate-spin" />
+          <span className="font-bold text-slate-400 uppercase tracking-widest text-xs">Processing Data...</span>
+        </div>
+      ) : (
+        <div ref={dashboardRef}>
+          {/* Main Stats */}
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+            <div className="bg-blue-600 p-6 rounded-2xl shadow-lg shadow-blue-200 text-white">
+              <div className="flex items-center justify-between mb-4">
+                <Users className="w-8 h-8 opacity-50" />
+                <span className="text-[10px] font-black uppercase tracking-widest bg-white/20 px-3 py-1 rounded-full">Total Reach</span>
+              </div>
+              <h4 className="text-4xl font-black mb-1">{data?.total_applicants || 0}</h4>
+              <p className="text-sm font-medium text-blue-100">Filtered Applicants</p>
+            </div>
+            
+            <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm group hover:border-blue-300 transition-all">
+              <div className="flex items-center justify-between mb-4">
+                <Activity className="w-6 h-6 text-emerald-500" />
+                <div className="w-12 h-1 bg-slate-100 rounded-full overflow-hidden">
+                  <div className="w-2/3 h-full bg-emerald-500"></div>
+                </div>
+              </div>
+              <h4 className="text-2xl font-black text-slate-800 mb-1">
+                {data?.status?.find(s => s.label === 'approved')?.count || 0}
+              </h4>
+              <p className="text-xs font-black text-slate-400 uppercase tracking-wider">Approved Recipients</p>
+            </div>
+
+            <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm group hover:border-blue-300 transition-all">
+              <div className="flex items-center justify-between mb-4">
+                <MapPin className="w-6 h-6 text-amber-500" />
+                <div className="w-12 h-1 bg-slate-100 rounded-full overflow-hidden">
+                  <div className="w-full h-full bg-amber-500"></div>
+                </div>
+              </div>
+              <h4 className="text-2xl font-black text-slate-800 mb-1">
+                {data?.province?.length || 0}
+              </h4>
+              <p className="text-xs font-black text-slate-400 uppercase tracking-wider">Regions Covered</p>
+            </div>
+
+            <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm group hover:border-blue-300 transition-all">
+              <div className="flex items-center justify-between mb-4">
+                <GraduationCap className="w-6 h-6 text-violet-500" />
+                <div className="w-12 h-1 bg-slate-100 rounded-full overflow-hidden">
+                  <div className="w-3/4 h-full bg-violet-500"></div>
+                </div>
+              </div>
+              <h4 className="text-2xl font-black text-slate-800 mb-1">
+                {data?.school_type?.find(s => s.label === 'Government')?.count || 0}
+              </h4>
+              <p className="text-xs font-black text-slate-400 uppercase tracking-wider">Public School Reach</p>
+            </div>
+          </div>
+
+          {/* Charts Grid */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            {/* Gender Distribution */}
+            <div className="bg-white p-8 rounded-2xl border border-slate-200 shadow-sm">
+              <div className="flex items-center justify-between mb-8">
+                <h3 className="font-black text-slate-800 uppercase tracking-tight text-lg">Gender Distribution</h3>
+                <span className="text-[10px] font-black text-slate-400 bg-slate-50 px-3 py-1 rounded-full uppercase">Demographics</span>
+              </div>
+              <div className="h-[300px] flex items-center justify-center">
+                <Pie 
+                  data={getChartData(data?.gender, 'Gender', 'pie')} 
+                  options={{ 
+                    maintainAspectRatio: false,
+                    plugins: { legend: { position: 'bottom', labels: { usePointStyle: true, font: { weight: 'bold', size: 11 } } } }
+                  }} 
+                />
+              </div>
+            </div>
+
+            {/* Stream Comparison */}
+            <div className="bg-white p-8 rounded-2xl border border-slate-200 shadow-sm">
+              <div className="flex items-center justify-between mb-8">
+                <h3 className="font-black text-slate-800 uppercase tracking-tight text-lg">Academic Stream</h3>
+                <span className="text-[10px] font-black text-slate-400 bg-slate-50 px-3 py-1 rounded-full uppercase">Academic</span>
+              </div>
+              <div className="h-[300px]">
+                <Bar 
+                  data={getChartData(data?.stream, 'Students')} 
+                  options={{ 
+                    maintainAspectRatio: false, 
+                    plugins: { legend: { display: false } },
+                    scales: { y: { beginAtZero: true, grid: { display: false } }, x: { grid: { display: false } } }
+                  }} 
+                />
+              </div>
+            </div>
+
+            {/* GPA Breakdown */}
+            <div className="bg-white p-8 rounded-2xl border border-slate-200 shadow-sm">
+              <div className="flex items-center justify-between mb-8">
+                <h3 className="font-black text-slate-800 uppercase tracking-tight text-lg">GPA Performance (SEE)</h3>
+                <span className="text-[10px] font-black text-slate-400 bg-slate-50 px-3 py-1 rounded-full uppercase">Academic Trend</span>
+              </div>
+              <div className="h-[300px]">
+                <Line 
+                  data={getChartData(data?.gpa_breakdown, 'Applicants')} 
+                  options={{ 
+                    maintainAspectRatio: false,
+                    plugins: { legend: { display: false } },
+                    elements: { line: { tension: 0.4, borderColor: '#3b82f6', borderWidth: 3 }, point: { radius: 4, backgroundColor: '#3b82f6' } },
+                    scales: { y: { beginAtZero: true, grid: { display: true, color: '#f1f5f9' } }, x: { grid: { display: false } } }
+                  }} 
+                />
+              </div>
+            </div>
+
+            {/* Ethnicity Breakdown */}
+            <div className="bg-white p-8 rounded-2xl border border-slate-200 shadow-sm">
+              <div className="flex items-center justify-between mb-8">
+                <h3 className="font-black text-slate-800 uppercase tracking-tight text-lg">Ethnicity Profile</h3>
+                <span className="text-[10px] font-black text-slate-400 bg-slate-50 px-3 py-1 rounded-full uppercase">Inclusion</span>
+              </div>
+              <div className="h-[300px]">
+                <Bar 
+                  data={getChartData(data?.ethnicity, 'Count')} 
+                  options={{ 
+                    indexAxis: 'y',
+                    maintainAspectRatio: false,
+                    plugins: { legend: { display: false } },
+                    scales: { x: { beginAtZero: true, grid: { display: false } }, y: { grid: { display: false } } }
+                  }} 
+                />
+              </div>
+            </div>
+
+            {/* Provincial Data */}
+            <div className="bg-white p-8 rounded-2xl border border-slate-200 shadow-sm lg:col-span-2">
+              <div className="flex items-center justify-between mb-8">
+                <h3 className="font-black text-slate-800 uppercase tracking-tight text-lg">Regional Penetration (Province)</h3>
+                <span className="text-[10px] font-black text-slate-400 bg-slate-50 px-3 py-1 rounded-full uppercase">Geographic</span>
+              </div>
+              <div className="h-[350px]">
+                <Bar 
+                  data={getChartData(data?.province, 'Applicants')} 
+                  options={{ 
+                    maintainAspectRatio: false,
+                    plugins: { legend: { display: false } },
+                    scales: { y: { beginAtZero: true, grid: { display: true, color: '#f1f5f9' } }, x: { grid: { display: false } } }
+                  }} 
+                />
+              </div>
+            </div>
+          </div>
+        </div>
       )}
+
+      <style jsx global>{`
+        @media print {
+          /* Hide navigation elements */
+          aside, 
+          nav, 
+          header, 
+          .no-print,
+          [style*="margin-left: 280px"],
+          [style*="margin-left:280px"] {
+            display: none !important;
+            margin-left: 0 !important;
+          }
+          
+          /* Reset main container */
+          main, 
+          .flex-1 {
+            margin-left: 0 !important;
+            padding: 0 !important;
+            width: 100% !important;
+            display: block !important;
+            overflow: visible !important;
+          }
+
+          .fade-in {
+            max-width: 100% !important;
+            padding: 0 !important;
+            margin: 0 !important;
+          }
+
+          .grid {
+            display: grid !important;
+            grid-template-columns: repeat(2, 1fr) !important;
+            gap: 20px !important;
+          }
+
+          /* Ensure KPI cards stay in a row if possible or grid */
+          .grid-cols-4 {
+            grid-template-columns: repeat(4, 1fr) !important;
+          }
+
+          .bg-white {
+            border: 1px solid #eee !important;
+            box-shadow: none !important;
+            page-break-inside: avoid;
+          }
+
+          canvas {
+            max-width: 100% !important;
+            height: auto !important;
+          }
+
+          .mb-8 {
+            margin-bottom: 2rem !important;
+            page-break-inside: avoid;
+          }
+
+          h2 {
+            font-size: 24pt !important;
+            margin-top: 0 !important;
+          }
+
+          h3 {
+            font-size: 16pt !important;
+          }
+
+          /* Ensure charts are visible */
+          .h-[300px], .h-[350px] {
+            height: 300px !important;
+          }
+        }
+      `}</style>
     </section>
   );
 }

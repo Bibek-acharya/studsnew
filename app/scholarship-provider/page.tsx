@@ -65,6 +65,14 @@ const ScholarshipProviderZone: React.FC<ScholarshipProviderZoneProps> = ({
   const [fpOtpTimer, setFpOtpTimer] = useState(120);
 
   useEffect(() => {
+    const token = localStorage.getItem("scholarshipProviderToken");
+    const user = localStorage.getItem("scholarshipProviderUser");
+    if (token && user) {
+      router.push("/scholarship-provider/dashboard");
+    }
+  }, [router]);
+
+  useEffect(() => {
     if (showOtpStep || fpStep === "otp") {
       const interval = setInterval(() => {
         if (showOtpStep) {
@@ -127,7 +135,7 @@ const ScholarshipProviderZone: React.FC<ScholarshipProviderZoneProps> = ({
           ...subUser,
           isSubUser: true,
         }));
-        setCurrentView("dashboard");
+        router.push("/scholarship-provider/dashboard");
         setLoginPassword("");
         return;
       }
@@ -148,7 +156,7 @@ const ScholarshipProviderZone: React.FC<ScholarshipProviderZoneProps> = ({
         localStorage.setItem("scholarshipProviderUser", JSON.stringify(user));
       }
 
-      setCurrentView("dashboard");
+      router.push("/scholarship-provider/dashboard");
       setLoginPassword("");
     } catch (error) {
       const msg = error instanceof Error ? error.message : "Login failed. Please try again.";
@@ -353,17 +361,6 @@ const ScholarshipProviderZone: React.FC<ScholarshipProviderZoneProps> = ({
     }
   };
 
-  if (currentView === "dashboard") {
-    return <ScholarshipProviderDashboard onLogout={() => {
-      const userStr = localStorage.getItem("scholarshipProviderUser");
-      const user = userStr ? JSON.parse(userStr) : null;
-      if (user?.isSubUser) {
-        localStorage.removeItem("scholarshipProviderUser");
-      }
-      apiService.scholarshipProviderLogout();
-      setCurrentView("landing");
-    }} />;
-  }
 
   if (currentView === "pending-approval") {
     return (

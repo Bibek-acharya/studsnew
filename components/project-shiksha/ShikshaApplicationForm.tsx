@@ -1207,7 +1207,7 @@ export default function ShikshaApplicationForm({
               disabled={isSubmitting}
               className="w-full sm:w-auto bg-[#0000ff] hover:bg-[#0000cc] disabled:bg-gray-400 text-white font-bold text-[16px] py-4 px-12 rounded transition-all hover:-translate-y-0.5 active:translate-y-0 text-center disabled:cursor-not-allowed"
             >
-              {isSubmitting ? "Processing..." : (paymentConfig?.enabled && paymentConfig.fee_amount > 0 ? "Continue to Payment" : "Submit Application")}
+              {isSubmitting ? "Processing..." : (paymentConfig?.enabled && paymentConfig.fee_amount > 0 ? "Proceed to Payment" : "Submit Application")}
             </button>
           </div>
         </form>

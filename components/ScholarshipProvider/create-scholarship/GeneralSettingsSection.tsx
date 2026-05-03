@@ -5,6 +5,7 @@ import { format, addDays } from "date-fns";
 import FileUpload from "../common/FileUpload";
 import DatePicker from "../common/DatePicker";
 import Dropdown from "@/components/college-recommender/Dropdown";
+import { NEPAL_DISTRICTS } from "@/lib/location-data";
 
 interface GeneralSettingsSectionProps {
   mainTitle: string;
@@ -107,6 +108,36 @@ export const GeneralSettingsSection: React.FC<GeneralSettingsSectionProps> = ({
   bannerError,
 }) => {
   const tomorrow = format(addDays(new Date(), 1), "yyyy-MM-dd");
+  const [showSuggestions, setShowSuggestions] = React.useState(false);
+  const [filteredDistricts, setFilteredDistricts] = React.useState<string[]>([]);
+  const suggestionRef = React.useRef<HTMLDivElement>(null);
+
+  const ALL_DISTRICTS = React.useMemo(() => {
+    return Array.from(new Set(Object.values(NEPAL_DISTRICTS).flat())).sort();
+  }, []);
+
+  React.useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (suggestionRef.current && !suggestionRef.current.contains(event.target as Node)) {
+        setShowSuggestions(false);
+      }
+    }
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
+  const handleLocationChange = (val: string) => {
+    setLocation(val);
+    if (val.trim().length > 0) {
+      const filtered = ALL_DISTRICTS.filter(d => 
+        d.toLowerCase().includes(val.toLowerCase())
+      ).slice(0, 8);
+      setFilteredDistricts(filtered);
+      setShowSuggestions(filtered.length > 0);
+    } else {
+      setShowSuggestions(false);
+    }
+  };
 
   return (
     <div className="bg-white rounded-xl border border-gray-200 overflow-hidden mb-8">
@@ -226,18 +257,45 @@ export const GeneralSettingsSection: React.FC<GeneralSettingsSectionProps> = ({
             {educationLevelError && <p className="text-red-500 text-xs mt-1">{educationLevelError}</p>}
           </div>
 
-          <div className="space-y-1.5">
+          <div className="space-y-1.5 relative" ref={suggestionRef}>
             <label className="block text-sm font-medium text-gray-700">
               Location <span className="text-red-500">*</span>
             </label>
-            <input
-              id="location"
-              type="text"
-              className={`${formInputClass} ${locationError ? "border-red-500 bg-red-50/10" : ""}`}
-              placeholder="e.g. Kathmandu, Nepal"
-              value={location}
-              onChange={(e) => setLocation(e.target.value)}
-            />
+            <div className="relative">
+              <input
+                id="location"
+                type="text"
+                className={`${formInputClass} ${locationError ? "border-red-500 bg-red-50/10" : ""}`}
+                placeholder="Search district (e.g. Kathmandu)"
+                value={location}
+                onChange={(e) => handleLocationChange(e.target.value)}
+                onFocus={() => {
+                  if (location.trim().length > 0) setShowSuggestions(filteredDistricts.length > 0);
+                }}
+                autoComplete="off"
+              />
+              {showSuggestions && (
+                <div className="absolute z-50 w-full mt-1 bg-white border border-gray-200 rounded-lg shadow-xl overflow-hidden animate-in fade-in zoom-in duration-100">
+                  {filteredDistricts.map((d) => (
+                    <button
+                      key={d}
+                      type="button"
+                      className="w-full text-left px-4 py-2.5 text-sm text-gray-700 hover:bg-blue-50 hover:text-blue-700 transition-colors flex items-center gap-2"
+                      onClick={() => {
+                        setLocation(d);
+                        setShowSuggestions(false);
+                      }}
+                    >
+                      <svg className="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                      </svg>
+                      {d}
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
             {locationError && <p className="text-red-500 text-xs mt-1">{locationError}</p>}
           </div>
 
