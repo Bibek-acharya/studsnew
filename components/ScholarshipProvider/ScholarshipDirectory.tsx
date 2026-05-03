@@ -3,6 +3,7 @@
 import React, { useState, useEffect, useCallback, useMemo, memo } from "react";
 import { Home, Building2, CheckCircle, DollarSign, MapPin, GraduationCap, Calendar, Trash2, Pencil, Users } from "lucide-react";
 import { scholarshipProviderApi, ProviderScholarship } from "@/services/scholarshipProviderApi";
+import ConfirmationModal from "./common/ConfirmationModal";
 
 interface ScholarshipDirectoryProps {
   onEdit?: (id: number) => void;
@@ -50,6 +51,11 @@ const FALLBACKS: ProviderScholarship[] = [
 const ScholarshipDirectory: React.FC<ScholarshipDirectoryProps> = memo(({ onEdit }) => {
   const [scholarships, setScholarships] = useState<ProviderScholarship[]>([]);
   const [loading, setLoading] = useState(true);
+  const [deleteModal, setDeleteModal] = useState<{ isOpen: boolean; scholarshipId: number | null; title: string }>({
+    isOpen: false,
+    scholarshipId: null,
+    title: "",
+  });
 
   useEffect(() => {
     async function fetchData() {
@@ -67,14 +73,25 @@ const ScholarshipDirectory: React.FC<ScholarshipDirectoryProps> = memo(({ onEdit
   }, []);
 
   const handleDelete = useCallback(async (id: number) => {
-    if (!confirm("Delete this scholarship?")) return;
+    const target = scholarships.find((s) => s.id === id);
+    setDeleteModal({
+      isOpen: true,
+      scholarshipId: id,
+      title: target?.title || "this scholarship",
+    });
+  }, [scholarships]);
+
+  const confirmDeleteScholarship = useCallback(async () => {
+    if (!deleteModal.scholarshipId) return;
+    const scholarshipId = deleteModal.scholarshipId;
+    setDeleteModal({ isOpen: false, scholarshipId: null, title: "" });
     try {
-      await scholarshipProviderApi.deleteScholarship(id);
-      setScholarships((prev) => prev.filter((s) => s.id !== id));
+      await scholarshipProviderApi.deleteScholarship(scholarshipId);
+      setScholarships((prev) => prev.filter((s) => s.id !== scholarshipId));
     } catch {
       alert("Failed to delete scholarship");
     }
-  }, []);
+  }, [deleteModal.scholarshipId]);
 
   const fundingColor = (type: string) => {
     const map: Record<string, string> = {
@@ -109,6 +126,17 @@ const ScholarshipDirectory: React.FC<ScholarshipDirectoryProps> = memo(({ onEdit
 
   return (
     <div className="space-y-6">
+      <ConfirmationModal
+        isOpen={deleteModal.isOpen}
+        title="Delete Scholarship"
+        message={`Are you sure you want to delete \"${deleteModal.title}\"? This action cannot be undone.`}
+        confirmText="Delete"
+        cancelText="Cancel"
+        onConfirm={confirmDeleteScholarship}
+        onCancel={() => setDeleteModal({ isOpen: false, scholarshipId: null, title: "" })}
+        destructive
+      />
+
       <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-2">
         <h1 className="text-2xl font-bold text-gray-800">Scholarship Directory</h1>
         <div className="flex items-center text-sm text-gray-500 mt-2 sm:mt-0 gap-2">

@@ -109,6 +109,7 @@ export const ContactDetailsSection: React.FC<ContactDetailsSectionProps> = ({
               Program Coverage Area <span className="text-red-500">*</span>
             </label>
             <input
+              id="coverageArea"
               type="text"
               className={formInputClass}
               placeholder="Which areas does this scholarship cover?"
@@ -121,6 +122,7 @@ export const ContactDetailsSection: React.FC<ContactDetailsSectionProps> = ({
               Contact Email Address <span className="text-red-500">*</span>
             </label>
             <input
+              id="contactEmail"
               type="email"
               className={`${formInputClass} ${contactEmailError ? 'border-red-500' : ''}`}
               placeholder="contact@example.com"
@@ -134,6 +136,7 @@ export const ContactDetailsSection: React.FC<ContactDetailsSectionProps> = ({
               Primary Phone Number <span className="text-red-500">*</span>
             </label>
             <input
+              id="primaryPhone"
               type="text"
               className={`${formInputClass} ${primaryPhoneError ? 'border-red-500' : ''}`}
               placeholder="98XXXXXXXX (10 digits starting with 9)"
@@ -147,6 +150,7 @@ export const ContactDetailsSection: React.FC<ContactDetailsSectionProps> = ({
               Secondary Phone Number <span className="text-red-500">*</span>
             </label>
             <input
+              id="secondaryPhone"
               type="text"
               className={`${formInputClass} ${secondaryPhoneError ? 'border-red-500' : ''}`}
               placeholder="98XXXXXXXX (10 digits starting with 9)"
@@ -160,6 +164,7 @@ export const ContactDetailsSection: React.FC<ContactDetailsSectionProps> = ({
               Official Website URL <span className="text-red-500">*</span>
             </label>
             <input
+              id="websiteUrl"
               type="text"
               className={`${formInputClass} ${websiteUrlError ? 'border-red-500' : ''}`}
               placeholder="https://example.com"
@@ -173,6 +178,7 @@ export const ContactDetailsSection: React.FC<ContactDetailsSectionProps> = ({
               Office Address <span className="text-red-500">*</span>
             </label>
             <input
+              id="officeAddress"
               type="text"
               className={formInputClass}
               placeholder="Physical location"
@@ -185,6 +191,7 @@ export const ContactDetailsSection: React.FC<ContactDetailsSectionProps> = ({
               Map Embed URL <span className="text-red-500">*</span>
             </label>
             <input
+              id="mapUrl"
               type="text"
               className={`${formInputClass} ${mapUrlError ? 'border-red-500' : ''}`}
               placeholder="https://www.google.com/maps/embed?pb..."

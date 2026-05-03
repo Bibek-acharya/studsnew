@@ -3,8 +3,10 @@
 import React from "react";
 import { Plus, Trash } from "@phosphor-icons/react";
 
-interface ExamCenterItem {
+export interface ExamCenterItem {
   province: string;
+  headerColor: string;
+  info: string;
   centerName: string;
   contactPerson: string;
   phoneNumber: string;
@@ -25,7 +27,7 @@ const PROVINCES = [
 
 export const ExamCentersSection: React.FC<ExamCentersSectionProps> = ({ examCenters, setExamCenters }) => {
   const addExamCenter = () => {
-    setExamCenters([...examCenters, { province: "", centerName: "", contactPerson: "", phoneNumber: "", mapCoordinates: "" }]);
+    setExamCenters([...examCenters, { province: "", headerColor: "", info: "", centerName: "", contactPerson: "", phoneNumber: "", mapCoordinates: "" }]);
   };
 
   const removeExamCenter = (index: number) => {
@@ -78,6 +80,32 @@ export const ExamCentersSection: React.FC<ExamCentersSectionProps> = ({ examCent
                   </select>
                 </div>
                 <div>
+                  <label className="block text-sm font-medium text-gray-700">Header Color</label>
+                  <div className="flex gap-2 items-center">
+                    <input
+                      type="color"
+                      className="w-12 h-10 rounded cursor-pointer border border-gray-200"
+                      value={ec.headerColor || "#3B82F6"}
+                      onChange={(e) => updateExamCenter(index, "headerColor", e.target.value)}
+                    />
+                    <input
+                      className={formInputClass}
+                      placeholder="#3B82F6"
+                      value={ec.headerColor}
+                      onChange={(e) => updateExamCenter(index, "headerColor", e.target.value)}
+                    />
+                  </div>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700">Info</label>
+                  <input
+                    className={formInputClass}
+                    placeholder="Additional info"
+                    value={ec.info}
+                    onChange={(e) => updateExamCenter(index, "info", e.target.value)}
+                  />
+                </div>
+                <div>
                   <label className="block text-sm font-medium text-gray-700">Center Name</label>
                   <input
                     className={formInputClass}
@@ -105,10 +133,10 @@ export const ExamCentersSection: React.FC<ExamCentersSectionProps> = ({ examCent
                   />
                 </div>
                 <div className="md:col-span-2">
-                  <label className="block text-sm font-medium text-gray-700">Map Coordinates (lat, lng)</label>
+                  <label className="block text-sm font-medium text-gray-700">Map Link</label>
                   <input
                     className={formInputClass}
-                    placeholder="26.4525, 87.2718"
+                    placeholder="https://maps.app.goo.gl/..."
                     value={ec.mapCoordinates}
                     onChange={(e) => updateExamCenter(index, "mapCoordinates", e.target.value)}
                   />

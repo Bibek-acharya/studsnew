@@ -1,8 +1,10 @@
 "use client";
 
 import React, { useState, useEffect, useCallback, memo } from "react";
+import { toast } from "sonner";
 import { Home, CalendarDays, Search, Eye, Pencil, Trash2, ChevronLeft, ChevronRight } from "lucide-react";
 import { scholarshipProviderApi, ProviderEvent } from "@/services/scholarshipProviderApi";
+import ConfirmationModal from "./common/ConfirmationModal";
 
 const FALLBACK_EVENTS: ProviderEvent[] = [
   { id: 1, provider_id: 1, name: "Leadership Training 2026", short_desc: "Leadership workshop", description: "3-day intensive leadership workshop", image_url: "https://images.unsplash.com/photo-1542744173-8e7e53415bb0?auto=format&fit=crop&q=80&w=800&h=400", event_type: "Training", category: "Development", max_participants: 50, online_link: "", organized_by: "Youth Center", contact_person: "John Doe", contact_email: "john@example.com", start_date: "2026-04-25T09:00:00", end_date: "2026-04-27T16:00:00", location: "Kathmandu", tags: ["leadership", "training"], enable_registration: true, status: "upcoming", attendees: 0, created_at: "", updated_at: "" },
@@ -37,6 +39,11 @@ const EventsDirectory: React.FC = memo(() => {
   const [search, setSearch] = useState("");
   const [page, setPage] = useState(1);
   const [total, setTotal] = useState(0);
+  const [deleteModal, setDeleteModal] = useState<{ isOpen: boolean; eventId: number | null; title: string }>({
+    isOpen: false,
+    eventId: null,
+    title: "",
+  });
   const limit = 10;
 
   useEffect(() => {
@@ -61,14 +68,21 @@ const EventsDirectory: React.FC = memo(() => {
     : events;
 
   const handleDelete = useCallback(async (id: number) => {
-    if (!confirm("Delete this event?")) return;
+    const target = events.find((item) => item.id === id);
+    setDeleteModal({ isOpen: true, eventId: id, title: target?.name || "this event" });
+  }, [events]);
+
+  const confirmDeleteEvent = useCallback(async () => {
+    if (!deleteModal.eventId) return;
+    const eventId = deleteModal.eventId;
+    setDeleteModal({ isOpen: false, eventId: null, title: "" });
     try {
-      await scholarshipProviderApi.deleteEvent(id);
-      setEvents((prev) => prev.filter((e) => e.id !== id));
-    } catch {
-      alert("Failed to delete event");
+      await scholarshipProviderApi.deleteEvent(eventId);
+      setEvents((prev) => prev.filter((e) => e.id !== eventId));
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Failed to delete event");
     }
-  }, []);
+  }, [deleteModal.eventId]);
 
   const totalPages = Math.ceil(total / limit);
 
@@ -88,6 +102,17 @@ const EventsDirectory: React.FC = memo(() => {
 
   return (
     <div className="space-y-6">
+      <ConfirmationModal
+        isOpen={deleteModal.isOpen}
+        title="Delete Event"
+        message={`Are you sure you want to delete \"${deleteModal.title}\"? This action cannot be undone.`}
+        confirmText="Delete"
+        cancelText="Cancel"
+        onConfirm={confirmDeleteEvent}
+        onCancel={() => setDeleteModal({ isOpen: false, eventId: null, title: "" })}
+        destructive
+      />
+
       <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-2">
         <h1 className="text-2xl font-bold text-gray-800">Events Directory</h1>
         <div className="flex items-center text-sm text-gray-500 mt-2 sm:mt-0 gap-2">

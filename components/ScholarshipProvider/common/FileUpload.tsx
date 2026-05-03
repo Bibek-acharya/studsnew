@@ -5,6 +5,7 @@ import { UploadCloud, Trash2 } from "lucide-react";
 
 interface FileUploadProps {
   label?: string;
+  uploadedText?: string;
   accept?: string;
   maxSize?: string;
   recommendedSize?: string;
@@ -16,6 +17,7 @@ interface FileUploadProps {
 
 const FileUpload: React.FC<FileUploadProps> = ({
   label,
+  uploadedText = "File uploaded",
   accept = "image/*",
   maxSize = "5MB",
   recommendedSize,
@@ -95,7 +97,7 @@ const FileUpload: React.FC<FileUploadProps> = ({
               <Trash2 className="w-4 h-4" />
             </button>
             <div className="absolute bottom-3 left-3 right-12 text-left text-white">
-              <p className="text-sm font-semibold">Banner uploaded</p>
+              <p className="text-sm font-semibold">{uploadedText}</p>
               <p className="text-xs text-white/80">Click anywhere to replace the image</p>
             </div>
           </div>

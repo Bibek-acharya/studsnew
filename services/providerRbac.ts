@@ -42,11 +42,37 @@ export const PERMISSIONS_LIST = [
 
 export const providerRbacApi = {
   async getUsers(): Promise<{ users: ProviderUser[]; meta: any }> {
-    return apiRequest("/api/v1/scholarship-providers/auth/access-users");
+    const res = await apiRequest<{ success: boolean; data: { users: any[]; meta: any } }>("/api/v1/scholarship-providers/auth/access-users");
+    const users = ((res.data?.users || []) as any[]).map((u: any) => ({
+      id: Number(u.id),
+      name: u.name,
+      email: u.email,
+      role: u.role,
+      roleLabel: u.role_label,
+      status: u.status,
+      lastActive: u.last_active,
+      avatar: u.avatar,
+      providerId: Number(u.provider_id),
+      permissions: u.permissions,
+    }));
+    return { users, meta: res.data?.meta || {} };
   },
 
   async getUser(id: number): Promise<ProviderUser> {
-    return apiRequest(`/api/v1/scholarship-providers/auth/access-users/${id}`);
+    const res = await apiRequest<{ success: boolean; data: any }>(`/api/v1/scholarship-providers/auth/access-users/${id}`);
+    const u = res.data || res;
+    return {
+      id: Number(u.id),
+      name: u.name,
+      email: u.email,
+      role: u.role,
+      roleLabel: u.role_label,
+      status: u.status,
+      lastActive: u.last_active,
+      avatar: u.avatar,
+      providerId: Number(u.provider_id),
+      permissions: u.permissions,
+    };
   },
 
   async createUser(data: CreateUserRequest): Promise<ProviderUser> {
@@ -77,10 +103,27 @@ export const providerRbacApi = {
   },
 
   async login(email: string, password: string): Promise<{ user: ProviderUser; token: string; permissions: string[] }> {
-    return apiRequest("/api/v1/scholarship-providers/auth/access-login", {
+    const res = await apiRequest<{ success: boolean; data: { user: any; token: string; permissions: string[] } }>("/api/v1/scholarship-providers/auth/access-login", {
       method: "POST",
       body: JSON.stringify({ email, password }),
     });
+    const u = res.data?.user || res.user;
+    return {
+      user: {
+        id: u.id,
+        name: u.name,
+        email: u.email,
+        role: u.role,
+        roleLabel: u.role_label,
+        status: u.status,
+        lastActive: u.last_active,
+        avatar: u.avatar,
+        providerId: u.provider_id,
+        permissions: u.permissions,
+      },
+      token: res.data?.token || res.token,
+      permissions: res.data?.permissions || res.permissions || [],
+    };
   },
 
   async changePassword(data: { current_password: string; new_password: string }): Promise<void> {

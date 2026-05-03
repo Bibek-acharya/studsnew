@@ -24,6 +24,7 @@ interface DatePickerProps {
   onChange: (value: string) => void;
   placeholder: string;
   label?: string;
+  id?: string;
   required?: boolean;
   minDate?: string;
   maxDate?: string;
@@ -65,6 +66,7 @@ const DatePicker: React.FC<DatePickerProps> = ({
   onChange,
   placeholder,
   label,
+  id,
   required,
   minDate,
   maxDate,
@@ -190,6 +192,7 @@ const DatePicker: React.FC<DatePickerProps> = ({
       <div className="relative">
         <button
           ref={buttonRef}
+          id={id}
           type="button"
           onClick={() => setIsOpen((prev) => !prev)}
           className={`input-field flex items-center justify-between gap-3 text-left ${

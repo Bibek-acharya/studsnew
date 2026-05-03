@@ -27,6 +27,7 @@ interface SidebarProps {
 
 const Sidebar: React.FC<SidebarProps> = ({ activeTab, onNavigate, onLogout, permissions = [] }) => {
   const hasPermission = (permId: string) => permissions.includes(permId);
+  const [showLogoutModal, setShowLogoutModal] = useState(false);
 
   const [openDropdowns, setOpenDropdowns] = useState<Record<string, boolean>>({
     scholarship: false,
@@ -113,6 +114,52 @@ const Sidebar: React.FC<SidebarProps> = ({ activeTab, onNavigate, onLogout, perm
     );
   };
 
+  const LogoutModal = () => {
+    if (!showLogoutModal) return null;
+
+    return (
+      <div className="fixed inset-0 z-[60] flex items-center justify-center px-4">
+        <div className="absolute inset-0 bg-black/45" onClick={() => setShowLogoutModal(false)} />
+        <div className="relative w-full max-w-[480px] rounded-[28px] bg-white px-6 pb-6 pt-8 shadow-[0_24px_70px_rgba(15,23,42,0.18)] sm:px-8 sm:pb-8 sm:pt-10">
+          <div className="mx-auto mb-6 flex h-16 w-16 items-center justify-center rounded-full bg-red-50 sm:h-18 sm:w-18">
+            <div className="flex h-10 w-10 items-center justify-center rounded-full border-2 border-red-500 text-red-500">
+              <span className="text-2xl leading-none font-semibold">!</span>
+            </div>
+          </div>
+
+          <div className="mx-auto max-w-[380px] text-center">
+            <h3 className="text-[28px] font-semibold tracking-tight text-slate-900 sm:text-[32px]">
+              Log out of your account?
+            </h3>
+            <p className="mt-4 text-[17px] leading-7 text-slate-500 sm:text-[18px]">
+              Are you sure you want to log out? You will need to re-enter your credentials to access your account.
+            </p>
+          </div>
+
+          <div className="mt-8 grid grid-cols-2 gap-4 sm:mt-10">
+            <button
+              type="button"
+              onClick={() => setShowLogoutModal(false)}
+              className="h-14 rounded-xl bg-slate-100 text-lg font-medium text-slate-600 transition-colors hover:bg-slate-200"
+            >
+              Cancel
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                setShowLogoutModal(false);
+                onLogout();
+              }}
+              className="h-14 rounded-xl bg-red-600 text-lg font-semibold text-white shadow-sm transition-colors hover:bg-red-700"
+            >
+              Yes, Log out
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  };
+
   return (
     <aside className="w-[280px] bg-white border-r border-gray-200 fixed left-0 top-0 bottom-0 overflow-y-auto z-50">
       <div className="h-16 flex items-center px-6 border-b border-gray-50">
@@ -126,7 +173,7 @@ const Sidebar: React.FC<SidebarProps> = ({ activeTab, onNavigate, onLogout, perm
       <nav className="py-4 px-4 flex flex-col gap-1">
         <NavItem
           icon={LayoutDashboard}
-          label="Dashboard"
+          label="Overview"
           section="sec-dashboard"
           requiredPerm="scholarships"
         />
@@ -228,13 +275,15 @@ const Sidebar: React.FC<SidebarProps> = ({ activeTab, onNavigate, onLogout, perm
         <NavItem icon={Settings} label="Settings" section="sec-settings" requiredPerm="settings" />
 
         <div
-          onClick={onLogout}
+          onClick={() => setShowLogoutModal(true)}
           className="flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium text-red-500 hover:bg-red-50 cursor-pointer mt-4 transition-all"
         >
           <LogOut className="w-5 h-5" />
           <span>Logout</span>
         </div>
       </nav>
+
+      <LogoutModal />
     </aside>
   );
 };

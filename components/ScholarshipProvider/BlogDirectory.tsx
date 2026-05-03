@@ -1,8 +1,10 @@
 "use client";
 
 import React, { useState, useEffect, useCallback, useMemo, memo } from "react";
+import { toast } from "sonner";
 import { Home, FileText, Search, Eye, Pencil, Trash2, ChevronLeft, ChevronRight } from "lucide-react";
 import { scholarshipProviderApi, ProviderBlog } from "@/services/scholarshipProviderApi";
+import ConfirmationModal from "./common/ConfirmationModal";
 
 const FALLBACK_BLOGS: ProviderBlog[] = [
   { id: 1, provider_id: 1, title: "Product of Scholarship Project - Sunil's Story", content: "How scholarship changed one student's life", image_url: "", author: "Admin", status: "published", published_at: "2025-10-27", views: 0, likes: 0, created_at: "2025-10-27", updated_at: "" },
@@ -24,6 +26,11 @@ const BlogDirectory: React.FC = memo(() => {
   const [search, setSearch] = useState("");
   const [page, setPage] = useState(1);
   const [total, setTotal] = useState(0);
+  const [deleteModal, setDeleteModal] = useState<{ isOpen: boolean; blogId: number | null; title: string }>({
+    isOpen: false,
+    blogId: null,
+    title: "",
+  });
   const limit = 10;
 
   useEffect(() => {
@@ -48,14 +55,21 @@ const BlogDirectory: React.FC = memo(() => {
     : blogs;
 
   const handleDelete = useCallback(async (id: number) => {
-    if (!confirm("Delete this blog?")) return;
+    const target = blogs.find((blog) => blog.id === id);
+    setDeleteModal({ isOpen: true, blogId: id, title: target?.title || "this blog" });
+  }, [blogs]);
+
+  const confirmDeleteBlog = useCallback(async () => {
+    if (!deleteModal.blogId) return;
+    const blogId = deleteModal.blogId;
+    setDeleteModal({ isOpen: false, blogId: null, title: "" });
     try {
-      await scholarshipProviderApi.deleteBlog(id);
-      setBlogs((prev) => prev.filter((b) => b.id !== id));
-    } catch {
-      alert("Failed to delete blog");
+      await scholarshipProviderApi.deleteBlog(blogId);
+      setBlogs((prev) => prev.filter((b) => b.id !== blogId));
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Failed to delete blog");
     }
-  }, []);
+  }, [deleteModal.blogId]);
 
   const totalPages = Math.ceil(total / limit);
 
@@ -65,6 +79,17 @@ const BlogDirectory: React.FC = memo(() => {
 
   return (
     <div className="space-y-6">
+      <ConfirmationModal
+        isOpen={deleteModal.isOpen}
+        title="Delete Blog"
+        message={`Are you sure you want to delete \"${deleteModal.title}\"? This action cannot be undone.`}
+        confirmText="Delete"
+        cancelText="Cancel"
+        onConfirm={confirmDeleteBlog}
+        onCancel={() => setDeleteModal({ isOpen: false, blogId: null, title: "" })}
+        destructive
+      />
+
       <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-2">
         <h1 className="text-2xl font-bold text-gray-800">Blog Directory</h1>
         <div className="flex items-center text-sm text-gray-500 mt-2 sm:mt-0 gap-2">

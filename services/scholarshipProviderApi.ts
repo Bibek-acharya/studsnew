@@ -10,11 +10,6 @@ async function callApi<T>(path: string, options: RequestInit = {}): Promise<T> {
 }
 
 const FIELD_MAPPINGS = {
-  scholarship_types_new: 'scholarship_types',
-  selection_rubric_new: 'selection_rubric',
-  faqs_new: 'fa_qs',
-  gallery_images_new: 'gallery_images',
-  exam_centers_new: 'exam_centers',
   about_paragraph_1: 'about_paragraph1',
   about_paragraph_2: 'about_paragraph2',
   scholarship_description_1: 'scholarship_description1',
@@ -177,6 +172,7 @@ export interface ExamCenterItem {
 export interface DownloadItem {
   title: string;
   description: string;
+  url: string;
 }
 
 export interface BankDetails {
@@ -246,7 +242,7 @@ export interface CreateScholarshipPayload {
   faqs?: FAQ[];
   partners?: Partner[];
   achievements?: Achievement[];
-  gallery_images?: string[];
+  gallery_images?: GalleryImageItem[];
   guidelines_url?: string;
   news_items?: NewsItem[];
   map_embed_url?: string;
@@ -344,7 +340,7 @@ export interface ProviderScholarship {
   faqs?: FAQ[];
   partners?: Partner[];
   achievements?: Achievement[];
-  gallery_images?: string[];
+  gallery_images?: GalleryImageItem[];
   guidelines_url?: string;
   news_items?: NewsItem[];
   map_embed_url?: string;
@@ -373,16 +369,7 @@ export interface ProviderScholarship {
   partner_groups?: PartnerGroup[];
   exam_centers_new?: ExamCenterItem[];
   downloads?: DownloadItem[];
-  payment_config?: {
-    fee_amount: number;
-    methods: string[];
-    bank_details?: {
-      bankName: string;
-      accountName: string;
-      accountNumber: string;
-      branch: string;
-    };
-  };
+  payment_config?: PaymentConfig;
 }
 
 export interface ProviderPayment {
@@ -390,6 +377,17 @@ export interface ProviderPayment {
   receipt_url?: string;
   amount?: number;
   processed_at?: string;
+}
+
+export interface ProviderProfile {
+  id: number;
+  provider_name: string;
+  registration_number: string;
+  email: string;
+  contact_number?: string;
+  pan_number?: string;
+  website_url?: string;
+  role: string;
 }
 
 export interface ProviderApplication {
@@ -402,6 +400,8 @@ export interface ProviderApplication {
   email: string;
   phone_number: string;
   status: string;
+  evaluation_score?: number;
+  evaluation_passed?: boolean;
   evaluation_notes: string;
   documents: any;
   personal_statement: string;
@@ -621,7 +621,7 @@ export const scholarshipProviderApi = {
   },
 
   async getAnalytics(): Promise<AnalyticsData> {
-    return apiRequest<AnalyticsData>("/api/v1/scholarship-providers/analytics");
+    return callApi<AnalyticsData>("/api/v1/scholarship-providers/analytics");
   },
 
   async createScholarship(data: CreateScholarshipPayload): Promise<ProviderScholarship> {
@@ -721,12 +721,12 @@ export const scholarshipProviderApi = {
     return apiRequest<ProviderMessage>(`/api/v1/scholarship-providers/messages/${id}`);
   },
 
-  async getProfile(): Promise<{ id: number; provider_name: string; registration_number: string; email: string; role: string }> {
-    return callApi<{ id: number; provider_name: string; registration_number: string; email: string; role: string }>("/api/v1/scholarship-providers/profile");
+  async getProfile(): Promise<ProviderProfile> {
+    return callApi<ProviderProfile>("/api/v1/scholarship-providers/profile");
   },
 
-  async updateProfile(data: { provider_name: string; registration_number: string }): Promise<{ id: number; provider_name: string; registration_number: string; email: string }> {
-    return apiRequest("/api/v1/scholarship-providers/profile", {
+  async updateProfile(data: { provider_name: string; registration_number: string; contact_number?: string; pan_number?: string; website_url?: string }): Promise<ProviderProfile> {
+    return apiRequest<ProviderProfile>("/api/v1/scholarship-providers/profile", {
       method: "PUT",
       body: JSON.stringify(data),
     });
@@ -743,6 +743,21 @@ export const scholarshipProviderApi = {
     return extractUploadedUrl(
       apiRequest<{ data?: { url?: string }; url?: string }>(
         `/api/v1/scholarship-providers/uploads?folder=${encodeURIComponent(folder)}`,
+        {
+          method: "POST",
+          body: formData,
+        },
+      ),
+    );
+  },
+
+  async uploadDocument(file: File, folder: string): Promise<string> {
+    const formData = new FormData();
+    formData.append("file", file);
+
+    return extractUploadedUrl(
+      apiRequest<{ data?: { url?: string }; url?: string }>(
+        `/api/v1/scholarship-providers/uploads/document?folder=${encodeURIComponent(folder)}`,
         {
           method: "POST",
           body: formData,

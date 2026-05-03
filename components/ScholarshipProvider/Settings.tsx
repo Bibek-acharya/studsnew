@@ -11,7 +11,7 @@ const Settings: React.FC = memo(() => {
   const [curPassword, setCurPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
   const [conNewPassword, setConNewPassword] = useState("");
-  const [notifs, setNotifs] = useState({ email: true, newApp: true, payment: true, deadline: true, result: true });
+  const [notifs, setNotifs] = useState({ email: true, newApp: true, payment: true, deadline: true });
   const [twoFA, setTwoFA] = useState(false);
   const [passLoading, setPassLoading] = useState(false);
   const [passError, setPassError] = useState("");
@@ -140,7 +140,6 @@ const Settings: React.FC = memo(() => {
             { key: "newApp", label: "New Application Alert", desc: "Get notified when a new application is submitted" },
             { key: "payment", label: "Payment Confirmation Alert", desc: "Notify when application fee is received" },
             { key: "deadline", label: "Deadline Reminder", desc: "Auto-remind applicants 3 days before deadline" },
-            { key: "result", label: "Result Publish Alert", desc: "Notify all applicants when results are published" },
           ].map((n) => (
             <div key={n.key} className="flex items-center justify-between p-3 border border-gray-200 rounded-lg">
               <div>
@@ -150,25 +149,6 @@ const Settings: React.FC = memo(() => {
               <Toggle checked={(notifs as any)[n.key]} onChange={(v) => setNotifs((prev) => ({ ...prev, [n.key]: v }))} />
             </div>
           ))}
-        </div>
-      </div>
-
-      {/* Privacy & Security */}
-      <div className="bg-white rounded-lg p-8 border border-slate-100">
-        <div className="flex justify-between items-center mb-6">
-          <h2 className="text-lg font-bold text-gray-900 flex items-center gap-2">
-            Privacy & Security
-          </h2>
-          <button onClick={() => alert("Security settings saved!")} className="px-4 py-2 bg-blue-600 text-white rounded-lg text-sm font-semibold hover:bg-blue-700 transition-colors">Save Changes</button>
-        </div>
-        <div className="space-y-4">
-          <div className="flex items-center justify-between p-3 border border-gray-200 rounded-lg">
-            <div>
-              <p className="text-sm font-medium text-gray-900">Two-Factor Authentication (2FA)</p>
-              <p className="text-xs text-gray-500">Require OTP for admin logins</p>
-            </div>
-            <Toggle checked={twoFA} onChange={setTwoFA} />
-          </div>
         </div>
       </div>
 

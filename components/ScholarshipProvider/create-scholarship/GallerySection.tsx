@@ -1,11 +1,14 @@
 "use client";
 
-import React from "react";
+import React, { useState } from "react";
 import { Plus, Trash } from "@phosphor-icons/react";
+import { scholarshipProviderApi } from "@/services/scholarshipProviderApi";
+import FileUpload from "../common/FileUpload";
 
-interface GalleryImageItem {
+export interface GalleryImageItem {
   title: string;
   url: string;
+  file?: File;
 }
 
 interface GallerySectionProps {
@@ -16,6 +19,8 @@ interface GallerySectionProps {
 const formInputClass = "w-full px-4 py-2.5 rounded-lg border border-gray-200 bg-white text-gray-900 focus:outline-none focus:border-blue-500";
 
 export const GallerySection: React.FC<GallerySectionProps> = ({ images, setImages }) => {
+  const [uploadingIndex, setUploadingIndex] = useState<number | null>(null);
+
   const addImage = () => {
     setImages([...images, { title: "", url: "" }]);
   };
@@ -26,6 +31,18 @@ export const GallerySection: React.FC<GallerySectionProps> = ({ images, setImage
 
   const updateImage = (index: number, field: keyof GalleryImageItem, value: string) => {
     setImages(images.map((img, i) => i === index ? { ...img, [field]: value } : img));
+  };
+
+  const handleFileSelect = async (index: number, file: File) => {
+    setUploadingIndex(index);
+    try {
+      const url = await scholarshipProviderApi.uploadImage(file, "gallery");
+      setImages(images.map((img, i) => i === index ? { ...img, url, file } : img));
+    } catch (error) {
+      console.error("Failed to upload image:", error);
+    } finally {
+      setUploadingIndex(null);
+    }
   };
 
   return (
@@ -64,13 +81,18 @@ export const GallerySection: React.FC<GallerySectionProps> = ({ images, setImage
                 />
               </div>
               <div className="flex-grow">
-                <label className="block text-sm font-medium text-gray-700">Image URL</label>
-                <input
-                  className={`${formInputClass} text-sm`}
-                  placeholder="https://example.com/image.jpg"
-                  value={img.url}
-                  onChange={(e) => updateImage(index, "url", e.target.value)}
-                />
+                {uploadingIndex === index ? (
+                  <p className="text-sm text-blue-600 py-2">Uploading...</p>
+                ) : (
+                  <FileUpload
+                    label="Upload Image"
+                    accept="image/*"
+                    maxSize="5MB"
+                    previewUrl={img.url}
+                    onFileSelect={(file) => handleFileSelect(index, file)}
+                    onClearPreview={() => updateImage(index, "url", "")}
+                  />
+                )}
               </div>
               <button
                 type="button"

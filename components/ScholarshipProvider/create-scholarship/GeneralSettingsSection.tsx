@@ -112,6 +112,7 @@ export const GeneralSettingsSection: React.FC<GeneralSettingsSectionProps> = ({
             Main Title (Scholarship Name) <span className="text-red-500">*</span>
           </label>
           <input
+            id="mainTitle"
             type="text"
             className={formInputClass}
             placeholder="e.g. Project Shiksha Scholarship 2082"
@@ -126,6 +127,7 @@ export const GeneralSettingsSection: React.FC<GeneralSettingsSectionProps> = ({
             Scholarship Provider Name <span className="text-red-500">*</span>
           </label>
           <input
+            id="providerName"
             type="text"
             className={formInputClass}
             placeholder="e.g. Ncell Foundation"
@@ -140,6 +142,7 @@ export const GeneralSettingsSection: React.FC<GeneralSettingsSectionProps> = ({
               Funding Type <span className="text-red-500">*</span>
             </label>
             <Dropdown
+              id="fundingType"
               value={fundingType}
               onChange={setFundingType}
               options={FUNDING_TYPES}
@@ -161,6 +164,7 @@ export const GeneralSettingsSection: React.FC<GeneralSettingsSectionProps> = ({
               Scholarship Type <span className="text-red-500">*</span>
             </label>
             <Dropdown
+              id="scholarshipType"
               value={scholarshipType}
               onChange={setScholarshipType}
               options={SCHOLARSHIP_TYPES}
@@ -182,6 +186,7 @@ export const GeneralSettingsSection: React.FC<GeneralSettingsSectionProps> = ({
               Education Level <span className="text-red-500">*</span>
             </label>
             <Dropdown
+              id="educationLevel"
               value={educationLevel}
               onChange={setEducationLevel}
               options={EDUCATION_LEVELS}
@@ -203,6 +208,7 @@ export const GeneralSettingsSection: React.FC<GeneralSettingsSectionProps> = ({
               Location <span className="text-red-500">*</span>
             </label>
             <input
+              id="location"
               type="text"
               className={formInputClass}
               placeholder="e.g. Kathmandu, Nepal"
@@ -216,6 +222,7 @@ export const GeneralSettingsSection: React.FC<GeneralSettingsSectionProps> = ({
               Starting Date <span className="text-red-500">*</span>
             </label>
             <DatePicker
+              id="startDate"
               value={startDate}
               onChange={setStartDate}
               placeholder="Select start date"
@@ -230,6 +237,7 @@ export const GeneralSettingsSection: React.FC<GeneralSettingsSectionProps> = ({
               Ending Date <span className="text-red-500">*</span>
             </label>
             <DatePicker
+              id="endDate"
               value={endDate}
               onChange={setEndDate}
               placeholder="Select end date"
@@ -244,6 +252,7 @@ export const GeneralSettingsSection: React.FC<GeneralSettingsSectionProps> = ({
               Apply Form Link
             </label>
             <input
+              id="applyLink"
               type="url"
               className={formInputClass}
               placeholder="https://forms.gle/... or website link"

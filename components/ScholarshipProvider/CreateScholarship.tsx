@@ -22,6 +22,8 @@ import {
   ExamCentersSection,
   DownloadsSection,
   PaymentConfigSection,
+  type GalleryImageItem,
+  type PartnerOrganization,
 } from "./create-scholarship";
 
 interface VideoTutorial {
@@ -60,23 +62,17 @@ interface FAQItem {
   answer: string;
 }
 
-interface GalleryImageItem {
-  title: string;
-  url: string;
-}
-
-interface PartnerOrganization {
+interface PartnerFormItem {
+  groupHeading: string;
   name: string;
   website: string;
-}
-
-interface PartnerGroup {
-  heading: string;
-  partners: PartnerOrganization[];
+  logo: string;
 }
 
 interface ExamCenterItem {
   province: string;
+  headerColor: string;
+  info: string;
   centerName: string;
   contactPerson: string;
   phoneNumber: string;
@@ -86,6 +82,7 @@ interface ExamCenterItem {
 interface DownloadItem {
   title: string;
   description: string;
+  url: string;
 }
 
 interface BankDetails {
@@ -100,34 +97,7 @@ interface CreateScholarshipProps {
   onNavigate?: (section: string) => void;
 }
 
-const emptyVideo = (): VideoTutorial => ({ url: "", title: "", description: "" });
-const emptyJourneyItem = (): JourneyTimelineItem => ({ year: "", title: "", description: "" });
-const emptyScholarshipType = (): ScholarshipTypeItem => ({ type: "", seats: "", coverage: "", eligibility: "" });
-const emptyRubric = (): SelectionRubricItem => ({ criteria: "", description: "", weight: "" });
-const emptyProcessStep = (): SelectionProcessStepItem => ({ step: 1, title: "", description: "" });
-const emptyFAQ = (): FAQItem => ({ question: "", answer: "" });
-const emptyGalleryImage = (): GalleryImageItem => ({ title: "", url: "" });
-const emptyPartnerOrg = (): PartnerOrganization => ({ name: "", website: "" });
-const emptyPartnerGroup = (): PartnerGroup => ({ heading: "", partners: [] });
-const emptyExamCenter = (): ExamCenterItem => ({ province: "", centerName: "", contactPerson: "", phoneNumber: "", mapCoordinates: "" });
-const emptyDownload = (): DownloadItem => ({ title: "", description: "" });
-type ScholarshipSaveMode = "draft" | "published";
-type ValidationField =
-  | "pageTitle"
-  | "banner"
-  | "location"
-  | "degreeLevel"
-  | "fundingType"
-  | "scholarshipType"
-  | "applicationStartDate"
-  | "applicationEndDate";
 
-const toLocalDateString = (date: Date) => {
-  const year = date.getFullYear();
-  const month = `${date.getMonth() + 1}`.padStart(2, "0");
-  const day = `${date.getDate()}`.padStart(2, "0");
-  return `${year}-${month}-${day}`;
-};
 
 const CreateScholarship: React.FC<CreateScholarshipProps> = memo(({ scholarshipId, onNavigate }: CreateScholarshipProps) => {
   // General Settings
@@ -196,7 +166,7 @@ const CreateScholarship: React.FC<CreateScholarshipProps> = memo(({ scholarshipI
   const [galleryImages, setGalleryImages] = useState<GalleryImageItem[]>([]);
 
   // Partners
-  const [partnerGroups, setPartnerGroups] = useState<PartnerGroup[]>([]);
+  const [partnerGroups, setPartnerGroups] = useState<PartnerFormItem[]>([]);
 
   // Exam Centers
   const [examCenters, setExamCenters] = useState<ExamCenterItem[]>([]);
@@ -225,21 +195,6 @@ const CreateScholarship: React.FC<CreateScholarshipProps> = memo(({ scholarshipI
   const [status, setStatus] = useState<'draft' | 'published'>('draft');
 
   const isEditing = Boolean(scholarshipId);
-  const isBusy = submitting;
-  const pageTitleRef = useRef<HTMLInputElement | null>(null);
-  const bannerRef = useRef<HTMLDivElement | null>(null);
-  const locationRef = useRef<HTMLInputElement | null>(null);
-  const degreeLevelRef = useRef<HTMLDivElement | null>(null);
-  const fundingTypeRef = useRef<HTMLDivElement | null>(null);
-  const scholarshipTypeRef = useRef<HTMLDivElement | null>(null);
-  const applicationStartDateRef = useRef<HTMLInputElement | null>(null);
-  const applicationEndDateRef = useRef<HTMLInputElement | null>(null);
-  const degreeLevelOptions = ["+2 / Grade 11-12", "Diploma", "Bachelor's", "Master's", "PhD"];
-  const fundingTypeOptions = ["Fully Funded", "Partial Tuition", "Merit-Based", "Need-Based"];
-  const scholarshipTypeOptions = ["Merit Based", "Need Based", "Sports", "Arts", "Research"];
-  const provinceOptions = ["Koshi", "Madhesh", "Bagmati", "Gandaki", "Lumbini", "Karnali", "Sudurpashchim"];
-  const today = toLocalDateString(new Date());
-  const tomorrow = toLocalDateString(new Date(Date.now() + 24 * 60 * 60 * 1000));
 
   // Banner file handler
   const handleBannerFileSelect = (file: File) => {
@@ -253,9 +208,6 @@ const CreateScholarship: React.FC<CreateScholarshipProps> = memo(({ scholarshipI
   };
 
   // Map URL handler
-  const handleMapUrlChange = (value: string) => {
-    setMapUrl(value);
-  };
 
   // QR Code file handler
   const handleQrCodeFileSelect = (file: File) => {
@@ -313,7 +265,7 @@ const CreateScholarship: React.FC<CreateScholarshipProps> = memo(({ scholarshipI
       // Scholarship Details
       setScholarshipSectionTitle(s.scholarship_section_title || "");
       setScholarshipSubtitle(s.scholarship_subtitle || "");
-      setScholarshipDescription(s.scholarship_description_1 || "");
+      setScholarshipDescription(s.scholarship_description_1 || s.description || "");
       setScholarshipTypes((s.scholarship_types_new as ScholarshipTypeItem[]) || (s.scholarship_types || []).map((t: any) => ({ type: t.type || "", seats: t.seats || "", coverage: t.coverage || "", eligibility: t.eligibility || "" })) as ScholarshipTypeItem[]);
       setTimelineEvents((s as any).timeline || []);
       setSelectionRubric(s.selection_rubric_new || []);
@@ -331,10 +283,13 @@ const CreateScholarship: React.FC<CreateScholarshipProps> = memo(({ scholarshipI
       setFaqs(s.faqs_new || (s.faqs || []).map((f: any) => ({ question: f.question || "", answer: f.answer || "" })));
 
       // Gallery
-      setGalleryImages(s.gallery_images_new || (s.gallery_images || []).map((img: string) => ({ title: "", url: img })));
+      setGalleryImages(s.gallery_images_new || (s.gallery_images || []).map((img: any) => ({
+        title: img.title || "",
+        url: img.url || img || ""
+      })));
 
       // Partners
-      setPartnerGroups(s.partner_groups || []);
+      setPartnerGroups(((s as any).partner_groups || []) as PartnerFormItem[]);
 
       // Exam Centers
       setExamCenters((s.exam_centers_new as unknown as ExamCenterItem[]) || []);
@@ -346,10 +301,15 @@ const CreateScholarship: React.FC<CreateScholarshipProps> = memo(({ scholarshipI
       const paymentConfig = (s as any).payment_config;
       if (paymentConfig) {
         setEnablePayment(paymentConfig.enabled ?? false);
-        setPaymentFeeAmount(paymentConfig.fee_amount || 100);
+        setPaymentFeeAmount(paymentConfig.fee_amount ?? 0);
         setEnableBank(paymentConfig.methods?.includes('bank') ?? false);
         if (paymentConfig.bank_details) {
-          setBankDetails(paymentConfig.bank_details);
+          setBankDetails({
+            bankName: paymentConfig.bank_details.bank_name || "",
+            accountName: paymentConfig.bank_details.account_name || "",
+            accountNumber: paymentConfig.bank_details.account_number || "",
+            branch: paymentConfig.bank_details.branch || "",
+          });
         }
         if (paymentConfig.qr_code) {
           setQrCodeUrl(paymentConfig.qr_code);
@@ -363,6 +323,7 @@ const CreateScholarship: React.FC<CreateScholarshipProps> = memo(({ scholarshipI
 
   const validateDates = useCallback(() => {
     let isValidDate = true;
+    let firstInvalidField = "";
     const today = new Date();
     today.setHours(0, 0, 0, 0);
 
@@ -376,9 +337,11 @@ const CreateScholarship: React.FC<CreateScholarshipProps> = memo(({ scholarshipI
       if (!isValid(start)) {
         setStartDateError("Invalid date format");
         isValidDate = false;
+        firstInvalidField ||= "startDate";
       } else if (!isAfter(start, today)) {
         setStartDateError("Start date must be in the future");
         isValidDate = false;
+        firstInvalidField ||= "startDate";
       }
     }
 
@@ -388,19 +351,21 @@ const CreateScholarship: React.FC<CreateScholarshipProps> = memo(({ scholarshipI
       if (!isValid(end)) {
         setEndDateError("Invalid date format");
         isValidDate = false;
+        firstInvalidField ||= "endDate";
       } else if (startDate) {
         const start = parseISO(startDate);
         if (!isAfter(end, start)) {
           setEndDateError("End date must be after start date");
           isValidDate = false;
+          firstInvalidField ||= "endDate";
         }
       }
     }
 
-    return isValidDate;
+    return { isValidDate, field: firstInvalidField };
   }, [startDate, endDate]);
 
-  const validateScholarship = useCallback((mode: string) => {
+  const validateScholarship = useCallback(() => {
     // Email validation
     if (!contactEmail) {
       return { message: "Contact email is required", field: "contactEmail" };
@@ -486,16 +451,21 @@ const CreateScholarship: React.FC<CreateScholarshipProps> = memo(({ scholarshipI
   const handleSave = useCallback(async (draft: boolean = false) => {
     if (!mainTitle.trim()) {
       setError("Page Title is required.");
+      scrollToField("mainTitle");
       return;
     }
 
     // Validate dates
-    if (!validateDates()) {
+    const dateValidation = validateDates();
+    if (!dateValidation.isValidDate) {
+      if (dateValidation.field) {
+        scrollToField(dateValidation.field);
+      }
       return;
     }
 
     const mode = draft ? "draft" : "published";
-    const validationError = validateScholarship(mode);
+    const validationError = validateScholarship();
     if (validationError.message) {
       toast.error(validationError.message);
       if (validationError.field) {
@@ -515,6 +485,10 @@ const CreateScholarship: React.FC<CreateScholarshipProps> = memo(({ scholarshipI
       provider: providerName,
       description: aboutOverview,
       provider_name: providerName,
+      funding_type_other: fundingTypeOther || undefined,
+      scholarship_type_other: scholarshipTypeOther || undefined,
+      education_level: educationLevel || undefined,
+      education_level_other: educationLevelOther || undefined,
       location,
       value: "",
       deadline: endDate ? new Date(endDate).toISOString() : "",
@@ -540,8 +514,17 @@ const CreateScholarship: React.FC<CreateScholarshipProps> = memo(({ scholarshipI
       scholarship_section_title: scholarshipSectionTitle || undefined,
       scholarship_subtitle: scholarshipSubtitle || undefined,
       scholarship_description_1: scholarshipDescription || undefined,
+      scholarship_description_2: undefined,
       timeline: timelineEvents,
+      scholarship_types: scholarshipTypes,
       scholarship_types_new: scholarshipTypes,
+      selection_rubric: selectionRubric.map((item) => ({
+        criteria: item.criteria,
+        description: item.description,
+        weight: item.weight,
+        marks: "",
+        pass_mark: "",
+      })),
       selection_rubric_new: selectionRubric,
       eligibility_section_title: eligibilitySectionTitle || undefined,
       eligibility_subtitle: eligibilitySubtitle || undefined,
@@ -550,9 +533,12 @@ const CreateScholarship: React.FC<CreateScholarshipProps> = memo(({ scholarshipI
       partially_funded_criteria: partiallyFundedConditions,
       selection_process_steps: selectionProcessSteps,
       required_documents: requiredDocuments,
+      faqs: faqs,
       faqs_new: faqs,
+      gallery_images: galleryImages,
       gallery_images_new: galleryImages,
-      partner_groups: partnerGroups,
+      partner_groups: partnerGroups as unknown as any,
+      exam_centers: examCenters as unknown as any,
       exam_centers_new: examCenters as unknown as any,
       downloads: downloads,
       payment_config: {

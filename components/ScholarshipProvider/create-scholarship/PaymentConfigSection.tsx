@@ -147,12 +147,14 @@ export const PaymentConfigSection: React.FC<PaymentConfigSectionProps> = ({
                 </div>
                 <div className="md:col-span-2 space-y-1.5">
                   <label className="block text-sm font-medium text-gray-700">QR Code <span className="text-red-500">*</span></label>
-                  <FileUpload
-                    accept="image/*"
-                    maxSize="2MB"
-                    onFileSelect={onQrCodeSelect}
-                    previewUrl={qrCodePreview}
-                  />
+                  <div className="w-full md:w-[12.5%]">
+                    <FileUpload
+                      accept="image/*"
+                      maxSize="2MB"
+                      onFileSelect={onQrCodeSelect}
+                      previewUrl={qrCodePreview}
+                    />
+                  </div>
                 </div>
               </div>
             )}

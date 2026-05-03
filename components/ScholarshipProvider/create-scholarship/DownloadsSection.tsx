@@ -1,11 +1,15 @@
 "use client";
 
-import React from "react";
+import React, { useState } from "react";
 import { Plus, Trash } from "@phosphor-icons/react";
+import { scholarshipProviderApi } from "@/services/scholarshipProviderApi";
+import FileUpload from "../common/FileUpload";
 
-interface DownloadItem {
+export interface DownloadItem {
   title: string;
   description: string;
+  url: string;
+  file?: File;
 }
 
 interface DownloadsSectionProps {
@@ -16,8 +20,10 @@ interface DownloadsSectionProps {
 const formInputClass = "w-full px-4 py-2.5 rounded-lg border border-gray-200 bg-white text-gray-900 focus:outline-none focus:border-blue-500";
 
 export const DownloadsSection: React.FC<DownloadsSectionProps> = ({ downloads, setDownloads }) => {
+  const [uploadingIndex, setUploadingIndex] = useState<number | null>(null);
+
   const addDownload = () => {
-    setDownloads([...downloads, { title: "", description: "" }]);
+    setDownloads([...downloads, { title: "", description: "", url: "" }]);
   };
 
   const removeDownload = (index: number) => {
@@ -26,6 +32,18 @@ export const DownloadsSection: React.FC<DownloadsSectionProps> = ({ downloads, s
 
   const updateDownload = (index: number, field: keyof DownloadItem, value: string) => {
     setDownloads(downloads.map((d, i) => i === index ? { ...d, [field]: value } : d));
+  };
+
+  const handleFileSelect = async (index: number, file: File) => {
+    setUploadingIndex(index);
+    try {
+      const url = await scholarshipProviderApi.uploadDocument(file, "downloads");
+      setDownloads(downloads.map((d, i) => i === index ? { ...d, url, file } : d));
+    } catch (error) {
+      console.error("Failed to upload file:", error);
+    } finally {
+      setUploadingIndex(null);
+    }
   };
 
   return (
@@ -52,24 +70,41 @@ export const DownloadsSection: React.FC<DownloadsSectionProps> = ({ downloads, s
       </div>
       <div className="p-6 space-y-4">
         {downloads.map((d, index) => (
-          <div key={index} className="border border-gray-200 rounded-lg p-3 bg-gray-50 flex items-center gap-3">
-            <div className="flex-grow">
-              <label className="block text-sm font-medium text-gray-700">Title</label>
-              <input
-                className={`${formInputClass} text-sm`}
-                placeholder="Scholarship Information Brochure"
-                value={d.title}
-                onChange={(e) => updateDownload(index, "title", e.target.value)}
-              />
-            </div>
-            <div className="flex-grow">
-              <label className="block text-sm font-medium text-gray-700">Description</label>
-              <input
-                className={`${formInputClass} text-sm`}
-                placeholder="Complete guide about the scholarship"
-                value={d.description}
-                onChange={(e) => updateDownload(index, "description", e.target.value)}
-              />
+          <div key={index} className="border border-gray-200 rounded-lg p-3 bg-gray-50 flex items-start gap-3">
+            <div className="flex-grow grid grid-cols-1 md:grid-cols-2 gap-3">
+              <div>
+                <label className="block text-sm font-medium text-gray-700">Title</label>
+                <input
+                  className={`${formInputClass} text-sm`}
+                  placeholder="Scholarship Information Brochure"
+                  value={d.title}
+                  onChange={(e) => updateDownload(index, "title", e.target.value)}
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700">Description</label>
+                <input
+                  className={`${formInputClass} text-sm`}
+                  placeholder="Complete guide about the scholarship"
+                  value={d.description}
+                  onChange={(e) => updateDownload(index, "description", e.target.value)}
+                />
+              </div>
+              <div className="md:col-span-2">
+                <label className="block text-sm font-medium text-gray-700">File</label>
+                {uploadingIndex === index ? (
+                  <p className="text-sm text-blue-600 py-2">Uploading...</p>
+                ) : (
+                  <FileUpload
+                    label=""
+                    accept=".pdf,.doc,.docx"
+                    maxSize="10MB"
+                    previewUrl={d.url}
+                    onFileSelect={(file) => handleFileSelect(index, file)}
+                    onClearPreview={() => updateDownload(index, "url", "")}
+                  />
+                )}
+              </div>
             </div>
             <button
               type="button"

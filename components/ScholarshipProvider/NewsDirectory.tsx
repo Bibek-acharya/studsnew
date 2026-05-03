@@ -1,8 +1,10 @@
 "use client";
 
 import React, { useState, useEffect, useCallback, useMemo, memo } from "react";
+import { toast } from "sonner";
 import { Home, Newspaper, Search, Eye, Pencil, Trash2, ChevronLeft, ChevronRight } from "lucide-react";
 import { scholarshipProviderApi, ProviderNews } from "@/services/scholarshipProviderApi";
+import ConfirmationModal from "./common/ConfirmationModal";
 
 const FALLBACK_NEWS: ProviderNews[] = [
   { id: 1, provider_id: 1, title: "Government Announces New Education Policy", short_desc: "New policy framework announced", content: "Ministry unveils comprehensive policy framework", image_url: "https://images.unsplash.com/photo-1542744173-8e7e53415bb0?auto=format&fit=crop&q=80&w=800&h=400", news_type: "news", published_by: "Education Ministry", publish_date: "2026-04-20", tags: ["education", "policy"], allow_comments: true, status: "published", published_at: new Date(Date.now() - 3 * 86400000).toISOString(), created_at: new Date(Date.now() - 3 * 86400000).toISOString(), updated_at: "" },
@@ -37,6 +39,11 @@ const NewsDirectory: React.FC = memo(() => {
   const [search, setSearch] = useState("");
   const [page, setPage] = useState(1);
   const [total, setTotal] = useState(0);
+  const [deleteModal, setDeleteModal] = useState<{ isOpen: boolean; newsId: number | null; title: string }>({
+    isOpen: false,
+    newsId: null,
+    title: "",
+  });
   const limit = 10;
 
   useEffect(() => {
@@ -62,14 +69,21 @@ const NewsDirectory: React.FC = memo(() => {
   }, [news, search]);
 
   const handleDelete = useCallback(async (id: number) => {
-    if (!confirm("Delete this news item?")) return;
+    const target = news.find((item) => item.id === id);
+    setDeleteModal({ isOpen: true, newsId: id, title: target?.title || "this news item" });
+  }, [news]);
+
+  const confirmDeleteNews = useCallback(async () => {
+    if (!deleteModal.newsId) return;
+    const newsId = deleteModal.newsId;
+    setDeleteModal({ isOpen: false, newsId: null, title: "" });
     try {
-      await scholarshipProviderApi.deleteNews(id);
-      setNews((prev) => prev.filter((n) => n.id !== id));
-    } catch {
-      alert("Failed to delete news");
+      await scholarshipProviderApi.deleteNews(newsId);
+      setNews((prev) => prev.filter((n) => n.id !== newsId));
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Failed to delete news");
     }
-  }, []);
+  }, [deleteModal.newsId]);
 
   const totalPages = Math.ceil(total / limit);
 
@@ -79,6 +93,17 @@ const NewsDirectory: React.FC = memo(() => {
 
   return (
     <div className="space-y-6">
+      <ConfirmationModal
+        isOpen={deleteModal.isOpen}
+        title="Delete News Item"
+        message={`Are you sure you want to delete \"${deleteModal.title}\"? This action cannot be undone.`}
+        confirmText="Delete"
+        cancelText="Cancel"
+        onConfirm={confirmDeleteNews}
+        onCancel={() => setDeleteModal({ isOpen: false, newsId: null, title: "" })}
+        destructive
+      />
+
       <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-2">
         <h1 className="text-2xl font-bold text-gray-800">News Directory</h1>
         <div className="flex items-center text-sm text-gray-500 mt-2 sm:mt-0 gap-2">

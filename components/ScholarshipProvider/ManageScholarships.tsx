@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { scholarshipProviderApi, ProviderScholarship } from '@/services/scholarshipProviderApi';
+import ConfirmationModal from './common/ConfirmationModal';
 
 interface ManageScholarshipsProps {
   onNavigate: (section: string) => void;
@@ -15,6 +16,11 @@ export default function ManageScholarships({ onNavigate, onEdit }: ManageScholar
   const [page, setPage] = useState(1);
   const [total, setTotal] = useState(0);
   const [togglingId, setTogglingId] = useState<number | null>(null);
+  const [deleteModal, setDeleteModal] = useState<{ isOpen: boolean; scholarshipId: number | null; title: string }>({
+    isOpen: false,
+    scholarshipId: null,
+    title: '',
+  });
   const limit = 10;
 
   useEffect(() => {
@@ -36,10 +42,21 @@ export default function ManageScholarships({ onNavigate, onEdit }: ManageScholar
   }
 
   async function handleDelete(id: number) {
-    if (!confirm('Are you sure you want to delete this scholarship?')) return;
+    const target = scholarships.find((s) => s.id === id);
+    setDeleteModal({
+      isOpen: true,
+      scholarshipId: id,
+      title: target?.title || 'this scholarship',
+    });
+  }
+
+  async function confirmDeleteScholarship() {
+    if (!deleteModal.scholarshipId) return;
+    const scholarshipId = deleteModal.scholarshipId;
+    setDeleteModal({ isOpen: false, scholarshipId: null, title: '' });
     try {
-      await scholarshipProviderApi.deleteScholarship(id);
-      setScholarships(prev => prev.filter(s => s.id !== id));
+      await scholarshipProviderApi.deleteScholarship(scholarshipId);
+      setScholarships(prev => prev.filter(s => s.id !== scholarshipId));
       setTotal(prev => Math.max(0, prev - 1));
     } catch (err) {
       alert(err instanceof Error ? err.message : 'Failed to delete scholarship');
@@ -111,6 +128,17 @@ export default function ManageScholarships({ onNavigate, onEdit }: ManageScholar
 
   return (
     <section className="fade-in max-w-7xl mx-auto pb-20">
+      <ConfirmationModal
+        isOpen={deleteModal.isOpen}
+        title="Delete Scholarship"
+        message={`Are you sure you want to delete "${deleteModal.title}"? This action cannot be undone.`}
+        confirmText="Delete"
+        cancelText="Cancel"
+        onConfirm={confirmDeleteScholarship}
+        onCancel={() => setDeleteModal({ isOpen: false, scholarshipId: null, title: '' })}
+        destructive
+      />
+
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-8 gap-4">
         <div>
           <h2 className="text-2xl font-black text-slate-800">Scholarship Portfolio</h2>

@@ -5,10 +5,6 @@ import { Home, Users, Plus, Pencil, Trash2, Search, X, ShieldCheck, UserPlus } f
 import {
   providerRbacApi,
   ProviderUser,
-  getStoredUsers,
-  saveUsers,
-  getStoredPermissions,
-  savePermissions,
 } from "@/services/providerRbac";
 
 
@@ -46,8 +42,26 @@ const AssignAccess: React.FC = memo(() => {
   const [permissions, setPermissions] = useState<Record<string, boolean>>({});
 
   useEffect(() => {
-    const stored = getStoredUsers();
-    setUsers(stored);
+    let mounted = true;
+
+    async function loadUsers() {
+      try {
+const res = await providerRbacApi.getUsers();
+        if (!mounted) return;
+
+        setUsers(res.data?.users || res.users || []);
+      } catch {
+        if (mounted) {
+          setUsers([]);
+        }
+      }
+    }
+
+    loadUsers();
+
+    return () => {
+      mounted = false;
+    };
   }, []);
 
   const filtered = search ? users.filter((u) => u.name.toLowerCase().includes(search.toLowerCase()) || u.email.includes(search)) : users;
@@ -55,48 +69,53 @@ const AssignAccess: React.FC = memo(() => {
   const openPermModal = (user: ProviderUser) => {
     setPermUserName(user.name);
     setPermUserId(user.id);
-    const storedPerms = getStoredPermissions();
-    const userPerms = storedPerms.find(p => p.userId === user.id)?.permissions || [];
+    const userPerms = user.permissions || [];
     setPermissions(userPerms.reduce((acc: Record<string, boolean>, p: string) => ({...acc, [p]: true}), {}));
     setPermModalOpen(true);
   };
 
-  const handleAddUser = () => {
-    const newUser: ProviderUser = {
-      id: Date.now(),
-      name: newName,
-      email: newEmail,
-      password: newPassword,
-      role: "user",
-      roleLabel: "User",
-      status: "Active",
-      lastActive: "Never",
-      avatar: `https://i.pravatar.cc/150?u=${Date.now()}`,
-      providerId: 0,
-      permissions: [],
-    };
-    const updatedUsers = [...users, newUser];
-    saveUsers(updatedUsers);
-    setUsers(updatedUsers);
-    setAddModalOpen(false);
-    setNewName("");
-    setNewEmail("");
-    setNewPassword("");
-    openPermModal(newUser);
+  const handleAddUser = async () => {
+    try {
+      const created = await providerRbacApi.createUser({
+        name: newName,
+        email: newEmail,
+        password: newPassword,
+        role: "user",
+        roleLabel: "User",
+        permissions: [],
+      });
+      setUsers((prev) => [...prev, created]);
+      setAddModalOpen(false);
+      setNewName("");
+      setNewEmail("");
+      setNewPassword("");
+      openPermModal(created);
+    } catch {
+      alert("Failed to create user");
+    }
   };
 
-  const handleDeleteUser = (u: ProviderUser) => {
-    providerRbacApi.deleteUser(u.id);
-    setUsers(prev => prev.filter(x => x.id !== u.id));
+  const handleDeleteUser = async (u: ProviderUser) => {
+    try {
+      await providerRbacApi.deleteUser(u.id);
+      setUsers((prev) => prev.filter((x) => x.id !== u.id));
+    } catch {
+      alert("Failed to delete user");
+    }
   };
 
-  const handleSavePermissions = () => {
+  const handleSavePermissions = async () => {
     const selectedPerms = Object.entries(permissions)
       .filter(([, v]) => v)
       .map(([k]) => k);
 
-    savePermissions(permUserId, selectedPerms);
-    setPermModalOpen(false);
+    try {
+      await providerRbacApi.updatePermissions(permUserId, selectedPerms);
+      setUsers((prev) => prev.map((user) => (user.id === permUserId ? { ...user, permissions: selectedPerms } : user)));
+      setPermModalOpen(false);
+    } catch {
+      alert("Failed to save permissions");
+    }
   };
 
   return (
@@ -142,7 +161,7 @@ const AssignAccess: React.FC = memo(() => {
             </thead>
             <tbody className="divide-y divide-gray-100">
               {filtered.length === 0 ? (
-                <tr><td colSpan={5} className="py-8 text-center text-gray-500">No users found</td></tr>
+                <tr key="no-users"><td colSpan={5} className="py-8 text-center text-gray-500">No users found</td></tr>
               ) : filtered.map((u) => (
                 <tr key={u.id} className="hover:bg-gray-50">
                   <td className="py-3 px-4">
