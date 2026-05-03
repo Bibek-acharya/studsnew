@@ -1,11 +1,12 @@
 "use client";
 
 import React, { useState, useEffect, memo } from "react";
-import { Home, Users, Plus, Pencil, Trash2, Search, X, ShieldCheck, UserPlus, AlertTriangle, Eye, EyeOff, ChevronRight } from "lucide-react";
+import { Home, Users, Plus, Pencil, Trash2, Search, X, ShieldCheck, UserPlus, AlertTriangle, Eye, EyeOff, ChevronRight, ChevronLeft } from "lucide-react";
 import { toast } from "sonner";
 import {
   providerRbacApi,
   ProviderUser,
+  PERMISSIONS_LIST
 } from "@/services/providerRbac";
 
 
@@ -15,21 +16,6 @@ const STATUS_COLORS: Record<string, string> = {
   Inactive: "bg-red-100 text-red-700",
 };
 
-const PERMISSIONS = [
-  { id: "scholarships", label: "Manage Scholarships", desc: "Create, edit, and delete scholarships" },
-  { id: "applications", label: "Manage Applications", desc: "View, approve, and reject applications" },
-  { id: "shortlists", label: "Manage Shortlists", desc: "Add and remove shortlisted applicants" },
-  { id: "messages", label: "Message", desc: "Send and receive messages" },
-  { id: "news", label: "Manage News", desc: "Create, edit, and publish news" },
-  { id: "events", label: "Manage Events", desc: "Create, edit, and manage events" },
-  { id: "blogs", label: "Manage Blogs", desc: "Create, edit, and publish blog posts" },
-  { id: "profile", label: "Manage Profile", desc: "Edit organization profile details" },
-  { id: "analytics", label: "Analytics", desc: "View analytics and reports" },
-  { id: "evaluation", label: "Evaluation & Results", desc: "Manage written exam, interview, and final results" },
-  { id: "access", label: "Assign Access", desc: "Manage user permissions and roles" },
-  { id: "settings", label: "Settings", desc: "Configure system settings" },
-];
-
 const AssignAccess: React.FC = memo(() => {
   const [users, setUsers] = useState<ProviderUser[]>([]);
   const [search, setSearch] = useState("");
@@ -37,28 +23,27 @@ const AssignAccess: React.FC = memo(() => {
   // Wizard state
   const [wizardOpen, setWizardOpen] = useState(false);
   const [wizardStep, setWizardStep] = useState<1 | 2>(1);
-  const [createdUser, setCreatedUser] = useState<ProviderUser | null>(null);
 
-  // Step 1 fields
+  // User fields (shared between steps)
   const [newName, setNewName] = useState("");
   const [newEmail, setNewEmail] = useState("");
   const [newPassword, setNewPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
+  const [wizardPermissions, setWizardPermissions] = useState<Record<string, boolean>>({});
+  
+  // UI states
+  const [addLoading, setAddLoading] = useState(false);
   const [addError, setAddError] = useState("");
   const [nameError, setNameError] = useState("");
   const [emailError, setEmailError] = useState("");
   const [passwordError, setPasswordError] = useState("");
-  const [addLoading, setAddLoading] = useState(false);
-
-  // Step 2 - permissions
-  const [wizardPermissions, setWizardPermissions] = useState<Record<string, boolean>>({});
-  const [permSaving, setPermSaving] = useState(false);
 
   // Edit permissions (for existing users)
   const [permModalOpen, setPermModalOpen] = useState(false);
   const [permUserName, setPermUserName] = useState("");
   const [permUserId, setPermUserId] = useState<number>(0);
   const [permissions, setPermissions] = useState<Record<string, boolean>>({});
+  const [permSaving, setPermSaving] = useState(false);
 
   // Delete
   const [deleteModalOpen, setDeleteModalOpen] = useState(false);
@@ -86,7 +71,6 @@ const AssignAccess: React.FC = memo(() => {
   const openWizard = () => {
     setWizardOpen(true);
     setWizardStep(1);
-    setCreatedUser(null);
     setNewName(""); setNewEmail(""); setNewPassword("");
     setShowPassword(false);
     setAddError(""); setNameError(""); setEmailError(""); setPasswordError("");
@@ -96,11 +80,9 @@ const AssignAccess: React.FC = memo(() => {
   const closeWizard = () => {
     setWizardOpen(false);
     setWizardStep(1);
-    setCreatedUser(null);
   };
 
-  // Step 1: validate and create user
-  const handleStep1 = async () => {
+  const validateStep1 = () => {
     setAddError(""); setNameError(""); setEmailError(""); setPasswordError("");
     let hasError = false;
     if (!newName.trim()) { setNameError("Full name is required"); hasError = true; }
@@ -111,9 +93,27 @@ const AssignAccess: React.FC = memo(() => {
       setPasswordError("Password must be at least 8 characters, include uppercase, lowercase, a number, and a special character.");
       hasError = true;
     }
-    if (hasError) return;
+    return !hasError;
+  };
 
+  const handleNextStep = () => {
+    if (validateStep1()) {
+      setWizardStep(2);
+    }
+  };
+
+  const handlePrevStep = () => {
+    setWizardStep(1);
+  };
+
+  const handleCreateUserFinal = async () => {
     setAddLoading(true);
+    setAddError("");
+    
+    const selectedPerms = Object.entries(wizardPermissions)
+      .filter(([, v]) => v)
+      .map(([k]) => k);
+
     try {
       const created = await providerRbacApi.createUser({
         name: newName,
@@ -121,33 +121,20 @@ const AssignAccess: React.FC = memo(() => {
         password: newPassword,
         role: "user",
         roleLabel: "User",
-        permissions: [],
+        permissions: selectedPerms,
       });
-      setCreatedUser(created);
+      
       setUsers((prev) => [...prev, created]);
-      setWizardStep(2);
+      toast.success(`Access granted to ${newEmail} with ${selectedPerms.length} permissions.`);
+      closeWizard();
     } catch (err: any) {
       setAddError(err.message || "Failed to create user. Email might already be in use.");
+      // If error is about email, maybe go back to step 1
+      if (err.message?.toLowerCase().includes("email")) {
+        setWizardStep(1);
+      }
     } finally {
       setAddLoading(false);
-    }
-  };
-
-  // Step 2: save permissions and finish
-  const handleStep2 = async () => {
-    if (!createdUser) return;
-    const selectedPerms = Object.entries(wizardPermissions).filter(([, v]) => v).map(([k]) => k);
-    setPermSaving(true);
-    try {
-      await providerRbacApi.updatePermissions(createdUser.id, selectedPerms);
-      setUsers((prev) => prev.map((u) => u.id === createdUser.id ? { ...u, permissions: selectedPerms } : u));
-      toast.success(`User ${createdUser.email} added with permissions.`);
-      closeWizard();
-    } catch {
-      toast.error("User created but failed to save permissions. You can edit them from the table.");
-      closeWizard();
-    } finally {
-      setPermSaving(false);
     }
   };
 
@@ -176,6 +163,7 @@ const AssignAccess: React.FC = memo(() => {
 
   const handleSavePermissions = async () => {
     const selectedPerms = Object.entries(permissions).filter(([, v]) => v).map(([k]) => k);
+    setPermSaving(true);
     try {
       await providerRbacApi.updatePermissions(permUserId, selectedPerms);
       setUsers((prev) => prev.map((user) => (user.id === permUserId ? { ...user, permissions: selectedPerms } : user)));
@@ -183,6 +171,8 @@ const AssignAccess: React.FC = memo(() => {
       setPermModalOpen(false);
     } catch {
       toast.error("Failed to save permissions");
+    } finally {
+      setPermSaving(false);
     }
   };
 
@@ -340,11 +330,11 @@ const AssignAccess: React.FC = memo(() => {
                 <div className="flex justify-end gap-3 px-6 py-4 border-t border-gray-200">
                   <button onClick={closeWizard} className="px-5 py-2.5 border border-gray-300 rounded-lg text-gray-700 font-medium hover:bg-gray-50">Cancel</button>
                   <button
-                    onClick={handleStep1}
-                    disabled={addLoading || !newName.trim() || !newEmail.trim() || !newPassword.trim()}
+                    onClick={handleNextStep}
+                    disabled={!newName.trim() || !newEmail.trim() || !newPassword.trim()}
                     className="px-5 py-2.5 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all flex items-center gap-2"
                   >
-                    {addLoading ? <><span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />Creating...</> : <>Next: Set Permissions <ChevronRight className="w-4 h-4" /></>}
+                    Next: Set Permissions <ChevronRight className="w-4 h-4" />
                   </button>
                 </div>
               </>
@@ -354,11 +344,16 @@ const AssignAccess: React.FC = memo(() => {
             {wizardStep === 2 && (
               <>
                 <div className="p-6">
+                  {addError && (
+                    <div className="p-3 mb-4 bg-red-50 border border-red-100 rounded-lg text-red-600 text-xs font-medium flex items-center gap-2">
+                      <AlertTriangle className="w-4 h-4" /> {addError}
+                    </div>
+                  )}
                   <div className="bg-blue-50 rounded-lg p-3 mb-5 text-sm text-gray-700">
-                    Setting permissions for: <span className="font-bold text-blue-700">{createdUser?.name}</span> (<span className="text-gray-500">{createdUser?.email}</span>)
+                    Setting permissions for: <span className="font-bold text-blue-700">{newName}</span> (<span className="text-gray-500">{newEmail}</span>)
                   </div>
                   <div className="space-y-2 max-h-[40vh] overflow-y-auto pr-1">
-                    {PERMISSIONS.map((perm) => (
+                    {PERMISSIONS_LIST.map((perm) => (
                       <div key={perm.id} className="flex items-center justify-between p-3 border border-gray-200 rounded-lg hover:bg-gray-50">
                         <div>
                           <p className="font-medium text-gray-900 text-sm">{perm.label}</p>
@@ -373,15 +368,16 @@ const AssignAccess: React.FC = memo(() => {
                   </div>
                 </div>
                 <div className="flex justify-between gap-3 px-6 py-4 border-t border-gray-200">
-                  <p className="text-xs text-gray-500 self-center">You can always edit permissions later.</p>
+                  <button onClick={handlePrevStep} className="px-4 py-2 text-gray-600 hover:bg-gray-100 rounded-lg flex items-center gap-1">
+                    <ChevronLeft className="w-4 h-4" /> Back
+                  </button>
                   <div className="flex gap-3">
-                    <button onClick={closeWizard} className="px-5 py-2.5 border border-gray-300 rounded-lg text-gray-700 font-medium hover:bg-gray-50">Skip</button>
                     <button
-                      onClick={handleStep2}
-                      disabled={permSaving}
+                      onClick={handleCreateUserFinal}
+                      disabled={addLoading}
                       className="px-5 py-2.5 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700 disabled:opacity-50 flex items-center gap-2"
                     >
-                      {permSaving ? <><span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />Saving...</> : <><ShieldCheck className="w-4 h-4" />Save & Finish</>}
+                      {addLoading ? <><span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />Creating...</> : <><ShieldCheck className="w-4 h-4" />Save & Finish</>}
                     </button>
                   </div>
                 </div>
@@ -404,7 +400,7 @@ const AssignAccess: React.FC = memo(() => {
                 <p className="text-sm text-gray-700">Assigning permissions for: <span className="font-bold text-blue-700">{permUserName}</span></p>
               </div>
               <div className="space-y-3">
-                {PERMISSIONS.map((perm) => (
+                {PERMISSIONS_LIST.map((perm) => (
                   <div key={perm.id} className="flex items-center justify-between p-3 border border-gray-200 rounded-lg hover:bg-gray-50">
                     <div>
                       <p className="font-medium text-gray-900 text-sm">{perm.label}</p>
@@ -419,7 +415,9 @@ const AssignAccess: React.FC = memo(() => {
               </div>
               <div className="flex justify-end gap-3 mt-6 pt-4 border-t border-gray-200">
                 <button onClick={() => setPermModalOpen(false)} className="px-6 py-2.5 border border-gray-300 rounded-lg text-gray-700 font-medium hover:bg-gray-50">Cancel</button>
-                <button onClick={handleSavePermissions} className="px-6 py-2.5 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700">Save Permissions</button>
+                <button onClick={handleSavePermissions} disabled={permSaving} className="px-6 py-2.5 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700 disabled:opacity-50">
+                   {permSaving ? "Saving..." : "Save Permissions"}
+                </button>
               </div>
             </div>
           </div>

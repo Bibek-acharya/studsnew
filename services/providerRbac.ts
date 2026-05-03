@@ -76,17 +76,43 @@ export const providerRbacApi = {
   },
 
   async createUser(data: CreateUserRequest): Promise<ProviderUser> {
-    return apiRequest("/api/v1/scholarship-providers/auth/access-users", {
+    const res = await apiRequest<{ success: boolean; data: any }>("/api/v1/scholarship-providers/auth/access-users", {
       method: "POST",
       body: JSON.stringify(data),
     });
+    const u = res.data;
+    return {
+      id: Number(u.id),
+      name: u.name,
+      email: u.email,
+      role: u.role,
+      roleLabel: u.role_label,
+      status: u.status,
+      lastActive: u.last_active,
+      avatar: u.avatar,
+      providerId: Number(u.provider_id),
+      permissions: u.permissions,
+    };
   },
 
   async updateUser(id: number, data: Partial<CreateUserRequest>): Promise<ProviderUser> {
-    return apiRequest(`/api/v1/scholarship-providers/auth/access-users/${id}`, {
+    const res = await apiRequest<{ success: boolean; data: any }>(`/api/v1/scholarship-providers/auth/access-users/${id}`, {
       method: "PUT",
       body: JSON.stringify(data),
     });
+    const u = res.data;
+    return {
+      id: Number(u.id),
+      name: u.name,
+      email: u.email,
+      role: u.role,
+      roleLabel: u.role_label,
+      status: u.status,
+      lastActive: u.last_active,
+      avatar: u.avatar,
+      providerId: Number(u.provider_id),
+      permissions: u.permissions,
+    };
   },
 
   async deleteUser(id: number): Promise<void> {
@@ -99,6 +125,13 @@ export const providerRbacApi = {
     return apiRequest(`/api/v1/scholarship-providers/auth/access-users/${id}/permissions`, {
       method: "PUT",
       body: JSON.stringify({ permissions }),
+    });
+  },
+
+  async resetPassword(id: number, newPassword: string): Promise<void> {
+    return apiRequest(`/api/v1/scholarship-providers/auth/access-users/${id}/reset-password`, {
+      method: "PUT",
+      body: JSON.stringify({ new_password: newPassword }),
     });
   },
 
