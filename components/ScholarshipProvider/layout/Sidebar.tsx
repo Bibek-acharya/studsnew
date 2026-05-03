@@ -16,6 +16,7 @@ import {
   Settings,
   LogOut,
   Award,
+  Bell,
 } from "lucide-react";
 
 interface SidebarProps {

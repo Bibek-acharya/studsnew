@@ -109,7 +109,7 @@ export const ExamCentersSection: React.FC<ExamCentersSectionProps> = ({ examCent
                   <label className="block text-sm font-medium text-gray-700">Center Name</label>
                   <input
                     className={formInputClass}
-                    placeholder="Advance Academy Biratnagar"
+                    placeholder="Enter Exam Center Name"
                     value={ec.centerName}
                     onChange={(e) => updateExamCenter(index, "centerName", e.target.value)}
                   />
@@ -118,7 +118,7 @@ export const ExamCentersSection: React.FC<ExamCentersSectionProps> = ({ examCent
                   <label className="block text-sm font-medium text-gray-700">Contact Person</label>
                   <input
                     className={formInputClass}
-                    placeholder="Mr. Ram Kumar Sharma"
+                    placeholder="Enter Contact Person Name"
                     value={ec.contactPerson}
                     onChange={(e) => updateExamCenter(index, "contactPerson", e.target.value)}
                   />
@@ -127,7 +127,7 @@ export const ExamCentersSection: React.FC<ExamCentersSectionProps> = ({ examCent
                   <label className="block text-sm font-medium text-gray-700">Phone Number</label>
                   <input
                     className={formInputClass}
-                    placeholder="9842012345"
+                    placeholder="98XXXXXXXX"
                     value={ec.phoneNumber}
                     onChange={(e) => updateExamCenter(index, "phoneNumber", e.target.value)}
                   />

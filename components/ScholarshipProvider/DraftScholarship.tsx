@@ -3,6 +3,7 @@
 import React, { useState, useEffect, memo } from "react";
 import { Home, Building2, CheckCircle, DollarSign, MapPin, GraduationCap, Pencil, ChevronLeft, ChevronRight, X } from "lucide-react";
 import { scholarshipProviderApi, ProviderScholarship } from "@/services/scholarshipProviderApi";
+import { toast } from "sonner";
 
 interface DraftScholarshipProps {
   onEdit?: (id: number) => void;
@@ -81,8 +82,6 @@ const DraftScholarship: React.FC<DraftScholarshipProps> = memo(({ onEdit, onNavi
   const [loading, setLoading] = useState(true);
   const [page, setPage] = useState(1);
   const [publishing, setPublishing] = useState<number | null>(null);
-  const [successToast, setSuccessToast] = useState<string | null>(null);
-  const [errorToast, setErrorToast] = useState<string | null>(null);
   const [confirmModal, setConfirmModal] = useState<{
     isOpen: boolean;
     scholarshipId: number | null;
@@ -109,16 +108,6 @@ const DraftScholarship: React.FC<DraftScholarshipProps> = memo(({ onEdit, onNavi
     fetchDrafts();
   }, []);
 
-  useEffect(() => {
-    if (successToast || errorToast) {
-      const timer = setTimeout(() => {
-        setSuccessToast(null);
-        setErrorToast(null);
-      }, 3000);
-      return () => clearTimeout(timer);
-    }
-  }, [successToast, errorToast]);
-
   const handlePublishClick = (id: number, title: string) => {
     setConfirmModal({
       isOpen: true,
@@ -134,9 +123,9 @@ const DraftScholarship: React.FC<DraftScholarshipProps> = memo(({ onEdit, onNavi
     try {
       await scholarshipProviderApi.publishScholarship(confirmModal.scholarshipId);
       setDrafts((prev) => prev.filter((d) => d.id !== confirmModal.scholarshipId));
-      setSuccessToast("Scholarship published successfully!");
+      toast.success("Your scholarship is now live and visible in the directory.");
     } catch (err) {
-      setErrorToast("Failed to publish scholarship");
+      toast.error("Failed to publish scholarship");
     } finally {
       setPublishing(null);
     }
@@ -169,17 +158,6 @@ const DraftScholarship: React.FC<DraftScholarshipProps> = memo(({ onEdit, onNavi
 
   return (
     <>
-      {successToast && (
-        <div className="fixed top-6 right-6 z-50 bg-green-600 text-white px-4 py-3 rounded-lg shadow-lg flex items-center gap-2 animate-in fade-in slide-in-from-right">
-          <CheckCircle className="w-5 h-5" />
-          <span className="font-medium text-sm">{successToast}</span>
-        </div>
-      )}
-      {errorToast && (
-        <div className="fixed top-6 right-6 z-50 bg-red-600 text-white px-4 py-3 rounded-lg shadow-lg flex items-center gap-2 animate-in fade-in slide-in-from-right">
-          <span className="font-medium text-sm">{errorToast}</span>
-        </div>
-      )}
       <ConfirmationModal
         isOpen={confirmModal.isOpen}
         title="Publish Scholarship"

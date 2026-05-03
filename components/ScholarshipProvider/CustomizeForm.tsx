@@ -3,6 +3,7 @@
 import React, { useState, memo } from "react";
 import { Home, User, BookOpen, MapPin, Users, Info, Plus, SlidersHorizontal, X } from "lucide-react";
 import ToggleSwitch from "./common/ToggleSwitch";
+import { toast } from "sonner";
 
 type FieldType = "text" | "number" | "email" | "file" | "textarea" | "tel" | "date" | "select";
 
@@ -202,6 +203,7 @@ const CustomizeForm: React.FC = memo(() => {
       fields: s.fields.map((f) => ({ label: f.label, type: f.type, required: f.required })),
     }));
     console.log("Form customization saved:", config);
+    toast.success("Your custom application form is now live.");
   };
 
   const typeBadge = (type: FieldType) => {

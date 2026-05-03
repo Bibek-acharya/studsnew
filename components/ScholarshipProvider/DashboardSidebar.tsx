@@ -25,13 +25,27 @@ const DashboardSidebar = ({ isMobileOpen, toggleSidebar, activeTab, onNavigate, 
     { menu: 'system', id: 'sec-settings', icon: 'fa-gear', label: 'Settings' }
   ];
 
-  const renderNavGroup = (groupName: string, menuKey: string) => (
-    <div className="px-6 mb-6">
-      <p className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">{groupName}</p>
-      <nav className="space-y-1">
-        {menuItems
-          .filter(item => item.menu === menuKey)
-          .map(item => (
+  const renderNavGroup = (groupName: string, menuKey: string) => {
+    const filteredItems = menuItems.filter(item => {
+      if (item.menu !== menuKey) return false;
+      
+      // If not a sub-user, show everything
+      if (!providerUser?.is_sub_user) return true;
+      
+      // Always show dashboard and settings for sub-users too (per requirement)
+      if (item.id === 'sec-dashboard' || item.id === 'sec-settings') return true;
+      
+      // Check specific permissions
+      return providerUser.permissions?.includes(item.id);
+    });
+
+    if (filteredItems.length === 0) return null;
+
+    return (
+      <div className="px-6 mb-6">
+        <p className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">{groupName}</p>
+        <nav className="space-y-1">
+          {filteredItems.map(item => (
             <button
               key={item.id}
               onClick={() => onNavigate(item.id)}
@@ -50,9 +64,10 @@ const DashboardSidebar = ({ isMobileOpen, toggleSidebar, activeTab, onNavigate, 
               )}
             </button>
           ))}
-      </nav>
-    </div>
-  );
+        </nav>
+      </div>
+    );
+  };
 
   return (
     <aside

@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { scholarshipProviderApi, ProviderScholarship } from '@/services/scholarshipProviderApi';
 import ConfirmationModal from './common/ConfirmationModal';
+import { toast } from 'sonner';
 
 interface ManageScholarshipsProps {
   onNavigate: (section: string) => void;
@@ -58,8 +59,9 @@ export default function ManageScholarships({ onNavigate, onEdit }: ManageScholar
       await scholarshipProviderApi.deleteScholarship(scholarshipId);
       setScholarships(prev => prev.filter(s => s.id !== scholarshipId));
       setTotal(prev => Math.max(0, prev - 1));
+      toast.success('Scholarship deleted successfully');
     } catch (err) {
-      alert(err instanceof Error ? err.message : 'Failed to delete scholarship');
+      toast.error(err instanceof Error ? err.message : 'Failed to delete scholarship');
     }
   }
 
@@ -84,8 +86,13 @@ export default function ManageScholarships({ onNavigate, onEdit }: ManageScholar
         status: apiStatus,
       });
       setScholarships(prev => prev.map(item => item.id === s.id ? { ...item, status: newStatus } : item));
+      if (newStatus === 'active') {
+        toast.success("Your scholarship is now live and visible in the directory.");
+      } else {
+        toast.success("Your scholarship has been saved as a draft.");
+      }
     } catch (err) {
-      alert(err instanceof Error ? err.message : 'Failed to update status');
+      toast.error(err instanceof Error ? err.message : 'Failed to update status');
     } finally {
       setTogglingId(null);
     }

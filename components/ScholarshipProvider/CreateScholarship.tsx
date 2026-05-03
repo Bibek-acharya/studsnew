@@ -114,6 +114,13 @@ const CreateScholarship: React.FC<CreateScholarshipProps> = memo(({ scholarshipI
   const [endDate, setEndDate] = useState("");
   const [startDateError, setStartDateError] = useState("");
   const [endDateError, setEndDateError] = useState("");
+  const [mainTitleError, setMainTitleError] = useState("");
+  const [providerNameError, setProviderNameError] = useState("");
+  const [fundingTypeError, setFundingTypeError] = useState("");
+  const [scholarshipTypeError, setScholarshipTypeError] = useState("");
+  const [educationLevelError, setEducationLevelError] = useState("");
+  const [locationError, setLocationError] = useState("");
+  const [bannerError, setBannerError] = useState("");
   const [applyLink, setApplyLink] = useState("");
   const [bannerBgUrl, setBannerBgUrl] = useState("");
   const [bannerBgPreview, setBannerBgPreview] = useState("");
@@ -129,7 +136,10 @@ const CreateScholarship: React.FC<CreateScholarshipProps> = memo(({ scholarshipI
   const [websiteUrl, setWebsiteUrl] = useState("");
   const [websiteUrlError, setWebsiteUrlError] = useState("");
   const [officeAddress, setOfficeAddress] = useState("");
+  const [officeAddressError, setOfficeAddressError] = useState("");
+  const [coverageAreaError, setCoverageAreaError] = useState("");
   const [mapUrl, setMapUrl] = useState("");
+  const [mapUrlError, setMapUrlError] = useState("");
 
   // About
   const [aboutOverview, setAboutOverview] = useState("");
@@ -149,6 +159,10 @@ const CreateScholarship: React.FC<CreateScholarshipProps> = memo(({ scholarshipI
   const [scholarshipDescription, setScholarshipDescription] = useState("");
   const [scholarshipTypes, setScholarshipTypes] = useState<ScholarshipTypeItem[]>([]);
   const [selectionRubric, setSelectionRubric] = useState<SelectionRubricItem[]>([]);
+  
+  const [schSectionTitleError, setSchSectionTitleError] = useState("");
+  const [schSubtitleError, setSchSubtitleError] = useState("");
+  const [schDescriptionError, setSchDescriptionError] = useState("");
 
   // Eligibility
   const [eligibilitySectionTitle, setEligibilitySectionTitle] = useState("");
@@ -158,6 +172,9 @@ const CreateScholarship: React.FC<CreateScholarshipProps> = memo(({ scholarshipI
   const [partiallyFundedConditions, setPartiallyFundedConditions] = useState<string[]>([]);
   const [selectionProcessSteps, setSelectionProcessSteps] = useState<SelectionProcessStepItem[]>([]);
   const [requiredDocuments, setRequiredDocuments] = useState<string[]>([]);
+
+  const [eligSectionTitleError, setEligSectionTitleError] = useState("");
+  const [eligSubtitleError, setEligSubtitleError] = useState("");
 
   // FAQ
   const [faqs, setFaqs] = useState<FAQItem[]>([]);
@@ -189,7 +206,6 @@ const CreateScholarship: React.FC<CreateScholarshipProps> = memo(({ scholarshipI
 
   // Form state
   const [submitting, setSubmitting] = useState(false);
-  const [success, setSuccess] = useState("");
   const [error, setError] = useState("");
   const [loadingData, setLoadingData] = useState(false);
   const [status, setStatus] = useState<'draft' | 'published'>('draft');
@@ -368,62 +384,154 @@ const CreateScholarship: React.FC<CreateScholarshipProps> = memo(({ scholarshipI
   }, [startDate, endDate]);
 
   const validateScholarship = useCallback(() => {
-    // Email validation
+    let hasError = false;
+    
+    // Clear previous errors
+    setMainTitleError("");
+    setProviderNameError("");
+    setFundingTypeError("");
+    setScholarshipTypeError("");
+    setEducationLevelError("");
+    setLocationError("");
+    setContactEmailError("");
+    setPrimaryPhoneError("");
+    setSecondaryPhoneError("");
+    setWebsiteUrlError("");
+    setCoverageAreaError("");
+    setOfficeAddressError("");
+    setMapUrlError("");
+    setBannerError("");
+    setSchSectionTitleError("");
+    setSchSubtitleError("");
+    setSchDescriptionError("");
+    setEligSectionTitleError("");
+    setEligSubtitleError("");
+
+    if (!mainTitle.trim()) {
+      setMainTitleError("Main title is required");
+      hasError = true;
+    }
+
+    if (!providerName.trim()) {
+      setProviderNameError("Provider name is required");
+      hasError = true;
+    }
+
+    if (!fundingType) {
+      setFundingTypeError("Funding type is required");
+      hasError = true;
+    }
+
+    if (!scholarshipType) {
+      setScholarshipTypeError("Scholarship type is required");
+      hasError = true;
+    }
+
+    if (!educationLevel) {
+      setEducationLevelError("Education level is required");
+      hasError = true;
+    }
+
+    if (!location.trim()) {
+      setLocationError("Location is required");
+      hasError = true;
+    }
+
+    if (!bannerBgUrl) {
+      setBannerError("Banner image is required");
+      hasError = true;
+    }
+
     if (!contactEmail) {
-      return { message: "Contact email is required", field: "contactEmail" };
-    }
-    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(contactEmail)) {
-      return { message: "Invalid contact email format", field: "contactEmail" };
-    }
-
-    // Phone validation - exactly 10 digits starting with 9
-    if (!primaryPhone || !/^9\d{9}$/.test(primaryPhone)) {
-      return { message: "Primary phone must be exactly 10 digits and start with 9", field: "primaryPhone" };
+      setContactEmailError("Contact email is required");
+      hasError = true;
+    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(contactEmail)) {
+      setContactEmailError("Invalid contact email format");
+      hasError = true;
     }
 
-    // Secondary phone validation (optional but if provided must be valid)
+    if (!primaryPhone) {
+      setPrimaryPhoneError("Primary phone is required");
+      hasError = true;
+    } else if (!/^9\d{9}$/.test(primaryPhone)) {
+      setPrimaryPhoneError("Primary phone must be 10 digits starting with 9");
+      hasError = true;
+    }
+
     if (secondaryPhone && !/^9\d{9}$/.test(secondaryPhone)) {
-      return { message: "Secondary phone must be exactly 10 digits and start with 9", field: "secondaryPhone" };
+      setSecondaryPhoneError("Secondary phone must be 10 digits starting with 9");
+      hasError = true;
     }
 
-    // Website URL validation
     if (!websiteUrl) {
-      return { message: "Website URL is required", field: "websiteUrl" };
-    }
-    try {
-      new URL(websiteUrl);
-      if (!websiteUrl.startsWith('http://') && !websiteUrl.startsWith('https://')) {
-        return { message: "Website URL must start with http:// or https://", field: "websiteUrl" };
+      setWebsiteUrlError("Website URL is required");
+      hasError = true;
+    } else {
+      try {
+        new URL(websiteUrl);
+        if (!websiteUrl.startsWith('http://') && !websiteUrl.startsWith('https://')) {
+          setWebsiteUrlError("Website URL must start with http:// or https://");
+          hasError = true;
+        }
+      } catch {
+        setWebsiteUrlError("Invalid website URL");
+        hasError = true;
       }
-    } catch {
-      return { message: "Invalid website URL", field: "websiteUrl" };
     }
 
-    // Coverage area validation
     if (!coverageArea.trim()) {
-      return { message: "Coverage area is required", field: "coverageArea" };
+      setCoverageAreaError("Coverage area is required");
+      hasError = true;
     }
 
-    // Office address validation
     if (!officeAddress.trim()) {
-      return { message: "Office address is required", field: "officeAddress" };
+      setOfficeAddressError("Office address is required");
+      hasError = true;
     }
 
-    // Map URL validation
     if (!mapUrl.trim()) {
-      return { message: "Map URL is required", field: "mapUrl" };
-    }
-    try {
-      new URL(mapUrl);
-      if (!mapUrl.startsWith('http://') && !mapUrl.startsWith('https://')) {
-        return { message: "Map URL must start with http:// or https://", field: "mapUrl" };
+      setMapUrlError("Map URL is required");
+      hasError = true;
+    } else {
+      try {
+        new URL(mapUrl);
+        if (!mapUrl.startsWith('http://') && !mapUrl.startsWith('https://')) {
+          setMapUrlError("Map URL must start with http:// or https://");
+          hasError = true;
+        }
+      } catch {
+        setMapUrlError("Invalid map URL");
+        hasError = true;
       }
-    } catch {
-      return { message: "Invalid map URL", field: "mapUrl" };
     }
 
-    return { message: "", field: "" };
-  }, [contactEmail, primaryPhone, secondaryPhone, websiteUrl, coverageArea, officeAddress, mapUrl]);
+    if (!scholarshipSectionTitle.trim()) {
+      setSchSectionTitleError("Section title is required");
+      hasError = true;
+    }
+
+    if (!scholarshipSubtitle.trim()) {
+      setSchSubtitleError("Subtitle is required");
+      hasError = true;
+    }
+
+    if (!scholarshipDescription.trim()) {
+      setSchDescriptionError("Description is required");
+      hasError = true;
+    }
+
+    if (!eligibilitySectionTitle.trim()) {
+      setEligSectionTitleError("Section title is required");
+      hasError = true;
+    }
+
+    if (!eligibilitySubtitle.trim()) {
+      setEligSubtitleError("Short description is required");
+      hasError = true;
+    }
+
+    return !hasError;
+  }, [mainTitle, providerName, fundingType, scholarshipType, educationLevel, location, bannerBgUrl, contactEmail, primaryPhone, secondaryPhone, websiteUrl, coverageArea, officeAddress, mapUrl, scholarshipSectionTitle, scholarshipSubtitle, scholarshipDescription, eligibilitySectionTitle, eligibilitySubtitle]);
 
   const scrollToField = useCallback((field: string) => {
     const element = document.getElementById(field);
@@ -451,28 +559,18 @@ const CreateScholarship: React.FC<CreateScholarshipProps> = memo(({ scholarshipI
   }, []);
 
   const handleSave = useCallback(async (draft: boolean = false) => {
-    if (!mainTitle.trim()) {
-      setError("Page Title is required.");
-      scrollToField("mainTitle");
-      return;
-    }
-
     // Validate dates
     const dateValidation = validateDates();
     if (!dateValidation.isValidDate) {
+      setError("Please fix the date errors.");
       if (dateValidation.field) {
         scrollToField(dateValidation.field);
       }
       return;
     }
 
-    const mode = draft ? "draft" : "published";
-    const validationError = validateScholarship();
-    if (validationError.message) {
-      toast.error(validationError.message);
-      if (validationError.field) {
-        scrollToField(validationError.field);
-      }
+    if (!validateScholarship()) {
+      setError("Please fix the errors below.");
       return;
     }
 
@@ -559,19 +657,27 @@ const CreateScholarship: React.FC<CreateScholarshipProps> = memo(({ scholarshipI
       },
     };
 
+    const mode = draft ? "draft" : "published";
     try {
       if (isEditing && scholarshipId) {
         await scholarshipProviderApi.updateScholarship(scholarshipId, payload);
       } else {
         await scholarshipProviderApi.createScholarship(payload);
       }
-      toast.success(mode === "draft" ? "Draft saved successfully!" : "Scholarship published successfully!");
+      if (mode === "draft") {
+        toast.success(isEditing ? "Your scholarship draft has been updated." : "Your scholarship has been saved as a draft.");
+      } else {
+        toast.success(isEditing ? "Your scholarship has been updated successfully." : "Your scholarship has been created successfully.");
+        if (!isEditing) {
+          setTimeout(() => toast.success("Your scholarship is now live and visible in the directory."), 500);
+        }
+      }
       if (onNavigate) {
         const nextSection = mode === "draft" ? "sec-draft-scholarship" : "sec-scholarship-directory";
         setTimeout(() => onNavigate(nextSection), 1500);
       }
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : "Failed to save scholarship");
+      setError(err instanceof Error ? err.message : "Failed to save scholarship");
     } finally {
       setSubmitting(false);
     }
@@ -607,10 +713,12 @@ const CreateScholarship: React.FC<CreateScholarshipProps> = memo(({ scholarshipI
       </div>
 
       {error && (
-        <div className="p-4 bg-red-50 border border-red-200 rounded-lg text-red-700 text-sm mb-6">{error}</div>
-      )}
-      {success && (
-        <div className="p-4 bg-green-50 border border-green-200 rounded-lg text-green-700 text-sm mb-6">{success}</div>
+        <div className="p-4 bg-red-50 border border-red-200 rounded-lg text-red-700 text-sm mb-6 flex items-center gap-2">
+          <svg className="w-5 h-5 shrink-0" fill="currentColor" viewBox="0 0 20 20">
+            <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+          </svg>
+          {error}
+        </div>
       )}
 
       {/* General Settings */}
@@ -644,6 +752,13 @@ const CreateScholarship: React.FC<CreateScholarshipProps> = memo(({ scholarshipI
         bannerBgUrl={bannerBgUrl}
         bannerBgPreview={bannerBgPreview}
         onBannerSelect={handleBannerFileSelect}
+        mainTitleError={mainTitleError}
+        providerNameError={providerNameError}
+        fundingTypeError={fundingTypeError}
+        scholarshipTypeError={scholarshipTypeError}
+        educationLevelError={educationLevelError}
+        locationError={locationError}
+        bannerError={bannerError}
       />
 
       {/* Contact Details */}
@@ -668,8 +783,11 @@ const CreateScholarship: React.FC<CreateScholarshipProps> = memo(({ scholarshipI
         setWebsiteUrlError={setWebsiteUrlError}
         officeAddress={officeAddress}
         setOfficeAddress={setOfficeAddress}
+        coverageAreaError={coverageAreaError}
+        officeAddressError={officeAddressError}
         mapUrl={mapUrl}
         setMapUrl={setMapUrl}
+        mapUrlError={mapUrlError}
       />
 
       {/* About Section */}
@@ -702,6 +820,9 @@ const CreateScholarship: React.FC<CreateScholarshipProps> = memo(({ scholarshipI
         setScholarshipTypes={setScholarshipTypes}
         selectionRubric={selectionRubric}
         setSelectionRubric={setSelectionRubric}
+        sectionTitleError={schSectionTitleError}
+        subtitleError={schSubtitleError}
+        descriptionError={schDescriptionError}
       />
 
       {/* Eligibility */}
@@ -720,6 +841,8 @@ const CreateScholarship: React.FC<CreateScholarshipProps> = memo(({ scholarshipI
         setSelectionProcessSteps={setSelectionProcessSteps}
         requiredDocuments={requiredDocuments}
         setRequiredDocuments={setRequiredDocuments}
+        sectionTitleError={eligSectionTitleError}
+        subtitleError={eligSubtitleError}
       />
 
       {/* Scholarship Timeline (Key Dates) */}

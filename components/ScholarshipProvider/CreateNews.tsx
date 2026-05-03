@@ -3,6 +3,7 @@
 import React, { useState, useCallback, memo } from "react";
 import dynamic from "next/dynamic";
 import { Home, PlusCircle } from "lucide-react";
+import { toast } from "sonner";
 import { scholarshipProviderApi } from "@/services/scholarshipProviderApi";
 import FileUpload from "./common/FileUpload";
 
@@ -81,7 +82,7 @@ const CreateNews: React.FC = memo(() => {
         allow_comments: allowComments,
         status: draft ? "draft" : "published",
       });
-      setSuccess(draft ? "Draft saved!" : "News published!");
+      toast.success(draft ? "Your news post has been saved as a draft." : "Your news has been published in the directory.");
     } catch (err: any) {
       setError(err.message || "Failed to save news");
     } finally {
@@ -194,7 +195,6 @@ const CreateNews: React.FC = memo(() => {
       </div>
 
       {error && <div className="p-4 bg-red-50 border border-red-200 rounded-lg text-red-700 text-sm">{error}</div>}
-      {success && <div className="p-4 bg-green-50 border border-green-200 rounded-lg text-green-700 text-sm">{success}</div>}
     </div>
   );
 });

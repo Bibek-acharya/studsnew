@@ -36,6 +36,13 @@ interface GeneralSettingsSectionProps {
   bannerBgUrl: string;
   bannerBgPreview: string;
   onBannerSelect: (file: File) => void;
+  mainTitleError?: string;
+  providerNameError?: string;
+  fundingTypeError?: string;
+  scholarshipTypeError?: string;
+  educationLevelError?: string;
+  locationError?: string;
+  bannerError?: string;
 }
 
 const FUNDING_TYPES = [
@@ -60,6 +67,7 @@ const SCHOLARSHIP_TYPES = [
 ];
 
 const EDUCATION_LEVELS = [
+  { value: "+2", label: "+2" },
   { value: "Diploma", label: "Diploma" },
   { value: "Bachelor's Degree", label: "Bachelor's Degree" },
   { value: "Master's Degree", label: "Master's Degree" },
@@ -90,6 +98,13 @@ export const GeneralSettingsSection: React.FC<GeneralSettingsSectionProps> = ({
   bannerBgUrl,
   bannerBgPreview,
   onBannerSelect,
+  mainTitleError,
+  providerNameError,
+  fundingTypeError,
+  scholarshipTypeError,
+  educationLevelError,
+  locationError,
+  bannerError,
 }) => {
   const tomorrow = format(addDays(new Date(), 1), "yyyy-MM-dd");
 
@@ -114,11 +129,12 @@ export const GeneralSettingsSection: React.FC<GeneralSettingsSectionProps> = ({
           <input
             id="mainTitle"
             type="text"
-            className={formInputClass}
-            placeholder="e.g. Project Shiksha Scholarship 2082"
+            className={`${formInputClass} ${mainTitleError ? "border-red-500 bg-red-50/10" : ""}`}
+            placeholder="Enter Scholarship Name"
             value={mainTitle}
             onChange={(e) => setMainTitle(e.target.value)}
           />
+          {mainTitleError && <p className="text-red-500 text-xs mt-1">{mainTitleError}</p>}
           <p className="text-xs text-gray-500">This appears at the top of the page</p>
         </div>
 
@@ -129,11 +145,12 @@ export const GeneralSettingsSection: React.FC<GeneralSettingsSectionProps> = ({
           <input
             id="providerName"
             type="text"
-            className={formInputClass}
-            placeholder="e.g. Ncell Foundation"
+            className={`${formInputClass} ${providerNameError ? "border-red-500 bg-red-50/10" : ""}`}
+            placeholder="Enter Scholarship Provider Name"
             value={providerName}
             onChange={(e) => setProviderName(e.target.value)}
           />
+          {providerNameError && <p className="text-red-500 text-xs mt-1">{providerNameError}</p>}
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -147,16 +164,18 @@ export const GeneralSettingsSection: React.FC<GeneralSettingsSectionProps> = ({
               onChange={setFundingType}
               options={FUNDING_TYPES}
               placeholder="Select Funding Type"
+              error={fundingTypeError}
             />
             {fundingType === "Other" && (
               <input
                 type="text"
-                className={`${formInputClass} mt-2`}
+                className={`${formInputClass} mt-2 ${fundingTypeError ? "border-red-500 bg-red-50/10" : ""}`}
                 placeholder="Specify other funding type"
                 value={fundingTypeOther}
                 onChange={(e) => setFundingTypeOther(e.target.value)}
               />
             )}
+            {fundingTypeError && <p className="text-red-500 text-xs mt-1">{fundingTypeError}</p>}
           </div>
 
           <div className="space-y-1.5">
@@ -169,16 +188,18 @@ export const GeneralSettingsSection: React.FC<GeneralSettingsSectionProps> = ({
               onChange={setScholarshipType}
               options={SCHOLARSHIP_TYPES}
               placeholder="Select Scholarship Type"
+              error={scholarshipTypeError}
             />
             {scholarshipType === "Other" && (
               <input
                 type="text"
-                className={`${formInputClass} mt-2`}
+                className={`${formInputClass} mt-2 ${scholarshipTypeError ? "border-red-500 bg-red-50/10" : ""}`}
                 placeholder="Specify other scholarship type"
                 value={scholarshipTypeOther}
                 onChange={(e) => setScholarshipTypeOther(e.target.value)}
               />
             )}
+            {scholarshipTypeError && <p className="text-red-500 text-xs mt-1">{scholarshipTypeError}</p>}
           </div>
 
           <div className="space-y-1.5">
@@ -191,16 +212,18 @@ export const GeneralSettingsSection: React.FC<GeneralSettingsSectionProps> = ({
               onChange={setEducationLevel}
               options={EDUCATION_LEVELS}
               placeholder="Select Level"
+              error={educationLevelError}
             />
             {educationLevel === "Other" && (
               <input
                 type="text"
-                className={`${formInputClass} mt-2`}
+                className={`${formInputClass} mt-2 ${educationLevelError ? "border-red-500 bg-red-50/10" : ""}`}
                 placeholder="Specify other education level"
                 value={educationLevelOther}
                 onChange={(e) => setEducationLevelOther(e.target.value)}
               />
             )}
+            {educationLevelError && <p className="text-red-500 text-xs mt-1">{educationLevelError}</p>}
           </div>
 
           <div className="space-y-1.5">
@@ -210,11 +233,12 @@ export const GeneralSettingsSection: React.FC<GeneralSettingsSectionProps> = ({
             <input
               id="location"
               type="text"
-              className={formInputClass}
+              className={`${formInputClass} ${locationError ? "border-red-500 bg-red-50/10" : ""}`}
               placeholder="e.g. Kathmandu, Nepal"
               value={location}
               onChange={(e) => setLocation(e.target.value)}
             />
+            {locationError && <p className="text-red-500 text-xs mt-1">{locationError}</p>}
           </div>
 
           <div className="space-y-1.5">
@@ -273,6 +297,7 @@ export const GeneralSettingsSection: React.FC<GeneralSettingsSectionProps> = ({
             onFileSelect={onBannerSelect}
             previewUrl={bannerBgPreview}
           />
+          {bannerError && <p className="text-red-500 text-xs mt-1">{bannerError}</p>}
         </div>
       </div>
     </div>

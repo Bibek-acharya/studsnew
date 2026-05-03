@@ -43,8 +43,8 @@ const TopBar: React.FC<TopBarProps> = ({
     setNotifLoading(true);
     try {
       const res = await scholarshipProviderApi.getNotifications(1, 10);
-      setNotifications(res.notifications);
-      setNotifUnreadCount(res.unread_count);
+      setNotifications(res.notifications || []);
+      setNotifUnreadCount(res.unread_count || 0);
     } catch {
       setNotifications([]);
       setNotifUnreadCount(0);
@@ -175,7 +175,7 @@ const TopBar: React.FC<TopBarProps> = ({
                     <p className="text-xs font-bold">No notifications yet</p>
                   </div>
                 ) : (
-                  notifications.map(notif => (
+                  (notifications || []).map(notif => (
                     <button
                       key={notif.id}
                       onClick={() => handleMarkRead(notif.id, notif.link)}
@@ -205,10 +205,10 @@ const TopBar: React.FC<TopBarProps> = ({
                 )}
               </div>
 
-              {notifications.length > 0 && (
+              {notifications && notifications.length > 0 && (
                 <div className="p-3 border-t border-slate-100 bg-slate-50/50 text-center">
                   <button
-                    onClick={() => { setShowNotifDropdown(false); onNavigate?.('sec-dashboard'); }}
+                    onClick={() => { setShowNotifDropdown(false); onNavigate?.('sec-notifications'); }}
                     className="text-[10px] font-black text-primary-600 hover:text-primary-800 uppercase tracking-widest"
                   >
                     View all activity

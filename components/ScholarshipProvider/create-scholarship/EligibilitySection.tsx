@@ -25,6 +25,8 @@ interface EligibilitySectionProps {
   setSelectionProcessSteps: React.Dispatch<React.SetStateAction<SelectionProcessStepItem[]>>;
   requiredDocuments: string[];
   setRequiredDocuments: React.Dispatch<React.SetStateAction<string[]>>;
+  sectionTitleError?: string;
+  subtitleError?: string;
 }
 
 const formInputClass = "w-full px-4 py-2.5 rounded-lg border border-gray-200 bg-white text-gray-900 focus:outline-none focus:border-blue-500";
@@ -101,6 +103,7 @@ export const EligibilitySection: React.FC<EligibilitySectionProps> = ({
   partiallyFundedConditions, setPartiallyFundedConditions,
   selectionProcessSteps, setSelectionProcessSteps,
   requiredDocuments, setRequiredDocuments,
+  sectionTitleError, subtitleError,
 }) => {
   const addStringItem = (setter: React.Dispatch<React.SetStateAction<string[]>>, value: string) => {
     setter((prev) => [...prev, value]);
@@ -155,11 +158,12 @@ export const EligibilitySection: React.FC<EligibilitySectionProps> = ({
             </label>
             <input
               type="text"
-              className={formInputClass}
+              className={`${formInputClass} ${sectionTitleError ? "border-red-500 bg-red-50/10" : ""}`}
               value={sectionTitle}
               onChange={(e) => setSectionTitle(e.target.value)}
               placeholder="Eligibility & Selection Criteria"
             />
+            {sectionTitleError && <p className="text-red-500 text-xs mt-1">{sectionTitleError}</p>}
           </div>
           <div className="space-y-1.5">
             <label className="block text-sm font-medium text-gray-700">
@@ -171,6 +175,7 @@ export const EligibilitySection: React.FC<EligibilitySectionProps> = ({
               placeholder="Requirements and selection process"
               minHeight={80}
             />
+            {subtitleError && <p className="text-red-500 text-xs mt-1">{subtitleError}</p>}
           </div>
         </div>
 

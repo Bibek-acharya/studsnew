@@ -18,7 +18,11 @@ export async function apiRequest<T>(path: string, options: ApiRequestOptions = {
   // Get token from localStorage for production (cookie won't be sent to API domain)
   let token: string | null = null;
   if (typeof window !== "undefined") {
-    token = localStorage.getItem("token");
+    if (path.includes("/scholarship-providers/")) {
+      token = localStorage.getItem("scholarshipProviderToken") || localStorage.getItem("token");
+    } else {
+      token = localStorage.getItem("token");
+    }
   }
 
   const isFormData =
@@ -78,6 +82,9 @@ export interface AuthResponse {
       last_name: string;
       role: string;
       preferences?: any;
+      provider_id?: number;
+      permissions?: string[];
+      is_sub_user?: boolean;
     };
     token: string;
   };

@@ -13,6 +13,9 @@ interface User {
   role: string;
   image_url?: string;
   current_status?: string;
+  provider_id?: number;
+  permissions?: string[];
+  is_sub_user?: boolean;
 }
 
 interface AuthContextType {
@@ -25,6 +28,7 @@ interface AuthContextType {
   verifyOTP: (email: string, otp: string) => Promise<void>;
   sendOTP: (email: string) => Promise<void>;
   setUser: (user: User) => void;
+  setSession: (user: User, token: string) => void;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -85,6 +89,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const setUser = (userData: User) => {
     if (typeof window !== "undefined") {
       localStorage.setItem(USER_STORAGE_KEY, JSON.stringify(userData));
+    }
+    setUserState(userData);
+  };
+
+  const setSession = (userData: User, token: string) => {
+    if (typeof window !== "undefined") {
+      persistAuthSession(localStorage, userData, token);
     }
     setUserState(userData);
   };
@@ -174,6 +185,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     verifyOTP,
     sendOTP,
     setUser,
+    setSession,
   }), [user, isAuthenticated, loading]);
 
   return (

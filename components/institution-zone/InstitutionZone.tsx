@@ -15,7 +15,7 @@ export default function InstitutionZone() {
   const router = useRouter();
 
   return (
-    <div className="min-h-screen font-sans selection:bg-brandBlue selection:text-white bg-white">
+    <div className="min-h-screen font-sans selection:bg-[#0000ff] selection:text-white bg-white">
       <InstitutionHeader />
 
       {/* --- HERO SECTION --- */}

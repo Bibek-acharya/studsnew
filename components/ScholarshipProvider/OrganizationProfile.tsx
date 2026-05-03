@@ -108,7 +108,7 @@ const OrganizationProfile: React.FC = memo(() => {
         website_url: websiteUrl,
       });
       setProfile(updated);
-      toast.success("Profile saved successfully");
+      toast.success("Your profile has been updated successfully.");
     } catch (err) {
       toast.error(err instanceof Error ? err.message : "Failed to save profile");
     } finally {

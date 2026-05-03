@@ -28,6 +28,9 @@ interface ScholarshipDetailsSectionProps {
   setScholarshipTypes: React.Dispatch<React.SetStateAction<ScholarshipTypeItem[]>>;
   selectionRubric: SelectionRubricItem[];
   setSelectionRubric: React.Dispatch<React.SetStateAction<SelectionRubricItem[]>>;
+  sectionTitleError?: string;
+  subtitleError?: string;
+  descriptionError?: string;
 }
 
 const formInputClass = "w-full px-4 py-2.5 rounded-lg border border-gray-200 bg-white text-gray-900 focus:outline-none focus:border-blue-500";
@@ -38,6 +41,7 @@ export const ScholarshipDetailsSection: React.FC<ScholarshipDetailsSectionProps>
   description, setDescription,
   scholarshipTypes, setScholarshipTypes,
   selectionRubric, setSelectionRubric,
+  sectionTitleError, subtitleError, descriptionError,
 }) => {
   const addScholarshipType = () => {
     setScholarshipTypes([...scholarshipTypes, { type: "", seats: "", coverage: "", eligibility: "" }]);
@@ -84,11 +88,12 @@ export const ScholarshipDetailsSection: React.FC<ScholarshipDetailsSectionProps>
             </label>
             <input
               type="text"
-              className={formInputClass}
+              className={`${formInputClass} ${sectionTitleError ? "border-red-500 bg-red-50/10" : ""}`}
               value={sectionTitle}
               onChange={(e) => setSectionTitle(e.target.value)}
               placeholder="Scholarship Program 2082"
             />
+            {sectionTitleError && <p className="text-red-500 text-xs mt-1">{sectionTitleError}</p>}
           </div>
           <div className="space-y-1.5">
             <label className="block text-sm font-medium text-gray-700">
@@ -96,11 +101,12 @@ export const ScholarshipDetailsSection: React.FC<ScholarshipDetailsSectionProps>
             </label>
             <input
               type="text"
-              className={formInputClass}
+              className={`${formInputClass} ${subtitleError ? "border-red-500 bg-red-50/10" : ""}`}
               value={subtitle}
               onChange={(e) => setSubtitle(e.target.value)}
               placeholder="Fully funded higher secondary education"
             />
+            {subtitleError && <p className="text-red-500 text-xs mt-1">{subtitleError}</p>}
           </div>
           <div className="space-y-1.5">
             <label className="block text-sm font-medium text-gray-700">
@@ -112,6 +118,7 @@ export const ScholarshipDetailsSection: React.FC<ScholarshipDetailsSectionProps>
               placeholder="Describe the scholarship program..."
               minHeight={120}
             />
+            {descriptionError && <p className="text-red-500 text-xs mt-1">{descriptionError}</p>}
           </div>
         </div>
 

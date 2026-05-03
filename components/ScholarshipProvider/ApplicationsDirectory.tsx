@@ -3,6 +3,7 @@
 import React, { useEffect, useState, useCallback } from "react";
 import { Home, Star, Search, Eye, CheckCircle, XCircle, ChevronLeft, ChevronRight } from "lucide-react";
 import { scholarshipProviderApi, ProviderApplication } from "@/services/scholarshipProviderApi";
+import { toast } from "sonner";
 
 interface ApplicationsDirectoryProps {
   onReviewStudent: (id: string) => void;
@@ -36,8 +37,6 @@ export default function ApplicationsDirectory({ onReviewStudent }: ApplicationsD
   const [selectedAppId, setSelectedAppId] = useState<number | null>(null);
   const [isApproveAction, setIsApproveAction] = useState(true);
   const [rejectionReason, setRejectionReason] = useState('');
-  const [error, setError] = useState<string | null>(null);
-  const [success, setSuccess] = useState<string | null>(null);
 
   useEffect(() => {
     async function fetchData() {
@@ -76,13 +75,13 @@ export default function ApplicationsDirectory({ onReviewStudent }: ApplicationsD
           payment: { ...app.payment, status: isApproveAction ? 'completed' : 'rejected' }
         } : app
       ));
-      setSuccess(isApproveAction ? 'Payment approved' : 'Payment rejected');
+      toast.success(isApproveAction ? 'Payment approved' : 'Payment rejected');
       setShowConfirmModal(false);
       setShowRejectModal(false);
       setSelectedAppId(null);
       setRejectionReason('');
     } catch (err) {
-      setError('Failed to process payment');
+      toast.error('Failed to process payment');
     }
   };
 
@@ -90,9 +89,9 @@ export default function ApplicationsDirectory({ onReviewStudent }: ApplicationsD
     try {
       await scholarshipProviderApi.updateApplicationStatus(id, newStatus);
       setApplications((prev) => prev.map((app) => (app.id === id ? { ...app, status: newStatus } : app)));
-      setSuccess('Status updated successfully');
+      toast.success('Status updated successfully');
     } catch {
-      setError('Failed to update status');
+      toast.error('Failed to update status');
     }
   }, []);
 
@@ -397,14 +396,7 @@ export default function ApplicationsDirectory({ onReviewStudent }: ApplicationsD
         </div>
       )}
 
-      {(error || success) && (
-        <div className={`${error ? 'bg-red-100 text-red-800 border border-red-200' : 'bg-green-100 text-green-800 border border-green-200'} px-4 py-3 rounded-lg shadow-lg z-50`}>
-          {error || success}
-          <button onClick={() => { setError(null); setSuccess(null); }} className="ml-3 text-sm underline">
-            Dismiss
-          </button>
-        </div>
-      )}
+      {/* Removed local error/success display in favor of toasts */}
     </div>
   );
 }

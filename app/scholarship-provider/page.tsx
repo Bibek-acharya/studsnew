@@ -400,7 +400,7 @@ const ScholarshipProviderZone: React.FC<ScholarshipProviderZoneProps> = ({
   }
 
   return (
-    <><div suppressHydrationWarning className="min-h-screen w-full font-sans selection:bg-brandBlue selection:text-white bg-gray-50 flex items-center justify-center p-4 md:p-8 lg:p-12">
+    <><div suppressHydrationWarning className="min-h-screen w-full font-sans selection:bg-[#0000ff] selection:text-white bg-gray-50 flex items-center justify-center p-4 md:p-8 lg:p-12">
       <div className="w-full max-w-[1400px] bg-[#0000ff] rounded-2xl p-6 sm:p-10 lg:py-10 lg:px-16 xl:px-20 relative overflow-hidden">
         <div className="relative z-10 grid grid-cols-1 lg:grid-cols-2 gap-10 lg:gap-12 items-center w-full">
           <div className="order-2 lg:order-1 flex flex-col justify-center text-center lg:text-left space-y-5 mx-auto lg:mx-0 max-w-xl">
@@ -425,8 +425,8 @@ const ScholarshipProviderZone: React.FC<ScholarshipProviderZoneProps> = ({
                       <h1 className="text-xl font-bold text-gray-900 mb-1.5">Sign in to StudSphere</h1>
                       <p className="text-[13px] text-gray-500 font-medium">Welcome back! Enter your details to access your dashboard.</p>
                     </div>
-                    <form suppressHydrationWarning onSubmit={handleProviderLogin} className="space-y-4">
-                      <div suppressHydrationWarning>
+                    <form onSubmit={handleProviderLogin} className="space-y-4">
+                      <div>
                         <label className="block text-[13px] font-semibold text-gray-700 mb-1.5">Email</label>
                         <input
                           type="email"
@@ -449,11 +449,10 @@ const ScholarshipProviderZone: React.FC<ScholarshipProviderZoneProps> = ({
                           />
                           <button
                             type="button"
-                            suppressHydrationWarning
                             onClick={() => setShowLoginPassword(!showLoginPassword)}
                             className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-[#0000ff] transition-colors"
                           >
-                            {showLoginPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                            {showLoginPassword ? <Eye size={18} /> : <EyeOff size={18} />}
                           </button>
                         </div>
                         {loginFieldErrors.password && <p className="text-red-500 text-[12px] mt-1">{loginFieldErrors.password}</p>}
@@ -593,23 +592,41 @@ const ScholarshipProviderZone: React.FC<ScholarshipProviderZoneProps> = ({
                         <div className="space-y-4">
                           <div>
                             <label className="block text-[13px] font-semibold text-gray-700 mb-1.5">New Password</label>
-                            <input
-                              type="password"
-                              placeholder="At least 6 characters"
-                              value={fpNewPassword}
-                              onChange={(e) => setFpNewPassword(e.target.value)}
-                              className="w-full px-4 py-3 rounded-lg border border-gray-200 bg-white text-sm focus:outline-none focus:border-[#0000ff] focus:ring-1 focus:ring-[#0000ff] transition-all placeholder:text-gray-400 font-medium text-gray-900"
-                            />
+                            <div className="relative">
+                              <input
+                                type={showLoginPassword ? "text" : "password"}
+                                placeholder="At least 6 characters"
+                                value={fpNewPassword}
+                                onChange={(e) => setFpNewPassword(e.target.value)}
+                                className="w-full px-4 py-3 rounded-lg border border-gray-200 bg-white text-sm focus:outline-none focus:border-[#0000ff] focus:ring-1 focus:ring-[#0000ff] transition-all placeholder:text-gray-400 font-medium text-gray-900"
+                              />
+                              <button
+                                type="button"
+                                onClick={() => setShowLoginPassword(!showLoginPassword)}
+                                className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-[#0000ff] transition-colors"
+                              >
+                                {showLoginPassword ? <Eye size={18} /> : <EyeOff size={18} />}
+                              </button>
+                            </div>
                           </div>
                           <div>
                             <label className="block text-[13px] font-semibold text-gray-700 mb-1.5">Confirm Password</label>
-                            <input
-                              type="password"
-                              placeholder="Re-enter your password"
-                              value={fpConfirmPassword}
-                              onChange={(e) => setFpConfirmPassword(e.target.value)}
-                              className="w-full px-4 py-3 rounded-lg border border-gray-200 bg-white text-sm focus:outline-none focus:border-[#0000ff] focus:ring-1 focus:ring-[#0000ff] transition-all placeholder:text-gray-400 font-medium text-gray-900"
-                            />
+                            <div className="relative">
+                              <input
+                                type={showLoginPassword ? "text" : "password"}
+                                placeholder="Re-enter your password"
+                                value={fpConfirmPassword}
+                                onChange={(e) => setFpConfirmPassword(e.target.value)}
+                                className="w-full px-4 py-3 rounded-lg border border-gray-200 bg-white text-sm focus:outline-none focus:border-[#0000ff] focus:ring-1 focus:ring-[#0000ff] transition-all placeholder:text-gray-400 font-medium text-gray-900"
+                              />
+                              <button
+                                type="button"
+                                onClick={() => setShowLoginPassword(!showLoginPassword)}
+                                className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-[#0000ff] transition-colors"
+                              >
+                                {showLoginPassword ? <Eye size={18} /> : <EyeOff size={18} />}
+                              </button>
+                            </div>
                           </div>
                           {fpError && <p className="text-sm text-red-500">{fpError}</p>}
                           <button

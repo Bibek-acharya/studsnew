@@ -3,6 +3,7 @@
 import React, { useState, useCallback, memo } from "react";
 import dynamic from "next/dynamic";
 import { Home, CalendarPlus } from "lucide-react";
+import { toast } from "sonner";
 import { scholarshipProviderApi } from "@/services/scholarshipProviderApi";
 import FileUpload from "./common/FileUpload";
 
@@ -109,7 +110,7 @@ const CreateEvent: React.FC = memo(() => {
         enable_registration: enableRegistration,
         status: draft ? "draft" : "upcoming",
       });
-      setSuccess(draft ? "Draft saved!" : "Event published!");
+      toast.success(draft ? "Your event has been saved as a draft." : "Your event is now live.");
     } catch (err: any) {
       setError(err.message || "Failed to save event");
     } finally {
@@ -266,7 +267,6 @@ const CreateEvent: React.FC = memo(() => {
       </div>
 
       {error && <div className="p-4 bg-red-50 border border-red-200 rounded-lg text-red-700 text-sm">{error}</div>}
-      {success && <div className="p-4 bg-green-50 border border-green-200 rounded-lg text-green-700 text-sm">{success}</div>}
     </div>
   );
 });

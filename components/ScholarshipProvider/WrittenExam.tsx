@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect, memo } from "react";
 import { Home, GraduationCap, Search, Plus, Pencil, Trash2, ChevronLeft, ChevronRight, X, AlertCircle } from "lucide-react";
+import { toast } from "sonner";
 
 interface ExamResult {
   id: number;
@@ -109,6 +110,7 @@ const WrittenExam: React.FC = memo(() => {
       status: marksNum >= 40 ? "Pass" : "Fail",
     };
     setResults((prev) => [...prev, newResult]);
+    toast.success("User marks have been added successfully.");
     setModalOpen(false);
   };
 

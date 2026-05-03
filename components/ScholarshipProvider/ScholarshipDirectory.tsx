@@ -4,6 +4,7 @@ import React, { useState, useEffect, useCallback, useMemo, memo } from "react";
 import { Home, Building2, CheckCircle, DollarSign, MapPin, GraduationCap, Calendar, Trash2, Pencil, Users } from "lucide-react";
 import { scholarshipProviderApi, ProviderScholarship } from "@/services/scholarshipProviderApi";
 import ConfirmationModal from "./common/ConfirmationModal";
+import { toast } from "sonner";
 
 interface ScholarshipDirectoryProps {
   onEdit?: (id: number) => void;
@@ -88,8 +89,9 @@ const ScholarshipDirectory: React.FC<ScholarshipDirectoryProps> = memo(({ onEdit
     try {
       await scholarshipProviderApi.deleteScholarship(scholarshipId);
       setScholarships((prev) => prev.filter((s) => s.id !== scholarshipId));
+      toast.success("Scholarship deleted successfully");
     } catch {
-      alert("Failed to delete scholarship");
+      toast.error("Failed to delete scholarship");
     }
   }, [deleteModal.scholarshipId]);
 

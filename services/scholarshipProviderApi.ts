@@ -383,6 +383,8 @@ export interface ProviderProfile {
   pan_number?: string;
   website_url?: string;
   role: string;
+  is_sub_user?: boolean;
+  permissions?: string[];
 }
 
 export interface ProviderApplication {
@@ -770,7 +772,7 @@ export const scholarshipProviderApi = {
 
   async getNotifications(page = 1, limit = 20): Promise<NotificationsResponse> {
     const params = new URLSearchParams({ page: String(page), limit: String(limit) }).toString();
-    return apiRequest(`/api/v1/scholarship-providers/notifications?${params}`);
+    return callApi(`/api/v1/scholarship-providers/notifications?${params}`);
   },
 
   async markNotificationRead(id: number): Promise<void> {
@@ -779,6 +781,20 @@ export const scholarshipProviderApi = {
 
   async markAllNotificationsRead(): Promise<void> {
     await apiRequest("/api/v1/scholarship-providers/notifications/read-all", { method: "PUT" });
+  },
+
+  async exportApplications(): Promise<void> {
+    const token = localStorage.getItem("scholarshipProviderToken");
+    // We pass the token in query param because window.location.href doesn't support headers
+    const url = `${API_BASE_URL}/api/v1/scholarship-providers/applications/export?token=${token}`;
+    window.location.href = url;
+  },
+
+  async changeEmail(data: { new_email: string; password: string }): Promise<void> {
+    await apiRequest("/api/v1/scholarship-providers/change-email", {
+      method: "PUT",
+      body: JSON.stringify(data),
+    });
   },
 
   async createNews(data: {

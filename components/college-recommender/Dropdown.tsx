@@ -16,9 +16,10 @@ interface DropdownProps {
   placeholder: string;
   size?: "sm" | "md";
   className?: string;
+  error?: string;
 }
 
-export default function Dropdown({ id, value, onChange, options, placeholder, size = "md", className = "" }: DropdownProps) {
+export default function Dropdown({ id, value, onChange, options, placeholder, size = "md", className = "", error }: DropdownProps) {
   const [isOpen, setIsOpen] = useState(false);
   const isSmall = size === "sm";
 
@@ -29,10 +30,12 @@ export default function Dropdown({ id, value, onChange, options, placeholder, si
       <button
         type="button"
         onClick={() => setIsOpen(!isOpen)}
-        className={`flex w-full items-center justify-between rounded-lg border border-gray-200 bg-white text-left transition-all duration-200 focus:outline-none focus:border-blue-500 hover:border-gray-200 ${
+        className={`flex w-full items-center justify-between rounded-lg border text-left transition-all duration-200 focus:outline-none focus:border-blue-500 hover:border-gray-200 ${
           isSmall ? "px-4 py-2.5 text-sm" : "px-4 py-2.5 text-sm"
         } ${
-          isOpen ? "border-blue-500 ring-2 ring-blue-100" : ""
+          isOpen ? "border-blue-500 ring-0 ring-blue-100" : ""
+        } ${
+          error ? "border-red-500 bg-red-50/10" : "border-gray-200 bg-white"
         }`}
       >
         <span

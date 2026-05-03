@@ -34,8 +34,8 @@ const DashboardHeader = ({ toggleSidebar, activeTab, onNavigate, onNotificationU
   async function loadNotifications() {
     try {
       const res = await scholarshipProviderApi.getNotifications(1, 10);
-      setNotifications(res.notifications);
-      setUnreadCount(res.unread_count);
+      setNotifications(res.notifications || []);
+      setUnreadCount(res.unread_count || 0);
     } catch {
       setNotifications([]);
       setUnreadCount(0);
@@ -104,6 +104,7 @@ const DashboardHeader = ({ toggleSidebar, activeTab, onNavigate, onNotificationU
       case 'sec-reports': return { title: 'Analytics & Reports', subtitle: "Detailed insights and downloadable data sets." };
       case 'sec-settings': return { title: 'System Preferences', subtitle: "Configure your dashboard and notification settings." };
       case 'sec-messages': return { title: 'Messages / Chat', subtitle: "Communicate directly with interested candidates." };
+      case 'sec-notifications': return { title: 'Notification Center', subtitle: "Stay updated with recent activities and system alerts." };
       default: return { title: 'Dashboard', subtitle: 'Manage your organization data.' };
     }
   };
@@ -186,7 +187,7 @@ const DashboardHeader = ({ toggleSidebar, activeTab, onNavigate, onNotificationU
                       <p className="text-xs font-bold">No notifications yet</p>
                     </div>
                   ) : (
-                    notifications.map(notif => (
+                    (notifications || []).map(notif => (
                       <button
                         key={notif.id}
                         onClick={() => handleMarkRead(notif.id, notif.link)}
@@ -216,10 +217,10 @@ const DashboardHeader = ({ toggleSidebar, activeTab, onNavigate, onNotificationU
                   )}
                 </div>
 
-                {notifications.length > 0 && (
+                {notifications && notifications.length > 0 && (
                   <div className="p-3 border-t border-slate-100 bg-slate-50/50 text-center">
                     <button
-                      onClick={() => { setShowNotifDropdown(false); onNavigate?.('sec-dashboard'); }}
+                      onClick={() => { setShowNotifDropdown(false); onNavigate?.('sec-notifications'); }}
                       className="text-[10px] font-black text-primary-600 hover:text-primary-800 uppercase tracking-widest"
                     >
                       View all activity

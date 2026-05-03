@@ -3,6 +3,7 @@
 import React, { useEffect, useState } from 'react';
 import dynamic from 'next/dynamic';
 import { scholarshipProviderApi, ProviderApplication } from '@/services/scholarshipProviderApi';
+import { toast } from 'sonner';
 
 const ReactQuill = dynamic(() => import('react-quill-new'), {
   ssr: false,
@@ -85,9 +86,10 @@ export default function StudentEvaluation({ applicationId, onBack, onStatusUpdat
         passing: score >= 50,
       });
       setNotes(updatedNotes);
+      toast.success('Evaluation note added successfully');
       setNewNote('');
     } catch (err) {
-      alert(err instanceof Error ? err.message : 'Failed to save note');
+      toast.error(err instanceof Error ? err.message : 'Failed to save note');
     } finally {
       setSaving(false);
     }
@@ -100,9 +102,10 @@ export default function StudentEvaluation({ applicationId, onBack, onStatusUpdat
       await scholarshipProviderApi.updateApplicationStatus(application.id, newStatus);
       setStatus(newStatus);
       setApplication(prev => prev ? { ...prev, status: newStatus } : null);
+      toast.success(`Application status updated to ${newStatus.replace('_', ' ')}`);
       onStatusUpdate?.();
     } catch (err) {
-      alert(err instanceof Error ? err.message : 'Failed to update status');
+      toast.error(err instanceof Error ? err.message : 'Failed to update status');
     } finally {
       setSavingStatus(false);
     }

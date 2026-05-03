@@ -22,7 +22,9 @@ import {
   ProviderScholarship,
   ProviderNotification,
   ProviderCalendarEvent,
+  ProviderProfile,
 } from "@/services/scholarshipProviderApi";
+import { toast } from "sonner";
 
 interface DashboardOverviewProps {
   onNavigate?: (section: string) => void;
@@ -63,7 +65,21 @@ const DashboardOverview: React.FC<DashboardOverviewProps> = memo(({ onNavigate }
       }
     }
     fetchData();
+    checkProfile();
   }, []);
+
+  async function checkProfile() {
+    try {
+      const profile = await scholarshipProviderApi.getProfile();
+      if (!profile.provider_name || !profile.registration_number) {
+        toast.error("Your profile is incomplete—please complete it to continue.", {
+          duration: 5000,
+        });
+      }
+    } catch (err) {
+      console.error("Failed to check profile", err);
+    }
+  }
 
   const totalActive = scholarships.filter((s) => ["active", "published"].includes(s.status)).length;
   const totalDraft = scholarships.filter((s) => s.status === "draft").length;

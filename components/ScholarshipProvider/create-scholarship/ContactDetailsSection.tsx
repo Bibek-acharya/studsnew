@@ -23,6 +23,8 @@ interface ContactDetailsSectionProps {
   setWebsiteUrlError?: (v: string) => void;
   officeAddress: string;
   setOfficeAddress: (v: string) => void;
+  coverageAreaError?: string;
+  officeAddressError?: string;
   mapUrl: string;
   setMapUrl: (v: string) => void;
   mapUrlError?: string;
@@ -58,6 +60,7 @@ export const ContactDetailsSection: React.FC<ContactDetailsSectionProps> = ({
   secondaryPhone, setSecondaryPhone, secondaryPhoneError, setSecondaryPhoneError,
   websiteUrl, setWebsiteUrl, websiteUrlError, setWebsiteUrlError,
   officeAddress, setOfficeAddress,
+  coverageAreaError, officeAddressError,
   mapUrl, setMapUrl, mapUrlError, setMapUrlError,
 }) => {
   const handlePhoneInput = (value: string, setter: (v: string) => void, setError?: (v: string) => void) => {
@@ -111,11 +114,12 @@ export const ContactDetailsSection: React.FC<ContactDetailsSectionProps> = ({
             <input
               id="coverageArea"
               type="text"
-              className={formInputClass}
+              className={`${formInputClass} ${coverageAreaError ? 'border-red-500 bg-red-50/10' : ''}`}
               placeholder="Which areas does this scholarship cover?"
               value={coverageArea}
               onChange={(e) => setCoverageArea(e.target.value)}
             />
+            {coverageAreaError && <p className="text-xs text-red-500 mt-1">{coverageAreaError}</p>}
           </div>
           <div className="space-y-1.5">
             <label className="block text-sm font-medium text-gray-700">
@@ -124,12 +128,12 @@ export const ContactDetailsSection: React.FC<ContactDetailsSectionProps> = ({
             <input
               id="contactEmail"
               type="email"
-              className={`${formInputClass} ${contactEmailError ? 'border-red-500' : ''}`}
+              className={`${formInputClass} ${contactEmailError ? 'border-red-500 bg-red-50/10' : ''}`}
               placeholder="contact@example.com"
               value={contactEmail}
               onChange={(e) => handleEmailChange(e.target.value, setContactEmail, setContactEmailError)}
             />
-            {contactEmailError && <p className="text-xs text-red-500">{contactEmailError}</p>}
+            {contactEmailError && <p className="text-xs text-red-500 mt-1">{contactEmailError}</p>}
           </div>
           <div className="space-y-1.5">
             <label className="block text-sm font-medium text-gray-700">
@@ -138,12 +142,12 @@ export const ContactDetailsSection: React.FC<ContactDetailsSectionProps> = ({
             <input
               id="primaryPhone"
               type="text"
-              className={`${formInputClass} ${primaryPhoneError ? 'border-red-500' : ''}`}
-              placeholder="98XXXXXXXX (10 digits starting with 9)"
+              className={`${formInputClass} ${primaryPhoneError ? 'border-red-500 bg-red-50/10' : ''}`}
+              placeholder="98XXXXXXXX"
               value={primaryPhone}
               onChange={(e) => handlePhoneInput(e.target.value, setPrimaryPhone, setPrimaryPhoneError)}
             />
-            {primaryPhoneError && <p className="text-xs text-red-500">{primaryPhoneError}</p>}
+            {primaryPhoneError && <p className="text-xs text-red-500 mt-1">{primaryPhoneError}</p>}
           </div>
           <div className="space-y-1.5">
             <label className="block text-sm font-medium text-gray-700">
@@ -152,12 +156,12 @@ export const ContactDetailsSection: React.FC<ContactDetailsSectionProps> = ({
             <input
               id="secondaryPhone"
               type="text"
-              className={`${formInputClass} ${secondaryPhoneError ? 'border-red-500' : ''}`}
-              placeholder="98XXXXXXXX (10 digits starting with 9)"
+              className={`${formInputClass} ${secondaryPhoneError ? 'border-red-500 bg-red-50/10' : ''}`}
+              placeholder="98XXXXXXXX"
               value={secondaryPhone}
               onChange={(e) => handlePhoneInput(e.target.value, setSecondaryPhone, setSecondaryPhoneError)}
             />
-            {secondaryPhoneError && <p className="text-xs text-red-500">{secondaryPhoneError}</p>}
+            {secondaryPhoneError && <p className="text-xs text-red-500 mt-1">{secondaryPhoneError}</p>}
           </div>
           <div className="space-y-1.5">
             <label className="block text-sm font-medium text-gray-700">
@@ -166,12 +170,12 @@ export const ContactDetailsSection: React.FC<ContactDetailsSectionProps> = ({
             <input
               id="websiteUrl"
               type="text"
-              className={`${formInputClass} ${websiteUrlError ? 'border-red-500' : ''}`}
+              className={`${formInputClass} ${websiteUrlError ? 'border-red-500 bg-red-50/10' : ''}`}
               placeholder="https://example.com"
               value={websiteUrl}
               onChange={(e) => handleUrlChange(e.target.value, setWebsiteUrl, setWebsiteUrlError)}
             />
-            {websiteUrlError && <p className="text-xs text-red-500">{websiteUrlError}</p>}
+            {websiteUrlError && <p className="text-xs text-red-500 mt-1">{websiteUrlError}</p>}
           </div>
           <div className="space-y-1.5">
             <label className="block text-sm font-medium text-gray-700">
@@ -180,11 +184,12 @@ export const ContactDetailsSection: React.FC<ContactDetailsSectionProps> = ({
             <input
               id="officeAddress"
               type="text"
-              className={formInputClass}
+              className={`${formInputClass} ${officeAddressError ? 'border-red-500 bg-red-50/10' : ''}`}
               placeholder="Physical location"
               value={officeAddress}
               onChange={(e) => setOfficeAddress(e.target.value)}
             />
+            {officeAddressError && <p className="text-xs text-red-500 mt-1">{officeAddressError}</p>}
           </div>
           <div className="space-y-1.5">
             <label className="block text-sm font-medium text-gray-700">
@@ -193,12 +198,12 @@ export const ContactDetailsSection: React.FC<ContactDetailsSectionProps> = ({
             <input
               id="mapUrl"
               type="text"
-              className={`${formInputClass} ${mapUrlError ? 'border-red-500' : ''}`}
+              className={`${formInputClass} ${mapUrlError ? 'border-red-500 bg-red-50/10' : ''}`}
               placeholder="https://www.google.com/maps/embed?pb..."
               value={mapUrl}
               onChange={(e) => handleUrlChange(e.target.value, setMapUrl, setMapUrlError)}
             />
-            {mapUrlError && <p className="text-xs text-red-500">{mapUrlError}</p>}
+            {mapUrlError && <p className="text-xs text-red-500 mt-1">{mapUrlError}</p>}
           </div>
         </div>
       </div>

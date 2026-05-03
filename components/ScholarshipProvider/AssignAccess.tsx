@@ -1,7 +1,8 @@
 "use client";
 
 import React, { useState, useEffect, memo } from "react";
-import { Home, Users, Plus, Pencil, Trash2, Search, X, ShieldCheck, UserPlus } from "lucide-react";
+import { Home, Users, Plus, Pencil, Trash2, Search, X, ShieldCheck, UserPlus, AlertTriangle } from "lucide-react";
+import { toast } from "sonner";
 import {
   providerRbacApi,
   ProviderUser,
@@ -40,13 +41,19 @@ const AssignAccess: React.FC = memo(() => {
   const [newEmail, setNewEmail] = useState("");
   const [newPassword, setNewPassword] = useState("");
   const [permissions, setPermissions] = useState<Record<string, boolean>>({});
+  const [deleteModalOpen, setDeleteModalOpen] = useState(false);
+  const [userToDelete, setUserToDelete] = useState<ProviderUser | null>(null);
+  const [addError, setAddError] = useState("");
+  const [nameError, setNameError] = useState("");
+  const [emailError, setEmailError] = useState("");
+  const [passwordError, setPasswordError] = useState("");
 
   useEffect(() => {
     let mounted = true;
 
     async function loadUsers() {
       try {
-const res = await providerRbacApi.getUsers();
+        const res = await providerRbacApi.getUsers();
         if (!mounted) return;
 
         setUsers(res.users || []);
@@ -75,6 +82,38 @@ const res = await providerRbacApi.getUsers();
   };
 
   const handleAddUser = async () => {
+    setAddError("");
+    setNameError("");
+    setEmailError("");
+    setPasswordError("");
+    
+    let hasError = false;
+    if (!newName.trim()) {
+      setNameError("Full name is required");
+      hasError = true;
+    }
+    
+    if (!newEmail.trim()) {
+      setEmailError("Email address is required");
+      hasError = true;
+    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(newEmail)) {
+      setEmailError("Please enter a valid email address");
+      hasError = true;
+    }
+
+    if (!newPassword.trim()) {
+      setPasswordError("Password is required");
+      hasError = true;
+    } else {
+      const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
+      if (!passwordRegex.test(newPassword)) {
+        setPasswordError("Password must be at least 8 characters, include uppercase, lowercase, a number, and a special character.");
+        hasError = true;
+      }
+    }
+
+    if (hasError) return;
+
     try {
       const created = await providerRbacApi.createUser({
         name: newName,
@@ -85,22 +124,32 @@ const res = await providerRbacApi.getUsers();
         permissions: [],
       });
       setUsers((prev) => [...prev, created]);
+      toast.success(`Access has been granted to ${newEmail}.`);
       setAddModalOpen(false);
       setNewName("");
       setNewEmail("");
       setNewPassword("");
       openPermModal(created);
-    } catch {
-      alert("Failed to create user");
+    } catch (err: any) {
+      setAddError(err.message || "Failed to create user. Email might already be in use.");
     }
   };
 
-  const handleDeleteUser = async (u: ProviderUser) => {
+  const handleDeleteUser = (u: ProviderUser) => {
+    setUserToDelete(u);
+    setDeleteModalOpen(true);
+  };
+
+  const confirmDelete = async () => {
+    if (!userToDelete) return;
     try {
-      await providerRbacApi.deleteUser(u.id);
-      setUsers((prev) => prev.filter((x) => x.id !== u.id));
+      await providerRbacApi.deleteUser(userToDelete.id);
+      setUsers((prev) => prev.filter((x) => x.id !== userToDelete.id));
+      toast.success(`Access has been removed from ${userToDelete.email}.`);
+      setDeleteModalOpen(false);
+      setUserToDelete(null);
     } catch {
-      alert("Failed to delete user");
+      toast.error("Failed to delete user");
     }
   };
 
@@ -112,9 +161,10 @@ const res = await providerRbacApi.getUsers();
     try {
       await providerRbacApi.updatePermissions(permUserId, selectedPerms);
       setUsers((prev) => prev.map((user) => (user.id === permUserId ? { ...user, permissions: selectedPerms } : user)));
+      toast.success("Access permissions have been updated.");
       setPermModalOpen(false);
     } catch {
-      alert("Failed to save permissions");
+      toast.error("Failed to save permissions");
     }
   };
 
@@ -199,22 +249,54 @@ const res = await providerRbacApi.getUsers();
               <button onClick={() => setAddModalOpen(false)} className="p-2 hover:bg-gray-100 rounded-lg"><X className="w-5 h-5" /></button>
             </div>
             <div className="p-6 space-y-5">
+              {addError && (
+                <div className="p-3 bg-red-50 border border-red-100 rounded-lg text-red-600 text-xs font-medium flex items-center gap-2 animate-in fade-in slide-in-from-top-1">
+                  <AlertTriangle className="w-4 h-4" /> {addError}
+                </div>
+              )}
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1.5">Full Name <span className="text-red-500">*</span></label>
-                <input type="text" className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Enter full name" value={newName} onChange={(e) => setNewName(e.target.value)} />
+                <input 
+                  type="text" 
+                  className={`w-full px-3 py-2 border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors ${nameError ? "border-red-500 bg-red-50/10" : "border-gray-300"}`} 
+                  placeholder="Enter full name" 
+                  value={newName} 
+                  onChange={(e) => { setNewName(e.target.value); if(nameError) setNameError(""); }} 
+                />
+                {nameError && <p className="text-red-500 text-xs mt-1">{nameError}</p>}
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1.5">Email Address <span className="text-red-500">*</span></label>
-                <input type="email" className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="user@example.com" value={newEmail} onChange={(e) => setNewEmail(e.target.value)} />
+                <input 
+                  type="email" 
+                  className={`w-full px-3 py-2 border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors ${emailError ? "border-red-500 bg-red-50/10" : "border-gray-300"}`} 
+                  placeholder="user@example.com" 
+                  value={newEmail} 
+                  onChange={(e) => { setNewEmail(e.target.value); if(emailError) setEmailError(""); }} 
+                />
+                {emailError && <p className="text-red-500 text-xs mt-1">{emailError}</p>}
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1.5">Password <span className="text-red-500">*</span></label>
-                <input type="password" className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Enter password" value={newPassword} onChange={(e) => setNewPassword(e.target.value)} />
+                <input 
+                  type="password" 
+                  className={`w-full px-3 py-2 border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors ${passwordError ? "border-red-500 bg-red-50/10" : "border-gray-300"}`} 
+                  placeholder="Enter password" 
+                  value={newPassword} 
+                  onChange={(e) => { setNewPassword(e.target.value); if(passwordError) setPasswordError(""); }} 
+                />
+                {passwordError && <p className="text-red-500 text-xs mt-1">{passwordError}</p>}
               </div>
             </div>
             <div className="flex justify-end gap-3 px-6 py-4 border-t border-gray-200">
               <button onClick={() => setAddModalOpen(false)} className="px-6 py-2.5 border border-gray-300 rounded-lg text-gray-700 font-medium hover:bg-gray-50">Cancel</button>
-              <button onClick={handleAddUser} className="px-6 py-2.5 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700">Continue</button>
+              <button 
+                onClick={handleAddUser} 
+                disabled={!newName.trim() || !newEmail.trim() || !newPassword.trim()}
+                className="px-6 py-2.5 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+              >
+                Continue
+              </button>
             </div>
           </div>
         </div>
@@ -248,6 +330,36 @@ const res = await providerRbacApi.getUsers();
               <div className="flex justify-end gap-3 mt-6 pt-4 border-t border-gray-200">
                 <button onClick={() => setPermModalOpen(false)} className="px-6 py-2.5 border border-gray-300 rounded-lg text-gray-700 font-medium hover:bg-gray-50">Cancel</button>
                 <button onClick={handleSavePermissions} className="px-6 py-2.5 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700">Save Permissions</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+      {deleteModalOpen && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/50 p-4 animate-in fade-in duration-200">
+          <div className="bg-white rounded-xl max-w-sm w-full overflow-hidden shadow-2xl animate-in zoom-in-95 duration-200">
+            <div className="p-6 text-center">
+              <div className="w-16 h-16 bg-red-50 text-red-600 rounded-full flex items-center justify-center mx-auto mb-4">
+                <AlertTriangle className="w-8 h-8" />
+              </div>
+              <h3 className="text-xl font-bold text-gray-900 mb-2">Confirm Delete</h3>
+              <p className="text-gray-500 text-sm leading-relaxed mb-6">
+                Are you sure you want to remove <span className="font-bold text-gray-900">"{userToDelete?.name}"</span>? 
+                This action will revoke all their access and cannot be undone.
+              </p>
+              <div className="flex flex-col gap-3">
+                <button 
+                  onClick={confirmDelete}
+                  className="w-full py-3 bg-red-600 text-white rounded-lg font-semibold hover:bg-red-700 active:scale-[0.98] transition-all"
+                >
+                  Yes, Remove User
+                </button>
+                <button 
+                  onClick={() => { setDeleteModalOpen(false); setUserToDelete(null); }}
+                  className="w-full py-3 bg-gray-50 text-gray-700 rounded-lg font-semibold hover:bg-gray-100 active:scale-[0.98] transition-all border border-gray-200"
+                >
+                  Cancel
+                </button>
               </div>
             </div>
           </div>

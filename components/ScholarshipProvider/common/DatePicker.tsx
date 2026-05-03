@@ -59,7 +59,6 @@ const MONTHS = [
   "December",
 ];
 
-const toDropdownOptions = (arr: string[]) => arr.map(v => ({ value: v, label: v }));
 
 const DatePicker: React.FC<DatePickerProps> = ({
   value,
@@ -100,16 +99,6 @@ const DatePicker: React.FC<DatePickerProps> = ({
     }
   }, [isOpen]);
 
-  const availableYears = useMemo(() => {
-    const now = new Date();
-    const startYear = minDateObj ? minDateObj.getFullYear() : now.getFullYear() - 1;
-    const endYear = maxDateObj ? maxDateObj.getFullYear() : now.getFullYear() + 10;
-    const years: number[] = [];
-    for (let year = startYear; year <= endYear; year += 1) {
-      years.push(year);
-    }
-    return years;
-  }, [maxDateObj, minDateObj]);
 
   useEffect(() => {
     if (!isOpen) return;
@@ -163,23 +152,7 @@ const DatePicker: React.FC<DatePickerProps> = ({
     setIsOpen(false);
   };
 
-  const handleMonthChange = (monthIndex: number) => {
-    setCurrentMonth((month) => {
-      const next = startOfMonth(setMonth(month, monthIndex));
-      if (minDateObj && isBefore(endOfMonth(next), minDateObj)) return startOfMonth(minDateObj);
-      if (maxDateObj && isAfter(next, startOfMonth(maxDateObj))) return startOfMonth(maxDateObj);
-      return next;
-    });
-  };
 
-  const handleYearChange = (year: number) => {
-    setCurrentMonth((month) => {
-      const next = startOfMonth(setYear(month, year));
-      if (minDateObj && isBefore(endOfMonth(next), minDateObj)) return startOfMonth(minDateObj);
-      if (maxDateObj && isAfter(next, startOfMonth(maxDateObj))) return startOfMonth(maxDateObj);
-      return next;
-    });
-  };
 
   return (
     <div className="w-full">

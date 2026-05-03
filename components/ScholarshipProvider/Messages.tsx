@@ -9,6 +9,7 @@ import {
   Plus,
   MessageSquare,
 } from "lucide-react";
+import { toast } from "sonner";
 
 interface ChatMessage {
   id: number;
@@ -216,6 +217,7 @@ const Messages: React.FC = () => {
       prev ? { ...prev, messages: [...prev.messages, newMsg] } : null
     );
     setMessageInput("");
+    toast.success("You replied to a message successfully.");
   }, [messageInput, selectedChat]);
 
   const clearChat = useCallback(() => {

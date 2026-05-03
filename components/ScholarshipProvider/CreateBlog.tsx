@@ -3,6 +3,7 @@
 import React, { useState, useCallback, memo } from "react";
 import dynamic from "next/dynamic";
 import { Home, Feather } from "lucide-react";
+import { toast } from "sonner";
 import { scholarshipProviderApi } from "@/services/scholarshipProviderApi";
 import FileUpload from "./common/FileUpload";
 
@@ -99,7 +100,7 @@ const CreateBlog: React.FC = memo(() => {
         image_url: featuredImageUrl,
         status: draft ? "draft" : status,
       });
-      setSuccess(draft ? "Draft saved!" : "Blog published!");
+      toast.success(draft ? "Your blog post has been saved as a draft." : "Your blog has been published successfully.");
     } catch (err: any) {
       setError(err.message || "Failed to save blog");
     } finally {
@@ -224,7 +225,6 @@ const CreateBlog: React.FC = memo(() => {
       </div>
 
       {error && <div className="p-4 bg-red-50 border border-red-200 rounded-lg text-red-700 text-sm">{error}</div>}
-      {success && <div className="p-4 bg-green-50 border border-green-200 rounded-lg text-green-700 text-sm">{success}</div>}
     </div>
   );
 });

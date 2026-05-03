@@ -137,7 +137,7 @@ const Interviews: React.FC = memo(() => {
           passing: updated.evaluation_passed ?? draft.passing,
         },
       }));
-      toast.success("Evaluation saved");
+      toast.success("Interview details have been updated.");
     } catch (err) {
       toast.error(err instanceof Error ? err.message : "Failed to save evaluation");
     } finally {

@@ -3,6 +3,7 @@
 import React, { useState, useEffect, useCallback, memo } from "react";
 import { Home, Star, Eye, CheckCircle, XCircle, ChevronLeft, ChevronRight } from "lucide-react";
 import { scholarshipProviderApi, ProviderApplication } from "@/services/scholarshipProviderApi";
+import { toast } from "sonner";
 
 const ShortlistManagement: React.FC = memo(() => {
   const [applications, setApplications] = useState<ProviderApplication[]>([]);
@@ -33,8 +34,11 @@ const ShortlistManagement: React.FC = memo(() => {
     try {
       await scholarshipProviderApi.updateApplicationStatus(id, status);
       setApplications((prev) => prev.map((a) => (a.id === id ? { ...a, status } : a)));
+      const user = applications.find(a => a.id === id);
+      const name = user ? `${user.first_name} ${user.last_name}` : "User";
+      toast.success(status === 'approved' ? `You have shortlisted ${name}.` : `You have rejected ${name}'s application.`);
     } catch {
-      alert("Failed to update status");
+      toast.error("Failed to update status");
     }
   }, []);
 

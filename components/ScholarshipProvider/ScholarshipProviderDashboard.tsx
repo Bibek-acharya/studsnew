@@ -6,6 +6,7 @@ import { scholarshipProviderApi } from '@/services/scholarshipProviderApi';
 import { getStoredPermissions, PERMISSIONS_LIST } from "@/services/providerRbac";
 import PageLayout from './layout/PageLayout';
 import Unauthorized from './layout/Unauthorized';
+import { Toaster } from 'sonner';
 
 const DashboardOverview = dynamic(() => import('./DashboardOverview'));
 const OrganizationProfile = dynamic(() => import('./OrganizationProfile'));
@@ -31,6 +32,7 @@ const ShortlistManagement = dynamic(() => import('./ShortlistManagement'));
 const CustomizeForm = dynamic(() => import('./CustomizeForm'));
 const DraftScholarship = dynamic(() => import('./DraftScholarship'));
 const WrittenExam = dynamic(() => import('./WrittenExam'));
+const Notifications = dynamic(() => import('./Notifications'));
 
 interface DashboardProps {
   onLogout?: () => void;
@@ -54,30 +56,25 @@ const ScholarshipProviderDashboard: React.FC<DashboardProps> = ({ onLogout }) =>
         ]);
         setProviderUser(profile);
         setUnreadMessages(dashboard.unread_messages);
-      } catch {
+        
+        if (profile.is_sub_user) {
+          setRbacPermissions(profile.permissions || []);
+        } else {
+          // Main provider has all permissions
+          const allPerms = PERMISSIONS_LIST.map(p => p.id);
+          setRbacPermissions(allPerms);
+        }
+      } catch (err) {
+        console.error("Failed to load provider data:", err);
         setProviderUser({ provider_name: "Provider", email: "" });
         setUnreadMessages(0);
+        setRbacPermissions([]);
       }
     }
 
     loadProviderData();
   }, [router, onLogout]);
 
-  useEffect(() => {
-    const stored = localStorage.getItem("scholarshipProviderUser");
-    if (stored) {
-      const user = JSON.parse(stored);
-      if (user.isSubUser && user.id) {
-        // Sub-user - load specific permissions
-        const perms = getStoredPermissions();
-        const userPerm = perms.find((p: { userId: number }) => p.userId === user.id);
-        setRbacPermissions(userPerm?.permissions || []);
-      } else {
-        // Main provider admin - has all permissions
-        setRbacPermissions(PERMISSIONS_LIST.map(p => p.id));
-      }
-    }
-  }, []);
 
   const PERMISSION_MAP: Record<string, string> = {
     "sec-create-scholarship": "scholarships",
@@ -167,7 +164,7 @@ const ScholarshipProviderDashboard: React.FC<DashboardProps> = ({ onLogout }) =>
       case 'sec-reports':
         return <Analytics />;
       case 'sec-settings':
-        return <Settings />;
+        return <Settings profile={providerUser} onLogout={handleLogout} />;
       case 'sec-assign-access':
         return <AssignAccess />;
       case 'sec-create-news':
@@ -196,6 +193,8 @@ const ScholarshipProviderDashboard: React.FC<DashboardProps> = ({ onLogout }) =>
         return <CustomizeForm />;
       case 'sec-draft-scholarship':
         return <DraftScholarship onEdit={handleEditScholarship} onNavigate={navigateTo} />;
+      case 'sec-notifications':
+        return <Notifications />;
       default:
         return <DashboardOverview onNavigate={navigateTo} />;
     }
@@ -211,6 +210,7 @@ const ScholarshipProviderDashboard: React.FC<DashboardProps> = ({ onLogout }) =>
       permissions={rbacPermissions}
     >
       {renderContent()}
+      <Toaster position="bottom-left" closeButton={false} />
     </PageLayout>
   );
 };

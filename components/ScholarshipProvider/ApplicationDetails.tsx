@@ -3,6 +3,7 @@
 import React, { useEffect, useState } from "react";
 import { ArrowLeft, Mail, Phone, GraduationCap, BookOpen, Users, FileText, Check, X, Star } from "lucide-react";
 import { scholarshipProviderApi, ProviderApplication } from "@/services/scholarshipProviderApi";
+import { toast } from "sonner";
 
 interface ApplicationDetailsProps {
   applicationId: string;
@@ -40,9 +41,17 @@ export default function ApplicationDetails({ applicationId, onBack, onStatusUpda
     try {
       await scholarshipProviderApi.updateApplicationStatus(application.id, newStatus);
       setApplication((prev) => (prev ? { ...prev, status: newStatus } : null));
+      const name = application.full_name || `${application.first_name} ${application.last_name}`;
+      if (newStatus === 'shortlisted') {
+        toast.success(`You have shortlisted ${name}.`);
+      } else if (newStatus === 'rejected') {
+        toast.success(`You have rejected ${name}'s application.`);
+      } else {
+        toast.success(`Application status updated to ${newStatus.replace('_', ' ')}`);
+      }
       onStatusUpdate?.();
     } catch (err) {
-      alert(err instanceof Error ? err.message : "Failed to update status");
+      toast.error(err instanceof Error ? err.message : "Failed to update status");
     } finally {
       setSavingStatus(false);
     }

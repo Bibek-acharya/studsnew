@@ -187,7 +187,7 @@ const FinalResult: React.FC = memo(() => {
         status: "published",
         results: payloadResults,
       });
-      toast.success("Final result published");
+      toast.success("Results have been published successfully.");
     } catch (err) {
       toast.error(err instanceof Error ? err.message : "Failed to publish final result");
     } finally {

@@ -14,6 +14,7 @@ import {
   Plus,
   Calendar as CalendarIcon,
 } from "lucide-react";
+import { toast } from "sonner";
 import { getCalendarEvents, createCalendarEvent, deleteCalendarEvent, ProviderCalendarEvent } from "@/services/scholarshipProviderApi";
 
 const Calendar: React.FC = () => {
@@ -111,6 +112,7 @@ const Calendar: React.FC = () => {
         color: newEvent.color,
       });
       setEvents((prev) => [...prev, created]);
+      toast.success("A new task has been added.");
       setShowEventForm(false);
       setNewEvent({
         title: "",
@@ -123,7 +125,7 @@ const Calendar: React.FC = () => {
         color: "#a855f7",
       });
     } catch {
-      alert("Failed to create event");
+      toast.error("Failed to create event");
     }
   }, [newEvent]);
 
@@ -131,9 +133,10 @@ const Calendar: React.FC = () => {
     try {
       await deleteCalendarEvent(id);
       setEvents((prev) => prev.filter((e) => e.id !== id));
+      toast.success("Event deleted successfully");
       setSelectedEvent(null);
     } catch {
-      alert("Failed to delete event");
+      toast.error("Failed to delete event");
     }
   }, []);
 
