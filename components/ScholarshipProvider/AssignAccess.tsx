@@ -49,7 +49,7 @@ const AssignAccess: React.FC = memo(() => {
 const res = await providerRbacApi.getUsers();
         if (!mounted) return;
 
-        setUsers(res.data?.users || res.users || []);
+        setUsers(res.users || []);
       } catch {
         if (mounted) {
           setUsers([]);

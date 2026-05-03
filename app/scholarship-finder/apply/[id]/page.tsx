@@ -34,5 +34,5 @@ export default function ScholarshipApplyPage({ params }: { params: Promise<{ id:
     );
   }
 
-  return <ShikshaApplicationForm scholarshipTitle={scholarship.title} scholarshipId={Number(id) || undefined} />;
+  const examCenters = (scholarship.exam_centers_new || scholarship.exam_centers || []).map((ec: any) => typeof ec === "string" ? ec : ec.centerName || ec.name).filter(Boolean); return <ShikshaApplicationForm scholarshipTitle={scholarship.title} scholarshipId={Number(id) || undefined} examCenters={examCenters} paymentConfig={scholarship.payment_config} />;
 }

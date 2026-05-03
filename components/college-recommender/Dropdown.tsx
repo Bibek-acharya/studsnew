@@ -9,6 +9,7 @@ interface DropdownOption {
 }
 
 interface DropdownProps {
+  id?: string;
   value: string;
   onChange: (val: string) => void;
   options: DropdownOption[];
@@ -17,7 +18,7 @@ interface DropdownProps {
   className?: string;
 }
 
-export default function Dropdown({ value, onChange, options, placeholder, size = "md", className = "" }: DropdownProps) {
+export default function Dropdown({ id, value, onChange, options, placeholder, size = "md", className = "" }: DropdownProps) {
   const [isOpen, setIsOpen] = useState(false);
   const isSmall = size === "sm";
 

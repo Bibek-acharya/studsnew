@@ -107,7 +107,7 @@ export const providerRbacApi = {
       method: "POST",
       body: JSON.stringify({ email, password }),
     });
-    const u = res.data?.user || res.user;
+    const u = res.data?.user;
     return {
       user: {
         id: u.id,
@@ -121,8 +121,8 @@ export const providerRbacApi = {
         providerId: u.provider_id,
         permissions: u.permissions,
       },
-      token: res.data?.token || res.token,
-      permissions: res.data?.permissions || res.permissions || [],
+      token: res.data?.token,
+      permissions: res.data?.permissions || [],
     };
   },
 

@@ -363,6 +363,7 @@ const FeaturedScholarshipsPage = () => {
           search: searchQuery || undefined,
           status: filters.scholarshipType.length > 0 ? undefined : undefined,
           limit: 100,
+          sort: "newest",
         });
         const apiItems: ScholarshipItem[] = response.data?.scholarships || [];
         const mapped = apiItems.map(mapBackendItem);
@@ -451,7 +452,7 @@ const FeaturedScholarshipsPage = () => {
     setShowCategoryAlert(false);
     
     try {
-      const response = await apiService.getEducationScholarships({ limit: 100 });
+      const response = await apiService.getEducationScholarships({ limit: 100, sort: "newest" });
       const apiItems: ScholarshipItem[] = response.data?.scholarships || [];
       const mapped = apiItems.map(mapBackendItem);
       const filtered = applyFilters(mapped, { ...filters, scholarshipType: [badgeType] }, searchQuery, userLocation);

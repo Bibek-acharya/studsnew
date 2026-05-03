@@ -38,7 +38,16 @@ export default function ScholarshipDetailPage({ scholarship, similarScholarships
   const [lightboxIndex, setLightboxIndex] = useState<number | null>(null);
   const tabContainerRef = useRef<HTMLDivElement>(null);
 
-  const desc = scholarship.description || "";
+  const getImageUrl = useCallback((url: any) => {
+    if (!url || typeof url !== "string") return "";
+    if (url.startsWith("http://") || url.startsWith("https://") || url.startsWith("data:")) {
+      return url;
+    }
+    const backendUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080";
+    return `${backendUrl}${url.startsWith("/") ? "" : "/"}${url}`;
+  }, []);
+
+  const desc = scholarship.about_paragraph_1 || scholarship.description || "";
 
   const availableTabs = useMemo(() => {
     return [
@@ -62,19 +71,33 @@ export default function ScholarshipDetailPage({ scholarship, similarScholarships
     }
   }, [availableTabs, activeTab]);
 
-  const dynamicFaqs = Array.isArray(scholarship.faqs) && scholarship.faqs.length > 0
+  const dynamicFaqs = (Array.isArray(scholarship.faqs_new) && scholarship.faqs_new.length > 0)
+    ? scholarship.faqs_new.map((f: any) => ({ q: f.question || f.title || "", a: f.answer || f.description || "" }))
+    : (Array.isArray(scholarship.faqs) && scholarship.faqs.length > 0)
     ? scholarship.faqs.map((f: any) => ({ q: f.question || f.title || "", a: f.answer || f.description || "" }))
     : [];
-  const dynamicTimeline = Array.isArray(scholarship.timeline) && scholarship.timeline.length > 0
-    ? scholarship.timeline.map((t: any) => ({ title: t.title || t.event || "", date: t.date || "", desc: t.description || "" }))
+
+  const dynamicTimeline = (Array.isArray(scholarship.timeline) && scholarship.timeline.length > 0)
+    ? scholarship.timeline.map((t: any) => ({ title: t.title || t.event || t.heading || "", date: t.date || "", desc: t.description || "" }))
     : null;
-  const dynamicEligibility = Array.isArray(scholarship.eligibility_criteria) && scholarship.eligibility_criteria.length > 0
-    ? scholarship.eligibility_criteria.map((e: any) => e.title || e.criterion || e.description || "")
+
+  const dynamicEligibility = (Array.isArray(scholarship.basic_eligibility_criteria) && scholarship.basic_eligibility_criteria.length > 0)
+    ? scholarship.basic_eligibility_criteria.map((e: any) => typeof e === 'string' ? e : (e.title || e.criterion || e.description || ""))
+    : (Array.isArray(scholarship.eligibility_criteria) && scholarship.eligibility_criteria.length > 0)
+    ? scholarship.eligibility_criteria.map((e: any) => typeof e === 'string' ? e : (e.title || e.criterion || e.description || ""))
     : [];
-  const dynamicDocs = Array.isArray(scholarship.required_documents) && scholarship.required_documents.length > 0
-    ? scholarship.required_documents.map((d: any) => d.title || d.name || d.description || "")
+
+  const dynamicDocs = (Array.isArray(scholarship.required_documents) && scholarship.required_documents.length > 0)
+    ? scholarship.required_documents.map((d: any) => typeof d === 'string' ? d : (d.title || d.name || d.description || ""))
     : [];
-  const dynamicSelectionSteps = Array.isArray(scholarship.selection_process) && scholarship.selection_process.length > 0
+
+  const dynamicSelectionSteps = (Array.isArray(scholarship.selection_process_steps) && scholarship.selection_process_steps.length > 0)
+    ? scholarship.selection_process_steps.map((s: any, i: number) => ({
+        num: String(s.step || i + 1),
+        title: s.title || s.stage || "",
+        desc: s.description || "",
+      }))
+    : (Array.isArray(scholarship.selection_process) && scholarship.selection_process.length > 0)
     ? scholarship.selection_process.map((s: any, i: number) => ({
         num: String(i + 1),
         title: s.title || s.stage || "",
@@ -94,10 +117,13 @@ export default function ScholarshipDetailPage({ scholarship, similarScholarships
 
   const closeLightbox = useCallback(() => setLightboxIndex(null), []);
 
-  const galleryImages = Array.isArray(scholarship.gallery_images) && scholarship.gallery_images.length > 0
-    ? scholarship.gallery_images
+  const galleryImages = (Array.isArray(scholarship.gallery_images_new) && scholarship.gallery_images_new.length > 0)
+    ? scholarship.gallery_images_new.map((img: any) => getImageUrl(img.url || img))
+    : (Array.isArray(scholarship.gallery_images) && scholarship.gallery_images.length > 0)
+    ? scholarship.gallery_images.map((img: any) => getImageUrl(img.url || img))
     : [];
-  const bannerImage = scholarship.banner_background_image_url || scholarship.image_url || galleryImages[0] || "";
+  
+  const bannerImage = getImageUrl(scholarship.banner_background_image_url || scholarship.image || scholarship.image_url || galleryImages[0] || "");
 
   const changeImage = (dir: number) => {
     if (lightboxIndex === null) return;
@@ -223,8 +249,8 @@ export default function ScholarshipDetailPage({ scholarship, similarScholarships
           {activeTab === "scholarship" && (
             <div>
               <div className="mb-6">
-                <h2 className="text-[20px] font-bold text-gray-900">{scholarship.title || "Scholarship Program 2082"}</h2>
-                <p className="mt-1 text-[14px] text-gray-500">Fully funded higher secondary education for SEE graduates across Nepal</p>
+                <h2 className="text-[20px] font-bold text-gray-900">{scholarship.scholarship_section_title || scholarship.title || "Scholarship Program"}</h2>
+                <p className="mt-1 text-[14px] text-gray-500">{scholarship.scholarship_subtitle || "Scholarship program details and requirements"}</p>
               </div>
               <div className="mb-6 text-[14px] leading-relaxed text-gray-600" style={{ overflowWrap: "break-word", wordBreak: "break-word" }} dangerouslySetInnerHTML={{ __html: desc || "<p>Project Shiksha is a transformative scholarship program designed to provide exceptional SEE graduates from across Nepal with access to higher secondary education, along with complete support for tuition, fooding, and accommodation.</p><p>This scholarship is based on financial need and academic performance of candidates.</p>" }} />
               <div className="mb-6 overflow-hidden rounded-md border border-gray-100 bg-white">
@@ -245,17 +271,17 @@ export default function ScholarshipDetailPage({ scholarship, similarScholarships
                       <div className="col-span-2 text-[12px] font-bold uppercase tracking-wider text-gray-500">ELIGIBILITY</div>
                       <div className="col-span-2 text-right text-[12px] font-bold uppercase tracking-wider text-gray-500">ACTION</div>
                     </div>
-                    {[
-                      { type: "Fully Funded", seats: "60 Seats (30 Boys & 30 Girls)", coverage: "Full Support", coverageClass: "text-green-600 bg-green-50", eligibility: "Financial Need + Merit" },
-                      { type: "Partially Funded", seats: "50 Seats", coverage: "Tuition Only", coverageClass: "text-blue-600 bg-blue-50", eligibility: "Merit Based" },
-                    ].map((row, i) => (
+                    {(Array.isArray(scholarship.scholarship_types_new) && scholarship.scholarship_types_new.length > 0 ? scholarship.scholarship_types_new : [
+                      { type: "Fully Funded", seats: "60 Seats (30 Boys & 30 Girls)", coverage: "Full Support", eligibility: "Financial Need + Merit" },
+                      { type: "Partially Funded", seats: "50 Seats", coverage: "Tuition Only", eligibility: "Merit Based" },
+                    ]).map((row: any, i: number) => (
                       <div key={i} className="grid grid-cols-12 gap-4 border-b border-gray-100 px-6 py-4 items-center hover:bg-gray-50 transition">
                         <div className="col-span-3"><h4 className="text-[14px] font-bold text-gray-900">{row.type}</h4></div>
                         <div className="col-span-3 text-[14px] text-gray-700">{row.seats}</div>
-                        <div className="col-span-2"><span className={`rounded-md px-2.5 py-1 text-[13px] font-bold ${row.coverageClass}`}>{row.coverage}</span></div>
+                        <div className="col-span-2"><span className={`rounded-md px-2.5 py-1 text-[13px] font-bold ${row.coverage === "Full Support" ? "text-green-600 bg-green-50" : "text-blue-600 bg-blue-50"}`}>{row.coverage}</span></div>
                         <div className="col-span-2 text-[13px] text-gray-600">{row.eligibility}</div>
                         <div className="col-span-2 text-right">
-                          <a href="https://projectshiksha.hundredgroupnepal.org/" target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1 rounded-md bg-blue-600 px-3 py-2 text-xs font-bold text-white transition hover:bg-blue-700 shadow-sm">
+                          <a href={scholarship.apply_link || "#"} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1 rounded-md bg-blue-600 px-3 py-2 text-xs font-bold text-white transition hover:bg-blue-700 shadow-sm">
                             <ExternalLink size={12} /> Apply
                           </a>
                         </div>
@@ -278,28 +304,30 @@ export default function ScholarshipDetailPage({ scholarship, similarScholarships
                         </tr>
                       </thead>
                       <tbody className="divide-y divide-gray-100">
-                        {[
-                          { name: "Written Examination", detail: "English, Math, Science, Social Studies", weight: "60%", marks: "60 Marks", pass: "24 Marks" },
-                          { name: "Personal Interview", detail: "Communication, Confidence, Goals", weight: "25%", marks: "25 Marks", pass: "10 Marks" },
-                          { name: "Academic Record", detail: "SEE GPA & Previous Performance", weight: "10%", marks: "10 Marks", pass: "4 Marks" },
-                          { name: "Financial Need Assessment", detail: "Family Income, Economic Background", weight: "5%", marks: "5 Marks", pass: "2 Marks" },
-                        ].map((row, i) => (
+                        {(Array.isArray(scholarship.selection_rubric_new) && scholarship.selection_rubric_new.length > 0 ? scholarship.selection_rubric_new : [
+                          { criteria: "Written Examination", description: "English, Math, Science, Social Studies", weight: "60%", marks: "60 Marks", pass_mark: "24 Marks" },
+                          { criteria: "Personal Interview", description: "Communication, Confidence, Goals", weight: "25%", marks: "25 Marks", pass_mark: "10 Marks" },
+                          { criteria: "Academic Record", description: "SEE GPA & Previous Performance", weight: "10%", marks: "10 Marks", pass_mark: "4 Marks" },
+                          { criteria: "Financial Need Assessment", description: "Family Income, Economic Background", weight: "5%", marks: "5 Marks", pass_mark: "2 Marks" },
+                        ]).map((row: any, i: number) => (
                           <tr key={i} className="transition hover:bg-gray-50">
                             <td className="px-5 py-4 text-[14px] text-gray-700">
-                              <div className="font-semibold text-gray-900">{row.name}</div>
-                              <div className="text-[12px] text-gray-500">{row.detail}</div>
+                              <div className="font-semibold text-gray-900">{row.criteria}</div>
+                              <div className="text-[12px] text-gray-500">{row.description}</div>
                             </td>
                             <td className="px-5 py-4 text-[14px] text-gray-600">{row.weight}</td>
                             <td className="px-5 py-4 text-[14px] font-semibold text-gray-900">{row.marks}</td>
-                            <td className="px-5 py-4 text-[14px] font-semibold text-green-600">{row.pass}</td>
+                            <td className="px-5 py-4 text-[14px] font-semibold text-green-600">{row.pass_mark}</td>
                           </tr>
                         ))}
+                        {(!scholarship.selection_rubric_new || scholarship.selection_rubric_new.length === 0) && (
                         <tr className="bg-blue-50">
                           <td className="px-5 py-4 text-[14px] font-bold text-gray-900">Total</td>
                           <td className="px-5 py-4 text-[14px] font-bold text-gray-900">100%</td>
                           <td className="px-5 py-4 text-[14px] font-bold text-gray-900">100 Marks</td>
                           <td className="px-5 py-4 text-[14px] font-bold text-green-600">40 Marks</td>
                         </tr>
+                        )}
                       </tbody>
                     </table>
                   </div>
@@ -318,7 +346,7 @@ export default function ScholarshipDetailPage({ scholarship, similarScholarships
 
           {/* Tab: Exam Centers */}
           {activeTab === "centers" && (
-            <ExamCentersTab centers={scholarship.exam_centers || []} />
+            <ExamCentersTab centers={(Array.isArray(scholarship.exam_centers_new) && scholarship.exam_centers_new.length > 0) ? scholarship.exam_centers_new : (scholarship.exam_centers || [])} />
           )}
 
           {/* Tab: News */}
@@ -333,7 +361,7 @@ export default function ScholarshipDetailPage({ scholarship, similarScholarships
 
           {/* Tab: Gallery */}
           {activeTab === "gallery" && (
-            <GalleryTab images={scholarship.gallery_images || []} lightboxIndex={lightboxIndex} setLightboxIndex={setLightboxIndex} closeLightbox={closeLightbox} changeImage={changeImage} />
+            <GalleryTab images={galleryImages} lightboxIndex={lightboxIndex} setLightboxIndex={setLightboxIndex} closeLightbox={closeLightbox} changeImage={changeImage} />
           )}
 
           {/* Tab: FAQ */}
@@ -341,7 +369,7 @@ export default function ScholarshipDetailPage({ scholarship, similarScholarships
 
           {/* Tab: Partners */}
           {activeTab === "partners" && (
-            <PartnersTab items={scholarship.partners || []} />
+            <PartnersTab items={scholarship.partner_groups || scholarship.partners || []} getImageUrl={getImageUrl} />
           )}
 
           {/* Tab: Review */}
@@ -738,8 +766,8 @@ const MOCK_PARTNERS = [
   { name: "Dari Club USA", logo_url: "https://projectshiksha.hundredgroupnepal.org/images/dari-club.jpeg" },
 ];
 
-function PartnersTab({ items }: { items: any[] }) {
-  const data = items.length > 0 ? items : MOCK_PARTNERS;
+function PartnersTab({ items, getImageUrl }: { items: any[]; getImageUrl: (url: string) => string }) {
+  const data = (items && items.length > 0) ? items : MOCK_PARTNERS;
   return (
     <div>
       <div className="mb-6">
@@ -749,8 +777,8 @@ function PartnersTab({ items }: { items: any[] }) {
       <div className="grid grid-cols-2 gap-6 md:grid-cols-3">
         {data.map((p, i) => (
           <div key={i} className="flex flex-col items-center justify-center rounded-md border border-gray-100 bg-white p-8 text-center">
-            {p.logo_url ? (
-              <img src={p.logo_url} alt={p.name} className="mb-3 h-16 w-auto object-contain" />
+            {p.logo_url || p.logo ? (
+              <img src={getImageUrl(p.logo_url || p.logo)} alt={p.name} className="mb-3 h-16 w-auto object-contain" />
             ) : (
               <div className="mb-3 flex h-16 w-16 items-center justify-center rounded-full bg-blue-50 text-xl font-bold text-blue-600">
                 {p.name?.charAt(0) || "?"}

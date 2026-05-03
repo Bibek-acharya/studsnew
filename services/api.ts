@@ -1262,6 +1262,28 @@ export const apiService = {
       headers,
     });
   },
+ 
+  async uploadScholarshipFile(file: File, folder: string): Promise<string> {
+    const formData = new FormData();
+    formData.append("file", file);
+    const token = this.getToken();
+    const headers: Record<string, string> = {};
+    if (token) headers.Authorization = `Bearer ${token}`;
+
+    const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080"}/api/v1/scholarships/upload?folder=${encodeURIComponent(folder)}`, {
+      method: "POST",
+      body: formData,
+      headers,
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({}));
+      throw new Error(errorData.message || "Failed to upload file");
+    }
+
+    const res = await response.json();
+    return res.data?.url || res.url || "";
+  },
 
   async getForumCommunities(_token?: string): Promise<ForumCommunity[]> {
     const response = await fetch(`${API_BASE_URL}/api/v1/forum/communities`, {
@@ -1755,7 +1777,7 @@ export const scholarshipApi = {
     });
   },
   
-  async initiatePayment(scholarshipId: number, data: { method: string; amount: number }) {
+  async initiatePayment(scholarshipId: number, data: { method: string; amount: number; application_id?: number }) {
     return apiRequest(`/api/v1/scholarships/${scholarshipId}/pay`, {
       method: 'POST',
       body: JSON.stringify(data),

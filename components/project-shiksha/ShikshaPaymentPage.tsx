@@ -1,5 +1,6 @@
 "use client";
 
+import { apiService, scholarshipApi } from "../../services/api";
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
@@ -19,12 +20,39 @@ type PaymentMethod = "esewa" | "khalti" | "bank";
 
 interface ApplicationData {
   fullName: string;
+  scholarshipId: number;
+  applicationId: number;
   phone: string;
   photoPreview: string;
+  paymentConfig?: {
+    enabled: boolean;
+    fee_amount: number;
+    currency: string;
+    methods: string[];
+    bank_name: string;
+    account_name: string;
+    account_number: string;
+    bank_details?: {
+      branch: string;
+      bank_name: string;
+      account_name: string;
+      account_number: string;
+    };
+    qr_code: string;
+  };
 }
 
 export default function ShikshaPaymentPage() {
   const router = useRouter();
+
+  const getImageUrl = (url: any) => {
+    if (!url || typeof url !== "string") return "";
+    if (url.startsWith("http://") || url.startsWith("https://") || url.startsWith("data:")) {
+      return url;
+    }
+    const backendUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080";
+    return `${backendUrl}${url.startsWith("/") ? "" : "/"}${url}`;
+  };
   const [applicationData, setApplicationData] = useState<ApplicationData | null>(null);
   const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>("esewa");
   const [applicantName, setApplicantName] = useState("");
@@ -34,7 +62,7 @@ export default function ShikshaPaymentPage() {
   const [timeLeft, setTimeLeft] = useState(300); // 5 minutes
   const [showTimer, setShowTimer] = useState(false);
 
-  const FEE_AMOUNT = 250;
+  const feeAmount = applicationData?.paymentConfig?.fee_amount || 250;
 
   useEffect(() => {
     // Load application data from sessionStorage
@@ -66,7 +94,7 @@ export default function ShikshaPaymentPage() {
     return `${m}:${s}`;
   };
 
-  const handlePayment = async () => {
+    const handlePayment = async () => {
     if (!applicantName.trim()) {
       alert("Please enter applicant name");
       return;
@@ -76,32 +104,58 @@ export default function ShikshaPaymentPage() {
       return;
     }
 
-    setIsProcessing(true);
-
-    if (paymentMethod === "bank") {
-      if (!paymentScreenshot) {
-        alert("Please upload payment screenshot");
-        setIsProcessing(false);
-        return;
-      }
-      setShowTimer(true);
-      
-      // Simulate verification delay
-      setTimeout(() => {
-        setIsProcessing(false);
-        setShowTimer(false);
-        // Navigate to success page
-        router.push("/scholarship-apply/project-shiksha/success");
-      }, 5000);
+    if (!applicationData?.scholarshipId) {
+      alert("Scholarship ID is missing");
       return;
     }
 
-    // For eSewa and Khalti - simulate processing
-    setTimeout(() => {
+    setIsProcessing(true);
+
+    try {
+      // 1. Initiate Payment
+      const initResp: any = await scholarshipApi.initiatePayment(applicationData.scholarshipId, {
+        method: paymentMethod,
+        amount: feeAmount,
+        application_id: applicationData.applicationId
+      });
+      const paymentId = initResp.data?.id || initResp.id;
+
+      if (paymentMethod === "bank") {
+        if (!paymentScreenshot) {
+          alert("Please upload payment screenshot");
+          setIsProcessing(false);
+          return;
+        }
+
+        // 2. Upload Receipt
+        const uploadResp: any = await apiService.uploadScholarshipFile(paymentScreenshot, "receipts");
+        const receiptUrl = uploadResp.data?.url || uploadResp.url;
+
+        // 3. Save Receipt to Payment
+        await scholarshipApi.uploadBankReceipt(paymentId, receiptUrl);
+
+        // 4. Update session storage to indicate bank payment
+        sessionStorage.setItem("shiksha_payment_status", "pending_verification");
+        
+        setIsProcessing(false);
+        router.push("/scholarship-apply/project-shiksha/success");
+      } else {
+        // eSewa / Khalti - Simulate success for demo
+        const transactionId = `TXN-${Date.now()}`;
+        
+        // 2. Confirm Payment (Approve Application + Send Email in backend)
+        await scholarshipApi.confirmPayment(paymentId, transactionId);
+
+        sessionStorage.setItem("shiksha_payment_status", "completed");
+        
+        setIsProcessing(false);
+        router.push("/scholarship-apply/project-shiksha/success");
+      }
+    } catch (error: any) {
+      console.error("Payment error:", error);
+      alert(error.message || "Payment failed. Please try again.");
       setIsProcessing(false);
-      // Navigate to success page
-      router.push("/scholarship-apply/project-shiksha/success");
-    }, 2000);
+    }
   };
 
   const showBankPanel = paymentMethod === "bank";
@@ -178,24 +232,26 @@ export default function ShikshaPaymentPage() {
               </div>
             </label>
 
-            {/* Bank Transfer */}
-            <label className="relative cursor-pointer">
-              <input
-                type="radio"
-                name="payment_method"
-                value="bank"
-                checked={paymentMethod === "bank"}
-                onChange={() => setPaymentMethod("bank")}
-                className="peer sr-only"
-              />
-              <div className="w-24 h-14 border-2 border-gray-200 rounded-md flex flex-col items-center justify-center hover:border-gray-300 transition-colors peer-checked:border-[#0000ff] peer-checked:bg-blue-50/50">
-                <Landmark className="w-5 h-5 text-gray-500 peer-checked:text-[#0000ff] mb-0.5 transition-colors" />
-                <span className="text-[10px] font-bold text-gray-500 peer-checked:text-[#0000ff] transition-colors">Bank QR</span>
-              </div>
-              <div className="absolute -top-2 -right-2 bg-[#0000ff] text-white rounded-full w-5 h-5 flex items-center justify-center opacity-0 peer-checked:opacity-100 transition-opacity shadow-sm">
-                <CheckCircle className="w-3 h-3" />
-              </div>
-            </label>
+            {/* Bank Transfer - Only show if enabled in config */}
+            {(applicationData?.paymentConfig?.methods && applicationData?.paymentConfig?.methods.includes("bank")) && (
+              <label className="relative cursor-pointer">
+                <input
+                  type="radio"
+                  name="payment_method"
+                  value="bank"
+                  checked={paymentMethod === "bank"}
+                  onChange={() => setPaymentMethod("bank")}
+                  className="peer sr-only"
+                />
+                <div className="w-24 h-14 border-2 border-gray-200 rounded-md flex flex-col items-center justify-center hover:border-gray-300 transition-colors peer-checked:border-[#0000ff] peer-checked:bg-blue-50/50">
+                  <Landmark className="w-5 h-5 text-gray-500 peer-checked:text-[#0000ff] mb-0.5 transition-colors" />
+                  <span className="text-[10px] font-bold text-gray-500 peer-checked:text-[#0000ff] transition-colors">Bank QR</span>
+                </div>
+                <div className="absolute -top-2 -right-2 bg-[#0000ff] text-white rounded-full w-5 h-5 flex items-center justify-center opacity-0 peer-checked:opacity-100 transition-opacity shadow-sm">
+                  <CheckCircle className="w-3 h-3" />
+                </div>
+              </label>
+            )}
           </div>
         </div>
 
@@ -205,26 +261,24 @@ export default function ShikshaPaymentPage() {
             <div className="flex items-start gap-4 mb-4">
               <div className="w-24 h-24 bg-white border border-gray-200 rounded-lg p-1.5 shrink-0 shadow-sm">
                 {/* QR Code */}
-                <Image
-                  src={`https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=ProjectShikshaPayment-${FEE_AMOUNT}`}
+                <img
+                  src={getImageUrl(applicationData?.paymentConfig?.qr_code) || `https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=ProjectShikshaPayment-${feeAmount}`}
                   alt="Bank QR Code"
-                  width={96}
-                  height={96}
                   className="w-full h-full object-contain"
                 />
               </div>
               <div className="flex-1 text-[13px] space-y-1.5 pt-1">
                 <p className="flex justify-between border-b border-gray-200/50 pb-1">
                   <span className="text-gray-500 font-medium">Bank:</span>
-                  <span className="font-bold text-gray-800">Nepal Bank Limited</span>
+                  <span className="font-bold text-gray-800">{applicationData?.paymentConfig?.bank_details?.bank_name || "Nepal Bank Limited"}</span>
                 </p>
                 <p className="flex justify-between border-b border-gray-200/50 pb-1">
                   <span className="text-gray-500 font-medium">A/C Name:</span>
-                  <span className="font-bold text-gray-800">Project Shiksha</span>
+                  <span className="font-bold text-gray-800">{applicationData?.paymentConfig?.bank_details?.account_name || "Project Shiksha"}</span>
                 </p>
                 <p className="flex justify-between">
                   <span className="text-gray-500 font-medium">A/C No:</span>
-                  <span className="font-bold text-[#0000ff]">01234567890123</span>
+                  <span className="font-bold text-[#0000ff]">{applicationData?.paymentConfig?.bank_details?.account_number || "01234567890123"}</span>
                 </p>
               </div>
             </div>
@@ -250,7 +304,7 @@ export default function ShikshaPaymentPage() {
         <div className="w-full bg-gray-50 border border-gray-200 rounded-xl p-5 mb-6 shadow-sm">
           <div className="flex justify-between items-center mb-3">
             <span className="text-gray-600 font-medium">Entrance Exam Fee</span>
-            <span className="font-bold text-gray-800">Rs. {FEE_AMOUNT}.00</span>
+            <span className="font-bold text-gray-800">Rs. {feeAmount}.00</span>
           </div>
           <div className="flex justify-between items-center mb-3">
             <span className="text-gray-600 font-medium">Processing Fee</span>
@@ -258,7 +312,7 @@ export default function ShikshaPaymentPage() {
           </div>
           <div className="border-t border-gray-200 pt-3 flex justify-between items-center">
             <span className="text-gray-800 font-bold">Total Amount</span>
-            <span className="font-bold text-xl text-[#0000ff]">Rs. {FEE_AMOUNT}.00</span>
+            <span className="font-bold text-xl text-[#0000ff]">Rs. {feeAmount}.00</span>
           </div>
         </div>
 
@@ -312,7 +366,7 @@ export default function ShikshaPaymentPage() {
                 <input
                   type="text"
                   className="w-full border-2 border-gray-200 rounded-md pl-10 pr-4 py-3 text-sm bg-gray-50 text-gray-500 outline-none cursor-not-allowed font-semibold text-left"
-                  value={FEE_AMOUNT}
+                  value={feeAmount}
                   readOnly
                 />
               </div>

@@ -11,12 +11,14 @@ interface ApplicationData {
   dobBS: string;
   dobAD: string;
   gender: string;
+  paymentConfig?: any;
 }
 
 export default function ShikshaSuccessPage() {
   const router = useRouter();
   const [applicationData, setApplicationData] = useState<ApplicationData | null>(null);
   const [rollNumber, setRollNumber] = useState("");
+  const [paymentStatus, setPaymentStatus] = useState<string | null>(null);
   const [applicationNo, setApplicationNo] = useState("");
   const [showAdmitCard, setShowAdmitCard] = useState(false);
 
@@ -30,6 +32,8 @@ export default function ShikshaSuccessPage() {
       const randomAppNo = `RD${Math.floor(1000 + Math.random() * 9000)}S${Math.floor(100 + Math.random() * 900)}`;
       setApplicationNo(randomAppNo);
     }
+    const status = sessionStorage.getItem("shiksha_payment_status");
+    setPaymentStatus(status);
   }, []);
 
   const handlePrint = () => {
@@ -55,20 +59,27 @@ export default function ShikshaSuccessPage() {
             <BadgeCheck className="w-12 h-12 text-green-500" />
           </div>
           
-          <h2 className="text-3xl font-bold text-gray-800 mb-2">Payment Successful!</h2>
+          <h2 className="text-3xl font-bold text-gray-800 mb-2">
+            {paymentStatus === "pending_verification" 
+              ? "Application Received!" 
+              : (applicationData.paymentConfig?.enabled && applicationData.paymentConfig?.fee_amount > 0 ? "Payment Successful!" : "Application Submitted!")}
+          </h2>
           <p className="text-gray-600 mb-6">
-            Your payment of Rs. 250 has been received and your application for Project Shiksha is complete.
+            {paymentStatus === "pending_verification"
+              ? "Your payment receipt has been uploaded. We will contact you after verifying the payment."
+              : (applicationData.paymentConfig?.enabled && applicationData.paymentConfig?.fee_amount > 0 ? `Your payment of ${applicationData.paymentConfig.currency || "Rs."} ${applicationData.paymentConfig.fee_amount} has been received and your application for Project Shiksha is complete.` : "Application submitted successfully. Check your email for the admit card.")}
           </p>
           
           <p className="text-sm text-gray-500 mb-8">
-            We will contact you soon with further details about the entrance examination.
+            We will contact you soon with further details about the entrance examination. Please check your email for Admit card.
           </p>
 
           <button
-            onClick={() => setShowAdmitCard(true)}
-            className="w-full bg-[#0000ff] hover:bg-[#0000cc] text-white font-semibold py-3 px-6 rounded-lg transition-colors shadow-md"
+            onClick={() => router.push("/")}
+            className="w-full bg-[#0000ff] hover:bg-[#0000cc] text-white font-semibold py-3 px-6 rounded-lg transition-colors shadow-md flex items-center justify-center gap-2"
           >
-            View Admit Card
+            <Home className="w-5 h-5" />
+            Back to Home
           </button>
         </div>
       </div>

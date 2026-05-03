@@ -73,7 +73,28 @@ const initialFormData: ProjectShikshaFormData = {
   declaration: false,
 };
 
-export default function ShikshaApplicationForm({ scholarshipTitle, scholarshipId }: { scholarshipTitle?: string; scholarshipId?: number }) {
+export default function ShikshaApplicationForm({
+  scholarshipTitle,
+  scholarshipId,
+  examCenters: dynamicExamCenters,
+  paymentConfig,
+}: {
+  scholarshipTitle?: string;
+  scholarshipId?: number;
+  examCenters?: string[];
+  paymentConfig?: {
+    enabled: boolean;
+    fee_amount: number;
+    methods: string[];
+    qr_code: string;
+    bank_details: {
+      branch: string;
+      bank_name: string;
+      account_name: string;
+      account_number: string;
+    };
+  };
+}) {
   const router = useRouter();
   const [formData, setFormData] = useState<ProjectShikshaFormData>(initialFormData);
   const [errors, setErrors] = useState<Partial<Record<keyof ProjectShikshaFormData, string>>>({});
@@ -153,6 +174,40 @@ export default function ShikshaApplicationForm({ scholarshipTitle, scholarshipId
         return;
       }
 
+      // Step 1: Upload Photo
+      let photo_url = "";
+      if (formData.photo) {
+        try {
+          photo_url = await apiService.uploadScholarshipFile(formData.photo, "photos");
+        } catch (uploadError) {
+          console.error("Photo upload error:", uploadError);
+        }
+      }
+
+      // Step 2: Upload Documents
+      const documents: any[] = [];
+      const documentFields = [
+        { key: "birthCertificate" as const, title: "Birth Certificate" },
+        { key: "seeMarksheet" as const, title: "SEE Marksheet" },
+        { key: "class8Marksheet" as const, title: "Class 8 Marksheet" },
+        { key: "class9Marksheet" as const, title: "Class 9 Marksheet" },
+      ];
+
+      for (const docField of documentFields) {
+        const file = formData[docField.key as keyof typeof formData];
+        if (file instanceof File) {
+          try {
+            const url = await apiService.uploadScholarshipFile(file, "documents");
+            documents.push({
+              title: docField.title,
+              url: url,
+            });
+          } catch (uploadError) {
+            console.error(`${docField.title} upload error:`, uploadError);
+          }
+        }
+      }
+
       const payload = {
         full_name: formData.fullName,
         gender: formData.gender,
@@ -163,7 +218,7 @@ export default function ShikshaApplicationForm({ scholarshipTitle, scholarshipId
         age: parseInt(formData.age) || 0,
         phone_number: formData.phone || "",
         email: formData.email || "",
-        photo_url: "",
+        photo_url: photo_url,
 
         see_gpa: formData.seeGpa || "",
         school_type: formData.seeSchoolType,
@@ -197,16 +252,27 @@ export default function ShikshaApplicationForm({ scholarshipTitle, scholarshipId
 
         stream: formData.stream,
         exam_center: formData.examCenter,
+        documents: documents,
       };
 
-      await apiService.applyScholarship(scholarshipId, payload);
+      const response = await apiService.applyScholarship(scholarshipId, payload);
+      const applicationId = response.data?.id || response.id;
 
       sessionStorage.setItem("shiksha_application_data", JSON.stringify({
         ...formData,
+        photo_url,
+        applicationId,
         photoPreview,
+        scholarshipId,
+        paymentConfig, // Store config for payment page
       }));
 
-      router.push("/scholarship-apply/project-shiksha/payment");
+      // Check if payment is active
+      if (paymentConfig?.enabled && paymentConfig.fee_amount > 0) {
+        router.push("/scholarship-apply/project-shiksha/payment");
+      } else {
+        router.push("/scholarship-apply/project-shiksha/success");
+      }
     } catch (error) {
       console.error("Submission error:", error);
       setErrors({ fullName: "An error occurred. Please try again." });
@@ -1104,7 +1170,8 @@ export default function ShikshaApplicationForm({ scholarshipTitle, scholarshipId
                   className="w-full border border-gray-300 rounded py-3 px-4 text-[15px] text-gray-800 outline-none focus:ring-0 focus:border-[#0000ff] transition-all bg-white cursor-pointer"
                 >
                   <option value="" disabled>Select Exam Center</option>
-                  {examCenters.map((ec) => (
+                  {/* Use dynamic exam centers if provided, otherwise fallback to static list */}
+                  {(dynamicExamCenters && dynamicExamCenters.length > 0 ? dynamicExamCenters : examCenters).map((ec) => (
                     <option key={ec} value={ec}>{ec}</option>
                   ))}
                 </SelectArrow>
@@ -1140,7 +1207,7 @@ export default function ShikshaApplicationForm({ scholarshipTitle, scholarshipId
               disabled={isSubmitting}
               className="w-full sm:w-auto bg-[#0000ff] hover:bg-[#0000cc] disabled:bg-gray-400 text-white font-bold text-[16px] py-4 px-12 rounded transition-all hover:-translate-y-0.5 active:translate-y-0 text-center disabled:cursor-not-allowed"
             >
-              {isSubmitting ? "Processing..." : "Submit Application"}
+              {isSubmitting ? "Processing..." : (paymentConfig?.enabled && paymentConfig.fee_amount > 0 ? "Continue to Payment" : "Submit Application")}
             </button>
           </div>
         </form>

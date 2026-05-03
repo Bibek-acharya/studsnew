@@ -197,27 +197,29 @@ const CreateScholarship: React.FC<CreateScholarshipProps> = memo(({ scholarshipI
   const isEditing = Boolean(scholarshipId);
 
   // Banner file handler
-  const handleBannerFileSelect = (file: File) => {
-    const reader = new FileReader();
-    reader.onload = (e) => {
-      const dataUrl = e.target?.result as string;
-      setBannerBgPreview(dataUrl);
-      setBannerBgUrl(dataUrl);
-    };
-    reader.readAsDataURL(file);
+  const handleBannerFileSelect = async (file: File) => {
+    try {
+      const url = await scholarshipProviderApi.uploadImage(file, "scholarships");
+      setBannerBgUrl(url);
+      setBannerBgPreview(url);
+    } catch (err) {
+      toast.error("Failed to upload banner image");
+      console.error(err);
+    }
   };
 
   // Map URL handler
 
   // QR Code file handler
-  const handleQrCodeFileSelect = (file: File) => {
-    const reader = new FileReader();
-    reader.onload = (e) => {
-      const dataUrl = e.target?.result as string;
-      setQrCodePreview(dataUrl);
-      setQrCodeUrl(dataUrl);
-    };
-    reader.readAsDataURL(file);
+  const handleQrCodeFileSelect = async (file: File) => {
+    try {
+      const url = await scholarshipProviderApi.uploadImage(file, "payments");
+      setQrCodeUrl(url);
+      setQrCodePreview(url);
+    } catch (err) {
+      toast.error("Failed to upload QR code");
+      console.error(err);
+    }
   };
 
   // Load existing data

@@ -9,12 +9,7 @@ async function callApi<T>(path: string, options: RequestInit = {}): Promise<T> {
   return res as T;
 }
 
-const FIELD_MAPPINGS = {
-  about_paragraph_1: 'about_paragraph1',
-  about_paragraph_2: 'about_paragraph2',
-  scholarship_description_1: 'scholarship_description1',
-  scholarship_description_2: 'scholarship_description2',
-} as const;
+const FIELD_MAPPINGS = {} as Record<string, string>;
 
 function mapScholarshipFields(data: Partial<CreateScholarshipPayload>) {
   const mapped = { ...data } as Record<string, unknown>;
