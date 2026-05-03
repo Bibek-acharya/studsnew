@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { scholarshipProviderApi, ProviderNotification } from '@/services/scholarshipProviderApi';
 import { toast } from 'sonner';
 import { 
@@ -14,9 +14,7 @@ import {
   Check, 
   Clock, 
   Filter,
-  CheckCircle2,
-  AlertCircle
-} from 'lucide-react';
+  CheckCircle2} from 'lucide-react';
 
 const Notifications = () => {
   const [notifications, setNotifications] = useState<ProviderNotification[]>([]);
@@ -153,7 +151,7 @@ const Notifications = () => {
 
   return (
     <div className="w-full min-h-screen bg-slate-50/30 px-4 sm:px-8 pb-8">
-      <header className="flex items-center justify-between py-6 sticky top-0 z-10 bg-slate-50/30 backdrop-blur-md">
+      <header className="flex items-center justify-between py-6 ">
         <div className="flex items-center gap-4">
           <h2 className="text-2xl font-bold text-slate-900 tracking-tight">Notifications</h2>
           {notifications.filter(n => !n.read).length > 0 && (
