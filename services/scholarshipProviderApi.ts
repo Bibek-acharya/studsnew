@@ -1086,3 +1086,17 @@ export const getPublicEvents = async (page = 1, limit = 12) => {
   );
   return res.data;
 };
+
+export const getPublicBlogs = async (page = 1, limit = 12) => {
+  const res = await apiRequest<{ data: { blogs: ProviderBlog[]; meta: any } }>(
+    `/api/v1/public/blogs?page=${page}&limit=${limit}`
+  );
+  return res.data;
+};
+
+export const getPublicBlogByID = async (id: number) => {
+  const res = await apiRequest<{ data: ProviderBlog }>(
+    `/api/v1/public/blogs/${id}`
+  );
+  return res.data;
+};

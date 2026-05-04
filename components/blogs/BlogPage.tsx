@@ -3,6 +3,7 @@
 import React, { useMemo, useState, useEffect } from "react";
 import Link from "next/link";
 import { fetchPublicBlogs, BlogEntry } from "@/services/blogApi";
+import { getPublicBlogs } from "@/services/scholarshipProviderApi";
 import Pagination from "@/components/ui/Pagination";
 
 type BlogCategoryFilter =
@@ -49,7 +50,34 @@ const BlogPage: React.FC = () => {
       try {
         const category = activeCategory === "All News" ? undefined : activeCategory;
         const result = await fetchPublicBlogs({ page: 1, limit: 50, category });
-        setBlogs(result.blogs);
+        let allBlogs: BlogEntry[] = result.blogs;
+
+        try {
+          const providerData = await getPublicBlogs(1, 50);
+          if (providerData?.blogs && providerData.blogs.length > 0) {
+            const providerBlogs = providerData.blogs.map((b: any): BlogEntry => ({
+              id: b.id,
+              title: b.title,
+              slug: b.title?.toLowerCase().replace(/\s+/g, "-") || "",
+              excerpt: b.content?.slice(0, 200) || "",
+              content: b.content || "",
+              image: b.image_url || "",
+              author: b.author || "Provider",
+              category: category || "Others",
+              tags: [],
+              read_time: "3 min",
+              featured: false,
+              published: b.status === "published",
+              views: b.views || 0,
+              created_at: b.published_at || b.created_at,
+            }));
+            allBlogs = [...allBlogs, ...providerBlogs];
+          }
+        } catch {
+          // Provider blogs fetch failed, continue with admin blogs only
+        }
+
+        setBlogs(allBlogs);
       } catch {
         setBlogs([]);
       } finally {

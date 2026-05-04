@@ -26,17 +26,23 @@ const NewsDetailsPage: React.FC<{ params: Promise<{ id: string }> }> = ({ params
     if (!id) return;
     
     async function fetchNews() {
+      const safeId = id!;
       try {
-        const res = await fetch(`/api/v1/news/${id}`);
+        const isProvider = safeId.startsWith("provider-");
+        const actualId = isProvider ? safeId.replace("provider-", "") : safeId;
+        const apiUrl = isProvider
+          ? `${process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080"}/api/v1/public/news/${actualId}`
+          : `/api/v1/news/${safeId}`;
+
+        const res = await fetch(apiUrl);
         const data = await res.json();
         if (data?.data) {
           setArticle(data.data);
           
-          // Fetch related news
           const relatedRes = await fetch(`/api/v1/news?category=${data.data.category}`);
           const relatedData = await relatedRes.json();
           if (relatedData?.data?.news) {
-            setRelated(relatedData.data.news.filter((n: any) => String(n.id) !== id).slice(0, 3));
+            setRelated(relatedData.data.news.filter((n: any) => String(n.id) !== safeId).slice(0, 3));
           }
         }
       } catch (e) {

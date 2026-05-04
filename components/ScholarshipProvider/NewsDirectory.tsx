@@ -144,7 +144,6 @@ const NewsDirectory: React.FC = memo(() => {
               {filtered.length === 0 ? (
                 <tr><td colSpan={7} className="py-8 text-center text-gray-500">No news found</td></tr>
               ) : filtered.map((item) => {
-                const type = "news";
                 return (
                   <tr key={item.id} className="hover:bg-gray-50">
                     <td className="py-3 px-4">
@@ -155,9 +154,9 @@ const NewsDirectory: React.FC = memo(() => {
                       <p className="text-xs text-gray-500">{item.content?.slice(0, 60)}</p>
                     </td>
                     <td className="text-center py-3 px-4">
-                      <span className={`px-2 py-1 rounded text-xs font-semibold ${TYPE_COLORS[type] || "bg-gray-100 text-gray-700"}`}>{NEWS_TYPES[type] || type}</span>
+                      <span className={`px-2 py-1 rounded text-xs font-semibold ${TYPE_COLORS[item.news_type] || "bg-gray-100 text-gray-700"}`}>{NEWS_TYPES[item.news_type] || item.news_type || "News"}</span>
                     </td>
-                    <td className="text-center py-3 px-4 text-gray-600">Admin</td>
+                    <td className="text-center py-3 px-4 text-gray-600">{item.published_by || "Admin"}</td>
                     <td className="text-center py-3 px-4 text-gray-500">
                       {item.published_at ? new Date(item.published_at).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" }) : "N/A"}
                     </td>

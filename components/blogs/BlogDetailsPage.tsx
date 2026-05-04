@@ -9,6 +9,7 @@ import {
   BlogEntry,
   BlogComment,
 } from "@/services/blogApi";
+import { getPublicBlogByID } from "@/services/scholarshipProviderApi";
 import { useAuth } from "@/services/AuthContext";
 
 const BlogDetailsPage: React.FC<{ params: Promise<{ id: string }> }> = ({
@@ -29,19 +30,53 @@ const BlogDetailsPage: React.FC<{ params: Promise<{ id: string }> }> = ({
   useEffect(() => {
     if (!id) return;
     setLoading(true);
-    Promise.all([fetchPublicBlogById(id), fetchBlogComments(id)]).then(
-      ([blogResult, commentsData]) => {
-        if (blogResult) {
-          setBlog(blogResult.blog);
-          setRelated(blogResult.related);
+
+    async function fetchBlog() {
+      const safeId = id!;
+      try {
+        const isProvider = safeId.startsWith("provider-");
+        const actualId = isProvider ? safeId.replace("provider-", "") : safeId;
+
+        if (isProvider) {
+          const blogData = await getPublicBlogByID(parseInt(actualId));
+          if (blogData) {
+            setBlog({
+              id: parseInt(actualId),
+              title: blogData.title,
+              slug: blogData.title?.toLowerCase().replace(/\s+/g, "-") || "",
+              excerpt: blogData.content?.slice(0, 200) || "",
+              content: blogData.content || "",
+              image: blogData.image_url || "",
+              author: blogData.author || "Provider",
+              category: "Others",
+              tags: [],
+              read_time: "3 min",
+              featured: false,
+              published: blogData.status === "published",
+              views: blogData.views || 0,
+              created_at: blogData.published_at || blogData.created_at,
+            });
+            setRelated([]);
+          }
+        } else {
+          const [blogResult, commentsData] = await Promise.all([
+            fetchPublicBlogById(safeId),
+            fetchBlogComments(safeId),
+          ]);
+          if (blogResult) {
+            setBlog(blogResult.blog);
+            setRelated(blogResult.related);
+          }
+          setComments(commentsData || []);
         }
-        setComments(commentsData || []);
+      } catch (err) {
+        console.error("Error fetching blog:", err);
+      } finally {
         setLoading(false);
-      },
-    ).catch((err) => {
-      console.error("Error fetching blog:", err);
-      setLoading(false);
-    });
+      }
+    }
+
+    fetchBlog();
   }, [id]);
 
   const [commentInput, setCommentInput] = useState("");

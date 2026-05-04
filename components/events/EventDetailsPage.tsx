@@ -3,6 +3,7 @@
 import React, { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { fetchPublicEventById, fetchPublicEvents, EventEntry } from "@/services/eventApi";
+import { getPublicEvents as getProviderPublicEvents } from "@/services/scholarshipProviderApi";
 
 const EventDetailsPage: React.FC<{ params: Promise<{ id: string }> }> = ({ params }) => {
   const [id, setId] = useState<string | null>(null);
@@ -14,7 +15,36 @@ const EventDetailsPage: React.FC<{ params: Promise<{ id: string }> }> = ({ param
     params.then(async (p) => {
       setId(p.id);
       try {
-        const eventData = await fetchPublicEventById(p.id);
+        const isProvider = p.id.startsWith("provider-");
+        const actualId = isProvider ? p.id.replace("provider-", "") : p.id;
+
+        let eventData: EventEntry | null;
+        if (isProvider) {
+          try {
+            const providerData = await getProviderPublicEvents(1, 100);
+            const found = providerData.events.find((e: any) => String(e.id) === actualId);
+            eventData = found ? {
+              id: `provider-${found.id}`,
+              title: found.name,
+              excerpt: found.short_desc || "",
+              description: found.description || "",
+              category: found.category || found.event_type || "Event",
+              image: found.image_url || "",
+              organizer: found.organized_by || "",
+              location: found.location || "",
+              date: found.start_date ? new Date(found.start_date).toLocaleDateString() : "",
+              time: found.start_date ? new Date(found.start_date).toLocaleTimeString() : "",
+              registrationFee: "",
+              interestedCount: 0,
+              published: true,
+              created_at: found.created_at,
+            } : null;
+          } catch {
+            eventData = null;
+          }
+        } else {
+          eventData = await fetchPublicEventById(p.id);
+        }
         setEvent(eventData);
         
         if (eventData) {
