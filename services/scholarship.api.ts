@@ -1,5 +1,6 @@
 export interface Scholarship {
   id: string | number;
+  provider_id?: number;
   title: string;
   org: string;
   amount: string;

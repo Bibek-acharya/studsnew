@@ -9,6 +9,7 @@ export { default as EligibilitySection } from "./EligibilitySection";
 export { default as FAQSection } from "./FAQSection";
 export { default as GallerySection, type GalleryImageItem } from "./GallerySection";
 export { default as PartnersSection, type PartnerOrganization } from "./PartnersSection";
+export { default as PartnerMessagesSection, type PartnerMessageItem } from "./PartnerMessagesSection";
 export { default as ExamCentersSection, type ExamCenterItem } from "./ExamCentersSection";
 export { default as DownloadsSection, type DownloadItem } from "./DownloadsSection";
 export { default as PaymentConfigSection } from "./PaymentConfigSection";

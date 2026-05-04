@@ -20,7 +20,12 @@ const STATUS_COLORS: Record<string, string> = {
   scheduled: "bg-blue-100 text-blue-700",
 };
 
-const BlogDirectory: React.FC = memo(() => {
+interface BlogDirectoryProps {
+  onView?: (id: number) => void;
+  onEdit?: (id: number) => void;
+}
+
+const BlogDirectory: React.FC<BlogDirectoryProps> = memo(({ onView, onEdit }) => {
   const [blogs, setBlogs] = useState<ProviderBlog[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
@@ -38,11 +43,11 @@ const BlogDirectory: React.FC = memo(() => {
       setLoading(true);
       try {
         const res = await scholarshipProviderApi.getBlogs(page, limit);
-        setBlogs(res.blogs.length > 0 ? res.blogs : FALLBACK_BLOGS);
+        setBlogs(res.blogs);
         setTotal(res.meta.total);
       } catch {
-        setBlogs(FALLBACK_BLOGS);
-        setTotal(FALLBACK_BLOGS.length);
+        setBlogs([]);
+        setTotal(0);
       } finally {
         setLoading(false);
       }
@@ -141,7 +146,7 @@ const BlogDirectory: React.FC = memo(() => {
                   </td>
                   <td className="py-3 px-4">
                     <p className="font-medium text-gray-900">{blog.title}</p>
-                    <p className="text-xs text-gray-500">{blog.content?.slice(0, 60)}</p>
+                    <p className="text-xs text-gray-500">{blog.content?.replace(/<[^>]*>/g, '').slice(0, 60)}</p>
                   </td>
                   <td className="text-center py-3 px-4">
                     <span className="bg-blue-100 text-blue-700 px-2 py-1 rounded text-xs font-semibold">Story</span>
@@ -158,8 +163,8 @@ const BlogDirectory: React.FC = memo(() => {
                   </td>
                   <td className="text-center py-3 px-4">
                     <div className="flex items-center justify-center gap-2">
-                      <button className="p-1.5 hover:bg-blue-50 rounded text-blue-600" title="View"><Eye className="w-4 h-4" /></button>
-                      <button className="p-1.5 hover:bg-green-50 rounded text-green-600" title="Edit"><Pencil className="w-4 h-4" /></button>
+                      <button className="p-1.5 hover:bg-blue-50 rounded text-blue-600" title="View" onClick={() => onView?.(blog.id)}><Eye className="w-4 h-4" /></button>
+                      <button className="p-1.5 hover:bg-green-50 rounded text-green-600" title="Edit" onClick={() => onEdit?.(blog.id)}><Pencil className="w-4 h-4" /></button>
                       <button className="p-1.5 hover:bg-red-50 rounded text-red-600" title="Delete" onClick={() => handleDelete(blog.id)}><Trash2 className="w-4 h-4" /></button>
                     </div>
                   </td>

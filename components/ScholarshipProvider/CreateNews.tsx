@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useCallback, memo } from "react";
+import React, { useState, useCallback, useEffect, memo } from "react";
 import dynamic from "next/dynamic";
 import { Home, PlusCircle } from "lucide-react";
 import { toast } from "sonner";
@@ -29,7 +29,14 @@ const NEWS_TYPES = [
   { value: "update", label: "Update" },
 ];
 
-const CreateNews: React.FC = memo(() => {
+interface CreateNewsProps {
+  newsId?: number;
+  onNavigate?: (section: string) => void;
+  onEditComplete?: () => void;
+}
+
+const CreateNews: React.FC<CreateNewsProps> = memo(({ newsId, onNavigate, onEditComplete }) => {
+  const isEditing = !!newsId;
   const [title, setTitle] = useState("");
   const [newsType, setNewsType] = useState("");
   const [publishedBy, setPublishedBy] = useState("Admin");
@@ -44,6 +51,30 @@ const CreateNews: React.FC = memo(() => {
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
+
+  useEffect(() => {
+    if (newsId != null) {
+      const id = newsId as number;
+      async function fetchNews() {
+        try {
+          const news = await scholarshipProviderApi.getNewsById(id);
+          setTitle(news.title || "");
+          setNewsType(news.news_type || "");
+          setPublishedBy(news.published_by || "Admin");
+          setPublishDate(news.publish_date || "");
+          setShortDesc(news.short_desc || "");
+          setContent(news.content || "");
+          setTags(news.tags?.join(", ") || "");
+          setAllowComments(news.allow_comments || false);
+          setFeaturedImageUrl(news.image_url || "");
+          setFeaturedImagePreview(news.image_url || "");
+        } catch (err) {
+          setError("Failed to load news");
+        }
+      }
+      fetchNews();
+    }
+  }, [newsId]);
 
   const handleImageSelect = useCallback(async (file: File) => {
     const localPreview = URL.createObjectURL(file);
@@ -70,7 +101,7 @@ const CreateNews: React.FC = memo(() => {
     setError("");
     setSuccess("");
     try {
-      await scholarshipProviderApi.createNews({
+      const payload = {
         title,
         short_desc: shortDesc,
         content: content,
@@ -81,31 +112,39 @@ const CreateNews: React.FC = memo(() => {
         tags: tags ? tags.split(',').map(t => t.trim()) : [],
         allow_comments: allowComments,
         status: draft ? "draft" : "published",
-      });
-      toast.success(draft ? "Your news post has been saved as a draft." : "Your news has been published in the directory.");
+      };
+      if (isEditing && newsId) {
+        await scholarshipProviderApi.updateNews(newsId, payload);
+        toast.success(draft ? "Your news post has been updated as a draft." : "Your news has been updated.");
+      } else {
+        await scholarshipProviderApi.createNews(payload);
+        toast.success(draft ? "Your news post has been saved as a draft." : "Your news has been published in the directory.");
+      }
+      onEditComplete?.();
+      onNavigate?.("sec-news-directory");
     } catch (err: any) {
       setError(err.message || "Failed to save news");
     } finally {
       setSubmitting(false);
     }
-  }, [title, shortDesc, content, featuredImageUrl, newsType, publishedBy, publishDate, tags, allowComments]);
+  }, [title, shortDesc, content, featuredImageUrl, newsType, publishedBy, publishDate, tags, allowComments, onNavigate, isEditing, newsId, onEditComplete]);
 
   return (
     <div className="space-y-6">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-2">
-        <h1 className="text-2xl font-bold text-gray-800">Create News</h1>
+        <h1 className="text-2xl font-bold text-gray-800">{isEditing ? 'Edit News' : 'Create News'}</h1>
         <div className="flex items-center text-sm text-gray-500 mt-2 sm:mt-0 gap-2">
           <Home className="w-4 h-4" />
           <span>Dashboard</span>
           <span>-</span>
-          <span className="text-gray-800 font-medium">Create News</span>
+          <span className="text-gray-800 font-medium">{isEditing ? 'Edit News' : 'Create News'}</span>
         </div>
       </div>
 
       <div className="bg-white rounded-lg p-8 border border-slate-100">
         <div className="flex justify-between items-center mb-6">
           <h2 className="text-lg font-bold text-gray-900 flex items-center gap-2">
-            <PlusCircle className="w-5 h-5 text-blue-600" /> Create News
+            <PlusCircle className="w-5 h-5 text-blue-600" /> {isEditing ? 'Edit News' : 'Create News'}
           </h2>
           <div className="flex gap-2">
             <button

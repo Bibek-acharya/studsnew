@@ -5,40 +5,40 @@ import { Plus, Trash } from "@phosphor-icons/react";
 import { scholarshipProviderApi } from "@/services/scholarshipProviderApi";
 import FileUpload from "../common/FileUpload";
 
-export interface PartnerOrganization {
-  groupHeading: string;
+export interface PartnerMessageItem {
   name: string;
-  website: string;
+  label: string;
+  message: string;
   logo: string;
 }
 
-interface PartnersSectionProps {
-  partnerGroups: PartnerOrganization[];
-  setPartnerGroups: React.Dispatch<React.SetStateAction<PartnerOrganization[]>>;
+interface PartnerMessagesSectionProps {
+  messages: PartnerMessageItem[];
+  setMessages: React.Dispatch<React.SetStateAction<PartnerMessageItem[]>>;
 }
 
 const formInputClass = "w-full px-4 py-2.5 rounded-lg border border-gray-200 bg-white text-gray-900 focus:outline-none focus:border-blue-500";
 
-export const PartnersSection: React.FC<PartnersSectionProps> = ({ partnerGroups, setPartnerGroups }) => {
+export const PartnerMessagesSection: React.FC<PartnerMessagesSectionProps> = ({ messages, setMessages }) => {
   const [uploadingIndex, setUploadingIndex] = useState<number | null>(null);
 
-  const addPartner = () => {
-    setPartnerGroups([...partnerGroups, { groupHeading: "", name: "", website: "", logo: "" }]);
+  const addMessage = () => {
+    setMessages([...messages, { name: "", label: "", message: "", logo: "" }]);
   };
 
-  const removePartner = (index: number) => {
-    setPartnerGroups(partnerGroups.filter((_, i) => i !== index));
+  const removeMessage = (index: number) => {
+    setMessages(messages.filter((_, i) => i !== index));
   };
 
-  const updatePartner = (index: number, field: keyof PartnerOrganization, value: string) => {
-    setPartnerGroups(partnerGroups.map((p, i) => i === index ? { ...p, [field]: value } : p));
+  const updateMessage = (index: number, field: keyof PartnerMessageItem, value: string) => {
+    setMessages(messages.map((m, i) => i === index ? { ...m, [field]: value } : m));
   };
 
   const handleLogoUpload = async (index: number, file: File) => {
     setUploadingIndex(index);
     try {
-      const url = await scholarshipProviderApi.uploadImage(file, "partners");
-      setPartnerGroups(partnerGroups.map((p, i) => i === index ? { ...p, logo: url } : p));
+      const url = await scholarshipProviderApi.uploadImage(file, "partner-messages");
+      setMessages(messages.map((m, i) => i === index ? { ...m, logo: url } : m));
     } catch (error) {
       console.error("Failed to upload logo:", error);
     } finally {
@@ -52,64 +52,65 @@ export const PartnersSection: React.FC<PartnersSectionProps> = ({ partnerGroups,
         <div className="flex items-center gap-3">
           <div className="p-2 bg-blue-100 text-blue-600 rounded-lg">
             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z" />
             </svg>
           </div>
           <div>
-            <h2 className="text-lg font-semibold text-gray-800">Partner Organizations</h2>
-            <p className="text-sm text-gray-500 mt-0.5">Organizations supporting this scholarship program</p>
+            <h2 className="text-lg font-semibold text-gray-800">Partner Messages</h2>
+            <p className="text-sm text-gray-500 mt-0.5">Messages from partner organizations</p>
           </div>
         </div>
         <button
           type="button"
           className="px-3 py-1.5 text-sm font-medium text-blue-600 bg-white border border-gray-200 rounded-lg hover:bg-blue-50 flex items-center gap-1.5 transition-colors shadow-sm shrink-0"
-          onClick={addPartner}
+          onClick={addMessage}
         >
-          <Plus size={16} /> Add Partner
+          <Plus size={16} /> Add Message
         </button>
       </div>
       <div className="p-6 space-y-6">
-        {partnerGroups.map((partner, index) => (
+        {messages.map((message, index) => (
           <div key={index} className="flex gap-4 items-start p-4 bg-gray-50 rounded-lg border border-gray-200">
             <div className="flex-1 space-y-4">
               <div className="space-y-1.5">
                 <label className="block text-sm font-medium text-gray-700">
-                  Group Heading <span className="text-red-500">*</span>
+                  Name <span className="text-red-500">*</span>
                 </label>
                 <input
                   className={formInputClass}
-                  placeholder="e.g. Academic Partners"
-                  value={partner.groupHeading ?? ""}
-                  onChange={(e) => updatePartner(index, "groupHeading", e.target.value)}
+                  placeholder="Organization Name"
+                  value={message.name ?? ""}
+                  onChange={(e) => updateMessage(index, "name", e.target.value)}
                 />
               </div>
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-1.5">
                   <label className="block text-sm font-medium text-gray-700">
-                    Organization Name <span className="text-red-500">*</span>
+                    Label <span className="text-red-500">*</span>
                   </label>
                   <input
                     className={formInputClass}
-                    placeholder="Organization Name"
-                    value={partner.name ?? ""}
-                    onChange={(e) => updatePartner(index, "name", e.target.value)}
+                    placeholder="e.g. From Our Partners"
+                    value={message.label ?? ""}
+                    onChange={(e) => updateMessage(index, "label", e.target.value)}
                   />
                 </div>
                 <div className="space-y-1.5">
                   <label className="block text-sm font-medium text-gray-700">
-                    Website URL <span className="text-red-500">*</span>
+                    Message <span className="text-red-500">*</span>
                   </label>
-                  <input
-                    className={formInputClass}
-                    placeholder="https://"
-                    value={partner.website ?? ""}
-                    onChange={(e) => updatePartner(index, "website", e.target.value)}
+                  <textarea
+                    className={`${formInputClass} resize-none`}
+                    rows={2}
+                    placeholder="Partner message content"
+                    value={message.message ?? ""}
+                    onChange={(e) => updateMessage(index, "message", e.target.value)}
                   />
                 </div>
               </div>
               <div className="w-1/8 space-y-1.5">
                 <label className="block text-sm font-medium text-gray-700">
-                  Organization Logo <span className="text-red-500">*</span>
+                  Logo <span className="text-red-500">*</span>
                 </label>
                 {uploadingIndex === index ? (
                   <p className="text-sm text-blue-600 py-2">Uploading...</p>
@@ -119,9 +120,9 @@ export const PartnersSection: React.FC<PartnersSectionProps> = ({ partnerGroups,
                     uploadedText="Logo uploaded"
                     accept="image/*"
                     maxSize="2MB"
-                    previewUrl={partner.logo}
+                    previewUrl={message.logo}
                     onFileSelect={(file) => handleLogoUpload(index, file)}
-                    onClearPreview={() => updatePartner(index, "logo", "")}
+                    onClearPreview={() => updateMessage(index, "logo", "")}
                   />
                 )}
               </div>
@@ -129,18 +130,18 @@ export const PartnersSection: React.FC<PartnersSectionProps> = ({ partnerGroups,
             <button
               type="button"
               className="p-2 text-red-500 hover:bg-red-50 rounded-lg mt-6"
-              onClick={() => removePartner(index)}
+              onClick={() => removeMessage(index)}
             >
               <Trash size={18} />
             </button>
           </div>
         ))}
-        {partnerGroups.length === 0 && (
-          <p className="text-sm text-gray-500 text-center py-4">No partner organizations added yet.</p>
+        {messages.length === 0 && (
+          <p className="text-sm text-gray-500 text-center py-4">No partner messages added yet.</p>
         )}
       </div>
     </div>
   );
 };
 
-export default PartnersSection;
+export default PartnerMessagesSection;

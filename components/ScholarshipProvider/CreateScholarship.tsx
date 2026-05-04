@@ -19,11 +19,13 @@ import {
   FAQSection,
   GallerySection,
   PartnersSection,
+  PartnerMessagesSection,
   ExamCentersSection,
   DownloadsSection,
   PaymentConfigSection,
   type GalleryImageItem,
   type PartnerOrganization,
+  type PartnerMessageItem,
 } from "./create-scholarship";
 
 interface VideoTutorial {
@@ -185,6 +187,9 @@ const CreateScholarship: React.FC<CreateScholarshipProps> = memo(({ scholarshipI
   // Partners
   const [partnerGroups, setPartnerGroups] = useState<PartnerFormItem[]>([]);
 
+  // Partner Messages
+  const [partnerMessages, setPartnerMessages] = useState<PartnerMessageItem[]>([]);
+
   // Exam Centers
   const [examCenters, setExamCenters] = useState<ExamCenterItem[]>([]);
 
@@ -308,6 +313,9 @@ const CreateScholarship: React.FC<CreateScholarshipProps> = memo(({ scholarshipI
 
       // Partners
       setPartnerGroups(((s as any).partner_groups || []) as PartnerFormItem[]);
+
+      // Partner Messages
+      setPartnerMessages(((s as any).partner_messages || []) as PartnerMessageItem[]);
 
       // Exam Centers
       setExamCenters((s.exam_centers_new as unknown as ExamCenterItem[]) || []);
@@ -559,19 +567,22 @@ const CreateScholarship: React.FC<CreateScholarshipProps> = memo(({ scholarshipI
   }, []);
 
   const handleSave = useCallback(async (draft: boolean = false) => {
-    // Validate dates
-    const dateValidation = validateDates();
-    if (!dateValidation.isValidDate) {
-      setError("Please fix the date errors.");
-      if (dateValidation.field) {
-        scrollToField(dateValidation.field);
+    if (!draft) {
+      const dateValidation = validateDates();
+      if (!dateValidation.isValidDate) {
+        setError("Please fix the date errors.");
+        if (dateValidation.field) {
+          scrollToField(dateValidation.field);
+        }
+        return;
       }
-      return;
-    }
 
-    if (!validateScholarship()) {
-      setError("Please fix the errors below.");
-      return;
+      const validationResult = validateScholarship();
+      if (validationResult !== true) {
+        setError("Please fix the errors below.");
+        scrollToField(validationResult as string);
+        return;
+      }
     }
 
     setSubmitting(true);
@@ -638,6 +649,7 @@ const CreateScholarship: React.FC<CreateScholarshipProps> = memo(({ scholarshipI
       gallery_images: galleryImages,
       gallery_images_new: galleryImages,
       partner_groups: partnerGroups as unknown as any,
+      partner_messages: partnerMessages as unknown as any,
       exam_centers: examCenters as unknown as any,
       exam_centers_new: examCenters as unknown as any,
       downloads: downloads,
@@ -687,7 +699,7 @@ const CreateScholarship: React.FC<CreateScholarshipProps> = memo(({ scholarshipI
       aboutOverview, videoTutorials, journeyTimeline, scholarshipSectionTitle, scholarshipSubtitle,
       scholarshipDescription, scholarshipTypes, selectionRubric, eligibilitySectionTitle, eligibilitySubtitle,
       basicRequirements, fullyFundedConditions, partiallyFundedConditions, selectionProcessSteps,
-      requiredDocuments, faqs, galleryImages, partnerGroups, examCenters, downloads, scholarshipId,
+      requiredDocuments, faqs, galleryImages, partnerGroups, partnerMessages, examCenters, downloads, scholarshipId,
       isEditing, onNavigate, status, enablePayment, enableBank, bankDetails, qrCodeUrl]);
 
   if (loadingData) {
@@ -867,6 +879,12 @@ const CreateScholarship: React.FC<CreateScholarshipProps> = memo(({ scholarshipI
       <PartnersSection
         partnerGroups={partnerGroups}
         setPartnerGroups={setPartnerGroups}
+      />
+
+      {/* Partner Messages */}
+      <PartnerMessagesSection
+        messages={partnerMessages}
+        setMessages={setPartnerMessages}
       />
 
       {/* Exam Centers */}

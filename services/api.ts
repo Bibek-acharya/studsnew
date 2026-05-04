@@ -194,6 +194,7 @@ export interface EducationEventResponse {
 
 export interface ScholarshipItem {
   id: number;
+  provider_id?: number;
   title: string;
   provider: string;
   location: string;

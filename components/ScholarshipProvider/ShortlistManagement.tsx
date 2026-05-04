@@ -1,11 +1,14 @@
 "use client";
 
-import React, { useState, useEffect, useCallback, memo } from "react";
-import { Home, Star, Eye, CheckCircle, XCircle, ChevronLeft, ChevronRight } from "lucide-react";
+import React, { useState, useEffect, memo } from "react";
+import { Home, Star, Eye, ChevronLeft, ChevronRight } from "lucide-react";
 import { scholarshipProviderApi, ProviderApplication } from "@/services/scholarshipProviderApi";
-import { toast } from "sonner";
 
-const ShortlistManagement: React.FC = memo(() => {
+interface ShortlistManagementProps {
+  onReviewStudent?: (id: string) => void;
+}
+
+const ShortlistManagement: React.FC<ShortlistManagementProps> = memo(({ onReviewStudent }) => {
   const [applications, setApplications] = useState<ProviderApplication[]>([]);
   const [loading, setLoading] = useState(true);
   const [page, setPage] = useState(1);
@@ -29,18 +32,6 @@ const ShortlistManagement: React.FC = memo(() => {
   const shortlisted = applications.filter((a) => a.status === "shortlisted");
   const totalPages = Math.ceil(shortlisted.length / limit);
   const paged = shortlisted.slice((page - 1) * limit, page * limit);
-
-  const updateStatus = useCallback(async (id: number, status: string) => {
-    try {
-      await scholarshipProviderApi.updateApplicationStatus(id, status);
-      setApplications((prev) => prev.map((a) => (a.id === id ? { ...a, status } : a)));
-      const user = applications.find(a => a.id === id);
-      const name = user ? `${user.first_name} ${user.last_name}` : "User";
-      toast.success(status === 'approved' ? `You have shortlisted ${name}.` : `You have rejected ${name}'s application.`);
-    } catch {
-      toast.error("Failed to update status");
-    }
-  }, []);
 
   const appId = (idx: number) => `#APP-2026-${String(idx + 1).padStart(3, "0")}`;
 
@@ -117,14 +108,8 @@ const ShortlistManagement: React.FC = memo(() => {
                       </td>
                       <td className="text-center py-3 px-3">
                         <div className="flex items-center justify-center gap-1">
-                          <button className="p-1.5 hover:bg-blue-50 rounded text-blue-600" title="View Profile">
+                          <button onClick={() => onReviewStudent?.(String(app.id))} className="p-1.5 hover:bg-blue-50 rounded text-blue-600" title="View Profile">
                             <Eye className="w-4 h-4" />
-                          </button>
-                          <button onClick={() => updateStatus(app.id, "approved")} className="p-1.5 hover:bg-green-50 rounded text-green-600" title="Approve">
-                            <CheckCircle className="w-4 h-4" />
-                          </button>
-                          <button onClick={() => updateStatus(app.id, "rejected")} className="p-1.5 hover:bg-red-50 rounded text-red-600" title="Reject">
-                            <XCircle className="w-4 h-4" />
                           </button>
                         </div>
                       </td>

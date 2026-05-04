@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useCallback, memo } from "react";
+import React, { useState, useCallback, useEffect, memo } from "react";
 import dynamic from "next/dynamic";
 import { Home, Feather } from "lucide-react";
 import { toast } from "sonner";
@@ -50,7 +50,14 @@ const STATUS_OPTIONS = [
   { value: "scheduled", label: "Scheduled" },
 ];
 
-const CreateBlog: React.FC = memo(() => {
+interface CreateBlogProps {
+  blogId?: number | null;
+  onNavigate?: (section: string) => void;
+  onEditComplete?: () => void;
+}
+
+const CreateBlog: React.FC<CreateBlogProps> = memo(({ blogId, onNavigate, onEditComplete }) => {
+  const isEditing = !!blogId;
   const [title, setTitle] = useState("");
   const [blogType, setBlogType] = useState("");
   const [category, setCategory] = useState("");
@@ -67,6 +74,26 @@ const CreateBlog: React.FC = memo(() => {
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
+
+useEffect(() => {
+    if (blogId != null) {
+      const id = blogId as number;
+      async function fetchBlog() {
+        try {
+          const blog = await scholarshipProviderApi.getBlogById(id);
+          setTitle(blog.title || "");
+          setContent(blog.content || "");
+          setPublishedBy(blog.author?.toLowerCase() || "admin");
+          setStatus(blog.status || "draft");
+          setFeaturedImageUrl(blog.image_url || "");
+          setFeaturedImagePreview(blog.image_url || "");
+        } catch (err) {
+          setError("Failed to load blog");
+        }
+      }
+      fetchBlog();
+    }
+  }, [blogId]);
 
   const handleImageSelect = useCallback(async (file: File) => {
     const localPreview = URL.createObjectURL(file);
@@ -93,37 +120,45 @@ const CreateBlog: React.FC = memo(() => {
     setError("");
     setSuccess("");
     try {
-      await scholarshipProviderApi.createBlog({
+      const payload = {
         title,
         content: content || shortDesc,
         author: PUBLISHED_BY.find((p) => p.value === publishedBy)?.label || "Admin",
         image_url: featuredImageUrl,
         status: draft ? "draft" : status,
-      });
-      toast.success(draft ? "Your blog post has been saved as a draft." : "Your blog has been published successfully.");
+      };
+      if (isEditing && blogId) {
+        await scholarshipProviderApi.updateBlog(blogId, payload);
+        toast.success(draft ? "Your blog has been updated as a draft." : "Your blog has been updated.");
+      } else {
+        await scholarshipProviderApi.createBlog(payload);
+        toast.success(draft ? "Your blog post has been saved as a draft." : "Your blog has been published successfully.");
+      }
+      onEditComplete?.();
+      onNavigate?.("sec-blog-directory");
     } catch (err: any) {
       setError(err.message || "Failed to save blog");
     } finally {
       setSubmitting(false);
     }
-  }, [title, content, shortDesc, publishedBy, status, featuredImageUrl]);
+  }, [title, content, shortDesc, publishedBy, status, featuredImageUrl, onNavigate, isEditing, blogId, onEditComplete]);
 
   return (
     <div className="space-y-6">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-2">
-        <h1 className="text-2xl font-bold text-gray-800">Create Blog</h1>
+        <h1 className="text-2xl font-bold text-gray-800">{isEditing ? 'Edit Blog' : 'Create Blog'}</h1>
         <div className="flex items-center text-sm text-gray-500 mt-2 sm:mt-0 gap-2">
           <Home className="w-4 h-4" />
           <span>Dashboard</span>
           <span>-</span>
-          <span className="text-gray-800 font-medium">Create Blog</span>
+          <span className="text-gray-800 font-medium">{isEditing ? 'Edit Blog' : 'Create Blog'}</span>
         </div>
       </div>
 
       <div className="bg-white rounded-lg p-8 border border-slate-100">
         <div className="flex justify-between items-center mb-6">
           <h2 className="text-lg font-bold text-gray-900 flex items-center gap-2">
-            <Feather className="w-5 h-5 text-blue-600" /> Create Blog
+            <Feather className="w-5 h-5 text-blue-600" /> {isEditing ? 'Edit Blog' : 'Create Blog'}
           </h2>
           <div className="flex gap-2">
             <button

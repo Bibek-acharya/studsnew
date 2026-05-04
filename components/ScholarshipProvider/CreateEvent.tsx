@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useCallback, memo } from "react";
+import React, { useState, useCallback, useEffect, memo } from "react";
 import dynamic from "next/dynamic";
 import { Home, CalendarPlus } from "lucide-react";
 import { toast } from "sonner";
@@ -40,7 +40,14 @@ const CATEGORIES = [
   { value: "fundraising", label: "Fundraising" },
 ];
 
-const CreateEvent: React.FC = memo(() => {
+interface CreateEventProps {
+  eventId?: number | null;
+  onNavigate?: (section: string) => void;
+  onEditComplete?: () => void;
+}
+
+const CreateEvent: React.FC<CreateEventProps> = memo(({ eventId, onNavigate, onEditComplete }) => {
+  const isEditing = !!eventId;
   const [title, setTitle] = useState("");
   const [eventType, setEventType] = useState("");
   const [category, setCategory] = useState("");
@@ -63,6 +70,45 @@ const CreateEvent: React.FC = memo(() => {
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
+
+  useEffect(() => {
+    if (eventId != null) {
+      const id = eventId as number;
+      async function fetchEvent() {
+        try {
+          const event = await scholarshipProviderApi.getEventById(id);
+          setTitle(event.name || "");
+          setEventType(event.event_type || "");
+          setCategory(event.category || "");
+          if (event.start_date) {
+            const datePart = event.start_date.split('T')[0];
+            setEventDate(datePart);
+            const timePart = event.start_date.split('T')[1]?.substring(0, 5) || "";
+            setStartTime(timePart);
+          }
+          if (event.end_date) {
+            const endTimePart = event.end_date.split('T')[1]?.substring(0, 5) || "";
+            setEndTime(endTimePart);
+          }
+          setMaxParticipants(event.max_participants?.toString() || "");
+          setVenue(event.location || "");
+          setOnlineLink(event.online_link || "");
+          setOrganizedBy(event.organized_by || "");
+          setContactPerson(event.contact_person || "");
+          setContactEmail(event.contact_email || "");
+          setShortDesc(event.short_desc || "");
+          setDescription(event.description || "");
+          setTags(event.tags?.join(", ") || "");
+          setEnableRegistration(event.enable_registration || false);
+          setFeaturedImageUrl(event.image_url || "");
+          setFeaturedImagePreview(event.image_url || "");
+        } catch (err) {
+          setError("Failed to load event");
+        }
+      }
+      fetchEvent();
+    }
+  }, [eventId]);
 
   const handleImageSelect = useCallback(async (file: File) => {
     const localPreview = URL.createObjectURL(file);
@@ -91,7 +137,7 @@ const CreateEvent: React.FC = memo(() => {
     try {
       const startDateTime = startTime ? `${eventDate}T${startTime}:00` : `${eventDate}T00:00:00`;
       const endDateTime = endTime ? `${eventDate}T${endTime}:00` : startDateTime;
-      await scholarshipProviderApi.createEvent({
+      const payload = {
         name: title,
         short_desc: shortDesc,
         description: description,
@@ -109,31 +155,39 @@ const CreateEvent: React.FC = memo(() => {
         tags: tags ? tags.split(',').map(t => t.trim()) : [],
         enable_registration: enableRegistration,
         status: draft ? "draft" : "upcoming",
-      });
-      toast.success(draft ? "Your event has been saved as a draft." : "Your event is now live.");
+      };
+      if (isEditing && eventId) {
+        await scholarshipProviderApi.updateEvent(eventId, payload);
+        toast.success(draft ? "Your event has been updated as a draft." : "Your event has been updated.");
+      } else {
+        await scholarshipProviderApi.createEvent(payload);
+        toast.success(draft ? "Your event has been saved as a draft." : "Your event is now live.");
+      }
+      onEditComplete?.();
+      onNavigate?.("sec-events-directory");
     } catch (err: any) {
       setError(err.message || "Failed to save event");
     } finally {
       setSubmitting(false);
     }
-  }, [title, eventDate, startTime, endTime, eventType, category, maxParticipants, onlineLink, organizedBy, contactPerson, contactEmail, shortDesc, description, tags, enableRegistration, venue, featuredImageUrl]);
+  }, [title, eventDate, startTime, endTime, eventType, category, maxParticipants, onlineLink, organizedBy, contactPerson, contactEmail, shortDesc, description, tags, enableRegistration, venue, featuredImageUrl, onNavigate, isEditing, eventId, onEditComplete]);
 
   return (
     <div className="space-y-6">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-2">
-        <h1 className="text-2xl font-bold text-gray-800">Create Event</h1>
+        <h1 className="text-2xl font-bold text-gray-800">{isEditing ? 'Edit Event' : 'Create Event'}</h1>
         <div className="flex items-center text-sm text-gray-500 mt-2 sm:mt-0 gap-2">
           <Home className="w-4 h-4" />
           <span>Dashboard</span>
           <span>-</span>
-          <span className="text-gray-800 font-medium">Create Event</span>
+          <span className="text-gray-800 font-medium">{isEditing ? 'Edit Event' : 'Create Event'}</span>
         </div>
       </div>
 
       <div className="bg-white rounded-lg p-8 border border-slate-100">
         <div className="flex justify-between items-center mb-6">
           <h2 className="text-lg font-bold text-gray-900 flex items-center gap-2">
-            <CalendarPlus className="w-5 h-5 text-blue-600" /> Create Event
+            <CalendarPlus className="w-5 h-5 text-blue-600" /> {isEditing ? 'Edit Event' : 'Create Event'}
           </h2>
           <div className="flex gap-2">
             <button

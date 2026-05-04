@@ -839,6 +839,7 @@ function DownloadsTab({ items, getImageUrl }: { items: any[]; getImageUrl: (url:
 
 function ContactSidebar({ scholarship }: { scholarship: any }) {
   const provider = scholarship.provider || "";
+  const providerId = scholarship.provider_id;
   const location = scholarship.location || "Nationwide Scholarship Program";
   const phone = scholarship.provider_phone || scholarship.phone || "";
   const email = scholarship.provider_email || scholarship.email || "";
@@ -846,9 +847,13 @@ function ContactSidebar({ scholarship }: { scholarship: any }) {
   return (
     <div className="rounded-2xl border border-gray-100 bg-white p-5 shadow-sm">
       <h3 className="mb-5 text-[18px] font-bold text-gray-900">Contact Information</h3>
-      {provider && (
+      {provider && providerId ? (
+        <Link href={`/providers/${providerId}`} className="mb-4 text-[13px] font-semibold text-blue-600 hover:text-blue-700 hover:underline">
+          {provider}
+        </Link>
+      ) : provider ? (
         <p className="mb-4 text-[13px] font-semibold text-gray-700">{provider}</p>
-      )}
+      ) : null}
       <ul className="space-y-4">
         <li className="flex items-start gap-3 text-[13px]">
           <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-blue-50 text-blue-600">

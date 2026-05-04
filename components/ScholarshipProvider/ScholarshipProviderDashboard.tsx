@@ -34,6 +34,7 @@ const DraftScholarship = dynamic(() => import('./DraftScholarship'));
 const WrittenExam = dynamic(() => import('./WrittenExam'));
 const Notifications = dynamic(() => import('./Notifications'));
 
+
 interface DashboardProps {
   onLogout?: () => void;
 }
@@ -43,6 +44,9 @@ const ScholarshipProviderDashboard: React.FC<DashboardProps> = ({ onLogout }) =>
   const [activeTab, setActiveTab] = useState('sec-dashboard');
   const [selectedStudentId, setSelectedStudentId] = useState<string | null>(null);
   const [editingScholarshipId, setEditingScholarshipId] = useState<number | null>(null);
+  const [editingNewsId, setEditingNewsId] = useState<number | null>(null);
+  const [editingEventId, setEditingEventId] = useState<number | null>(null);
+  const [editingBlogId, setEditingBlogId] = useState<number | null>(null);
   const [providerUser, setProviderUser] = useState<any>(null);
   const [unreadMessages, setUnreadMessages] = useState(0);
   const [rbacPermissions, setRbacPermissions] = useState<string[]>([]);
@@ -168,17 +172,17 @@ const ScholarshipProviderDashboard: React.FC<DashboardProps> = ({ onLogout }) =>
       case 'sec-assign-access':
         return <AssignAccess />;
       case 'sec-create-news':
-        return <CreateNews />;
+        return <CreateNews newsId={editingNewsId || undefined} onNavigate={navigateTo} onEditComplete={() => setEditingNewsId(null)} />;
       case 'sec-news-directory':
-        return <NewsDirectory />;
+        return <NewsDirectory onView={(id) => {}} onEdit={(id) => { setEditingNewsId(id); navigateTo('sec-create-news'); }} />;
       case 'sec-create-event':
-        return <CreateEvent />;
+        return <CreateEvent eventId={editingEventId || undefined} onNavigate={navigateTo} onEditComplete={() => setEditingEventId(null)} />;
       case 'sec-events-directory':
-        return <EventsDirectory />;
+        return <EventsDirectory onView={(id) => {}} onEdit={(id) => { setEditingEventId(id); navigateTo('sec-create-event'); }} />;
       case 'sec-create-blog':
-        return <CreateBlog />;
+        return <CreateBlog blogId={editingBlogId || undefined} onNavigate={navigateTo} onEditComplete={() => setEditingBlogId(null)} />;
       case 'sec-blog-directory':
-        return <BlogDirectory />;
+        return <BlogDirectory onView={(id) => {}} onEdit={(id) => { setEditingBlogId(id); navigateTo('sec-create-blog'); }} />;
       case 'sec-calendar':
         return <Calendar />;
       case 'sec-messages':
@@ -186,7 +190,7 @@ const ScholarshipProviderDashboard: React.FC<DashboardProps> = ({ onLogout }) =>
       case 'sec-results':
         return <ResultPublish />;
       case 'sec-shortlist':
-        return <ShortlistManagement />;
+        return <ShortlistManagement onReviewStudent={handleReviewStudent} />;
       case 'sec-written-exam':
         return <WrittenExam />;
       case 'sec-customize-form':

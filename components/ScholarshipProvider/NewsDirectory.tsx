@@ -33,7 +33,12 @@ const STATUS_COLORS: Record<string, string> = {
   archived: "bg-gray-100 text-gray-700",
 };
 
-const NewsDirectory: React.FC = memo(() => {
+interface NewsDirectoryProps {
+  onView?: (id: number) => void;
+  onEdit?: (id: number) => void;
+}
+
+const NewsDirectory: React.FC<NewsDirectoryProps> = memo(({ onView, onEdit }) => {
   const [news, setNews] = useState<ProviderNews[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
@@ -51,11 +56,11 @@ const NewsDirectory: React.FC = memo(() => {
       setLoading(true);
       try {
         const res = await scholarshipProviderApi.getNews(page, limit);
-        setNews(res.news.length > 0 ? res.news : FALLBACK_NEWS);
+        setNews(res.news);
         setTotal(res.meta.total);
       } catch {
-        setNews(FALLBACK_NEWS);
-        setTotal(FALLBACK_NEWS.length);
+        setNews([]);
+        setTotal(0);
       } finally {
         setLoading(false);
       }
@@ -151,7 +156,11 @@ const NewsDirectory: React.FC = memo(() => {
                     </td>
                     <td className="py-3 px-4">
                       <p className="font-medium text-gray-900">{item.title}</p>
-                      <p className="text-xs text-gray-500">{item.content?.slice(0, 60)}</p>
+                      {item.short_desc ? (
+                        <p className="text-xs text-gray-500" dangerouslySetInnerHTML={{ __html: item.short_desc.slice(0, 60) + (item.short_desc.length > 60 ? '...' : '') }} />
+                      ) : (
+                        <p className="text-xs text-gray-500">{item.content?.replace(/<[^>]*>/g, '').slice(0, 60)}</p>
+                      )}
                     </td>
                     <td className="text-center py-3 px-4">
                       <span className={`px-2 py-1 rounded text-xs font-semibold ${TYPE_COLORS[item.news_type] || "bg-gray-100 text-gray-700"}`}>{NEWS_TYPES[item.news_type] || item.news_type || "News"}</span>
@@ -167,8 +176,8 @@ const NewsDirectory: React.FC = memo(() => {
                     </td>
                     <td className="text-center py-3 px-4">
                       <div className="flex items-center justify-center gap-2">
-                        <button className="p-1.5 hover:bg-blue-50 rounded text-blue-600" title="View"><Eye className="w-4 h-4" /></button>
-                        <button className="p-1.5 hover:bg-green-50 rounded text-green-600" title="Edit"><Pencil className="w-4 h-4" /></button>
+                        <button className="p-1.5 hover:bg-blue-50 rounded text-blue-600" title="View" onClick={() => onView?.(item.id)}><Eye className="w-4 h-4" /></button>
+                        <button className="p-1.5 hover:bg-green-50 rounded text-green-600" title="Edit" onClick={() => onEdit?.(item.id)}><Pencil className="w-4 h-4" /></button>
                         <button className="p-1.5 hover:bg-red-50 rounded text-red-600" title="Delete" onClick={() => handleDelete(item.id)}><Trash2 className="w-4 h-4" /></button>
                       </div>
                     </td>

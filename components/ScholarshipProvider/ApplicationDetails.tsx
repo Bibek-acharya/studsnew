@@ -364,19 +364,19 @@ export default function ApplicationDetails({ applicationId, onBack, onStatusUpda
           <div className="bg-white rounded-xl border border-slate-200 p-6">
             <h4 className="text-sm font-bold text-slate-400 uppercase tracking-wider mb-4">Quick Actions</h4>
             <div className="flex flex-wrap gap-3">
-              {application.status !== "approved" && (
-                <button onClick={() => handleStatusChange("approved")} disabled={savingStatus} className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 text-sm font-semibold flex items-center gap-2 disabled:opacity-50">
-                  <Check className="w-4 h-4" /> Approve
-                </button>
+              {(application.status === "pending" || application.status === "under_review") && (
+                <>
+                  <button onClick={() => handleStatusChange("approved")} disabled={savingStatus} className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 text-sm font-semibold flex items-center gap-2 disabled:opacity-50">
+                    <Check className="w-4 h-4" /> Approve
+                  </button>
+                  <button onClick={() => handleStatusChange("rejected")} disabled={savingStatus} className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 text-sm font-semibold flex items-center gap-2 disabled:opacity-50">
+                    <X className="w-4 h-4" /> Reject
+                  </button>
+                </>
               )}
-              {application.status !== "shortlisted" && application.status !== "approved" && (
+              {application.status === "approved" && (
                 <button onClick={() => handleStatusChange("shortlisted")} disabled={savingStatus} className="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 text-sm font-semibold flex items-center gap-2 disabled:opacity-50">
                   <Star className="w-4 h-4" /> Shortlist
-                </button>
-              )}
-              {application.status !== "rejected" && (
-                <button onClick={() => handleStatusChange("rejected")} disabled={savingStatus} className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 text-sm font-semibold flex items-center gap-2 disabled:opacity-50">
-                  <X className="w-4 h-4" /> Reject
                 </button>
               )}
             </div>

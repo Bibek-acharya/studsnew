@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useEffect, useMemo } from "react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Search, Image as ImageIcon, BadgeCheck, Banknote, MapPin, GraduationCap, Calendar, Bookmark, ChevronDown } from "lucide-react";
 import { apiService, ScholarshipItem } from "@/services/api";
@@ -17,6 +18,7 @@ const SCHOLARSHIPS_PER_PAGE = 18;
 function mapBackendItem(item: ScholarshipItem): Scholarship {
   return {
     id: item.id,
+    provider_id: item.provider_id,
     title: item.title,
     org: item.provider,
     amount: item.value || item.amount || "",
@@ -231,7 +233,13 @@ const ScholarshipCard = ({
           {scholarship.title}
         </h3>
         <div className="flex items-center gap-1.5 text-[12.5px] text-gray-500 mb-3.5">
-          {scholarship.org}
+          {scholarship.provider_id ? (
+            <Link href={`/providers/${scholarship.provider_id}`} className="hover:text-blue-600 transition-colors">
+              {scholarship.org}
+            </Link>
+          ) : (
+            scholarship.org
+          )}
           <BadgeCheck className="w-3.5 h-3.5 text-white fill-[#2563eb]" />
         </div>
 

@@ -20,6 +20,13 @@ const DashboardSidebar = ({ isMobileOpen, toggleSidebar, activeTab, onNavigate, 
     { menu: 'management', id: 'sec-create-scholarship', icon: 'fa-plus-circle', label: 'Create Opportunity' },
     { menu: 'management', id: 'sec-interviews', icon: 'fa-video', label: 'Interviews' },
     
+    { menu: 'content', id: 'sec-news-directory', icon: 'fa-newspaper', label: 'News Directory' },
+    { menu: 'content', id: 'sec-create-news', icon: 'fa-plus', label: 'Create News' },
+    { menu: 'content', id: 'sec-events-directory', icon: 'fa-calendar-days', label: 'Events Directory' },
+    { menu: 'content', id: 'sec-create-event', icon: 'fa-calendar-plus', label: 'Create Event' },
+    { menu: 'content', id: 'sec-blog-directory', icon: 'fa-file-lines', label: 'Blog Directory' },
+    { menu: 'content', id: 'sec-create-blog', icon: 'fa-pen-to-square', label: 'Create Blog' },
+    
     { menu: 'system', id: 'sec-reports', icon: 'fa-chart-line', label: 'Analytics & Reports' },
     { menu: 'system', id: 'sec-org-profile', icon: 'fa-building', label: 'Organization Profile' },
     { menu: 'system', id: 'sec-settings', icon: 'fa-gear', label: 'Settings' }
@@ -91,6 +98,7 @@ const DashboardSidebar = ({ isMobileOpen, toggleSidebar, activeTab, onNavigate, 
       <div className="flex-1 overflow-y-auto py-6 custom-scrollbar">
         {renderNavGroup('Main Menu', 'main')}
         {renderNavGroup('Management', 'management')}
+        {renderNavGroup('Content', 'content')}
         {renderNavGroup('System', 'system')}
       </div>
 

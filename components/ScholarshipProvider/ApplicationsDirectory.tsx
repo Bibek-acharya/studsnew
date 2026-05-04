@@ -283,15 +283,21 @@ export default function ApplicationsDirectory({ onReviewStudent }: ApplicationsD
                           <button onClick={() => onReviewStudent(String(app.id))} className="p-1.5 hover:bg-blue-50 rounded text-blue-600" title="View Profile">
                             <Eye className="w-4 h-4" />
                           </button>
-                          <button onClick={() => handleStatusChange(app.id, "shortlisted")} className="p-1.5 hover:bg-purple-50 rounded text-purple-600" title="Shortlist">
-                            <Star className="w-4 h-4" />
-                          </button>
-                          <button onClick={() => handleStatusChange(app.id, "approved")} className="p-1.5 hover:bg-green-50 rounded text-green-600" title="Approve">
-                            <CheckCircle className="w-4 h-4" />
-                          </button>
-                          <button onClick={() => handleStatusChange(app.id, "rejected")} className="p-1.5 hover:bg-red-50 rounded text-red-600" title="Reject">
-                            <XCircle className="w-4 h-4" />
-                          </button>
+                          {(app.status === "pending" || app.status === "under_review") && (
+                            <>
+                              <button onClick={() => handleStatusChange(app.id, "approved")} className="p-1.5 hover:bg-green-50 rounded text-green-600" title="Approve">
+                                <CheckCircle className="w-4 h-4" />
+                              </button>
+                              <button onClick={() => handleStatusChange(app.id, "rejected")} className="p-1.5 hover:bg-red-50 rounded text-red-600" title="Reject">
+                                <XCircle className="w-4 h-4" />
+                              </button>
+                            </>
+                          )}
+                          {app.status === "approved" && (
+                            <button onClick={() => handleStatusChange(app.id, "shortlisted")} className="p-1.5 hover:bg-purple-50 rounded text-purple-600" title="Shortlist">
+                              <Star className="w-4 h-4" />
+                            </button>
+                          )}
                         </div>
 
                       </td>
