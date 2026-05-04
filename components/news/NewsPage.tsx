@@ -19,6 +19,13 @@ interface NewsArticle {
   tags: string[];
 }
 
+const stripHtml = (html: string) => {
+  if (typeof window === 'undefined') return html;
+  const doc = new DOMParser().parseFromString(html, 'text/html');
+  return doc.body.textContent || "";
+};
+
+
 type NewsCategoryFilter =
   | "All News"
   | "Admission"
@@ -101,7 +108,7 @@ const NewsPage: React.FC = () => {
             const providerNews = providerData.news.map((n: any): NewsArticle => ({
               id: `provider-${n.id}`,
               title: n.title,
-              excerpt: n.short_desc || n.content || "",
+              excerpt: stripHtml(n.short_desc || n.content || ""),
               content: n.content || n.short_desc || "",
               category: n.news_type || "News",
               image: n.image_url || "",
@@ -111,6 +118,7 @@ const NewsPage: React.FC = () => {
               source: n.published_by || "Provider",
               tags: n.tags || [],
             }));
+
             news = [...news, ...providerNews];
           }
         } catch (providerErr) {
@@ -272,8 +280,9 @@ const NewsPage: React.FC = () => {
                   {item.title}
                 </Link>
                 <p className="text-slate-500 text-sm mb-5 grow line-clamp-2 leading-relaxed">
-                  {item.excerpt}
+                  {stripHtml(item.excerpt)}
                 </p>
+
 
                 <div className="pt-4 border-t border-gray-100 flex justify-between items-center text-sm mt-auto">
                   <span className="text-slate-400 flex items-center font-medium">

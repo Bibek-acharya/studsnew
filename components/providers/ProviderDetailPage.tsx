@@ -12,6 +12,12 @@ import {
 import * as LucideIcons from "lucide-react";
 import { ArrowArcRightIcon } from "@phosphor-icons/react";
 
+const stripHtml = (html: string) => {
+  if (typeof window === 'undefined') return html;
+  const doc = new DOMParser().parseFromString(html, 'text/html');
+  return doc.body.textContent || "";
+};
+
 const TABS = [
   "About", "Our Service", "Our Sector", "Our Projects",
   "News & Notice", "Scholarship", "Gallery", "Review"
@@ -352,34 +358,128 @@ const ProviderDetailPage: React.FC<{ params: Promise<{ id: string }> }> = ({ par
           {activeTab === "News & Notice" && (
             <div>
               <div className="mb-6">
-                <h2 className="text-[20px] font-bold text-gray-900">News & Blog</h2>
+                <h2 className="text-[20px] font-bold text-gray-900">News & Notice</h2>
                 <p className="text-[14px] text-gray-500 mt-1">Stay updated with our latest announcements and stories.</p>
               </div>
-              <div className="flex items-center gap-4 mb-6 text-sm text-gray-500">
-                <Newspaper className="w-5 h-5 text-blue-600" />
-                <span>{profile.news_count} news items</span>
-                <FileText className="w-5 h-5 text-blue-600 ml-2" />
-                <span>{profile.blog_count} blog posts</span>
-              </div>
-              <p className="text-gray-400 italic">
-                Visit our <a href="/news" className="text-blue-600 hover:underline">News</a> and{" "}
-                <a href="/blogs" className="text-blue-600 hover:underline">Blogs</a> pages to explore content from this provider.
-              </p>
+              {(profile.news?.length ?? 0) === 0 ? (
+                <p className="text-gray-400 italic">No news listed yet.</p>
+              ) : (
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                  {profile.news?.map((item) => (
+                    <article
+                      key={item.id}
+                      className="bg-white border border-gray-100 hover:border-blue-500/20 rounded-xl p-4 flex flex-col transition-all duration-300 group cursor-pointer shadow-sm hover:shadow-md"
+                    >
+                      <div className="mb-3 flex justify-between items-center">
+                        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-blue-50 text-blue-700">
+                          {item.news_type || "Notice"}
+                        </span>
+                        <span className="text-gray-400 text-[11px] flex items-center font-medium">
+                          <Calendar className="w-3 h-3 mr-1" />
+                          {item.publish_date ? new Date(item.publish_date).toLocaleDateString() : new Date(item.created_at).toLocaleDateString()}
+                        </span>
+                      </div>
+
+                      <div className="rounded-lg overflow-hidden aspect-16/10 mb-4 bg-gray-50 h-32 border border-gray-100">
+                        <img
+                          src={item.image_url || "https://images.unsplash.com/photo-1504711432869-efd597cdd045?auto=format&fit=crop&q=80&w=800"}
+                          alt={item.title}
+                          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 ease-out"
+                        />
+                      </div>
+
+                      <h3 className="font-bold text-[15px] text-slate-900 leading-snug mb-2 group-hover:text-blue-600 transition-colors line-clamp-2">
+                        {item.title}
+                      </h3>
+                      <p className="text-slate-500 text-[13px] mb-4 grow line-clamp-2 leading-relaxed">
+                        {stripHtml(item.short_desc || item.content || "")}
+                      </p>
+
+
+                      <div className="pt-3 border-t border-gray-50 flex justify-between items-center text-[12px] mt-auto">
+                        <span className="text-slate-400">By {item.published_by || "Provider"}</span>
+                        <a href={`/news/${item.id}`} className="text-blue-600 font-bold hover:underline">
+                          View Details
+                        </a>
+                      </div>
+                    </article>
+                  ))}
+                </div>
+              )}
             </div>
           )}
 
           {activeTab === "Scholarship" && (
             <div>
               <div className="mb-6">
-                <h2 className="text-[20px] font-bold text-gray-900">Scholarship Project</h2>
-                <p className="text-[14px] text-gray-500 mt-1">
-                  {profile.scholarship_count} scholarship{profile.scholarship_count !== 1 ? "s" : ""} offered by this provider.
-                </p>
+                <h2 className="text-[20px] font-bold text-gray-900">Available Scholarships</h2>
+                <p className="text-[14px] text-gray-500 mt-1">Explore scholarship opportunities from this provider.</p>
               </div>
-              <p className="text-gray-400 italic">
-                Browse all scholarships from this provider on our{" "}
-                <a href={`/scholarship-finder`} className="text-blue-600 hover:underline">Scholarship Finder</a> page.
-              </p>
+              {(profile.scholarships?.length ?? 0) === 0 ? (
+                <p className="text-gray-400 italic">No scholarships listed yet.</p>
+              ) : (
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                  {profile.scholarships?.map((sch) => (
+                    <div key={sch.id} className="relative flex flex-col bg-white rounded-xl border border-gray-200/80 transition-all duration-300 p-3 hover:shadow-md group">
+                      <div className="h-32 w-full bg-gray-100 relative overflow-hidden rounded-lg mb-3 border border-gray-100">
+                        <img 
+                          src={sch.banner_background_image_url || "https://images.unsplash.com/photo-1523050854058-8df90110c9f1?auto=format&fit=crop&q=80&w=800"} 
+                          alt={sch.title} 
+                          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" 
+                        />
+                      </div>
+
+                      <div className="flex flex-col grow px-1">
+                        <div className="flex items-center gap-2 mb-2">
+                          <span className="text-blue-600 bg-blue-50 text-[10px] font-bold px-2 py-0.5 rounded-md uppercase tracking-wide">
+                            {sch.scholarship_type || "SCHOLARSHIP"}
+                          </span>
+                          <div className={`flex items-center gap-1 px-2 py-0.5 rounded-md ${sch.status === 'OPEN' ? 'bg-green-50 text-green-600' : 'bg-yellow-50 text-yellow-600'}`}>
+                            <span className={`w-1 h-1 rounded-full ${sch.status === 'OPEN' ? 'bg-green-600' : 'bg-yellow-600'}`}></span>
+                            <span className="text-[10px] font-bold uppercase tracking-wide">
+                              {sch.status || "OPEN"}
+                            </span>
+                          </div>
+                        </div>
+
+                        <h3 className="font-bold text-[15px] leading-tight text-slate-900 mb-2 group-hover:text-blue-600 line-clamp-1">
+                          {sch.title}
+                        </h3>
+
+                        <div className="bg-gray-50/50 rounded-lg p-3 border border-gray-100 mb-4 mt-auto flex flex-col gap-2">
+                          <div className="flex items-center gap-1.5 text-[11px] text-gray-600 font-medium">
+                            <MapPin className="w-3 h-3 text-gray-400 shrink-0" />
+                            <span className="truncate">{sch.location}</span>
+                          </div>
+                          <div className="flex items-center gap-1.5 text-[11px] text-gray-600 font-medium">
+                            <GraduationCap className="w-3 h-3 text-gray-400 shrink-0" />
+                            <span className="truncate">{sch.degree_level}</span>
+                          </div>
+                          <div className="flex items-center gap-1.5 text-[11px] text-gray-800 font-bold mt-1">
+                            <Calendar className="w-3 h-3 text-red-500 shrink-0" />
+                            <span>Ends: {sch.deadline}</span>
+                          </div>
+                        </div>
+
+                        <div className="flex items-center gap-2">
+                          <a
+                            href={`/scholarship-finder/${sch.id}`}
+                            className="flex-1 py-1.5 text-center text-[12px] font-bold text-gray-700 bg-white border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors"
+                          >
+                            Details
+                          </a>
+                          <a 
+                            href={`/scholarship-finder/apply/${sch.id}`} 
+                            className="flex-1 py-1.5 text-center text-[12px] font-bold text-white bg-blue-600 rounded-lg hover:bg-blue-700 transition-colors"
+                          >
+                            Apply
+                          </a>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
           )}
 

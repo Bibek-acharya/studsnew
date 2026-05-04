@@ -27,6 +27,13 @@ const categoryPills: BlogCategoryFilter[] = [
   "Others",
 ];
 
+const stripHtml = (html: string) => {
+  if (typeof window === 'undefined') return html;
+  const doc = new DOMParser().parseFromString(html, 'text/html');
+  return doc.body.textContent || "";
+};
+
+
 const badgeClassFromCategory = (category: string) => {
   if (category === "Scholarship") return "bg-emerald-500";
   if (category === "Admission") return "bg-blue-700";
@@ -59,7 +66,7 @@ const BlogPage: React.FC = () => {
               id: b.id,
               title: b.title,
               slug: b.title?.toLowerCase().replace(/\s+/g, "-") || "",
-              excerpt: b.content?.slice(0, 200) || "",
+              excerpt: stripHtml(b.content || "").slice(0, 200) || "",
               content: b.content || "",
               image: b.image_url || "",
               author: b.author || "Provider",
@@ -71,6 +78,7 @@ const BlogPage: React.FC = () => {
               views: b.views || 0,
               created_at: b.published_at || b.created_at,
             }));
+
             allBlogs = [...allBlogs, ...providerBlogs];
           }
         } catch {
@@ -169,7 +177,8 @@ const BlogPage: React.FC = () => {
                     <h3 className="text-2xl sm:text-3xl md:text-4xl font-bold text-white mb-2 leading-tight">
                       {featuredBlog.title}
                     </h3>
-                    <p className="text-gray-200 text-sm sm:text-base line-clamp-2">{featuredBlog.excerpt}</p>
+                    <p className="text-gray-200 text-sm sm:text-base line-clamp-2">{stripHtml(featuredBlog.excerpt)}</p>
+
                   </div>
                   <button className="bg-white text-gray-900 font-semibold px-6 py-2.5 rounded-md hover:bg-gray-100 transition-colors whitespace-nowrap  self-start md:self-auto">
                     Read Full Story
@@ -231,7 +240,8 @@ const BlogPage: React.FC = () => {
                     <Link href={`/blogs/${blog.id}`} className="text-lg font-bold text-gray-900 leading-snug mb-2 line-clamp-2 hover:text-[#0000ff]">
                       {blog.title}
                     </Link>
-                    <p className="text-sm text-gray-500 line-clamp-3 mb-5 flex-1">{blog.excerpt}</p>
+                    <p className="text-sm text-gray-500 line-clamp-3 mb-5 flex-1">{stripHtml(blog.excerpt)}</p>
+
 
                     <div className="flex justify-between items-center pt-4 border-t border-gray-100 mt-auto">
                       <div className="flex items-center gap-2.5">

@@ -27,6 +27,13 @@ const filterPills: EventFilter[] = [
   "Others",
 ];
 
+const stripHtml = (html: string) => {
+  if (typeof window === 'undefined') return html;
+  const doc = new DOMParser().parseFromString(html, 'text/html');
+  return doc.body.textContent || "";
+};
+
+
 const mapCategory = (category: string): EventFilter => {
   if (category === "Workshop" || category === "Seminar") return "Seminar & Workshop";
   if (category === "Job Fair") return "Career Fairs";
@@ -187,7 +194,8 @@ const EventsPage: React.FC = () => {
                     </span>
                   </div>
                   <h3 className="text-3xl font-bold mb-2">{featured.title}</h3>
-                  <p className="text-gray-200 text-base font-medium line-clamp-2">{featured.excerpt}</p>
+                  <p className="text-gray-200 text-base font-medium line-clamp-2">{stripHtml(featured.excerpt || "")}</p>
+
                 </div>
                 <button className="bg-white text-black px-6 py-3 rounded-md font-bold hover:bg-gray-100 transition whitespace-nowrap ">
                   Read Full Story
@@ -254,7 +262,8 @@ const EventsPage: React.FC = () => {
                       <i className="fa-solid fa-location-dot mr-2 text-gray-500"></i> {event.location}
                     </div>
 
-                    <p className="text-xs text-gray-500 mb-5 line-clamp-3 leading-relaxed font-medium">{event.excerpt}</p>
+                    <p className="text-xs text-gray-500 mb-5 line-clamp-3 leading-relaxed font-medium">{stripHtml(event.excerpt || "")}</p>
+
 
                     <div className="mt-auto flex gap-2">
                       <Link

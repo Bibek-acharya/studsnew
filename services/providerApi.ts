@@ -17,6 +17,8 @@ export interface ProviderProfile {
   projects?: ProviderProject[];
   gallery?: ProviderGalleryImage[];
   reviews?: ProviderReview[];
+  scholarships?: any[];
+  news?: any[];
   scholarship_count: number;
   news_count: number;
   event_count: number;
