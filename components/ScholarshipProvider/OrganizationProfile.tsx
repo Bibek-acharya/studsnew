@@ -1,7 +1,8 @@
 "use client";
 
 import React, { memo, useEffect, useState } from "react";
-import { Building2, Home, Image, Mail, Phone, BadgeInfo, Globe, CreditCard, Plus, Pencil, Trash2, Star } from "lucide-react";
+import { Building2, Home, Image, Mail, Phone, BadgeInfo, Globe, CreditCard, Plus, Pencil, Trash2, Star, FileText } from "lucide-react";
+
 import { toast } from "sonner";
 import FileUpload from "./common/FileUpload";
 import ConfirmationModal from "./common/ConfirmationModal";
@@ -34,6 +35,25 @@ const OrganizationProfile: React.FC = memo(() => {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [uploadingLogo, setUploadingLogo] = useState(false);
+  
+  // Founder fields
+  const [founderName, setFounderName] = useState("");
+  const [founderRole, setFounderRole] = useState("");
+  const [founderMessage, setFounderMessage] = useState("");
+  const [founderImageUrl, setFounderImageUrl] = useState("");
+  const [founderImagePreview, setFounderImagePreview] = useState("");
+  const [uploadingFounderImage, setUploadingFounderImage] = useState(false);
+
+  // Social media fields
+  const [facebookUrl, setFacebookUrl] = useState("");
+  const [instagramUrl, setInstagramUrl] = useState("");
+  const [youtubeUrl, setYoutubeUrl] = useState("");
+  const [linkedinUrl, setLinkedinUrl] = useState("");
+  const [mapUrl, setMapUrl] = useState("");
+  const [brochureUrl, setBrochureUrl] = useState("");
+  const [uploadingBrochure, setUploadingBrochure] = useState(false);
+
+
 
   // Content management state
   const [services, setServices] = useState<any[]>([]);
@@ -63,6 +83,23 @@ const OrganizationProfile: React.FC = memo(() => {
         setMission(data.mission || "");
         setValues(data.values || "");
         if (data.logo_url) { setLogoUrl(data.logo_url); setLogoPreview(data.logo_url); }
+        
+        // Founder
+        setFounderName(data.founder_name || "");
+        setFounderRole(data.founder_role || "");
+        setFounderMessage(data.founder_message || "");
+        if (data.founder_image_url) {
+          setFounderImageUrl(data.founder_image_url);
+          setFounderImagePreview(data.founder_image_url);
+        }
+
+        // Social
+        setFacebookUrl(data.facebook_url || "");
+        setInstagramUrl(data.instagram_url || "");
+        setYoutubeUrl(data.youtube_url || "");
+        setLinkedinUrl(data.linkedin_url || "");
+        setMapUrl(data.map_url || "");
+        setBrochureUrl(data.brochure_url || "");
       } catch (err) {
         toast.error(err instanceof Error ? err.message : "Failed to load profile");
       } finally {
@@ -86,7 +123,36 @@ const OrganizationProfile: React.FC = memo(() => {
     } catch {}
   };
 
+  const handleFounderImageSelect = async (file: File) => {
+    setFounderImagePreview(URL.createObjectURL(file));
+    setUploadingFounderImage(true);
+    try {
+      const url = await scholarshipProviderApi.uploadImage(file, "founders");
+      setFounderImageUrl(url);
+      setFounderImagePreview(url);
+      toast.success("Founder image uploaded");
+    } catch (err) {
+      setFounderImageUrl("");
+      setFounderImagePreview("");
+      toast.error(err instanceof Error ? err.message : "Failed to upload founder image");
+    } finally { setUploadingFounderImage(false); }
+  };
+
+  const handleBrochureSelect = async (file: File) => {
+    setUploadingBrochure(true);
+    try {
+      const url = await scholarshipProviderApi.uploadDocument(file, "brochures");
+      setBrochureUrl(url);
+      toast.success("Brochure uploaded successfully");
+
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Failed to upload brochure");
+    } finally { setUploadingBrochure(false); }
+  };
+
   const handleLogoSelect = async (file: File) => {
+
+
     setLogoPreview(URL.createObjectURL(file));
     setUploadingLogo(true);
     try {
@@ -117,8 +183,19 @@ const OrganizationProfile: React.FC = memo(() => {
         about_text: aboutText,
         mission,
         values,
+        founder_name: founderName,
+        founder_role: founderRole,
+        founder_message: founderMessage,
+        founder_image_url: founderImageUrl,
+        facebook_url: facebookUrl,
+        instagram_url: instagramUrl,
+        youtube_url: youtubeUrl,
+        linkedin_url: linkedinUrl,
+        map_url: mapUrl,
+        brochure_url: brochureUrl,
       });
       setProfile(updated);
+
       toast.success("Profile updated successfully.");
     } catch (err) {
       toast.error(err instanceof Error ? err.message : "Failed to save profile");
@@ -272,6 +349,120 @@ const OrganizationProfile: React.FC = memo(() => {
                 <textarea className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:border-blue-500" value={values} onChange={(e) => setValues(e.target.value)} rows={3} placeholder="Our values..." />
               </div>
             </div>
+
+            {/* Founder Section */}
+            <div className="mt-8 pt-8 border-t border-gray-100">
+              <h3 className="text-md font-bold text-gray-900 mb-4 flex items-center gap-2">
+                <Star className="w-4 h-4 text-blue-600" />
+                Founder Information
+              </h3>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="md:col-span-1">
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Founder Image</label>
+                  <div className="flex items-center gap-4">
+                    <div className="w-20 h-20 rounded-xl bg-gray-50 border border-gray-100 overflow-hidden flex-shrink-0">
+                      {founderImagePreview ? (
+                        <img src={founderImagePreview} alt="Founder" className="w-full h-full object-cover" />
+                      ) : (
+                        <div className="w-full h-full flex items-center justify-center text-gray-300">
+                          <Image className="w-8 h-8" />
+                        </div>
+                      )}
+                    </div>
+                    <div className="flex-1">
+                      <FileUpload
+                        accept="image/*"
+                        maxSize="2MB"
+                        onFileSelect={handleFounderImageSelect}
+                      />
+                      {uploadingFounderImage && <p className="mt-2 text-sm text-blue-600 font-medium">Uploading image...</p>}
+                    </div>
+
+                  </div>
+                </div>
+                <div className="md:col-span-1 space-y-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1.5">Founder Name</label>
+                    <input type="text" className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:border-blue-500" value={founderName} onChange={(e) => setFounderName(e.target.value)} placeholder="e.g. John Doe" />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1.5">Founder Role</label>
+                    <input type="text" className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:border-blue-500" value={founderRole} onChange={(e) => setFounderRole(e.target.value)} placeholder="e.g. Founder & Chairperson" />
+                  </div>
+                </div>
+                <div className="md:col-span-2">
+                  <label className="block text-sm font-medium text-gray-700 mb-1.5">Founder's Message / Quote</label>
+                  <textarea className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:border-blue-500" value={founderMessage} onChange={(e) => setFounderMessage(e.target.value)} rows={3} placeholder="A short message or quote from the founder..." />
+                </div>
+              </div>
+            </div>
+
+            {/* Social Media & Map Section */}
+            <div className="mt-8 pt-8 border-t border-gray-100">
+              <h3 className="text-md font-bold text-gray-900 mb-4 flex items-center gap-2">
+                <Globe className="w-4 h-4 text-blue-600" />
+                Social Media & Location
+              </h3>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1.5">Facebook URL</label>
+                  <input type="url" className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:border-blue-500" value={facebookUrl} onChange={(e) => setFacebookUrl(e.target.value)} placeholder="https://facebook.com/your-page" />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1.5">Instagram URL</label>
+                  <input type="url" className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:border-blue-500" value={instagramUrl} onChange={(e) => setInstagramUrl(e.target.value)} placeholder="https://instagram.com/your-profile" />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1.5">YouTube URL</label>
+                  <input type="url" className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:border-blue-500" value={youtubeUrl} onChange={(e) => setYoutubeUrl(e.target.value)} placeholder="https://youtube.com/@your-channel" />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1.5">LinkedIn URL</label>
+                  <input type="url" className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:border-blue-500" value={linkedinUrl} onChange={(e) => setLinkedinUrl(e.target.value)} placeholder="https://linkedin.com/company/your-company" />
+                </div>
+                <div className="md:col-span-2">
+                  <label className="block text-sm font-medium text-gray-700 mb-1.5">Google Maps Embed URL</label>
+                  <input type="text" className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:border-blue-500" value={mapUrl} onChange={(e) => setMapUrl(e.target.value)} placeholder='e.g. https://www.google.com/maps/embed?pb=...' />
+                  <p className="mt-1 text-[11px] text-gray-500">Go to Google Maps → Share → Embed a map → Copy the URL inside the src="" attribute.</p>
+                </div>
+              </div>
+            </div>
+
+            {/* Brochure Section */}
+            <div className="mt-8 pt-8 border-t border-gray-100">
+              <h3 className="text-md font-bold text-gray-900 mb-4 flex items-center gap-2">
+                <FileText className="w-4 h-4 text-blue-600" />
+                Organization Brochure
+              </h3>
+              <div className="bg-gray-50 rounded-xl p-6 border border-dashed border-gray-200">
+                <div className="flex flex-col md:flex-row items-center gap-6">
+                  <div className="w-16 h-16 rounded-lg bg-blue-100 flex items-center justify-center text-blue-600 flex-shrink-0">
+                    <FileText className="w-8 h-8" />
+                  </div>
+                  <div className="flex-1 text-center md:text-left">
+                    <h4 className="text-sm font-bold text-gray-900">Upload Official Brochure</h4>
+                    <p className="text-xs text-gray-500 mt-1">PDF format preferred. Max size 5MB.</p>
+                    {brochureUrl && (
+                      <div className="mt-2 inline-flex items-center gap-2 px-3 py-1 bg-green-50 text-green-700 rounded-full text-[11px] font-medium border border-green-100">
+                        <Star className="w-3 h-3" />
+                        Brochure Uploaded
+                        <a href={brochureUrl} target="_blank" rel="noreferrer" className="underline hover:text-green-800 ml-1">View Current</a>
+                      </div>
+                    )}
+                  </div>
+                  <div className="flex-shrink-0 text-center">
+                    <FileUpload
+                      accept=".pdf,.doc,.docx"
+                      maxSize="5MB"
+                      onFileSelect={handleBrochureSelect}
+                    />
+                    {uploadingBrochure && <p className="mt-2 text-sm text-blue-600 font-medium">Uploading brochure...</p>}
+                  </div>
+
+                </div>
+              </div>
+            </div>
+
             <div className="mt-6 flex justify-end">
               <button onClick={handleSaveProfile} disabled={saving} className="px-6 py-2 bg-blue-600 text-white rounded-lg text-sm font-semibold hover:bg-blue-700 disabled:opacity-50">
                 {saving ? "Saving..." : "Save Changes"}

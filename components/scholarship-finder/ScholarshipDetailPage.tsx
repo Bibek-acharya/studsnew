@@ -914,7 +914,18 @@ function ContactSidebar({ scholarship }: { scholarship: any }) {
           <iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3532.4762842059996!2d85.3897!3d27.7172!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x39eb190c0b8c5e01%3A0x1234567890abcdef!2sGokarneshwor%2008%2C%20Kathmandu!5e0!3m2!1sen!2snp!4v1234567890" width="100%" height="150" style={{ border: 0 }} allowFullScreen loading="lazy" referrerPolicy="no-referrer-when-downgrade"></iframe>
         </div>
       </div>
+
+     
+        <div className="mt-6">
+          <Link href={`/providers/${providerId}`} className="flex w-full items-center justify-center gap-2 rounded-xl border border-gray-200 bg-white py-3 text-[14px] font-bold text-gray-900 transition hover:bg-gray-50 hover:text-blue-600 shadow-sm">
+            View Provider Profile
+            <ExternalLink size={16} />
+          </Link>
+        </div>
+  
     </div>
+
+
   );
 }
 

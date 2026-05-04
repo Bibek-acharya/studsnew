@@ -399,7 +399,20 @@ export interface ProviderProfile {
   about_text?: string;
   mission?: string;
   values?: string;
+  founder_name?: string;
+  founder_role?: string;
+  founder_message?: string;
+  founder_image_url?: string;
+  facebook_url?: string;
+  instagram_url?: string;
+  youtube_url?: string;
+  linkedin_url?: string;
+  map_url?: string;
+  brochure_url?: string;
   role: string;
+
+
+
   is_sub_user?: boolean;
   permissions?: string[];
 }
@@ -773,7 +786,30 @@ export const scholarshipProviderApi = {
     return callApi<ProviderProfile>("/api/v1/scholarship-providers/profile");
   },
 
-  async updateProfile(data: { provider_name: string; registration_number: string; contact_number?: string; pan_number?: string; website_url?: string; logo_url?: string; address?: string; about_text?: string; mission?: string; values?: string }): Promise<ProviderProfile> {
+  async updateProfile(data: { 
+    provider_name: string; 
+    registration_number: string; 
+    contact_number?: string; 
+    pan_number?: string; 
+    website_url?: string; 
+    logo_url?: string; 
+    address?: string; 
+    about_text?: string; 
+    mission?: string; 
+    values?: string;
+    founder_name?: string;
+    founder_role?: string;
+    founder_message?: string;
+    founder_image_url?: string;
+    facebook_url?: string;
+    instagram_url?: string;
+    youtube_url?: string;
+    linkedin_url?: string;
+    map_url?: string;
+    brochure_url?: string;
+  }): Promise<ProviderProfile> {
+
+
     return apiRequest<ProviderProfile>("/api/v1/scholarship-providers/profile", {
       method: "PUT",
       body: JSON.stringify(data),

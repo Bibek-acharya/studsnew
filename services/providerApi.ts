@@ -12,7 +12,19 @@ export interface ProviderProfile {
   about_text?: string;
   mission?: string;
   values?: string;
+  founder_name?: string;
+  founder_role?: string;
+  founder_message?: string;
+  founder_image_url?: string;
+  facebook_url?: string;
+  instagram_url?: string;
+  youtube_url?: string;
+  linkedin_url?: string;
+  map_url?: string;
+  brochure_url?: string;
   services?: ProviderService[];
+
+
   sectors?: ProviderSector[];
   projects?: ProviderProject[];
   gallery?: ProviderGalleryImage[];

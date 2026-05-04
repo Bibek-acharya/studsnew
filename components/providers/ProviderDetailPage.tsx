@@ -7,8 +7,10 @@ import {
   BookOpen, PenTool, GraduationCap, Droplet, TriangleAlert, Users, Coffee,
   Calendar, ArrowRight, Star, ChevronLeft, ChevronRight, X, ExternalLink,
   Newspaper, FileText,
-  ArrowRightCircle
+  ArrowRightCircle,
+  Quote, Phone, Smartphone, Mail
 } from "lucide-react";
+
 import * as LucideIcons from "lucide-react";
 import { ArrowArcRightIcon } from "@phosphor-icons/react";
 
@@ -670,67 +672,150 @@ const ProviderDetailPage: React.FC<{ params: Promise<{ id: string }> }> = ({ par
         </div>
 
         {/* Right Sidebar */}
-        <div className="lg:w-full mt-12 lg:mt-0">
-          <div className="sticky top-8">
-            <div className="mb-8">
-              <h2 className="text-lg font-bold text-gray-900 mb-4">Quick Info</h2>
-              <div className="space-y-4">
-                {profile.email && (
-                  <div className="flex items-center gap-3 text-sm">
-                    <div className="w-8 h-8 rounded-full bg-blue-50 flex items-center justify-center text-blue-600 shrink-0">
-                      <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" /></svg>
-                    </div>
-                    <a href={`mailto:${profile.email}`} className="text-gray-900 font-medium hover:text-blue-600 transition-colors">
-                      {profile.email}
-                    </a>
-                  </div>
-                )}
-                {profile.contact_number && (
-                  <div className="flex items-center gap-3 text-sm">
-                    <div className="w-8 h-8 rounded-full bg-blue-50 flex items-center justify-center text-blue-600 shrink-0">
-                      <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" /></svg>
-                    </div>
-                    <a href={`tel:${profile.contact_number}`} className="text-gray-900 font-medium hover:text-blue-600 transition-colors">
-                      {profile.contact_number}
-                    </a>
-                  </div>
-                )}
-                {profile.website_url && (
-                  <div className="flex items-center gap-3 text-sm">
-                    <div className="w-8 h-8 rounded-full bg-blue-50 flex items-center justify-center text-blue-600 shrink-0">
-                      <Globe className="w-4 h-4" />
-                    </div>
-                    <a href={profile.website_url} target="_blank" rel="noreferrer" className="text-gray-900 font-medium hover:text-blue-600 transition-colors">
-                      {new URL(profile.website_url).hostname}
-                    </a>
-                  </div>
-                )}
-              </div>
-            </div>
-
-            <div className="border-t border-gray-100 pt-6">
-              <h3 className="font-bold text-gray-900 text-sm mb-3">Stats</h3>
-              <div className="grid grid-cols-2 gap-3">
-                <div className="bg-gray-50 rounded-lg p-3 text-center">
-                  <p className="text-lg font-bold text-gray-900">{profile.scholarship_count}</p>
-                  <p className="text-[11px] text-gray-500">Scholarships</p>
+        <div className="lg:col-span-1 space-y-6">
+          {/* Founder's Message Card */}
+          <div className="bg-blue-600 rounded-2xl p-5 shadow-sm text-white min-h-[280px]">
+            <div className="flex items-start gap-4">
+              <img 
+                src={profile.founder_image_url || "https://sowersaction.org.np/wp-content/uploads/2025/03/1.jpg"} 
+                alt="Founder" 
+                className="w-20 h-20 object-cover rounded-xl shadow-md flex-shrink-0"
+              />
+              <div className="flex-1">
+                <div className="flex items-center gap-1.5 mb-3">
+                  <Quote className="w-4 h-4 text-blue-200" />
+                  <h3 className="font-bold text-white text-[15px]">Founder's Message</h3>
                 </div>
-                <div className="bg-gray-50 rounded-lg p-3 text-center">
-                  <p className="text-lg font-bold text-gray-900">{profile.news_count}</p>
-                  <p className="text-[11px] text-gray-500">News</p>
-                </div>
-                <div className="bg-gray-50 rounded-lg p-3 text-center">
-                  <p className="text-lg font-bold text-gray-900">{profile.event_count}</p>
-                  <p className="text-[11px] text-gray-500">Events</p>
-                </div>
-                <div className="bg-gray-50 rounded-lg p-3 text-center">
-                  <p className="text-lg font-bold text-gray-900">{profile.blog_count}</p>
-                  <p className="text-[11px] text-gray-500">Blogs</p>
+                <p className="text-[12px] text-blue-100 leading-relaxed mb-3 italic">
+                  {profile.founder_message ? `"${profile.founder_message}"` : `"At ${profile.provider_name}, we believe that every individual deserves access to quality education, healthcare, and opportunities for a better life."`}
+                </p>
+                <div className="pt-3 border-t border-blue-500/50">
+                  <p className="font-bold text-white text-[13px]">{profile.founder_name || "Founder & Chairperson"}</p>
+                  <p className="text-blue-200 text-[11px]">{profile.founder_role || profile.provider_name}</p>
                 </div>
               </div>
             </div>
           </div>
+
+          {/* Contact Information Card */}
+          <div className="bg-white border border-gray-100 rounded-2xl p-5 shadow-sm">
+            <h3 className="font-bold text-gray-900 text-[18px] mb-5">Contact Information</h3>
+            
+            <ul className="space-y-4">
+              {/* Address */}
+              <li className="flex items-start gap-3 text-[13px]">
+                <div className="w-8 h-8 rounded-full bg-blue-50 flex items-center justify-center text-blue-600 shrink-0">
+                  <MapPin className="w-4 h-4" />
+                </div>
+                <div>
+                  <span className="block text-gray-900 font-bold text-[13px]">Address</span>
+                  <span className="text-gray-500 font-medium text-[12px]">
+                    {profile.address}
+                  </span>
+                </div>
+              </li>
+              {/* Phone */}
+              <li className="flex items-center gap-3 text-[13px]">
+                <div className="w-8 h-8 rounded-full bg-emerald-50 flex items-center justify-center text-emerald-600 shrink-0">
+                  <Phone className="w-4 h-4" />
+                </div>
+                <div>
+                  <span className="block text-gray-900 font-bold text-[13px]">Phone</span>
+                  <a href={`tel:${profile.contact_number}`} className="text-gray-500 font-medium text-[12px] hover:text-emerald-600 transition">
+                    {profile.contact_number}
+                  </a>
+                </div>
+              </li>
+              {/* Email */}
+              <li className="flex items-center gap-3 text-[13px]">
+                <div className="w-8 h-8 rounded-full bg-red-50 flex items-center justify-center text-red-500 shrink-0">
+                  <Mail className="w-4 h-4" />
+                </div>
+                <div>
+                  <span className="block text-gray-900 font-bold text-[13px]">Email</span>
+                  <a href={`mailto:${profile.email}`} className="text-gray-500 font-medium text-[12px] hover:text-red-500 transition">
+                    {profile.email}
+                  </a>
+                </div>
+              </li>
+              {/* Website */}
+              <li className="flex items-center gap-3 text-[13px]">
+                <div className="w-8 h-8 rounded-full bg-purple-50 flex items-center justify-center text-purple-600 shrink-0">
+                  <Globe className="w-4 h-4" />
+                </div>
+                <div>
+                  <span className="block text-gray-900 font-bold text-[13px]">Website</span>
+                  <a href={profile.website_url} target="_blank" rel="noreferrer" className="text-blue-500 font-medium text-[12px] hover:underline transition">
+                    {profile.website_url ? new URL(profile.website_url).hostname : ""}
+                  </a>
+                </div>
+              </li>
+            </ul>
+
+            {/* Social Media */}
+            {(profile.facebook_url || profile.instagram_url || profile.youtube_url || profile.linkedin_url) && (
+              <div className="mt-5">
+                <h4 className="font-bold text-gray-900 text-[13px] mb-3">Social Media</h4>
+                <div className="flex items-center gap-3 text-xl">
+                  {profile.facebook_url && (
+                    <a href={profile.facebook_url} target="_blank" rel="noreferrer" className="text-[#1877F2] hover:opacity-80 transition">
+                      <i className="fab fa-facebook"></i>
+                    </a>
+                  )}
+                  {profile.instagram_url && (
+                    <a href={profile.instagram_url} target="_blank" rel="noreferrer" className="text-[#E4405F] hover:opacity-80 transition">
+                      <i className="fab fa-instagram"></i>
+                    </a>
+                  )}
+                  {profile.youtube_url && (
+                    <a href={profile.youtube_url} target="_blank" rel="noreferrer" className="text-[#FF0000] hover:opacity-80 transition">
+                      <i className="fab fa-youtube"></i>
+                    </a>
+                  )}
+                  {profile.linkedin_url && (
+                    <a href={profile.linkedin_url} target="_blank" rel="noreferrer" className="text-[#0A66C2] hover:opacity-80 transition">
+                      <i className="fab fa-linkedin"></i>
+                    </a>
+                  )}
+                </div>
+              </div>
+            )}
+
+            {/* Brochure Download */}
+            {profile.brochure_url && (
+              <div className="mt-5">
+                <a 
+                  href={profile.brochure_url.startsWith('http') ? profile.brochure_url : `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8080'}${profile.brochure_url}`}
+                  target="_blank" 
+                  rel="noreferrer"
+                  download="Provider_Brochure"
+                  className="w-full flex items-center justify-center gap-2 py-3 bg-gray-900 text-white rounded-xl font-bold text-sm hover:bg-gray-800 transition-all shadow-sm"
+                >
+                  <Download className="w-4 h-4" />
+                  Download Brochure
+                </a>
+              </div>
+            )}
+
+
+            {/* Google Maps Embed */}
+
+            {profile.map_url && (
+              <div className="mt-5 rounded-xl overflow-hidden shadow-sm border border-gray-200">
+                <iframe 
+                  src={profile.map_url} 
+                  width="100%" 
+                  height="150" 
+                  style={{ border: 0 }} 
+                  allowFullScreen={true} 
+                  loading="lazy" 
+                  referrerPolicy="no-referrer-when-downgrade"
+                ></iframe>
+              </div>
+            )}
+          </div>
         </div>
+
       </div>
 
       <style jsx>{`
