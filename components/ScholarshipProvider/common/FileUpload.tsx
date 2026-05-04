@@ -9,7 +9,9 @@ interface FileUploadProps {
   accept?: string;
   maxSize?: string;
   recommendedSize?: string;
+  multiple?: boolean;
   onFileSelect?: (file: File) => void | Promise<void>;
+  onFilesSelect?: (files: FileList) => void | Promise<void>;
   previewUrl?: string;
   previewClassName?: string;
   onClearPreview?: () => void;
@@ -21,7 +23,9 @@ const FileUpload: React.FC<FileUploadProps> = ({
   accept = "image/*",
   maxSize = "5MB",
   recommendedSize,
+  multiple = false,
   onFileSelect,
+  onFilesSelect,
   previewUrl,
   previewClassName = "w-full h-32 object-cover rounded-lg mt-2",
   onClearPreview,
@@ -41,9 +45,13 @@ const FileUpload: React.FC<FileUploadProps> = ({
   const handleDrop = (e: React.DragEvent) => {
     e.preventDefault();
     setIsDragOver(false);
-    const file = e.dataTransfer.files[0];
-    if (file && onFileSelect) {
-      onFileSelect(file);
+    if (multiple && onFilesSelect) {
+      onFilesSelect(e.dataTransfer.files);
+    } else {
+      const file = e.dataTransfer.files[0];
+      if (file && onFileSelect) {
+        onFileSelect(file);
+      }
     }
   };
 
@@ -52,16 +60,22 @@ const FileUpload: React.FC<FileUploadProps> = ({
   };
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file && onFileSelect) {
-      onFileSelect(file);
+    if (multiple && onFilesSelect && e.target.files) {
+      onFilesSelect(e.target.files);
+    } else {
+      const file = e.target.files?.[0];
+      if (file && onFileSelect) {
+        onFileSelect(file);
+      }
     }
   };
 
   const handleClear = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
-    fileInputRef.current && (fileInputRef.current.value = "");
+    if (fileInputRef.current) {
+      fileInputRef.current.value = "";
+    }
     onClearPreview?.();
   };
 
@@ -116,6 +130,7 @@ const FileUpload: React.FC<FileUploadProps> = ({
         ref={fileInputRef}
         type="file"
         accept={accept}
+        multiple={multiple}
         onChange={handleFileChange}
         className="hidden"
       />

@@ -28,6 +28,7 @@ export interface ProviderService {
   icon: string;
   title: string;
   description: string;
+  external_link: string;
   sort_order: number;
 }
 
@@ -38,6 +39,7 @@ export interface ProviderSector {
   color: string;
   image_url: string;
   icon: string;
+  external_link: string;
   sort_order: number;
 }
 
@@ -47,12 +49,14 @@ export interface ProviderProject {
   description: string;
   image_url: string;
   category: string;
+  external_link: string;
   date: string;
   sort_order: number;
 }
 
 export interface ProviderGalleryImage {
   id: number;
+  folder: string;
   image_url: string;
   caption: string;
   sort_order: number;

@@ -6,8 +6,11 @@ import {
   MapPin, Building, Globe, ArrowUpRight, Download, Share2, Heart, ShieldCheck,
   BookOpen, PenTool, GraduationCap, Droplet, TriangleAlert, Users, Coffee,
   Calendar, ArrowRight, Star, ChevronLeft, ChevronRight, X, ExternalLink,
-  Newspaper, FileText
+  Newspaper, FileText,
+  ArrowRightCircle
 } from "lucide-react";
+import * as LucideIcons from "lucide-react";
+import { ArrowArcRightIcon } from "@phosphor-icons/react";
 
 const TABS = [
   "About", "Our Service", "Our Sector", "Our Projects",
@@ -35,6 +38,21 @@ const ProviderDetailPage: React.FC<{ params: Promise<{ id: string }> }> = ({ par
       .catch(() => setProfile(null))
       .finally(() => setLoading(false));
   }, [id]);
+
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (lightboxIndex === null) return;
+      if (e.key === "ArrowLeft") {
+        setLightboxIndex((prev) => prev !== null ? Math.max(0, prev - 1) : null);
+      } else if (e.key === "ArrowRight") {
+        setLightboxIndex((prev) => (prev !== null && profile?.gallery) ? Math.min(profile.gallery.length - 1, prev + 1) : null);
+      } else if (e.key === "Escape") {
+        setLightboxIndex(null);
+      }
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [lightboxIndex, profile?.gallery]);
 
   if (loading) {
     return (
@@ -206,19 +224,22 @@ const ProviderDetailPage: React.FC<{ params: Promise<{ id: string }> }> = ({ par
                 <p className="text-gray-400 italic">No services listed yet.</p>
               ) : (
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-                  {profile.services?.map((svc) => (
-                    <div key={svc.id} className="bg-white border border-gray-100 p-6 rounded-2xl shadow-sm">
-                      <div className="flex items-start gap-4">
-                        <div className="w-12 h-12 rounded-xl bg-blue-50 flex items-center justify-center text-blue-600 shrink-0">
-                          <Coffee className="w-6 h-6" />
-                        </div>
-                        <div>
-                          <h4 className="font-bold text-gray-900 text-[15px] mb-2">{svc.title}</h4>
-                          <p className="text-[13px] text-gray-600">{svc.description}</p>
+                  {profile.services?.map((svc) => {
+                    const ServiceIcon = (LucideIcons as any)[svc.icon] || Coffee;
+                    return (
+                      <div key={svc.id} className="bg-white border border-gray-100 p-6 rounded-2xl shadow-sm">
+                        <div className="flex items-start gap-4">
+                          <div className="w-14 h-14 rounded-xl bg-blue-50 flex items-center justify-center text-blue-600 shrink-0">
+                            <ServiceIcon className="w-7 h-7" />
+                          </div>
+                          <div className="flex-1">
+                            <h4 className="font-bold text-gray-900 text-[16px] mb-2">{svc.title}</h4>
+                            <p className="text-[14px] text-gray-600 leading-relaxed">{svc.description}</p>
+                          </div>
                         </div>
                       </div>
-                    </div>
-                  ))}
+                    );
+                  })}
                 </div>
               )}
             </div>
@@ -243,24 +264,33 @@ const ProviderDetailPage: React.FC<{ params: Promise<{ id: string }> }> = ({ par
                     return (
                       <div key={sec.id} className="bg-white border border-gray-100 rounded-2xl overflow-hidden shadow-sm group">
                         <div className="p-4 pb-0">
-                          <div
-                            className="h-40 flex items-center justify-center rounded-xl overflow-hidden"
-                            style={{ background: `linear-gradient(135deg, ${sec.color}, ${sec.color}dd)` }}
-                          >
-                            <Icon className="w-20 h-20 text-white/90" />
+                          <div className="h-44 rounded-xl overflow-hidden bg-gray-50 border border-gray-100">
+                            {sec.image_url ? (
+                              <img src={sec.image_url} alt={sec.name} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+                            ) : (
+                              <div 
+                                className="w-full h-full flex items-center justify-center"
+                                style={{ background: `linear-gradient(135deg, ${sec.color}, ${sec.color}dd)` }}
+                              >
+                                <Icon className="w-16 h-16 text-white/90" />
+                              </div>
+                            )}
                           </div>
                         </div>
                         <div className="p-5">
-                          <div className="mb-3">
-                            <span
-                              className="inline-block px-3 py-1 rounded-full text-[11px] font-bold text-white"
-                              style={{ backgroundColor: sec.color }}
-                            >
-                              {sec.name}
-                            </span>
-                          </div>
                           <h3 className="font-bold text-gray-900 text-[16px] mb-2">{sec.name}</h3>
-                          <p className="text-[13px] text-gray-600 mb-4 line-clamp-2">{sec.description}</p>
+                          <p className="text-[14px] text-gray-600 mb-4 line-clamp-2 leading-relaxed">{sec.description}</p>
+                          {sec.external_link && (
+                            <a 
+                              href={sec.external_link} 
+                              target="_blank" 
+                              rel="noopener noreferrer"
+                              className="inline-flex items-center gap-1.5 text-blue-600 hover:text-blue-700 font-bold text-[13px] group/link"
+                            >
+                              Learn More
+                              <ArrowRight className="w-4 h-4 group-hover/link:translate-x-1 transition-transform" />
+                            </a>
+                          )}
                         </div>
                       </div>
                     );
@@ -290,19 +320,25 @@ const ProviderDetailPage: React.FC<{ params: Promise<{ id: string }> }> = ({ par
                         />
                       </div>
                       <div className="p-5">
-                        <div className="mb-3">
-                          <span className="inline-block px-3 py-1 rounded-full text-[11px] font-bold bg-blue-50 text-blue-600">
-                            {proj.category || "General"}
-                          </span>
-                        </div>
                         <h3 className="font-bold text-gray-900 text-[16px] mb-2">{proj.title}</h3>
-                        <p className="text-[13px] text-gray-600 mb-4 line-clamp-2">{proj.description}</p>
+                        <p className="text-[14px] text-gray-600 mb-4 line-clamp-2 leading-relaxed">{proj.description}</p>
                         <div className="flex items-center justify-between">
                           {proj.date && (
-                            <div className="flex items-center gap-1.5 text-[12px] text-gray-500">
+                            <div className="flex items-center gap-1.5 text-[12px] text-gray-500 font-medium">
                               <Calendar className="w-4 h-4" />
                               <span>{proj.date}</span>
                             </div>
+                          )}
+                          {proj.external_link && (
+                            <a 
+                              href={proj.external_link} 
+                              target="_blank" 
+                              rel="noopener noreferrer"
+                              className="inline-flex items-center gap-1 text-blue-600 hover:text-blue-700 font-bold text-[13px] group/link"
+                            >
+                              Learn More
+                              <ArrowRight className="w-4 h-4 group-hover/link:translate-x-0.5 transition-transform" />
+                            </a>
                           )}
                         </div>
                       </div>
@@ -348,7 +384,7 @@ const ProviderDetailPage: React.FC<{ params: Promise<{ id: string }> }> = ({ par
           )}
 
           {activeTab === "Gallery" && (
-            <div>
+            <div className="space-y-12">
               <div className="mb-6 flex justify-between items-center">
                 <div>
                   <h2 className="text-[20px] font-bold text-gray-900">Photo Gallery</h2>
@@ -358,21 +394,60 @@ const ProviderDetailPage: React.FC<{ params: Promise<{ id: string }> }> = ({ par
               {(profile.gallery?.length ?? 0) === 0 ? (
                 <p className="text-gray-400 italic">No gallery images yet.</p>
               ) : (
-                <div className="photo-grid" style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(250px, 1fr))", gap: "1rem" }}>
-                  {profile.gallery?.map((img, idx) => (
-                    <div
-                      key={img.id}
-                      className="cursor-pointer overflow-hidden rounded-lg border border-gray-100 bg-white p-2"
-                      onClick={() => setLightboxIndex(idx)}
-                    >
-                      <img
-                        src={img.image_url}
-                        alt={img.caption || "Gallery image"}
-                        className="w-full h-40 object-cover rounded hover:scale-105 transition-transform duration-300"
-                      />
-                      {img.caption && (
-                        <p className="text-xs text-gray-500 mt-1.5 px-1">{img.caption}</p>
-                      )}
+                <div className="space-y-10">
+                  {Object.entries(
+                    profile.gallery!.reduce((acc: any, img: any) => {
+                      const folder = img.folder || "General";
+                      if (!acc[folder]) acc[folder] = [];
+                      acc[folder].push(img);
+                      return acc;
+                    }, {})
+                  ).map(([folder, images]: [string, any]) => (
+                    <div key={folder} className="space-y-5">
+                      <div className="flex items-center gap-3 ">
+                        <h3 className="text-lg font-bold text-gray-800 capitalize tracking-tight">
+                          {folder}
+                        </h3>
+                      </div>
+                      <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-5">
+                        {images.slice(0, images.length > 8 ? 7 : 8).map((img: any) => (
+                          <div
+                            key={img.id}
+                            className="group cursor-pointer overflow-hidden rounded-2xl border border-gray-100 bg-white p-1.5 shadow-sm hover:shadow-md transition-all duration-300"
+                            onClick={() => setLightboxIndex(profile.gallery!.findIndex(i => i.id === img.id))}
+                          >
+                            <div className="aspect-[4/3] overflow-hidden rounded-xl bg-gray-50">
+                              <img
+                                src={img.image_url}
+                                alt={img.caption || "Gallery image"}
+                                className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+                              />
+                            </div>
+                            {img.caption && (
+                              <p className="text-[12px] text-gray-600 mt-2 px-1 text-center font-semibold truncate group-hover:text-blue-600 transition-colors">
+                                {img.caption}
+                              </p>
+                            )}
+                          </div>
+                        ))}
+                        
+                        {images.length > 8 && (
+                          <div 
+                            className="group cursor-pointer overflow-hidden rounded-2xl border border-blue-100 border-dashed bg-blue-50/30 p-1.5 shadow-sm hover:shadow-md hover:border-blue-300 transition-all duration-300"
+                            onClick={() => setLightboxIndex(profile.gallery!.findIndex(i => i.id === images[0].id))}
+                          >
+                            <div className="aspect-[4/3] overflow-hidden rounded-xl bg-blue-600/5 flex flex-col items-center justify-center">
+                              <div className="w-12 h-12 rounded-full bg-blue-100 flex items-center justify-center group-hover:bg-blue-600 group-hover:text-white transition-all duration-300">
+                                <ArrowRight className="w-6 h-6" />
+                              </div>
+                              <span className="mt-2 font-bold text-sm text-blue-700">View All</span>
+                            </div>
+                            <p className="text-[12px] text-blue-600/60 mt-2 px-1 text-center font-bold tracking-tight">
+                              +{images.length - 7} PHOTOS
+                            </p>
+                          </div>
+                        )}
+                      </div>
                     </div>
                   ))}
                 </div>
@@ -401,7 +476,7 @@ const ProviderDetailPage: React.FC<{ params: Promise<{ id: string }> }> = ({ par
                   <img
                     src={profile.gallery?.[lightboxIndex]?.image_url}
                     alt="Gallery"
-                    className="max-w-[90%] max-h-[85vh] object-contain rounded-lg"
+                    className="max-w-[90%] max-h-[85vh] object-contain rounded-lg shadow-2xl"
                     onClick={(e) => e.stopPropagation()}
                   />
                   <button
@@ -413,6 +488,10 @@ const ProviderDetailPage: React.FC<{ params: Promise<{ id: string }> }> = ({ par
                   >
                     <ChevronRight className="w-10 h-10" />
                   </button>
+                  <div className="absolute bottom-10 left-0 right-0 text-center text-white">
+                    <p className="text-lg font-bold">{profile.gallery?.[lightboxIndex]?.caption}</p>
+                    <p className="text-sm text-gray-400 capitalize">{profile.gallery?.[lightboxIndex]?.folder || 'General'}</p>
+                  </div>
                 </div>
               )}
             </div>

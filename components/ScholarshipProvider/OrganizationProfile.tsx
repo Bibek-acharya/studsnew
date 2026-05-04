@@ -11,10 +11,9 @@ import {
   getSectors, createSector, updateSector, deleteSector,
   getProjects, createProject, updateProject, deleteProject,
   getGalleryImages, createGalleryImage, updateGalleryImage, deleteGalleryImage,
-  getReviews, createReview, updateReview, deleteReview,
 } from "@/services/scholarshipProviderApi";
 
-const TABS = ["Details", "Services", "Sectors", "Projects", "Gallery", "Reviews"] as const;
+const TABS = ["Details", "Services", "Sectors", "Projects", "Gallery"] as const;
 type Tab = (typeof TABS)[number];
 
 const OrganizationProfile: React.FC = memo(() => {
@@ -41,8 +40,9 @@ const OrganizationProfile: React.FC = memo(() => {
   const [sectors, setSectors] = useState<any[]>([]);
   const [projects, setProjects] = useState<any[]>([]);
   const [gallery, setGallery] = useState<any[]>([]);
-  const [reviews, setReviews] = useState<any[]>([]);
   const [showForm, setShowForm] = useState<any>(null);
+  const [bulkUploading, setBulkUploading] = useState(false);
+  const [bulkUploadFolder, setBulkUploadFolder] = useState("");
   const [deleteModal, setDeleteModal] = useState<{ isOpen: boolean; id: number | null; type: string }>({ isOpen: false, id: null, type: "" });
 
   useEffect(() => {
@@ -76,14 +76,13 @@ const OrganizationProfile: React.FC = memo(() => {
 
   const loadContent = async () => {
     try {
-      const [s, sec, p, g, r] = await Promise.all([
+      const [s, sec, p, g] = await Promise.all([
         getServices().catch(() => []),
         getSectors().catch(() => []),
         getProjects().catch(() => []),
         getGalleryImages().catch(() => []),
-        getReviews().catch(() => []),
       ]);
-      setServices(s); setSectors(sec); setProjects(p); setGallery(g); setReviews(r);
+      setServices(s); setSectors(sec); setProjects(p); setGallery(g);
     } catch {}
   };
 
@@ -137,8 +136,6 @@ const OrganizationProfile: React.FC = memo(() => {
         if (editing) { await updateProject(editing, data); } else { await createProject(data); }
       } else if (type === "gallery") {
         if (editing) { await updateGalleryImage(editing, data); } else { await createGalleryImage(data); }
-      } else if (type === "reviews") {
-        if (editing) { await updateReview(editing, data); } else { await createReview(data); }
       }
       toast.success(editing ? "Updated" : "Created");
       setShowForm(null);
@@ -154,94 +151,31 @@ const OrganizationProfile: React.FC = memo(() => {
       else if (t === "sectors") { await deleteSector(deleteModal.id); }
       else if (t === "projects") { await deleteProject(deleteModal.id); }
       else if (t === "gallery") { await deleteGalleryImage(deleteModal.id); }
-      else if (t === "reviews") { await deleteReview(deleteModal.id); }
       toast.success("Deleted");
       loadContent();
     } catch { toast.error("Failed to delete"); }
     setDeleteModal({ isOpen: false, id: null, type: "" });
   };
 
-  if (loading) return <div className="py-12 text-center text-slate-500">Loading profile...</div>;
-
-  const renderForm = () => {
-    if (!showForm) return null;
-    const { type, data } = showForm;
-    const [form, setForm] = useState(data || {});
-
-    return (
-      <div className="bg-white rounded-lg p-6 border border-slate-100 space-y-4 mb-6">
-        {type === "services" && (
-          <>
-            <input placeholder="Icon name (e.g. coffee, book-open)" value={form.icon || ""} onChange={(e) => setForm({ ...form, icon: e.target.value })} className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm" />
-            <input placeholder="Title" value={form.title || ""} onChange={(e) => setForm({ ...form, title: e.target.value })} className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm" />
-            <textarea placeholder="Description" value={form.description || ""} onChange={(e) => setForm({ ...form, description: e.target.value })} className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm" rows={3} />
-          </>
-        )}
-        {type === "sectors" && (
-          <>
-            <input placeholder="Name" value={form.name || ""} onChange={(e) => setForm({ ...form, name: e.target.value })} className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm" />
-            <textarea placeholder="Description" value={form.description || ""} onChange={(e) => setForm({ ...form, description: e.target.value })} className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm" rows={3} />
-            <div className="flex gap-4 items-center">
-              <label className="text-sm text-gray-600">Color:</label>
-              <input type="color" value={form.color || "#2563eb"} onChange={(e) => setForm({ ...form, color: e.target.value })} className="w-10 h-10 rounded cursor-pointer" />
-              <input placeholder="Icon name" value={form.icon || ""} onChange={(e) => setForm({ ...form, icon: e.target.value })} className="flex-1 px-3 py-2 border border-gray-200 rounded-lg text-sm" />
-            </div>
-            <input placeholder="Image URL" value={form.image_url || ""} onChange={(e) => setForm({ ...form, image_url: e.target.value })} className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm" />
-          </>
-        )}
-        {type === "projects" && (
-          <>
-            <input placeholder="Title" value={form.title || ""} onChange={(e) => setForm({ ...form, title: e.target.value })} className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm" />
-            <textarea placeholder="Description" value={form.description || ""} onChange={(e) => setForm({ ...form, description: e.target.value })} className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm" rows={3} />
-            <input placeholder="Image URL" value={form.image_url || ""} onChange={(e) => setForm({ ...form, image_url: e.target.value })} className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm" />
-            <div className="flex gap-4">
-              <input placeholder="Category" value={form.category || ""} onChange={(e) => setForm({ ...form, category: e.target.value })} className="flex-1 px-3 py-2 border border-gray-200 rounded-lg text-sm" />
-              <input type="date" value={form.date || ""} onChange={(e) => setForm({ ...form, date: e.target.value })} className="flex-1 px-3 py-2 border border-gray-200 rounded-lg text-sm" />
-            </div>
-          </>
-        )}
-        {type === "gallery" && (
-          <>
-            <input placeholder="Image URL" value={form.image_url || ""} onChange={(e) => setForm({ ...form, image_url: e.target.value })} className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm" />
-            {form.image_url && <img src={form.image_url} alt="Preview" className="w-full h-40 object-cover rounded-lg" />}
-            <input placeholder="Caption" value={form.caption || ""} onChange={(e) => setForm({ ...form, caption: e.target.value })} className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm" />
-          </>
-        )}
-        {type === "reviews" && (
-          <>
-            <div className="flex gap-4">
-              <input placeholder="Author name" value={form.author_name || ""} onChange={(e) => setForm({ ...form, author_name: e.target.value })} className="flex-1 px-3 py-2 border border-gray-200 rounded-lg text-sm" />
-              <input placeholder="Avatar URL" value={form.avatar_url || ""} onChange={(e) => setForm({ ...form, avatar_url: e.target.value })} className="flex-1 px-3 py-2 border border-gray-200 rounded-lg text-sm" />
-            </div>
-            <div className="flex items-center gap-2">
-              <span className="text-sm text-gray-600">Rating:</span>
-              {[1,2,3,4,5].map((r) => (
-                <button key={r} onClick={() => setForm({ ...form, rating: r })} type="button">
-                  <Star className={`w-5 h-5 ${r <= (form.rating || 5) ? "fill-yellow-400 text-yellow-400" : "text-gray-300"}`} />
-                </button>
-              ))}
-            </div>
-            <input placeholder="Title" value={form.title || ""} onChange={(e) => setForm({ ...form, title: e.target.value })} className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm" />
-            <textarea placeholder="Content" value={form.content || ""} onChange={(e) => setForm({ ...form, content: e.target.value })} className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm" rows={3} />
-            <div className="flex gap-4">
-              <textarea placeholder="Pros" value={form.pros || ""} onChange={(e) => setForm({ ...form, pros: e.target.value })} className="flex-1 px-3 py-2 border border-gray-200 rounded-lg text-sm" rows={2} />
-              <textarea placeholder="Cons" value={form.cons || ""} onChange={(e) => setForm({ ...form, cons: e.target.value })} className="flex-1 px-3 py-2 border border-gray-200 rounded-lg text-sm" rows={2} />
-            </div>
-            <select value={form.status || "published"} onChange={(e) => setForm({ ...form, status: e.target.value })} className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm">
-              <option value="published">Published</option>
-              <option value="pending">Pending</option>
-            </select>
-          </>
-        )}
-        <div className="flex gap-2">
-          <button onClick={() => handleContentSubmit(type, form)} className="px-4 py-2 bg-blue-600 text-white rounded-lg text-sm font-semibold">
-            {showForm.editing ? "Update" : "Create"}
-          </button>
-          <button onClick={() => setShowForm(null)} className="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg text-sm font-semibold">Cancel</button>
-        </div>
-      </div>
-    );
+  const handleBulkGalleryUpload = async (files: FileList) => {
+    setBulkUploading(true);
+    const toastId = toast.loading(`Uploading ${files.length} images...`);
+    try {
+      const uploadPromises = Array.from(files).map(async (file) => {
+        const url = await scholarshipProviderApi.uploadImage(file, "gallery");
+        return createGalleryImage({ image_url: url, caption: file.name.split('.')[0], folder: bulkUploadFolder });
+      });
+      await Promise.all(uploadPromises);
+      toast.success("All images uploaded successfully", { id: toastId });
+      loadContent();
+    } catch (err) {
+      toast.error("Failed to upload some images", { id: toastId });
+    } finally {
+      setBulkUploading(false);
+    }
   };
+
+  if (loading) return <div className="py-12 text-center text-slate-500">Loading profile...</div>;
 
   return (
     <div className="space-y-6">
@@ -355,7 +289,7 @@ const OrganizationProfile: React.FC = memo(() => {
           onAdd={() => setShowForm({ type: "services", data: {}, editing: null })}
           onEdit={(item: any) => setShowForm({ type: "services", data: item, editing: item.id })}
           onDelete={(item: any) => setDeleteModal({ isOpen: true, id: item.id, type: "services" })}
-          renderItem={(item: any) => <><p className="font-medium text-gray-900">{item.title}</p><p className="text-sm text-gray-500">{item.description}</p></>}
+          renderItem={(item: any) => <div className="flex items-center gap-3">{item.image_url && <img src={item.image_url} alt="" className="w-10 h-10 object-cover rounded" />}<div><p className="font-medium text-gray-900">{item.title}</p><p className="text-sm text-gray-500 line-clamp-1">{item.description}</p>{item.external_link && <p className="text-xs text-blue-600 truncate max-w-[200px]">{item.external_link}</p>}</div></div>}
         />
       )}
 
@@ -367,7 +301,7 @@ const OrganizationProfile: React.FC = memo(() => {
           onAdd={() => setShowForm({ type: "sectors", data: { color: "#2563eb" }, editing: null })}
           onEdit={(item: any) => setShowForm({ type: "sectors", data: item, editing: item.id })}
           onDelete={(item: any) => setDeleteModal({ isOpen: true, id: item.id, type: "sectors" })}
-          renderItem={(item: any) => <><div className="flex items-center gap-3"><div className="w-6 h-6 rounded" style={{backgroundColor: item.color}} /><div><p className="font-medium text-gray-900">{item.name}</p><p className="text-sm text-gray-500">{item.description}</p></div></div></>}
+          renderItem={(item: any) => <div className="flex items-center gap-3">{item.image_url ? <img src={item.image_url} alt="" className="w-10 h-10 object-cover rounded" /> : <div className="w-10 h-10 rounded" style={{backgroundColor: item.color}} />}<div><p className="font-medium text-gray-900">{item.name}</p><p className="text-sm text-gray-500 line-clamp-1">{item.description}</p>{item.external_link && <p className="text-xs text-blue-600 truncate max-w-[200px]">{item.external_link}</p>}</div></div>}
         />
       )}
 
@@ -379,32 +313,94 @@ const OrganizationProfile: React.FC = memo(() => {
           onAdd={() => setShowForm({ type: "projects", data: {}, editing: null })}
           onEdit={(item: any) => setShowForm({ type: "projects", data: item, editing: item.id })}
           onDelete={(item: any) => setDeleteModal({ isOpen: true, id: item.id, type: "projects" })}
-          renderItem={(item: any) => <><p className="font-medium text-gray-900">{item.title}</p><p className="text-sm text-gray-500">{item.description}</p></>}
+          renderItem={(item: any) => <div className="flex items-center gap-3">{item.image_url && <img src={item.image_url} alt="" className="w-12 h-10 object-cover rounded" />}<div><p className="font-medium text-gray-900">{item.title}</p><p className="text-sm text-gray-500 line-clamp-1">{item.description}</p>{item.external_link && <p className="text-xs text-blue-600 truncate max-w-[200px]">{item.external_link}</p>}</div></div>}
         />
       )}
 
       {/* Gallery Tab */}
       {activeTab === "Gallery" && (
-        <ContentList
-          title="Gallery"
-          items={gallery}
-          onAdd={() => setShowForm({ type: "gallery", data: {}, editing: null })}
-          onEdit={(item: any) => setShowForm({ type: "gallery", data: item, editing: item.id })}
-          onDelete={(item: any) => setDeleteModal({ isOpen: true, id: item.id, type: "gallery" })}
-          renderItem={(item: any) => <div className="flex items-center gap-3"><img src={item.image_url} alt="" className="w-16 h-12 object-cover rounded" /><p className="text-sm text-gray-600">{item.caption || "No caption"}</p></div>}
-        />
-      )}
+        <div className="space-y-6">
+          <div className="bg-white rounded-lg p-6 border border-slate-100">
+            <h2 className="text-lg font-bold text-gray-900 mb-4">Bulk Upload Images</h2>
+            <div className="mb-4">
+              <label className="text-sm font-medium text-gray-700 block mb-1">Target Folder (optional)</label>
+              <input 
+                placeholder="e.g. disaster, env" 
+                value={bulkUploadFolder} 
+                onChange={(e) => setBulkUploadFolder(e.target.value)}
+                className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm"
+              />
+            </div>
+            <FileUpload 
+              multiple 
+              accept="image/*" 
+              maxSize="10MB" 
+              onFilesSelect={handleBulkGalleryUpload}
+              uploadedText={bulkUploading ? "Uploading..." : "Click to bulk upload gallery images"}
+            />
+            {bulkUploading && <p className="mt-2 text-sm text-blue-600 animate-pulse">Processing bulk upload, please wait...</p>}
+          </div>
 
-      {/* Reviews Tab */}
-      {activeTab === "Reviews" && (
-        <ContentList
-          title="Reviews"
-          items={reviews}
-          onAdd={() => setShowForm({ type: "reviews", data: { rating: 5, status: "published" }, editing: null })}
-          onEdit={(item: any) => setShowForm({ type: "reviews", data: item, editing: item.id })}
-          onDelete={(item: any) => setDeleteModal({ isOpen: true, id: item.id, type: "reviews" })}
-          renderItem={(item: any) => <><p className="font-medium text-gray-900">{item.author_name}</p><p className="text-sm text-gray-500">{item.content?.slice(0, 100)}</p></>}
-        />
+          <div className="space-y-8">
+            {Object.entries(
+              gallery.reduce((acc: any, img: any) => {
+                const folder = img.folder || "Uncategorized";
+                if (!acc[folder]) acc[folder] = [];
+                acc[folder].push(img);
+                return acc;
+              }, {})
+            ).map(([folder, images]: [string, any]) => (
+              <div key={folder} className="bg-white rounded-lg p-6 border border-slate-100">
+                <div className="flex justify-between items-center mb-4 pb-2 border-b border-gray-50">
+                  <h3 className="text-md font-bold text-gray-800 capitalize flex items-center gap-2">
+                    <span className="w-2 h-2 rounded-full bg-blue-500"></span>
+                    {folder} Folder
+                  </h3>
+                  <button 
+                    onClick={() => setShowForm({ type: "gallery", data: { folder: folder === "Uncategorized" ? "" : folder }, editing: null })}
+                    className="text-sm text-blue-600 hover:text-blue-700 font-medium"
+                  >
+                    + Add Image to this folder
+                  </button>
+                </div>
+                <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
+                  {images.map((img: any) => (
+                    <div key={img.id} className="group relative aspect-square rounded-lg overflow-hidden border border-gray-100 bg-gray-50">
+                      <img src={img.image_url} alt={img.caption} className="w-full h-full object-cover transition-transform group-hover:scale-105" />
+                      <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
+                        <button 
+                          onClick={() => setShowForm({ type: "gallery", data: img, editing: img.id })}
+                          className="p-1.5 bg-white text-gray-700 rounded-full hover:bg-gray-100"
+                        >
+                          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" /></svg>
+                        </button>
+                        <button 
+                          onClick={() => setDeleteModal({ isOpen: true, id: img.id, type: "gallery" })}
+                          className="p-1.5 bg-white text-red-600 rounded-full hover:bg-red-50"
+                        >
+                          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
+                        </button>
+                      </div>
+                      {img.caption && <div className="absolute bottom-0 inset-x-0 bg-black/60 p-1 text-[10px] text-white truncate text-center">{img.caption}</div>}
+                    </div>
+                  ))}
+                </div>
+              </div>
+            ))}
+            
+            {gallery.length === 0 && (
+              <div className="bg-white rounded-lg p-12 border border-slate-100 text-center">
+                <p className="text-gray-500 mb-4">Your gallery is empty.</p>
+                <button 
+                  onClick={() => setShowForm({ type: "gallery", data: {}, editing: null })}
+                  className="px-4 py-2 bg-blue-600 text-white rounded-lg text-sm font-semibold"
+                >
+                  Add Your First Image
+                </button>
+              </div>
+            )}
+          </div>
+        </div>
       )}
 
       {showForm && <FormWrapper showForm={showForm} onSubmit={handleContentSubmit} onCancel={() => setShowForm(null)} />}
@@ -454,16 +450,47 @@ const ContentList = ({ title, items, onAdd, onEdit, onDelete, renderItem }: {
 // Separate form component to manage its own state
 const FormWrapper = ({ showForm, onSubmit, onCancel }: { showForm: any; onSubmit: (type: string, data: any) => void; onCancel: () => void }) => {
   const [form, setForm] = useState(showForm.data || {});
+  const [uploading, setUploading] = useState(false);
   const type = showForm.type;
 
+  const handleImageUpload = async (file: File) => {
+    setUploading(true);
+    try {
+      const url = await scholarshipProviderApi.uploadImage(file, type);
+      setForm({ ...form, image_url: url });
+      toast.success("Image uploaded");
+    } catch (err) {
+      toast.error("Failed to upload image");
+    } finally {
+      setUploading(false);
+    }
+  };
+
+  const isValidUrl = (url: string) => {
+    if (!url) return true;
+    try {
+      new URL(url);
+      return true;
+    } catch {
+      return false;
+    }
+  };
+
+  const handleSubmit = () => {
+    if (form.external_link && !isValidUrl(form.external_link)) {
+      toast.error("Please enter a valid URL (starting with http:// or https://)");
+      return;
+    }
+    onSubmit(type, form);
+  };
+
   return (
-    <div className="bg-white rounded-lg p-6 border border-slate-100 space-y-4">
+    <div className="bg-white rounded-lg p-6 border border-slate-100 space-y-4 mb-6">
       {type === "services" && (
         <>
-          <input placeholder="Icon name" value={form.icon || ""} onChange={(e) => setForm({ ...form, icon: e.target.value })} className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm" />
           <input placeholder="Title" value={form.title || ""} onChange={(e) => setForm({ ...form, title: e.target.value })} className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm" />
           <textarea placeholder="Description" value={form.description || ""} onChange={(e) => setForm({ ...form, description: e.target.value })} className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm" rows={3} />
-          <input type="number" placeholder="Sort order" value={form.sort_order || 0} onChange={(e) => setForm({ ...form, sort_order: parseInt(e.target.value) || 0 })} className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm" />
+          <input placeholder="Icon Name (e.g. Coffee, Book, Globe)" value={form.icon || ""} onChange={(e) => setForm({ ...form, icon: e.target.value })} className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm" />
         </>
       )}
       {type === "sectors" && (
@@ -471,62 +498,59 @@ const FormWrapper = ({ showForm, onSubmit, onCancel }: { showForm: any; onSubmit
           <input placeholder="Name" value={form.name || ""} onChange={(e) => setForm({ ...form, name: e.target.value })} className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm" />
           <textarea placeholder="Description" value={form.description || ""} onChange={(e) => setForm({ ...form, description: e.target.value })} className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm" rows={3} />
           <div className="flex gap-4 items-center">
-            <label className="text-sm text-gray-600">Color:</label>
+            <label className="text-sm text-gray-600 shrink-0">Theme Color:</label>
             <input type="color" value={form.color || "#2563eb"} onChange={(e) => setForm({ ...form, color: e.target.value })} className="w-10 h-10 rounded cursor-pointer" />
-            <input placeholder="Icon name" value={form.icon || ""} onChange={(e) => setForm({ ...form, icon: e.target.value })} className="flex-1 px-3 py-2 border border-gray-200 rounded-lg text-sm" />
+            <input type="url" placeholder="External Link" value={form.external_link || ""} onChange={(e) => setForm({ ...form, external_link: e.target.value })} className="flex-1 px-3 py-2 border border-gray-200 rounded-lg text-sm" />
           </div>
-          <input placeholder="Image URL" value={form.image_url || ""} onChange={(e) => setForm({ ...form, image_url: e.target.value })} className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm" />
-          <input type="number" placeholder="Sort order" value={form.sort_order || 0} onChange={(e) => setForm({ ...form, sort_order: parseInt(e.target.value) || 0 })} className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm" />
+          <div className="space-y-1">
+            <label className="text-xs font-medium text-gray-500">Sector Image</label>
+            <FileUpload 
+              onFileSelect={handleImageUpload} 
+              previewUrl={form.image_url} 
+              uploadedText={uploading ? "Uploading..." : "Image Uploaded"} 
+              onClearPreview={() => setForm({ ...form, image_url: "" })}
+            />
+          </div>
         </>
       )}
       {type === "projects" && (
         <>
           <input placeholder="Title" value={form.title || ""} onChange={(e) => setForm({ ...form, title: e.target.value })} className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm" />
           <textarea placeholder="Description" value={form.description || ""} onChange={(e) => setForm({ ...form, description: e.target.value })} className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm" rows={3} />
-          <input placeholder="Image URL" value={form.image_url || ""} onChange={(e) => setForm({ ...form, image_url: e.target.value })} className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm" />
+          <input type="url" placeholder="External Link" value={form.external_link || ""} onChange={(e) => setForm({ ...form, external_link: e.target.value })} className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm" />
+          <div className="space-y-1">
+            <label className="text-xs font-medium text-gray-500">Project Image</label>
+            <FileUpload 
+              onFileSelect={handleImageUpload} 
+              previewUrl={form.image_url} 
+              uploadedText={uploading ? "Uploading..." : "Image Uploaded"} 
+              onClearPreview={() => setForm({ ...form, image_url: "" })}
+            />
+          </div>
           <div className="flex gap-4">
             <input placeholder="Category" value={form.category || ""} onChange={(e) => setForm({ ...form, category: e.target.value })} className="flex-1 px-3 py-2 border border-gray-200 rounded-lg text-sm" />
             <input type="date" value={form.date?.slice(0,10) || ""} onChange={(e) => setForm({ ...form, date: e.target.value })} className="flex-1 px-3 py-2 border border-gray-200 rounded-lg text-sm" />
           </div>
-          <input type="number" placeholder="Sort order" value={form.sort_order || 0} onChange={(e) => setForm({ ...form, sort_order: parseInt(e.target.value) || 0 })} className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm" />
         </>
       )}
       {type === "gallery" && (
         <>
-          <input placeholder="Image URL" value={form.image_url || ""} onChange={(e) => setForm({ ...form, image_url: e.target.value })} className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm" />
-          {form.image_url && <img src={form.image_url} alt="Preview" className="w-full h-40 object-cover rounded-lg" />}
+          <input placeholder="Folder Name (e.g. disaster, env)" value={form.folder || ""} onChange={(e) => setForm({ ...form, folder: e.target.value })} className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm" />
+          <div className="space-y-1">
+            <label className="text-xs font-medium text-gray-500">Gallery Image</label>
+            <FileUpload 
+              onFileSelect={handleImageUpload} 
+              previewUrl={form.image_url} 
+              uploadedText={uploading ? "Uploading..." : "Image Uploaded"} 
+              onClearPreview={() => setForm({ ...form, image_url: "" })}
+            />
+          </div>
           <input placeholder="Caption" value={form.caption || ""} onChange={(e) => setForm({ ...form, caption: e.target.value })} className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm" />
-          <input type="number" placeholder="Sort order" value={form.sort_order || 0} onChange={(e) => setForm({ ...form, sort_order: parseInt(e.target.value) || 0 })} className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm" />
         </>
       )}
-      {type === "reviews" && (
-        <>
-          <div className="flex gap-4">
-            <input placeholder="Author name" value={form.author_name || ""} onChange={(e) => setForm({ ...form, author_name: e.target.value })} className="flex-1 px-3 py-2 border border-gray-200 rounded-lg text-sm" />
-            <input placeholder="Avatar URL" value={form.avatar_url || ""} onChange={(e) => setForm({ ...form, avatar_url: e.target.value })} className="flex-1 px-3 py-2 border border-gray-200 rounded-lg text-sm" />
-          </div>
-          <div className="flex items-center gap-2">
-            <span className="text-sm text-gray-600">Rating:</span>
-            {[1,2,3,4,5].map((r) => (
-              <button key={r} onClick={() => setForm({ ...form, rating: r })} type="button">
-                <Star className={`w-5 h-5 ${r <= (form.rating || 5) ? "fill-yellow-400 text-yellow-400" : "text-gray-300"}`} />
-              </button>
-            ))}
-          </div>
-          <input placeholder="Title" value={form.title || ""} onChange={(e) => setForm({ ...form, title: e.target.value })} className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm" />
-          <textarea placeholder="Content" value={form.content || ""} onChange={(e) => setForm({ ...form, content: e.target.value })} className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm" rows={3} />
-          <div className="flex gap-4">
-            <textarea placeholder="Pros" value={form.pros || ""} onChange={(e) => setForm({ ...form, pros: e.target.value })} className="flex-1 px-3 py-2 border border-gray-200 rounded-lg text-sm" rows={2} />
-            <textarea placeholder="Cons" value={form.cons || ""} onChange={(e) => setForm({ ...form, cons: e.target.value })} className="flex-1 px-3 py-2 border border-gray-200 rounded-lg text-sm" rows={2} />
-          </div>
-          <select value={form.status || "published"} onChange={(e) => setForm({ ...form, status: e.target.value })} className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm">
-            <option value="published">Published</option>
-            <option value="pending">Pending</option>
-          </select>
-        </>
-      )}
+
       <div className="flex gap-2">
-        <button onClick={() => onSubmit(type, form)} className="px-4 py-2 bg-blue-600 text-white rounded-lg text-sm font-semibold">
+        <button onClick={handleSubmit} disabled={uploading} className="px-4 py-2 bg-blue-600 text-white rounded-lg text-sm font-semibold disabled:opacity-50">
           {showForm.editing ? "Update" : "Create"}
         </button>
         <button onClick={onCancel} className="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg text-sm font-semibold">Cancel</button>

@@ -578,9 +578,9 @@ const CreateScholarship: React.FC<CreateScholarshipProps> = memo(({ scholarshipI
       }
 
       const validationResult = validateScholarship();
-      if (validationResult !== true) {
+      if (typeof validationResult === "string") {
         setError("Please fix the errors below.");
-        scrollToField(validationResult as string);
+        scrollToField(validationResult);
         return;
       }
     }
