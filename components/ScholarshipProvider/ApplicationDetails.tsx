@@ -405,6 +405,7 @@ export default function ApplicationDetails({ applicationId, onBack, onStatusUpda
 }
 
 function DetailField({ label, value }: { label: string; value: string }) {
+  if (!value || value === "N/A") return null;
   return (
     <div className="bg-slate-50 rounded-lg p-3">
       <p className="text-xs font-semibold text-slate-400 mb-1">{label}</p>
