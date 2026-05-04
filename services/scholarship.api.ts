@@ -15,6 +15,7 @@ export interface Scholarship {
   courseStream: string;
   providerType: string;
   coverage: string;
+  fundingType?: string;
   gpaRequirement: string;
   entranceRequired: boolean;
   deadlineType: string;

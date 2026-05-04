@@ -20,6 +20,7 @@ function mapBackendItem(item: ScholarshipItem): Scholarship {
     title: item.title,
     org: item.provider,
     amount: item.value || item.amount || "",
+    fundingType: item.funding_type || item.scholarship_type || "",
     location: item.location,
     studyLevel: item.degree_level || "",
     deadline: item.deadline,
@@ -237,10 +238,10 @@ const ScholarshipCard = ({
         {/* Details Box */}
         <div className="bg-[#f9fafb] rounded-md p-3.5 border border-gray-100 mb-4 mt-auto flex flex-col gap-2.5">
           <div className="grid grid-cols-2 gap-x-2">
-            {/* Amount */}
-            <div className="flex items-center gap-1.5 text-[12px] text-gray-600 font-medium">
+            {/* Funding Type */}
+            <div className="flex items-center gap-1.5 text-[12px] text-gray-600 font-medium" title={scholarship.fundingType}>
               <Banknote className="w-3.5 h-3.5 text-gray-400 shrink-0" />
-              <span className="truncate">{scholarship.amount}</span>
+              <span className="truncate">{scholarship.fundingType}</span>
             </div>
             {/* Location */}
             <div className="flex items-center gap-1.5 text-[12px] text-gray-600 font-medium">
