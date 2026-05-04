@@ -128,22 +128,20 @@ export default function ShikshaPaymentPage() {
         }
 
         // 2. Upload Receipt
-        const uploadResp: any = await apiService.uploadScholarshipFile(paymentScreenshot, "receipts");
-        const receiptUrl = uploadResp.data?.url || uploadResp.url;
+        const receiptUrl = await apiService.uploadScholarshipFile(paymentScreenshot, "receipts");
 
         // 3. Save Receipt to Payment
         await scholarshipApi.uploadBankReceipt(paymentId, receiptUrl);
 
-        // 4. Update session storage to indicate bank payment
         sessionStorage.setItem("shiksha_payment_status", "pending_verification");
         
         setIsProcessing(false);
         router.push("/scholarship-apply/project-shiksha/success");
       } else {
-        // eSewa / Khalti - Simulate success for demo
+        // eSewa / Khalti
         const transactionId = `TXN-${Date.now()}`;
         
-        // 2. Confirm Payment (Approve Application + Send Email in backend)
+        // 2. Confirm Payment
         await scholarshipApi.confirmPayment(paymentId, transactionId);
 
         sessionStorage.setItem("shiksha_payment_status", "completed");

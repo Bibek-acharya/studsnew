@@ -72,7 +72,7 @@ export default function ApplicationsDirectory({ onReviewStudent }: ApplicationsD
       setApplications((prev) => prev.map((app) => 
         app.id === selectedAppId ? { 
           ...app, 
-          payment: { ...app.payment, status: isApproveAction ? 'completed' : 'rejected' }
+          payment: app.payment ? { ...app.payment, status: isApproveAction ? 'completed' : 'rejected' } : undefined
         } : app
       ));
       toast.success(isApproveAction ? 'Payment approved' : 'Payment rejected');
@@ -123,7 +123,7 @@ export default function ApplicationsDirectory({ onReviewStudent }: ApplicationsD
   };
 
   const totalPages = Math.ceil(total / limit);
-  const appId = (idx: number) => `#APP-2026-${String((page - 1) * limit + idx + 1).padStart(3, "0")}`;
+  const appId = (id: number) => `#APP-2026-${String(id).padStart(3, "0")}`;
 
   const statusBadge = (status: string) => {
     const map: Record<string, string> = {
@@ -236,7 +236,7 @@ export default function ApplicationsDirectory({ onReviewStudent }: ApplicationsD
                   ) : filtered.map((app, idx) => (
                     <tr key={app.id} className="hover:bg-gray-50">
                       <td className="text-center py-3 px-3"><input type="checkbox" className="rounded" /></td>
-                      <td className="text-center py-3 px-3 font-mono font-medium text-blue-600">{appId(idx)}</td>
+                      <td className="text-center py-3 px-3 font-mono font-medium text-blue-600">{appId(app.id)}</td>
                       <td className="py-3 px-3 font-medium text-gray-900">{app.first_name} {app.last_name}</td>
                       <td className="text-center py-3 px-3">
                         <span className={`px-2 py-1 rounded text-xs font-semibold ${app.gender === "Female" ? "bg-pink-100 text-pink-700" : "bg-blue-100 text-blue-700"}`}>{app.gender || "N/A"}</span>
@@ -293,30 +293,7 @@ export default function ApplicationsDirectory({ onReviewStudent }: ApplicationsD
                             <XCircle className="w-4 h-4" />
                           </button>
                         </div>
-                        {app.payment?.status === 'pending_approval' && (
-                          <div className="flex items-center justify-center gap-1 mt-1">
-                            <button
-                              onClick={() => handlePaymentAction(app.id, true)}
-                              className="px-2 py-1 bg-green-600 text-white rounded text-xs"
-                            >
-                              Approve
-                            </button>
-                            <button
-                              onClick={() => handlePaymentAction(app.id, false)}
-                              className="px-2 py-1 bg-red-600 text-white rounded text-xs"
-                            >
-                              Reject
-                            </button>
-                            {app.payment?.receipt_url && (
-                              <button
-                                onClick={() => setSelectedReceipt(app.payment?.receipt_url || null)}
-                                className="px-2 py-1 bg-blue-600 text-white rounded text-xs"
-                              >
-                                View Receipt
-                              </button>
-                            )}
-                          </div>
-                        )}
+
                       </td>
                     </tr>
                   ))}

@@ -368,10 +368,13 @@ export interface ProviderScholarship {
 }
 
 export interface ProviderPayment {
-  status: 'pending' | 'pending_approval' | 'completed' | 'rejected';
+  id: number;
+  method: string;
+  amount: number;
+  status: string;
   receipt_url?: string;
-  amount?: number;
-  processed_at?: string;
+  transaction_id?: string;
+  paid_at?: string;
 }
 
 export interface ProviderProfile {

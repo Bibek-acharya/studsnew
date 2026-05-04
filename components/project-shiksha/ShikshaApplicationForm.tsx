@@ -199,7 +199,7 @@ export default function ShikshaApplicationForm({
           try {
             const url = await apiService.uploadScholarshipFile(file, "documents");
             documents.push({
-              title: docField.title,
+              name: docField.title,
               url: url,
             });
           } catch (uploadError) {
@@ -253,8 +253,8 @@ export default function ShikshaApplicationForm({
         stream: formData.stream,
         exam_center: formData.examCenter,
         documents: documents,
+        requires_payment: paymentConfig?.enabled && paymentConfig.fee_amount > 0,
       };
-
       const response = await apiService.applyScholarship(scholarshipId, payload);
       const applicationId = response.data?.id || response.id;
 
@@ -264,7 +264,7 @@ export default function ShikshaApplicationForm({
         applicationId,
         photoPreview,
         scholarshipId,
-        paymentConfig, // Store config for payment page
+        paymentConfig,
       }));
 
       // Check if payment is active

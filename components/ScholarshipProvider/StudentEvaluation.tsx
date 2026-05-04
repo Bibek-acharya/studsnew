@@ -186,8 +186,8 @@ export default function StudentEvaluation({ applicationId, onBack, onStatusUpdat
                     </div>
                     <p className="text-xs font-bold text-slate-700 truncate mb-2">{doc.name || `Document ${i + 1}`}</p>
                     <div className="flex gap-2 justify-center">
-                      <button className="px-3 py-1 text-[10px] font-black uppercase bg-primary-50 text-primary-600 rounded-md">View</button>
-                      <button className="px-3 py-1 text-[10px] font-black uppercase bg-slate-50 text-slate-500 rounded-md"><i className="fa-solid fa-download"></i></button>
+                      <a href={doc.url} target="_blank" rel="noopener noreferrer" className="px-3 py-1 text-[10px] font-black uppercase bg-primary-50 text-primary-600 rounded-md inline-block">View</a>
+                      <a href={doc.url} download className="px-3 py-1 text-[10px] font-black uppercase bg-slate-50 text-slate-500 rounded-md inline-block"><i className="fa-solid fa-download"></i></a>
                     </div>
                   </div>
                 ))}

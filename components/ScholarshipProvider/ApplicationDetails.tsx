@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-import { ArrowLeft, Mail, Phone, GraduationCap, BookOpen, Users, FileText, Check, X, Star } from "lucide-react";
+import { ArrowLeft, Mail, Phone, GraduationCap, BookOpen, Users, FileText, Check, X, Star, CreditCard, ImageIcon } from "lucide-react";
 import { scholarshipProviderApi, ProviderApplication } from "@/services/scholarshipProviderApi";
 import { toast } from "sonner";
 
@@ -16,6 +16,14 @@ export default function ApplicationDetails({ applicationId, onBack, onStatusUpda
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [savingStatus, setSavingStatus] = useState(false);
+  const [previewImage, setPreviewImage] = useState<string | null>(null);
+
+  const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080";
+
+  const toAbsoluteUrl = (path: string | undefined | null): string => {
+    if (!path) return "";
+    return path.startsWith("http") ? path : `${API_BASE_URL}${path.startsWith("/") ? "" : "/"}${path}`;
+  };
 
   useEffect(() => {
     loadApplication();
@@ -32,6 +40,29 @@ export default function ApplicationDetails({ applicationId, onBack, onStatusUpda
       setError(err instanceof Error ? err.message : "Failed to load application");
     } finally {
       setLoading(false);
+    }
+  }
+
+  async function handlePaymentApproval(approve: boolean) {
+    if (!application) return;
+    setSavingStatus(true);
+    try {
+      await scholarshipProviderApi.approvePayment(application.id, approve, "");
+      setApplication((prev) =>
+        prev
+          ? {
+              ...prev,
+              payment: prev.payment
+                ? { ...prev.payment, status: approve ? "completed" : "failed" }
+                : undefined,
+            }
+          : null
+      );
+      toast.success(approve ? "Payment approved and admit card sent" : "Payment rejected");
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Failed to process payment");
+    } finally {
+      setSavingStatus(false);
     }
   }
 
@@ -92,7 +123,7 @@ export default function ApplicationDetails({ applicationId, onBack, onStatusUpda
   const initials = `${application.first_name?.[0] || ""}${application.last_name?.[0] || ""}`;
 
   return (
-    <div className="space-y-6">
+    <>
       <div className="flex items-center justify-between bg-white rounded-xl border border-slate-200 p-4">
         <div className="flex items-center gap-4">
           <button onClick={onBack} className="p-2 hover:bg-slate-100 rounded-lg transition text-slate-600">
@@ -168,7 +199,19 @@ export default function ApplicationDetails({ applicationId, onBack, onStatusUpda
               <DetailField label="Ethnicity Other" value={application.ethnicity_other || "N/A"} />
               <DetailField label="DOB (BS)" value={application.date_of_birth_bs || "N/A"} />
               <DetailField label="DOB (AD)" value={application.date_of_birth_ad || "N/A"} />
-              <DetailField label="Photo" value={application.photo_url ? "Uploaded" : "N/A"} />
+              <div className="bg-slate-50 rounded-lg p-3">
+                <p className="text-xs font-semibold text-slate-400 mb-1">Photo</p>
+                {application.photo_url ? (
+                  <img
+                    src={toAbsoluteUrl(application.photo_url)}
+                    alt="Applicant photo"
+                    className="w-20 h-20 object-cover rounded-lg cursor-pointer hover:opacity-80 border"
+                    onClick={() => setPreviewImage(toAbsoluteUrl(application.photo_url))}
+                  />
+                ) : (
+                  <p className="text-sm font-medium text-slate-800">N/A</p>
+                )}
+              </div>
             </div>
           </div>
 
@@ -260,16 +303,60 @@ export default function ApplicationDetails({ applicationId, onBack, onStatusUpda
                 {application.documents.map((doc: any, index: number) => (
                   <a
                     key={index}
-                    href={doc.url}
+                    href={toAbsoluteUrl(doc.url)}
                     target="_blank"
                     rel="noopener noreferrer"
                     className="flex items-center gap-2 p-2 rounded-lg hover:bg-slate-50 text-blue-600 hover:text-blue-700"
                   >
                     <FileText className="w-4 h-4" />
-                    <span className="text-sm font-medium">{doc.name}</span>
+                    <span className="text-sm font-medium">{doc.name || doc.title}</span>
                   </a>
                 ))}
               </div>
+            </div>
+          )}
+
+          {/* Payment Details */}
+          {application.payment && (
+            <div className="bg-white rounded-xl border border-slate-200 p-6">
+              <h4 className="text-sm font-bold text-slate-400 uppercase tracking-wider mb-4 flex items-center gap-2">
+                <CreditCard className="w-4 h-4" /> Payment Details
+              </h4>
+              <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+                <DetailField label="Status" value={application.payment.status?.replace("_", " ") || "N/A"} />
+                <DetailField label="Amount" value={application.payment.amount != null ? `Rs. ${application.payment.amount.toLocaleString()}` : "N/A"} />
+                <DetailField label="Method" value={application.payment.method || "N/A"} />
+              </div>
+              {application.payment?.receipt_url && (
+                <div className="mt-4 pt-4 border-t border-slate-100">
+                  <p className="text-xs font-semibold text-slate-400 mb-2">Payment Receipt</p>
+                  <img
+                    src={toAbsoluteUrl(application.payment.receipt_url)}
+                    alt="Payment receipt"
+                    className="max-h-48 rounded-lg cursor-pointer hover:opacity-80 border"
+                    onClick={() => setPreviewImage(toAbsoluteUrl(application.payment?.receipt_url))}
+                  />
+                </div>
+              )}
+
+              {application.payment?.status === "pending_approval" && (
+                <div className="mt-4 pt-4 border-t border-slate-100 flex gap-2">
+                  <button
+                    onClick={() => handlePaymentApproval(true)}
+                    disabled={savingStatus}
+                    className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 text-sm font-semibold disabled:opacity-50"
+                  >
+                    <Check className="w-4 h-4 inline mr-1" /> Approve Payment
+                  </button>
+                  <button
+                    onClick={() => handlePaymentApproval(false)}
+                    disabled={savingStatus}
+                    className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 text-sm font-semibold disabled:opacity-50"
+                  >
+                    <X className="w-4 h-4 inline mr-1" /> Reject Payment
+                  </button>
+                </div>
+              )}
             </div>
           )}
 
@@ -296,7 +383,24 @@ export default function ApplicationDetails({ applicationId, onBack, onStatusUpda
           </div>
         </div>
       </div>
-    </div>
+
+      {previewImage && (
+        <div
+          className="fixed inset-0 bg-black/60 flex items-center justify-center z-50"
+          onClick={() => setPreviewImage(null)}
+        >
+          <div className="relative max-w-2xl max-h-[90vh] mx-4" onClick={(e) => e.stopPropagation()}>
+            <button
+              onClick={() => setPreviewImage(null)}
+              className="absolute -top-3 -right-3 w-8 h-8 bg-white rounded-full shadow flex items-center justify-center text-slate-600 hover:text-slate-900"
+            >
+              <X className="w-4 h-4" />
+            </button>
+            <img src={previewImage} alt="Preview" className="max-w-full max-h-[85vh] rounded-lg shadow-2xl" />
+          </div>
+        </div>
+      )}
+    </>
   );
 }
 
