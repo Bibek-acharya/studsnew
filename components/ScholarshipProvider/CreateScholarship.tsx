@@ -229,6 +229,12 @@ const CreateScholarship: React.FC<CreateScholarshipProps> = memo(({ scholarshipI
     }
   };
 
+  const handleBannerClear = () => {
+    setBannerBgUrl("");
+    setBannerBgPreview("");
+    setBannerError("");
+  };
+
   // Map URL handler
 
   // QR Code file handler
@@ -357,8 +363,12 @@ const CreateScholarship: React.FC<CreateScholarshipProps> = memo(({ scholarshipI
     setStartDateError("");
     setEndDateError("");
 
-    // Validate start date - must be in the future
-    if (startDate) {
+    // Validate start date - required and must be in the future
+    if (!startDate) {
+      setStartDateError("Start date is required");
+      isValidDate = false;
+      firstInvalidField ||= "startDate";
+    } else {
       const start = parseISO(startDate);
       if (!isValid(start)) {
         setStartDateError("Invalid date format");
@@ -371,8 +381,12 @@ const CreateScholarship: React.FC<CreateScholarshipProps> = memo(({ scholarshipI
       }
     }
 
-    // Validate end date - must be after start date
-    if (endDate) {
+    // Validate end date - required and must be after start date
+    if (!endDate) {
+      setEndDateError("End date is required");
+      isValidDate = false;
+      firstInvalidField ||= "endDate";
+    } else {
       const end = parseISO(endDate);
       if (!isValid(end)) {
         setEndDateError("Invalid date format");
@@ -393,6 +407,11 @@ const CreateScholarship: React.FC<CreateScholarshipProps> = memo(({ scholarshipI
 
   const validateScholarship = useCallback(() => {
     let hasError = false;
+    let firstFieldId: string | null = null;
+
+    const setFirstError = (fieldId: string) => {
+      if (!firstFieldId) firstFieldId = fieldId;
+    };
     
     // Clear previous errors
     setMainTitleError("");
@@ -418,127 +437,152 @@ const CreateScholarship: React.FC<CreateScholarshipProps> = memo(({ scholarshipI
     if (!mainTitle.trim()) {
       setMainTitleError("Main title is required");
       hasError = true;
+      setFirstError("mainTitle");
     }
 
     if (!providerName.trim()) {
       setProviderNameError("Provider name is required");
       hasError = true;
+      setFirstError("providerName");
     }
 
     if (!fundingType) {
       setFundingTypeError("Funding type is required");
       hasError = true;
+      setFirstError("fundingType");
     }
 
     if (!scholarshipType) {
       setScholarshipTypeError("Scholarship type is required");
       hasError = true;
+      setFirstError("scholarshipType");
     }
 
     if (!educationLevel) {
       setEducationLevelError("Education level is required");
       hasError = true;
+      setFirstError("educationLevel");
     }
 
     if (!location.trim()) {
       setLocationError("Location is required");
       hasError = true;
+      setFirstError("location");
     }
 
     if (!bannerBgUrl) {
       setBannerError("Banner image is required");
       hasError = true;
+      setFirstError("bannerBgUrl");
     }
 
     if (!contactEmail) {
       setContactEmailError("Contact email is required");
       hasError = true;
+      setFirstError("contactEmail");
     } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(contactEmail)) {
       setContactEmailError("Invalid contact email format");
       hasError = true;
+      setFirstError("contactEmail");
     }
 
     if (!primaryPhone) {
       setPrimaryPhoneError("Primary phone is required");
       hasError = true;
+      setFirstError("primaryPhone");
     } else if (!/^9\d{9}$/.test(primaryPhone)) {
       setPrimaryPhoneError("Primary phone must be 10 digits starting with 9");
       hasError = true;
+      setFirstError("primaryPhone");
     }
 
     if (secondaryPhone && !/^9\d{9}$/.test(secondaryPhone)) {
       setSecondaryPhoneError("Secondary phone must be 10 digits starting with 9");
       hasError = true;
+      setFirstError("secondaryPhone");
     }
 
     if (!websiteUrl) {
       setWebsiteUrlError("Website URL is required");
       hasError = true;
+      setFirstError("websiteUrl");
     } else {
       try {
         new URL(websiteUrl);
         if (!websiteUrl.startsWith('http://') && !websiteUrl.startsWith('https://')) {
           setWebsiteUrlError("Website URL must start with http:// or https://");
           hasError = true;
+          setFirstError("websiteUrl");
         }
       } catch {
         setWebsiteUrlError("Invalid website URL");
         hasError = true;
+        setFirstError("websiteUrl");
       }
     }
 
     if (!coverageArea.trim()) {
       setCoverageAreaError("Coverage area is required");
       hasError = true;
+      setFirstError("coverageArea");
     }
 
     if (!officeAddress.trim()) {
       setOfficeAddressError("Office address is required");
       hasError = true;
+      setFirstError("officeAddress");
     }
 
     if (!mapUrl.trim()) {
       setMapUrlError("Map URL is required");
       hasError = true;
+      setFirstError("mapUrl");
     } else {
       try {
         new URL(mapUrl);
         if (!mapUrl.startsWith('http://') && !mapUrl.startsWith('https://')) {
           setMapUrlError("Map URL must start with http:// or https://");
           hasError = true;
+          setFirstError("mapUrl");
         }
       } catch {
         setMapUrlError("Invalid map URL");
         hasError = true;
+        setFirstError("mapUrl");
       }
     }
 
     if (!scholarshipSectionTitle.trim()) {
       setSchSectionTitleError("Section title is required");
       hasError = true;
+      setFirstError("scholarshipSectionTitle");
     }
 
     if (!scholarshipSubtitle.trim()) {
       setSchSubtitleError("Subtitle is required");
       hasError = true;
+      setFirstError("scholarshipSubtitle");
     }
 
     if (!scholarshipDescription.trim()) {
       setSchDescriptionError("Description is required");
       hasError = true;
+      setFirstError("scholarshipDescription");
     }
 
     if (!eligibilitySectionTitle.trim()) {
       setEligSectionTitleError("Section title is required");
       hasError = true;
+      setFirstError("eligibilitySectionTitle");
     }
 
     if (!eligibilitySubtitle.trim()) {
       setEligSubtitleError("Short description is required");
       hasError = true;
+      setFirstError("eligibilitySubtitle");
     }
 
-    return !hasError;
+    return { isValid: !hasError, firstFieldId };
   }, [mainTitle, providerName, fundingType, scholarshipType, educationLevel, location, bannerBgUrl, contactEmail, primaryPhone, secondaryPhone, websiteUrl, coverageArea, officeAddress, mapUrl, scholarshipSectionTitle, scholarshipSubtitle, scholarshipDescription, eligibilitySectionTitle, eligibilitySubtitle]);
 
   const scrollToField = useCallback((field: string) => {
@@ -567,20 +611,29 @@ const CreateScholarship: React.FC<CreateScholarshipProps> = memo(({ scholarshipI
   }, []);
 
   const handleSave = useCallback(async (draft: boolean = false) => {
+    // Clear the main error before running validation
+    setError("");
+
     if (!draft) {
-      const dateValidation = validateDates();
-      if (!dateValidation.isValidDate) {
-        setError("Please fix the date errors.");
-        if (dateValidation.field) {
-          scrollToField(dateValidation.field);
+      const validation = validateScholarship();
+      if (!validation.isValid) {
+        if (validation.firstFieldId) {
+          scrollToField(validation.firstFieldId);
         }
+        setTimeout(() => {
+          const firstErrorElement = document.querySelector('.border-red-500');
+          if (firstErrorElement) {
+            firstErrorElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          }
+        }, 0);
         return;
       }
 
-      const validationResult = validateScholarship();
-      if (typeof validationResult === "string") {
-        setError("Please fix the errors below.");
-        scrollToField(validationResult);
+      const dateValidation = validateDates();
+      if (!dateValidation.isValidDate) {
+        if (dateValidation.field) {
+          scrollToField(dateValidation.field);
+        }
         return;
       }
     }
@@ -764,6 +817,7 @@ const CreateScholarship: React.FC<CreateScholarshipProps> = memo(({ scholarshipI
         bannerBgUrl={bannerBgUrl}
         bannerBgPreview={bannerBgPreview}
         onBannerSelect={handleBannerFileSelect}
+        onBannerClear={handleBannerClear}
         mainTitleError={mainTitleError}
         providerNameError={providerNameError}
         fundingTypeError={fundingTypeError}

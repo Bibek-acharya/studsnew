@@ -157,6 +157,7 @@ export const EligibilitySection: React.FC<EligibilitySectionProps> = ({
               Section Title <span className="text-red-500">*</span>
             </label>
             <input
+              id="eligibilitySectionTitle"
               type="text"
               className={`${formInputClass} ${sectionTitleError ? "border-red-500 bg-red-50/10" : ""}`}
               value={sectionTitle}
@@ -165,7 +166,7 @@ export const EligibilitySection: React.FC<EligibilitySectionProps> = ({
             />
             {sectionTitleError && <p className="text-red-500 text-xs mt-1">{sectionTitleError}</p>}
           </div>
-          <div className="space-y-1.5">
+          <div id="eligibilitySubtitle" className="space-y-1.5">
             <label className="block text-sm font-medium text-gray-700">
               Short Description <span className="text-red-500">*</span>
             </label>

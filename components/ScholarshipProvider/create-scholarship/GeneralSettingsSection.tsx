@@ -37,6 +37,7 @@ interface GeneralSettingsSectionProps {
   bannerBgUrl: string;
   bannerBgPreview: string;
   onBannerSelect: (file: File) => void;
+  onBannerClear?: () => void;
   mainTitleError?: string;
   providerNameError?: string;
   fundingTypeError?: string;
@@ -99,6 +100,7 @@ export const GeneralSettingsSection: React.FC<GeneralSettingsSectionProps> = ({
   bannerBgUrl,
   bannerBgPreview,
   onBannerSelect,
+  onBannerClear,
   mainTitleError,
   providerNameError,
   fundingTypeError,
@@ -344,7 +346,7 @@ export const GeneralSettingsSection: React.FC<GeneralSettingsSectionProps> = ({
           </div>
         </div>
 
-        <div className="space-y-1.5">
+        <div id="bannerBgUrl" className="space-y-1.5">
           <label className="block text-sm font-medium text-gray-700">
             Hero Banner Image <span className="text-red-500">*</span>
           </label>
@@ -354,6 +356,7 @@ export const GeneralSettingsSection: React.FC<GeneralSettingsSectionProps> = ({
             recommendedSize="1920x600"
             onFileSelect={onBannerSelect}
             previewUrl={bannerBgPreview}
+            onClearPreview={onBannerClear}
           />
           {bannerError && <p className="text-red-500 text-xs mt-1">{bannerError}</p>}
         </div>

@@ -29,6 +29,7 @@ export default function Dropdown({ id, value, onChange, options, placeholder, si
     <div className={`relative w-full ${className}`}>
       <button
         type="button"
+        id={id}
         onClick={() => setIsOpen(!isOpen)}
         className={`flex w-full items-center justify-between rounded-lg border text-left transition-all duration-200 focus:outline-none focus:border-blue-500 hover:border-gray-200 ${
           isSmall ? "px-4 py-2.5 text-sm" : "px-4 py-2.5 text-sm"

@@ -87,6 +87,7 @@ export const ScholarshipDetailsSection: React.FC<ScholarshipDetailsSectionProps>
               Section Title <span className="text-red-500">*</span>
             </label>
             <input
+              id="scholarshipSectionTitle"
               type="text"
               className={`${formInputClass} ${sectionTitleError ? "border-red-500 bg-red-50/10" : ""}`}
               value={sectionTitle}
@@ -100,6 +101,7 @@ export const ScholarshipDetailsSection: React.FC<ScholarshipDetailsSectionProps>
               Subtitle/Tagline <span className="text-red-500">*</span>
             </label>
             <input
+              id="scholarshipSubtitle"
               type="text"
               className={`${formInputClass} ${subtitleError ? "border-red-500 bg-red-50/10" : ""}`}
               value={subtitle}
@@ -108,7 +110,7 @@ export const ScholarshipDetailsSection: React.FC<ScholarshipDetailsSectionProps>
             />
             {subtitleError && <p className="text-red-500 text-xs mt-1">{subtitleError}</p>}
           </div>
-          <div className="space-y-1.5">
+          <div id="scholarshipDescription" className="space-y-1.5">
             <label className="block text-sm font-medium text-gray-700">
               Program Description <span className="text-red-500">*</span>
             </label>
