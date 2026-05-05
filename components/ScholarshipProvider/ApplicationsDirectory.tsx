@@ -95,6 +95,7 @@ export default function ApplicationsDirectory() {
   }, []);
 
   const filtered = applications.filter((a) => {
+    if (a.status === "shortlisted") return false;
     const name = `${a.first_name} ${a.last_name}`.toLowerCase();
     if (search && !name.includes(search.toLowerCase())) return false;
     if (filterGender && a.gender !== filterGender) return false;

@@ -164,7 +164,7 @@ const ScholarshipProviderDashboard: React.FC<DashboardProps> = ({ onLogout }) =>
       case 'sec-interviews':
         return <Interviews />;
       case 'sec-messages':
-        return <Messages />;
+        return <Messages onUnreadChange={setUnreadMessages} />;
       case 'sec-reports':
         return <Analytics />;
       case 'sec-settings':
@@ -186,11 +186,11 @@ const ScholarshipProviderDashboard: React.FC<DashboardProps> = ({ onLogout }) =>
       case 'sec-calendar':
         return <Calendar />;
       case 'sec-messages':
-        return <Messages />;
+        return <Messages onUnreadChange={setUnreadMessages} />;
       case 'sec-results':
         return <ResultPublish />;
       case 'sec-shortlist':
-        return <ShortlistManagement onReviewStudent={handleReviewStudent} />;
+        return <ShortlistManagement />;
       case 'sec-written-exam':
         return <WrittenExam />;
       case 'sec-customize-form':

@@ -99,7 +99,7 @@ const FileUpload: React.FC<FileUploadProps> = ({
       >
         {previewUrl ? (
           <div className="relative">
-            <img src={previewUrl} className="w-full h-40 object-cover" alt="Preview" />
+            <img src={previewUrl} className={previewClassName} alt="Preview" />
             <div className="absolute inset-0 bg-gradient-to-t from-black/35 via-black/10 to-transparent" />
             <button
               type="button"

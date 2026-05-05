@@ -409,6 +409,7 @@ export interface ProviderProfile {
   linkedin_url?: string;
   map_url?: string;
   brochure_url?: string;
+  banner_url?: string;
   role: string;
 
 
@@ -494,6 +495,8 @@ export interface ProviderMessage {
   id: number;
   provider_id: number;
   user_id: number;
+  user_name: string;
+  user_email: string;
   subject: string;
   content: string;
   read: boolean;
@@ -741,10 +744,14 @@ export const scholarshipProviderApi = {
     });
   },
 
-  async evaluateApplication(id: number, data: { score: number; notes: string; passing: boolean }): Promise<ProviderApplication> {
-    return apiRequest<ProviderApplication>(`/api/v1/scholarship-providers/applications/${id}/evaluate`, {
+  async evaluateApplication(id: number, data: { score: number | null; notes: string; passing: boolean }): Promise<ProviderApplication> {
+    return callApi<ProviderApplication>(`/api/v1/scholarship-providers/applications/${id}/evaluate`, {
       method: "PUT",
-      body: JSON.stringify(data),
+      body: JSON.stringify({
+        score: data.score,
+        notes: data.notes,
+        passing: data.passing,
+      }),
     });
   },
 
@@ -768,18 +775,35 @@ export const scholarshipProviderApi = {
 
   async getMessages(page = 1, limit = 20): Promise<{ messages: ProviderMessage[]; meta: { total: number; page: number; limit: number } }> {
     const params = new URLSearchParams({ page: String(page), limit: String(limit) }).toString();
-    return apiRequest(`/api/v1/scholarship-providers/messages?${params}`);
+    return callApi<{ messages: ProviderMessage[]; meta: { total: number; page: number; limit: number } }>(`/api/v1/scholarship-providers/messages?${params}`);
   },
 
   async createMessage(data: { user_id: number; subject: string; content: string }): Promise<ProviderMessage> {
-    return apiRequest<ProviderMessage>("/api/v1/scholarship-providers/messages", {
+    return callApi<ProviderMessage>("/api/v1/scholarship-providers/messages", {
       method: "POST",
       body: JSON.stringify(data),
     });
   },
 
   async getMessageById(id: number): Promise<ProviderMessage> {
-    return apiRequest<ProviderMessage>(`/api/v1/scholarship-providers/messages/${id}`);
+    return callApi<ProviderMessage>(`/api/v1/scholarship-providers/messages/${id}`);
+  },
+
+  async markMessagesRead(userId: number): Promise<void> {
+    await apiRequest(`/api/v1/scholarship-providers/messages/read`, {
+      method: "PUT",
+      body: JSON.stringify({ user_id: userId }),
+    });
+  },
+
+  async getUserInfo(userId: number): Promise<{ id: number; first_name: string; last_name: string; email: string; phone: string; gender: string; address: string; bio: string; role: string }> {
+    return callApi(`/api/v1/scholarship-providers/users/${userId}`);
+  },
+
+  async markMessageRead(messageId: number): Promise<void> {
+    await apiRequest(`/api/v1/scholarship-providers/messages/${messageId}/read`, {
+      method: "PUT",
+    });
   },
 
   async getProfile(): Promise<ProviderProfile> {
@@ -807,6 +831,7 @@ export const scholarshipProviderApi = {
     linkedin_url?: string;
     map_url?: string;
     brochure_url?: string;
+    banner_url?: string;
   }): Promise<ProviderProfile> {
 
 
@@ -1169,6 +1194,119 @@ export const updateService = async (id: number, data: any) => {
     method: 'PUT', body: JSON.stringify(data),
   });
   return res.data;
+};
+
+export interface WrittenExamData {
+  id: number;
+  created_at: string;
+  updated_at: string;
+  provider_id: number;
+  scholarship_id: number;
+  title: string;
+  exam_date: string;
+  duration: number;
+  location: string;
+  total_marks: number;
+  passing_marks: number;
+  status: string;
+  results?: WrittenExamResultData[];
+}
+
+export interface WrittenExamResultData {
+  id: number;
+  created_at: string;
+  written_exam_id: number;
+  application_id: number;
+  marks_obtained: number;
+  remarks: string;
+  student_name?: string;
+  stream?: string;
+  exam_center?: string;
+  roll_no?: string;
+}
+
+export interface WrittenExamsResponse {
+  exams: WrittenExamData[];
+  meta: { total: number; page: number; limit: number };
+}
+
+export const writtenExamApi = {
+  async create(data: {
+    scholarship_id: number;
+    title: string;
+    exam_date?: string;
+    duration?: number;
+    location?: string;
+    total_marks?: number;
+    passing_marks?: number;
+    status?: string;
+  }): Promise<WrittenExamData> {
+    return callApi<WrittenExamData>("/api/v1/scholarship-providers/written-exams", {
+      method: "POST",
+      body: JSON.stringify(data),
+    });
+  },
+
+  async getList(params?: { scholarship_id?: number; page?: number; limit?: number }): Promise<WrittenExamsResponse> {
+    const query = new URLSearchParams();
+    if (params?.scholarship_id) query.set("scholarship_id", String(params.scholarship_id));
+    if (params?.page) query.set("page", String(params.page));
+    if (params?.limit) query.set("limit", String(params.limit));
+    const qs = query.toString();
+    return callApi<WrittenExamsResponse>(`/api/v1/scholarship-providers/written-exams${qs ? "?" + qs : ""}`);
+  },
+
+  async getById(id: number): Promise<WrittenExamData> {
+    return callApi<WrittenExamData>(`/api/v1/scholarship-providers/written-exams/${id}`);
+  },
+
+  async update(id: number, data: {
+    title?: string;
+    exam_date?: string;
+    duration?: number;
+    location?: string;
+    total_marks?: number;
+    passing_marks?: number;
+    status?: string;
+  }): Promise<WrittenExamData> {
+    return callApi<WrittenExamData>(`/api/v1/scholarship-providers/written-exams/${id}`, {
+      method: "PUT",
+      body: JSON.stringify(data),
+    });
+  },
+
+  async delete(id: number): Promise<void> {
+    await apiRequest(`/api/v1/scholarship-providers/written-exams/${id}`, {
+      method: "DELETE",
+    });
+  },
+
+  async addResult(examId: number, data: {
+    application_id: number;
+    marks_obtained?: number;
+    remarks?: string;
+  }): Promise<WrittenExamData> {
+    return callApi<WrittenExamData>(`/api/v1/scholarship-providers/written-exams/${examId}/results`, {
+      method: "POST",
+      body: JSON.stringify(data),
+    });
+  },
+
+  async updateResult(examId: number, resultId: number, data: {
+    marks_obtained?: number;
+    remarks?: string;
+  }): Promise<WrittenExamData> {
+    return callApi<WrittenExamData>(`/api/v1/scholarship-providers/written-exams/${examId}/results/${resultId}`, {
+      method: "PUT",
+      body: JSON.stringify(data),
+    });
+  },
+
+  async deleteResult(examId: number, resultId: number): Promise<void> {
+    await apiRequest(`/api/v1/scholarship-providers/written-exams/${examId}/results/${resultId}`, {
+      method: "DELETE",
+    });
+  },
 };
 
 export const deleteService = async (id: number) => {

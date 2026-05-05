@@ -24,7 +24,11 @@ import {
   Globe,
   CircleAlert,
   ClipboardList,
+  Send,
 } from "lucide-react";
+import { useAuth } from "@/services/AuthContext";
+import apiService from "@/services/apiService";
+import { toast } from "sonner";
 
 interface ScholarshipDetailPageProps {
   scholarship: any;
@@ -395,7 +399,7 @@ export default function ScholarshipDetailPage({ scholarship, similarScholarships
         <aside className="space-y-6 lg:col-span-1">
           <PartnerMessageCarousel />
           <ContactSidebar scholarship={scholarship} />
-          <RequestInfoForm />
+          <RequestInfoForm scholarship={scholarship} />
         </aside>
       </div>
 
@@ -915,14 +919,14 @@ function ContactSidebar({ scholarship }: { scholarship: any }) {
         </div>
       </div>
 
-     
+      {providerId && providerId > 0 && (
         <div className="mt-6">
           <Link href={`/providers/${providerId}`} className="flex w-full items-center justify-center gap-2 rounded-xl border border-gray-200 bg-white py-3 text-[14px] font-bold text-gray-900 transition hover:bg-gray-50 hover:text-blue-600 shadow-sm">
             View Provider Profile
             <ExternalLink size={16} />
           </Link>
         </div>
-  
+      )}
     </div>
 
 
@@ -986,32 +990,126 @@ function PartnerMessageCarousel() {
   );
 }
 
-function RequestInfoForm() {
+function RequestInfoForm({ scholarship }: { scholarship: any }) {
+  const { user, isAuthenticated } = useAuth();
+  const [fullName, setFullName] = useState(user ? `${user.first_name} ${user.last_name}`.trim() : "");
+  const [email, setEmail] = useState(user?.email || "");
+  const [phone, setPhone] = useState("");
+  const [message, setMessage] = useState("");
+  const [errors, setErrors] = useState<{ email?: string; phone?: string }>({});
+  const [submitting, setSubmitting] = useState(false);
+  const [sent, setSent] = useState(false);
+
+  const validate = useCallback(() => {
+    const errs: typeof errors = {};
+    const emailRe = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRe.test(email)) errs.email = "Please enter a valid email address";
+    if (phone && !/^9\d{9}$/.test(phone)) errs.phone = "Phone must be 10 digits starting with 9";
+    setErrors(errs);
+    return Object.keys(errs).length === 0;
+  }, [email, phone]);
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!fullName || !email || !message) return;
+    if (!isAuthenticated || !user) return;
+    if (!validate()) return;
+
+    setSubmitting(true);
+    try {
+      await apiService.post("/api/v1/scholarship-providers/messages/from-user", {
+        provider_id: scholarship.provider_id,
+        user_id: user.id,
+        user_name: fullName,
+        user_email: email,
+        subject: `Inquiry from ${fullName}`,
+        content: message,
+        phone: phone || undefined,
+      });
+      setSent(true);
+      setTimeout(() => {
+        setSent(false);
+        setMessage("");
+        setPhone("");
+      }, 2000);
+    } catch {
+      toast.error("Failed to send message. Please try again.");
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  if (!isAuthenticated) {
+    return (
+      <div className="rounded-md border border-gray-100 bg-white p-6 sm:p-7">
+        <h2 className="mb-2 text-[22px] font-bold text-gray-900">Request Information</h2>
+        <p className="mb-4 text-[15px] font-medium leading-snug text-gray-500">Please log in to send a message to the scholarship provider.</p>
+        <Link href="/login" className="flex w-full items-center justify-center gap-2.5 rounded-md bg-blue-600 py-4 text-[15px] font-bold text-white transition-all hover:bg-blue-700">
+          Log In to Send Message
+        </Link>
+      </div>
+    );
+  }
+
   return (
     <div className="rounded-md border border-gray-100 bg-white p-6 sm:p-7">
       <h2 className="mb-2 text-[22px] font-bold text-gray-900">Request Information</h2>
-      <p className="mb-6 text-[15px] font-medium leading-snug text-gray-500">Fill the form and our admission counselor will contact you.</p>
-      <form className="space-y-4" onSubmit={(e) => e.preventDefault()}>
-        <input type="text" placeholder="Full Name" className="w-full rounded-md border border-gray-200 bg-white px-4 py-3.5 text-sm font-medium text-gray-900 placeholder-gray-400 transition-colors focus:border-blue-600 focus:outline-none focus:ring-1 focus:ring-blue-600" />
-        <input type="email" placeholder="Email Address" className="w-full rounded-md border border-gray-200 bg-white px-4 py-3.5 text-sm font-medium text-gray-900 placeholder-gray-400 transition-colors focus:border-blue-600 focus:outline-none focus:ring-1 focus:ring-blue-600" />
-        <input type="tel" placeholder="Phone Number" className="w-full rounded-md border border-gray-200 bg-white px-4 py-3.5 text-sm font-medium text-gray-900 placeholder-gray-400 transition-colors focus:border-blue-600 focus:outline-none focus:ring-1 focus:ring-blue-600" />
-        <div className="relative">
-          <select defaultValue="" className="w-full appearance-none rounded-md border border-gray-200 bg-white px-4 py-3.5 text-sm font-medium text-gray-500 transition-colors focus:border-blue-600 focus:outline-none focus:ring-1 focus:ring-blue-600">
-            <option value="" disabled>Select Course of Interest</option>
-            <option>Research Grant Inquiry</option>
-            <option>Facility Access</option>
-            <option>Other Information</option>
-          </select>
-          <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-4 text-gray-400">
-            <ChevronDown size={16} />
+      <p className="mb-6 text-[15px] font-medium leading-snug text-gray-500">Send a message to the scholarship provider.</p>
+      {sent ? (
+        <div className="rounded-md bg-green-50 p-5 text-center">
+          <CheckCircle size={32} className="mx-auto mb-2 text-green-600" />
+          <p className="text-[15px] font-semibold text-green-700">Submitted</p>
+        </div>
+      ) : (
+        <form className="space-y-4" onSubmit={handleSubmit}>
+          <input
+            type="text"
+            placeholder="Full Name"
+            value={fullName}
+            onChange={(e) => setFullName(e.target.value)}
+            required
+            className="w-full rounded-md border border-gray-200 bg-white px-4 py-3.5 text-sm font-medium text-gray-900 placeholder-gray-400 transition-colors focus:border-blue-600 focus:outline-none focus:ring-1 focus:ring-blue-600"
+          />
+          <input
+            type="email"
+            placeholder="Email Address"
+            value={email}
+            onChange={(e) => { setEmail(e.target.value); setErrors((p) => ({ ...p, email: undefined })); }}
+            required
+            className={`w-full rounded-md border bg-white px-4 py-3.5 text-sm font-medium text-gray-900 placeholder-gray-400 transition-colors focus:outline-none focus:ring-1 ${
+              errors.email ? "border-red-400 focus:border-red-500 focus:ring-red-500" : "border-gray-200 focus:border-blue-600 focus:ring-blue-600"
+            }`}
+          />
+          {errors.email && <p className="-mt-2 text-xs text-red-500">{errors.email}</p>}
+          <input
+            type="tel"
+            placeholder="Phone Number"
+            value={phone}
+            onChange={(e) => { setPhone(e.target.value); setErrors((p) => ({ ...p, phone: undefined })); }}
+            className={`w-full rounded-md border bg-white px-4 py-3.5 text-sm font-medium text-gray-900 placeholder-gray-400 transition-colors focus:outline-none focus:ring-1 ${
+              errors.phone ? "border-red-400 focus:border-red-500 focus:ring-red-500" : "border-gray-200 focus:border-blue-600 focus:ring-blue-600"
+            }`}
+          />
+          {errors.phone && <p className="-mt-2 text-xs text-red-500">{errors.phone}</p>}
+          <textarea
+            placeholder="Write your message..."
+            value={message}
+            onChange={(e) => setMessage(e.target.value)}
+            required
+            rows={4}
+            className="w-full resize-none rounded-md border border-gray-200 bg-white px-4 py-3.5 text-sm font-medium text-gray-900 placeholder-gray-400 transition-colors focus:border-blue-600 focus:outline-none focus:ring-1 focus:ring-blue-600"
+          />
+          <div className="pt-2">
+            <button
+              type="submit"
+              disabled={submitting}
+              className="flex w-full items-center justify-center gap-2.5 rounded-md bg-blue-600 py-4 text-[15px] font-bold text-white transition-all hover:bg-blue-700 disabled:opacity-60"
+            >
+              <Send size={18} /> {submitting ? "Sending..." : "Send Message"}
+            </button>
           </div>
-        </div>
-        <div className="pt-2">
-          <button type="submit" className="flex w-full items-center justify-center gap-2.5 rounded-md bg-blue-600 py-4 text-[15px] font-bold text-white transition-all hover:bg-blue-700">
-            <Bell size={18} /> Keep me notified
-          </button>
-        </div>
-      </form>
+        </form>
+      )}
     </div>
   );
 }

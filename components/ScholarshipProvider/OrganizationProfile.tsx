@@ -1,6 +1,6 @@
 "use client";
 
-import React, { memo, useEffect, useState } from "react";
+import React, { memo, useEffect, useState, useCallback } from "react";
 import { Building2, Home, Image, Mail, Phone, BadgeInfo, Globe, CreditCard, Plus, Pencil, Trash2, Star, FileText } from "lucide-react";
 
 import { toast } from "sonner";
@@ -20,6 +20,7 @@ type Tab = (typeof TABS)[number];
 const OrganizationProfile: React.FC = memo(() => {
   const [profile, setProfile] = useState<ProviderProfile | null>(null);
   const [activeTab, setActiveTab] = useState<Tab>("Details");
+  const [isEditing, setIsEditing] = useState(false);
   const [providerName, setProviderName] = useState("");
   const [registrationNumber, setRegistrationNumber] = useState("");
   const [email, setEmail] = useState("");
@@ -32,6 +33,9 @@ const OrganizationProfile: React.FC = memo(() => {
   const [values, setValues] = useState("");
   const [logoUrl, setLogoUrl] = useState("");
   const [logoPreview, setLogoPreview] = useState("");
+  const [bannerUrl, setBannerUrl] = useState("");
+  const [bannerPreview, setBannerPreview] = useState("");
+  const [uploadingBanner, setUploadingBanner] = useState(false);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [uploadingLogo, setUploadingLogo] = useState(false);
@@ -65,51 +69,51 @@ const OrganizationProfile: React.FC = memo(() => {
   const [bulkUploadFolder, setBulkUploadFolder] = useState("");
   const [deleteModal, setDeleteModal] = useState<{ isOpen: boolean; id: number | null; type: string }>({ isOpen: false, id: null, type: "" });
 
-  useEffect(() => {
-    let mounted = true;
-    async function loadProfile() {
-      try {
-        const data = await scholarshipProviderApi.getProfile();
-        if (!mounted) return;
-        setProfile(data);
-        setProviderName(data.provider_name || "");
-        setRegistrationNumber(data.registration_number || "");
-        setEmail(data.email || "");
-        setContactNumber(data.contact_number || "");
-        setPanNumber(data.pan_number || "");
-        setWebsiteUrl(data.website_url || "");
-        setAddress(data.address || "");
-        setAboutText(data.about_text || "");
-        setMission(data.mission || "");
-        setValues(data.values || "");
-        if (data.logo_url) { setLogoUrl(data.logo_url); setLogoPreview(data.logo_url); }
-        
-        // Founder
-        setFounderName(data.founder_name || "");
-        setFounderRole(data.founder_role || "");
-        setFounderMessage(data.founder_message || "");
-        if (data.founder_image_url) {
-          setFounderImageUrl(data.founder_image_url);
-          setFounderImagePreview(data.founder_image_url);
-        }
-
-        // Social
-        setFacebookUrl(data.facebook_url || "");
-        setInstagramUrl(data.instagram_url || "");
-        setYoutubeUrl(data.youtube_url || "");
-        setLinkedinUrl(data.linkedin_url || "");
-        setMapUrl(data.map_url || "");
-        setBrochureUrl(data.brochure_url || "");
-      } catch (err) {
-        toast.error(err instanceof Error ? err.message : "Failed to load profile");
-      } finally {
-        if (mounted) setLoading(false);
+  const loadProfile = useCallback(async () => {
+    try {
+      const data = await scholarshipProviderApi.getProfile();
+      setProfile(data);
+      setProviderName(data.provider_name || "");
+      setRegistrationNumber(data.registration_number || "");
+      setEmail(data.email || "");
+      setContactNumber(data.contact_number || "");
+      setPanNumber(data.pan_number || "");
+      setWebsiteUrl(data.website_url || "");
+      setAddress(data.address || "");
+      setAboutText(data.about_text || "");
+      setMission(data.mission || "");
+      setValues(data.values || "");
+      if (data.logo_url) { setLogoUrl(data.logo_url); setLogoPreview(data.logo_url); }
+      if (data.banner_url) { setBannerUrl(data.banner_url); setBannerPreview(data.banner_url); }
+      
+      // Founder
+      setFounderName(data.founder_name || "");
+      setFounderRole(data.founder_role || "");
+      setFounderMessage(data.founder_message || "");
+      if (data.founder_image_url) {
+        setFounderImageUrl(data.founder_image_url);
+        setFounderImagePreview(data.founder_image_url);
       }
+
+      // Social
+      setFacebookUrl(data.facebook_url || "");
+      setInstagramUrl(data.instagram_url || "");
+      setYoutubeUrl(data.youtube_url || "");
+      setLinkedinUrl(data.linkedin_url || "");
+      setMapUrl(data.map_url || "");
+      setBrochureUrl(data.brochure_url || "");
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Failed to load profile");
+    } finally {
+      setLoading(false);
     }
+  }, []);
+
+  useEffect(() => {
+    setLoading(true);
     loadProfile();
     loadContent();
-    return () => { mounted = false; };
-  }, []);
+  }, [loadProfile]);
 
   const loadContent = async () => {
     try {
@@ -165,6 +169,24 @@ const OrganizationProfile: React.FC = memo(() => {
     } finally { setUploadingLogo(false); }
   };
 
+  const handleBannerSelect = async (file: File) => {
+    setBannerPreview(URL.createObjectURL(file));
+    setUploadingBanner(true);
+    try {
+      const url = await scholarshipProviderApi.uploadImage(file, "banners");
+      setBannerUrl(url); setBannerPreview(url);
+      toast.success("Banner uploaded");
+    } catch (err) {
+      setBannerUrl(""); setBannerPreview("");
+      toast.error(err instanceof Error ? err.message : "Failed to upload banner");
+    } finally { setUploadingBanner(false); }
+  };
+
+  const handleBannerClear = () => {
+    setBannerUrl("");
+    setBannerPreview("");
+  };
+
   const handleSaveProfile = async () => {
     if (!providerName.trim() || !registrationNumber.trim()) {
       toast.error("Organization name and registration number are required");
@@ -179,6 +201,7 @@ const OrganizationProfile: React.FC = memo(() => {
         pan_number: panNumber,
         website_url: websiteUrl,
         logo_url: logoUrl,
+        banner_url: bannerUrl,
         address,
         about_text: aboutText,
         mission,
@@ -291,14 +314,50 @@ const OrganizationProfile: React.FC = memo(() => {
               <h2 className="text-lg font-bold text-gray-900 flex items-center gap-2">
                 <Image className="w-5 h-5 text-blue-600" /> Branding Images
               </h2>
-              <button onClick={handleSaveProfile} disabled={saving} className="px-4 py-2 bg-blue-600 text-white rounded-lg text-sm font-semibold hover:bg-blue-700 disabled:opacity-50">
-                {saving ? "Saving..." : "Save"}
-              </button>
+              {isEditing ? (
+                <div className="flex gap-2">
+                  <button onClick={() => { setIsEditing(false); loadProfile(); }} className="px-4 py-2 border border-gray-300 text-gray-700 rounded-lg text-sm font-semibold hover:bg-gray-50">
+                    Cancel
+                  </button>
+                  <button onClick={handleSaveProfile} disabled={saving} className="px-4 py-2 bg-blue-600 text-white rounded-lg text-sm font-semibold hover:bg-blue-700 disabled:opacity-50">
+                    {saving ? "Saving..." : "Save"}
+                  </button>
+                </div>
+              ) : (
+                <button onClick={() => setIsEditing(true)} className="px-4 py-2 border border-gray-300 text-gray-700 rounded-lg text-sm font-semibold hover:bg-gray-50 flex items-center gap-2">
+                  <Pencil className="w-4 h-4" /> Edit Profile
+                </button>
+              )}
             </div>
-            <div className="max-w-xs">
-              <label className="block text-sm font-medium text-gray-700 mb-1.5">Organization Logo</label>
-              <FileUpload accept="image/*" maxSize="2MB" recommendedSize="500x500" onFileSelect={handleLogoSelect} previewUrl={logoPreview} previewClassName="w-[120px] h-[120px] object-contain rounded-lg mt-2 mx-auto border border-slate-200 bg-white" />
-              {uploadingLogo && <p className="mt-2 text-xs text-blue-600">Uploading logo...</p>}
+            <div className="flex gap-8">
+              <div className="w-1/6">
+                <label className="block text-sm font-medium text-gray-700 mb-1.5">Organization Logo</label>
+                {isEditing ? (
+                  <>
+                    <FileUpload accept="image/*" maxSize="2MB" recommendedSize="500x500" onFileSelect={handleLogoSelect} previewUrl={logoPreview} previewClassName="w-[120px] h-[120px] object-contain rounded-lg border border-slate-200 bg-white" />
+                    {uploadingLogo && <p className="mt-2 text-xs text-blue-600">Uploading logo...</p>}
+                  </>
+                ) : (
+                  <div className="relative overflow-hidden border border-slate-200 rounded-md">
+                    <img src={logoPreview || ""} className="w-[120px] h-[120px] object-contain mx-auto" alt="Logo" />
+                    {!logoPreview && <div className="absolute inset-0 flex items-center justify-center text-gray-300 text-sm">No logo</div>}
+                  </div>
+                )}
+              </div>
+              <div className="w-5/6">
+                <label className="block text-sm font-medium text-gray-700 mb-1.5">Profile Banner Image</label>
+                {isEditing ? (
+                  <>
+                    <FileUpload accept="image/*" maxSize="5MB" recommendedSize="1920x400" onFileSelect={handleBannerSelect} previewUrl={bannerPreview} previewClassName="w-full h-[120px] object-cover rounded-lg border border-slate-200" onClearPreview={handleBannerClear} />
+                    {uploadingBanner && <p className="mt-2 text-xs text-blue-600">Uploading banner...</p>}
+                  </>
+                ) : (
+                  <div className="relative overflow-hidden border border-slate-200 rounded-md">
+                    <img src={bannerPreview || ""} className="w-full h-[120px] object-cover" alt="Banner" />
+                    {!bannerPreview && <div className="absolute inset-0 flex items-center justify-center text-gray-300 text-sm">No banner uploaded</div>}
+                  </div>
+                )}
+              </div>
             </div>
           </div>
 
@@ -308,46 +367,16 @@ const OrganizationProfile: React.FC = memo(() => {
               <Building2 className="w-5 h-5 text-blue-600" /> Organization Details
             </h2>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div className="md:col-span-2">
-                <label className="block text-sm font-medium text-gray-700 mb-1.5">Organization Name <span className="text-red-500">*</span></label>
-                <input type="text" className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:border-blue-500" value={providerName} onChange={(e) => setProviderName(e.target.value)} placeholder="Enter organization name" />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1.5">Registration Number <span className="text-red-500">*</span></label>
-                <input type="text" className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:border-blue-500" value={registrationNumber} onChange={(e) => setRegistrationNumber(e.target.value)} placeholder="e.g., 12345/078-079" />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1.5">Email Address</label>
-                <input type="email" className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm bg-gray-50" value={email} readOnly />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1.5">Contact Number</label>
-                <input type="tel" className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:border-blue-500" value={contactNumber} onChange={(e) => setContactNumber(e.target.value)} placeholder="+977-1-XXXXXXX" />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1.5">PAN Number</label>
-                <input type="text" className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:border-blue-500" value={panNumber} onChange={(e) => setPanNumber(e.target.value)} placeholder="PAN / VAT number" />
-              </div>
-              <div className="md:col-span-2">
-                <label className="block text-sm font-medium text-gray-700 mb-1.5">Address</label>
-                <input type="text" className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:border-blue-500" value={address} onChange={(e) => setAddress(e.target.value)} placeholder="Organization address" />
-              </div>
-              <div className="md:col-span-2">
-                <label className="block text-sm font-medium text-gray-700 mb-1.5">Website URL</label>
-                <input type="url" className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:border-blue-500" value={websiteUrl} onChange={(e) => setWebsiteUrl(e.target.value)} placeholder="https://www.example.com" />
-              </div>
-              <div className="md:col-span-2">
-                <label className="block text-sm font-medium text-gray-700 mb-1.5">About Text</label>
-                <textarea className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:border-blue-500" value={aboutText} onChange={(e) => setAboutText(e.target.value)} rows={4} placeholder="Describe your organization..." />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1.5">Mission</label>
-                <textarea className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:border-blue-500" value={mission} onChange={(e) => setMission(e.target.value)} rows={3} placeholder="Our mission..." />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1.5">Values</label>
-                <textarea className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:border-blue-500" value={values} onChange={(e) => setValues(e.target.value)} rows={3} placeholder="Our values..." />
-              </div>
+              <Field label="Organization Name" required value={providerName} isEditing={isEditing}><input type="text" className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:border-blue-500" value={providerName} onChange={(e) => setProviderName(e.target.value)} placeholder="Enter organization name" /></Field>
+              <Field label="Registration Number" required value={registrationNumber} isEditing={isEditing}><input type="text" className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:border-blue-500" value={registrationNumber} onChange={(e) => setRegistrationNumber(e.target.value)} placeholder="e.g., 12345/078-079" /></Field>
+              <Field label="Email Address" value={email} isEditing={false}><input type="email" className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm bg-gray-50" value={email} readOnly /></Field>
+              <Field label="Contact Number" value={contactNumber} isEditing={isEditing}><input type="tel" className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:border-blue-500" value={contactNumber} onChange={(e) => setContactNumber(e.target.value)} placeholder="+977-1-XXXXXXX" /></Field>
+              <Field label="PAN Number" value={panNumber} isEditing={isEditing}><input type="text" className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:border-blue-500" value={panNumber} onChange={(e) => setPanNumber(e.target.value)} placeholder="PAN / VAT number" /></Field>
+              <Field label="Address" value={address} isEditing={isEditing} span={2}><input type="text" className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:border-blue-500" value={address} onChange={(e) => setAddress(e.target.value)} placeholder="Organization address" /></Field>
+              <Field label="Website URL" value={websiteUrl} isEditing={isEditing} span={2}><input type="url" className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:border-blue-500" value={websiteUrl} onChange={(e) => setWebsiteUrl(e.target.value)} placeholder="https://www.example.com" /></Field>
+              <Field label="About Text" value={aboutText} isEditing={isEditing} span={2}><textarea className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:border-blue-500" value={aboutText} onChange={(e) => setAboutText(e.target.value)} rows={4} placeholder="Describe your organization..." /></Field>
+              <Field label="Mission" value={mission} isEditing={isEditing}><textarea className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:border-blue-500" value={mission} onChange={(e) => setMission(e.target.value)} rows={3} placeholder="Our mission..." /></Field>
+              <Field label="Values" value={values} isEditing={isEditing}><textarea className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:border-blue-500" value={values} onChange={(e) => setValues(e.target.value)} rows={3} placeholder="Our values..." /></Field>
             </div>
 
             {/* Founder Section */}
@@ -369,31 +398,17 @@ const OrganizationProfile: React.FC = memo(() => {
                         </div>
                       )}
                     </div>
-                    <div className="flex-1">
-                      <FileUpload
-                        accept="image/*"
-                        maxSize="2MB"
-                        onFileSelect={handleFounderImageSelect}
-                      />
-                      {uploadingFounderImage && <p className="mt-2 text-sm text-blue-600 font-medium">Uploading image...</p>}
-                    </div>
-
+                    {isEditing && (
+                      <div className="flex-1">
+                        <FileUpload accept="image/*" maxSize="2MB" onFileSelect={handleFounderImageSelect} />
+                        {uploadingFounderImage && <p className="mt-2 text-sm text-blue-600 font-medium">Uploading image...</p>}
+                      </div>
+                    )}
                   </div>
                 </div>
-                <div className="md:col-span-1 space-y-4">
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1.5">Founder Name</label>
-                    <input type="text" className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:border-blue-500" value={founderName} onChange={(e) => setFounderName(e.target.value)} placeholder="e.g. John Doe" />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1.5">Founder Role</label>
-                    <input type="text" className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:border-blue-500" value={founderRole} onChange={(e) => setFounderRole(e.target.value)} placeholder="e.g. Founder & Chairperson" />
-                  </div>
-                </div>
-                <div className="md:col-span-2">
-                  <label className="block text-sm font-medium text-gray-700 mb-1.5">Founder's Message / Quote</label>
-                  <textarea className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:border-blue-500" value={founderMessage} onChange={(e) => setFounderMessage(e.target.value)} rows={3} placeholder="A short message or quote from the founder..." />
-                </div>
+                <Field label="Founder Name" value={founderName} isEditing={isEditing}><input type="text" className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:border-blue-500" value={founderName} onChange={(e) => setFounderName(e.target.value)} placeholder="e.g. John Doe" /></Field>
+                <Field label="Founder Role" value={founderRole} isEditing={isEditing}><input type="text" className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:border-blue-500" value={founderRole} onChange={(e) => setFounderRole(e.target.value)} placeholder="e.g. Founder & Chairperson" /></Field>
+                <Field label="Founder's Message / Quote" value={founderMessage} isEditing={isEditing} span={2}><textarea className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:border-blue-500" value={founderMessage} onChange={(e) => setFounderMessage(e.target.value)} rows={3} placeholder="A short message or quote from the founder..." /></Field>
               </div>
             </div>
 
@@ -404,27 +419,11 @@ const OrganizationProfile: React.FC = memo(() => {
                 Social Media & Location
               </h3>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1.5">Facebook URL</label>
-                  <input type="url" className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:border-blue-500" value={facebookUrl} onChange={(e) => setFacebookUrl(e.target.value)} placeholder="https://facebook.com/your-page" />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1.5">Instagram URL</label>
-                  <input type="url" className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:border-blue-500" value={instagramUrl} onChange={(e) => setInstagramUrl(e.target.value)} placeholder="https://instagram.com/your-profile" />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1.5">YouTube URL</label>
-                  <input type="url" className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:border-blue-500" value={youtubeUrl} onChange={(e) => setYoutubeUrl(e.target.value)} placeholder="https://youtube.com/@your-channel" />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1.5">LinkedIn URL</label>
-                  <input type="url" className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:border-blue-500" value={linkedinUrl} onChange={(e) => setLinkedinUrl(e.target.value)} placeholder="https://linkedin.com/company/your-company" />
-                </div>
-                <div className="md:col-span-2">
-                  <label className="block text-sm font-medium text-gray-700 mb-1.5">Google Maps Embed URL</label>
-                  <input type="text" className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:border-blue-500" value={mapUrl} onChange={(e) => setMapUrl(e.target.value)} placeholder='e.g. https://www.google.com/maps/embed?pb=...' />
-                  <p className="mt-1 text-[11px] text-gray-500">Go to Google Maps → Share → Embed a map → Copy the URL inside the src="" attribute.</p>
-                </div>
+                <Field label="Facebook URL" value={facebookUrl} isEditing={isEditing}><input type="url" className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:border-blue-500" value={facebookUrl} onChange={(e) => setFacebookUrl(e.target.value)} placeholder="https://facebook.com/your-page" /></Field>
+                <Field label="Instagram URL" value={instagramUrl} isEditing={isEditing}><input type="url" className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:border-blue-500" value={instagramUrl} onChange={(e) => setInstagramUrl(e.target.value)} placeholder="https://instagram.com/your-profile" /></Field>
+                <Field label="YouTube URL" value={youtubeUrl} isEditing={isEditing}><input type="url" className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:border-blue-500" value={youtubeUrl} onChange={(e) => setYoutubeUrl(e.target.value)} placeholder="https://youtube.com/@your-channel" /></Field>
+                <Field label="LinkedIn URL" value={linkedinUrl} isEditing={isEditing}><input type="url" className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:border-blue-500" value={linkedinUrl} onChange={(e) => setLinkedinUrl(e.target.value)} placeholder="https://linkedin.com/company/your-company" /></Field>
+                <Field label="Google Maps Embed URL" value={mapUrl} isEditing={isEditing} span={2}><div><input type="text" className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:border-blue-500" value={mapUrl} onChange={(e) => setMapUrl(e.target.value)} placeholder='e.g. https://www.google.com/maps/embed?pb=...' /><p className="mt-1 text-[11px] text-gray-500">Go to Google Maps → Share → Embed a map → Copy the URL inside the src="" attribute.</p></div></Field>
               </div>
             </div>
 
@@ -440,34 +439,35 @@ const OrganizationProfile: React.FC = memo(() => {
                     <FileText className="w-8 h-8" />
                   </div>
                   <div className="flex-1 text-center md:text-left">
-                    <h4 className="text-sm font-bold text-gray-900">Upload Official Brochure</h4>
+                    <h4 className="text-sm font-bold text-gray-900">Organization Brochure</h4>
                     <p className="text-xs text-gray-500 mt-1">PDF format preferred. Max size 5MB.</p>
-                    {brochureUrl && (
+                    {brochureUrl ? (
                       <div className="mt-2 inline-flex items-center gap-2 px-3 py-1 bg-green-50 text-green-700 rounded-full text-[11px] font-medium border border-green-100">
                         <Star className="w-3 h-3" />
                         Brochure Uploaded
-                        <a href={brochureUrl} target="_blank" rel="noreferrer" className="underline hover:text-green-800 ml-1">View Current</a>
+                        <a href={brochureUrl.startsWith('http') ? brochureUrl : `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8080'}${brochureUrl.startsWith('/') ? '' : '/'}${brochureUrl}`} target="_blank" rel="noreferrer" className="underline hover:text-green-800 ml-1">View Current</a>
                       </div>
+                    ) : !isEditing && (
+                      <p className="mt-2 text-xs text-gray-400">No brochure uploaded</p>
                     )}
                   </div>
-                  <div className="flex-shrink-0 text-center">
-                    <FileUpload
-                      accept=".pdf,.doc,.docx"
-                      maxSize="5MB"
-                      onFileSelect={handleBrochureSelect}
-                    />
-                    {uploadingBrochure && <p className="mt-2 text-sm text-blue-600 font-medium">Uploading brochure...</p>}
-                  </div>
-
+                  {isEditing && (
+                    <div className="flex-shrink-0 text-center">
+                      <FileUpload accept=".pdf,.doc,.docx" maxSize="5MB" onFileSelect={handleBrochureSelect} />
+                      {uploadingBrochure && <p className="mt-2 text-sm text-blue-600 font-medium">Uploading brochure...</p>}
+                    </div>
+                  )}
                 </div>
               </div>
             </div>
 
-            <div className="mt-6 flex justify-end">
-              <button onClick={handleSaveProfile} disabled={saving} className="px-6 py-2 bg-blue-600 text-white rounded-lg text-sm font-semibold hover:bg-blue-700 disabled:opacity-50">
-                {saving ? "Saving..." : "Save Changes"}
-              </button>
-            </div>
+            {isEditing && (
+              <div className="mt-6 flex justify-end">
+                <button onClick={handleSaveProfile} disabled={saving} className="px-6 py-2 bg-blue-600 text-white rounded-lg text-sm font-semibold hover:bg-blue-700 disabled:opacity-50">
+                  {saving ? "Saving..." : "Save Changes"}
+                </button>
+              </div>
+            )}
           </div>
         </>
       )}
@@ -749,6 +749,19 @@ const FormWrapper = ({ showForm, onSubmit, onCancel }: { showForm: any; onSubmit
     </div>
   );
 };
+
+function Field({ label, value, isEditing, required, span, children }: { label: string; value: string; isEditing: boolean; required?: boolean; span?: number; children: React.ReactNode }) {
+  const cls = span === 2 ? "md:col-span-2" : "";
+  if (isEditing) {
+    return <div className={cls}>{children}</div>;
+  }
+  return (
+    <div className={cls}>
+      <label className="block text-sm font-medium text-gray-700 mb-1">{label}</label>
+      <p className="text-sm text-gray-900 py-2">{value || <span className="text-gray-400">Not provided</span>}</p>
+    </div>
+  );
+}
 
 OrganizationProfile.displayName = "OrganizationProfile";
 export default OrganizationProfile;

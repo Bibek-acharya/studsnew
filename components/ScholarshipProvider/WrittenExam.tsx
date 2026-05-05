@@ -1,120 +1,312 @@
 "use client";
 
-import React, { useState, useEffect, memo } from "react";
-import { Home, GraduationCap, Search, Plus, Pencil, Trash2, ChevronLeft, ChevronRight, X, AlertCircle } from "lucide-react";
+import React, { useState, useEffect, useCallback, useMemo, memo } from "react";
+import { Home, Search, Plus, Pencil, Trash2, X, Loader2, ChevronLeft, ChevronRight } from "lucide-react";
 import { toast } from "sonner";
+import { scholarshipProviderApi, writtenExamApi, WrittenExamData, WrittenExamResultData, ProviderApplication } from "@/services/scholarshipProviderApi";
 
-interface ExamResult {
-  id: number;
-  name: string;
-  appId: string;
-  symbolNo: string;
-  stream: string;
-  examCenter: string;
-  marks: number;
-  status: "Pass" | "Fail";
-}
+const PAGE_SIZE = 20;
 
-const SCHOLARSHIP_DATA: Record<string, ExamResult[]> = {
-  sch1: [
-    { id: 1, name: "Ram Bahadur Thapa", appId: "APP-2026-001", symbolNo: "2082001", stream: "Science", examCenter: "Kathmandu", marks: 85, status: "Pass" },
-    { id: 2, name: "Sita Kumari Sharma", appId: "APP-2026-002", symbolNo: "2082056", stream: "Management", examCenter: "Pokhara", marks: 92, status: "Pass" },
-    { id: 3, name: "Ganesh Bahadur Rai", appId: "APP-2026-003", symbolNo: "2082015", stream: "Science", examCenter: "Biratnagar", marks: 73, status: "Pass" },
-  ],
-  sch2: [
-    { id: 4, name: "Maya Devi Chaudhary", appId: "APP-2026-004", symbolNo: "2082078", stream: "Management", examCenter: "Nepalgunj", marks: 45, status: "Fail" },
-    { id: 5, name: "Bikram Gurung", appId: "APP-2026-005", symbolNo: "2082103", stream: "Science", examCenter: "Pokhara", marks: 88, status: "Pass" },
-    { id: 6, name: "Krishna Bahadur Khatri", appId: "APP-2026-010", symbolNo: "2082141", stream: "Science", examCenter: "Nepalgunj", marks: 96, status: "Pass" },
-  ],
+const APP_ID_YEAR = new Date().getFullYear();
+const formatAppId = (id: number) => `APP-${APP_ID_YEAR}-${String(id).padStart(3, "0")}`;
+// Strip "APP-YYYY-" prefix to get raw numeric ID for matching
+const parseAppId = (val: string) => {
+  const m = val.match(/^#?APP-\d{4}-(\d+)$/i);
+  return m ? parseInt(m[1], 10) : null;
 };
 
-const LOOKUP_DB: Record<string, { name: string; appId: string; stream: string; examCenter: string }> = {
-  "2082001": { name: "Ram Bahadur Thapa", appId: "APP-2026-001", stream: "Science", examCenter: "Kathmandu" },
-  "2082056": { name: "Sita Kumari Sharma", appId: "APP-2026-002", stream: "Management", examCenter: "Pokhara" },
-  "2082015": { name: "Ganesh Bahadur Rai", appId: "APP-2026-003", stream: "Science", examCenter: "Biratnagar" },
-  "2082078": { name: "Maya Devi Chaudhary", appId: "APP-2026-004", stream: "Management", examCenter: "Nepalgunj" },
-  "2082103": { name: "Bikram Gurung", appId: "APP-2026-005", stream: "Science", examCenter: "Pokhara" },
-  "2082141": { name: "Krishna Bahadur Khatri", appId: "APP-2026-010", stream: "Science", examCenter: "Nepalgunj" },
+const STREAM_COLORS: Record<string, string> = {
+  Science: "bg-cyan-100 text-cyan-700",
+  Management: "bg-indigo-100 text-indigo-700",
+  Humanities: "bg-yellow-100 text-yellow-700",
+  Education: "bg-green-100 text-green-700",
+  Law: "bg-red-100 text-red-700",
 };
+
+const LS_KEY = "written_exam_scholarship_id";
 
 const WrittenExam: React.FC = memo(() => {
-  const [scholarship, setScholarship] = useState("");
-  const [examCenter, setExamCenter] = useState("");
-  const [results, setResults] = useState<ExamResult[]>([]);
+  const [scholarships, setScholarships] = useState<{ id: number; title: string; status: string }[]>([]);
+  const [scholarshipId, setScholarshipId] = useState(() => {
+    if (typeof window !== "undefined") return localStorage.getItem(LS_KEY) || "";
+    return "";
+  });
+  const [exam, setExam] = useState<WrittenExamData | null>(null);
+  const [appsMap, setAppsMap] = useState<Record<number, ProviderApplication>>({});
+  const [loading, setLoading] = useState(false);
+
+  // Search & pagination
   const [search, setSearch] = useState("");
   const [page, setPage] = useState(1);
-  const [modalOpen, setModalOpen] = useState(false);
-  const [step, setStep] = useState(1);
-  const [symbolLookup, setSymbolLookup] = useState("");
-  const [notFound, setNotFound] = useState(false);
-  const [foundStudent, setFoundStudent] = useState<{ name: string; appId: string; stream: string; examCenter: string } | null>(null);
-  const [marks, setMarks] = useState("");
-  const limit = 10;
+
+  // Add student modal — 2-step flow
+  const [addOpen, setAddOpen] = useState(false);
+  const [addStep, setAddStep] = useState<1 | 2>(1);
+  const [lookupValue, setLookupValue] = useState("");
+  const [lookupError, setLookupError] = useState(false);
+  const [lookedUpStudent, setLookedUpStudent] = useState<{
+    application_id: number;
+    full_name: string;
+    roll_no?: string;
+    stream?: string;
+    exam_center?: string;
+  } | null>(null);
+  const [addMarks, setAddMarks] = useState("");
+  const [addingStudent, setAddingStudent] = useState(false);
+
+  // Edit marks modal
+  const [editOpen, setEditOpen] = useState(false);
+  const [editResult, setEditResult] = useState<WrittenExamResultData | null>(null);
+  const [editMarks, setEditMarks] = useState("");
+  const [savingEdit, setSavingEdit] = useState(false);
+  const [deleteId, setDeleteId] = useState<number | null>(null);
 
   useEffect(() => {
-    if (scholarship) {
-      setResults(SCHOLARSHIP_DATA[scholarship] || []);
-    } else {
-      setResults(Object.values(SCHOLARSHIP_DATA).flat());
+    (async () => {
+      try {
+        const resp = await scholarshipProviderApi.getScholarships(1, 100);
+        setScholarships(
+          resp.scholarships
+            .filter((s) => s.status !== "draft")
+            .map((s) => ({ id: s.id, title: s.title, status: s.status }))
+        );
+      } catch {
+        toast.error("Failed to load scholarships");
+      }
+    })();
+  }, []);
+
+  const getOrCreateExam = useCallback(async (sid: number) => {
+    setLoading(true);
+    try {
+      const [exams, appsResp] = await Promise.all([
+        writtenExamApi.getList({ scholarship_id: sid }),
+        scholarshipProviderApi.getApplications({ scholarship_id: String(sid), status: "shortlisted", page: 1, limit: 500 }),
+      ]);
+
+      // Build apps lookup map
+      const map: Record<number, ProviderApplication> = {};
+      for (const a of appsResp.applications) {
+        map[a.id] = a;
+      }
+      setAppsMap(map);
+
+      if (exams.exams && exams.exams.length > 0) {
+        setExam(await writtenExamApi.getById(exams.exams[0].id));
+      } else {
+        const created = await writtenExamApi.create({
+          scholarship_id: sid,
+          title: "Written Exam",
+          status: "draft",
+        });
+        setExam(created);
+      }
+    } catch {
+      toast.error("Failed to load written exam");
+      setExam(null);
+      setAppsMap({});
+    } finally {
+      setLoading(false);
     }
-    setExamCenter("");
-    setPage(1);
-  }, [scholarship]);
+  }, []);
 
-  const uniqueCenters = [...new Set(results.map((r) => r.examCenter))];
-
-  const filtered = (search
-    ? results.filter((r) => r.name.toLowerCase().includes(search.toLowerCase()) || r.symbolNo.includes(search))
-    : results).filter((r) => !examCenter || r.examCenter === examCenter);
-
-  const totalPages = Math.ceil(filtered.length / limit);
-  const paged = filtered.slice((page - 1) * limit, page * limit);
-
-  const streamColor = (stream: string) => {
-    const map: Record<string, string> = { Science: "bg-cyan-100 text-cyan-700", Management: "bg-indigo-100 text-indigo-700", Humanities: "bg-yellow-100 text-yellow-700", Education: "bg-green-100 text-green-700", Law: "bg-red-100 text-red-700" };
-    return map[stream] || "bg-gray-100 text-gray-700";
-  };
-
-  const openModal = () => {
-    setStep(1);
-    setSymbolLookup("");
-    setNotFound(false);
-    setFoundStudent(null);
-    setMarks("");
-    setModalOpen(true);
-  };
-
-  const handleLookup = () => {
-    const student = LOOKUP_DB[symbolLookup];
-    if (student) {
-      setFoundStudent(student);
-      setNotFound(false);
-      setStep(2);
+  useEffect(() => {
+    if (scholarshipId) {
+      setPage(1);
+      setSearch("");
+      getOrCreateExam(Number(scholarshipId));
     } else {
-      setNotFound(true);
-      setFoundStudent(null);
+      setExam(null);
+    }
+  }, [scholarshipId, getOrCreateExam]);
+
+  const refreshExam = useCallback(async () => {
+    if (!exam?.id) return;
+    try {
+      const [updated, appsResp] = await Promise.all([
+        writtenExamApi.getById(exam.id),
+        scholarshipProviderApi.getApplications({ scholarship_id: String(scholarshipId), status: "shortlisted", page: 1, limit: 500 }),
+      ]);
+      setExam(updated);
+      const map: Record<number, ProviderApplication> = {};
+      for (const a of appsResp.applications) {
+        map[a.id] = a;
+      }
+      setAppsMap(map);
+    } catch {
+      toast.error("Failed to refresh exam");
+    }
+  }, [exam?.id, scholarshipId]);
+
+  // --- Filtered & paginated results ---
+  const allResults = exam?.results || [];
+
+  const filteredResults = useMemo(() => {
+    if (!search) return allResults;
+    const q = search.toLowerCase();
+    return allResults.filter(
+      (r) =>
+        (r.student_name || "").toLowerCase().includes(q) ||
+        String(r.application_id).includes(q) ||
+        (r.roll_no || "").toLowerCase().includes(q)
+    );
+  }, [allResults, search]);
+
+  const totalPages = Math.max(1, Math.ceil(filteredResults.length / PAGE_SIZE));
+  const safePage = Math.min(page, totalPages);
+  const paginatedResults = filteredResults.slice((safePage - 1) * PAGE_SIZE, safePage * PAGE_SIZE);
+
+  // --- Add Student Modal ---
+  const openAddModal = () => {
+    setAddStep(1);
+    setLookupValue("");
+    setLookupError(false);
+    setLookedUpStudent(null);
+    setAddMarks("");
+    setAddOpen(true);
+  };
+
+  const closeAddModal = () => {
+    setAddOpen(false);
+    setLookedUpStudent(null);
+    setLookupError(false);
+  };
+
+  const handleLookup = async () => {
+    const val = lookupValue.trim();
+    if (!val) return;
+    setLookupError(false);
+    setLookedUpStudent(null);
+
+    try {
+      // Search shortlisted applications for this scholarship
+      const resp = await scholarshipProviderApi.getApplications({
+        status: "shortlisted",
+        scholarship_id: scholarshipId,
+        page: 1,
+        limit: 200,
+      });
+
+      // Try match by raw ID, formatted APP-YYYY-XXX ID, or name
+      const parsedId = parseAppId(val);
+      const match = resp.applications.find(
+        (a) =>
+          String(a.id) === val ||
+          (parsedId !== null && a.id === parsedId) ||
+          formatAppId(a.id) === val.toUpperCase() ||
+          a.full_name?.toLowerCase().includes(val.toLowerCase())
+      );
+
+      if (!match) {
+        setLookupError(true);
+        return;
+      }
+
+      // Check not already in exam
+      if (exam?.results?.some((r) => r.application_id === match.id)) {
+        toast.error("Student already added to this exam");
+        setLookupError(true);
+        return;
+      }
+
+      setLookedUpStudent({
+        application_id: match.id,
+        full_name: match.full_name || `${match.first_name} ${match.last_name}`,
+        stream: match.stream,
+        exam_center: match.exam_center,
+      });
+      setAddMarks("");
+      setAddStep(2);
+    } catch {
+      toast.error("Failed to look up student");
     }
   };
 
-  const handleAddStudent = () => {
-    if (!foundStudent || !marks) return;
-    const marksNum = parseInt(marks, 10);
-    const newResult: ExamResult = {
-      id: Date.now(),
-      name: foundStudent.name,
-      appId: foundStudent.appId,
-      symbolNo: symbolLookup,
-      stream: foundStudent.stream,
-      examCenter: foundStudent.examCenter,
-      marks: marksNum,
-      status: marksNum >= 40 ? "Pass" : "Fail",
-    };
-    setResults((prev) => [...prev, newResult]);
-    toast.success("User marks have been added successfully.");
-    setModalOpen(false);
+  const handleAddStudent = async () => {
+    if (!exam?.id || !lookedUpStudent || !addMarks.trim()) return;
+    setAddingStudent(true);
+    try {
+      const updated = await writtenExamApi.addResult(exam.id, {
+        application_id: lookedUpStudent.application_id,
+        marks_obtained: Number(addMarks),
+      });
+      setExam(updated);
+      // Merge looked-up student into apps map so name shows immediately
+      if (lookedUpStudent && !appsMap[lookedUpStudent.application_id]) {
+        setAppsMap((prev) => ({
+          ...prev,
+          [lookedUpStudent.application_id]: {
+            id: lookedUpStudent.application_id,
+            first_name: lookedUpStudent.full_name.split(" ")[0] || "",
+            last_name: lookedUpStudent.full_name.split(" ").slice(1).join(" ") || "",
+            stream: lookedUpStudent.stream,
+            exam_center: lookedUpStudent.exam_center,
+          } as ProviderApplication,
+        }));
+      }
+      toast.success("Student added");
+      closeAddModal();
+    } catch {
+      toast.error("Failed to add student");
+    } finally {
+      setAddingStudent(false);
+    }
   };
 
-  const autoStatus = marks ? (parseInt(marks, 10) >= 40 ? "Pass" : "Fail") : "";
+  // --- Edit Marks Modal ---
+  const openEditMarks = (result: WrittenExamResultData) => {
+    setEditResult(result);
+    setEditMarks(String(result.marks_obtained ?? ""));
+    setEditOpen(true);
+  };
+
+  const getStudentName = (r: WrittenExamResultData) => {
+    if (r.student_name) return r.student_name;
+    const app = appsMap[r.application_id];
+    return app ? `${app.first_name} ${app.last_name}` : "—";
+  };
+
+  const handleEditMarks = async () => {
+    if (!exam?.id || !editResult) return;
+    setSavingEdit(true);
+    try {
+      const updated = await writtenExamApi.updateResult(exam.id, editResult.id, {
+        marks_obtained: Number(editMarks),
+      });
+      setExam(updated);
+      toast.success("Marks updated");
+      setEditOpen(false);
+    } catch {
+      toast.error("Failed to update marks");
+    } finally {
+      setSavingEdit(false);
+    }
+  };
+
+  const handleDeleteResult = async () => {
+    const resultId = deleteId;
+    if (!exam?.id || resultId == null) return;
+    setDeleteId(null);
+    try {
+      await writtenExamApi.deleteResult(exam.id, resultId);
+      refreshExam();
+      toast.success("Student removed");
+    } catch {
+      toast.error("Failed to remove student");
+    }
+  };
+
+  const autoStatus = (marks: number) => {
+    if (!marks && marks !== 0) return "";
+    return marks >= 40 ? "Pass" : "Fail";
+  };
+
+  const autoStatusClass = (marks: number) => {
+    const s = autoStatus(marks);
+    if (s === "Pass") return "bg-green-100 text-green-700";
+    if (s === "Fail") return "bg-red-100 text-red-700";
+    return "";
+  };
 
   return (
     <div className="space-y-6">
@@ -128,50 +320,53 @@ const WrittenExam: React.FC = memo(() => {
         </div>
       </div>
 
-      <div className="bg-white rounded-lg p-8 border border-slate-100">
-        <div className="flex justify-between items-center mb-6">
-          <h2 className="text-lg font-bold text-gray-900 flex items-center gap-2">
-            <GraduationCap className="w-5 h-5 text-purple-600" /> Student Results
-          </h2>
-          <div className="flex items-center gap-3">
-            <div className="relative w-64">
-              <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                <Search className="w-4 h-4 text-gray-400" />
-              </div>
-              <input type="text" className="w-full pl-10 pr-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:border-blue-500" placeholder="Search by name or symbol..." value={search} onChange={(e) => { setSearch(e.target.value); setPage(1); }} />
-            </div>
-            <button onClick={openModal} className="px-4 py-2 bg-blue-600 text-white rounded-lg text-sm font-semibold hover:bg-blue-700 transition-colors flex items-center gap-1">
-              <Plus className="w-4 h-4" /> Add Student
-            </button>
-          </div>
-        </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-5 mb-6">
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1.5">Select Scholarship</label>
-            <select className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:border-blue-500" value={scholarship} onChange={(e) => setScholarship(e.target.value)}>
-              <option value="">Select scholarship</option>
-              <option value="sch1">Project Shiksha Scholarship 2082</option>
-              <option value="sch2">Nepal STEM Excellence Grant</option>
-            </select>
-          </div>
-          {scholarship && (
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1.5">Exam Center</label>
-              <select className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:border-blue-500" value={examCenter} onChange={(e) => setExamCenter(e.target.value)}>
-                <option value="">All Centers</option>
-                {uniqueCenters.map((c) => <option key={c} value={c}>{c}</option>)}
+      <div className="bg-white rounded-lg p-6 border border-slate-100">
+        {/* Top bar: scholarship select + search + add button */}
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
+          <div className="flex items-center gap-4">
+            <div className="w-72">
+              <select
+                className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:border-blue-500"
+                value={scholarshipId}
+                onChange={(e) => { const v = e.target.value; setScholarshipId(v); if (typeof window !== "undefined") localStorage.setItem(LS_KEY, v); }}
+              >
+                <option value="">Select scholarship</option>
+                {scholarships.map((s) => (
+                  <option key={s.id} value={s.id}>{s.title}</option>
+                ))}
               </select>
+            </div>
+          </div>
+          {exam && (
+            <div className="flex items-center gap-3">
+              <div className="relative w-64">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+                <input
+                  type="text"
+                  className="w-full pl-10 pr-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:border-blue-500"
+                  placeholder="Search by name or symbol..."
+                  value={search}
+                  onChange={(e) => { setSearch(e.target.value); setPage(1); }}
+                />
+              </div>
+              <button
+                onClick={openAddModal}
+                className="px-4 py-2 bg-blue-600 text-white rounded-lg text-sm font-semibold hover:bg-blue-700 transition-colors flex items-center gap-1"
+              >
+                <Plus className="w-4 h-4" /> Add Student
+              </button>
             </div>
           )}
         </div>
 
-        {results.length === 0 ? (
-          <div className="py-12 text-center text-gray-400 text-sm">No results found</div>
-        ) : (
+        {!scholarshipId ? (
+          <div className="py-12 text-center text-gray-400 text-sm">Select a scholarship to manage written exam</div>
+        ) : loading ? (
+          <div className="py-12 flex items-center justify-center text-gray-400"><Loader2 className="w-5 h-5 animate-spin mr-2" /> Loading...</div>
+        ) : allResults.length > 0 ? (
           <>
             <div className="overflow-x-auto" style={{ maxWidth: "100%" }}>
-              <table className="w-full text-sm" style={{ minWidth: "1000px" }}>
+              <table className="w-full text-sm" style={{ minWidth: 1000 }}>
                 <thead className="bg-gray-50 border-b border-gray-200">
                   <tr>
                     <th className="text-left py-3 px-4 font-semibold text-gray-700">Student Name</th>
@@ -185,92 +380,229 @@ const WrittenExam: React.FC = memo(() => {
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-gray-100">
-                  {paged.length === 0 ? (
-                    <tr><td colSpan={8} className="py-8 text-center text-gray-500">No results found</td></tr>
-                  ) : paged.map((r) => (
-                    <tr key={r.id} className="hover:bg-gray-50">
-                      <td className="py-3 px-4 font-medium text-gray-900">{r.name}</td>
-                      <td className="text-center py-3 px-4 font-mono text-gray-600">{r.appId}</td>
-                      <td className="text-center py-3 px-4 font-mono text-gray-600">{r.symbolNo}</td>
-                      <td className="text-center py-3 px-4"><span className={`px-2 py-1 rounded text-xs font-semibold ${streamColor(r.stream)}`}>{r.stream}</span></td>
-                      <td className="text-center py-3 px-4 text-gray-600">{r.examCenter}</td>
-                      <td className="text-center py-3 px-4 font-bold text-gray-900">{r.marks}</td>
-                      <td className="text-center py-3 px-4">
-                        <span className={`px-2 py-1 rounded text-xs font-semibold ${r.status === "Pass" ? "bg-green-100 text-green-700" : "bg-red-100 text-red-700"}`}>{r.status}</span>
-                      </td>
-                      <td className="text-center py-3 px-4">
-                        <div className="flex items-center justify-center gap-2">
-                          <button className="p-1.5 hover:bg-blue-50 rounded text-blue-600"><Pencil className="w-4 h-4" /></button>
-                          <button onClick={() => setResults((prev) => prev.filter((x) => x.id !== r.id))} className="p-1.5 hover:bg-red-50 rounded text-red-600"><Trash2 className="w-4 h-4" /></button>
-                        </div>
-                      </td>
-                    </tr>
-                  ))}
+                  {paginatedResults.map((r) => {
+                    const app = appsMap[r.application_id];
+                    const studentName = r.student_name || (app ? `${app.first_name} ${app.last_name}` : "—");
+                    const stream = r.stream || app?.stream;
+                    const examCenter = r.exam_center || app?.exam_center;
+                    const streamColor = STREAM_COLORS[stream || ""] || "bg-gray-100 text-gray-700";
+                    const statusClass = r.marks_obtained != null
+                      ? (r.marks_obtained >= 40 ? "bg-green-100 text-green-700" : "bg-red-100 text-red-700")
+                      : "";
+                    const statusText = r.marks_obtained != null
+                      ? (r.marks_obtained >= 40 ? "Pass" : "Fail")
+                      : "";
+                    return (
+                      <tr key={r.id} className="hover:bg-gray-50">
+                        <td className="py-3 px-4 font-medium text-gray-900">{studentName}</td>
+                        <td className="text-center py-3 px-4 font-mono text-gray-600">{formatAppId(r.application_id)}</td>
+                        <td className="text-center py-3 px-4 font-mono text-gray-600">{r.roll_no || "—"}</td>
+                        <td className="text-center py-3 px-4">
+                          <span className={`px-2 py-1 rounded text-xs font-semibold ${streamColor}`}>{stream || "N/A"}</span>
+                        </td>
+                        <td className="text-center py-3 px-4 text-gray-600">{examCenter || "—"}</td>
+                        <td className="text-center py-3 px-4 font-bold text-gray-900">{r.marks_obtained ?? "—"}</td>
+                        <td className="text-center py-3 px-4">
+                          {statusText ? (
+                            <span className={`px-2 py-1 rounded text-xs font-semibold ${statusClass}`}>{statusText}</span>
+                          ) : (
+                            <span className="text-xs text-gray-400">—</span>
+                          )}
+                        </td>
+                        <td className="text-center py-3 px-4">
+                          <div className="flex items-center justify-center gap-2">
+                            <button onClick={() => openEditMarks(r)} className="p-1.5 hover:bg-blue-50 rounded text-blue-600" title="Edit marks"><Pencil className="w-4 h-4" /></button>
+                            <button onClick={() => setDeleteId(r.id)} className="p-1.5 hover:bg-red-50 rounded text-red-600" title="Remove"><Trash2 className="w-4 h-4" /></button>
+                          </div>
+                        </td>
+                      </tr>
+                    );
+                  })}
                 </tbody>
               </table>
             </div>
 
+            {/* Pagination */}
             <div className="flex items-center justify-between mt-6">
-              <p className="text-sm text-gray-500">Showing <span className="font-medium">{(page - 1) * limit + 1}-{Math.min(page * limit, filtered.length)}</span> of <span className="font-medium">{filtered.length}</span> students</p>
+              <p className="text-sm text-gray-500">
+                Showing <span className="font-medium">{(safePage - 1) * PAGE_SIZE + 1}-{Math.min(safePage * PAGE_SIZE, filteredResults.length)}</span> of{" "}
+                <span className="font-medium">{filteredResults.length}</span> students
+              </p>
               <div className="flex items-center gap-2">
-                <button onClick={() => setPage((p) => Math.max(1, p - 1))} disabled={page === 1} className="w-8 h-8 flex items-center justify-center rounded-lg border border-gray-200 text-gray-400 disabled:cursor-not-allowed disabled:opacity-50 hover:bg-gray-50"><ChevronLeft className="w-4 h-4" /></button>
-                {Array.from({ length: Math.min(totalPages, 5) }, (_, i) => (
-                  <button key={i} onClick={() => setPage(i + 1)} className={`w-8 h-8 flex items-center justify-center rounded-lg text-sm font-medium ${page === i + 1 ? "bg-blue-600 text-white" : "border border-gray-200 text-gray-600 hover:bg-gray-50"}`}>{i + 1}</button>
+                <button
+                  disabled={safePage <= 1}
+                  onClick={() => setPage(safePage - 1)}
+                  className="w-8 h-8 flex items-center justify-center rounded-lg border border-gray-200 text-gray-600 hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed"
+                >
+                  <ChevronLeft className="w-4 h-4" />
+                </button>
+                {Array.from({ length: totalPages }, (_, i) => i + 1).map((p) => (
+                  <button
+                    key={p}
+                    onClick={() => setPage(p)}
+                    className={`w-8 h-8 flex items-center justify-center rounded-lg text-sm font-medium ${
+                      p === safePage ? "bg-blue-600 text-white" : "border border-gray-200 text-gray-600 hover:bg-gray-50"
+                    }`}
+                  >
+                    {p}
+                  </button>
                 ))}
-                {totalPages > 5 && <span className="text-gray-400">...</span>}
-                <button onClick={() => setPage((p) => Math.min(totalPages, p + 1))} disabled={page === totalPages} className="w-8 h-8 flex items-center justify-center rounded-lg border border-gray-200 text-gray-400 disabled:cursor-not-allowed disabled:opacity-50 hover:bg-gray-50"><ChevronRight className="w-4 h-4" /></button>
+                <button
+                  disabled={safePage >= totalPages}
+                  onClick={() => setPage(safePage + 1)}
+                  className="w-8 h-8 flex items-center justify-center rounded-lg border border-gray-200 text-gray-600 hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed"
+                >
+                  <ChevronRight className="w-4 h-4" />
+                </button>
               </div>
             </div>
           </>
+        ) : (
+          <div className="py-12 text-center text-gray-400 text-sm">No students added yet. Click &quot;Add Student&quot; to begin.</div>
         )}
       </div>
 
-      {modalOpen && (
+      {/* Add Student Modal — Step 1: Lookup */}
+      {addOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
           <div className="bg-white rounded-lg max-w-lg w-full overflow-hidden shadow-xl">
-            <div className="bg-white border-b border-gray-200 px-6 py-4 flex items-center justify-between">
-              <h2 className="text-lg font-bold text-gray-900 flex items-center gap-2"><GraduationCap className="w-5 h-5 text-purple-600" /> Add Student Result</h2>
-              <button onClick={() => setModalOpen(false)} className="p-2 hover:bg-gray-100 rounded-lg"><X className="w-5 h-5" /></button>
+            <div className="px-6 py-4 border-b border-gray-200 flex items-center justify-between">
+              <h2 className="text-lg font-bold text-gray-900 flex items-center gap-2">
+                <Plus className="w-5 h-5 text-blue-600" /> Add Student Result
+              </h2>
+              <button onClick={closeAddModal} className="p-2 hover:bg-gray-100 rounded-lg"><X className="w-5 h-5" /></button>
             </div>
 
-            {step === 1 && (
+            {addStep === 1 ? (
               <div className="p-6">
-                <p className="text-sm text-gray-600 mb-4">Enter the Symbol Number to look up student details.</p>
+                <p className="text-sm text-gray-600 mb-4">Enter the Application ID or Student Name to look up student details.</p>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1.5">Symbol Number <span className="text-red-500">*</span></label>
-                  <input type="text" className="w-full px-3 py-2 border border-gray-300 rounded-lg text-lg text-center font-mono tracking-widest focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="e.g., 2082001" value={symbolLookup} onChange={(e) => { setSymbolLookup(e.target.value); setNotFound(false); }} />
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Application ID / Name <span className="text-red-500">*</span></label>
+                  <input
+                    type="text"
+                    className="w-full px-3 py-2 border border-gray-200 rounded-lg text-lg text-center font-mono tracking-widest focus:outline-none focus:border-blue-500"
+                    placeholder="e.g., 42 or Ram Bahadur"
+                    value={lookupValue}
+                    onChange={(e) => { setLookupValue(e.target.value); setLookupError(false); }}
+                    onKeyDown={(e) => e.key === "Enter" && handleLookup()}
+                  />
                 </div>
-                {notFound && (
-                  <div className="mt-4 p-3 bg-red-50 border border-red-200 rounded-lg">
-                    <p className="text-sm text-red-700 flex items-center gap-2"><AlertCircle className="w-5 h-5" /> Result Not Found. Try Again.</p>
-                  </div>
+                {lookupError && (
+                  <p className="mt-4 text-sm text-red-600">Student not found. Try again with a different Application ID or name.</p>
                 )}
                 <div className="flex justify-end gap-3 mt-6">
-                  <button onClick={() => setModalOpen(false)} className="px-6 py-2.5 border border-gray-300 rounded-lg text-gray-700 font-medium hover:bg-gray-50 transition-colors">Cancel</button>
+                  <button onClick={closeAddModal} className="px-6 py-2.5 border border-gray-300 rounded-lg text-gray-700 font-medium hover:bg-gray-50 transition-colors">Cancel</button>
                   <button onClick={handleLookup} className="px-6 py-2.5 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700 transition-colors">Look Up</button>
                 </div>
               </div>
-            )}
-
-            {step === 2 && foundStudent && (
+            ) : (
               <div className="p-6 space-y-4">
-                <div><label className="block text-sm font-medium text-gray-700 mb-1.5">Student Name</label><input type="text" className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm bg-gray-50" value={foundStudent.name} readOnly /></div>
-                <div><label className="block text-sm font-medium text-gray-700 mb-1.5">Application ID</label><input type="text" className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm bg-gray-50" value={foundStudent.appId} readOnly /></div>
-                <div><label className="block text-sm font-medium text-gray-700 mb-1.5">Symbol Number</label><input type="text" className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm bg-gray-50" value={symbolLookup} readOnly /></div>
-                <div className="grid grid-cols-2 gap-4">
-                  <div><label className="block text-sm font-medium text-gray-700 mb-1.5">Stream</label><input type="text" className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm bg-gray-50" value={foundStudent.stream} readOnly /></div>
-                  <div><label className="block text-sm font-medium text-gray-700 mb-1.5">Exam Center</label><input type="text" className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm bg-gray-50" value={foundStudent.examCenter} readOnly /></div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Student Name</label>
+                  <input type="text" className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm bg-gray-50" value={lookedUpStudent?.full_name || ""} readOnly />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Application ID</label>
+                  <input type="text" className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm bg-gray-50" value={lookedUpStudent ? formatAppId(lookedUpStudent.application_id) : ""} readOnly />
                 </div>
                 <div className="grid grid-cols-2 gap-4">
-                  <div><label className="block text-sm font-medium text-gray-700 mb-1.5">Marks / Score <span className="text-red-500">*</span></label><input type="number" className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="e.g., 85" value={marks} onChange={(e) => setMarks(e.target.value)} /></div>
-                  <div><label className="block text-sm font-medium text-gray-700 mb-1.5">Status</label><input type="text" className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm bg-gray-50 font-semibold" value={autoStatus} placeholder="Auto from marks" readOnly /></div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Stream</label>
+                    <input type="text" className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm bg-gray-50" value={lookedUpStudent?.stream || "N/A"} readOnly />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Exam Center</label>
+                    <input type="text" className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm bg-gray-50" value={lookedUpStudent?.exam_center || "N/A"} readOnly />
+                  </div>
+                </div>
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Marks / Score <span className="text-red-500">*</span></label>
+                    <input
+                      type="number"
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      placeholder="e.g., 85"
+                      value={addMarks}
+                      onChange={(e) => setAddMarks(e.target.value)}
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Status</label>
+                    <input
+                      type="text"
+                      className={`w-full px-3 py-2 border border-gray-200 rounded-lg text-sm bg-gray-50 font-semibold ${autoStatusClass(Number(addMarks))}`}
+                      value={autoStatus(Number(addMarks))}
+                      readOnly
+                      placeholder="Auto from marks"
+                    />
+                  </div>
                 </div>
                 <div className="flex justify-end gap-3 pt-4 border-t border-gray-200">
-                  <button onClick={() => setStep(1)} className="px-6 py-2.5 border border-gray-300 rounded-lg text-gray-700 font-medium hover:bg-gray-50 transition-colors">Back</button>
-                  <button onClick={handleAddStudent} disabled={!marks} className="px-6 py-2.5 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700 transition-colors disabled:opacity-50">Add Student</button>
+                  <button onClick={() => { setAddStep(1); setLookupError(false); }} className="px-6 py-2.5 border border-gray-300 rounded-lg text-gray-700 font-medium hover:bg-gray-50 transition-colors">Back</button>
+                  <button onClick={handleAddStudent} disabled={!addMarks.trim() || addingStudent} className="px-6 py-2.5 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700 disabled:opacity-50 flex items-center gap-2">
+                    {addingStudent ? <><Loader2 className="w-4 h-4 animate-spin" /> Adding...</> : "Add Student"}
+                  </button>
                 </div>
               </div>
             )}
+          </div>
+        </div>
+      )}
+
+      {/* Delete Confirmation Modal */}
+      {deleteId != null && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
+          <div className="bg-white rounded-lg max-w-sm w-full overflow-hidden shadow-xl">
+            <div className="px-6 py-4">
+              <p className="text-sm text-gray-700">Remove this student from exam?</p>
+            </div>
+            <div className="px-6 py-4 border-t border-gray-200 flex justify-end gap-3">
+              <button onClick={() => setDeleteId(null)} className="px-6 py-2.5 border border-gray-300 rounded-lg text-gray-700 font-medium hover:bg-gray-50">Cancel</button>
+              <button onClick={handleDeleteResult} className="px-6 py-2.5 bg-red-600 text-white rounded-lg font-medium hover:bg-red-700">Remove</button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Edit Marks Modal */}
+      {editOpen && editResult && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
+          <div className="bg-white rounded-lg max-w-md w-full overflow-hidden shadow-xl">
+            <div className="px-6 py-4 border-b border-gray-200 flex items-center justify-between">
+              <h2 className="text-lg font-bold text-gray-900">Edit Marks</h2>
+              <button onClick={() => setEditOpen(false)} className="p-2 hover:bg-gray-100 rounded-lg"><X className="w-5 h-5" /></button>
+            </div>
+            <div className="p-6 space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Student Name</label>
+                <input type="text" className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm bg-gray-50" value={getStudentName(editResult)} readOnly />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Application ID</label>
+                <input type="text" className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm bg-gray-50" value={formatAppId(editResult.application_id)} readOnly />
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Marks Obtained</label>
+                  <input type="number" className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" value={editMarks} onChange={(e) => setEditMarks(e.target.value)} />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Status</label>
+                  <input
+                    type="text"
+                    className={`w-full px-3 py-2 border border-gray-200 rounded-lg text-sm bg-gray-50 font-semibold ${autoStatusClass(Number(editMarks))}`}
+                    value={autoStatus(Number(editMarks))}
+                    readOnly
+                  />
+                </div>
+              </div>
+              <div className="flex justify-end gap-3 pt-4">
+                <button onClick={() => setEditOpen(false)} className="px-6 py-2.5 border border-gray-300 rounded-lg text-gray-700 font-medium hover:bg-gray-50">Cancel</button>
+                <button onClick={handleEditMarks} disabled={savingEdit} className="px-6 py-2.5 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700 disabled:opacity-50 flex items-center gap-2">
+                  {savingEdit ? <><Loader2 className="w-4 h-4 animate-spin" /> Saving...</> : "Save"}
+                </button>
+              </div>
+            </div>
           </div>
         </div>
       )}

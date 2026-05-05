@@ -3,15 +3,25 @@
 import React, { useState, useEffect, memo } from "react";
 import { Home, Star, Eye, ChevronLeft, ChevronRight } from "lucide-react";
 import { scholarshipProviderApi, ProviderApplication } from "@/services/scholarshipProviderApi";
+import ApplicantProfileModal from "./ApplicantProfileModal";
 
-interface ShortlistManagementProps {
-  onReviewStudent?: (id: string) => void;
-}
+const statusBadge = (status: string) => {
+  const map: Record<string, string> = {
+    pending: "bg-yellow-100 text-yellow-700",
+    approved: "bg-green-100 text-green-700",
+    shortlisted: "bg-purple-100 text-purple-700",
+    rejected: "bg-red-100 text-red-700",
+  };
+  return map[status] || "bg-gray-100 text-gray-700";
+};
 
-const ShortlistManagement: React.FC<ShortlistManagementProps> = memo(({ onReviewStudent }) => {
+const statusLabel = (s: string) => s.charAt(0).toUpperCase() + s.slice(1);
+
+const ShortlistManagement: React.FC = memo(() => {
   const [applications, setApplications] = useState<ProviderApplication[]>([]);
   const [loading, setLoading] = useState(true);
   const [page, setPage] = useState(1);
+  const [selectedApplicantId, setSelectedApplicantId] = useState<number | null>(null);
   const limit = 10;
 
   useEffect(() => {
@@ -33,7 +43,7 @@ const ShortlistManagement: React.FC<ShortlistManagementProps> = memo(({ onReview
   const totalPages = Math.ceil(shortlisted.length / limit);
   const paged = shortlisted.slice((page - 1) * limit, page * limit);
 
-  const appId = (idx: number) => `#APP-2026-${String(idx + 1).padStart(3, "0")}`;
+  const appId = (id: number) => `#APP-2026-${String(id).padStart(3, "0")}`;
 
   if (loading) {
     return <div className="py-12 text-center text-slate-500">Loading shortlist...</div>;
@@ -69,7 +79,7 @@ const ShortlistManagement: React.FC<ShortlistManagementProps> = memo(({ onReview
         ) : (
           <>
             <div className="overflow-x-auto" style={{ maxWidth: "100%" }}>
-              <table className="w-full text-sm" style={{ minWidth: "1200px" }}>
+              <table className="w-full text-sm" style={{ minWidth: "1800px" }}>
                 <thead className="bg-gray-50 border-b border-gray-200">
                   <tr>
                     <th className="text-center py-3 px-3 font-semibold text-gray-700">App ID</th>
@@ -79,25 +89,30 @@ const ShortlistManagement: React.FC<ShortlistManagementProps> = memo(({ onReview
                     <th className="text-center py-3 px-3 font-semibold text-gray-700">Province</th>
                     <th className="text-center py-3 px-3 font-semibold text-gray-700">District</th>
                     <th className="text-center py-3 px-3 font-semibold text-gray-700">Stream</th>
+                    <th className="text-center py-3 px-3 font-semibold text-gray-700">Exam Center</th>
                     <th className="text-center py-3 px-3 font-semibold text-gray-700">GPA</th>
                     <th className="text-center py-3 px-3 font-semibold text-gray-700">School Type</th>
+                    <th className="text-center py-3 px-3 font-semibold text-gray-700">Admit Card</th>
+                    <th className="text-center py-3 px-3 font-semibold text-gray-700">Payment</th>
+                    <th className="text-center py-3 px-3 font-semibold text-gray-700">Final Status</th>
                     <th className="text-center py-3 px-3 font-semibold text-gray-700">Actions</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-gray-100">
                   {paged.map((app, idx) => (
                     <tr key={app.id} className="hover:bg-gray-50">
-                      <td className="text-center py-3 px-3 font-mono font-medium text-blue-600">{appId((page - 1) * limit + idx)}</td>
+                      <td className="text-center py-3 px-3 font-mono font-medium text-blue-600">{appId(app.id)}</td>
                       <td className="py-3 px-3 font-medium text-gray-900">{app.first_name} {app.last_name}</td>
                       <td className="text-center py-3 px-3">
                         <span className={`px-2 py-1 rounded text-xs font-semibold ${app.gender === "Female" ? "bg-pink-100 text-pink-700" : "bg-blue-100 text-blue-700"}`}>{app.gender || "N/A"}</span>
                       </td>
-                      <td className="text-center py-3 px-3 text-gray-600">{(app as any).ethnicity || "-"}</td>
+                      <td className="text-center py-3 px-3 text-gray-600">{app.ethnicity || "-"}</td>
                       <td className="text-center py-3 px-3 text-gray-600">{app.province || "-"}</td>
-                      <td className="text-center py-3 px-3 text-gray-600">{(app as any).district || "-"}</td>
+                      <td className="text-center py-3 px-3 text-gray-600">{app.district || "-"}</td>
                       <td className="text-center py-3 px-3">
                         <span className={`px-2 py-1 rounded text-xs font-semibold ${app.stream === "Management" ? "bg-indigo-100 text-indigo-700" : "bg-cyan-100 text-cyan-700"}`}>{app.stream || "N/A"}</span>
                       </td>
+                      <td className="text-center py-3 px-3 text-gray-600">{app.exam_center || "-"}</td>
                       <td className="text-center py-3 px-3 font-bold text-green-600">{app.gpa?.toFixed(2) || "-"}</td>
                       <td className="text-center py-3 px-3">
                         <span className={`px-2 py-1 rounded text-xs font-semibold ${
@@ -107,8 +122,30 @@ const ShortlistManagement: React.FC<ShortlistManagementProps> = memo(({ onReview
                         }`}>{app.school_type || "N/A"}</span>
                       </td>
                       <td className="text-center py-3 px-3">
+                        <span className="bg-green-100 text-green-700 px-2 py-1 rounded text-xs font-semibold">Sent</span>
+                      </td>
+                      <td className="text-center py-3 px-3">
+                        {(() => {
+                          const status = app.payment?.status;
+                          const colors: Record<string, string> = {
+                            pending: 'bg-yellow-100 text-yellow-800',
+                            completed: 'bg-green-100 text-green-800',
+                            pending_approval: 'bg-blue-100 text-blue-800',
+                            rejected: 'bg-red-100 text-red-800',
+                          };
+                          return status ? (
+                            <span className={`px-2 py-1 rounded text-xs font-medium ${colors[status] || 'bg-gray-100'}`}>
+                              {status.replace('_', ' ')}
+                            </span>
+                          ) : '-';
+                        })()}
+                      </td>
+                      <td className="text-center py-3 px-3">
+                        <span className={`${statusBadge(app.status)} px-2 py-1 rounded text-xs font-semibold`}>{statusLabel(app.status)}</span>
+                      </td>
+                      <td className="text-center py-3 px-3">
                         <div className="flex items-center justify-center gap-1">
-                          <button onClick={() => onReviewStudent?.(String(app.id))} className="p-1.5 hover:bg-blue-50 rounded text-blue-600" title="View Profile">
+                          <button onClick={() => setSelectedApplicantId(app.id)} className="p-1.5 hover:bg-blue-50 rounded text-blue-600" title="View Profile">
                             <Eye className="w-4 h-4" />
                           </button>
                         </div>
@@ -140,6 +177,18 @@ const ShortlistManagement: React.FC<ShortlistManagementProps> = memo(({ onReview
           </>
         )}
       </div>
+
+      {selectedApplicantId && (
+        <ApplicantProfileModal
+          applicationId={selectedApplicantId}
+          onClose={() => setSelectedApplicantId(null)}
+          onStatusUpdate={() => {
+            scholarshipProviderApi.getApplications({ page: 1, limit: 100 }).then((res) => {
+              setApplications(res.applications.filter((a) => a.status === "shortlisted" || a.status === "approved" || a.status === "rejected"));
+            }).catch(() => {});
+          }}
+        />
+      )}
     </div>
   );
 });

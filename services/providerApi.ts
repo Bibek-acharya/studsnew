@@ -22,6 +22,7 @@ export interface ProviderProfile {
   linkedin_url?: string;
   map_url?: string;
   brochure_url?: string;
+  banner_url?: string;
   services?: ProviderService[];
 
 

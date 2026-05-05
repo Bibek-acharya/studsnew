@@ -95,7 +95,7 @@ const ProviderDetailPage: React.FC<{ params: Promise<{ id: string }> }> = ({ par
       <div
         className="relative w-full h-[220px] md:h-[360px] bg-cover bg-center"
         style={{
-          backgroundImage: `url(https://images.unsplash.com/photo-1540575467063-178a50c2df87?auto=format&fit=crop&q=80&w=2000&h=600)`,
+          backgroundImage: `url(${profile.banner_url || "https://images.unsplash.com/photo-1540575467063-178a50c2df87?auto=format&fit=crop&q=80&w=2000&h=600"})`,
         }}
       >
         <div className="absolute inset-0 bg-black/20" />
@@ -153,9 +153,17 @@ const ProviderDetailPage: React.FC<{ params: Promise<{ id: string }> }> = ({ par
             </div>
 
             <div className="flex flex-wrap items-center gap-3 mt-6 lg:mt-0 w-full lg:w-auto">
-              <button className="flex items-center justify-center gap-2 bg-white border border-gray-200 hover:bg-gray-50 text-gray-700 px-5 py-2.5 rounded-lg text-[14px] font-semibold transition-colors shadow-sm">
-                <Download className="w-4 h-4" /> Brochure
-              </button>
+              {profile.brochure_url && (
+                <a 
+                  href={profile.brochure_url.startsWith('http') ? profile.brochure_url : `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8080'}${profile.brochure_url.startsWith('/') ? '' : '/'}${profile.brochure_url}`}
+                  target="_blank" 
+                  rel="noreferrer"
+                  download
+                  className="flex items-center justify-center gap-2 bg-white border border-gray-200 hover:bg-gray-50 text-gray-700 px-5 py-2.5 rounded-lg text-[14px] font-semibold transition-colors shadow-sm"
+                >
+                  <Download className="w-4 h-4" /> Brochure
+                </a>
+              )}
               <button className="flex items-center justify-center bg-white border border-gray-200 hover:bg-gray-50 text-gray-700 p-2.5 rounded-lg transition-colors shadow-sm">
                 <Share2 className="w-5 h-5" />
               </button>
@@ -785,7 +793,7 @@ const ProviderDetailPage: React.FC<{ params: Promise<{ id: string }> }> = ({ par
             {profile.brochure_url && (
               <div className="mt-5">
                 <a 
-                  href={profile.brochure_url.startsWith('http') ? profile.brochure_url : `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8080'}${profile.brochure_url}`}
+                  href={profile.brochure_url.startsWith('http') ? profile.brochure_url : `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8080'}${profile.brochure_url.startsWith('/') ? '' : '/'}${profile.brochure_url}`}
                   target="_blank" 
                   rel="noreferrer"
                   download="Provider_Brochure"
