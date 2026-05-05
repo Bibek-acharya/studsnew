@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect, memo } from "react";
-import { Home, Building2, CheckCircle, DollarSign, MapPin, GraduationCap, Pencil, ChevronLeft, ChevronRight, X } from "lucide-react";
+import { Home, Building2, CheckCircle, Tag, MapPin, GraduationCap, Pencil, ChevronLeft, ChevronRight, X } from "lucide-react";
 import { scholarshipProviderApi, ProviderScholarship } from "@/services/scholarshipProviderApi";
 import { toast } from "sonner";
 
@@ -217,8 +217,8 @@ const DraftScholarship: React.FC<DraftScholarshipProps> = memo(({ onEdit, onNavi
                   <div className="bg-gray-50 rounded-lg p-3 flex flex-col gap-2 border border-gray-100">
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-1.5 text-gray-600 text-xs">
-                        <DollarSign className="w-3 h-3 text-gray-400" />
-                        <span className="text-xs">{sch.value}</span>
+                        <Tag className="w-3 h-3 text-gray-400" />
+                        <span className="text-xs capitalize">{sch.funding_type?.toLowerCase()}</span>
                       </div>
                       <div className="flex items-center gap-1.5 text-gray-600 text-xs truncate">
                         <MapPin className="w-3 h-3 text-gray-400" />

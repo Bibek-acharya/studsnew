@@ -4,10 +4,7 @@ import React, { useEffect, useState, useCallback } from "react";
 import { Home, Star, Search, Eye, CheckCircle, XCircle, ChevronLeft, ChevronRight } from "lucide-react";
 import { scholarshipProviderApi, ProviderApplication } from "@/services/scholarshipProviderApi";
 import { toast } from "sonner";
-
-interface ApplicationsDirectoryProps {
-  onReviewStudent: (id: string) => void;
-}
+import ApplicantProfileModal from "./ApplicantProfileModal";
 
 const GENDER_OPTIONS = ["Male", "Female"];
 const ETHNICITY_OPTIONS = ["Bahun", "Chhetri", "Magar", "Tamang", "Gurung", "Rai", "Tharu", "Sherpa", "Madhesi", "Dalit"];
@@ -16,12 +13,14 @@ const DISTRICT_OPTIONS = ["Kathmandu", "Lalitpur", "Kaski", "Chitwan", "Morang",
 const SCHOOL_TYPE_OPTIONS = ["Private", "Public", "Community"];
 const STATUS_OPTIONS = ["Pending", "Shortlisted", "Approved", "Rejected"];
 
-export default function ApplicationsDirectory({ onReviewStudent }: ApplicationsDirectoryProps) {
+export default function ApplicationsDirectory() {
   const [applications, setApplications] = useState<ProviderApplication[]>([]);
   const [loading, setLoading] = useState(true);
   const [page, setPage] = useState(1);
   const [total, setTotal] = useState(0);
   const limit = 10;
+
+  const [selectedApplicantId, setSelectedApplicantId] = useState<number | null>(null);
 
   const [search, setSearch] = useState("");
   const [filterGender, setFilterGender] = useState("");
@@ -280,7 +279,7 @@ export default function ApplicationsDirectory({ onReviewStudent }: ApplicationsD
                       </td>
                       <td className="text-center py-3 px-3">
                         <div className="flex items-center justify-center gap-1">
-                          <button onClick={() => onReviewStudent(String(app.id))} className="p-1.5 hover:bg-blue-50 rounded text-blue-600" title="View Profile">
+                          <button onClick={() => setSelectedApplicantId(app.id)} className="p-1.5 hover:bg-blue-50 rounded text-blue-600" title="View Profile">
                             <Eye className="w-4 h-4" />
                           </button>
                           {(app.status === "pending" || app.status === "under_review") && (
@@ -379,7 +378,20 @@ export default function ApplicationsDirectory({ onReviewStudent }: ApplicationsD
         </div>
       )}
 
-      {/* Removed local error/success display in favor of toasts */}
+      {/* Applicant Profile Modal */}
+      {selectedApplicantId && (
+        <ApplicantProfileModal
+          applicationId={selectedApplicantId}
+          onClose={() => setSelectedApplicantId(null)}
+          onStatusUpdate={() => {
+            // Refresh the list after status change
+            scholarshipProviderApi.getApplications({ page, limit }).then((res) => {
+              setApplications(res.applications);
+              setTotal(res.meta.total);
+            }).catch(() => {});
+          }}
+        />
+      )}
     </div>
   );
 }

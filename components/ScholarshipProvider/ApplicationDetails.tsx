@@ -124,29 +124,15 @@ export default function ApplicationDetails({ applicationId, onBack, onStatusUpda
 
   return (
     <>
-      <div className="flex items-center justify-between bg-white rounded-xl border border-slate-200 p-4">
-        <div className="flex items-center gap-4">
+      <div className="flex items-center justify-between bg-white rounded-xl border border-slate-200 p-4 mb-4">
+        <div className="flex items-center gap-4 ">
           <button onClick={onBack} className="p-2 hover:bg-slate-100 rounded-lg transition text-slate-600">
             <ArrowLeft className="w-5 h-5" />
           </button>
           <div>
             <h2 className="text-lg font-bold text-slate-900">Applicant Details</h2>
-            <p className="text-sm text-slate-500">#{application.id} &middot; Applied {new Date(application.created_at).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}</p>
+            <p className="text-sm text-slate-500">Applied {new Date(application.created_at).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}</p>
           </div>
-        </div>
-        <div className="flex items-center gap-2">
-          <select
-            value={application.status}
-            onChange={(e) => handleStatusChange(e.target.value)}
-            disabled={savingStatus}
-            className="border border-slate-300 rounded-lg px-3 py-2 text-sm font-medium outline-none focus:border-blue-600 disabled:opacity-50"
-          >
-            <option value="pending">Pending</option>
-            <option value="under_review">Under Review</option>
-            <option value="shortlisted">Shortlisted</option>
-            <option value="approved">Approved</option>
-            <option value="rejected">Rejected</option>
-          </select>
         </div>
       </div>
 

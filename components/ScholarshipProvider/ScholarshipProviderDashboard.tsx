@@ -158,7 +158,7 @@ const ScholarshipProviderDashboard: React.FC<DashboardProps> = ({ onLogout }) =>
       case 'sec-manage-scholarships':
         return <ManageScholarships onNavigate={navigateTo} onEdit={handleEditScholarship} />;
       case 'sec-applications':
-        return <ApplicationsDirectory onReviewStudent={handleReviewStudent} />;
+        return <ApplicationsDirectory />;
       case 'sec-student-profile':
         return <ApplicationDetails applicationId={selectedStudentId || ''} onBack={() => setActiveTab('sec-applications')} />;
       case 'sec-interviews':
