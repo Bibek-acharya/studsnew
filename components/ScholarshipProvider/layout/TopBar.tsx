@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useEffect, useRef, useState } from "react";
-import { Search, Bell, MessageSquare } from "lucide-react";
+import { Search, Bell, MessageSquare, BadgeCheck } from "lucide-react";
 import { scholarshipProviderApi, ProviderNotification } from "@/services/scholarshipProviderApi";
 
 interface TopBarProps {
@@ -112,7 +112,7 @@ const TopBar: React.FC<TopBarProps> = ({
   };
 
   return (
-    <div className="bg-white border-b border-slate-200 px-6 py-3 flex items-center justify-between sticky top-0 z-40">
+    <div className="bg-white border-b border-slate-200 h-16 px-6 flex items-center justify-between sticky top-0 z-40">
       <div className="flex items-center gap-4 flex-1"></div>
 
       <div className="flex items-center gap-4">
@@ -213,14 +213,18 @@ const TopBar: React.FC<TopBarProps> = ({
         <div className="h-8 w-px bg-slate-300"></div>
 
         <div className="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-slate-50 cursor-pointer transition-colors">
-          <div className="w-10 h-10 rounded-full bg-linear-to-br from-blue-600 to-blue-500 text-white flex items-center justify-center font-semibold text-sm">
-            {getInitials(providerUser?.provider_name || "Admin User")}
-          </div>
+          {providerUser?.logo_url ? (
+            <img src={providerUser.logo_url} alt={providerUser.provider_name} className="w-10 h-10 rounded-full object-cover border border-slate-200" />
+          ) : (
+            <div className="w-10 h-10 rounded-full bg-linear-to-br from-blue-600 to-blue-500 text-white flex items-center justify-center font-semibold text-sm">
+              {getInitials(providerUser?.provider_name || "Admin User")}
+            </div>
+          )}
           <div className="text-left">
-            <p className="text-sm font-semibold text-slate-800">
-              {providerUser?.provider_name || "Admin User"}
+            <p className="text-sm font-semibold text-slate-800 inline-flex items-center gap-1">
+              {providerUser?.provider_name || "Admin User"} <BadgeCheck className="w-3.5 h-3.5 text-white fill-[#2563eb]" />
             </p>
-            <p className="text-xs text-slate-500">Administrator</p>
+            <p className="text-xs text-slate-500">{providerUser?.role || "Administrator"}</p>
           </div>
         </div>
       </div>

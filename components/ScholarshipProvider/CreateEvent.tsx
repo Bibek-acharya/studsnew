@@ -6,6 +6,8 @@ import { Home, CalendarPlus } from "lucide-react";
 import { toast } from "sonner";
 import { scholarshipProviderApi } from "@/services/scholarshipProviderApi";
 import FileUpload from "./common/FileUpload";
+import DatePicker from "./common/DatePicker";
+import Dropdown from "../college-recommender/Dropdown";
 
 const ReactQuill = dynamic(() => import("react-quill-new"), { ssr: false });
 
@@ -70,6 +72,7 @@ const CreateEvent: React.FC<CreateEventProps> = memo(({ eventId, onNavigate, onE
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
+  const [errors, setErrors] = useState<Record<string, string>>({});
 
   useEffect(() => {
     if (eventId != null) {
@@ -128,9 +131,30 @@ const CreateEvent: React.FC<CreateEventProps> = memo(({ eventId, onNavigate, onE
     }
   }, []);
 
+  const validate = useCallback(() => {
+    const errs: Record<string, string> = {};
+    if (!title.trim()) errs.title = "Event title is required";
+    if (!eventDate) errs.eventDate = "Event date is required";
+    else {
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+      if (new Date(eventDate) < today) errs.eventDate = "Event date cannot be in the past";
+    }
+    if (!eventType) errs.eventType = "Event type is required";
+    if (!venue.trim()) errs.venue = "Venue is required";
+    if (!featuredImageUrl) errs.featuredImage = "Featured image is required";
+    if (!shortDesc.replace(/<[^>]*>/g, "").trim()) errs.shortDesc = "Summary is required";
+    if (!description.replace(/<[^>]*>/g, "").trim()) errs.description = "Description is required";
+    if (contactEmail && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(contactEmail)) errs.contactEmail = "Invalid email format";
+    if (startTime && endTime && startTime >= endTime) {
+      errs.endTime = "End time must be after start time";
+    }
+    setErrors(errs);
+    return Object.keys(errs).length === 0;
+  }, [title, eventDate, eventType, venue, featuredImageUrl, shortDesc, description, contactEmail, startTime, endTime]);
+
   const handleSave = useCallback(async (draft: boolean) => {
-    if (!title.trim() || !eventDate) { setError("Title and date are required"); return; }
-    if (!featuredImageUrl) { setError("Featured image is required"); return; }
+    if (!validate()) return;
     setSubmitting(true);
     setError("");
     setSuccess("");
@@ -170,7 +194,7 @@ const CreateEvent: React.FC<CreateEventProps> = memo(({ eventId, onNavigate, onE
     } finally {
       setSubmitting(false);
     }
-  }, [title, eventDate, startTime, endTime, eventType, category, maxParticipants, onlineLink, organizedBy, contactPerson, contactEmail, shortDesc, description, tags, enableRegistration, venue, featuredImageUrl, onNavigate, isEditing, eventId, onEditComplete]);
+  }, [validate, title, eventDate, startTime, endTime, eventType, category, maxParticipants, onlineLink, organizedBy, contactPerson, contactEmail, shortDesc, description, tags, enableRegistration, venue, featuredImageUrl, onNavigate, isEditing, eventId, onEditComplete]);
 
   return (
     <div className="space-y-6">
@@ -199,7 +223,7 @@ const CreateEvent: React.FC<CreateEventProps> = memo(({ eventId, onNavigate, onE
             </button>
             <button
               onClick={() => handleSave(false)}
-              disabled={submitting || uploadingImage || !title.trim() || !eventDate || !featuredImageUrl}
+              disabled={submitting || uploadingImage}
               className="px-4 py-2 bg-blue-600 text-white rounded-lg text-sm font-semibold hover:bg-blue-700 transition-colors"
             >
               Publish
@@ -211,36 +235,49 @@ const CreateEvent: React.FC<CreateEventProps> = memo(({ eventId, onNavigate, onE
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div className="md:col-span-2">
               <label className="block text-sm font-medium text-gray-700 mb-1.5">Event Title <span className="text-red-500">*</span></label>
-              <input type="text" className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:border-blue-500" placeholder="Enter event title" value={title} onChange={(e) => setTitle(e.target.value)} />
+              <input type="text" className={`w-full px-3 py-2 border rounded-lg text-sm focus:outline-none focus:border-blue-500 ${errors.title ? "border-red-500" : "border-gray-200"}`} placeholder="Enter event title" value={title} onChange={(e) => { setTitle(e.target.value); setErrors((prev) => ({ ...prev, title: "" })); }} />
+              {errors.title && <p className="mt-1 text-xs text-red-500">{errors.title}</p>}
             </div>
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1.5">Event Type <span className="text-red-500">*</span></label>
-              <select className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:border-blue-500" value={eventType} onChange={(e) => setEventType(e.target.value)}>
-                <option value="">Select Type</option>
-                {EVENT_TYPES.map((t) => <option key={t.value} value={t.value}>{t.label}</option>)}
-              </select>
+              <Dropdown
+                value={eventType}
+                onChange={(v) => { setEventType(v); setErrors((prev) => ({ ...prev, eventType: "" })); }}
+                options={EVENT_TYPES}
+                placeholder="Select Type"
+                error={errors.eventType}
+              />
+              {errors.eventType && <p className="mt-1 text-xs text-red-500">{errors.eventType}</p>}
             </div>
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1.5">Category</label>
-              <select className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:border-blue-500" value={category} onChange={(e) => setCategory(e.target.value)}>
-                <option value="">Select Category</option>
-                {CATEGORIES.map((c) => <option key={c.value} value={c.value}>{c.label}</option>)}
-              </select>
+              <Dropdown
+                value={category}
+                onChange={(v) => setCategory(v)}
+                options={CATEGORIES}
+                placeholder="Select Category"
+              />
             </div>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1.5">Event Date <span className="text-red-500">*</span></label>
-              <input type="date" className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:border-blue-500" value={eventDate} onChange={(e) => setEventDate(e.target.value)} />
-            </div>
+            <DatePicker
+              value={eventDate}
+              onChange={(v) => { setEventDate(v); setErrors((prev) => ({ ...prev, eventDate: "" })); }}
+              placeholder="Select event date"
+              label="Event Date"
+              required
+              minDate={new Date().toISOString().split("T")[0]}
+              error={errors.eventDate}
+            />
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1.5">Start Time</label>
               <input type="time" className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:border-blue-500" value={startTime} onChange={(e) => setStartTime(e.target.value)} />
             </div>
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1.5">End Time</label>
-              <input type="time" className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:border-blue-500" value={endTime} onChange={(e) => setEndTime(e.target.value)} />
+              <input type="time" className={`w-full px-3 py-2 border rounded-lg text-sm focus:outline-none focus:border-blue-500 ${errors.endTime ? "border-red-500" : "border-gray-200"}`} value={endTime} onChange={(e) => { setEndTime(e.target.value); setErrors((prev) => ({ ...prev, endTime: "" })); }} />
+              {errors.endTime && <p className="mt-1 text-xs text-red-500">{errors.endTime}</p>}
             </div>
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1.5">Maximum Participants</label>
@@ -251,7 +288,8 @@ const CreateEvent: React.FC<CreateEventProps> = memo(({ eventId, onNavigate, onE
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1.5">Venue/Location <span className="text-red-500">*</span></label>
-              <input type="text" className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:border-blue-500" placeholder="e.g., Sowers Action Nepal Office, Kathmandu" value={venue} onChange={(e) => setVenue(e.target.value)} />
+              <input type="text" className={`w-full px-3 py-2 border rounded-lg text-sm focus:outline-none focus:border-blue-500 ${errors.venue ? "border-red-500" : "border-gray-200"}`} placeholder="e.g., Sowers Action Nepal Office, Kathmandu" value={venue} onChange={(e) => { setVenue(e.target.value); setErrors((prev) => ({ ...prev, venue: "" })); }} />
+              {errors.venue && <p className="mt-1 text-xs text-red-500">{errors.venue}</p>}
             </div>
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1.5">Online Meeting Link</label>
@@ -270,7 +308,8 @@ const CreateEvent: React.FC<CreateEventProps> = memo(({ eventId, onNavigate, onE
             </div>
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1.5">Contact Email</label>
-              <input type="email" className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:border-blue-500" placeholder="events@example.com" value={contactEmail} onChange={(e) => setContactEmail(e.target.value)} />
+              <input type="email" className={`w-full px-3 py-2 border rounded-lg text-sm focus:outline-none focus:border-blue-500 ${errors.contactEmail ? "border-red-500" : "border-gray-200"}`} placeholder="events@example.com" value={contactEmail} onChange={(e) => { setContactEmail(e.target.value); setErrors((prev) => ({ ...prev, contactEmail: "" })); }} />
+              {errors.contactEmail && <p className="mt-1 text-xs text-red-500">{errors.contactEmail}</p>}
             </div>
           </div>
 
@@ -284,6 +323,7 @@ const CreateEvent: React.FC<CreateEventProps> = memo(({ eventId, onNavigate, onE
               previewUrl={featuredImagePreview}
             />
             {uploadingImage && <p className="mt-2 text-xs text-blue-600">Uploading featured image...</p>}
+            {errors.featuredImage && <p className="mt-1 text-xs text-red-500">{errors.featuredImage}</p>}
           </div>
 
           <div>

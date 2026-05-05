@@ -6,6 +6,7 @@ import { Home, Feather } from "lucide-react";
 import { toast } from "sonner";
 import { scholarshipProviderApi } from "@/services/scholarshipProviderApi";
 import FileUpload from "./common/FileUpload";
+import Dropdown from "../college-recommender/Dropdown";
 
 const ReactQuill = dynamic(() => import("react-quill-new"), { ssr: false });
 
@@ -62,7 +63,7 @@ const CreateBlog: React.FC<CreateBlogProps> = memo(({ blogId, onNavigate, onEdit
   const [blogType, setBlogType] = useState("");
   const [category, setCategory] = useState("");
   const [publishedBy, setPublishedBy] = useState("admin");
-  const [publishDate, setPublishDate] = useState("");
+
   const [readingTime, setReadingTime] = useState("");
   const [shortDesc, setShortDesc] = useState("");
   const [content, setContent] = useState("");
@@ -74,6 +75,7 @@ const CreateBlog: React.FC<CreateBlogProps> = memo(({ blogId, onNavigate, onEdit
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
+  const [errors, setErrors] = useState<Record<string, string>>({});
 
 useEffect(() => {
     if (blogId != null) {
@@ -113,9 +115,19 @@ useEffect(() => {
     }
   }, []);
 
+  const validate = useCallback(() => {
+    const errs: Record<string, string> = {};
+    if (!title.trim()) errs.title = "Blog title is required";
+    if (!blogType) errs.blogType = "Blog type is required";
+    if (!featuredImageUrl) errs.featuredImage = "Featured image is required";
+    if (!shortDesc.replace(/<[^>]*>/g, "").trim()) errs.shortDesc = "Excerpt is required";
+    if (!content.replace(/<[^>]*>/g, "").trim()) errs.content = "Content is required";
+    setErrors(errs);
+    return Object.keys(errs).length === 0;
+  }, [title, blogType, featuredImageUrl, shortDesc, content]);
+
   const handleSave = useCallback(async (draft: boolean) => {
-    if (!title.trim()) { setError("Title is required"); return; }
-    if (!featuredImageUrl) { setError("Featured image is required"); return; }
+    if (!validate()) return;
     setSubmitting(true);
     setError("");
     setSuccess("");
@@ -141,7 +153,7 @@ useEffect(() => {
     } finally {
       setSubmitting(false);
     }
-  }, [title, content, shortDesc, publishedBy, status, featuredImageUrl, onNavigate, isEditing, blogId, onEditComplete]);
+  }, [validate, title, content, shortDesc, publishedBy, status, featuredImageUrl, onNavigate, isEditing, blogId, onEditComplete]);
 
   return (
     <div className="space-y-6">
@@ -170,7 +182,7 @@ useEffect(() => {
             </button>
             <button
               onClick={() => handleSave(false)}
-              disabled={submitting || uploadingImage || !title.trim() || !featuredImageUrl}
+              disabled={submitting || uploadingImage}
               className="px-4 py-2 bg-blue-600 text-white rounded-lg text-sm font-semibold hover:bg-blue-700 transition-colors"
             >
               Publish
@@ -182,34 +194,40 @@ useEffect(() => {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div className="md:col-span-2">
               <label className="block text-sm font-medium text-gray-700 mb-1.5">Blog Title <span className="text-red-500">*</span></label>
-              <input type="text" className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:border-blue-500" placeholder="Enter blog title" value={title} onChange={(e) => setTitle(e.target.value)} />
+              <input type="text" className={`w-full px-3 py-2 border rounded-lg text-sm focus:outline-none focus:border-blue-500 ${errors.title ? "border-red-500" : "border-gray-200"}`} placeholder="Enter blog title" value={title} onChange={(e) => { setTitle(e.target.value); setErrors((prev) => ({ ...prev, title: "" })); }} />
+              {errors.title && <p className="mt-1 text-xs text-red-500">{errors.title}</p>}
             </div>
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1.5">Blog Type <span className="text-red-500">*</span></label>
-              <select className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:border-blue-500" value={blogType} onChange={(e) => setBlogType(e.target.value)}>
-                <option value="">Select Type</option>
-                {BLOG_TYPES.map((t) => <option key={t.value} value={t.value}>{t.label}</option>)}
-              </select>
+              <Dropdown
+                value={blogType}
+                onChange={(v) => { setBlogType(v); setErrors((prev) => ({ ...prev, blogType: "" })); }}
+                options={BLOG_TYPES}
+                placeholder="Select Type"
+                error={errors.blogType}
+              />
+              {errors.blogType && <p className="mt-1 text-xs text-red-500">{errors.blogType}</p>}
             </div>
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1.5">Category</label>
-              <select className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:border-blue-500" value={category} onChange={(e) => setCategory(e.target.value)}>
-                <option value="">Select Category</option>
-                {CATEGORIES.map((c) => <option key={c.value} value={c.value}>{c.label}</option>)}
-              </select>
+              <Dropdown
+                value={category}
+                onChange={(v) => setCategory(v)}
+                options={CATEGORIES}
+                placeholder="Select Category"
+              />
             </div>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1.5">Published By <span className="text-red-500">*</span></label>
-              <select className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:border-blue-500" value={publishedBy} onChange={(e) => setPublishedBy(e.target.value)}>
-                {PUBLISHED_BY.map((p) => <option key={p.value} value={p.value}>{p.label}</option>)}
-              </select>
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1.5">Publish Date</label>
-              <input type="date" className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:border-blue-500" value={publishDate} onChange={(e) => setPublishDate(e.target.value)} />
+              <Dropdown
+                value={publishedBy}
+                onChange={(v) => setPublishedBy(v)}
+                options={PUBLISHED_BY}
+                placeholder="Select author"
+              />
             </div>
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1.5">Reading Time</label>
@@ -227,21 +245,24 @@ useEffect(() => {
               previewUrl={featuredImagePreview}
             />
             {uploadingImage && <p className="mt-2 text-xs text-blue-600">Uploading featured image...</p>}
+            {errors.featuredImage && <p className="mt-1 text-xs text-red-500">{errors.featuredImage}</p>}
           </div>
 
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1.5">Short Description / Excerpt <span className="text-red-500">*</span></label>
-            <div className="border border-gray-200 rounded-lg overflow-hidden">
+            <div className={`border rounded-lg overflow-hidden ${errors.shortDesc ? "border-red-500" : "border-gray-200"}`}>
               <ReactQuill theme="snow" value={shortDesc} onChange={setShortDesc} modules={quillModules} formats={quillFormats} className="bg-white" />
             </div>
             <p className="text-xs text-gray-500 text-right mt-1">{shortDesc.replace(/<[^>]*>/g, "").length}/250 characters</p>
+            {errors.shortDesc && <p className="mt-1 text-xs text-red-500">{errors.shortDesc}</p>}
           </div>
 
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1.5">Full Blog Content <span className="text-red-500">*</span></label>
-            <div className="border border-gray-200 rounded-lg overflow-hidden">
+            <div className={`border rounded-lg overflow-hidden ${errors.content ? "border-red-500" : "border-gray-200"}`}>
               <ReactQuill theme="snow" value={content} onChange={setContent} modules={quillModules} formats={quillFormats} className="bg-white" />
             </div>
+            {errors.content && <p className="mt-1 text-xs text-red-500">{errors.content}</p>}
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -251,9 +272,12 @@ useEffect(() => {
             </div>
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1.5">Status</label>
-              <select className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:border-blue-500" value={status} onChange={(e) => setStatus(e.target.value)}>
-                {STATUS_OPTIONS.map((s) => <option key={s.value} value={s.value}>{s.label}</option>)}
-              </select>
+              <Dropdown
+                value={status}
+                onChange={(v) => setStatus(v)}
+                options={STATUS_OPTIONS}
+                placeholder="Select status"
+              />
             </div>
           </div>
         </div>

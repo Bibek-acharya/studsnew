@@ -1,9 +1,10 @@
 "use client";
 
 import React, { useState, useEffect, memo } from "react";
-import { Home, Building2, CheckCircle, Tag, MapPin, GraduationCap, Pencil, ChevronLeft, ChevronRight, X } from "lucide-react";
+import { Home, Building2, CheckCircle, Tag, MapPin, GraduationCap, Pencil, ChevronLeft, ChevronRight, X, AlertTriangle } from "lucide-react";
 import { scholarshipProviderApi, ProviderScholarship } from "@/services/scholarshipProviderApi";
 import { toast } from "sonner";
+import { validateScholarshipData, validateDates, type FieldError, type ScholarshipFormData } from "@/lib/scholarship-validation";
 
 interface DraftScholarshipProps {
   onEdit?: (id: number) => void;
@@ -62,23 +63,121 @@ const ConfirmationModal: React.FC<ConfirmationModalProps> = ({
   );
 };
 
-const DRAFT_FALLBACKS: ProviderScholarship[] = [
-  {
-    id: 1, provider_id: 1, title: "Medical Scholarship 2082", provider: "Sowers Action Nepal", description: "",
-    funding_type: "FULLY FUNDED", status: "draft", location: "Bharatpur, Nepal", value: "NPR 500,000",
-    degree_level: "MBBS / BDS", deadline: "", image_url: "https://images.unsplash.com/photo-1513258496099-48168024aec0?auto=format&fit=crop&w=800&q=80",
-    field_of_study: [], scholarship_type: "", applications_count: 0, created_at: "", updated_at: "",
-  },
-  {
-    id: 2, provider_id: 1, title: "Agriculture Development Grant", provider: "Sowers Action Nepal", description: "",
-    funding_type: "PARTIAL TUITION", status: "draft", location: "Butwal, Nepal", value: "NPR 200,000",
-    degree_level: "Diploma / Bachelors", deadline: "", image_url: "https://images.unsplash.com/photo-1532629345422-7515f3d16bb6?auto=format&fit=crop&w=800&q=80",
-    field_of_study: [], scholarship_type: "", applications_count: 0, created_at: "", updated_at: "",
-  },
-];
+const FIELD_LABELS: Record<string, string> = {
+  mainTitle: "Main Title",
+  providerName: "Provider Name",
+  fundingType: "Funding Type",
+  scholarshipType: "Scholarship Type",
+  educationLevel: "Education Level",
+  location: "Location",
+  bannerBgUrl: "Banner Image",
+  startDate: "Start Date",
+  endDate: "End Date",
+  contactEmail: "Contact Email",
+  primaryPhone: "Primary Phone",
+  secondaryPhone: "Secondary Phone",
+  websiteUrl: "Website URL",
+  coverageArea: "Coverage Area",
+  officeAddress: "Office Address",
+  mapUrl: "Map URL",
+  scholarshipSectionTitle: "Scholarship Section Title",
+  scholarshipSubtitle: "Scholarship Subtitle",
+  scholarshipDescription: "Scholarship Description",
+  eligibilitySectionTitle: "Eligibility Section Title",
+  eligibilitySubtitle: "Eligibility Subtitle",
+};
+
+interface ValidationErrorModalProps {
+  isOpen: boolean;
+  errors: FieldError[];
+  onEdit: () => void;
+  onCancel: () => void;
+}
+
+const ValidationErrorModal: React.FC<ValidationErrorModalProps> = ({
+  isOpen,
+  errors,
+  onEdit,
+  onCancel,
+}) => {
+  if (!isOpen) return null;
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center">
+      <div className="absolute inset-0 bg-black/50" onClick={onCancel} />
+      <div className="relative bg-white rounded-xl shadow-2xl max-w-md w-full mx-4 p-6 animate-in fade-in zoom-in-95 duration-200">
+        <div className="flex items-center gap-3 mb-4">
+          <div className="w-10 h-10 rounded-full bg-red-100 flex items-center justify-center shrink-0">
+            <AlertTriangle className="w-5 h-5 text-red-600" />
+          </div>
+          <div>
+            <h3 className="text-lg font-bold text-gray-900">Cannot Publish</h3>
+            <p className="text-sm text-gray-500">Please fix the following issues:</p>
+          </div>
+        </div>
+        <div className="bg-red-50 rounded-lg p-4 max-h-64 overflow-y-auto space-y-2 mb-6">
+          {errors.map((err, i) => (
+            <div key={i} className="flex items-start gap-2 text-sm">
+              <span className="text-red-500 mt-0.5 shrink-0">•</span>
+              <div>
+                <span className="font-medium text-red-800">
+                  {FIELD_LABELS[err.field] || err.field}
+                </span>
+                <span className="text-red-700"> — {err.message}</span>
+              </div>
+            </div>
+          ))}
+        </div>
+        <div className="flex gap-3">
+          <button
+            onClick={onCancel}
+            className="flex-1 px-4 py-2.5 border border-gray-300 text-gray-700 font-semibold rounded-lg hover:bg-gray-50 transition-colors"
+          >
+            Cancel
+          </button>
+          <button
+            onClick={onEdit}
+            className="flex-1 px-4 py-2.5 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700 transition-colors"
+          >
+            Edit Draft
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+
+
+function scholarshipToFormData(s: ProviderScholarship): ScholarshipFormData {
+  const d = s as any;
+  return {
+    mainTitle: s.title || "",
+    providerName: d.provider_name || s.provider || "",
+    fundingType: s.funding_type || "",
+    scholarshipType: s.scholarship_type || "",
+    educationLevel: d.education_level || s.degree_level || "",
+    location: s.location || "",
+    bannerBgUrl: s.banner_background_image_url || s.image_url || "",
+    startDate: s.application_start_date?.split("T")[0] || "",
+    endDate: s.application_end_date?.split("T")[0] || s.deadline?.split("T")[0] || "",
+    contactEmail: d.contact_email || "",
+    primaryPhone: d.primary_phone || "",
+    secondaryPhone: d.secondary_phone || "",
+    websiteUrl: d.website_url || "",
+    coverageArea: d.coverage_area || "",
+    officeAddress: d.office_address || "",
+    mapUrl: d.map_url || "",
+    scholarshipSectionTitle: s.scholarship_section_title || "",
+    scholarshipSubtitle: s.scholarship_subtitle || "",
+    scholarshipDescription: s.scholarship_description_1 || s.description || "",
+    eligibilitySectionTitle: s.eligibility_section_title || "",
+    eligibilitySubtitle: s.eligibility_subtitle || "",
+  };
+}
 
 const DraftScholarship: React.FC<DraftScholarshipProps> = memo(({ onEdit, onNavigate }) => {
-  const [drafts, setDrafts] = useState<ProviderScholarship[]>(DRAFT_FALLBACKS);
+  const [drafts, setDrafts] = useState<ProviderScholarship[]>([]);
   const [loading, setLoading] = useState(true);
   const [page, setPage] = useState(1);
   const [publishing, setPublishing] = useState<number | null>(null);
@@ -91,6 +190,15 @@ const DraftScholarship: React.FC<DraftScholarshipProps> = memo(({ onEdit, onNavi
     scholarshipId: null,
     title: "",
   });
+  const [validationModal, setValidationModal] = useState<{
+    isOpen: boolean;
+    scholarshipId: number | null;
+    errors: FieldError[];
+  }>({
+    isOpen: false,
+    scholarshipId: null,
+    errors: [],
+  });
   const perPage = 8;
 
   useEffect(() => {
@@ -98,9 +206,9 @@ const DraftScholarship: React.FC<DraftScholarshipProps> = memo(({ onEdit, onNavi
       try {
         const res = await scholarshipProviderApi.getScholarships(1, 50);
         const draftSchols = res.scholarships.filter((s) => s.status === "draft");
-        setDrafts(draftSchols.length > 0 ? draftSchols : DRAFT_FALLBACKS);
+        setDrafts(draftSchols);
       } catch {
-        setDrafts(DRAFT_FALLBACKS);
+        setDrafts([]);
       } finally {
         setLoading(false);
       }
@@ -118,11 +226,28 @@ const DraftScholarship: React.FC<DraftScholarshipProps> = memo(({ onEdit, onNavi
 
   const handleConfirmPublish = async () => {
     if (!confirmModal.scholarshipId) return;
+    const id = confirmModal.scholarshipId;
+    const title = confirmModal.title;
     setConfirmModal({ isOpen: false, scholarshipId: null, title: "" });
-    setPublishing(confirmModal.scholarshipId);
+    setPublishing(id);
+
     try {
-      await scholarshipProviderApi.publishScholarship(confirmModal.scholarshipId);
-      setDrafts((prev) => prev.filter((d) => d.id !== confirmModal.scholarshipId));
+      const scholarship = await scholarshipProviderApi.getScholarshipById(id);
+      const formData = scholarshipToFormData(scholarship);
+
+      const fieldErrors = validateScholarshipData(formData);
+      const dateErrors = validateDates(formData.startDate, formData.endDate);
+      const allErrors = [...fieldErrors.errors, ...dateErrors.errors];
+
+      if (allErrors.length > 0) {
+        setPublishing(null);
+        setValidationModal({ isOpen: true, scholarshipId: id, errors: allErrors });
+        return;
+      }
+
+      const payload: Record<string, unknown> = { ...scholarship, status: "published" };
+      await scholarshipProviderApi.updateScholarship(id, payload as any);
+      setDrafts((prev) => prev.filter((d) => d.id !== id));
       toast.success("Your scholarship is now live and visible in the directory.");
     } catch (err) {
       toast.error("Failed to publish scholarship");
@@ -133,6 +258,18 @@ const DraftScholarship: React.FC<DraftScholarshipProps> = memo(({ onEdit, onNavi
 
   const handleCancelPublish = () => {
     setConfirmModal({ isOpen: false, scholarshipId: null, title: "" });
+  };
+
+  const handleCloseValidation = () => {
+    setValidationModal({ isOpen: false, scholarshipId: null, errors: [] });
+  };
+
+  const handleEditFromValidation = () => {
+    const id = validationModal.scholarshipId;
+    setValidationModal({ isOpen: false, scholarshipId: null, errors: [] });
+    if (id && onEdit) {
+      onEdit(id);
+    }
   };
 
   const totalPages = Math.ceil(drafts.length / perPage);
@@ -166,6 +303,13 @@ const DraftScholarship: React.FC<DraftScholarshipProps> = memo(({ onEdit, onNavi
         cancelText="Cancel"
         onConfirm={handleConfirmPublish}
         onCancel={handleCancelPublish}
+      />
+
+      <ValidationErrorModal
+        isOpen={validationModal.isOpen}
+        errors={validationModal.errors}
+        onEdit={handleEditFromValidation}
+        onCancel={handleCloseValidation}
       />
       <div className="space-y-6">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-2">

@@ -10,44 +10,7 @@ interface ScholarshipDirectoryProps {
   onEdit?: (id: number) => void;
 }
 
-const FALLBACKS: ProviderScholarship[] = [
-  {
-    id: 1, provider_id: 1, title: "Nepal STEM Excellence Grant", provider: "Tech Nepal Foundation", description: "",
-    funding_type: "PARTIAL TUITION", status: "finished", location: "Kathmandu, Nepal", value: "NPR 400,000",
-    degree_level: "Bachelors", deadline: "2026-04-10", image_url: "https://images.unsplash.com/photo-1522202176988-66273c2fd55f?auto=format&fit=crop&w=800&q=80",
-    field_of_study: [], scholarship_type: "", applications_count: 12, created_at: "", updated_at: "",
-  },
-  {
-    id: 2, provider_id: 1, title: "Project Shiksha Scholarship 2082", provider: "Sowers Action Nepal", description: "",
-    funding_type: "FULLY FUNDED", status: "active", location: "Kathmandu, Nepal", value: "NPR 50,000/yr",
-    degree_level: "+2 / Grade 11-12", deadline: "2026-06-30", image_url: "https://images.unsplash.com/photo-1523240795612-9a054b0db644?auto=format&fit=crop&w=800&q=80",
-    field_of_study: [], scholarship_type: "", applications_count: 45, created_at: "", updated_at: "",
-  },
-  {
-    id: 3, provider_id: 1, title: "Women in Engineering Grant", provider: "Ncell Foundation", description: "",
-    funding_type: "PARTIAL TUITION", status: "active", location: "Pokhara, Nepal", value: "NPR 250,000",
-    degree_level: "Bachelors", deadline: "2026-05-15", image_url: "https://images.unsplash.com/photo-1497633762265-9d179a990aa6?auto=format&fit=crop&w=800&q=80",
-    field_of_study: [], scholarship_type: "", applications_count: 28, created_at: "", updated_at: "",
-  },
-  {
-    id: 4, provider_id: 1, title: "Community Leadership Award", provider: "100 Group Nepal", description: "",
-    funding_type: "FULLY FUNDED", status: "active", location: "Lalitpur, Nepal", value: "NPR 180,000",
-    degree_level: "Bachelors / Masters", deadline: "2026-07-20", image_url: "https://images.unsplash.com/photo-1434030216411-0b793f4b4173?auto=format&fit=crop&w=800&q=80",
-    field_of_study: [], scholarship_type: "", applications_count: 8, created_at: "", updated_at: "",
-  },
-  {
-    id: 5, provider_id: 1, title: "ICT Scholarship Nepal", provider: "Creating Opportunities", description: "",
-    funding_type: "MERIT-BASED", status: "active", location: "Biratnagar, Nepal", value: "NPR 300,000",
-    degree_level: "+2 / Diploma", deadline: "2026-08-10", image_url: "https://images.unsplash.com/photo-1509062522246-3755977927d7?auto=format&fit=crop&w=800&q=80",
-    field_of_study: [], scholarship_type: "", applications_count: 34, created_at: "", updated_at: "",
-  },
-  {
-    id: 6, provider_id: 1, title: "Rural Student Scholarship", provider: "RONB Foundation", description: "",
-    funding_type: "PARTIAL TUITION", status: "active", location: "Nepalgunj, Nepal", value: "NPR 150,000",
-    degree_level: "+2 / Bachelors", deadline: "2026-09-05", image_url: "https://images.unsplash.com/photo-1523050854058-8df90910b683?auto=format&fit=crop&w=800&q=80",
-    field_of_study: [], scholarship_type: "", applications_count: 19, created_at: "", updated_at: "",
-  },
-];
+
 
 const ScholarshipDirectory: React.FC<ScholarshipDirectoryProps> = memo(({ onEdit }) => {
   const [scholarships, setScholarships] = useState<ProviderScholarship[]>([]);
@@ -62,10 +25,10 @@ const ScholarshipDirectory: React.FC<ScholarshipDirectoryProps> = memo(({ onEdit
     async function fetchData() {
       try {
         const res = await scholarshipProviderApi.getScholarships(1, 50);
-        const nonDrafts = (res.scholarships.length > 0 ? res.scholarships : FALLBACKS).filter((s) => s.status !== 'draft');
+        const nonDrafts = res.scholarships.filter((s) => s.status !== 'draft');
         setScholarships(nonDrafts);
       } catch {
-        setScholarships(FALLBACKS.filter((s) => s.status !== 'draft'));
+        setScholarships([]);
       } finally {
         setLoading(false);
       }

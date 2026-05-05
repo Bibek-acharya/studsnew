@@ -550,6 +550,17 @@ export interface MetricCount {
   count: number;
 }
 
+export interface CrossMetric {
+  label: string;
+  values: MetricCount[];
+}
+
+export interface ExamCenterMetric {
+  name: string;
+  management: number;
+  science: number;
+}
+
 export interface DetailedAnalyticsData {
   total_applicants: number;
   gender: MetricCount[];
@@ -560,6 +571,15 @@ export interface DetailedAnalyticsData {
   province: MetricCount[];
   district: MetricCount[];
   status: MetricCount[];
+  admit_cards_sent?: number;
+  admit_cards_pending?: number;
+  payment_methods?: MetricCount[];
+  gpa_by_school_type?: MetricCount[];
+  gender_by_province?: CrossMetric[];
+  stream_by_province?: CrossMetric[];
+  school_type_by_province?: CrossMetric[];
+  exam_centers?: ExamCenterMetric[];
+  district_count?: number;
 }
 
 export interface DetailedAnalyticsFilters {
@@ -567,6 +587,7 @@ export interface DetailedAnalyticsFilters {
   district?: string;
   school_type?: string;
   scholarship_status?: string;
+  ethnicity_province?: string;
 }
 
 export interface ProviderNews {
@@ -684,6 +705,7 @@ export const scholarshipProviderApi = {
     if (filters.district) params.append('district', filters.district);
     if (filters.school_type) params.append('school_type', filters.school_type);
     if (filters.scholarship_status) params.append('scholarship_status', filters.scholarship_status);
+    if (filters.ethnicity_province) params.append('ethnicity_province', filters.ethnicity_province);
     
     return callApi<DetailedAnalyticsData>(`/api/v1/scholarship-providers/analytics/detailed?${params.toString()}`);
   },
@@ -1034,7 +1056,7 @@ export const scholarshipProviderApi = {
   },
 
   async getBlogById(id: number): Promise<ProviderBlog> {
-    return apiRequest<ProviderBlog>(`/api/v1/scholarship-providers/blogs/${id}`);
+    return callApi<ProviderBlog>(`/api/v1/scholarship-providers/blogs/${id}`);
   },
 
   async updateBlog(id: number, data: { title: string; content: string; image_url?: string; author?: string; status?: string }): Promise<ProviderBlog> {

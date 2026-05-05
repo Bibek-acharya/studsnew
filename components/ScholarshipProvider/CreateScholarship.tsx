@@ -2,11 +2,12 @@
 
 import React, { useState, useCallback, useEffect, useRef, memo } from "react";
 import { toast } from "sonner";
-import { format, addDays, isAfter, parseISO, isValid } from "date-fns";
+import { parseISO, isValid, isAfter } from "date-fns";
 import {
   Gear, FloppyDisk, PaperPlaneTilt
 } from "@phosphor-icons/react";
 import { scholarshipProviderApi } from "../../services/scholarshipProviderApi";
+import { validateScholarshipData, validateDates, type ScholarshipFormData } from "@/lib/scholarship-validation";
 import {
   GeneralSettingsSection,
   ContactDetailsSection,
@@ -353,56 +354,24 @@ const CreateScholarship: React.FC<CreateScholarshipProps> = memo(({ scholarshipI
     }).catch(() => setLoadingData(false));
   }, [scholarshipId]);
 
-  const validateDates = useCallback(() => {
-    let isValidDate = true;
-    let firstInvalidField = "";
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-
-    // Clear previous errors
+  const validateFormDates = useCallback(() => {
     setStartDateError("");
     setEndDateError("");
 
-    // Validate start date - required and must be in the future
-    if (!startDate) {
-      setStartDateError("Start date is required");
-      isValidDate = false;
-      firstInvalidField ||= "startDate";
-    } else {
-      const start = parseISO(startDate);
-      if (!isValid(start)) {
-        setStartDateError("Invalid date format");
-        isValidDate = false;
-        firstInvalidField ||= "startDate";
-      } else if (!isAfter(start, today)) {
-        setStartDateError("Start date must be in the future");
-        isValidDate = false;
-        firstInvalidField ||= "startDate";
+    const result = validateDates(startDate, endDate);
+    let firstField = "";
+
+    for (const err of result.errors) {
+      if (err.field === "startDate") {
+        setStartDateError(err.message);
+        firstField ||= "startDate";
+      } else if (err.field === "endDate") {
+        setEndDateError(err.message);
+        firstField ||= "endDate";
       }
     }
 
-    // Validate end date - required and must be after start date
-    if (!endDate) {
-      setEndDateError("End date is required");
-      isValidDate = false;
-      firstInvalidField ||= "endDate";
-    } else {
-      const end = parseISO(endDate);
-      if (!isValid(end)) {
-        setEndDateError("Invalid date format");
-        isValidDate = false;
-        firstInvalidField ||= "endDate";
-      } else if (startDate) {
-        const start = parseISO(startDate);
-        if (!isAfter(end, start)) {
-          setEndDateError("End date must be after start date");
-          isValidDate = false;
-          firstInvalidField ||= "endDate";
-        }
-      }
-    }
-
-    return { isValidDate, field: firstInvalidField };
+    return { isValidDate: result.isValid, field: firstField };
   }, [startDate, endDate]);
 
   const validateScholarship = useCallback(() => {
@@ -412,8 +381,7 @@ const CreateScholarship: React.FC<CreateScholarshipProps> = memo(({ scholarshipI
     const setFirstError = (fieldId: string) => {
       if (!firstFieldId) firstFieldId = fieldId;
     };
-    
-    // Clear previous errors
+
     setMainTitleError("");
     setProviderNameError("");
     setFundingTypeError("");
@@ -434,156 +402,44 @@ const CreateScholarship: React.FC<CreateScholarshipProps> = memo(({ scholarshipI
     setEligSectionTitleError("");
     setEligSubtitleError("");
 
-    if (!mainTitle.trim()) {
-      setMainTitleError("Main title is required");
-      hasError = true;
-      setFirstError("mainTitle");
-    }
+    const data: ScholarshipFormData = {
+      mainTitle, providerName, fundingType, scholarshipType, educationLevel,
+      location, bannerBgUrl, startDate, endDate, contactEmail, primaryPhone,
+      secondaryPhone, websiteUrl, coverageArea, officeAddress, mapUrl,
+      scholarshipSectionTitle, scholarshipSubtitle, scholarshipDescription,
+      eligibilitySectionTitle, eligibilitySubtitle,
+    };
 
-    if (!providerName.trim()) {
-      setProviderNameError("Provider name is required");
-      hasError = true;
-      setFirstError("providerName");
-    }
+    const result = validateScholarshipData(data);
 
-    if (!fundingType) {
-      setFundingTypeError("Funding type is required");
+    for (const err of result.errors) {
       hasError = true;
-      setFirstError("fundingType");
-    }
-
-    if (!scholarshipType) {
-      setScholarshipTypeError("Scholarship type is required");
-      hasError = true;
-      setFirstError("scholarshipType");
-    }
-
-    if (!educationLevel) {
-      setEducationLevelError("Education level is required");
-      hasError = true;
-      setFirstError("educationLevel");
-    }
-
-    if (!location.trim()) {
-      setLocationError("Location is required");
-      hasError = true;
-      setFirstError("location");
-    }
-
-    if (!bannerBgUrl) {
-      setBannerError("Banner image is required");
-      hasError = true;
-      setFirstError("bannerBgUrl");
-    }
-
-    if (!contactEmail) {
-      setContactEmailError("Contact email is required");
-      hasError = true;
-      setFirstError("contactEmail");
-    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(contactEmail)) {
-      setContactEmailError("Invalid contact email format");
-      hasError = true;
-      setFirstError("contactEmail");
-    }
-
-    if (!primaryPhone) {
-      setPrimaryPhoneError("Primary phone is required");
-      hasError = true;
-      setFirstError("primaryPhone");
-    } else if (!/^9\d{9}$/.test(primaryPhone)) {
-      setPrimaryPhoneError("Primary phone must be 10 digits starting with 9");
-      hasError = true;
-      setFirstError("primaryPhone");
-    }
-
-    if (secondaryPhone && !/^9\d{9}$/.test(secondaryPhone)) {
-      setSecondaryPhoneError("Secondary phone must be 10 digits starting with 9");
-      hasError = true;
-      setFirstError("secondaryPhone");
-    }
-
-    if (!websiteUrl) {
-      setWebsiteUrlError("Website URL is required");
-      hasError = true;
-      setFirstError("websiteUrl");
-    } else {
-      try {
-        new URL(websiteUrl);
-        if (!websiteUrl.startsWith('http://') && !websiteUrl.startsWith('https://')) {
-          setWebsiteUrlError("Website URL must start with http:// or https://");
-          hasError = true;
-          setFirstError("websiteUrl");
-        }
-      } catch {
-        setWebsiteUrlError("Invalid website URL");
-        hasError = true;
-        setFirstError("websiteUrl");
+      setFirstError(err.field);
+      switch (err.field) {
+        case "mainTitle": setMainTitleError(err.message); break;
+        case "providerName": setProviderNameError(err.message); break;
+        case "fundingType": setFundingTypeError(err.message); break;
+        case "scholarshipType": setScholarshipTypeError(err.message); break;
+        case "educationLevel": setEducationLevelError(err.message); break;
+        case "location": setLocationError(err.message); break;
+        case "bannerBgUrl": setBannerError(err.message); break;
+        case "contactEmail": setContactEmailError(err.message); break;
+        case "primaryPhone": setPrimaryPhoneError(err.message); break;
+        case "secondaryPhone": setSecondaryPhoneError(err.message); break;
+        case "websiteUrl": setWebsiteUrlError(err.message); break;
+        case "coverageArea": setCoverageAreaError(err.message); break;
+        case "officeAddress": setOfficeAddressError(err.message); break;
+        case "mapUrl": setMapUrlError(err.message); break;
+        case "scholarshipSectionTitle": setSchSectionTitleError(err.message); break;
+        case "scholarshipSubtitle": setSchSubtitleError(err.message); break;
+        case "scholarshipDescription": setSchDescriptionError(err.message); break;
+        case "eligibilitySectionTitle": setEligSectionTitleError(err.message); break;
+        case "eligibilitySubtitle": setEligSubtitleError(err.message); break;
       }
-    }
-
-    if (!coverageArea.trim()) {
-      setCoverageAreaError("Coverage area is required");
-      hasError = true;
-      setFirstError("coverageArea");
-    }
-
-    if (!officeAddress.trim()) {
-      setOfficeAddressError("Office address is required");
-      hasError = true;
-      setFirstError("officeAddress");
-    }
-
-    if (!mapUrl.trim()) {
-      setMapUrlError("Map URL is required");
-      hasError = true;
-      setFirstError("mapUrl");
-    } else {
-      try {
-        new URL(mapUrl);
-        if (!mapUrl.startsWith('http://') && !mapUrl.startsWith('https://')) {
-          setMapUrlError("Map URL must start with http:// or https://");
-          hasError = true;
-          setFirstError("mapUrl");
-        }
-      } catch {
-        setMapUrlError("Invalid map URL");
-        hasError = true;
-        setFirstError("mapUrl");
-      }
-    }
-
-    if (!scholarshipSectionTitle.trim()) {
-      setSchSectionTitleError("Section title is required");
-      hasError = true;
-      setFirstError("scholarshipSectionTitle");
-    }
-
-    if (!scholarshipSubtitle.trim()) {
-      setSchSubtitleError("Subtitle is required");
-      hasError = true;
-      setFirstError("scholarshipSubtitle");
-    }
-
-    if (!scholarshipDescription.trim()) {
-      setSchDescriptionError("Description is required");
-      hasError = true;
-      setFirstError("scholarshipDescription");
-    }
-
-    if (!eligibilitySectionTitle.trim()) {
-      setEligSectionTitleError("Section title is required");
-      hasError = true;
-      setFirstError("eligibilitySectionTitle");
-    }
-
-    if (!eligibilitySubtitle.trim()) {
-      setEligSubtitleError("Short description is required");
-      hasError = true;
-      setFirstError("eligibilitySubtitle");
     }
 
     return { isValid: !hasError, firstFieldId };
-  }, [mainTitle, providerName, fundingType, scholarshipType, educationLevel, location, bannerBgUrl, contactEmail, primaryPhone, secondaryPhone, websiteUrl, coverageArea, officeAddress, mapUrl, scholarshipSectionTitle, scholarshipSubtitle, scholarshipDescription, eligibilitySectionTitle, eligibilitySubtitle]);
+  }, [mainTitle, providerName, fundingType, scholarshipType, educationLevel, location, bannerBgUrl, startDate, endDate, contactEmail, primaryPhone, secondaryPhone, websiteUrl, coverageArea, officeAddress, mapUrl, scholarshipSectionTitle, scholarshipSubtitle, scholarshipDescription, eligibilitySectionTitle, eligibilitySubtitle]);
 
   const scrollToField = useCallback((field: string) => {
     const element = document.getElementById(field);
@@ -629,7 +485,7 @@ const CreateScholarship: React.FC<CreateScholarshipProps> = memo(({ scholarshipI
         return;
       }
 
-      const dateValidation = validateDates();
+      const dateValidation = validateFormDates();
       if (!dateValidation.isValidDate) {
         if (dateValidation.field) {
           scrollToField(dateValidation.field);
