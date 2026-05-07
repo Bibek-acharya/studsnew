@@ -11,6 +11,7 @@ import {
 } from "@/services/blogApi";
 import { getPublicBlogByID } from "@/services/scholarshipProviderApi";
 import { useAuth } from "@/services/AuthContext";
+import { getImageUrl, stripHtml } from "@/services/api";
 
 const BlogDetailsPage: React.FC<{ params: Promise<{ id: string }> }> = ({
   params,
@@ -44,7 +45,7 @@ const BlogDetailsPage: React.FC<{ params: Promise<{ id: string }> }> = ({
               id: parseInt(actualId),
               title: blogData.title,
               slug: blogData.title?.toLowerCase().replace(/\s+/g, "-") || "",
-              excerpt: blogData.content?.slice(0, 200) || "",
+              excerpt: stripHtml(blogData.content?.slice(0, 200)) || "",
               content: blogData.content || "",
               image: blogData.image_url || "",
               author: blogData.author || "Provider",
@@ -189,14 +190,19 @@ const BlogDetailsPage: React.FC<{ params: Promise<{ id: string }> }> = ({
             </div>
           </div>
 
-          <img
-            src={blog.image}
-            alt={blog.title}
-            className="w-full h-[300px] sm:h-[400px] object-cover rounded-md mb-8"
-          />
+          <div className="w-full h-[300px] sm:h-[400px] rounded-md mb-8 overflow-hidden bg-gray-100">
+            <img
+              src={getImageUrl(blog.image)}
+              alt={blog.title}
+              className="w-full h-full object-cover"
+              onError={(e) => {
+                (e.target as HTMLImageElement).src = getImageUrl("");
+              }}
+            />
+          </div>
 
           <div className="bg-blue-50 border-l-4 border-blue-500 p-5 rounded-r-xl mb-8 text-gray-700 text-sm sm:text-base leading-relaxed">
-            {blog.excerpt}
+            {stripHtml(blog.excerpt)}
           </div>
 
           <div className="prose max-w-none text-gray-700 [&_pre]:overflow-x-auto [&_pre]:whitespace-pre-wrap [&_pre]:break-words [&_code]:break-words [&_img]:max-w-full">
@@ -363,9 +369,12 @@ const BlogDetailsPage: React.FC<{ params: Promise<{ id: string }> }> = ({
                     className="group block text-left w-full"
                   >
                     <img
-                      src={rel.image}
+                      src={getImageUrl(rel.image)}
                       alt={rel.title}
                       className="w-full h-40 object-cover rounded-md mb-3"
+                      onError={(e) => {
+                        (e.target as HTMLImageElement).src = getImageUrl("");
+                      }}
                     />
                     <div className="flex justify-between items-center mb-2">
                       <span
@@ -381,7 +390,7 @@ const BlogDetailsPage: React.FC<{ params: Promise<{ id: string }> }> = ({
                       {rel.title}
                     </h4>
                     <p className="text-xs text-gray-500 line-clamp-2">
-                      {rel.excerpt}
+                      {stripHtml(rel.excerpt)}
                     </p>
                   </Link>
                 );

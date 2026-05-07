@@ -4,6 +4,7 @@ import React, { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { fetchPublicEventById, fetchPublicEvents, EventEntry } from "@/services/eventApi";
 import { getPublicEvents as getProviderPublicEvents } from "@/services/scholarshipProviderApi";
+import { getImageUrl, stripHtml } from "@/services/api";
 
 const EventDetailsPage: React.FC<{ params: Promise<{ id: string }> }> = ({ params }) => {
   const [id, setId] = useState<string | null>(null);
@@ -91,8 +92,15 @@ const EventDetailsPage: React.FC<{ params: Promise<{ id: string }> }> = ({ param
 
   return (
     <main className="max-w-350 mx-auto pt-6 pb-10 lg:pb-14 bg-white min-h-screen">
-      <div className="relative w-full h-62.5 sm:h-75 lg:h-90 rounded-md lg:rounded-md overflow-hidden shadow-xl mb-10 lg:mb-16">
-        <img src={event.image} alt={event.title} className="absolute inset-0 w-full h-full object-cover" />
+        <div className="relative w-full h-62.5 sm:h-75 lg:h-90 rounded-md lg:rounded-md overflow-hidden shadow-xl mb-10 lg:mb-16 bg-gray-100">
+        <img
+          src={getImageUrl(event.image)}
+          alt={event.title}
+          className="absolute inset-0 w-full h-full object-cover"
+          onError={(e) => {
+            (e.target as HTMLImageElement).src = getImageUrl("");
+          }}
+        />
         <div className="absolute inset-0 bg-linear-to-t from-gray-900 via-gray-900/60 to-transparent"></div>
 
         <div className="absolute bottom-0 left-0 w-full p-6 sm:p-10 lg:p-12">
@@ -108,7 +116,7 @@ const EventDetailsPage: React.FC<{ params: Promise<{ id: string }> }> = ({ param
             {event.title}
           </h1>
           <p className="text-gray-200 text-xs sm:text-sm lg:text-lg max-w-2xl leading-relaxed hidden sm:block">
-            {event.excerpt}
+            {stripHtml(event.excerpt)}
           </p>
         </div>
       </div>
@@ -351,7 +359,14 @@ const EventDetailsPage: React.FC<{ params: Promise<{ id: string }> }> = ({ param
                 key={`${rel.id}-${idx}`}
                 className="bg-white border border-gray-200 rounded-md overflow-hidden hover:shadow-lg transition-shadow duration-300"
               >
-                <img src={rel.image} alt={rel.title} className="w-full h-44 object-cover" />
+                <img
+                  src={getImageUrl(rel.image)}
+                  alt={rel.title}
+                  className="w-full h-44 object-cover"
+                  onError={(e) => {
+                    (e.target as HTMLImageElement).src = getImageUrl("");
+                  }}
+                />
                 <div className="p-5">
                   <div className="flex justify-between items-center mb-3">
                     <span className={`${relBadge.className} text-white text-[11px] px-2.5 py-1 rounded-full font-medium tracking-wide`}>
@@ -375,7 +390,7 @@ const EventDetailsPage: React.FC<{ params: Promise<{ id: string }> }> = ({ param
                     </div>
                   </div>
 
-                  <p className="text-gray-500 text-[13px] leading-relaxed mb-5 line-clamp-3">{rel.excerpt}</p>
+                  <p className="text-gray-500 text-[13px] leading-relaxed mb-5 line-clamp-3">{stripHtml(rel.excerpt)}</p>
 
                   <div className="border-t border-dashed border-gray-200 mb-4"></div>
 

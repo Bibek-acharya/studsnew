@@ -24,8 +24,9 @@ import {
   ExamCentersSection,
   DownloadsSection,
   PaymentConfigSection,
-  type GalleryImageItem,
-  type PartnerOrganization,
+  type GalleryEntry,
+  type GalleryGroup,
+  type PartnerGroup,
   type PartnerMessageItem,
 } from "./create-scholarship";
 
@@ -63,13 +64,6 @@ interface SelectionProcessStepItem {
 interface FAQItem {
   question: string;
   answer: string;
-}
-
-interface PartnerFormItem {
-  groupHeading: string;
-  name: string;
-  website: string;
-  logo: string;
 }
 
 interface ExamCenterItem {
@@ -154,7 +148,7 @@ const CreateScholarship: React.FC<CreateScholarshipProps> = memo(({ scholarshipI
   const [journeyTimeline, setJourneyTimeline] = useState<JourneyTimelineItem[]>([]);
 
   // Scholarship Timeline (Key Dates)
-  const [timelineEvents, setTimelineEvents] = useState<{ title: string; date: string; description: string }[]>([]);
+  const [timelineEvents, setTimelineEvents] = useState<{ title: string; date: string; description: string; icon: string }[]>([]);
 
   // Scholarship Details
   const [scholarshipSectionTitle, setScholarshipSectionTitle] = useState("");
@@ -183,10 +177,10 @@ const CreateScholarship: React.FC<CreateScholarshipProps> = memo(({ scholarshipI
   const [faqs, setFaqs] = useState<FAQItem[]>([]);
 
   // Gallery
-  const [galleryImages, setGalleryImages] = useState<GalleryImageItem[]>([]);
+  const [galleryGroups, setGalleryGroups] = useState<GalleryGroup[]>([]);
 
   // Partners
-  const [partnerGroups, setPartnerGroups] = useState<PartnerFormItem[]>([]);
+  const [partnerGroups, setPartnerGroups] = useState<PartnerGroup[]>([]);
 
   // Partner Messages
   const [partnerMessages, setPartnerMessages] = useState<PartnerMessageItem[]>([]);
@@ -313,13 +307,35 @@ const CreateScholarship: React.FC<CreateScholarshipProps> = memo(({ scholarshipI
       setFaqs(s.faqs_new || (s.faqs || []).map((f: any) => ({ question: f.question || "", answer: f.answer || "" })));
 
       // Gallery
-      setGalleryImages(s.gallery_images_new || (s.gallery_images || []).map((img: any) => ({
-        title: img.title || "",
-        url: img.url || img || ""
-      })));
+      const rawImages: any[] = s.gallery_images_new || (s.gallery_images || []).map((img: any) => ({
+        title: img.title || "", url: img.url || img || "", folder: img.folder || "",
+      }));
+      if (rawImages.length > 0 && rawImages[0].images) {
+        setGalleryGroups(rawImages as GalleryGroup[]);
+      } else {
+        const map = new Map<string, { title: string; url: string }[]>();
+        for (const img of rawImages) {
+          const key = img.folder || "Gallery";
+          if (!map.has(key)) map.set(key, []);
+          map.get(key)!.push({ title: img.title || "", url: img.url || "" });
+        }
+        setGalleryGroups(Array.from(map.entries()).map(([folder, images]) => ({ folder, images })));
+      }
 
       // Partners
-      setPartnerGroups(((s as any).partner_groups || []) as PartnerFormItem[]);
+      const rawGroups: any[] = (s as any).partner_groups || [];
+      if (rawGroups.length > 0 && rawGroups[0].partners) {
+        setPartnerGroups(rawGroups as PartnerGroup[]);
+      } else {
+        const map = new Map<string, { name: string; website: string; logo: string }[]>();
+        for (const item of rawGroups) {
+          const key = item.groupHeading || "Partners";
+          if (!item.name) continue;
+          if (!map.has(key)) map.set(key, []);
+          map.get(key)!.push({ name: item.name || "", website: item.website || "", logo: item.logo || "" });
+        }
+        setPartnerGroups(Array.from(map.entries()).map(([groupHeading, partners]) => ({ groupHeading, partners })));
+      }
 
       // Partner Messages
       setPartnerMessages(((s as any).partner_messages || []) as PartnerMessageItem[]);
@@ -555,8 +571,8 @@ const CreateScholarship: React.FC<CreateScholarshipProps> = memo(({ scholarshipI
       required_documents: requiredDocuments,
       faqs: faqs,
       faqs_new: faqs,
-      gallery_images: galleryImages,
-      gallery_images_new: galleryImages,
+      gallery_images: galleryGroups.flatMap(g => g.images.map(img => ({ folder: g.folder, title: img.title, url: img.url }))) as unknown as any,
+      gallery_images_new: galleryGroups.flatMap(g => g.images.map(img => ({ folder: g.folder, title: img.title, url: img.url }))) as unknown as any,
       partner_groups: partnerGroups as unknown as any,
       partner_messages: partnerMessages as unknown as any,
       exam_centers: examCenters as unknown as any,
@@ -608,8 +624,8 @@ const CreateScholarship: React.FC<CreateScholarshipProps> = memo(({ scholarshipI
       aboutOverview, videoTutorials, journeyTimeline, scholarshipSectionTitle, scholarshipSubtitle,
       scholarshipDescription, scholarshipTypes, selectionRubric, eligibilitySectionTitle, eligibilitySubtitle,
       basicRequirements, fullyFundedConditions, partiallyFundedConditions, selectionProcessSteps,
-      requiredDocuments, faqs, galleryImages, partnerGroups, partnerMessages, examCenters, downloads, scholarshipId,
-      isEditing, onNavigate, status, enablePayment, enableBank, bankDetails, qrCodeUrl]);
+      requiredDocuments, faqs, galleryGroups, partnerGroups, partnerMessages, examCenters, downloads, scholarshipId,
+      isEditing, onNavigate, status, enablePayment, enableBank, bankDetails, qrCodeUrl, timelineEvents, paymentFeeAmount]);
 
   if (loadingData) {
     return (
@@ -775,8 +791,8 @@ const CreateScholarship: React.FC<CreateScholarshipProps> = memo(({ scholarshipI
 
       {/* Gallery */}
       <GallerySection
-        images={galleryImages}
-        setImages={setGalleryImages}
+        groups={galleryGroups}
+        setGroups={setGalleryGroups}
       />
 
       {/* FAQ */}

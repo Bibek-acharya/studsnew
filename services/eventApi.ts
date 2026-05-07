@@ -112,7 +112,7 @@ export async function fetchPublicEvents(params: {
 
 export async function fetchPublicEventById(id: string): Promise<EventEntry | null> {
   try {
-    const res = await fetch(`/api/v1/admin/events/${id}`);
+    const res = await fetch(`/api/v1/events/${id}`);
 
     if (!res.ok) {
       return null;
@@ -120,7 +120,34 @@ export async function fetchPublicEventById(id: string): Promise<EventEntry | nul
 
     const result = await res.json();
     if (result?.data) {
-      return result.data;
+      const raw = result.data;
+      return {
+        id: String(raw.id ?? raw.event_id),
+        title: raw.title || raw.name || "",
+        excerpt: raw.excerpt || raw.short_desc || raw.description?.slice(0, 200) || "",
+        description: raw.description || "",
+        category: raw.category || raw.event_type || "Event",
+        image: raw.image || raw.image_url || raw.banner_image || "",
+        organizer: raw.organizer || raw.organized_by || "",
+        location: raw.location || "",
+        date: raw.date || raw.start_date
+          ? new Date(raw.date || raw.start_date).toLocaleDateString("en-US", {
+              month: "short",
+              day: "numeric",
+              year: "numeric",
+            })
+          : "",
+        time: raw.time || raw.start_date
+          ? new Date(raw.start_date).toLocaleTimeString("en-US", {
+              hour: "2-digit",
+              minute: "2-digit",
+            })
+          : "",
+        registrationFee: raw.registrationFee ?? raw.registration_fee ?? "",
+        interestedCount: raw.interestedCount ?? raw.interested_count ?? 0,
+        published: raw.published ?? raw.status === "published",
+        created_at: raw.created_at || raw.publish_date || new Date().toISOString(),
+      };
     }
 
     return null;

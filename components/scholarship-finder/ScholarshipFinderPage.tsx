@@ -267,7 +267,7 @@ const ScholarshipCard = ({
           {/* Deadline */}
           <div className="flex items-center gap-1.5 text-[12px] text-gray-800 font-medium">
             <Calendar className="w-3.5 h-3.5 text-[#f43f5e] shrink-0" />
-            <span>Ends: {scholarship.deadline}</span>
+            <span className="text-red-500">Deadline: {scholarship.deadline}</span>
           </div>
         </div>
 

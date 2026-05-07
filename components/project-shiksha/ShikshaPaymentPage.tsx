@@ -16,7 +16,7 @@ import {
   Landmark
 } from "lucide-react";
 
-type PaymentMethod = "esewa" | "khalti" | "bank";
+type PaymentMethod = "esewa" | "bank";
 
 interface ApplicationData {
   fullName: string;
@@ -196,30 +196,6 @@ export default function ShikshaPaymentPage() {
                 <Image
                   src="/esewa_logo.jpg"
                   alt="eSewa"
-                  width={80}
-                  height={40}
-                  className="w-full h-full object-contain"
-                />
-              </div>
-              <div className="absolute -top-2 -right-2 bg-[#0000ff] text-white rounded-full w-5 h-5 flex items-center justify-center opacity-0 peer-checked:opacity-100 transition-opacity shadow-sm">
-                <CheckCircle className="w-3 h-3" />
-              </div>
-            </label>
-
-            {/* Khalti */}
-            <label className="relative cursor-pointer">
-              <input
-                type="radio"
-                name="payment_method"
-                value="khalti"
-                checked={paymentMethod === "khalti"}
-                onChange={() => setPaymentMethod("khalti")}
-                className="peer sr-only"
-              />
-              <div className="w-24 h-14 border-2 border-gray-200 rounded-md flex items-center justify-center hover:border-gray-300 transition-colors peer-checked:border-[#0000ff] peer-checked:bg-blue-50/50 p-1">
-                <Image
-                  src="/khalti_logo.png"
-                  alt="Khalti"
                   width={80}
                   height={40}
                   className="w-full h-full object-contain"

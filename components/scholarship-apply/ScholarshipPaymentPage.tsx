@@ -22,7 +22,7 @@ interface Scholarship {
 export default function ScholarshipPaymentPage({ scholarshipId }: { scholarshipId: number }) {
   const router = useRouter();
   const [scholarship, setScholarship] = useState<Scholarship | null>(null);
-  const [paymentMethod, setPaymentMethod] = useState<"esewa" | "khalti" | "bank">("esewa");
+  const [paymentMethod, setPaymentMethod] = useState<"esewa" | "bank">("esewa");
   const [applicantName, setApplicantName] = useState("");
   const [contactNumber, setContactNumber] = useState("");
   const [paymentScreenshot, setPaymentScreenshot] = useState<File | null>(null);
@@ -96,17 +96,6 @@ export default function ScholarshipPaymentPage({ scholarshipId }: { scholarshipI
                   onChange={() => setPaymentMethod("esewa")}
                 />
                 <span className="border-2 rounded- lg p-3">eSewa</span>
-              </label>
-            )}
-            {methods.includes("khalti") && (
-              <label className="cursor- pointer flex items- center gap-2">
-                <input
-                  type="radio"
-                  name="paymentMethod"
-                  checked={paymentMethod === "khalti"}
-                  onChange={() => setPaymentMethod("khalti")}
-                />
-                <span className="border-2 rounded- lg p-3">Khalti</span>
               </label>
             )}
             {methods.includes("bank") && (

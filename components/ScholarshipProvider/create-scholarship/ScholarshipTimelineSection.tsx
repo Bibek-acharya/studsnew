@@ -7,6 +7,7 @@ interface TimelineEvent {
   title: string;
   date: string;
   description: string;
+  icon: string;
 }
 
 interface ScholarshipTimelineSectionProps {
@@ -22,7 +23,7 @@ export const ScholarshipTimelineSection: React.FC<ScholarshipTimelineSectionProp
   setTimelineEvents,
 }) => {
   const addEvent = () => {
-    setTimelineEvents([...timelineEvents, { title: "", date: "", description: "" }]);
+    setTimelineEvents([...timelineEvents, { title: "", date: "", description: "", icon: "" }]);
   };
 
   const removeEvent = (index: number) => {
@@ -58,7 +59,7 @@ export const ScholarshipTimelineSection: React.FC<ScholarshipTimelineSectionProp
       <div className="p-6 space-y-4">
         {timelineEvents.map((event, index) => (
           <div key={index} className="flex gap-4 items-start p-4 bg-gray-50 rounded-lg border border-gray-200 relative group">
-            <div className="flex-1 grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div className="flex-1 grid grid-cols-1 md:grid-cols-4 gap-4">
               <div className="space-y-1.5">
                 <label className="block text-sm font-medium text-gray-700">
                   Event Title <span className="text-red-500">*</span>
@@ -83,7 +84,19 @@ export const ScholarshipTimelineSection: React.FC<ScholarshipTimelineSectionProp
                   placeholder="e.g. Ashad 30, 2082 (Monday)"
                 />
               </div>
-              <div className="space-y-1.5 md:col-span-1">
+              <div className="space-y-1.5">
+                <label className="block text-sm font-medium text-gray-700">
+                  Icon
+                </label>
+                <input
+                  type="text"
+                  className={formInputClass}
+                  value={event.icon}
+                  onChange={(e) => updateEvent(index, "icon", e.target.value)}
+                  placeholder="e.g. Calendar"
+                />
+              </div>
+              <div className="space-y-1.5">
                 <label className="block text-sm font-medium text-gray-700">
                   Description
                 </label>

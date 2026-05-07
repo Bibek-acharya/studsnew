@@ -218,6 +218,22 @@ const OrganizationProfile: React.FC = memo(() => {
         brochure_url: brochureUrl,
       });
       setProfile(updated);
+      if (updated.founder_name !== undefined) setFounderName(updated.founder_name);
+      if (updated.founder_role !== undefined) setFounderRole(updated.founder_role);
+      if (updated.founder_message !== undefined) setFounderMessage(updated.founder_message);
+      if (updated.founder_image_url !== undefined) {
+        setFounderImageUrl(updated.founder_image_url);
+        setFounderImagePreview(updated.founder_image_url);
+      }
+      if (updated.facebook_url !== undefined) setFacebookUrl(updated.facebook_url);
+      if (updated.instagram_url !== undefined) setInstagramUrl(updated.instagram_url);
+      if (updated.youtube_url !== undefined) setYoutubeUrl(updated.youtube_url);
+      if (updated.linkedin_url !== undefined) setLinkedinUrl(updated.linkedin_url);
+      if (updated.map_url !== undefined) setMapUrl(updated.map_url);
+      if (updated.brochure_url !== undefined) setBrochureUrl(updated.brochure_url);
+      if (updated.contact_number !== undefined) setContactNumber(updated.contact_number);
+      if (updated.pan_number !== undefined) setPanNumber(updated.pan_number);
+      if (updated.website_url !== undefined) setWebsiteUrl(updated.website_url);
 
       toast.success("Profile updated successfully.");
     } catch (err) {

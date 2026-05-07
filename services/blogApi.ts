@@ -141,7 +141,43 @@ export async function fetchPublicBlogById(id: string): Promise<{ blog: BlogEntry
 
     const result = await res.json();
     if (result?.data) {
-      return { blog: result.data, related: [] };
+      const raw = result.data;
+      const blog: BlogEntry = {
+        id: raw.id ?? raw.blog_id,
+        title: raw.title || "",
+        slug: raw.slug || raw.title?.toLowerCase().replace(/\s+/g, "-") || "",
+        excerpt: raw.excerpt || raw.short_desc || raw.content?.slice(0, 200) || "",
+        content: raw.content || "",
+        image: raw.image || raw.image_url || raw.banner_image || "",
+        author: raw.author || raw.published_by || "Admin",
+        category: raw.category || "Others",
+        tags: raw.tags || [],
+        read_time: raw.read_time || raw.reading_time || "3 min",
+        featured: raw.featured ?? false,
+        published: raw.published ?? raw.status === "published",
+        views: raw.views || 0,
+        created_at: raw.created_at || raw.published_at || raw.publish_date || new Date().toISOString(),
+      };
+      const rawRelated = raw.related || [];
+      const related: BlogEntry[] = Array.isArray(rawRelated)
+        ? rawRelated.map((r: any): BlogEntry => ({
+            id: r.id ?? r.blog_id,
+            title: r.title || "",
+            slug: r.slug || r.title?.toLowerCase().replace(/\s+/g, "-") || "",
+            excerpt: r.excerpt || r.short_desc || r.content?.slice(0, 200) || "",
+            content: r.content || "",
+            image: r.image || r.image_url || r.banner_image || "",
+            author: r.author || r.published_by || "Admin",
+            category: r.category || "Others",
+            tags: r.tags || [],
+            read_time: r.read_time || r.reading_time || "3 min",
+            featured: r.featured ?? false,
+            published: r.published ?? r.status === "published",
+            views: r.views || 0,
+            created_at: r.created_at || r.published_at || new Date().toISOString(),
+          }))
+        : [];
+      return { blog, related };
     }
 
     return null;

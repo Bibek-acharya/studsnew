@@ -64,6 +64,7 @@ export interface TimelineEvent {
   title: string;
   date: string;
   description: string;
+  icon: string;
 }
 
 export interface JourneyTimelineItem {
@@ -857,7 +858,7 @@ export const scholarshipProviderApi = {
   }): Promise<ProviderProfile> {
 
 
-    return apiRequest<ProviderProfile>("/api/v1/scholarship-providers/profile", {
+    return callApi<ProviderProfile>("/api/v1/scholarship-providers/profile", {
       method: "PUT",
       body: JSON.stringify(data),
     });

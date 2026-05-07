@@ -9,6 +9,29 @@ if (typeof window !== "undefined") {
   console.info("API_BASE_URL:", API_BASE_URL);
 }
 
+const PLACEHOLDER_IMAGE = "https://placehold.co/800x400?text=No+Image";
+
+export function getImageUrl(url: string | null | undefined): string {
+  if (!url) return PLACEHOLDER_IMAGE;
+  if (url.startsWith("http://") || url.startsWith("https://")) return url;
+  if (url.startsWith("/")) return `${API_BASE_URL}${url}`;
+  return `${API_BASE_URL}/${url}`;
+}
+
+export function stripHtml(html: string | null | undefined): string {
+  if (!html) return "";
+  return html
+    .replace(/<[^>]*>/g, "")
+    .replace(/&nbsp;/g, " ")
+    .replace(/&amp;/g, "&")
+    .replace(/&lt;/g, "<")
+    .replace(/&gt;/g, ">")
+    .replace(/&quot;/g, '"')
+    .replace(/&#39;/g, "'")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
 type ApiRequestOptions = RequestInit & {
   suppressAuthExpired?: boolean;
 };

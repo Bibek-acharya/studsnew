@@ -7,8 +7,8 @@ export { default as ScholarshipTimelineSection } from "./ScholarshipTimelineSect
 export { default as ScholarshipDetailsSection } from "./ScholarshipDetailsSection";
 export { default as EligibilitySection } from "./EligibilitySection";
 export { default as FAQSection } from "./FAQSection";
-export { default as GallerySection, type GalleryImageItem } from "./GallerySection";
-export { default as PartnersSection, type PartnerOrganization } from "./PartnersSection";
+export { default as GallerySection, type GalleryGroup, type GalleryEntry } from "./GallerySection";
+export { default as PartnersSection, type PartnerGroup, type PartnerEntry } from "./PartnersSection";
 export { default as PartnerMessagesSection, type PartnerMessageItem } from "./PartnerMessagesSection";
 export { default as ExamCentersSection, type ExamCenterItem } from "./ExamCentersSection";
 export { default as DownloadsSection, type DownloadItem } from "./DownloadsSection";

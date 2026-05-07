@@ -1,0 +1,92 @@
+"use client";
+
+import { useMemo } from "react";
+import { ArrowRight } from "lucide-react";
+
+const MOCK_GALLERY_IMAGES = [
+  "https://projectshiksha.hundredgroupnepal.org/images/shiks.jpg",
+  "https://sowersaction.org.np/wp-content/uploads/2025/04/WhatsApp-Image-2025-04-02-at-14.37.52_81769f1f.jpg",
+  "https://sowersaction.org.np/wp-content/uploads/2025/02/cafe.jpg",
+  "https://sowersaction.org.np/wp-content/uploads/2025/01/IMG_7141-scaled.jpg",
+  "https://sowersaction.org.np/wp-content/uploads/2025/01/IMG_5591-e1739791077307.jpeg",
+  "https://sowersaction.org.np/wp-content/uploads/2025/02/WhatsApp-Image-2025-03-28-at-14.19.06_688006be.jpg",
+];
+
+export default function GalleryTab({ images, lightboxIndex, setLightboxIndex, closeLightbox, changeImage }: {
+  images: { url: string; title: string; folder: string }[];
+  lightboxIndex: number | null;
+  setLightboxIndex: (i: number | null) => void;
+  closeLightbox: () => void;
+  changeImage: (dir: number) => void;
+}) {
+  const items = images.length > 0 ? images : MOCK_GALLERY_IMAGES.map(url => ({ url, title: "", folder: "" }));
+  const urls = items.map(i => i.url);
+
+  const grouped: { heading: string; items: typeof items }[] = useMemo(() => {
+    const groups = new Map<string, typeof items>();
+    for (const img of items) {
+      const key = img.folder || "Gallery";
+      if (!groups.has(key)) groups.set(key, []);
+      groups.get(key)!.push(img);
+    }
+    return Array.from(groups.entries()).map(([heading, imgs]) => ({ heading, items: imgs }));
+  }, [items]);
+
+  return (
+    <div className="space-y-10">
+      <div className="mb-6">
+        <h2 className="text-[20px] font-bold text-gray-900">Photo Gallery</h2>
+        <p className="text-[14px] text-gray-500 mt-1">Glimpses of our programs and events</p>
+      </div>
+      {grouped.map((group, gi) => (
+        <div key={gi} className="space-y-5">
+          <h3 className="text-lg font-bold text-gray-800 capitalize tracking-tight">{group.heading}</h3>
+          <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-5">
+            {group.items.slice(0, group.items.length > 8 ? 7 : 8).map((img, ii) => {
+              const globalIndex = urls.indexOf(img.url);
+              return (
+                <div
+                  key={ii}
+                  className="group cursor-pointer overflow-hidden rounded-2xl border border-gray-100 bg-white p-1.5 shadow-sm hover:shadow-md transition-all duration-300"
+                  onClick={() => setLightboxIndex(globalIndex >= 0 ? globalIndex : null)}
+                >
+                  <div className="aspect-[4/3] overflow-hidden rounded-xl bg-gray-50">
+                    <img
+                      src={img.url}
+                      alt={img.title || "Gallery image"}
+                      className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+                    />
+                  </div>
+                  {img.title && (
+                    <p className="text-[12px] text-gray-600 mt-2 px-1 text-center font-semibold truncate group-hover:text-blue-600 transition-colors">
+                      {img.title}
+                    </p>
+                  )}
+                </div>
+              );
+            })}
+            {group.items.length > 8 && (
+              <div
+                className="group cursor-pointer overflow-hidden rounded-2xl border border-blue-100 border-dashed bg-blue-50/30 p-1.5 shadow-sm hover:shadow-md hover:border-blue-300 transition-all duration-300"
+                onClick={() => {
+                  const firstIdx = urls.indexOf(group.items[0].url);
+                  setLightboxIndex(firstIdx >= 0 ? firstIdx : null);
+                }}
+              >
+                <div className="aspect-[4/3] overflow-hidden rounded-xl bg-blue-600/5 flex flex-col items-center justify-center">
+                  <div className="w-12 h-12 rounded-full bg-blue-100 flex items-center justify-center group-hover:bg-blue-600 group-hover:text-white transition-all duration-300">
+                    <ArrowRight className="w-6 h-6" />
+                  </div>
+                  <span className="mt-2 font-bold text-sm text-blue-700">View All</span>
+                </div>
+                <p className="text-[12px] text-blue-600/60 mt-2 px-1 text-center font-bold tracking-tight">
+                  +{group.items.length - 7} PHOTOS
+                </p>
+              </div>
+            )}
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+}

@@ -12,6 +12,57 @@ interface CommentItem {
   likes: number;
 }
 
+function stripHtml(html: string): string {
+  if (typeof window === 'undefined') {
+    return html.replace(/<[^>]*>/g, '').trim();
+  }
+  const doc = new DOMParser().parseFromString(html, 'text/html');
+  return doc.body.textContent || "";
+}
+
+function normalizeArticle(data: any): any {
+  if (!data) return null;
+  const isProvider = data.published_by !== undefined || data.image_url !== undefined;
+  if (isProvider) {
+    return {
+      ...data,
+      image: data.image_url || "",
+      author: data.published_by || "Unknown",
+      excerpt: stripHtml(data.short_desc || ""),
+      category: data.news_type || "News",
+      date: data.publish_date || data.published_at || data.created_at || "",
+    };
+  }
+  return {
+    ...data,
+    excerpt: data.excerpt || data.desc || "",
+    date: data.date || data.created || "",
+  };
+}
+
+function formatDate(dateStr: string): string {
+  if (!dateStr) return "Recently";
+  const date = new Date(dateStr);
+  if (isNaN(date.getTime())) return dateStr;
+  const now = new Date();
+  const diff = now.getTime() - date.getTime();
+  const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+  if (days === 0) return "Today";
+  if (days === 1) return "1 day ago";
+  if (days < 30) return `${days} days ago`;
+  if (days < 365) {
+    const months = Math.floor(days / 30);
+    return `${months} month${months > 1 ? "s" : ""} ago`;
+  }
+  return date.toLocaleDateString("en-US", { year: "numeric", month: "short", day: "numeric" });
+}
+
+function getImageUrl(image: string | null | undefined): string | null {
+  if (!image) return null;
+  if (image.startsWith("http://") || image.startsWith("https://")) return image;
+  return image;
+}
+
 const NewsDetailsPage: React.FC<{ params: Promise<{ id: string }> }> = ({ params }) => {
   const [id, setId] = useState<string | null>(null);
   const [article, setArticle] = useState<any>(null);
@@ -37,12 +88,18 @@ const NewsDetailsPage: React.FC<{ params: Promise<{ id: string }> }> = ({ params
         const res = await fetch(apiUrl);
         const data = await res.json();
         if (data?.data) {
-          setArticle(data.data);
+          const normalized = normalizeArticle(data.data);
+          setArticle(normalized);
           
-          const relatedRes = await fetch(`/api/v1/news?category=${data.data.category}`);
+          const relatedRes = await fetch(`/api/v1/news?category=${normalized.category}`);
           const relatedData = await relatedRes.json();
           if (relatedData?.data?.news) {
-            setRelated(relatedData.data.news.filter((n: any) => String(n.id) !== safeId).slice(0, 3));
+            setRelated(
+              relatedData.data.news
+                .filter((n: any) => String(n.id) !== safeId)
+                .slice(0, 3)
+                .map((n: any) => normalizeArticle(n))
+            );
           }
         }
       } catch (e) {
@@ -133,11 +190,13 @@ const NewsDetailsPage: React.FC<{ params: Promise<{ id: string }> }> = ({ params
               <i className="fa-solid fa-graduation-cap text-sm"></i> {categoryUi}
             </span>
             <span className="flex items-center gap-1.5">
-              <i className="fa-regular fa-clock"></i> 90 days ago
+              <i className="fa-regular fa-clock"></i> {formatDate(article.date)}
             </span>
-            <span className="flex items-center gap-1.5 ml-auto">
-              <i className="fa-regular fa-eye"></i> 200 views
-            </span>
+            {article.views > 0 && (
+              <span className="flex items-center gap-1.5 ml-auto">
+                <i className="fa-regular fa-eye"></i> {article.views} views
+              </span>
+            )}
           </div>
 
           <h1 className="text-3xl md:text-[2.5rem] font-bold leading-tight mb-6 text-gray-900 tracking-tight">
@@ -154,22 +213,26 @@ const NewsDetailsPage: React.FC<{ params: Promise<{ id: string }> }> = ({ params
             <div className="flex items-center gap-2">
               <i className="fa-solid fa-calendar text-gray-800"></i>
               <span>
-                Latest Update: <strong className="text-gray-900 font-semibold">Today</strong>
+                Latest Update: <strong className="text-gray-900 font-semibold">{formatDate(article.date)}</strong>
               </span>
             </div>
           </div>
 
-          <div className="mb-8 rounded-md overflow-hidden  border border-gray-100">
-            <img
-              src={article.image}
-              alt={article.title}
-              className="w-full h-auto max-h-[450px] object-cover hover:scale-[1.02] transition-transform duration-500"
-            />
-          </div>
+          {getImageUrl(article.image) && (
+            <div className="mb-8 rounded-md overflow-hidden border border-gray-100">
+              <img
+                src={getImageUrl(article.image)!}
+                alt={article.title}
+                className="w-full h-auto max-h-[450px] object-cover hover:scale-[1.02] transition-transform duration-500"
+              />
+            </div>
+          )}
 
-          <div className="bg-blue-50 border-l-[3px] border-blue-500 p-5 md:p-6 rounded-r-xl mb-10 text-gray-700 leading-relaxed text-[1.05rem]">
-            {article.excerpt}
-          </div>
+          {article.excerpt && (
+            <div className="bg-blue-50 border-l-[3px] border-blue-500 p-5 md:p-6 rounded-r-xl mb-10 text-gray-700 leading-relaxed text-[1.05rem]">
+              {article.excerpt}
+            </div>
+          )}
 
           <div className="prose prose-slate max-w-none mb-12 text-gray-700 leading-relaxed text-[1.05rem] [&_pre]:overflow-x-auto [&_pre]:whitespace-pre-wrap [&_pre]:break-words [&_code]:break-words [&_img]:max-w-full">
             <div className="break-words" dangerouslySetInnerHTML={{ __html: article.content || "" }} />
@@ -277,30 +340,38 @@ const NewsDetailsPage: React.FC<{ params: Promise<{ id: string }> }> = ({ params
             <div className="space-y-6">
               {related.length > 0 ? (
                 related.map((rel, idx) => {
-                  const relCategory = idx % 3 === 0 ? "Scholarship" : idx % 3 === 1 ? "Exam" : "Fee";
+                  const relCategoryUi =
+                    rel.category === "Academic" ? "Admission"
+                    : rel.category === "Tech" ? "Exam"
+                    : rel.category === "Jobs" ? "Fee"
+                    : "Notice";
                   const relBadge =
-                    relCategory === "Scholarship"
-                      ? "bg-green-500"
-                      : relCategory === "Exam"
+                    relCategoryUi === "Admission"
+                      ? "bg-blue-600"
+                      : relCategoryUi === "Exam"
                         ? "bg-red-500"
-                        : "bg-orange-500";
+                        : relCategoryUi === "Fee"
+                          ? "bg-orange-500"
+                          : "bg-indigo-600";
 
                   return (
                     <div key={rel.id}>
                       <Link href={`/news/${rel.id}`} className="group cursor-pointer block">
-                        <div className="rounded-md overflow-hidden mb-3">
-                          <img
-                            src={rel.image}
-                            alt={rel.title}
-                            className="w-full h-[150px] object-cover group-hover:scale-105 transition-transform duration-300"
-                          />
-                        </div>
+                        {getImageUrl(rel.image) && (
+                          <div className="rounded-md overflow-hidden mb-3">
+                            <img
+                              src={getImageUrl(rel.image)!}
+                              alt={rel.title}
+                              className="w-full h-[150px] object-cover group-hover:scale-105 transition-transform duration-300"
+                            />
+                          </div>
+                        )}
                         <div className="flex items-center justify-between mb-2">
                           <span className={`${relBadge} text-white text-[11px] font-bold px-2.5 py-0.5 rounded-full tracking-wide uppercase`}>
-                            {relCategory}
+                            {relCategoryUi}
                           </span>
                           <span className="text-xs text-gray-500 flex items-center gap-1">
-                            <i className="fa-regular fa-clock"></i> 90 days ago
+                            <i className="fa-regular fa-clock"></i> {formatDate(rel.date)}
                           </span>
                         </div>
                         <h3 className="font-bold text-[1.1rem] leading-snug text-gray-900 group-hover:text-blue-600 transition-colors mb-2">
