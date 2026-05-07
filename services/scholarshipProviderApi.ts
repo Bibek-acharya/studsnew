@@ -288,6 +288,8 @@ export interface CreateScholarshipPayload {
   office_address?: string;
   map_url?: string;
   payment_config?: PaymentConfig;
+  exam_date?: string;
+  exam_time?: string;
 }
 
 export interface ProviderScholarship {
@@ -375,6 +377,8 @@ export interface ProviderScholarship {
   exam_centers_new?: ExamCenterItem[];
   downloads?: DownloadItem[];
   payment_config?: PaymentConfig;
+  exam_date?: string;
+  exam_time?: string;
 }
 
 export interface ProviderPayment {

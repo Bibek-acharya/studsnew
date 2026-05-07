@@ -34,13 +34,13 @@ export function stripHtml(html: string | null | undefined): string {
 
 type ApiRequestOptions = RequestInit & {
   suppressAuthExpired?: boolean;
+  authToken?: string;
 };
 
 export async function apiRequest<T>(path: string, options: ApiRequestOptions = {}): Promise<T> {
-  const { suppressAuthExpired, ...requestOptions } = options;
-  // Get token from localStorage for production (cookie won't be sent to API domain)
-  let token: string | null = null;
-  if (typeof window !== "undefined") {
+  const { suppressAuthExpired, authToken, ...requestOptions } = options;
+  let token: string | null = authToken ?? null;
+  if (!token && typeof window !== "undefined") {
     if (path.includes("/scholarship-providers/")) {
       token = localStorage.getItem("scholarshipProviderToken") || localStorage.getItem("token");
     } else {
@@ -541,7 +541,11 @@ export interface ForumPost {
 export interface DashboardStats {
   applications_submitted: number;
   saved_colleges: number;
+  saved_scholarships: number;
   scholarships_applied: number;
+  active_invites: number;
+  unread_messages: number;
+  upcoming_deadlines: number;
   profile_completion: number;
 }
 
@@ -1573,14 +1577,14 @@ export const apiService = {
     page?: number;
     limit?: number;
     sort?: string;
-  }): Promise<any> {
+  }, options?: ApiRequestOptions): Promise<any> {
     const query = new URLSearchParams();
     if (params?.page) query.set("page", String(params.page));
     if (params?.limit) query.set("limit", String(params.limit));
     if (params?.sort) query.set("sort", params.sort);
 
     const queryStr = query.toString();
-    return apiRequest<any>(`/api/v1/education/reviews/college/${collegeId}${queryStr ? `?${queryStr}` : ""}`);
+    return apiRequest<any>(`/api/v1/education/reviews/college/${collegeId}${queryStr ? `?${queryStr}` : ""}`, options);
   },
 
   async submitReview(data: {
@@ -1598,23 +1602,24 @@ export const apiService = {
     scholarship?: boolean;
     internshipOutcome?: string;
     email: string;
-  }): Promise<any> {
+  }, options?: ApiRequestOptions): Promise<any> {
     return apiRequest<any>("/api/v1/user/reviews", {
       method: "POST",
       body: JSON.stringify(data),
+      ...options,
     });
   },
 
   async getUserReviews(params?: {
     page?: number;
     limit?: number;
-  }): Promise<any> {
+  }, options?: ApiRequestOptions): Promise<any> {
     const query = new URLSearchParams();
     if (params?.page) query.set("page", String(params.page));
     if (params?.limit) query.set("limit", String(params.limit));
 
     const queryStr = query.toString();
-    return apiRequest<any>(`/api/v1/user/reviews${queryStr ? `?${queryStr}` : ""}`);
+    return apiRequest<any>(`/api/v1/user/reviews${queryStr ? `?${queryStr}` : ""}`, options);
   },
 
   async updateReview(reviewId: number, data: Partial<{
@@ -1622,29 +1627,33 @@ export const apiService = {
     cons: string;
     summaryTitle: string;
     ratings: Record<string, number>;
-  }>): Promise<any> {
+  }>, options?: ApiRequestOptions): Promise<any> {
     return apiRequest<any>(`/api/v1/user/reviews/${reviewId}`, {
       method: "PUT",
       body: JSON.stringify(data),
+      ...options,
     });
   },
 
-  async deleteReview(reviewId: number): Promise<any> {
+  async deleteReview(reviewId: number, options?: ApiRequestOptions): Promise<any> {
     return apiRequest<any>(`/api/v1/user/reviews/${reviewId}`, {
       method: "DELETE",
+      ...options,
     });
   },
 
-  async markReviewHelpful(reviewId: number): Promise<any> {
+  async markReviewHelpful(reviewId: number, options?: ApiRequestOptions): Promise<any> {
     return apiRequest<any>(`/api/v1/education/reviews/${reviewId}/helpful`, {
       method: "POST",
+      ...options,
     });
   },
 
-  async reportReview(reviewId: number, reason: string): Promise<any> {
+  async reportReview(reviewId: number, reason: string, options?: ApiRequestOptions): Promise<any> {
     return apiRequest<any>(`/api/v1/user/reviews/${reviewId}/report`, {
       method: "POST",
       body: JSON.stringify({ reason }),
+      ...options,
     });
   },
 

@@ -1,19 +1,29 @@
 'use client'
 
-import React, { useState, useEffect } from 'react'
-import { GraduationCap, CalendarCheck, Sparkle, Banknote, ChartBar, CheckCircle, Moon, Bell, Archive, Trash2, X, BellOff, Inbox, ArchiveRestore, Loader2, AlertCircle } from 'lucide-react'
+import React, { useState, useEffect, useMemo } from 'react'
+import { Bell, BellOff, Loader2, AlertCircle } from 'lucide-react'
 import { apiService, StudentNotificationItem } from '@/services/api'
+
+type NotifCategory = 'all' | 'deadline' | 'application' | 'message' | 'counselling' | 'scholarship' | 'system'
 
 interface Notification {
   id: number
   title: string
-  category: 'following' | 'system' | 'match'
   message: string
+  type: string
   time: string
   unread: boolean
-  archived: boolean
-  icon: string
 }
+
+const categoryDefs: { key: NotifCategory; label: string; bgClass: string; textClass: string; iconBg: string; iconColor: string }[] = [
+  { key: 'all', label: 'All', bgClass: 'bg-blue-100 text-blue-700', textClass: 'text-blue-700', iconBg: 'bg-blue-50', iconColor: 'text-blue-600' },
+  { key: 'deadline', label: 'Deadlines', bgClass: 'bg-red-100 text-red-700', textClass: 'text-red-700', iconBg: 'bg-red-50', iconColor: 'text-red-500' },
+  { key: 'application', label: 'Applications', bgClass: 'bg-blue-100 text-blue-700', textClass: 'text-blue-700', iconBg: 'bg-blue-50', iconColor: 'text-blue-600' },
+  { key: 'message', label: 'Messages', bgClass: 'bg-purple-100 text-purple-700', textClass: 'text-purple-700', iconBg: 'bg-purple-50', iconColor: 'text-purple-600' },
+  { key: 'counselling', label: 'Counselling', bgClass: 'bg-indigo-100 text-indigo-700', textClass: 'text-indigo-700', iconBg: 'bg-indigo-50', iconColor: 'text-indigo-600' },
+  { key: 'scholarship', label: 'Scholarship', bgClass: 'bg-orange-100 text-orange-700', textClass: 'text-orange-700', iconBg: 'bg-orange-50', iconColor: 'text-orange-500' },
+  { key: 'system', label: 'System', bgClass: 'bg-gray-100 text-gray-600', textClass: 'text-gray-600', iconBg: 'bg-gray-100', iconColor: 'text-gray-600' },
+]
 
 function computeRelativeTime(dateStr: string): string {
   const now = Date.now()
@@ -22,63 +32,50 @@ function computeRelativeTime(dateStr: string): string {
   const diffSec = Math.floor(diffMs / 1000)
   if (diffSec < 60) return 'just now'
   const diffMin = Math.floor(diffSec / 60)
-  if (diffMin < 60) return `${diffMin}m ago`
+  if (diffMin < 60) return `${diffMin} minutes ago`
   const diffHour = Math.floor(diffMin / 60)
-  if (diffHour < 24) return `${diffHour}h ago`
+  if (diffHour < 24) return `${diffHour} hours ago`
   const diffDay = Math.floor(diffHour / 24)
-  if (diffDay < 7) return `${diffDay}d ago`
+  if (diffDay === 1) return '1 day ago'
+  if (diffDay < 7) return `${diffDay} days ago`
   return new Date(dateStr).toLocaleDateString()
 }
 
-function getIconComponent(category: string) {
-  const icons: Record<string, React.ReactElement> = {
-    system: <CheckCircle className="w-5 h-5" />,
-    following: <Bell className="w-5 h-5" />,
+function getSvgForCategory(cat: NotifCategory): string {
+  switch (cat) {
+    case 'deadline':
+      return '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><path d="M12 9v4"/><path d="M12 17h.01"/></svg>'
+    case 'application':
+      return '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/><polyline points="14 2 14 8 20 8"/></svg>'
+    case 'message':
+      return '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>'
+    case 'counselling':
+      return '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="18" x="3" y="4" rx="2" ry="2"/><line x1="16" x2="16" y1="2" y2="6"/><line x1="8" x2="8" y1="2" y2="6"/><line x1="3" x2="21" y1="10" y2="10"/><path d="m9 16 2 2 4-4"/></svg>'
+    case 'scholarship':
+      return '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21.42 10.922a1 1 0 0 0-.019-1.838L12.83 5.18a2 2 0 0 0-1.66 0L2.6 9.08a1 1 0 0 0 0 1.832l8.57 3.908a2 2 0 0 0 1.66 0z"/><path d="M22 10v6"/><path d="M6 12.5V16a6 3 0 0 0 12 0v-3.5"/></svg>'
+    case 'system':
+      return '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg>'
+    default:
+      return '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/></svg>'
   }
-  return icons[category] || <Bell className="w-5 h-5" />
 }
 
-function getIconStyles(category: Notification['category']) {
-  const styles = {
-    following: { bg: 'bg-sky-100', text: 'text-sky-600' },
-    system: { bg: 'bg-gray-100', text: 'text-gray-600' },
-    match: { bg: 'bg-pink-100', text: 'text-pink-600' },
-  }
-  return styles[category] || styles.system
-}
-
-function getCategoryTag(category: string) {
-  if (category === 'following') {
-    return <span className="text-xs font-medium px-2 py-0.5 rounded-md border bg-white text-sky-600 border-sky-200">Following</span>
-  } else if (category === 'system') {
-    return <span className="text-xs font-medium px-2 py-0.5 rounded-md border bg-white text-gray-600 border-gray-200">System</span>
-  }
-  return null
-}
-
-type TabType = 'all' | 'following' | 'system' | 'archive'
-
-const ARCHIVE_STORAGE_KEY = 'studsphere_archived_notifications'
-
-function getArchivedIds(): number[] {
-  if (typeof window === 'undefined') return []
-  try {
-    const stored = localStorage.getItem(ARCHIVE_STORAGE_KEY)
-    return stored ? JSON.parse(stored) : []
-  } catch { return [] }
-}
-
-function setArchivedIds(ids: number[]) {
-  if (typeof window === 'undefined') return
-  localStorage.setItem(ARCHIVE_STORAGE_KEY, JSON.stringify(ids))
+function mapTypeToCategory(type: string): NotifCategory {
+  const t = type.toLowerCase()
+  if (t.includes('deadline')) return 'deadline'
+  if (t.includes('application') || t.includes('admission') || t.includes('submitted') || t.includes('document')) return 'application'
+  if (t.includes('message') || t.includes('chat')) return 'message'
+  if (t.includes('counselling') || t.includes('counsel') || t.includes('session')) return 'counselling'
+  if (t.includes('scholarship')) return 'scholarship'
+  if (t.includes('system') || t.includes('profile') || t.includes('info')) return 'system'
+  return 'system'
 }
 
 export default function NotificationsSection() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [notifications, setNotifications] = useState<Notification[]>([])
-  const [currentTab, setCurrentTab] = useState<TabType>('all')
-  const [archivedIds, setArchivedIdsState] = useState<number[]>(getArchivedIds)
+  const [currentTab, setCurrentTab] = useState<NotifCategory>('all')
 
   useEffect(() => {
     const fetchNotifications = async () => {
@@ -87,16 +84,17 @@ export default function NotificationsSection() {
         setError(null)
         const res = await apiService.getStudentNotifications(1, 50)
         const items: StudentNotificationItem[] = res.data?.notifications || []
-        setNotifications(items.map(n => ({
-          id: n.id,
-          title: n.title,
-          category: n.type === 'system' ? 'system' as const : 'following' as const,
-          message: n.message,
-          time: computeRelativeTime(n.created_at),
-          unread: !n.read,
-          archived: archivedIds.includes(n.id),
-          icon: n.type === 'system' ? 'system' : 'following',
-        })))
+        setNotifications(items.map(n => {
+          const category = mapTypeToCategory(n.type)
+          return {
+            id: n.id,
+            title: n.title,
+            message: n.message,
+            type: category,
+            time: computeRelativeTime(n.created_at),
+            unread: !n.read,
+          }
+        }))
       } catch (err: any) {
         setError(err.message || 'Failed to load notifications')
       } finally {
@@ -105,10 +103,6 @@ export default function NotificationsSection() {
     }
     fetchNotifications()
   }, [])
-
-  useEffect(() => {
-    setArchivedIds(archivedIds)
-  }, [archivedIds])
 
   const markAsRead = async (id: number) => {
     setNotifications(prev => prev.map(n =>
@@ -119,174 +113,121 @@ export default function NotificationsSection() {
     } catch { /* ignore */ }
   }
 
-  const toggleArchive = (id: number, e: React.MouseEvent) => {
-    e.stopPropagation()
-    setArchivedIdsState(prev =>
-      prev.includes(id) ? prev.filter(a => a !== id) : [...prev, id]
-    )
-    setNotifications(prev => prev.map(n =>
-      n.id === id ? { ...n, archived: !n.archived } : n
-    ))
-  }
-
-  const deleteNotification = (id: number, e: React.MouseEvent) => {
-    e.stopPropagation()
-    setNotifications(prev => prev.filter(n => n.id !== id))
-  }
-
   const markAllAsRead = async () => {
-    const currentNotifications = getFilteredNotifications()
-    setNotifications(prev => prev.map(n => {
-      if (currentNotifications.some(cn => cn.id === n.id)) {
-        return { ...n, unread: false }
-      }
-      return n
-    }))
+    setNotifications(prev => prev.map(n => ({ ...n, unread: false })))
     try {
       await apiService.markAllNotificationsRead()
     } catch { /* ignore */ }
   }
 
-  const getFilteredNotifications = () => {
-    if (currentTab === 'archive') {
-      return notifications.filter(n => n.archived === true)
-    }
-    return notifications.filter(n => {
-      if (n.archived) return false
-      if (currentTab === 'all') return true
-      return n.category === currentTab
-    })
-  }
+  const filteredNotifications = useMemo(() => {
+    if (currentTab === 'all') return notifications
+    return notifications.filter(n => n.type === currentTab)
+  }, [notifications, currentTab])
 
-  const filteredNotifications = getFilteredNotifications()
-  const unreadCount = notifications.filter(n => n.unread && !n.archived).length
+  const counts = useMemo(() => {
+    const map: Record<string, number> = { all: notifications.length }
+    notifications.forEach(n => {
+      map[n.type] = (map[n.type] || 0) + 1
+    })
+    return map
+  }, [notifications])
 
   if (loading) {
     return (
-      <div className="w-full max-w-7xl mx-auto flex items-center justify-center py-20">
-        <div className="flex flex-col items-center gap-3">
-          <Loader2 className="w-8 h-8 animate-spin text-primary" />
-          <p className="text-sm text-slate-500">Loading notifications...</p>
-        </div>
+      <div className="flex items-center justify-center py-20">
+        <Loader2 className="w-8 h-8 animate-spin text-[#0000ff]" />
       </div>
     )
   }
 
   if (error) {
     return (
-      <div className="w-full max-w-7xl mx-auto flex items-center justify-center py-20">
-        <div className="flex flex-col items-center gap-3 text-center">
-          <AlertCircle className="w-8 h-8 text-red-500" />
-          <p className="text-sm text-red-600">{error}</p>
-          <button onClick={() => window.location.reload()} className="text-sm text-primary hover:underline">Retry</button>
+      <div className="flex items-center justify-center py-20">
+        <div className="flex items-center gap-2 text-red-500">
+          <AlertCircle className="w-5 h-5" />
+          <span>{error}</span>
         </div>
       </div>
     )
   }
 
   return (
-    <div className="w-full max-w-7xl mx-auto">
-      <header className="flex items-center justify-between py-5 sticky top-0 z-10">
-        <div className="flex items-center gap-4">
-          {unreadCount > 0 && (
-            <span className="bg-blue-600 text-white text-sm font-semibold px-2.5 py-0.5 rounded-full min-w-[28px] flex items-center justify-center">
-              {unreadCount}
-            </span>
-          )}
+    <div className="mt-4">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-6">
+        <h1 className="text-2xl font-bold text-gray-800">Notifications</h1>
+        <div className="flex items-center text-sm text-gray-500 mt-2 sm:mt-0 gap-2">
+          <span>Dashboard</span>
+          <span>-</span>
+          <span className="text-gray-800 font-medium">Notifications</span>
         </div>
-        {unreadCount > 0 && (
-          <button
-            onClick={markAllAsRead}
-            className="text-sm font-medium text-slate-600 hover:text-blue-600 transition-colors"
-          >
-            Mark all as read
-          </button>
-        )}
-      </header>
-
-      <div className="flex gap-1 bg-slate-100 p-1 rounded-md mb-6 w-fit">
-        {(['all', 'following', 'system', 'archive'] as TabType[]).map((tab) => (
-          <button
-            key={tab}
-            onClick={() => setCurrentTab(tab)}
-            className={`px-4 py-2 text-sm font-semibold rounded-md transition-all ${
-              currentTab === tab 
-                ? 'bg-white text-primary'
-                : 'text-slate-500 hover:text-slate-700'
-            }`}
-          >
-            {tab.charAt(0).toUpperCase() + tab.slice(1)}
-          </button>
-        ))}
       </div>
 
-      <div className="flex-1 overflow-y-auto">
-        {filteredNotifications.length === 0 ? (
-          <div className="flex flex-col items-center justify-center py-20 text-center">
-            <div className="w-20 h-20 bg-slate-100 rounded-full flex items-center justify-center mb-5">
-              <BellOff className="w-10 h-10 text-slate-300" />
-            </div>
-            <h3 className="text-lg font-semibold text-slate-800 mb-2">No notifications</h3>
-            <p className="text-sm text-slate-500 max-w-[260px]">
-              You&apos;re all caught up!
+      <div className="bg-white rounded-xl border border-gray-100 shadow-sm overflow-hidden">
+        <div className="border-b border-gray-100">
+          <div className="flex overflow-x-auto no-scrollbar gap-1 p-3">
+            {categoryDefs.map(cat => (
+              <button
+                key={cat.key}
+                onClick={() => setCurrentTab(cat.key)}
+                className={`px-4 py-2 text-sm font-medium rounded-lg whitespace-nowrap flex items-center gap-2 transition-colors ${
+                  currentTab === cat.key
+                    ? 'bg-blue-50 text-blue-600'
+                    : 'text-gray-600 hover:bg-gray-100'
+                }`}
+              >
+                {cat.label}
+                <span className={`text-xs px-1.5 py-0.5 rounded-full ${cat.bgClass}`}>
+                  {counts[cat.key] || 0}
+                </span>
+              </button>
+            ))}
+          </div>
+          <div className="px-4 pb-3 flex justify-between items-center">
+            <p className="text-xs text-gray-500">
+              {currentTab === 'all' ? 'Showing all notifications' : `Showing ${currentTab} notifications`}
             </p>
+            <button
+              onClick={markAllAsRead}
+              className="px-3 py-1.5 text-sm text-blue-600 hover:bg-blue-50 rounded-lg font-medium transition-colors"
+            >
+              Mark All Read
+            </button>
+          </div>
+        </div>
+
+        {filteredNotifications.length === 0 ? (
+          <div className="p-12 text-center">
+            <Bell className="w-12 h-12 text-gray-300 mx-auto mb-4" />
+            <h3 className="text-lg font-bold text-gray-700 mb-2">No notifications</h3>
+            <p className="text-sm text-gray-500">You&apos;re all caught up!</p>
           </div>
         ) : (
-          <div className="divide-y divide-slate-100">
-            {filteredNotifications.map((notif, index) => {
-              const iconStyles = getIconStyles(notif.category)
+          <div className="divide-y divide-gray-100">
+            {filteredNotifications.map(notif => {
+              const catDef = categoryDefs.find(c => c.key === notif.type) || categoryDefs[6]
               return (
                 <div
                   key={notif.id}
                   onClick={() => markAsRead(notif.id)}
-                  className={`group relative flex gap-4 px-6 py-5 cursor-pointer transition-all hover:bg-slate-50 ${
-                    notif.unread ? 'bg-blue-50/50' : ''
+                  className={`p-4 hover:bg-blue-50/50 flex items-start gap-3 transition-colors cursor-pointer ${
+                    notif.unread ? 'bg-blue-50/30' : ''
                   }`}
-                  style={{ animationDelay: `${index * 0.05}s` }}
                 >
+                  <div className={`w-10 h-10 rounded-full flex items-center justify-center shrink-0 ${catDef.iconBg}`}>
+                    <span
+                      className={catDef.iconColor}
+                      dangerouslySetInnerHTML={{ __html: getSvgForCategory(notif.type as NotifCategory) }}
+                    />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-medium text-gray-900">{notif.title}</p>
+                    <p className="text-xs text-gray-500 mt-0.5 truncate">{notif.message}</p>
+                    <p className="text-xs text-gray-400 mt-1">{notif.time}</p>
+                  </div>
                   {notif.unread && (
-                    <div className="absolute left-0 top-0 bottom-0 w-0.75 bg-blue-600 rounded-r" />
+                    <span className="w-2 h-2 bg-blue-600 rounded-full mt-2 shrink-0" />
                   )}
-                  
-                  <div className={`w-11 h-11 rounded-md flex items-center justify-center flex-shrink-0 ${iconStyles.bg} ${iconStyles.text}`}>
-                    {getIconComponent(notif.category)}
-                  </div>
-                  
-                  <div className="flex-1 flex flex-col justify-center gap-1.5 min-w-0">
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-3 flex-wrap">
-                        <span className={`font-medium ${notif.unread ? 'font-bold text-slate-900' : 'text-slate-800'}`}>
-                          {notif.title}
-                        </span>
-                        {getCategoryTag(notif.category)}
-                      </div>
-                    </div>
-                    
-                    <p className={`text-sm ${notif.unread ? 'text-slate-800' : 'text-slate-600'}`}>
-                      {notif.message}
-                    </p>
-                    
-                    <div className="flex items-center gap-4 mt-1">
-                      <span className="text-xs text-slate-400 font-medium">{notif.time}</span>
-                    </div>
-                  </div>
-
-                  <div className="absolute right-6 top-1/2 -translate-y-1/2 flex gap-1 opacity-0 group-hover:opacity-100 transition-all">
-                    <button
-                      onClick={(e) => toggleArchive(notif.id, e)}
-                      className="w-9 h-9 rounded-full bg-white border border-slate-200 text-slate-500 hover:text-slate-800 hover:border-slate-300 flex items-center justify-center transition-all "
-                      title={notif.archived ? "Unarchive" : "Archive"}
-                    >
-                      {notif.archived ? <ArchiveRestore className="w-4 h-4" /> : <Archive className="w-4 h-4" />}
-                    </button>
-                    <button
-                      onClick={(e) => deleteNotification(notif.id, e)}
-                      className="w-9 h-9 rounded-full bg-white border border-slate-200 text-slate-500 hover:text-red-600 hover:border-red-300 flex items-center justify-center transition-all "
-                      title="Delete"
-                    >
-                      <Trash2 className="w-4 h-4" />
-                    </button>
-                  </div>
                 </div>
               )
             })}

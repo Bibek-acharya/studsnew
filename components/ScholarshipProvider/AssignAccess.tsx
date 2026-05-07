@@ -224,7 +224,9 @@ const AssignAccess: React.FC = memo(() => {
                 <tr key={u.id} className="hover:bg-gray-50">
                   <td className="py-3 px-4">
                     <div className="flex items-center gap-3">
-                      <img className="h-8 w-8 rounded-full object-cover border border-gray-200" src={u.avatar} alt={u.name} />
+                      <div className="h-8 w-8 rounded-full bg-blue-100 text-blue-700 flex items-center justify-center text-xs font-bold border border-gray-200 flex-shrink-0">
+                        {u.name.split(" ").map((n) => n[0]).slice(0, 2).join("").toUpperCase()}
+                      </div>
                       <p className="font-medium text-gray-900">{u.name}</p>
                     </div>
                   </td>

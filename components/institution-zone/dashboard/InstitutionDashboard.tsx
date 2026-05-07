@@ -5,56 +5,72 @@ import InstitutionLayout, {
   InstitutionPage,
 } from "./institution/InstitutionLayout";
 import OverviewPage from "./institution/OverviewPage";
-import AdmissionPage from "./institution/AdmissionPage";
-import AdmissionManagePage from "./institution/AdmissionManagePage";
-import ProgramPage from "./institution/ProgramPage";
-import CollegeProfilePage from "./institution/CollegeProfilePage";
-import CounsellingPage from "./institution/CounsellingPage";
-import EntrancePage from "./institution/EntrancePage";
-import EventsPage from "./institution/EventsPage";
-import NewsNoticePage from "./institution/NewsNoticePage";
-import QMSPage from "@/components/institution-zone/dashboard/institution/QMSPage";
-import ScholarshipSectionContainer from "@/components/institution-zone/dashboard/institution/ScholarshipSectionContainer";
-
-const Placeholder: React.FC<{ title: string }> = ({ title }) => (
-  <div className="flex items-center justify-center h-full text-slate-400 text-lg font-medium">
-    {title} — Coming Soon
-  </div>
-);
+import AdmissionCreatePage from "./institution/AdmissionCreatePage";
+import AdmissionFormPage from "./institution/AdmissionFormPage";
+import AdmissionApplicationsPage from "./institution/AdmissionApplicationsPage";
+import AdmissionDirectoryPage from "./institution/AdmissionDirectoryPage";
+import AdmissionShortlistPage from "./institution/AdmissionShortlistPage";
+import ScholarshipListPage from "./institution/ScholarshipListPage";
+import ScholarshipApplicationsPage from "./institution/ScholarshipApplicationsPage";
+import CounsellingRequestsPage from "./institution/CounsellingRequestsPage";
+import CounsellingHistoryPage from "./institution/CounsellingHistoryPage";
+import EntranceCreatePage from "./institution/EntranceCreatePage";
+import EntranceApplicantsPage from "./institution/EntranceApplicantsPage";
+import EntranceResultsPage from "./institution/EntranceResultsPage";
+import CourseListPage from "./institution/CourseListPage";
+import CourseSyllabusPage from "./institution/CourseSyllabusPage";
+import CourseMaterialPage from "./institution/CourseMaterialPage";
+import MessagePage from "./institution/MessagePage";
+import CreateNewsPage from "./institution/CreateNewsPage";
+import NewsDirectoryPage from "./institution/NewsDirectoryPage";
+import CreateEventPage from "./institution/CreateEventPage";
+import EventsDirectoryPage from "./institution/EventsDirectoryPage";
+import CreateBlogPage from "./institution/CreateBlogPage";
+import BlogDirectoryPage from "./institution/BlogDirectoryPage";
+import ProfilePage from "./institution/ProfilePage";
+import AnalyticsPage from "./institution/AnalyticsPage";
+import NotificationsPage from "./institution/NotificationsPage";
+import SettingsPage from "./institution/SettingsPage";
+import InviteStudentPage from "./institution/InviteStudentPage";
+import ReviewsPage from "./institution/ReviewsPage";
+import ManageAdvertisementPage from "./institution/ManageAdvertisementPage";
 
 const InstitutionDashboard: React.FC = () => {
   const [activePage, setActivePage] = useState<InstitutionPage>("overview");
 
   const renderPage = () => {
     switch (activePage) {
-      case "overview":
-        return <OverviewPage />;
-      case "admission":
-        return <AdmissionPage />;
-      case "admissionManage":
-        return <AdmissionManagePage />;
-      case "program":
-        return <ProgramPage />;
-      case "collegeProfile":
-        return <CollegeProfilePage />;
-      case "counselling":
-        return <CounsellingPage />;
-      case "entrance":
-        return <EntrancePage />;
-      case "events":
-        return <EventsPage />;
-      case "newsNotice":
-        return <NewsNoticePage />;
-      // case "qms":
-      //   return <QMSPage />;
-      case "scholarship":
-        return <Placeholder title="Scholarship Applications" />;
-      case "scholarshipManage":
-        return <ScholarshipSectionContainer />;
-      case "settings":
-        return <Placeholder title="Settings" />;
-      default:
-        return <OverviewPage />;
+      case "overview": return <OverviewPage />;
+      case "createAdmission": return <AdmissionCreatePage />;
+      case "admissionForm": return <AdmissionFormPage />;
+      case "admissionApplications": return <AdmissionApplicationsPage />;
+      case "admissionDirectory": return <AdmissionDirectoryPage />;
+      case "admissionShortlist": return <AdmissionShortlistPage />;
+      case "scholarshipList": return <ScholarshipListPage />;
+      case "scholarshipApplications": return <ScholarshipApplicationsPage />;
+      case "counsellingRequests": return <CounsellingRequestsPage />;
+      case "counsellingHistory": return <CounsellingHistoryPage />;
+      case "entranceCreate": return <EntranceCreatePage />;
+      case "entranceApplicants": return <EntranceApplicantsPage />;
+      case "entranceResults": return <EntranceResultsPage />;
+      case "courseList": return <CourseListPage />;
+      case "courseSyllabus": return <CourseSyllabusPage />;
+      case "courseMaterial": return <CourseMaterialPage />;
+      case "message": return <MessagePage />;
+      case "createNews": return <CreateNewsPage />;
+      case "newsDirectory": return <NewsDirectoryPage />;
+      case "createEvent": return <CreateEventPage />;
+      case "eventsDirectory": return <EventsDirectoryPage />;
+      case "createBlog": return <CreateBlogPage />;
+      case "blogDirectory": return <BlogDirectoryPage />;
+      case "profile": return <ProfilePage />;
+      case "analytics": return <AnalyticsPage />;
+      case "notification": return <NotificationsPage />;
+      case "settings": return <SettingsPage />;
+      case "inviteStudent": return <InviteStudentPage />;
+      case "reviews": return <ReviewsPage />;
+      case "manageAdvertisement": return <ManageAdvertisementPage />;
+      default: return <OverviewPage />;
     }
   };
 

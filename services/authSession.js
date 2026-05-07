@@ -19,6 +19,10 @@ function persistAuthSession(storage, user, token) {
   storage.setItem(USER_STORAGE_KEY, JSON.stringify(user));
   storage.setItem(TOKEN_STORAGE_KEY, token);
   storage.setItem(AUTH_STORAGE_KEY, JSON.stringify({ token, user }));
+
+  if (typeof document !== "undefined") {
+    document.cookie = `token=${token}; path=/; max-age=604800; SameSite=Lax`;
+  }
 }
 
 function clearAuthSession(storage) {

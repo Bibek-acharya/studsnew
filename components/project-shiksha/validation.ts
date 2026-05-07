@@ -21,6 +21,7 @@ export function validateForm(data: ProjectShikshaFormData): {
   if (data.email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(data.email)) {
     errors.email = "Invalid email format";
   }
+  if (!data.email.trim()) errors.email = "Email is required";
   if (!data.seeSchoolType) errors.seeSchoolType = "School type is required";
   if (data.seeSchoolType && !data.schoolName.trim()) {
     errors.schoolName = "School name is required";

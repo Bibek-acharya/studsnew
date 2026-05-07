@@ -1,7 +1,18 @@
 "use server";
 
+import { cookies } from "next/headers";
 import { apiService } from "@/services/api";
 import { validateReviewInput, ReviewInput, Review } from "@/lib/review-types";
+
+async function getAuthOptions(): Promise<{ authToken?: string }> {
+  try {
+    const cookieStore = await cookies();
+    const token = cookieStore.get("token")?.value;
+    return token ? { authToken: token } : {};
+  } catch {
+    return {};
+  }
+}
 
 export interface ActionResponse<T = any> {
   success: boolean;
@@ -23,7 +34,7 @@ export async function submitReviewAction(
   }
 
   try {
-    const response = await apiService.submitReview(input);
+    const response = await apiService.submitReview(input, await getAuthOptions());
 
     if (response?.data?.review) {
       return {
@@ -56,7 +67,7 @@ export async function getCollegeReviewsAction(
     const response = await apiService.getCollegeReviews(collegeId, {
       page,
       limit,
-    });
+    }, await getAuthOptions());
     return {
       success: true,
       data: response,
@@ -72,7 +83,7 @@ export async function getCollegeReviewsAction(
 
 export async function getUserReviewsAction(page = 1, limit = 10) {
   try {
-    const response = await apiService.getUserReviews({ page, limit });
+    const response = await apiService.getUserReviews({ page, limit }, await getAuthOptions());
     return {
       success: true,
       data: response,
@@ -96,7 +107,7 @@ export async function updateReviewAction(
   }>
 ): Promise<ActionResponse> {
   try {
-    const response = await apiService.updateReview(reviewId, data);
+    const response = await apiService.updateReview(reviewId, data, await getAuthOptions());
     return {
       success: true,
       data: response,
@@ -115,7 +126,7 @@ export async function deleteReviewAction(
   reviewId: number
 ): Promise<ActionResponse> {
   try {
-    await apiService.deleteReview(reviewId);
+    await apiService.deleteReview(reviewId, await getAuthOptions());
     return {
       success: true,
       message: "Review deleted successfully",
@@ -133,7 +144,7 @@ export async function markReviewHelpfulAction(
   reviewId: number
 ): Promise<ActionResponse> {
   try {
-    const response = await apiService.markReviewHelpful(reviewId);
+    const response = await apiService.markReviewHelpful(reviewId, await getAuthOptions());
     return {
       success: true,
       data: response,
@@ -159,7 +170,7 @@ export async function reportReviewAction(
   }
 
   try {
-    const response = await apiService.reportReview(reviewId, reason);
+    const response = await apiService.reportReview(reviewId, reason, await getAuthOptions());
     return {
       success: true,
       message: "Report submitted successfully",

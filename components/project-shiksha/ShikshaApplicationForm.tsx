@@ -459,7 +459,7 @@ export default function ShikshaApplicationForm({
                 </div>
 
                 <div>
-                  <label className="block text-[14px] font-semibold text-gray-700 mb-1.5">Email Address</label>
+                  <label className="block text-[14px] font-semibold text-gray-700 mb-1.5">Email Address <span className="text-red-500">*</span></label>
                   <input
                     type="email"
                     id="email"

@@ -30,6 +30,10 @@ interface GeneralSettingsSectionProps {
   setStartDate: (v: string) => void;
   endDate: string;
   setEndDate: (v: string) => void;
+  examDate: string;
+  setExamDate: (v: string) => void;
+  examTime: string;
+  setExamTime: (v: string) => void;
   startDateError?: string;
   endDateError?: string;
   applyLink: string;
@@ -94,6 +98,8 @@ export const GeneralSettingsSection: React.FC<GeneralSettingsSectionProps> = ({
   location, setLocation,
   startDate, setStartDate,
   endDate, setEndDate,
+  examDate, setExamDate,
+  examTime, setExamTime,
   startDateError,
   endDateError,
   applyLink, setApplyLink,
@@ -328,6 +334,32 @@ export const GeneralSettingsSection: React.FC<GeneralSettingsSectionProps> = ({
               required
               minDate={startDate || undefined}
               error={endDateError}
+            />
+          </div>
+
+          <div className="space-y-1.5">
+            <label className="block text-sm font-medium text-gray-700">
+              Exam Date
+            </label>
+            <DatePicker
+              id="examDate"
+              value={examDate}
+              onChange={setExamDate}
+              placeholder="Select exam date"
+            />
+          </div>
+
+          <div className="space-y-1.5">
+            <label className="block text-sm font-medium text-gray-700">
+              Exam Time
+            </label>
+            <input
+              id="examTime"
+              type="text"
+              className={formInputClass}
+              placeholder="e.g. 09:00 A.M. to 11:30 A.M."
+              value={examTime}
+              onChange={(e) => setExamTime(e.target.value)}
             />
           </div>
 

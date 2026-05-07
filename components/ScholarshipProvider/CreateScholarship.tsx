@@ -109,6 +109,8 @@ const CreateScholarship: React.FC<CreateScholarshipProps> = memo(({ scholarshipI
   const [location, setLocation] = useState("");
   const [startDate, setStartDate] = useState("");
   const [endDate, setEndDate] = useState("");
+  const [examDate, setExamDate] = useState("");
+  const [examTime, setExamTime] = useState("");
   const [startDateError, setStartDateError] = useState("");
   const [endDateError, setEndDateError] = useState("");
   const [mainTitleError, setMainTitleError] = useState("");
@@ -264,6 +266,8 @@ const CreateScholarship: React.FC<CreateScholarshipProps> = memo(({ scholarshipI
       setLocation(s.location || "");
       setStartDate(s.application_start_date?.split('T')[0] || "");
       setEndDate(s.application_end_date?.split('T')[0] || "");
+      setExamDate((s as any).exam_date || "");
+      setExamTime((s as any).exam_time || "");
       setApplyLink((s as any).apply_link || "");
       setBannerBgUrl(s.banner_background_image_url || "");
       setBannerBgPreview(s.banner_background_image_url || "");
@@ -535,6 +539,8 @@ const CreateScholarship: React.FC<CreateScholarshipProps> = memo(({ scholarshipI
       status: (draft ? 'draft' : 'published') as 'draft' | 'published',
       application_start_date: startDate ? new Date(startDate).toISOString() : undefined,
       application_end_date: endDate ? new Date(endDate).toISOString() : undefined,
+      exam_date: examDate || undefined,
+      exam_time: examTime || undefined,
       apply_link: applyLink || undefined,
       banner_background_image_url: bannerBgUrl || undefined,
       coverage_area: coverageArea || undefined,
@@ -624,8 +630,9 @@ const CreateScholarship: React.FC<CreateScholarshipProps> = memo(({ scholarshipI
       aboutOverview, videoTutorials, journeyTimeline, scholarshipSectionTitle, scholarshipSubtitle,
       scholarshipDescription, scholarshipTypes, selectionRubric, eligibilitySectionTitle, eligibilitySubtitle,
       basicRequirements, fullyFundedConditions, partiallyFundedConditions, selectionProcessSteps,
-      requiredDocuments, faqs, galleryGroups, partnerGroups, partnerMessages, examCenters, downloads, scholarshipId,
-      isEditing, onNavigate, status, enablePayment, enableBank, bankDetails, qrCodeUrl, timelineEvents, paymentFeeAmount]);
+    requiredDocuments, faqs, galleryGroups, partnerGroups, partnerMessages, examCenters, downloads, scholarshipId,
+    isEditing, onNavigate, status, enablePayment, enableBank, bankDetails, qrCodeUrl, timelineEvents, paymentFeeAmount,
+    examDate, examTime]);
 
   if (loadingData) {
     return (
@@ -682,6 +689,10 @@ const CreateScholarship: React.FC<CreateScholarshipProps> = memo(({ scholarshipI
         setStartDate={handleStartDateChange}
         endDate={endDate}
         setEndDate={handleEndDateChange}
+        examDate={examDate}
+        setExamDate={setExamDate}
+        examTime={examTime}
+        setExamTime={setExamTime}
         startDateError={startDateError}
         endDateError={endDateError}
         applyLink={applyLink}
