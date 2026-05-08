@@ -1,5 +1,5 @@
-import CollegeProfilePage from "@/components/institution-zone/dashboard/institution/CollegeProfilePage";
+import { redirect } from "next/navigation";
 
-export default function Page() {
-  return <CollegeProfilePage />;
+export default function CollegeProfilePage() {
+  redirect("/institution-zone/dashboard/profile");
 }
