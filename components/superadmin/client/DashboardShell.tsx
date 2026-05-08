@@ -6,27 +6,26 @@ import Image from "next/image";
 import { clearAllAuthSessions, clearCookie } from "@/services/authSession";
 import {
   LayoutDashboard,
-  Building2,
-  BookOpen,
   GraduationCap,
-  ClipboardList,
-  MessageSquare,
-  Newspaper,
-  FileText,
-  Calendar,
-  Building,
-  Users,
-  BarChart3,
-  Bell,
+  Building2,
+  HandHeart,
   ShieldCheck,
   CreditCard,
-  Clock,
-  Database,
+  Megaphone,
+  Newspaper,
+  Calendar,
+  FileText,
+  Building,
+  Bell,
+  MessageSquare,
+  BarChart3,
   Settings,
   LogOut,
-  Search,
   ChevronRight,
-  UserCheck,
+  Users,
+  UserPlus,
+  ClipboardList,
+  BookOpen,
 } from "lucide-react";
 
 const OverviewSection = lazy(() => import("./OverviewSection"));
@@ -59,6 +58,10 @@ const AddUserSection = lazy(() => import("./AddUserSection"));
 const AnalyticsSection = lazy(() => import("./AnalyticsSection"));
 const PendingProvidersSection = lazy(() => import("./PendingProvidersSection"));
 const VerifiedProvidersSection = lazy(() => import("./VerifiedProvidersSection"));
+const PendingInstitutionsSection = lazy(() => import("./PendingInstitutionsSection"));
+const ManageProfileAccessSection = lazy(() => import("./ManageProfileAccessSection"));
+const AdvertiseRequestSection = lazy(() => import("./AdvertiseRequestSection"));
+const RejectedInstitutionsSection = lazy(() => import("./RejectedInstitutionsSection"));
 
 type SectionType =
   | "overview"
@@ -90,28 +93,52 @@ type SectionType =
   | "backup"
   | "settings"
   | "pending-providers"
-  | "scholarship-provider";
+  | "scholarship-provider"
+  | "pending-institutions"
+  | "student-overview"
+  | "student-manage-user"
+  | "student-faq"
+  | "institution-overview"
+  | "manage-profile-access"
+  | "advertise-request"
+  | "rejected-institutions"
+  | "provider-overview"
+  | "provider-calendar"
+  | "provider-evaluation"
+  | "assign-access"
+  | "manage-ads"
+  | "news-directory"
+  | "events-directory"
+  | "blogs-directory";
 
-const navItems = [
-  { icon: LayoutDashboard, label: "Overview", section: "overview" as SectionType },
-  { icon: Building2, label: "Manage College", section: "manage-college" as SectionType, children: ["add-college", "manage-college"] as SectionType[] },
-  { icon: BookOpen, label: "Manage Course", section: "manage-course" as SectionType, children: ["add-course", "manage-course"] as SectionType[] },
-  { icon: GraduationCap, label: "Manage Scholarship", section: "manage-scholarship" as SectionType, children: ["create-scholarship", "manage-scholarship", "scholarship-provider", "pending-providers"] as SectionType[] },
-  { icon: ClipboardList, label: "Manage Entrance", section: "manage-entrance" as SectionType, children: ["add-entrance", "manage-entrance"] as SectionType[] },
-  { icon: MessageSquare, label: "Message/Inquiry", section: "message-inquiry" as SectionType },
-  { icon: Newspaper, label: "Manage News", section: "manage-news" as SectionType, children: ["create-news", "manage-news"] as SectionType[] },
-  { icon: FileText, label: "Manage Blogs", section: "manage-blog" as SectionType, children: ["create-blog", "manage-blog"] as SectionType[] },
-  { icon: Calendar, label: "Manage Events", section: "manage-events" as SectionType, children: ["create-event", "manage-events"] as SectionType[] },
-  { icon: Building, label: "Manage Campus Feed", section: "manage-campus-feed" as SectionType },
-  { icon: Users, label: "User Management", section: "user-management" as SectionType, children: ["add-user", "user-management"] as SectionType[] },
-  { icon: BarChart3, label: "Analytics", section: "analytics" as SectionType },
-  { icon: Bell, label: "Manage Notification", section: "manage-notification" as SectionType },
-  { icon: ShieldCheck, label: "Access Control", section: "access-control" as SectionType },
-  { icon: CreditCard, label: "Payment", section: "payment" as SectionType },
-  { icon: Building2, label: "Manage Organization", section: "organization-profile" as SectionType, children: ["organization-profile", "organization-settings"] as SectionType[] },
-  { icon: Clock, label: "History", section: "history" as SectionType },
-  { icon: Database, label: "Backup", section: "backup" as SectionType },
-  { icon: Settings, label: "Settings", section: "settings" as SectionType },
+interface NavChild {
+  section: SectionType;
+  label: string;
+}
+
+interface NavItemData {
+  icon: React.ReactNode;
+  label: string;
+  section: SectionType;
+  children?: NavChild[];
+}
+
+const navItems: NavItemData[] = [
+  { icon: <LayoutDashboard size={20} />, label: "Overview", section: "overview" },
+  { icon: <GraduationCap size={20} />, label: "Student Dashboard", section: "student-overview", children: [{ section: "student-overview", label: "Overview" }, { section: "student-manage-user", label: "Manage User" }, { section: "student-faq", label: "FAQ" }] },
+  { icon: <Building2 size={20} />, label: "Institution Dashboard", section: "institution-overview", children: [{ section: "institution-overview", label: "Overview" }, { section: "manage-college", label: "Listed Institutions" }, { section: "manage-profile-access", label: "Manage Profile Access" }, { section: "advertise-request", label: "Advertise Request" }, { section: "pending-institutions", label: "Pending Institutions Request" }, { section: "rejected-institutions", label: "Rejected Institutions" }] },
+  { icon: <HandHeart size={20} />, label: "Provider Dashboard", section: "provider-overview", children: [{ section: "provider-overview", label: "Overview" }, { section: "manage-scholarship", label: "Manage Scholarship" }, { section: "pending-providers", label: "Pending Providers" }, { section: "scholarship-provider", label: "Scholarship Provider" }, { section: "provider-calendar", label: "Calendar" }, { section: "provider-evaluation", label: "Evaluation & Results" }, { section: "manage-news", label: "Manage News" }, { section: "manage-events", label: "Manage Events" }, { section: "manage-blog", label: "Manage Blogs" }, { section: "assign-access", label: "Assign Access" }] },
+  { icon: <ShieldCheck size={20} />, label: "Assign Access", section: "access-control" },
+  { icon: <CreditCard size={20} />, label: "Revenue", section: "payment" },
+  { icon: <Megaphone size={20} />, label: "Manage Ads", section: "manage-ads" },
+  { icon: <Newspaper size={20} />, label: "News", section: "news-directory", children: [{ section: "create-news", label: "Create News" }, { section: "manage-news", label: "News Directory" }] },
+  { icon: <Calendar size={20} />, label: "Events", section: "events-directory", children: [{ section: "create-event", label: "Create Events" }, { section: "manage-events", label: "Events Directory" }] },
+  { icon: <FileText size={20} />, label: "Blogs", section: "blogs-directory", children: [{ section: "create-blog", label: "Create Blogs" }, { section: "manage-blog", label: "Blogs Directory" }] },
+  { icon: <Building size={20} />, label: "Manage Campus Feed", section: "manage-campus-feed" },
+  { icon: <Bell size={20} />, label: "Notification", section: "manage-notification" },
+  { icon: <MessageSquare size={20} />, label: "Message", section: "message-inquiry" },
+  { icon: <BarChart3 size={20} />, label: "Analytics", section: "analytics" },
+  { icon: <Settings size={20} />, label: "Settings", section: "settings" },
 ];
 
 export default function DashboardShell() {
@@ -199,6 +226,14 @@ export default function DashboardShell() {
         return <UserListSection setActiveSection={navigateTo} />;
       case "add-user":
         return <AddUserSection setActiveSection={navigateTo} />;
+      case "manage-profile-access":
+        return <ManageProfileAccessSection />;
+      case "advertise-request":
+        return <AdvertiseRequestSection />;
+      case "rejected-institutions":
+        return <RejectedInstitutionsSection />;
+      case "pending-institutions":
+        return <PendingInstitutionsSection />;
       case "pending-providers":
         return <PendingProvidersSection />;
       case "scholarship-provider":
@@ -206,115 +241,104 @@ export default function DashboardShell() {
       case "analytics":
         return <AnalyticsSection />;
       default:
-        return <div className="flex h-60 items-center justify-center text-gray-400">Section not found</div>;
+        return <PlaceholderSection section={activeSection} />;
     }
   };
 
   return (
-    <div className="min-h-screen bg-[#f8fafc] font-sans text-gray-800">
-      <div className="flex min-h-screen">
-        <aside className="fixed left-0 top-0 bottom-0 z-50 w-[280px] overflow-y-auto border-r border-[#e2e8f0] bg-white hide-scrollbar">
-          <div className="flex items-center justify-center border-b border-[#e2e8f0] p-5">
-            <Image
-              src="/studsphere.png"
-              alt="Logo"
-              width={180}
-              height={48}
-              className="h-12 w-auto"
-            />
-          </div>
+    <div className="min-h-screen bg-white text-gray-800 font-sans h-screen flex overflow-hidden">
+      <aside className="w-64 bg-white border-r border-gray-200 flex-shrink-0 flex flex-col z-20">
+        <div className="h-16 flex items-center px-6 border-b border-gray-50">
+          <Image src="/studsphere.png" alt="StudySphere Logo" width={180} height={48} className="h-10 w-auto" />
+        </div>
+        <div className="flex-1 overflow-y-auto no-scrollbar py-4 px-4 flex flex-col gap-1">
+          {navItems.map((item) =>
+            item.children ? (
+              <NavDropdown
+                key={item.label}
+                icon={item.icon}
+                label={item.label}
+                isOpen={!!dropdowns[item.label]}
+                onToggle={() => toggleDropdown(item.label)}
+              >
+                {item.children.map((child) => (
+                  <button
+                    key={child.section}
+                    type="button"
+                    onClick={() => setActiveSection(child.section)}
+                    className={`w-full text-left px-3 py-2 text-sm font-medium rounded-md transition-colors ${
+                      activeSection === child.section
+                        ? "text-blue-600 bg-blue-50"
+                        : "text-gray-500 hover:text-blue-600 hover:bg-blue-50"
+                    }`}
+                  >
+                    {child.label}
+                  </button>
+                ))}
+              </NavDropdown>
+            ) : (
+              <NavItem
+                key={item.label}
+                icon={item.icon}
+                label={item.label}
+                active={activeSection === item.section}
+                onClick={() => setActiveSection(item.section)}
+              />
+            ),
+          )}
 
-          <nav className="space-y-1 p-4">
-            {navItems.map((item) =>
-              item.children ? (
-                <NavDropdown
-                  key={item.label}
-                  icon={<item.icon size={20} />}
-                  label={item.label}
-                  isOpen={!!dropdowns[item.label]}
-                  onToggle={() => toggleDropdown(item.label)}
-                >
-                  {item.children.map((child) => (
-                    <SubNavItem
-                      key={child}
-                      label={prettyLabel(child)}
-                      active={activeSection === child}
-                      onClick={() => setActiveSection(child)}
-                    />
-                  ))}
-                </NavDropdown>
-              ) : (
-                <NavItem
-                  key={item.label}
-                  icon={<item.icon size={20} />}
-                  label={item.label}
-                  active={activeSection === item.section}
-                  onClick={() => setActiveSection(item.section)}
-                />
-              ),
-            )}
+          <button
+            type="button"
+            onClick={handleLogout}
+            className="flex items-center gap-3 px-3 py-2.5 text-sm font-medium text-red-500 hover:bg-red-50 rounded-md transition-colors mt-2"
+          >
+            <LogOut size={20} />
+            <span>Logout</span>
+          </button>
+        </div>
+      </aside>
 
-            <button
-              type="button"
-              onClick={handleLogout}
-              className="mt-4 flex w-full items-center gap-3 rounded-lg px-4 py-3 text-left text-sm font-medium text-red-500 transition-colors hover:bg-red-50 hover:text-red-600"
-            >
-              <LogOut size={20} />
-              <span>Logout</span>
+      <div className="flex-1 flex flex-col h-screen overflow-hidden">
+        <header className="h-16 bg-white flex items-center justify-end px-6 shadow-sm z-10">
+          <div className="flex items-center gap-3">
+            <button type="button" className="icon-btn-hover text-gray-400 hover:text-gray-600 transition-colors relative">
+              <MessageSquare size={22} />
+              <span className="absolute -top-1 -right-1 min-w-5 h-5 flex items-center justify-center text-[10px] font-bold text-white bg-red-500 rounded-full px-1">3</span>
             </button>
-          </nav>
-        </aside>
+            <button type="button" className="icon-btn-hover text-gray-400 hover:text-gray-600 transition-colors relative">
+              <Bell size={22} />
+              <span className="absolute -top-1 -right-1 min-w-5 h-5 flex items-center justify-center text-[10px] font-bold text-white bg-red-500 rounded-full px-1">5</span>
+            </button>
 
-        <main className="ml-[280px] flex min-h-screen flex-1 flex-col">
-          <Header />
-
-          <div className="flex-1 overflow-y-auto p-8">
-            <Suspense fallback={<SectionLoader />}>
-              <AnimatePresence mode="wait">
-                <motion.div
-                  key={activeSection}
-                  initial={{ opacity: 0, y: 10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: -10 }}
-                  transition={{ duration: 0.15 }}
-                >
-                  {renderSection()}
-                </motion.div>
-              </AnimatePresence>
-            </Suspense>
+            <div className="pl-3 border-l border-gray-200 flex items-center gap-3">
+              <div className="h-10 w-10 rounded-full bg-gradient-to-br from-blue-400 to-blue-600 flex items-center justify-center text-sm font-bold text-white shadow-sm">
+                SA
+              </div>
+              <div>
+                <p className="text-sm font-semibold text-gray-900">Admin System</p>
+                <p className="text-xs text-gray-500">Super Admin</p>
+              </div>
+            </div>
           </div>
+        </header>
+
+        <main className="flex-1 overflow-y-auto p-4 md:p-6 lg:p-8">
+          <Suspense fallback={<SectionLoader />}>
+            <AnimatePresence mode="wait">
+              <motion.div
+                key={activeSection}
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -10 }}
+                transition={{ duration: 0.15 }}
+              >
+                {renderSection()}
+              </motion.div>
+            </AnimatePresence>
+          </Suspense>
         </main>
       </div>
     </div>
-  );
-}
-
-function Header() {
-  return (
-    <header className="sticky top-0 z-40 flex items-center justify-between border-b border-[#e2e8f0] bg-white px-8 py-3">
-      <div className="flex items-center border border-[#e2e8f0] bg-gray-50 px-4 py-2 transition-all focus-within:border-blue-600 focus-within:bg-white rounded-md w-[500px]">
-        <Search size={18} className="text-gray-400" />
-        <input
-          type="text"
-          placeholder="Search colleges, courses, users..."
-          className="ml-2 w-full border-none bg-transparent text-sm outline-none"
-        />
-      </div>
-
-      <div className="flex items-center gap-4">
-        <IconButton badge={5} icon={<Bell size={20} />} />
-        <IconButton badge={12} icon={<MessageSquare size={20} />} />
-        <div className="group flex cursor-pointer items-center gap-3 border-l border-gray-100 pl-4">
-          <div className="text-right">
-            <p className="text-sm font-semibold leading-tight text-gray-900">Superadmin</p>
-            <p className="text-[10px] font-bold uppercase tracking-wider text-gray-500">Super Administrator</p>
-          </div>
-          <div className="flex h-10 w-10 items-center justify-center rounded-full bg-blue-600 text-sm font-medium text-white transition-transform group-hover:scale-105">
-            SA
-          </div>
-        </div>
-      </div>
-    </header>
   );
 }
 
@@ -323,24 +347,22 @@ function NavItem({
   label,
   active,
   onClick,
-  className = "",
 }: {
   icon: React.ReactNode;
   label: string;
   active: boolean;
   onClick: () => void;
-  className?: string;
 }) {
   return (
     <button
       type="button"
       onClick={onClick}
-      className={`flex w-full items-center gap-3 rounded-lg px-4 py-3 text-left text-sm font-medium transition-colors ${
-        active ? "bg-blue-50 text-blue-600" : "text-slate-500 hover:bg-blue-50 hover:text-blue-600"
-      } ${className}`}
+      className={`nav-item flex items-center gap-3 px-3 py-2.5 rounded-md transition-colors w-full ${
+        active ? "active bg-blue-50 text-blue-600" : "text-gray-700 hover:bg-blue-50 hover:text-blue-600"
+      }`}
     >
       {icon}
-      <span>{label}</span>
+      <span className="font-medium text-sm">{label}</span>
     </button>
   );
 }
@@ -359,93 +381,39 @@ function NavDropdown({
   children: React.ReactNode;
 }) {
   return (
-    <div>
+    <div className="flex flex-col">
       <button
         type="button"
         onClick={onToggle}
-        className={`flex w-full items-center justify-between rounded-lg px-4 py-3 text-left text-sm font-medium transition-colors ${
-          isOpen ? "text-blue-600" : "text-slate-500 hover:bg-blue-50 hover:text-blue-600"
+        className="nav-item flex items-center justify-between px-3 py-2 rounded-md transition-colors w-full text-gray-700 hover:bg-blue-50 hover:text-blue-600"
+      >
+        <div className="flex items-center gap-3">
+          {icon}
+          <span className="font-medium text-sm">{label}</span>
+        </div>
+        <ChevronRight size={14} className={`transition-transform duration-200 ${isOpen ? "rotate-90" : ""}`} />
+      </button>
+      <div
+        className={`overflow-hidden transition-all duration-200 ${
+          isOpen ? "max-h-96 opacity-100" : "max-h-0 opacity-0"
         }`}
       >
-        <span className="flex items-center gap-3">
-          {icon}
-          {label}
-        </span>
-        <ChevronRight size={16} className={`transition-transform duration-200 ${isOpen ? "rotate-90" : ""}`} />
-      </button>
-      <motion.div
-        initial={false}
-        animate={{ height: isOpen ? "auto" : 0, opacity: isOpen ? 1 : 0 }}
-        className="overflow-hidden"
-      >
-        <div className="space-y-0.5 px-4 pl-10 py-1">{children}</div>
-      </motion.div>
+        <div className="pl-10 pr-3 py-2 flex flex-col gap-1">{children}</div>
+      </div>
     </div>
   );
 }
 
-function SubNavItem({
-  label,
-  active,
-  onClick,
-}: {
-  label: string;
-  active: boolean;
-  onClick: () => void;
-}) {
+function PlaceholderSection({ section }: { section: string }) {
   return (
-    <button
-      type="button"
-      onClick={onClick}
-      className={`w-full rounded-lg px-4 py-2 text-left text-sm font-medium transition-all ${
-        active ? "bg-blue-50 text-blue-600" : "text-slate-500 hover:bg-blue-50 hover:text-blue-600"
-      }`}
-    >
-      {label}
-    </button>
+    <div className="flex h-60 items-center justify-center text-gray-400">
+      <div className="text-center">
+        <FileText size={40} className="mx-auto mb-3 opacity-50" />
+        <p className="text-lg font-medium">Coming Soon</p>
+        <p className="text-sm mt-1">{section.replace(/-/g, " ")} section is under development.</p>
+      </div>
+    </div>
   );
-}
-
-function IconButton({ icon, badge }: { icon: React.ReactNode; badge?: number }) {
-  return (
-    <button type="button" className="relative rounded-md p-2.5 text-gray-500 transition-all hover:bg-gray-100 hover:text-blue-600">
-      {icon}
-      {typeof badge === "number" ? (
-        <span className="absolute -right-1 -top-1 flex h-5 w-5 items-center justify-center rounded-full border-2 border-white bg-red-500 text-[10px] font-bold text-white">
-          {badge}
-        </span>
-      ) : null}
-    </button>
-  );
-}
-
-function prettyLabel(section: SectionType) {
-  const map: Record<string, string> = {
-    "add-college": "Add College",
-    "manage-college": "College List",
-    "add-course": "Add Course",
-    "manage-course": "Course List",
-    "create-scholarship": "Create Scholarship",
-    "manage-scholarship": "Scholarship List",
-    "add-entrance": "Add Entrance",
-    "manage-entrance": "Entrance List",
-    "create-news": "Create News",
-    "manage-news": "News List",
-    "create-blog": "Create Blog",
-    "manage-blog": "Blog List",
-    "create-event": "Create Event",
-    "manage-events": "Events List",
-    "manage-campus-feed": "Campus Feed",
-    "add-user": "Add User",
-    "user-management": "User List",
-    "pending-providers": "Pending Providers",
-    "scholarship-provider": "Scholarship Provider",
-    "manage-notification": "Manage Notification",
-    "access-control": "Access Control",
-    "organization-profile": "Organization Profile",
-    "organization-settings": "Organization Settings",
-  };
-  return map[section] || section.replace(/-/g, " ");
 }
 
 function SectionLoader() {

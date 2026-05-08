@@ -21,6 +21,7 @@ import {
   EnvelopeOpen,
   Star,
   Megaphone,
+  Lock,
 } from "@phosphor-icons/react";
 
 export type InstitutionPage =
@@ -80,6 +81,27 @@ const InstitutionLayout: React.FC<Props> = ({ activePage, onNavigate, children }
   const [openDropdowns, setOpenDropdowns] = useState<Record<string, boolean>>({});
   const [notificationOpen, setNotificationOpen] = useState(false);
   const [showLogoutModal, setShowLogoutModal] = useState(false);
+  const [accessDisabled, setAccessDisabled] = useState<Record<string, boolean>>({});
+
+  useEffect(() => {
+    const fetchAccess = async () => {
+      try {
+        const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080";
+        const token = localStorage.getItem("institutionToken");
+        if (!token) return;
+        const res = await fetch(`${API_BASE_URL}/api/v1/institutions/profile-access`, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        const data = await res.json();
+        const access: Record<string, boolean> = data.data || {};
+        const allToggles = ["About","Course & Fees","Admission","Scholarship","News","Events","Blogs"];
+        const disabled: Record<string, boolean> = {};
+        allToggles.forEach((t) => { if (access[t] === false) disabled[t] = true; });
+        setAccessDisabled(disabled);
+      } catch {}
+    };
+    fetchAccess();
+  }, []);
 
   const handleLogout = () => {
     localStorage.removeItem("institutionAuthToken");
@@ -104,6 +126,20 @@ const InstitutionLayout: React.FC<Props> = ({ activePage, onNavigate, children }
 
   const isDropdownActive = (items: NavDropdownItem[]) =>
     items.some((item) => item.page === activePage);
+
+  const accessMap: Record<string, string> = {
+    admission: "Admission",
+    scholarship: "Scholarship",
+    course: "Course & Fees",
+    news: "News",
+    events: "Events",
+    blogs: "Blogs",
+  };
+
+  const isLocked = (key: string) => {
+    const toggleName = accessMap[key];
+    return toggleName ? accessDisabled[toggleName] === true : false;
+  };
 
   const navSections: (NavSection & { key: string })[] = [
     {
@@ -293,52 +329,58 @@ const InstitutionLayout: React.FC<Props> = ({ activePage, onNavigate, children }
             const key = section.key;
 
             if (section.type === "dropdown" && section.items) {
+              const locked = isLocked(key);
               const isOpen = openDropdowns[key] || isDropdownActive(section.items);
               const isActive = isDropdownActive(section.items);
 
               return (
                 <div key={key} className="flex flex-col">
                   <button
-                    onClick={() => toggleDropdown(key)}
+                    onClick={() => { if (!locked) toggleDropdown(key); }}
                     className={`w-full flex items-center justify-between px-3 py-2.5 rounded-md transition-colors ${
-                      isActive
+                      locked ? "text-gray-300 cursor-not-allowed" : isActive
                         ? "bg-brand-50 text-brand-600"
                         : "text-gray-700 hover:bg-brand-50 hover:text-brand-600"
                     }`}
+                    title={locked ? "This section has been disabled by the admin" : ""}
                   >
                     <div className="flex items-center gap-3">
-                      {section.icon}
+                      {locked ? <Lock weight="fill" className="w-[18px] h-[18px]" /> : section.icon}
                       <span className="font-medium text-sm">{section.label}</span>
                     </div>
-                    <CaretRight
-                      weight="bold"
-                      className={`text-xs transition-transform duration-200 ${isOpen ? "rotate-90" : ""}`}
-                    />
+                    {!locked && (
+                      <CaretRight
+                        weight="bold"
+                        className={`text-xs transition-transform duration-200 ${isOpen ? "rotate-90" : ""}`}
+                      />
+                    )}
                   </button>
-                  <div
-                    className={`overflow-hidden transition-all duration-200 ${
-                      isOpen ? "max-h-96" : "max-h-0"
-                    }`}
-                  >
-                    <div className="pl-10 pr-3 py-1 flex flex-col gap-1">
-                      {section.items.map((item) => (
-                        <button
-                          key={item.page}
-                          onClick={() => {
-                            onNavigate(item.page);
-                            setSidebarOpen(false);
-                          }}
-                          className={`flex items-center gap-2 px-3 py-2 text-sm rounded-md transition-colors ${
-                            activePage === item.page
-                              ? "text-brand-600 bg-brand-50"
-                              : "text-gray-500 hover:text-brand-600 hover:bg-brand-50"
-                          }`}
-                        >
-                          <span>{item.label}</span>
-                        </button>
-                      ))}
+                  {!locked && (
+                    <div
+                      className={`overflow-hidden transition-all duration-200 ${
+                        isOpen ? "max-h-96" : "max-h-0"
+                      }`}
+                    >
+                      <div className="pl-10 pr-3 py-1 flex flex-col gap-1">
+                        {section.items.map((item) => (
+                          <button
+                            key={item.page}
+                            onClick={() => {
+                              onNavigate(item.page);
+                              setSidebarOpen(false);
+                            }}
+                            className={`flex items-center gap-2 px-3 py-2 text-sm rounded-md transition-colors ${
+                              activePage === item.page
+                                ? "text-brand-600 bg-brand-50"
+                                : "text-gray-500 hover:text-brand-600 hover:bg-brand-50"
+                            }`}
+                          >
+                            <span>{item.label}</span>
+                          </button>
+                        ))}
+                      </div>
                     </div>
-                  </div>
+                  )}
                 </div>
               );
             }
@@ -346,23 +388,29 @@ const InstitutionLayout: React.FC<Props> = ({ activePage, onNavigate, children }
             // Single nav item
             const isActive = activePage === section.page;
             const isLogout = section.isLogout;
+            const locked = isLocked(key);
 
             return (
               <button
                 key={key}
                 onClick={() => {
-                  onNavigate(section.page!);
-                  setSidebarOpen(false);
+                  if (!locked) {
+                    onNavigate(section.page!);
+                    setSidebarOpen(false);
+                  }
                 }}
                 className={`flex items-center gap-3 px-3 py-2.5 rounded-md transition-colors ${
                   isLogout
                     ? "text-red-500 hover:bg-red-50"
-                    : isActive
-                      ? "bg-brand-50 text-brand-600"
-                      : "text-gray-700 hover:bg-brand-50 hover:text-brand-600"
+                    : locked
+                      ? "text-gray-300 cursor-not-allowed"
+                      : isActive
+                        ? "bg-brand-50 text-brand-600"
+                        : "text-gray-700 hover:bg-brand-50 hover:text-brand-600"
                 }`}
+                title={locked ? "This section has been disabled by the admin" : ""}
               >
-                {section.icon}
+                {locked ? <Lock weight="fill" className="w-[18px] h-[18px]" /> : section.icon}
                 <span className="font-medium text-sm">{section.label}</span>
               </button>
             );

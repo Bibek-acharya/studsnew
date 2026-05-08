@@ -3,132 +3,157 @@
 import React from "react";
 import {
   Users,
-  Building,
-  BookOpen,
-  CreditCard,
-  CircleAlert,
+  Building2,
+  HandHeart,
+  FileText,
   GraduationCap,
-  ClipboardList,
-  Newspaper,
+  DollarSign,
   Calendar,
-  ChevronRight,
-  ShieldCheck,
-  ArrowRight,
+  MessageSquare,
+  Bell,
+  Settings,
+  BarChart3,
   UserPlus,
   CheckCircle,
-  FileText,
-  MessageSquare,
+  CreditCard,
 } from "lucide-react";
+
+const platformStyles: Record<string, { bg: string; text: string }> = {
+  Student: { bg: "bg-blue-100", text: "text-blue-700" },
+  College: { bg: "bg-green-100", text: "text-green-700" },
+  Provider: { bg: "bg-pink-100", text: "text-pink-700" },
+};
+
+const statusStyles: Record<string, { bg: string; text: string }> = {
+  Active: { bg: "bg-green-100", text: "text-green-700" },
+  Healthy: { bg: "bg-green-100", text: "text-green-700" },
+  Degraded: { bg: "bg-amber-100", text: "text-amber-700" },
+};
 
 export default function OverviewSection({ setActiveSection }: { setActiveSection: (s: string) => void }) {
   const activities = [
-    { title: "New student registered", meta: "Anjali Sharma - 2h ago", icon: <UserPlus className="h-4 w-4" />, tone: "blue" as const },
-    { title: "College approved", meta: "Sowers College - 5h ago", icon: <CheckCircle className="h-4 w-4" />, tone: "green" as const },
-    { title: "New course added", meta: "BBA Program - 1d ago", icon: <FileText className="h-4 w-4" />, tone: "purple" as const },
-    { title: "Payment received", meta: "Rs 50,000 - 2d ago", icon: <CreditCard className="h-4 w-4" />, tone: "amber" as const },
-    { title: "New inquiry received", meta: "Ramesh Magar - 3d ago", icon: <MessageSquare className="h-4 w-4" />, tone: "red" as const },
+    { action: "New Application Submitted", platform: "Student", user: "Emily Johnson", time: "2 mins ago", icon: FileText, iconBg: "bg-blue-50", iconColor: "text-blue-600" },
+    { action: "Institution Admission Updated", platform: "College", user: "MIT Admissions", time: "15 mins ago", icon: Building2, iconBg: "bg-green-50", iconColor: "text-green-600" },
+    { action: "Scholarship Created", platform: "Provider", user: "Sowers Action", time: "1 hour ago", icon: HandHeart, iconBg: "bg-purple-50", iconColor: "text-purple-600" },
+    { action: "New User Registered", platform: "Student", user: "Anjali Sharma", time: "2 hours ago", icon: UserPlus, iconBg: "bg-amber-50", iconColor: "text-amber-600" },
+    { action: "Event Created", platform: "College", user: "Stanford University", time: "3 hours ago", icon: Calendar, iconBg: "bg-indigo-50", iconColor: "text-indigo-600" },
   ];
 
-  const accessRows = [
-    { initials: "AU", name: "Admin User", email: "admin@sowersaction.org", role: "Administrator", status: "Active", lastActive: "Now" },
-    { initials: "EU", name: "Editor User", email: "editor@sowersaction.org", role: "Editor", status: "Active", lastActive: "2 hours ago" },
-    { initials: "SM", name: "Scholarship Manager", email: "scholarship@sowersaction.org", role: "Scholarship Manager", status: "Active", lastActive: "1 hour ago" },
+  const platforms = [
+    { label: "Student Portal", status: "Active" as const },
+    { label: "Institution Portal", status: "Active" as const },
+    { label: "Provider Portal", status: "Active" as const },
+    { label: "API Services", status: "Degraded" as const },
+    { label: "Database", status: "Healthy" as const },
   ];
 
   return (
-    <div className="space-y-6">
-      <div className="grid grid-cols-1 gap-4 md:grid-cols-5">
-        <StatCard icon={<Users size={24} />} value="3,847" label="Total Users" change="+12.5% from last month" gradient="from-blue-500 to-blue-600" />
-        <StatCard icon={<Building size={24} />} value="12" label="Total Colleges" change="+2 new this month" gradient="from-green-500 to-green-600" />
-        <StatCard icon={<BookOpen size={24} />} value="48" label="Total Courses" change="Across all colleges" gradient="from-purple-500 to-purple-600" />
-        <StatCard icon={<CreditCard size={24} />} value="Rs 892K" label="Total Revenue" change="+15.3% from last month" gradient="from-orange-500 to-orange-600" />
-        <StatCard icon={<CircleAlert size={24} />} value="23" label="Pending Actions" change="Requires attention" gradient="from-red-500 to-red-600" />
-      </div>
-
-      <div className="grid grid-cols-1 gap-6 lg:grid-cols-5">
-        <div className="space-y-4 lg:col-span-1">
-          <SimpleStatCard icon={<GraduationCap size={20} className="text-blue-600" />} value="24" label="Active Scholarships" bg="bg-blue-100" />
-          <SimpleStatCard icon={<ClipboardList size={20} className="text-green-600" />} value="8" label="Entrance Exams" bg="bg-green-100" />
-          <SimpleStatCard icon={<Newspaper size={20} className="text-purple-600" />} value="89" label="News Published" bg="bg-purple-100" />
-          <SimpleStatCard icon={<Calendar size={20} className="text-yellow-600" />} value="45" label="Events Organized" bg="bg-yellow-100" />
-        </div>
-
-        <div className="rounded-xl border border-gray-200 bg-white p-5 lg:col-span-2">
-          <h3 className="mb-4 text-sm font-bold text-gray-900">Recent Activities</h3>
-          <div className="space-y-3">
-            {activities.map((item) => (
-              <ActivityItem key={item.title} icon={item.icon} title={item.title} sub={item.meta} tone={item.tone} />
-            ))}
-          </div>
-        </div>
-
-        <div className="overflow-hidden rounded-xl border border-gray-200 bg-white lg:col-span-2">
-          <div className="flex items-center justify-between border-b border-gray-100 px-6 py-4">
-            <h2 className="text-lg font-bold text-gray-800">Calendar</h2>
-            <div className="flex items-center gap-3 rounded-full bg-blue-50 px-3 py-1">
-              <button type="button" className="text-gray-500 hover:text-blue-600">
-                <ChevronRight size={16} className="rotate-180" />
-              </button>
-              <span className="text-xs font-bold text-gray-700">April 2026</span>
-              <button type="button" className="text-gray-500 hover:text-blue-600">
-                <ChevronRight size={16} />
-              </button>
-            </div>
-          </div>
-          <div className="p-6">
-            <div className="mb-2 grid grid-cols-7 gap-1 text-center text-[10px] font-bold text-gray-400">
-              {["SU", "MO", "TU", "WE", "TH", "FR", "SA"].map((day) => (
-                <div key={day}>{day}</div>
-              ))}
-            </div>
-            <div className="grid grid-cols-7 gap-2">
-              {Array.from({ length: 30 }, (_, index) => index + 1).map((day) => (
-                <div
-                  key={day}
-                  className={`flex aspect-square cursor-pointer items-center justify-center rounded-full text-xs transition-all ${
-                    day === 24 ? "bg-blue-600 font-bold text-white" : "text-gray-600 hover:bg-gray-100"
-                  }`}
-                >
-                  {day}
-                </div>
-              ))}
-            </div>
-            <div className="mt-6 space-y-4">
-              <h4 className="text-xs font-bold uppercase tracking-wider text-gray-400">Upcoming Events</h4>
-              <NextEventItem color="purple" time="09:00 - 09:45 AM" title="Leadership Training Session" />
-              <NextEventItem color="orange" time="11:15 - 12:00 AM" title="Scholarship Review Meeting" />
-            </div>
-          </div>
+    <div>
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-6">
+        <h1 className="text-2xl font-bold text-gray-800">Super Admin Dashboard</h1>
+        <div className="flex items-center text-sm text-gray-500 mt-2 sm:mt-0 gap-2">
+          <span>Dashboard</span>
+          <span>-</span>
+          <span className="text-gray-800 font-medium">Overview</span>
         </div>
       </div>
 
-      <div className="rounded-xl border border-gray-200 bg-white p-6">
-        <div className="mb-6 flex items-center justify-between">
-          <h3 className="flex items-center gap-2 text-base font-bold text-gray-900">
-            <ShieldCheck size={20} className="text-blue-600" /> Current Access Holders
-          </h3>
-          <button type="button" onClick={() => setActiveSection("access-control")} className="flex items-center gap-1 text-sm font-semibold text-blue-600 hover:text-blue-700">
-            Manage Access <ArrowRight size={16} className="transition-transform group-hover:translate-x-1" />
-          </button>
+      <div className="flex flex-col lg:flex-row gap-6">
+        <div className="w-full lg:w-2/3 xl:w-8/12 flex flex-col gap-6">
+          <div className="relative w-full h-[240px] bg-[#0000ff] rounded-2xl overflow-hidden flex items-center">
+            <div className="absolute top-0 right-0 w-[450px] h-[450px] bg-white opacity-[0.04] rounded-full translate-x-1/3 -translate-y-1/3 pointer-events-none" />
+            <div className="absolute top-0 right-0 w-[300px] h-[300px] bg-white opacity-[0.05] rounded-full translate-x-1/4 -translate-y-1/4 pointer-events-none" />
+            <div className="absolute right-0 top-1/2 -translate-y-1/2 h-[240px] w-[240px] bg-white opacity-[0.15] rounded-full translate-x-[35%] pointer-events-none" />
+            <div className="relative z-10 px-6 md:px-10 flex flex-col items-start w-full md:max-w-[70%]">
+              <div className="flex items-center gap-2 bg-white/20 text-white text-xs md:text-sm font-medium px-3 py-1.5 rounded-md mb-8 w-max shadow-sm">
+                <Calendar size={14} />
+                <span>May 08, 2026 11:25 am</span>
+              </div>
+              <h1 className="text-white text-2xl md:text-[28px] leading-tight font-bold tracking-wide mb-2">Welcome back, Super Admin 👋</h1>
+              <p className="text-[#cbd0fa] text-sm md:text-[15px] font-medium">Monitor and control all platforms from one place</p>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 xl:gap-6">
+            <StatCard icon={<Users size={24} />} iconBg="bg-blue-50" iconColor="text-blue-600" value="12,847" label="Total Students" change="+15% this month" />
+            <StatCard icon={<Building2 size={24} />} iconBg="bg-green-50" iconColor="text-green-600" value="248" label="Total Institutions" change="+5 this month" />
+            <StatCard icon={<HandHeart size={24} />} iconBg="bg-purple-50" iconColor="text-purple-600" value="86" label="Total Providers" change="+3 this month" />
+            <StatCard icon={<FileText size={24} />} iconBg="bg-amber-50" iconColor="text-amber-600" value="34,562" label="Total Applications" change="+12% this year" />
+            <StatCard icon={<GraduationCap size={24} />} iconBg="bg-indigo-50" iconColor="text-indigo-600" value="156" label="Active Scholarships" change="Live on platform" />
+            <StatCard icon={<DollarSign size={24} />} iconBg="bg-red-50" iconColor="text-red-600" value="$2.4M" label="Platform Revenue" change="+8% this month" />
+          </div>
+
+          <div className="bg-white rounded-xl border border-gray-100 shadow-sm overflow-hidden">
+            <div className="p-5 border-b border-gray-100 flex justify-between items-center">
+              <h3 className="text-lg font-bold text-gray-800">Recent Platform Activities</h3>
+              <button type="button" className="text-sm text-blue-600 hover:underline">View All</button>
+            </div>
+            <div className="overflow-x-auto">
+              <table className="w-full">
+                <thead className="bg-gray-50">
+                  <tr>
+                    <th className="px-5 py-3 text-left text-xs font-semibold text-gray-500 uppercase">Action</th>
+                    <th className="px-5 py-3 text-left text-xs font-semibold text-gray-500 uppercase">Platform</th>
+                    <th className="px-5 py-3 text-left text-xs font-semibold text-gray-500 uppercase">User</th>
+                    <th className="px-5 py-3 text-left text-xs font-semibold text-gray-500 uppercase">Time</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-gray-100">
+                  {activities.map((item, i) => {
+                    const Icon = item.icon;
+                    return (
+                      <tr key={i} className="hover:bg-gray-50 transition-colors">
+                        <td className="px-5 py-3">
+                          <div className="flex items-center gap-3">
+                            <div className={`w-8 h-8 rounded-full ${item.iconBg} flex items-center justify-center shrink-0 ${item.iconColor}`}>
+                              <Icon size={14} />
+                            </div>
+                            <span className="text-sm font-medium text-gray-900">{item.action}</span>
+                          </div>
+                        </td>
+                        <td className="px-5 py-3">
+                          <PlatformBadge label={item.platform} />
+                        </td>
+                        <td className="px-5 py-3 text-sm text-gray-600">{item.user}</td>
+                        <td className="px-5 py-3 text-sm text-gray-500">{item.time}</td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
+          </div>
         </div>
 
-        <div className="overflow-x-auto">
-          <table className="w-full text-sm">
-            <thead className="border-b border-gray-200 bg-gray-50">
-              <tr>
-                <th className="px-4 py-3 text-left font-bold text-gray-600">User</th>
-                <th className="px-4 py-3 text-left font-bold text-gray-600">Email</th>
-                <th className="px-4 py-3 text-center font-bold text-gray-600">Role</th>
-                <th className="px-4 py-3 text-center font-bold text-gray-600">Status</th>
-                <th className="px-4 py-3 text-center font-bold text-gray-600">Last Active</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-gray-100">
-              {accessRows.map((row) => (
-                <AccessRow key={row.email} {...row} />
+        <div className="w-full lg:w-1/3 xl:w-4/12 flex flex-col gap-6">
+          <div className="bg-white rounded-xl p-6 border border-gray-100 shadow-sm">
+            <div className="flex justify-between items-start mb-4">
+              <div>
+                <h2 className="text-lg font-bold text-gray-800">Platform Status</h2>
+                <p className="text-xs text-gray-500">Current system health</p>
+              </div>
+            </div>
+            <div className="space-y-4">
+              {platforms.map((p) => (
+                <StatusRow key={p.label} label={p.label} status={p.status} />
               ))}
-            </tbody>
-          </table>
+            </div>
+          </div>
+
+          <div className="bg-white rounded-xl p-6 border border-gray-100 shadow-sm">
+            <div className="flex justify-between items-start mb-4">
+              <div>
+                <h2 className="text-lg font-bold text-gray-800">Quick Actions</h2>
+                <p className="text-xs text-gray-500">Common admin tasks</p>
+              </div>
+            </div>
+            <div className="grid grid-cols-2 gap-3">
+              <QuickActionButton icon={<Users size={24} />} iconClass="text-blue-600" label="Manage Users" />
+              <QuickActionButton icon={<BarChart3 size={24} />} iconClass="text-green-600" label="Analytics" />
+              <QuickActionButton icon={<MessageSquare size={24} />} iconClass="text-purple-600" label="Messages" />
+              <QuickActionButton icon={<Settings size={24} />} iconClass="text-gray-600" label="Settings" />
+            </div>
+          </div>
         </div>
       </div>
     </div>
@@ -137,129 +162,67 @@ export default function OverviewSection({ setActiveSection }: { setActiveSection
 
 function StatCard({
   icon,
+  iconBg,
+  iconColor,
   value,
   label,
   change,
-  gradient,
 }: {
   icon: React.ReactNode;
+  iconBg: string;
+  iconColor: string;
   value: string;
   label: string;
   change: string;
-  gradient: string;
 }) {
+  const isPercent = change.startsWith("+");
   return (
-    <div className={`rounded-2xl bg-gradient-to-br ${gradient} p-6 text-white shadow-lg transition-transform hover:-translate-y-1`}>
-      <div className="mb-4 flex items-center justify-between">
-        <div className="rounded-lg bg-white/20 p-2 backdrop-blur-sm">{icon}</div>
-        <span className="text-3xl font-extrabold">{value}</span>
-      </div>
-      <p className="text-sm font-bold opacity-90">{label}</p>
-      <p className="mt-1 text-[10px] font-semibold uppercase tracking-wide opacity-75">{change}</p>
-    </div>
-  );
-}
-
-function SimpleStatCard({
-  icon,
-  value,
-  label,
-  bg,
-}: {
-  icon: React.ReactNode;
-  value: string;
-  label: string;
-  bg: string;
-}) {
-  return (
-    <div className="rounded-xl border border-gray-100 bg-white p-5 shadow-sm transition-all hover:shadow-md">
-      <div className={`mb-3 flex h-10 w-10 items-center justify-center rounded-lg ${bg}`}>{icon}</div>
-      <p className="text-2xl font-extrabold text-gray-900">{value}</p>
-      <p className="text-xs font-bold uppercase tracking-wider text-gray-400">{label}</p>
-    </div>
-  );
-}
-
-function ActivityItem({
-  icon,
-  title,
-  sub,
-  tone,
-}: {
-  icon: React.ReactNode;
-  title: string;
-  sub: string;
-  tone: "blue" | "green" | "purple" | "amber" | "red";
-}) {
-  const colors = {
-    blue: "bg-blue-100 text-blue-600",
-    green: "bg-green-100 text-green-600",
-    purple: "bg-purple-100 text-purple-600",
-    amber: "bg-amber-100 text-amber-600",
-    red: "bg-red-100 text-red-600",
-  };
-
-  return (
-    <div className="flex items-center gap-4 rounded-xl bg-gray-50 p-3 transition-colors hover:bg-gray-100">
-      <div className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-full ${colors[tone]}`}>{icon}</div>
-      <div className="min-w-0 flex-1">
-        <p className="truncate text-sm font-bold text-gray-900">{title}</p>
-        <p className="text-[10px] font-semibold uppercase tracking-wide text-gray-400">{sub}</p>
-      </div>
-    </div>
-  );
-}
-
-function NextEventItem({ color, time, title }: { color: "purple" | "orange" | "blue"; time: string; title: string }) {
-  const colors = {
-    purple: "bg-purple-600",
-    orange: "bg-orange-500",
-    blue: "bg-blue-500",
-  };
-  return (
-    <div className="flex cursor-pointer gap-4 group">
-      <div className={`w-[4px] shrink-0 rounded-full ${colors[color]} transition-all group-hover:scale-y-110`} />
-      <div className="flex flex-col">
-        <div className="text-[11px] font-bold tracking-tight text-gray-900">{time}</div>
-        <div className="mt-0.5 text-xs font-medium text-gray-500 transition-colors group-hover:text-blue-600">{title}</div>
-      </div>
-    </div>
-  );
-}
-
-function AccessRow({
-  initials,
-  name,
-  email,
-  role,
-  status,
-  lastActive,
-}: {
-  initials: string;
-  name: string;
-  email: string;
-  role: string;
-  status: string;
-  lastActive: string;
-}) {
-  return (
-    <tr className="transition-colors hover:bg-gray-50">
-      <td className="px-4 py-4">
-        <div className="flex items-center gap-3">
-          <div className="flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-br from-blue-400 to-blue-600 text-xs font-bold text-white shadow-sm">
-            {initials}
-          </div>
-          <span className="font-bold text-gray-900">{name}</span>
+    <div className="bg-white rounded-xl p-5 border border-gray-100 shadow-sm flex flex-col justify-between">
+      <div className="flex items-center gap-3">
+        <div className={`w-12 h-12 rounded-full ${iconBg} ${iconColor} flex items-center justify-center shrink-0`}>
+          {icon}
         </div>
-      </td>
-      <td className="px-4 py-4 font-medium text-gray-500">{email}</td>
-      <td className="px-4 py-4 text-center">
-        <span className="rounded-full bg-blue-50 px-3 py-1 text-[10px] font-bold uppercase tracking-wider text-blue-600">{role}</span>
-      </td>
-      <td className="px-4 py-4 text-center">
-        <span className="rounded-full bg-green-50 px-3 py-1 text-[10px] font-bold uppercase tracking-wider text-green-600">{status}</span>
-      </td>
-      <td className="px-4 py-4 text-center text-xs font-semibold uppercase text-gray-400">{lastActive}</td>
-    </tr>
+        <div>
+          <p className="text-xs text-gray-500 font-medium mb-0.5">{label}</p>
+          <h3 className="text-xl font-bold text-gray-800">{value}</h3>
+        </div>
+      </div>
+      <div className="text-xs text-gray-500 flex items-center gap-1 mt-2">
+        {isPercent && <span className="text-green-500 font-medium bg-green-50 px-1.5 py-0.5 rounded">{change.split(" ")[0]}</span>}
+        <span>{isPercent ? change.substring(change.indexOf(" ") + 1) : change}</span>
+      </div>
+    </div>
+  );
+}
+
+function PlatformBadge({ label }: { label: string }) {
+  const s = platformStyles[label] || { bg: "bg-gray-100", text: "text-gray-700" };
+  return (
+    <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium ${s.bg} ${s.text}`}>
+      {label}
+    </span>
+  );
+}
+
+function StatusRow({ label, status }: { label: string; status: string }) {
+  const dotColor = status === "Active" || status === "Healthy" ? "bg-green-500" : "bg-yellow-500";
+  const s = statusStyles[status] || { bg: "bg-gray-100", text: "text-gray-700" };
+  return (
+    <div className="flex items-center justify-between">
+      <div className="flex items-center gap-3">
+        <div className={`w-3 h-3 rounded-full ${dotColor}`} />
+        <span className="text-sm text-gray-700">{label}</span>
+      </div>
+      <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${s.bg} ${s.text}`}>{status}</span>
+    </div>
+  );
+}
+
+function QuickActionButton({ icon, iconClass, label }: { icon: React.ReactNode; iconClass: string; label: string }) {
+  return (
+    <button type="button" className="flex flex-col items-center gap-2 p-4 bg-gray-50 rounded-lg hover:bg-blue-50 transition-colors">
+      <span className={`${iconClass}`}>{icon}</span>
+      <span className="text-xs font-medium text-gray-700">{label}</span>
+    </button>
   );
 }

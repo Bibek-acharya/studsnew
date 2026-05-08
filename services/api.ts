@@ -1531,6 +1531,12 @@ export const apiService = {
     };
   },
 
+  async institutionLogin(email: string, password: string): Promise<AuthResponse> {
+    return apiRequest<AuthResponse>("/api/v1/institutions/auth/login", {
+      method: "POST",
+      body: JSON.stringify({ email, password }),
+    });
+  },
   async scholarshipProviderLogin(email: string, password: string): Promise<AuthResponse> {
     return apiRequest<AuthResponse>("/api/v1/scholarship-providers/auth/login", {
       method: "POST",
@@ -1548,6 +1554,46 @@ export const apiService = {
     return apiRequest<RegisterResponse>("/api/v1/scholarship-providers/auth/register", {
       method: "POST",
       body: JSON.stringify(data),
+    });
+  },
+
+  async institutionRegister(data: {
+    institution_name: string;
+    registration_number: string;
+    email: string;
+    contact_number?: string;
+    province?: string;
+    district?: string;
+    local_body?: string;
+    organization_type?: string;
+    pan_number?: string;
+    website_url?: string;
+    contact_person?: string;
+    contact_person_designation?: string;
+    contact_person_phone?: string;
+  }): Promise<RegisterResponse> {
+    return apiRequest<RegisterResponse>("/api/v1/institutions/auth/register", {
+      method: "POST",
+      body: JSON.stringify(data),
+    });
+  },
+
+  async listPendingInstitutions(): Promise<{ data: any[]; message: string }> {
+    return apiRequest<{ data: any[]; message: string }>("/api/v1/superadmin/pending-institutions");
+  },
+
+  async listVerifiedInstitutions(): Promise<{ data: any[]; message: string }> {
+    return apiRequest<{ data: any[]; message: string }>("/api/v1/superadmin/institutions");
+  },
+
+  async listRejectedInstitutions(): Promise<{ data: any[]; message: string }> {
+    return apiRequest<{ data: any[]; message: string }>("/api/v1/superadmin/rejected-institutions");
+  },
+
+  async approveInstitution(institutionId: number, action: string): Promise<{ message: string }> {
+    return apiRequest<{ message: string }>("/api/v1/superadmin/institutions/approve", {
+      method: "POST",
+      body: JSON.stringify({ institution_id: institutionId, action }),
     });
   },
 
