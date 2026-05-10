@@ -6,12 +6,13 @@ import { scholarshipProviderApi } from "../../services/scholarshipProviderApi";
 import { getStoredUsers } from "@/services/providerRbac";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
+import Link from "next/link";
 import { BadgeCheck, Eye, EyeOff, Loader2, ArrowLeft } from "lucide-react";
 
 import ScholarshipProviderDashboard from "@/components/ScholarshipProvider/ScholarshipProviderDashboard";
 
 interface ScholarshipProviderZoneProps {
-  onNavigate?: (view: any, data?: any) => void;
+  onNavigate?: (view: string, data?: unknown) => void;
 }
 
 type ViewState = "landing" | "dashboard" | "pending-approval";
@@ -26,6 +27,7 @@ const ScholarshipProviderZone: React.FC<ScholarshipProviderZoneProps> = ({
   onNavigate,
 }) => {
   const [activeTab, setActiveTab] = useState<"register" | "login">("login");
+  const [rememberMe, setRememberMe] = useState(false);
   const [showLoginPassword, setShowLoginPassword] = useState(false);
   const [loginEmail, setLoginEmail] = useState("");
   const [loginPassword, setLoginPassword] = useState("");
@@ -65,8 +67,8 @@ const ScholarshipProviderZone: React.FC<ScholarshipProviderZoneProps> = ({
   const [fpOtpTimer, setFpOtpTimer] = useState(120);
 
   useEffect(() => {
-    const token = localStorage.getItem("scholarshipProviderToken");
-    const user = localStorage.getItem("scholarshipProviderUser");
+    const token = localStorage.getItem("scholarshipProviderToken") || sessionStorage.getItem("scholarshipProviderToken");
+    const user = localStorage.getItem("scholarshipProviderUser") || sessionStorage.getItem("scholarshipProviderUser");
     if (token && user) {
       router.push("/scholarship-provider/dashboard");
     }
@@ -128,13 +130,24 @@ const ScholarshipProviderZone: React.FC<ScholarshipProviderZoneProps> = ({
 
     setAuthLoading(true);
     try {
+      const storage = rememberMe ? localStorage : sessionStorage;
+
+      // Set token cookie for middleware (which checks for `token` cookie)
+      const setTokenCookie = (token: string) => {
+        if (typeof document !== "undefined") {
+          const maxAge = rememberMe ? "max-age=604800;" : "";
+          document.cookie = `token=${token}; path=/; ${maxAge}SameSite=Lax`;
+        }
+      };
+
       // FIRST: Check for sub-user login
       const subUser = loginProviderUser(loginEmail.trim(), loginPassword);
       if (subUser) {
-        localStorage.setItem("scholarshipProviderUser", JSON.stringify({
+        storage.setItem("scholarshipProviderUser", JSON.stringify({
           ...subUser,
           isSubUser: true,
         }));
+        setTokenCookie("sub_user");
         router.push("/scholarship-provider/dashboard");
         setLoginPassword("");
         return;
@@ -146,14 +159,15 @@ const ScholarshipProviderZone: React.FC<ScholarshipProviderZoneProps> = ({
         loginPassword,
       );
 
-      // Store token in localStorage for API requests (production fix for cross-domain cookies)
-      const token = (response as any).data?.token || (response as any).token;
-      const user = (response as any).data?.user || (response as any).user;
+      // Store token in storage based on remember me preference
+      const token = response.data?.token;
+      const user = response.data?.user;
       if (token) {
-        localStorage.setItem("scholarshipProviderToken", token);
+        storage.setItem("scholarshipProviderToken", token);
+        setTokenCookie(token);
       }
       if (user) {
-        localStorage.setItem("scholarshipProviderUser", JSON.stringify(user));
+        storage.setItem("scholarshipProviderUser", JSON.stringify(user));
       }
 
       router.push("/scholarship-provider/dashboard");
@@ -413,9 +427,9 @@ const ScholarshipProviderZone: React.FC<ScholarshipProviderZoneProps> = ({
 
             <div className="w-full max-w-md">
               <div className="bg-white border border-gray-200 rounded-xl p-8 sm:p-10 shadow-lg">
-                <a href="/" className="flex justify-center mb-6">
+                <Link href="/" className="flex justify-center mb-6">
                   <Image src="/studsphere.png" alt="StudSphere" width={160} height={42} className="h-10 w-auto" />
-                </a>
+                </Link>
                 {activeTab === "login" && !showForgotPassword && (
                   <div className="animate-[fadeIn_0.4s_cubic-bezier(0.16,1,0.3,1)_forwards]">
                     <div className="text-center mb-5">
@@ -456,7 +470,7 @@ const ScholarshipProviderZone: React.FC<ScholarshipProviderZoneProps> = ({
                       </div>
                       <div className="flex items-center justify-between pt-1">
 <label className="flex items-center gap-2 cursor-pointer group">
-                           <input type="checkbox" className="w-4 h-4 rounded border-gray-300 cursor-pointer accent-[#0000ff]" />
+                           <input type="checkbox" checked={rememberMe} onChange={() => setRememberMe(!rememberMe)} className="w-4 h-4 rounded border-gray-300 cursor-pointer accent-[#0000ff]" />
                           <span className="text-[13px] text-gray-500 font-medium group-hover:text-gray-800 transition-colors">Remember me</span>
                         </label>
                         <button type="button" onClick={() => { setShowForgotPassword(true); setFpStep("email"); setFpError(null); setFpSuccess(null); }} className="text-[13px] font-semibold text-[#0000ff] hover:text-[#0000cc] hover:underline transition-colors">

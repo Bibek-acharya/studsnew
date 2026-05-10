@@ -38,6 +38,7 @@ export const PERMISSIONS_LIST = [
   { id: "evaluation", label: "Evaluation & Results", desc: "Manage written exam, interview, and final results" },
   { id: "access", label: "Assign Access", desc: "Manage user permissions and roles" },
   { id: "settings", label: "Settings", desc: "Configure system settings" },
+  { id: "volunteers", label: "Manage Volunteers", desc: "Manage volunteer requests and applications" },
 ];
 
 export const providerRbacApi = {

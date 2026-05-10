@@ -1149,6 +1149,64 @@ export const scholarshipProviderApi = {
       body: JSON.stringify({ email, otp, password }),
     });
   },
+
+  // ─── Volunteer API ──────────────────────────────────────────────────
+
+  async getVolunteers(page = 1, limit = 20): Promise<any> {
+    return callApi(`/api/v1/scholarship-providers/volunteers?page=${page}&limit=${limit}`);
+  },
+
+  async getVolunteerByID(id: number): Promise<any> {
+    return callApi(`/api/v1/scholarship-providers/volunteers/${id}`);
+  },
+
+  async createVolunteer(data: any): Promise<any> {
+    return callApi('/api/v1/scholarship-providers/volunteers', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(data),
+    });
+  },
+
+  async updateVolunteer(id: number, data: any): Promise<any> {
+    return callApi(`/api/v1/scholarship-providers/volunteers/${id}`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(data),
+    });
+  },
+
+  async deleteVolunteer(id: number): Promise<any> {
+    return callApi(`/api/v1/scholarship-providers/volunteers/${id}`, {
+      method: 'DELETE',
+    });
+  },
+
+  async toggleVolunteer(id: number): Promise<any> {
+    return callApi(`/api/v1/scholarship-providers/volunteers/${id}/toggle`, {
+      method: 'PUT',
+    });
+  },
+
+  async getVolunteerApplications(volunteerId?: number, page = 1, limit = 20): Promise<any> {
+    let path = `/api/v1/scholarship-providers/volunteers/applications?page=${page}&limit=${limit}`;
+    if (volunteerId) {
+      path = `/api/v1/scholarship-providers/volunteers/${volunteerId}/applications?page=${page}&limit=${limit}`;
+    }
+    return callApi(path);
+  },
+
+  async shortlistVolunteerApplication(id: number): Promise<any> {
+    return callApi(`/api/v1/scholarship-providers/volunteers/applications/${id}/shortlist`, {
+      method: 'PUT',
+    });
+  },
+
+  async rejectVolunteerApplication(id: number): Promise<any> {
+    return callApi(`/api/v1/scholarship-providers/volunteers/applications/${id}/reject`, {
+      method: 'PUT',
+    });
+  },
 };
 
 export const getCalendarEvents = async (): Promise<ProviderCalendarEvent[]> => {

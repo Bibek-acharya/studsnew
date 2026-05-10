@@ -33,6 +33,10 @@ const CustomizeForm = dynamic(() => import('./CustomizeForm'));
 const DraftScholarship = dynamic(() => import('./DraftScholarship'));
 const WrittenExam = dynamic(() => import('./WrittenExam'));
 const Notifications = dynamic(() => import('./Notifications'));
+const VolunteerDirectory = dynamic(() => import('./VolunteerDirectory'));
+const CreateVolunteer = dynamic(() => import('./CreateVolunteer'));
+const ManageApplication = dynamic(() => import('./ManageApplication'));
+const VolunteerShortlist = dynamic(() => import('./VolunteerShortlist'));
 
 
 interface DashboardProps {
@@ -47,6 +51,7 @@ const ScholarshipProviderDashboard: React.FC<DashboardProps> = ({ onLogout }) =>
   const [editingNewsId, setEditingNewsId] = useState<number | null>(null);
   const [editingEventId, setEditingEventId] = useState<number | null>(null);
   const [editingBlogId, setEditingBlogId] = useState<number | null>(null);
+  const [editingVolunteerId, setEditingVolunteerId] = useState<number | null>(null);
   const [providerUser, setProviderUser] = useState<any>(null);
   const [unreadMessages, setUnreadMessages] = useState(0);
   const [rbacPermissions, setRbacPermissions] = useState<string[]>([]);
@@ -103,6 +108,10 @@ const ScholarshipProviderDashboard: React.FC<DashboardProps> = ({ onLogout }) =>
     "sec-results": "evaluation",
     "sec-customize-form": "scholarships",
     "sec-draft-scholarship": "scholarships",
+    "sec-create-volunteer": "volunteers",
+    "sec-volunteer-request": "volunteers",
+    "sec-volunteer-application": "volunteers",
+    "sec-volunteer-shortlist": "volunteers",
   };
 
   const canAccess = (section: string): boolean => {
@@ -125,11 +134,17 @@ const ScholarshipProviderDashboard: React.FC<DashboardProps> = ({ onLogout }) =>
     setActiveTab(section);
     setSelectedStudentId(null);
     setEditingScholarshipId(null);
+    setEditingVolunteerId(null);
   }, []);
 
   const handleEditScholarship = useCallback((id: number) => {
     setEditingScholarshipId(id);
     setActiveTab('sec-edit-scholarship');
+  }, []);
+
+  const handleEditVolunteer = useCallback((id: number) => {
+    setEditingVolunteerId(id);
+    setActiveTab('sec-create-volunteer');
   }, []);
 
   const handleReviewStudent = useCallback((id: string) => {
@@ -197,6 +212,14 @@ const ScholarshipProviderDashboard: React.FC<DashboardProps> = ({ onLogout }) =>
         return <CustomizeForm />;
       case 'sec-draft-scholarship':
         return <DraftScholarship onEdit={handleEditScholarship} onNavigate={navigateTo} />;
+      case 'sec-create-volunteer':
+        return <CreateVolunteer editId={editingVolunteerId} />;
+      case 'sec-volunteer-request':
+        return <VolunteerDirectory onEdit={handleEditVolunteer} />;
+      case 'sec-volunteer-application':
+        return <ManageApplication />;
+      case 'sec-volunteer-shortlist':
+        return <VolunteerShortlist />;
       case 'sec-notifications':
         return <Notifications />;
       default:

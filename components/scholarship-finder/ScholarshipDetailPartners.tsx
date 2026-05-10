@@ -2,15 +2,6 @@
 
 import { useMemo } from "react";
 
-const MOCK_PARTNERS = [
-  { name: "Sowers Action Nepal", logo_url: "https://projectshiksha.hundredgroupnepal.org/images/sa_new.jpeg", website: "" },
-  { name: "Sowers Hong Kong", logo_url: "https://projectshiksha.hundredgroupnepal.org/images/sower-hk.jpeg", website: "" },
-  { name: "RONB", logo_url: "https://projectshiksha.hundredgroupnepal.org/images/ronb.jpg", website: "" },
-  { name: "Ncell Foundation", logo_url: "https://projectshiksha.hundredgroupnepal.org/images/ncell.png", website: "" },
-  { name: "Creating Opportunities", logo_url: "https://projectshiksha.hundredgroupnepal.org/images/creating.png", website: "" },
-  { name: "Dari Club USA", logo_url: "https://projectshiksha.hundredgroupnepal.org/images/dari-club.jpeg", website: "" },
-];
-
 export default function PartnersTab({ items, partnerGroups, getImageUrl }: { items: any[]; partnerGroups: any[] | null; getImageUrl: (url: string) => string }) {
   const flatItems = (items && items.length > 0) ? items : [];
 
@@ -38,8 +29,7 @@ export default function PartnersTab({ items, partnerGroups, getImageUrl }: { ite
     return allFlat.length > 0 ? [{ heading: "Partners", partners: allFlat }] : [];
   }, [partnerGroups, flatItems]);
 
-  const hasContent = grouped.length > 0;
-  const fallback = hasContent ? [] : MOCK_PARTNERS;
+  if (grouped.length === 0) return null;
 
   return (
     <div>
@@ -47,7 +37,7 @@ export default function PartnersTab({ items, partnerGroups, getImageUrl }: { ite
         <h2 className="text-[20px] font-bold text-gray-900">Our Partners</h2>
         <p className="mt-1 text-[14px] text-gray-500">Organizations supporting this scholarship</p>
       </div>
-      {hasContent ? grouped.map((group, gi) => (
+      {grouped.map((group, gi) => (
         <div key={gi} className="mb-8">
           {group.heading && <h3 className="mb-4 text-[16px] font-bold text-gray-900">{group.heading}</h3>}
           <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-5">
@@ -85,42 +75,7 @@ export default function PartnersTab({ items, partnerGroups, getImageUrl }: { ite
             })}
           </div>
         </div>
-      )) : (
-        <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-5">
-          {fallback.map((p, i) => {
-            const content = (
-              <>
-                <div className="aspect-[4/3] overflow-hidden rounded-xl bg-gray-50">
-                  {p.logo_url ? (
-                    <img
-                      src={getImageUrl(p.logo_url)}
-                      alt={p.name}
-                      className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
-                    />
-                  ) : (
-                    <div className="w-full h-full flex items-center justify-center bg-blue-50 text-3xl font-bold text-blue-600">
-                      {p.name?.charAt(0) || "?"}
-                    </div>
-                  )}
-                </div>
-                <p className="text-[12px] text-gray-600 mt-2 px-1 text-center font-semibold truncate group-hover:text-blue-600 transition-colors">
-                  {p.name}
-                </p>
-              </>
-            );
-            const cardClass = "group cursor-pointer overflow-hidden rounded-2xl border border-gray-100 bg-white p-1.5 shadow-sm hover:shadow-md transition-all duration-300";
-            return p.website ? (
-              <a key={i} href={p.website} target="_blank" rel="noopener noreferrer" className={cardClass}>
-                {content}
-              </a>
-            ) : (
-              <div key={i} className={cardClass}>
-                {content}
-              </div>
-            );
-          })}
-        </div>
-      )}
+      ))}
     </div>
   );
 }

@@ -44,6 +44,21 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
     return ((user.first_name?.[0] || '') + (user.last_name?.[0] || '')).toUpperCase() || 'U'
   }, [user])
 
+  const statusLabels: Record<string, string> = {
+    see_graduate: "SEE Graduate",
+    plus_two_running: "+2 Running",
+    plus_two_graduate: "+2 Graduate",
+  };
+
+  const profileLabel = useMemo(() => {
+    if (!user) return "Student";
+    if (user.role === "admin") return "Admin";
+    if (user.current_status && statusLabels[user.current_status]) {
+      return statusLabels[user.current_status];
+    }
+    return "Student";
+  }, [user]);
+
   const timeAgo = (dateStr: string) => {
     const now = new Date()
     const date = new Date(dateStr)
@@ -222,7 +237,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
               </button>
               <div className="text-left hidden sm:block">
                 <p className="text-sm font-bold text-gray-800 transition-colors">{user?.first_name || 'User'} {user?.last_name || ''}</p>
-                <p className="text-xs text-gray-500">{user?.role || 'Student'}</p>
+                <p className="text-xs text-gray-500">{profileLabel}</p>
               </div>
             </div>
           </div>

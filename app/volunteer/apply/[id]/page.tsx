@@ -1,0 +1,306 @@
+"use client";
+
+import React from "react";
+import { useRouter } from "next/navigation";
+import { use, useState, useEffect } from "react";
+import { apiService } from "@/services/api";
+import NepaliCalendar from "@/components/volunteer/VolunteerNepaliCalendar";
+import Dropdown from "@/components/college-recommender/Dropdown";
+
+const NEPALI_PROVINCES = [
+  "Koshi", "Madhesh", "Bagmati", "Gandaki", "Lumbini", "Karnali", "Sudurpashchim",
+];
+
+const DISTRICT_DATA: Record<string, string[]> = {
+  Koshi: ["Biratnagar", "Dharan", "Ilam", "Birtamod", "Damak", "Itahari", "Rajbiraj", "Jhapa"],
+  Madhesh: ["Birgunj", "Janakpur", "Rajbiraj", "Kalaiya", "Gaur", "Lahan", "Siraha"],
+  Bagmati: ["Kathmandu", "Lalitpur", "Bhaktapur", "Hetauda", "Bharatpur", "Chitwan", "Dhading"],
+  Gandaki: ["Pokhara", "Baglung", "Besisahar", "Kaski", "Lamjung", "Mustang"],
+  Lumbini: ["Butwal", "Bhairahawa", "Nepalgunj", "Dang", "Tulsipur", "Ghorahi"],
+  Karnali: ["Surkhet", "Dailekh", "Jajarkot", "Kalikot", "Mugu", "Jumla"],
+  Sudurpashchim: ["Dhangadhi", "Mahendranagar", "Bhimdatta", "Dadeldhura", "Dipayal"],
+};
+
+const ALL_DISTRICTS = [...new Set(Object.values(DISTRICT_DATA).flat().sort())];
+
+export default function VolunteerApplyPage({ params }: { params: Promise<{ id: string }> }) {
+  const { id } = use(params);
+  const router = useRouter();
+
+  const [volunteer, setVolunteer] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
+  const [notFound, setNotFound] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
+
+  const [fullName, setFullName] = useState("");
+  const [gender, setGender] = useState("");
+  const [phone, setPhone] = useState("");
+  const [email, setEmail] = useState("");
+  const [designation, setDesignation] = useState("");
+  const [otherDesignation, setOtherDesignation] = useState("");
+  const [province, setProvince] = useState("");
+  const [district, setDistrict] = useState("");
+  const [municipality, setMunicipality] = useState("");
+  const [ward, setWard] = useState("");
+  const [tole, setTole] = useState("");
+  const [participateDistrict, setParticipateDistrict] = useState("");
+  const [selectedDays, setSelectedDays] = useState<string[]>([]);
+  const [volunteeredBefore, setVolunteeredBefore] = useState("");
+  const [volunteerDetails, setVolunteerDetails] = useState("");
+  const [submitted, setSubmitted] = useState(false);
+  const [declaration, setDeclaration] = useState(false);
+
+  useEffect(() => {
+    const fetchVolunteer = async () => {
+      try {
+        const res = await apiService.getPublicVolunteerByID(Number(id));
+        if (res?.success && res?.data) {
+          setVolunteer({ ...res.data, availableDates: res.data.specific_dates || [] });
+        } else {
+          setNotFound(true);
+        }
+      } catch {
+        setNotFound(true);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchVolunteer();
+  }, [id]);
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setSubmitting(true);
+    try {
+      await apiService.submitVolunteerApplication(volunteer.id, {
+        full_name: fullName,
+        gender,
+        phone,
+        email,
+        designation,
+        other_designation: otherDesignation,
+        province,
+        district,
+        municipality,
+        ward,
+        tole,
+        participate_district: participateDistrict,
+        available_days: selectedDays,
+        volunteered_before: volunteeredBefore,
+        volunteer_details: volunteerDetails,
+      });
+      setSubmitted(true);
+    } catch {
+      alert("Failed to submit application. Please try again.");
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  if (loading) {
+    return (
+      <div className="flex min-h-screen items-center justify-center" style={{ backgroundColor: "#0000ff" }}>
+        <p className="text-white text-lg font-bold">Loading...</p>
+      </div>
+    );
+  }
+
+  if (notFound || !volunteer) {
+    return (
+      <div className="flex min-h-screen items-center justify-center" style={{ backgroundColor: "#0000ff" }}>
+        <p className="text-white text-lg font-bold">Volunteer opportunity not found.</p>
+      </div>
+    );
+  }
+
+  if (submitted) {
+    return (
+      <div className="min-h-screen flex flex-col items-center justify-center px-4" style={{ backgroundColor: "#0000ff" }}>
+        <div className="w-full max-w-[500px] bg-white rounded-2xl p-10 text-center">
+          <div className="w-24 h-24 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-6">
+            <svg className="w-12 h-12 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M5 13l4 4L19 7"></path></svg>
+          </div>
+          <h2 className="text-3xl font-bold text-gray-800 mb-2">Registration Successful!</h2>
+          <p className="text-gray-600 mb-8 text-center">Thank you for registering as a volunteer. We will contact you soon.</p>
+          <button onClick={() => router.push("/volunteer")} className="bg-[#0000ff] hover:bg-[#0000cc] text-white font-semibold py-3 px-6 rounded-lg transition-colors shadow-md">
+            Close
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="min-h-screen flex flex-col items-center pt-8 pb-20 px-4 sm:px-6" style={{ backgroundColor: "#0000ff" }}>
+      <header className="w-full max-w-[900px] mb-8 text-center sm:text-left">
+        <h1 className="text-[32px] sm:text-[40px] font-extrabold text-white mb-2 leading-tight drop-shadow-sm">Volunteer Registration</h1>
+        <p className="text-[18px] text-white/90 font-medium">{volunteer.title} &mdash; {volunteer.organizer}</p>
+      </header>
+
+      <main className="w-full max-w-[900px] bg-white rounded-2xl relative">
+        <div className="bg-[#f0fdf4] border-b border-[#bbf7d0] py-3.5 px-6 flex justify-center items-center gap-3 text-[14px] text-[#166534]">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-5 h-5 flex-shrink-0">
+            <path fillRule="evenodd" d="M12.516 2.17a.75.75 0 00-1.032 0 11.209 11.209 0 01-7.877 3.08.75.75 0 00-.722.515A12.74 12.74 0 002.25 9.75c0 5.942 4.064 10.933 9.563 12.348a.749.749 0 00.374 0c5.499-1.415 9.563-6.406 9.563-12.348 0-1.39-.223-2.73-.635-3.985a.75.75 0 00-.722-.516l-.143.001c-2.996 0-5.717-1.17-7.734-3.08zm3.094 8.016a.75.75 0 10-1.22-.872l-3.236 4.53L9.53 12.22a.75.75 0 00-1.06 1.06l2.25 2.25a.75.75 0 001.14-.094l3.75-5.25z" clipRule="evenodd" />
+          </svg>
+          <span className="font-medium">Your data is secure and will be used for volunteer registration purposes only.</span>
+        </div>
+
+        <form onSubmit={handleSubmit} className="px-6 sm:px-12 py-8">
+          <div className="mb-12">
+            <div className="mb-6 pb-3">
+              <h2 className="text-[20px] font-bold text-[#1e293b]">Personal Details</h2>
+            </div>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-5">
+              <div className="col-span-1 sm:col-span-2">
+                <label className="block text-[14px] font-semibold text-gray-700 mb-1.5">Full Name <span className="text-red-500">*</span></label>
+                <input type="text" value={fullName} onChange={(e) => setFullName(e.target.value)} required
+                  className="w-full border border-gray-300 rounded py-3 px-4 text-[15px] text-gray-800 outline-none focus:ring-0 focus:border-[#0000ff] transition-all bg-white"
+                  placeholder="Enter your full name" />
+              </div>
+              <div>
+                <label className="block text-[14px] font-semibold text-gray-700 mb-1.5">Gender <span className="text-red-500">*</span></label>
+                <select value={gender} onChange={(e) => setGender(e.target.value)} required
+                  className="w-full border border-gray-300 rounded py-3 px-4 text-[15px] text-gray-800 outline-none focus:ring-0 focus:border-[#0000ff] transition-all bg-white cursor-pointer">
+                  <option value="" disabled>Select Gender</option>
+                  <option value="Male">Male</option>
+                  <option value="Female">Female</option>
+                  <option value="Other">Other</option>
+                </select>
+              </div>
+              <div>
+                <label className="block text-[14px] font-semibold text-gray-700 mb-1.5">Phone Number <span className="text-red-500">*</span></label>
+                <input type="tel" value={phone} onChange={(e) => setPhone(e.target.value.replace(/[^0-9]/g, "").slice(0, 10))} required
+                  className="w-full border border-gray-300 rounded py-3 px-4 text-[15px] text-gray-800 outline-none focus:ring-0 focus:border-[#0000ff] transition-all bg-white"
+                  placeholder="Enter your phone number" />
+              </div>
+              <div>
+                <label className="block text-[14px] font-semibold text-gray-700 mb-1.5">Email Address <span className="text-red-500">*</span></label>
+                <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} required
+                  className="w-full border border-gray-300 rounded py-3 px-4 text-[15px] text-gray-800 outline-none focus:ring-0 focus:border-[#0000ff] transition-all bg-white"
+                  placeholder="Enter your email" />
+              </div>
+              <div>
+                <label className="block text-[14px] font-semibold text-gray-700 mb-1.5">Designation <span className="text-red-500">*</span></label>
+                <select value={designation} onChange={(e) => setDesignation(e.target.value)} required
+                  className="w-full border border-gray-300 rounded py-3 px-4 text-[15px] text-gray-800 outline-none focus:ring-0 focus:border-[#0000ff] transition-all bg-white cursor-pointer">
+                  <option value="" disabled>Select Designation</option>
+                  <option value="Student">Student</option>
+                  <option value="Job Holder">Job Holder</option>
+                  <option value="Business Owner">Business Owner</option>
+                  <option value="Freelancer">Freelancer</option>
+                  <option value="Teacher">Teacher</option>
+                  <option value="Social Worker">Social Worker</option>
+                  <option value="Other">Other</option>
+                </select>
+              </div>
+              {designation === "Other" && (
+                <div>
+                  <label className="block text-[14px] font-semibold text-gray-700 mb-1.5">If Other, Please Specify <span className="text-red-500">*</span></label>
+                  <input type="text" value={otherDesignation} onChange={(e) => setOtherDesignation(e.target.value)} required
+                    className="w-full border border-gray-300 rounded py-3 px-4 text-[15px] text-gray-800 outline-none focus:ring-0 focus:border-[#0000ff] transition-all bg-white"
+                    placeholder="Please specify your designation" />
+                </div>
+              )}
+
+              <div className="col-span-1 sm:col-span-2 pt-4 border-t border-gray-100">
+                <h3 className="text-[16px] font-semibold text-gray-700 mb-4">Current Address</h3>
+              </div>
+              <div>
+                <label className="block text-[14px] font-semibold text-gray-700 mb-1.5">Province <span className="text-red-500">*</span></label>
+                <select value={province} onChange={(e) => { setProvince(e.target.value); setDistrict(""); }} required
+                  className="w-full border border-gray-300 rounded py-3 px-4 text-[15px] text-gray-800 outline-none focus:ring-0 focus:border-[#0000ff] transition-all bg-white cursor-pointer">
+                  <option value="" disabled>Select Province</option>
+                  {NEPALI_PROVINCES.map((p) => <option key={p} value={p}>{p}</option>)}
+                </select>
+              </div>
+              <div>
+                <label className="block text-[14px] font-semibold text-gray-700 mb-1.5">District <span className="text-red-500">*</span></label>
+                <select value={district} onChange={(e) => setDistrict(e.target.value)} required
+                  className="w-full border border-gray-300 rounded py-3 px-4 text-[15px] text-gray-800 outline-none focus:ring-0 focus:border-[#0000ff] transition-all bg-white cursor-pointer">
+                  <option value="" disabled>Select District</option>
+                  {province && (DISTRICT_DATA[province] || []).map((d) => <option key={d} value={d}>{d}</option>)}
+                </select>
+              </div>
+              <div>
+                <label className="block text-[14px] font-semibold text-gray-700 mb-1.5">Municipality / RM <span className="text-red-500">*</span></label>
+                <input type="text" value={municipality} onChange={(e) => setMunicipality(e.target.value)} required
+                  className="w-full border border-gray-300 rounded py-3 px-4 text-[15px] text-gray-800 outline-none focus:ring-0 focus:border-[#0000ff] transition-all bg-white"
+                  placeholder="Enter municipality" />
+              </div>
+              <div>
+                <label className="block text-[14px] font-semibold text-gray-700 mb-1.5">Ward No. <span className="text-red-500">*</span></label>
+                <input type="number" value={ward} onChange={(e) => setWard(e.target.value)} required min={1}
+                  className="w-full border border-gray-300 rounded py-3 px-4 text-[15px] text-gray-800 outline-none focus:ring-0 focus:border-[#0000ff] transition-all bg-white"
+                  placeholder="Ward Number" />
+              </div>
+              <div className="col-span-1 sm:col-span-2">
+                <label className="block text-[14px] font-semibold text-gray-700 mb-1.5">Tole / Village</label>
+                <input type="text" value={tole} onChange={(e) => setTole(e.target.value)}
+                  className="w-full border border-gray-300 rounded py-3 px-4 text-[15px] text-gray-800 outline-none focus:ring-0 focus:border-[#0000ff] transition-all bg-white"
+                  placeholder="Enter tole or village name" />
+              </div>
+            </div>
+          </div>
+
+          <div className="mb-12">
+            <div className="mb-6 pb-3">
+              <h2 className="text-[20px] font-bold text-[#1e293b]">Volunteer Preferences</h2>
+            </div>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-5">
+              <div>
+                <label className="block text-[14px] font-semibold text-gray-700 mb-1.5">District to Participate <span className="text-red-500">*</span></label>
+                <Dropdown
+                  value={participateDistrict}
+                  onChange={setParticipateDistrict}
+                  options={ALL_DISTRICTS.map((d) => ({ value: d, label: d }))}
+                  placeholder="Select District"
+                />
+              </div>
+              <div>
+                <label className="block text-[14px] font-semibold text-gray-700 mb-1.5">Available Days <span className="text-red-500">*</span></label>
+                <NepaliCalendar availableDates={volunteer.availableDates} selectedDays={selectedDays} onDaysChange={setSelectedDays} />
+              </div>
+            </div>
+
+            <div className="mt-6">
+              <label className="block text-[14px] font-semibold text-gray-700 mb-3">Have you volunteered before on {volunteer.organizer}? <span className="text-red-500">*</span></label>
+              <div className="flex gap-4">
+                {["Yes", "No"].map((opt) => (
+                  <label key={opt} className="flex items-center gap-2 cursor-pointer">
+                    <input type="radio" name="volunteered_before" value={opt} checked={volunteeredBefore === opt} onChange={() => setVolunteeredBefore(opt)}
+                      className="w-4 h-4 text-[#0000ff] border-gray-300 focus:ring-0 cursor-pointer" />
+                    <span className="text-[15px] font-semibold text-gray-700">{opt}</span>
+                  </label>
+                ))}
+              </div>
+            </div>
+
+            {volunteeredBefore === "Yes" && (
+              <div className="mt-5">
+                <label className="block text-[14px] font-semibold text-gray-700 mb-1.5">Previous Role / Details</label>
+                <textarea value={volunteerDetails} onChange={(e) => setVolunteerDetails(e.target.value)}
+                  className="w-full border border-gray-300 rounded py-3 px-4 text-[15px] text-gray-800 outline-none focus:ring-0 focus:border-[#0000ff] transition-all bg-white resize-none"
+                  rows={3} placeholder="Please describe your previous volunteer role or details" />
+              </div>
+            )}
+          </div>
+
+          <div className="mt-10 pt-6 border-t border-gray-200">
+            <label className="flex items-start gap-3 cursor-pointer">
+              <input type="checkbox" checked={declaration} onChange={(e) => setDeclaration(e.target.checked)} required
+                className="w-5 h-5 mt-0.5 text-[#0000ff] rounded border-gray-300 focus:ring-0 focus:border-[#0000ff] cursor-pointer" />
+              <span className="text-[15px] font-semibold text-gray-800 leading-snug">I confirm that the information provided is correct.</span>
+            </label>
+          </div>
+
+          <div className="mt-8 flex justify-end">
+            <button type="submit" disabled={submitting}
+              className="w-full sm:w-auto bg-[#0000ff] hover:bg-[#0000cc] text-white font-bold text-[16px] py-4 px-12 rounded-lg transition-all hover:-translate-y-0.5 active:translate-y-0 text-center disabled:opacity-50 disabled:cursor-not-allowed">
+              {submitting ? "Submitting..." : "Submit Application"}
+            </button>
+          </div>
+        </form>
+      </main>
+    </div>
+  );
+}

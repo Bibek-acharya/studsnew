@@ -16,6 +16,7 @@ import {
   Settings,
   LogOut,
   Award,
+  Users,
 } from "lucide-react";
 
 interface SidebarProps {
@@ -35,6 +36,7 @@ const Sidebar: React.FC<SidebarProps> = ({ activeTab, onNavigate, onLogout, perm
     events: false,
     blog: false,
     evaluation: false,
+    volunteer: false,
   });
 
   const toggleDropdown = (key: string) => {
@@ -242,6 +244,19 @@ const Sidebar: React.FC<SidebarProps> = ({ activeTab, onNavigate, onLogout, perm
         >
           <DropdownItem label="Create Blog" section="sec-create-blog" />
           <DropdownItem label="Blog Directory" section="sec-blog-directory" />
+        </NavItem>
+
+        <NavItem
+          icon={Users}
+          label="Manage Volunteers"
+          section="sec-volunteer-dropdown"
+          dropdown="volunteer"
+          requiredPerm="volunteers"
+        >
+          <DropdownItem label="Create Volunteer" section="sec-create-volunteer" />
+          <DropdownItem label="Volunteer Directory" section="sec-volunteer-request" />
+          <DropdownItem label="Manage Application" section="sec-volunteer-application" />
+          <DropdownItem label="Shortlist Volunteer" section="sec-volunteer-shortlist" />
         </NavItem>
 
         <NavItem

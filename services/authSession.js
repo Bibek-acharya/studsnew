@@ -15,13 +15,15 @@ function clearCookie(name) {
   document.cookie = `${name}=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT; SameSite=Lax`;
 }
 
-function persistAuthSession(storage, user, token) {
+function persistAuthSession(user, token, rememberMe = true) {
+  const storage = rememberMe ? window.localStorage : window.sessionStorage;
   storage.setItem(USER_STORAGE_KEY, JSON.stringify(user));
   storage.setItem(TOKEN_STORAGE_KEY, token);
   storage.setItem(AUTH_STORAGE_KEY, JSON.stringify({ token, user }));
 
   if (typeof document !== "undefined") {
-    document.cookie = `token=${token}; path=/; max-age=604800; SameSite=Lax`;
+    const maxAge = rememberMe ? "max-age=604800;" : "";
+    document.cookie = `token=${token}; path=/; ${maxAge}SameSite=Lax`;
   }
 }
 

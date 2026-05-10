@@ -78,12 +78,8 @@ export default function NewsTab({ scholarship }: { scholarship: any }) {
     return items.length > 0 ? items.slice(0, 6) : null;
   }, [providerNews, loading, scholarship.news_items]);
 
-  const displayData = !loading && !data ? [
-    { title: "Entrance Examination Schedule Published", description: "The entrance examination for Project Shiksha Scholarship 2082 will be held on Shrawan 1, 2082 at all exam centers across Nepal.", category: "Notice", date: "22 Apr 2026", link: "#" },
-    { title: "Final Scholarship Result Published", description: "The final result for Project Shiksha Scholarship 2082 has been published. 110 students selected.", category: "Result", date: "15 Apr 2026", link: "https://projectshiksha.hundredgroupnepal.org/final-result" },
-    { title: "Leadership Training Workshop 2026", description: "Successful 3-day leadership training workshop for scholarship recipients conducted in April 2026.", category: "Event", date: "10 Apr 2026", link: "#" },
-    { title: "Application Deadline Extended", description: "Due to overwhelming response, the application deadline has been extended until Ashad 30, 2082.", category: "Update", date: "28 Jun 2025", link: "#" },
-  ] : data;
+  if (!data && !loading) return null;
+
   const gradients = ["from-blue-500 to-blue-600", "from-green-500 to-green-600", "from-purple-500 to-purple-600", "from-orange-500 to-orange-600"];
   const badgeColors = ["bg-blue-50 text-blue-600", "bg-green-50 text-green-600", "bg-purple-50 text-purple-600", "bg-orange-50 text-orange-600"];
   const icons = [<FileText size={80} className="text-white/90" />, <CheckCircle size={80} className="text-white/90" />, <Users size={80} className="text-white/90" />, <Calendar size={80} className="text-white/90" />];
@@ -94,7 +90,7 @@ export default function NewsTab({ scholarship }: { scholarship: any }) {
         <p className="mt-1 text-[14px] text-gray-500">Stay updated with our latest announcements and stories</p>
       </div>
       <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
-        {displayData ? displayData.map((item, i) => (
+        {data ? data.map((item, i) => (
           <div key={i} className="overflow-hidden rounded-md border border-gray-100 bg-white">
             <div className="p-4 pb-0">
               <div className={`flex h-40 items-center justify-center rounded-md bg-gradient-to-br ${gradients[i % gradients.length]} overflow-hidden`}>

@@ -23,6 +23,7 @@ export default function InstitutionZone() {
   const [view, setView] = useState<"login" | "register">("login");
   const [currentView, setCurrentView] = useState<"landing" | "pending-approval">("landing");
 
+  const [rememberMe, setRememberMe] = useState(false);
   const [showLoginPassword, setShowLoginPassword] = useState(false);
   const [loginEmail, setLoginEmail] = useState("");
   const [loginPassword, setLoginPassword] = useState("");
@@ -105,11 +106,12 @@ export default function InstitutionZone() {
       );
       const token = (response as any).data?.token || (response as any).token;
       const user = (response as any).data?.user || (response as any).user;
+      const storage = rememberMe ? localStorage : sessionStorage;
       if (token) {
-        localStorage.setItem("institutionToken", token);
+        storage.setItem("institutionToken", token);
       }
       if (user) {
-        localStorage.setItem("institutionUser", JSON.stringify(user));
+        storage.setItem("institutionUser", JSON.stringify(user));
       }
       router.push("/institution-zone/dashboard");
     } catch (error) {
@@ -419,6 +421,8 @@ export default function InstitutionZone() {
                           <label className="flex items-center gap-2 cursor-pointer group">
                             <input
                               type="checkbox"
+                              checked={rememberMe}
+                              onChange={() => setRememberMe(!rememberMe)}
                               className="w-4 h-4 rounded border-gray-300 cursor-pointer accent-[#0000ff]"
                             />
                             <span className="text-[13px] text-gray-500 font-medium group-hover:text-gray-800 transition-colors">

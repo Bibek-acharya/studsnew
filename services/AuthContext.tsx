@@ -43,8 +43,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     let isMounted = true;
 
     const bootstrapAuth = async () => {
-      const storedToken = typeof window !== "undefined" ? localStorage.getItem("token") : null;
-      const stored = typeof window !== "undefined" ? localStorage.getItem(USER_STORAGE_KEY) : null;
+      const storedToken = typeof window !== "undefined"
+        ? (localStorage.getItem("token") || sessionStorage.getItem("token"))
+        : null;
+      const stored = typeof window !== "undefined"
+        ? (localStorage.getItem(USER_STORAGE_KEY) || sessionStorage.getItem(USER_STORAGE_KEY))
+        : null;
 
       // Only trust cached user state when a real auth token is also present.
       // This prevents stale superadmin/user records from being shown after logout.
@@ -95,13 +99,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const setSession = (userData: User, token: string) => {
     if (typeof window !== "undefined") {
-      persistAuthSession(localStorage, userData, token);
+      persistAuthSession(userData, token, true);
     }
     setUserState(userData);
   };
 
-  const login = async (email: string, password: string, _rememberMe = false) => {
-    void _rememberMe;
+  const login = async (email: string, password: string, rememberMe = false) => {
     const response: AuthResponse = await apiService.login(email, password);
 
     if (!response.data?.token) {
@@ -114,10 +117,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       last_name: response.data.user.last_name,
       email: response.data.user.email,
       role: response.data.user.role,
+      image_url: response.data.user.image_url,
     };
 
     if (typeof window !== "undefined") {
-      persistAuthSession(localStorage, userData, response.data.token);
+      persistAuthSession(userData, response.data.token, rememberMe);
     }
     setUserState(userData);
   };
@@ -150,10 +154,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       last_name: response.data.user.last_name,
       email: response.data.user.email,
       role: response.data.user.role,
+      image_url: response.data.user.image_url,
     };
 
     if (typeof window !== "undefined") {
-      persistAuthSession(localStorage, userData, response.data.token);
+      persistAuthSession(userData, response.data.token, true);
     }
     setUserState(userData);
   };

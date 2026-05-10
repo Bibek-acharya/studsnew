@@ -104,6 +104,7 @@ export interface AuthResponse {
       first_name: string;
       last_name: string;
       role: string;
+      image_url?: string;
       preferences?: any;
       provider_id?: number;
       permissions?: string[];
@@ -733,6 +734,7 @@ export interface ProfileData {
   email: string;
   first_name: string;
   last_name: string;
+  image_url: string;
   phone: string;
   date_of_birth: string;
   gender: string;
@@ -1817,6 +1819,24 @@ export const apiService = {
     });
   },
 
+  async uploadProfilePicture(file: File): Promise<ProfileResponse> {
+    const token = typeof window !== 'undefined'
+      ? (localStorage.getItem('token') || sessionStorage.getItem('token'))
+      : null;
+    const formData = new FormData();
+    formData.append('file', file);
+    const response = await fetch(`${API_BASE_URL}/api/v1/auth/profile/picture`, {
+      method: 'POST',
+      headers: token ? { Authorization: `Bearer ${token}` } : {},
+      body: formData,
+    });
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({}));
+      throw new Error(errorData.message || 'Failed to upload profile picture');
+    }
+    return response.json();
+  },
+
   // === Education Entries ===
   async getEducationEntries(): Promise<EducationEntriesResponse> {
     return apiRequest<EducationEntriesResponse>("/api/v1/profile/education");
@@ -1839,6 +1859,31 @@ export const apiService = {
   async deleteEducationEntry(id: number): Promise<void> {
     return apiRequest<void>(`/api/v1/profile/education/${id}`, {
       method: "DELETE",
+    });
+  },
+
+  // ─── Public Volunteer API ─────────────────────────────────────────
+
+  async getPublicVolunteers(params?: { search?: string; type?: string; province?: string; page?: number; limit?: number }): Promise<any> {
+    const searchParams = new URLSearchParams();
+    if (params?.search) searchParams.set('search', params.search);
+    if (params?.type) searchParams.set('type', params.type);
+    if (params?.province) searchParams.set('province', params.province);
+    if (params?.page) searchParams.set('page', String(params.page));
+    if (params?.limit) searchParams.set('limit', String(params.limit));
+    const qs = searchParams.toString();
+    return apiRequest(`/api/v1/public/volunteers${qs ? `?${qs}` : ''}`);
+  },
+
+  async getPublicVolunteerByID(id: number): Promise<any> {
+    return apiRequest(`/api/v1/public/volunteers/${id}`);
+  },
+
+  async submitVolunteerApplication(volunteerId: number, data: any): Promise<any> {
+    return apiRequest(`/api/v1/public/volunteers/${volunteerId}/apply`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(data),
     });
   },
 };

@@ -3,15 +3,6 @@
 import { useMemo } from "react";
 import { ArrowRight } from "lucide-react";
 
-const MOCK_GALLERY_IMAGES = [
-  "https://projectshiksha.hundredgroupnepal.org/images/shiks.jpg",
-  "https://sowersaction.org.np/wp-content/uploads/2025/04/WhatsApp-Image-2025-04-02-at-14.37.52_81769f1f.jpg",
-  "https://sowersaction.org.np/wp-content/uploads/2025/02/cafe.jpg",
-  "https://sowersaction.org.np/wp-content/uploads/2025/01/IMG_7141-scaled.jpg",
-  "https://sowersaction.org.np/wp-content/uploads/2025/01/IMG_5591-e1739791077307.jpeg",
-  "https://sowersaction.org.np/wp-content/uploads/2025/02/WhatsApp-Image-2025-03-28-at-14.19.06_688006be.jpg",
-];
-
 export default function GalleryTab({ images, lightboxIndex, setLightboxIndex, closeLightbox, changeImage }: {
   images: { url: string; title: string; folder: string }[];
   lightboxIndex: number | null;
@@ -19,18 +10,19 @@ export default function GalleryTab({ images, lightboxIndex, setLightboxIndex, cl
   closeLightbox: () => void;
   changeImage: (dir: number) => void;
 }) {
-  const items = images.length > 0 ? images : MOCK_GALLERY_IMAGES.map(url => ({ url, title: "", folder: "" }));
-  const urls = items.map(i => i.url);
+  if (images.length === 0) return null;
 
-  const grouped: { heading: string; items: typeof items }[] = useMemo(() => {
-    const groups = new Map<string, typeof items>();
-    for (const img of items) {
+  const urls = images.map(i => i.url);
+
+  const grouped: { heading: string; items: typeof images }[] = useMemo(() => {
+    const groups = new Map<string, typeof images>();
+    for (const img of images) {
       const key = img.folder || "Gallery";
       if (!groups.has(key)) groups.set(key, []);
       groups.get(key)!.push(img);
     }
     return Array.from(groups.entries()).map(([heading, imgs]) => ({ heading, items: imgs }));
-  }, [items]);
+  }, [images]);
 
   return (
     <div className="space-y-10">

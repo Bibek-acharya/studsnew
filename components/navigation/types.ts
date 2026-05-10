@@ -38,6 +38,7 @@ export type ViewKey =
   | "savedColleges"
   | "notificationSettings"
   | "userSettings"
+  | "volunteer"
   ;
 
 export type NotificationTab = "all" | "following" | "system" | "archive";

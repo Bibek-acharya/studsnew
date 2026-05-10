@@ -3,15 +3,7 @@
 import { MapPin } from "lucide-react";
 
 export default function ExamCentersTab({ centers }: { centers: any[] }) {
-  const rawItems = centers.length > 0 ? centers : [
-    { province: "Bagmati Province", city: "Kathmandu", venue: "Advance Academy, Lalitpur", contact: "Mr. Bablu Gupta", phone: "9851131074, 9861116456" },
-    { province: "Gandaki Province", city: "Pokhara", venue: "Gandaki College, Mahendrapul", contact: "Mr. Prasanna Dhungel, Mr. Pabin Chhetri", phone: "9801127672, 9856009596" },
-    { province: "Lumbini Province", city: "Butwal", venue: "Butwal Campus, Tankasinwa", contact: "Mr. Sushant Acharya, Er. Subodh Regmi", phone: "9749394615, 9851313120" },
-    { province: "Koshi Province", city: "Biratnagar", venue: "Koshi College, Main Road", contact: "Mr. Dhiraj Shah", phone: "9827329145" },
-    { province: "Sudurpashchim Province", city: "Kailali", venue: "Seti College, Dhangadhi", contact: "Mr. Jay Dhami", phone: "9868742691" },
-    { province: "Madhesh Province", city: "Lahan", venue: "Janak Education Center", contact: "Mr. Aashish Chaudhary, Mr. Shiv Yadav", phone: "9818378642, 9861969297" },
-    { province: "Madhesh Province", city: "Birgunj", venue: "Narayani Academy, Ghantaghar", contact: "Mr. Anurag Gupta, Mr. Prabhat Kumar", phone: "9844000111, 9801230707" },
-  ];
+  if (centers.length === 0) return null;
 
   const extractMapLink = (raw: string): string => {
     if (!raw) return "";
@@ -21,7 +13,7 @@ export default function ExamCentersTab({ centers }: { centers: any[] }) {
     return trimmed;
   };
 
-  const items = rawItems.map((c: any) => ({
+  const items = centers.map((c: any) => ({
     province: c.province || "",
     headerColor: c.headerColor || c.headerColor_ || "",
     info: c.info || "",
@@ -34,24 +26,18 @@ export default function ExamCentersTab({ centers }: { centers: any[] }) {
 
   const parseMapCoords = (link: string): string => {
     if (!link) return "";
-    // Direct lat,lng coordinates
     const coordMatch = link.match(/^[-+]?([1-8]?\d(\.\d+)?|90(\.0+)?),\s*[-+]?(180(\.0+)?|((1[0-7]\d)|([1-9]?\d))(\.\d+)?)$/);
     if (coordMatch) return coordMatch[0].replace(/\s+/g, "");
-    // Google Maps embed URL: !2dLNG!3dLAT or !3dLAT!4dLNG
     const embed2d3d = link.match(/!2d([-+]?\d+\.?\d*)!3d([-+]?\d+\.?\d*)/);
     if (embed2d3d) return `${embed2d3d[2]},${embed2d3d[1]}`;
     const embed3d4d = link.match(/!3d([-+]?\d+\.?\d*)!4d([-+]?\d+\.?\d*)/);
     if (embed3d4d) return `${embed3d4d[1]},${embed3d4d[2]}`;
-    // /@lat,lng,zoom in Google Maps URLs
     const atMatch = link.match(/[@/]([-+]?\d+\.?\d*),\s*([-+]?\d+\.?\d*)/);
     if (atMatch) return `${atMatch[1]},${atMatch[2]}`;
-    // ?q=lat,lng or &q=lat,lng or /place/name/@lat,lng
     const qMatch = link.match(/[?&]q=([-+]?\d+\.?\d*),\s*([-+]?\d+\.?\d*)/);
     if (qMatch) return `${qMatch[1]},${qMatch[2]}`;
-    // ?ll=lat,lng
     const llMatch = link.match(/[?&]ll=([-+]?\d+\.?\d*),([-+]?\d+\.?\d*)/);
     if (llMatch) return `${llMatch[1]},${llMatch[2]}`;
-    // ?center=lat,lng
     const centerMatch = link.match(/[?&]center=([-+]?\d+\.?\d*),([-+]?\d+\.?\d*)/);
     if (centerMatch) return `${centerMatch[1]},${centerMatch[2]}`;
     return "";
@@ -71,11 +57,6 @@ export default function ExamCentersTab({ centers }: { centers: any[] }) {
     if (coords) return `https://maps.google.com/maps?q=${encodeURIComponent(coords)}&z=15&output=embed`;
     if (isGoogleMapsUrl(link)) return `https://maps.google.com/maps?q=${encodeURIComponent(link)}&output=embed`;
     return "";
-  };
-
-  const getStaticMapUrl = (coords: string): string => {
-    if (!coords) return "";
-    return `https://staticmap.openstreetmap.de/staticmap.php?center=${encodeURIComponent(coords)}&zoom=15&size=220x130&markers=${encodeURIComponent(coords)},ol-marker`;
   };
 
   return (

@@ -12,8 +12,8 @@ export default function DashboardPage() {
   useEffect(() => {
     async function checkAuth() {
       try {
-        const token = localStorage.getItem("scholarshipProviderToken");
-        const userStr = localStorage.getItem("scholarshipProviderUser");
+        const token = localStorage.getItem("scholarshipProviderToken") || sessionStorage.getItem("scholarshipProviderToken");
+        const userStr = localStorage.getItem("scholarshipProviderUser") || sessionStorage.getItem("scholarshipProviderUser");
         
         if (!token || !userStr) {
           setAuthenticated(false);
@@ -28,6 +28,8 @@ export default function DashboardPage() {
         console.error("Auth check failed:", error);
         localStorage.removeItem("scholarshipProviderToken");
         localStorage.removeItem("scholarshipProviderUser");
+        sessionStorage.removeItem("scholarshipProviderToken");
+        sessionStorage.removeItem("scholarshipProviderUser");
         setAuthenticated(false);
         router.push("/scholarship-provider");
       }

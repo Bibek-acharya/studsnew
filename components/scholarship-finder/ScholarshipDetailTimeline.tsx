@@ -4,14 +4,7 @@ import * as LucideIcons from "lucide-react";
 import { Calendar } from "lucide-react";
 
 export default function TimelineTab({ events }: { events: { title: string; date: string; desc: string; icon: string }[] }) {
-  const items = events.length > 0 ? events : [
-    { title: "Application Opens", date: "Ashad 21, 2082 (Saturday)", desc: "Online application portal becomes available for all eligible students", icon: "Calendar" },
-    { title: "Application Deadline", date: "Ashad 30, 2082 (Monday) - 11:59 PM", desc: "Last date to submit complete scholarship applications", icon: "Clock" },
-    { title: "Entrance Examination", date: "Shrawan 1, 2082 (Thursday) - 9:00 AM", desc: "Exam conducted simultaneously across all provinces", icon: "FileText" },
-    { title: "Entrance Exam Result", date: "Shrawan 1, 2082 (Thursday Evening)", desc: "Entrance exam result will be published on official website", icon: "CheckCircle" },
-    { title: "Interviews", date: "Shrawan 2 and 3, 2082 (Friday, Saturday)", desc: "Interview of shortlisted candidates will be conducted", icon: "Users" },
-    { title: "Final Result Publication", date: "Shrawan 4, 2082 (Sunday Evening)", desc: "Final result will be published on official website", icon: "Award" },
-  ];
+  if (events.length === 0) return null;
 
   const resolveIcon = (name: string) => {
     if (!name) return Calendar;
@@ -28,10 +21,10 @@ export default function TimelineTab({ events }: { events: { title: string; date:
         <p className="mt-1 text-[14px] text-gray-500">Important dates for this scholarship</p>
       </div>
       <div className="space-y-4">
-        {items.map((ev, i) => {
+        {events.map((ev, i) => {
           const color = eventColors[i % eventColors.length];
           const Icon = resolveIcon(ev.icon);
-          const isLast = i === items.length - 1;
+          const isLast = i === events.length - 1;
           return (
           <div key={i} className="flex gap-4">
             <div className="flex flex-col items-center">

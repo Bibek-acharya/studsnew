@@ -37,6 +37,7 @@ function GoogleAuthCallback() {
           last_name: profile.last_name,
           email: profile.email,
           role: profile.role,
+          image_url: profile.image_url,
         }, token);
         
         // Use a small timeout to ensure state is committed before redirect

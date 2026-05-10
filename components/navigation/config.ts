@@ -35,6 +35,7 @@ export const routeMap: Record<ViewKey, string> = {
   userSettings: "/user/dashboard/settings",
   login: "/login",
   signup: "/register",
+  volunteer: "/volunteer",
 };
 
 export const notificationTabs: NotificationTab[] = [
@@ -134,6 +135,13 @@ export const desktopMenuSections: DesktopMenuSection[] = [
     label: "More",
     alignRight: true,
     items: [
+      {
+        icon: "fa-hand-holding-heart",
+        color: "text-red-500",
+        title: "Become a Volunteer",
+        desc: "Join our volunteer programs and make a difference in education.",
+        viewKey: "volunteer",
+      },
       {
         icon: "fa-newspaper",
         color: "text-blue-500",
@@ -246,6 +254,12 @@ export const mobileMenuSections: MobileMenuSection[] = [
     key: "more",
     label: "More",
     items: [
+      {
+        label: "Become a Volunteer",
+        icon: "fa-hand-holding-heart",
+        color: "text-red-500",
+        viewKey: "volunteer",
+      },
       {
         label: "News",
         icon: "fa-newspaper",

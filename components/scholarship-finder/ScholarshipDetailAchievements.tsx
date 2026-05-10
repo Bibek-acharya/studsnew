@@ -3,12 +3,8 @@
 import { ArrowRight, Trophy } from "lucide-react";
 
 export default function AchievementsTab({ items }: { items: any[] }) {
-  const data = items.length > 0 ? items : [
-    { title: "Successful Scholarship Program 2081", description: "Project Shiksha successfully completed its first batch with 95% of scholarship holders achieving distinction in their +2 examinations.", badge: "Success", tags: ["95% Pass", "85% Distinction"], link: "#" },
-    { title: "National Recognition", description: "Received the 'Best Educational Initiative Award 2025' from the Ministry of Education for outstanding contribution.", badge: "Award", tags: ["National Award", "2025"], link: "#" },
-    { title: "Student Success Stories", description: "Scholarship recipients securing admissions in prestigious medical and engineering colleges across Nepal.", badge: "Students", tags: ["Medical", "Engineering"], link: "#" },
-    { title: "Strategic Partnerships", description: "Built strong collaborations with leading educational institutions, NGOs, and corporate partners nationwide.", badge: "Partners", tags: ["5+ Partners", "Nationwide"], link: "#" },
-  ];
+  if (items.length === 0) return null;
+
   const gradients = ["from-yellow-500 to-yellow-600", "from-blue-500 to-blue-600", "from-green-500 to-green-600", "from-purple-500 to-purple-600"];
   const badgeColors = ["bg-green-50 text-green-600", "bg-yellow-50 text-yellow-600", "bg-green-50 text-green-600", "bg-purple-50 text-purple-600"];
   return (
@@ -18,7 +14,7 @@ export default function AchievementsTab({ items }: { items: any[] }) {
         <p className="mt-1 text-[14px] text-gray-500">Milestones and success stories</p>
       </div>
       <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
-        {data.map((item, i) => (
+        {items.map((item, i) => (
           <div key={i} className="overflow-hidden rounded-md border border-gray-100 bg-white">
             <div className="p-4 pb-0">
               <div className={`flex h-40 items-center justify-center overflow-hidden rounded-md bg-gradient-to-br ${gradients[i % gradients.length]}`}>
