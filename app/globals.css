@@ -205,9 +205,22 @@ body {
 
 /* Rich text content (Quill HTML output) */
 .rich-text {
-  line-height: 1.7;
-  color: #374151;
+  line-height: 1.8;
+  color: #4b5563;
   font-size: 0.9375rem;
+}
+.rich-text :is(h1, h2, h3, h4, h5, h6) {
+  font-weight: 700;
+  color: #111827;
+  margin-bottom: 0.5em;
+  margin-top: 1em;
+}
+.rich-text h1 { font-size: 1.5rem; }
+.rich-text h2 { font-size: 1.25rem; }
+.rich-text h3 { font-size: 1.125rem; }
+.rich-text :is(p, li) {
+  font-size: inherit;
+  color: inherit;
 }
 .rich-text p {
   margin-bottom: 0.75em;

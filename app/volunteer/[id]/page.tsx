@@ -4,7 +4,7 @@ import React from "react";
 import { use, useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { apiService, getImageUrl } from "@/services/api";
-import { Building2, MapPin, Clock, Banknote, ArrowLeft, Calendar, Users } from "lucide-react";
+import { Calendar, ChevronRight } from "lucide-react";
 
 function formatDate(dateStr: string): string {
   if (!dateStr) return "";
@@ -14,6 +14,20 @@ function formatDate(dateStr: string): string {
     day: "numeric",
     year: "numeric",
   });
+}
+
+function timeAgo(dateStr: string): string {
+  if (!dateStr) return "";
+  const now = new Date();
+  const date = new Date(dateStr);
+  const diffMs = now.getTime() - date.getTime();
+  const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+  if (diffDays === 0) return "Today";
+  if (diffDays === 1) return "1 day ago";
+  if (diffDays < 30) return `${diffDays} days ago`;
+  const diffMonths = Math.floor(diffDays / 30);
+  if (diffMonths === 1) return "1 month ago";
+  return `${diffMonths} months ago`;
 }
 
 export default function VolunteerDetailsPage({ params }: { params: Promise<{ id: string }> }) {
@@ -45,160 +59,130 @@ export default function VolunteerDetailsPage({ params }: { params: Promise<{ id:
 
   if (loading) {
     return (
-      <div className="flex min-h-screen items-center justify-center" style={{ backgroundColor: "#0000ff" }}>
-        <p className="text-white text-lg font-bold">Loading...</p>
+      <div className="flex min-h-screen items-center justify-center bg-white">
+        <p className="text-gray-500 text-lg font-semibold">Loading...</p>
       </div>
     );
   }
 
   if (notFound || !volunteer) {
     return (
-      <div className="flex min-h-screen items-center justify-center" style={{ backgroundColor: "#0000ff" }}>
-        <p className="text-white text-lg font-bold">Volunteer opportunity not found.</p>
+      <div className="flex min-h-screen items-center justify-center bg-white">
+        <p className="text-gray-500 text-lg font-semibold">Volunteer opportunity not found.</p>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <div className="relative h-48 sm:h-64 md:h-80 w-full overflow-hidden">
-        <img
-          src={getImageUrl(volunteer.banner_image)}
-          alt={volunteer.title}
-          className="w-full h-full object-cover"
-          onError={(e) => { (e.target as HTMLImageElement).src = "https://via.placeholder.com/1200x400?text=Volunteer+Event"; }}
-        />
-        <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/30 to-transparent" />
-        <button
-          onClick={() => router.push("/volunteer")}
-          className="absolute top-3 left-3 sm:top-4 sm:left-4 flex items-center gap-1.5 sm:gap-2 rounded-lg bg-white/90 px-3 py-1.5 sm:px-4 sm:py-2 text-xs sm:text-sm font-semibold text-gray-800 shadow-sm backdrop-blur-sm transition-colors hover:bg-white"
-        >
-          <ArrowLeft size={16} />
-          Back
-        </button>
-      </div>
+    <div className="bg-white text-gray-900 antialiased pb-20 min-h-screen">
+      <div className="max-w-350 mx-auto px-4 sm:px-6 lg:px-8 pt-10">
+        {/* Breadcrumb */}
+        <nav className="flex items-center gap-1.5 text-sm text-gray-500 mb-6">
+          <button onClick={() => router.push("/")} className="hover:text-gray-800 transition-colors">Home</button>
+          <ChevronRight size={14} className="text-gray-400" />
+          <button onClick={() => router.push("/volunteer")} className="hover:text-gray-800 transition-colors">Volunteer</button>
+          <ChevronRight size={14} className="text-gray-400" />
+          <span className="text-gray-800 font-medium truncate max-w-[200px] sm:max-w-[300px]">{volunteer.title}</span>
+        </nav>
 
-      <div className="mx-auto max-w-5xl -mt-12 sm:-mt-16 relative z-10 px-4 pb-16">
-        <div className="rounded-2xl bg-white shadow-lg overflow-hidden">
-          <div className="p-4 sm:p-6 md:p-8">
-            <div className="mb-4 sm:mb-6 flex flex-wrap items-center gap-2 sm:gap-3">
-              <span className="rounded-full bg-[#0000ff] px-3 py-1 sm:px-4 sm:py-1.5 text-[11px] sm:text-xs font-bold uppercase tracking-wider text-white">
-                {isPaid ? "Paid Volunteer" : "Unpaid Volunteer"}
-              </span>
-              {volunteer.active !== false && (
-                <span className="rounded-full bg-green-100 px-2.5 py-1 sm:px-3 sm:py-1.5 text-[11px] sm:text-xs font-semibold text-green-700">
-                  Active
-                </span>
-              )}
-              {volunteer.applicant_count > 0 && (
-                <span className="rounded-full bg-blue-100 px-2.5 py-1 sm:px-3 sm:py-1.5 text-[11px] sm:text-xs font-semibold text-blue-700 flex items-center gap-1">
-                  <Users size={13} />
-                  {volunteer.applicant_count} applicant{volunteer.applicant_count !== 1 ? "s" : ""}
-                </span>
-              )}
-            </div>
+        {/* Header above image */}
+        <div className="px-2 md:px-4 mb-8">
 
-            <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold text-gray-900 mb-4 sm:mb-6 leading-tight">{volunteer.title}</h1>
+          <h1 className="text-3xl md:text-[32px] font-bold tracking-tight text-gray-900 mb-2">{volunteer.title}</h1>
+          {/* <p className="text-gray-600 text-lg mb-1">{volunteer.organizer || "—"}</p>
+          <p className="text-gray-400 text-sm">{volunteer.location} &bull; {volunteer.created_at ? timeAgo(volunteer.created_at) : ""}</p> */}
+        </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4 mb-6 sm:mb-8">
-              <div className="flex items-start gap-2 sm:gap-3 rounded-xl bg-gray-50 p-3 sm:p-4">
-                <Building2 size={18} className="mt-0.5 shrink-0 text-gray-500" />
-                <div className="min-w-0">
-                  <p className="text-[11px] sm:text-xs font-semibold uppercase tracking-wide text-gray-500">Organizer</p>
-                  <p className="text-sm font-semibold text-gray-800 break-words">{volunteer.organizer || "—"}</p>
-                </div>
-              </div>
-              <div className="flex items-start gap-2 sm:gap-3 rounded-xl bg-gray-50 p-3 sm:p-4">
-                <MapPin size={18} className="mt-0.5 shrink-0 text-gray-500" />
-                <div className="min-w-0">
-                  <p className="text-[11px] sm:text-xs font-semibold uppercase tracking-wide text-gray-500">Location</p>
-                  <p className="text-sm font-semibold text-gray-800 break-words">{volunteer.location || "—"}</p>
-                </div>
-              </div>
-              <div className="flex items-start gap-2 sm:gap-3 rounded-xl bg-gray-50 p-3 sm:p-4">
-                <Clock size={18} className="mt-0.5 shrink-0 text-gray-500" />
-                <div className="min-w-0">
-                  <p className="text-[11px] sm:text-xs font-semibold uppercase tracking-wide text-gray-500">Deadline</p>
-                  <p className="text-sm font-semibold text-orange-600">{formatDate(volunteer.application_deadline) || "—"}</p>
-                </div>
-              </div>
-              <div className="flex items-start gap-2 sm:gap-3 rounded-xl bg-gray-50 p-3 sm:p-4">
-                <Banknote size={18} className="mt-0.5 shrink-0 text-gray-500" />
-                <div className="min-w-0">
-                  <p className="text-[11px] sm:text-xs font-semibold uppercase tracking-wide text-gray-500">Compensation</p>
-                  <p className="text-sm font-semibold text-gray-800 break-words">
-                    {isPaid
-                      ? volunteer.volunteer_payment
-                        ? `NPR ${volunteer.volunteer_payment}`
-                        : "Stipend Provided"
-                      : "Unpaid Volunteer Role"}
-                  </p>
-                </div>
-              </div>
-              <div className="flex items-start gap-2 sm:gap-3 rounded-xl bg-gray-50 p-3 sm:p-4">
-                <Banknote size={18} className="mt-0.5 shrink-0 text-gray-500" />
-                <div className="min-w-0">
-                  <p className="text-[11px] sm:text-xs font-semibold uppercase tracking-wide text-gray-500">Application Fee</p>
-                  <p className="text-sm font-semibold text-[#0000ff]">Free</p>
-                </div>
-              </div>
-              {volunteer.districts && volunteer.districts.length > 0 && (
-                <div className="flex items-start gap-2 sm:gap-3 rounded-xl bg-gray-50 p-3 sm:p-4">
-                  <MapPin size={18} className="mt-0.5 shrink-0 text-gray-500" />
-                  <div className="min-w-0">
-                    <p className="text-[11px] sm:text-xs font-semibold uppercase tracking-wide text-gray-500">Participating Districts</p>
-                    <p className="text-sm font-semibold text-gray-800 break-words">{volunteer.districts.join(", ")}</p>
-                  </div>
-                </div>
-              )}
-            </div>
+        {/* Cover Image */}
+        <div className="mb-12 px-2 md:px-4">
+          <div className="h-[200px] sm:h-[240px] md:h-[320px] w-full rounded-3xl overflow-hidden">
+            <img
+              src={getImageUrl(volunteer.banner_image)}
+              alt={volunteer.title}
+              className="w-full h-full object-cover"
+              onError={(e) => { (e.target as HTMLImageElement).src = "https://via.placeholder.com/1200x400?text=Volunteer+Event"; }}
+            />
+          </div>
+        </div>
 
+        {/* Main Content & Sidebar Grid */}
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 px-2 md:px-4">
+          {/* Left Column - Main Content */}
+          <div className="lg:col-span-8 space-y-10">
             {volunteer.description && (
-              <div className="mb-6 sm:mb-8">
-                <h2 className="text-base sm:text-lg font-bold text-gray-900 mb-2 sm:mb-3">About This Opportunity</h2>
+              <section>
+                <h2 className="text-[22px] font-bold mb-4">About this opportunity</h2>
                 <div
-                  className="rich-text"
+                  className="rich-text [word-break:keep-all] [&_*]:[word-break:keep-all] [overflow-wrap:break-word] [&_*]:[overflow-wrap:break-word] [&_img]:max-w-full [&_img]:h-auto [&_table]:max-w-full [&_pre]:whitespace-pre-wrap [&_iframe]:max-w-full"
                   dangerouslySetInnerHTML={{ __html: volunteer.description }}
                 />
-              </div>
+              </section>
             )}
 
-            {(volunteer.specific_dates?.length > 0 || volunteer.date_mode === "range") && (
-              <div className="mb-6 sm:mb-8">
-                <h2 className="text-base sm:text-lg font-bold text-gray-900 mb-3 flex items-center gap-2">
-                  <Calendar size={18} />
-                  Schedule
-                </h2>
-                <div className="rounded-xl bg-gray-50 p-3 sm:p-4">
-                  {volunteer.date_mode === "range" && volunteer.range_start && volunteer.range_end && (
-                    <p className="text-sm text-gray-700">
-                      <strong>Date Range:</strong> {formatDate(volunteer.range_start)} &mdash; {formatDate(volunteer.range_end)}
-                    </p>
-                  )}
-                  {volunteer.specific_dates && volunteer.specific_dates.length > 0 && (
-                    <div>
-                      <p className="text-sm font-semibold text-gray-700 mb-2">Available Dates:</p>
-                      <div className="flex flex-wrap gap-2">
-                        {volunteer.specific_dates.map((date: string, i: number) => (
-                          <span key={i} className="rounded-lg border border-blue-200 bg-blue-50 px-2.5 py-1 sm:px-3 sm:py-1 text-xs font-medium text-blue-700">
-                            {formatDate(date)}
-                          </span>
-                        ))}
-                      </div>
-                    </div>
-                  )}
-                </div>
-              </div>
-            )}
+
           </div>
 
-          <div className="border-t border-gray-100 bg-gray-50 px-4 sm:px-6 md:px-8 py-4 sm:py-5 flex flex-col sm:flex-row gap-3 justify-end">
-            <button
-              onClick={() => router.push(`/volunteer/apply/${volunteer.id}`)}
-              className="w-full sm:w-auto rounded-lg bg-[#0000ff] px-6 sm:px-8 py-3 text-sm font-bold text-white shadow-sm transition-colors hover:bg-blue-800"
-            >
-              Apply Now
-            </button>
+          {/* Right Column - Sidebar */}
+          <div className="lg:col-span-4 space-y-6">
+            <div className="border border-gray-100 rounded-3xl p-7 shadow-[0_2px_20px_-5px_rgba(0,0,0,0.05)]">
+              {isPaid && (
+                <>
+                  <div className="text-[34px] font-bold text-gray-900 leading-tight">
+                    {volunteer.volunteer_payment ? `NPR ${volunteer.volunteer_payment}` : "Stipend"}
+                  </div>
+                  <div className="text-sm text-gray-500 mb-8 font-medium">Compensation</div>
+                </>
+              )}
+
+              {/* Details */}
+              <div className="text-xs text-gray-400 font-medium mb-5">Details</div>
+
+              <div className="space-y-5 mb-8">
+                <div className="flex items-start">
+                  <div className="mt-0.5 mr-4 text-gray-500">
+                    <Calendar size={18} />
+                  </div>
+                  <div>
+                    <div className="text-[15px] font-bold text-gray-900">{formatDate(volunteer.application_deadline) || "—"}</div>
+                    <div className="text-[13px] text-gray-400">Deadline</div>
+                  </div>
+                </div>
+
+                <div className="flex items-start">
+                  <div className="mt-0.5 mr-4 text-gray-500">
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                    </svg>
+                  </div>
+                  <div>
+                    <div className="text-[15px] font-bold text-gray-900">{isPaid ? "Paid" : "Unpaid"}</div>
+                    <div className="text-[13px] text-gray-400">Volunteer Type</div>
+                  </div>
+                </div>
+
+                <div className="flex items-start">
+                  <div className="mt-0.5 mr-4 text-gray-500">
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                  </div>
+                  <div>
+                    <div className="text-[15px] font-bold text-gray-900">Free</div>
+                    <div className="text-[13px] text-gray-400">Application Fee</div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Apply button */}
+              <button
+                onClick={() => router.push(`/volunteer/apply/${volunteer.id}`)}
+                className="w-full bg-brand-blue hover:bg-brand-hover text-white rounded-full py-3.5 font-semibold text-[15px] transition-colors shadow-sm"
+              >
+                Apply Now
+              </button>
+
+
+            </div>
           </div>
         </div>
       </div>
