@@ -17,7 +17,7 @@ const InfoBlock: React.FC<{
       </div>
       <h3 className="text-[16px] font-bold text-gray-900">{title}</h3>
     </div>
-    <p className="text-[14.5px] leading-[1.7] text-gray-600">{desc}</p>
+    <div className="text-[14.5px] leading-[1.7] text-gray-600 [word-break:keep-all] [&_*]:[word-break:keep-all] [overflow-wrap:anywhere] [&_*]:[overflow-wrap:anywhere] [&_img]:max-w-full" dangerouslySetInnerHTML={{ __html: desc }} />
   </div>
 );
 

@@ -20,32 +20,32 @@ const HeroSection: React.FC<HeroSectionProps> = ({ onNavigate }) => {
     {
       image:
         "https://images.unsplash.com/photo-1541339907198-e08756dedf3f?q=80&w=2070&auto=format&fit=crop",
-      text: "kist.edu.np",
-      url: "https://kist.edu.np",
+      text: "studsphere.com",
+      url: "https://studsphere.com",
     },
     {
       image:
         "https://images.unsplash.com/photo-1498243691581-b145c3f54a5a?q=80&w=2070&auto=format&fit=crop",
-      text: "ggic.edu.np",
-      url: "https://ggic.edu.np",
+      text: "studsphere.com",
+      url: "https://studsphere.com",
     },
     {
       image:
         "https://images.unsplash.com/photo-1562774053-701939374585?q=80&w=2065&auto=format&fit=crop",
-      text: "islington.edu.np",
-      url: "https://islington.edu.np",
+      text: "studsphere.com",
+      url: "https://studsphere.com",
     },
     {
       image:
         "https://images.unsplash.com/photo-1525926476841-be2069c93a4d?q=80&w=2070&auto=format&fit=crop",
-      text: "texasintl.edu.np",
-      url: "https://texasintl.edu.np",
+      text: "studsphere.com",
+      url: "https://studsphere.com",
     },
     {
       image:
         "https://images.unsplash.com/photo-1606761568499-6d2451b23c66?q=80&w=1974&auto=format&fit=crop",
-      text: "nami.edu.np",
-      url: "https://nami.edu.np",
+      text: "studsphere.com",
+      url: "https://studsphere.com",
     },
   ];
 
@@ -143,29 +143,29 @@ const HeroSection: React.FC<HeroSectionProps> = ({ onNavigate }) => {
             </button>
           </form>
 
-          <div className="mt-6 flex flex-wrap justify-center items-center gap-3 text-sm font-medium text-gray-200 drop-">
-            <span className="font-bold text-white">Your recent visit:</span>
-            <button
-              onClick={() => onNavigate("findCollege", { search: "BIT" })}
-              className="hover:text-white hover:underline transition-colors"
-            >
-              BIT Colleges
-            </button>
-            <span className="text-gray-400 inline">&bull;</span>
-            <button
-              onClick={() => onNavigate("collegeRecommender")}
-              className="hover:text-white hover:underline transition-colors"
-            >
-              College Predictor
-            </button>
-            <span className="text-gray-400 inline">&bull;</span>
-            <button
-              onClick={() => onNavigate("scholarshipFinder")}
-              className="hover:text-white hover:underline transition-colors"
-            >
-              Scholarship
-            </button>
-          </div>
+            {/* <div className="mt-6 flex flex-wrap justify-center items-center gap-3 text-sm font-medium text-gray-200 drop-">
+              <span className="font-bold text-white">Your recent visit:</span>
+              <button
+                onClick={() => onNavigate("findCollege", { search: "BIT" })}
+                className="hover:text-white hover:underline transition-colors"
+              >
+                BIT Colleges
+              </button>
+              <span className="text-gray-400 inline">&bull;</span>
+              <button
+                onClick={() => onNavigate("collegeRecommender")}
+                className="hover:text-white hover:underline transition-colors"
+              >
+                College Predictor
+              </button>
+              <span className="text-gray-400 inline">&bull;</span>
+              <button
+                onClick={() => onNavigate("scholarshipFinder")}
+                className="hover:text-white hover:underline transition-colors"
+              >
+                Scholarship
+              </button>
+            </div> */}
         </div>
 
         {/* BOTTOM CONTROLS */}

@@ -39,6 +39,8 @@ const ProfilePage: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
+  const [publicProfile, setPublicProfile] = useState(true);
+  const [settingsLoading, setSettingsLoading] = useState(true);
 
   const [videos, setVideos] = useState<VideoItem[]>([]);
   const [overviewRows, setOverviewRows] = useState<OverviewRow[]>([]);
@@ -70,12 +72,14 @@ const ProfilePage: React.FC = () => {
 
   useEffect(() => {
     loadProfile();
+    loadSettings();
   }, []);
 
   const getToken = () => localStorage.getItem("institutionToken");
+  const apiBase = () => process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080";
 
   const api = async (path: string, options?: RequestInit) => {
-    const base = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080";
+    const base = apiBase();
     const token = getToken();
     const res = await fetch(`${base}${path}`, {
       ...options,
@@ -87,6 +91,23 @@ const ProfilePage: React.FC = () => {
     });
     if (!res.ok) throw new Error(`API error: ${res.status}`);
     return res.json();
+  };
+
+  const uploadFile = async (file: File, folder: string): Promise<string> => {
+    const base = apiBase();
+    const token = getToken();
+    const formData = new FormData();
+    formData.append("file", file);
+    const res = await fetch(`${base}/api/v1/institution/upload?folder=${folder}`, {
+      method: "POST",
+      headers: {
+        ...(token ? { Authorization: `Bearer ${token}` } : {}),
+      },
+      body: formData,
+    });
+    if (!res.ok) throw new Error(`Upload error: ${res.status}`);
+    const data = await res.json();
+    return data?.data?.url || "";
   };
 
   const loadProfile = async () => {
@@ -117,6 +138,32 @@ const ProfilePage: React.FC = () => {
       console.error("Failed to load profile:", e);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const loadSettings = async () => {
+    try {
+      const res = await api("/api/v1/institution/settings");
+      if (res?.data?.public_profile !== undefined) {
+        setPublicProfile(res.data.public_profile);
+      }
+    } catch (e) {
+      console.error("Failed to load settings:", e);
+    } finally {
+      setSettingsLoading(false);
+    }
+  };
+
+  const togglePublicProfile = async () => {
+    const newValue = !publicProfile;
+    try {
+      await api("/api/v1/institution/settings", {
+        method: "PUT",
+        body: JSON.stringify({ public_profile: newValue }),
+      });
+      setPublicProfile(newValue);
+    } catch (e) {
+      console.error("Failed to update settings:", e);
     }
   };
 
@@ -194,11 +241,27 @@ const ProfilePage: React.FC = () => {
               <h2 className="text-xl font-bold text-gray-800">Manage Profile</h2>
               <p className="text-sm text-gray-500 mt-1">Update your college profile information below.</p>
             </div>
-            <button type="submit" disabled={saving}
-              className="px-6 py-2.5 bg-blue-600 text-white rounded-md font-medium hover:bg-blue-700 transition flex items-center gap-2 disabled:opacity-50">
-              <i className={`fa-solid ${saving ? "fa-spinner fa-spin" : "fa-check"}`}></i>
-              {saving ? "Saving..." : "Save Profile"}
-            </button>
+            <div className="flex items-center gap-4">
+              <div className="flex items-center gap-3">
+                <span className="text-sm font-medium text-gray-600">Profile Visibility:</span>
+                <button
+                  type="button"
+                  onClick={togglePublicProfile}
+                  disabled={settingsLoading}
+                  className={`relative inline-flex h-7 w-12 items-center rounded-full transition-colors focus:outline-none ${publicProfile ? 'bg-green-500' : 'bg-gray-300'}`}
+                >
+                  <span className={`inline-block h-5 w-5 transform rounded-full bg-white transition-transform ${publicProfile ? 'translate-x-6' : 'translate-x-1'}`} />
+                </button>
+                <span className={`text-sm font-semibold ${publicProfile ? 'text-green-600' : 'text-gray-500'}`}>
+                  {publicProfile ? 'Public' : 'Private'}
+                </span>
+              </div>
+              <button type="submit" disabled={saving}
+                className="px-6 py-2.5 bg-blue-600 text-white rounded-md font-medium hover:bg-blue-700 transition flex items-center gap-2 disabled:opacity-50">
+                <i className={`fa-solid ${saving ? "fa-spinner fa-spin" : "fa-check"}`}></i>
+                {saving ? "Saving..." : "Save Profile"}
+              </button>
+            </div>
           </div>
 
           {saved && (
@@ -227,7 +290,14 @@ const ProfilePage: React.FC = () => {
                       </div>
                     </div>
                   )}
-                  <input ref={logoInputRef} type="file" className="sr-only" accept="image/*" onChange={e => handleFileChange(e, setLogoUrl, setLogoFile)} />
+                  <input ref={logoInputRef} type="file" className="sr-only" accept="image/*" onChange={async e => {
+                    const file = e.target.files?.[0];
+                    if (!file) return;
+                    try {
+                      const url = await uploadFile(file, "institution/logo");
+                      setLogoUrl(url);
+                    } catch { /* skip */ }
+                  }} />
                 </div>
               </div>
               <div>
@@ -244,7 +314,14 @@ const ProfilePage: React.FC = () => {
                       </div>
                     </div>
                   )}
-                  <input ref={bannerInputRef} type="file" className="sr-only" accept="image/*" onChange={e => handleFileChange(e, setBannerUrl, setBannerFile)} />
+                  <input ref={bannerInputRef} type="file" className="sr-only" accept="image/*" onChange={async e => {
+                    const file = e.target.files?.[0];
+                    if (!file) return;
+                    try {
+                      const url = await uploadFile(file, "institution/banner");
+                      setBannerUrl(url);
+                    } catch { /* skip */ }
+                  }} />
                 </div>
               </div>
             </div>
@@ -537,10 +614,16 @@ const ProfilePage: React.FC = () => {
                   <p className="text-xs text-gray-400">PNG, JPG up to 5MB each</p>
                 </div>
                 <input ref={galleryRef} type="file" className="sr-only" accept="image/*" multiple
-                  onChange={e => {
+                  onChange={async e => {
                     const files = Array.from(e.target.files || []);
-                    const newItems = files.map((f, i) => ({ id: Date.now() + i, url: URL.createObjectURL(f) }));
-                    setGallery(prev => [...prev, ...newItems]);
+                    const newItems: GalleryItem[] = [];
+                    for (let i = 0; i < files.length; i++) {
+                      try {
+                        const url = await uploadFile(files[i], "institution/gallery");
+                        newItems.push({ id: Date.now() + i, url });
+                      } catch { /* skip failed uploads */ }
+                    }
+                    if (newItems.length > 0) setGallery(prev => [...prev, ...newItems]);
                   }} />
               </div>
             </div>
@@ -584,7 +667,14 @@ const ProfilePage: React.FC = () => {
                   <input className={`${inputClass} text-sm flex-1`} placeholder="Document name" value={d.name} onChange={e => updateItem(setDownloads, d.id, "name", e.target.value)} />
                   <label className="px-4 py-2 bg-white border border-gray-300 rounded-md text-sm text-gray-600 cursor-pointer hover:bg-gray-50 whitespace-nowrap flex items-center gap-1 flex-shrink-0">
                     <i className="fa-solid fa-upload"></i> Choose File
-                    <input type="file" className="hidden" />
+                    <input type="file" className="hidden" onChange={async e => {
+                      const file = e.target.files?.[0];
+                      if (!file) return;
+                      try {
+                        const url = await uploadFile(file, "institution/downloads");
+                        updateItem(setDownloads, d.id, "file", url);
+                      } catch { /* skip */ }
+                    }} />
                   </label>
                 </div>
               ))}

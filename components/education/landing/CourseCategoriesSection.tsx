@@ -25,11 +25,11 @@ const partnerLogos = [
     name: "KIST College",
     logo: "https://kist.edu.np/resources/assets/img/logo_small.jpg",
   },
-  {
-    id: 2,
-    name: "Trinity International College",
-    logo: "https://www.trinity.edu.np/assets/backend/uploads/Logo/trinity%20college%20logo.jpg",
-  },
+  // {
+  //   id: 2,
+  //   name: "Trinity International College",
+  //   logo: "https://www.trinity.edu.np/assets/backend/uploads/Logo/trinity%20college%20logo.jpg",
+  // },
   {
     id: 3,
     name: "Advance Foundation",

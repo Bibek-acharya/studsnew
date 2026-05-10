@@ -2,7 +2,7 @@
 
 import React from "react";
 import { useRouter } from "next/navigation";
-import { use, useState, useEffect } from "react";
+import { use, useState, useEffect, useRef } from "react";
 import { apiService } from "@/services/api";
 import NepaliCalendar from "@/components/volunteer/VolunteerNepaliCalendar";
 import Dropdown from "@/components/college-recommender/Dropdown";
@@ -34,6 +34,53 @@ export default function VolunteerApplyPage({ params }: { params: Promise<{ id: s
   const [volunteerDetails, setVolunteerDetails] = useState("");
   const [submitted, setSubmitted] = useState(false);
   const [declaration, setDeclaration] = useState(false);
+  const [errors, setErrors] = useState<Record<string, string>>({});
+
+  const fieldRefs: Record<string, React.RefObject<HTMLDivElement | null>> = {
+    fullName: useRef<HTMLDivElement>(null),
+    gender: useRef<HTMLDivElement>(null),
+    phone: useRef<HTMLDivElement>(null),
+    email: useRef<HTMLDivElement>(null),
+    designation: useRef<HTMLDivElement>(null),
+    province: useRef<HTMLDivElement>(null),
+    district: useRef<HTMLDivElement>(null),
+    municipality: useRef<HTMLDivElement>(null),
+    ward: useRef<HTMLDivElement>(null),
+    tole: useRef<HTMLDivElement>(null),
+    participateDistrict: useRef<HTMLDivElement>(null),
+    availableDays: useRef<HTMLDivElement>(null),
+    volunteeredBefore: useRef<HTMLDivElement>(null),
+    declaration: useRef<HTMLDivElement>(null),
+  };
+
+  const fieldOrder = [
+    "fullName", "gender", "phone", "email", "designation",
+    "province", "district", "municipality", "ward", "tole",
+    "participateDistrict", "availableDays", "volunteeredBefore", "declaration"
+  ];
+
+  function getFieldErrors(): Record<string, string> {
+    const e: Record<string, string> = {};
+    if (!fullName.trim()) e.fullName = "Full name is required";
+    if (!gender) e.gender = "Gender is required";
+    if (!phone.trim()) e.phone = "Phone number is required";
+    else if (phone.length < 10) e.phone = "Phone number must be 10 digits";
+    if (!email.trim()) e.email = "Email is required";
+    else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) e.email = "Enter a valid email address";
+    if (!designation) e.designation = "Designation is required";
+    if (designation === "Other" && !otherDesignation.trim()) e.designation = "Please specify your designation";
+    if (!province) e.province = "Province is required";
+    if (!district) e.district = "District is required";
+    if (!municipality) e.municipality = "Municipality is required";
+    if (!ward) e.ward = "Ward number is required";
+    if (!tole.trim()) e.tole = "Tole/Village is required";
+    if (!participateDistrict) e.participateDistrict = "Participating district is required";
+    if (selectedDays.length === 0) e.availableDays = "Select at least one available day";
+    if (!volunteeredBefore) e.volunteeredBefore = "Please select an option";
+    if (volunteeredBefore === "Yes" && !volunteerDetails.trim()) e.volunteerDetails = "Previous role details are required";
+    if (!declaration) e.declaration = "Please confirm the declaration";
+    return e;
+  }
 
   useEffect(() => {
     const fetchVolunteer = async () => {
@@ -71,6 +118,19 @@ export default function VolunteerApplyPage({ params }: { params: Promise<{ id: s
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    const fieldErrors = getFieldErrors();
+    setErrors(fieldErrors);
+
+    if (Object.keys(fieldErrors).length > 0) {
+      for (const key of fieldOrder) {
+        if (fieldErrors[key]) {
+          fieldRefs[key]?.current?.scrollIntoView({ behavior: "smooth", block: "center" });
+          break;
+        }
+      }
+      return;
+    }
+
     setSubmitting(true);
     try {
       await apiService.submitVolunteerApplication(volunteer.id, {
@@ -152,31 +212,36 @@ export default function VolunteerApplyPage({ params }: { params: Promise<{ id: s
               <h2 className="text-[20px] font-bold text-[#1e293b]">Personal Details</h2>
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-5">
-              <div className="col-span-1 sm:col-span-2">
+              <div ref={fieldRefs.fullName} className="col-span-1 sm:col-span-2">
                 <label className="block text-[14px] font-semibold text-gray-700 mb-1.5">Full Name <span className="text-red-500">*</span></label>
-                <input type="text" value={fullName} onChange={(e) => setFullName(e.target.value)} required
-                  className="w-full border border-gray-300 rounded py-3 px-4 text-[15px] text-gray-800 outline-none focus:ring-0 focus:border-[#0000ff] transition-all bg-white"
+                <input type="text" value={fullName} onChange={(e) => { setFullName(e.target.value); if (errors.fullName) setErrors((p) => { const n = { ...p }; delete n.fullName; return n; }); }} required
+                  className={`w-full border rounded py-3 px-4 text-[15px] text-gray-800 outline-none focus:ring-0 focus:border-[#0000ff] transition-all bg-white ${errors.fullName ? "border-red-500" : "border-gray-300"}`}
                   placeholder="Enter your full name" />
+                {errors.fullName && <p className="text-red-500 text-[13px] mt-1">{errors.fullName}</p>}
               </div>
-              <div>
+              <div ref={fieldRefs.gender}>
                 <label className="block text-[14px] font-semibold text-gray-700 mb-1.5">Gender <span className="text-red-500">*</span></label>
-                <Dropdown value={gender} onChange={setGender} options={[{ value: "Male", label: "Male" }, { value: "Female", label: "Female" }, { value: "Other", label: "Other" }]} placeholder="Select Gender" />
+                <Dropdown id="gender" value={gender} onChange={(v) => { setGender(v); if (errors.gender) setErrors((p) => { const n = { ...p }; delete n.gender; return n; }); }} options={[{ value: "Male", label: "Male" }, { value: "Female", label: "Female" }, { value: "Other", label: "Other" }]} placeholder="Select Gender" error={errors.gender} />
+                {errors.gender && <p className="text-red-500 text-[13px] mt-1">{errors.gender}</p>}
               </div>
-              <div>
+              <div ref={fieldRefs.phone}>
                 <label className="block text-[14px] font-semibold text-gray-700 mb-1.5">Phone Number <span className="text-red-500">*</span></label>
-                <input type="tel" value={phone} onChange={(e) => setPhone(e.target.value.replace(/[^0-9]/g, "").slice(0, 10))} required
-                  className="w-full border border-gray-300 rounded py-3 px-4 text-[15px] text-gray-800 outline-none focus:ring-0 focus:border-[#0000ff] transition-all bg-white"
+                <input type="tel" value={phone} onChange={(e) => { setPhone(e.target.value.replace(/[^0-9]/g, "").slice(0, 10)); if (errors.phone) setErrors((p) => { const n = { ...p }; delete n.phone; return n; }); }} required
+                  className={`w-full border rounded py-3 px-4 text-[15px] text-gray-800 outline-none focus:ring-0 focus:border-[#0000ff] transition-all bg-white ${errors.phone ? "border-red-500" : "border-gray-300"}`}
                   placeholder="Enter your phone number" />
+                {errors.phone && <p className="text-red-500 text-[13px] mt-1">{errors.phone}</p>}
               </div>
-              <div>
+              <div ref={fieldRefs.email}>
                 <label className="block text-[14px] font-semibold text-gray-700 mb-1.5">Email Address <span className="text-red-500">*</span></label>
-                <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} required
-                  className="w-full border border-gray-300 rounded py-3 px-4 text-[15px] text-gray-800 outline-none focus:ring-0 focus:border-[#0000ff] transition-all bg-white"
+                <input type="email" value={email} onChange={(e) => { setEmail(e.target.value); if (errors.email) setErrors((p) => { const n = { ...p }; delete n.email; return n; }); }} required
+                  className={`w-full border rounded py-3 px-4 text-[15px] text-gray-800 outline-none focus:ring-0 focus:border-[#0000ff] transition-all bg-white ${errors.email ? "border-red-500" : "border-gray-300"}`}
                   placeholder="Enter your email" />
+                {errors.email && <p className="text-red-500 text-[13px] mt-1">{errors.email}</p>}
               </div>
-              <div>
+              <div ref={fieldRefs.designation}>
                 <label className="block text-[14px] font-semibold text-gray-700 mb-1.5">Designation <span className="text-red-500">*</span></label>
-                <Dropdown value={designation} onChange={setDesignation} options={[{ value: "Student", label: "Student" }, { value: "Job Holder", label: "Job Holder" }, { value: "Business Owner", label: "Business Owner" }, { value: "Freelancer", label: "Freelancer" }, { value: "Teacher", label: "Teacher" }, { value: "Social Worker", label: "Social Worker" }, { value: "Other", label: "Other" }]} placeholder="Select Designation" />
+                <Dropdown id="designation" value={designation} onChange={(v) => { setDesignation(v); if (errors.designation) setErrors((p) => { const n = { ...p }; delete n.designation; return n; }); }} options={[{ value: "Student", label: "Student" }, { value: "Job Holder", label: "Job Holder" }, { value: "Business Owner", label: "Business Owner" }, { value: "Freelancer", label: "Freelancer" }, { value: "Teacher", label: "Teacher" }, { value: "Social Worker", label: "Social Worker" }, { value: "Other", label: "Other" }]} placeholder="Select Designation" error={errors.designation} />
+                {errors.designation && <p className="text-red-500 text-[13px] mt-1">{errors.designation}</p>}
               </div>
               {designation === "Other" && (
                 <div>
@@ -190,29 +255,34 @@ export default function VolunteerApplyPage({ params }: { params: Promise<{ id: s
               <div className="col-span-1 sm:col-span-2 pt-4 border-t border-gray-100">
                 <h3 className="text-[16px] font-semibold text-gray-700 mb-4">Current Address</h3>
               </div>
-              <div>
+              <div ref={fieldRefs.province}>
                 <label className="block text-[14px] font-semibold text-gray-700 mb-1.5">Province <span className="text-red-500">*</span></label>
-                <Dropdown value={province} onChange={(v) => { setProvince(v); setDistrict(""); setMunicipality(""); }} options={NEPAL_PROVINCES.map((p: string) => ({ value: p, label: p }))} placeholder="Select Province" />
+                <Dropdown id="province" value={province} onChange={(v) => { setProvince(v); setDistrict(""); setMunicipality(""); if (errors.province) setErrors((p) => { const n = { ...p }; delete n.province; return n; }); }} options={NEPAL_PROVINCES.map((p: string) => ({ value: p, label: p }))} placeholder="Select Province" error={errors.province} />
+                {errors.province && <p className="text-red-500 text-[13px] mt-1">{errors.province}</p>}
               </div>
-              <div>
+              <div ref={fieldRefs.district}>
                 <label className="block text-[14px] font-semibold text-gray-700 mb-1.5">District <span className="text-red-500">*</span></label>
-                <Dropdown value={district} onChange={(v) => { setDistrict(v); setMunicipality(""); }} options={province ? (NEPAL_DISTRICTS[province as keyof typeof NEPAL_DISTRICTS] || []).map((d: string) => ({ value: d, label: d })) : []} placeholder="Select District" />
+                <Dropdown id="district" value={district} onChange={(v) => { setDistrict(v); setMunicipality(""); if (errors.district) setErrors((p) => { const n = { ...p }; delete n.district; return n; }); }} options={province ? (NEPAL_DISTRICTS[province as keyof typeof NEPAL_DISTRICTS] || []).map((d: string) => ({ value: d, label: d })) : []} placeholder="Select District" error={errors.district} />
+                {errors.district && <p className="text-red-500 text-[13px] mt-1">{errors.district}</p>}
               </div>
-              <div>
+              <div ref={fieldRefs.municipality}>
                 <label className="block text-[14px] font-semibold text-gray-700 mb-1.5">Municipality / RM <span className="text-red-500">*</span></label>
-                <Dropdown value={municipality} onChange={setMunicipality} options={district && NEPAL_LOCAL_BODIES[district as keyof typeof NEPAL_LOCAL_BODIES] ? (NEPAL_LOCAL_BODIES[district as keyof typeof NEPAL_LOCAL_BODIES] as Array<{name: string; wards: number}>).map((lb) => ({ value: lb.name, label: lb.name })) : []} placeholder="Select Municipality" />
+                <Dropdown id="municipality" value={municipality} onChange={(v) => { setMunicipality(v); if (errors.municipality) setErrors((p) => { const n = { ...p }; delete n.municipality; return n; }); }} options={district && NEPAL_LOCAL_BODIES[district as keyof typeof NEPAL_LOCAL_BODIES] ? (NEPAL_LOCAL_BODIES[district as keyof typeof NEPAL_LOCAL_BODIES] as Array<{name: string; wards: number}>).map((lb) => ({ value: lb.name, label: lb.name })) : []} placeholder="Select Municipality" error={errors.municipality} />
+                {errors.municipality && <p className="text-red-500 text-[13px] mt-1">{errors.municipality}</p>}
               </div>
-              <div>
+              <div ref={fieldRefs.ward}>
                 <label className="block text-[14px] font-semibold text-gray-700 mb-1.5">Ward No. <span className="text-red-500">*</span></label>
-                <input type="number" value={ward} onChange={(e) => setWard(e.target.value)} required min={1}
-                  className="w-full border border-gray-300 rounded py-3 px-4 text-[15px] text-gray-800 outline-none focus:ring-0 focus:border-[#0000ff] transition-all bg-white"
+                <input type="number" value={ward} onChange={(e) => { setWard(e.target.value); if (errors.ward) setErrors((p) => { const n = { ...p }; delete n.ward; return n; }); }} required min={1}
+                  className={`w-full border rounded py-3 px-4 text-[15px] text-gray-800 outline-none focus:ring-0 focus:border-[#0000ff] transition-all bg-white ${errors.ward ? "border-red-500" : "border-gray-300"}`}
                   placeholder="Ward Number" />
+                {errors.ward && <p className="text-red-500 text-[13px] mt-1">{errors.ward}</p>}
               </div>
-              <div className="col-span-1 sm:col-span-2">
-                <label className="block text-[14px] font-semibold text-gray-700 mb-1.5">Tole / Village</label>
-                <input type="text" value={tole} onChange={(e) => setTole(e.target.value)}
-                  className="w-full border border-gray-300 rounded py-3 px-4 text-[15px] text-gray-800 outline-none focus:ring-0 focus:border-[#0000ff] transition-all bg-white"
+              <div ref={fieldRefs.tole} className="col-span-1 sm:col-span-2">
+                <label className="block text-[14px] font-semibold text-gray-700 mb-1.5">Tole / Village <span className="text-red-500">*</span></label>
+                <input type="text" value={tole} onChange={(e) => { setTole(e.target.value); if (errors.tole) setErrors((p) => { const n = { ...p }; delete n.tole; return n; }); }} required
+                  className={`w-full border rounded py-3 px-4 text-[15px] text-gray-800 outline-none focus:ring-0 focus:border-[#0000ff] transition-all bg-white ${errors.tole ? "border-red-500" : "border-gray-300"}`}
                   placeholder="Enter tole or village name" />
+                {errors.tole && <p className="text-red-500 text-[13px] mt-1">{errors.tole}</p>}
               </div>
             </div>
           </div>
@@ -222,49 +292,54 @@ export default function VolunteerApplyPage({ params }: { params: Promise<{ id: s
               <h2 className="text-[20px] font-bold text-[#1e293b]">Volunteer Preferences</h2>
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-5">
-              <div>
+              <div ref={fieldRefs.participateDistrict}>
                 <label className="block text-[14px] font-semibold text-gray-700 mb-1.5">District to Participate <span className="text-red-500">*</span></label>
                 {volunteer.districts && volunteer.districts.length > 0 ? (
-                  <Dropdown value={participateDistrict} onChange={setParticipateDistrict} options={volunteer.districts.map((d: string) => ({ value: d, label: d }))} placeholder="Select District" />
+                  <Dropdown id="participateDistrict" value={participateDistrict} onChange={(v) => { setParticipateDistrict(v); if (errors.participateDistrict) setErrors((p) => { const n = { ...p }; delete n.participateDistrict; return n; }); }} options={volunteer.districts.map((d: string) => ({ value: d, label: d }))} placeholder="Select District" error={errors.participateDistrict} />
                 ) : (
                   <p className="text-sm text-gray-500 italic">No participating districts listed</p>
                 )}
+                {errors.participateDistrict && <p className="text-red-500 text-[13px] mt-1">{errors.participateDistrict}</p>}
               </div>
-              <div>
+              <div ref={fieldRefs.availableDays}>
                 <label className="block text-[14px] font-semibold text-gray-700 mb-1.5">Available Days <span className="text-red-500">*</span></label>
-                <NepaliCalendar availableDates={volunteer.availableDates} selectedDays={selectedDays} onDaysChange={setSelectedDays} />
+                <NepaliCalendar availableDates={volunteer.availableDates} selectedDays={selectedDays} onDaysChange={(days) => { setSelectedDays(days); if (errors.availableDays) setErrors((p) => { const n = { ...p }; delete n.availableDays; return n; }); }} />
+                {errors.availableDays && <p className="text-red-500 text-[13px] mt-1">{errors.availableDays}</p>}
               </div>
             </div>
 
-            <div className="mt-6">
+            <div ref={fieldRefs.volunteeredBefore} className="mt-6">
               <label className="block text-[14px] font-semibold text-gray-700 mb-3">Have you volunteered before on {volunteer.organizer}? <span className="text-red-500">*</span></label>
               <div className="flex gap-4">
                 {["Yes", "No"].map((opt) => (
                   <label key={opt} className="flex items-center gap-2 cursor-pointer">
-                    <input type="radio" name="volunteered_before" value={opt} checked={volunteeredBefore === opt} onChange={() => setVolunteeredBefore(opt)}
+                    <input type="radio" name="volunteered_before" value={opt} checked={volunteeredBefore === opt} onChange={() => { setVolunteeredBefore(opt); if (errors.volunteeredBefore) setErrors((p) => { const n = { ...p }; delete n.volunteeredBefore; return n; }); }}
                       className="w-4 h-4 text-[#0000ff] border-gray-300 focus:ring-0 cursor-pointer" />
                     <span className="text-[15px] font-semibold text-gray-700">{opt}</span>
                   </label>
                 ))}
               </div>
+              {errors.volunteeredBefore && <p className="text-red-500 text-[13px] mt-1">{errors.volunteeredBefore}</p>}
             </div>
 
             {volunteeredBefore === "Yes" && (
               <div className="mt-5">
-                <label className="block text-[14px] font-semibold text-gray-700 mb-1.5">Previous Role / Details</label>
-                <textarea value={volunteerDetails} onChange={(e) => setVolunteerDetails(e.target.value)}
-                  className="w-full border border-gray-300 rounded py-3 px-4 text-[15px] text-gray-800 outline-none focus:ring-0 focus:border-[#0000ff] transition-all bg-white resize-none"
+                <label className="block text-[14px] font-semibold text-gray-700 mb-1.5">Previous Role / Details <span className="text-red-500">*</span></label>
+                <textarea value={volunteerDetails} onChange={(e) => { setVolunteerDetails(e.target.value); if (errors.volunteerDetails) setErrors((p) => { const n = { ...p }; delete n.volunteerDetails; return n; }); }} required
+                  className={`w-full border rounded py-3 px-4 text-[15px] text-gray-800 outline-none focus:ring-0 focus:border-[#0000ff] transition-all bg-white resize-none ${errors.volunteerDetails ? "border-red-500" : "border-gray-300"}`}
                   rows={3} placeholder="Please describe your previous volunteer role or details" />
+                {errors.volunteerDetails && <p className="text-red-500 text-[13px] mt-1">{errors.volunteerDetails}</p>}
               </div>
             )}
           </div>
 
-          <div className="mt-10 pt-6 border-t border-gray-200">
+          <div ref={fieldRefs.declaration} className="mt-10 pt-6 border-t border-gray-200">
             <label className="flex items-start gap-3 cursor-pointer">
-              <input type="checkbox" checked={declaration} onChange={(e) => setDeclaration(e.target.checked)} required
+              <input type="checkbox" checked={declaration} onChange={(e) => { setDeclaration(e.target.checked); if (errors.declaration) setErrors((p) => { const n = { ...p }; delete n.declaration; return n; }); }} required
                 className="w-5 h-5 mt-0.5 text-[#0000ff] rounded border-gray-300 focus:ring-0 focus:border-[#0000ff] cursor-pointer" />
               <span className="text-[15px] font-semibold text-gray-800 leading-snug">I confirm that the information provided is correct.</span>
             </label>
+            {errors.declaration && <p className="text-red-500 text-[13px] mt-1 ml-8">{errors.declaration}</p>}
           </div>
 
           <div className="mt-8 flex justify-end">

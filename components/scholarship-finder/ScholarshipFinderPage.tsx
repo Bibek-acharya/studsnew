@@ -3,7 +3,7 @@
 import React, { useState, useEffect, useMemo } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { Search, Image as ImageIcon, BadgeCheck, Banknote, MapPin, GraduationCap, Calendar, Bookmark, ChevronDown } from "lucide-react";
+import { Search, Image as ImageIcon, BadgeCheck, Banknote, MapPin, GraduationCap, Calendar, Bookmark, ChevronDown, SlidersHorizontal } from "lucide-react";
 import { apiService, ScholarshipItem } from "@/services/api";
 import type { Scholarship } from "@/services/scholarship.api";
 import { useAuth } from "@/services/AuthContext";
@@ -329,6 +329,7 @@ const FeaturedScholarshipsPage = () => {
     deadlineType: [] as string[],
   });
 
+  const [showMobileFilters, setShowMobileFilters] = useState(false);
   const [appliedDropdownOpen, setAppliedDropdownOpen] = useState(false);
   const [userLocation, setUserLocation] = useState<{ lat?: number; lng?: number }>({});
 
@@ -512,7 +513,20 @@ const FeaturedScholarshipsPage = () => {
         <div className="max-w-350 mx-auto">
           {/* Main Layout: Sidebar + Grid */}
           <div className="flex flex-col lg:flex-row gap-8 items-start">
-            <ScholarshipFilterSidebar filters={filters} setFilters={setFilters} onLocationDetect={handleLocationDetect} />
+            {/* Desktop sidebar */}
+            <div className="hidden lg:block w-full lg:w-1/5">
+              <ScholarshipFilterSidebar filters={filters} setFilters={setFilters} onLocationDetect={handleLocationDetect} />
+            </div>
+
+            {/* Mobile filter drawer from bottom */}
+            {showMobileFilters && (
+              <div className="fixed inset-0 z-50 lg:hidden" onClick={() => setShowMobileFilters(false)}>
+                <div className="absolute inset-0 bg-black/50" />
+                <div className="absolute bottom-0 left-0 right-0 max-h-[70vh] bg-white rounded-t-2xl shadow-xl overflow-y-auto" onClick={(e) => e.stopPropagation()}>
+                  <ScholarshipFilterSidebar filters={filters} setFilters={setFilters} onLocationDetect={handleLocationDetect} onClose={() => setShowMobileFilters(false)} />
+                </div>
+              </div>
+            )}
 
             {/* Grid Container (Right Side) */}
             <div className="w-full lg:w-3/4">
@@ -523,15 +537,25 @@ const FeaturedScholarshipsPage = () => {
                   <div className="text-[16px] text-black mb-2">
                     Showing {scholarships.length > 0 ? `1–${scholarships.length}` : "0"} of {scholarships.length} <span className="font-bold">Scholarships</span>
                   </div>
-                  <div className="relative w-full sm:w-95">
-                    <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
-                    <input
-                      type="text"
-                      value={searchQuery}
-                      onChange={handleSearchChange}
-                      placeholder="Search scholarships, locations, courses..."
-                      className="w-full pl-9 pr-4 py-2.5 bg-white border border-gray-200 rounded-md text-[14px] focus:outline-none focus:ring-1 focus:ring-blue-500/50 focus:border-blue-500 transition-all placeholder:text-gray-400 "
-                    />
+                  <div className="relative w-full sm:w-95 flex items-center gap-2">
+                    <div className="relative flex-1">
+                      <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+                      <input
+                        type="text"
+                        value={searchQuery}
+                        onChange={handleSearchChange}
+                        placeholder="Search scholarships, locations, courses..."
+                        className="w-full pl-9 pr-4 py-2.5 bg-white border border-gray-200 rounded-md text-[14px] focus:outline-none focus:ring-1 focus:ring-blue-500/50 focus:border-blue-500 transition-all placeholder:text-gray-400 "
+                      />
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => setShowMobileFilters(true)}
+                      className="lg:hidden flex items-center justify-center gap-1.5 shrink-0 px-3 py-2.5 bg-white border border-gray-200 rounded-md text-[13px] font-semibold text-gray-700 hover:bg-gray-50 transition-colors"
+                    >
+                      <SlidersHorizontal size={14} />
+                      Filters
+                    </button>
                   </div>
                 </div>
 

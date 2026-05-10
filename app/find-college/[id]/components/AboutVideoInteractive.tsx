@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 
 type CardData = {
   avatar: string;
@@ -11,7 +11,7 @@ type CardData = {
   video: string;
 };
 
-const cardData: Record<string, CardData> = {
+const hardcodedCardData: Record<string, CardData> = {
   "Samir Sharma": {
     avatar:
       "https://images.unsplash.com/photo-1480455624313-e29b44bbfde1?auto=format&fit=crop&w=150&h=150&q=80",
@@ -68,11 +68,43 @@ const cardData: Record<string, CardData> = {
   },
 };
 
-const AboutVideoInteractive: React.FC = () => {
-  const [mainKey, setMainKey] = useState("Samir Sharma");
-  const [fading, setFading] = useState(false);
+interface VideoEntry {
+  url: string;
+  message: string;
+  name: string;
+  designation: string;
+}
+
+const AboutVideoInteractive: React.FC<{ videos?: VideoEntry[] }> = ({ videos }) => {
+  const cardData = React.useMemo(() => {
+    if (videos && videos.length > 0) {
+      const data: Record<string, CardData> = {};
+      videos.forEach((v, i) => {
+        const key = v.name || `Video ${i + 1}`;
+        data[key] = {
+          avatar: "",
+          title: v.message || "Video",
+          quote: "",
+          author: v.name || "",
+          role: v.designation || "",
+          video: v.url,
+        };
+      });
+      return data;
+    }
+    return hardcodedCardData;
+  }, [videos]);
 
   const allKeys = Object.keys(cardData);
+  const [mainKey, setMainKey] = useState("");
+  const [fading, setFading] = useState(false);
+
+  useEffect(() => {
+    if (!allKeys.includes(mainKey)) {
+      setMainKey(allKeys[0] || "");
+    }
+  }, [allKeys, mainKey]);
+
   const others = allKeys.filter((k) => k !== mainKey);
   const mainData = cardData[mainKey];
 
@@ -83,6 +115,8 @@ const AboutVideoInteractive: React.FC = () => {
       setFading(false);
     }, 150);
   };
+
+  if (!mainData || allKeys.length === 0) return null;
 
   return (
     <div className="mx-auto mb-10 flex w-full max-w-212.5 flex-col items-center justify-center gap-6 xl:flex-row xl:gap-8">
@@ -152,11 +186,17 @@ const AboutVideoInteractive: React.FC = () => {
         <div
           className={`relative z-10 flex h-full flex-col justify-center transition-opacity duration-150 ${fading ? "opacity-50" : "opacity-100"}`}
         >
-          <img
-            src={mainData.avatar}
-            alt="Avatar"
-            className="mb-3 h-12 w-12 rounded-md border border-white/20 object-cover sm:mb-4 sm:h-14 sm:w-14"
-          />
+          {mainData.avatar ? (
+            <img
+              src={mainData.avatar}
+              alt="Avatar"
+              className="mb-3 h-12 w-12 rounded-md border border-white/20 object-cover sm:mb-4 sm:h-14 sm:w-14"
+            />
+          ) : (
+            <div className="mb-3 h-12 w-12 rounded-md border border-white/20 bg-white/10 flex items-center justify-center sm:mb-4 sm:h-14 sm:w-14">
+              <i className="fa-solid fa-user text-white/60"></i>
+            </div>
+          )}
           <h2
             dangerouslySetInnerHTML={{ __html: mainData.title }}
             className="mb-2 text-[16px] font-bold leading-tight tracking-tight text-white sm:mb-3 sm:text-[18px]"

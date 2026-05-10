@@ -141,8 +141,8 @@ const CollegeGrid: React.FC<CollegeGridProps> = ({
   onNavigate,
 }) => {
   const [currentPage, setCurrentPage] = useState(1);
-  const [savedColleges, setSavedColleges] = useState<number[]>([]);
-  const [selectedForInquiry, setSelectedForInquiry] = useState<number[]>([]);
+  const [savedColleges, setSavedColleges] = useState<(number | string)[]>([]);
+  const [selectedForInquiry, setSelectedForInquiry] = useState<(number | string)[]>([]);
   const [isQuickInquiryMode, setIsQuickInquiryMode] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [inquiryMessage, setInquiryMessage] = useState("");
@@ -182,7 +182,7 @@ const CollegeGrid: React.FC<CollegeGridProps> = ({
 
   const { data, isLoading, error } = useQuery({
     queryKey: ["colleges", currentPage, filters, isQuickInquiryMode],
-    queryFn: () => {
+    queryFn: async () => {
       const sortConfig: Record<string, { sort: string; order: "ASC" | "DESC" }> = {
         popularity: { sort: "rating", order: "DESC" },
         rating: { sort: "rating", order: "DESC" },
@@ -210,10 +210,53 @@ const CollegeGrid: React.FC<CollegeGridProps> = ({
       if (locationTerms.length > 0) params.location = locationTerms.join(",");
       if (universityTerms.length > 0) params.affiliation = universityTerms.join(",");
       if (filters.feeMax < 2000000) params.feeMax = filters.feeMax;
-
       if (searchTerms.length > 0) params.search = searchTerms.join(" ");
 
-      return apiService.getColleges(params);
+      // Fetch from both APIs in parallel
+      const [collegeRes, institutionRes] = await Promise.all([
+        apiService.getColleges(params),
+        apiService.getPublicInstitutions({
+          page: currentPage,
+          limit: COLLEGES_PER_PAGE,
+          search: filters.search || undefined,
+          location: locationTerms.length > 0 ? locationTerms.join(",") : undefined,
+        }),
+      ]);
+
+      // Map institution results to College shape with inst_ prefix
+      const institutionColleges: College[] = (institutionRes?.data?.institutions || []).map(
+        (inst: any) => ({
+          id: `inst_${inst.id}` as any,
+          name: inst.institution_name,
+          image_url: inst.banner_url || inst.logo_url,
+          description: inst.about,
+          location: inst.district,
+          website: inst.website_url,
+          verified: true,
+          featured: false,
+          rating: 0,
+          reviews: 0,
+          type: "College",
+        })
+      );
+
+      // Merge: institutions first, then old colleges
+      const merged = [
+        ...institutionColleges,
+        ...(collegeRes?.data?.colleges || []),
+      ];
+
+      return {
+        data: {
+          colleges: merged,
+          pagination: collegeRes?.data?.pagination || {
+            total: merged.length,
+            totalPages: 1,
+            page: 1,
+            pageSize: COLLEGES_PER_PAGE,
+          },
+        },
+      };
     },
     placeholderData: (previousData) => previousData,
   });

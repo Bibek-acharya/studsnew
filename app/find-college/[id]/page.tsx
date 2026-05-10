@@ -409,7 +409,8 @@ const isCollegeVerified = (value: unknown): boolean => {
 
 const CollegeDetailsPage: React.FC = () => {
   const params = useParams();
-  const collegeId = params.id ? Number(params.id) : null;
+  const idStr = params.id as string;
+  const collegeId = idStr && !idStr.startsWith("inst_") ? Number(idStr) : null;
 
   const [activeTab, setActiveTab] = useState<TabKey>("about");
   const [courseFilter, setCourseFilter] = useState<LevelFilter>("all");
@@ -476,29 +477,45 @@ const CollegeDetailsPage: React.FC = () => {
   const handlePrevImage = () => {
     if (selectedImageIndex === null) return;
     setSelectedImageIndex((prev) =>
-      prev === 0 ? galleryImages.length - 1 : (prev as number) - 1
+      prev === 0 ? galleryImagesSource.length - 1 : (prev as number) - 1
     );
   };
 
   const handleNextImage = () => {
     if (selectedImageIndex === null) return;
     setSelectedImageIndex((prev) =>
-      prev === galleryImages.length - 1 ? 0 : (prev as number) + 1
+      prev === galleryImagesSource.length - 1 ? 0 : (prev as number) + 1
     );
   };
 
   useEffect(() => {
-    if (collegeId) {
-      setLoading(true);
+    const idStr = params.id as string;
+    if (!idStr) {
+      setLoading(false);
+      return;
+    }
+
+    setLoading(true);
+    // Check if it's an institution (prefixed with inst_)
+    if (idStr.startsWith("inst_")) {
+      const actualId = parseInt(idStr.replace("inst_", ""), 10);
       apiService
-        .getCollegeById(collegeId)
+        .getPublicInstitutionById(actualId)
+        .then((res) => {
+          setCollege(res.data);
+          setLoading(false);
+        })
+        .catch(() => setLoading(false));
+    } else {
+      apiService
+        .getCollegeById(Number(idStr))
         .then((res) => {
           setCollege(res.data);
           setLoading(false);
         })
         .catch(() => setLoading(false));
     }
-  }, [collegeId]);
+  }, [params.id]);
 
   useEffect(() => {
     if (activeTab === "review" && collegeId && !reviewsData) {
@@ -551,19 +568,41 @@ const CollegeDetailsPage: React.FC = () => {
     setShareUrl(window.location.href);
   }, [collegeId]);
 
-  const name = college?.name || fallbackCollege.name;
-  const locationText = college?.location || fallbackCollege.location;
+  const isInstitution = (params.id as string)?.startsWith("inst_");
+
+  // For institution: map fields from institution API response
+  const instName = isInstitution ? college?.institution_name : null;
+  const instLocation = isInstitution ? college?.district : null;
+  const instWebsite = isInstitution ? college?.website_url : null;
+  const instDescription = isInstitution ? college?.about : null;
+  const instVision = isInstitution ? college?.vision : null;
+  const instMission = isInstitution ? college?.mission : null;
+  const instOverviewData = isInstitution ? college?.overview_data : null;
+  const instLeadershipData = isInstitution ? college?.leadership_data : null;
+  const instVideos = isInstitution ? college?.videos : null;
+  const instCourses = isInstitution ? college?.courses_data : null;
+  const instPrograms = isInstitution ? college?.programs_data : null;
+  const instFacilities = isInstitution ? college?.facilities_data : null;
+  const instAlumni = isInstitution ? college?.alumni_data : null;
+  const instGallery = isInstitution ? college?.gallery_data : null;
+  const instDownloads = isInstitution ? college?.downloads_data : null;
+  const galleryImagesSource = instGallery && Array.isArray(instGallery) ? instGallery.map((g: any) => g.url || g) : galleryImages;
+  const instLogo = isInstitution ? college?.logo_url : null;
+  const instBanner = isInstitution ? college?.banner_url : null;
+
+  const name = instName || college?.name || fallbackCollege.name;
+  const locationText = instLocation || college?.location || fallbackCollege.location;
   const rating = college?.rating ?? fallbackCollege.rating;
   const reviewsCount =
     college?.reviews !== undefined
       ? Number(college.reviews || 0).toLocaleString()
       : fallbackCollege.reviewsCount;
-  const website = college?.website || fallbackCollege.website;
+  const website = instWebsite || college?.website || fallbackCollege.website;
   const websiteHref =
     website.startsWith("http://") || website.startsWith("https://")
       ? website
       : `https://${website}`;
-  const description = college?.description || fallbackCollege.description;
+  const description = instDescription || college?.description || fallbackCollege.description;
   const isVerified = isCollegeVerified(college?.verified);
   const shareTitle = `${name} - Studsphere`;
   const shareText = `Check out ${name} on Studsphere`;
@@ -610,7 +649,7 @@ const CollegeDetailsPage: React.FC = () => {
     <div className="w-full">
       <div
         className="relative h-55 w-full bg-blue-800 bg-center md:h-90"
-        // style={{ backgroundImage: `url('${banner}')` }}
+        style={{ backgroundImage: `url('${instBanner || fallbackCollege.banner}')` }}
       >
         <div className="absolute bottom-4 right-4 z-20 md:bottom-6 md:right-6">
           {isVerified ? (
@@ -634,7 +673,7 @@ const CollegeDetailsPage: React.FC = () => {
         <div className="relative px-6 pb-8 md:px-12 lg:px-24 xl:px-32">
           <div className="relative z-10 mr-auto -mt-12 flex h-30 w-30 items-center justify-center overflow-hidden rounded-md border border-gray-200 bg-white p-2 md:absolute md:-top-4 md:left-12 md:mx-0 md:mt-0 md:h-37.5 md:w-37.5 lg:left-24 xl:left-32">
             <img
-              src={fallbackCollege.logo}
+              src={instLogo || fallbackCollege.logo}
               alt="College Logo"
               className="h-full w-full object-contain"
             />
@@ -782,26 +821,34 @@ const CollegeDetailsPage: React.FC = () => {
         <div className="lg:col-span-2">
           {activeTab === "about" && (
             <div className="space-y-10">
-              <AboutVideoInteractive />
+              <AboutVideoInteractive videos={instVideos || undefined} />
 
-              <div className="space-y-6 text-[15px] leading-[1.8] text-gray-600 md:text-[16px]">
-                <p>{description}</p>
-                <p>{fallbackCollege.secondDescription}</p>
+              <div className="space-y-6 text-[15px] leading-[1.8] text-gray-600 md:text-[16px] [word-break:keep-all] [&_*]:[word-break:keep-all] [overflow-wrap:anywhere] [&_*]:[overflow-wrap:anywhere]">
+                <div dangerouslySetInnerHTML={{ __html: description }} />
+                {!isInstitution && <p>{fallbackCollege.secondDescription}</p>}
               </div>
 
               <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
-                <InfoBlock
-                  title="Our Vision"
-                  desc="To become a center of excellence by imparting quality education, focusing on research, innovation, and holistic development."
-                  icon="fa-solid fa-eye"
-                  color="blue"
-                />
-                <InfoBlock
-                  title="Our Mission"
-                  desc="Equipping students with the knowledge and skills necessary to excel in a dynamic global environment while upholding strong ethical values."
-                  icon="fa-solid fa-bullseye"
-                  color="green"
-                />
+                {instVision ? (
+                  <InfoBlock title="Our Vision" desc={instVision} icon="fa-solid fa-eye" color="blue" />
+                ) : (
+                  <InfoBlock
+                    title="Our Vision"
+                    desc="To become a center of excellence by imparting quality education, focusing on research, innovation, and holistic development."
+                    icon="fa-solid fa-eye"
+                    color="blue"
+                  />
+                )}
+                {instMission ? (
+                  <InfoBlock title="Our Mission" desc={instMission} icon="fa-solid fa-bullseye" color="green" />
+                ) : (
+                  <InfoBlock
+                    title="Our Mission"
+                    desc="Equipping students with the knowledge and skills necessary to excel in a dynamic global environment while upholding strong ethical values."
+                    icon="fa-solid fa-bullseye"
+                    color="green"
+                  />
+                )}
               </div>
 
               <div className="space-y-6 rounded-md">
@@ -811,27 +858,20 @@ const CollegeDetailsPage: React.FC = () => {
                 <div className="overflow-x-auto">
                   <table className="w-full rounded-md border border-gray-200 text-left text-sm">
                     <tbody className="divide-y divide-gray-200 text-gray-600">
-                      <OverviewRow label="Established" value="1959" />
-                      <OverviewRow
-                        label="Location"
-                        value="Kirtipur, 5 km from Kathmandu's city center"
-                      />
-                      <OverviewRow
-                        label="Campus Size"
-                        value="154.77 hectares (3,042-5-2 ropanis)"
-                      />
-                      <OverviewRow
-                        label="Type"
-                        value="Non-profit, autonomous, funded by Government of Nepal"
-                      />
-                      <OverviewRow
-                        label="Status"
-                        value="Declared Central University on January 8, 2013"
-                      />
-                      <OverviewRow
-                        label="Global Ranking"
-                        value="One of the world's largest universities by size and program diversity"
-                      />
+                      {instOverviewData && Array.isArray(instOverviewData) && instOverviewData.length > 0 ? (
+                        instOverviewData.map((row: any, i: number) => (
+                          <OverviewRow key={i} label={row.key || row.label || ""} value={row.value || ""} />
+                        ))
+                      ) : (
+                        <>
+                          <OverviewRow label="Established" value="1959" />
+                          <OverviewRow label="Location" value="Kirtipur, 5 km from Kathmandu's city center" />
+                          <OverviewRow label="Campus Size" value="154.77 hectares (3,042-5-2 ropanis)" />
+                          <OverviewRow label="Type" value="Non-profit, autonomous, funded by Government of Nepal" />
+                          <OverviewRow label="Status" value="Declared Central University on January 8, 2013" />
+                          <OverviewRow label="Global Ranking" value="One of the world's largest universities by size and program diversity" />
+                        </>
+                      )}
                     </tbody>
                   </table>
                 </div>
@@ -849,31 +889,19 @@ const CollegeDetailsPage: React.FC = () => {
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-gray-200 text-gray-600">
-                      <AdminRow
-                        position="Chancellor"
-                        role="Ceremonial head (Prime Minister)"
-                        holder="Sushila Karki, Rt. Hon'ble Prime Minister"
-                      />
-                      <AdminRow
-                        position="Pro-Chancellor"
-                        role="Minister of Education"
-                        holder="Mahabir Pun"
-                      />
-                      <AdminRow
-                        position="Vice Chancellor"
-                        role="Chief Executive, oversees operations"
-                        holder="Prof. Deepak Aryal, PhD"
-                      />
-                      <AdminRow
-                        position="Rector"
-                        role="Manages academic programs"
-                        holder="Prof. Khadga K.C, PhD"
-                      />
-                      <AdminRow
-                        position="Registrar"
-                        role="Handles financial and administrative affairs"
-                        holder="Prof. Kedar Prasad Rijal, PhD"
-                      />
+                      {instLeadershipData && Array.isArray(instLeadershipData) && instLeadershipData.length > 0 ? (
+                        instLeadershipData.map((row: any, i: number) => (
+                          <AdminRow key={i} position={row.position || ""} role={row.role || ""} holder={row.holder || ""} />
+                        ))
+                      ) : (
+                        <>
+                          <AdminRow position="Chancellor" role="Ceremonial head (Prime Minister)" holder="Sushila Karki, Rt. Hon'ble Prime Minister" />
+                          <AdminRow position="Pro-Chancellor" role="Minister of Education" holder="Mahabir Pun" />
+                          <AdminRow position="Vice Chancellor" role="Chief Executive, oversees operations" holder="Prof. Deepak Aryal, PhD" />
+                          <AdminRow position="Rector" role="Manages academic programs" holder="Prof. Khadga K.C, PhD" />
+                          <AdminRow position="Registrar" role="Handles financial and administrative affairs" holder="Prof. Kedar Prasad Rijal, PhD" />
+                        </>
+                      )}
                     </tbody>
                   </table>
                 </div>
@@ -887,7 +915,7 @@ const CollegeDetailsPage: React.FC = () => {
                 <p className="text-[14px] font-semibold text-brand-blue">
                   Fees in NPR/year – filter by level
                 </p>
-                <FilterPills active={courseFilter} onChange={setCourseFilter} />
+                {!instCourses && <FilterPills active={courseFilter} onChange={setCourseFilter} />}
               </div>
               <div className="w-full overflow-x-auto">
                 <div className="min-w-175">
@@ -897,9 +925,9 @@ const CollegeDetailsPage: React.FC = () => {
                     <ProgTh className="col-span-3">FEES / YEAR</ProgTh>
                     <ProgTh className="col-span-3">ELIGIBILITY & SEAT</ProgTh>
                   </div>
-                  {filteredCourses.map((course) => (
+                  {(instCourses && Array.isArray(instCourses) ? instCourses : filteredCourses).map((course: any, i: number) => (
                     <div
-                      key={course.name}
+                      key={course.name || i}
                       className="grid grid-cols-12 items-center gap-4 border-b border-gray-100 px-6 py-5 hover:bg-gray-50/50"
                     >
                       <div className="col-span-4">
@@ -907,7 +935,7 @@ const CollegeDetailsPage: React.FC = () => {
                           {course.name}
                         </h4>
                         <p className="text-[12px] text-gray-500">
-                          {course.specialization}
+                          {course.specialization || ""}
                         </p>
                       </div>
                       <div className="col-span-2">
@@ -915,7 +943,7 @@ const CollegeDetailsPage: React.FC = () => {
                           {course.duration}
                         </h4>
                         <p className="text-[12px] text-gray-500">
-                          {course.type}
+                          {course.type || ""}
                         </p>
                       </div>
                       <div className="col-span-3">
@@ -929,7 +957,7 @@ const CollegeDetailsPage: React.FC = () => {
                           {course.eligibility}
                         </p>
                         <span className="inline-block rounded bg-[#eafaef] px-2.5 py-1 text-[11px] font-bold text-[#16a34a]">
-                          {course.seats}
+                          {course.seats || ""}
                         </span>
                       </div>
                     </div>
@@ -1006,10 +1034,9 @@ const CollegeDetailsPage: React.FC = () => {
                 <p className="text-[14px] font-semibold text-brand-blue">
                   Programs offered – filter by level
                 </p>
-                <FilterPills
-                  active={programFilter}
-                  onChange={setProgramFilter}
-                />
+                {!instPrograms && (
+                  <FilterPills active={programFilter} onChange={setProgramFilter} />
+                )}
               </div>
               <div className="w-full overflow-x-auto">
                 <div className="min-w-[800px]">
@@ -1020,9 +1047,9 @@ const CollegeDetailsPage: React.FC = () => {
                     <ProgTh className="col-span-2">STATUS</ProgTh>
                     <ProgTh className="col-span-2">ACTION</ProgTh>
                   </div>
-                  {filteredPrograms.map((program) => (
+                  {(instPrograms && Array.isArray(instPrograms) ? instPrograms : filteredPrograms).map((program: any, i: number) => (
                     <div
-                      key={program.name}
+                      key={program.name || i}
                       className="grid grid-cols-12 items-center gap-4 border-b border-gray-100 px-6 py-5 hover:bg-gray-50/50"
                     >
                       <div className="col-span-3">
@@ -1070,9 +1097,9 @@ const CollegeDetailsPage: React.FC = () => {
                 </p>
               </div>
               <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
-                {facilities.map((facility) => (
+                {(instFacilities && Array.isArray(instFacilities) ? instFacilities : facilities).map((facility: any, i: number) => (
                   <div
-                    key={facility.title}
+                    key={facility.title || facility.heading || i}
                     className="flex items-start gap-4 rounded-md border border-gray-200 bg-white p-5"
                   >
                     <div className="flex h-10 w-10 items-center justify-center rounded-md bg-brand-blue/5 text-brand-blue">
@@ -1080,7 +1107,7 @@ const CollegeDetailsPage: React.FC = () => {
                     </div>
                     <div>
                       <h4 className="text-[16px] font-bold text-gray-900">
-                        {facility.title}
+                        {facility.title || facility.heading}
                       </h4>
                       <p className="text-[13px] text-gray-600">
                         {facility.desc}
@@ -1230,28 +1257,36 @@ const CollegeDetailsPage: React.FC = () => {
                 </p>
               </div>
               <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
-                {alumni.map((person) => (
+                {(instAlumni && Array.isArray(instAlumni) ? instAlumni : alumni).map((person: any, i: number) => (
                   <div
-                    key={person.name}
+                    key={person.name || i}
                     className="flex items-center gap-4 rounded-md border border-gray-200 bg-white p-5"
                   >
-                    <img
-                      src={person.image}
-                      className="h-16 w-16 rounded-full object-cover"
-                      alt={person.name}
-                    />
+                    {person.photo || person.image ? (
+                      <img
+                        src={person.photo || person.image}
+                        className="h-16 w-16 rounded-full object-cover"
+                        alt={person.name}
+                      />
+                    ) : (
+                      <div className="h-16 w-16 rounded-full bg-gray-100 flex items-center justify-center">
+                        <i className="fa-solid fa-user text-gray-400"></i>
+                      </div>
+                    )}
                     <div className="flex-1">
                       <h4 className="font-bold text-gray-900">{person.name}</h4>
                       <p className="text-[12.5px] text-gray-500">
-                        {person.role}
+                        {person.job || person.role}
                       </p>
                       <p className="text-[11.5px] text-gray-400">
                         {person.batch}
                       </p>
                     </div>
-                    <button className="flex h-10 w-10 items-center justify-center rounded-full bg-brand-blue/5 text-brand-blue hover:bg-brand-blue/10">
-                      <i className="fa-brands fa-linkedin-in"></i>
-                    </button>
+                    {person.linkedin && (
+                      <a href={person.linkedin} target="_blank" rel="noreferrer" className="flex h-10 w-10 items-center justify-center rounded-full bg-brand-blue/5 text-brand-blue hover:bg-brand-blue/10">
+                        <i className="fa-brands fa-linkedin-in"></i>
+                      </a>
+                    )}
                   </div>
                 ))}
               </div>
@@ -1266,7 +1301,7 @@ const CollegeDetailsPage: React.FC = () => {
                 </h2>
               </div>
               <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3">
-                {galleryImages.slice(0, visibleImageCount).map((image, index) => (
+                {galleryImagesSource.slice(0, visibleImageCount).map((image: string, index: number) => (
                   <div
                     key={image}
                     className="aspect-[16/10] overflow-hidden rounded-md cursor-pointer"
@@ -1281,7 +1316,7 @@ const CollegeDetailsPage: React.FC = () => {
                 ))}
               </div>
 
-              {visibleImageCount < galleryImages.length && (
+              {visibleImageCount < galleryImagesSource.length && (
                 <div className="mt-8 text-center">
                   <button
                     className="rounded-md bg-brand-blue px-8 py-3 text-sm font-bold text-white hover:bg-brand-hover transition"
@@ -1308,7 +1343,7 @@ const CollegeDetailsPage: React.FC = () => {
                   </button>
 
                   <img
-                    src={galleryImages[selectedImageIndex]}
+                    src={galleryImagesSource[selectedImageIndex]}
                     alt="Gallery preview"
                     className="max-h-[90vh] max-w-[90vw] object-contain"
                     onClick={(e) => e.stopPropagation()}
@@ -1499,33 +1534,38 @@ const CollegeDetailsPage: React.FC = () => {
                 </p>
               </div>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {downloads.map((download) => (
-                  <div
-                    key={download.title}
-                    className="flex items-center justify-between rounded-md border border-gray-200 bg-white p-5 transition"
-                  >
-                    <div className="flex items-center gap-4">
-                      <div
-                        className={`flex h-12 w-12 items-center justify-center rounded-md ${download.color}`}
-                      >
-                        <i className="fa-regular fa-file-lines text-xl"></i>
-                      </div>
-                      <div>
-                        <h4 className="font-bold text-gray-900">
-                          {download.title}
-                        </h4>
-                        <p className="text-[12.5px] text-gray-500">
-                          {download.size}
-                        </p>
-                      </div>
-                    </div>
-                    <button
-                      className={`flex items-center gap-2 rounded-md px-5 py-2.5 text-sm font-bold text-white  ${download.btn}`}
+                {(instDownloads && Array.isArray(instDownloads) ? instDownloads : downloads).map((download: any, i: number) => {
+                  const isInst = instDownloads && Array.isArray(instDownloads);
+                  return (
+                    <div
+                      key={download.title || download.name || i}
+                      className="flex items-center justify-between rounded-md border border-gray-200 bg-white p-5 transition"
                     >
-                      <i className="fa-solid fa-download"></i>Download
-                    </button>
-                  </div>
-                ))}
+                      <div className="flex items-center gap-4">
+                        <div className="flex h-12 w-12 items-center justify-center rounded-md bg-brand-blue/5 text-brand-blue">
+                          <i className="fa-regular fa-file-lines text-xl"></i>
+                        </div>
+                        <div>
+                          <h4 className="font-bold text-gray-900">
+                            {download.title || download.name}
+                          </h4>
+                          <p className="text-[12.5px] text-gray-500">
+                            {download.size || (isInst ? "Download file" : "")}
+                          </p>
+                        </div>
+                      </div>
+                      {download.file ? (
+                        <a href={download.file} target="_blank" rel="noreferrer" className="flex items-center gap-2 rounded-md bg-brand-blue hover:bg-brand-hover px-5 py-2.5 text-sm font-bold text-white">
+                          <i className="fa-solid fa-download"></i>Download
+                        </a>
+                      ) : (
+                        <button className="flex items-center gap-2 rounded-md bg-brand-blue hover:bg-brand-hover px-5 py-2.5 text-sm font-bold text-white">
+                          <i className="fa-solid fa-download"></i>Download
+                        </button>
+                      )}
+                    </div>
+                  );
+                })}
               </div>
             </div>
           )}

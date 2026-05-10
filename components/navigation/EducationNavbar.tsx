@@ -39,7 +39,7 @@ import {
 } from "./types";
 import Image from "next/image";
 import { trendingSearches } from "@/utils/searchDatabase";
-import { apiService, DashboardStats } from "@/services/api";
+import { apiService, DashboardStats, getImageUrl } from "@/services/api";
 
 const EducationNavbar: React.FC<EducationNavbarProps> = ({
   onNavigate,
@@ -841,10 +841,14 @@ const EducationNavbar: React.FC<EducationNavbarProps> = ({
                           prev === "mobile-profile-menu" ? null : "mobile-profile-menu",
                         )
                       }
-                      className="relative flex h-9 w-9 items-center justify-center rounded-full bg-brand-blue text-sm font-bold text-white ring-2 ring-white"
+                      className={`relative flex h-9 w-9 items-center justify-center rounded-full text-sm font-bold text-white ring-2 ring-white ${user?.image_url ? "p-0" : "bg-brand-blue"}`}
                       aria-label="Open profile menu"
                     >
-                      <span>{initials}</span>
+                      {user?.image_url ? (
+                        <img src={getImageUrl(user.image_url)} alt="" className="h-full w-full rounded-full object-cover" />
+                      ) : (
+                        <span>{initials}</span>
+                      )}
                       <div className="absolute bottom-0 right-0 h-2.5 w-2.5 rounded-full border-2 border-white bg-green-500"></div>
                     </button>
 
@@ -960,9 +964,13 @@ const EducationNavbar: React.FC<EducationNavbarProps> = ({
                       className="flex items-center gap-3"
                     >
                       <div className="relative">
-                        <div className="flex h-9 w-9 items-center justify-center rounded-full bg-brand-blue text-white font-bold text-sm ring-2 ring-white">
-                          <span>{initials}</span>
-                        </div>
+                        {user.image_url ? (
+                          <img src={getImageUrl(user.image_url)} alt="" className="h-9 w-9 rounded-full object-cover ring-2 ring-white" />
+                        ) : (
+                          <div className="flex h-9 w-9 items-center justify-center rounded-full bg-brand-blue text-white font-bold text-sm ring-2 ring-white">
+                            <span>{initials}</span>
+                          </div>
+                        )}
                         <div className="absolute bottom-0 right-0 w-2.5 h-2.5 bg-green-500 border-2 border-white rounded-full"></div>
                       </div>
                       <div className="flex flex-col text-left">
@@ -1295,9 +1303,13 @@ const EducationNavbar: React.FC<EducationNavbarProps> = ({
                 <div className="mb-5 rounded-md border border-gray-200 bg-gray-50 p-3">
                   <div className="flex items-center gap-3">
                     <div className="relative">
-                      <div className="flex h-10 w-10 items-center justify-center rounded-full bg-brand-blue text-sm font-bold text-white">
-                        <span>{initials}</span>
-                      </div>
+                      {user.image_url ? (
+                        <img src={getImageUrl(user.image_url)} alt="" className="h-10 w-10 rounded-full object-cover" />
+                      ) : (
+                        <div className="flex h-10 w-10 items-center justify-center rounded-full bg-brand-blue text-sm font-bold text-white">
+                          <span>{initials}</span>
+                        </div>
+                      )}
                       <div className="absolute bottom-0 right-0 h-2.5 w-2.5 rounded-full border-2 border-white bg-green-500"></div>
                     </div>
                     <div className="flex flex-col">

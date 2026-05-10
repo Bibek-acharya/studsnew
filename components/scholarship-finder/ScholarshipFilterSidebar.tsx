@@ -76,12 +76,14 @@ interface ScholarshipFilterSidebarProps {
   filters: ScholarshipFilters;
   setFilters: React.Dispatch<React.SetStateAction<ScholarshipFilters>>;
   onLocationDetect?: (location: string, lat?: number, lng?: number) => void;
+  onClose?: () => void;
 }
 
 const ScholarshipFilterSidebar: React.FC<ScholarshipFilterSidebarProps> = ({
   filters,
   setFilters,
   onLocationDetect,
+  onClose,
 }) => {
   const [showAppliedDropdown, setShowAppliedDropdown] = useState(false);
 
@@ -192,12 +194,21 @@ const ScholarshipFilterSidebar: React.FC<ScholarshipFilterSidebarProps> = ({
           <FaSliders size={18} className="text-black" />
           <h3 className="font-black text-xl text-slate-900 tracking-tight">Filters</h3>
         </div>
+        <div className="flex items-center gap-2">
+        {onClose && (
+          <button type="button" onClick={onClose} className="lg:hidden flex items-center justify-center w-8 h-8 rounded-md text-gray-500 hover:bg-gray-100 hover:text-gray-700 transition-colors">
+            <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          </button>
+        )}
         {hasActiveFilters && (
           <button type="button" onClick={() => setShowAppliedDropdown(!showAppliedDropdown)} className="inline-flex items-center gap-2 rounded-md px-3 py-1.5 text-[12px] font-semibold text-blue-700 transition-colors">
             Applied ({appliedFilters.length})
             <i className={`fa-solid fa-chevron-down text-[10px] transition-transform ${showAppliedDropdown ? "rotate-180" : ""}`}></i>
           </button>
         )}
+        </div>
       </div>
 
       {hasActiveFilters && showAppliedDropdown && (

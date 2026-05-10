@@ -1,23 +1,93 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { useAuth } from "@/services/AuthContext";
+import { apiService } from "@/services/api";
 import { Eye, EyeOff } from "lucide-react";
 
 const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
+function decodeToken(token: string) {
+  try {
+    const payload = JSON.parse(atob(token.split(".")[1]));
+    return {
+      id: payload.user_id,
+      email: payload.email,
+      role: payload.role || "student",
+      first_name: payload.first_name || payload.email?.split("@")[0] || "",
+      last_name: payload.last_name || "",
+      image_url: payload.image_url || "",
+    };
+  } catch {
+    return null;
+  }
+}
+
+function getInitials(name: string, email: string) {
+  if (name && name !== email?.split("@")[0]) {
+    return name.charAt(0).toUpperCase();
+  }
+  return (email?.charAt(0) || "?").toUpperCase();
+}
+
 export default function LoginForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const { login } = useAuth();
+  const { login, setSession } = useAuth();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [rememberMe, setRememberMe] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [googleLoading, setGoogleLoading] = useState(false);
   const [error, setError] = useState("");
+  const tokenProcessed = useRef(false);
+
+  useEffect(() => {
+    const token = searchParams.get("token");
+    if (token && !tokenProcessed.current) {
+      tokenProcessed.current = true;
+      setGoogleLoading(true);
+      const redirect = searchParams.get("redirect") || "/";
+      (async () => {
+        if (typeof window !== "undefined") {
+          localStorage.setItem("token", token);
+        }
+        try {
+          const res = await apiService.getProfile({
+            headers: { Authorization: `Bearer ${token}` },
+          } as any);
+          const profile = res.data;
+          setSession({
+            id: profile.id,
+            first_name: profile.first_name,
+            last_name: profile.last_name,
+            email: profile.email,
+            role: profile.role,
+            image_url: profile.image_url,
+          }, token);
+          window.location.href = redirect;
+        } catch {
+          const user = decodeToken(token);
+          if (user) {
+            setSession(user, token);
+            window.location.href = redirect;
+          } else {
+            setGoogleLoading(false);
+            setError("Failed to process login");
+          }
+        }
+      })();
+      return;
+    }
+
+    const errorParam = searchParams.get("error");
+    if (errorParam) {
+      setError(decodeURIComponent(errorParam));
+    }
+  }, [searchParams, setSession]);
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -66,10 +136,15 @@ export default function LoginForm() {
         <button
           type="button"
           onClick={handleGoogle}
-          className="w-full flex items-center justify-center gap-3 rounded-md border border-gray-200 bg-white py-3 px-4 text-sm font-semibold text-gray-700 transition-all hover:bg-gray-50"
+          disabled={googleLoading}
+          className="w-full flex items-center justify-center gap-3 rounded-md border border-gray-200 bg-white py-3 px-4 text-sm font-semibold text-gray-700 transition-all hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
         >
-          <img src="/google-icon.svg" alt="Google icon" className="h-5 w-5" />
-          Sign in via Google
+          {googleLoading ? (
+            <div className="h-5 w-5 border-2 border-blue-600 border-t-transparent rounded-full animate-spin" />
+          ) : (
+            <img src="/google-icon.svg" alt="Google icon" className="h-5 w-5" />
+          )}
+          {googleLoading ? "Completing sign in..." : "Sign in via Google"}
         </button>
       </div>
 
@@ -90,6 +165,9 @@ export default function LoginForm() {
               className={`w-full rounded-md border border-gray-200 bg-white px-4 py-3 text-sm text-gray-900 outline-none transition-all focus:border-[#0000ff] focus:ring-0 focus:ring-[#0000ff] ${error ? "border-red-500" : ""}`}
             />
           </div>
+          {error && (
+            <p className="text-[13px] text-red-500 font-medium">{error}</p>
+          )}
         </div>
 
         <div className="space-y-2">
@@ -134,9 +212,6 @@ export default function LoginForm() {
         >
           {loading ? "Signing in..." : "Sign In"}
         </button>
-        {error && (
-          <p className="text-[13px] text-red-500 text-center font-medium">{error}</p>
-        )}
       </form>
     </div>
   );

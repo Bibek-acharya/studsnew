@@ -812,6 +812,51 @@ export interface EducationEntryResponse {
   message: string;
 }
 
+// === Institution Dashboard ===
+export interface InstitutionDashboardData {
+  total_programs: number;
+  total_students: number;
+  active_entrances: number;
+  pending_bookings: number;
+  unread_messages: number;
+}
+
+export interface InstitutionAnalyticsProgramStat {
+  id: number;
+  name: string;
+  status: string;
+  entrances: number;
+}
+
+export interface InstitutionAnalyticsData {
+  program_stats: InstitutionAnalyticsProgramStat[];
+  total_applicants: number;
+}
+
+export interface InstitutionProfileData {
+  id: number;
+  institution_name: string;
+  email: string;
+  registration_number: string;
+  role: string;
+  location: string;
+  website: string;
+  logo_url: string;
+  banner_url: string;
+  about: string;
+  vision: string;
+  mission: string;
+  videos: any;
+  overview_data: any;
+  leadership_data: any;
+  courses_data: any;
+  programs_data: any;
+  facilities_data: any;
+  alumni_data: any;
+  gallery_data: any;
+  downloads_data: any;
+}
+
 export const apiService = {
   getUser(): ForumUser | null {
     if (typeof window === "undefined") return null;
@@ -1580,6 +1625,22 @@ export const apiService = {
     });
   },
 
+  // === Institution Dashboard ===
+  async getInstitutionDashboard(): Promise<{ success: boolean; data: InstitutionDashboardData; message: string }> {
+    const token = typeof window !== "undefined" ? localStorage.getItem("institutionToken") : null;
+    return apiRequest("/api/v1/institution/dashboard", { authToken: token || undefined });
+  },
+
+  async getInstitutionAnalytics(): Promise<{ success: boolean; data: InstitutionAnalyticsData; message: string }> {
+    const token = typeof window !== "undefined" ? localStorage.getItem("institutionToken") : null;
+    return apiRequest("/api/v1/institution/analytics", { authToken: token || undefined });
+  },
+
+  async getInstitutionProfile(): Promise<{ success: boolean; data: InstitutionProfileData; message: string }> {
+    const token = typeof window !== "undefined" ? localStorage.getItem("institutionToken") : null;
+    return apiRequest("/api/v1/institution/profile", { authToken: token || undefined });
+  },
+
   async listPendingInstitutions(): Promise<{ data: any[]; message: string }> {
     return apiRequest<{ data: any[]; message: string }>("/api/v1/superadmin/pending-institutions");
   },
@@ -1885,6 +1946,21 @@ export const apiService = {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(data),
     });
+  },
+
+  async getPublicInstitutions(params: Record<string, any>): Promise<any> {
+    const query = new URLSearchParams();
+    Object.entries(params || {}).forEach(([key, value]) => {
+      if (value !== undefined && value !== null && value !== '') {
+        query.set(key, String(value));
+      }
+    });
+    const qs = query.toString();
+    return apiRequest<any>(`/api/v1/institutions/public${qs ? `?${qs}` : ''}`);
+  },
+
+  async getPublicInstitutionById(id: number): Promise<any> {
+    return apiRequest<any>(`/api/v1/institutions/public/${id}`);
   },
 };
 

@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation'
 import Sidebar from './Sidebar'
 import Link from 'next/link'
 import { Menu, Search, Bell, Clock } from 'lucide-react'
-import { apiService } from '@/services/api'
+import { apiService, getImageUrl } from '@/services/api'
 import { useAuth } from '@/services/AuthContext'
 
 interface DashboardLayoutProps {
@@ -229,10 +229,14 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
             <div className="flex items-center gap-3 pl-4 border-l border-gray-200">
               <button
                 type="button"
-                className="relative flex items-center justify-center w-10 h-10 rounded-full bg-blue-600 text-white  border border-blue-700 transition-colors hover:bg-blue-700"
+                className="relative flex items-center justify-center w-10 h-10 rounded-full bg-blue-600 text-white border border-blue-700 transition-colors hover:bg-blue-700 overflow-hidden"
                 aria-label="User profile"
               >
-                <span className="text-sm font-semibold">{initials}</span>
+                {user?.image_url ? (
+                  <img src={getImageUrl(user.image_url)} alt="" className="w-full h-full object-cover" />
+                ) : (
+                  <span className="text-sm font-semibold">{initials}</span>
+                )}
                 <span className="absolute -bottom-0.5 -right-0.5 h-3 w-3 rounded-full border-2 border-white bg-emerald-400 " />
               </button>
               <div className="text-left hidden sm:block">
