@@ -80,7 +80,7 @@ const EducationPage: React.FC<EducationPageProps> = ({
       {/* Section 12: Not sure where to start? */}
       {/* <RecommendedForYouSection onNavigate={onNavigate} /> */}
       {/* Floating Popups */}
-      <LandingPopups />
+      {/* <LandingPopups /> */}
     </div>
   );
 };
