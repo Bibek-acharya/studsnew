@@ -196,11 +196,11 @@ export default function VolunteerApplyPage({ params }: { params: Promise<{ id: s
               </div>
               <div>
                 <label className="block text-[14px] font-semibold text-gray-700 mb-1.5">District <span className="text-red-500">*</span></label>
-                <Dropdown value={district} onChange={(v) => { setDistrict(v); setMunicipality(""); }} options={province ? (NEPAL_DISTRICTS[province] || []).map((d: string) => ({ value: d, label: d })) : []} placeholder="Select District" />
+                <Dropdown value={district} onChange={(v) => { setDistrict(v); setMunicipality(""); }} options={province ? (NEPAL_DISTRICTS[province as keyof typeof NEPAL_DISTRICTS] || []).map((d: string) => ({ value: d, label: d })) : []} placeholder="Select District" />
               </div>
               <div>
                 <label className="block text-[14px] font-semibold text-gray-700 mb-1.5">Municipality / RM <span className="text-red-500">*</span></label>
-                <Dropdown value={municipality} onChange={setMunicipality} options={district && NEPAL_LOCAL_BODIES[district] ? (NEPAL_LOCAL_BODIES[district] as Array<{name: string; wards: number}>).map((lb) => ({ value: lb.name, label: lb.name })) : []} placeholder="Select Municipality" />
+                <Dropdown value={municipality} onChange={setMunicipality} options={district && NEPAL_LOCAL_BODIES[district as keyof typeof NEPAL_LOCAL_BODIES] ? (NEPAL_LOCAL_BODIES[district as keyof typeof NEPAL_LOCAL_BODIES] as Array<{name: string; wards: number}>).map((lb) => ({ value: lb.name, label: lb.name })) : []} placeholder="Select Municipality" />
               </div>
               <div>
                 <label className="block text-[14px] font-semibold text-gray-700 mb-1.5">Ward No. <span className="text-red-500">*</span></label>
