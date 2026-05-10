@@ -88,6 +88,16 @@ const ScholarshipFilterSidebar: React.FC<ScholarshipFilterSidebarProps> = ({
   const [locating, setLocating] = useState(false);
   const [navLocString, setNavLocString] = useState("");
 
+  const [isDesktop, setIsDesktop] = useState(false);
+
+  useEffect(() => {
+    const mq = window.matchMedia("(min-width: 1024px)");
+    setIsDesktop(mq.matches);
+    const handler = (e: MediaQueryListEvent) => setIsDesktop(e.matches);
+    mq.addEventListener("change", handler);
+    return () => mq.removeEventListener("change", handler);
+  }, []);
+
   useEffect(() => {
     const updateLocation = (cityStr: string) => {
       if (!cityStr || cityStr === "Detect Location" || cityStr === "Detecting..." || cityStr === "Location Found") return;
@@ -175,7 +185,7 @@ const ScholarshipFilterSidebar: React.FC<ScholarshipFilterSidebarProps> = ({
   const clearAll = () => setFilters({ studyLevel: [], location: [], courseStream: [], scholarshipType: [], providerType: [], coverage: [], gpaRequirement: [], deadlineType: [] });
 
   return (
-    <aside className="w-full lg:w-1/5 bg-white rounded-md border border-gray-200/80 p-5 shrink-0 sticky top-8">
+    <aside className="w-full lg:w-1/5 bg-white rounded-md border border-gray-200/80 p-5 shrink-0 lg:sticky lg:top-8">
       {/* Header */}
       <div className="mb-2 flex items-center justify-between">
         <div className="flex items-center gap-3">
@@ -245,14 +255,14 @@ const ScholarshipFilterSidebar: React.FC<ScholarshipFilterSidebarProps> = ({
       </div>
 
       {/* 1. Study Level */}
-      <Accordion title="Study Level" defaultOpen>
+      <Accordion title="Study Level" defaultOpen={isDesktop}>
         <CheckboxItem id="sl-plus2" label="+2" checked={filters.studyLevel.includes("+2")} onChange={() => toggleFilter("studyLevel", "+2")} />
         <CheckboxItem id="sl-alevel" label="A Level" checked={filters.studyLevel.includes("A Level")} onChange={() => toggleFilter("studyLevel", "A Level")} />
         <CheckboxItem id="sl-ctevt" label="CTEVT" checked={filters.studyLevel.includes("CTEVT")} onChange={() => toggleFilter("studyLevel", "CTEVT")} />
       </Accordion>
 
       {/* 2. Location */}
-      <Accordion title="Location">
+      <Accordion title="Location" defaultOpen={isDesktop}>
         <CheckboxItem id="loc-kath" label="Kathmandu" checked={filters.location.includes("Kathmandu")} onChange={() => toggleFilter("location", "Kathmandu")} />
         <CheckboxItem id="loc-lalit" label="Lalitpur" checked={filters.location.includes("Lalitpur")} onChange={() => toggleFilter("location", "Lalitpur")} />
         <CheckboxItem id="loc-pok" label="Pokhara" checked={filters.location.includes("Pokhara")} onChange={() => toggleFilter("location", "Pokhara")} />
@@ -260,7 +270,7 @@ const ScholarshipFilterSidebar: React.FC<ScholarshipFilterSidebarProps> = ({
       </Accordion>
 
       {/* 3. Course / Stream */}
-      <Accordion title="Course / Stream">
+      <Accordion title="Course / Stream" defaultOpen={isDesktop}>
         <CheckboxItem id="cs-science" label="Science" checked={filters.courseStream.includes("Science")} onChange={() => toggleFilter("courseStream", "Science")} />
         <CheckboxItem id="cs-mgmt" label="Management" checked={filters.courseStream.includes("Management")} onChange={() => toggleFilter("courseStream", "Management")} />
         <CheckboxItem id="cs-it" label="IT" checked={filters.courseStream.includes("IT")} onChange={() => toggleFilter("courseStream", "IT")} />
@@ -270,7 +280,7 @@ const ScholarshipFilterSidebar: React.FC<ScholarshipFilterSidebarProps> = ({
       </Accordion>
 
       {/* 4. Scholarship Type */}
-      <Accordion title="Scholarship Type">
+      <Accordion title="Scholarship Type" defaultOpen={isDesktop}>
         <CheckboxItem id="st-merit" label="MERIT BASED" checked={filters.scholarshipType.includes("MERIT BASED")} onChange={() => toggleFilter("scholarshipType", "MERIT BASED")} />
         <CheckboxItem id="st-need" label="NEED BASED" checked={filters.scholarshipType.includes("NEED BASED")} onChange={() => toggleFilter("scholarshipType", "NEED BASED")} />
         <CheckboxItem id="st-partial" label="PARTIAL TUITION" checked={filters.scholarshipType.includes("PARTIAL TUITION")} onChange={() => toggleFilter("scholarshipType", "PARTIAL TUITION")} />
@@ -279,7 +289,7 @@ const ScholarshipFilterSidebar: React.FC<ScholarshipFilterSidebarProps> = ({
       </Accordion>
 
       {/* 5. Provider Type */}
-      <Accordion title="Provider Type">
+      <Accordion title="Provider Type" defaultOpen={isDesktop}>
         <CheckboxItem id="pt-gov" label="Government" checked={filters.providerType.includes("Government")} onChange={() => toggleFilter("providerType", "Government")} />
         <CheckboxItem id="pt-college" label="College" checked={filters.providerType.includes("College")} onChange={() => toggleFilter("providerType", "College")} />
         <CheckboxItem id="pt-uni" label="University" checked={filters.providerType.includes("University")} onChange={() => toggleFilter("providerType", "University")} />
@@ -289,7 +299,7 @@ const ScholarshipFilterSidebar: React.FC<ScholarshipFilterSidebarProps> = ({
       </Accordion>
 
       {/* 6. Scholarship Coverage */}
-      <Accordion title="Scholarship Coverage">
+      <Accordion title="Scholarship Coverage" defaultOpen={isDesktop}>
         <CheckboxItem id="cov-full" label="Full" checked={filters.coverage.includes("Full")} onChange={() => toggleFilter("coverage", "Full")} />
         <CheckboxItem id="cov-75" label="75%" checked={filters.coverage.includes("75%")} onChange={() => toggleFilter("coverage", "75%")} />
         <CheckboxItem id="cov-50" label="50%" checked={filters.coverage.includes("50%")} onChange={() => toggleFilter("coverage", "50%")} />
@@ -298,7 +308,7 @@ const ScholarshipFilterSidebar: React.FC<ScholarshipFilterSidebarProps> = ({
       </Accordion>
 
       {/* 7. GPA Requirement */}
-      <Accordion title="GPA Requirement">
+      <Accordion title="GPA Requirement" defaultOpen={isDesktop}>
         <CheckboxItem id="gpa-no" label="No GPA Required" checked={filters.gpaRequirement.includes("No GPA Required")} onChange={() => toggleFilter("gpaRequirement", "No GPA Required")} />
         <CheckboxItem id="gpa-2" label="2.0+" checked={filters.gpaRequirement.includes("2.0+")} onChange={() => toggleFilter("gpaRequirement", "2.0+")} />
         <CheckboxItem id="gpa-25" label="2.5+" checked={filters.gpaRequirement.includes("2.5+")} onChange={() => toggleFilter("gpaRequirement", "2.5+")} />
@@ -307,7 +317,7 @@ const ScholarshipFilterSidebar: React.FC<ScholarshipFilterSidebarProps> = ({
       </Accordion>
 
       {/* 8. Deadline */}
-      <Accordion title="Deadline">
+      <Accordion title="Deadline" defaultOpen={isDesktop}>
         <CheckboxItem id="dl-soon" label="Ending Soon" checked={filters.deadlineType.includes("Ending Soon")} onChange={() => toggleFilter("deadlineType", "Ending Soon")} />
         <CheckboxItem id="dl-week" label="This Week" checked={filters.deadlineType.includes("This Week")} onChange={() => toggleFilter("deadlineType", "This Week")} />
         <CheckboxItem id="dl-month" label="This Month" checked={filters.deadlineType.includes("This Month")} onChange={() => toggleFilter("deadlineType", "This Month")} />

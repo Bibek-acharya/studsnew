@@ -2,11 +2,12 @@
 
 import React, { useState, useMemo, useEffect } from "react";
 import { createPortal } from "react-dom";
-import { Search, Settings, Users, Download, Trash2 } from "lucide-react";
+import { Search, Settings, Users, Download, Undo2 } from "lucide-react";
 import Dropdown from "@/components/college-recommender/Dropdown";
 import { NEPAL_DISTRICTS, NEPAL_PROVINCES } from "@/lib/location-data";
 import { toast } from "sonner";
 import { scholarshipProviderApi } from "@/services/scholarshipProviderApi";
+import ConfirmationModal from "./common/ConfirmationModal";
 
 
 
@@ -23,12 +24,13 @@ const VolunteerShortlist = () => {
   const [filterDay, setFilterDay] = useState("");
   const [page, setPage] = useState(1);
   const perPage = 10;
+  const [unshortlistTarget, setUnshortlistTarget] = useState<{ id: number; name: string } | null>(null);
 
   useEffect(() => {
     setLoading(true);
     scholarshipProviderApi.getVolunteerApplications()
       .then((res: any) => {
-        const data = (res?.data?.applications || []).filter((a: any) => a.status === "shortlisted");
+        const data = (res?.applications || []).filter((a: any) => a.status === "shortlisted");
         setVolunteers(data);
         setLoading(false);
       })
@@ -50,13 +52,16 @@ const VolunteerShortlist = () => {
   const totalPages = Math.ceil(filtered.length / perPage);
   const paginated = filtered.slice((page - 1) * perPage, page * perPage);
 
-  const handleDelete = async (id: number) => {
+  const handleUnshortlist = async () => {
+    if (!unshortlistTarget) return;
+    const id = unshortlistTarget.id;
+    setUnshortlistTarget(null);
     try {
-      await scholarshipProviderApi.rejectVolunteerApplication(id);
-      toast.success("Application removed from shortlist");
+      await scholarshipProviderApi.unshortlistVolunteerApplication(id);
+      toast.success("Application moved back to Manage Applications");
       setVolunteers(prev => prev.filter(v => v.id !== id));
     } catch {
-      toast.error("Failed to remove application");
+      toast.error("Failed to move application");
     }
   };
 
@@ -71,6 +76,16 @@ const VolunteerShortlist = () => {
 
   return (
     <div className="w-full min-h-screen bg-slate-50/30 px-4 sm:px-8 pb-8">
+      <ConfirmationModal
+        isOpen={!!unshortlistTarget}
+        title="Move to Manage Applications"
+        message={`Remove "${unshortlistTarget?.name}" from shortlist and move back to Manage Applications?`}
+        confirmText="Move Back"
+        cancelText="Cancel"
+        onConfirm={handleUnshortlist}
+        onCancel={() => setUnshortlistTarget(null)}
+        destructive={false}
+      />
       <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-6 pt-6">
         <h2 className="text-2xl font-bold text-slate-900 tracking-tight">Shortlist Volunteer</h2>
         <div className="flex items-center text-sm text-slate-500 mt-2 sm:mt-0 gap-2">
@@ -205,11 +220,11 @@ const VolunteerShortlist = () => {
                   <td className="py-4 px-4 text-center text-gray-500 text-xs">{v.created_at}</td>
                   <td className="py-4 px-4 text-center">
                     <button
-                      onClick={() => handleDelete(v.id)}
-                      className="p-2 hover:bg-red-100 rounded-lg text-red-600 transition-colors"
-                      title="Delete"
+                      onClick={() => setUnshortlistTarget({ id: v.id, name: v.full_name })}
+                      className="p-2 hover:bg-amber-100 rounded-lg text-amber-600 transition-colors"
+                      title="Move to Manage Applications"
                     >
-                      <Trash2 size={18} />
+                      <Undo2 size={18} />
                     </button>
                   </td>
                 </tr>

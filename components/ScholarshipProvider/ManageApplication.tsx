@@ -7,6 +7,7 @@ import Dropdown from "@/components/college-recommender/Dropdown";
 import { NEPAL_DISTRICTS, NEPAL_PROVINCES } from "@/lib/location-data";
 import { toast } from "sonner";
 import { scholarshipProviderApi } from "@/services/scholarshipProviderApi";
+import ConfirmationModal from "./common/ConfirmationModal";
 
 
 
@@ -23,12 +24,13 @@ const ManageApplication = () => {
   const [filterDay, setFilterDay] = useState("");
   const [page, setPage] = useState(1);
   const perPage = 10;
+  const [rejectTarget, setRejectTarget] = useState<{ id: number; name: string } | null>(null);
 
   useEffect(() => {
     setLoading(true);
     scholarshipProviderApi.getVolunteerApplications()
       .then((res: any) => {
-        const data = res?.data?.applications || [];
+        const data = (res?.applications || []).filter((a: any) => a.status === "pending");
         setVolunteers(data);
         setLoading(false);
       })
@@ -45,7 +47,10 @@ const ManageApplication = () => {
     }
   };
 
-  const handleReject = async (id: number) => {
+  const handleConfirmReject = async () => {
+    if (!rejectTarget) return;
+    const id = rejectTarget.id;
+    setRejectTarget(null);
     try {
       await scholarshipProviderApi.rejectVolunteerApplication(id);
       toast.success("Application rejected");
@@ -81,6 +86,16 @@ const ManageApplication = () => {
 
   return (
     <div className="w-full min-h-screen bg-slate-50/30 px-4 sm:px-8 pb-8">
+      <ConfirmationModal
+        isOpen={!!rejectTarget}
+        title="Reject Application"
+        message={`Are you sure you want to reject "${rejectTarget?.name}"? This action cannot be undone.`}
+        confirmText="Reject"
+        cancelText="Cancel"
+        onConfirm={handleConfirmReject}
+        onCancel={() => setRejectTarget(null)}
+        destructive
+      />
       <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-6 pt-6">
         <h2 className="text-2xl font-bold text-slate-900 tracking-tight">Manage Applications</h2>
         <div className="flex items-center text-sm text-slate-500 mt-2 sm:mt-0 gap-2">
@@ -212,11 +227,11 @@ const ManageApplication = () => {
                   </td>
                   <td className="py-4 px-4 text-center text-gray-500 text-xs">{v.volunteered_before === "Yes" ? v.volunteer_details : "-"}</td>
                   <DaysCell days={v.available_days} />
-                  <td className="py-4 px-4 text-center text-gray-500 text-xs">{v.created_at}</td>
+                  <td className="py-4 px-4 text-center text-gray-500 text-xs">{v.created_at ? new Date(v.created_at).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" }) : ""}</td>
                   <td className="py-4 px-4 text-center">
                     <div className="flex items-center justify-center gap-2">
                       <button onClick={() => handleShortlist(v.id)} className="p-2 hover:bg-green-100 rounded-lg text-green-600 transition-colors" title="Shortlist"><CheckCircle size={18} /></button>
-                      <button onClick={() => handleReject(v.id)} className="p-2 hover:bg-red-100 rounded-lg text-red-600 transition-colors" title="Delete"><Trash2 size={18} /></button>
+                      <button onClick={() => setRejectTarget({ id: v.id, name: v.full_name })} className="p-2 hover:bg-red-100 rounded-lg text-red-600 transition-colors" title="Reject"><Trash2 size={18} /></button>
                     </div>
                   </td>
                 </tr>
@@ -270,29 +285,34 @@ const ManageApplication = () => {
 
 function DaysCell({ days: dayList }: { days: string[] }) {
   const [open, setOpen] = useState(false);
-  const month = "June 2026";
-  const firstDay = new Date(2026, 5, 1).getDay();
-  const totalDays = 30;
+  const sorted = [...dayList].sort();
+  const firstDate = sorted.length > 0 ? sorted[0].split("-").map(Number) : null;
+  const year = firstDate ? firstDate[0] : new Date().getFullYear();
+  const month = firstDate ? firstDate[1] - 1 : new Date().getMonth();
+  const monthLabel = `${["January","February","March","April","May","June","July","August","September","October","November","December"][month]} ${year}`;
+  const firstDay = new Date(year, month, 1).getDay();
+  const totalDays = new Date(year, month + 1, 0).getDate();
+  const dateSet = new Set(sorted);
 
   const modal = open ? createPortal(
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-gray-900/50 backdrop-blur-sm p-4" onClick={() => setOpen(false)}>
       <div className="bg-white rounded-2xl shadow-xl w-full max-w-md overflow-hidden" onClick={e => e.stopPropagation()}>
         <div className="px-5 pt-5 pb-3 border-b border-gray-100 flex items-center justify-between">
-          <h3 className="text-base font-bold text-gray-900">{month}</h3>
+          <h3 className="text-base font-bold text-gray-900">{monthLabel}</h3>
           <button onClick={() => setOpen(false)} className="p-1 rounded-lg hover:bg-gray-100 transition-colors">
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" /></svg>
           </button>
         </div>
         <div className="p-5">
-              <div className="grid grid-cols-7 gap-2 text-center text-xs font-semibold text-gray-400 mb-2">
+          <div className="grid grid-cols-7 gap-2 text-center text-xs font-semibold text-gray-400 mb-2">
             {["Su", "Mo", "Tu", "We", "Th", "Fr", "Sa"].map(d => <div key={d} className="py-1">{d}</div>)}
           </div>
           <div className="grid grid-cols-7 gap-2 text-center text-sm">
             {Array.from({ length: firstDay }, (_, i) => <div key={`e-${i}`} />)}
             {Array.from({ length: totalDays }, (_, i) => {
-              const day = String(i + 1);
-              const hl = dayList.includes(day);
-              return <div key={day} className={`w-9 h-9 flex items-center justify-center mx-auto rounded-full text-sm font-medium ${hl ? "bg-amber-100 text-amber-800 font-bold ring-1 ring-amber-300" : "text-gray-600 hover:bg-gray-100"}`}>{day}</div>;
+              const dateStr = `${year}-${String(month + 1).padStart(2, "0")}-${String(i + 1).padStart(2, "0")}`;
+              const hl = dateSet.has(dateStr);
+              return <div key={i + 1} className={`w-9 h-9 flex items-center justify-center mx-auto rounded-full text-sm font-medium ${hl ? "bg-amber-100 text-amber-800 font-bold ring-1 ring-amber-300" : "text-gray-600 hover:bg-gray-100"}`}>{i + 1}</div>;
             })}
           </div>
           <div className="mt-4 pt-3 border-t border-gray-100 flex items-center gap-2 text-xs text-gray-500">

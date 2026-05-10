@@ -33,6 +33,7 @@ const CreateVolunteer = ({ editId }: CreateVolunteerProps) => {
   const [rangeEnd, setRangeEnd] = useState("");
   const [applicationDeadline, setApplicationDeadline] = useState("");
   const [description, setDescription] = useState("");
+  const [volunteeringLocation, setVolunteeringLocation] = useState("");
   const [districts, setDistricts] = useState<string[]>([]);
   const [uploading, setUploading] = useState(false);
   const [saving, setSaving] = useState(false);
@@ -44,6 +45,7 @@ const CreateVolunteer = ({ editId }: CreateVolunteerProps) => {
   const [districtError, setDistrictError] = useState("");
   const [descriptionError, setDescriptionError] = useState("");
   const [volunteerPaymentError, setVolunteerPaymentError] = useState("");
+  const [locationError, setLocationError] = useState("");
 
   useEffect(() => {
     if (editId) {
@@ -60,6 +62,7 @@ const CreateVolunteer = ({ editId }: CreateVolunteerProps) => {
           setRangeEnd(data.range_end || "");
           setApplicationDeadline(data.application_deadline || "");
           setDescription(data.description || "");
+          setVolunteeringLocation(data.location || "");
           setDistricts(data.districts || []);
         }
       }).catch(() => toast.error("Failed to load volunteer"));
@@ -82,6 +85,7 @@ const CreateVolunteer = ({ editId }: CreateVolunteerProps) => {
     setDistrictError("");
     setDescriptionError("");
     setVolunteerPaymentError("");
+    setLocationError("");
 
     if (!volunteerTitle.trim()) setErr("volunteerTitle", setVolunteerTitleError, "Volunteer title is required");
     if (!bannerImage) setErr("bannerImage", setBannerImageError, "Banner image is required");
@@ -98,7 +102,7 @@ const CreateVolunteer = ({ editId }: CreateVolunteerProps) => {
     if (volunteerType === "paid" && !volunteerPayment.trim()) setErr("volunteerPayment", setVolunteerPaymentError, "Payment amount is required");
 
     return { isValid: !hasError, firstFieldId };
-  }, [volunteerTitle, bannerImage, dateMode, rangeStart, rangeEnd, specificDates, applicationDeadline, districts, description, volunteerType, volunteerPayment]);
+  }, [volunteerTitle, bannerImage, dateMode, rangeStart, rangeEnd, specificDates, applicationDeadline, districts, description, volunteerType, volunteerPayment, volunteeringLocation]);
 
   const handleUpload = async (file: File) => {
     setUploading(true);
@@ -128,6 +132,7 @@ const CreateVolunteer = ({ editId }: CreateVolunteerProps) => {
         title: volunteerTitle,
         banner_image: bannerImage,
         description,
+        location: volunteeringLocation,
         volunteer_type: volunteerType,
         volunteer_payment: volunteerPayment,
         date_mode: dateMode,
@@ -216,6 +221,11 @@ const CreateVolunteer = ({ editId }: CreateVolunteerProps) => {
             <FileUpload accept="image/*" maxSize="5MB" onFileSelect={handleUpload} previewUrl={bannerImage} onClearPreview={() => { setBannerImage(""); setBannerImageError(""); }} />
             {uploading && <p className="text-blue-600 text-xs mt-1 flex items-center gap-1"><span className="animate-spin">&#9696;</span> Uploading...</p>}
             {bannerImageError && <p className="text-red-500 text-xs mt-1">{bannerImageError}</p>}
+          </div>
+          <div className="space-y-1.5">
+            <label className="block text-sm font-medium text-gray-700">Volunteering Location</label>
+            <input type="text" className={`${formInputClass} ${locationError ? "border-red-500 bg-red-50/10" : ""}`} placeholder="e.g. Central Park, South Gate" value={volunteeringLocation} onChange={e => { setVolunteeringLocation(e.target.value); setLocationError(""); }} />
+            {locationError && <p className="text-red-500 text-xs mt-1">{locationError}</p>}
           </div>
         </div>
       </div>
@@ -354,13 +364,12 @@ function DistrictSelector({ districts, onChange, onToggle }: { districts: string
       </div>
       <div id="districts" className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2 max-h-60 overflow-y-auto">
         {filtered.map(d => (
-          <label key={d} className={`flex items-center gap-2 px-3 py-2 rounded-lg text-sm cursor-pointer transition-all ${districts.includes(d) ? "bg-blue-50 text-blue-700 ring-1 ring-blue-200" : "bg-gray-50 text-gray-600 hover:bg-gray-100"}`}>
-            <input type="checkbox" checked={districts.includes(d)} onChange={() => { onToggle(d); onChange(""); }} className="sr-only" />
-            <div className={`w-4 h-4 rounded border-2 flex items-center justify-center transition-all ${districts.includes(d) ? "bg-blue-600 border-blue-600" : "border-gray-300"}`}>
+          <button key={d} type="button" onClick={() => { onToggle(d); onChange(""); }} className={`flex items-center gap-2 px-3 py-2 rounded-lg text-sm cursor-pointer transition-all text-left ${districts.includes(d) ? "bg-blue-50 text-blue-700 ring-1 ring-blue-200" : "bg-gray-50 text-gray-600 hover:bg-gray-100"}`}>
+            <div className={`w-4 h-4 rounded border-2 flex items-center justify-center transition-all shrink-0 ${districts.includes(d) ? "bg-blue-600 border-blue-600" : "border-gray-300"}`}>
               {districts.includes(d) && <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="3"><polyline points="20 6 9 17 4 12" /></svg>}
             </div>
             {d}
-          </label>
+          </button>
         ))}
       </div>
     </div>

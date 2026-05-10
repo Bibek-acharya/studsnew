@@ -1202,6 +1202,12 @@ export const scholarshipProviderApi = {
     });
   },
 
+  async unshortlistVolunteerApplication(id: number): Promise<any> {
+    return callApi(`/api/v1/scholarship-providers/volunteers/applications/${id}/unshortlist`, {
+      method: 'PUT',
+    });
+  },
+
   async rejectVolunteerApplication(id: number): Promise<any> {
     return callApi(`/api/v1/scholarship-providers/volunteers/applications/${id}/reject`, {
       method: 'PUT',

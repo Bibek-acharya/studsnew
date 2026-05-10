@@ -33,7 +33,7 @@ export default function GalleryTab({ images, lightboxIndex, setLightboxIndex, cl
       {grouped.map((group, gi) => (
         <div key={gi} className="space-y-5">
           <h3 className="text-lg font-bold text-gray-800 capitalize tracking-tight">{group.heading}</h3>
-          <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-5">
+           <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-3 md:gap-5">
             {group.items.slice(0, group.items.length > 8 ? 7 : 8).map((img, ii) => {
               const globalIndex = urls.indexOf(img.url);
               return (

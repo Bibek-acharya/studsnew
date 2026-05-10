@@ -6,22 +6,7 @@ import { use, useState, useEffect } from "react";
 import { apiService } from "@/services/api";
 import NepaliCalendar from "@/components/volunteer/VolunteerNepaliCalendar";
 import Dropdown from "@/components/college-recommender/Dropdown";
-
-const NEPALI_PROVINCES = [
-  "Koshi", "Madhesh", "Bagmati", "Gandaki", "Lumbini", "Karnali", "Sudurpashchim",
-];
-
-const DISTRICT_DATA: Record<string, string[]> = {
-  Koshi: ["Biratnagar", "Dharan", "Ilam", "Birtamod", "Damak", "Itahari", "Rajbiraj", "Jhapa"],
-  Madhesh: ["Birgunj", "Janakpur", "Rajbiraj", "Kalaiya", "Gaur", "Lahan", "Siraha"],
-  Bagmati: ["Kathmandu", "Lalitpur", "Bhaktapur", "Hetauda", "Bharatpur", "Chitwan", "Dhading"],
-  Gandaki: ["Pokhara", "Baglung", "Besisahar", "Kaski", "Lamjung", "Mustang"],
-  Lumbini: ["Butwal", "Bhairahawa", "Nepalgunj", "Dang", "Tulsipur", "Ghorahi"],
-  Karnali: ["Surkhet", "Dailekh", "Jajarkot", "Kalikot", "Mugu", "Jumla"],
-  Sudurpashchim: ["Dhangadhi", "Mahendranagar", "Bhimdatta", "Dadeldhura", "Dipayal"],
-};
-
-const ALL_DISTRICTS = [...new Set(Object.values(DISTRICT_DATA).flat().sort())];
+import { NEPAL_PROVINCES, NEPAL_DISTRICTS, NEPAL_LOCAL_BODIES } from "@/lib/location-data";
 
 export default function VolunteerApplyPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = use(params);
@@ -55,7 +40,23 @@ export default function VolunteerApplyPage({ params }: { params: Promise<{ id: s
       try {
         const res = await apiService.getPublicVolunteerByID(Number(id));
         if (res?.success && res?.data) {
-          setVolunteer({ ...res.data, availableDates: res.data.specific_dates || [] });
+          const data = res.data;
+          let dates: string[] = [];
+          if (data.date_mode === "specific") {
+            dates = data.specific_dates || [];
+          } else if (data.date_mode === "range" && data.range_start && data.range_end) {
+            const sp = data.range_start.split("-").map(Number);
+            const ep = data.range_end.split("-").map(Number);
+            const start = new Date(sp[0], sp[1] - 1, sp[2]);
+            const end = new Date(ep[0], ep[1] - 1, ep[2]);
+            for (let d = new Date(start); d <= end; d.setDate(d.getDate() + 1)) {
+              const y = d.getFullYear();
+              const m = String(d.getMonth() + 1).padStart(2, "0");
+              const day = String(d.getDate()).padStart(2, "0");
+              dates.push(`${y}-${m}-${day}`);
+            }
+          }
+          setVolunteer({ ...data, availableDates: dates });
         } else {
           setNotFound(true);
         }
@@ -145,7 +146,7 @@ export default function VolunteerApplyPage({ params }: { params: Promise<{ id: s
           <span className="font-medium">Your data is secure and will be used for volunteer registration purposes only.</span>
         </div>
 
-        <form onSubmit={handleSubmit} className="px-6 sm:px-12 py-8">
+        <form onSubmit={handleSubmit} noValidate className="px-6 sm:px-12 py-8">
           <div className="mb-12">
             <div className="mb-6 pb-3">
               <h2 className="text-[20px] font-bold text-[#1e293b]">Personal Details</h2>
@@ -159,13 +160,7 @@ export default function VolunteerApplyPage({ params }: { params: Promise<{ id: s
               </div>
               <div>
                 <label className="block text-[14px] font-semibold text-gray-700 mb-1.5">Gender <span className="text-red-500">*</span></label>
-                <select value={gender} onChange={(e) => setGender(e.target.value)} required
-                  className="w-full border border-gray-300 rounded py-3 px-4 text-[15px] text-gray-800 outline-none focus:ring-0 focus:border-[#0000ff] transition-all bg-white cursor-pointer">
-                  <option value="" disabled>Select Gender</option>
-                  <option value="Male">Male</option>
-                  <option value="Female">Female</option>
-                  <option value="Other">Other</option>
-                </select>
+                <Dropdown value={gender} onChange={setGender} options={[{ value: "Male", label: "Male" }, { value: "Female", label: "Female" }, { value: "Other", label: "Other" }]} placeholder="Select Gender" />
               </div>
               <div>
                 <label className="block text-[14px] font-semibold text-gray-700 mb-1.5">Phone Number <span className="text-red-500">*</span></label>
@@ -181,17 +176,7 @@ export default function VolunteerApplyPage({ params }: { params: Promise<{ id: s
               </div>
               <div>
                 <label className="block text-[14px] font-semibold text-gray-700 mb-1.5">Designation <span className="text-red-500">*</span></label>
-                <select value={designation} onChange={(e) => setDesignation(e.target.value)} required
-                  className="w-full border border-gray-300 rounded py-3 px-4 text-[15px] text-gray-800 outline-none focus:ring-0 focus:border-[#0000ff] transition-all bg-white cursor-pointer">
-                  <option value="" disabled>Select Designation</option>
-                  <option value="Student">Student</option>
-                  <option value="Job Holder">Job Holder</option>
-                  <option value="Business Owner">Business Owner</option>
-                  <option value="Freelancer">Freelancer</option>
-                  <option value="Teacher">Teacher</option>
-                  <option value="Social Worker">Social Worker</option>
-                  <option value="Other">Other</option>
-                </select>
+                <Dropdown value={designation} onChange={setDesignation} options={[{ value: "Student", label: "Student" }, { value: "Job Holder", label: "Job Holder" }, { value: "Business Owner", label: "Business Owner" }, { value: "Freelancer", label: "Freelancer" }, { value: "Teacher", label: "Teacher" }, { value: "Social Worker", label: "Social Worker" }, { value: "Other", label: "Other" }]} placeholder="Select Designation" />
               </div>
               {designation === "Other" && (
                 <div>
@@ -207,25 +192,15 @@ export default function VolunteerApplyPage({ params }: { params: Promise<{ id: s
               </div>
               <div>
                 <label className="block text-[14px] font-semibold text-gray-700 mb-1.5">Province <span className="text-red-500">*</span></label>
-                <select value={province} onChange={(e) => { setProvince(e.target.value); setDistrict(""); }} required
-                  className="w-full border border-gray-300 rounded py-3 px-4 text-[15px] text-gray-800 outline-none focus:ring-0 focus:border-[#0000ff] transition-all bg-white cursor-pointer">
-                  <option value="" disabled>Select Province</option>
-                  {NEPALI_PROVINCES.map((p) => <option key={p} value={p}>{p}</option>)}
-                </select>
+                <Dropdown value={province} onChange={(v) => { setProvince(v); setDistrict(""); setMunicipality(""); }} options={NEPAL_PROVINCES.map((p: string) => ({ value: p, label: p }))} placeholder="Select Province" />
               </div>
               <div>
                 <label className="block text-[14px] font-semibold text-gray-700 mb-1.5">District <span className="text-red-500">*</span></label>
-                <select value={district} onChange={(e) => setDistrict(e.target.value)} required
-                  className="w-full border border-gray-300 rounded py-3 px-4 text-[15px] text-gray-800 outline-none focus:ring-0 focus:border-[#0000ff] transition-all bg-white cursor-pointer">
-                  <option value="" disabled>Select District</option>
-                  {province && (DISTRICT_DATA[province] || []).map((d) => <option key={d} value={d}>{d}</option>)}
-                </select>
+                <Dropdown value={district} onChange={(v) => { setDistrict(v); setMunicipality(""); }} options={province ? (NEPAL_DISTRICTS[province] || []).map((d: string) => ({ value: d, label: d })) : []} placeholder="Select District" />
               </div>
               <div>
                 <label className="block text-[14px] font-semibold text-gray-700 mb-1.5">Municipality / RM <span className="text-red-500">*</span></label>
-                <input type="text" value={municipality} onChange={(e) => setMunicipality(e.target.value)} required
-                  className="w-full border border-gray-300 rounded py-3 px-4 text-[15px] text-gray-800 outline-none focus:ring-0 focus:border-[#0000ff] transition-all bg-white"
-                  placeholder="Enter municipality" />
+                <Dropdown value={municipality} onChange={setMunicipality} options={district && NEPAL_LOCAL_BODIES[district] ? (NEPAL_LOCAL_BODIES[district] as Array<{name: string; wards: number}>).map((lb) => ({ value: lb.name, label: lb.name })) : []} placeholder="Select Municipality" />
               </div>
               <div>
                 <label className="block text-[14px] font-semibold text-gray-700 mb-1.5">Ward No. <span className="text-red-500">*</span></label>
@@ -249,12 +224,11 @@ export default function VolunteerApplyPage({ params }: { params: Promise<{ id: s
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-5">
               <div>
                 <label className="block text-[14px] font-semibold text-gray-700 mb-1.5">District to Participate <span className="text-red-500">*</span></label>
-                <Dropdown
-                  value={participateDistrict}
-                  onChange={setParticipateDistrict}
-                  options={ALL_DISTRICTS.map((d) => ({ value: d, label: d }))}
-                  placeholder="Select District"
-                />
+                {volunteer.districts && volunteer.districts.length > 0 ? (
+                  <Dropdown value={participateDistrict} onChange={setParticipateDistrict} options={volunteer.districts.map((d: string) => ({ value: d, label: d }))} placeholder="Select District" />
+                ) : (
+                  <p className="text-sm text-gray-500 italic">No participating districts listed</p>
+                )}
               </div>
               <div>
                 <label className="block text-[14px] font-semibold text-gray-700 mb-1.5">Available Days <span className="text-red-500">*</span></label>

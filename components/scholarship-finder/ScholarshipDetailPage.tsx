@@ -13,6 +13,7 @@ import FaqTab from "./ScholarshipDetailFaq";
 import PartnersTab from "./ScholarshipDetailPartners";
 import ReviewTab from "./ScholarshipDetailReviews";
 import DownloadsTab from "./ScholarshipDetailDownloads";
+import ScholarshipDetailTypesTable from "./ScholarshipDetailTypesTable";
 import { ContactSidebar, PartnerMessageCarousel, RequestInfoForm } from "./ScholarshipDetailSidebar";
 
 interface ScholarshipDetailPageProps {
@@ -25,6 +26,8 @@ export default function ScholarshipDetailPage({ scholarship, similarScholarships
   const [activeTab, setActiveTab] = useState("");
   const [faqOpen, setFaqOpen] = useState<number[]>([]);
   const [lightboxIndex, setLightboxIndex] = useState<number | null>(null);
+  const [canScrollLeft, setCanScrollLeft] = useState(false);
+  const [canScrollRight, setCanScrollRight] = useState(false);
   const tabContainerRef = useRef<HTMLDivElement>(null);
 
   const getImageUrl = useCallback((url: any) => {
@@ -87,6 +90,22 @@ export default function ScholarshipDetailPage({ scholarship, similarScholarships
       tabContainerRef.current.scrollBy({ left: dir * 200, behavior: "smooth" });
     }
   };
+
+  const updateScrollState = useCallback(() => {
+    const el = tabContainerRef.current;
+    if (el) {
+      setCanScrollLeft(el.scrollLeft > 4);
+      setCanScrollRight(el.scrollLeft < el.scrollWidth - el.clientWidth - 4);
+    }
+  }, []);
+
+  useEffect(() => {
+    const el = tabContainerRef.current;
+    if (!el) return;
+    updateScrollState();
+    el.addEventListener("scroll", updateScrollState);
+    return () => el.removeEventListener("scroll", updateScrollState);
+  }, [updateScrollState]);
 
   const toggleFaq = (idx: number) => {
     setFaqOpen((prev) => prev.includes(idx) ? prev.filter((i) => i !== idx) : [...prev, idx]);
@@ -188,7 +207,7 @@ export default function ScholarshipDetailPage({ scholarship, similarScholarships
         </div>
         {bannerImage && (
           <div
-            className="relative h-[280px] w-full overflow-hidden rounded-md bg-cover bg-center md:h-[380px]"
+            className="relative h-[200px] xs:h-[250px] sm:h-[300px] md:h-[380px] w-full overflow-hidden rounded-md bg-cover bg-center"
             style={{ backgroundImage: `url('${bannerImage}')`, backgroundPosition: "center 20%" }}
           >
             <div className="absolute inset-0 bg-black/10" />
@@ -201,12 +220,12 @@ export default function ScholarshipDetailPage({ scholarship, similarScholarships
           <button
             type="button"
             onClick={() => scrollTabs(-1)}
-            className="absolute left-0 top-1/2 z-10 flex h-9 w-9 -translate-y-1/2 items-center justify-center rounded-full border border-gray-200 bg-white md:hidden"
+            className={`absolute left-0 top-1/2 z-10 flex h-9 w-9 -translate-y-1/2 items-center justify-center rounded-full border border-gray-200 bg-white md:hidden ${!canScrollLeft ? "hidden" : ""}`}
           >
             <ChevronLeft size={20} className="text-gray-600" />
           </button>
           <div ref={tabContainerRef} className="hide-scrollbar overflow-x-auto">
-            <nav className="flex whitespace-nowrap border-b border-gray-100">
+            <nav className="flex whitespace-nowrap border-b border-gray-100 pr-10 md:pr-0">
               {availableTabs.map((tab) => (
                 <button
                   key={tab.id}
@@ -226,15 +245,15 @@ export default function ScholarshipDetailPage({ scholarship, similarScholarships
           <button
             type="button"
             onClick={() => scrollTabs(1)}
-            className="absolute right-0 top-1/2 z-10 flex h-9 w-9 -translate-y-1/2 items-center justify-center rounded-full border border-gray-200 bg-white md:hidden"
+            className={`absolute right-0 top-1/2 z-10 flex h-9 w-9 -translate-y-1/2 items-center justify-center rounded-full border border-gray-200 bg-white md:hidden ${!canScrollRight ? "hidden" : ""}`}
           >
             <ChevronRight size={20} className="text-gray-600" />
           </button>
         </div>
       </div>
 
-      <div className="mx-auto max-w-350 grid grid-cols-1 gap-10 bg-white py-8 md:py-12 lg:grid-cols-3">
-        <div className="min-h-[500px] lg:col-span-2">
+      <div className="mx-auto max-w-350 grid grid-cols-1 gap-6 md:gap-10 bg-white py-8 md:py-12 lg:grid-cols-3">
+        <div className="min-h-[300px] md:min-h-[500px] lg:col-span-2">
           {activeTab === "about" && (
             <div className="space-y-10">
               {desc && (
@@ -321,35 +340,15 @@ export default function ScholarshipDetailPage({ scholarship, similarScholarships
                       <span className="rounded-full border border-gray-200 bg-white px-4 py-1.5 text-gray-700 transition">Partially Funded</span>
                     </div>
                   </div>
-                  <div className="w-full overflow-x-auto">
-                    <div className="min-w-[800px]">
-                      <div className="grid grid-cols-12 gap-4 border-b border-gray-100 bg-white px-6 py-4 items-center">
-                        <div className="col-span-3 text-[12px] font-bold uppercase tracking-wider text-gray-500">TYPE</div>
-                        <div className="col-span-3 text-[12px] font-bold uppercase tracking-wider text-gray-500">SEATS</div>
-                        <div className="col-span-2 text-[12px] font-bold uppercase tracking-wider text-gray-500">COVERAGE</div>
-                        <div className="col-span-2 text-[12px] font-bold uppercase tracking-wider text-gray-500">ELIGIBILITY</div>
-                        <div className="col-span-2 text-right text-[12px] font-bold uppercase tracking-wider text-gray-500">ACTION</div>
-                      </div>
-                      {scholarship.scholarship_types_new.map((t: any) => ({
-                        type: t.scholarship_type || t.type || t.name || "",
-                        seats: t.number_of_seats || t.seats || t.total_seats || "",
-                        coverage: t.coverage_type || t.coverage || "",
-                        eligibility: t.eligibility_criteria || t.eligibility || "",
-                      })).map((row: any, i: number) => (
-                        <div key={i} className="grid grid-cols-12 gap-4 border-b border-gray-100 px-6 py-4 items-center hover:bg-gray-50 transition">
-                          <div className="col-span-3"><h4 className="text-[14px] font-bold text-gray-900">{row.type}</h4></div>
-                          <div className="col-span-3 text-[14px] text-gray-700">{row.seats}</div>
-                          <div className="col-span-2"><span className={`rounded-md px-2.5 py-1 text-[12px] font-bold ${row.coverage === "Full Support" ? "text-green-600 bg-green-50" : "text-blue-600 bg-blue-50"}`}>{row.coverage}</span></div>
-                          <div className="col-span-2 text-[13px] text-gray-600">{row.eligibility}</div>
-                          <div className="col-span-2 text-right">
-                            <a href={scholarship.apply_link || "#"} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1 rounded-md bg-blue-600 px-3 py-2 text-xs font-bold text-white transition hover:bg-blue-700 shadow-sm">
-                              <ExternalLink size={12} /> Apply
-                            </a>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
+                  <ScholarshipDetailTypesTable
+                    types={scholarship.scholarship_types_new.map((t: any) => ({
+                      type: t.scholarship_type || t.type || t.name || "",
+                      seats: t.number_of_seats || t.seats || t.total_seats || "",
+                      coverage: t.coverage_type || t.coverage || "",
+                      eligibility: t.eligibility_criteria || t.eligibility || "",
+                    }))}
+                    applyLink={scholarship.apply_link}
+                  />
                 </div>
               )}
               {hasSelectionRubric && (
@@ -433,9 +432,9 @@ export default function ScholarshipDetailPage({ scholarship, similarScholarships
       {lightboxIndex !== null && (
         <div className="fixed inset-0 z-[1000] flex items-center justify-center bg-black/95" onClick={closeLightbox}>
           <button type="button" onClick={closeLightbox} className="absolute right-8 top-5 cursor-pointer text-[40px] text-white z-[1001] hover:text-gray-300">&times;</button>
-          <button type="button" onClick={(e) => { e.stopPropagation(); changeImage(-1); }} className="absolute left-5 top-1/2 -translate-y-1/2 cursor-pointer px-5 py-5 text-[50px] text-white select-none hover:text-gray-300 z-[1001]">&#10094;</button>
+          <button type="button" onClick={(e) => { e.stopPropagation(); changeImage(-1); }} className="absolute left-3 md:left-5 top-1/2 -translate-y-1/2 cursor-pointer px-3 py-3 md:px-5 md:py-5 text-[30px] md:text-[50px] text-white select-none hover:text-gray-300 z-[1001]">&#10094;</button>
           <img src={galleryImages[lightboxIndex]?.url} alt={galleryImages[lightboxIndex]?.title || "Gallery"} className="max-h-[85vh] max-w-[90%] rounded-md object-contain" onClick={(e) => e.stopPropagation()} />
-          <button type="button" onClick={(e) => { e.stopPropagation(); changeImage(1); }} className="absolute right-5 top-1/2 -translate-y-1/2 cursor-pointer px-5 py-5 text-[50px] text-white select-none hover:text-gray-300 z-[1001]">&#10095;</button>
+          <button type="button" onClick={(e) => { e.stopPropagation(); changeImage(1); }} className="absolute right-3 md:right-5 top-1/2 -translate-y-1/2 cursor-pointer px-3 py-3 md:px-5 md:py-5 text-[30px] md:text-[50px] text-white select-none hover:text-gray-300 z-[1001]">&#10095;</button>
         </div>
       )}
     </div>

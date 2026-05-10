@@ -209,7 +209,7 @@ const ScholarshipCard = ({
       )}
 
       {/* Image Area */}
-      <div className="h-31.25 w-full bg-gray-100 relative overflow-hidden rounded-md mb-3">
+      <div className="aspect-[16/10] w-full bg-gray-100 relative overflow-hidden rounded-md mb-3">
         {imageHtml}
       </div>
 
@@ -229,10 +229,10 @@ const ScholarshipCard = ({
         </div>
 
         {/* Title & Organization */}
-        <h3 className="font-bold text-[16px] leading-tight text-slate-900 mb-1 hover:text-brand-blue">
+        <h3 className="font-bold text-[16px] leading-tight text-slate-900 mb-1 hover:text-brand-blue line-clamp-2">
           {scholarship.title}
         </h3>
-        <div className="flex items-center gap-1.5 text-[12.5px] text-gray-500 mb-3.5">
+        <div className="flex items-center gap-1.5 text-[12.5px] text-gray-500 mb-3.5 line-clamp-1">
           {scholarship.provider_id ? (
             <Link href={`/providers/${scholarship.provider_id}`} className="hover:text-blue-600 transition-colors">
               {scholarship.org}
