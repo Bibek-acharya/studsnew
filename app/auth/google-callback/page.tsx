@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { Suspense, useEffect, useRef } from "react";
 import { useSearchParams } from "next/navigation";
 import { useAuth } from "@/services/AuthContext";
 
@@ -50,5 +50,9 @@ function GoogleAuthCallback() {
 }
 
 export default function GoogleAuthCallbackPage() {
-  return <GoogleAuthCallback />;
+  return (
+    <Suspense fallback={<div className="flex min-h-screen items-center justify-center"><p className="text-gray-500">Processing login...</p></div>}>
+      <GoogleAuthCallback />
+    </Suspense>
+  );
 }
