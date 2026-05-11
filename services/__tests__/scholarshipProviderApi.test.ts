@@ -50,7 +50,7 @@ describe('scholarshipProviderApi.createScholarship', () => {
   });
 
   it('maps falsy _new values (empty arrays)', async () => {
-    const mockData = {
+    const mockData: any = {
       scholarship_types_new: [],
       selection_rubric_new: [],
       faqs_new: [],
@@ -68,7 +68,7 @@ describe('scholarshipProviderApi.createScholarship', () => {
   });
 
   it('handles conflicts between _new and legacy fields (_new wins)', async () => {
-    const mockData = {
+    const mockData: any = {
       scholarship_types_new: [{ type: 'New' }],
       scholarship_types: [{ type: 'Legacy' }],
     };
@@ -89,7 +89,7 @@ describe('scholarshipProviderApi.updateScholarship', () => {
 
   it('maps _new suffix fields and calls put with correct URL and data', async () => {
     const id = 123;
-    const mockData = {
+    const mockData: any = {
       scholarship_types_new: [{ type: 'Merit' }],
       selection_rubric_new: [{ criteria: 'GPA' }],
       faqs_new: [{ question: 'Test?' }],
@@ -117,7 +117,7 @@ describe('scholarshipProviderApi.updateScholarship', () => {
 
   it('handles missing _new fields without crashing', async () => {
     const id = 123;
-    const mockData = {
+    const mockData: any = {
       title: 'Updated Scholarship',
     };
 
