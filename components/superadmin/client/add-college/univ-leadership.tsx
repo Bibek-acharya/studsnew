@@ -6,13 +6,7 @@ import { FormCard } from "./FormCard";
 import { DynamicTable } from "./FormInput";
 import { generateId } from "@/lib/superadmin/constants";
 
-export function UniversityOverviewCard({
-  locked,
-  onToggleLock,
-}: {
-  locked: boolean;
-  onToggleLock: () => void;
-}) {
+export function UniversityOverviewCard() {
   const [fields, setFields] = useState([
     { id: "1", field: "Established", value: "1959" },
     { id: "2", field: "Location", value: "Kirtipur, 5 km from Kathmandu's city center" },
@@ -25,8 +19,6 @@ export function UniversityOverviewCard({
       icon={<Info size={24} className="text-blue-600" />}
       title="University Overview"
       sub="Institutional details and rankings"
-      locked={locked}
-      onToggleLock={onToggleLock}
     >
       <DynamicTable
         columns={[
@@ -49,13 +41,7 @@ export function UniversityOverviewCard({
   );
 }
 
-export function LeadershipCard({
-  locked,
-  onToggleLock,
-}: {
-  locked: boolean;
-  onToggleLock: () => void;
-}) {
+export function LeadershipCard() {
   const [members, setMembers] = useState([
     { id: "1", position: "Chancellor", role: "Ceremonial head", holder: "Sushila Karki" },
     { id: "2", position: "Vice Chancellor", role: "Chief Executive", holder: "Prof. Deepak Aryal, PhD" },
@@ -67,8 +53,6 @@ export function LeadershipCard({
       icon={<Users size={24} className="text-purple-600" />}
       title="Leadership & Administration"
       sub="Key administrative personnel"
-      locked={locked}
-      onToggleLock={onToggleLock}
       action={
         <button
           type="button"

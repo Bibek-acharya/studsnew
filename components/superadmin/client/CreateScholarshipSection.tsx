@@ -46,22 +46,22 @@ export default function CreateScholarshipSection({
         </div>
       </div>
 
-      <BasicInfoCard locked={!!lockedSections.basic} onToggleLock={() => toggleLock("basic")} />
-      <FinancialCard locked={!!lockedSections.financial} onToggleLock={() => toggleLock("financial")} />
-      <DescriptionCard locked={!!lockedSections.desc} onToggleLock={() => toggleLock("desc")} />
-      <TimelineCard locked={!!lockedSections.timeline} onToggleLock={() => toggleLock("timeline")} />
-      <JourneyTimelineCard locked={!!lockedSections.journey} onToggleLock={() => toggleLock("journey")} />
-      <ScholarshipTypesCard locked={!!lockedSections.types} onToggleLock={() => toggleLock("types")} />
-      <SelectionRubricCard locked={!!lockedSections.rubric} onToggleLock={() => toggleLock("rubric")} />
-      <MediaCard locked={!!lockedSections.media} onToggleLock={() => toggleLock("media")} />
-      <ContactCard locked={!!lockedSections.contact} onToggleLock={() => toggleLock("contact")} />
-      <EligibilityCard locked={!!lockedSections.eligibility} onToggleLock={() => toggleLock("eligibility")} />
-      <ExamCentersCard locked={!!lockedSections.centers} onToggleLock={() => toggleLock("centers")} />
-      <FaqCard locked={!!lockedSections.faq} onToggleLock={() => toggleLock("faq")} />
-      <PartnersCard locked={!!lockedSections.partners} onToggleLock={() => toggleLock("partners")} />
-      <AchievementsCard locked={!!lockedSections.achievements} onToggleLock={() => toggleLock("achievements")} />
-      <GalleryCard locked={!!lockedSections.gallery} onToggleLock={() => toggleLock("gallery")} />
-      <NewsNoticeCard locked={!!lockedSections.news} onToggleLock={() => toggleLock("news")} />
+      <BasicInfoCard />
+      <FinancialCard />
+      <DescriptionCard />
+      <TimelineCard />
+      <JourneyTimelineCard />
+      <ScholarshipTypesCard />
+      <SelectionRubricCard />
+      <MediaCard />
+      <ContactCard />
+      <EligibilityCard />
+      <ExamCentersCard />
+      <FaqCard />
+      <PartnersCard />
+      <AchievementsCard />
+      <GalleryCard />
+      <NewsNoticeCard />
 
       <div className="flex justify-end gap-4">
         <button

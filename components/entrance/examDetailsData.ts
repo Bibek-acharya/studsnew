@@ -21,6 +21,10 @@ export const MOCK_EXAM_DETAILS: Record<string, ExamDetails> = {
     examMode: "Offline (OMR Based)",
     applicationFee: "NPR 3,500",
     foreignFee: "NPR 7,000",
+    phone: "01-5520398",
+    email: "ioe@ioe.edu.np",
+    website: "https://ioe.edu.np",
+    location: "Pulchowk Campus, Lalitpur, Nepal",
     applicationSteps: [
       { title: "Fee Payment", description: "Pay the examination fee through eSewa, Khalti, ConnectIPS, or designated bank branches. Regular applicants: NPR 3,500 | Foreign applicants: NPR 7,000." },
       { title: "Online Registration", description: "Visit the IOE admission portal (ioe.edu.np) and fill in personal details, academic records, and upload a passport-size photograph." },
@@ -56,18 +60,22 @@ export const MOCK_EXAM_DETAILS: Record<string, ExamDetails> = {
     ],
     admitCardInfo: "The IOE admit card is mandatory for exam entry. Download it from the IOE admission portal after the release date. Ensure all details are correct before printing.",
     upcomingDates: [
-      { date: "Chaitra 1, 2081 - Jestha 5, 2082", event: "IOE Entrance 2081 Registration", status: "Ongoing" },
-      { date: "Jestha 15, 2082", event: "IOE Entrance Examination Date" },
+      { date: "Chaitra 1, 2081 - Jestha 5, 2082", dateEn: "Mar 14 - May 19, 2026", event: "IOE Entrance 2081 Registration", status: "Ongoing" },
+      { date: "Jestha 15, 2082", dateEn: "May 29, 2026", event: "IOE Entrance Examination Date" },
     ],
     pastDates: [
-      { date: "Ashwin 15, 2080", event: "IOE Entrance 2080 Examination" },
-      { date: "Bhadra 1 - 25, 2080", event: "IOE Entrance 2080 Registration" },
+      { date: "Ashwin 15, 2080", dateEn: "Oct 1, 2024", event: "IOE Entrance 2080 Examination" },
+      { date: "Bhadra 1 - 25, 2080", dateEn: "Aug 17 - Sep 10, 2024", event: "IOE Entrance 2080 Registration" },
     ],
     faqs: [
       { question: "Can I apply for both BE and B.Arch in the same form?", answer: "Yes, you can apply for both programs. However, B.Arch requires an additional drawing test which is conducted separately." },
       { question: "Is there negative marking in IOE Entrance?", answer: "No, there is no negative marking in the IOE Entrance Examination. Each correct answer carries 1 mark." },
       { question: "What is the application fee for IOE Entrance?", answer: "The application fee is NPR 3,500 for Nepalese students and NPR 7,000 for foreign students." },
       { question: "Which campuses are covered under IOE Entrance?", answer: "IOE Entrance covers all constituent campuses (Pulchowk, Thapathali, Purwanchal, Paschimanchal) and affiliated colleges under TU." },
+    ],
+    contactPersons: [
+      { name: "Prof. Dr. Shashidhar Ram Joshi", role: "Exam Controller", img: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&h=150&fit=crop&crop=face", phone: "01-5520398", email: "controller@ioe.edu.np", wa: "9779800000001" },
+      { name: "Er. Ram Chandra Thapa", role: "Admission Officer", img: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=150&h=150&fit=crop&crop=face", phone: "01-5520399", email: "admission@ioe.edu.np", wa: "9779800000002" },
     ],
   },
   "cee-medical-2081": {
@@ -90,6 +98,10 @@ export const MOCK_EXAM_DETAILS: Record<string, ExamDetails> = {
     examMode: "Offline (OMR Based)",
     applicationFee: "NPR 4,000",
     foreignFee: "NPR 8,000",
+    phone: "01-4211000",
+    email: "info@mec.gov.np",
+    website: "https://entrance.mec.gov.np",
+    location: "Maharajgunj, Kathmandu, Nepal",
     applicationSteps: [
       { title: "Fee Payment", description: "Pay the examination fee through eSewa, Khalti, ConnectIPS, or bank voucher. Nepalese students: NPR 4,000 | Foreign students: NPR 8,000." },
       { title: "Profile Creation", description: "Register with your valid email ID, mobile number, and the transaction number from your fee payment to create an account on the MEC portal." },
@@ -125,18 +137,22 @@ export const MOCK_EXAM_DETAILS: Record<string, ExamDetails> = {
     ],
     admitCardInfo: "The CEE admit card is a mandatory document. Candidates will not be allowed inside the exam hall without it. Print your admit card in color and ensure your photograph is clearly visible.",
     upcomingDates: [
-      { date: "Baisakh 15 - Jestha 30, 2082", event: "CEE Medical 2081 Registration", status: "Ongoing" },
-      { date: "Asar 10, 2082", event: "CEE Medical Entrance Examination Date" },
+      { date: "Baisakh 15 - Jestha 30, 2082", dateEn: "Apr 28 - Jun 13, 2026", event: "CEE Medical 2081 Registration", status: "Ongoing" },
+      { date: "Asar 10, 2082", dateEn: "Jun 24, 2026", event: "CEE Medical Entrance Examination Date" },
     ],
     pastDates: [
-      { date: "Jestha 20, 2081", event: "CEE Medical 2080 Examination" },
-      { date: "Chaitra 1 - 25, 2080", event: "CEE Medical 2080 Registration" },
+      { date: "Jestha 20, 2081", dateEn: "Jun 3, 2025", event: "CEE Medical 2080 Examination" },
+      { date: "Chaitra 1 - 25, 2080", dateEn: "Mar 14 - Apr 7, 2025", event: "CEE Medical 2080 Registration" },
     ],
     faqs: [
       { question: "Is there any age limit to apply for CEE Medical?", answer: "No, there is no age limit specified by the Medical Education Commission for appearing in CEE Medical." },
       { question: "From where can I download the CEE admit card?", answer: "You can download the admit card from the official MEC portal at entrance.mec.gov.np after the release date." },
       { question: "What is the application fee of CEE Medical?", answer: "The application fee is NPR 4,000 for Nepalese students and NPR 8,000 for foreign students." },
       { question: "Does MEC offer master's courses through CEE?", answer: "No, CEE is specifically for undergraduate programs. Master's level entrance exams are conducted separately as MECEE-PG." },
+    ],
+    contactPersons: [
+      { name: "Dr. Govinda KC", role: "Exam Coordinator", img: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=150&h=150&fit=crop&crop=face", phone: "01-4211000", email: "coordinator@mec.gov.np", wa: "9779800000003" },
+      { name: "Ms. Sunita Sharma", role: "Admission Officer", img: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=150&h=150&fit=crop&crop=face", phone: "01-4211001", email: "admission@mec.gov.np", wa: "9779800000004" },
     ],
   },
   "cmat-tu-2081": {
@@ -159,6 +175,10 @@ export const MOCK_EXAM_DETAILS: Record<string, ExamDetails> = {
     examMode: "Offline (OMR Based)",
     applicationFee: "NPR 3,000",
     foreignFee: "NPR 6,000",
+    phone: "01-4331766",
+    email: "fom@tu.edu.np",
+    website: "https://fom.tu.edu.np",
+    location: "Kirtipur, Kathmandu, Nepal",
     applicationSteps: [
       { title: "Fee Payment", description: "Pay the examination fee through eSewa, Khalti, ConnectIPS, or designated bank branches. Regular applicants: NPR 3,000 | Late applicants: NPR 4,500." },
       { title: "Online Registration", description: "Visit the TU FOM admission portal and fill in personal details, academic records, and upload a passport-size photograph." },
@@ -194,18 +214,22 @@ export const MOCK_EXAM_DETAILS: Record<string, ExamDetails> = {
     ],
     admitCardInfo: "The CMAT admit card is mandatory for exam entry. Download it from the TU FOM admission portal after the release date. Ensure all details are correct before printing.",
     upcomingDates: [
-      { date: "Shrawan 1 - Bhadra 15, 2082", event: "CMAT 2081 Registration", status: "Upcoming" },
-      { date: "Bhadra 2082", event: "CMAT Entrance Examination Date" },
+      { date: "Shrawan 1 - Bhadra 15, 2082", dateEn: "Jul 17 - Aug 31, 2026", event: "CMAT 2081 Registration", status: "Upcoming" },
+      { date: "Bhadra 2082", dateEn: "Aug-Sep 2026", event: "CMAT Entrance Examination Date" },
     ],
     pastDates: [
-      { date: "Bhadra 10, 2081", event: "CMAT 2080 Examination" },
-      { date: "Shrawan 1 - 25, 2081", event: "CMAT 2080 Registration" },
+      { date: "Bhadra 10, 2081", dateEn: "Aug 26, 2025", event: "CMAT 2080 Examination" },
+      { date: "Shrawan 1 - 25, 2081", dateEn: "Jul 17 - Aug 10, 2025", event: "CMAT 2080 Registration" },
     ],
     faqs: [
       { question: "Can I apply for multiple management programs with one CMAT form?", answer: "Yes, a single CMAT score is valid for all management programs (BBA, BBM, BBS, BIM) under TU." },
       { question: "Is there negative marking in CMAT?", answer: "No, there is no negative marking in CMAT. Each correct answer carries 1 mark." },
       { question: "What is the application fee for CMAT?", answer: "The application fee is NPR 3,000 for regular applicants and NPR 4,500 for late applicants." },
       { question: "Which campuses accept CMAT scores?", answer: "All TU constituent campuses (Kirtipur, Shankar Dev, etc.) and affiliated colleges offering management programs accept CMAT scores." },
+    ],
+    contactPersons: [
+      { name: "Prof. Dr. Krishna Prasad Acharya", role: "Dean", img: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&h=150&fit=crop&crop=face", phone: "01-4331766", email: "dean@fom.tu.edu.np", wa: "9779800000005" },
+      { name: "Mr. Hari Shrestha", role: "Admission Officer", img: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=150&h=150&fit=crop&crop=face", phone: "01-4331767", email: "admission@fom.tu.edu.np", wa: "9779800000006" },
     ],
   },
   "kuumatt-2081": {
@@ -228,6 +252,10 @@ export const MOCK_EXAM_DETAILS: Record<string, ExamDetails> = {
     examMode: "Computer Based Test (CBT)",
     applicationFee: "NPR 3,500",
     foreignFee: "USD 50",
+    phone: "011-661399",
+    email: "admissions@ku.edu.np",
+    website: "https://ku.edu.np",
+    location: "Dhulikhel, Kavrepalanchok, Nepal",
     applicationSteps: [
       { title: "Fee Payment", description: "Pay the examination fee through eSewa, Khalti, ConnectIPS, or designated bank branches. Applicants: NPR 3,500 | Foreign applicants: USD 50." },
       { title: "Online Registration", description: "Visit the KU admission portal (ku.edu.np) and fill in personal details, academic records, and upload a passport-size photograph." },
@@ -263,18 +291,22 @@ export const MOCK_EXAM_DETAILS: Record<string, ExamDetails> = {
     ],
     admitCardInfo: "The KUUMAT admit card is mandatory for exam entry. Download it from the KU admission portal after the release date. Ensure all details are correct before printing.",
     upcomingDates: [
-      { date: "TBA", event: "KUUMAT 2081 Registration", status: "Upcoming" },
-      { date: "TBA", event: "KUUMAT Entrance Examination Date" },
+      { date: "TBA", dateEn: "TBA", event: "KUUMAT 2081 Registration", status: "Upcoming" },
+      { date: "TBA", dateEn: "TBA", event: "KUUMAT Entrance Examination Date" },
     ],
     pastDates: [
-      { date: "Ashwin 5, 2081", event: "KUUMAT 2080 Examination" },
-      { date: "Bhadra 1 - 20, 2081", event: "KUUMAT 2080 Registration" },
+      { date: "Ashwin 5, 2081", dateEn: "Sep 21, 2025", event: "KUUMAT 2080 Examination" },
+      { date: "Bhadra 1 - 20, 2081", dateEn: "Aug 17 - Sep 5, 2025", event: "KUUMAT 2080 Registration" },
     ],
     faqs: [
       { question: "Is KUUMAT conducted online or offline?", answer: "KUUMAT is conducted as a Computer Based Test (CBT) at designated test centers." },
       { question: "Is there negative marking in KUUMAT?", answer: "Yes, there is a negative marking of 0.25 marks for each incorrect answer." },
       { question: "What is the application fee for KUUMAT?", answer: "The application fee is NPR 3,500 for Nepalese students and USD 50 for foreign students." },
       { question: "Does KUUMAT have an interview round?", answer: "Yes, shortlisted candidates based on the entrance score are called for an interview or group discussion round." },
+    ],
+    contactPersons: [
+      { name: "Prof. Dr. Bishal K. Shrestha", role: "Admission Director", img: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=150&h=150&fit=crop&crop=face", phone: "011-661399", email: "admissions@ku.edu.np", wa: "9779800000007" },
+      { name: "Ms. Anjana Poudel", role: "Admission Officer", img: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=150&h=150&fit=crop&crop=face", phone: "011-661400", email: "info@som.ku.edu.np", wa: "9779800000008" },
     ],
   },
 };

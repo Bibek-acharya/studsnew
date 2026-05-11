@@ -1,0 +1,190 @@
+"use client";
+import React, { useState } from "react";
+import SectionHeader from "@/components/institution-zone/dashboard/shared/SectionHeader";
+import {
+  MagnifyingGlass,
+  Eye,
+  Pencil,
+  Trash,
+  CaretLeft,
+  CaretRight,
+} from "@phosphor-icons/react";
+
+interface EntranceExam {
+  id: number;
+  examName: string;
+  conductingBody: string;
+  program: string;
+  level: string;
+  examDate: string;
+  status: string;
+  applicants: number;
+}
+
+const MOCK_EXAMS: EntranceExam[] = [
+  { id: 1, examName: "IOE BE/B.Arch Entrance 2081", conductingBody: "Institute of Engineering, TU", program: "BE/B.Arch", level: "Bachelor", examDate: "2026-05-29", status: "Ongoing", applicants: 45 },
+  { id: 2, examName: "CEE Medical 2081", conductingBody: "Medical Education Commission", program: "MBBS/BDS", level: "Bachelor", examDate: "2026-06-24", status: "Upcoming", applicants: 32 },
+  { id: 3, examName: "CMAT Management 2081", conductingBody: "Faculty of Management, TU", program: "BBA/BBM", level: "Bachelor", examDate: "2026-08-15", status: "Upcoming", applicants: 28 },
+  { id: 4, examName: "KUUMAT 2081", conductingBody: "School of Management, KU", program: "BBA/BBA-Finance", level: "Bachelor", examDate: "2026-09-01", status: "Upcoming", applicants: 15 },
+  { id: 5, examName: "BSc CSIT Entrance 2081", conductingBody: "Tribhuvan University", program: "BSc CSIT", level: "Bachelor", examDate: "2026-04-15", status: "Closed", applicants: 67 },
+];
+
+const statusColors: Record<string, string> = {
+  Ongoing: "text-green-600 bg-green-50",
+  Upcoming: "text-orange-600 bg-orange-50",
+  Closed: "text-red-600 bg-red-50",
+};
+
+const statusPill = (status: string) => {
+  const color = statusColors[status] || "bg-gray-100 text-gray-700";
+  return (
+    <span className={`px-2 py-1 rounded text-xs font-bold uppercase ${color}`}>{status}</span>
+  );
+};
+
+const ITEMS_PER_PAGE = 5;
+
+const EntranceDirectoryPage: React.FC = () => {
+  const [exams] = useState(MOCK_EXAMS);
+  const [search, setSearch] = useState("");
+  const [page, setPage] = useState(1);
+
+  const filtered = exams.filter((e) => {
+    const s = search.toLowerCase();
+    if (!s) return true;
+    return (
+      e.examName.toLowerCase().includes(s) ||
+      e.conductingBody.toLowerCase().includes(s) ||
+      e.program.toLowerCase().includes(s)
+    );
+  });
+
+  const totalPages = Math.max(1, Math.ceil(filtered.length / ITEMS_PER_PAGE));
+  const safePage = Math.min(page, totalPages);
+  const paginated = filtered.slice((safePage - 1) * ITEMS_PER_PAGE, safePage * ITEMS_PER_PAGE);
+
+  return (
+    <div className="p-4 md:p-6 lg:p-8 min-h-full">
+      <SectionHeader
+        title="Entrance Directory"
+        breadcrumbItems={[
+          { label: "Dashboard", href: "/institution-zone/dashboard/overview" },
+          { label: "Entrance Directory" },
+        ]}
+      />
+
+      <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+        <div className="bg-gray-50/50 px-6 py-4 border-b border-gray-200 flex flex-col sm:flex-row justify-between gap-4">
+          <h2 className="text-lg font-bold text-gray-900 flex items-center gap-2 self-center">
+            All Entrance Exams
+          </h2>
+          <div className="relative min-w-[250px]">
+            <MagnifyingGlass
+              weight="bold"
+              className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 w-4 h-4"
+            />
+            <input
+              placeholder="Search exams..."
+              value={search}
+              onChange={(e) => {
+                setSearch(e.target.value);
+                setPage(1);
+              }}
+              className="w-full pl-9 pr-4 py-2 border border-gray-300 rounded-lg text-sm focus:border-blue-600 outline-none"
+            />
+          </div>
+        </div>
+
+        <div className="overflow-x-auto">
+          <table className="w-full text-left border-collapse text-sm min-w-[900px]">
+            <thead>
+              <tr className="bg-gray-50 border-b border-gray-200 text-gray-600 font-medium">
+                <th className="px-4 py-3">Exam Name</th>
+                <th className="px-4 py-3">Conducting Body</th>
+                <th className="px-4 py-3">Program</th>
+                <th className="px-4 py-3">Level</th>
+                <th className="px-4 py-3">Exam Date</th>
+                <th className="px-4 py-3">Applicants</th>
+                <th className="px-4 py-3">Status</th>
+                <th className="px-4 py-3 text-center">Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              {paginated.length === 0 ? (
+                <tr>
+                  <td colSpan={8} className="px-4 py-8 text-center text-gray-500">
+                    No entrance exams found.
+                  </td>
+                </tr>
+              ) : (
+                paginated.map((exam) => (
+                  <tr key={exam.id} className="hover:bg-gray-50 border-b border-gray-200">
+                    <td className="px-4 py-3 font-medium text-gray-800">{exam.examName}</td>
+                    <td className="px-4 py-3 text-gray-600">{exam.conductingBody}</td>
+                    <td className="px-4 py-3 text-gray-600">{exam.program}</td>
+                    <td className="px-4 py-3 text-gray-600">{exam.level}</td>
+                    <td className="px-4 py-3 text-gray-600">{exam.examDate}</td>
+                    <td className="px-4 py-3 text-gray-600">{exam.applicants}</td>
+                    <td className="px-4 py-3">{statusPill(exam.status)}</td>
+                    <td className="px-4 py-3">
+                      <div className="flex items-center justify-center gap-1">
+                        <button title="View" className="p-1.5 rounded text-gray-400 hover:text-blue-600 hover:bg-blue-50">
+                          <Eye weight="bold" className="w-4 h-4" />
+                        </button>
+                        <button title="Edit" className="p-1.5 rounded text-gray-400 hover:text-green-600 hover:bg-green-50">
+                          <Pencil weight="bold" className="w-4 h-4" />
+                        </button>
+                        <button title="Delete" className="p-1.5 rounded text-gray-400 hover:text-red-600 hover:bg-red-50">
+                          <Trash weight="bold" className="w-4 h-4" />
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                ))
+              )}
+            </tbody>
+          </table>
+        </div>
+
+        <div className="px-6 py-4 border-t border-gray-200 flex flex-col sm:flex-row items-center justify-between gap-4 bg-gray-50/30">
+          <p className="text-sm text-gray-500">
+            Showing {(safePage - 1) * ITEMS_PER_PAGE + 1} to {Math.min(safePage * ITEMS_PER_PAGE, filtered.length)} of {filtered.length} records
+          </p>
+          <div className="flex items-center gap-2">
+            <button
+              onClick={() => setPage((p) => Math.max(1, p - 1))}
+              disabled={safePage === 1}
+              className="p-2 rounded border border-gray-200 text-gray-600 hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              <CaretLeft weight="bold" className="w-4 h-4" />
+            </button>
+            {Array.from({ length: totalPages }, (_, i) => i + 1)
+              .slice(Math.max(0, safePage - 3), safePage + 2)
+              .map((n) => (
+                <button
+                  key={n}
+                  onClick={() => setPage(n)}
+                  className={`w-8 h-8 rounded border text-sm font-medium flex items-center justify-center ${
+                    n === safePage
+                      ? "border-blue-500 bg-blue-50 text-blue-700"
+                      : "border-gray-200 text-gray-600 hover:bg-gray-100"
+                  }`}
+                >
+                  {n}
+                </button>
+              ))}
+            <button
+              onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
+              disabled={safePage >= totalPages}
+              className="p-2 rounded border border-gray-200 text-gray-600 hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              <CaretRight weight="bold" className="w-4 h-4" />
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export default EntranceDirectoryPage;

@@ -495,41 +495,6 @@ const ProfilePage: React.FC = () => {
             </div>
           </div>
 
-          {/* ─── Offered Programs ─── */}
-          <div className="bg-white p-6 rounded-md  border border-gray-200">
-            <div className="flex justify-between items-center mb-5 border-b pb-3">
-              <h3 className="text-lg font-semibold text-gray-800">
-                <i className="fa-solid fa-layer-group text-blue-500 mr-2"></i>Offered Programs
-              </h3>
-              <button type="button" onClick={() => addItem(setPrograms, { name: "", level: "Bachelor", affiliation: "", status: "Ongoing" })}
-                className="text-sm text-blue-600 bg-blue-50 px-3 py-1.5 rounded-md hover:bg-blue-100 transition-colors font-medium">
-                <i className="fa-solid fa-plus mr-1"></i> Add Program
-              </button>
-            </div>
-            <div className="space-y-3">
-              {programs.map(p => (
-                <div key={p.id} className="bg-gray-50 border border-gray-200 rounded-md p-4 relative group">
-                  <button type="button" onClick={() => removeItem(setPrograms, p.id)}
-                    className="absolute top-3 right-3 text-red-400 hover:text-red-600 hover:bg-red-50 p-1.5 rounded-md transition-colors opacity-0 group-hover:opacity-100">
-                    <i className="fa-solid fa-trash"></i>
-                  </button>
-                  <div className="grid grid-cols-1 md:grid-cols-4 gap-3 pr-10">
-                    <input type="text" className={`${inputClass} text-sm`} placeholder="Program name" value={p.name} onChange={e => updateItem(setPrograms, p.id, "name", e.target.value)} />
-                    <select className={`${inputClass} text-sm bg-white`} value={p.level} onChange={e => updateItem(setPrograms, p.id, "level", e.target.value)}>
-                      <option>+2</option><option>Bachelor</option><option>Master</option>
-                    </select>
-                    <input type="text" className={`${inputClass} text-sm`} placeholder="Affiliation" value={p.affiliation} onChange={e => updateItem(setPrograms, p.id, "affiliation", e.target.value)} />
-                    <select className={`${inputClass} text-sm bg-white`} value={p.status} onChange={e => updateItem(setPrograms, p.id, "status", e.target.value)}>
-                      <option value="Ongoing">🟢 Ongoing</option>
-                      <option value="Closed">🔴 Closed</option>
-                    </select>
-                  </div>
-                </div>
-              ))}
-              {programs.length === 0 && <p className="text-sm text-gray-400 py-4 text-center">No programs added.</p>}
-            </div>
-          </div>
-
           {/* ─── Facilities ─── */}
           <div className="bg-white p-6 rounded-md  border border-gray-200">
             <div className="flex justify-between items-center mb-5 border-b pb-3">

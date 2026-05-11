@@ -6,20 +6,12 @@ import { FormCard } from "./FormCard";
 import { FormInput, FileUpload } from "./FormInput";
 import { COLLEGE_LEVELS, COLLEGE_TYPES, AFFILIATIONS } from "@/lib/superadmin/constants";
 
-export function BasicInfoCard({
-  locked,
-  onToggleLock,
-}: {
-  locked: boolean;
-  onToggleLock: () => void;
-}) {
+export function BasicInfoCard() {
   return (
     <FormCard
       icon={<Building2 size={24} className="text-blue-600" />}
       title="Basic Information"
       sub="Essential details about the college"
-      locked={locked}
-      onToggleLock={onToggleLock}
     >
       <div className="space-y-8">
         <FileUpload
@@ -67,20 +59,12 @@ export function BasicInfoCard({
   );
 }
 
-export function ContactInfoCard({
-  locked,
-  onToggleLock,
-}: {
-  locked: boolean;
-  onToggleLock: () => void;
-}) {
+export function ContactInfoCard() {
   return (
     <FormCard
       icon={<Phone size={24} className="text-green-600" />}
       title="Contact Information"
       sub="Primary contact details for administration"
-      locked={locked}
-      onToggleLock={onToggleLock}
     >
       <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
         <FormInput label="Contact Person Name" placeholder="e.g., Ram Sharma" required />

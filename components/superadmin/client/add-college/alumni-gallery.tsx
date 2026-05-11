@@ -5,20 +5,12 @@ import { Users, ImagePlus } from "lucide-react";
 import { FormCard } from "./FormCard";
 import { FormInput } from "./FormInput";
 
-export function AlumniCard({
-  locked,
-  onToggleLock,
-}: {
-  locked: boolean;
-  onToggleLock: () => void;
-}) {
+export function AlumniCard() {
   return (
     <FormCard
       icon={<Users size={24} className="text-teal-600" />}
       title="Alumni"
       sub="Notable graduates and their achievements"
-      locked={locked}
-      onToggleLock={onToggleLock}
       action={
         <button
           type="button"
@@ -58,13 +50,7 @@ export function AlumniCard({
   );
 }
 
-export function GalleryCard({
-  locked,
-  onToggleLock,
-}: {
-  locked: boolean;
-  onToggleLock: () => void;
-}) {
+export function GalleryCard() {
   const photos = [
     "https://images.unsplash.com/photo-1541339907198-e08756dedf3f?w=300&h=300&fit=crop",
     "https://images.unsplash.com/photo-1523050854058-8df90110c9f1?w=300&h=300&fit=crop",
@@ -76,8 +62,6 @@ export function GalleryCard({
       icon={<ImagePlus size={24} className="text-violet-600" />}
       title="Gallery"
       sub="Campus photos and moments"
-      locked={locked}
-      onToggleLock={onToggleLock}
       action={
         <button
           type="button"

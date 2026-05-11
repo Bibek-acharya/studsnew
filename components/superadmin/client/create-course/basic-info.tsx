@@ -25,9 +25,9 @@ const STATUSES = [
   { value: "upcoming", label: "Upcoming" },
 ] as const;
 
-export function BasicInfoCard({ locked, onToggleLock }: { locked: boolean; onToggleLock: () => void }) {
+export function BasicInfoCard() {
   return (
-    <FormCard icon={<BookOpen size={24} className="text-blue-600" />} title="Basic Information" sub="Essential details about the course" locked={locked} onToggleLock={onToggleLock}>
+    <FormCard icon={<BookOpen size={24} className="text-blue-600" />} title="Basic Information" sub="Essential details about the course">
       <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
         <FormInput label="Course Name" placeholder="e.g., 10+2 Science" required />
         <FormInput label="College / Institution" placeholder="e.g., Sowers College" required />
@@ -43,9 +43,9 @@ export function BasicInfoCard({ locked, onToggleLock }: { locked: boolean; onTog
   );
 }
 
-export function DescriptionCard({ locked, onToggleLock }: { locked: boolean; onToggleLock: () => void }) {
+export function DescriptionCard() {
   return (
-    <FormCard icon={<FileText size={24} className="text-amber-600" />} title="Description & Overview" sub="Course description and target audience" locked={locked} onToggleLock={onToggleLock}>
+    <FormCard icon={<FileText size={24} className="text-amber-600" />} title="Description & Overview" sub="Course description and target audience">
       <div className="space-y-6">
         <div>
           <label className="mb-2 block text-sm font-medium text-gray-700">Course Description</label>
@@ -61,7 +61,7 @@ export function DescriptionCard({ locked, onToggleLock }: { locked: boolean; onT
   );
 }
 
-export function FeesCard({ locked, onToggleLock }: { locked: boolean; onToggleLock: () => void }) {
+export function FeesCard() {
   const [particulars, setParticulars] = useState([
     { id: generateId(), name: "Admission Fee", amount: "25,000", freq: "One-time", note: "Non-refundable" },
     { id: generateId(), name: "Monthly Tuition Fee", amount: "6,500", freq: "Monthly (x12)", note: "Per month" },
@@ -70,7 +70,7 @@ export function FeesCard({ locked, onToggleLock }: { locked: boolean; onToggleLo
   ]);
 
   return (
-    <FormCard icon={<CreditCard size={24} className="text-green-600" />} title="Fee Structure" sub="Course fees and payment particulars" locked={locked} onToggleLock={onToggleLock} action={
+    <FormCard icon={<CreditCard size={24} className="text-green-600" />} title="Fee Structure" sub="Course fees and payment particulars" action={
       <button type="button" onClick={() => setParticulars((prev) => [...prev, { id: generateId(), name: "", amount: "", freq: "", note: "" }])} className="flex items-center gap-2 rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-blue-700">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M5 12h14" /><path d="M12 5v14" /></svg> Add Row
       </button>
@@ -110,7 +110,7 @@ export function FeesCard({ locked, onToggleLock }: { locked: boolean; onToggleLo
   );
 }
 
-export function FeaturesCard({ locked, onToggleLock }: { locked: boolean; onToggleLock: () => void }) {
+export function FeaturesCard( ) {
   const [features, setFeatures] = useState([
     { id: generateId(), num: 1, title: "Comprehensive Curriculum", desc: "NEB-approved curriculum covering theoretical and practical components with regular assessments and laboratory sessions." },
     { id: generateId(), num: 2, title: "State-of-the-Art Laboratories", desc: "Fully equipped Physics, Chemistry, and Biology laboratories with modern instruments." },
@@ -123,7 +123,7 @@ export function FeaturesCard({ locked, onToggleLock }: { locked: boolean; onTogg
   const addFeature = () => setFeatures((prev) => [...prev, { id: generateId(), num: prev.length + 1, title: "", desc: "" }]);
 
   return (
-    <FormCard icon={<Award size={24} className="text-purple-600" />} title="Course Features" sub="Key features and highlights of the course" locked={locked} onToggleLock={onToggleLock} action={
+    <FormCard icon={<Award size={24} className="text-purple-600" />} title="Course Features" sub="Key features and highlights of the course" action={
       <button type="button" onClick={addFeature} className="flex items-center gap-2 rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-blue-700">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M5 12h14" /><path d="M12 5v14" /></svg> Add Feature
       </button>
@@ -146,14 +146,14 @@ export function FeaturesCard({ locked, onToggleLock }: { locked: boolean; onTogg
   );
 }
 
-export function StreamsCard({ locked, onToggleLock }: { locked: boolean; onToggleLock: () => void }) {
+export function StreamsCard( ) {
   const [streams, setStreams] = useState([
     { id: generateId(), name: "Physical Group", subtitle: "Physics, Chemistry, Mathematics", desc: "Designed for students who aspire to pursue careers in engineering, technology, and pure sciences.", streams: "Physics, Chemistry, Mathematics (PCM)\nComputer Science & IT\nStatistics & Mathematics", careers: "Engineering (BE, BTech)\nB.Sc. CSIT / BIT\nArchitecture" },
     { id: generateId(), name: "Biology Group", subtitle: "Physics, Chemistry, Biology", desc: "Designed for students who aspire to pursue careers in medicine, healthcare, and life sciences.", streams: "Physics, Chemistry, Biology (PCB)\nMathematics (Optional)\nComputer Science (Optional)", careers: "Medicine (MBBS, BDS)\nNursing / Pharmacy\nAgriculture / Forestry" },
   ]);
 
   return (
-    <FormCard icon={<GraduationCap size={24} className="text-indigo-600" />} title="Course Streams & Groups" sub="Available streams within the course" locked={locked} onToggleLock={onToggleLock} action={
+    <FormCard icon={<GraduationCap size={24} className="text-indigo-600" />} title="Course Streams & Groups" sub="Available streams within the course" action={
       <button type="button" onClick={() => setStreams((prev) => [...prev, { id: generateId(), name: "", subtitle: "", desc: "", streams: "", careers: "" }])} className="flex items-center gap-2 rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-blue-700">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M5 12h14" /><path d="M12 5v14" /></svg> Add Stream
       </button>
@@ -189,7 +189,7 @@ export function StreamsCard({ locked, onToggleLock }: { locked: boolean; onToggl
   );
 }
 
-export function ScholarshipsOverviewCard({ locked, onToggleLock }: { locked: boolean; onToggleLock: () => void }) {
+export function ScholarshipsOverviewCard( ) {
   const [items, setItems] = useState([
     { id: generateId(), name: "Merit-Based (SEE GPA)", coverage: "50-100% Coverage", tag1: "GPA 3.6+", tag2: "", desc: "Students securing exceptionally high GPAs (typically above 3.6 or A+ aggregate) in their SEE examinations receive direct waivers." },
     { id: generateId(), name: "Entrance Toppers", coverage: "Up to 100%", tag1: "Top 10 Ranks", tag2: "", desc: "Top performers in the college's internal entrance examinations are rewarded with up to 100% scholarships." },
@@ -198,7 +198,7 @@ export function ScholarshipsOverviewCard({ locked, onToggleLock }: { locked: boo
   ]);
 
   return (
-    <FormCard icon={<Award size={24} className="text-yellow-600" />} title="Scholarship Overview" sub="Scholarship types and coverage details" locked={locked} onToggleLock={onToggleLock} action={
+    <FormCard icon={<Award size={24} className="text-yellow-600" />} title="Scholarship Overview" sub="Scholarship types and coverage details" action={
       <button type="button" onClick={() => setItems((prev) => [...prev, { id: generateId(), name: "", coverage: "", tag1: "", tag2: "", desc: "" }])} className="flex items-center gap-2 rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-blue-700">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M5 12h14" /><path d="M12 5v14" /></svg> Add
       </button>
@@ -220,14 +220,14 @@ export function ScholarshipsOverviewCard({ locked, onToggleLock }: { locked: boo
   );
 }
 
-export function AdmissionProcessCard({ locked, onToggleLock }: { locked: boolean; onToggleLock: () => void }) {
+export function AdmissionProcessCard( ) {
   const [steps, setSteps] = useState([
     { id: generateId(), step: "1", title: "Application Form", desc: "Many colleges from different districts open online admission forms, while many others still require you to open/submit the form physically at the college." },
     { id: generateId(), step: "2", title: "Entrance Examination", desc: "Colleges can have different admission times and schedules for their entrance exams." },
   ]);
 
   return (
-    <FormCard icon={<ClipboardList size={24} className="text-blue-600" />} title="Admission Process" sub="Step-by-step admission process" locked={locked} onToggleLock={onToggleLock} action={
+    <FormCard icon={<ClipboardList size={24} className="text-blue-600" />} title="Admission Process" sub="Step-by-step admission process" action={
       <button type="button" onClick={() => setSteps((prev) => [...prev, { id: generateId(), step: String(prev.length + 1), title: "", desc: "" }])} className="flex items-center gap-2 rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-blue-700">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M5 12h14" /><path d="M12 5v14" /></svg> Add Step
       </button>
@@ -250,14 +250,14 @@ export function AdmissionProcessCard({ locked, onToggleLock }: { locked: boolean
   );
 }
 
-export function FaqCard({ locked, onToggleLock }: { locked: boolean; onToggleLock: () => void }) {
+export function FaqCard( ) {
   const [faqs, setFaqs] = useState([
     { id: generateId(), question: "Is it mandatory to take Extra Mathematics if I choose the Biology group?", answer: "No, extra mathematics is an optional subject for Biology students. However, it is highly recommended if you are unsure whether you want to pursue medical or engineering fields later." },
     { id: generateId(), question: "Can I change my stream from Science to Management in Grade 12?", answer: "Once you are registered for the Science stream in Grade 11 with NEB, switching faculties for Grade 12 is generally not permitted." },
   ]);
 
   return (
-    <FormCard icon={<HelpCircle size={24} className="text-blue-600" />} title="FAQ" sub="Frequently asked questions" locked={locked} onToggleLock={onToggleLock} action={
+    <FormCard icon={<HelpCircle size={24} className="text-blue-600" />} title="FAQ" sub="Frequently asked questions" action={
       <button type="button" onClick={() => setFaqs((prev) => [...prev, { id: generateId(), question: "", answer: "" }])} className="flex items-center gap-2 rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-blue-700">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M5 12h14" /><path d="M12 5v14" /></svg> Add FAQ
       </button>
@@ -280,9 +280,9 @@ export function FaqCard({ locked, onToggleLock }: { locked: boolean; onToggleLoc
   );
 }
 
-export function MediaCard({ locked, onToggleLock }: { locked: boolean; onToggleLock: () => void }) {
+export function MediaCard( ) {
   return (
-    <FormCard icon={<ImageIcon size={24} className="text-green-600" />} title="Media" sub="Cover photo and gallery images" locked={locked} onToggleLock={onToggleLock}>
+    <FormCard icon={<ImageIcon size={24} className="text-green-600" />} title="Media" sub="Cover photo and gallery images">
       <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
         <div>
           <label className="mb-3 block text-sm font-medium text-gray-700">Cover / Banner Photo</label>

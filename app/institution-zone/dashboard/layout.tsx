@@ -16,19 +16,24 @@ export default function DashboardLayout({
 
   const getActivePage = (path: string): InstitutionPage => {
     if (path.includes("/admission/create")) return "createAdmission";
-    if (path.includes("/admission/form")) return "admissionForm";
     if (path.includes("/admission/applications")) return "admissionApplications";
     if (path.includes("/admission/directory")) return "admissionDirectory";
     if (path.includes("/admission/shortlist")) return "admissionShortlist";
+    if (path.includes("/admission/draft")) return "admissionDraft";
+    if (path.includes("/scholarship/create")) return "scholarshipCreate";
+    if (path.includes("/scholarship/draft")) return "scholarshipDraft";
+    if (path.includes("/scholarship/shortlist")) return "scholarshipShortlist";
     if (path.includes("/scholarship/applications")) return "scholarshipApplications";
     if (path.includes("/scholarship/list")) return "scholarshipList";
     if (path.includes("/counselling/requests")) return "counsellingRequests";
     if (path.includes("/counselling/history")) return "counsellingHistory";
     if (path.includes("/entrance/results")) return "entranceResults";
     if (path.includes("/entrance/applicants")) return "entranceApplicants";
+    if (path.includes("/entrance/draft")) return "entranceDraft";
+    if (path.includes("/entrance/directory")) return "entranceDirectory";
     if (path.includes("/entrance/create")) return "entranceCreate";
-    if (path.includes("/course/syllabus")) return "courseSyllabus";
-    if (path.includes("/course/material")) return "courseMaterial";
+    if (path.match(/\/entrance\/?$/)) return "entranceDetails";
+    if (path.includes("/course/create")) return "courseCreate";
     if (path.includes("/course/list")) return "courseList";
     if (path.includes("/message")) return "message";
     if (path.includes("/news/create")) return "createNews";
@@ -53,20 +58,25 @@ export default function DashboardLayout({
     const routeMap: Record<InstitutionPage, string> = {
       overview: "/institution-zone/dashboard/overview",
       createAdmission: "/institution-zone/dashboard/admission/create",
-      admissionForm: "/institution-zone/dashboard/admission/form",
       admissionApplications: "/institution-zone/dashboard/admission/applications",
       admissionDirectory: "/institution-zone/dashboard/admission/directory",
       admissionShortlist: "/institution-zone/dashboard/admission/shortlist",
+      admissionDraft: "/institution-zone/dashboard/admission/draft",
+      scholarshipCreate: "/institution-zone/dashboard/scholarship/create",
+      scholarshipDraft: "/institution-zone/dashboard/scholarship/draft",
+      scholarshipShortlist: "/institution-zone/dashboard/scholarship/shortlist",
       scholarshipList: "/institution-zone/dashboard/scholarship/list",
       scholarshipApplications: "/institution-zone/dashboard/scholarship/applications",
       counsellingRequests: "/institution-zone/dashboard/counselling/requests",
       counsellingHistory: "/institution-zone/dashboard/counselling/history",
+      entranceDetails: "/institution-zone/dashboard/entrance",
+      entranceDraft: "/institution-zone/dashboard/entrance/draft",
+      entranceDirectory: "/institution-zone/dashboard/entrance/directory",
       entranceCreate: "/institution-zone/dashboard/entrance/create",
       entranceApplicants: "/institution-zone/dashboard/entrance/applicants",
       entranceResults: "/institution-zone/dashboard/entrance/results",
+      courseCreate: "/institution-zone/dashboard/course/create",
       courseList: "/institution-zone/dashboard/course/list",
-      courseSyllabus: "/institution-zone/dashboard/course/syllabus",
-      courseMaterial: "/institution-zone/dashboard/course/material",
       message: "/institution-zone/dashboard/message",
       createNews: "/institution-zone/dashboard/news/create",
       newsDirectory: "/institution-zone/dashboard/news/directory",

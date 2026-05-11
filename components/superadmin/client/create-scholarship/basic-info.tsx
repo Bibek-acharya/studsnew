@@ -37,9 +37,9 @@ const SCHOLARSHIP_TYPES = [
 
 const BENEFITS = ["Tuition Fees", "Food & Accommodation", "Research Materials", "Travel Allowance", "Books & Supplies", "Full Support"];
 
-export function BasicInfoCard({ locked, onToggleLock }: { locked: boolean; onToggleLock: () => void }) {
+export function BasicInfoCard()  {
   return (
-    <FormCard icon={<GraduationCap size={24} className="text-blue-600" />} title="Basic Information" sub="Essential details about the scholarship program" locked={locked} onToggleLock={onToggleLock}>
+    <FormCard icon={<GraduationCap size={24} className="text-blue-600" />} title="Basic Information" sub="Essential details about the scholarship program">
       <div className="space-y-6">
         <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
           <FormInput label="Scholarship Title" placeholder="e.g., Project Shiksha Scholarship 2025" required />
@@ -54,9 +54,9 @@ export function BasicInfoCard({ locked, onToggleLock }: { locked: boolean; onTog
   );
 }
 
-export function FinancialCard({ locked, onToggleLock }: { locked: boolean; onToggleLock: () => void }) {
+export function FinancialCard()  {
   return (
-    <FormCard icon={<GraduationCap size={24} className="text-yellow-600" />} title="Financial Details" sub="Funding information and coverage details" locked={locked} onToggleLock={onToggleLock}>
+    <FormCard icon={<GraduationCap size={24} className="text-yellow-600" />} title="Financial Details" sub="Funding information and coverage details">
       <div className="space-y-6">
         <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-4">
           <FormInput label="Total Value / Amount" placeholder="e.g., NPR 500,000" required />
@@ -80,9 +80,9 @@ export function FinancialCard({ locked, onToggleLock }: { locked: boolean; onTog
   );
 }
 
-export function DescriptionCard({ locked, onToggleLock }: { locked: boolean; onToggleLock: () => void }) {
+export function DescriptionCard()  {
   return (
-    <FormCard icon={<GraduationCap size={24} className="text-amber-600" />} title="Description & Details" sub="Program overview, eligibility, and terms" locked={locked} onToggleLock={onToggleLock}>
+    <FormCard icon={<GraduationCap size={24} className="text-amber-600" />} title="Description & Details" sub="Program overview, eligibility, and terms">
       <div className="space-y-6">
         <div>
           <label className="mb-2 block text-sm font-medium text-gray-700">Program Description (About Tab)</label>
@@ -130,7 +130,7 @@ const EVENT_COLORS = [
   { value: "bg-gray-600", label: "Gray" },
 ];
 
-export function TimelineCard({ locked, onToggleLock }: { locked: boolean; onToggleLock: () => void }) {
+export function TimelineCard()  {
   const [dates, setDates] = React.useState([
     { id: generateId(), event: "Application Opens", date: "", dateText: "", desc: "", color: "bg-blue-600" },
     { id: generateId(), event: "Application Deadline", date: "", dateText: "", desc: "", color: "bg-blue-600" },
@@ -138,7 +138,7 @@ export function TimelineCard({ locked, onToggleLock }: { locked: boolean; onTogg
   ]);
 
   return (
-    <FormCard icon={<GraduationCap size={24} className="text-purple-600" />} title="Timeline & Important Dates" sub="Key dates for the scholarship program (shown in Timeline tab)" locked={locked} onToggleLock={onToggleLock} action={
+    <FormCard icon={<GraduationCap size={24} className="text-purple-600" />} title="Timeline & Important Dates" sub="Key dates for the scholarship program (shown in Timeline tab)" action={
       <button type="button" onClick={() => setDates((prev) => [...prev, { id: generateId(), event: "", date: "", dateText: "", desc: "", color: "bg-blue-600" }])} className="flex items-center gap-2 rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-blue-700">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M5 12h14" /><path d="M12 5v14" /></svg> Add Date
       </button>
@@ -193,14 +193,14 @@ const YEAR_COLORS = [
   { value: "bg-teal-600", label: "Teal" },
 ];
 
-export function JourneyTimelineCard({ locked, onToggleLock }: { locked: boolean; onToggleLock: () => void }) {
+export function JourneyTimelineCard()  {
   const [entries, setEntries] = React.useState([
     { id: generateId(), year: "2022", color: "bg-blue-600", title: "Project Shiksha Launched", desc: "Project Shiksha was founded by 100 Group..." },
     { id: generateId(), year: "2023", color: "bg-green-600", title: "First Batch of Scholars", desc: "Successfully enrolled the first batch..." },
   ]);
 
   return (
-    <FormCard icon={<Clock size={24} className="text-indigo-600" />} title="Journey Timeline" sub="Historical timeline entries shown in the About tab" locked={locked} onToggleLock={onToggleLock} action={
+    <FormCard icon={<Clock size={24} className="text-indigo-600" />} title="Journey Timeline" sub="Historical timeline entries shown in the About tab" action={
       <button type="button" onClick={() => setEntries((prev) => [...prev, { id: generateId(), year: "", color: "bg-blue-600", title: "", desc: "" }])} className="flex items-center gap-2 rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-blue-700">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M5 12h14" /><path d="M12 5v14" /></svg> Add Entry
       </button>
@@ -236,9 +236,9 @@ export function JourneyTimelineCard({ locked, onToggleLock }: { locked: boolean;
   );
 }
 
-export function MediaCard({ locked, onToggleLock }: { locked: boolean; onToggleLock: () => void }) {
+export function MediaCard()  {
   return (
-    <FormCard icon={<GraduationCap size={24} className="text-green-600" />} title="Media & Documents" sub="Cover photo, notice image, and official documents" locked={locked} onToggleLock={onToggleLock}>
+    <FormCard icon={<GraduationCap size={24} className="text-green-600" />} title="Media & Documents" sub="Cover photo, notice image, and official documents">
       <div className="space-y-6">
         <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
           <div>
@@ -279,9 +279,9 @@ export function MediaCard({ locked, onToggleLock }: { locked: boolean; onToggleL
   );
 }
 
-export function ContactCard({ locked, onToggleLock }: { locked: boolean; onToggleLock: () => void }) {
+export function ContactCard()  {
   return (
-    <FormCard icon={<GraduationCap size={24} className="text-green-600" />} title="Contact Information" sub="Provider contact details" locked={locked} onToggleLock={onToggleLock}>
+    <FormCard icon={<GraduationCap size={24} className="text-green-600" />} title="Contact Information" sub="Provider contact details">
       <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
         <div className="space-y-2">
           <label className="block text-sm font-medium text-gray-700">Provider Email</label>

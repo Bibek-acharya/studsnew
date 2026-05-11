@@ -5,7 +5,7 @@ import { Trophy, ImageIcon } from "lucide-react";
 import { FormCard } from "../add-college/FormCard";
 import { generateId } from "@/lib/superadmin/constants";
 
-export function AchievementsCard({ locked, onToggleLock }: { locked: boolean; onToggleLock: () => void }) {
+export function AchievementsCard()  {
   const [items, setItems] = useState([
     { id: generateId(), title: "Successful Scholarship Program", badge: "Success", desc: "95% of scholarship holders achieving distinction.", tags: "95% Pass, 85% Distinction", link: "" },
   ]);
@@ -16,7 +16,7 @@ export function AchievementsCard({ locked, onToggleLock }: { locked: boolean; on
     setItems((prev) => prev.map((x) => (x.id === id ? { ...x, [field]: val } : x)));
 
   return (
-    <FormCard icon={<Trophy size={24} className="text-yellow-600" />} title="Achievements" sub="Milestones and success stories (shown in Achievements tab)" locked={locked} onToggleLock={onToggleLock} action={
+    <FormCard icon={<Trophy size={24} className="text-yellow-600" />} title="Achievements" sub="Milestones and success stories (shown in Achievements tab)" action={
       <button type="button" onClick={addItem} className="flex items-center gap-2 rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-blue-700">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M5 12h14" /><path d="M12 5v14" /></svg> Add Achievement
       </button>
@@ -60,14 +60,14 @@ export function AchievementsCard({ locked, onToggleLock }: { locked: boolean; on
   );
 }
 
-export function GalleryCard({ locked, onToggleLock }: { locked: boolean; onToggleLock: () => void }) {
+export function GalleryCard()  {
   const [photos, setPhotos] = useState([
     "https://images.unsplash.com/photo-1541339907198-e08756dedf3f?w=300&h=300&fit=crop",
     "https://images.unsplash.com/photo-1523050854058-8df90110c9f1?w=300&h=300&fit=crop",
   ]);
 
   return (
-    <FormCard icon={<ImageIcon size={24} className="text-violet-600" />} title="Gallery" sub="Photo gallery for the scholarship" locked={locked} onToggleLock={onToggleLock}>
+    <FormCard icon={<ImageIcon size={24} className="text-violet-600" />} title="Gallery" sub="Photo gallery for the scholarship">
       <div className="space-y-6">
         <div className="cursor-pointer rounded-md border-2 border-dashed border-gray-200 p-12 text-center transition-all hover:border-blue-400 hover:bg-blue-50/50">
           <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-md bg-blue-100">

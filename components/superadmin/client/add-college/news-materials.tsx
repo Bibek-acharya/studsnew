@@ -6,20 +6,12 @@ import { FormCard } from "./FormCard";
 import { FormInput } from "./FormInput";
 import { NEWS_CATEGORIES, DOCUMENT_TYPES } from "@/lib/superadmin/constants";
 
-export function NewsNoticeCard({
-  locked,
-  onToggleLock,
-}: {
-  locked: boolean;
-  onToggleLock: () => void;
-}) {
+export function NewsNoticeCard() {
   return (
     <FormCard
       icon={<Newspaper size={24} className="text-cyan-600" />}
       title="News & Notice"
       sub="Latest updates and announcements"
-      locked={locked}
-      onToggleLock={onToggleLock}
       action={
         <button
           type="button"
@@ -67,13 +59,7 @@ export function NewsNoticeCard({
   );
 }
 
-export function DownloadsCard({
-  locked,
-  onToggleLock,
-}: {
-  locked: boolean;
-  onToggleLock: () => void;
-}) {
+export function DownloadsCard() {
   const documents = [
     { initials: "PR", title: "Prospectus 2025", meta: "PDF • 8.2 MB • Uploaded on Apr 20, 2026", bg: "bg-blue-100 text-blue-600" },
     { initials: "AF", title: "Application Form", meta: "PDF • 2.1 MB • Uploaded on Apr 18, 2026", bg: "bg-green-100 text-green-600" },
@@ -84,8 +70,6 @@ export function DownloadsCard({
       icon={<Download size={24} className="text-emerald-600" />}
       title="Downloads"
       sub="Brochures, forms, and documents"
-      locked={locked}
-      onToggleLock={onToggleLock}
       action={
         <button
           type="button"

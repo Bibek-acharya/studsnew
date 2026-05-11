@@ -6,20 +6,12 @@ import { FormCard } from "./FormCard";
 import { FormInput } from "./FormInput";
 import { FACILITIES } from "@/lib/superadmin/constants";
 
-export function FacilitiesCard({
-  locked,
-  onToggleLock,
-}: {
-  locked: boolean;
-  onToggleLock: () => void;
-}) {
+export function FacilitiesCard() {
   return (
     <FormCard
       icon={<CheckCircle size={24} className="text-orange-600" />}
       title="Facilities"
       sub="Campus infrastructure and amenities"
-      locked={locked}
-      onToggleLock={onToggleLock}
     >
       <div className="space-y-6">
         <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
@@ -115,20 +107,12 @@ function FacilityIcon({ id }: { id: string }) {
   }
 }
 
-export function EventsActivitiesCard({
-  locked,
-  onToggleLock,
-}: {
-  locked: boolean;
-  onToggleLock: () => void;
-}) {
+export function EventsActivitiesCard() {
   return (
     <FormCard
       icon={<Calendar size={24} className="text-rose-600" />}
       title="Events & Activities"
       sub="Campus events and student activities"
-      locked={locked}
-      onToggleLock={onToggleLock}
       action={
         <button
           type="button"
@@ -170,20 +154,12 @@ export function EventsActivitiesCard({
   );
 }
 
-export function CollegeScholarshipCard({
-  locked,
-  onToggleLock,
-}: {
-  locked: boolean;
-  onToggleLock: () => void;
-}) {
+export function CollegeScholarshipCard() {
   return (
     <FormCard
       icon={<Award size={24} className="text-yellow-600" />}
       title="Scholarship"
       sub="Financial aid and scholarship programs"
-      locked={locked}
-      onToggleLock={onToggleLock}
       action={
         <button
           type="button"

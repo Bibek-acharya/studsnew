@@ -1,238 +1,205 @@
 "use client";
-import React, { useState } from "react";
-import {
-  Plus,
-  MagnifyingGlass,
-  GraduationCap,
-  CheckCircle,
-  Users,
-  BookmarkSimple,
-  ChatCircleDots,
-  Trash,
-  Pencil,
-} from "@phosphor-icons/react";
-import SectionHeader from "@/components/institution-zone/dashboard/shared/SectionHeader";
-import StatCard from "@/components/institution-zone/dashboard/shared/StatCard";
 
-const breadcrumb = [
-  { label: "Dashboard", href: "/institution-zone/dashboard" },
-  { label: "Scholarship", href: "/institution-zone/dashboard/scholarship" },
-  { label: "Scholarship List" },
-];
+import React, { useState, useEffect, useCallback } from "react";
+import { useRouter } from "next/navigation";
+import { Home, Building2, CheckCircle, DollarSign, MapPin, GraduationCap, Calendar, Trash2, Pencil, Users } from "lucide-react";
+import { toast } from "sonner";
+import ConfirmationModal from "@/components/ScholarshipProvider/common/ConfirmationModal";
 
-const initialData = [
-  {
-    id: 1,
-    name: "Merit Excellence Scholarship",
-    level: "Undergraduate",
-    stream: "Science & Technology",
-    coverage: "Full Tuition",
-    eligibility: "GPA ≥ 3.5",
-    seats: 25,
-    status: "active",
-  },
-  {
-    id: 2,
-    name: "Need-Based Financial Aid",
-    level: "All Levels",
-    stream: "All Streams",
-    coverage: "NPR 50,000/year",
-    eligibility: "Income < NPR 5L",
-    seats: 50,
-    status: "active",
-  },
-  {
-    id: 3,
-    name: "Women in STEM Grant",
-    level: "Masters",
-    stream: "Engineering",
-    coverage: "NPR 100,000/year",
-    eligibility: "Female Candidates",
-    seats: 10,
-    status: "active",
-  },
-  {
-    id: 4,
-    name: "Rural Education Fund",
-    level: "Undergraduate",
-    stream: "Arts & Humanities",
-    coverage: "Partial Fee",
-    eligibility: "Rural Background",
-    seats: 30,
-    status: "inactive",
-  },
-  {
-    id: 5,
-    name: "Sports Achievement Award",
-    level: "All Levels",
-    stream: "All Streams",
-    coverage: "NPR 25,000/year",
-    eligibility: "National Level Sports",
-    seats: 15,
-    status: "active",
-  },
-  {
-    id: 6,
-    name: "Research Fellowship Program",
-    level: "PhD",
-    stream: "Research",
-    coverage: "NPR 200,000/year",
-    eligibility: "Masters Degree",
-    seats: 8,
-    status: "inactive",
-  },
-];
+const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080";
 
-const ScholarshipListPage = () => {
-  const [data] = useState(initialData);
-  const [search, setSearch] = useState("");
-  const [filterLevel, setFilterLevel] = useState("All");
-  const [filterStatus, setFilterStatus] = useState("All");
+const fundingColor = (type: string) => {
+  const map: Record<string, string> = {
+    "FULLY FUNDED": "bg-green-50 text-green-600",
+    "PARTIAL TUITION": "bg-blue-50 text-blue-600",
+    "MERIT-BASED": "bg-cyan-50 text-cyan-600",
+  };
+  return map[type] || "bg-gray-50 text-gray-600";
+};
 
-  const filtered = data.filter((s) => {
-    const matchSearch = s.name.toLowerCase().includes(search.toLowerCase());
-    const matchLevel = filterLevel === "All" || s.level === filterLevel;
-    const matchStatus = filterStatus === "All" || s.status === filterStatus;
-    return matchSearch && matchLevel && matchStatus;
+const statusBadge = (status: string) => {
+  const map: Record<string, string> = {
+    active: "bg-green-50 text-green-600",
+    draft: "bg-yellow-50 text-yellow-600",
+    published: "bg-green-50 text-green-600",
+    finished: "bg-orange-50 text-orange-600",
+  };
+  return map[status] || "bg-gray-50 text-gray-600";
+};
+
+const statusDot = (status: string) => {
+  const map: Record<string, string> = {
+    active: "bg-green-500",
+    draft: "bg-yellow-500",
+    published: "bg-green-500",
+    finished: "bg-orange-500",
+  };
+  return map[status] || "bg-gray-500";
+};
+
+const ScholarshipListPage: React.FC = () => {
+  const router = useRouter();
+  const [scholarships, setScholarships] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [deleteModal, setDeleteModal] = useState<{ isOpen: boolean; scholarshipId: number | null; title: string }>({
+    isOpen: false, scholarshipId: null, title: "",
   });
 
-  const stats = [
-    {
-      icon: <BookmarkSimple weight="fill" />,
-      iconBg: "bg-blue-100",
-      iconColor: "text-blue-600",
-      label: "Total Scholarships",
-      value: "24",
-    },
-    {
-      icon: <CheckCircle weight="fill" />,
-      iconBg: "bg-green-100",
-      iconColor: "text-green-600",
-      label: "Active",
-      value: "18",
-    },
-    {
-      icon: <Users weight="fill" />,
-      iconBg: "bg-purple-100",
-      iconColor: "text-purple-600",
-      label: "Applications",
-      value: "156",
-    },
-    {
-      icon: <GraduationCap weight="fill" />,
-      iconBg: "bg-amber-100",
-      iconColor: "text-amber-600",
-      label: "Awarded",
-      value: "89",
-    },
-  ];
+  useEffect(() => {
+    async function fetchData() {
+      try {
+        const token = localStorage.getItem("institutionToken");
+        const res = await fetch(`${API_BASE}/api/v1/scholarship-providers/scholarships?page=1&limit=50`, {
+          headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" },
+        });
+        const json = await res.json();
+        const data = json?.data || json;
+        const list = data?.scholarships || data || [];
+        const nonDrafts = list.filter((s: any) => s.status !== "draft");
+        setScholarships(nonDrafts);
+      } catch {
+        setScholarships([]);
+      } finally {
+        setLoading(false);
+      }
+    }
+    fetchData();
+  }, []);
+
+  const handleDelete = useCallback((id: number) => {
+    const target = scholarships.find((s) => s.id === id);
+    setDeleteModal({
+      isOpen: true,
+      scholarshipId: id,
+      title: target?.title || "this scholarship",
+    });
+  }, [scholarships]);
+
+  const confirmDeleteScholarship = useCallback(async () => {
+    if (!deleteModal.scholarshipId) return;
+    const scholarshipId = deleteModal.scholarshipId;
+    setDeleteModal({ isOpen: false, scholarshipId: null, title: "" });
+    try {
+      const token = localStorage.getItem("institutionToken");
+      await fetch(`${API_BASE}/api/v1/scholarship-providers/scholarships/${scholarshipId}`, {
+        method: "DELETE",
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      setScholarships((prev) => prev.filter((s) => s.id !== scholarshipId));
+      toast.success("Scholarship deleted successfully");
+    } catch {
+      toast.error("Failed to delete scholarship");
+    }
+  }, [deleteModal.scholarshipId]);
+
+  const handleEdit = (id: number) => {
+    router.push(`/institution-zone/dashboard/scholarship/create?id=${id}`);
+  };
+
+  const handleViewApplicants = (id: number) => {
+    router.push(`/institution-zone/dashboard/scholarship/applications?scholarshipId=${id}`);
+  };
+
+  if (loading) {
+    return <div className="py-12 text-center text-slate-500">Loading scholarships...</div>;
+  }
 
   return (
-    <div className="p-4 md:p-6 lg:p-8">
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-6">
-        <SectionHeader title="Scholarship List" breadcrumbItems={breadcrumb} />
-      </div>
+    <div className="p-4 md:p-6 lg:p-8 min-h-full space-y-6">
+      <ConfirmationModal
+        isOpen={deleteModal.isOpen}
+        title="Delete Scholarship"
+        message={`Are you sure you want to delete "${deleteModal.title}"? This action cannot be undone.`}
+        confirmText="Delete"
+        cancelText="Cancel"
+        onConfirm={confirmDeleteScholarship}
+        onCancel={() => setDeleteModal({ isOpen: false, scholarshipId: null, title: "" })}
+        destructive
+      />
 
-      <div className="flex justify-end mb-6">
-        <button className="px-4 py-2 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-700 flex items-center gap-2">
-          <Plus weight="bold" />
-          Add Scholarship
-        </button>
-      </div>
-
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-        {stats.map((s, i) => (
-          <StatCard key={i} {...s} />
-        ))}
-      </div>
-
-      <div className="bg-white rounded-xl p-6 border border-gray-100 shadow-sm">
-        <div className="flex flex-col sm:flex-row gap-4 mb-6">
-          <div className="relative flex-1">
-            <MagnifyingGlass className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
-            <input
-              type="text"
-              placeholder="Search scholarships..."
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              className="w-full pl-10 pr-4 py-2.5 border border-gray-300 rounded-lg text-sm focus:border-blue-600 outline-none"
-            />
-          </div>
-          <select
-            value={filterLevel}
-            onChange={(e) => setFilterLevel(e.target.value)}
-            className="px-4 py-2.5 border border-gray-300 rounded-lg text-sm focus:border-blue-600 outline-none"
-          >
-            <option value="All">All Levels</option>
-            <option value="Undergraduate">Undergraduate</option>
-            <option value="Masters">Masters</option>
-            <option value="PhD">PhD</option>
-            <option value="All Levels">All Levels</option>
-          </select>
-          <select
-            value={filterStatus}
-            onChange={(e) => setFilterStatus(e.target.value)}
-            className="px-4 py-2.5 border border-gray-300 rounded-lg text-sm focus:border-blue-600 outline-none"
-          >
-            <option value="All">All Status</option>
-            <option value="active">Active</option>
-            <option value="inactive">Inactive</option>
-          </select>
-        </div>
-
-        <div className="overflow-x-auto">
-          <table className="w-full">
-            <thead>
-              <tr className="bg-gray-50 border-b border-gray-200">
-                <th className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase">Scholarship Name</th>
-                <th className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase">Level</th>
-                <th className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase">Stream</th>
-                <th className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase">Coverage</th>
-                <th className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase">Eligibility</th>
-                <th className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase">Seats</th>
-                <th className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase">Status</th>
-                <th className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase">Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              {filtered.map((s) => (
-                <tr key={s.id} className="hover:bg-gray-50 border-b border-gray-200">
-                  <td className="px-4 py-3 text-sm font-medium text-gray-800">{s.name}</td>
-                  <td className="px-4 py-3 text-sm text-gray-600">{s.level}</td>
-                  <td className="px-4 py-3 text-sm text-gray-600">{s.stream}</td>
-                  <td className="px-4 py-3 text-sm text-gray-600">{s.coverage}</td>
-                  <td className="px-4 py-3 text-sm text-gray-600">{s.eligibility}</td>
-                  <td className="px-4 py-3 text-sm text-gray-600">{s.seats}</td>
-                  <td className="px-4 py-3">
-                    <span
-                      className={`px-2 py-1 rounded-full text-xs font-medium ${
-                        s.status === "active"
-                          ? "bg-green-100 text-green-700"
-                          : "bg-red-100 text-red-700"
-                      }`}
-                    >
-                      {s.status === "active" ? "Active" : "Inactive"}
-                    </span>
-                  </td>
-                  <td className="px-4 py-3">
-                    <div className="flex items-center gap-2">
-                      <button className="p-1.5 text-gray-400 hover:text-blue-600 transition-colors" title="Edit">
-                        <Pencil />
-                      </button>
-                      <button className="p-1.5 text-gray-400 hover:text-red-600 transition-colors" title="Delete">
-                        <Trash />
-                      </button>
-                      <button className="p-1.5 text-gray-400 hover:text-green-600 transition-colors" title="View Applications">
-                        <ChatCircleDots />
-                      </button>
-                    </div>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-2">
+        <h1 className="text-2xl font-bold text-gray-800">Scholarship Directory</h1>
+        <div className="flex items-center text-sm text-gray-500 mt-2 sm:mt-0 gap-2">
+          <Home className="w-4 h-4" />
+          <span>Dashboard</span>
+          <span>-</span>
+          <span className="text-gray-800 font-medium">Scholarship Directory</span>
         </div>
       </div>
+
+      {scholarships.length === 0 ? (
+        <div className="bg-white rounded-lg p-12 text-center border border-slate-100">
+          <p className="text-slate-500">No scholarships found.</p>
+        </div>
+      ) : (
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+          {scholarships.map((sch) => (
+            <div key={sch.id} className="bg-white rounded-lg border border-gray-200 p-3.5 shadow-sm">
+              <div className="w-full h-28 rounded-xl overflow-hidden mb-3">
+                <img
+                  src={sch.banner_background_image_url || sch.image_url || "https://images.unsplash.com/photo-1522202176988-66273c2fd55f?auto=format&fit=crop&w=800&q=80"}
+                  alt={sch.title}
+                  className="w-full h-full object-cover"
+                />
+              </div>
+              <div className="flex items-center gap-1.5 mb-2">
+                <span className={`${fundingColor(sch.funding_type)} text-[10px] font-bold px-2 py-1 rounded-md`}>
+                  {sch.funding_type || "SCHOLARSHIP"}
+                </span>
+                <span className={`${statusBadge(sch.status)} text-[10px] font-bold px-2 py-1 rounded-md flex items-center gap-1`}>
+                  <span className={`w-1 h-1 rounded-full ${statusDot(sch.status)}`} /> {sch.status.toUpperCase()}
+                </span>
+              </div>
+              <h3 className="text-base font-bold text-gray-900 mb-0.5 truncate">{sch.title}</h3>
+              <div className="flex items-center gap-1 text-gray-500 text-xs mb-3">
+                <Building2 className="w-3 h-3" />
+                <span className="truncate">{sch.provider_name || sch.provider}</span>
+                <CheckCircle className="w-3 h-3 text-blue-600" />
+              </div>
+              <div className="bg-gray-50 rounded-lg p-3 flex flex-col gap-2 border border-gray-100">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-1.5 text-gray-600 text-xs" title={sch.funding_type}>
+                    <DollarSign className="w-3 h-3 text-gray-400 shrink-0" />
+                    <span className="text-xs truncate">{sch.funding_type}</span>
+                  </div>
+                  <div className="flex items-center gap-1.5 text-gray-600 text-xs truncate">
+                    <MapPin className="w-3 h-3 text-gray-400" />
+                    <span className="text-xs truncate">{sch.location}</span>
+                  </div>
+                </div>
+                <div className="flex items-center gap-1.5 text-gray-600 text-xs">
+                  <GraduationCap className="w-3 h-3 text-gray-400" />
+                  <span className="text-xs">{sch.degree_level}</span>
+                </div>
+                <div className="flex items-center gap-1.5 text-red-500 text-xs font-medium">
+                  <Calendar className="w-3 h-3 text-red-400" />
+                  <span className="text-xs">Ends: {sch.deadline ? new Date(sch.deadline).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" }) : "N/A"}</span>
+                </div>
+              </div>
+              <div className="flex gap-1.5 mt-3">
+                <button
+                  onClick={() => handleEdit(sch.id)}
+                  className="flex-[0.7] py-2 px-2 border border-gray-300 text-gray-700 font-semibold rounded-md hover:bg-gray-50 transition-colors text-[11px]"
+                >
+                  <Pencil className="w-3 h-3 inline mr-0.5" /> Edit
+                </button>
+                <button
+                  onClick={() => handleDelete(sch.id)}
+                  className="flex-[0.7] py-2 px-2 border border-red-200 text-red-600 font-semibold rounded-md hover:bg-red-50 transition-colors text-[11px]"
+                >
+                  <Trash2 className="w-3 h-3 inline mr-0.5" /> Delete
+                </button>
+                <button
+                  onClick={() => handleViewApplicants(sch.id)}
+                  className="flex-[1.6] py-2 px-2 bg-blue-700 text-white font-semibold rounded-md hover:bg-blue-800 transition-colors text-[11px]"
+                >
+                  <Users className="w-3 h-3 inline mr-0.5" /> View Applicants
+                </button>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
     </div>
   );
 };

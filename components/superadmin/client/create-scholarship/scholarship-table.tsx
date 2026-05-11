@@ -5,14 +5,14 @@ import { Table, ListChecks } from "lucide-react";
 import { FormCard } from "../add-college/FormCard";
 import { generateId } from "@/lib/superadmin/constants";
 
-export function ScholarshipTypesCard({ locked, onToggleLock }: { locked: boolean; onToggleLock: () => void }) {
+export function ScholarshipTypesCard()  {
   const [rows, setRows] = useState([
     { id: generateId(), type: "Fully Funded", seats: "60 Seats (30 Boys & 30 Girls)", coverage: "Full Support", eligibility: "Financial Need + Merit", applyUrl: "https://projectshiksha.hundredgroupnepal.org/" },
     { id: generateId(), type: "Partially Funded", seats: "50 Seats", coverage: "Tuition Only", eligibility: "Merit Based", applyUrl: "https://projectshiksha.hundredgroupnepal.org/" },
   ]);
 
   return (
-    <FormCard icon={<Table size={24} className="text-blue-600" />} title="Scholarship Types" sub="Table of scholarship categories (shown in Scholarship tab with Apply buttons)" locked={locked} onToggleLock={onToggleLock} action={
+    <FormCard icon={<Table size={24} className="text-blue-600" />} title="Scholarship Types" sub="Table of scholarship categories (shown in Scholarship tab with Apply buttons)" action={
       <button type="button" onClick={() => setRows((prev) => [...prev, { id: generateId(), type: "", seats: "", coverage: "", eligibility: "", applyUrl: "" }])} className="flex items-center gap-2 rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-blue-700">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M5 12h14" /><path d="M12 5v14" /></svg> Add Row
       </button>
@@ -60,7 +60,7 @@ export function ScholarshipTypesCard({ locked, onToggleLock }: { locked: boolean
   );
 }
 
-export function SelectionRubricCard({ locked, onToggleLock }: { locked: boolean; onToggleLock: () => void }) {
+export function SelectionRubricCard()  {
   const [rows, setRows] = useState([
     { id: generateId(), criteria: "Written Examination", desc: "English, Math, Science, Social Studies", weight: "60%", marks: "60", passMark: "24" },
     { id: generateId(), criteria: "Personal Interview", desc: "Communication, Confidence, Goals", weight: "25%", marks: "25", passMark: "10" },
@@ -75,7 +75,7 @@ export function SelectionRubricCard({ locked, onToggleLock }: { locked: boolean;
   }), { weight: 0, marks: 0, passMark: 0 });
 
   return (
-    <FormCard icon={<ListChecks size={24} className="text-green-600" />} title="Selection Rubric" sub="Scoring criteria table shown in the Scholarship tab" locked={locked} onToggleLock={onToggleLock} action={
+    <FormCard icon={<ListChecks size={24} className="text-green-600" />} title="Selection Rubric" sub="Scoring criteria table shown in the Scholarship tab" action={
       <button type="button" onClick={() => setRows((prev) => [...prev, { id: generateId(), criteria: "", desc: "", weight: "", marks: "", passMark: "" }])} className="flex items-center gap-2 rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-blue-700">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M5 12h14" /><path d="M12 5v14" /></svg> Add Row
       </button>

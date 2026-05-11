@@ -1,7 +1,7 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  
+
   /* config options here */
   images: {
     remotePatterns: [
@@ -71,6 +71,7 @@ const nextConfig: NextConfig = {
       },
     ],
   },
+  allowedDevOrigins: ['petersburg-inside-grande-llp.trycloudflare.com'],
 };
 
 export default nextConfig;

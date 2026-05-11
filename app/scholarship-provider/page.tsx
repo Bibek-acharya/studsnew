@@ -378,7 +378,7 @@ const ScholarshipProviderZone: React.FC<ScholarshipProviderZoneProps> = ({
 
   if (currentView === "pending-approval") {
     return (
-      <div className="bg-gradient-to-br from-blue-50 via-white to-blue-50 min-h-screen flex items-center justify-center p-4 font-sans relative overflow-hidden">
+      <div className="bg-linear-to-br from-blue-50 via-white to-blue-50 min-h-screen flex items-center justify-center p-4 font-sans relative overflow-hidden">
         <div className="absolute top-0 left-0 w-full h-full overflow-hidden pointer-events-none">
           <div className="absolute -top-40 -right-40 w-80 h-80 bg-blue-100 rounded-full opacity-30 blur-3xl"></div>
           <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-blue-100 rounded-full opacity-30 blur-3xl"></div>
@@ -390,7 +390,7 @@ const ScholarshipProviderZone: React.FC<ScholarshipProviderZoneProps> = ({
           <h2 className="text-xl font-bold text-gray-900 mb-2">Application Submitted Successfully!</h2>
           <div className="bg-blue-50 border border-blue-100 rounded-xl p-5 mt-6 mb-6 text-left">
             <div className="flex items-start gap-3">
-              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-[#0000ff] mt-0.5 flex-shrink-0">
+              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-[#0000ff] mt-0.5 shrink-0">
                 <circle cx="12" cy="12" r="10"/><line x1="12" x2="12" y1="8" y2="12"/><line x1="12" x2="12.01" y1="16" y2="16"/>
               </svg>
               <p className="text-[14px] text-gray-700 font-medium leading-relaxed">

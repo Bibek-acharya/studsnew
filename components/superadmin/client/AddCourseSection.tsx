@@ -40,15 +40,15 @@ export default function AddCourseSection({
         </div>
       </div>
 
-      <BasicInfoCard locked={!!lockedSections.basic} onToggleLock={() => toggleLock("basic")} />
-      <DescriptionCard locked={!!lockedSections.desc} onToggleLock={() => toggleLock("desc")} />
-      <FeesCard locked={!!lockedSections.fees} onToggleLock={() => toggleLock("fees")} />
-      <FeaturesCard locked={!!lockedSections.features} onToggleLock={() => toggleLock("features")} />
-      <StreamsCard locked={!!lockedSections.streams} onToggleLock={() => toggleLock("streams")} />
-      <ScholarshipsOverviewCard locked={!!lockedSections.scholarships} onToggleLock={() => toggleLock("scholarships")} />
-      <AdmissionProcessCard locked={!!lockedSections.admission} onToggleLock={() => toggleLock("admission")} />
-      <FaqCard locked={!!lockedSections.faq} onToggleLock={() => toggleLock("faq")} />
-      <MediaCard locked={!!lockedSections.media} onToggleLock={() => toggleLock("media")} />
+      <BasicInfoCard />
+      <DescriptionCard />
+      <FeesCard />
+      <FeaturesCard />
+      <StreamsCard />
+      <ScholarshipsOverviewCard />
+      <AdmissionProcessCard />
+      <FaqCard />
+      <MediaCard />
 
       <div className="flex justify-end gap-4">
         <button

@@ -5,7 +5,7 @@ import { HelpCircle, Handshake } from "lucide-react";
 import { FormCard } from "../add-college/FormCard";
 import { generateId } from "@/lib/superadmin/constants";
 
-export function FaqCard({ locked, onToggleLock }: { locked: boolean; onToggleLock: () => void }) {
+export function FaqCard()  {
   const [faqs, setFaqs] = useState([
     { id: generateId(), question: "Who is eligible to apply for this scholarship?", answer: "" },
     { id: generateId(), question: "What is the selection process?", answer: "" },
@@ -17,7 +17,7 @@ export function FaqCard({ locked, onToggleLock }: { locked: boolean; onToggleLoc
     setFaqs((prev) => prev.map((f) => (f.id === id ? { ...f, [field]: val } : f)));
 
   return (
-    <FormCard icon={<HelpCircle size={24} className="text-blue-600" />} title="FAQ" sub="Frequently asked questions about the scholarship" locked={locked} onToggleLock={onToggleLock} action={
+    <FormCard icon={<HelpCircle size={24} className="text-blue-600" />} title="FAQ" sub="Frequently asked questions about the scholarship" action={
       <button type="button" onClick={addFaq} className="flex items-center gap-2 rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-blue-700">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M5 12h14" /><path d="M12 5v14" /></svg> Add FAQ
       </button>
@@ -50,7 +50,7 @@ const PARTNER_ROLES = [
   { value: "other", label: "Other" },
 ];
 
-export function PartnersCard({ locked, onToggleLock }: { locked: boolean; onToggleLock: () => void }) {
+export function PartnersCard()  {
   const [partners, setPartners] = useState([
     { id: generateId(), name: "100 Group", role: "lead_organizer", logoUrl: "", website: "" },
     { id: generateId(), name: "Sowers Action Nepal", role: "lead_organizer", logoUrl: "", website: "" },
@@ -62,7 +62,7 @@ export function PartnersCard({ locked, onToggleLock }: { locked: boolean; onTogg
     setPartners((prev) => prev.map((p) => (p.id === id ? { ...p, [field]: val } : p)));
 
   return (
-    <FormCard icon={<Handshake size={24} className="text-purple-600" />} title="Partners" sub="Organizations supporting the scholarship (shown in Partners tab grouped by role)" locked={locked} onToggleLock={onToggleLock} action={
+    <FormCard icon={<Handshake size={24} className="text-purple-600" />} title="Partners" sub="Organizations supporting the scholarship (shown in Partners tab grouped by role)" action={
       <button type="button" onClick={addPartner} className="flex items-center gap-2 rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-blue-700">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M5 12h14" /><path d="M12 5v14" /></svg> Add Partner
       </button>

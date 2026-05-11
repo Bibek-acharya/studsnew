@@ -10,14 +10,14 @@ const PROVINCES = [
   "Koshi Province", "Sudurpashchim Province", "Madhesh Province", "Karnali Province",
 ];
 
-export function ExamCentersCard({ locked, onToggleLock }: { locked: boolean; onToggleLock: () => void }) {
+export function ExamCentersCard()  {
   const [centers, setCenters] = useState([
     { id: generateId(), province: "Bagmati Province", city: "Kathmandu", venue: "Advance Academy, Lalitpur", contact: "Mr. Bablu Gupta", phone: "9851131074, 9861116456", mapUrl: "" },
     { id: generateId(), province: "Gandaki Province", city: "Pokhara", venue: "Gandaki College, Mahendrapul", contact: "Mr. Prasanna Dhungel", phone: "9801127672, 9856009596", mapUrl: "" },
   ]);
 
   return (
-    <FormCard icon={<MapPin size={24} className="text-red-600" />} title="Exam Centers" sub="Entrance exam locations by province" locked={locked} onToggleLock={onToggleLock} action={
+    <FormCard icon={<MapPin size={24} className="text-red-600" />} title="Exam Centers" sub="Entrance exam locations by province" action={
       <button type="button" onClick={() => setCenters((prev) => [...prev, { id: generateId(), province: "", city: "", venue: "", contact: "", phone: "", mapUrl: "" }])} className="flex items-center gap-2 rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-blue-700">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M5 12h14" /><path d="M12 5v14" /></svg> Add Center
       </button>

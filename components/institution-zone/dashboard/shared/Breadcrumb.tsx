@@ -9,7 +9,7 @@ interface BreadcrumbProps {
 const Breadcrumb: React.FC<BreadcrumbProps> = ({ items }) => {
   return (
     <div className="flex items-center text-sm text-gray-500 gap-2">
-      <House weight="fill" />
+      <House />
       {items.map((item, i) => (
         <React.Fragment key={i}>
           <span>-</span>

@@ -6,13 +6,7 @@ import { FormCard } from "./FormCard";
 import { FormInput } from "./FormInput";
 import { COURSE_LEVELS, ADMISSION_STATUSES, PROGRAM_STATUSES } from "@/lib/superadmin/constants";
 
-export function CoursesFeesCard({
-  locked,
-  onToggleLock,
-}: {
-  locked: boolean;
-  onToggleLock: () => void;
-}) {
+export function CoursesFeesCard() {
   const courses = [
     { initials: "CS", name: "B.Sc. CSIT", meta: "4 Years • Rs. 150,000/year • 120 Seats", bg: "bg-blue-100 text-blue-600" },
     { initials: "BF", name: "BBA Finance", meta: "4 Years • Rs. 120,000/year • 80 Seats", bg: "bg-green-100 text-green-600" },
@@ -23,8 +17,6 @@ export function CoursesFeesCard({
       icon={<BookOpen size={24} className="text-blue-600" />}
       title="Courses & Fees"
       sub="Add programs offered by the college"
-      locked={locked}
-      onToggleLock={onToggleLock}
       action={
         <button
           type="button"
@@ -101,20 +93,12 @@ export function CoursesFeesCard({
   );
 }
 
-export function AdmissionsCard({
-  locked,
-  onToggleLock,
-}: {
-  locked: boolean;
-  onToggleLock: () => void;
-}) {
+export function AdmissionsCard() {
   return (
     <FormCard
       icon={<ClipboardList size={24} className="text-green-600" />}
       title="Admissions"
       sub="Manage admission notices and deadlines"
-      locked={locked}
-      onToggleLock={onToggleLock}
       action={
         <button
           type="button"
@@ -154,20 +138,12 @@ export function AdmissionsCard({
   );
 }
 
-export function OfferedProgramsCard({
-  locked,
-  onToggleLock,
-}: {
-  locked: boolean;
-  onToggleLock: () => void;
-}) {
+export function OfferedProgramsCard() {
   return (
     <FormCard
       icon={<GraduationCap size={24} className="text-purple-600" />}
       title="Offered Programs"
       sub="List all programs offered"
-      locked={locked}
-      onToggleLock={onToggleLock}
       action={
         <button
           type="button"

@@ -7,7 +7,7 @@ import React, {
   useRef,
   useCallback,
 } from "react";
-import { useParams } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import { apiService } from "@/services/api";
 import CollegeCard from "@/components/admissions/CollegeCard";
 import { BadgeCheckIcon, ChevronLeft, ChevronRight, MessageSquarePlus } from "lucide-react";
@@ -24,6 +24,7 @@ import {
   ContactInfoRow,
 } from "./components";
 import ClaimCollegeModal from "./components/ClaimCollegeModal";
+import { getInstitutionCourses } from "@/services/institutionCourses";
 
 type TabKey =
   | "about"
@@ -409,6 +410,7 @@ const isCollegeVerified = (value: unknown): boolean => {
 
 const CollegeDetailsPage: React.FC = () => {
   const params = useParams();
+  const router = useRouter();
   const idStr = params.id as string;
   const collegeId = idStr && !idStr.startsWith("inst_") ? Number(idStr) : null;
 
@@ -627,6 +629,17 @@ const CollegeDetailsPage: React.FC = () => {
         (item) => programFilter === "all" || item.level === programFilter,
       ),
     [programFilter],
+  );
+  const institutionCoursesFromStorage = useMemo(
+    () => getInstitutionCourses().map((c) => ({
+      id: c.id,
+      level: c.level,
+      name: c.name,
+      affiliation: c.level === "+2" ? "NEB" : `${c.level} Program`,
+      status: c.status === "Active" ? "Ongoing" : "Closed",
+      courseId: c.id,
+    })),
+    [],
   );
   const filteredScholarships = useMemo(
     () =>
@@ -1047,9 +1060,9 @@ const CollegeDetailsPage: React.FC = () => {
                     <ProgTh className="col-span-2">STATUS</ProgTh>
                     <ProgTh className="col-span-2">ACTION</ProgTh>
                   </div>
-                  {(instPrograms && Array.isArray(instPrograms) ? instPrograms : filteredPrograms).map((program: any, i: number) => (
+                  {(instPrograms && Array.isArray(instPrograms) ? [...instPrograms, ...institutionCoursesFromStorage] : [...filteredPrograms, ...institutionCoursesFromStorage]).map((program: any, i: number) => (
                     <div
-                      key={program.name || i}
+                      key={program.name || program.courseId || i}
                       className="grid grid-cols-12 items-center gap-4 border-b border-gray-100 px-6 py-5 hover:bg-gray-50/50"
                     >
                       <div className="col-span-3">
@@ -1075,7 +1088,10 @@ const CollegeDetailsPage: React.FC = () => {
                         </span>
                       </div>
                       <div className="col-span-2">
-                        <button className="rounded-md bg-brand-blue/5 px-4 py-2 text-xs font-bold text-brand-blue hover:bg-brand-blue/10">
+                        <button
+                          onClick={() => program.courseId ? router.push(`/course-finder/${program.courseId}`) : undefined}
+                          className="rounded-md bg-brand-blue/5 px-4 py-2 text-xs font-bold text-brand-blue hover:bg-brand-blue/10"
+                        >
                           View Details
                         </button>
                       </div>

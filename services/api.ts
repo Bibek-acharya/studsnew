@@ -380,6 +380,7 @@ export interface EducationCourse {
   careerPath?: string;
   description?: string;
   image?: string;
+  source?: string;
 }
 
 export interface College {
@@ -853,8 +854,14 @@ export interface InstitutionProfileData {
   programs_data: any;
   facilities_data: any;
   alumni_data: any;
-  gallery_data: any;
   downloads_data: any;
+  whats_new_data: any;
+  eligibility_data: any;
+  admission_process_data: any;
+  scholarships_data: any;
+  faqs_data: any;
+  contact_persons_data: any;
+  brochure_data: any;
 }
 
 export const apiService = {
@@ -1636,9 +1643,33 @@ export const apiService = {
     return apiRequest("/api/v1/institution/analytics", { authToken: token || undefined });
   },
 
+  async getInstitutionAdmissions(status?: string): Promise<{ success: boolean; data: any[]; message: string }> {
+    const token = typeof window !== "undefined" ? localStorage.getItem("institutionToken") : null;
+    const query = status ? `?status=${status}` : "";
+    return apiRequest(`/api/v1/institution/admissions${query}`, { authToken: token || undefined });
+  },
+
+  async updateAdmissionStatus(id: number, status: string, notes?: string): Promise<{ success: boolean; data: any; message: string }> {
+    const token = typeof window !== "undefined" ? localStorage.getItem("institutionToken") : null;
+    return apiRequest(`/api/v1/institution/admissions/${id}/status`, {
+      method: "PUT",
+      body: JSON.stringify({ status, notes: notes || "" }),
+      authToken: token || undefined,
+    });
+  },
+
   async getInstitutionProfile(): Promise<{ success: boolean; data: InstitutionProfileData; message: string }> {
     const token = typeof window !== "undefined" ? localStorage.getItem("institutionToken") : null;
     return apiRequest("/api/v1/institution/profile", { authToken: token || undefined });
+  },
+
+  async updateInstitutionProfile(data: Partial<InstitutionProfileData>): Promise<{ success: boolean; data: InstitutionProfileData; message: string }> {
+    const token = typeof window !== "undefined" ? localStorage.getItem("institutionToken") : null;
+    return apiRequest("/api/v1/institution/profile", {
+      method: "PUT",
+      body: JSON.stringify(data),
+      authToken: token || undefined,
+    });
   },
 
   async listPendingInstitutions(): Promise<{ data: any[]; message: string }> {

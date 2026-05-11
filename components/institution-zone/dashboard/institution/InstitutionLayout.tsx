@@ -27,20 +27,26 @@ import {
 export type InstitutionPage =
   | "overview"
   | "createAdmission"
-  | "admissionForm"
+ 
   | "admissionApplications"
   | "admissionDirectory"
   | "admissionShortlist"
+  | "admissionDraft"
+  | "scholarshipCreate"
+  | "scholarshipDraft"
+  | "scholarshipShortlist"
   | "scholarshipList"
   | "scholarshipApplications"
   | "counsellingRequests"
   | "counsellingHistory"
+  | "entranceDetails"
+  | "entranceDraft"
+  | "entranceDirectory"
   | "entranceCreate"
   | "entranceApplicants"
   | "entranceResults"
+  | "courseCreate"
   | "courseList"
-  | "courseSyllabus"
-  | "courseMaterial"
   | "message"
   | "createNews"
   | "newsDirectory"
@@ -147,16 +153,16 @@ const InstitutionLayout: React.FC<Props> = ({ activePage, onNavigate, children }
       type: "item",
       page: "overview",
       label: "Overview",
-      icon: <SquaresFour weight="fill" className="w-[18px] h-[18px]" />,
+      icon: <SquaresFour className="w-[18px] h-[18px]" />,
     },
     {
       key: "admission",
       type: "dropdown",
       label: "Manage Admission",
-      icon: <UserPlus weight="fill" className="w-[18px] h-[18px]" />,
+      icon: <UserPlus className="w-[18px] h-[18px]" />,
       items: [
         { page: "createAdmission", label: "Create Admission" },
-        { page: "admissionForm", label: "Admission Form" },
+        { page: "admissionDraft", label: "Draft Admission" },
         { page: "admissionApplications", label: "Applications" },
         { page: "admissionDirectory", label: "Admission Directory" },
         { page: "admissionShortlist", label: "Shortlist" },
@@ -166,17 +172,20 @@ const InstitutionLayout: React.FC<Props> = ({ activePage, onNavigate, children }
       key: "scholarship",
       type: "dropdown",
       label: "Manage Scholarship",
-      icon: <GraduationCap weight="fill" className="w-[18px] h-[18px]" />,
+      icon: <GraduationCap className="w-[18px] h-[18px]" />,
       items: [
+        { page: "scholarshipCreate", label: "Create Scholarship" },
+        { page: "scholarshipDraft", label: "Draft Scholarship" },
         { page: "scholarshipList", label: "Scholarship List" },
         { page: "scholarshipApplications", label: "Applications" },
+        { page: "scholarshipShortlist", label: "Shortlist" },
       ],
     },
     {
       key: "counselling",
       type: "dropdown",
       label: "Manage Counselling",
-      icon: <ChatsCircle weight="fill" className="w-[18px] h-[18px]" />,
+      icon: <ChatsCircle className="w-[18px] h-[18px]" />,
       items: [
         { page: "counsellingRequests", label: "Counselling Requests" },
         { page: "counsellingHistory", label: "Session History" },
@@ -186,9 +195,11 @@ const InstitutionLayout: React.FC<Props> = ({ activePage, onNavigate, children }
       key: "entrance",
       type: "dropdown",
       label: "Manage Entrance",
-      icon: <ClipboardText weight="fill" className="w-[18px] h-[18px]" />,
+      icon: <ClipboardText className="w-[18px] h-[18px]" />,
       items: [
-        { page: "entranceCreate", label: "Create Exam" },
+        { page: "entranceDetails", label: "Create Entrance" },
+        { page: "entranceDraft", label: "Draft Entrance" },
+        { page: "entranceDirectory", label: "Entrance Directory" },
         { page: "entranceApplicants", label: "Applicants" },
         { page: "entranceResults", label: "Results" },
       ],
@@ -197,11 +208,10 @@ const InstitutionLayout: React.FC<Props> = ({ activePage, onNavigate, children }
       key: "course",
       type: "dropdown",
       label: "Manage Course",
-      icon: <BookOpen weight="fill" className="w-[18px] h-[18px]" />,
+      icon: <BookOpen className="w-[18px] h-[18px]" />,
       items: [
+        { page: "courseCreate", label: "Create Course" },
         { page: "courseList", label: "Course List" },
-        { page: "courseSyllabus", label: "Syllabus" },
-        { page: "courseMaterial", label: "Study Material" },
       ],
     },
     {
@@ -209,20 +219,20 @@ const InstitutionLayout: React.FC<Props> = ({ activePage, onNavigate, children }
       type: "item",
       page: "message",
       label: "Message",
-      icon: <Chats weight="fill" className="w-[18px] h-[18px]" />,
+      icon: <Chats className="w-[18px] h-[18px]" />,
     },
     {
       key: "inviteStudent",
       type: "item",
       page: "inviteStudent",
       label: "Invite Student",
-      icon: <EnvelopeOpen weight="fill" className="w-[18px] h-[18px]" />,
+      icon: <EnvelopeOpen className="w-[18px] h-[18px]" />,
     },
     {
       key: "news",
       type: "dropdown",
       label: "Manage News",
-      icon: <Newspaper weight="fill" className="w-[18px] h-[18px]" />,
+      icon: <Newspaper className="w-[18px] h-[18px]" />,
       items: [
         { page: "createNews", label: "Create News" },
         { page: "newsDirectory", label: "News Directory" },
@@ -232,7 +242,7 @@ const InstitutionLayout: React.FC<Props> = ({ activePage, onNavigate, children }
       key: "events",
       type: "dropdown",
       label: "Manage Events",
-      icon: <CalendarBlank weight="fill" className="w-[18px] h-[18px]" />,
+      icon: <CalendarBlank className="w-[18px] h-[18px]" />,
       items: [
         { page: "createEvent", label: "Create Event" },
         { page: "eventsDirectory", label: "Events Directory" },
@@ -242,7 +252,7 @@ const InstitutionLayout: React.FC<Props> = ({ activePage, onNavigate, children }
       key: "blogs",
       type: "dropdown",
       label: "Manage Blogs",
-      icon: <FileText weight="fill" className="w-[18px] h-[18px]" />,
+      icon: <FileText className="w-[18px] h-[18px]" />,
       items: [
         { page: "createBlog", label: "Create Blog" },
         { page: "blogDirectory", label: "Blog Directory" },
@@ -253,42 +263,42 @@ const InstitutionLayout: React.FC<Props> = ({ activePage, onNavigate, children }
       type: "item",
       page: "reviews",
       label: "Reviews",
-      icon: <Star weight="fill" className="w-[18px] h-[18px]" />,
+      icon: <Star className="w-[18px] h-[18px]" />,
     },
     {
       key: "manageAdvertisement",
       type: "item",
       page: "manageAdvertisement",
       label: "Manage Advertisement",
-      icon: <Megaphone weight="fill" className="w-[18px] h-[18px]" />,
+      icon: <Megaphone className="w-[18px] h-[18px]" />,
     },
     {
       key: "profile",
       type: "item",
       page: "profile",
       label: "Manage Profile",
-      icon: <UserGear weight="fill" className="w-[18px] h-[18px]" />,
+      icon: <UserGear className="w-[18px] h-[18px]" />,
     },
     {
       key: "analytics",
       type: "item",
       page: "analytics",
       label: "Analytics",
-      icon: <ChartBar weight="fill" className="w-[18px] h-[18px]" />,
+      icon: <ChartBar className="w-[18px] h-[18px]" />,
     },
     {
       key: "notification",
       type: "item",
       page: "notification",
       label: "Notification",
-      icon: <Bell weight="fill" className="w-[18px] h-[18px]" />,
+      icon: <Bell className="w-[18px] h-[18px]" />,
     },
     {
       key: "settings",
       type: "item",
       page: "settings",
       label: "Settings",
-      icon: <Gear weight="fill" className="w-[18px] h-[18px]" />,
+      icon: <Gear className="w-[18px] h-[18px]" />,
     },
   ];
 
@@ -350,7 +360,6 @@ const InstitutionLayout: React.FC<Props> = ({ activePage, onNavigate, children }
                     </div>
                     {!locked && (
                       <CaretRight
-                        weight="bold"
                         className={`text-xs transition-transform duration-200 ${isOpen ? "rotate-90" : ""}`}
                       />
                     )}
@@ -361,7 +370,7 @@ const InstitutionLayout: React.FC<Props> = ({ activePage, onNavigate, children }
                         isOpen ? "max-h-96" : "max-h-0"
                       }`}
                     >
-                      <div className="pl-10 pr-3 py-1 flex flex-col gap-1">
+                      <div className="pl-10 pr-3 py-2 flex flex-col gap-1">
                         {section.items.map((item) => (
                           <button
                             key={item.page}
@@ -375,7 +384,7 @@ const InstitutionLayout: React.FC<Props> = ({ activePage, onNavigate, children }
                                 : "text-gray-500 hover:text-brand-600 hover:bg-brand-50"
                             }`}
                           >
-                            <span>{item.label}</span>
+                            <span className="whitespace-nowrap">{item.label}</span>
                           </button>
                         ))}
                       </div>
@@ -421,7 +430,7 @@ const InstitutionLayout: React.FC<Props> = ({ activePage, onNavigate, children }
             onClick={() => setShowLogoutModal(true)}
             className="flex items-center gap-3 px-3 py-2.5 rounded-md transition-colors text-red-500 hover:bg-red-50"
           >
-            <SignOut weight="fill" className="w-[18px] h-[18px]" />
+            <SignOut className="w-[18px] h-[18px]" />
             <span className="font-medium text-sm">Logout</span>
           </button>
         </div>
@@ -473,11 +482,11 @@ const InstitutionLayout: React.FC<Props> = ({ activePage, onNavigate, children }
                   </div>
                   <div className="max-h-72 overflow-y-auto">
                     {[
-                      { icon: <UserPlus weight="fill" className="text-blue-600 text-sm" />, bg: "bg-blue-50", text: "New student application received", time: "2 minutes ago" },
-                      { icon: <SquaresFour weight="fill" className="text-orange-500 text-sm" />, bg: "bg-orange-50", text: "Scholarship deadline approaching", time: "1 hour ago" },
-                      { icon: <Chats weight="fill" className="text-green-600 text-sm" />, bg: "bg-green-50", text: "New message from applicant", time: "3 hours ago" },
-                      { icon: <FileText weight="fill" className="text-purple-600 text-sm" />, bg: "bg-purple-50", text: "Admission form updated", time: "1 day ago" },
-                      { icon: <BookOpen weight="fill" className="text-red-600 text-sm" />, bg: "bg-red-50", text: "Book issued to student", time: "3 days ago" },
+                      { icon: <UserPlus className="text-blue-600 text-sm" />, bg: "bg-blue-50", text: "New student application received", time: "2 minutes ago" },
+                      { icon: <SquaresFour className="text-orange-500 text-sm" />, bg: "bg-orange-50", text: "Scholarship deadline approaching", time: "1 hour ago" },
+                      { icon: <Chats className="text-green-600 text-sm" />, bg: "bg-green-50", text: "New message from applicant", time: "3 hours ago" },
+                      { icon: <FileText className="text-purple-600 text-sm" />, bg: "bg-purple-50", text: "Admission form updated", time: "1 day ago" },
+                      { icon: <BookOpen className="text-red-600 text-sm" />, bg: "bg-red-50", text: "Book issued to student", time: "3 days ago" },
                     ].map((notif, i) => (
                       <div
                         key={i}

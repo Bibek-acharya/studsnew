@@ -1,10 +1,27 @@
 "use client";
 import React, { useEffect, useState } from "react";
-import { Search, CheckCircle, XCircle, Link2, Clock, Users, CalendarDays, Plus, Trash2, X } from "lucide-react";
+import {
+  MagnifyingGlass,
+  CheckCircle,
+  XCircle,
+  Link as LinkIcon,
+  Clock,
+  Users,
+  CalendarBlank,
+  Plus,
+  Trash,
+  X,
+  ChatsCircle,
+} from "@phosphor-icons/react";
+import SectionHeader from "@/components/institution-zone/dashboard/shared/SectionHeader";
 import { apiService, InstitutionCounsellingBookingItem } from "@/services/api";
 
+const breadcrumb = [
+  { label: "Dashboard", href: "/institution-zone/dashboard" },
+  { label: "Counselling" },
+];
+
 type RequestStatus = "pending" | "confirmed" | "cancelled" | "completed";
-type CounsellingMode = "Online" | "In-Person" | "Phone";
 
 interface SlotItem {
   id: number;
@@ -24,7 +41,7 @@ const statusColors: Record<RequestStatus, string> = {
   pending: "bg-yellow-100 text-yellow-700",
   confirmed: "bg-green-100 text-green-700",
   cancelled: "bg-red-100 text-red-700",
-  completed: "bg-slate-100 text-slate-700",
+  completed: "bg-gray-100 text-gray-700",
 };
 
 const CounsellingPage: React.FC = () => {
@@ -115,19 +132,16 @@ const CounsellingPage: React.FC = () => {
   const acceptedStat = bookings.filter((booking) => booking.status === "confirmed").length;
 
   return (
-    <div className="p-4 lg:p-8 space-y-6 max-w-350 mx-auto">
-      <div>
-        <h1 className="text-2xl font-bold text-slate-900">Counselling Management</h1>
-        <p className="text-slate-500 text-sm mt-1">Manage student counselling requests and available time slots.</p>
-      </div>
+    <div className="p-4 md:p-6 lg:p-8 space-y-6">
+      <SectionHeader title="Counselling Management" breadcrumbItems={breadcrumb} />
 
       {/* Tabs */}
-      <div className="flex gap-1 bg-slate-100 rounded-md p-1 w-fit">
+      <div className="flex gap-1 bg-gray-100 rounded-md p-1 w-fit">
         {(["requests", "slots"] as const).map(t => (
           <button
             key={t}
             onClick={() => setTab(t)}
-            className={`px-5 py-2 rounded-md text-sm font-medium transition-colors ${tab === t ? "bg-white text-slate-900 " : "text-slate-500 hover:text-slate-700"}`}
+            className={`px-5 py-2 rounded-md text-sm font-medium transition-colors ${tab === t ? "bg-white text-gray-900 shadow-sm" : "text-gray-500 hover:text-gray-700"}`}
           >
             {t === "requests" ? "Student Requests" : "Manage Slots"}
           </button>
@@ -137,33 +151,33 @@ const CounsellingPage: React.FC = () => {
       {tab === "requests" && (
         <>
           {/* Stat Cards */}
-          <div className="grid grid-cols-3 gap-4 max-w-2xl">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
             {[
               { label: "Total Requests", value: totalStat, icon: <Users className="w-5 h-5" />, color: "text-blue-600 bg-blue-50" },
               { label: "Pending", value: pendingStat, icon: <Clock className="w-5 h-5" />, color: "text-yellow-600 bg-yellow-50" },
               { label: "Accepted / Linked", value: acceptedStat, icon: <CheckCircle className="w-5 h-5" />, color: "text-green-600 bg-green-50" },
             ].map(c => (
-              <div key={c.label} className="bg-white rounded-md border border-slate-200 p-4 flex items-center gap-3 ">
-                <div className={`w-9 h-9 rounded-full flex items-center justify-center ${c.color}`}>{c.icon}</div>
+              <div key={c.label} className="bg-white rounded-xl p-5 border border-gray-100 shadow-sm flex items-center gap-3">
+                <div className={`w-12 h-12 rounded-full flex items-center justify-center ${c.color}`}>{c.icon}</div>
                 <div>
-                  <p className="text-xs text-slate-500">{c.label}</p>
-                  <p className="text-xl font-bold text-slate-900">{c.value}</p>
+                  <p className="text-xs text-gray-500 font-medium">{c.label}</p>
+                  <p className="text-xl font-bold text-gray-800">{c.value}</p>
                 </div>
               </div>
             ))}
           </div>
 
           {/* Filters */}
-          <div className="bg-white rounded-md border border-slate-200  overflow-hidden">
-            <div className="p-4 border-b border-slate-100 flex flex-wrap gap-3">
+          <div className="bg-white rounded-xl border border-gray-100 shadow-sm overflow-hidden">
+            <div className="p-5 border-b border-gray-100 flex flex-wrap gap-3">
               <div className="relative flex-1 min-w-[200px]">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
-                <input value={search} onChange={e => setSearch(e.target.value)} placeholder="Search session or notes..." className="w-full pl-9 pr-4 py-2 border border-slate-200 rounded-md text-sm focus:ring-2 focus:ring-blue-500 outline-none" />
+                <MagnifyingGlass className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+                <input value={search} onChange={e => setSearch(e.target.value)} placeholder="Search session or notes..." className="w-full pl-9 pr-4 py-2.5 border border-gray-300 rounded-lg text-sm focus:border-blue-600 outline-none" />
               </div>
-              <select value={filterProgram} onChange={e => setFilterProgram(e.target.value)} className="border border-slate-200 rounded-md px-3 py-2 text-sm bg-white focus:ring-2 focus:ring-blue-500 outline-none">
+              <select value={filterProgram} onChange={e => setFilterProgram(e.target.value)} className="border border-gray-300 rounded-lg px-4 py-2.5 text-sm bg-white focus:border-blue-600 outline-none">
                 {programs.map(p => <option key={p}>{p}</option>)}
               </select>
-              <select value={filterStatus} onChange={e => setFilterStatus(e.target.value as typeof filterStatus)} className="border border-slate-200 rounded-md px-3 py-2 text-sm bg-white focus:ring-2 focus:ring-blue-500 outline-none">
+              <select value={filterStatus} onChange={e => setFilterStatus(e.target.value as typeof filterStatus)} className="border border-gray-300 rounded-lg px-4 py-2.5 text-sm bg-white focus:border-blue-600 outline-none">
                 <option value="All">All Status</option>
                 <option value="pending">Pending</option>
                 <option value="confirmed">Confirmed</option>
@@ -174,35 +188,35 @@ const CounsellingPage: React.FC = () => {
 
             {/* Table */}
             <div className="overflow-x-auto">
-              <table className="w-full min-w-[800px] text-left">
-                <thead className="bg-slate-50 text-xs uppercase text-slate-500 border-b border-slate-100">
+              <table className="w-full">
+                <thead className="bg-gray-50 border-b border-gray-200">
                   <tr>
                     {["Booking", "Session", "Date", "Notes", "Status", "Actions"].map(h => (
-                      <th key={h} className="p-3 font-semibold">{h}</th>
+                      <th key={h} className="px-5 py-3 text-left text-xs font-semibold text-gray-500 uppercase">{h}</th>
                     ))}
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-slate-100">
+                <tbody className="divide-y divide-gray-100">
                   {filtered.length === 0 ? (
-                    <tr><td colSpan={6} className="p-8 text-center text-slate-400 text-sm">No requests found.</td></tr>
+                    <tr><td colSpan={6} className="p-8 text-center text-gray-400 text-sm">No requests found.</td></tr>
                   ) : filtered.map((booking) => (
-                    <tr key={booking.id} className="hover:bg-slate-50 transition-colors">
-                      <td className="p-3 text-sm text-slate-600">#{booking.id}</td>
-                      <td className="p-3 text-sm text-slate-600">{booking.session?.title || 'Untitled session'}</td>
-                      <td className="p-3 text-sm text-slate-600">{booking.session?.scheduled_at ? new Date(booking.session.scheduled_at).toLocaleDateString() : '-'}</td>
-                      <td className="p-3 text-sm text-slate-600">{booking.notes || '-'}</td>
-                      <td className="p-3">
+                    <tr key={booking.id} className="hover:bg-gray-50 transition-colors">
+                      <td className="px-5 py-3 text-sm text-gray-600">#{booking.id}</td>
+                      <td className="px-5 py-3 text-sm text-gray-600">{booking.session?.title || 'Untitled session'}</td>
+                      <td className="px-5 py-3 text-sm text-gray-600">{booking.session?.scheduled_at ? new Date(booking.session.scheduled_at).toLocaleDateString() : '-'}</td>
+                      <td className="px-5 py-3 text-sm text-gray-600">{booking.notes || '-'}</td>
+                      <td className="px-5 py-3">
                         <span className={`px-2.5 py-1 rounded-full text-xs font-semibold ${statusColors[booking.status as RequestStatus]}`}>{booking.status}</span>
                       </td>
-                      <td className="p-3">
+                      <td className="px-5 py-3">
                         <div className="flex gap-1.5 flex-wrap">
                           {booking.status === 'pending' && (
-                            <button onClick={() => updateStatus(booking.id, 'confirmed')} className="px-2.5 py-1.5 bg-green-500 hover:bg-green-600 text-white rounded-md text-xs font-medium flex items-center gap-1 transition-colors">
+                            <button onClick={() => updateStatus(booking.id, 'confirmed')} className="h-8 px-3 bg-green-500 hover:bg-green-600 text-white rounded-md text-xs font-medium flex items-center gap-1 transition-colors">
                               <CheckCircle className="w-3.5 h-3.5" /> Confirm
                             </button>
                           )}
                           {booking.status !== 'cancelled' && booking.status !== 'completed' && (
-                            <button onClick={() => updateStatus(booking.id, 'cancelled')} className="px-2.5 py-1.5 bg-red-50 hover:bg-red-100 text-red-600 rounded-md text-xs font-medium flex items-center gap-1 transition-colors">
+                            <button onClick={() => updateStatus(booking.id, 'cancelled')} className="h-8 px-3 bg-red-50 hover:bg-red-100 text-red-600 rounded-md text-xs font-medium flex items-center gap-1 transition-colors">
                               <XCircle className="w-3.5 h-3.5" /> Cancel
                             </button>
                           )}
@@ -220,61 +234,61 @@ const CounsellingPage: React.FC = () => {
       {tab === "slots" && (
         <div className="grid grid-cols-1 lg:grid-cols-5 gap-6">
           {/* Create Slot Form */}
-          <div className="lg:col-span-2 bg-white rounded-md border border-slate-200  p-6 space-y-4 h-fit">
-            <h3 className="font-bold text-slate-800">Create New Slot</h3>
+          <div className="lg:col-span-2 bg-white rounded-xl border border-gray-100 shadow-sm p-6 space-y-4 h-fit">
+            <h3 className="font-bold text-gray-800">Create New Slot</h3>
             <div>
-              <label className="block text-sm font-medium text-slate-700 mb-1">Date</label>
-              <input type="date" value={slotDate} onChange={e => setSlotDate(e.target.value)} className="w-full border border-slate-200 rounded-md p-2.5 text-sm focus:ring-2 focus:ring-blue-500 outline-none" />
+              <label className="block text-sm font-medium text-gray-700 mb-1">Date</label>
+              <input type="date" value={slotDate} onChange={e => setSlotDate(e.target.value)} className="w-full px-4 py-2.5 border border-gray-300 rounded-lg text-sm focus:border-blue-600 outline-none" />
             </div>
             <div className="grid grid-cols-2 gap-3">
               <div>
-                <label className="block text-sm font-medium text-slate-700 mb-1">Start Time</label>
-                <input type="time" value={slotStart} onChange={e => setSlotStart(e.target.value)} className="w-full border border-slate-200 rounded-md p-2.5 text-sm focus:ring-2 focus:ring-blue-500 outline-none" />
+                <label className="block text-sm font-medium text-gray-700 mb-1">Start Time</label>
+                <input type="time" value={slotStart} onChange={e => setSlotStart(e.target.value)} className="w-full px-4 py-2.5 border border-gray-300 rounded-lg text-sm focus:border-blue-600 outline-none" />
               </div>
               <div>
-                <label className="block text-sm font-medium text-slate-700 mb-1">End Time</label>
-                <input type="time" value={slotEnd} onChange={e => setSlotEnd(e.target.value)} className="w-full border border-slate-200 rounded-md p-2.5 text-sm focus:ring-2 focus:ring-blue-500 outline-none" />
+                <label className="block text-sm font-medium text-gray-700 mb-1">End Time</label>
+                <input type="time" value={slotEnd} onChange={e => setSlotEnd(e.target.value)} className="w-full px-4 py-2.5 border border-gray-300 rounded-lg text-sm focus:border-blue-600 outline-none" />
               </div>
             </div>
             <div>
-              <label className="block text-sm font-medium text-slate-700 mb-1">Max Capacity</label>
-              <input type="number" min="1" max="50" value={slotCapacity} onChange={e => setSlotCapacity(e.target.value)} className="w-full border border-slate-200 rounded-md p-2.5 text-sm focus:ring-2 focus:ring-blue-500 outline-none" />
+              <label className="block text-sm font-medium text-gray-700 mb-1">Max Capacity</label>
+              <input type="number" min="1" max="50" value={slotCapacity} onChange={e => setSlotCapacity(e.target.value)} className="w-full px-4 py-2.5 border border-gray-300 rounded-lg text-sm focus:border-blue-600 outline-none" />
             </div>
-            <button onClick={addSlot} className="w-full py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-md text-sm font-semibold transition-colors flex items-center justify-center gap-2">
+            <button onClick={addSlot} className="w-full h-11 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-sm font-semibold transition-colors flex items-center justify-center gap-2">
               <Plus className="w-4 h-4" /> Create Slot
             </button>
           </div>
 
           {/* Available Slots */}
           <div className="lg:col-span-3 space-y-3">
-            <h3 className="font-bold text-slate-800">Current Availability</h3>
+            <h3 className="font-bold text-gray-800">Current Availability</h3>
             {slots.length === 0 ? (
-              <div className="bg-white rounded-md border border-slate-200 p-8 text-center text-slate-400 text-sm">
+              <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-8 text-center text-gray-400 text-sm">
                 No slots created yet.
               </div>
             ) : slots.map(s => (
-              <div key={s.id} className="bg-white rounded-md border border-slate-200  p-4 flex items-center justify-between gap-4">
+              <div key={s.id} className="bg-white rounded-xl border border-gray-100 shadow-sm p-5 flex items-center justify-between gap-4">
                 <div className="flex items-center gap-4">
-                  <div className="w-10 h-10 bg-blue-50 rounded-md flex items-center justify-center text-blue-600">
-                    <CalendarDays className="w-5 h-5" />
+                  <div className="w-12 h-12 bg-blue-50 rounded-full flex items-center justify-center text-blue-600">
+                    <CalendarBlank className="w-5 h-5" />
                   </div>
                   <div>
-                    <p className="font-semibold text-slate-800">{s.date}</p>
-                    <p className="text-sm text-slate-500">{s.start} — {s.end}</p>
+                    <p className="font-semibold text-gray-800">{s.date}</p>
+                    <p className="text-sm text-gray-500">{s.start} — {s.end}</p>
                   </div>
                 </div>
                 <div className="text-center">
-                  <p className="text-lg font-bold text-slate-900">{s.booked}<span className="text-slate-400 font-normal text-sm">/{s.capacity}</span></p>
-                  <p className="text-xs text-slate-400">Booked</p>
+                  <p className="text-lg font-bold text-gray-800">{s.booked}<span className="text-gray-400 font-normal text-sm">/{s.capacity}</span></p>
+                  <p className="text-xs text-gray-400">Booked</p>
                 </div>
                 <div className="w-24">
-                  <div className="h-2 bg-slate-100 rounded-full overflow-hidden">
+                  <div className="h-2 bg-gray-100 rounded-full overflow-hidden">
                     <div className="h-2 bg-blue-500 rounded-full" style={{ width: `${(s.booked / s.capacity) * 100}%` }} />
                   </div>
-                  <p className="text-xs text-slate-400 mt-1 text-right">{s.capacity - s.booked} free</p>
+                  <p className="text-xs text-gray-400 mt-1 text-right">{s.capacity - s.booked} free</p>
                 </div>
-                <button onClick={() => setSlots(prev => prev.filter(x => x.id !== s.id))} className="text-slate-400 hover:text-red-500 p-1">
-                  <Trash2 className="w-4 h-4" />
+                <button onClick={() => setSlots(prev => prev.filter(x => x.id !== s.id))} className="text-gray-400 hover:text-red-500 p-1">
+                  <Trash className="w-4 h-4" />
                 </button>
               </div>
             ))}
@@ -284,27 +298,27 @@ const CounsellingPage: React.FC = () => {
 
       {/* Meeting Link Modal */}
       {showLinkModal && (
-        <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center backdrop-blur-sm">
-          <div className="bg-white w-full max-w-md rounded-md shadow-2xl overflow-hidden m-4">
-            <div className="p-4 border-b bg-slate-50 flex justify-between items-center">
-              <h3 className="font-bold text-slate-800">Provide Online Meeting Link</h3>
-              <button onClick={() => setShowLinkModal(false)} className="text-slate-400 hover:text-slate-700"><X className="w-5 h-5" /></button>
+        <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center">
+          <div className="bg-white w-full max-w-md rounded-xl shadow-xl overflow-hidden m-4">
+            <div className="px-6 py-4 border-b border-gray-100 flex justify-between items-center">
+              <h3 className="font-bold text-gray-800">Provide Online Meeting Link</h3>
+              <button onClick={() => setShowLinkModal(false)} className="text-gray-400 hover:text-gray-600"><X className="w-5 h-5" /></button>
             </div>
-            <div className="p-5 space-y-4">
+            <div className="p-6 space-y-4">
               <div>
-                <label className="block text-sm font-medium text-slate-700 mb-1">Platform</label>
-                <select value={platform} onChange={e => setPlatform(e.target.value)} className="w-full border border-slate-200 rounded-md p-2.5 text-sm bg-white focus:ring-2 focus:ring-blue-500 outline-none">
+                <label className="block text-sm font-medium text-gray-700 mb-1">Platform</label>
+                <select value={platform} onChange={e => setPlatform(e.target.value)} className="w-full px-4 py-2.5 border border-gray-300 rounded-lg text-sm bg-white focus:border-blue-600 outline-none">
                   <option>Google Meet</option><option>Zoom</option><option>Microsoft Teams</option><option>Jitsi</option>
                 </select>
               </div>
               <div>
-                <label className="block text-sm font-medium text-slate-700 mb-1">Meeting URL</label>
-                <input value={meetUrl} onChange={e => setMeetUrl(e.target.value)} placeholder="https://meet.google.com/xxx" className="w-full border border-slate-200 rounded-md p-2.5 text-sm focus:ring-2 focus:ring-blue-500 outline-none" />
+                <label className="block text-sm font-medium text-gray-700 mb-1">Meeting URL</label>
+                <input value={meetUrl} onChange={e => setMeetUrl(e.target.value)} placeholder="https://meet.google.com/xxx" className="w-full px-4 py-2.5 border border-gray-300 rounded-lg text-sm focus:border-blue-600 outline-none" />
               </div>
               <div className="flex gap-3 justify-end pt-2">
-                <button onClick={() => setShowLinkModal(false)} className="px-4 py-2 border rounded-md text-slate-600 text-sm">Cancel</button>
-                <button onClick={provideLink} className="px-5 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-md text-sm font-semibold flex items-center gap-2">
-                  <Link2 className="w-4 h-4" /> Send Link
+                <button onClick={() => setShowLinkModal(false)} className="h-10 px-4 border border-gray-300 rounded-lg text-gray-600 text-sm font-medium hover:bg-gray-50">Cancel</button>
+                <button onClick={provideLink} className="h-10 px-5 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-sm font-semibold flex items-center gap-2">
+                  <LinkIcon className="w-4 h-4" /> Send Link
                 </button>
               </div>
             </div>

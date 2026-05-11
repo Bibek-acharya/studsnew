@@ -6,20 +6,12 @@ import { FormCard } from "./FormCard";
 import { FormInput } from "./FormInput";
 import { DEFAULT_INQUIRY_FIELDS } from "@/lib/superadmin/constants";
 
-export function MapLocationCard({
-  locked,
-  onToggleLock,
-}: {
-  locked: boolean;
-  onToggleLock: () => void;
-}) {
+export function MapLocationCard() {
   return (
     <FormCard
       icon={<MapPin size={24} className="text-green-600" />}
       title="Map Location"
       sub="College location on map"
-      locked={locked}
-      onToggleLock={onToggleLock}
     >
       <div className="space-y-4">
         <FormInput
@@ -44,20 +36,12 @@ export function MapLocationCard({
   );
 }
 
-export function InquiryFormCard({
-  locked,
-  onToggleLock,
-}: {
-  locked: boolean;
-  onToggleLock: () => void;
-}) {
+export function InquiryFormCard() {
   return (
     <FormCard
       icon={<Mail size={24} className="text-blue-600" />}
       title="Quick Inquiry Form Settings"
       sub="Configure inquiry form for students"
-      locked={locked}
-      onToggleLock={onToggleLock}
     >
       <div className="space-y-6">
         <div className="grid grid-cols-1 gap-6 md:grid-cols-2">

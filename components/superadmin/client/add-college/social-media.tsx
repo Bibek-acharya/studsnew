@@ -5,20 +5,12 @@ import { Share2 } from "lucide-react";
 import { FormCard } from "./FormCard";
 import { FormInput } from "./FormInput";
 
-export function SocialMediaCard({
-  locked,
-  onToggleLock,
-}: {
-  locked: boolean;
-  onToggleLock: () => void;
-}) {
+export function SocialMediaCard() {
   return (
     <FormCard
       icon={<Share2 size={24} className="text-pink-600" />}
       title="Social Media Links"
       sub="Connect with students on social platforms"
-      locked={locked}
-      onToggleLock={onToggleLock}
     >
       <div className="grid grid-cols-1 gap-6 md:grid-cols-5">
         <FormInput

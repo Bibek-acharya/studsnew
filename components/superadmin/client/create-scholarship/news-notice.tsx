@@ -13,7 +13,7 @@ const NEWS_CATEGORIES = [
   { value: "achievement", label: "Achievement" },
 ];
 
-export function NewsNoticeCard({ locked, onToggleLock }: { locked: boolean; onToggleLock: () => void }) {
+export function NewsNoticeCard()  {
   const [items, setItems] = useState([
     { id: generateId(), title: "Entrance Examination Schedule Published", category: "Notice", desc: "The entrance examination will be held on Shrawan 1, 2082.", date: "", link: "" },
   ]);
@@ -24,7 +24,7 @@ export function NewsNoticeCard({ locked, onToggleLock }: { locked: boolean; onTo
     setItems((prev) => prev.map((x) => (x.id === id ? { ...x, [field]: val } : x)));
 
   return (
-    <FormCard icon={<Newspaper size={24} className="text-cyan-600" />} title="News & Notice" sub="Announcements and updates (shown in News & Notice tab)" locked={locked} onToggleLock={onToggleLock} action={
+    <FormCard icon={<Newspaper size={24} className="text-cyan-600" />} title="News & Notice" sub="Announcements and updates (shown in News & Notice tab)" action={
       <button type="button" onClick={addItem} className="flex items-center gap-2 rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-blue-700">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M5 12h14" /><path d="M12 5v14" /></svg> Add News
       </button>

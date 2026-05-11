@@ -66,7 +66,7 @@ export interface EntranceDetailsResponse {
 
 const SEEDED_EXAMS: Exam[] = [
   {
-    id: "ioe-be-2081",
+    id: "ioe-entrance-2081",
     institution: "Tribhuvan University - IOE",
     verified: true,
     location: "Pulchowk Campus, Lalitpur",
@@ -353,7 +353,7 @@ const SEEDED_EXAMS: Exam[] = [
     imageUrl: "https://images.unsplash.com/photo-1523240795613-b5897db862b1?auto=format&fit=crop&w=800&q=80",
   },
   {
-    id: "ku-mmat-2081",
+    id: "kuumatt-2081",
     institution: "Kathmandu University",
     verified: true,
     location: "Dhulikhel, Kavrepalanchok",

@@ -5,9 +5,9 @@ import { CircleCheck, ClipboardList, FileText } from "lucide-react";
 import { FormCard } from "../add-college/FormCard";
 import { generateId } from "@/lib/superadmin/constants";
 
-export function EligibilityCard({ locked, onToggleLock }: { locked: boolean; onToggleLock: () => void }) {
+export function EligibilityCard()  {
   return (
-    <FormCard icon={<CircleCheck size={24} className="text-indigo-600" />} title="Eligibility & Selection" sub="Detailed criteria, selection process, and required documents" locked={locked} onToggleLock={onToggleLock}>
+    <FormCard icon={<CircleCheck size={24} className="text-indigo-600" />} title="Eligibility & Selection" sub="Detailed criteria, selection process, and required documents">
       <div className="space-y-6">
         <div>
           <label className="mb-2 block text-sm font-medium text-gray-700">Basic Eligibility Criteria</label>

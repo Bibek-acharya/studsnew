@@ -5,20 +5,12 @@ import { Video, FileText, Target } from "lucide-react";
 import { FormCard } from "./FormCard";
 import { FormInput } from "./FormInput";
 
-export function VideoIntroCard({
-  locked,
-  onToggleLock,
-}: {
-  locked: boolean;
-  onToggleLock: () => void;
-}) {
+export function VideoIntroCard() {
   return (
     <FormCard
       icon={<Video size={24} className="text-purple-600" />}
       title="Video Introduction"
       sub="Add college introduction video with staff"
-      locked={locked}
-      onToggleLock={onToggleLock}
       action={
         <button
           type="button"
@@ -86,20 +78,12 @@ function ParticipantCard({
   );
 }
 
-export function AboutDescriptionCard({
-  locked,
-  onToggleLock,
-}: {
-  locked: boolean;
-  onToggleLock: () => void;
-}) {
+export function AboutDescriptionCard() {
   return (
     <FormCard
       icon={<FileText size={24} className="text-amber-600" />}
       title="About & Description"
       sub="Tell students about the college"
-      locked={locked}
-      onToggleLock={onToggleLock}
     >
       <div className="space-y-6">
         <div className="space-y-2">
@@ -118,20 +102,12 @@ export function AboutDescriptionCard({
   );
 }
 
-export function VisionMissionCard({
-  locked,
-  onToggleLock,
-}: {
-  locked: boolean;
-  onToggleLock: () => void;
-}) {
+export function VisionMissionCard() {
   return (
     <FormCard
       icon={<Target size={24} className="text-indigo-600" />}
       title="Vision & Mission"
       sub="College's core values and goals"
-      locked={locked}
-      onToggleLock={onToggleLock}
     >
       <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
         <div className="space-y-2">
