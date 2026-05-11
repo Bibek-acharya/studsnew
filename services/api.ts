@@ -1940,11 +1940,21 @@ export const apiService = {
     return apiRequest(`/api/v1/public/volunteers/${id}`);
   },
 
-  async submitVolunteerApplication(volunteerId: number, data: any): Promise<any> {
+  async submitVolunteerApplication(volunteerId: number, data: any, cvFile?: File): Promise<any> {
+    const formData = new FormData();
+    Object.entries(data).forEach(([key, value]) => {
+      if (Array.isArray(value)) {
+        value.forEach((v: string) => formData.append(key, v));
+      } else {
+        formData.append(key, value as string);
+      }
+    });
+    if (cvFile) {
+      formData.append('cv_file', cvFile);
+    }
     return apiRequest(`/api/v1/public/volunteers/${volunteerId}/apply`, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(data),
+      body: formData,
     });
   },
 

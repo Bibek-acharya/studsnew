@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useMemo, useCallback, useEffect } from "react";
+import { SlidersHorizontal } from "lucide-react";
 import VolunteerCard from "@/components/volunteer/VolunteerCard";
 import type { Volunteer } from "@/components/volunteer/VolunteerCard";
 import VolunteerFilter, { VolunteerFilters, DEFAULT_VOLUNTEER_FILTERS } from "@/components/volunteer/VolunteerFilter";
@@ -54,6 +55,7 @@ export default function VolunteerPage() {
   const [totalResults, setTotalResults] = useState(0);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [showMobileFilters, setShowMobileFilters] = useState(false);
 
   const fetchVolunteers = useCallback(async (page: number) => {
     setLoading(true);
@@ -106,13 +108,24 @@ export default function VolunteerPage() {
   return (
     <div className="min-h-screen p-4 text-gray-800 md:p-6 lg:p-8">
       <div className="mx-auto flex max-w-350 flex-col gap-6 lg:flex-row lg:flex-nowrap lg:gap-8">
-        <aside className="w-full shrink-0 lg:w-75">
+        <aside className="hidden lg:block w-full shrink-0 lg:w-75">
           <VolunteerFilter filters={filters} setFilters={handleSetFilters} />
         </aside>
-        <main className="min-w-0 flex-1">
+
+        {/* Mobile filter drawer */}
+        {showMobileFilters && (
+          <div className="fixed inset-0 z-50 lg:hidden" onClick={() => setShowMobileFilters(false)}>
+            <div className="absolute inset-0 bg-black/50" />
+            <div className="absolute bottom-0 left-0 right-0 max-h-[70vh] bg-white rounded-t-2xl shadow-xl overflow-y-auto" onClick={(e) => e.stopPropagation()}>
+              <VolunteerFilter filters={filters} setFilters={handleSetFilters} onClose={() => setShowMobileFilters(false)} />
+            </div>
+          </div>
+        )}
+
+        <main className="w-full min-w-0 lg:w-[calc(100%-19rem)]">
           <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
             <div>
-              <h1 className="text-xl font-bold text-gray-900">
+              <h1 className="text-md text-gray-900">
                 {loading ? (
                   "Loading volunteers..."
                 ) : (
@@ -120,17 +133,27 @@ export default function VolunteerPage() {
                 )}
               </h1>
             </div>
-            <div className="relative w-full sm:w-72">
-              <input
-                type="text"
-                value={filters.search}
-                onChange={(e) => { setFilters((prev) => ({ ...prev, search: e.target.value })); setCurrentPage(1); }}
-                placeholder="Search volunteer opportunities..."
-                className="w-full rounded-lg border border-gray-300 py-2.5 pl-4 pr-10 text-[14px] outline-none focus:border-[#0000ff] transition-all"
-              />
-              <svg className="absolute right-3 top-1/2 h-5 w-5 -translate-y-1/2 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-              </svg>
+            <div className="relative flex w-full sm:w-95 items-center gap-2">
+              <div className="relative flex-1">
+                <input
+                  type="text"
+                  value={filters.search}
+                  onChange={(e) => { setFilters((prev) => ({ ...prev, search: e.target.value })); setCurrentPage(1); }}
+                  placeholder="Search volunteer opportunities..."
+                  className="w-full rounded-lg border border-gray-300 py-2.5 pl-4 pr-10 text-[14px] outline-none focus:border-[#0000ff] transition-all"
+                />
+                <svg className="absolute right-3 top-1/2 h-5 w-5 -translate-y-1/2 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                </svg>
+              </div>
+              <button
+                type="button"
+                onClick={() => setShowMobileFilters(true)}
+                className="lg:hidden flex items-center justify-center gap-1.5 shrink-0 px-3 py-2.5 bg-white border border-gray-300 rounded-lg text-[13px] font-semibold text-gray-700 hover:bg-gray-50 transition-colors"
+              >
+                <SlidersHorizontal size={14} />
+                Filters
+              </button>
             </div>
           </div>
           {loading ? (

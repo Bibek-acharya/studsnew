@@ -77,7 +77,7 @@ const HeroSection: React.FC<HeroSectionProps> = ({ onNavigate }) => {
 
   return (
     <div className="w-full pt-2 pb-6 md:pb-4 flex justify-center px-4 sm:px-6 md:px-8">
-        <main className="relative w-full max-w-350 h-85 sm:h-105 md:h-auto md:min-h-120 lg:h-135 flex items-center justify-center overflow-hidden rounded-xl md:rounded-2xl">
+        <main className="relative w-full max-w-350 h-60 sm:h-70 md:h-auto md:min-h-120 lg:h-135 flex items-center justify-center overflow-hidden rounded-xl md:rounded-2xl">
         {/* Background Slider Container */}
         <div id="slider-container" className="absolute inset-0 z-0 overflow-hidden">
           <div
@@ -99,7 +99,7 @@ const HeroSection: React.FC<HeroSectionProps> = ({ onNavigate }) => {
         <div className="absolute inset-0 bg-linear-to-b from-black/60 via-transparent to-black/70 z-10"></div>
 
         {/* MOBILE LAYOUT */}
-        <div className="md:hidden relative z-20 w-full h-full flex flex-col justify-center items-center px-4 sm:px-6 pb-18 sm:pb-20 text-white text-center mt-0 sm:mt-1">
+        <div className="md:hidden relative z-20 w-full h-full flex flex-col justify-center items-center px-4 sm:px-6 text-white text-center mt-0 sm:mt-1">
           <h1 className="text-2xl sm:text-3xl font-bold tracking-tight mb-2 drop- leading-tight">
             Find Your Perfect College
           </h1>

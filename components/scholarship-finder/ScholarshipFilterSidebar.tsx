@@ -187,7 +187,7 @@ const ScholarshipFilterSidebar: React.FC<ScholarshipFilterSidebarProps> = ({
   const clearAll = () => setFilters({ studyLevel: [], location: [], courseStream: [], scholarshipType: [], providerType: [], coverage: [], gpaRequirement: [], deadlineType: [] });
 
   return (
-    <aside className="w-full lg:w-1/5 bg-white rounded-md border border-gray-200/80 p-5 shrink-0 lg:sticky lg:top-8">
+    <aside className="w-full bg-white rounded-md border border-gray-200/80 p-5 shrink-0 lg:sticky lg:top-8">
       {/* Header */}
       <div className="mb-2 flex items-center justify-between">
         <div className="flex items-center gap-3">

@@ -245,9 +245,9 @@ export default function ApplicationDetails({ applicationId, onBack, onStatusUpda
               <DetailField label="Temporary Municipality" value={application.temporary_municipality || "N/A"} />
               <DetailField label="Temporary Ward" value={application.temporary_ward || "N/A"} />
               <DetailField label="Temporary Tole" value={application.temporary_tole || "N/A"} />
-              <DetailField label="Guardian Name" value={application.guardian_name || "N/A"} />
-              <DetailField label="Guardian Phone" value={application.guardian_phone || "N/A"} />
-              <DetailField label="Guardian Email" value={application.guardian_email || "N/A"} />
+              <DetailField label="Parent's Name" value={application.guardian_name || "N/A"} />
+              <DetailField label="Parent's Phone" value={application.guardian_phone || "N/A"} />
+              <DetailField label="Parent's Email" value={application.guardian_email || "N/A"} />
               <DetailField label="Father Occupation" value={application.father_occupation || "N/A"} />
               <DetailField label="Father Occupation Other" value={application.father_occupation_other || "N/A"} />
               <DetailField label="Mother Occupation" value={application.mother_occupation || "N/A"} />

@@ -169,8 +169,8 @@ export default function ApplicantProfileModal({ applicationId, onClose, onStatus
                     Family Background
                   </h4>
                   <div className="space-y-3 p-4 bg-gray-50 rounded-xl">
-                    <InfoRow label="Guardian's Name" value={application.guardian_name} />
-                    <InfoRow label="Guardian's Phone" value={application.guardian_phone} />
+                    <InfoRow label="Parent's Name" value={application.guardian_name} />
+                    <InfoRow label="Parent's Phone" value={application.guardian_phone} />
                     <InfoRow label="Father's Occupation" value={application.father_occupation} />
                     <InfoRow label="Mother's Occupation" value={application.mother_occupation} />
                     <InfoRow label="Family Monthly Income" value={application.family_monthly_income != null ? `NPR ${application.family_monthly_income.toLocaleString()}` : undefined} />

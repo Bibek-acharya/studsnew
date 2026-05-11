@@ -32,6 +32,7 @@ export default function VolunteerApplyPage({ params }: { params: Promise<{ id: s
   const [selectedDays, setSelectedDays] = useState<string[]>([]);
   const [volunteeredBefore, setVolunteeredBefore] = useState("");
   const [volunteerDetails, setVolunteerDetails] = useState("");
+  const [cvFile, setCvFile] = useState<File | null>(null);
   const [submitted, setSubmitted] = useState(false);
   const [declaration, setDeclaration] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
@@ -59,6 +60,11 @@ export default function VolunteerApplyPage({ params }: { params: Promise<{ id: s
     "participateDistrict", "availableDays", "volunteeredBefore", "declaration"
   ];
 
+  const localBody = district && municipality
+    ? (NEPAL_LOCAL_BODIES[district as keyof typeof NEPAL_LOCAL_BODIES] as Array<{ name: string; wards: number }>)?.find(lb => lb.name === municipality)
+    : null;
+  const maxWard = localBody?.wards || 0;
+
   function getFieldErrors(): Record<string, string> {
     const e: Record<string, string> = {};
     if (!fullName.trim()) e.fullName = "Full name is required";
@@ -73,6 +79,7 @@ export default function VolunteerApplyPage({ params }: { params: Promise<{ id: s
     if (!district) e.district = "District is required";
     if (!municipality) e.municipality = "Municipality is required";
     if (!ward) e.ward = "Ward number is required";
+    else if (maxWard > 0 && Number(ward) > maxWard) e.ward = `${municipality} has only ${maxWard} wards`;
     if (!tole.trim()) e.tole = "Tole/Village is required";
     if (!participateDistrict) e.participateDistrict = "Participating district is required";
     if (selectedDays.length === 0) e.availableDays = "Select at least one available day";
@@ -149,7 +156,7 @@ export default function VolunteerApplyPage({ params }: { params: Promise<{ id: s
         available_days: selectedDays,
         volunteered_before: volunteeredBefore,
         volunteer_details: volunteerDetails,
-      });
+      }, cvFile || undefined);
       setSubmitted(true);
     } catch {
       alert("Failed to submit application. Please try again.");
@@ -199,8 +206,8 @@ export default function VolunteerApplyPage({ params }: { params: Promise<{ id: s
       </header>
 
       <main className="w-full max-w-[900px] bg-white rounded-2xl relative">
-        <div className="bg-[#f0fdf4] border-b border-[#bbf7d0] py-3.5 px-6 flex justify-center items-center gap-3 text-[14px] text-[#166534]">
-          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-5 h-5 flex-shrink-0">
+        <div className="bg-[#f0fdf4] border-b border-[#bbf7d0] py-3.5 px-6 flex justify-center items-center gap-3 text-[14px] text-[#166534] rounded-t-2xl">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-5 h-5 shrink-0">
             <path fillRule="evenodd" d="M12.516 2.17a.75.75 0 00-1.032 0 11.209 11.209 0 01-7.877 3.08.75.75 0 00-.722.515A12.74 12.74 0 002.25 9.75c0 5.942 4.064 10.933 9.563 12.348a.749.749 0 00.374 0c5.499-1.415 9.563-6.406 9.563-12.348 0-1.39-.223-2.73-.635-3.985a.75.75 0 00-.722-.516l-.143.001c-2.996 0-5.717-1.17-7.734-3.08zm3.094 8.016a.75.75 0 10-1.22-.872l-3.236 4.53L9.53 12.22a.75.75 0 00-1.06 1.06l2.25 2.25a.75.75 0 001.14-.094l3.75-5.25z" clipRule="evenodd" />
           </svg>
           <span className="font-medium">Your data is secure and will be used for volunteer registration purposes only.</span>
@@ -272,7 +279,7 @@ export default function VolunteerApplyPage({ params }: { params: Promise<{ id: s
               </div>
               <div ref={fieldRefs.ward}>
                 <label className="block text-[14px] font-semibold text-gray-700 mb-1.5">Ward No. <span className="text-red-500">*</span></label>
-                <input type="number" value={ward} onChange={(e) => { setWard(e.target.value); if (errors.ward) setErrors((p) => { const n = { ...p }; delete n.ward; return n; }); }} required min={1}
+                <input type="number" value={ward} onChange={(e) => { const val = e.target.value; setWard(val); if (maxWard > 0 && Number(val) > maxWard) { setErrors((p) => ({ ...p, ward: `${municipality} has only ${maxWard} wards` })); } else { setErrors((p) => { const n = { ...p }; delete n.ward; return n; }); } }} required min={1} max={maxWard || undefined}
                   className={`w-full border rounded py-3 px-4 text-[15px] text-gray-800 outline-none focus:ring-0 focus:border-[#0000ff] transition-all bg-white ${errors.ward ? "border-red-500" : "border-gray-300"}`}
                   placeholder="Ward Number" />
                 {errors.ward && <p className="text-red-500 text-[13px] mt-1">{errors.ward}</p>}
@@ -331,6 +338,45 @@ export default function VolunteerApplyPage({ params }: { params: Promise<{ id: s
                 {errors.volunteerDetails && <p className="text-red-500 text-[13px] mt-1">{errors.volunteerDetails}</p>}
               </div>
             )}
+          </div>
+
+          <div className="mb-12">
+            <div className="mb-6 pb-3">
+              <h2 className="text-[20px] font-bold text-[#1e293b]">Documents</h2>
+            </div>
+            <div className="grid grid-cols-1 gap-y-5">
+              <div>
+                <label className="block text-[14px] font-semibold text-gray-700 mb-1.5">Upload CV / Resume</label>
+                <div className={`border-2 border-dashed rounded-lg p-6 text-center cursor-pointer transition-colors ${cvFile ? "border-[#0000ff] bg-blue-50" : "border-gray-300 hover:border-gray-400"}`}
+                  onClick={() => document.getElementById("cv-file-input")?.click()}>
+                  {cvFile ? (
+                    <div className="flex flex-col items-center gap-2">
+                      <svg className="w-8 h-8 text-[#0000ff]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+                      <span className="text-[14px] font-medium text-[#0000ff]">{cvFile.name}</span>
+                      <span className="text-[12px] text-gray-500">{(cvFile.size / 1024).toFixed(1)} KB</span>
+                      <button type="button" onClick={(e) => { e.stopPropagation(); setCvFile(null); }} className="text-[13px] text-red-500 hover:text-red-700 font-medium">Remove</button>
+                    </div>
+                  ) : (
+                    <div className="flex flex-col items-center gap-2">
+                      <svg className="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"></path></svg>
+                      <span className="text-[14px] text-gray-500">Click to upload CV / Resume</span>
+                      <span className="text-[12px] text-gray-400">PDF, DOC or DOCX (Max 10MB)</span>
+                    </div>
+                  )}
+                </div>
+                <input id="cv-file-input" type="file" accept=".pdf,.doc,.docx" className="hidden"
+                  onChange={(e) => {
+                    const file = e.target.files?.[0];
+                    if (file) {
+                      if (file.size > 10 * 1024 * 1024) {
+                        alert("File size must be under 10MB");
+                        return;
+                      }
+                      setCvFile(file);
+                    }
+                  }} />
+              </div>
+            </div>
           </div>
 
           <div ref={fieldRefs.declaration} className="mt-10 pt-6 border-t border-gray-200">

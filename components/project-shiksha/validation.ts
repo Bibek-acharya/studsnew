@@ -45,7 +45,7 @@ export function validateForm(data: ProjectShikshaFormData): {
   if (!data.tempWard) errors.tempWard = "Ward number is required";
 
   // Family
-  if (!data.guardianName.trim()) errors.guardianName = "Guardian name is required";
+  if (!data.guardianName.trim()) errors.guardianName = "Parent's name is required";
   if (!data.guardianPhone || data.guardianPhone.length !== 10) {
     errors.guardianPhone = "Valid 10-digit phone number is required";
   } else if (!data.guardianPhone.startsWith("9")) {
@@ -65,7 +65,7 @@ export function validateForm(data: ProjectShikshaFormData): {
 
   // Documents
   if (!data.seeMarksheet) errors.seeMarksheet = "SEE marksheet is required";
-  if (!data.birthCertificate) errors.birthCertificate = "Citizenship/Birth certificate is required";
+  if (!data.birthCertificate) errors.birthCertificate = "Birth certificate is required";
   if (!data.photo) errors.photo = "Passport photo is required";
 
   // Admit Card

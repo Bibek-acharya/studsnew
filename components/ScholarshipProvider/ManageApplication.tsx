@@ -7,6 +7,7 @@ import Dropdown from "@/components/college-recommender/Dropdown";
 import { NEPAL_DISTRICTS, NEPAL_PROVINCES } from "@/lib/location-data";
 import { toast } from "sonner";
 import { scholarshipProviderApi } from "@/services/scholarshipProviderApi";
+import { getImageUrl } from "@/services/api";
 import ConfirmationModal from "./common/ConfirmationModal";
 
 
@@ -190,6 +191,7 @@ const ManageApplication = () => {
                 <th className="text-left py-4 px-4 font-bold text-gray-700" style={{ minWidth: 260 }}>Province / District<br /><span className="text-xs font-normal text-gray-400">/ Municipality / Ward</span></th>
                 <th className="text-center py-4 px-4 font-bold text-gray-700">Participate District</th>
                 <th className="text-center py-4 px-4 font-bold text-gray-700">Designation</th>
+                <th className="text-center py-4 px-4 font-bold text-gray-700">CV / Resume</th>
                 <th className="text-center py-4 px-4 font-bold text-gray-700">Previous Volunteer</th>
                 <th className="text-center py-4 px-4 font-bold text-gray-700">Previous Volunteer Role</th>
                 <th className="text-center py-4 px-4 font-bold text-gray-700">Available Days</th>
@@ -199,10 +201,10 @@ const ManageApplication = () => {
             </thead>
             <tbody className="divide-y divide-gray-100">
               {loading ? (
-                <tr><td colSpan={12} className="py-20 text-center text-gray-400">Loading...</td></tr>
+                <tr><td colSpan={13} className="py-20 text-center text-gray-400">Loading...</td></tr>
               ) : paginated.length === 0 ? (
                 <tr>
-                  <td colSpan={12} className="py-20 text-center text-gray-400">No volunteers found</td>
+                  <td colSpan={13} className="py-20 text-center text-gray-400">No volunteers found</td>
                 </tr>
               ) : (
                 paginated.map((v, i) => (
@@ -217,6 +219,15 @@ const ManageApplication = () => {
                   <td className="py-4 px-4 text-center text-gray-600">{v.participate_district}</td>
                   <td className="py-4 px-4 text-center">
                     <span className="bg-purple-100 text-purple-700 px-3 py-1 rounded-full text-xs font-bold whitespace-nowrap">{v.designation}</span>
+                  </td>
+                  <td className="py-4 px-4 text-center">
+                    {v.cv_path ? (
+                      <button onClick={async () => { const r = await fetch(getImageUrl(v.cv_path)); const b = await r.blob(); const u = URL.createObjectURL(b); const a = document.createElement('a'); a.href = u; a.download = v.cv_path.split('/').pop() || 'cv'; document.body.appendChild(a); a.click(); document.body.removeChild(a); URL.revokeObjectURL(u); }} className="p-2 hover:bg-blue-100 rounded-lg text-blue-600 transition-colors inline-flex" title="Download CV / Resume">
+                        <Download size={18} />
+                      </button>
+                    ) : (
+                      <span className="text-gray-300">-</span>
+                    )}
                   </td>
                   <td className="py-4 px-4 text-center">
                     {v.volunteered_before === "Yes" ? (

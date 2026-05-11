@@ -744,7 +744,7 @@ export default function ScholarshipEntranceForm({ scholarshipTitle, onClose }: {
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-6">
                     <div>
-                        <label className="block text-[14px] font-semibold text-gray-700 mb-1.5">Guardian's Name <span className="text-red-500">*</span></label>
+                        <label className="block text-[14px] font-semibold text-gray-700 mb-1.5">Parent's Name <span className="text-red-500">*</span></label>
                         <input 
                           type="text" 
                           className="w-full border border-gray-300 rounded-md py-3 px-4 text-[15px] font-medium" 
@@ -755,7 +755,7 @@ export default function ScholarshipEntranceForm({ scholarshipTitle, onClose }: {
                         />
                     </div>
                     <div>
-                        <label className="block text-[14px] font-semibold text-gray-700 mb-1.5">Guardian's Phone <span className="text-red-500">*</span></label>
+                        <label className="block text-[14px] font-semibold text-gray-700 mb-1.5">Parent's Phone <span className="text-red-500">*</span></label>
                         <input 
                           type="tel" 
                           className="w-full border border-gray-300 rounded-md py-3 px-4 text-[15px] font-medium" 

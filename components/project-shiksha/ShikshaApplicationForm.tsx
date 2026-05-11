@@ -107,10 +107,12 @@ export default function ShikshaApplicationForm({
     setErrors((prev) => ({ ...prev, [field]: undefined }));
   }, []);
 
+  const DOCUMENT_FIELDS = new Set(["birthCertificate", "seeMarksheet", "class8Marksheet", "class9Marksheet", "photo"]);
+
   const handleBlur = useCallback((e: React.FocusEvent) => {
     const target = e.target as HTMLElement;
     const field = target.id as keyof ProjectShikshaFormData;
-    if (!field || !(field in initialFormData)) return;
+    if (!field || !(field in initialFormData) || DOCUMENT_FIELDS.has(field)) return;
     const result = validateForm(formData);
     if (result.errors[field]) {
       setErrors((prev) => ({ ...prev, [field]: result.errors[field] }));
@@ -427,20 +429,19 @@ export default function ShikshaApplicationForm({
                   <label className="block text-[14px] font-semibold text-gray-700 mb-1.5">Age</label>
                   <div className="relative">
                     <input
-                      type="number"
+                      type="text"
                       id="age"
                       value={formData.age}
                       readOnly
                       className="w-full bg-gray-100 border border-gray-300 rounded py-3 px-4 text-[15px] text-gray-600 outline-none cursor-not-allowed font-medium"
                       placeholder="Auto-calc"
                     />
-                    <span className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 text-sm font-medium">Yrs</span>
                   </div>
                 </div>
 
                 <div>
                   <label className="block text-[14px] font-semibold text-gray-700 mb-1.5">
-                    Phone Number <span className="text-red-500">*</span>
+                    Phone Number (Ncell Preferred) <span className="text-red-500">*</span>
                   </label>
                   <input
                     type="tel"
@@ -472,7 +473,7 @@ export default function ShikshaApplicationForm({
                 </div>
               </div>
 
-              <div className="w-full md:w-40 flex-shrink-0 order-1 md:order-2 flex flex-col items-start">
+              <div className="w-full md:w-40 flex-shrink-0 order-1 md:order-2 flex flex-col items-center md:items-start">
                 <label className="block text-[14px] font-semibold text-gray-700 mb-2 w-full text-center md:text-left">
                   Passport Photo <span className="text-red-500">*</span>
                 </label>
@@ -659,7 +660,7 @@ export default function ShikshaApplicationForm({
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div className="border border-gray-200 rounded-xl p-4 bg-gray-50 flex flex-col justify-center">
                   <label className="block text-[14px] font-semibold text-gray-800 mb-2">
-                    Date of Birth Certificate <span className="text-red-500">*</span>
+                    Birth Certificate <span className="text-red-500">*</span>
                   </label>
                   <input
                     type="file"
@@ -951,7 +952,7 @@ export default function ShikshaApplicationForm({
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-5">
               <div>
                 <label className="block text-[14px] font-semibold text-gray-700 mb-1.5">
-                  Guardian&apos;s Name <span className="text-red-500">*</span>
+                  Parent's Name <span className="text-red-500">*</span>
                 </label>
                 <input
                   type="text"
@@ -966,7 +967,7 @@ export default function ShikshaApplicationForm({
 
               <div>
                 <label className="block text-[14px] font-semibold text-gray-700 mb-1.5">
-                  Guardian&apos;s Phone Number <span className="text-red-500">*</span>
+                  Parent's Phone <span className="text-red-500">*</span>
                 </label>
                 <input
                   type="tel"
@@ -986,7 +987,7 @@ export default function ShikshaApplicationForm({
 
               <div>
                 <label className="block text-[14px] font-semibold text-gray-700 mb-1.5">
-                  Guardian&apos;s Email <span className="text-gray-400 font-normal text-xs ml-1">(Optional)</span>
+                  Parent's Email
                 </label>
                 <input
                   type="email"
@@ -994,7 +995,7 @@ export default function ShikshaApplicationForm({
                   value={formData.guardianEmail}
                   onChange={(e) => handleInputChange("guardianEmail", e.target.value)}
                   className="w-full border border-gray-300 rounded py-3 px-4 text-[15px] text-gray-800 outline-none focus:ring-0 focus:border-[#0000ff] transition-all bg-white"
-                  placeholder="guardian@email.com"
+                  placeholder="parent@email.com"
                 />
                 {errors.guardianEmail && <p className="text-red-500 text-[12px] mt-1">{errors.guardianEmail}</p>}
               </div>
