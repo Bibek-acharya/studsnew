@@ -78,7 +78,15 @@ export default function NewsTab({ scholarship }: { scholarship: any }) {
     return items.length > 0 ? items.slice(0, 6) : null;
   }, [providerNews, loading, scholarship.news_items]);
 
-  if (!data && !loading) return null;
+  if (!data && !loading) return (
+    <div>
+      <div className="mb-6">
+        <h2 className="text-[20px] font-bold text-gray-900">News & Notice</h2>
+        <p className="mt-1 text-[14px] text-gray-500">Stay updated with our latest announcements and stories</p>
+      </div>
+      <div className="py-16 text-center text-gray-400"><p className="text-[15px] font-medium">No news or notices available</p></div>
+    </div>
+  );
 
   const gradients = ["from-blue-500 to-blue-600", "from-green-500 to-green-600", "from-purple-500 to-purple-600", "from-orange-500 to-orange-600"];
   const badgeColors = ["bg-blue-50 text-blue-600", "bg-green-50 text-green-600", "bg-purple-50 text-purple-600", "bg-orange-50 text-orange-600"];

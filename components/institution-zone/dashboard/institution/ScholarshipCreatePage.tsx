@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useCallback, useEffect } from "react";
+import React, { useState, useCallback, useEffect, useRef } from "react";
 import { toast } from "sonner";
 import { parseISO, isValid, isAfter } from "date-fns";
 import {
@@ -209,6 +209,7 @@ const ScholarshipCreatePage: React.FC<ScholarshipCreatePageProps> = ({ onBack, s
 
   // Form state
   const [submitting, setSubmitting] = useState(false);
+  const submittingRef = useRef(false);
   const [error, setError] = useState("");
   const [loadingData, setLoadingData] = useState(false);
 
@@ -493,6 +494,9 @@ const ScholarshipCreatePage: React.FC<ScholarshipCreatePageProps> = ({ onBack, s
   }, []);
 
   const handleSave = useCallback(async (draft: boolean = false) => {
+    if (submittingRef.current) return;
+    submittingRef.current = true;
+
     setError("");
 
     if (!draft) {
@@ -623,6 +627,7 @@ const ScholarshipCreatePage: React.FC<ScholarshipCreatePageProps> = ({ onBack, s
       setError(err instanceof Error ? err.message : "Failed to save scholarship");
     } finally {
       setSubmitting(false);
+      submittingRef.current = false;
     }
   }, [mainTitle, providerName, fundingType, fundingTypeOther, scholarshipType, scholarshipTypeOther,
       educationLevel, educationLevelOther, location, startDate, endDate, applyLink, bannerBgUrl,

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef, useEffect, useCallback, useMemo } from "react";
+import { useState, useRef, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { ChevronLeft, ChevronRight, ExternalLink, FileText, Share2 } from "lucide-react";
 import { EligibilityTab } from "./ScholarshipDetailEligibility";
@@ -23,6 +23,12 @@ interface ScholarshipDetailPageProps {
 
 export default function ScholarshipDetailPage({ scholarship, similarScholarships }: ScholarshipDetailPageProps) {
   const router = useRouter();
+  useEffect(() => {
+    window.scrollTo(0, 0);
+    history.scrollRestoration = "manual";
+    const id = setTimeout(() => window.scrollTo(0, 0), 300);
+    return () => { clearTimeout(id); history.scrollRestoration = "auto"; };
+  }, []);
   const [activeTab, setActiveTab] = useState("");
   const [faqOpen, setFaqOpen] = useState<number[]>([]);
   const [lightboxIndex, setLightboxIndex] = useState<number | null>(null);
@@ -140,35 +146,20 @@ export default function ScholarshipDetailPage({ scholarship, similarScholarships
     return () => window.removeEventListener("keydown", handleKey);
   }, [lightboxIndex, closeLightbox, changeImage]);
 
-  const hasScholarshipTypes = Array.isArray(scholarship.scholarship_types_new) && scholarship.scholarship_types_new.length > 0;
-  const hasSelectionRubric = Array.isArray(scholarship.selection_rubric_new) && scholarship.selection_rubric_new.length > 0;
-  const hasAboutContent = !!(desc || scholarship.about_paragraph_2 || scholarship.video_tutorials?.length || dynamicJourneyTimeline.length > 0);
-  const hasExamCenters = (Array.isArray(scholarship.exam_centers_new) && scholarship.exam_centers_new.length > 0) || (Array.isArray(scholarship.exam_centers) && scholarship.exam_centers.length > 0);
-  const hasAchievements = Array.isArray(scholarship.achievements) && scholarship.achievements.length > 0;
-  const hasGallery = galleryImages.length > 0;
-  const hasFaqs = dynamicFaqs.length > 0;
-  const hasPartners = (Array.isArray(scholarship.partners) && scholarship.partners.length > 0) || (Array.isArray(scholarship.partner_groups) && scholarship.partner_groups.length > 0);
-  const hasReviews = true;
-  const hasEligibility = dynamicEligibility.length > 0 || dynamicDocs.length > 0 || dynamicSelectionSteps !== null;
-  const hasTimeline = dynamicTimeline !== null;
-  const hasScholarshipSection = hasScholarshipTypes || hasSelectionRubric;
-
-  const availableTabs = useMemo(() => {
-    const tabs: { id: string; label: string }[] = [];
-    if (hasAboutContent) tabs.push({ id: "about", label: "About" });
-    if (hasScholarshipSection) tabs.push({ id: "scholarship", label: "Scholarship" });
-    if (hasEligibility) tabs.push({ id: "eligibility", label: "Eligibility & Criteria" });
-    if (hasTimeline) tabs.push({ id: "timeline", label: "Timeline" });
-    if (hasExamCenters) tabs.push({ id: "centers", label: "Exam Centers" });
-    tabs.push({ id: "news", label: "News & Notice" });
-    if (hasAchievements) tabs.push({ id: "achievements", label: "Achievements" });
-    if (hasGallery) tabs.push({ id: "gallery", label: "Gallery" });
-    if (hasFaqs) tabs.push({ id: "faq", label: "FAQ" });
-    if (hasPartners) tabs.push({ id: "partners", label: "Partners" });
-    if (hasDownloads) tabs.push({ id: "downloads", label: "Downloads" });
-    if (hasReviews) tabs.push({ id: "review", label: "Review" });
-    return tabs;
-  }, [hasAboutContent, hasScholarshipSection, hasEligibility, hasTimeline, hasExamCenters, hasAchievements, hasGallery, hasFaqs, hasPartners, hasDownloads, hasReviews]);
+  const availableTabs: { id: string; label: string }[] = [
+    { id: "about", label: "About" },
+    { id: "scholarship", label: "Scholarship" },
+    { id: "eligibility", label: "Eligibility & Criteria" },
+    { id: "timeline", label: "Timeline" },
+    { id: "centers", label: "Exam Centers" },
+    { id: "news", label: "News & Notice" },
+    { id: "achievements", label: "Achievements" },
+    { id: "gallery", label: "Gallery" },
+    { id: "faq", label: "FAQ" },
+    { id: "partners", label: "Partners" },
+    { id: "downloads", label: "Downloads" },
+    { id: "review", label: "Review" },
+  ];
 
   useEffect(() => {
     if (availableTabs.length > 0 && !availableTabs.find(t => t.id === activeTab)) {
@@ -255,6 +246,7 @@ export default function ScholarshipDetailPage({ scholarship, similarScholarships
       <div className="mx-auto max-w-350 grid grid-cols-1 gap-6 md:gap-10 bg-white py-8 md:py-12 lg:grid-cols-3">
         <div className="min-h-[300px] md:min-h-[500px] lg:col-span-2">
           {activeTab === "about" && (
+            (desc || scholarship.about_paragraph_2 || (Array.isArray(scholarship.video_tutorials) && scholarship.video_tutorials.length > 0) || dynamicJourneyTimeline.length > 0) ? (
             <div className="space-y-10">
               {desc && (
                 <div className="text-[15px] leading-[1.8] text-gray-600 hyphens-none break-words" dangerouslySetInnerHTML={{ __html: desc }} />
@@ -322,16 +314,20 @@ export default function ScholarshipDetailPage({ scholarship, similarScholarships
                 </div>
               )}
             </div>
+            ) : (
+              <div className="py-16 text-center text-gray-400"><p className="text-[15px] font-medium">No information available</p></div>
+            )
           )}
 
           {activeTab === "scholarship" && (
+            (Array.isArray(scholarship.scholarship_types_new || scholarship.scholarship_types) && ((scholarship.scholarship_types_new || []).length > 0 || (scholarship.scholarship_types || []).length > 0)) ||
+            (Array.isArray(scholarship.selection_rubric_new || scholarship.selection_rubric) && ((scholarship.selection_rubric_new || []).length > 0 || (scholarship.selection_rubric || []).length > 0)) ? (
             <div>
               <div className="mb-6">
                 <h2 className="text-[20px] font-bold text-gray-900">{scholarship.scholarship_section_title || scholarship.title || "Scholarship Program"}</h2>
                 <p className="mt-1 text-[14px] text-gray-500">{scholarship.scholarship_subtitle || "Scholarship program details and requirements"}</p>
               </div>
-              {hasScholarshipTypes && (
-                <div className="mb-6 overflow-hidden rounded-md border border-gray-100 bg-white">
+              <div className="mb-6 overflow-hidden rounded-md border border-gray-100 bg-white">
                   <div className="flex flex-wrap items-center justify-between gap-4 border-b border-gray-100 bg-[#f4f8fc] px-6 py-4">
                     <p className="text-[14px] font-semibold text-blue-600">Filter by education level</p>
                     <div className="flex gap-2 text-[13px] font-medium">
@@ -341,7 +337,7 @@ export default function ScholarshipDetailPage({ scholarship, similarScholarships
                     </div>
                   </div>
                   <ScholarshipDetailTypesTable
-                    types={scholarship.scholarship_types_new.map((t: any) => ({
+                    types={(scholarship.scholarship_types_new || scholarship.scholarship_types || []).map((t: any) => ({
                       type: t.scholarship_type || t.type || t.name || "",
                       seats: t.number_of_seats || t.seats || t.total_seats || "",
                       coverage: t.coverage_type || t.coverage || "",
@@ -350,9 +346,7 @@ export default function ScholarshipDetailPage({ scholarship, similarScholarships
                     applyLink={scholarship.apply_link}
                   />
                 </div>
-              )}
-              {hasSelectionRubric && (
-                <div className="mb-6">
+              <div className="mb-6">
                   <h3 className="mb-4 text-[17px] font-bold text-gray-900">Selection Process & Rubric</h3>
                   <div className="overflow-hidden rounded-md border border-gray-100 bg-white">
                     <div className="overflow-x-auto">
@@ -365,7 +359,7 @@ export default function ScholarshipDetailPage({ scholarship, similarScholarships
                           </tr>
                         </thead>
                         <tbody className="divide-y divide-gray-100">
-                          {scholarship.selection_rubric_new.map((r: any) => ({
+                          {(scholarship.selection_rubric_new || scholarship.selection_rubric || []).map((r: any) => ({
                             criteria: r.criteria || r.title || "",
                             description: r.description || "",
                             weight: r.weight || r.percentage || "",
@@ -381,11 +375,14 @@ export default function ScholarshipDetailPage({ scholarship, similarScholarships
                     </div>
                   </div>
                 </div>
-              )}
             </div>
+            ) : (
+              <div className="py-16 text-center text-gray-400"><p className="text-[15px] font-medium">No scholarship details available</p></div>
+            )
           )}
 
           {activeTab === "eligibility" && (
+            dynamicEligibility.length > 0 || dynamicDocs.length > 0 || dynamicSelectionSteps !== null ? (
             <EligibilityTab
               criteria={dynamicEligibility}
               docs={dynamicDocs}
@@ -393,32 +390,69 @@ export default function ScholarshipDetailPage({ scholarship, similarScholarships
               sectionTitle={scholarship.eligibility_section_title}
               sectionSubtitle={scholarship.eligibility_subtitle}
             />
+            ) : (
+              <div className="py-16 text-center text-gray-400"><p className="text-[15px] font-medium">No eligibility information available</p></div>
+            )
           )}
 
-          {activeTab === "timeline" && <TimelineTab events={dynamicTimeline || []} />}
+          {activeTab === "timeline" && (
+            dynamicTimeline && dynamicTimeline.length > 0 ? (
+            <TimelineTab events={dynamicTimeline} />
+            ) : (
+              <div className="py-16 text-center text-gray-400"><p className="text-[15px] font-medium">No timeline information available</p></div>
+            )
+          )}
 
           {activeTab === "centers" && (
-            <ExamCentersTab centers={(Array.isArray(scholarship.exam_centers_new) && scholarship.exam_centers_new.length > 0) ? scholarship.exam_centers_new : (scholarship.exam_centers || [])} />
+            (Array.isArray(scholarship.exam_centers_new) && scholarship.exam_centers_new.length > 0) || (Array.isArray(scholarship.exam_centers) && scholarship.exam_centers.length > 0) ? (
+            <ExamCentersTab centers={(scholarship.exam_centers_new || scholarship.exam_centers || [])} />
+            ) : (
+              <div className="py-16 text-center text-gray-400"><p className="text-[15px] font-medium">No exam centers information available</p></div>
+            )
           )}
 
           {activeTab === "news" && <NewsTab scholarship={scholarship} />}
 
-          {activeTab === "achievements" && <AchievementsTab items={scholarship.achievements || []} />}
-
-          {activeTab === "gallery" && (
-            <GalleryTab images={galleryImages} lightboxIndex={lightboxIndex} setLightboxIndex={setLightboxIndex} closeLightbox={closeLightbox} changeImage={changeImage} />
+          {activeTab === "achievements" && (
+            Array.isArray(scholarship.achievements) && scholarship.achievements.length > 0 ? (
+            <AchievementsTab items={scholarship.achievements} />
+            ) : (
+              <div className="py-16 text-center text-gray-400"><p className="text-[15px] font-medium">No achievements information available</p></div>
+            )
           )}
 
-          {activeTab === "faq" && <FaqTab faqs={dynamicFaqs} faqOpen={faqOpen} toggleFaq={toggleFaq} />}
+          {activeTab === "gallery" && (
+            galleryImages.length > 0 ? (
+            <GalleryTab images={galleryImages} lightboxIndex={lightboxIndex} setLightboxIndex={setLightboxIndex} closeLightbox={closeLightbox} changeImage={changeImage} />
+            ) : (
+              <div className="py-16 text-center text-gray-400"><p className="text-[15px] font-medium">No gallery images available</p></div>
+            )
+          )}
+
+          {activeTab === "faq" && (
+            dynamicFaqs.length > 0 ? (
+            <FaqTab faqs={dynamicFaqs} faqOpen={faqOpen} toggleFaq={toggleFaq} />
+            ) : (
+              <div className="py-16 text-center text-gray-400"><p className="text-[15px] font-medium">No FAQs available</p></div>
+            )
+          )}
 
           {activeTab === "partners" && (
+            (Array.isArray(scholarship.partners) && scholarship.partners.length > 0) || (Array.isArray(scholarship.partner_groups) && scholarship.partner_groups.length > 0) ? (
             <PartnersTab items={scholarship.partners || []} partnerGroups={scholarship.partner_groups || null} getImageUrl={getImageUrl} />
+            ) : (
+              <div className="py-16 text-center text-gray-400"><p className="text-[15px] font-medium">No partners information available</p></div>
+            )
           )}
 
           {activeTab === "review" && <ReviewTab scholarship={scholarship} />}
 
-          {activeTab === "downloads" && hasDownloads && (
+          {activeTab === "downloads" && (
+            hasDownloads ? (
             <DownloadsTab items={scholarship.downloads} getImageUrl={getImageUrl} />
+            ) : (
+              <div className="py-16 text-center text-gray-400"><p className="text-[15px] font-medium">No downloads available</p></div>
+            )
           )}
         </div>
 

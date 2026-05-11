@@ -1,56 +1,97 @@
 "use client";
 
-import React, { useState, useMemo } from "react";
-import { Plus, MagnifyingGlass, Pencil, Trash, Eye, MapPin, Clock, CalendarBlank } from "@phosphor-icons/react";
+import React, { useState, useEffect, useCallback, useMemo } from "react";
+import { useRouter } from "next/navigation";
+import { Plus, MagnifyingGlass, Eye, Pencil, Trash, Spinner, CaretLeft, CaretRight, X } from "@phosphor-icons/react";
+import { toast } from "sonner";
 import SectionHeader from "@/components/institution-zone/dashboard/shared/SectionHeader";
+import { institutionEventsApi, InstitutionEvent } from "@/services/institutionEventsApi";
 
-interface EventItem {
-  id: number;
-  title: string;
-  date: string;
-  time: string;
-  location: string;
-  category: string;
-  description: string;
-}
-
-const INITIAL_EVENTS: EventItem[] = [
-  { id: 1, title: "Spring Festival 2026", date: "May 15, 2026", time: "10:00 AM - 6:00 PM", location: "Main Campus Ground", category: "Cultural", description: "Annual spring festival with music, dance, and food stalls." },
-  { id: 2, title: "AI Workshop Series", date: "May 10, 2026", time: "2:00 PM - 5:00 PM", location: "CS Lab Block", category: "Academic", description: "Hands-on workshop on machine learning and AI fundamentals." },
-  { id: 3, title: "Inter-College Cricket Tournament", date: "May 20, 2026", time: "9:00 AM - 4:00 PM", location: "Sports Complex", category: "Sports", description: "Annual cricket tournament featuring 12 colleges." },
-  { id: 4, title: "Photography Exhibition", date: "June 01, 2026", time: "11:00 AM - 7:00 PM", location: "Art Gallery", category: "Cultural", description: "Student photography showcase on campus life and nature." },
-  { id: 5, title: "Research Symposium", date: "May 25, 2026", time: "10:00 AM - 3:00 PM", location: "Conference Hall", category: "Academic", description: "Presentations of undergraduate and graduate research projects." },
-  { id: 6, title: "Yoga & Wellness Camp", date: "May 08, 2026", time: "6:00 AM - 8:00 AM", location: "Yoga Hall", category: "Sports", description: "Week-long yoga and meditation camp for students and faculty." },
-  { id: 7, title: "Alumni Networking Dinner", date: "June 05, 2026", time: "7:00 PM - 10:00 PM", location: "Grand Ballroom", category: "Cultural", description: "Networking dinner connecting current students with alumni." },
-];
-
-const categoryStyles: Record<string, string> = {
-  Academic: "bg-blue-100 text-blue-700",
-  Cultural: "bg-purple-100 text-purple-700",
-  Sports: "bg-green-100 text-green-700",
+const TYPE_COLORS: Record<string, string> = {
+  workshop: "bg-purple-100 text-purple-700",
+  training: "bg-blue-100 text-blue-700",
+  seminar: "bg-red-100 text-red-700",
+  conference: "bg-cyan-100 text-cyan-700",
+  program: "bg-orange-100 text-orange-700",
+  ceremony: "bg-pink-100 text-pink-700",
+  webinar: "bg-teal-100 text-teal-700",
+  meeting: "bg-indigo-100 text-indigo-700",
 };
 
+const STATUS_COLORS: Record<string, string> = {
+  upcoming: "bg-green-100 text-green-700",
+  completed: "bg-gray-100 text-gray-700",
+  draft: "bg-yellow-100 text-yellow-700",
+  planned: "bg-blue-100 text-blue-700",
+  scheduled: "bg-yellow-100 text-yellow-700",
+};
+
+const FALLBACK_IMAGE = "https://images.unsplash.com/photo-1542744173-8e7e53415bb0?auto=format&fit=crop&q=80&w=800&h=400";
+
 const EventsDirectoryPage: React.FC = () => {
-  const [events, setEvents] = useState<EventItem[]>(INITIAL_EVENTS);
+  const router = useRouter();
+  const [events, setEvents] = useState<InstitutionEvent[]>([]);
+  const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
-  const [activeTab, setActiveTab] = useState<"upcoming" | "past" | "all">("all");
+  const [page, setPage] = useState(1);
+  const [total, setTotal] = useState(0);
+  const [deleteModal, setDeleteModal] = useState<{ isOpen: boolean; eventId: number | null; title: string }>({
+    isOpen: false,
+    eventId: null,
+    title: "",
+  });
+  const limit = 10;
 
-  const filteredEvents = useMemo(() => {
-    const now = new Date();
-    return events
-      .filter((item) => {
-        const matchSearch =
-          item.title.toLowerCase().includes(search.toLowerCase()) ||
-          item.description.toLowerCase().includes(search.toLowerCase());
-        const eventDate = new Date(item.date);
-        if (activeTab === "upcoming") return matchSearch && eventDate >= now;
-        if (activeTab === "past") return matchSearch && eventDate < now;
-        return matchSearch;
-      });
-  }, [events, search, activeTab]);
+  useEffect(() => {
+    async function fetchEvents() {
+      setLoading(true);
+      try {
+        const res = await institutionEventsApi.list(page, limit);
+        setEvents(res.events || []);
+        setTotal(res.meta?.total || 0);
+      } catch {
+        setEvents([]);
+        setTotal(0);
+      } finally {
+        setLoading(false);
+      }
+    }
+    fetchEvents();
+  }, [page]);
 
-  const handleDelete = (id: number) => {
-    setEvents((prev) => prev.filter((e) => e.id !== id));
+  const filtered = useMemo(() => {
+    if (!search) return events;
+    return events.filter((e) => e.name.toLowerCase().includes(search.toLowerCase()));
+  }, [events, search]);
+
+  const handleDelete = useCallback((id: number) => {
+    const target = events.find((item) => item.id === id);
+    setDeleteModal({ isOpen: true, eventId: id, title: target?.name || "this event" });
+  }, [events]);
+
+  const confirmDeleteEvent = useCallback(async () => {
+    if (!deleteModal.eventId) return;
+    const eventId = deleteModal.eventId;
+    setDeleteModal({ isOpen: false, eventId: null, title: "" });
+    try {
+      await institutionEventsApi.delete(eventId);
+      setEvents((prev) => prev.filter((e) => e.id !== eventId));
+      toast.success("Event deleted successfully.");
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Failed to delete event");
+    }
+  }, [deleteModal.eventId]);
+
+  const totalPages = Math.ceil(total / limit);
+
+  const formatDate = (dateStr: string) => {
+    const d = new Date(dateStr);
+    return d.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" });
+  };
+
+  const formatTime = (dateStr: string) => {
+    const d = new Date(dateStr);
+    return d.toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit", hour12: true });
   };
 
   return (
@@ -63,84 +104,202 @@ const EventsDirectoryPage: React.FC = () => {
         ]}
       />
 
-      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-6">
-        <div className="flex flex-col sm:flex-row gap-3 w-full sm:w-auto">
-          <div className="relative">
-            <MagnifyingGlass className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
-            <input
-              type="text"
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              placeholder="Search events..."
-              className="w-full sm:w-64 pl-10 pr-4 py-2 border border-gray-300 rounded-lg text-sm focus:border-blue-600 outline-none"
-            />
-          </div>
-        </div>
-        <button className="px-4 py-2 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-700 flex items-center gap-2 whitespace-nowrap">
-          <Plus size={18} />
-          Create Event
-        </button>
-      </div>
-
-      <div className="flex gap-2 mb-6">
-        {(["upcoming", "past", "all"] as const).map((tab) => (
-          <button
-            key={tab}
-            onClick={() => setActiveTab(tab)}
-            className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors capitalize ${
-              activeTab === tab
-                ? "bg-blue-600 text-white"
-                : "border border-gray-300 text-gray-700 hover:bg-gray-50"
-            }`}
-          >
-            {tab}
-          </button>
-        ))}
-      </div>
-
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {filteredEvents.map((item) => (
-          <div
-            key={item.id}
-            className="bg-white rounded-xl border border-gray-100 shadow-sm hover:shadow-md transition-shadow p-6"
-          >
-            <div className="flex items-center gap-2 mb-4">
-              <span className={`px-2 py-1 rounded-full text-xs font-medium ${categoryStyles[item.category]}`}>
-                {item.category}
-              </span>
-            </div>
-            <h3 className="text-lg font-semibold text-gray-800 mb-3">{item.title}</h3>
-            <p className="text-sm text-gray-500 line-clamp-2 mb-4">{item.description}</p>
-            <div className="space-y-2 mb-4">
-              <div className="flex items-center gap-2 text-sm text-gray-500">
-                <CalendarBlank size={16} />
-                <span>{item.date}</span>
-              </div>
-              <div className="flex items-center gap-2 text-sm text-gray-500">
-                <Clock size={16} />
-                <span>{item.time}</span>
-              </div>
-              <div className="flex items-center gap-2 text-sm text-gray-500">
-                <MapPin size={16} />
-                <span>{item.location}</span>
-              </div>
-            </div>
-            <div className="flex items-center gap-2 pt-3 border-t border-gray-100">
-              <button className="p-2 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors">
-                <Eye size={18} />
-              </button>
-              <button className="p-2 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors">
-                <Pencil size={18} />
+      {/* Delete Confirmation Modal */}
+      {deleteModal.isOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center">
+          <div className="absolute inset-0 bg-black/50" onClick={() => setDeleteModal({ isOpen: false, eventId: null, title: "" })} />
+          <div className="relative mx-4 w-full max-w-sm rounded-xl bg-white p-6 shadow-2xl">
+            <button
+              onClick={() => setDeleteModal({ isOpen: false, eventId: null, title: "" })}
+              className="absolute right-4 top-4 text-gray-400 hover:text-gray-600"
+            >
+              <X className="w-5 h-5" />
+            </button>
+            <h3 className="mb-2 text-lg font-bold text-gray-900">Delete Event</h3>
+            <p className="mb-6 text-sm text-gray-600">
+              Are you sure you want to delete &ldquo;{deleteModal.title}&rdquo;? This action cannot be undone.
+            </p>
+            <div className="flex gap-3">
+              <button
+                onClick={() => setDeleteModal({ isOpen: false, eventId: null, title: "" })}
+                className="flex-1 rounded-lg border border-gray-300 px-4 py-2.5 font-semibold text-gray-700 hover:bg-gray-50"
+              >
+                Cancel
               </button>
               <button
-                onClick={() => handleDelete(item.id)}
-                className="p-2 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors"
+                onClick={confirmDeleteEvent}
+                className="flex-1 rounded-lg bg-red-600 px-4 py-2.5 font-semibold text-white hover:bg-red-700"
               >
-                <Trash size={18} />
+                Delete
               </button>
             </div>
           </div>
-        ))}
+        </div>
+      )}
+
+      <div className="bg-white rounded-xl border border-gray-100 shadow-sm">
+        <div className="p-6 border-b border-gray-100">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+            <div className="relative w-full sm:w-80">
+              <MagnifyingGlass className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
+              <input
+                type="text"
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                placeholder="Search events..."
+                className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg text-sm focus:border-blue-600 outline-none"
+              />
+            </div>
+            <button
+              onClick={() => router.push("/institution-zone/dashboard/events/create")}
+              className="px-4 py-2 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-700 flex items-center gap-2 whitespace-nowrap"
+            >
+              <Plus size={18} />
+              Create Event
+            </button>
+          </div>
+        </div>
+
+        {loading ? (
+          <div className="flex items-center justify-center py-16">
+            <Spinner className="w-8 h-8 text-blue-600 animate-spin" />
+            <span className="ml-3 text-gray-500">Loading events...</span>
+          </div>
+        ) : (
+          <>
+            <div className="overflow-x-auto">
+              <table className="w-full text-sm">
+                <thead className="bg-gray-50 border-b border-gray-200">
+                  <tr>
+                    <th className="text-left py-3 px-6 font-semibold text-gray-700">Image</th>
+                    <th className="text-left py-3 px-6 font-semibold text-gray-700">Event Title</th>
+                    <th className="text-center py-3 px-6 font-semibold text-gray-700">Type</th>
+                    <th className="text-center py-3 px-6 font-semibold text-gray-700">Date & Time</th>
+                    <th className="text-center py-3 px-6 font-semibold text-gray-700">Venue</th>
+                    <th className="text-center py-3 px-6 font-semibold text-gray-700">Status</th>
+                    <th className="text-center py-3 px-6 font-semibold text-gray-700">Actions</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-gray-100">
+                  {filtered.length === 0 ? (
+                    <tr>
+                      <td colSpan={7} className="py-12 text-center text-gray-500">
+                        {search ? "No events found matching your search." : "No events yet. Create your first event!"}
+                      </td>
+                    </tr>
+                  ) : filtered.map((event) => (
+                    <tr key={event.id} className="hover:bg-gray-50">
+                      <td className="py-3 px-6">
+                        <img
+                          src={event.image_url || FALLBACK_IMAGE}
+                          alt={event.name}
+                          className="w-20 h-14 object-cover rounded-lg border border-gray-200"
+                        />
+                      </td>
+                      <td className="py-3 px-6">
+                        <p className="font-medium text-gray-900">{event.name}</p>
+                        {event.short_desc && (
+                          <p
+                            className="text-xs text-gray-500 mt-0.5"
+                            dangerouslySetInnerHTML={{
+                              __html: event.short_desc.replace(/<[^>]*>/g, "").slice(0, 60) + (event.short_desc.replace(/<[^>]*>/g, "").length > 60 ? "..." : ""),
+                            }}
+                          />
+                        )}
+                        {!event.short_desc && event.description && (
+                          <p className="text-xs text-gray-500 mt-0.5">
+                            {event.description.replace(/<[^>]*>/g, "").slice(0, 60)}
+                          </p>
+                        )}
+                      </td>
+                      <td className="text-center py-3 px-6">
+                        <span className={`px-2 py-1 rounded text-xs font-semibold ${TYPE_COLORS[event.event_type] || "bg-gray-100 text-gray-700"}`}>
+                          {event.event_type ? event.event_type.charAt(0).toUpperCase() + event.event_type.slice(1) : "N/A"}
+                        </span>
+                      </td>
+                      <td className="text-center py-3 px-6">
+                        <p className="font-medium text-gray-900">{formatDate(event.start_date)}</p>
+                        <p className="text-xs text-gray-500">{formatTime(event.start_date)} - {formatTime(event.end_date)}</p>
+                      </td>
+                      <td className="text-center py-3 px-6 text-gray-600">{event.location || "N/A"}</td>
+                      <td className="text-center py-3 px-6">
+                        <span className={`px-2 py-1 rounded text-xs font-semibold ${STATUS_COLORS[event.status] || "bg-gray-100 text-gray-700"}`}>
+                          {event.status ? event.status.charAt(0).toUpperCase() + event.status.slice(1) : "Draft"}
+                        </span>
+                      </td>
+                      <td className="text-center py-3 px-6">
+                        <div className="flex items-center justify-center gap-2">
+                          <button
+                            onClick={() => router.push(`/institution-zone/dashboard/events/create?edit=${event.id}`)}
+                            className="p-1.5 hover:bg-blue-50 rounded text-blue-600"
+                            title="Edit"
+                          >
+                            <Pencil className="w-4 h-4" />
+                          </button>
+                          <button
+                            onClick={() => handleDelete(event.id)}
+                            className="p-1.5 hover:bg-red-50 rounded text-red-600"
+                            title="Delete"
+                          >
+                            <Trash className="w-4 h-4" />
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+
+            {totalPages > 1 && (
+              <div className="flex items-center justify-between px-6 py-4 border-t border-gray-100">
+                <p className="text-sm text-gray-500">
+                  Showing{" "}
+                  <span className="font-medium">{(page - 1) * limit + 1}-{Math.min(page * limit, total)}</span>{" "}
+                  of <span className="font-medium">{total}</span> events
+                </p>
+                <div className="flex items-center gap-2">
+                  <button
+                    onClick={() => setPage((p) => Math.max(1, p - 1))}
+                    disabled={page === 1}
+                    className="w-8 h-8 flex items-center justify-center rounded-lg border border-gray-200 text-gray-400 disabled:opacity-50 hover:bg-gray-50"
+                  >
+                    <CaretLeft className="w-4 h-4" />
+                  </button>
+                  {Array.from({ length: Math.min(totalPages, 5) }, (_, i) => (
+                    <button
+                      key={i}
+                      onClick={() => setPage(i + 1)}
+                      className={`w-8 h-8 flex items-center justify-center rounded-lg text-sm font-medium ${
+                        page === i + 1
+                          ? "bg-blue-600 text-white"
+                          : "border border-gray-200 text-gray-600 hover:bg-gray-50"
+                      }`}
+                    >
+                      {i + 1}
+                    </button>
+                  ))}
+                  {totalPages > 5 && <span className="text-gray-400">...</span>}
+                  {totalPages > 5 && (
+                    <button
+                      onClick={() => setPage(totalPages)}
+                      className="w-8 h-8 flex items-center justify-center rounded-lg border border-gray-200 text-gray-600 hover:bg-gray-50 text-sm"
+                    >
+                      {totalPages}
+                    </button>
+                  )}
+                  <button
+                    onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
+                    disabled={page === totalPages}
+                    className="w-8 h-8 flex items-center justify-center rounded-lg border border-gray-200 text-gray-400 disabled:opacity-50 hover:bg-gray-50"
+                  >
+                    <CaretRight className="w-4 h-4" />
+                  </button>
+                </div>
+              </div>
+            )}
+          </>
+        )}
       </div>
     </div>
   );

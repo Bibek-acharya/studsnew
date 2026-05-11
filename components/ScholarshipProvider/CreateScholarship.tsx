@@ -208,6 +208,7 @@ const CreateScholarship: React.FC<CreateScholarshipProps> = memo(({ scholarshipI
 
   // Form state
   const [submitting, setSubmitting] = useState(false);
+  const submittingRef = useRef(false);
   const [error, setError] = useState("");
   const [loadingData, setLoadingData] = useState(false);
   const [status, setStatus] = useState<'draft' | 'published'>('draft');
@@ -487,6 +488,9 @@ const CreateScholarship: React.FC<CreateScholarshipProps> = memo(({ scholarshipI
   }, []);
 
   const handleSave = useCallback(async (draft: boolean = false) => {
+    if (submittingRef.current) return;
+    submittingRef.current = true;
+
     // Clear the main error before running validation
     setError("");
 
@@ -515,6 +519,15 @@ const CreateScholarship: React.FC<CreateScholarshipProps> = memo(({ scholarshipI
     }
 
     setSubmitting(true);
+
+    try {
+      await scholarshipProviderApi.getProfile();
+    } catch {
+      setError("Provider account not found. Please contact support.");
+      setSubmitting(false);
+      submittingRef.current = false;
+      return;
+    }
 
     const finalFundingType = fundingType === "Other" ? fundingTypeOther : fundingType;
     const finalScholarshipType = scholarshipType === "Other" ? scholarshipTypeOther : scholarshipType;
@@ -623,6 +636,7 @@ const CreateScholarship: React.FC<CreateScholarshipProps> = memo(({ scholarshipI
       setError(err instanceof Error ? err.message : "Failed to save scholarship");
     } finally {
       setSubmitting(false);
+      submittingRef.current = false;
     }
   }, [mainTitle, providerName, fundingType, fundingTypeOther, scholarshipType, scholarshipTypeOther, 
       educationLevel, educationLevelOther, location, startDate, endDate, applyLink, bannerBgUrl,

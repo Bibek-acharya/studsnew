@@ -606,32 +606,41 @@ const FeaturedScholarshipsPage = () => {
               </div>
 
               {/* Scholarship Cards Grid */}
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
-                {scholarships.map((scholarship, index) => {
-                    const isAfter2Rows = (index + 1) % 6 === 0 && index > 0;
-                    const showAd = index < 12 && isAfter2Rows;
-                    const adIndex = Math.floor(index / 6);
-                    
-                    return (
-                      <React.Fragment key={scholarship.id}>
-                        <ScholarshipCard
-                          scholarship={scholarship}
-                          isSelected={selectedForApply.includes(scholarship.id)}
-                          isQuickApplyMode={isQuickApplyMode}
-                          isSaved={savedScholarships.includes(scholarship.id)}
-                          onToggleSelection={() => toggleSelection(scholarship.id)}
-                          onToggleSaved={() => toggleSavedScholarship(scholarship.id)}
-                        />
-                        {showAd && (
-                          <div className="col-span-1 md:col-span-2 lg:col-span-3 w-full">
-                            {adIndex === 0 && <RecommendedScholarship />}
-                            {adIndex === 1 && <ScholarshipBasedOnCollege />}
-                          </div>
-                        )}
-                      </React.Fragment>
-                    );
-                  })}
-              </div>
+              {scholarships.length === 0 ? (
+                <div className="flex flex-col items-center justify-center py-20 px-4">
+                  <div className="w-24 h-24 rounded-full bg-gray-50 flex items-center justify-center mb-6">
+                    <GraduationCap className="w-10 h-10 text-gray-300" />
+                  </div>
+                  <h3 className="text-xl font-bold text-gray-900">No Scholarships Found</h3>
+                </div>
+              ) : (
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+                  {scholarships.map((scholarship, index) => {
+                      const isAfter2Rows = (index + 1) % 6 === 0 && index > 0;
+                      const showAd = index < 12 && isAfter2Rows;
+                      const adIndex = Math.floor(index / 6);
+                      
+                      return (
+                        <React.Fragment key={scholarship.id}>
+                          <ScholarshipCard
+                            scholarship={scholarship}
+                            isSelected={selectedForApply.includes(scholarship.id)}
+                            isQuickApplyMode={isQuickApplyMode}
+                            isSaved={savedScholarships.includes(scholarship.id)}
+                            onToggleSelection={() => toggleSelection(scholarship.id)}
+                            onToggleSaved={() => toggleSavedScholarship(scholarship.id)}
+                          />
+                          {showAd && (
+                            <div className="col-span-1 md:col-span-2 lg:col-span-3 w-full">
+                              {adIndex === 0 && <RecommendedScholarship />}
+                              {adIndex === 1 && <ScholarshipBasedOnCollege />}
+                            </div>
+                          )}
+                        </React.Fragment>
+                      );
+                    })}
+                </div>
+              )}
 
               {/* Pagination */}
               <div className="flex items-center justify-center gap-2 mt-12 mb-4">
