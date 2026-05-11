@@ -9,45 +9,56 @@ interface HeroSectionProps {
     view: string,
     data?: { search?: string; [key: string]: unknown },
   ) => void;
+  slides?: { image: string; title?: string; subtitle?: string; link_url?: string; button_text?: string }[];
 }
 
-const HeroSection: React.FC<HeroSectionProps> = ({ onNavigate }) => {
+const DEFAULT_SLIDES = [
+  { image: "https://images.unsplash.com/photo-1541339907198-e08756dedf3f?q=80&w=2070&auto=format&fit=crop", text: "studsphere.com", url: "https://studsphere.com" },
+  { image: "https://images.unsplash.com/photo-1498243691581-b145c3f54a5a?q=80&w=2070&auto=format&fit=crop", text: "studsphere.com", url: "https://studsphere.com" },
+  { image: "https://images.unsplash.com/photo-1562774053-701939374585?q=80&w=2065&auto=format&fit=crop", text: "studsphere.com", url: "https://studsphere.com" },
+  { image: "https://images.unsplash.com/photo-1525926476841-be2069c93a4d?q=80&w=2070&auto=format&fit=crop", text: "studsphere.com", url: "https://studsphere.com" },
+  { image: "https://images.unsplash.com/photo-1606761568499-6d2451b23c66?q=80&w=1974&auto=format&fit=crop", text: "studsphere.com", url: "https://studsphere.com" },
+];
+
+const HeroSection: React.FC<HeroSectionProps> = ({ onNavigate, slides = [] }) => {
   const [currentSlide, setCurrentSlide] = useState(0);
   const [fade, setFade] = useState(true);
   const [desktopQuery, setDesktopQuery] = useState("");
+  const [fetchedSlides, setFetchedSlides] = useState(slides);
 
-  const heroSlides = [
-    {
-      image:
-        "https://images.unsplash.com/photo-1541339907198-e08756dedf3f?q=80&w=2070&auto=format&fit=crop",
-      text: "studsphere.com",
-      url: "https://studsphere.com",
-    },
-    {
-      image:
-        "https://images.unsplash.com/photo-1498243691581-b145c3f54a5a?q=80&w=2070&auto=format&fit=crop",
-      text: "studsphere.com",
-      url: "https://studsphere.com",
-    },
-    {
-      image:
-        "https://images.unsplash.com/photo-1562774053-701939374585?q=80&w=2065&auto=format&fit=crop",
-      text: "studsphere.com",
-      url: "https://studsphere.com",
-    },
-    {
-      image:
-        "https://images.unsplash.com/photo-1525926476841-be2069c93a4d?q=80&w=2070&auto=format&fit=crop",
-      text: "studsphere.com",
-      url: "https://studsphere.com",
-    },
-    {
-      image:
-        "https://images.unsplash.com/photo-1606761568499-6d2451b23c66?q=80&w=1974&auto=format&fit=crop",
-      text: "studsphere.com",
-      url: "https://studsphere.com",
-    },
-  ];
+  const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080";
+
+  useEffect(() => {
+    if (slides.length > 0) {
+      setFetchedSlides(slides);
+      return;
+    }
+    const fetchCarousel = async () => {
+      try {
+        const res = await fetch(`${API_BASE}/api/v1/system/carousels?page=landing`);
+        const json = await res.json();
+        if (json.success && json.data && json.data.length > 0) {
+          setFetchedSlides(
+            json.data.map((s: { image_url: string; link_url: string; title?: string; subtitle?: string }) => ({
+              image: s.image_url.startsWith("/uploads") ? `${API_BASE}${s.image_url}` : s.image_url,
+              title: s.title,
+              subtitle: s.subtitle,
+              link_url: s.link_url,
+            }))
+          );
+        }
+      } catch {
+        // fallback to defaults
+      }
+    };
+    fetchCarousel();
+  }, [slides]);
+
+  const heroSlides = fetchedSlides.length > 0 ? fetchedSlides.map((s) => ({
+    image: s.image,
+    text: s.title || s.subtitle || "studsphere.com",
+    url: s.link_url || "https://studsphere.com",
+  })) : DEFAULT_SLIDES;
 
   useEffect(() => {
     const interval = setInterval(() => {

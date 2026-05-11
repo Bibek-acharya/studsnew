@@ -10,39 +10,9 @@ interface AdSlide {
   description?: string;
 }
 
-const adCarousels: AdSlide[][] = [
-  [
-    {
-      image: "https://kist-edu-np.s3.ap-south-1.amazonaws.com/uploads/media/c41b90bcc485bfd7e06896d9bd8deb1c75a299431672641200.jpg",
-      title: "Discover Campus Life",
-    },
-    {
-      image: "https://kist-edu-np.s3.ap-south-1.amazonaws.com/uploads/album/value/e71ee13b2c733ac02f8709c49f3677c3d0f2d9d01766569944.jpg",
-      title: "Explore Academic Programs",
-    },
-    {
-      image: "https://kist-edu-np.s3.ap-south-1.amazonaws.com/uploads/slider/4936925f5363b99c1eb6862c5af01996bf9aaa541625033698.jpg",
-      title: "Join Our Community",
-    },
-  ],
-  [
-    {
-      image: "https://kist-edu-np.s3.ap-south-1.amazonaws.com/uploads/media/c41b90bcc485bfd7e06896d9bd8deb1c75a299431672641200.jpg",
-      title: "Scholarships Available",
-      description: "Apply now to unlock funding opportunities for the 2026 academic year.",
-    },
-    {
-      image: "https://kist.edu.np/resources/assets/img/kist_building.jpg",
-      title: "World-Class Facilities",
-      description: "State-of-the-art labs, libraries, and modern campus infrastructure.",
-    },
-    {
-      image: "https://kist-edu-np.s3.ap-south-1.amazonaws.com/uploads/album/value/3b46b09ce63aa0e3b287a5b1855ce3df27e6b98e1705905215.jpg",
-      title: "Student Success Stories",
-      description: "Hear from our alumni who are making a difference around the globe.",
-    },
-  ],
-];
+interface AdWidgetsSectionProps {
+  ads?: { image_url: string; title: string; link_url?: string }[];
+}
 
 const AdCard: React.FC<{ slides: AdSlide[]; carouselIndex: number }> = ({ slides, carouselIndex }) => {
   const [currentSlide, setCurrentSlide] = useState(0);
@@ -134,16 +104,18 @@ const AdCard: React.FC<{ slides: AdSlide[]; carouselIndex: number }> = ({ slides
   );
 };
 
-const AdWidgetsSection = () => {
+const AdWidgetsSection: React.FC<AdWidgetsSectionProps> = ({ ads = [] }) => {
   const placement = getAdPlacement("home-ad-widgets");
 
-  if (!placement.enabled) return null;
+  if (!placement.enabled || ads.length === 0) return null;
+
+  const carousels: AdSlide[][] = [ads.map((a) => ({ image: a.image_url, title: a.title }))];
 
   return (
 <section className="mt-16 sm:mt-20 md:mt-24 w-full px-4 sm:px-6 md:px-8">
   <div className="max-w-350 mx-auto w-full">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-5 md:gap-6">
-          {adCarousels.map((slides, index) => (
+          {carousels.map((slides, index) => (
             <AdCard key={index} slides={slides} carouselIndex={index} />
           ))}
         </div>

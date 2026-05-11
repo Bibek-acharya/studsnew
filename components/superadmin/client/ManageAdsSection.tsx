@@ -3,10 +3,14 @@
 import React, { useState } from "react";
 import AdvertiseRequestSection from "./AdvertiseRequestSection";
 import PopupManagementTab from "./PopupManagementTab";
+import HeroBannerTab from "./HeroBannerTab";
+import ShowcaseBannerTab from "./ShowcaseBannerTab";
 
 const TABS = [
   { id: "advertise", label: "Advertise Request" },
   { id: "popup", label: "Landing Page Popup" },
+  { id: "hero", label: "Hero Banner" },
+  { id: "showcase", label: "Showcase Banner" },
 ];
 
 export default function ManageAdsSection() {
@@ -32,6 +36,8 @@ export default function ManageAdsSection() {
 
       {activeTab === "advertise" && <AdvertiseRequestSection />}
       {activeTab === "popup" && <PopupManagementTab />}
+      {activeTab === "hero" && <HeroBannerTab />}
+      {activeTab === "showcase" && <ShowcaseBannerTab />}
     </div>
   );
 }

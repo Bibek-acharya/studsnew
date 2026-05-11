@@ -8,9 +8,10 @@ import HoverTooltip from "./HoverTooltip";
 
 interface CourseCategoriesSectionProps {
   onNavigate: (view: string, data?: { [key: string]: unknown }) => void;
+  categories?: { name: string; count?: number }[];
 }
 
-const courseCategories = [
+const defaultCategories = [
   { title: "Science & Technology", count: "2k+ colleges", isActive: false },
   { title: "Engineering", count: "2k+ colleges", isActive: true },
   { title: "Management & Business", count: "2k+ colleges", isActive: false },
@@ -19,31 +20,13 @@ const courseCategories = [
   { title: "Arts & Humanities", count: "1.5k+ colleges", isActive: false },
 ];
 
-const partnerLogos = [
-  {
-    id: 1,
-    name: "KIST College",
-    logo: "https://kist.edu.np/resources/assets/img/logo_small.jpg",
-  },
-  // {
-  //   id: 2,
-  //   name: "Trinity International College",
-  //   logo: "https://www.trinity.edu.np/assets/backend/uploads/Logo/trinity%20college%20logo.jpg",
-  // },
-  {
-    id: 3,
-    name: "Advance Foundation",
-    logo: "https://advancefoundation.edu.np/public/assets/img/logo.jpg",
-  },
-  {
-    id: 4,
-    name: "KIST College",
-    logo: "https://kist.edu.np/resources/assets/img/logo_small.jpg",
-  },
-];
+const partnerLogos: { id: number; name: string; logo: string }[] = [];
 
-const CourseCategoriesSection: React.FC<CourseCategoriesSectionProps> = ({ onNavigate }) => {
+const CourseCategoriesSection: React.FC<CourseCategoriesSectionProps> = ({ onNavigate, categories = [] }) => {
   const containerRef = useRef<HTMLDivElement | null>(null);
+  const courseCategories = categories.length > 0
+    ? categories.map((c) => ({ title: c.name, count: c.count ? `${c.count}+ colleges` : "Available", isActive: false }))
+    : defaultCategories;
 
   const scrollByCard = (direction: -1 | 1) => {
     const container = containerRef.current;
@@ -112,6 +95,7 @@ const CourseCategoriesSection: React.FC<CourseCategoriesSectionProps> = ({ onNav
               <p className={`text-xs sm:text-sm ${course.isActive ? 'text-[#0000FF] font-medium' : 'text-gray-500'} mb-5 sm:mb-6 group-hover:text-[#0000CC] transition-all duration-300`}>
                 {course.count}
               </p>
+              {partnerLogos.length > 0 && (
               <div className="flex gap-1.5 sm:gap-2">
                 {partnerLogos.map((logo, lIdx) => (
                   <HoverTooltip
@@ -144,6 +128,7 @@ const CourseCategoriesSection: React.FC<CourseCategoriesSectionProps> = ({ onNav
                   </HoverTooltip>
                 ))}
               </div>
+              )}
             </div>
           ))}
         </div>

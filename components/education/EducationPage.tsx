@@ -21,6 +21,9 @@ interface EducationPageProps {
   scholarships: ScholarshipItem[];
   eventSlides: EducationEvent[];
   newsArticles: EducationNewsItem[];
+  exams?: any[];
+  heroSlides?: any[];
+  ads?: any[];
 }
 
 const EducationPage: React.FC<EducationPageProps> = ({
@@ -28,6 +31,9 @@ const EducationPage: React.FC<EducationPageProps> = ({
   scholarships,
   eventSlides,
   newsArticles,
+  exams = [],
+  heroSlides = [],
+  ads = [],
 }) => {
   const router = useRouter();
 
@@ -56,25 +62,25 @@ const EducationPage: React.FC<EducationPageProps> = ({
   return (
     <div className="bg-white min-h-screen font-sans text-[#111827] antialiased pt-4 sm:pt-6 overflow-x-hidden">
       {/* Section 1: Hero */}
-      <HeroSection onNavigate={handleNavigate} />
+      <HeroSection onNavigate={handleNavigate} slides={heroSlides} />
       {/* Section 2: Smarter Tools, Greater Success */}
       <SmarterToolsSection onNavigate={handleNavigate} />
       {/* Section 3: Event Carousel */}
-      <EventShowcaseSection onNavigate={handleNavigate} events={eventSlides} />
+      <EventShowcaseSection onNavigate={handleNavigate} />
       {/* Section 4: Right Course. Right College. */}
-      <CourseCategoriesSection onNavigate={handleNavigate} />
+      {/* <CourseCategoriesSection onNavigate={handleNavigate} /> */}
       {/* Section 5: Explore Featured Colleges & Universities */}
-      <FeaturedInstitutionsSection onNavigate={handleNavigate} featuredColleges={featuredColleges} />
+      {featuredColleges.length > 0 && <FeaturedInstitutionsSection onNavigate={handleNavigate} featuredColleges={featuredColleges} />}
       {/* Section 6: Featured Financial Aid */}
-      <FinancialAidSection onNavigate={handleNavigate} scholarships={scholarships} />
+      {scholarships.length > 0 && <FinancialAidSection onNavigate={handleNavigate} scholarships={scholarships} />}
       {/* Section 7: Find All Exam Announcements Easily */}
-      <ExamAnnouncementsSection onNavigate={handleNavigate} />
+      {exams.length > 0 && <ExamAnnouncementsSection onNavigate={handleNavigate} exams={exams} />}
       {/* Section 8: Latest News & Stories */}
-      <NewsStoriesSection onNavigate={handleNavigate} newsArticles={newsArticles} />
+      {newsArticles.length > 0 && <NewsStoriesSection onNavigate={handleNavigate} newsArticles={newsArticles} />}
       {/* Section 9: Ad Widgets */}
-      <AdWidgetsSection />
+      <AdWidgetsSection ads={ads} />
       {/* Section 10: Top College Events */}
-      <CampusEventsSection onNavigate={handleNavigate} />
+      {eventSlides.length > 0 && <CampusEventsSection onNavigate={handleNavigate} events={eventSlides} />}
       {/* Section 11: What Our Students Say */}
       <TestimonialsSection onNavigate={handleNavigate} />
       {/* Section 12: Not sure where to start? */}

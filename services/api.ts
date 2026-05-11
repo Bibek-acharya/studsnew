@@ -200,6 +200,7 @@ export interface EducationEvent {
   image: string;
   interested: number;
   trending: boolean;
+  featured: boolean;
 }
 
 export interface EducationEventsResponse {
@@ -212,6 +213,63 @@ export interface EducationEventsResponse {
 export interface EducationEventResponse {
   data: {
     event: EducationEvent;
+  };
+  message: string;
+}
+
+export interface EducationExam {
+  id: number;
+  title: string;
+  board: string;
+  level: string;
+  type: string;
+  exam_date: string;
+  form_deadline: string;
+  status: string;
+  highlights: string[];
+  institution_logo?: string;
+  institution_name?: string;
+  location?: string;
+}
+
+export interface EducationExamsResponse {
+  data: {
+    exams: EducationExam[];
+  };
+  message: string;
+}
+
+export interface CarouselSlide {
+  id: number;
+  title: string;
+  subtitle: string;
+  description: string;
+  image_url: string;
+  link_url: string;
+  button_text: string;
+  order: number;
+  active: boolean;
+}
+
+export interface CarouselsResponse {
+  data: {
+    carousels: CarouselSlide[];
+  };
+  message: string;
+}
+
+export interface Ad {
+  id: number;
+  title: string;
+  image_url: string;
+  link_url: string;
+  position: string;
+  active: boolean;
+}
+
+export interface AdsResponse {
+  data: {
+    ads: Ad[];
   };
   message: string;
 }
@@ -988,6 +1046,7 @@ export const apiService = {
     category?: string;
     search?: string;
     sort?: string;
+    featured?: string;
   }): Promise<EducationEventsResponse> {
     const query = new URLSearchParams();
     if (params?.page) query.set("page", String(params.page));
@@ -995,6 +1054,7 @@ export const apiService = {
     if (params?.category) query.set("category", params.category);
     if (params?.search) query.set("search", params.search);
     if (params?.sort) query.set("sort", params.sort);
+    if (params?.featured) query.set("featured", params.featured);
 
     const queryStr = query.toString();
     return apiRequest<EducationEventsResponse>(`/api/v1/education/events${queryStr ? `?${queryStr}` : ""}`);
@@ -1006,6 +1066,42 @@ export const apiService = {
 
   async getEducationEventById(id: number): Promise<EducationEventResponse> {
     return apiRequest<EducationEventResponse>(`/api/v1/education/events/${id}`);
+  },
+
+  async getAdminEvents(page = 1, limit = 50): Promise<any> {
+    return apiRequest<any>(`/api/v1/admin/events?page=${page}&limit=${limit}`, {
+      cache: "no-store",
+    });
+  },
+
+  async createEvent(data: any): Promise<any> {
+    return apiRequest<any>("/api/v1/admin/events", {
+      method: "POST",
+      body: JSON.stringify(data),
+      cache: "no-store",
+    });
+  },
+
+  async updateEvent(id: number, data: any): Promise<any> {
+    return apiRequest<any>(`/api/v1/admin/events/${id}`, {
+      method: "PUT",
+      body: JSON.stringify(data),
+      cache: "no-store",
+    });
+  },
+
+  async deleteEvent(id: number): Promise<any> {
+    return apiRequest<any>(`/api/v1/admin/events/${id}`, {
+      method: "DELETE",
+      cache: "no-store",
+    });
+  },
+
+  async toggleEventFeatured(id: number): Promise<any> {
+    return apiRequest<any>(`/api/v1/admin/events/${id}/feature`, {
+      method: "PUT",
+      cache: "no-store",
+    });
   },
 
   async getEducationNews(params?: {
@@ -1313,7 +1409,6 @@ export const apiService = {
     field?: string;
     affiliation?: string;
   }): Promise<{ data: { courses: EducationCourse[] } }> {
-    // Use course-api.ts with backend integration
     const { courses } = await fetchCourses({
       page: params?.page,
       limit: params?.limit,
@@ -1328,6 +1423,27 @@ export const apiService = {
         courses: courses as unknown as EducationCourse[],
       },
     };
+  },
+
+  async getEducationExams(params?: {
+    page?: number;
+    limit?: number;
+  }): Promise<EducationExamsResponse> {
+    const query = new URLSearchParams();
+    if (params?.page) query.set("page", String(params.page));
+    if (params?.limit) query.set("limit", String(params.limit));
+    const queryStr = query.toString();
+    return apiRequest<EducationExamsResponse>(`/api/v1/education/exams${queryStr ? `?${queryStr}` : ""}`);
+  },
+
+  async getActiveAds(page?: string): Promise<AdsResponse> {
+    const query = page ? `?page=${page}` : "";
+    return apiRequest<AdsResponse>(`/api/v1/system/ads${query}`);
+  },
+
+  async getCarousels(page?: string): Promise<CarouselsResponse> {
+    const query = page ? `?page=${page}` : "";
+    return apiRequest<CarouselsResponse>(`/api/v1/system/carousels${query}`);
   },
 
   async getEducationScholarshipById(id: string | number): Promise<any> {

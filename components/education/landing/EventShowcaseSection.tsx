@@ -1,68 +1,53 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { EducationEvent } from "@/services/api";
+
+interface ShowcaseSlide {
+  image: string;
+  title: string;
+  link_url: string;
+}
 
 interface EventShowcaseSectionProps {
   onNavigate: (view: string, data?: any) => void;
-  events?: EducationEvent[];
 }
 
-const EventShowcaseSection: React.FC<EventShowcaseSectionProps> = ({ onNavigate, events = [] }) => {
+const EventShowcaseSection: React.FC<EventShowcaseSectionProps> = ({ onNavigate }) => {
   const [currentSlide, setCurrentSlide] = useState(0);
+  const [slides, setSlides] = useState<ShowcaseSlide[]>([]);
 
-  const eventSlides = events.length
-    ? events.map((event) => ({
-        image: event.image,
-        alt: event.title,
-        badgeText: event.trending ? "Featured" : "Upcoming",
-        title: event.title,
-        date: event.date,
-        location: event.location,
-        interested: `${event.interested || 0}+ Interested`,
-        avatars: [event.id, event.id + 1, event.id + 2],
-      }))
-    : [
-        {
-          image: "https://images.unsplash.com/photo-1540575467063-178a50c2df87?auto=format&fit=crop&q=80&w=1200",
-          alt: "AI Conference Event",
-          badgeIcon: "fa-bolt",
-          badgeClass: "bg-blue-50 border-blue-100 text-[#0000FF]",
-          badgeIconClass: "text-[#0000FF]",
-          badgeText: "Featured",
-          title: "Learn today, lead tomorrow — your AI journey starts here!",
-          date: "Sat, 15 Nov",
-          location: "Sallaghari, Bhaktapur",
-          interested: "100+ Interested",
-          avatars: [33, 47, 12],
-        },
-        {
-          image: "https://images.unsplash.com/photo-1505373877841-8d25f7d46678?auto=format&fit=crop&q=80&w=1200",
-          alt: "Tech Innovation Summit",
-          badgeIcon: "fa-bolt",
-          badgeClass: "bg-green-50 border-green-100 text-[#1dc05c]",
-          badgeIconClass: "text-[#1dc05c]",
-          badgeText: "Upcoming",
-          title: "Shape the future with cutting-edge tech innovation!",
-          date: "Wed, 22 Nov",
-          location: "Lalitpur, Kathmandu",
-          interested: "250+ Interested",
-          avatars: [22, 55, 88],
-        },
-        {
-          image: "https://images.unsplash.com/photo-1523580494863-6f3031224c94?auto=format&fit=crop&q=80&w=1200",
-          alt: "Education Expo",
-          badgeIcon: "fa-bolt",
-          badgeClass: "bg-yellow-50 border-yellow-100 text-[#dfac1d]",
-          badgeIconClass: "text-[#dfac1d]",
-          badgeText: "Hot",
-          title: "Unlock global opportunities at the education expo!",
-          date: "Mon, 5 Dec",
-          location: "Bhrikutimandap, Kathmandu",
-          interested: "500+ Interested",
-          avatars: [10, 34, 56],
-        },
-      ];
+  const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080";
+
+  useEffect(() => {
+    const fetchAds = async () => {
+      try {
+        const res = await fetch(`${API_BASE}/api/v1/system/ads?page=landing&position=showcase`);
+        const json = await res.json();
+        if (json.success && json.data && json.data.length > 0) {
+          setSlides(
+            json.data.map((ad: { image_url: string; title?: string; link_url?: string }) => ({
+              image: ad.image_url.startsWith("/uploads") ? `${API_BASE}${ad.image_url}` : ad.image_url,
+              title: ad.title || "Learn More",
+              link_url: ad.link_url || "#",
+            }))
+          );
+        }
+      } catch {}
+    };
+    fetchAds();
+  }, []);
+
+  const eventSlides = slides.map((slide) => ({
+    image: slide.image,
+    alt: slide.title,
+    badgeText: "Featured",
+    title: slide.title,
+    link_url: slide.link_url,
+    date: "",
+    location: "",
+    interested: "",
+    avatars: [],
+  }));
 
   useEffect(() => {
     if (eventSlides.length === 0) return;
@@ -138,21 +123,16 @@ const EventShowcaseSection: React.FC<EventShowcaseSectionProps> = ({ onNavigate,
                     </div>
 
                     <div className="flex flex-wrap items-center gap-3 sm:gap-4 md:gap-6">
-                      <button
-                        type="button"
-                        onClick={() => onNavigate("events", slide)}
-                        className="inline-flex items-center justify-center bg-brand-blue hover:bg-[#0000CC] text-white font-semibold py-2.5 sm:py-3 md:py-3.5 px-5 sm:px-6 md:px-8 rounded-md transition-colors  text-[13px] sm:text-[14px] md:text-[15px]"
+                      <a
+                        href={slide.link_url || "#"}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="inline-flex items-center justify-center bg-brand-blue hover:bg-[#0000CC] text-white font-semibold py-2.5 sm:py-3 md:py-3.5 px-5 sm:px-6 md:px-8 rounded-md transition-colors text-[13px] sm:text-[14px] md:text-[15px]"
                       >
                         Apply Now
-                      </button>
+                      </a>
 
-                      <button
-                        type="button"
-                        onClick={() => onNavigate("eventsPage", slide)}
-                        className="inline-flex items-center justify-center bg-white border border-gray-200 hover:bg-gray-50 hover:border-blue-100 text-gray-700 font-semibold py-2.5 sm:py-3 md:py-3.5 px-5 sm:px-6 md:px-8 rounded-md transition-colors text-[13px] sm:text-[14px] md:text-[15px]"
-                      >
-                        View Details
-                      </button>
+
                     </div>
                   </div>
                 </div>

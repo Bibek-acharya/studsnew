@@ -7,64 +7,10 @@ import HoverTooltip from "./HoverTooltip";
 
 interface CampusEventsSectionProps {
   onNavigate: (view: string, data?: { [key: string]: unknown }) => void;
+  events?: any[];
 }
 
-const events = [
-  {
-    closeText: "Entry closes by 10 Mar",
-    tag: "Tech Fest",
-    title: "KU IT Meet 2026",
-    location: "Kathmandu University",
-    logo: "https://kist.edu.np/resources/assets/img/logo_small.jpg",
-    chips: ["Software Dev", "AI & ML"],
-    schedule: "15 Mar, 09:00 AM",
-    enrolled: "342 Enrolled",
-    bottomPill: "Prize Pool",
-    bottomPillClass: "bg-purple-50 text-purple-600",
-    icon: <Gift className="w-3.5 h-3.5" />
-  },
-  {
-    closeText: "Entry closes by 20 Mar",
-    tag: "Exhibition",
-    title: "Locus Tech Festival",
-    location: "Pulchowk Campus, IOE",
-    logo: "https://kist.edu.np/resources/assets/img/logo_small.jpg",
-    chips: ["Hardware", "Robotics"],
-    schedule: "22 Mar, 10:00 AM",
-    enrolled: "510 Enrolled",
-    bottomPill: "Certificate",
-    bottomPillClass: "bg-green-50 text-green-600",
-    icon: <BadgeCheck className="w-3.5 h-3.5" />
-  },
-  {
-    closeText: "Entry closes by 2 Apr",
-    tag: "Competition",
-    title: "Deerwalk Appathon",
-    location: "DWIT College",
-    logo: "https://kist.edu.np/resources/assets/img/logo_small.jpg",
-    chips: ["App Development", "UI / UX"],
-    schedule: "5 Apr, 08:30 AM",
-    enrolled: "215 Enrolled",
-    bottomPill: "Internship",
-    bottomPillClass: "bg-orange-50 text-orange-600",
-    icon: <Briefcase className="w-3.5 h-3.5" />
-  },
-  {
-    closeText: "Entry closes by 10 Apr",
-    tag: "Hiring Challenge",
-    title: "Islington Innovation",
-    location: "Islington College",
-    logo: "https://kist.edu.np/resources/assets/img/logo_small.jpg",
-    chips: ["Cybersecurity", "Cloud Config"],
-    schedule: "12 Apr, 11:00 AM",
-    enrolled: "420 Enrolled",
-    bottomPill: "Job offer",
-    bottomPillClass: "bg-indigo-50 text-indigo-600",
-    icon: <Briefcase className="w-3.5 h-3.5" />
-  },
-];
-
-const CampusEventsSection: React.FC<CampusEventsSectionProps> = ({ onNavigate }) => {
+const CampusEventsSection: React.FC<CampusEventsSectionProps> = ({ onNavigate, events = [] }) => {
   const sliderRef = useRef<HTMLDivElement | null>(null);
 
   const scrollSlider = (direction: -1 | 1) => {
@@ -76,6 +22,8 @@ const CampusEventsSection: React.FC<CampusEventsSectionProps> = ({ onNavigate })
       behavior: "smooth",
     });
   };
+
+  if (events.length === 0) return null;
 
   return (
 <section className="mt-16 sm:mt-20 md:mt-24 w-full px-4 sm:px-6 md:px-8">
@@ -158,7 +106,7 @@ const CampusEventsSection: React.FC<CampusEventsSectionProps> = ({ onNavigate })
 
                 {/* Tags */}
                 <div className="flex flex-wrap gap-1.5 sm:gap-2 mt-0.5 sm:mt-1">
-                  {event.chips.map((chip, cIdx) => (
+                  {(event.chips || []).map((chip: string, cIdx: number) => (
                     <span
                       key={cIdx}
                       className="px-2 sm:px-3 py-0.5 sm:py-1 rounded-full border border-gray-200 text-[10px] xs:text-[11px] sm:text-[12px] text-gray-600 font-medium"

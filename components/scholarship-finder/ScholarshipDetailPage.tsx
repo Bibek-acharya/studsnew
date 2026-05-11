@@ -2,7 +2,7 @@
 
 import { useState, useRef, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
-import { ChevronLeft, ChevronRight, ExternalLink, FileText, Share2 } from "lucide-react";
+import { ChevronLeft, ChevronRight, ExternalLink, FileText, FileX, SearchX, Share2 } from "lucide-react";
 import { EligibilityTab } from "./ScholarshipDetailEligibility";
 import TimelineTab from "./ScholarshipDetailTimeline";
 import ExamCentersTab from "./ScholarshipDetailExamCenters";
@@ -184,6 +184,7 @@ export default function ScholarshipDetailPage({ scholarship, similarScholarships
   if (availableTabs.length === 0) {
     return (
       <div className="mx-auto max-w-350 py-20 text-center">
+        <SearchX size={48} className="mx-auto mb-4 text-gray-300" />
         <p className="text-lg font-bold text-gray-500">No scholarship details available</p>
       </div>
     );
@@ -191,7 +192,7 @@ export default function ScholarshipDetailPage({ scholarship, similarScholarships
 
   return (
     <div className="w-full bg-white">
-      <div className="mx-auto max-w-350 pt-12 pb-8">
+      <div className="mx-auto max-w-350 px-4 md:px-0 pt-12 pb-8">
         <div className="mb-6 flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
           <h1 className="text-[28px] font-bold text-gray-900 md:text-4xl">{scholarship.title}</h1>
           <div className="flex items-center gap-3">
@@ -258,7 +259,7 @@ export default function ScholarshipDetailPage({ scholarship, similarScholarships
         </div>
       </div>
 
-      <div className="mx-auto max-w-350 grid grid-cols-1 gap-6 md:gap-10 bg-white py-8 md:py-12 lg:grid-cols-3">
+      <div className="mx-auto max-w-350 grid grid-cols-1 gap-6 md:gap-10 bg-white px-4 md:px-0 py-8 md:py-12 lg:grid-cols-3">
         <div className="min-h-[300px] md:min-h-[500px] lg:col-span-2">
           {activeTab === "about" && (
             (desc || scholarship.about_paragraph_2 || (Array.isArray(scholarship.video_tutorials) && scholarship.video_tutorials.length > 0) || dynamicJourneyTimeline.length > 0) ? (
@@ -330,7 +331,7 @@ export default function ScholarshipDetailPage({ scholarship, similarScholarships
               )}
             </div>
             ) : (
-              <div className="py-16 text-center text-gray-400"><p className="text-[15px] font-medium">No information available</p></div>
+              <div className="py-16 text-center text-gray-400"><FileX size={56} className="mx-auto mb-3" /><p className="text-[15px] font-medium">No information available</p></div>
             )
           )}
 
@@ -393,7 +394,7 @@ export default function ScholarshipDetailPage({ scholarship, similarScholarships
                 </div>
             </div>
             ) : (
-              <div className="py-16 text-center text-gray-400"><p className="text-[15px] font-medium">No scholarship details available</p></div>
+              <div className="py-16 text-center text-gray-400"><FileX size={56} className="mx-auto mb-3" /><p className="text-[15px] font-medium">No scholarship details available</p></div>
             )
           )}
 
@@ -407,7 +408,7 @@ export default function ScholarshipDetailPage({ scholarship, similarScholarships
               sectionSubtitle={scholarship.eligibility_subtitle}
             />
             ) : (
-              <div className="py-16 text-center text-gray-400"><p className="text-[15px] font-medium">No eligibility information available</p></div>
+              <div className="py-16 text-center text-gray-400"><FileX size={56} className="mx-auto mb-3" /><p className="text-[15px] font-medium">No eligibility information available</p></div>
             )
           )}
 
@@ -415,7 +416,7 @@ export default function ScholarshipDetailPage({ scholarship, similarScholarships
             dynamicTimeline && dynamicTimeline.length > 0 ? (
             <TimelineTab events={dynamicTimeline} />
             ) : (
-              <div className="py-16 text-center text-gray-400"><p className="text-[15px] font-medium">No timeline information available</p></div>
+              <div className="py-16 text-center text-gray-400"><FileX size={56} className="mx-auto mb-3" /><p className="text-[15px] font-medium">No timeline information available</p></div>
             )
           )}
 
@@ -423,7 +424,7 @@ export default function ScholarshipDetailPage({ scholarship, similarScholarships
             (Array.isArray(scholarship.exam_centers_new) && scholarship.exam_centers_new.length > 0) || (Array.isArray(scholarship.exam_centers) && scholarship.exam_centers.length > 0) ? (
             <ExamCentersTab centers={(scholarship.exam_centers_new || scholarship.exam_centers || [])} />
             ) : (
-              <div className="py-16 text-center text-gray-400"><p className="text-[15px] font-medium">No exam centers information available</p></div>
+              <div className="py-16 text-center text-gray-400"><FileX size={56} className="mx-auto mb-3" /><p className="text-[15px] font-medium">No exam centers information available</p></div>
             )
           )}
 
@@ -435,7 +436,7 @@ export default function ScholarshipDetailPage({ scholarship, similarScholarships
             galleryImages.length > 0 ? (
             <GalleryTab images={galleryImages} lightboxIndex={lightboxIndex} setLightboxIndex={setLightboxIndex} closeLightbox={closeLightbox} changeImage={changeImage} />
             ) : (
-              <div className="py-16 text-center text-gray-400"><p className="text-[15px] font-medium">No gallery images available</p></div>
+              <div className="py-16 text-center text-gray-400"><FileX size={56} className="mx-auto mb-3" /><p className="text-[15px] font-medium">No gallery images available</p></div>
             )
           )}
 
@@ -443,7 +444,7 @@ export default function ScholarshipDetailPage({ scholarship, similarScholarships
             dynamicFaqs.length > 0 ? (
             <FaqTab faqs={dynamicFaqs} faqOpen={faqOpen} toggleFaq={toggleFaq} />
             ) : (
-              <div className="py-16 text-center text-gray-400"><p className="text-[15px] font-medium">No FAQs available</p></div>
+              <div className="py-16 text-center text-gray-400"><FileX size={56} className="mx-auto mb-3" /><p className="text-[15px] font-medium">No FAQs available</p></div>
             )
           )}
 
@@ -451,7 +452,7 @@ export default function ScholarshipDetailPage({ scholarship, similarScholarships
             (Array.isArray(scholarship.partners) && scholarship.partners.length > 0) || (Array.isArray(scholarship.partner_groups) && scholarship.partner_groups.length > 0) ? (
             <PartnersTab items={scholarship.partners || []} partnerGroups={scholarship.partner_groups || null} getImageUrl={getImageUrl} />
             ) : (
-              <div className="py-16 text-center text-gray-400"><p className="text-[15px] font-medium">No partners information available</p></div>
+              <div className="py-16 text-center text-gray-400"><FileX size={56} className="mx-auto mb-3" /><p className="text-[15px] font-medium">No partners information available</p></div>
             )
           )}
 
@@ -461,7 +462,7 @@ export default function ScholarshipDetailPage({ scholarship, similarScholarships
             hasDownloads ? (
             <DownloadsTab items={scholarship.downloads} getImageUrl={getImageUrl} />
             ) : (
-              <div className="py-16 text-center text-gray-400"><p className="text-[15px] font-medium">No downloads available</p></div>
+              <div className="py-16 text-center text-gray-400"><FileX size={56} className="mx-auto mb-3" /><p className="text-[15px] font-medium">No downloads available</p></div>
             )
           )}
         </div>

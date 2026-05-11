@@ -5,9 +5,10 @@ import { ChevronLeft, ChevronRight } from "lucide-react";
 
 interface TestimonialsSectionProps {
   onNavigate: (view: string, data?: { [key: string]: unknown }) => void;
+  testimonials?: any[];
 }
 
-const testimonials = [
+const defaultTestimonials = [
   {
     id: 1,
     name: "Alex Rivera",
@@ -42,8 +43,10 @@ const testimonials = [
   },
 ];
 
-const TestimonialsSection: React.FC<TestimonialsSectionProps> = ({ onNavigate }) => {
+const TestimonialsSection: React.FC<TestimonialsSectionProps> = ({ onNavigate, testimonials = [] }) => {
   void onNavigate;
+  const items = testimonials.length > 0 ? testimonials : defaultTestimonials;
+  if (items.length === 0) return null;
   const containerRef = useRef<HTMLDivElement | null>(null);
 
   const scrollByWidth = (direction: -1 | 1) => {
@@ -89,7 +92,7 @@ const TestimonialsSection: React.FC<TestimonialsSectionProps> = ({ onNavigate })
 
         {/* Testimonial Cards Grid / Rail */}
         <div className="flex gap-4 overflow-x-auto no-scrollbar snap-x snap-mandatory pb-4 md:grid md:grid-cols-4 md:gap-4 md:overflow-visible md:pb-0">
-          {testimonials.map((testimonial) => (
+          {items.map((testimonial) => (
             <div
               key={testimonial.id}
               className="relative z-0 w-[82vw] shrink-0 snap-start rounded-md bg-[#F8F9FC] p-5 xs:w-[74vw] xs:p-6 sm:w-[46vw] sm:p-7 md:w-auto md:p-8"

@@ -24,6 +24,7 @@ function mapVolunteer(apiVol: any): Volunteer {
   const isPaid = apiVol.volunteer_type === "paid";
   return {
     id: apiVol.id,
+    slug: apiVol.slug,
     image: getImageUrl(apiVol.banner_image),
     type: isPaid ? "Paid Volunteer" : "Unpaid Volunteer",
     title: apiVol.title,

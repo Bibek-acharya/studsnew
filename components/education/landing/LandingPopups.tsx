@@ -46,7 +46,7 @@ const LandingPopups = () => {
             <div className="min-w-20 border-r border-gray-100 pr-3 xs:min-w-22.5 sm:min-w-25 sm:pr-4">
               <div className="mb-1.5 flex h-12 w-12 items-center justify-center rounded-md border-3 border-white bg-gray-50 shadow-[0_2px_8px_rgba(0,0,0,0.08)] xs:h-14 xs:w-14 sm:mb-2 sm:h-16 sm:w-16 sm:border-4">
                 <img
-                  src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=https://chat.whatsapp.com/studsphere"
+                  src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=https://chat.whatsapp.com/HJOpX67y6eSKfKXWUaf1FB"
                   alt="QR Code"
                   className="h-full w-full object-contain"
                 />
