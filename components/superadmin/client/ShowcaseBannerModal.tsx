@@ -8,6 +8,8 @@ interface ShowcaseAd {
   title: string;
   image_url: string;
   link_url: string;
+  location?: string;
+  start_date?: string;
   active: boolean;
 }
 
@@ -31,6 +33,8 @@ export default function ShowcaseBannerModal({ ad, onClose }: ShowcaseBannerModal
   const [uploading, setUploading] = useState(false);
   const [title, setTitle] = useState(ad?.title || "");
   const [linkUrl, setLinkUrl] = useState(ad?.link_url || "");
+  const [location, setLocation] = useState(ad?.location || "");
+  const [date, setDate] = useState(ad?.start_date ? ad.start_date.split("T")[0] : "");
   const [active, setActive] = useState(ad?.active ?? true);
   const [saving, setSaving] = useState(false);
 
@@ -79,10 +83,12 @@ export default function ShowcaseBannerModal({ ad, onClose }: ShowcaseBannerModal
         return;
       }
 
-      const payload = {
+      const payload: Record<string, any> = {
         title: title.trim(),
         image_url: finalImageUrl,
         link_url: linkUrl.trim(),
+        location: location.trim(),
+        start_date: date || null,
         page: "landing",
         position: "showcase",
         active,
@@ -161,6 +167,27 @@ export default function ShowcaseBannerModal({ ad, onClose }: ShowcaseBannerModal
             <p className="text-xs text-gray-400 mt-1">
               URL users will go to when clicking the banner.
             </p>
+          </div>
+
+          <div>
+            <label className="block text-sm font-semibold text-gray-700 mb-2">Location</label>
+            <input
+              type="text"
+              value={location}
+              onChange={(e) => setLocation(e.target.value)}
+              placeholder="e.g. Kathmandu, Pokhara"
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:border-blue-600 outline-none"
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-semibold text-gray-700 mb-2">Date</label>
+            <input
+              type="date"
+              value={date}
+              onChange={(e) => setDate(e.target.value)}
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:border-blue-600 outline-none"
+            />
           </div>
 
           <label className="flex items-center gap-3 cursor-pointer">

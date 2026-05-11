@@ -6,6 +6,8 @@ interface ShowcaseSlide {
   image: string;
   title: string;
   link_url: string;
+  location?: string;
+  date?: string;
 }
 
 interface EventShowcaseSectionProps {
@@ -25,10 +27,12 @@ const EventShowcaseSection: React.FC<EventShowcaseSectionProps> = ({ onNavigate 
         const json = await res.json();
         if (json.success && json.data && json.data.length > 0) {
           setSlides(
-            json.data.map((ad: { image_url: string; title?: string; link_url?: string }) => ({
+            json.data.map((ad: { image_url: string; title?: string; link_url?: string; location?: string; start_date?: string }) => ({
               image: ad.image_url.startsWith("/uploads") ? `${API_BASE}${ad.image_url}` : ad.image_url,
               title: ad.title || "Learn More",
               link_url: ad.link_url || "#",
+              location: ad.location || "",
+              date: ad.start_date ? new Date(ad.start_date).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" }) : "",
             }))
           );
         }
@@ -43,8 +47,8 @@ const EventShowcaseSection: React.FC<EventShowcaseSectionProps> = ({ onNavigate 
     badgeText: "Featured",
     title: slide.title,
     link_url: slide.link_url,
-    date: "",
-    location: "",
+    date: slide.date || "",
+    location: slide.location || "",
     interested: "",
     avatars: [],
   }));

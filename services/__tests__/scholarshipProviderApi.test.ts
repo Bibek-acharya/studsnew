@@ -8,7 +8,7 @@ describe('scholarshipProviderApi.createScholarship', () => {
   });
 
   it('maps _new suffix fields to backend fields without suffix', async () => {
-    const mockData = {
+    const mockData: any = {
       scholarship_types_new: [{ type: 'Merit' }],
       selection_rubric_new: [{ criteria: 'GPA' }],
       faqs_new: [{ question: 'Test?' }],
@@ -35,7 +35,7 @@ describe('scholarshipProviderApi.createScholarship', () => {
   });
 
   it('handles missing _new fields without crashing', async () => {
-    const mockData = {
+    const mockData: any = {
       title: 'Test Scholarship',
       value: '1000',
     };
