@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
 import { 
-  User, Phone, Banknote, Lock, UploadCloud, Loader2, CheckCircle, Info, Landmark
+  Lock, UploadCloud, Loader2, CheckCircle, Info, Landmark
 } from "lucide-react";
 import { scholarshipApi } from "@/services/api";
 
@@ -37,8 +37,6 @@ export default function ScholarshipPaymentPage({ scholarshipSlug }: { scholarshi
   const [applicationId, setApplicationId] = useState<number | null>(null);
   const [scholarshipId, setScholarshipId] = useState<number | null>(null);
   const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>("esewa");
-  const [applicantName, setApplicantName] = useState("");
-  const [contactNumber, setContactNumber] = useState("");
   const [paymentScreenshot, setPaymentScreenshot] = useState<File | null>(null);
   const [isProcessing, setIsProcessing] = useState(false);
   const [loading, setLoading] = useState(true);
@@ -59,8 +57,6 @@ export default function ScholarshipPaymentPage({ scholarshipSlug }: { scholarshi
           appData = JSON.parse(stored);
           if (appData.scholarshipId === resolvedId) {
             setApplicationId(appData.applicationId);
-            setApplicantName(appData.fullName || "");
-            setContactNumber(appData.phone || appData.phoneNumber || "");
           }
           if (appData.paymentConfig && (!paymentConfig || !paymentConfig.fee_amount)) {
             paymentConfig = appData.paymentConfig;
@@ -106,14 +102,6 @@ export default function ScholarshipPaymentPage({ scholarshipSlug }: { scholarshi
   };
 
   const handlePayment = async () => {
-    if (!applicantName.trim()) {
-      alert("Please enter applicant name");
-      return;
-    }
-    if (!contactNumber.trim() || contactNumber.length < 7) {
-      alert("Please enter a valid contact number");
-      return;
-    }
     if (!applicationId) {
       alert("Application ID is missing. Please submit the application first.");
       return;
@@ -321,63 +309,6 @@ export default function ScholarshipPaymentPage({ scholarshipSlug }: { scholarshi
           <div className="border-t border-gray-200 pt-3 flex justify-between items-center">
             <span className="text-gray-800 font-bold">Total Amount</span>
             <span className="font-bold text-xl text-[#0000ff]">{scholarship?.paymentConfig?.currency || "Rs."} {feeAmount}.00</span>
-          </div>
-        </div>
-
-        <div className="space-y-5 mb-8">
-          <div>
-            <label className="block text-[13px] font-bold text-gray-700 mb-1.5">
-              Applicant Name <span className="text-red-500">*</span>
-            </label>
-            <div className="relative">
-              <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none">
-                <User className="h-4 w-4 text-gray-400" />
-              </div>
-              <input
-                type="text"
-                value={applicantName}
-                onChange={(e) => setApplicantName(e.target.value)}
-                className="w-full border-2 border-gray-200 rounded-md pl-10 pr-4 py-3 text-sm focus:border-[#0000ff] outline-none transition-colors"
-                placeholder="Full Name"
-                required
-              />
-            </div>
-          </div>
-
-          <div className="flex gap-4">
-            <div className="flex-1">
-              <label className="block text-[13px] font-bold text-gray-700 mb-1.5">
-                Contact Number <span className="text-red-500">*</span>
-              </label>
-              <div className="relative">
-                <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none">
-                  <Phone className="h-4 w-4 text-gray-400" />
-                </div>
-                <input
-                  type="text"
-                  value={contactNumber}
-                  onChange={(e) => setContactNumber(e.target.value.replace(/[^0-9]/g, "").slice(0, 10))}
-                  className="w-full border-2 border-gray-200 rounded-md pl-10 pr-4 py-3 text-sm tracking-wide focus:border-[#0000ff] outline-none transition-colors"
-                  placeholder="9840000000"
-                  maxLength={10}
-                  required
-                />
-              </div>
-            </div>
-            <div className="w-32">
-              <label className="block text-[13px] font-bold text-gray-700 mb-1.5">Fee (NPR)</label>
-              <div className="relative">
-                <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none">
-                  <Banknote className="h-4 w-4 text-gray-400" />
-                </div>
-                <input
-                  type="text"
-                  className="w-full border-2 border-gray-200 rounded-md pl-10 pr-4 py-3 text-sm bg-gray-50 text-gray-500 outline-none cursor-not-allowed font-semibold text-left"
-                  value={feeAmount}
-                  readOnly
-                />
-              </div>
-            </div>
           </div>
         </div>
 

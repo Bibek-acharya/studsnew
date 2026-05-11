@@ -19,6 +19,17 @@ const stripHtml = (html: string) => {
   return decodeEntities(html.replace(/<[^>]*>/g, ""));
 };
 
+const formatDate = (dateStr: string) => {
+  if (!dateStr) return "";
+  try {
+    const d = new Date(dateStr);
+    if (isNaN(d.getTime())) return dateStr;
+    return d.toLocaleDateString("en-US", { day: "numeric", month: "short", year: "numeric" });
+  } catch {
+    return dateStr;
+  }
+};
+
 export default function NewsTab({ scholarship }: { scholarship: any }) {
   const [providerNews, setProviderNews] = useState<any[] | null>(null);
   const [loading, setLoading] = useState(true);
@@ -113,7 +124,7 @@ export default function NewsTab({ scholarship }: { scholarship: any }) {
               <p className="mb-4 text-[13px] text-gray-600 line-clamp-2">{item.description}</p>
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-1.5 text-[12px] text-gray-500">
-                  <Calendar size={16} /><span>{item.date}</span>
+                  <Calendar size={16} /><span>{formatDate(item.date)}</span>
                 </div>
                 {item.link && (
                 <a href={item.link} target="_blank" rel="noopener noreferrer" className="flex items-center gap-1 text-[13px] font-bold text-blue-600 hover:text-blue-700">

@@ -27,6 +27,7 @@ const NEWS_TYPES = [
   { value: "news", label: "News" },
   { value: "press-release", label: "Press Release" },
   { value: "update", label: "Update" },
+  { value: "achievement", label: "Achievement" },
 ];
 
 interface CreateNewsProps {

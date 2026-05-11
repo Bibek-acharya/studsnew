@@ -20,9 +20,15 @@ interface NewsArticle {
 }
 
 const stripHtml = (html: string) => {
-  if (typeof window === 'undefined') return html;
-  const doc = new DOMParser().parseFromString(html, 'text/html');
-  return doc.body.textContent || "";
+  if (!html) return "";
+  return html
+    .replace(/<[^>]*>/g, "")
+    .replace(/&nbsp;/g, " ")
+    .replace(/&amp;/g, "&")
+    .replace(/&lt;/g, "<")
+    .replace(/&gt;/g, ">")
+    .replace(/&quot;/g, '"')
+    .replace(/&#39;/g, "'");
 };
 
 
@@ -58,14 +64,13 @@ const categoryBadgeClass = (category: NewsCategoryFilter) => {
 };
 
 const mapNewsToUiCategory = (article: NewsArticle): NewsCategoryFilter => {
-  if (article.category === "Academic") return "Admission";
-  if (article.category === "Policy") return "Notice";
-  if (article.category === "Tech") return "Exams";
-  if (article.category === "Jobs") return "Others";
-  if (article.category === "Events") return "Events";
-  if (article.category === "Announcements") return "Notice";
-  if (article.category === "Academics") return "Admission";
-  if (article.category === "Sports") return "Events";
+  const cat = article.category?.toLowerCase() || "";
+  if (["academic", "academics"].includes(cat)) return "Admission";
+  if (["policy", "announcements"].includes(cat)) return "Notice";
+  if (cat === "tech") return "Exams";
+  if (cat === "jobs") return "Others";
+  if (["events", "sports"].includes(cat)) return "Events";
+  if (cat === "achievement") return "Achievements";
   return "Others";
 };
 
@@ -186,7 +191,7 @@ const NewsPage: React.FC = () => {
                     {featuredNews.title}
                   </h3>
                   <p className="text-gray-200 text-base sm:text-lg font-medium line-clamp-2">
-                    {featuredNews.excerpt}
+                    {stripHtml(featuredNews.excerpt)}
                   </p>
                 </div>
 
