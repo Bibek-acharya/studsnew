@@ -31,30 +31,7 @@ interface Conversation {
   unreadCount: Record<string, number>
 }
 
-const mockDetails: Record<string, { title: string; role: string; items: { icon: string; label: string; value: string; copy?: boolean }[] }> = {
-  'usr_college_1': {
-    title: 'About College',
-    role: 'University',
-    items: [
-      { icon: 'building-2', label: 'Department:', value: 'Admissions Office' },
-      { icon: 'link-2', label: 'Website URL:', value: 'stanford.edu', copy: true },
-      { icon: 'map-pin', label: 'Location:', value: 'Stanford, CA' },
-      { icon: 'phone', label: 'Phone:', value: '(650) 723-2300' },
-      { icon: 'mail', label: 'Email:', value: 'admission@stanford.edu' }
-    ]
-  },
-  'usr_college_2': {
-    title: 'About College',
-    role: 'University',
-    items: [
-      { icon: 'building-2', label: 'Department:', value: 'Engineering Dept' },
-      { icon: 'link-2', label: 'Website URL:', value: 'mit.edu', copy: true },
-      { icon: 'map-pin', label: 'Location:', value: 'Cambridge, MA' },
-      { icon: 'phone', label: 'Phone:', value: '(617) 253-1000' },
-      { icon: 'mail', label: 'Email:', value: 'admissions@mit.edu' }
-    ]
-  }
-}
+const mockDetails: Record<string, { title: string; role: string; items: { icon: string; label: string; value: string; copy?: boolean }[] }> = {}
 
 const filters = ['All', 'Admission', 'Inquiry', 'Counseling']
 

@@ -21,13 +21,7 @@ interface EntranceExam {
   applicants: number;
 }
 
-const MOCK_EXAMS: EntranceExam[] = [
-  { id: 1, examName: "IOE BE/B.Arch Entrance 2081", conductingBody: "Institute of Engineering, TU", program: "BE/B.Arch", level: "Bachelor", examDate: "2026-05-29", status: "Ongoing", applicants: 45 },
-  { id: 2, examName: "CEE Medical 2081", conductingBody: "Medical Education Commission", program: "MBBS/BDS", level: "Bachelor", examDate: "2026-06-24", status: "Upcoming", applicants: 32 },
-  { id: 3, examName: "CMAT Management 2081", conductingBody: "Faculty of Management, TU", program: "BBA/BBM", level: "Bachelor", examDate: "2026-08-15", status: "Upcoming", applicants: 28 },
-  { id: 4, examName: "KUUMAT 2081", conductingBody: "School of Management, KU", program: "BBA/BBA-Finance", level: "Bachelor", examDate: "2026-09-01", status: "Upcoming", applicants: 15 },
-  { id: 5, examName: "BSc CSIT Entrance 2081", conductingBody: "Tribhuvan University", program: "BSc CSIT", level: "Bachelor", examDate: "2026-04-15", status: "Closed", applicants: 67 },
-];
+const MOCK_EXAMS: EntranceExam[] = [];
 
 const statusColors: Record<string, string> = {
   Ongoing: "text-green-600 bg-green-50",

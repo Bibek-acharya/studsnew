@@ -61,6 +61,7 @@ const VerifiedProvidersSection = lazy(() => import("./VerifiedProvidersSection")
 const PendingInstitutionsSection = lazy(() => import("./PendingInstitutionsSection"));
 const ManageProfileAccessSection = lazy(() => import("./ManageProfileAccessSection"));
 const AdvertiseRequestSection = lazy(() => import("./AdvertiseRequestSection"));
+const ManageAdsSection = lazy(() => import("./ManageAdsSection"));
 const RejectedInstitutionsSection = lazy(() => import("./RejectedInstitutionsSection"));
 
 type SectionType =
@@ -240,6 +241,8 @@ export default function DashboardShell() {
         return <VerifiedProvidersSection />;
       case "analytics":
         return <AnalyticsSection />;
+      case "manage-ads":
+        return <ManageAdsSection />;
       default:
         return <PlaceholderSection section={activeSection} />;
     }

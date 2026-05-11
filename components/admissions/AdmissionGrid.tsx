@@ -115,7 +115,7 @@ const AdmissionGrid: React.FC<AdmissionGridProps> = ({
     return null;
   };
 
-  const config = levelConfig[level] || levelConfig["high-school"];
+  const config = levelConfig[level] || levelConfig["high-school"] || { title: "Colleges", subtitle: "", badge: "" };
 
   const handleSearchChange = (value: string) => {
     setFilters((prev) => ({ ...prev, search: value }));

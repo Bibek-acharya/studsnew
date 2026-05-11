@@ -7,6 +7,7 @@ import { apiService } from "@/services/api";
 import NepaliCalendar from "@/components/volunteer/VolunteerNepaliCalendar";
 import Dropdown from "@/components/college-recommender/Dropdown";
 import { NEPAL_PROVINCES, NEPAL_DISTRICTS, NEPAL_LOCAL_BODIES } from "@/lib/location-data";
+import { BadgeCheck } from "lucide-react";
 
 export default function VolunteerApplyPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = use(params);
@@ -186,7 +187,7 @@ export default function VolunteerApplyPage({ params }: { params: Promise<{ slug:
       <div className="min-h-screen flex flex-col items-center justify-center px-4" style={{ backgroundColor: "#0000ff" }}>
         <div className="w-full max-w-[500px] bg-white rounded-2xl p-10 text-center">
           <div className="w-24 h-24 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-6">
-            <svg className="w-12 h-12 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M5 13l4 4L19 7"></path></svg>
+            <BadgeCheck className="w-12 h-12 text-green-500" strokeWidth={1} />
           </div>
           <h2 className="text-3xl font-bold text-gray-800 mb-2">Registration Successful!</h2>
           <p className="text-gray-600 mb-8 text-center">Thank you for registering as a volunteer. We will contact you soon.</p>

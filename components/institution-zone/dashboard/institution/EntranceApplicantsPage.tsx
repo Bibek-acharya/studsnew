@@ -58,20 +58,7 @@ const statusPill = (status: string) => {
 
 const ITEMS_PER_PAGE = 5;
 
-const MOCK_DATA: Applicant[] = Array.from({ length: 18 }, (_, i) => ({
-  id: i + 1,
-  studentName: ["Aarav Sharma", "Priya Patel", "Rohan Thapa", "Sneha Adhikari", "Kiran Gurung", "Anita Rai"][i % 6],
-  gender: i % 2 === 0 ? "Male" : "Female",
-  examName: ["BSc CS Entrance 2026", "MBA Entrance 2026", "BE Civil Entrance 2026", "BBA Entrance 2026"][i % 4],
-  program: ["BSc CS", "MBA", "BE Civil", "BBA"][i % 4],
-  registrationNo: `ENT-2026-${String(100 + i).slice(1)}`,
-  score: `${65 + (i * 5) % 30}`,
-  email: `student${i + 1}@email.com`,
-  phone: `+977 98${String(40000000 + i * 123456).slice(0, 8)}`,
-  address: `Address ${i + 1}`,
-  city: ["Kathmandu", "Lalitpur", "Pokhara", "Chitwan"][i % 4],
-  status: ["pending", "approved", "shortlisted", "rejected", "pending", "under_review"][i % 6],
-}));
+const MOCK_DATA: Applicant[] = [];
 
 const EntranceApplicantsPage = () => {
   const [applicants] = useState(MOCK_DATA);

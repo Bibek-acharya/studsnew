@@ -34,7 +34,21 @@ export default function ScholarshipDetailPage({ scholarship, similarScholarships
   const [lightboxIndex, setLightboxIndex] = useState<number | null>(null);
   const [canScrollLeft, setCanScrollLeft] = useState(false);
   const [canScrollRight, setCanScrollRight] = useState(false);
+  const [showShareModal, setShowShareModal] = useState(false);
+  const [copySuccess, setCopySuccess] = useState(false);
   const tabContainerRef = useRef<HTMLDivElement>(null);
+
+  const shareUrl = typeof window !== "undefined" ? window.location.href : "";
+  const shareText = scholarship?.title ? `Check out ${scholarship.title} on Studsphere` : "";
+
+  const handleCopyLink = () => {
+    navigator.clipboard.writeText(shareUrl).then(() => {
+      setCopySuccess(true);
+      setTimeout(() => setCopySuccess(false), 2500);
+    });
+  };
+
+  const getShareUrl = () => encodeURIComponent(shareUrl);
 
   const getImageUrl = useCallback((url: any) => {
     if (!url || typeof url !== "string") return "";
@@ -190,6 +204,7 @@ export default function ScholarshipDetailPage({ scholarship, similarScholarships
             </button>
             <button
               type="button"
+              onClick={() => { setShowShareModal(true); setCopySuccess(false); }}
               className="flex items-center justify-center rounded-md border border-gray-200 bg-white p-2.5 text-gray-700 transition-colors hover:bg-gray-50"
             >
               <Share2 size={20} />
@@ -320,6 +335,7 @@ export default function ScholarshipDetailPage({ scholarship, similarScholarships
           )}
 
           {activeTab === "scholarship" && (
+            (scholarship.scholarship_section_title || scholarship.scholarship_subtitle) ||
             (Array.isArray(scholarship.scholarship_types_new || scholarship.scholarship_types) && ((scholarship.scholarship_types_new || []).length > 0 || (scholarship.scholarship_types || []).length > 0)) ||
             (Array.isArray(scholarship.selection_rubric_new || scholarship.selection_rubric) && ((scholarship.selection_rubric_new || []).length > 0 || (scholarship.selection_rubric || []).length > 0)) ? (
             <div>
@@ -382,7 +398,7 @@ export default function ScholarshipDetailPage({ scholarship, similarScholarships
           )}
 
           {activeTab === "eligibility" && (
-            dynamicEligibility.length > 0 || dynamicDocs.length > 0 || dynamicSelectionSteps !== null ? (
+            dynamicEligibility.length > 0 || dynamicDocs.length > 0 || dynamicSelectionSteps !== null || scholarship.eligibility_section_title || scholarship.eligibility_subtitle ? (
             <EligibilityTab
               criteria={dynamicEligibility}
               docs={dynamicDocs}
@@ -462,6 +478,85 @@ export default function ScholarshipDetailPage({ scholarship, similarScholarships
           <RequestInfoForm scholarship={scholarship} />
         </aside>
       </div>
+
+      {showShareModal && (
+        <div
+          className="fixed inset-0 z-110 flex items-end sm:items-center justify-center bg-black/40 backdrop-blur-sm px-4"
+          onClick={() => setShowShareModal(false)}
+        >
+          <div
+            className="w-full max-w-sm rounded-md bg-white overflow-hidden"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex items-center justify-between px-6 pt-6 pb-4 border-b border-gray-100">
+              <h3 className="text-lg font-black text-gray-900">Share</h3>
+              <button onClick={() => setShowShareModal(false)} className="rounded-full p-1.5 hover:bg-gray-100 transition">
+                <svg className="h-5 w-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
+
+            <div className="px-6 py-4">
+              <p className="text-[11px] font-black uppercase tracking-widest text-gray-400 mb-3">Link</p>
+              <div className="flex items-center gap-2 rounded-md border border-gray-200 bg-gray-50 px-4 py-2.5">
+                <span className="flex-1 truncate text-xs font-medium text-gray-600">{shareUrl}</span>
+                <button
+                  onClick={handleCopyLink}
+                  className={`shrink-0 rounded-md px-3 py-1.5 text-[11px] font-black uppercase tracking-widest transition ${copySuccess
+                    ? 'bg-green-100 text-green-600'
+                    : 'bg-blue-600 text-white hover:bg-blue-700'
+                    }`}
+                >
+                  {copySuccess ? '✓ Copied!' : 'Copy'}
+                </button>
+              </div>
+            </div>
+
+            <div className="px-6 pb-6">
+              <p className="text-[11px] font-black uppercase tracking-widest text-gray-400 mb-3">Share On</p>
+              <div className="grid grid-cols-4 gap-3">
+                {[
+                  {
+                    name: 'WhatsApp', emoji: '💬',
+                    color: 'bg-green-50 text-green-600',
+                    href: `https://api.whatsapp.com/send?text=${getShareUrl()}`,
+                  },
+                  {
+                    name: 'Twitter', emoji: '𝕏',
+                    color: 'bg-gray-50 text-gray-900',
+                    href: `https://twitter.com/intent/tweet?url=${getShareUrl()}`,
+                  },
+                  {
+                    name: 'Facebook', emoji: '📘',
+                    color: 'bg-blue-50 text-blue-700',
+                    href: `https://www.facebook.com/sharer/sharer.php?u=${getShareUrl()}`,
+                  },
+                  {
+                    name: 'Telegram', emoji: '✈️',
+                    color: 'bg-sky-50 text-sky-600',
+                    href: `https://t.me/share/url?url=${getShareUrl()}`,
+                  },
+                ].map((p) => (
+                  <a
+                    key={p.name}
+                    href={p.href}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    onClick={() => setShowShareModal(false)}
+                    className="flex flex-col items-center gap-1.5 group"
+                  >
+                    <div className={`flex h-14 w-14 items-center justify-center rounded-md ${p.color} text-2xl transition-all group-hover:scale-110`}>
+                      {p.emoji}
+                    </div>
+                    <span className="text-[10px] font-bold text-gray-500 group-hover:text-gray-700">{p.name}</span>
+                  </a>
+                ))}
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
 
       {lightboxIndex !== null && (
         <div className="fixed inset-0 z-[1000] flex items-center justify-center bg-black/95" onClick={closeLightbox}>

@@ -78,60 +78,29 @@ const NewsPage: React.FC = () => {
 
   useEffect(() => {
     async function fetchNews() {
+      let news: NewsArticle[] = [];
       try {
-        // Fetch admin news
-        const res = await fetch("/api/v1/news");
-        const data = await res.json();
-        let news: NewsArticle[] = [];
-        
-        if (data?.data?.news && data.data.news.length > 0) {
-          // Convert admin news format to public format
-          news = data.data.news.map((n: any): NewsArticle => ({
-            id: `admin-${n.id}`,
+        const providerData = await getPublicNews(1, 20);
+        if (providerData?.news && providerData.news.length > 0) {
+          news = providerData.news.map((n: any): NewsArticle => ({
+            id: `provider-${n.id}`,
             title: n.title,
-            excerpt: n.desc || n.title,
-            content: n.content || n.desc || "",
-            category: n.category,
-            image: n.image,
-            author: n.author,
-            date: n.date,
+            excerpt: n.short_desc || "",
+            content: n.content || n.short_desc || "",
+            category: n.news_type || "News",
+            image: n.image_url || "",
+            author: n.published_by || "Provider",
+            date: n.publish_date || new Date(n.created_at).toLocaleDateString(),
             readTime: "3 min",
-            source: n.author,
-            tags: [],
+            source: n.published_by || "Provider",
+            tags: n.tags || [],
           }));
         }
-
-        // Also fetch provider news from Go backend
-        try {
-          const providerData = await getPublicNews(1, 20);
-          if (providerData?.news && providerData.news.length > 0) {
-            const providerNews = providerData.news.map((n: any): NewsArticle => ({
-              id: `provider-${n.id}`,
-              title: n.title,
-              excerpt: stripHtml(n.short_desc || n.content || ""),
-              content: n.content || n.short_desc || "",
-              category: n.news_type || "News",
-              image: n.image_url || "",
-              author: n.published_by || "Provider",
-              date: n.publish_date || new Date(n.created_at).toLocaleDateString(),
-              readTime: "3 min",
-              source: n.published_by || "Provider",
-              tags: n.tags || [],
-            }));
-
-            news = [...news, ...providerNews];
-          }
-        } catch (providerErr) {
-          console.warn("Failed to fetch provider news:", providerErr);
-        }
-
-        setAllNews(news);
       } catch (e) {
-        console.error("Failed to fetch news:", e);
-        setAllNews([]);
-      } finally {
-        setLoading(false);
+        console.warn("Failed to fetch provider news:", e);
       }
+      setAllNews(news);
+      setLoading(false);
     }
     fetchNews();
   }, []);

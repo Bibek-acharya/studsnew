@@ -20,13 +20,7 @@ interface PublishedAdmission {
   applicants: number;
 }
 
-const MOCK_ADMISSIONS: PublishedAdmission[] = [
-  { id: 1, title: "BCA Program Admission 2026", program: "BCA", level: "Bachelor", publishedDate: "2026-04-01", status: "Published", applicants: 45 },
-  { id: 2, title: "Civil Engineering Fall Intake", program: "Civil Engineering", level: "Bachelor", publishedDate: "2026-03-15", status: "Published", applicants: 32 },
-  { id: 3, title: "MBA Admissions Spring 2026", program: "MBA", level: "Master", publishedDate: "2026-02-20", status: "Draft", applicants: 0 },
-  { id: 4, title: "+2 Science Admission Open", program: "Science", level: "+2", publishedDate: "2026-05-01", status: "Published", applicants: 78 },
-  { id: 5, title: "Diploma in IT Admission", program: "Diploma in IT", level: "Diploma", publishedDate: "2026-04-10", status: "Published", applicants: 15 },
-];
+const MOCK_ADMISSIONS: PublishedAdmission[] = [];
 
 const statusColors: Record<string, string> = {
   Published: "text-green-600 bg-green-50",

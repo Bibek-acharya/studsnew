@@ -9,74 +9,7 @@ const breadcrumb = [
   { label: "Results" },
 ];
 
-const initialData = [
-  {
-    id: 1,
-    studentName: "Aarav Sharma",
-    registrationNo: "ENT-2026-001",
-    marksObtained: 82,
-    totalMarks: 100,
-    percentage: 82,
-    result: "pass",
-    rank: 1,
-    exam: "BSc CS Entrance 2026",
-  },
-  {
-    id: 2,
-    studentName: "Anita Rai",
-    registrationNo: "ENT-2026-006",
-    marksObtained: 76,
-    totalMarks: 100,
-    percentage: 76,
-    result: "pass",
-    rank: 2,
-    exam: "BSc CS Entrance 2026",
-  },
-  {
-    id: 3,
-    studentName: "Priya Patel",
-    registrationNo: "ENT-2026-002",
-    marksObtained: 68,
-    totalMarks: 100,
-    percentage: 68,
-    result: "pass",
-    rank: 3,
-    exam: "BSc CS Entrance 2026",
-  },
-  {
-    id: 4,
-    studentName: "Rohan Thapa",
-    registrationNo: "ENT-2026-003",
-    marksObtained: 45,
-    totalMarks: 100,
-    percentage: 45,
-    result: "pass",
-    rank: 4,
-    exam: "BSc CS Entrance 2026",
-  },
-  {
-    id: 5,
-    studentName: "Sneha Adhikari",
-    registrationNo: "ENT-2026-004",
-    marksObtained: 35,
-    totalMarks: 100,
-    percentage: 35,
-    result: "fail",
-    rank: 5,
-    exam: "BSc CS Entrance 2026",
-  },
-  {
-    id: 6,
-    studentName: "Kiran Gurung",
-    registrationNo: "ENT-2026-005",
-    marksObtained: 88,
-    totalMarks: 100,
-    percentage: 88,
-    result: "pass",
-    rank: 1,
-    exam: "MBA Entrance 2026",
-  },
-];
+const initialData: any[] = [];
 
 const EntranceResultsPage = () => {
   const [data] = useState(initialData);

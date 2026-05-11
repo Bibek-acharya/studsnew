@@ -4,38 +4,11 @@ import { useState, useMemo } from "react"
 import { useParams } from "next/navigation"
 import { MessageSquare, Users, ArrowLeft, User, Image, BarChart2, Video, ArrowUp, ArrowDown, MessageCircle, Share2 } from "lucide-react"
 
-const mockUserPosts = [
-  {
-    id: 1,
-    title: "Private college vs Drop Year for Computer Engineering?",
-    content: "I scored decent in my +2 but my IOE entrance rank is around 3200. I really want to study at Pulchowk or Thapathali...",
-    community: { name: "Engineering & IOE", emoji: "📐" },
-    upvotes: 214,
-    comments: 89,
-    time: "1d"
-  },
-  {
-    id: 2,
-    title: "Best resources for BCT first semester?",
-    content: "Just started my BCT journey. Can anyone suggest good books and YouTube channels?",
-    community: { name: "Engineering & IOE", emoji: "📐" },
-    upvotes: 45,
-    comments: 23,
-    time: "3d"
-  }
-]
+const mockUserPosts: any[] = []
 
-const mockFollowing = [
-  { id: 1, emoji: "📐", name: "IOE Engineering Prep", members: 12500 },
-  { id: 2, emoji: "💻", name: "IT (CSIT/BCA/BIT)", members: 8200 },
-  { id: 3, emoji: "🩺", name: "CEE Medical Prep", members: 5600 },
-  { id: 4, emoji: "🏛️", name: "Kathmandu University", members: 4100 }
-]
+const mockFollowing: any[] = []
 
-const mockUserData: Record<string, { name: string; type: string; avatar?: string }> = {
-  '1': { name: 'Alex Johnson', type: 'Student' },
-  '2': { name: 'Jagdish Dhami', type: 'Student' },
-}
+const mockUserData: Record<string, { name: string; type: string; avatar?: string }> = {}
 
 function getInitials(name: string): string {
   return name

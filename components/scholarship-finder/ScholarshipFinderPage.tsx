@@ -23,7 +23,7 @@ function mapBackendItem(item: ScholarshipItem): Scholarship {
   return {
     id: item.id,
     slug: (item as any).slug || toSlug(item.title),
-    provider_id: item.provider_id,
+    providerId: (item as any).provider_id || item.provider_id,
     title: item.title,
     org: item.provider,
     amount: item.value || item.amount || "",
@@ -191,12 +191,12 @@ const ScholarshipCard = ({
           {scholarship.title}
         </h3>
         <div className="flex items-center gap-1.5 text-[12.5px] text-gray-500 mb-3.5 line-clamp-1">
-          {scholarship.provider_id ? (
-            <Link href={`/providers/${scholarship.provider_id}`} className="hover:text-blue-600 transition-colors">
+          {scholarship.providerId ? (
+            <Link href={`/providers/${scholarship.providerId}`} className="hover:text-blue-600 transition-colors">
               {scholarship.org}
             </Link>
           ) : (
-            scholarship.org
+            <span className="text-gray-500">{scholarship.org}</span>
           )}
           <BadgeCheck className="w-3.5 h-3.5 text-white fill-[#2563eb]" />
         </div>

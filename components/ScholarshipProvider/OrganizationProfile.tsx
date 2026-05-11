@@ -1,11 +1,13 @@
 "use client";
 
 import React, { memo, useEffect, useState, useCallback } from "react";
-import { Building2, Home, Image, Mail, Phone, BadgeInfo, Globe, CreditCard, Plus, Pencil, Trash2, Star, FileText } from "lucide-react";
+import { Building2, Home, Image, Mail, Phone, BadgeInfo, Globe, CreditCard, Plus, Pencil, Trash2, Star, FileText, Coffee } from "lucide-react";
+import * as LucideIcons from "lucide-react";
 
 import { toast } from "sonner";
 import FileUpload from "./common/FileUpload";
 import ConfirmationModal from "./common/ConfirmationModal";
+import RichTextEditor from "./common/RichTextEditor";
 import { scholarshipProviderApi, ProviderProfile } from "@/services/scholarshipProviderApi";
 import {
   getServices, createService, updateService, deleteService,
@@ -355,8 +357,11 @@ const OrganizationProfile: React.FC = memo(() => {
                   </>
                 ) : (
                   <div className="relative overflow-hidden border border-slate-200 rounded-md">
-                    <img src={logoPreview || ""} className="w-[120px] h-[120px] object-contain mx-auto" alt="Logo" />
-                    {!logoPreview && <div className="absolute inset-0 flex items-center justify-center text-gray-300 text-sm">No logo</div>}
+                    {logoPreview ? (
+                      <img src={logoPreview} className="w-[120px] h-[120px] object-contain mx-auto" alt="Logo" />
+                    ) : (
+                      <div className="w-[120px] h-[120px] flex items-center justify-center text-gray-300 text-sm">No logo</div>
+                    )}
                   </div>
                 )}
               </div>
@@ -369,8 +374,11 @@ const OrganizationProfile: React.FC = memo(() => {
                   </>
                 ) : (
                   <div className="relative overflow-hidden border border-slate-200 rounded-md">
-                    <img src={bannerPreview || ""} className="w-full h-[120px] object-cover" alt="Banner" />
-                    {!bannerPreview && <div className="absolute inset-0 flex items-center justify-center text-gray-300 text-sm">No banner uploaded</div>}
+                    {bannerPreview ? (
+                      <img src={bannerPreview} className="w-full h-[120px] object-cover" alt="Banner" />
+                    ) : (
+                      <div className="w-full h-[120px] flex items-center justify-center text-gray-300 text-sm">No banner uploaded</div>
+                    )}
                   </div>
                 )}
               </div>
@@ -390,7 +398,13 @@ const OrganizationProfile: React.FC = memo(() => {
               <Field label="PAN Number" value={panNumber} isEditing={isEditing}><input type="text" className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:border-blue-500" value={panNumber} onChange={(e) => setPanNumber(e.target.value)} placeholder="PAN / VAT number" /></Field>
               <Field label="Address" value={address} isEditing={isEditing} span={2}><input type="text" className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:border-blue-500" value={address} onChange={(e) => setAddress(e.target.value)} placeholder="Organization address" /></Field>
               <Field label="Website URL" value={websiteUrl} isEditing={isEditing} span={2}><input type="url" className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:border-blue-500" value={websiteUrl} onChange={(e) => setWebsiteUrl(e.target.value)} placeholder="https://www.example.com" /></Field>
-              <Field label="About Text" value={aboutText} isEditing={isEditing} span={2}><textarea className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:border-blue-500" value={aboutText} onChange={(e) => setAboutText(e.target.value)} rows={4} placeholder="Describe your organization..." /></Field>
+              <Field label="About Text" value={aboutText} isEditing={isEditing} span={2}>
+                {isEditing ? (
+                  <RichTextEditor value={aboutText} onChange={setAboutText} placeholder="Describe your organization..." minHeight={200} />
+                ) : (
+                  <div className="prose prose-sm max-w-none text-gray-700" dangerouslySetInnerHTML={{ __html: aboutText }} />
+                )}
+              </Field>
               <Field label="Mission" value={mission} isEditing={isEditing}><textarea className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:border-blue-500" value={mission} onChange={(e) => setMission(e.target.value)} rows={3} placeholder="Our mission..." /></Field>
               <Field label="Values" value={values} isEditing={isEditing}><textarea className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:border-blue-500" value={values} onChange={(e) => setValues(e.target.value)} rows={3} placeholder="Our values..." /></Field>
             </div>
@@ -697,7 +711,21 @@ const FormWrapper = ({ showForm, onSubmit, onCancel }: { showForm: any; onSubmit
         <>
           <input placeholder="Title" value={form.title || ""} onChange={(e) => setForm({ ...form, title: e.target.value })} className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm" />
           <textarea placeholder="Description" value={form.description || ""} onChange={(e) => setForm({ ...form, description: e.target.value })} className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm" rows={3} />
-          <input placeholder="Icon Name (e.g. Coffee, Book, Globe)" value={form.icon || ""} onChange={(e) => setForm({ ...form, icon: e.target.value })} className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm" />
+          <div className="flex items-center gap-3">
+            <div className="flex-1">
+              <input placeholder="Icon Name (e.g. Coffee, Book, Globe, Heart)" value={form.icon || ""} onChange={(e) => setForm({ ...form, icon: e.target.value })} className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm" />
+            </div>
+            <div className="w-10 h-10 rounded-lg border border-gray-200 flex items-center justify-center shrink-0 bg-white">
+              {(() => {
+                const name = form.icon ? form.icon.charAt(0).toUpperCase() + form.icon.slice(1) : "";
+                const Icon = (LucideIcons as any)[name] || null;
+                return Icon ? <Icon className="w-5 h-5 text-blue-600" /> : <Coffee className="w-5 h-5 text-gray-300" />;
+              })()}
+            </div>
+          </div>
+          <a href="https://lucide.dev/icons" target="_blank" rel="noopener noreferrer" className="text-xs text-blue-600 hover:underline inline-flex items-center gap-1">
+            Browse Lucide Icons ↗
+          </a>
         </>
       )}
       {type === "sectors" && (

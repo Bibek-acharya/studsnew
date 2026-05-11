@@ -2,26 +2,45 @@
 
 import { useState, useEffect, useCallback } from "react";
 import { X } from "lucide-react";
-import Image from "next/image";
 import { useRouter } from "next/navigation";
 
 export default function ProjectShikshaPopup() {
   const [isOpen, setIsOpen] = useState(false);
+  const [popupData, setPopupData] = useState<{ id: number; image_url: string; link_url: string } | null>(null);
   const router = useRouter();
 
   useEffect(() => {
-    const dismissed = sessionStorage.getItem("studsphere_scholarship_dismissed");
-    if (!dismissed) {
-      const timer = setTimeout(() => setIsOpen(true), 200);
-      return () => clearTimeout(timer);
-    }
+    const fetchPopup = async () => {
+      try {
+        const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080";
+        const res = await fetch(`${API_BASE}/api/v1/system/ads?page=landing&position=popup`);
+        const json = await res.json();
+        if (json.success && json.data && json.data.length > 0) {
+          const ad = json.data[0];
+          const resolveImg = (u: string) => u.startsWith("/uploads") ? `${API_BASE}${u}` : u;
+          setPopupData({ id: ad.id, image_url: resolveImg(ad.image_url), link_url: ad.link_url });
+
+          const dismissed = sessionStorage.getItem(`popup_dismissed_${ad.id}`);
+          if (!dismissed) {
+            const timer = setTimeout(() => setIsOpen(true), 200);
+            return () => clearTimeout(timer);
+          }
+        }
+      } catch {}
+    };
+    fetchPopup();
   }, []);
+
+  const trackClick = useCallback(async () => {
+    if (!popupData) return;
+    try {
+      const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080";
+      await fetch(`${API_BASE}/api/v1/system/ads/${popupData.id}/click`, { method: "POST" });
+    } catch {}
+  }, [popupData]);
 
   const handleClose = useCallback(() => {
     setIsOpen(false);
-    try {
-      sessionStorage.setItem("studsphere_scholarship_dismissed", "true");
-    } catch (e) {}
   }, []);
 
   const handleEscape = useCallback((e: KeyboardEvent) => {
@@ -35,13 +54,18 @@ export default function ProjectShikshaPopup() {
     return () => document.removeEventListener("keydown", handleEscape);
   }, [handleEscape]);
 
-  if (!isOpen) return null;
+  if (!isOpen || !popupData) return null;
+
+  const dismissKey = popupData.link_url || "default";
+  const bannerStyle = { backgroundImage: 'url("' + popupData.image_url + '")' };
 
   return (
     <div
       className="fixed inset-0 bg-black/60 z-[150] flex items-center justify-center p-4"
       onClick={(e) => {
-        if (e.target === e.currentTarget) handleClose();
+        if (e.target === e.currentTarget) {
+          handleClose();
+        }
       }}
     >
       <div className="relative w-[min(80vw,500px)] h-[min(80vw,500px)] animate-in fade-in zoom-in-95 duration-300">
@@ -49,6 +73,7 @@ export default function ProjectShikshaPopup() {
           onClick={(e) => {
             e.stopPropagation();
             handleClose();
+            try { sessionStorage.setItem(`popup_dismissed_${dismissKey}`, "true"); } catch {}
           }}
           className="absolute -top-3 -right-3 text-white bg-black/50 hover:bg-black/70 rounded-full p-1.5 transition-colors z-20"
         >
@@ -59,16 +84,12 @@ export default function ProjectShikshaPopup() {
           className="relative w-full h-full rounded-xl overflow-hidden shadow-2xl cursor-pointer"
           onClick={() => {
             handleClose();
-            router.push("/scholarship-apply/project-shiksha");
+            try { sessionStorage.setItem(`popup_dismissed_${dismissKey}`, "true"); } catch {}
+            trackClick();
+            router.push(popupData.link_url);
           }}
         >
-          <Image
-            src="/test.jpg"
-            alt=""
-            fill
-            className="object-cover object-center"
-            sizes="(max-width: 768px) 100vw, 800px"
-          />
+          <div className="absolute inset-0 bg-cover bg-center" style={bannerStyle} />
         </div>
       </div>
     </div>

@@ -15,38 +15,11 @@ type DateSlot = {
   available: boolean;
 };
 
-const mockColleges = [
-  "KIST College",
-  "Kathmandu University",
-  "Tribhuvan University",
-  "Pokhara University",
-  "Patan Multiple Campus",
-  "Islington College",
-  "Softwarica College",
-  "Deerwalk Institute of Technology",
-  "NCIT College",
-  "St. Xavier's College",
-  "Global College of Management",
-  "NAMI College",
-  "Texas International College",
-];
+const mockColleges: string[] = [];
 
-const dates: DateSlot[] = [
-  { day: "MON", date: "06", slots: "2 Slots", available: true },
-  { day: "TUE", date: "07", slots: "5 Slots", available: true },
-  { day: "WED", date: "08", slots: "Booked", available: false },
-  { day: "THR", date: "09", slots: "1 Slot", available: true },
-  { day: "FRI", date: "10", slots: "3 Slots", available: true },
-  { day: "SAT", date: "11", slots: "Closed", available: false },
-];
+const dates: DateSlot[] = [];
 
-const times = [
-  "09:00 - 10:00 AM",
-  "10:30 - 11:30 AM",
-  "01:00 - 02:00 PM",
-  "02:30 - 03:30 PM",
-  "04:00 - 05:00 PM",
-];
+const times: string[] = [];
 
 const BookCounsellingPage: React.FC<BookCounsellingPageProps> = () => {
   const { isAuthenticated } = useAuth();

@@ -115,9 +115,9 @@ const EventDetailsPage: React.FC<{ params: Promise<{ id: string }> }> = ({ param
           <h1 className="text-2xl sm:text-3xl lg:text-5xl font-extrabold text-white leading-tight mb-3 sm:mb-4 max-w-4xl">
             {event.title}
           </h1>
-          <p className="text-gray-200 text-xs sm:text-sm lg:text-lg max-w-2xl leading-relaxed hidden sm:block">
-            {stripHtml(event.excerpt)}
-          </p>
+          <div className="text-gray-200 text-xs sm:text-sm lg:text-lg max-w-2xl leading-relaxed hidden sm:block news-content">
+            <div dangerouslySetInnerHTML={{ __html: event.excerpt }} />
+          </div>
         </div>
       </div>
 
@@ -129,8 +129,8 @@ const EventDetailsPage: React.FC<{ params: Promise<{ id: string }> }> = ({ param
               <h2 className="text-xl font-bold text-gray-900">Events Description</h2>
             </div>
 
-            <div className="space-y-4 text-[15px] leading-relaxed text-gray-600 [&_pre]:overflow-x-auto [&_pre]:whitespace-pre-wrap [&_pre]:break-words [&_code]:break-words [&_img]:max-w-full">
-              <div className="break-words" dangerouslySetInnerHTML={{ __html: event.description || "" }} />
+            <div className="space-y-4 text-[15px] leading-relaxed text-gray-600 [&_pre]:overflow-x-auto [&_pre]:whitespace-pre-wrap [&_pre]:break-words [&_code]:break-words [&_img]:max-w-full news-content">
+              <div dangerouslySetInnerHTML={{ __html: event.description || "" }} />
               <p>
                 This seminar provides a comprehensive overview of fully funded and partial scholarships available for Nepalese students in Australia, USA, UK, and Europe. We bring together expert counselors, past scholarship winners, and university representatives to guide you through the application process.
               </p>
@@ -390,7 +390,7 @@ const EventDetailsPage: React.FC<{ params: Promise<{ id: string }> }> = ({ param
                     </div>
                   </div>
 
-                  <p className="text-gray-500 text-[13px] leading-relaxed mb-5 line-clamp-3">{stripHtml(rel.excerpt)}</p>
+                  <p className="text-gray-500 text-[13px] leading-relaxed mb-5 line-clamp-3 news-content" dangerouslySetInnerHTML={{ __html: rel.excerpt }} />
 
                   <div className="border-t border-dashed border-gray-200 mb-4"></div>
 
@@ -418,6 +418,10 @@ const EventDetailsPage: React.FC<{ params: Promise<{ id: string }> }> = ({ param
           })}
         </div>
       </div>
+      <style>{`
+        .news-content a { color: #2563eb !important; text-decoration: underline !important; font-weight: 500 !important; }
+        .news-content a:hover { color: #1d4ed8 !important; }
+      `}</style>
     </main>
   );
 };

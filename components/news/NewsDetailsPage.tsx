@@ -28,7 +28,7 @@ function normalizeArticle(data: any): any {
       ...data,
       image: data.image_url || "",
       author: data.published_by || "Unknown",
-      excerpt: stripHtml(data.short_desc || ""),
+      excerpt: data.short_desc || "",
       category: data.news_type || "News",
       date: data.publish_date || data.published_at || data.created_at || "",
     };
@@ -79,28 +79,14 @@ const NewsDetailsPage: React.FC<{ params: Promise<{ id: string }> }> = ({ params
     async function fetchNews() {
       const safeId = id!;
       try {
-        const isProvider = safeId.startsWith("provider-");
-        const actualId = isProvider ? safeId.replace("provider-", "") : safeId;
-        const apiUrl = isProvider
-          ? `${process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080"}/api/v1/public/news/${actualId}`
-          : `/api/v1/news/${safeId}`;
+        const actualId = safeId.replace("provider-", "");
+        const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080";
 
-        const res = await fetch(apiUrl);
+        const res = await fetch(`${API_BASE}/api/v1/public/news/${actualId}`);
         const data = await res.json();
         if (data?.data) {
           const normalized = normalizeArticle(data.data);
           setArticle(normalized);
-          
-          const relatedRes = await fetch(`/api/v1/news?category=${normalized.category}`);
-          const relatedData = await relatedRes.json();
-          if (relatedData?.data?.news) {
-            setRelated(
-              relatedData.data.news
-                .filter((n: any) => String(n.id) !== safeId)
-                .slice(0, 3)
-                .map((n: any) => normalizeArticle(n))
-            );
-          }
         }
       } catch (e) {
         console.error("Failed to fetch news:", e);
@@ -229,13 +215,13 @@ const NewsDetailsPage: React.FC<{ params: Promise<{ id: string }> }> = ({ params
           )}
 
           {article.excerpt && (
-            <div className="bg-blue-50 border-l-[3px] border-blue-500 p-5 md:p-6 rounded-r-xl mb-10 text-gray-700 leading-relaxed text-[1.05rem]">
-              {article.excerpt}
+            <div className="bg-blue-50 border-l-[3px] border-blue-500 p-5 md:p-6 rounded-r-xl mb-10 text-gray-700 leading-relaxed text-[1.05rem] overflow-hidden news-content">
+              <div dangerouslySetInnerHTML={{ __html: article.excerpt }} />
             </div>
           )}
 
-          <div className="prose prose-slate max-w-none mb-12 text-gray-700 leading-relaxed text-[1.05rem] [&_pre]:overflow-x-auto [&_pre]:whitespace-pre-wrap [&_pre]:break-words [&_code]:break-words [&_img]:max-w-full">
-            <div className="break-words" dangerouslySetInnerHTML={{ __html: article.content || "" }} />
+          <div className="prose prose-slate max-w-none mb-12 text-gray-700 leading-relaxed text-[1.05rem] [&_pre]:overflow-x-auto [&_pre]:whitespace-pre-wrap [&_pre]:break-words [&_code]:break-words [&_img]:max-w-full overflow-hidden news-content">
+            <div dangerouslySetInnerHTML={{ __html: article.content || article.excerpt || "" }} />
           </div>
 
           <hr className="border-gray-100 mb-8" />
@@ -400,6 +386,16 @@ const NewsDetailsPage: React.FC<{ params: Promise<{ id: string }> }> = ({ params
           </div>
         </aside>
       </div>
+      <style>{`
+        .news-content a {
+          color: #2563eb !important;
+          text-decoration: underline !important;
+          font-weight: 500 !important;
+        }
+        .news-content a:hover {
+          color: #1d4ed8 !important;
+        }
+      `}</style>
     </div>
   );
 };

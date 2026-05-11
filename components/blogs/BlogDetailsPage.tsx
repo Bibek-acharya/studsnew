@@ -45,7 +45,7 @@ const BlogDetailsPage: React.FC<{ params: Promise<{ id: string }> }> = ({
               id: parseInt(actualId),
               title: blogData.title,
               slug: blogData.title?.toLowerCase().replace(/\s+/g, "-") || "",
-              excerpt: stripHtml(blogData.content?.slice(0, 200)) || "",
+              excerpt: blogData.content?.slice(0, 200) || "",
               content: blogData.content || "",
               image: blogData.image_url || "",
               author: blogData.author || "Provider",
@@ -201,12 +201,12 @@ const BlogDetailsPage: React.FC<{ params: Promise<{ id: string }> }> = ({
             />
           </div>
 
-          <div className="bg-blue-50 border-l-4 border-blue-500 p-5 rounded-r-xl mb-8 text-gray-700 text-sm sm:text-base leading-relaxed">
-            {stripHtml(blog.excerpt)}
+          <div className="bg-blue-50 border-l-4 border-blue-500 p-5 rounded-r-xl mb-8 text-gray-700 text-sm sm:text-base leading-relaxed news-content">
+            <div dangerouslySetInnerHTML={{ __html: blog.excerpt }} />
           </div>
 
-          <div className="prose max-w-none text-gray-700 [&_pre]:overflow-x-auto [&_pre]:whitespace-pre-wrap [&_pre]:break-words [&_code]:break-words [&_img]:max-w-full">
-            <div className="text-gray-700 mb-8 break-words" dangerouslySetInnerHTML={{ __html: blog.content }} />
+          <div className="prose max-w-none text-gray-700 [&_pre]:overflow-x-auto [&_pre]:whitespace-pre-wrap [&_pre]:break-words [&_code]:break-words [&_img]:max-w-full news-content">
+            <div className="text-gray-700 mb-8" dangerouslySetInnerHTML={{ __html: blog.content }} />
           </div>
 
           <div className="mt-8 mb-6 flex flex-wrap items-center gap-3">
@@ -409,6 +409,10 @@ const BlogDetailsPage: React.FC<{ params: Promise<{ id: string }> }> = ({
           </div>
         </aside>
       </div>
+      <style>{`
+        .news-content a { color: #2563eb !important; text-decoration: underline !important; font-weight: 500 !important; }
+        .news-content a:hover { color: #1d4ed8 !important; }
+      `}</style>
     </div>
   );
 };

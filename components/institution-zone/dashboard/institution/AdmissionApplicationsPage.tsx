@@ -31,56 +31,7 @@ interface Applicant {
   status: "Pending" | "Shortlisted" | "Approved" | "Rejected";
 }
 
-const MOCK_DATA: Applicant[] = [
-  {
-    id: 1, name: "Aarav Sharma", initials: "AS", address: "Kathmandu, Ward-5",
-    contactNo: "9812345678", email: "aarav@example.com", parentContact: "9841112233",
-    seeSchool: "Trinity Int. College", schoolAddress: "Dillibazar, Kathmandu",
-    schoolType: "Private", stream: "Science", shift: "Morning", status: "Pending",
-  },
-  {
-    id: 2, name: "Nisha Thapa", initials: "NT", address: "Bhaktapur, Ward-12",
-    contactNo: "9823456789", email: "nisha@example.com", parentContact: "9842223344",
-    seeSchool: "St. Xavier's School", schoolAddress: "Jawalakhel, Lalitpur",
-    schoolType: "Private", stream: "Management", shift: "Day", status: "Approved",
-  },
-  {
-    id: 3, name: "Rohan Karki", initials: "RK", address: "Pokhara, Bazar",
-    contactNo: "9834567890", email: "rohan@example.com", parentContact: "9843334455",
-    seeSchool: "Global Academy", schoolAddress: "Lakeside, Pokhara",
-    schoolType: "Private", stream: "Science", shift: "Morning", status: "Shortlisted",
-  },
-  {
-    id: 4, name: "Puja Rai", initials: "PR", address: "Butwal, Ward-8",
-    contactNo: "9845678901", email: "puja@example.com", parentContact: "9844445566",
-    seeSchool: "NIST Secondary", schoolAddress: "Butwal-10, Rupandehi",
-    schoolType: "Government", stream: "Humanities", shift: "Day", status: "Rejected",
-  },
-  {
-    id: 5, name: "Bikash Magar", initials: "BM", address: "Jhapa, Chowk",
-    contactNo: "9856789012", email: "bikash@example.com", parentContact: "9845556677",
-    seeSchool: "KMC Secondary", schoolAddress: "Birtamode, Jhapa",
-    schoolType: "Community", stream: "Science", shift: "Morning", status: "Pending",
-  },
-  {
-    id: 6, name: "Sita Gurung", initials: "SG", address: "Lalitpur, Ward-4",
-    contactNo: "9867890123", email: "sita@example.com", parentContact: "9846667788",
-    seeSchool: "Little Angels", schoolAddress: "Hattiban, Lalitpur",
-    schoolType: "Private", stream: "Science", shift: "Day", status: "Approved",
-  },
-  {
-    id: 7, name: "Pradeep Adhikari", initials: "PA", address: "Dhanusha, Ward-2",
-    contactNo: "9878901234", email: "pradeep@example.com", parentContact: "9847778899",
-    seeSchool: "Sagarmatha College", schoolAddress: "Janakpur, Dhanusha",
-    schoolType: "Community", stream: "Management", shift: "Morning", status: "Pending",
-  },
-  {
-    id: 8, name: "Anjali Tamang", initials: "AT", address: "Surkhet, Bazar",
-    contactNo: "9889012345", email: "anjali@example.com", parentContact: "9848889900",
-    seeSchool: "GoldenGate Int.", schoolAddress: "Birendranagar, Surkhet",
-    schoolType: "Private", stream: "Law", shift: "Day", status: "Rejected",
-  },
-];
+const MOCK_DATA: Applicant[] = [];
 
 const statusPill = (status: string) => {
   const colors: Record<string, string> = {
