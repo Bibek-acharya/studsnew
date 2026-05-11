@@ -249,10 +249,10 @@ export default function ScholarshipDetailPage({ scholarship, similarScholarships
             (desc || scholarship.about_paragraph_2 || (Array.isArray(scholarship.video_tutorials) && scholarship.video_tutorials.length > 0) || dynamicJourneyTimeline.length > 0) ? (
             <div className="space-y-10">
               {desc && (
-                <div className="text-[15px] leading-[1.8] text-gray-600 hyphens-none break-words" dangerouslySetInnerHTML={{ __html: desc }} />
+                <div className="rich-text text-[15px] leading-[1.8] text-gray-600 hyphens-none break-words" dangerouslySetInnerHTML={{ __html: desc }} />
               )}
               {scholarship.about_paragraph_2 && (
-                <div className="mt-4 text-[15px] leading-[1.8] text-gray-600 hyphens-none break-words" dangerouslySetInnerHTML={{ __html: scholarship.about_paragraph_2 }} />
+                <div className="rich-text mt-4 text-[15px] leading-[1.8] text-gray-600 hyphens-none break-words" dangerouslySetInnerHTML={{ __html: scholarship.about_paragraph_2 }} />
               )}
               {(Array.isArray(scholarship.video_tutorials) && scholarship.video_tutorials.length > 0) && (
                 <div>

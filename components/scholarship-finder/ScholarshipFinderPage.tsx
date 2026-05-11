@@ -65,55 +65,8 @@ function paginate<T>(items: T[], page: number, perPage: number): { items: T[]; t
   return { items: items.slice(start, start + perPage), total, totalPages };
 }
 
-const FilterSection = ({
-  title,
-  icon,
-  children,
-  isOpenDefault = false,
-}: {
-  title: string;
-  icon?: React.ReactNode;
-  children: React.ReactNode;
-  isOpenDefault?: boolean;
-}) => {
-  return (
-    <details className="group mb-4 border-b border-gray-100 pb-4" open={isOpenDefault}>
-      <summary className="flex justify-between items-center font-semibold text-[14px] text-slate-800 cursor-pointer list-none">
-        <span className="flex items-center gap-2">
-          {icon}
-          {title}
-        </span>
-        <ChevronDown className="w-4 h-4 text-gray-500 transition-transform group-open:rotate-180" />
-      </summary>
-      <div className="mt-3">{children}</div>
-    </details>
-  );
-};
 
-const CheckboxLabel = ({ label, checked = false, onChange }: { label: string; checked?: boolean; onChange?: (checked: boolean) => void }) => (
-  <label className="flex items-center gap-3 cursor-pointer group/label mb-3">
-    <input
-      type="checkbox"
-      checked={checked}
-      onChange={(e) => onChange?.(e.target.checked)}
-      className="w-4 h-4 accent-[#0000ff] border-gray-300 rounded cursor-pointer"
-    />
-    <span className="text-[14px] text-gray-600 group-hover/label:text-gray-900 transition-colors">
-      {label}
-    </span>
-  </label>
-);
 
-const SearchInput = ({ placeholder }: { placeholder: string }) => (
-  <div className="relative mb-3">
-    <Search className="w-3.5 h-3.5 absolute left-2.5 top-1/2 -translate-y-1/2 text-gray-400" />
-    <input
-      type="text"
-      placeholder={placeholder}
-      className="w-full pl-8 pr-3 py-1.5 bg-gray-50 border border-gray-200 rounded-md text-[12px] focus:outline-none focus:ring-1 focus:ring-blue-500/50 focus:border-blue-500 focus:bg-white transition-all placeholder:text-gray-400"
-    />
-  </div>
-);
 
 const getStatusStyle = (status: string) => {
   switch (status) {
@@ -209,7 +162,7 @@ const ScholarshipCard = ({
       )}
 
       {/* Image Area */}
-      <div className="aspect-[16/10] w-full bg-gray-100 relative overflow-hidden rounded-md mb-3">
+      <div className="h-32 w-full bg-gray-100 relative overflow-hidden rounded-md mb-3">
         {imageHtml}
       </div>
 
@@ -337,24 +290,6 @@ const FeaturedScholarshipsPage = () => {
     setUserLocation({ lat, lng });
   };
 
-  const appliedFilters = useMemo(() => {
-    const tags: { key: string; label: string; value: string }[] = [];
-    const labels: Record<string, string> = {
-      studyLevel: "Study Level",
-      courseStream: "Course",
-      scholarshipType: "Type",
-      providerType: "Provider",
-      coverage: "Coverage",
-      gpaRequirement: "GPA",
-      deadlineType: "Deadline",
-    };
-    Object.entries(filters).forEach(([key, values]) => {
-      if (Array.isArray(values)) {
-        values.forEach((v) => tags.push({ key, label: labels[key] || key, value: v }));
-      }
-    });
-    return tags;
-  }, [filters]);
 
   useEffect(() => {
     const savedCoords = sessionStorage.getItem("navLocationCoords");
@@ -389,14 +324,6 @@ const FeaturedScholarshipsPage = () => {
     loadScholarships();
   }, [filters, userLocation, currentPage, searchQuery]);
 
-  const toggleFilter = (key: keyof typeof filters, value: string) => {
-    setFilters((prev) => ({
-      ...prev,
-      [key]: prev[key].includes(value)
-        ? prev[key].filter((v) => v !== value)
-        : [...prev[key], value],
-    }));
-  };
 
   const toggleSelection = (scholarshipId: string | number) => {
     setSelectedForApply((prev) => {
@@ -479,7 +406,6 @@ const FeaturedScholarshipsPage = () => {
     setIsQuickApplyMode(true);
   };
 
-  const scholarshipTypeOptions = ["Need Based", "Merit Based", "Partial Tuition", "Full Tuition", "Research Grant"];
 
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setSearchQuery(e.target.value);
@@ -501,10 +427,6 @@ const FeaturedScholarshipsPage = () => {
     setTimeout(() => setToast(null), 4000);
   };
 
-  const handleExploreClick = (cardName: string) => {
-    setToast(`Redirecting to opportunities from ${cardName}...`);
-    setTimeout(() => setToast(null), 3000);
-  };
 
  
   return (
