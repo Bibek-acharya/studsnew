@@ -8,6 +8,7 @@ import { validateForm } from "./validation";
 import { NEPAL_PROVINCES, NEPAL_DISTRICTS, NEPAL_LOCAL_BODIES } from "@/lib/location-data";
 import { apiService } from "@/services/api";
 import PartnerLogosCard from "@/components/scholarship-apply/PartnerLogosCard";
+import AlertDialog from "@/components/ui/AlertDialog";
 
 function SelectArrow({ className = "", children, ...props }: React.SelectHTMLAttributes<HTMLSelectElement>) {
   return (
@@ -111,6 +112,7 @@ export default function ShikshaApplicationForm({
   const [photoPreview, setPhotoPreview] = useState<string | null>(null);
   const [sameAsPermanent, setSameAsPermanent] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [alertMessage, setAlertMessage] = useState("");
 
   const handleInputChange = useCallback((field: keyof ProjectShikshaFormData, value: string | boolean | File | null) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
@@ -516,12 +518,28 @@ export default function ShikshaApplicationForm({
                   className="hidden"
                   onChange={(e) => {
                     const file = e.target.files?.[0] || null;
-                    if (file && file.size > 2 * 1024 * 1024) {
-                      alert("File is too large. Please upload an image smaller than 2MB.");
-                      e.target.value = "";
-                      return;
+                    if (file) {
+                      if (file.size > 2 * 1024 * 1024) {
+                        setAlertMessage("File is too large. Please upload an image smaller than 2MB.");
+                        e.target.value = "";
+                        return;
+                      }
+                      const img = new Image();
+                      const reader = new FileReader();
+                      reader.onload = (ev) => {
+                        img.onload = () => {
+                          const ratio = img.width / img.height;
+                          if (ratio < 0.95 || ratio > 1.05) {
+                            setAlertMessage("Photo must be 1:1 (square) aspect ratio.");
+                            e.target.value = "";
+                            return;
+                          }
+                          handleFileChange("photo", file);
+                        };
+                        img.src = ev.target?.result as string;
+                      };
+                      reader.readAsDataURL(file);
                     }
-                    handleFileChange("photo", file);
                   }}
                 />
                 {errors.photo && <p className="text-red-500 text-[12px] mt-1">{errors.photo}</p>}
@@ -1230,6 +1248,7 @@ export default function ShikshaApplicationForm({
         </div>
       )}
       </div>
+      <AlertDialog isOpen={!!alertMessage} onClose={() => setAlertMessage("")} message={alertMessage} />
     </div>
   );
 }

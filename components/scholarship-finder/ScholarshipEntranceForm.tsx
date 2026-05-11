@@ -16,6 +16,7 @@ import {
   Bell,
   Mail,
 } from "lucide-react";
+import AlertDialog from "@/components/ui/AlertDialog";
 
 type ViewState = "form" | "payment" | "success" | "admit";
 
@@ -29,6 +30,7 @@ export default function ScholarshipEntranceForm({ scholarshipTitle, onClose }: {
   const [rollNumber, setRollNumber] = useState("");
   const [photoPreview, setPhotoPreview] = useState<string | null>(null);
   const [copyAddress, setCopyAddress] = useState(false);
+  const [alertMessage, setAlertMessage] = useState("");
 
   // Form State
   const [formData, setFormData] = useState({
@@ -87,12 +89,25 @@ export default function ScholarshipEntranceForm({ scholarshipTitle, onClose }: {
     const file = e.target.files?.[0];
     if (file) {
       if (file.size > 2 * 1024 * 1024) {
-        alert("File is too large. Max 2MB.");
+        setAlertMessage("File is too large. Max 2MB.");
+        e.target.value = "";
         return;
       }
+      const img = new Image();
       const reader = new FileReader();
-      reader.onload = (e) => {
-        setPhotoPreview(e.target?.result as string);
+      reader.onload = (ev) => {
+        const dataUrl = ev.target?.result as string;
+        img.onload = () => {
+          const ratio = img.width / img.height;
+          if (ratio < 0.95 || ratio > 1.05) {
+            setAlertMessage("Photo must be 1:1 (square) aspect ratio.");
+            e.target.value = "";
+            setPhotoPreview(null);
+            return;
+          }
+          setPhotoPreview(dataUrl);
+        };
+        img.src = dataUrl;
       };
       reader.readAsDataURL(file);
     }
@@ -119,7 +134,7 @@ export default function ScholarshipEntranceForm({ scholarshipTitle, onClose }: {
     e.preventDefault();
     // Manual validation simulation as per HTML
     if (!formData.fullName || !formData.gender || !selectedBsDate || !photoPreview) {
-      alert("Please fill in all required fields marked with *.");
+      setAlertMessage("Please fill in all required fields marked with *.");
       return;
     }
     window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -938,6 +953,7 @@ export default function ScholarshipEntranceForm({ scholarshipTitle, onClose }: {
           }
         }
       `}</style>
+      <AlertDialog isOpen={!!alertMessage} onClose={() => setAlertMessage("")} message={alertMessage} />
     </div>
   );
 }

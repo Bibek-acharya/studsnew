@@ -13,7 +13,7 @@ interface AlertDialogProps {
 const AlertDialog: React.FC<AlertDialogProps> = ({
   isOpen,
   onClose,
-  title = "Notice",
+  title = "Alert!",
   message,
   confirmText = "OK",
 }) => {

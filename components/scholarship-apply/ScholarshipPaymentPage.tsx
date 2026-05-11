@@ -4,9 +4,10 @@ import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
 import { 
-  Lock, UploadCloud, Loader2, CheckCircle, Info, Landmark
+  User, Phone, Lock, UploadCloud, Loader2, CheckCircle, Info, Landmark
 } from "lucide-react";
 import { scholarshipApi } from "@/services/api";
+import AlertDialog from "@/components/ui/AlertDialog";
 
 type PaymentMethod = "esewa" | "bank";
 
@@ -37,9 +38,12 @@ export default function ScholarshipPaymentPage({ scholarshipSlug }: { scholarshi
   const [applicationId, setApplicationId] = useState<number | null>(null);
   const [scholarshipId, setScholarshipId] = useState<number | null>(null);
   const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>("esewa");
+  const [applicantName, setApplicantName] = useState("");
+  const [contactNumber, setContactNumber] = useState("");
   const [paymentScreenshot, setPaymentScreenshot] = useState<File | null>(null);
   const [isProcessing, setIsProcessing] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [alertMessage, setAlertMessage] = useState("");
 
   useEffect(() => {
     const loadData = async () => {
@@ -102,12 +106,22 @@ export default function ScholarshipPaymentPage({ scholarshipSlug }: { scholarshi
   };
 
   const handlePayment = async () => {
+    if (paymentMethod === "bank") {
+      if (!applicantName.trim()) {
+        setAlertMessage("Please enter applicant name");
+        return;
+      }
+      if (!contactNumber.trim() || contactNumber.length < 7) {
+        setAlertMessage("Please enter a valid contact number");
+        return;
+      }
+    }
     if (!applicationId) {
-      alert("Application ID is missing. Please submit the application first.");
+      setAlertMessage("Application ID is missing. Please submit the application first.");
       return;
     }
     if (!scholarshipId) {
-      alert("Scholarship data not loaded yet. Please wait.");
+      setAlertMessage("Scholarship data not loaded yet. Please wait.");
       return;
     }
 
@@ -116,7 +130,7 @@ export default function ScholarshipPaymentPage({ scholarshipSlug }: { scholarshi
     try {
       if (paymentMethod === "bank") {
         if (!paymentScreenshot) {
-          alert("Please upload payment screenshot");
+          setAlertMessage("Please upload payment screenshot");
           setIsProcessing(false);
           return;
         }
@@ -171,7 +185,7 @@ export default function ScholarshipPaymentPage({ scholarshipSlug }: { scholarshi
       }
     } catch (error: any) {
       console.error("Payment error:", error);
-      alert(error.message || "Payment failed. Please try again.");
+      setAlertMessage(error.message || "Payment failed. Please try again.");
       setIsProcessing(false);
     }
   };
@@ -227,9 +241,7 @@ export default function ScholarshipPaymentPage({ scholarshipSlug }: { scholarshi
                   className="w-full h-full object-contain"
                 />
               </div>
-              <div className="absolute -top-2 -right-2 bg-[#0000ff] text-white rounded-full w-5 h-5 flex items-center justify-center opacity-0 peer-checked:opacity-100 transition-opacity shadow-sm">
-                <CheckCircle className="w-3 h-3" />
-              </div>
+            
             </label>
 
             {scholarship?.paymentConfig?.methods?.includes("bank") && (
@@ -246,9 +258,7 @@ export default function ScholarshipPaymentPage({ scholarshipSlug }: { scholarshi
                   <Landmark className="w-5 h-5 text-gray-500 peer-checked:text-[#0000ff] mb-0.5 transition-colors" />
                   <span className="text-[10px] font-bold text-gray-500 peer-checked:text-[#0000ff] transition-colors">Bank QR</span>
                 </div>
-                <div className="absolute -top-2 -right-2 bg-[#0000ff] text-white rounded-full w-5 h-5 flex items-center justify-center opacity-0 peer-checked:opacity-100 transition-opacity shadow-sm">
-                  <CheckCircle className="w-3 h-3" />
-                </div>
+            
               </label>
             )}
           </div>
@@ -293,6 +303,27 @@ export default function ScholarshipPaymentPage({ scholarshipSlug }: { scholarshi
               {paymentScreenshot && (
                 <p className="text-green-600 text-[12px] mt-1">✓ {paymentScreenshot.name}</p>
               )}
+            </div>
+
+            <div className="space-y-4 mt-5">
+              <div>
+                <label className="block text-[12px] font-bold text-gray-700 mb-1.5">Applicant Name <span className="text-red-500">*</span></label>
+                <div className="relative">
+                  <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none">
+                    <User className="h-4 w-4 text-gray-400" />
+                  </div>
+                  <input type="text" value={applicantName} onChange={(e) => setApplicantName(e.target.value)} className="w-full border-2 border-gray-200 rounded-md pl-10 pr-4 py-2.5 text-sm focus:border-[#0000ff] outline-none transition-colors bg-white" placeholder="Full Name" required />
+                </div>
+              </div>
+              <div>
+                <label className="block text-[12px] font-bold text-gray-700 mb-1.5">Contact Number <span className="text-red-500">*</span></label>
+                <div className="relative">
+                  <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none">
+                    <Phone className="h-4 w-4 text-gray-400" />
+                  </div>
+                  <input type="text" value={contactNumber} onChange={(e) => setContactNumber(e.target.value.replace(/[^0-9]/g, "").slice(0, 10))} className="w-full border-2 border-gray-200 rounded-md pl-10 pr-4 py-2.5 text-sm tracking-wide focus:border-[#0000ff] outline-none transition-colors bg-white" placeholder="9840000000" maxLength={10} required />
+                </div>
+              </div>
             </div>
           </div>
         </div>
@@ -344,6 +375,7 @@ export default function ScholarshipPaymentPage({ scholarshipSlug }: { scholarshi
           )}
         </button>
       </div>
+      <AlertDialog isOpen={!!alertMessage} onClose={() => setAlertMessage("")} message={alertMessage} />
     </div>
   );
 }
