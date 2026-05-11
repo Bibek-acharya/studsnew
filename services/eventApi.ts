@@ -319,7 +319,7 @@ export async function uploadEventImage(file: File): Promise<string> {
     const formData = new FormData();
     formData.append("image", file);
 
-    const res = await fetch("/api/v1/admin/events/upload-image", {
+    const res = await fetch(`${API_BASE_URL}/api/v1/admin/events/upload-image`, {
       method: "POST",
       body: formData,
     });
@@ -330,7 +330,7 @@ export async function uploadEventImage(file: File): Promise<string> {
     }
 
     const data = await res.json();
-    return data.data.url;
+    return data.data?.url || data.url || "";
   } catch (err) {
     throw new Error("Failed to upload image");
   }
