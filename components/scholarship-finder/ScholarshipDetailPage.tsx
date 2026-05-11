@@ -183,7 +183,7 @@ export default function ScholarshipDetailPage({ scholarship, similarScholarships
           <div className="flex items-center gap-3">
             <button
               type="button"
-              onClick={() => router.push(`/scholarship-finder/apply/${scholarship.id}`)}
+              onClick={() => router.push(`/scholarship-finder/apply/${scholarship.slug}`)}
               className="flex items-center justify-center gap-2 rounded-md bg-blue-600 px-5 py-2.5 text-[14px] font-semibold text-white transition-colors hover:bg-blue-700"
             >
               <FileText size={16} /> Apply Now

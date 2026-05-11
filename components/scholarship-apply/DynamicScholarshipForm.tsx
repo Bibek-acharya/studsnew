@@ -18,16 +18,18 @@ interface FormSection {
   fields: FormField[];
 }
 
+type FormDataValue = string | number | null;
+
 interface DynamicScholarshipFormProps {
   scholarshipId: number;
+  scholarshipSlug?: string;
   scholarshipTitle: string;
   formConfig: { sections: FormSection[] };
 }
 
-type FormDataValue = string | number | null;
-
 export default function DynamicScholarshipForm({
   scholarshipId,
+  scholarshipSlug,
   scholarshipTitle,
   formConfig,
 }: DynamicScholarshipFormProps) {
@@ -89,8 +91,16 @@ export default function DynamicScholarshipForm({
         scholarship_id: scholarshipId,
       };
 
-      await apiService.applyScholarship(scholarshipId, payload);
-      router.push(`/scholarship-pay/${scholarshipId}`);
+      const response = await apiService.applyScholarship(scholarshipId, payload);
+      const applicationId = response.data?.id || response.id;
+
+      sessionStorage.setItem("scholarship_application_data", JSON.stringify({
+        applicationId,
+        scholarshipId,
+        fullName: formData.full_name || formData.fullName || "",
+        phone: formData.phone || formData.phone_number || "",
+      }));
+      router.push(`/scholarship-pay/${scholarshipSlug || scholarshipId}`);
     } catch (error) {
       console.error("Application error:", error);
       setSubmitError("Failed to submit application. Please try again.");
@@ -145,49 +155,47 @@ export default function DynamicScholarshipForm({
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 py-8">
-      <div className="max-w-3xl mx-auto bg-white rounded-lg shadow p-8">
-        <h1 className="text-2xl font-bold mb-6 text-gray-900">{scholarshipTitle}</h1>
+    <div className="bg-white rounded-lg shadow p-8">
+      <h1 className="text-2xl font-bold text-gray-900 mb-6">{scholarshipTitle}</h1>
 
-        <form onSubmit={handleSubmit}>
-          {formConfig.sections.map((section) => (
-            <div key={section.id} className="mb-8">
-              <h2 className="text-lg font-semibold mb-4 pb-2 border-b text-gray-800">{section.title}</h2>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {section.fields.map((field) => (
-                  <div
-                    key={field.id}
-                    className={field.type === "textarea" ? "md:col-span-2" : ""}
-                  >
-                    <label className="block text-sm font-medium mb-1 text-gray-700">
-                      {field.label}
-                      {field.required && <span className="text-red-500"> *</span>}
-                    </label>
-                    {renderField(field)}
-                    {errors[field.id] && (
-                      <p className="text-red-500 text-sm mt-1">{errors[field.id]}</p>
-                    )}
-                  </div>
-                ))}
-              </div>
+      <form onSubmit={handleSubmit}>
+        {formConfig.sections.map((section) => (
+          <div key={section.id} className="mb-8">
+            <h2 className="text-lg font-semibold mb-4 pb-2 border-b text-gray-800">{section.title}</h2>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {section.fields.map((field) => (
+                <div
+                  key={field.id}
+                  className={field.type === "textarea" ? "md:col-span-2" : ""}
+                >
+                  <label className="block text-sm font-medium mb-1 text-gray-700">
+                    {field.label}
+                    {field.required && <span className="text-red-500"> *</span>}
+                  </label>
+                  {renderField(field)}
+                  {errors[field.id] && (
+                    <p className="text-red-500 text-sm mt-1">{errors[field.id]}</p>
+                  )}
+                </div>
+              ))}
             </div>
-          ))}
+          </div>
+        ))}
 
-          {submitError && (
-            <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-md">
-              <p className="text-red-600 text-sm">{submitError}</p>
-            </div>
-          )}
+        {submitError && (
+          <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-md">
+            <p className="text-red-600 text-sm">{submitError}</p>
+          </div>
+        )}
 
-          <button
-            type="submit"
-            disabled={isSubmitting}
-            className="w-full bg-blue-600 text-white py-3 rounded-lg font-semibold hover:bg-blue-700 disabled:bg-gray-400 transition-colors"
-          >
-            {isSubmitting ? "Submitting..." : "Submit Application"}
-          </button>
-        </form>
-      </div>
+        <button
+          type="submit"
+          disabled={isSubmitting}
+          className="w-full bg-blue-600 text-white py-3 rounded-lg font-semibold hover:bg-blue-700 disabled:bg-gray-400 transition-colors"
+        >
+          {isSubmitting ? "Submitting..." : "Submit Application"}
+        </button>
+      </form>
     </div>
   );
 }

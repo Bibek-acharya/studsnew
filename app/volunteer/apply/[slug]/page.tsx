@@ -8,8 +8,8 @@ import NepaliCalendar from "@/components/volunteer/VolunteerNepaliCalendar";
 import Dropdown from "@/components/college-recommender/Dropdown";
 import { NEPAL_PROVINCES, NEPAL_DISTRICTS, NEPAL_LOCAL_BODIES } from "@/lib/location-data";
 
-export default function VolunteerApplyPage({ params }: { params: Promise<{ id: string }> }) {
-  const { id } = use(params);
+export default function VolunteerApplyPage({ params }: { params: Promise<{ slug: string }> }) {
+  const { slug } = use(params);
   const router = useRouter();
 
   const [volunteer, setVolunteer] = useState<any>(null);
@@ -92,7 +92,7 @@ export default function VolunteerApplyPage({ params }: { params: Promise<{ id: s
   useEffect(() => {
     const fetchVolunteer = async () => {
       try {
-        const res = await apiService.getPublicVolunteerByID(Number(id));
+        const res = await apiService.getPublicVolunteerByID(slug);
         if (res?.success && res?.data) {
           const data = res.data;
           let dates: string[] = [];
@@ -121,7 +121,7 @@ export default function VolunteerApplyPage({ params }: { params: Promise<{ id: s
       }
     };
     fetchVolunteer();
-  }, [id]);
+  }, [slug]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -140,7 +140,7 @@ export default function VolunteerApplyPage({ params }: { params: Promise<{ id: s
 
     setSubmitting(true);
     try {
-      await apiService.submitVolunteerApplication(volunteer.id, {
+      await apiService.submitVolunteerApplication(volunteer.slug, {
         full_name: fullName,
         gender,
         phone,

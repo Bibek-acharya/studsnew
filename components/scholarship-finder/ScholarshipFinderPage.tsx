@@ -15,9 +15,14 @@ import SelectScholarshipTypeModal from "./SelectScholarshipTypeModal";
 
 const SCHOLARSHIPS_PER_PAGE = 18;
 
+function toSlug(str: string): string {
+  return str.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "") || "scholarship";
+}
+
 function mapBackendItem(item: ScholarshipItem): Scholarship {
   return {
     id: item.id,
+    slug: (item as any).slug || toSlug(item.title),
     provider_id: item.provider_id,
     title: item.title,
     org: item.provider,
@@ -227,12 +232,12 @@ const ScholarshipCard = ({
         {/* Action Buttons */}
         <div className="flex items-center gap-2">
           <button
-            onClick={() => router.push(`/scholarship-finder/${scholarship.id}`)}
+            onClick={() => router.push(`/scholarship-finder/${scholarship.slug}`)}
             className="flex-1 py-2 text-[13px] font-semibold text-gray-700 bg-white border border-gray-200 rounded-md hover:bg-gray-50 transition-colors"
           >
             Details
           </button>
-          <button onClick={() => router.push(`/scholarship-finder/apply/${scholarship.id}`)} className="flex-[1.2] py-2 text-[13px] font-semibold text-white bg-brand-blue rounded-md hover:bg-[#0000cc] transition-colors">
+          <button onClick={() => router.push(`/scholarship-finder/apply/${scholarship.slug}`)} className="flex-[1.2] py-2 text-[13px] font-semibold text-white bg-brand-blue rounded-md hover:bg-[#0000cc] transition-colors">
             Apply
           </button>
           <button 

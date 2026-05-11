@@ -104,22 +104,9 @@ export default function ShikshaPaymentPage() {
       return;
     }
 
-    if (!applicationData?.scholarshipId) {
-      alert("Scholarship ID is missing");
-      return;
-    }
-
     setIsProcessing(true);
 
     try {
-      // 1. Initiate Payment
-      const initResp: any = await scholarshipApi.initiatePayment(applicationData.scholarshipId, {
-        method: paymentMethod,
-        amount: feeAmount,
-        application_id: applicationData.applicationId
-      });
-      const paymentId = initResp.data?.id || initResp.id;
-
       if (paymentMethod === "bank") {
         if (!paymentScreenshot) {
           alert("Please upload payment screenshot");
@@ -127,27 +114,56 @@ export default function ShikshaPaymentPage() {
           return;
         }
 
-        // 2. Upload Receipt
-        const receiptUrl = await apiService.uploadScholarshipFile(paymentScreenshot, "receipts");
+        const initResp: any = await scholarshipApi.initiatePayment(applicationData?.scholarshipId!, {
+          method: "bank",
+          amount: feeAmount,
+          application_id: applicationData?.applicationId
+        });
+        const paymentId = initResp.data?.id || initResp.id;
 
-        // 3. Save Receipt to Payment
+        const receiptUrl = await apiService.uploadScholarshipFile(paymentScreenshot, "receipts");
         await scholarshipApi.uploadBankReceipt(paymentId, receiptUrl);
 
         sessionStorage.setItem("shiksha_payment_status", "pending_verification");
-        
         setIsProcessing(false);
         router.push("/scholarship-apply/project-shiksha/success");
       } else {
-        // eSewa / Khalti
-        const transactionId = `TXN-${Date.now()}`;
-        
-        // 2. Confirm Payment
-        await scholarshipApi.confirmPayment(paymentId, transactionId);
+        // eSewa - redirect to eSewa gateway
+        const initResp: any = await scholarshipApi.esewaInitiate(
+          applicationData?.applicationId!,
+          feeAmount
+        );
+        const esewaData = initResp.data;
 
-        sessionStorage.setItem("shiksha_payment_status", "completed");
-        
-        setIsProcessing(false);
-        router.push("/scholarship-apply/project-shiksha/success");
+        const form = document.createElement("form");
+        form.method = "POST";
+        form.action = esewaData.gateway_url;
+        form.style.display = "none";
+
+        const fields: Record<string, string> = {
+          amount: esewaData.amount,
+          tax_amount: esewaData.tax_amount,
+          total_amount: esewaData.total_amount,
+          transaction_uuid: esewaData.transaction_uuid,
+          product_code: esewaData.product_code,
+          product_service_charge: "0",
+          product_delivery_charge: "0",
+          success_url: esewaData.success_url,
+          failure_url: esewaData.failure_url,
+          signed_field_names: "total_amount,transaction_uuid,product_code",
+          signature: esewaData.signature,
+        };
+
+        Object.entries(fields).forEach(([key, value]) => {
+          const input = document.createElement("input");
+          input.type = "hidden";
+          input.name = key;
+          input.value = value;
+          form.appendChild(input);
+        });
+
+        document.body.appendChild(form);
+        form.submit();
       }
     } catch (error: any) {
       console.error("Payment error:", error);

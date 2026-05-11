@@ -1,9 +1,10 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
-import { CheckCircle, Download, Home, BadgeCheck, Printer } from "lucide-react";
+import { useRouter, useSearchParams } from "next/navigation";
+import { CheckCircle, Download, Home, BadgeCheck, Printer, Loader2, AlertCircle } from "lucide-react";
 import AdmitCard from "./AdmitCard";
+import { scholarshipApi } from "../../services/api";
 
 interface ApplicationData {
   fullName: string;
@@ -11,30 +12,56 @@ interface ApplicationData {
   dobBS: string;
   dobAD: string;
   gender: string;
+  scholarshipId?: number;
+  applicationId?: number;
   paymentConfig?: any;
 }
 
 export default function ShikshaSuccessPage() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const [applicationData, setApplicationData] = useState<ApplicationData | null>(null);
   const [rollNumber, setRollNumber] = useState("");
   const [paymentStatus, setPaymentStatus] = useState<string | null>(null);
   const [applicationNo, setApplicationNo] = useState("");
   const [showAdmitCard, setShowAdmitCard] = useState(false);
+  const [isVerifying, setIsVerifying] = useState(false);
+  const [verifyError, setVerifyError] = useState<string | null>(null);
 
   useEffect(() => {
     const stored = sessionStorage.getItem("shiksha_application_data");
-    if (stored) {
-      const data = JSON.parse(stored);
-      setApplicationData(data);
-      const randomRoll = `PS-${Math.floor(1000 + Math.random() * 9000)}`;
-      setRollNumber(randomRoll);
-      const randomAppNo = `RD${Math.floor(1000 + Math.random() * 9000)}S${Math.floor(100 + Math.random() * 900)}`;
-      setApplicationNo(randomAppNo);
+    if (!stored) {
+      router.push("/scholarship-apply/project-shiksha");
+      return;
     }
-    const status = sessionStorage.getItem("shiksha_payment_status");
-    setPaymentStatus(status);
-  }, []);
+
+    const data = JSON.parse(stored);
+    setApplicationData(data);
+    setApplicationNo(`RD${Math.floor(1000 + Math.random() * 9000)}S${Math.floor(100 + Math.random() * 900)}`);
+
+    const verifyEsewa = async () => {
+      const dataParam = searchParams.get("data");
+      if (dataParam) {
+        setIsVerifying(true);
+        try {
+          const decoded = JSON.parse(atob(dataParam));
+          await scholarshipApi.esewaVerifyPayment(data.applicationId, decoded);
+          sessionStorage.setItem("shiksha_payment_status", "completed");
+          setPaymentStatus("completed");
+        } catch (err: any) {
+          setVerifyError(err.message || "Payment verification failed");
+          setPaymentStatus("failed");
+        } finally {
+          setIsVerifying(false);
+        }
+      } else {
+        const status = sessionStorage.getItem("shiksha_payment_status");
+        setPaymentStatus(status);
+      }
+    };
+
+    verifyEsewa();
+  }, [router, searchParams]);
 
   const handlePrint = () => {
     window.print();
@@ -46,6 +73,36 @@ export default function ShikshaSuccessPage() {
         <div className="text-center">
           <div className="w-16 h-16 border-4 border-gray-200 border-t-[#0000ff] rounded-full animate-spin mx-auto mb-4" />
           <p className="text-gray-600">Loading your application...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (isVerifying) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-50 p-4">
+        <div className="max-w-md w-full bg-white rounded-2xl shadow-xl p-8 text-center">
+          <Loader2 className="w-12 h-12 animate-spin text-[#0000ff] mx-auto mb-6" />
+          <h2 className="text-2xl font-bold text-gray-800 mb-2">Verifying Payment</h2>
+          <p className="text-gray-600">Please wait while we verify your eSewa payment...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (verifyError) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-50 p-4">
+        <div className="max-w-md w-full bg-white rounded-2xl shadow-xl p-8 text-center">
+          <AlertCircle className="w-12 h-12 text-red-500 mx-auto mb-6" />
+          <h2 className="text-2xl font-bold text-gray-800 mb-2">Payment Verification Failed</h2>
+          <p className="text-gray-600 mb-4">{verifyError}</p>
+          <button
+            onClick={() => router.push("/scholarship-apply/project-shiksha/payment")}
+            className="w-full bg-[#0000ff] hover:bg-[#0000cc] text-white font-semibold py-3 px-6 rounded-lg transition-colors"
+          >
+            Back to Payment
+          </button>
         </div>
       </div>
     );
@@ -89,7 +146,6 @@ export default function ShikshaSuccessPage() {
   return (
     <div className="min-h-screen bg-gray-50 py-8 px-4">
       <div className="max-w-[210mm] mx-auto">
-        {/* Printable Card */}
         <AdmitCard
           fullName={applicationData.fullName}
           photoPreview={applicationData.photoPreview}
@@ -106,7 +162,6 @@ export default function ShikshaSuccessPage() {
           subjectName="Science Entrance Test"
         />
 
-        {/* Print Button */}
         <div className="mt-6 no-print flex gap-4">
           <button
             onClick={handlePrint}

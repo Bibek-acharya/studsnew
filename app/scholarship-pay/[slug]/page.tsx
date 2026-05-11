@@ -1,9 +1,11 @@
+import React from "react";
 import ScholarshipPaymentPage from "@/components/scholarship-apply/ScholarshipPaymentPage";
 
 interface PageProps {
-  params: { id: string };
+  params: Promise<{ slug: string }>;
 }
 
 export default function Page({ params }: PageProps) {
-  return <ScholarshipPaymentPage scholarshipId={parseInt(params.id)} />;
+  const { slug } = React.use(params);
+  return <ScholarshipPaymentPage scholarshipSlug={slug} />;
 }

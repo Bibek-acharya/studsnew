@@ -218,6 +218,7 @@ export interface EducationEventResponse {
 
 export interface ScholarshipItem {
   id: number;
+  slug?: string;
   provider_id?: number;
   title: string;
   provider: string;
@@ -1329,19 +1330,19 @@ export const apiService = {
     };
   },
 
-  async getEducationScholarshipById(id: any): Promise<any> {
+  async getEducationScholarshipById(id: string | number): Promise<any> {
     return apiRequest<ScholarshipDetailResponse>(`/api/v1/education/scholarships/${id}`, {
       cache: "no-store",
     });
   },
 
-  async getEducationSimilarScholarships(id: any): Promise<any> {
+  async getEducationSimilarScholarships(id: string | number): Promise<any> {
     return apiRequest<ScholarshipDetailResponse>(`/api/v1/education/scholarships/${id}/similar`, {
       cache: "no-store",
     });
   },
 
-  async applyScholarship(scholarshipId: number, data: any): Promise<any> {
+  async applyScholarship(scholarshipId: string | number, data: any): Promise<any> {
     const headers: Record<string, string> = { "Content-Type": "application/json" };
     const token = this.getToken();
     if (token) headers.Authorization = `Bearer ${token}`;
@@ -1967,11 +1968,11 @@ export const apiService = {
     return apiRequest(`/api/v1/public/volunteers${qs ? `?${qs}` : ''}`);
   },
 
-  async getPublicVolunteerByID(id: number): Promise<any> {
+  async getPublicVolunteerByID(id: string | number): Promise<any> {
     return apiRequest(`/api/v1/public/volunteers/${id}`);
   },
 
-  async submitVolunteerApplication(volunteerId: number, data: any, cvFile?: File): Promise<any> {
+  async submitVolunteerApplication(volunteerId: string | number, data: any, cvFile?: File): Promise<any> {
     const formData = new FormData();
     Object.entries(data).forEach(([key, value]) => {
       if (Array.isArray(value)) {
@@ -2014,8 +2015,8 @@ export const scholarshipApi = {
     return callApi<{ scholarships: any[] }>('/api/v1/scholarships');
   },
   
-  async getScholarshipById(id: number) {
-    return callApi<any>(`/api/v1/scholarships/${id}`);
+  async getScholarshipById(id: string | number) {
+    return callApi<any>(`/api/v1/education/scholarships/${id}`);
   },
   
   async applyScholarship(scholarshipId: number, data: any) {
@@ -2043,6 +2044,31 @@ export const scholarshipApi = {
     return apiRequest(`/api/v1/scholarships/pay/${paymentId}/receipt`, {
       method: 'POST',
       body: JSON.stringify({ receipt_image: receiptImage }),
+    });
+  },
+
+  async esewaInitiate(applicationId: number, amount: number) {
+    return apiRequest("/api/v1/scholarships/pay/esewa/initiate", {
+      method: 'POST',
+      body: JSON.stringify({
+        application_id: applicationId,
+        amount,
+      }),
+    });
+  },
+
+  async esewaVerifyPayment(applicationId: number, data: any) {
+    return apiRequest("/api/v1/scholarships/pay/esewa/verify", {
+      method: 'POST',
+      body: JSON.stringify({
+        application_id: applicationId,
+        transaction_uuid: data.transaction_uuid || data.transactionUuid,
+        total_amount: data.total_amount || data.totalAmount,
+        product_code: data.product_code || data.productCode,
+        status: data.status,
+        transaction_code: data.transaction_code || data.transactionCode || "",
+        ref_id: data.ref_id || data.reference_id || data.refId || "",
+      }),
     });
   },
 };

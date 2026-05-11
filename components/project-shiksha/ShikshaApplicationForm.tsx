@@ -7,6 +7,7 @@ import { ProjectShikshaFormData, schoolTypes, occupations, streams, examCenters,
 import { validateForm } from "./validation";
 import { NEPAL_PROVINCES, NEPAL_DISTRICTS, NEPAL_LOCAL_BODIES } from "@/lib/location-data";
 import { apiService } from "@/services/api";
+import PartnerLogosCard from "@/components/scholarship-apply/PartnerLogosCard";
 
 function SelectArrow({ className = "", children, ...props }: React.SelectHTMLAttributes<HTMLSelectElement>) {
   return (
@@ -73,14 +74,22 @@ const initialFormData: ProjectShikshaFormData = {
   declaration: false,
 };
 
+interface PartnerLogo {
+  name: string;
+  logo: string;
+}
+
 export default function ShikshaApplicationForm({
   scholarshipTitle,
   scholarshipId,
+  scholarshipSlug,
   examCenters: dynamicExamCenters,
   paymentConfig,
+  partnerLogos,
 }: {
   scholarshipTitle?: string;
   scholarshipId?: number;
+  scholarshipSlug?: string;
   examCenters?: string[];
   paymentConfig?: {
     enabled: boolean;
@@ -94,6 +103,7 @@ export default function ShikshaApplicationForm({
       account_number: string;
     };
   };
+  partnerLogos?: PartnerLogo[];
 }) {
   const router = useRouter();
   const [formData, setFormData] = useState<ProjectShikshaFormData>(initialFormData);
@@ -260,18 +270,20 @@ export default function ShikshaApplicationForm({
       const response = await apiService.applyScholarship(scholarshipId, payload);
       const applicationId = response.data?.id || response.id;
 
-      sessionStorage.setItem("shiksha_application_data", JSON.stringify({
+      const appData = {
         ...formData,
         photo_url,
         applicationId,
         photoPreview,
         scholarshipId,
         paymentConfig,
-      }));
+      };
+      sessionStorage.setItem("shiksha_application_data", JSON.stringify(appData));
+      sessionStorage.setItem("scholarship_application_data", JSON.stringify(appData));
 
       // Check if payment is active
       if (paymentConfig?.enabled && paymentConfig.fee_amount > 0) {
-        router.push("/scholarship-apply/project-shiksha/payment");
+        router.push(`/scholarship-pay/${scholarshipSlug || scholarshipId}`);
       } else {
         router.push("/scholarship-apply/project-shiksha/success");
       }
@@ -311,24 +323,23 @@ export default function ShikshaApplicationForm({
 
   return (
     <div className="min-h-screen flex flex-col items-center pt-8 pb-20 px-4 sm:px-6" style={{ backgroundColor: "#0000ff" }}>
-      <header className="w-full max-w-[900px] mb-8 text-center sm:text-left flex flex-col sm:flex-row items-center justify-between gap-6">
-        <div>
-          <h1 className="text-[32px] sm:text-[40px] font-extrabold text-white mb-2 leading-tight drop-shadow-sm">
-            {scholarshipTitle || "Project Shiksha Entrance 2082"}
-          </h1>
-          <p className="text-[18px] text-white/90 font-medium">Empowering Education, Shaping Futures.</p>
-        </div>
+      <header className="w-full max-w-350 mb-8 text-left px-4 sm:px-0">
+        <h1 className="text-[32px] sm:text-[40px] font-extrabold text-white mb-2 leading-tight drop-shadow-sm">
+          {scholarshipTitle || "Project Shiksha Entrance 2082"}
+        </h1>
+        <p className="text-[18px] text-white/90 font-medium">Empowering Education, Shaping Futures.</p>
       </header>
 
-      <main className="w-full max-w-[900px] bg-white rounded-2xl overflow-hidden relative">
-        <div className="bg-[#f0fdf4] border-b border-[#bbf7d0] py-3.5 px-6 flex justify-center items-center gap-3 text-[14px] text-[#166534]">
-          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-5 h-5 flex-shrink-0">
-            <path fillRule="evenodd" d="M12.516 2.17a.75.75 0 00-1.032 0 11.209 11.209 0 01-7.877 3.08.75.75 0 00-.722.515A12.74 12.74 0 002.25 9.75c0 5.942 4.064 10.933 9.563 12.348a.749.749 0 00.374 0c5.499-1.415 9.563-6.406 9.563-12.348 0-1.39-.223-2.73-.635-3.985a.75.75 0 00-.722-.516l-.143.001c-2.996 0-5.717-1.17-7.734-3.08zm3.094 8.016a.75.75 0 10-1.22-.872l-3.236 4.53L9.53 12.22a.75.75 0 00-1.06 1.06l2.25 2.25a.75.75 0 001.14-.094l3.75-5.25z" clipRule="evenodd" />
-          </svg>
-          <span className="font-medium">Your data is secure and will be used for admission purposes only.</span>
-        </div>
+      <div className="w-full max-w-350 flex flex-col lg:flex-row gap-6 items-start">
+        <main className="w-full bg-white rounded-2xl overflow-hidden relative order-2 lg:order-1">
+          <div className="bg-[#f0fdf4] border-b border-[#bbf7d0] py-3.5 px-6 flex justify-center items-center gap-3 text-[14px] text-[#166534]">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-5 h-5 flex-shrink-0">
+              <path fillRule="evenodd" d="M12.516 2.17a.75.75 0 00-1.032 0 11.209 11.209 0 01-7.877 3.08.75.75 0 00-.722.515A12.74 12.74 0 002.25 9.75c0 5.942 4.064 10.933 9.563 12.348a.749.749 0 00.374 0c5.499-1.415 9.563-6.406 9.563-12.348 0-1.39-.223-2.73-.635-3.985a.75.75 0 00-.722-.516l-.143.001c-2.996 0-5.717-1.17-7.734-3.08zm3.094 8.016a.75.75 0 10-1.22-.872l-3.236 4.53L9.53 12.22a.75.75 0 00-1.06 1.06l2.25 2.25a.75.75 0 001.14-.094l3.75-5.25z" clipRule="evenodd" />
+            </svg>
+            <span className="font-medium">Your data is secure and will be used for admission purposes only.</span>
+          </div>
 
-        <form onSubmit={handleSubmit} noValidate onBlurCapture={handleBlur} className="px-6 sm:px-12 py-8">
+          <form onSubmit={handleSubmit} noValidate onBlurCapture={handleBlur} className="px-6 sm:px-12 py-8">
           {/* Section 1: Personal Details */}
           <section className="mb-12">
             <div className="mb-6 pb-3">
@@ -1213,6 +1224,12 @@ export default function ShikshaApplicationForm({
           </div>
         </form>
       </main>
+      {partnerLogos && partnerLogos.length > 0 && (
+        <div className="w-full lg:w-72 shrink-0 order-1 lg:order-2">
+          <PartnerLogosCard logos={partnerLogos} />
+        </div>
+      )}
+      </div>
     </div>
   );
 }

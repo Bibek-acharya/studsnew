@@ -30,8 +30,12 @@ function timeAgo(dateStr: string): string {
   return `${diffMonths} months ago`;
 }
 
-export default function VolunteerDetailsPage({ params }: { params: Promise<{ id: string }> }) {
-  const { id } = use(params);
+function toSlug(str: string): string {
+  return str.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "") || "volunteer";
+}
+
+export default function VolunteerDetailsPage({ params }: { params: Promise<{ slug: string }> }) {
+  const { slug } = use(params);
   const router = useRouter();
   const [volunteer, setVolunteer] = useState<any>(null);
   const [loading, setLoading] = useState(true);
@@ -40,7 +44,7 @@ export default function VolunteerDetailsPage({ params }: { params: Promise<{ id:
   useEffect(() => {
     const fetchVolunteer = async () => {
       try {
-        const res = await apiService.getPublicVolunteerByID(Number(id));
+        const res = await apiService.getPublicVolunteerByID(slug);
         if (res?.success && res?.data) {
           setVolunteer(res.data);
         } else {
@@ -53,7 +57,7 @@ export default function VolunteerDetailsPage({ params }: { params: Promise<{ id:
       }
     };
     fetchVolunteer();
-  }, [id]);
+  }, [slug]);
 
   const isPaid = volunteer?.volunteer_type === "paid";
 
@@ -175,7 +179,7 @@ export default function VolunteerDetailsPage({ params }: { params: Promise<{ id:
 
               {/* Apply button */}
               <button
-                onClick={() => router.push(`/volunteer/apply/${volunteer.id}`)}
+                onClick={() => router.push(`/volunteer/apply/${volunteer.slug || toSlug(volunteer.title)}`)}
                 className="w-full bg-brand-blue hover:bg-brand-hover text-white rounded-full py-3.5 font-semibold text-[15px] transition-colors shadow-sm"
               >
                 Apply Now

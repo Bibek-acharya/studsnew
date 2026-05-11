@@ -3,6 +3,7 @@ import { useRouter } from "next/navigation";
 
 interface Volunteer {
   id: number;
+  slug?: string;
   image: string;
   type: string;
   title: string;
@@ -15,8 +16,13 @@ interface Volunteer {
   availableDates: string[];
 }
 
+function toSlug(str: string): string {
+  return str.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "") || "volunteer";
+}
+
 export default function VolunteerCard({ volunteer }: { volunteer: Volunteer }) {
   const router = useRouter();
+  const slug = volunteer.slug || toSlug(volunteer.title);
 
   return (
     <div className="rounded-[16px] border border-gray-200 bg-white p-3 transition-all duration-300 w-full max-w-[400px]">
@@ -51,10 +57,10 @@ export default function VolunteerCard({ volunteer }: { volunteer: Volunteer }) {
         </div>
       </div>
       <div className="flex items-center gap-2">
-        <button onClick={() => router.push(`/volunteer/${volunteer.id}`)} className="flex-1 h-10 rounded-lg border border-gray-200 bg-white py-2 text-[13px] font-semibold text-[#1e293b] transition-colors hover:bg-gray-50 ">
+        <button onClick={() => router.push(`/volunteer/${slug}`)} className="flex-1 h-10 rounded-lg border border-gray-200 bg-white py-2 text-[13px] font-semibold text-[#1e293b] transition-colors hover:bg-gray-50 ">
           Details
         </button>
-        <button onClick={() => router.push(`/volunteer/apply/${volunteer.id}`)} className="flex-[1.2] h-10 rounded-lg bg-[#0000ff] py-2 text-[13px] font-semibold text-white shadow-sm transition-colors hover:bg-blue-800 hover:cursor-pointer">
+        <button onClick={() => router.push(`/volunteer/apply/${slug}`)} className="flex-[1.2] h-10 rounded-lg bg-[#0000ff] py-2 text-[13px] font-semibold text-white shadow-sm transition-colors hover:bg-blue-800 hover:cursor-pointer">
           Apply Now
         </button>
         {/* <button className="rounded-lg border border-gray-200 bg-white px-3 py-2 text-gray-400 transition-colors hover:bg-gray-50 hover:text-gray-600 ">

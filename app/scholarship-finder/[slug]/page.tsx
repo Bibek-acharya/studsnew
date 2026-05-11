@@ -5,17 +5,17 @@ import { useQuery } from "@tanstack/react-query";
 import { apiService } from "@/services/api";
 import ScholarshipDetailPage from "@/components/scholarship-finder/ScholarshipDetailPage";
 
-export default function ScholarshipDetailsPage({ params }: { params: Promise<{ id: string }> }) {
-  const { id } = React.use(params);
+export default function ScholarshipDetailsPage({ params }: { params: Promise<{ slug: string }> }) {
+  const { slug } = React.use(params);
 
   const { data: detailRes, isLoading: isDetailLoading, error: detailError } = useQuery({
-    queryKey: ["scholarship", id],
-    queryFn: () => apiService.getEducationScholarshipById(id),
+    queryKey: ["scholarship", slug],
+    queryFn: () => apiService.getEducationScholarshipById(slug),
   });
 
   const { data: similarRes } = useQuery({
-    queryKey: ["similar-scholarships", id],
-    queryFn: () => apiService.getEducationSimilarScholarships(id),
+    queryKey: ["similar-scholarships", slug],
+    queryFn: () => apiService.getEducationSimilarScholarships(slug),
   });
 
   const scholarship = detailRes?.data;
