@@ -12,17 +12,12 @@ interface CommentItem {
   likes: number;
 }
 
-function stripHtml(html: string): string {
-  if (typeof window === 'undefined') {
-    return html.replace(/<[^>]*>/g, '').trim();
-  }
-  const doc = new DOMParser().parseFromString(html, 'text/html');
-  return doc.body.textContent || "";
-}
-
 function normalizeArticle(data: any): any {
   if (!data) return null;
-  const isProvider = data.published_by !== undefined || data.image_url !== undefined;
+
+  const isProvider =
+    data.published_by !== undefined || data.image_url !== undefined;
+
   if (isProvider) {
     return {
       ...data,
@@ -30,9 +25,14 @@ function normalizeArticle(data: any): any {
       author: data.published_by || "Unknown",
       excerpt: data.short_desc || "",
       category: data.news_type || "News",
-      date: data.publish_date || data.published_at || data.created_at || "",
+      date:
+        data.publish_date ||
+        data.published_at ||
+        data.created_at ||
+        "",
     };
   }
+
   return {
     ...data,
     excerpt: data.excerpt || data.desc || "",
@@ -42,28 +42,57 @@ function normalizeArticle(data: any): any {
 
 function formatDate(dateStr: string): string {
   if (!dateStr) return "Recently";
+
   const date = new Date(dateStr);
+
   if (isNaN(date.getTime())) return dateStr;
+
   const now = new Date();
   const diff = now.getTime() - date.getTime();
+
+  if (diff < 0) {
+    return date.toLocaleDateString("en-US", {
+      year: "numeric",
+      month: "short",
+      day: "numeric",
+    });
+  }
+
   const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+
   if (days === 0) return "Today";
   if (days === 1) return "1 day ago";
+
   if (days < 30) return `${days} days ago`;
+
   if (days < 365) {
     const months = Math.floor(days / 30);
     return `${months} month${months > 1 ? "s" : ""} ago`;
   }
-  return date.toLocaleDateString("en-US", { year: "numeric", month: "short", day: "numeric" });
+
+  return date.toLocaleDateString("en-US", {
+    year: "numeric",
+    month: "short",
+    day: "numeric",
+  });
 }
 
 function getImageUrl(image: string | null | undefined): string | null {
   if (!image) return null;
-  if (image.startsWith("http://") || image.startsWith("https://")) return image;
+
+  if (
+    image.startsWith("http://") ||
+    image.startsWith("https://")
+  ) {
+    return image;
+  }
+
   return image;
 }
 
-const NewsDetailsPage: React.FC<{ params: Promise<{ id: string }> }> = ({ params }) => {
+const NewsDetailsPage: React.FC<{
+  params: Promise<{ id: string }>;
+}> = ({ params }) => {
   const [id, setId] = useState<string | null>(null);
   const [article, setArticle] = useState<any>(null);
   const [related, setRelated] = useState<any[]>([]);
@@ -75,29 +104,67 @@ const NewsDetailsPage: React.FC<{ params: Promise<{ id: string }> }> = ({ params
 
   useEffect(() => {
     if (!id) return;
-    
+
     async function fetchNews() {
       const safeId = id!;
-      try {
-        const actualId = safeId.replace("provider-", "");
-        const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080";
+      const API_BASE =
+        process.env.NEXT_PUBLIC_API_URL ||
+        "http://localhost:8080";
 
-        const res = await fetch(`${API_BASE}/api/v1/public/news/${actualId}`);
-        const data = await res.json();
-        if (data?.data) {
-          const normalized = normalizeArticle(data.data);
-          setArticle(normalized);
+      try {
+        if (safeId.startsWith("provider-")) {
+          const actualId = safeId.replace("provider-", "");
+
+          const res = await fetch(
+            `${API_BASE}/api/v1/public/news/${actualId}`
+          );
+
+          const data = await res.json();
+
+          if (data?.data) {
+            setArticle(normalizeArticle(data.data));
+            return;
+          }
+        } else if (safeId.startsWith("edu-")) {
+          const actualId = safeId.replace("edu-", "");
+
+          const res = await fetch(
+            `${API_BASE}/api/v1/education/news/${actualId}`
+          );
+
+          const data = await res.json();
+
+          if (data?.data) {
+            setArticle(normalizeArticle(data.data));
+            return;
+          }
+        } else {
+          const res = await fetch(
+            `${API_BASE}/api/v1/public/news/${safeId}`
+          );
+
+          const data = await res.json();
+
+          if (data?.data) {
+            setArticle(normalizeArticle(data.data));
+            return;
+          }
         }
+
+        setArticle(null);
       } catch (e) {
         console.error("Failed to fetch news:", e);
+        setArticle(null);
       } finally {
         setLoading(false);
       }
     }
+
     fetchNews();
   }, [id]);
 
   const [commentInput, setCommentInput] = useState("");
+
   const [comments, setComments] = useState<CommentItem[]>([
     {
       id: "seed-1",
@@ -116,6 +183,7 @@ const NewsDetailsPage: React.FC<{ params: Promise<{ id: string }> }> = ({ params
 
   const categoryUi = useMemo(() => {
     if (!article) return "Notice";
+
     if (article.category === "Academic") return "Admission";
     if (article.category === "Tech") return "Exam";
     if (article.category === "Jobs") return "Fee";
@@ -124,6 +192,7 @@ const NewsDetailsPage: React.FC<{ params: Promise<{ id: string }> }> = ({ params
     if (article.category === "Announcements") return "Notice";
     if (article.category === "Academics") return "Admission";
     if (article.category === "Sports") return "Events";
+
     return "Notice";
   }, [article]);
 
@@ -131,11 +200,13 @@ const NewsDetailsPage: React.FC<{ params: Promise<{ id: string }> }> = ({ params
     if (categoryUi === "Admission") return "bg-blue-600";
     if (categoryUi === "Exam") return "bg-red-500";
     if (categoryUi === "Fee") return "bg-orange-500";
+
     return "bg-indigo-600";
   }, [categoryUi]);
 
   const postComment = () => {
     const text = commentInput.trim();
+
     if (!text) return;
 
     const newComment: CommentItem = {
@@ -172,15 +243,22 @@ const NewsDetailsPage: React.FC<{ params: Promise<{ id: string }> }> = ({ params
       <div className="max-w-350 mx-auto py-8 flex flex-col lg:flex-row gap-10 lg:gap-16">
         <main className="w-full lg:w-[68%]">
           <div className="flex items-center gap-4 text-sm font-medium text-gray-500 mb-6 border-b border-gray-100 pb-4">
-            <span className={`${categoryBadgeClass} text-white px-3 py-1 rounded-full flex items-center gap-1.5 `}>
-              <i className="fa-solid fa-graduation-cap text-sm"></i> {categoryUi}
+            <span
+              className={`${categoryBadgeClass} text-white px-3 py-1 rounded-full flex items-center gap-1.5`}
+            >
+              <i className="fa-solid fa-graduation-cap text-sm"></i>
+              {categoryUi}
             </span>
+
             <span className="flex items-center gap-1.5">
-              <i className="fa-regular fa-clock"></i> {formatDate(article.date)}
+              <i className="fa-regular fa-clock"></i>
+              {formatDate(article.date)}
             </span>
+
             {article.views > 0 && (
               <span className="flex items-center gap-1.5 ml-auto">
-                <i className="fa-regular fa-eye"></i> {article.views} views
+                <i className="fa-regular fa-eye"></i>
+                {article.views} views
               </span>
             )}
           </div>
@@ -192,20 +270,29 @@ const NewsDetailsPage: React.FC<{ params: Promise<{ id: string }> }> = ({ params
           <div className="flex flex-wrap items-center justify-between gap-4 text-sm text-gray-600 mb-8">
             <div className="flex items-center gap-2">
               <i className="fa-solid fa-user text-gray-800"></i>
+
               <span>
-                Published by: <strong className="text-gray-900 font-semibold">{article.author}</strong>
+                Published by:{" "}
+                <strong className="text-gray-900 font-semibold">
+                  {article.author}
+                </strong>
               </span>
             </div>
+
             <div className="flex items-center gap-2">
               <i className="fa-solid fa-calendar text-gray-800"></i>
+
               <span>
-                Latest Update: <strong className="text-gray-900 font-semibold">{formatDate(article.date)}</strong>
+                Latest Update:{" "}
+                <strong className="text-gray-900 font-semibold">
+                  {formatDate(article.date)}
+                </strong>
               </span>
             </div>
           </div>
 
           {getImageUrl(article.image) && (
-            <div className="mb-8 rounded-md overflow-hidden border border-gray-100">
+            <div className="mb-8 rounded-xl overflow-hidden border border-gray-100">
               <img
                 src={getImageUrl(article.image)!}
                 alt={article.title}
@@ -215,19 +302,27 @@ const NewsDetailsPage: React.FC<{ params: Promise<{ id: string }> }> = ({ params
           )}
 
           {article.excerpt && (
-            <div className="bg-blue-50 border-l-[3px] border-blue-500 p-5 md:p-6 rounded-r-xl mb-10 text-gray-700 leading-relaxed text-[1.05rem] overflow-hidden news-content">
-              <div dangerouslySetInnerHTML={{ __html: article.excerpt }} />
+            <div className="news-content prose prose-slate max-w-none break-words bg-blue-50 border-l-[3px] border-blue-500 p-5 md:p-6 rounded-r-xl mb-10">
+              <div
+                dangerouslySetInnerHTML={{
+                  __html: article.excerpt,
+                }}
+              />
             </div>
           )}
 
-          <div className="prose prose-slate max-w-none mb-12 text-gray-700 leading-relaxed text-[1.05rem] [&_pre]:overflow-x-auto [&_pre]:whitespace-pre-wrap [&_pre]:break-words [&_code]:break-words [&_img]:max-w-full overflow-hidden news-content">
-            <div dangerouslySetInnerHTML={{ __html: article.content || article.excerpt || "" }} />
-          </div>
+          <div
+            className="news-content prose prose-slate max-w-none break-words overflow-hidden mb-12 prose-img:max-w-full prose-img:h-auto prose-img:rounded-xl prose-pre:overflow-x-auto prose-pre:whitespace-pre-wrap prose-table:block prose-table:overflow-x-auto prose-a:text-blue-600 hover:prose-a:text-blue-700 prose-headings:text-gray-900 prose-p:text-gray-700 prose-li:text-gray-700"
+            dangerouslySetInnerHTML={{ __html: article.content || article.excerpt || "" }}
+          />
 
           <hr className="border-gray-100 mb-8" />
 
           <div className="mb-10">
-            <h3 className="text-lg font-bold mb-4 text-gray-900">Tags:</h3>
+            <h3 className="text-lg font-bold mb-4 text-gray-900">
+              Tags:
+            </h3>
+
             <div className="flex flex-wrap gap-2.5">
               {(article.tags || []).map((tag: string) => (
                 <button
@@ -240,47 +335,38 @@ const NewsDetailsPage: React.FC<{ params: Promise<{ id: string }> }> = ({ params
             </div>
           </div>
 
-          <div className="flex items-center justify-between mb-12 flex-wrap gap-4">
-            <h3 className="text-lg font-bold text-gray-900">Share this announcement:</h3>
-            <div className="flex gap-2">
-              {[
-                { icon: "fa-facebook-f", color: "bg-blue-500 hover:bg-blue-600" },
-                { icon: "fa-instagram", color: "bg-blue-400 hover:bg-blue-500" },
-                { icon: "fa-linkedin-in", color: "bg-blue-600 hover:bg-blue-700" },
-                { icon: "fa-x-twitter", color: "bg-black hover:bg-gray-800" },
-              ].map((social) => (
-                <button
-                  key={social.icon}
-                  className={`w-9 h-9 rounded-full ${social.color} flex items-center justify-center text-white transition-colors`}
-                >
-                  <i className={`fa-brands ${social.icon} text-sm`}></i>
-                </button>
-              ))}
-            </div>
-          </div>
-
           <section className="mb-16">
             <div className="flex items-center gap-2 mb-6">
               <i className="fa-solid fa-comments text-blue-600 text-2xl"></i>
-              <h2 className="text-2xl font-bold text-gray-900">Comments & Discussion</h2>
+
+              <h2 className="text-2xl font-bold text-gray-900">
+                Comments & Discussion
+              </h2>
             </div>
 
-            <div className="mb-8 bg-white border border-gray-200 rounded-md  overflow-hidden focus-within:border-blue-500 focus-within:ring-1 focus-within:ring-blue-500 transition-all">
+            <div className="mb-8 bg-white border border-gray-200 rounded-xl overflow-hidden focus-within:border-blue-500 focus-within:ring-1 focus-within:ring-blue-500 transition-all">
               <textarea
                 value={commentInput}
-                onChange={(event) => setCommentInput(event.target.value)}
+                onChange={(event) =>
+                  setCommentInput(event.target.value)
+                }
                 rows={4}
                 className="w-full p-4 outline-none resize-y text-gray-700 placeholder-gray-400"
                 placeholder="Join the discussion..."
               ></textarea>
+
               <div className="bg-gray-50 px-4 py-3 flex items-center justify-between border-t border-gray-100">
                 <div className="flex items-center gap-1.5 text-xs text-gray-500">
                   <i className="fa-solid fa-circle-info text-gray-400"></i>
-                  <span>Please keep comments respectful</span>
+
+                  <span>
+                    Please keep comments respectful
+                  </span>
                 </div>
+
                 <button
                   onClick={postComment}
-                  className="bg-blue-600 hover:bg-blue-700 text-white px-5 py-2 rounded-md text-sm font-semibold transition-colors  active:scale-95"
+                  className="bg-blue-600 hover:bg-blue-700 text-white px-5 py-2 rounded-md text-sm font-semibold transition-colors active:scale-95"
                 >
                   Post Comment
                 </button>
@@ -289,24 +375,43 @@ const NewsDetailsPage: React.FC<{ params: Promise<{ id: string }> }> = ({ params
 
             <div className="space-y-6">
               {comments.map((comment) => (
-                <div key={comment.id} className="relative">
-                  <div className="border border-gray-200 rounded-md p-5 bg-white ">
+                <div key={comment.id}>
+                  <div className="border border-gray-200 rounded-xl p-5 bg-white">
                     <div className="flex items-start gap-3 mb-3">
-                      <div className={`w-10 h-10 rounded-full ${comment.author.startsWith("You") ? "bg-green-100 text-green-600" : "bg-blue-100 text-blue-600"} flex items-center justify-center font-bold text-sm shrink-0`}>
+                      <div
+                        className={`w-10 h-10 rounded-full ${
+                          comment.author.startsWith("You")
+                            ? "bg-green-100 text-green-600"
+                            : "bg-blue-100 text-blue-600"
+                        } flex items-center justify-center font-bold text-sm shrink-0`}
+                      >
                         {comment.avatar}
                       </div>
+
                       <div>
-                        <h4 className="font-bold text-gray-900 text-sm">{comment.author}</h4>
-                        <span className="text-xs text-gray-500">{comment.time}</span>
+                        <h4 className="font-bold text-gray-900 text-sm">
+                          {comment.author}
+                        </h4>
+
+                        <span className="text-xs text-gray-500">
+                          {comment.time}
+                        </span>
                       </div>
                     </div>
-                    <p className="text-gray-700 text-sm leading-relaxed mb-4 whitespace-pre-wrap">{comment.message}</p>
+
+                    <p className="text-gray-700 text-sm leading-relaxed mb-4 whitespace-pre-wrap">
+                      {comment.message}
+                    </p>
+
                     <div className="flex items-center gap-4 text-xs font-medium text-gray-500">
                       <button className="flex items-center gap-1 hover:text-blue-600 transition-colors">
-                        <i className="fa-regular fa-heart"></i> {comment.likes}
+                        <i className="fa-regular fa-heart"></i>
+                        {comment.likes}
                       </button>
+
                       <button className="flex items-center gap-1 hover:text-blue-600 transition-colors">
-                        <i className="fa-regular fa-comment"></i> Reply
+                        <i className="fa-regular fa-comment"></i>
+                        Reply
                       </button>
                     </div>
                   </div>
@@ -320,31 +425,41 @@ const NewsDetailsPage: React.FC<{ params: Promise<{ id: string }> }> = ({ params
           <div className="lg:sticky lg:top-8">
             <div className="flex items-center gap-2 mb-6 border-b border-gray-200 pb-3">
               <i className="fa-regular fa-newspaper text-blue-600 text-[1.2rem]"></i>
-              <h2 className="text-xl font-bold text-gray-900">Related Articles</h2>
+
+              <h2 className="text-xl font-bold text-gray-900">
+                Related Articles
+              </h2>
             </div>
 
             <div className="space-y-6">
               {related.length > 0 ? (
                 related.map((rel, idx) => {
                   const relCategoryUi =
-                    rel.category === "Academic" ? "Admission"
-                    : rel.category === "Tech" ? "Exam"
-                    : rel.category === "Jobs" ? "Fee"
-                    : "Notice";
+                    rel.category === "Academic"
+                      ? "Admission"
+                      : rel.category === "Tech"
+                      ? "Exam"
+                      : rel.category === "Jobs"
+                      ? "Fee"
+                      : "Notice";
+
                   const relBadge =
                     relCategoryUi === "Admission"
                       ? "bg-blue-600"
                       : relCategoryUi === "Exam"
-                        ? "bg-red-500"
-                        : relCategoryUi === "Fee"
-                          ? "bg-orange-500"
-                          : "bg-indigo-600";
+                      ? "bg-red-500"
+                      : relCategoryUi === "Fee"
+                      ? "bg-orange-500"
+                      : "bg-indigo-600";
 
                   return (
                     <div key={rel.id}>
-                      <Link href={`/news/${rel.id}`} className="group cursor-pointer block">
+                      <Link
+                        href={`/news/${rel.id}`}
+                        className="group cursor-pointer block"
+                      >
                         {getImageUrl(rel.image) && (
-                          <div className="rounded-md overflow-hidden mb-3">
+                          <div className="rounded-xl overflow-hidden mb-3">
                             <img
                               src={getImageUrl(rel.image)!}
                               alt={rel.title}
@@ -352,48 +467,103 @@ const NewsDetailsPage: React.FC<{ params: Promise<{ id: string }> }> = ({ params
                             />
                           </div>
                         )}
+
                         <div className="flex items-center justify-between mb-2">
-                          <span className={`${relBadge} text-white text-[11px] font-bold px-2.5 py-0.5 rounded-full tracking-wide uppercase`}>
+                          <span
+                            className={`${relBadge} text-white text-[11px] font-bold px-2.5 py-0.5 rounded-full tracking-wide uppercase`}
+                          >
                             {relCategoryUi}
                           </span>
+
                           <span className="text-xs text-gray-500 flex items-center gap-1">
-                            <i className="fa-regular fa-clock"></i> {formatDate(rel.date)}
+                            <i className="fa-regular fa-clock"></i>
+
+                            {formatDate(rel.date)}
                           </span>
                         </div>
+
                         <h3 className="font-bold text-[1.1rem] leading-snug text-gray-900 group-hover:text-blue-600 transition-colors mb-2">
                           {rel.title}
                         </h3>
-                        <p className="text-sm text-gray-600 line-clamp-2">{rel.excerpt}</p>
+
+                        <p className="text-sm text-gray-600 line-clamp-2">
+                          {rel.excerpt}
+                        </p>
                       </Link>
-                      {idx !== related.length - 1 && <hr className="border-gray-100 mt-6" />}
+
+                      {idx !== related.length - 1 && (
+                        <hr className="border-gray-100 mt-6" />
+                      )}
                     </div>
                   );
                 })
               ) : (
-                <div className="text-sm text-gray-500">No related articles found.</div>
+                <div className="text-sm text-gray-500">
+                  No related articles found.
+                </div>
               )}
-            </div>
-
-            <div className="mt-8 text-center">
-              <Link
-                href="/news"
-                className="inline-flex items-center gap-2 text-blue-600 font-semibold hover:text-blue-800 transition-colors group"
-              >
-                View all articles
-                <i className="fa-solid fa-arrow-right text-xs group-hover:translate-x-1 transition-transform"></i>
-              </Link>
             </div>
           </div>
         </aside>
       </div>
-      <style>{`
-        .news-content a {
-          color: #2563eb !important;
-          text-decoration: underline !important;
-          font-weight: 500 !important;
+
+      <style jsx global>{`
+        .news-content iframe {
+          width: 100%;
+          min-height: 400px;
+          border-radius: 12px;
         }
+
+        .news-content img {
+          max-width: 100%;
+          height: auto;
+          border-radius: 12px;
+        }
+
+        .news-content table {
+          width: 100%;
+          display: block;
+          overflow-x: auto;
+        }
+
+        .news-content pre {
+          overflow-x: auto;
+          padding: 1rem;
+          border-radius: 0.75rem;
+          background: #0f172a;
+          color: white;
+        }
+
+        .news-content code {
+          white-space: pre-wrap;
+          word-break: break-word;
+        }
+
+        .news-content ul {
+          list-style: disc;
+          padding-left: 1.5rem;
+        }
+
+        .news-content ol {
+          list-style: decimal;
+          padding-left: 1.5rem;
+        }
+
+        .news-content blockquote {
+          border-left: 4px solid #2563eb;
+          padding-left: 1rem;
+          color: #475569;
+          font-style: italic;
+        }
+
+        .news-content a {
+          color: #2563eb;
+          text-decoration: underline;
+          font-weight: 500;
+        }
+
         .news-content a:hover {
-          color: #1d4ed8 !important;
+          color: #1d4ed8;
         }
       `}</style>
     </div>

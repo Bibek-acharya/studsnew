@@ -172,6 +172,12 @@ export default function DashboardShell() {
   }, []);
 
   const renderSection = () => {
+    if (activeSection.startsWith("edit-news-")) {
+      const editId = parseInt(activeSection.replace("edit-news-", ""), 10);
+      if (!isNaN(editId)) {
+        return <CreateNewsSection setActiveSection={navigateTo} editId={editId} />;
+      }
+    }
     switch (activeSection) {
       case "overview":
         return <OverviewSection setActiveSection={navigateTo} />;

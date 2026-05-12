@@ -4,6 +4,7 @@ import React, { useMemo, useState, useEffect } from "react";
 import Link from "next/link";
 import Pagination from "@/components/ui/Pagination";
 import { getPublicNews } from "@/services/scholarshipProviderApi";
+import { apiService } from "@/services/api";
 
 interface NewsArticle {
   id: string;
@@ -29,6 +30,24 @@ const stripHtml = (html: string) => {
     .replace(/&gt;/g, ">")
     .replace(/&quot;/g, '"')
     .replace(/&#39;/g, "'");
+};
+
+const timeAgo = (dateStr: string) => {
+  if (!dateStr) return "Recently";
+  const date = new Date(dateStr);
+  if (isNaN(date.getTime())) return dateStr;
+  const now = new Date();
+  const diff = now.getTime() - date.getTime();
+  if (diff < 0) return date.toLocaleDateString("en-US", { year: "numeric", month: "short", day: "numeric" });
+  const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+  if (days === 0) return "Today";
+  if (days === 1) return "1 day ago";
+  if (days < 30) return `${days} days ago`;
+  if (days < 365) {
+    const months = Math.floor(days / 30);
+    return `${months} month${months > 1 ? "s" : ""} ago`;
+  }
+  return date.toLocaleDateString("en-US", { year: "numeric", month: "short", day: "numeric" });
 };
 
 
@@ -65,12 +84,12 @@ const categoryBadgeClass = (category: NewsCategoryFilter) => {
 
 const mapNewsToUiCategory = (article: NewsArticle): NewsCategoryFilter => {
   const cat = article.category?.toLowerCase() || "";
-  if (["academic", "academics"].includes(cat)) return "Admission";
-  if (["policy", "announcements"].includes(cat)) return "Notice";
-  if (cat === "tech") return "Exams";
-  if (cat === "jobs") return "Others";
-  if (["events", "sports"].includes(cat)) return "Events";
-  if (cat === "achievement") return "Achievements";
+  if (["admission", "academic", "academics"].includes(cat)) return "Admission";
+  if (["scholarship"].includes(cat)) return "Scholarship";
+  if (["exam", "exams", "tech"].includes(cat)) return "Exams";
+  if (["notice", "announcement", "announcements", "policy", "press-release", "update", "news"].includes(cat)) return "Notice";
+  if (["event", "events", "sports"].includes(cat)) return "Events";
+  if (["achievement", "achievements"].includes(cat)) return "Achievements";
   return "Others";
 };
 
@@ -104,6 +123,28 @@ const NewsPage: React.FC = () => {
       } catch (e) {
         console.warn("Failed to fetch provider news:", e);
       }
+      try {
+        const eduData = await apiService.getEducationNews({ page: 1, limit: 20 });
+        const eduNews = eduData?.data?.news || [];
+        if (eduNews.length > 0) {
+          const mapped = eduNews.map((n: any): NewsArticle => ({
+            id: `edu-${n.id}`,
+            title: n.title,
+            excerpt: n.excerpt || "",
+            content: n.content || "",
+            category: n.category || "News",
+            image: n.image || "",
+            author: n.author || "Admin",
+            date: n.date || new Date(n.created_at).toLocaleDateString(),
+            readTime: n.readTime || "3 min",
+            source: n.source || "Admin",
+            tags: n.tags || [],
+          }));
+          news = [...news, ...mapped];
+        }
+      } catch (e) {
+        console.warn("Failed to fetch education news:", e);
+      }
       setAllNews(news);
       setLoading(false);
     }
@@ -119,10 +160,11 @@ const NewsPage: React.FC = () => {
         : allNews.filter((article) => mapNewsToUiCategory(article) === activeCategory);
 
     const sorted = [...filtered].sort((a, b) => {
-      if (sortBy === "Newest First") {
-        return b.id.localeCompare(a.id, undefined, { numeric: true, sensitivity: "base" });
-      }
-      return a.id.localeCompare(b.id, undefined, { numeric: true, sensitivity: "base" });
+      const dateA = new Date(a.date).getTime();
+      const dateB = new Date(b.date).getTime();
+      if (isNaN(dateA)) return 1;
+      if (isNaN(dateB)) return -1;
+      return sortBy === "Newest First" ? dateB - dateA : dateA - dateB;
     });
 
     return sorted;
@@ -183,7 +225,7 @@ const NewsPage: React.FC = () => {
                     </span>
                     <div className="flex items-center text-gray-300 text-sm font-medium">
                       <i className="fa-regular fa-clock mr-1.5 opacity-80"></i>
-                      90 days ago
+                      {timeAgo(featuredNews.date)}
                     </div>
                   </div>
 
@@ -260,7 +302,7 @@ const NewsPage: React.FC = () => {
 
                 <div className="pt-4 border-t border-gray-100 flex justify-between items-center text-sm mt-auto">
                   <span className="text-slate-400 flex items-center font-medium">
-                    <i className="fa-regular fa-clock mr-1.5"></i> 90 Days ago
+                    <i className="fa-regular fa-clock mr-1.5"></i> {timeAgo(item.date)}
                   </span>
                   <Link href={`/news/${item.id}`} className="text-blue-600 font-semibold flex items-center group-hover:translate-x-1 transition-transform duration-200">
                     View Details 

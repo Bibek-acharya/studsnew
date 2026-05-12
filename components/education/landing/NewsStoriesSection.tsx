@@ -12,6 +12,7 @@ interface NewsStoriesSectionProps {
 }
 
 type NewsCard = {
+  id: number;
   badgeText: string;
   badgeColorClass: string;
   imgSrc: string;
@@ -22,6 +23,7 @@ type NewsCard = {
 
 const newsData: NewsCard[] = [
   {
+    id: 0,
     badgeText: "Admission",
     badgeColorClass: "bg-blue-50 text-blue-600",
     imgSrc: "https://images.unsplash.com/photo-1541339907198-e08756dedf3f?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80",
@@ -30,6 +32,7 @@ const newsData: NewsCard[] = [
     timeAgo: "2 Hours ago",
   },
   {
+    id: 0,
     badgeText: "Exam",
     badgeColorClass: "bg-orange-50 text-orange-600",
     imgSrc: "https://images.unsplash.com/photo-1434030216411-0b793f4b4173?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80",
@@ -38,6 +41,7 @@ const newsData: NewsCard[] = [
     timeAgo: "1 Day ago",
   },
   {
+    id: 0,
     badgeText: "Scholarship",
     badgeColorClass: "bg-purple-50 text-purple-600",
     imgSrc: "https://images.unsplash.com/photo-1523050854058-8df90110c9f1?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80",
@@ -46,6 +50,7 @@ const newsData: NewsCard[] = [
     timeAgo: "3 Days ago",
   },
   {
+    id: 0,
     badgeText: "Event",
     badgeColorClass: "bg-blue-50 text-blue-600",
     imgSrc: "https://images.unsplash.com/photo-1540575467063-178a50c2df87?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80",
@@ -54,6 +59,7 @@ const newsData: NewsCard[] = [
     timeAgo: "1 Week ago",
   },
   {
+    id: 0,
     badgeText: "Notice",
     badgeColorClass: "bg-emerald-50 text-emerald-600",
     imgSrc: "https://images.unsplash.com/photo-1498243691581-b145c3f54a5a?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80",
@@ -65,8 +71,11 @@ const newsData: NewsCard[] = [
 
 const NewsStoriesSection: React.FC<NewsStoriesSectionProps> = ({ onNavigate, newsArticles }) => {
   const containerRef = useRef<HTMLDivElement | null>(null);
+  const stripHtml = (html: string) => html.replace(/<[^>]*>/g, "").replace(/&nbsp;/g, " ").replace(/&amp;/g, "&").trim();
+
   const data: NewsCard[] = newsArticles?.length
     ? newsArticles.map((item) => ({
+        id: item.id,
         badgeText: item.category || "News",
         badgeColorClass:
           item.category?.toLowerCase().includes("exam")
@@ -78,7 +87,7 @@ const NewsStoriesSection: React.FC<NewsStoriesSectionProps> = ({ onNavigate, new
             : "bg-emerald-50 text-emerald-600",
         imgSrc: item.image || "https://placehold.co/600x400/f1f5f9/94a3b8?text=News",
         title: item.title,
-        description: item.excerpt || item.content || "Stay updated with the latest education announcements.",
+        description: stripHtml(item.excerpt || item.content || "Stay updated with the latest education announcements."),
         timeAgo: item.date || "Today",
       }))
     : newsData;
