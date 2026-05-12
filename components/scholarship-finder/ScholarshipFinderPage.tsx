@@ -89,10 +89,14 @@ function getScholarshipDateStatus(startDate?: string, endDate?: string): string 
   if (endDate) {
     const end = new Date(endDate);
     if (isNaN(end.getTime())) return null;
-    if (end < today) return "Closed";
-    const oneDayFromNow = new Date(today);
-    oneDayFromNow.setDate(oneDayFromNow.getDate() + 1);
-    if (end <= oneDayFromNow) return "Ending Soon";
+
+    const endDay = new Date(end.getFullYear(), end.getMonth(), end.getDate());
+    if (endDay < today) return "Closed";
+
+    const msPerDay = 1000 * 60 * 60 * 24;
+    const daysLeft = Math.round((endDay.getTime() - today.getTime()) / msPerDay);
+
+    if (daysLeft === 1) return "Ending Soon";
     if (startDate) return "Ongoing";
     return null;
   }

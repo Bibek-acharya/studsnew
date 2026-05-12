@@ -241,7 +241,7 @@ const ScholarshipFilterSidebar: React.FC<ScholarshipFilterSidebarProps> = ({
       )}
 
       {/* Detect Location */}
-      <div className="border-b border-gray-100 py-3">
+      {/* <div className="border-b border-gray-100 py-3">
         <button
           type="button"
           onClick={handleLocate}
@@ -263,7 +263,7 @@ const ScholarshipFilterSidebar: React.FC<ScholarshipFilterSidebarProps> = ({
             {locating ? "Locating..." : navLocString || "Detect Location"}
           </span>
         </button>
-      </div>
+      </div> */}
 
       {/* 1. Study Level */}
       <Accordion title="Study Level" defaultOpen={isDesktop}>

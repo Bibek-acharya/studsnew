@@ -196,9 +196,9 @@ const ProviderDetailPage: React.FC<{ params: Promise<{ id: string }> }> = ({ par
         <div className="lg:col-span-2 min-h-[500px]">
           {activeTab === "About" && (
             <div className="space-y-10">
-              <div className="space-y-6 text-gray-600 text-[15px] md:text-[15.5px] leading-[1.8]">
+              <div className="space-y-6">
                 {profile.about_text ? (
-                  <div dangerouslySetInnerHTML={{ __html: profile.about_text }} />
+                  <div className="rich-text" dangerouslySetInnerHTML={{ __html: profile.about_text }} />
                 ) : (
                   <p className="text-gray-400 italic">No description provided.</p>
                 )}
