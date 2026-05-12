@@ -236,7 +236,17 @@ const ManageApplication = () => {
                       <span className="bg-gray-100 text-gray-500 px-3 py-1 rounded-full text-xs font-bold">No</span>
                     )}
                   </td>
-                  <td className="py-4 px-4 text-center text-gray-500 text-xs">{v.volunteered_before === "Yes" ? v.volunteer_details : "-"}</td>
+                   <td className="py-4 px-4 text-center text-gray-500 text-xs">
+                    {v.volunteered_before === "Yes" ? (
+                      <div className="group relative inline-block max-w-[200px]">
+                        <div className="truncate">{v.volunteer_details}</div>
+                        <div className="pointer-events-none absolute bottom-full left-1/2 -translate-x-1/2 mb-2 z-50 max-w-xs whitespace-normal rounded-md bg-slate-900 px-2 py-1 text-[10px] font-semibold text-white shadow-lg opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+                          {v.volunteer_details}
+                          <div className="absolute left-1/2 top-full -translate-x-1/2 border-4 border-transparent border-t-slate-900" />
+                        </div>
+                      </div>
+                    ) : "-"}
+                  </td>
                   <DaysCell days={v.available_days} />
                   <td className="py-4 px-4 text-center text-gray-500 text-xs">{v.created_at ? new Date(v.created_at).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" }) : ""}</td>
                   <td className="py-4 px-4 text-center">
