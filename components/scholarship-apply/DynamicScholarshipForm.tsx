@@ -191,7 +191,7 @@ export default function DynamicScholarshipForm({
         <button
           type="submit"
           disabled={isSubmitting}
-          className="w-full bg-blue-600 text-white py-3 rounded-lg font-semibold hover:bg-blue-700 disabled:bg-gray-400 transition-colors"
+          className="w-full bg-green-800 text-white py-3 rounded-lg font-semibold hover:bg-green-900 disabled:bg-gray-400 transition-colors"
         >
           {isSubmitting ? "Submitting..." : "Submit Application"}
         </button>

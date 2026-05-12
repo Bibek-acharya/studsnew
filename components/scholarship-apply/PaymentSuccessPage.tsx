@@ -59,7 +59,7 @@ export default function PaymentSuccessPage({ scholarshipSlug }: { scholarshipSlu
     return (
       <div className="min-h-screen flex items-center justify-center bg-[#F8FAFC] p-4">
         <div className="max-w-md w-full bg-white rounded-2xl shadow-xl p-8 text-center">
-          <Loader2 className="w-12 h-12 animate-spin text-[#0000ff] mx-auto mb-6" />
+          <Loader2 className="w-12 h-12 animate-spin text-[#006400] mx-auto mb-6" />
           <h2 className="text-2xl font-bold text-gray-800 mb-2">Verifying Payment</h2>
           <p className="text-gray-600">Please wait while we verify your payment...</p>
         </div>
@@ -76,7 +76,7 @@ export default function PaymentSuccessPage({ scholarshipSlug }: { scholarshipSlu
           <p className="text-gray-600 mb-6">{errorMessage || "Something went wrong with your payment."}</p>
           <button
             onClick={() => router.push(`/scholarship-pay/${scholarshipSlug}`)}
-            className="w-full bg-[#0000ff] hover:bg-[#0000cc] text-white font-semibold py-3 px-6 rounded-lg transition-colors"
+            className="w-full bg-[#006400] hover:bg-[#004d00] text-white font-semibold py-3 px-6 rounded-lg transition-colors"
           >
             Try Again
           </button>
@@ -97,7 +97,7 @@ export default function PaymentSuccessPage({ scholarshipSlug }: { scholarshipSlu
         </h2>
         {amount && (
           <p className="text-lg text-gray-600 mb-2">
-            Amount Paid: <span className="font-bold text-[#0000ff]">Rs. {amount}</span>
+            Amount Paid: <span className="font-bold text-[#006400]">Rs. {amount}</span>
           </p>
         )}
         <p className="text-gray-600 mb-8">
@@ -107,7 +107,7 @@ export default function PaymentSuccessPage({ scholarshipSlug }: { scholarshipSlu
 
         <button
           onClick={() => router.push("/")}
-          className="w-full bg-[#0000ff] hover:bg-[#0000cc] text-white font-semibold py-3 px-6 rounded-lg transition-colors shadow-md flex items-center justify-center gap-2"
+          className="w-full bg-[#006400] hover:bg-[#004d00] text-white font-semibold py-3 px-6 rounded-lg transition-colors shadow-md flex items-center justify-center gap-2"
         >
           <Home className="w-5 h-5" />
           Back to Home
