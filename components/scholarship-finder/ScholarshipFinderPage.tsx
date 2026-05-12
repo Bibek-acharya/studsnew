@@ -42,8 +42,8 @@ function mapBackendItem(item: ScholarshipItem): Scholarship {
     entranceRequired: false,
     deadlineType: "",
     eligibility: item.eligibility || item.degree_level || "",
-    startDate: (item as any).application_start_date || (item as any).start_date || undefined,
-    endDate: (item as any).application_end_date || (item as any).end_date || item.deadline || undefined,
+    startDate: item.application_start_date || item.start_date || undefined,
+    endDate: item.application_end_date || item.end_date || item.deadline || undefined,
   };
 }
 
@@ -93,7 +93,8 @@ function getScholarshipDateStatus(startDate?: string, endDate?: string): string 
     const oneDayFromNow = new Date(today);
     oneDayFromNow.setDate(oneDayFromNow.getDate() + 1);
     if (end <= oneDayFromNow) return "Ending Soon";
-    return "Ongoing";
+    if (startDate) return "Ongoing";
+    return null;
   }
 
   return null;
@@ -217,7 +218,7 @@ const ScholarshipCard = ({
               <span className="absolute left-1/2 top-full -translate-x-1/2 border-4 border-transparent border-t-slate-900" />
             </span>
           </span>
-<div className={`flex items-center gap-1.5 px-2 py-1 rounded-md ${statusStyle.statusBg}`}>
+          <div className={`flex items-center gap-1.5 px-2 py-1 rounded-md ${statusStyle.statusBg}`}>
               <span className={`w-1.5 h-1.5 rounded-full ${statusStyle.statusDot}`}></span>
               <span className={`text-[10px] font-bold uppercase tracking-wide ${statusStyle.statusText}`}>
                 {dateStatusLabel}

@@ -293,6 +293,10 @@ export interface ScholarshipItem {
   eligibility?: string;
   category?: string;
   tags?: string[];
+  application_start_date?: string;
+  application_end_date?: string;
+  start_date?: string;
+  end_date?: string;
 }
 
 export interface ScholarshipsResponse {

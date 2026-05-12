@@ -1,9 +1,10 @@
 "use client";
 
-import React from "react";
+import React, { useState, useCallback, useRef } from "react";
 import { format, addDays } from "date-fns";
 import FileUpload from "../common/FileUpload";
 import DatePicker from "../common/DatePicker";
+import ImageCropperModal from "../common/ImageCropperModal";
 import Dropdown from "@/components/college-recommender/Dropdown";
 import { NEPAL_DISTRICTS } from "@/lib/location-data";
 
@@ -133,6 +134,40 @@ export const GeneralSettingsSection: React.FC<GeneralSettingsSectionProps> = ({
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
+
+  // Crop state
+  const [cropperOpen, setCropperOpen] = useState(false);
+  const [cropImageSrc, setCropImageSrc] = useState<string | null>(null);
+  const pendingFileRef = useRef<File | null>(null);
+
+  const handleFileForCrop = useCallback((file: File) => {
+    pendingFileRef.current = file;
+    const objectUrl = URL.createObjectURL(file);
+    setCropImageSrc(objectUrl);
+    setCropperOpen(true);
+  }, []);
+
+  const handleCropComplete = useCallback(
+    async (croppedBlob: Blob) => {
+      const originalFile = pendingFileRef.current;
+      const croppedFile = new File([croppedBlob], originalFile?.name || "cropped.jpg", {
+        type: "image/jpeg",
+      });
+      URL.revokeObjectURL(cropImageSrc!);
+      setCropImageSrc(null);
+      setCropperOpen(false);
+      pendingFileRef.current = null;
+      onBannerSelect(croppedFile);
+    },
+    [cropImageSrc, onBannerSelect],
+  );
+
+  const handleCropCancel = useCallback(() => {
+    if (cropImageSrc) URL.revokeObjectURL(cropImageSrc);
+    setCropImageSrc(null);
+    setCropperOpen(false);
+    pendingFileRef.current = null;
+  }, [cropImageSrc]);
 
   const handleLocationChange = (val: string) => {
     setLocation(val);
@@ -386,12 +421,21 @@ export const GeneralSettingsSection: React.FC<GeneralSettingsSectionProps> = ({
             accept="image/*"
             maxSize="5MB"
             recommendedSize="1920x600"
-            onFileSelect={onBannerSelect}
+            onFileSelect={handleFileForCrop}
             previewUrl={bannerBgPreview}
             onClearPreview={onBannerClear}
           />
           {bannerError && <p className="text-red-500 text-xs mt-1">{bannerError}</p>}
         </div>
+
+        {cropperOpen && cropImageSrc && (
+          <ImageCropperModal
+            imageSrc={cropImageSrc}
+            onCropComplete={handleCropComplete}
+            onCancel={handleCropCancel}
+            aspectRatio={3.68 / 1}
+          />
+        )}
       </div>
     </div>
   );

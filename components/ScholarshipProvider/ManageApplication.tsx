@@ -73,7 +73,14 @@ const ManageApplication = () => {
       if (filterProvince && v.province !== filterProvince) return false;
       if (filterDistrict && v.district !== filterDistrict) return false;
       if (filterGender && v.gender !== filterGender) return false;
-      if (filterDay && !v.available_days.includes(filterDay)) return false;
+      if (filterDay) {
+        const dayNum = parseInt(filterDay, 10);
+        const hasDay = v.available_days.some((d: string) => {
+          const parts = d.split('-');
+          return parts.length === 3 && parseInt(parts[2], 10) === dayNum;
+        });
+        if (!hasDay) return false;
+      }
       return true;
     });
   }, [volunteers, search, filterProvince, filterDistrict, filterGender, filterDay]);
