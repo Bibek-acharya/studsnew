@@ -11,6 +11,7 @@ export interface ExamCenterItem {
   contactPerson: string;
   phoneNumber: string;
   mapCoordinates: string;
+  allocatedSeats: number;
 }
 
 interface ExamCentersSectionProps {
@@ -27,14 +28,14 @@ const PROVINCES = [
 
 export const ExamCentersSection: React.FC<ExamCentersSectionProps> = ({ examCenters, setExamCenters }) => {
   const addExamCenter = () => {
-    setExamCenters([...examCenters, { province: "", headerColor: "", info: "", centerName: "", contactPerson: "", phoneNumber: "", mapCoordinates: "" }]);
+    setExamCenters([...examCenters, { province: "", headerColor: "", info: "", centerName: "", contactPerson: "", phoneNumber: "", mapCoordinates: "", allocatedSeats: 0 }]);
   };
 
   const removeExamCenter = (index: number) => {
     setExamCenters(examCenters.filter((_, i) => i !== index));
   };
 
-  const updateExamCenter = (index: number, field: keyof ExamCenterItem, value: string) => {
+  const updateExamCenter = (index: number, field: keyof ExamCenterItem, value: string | number) => {
     setExamCenters(examCenters.map((ec, i) => i === index ? { ...ec, [field]: value } : ec));
   };
 
@@ -139,6 +140,17 @@ export const ExamCentersSection: React.FC<ExamCentersSectionProps> = ({ examCent
                     placeholder="https://maps.app.goo.gl/..."
                     value={ec.mapCoordinates}
                     onChange={(e) => updateExamCenter(index, "mapCoordinates", e.target.value)}
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700">Allocated Seats</label>
+                  <input
+                    type="number"
+                    min="0"
+                    className={formInputClass}
+                    placeholder="0 = Unlimited"
+                    value={ec.allocatedSeats ?? 0}
+                    onChange={(e) => updateExamCenter(index, "allocatedSeats", parseInt(e.target.value) || 0)}
                   />
                 </div>
               </div>

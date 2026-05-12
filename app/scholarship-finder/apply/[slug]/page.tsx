@@ -8,15 +8,22 @@ import ShikshaApplicationForm from "@/components/project-shiksha/ShikshaApplicat
 export default function ScholarshipApplyPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = React.use(params);
 
-  const { data: detailRes, isLoading } = useQuery({
+  const { data: detailRes, isLoading: detailLoading } = useQuery({
     queryKey: ["scholarship", slug],
     queryFn: () => apiService.getEducationScholarshipById(slug),
     retry: false,
   });
 
+  const { data: examCenters, isLoading: centersLoading } = useQuery({
+    queryKey: ["scholarship-exam-centers", slug],
+    queryFn: () => apiService.getAvailableExamCenters(slug),
+    retry: false,
+    enabled: !!detailRes?.data,
+  });
+
   const scholarship = detailRes?.data;
 
-  if (isLoading) {
+  if (detailLoading) {
     return (
       <div className="flex min-h-screen items-center justify-center bg-[#f8fafc]">
         <div className="h-12 w-12 animate-spin rounded-full border-4 border-blue-600 border-t-transparent" />
@@ -32,8 +39,6 @@ export default function ScholarshipApplyPage({ params }: { params: Promise<{ slu
       />
     );
   }
-
-  const examCenters = (scholarship.exam_centers_new || scholarship.exam_centers || []).map((ec: any) => typeof ec === "string" ? ec : ec.centerName || ec.name).filter(Boolean);
 
   const partnerLogos = (() => {
     const groups = scholarship.partner_groups || [];

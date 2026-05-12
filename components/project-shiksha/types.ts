@@ -43,10 +43,7 @@ export interface ProjectShikshaFormData {
   familyMembers: string;
 
   // Documents
-  birthCertificate: File | null;
   seeMarksheet: File | null;
-  class8Marksheet: File | null;
-  class9Marksheet: File | null;
   photo: File | null;
 
   // Admit Card

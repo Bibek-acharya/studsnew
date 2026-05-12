@@ -1452,6 +1452,13 @@ export const apiService = {
     });
   },
 
+  async getAvailableExamCenters(id: string | number): Promise<string[]> {
+    const res = await apiRequest<any>(`/api/v1/education/scholarships/${id}/exam-centers`, {
+      cache: "no-store",
+    });
+    return res?.data?.exam_centers || [];
+  },
+
   async getEducationSimilarScholarships(id: string | number): Promise<any> {
     return apiRequest<ScholarshipDetailResponse>(`/api/v1/education/scholarships/${id}/similar`, {
       cache: "no-store",

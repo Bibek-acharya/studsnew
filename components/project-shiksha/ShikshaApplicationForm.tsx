@@ -63,10 +63,7 @@ const initialFormData: ProjectShikshaFormData = {
   familyIncome: "",
   familyMembers: "",
 
-  birthCertificate: null,
   seeMarksheet: null,
-  class8Marksheet: null,
-  class9Marksheet: null,
   photo: null,
 
   stream: "",
@@ -114,12 +111,14 @@ export default function ShikshaApplicationForm({
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [alertMessage, setAlertMessage] = useState("");
 
+  const examCenterList = dynamicExamCenters !== undefined ? dynamicExamCenters : examCenters;
+
   const handleInputChange = useCallback((field: keyof ProjectShikshaFormData, value: string | boolean | File | null) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
     setErrors((prev) => ({ ...prev, [field]: undefined }));
   }, []);
 
-  const DOCUMENT_FIELDS = new Set(["birthCertificate", "seeMarksheet", "class8Marksheet", "class9Marksheet", "photo"]);
+  const DOCUMENT_FIELDS = new Set(["seeMarksheet", "photo"]);
 
   const handleBlur = useCallback((e: React.FocusEvent) => {
     const target = e.target as HTMLElement;
@@ -145,7 +144,7 @@ export default function ShikshaApplicationForm({
     }
   }, [errors.dobBS]);
 
-  const handleFileChange = useCallback((field: "birthCertificate" | "seeMarksheet" | "class8Marksheet" | "class9Marksheet" | "photo", file: File | null) => {
+  const handleFileChange = useCallback((field: "seeMarksheet" | "photo", file: File | null) => {
     handleInputChange(field, file);
     if (field === "photo" && file) {
       const reader = new FileReader();
@@ -201,10 +200,7 @@ export default function ShikshaApplicationForm({
       // Step 2: Upload Documents
       const documents: any[] = [];
       const documentFields = [
-        { key: "birthCertificate" as const, title: "Birth Certificate" },
         { key: "seeMarksheet" as const, title: "SEE Marksheet" },
-        { key: "class8Marksheet" as const, title: "Class 8 Marksheet" },
-        { key: "class9Marksheet" as const, title: "Class 9 Marksheet" },
       ];
 
       for (const docField of documentFields) {
@@ -675,20 +671,6 @@ export default function ShikshaApplicationForm({
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div className="border border-gray-200 rounded-xl p-4 bg-gray-50 flex flex-col justify-center">
                   <label className="block text-[14px] font-semibold text-gray-800 mb-2">
-                    Birth Certificate <span className="text-red-500">*</span>
-                  </label>
-                  <input
-                    type="file"
-                    id="birthCertificate"
-                    accept=".pdf,image/*"
-                    onChange={(e) => handleFileChange("birthCertificate", e.target.files?.[0] || null)}
-                    className="file-upload-arrow w-full text-sm text-gray-600 file:mr-4 file:py-2.5 file:px-4 file:rounded file:border-0 file:text-sm file:font-semibold file:bg-gray-200 file:text-gray-800 hover:file:bg-gray-300 cursor-pointer"
-                  />
-                  {errors.birthCertificate && <p className="text-red-500 text-[12px] mt-1">{errors.birthCertificate}</p>}
-                </div>
-
-                <div className="border border-gray-200 rounded-xl p-4 bg-gray-50 flex flex-col justify-center">
-                  <label className="block text-[14px] font-semibold text-gray-800 mb-2">
                     SEE Marksheet <span className="text-red-500">*</span>
                   </label>
                   <input
@@ -699,34 +681,6 @@ export default function ShikshaApplicationForm({
                     className="file-upload-arrow w-full text-sm text-gray-600 file:mr-4 file:py-2.5 file:px-4 file:rounded file:border-0 file:text-sm file:font-semibold file:bg-gray-200 file:text-gray-800 hover:file:bg-gray-300 cursor-pointer"
                   />
                   {errors.seeMarksheet && <p className="text-red-500 text-[12px] mt-1">{errors.seeMarksheet}</p>}
-                </div>
-
-                <div className="border border-gray-200 rounded-xl p-4 bg-gray-50 flex flex-col justify-center">
-                  <label className="block text-[14px] font-semibold text-gray-800 mb-2">
-                    Class 8 Marksheet <span className="text-red-500">*</span>
-                  </label>
-                  <input
-                    type="file"
-                    id="class8Marksheet"
-                    accept=".pdf,image/*"
-                    onChange={(e) => handleFileChange("class8Marksheet", e.target.files?.[0] || null)}
-                    className="file-upload-arrow w-full text-sm text-gray-600 file:mr-4 file:py-2.5 file:px-4 file:rounded file:border-0 file:text-sm file:font-semibold file:bg-gray-200 file:text-gray-800 hover:file:bg-gray-300 cursor-pointer"
-                  />
-                  {errors.class8Marksheet && <p className="text-red-500 text-[12px] mt-1">{errors.class8Marksheet}</p>}
-                </div>
-
-                <div className="border border-gray-200 rounded-xl p-4 bg-gray-50 flex flex-col justify-center">
-                  <label className="block text-[14px] font-semibold text-gray-800 mb-2">
-                    Class 9 Marksheet <span className="text-red-500">*</span>
-                  </label>
-                  <input
-                    type="file"
-                    id="class9Marksheet"
-                    accept=".pdf,image/*"
-                    onChange={(e) => handleFileChange("class9Marksheet", e.target.files?.[0] || null)}
-                    className="file-upload-arrow w-full text-sm text-gray-600 file:mr-4 file:py-2.5 file:px-4 file:rounded file:border-0 file:text-sm file:font-semibold file:bg-gray-200 file:text-gray-800 hover:file:bg-gray-300 cursor-pointer"
-                  />
-                  {errors.class9Marksheet && <p className="text-red-500 text-[12px] mt-1">{errors.class9Marksheet}</p>}
                 </div>
               </div>
             </div>
@@ -1179,18 +1133,21 @@ export default function ShikshaApplicationForm({
                 <label className="block text-[14px] font-semibold text-gray-700 mb-1.5">
                   Choose Exam Center <span className="text-red-500">*</span>
                 </label>
-                <SelectArrow
-                  id="examCenter"
-                  value={formData.examCenter}
-                  onChange={(e) => handleInputChange("examCenter", e.target.value)}
-                  className="w-full border border-gray-300 rounded py-3 px-4 text-[15px] text-gray-800 outline-none focus:ring-0 focus:border-[#006400] transition-all bg-white cursor-pointer"
-                >
-                  <option value="" disabled>Select Exam Center</option>
-                  {/* Use dynamic exam centers if provided, otherwise fallback to static list */}
-                  {(dynamicExamCenters && dynamicExamCenters.length > 0 ? dynamicExamCenters : examCenters).map((ec) => (
-                    <option key={ec} value={ec}>{ec}</option>
-                  ))}
-                </SelectArrow>
+                {examCenterList.length > 0 ? (
+                  <SelectArrow
+                    id="examCenter"
+                    value={formData.examCenter}
+                    onChange={(e) => handleInputChange("examCenter", e.target.value)}
+                    className="w-full border border-gray-300 rounded py-3 px-4 text-[15px] text-gray-800 outline-none focus:ring-0 focus:border-[#006400] transition-all bg-white cursor-pointer"
+                  >
+                    <option value="" disabled>Select Exam Center</option>
+                    {examCenterList.map((ec) => (
+                      <option key={ec} value={ec}>{ec}</option>
+                    ))}
+                  </SelectArrow>
+                ) : (
+                  <p className="text-gray-400 text-[15px] py-3">No exam centers available</p>
+                )}
                 {errors.examCenter && <p className="text-red-500 text-[12px] mt-1">{errors.examCenter}</p>}
               </div>
             </div>

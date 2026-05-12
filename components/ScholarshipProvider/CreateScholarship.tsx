@@ -74,6 +74,7 @@ interface ExamCenterItem {
   contactPerson: string;
   phoneNumber: string;
   mapCoordinates: string;
+  allocatedSeats: number;
 }
 
 interface DownloadItem {
