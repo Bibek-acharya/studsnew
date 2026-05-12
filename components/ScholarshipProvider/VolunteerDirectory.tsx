@@ -4,6 +4,7 @@ import React, { useEffect, useState, useCallback } from "react";
 import { scholarshipProviderApi } from "@/services/scholarshipProviderApi";
 import { Building2, MapPin, Users, Loader2, Search, Pencil, Calendar, CalendarDays, ListChecks, Settings } from "lucide-react";
 import { toast } from "sonner";
+import ConfirmationModal from "./common/ConfirmationModal";
 
 interface VolunteerRequest {
   id: number;
@@ -36,6 +37,7 @@ const VolunteerDirectory = ({ onEdit }: VolunteerDirectoryProps) => {
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState<"all" | "active" | "inactive">("all");
+  const [confirmingId, setConfirmingId] = useState<number | null>(null);
 
   useEffect(() => {
     setLoading(true);
@@ -139,9 +141,6 @@ const VolunteerDirectory = ({ onEdit }: VolunteerDirectoryProps) => {
                 {v.volunteer_payment && v.volunteer_type === "paid" && (
                   <span className="rounded-full bg-emerald-50 text-emerald-700 px-2 py-1 text-[10px] font-bold">NPR {v.volunteer_payment}</span>
                 )}
-                {v.applicant_count > 0 && (
-                  <span className="rounded-full bg-amber-50 text-amber-700 px-2 py-1 text-[10px] font-bold">{v.applicant_count}</span>
-                )}
               </div>
               <h2 className="mb-2.5 text-sm font-bold leading-tight text-black line-clamp-2">{v.title}</h2>
               <div className="mb-3 flex flex-col gap-1.5">
@@ -166,7 +165,7 @@ const VolunteerDirectory = ({ onEdit }: VolunteerDirectoryProps) => {
               )}
               <div className="flex items-center gap-2 pt-2.5 border-t border-gray-100">
                 <button
-                  onClick={() => toggleVolunteer(v.id)}
+                  onClick={() => setConfirmingId(v.id)}
                   className={`flex-1 rounded-lg border py-1.5 text-[12px] font-semibold transition-colors ${
                     v.active
                       ? "border-green-200 bg-green-50 text-green-700 hover:bg-green-100"
@@ -186,6 +185,26 @@ const VolunteerDirectory = ({ onEdit }: VolunteerDirectoryProps) => {
           ))}
         </div>
       )}
+      {confirmingId !== null && (() => {
+        const target = volunteers.find(v => v.id === confirmingId);
+        if (!target) return null;
+        const isActive = target.active;
+        return (
+          <ConfirmationModal
+            isOpen={true}
+            title={isActive ? "Deactivate Volunteer" : "Activate Volunteer"}
+            message={`Are you sure you want to ${isActive ? "deactivate" : "activate"} "${target.title}"? ${isActive ? "It will no longer be visible to applicants." : "It will be visible to applicants."}`}
+            confirmText={isActive ? "Yes, Deactivate" : "Yes, Activate"}
+            cancelText="Cancel"
+            destructive={isActive}
+            onConfirm={() => {
+              toggleVolunteer(confirmingId);
+              setConfirmingId(null);
+            }}
+            onCancel={() => setConfirmingId(null)}
+          />
+        );
+      })()}
     </div>
   );
 };

@@ -151,7 +151,7 @@ export const ContactDetailsSection: React.FC<ContactDetailsSectionProps> = ({
           </div>
           <div className="space-y-1.5">
             <label className="block text-sm font-medium text-gray-700">
-              Secondary Phone Number <span className="text-red-500">*</span>
+              Secondary Phone Number
             </label>
             <input
               id="secondaryPhone"

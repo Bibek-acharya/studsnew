@@ -221,6 +221,7 @@ const CreateScholarship: React.FC<CreateScholarshipProps> = memo(({ scholarshipI
       const url = await scholarshipProviderApi.uploadImage(file, "scholarships");
       setBannerBgUrl(url);
       setBannerBgPreview(url);
+      setBannerError("");
     } catch (err) {
       toast.error("Failed to upload banner image");
       console.error(err);
@@ -682,23 +683,23 @@ const CreateScholarship: React.FC<CreateScholarshipProps> = memo(({ scholarshipI
       {/* General Settings */}
       <GeneralSettingsSection
         mainTitle={mainTitle}
-        setMainTitle={setMainTitle}
+        setMainTitle={(v) => { setMainTitle(v); setMainTitleError(""); }}
         providerName={providerName}
-        setProviderName={setProviderName}
+        setProviderName={(v) => { setProviderName(v); setProviderNameError(""); }}
         fundingType={fundingType}
-        setFundingType={setFundingType}
+        setFundingType={(v) => { setFundingType(v); setFundingTypeError(""); }}
         fundingTypeOther={fundingTypeOther}
-        setFundingTypeOther={setFundingTypeOther}
+        setFundingTypeOther={(v) => { setFundingTypeOther(v); fundingTypeError && setFundingTypeError(""); }}
         scholarshipType={scholarshipType}
-        setScholarshipType={setScholarshipType}
+        setScholarshipType={(v) => { setScholarshipType(v); setScholarshipTypeError(""); }}
         scholarshipTypeOther={scholarshipTypeOther}
-        setScholarshipTypeOther={setScholarshipTypeOther}
+        setScholarshipTypeOther={(v) => { setScholarshipTypeOther(v); scholarshipTypeError && setScholarshipTypeError(""); }}
         educationLevel={educationLevel}
-        setEducationLevel={setEducationLevel}
+        setEducationLevel={(v) => { setEducationLevel(v); setEducationLevelError(""); }}
         educationLevelOther={educationLevelOther}
-        setEducationLevelOther={setEducationLevelOther}
+        setEducationLevelOther={(v) => { setEducationLevelOther(v); educationLevelError && setEducationLevelError(""); }}
         location={location}
-        setLocation={setLocation}
+        setLocation={(v) => { setLocation(v); setLocationError(""); }}
         startDate={startDate}
         setStartDate={handleStartDateChange}
         endDate={endDate}
@@ -727,7 +728,7 @@ const CreateScholarship: React.FC<CreateScholarshipProps> = memo(({ scholarshipI
       {/* Contact Details */}
       <ContactDetailsSection
         coverageArea={coverageArea}
-        setCoverageArea={setCoverageArea}
+        setCoverageArea={(v) => { setCoverageArea(v); setCoverageAreaError(""); }}
         contactEmail={contactEmail}
         setContactEmail={setContactEmail}
         contactEmailError={contactEmailError}
@@ -745,12 +746,13 @@ const CreateScholarship: React.FC<CreateScholarshipProps> = memo(({ scholarshipI
         websiteUrlError={websiteUrlError}
         setWebsiteUrlError={setWebsiteUrlError}
         officeAddress={officeAddress}
-        setOfficeAddress={setOfficeAddress}
+        setOfficeAddress={(v) => { setOfficeAddress(v); setOfficeAddressError(""); }}
         coverageAreaError={coverageAreaError}
         officeAddressError={officeAddressError}
         mapUrl={mapUrl}
         setMapUrl={setMapUrl}
         mapUrlError={mapUrlError}
+        setMapUrlError={setMapUrlError}
       />
 
       {/* About Section */}
@@ -774,11 +776,11 @@ const CreateScholarship: React.FC<CreateScholarshipProps> = memo(({ scholarshipI
       {/* Scholarship Details */}
       <ScholarshipDetailsSection
         sectionTitle={scholarshipSectionTitle}
-        setSectionTitle={setScholarshipSectionTitle}
+        setSectionTitle={(v) => { setScholarshipSectionTitle(v); setSchSectionTitleError(""); }}
         subtitle={scholarshipSubtitle}
-        setSubtitle={setScholarshipSubtitle}
+        setSubtitle={(v) => { setScholarshipSubtitle(v); setSchSubtitleError(""); }}
         description={scholarshipDescription}
-        setDescription={setScholarshipDescription}
+        setDescription={(v) => { setScholarshipDescription(v); setSchDescriptionError(""); }}
         scholarshipTypes={scholarshipTypes}
         setScholarshipTypes={setScholarshipTypes}
         selectionRubric={selectionRubric}
@@ -791,9 +793,9 @@ const CreateScholarship: React.FC<CreateScholarshipProps> = memo(({ scholarshipI
       {/* Eligibility */}
       <EligibilitySection
         sectionTitle={eligibilitySectionTitle}
-        setSectionTitle={setEligibilitySectionTitle}
+        setSectionTitle={(v) => { setEligibilitySectionTitle(v); setEligSectionTitleError(""); }}
         subtitle={eligibilitySubtitle}
-        setSubtitle={setEligibilitySubtitle}
+        setSubtitle={(v) => { setEligibilitySubtitle(v); setEligSubtitleError(""); }}
         basicRequirements={basicRequirements}
         setBasicRequirements={setBasicRequirements}
         fullyFundedConditions={fullyFundedConditions}

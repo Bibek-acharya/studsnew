@@ -155,7 +155,6 @@ const ScholarshipDirectory: React.FC<ScholarshipDirectoryProps> = memo(({ onEdit
               <div className="flex items-center gap-1 text-gray-500 text-xs mb-3">
                 <Building2 className="w-3 h-3" />
                 <span className="truncate">{sch.provider}</span>
-                <CheckCircle className="w-3 h-3 text-blue-600" />
               </div>
               <div className="bg-gray-50 rounded-lg p-3 flex flex-col gap-2 border border-gray-100">
                   <div className="flex items-center gap-3 text-gray-600 text-xs">
