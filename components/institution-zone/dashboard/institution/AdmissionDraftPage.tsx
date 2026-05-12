@@ -1,8 +1,9 @@
 "use client";
 
-import React, { useState, useMemo } from "react";
+import React, { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { FileText, Pencil, Trash, CaretLeft, CaretRight } from "@phosphor-icons/react";
+import { institutionAdmissionApi } from "@/services/institutionAdmissionApi";
 
 interface DraftAdmission {
   id: number;
@@ -12,30 +13,49 @@ interface DraftAdmission {
   lastEdited: string;
 }
 
-const DRAFT_ADMISSIONS: DraftAdmission[] = [
-  { id: 1, title: "BCA Program Admission 2026", program: "BCA", level: "Bachelor", lastEdited: "2026-05-10" },
-  { id: 2, title: "Civil Engineering Fall Intake", program: "Civil Engineering", level: "Bachelor", lastEdited: "2026-05-09" },
-  { id: 3, title: "MBA Admissions Spring 2026", program: "MBA", level: "Master", lastEdited: "2026-05-08" },
-  { id: 4, title: "+2 Science Admission Open", program: "Science", level: "+2", lastEdited: "2026-05-07" },
-  { id: 5, title: "Diploma in IT Admission", program: "Diploma in IT", level: "Diploma", lastEdited: "2026-05-06" },
-];
-
 const ITEMS_PER_PAGE = 5;
 
 const AdmissionDraftPage: React.FC = () => {
   const router = useRouter();
+  const [drafts, setDrafts] = useState<DraftAdmission[]>([]);
+  const [loading, setLoading] = useState(true);
   const [page, setPage] = useState(1);
 
-  const totalPages = Math.max(1, Math.ceil(DRAFT_ADMISSIONS.length / ITEMS_PER_PAGE));
+  useEffect(() => {
+    const fetchDrafts = async () => {
+      try {
+        const res = await institutionAdmissionApi.list("draft", 1, 100);
+        if (res.success && Array.isArray(res.data?.admissions)) {
+          setDrafts(
+            res.data.admissions.map((a: any) => ({
+              id: a.id,
+              title: a.title || "",
+              program: a.program || "",
+              level: a.level || "",
+              lastEdited: a.last_edited || "",
+            }))
+          );
+        }
+      } catch {
+        // silent
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchDrafts();
+  }, []);
+
+  const totalPages = Math.max(1, Math.ceil(drafts.length / ITEMS_PER_PAGE));
   const safePage = Math.min(page, totalPages);
-  const paginated = DRAFT_ADMISSIONS.slice((safePage - 1) * ITEMS_PER_PAGE, safePage * ITEMS_PER_PAGE);
+  const paginated = drafts.slice((safePage - 1) * ITEMS_PER_PAGE, safePage * ITEMS_PER_PAGE);
 
   const handleEdit = (id: number) => {
     router.push(`/institution-zone/dashboard/admission/create?id=${id}`);
   };
 
-  const handleDelete = (id: number) => {
-    console.log("Delete draft", id);
+  const handleDelete = async (id: number) => {
+    await institutionAdmissionApi.delete(id);
+    setDrafts((prev) => prev.filter((d) => d.id !== id));
   };
 
   return (
@@ -57,7 +77,11 @@ const AdmissionDraftPage: React.FC = () => {
           </h2>
         </div>
 
-        {paginated.length === 0 ? (
+        {loading ? (
+          <div className="text-center py-12 text-gray-400">
+            <p className="text-sm">Loading...</p>
+          </div>
+        ) : paginated.length === 0 ? (
           <div className="text-center py-12 text-gray-400">
             <FileText className="w-12 h-12 mx-auto mb-3 opacity-40" />
             <p className="text-sm">No draft admissions found</p>
@@ -94,10 +118,10 @@ const AdmissionDraftPage: React.FC = () => {
           </div>
         )}
 
-        {DRAFT_ADMISSIONS.length > ITEMS_PER_PAGE && (
+        {drafts.length > ITEMS_PER_PAGE && (
           <div className="flex items-center justify-between px-6 py-4 border-t border-gray-200 bg-gray-50/50">
             <p className="text-sm text-gray-500">
-              Showing <span className="font-medium">{(safePage - 1) * ITEMS_PER_PAGE + 1}-{Math.min(safePage * ITEMS_PER_PAGE, DRAFT_ADMISSIONS.length)}</span> of <span className="font-medium">{DRAFT_ADMISSIONS.length}</span>
+              Showing <span className="font-medium">{(safePage - 1) * ITEMS_PER_PAGE + 1}-{Math.min(safePage * ITEMS_PER_PAGE, drafts.length)}</span> of <span className="font-medium">{drafts.length}</span>
             </p>
             <div className="flex items-center gap-2">
               <button onClick={() => setPage((p) => Math.max(1, p - 1))} disabled={safePage === 1} className={`w-8 h-8 flex items-center justify-center rounded-lg border ${safePage === 1 ? "border-gray-200 text-gray-400 cursor-not-allowed" : "border-gray-200 text-gray-600 hover:bg-gray-50"}`}>

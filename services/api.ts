@@ -2242,4 +2242,5 @@ export const scholarshipProviderApi = {
       body: JSON.stringify({ approve, reason: reason || '' }),
     });
   },
+
 };

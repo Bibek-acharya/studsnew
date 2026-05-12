@@ -1,5 +1,6 @@
 "use client";
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import SectionHeader from "@/components/institution-zone/dashboard/shared/SectionHeader";
 import {
   MagnifyingGlass,
@@ -9,6 +10,7 @@ import {
   CaretLeft,
   CaretRight,
 } from "@phosphor-icons/react";
+import { institutionAdmissionApi } from "@/services/institutionAdmissionApi";
 
 interface PublishedAdmission {
   id: number;
@@ -19,8 +21,6 @@ interface PublishedAdmission {
   status: string;
   applicants: number;
 }
-
-const MOCK_ADMISSIONS: PublishedAdmission[] = [];
 
 const statusColors: Record<string, string> = {
   Published: "text-green-600 bg-green-50",
@@ -38,9 +38,37 @@ const statusPill = (status: string) => {
 const ITEMS_PER_PAGE = 5;
 
 const AdmissionDirectoryPage: React.FC = () => {
-  const [admissions] = useState(MOCK_ADMISSIONS);
+  const router = useRouter();
+  const [admissions, setAdmissions] = useState<PublishedAdmission[]>([]);
+  const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
   const [page, setPage] = useState(1);
+
+  useEffect(() => {
+    const fetchPublished = async () => {
+      try {
+        const res = await institutionAdmissionApi.list("published", 1, 100);
+        if (res.success && Array.isArray(res.data?.admissions)) {
+          setAdmissions(
+            res.data.admissions.map((a: any) => ({
+              id: a.id,
+              title: a.title || "",
+              program: a.program || "",
+              level: a.level || "",
+              publishedDate: a.published_at || "",
+              status: a.status === "published" ? "Published" : "Draft",
+              applicants: a.applicants || 0,
+            }))
+          );
+        }
+      } catch {
+        // silent
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchPublished();
+  }, []);
 
   const filtered = admissions.filter((a) => {
     const s = search.toLowerCase();
@@ -102,7 +130,13 @@ const AdmissionDirectoryPage: React.FC = () => {
               </tr>
             </thead>
             <tbody>
-              {paginated.length === 0 ? (
+              {loading ? (
+                <tr>
+                  <td colSpan={7} className="px-4 py-8 text-center text-gray-500">
+                    Loading...
+                  </td>
+                </tr>
+              ) : paginated.length === 0 ? (
                 <tr>
                   <td colSpan={7} className="px-4 py-8 text-center text-gray-500">
                     No admissions found.
@@ -119,13 +153,23 @@ const AdmissionDirectoryPage: React.FC = () => {
                     <td className="px-4 py-3">{statusPill(admission.status)}</td>
                     <td className="px-4 py-3">
                       <div className="flex items-center justify-center gap-1">
-                        <button title="View" className="p-1.5 rounded text-gray-400 hover:text-blue-600 hover:bg-blue-50">
-                          <Eye weight="bold" className="w-4 h-4" />
-                        </button>
-                        <button title="Edit" className="p-1.5 rounded text-gray-400 hover:text-green-600 hover:bg-green-50">
+                        <button
+                          title="Edit"
+                          onClick={() => router.push(`/institution-zone/dashboard/admission/create?id=${admission.id}`)}
+                          className="p-1.5 rounded text-gray-400 hover:text-green-600 hover:bg-green-50"
+                        >
                           <Pencil weight="bold" className="w-4 h-4" />
                         </button>
-                        <button title="Delete" className="p-1.5 rounded text-gray-400 hover:text-red-600 hover:bg-red-50">
+                        <button
+                          title="Delete"
+                          onClick={async () => {
+                            if (confirm("Delete this admission?")) {
+                              await institutionAdmissionApi.delete(admission.id);
+                              setAdmissions((prev) => prev.filter((a) => a.id !== admission.id));
+                            }
+                          }}
+                          className="p-1.5 rounded text-gray-400 hover:text-red-600 hover:bg-red-50"
+                        >
                           <Trash weight="bold" className="w-4 h-4" />
                         </button>
                       </div>

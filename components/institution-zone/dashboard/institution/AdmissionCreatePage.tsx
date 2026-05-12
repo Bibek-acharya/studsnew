@@ -2,10 +2,12 @@
 
 import React, { useState, useEffect, useCallback } from "react";
 import dynamic from "next/dynamic";
+import { useRouter } from "next/navigation";
 import * as LucideIcons from "lucide-react";
 import SectionHeader from "@/components/institution-zone/dashboard/shared/SectionHeader";
 import "react-quill-new/dist/quill.snow.css";
 import { apiService } from "@/services/api";
+import { institutionAdmissionApi } from "@/services/institutionAdmissionApi";
 
 const kebabToPascal = (name: string): string =>
   name.replace(/-./g, (m) => m[1].toUpperCase()).replace(/^./, (m) => m.toUpperCase());
@@ -157,7 +159,10 @@ function SectionItemHeader({
 }
 
 const AdmissionCreatePage: React.FC = () => {
-  const [loading, setLoading] = useState(true);
+  const router = useRouter();
+  const editId = typeof window !== "undefined" ? new URLSearchParams(window.location.search).get("id") : null;
+
+  const [loading, setLoading] = useState(!!editId);
   const [saving, setSaving] = useState(false);
 
   const [overviewHeading, setOverviewHeading] = useState("");
@@ -190,151 +195,164 @@ const AdmissionCreatePage: React.FC = () => {
   const fieldError = (field: string) =>
     errors[field] ? "ring-2 ring-red-500" : "";
 
-  useEffect(() => {
-    const fetchProfile = async () => {
-      try {
-        const res = await apiService.getInstitutionProfile();
-        if (res.success && res.data) {
-          const d = res.data;
-          const od = d.overview_data;
-          if (od) {
-            setOverviewHeading(String(od.overviewHeading ?? ""));
-            setOverviewDesc(String(od.overviewDesc ?? ""));
-            setApplicationFormLink(String(od.applicationFormLink ?? ""));
-            setLevel(String(od.level ?? ""));
-          }
-          const wnd = d.whats_new_data;
-          if (wnd) {
-            setWhatsNewTitle(wnd.title || "");
-            setWhatsNewDesc(wnd.description || "");
-            setWhatsNewBtnText(wnd.btnText || "");
-            setWhatsNewBtnLink(wnd.btnLink || "");
-          }
-          const pd = d.programs_data;
-          if (pd && Array.isArray(pd)) {
-            setPrograms(
-              pd.map((p: AnyRecord, i: number) => {
-                const rawStreams = p.streams;
-                const rawCareers = p.careers;
-                return {
-                  id: i + 1,
-                  title: String(p.title ?? ""),
-                  subtitle: String(p.subtitle ?? ""),
-                  admissionStatus: String(p.admissionStatus ?? ""),
-                  programIcon: String(p.programIcon ?? ""),
-                  description: String(p.description ?? ""),
-                  streams: Array.isArray(rawStreams) ? rawStreams.map(String) : (typeof rawStreams === "string" && rawStreams ? rawStreams.split("\n").map(s => s.replace(/^-\s*/, "").trim()).filter(Boolean) : []),
-                  careers: Array.isArray(rawCareers) ? rawCareers.map(String) : (typeof rawCareers === "string" && rawCareers ? rawCareers.split("\n").map(s => s.replace(/^-\s*/, "").trim()).filter(Boolean) : []),
-                };
-              })
-            );
-          }
-          const fd = d.facilities_data;
-          if (fd && Array.isArray(fd)) {
-            setFacilities(
-              fd.map((f: AnyRecord, i: number) => ({
-                id: i + 1,
-                heading: String(f.heading ?? ""),
-                facilityIcon: String(f.facilityIcon ?? ""),
-                description: String(f.description ?? ""),
-              }))
-            );
-          }
-          const cd = d.courses_data;
-          if (cd && Array.isArray(cd)) {
-            setCourses(
-              cd.map((c: AnyRecord, i: number) => ({
-                id: i + 1,
-                courseName: String(c.courseName ?? ""),
-                curriculumLink: String(c.curriculumLink ?? ""),
-                feesText: String(c.feesText ?? ""),
-                applicationDate: String(c.applicationDate ?? ""),
-                applyLink: String(c.applyLink ?? ""),
-              }))
-            );
-          }
-          const bd = d.brochure_data as AnyRecord | undefined;
-          if (bd) {
-            setBrochureUrl(String(bd.url ?? ""));
-          }
-          const dd = d.downloads_data;
-          if (dd && Array.isArray(dd)) {
-            setDownloads(
-              dd.map((dl: AnyRecord, i: number) => ({
-                id: i + 1,
-                title: String(dl.title ?? ""),
-                description: String(dl.description ?? ""),
-              }))
-            );
-          }
-          const faqD = d.faqs_data;
-          if (faqD && Array.isArray(faqD)) {
-            setFaqs(
-              faqD.map((fq: AnyRecord, i: number) => ({
-                id: i + 1,
-                question: String(fq.question ?? ""),
-                answer: String(fq.answer ?? ""),
-              }))
-            );
-          }
-          const cpD = d.contact_persons_data;
-          if (cpD && Array.isArray(cpD)) {
-            setContactPersons(
-              cpD.map((cp: AnyRecord, i: number) => ({
-                id: i + 1,
-                name: String(cp.name ?? ""),
-                designation: String(cp.designation ?? ""),
-                number: String(cp.number ?? ""),
-                email: String(cp.email ?? ""),
-                whatsapp: String(cp.whatsapp ?? ""),
-              }))
-            );
-          }
-          const scD = d.scholarships_data;
-          if (scD && Array.isArray(scD)) {
-            setScholarships(
-              scD.map((s: AnyRecord, i: number) => ({
-                id: i + 1,
-                name: String(s.name ?? ""),
-                level: String(s.level ?? ""),
-                stream: String(s.stream ?? ""),
-                coverage: String(s.coverage ?? ""),
-                eligibility: String(s.eligibility ?? ""),
-                seats: String(s.seats ?? ""),
-              }))
-            );
-          }
-          const elD = d.eligibility_data as AnyRecord | undefined;
-          if (elD) {
-            const items = elD.criteria;
-            if (items && Array.isArray(items)) {
-              setEligibilityCriteria(
-                items.map((ec: AnyRecord, i: number) => {
-                  const rawElig = ec.eligibility;
-                  const rawDocs = ec.documents;
-                  return {
-                    id: i + 1,
-                    level: String(ec.level ?? ""),
-                    stream: String(ec.stream ?? ""),
-                    eligibility: Array.isArray(rawElig) ? rawElig.map(String) : (typeof rawElig === "string" && rawElig ? rawElig.split("\n").map(s => s.replace(/^-\s*/, "").trim()).filter(Boolean) : []),
-                    documents: Array.isArray(rawDocs) ? rawDocs.map(String) : (typeof rawDocs === "string" && rawDocs ? rawDocs.split("\n").map(s => s.replace(/^-\s*/, "").trim()).filter(Boolean) : []),
-                  };
-                })
-              );
-            }
-          }
-          const apD = d.admission_process_data;
-          if (apD && Array.isArray(apD)) {
-            setAdmissionSteps(
-              apD.map((st: AnyRecord, i: number) => ({
-                id: i + 1,
-                stepNumber: String(st.stepNumber ?? ""),
-                title: String(st.title ?? ""),
-                description: String(st.description ?? ""),
-              }))
-            );
-          }
+  const populateFromData = useCallback((data: any) => {
+    const od = data.overview_data;
+    if (od) {
+      setOverviewHeading(String(od.overviewHeading ?? ""));
+      setOverviewDesc(String(od.overviewDesc ?? ""));
+      setApplicationFormLink(String(od.applicationFormLink ?? ""));
+      setLevel(String(od.level ?? ""));
+    }
+    const wnd = data.whats_new_data;
+    if (wnd) {
+      setWhatsNewTitle(wnd.title || "");
+      setWhatsNewDesc(wnd.description || "");
+      setWhatsNewBtnText(wnd.btnText || "");
+      setWhatsNewBtnLink(wnd.btnLink || "");
+    }
+    const pd = data.programs_data;
+    if (pd && Array.isArray(pd)) {
+      setPrograms(
+        pd.map((p: AnyRecord, i: number) => {
+          const rawStreams = p.streams;
+          const rawCareers = p.careers;
+          return {
+            id: i + 1,
+            title: String(p.title ?? ""),
+            subtitle: String(p.subtitle ?? ""),
+            admissionStatus: String(p.admissionStatus ?? ""),
+            programIcon: String(p.programIcon ?? ""),
+            description: String(p.description ?? ""),
+            streams: Array.isArray(rawStreams) ? rawStreams.map(String) : (typeof rawStreams === "string" && rawStreams ? rawStreams.split("\n").map(s => s.replace(/^-\s*/, "").trim()).filter(Boolean) : []),
+            careers: Array.isArray(rawCareers) ? rawCareers.map(String) : (typeof rawCareers === "string" && rawCareers ? rawCareers.split("\n").map(s => s.replace(/^-\s*/, "").trim()).filter(Boolean) : []),
+          };
+        })
+      );
+    }
+    const fd = data.facilities_data;
+    if (fd && Array.isArray(fd)) {
+      setFacilities(
+        fd.map((f: AnyRecord, i: number) => ({
+          id: i + 1,
+          heading: String(f.heading ?? ""),
+          facilityIcon: String(f.facilityIcon ?? ""),
+          description: String(f.description ?? ""),
+        }))
+      );
+    }
+    const cd = data.courses_data;
+    if (cd && Array.isArray(cd)) {
+      setCourses(
+        cd.map((c: AnyRecord, i: number) => ({
+          id: i + 1,
+          courseName: String(c.courseName ?? ""),
+          curriculumLink: String(c.curriculumLink ?? ""),
+          feesText: String(c.feesText ?? ""),
+          applicationDate: String(c.applicationDate ?? ""),
+          applyLink: String(c.applyLink ?? ""),
+        }))
+      );
+    }
+    const dld = data.downloads_data;
+    if (dld && Array.isArray(dld)) {
+      setDownloads(
+        dld.map((dl: AnyRecord, i: number) => ({
+          id: i + 1,
+          title: String(dl.title ?? ""),
+          description: String(dl.description ?? ""),
+        }))
+      );
+    }
+    const fqd = data.faqs_data;
+    if (fqd && Array.isArray(fqd)) {
+      setFaqs(
+        fqd.map((fq: AnyRecord, i: number) => ({
+          id: i + 1,
+          question: String(fq.question ?? ""),
+          answer: String(fq.answer ?? ""),
+        }))
+      );
+    }
+    const cpd = data.contact_persons_data;
+    if (cpd && Array.isArray(cpd)) {
+      setContactPersons(
+        cpd.map((cp: AnyRecord, i: number) => ({
+          id: i + 1,
+          name: String(cp.name ?? ""),
+          designation: String(cp.designation ?? ""),
+          number: String(cp.number ?? ""),
+          email: String(cp.email ?? ""),
+          whatsapp: String(cp.whatsapp ?? ""),
+        }))
+      );
+    }
+    const sd = data.scholarships_data;
+    if (sd && Array.isArray(sd)) {
+      setScholarships(
+        sd.map((s: AnyRecord, i: number) => ({
+          id: i + 1,
+          name: String(s.name ?? ""),
+          level: String(s.level ?? ""),
+          stream: String(s.stream ?? ""),
+          coverage: String(s.coverage ?? ""),
+          eligibility: String(s.eligibility ?? ""),
+          seats: String(s.seats ?? ""),
+        }))
+      );
+    }
+    const eld = data.eligibility_data;
+    if (eld) {
+      const items = eld.criteria;
+      if (items && Array.isArray(items)) {
+        setEligibilityCriteria(
+          items.map((ec: AnyRecord, i: number) => ({
+            id: i + 1,
+            level: String(ec.level ?? ""),
+            stream: String(ec.stream ?? ""),
+            eligibility: toArr(ec.eligibility),
+            documents: toArr(ec.documents),
+          }))
+        );
+      } else if (Array.isArray(eld)) {
+        setEligibilityCriteria(
+          eld.map((ec: AnyRecord, i: number) => ({
+            id: i + 1,
+            level: String(ec.level ?? ""),
+            stream: String(ec.stream ?? ""),
+            eligibility: toArr(ec.eligibility),
+            documents: toArr(ec.documents),
+          }))
+        );
+      }
+    }
+    const apd = data.admission_process_data;
+    if (apd && Array.isArray(apd)) {
+      setAdmissionSteps(
+        apd.map((as: AnyRecord, i: number) => ({
+          id: i + 1,
+          stepNumber: String(as.stepNumber ?? ""),
+          title: String(as.title ?? ""),
+          description: String(as.description ?? ""),
+        }))
+      );
+    }
+    const bd = data.brochure_data;
+    if (bd) {
+      setBrochureUrl(String(bd.url ?? ""));
+    }
+  }, []);
 
+  useEffect(() => {
+    if (!editId) {
+      setLoading(false);
+      return;
+    }
+    const fetchAdmission = async () => {
+      try {
+        const res = await institutionAdmissionApi.get(Number(editId));
+        if (res.success && res.data?.data) {
+          const d = typeof res.data.data === "string" ? JSON.parse(res.data.data) : res.data.data;
+          populateFromData(d);
         }
       } catch {
         // silent
@@ -342,8 +360,8 @@ const AdmissionCreatePage: React.FC = () => {
         setLoading(false);
       }
     };
-    fetchProfile();
-  }, []);
+    fetchAdmission();
+  }, [editId, populateFromData]);
 
   const validate = useCallback(() => {
     const errs: Record<string, boolean> = {};
@@ -403,7 +421,14 @@ const AdmissionCreatePage: React.FC = () => {
     setSaving(true);
     try {
       const data = collectData();
-      await apiService.updateInstitutionProfile(data);
+      if (editId) {
+        await institutionAdmissionApi.update(Number(editId), data, publish);
+      } else {
+        const res = await institutionAdmissionApi.create(data, publish);
+        if (res.success && res.data?.id) {
+          router.replace(`/institution-zone/dashboard/admission/create?id=${res.data.id}`);
+        }
+      }
     } catch {
       // silent
     } finally {

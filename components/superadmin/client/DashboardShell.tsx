@@ -184,6 +184,12 @@ export default function DashboardShell() {
         return <CreateEventSection setActiveSection={navigateTo} editId={editId} />;
       }
     }
+    if (activeSection.startsWith("edit-blog-")) {
+      const editId = parseInt(activeSection.replace("edit-blog-", ""), 10);
+      if (!isNaN(editId)) {
+        return <CreateBlogSection setActiveSection={navigateTo} editId={editId} />;
+      }
+    }
     switch (activeSection) {
       case "overview":
         return <OverviewSection setActiveSection={navigateTo} />;
