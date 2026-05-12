@@ -22,7 +22,8 @@ export default function ApplicationDetails({ applicationId, onBack, onStatusUpda
 
   const toAbsoluteUrl = (path: string | undefined | null): string => {
     if (!path) return "";
-    return path.startsWith("http") ? path : `${API_BASE_URL}${path.startsWith("/") ? "" : "/"}${path}`;
+    if (path.startsWith("http") || path.startsWith("data:")) return path;
+    return `${API_BASE_URL}${path.startsWith("/") ? "" : "/"}${path}`;
   };
 
   useEffect(() => {

@@ -20,12 +20,9 @@ export default function ApplicantProfileModal({ applicationId, onClose, onStatus
   const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080";
   const toAbsoluteUrl = (path: string | undefined | null): string => {
     if (!path) return "";
-    return path.startsWith("http") ? path : `${API_BASE_URL}${path.startsWith("/") ? "" : "/"}${path}`;
+    if (path.startsWith("http") || path.startsWith("data:")) return path;
+    return `${API_BASE_URL}${path.startsWith("/") ? "" : "/"}${path}`;
   };
-
-  useEffect(() => {
-    loadApplication();
-  }, [applicationId]);
 
   async function loadApplication() {
     setLoading(true);
@@ -36,6 +33,33 @@ export default function ApplicantProfileModal({ applicationId, onClose, onStatus
       toast.error("Failed to load application");
     } finally {
       setLoading(false);
+    }
+  }
+
+  useEffect(() => {
+    loadApplication();
+  }, [applicationId]);
+
+  async function handlePaymentApproval(approve: boolean) {
+    if (!application) return;
+    setSavingStatus(true);
+    try {
+      await scholarshipProviderApi.approvePayment(application.id, approve, "");
+      setApplication((prev) =>
+        prev
+          ? {
+              ...prev,
+              payment: prev.payment
+                ? { ...prev.payment, status: approve ? "completed" : "failed" }
+                : undefined,
+            }
+          : null
+      );
+      toast.success(approve ? "Payment approved and admit card sent" : "Payment rejected");
+    } catch {
+      toast.error("Failed to process payment");
+    } finally {
+      setSavingStatus(false);
     }
   }
 
@@ -130,6 +154,17 @@ export default function ApplicantProfileModal({ applicationId, onClose, onStatus
                     <InfoRow label="Age" value={application.age != null ? String(application.age) : undefined} />
                     <InfoRow label="Phone Number" value={application.phone_number} />
                     <InfoRow label="Email Address" value={application.email} />
+                    {application.photo_url && (
+                      <div className="pt-2 border-t border-gray-200">
+                        <p className="text-xs text-gray-500 mb-2">Photo</p>
+                        <img
+                          src={toAbsoluteUrl(application.photo_url)}
+                          alt="Applicant photo"
+                          className="w-20 h-20 object-cover rounded-lg cursor-pointer hover:opacity-80 border"
+                          onClick={() => setPreviewImage(toAbsoluteUrl(application.photo_url))}
+                        />
+                      </div>
+                    )}
                   </div>
                 </div>
 
@@ -194,14 +229,18 @@ export default function ApplicantProfileModal({ applicationId, onClose, onStatus
                             ) : (
                               <FileText className="w-5 h-5 text-red-500 shrink-0" />
                             )}
-                            <div className="flex-1 min-w-0">
-                              <p className="text-xs font-medium text-gray-800 truncate">{doc.name || doc.title || "Document"}</p>
-                              {doc.type && <p className="text-[10px] text-gray-400">{doc.type}</p>}
-                            </div>
                             <a
                               href={toAbsoluteUrl(doc.url)}
-                              target="_blank"
-                              rel="noopener noreferrer"
+                              download
+                              className="flex-1 min-w-0 flex items-center gap-2 hover:text-blue-700"
+                              title="Download"
+                            >
+                              <p className="text-xs font-medium text-gray-800 truncate">{doc.name || doc.title || "Document"}</p>
+                              {doc.type && <p className="text-[10px] text-gray-400 shrink-0">{doc.type}</p>}
+                            </a>
+                            <a
+                              href={toAbsoluteUrl(doc.url)}
+                              download
                               className="p-1.5 hover:bg-blue-50 rounded text-blue-600 shrink-0"
                               title="Download"
                             >
@@ -237,6 +276,24 @@ export default function ApplicantProfileModal({ applicationId, onClose, onStatus
                             className="max-h-32 rounded-lg cursor-pointer hover:opacity-80 border"
                             onClick={() => setPreviewImage(toAbsoluteUrl(application.payment?.receipt_url))}
                           />
+                        </div>
+                      )}
+                      {application.payment?.status === "pending_approval" && (
+                        <div className="pt-3 border-t border-gray-200 flex gap-2">
+                          <button
+                            onClick={() => handlePaymentApproval(true)}
+                            disabled={savingStatus}
+                            className="flex-1 px-3 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 text-xs font-semibold disabled:opacity-50"
+                          >
+                            <CheckCircle className="w-3.5 h-3.5 inline mr-1" /> Approve Payment
+                          </button>
+                          <button
+                            onClick={() => handlePaymentApproval(false)}
+                            disabled={savingStatus}
+                            className="flex-1 px-3 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 text-xs font-semibold disabled:opacity-50"
+                          >
+                            <XCircle className="w-3.5 h-3.5 inline mr-1" /> Reject Payment
+                          </button>
                         </div>
                       )}
                     </div>
