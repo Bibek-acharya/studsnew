@@ -346,8 +346,14 @@ const DraftScholarship: React.FC<DraftScholarshipProps> = memo(({ onEdit, onNavi
                     );
                   })()}
                   <div className="flex items-center gap-1.5 mb-2">
-                    <span className={`${fundingColor(sch.funding_type)} text-[10px] font-bold px-2 py-1 rounded-md`}>
-                      {sch.funding_type || "SCHOLARSHIP"}
+                    <span className="group relative inline-flex">
+                      <span className={`${fundingColor(sch.funding_type)} text-[10px] font-bold px-2 py-1 rounded-md max-w-[100px] truncate inline-block`}>
+                        {sch.funding_type || "SCHOLARSHIP"}
+                      </span>
+                      <span className="pointer-events-none absolute bottom-full left-1/2 -translate-x-1/2 mb-1 z-50 whitespace-nowrap rounded-md bg-slate-900 px-2 py-1 text-[10px] font-semibold text-white shadow-lg opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+                        {sch.funding_type || "SCHOLARSHIP"}
+                        <span className="absolute left-1/2 top-full -translate-x-1/2 border-4 border-transparent border-t-slate-900" />
+                      </span>
                     </span>
                     <span className="bg-yellow-50 text-yellow-600 text-[10px] font-bold px-2 py-1 rounded-md flex items-center gap-1">
                       <span className="w-1 h-1 rounded-full bg-yellow-500" /> DRAFT
@@ -355,15 +361,21 @@ const DraftScholarship: React.FC<DraftScholarshipProps> = memo(({ onEdit, onNavi
                   </div>
                   <h3 className="text-base font-bold text-gray-900 mb-3 truncate">{sch.title}</h3>
                   <div className="bg-gray-50 rounded-lg p-3 flex flex-col gap-2 border border-gray-100">
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-1.5 text-gray-600 text-xs">
-                        <Tag className="w-3 h-3 text-gray-400" />
-                        <span className="text-xs capitalize">{sch.funding_type?.toLowerCase()}</span>
-                      </div>
-                      <div className="flex items-center gap-1.5 text-gray-600 text-xs truncate">
-                        <MapPin className="w-3 h-3 text-gray-400" />
+                    <div className="flex items-center gap-3 text-gray-600 text-xs">
+                      <span className="flex items-center gap-1.5">
+                        <Tag className="w-3 h-3 text-gray-400 shrink-0" />
+                        <span className="group relative inline-flex">
+                          <span className="text-xs capitalize max-w-[100px] truncate inline-block">{sch.funding_type?.toLowerCase()}</span>
+                          <span className="pointer-events-none absolute bottom-full left-1/2 -translate-x-1/2 mb-1 z-50 whitespace-nowrap rounded-md bg-slate-900 px-2 py-1 text-[10px] font-semibold text-white shadow-lg opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+                            {sch.funding_type}
+                            <span className="absolute left-1/2 top-full -translate-x-1/2 border-4 border-transparent border-t-slate-900" />
+                          </span>
+                        </span>
+                      </span>
+                      <span className="flex items-center gap-1.5">
+                        <MapPin className="w-3 h-3 text-gray-400 shrink-0" />
                         <span className="text-xs truncate">{sch.location}</span>
-                      </div>
+                      </span>
                     </div>
                     <div className="flex items-center gap-1.5 text-gray-600 text-xs">
                       <GraduationCap className="w-3 h-3 text-gray-400" />

@@ -208,8 +208,14 @@ const ScholarshipCard = ({
       <div className="flex flex-col grow px-1">
         {/* Badges */}
         <div className="flex items-center gap-2 mb-2.5">
-          <span className="text-blue-600 bg-blue-50 text-[10px] font-bold px-2 py-1 rounded-md uppercase tracking-wide">
-            {scholarship.badgeType}
+          <span className="group relative inline-flex">
+            <span className="text-blue-600 bg-blue-50 text-[10px] font-bold px-2 py-1 rounded-md uppercase tracking-wide max-w-[100px] truncate inline-block">
+              {scholarship.badgeType}
+            </span>
+            <span className="pointer-events-none absolute bottom-full left-1/2 -translate-x-1/2 mb-1 z-50 whitespace-nowrap rounded-md bg-slate-900 px-2 py-1 text-[10px] font-semibold text-white shadow-lg opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+              {scholarship.badgeType}
+              <span className="absolute left-1/2 top-full -translate-x-1/2 border-4 border-transparent border-t-slate-900" />
+            </span>
           </span>
 <div className={`flex items-center gap-1.5 px-2 py-1 rounded-md ${statusStyle.statusBg}`}>
               <span className={`w-1.5 h-1.5 rounded-full ${statusStyle.statusDot}`}></span>
@@ -241,9 +247,15 @@ const ScholarshipCard = ({
         <div className="bg-[#f9fafb] rounded-md p-3.5 border border-gray-100 mb-4 mt-auto flex flex-col gap-2.5">
           <div className="grid grid-cols-2 gap-x-2">
             {/* Funding Type */}
-            <div className="flex items-center gap-1.5 text-[12px] text-gray-600 font-medium" title={scholarship.fundingType}>
+            <div className="flex items-center gap-1.5 text-[12px] text-gray-600 font-medium min-w-0">
               <Banknote className="w-3.5 h-3.5 text-gray-400 shrink-0" />
-              <span className="truncate">{scholarship.fundingType}</span>
+              <span className="group relative inline-flex">
+                <span className="max-w-[100px] truncate inline-block">{scholarship.fundingType}</span>
+                <span className="pointer-events-none absolute bottom-full left-1/2 -translate-x-1/2 mb-1 z-50 whitespace-nowrap rounded-md bg-slate-900 px-2 py-1 text-[10px] font-semibold text-white shadow-lg opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+                  {scholarship.fundingType}
+                  <span className="absolute left-1/2 top-full -translate-x-1/2 border-4 border-transparent border-t-slate-900" />
+                </span>
+              </span>
             </div>
             {/* Location */}
             <div className="flex items-center gap-1.5 text-[12px] text-gray-600 font-medium">
