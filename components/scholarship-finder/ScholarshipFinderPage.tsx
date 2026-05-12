@@ -101,19 +101,25 @@ function getScholarshipDateStatus(startDate?: string, endDate?: string): string 
 
 const getStatusStyle = (status: string) => {
   switch (status) {
-    case "OPEN":
+    case "Ongoing":
       return {
         statusDot: "bg-[#22c55e]",
         statusText: "text-[#22c55e]",
         statusBg: "bg-green-50",
       };
-    case "CLOSING SOON":
+    case "Ending Soon":
       return {
         statusDot: "bg-[#eab308]",
         statusText: "text-[#eab308]",
         statusBg: "bg-yellow-50",
       };
-    case "CLOSED":
+    case "Coming Soon":
+      return {
+        statusDot: "bg-[#3b82f6]",
+        statusText: "text-[#3b82f6]",
+        statusBg: "bg-blue-50",
+      };
+    case "Closed":
       return {
         statusDot: "bg-gray-400",
         statusText: "text-gray-500",
@@ -144,8 +150,8 @@ const ScholarshipCard = ({
   onToggleSaved?: () => void;
 }) => {
   const router = useRouter();
-  const statusStyle = getStatusStyle(scholarship.status);
-  const dateStatusLabel = getScholarshipDateStatus(scholarship.startDate, scholarship.endDate);
+  const dateStatusLabel = getScholarshipDateStatus(scholarship.startDate, scholarship.endDate) || scholarship.status;
+  const statusStyle = getStatusStyle(dateStatusLabel);
   
   const imageHtml = scholarship.imageUrl ? (
     <img src={scholarship.imageUrl} alt={scholarship.title} className="w-full h-full object-cover" />
@@ -208,7 +214,7 @@ const ScholarshipCard = ({
 <div className={`flex items-center gap-1.5 px-2 py-1 rounded-md ${statusStyle.statusBg}`}>
               <span className={`w-1.5 h-1.5 rounded-full ${statusStyle.statusDot}`}></span>
               <span className={`text-[10px] font-bold uppercase tracking-wide ${statusStyle.statusText}`}>
-                {scholarship.status}
+                {dateStatusLabel}
               </span>
             </div>
         </div>
