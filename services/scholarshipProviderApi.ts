@@ -764,10 +764,10 @@ export const scholarshipProviderApi = {
     return callApi<ProviderApplication>(`/api/v1/scholarship-providers/applications/${id}`);
   },
 
-  async updateApplicationStatus(id: number, status: string): Promise<ProviderApplication> {
+  async updateApplicationStatus(id: number, status: string, reason?: string): Promise<ProviderApplication> {
     return apiRequest<ProviderApplication>(`/api/v1/scholarship-providers/applications/${id}/status`, {
       method: "PUT",
-      body: JSON.stringify({ status }),
+      body: JSON.stringify({ status, reason }),
     });
   },
 

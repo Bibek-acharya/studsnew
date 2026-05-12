@@ -36,6 +36,9 @@ export default function ApplicationsDirectory() {
   const [selectedAppId, setSelectedAppId] = useState<number | null>(null);
   const [isApproveAction, setIsApproveAction] = useState(true);
   const [rejectionReason, setRejectionReason] = useState('');
+  const [showAppRejectModal, setShowAppRejectModal] = useState(false);
+  const [appRejectReason, setAppRejectReason] = useState('');
+  const [rejectingAppId, setRejectingAppId] = useState<number | null>(null);
 
   useEffect(() => {
     async function fetchData() {
@@ -93,6 +96,28 @@ export default function ApplicationsDirectory() {
       toast.error('Failed to update status');
     }
   }, []);
+
+  const handleAppReject = (id: number) => {
+    setRejectingAppId(id);
+    setAppRejectReason('');
+    setShowAppRejectModal(true);
+  };
+
+  const handleConfirmAppRejection = async () => {
+    if (!rejectingAppId) return;
+    try {
+      await scholarshipProviderApi.updateApplicationStatus(rejectingAppId, 'rejected', appRejectReason);
+      setApplications((prev) => prev.map((app) =>
+        app.id === rejectingAppId ? { ...app, status: 'rejected' } : app
+      ));
+      toast.success('Application rejected');
+      setShowAppRejectModal(false);
+      setRejectingAppId(null);
+      setAppRejectReason('');
+    } catch {
+      toast.error('Failed to reject application');
+    }
+  };
 
   const filtered = applications.filter((a) => {
     if (a.status === "shortlisted") return false;
@@ -291,7 +316,7 @@ export default function ApplicationsDirectory() {
                               <button onClick={() => handleStatusChange(app.id, "approved")} className="p-1.5 hover:bg-green-50 rounded text-green-600" title="Approve">
                                 <CheckCircle className="w-4 h-4" />
                               </button>
-                              <button onClick={() => handleStatusChange(app.id, "rejected")} className="p-1.5 hover:bg-red-50 rounded text-red-600" title="Reject">
+                              <button onClick={() => handleAppReject(app.id)} className="p-1.5 hover:bg-red-50 rounded text-red-600" title="Reject">
                                 <XCircle className="w-4 h-4" />
                               </button>
                             </>
@@ -375,6 +400,32 @@ export default function ApplicationsDirectory() {
                 Cancel
               </button>
               <button onClick={handleConfirmPayment} className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700">
+                Confirm Reject
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {showAppRejectModal && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+          <div className="bg-white p-6 rounded-lg shadow-xl max-w-md">
+            <h3 className="text-lg font-semibold mb-4">Reject Application</h3>
+            <p className="text-gray-600 mb-4">Provide a reason for rejecting this application (max 250 characters):</p>
+            <textarea
+              value={appRejectReason}
+              onChange={(e) => e.target.value.length <= 250 && setAppRejectReason(e.target.value)}
+              placeholder="Reason for rejection..."
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg mb-2 focus:outline-none focus:border-blue-500"
+              rows={3}
+              maxLength={250}
+            />
+            <p className="text-right text-xs text-gray-400 mb-4">{appRejectReason.length}/250</p>
+            <div className="flex justify-end gap-3">
+              <button onClick={() => setShowAppRejectModal(false)} className="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50">
+                Cancel
+              </button>
+              <button onClick={handleConfirmAppRejection} className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700">
                 Confirm Reject
               </button>
             </div>

@@ -15,6 +15,8 @@ export default function ApplicantProfileModal({ applicationId, onClose, onStatus
   const [application, setApplication] = useState<ProviderApplication | null>(null);
   const [loading, setLoading] = useState(true);
   const [savingStatus, setSavingStatus] = useState(false);
+  const [showRejectDialog, setShowRejectDialog] = useState(false);
+  const [rejectReason, setRejectReason] = useState('');
   const [previewImage, setPreviewImage] = useState<string | null>(null);
 
   const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080";
@@ -66,17 +68,38 @@ export default function ApplicantProfileModal({ applicationId, onClose, onStatus
 
   async function handleStatusChange(newStatus: string) {
     if (!application) return;
+    if (newStatus === 'rejected') {
+      setRejectReason('');
+      setShowRejectDialog(true);
+      return;
+    }
     setSavingStatus(true);
     try {
       await scholarshipProviderApi.updateApplicationStatus(application.id, newStatus);
       setApplication((prev) => (prev ? { ...prev, status: newStatus } : null));
       const name = application.full_name || `${application.first_name} ${application.last_name}`;
       if (newStatus === 'shortlisted') toast.success(`Shortlisted ${name}.`);
-      else if (newStatus === 'rejected') toast.success(`Rejected ${name}'s application.`);
       else toast.success(`Status updated to ${newStatus.replace('_', ' ')}`);
       onStatusUpdate?.();
     } catch {
       toast.error("Failed to update status");
+    } finally {
+      setSavingStatus(false);
+    }
+  }
+
+  async function handleConfirmReject() {
+    if (!application) return;
+    setSavingStatus(true);
+    setShowRejectDialog(false);
+    try {
+      await scholarshipProviderApi.updateApplicationStatus(application.id, 'rejected', rejectReason);
+      setApplication((prev) => (prev ? { ...prev, status: 'rejected' } : null));
+      const name = application.full_name || `${application.first_name} ${application.last_name}`;
+      toast.success(`Rejected ${name}'s application.`);
+      onStatusUpdate?.();
+    } catch {
+      toast.error("Failed to reject application");
     } finally {
       setSavingStatus(false);
     }
@@ -344,6 +367,32 @@ export default function ApplicantProfileModal({ applicationId, onClose, onStatus
               <X className="w-4 h-4" />
             </button>
             <img src={previewImage} alt="Preview" className="max-w-full max-h-[85vh] rounded-lg shadow-2xl" />
+          </div>
+        </div>
+      )}
+
+      {showRejectDialog && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-[70]">
+          <div className="bg-white p-6 rounded-lg shadow-xl max-w-md">
+            <h3 className="text-lg font-semibold mb-4">Reject Application</h3>
+            <p className="text-gray-600 mb-4">Provide a reason for rejecting this application (max 250 characters):</p>
+            <textarea
+              value={rejectReason}
+              onChange={(e) => e.target.value.length <= 250 && setRejectReason(e.target.value)}
+              placeholder="Reason for rejection..."
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg mb-2 focus:outline-none focus:border-blue-500"
+              rows={3}
+              maxLength={250}
+            />
+            <p className="text-right text-xs text-gray-400 mb-4">{rejectReason.length}/250</p>
+            <div className="flex justify-end gap-3">
+              <button onClick={() => setShowRejectDialog(false)} className="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50">
+                Cancel
+              </button>
+              <button onClick={handleConfirmReject} disabled={savingStatus} className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 disabled:opacity-50">
+                Confirm Reject
+              </button>
+            </div>
           </div>
         </div>
       )}
