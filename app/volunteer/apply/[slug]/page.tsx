@@ -52,13 +52,15 @@ export default function VolunteerApplyPage({ params }: { params: Promise<{ slug:
     participateDistrict: useRef<HTMLDivElement>(null),
     availableDays: useRef<HTMLDivElement>(null),
     volunteeredBefore: useRef<HTMLDivElement>(null),
+    cvFile: useRef<HTMLDivElement>(null),
     declaration: useRef<HTMLDivElement>(null),
   };
 
   const fieldOrder = [
     "fullName", "gender", "phone", "email", "designation",
     "province", "district", "municipality", "ward", "tole",
-    "participateDistrict", "availableDays", "volunteeredBefore", "declaration"
+    "participateDistrict", "availableDays", "volunteeredBefore",
+    "cvFile", "declaration"
   ];
 
   const localBody = district && municipality
@@ -86,6 +88,7 @@ export default function VolunteerApplyPage({ params }: { params: Promise<{ slug:
     if (selectedDays.length === 0) e.availableDays = "Select at least one available day";
     if (!volunteeredBefore) e.volunteeredBefore = "Please select an option";
     if (volunteeredBefore === "Yes" && !volunteerDetails.trim()) e.volunteerDetails = "Previous role details are required";
+    if (!cvFile) e.cvFile = "CV / Resume is required";
     if (!declaration) e.declaration = "Please confirm the declaration";
     return e;
   }
@@ -346,16 +349,16 @@ export default function VolunteerApplyPage({ params }: { params: Promise<{ slug:
               <h2 className="text-[20px] font-bold text-[#1e293b]">Documents</h2>
             </div>
             <div className="grid grid-cols-1 gap-y-5">
-              <div>
-                <label className="block text-[14px] font-semibold text-gray-700 mb-1.5">Upload CV / Resume</label>
-                <div className={`border-2 border-dashed rounded-lg p-6 text-center cursor-pointer transition-colors ${cvFile ? "border-[#0000ff] bg-blue-50" : "border-gray-300 hover:border-gray-400"}`}
+              <div ref={fieldRefs.cvFile}>
+                <label className="block text-[14px] font-semibold text-gray-700 mb-1.5">Upload CV / Resume <span className="text-red-500">*</span></label>
+                <div className={`border-2 border-dashed rounded-lg p-6 text-center cursor-pointer transition-colors ${errors.cvFile ? "border-red-500" : cvFile ? "border-[#0000ff] bg-blue-50" : "border-gray-300 hover:border-gray-400"}`}
                   onClick={() => document.getElementById("cv-file-input")?.click()}>
                   {cvFile ? (
                     <div className="flex flex-col items-center gap-2">
                       <svg className="w-8 h-8 text-[#0000ff]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
                       <span className="text-[14px] font-medium text-[#0000ff]">{cvFile.name}</span>
                       <span className="text-[12px] text-gray-500">{(cvFile.size / 1024).toFixed(1)} KB</span>
-                      <button type="button" onClick={(e) => { e.stopPropagation(); setCvFile(null); }} className="text-[13px] text-red-500 hover:text-red-700 font-medium">Remove</button>
+                      <button type="button" onClick={(e) => { e.stopPropagation(); setCvFile(null); if (errors.cvFile) setErrors((p) => { const n = { ...p }; delete n.cvFile; return n; }); }} className="text-[13px] text-red-500 hover:text-red-700 font-medium">Remove</button>
                     </div>
                   ) : (
                     <div className="flex flex-col items-center gap-2">
@@ -374,8 +377,10 @@ export default function VolunteerApplyPage({ params }: { params: Promise<{ slug:
                         return;
                       }
                       setCvFile(file);
+                      if (errors.cvFile) setErrors((p) => { const n = { ...p }; delete n.cvFile; return n; });
                     }
                   }} />
+                {errors.cvFile && <p className="text-red-500 text-[13px] mt-1">{errors.cvFile}</p>}
               </div>
             </div>
           </div>
