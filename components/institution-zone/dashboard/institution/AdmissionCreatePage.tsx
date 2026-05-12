@@ -163,6 +163,7 @@ const AdmissionCreatePage: React.FC = () => {
   const [overviewHeading, setOverviewHeading] = useState("");
   const [overviewDesc, setOverviewDesc] = useState("");
   const [applicationFormLink, setApplicationFormLink] = useState("");
+  const [level, setLevel] = useState("");
 
   const [whatsNewTitle, setWhatsNewTitle] = useState("");
   const [whatsNewDesc, setWhatsNewDesc] = useState("");
@@ -200,6 +201,7 @@ const AdmissionCreatePage: React.FC = () => {
             setOverviewHeading(String(od.overviewHeading ?? ""));
             setOverviewDesc(String(od.overviewDesc ?? ""));
             setApplicationFormLink(String(od.applicationFormLink ?? ""));
+            setLevel(String(od.level ?? ""));
           }
           const wnd = d.whats_new_data;
           if (wnd) {
@@ -356,6 +358,7 @@ const AdmissionCreatePage: React.FC = () => {
       overviewHeading,
       overviewDesc,
       applicationFormLink,
+      level,
     },
     whats_new_data: {
       title: whatsNewTitle,
@@ -459,16 +462,40 @@ const AdmissionCreatePage: React.FC = () => {
               />
               <p className="text-xs text-gray-500 mt-1">This appears at the top of the admissions page</p>
             </div>
-            <div>
-              <label className={labelClass}>Application Form Link <span className="text-red-500">*</span></label>
-              <input
-                type="url"
-                className={inputClass}
-                placeholder="https://example.com/apply"
-                value={applicationFormLink}
-                onChange={(e) => setApplicationFormLink(e.target.value)}
-              />
-              <p className="text-xs text-gray-500 mt-1">URL where students can submit their application</p>
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <label className={labelClass}>Level <span className="text-red-500">*</span></label>
+                <select
+                  className={selectClass}
+                  value={level}
+                  onChange={(e) => setLevel(e.target.value)}
+                  style={{
+                    backgroundImage:
+                      "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%230000ff'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M19 9l-7 7-7-7'%3E%3C/path%3E%3C/svg%3E\")",
+                    backgroundRepeat: "no-repeat",
+                    backgroundPosition: "right 1rem center",
+                    backgroundSize: "1.2em",
+                    paddingRight: "2.5rem",
+                  }}
+                >
+                  <option value="">Select Level</option>
+                  <option value="+2">+2</option>
+                  <option value="A-Level">A-Level</option>
+                  <option value="Diploma/CTEVT">Diploma/CTEVT</option>
+                </select>
+                <p className="text-xs text-gray-500 mt-1">Select the academic level for this admission</p>
+              </div>
+              <div>
+                <label className={labelClass}>Application Form Link</label>
+                <input
+                  type="url"
+                  className={inputClass}
+                  placeholder="https://example.com/apply"
+                  value={applicationFormLink}
+                  onChange={(e) => setApplicationFormLink(e.target.value)}
+                />
+                <p className="text-xs text-gray-500 mt-1">URL where students can submit their application</p>
+              </div>
             </div>
             <div>
               <label className={labelClass}>Hero Banner Image <span className="text-red-500">*</span></label>
