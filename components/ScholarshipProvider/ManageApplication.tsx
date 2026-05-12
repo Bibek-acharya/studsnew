@@ -14,6 +14,10 @@ import ConfirmationModal from "./common/ConfirmationModal";
 
 const ALL_DAYS = Array.from({ length: 10 }, (_, i) => String(i + 7));
 const allDistricts = Array.from(new Set(Object.values(NEPAL_DISTRICTS).flat().filter(Boolean))).sort();
+const getDistrictsForProvince = (province: string) =>
+  province && NEPAL_DISTRICTS[province as keyof typeof NEPAL_DISTRICTS]
+    ? (NEPAL_DISTRICTS[province as keyof typeof NEPAL_DISTRICTS] as string[])
+    : allDistricts;
 
 const ManageApplication = () => {
   const [volunteers, setVolunteers] = useState<any[]>([]);
@@ -137,7 +141,11 @@ const ManageApplication = () => {
                 <label className="text-sm font-medium text-gray-700">Province:</label>
                 <Dropdown
                   value={filterProvince}
-                  onChange={v => { setFilterProvince(v); setPage(1); }}
+                  onChange={v => {
+                    setFilterProvince(v);
+                    setFilterDistrict("");
+                    setPage(1);
+                  }}
                   options={[{ value: "", label: "All Provinces" }, ...NEPAL_PROVINCES.map(p => ({ value: p, label: p }))]}
                   placeholder="All Provinces"
                 />
@@ -147,7 +155,7 @@ const ManageApplication = () => {
                 <Dropdown
                   value={filterDistrict}
                   onChange={v => { setFilterDistrict(v); setPage(1); }}
-                  options={[{ value: "", label: "All Districts" }, ...allDistricts.map(d => ({ value: d, label: d }))]}
+                  options={[{ value: "", label: "All Districts" }, ...getDistrictsForProvince(filterProvince).map(d => ({ value: d, label: d }))]}
                   placeholder="All Districts"
                 />
               </div>
