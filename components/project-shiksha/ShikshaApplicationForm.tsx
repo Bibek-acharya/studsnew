@@ -498,7 +498,7 @@ export default function ShikshaApplicationForm({
                     <img
                       src={photoPreview}
                       alt="Preview"
-                      className="absolute inset-0 w-full h-full object-cover z-10"
+                      className="absolute inset-0 w-full h-full object-contain z-10"
                     />
                   ) : (
                     <div className="flex flex-col items-center justify-center text-gray-400 group-hover:text-gray-500 transition-colors text-center">
@@ -524,21 +524,7 @@ export default function ShikshaApplicationForm({
                         e.target.value = "";
                         return;
                       }
-                      const img = new Image();
-                      const reader = new FileReader();
-                      reader.onload = (ev) => {
-                        img.onload = () => {
-                          const ratio = img.width / img.height;
-                          if (ratio < 0.95 || ratio > 1.05) {
-                            setAlertMessage("Photo must be 1:1 (square) aspect ratio.");
-                            e.target.value = "";
-                            return;
-                          }
-                          handleFileChange("photo", file);
-                        };
-                        img.src = ev.target?.result as string;
-                      };
-                      reader.readAsDataURL(file);
+                      handleFileChange("photo", file);
                     }
                   }}
                 />
