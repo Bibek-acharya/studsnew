@@ -68,24 +68,24 @@ const FinancialAidSection: React.FC<FinancialAidSectionProps> = ({ onNavigate, s
             <div className="flex flex-col grow px-0.5 sm:px-1">
               {/* Tags */}
               <div className="flex items-center gap-2 sm:gap-2.5 mb-2.5 sm:mb-3">
-                <span className="text-[#2563eb] bg-[#eff6ff] px-2 py-0.5 sm:py-1 rounded text-[10px] sm:text-[11px] font-bold tracking-wider uppercase">
+                <span className="text-[#2563eb] bg-[#eff6ff] px-2 py-0.5 sm:py-1 rounded text-[10px] sm:text-[11px] font-bold tracking-wider uppercase truncate max-w-[100px] shrink-0">
                   {"type" in scholarship ? scholarship.type : scholarship.scholarship_type || "MERIT-BASED"}
                 </span>
-                <span className={`px-2 py-0.5 sm:py-1 rounded text-[10px] sm:text-[11px] md:text-[12px] font-semibold flex items-center gap-1 sm:gap-1.5 ${scholarship.status === 'Open' ? 'text-[#16a34a] bg-[#f0fdf4]' : 'text-amber-600 bg-amber-50'}`}>
-                  <span className={`w-1.5 h-1.5 rounded-full ${scholarship.status === 'Open' ? 'bg-[#16a34a]' : 'bg-amber-500'}`}></span>
+                <span className={`px-2 py-0.5 sm:py-1 rounded text-[10px] sm:text-[11px] md:text-[12px] font-semibold flex items-center gap-1 sm:gap-1.5 truncate max-w-[90px] shrink-0 ${scholarship.status === 'Open' ? 'text-[#16a34a] bg-[#f0fdf4]' : 'text-amber-600 bg-amber-50'}`}>
+                  <span className={`w-1.5 h-1.5 rounded-full shrink-0 ${scholarship.status === 'Open' ? 'bg-[#16a34a]' : 'bg-amber-500'}`}></span>
                   {scholarship.status || "Open"}
                 </span>
               </div>
 
               {/* Title & Institution */}
               <HoverTooltip label={scholarship.title || "Scholarship"}>
-                <h3 className="text-[15px] xs:text-[16px] sm:text-[17px] font-bold text-[#0f172a] leading-[1.35] mb-1 sm:mb-1.5 truncate hover:text-[#0000ff]">
+                <h3 className="text-[15px] xs:text-[16px] sm:text-[17px] font-bold text-[#0f172a] leading-[1.35] mb-1 sm:mb-1.5 line-clamp-2 hover:text-[#0000ff]">
                   {scholarship.title || "Scholarship"}
                 </h3>
               </HoverTooltip>
-              <div className="flex items-center text-[12px] xs:text-[13px] sm:text-[13.5px] text-[#64748b] mb-4 sm:mb-5">
+              <div className="flex items-center text-[12px] xs:text-[13px] sm:text-[13.5px] text-[#64748b] mb-4 sm:mb-5 line-clamp-1">
                 <Building className="w-3.5 h-3.5 sm:w-4 sm:h-4 mr-1 sm:mr-1.5 shrink-0" />
-                <span className="truncate">{scholarship.provider || "Tribhuvan University, Nepal"}</span>
+                <span>{scholarship.provider || "Tribhuvan University, Nepal"}</span>
                 <BadgeCheckIcon className="w-3.25 h-3.25 sm:w-3.75 sm:h-3.75 text-white fill-blue-500 ml-0.5 sm:ml-1 shrink-0" />
               </div>
 
