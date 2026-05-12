@@ -23,6 +23,8 @@ export interface Scholarship {
   deadlineType: string;
   specialCategory?: string;
   eligibility?: string;
+  startDate?: string;
+  endDate?: string;
 }
 
 export interface ScholarshipFilters {

@@ -42,6 +42,8 @@ function mapBackendItem(item: ScholarshipItem): Scholarship {
     entranceRequired: false,
     deadlineType: "",
     eligibility: item.eligibility || item.degree_level || "",
+    startDate: (item as any).application_start_date || (item as any).start_date || undefined,
+    endDate: (item as any).application_end_date || (item as any).end_date || item.deadline || undefined,
   };
 }
 
@@ -72,6 +74,30 @@ function paginate<T>(items: T[], page: number, perPage: number): { items: T[]; t
 
 
 
+
+function getScholarshipDateStatus(startDate?: string, endDate?: string): string | null {
+  if (!startDate && !endDate) return null;
+  const now = new Date();
+  const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+
+  if (startDate) {
+    const start = new Date(startDate);
+    if (isNaN(start.getTime())) return null;
+    if (start > today) return "Coming Soon";
+  }
+
+  if (endDate) {
+    const end = new Date(endDate);
+    if (isNaN(end.getTime())) return null;
+    if (end < today) return "Closed";
+    const oneDayFromNow = new Date(today);
+    oneDayFromNow.setDate(oneDayFromNow.getDate() + 1);
+    if (end <= oneDayFromNow) return "Ending Soon";
+    return "Ongoing";
+  }
+
+  return null;
+}
 
 const getStatusStyle = (status: string) => {
   switch (status) {
@@ -119,6 +145,7 @@ const ScholarshipCard = ({
 }) => {
   const router = useRouter();
   const statusStyle = getStatusStyle(scholarship.status);
+  const dateStatusLabel = getScholarshipDateStatus(scholarship.startDate, scholarship.endDate);
   
   const imageHtml = scholarship.imageUrl ? (
     <img src={scholarship.imageUrl} alt={scholarship.title} className="w-full h-full object-cover" />
@@ -187,7 +214,10 @@ const ScholarshipCard = ({
         </div>
 
         {/* Title & Organization */}
-        <h3 className="font-bold text-[16px] leading-tight text-slate-900 mb-1 hover:text-brand-blue line-clamp-2">
+        <h3
+          className="font-bold text-[16px] leading-tight text-slate-900 mb-1 hover:text-brand-blue line-clamp-2"
+          title={dateStatusLabel || undefined}
+        >
           {scholarship.title}
         </h3>
         <div className="flex items-center gap-1.5 text-[12.5px] text-gray-500 mb-3.5 line-clamp-1">
