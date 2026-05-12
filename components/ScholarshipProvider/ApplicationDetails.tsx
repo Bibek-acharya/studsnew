@@ -287,12 +287,10 @@ export default function ApplicationDetails({ applicationId, onBack, onStatusUpda
                 <FileText className="w-4 h-4" /> Documents
               </h4>
               <div className="space-y-2">
-                {application.documents.map((doc: any, index: number) => (
+                  {application.documents.map((doc: any, index: number) => (
                   <a
                     key={index}
-                    href={toAbsoluteUrl(doc.url)}
-                    target="_blank"
-                    rel="noopener noreferrer"
+                    href={`${toAbsoluteUrl(doc.url)}?dl=1`}
                     className="flex items-center gap-2 p-2 rounded-lg hover:bg-slate-50 text-blue-600 hover:text-blue-700"
                   >
                     <FileText className="w-4 h-4" />

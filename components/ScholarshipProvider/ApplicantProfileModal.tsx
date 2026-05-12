@@ -230,8 +230,7 @@ export default function ApplicantProfileModal({ applicationId, onClose, onStatus
                               <FileText className="w-5 h-5 text-red-500 shrink-0" />
                             )}
                             <a
-                              href={toAbsoluteUrl(doc.url)}
-                              download
+                              href={`${toAbsoluteUrl(doc.url)}?dl=1`}
                               className="flex-1 min-w-0 flex items-center gap-2 hover:text-blue-700"
                               title="Download"
                             >
@@ -239,8 +238,7 @@ export default function ApplicantProfileModal({ applicationId, onClose, onStatus
                               {doc.type && <p className="text-[10px] text-gray-400 shrink-0">{doc.type}</p>}
                             </a>
                             <a
-                              href={toAbsoluteUrl(doc.url)}
-                              download
+                              href={`${toAbsoluteUrl(doc.url)}?dl=1`}
                               className="p-1.5 hover:bg-blue-50 rounded text-blue-600 shrink-0"
                               title="Download"
                             >
