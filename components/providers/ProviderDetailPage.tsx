@@ -198,7 +198,7 @@ const ProviderDetailPage: React.FC<{ params: Promise<{ id: string }> }> = ({ par
             <div className="space-y-10">
               <div className="space-y-6">
                 {profile.about_text ? (
-                  <div className="rich-text" dangerouslySetInnerHTML={{ __html: profile.about_text }} />
+                  <div className="rich-text break-words" dangerouslySetInnerHTML={{ __html: profile.about_text }} />
                 ) : (
                   <p className="text-gray-400 italic">No description provided.</p>
                 )}
@@ -212,7 +212,7 @@ const ProviderDetailPage: React.FC<{ params: Promise<{ id: string }> }> = ({ par
                       </div>
                       <h3 className="font-bold text-gray-900 text-[16px]">Our Mission</h3>
                     </div>
-                    <p className="text-[14px] text-gray-600 leading-[1.7]">{profile.mission}</p>
+                    <p className="text-[14px] text-gray-600 leading-[1.7] break-words">{profile.mission}</p>
                   </div>
                 )}
                 {profile.values && (
@@ -223,7 +223,7 @@ const ProviderDetailPage: React.FC<{ params: Promise<{ id: string }> }> = ({ par
                       </div>
                       <h3 className="font-bold text-gray-900 text-[16px]">Our Values</h3>
                     </div>
-                    <p className="text-[14px] text-gray-600 leading-[1.7]">{profile.values}</p>
+                    <p className="text-[14px] text-gray-600 leading-[1.7] break-words">{profile.values}</p>
                   </div>
                 )}
               </div>
@@ -250,7 +250,7 @@ const ProviderDetailPage: React.FC<{ params: Promise<{ id: string }> }> = ({ par
                           </div>
                           <div className="flex-1">
                             <h4 className="font-bold text-gray-900 text-[16px] mb-2">{svc.title}</h4>
-                            <p className="text-[14px] text-gray-600 leading-relaxed">{svc.description}</p>
+                            <p className="text-[14px] text-gray-600 leading-relaxed break-words">{svc.description}</p>
                           </div>
                         </div>
                       </div>
@@ -295,7 +295,7 @@ const ProviderDetailPage: React.FC<{ params: Promise<{ id: string }> }> = ({ par
                         </div>
                         <div className="p-5">
                           <h3 className="font-bold text-gray-900 text-[16px] mb-2">{sec.name}</h3>
-                          <p className="text-[14px] text-gray-600 mb-4 line-clamp-2 leading-relaxed">{sec.description}</p>
+                          <p className="text-[14px] text-gray-600 mb-4 line-clamp-2 leading-relaxed break-words">{sec.description}</p>
                           {sec.external_link && (
                             <a 
                               href={sec.external_link} 
@@ -337,7 +337,7 @@ const ProviderDetailPage: React.FC<{ params: Promise<{ id: string }> }> = ({ par
                       </div>
                       <div className="p-5">
                         <h3 className="font-bold text-gray-900 text-[16px] mb-2">{proj.title}</h3>
-                        <p className="text-[14px] text-gray-600 mb-4 line-clamp-2 leading-relaxed">{proj.description}</p>
+                        <p className="text-[14px] text-gray-600 mb-4 line-clamp-2 leading-relaxed break-words">{proj.description}</p>
                         <div className="flex items-center justify-between">
                           {proj.date && (
                             <div className="flex items-center gap-1.5 text-[12px] text-gray-500 font-medium">
@@ -401,7 +401,7 @@ const ProviderDetailPage: React.FC<{ params: Promise<{ id: string }> }> = ({ par
                       <h3 className="font-bold text-[15px] text-slate-900 leading-snug mb-2 group-hover:text-blue-600 transition-colors line-clamp-2">
                         {item.title}
                       </h3>
-                      <p className="text-slate-500 text-[13px] mb-4 grow line-clamp-2 leading-relaxed">
+                      <p className="text-slate-500 text-[13px] mb-4 grow line-clamp-2 leading-relaxed break-words">
                         {stripHtml(item.short_desc || item.content || "")}
                       </p>
 
@@ -498,7 +498,7 @@ const ProviderDetailPage: React.FC<{ params: Promise<{ id: string }> }> = ({ par
               <div className="mb-6 flex justify-between items-center">
                 <div>
                   <h2 className="text-[20px] font-bold text-gray-900">Photo Gallery</h2>
-                  <p className="text-[14px] text-gray-500 mt-1">Glimpses of our programs and impact.</p>
+                  <p className="text-[14px] text-gray-500 mt-1">Glimpses of our programs and events</p>
                 </div>
               </div>
               {(profile.gallery?.length ?? 0) === 0 ? (
@@ -519,11 +519,11 @@ const ProviderDetailPage: React.FC<{ params: Promise<{ id: string }> }> = ({ par
                           {folder}
                         </h3>
                       </div>
-                      <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-5">
+                      <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-3 md:gap-5">
                         {images.slice(0, images.length > 8 ? 7 : 8).map((img: any) => (
                           <div
                             key={img.id}
-                            className="group cursor-pointer overflow-hidden rounded-2xl border border-gray-100 bg-white p-1.5 shadow-sm hover:shadow-md transition-all duration-300"
+                            className="group cursor-pointer overflow-hidden rounded-2xl border border-gray-100 bg-white shadow-sm hover:shadow-md transition-all duration-300"
                             onClick={() => setLightboxIndex(profile.gallery!.findIndex(i => i.id === img.id))}
                           >
                             <div className="aspect-[4/3] overflow-hidden rounded-xl bg-gray-50">
@@ -533,17 +533,12 @@ const ProviderDetailPage: React.FC<{ params: Promise<{ id: string }> }> = ({ par
                                 className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
                               />
                             </div>
-                            {img.caption && (
-                              <p className="text-[12px] text-gray-600 mt-2 px-1 text-center font-semibold truncate group-hover:text-blue-600 transition-colors">
-                                {img.caption}
-                              </p>
-                            )}
                           </div>
                         ))}
                         
                         {images.length > 8 && (
                           <div 
-                            className="group cursor-pointer overflow-hidden rounded-2xl border border-blue-100 border-dashed bg-blue-50/30 p-1.5 shadow-sm hover:shadow-md hover:border-blue-300 transition-all duration-300"
+                            className="group cursor-pointer overflow-hidden rounded-2xl border border-blue-100 border-dashed bg-blue-50/30 shadow-sm hover:shadow-md hover:border-blue-300 transition-all duration-300"
                             onClick={() => setLightboxIndex(profile.gallery!.findIndex(i => i.id === images[0].id))}
                           >
                             <div className="aspect-[4/3] overflow-hidden rounded-xl bg-blue-600/5 flex flex-col items-center justify-center">
@@ -654,19 +649,19 @@ const ProviderDetailPage: React.FC<{ params: Promise<{ id: string }> }> = ({ par
                         </div>
                       </div>
                       {rev.title && <h5 className="font-bold text-gray-800 text-[15px] mb-2">{rev.title}</h5>}
-                      <p className="text-[14px] text-gray-600 leading-relaxed mb-4">{rev.content}</p>
+                      <p className="text-[14px] text-gray-600 leading-relaxed mb-4 break-words">{rev.content}</p>
                       {(rev.pros || rev.cons) && (
                         <div className="flex gap-4">
                           {rev.pros && (
                             <div className="flex-1 bg-gray-50 p-3 rounded-lg border border-gray-100">
                               <span className="text-green-600 text-[12px] font-bold uppercase block mb-1">Pros</span>
-                              <span className="text-[13px] text-gray-700">{rev.pros}</span>
+                              <span className="text-[13px] text-gray-700 break-words">{rev.pros}</span>
                             </div>
                           )}
                           {rev.cons && (
                             <div className="flex-1 bg-gray-50 p-3 rounded-lg border border-gray-100">
                               <span className="text-red-500 text-[12px] font-bold uppercase block mb-1">Cons</span>
-                              <span className="text-[13px] text-gray-700">{rev.cons}</span>
+                              <span className="text-[13px] text-gray-700 break-words">{rev.cons}</span>
                             </div>
                           )}
                         </div>
@@ -694,7 +689,7 @@ const ProviderDetailPage: React.FC<{ params: Promise<{ id: string }> }> = ({ par
                   <Quote className="w-4 h-4 text-blue-200" />
                   <h3 className="font-bold text-white text-[15px]">Founder's Message</h3>
                 </div>
-                <p className="text-[12px] text-blue-100 leading-relaxed mb-3 italic">
+                <p className="text-[12px] text-blue-100 leading-relaxed mb-3 italic break-words">
                   {profile.founder_message ? `"${profile.founder_message}"` : `"At ${profile.provider_name}, we believe that every individual deserves access to quality education, healthcare, and opportunities for a better life."`}
                 </p>
                 <div className="pt-3 border-t border-blue-500/50">
@@ -717,7 +712,7 @@ const ProviderDetailPage: React.FC<{ params: Promise<{ id: string }> }> = ({ par
                 </div>
                 <div>
                   <span className="block text-gray-900 font-bold text-[13px]">Address</span>
-                  <span className="text-gray-500 font-medium text-[12px]">
+                  <span className="text-gray-500 font-medium text-[12px] break-words">
                     {profile.address}
                   </span>
                 </div>
