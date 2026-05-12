@@ -75,33 +75,30 @@ function paginate<T>(items: T[], page: number, perPage: number): { items: T[]; t
 
 
 
-function getScholarshipDateStatus(startDate?: string, endDate?: string): string | null {
-  if (!startDate && !endDate) return null;
+function getScholarshipDateStatus(startDate?: string, endDate?: string): string {
+  if (!startDate && !endDate) return "Ongoing";
   const now = new Date();
   const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
 
   if (startDate) {
     const start = new Date(startDate);
-    if (isNaN(start.getTime())) return null;
-    if (start > today) return "Coming Soon";
+    if (!isNaN(start.getTime()) && start > today) return "Coming Soon";
   }
 
   if (endDate) {
     const end = new Date(endDate);
-    if (isNaN(end.getTime())) return null;
+    if (!isNaN(end.getTime())) {
+      const endDay = new Date(end.getFullYear(), end.getMonth(), end.getDate());
+      if (endDay < today) return "Closed";
 
-    const endDay = new Date(end.getFullYear(), end.getMonth(), end.getDate());
-    if (endDay < today) return "Closed";
+      const msPerDay = 1000 * 60 * 60 * 24;
+      const daysLeft = Math.round((endDay.getTime() - today.getTime()) / msPerDay);
 
-    const msPerDay = 1000 * 60 * 60 * 24;
-    const daysLeft = Math.round((endDay.getTime() - today.getTime()) / msPerDay);
-
-    if (daysLeft === 1) return "Ending Soon";
-    if (startDate) return "Ongoing";
-    return null;
+      if (daysLeft <= 7) return "Ending Soon";
+    }
   }
 
-  return null;
+  return "Ongoing";
 }
 
 const getStatusStyle = (status: string) => {
@@ -155,7 +152,7 @@ const ScholarshipCard = ({
   onToggleSaved?: () => void;
 }) => {
   const router = useRouter();
-  const dateStatusLabel = getScholarshipDateStatus(scholarship.startDate, scholarship.endDate) || scholarship.status;
+  const dateStatusLabel = getScholarshipDateStatus(scholarship.startDate, scholarship.endDate);
   const statusStyle = getStatusStyle(dateStatusLabel);
   
   const imageHtml = scholarship.imageUrl ? (
