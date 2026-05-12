@@ -324,7 +324,7 @@ export default function ShikshaApplicationForm({
   const tempWards = getAvailableWards(formData.tempDistrict, formData.tempMunicipality);
 
   return (
-    <div className="min-h-screen flex flex-col items-center pt-8 pb-20 px-4 sm:px-6" style={{ backgroundColor: "#006400" }}>
+    <div className="min-h-screen flex flex-col items-center pt-8 pb-20 px-4 sm:px-6" style={{ backgroundColor: "#08bd80" }}>
       <header className="w-full max-w-350 mb-8 text-left px-4 sm:px-0">
         <h1 className="text-[32px] sm:text-[40px] font-extrabold text-white mb-2 leading-tight drop-shadow-sm">
           {scholarshipTitle || "Project Shiksha Entrance 2082"}
@@ -1235,7 +1235,7 @@ export default function ShikshaApplicationForm({
             <button
               type="submit"
               disabled={isSubmitting}
-              className="w-full sm:w-auto bg-[#006400] hover:bg-[#004d00] disabled:bg-gray-400 text-white font-bold text-[16px] py-4 px-12 rounded transition-all hover:-translate-y-0.5 active:translate-y-0 text-center disabled:cursor-not-allowed"
+              className="w-full sm:w-auto bg-brand-blue hover:bg-brand-hover disabled:bg-gray-400 text-white font-bold text-[16px] py-4 px-12 rounded transition-all hover:-translate-y-0.5 active:translate-y-0 text-center disabled:cursor-not-allowed"
             >
               {isSubmitting ? "Processing..." : (paymentConfig?.enabled && paymentConfig.fee_amount > 0 ? "Proceed to Payment" : "Submit Application")}
             </button>
