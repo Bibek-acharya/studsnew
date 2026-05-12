@@ -56,6 +56,7 @@ export default function ApplicantProfileModal({ applicationId, onClose, onStatus
           : null
       );
       toast.success(approve ? "Payment approved and admit card sent" : "Payment rejected");
+      onStatusUpdate?.();
     } catch {
       toast.error("Failed to process payment");
     } finally {
