@@ -3,6 +3,7 @@
 import React, { useState, useEffect, useCallback, useMemo, memo } from "react";
 import { Home, Building2, CheckCircle, DollarSign, MapPin, GraduationCap, Calendar, Trash2, Pencil, Users } from "lucide-react";
 import { scholarshipProviderApi, ProviderScholarship } from "@/services/scholarshipProviderApi";
+import { getImageUrl } from "@/services/api";
 import ConfirmationModal from "./common/ConfirmationModal";
 import { toast } from "sonner";
 
@@ -120,13 +121,22 @@ const ScholarshipDirectory: React.FC<ScholarshipDirectoryProps> = memo(({ onEdit
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
           {scholarships.map((sch) => (
             <div key={sch.id} className="bg-white rounded-lg border border-gray-200 p-3.5 shadow-sm">
-              <div className="w-full h-28 rounded-xl overflow-hidden mb-3">
-                <img
-                  src={sch.image_url || "https://images.unsplash.com/photo-1522202176988-66273c2fd55f?auto=format&fit=crop&w=800&q=80"}
-                  alt={sch.title}
-                  className="w-full h-full object-cover"
-                />
-              </div>
+              {(() => {
+                const img = sch.banner_background_image_url || sch.banner_image || sch.image_url;
+                return img ? (
+                  <div className="w-full h-28 rounded-xl overflow-hidden mb-3">
+                    <img
+                      src={getImageUrl(img)}
+                      alt={sch.title}
+                      className="w-full h-full object-cover"
+                    />
+                  </div>
+                ) : (
+                  <div className="w-full h-28 rounded-xl overflow-hidden mb-3 bg-gray-100 flex items-center justify-center">
+                    <span className="text-sm font-semibold text-gray-400 text-center px-2">{sch.title}</span>
+                  </div>
+                );
+              })()}
               <div className="flex items-center gap-1.5 mb-2">
                 <span className={`${fundingColor(sch.funding_type)} text-[10px] font-bold px-2 py-1 rounded-md`}>
                   {sch.funding_type || "SCHOLARSHIP"}

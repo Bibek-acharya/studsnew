@@ -4,6 +4,7 @@ import React, { useState, useEffect, memo } from "react";
 import { Home, Building2, CheckCircle, Tag, MapPin, GraduationCap, Pencil, ChevronLeft, ChevronRight, X, AlertTriangle } from "lucide-react";
 import { scholarshipProviderApi, ProviderScholarship } from "@/services/scholarshipProviderApi";
 import { toast } from "sonner";
+import { getImageUrl } from "@/services/api";
 import { validateScholarshipData, validateDates, type FieldError, type ScholarshipFormData } from "@/lib/scholarship-validation";
 
 interface DraftScholarshipProps {
@@ -284,11 +285,6 @@ const DraftScholarship: React.FC<DraftScholarshipProps> = memo(({ onEdit, onNavi
     return map[type] || "bg-gray-50 text-gray-600";
   };
 
-  const getDraftImage = (scholarship: ProviderScholarship) =>
-    scholarship.banner_background_image_url ||
-    scholarship.image_url ||
-    "https://images.unsplash.com/photo-1513258496099-48168024aec0?auto=format&fit=crop&w=800&q=80";
-
   if (loading) {
     return <div className="py-12 text-center text-slate-500">Loading drafts...</div>;
   }
@@ -337,13 +333,18 @@ const DraftScholarship: React.FC<DraftScholarshipProps> = memo(({ onEdit, onNavi
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
               {pagedDrafts.map((sch) => (
                 <div key={sch.id} className="bg-white rounded-lg border border-gray-200 p-3.5 shadow-sm">
-                  <div className="w-full h-28 rounded-lg overflow-hidden mb-3 bg-gray-100">
-                    <img
-                      src={getDraftImage(sch)}
-                      alt={sch.title}
-                      className="w-full h-full object-cover"
-                    />
-                  </div>
+                  {(() => {
+                    const img = sch.banner_background_image_url || sch.banner_image || sch.image_url;
+                    return img ? (
+                      <div className="w-full h-28 rounded-lg overflow-hidden mb-3 bg-gray-100">
+                        <img src={getImageUrl(img)} alt={sch.title} className="w-full h-full object-cover" />
+                      </div>
+                    ) : (
+                      <div className="w-full h-28 rounded-lg overflow-hidden mb-3 bg-gray-100 flex items-center justify-center">
+                        <span className="text-sm font-semibold text-gray-400 text-center px-2">{sch.title}</span>
+                      </div>
+                    );
+                  })()}
                   <div className="flex items-center gap-1.5 mb-2">
                     <span className={`${fundingColor(sch.funding_type)} text-[10px] font-bold px-2 py-1 rounded-md`}>
                       {sch.funding_type || "SCHOLARSHIP"}
