@@ -178,6 +178,12 @@ export default function DashboardShell() {
         return <CreateNewsSection setActiveSection={navigateTo} editId={editId} />;
       }
     }
+    if (activeSection.startsWith("edit-event-")) {
+      const editId = parseInt(activeSection.replace("edit-event-", ""), 10);
+      if (!isNaN(editId)) {
+        return <CreateEventSection setActiveSection={navigateTo} editId={editId} />;
+      }
+    }
     switch (activeSection) {
       case "overview":
         return <OverviewSection setActiveSection={navigateTo} />;
@@ -404,7 +410,7 @@ function NavDropdown({
       </button>
       <div
         className={`overflow-hidden transition-all duration-200 ${
-          isOpen ? "max-h-96 opacity-100" : "max-h-0 opacity-0"
+          isOpen ? "max-h-[600px] opacity-100" : "max-h-0 opacity-0"
         }`}
       >
         <div className="pl-10 pr-3 py-2 flex flex-col gap-1">{children}</div>

@@ -257,7 +257,10 @@ export default function ApplicationsDirectory() {
                         }`}>{app.school_type || "N/A"}</span>
                       </td>
                       <td className="text-center py-3 px-3">
-                        <span className="bg-green-100 text-green-700 px-2 py-1 rounded text-xs font-semibold">Sent</span>
+                        <span className={`px-2 py-1 rounded text-xs font-semibold ${
+                          app.payment?.status === "completed" ? "bg-green-100 text-green-700" :
+                          "bg-yellow-100 text-yellow-700"
+                        }`}>{app.payment?.status === "completed" ? "Sent" : "Pending"}</span>
                       </td>
                       <td className="text-center py-3 px-3">
                         {(() => {
