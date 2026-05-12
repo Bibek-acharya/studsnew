@@ -67,17 +67,22 @@ export default function NewsTab({ scholarship }: { scholarship: any }) {
   const data = useMemo(() => {
     const items: any[] = [];
     if (providerNews && !loading) {
-      items.push(...providerNews.map((n: any) => ({
+      items.push(...providerNews
+        .filter((n: any) => n.news_type?.toLowerCase() !== "achievement")
+        .map((n: any) => ({
         title: n.title,
         description: stripHtml(n.short_desc || n.content || "").substring(0, 150),
         category: n.news_type || "Notice",
         date: n.publish_date || n.created_at?.split("T")[0] || "",
         link: n.id ? `/news/provider-${n.id}` : "#",
+        image_url: n.image_url,
         _src: "provider",
       })));
     }
     if (scholarship.news_items?.length) {
-      items.push(...scholarship.news_items.map((item: any) => ({
+      items.push(...scholarship.news_items
+        .filter((item: any) => item.category?.toLowerCase() !== "achievement")
+        .map((item: any) => ({
         title: item.title,
         description: stripHtml(item.description || ""),
         category: item.category,
@@ -112,9 +117,15 @@ export default function NewsTab({ scholarship }: { scholarship: any }) {
         {data ? data.map((item, i) => (
           <div key={i} className="overflow-hidden rounded-md border border-gray-100 bg-white">
             <div className="p-4 pb-0">
-              <div className={`flex h-40 items-center justify-center rounded-md bg-gradient-to-br ${gradients[i % gradients.length]} overflow-hidden`}>
-                {icons[i % icons.length]}
-              </div>
+              {item.image_url ? (
+                <div className="h-40 overflow-hidden rounded-md">
+                  <img src={item.image_url} alt={item.title} className="h-full w-full object-cover" />
+                </div>
+              ) : (
+                <div className={`flex h-40 items-center justify-center rounded-md bg-gradient-to-br ${gradients[i % gradients.length]} overflow-hidden`}>
+                  {icons[i % icons.length]}
+                </div>
+              )}
             </div>
             <div className="p-5">
               <div className="mb-3">

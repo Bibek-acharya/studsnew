@@ -31,15 +31,15 @@ export default function GalleryTab({ images, lightboxIndex, setLightboxIndex, cl
         <p className="text-[14px] text-gray-500 mt-1">Glimpses of our programs and events</p>
       </div>
       {grouped.map((group, gi) => (
-        <div key={gi} className="space-y-5">
-          <h3 className="text-lg font-bold text-gray-800 capitalize tracking-tight">{group.heading}</h3>
-           <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-3 md:gap-5">
+          <div key={gi} className="space-y-5">
+            <h3 className="text-lg font-bold text-gray-800 capitalize tracking-tight">{group.heading}</h3>
+            <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-3 md:gap-5">
             {group.items.slice(0, group.items.length > 8 ? 7 : 8).map((img, ii) => {
               const globalIndex = urls.indexOf(img.url);
               return (
                 <div
                   key={ii}
-                  className="group cursor-pointer overflow-hidden rounded-2xl border border-gray-100 bg-white p-1.5 shadow-sm hover:shadow-md transition-all duration-300"
+                  className="group cursor-pointer overflow-hidden rounded-2xl border border-gray-100 bg-white shadow-sm hover:shadow-md transition-all duration-300"
                   onClick={() => setLightboxIndex(globalIndex >= 0 ? globalIndex : null)}
                 >
                   <div className="aspect-[4/3] overflow-hidden rounded-xl bg-gray-50">
@@ -49,11 +49,6 @@ export default function GalleryTab({ images, lightboxIndex, setLightboxIndex, cl
                       className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
                     />
                   </div>
-                  {img.title && (
-                    <p className="text-[12px] text-gray-600 mt-2 px-1 text-center font-semibold truncate group-hover:text-blue-600 transition-colors">
-                      {img.title}
-                    </p>
-                  )}
                 </div>
               );
             })}

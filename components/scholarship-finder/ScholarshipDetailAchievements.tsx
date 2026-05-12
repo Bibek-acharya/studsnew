@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useMemo } from "react";
-import { ArrowRight, Trophy } from "lucide-react";
+import { ExternalLink, Trophy } from "lucide-react";
 import { getPublicNews } from "@/services/scholarshipProviderApi";
 
 const decodeEntities = (text: string) => {
@@ -67,6 +67,7 @@ export default function AchievementsTab({ scholarship }: { scholarship: any }) {
           badge: "Achievement",
           tags: n.tags || [],
           link: n.id ? `/news/provider-${n.id}` : "#",
+          image_url: n.image_url,
         });
       }
     }
@@ -125,9 +126,15 @@ export default function AchievementsTab({ scholarship }: { scholarship: any }) {
         {items.map((item, i) => (
           <div key={i} className="overflow-hidden rounded-md border border-gray-100 bg-white">
             <div className="p-4 pb-0">
-              <div className={`flex h-40 items-center justify-center overflow-hidden rounded-md bg-gradient-to-br ${gradients[i % gradients.length]}`}>
-                <Trophy size={80} className="text-white/90" />
-              </div>
+              {item.image_url ? (
+                <div className="h-40 overflow-hidden rounded-md">
+                  <img src={item.image_url} alt={item.title} className="h-full w-full object-cover" />
+                </div>
+              ) : (
+                <div className={`flex h-40 items-center justify-center overflow-hidden rounded-md bg-gradient-to-br ${gradients[i % gradients.length]}`}>
+                  <Trophy size={80} className="text-white/90" />
+                </div>
+              )}
             </div>
             <div className="p-5">
               <div className="mb-3">
@@ -141,7 +148,7 @@ export default function AchievementsTab({ scholarship }: { scholarship: any }) {
                     <span key={j} className="rounded-md bg-blue-50 px-2.5 py-1 text-[10px] font-bold text-blue-600">{tag}</span>
                   ))}
                 </div>
-                {item.link && <a href={item.link} className="flex items-center gap-1 text-[13px] font-bold text-blue-600 hover:text-blue-700">Read More <ArrowRight size={16} /></a>}
+                {item.link && <a href={item.link} target="_blank" rel="noopener noreferrer" className="flex items-center gap-1 text-[13px] font-bold text-blue-600 hover:text-blue-700">Read More <ExternalLink size={16} /></a>}
               </div>
             </div>
           </div>
