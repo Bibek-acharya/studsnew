@@ -25,18 +25,19 @@ const ManageApplication = () => {
   const [filterDay, setFilterDay] = useState("");
   const [page, setPage] = useState(1);
   const perPage = 10;
+  const [totalItems, setTotalItems] = useState(0);
   const [rejectTarget, setRejectTarget] = useState<{ id: number; name: string } | null>(null);
 
   useEffect(() => {
     setLoading(true);
-    scholarshipProviderApi.getVolunteerApplications()
+    scholarshipProviderApi.getVolunteerApplications({ page, limit: perPage, status: "pending" })
       .then((res: any) => {
-        const data = (res?.applications || []).filter((a: any) => a.status === "pending");
-        setVolunteers(data);
+        setVolunteers(res?.applications || []);
+        setTotalItems(res?.meta?.total || 0);
         setLoading(false);
       })
       .catch(() => { setLoading(false); toast.error("Failed to load applications"); });
-  }, []);
+  }, [page]);
 
   const handleShortlist = async (id: number) => {
     try {
@@ -73,8 +74,8 @@ const ManageApplication = () => {
     });
   }, [volunteers, search, filterProvince, filterDistrict, filterGender, filterDay]);
 
-  const totalPages = Math.ceil(filtered.length / perPage);
-  const paginated = filtered.slice((page - 1) * perPage, page * perPage);
+  const totalPages = Math.ceil(totalItems / perPage);
+  const paginated = filtered;
 
   const resetFilters = () => {
     setSearch("");
@@ -264,7 +265,7 @@ const ManageApplication = () => {
 
         <div className="flex items-center justify-between px-6 py-4 border-t border-gray-100">
           <p className="text-sm text-gray-500">
-            Showing <span className="font-medium">{paginated.length}</span> of <span className="font-medium">{filtered.length}</span> volunteers
+            Showing <span className="font-medium">{paginated.length}</span> of <span className="font-medium">{totalItems}</span> volunteers
           </p>
           <div className="flex items-center gap-2">
             <button

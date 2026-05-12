@@ -1188,10 +1188,14 @@ export const scholarshipProviderApi = {
     });
   },
 
-  async getVolunteerApplications(volunteerId?: number, page = 1, limit = 20): Promise<any> {
-    let path = `/api/v1/scholarship-providers/volunteers/applications?page=${page}&limit=${limit}`;
-    if (volunteerId) {
-      path = `/api/v1/scholarship-providers/volunteers/${volunteerId}/applications?page=${page}&limit=${limit}`;
+  async getVolunteerApplications(params?: { volunteerId?: number; page?: number; limit?: number; status?: string }): Promise<any> {
+    const queryParams = new URLSearchParams();
+    queryParams.set('page', String(params?.page || 1));
+    queryParams.set('limit', String(params?.limit || 10));
+    if (params?.status) queryParams.set('status', params.status);
+    let path = `/api/v1/scholarship-providers/volunteers/applications?${queryParams}`;
+    if (params?.volunteerId) {
+      path = `/api/v1/scholarship-providers/volunteers/${params.volunteerId}/applications?${queryParams}`;
     }
     return callApi(path);
   },
