@@ -94,7 +94,7 @@ function getScholarshipDateStatus(startDate?: string, endDate?: string): string 
       const msPerDay = 1000 * 60 * 60 * 24;
       const daysLeft = Math.round((endDay.getTime() - today.getTime()) / msPerDay);
 
-      if (daysLeft <= 7) return "Ending Soon";
+      if (daysLeft <= 2) return "Ending Soon";
     }
   }
 
