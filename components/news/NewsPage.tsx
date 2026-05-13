@@ -18,6 +18,7 @@ interface NewsArticle {
   readTime: string;
   source: string;
   tags: string[];
+  featured?: boolean;
 }
 
 const stripHtml = (html: string) => {
@@ -139,6 +140,7 @@ const NewsPage: React.FC = () => {
             readTime: n.readTime || "3 min",
             source: n.source || "Admin",
             tags: n.tags || [],
+            featured: n.featured === true,
           }));
           news = [...news, ...mapped];
         }
@@ -151,7 +153,7 @@ const NewsPage: React.FC = () => {
     fetchNews();
   }, []);
 
-  const featuredNews = allNews[0];
+  const featuredNews = allNews.find((n) => n.featured === true) || allNews.toSorted((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())[0];
 
   const processedNews = useMemo(() => {
     const filtered =

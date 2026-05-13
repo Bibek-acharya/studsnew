@@ -20,6 +20,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
+  metadataBase: new URL("https://studsphere.com"),
   title: {
     default: "Studsphere - Nepal's #1 College & Scholarship Finder",
     template: "%s | Studsphere",

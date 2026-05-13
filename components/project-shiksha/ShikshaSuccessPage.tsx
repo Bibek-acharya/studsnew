@@ -71,7 +71,7 @@ export default function ShikshaSuccessPage() {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-50">
         <div className="text-center">
-          <div className="w-16 h-16 border-4 border-gray-200 border-t-[#006400] rounded-full animate-spin mx-auto mb-4" />
+          <div className="w-16 h-16 border-4 border-gray-200 border-t-brand-blue rounded-full animate-spin mx-auto mb-4" />
           <p className="text-gray-600">Loading your application...</p>
         </div>
       </div>
@@ -82,7 +82,7 @@ export default function ShikshaSuccessPage() {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-50 p-4">
         <div className="max-w-md w-full bg-white rounded-2xl shadow-xl p-8 text-center">
-          <Loader2 className="w-12 h-12 animate-spin text-[#006400] mx-auto mb-6" />
+          <Loader2 className="w-12 h-12 animate-spin text-brand-blue mx-auto mb-6" />
           <h2 className="text-2xl font-bold text-gray-800 mb-2">Verifying Payment</h2>
           <p className="text-gray-600">Please wait while we verify your eSewa payment...</p>
         </div>
@@ -99,7 +99,7 @@ export default function ShikshaSuccessPage() {
           <p className="text-gray-600 mb-4">{verifyError}</p>
           <button
             onClick={() => router.push("/scholarship-apply/project-shiksha/payment")}
-            className="w-full bg-[#006400] hover:bg-[#004d00] text-white font-semibold py-3 px-6 rounded-lg transition-colors"
+            className="w-full bg-brand-blue hover:bg-[#004d00] text-white font-semibold py-3 px-6 rounded-lg transition-colors"
           >
             Back to Payment
           </button>
@@ -133,7 +133,7 @@ export default function ShikshaSuccessPage() {
 
           <button
             onClick={() => router.push("/")}
-            className="w-full bg-[#006400] hover:bg-[#004d00] text-white font-semibold py-3 px-6 rounded-lg transition-colors shadow-md flex items-center justify-center gap-2"
+            className="w-full bg-brand-blue hover:bg-[#004d00] text-white font-semibold py-3 px-6 rounded-lg transition-colors shadow-md flex items-center justify-center gap-2"
           >
             <Home className="w-5 h-5" />
             Back to Home
@@ -165,7 +165,7 @@ export default function ShikshaSuccessPage() {
         <div className="mt-6 no-print flex gap-4">
           <button
             onClick={handlePrint}
-            className="flex-1 bg-[#006400] hover:bg-[#004d00] text-white font-bold text-[16px] py-4 px-6 rounded-xl transition-all shadow-md flex items-center justify-center gap-2"
+            className="flex-1 bg-brand-blue hover:bg-[#004d00] text-white font-bold text-[16px] py-4 px-6 rounded-xl transition-all shadow-md flex items-center justify-center gap-2"
           >
             <Printer className="w-6 h-6" />
             Download / Print PDF

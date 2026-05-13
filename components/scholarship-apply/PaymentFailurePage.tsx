@@ -21,7 +21,7 @@ export default function PaymentFailurePage({ scholarshipSlug }: { scholarshipSlu
         <div className="space-y-3">
           <button
             onClick={() => router.push(`/scholarship-pay/${scholarshipSlug}`)}
-            className="w-full bg-[#006400] hover:bg-[#004d00] text-white font-semibold py-3 px-6 rounded-lg transition-colors shadow-md flex items-center justify-center gap-2"
+            className="w-full bg-brand-blue hover:bg-[#004d00] text-white font-semibold py-3 px-6 rounded-lg transition-colors shadow-md flex items-center justify-center gap-2"
           >
             <ArrowLeft className="w-5 h-5" />
             Try Again

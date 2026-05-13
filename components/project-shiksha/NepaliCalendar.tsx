@@ -144,7 +144,7 @@ export default function NepaliCalendar({ value, onChange, error, minAge = 14, sh
           readOnly
           onClick={() => setIsOpen(!isOpen)}
           className={`w-full border rounded py-3 ${showIcon ? "pl-10" : "pl-4"} pr-4 text-[15px] text-gray-800 outline-none focus:ring-0 transition-all bg-white cursor-pointer ${
-            error || ageError ? "border-red-500" : "border-gray-300 focus:border-[#006400]"
+            error || ageError ? "border-red-500" : "border-gray-300 focus:border-brand-blue"
           }`}
           placeholder="Select from Calendar"
         />
@@ -168,7 +168,7 @@ export default function NepaliCalendar({ value, onChange, error, minAge = 14, sh
               <select
                 value={currentYear}
                 onChange={(e) => setCurrentYear(parseInt(e.target.value))}
-                className="border border-gray-300 rounded px-2 py-1 text-[14px] focus:outline-none focus:border-[#006400] cursor-pointer bg-white font-semibold"
+                className="border border-gray-300 rounded px-2 py-1 text-[14px] focus:outline-none focus:border-brand-blue cursor-pointer bg-white font-semibold"
               >
                 {YEARS.map((year) => (
                   <option key={year} value={year}>{year}</option>
@@ -190,7 +190,7 @@ export default function NepaliCalendar({ value, onChange, error, minAge = 14, sh
             <select
               value={currentMonth}
               onChange={(e) => setCurrentMonth(parseInt(e.target.value))}
-              className="w-full border border-gray-300 rounded px-3 py-2 text-[14px] focus:outline-none focus:border-[#006400] cursor-pointer bg-white font-medium"
+              className="w-full border border-gray-300 rounded px-3 py-2 text-[14px] focus:outline-none focus:border-brand-blue cursor-pointer bg-white font-medium"
             >
               {nepaliMonths.map((month, index) => (
                 <option key={month} value={index}>{month}</option>
@@ -220,9 +220,9 @@ export default function NepaliCalendar({ value, onChange, error, minAge = 14, sh
                   disabled={disabled}
                   className={`h-9 w-9 flex items-center justify-center rounded-full text-[13px] font-medium transition-all ${
                     isSelected(day)
-                      ? "bg-[#006400] text-white"
+                      ? "bg-brand-blue text-white"
                       : isToday(day)
-                      ? "bg-[#006400]/10 text-[#006400] font-bold border border-[#006400]"
+                      ? "bg-brand-blue/10 text-brand-blue font-bold border border-brand-blue"
                       : disabled
                       ? "text-gray-300 cursor-not-allowed"
                       : "text-gray-700 hover:bg-gray-100"
@@ -236,7 +236,7 @@ export default function NepaliCalendar({ value, onChange, error, minAge = 14, sh
 
           <div className="mt-3 pt-3 border-t border-gray-100 text-center">
             <p className="text-[11px] text-gray-500">
-              Minimum age: <span className="font-semibold text-[#006400]">{minAge} years</span>
+              Minimum age: <span className="font-semibold text-brand-blue">{minAge} years</span>
             </p>
           </div>
         </div>

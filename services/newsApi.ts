@@ -12,6 +12,8 @@ export interface AdminNews {
   readTime: string;
   source: string;
   tags: string[];
+  published: boolean;
+  featured: boolean;
   created_at: string;
   updated_at: string;
 }
@@ -60,6 +62,8 @@ export const adminNewsApi = {
     readTime?: string;
     source?: string;
     tags?: string[];
+    published?: boolean;
+    featured?: boolean;
   }): Promise<AdminNews> {
     return extractData(apiRequest("/api/v1/admin/news", {
       method: "POST",
@@ -79,6 +83,8 @@ export const adminNewsApi = {
     readTime?: string;
     source?: string;
     tags?: string[];
+    published?: boolean;
+    featured?: boolean;
   }): Promise<AdminNews> {
     return extractData(apiRequest(`/api/v1/admin/news/${id}`, {
       method: "PUT",

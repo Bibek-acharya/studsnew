@@ -326,6 +326,7 @@ export interface EducationNewsItem {
   readTime?: string;
   source?: string;
   tags?: string[];
+  featured?: boolean;
 }
 
 export interface EducationNewsResponse {
@@ -1114,6 +1115,7 @@ export const apiService = {
     category?: string;
     search?: string;
     sort?: string;
+    featured?: string;
   }): Promise<EducationNewsResponse> {
     const query = new URLSearchParams();
     if (params?.page) query.set("page", String(params.page));
@@ -1121,6 +1123,7 @@ export const apiService = {
     if (params?.category) query.set("category", params.category);
     if (params?.search) query.set("search", params.search);
     if (params?.sort) query.set("sort", params.sort);
+    if (params?.featured) query.set("featured", params.featured);
 
     const queryStr = query.toString();
     return apiRequest<EducationNewsResponse>(`/api/v1/education/news${queryStr ? `?${queryStr}` : ""}`);

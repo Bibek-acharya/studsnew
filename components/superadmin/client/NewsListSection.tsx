@@ -1,9 +1,14 @@
 "use client";
 
-import React, { useState, useEffect, useCallback, useMemo } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { toast } from "sonner";
-import { Home, Newspaper, Search, Eye, Pencil, Trash2, ChevronLeft, ChevronRight, Plus } from "lucide-react";
+import { Home, Newspaper, Search, Pencil, Trash2, ChevronLeft, ChevronRight, Plus, Star } from "lucide-react";
 import { adminNewsApi, AdminNews } from "@/services/newsApi";
+
+const STATUS_BADGE: Record<string, string> = {
+  published: "bg-green-100 text-green-700",
+  draft: "bg-yellow-100 text-yellow-700",
+};
 
 const CATEGORY_COLORS: Record<string, string> = {
   admission: "bg-blue-100 text-blue-700",
@@ -21,6 +26,13 @@ interface DeleteModalState {
   title: string;
 }
 
+interface FeaturedModalState {
+  isOpen: boolean;
+  newsId: number | null;
+  title: string;
+  setFeatured: boolean;
+}
+
 export default function NewsListSection({ setActiveSection }: { setActiveSection: (s: string) => void }) {
   const [news, setNews] = useState<AdminNews[]>([]);
   const [loading, setLoading] = useState(true);
@@ -28,6 +40,7 @@ export default function NewsListSection({ setActiveSection }: { setActiveSection
   const [page, setPage] = useState(1);
   const [total, setTotal] = useState(0);
   const [deleteModal, setDeleteModal] = useState<DeleteModalState>({ isOpen: false, newsId: null, title: "" });
+  const [featuredModal, setFeaturedModal] = useState<FeaturedModalState>({ isOpen: false, newsId: null, title: "", setFeatured: false });
   const limit = 10;
 
   useEffect(() => {
@@ -81,6 +94,19 @@ export default function NewsListSection({ setActiveSection }: { setActiveSection
     }
   }, [deleteModal.newsId]);
 
+  const confirmFeatured = useCallback(async () => {
+    if (!featuredModal.newsId) return;
+    const { newsId, setFeatured } = featuredModal;
+    setFeaturedModal({ isOpen: false, newsId: null, title: "", setFeatured: false });
+    try {
+      await adminNewsApi.update(newsId, { featured: setFeatured });
+      setNews((prev) => prev.map((n) => n.id === newsId ? { ...n, featured: setFeatured } : { ...n, featured: setFeatured ? false : n.featured }));
+      toast.success(setFeatured ? "Featured story of the week set." : "Featured story removed.");
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Failed to toggle featured");
+    }
+  }, [featuredModal]);
+
   const totalPages = Math.ceil(total / limit);
 
   const categoryLabel = (cat: string) => {
@@ -103,6 +129,25 @@ export default function NewsListSection({ setActiveSection }: { setActiveSection
             <div className="flex justify-end gap-3">
               <button onClick={() => setDeleteModal({ isOpen: false, newsId: null, title: "" })} className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200">Cancel</button>
               <button onClick={confirmDelete} className="px-4 py-2 text-sm font-medium text-white bg-red-600 rounded-lg hover:bg-red-700">Delete</button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {featuredModal.isOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
+          <div className="bg-white rounded-xl p-6 shadow-xl max-w-md w-full mx-4">
+            <h3 className="text-lg font-bold text-gray-900 mb-2">{featuredModal.setFeatured ? "Set as Featured Story" : "Remove Featured Story"}</h3>
+            <p className="text-sm text-gray-600 mb-6">
+              {featuredModal.setFeatured
+                ? `Are you sure you want to set "${featuredModal.title}" as the Featured Story of the Week? This will replace any existing featured story.`
+                : `Are you sure you want to remove "${featuredModal.title}" as the Featured Story of the Week?`}
+            </p>
+            <div className="flex justify-end gap-3">
+              <button onClick={() => setFeaturedModal({ isOpen: false, newsId: null, title: "", setFeatured: false })} className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200">Cancel</button>
+              <button onClick={confirmFeatured} className={`px-4 py-2 text-sm font-medium text-white rounded-lg ${featuredModal.setFeatured ? "bg-yellow-500 hover:bg-yellow-600" : "bg-red-600 hover:bg-red-700"}`}>
+                {featuredModal.setFeatured ? "Set as Featured" : "Remove"}
+              </button>
             </div>
           </div>
         </div>
@@ -152,12 +197,13 @@ export default function NewsListSection({ setActiveSection }: { setActiveSection
                 <th className="text-center py-3 px-4 font-semibold text-gray-700">Category</th>
                 <th className="text-center py-3 px-4 font-semibold text-gray-700">Author</th>
                 <th className="text-center py-3 px-4 font-semibold text-gray-700">Published</th>
+                <th className="text-center py-3 px-4 font-semibold text-gray-700">Status</th>
                 <th className="text-center py-3 px-4 font-semibold text-gray-700">Actions</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-100">
               {news.length === 0 ? (
-                <tr><td colSpan={6} className="py-8 text-center text-gray-500">No news found</td></tr>
+                <tr><td colSpan={7} className="py-8 text-center text-gray-500">No news found</td></tr>
               ) : news.map((item) => (
                 <tr key={item.id} className="hover:bg-gray-50">
                   <td className="py-3 px-4">
@@ -182,8 +228,20 @@ export default function NewsListSection({ setActiveSection }: { setActiveSection
                   <td className="text-center py-3 px-4 text-gray-500">
                     {item.date ? new Date(item.date).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" }) : "N/A"}
                   </td>
-                    <td className="text-center py-3 px-4">
+                  <td className="text-center py-3 px-4">
+                    <span className={`px-2 py-1 rounded text-xs font-semibold ${item.published ? STATUS_BADGE.published : STATUS_BADGE.draft}`}>
+                      {item.published ? "Published" : "Draft"}
+                    </span>
+                  </td>
+                  <td className="text-center py-3 px-4">
                     <div className="flex items-center justify-center gap-2">
+                      <button
+                        className={`p-1.5 rounded ${item.featured ? "text-yellow-500 hover:bg-yellow-50" : "text-gray-400 hover:bg-yellow-50 hover:text-yellow-500"}`}
+                        title={item.featured ? "Remove featured" : "Set as featured"}
+                        onClick={() => setFeaturedModal({ isOpen: true, newsId: item.id, title: item.title, setFeatured: !item.featured })}
+                      >
+                        <Star className={`w-4 h-4 ${item.featured ? "fill-yellow-500" : ""}`} />
+                      </button>
                       <button className="p-1.5 hover:bg-green-50 rounded text-green-600" title="Edit" onClick={() => setActiveSection(`edit-news-${item.id}`)}><Pencil className="w-4 h-4" /></button>
                       <button className="p-1.5 hover:bg-red-50 rounded text-red-600" title="Delete" onClick={() => handleDelete(item.id)}><Trash2 className="w-4 h-4" /></button>
                     </div>

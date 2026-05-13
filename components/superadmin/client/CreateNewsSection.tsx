@@ -86,7 +86,7 @@ export default function CreateNewsSection({ setActiveSection, editId }: { setAct
     setImagePreview("");
   }, []);
 
-  const handleSave = useCallback(async () => {
+  const handleSave = useCallback(async (asDraft: boolean) => {
     if (!title.trim()) { setError("Title is required"); return; }
     if (!category) { setError("Category is required"); return; }
     if (!imageUrl) { setError("Featured image is required"); return; }
@@ -101,14 +101,15 @@ export default function CreateNewsSection({ setActiveSection, editId }: { setAct
         image: imageUrl,
         author,
         tags: tags ? tags.split(",").map((t) => t.trim()) : [],
+        published: !asDraft,
       };
       if (isEditing && editId) {
         await adminNewsApi.update(editId, payload);
-        toast.success("News updated successfully.");
+        toast.success(asDraft ? "News updated as draft." : "News updated successfully.");
       } else {
         payload.date = new Date().toISOString();
         await adminNewsApi.create(payload);
-        toast.success("News published successfully.");
+        toast.success(asDraft ? "News saved as draft." : "News published successfully.");
       }
       setActiveSection("manage-news");
     } catch (err: any) {
@@ -143,11 +144,18 @@ export default function CreateNewsSection({ setActiveSection, editId }: { setAct
               Cancel
             </button>
             <button
-              onClick={handleSave}
+              onClick={() => handleSave(true)}
+              disabled={submitting || uploadingImage}
+              className="px-4 py-2 bg-slate-100 text-slate-700 border border-slate-200 rounded-lg text-sm font-semibold hover:bg-slate-200 transition-colors"
+            >
+              {submitting ? "Saving..." : "Draft"}
+            </button>
+            <button
+              onClick={() => handleSave(false)}
               disabled={submitting || uploadingImage || !title.trim() || !category || !imageUrl}
               className="px-4 py-2 bg-blue-600 text-white rounded-lg text-sm font-semibold hover:bg-blue-700 transition-colors disabled:opacity-50"
             >
-              {submitting ? "Saving..." : isEditing ? "Update News" : "Publish News"}
+              {submitting ? "Saving..." : isEditing ? "Update" : "Publish"}
             </button>
           </div>
         </div>

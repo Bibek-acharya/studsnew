@@ -331,7 +331,7 @@ export default function ShikshaApplicationForm({
       <div className="w-full max-w-350 flex flex-col lg:flex-row gap-6 items-start">
         <main className="w-full bg-white rounded-2xl overflow-hidden relative order-2 lg:order-1">
           <div className="bg-[#f0fdf4] border-b border-[#bbf7d0] py-3.5 px-6 flex justify-center items-center gap-3 text-[14px] text-[#166534]">
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-5 h-5 flex-shrink-0">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-5 h-5 shrink-0">
               <path fillRule="evenodd" d="M12.516 2.17a.75.75 0 00-1.032 0 11.209 11.209 0 01-7.877 3.08.75.75 0 00-.722.515A12.74 12.74 0 002.25 9.75c0 5.942 4.064 10.933 9.563 12.348a.749.749 0 00.374 0c5.499-1.415 9.563-6.406 9.563-12.348 0-1.39-.223-2.73-.635-3.985a.75.75 0 00-.722-.516l-.143.001c-2.996 0-5.717-1.17-7.734-3.08zm3.094 8.016a.75.75 0 10-1.22-.872l-3.236 4.53L9.53 12.22a.75.75 0 00-1.06 1.06l2.25 2.25a.75.75 0 001.14-.094l3.75-5.25z" clipRule="evenodd" />
             </svg>
             <span className="font-medium">Your data is secure and will be used for admission purposes only.</span>
@@ -345,7 +345,7 @@ export default function ShikshaApplicationForm({
             </div>
 
             <div className="flex flex-col md:flex-row gap-8 lg:gap-12">
-              <div className="flex-grow grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-5 order-2 md:order-1">
+              <div className="grow grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-5 order-2 md:order-1">
                 <div className="col-span-1 sm:col-span-2">
                   <label className="block text-[14px] font-semibold text-gray-700 mb-1.5">
                     Student&apos;s Full Name <span className="text-red-500">*</span>
@@ -355,7 +355,7 @@ export default function ShikshaApplicationForm({
                     id="fullName"
                     value={formData.fullName}
                     onChange={(e) => handleInputChange("fullName", e.target.value)}
-                    className="w-full border border-gray-300 rounded py-3 px-4 text-[15px] text-gray-800 outline-none focus:ring-0 focus:border-[#006400] transition-all bg-white"
+                    className="w-full border border-gray-300 rounded py-3 px-4 text-[15px] text-gray-800 outline-none focus:ring-0 focus:border-brand-blue transition-all bg-white"
                     placeholder="E.g. Ram Bahadur Thapa"
                   />
                   {errors.fullName && <p className="text-red-500 text-[12px] mt-1">{errors.fullName}</p>}
@@ -369,7 +369,7 @@ export default function ShikshaApplicationForm({
                     id="gender"
                     value={formData.gender}
                     onChange={(e) => handleInputChange("gender", e.target.value)}
-                    className="w-full border border-gray-300 rounded py-3 px-4 text-[15px] text-gray-800 outline-none focus:ring-0 focus:border-[#006400] transition-all bg-white cursor-pointer"
+                    className="w-full border border-gray-300 rounded py-3 px-4 text-[15px] text-gray-800 outline-none focus:ring-0 focus:border-brand-blue transition-all bg-white cursor-pointer"
                   >
                     <option value="" disabled>Select Gender</option>
                     <option value="Male">Male</option>
@@ -387,7 +387,7 @@ export default function ShikshaApplicationForm({
                     id="ethnicity"
                     value={formData.ethnicity}
                     onChange={(e) => handleInputChange("ethnicity", e.target.value)}
-                    className="w-full border border-gray-300 rounded py-3 px-4 text-[15px] text-gray-800 outline-none focus:ring-0 focus:border-[#006400] transition-all bg-white cursor-pointer"
+                    className="w-full border border-gray-300 rounded py-3 px-4 text-[15px] text-gray-800 outline-none focus:ring-0 focus:border-brand-blue transition-all bg-white cursor-pointer"
                   >
                     <option value="" disabled>Select Ethnicity</option>
                     {ethnicities.map((e) => (
@@ -400,7 +400,7 @@ export default function ShikshaApplicationForm({
                       id="ethnicityOther"
                       value={formData.ethnicityOther}
                       onChange={(e) => handleInputChange("ethnicityOther", e.target.value)}
-                      className="mt-2 w-full border border-gray-300 rounded py-3 px-4 text-[15px] text-gray-800 outline-none focus:ring-0 focus:border-[#006400] transition-all bg-white"
+                      className="mt-2 w-full border border-gray-300 rounded py-3 px-4 text-[15px] text-gray-800 outline-none focus:ring-0 focus:border-brand-blue transition-all bg-white"
                       placeholder="Please specify ethnicity"
                     />
                   )}
@@ -461,7 +461,7 @@ export default function ShikshaApplicationForm({
                       if (val.length > 0 && val[0] !== "9") return;
                       handleInputChange("phone", val);
                     }}
-                    className="w-full border border-gray-300 rounded py-3 px-4 text-[15px] text-gray-800 outline-none focus:ring-0 focus:border-[#006400] transition-all bg-white"
+                    className="w-full border border-gray-300 rounded py-3 px-4 text-[15px] text-gray-800 outline-none focus:ring-0 focus:border-brand-blue transition-all bg-white"
                     placeholder="10-digit mobile number"
                     maxLength={10}
                   />
@@ -475,14 +475,14 @@ export default function ShikshaApplicationForm({
                     id="email"
                     value={formData.email}
                     onChange={(e) => handleInputChange("email", e.target.value)}
-                    className="w-full border border-gray-300 rounded py-3 px-4 text-[15px] text-gray-800 outline-none focus:ring-0 focus:border-[#006400] transition-all bg-white"
+                    className="w-full border border-gray-300 rounded py-3 px-4 text-[15px] text-gray-800 outline-none focus:ring-0 focus:border-brand-blue transition-all bg-white"
                     placeholder="student@email.com"
                   />
                   {errors.email && <p className="text-red-500 text-[12px] mt-1">{errors.email}</p>}
                 </div>
               </div>
 
-              <div className="w-full md:w-40 flex-shrink-0 order-1 md:order-2 flex flex-col items-center md:items-start">
+              <div className="w-full md:w-40 shrink-0 order-1 md:order-2 flex flex-col items-center md:items-start">
                 <label className="block text-[14px] font-semibold text-gray-700 mb-2 w-full text-center md:text-left">
                   Passport Photo <span className="text-red-500">*</span>
                 </label>
@@ -544,7 +544,7 @@ export default function ShikshaApplicationForm({
                   id="seeSchoolType"
                   value={formData.seeSchoolType}
                   onChange={(e) => handleInputChange("seeSchoolType", e.target.value)}
-                  className="w-full border border-gray-300 rounded py-3 px-4 text-[15px] text-gray-800 outline-none focus:ring-0 focus:border-[#006400] transition-all bg-white cursor-pointer"
+                  className="w-full border border-gray-300 rounded py-3 px-4 text-[15px] text-gray-800 outline-none focus:ring-0 focus:border-brand-blue transition-all bg-white cursor-pointer"
                 >
                   <option value="" disabled>Select School Type</option>
                   {schoolTypes.map((type) => (
@@ -563,7 +563,7 @@ export default function ShikshaApplicationForm({
                   id="schoolName"
                   value={formData.schoolName}
                   onChange={(e) => handleInputChange("schoolName", e.target.value)}
-                  className="w-full border border-gray-300 rounded py-3 px-4 text-[15px] text-gray-800 outline-none focus:ring-0 focus:border-[#006400] transition-all bg-white"
+                  className="w-full border border-gray-300 rounded py-3 px-4 text-[15px] text-gray-800 outline-none focus:ring-0 focus:border-brand-blue transition-all bg-white"
                   placeholder="School you graduated from"
                 />
                 {errors.schoolName && <p className="text-red-500 text-[12px] mt-1">{errors.schoolName}</p>}
@@ -582,7 +582,7 @@ export default function ShikshaApplicationForm({
                     if (raw && raw !== "." && parseFloat(raw) > 4.0) return;
                     handleInputChange("seeGpa", raw);
                   }}
-                  className="w-full border border-gray-300 rounded py-3 px-4 text-[15px] text-gray-800 outline-none focus:ring-0 focus:border-[#006400] transition-all bg-white"
+                  className="w-full border border-gray-300 rounded py-3 px-4 text-[15px] text-gray-800 outline-none focus:ring-0 focus:border-brand-blue transition-all bg-white"
                   placeholder="E.g. 3.85"
                 />
                 {errors.seeGpa && <p className="text-red-500 text-[12px] mt-1">{errors.seeGpa}</p>}
@@ -599,7 +599,7 @@ export default function ShikshaApplicationForm({
                     handleInputChange("schoolDistrict", "");
                     handleInputChange("schoolMunicipality", "");
                   }}
-                  className="w-full border border-gray-300 rounded py-3 px-4 text-[15px] text-gray-800 outline-none focus:ring-0 focus:border-[#006400] transition-all bg-white cursor-pointer"
+                  className="w-full border border-gray-300 rounded py-3 px-4 text-[15px] text-gray-800 outline-none focus:ring-0 focus:border-brand-blue transition-all bg-white cursor-pointer"
                 >
                   <option value="" disabled>Select Province</option>
                   {NEPAL_PROVINCES.map((p) => (
@@ -621,7 +621,7 @@ export default function ShikshaApplicationForm({
                     handleInputChange("schoolMunicipality", "");
                   }}
                   disabled={!formData.schoolProvince}
-                  className="w-full border border-gray-300 rounded py-3 px-4 text-[15px] text-gray-800 outline-none focus:ring-0 focus:border-[#006400] transition-all bg-white cursor-pointer disabled:bg-gray-100 disabled:cursor-not-allowed"
+                  className="w-full border border-gray-300 rounded py-3 px-4 text-[15px] text-gray-800 outline-none focus:ring-0 focus:border-brand-blue transition-all bg-white cursor-pointer disabled:bg-gray-100 disabled:cursor-not-allowed"
                 >
                   <option value="" disabled>Select province first</option>
                   {getAvailableDistricts(formData.schoolProvince).map((d) => (
@@ -640,7 +640,7 @@ export default function ShikshaApplicationForm({
                   value={formData.schoolMunicipality}
                   onChange={(e) => handleInputChange("schoolMunicipality", e.target.value)}
                   disabled={!formData.schoolDistrict}
-                  className="w-full border border-gray-300 rounded py-3 px-4 text-[15px] text-gray-800 outline-none focus:ring-0 focus:border-[#006400] transition-all bg-white cursor-pointer disabled:bg-gray-100 disabled:cursor-not-allowed"
+                  className="w-full border border-gray-300 rounded py-3 px-4 text-[15px] text-gray-800 outline-none focus:ring-0 focus:border-brand-blue transition-all bg-white cursor-pointer disabled:bg-gray-100 disabled:cursor-not-allowed"
                 >
                   <option value="" disabled>Select district first</option>
                   {getAvailableMunicipalities(formData.schoolDistrict).map((m) => (
@@ -657,7 +657,7 @@ export default function ShikshaApplicationForm({
                   id="schoolTole"
                   value={formData.schoolTole}
                   onChange={(e) => handleInputChange("schoolTole", e.target.value)}
-                  className="w-full border border-gray-300 rounded py-3 px-4 text-[15px] text-gray-800 outline-none focus:ring-0 focus:border-[#006400] transition-all bg-white"
+                  className="w-full border border-gray-300 rounded py-3 px-4 text-[15px] text-gray-800 outline-none focus:ring-0 focus:border-brand-blue transition-all bg-white"
                   placeholder="Tole or village name"
                 />
                 {errors.schoolTole && <p className="text-red-500 text-[12px] mt-1">{errors.schoolTole}</p>}
@@ -707,7 +707,7 @@ export default function ShikshaApplicationForm({
                     handleInputChange("permMunicipality", "");
                     handleInputChange("permWard", "");
                   }}
-                  className="w-full border border-gray-300 rounded py-3 px-4 text-[15px] text-gray-800 outline-none focus:ring-0 focus:border-[#006400] transition-all bg-white cursor-pointer"
+                  className="w-full border border-gray-300 rounded py-3 px-4 text-[15px] text-gray-800 outline-none focus:ring-0 focus:border-brand-blue transition-all bg-white cursor-pointer"
                 >
                   <option value="" disabled>Select Province</option>
                   {NEPAL_PROVINCES.map((p) => (
@@ -730,7 +730,7 @@ export default function ShikshaApplicationForm({
                     handleInputChange("permWard", "");
                   }}
                   disabled={!formData.permProvince}
-                  className="w-full border border-gray-300 rounded py-3 px-4 text-[15px] text-gray-800 outline-none focus:ring-0 focus:border-[#006400] transition-all bg-white cursor-pointer disabled:bg-gray-100 disabled:cursor-not-allowed"
+                  className="w-full border border-gray-300 rounded py-3 px-4 text-[15px] text-gray-800 outline-none focus:ring-0 focus:border-brand-blue transition-all bg-white cursor-pointer disabled:bg-gray-100 disabled:cursor-not-allowed"
                 >
                   <option value="" disabled>Select province first</option>
                   {permDistricts.map((d) => (
@@ -752,7 +752,7 @@ export default function ShikshaApplicationForm({
                     handleInputChange("permWard", "");
                   }}
                   disabled={!formData.permDistrict}
-                  className="w-full border border-gray-300 rounded py-3 px-4 text-[15px] text-gray-800 outline-none focus:ring-0 focus:border-[#006400] transition-all bg-white cursor-pointer disabled:bg-gray-100 disabled:cursor-not-allowed"
+                  className="w-full border border-gray-300 rounded py-3 px-4 text-[15px] text-gray-800 outline-none focus:ring-0 focus:border-brand-blue transition-all bg-white cursor-pointer disabled:bg-gray-100 disabled:cursor-not-allowed"
                 >
                   <option value="" disabled>Select district first</option>
                   {permMunicipalities.map((m) => (
@@ -771,7 +771,7 @@ export default function ShikshaApplicationForm({
                   value={formData.permWard}
                   onChange={(e) => handleInputChange("permWard", e.target.value)}
                   disabled={!formData.permMunicipality}
-                  className="w-full border border-gray-300 rounded py-3 px-4 text-[15px] text-gray-800 outline-none focus:ring-0 focus:border-[#006400] transition-all bg-white cursor-pointer disabled:bg-gray-100 disabled:cursor-not-allowed"
+                  className="w-full border border-gray-300 rounded py-3 px-4 text-[15px] text-gray-800 outline-none focus:ring-0 focus:border-brand-blue transition-all bg-white cursor-pointer disabled:bg-gray-100 disabled:cursor-not-allowed"
                 >
                   <option value="" disabled>Select municipality first</option>
                   {permWards.map((w) => (
@@ -788,7 +788,7 @@ export default function ShikshaApplicationForm({
                   id="permTole"
                   value={formData.permTole}
                   onChange={(e) => handleInputChange("permTole", e.target.value)}
-                  className="w-full border border-gray-300 rounded py-3 px-4 text-[15px] text-gray-800 outline-none focus:ring-0 focus:border-[#006400] transition-all bg-white"
+                  className="w-full border border-gray-300 rounded py-3 px-4 text-[15px] text-gray-800 outline-none focus:ring-0 focus:border-brand-blue transition-all bg-white"
                   placeholder="Tole or village name"
                 />
               </div>
@@ -823,7 +823,7 @@ export default function ShikshaApplicationForm({
                     handleInputChange("tempWard", "");
                   }}
                   disabled={sameAsPermanent}
-                  className="w-full border border-gray-300 rounded py-3 px-4 text-[15px] text-gray-800 outline-none focus:ring-0 focus:border-[#006400] transition-all bg-white cursor-pointer disabled:bg-gray-100 disabled:cursor-not-allowed"
+                  className="w-full border border-gray-300 rounded py-3 px-4 text-[15px] text-gray-800 outline-none focus:ring-0 focus:border-brand-blue transition-all bg-white cursor-pointer disabled:bg-gray-100 disabled:cursor-not-allowed"
                 >
                   <option value="" disabled>Select Province</option>
                   {NEPAL_PROVINCES.map((p) => (
@@ -846,7 +846,7 @@ export default function ShikshaApplicationForm({
                     handleInputChange("tempWard", "");
                   }}
                   disabled={sameAsPermanent || !formData.tempProvince}
-                  className="w-full border border-gray-300 rounded py-3 px-4 text-[15px] text-gray-800 outline-none focus:ring-0 focus:border-[#006400] transition-all bg-white cursor-pointer disabled:bg-gray-100 disabled:cursor-not-allowed"
+                  className="w-full border border-gray-300 rounded py-3 px-4 text-[15px] text-gray-800 outline-none focus:ring-0 focus:border-brand-blue transition-all bg-white cursor-pointer disabled:bg-gray-100 disabled:cursor-not-allowed"
                 >
                   <option value="" disabled>Select province first</option>
                   {tempDistricts.map((d) => (
@@ -868,7 +868,7 @@ export default function ShikshaApplicationForm({
                     handleInputChange("tempWard", "");
                   }}
                   disabled={sameAsPermanent || !formData.tempDistrict}
-                  className="w-full border border-gray-300 rounded py-3 px-4 text-[15px] text-gray-800 outline-none focus:ring-0 focus:border-[#006400] transition-all bg-white cursor-pointer disabled:bg-gray-100 disabled:cursor-not-allowed"
+                  className="w-full border border-gray-300 rounded py-3 px-4 text-[15px] text-gray-800 outline-none focus:ring-0 focus:border-brand-blue transition-all bg-white cursor-pointer disabled:bg-gray-100 disabled:cursor-not-allowed"
                 >
                   <option value="" disabled>Select district first</option>
                   {tempMunicipalities.map((m) => (
@@ -887,7 +887,7 @@ export default function ShikshaApplicationForm({
                   value={formData.tempWard}
                   onChange={(e) => handleInputChange("tempWard", e.target.value)}
                   disabled={sameAsPermanent || !formData.tempMunicipality}
-                  className="w-full border border-gray-300 rounded py-3 px-4 text-[15px] text-gray-800 outline-none focus:ring-0 focus:border-[#006400] transition-all bg-white cursor-pointer disabled:bg-gray-100 disabled:cursor-not-allowed"
+                  className="w-full border border-gray-300 rounded py-3 px-4 text-[15px] text-gray-800 outline-none focus:ring-0 focus:border-brand-blue transition-all bg-white cursor-pointer disabled:bg-gray-100 disabled:cursor-not-allowed"
                 >
                   <option value="" disabled>Select municipality first</option>
                   {tempWards.map((w) => (
@@ -905,7 +905,7 @@ export default function ShikshaApplicationForm({
                   value={formData.tempTole}
                   onChange={(e) => handleInputChange("tempTole", e.target.value)}
                   disabled={sameAsPermanent}
-                  className="w-full border border-gray-300 rounded py-3 px-4 text-[15px] text-gray-800 outline-none focus:ring-0 focus:border-[#006400] transition-all bg-white disabled:bg-gray-100 disabled:cursor-not-allowed"
+                  className="w-full border border-gray-300 rounded py-3 px-4 text-[15px] text-gray-800 outline-none focus:ring-0 focus:border-brand-blue transition-all bg-white disabled:bg-gray-100 disabled:cursor-not-allowed"
                   placeholder="Tole or village name"
                 />
               </div>
@@ -928,7 +928,7 @@ export default function ShikshaApplicationForm({
                   id="guardianName"
                   value={formData.guardianName}
                   onChange={(e) => handleInputChange("guardianName", e.target.value)}
-                  className="w-full border border-gray-300 rounded py-3 px-4 text-[15px] text-gray-800 outline-none focus:ring-0 focus:border-[#006400] transition-all bg-white"
+                  className="w-full border border-gray-300 rounded py-3 px-4 text-[15px] text-gray-800 outline-none focus:ring-0 focus:border-brand-blue transition-all bg-white"
                   placeholder="E.g. Shyam Bahadur Thapa"
                 />
                 {errors.guardianName && <p className="text-red-500 text-[12px] mt-1">{errors.guardianName}</p>}
@@ -947,7 +947,7 @@ export default function ShikshaApplicationForm({
                     if (val.length > 0 && val[0] !== "9") return;
                     handleInputChange("guardianPhone", val);
                   }}
-                  className="w-full border border-gray-300 rounded py-3 px-4 text-[15px] text-gray-800 outline-none focus:ring-0 focus:border-[#006400] transition-all bg-white"
+                  className="w-full border border-gray-300 rounded py-3 px-4 text-[15px] text-gray-800 outline-none focus:ring-0 focus:border-brand-blue transition-all bg-white"
                   placeholder="10-digit mobile number"
                   maxLength={10}
                 />
@@ -963,7 +963,7 @@ export default function ShikshaApplicationForm({
                   id="guardianEmail"
                   value={formData.guardianEmail}
                   onChange={(e) => handleInputChange("guardianEmail", e.target.value)}
-                  className="w-full border border-gray-300 rounded py-3 px-4 text-[15px] text-gray-800 outline-none focus:ring-0 focus:border-[#006400] transition-all bg-white"
+                  className="w-full border border-gray-300 rounded py-3 px-4 text-[15px] text-gray-800 outline-none focus:ring-0 focus:border-brand-blue transition-all bg-white"
                   placeholder="parent@email.com"
                 />
                 {errors.guardianEmail && <p className="text-red-500 text-[12px] mt-1">{errors.guardianEmail}</p>}
@@ -978,7 +978,7 @@ export default function ShikshaApplicationForm({
                     id="fatherOccupation"
                     value={formData.fatherOccupation}
                     onChange={(e) => handleInputChange("fatherOccupation", e.target.value)}
-                    className="w-full border border-gray-300 rounded py-3 px-4 text-[15px] text-gray-800 outline-none focus:ring-0 focus:border-[#006400] transition-all bg-white cursor-pointer"
+                    className="w-full border border-gray-300 rounded py-3 px-4 text-[15px] text-gray-800 outline-none focus:ring-0 focus:border-brand-blue transition-all bg-white cursor-pointer"
                   >
                     <option value="" disabled>Select Occupation</option>
                     {occupations.map((occ) => (
@@ -991,7 +991,7 @@ export default function ShikshaApplicationForm({
                       id="fatherOccupationOther"
                       value={formData.fatherOccupationOther}
                       onChange={(e) => handleInputChange("fatherOccupationOther", e.target.value)}
-                      className="mt-2 w-full border border-gray-300 rounded py-3 px-4 text-[15px] text-gray-800 outline-none focus:ring-0 focus:border-[#006400] transition-all bg-white"
+                      className="mt-2 w-full border border-gray-300 rounded py-3 px-4 text-[15px] text-gray-800 outline-none focus:ring-0 focus:border-brand-blue transition-all bg-white"
                       placeholder="Please specify occupation"
                     />
                   )}
@@ -1006,7 +1006,7 @@ export default function ShikshaApplicationForm({
                     id="motherOccupation"
                     value={formData.motherOccupation}
                     onChange={(e) => handleInputChange("motherOccupation", e.target.value)}
-                    className="w-full border border-gray-300 rounded py-3 px-4 text-[15px] text-gray-800 outline-none focus:ring-0 focus:border-[#006400] transition-all bg-white cursor-pointer"
+                    className="w-full border border-gray-300 rounded py-3 px-4 text-[15px] text-gray-800 outline-none focus:ring-0 focus:border-brand-blue transition-all bg-white cursor-pointer"
                   >
                     <option value="" disabled>Select Occupation</option>
                     {occupations.map((occ) => (
@@ -1019,7 +1019,7 @@ export default function ShikshaApplicationForm({
                       id="motherOccupationOther"
                       value={formData.motherOccupationOther}
                       onChange={(e) => handleInputChange("motherOccupationOther", e.target.value)}
-                      className="mt-2 w-full border border-gray-300 rounded py-3 px-4 text-[15px] text-gray-800 outline-none focus:ring-0 focus:border-[#006400] transition-all bg-white"
+                      className="mt-2 w-full border border-gray-300 rounded py-3 px-4 text-[15px] text-gray-800 outline-none focus:ring-0 focus:border-brand-blue transition-all bg-white"
                       placeholder="Please specify occupation"
                     />
                   )}
@@ -1036,7 +1036,7 @@ export default function ShikshaApplicationForm({
                   id="familyIncome"
                   value={formData.familyIncome}
                   onChange={(e) => handleInputChange("familyIncome", e.target.value)}
-                  className="w-full border border-gray-300 rounded py-3 px-4 text-[15px] text-gray-800 outline-none focus:ring-0 focus:border-[#006400] transition-all bg-white"
+                  className="w-full border border-gray-300 rounded py-3 px-4 text-[15px] text-gray-800 outline-none focus:ring-0 focus:border-brand-blue transition-all bg-white"
                   placeholder="Estimated monthly income"
                   min={0}
                   max={500000}
@@ -1053,7 +1053,7 @@ export default function ShikshaApplicationForm({
                   id="familyMembers"
                   value={formData.familyMembers}
                   onChange={(e) => handleInputChange("familyMembers", e.target.value)}
-                  className="w-full border border-gray-300 rounded py-3 px-4 text-[15px] text-gray-800 outline-none focus:ring-0 focus:border-[#006400] transition-all bg-white"
+                  className="w-full border border-gray-300 rounded py-3 px-4 text-[15px] text-gray-800 outline-none focus:ring-0 focus:border-brand-blue transition-all bg-white"
                   placeholder="Total number of members"
                   min={1}
                   max={20}
@@ -1119,7 +1119,7 @@ export default function ShikshaApplicationForm({
                   id="stream"
                   value={formData.stream}
                   onChange={(e) => handleInputChange("stream", e.target.value)}
-                  className="w-full border border-gray-300 rounded py-3 px-4 text-[15px] text-gray-800 outline-none focus:ring-0 focus:border-[#006400] transition-all bg-white cursor-pointer"
+                  className="w-full border border-gray-300 rounded py-3 px-4 text-[15px] text-gray-800 outline-none focus:ring-0 focus:border-brand-blue transition-all bg-white cursor-pointer"
                 >
                   <option value="" disabled>Select Stream</option>
                   {streams.map((s) => (
@@ -1138,7 +1138,7 @@ export default function ShikshaApplicationForm({
                     id="examCenter"
                     value={formData.examCenter}
                     onChange={(e) => handleInputChange("examCenter", e.target.value)}
-                    className="w-full border border-gray-300 rounded py-3 px-4 text-[15px] text-gray-800 outline-none focus:ring-0 focus:border-[#006400] transition-all bg-white cursor-pointer"
+                    className="w-full border border-gray-300 rounded py-3 px-4 text-[15px] text-gray-800 outline-none focus:ring-0 focus:border-brand-blue transition-all bg-white cursor-pointer"
                   >
                     <option value="" disabled>Select Exam Center</option>
                     {examCenterList.map((ec) => (
@@ -1161,7 +1161,7 @@ export default function ShikshaApplicationForm({
                 id="declaration"
                 checked={formData.declaration}
                 onChange={(e) => handleInputChange("declaration", e.target.checked)}
-                className="w-5 h-5 mt-0.5 text-[#006400] rounded border-gray-300 focus:ring-0 focus:border-[#006400] cursor-pointer"
+                className="w-5 h-5 mt-0.5 text-brand-blue rounded border-gray-300 focus:ring-0 focus:border-brand-blue cursor-pointer"
               />
               <span className="text-[15px] font-semibold text-gray-800 leading-snug">
                 I confirm that all information provided is correct.
