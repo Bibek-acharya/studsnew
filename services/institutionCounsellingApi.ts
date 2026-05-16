@@ -44,6 +44,14 @@ export const institutionCounsellingApi = {
   async getSessions(): Promise<CounsellingSession[]> {
     return apiCall("/api/v1/institution/counselling/sessions");
   },
+  async createSession(data: { title: string; description: string; scheduled_at: string; duration: number; max_seats: number }): Promise<CounsellingSession> {
+    return apiCall("/api/v1/institution/counselling/sessions", {
+      method: "POST", body: JSON.stringify(data),
+    });
+  },
+  async deleteSession(id: number): Promise<void> {
+    return apiCall(`/api/v1/institution/counselling/sessions/${id}`, { method: "DELETE" });
+  },
   async getBookings(): Promise<CounsellingBooking[]> {
     return apiCall("/api/v1/institution/counselling/bookings");
   },

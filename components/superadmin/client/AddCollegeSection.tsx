@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useRef, useCallback } from "react";
+import React, { useState, useRef, useCallback, useEffect } from "react";
 import RichTextEditor from "@/components/ScholarshipProvider/common/RichTextEditor";
 import ImageCropperModal from "@/components/ScholarshipProvider/common/ImageCropperModal";
 import { NEPAL_DISTRICTS } from "@/lib/location-data";
@@ -8,11 +8,9 @@ import { NEPAL_DISTRICTS } from "@/lib/location-data";
 interface VideoItem { id: number; url: string; message: string; name: string; designation: string; }
 interface OverviewRow { id: number; key: string; value: string; }
 interface LeadershipRow { id: number; position: string; role: string; holder: string; }
-interface CourseRow { id: number; name: string; duration: string; fees: string; eligibility: string; }
+
 interface FacilityRow { id: number; icon: string; heading: string; desc: string; }
-interface AlumniRow { id: number; photo: string; name: string; job: string; batch: string; linkedin: string; }
-interface GalleryItem { id: number; url: string; }
-interface DownloadItem { id: number; name: string; file: string; }
+
 
 const DISTRICTS = Object.values(NEPAL_DISTRICTS).flat();
 
@@ -20,13 +18,21 @@ const inputClass = "w-full px-3 py-2 border border-gray-300 rounded-md focus:bor
 
 export default function AddCollegeSection({
   setActiveSection,
+  editId,
 }: {
   setActiveSection: (s: string) => void;
+  editId?: number;
 }) {
   const [collegeName, setCollegeName] = useState("");
   const [location, setLocation] = useState("");
   const [website, setWebsite] = useState("");
-  const [level, setLevel] = useState("");
+  const [level, setLevel] = useState<string[]>([]);
+
+  const toggleLevel = (value: string) => {
+    setLevel(prev => prev.includes(value) ? prev.filter(l => l !== value) : [...prev, value]);
+  };
+
+  const levelOptions = ["+2", "Bachelor", "Master", "A Level", "CTEVT"];
   const [affiliation, setAffiliation] = useState("");
   const [about, setAbout] = useState("");
   const [vision, setVision] = useState("");
@@ -44,19 +50,43 @@ export default function AddCollegeSection({
   const [videos, setVideos] = useState<VideoItem[]>([]);
   const [overviewRows, setOverviewRows] = useState<OverviewRow[]>([]);
   const [leadershipRows, setLeadershipRows] = useState<LeadershipRow[]>([]);
-  const [courses, setCourses] = useState<CourseRow[]>([]);
-
   const [facilities, setFacilities] = useState<FacilityRow[]>([]);
-  const [alumni, setAlumni] = useState<AlumniRow[]>([]);
-  const [gallery, setGallery] = useState<GalleryItem[]>([]);
-  const [downloads, setDownloads] = useState<DownloadItem[]>([]);
-
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [locationFilter, setLocationFilter] = useState("");
   const locationRef = useRef<HTMLDivElement>(null);
   const logoInputRef = useRef<HTMLInputElement>(null);
   const bannerInputRef = useRef<HTMLInputElement>(null);
-  const galleryRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    if (!editId) return;
+    const base = apiBase();
+    const token = getToken();
+    fetch(`${base}/api/v1/superadmin/institutions/${editId}`, {
+      headers: { ...(token ? { Authorization: `Bearer ${token}` } : {}) },
+    })
+      .then(res => res.json())
+      .then(json => {
+        const d = json?.data;
+        if (!d) return;
+        setCollegeName(d.institution_name || "");
+        setLocation(d.district || "");
+        setWebsite(d.website_url || "");
+        setAffiliation(d.affiliation || "");
+        setAbout(d.about || "");
+        setVision(d.vision || "");
+        setMission(d.mission || "");
+        setLogoUrl(d.logo_url || "");
+        setBannerUrl(d.banner_url || "");
+        if (d.level) setLevel(d.level.split(",").filter(Boolean));
+        const withId = (arr: any[]) => (arr || []).map((item: any, i: number) => ({ ...item, id: item.id || Date.now() + i }));
+        if (d.profile_data?.videos) setVideos(withId(d.profile_data.videos));
+        if (d.profile_data?.overview_data) setOverviewRows(withId(d.profile_data.overview_data));
+        if (d.profile_data?.leadership_data) setLeadershipRows(withId(d.profile_data.leadership_data));
+        if (d.profile_data?.facilities_data) setFacilities(withId(d.profile_data.facilities_data));
+
+      })
+      .catch(() => {});
+  }, [editId]);
 
   const filteredDistricts = DISTRICTS.filter(d => d.toLowerCase().includes(locationFilter.toLowerCase()));
 
@@ -131,33 +161,50 @@ export default function AddCollegeSection({
       if (bannerFile) {
         try { finalBannerUrl = await uploadFile(bannerFile, "institution/banner"); } catch {}
       }
-      const body = {
+      const body: Record<string, any> = {
         institution_name: collegeName,
+        email: "",
+        registration_number: "",
         location,
         website,
-        level,
+        level: level.join(","),
         affiliation,
         logo_url: finalLogoUrl.startsWith("data:") ? "" : finalLogoUrl,
         banner_url: finalBannerUrl.startsWith("data:") ? "" : finalBannerUrl,
         about, vision, mission,
-        videos: videos.map(({ id, ...rest }) => rest),
-        overview_data: overviewRows.map(({ id, ...rest }) => rest),
-        leadership_data: leadershipRows.map(({ id, ...rest }) => rest),
-        courses_data: courses.map(({ id, ...rest }) => rest),
-        facilities_data: facilities.map(({ id, ...rest }) => rest),
-        alumni_data: alumni.map(({ id, ...rest }) => rest),
-        gallery_data: gallery.map(({ id, ...rest }) => rest),
-        downloads_data: downloads.map(({ id, ...rest }) => rest),
       };
-      await api("/api/v1/superadmin/institutions", {
-        method: "POST",
-        body: JSON.stringify(body),
-      });
-      setFormSuccess(true);
-      setFormError("");
-      setTimeout(() => setActiveSection("manage-college"), 1500);
+
+      if (editId) {
+        body.profile_data = {
+          videos: videos.map(({ id, ...rest }) => rest),
+          overview_data: overviewRows.map(({ id, ...rest }) => rest),
+          leadership_data: leadershipRows.map(({ id, ...rest }) => rest),
+          facilities_data: facilities.map(({ id, ...rest }) => rest),
+        };
+        await api(`/api/v1/superadmin/institutions/${editId}`, {
+          method: "PUT",
+          body: JSON.stringify(body),
+        });
+        setFormSuccess(true);
+        setFormError("");
+        setTimeout(() => setActiveSection("manage-college"), 1500);
+      } else {
+        Object.assign(body, {
+          videos: videos.map(({ id, ...rest }) => rest),
+          overview_data: overviewRows.map(({ id, ...rest }) => rest),
+          leadership_data: leadershipRows.map(({ id, ...rest }) => rest),
+          facilities_data: facilities.map(({ id, ...rest }) => rest),
+        });
+        await api("/api/v1/superadmin/institutions", {
+          method: "POST",
+          body: JSON.stringify(body),
+        });
+        setFormSuccess(true);
+        setFormError("");
+        setTimeout(() => setActiveSection("manage-college"), 1500);
+      }
     } catch (err: any) {
-      setFormError(err?.message || "Failed to create institution. Please try again.");
+      setFormError(err?.message || `Failed to ${editId ? "update" : "create"} institution. Please try again.`);
     } finally {
       setSaving(false);
     }
@@ -168,21 +215,9 @@ export default function AddCollegeSection({
       <form onSubmit={handleSubmit}>
         <div className="max-w-[90rem] mx-auto space-y-8">
 
-          <div className="flex items-center justify-between">
-            <div>
-              <h2 className="text-xl font-bold text-gray-800">Create Institution</h2>
-              <p className="text-sm text-gray-500 mt-1">Register a new educational institution with full profile data.</p>
-            </div>
-            <div className="flex items-center gap-4">
-              <button type="button" onClick={() => setActiveSection("manage-college")}
-                className="px-6 py-2.5 bg-white border border-gray-300 rounded-md text-gray-700 font-medium hover:bg-gray-50 transition">
-                Cancel
-              </button>
-              <button type="submit" disabled={saving}
-                className="px-6 py-2.5 bg-blue-600 text-white rounded-md font-medium hover:bg-blue-700 transition flex items-center gap-2 disabled:opacity-50">
-                {saving ? "Creating..." : "Create Institution"}
-              </button>
-            </div>
+          <div>
+            <h2 className="text-xl font-bold text-gray-800">{editId ? "Edit Institution" : "Create Institution"}</h2>
+            <p className="text-sm text-gray-500 mt-1">{editId ? "Update the institution profile data." : "Register a new educational institution with full profile data."}</p>
           </div>
 
           {formSuccess && (
@@ -201,8 +236,8 @@ export default function AddCollegeSection({
             <h3 className="text-lg font-semibold text-gray-800 mb-5">
               <i className="fa-solid fa-image text-blue-500 mr-2"></i>Logo & Banner
             </h3>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div>
+            <div className="grid grid-cols-1 md:grid-cols-8 gap-6">
+              <div className="md:col-span-1">
                 <label className="block text-sm font-medium text-gray-700 mb-2">Organization Logo</label>
                 <div onClick={() => logoInputRef.current?.click()}
                   className="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-gray-300 border-dashed rounded-md hover:border-blue-400 transition cursor-pointer bg-gray-50 relative overflow-hidden h-40">
@@ -226,7 +261,7 @@ export default function AddCollegeSection({
                   }} />
                 </div>
               </div>
-              <div>
+              <div className="md:col-span-7">
                 <label className="block text-sm font-medium text-gray-700 mb-2">Banner / Cover Image</label>
                 <div onClick={() => bannerInputRef.current?.click()}
                   className="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-gray-300 border-dashed rounded-md hover:border-blue-400 transition cursor-pointer bg-gray-50 relative overflow-hidden h-40">
@@ -288,14 +323,20 @@ export default function AddCollegeSection({
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">Level</label>
-                <select className={inputClass} value={level} onChange={e => setLevel(e.target.value)}>
-                  <option value="">Select Level</option>
-                  <option value="+2">+2</option>
-                  <option value="Bachelor">Bachelor</option>
-                  <option value="Master">Master</option>
-                  <option value="A Level">A Level</option>
-                  <option value="CTEVT">CTEVT</option>
-                </select>
+                <div className="flex flex-wrap gap-2">
+                  {levelOptions.map(opt => (
+                    <label key={opt}
+                      className={`px-3 py-1.5 rounded-md border text-sm cursor-pointer transition-colors ${
+                        level.includes(opt)
+                          ? "bg-blue-50 border-blue-400 text-blue-700"
+                          : "bg-white border-gray-300 text-gray-600 hover:border-gray-400"
+                      }`}>
+                      <input type="checkbox" className="hidden" checked={level.includes(opt)}
+                        onChange={() => toggleLevel(opt)} />
+                      {opt}
+                    </label>
+                  ))}
+                </div>
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">Affiliated University</label>
@@ -411,37 +452,6 @@ export default function AddCollegeSection({
             </div>
           </div>
 
-          {/* ─── Courses & Fees ─── */}
-          <div className="bg-white p-6 rounded-md border border-gray-200">
-            <div className="flex justify-between items-center mb-5">
-              <h3 className="text-lg font-semibold text-gray-800">
-                <i className="fa-solid fa-book-open text-blue-500 mr-2"></i>Courses & Fees
-              </h3>
-              <button type="button" onClick={() => addItem(setCourses, { name: "", duration: "", fees: "", eligibility: "" })}
-                className="text-sm text-blue-600 bg-blue-50 px-3 py-1.5 rounded-md hover:bg-blue-100 transition-colors font-medium">
-                <i className="fa-solid fa-plus mr-1"></i> Add Course
-              </button>
-            </div>
-            <div className="space-y-3">
-              {courses.map(c => (
-                <div key={c.id} className="bg-gray-50 border border-gray-200 rounded-md p-4 relative group">
-                  <button type="button" onClick={() => removeItem(setCourses, c.id)}
-                    className="absolute top-3 right-3 text-red-400 hover:text-red-600 hover:bg-red-50 p-1.5 rounded-md transition-colors opacity-0 group-hover:opacity-100">
-                    <i className="fa-solid fa-trash"></i>
-                  </button>
-                  <div className="grid grid-cols-1 md:grid-cols-4 gap-3 pr-10">
-                    <input type="text" className={`${inputClass} text-sm`} placeholder="Course name" value={c.name} onChange={e => updateItem(setCourses, c.id, "name", e.target.value)} />
-                    <input type="text" className={`${inputClass} text-sm`} placeholder="Duration" value={c.duration} onChange={e => updateItem(setCourses, c.id, "duration", e.target.value)} />
-                    <input type="text" className={`${inputClass} text-sm`} placeholder="Fees / Year" value={c.fees} onChange={e => updateItem(setCourses, c.id, "fees", e.target.value)} />
-                    <input type="text" className={`${inputClass} text-sm`} placeholder="Eligibility & Seat" value={c.eligibility} onChange={e => updateItem(setCourses, c.id, "eligibility", e.target.value)} />
-                  </div>
-                </div>
-              ))}
-              {courses.length === 0 && <p className="text-sm text-gray-400 py-4 text-center">No courses added.</p>}
-            </div>
-          </div>
-
-
           {/* ─── Facilities ─── */}
           <div className="bg-white p-6 rounded-md border border-gray-200">
             <div className="flex justify-between items-center mb-5">
@@ -473,127 +483,6 @@ export default function AddCollegeSection({
             </div>
           </div>
 
-          {/* ─── Alumni ─── */}
-          <div className="bg-white p-6 rounded-md border border-gray-200">
-            <div className="flex justify-between items-center mb-5">
-              <h3 className="text-lg font-semibold text-gray-800">
-                <i className="fa-solid fa-users text-blue-500 mr-2"></i>Notable Alumni
-              </h3>
-              <button type="button" onClick={() => addItem(setAlumni, { photo: "", name: "", job: "", batch: "", linkedin: "" })}
-                className="text-sm text-blue-600 bg-blue-50 px-3 py-1.5 rounded-md hover:bg-blue-100 transition-colors font-medium">
-                <i className="fa-solid fa-plus mr-1"></i> Add Alumni
-              </button>
-            </div>
-            <div className="space-y-3">
-              {alumni.map(a => (
-                <div key={a.id} className="bg-gray-50 border border-gray-200 rounded-md p-4 relative group">
-                  <button type="button" onClick={() => removeItem(setAlumni, a.id)}
-                    className="absolute top-3 right-3 text-red-400 hover:text-red-600 hover:bg-red-50 p-1.5 rounded-md transition-colors opacity-0 group-hover:opacity-100">
-                    <i className="fa-solid fa-trash"></i>
-                  </button>
-                  <div className="flex gap-4 pr-10">
-                    <div className="w-16 h-16 rounded-full bg-gray-200 flex-shrink-0 overflow-hidden flex items-center justify-center">
-                      {a.photo ? <img src={a.photo} className="w-full h-full object-cover" alt="" /> : <i className="fa-solid fa-user text-gray-400 text-xl"></i>}
-                    </div>
-                    <div className="flex-1 space-y-2">
-                      <input className={`${inputClass} text-sm`} placeholder="Full name" value={a.name} onChange={e => updateItem(setAlumni, a.id, "name", e.target.value)} />
-                      <input className={`${inputClass} text-sm`} placeholder="Current job (e.g. Software Engineer at Google)" value={a.job} onChange={e => updateItem(setAlumni, a.id, "job", e.target.value)} />
-                      <div className="grid grid-cols-2 gap-2">
-                        <input className={`${inputClass} text-sm`} placeholder="Batch year" value={a.batch} onChange={e => updateItem(setAlumni, a.id, "batch", e.target.value)} />
-                        <input className={`${inputClass} text-sm`} placeholder="LinkedIn URL" value={a.linkedin} onChange={e => updateItem(setAlumni, a.id, "linkedin", e.target.value)} />
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              ))}
-              {alumni.length === 0 && <p className="text-sm text-gray-400 py-4 text-center">No alumni added.</p>}
-            </div>
-          </div>
-
-          {/* ─── Gallery ─── */}
-          <div className="bg-white p-6 rounded-md border border-gray-200">
-            <h3 className="text-lg font-semibold text-gray-800 mb-5">
-              <i className="fa-solid fa-image text-blue-500 mr-2"></i>Gallery
-            </h3>
-            <div className="mb-6">
-              <div onClick={() => galleryRef.current?.click()}
-                className="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-gray-300 border-dashed rounded-md hover:border-blue-400 transition cursor-pointer bg-gray-50 relative overflow-hidden">
-                <div className="space-y-1 text-center">
-                  <i className="fa-regular fa-image text-4xl text-gray-400"></i>
-                  <div className="flex text-sm text-gray-600 justify-center mt-3">
-                    <span className="font-medium text-blue-600 hover:text-blue-500">Upload images</span>
-                  </div>
-                  <p className="text-xs text-gray-400">PNG, JPG up to 5MB each</p>
-                </div>
-                <input ref={galleryRef} type="file" className="sr-only" accept="image/*" multiple
-                  onChange={async e => {
-                    const files = Array.from(e.target.files || []);
-                    const newItems: GalleryItem[] = [];
-                    for (let i = 0; i < files.length; i++) {
-                      try {
-                        const url = await uploadFile(files[i], "institution/gallery");
-                        newItems.push({ id: Date.now() + i, url });
-                      } catch { /* skip failed uploads */ }
-                    }
-                    if (newItems.length > 0) setGallery(prev => [...prev, ...newItems]);
-                  }} />
-              </div>
-            </div>
-            {gallery.length > 0 && (
-              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3">
-                {gallery.map(g => (
-                  <div key={g.id} className="relative group rounded-md overflow-hidden aspect-square bg-gray-200">
-                    <img src={g.url} className="w-full h-full object-cover" alt="Gallery" />
-                    <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                      <button type="button" onClick={() => removeItem(setGallery, g.id)} className="text-white hover:text-red-300">
-                        <i className="fa-solid fa-trash text-lg"></i>
-                      </button>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
-
-          {/* ─── Downloads ─── */}
-          <div className="bg-white p-6 rounded-md border border-gray-200">
-            <div className="flex justify-between items-center mb-5">
-              <h3 className="text-lg font-semibold text-gray-800">
-                <i className="fa-solid fa-download text-blue-500 mr-2"></i>Downloads / Resources
-              </h3>
-              <button type="button" onClick={() => addItem(setDownloads, { name: "", file: "" })}
-                className="text-sm text-blue-600 bg-blue-50 px-3 py-1.5 rounded-md hover:bg-blue-100 transition-colors font-medium">
-                <i className="fa-solid fa-plus mr-1"></i> Add Document
-              </button>
-            </div>
-            <div className="space-y-3">
-              {downloads.map(d => (
-                <div key={d.id} className="flex items-center gap-3 bg-gray-50 border border-gray-200 rounded-md p-3 relative group">
-                  <button type="button" onClick={() => removeItem(setDownloads, d.id)}
-                    className="absolute top-2 right-2 text-red-400 hover:text-red-600 hover:bg-red-50 p-1.5 rounded-md transition-colors opacity-0 group-hover:opacity-100">
-                    <i className="fa-solid fa-trash"></i>
-                  </button>
-                  <div className="w-10 h-10 rounded bg-blue-50 text-blue-500 flex items-center justify-center flex-shrink-0">
-                    <i className="fa-regular fa-file-lines"></i>
-                  </div>
-                  <input className={`${inputClass} text-sm flex-1`} placeholder="Document name" value={d.name} onChange={e => updateItem(setDownloads, d.id, "name", e.target.value)} />
-                  <label className="px-4 py-2 bg-white border border-gray-300 rounded-md text-sm text-gray-600 cursor-pointer hover:bg-gray-50 whitespace-nowrap flex items-center gap-1 flex-shrink-0">
-                    <i className="fa-solid fa-upload"></i> Choose File
-                    <input type="file" className="hidden" onChange={async e => {
-                      const file = e.target.files?.[0];
-                      if (!file) return;
-                      try {
-                        const url = await uploadFile(file, "institution/downloads");
-                        updateItem(setDownloads, d.id, "file", url);
-                      } catch { /* skip */ }
-                    }} />
-                  </label>
-                </div>
-              ))}
-              {downloads.length === 0 && <p className="text-sm text-gray-400 py-4 text-center">No documents added.</p>}
-            </div>
-          </div>
-
           {/* ─── Footer ─── */}
           <div className="flex items-center justify-end space-x-4 pt-6 mt-8 border-t border-gray-200 pb-10">
             <button type="button" onClick={() => setActiveSection("manage-college")}
@@ -603,7 +492,7 @@ export default function AddCollegeSection({
             <button type="submit" disabled={saving}
               className="px-6 py-2.5 bg-blue-600 text-white rounded-md font-medium hover:bg-blue-700 transition flex items-center gap-2 disabled:opacity-50">
               <i className={`fa-solid ${saving ? "fa-spinner fa-spin" : "fa-check"}`}></i>
-              {saving ? "Creating..." : "Create Institution"}
+              {saving ? (editId ? "Updating..." : "Creating...") : (editId ? "Edit Institution" : "Create Institution")}
             </button>
           </div>
 

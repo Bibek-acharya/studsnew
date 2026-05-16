@@ -4,6 +4,7 @@ const nextConfig: NextConfig = {
 
   /* config options here */
   images: {
+    dangerouslyAllowLocalIP: true,
     remotePatterns: [
       {
         protocol: "https",
@@ -68,6 +69,10 @@ const nextConfig: NextConfig = {
       {
         protocol: "https",
         hostname: "placehold.co",
+      },
+      {
+        protocol: "http",
+        hostname: "localhost",
       },
     ],
   },

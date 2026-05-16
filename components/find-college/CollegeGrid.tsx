@@ -233,7 +233,7 @@ const CollegeGrid: React.FC<CollegeGridProps> = ({
           location: inst.district,
           website: inst.website_url,
           verified: true,
-          featured: false,
+          featured: inst.featured || false,
           rating: 0,
           reviews: 0,
           type: "College",
@@ -809,7 +809,7 @@ const ProgramCard: React.FC<{
           </p>
         </div>
 
-       {college.website && (
+       {college.featured && college.website && (
         <div className="flex items-center gap-2 text-[14px] text-gray-500 mb-3">
           <Globe className="w-4.5 h-4.5 text-gray-400 shrink-0" />
           <a
@@ -864,8 +864,6 @@ const ProgramCard: React.FC<{
             </svg>
           </a>
         </div>
-
-        <div className="border-t border-dashed border-gray-200 mb-2" />
 
         <div className="flex flex-col gap-3 mt-auto">
           

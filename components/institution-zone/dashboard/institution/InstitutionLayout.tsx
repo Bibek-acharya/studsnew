@@ -438,11 +438,11 @@ const InstitutionLayout: React.FC<Props> = ({ activePage, onNavigate, children }
                               onNavigate(item.page);
                               setSidebarOpen(false);
                             }}
-                            className={`flex items-center gap-2 px-3 py-2 text-sm rounded-md transition-colors ${
-                              activePage === item.page
-                                ? "text-brand-600 bg-brand-50"
-                                : "text-gray-500 hover:text-brand-600 hover:bg-brand-50"
-                            }`}
+            className={`flex items-center gap-2 px-3 py-2 text-sm rounded-md transition-colors ${
+              activePage === item.page
+                ? "text-black bg-blue-100"
+                : "text-gray-500 hover:text-brand-600 hover:bg-brand-50"
+            }`}
                           >
                             <span className="whitespace-nowrap">{item.label}</span>
                           </button>
@@ -474,7 +474,7 @@ const InstitutionLayout: React.FC<Props> = ({ activePage, onNavigate, children }
                     : locked
                       ? "text-gray-300 cursor-not-allowed"
                       : isActive
-                        ? "bg-brand-50 text-brand-600"
+                        ? "bg-blue-100 text-black"
                         : "text-gray-700 hover:bg-brand-50 hover:text-brand-600"
                 }`}
                 title={locked ? "This section has been disabled by the admin" : ""}

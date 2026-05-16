@@ -244,20 +244,8 @@ export default function CollegeCard({
 
         <div className="border-b border-dotted border-gray-200 mt-auto mb-3 w-full pt-2" style={{ borderBottomWidth: "1.5px", borderBottomStyle: "dotted" }}></div>
 
-        {/* Middle Actions */}
-        <div className="flex items-center gap-1.5 mb-2">
-          <button
-            onClick={(e) => {
-              e.stopPropagation();
-              onMockTest?.();
-            }}
-            className="flex-1 py-1.5 px-2 bg-gray-50 text-[#334155] hover:bg-gray-100 border border-gray-200 rounded-md text-[11px] font-semibold transition-colors flex justify-center items-center gap-1 whitespace-nowrap"
-          >
-            <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2">
-              <path strokeLinecap="round" strokeLinejoin="round" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
-            </svg>
-            Mock Test
-          </button>
+        {/* Actions: Ask Question, Apply Now, Bookmark */}
+        <div className="flex items-center gap-1.5">
           <button
             onClick={(e) => {
               e.stopPropagation();
@@ -270,16 +258,12 @@ export default function CollegeCard({
             </svg>
             Ask Question
           </button>
-        </div>
-
-        {/* Apply + Favorite */}
-        <div className="flex items-center gap-1.5">
           <button
             onClick={(e) => {
               e.stopPropagation();
               onApply?.();
             }}
-            className="flex-1 py-2 px-2 bg-brand-blue hover:bg-brand-hover text-white rounded-md text-[12px] font-bold transition-colors"
+            className="flex-1 py-1.5 px-2 bg-brand-blue hover:bg-brand-hover text-white rounded-md text-[11px] font-bold transition-colors flex justify-center items-center gap-1 whitespace-nowrap"
           >
             Apply Now
           </button>

@@ -5,6 +5,7 @@ import dynamic from "next/dynamic";
 import * as LucideIcons from "lucide-react";
 import SectionHeader from "@/components/institution-zone/dashboard/shared/SectionHeader";
 import { institutionEntranceApi } from "@/services/institutionEntranceApi";
+import ImageCropperModal from "@/components/ScholarshipProvider/common/ImageCropperModal";
 import "react-quill-new/dist/quill.snow.css";
 
 const kebabToPascal = (name: string): string =>
@@ -212,6 +213,7 @@ interface ModelSet {
   title: string;
   size: string;
   description: string;
+  fileUrl: string;
 }
 
 interface ExamDateSchedule {
@@ -305,6 +307,29 @@ const EntrancePage: React.FC = () => {
   const [contactPersons, setContactPersons] = useState<ContactPerson[]>([]);
   const [faqs, setFaqs] = useState<FaqItem[]>([]);
 
+  const [heroBanner, setHeroBanner] = useState("");
+  const [cropperOpen, setCropperOpen] = useState(false);
+  const [cropImageSrc, setCropImageSrc] = useState<string | null>(null);
+  const [uploadingInfo, setUploadingInfo] = useState<{ id: number } | null>(null);
+
+  const getToken = () => localStorage.getItem("institutionToken");
+  const apiBase = () => process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080";
+
+  const uploadFile = async (file: File, folder: string): Promise<string> => {
+    const base = apiBase();
+    const formData = new FormData();
+    formData.append("file", file);
+    const res = await fetch(`${base}/api/v1/institution/upload?folder=${folder}`, {
+      method: "POST",
+      headers: { ...(getToken() ? { Authorization: `Bearer ${getToken()}` } : {}) },
+      body: formData,
+    });
+    if (!res.ok) throw new Error(`Upload error: ${res.status}`);
+    const data = await res.json();
+    const url = data?.data?.url || "";
+    return url.startsWith("/") ? `${base}${url}` : url;
+  };
+
   const [errors, setErrors] = useState<Record<string, boolean>>({});
 
   const fieldError = (field: string) =>
@@ -334,6 +359,29 @@ const EntrancePage: React.FC = () => {
     if (hasEmpty) errs.overviewDetails = true;
     setErrors(errs);
     return Object.keys(errs).length === 0;
+  };
+
+  const handleBannerCrop = async (croppedBlob: Blob) => {
+    const croppedFile = new File([croppedBlob], "banner.jpg", { type: "image/jpeg" });
+    try {
+      const url = await uploadFile(croppedFile, "institution/entrance");
+      setHeroBanner(url);
+    } catch (e) { console.error("Banner upload failed:", e); }
+    setCropperOpen(false);
+    setCropImageSrc(null);
+  };
+
+  const handleModelSetUpload = async (id: number, file: File) => {
+    if (!file.type.startsWith("image/") && file.type !== "application/pdf") {
+      alert("Please select an image or PDF file.");
+      return;
+    }
+    setUploadingInfo({ id });
+    try {
+      const url = await uploadFile(file, "institution/entrance");
+      setModelSets(prev => prev.map(ms => ms.id === id ? { ...ms, fileUrl: url } : ms));
+    } catch (e) { console.error("Upload failed:", e); }
+    setUploadingInfo(null);
   };
 
   const handleSave = async (publish: boolean) => {
@@ -387,14 +435,36 @@ const EntrancePage: React.FC = () => {
           <div className="p-6 space-y-5">
             <div>
               <label className={labelClass}>Hero Banner Image <span className="text-red-500">*</span></label>
-              <label className="border-2 border-dashed border-gray-300 rounded-xl p-8 flex flex-col items-center justify-center text-center hover:bg-gray-50 hover:border-blue-400 transition-colors cursor-pointer group">
-                <div className="p-3 bg-blue-50 text-blue-600 rounded-full group-hover:scale-110 transition-transform">
-                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
-                </div>
-                <span className="mt-4 text-sm font-medium text-gray-900">Click to upload banner image</span>
-                <span className="mt-1 text-xs text-gray-500">Recommended size: 1920x600px (JPG/PNG)</span>
-                <input type="file" className="hidden" />
-              </label>
+              <div onClick={() => document.getElementById("entrance-banner-input")?.click()}
+                className="border-2 border-dashed border-gray-300 rounded-xl flex flex-col items-center justify-center text-center hover:bg-gray-50 hover:border-blue-400 transition-colors cursor-pointer relative overflow-hidden min-h-[200px]">
+                {heroBanner ? (
+                  <div className="relative w-full h-full">
+                    <img src={heroBanner} className="w-full h-48 object-cover" alt="Banner" />
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/30 via-transparent to-transparent" />
+                    <span className="absolute bottom-3 left-3 text-xs text-white/80">Click anywhere to replace</span>
+                    <button type="button" onClick={e => { e.stopPropagation(); setHeroBanner(""); }}
+                      className="absolute top-3 right-3 p-2 bg-white/95 rounded-full text-red-500 hover:bg-white shadow-md">
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+                    </button>
+                  </div>
+                ) : (
+                  <>
+                    <div className="p-3 bg-blue-50 text-blue-600 rounded-full">
+                      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+                    </div>
+                    <span className="mt-3 text-sm font-medium text-gray-900">Click to upload banner image</span>
+                    <span className="mt-1 text-xs text-gray-500">Recommended size: 1920x600px (JPG/PNG)</span>
+                  </>
+                )}
+                <input id="entrance-banner-input" type="file" className="hidden" accept="image/*" onChange={e => {
+                  const file = e.target.files?.[0];
+                  if (!file) return;
+                  if (!file.type.startsWith("image/")) { alert("Please select an image file."); return; }
+                  const reader = new FileReader();
+                  reader.onload = ev => { if (ev.target?.result) { setCropImageSrc(ev.target.result as string); setCropperOpen(true); } };
+                  reader.readAsDataURL(file);
+                }} />
+              </div>
             </div>
             <div>
               <label className={labelClass}>Description <span className="text-red-500">*</span></label>
@@ -881,7 +951,7 @@ const EntrancePage: React.FC = () => {
             onAdd={() =>
               setModelSets((prev) => [
                 ...prev,
-                { id: nextId(prev), title: "", size: "", description: "" },
+                { id: nextId(prev), title: "", size: "", description: "", fileUrl: "" },
               ])
             }
             addLabel="Add Material"
@@ -926,12 +996,37 @@ const EntrancePage: React.FC = () => {
                   </div>
                   <div className="md:col-span-2">
                     <label className="border-2 border-dashed border-gray-300 rounded-xl p-4 flex flex-col items-center justify-center text-center hover:bg-gray-50 hover:border-blue-400 transition-colors cursor-pointer group">
-                      <div className="p-2 bg-blue-50 text-blue-600 rounded-full group-hover:scale-110 transition-transform">
-                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
-                      </div>
-                      <span className="mt-2 text-sm font-medium text-gray-900">Upload PDF File</span>
-                      <span className="mt-1 text-xs text-gray-500">PDF format recommended</span>
-                      <input type="file" className="hidden" accept=".pdf" />
+                      {ms.fileUrl ? (
+                        <div className="flex flex-col items-center gap-2">
+                          <div className="p-2 bg-green-50 text-green-600 rounded-full">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+                          </div>
+                          <span className="text-sm font-medium text-gray-900">File uploaded</span>
+                          <span className="text-xs text-gray-500">Click anywhere to replace</span>
+                          <div className="flex gap-2">
+                            <a href={ms.fileUrl} target="_blank" rel="noreferrer"
+                              className="px-3 py-1 text-xs font-medium text-blue-600 bg-blue-50 rounded-lg hover:bg-blue-100">View</a>
+                            <button type="button" onClick={e => { e.stopPropagation(); setModelSets(prev => prev.map(x => x.id === ms.id ? { ...x, fileUrl: "" } : x)); }}
+                              className="px-3 py-1 text-xs font-medium text-red-600 bg-red-50 rounded-lg hover:bg-red-100">Remove</button>
+                          </div>
+                        </div>
+                      ) : (
+                        <>
+                          <div className="p-2 bg-blue-50 text-blue-600 rounded-full group-hover:scale-110 transition-transform">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+                          </div>
+                          <span className="mt-2 text-sm font-medium text-gray-900">Upload PDF File</span>
+                          <span className="mt-1 text-xs text-gray-500">PDF format recommended</span>
+                        </>
+                      )}
+                      {uploadingInfo?.id === ms.id ? (
+                        <span className="text-xs text-blue-600 mt-2">Uploading...</span>
+                      ) : (
+                        <input type="file" className="hidden" accept=".pdf,image/*" onChange={e => {
+                          const file = e.target.files?.[0];
+                          if (file) handleModelSetUpload(ms.id, file);
+                        }} />
+                      )}
                     </label>
                   </div>
                 </div>
@@ -1252,6 +1347,14 @@ const EntrancePage: React.FC = () => {
           </button>
         </div>
       </div>
+
+      {cropperOpen && cropImageSrc && (
+        <ImageCropperModal
+          imageSrc={cropImageSrc}
+          onCropComplete={handleBannerCrop}
+          onCancel={() => { setCropperOpen(false); setCropImageSrc(null); }}
+        />
+      )}
     </div>
   );
 };

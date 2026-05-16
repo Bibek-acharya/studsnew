@@ -5,7 +5,7 @@ import {
   Building2, Plus, Search, Filter, Download, ChevronLeft, ChevronRight,
   ShieldOff, Trash2, Eye, CreditCard, MessageSquare, CheckCircle,
   Clock, Phone, CircleAlert, Loader2, RefreshCw, MapPin, Mail, Check,
-  X, DollarSign, CalendarDays
+  X, DollarSign, CalendarDays, Edit, Star
 } from "lucide-react";
 import { NEPAL_PROVINCES } from "@/lib/location-data";
 
@@ -44,6 +44,7 @@ interface Institution {
   status: string;
   created_at: string;
   logo_url: string;
+  featured?: boolean;
   subscription: Subscription | null;
 }
 
@@ -199,7 +200,7 @@ export default function CollegeListSection({ setActiveSection }: { setActiveSect
   const [paymentProcessing, setPaymentProcessing] = useState(false);
 
   const [confirmDialog, setConfirmDialog] = useState<{
-    open: boolean; title: string; message: string; action: "suspend" | "delete" | "verify"; institutionId: number | null; institutionName: string;
+    open: boolean; title: string; message: string; action: "suspend" | "delete" | "verify" | "feature"; institutionId: number | null; institutionName: string;
   }>({ open: false, title: "", message: "", action: "delete", institutionId: null, institutionName: "" });
 
   const [actionMsg, setActionMsg] = useState<{ type: "success" | "error"; text: string } | null>(null);
@@ -318,6 +319,17 @@ export default function CollegeListSection({ setActiveSection }: { setActiveSect
     });
   };
 
+  const handleOpenFeature = (inst: Institution) => {
+    setConfirmDialog({
+      open: true,
+      title: `${inst.featured ? "Unfeature" : "Feature"} Institution`,
+      message: `Are you sure you want to ${inst.featured ? "unfeature" : "feature"} "${inst.institution_name}"?`,
+      action: "feature",
+      institutionId: inst.id,
+      institutionName: inst.institution_name,
+    });
+  };
+
   const handleOpenDelete = (inst: Institution) => {
     setConfirmDialog({
       open: true,
@@ -339,6 +351,9 @@ export default function CollegeListSection({ setActiveSection }: { setActiveSect
       } else if (confirmDialog.action === "suspend") {
         await superadminFetch(`/api/v1/superadmin/institutions/${id}/suspend`, { method: "PUT" });
         showActionMsg("success", `${confirmDialog.institutionName} suspended successfully`);
+      } else if (confirmDialog.action === "feature") {
+        await superadminFetch(`/api/v1/superadmin/institutions/${id}/feature`, { method: "PUT" });
+        showActionMsg("success", `${confirmDialog.institutionName} featured status updated`);
       } else {
         await superadminFetch(`/api/v1/superadmin/institutions/${id}`, { method: "DELETE" });
         showActionMsg("success", `${confirmDialog.institutionName} deleted successfully`);
@@ -399,7 +414,7 @@ export default function CollegeListSection({ setActiveSection }: { setActiveSect
       <div className="bg-white rounded-xl border border-gray-200">
         <div className="p-6">
           {/* Level Tabs */}
-          <div className="flex items-center gap-2 mb-6 overflow-x-auto pb-2 border-b border-gray-200">
+          {/* <div className="flex items-center gap-2 mb-6 overflow-x-auto pb-2 border-b border-gray-200">
             {LEVELS.map(level => {
               const count = level === "all" ? institutions.length : levelCounts[level] || 0;
               return (
@@ -416,7 +431,7 @@ export default function CollegeListSection({ setActiveSection }: { setActiveSect
                 </button>
               );
             })}
-          </div>
+          </div> */}
 
           {/* Filters */}
           <div className="flex flex-wrap items-center gap-3 mb-6">
@@ -490,7 +505,6 @@ export default function CollegeListSection({ setActiveSection }: { setActiveSect
                       <th className="text-left py-3 px-3 font-semibold text-gray-700 text-xs w-36">Register Date</th>
                       <th className="text-left py-3 px-3 font-semibold text-gray-700 text-xs w-64">College Name</th>
                       <th className="text-center py-3 px-3 font-semibold text-gray-700 text-xs w-28">Type</th>
-                      <th className="text-center py-3 px-3 font-semibold text-gray-700 text-xs w-28">Level</th>
                       <th className="text-left py-3 px-3 font-semibold text-gray-700 text-xs w-48">Affiliation</th>
                       <th className="text-left py-3 px-3 font-semibold text-gray-700 text-xs w-52">Address</th>
                       <th className="text-left py-3 px-3 font-semibold text-gray-700 text-xs w-40">Contact Person</th>
@@ -542,11 +556,11 @@ export default function CollegeListSection({ setActiveSection }: { setActiveSect
                               {inst.organization_type || "-"}
                             </span>
                           </td>
-                          <td className="text-center py-3 px-3">
+                          {/* <td className="text-center py-3 px-3">
                             <span className={`px-2 py-1 rounded text-xs font-semibold ${LEVEL_STYLES[inst.level] || "bg-gray-100 text-gray-700"}`}>
                               {inst.level || "-"}
                             </span>
-                          </td>
+                          </td> */}
                           <td className="py-3 px-3 text-gray-600 text-xs">{inst.affiliation || "-"}</td>
                           <td className="py-3 px-3 text-gray-600 text-xs">
                             <div className="flex items-center gap-1">
@@ -632,6 +646,21 @@ export default function CollegeListSection({ setActiveSection }: { setActiveSect
                               <button type="button" onClick={() => window.open(`/find-college/${inst.id}`, "_blank")} className="tooltip p-1.5 hover:bg-purple-50 rounded text-purple-600 transition-colors" title="View Details"><Eye className="w-3.5 h-3.5" /></button>
                               <button type="button" onClick={() => handleOpenPayment(inst)} className="tooltip p-1.5 hover:bg-yellow-50 rounded text-yellow-600 transition-colors" title="Payment"><CreditCard className="w-3.5 h-3.5" /></button>
                               <button type="button" onClick={() => handleOpenSuspend(inst)} className="tooltip p-1.5 hover:bg-orange-50 rounded text-orange-600 transition-colors" title="Suspend"><ShieldOff className="w-3.5 h-3.5" /></button>
+                              <button type="button" onClick={() => handleOpenFeature(inst)}
+                                className={`tooltip p-1.5 rounded transition-colors ${inst.featured ? "text-amber-500 hover:bg-amber-50" : "text-gray-400 hover:bg-amber-50 hover:text-amber-500"}`}
+                                title={inst.featured ? "Unfeature" : "Feature"}>
+                                <Star className="w-3.5 h-3.5" />
+                              </button>
+                              <button type="button" onClick={() => setActiveSection(`edit-institution-${inst.id}`)}
+                                disabled={inst.claimed}
+                                className={`tooltip p-1.5 rounded transition-colors ${
+                                  inst.claimed
+                                    ? "text-gray-300 cursor-not-allowed"
+                                    : "hover:bg-indigo-50 text-indigo-600"
+                                }`}
+                                title={inst.claimed ? "Cannot edit - Institution is claimed" : "Edit"}>
+                                <Edit className="w-3.5 h-3.5" />
+                              </button>
                               <button type="button" onClick={() => handleOpenDelete(inst)} className="tooltip p-1.5 hover:bg-red-50 rounded text-red-600 transition-colors" title="Delete"><Trash2 className="w-3.5 h-3.5" /></button>
                             </div>
                           </td>

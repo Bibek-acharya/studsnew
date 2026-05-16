@@ -1,6 +1,9 @@
 "use client";
-import React, { useState, useRef, useEffect } from "react";
+import React, { useState, useRef, useEffect, useCallback } from "react";
+import { Plus, Trash } from "@phosphor-icons/react";
 import RichTextEditor from "@/components/ScholarshipProvider/common/RichTextEditor";
+import ImageCropperModal from "@/components/ScholarshipProvider/common/ImageCropperModal";
+import FileUpload from "@/components/ScholarshipProvider/common/FileUpload";
 
 interface VideoItem { id: number; url: string; message: string; name: string; designation: string; }
 interface OverviewRow { id: number; key: string; value: string; }
@@ -9,7 +12,8 @@ interface CourseRow { id: number; name: string; duration: string; fees: string; 
 interface ProgramRow { id: number; name: string; level: string; affiliation: string; status: string; }
 interface FacilityRow { id: number; icon: string; heading: string; desc: string; }
 interface AlumniRow { id: number; photo: string; name: string; job: string; batch: string; linkedin: string; }
-interface GalleryItem { id: number; url: string; }
+interface GalleryEntry { title: string; url: string; }
+interface GalleryGroup { folder: string; images: GalleryEntry[]; }
 interface DownloadItem { id: number; name: string; file: string; }
 
 const DISTRICTS = [
@@ -49,7 +53,8 @@ const ProfilePage: React.FC = () => {
   const [programs, setPrograms] = useState<ProgramRow[]>([]);
   const [facilities, setFacilities] = useState<FacilityRow[]>([]);
   const [alumni, setAlumni] = useState<AlumniRow[]>([]);
-  const [gallery, setGallery] = useState<GalleryItem[]>([]);
+  const [galleryGroups, setGalleryGroups] = useState<GalleryGroup[]>([]);
+  const [uploadingInfo, setUploadingInfo] = useState<{ groupIndex: number; imageIndex: number } | null>(null);
   const [downloads, setDownloads] = useState<DownloadItem[]>([]);
 
   const [showSuggestions, setShowSuggestions] = useState(false);
@@ -57,8 +62,8 @@ const ProfilePage: React.FC = () => {
   const locationRef = useRef<HTMLDivElement>(null);
   const logoInputRef = useRef<HTMLInputElement>(null);
   const bannerInputRef = useRef<HTMLInputElement>(null);
-  const galleryRef = useRef<HTMLInputElement>(null);
-  const fileInputsRef = useRef<Map<number, HTMLInputElement>>(new Map());
+  const [cropperOpen, setCropperOpen] = useState(false);
+  const [cropImageSrc, setCropImageSrc] = useState<string | null>(null);
 
   const filteredDistricts = DISTRICTS.filter(d => d.toLowerCase().includes(locationFilter.toLowerCase()));
 
@@ -107,7 +112,8 @@ const ProfilePage: React.FC = () => {
     });
     if (!res.ok) throw new Error(`Upload error: ${res.status}`);
     const data = await res.json();
-    return data?.data?.url || "";
+    const url = data?.data?.url || "";
+    return url.startsWith("/") ? `${base}${url}` : url;
   };
 
   const loadProfile = async () => {
@@ -131,7 +137,17 @@ const ProfilePage: React.FC = () => {
         if (data.programs_data) setPrograms(Array.isArray(data.programs_data) ? data.programs_data.map((p: any, i: number) => ({ ...p, id: p.id || i + 1 })) : []);
         if (data.facilities_data) setFacilities(Array.isArray(data.facilities_data) ? data.facilities_data.map((f: any, i: number) => ({ ...f, id: f.id || i + 1 })) : []);
         if (data.alumni_data) setAlumni(Array.isArray(data.alumni_data) ? data.alumni_data.map((a: any, i: number) => ({ ...a, id: a.id || i + 1 })) : []);
-        if (data.gallery_data) setGallery(Array.isArray(data.gallery_data) ? data.gallery_data.map((g: any, i: number) => ({ ...g, id: g.id || i + 1 })) : []);
+        if (data.gallery_data) {
+          if (Array.isArray(data.gallery_data) && data.gallery_data.length > 0) {
+            if ("folder" in data.gallery_data[0]) {
+              setGalleryGroups(data.gallery_data);
+            } else {
+              setGalleryGroups([{ folder: "Gallery", images: data.gallery_data.map((g: any) => ({ title: g.title || "", url: g.url || "" })) }]);
+            }
+          } else {
+            setGalleryGroups([]);
+          }
+        }
         if (data.downloads_data) setDownloads(Array.isArray(data.downloads_data) ? data.downloads_data.map((d: any, i: number) => ({ ...d, id: d.id || i + 1 })) : []);
       }
     } catch (e) {
@@ -177,6 +193,57 @@ const ProfilePage: React.FC = () => {
     setter((prev: any[]) => prev.map(x => x.id === id ? { ...x, [field]: value } : x));
   };
 
+  const handleBannerCrop = useCallback(async (croppedBlob: Blob) => {
+    const croppedFile = new File([croppedBlob], bannerFile?.name || "banner.jpg", { type: "image/jpeg" });
+    try {
+      const url = await uploadFile(croppedFile, "institution/banner");
+      setBannerUrl(url);
+    } catch { /* skip */ }
+    setCropperOpen(false);
+    setCropImageSrc(null);
+  }, [bannerFile]);
+
+  const addGalleryGroup = () => {
+    setGalleryGroups([...galleryGroups, { folder: "", images: [] }]);
+  };
+  const removeGalleryGroup = (groupIndex: number) => {
+    setGalleryGroups(galleryGroups.filter((_, i) => i !== groupIndex));
+  };
+  const updateGalleryFolder = (groupIndex: number, value: string) => {
+    setGalleryGroups(galleryGroups.map((g, i) => i === groupIndex ? { ...g, folder: value } : g));
+  };
+  const addGalleryImage = (groupIndex: number) => {
+    setGalleryGroups(galleryGroups.map((g, i) =>
+      i === groupIndex && g.images.length < 8
+        ? { ...g, images: [...g.images, { title: "", url: "" }] }
+        : g
+    ));
+  };
+  const removeGalleryImage = (groupIndex: number, imageIndex: number) => {
+    setGalleryGroups(galleryGroups.map((g, i) =>
+      i === groupIndex ? { ...g, images: g.images.filter((_, pi) => pi !== imageIndex) } : g
+    ));
+  };
+  const updateGalleryImage = (groupIndex: number, imageIndex: number, field: keyof GalleryEntry, value: string) => {
+    setGalleryGroups(galleryGroups.map((g, i) =>
+      i === groupIndex
+        ? { ...g, images: g.images.map((img, pi) => pi === imageIndex ? { ...img, [field]: value } : img) }
+        : g
+    ));
+  };
+  const handleGalleryFileSelect = async (groupIndex: number, imageIndex: number, file: File) => {
+    setUploadingInfo({ groupIndex, imageIndex });
+    try {
+      const url = await uploadFile(file, "institution/gallery");
+      setGalleryGroups(galleryGroups.map((g, i) =>
+        i === groupIndex
+          ? { ...g, images: g.images.map((img, pi) => pi === imageIndex ? { ...img, url } : img) }
+          : g
+      ));
+    } catch { /* skip */ }
+    setUploadingInfo(null);
+  };
+
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>, setter: (url: string) => void, fileSetter: (f: File) => void) => {
     const file = e.target.files?.[0];
     if (file) {
@@ -207,7 +274,7 @@ const ProfilePage: React.FC = () => {
         programs_data: programs.map(({ id, ...rest }) => rest),
         facilities_data: facilities.map(({ id, ...rest }) => rest),
         alumni_data: alumni.map(({ id, ...rest }) => rest),
-        gallery_data: gallery.map(({ id, ...rest }) => rest),
+        gallery_data: galleryGroups,
         downloads_data: downloads.map(({ id, ...rest }) => rest),
       };
       await api("/api/v1/institution/profile", {
@@ -272,11 +339,11 @@ const ProfilePage: React.FC = () => {
 
           {/* ─── Logo & Banner ─── */}
           <div className="bg-white p-6 rounded-md  border border-gray-200">
-            <h3 className="text-lg font-semibold text-gray-800 mb-5 border-b pb-3">
+            <h3 className="text-lg font-semibold text-gray-800 mb-5">
               <i className="fa-solid fa-image text-blue-500 mr-2"></i>Logo & Banner
             </h3>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div>
+            <div className="grid grid-cols-1 md:grid-cols-8 gap-6">
+              <div className="md:col-span-1">
                 <label className="block text-sm font-medium text-gray-700 mb-2">Organization Logo</label>
                 <div onClick={() => logoInputRef.current?.click()}
                   className="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-gray-300 border-dashed rounded-md hover:border-blue-400 transition cursor-pointer bg-gray-50 relative overflow-hidden h-40">
@@ -300,7 +367,7 @@ const ProfilePage: React.FC = () => {
                   }} />
                 </div>
               </div>
-              <div>
+              <div className="md:col-span-7">
                 <label className="block text-sm font-medium text-gray-700 mb-2">Banner / Cover Image</label>
                 <div onClick={() => bannerInputRef.current?.click()}
                   className="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-gray-300 border-dashed rounded-md hover:border-blue-400 transition cursor-pointer bg-gray-50 relative overflow-hidden h-40">
@@ -314,13 +381,18 @@ const ProfilePage: React.FC = () => {
                       </div>
                     </div>
                   )}
-                  <input ref={bannerInputRef} type="file" className="sr-only" accept="image/*" onChange={async e => {
+                  <input ref={bannerInputRef} type="file" className="sr-only" accept="image/*" onChange={e => {
                     const file = e.target.files?.[0];
                     if (!file) return;
-                    try {
-                      const url = await uploadFile(file, "institution/banner");
-                      setBannerUrl(url);
-                    } catch { /* skip */ }
+                    setBannerFile(file);
+                    const reader = new FileReader();
+                    reader.onload = ev => {
+                      if (ev.target?.result) {
+                        setCropImageSrc(ev.target.result as string);
+                        setCropperOpen(true);
+                      }
+                    };
+                    reader.readAsDataURL(file);
                   }} />
                 </div>
               </div>
@@ -329,7 +401,7 @@ const ProfilePage: React.FC = () => {
 
           {/* ─── General Information ─── */}
           <div className="bg-white p-6 rounded-md  border border-gray-200">
-            <h3 className="text-lg font-semibold text-gray-800 mb-5 border-b pb-3">
+            <h3 className="text-lg font-semibold text-gray-800 mb-5">
               <i className="fa-solid fa-building text-blue-500 mr-2"></i>General Information
             </h3>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -364,7 +436,7 @@ const ProfilePage: React.FC = () => {
 
           {/* ─── About Section ─── */}
           <div className="bg-white p-6 rounded-md  border border-gray-200">
-            <h3 className="text-lg font-semibold text-gray-800 mb-5 border-b pb-3">
+            <h3 className="text-lg font-semibold text-gray-800 mb-5">
               <i className="fa-solid fa-circle-info text-blue-500 mr-2"></i>About Section
             </h3>
 
@@ -467,7 +539,7 @@ const ProfilePage: React.FC = () => {
 
           {/* ─── Courses & Fees ─── */}
           <div className="bg-white p-6 rounded-md  border border-gray-200">
-            <div className="flex justify-between items-center mb-5 border-b pb-3">
+            <div className="flex justify-between items-center mb-5">
               <h3 className="text-lg font-semibold text-gray-800">
                 <i className="fa-solid fa-book-open text-blue-500 mr-2"></i>Courses & Fees
               </h3>
@@ -497,7 +569,7 @@ const ProfilePage: React.FC = () => {
 
           {/* ─── Facilities ─── */}
           <div className="bg-white p-6 rounded-md  border border-gray-200">
-            <div className="flex justify-between items-center mb-5 border-b pb-3">
+            <div className="flex justify-between items-center mb-5">
               <h3 className="text-lg font-semibold text-gray-800">
                 <i className="fa-solid fa-building text-blue-500 mr-2"></i>College Facilities
               </h3>
@@ -528,7 +600,7 @@ const ProfilePage: React.FC = () => {
 
           {/* ─── Alumni ─── */}
           <div className="bg-white p-6 rounded-md  border border-gray-200">
-            <div className="flex justify-between items-center mb-5 border-b pb-3">
+            <div className="flex justify-between items-center mb-5">
               <h3 className="text-lg font-semibold text-gray-800">
                 <i className="fa-solid fa-users text-blue-500 mr-2"></i>Notable Alumni
               </h3>
@@ -564,53 +636,124 @@ const ProfilePage: React.FC = () => {
           </div>
 
           {/* ─── Gallery ─── */}
-          <div className="bg-white p-6 rounded-md  border border-gray-200">
-            <h3 className="text-lg font-semibold text-gray-800 mb-5 border-b pb-3">
-              <i className="fa-solid fa-image text-blue-500 mr-2"></i>Gallery
-            </h3>
-            <div className="mb-6">
-              <div onClick={() => galleryRef.current?.click()}
-                className="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-gray-300 border-dashed rounded-md hover:border-blue-400 transition cursor-pointer bg-gray-50 relative overflow-hidden">
-                <div className="space-y-1 text-center">
-                  <i className="fa-regular fa-image text-4xl text-gray-400"></i>
-                  <div className="flex text-sm text-gray-600 justify-center mt-3">
-                    <span className="font-medium text-blue-600 hover:text-blue-500">Upload images</span>
-                  </div>
-                  <p className="text-xs text-gray-400">PNG, JPG up to 5MB each</p>
+          <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
+            <div className="border-b border-gray-200 bg-gray-50/50 px-6 py-4 flex items-center justify-between gap-4">
+              <div className="flex items-center gap-3">
+                <div className="p-2 bg-blue-100 text-blue-600 rounded-lg">
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                  </svg>
                 </div>
-                <input ref={galleryRef} type="file" className="sr-only" accept="image/*" multiple
-                  onChange={async e => {
-                    const files = Array.from(e.target.files || []);
-                    const newItems: GalleryItem[] = [];
-                    for (let i = 0; i < files.length; i++) {
-                      try {
-                        const url = await uploadFile(files[i], "institution/gallery");
-                        newItems.push({ id: Date.now() + i, url });
-                      } catch { /* skip failed uploads */ }
-                    }
-                    if (newItems.length > 0) setGallery(prev => [...prev, ...newItems]);
-                  }} />
+                <div>
+                  <h2 className="text-lg font-semibold text-gray-800">Photo Gallery</h2>
+                  <p className="text-sm text-gray-500 mt-0.5">Images displayed in the gallery section</p>
+                </div>
               </div>
+              <button
+                type="button"
+                className="px-3 py-1.5 text-sm font-medium text-blue-600 bg-white border border-gray-200 rounded-lg hover:bg-blue-50 flex items-center gap-1.5 transition-colors shadow-sm shrink-0"
+                onClick={addGalleryGroup}
+              >
+                <Plus size={16} /> Add Gallery Group
+              </button>
             </div>
-            {gallery.length > 0 && (
-              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3">
-                {gallery.map(g => (
-                  <div key={g.id} className="relative group rounded-md overflow-hidden aspect-square bg-gray-200">
-                    <img src={g.url} className="w-full h-full object-cover" alt="Gallery" />
-                    <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                      <button type="button" onClick={() => removeItem(setGallery, g.id)} className="text-white hover:text-red-300">
-                        <i className="fa-solid fa-trash text-lg"></i>
-                      </button>
+
+            <div className="p-6 space-y-8">
+              {galleryGroups.map((group, groupIndex) => (
+                <div key={groupIndex} className="border border-gray-200 rounded-2xl p-5">
+                  <div className="flex items-center justify-between gap-4 mb-6">
+                    <div className="flex-1">
+                      <label className="block text-sm font-semibold text-gray-700 mb-2">
+                        Gallery Folder Name <span className="text-red-500">*</span>
+                      </label>
+                      <input
+                        type="text"
+                        className="w-full h-12 rounded-xl border border-gray-300 px-4 outline-none focus:ring-4 focus:ring-blue-100 focus:border-blue-500 text-sm"
+                        placeholder="e.g. Leadership Workshop"
+                        value={group.folder}
+                        onChange={(e) => updateGalleryFolder(groupIndex, e.target.value)}
+                      />
                     </div>
+                    <button
+                      type="button"
+                      className="p-2 text-red-500 hover:bg-red-50 rounded-lg shrink-0 mt-5"
+                      onClick={() => removeGalleryGroup(groupIndex)}
+                    >
+                      <Trash size={18} />
+                    </button>
                   </div>
-                ))}
-              </div>
-            )}
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5">
+                    {group.images.map((img, imageIndex) => (
+                      <div key={imageIndex} className="border border-gray-200 rounded-2xl p-4 bg-white relative">
+                        <button
+                          type="button"
+                          className="absolute top-3 right-3 w-8 h-8 rounded-full bg-red-50 text-red-500 hover:bg-red-100 flex items-center justify-center z-10"
+                          onClick={() => removeGalleryImage(groupIndex, imageIndex)}
+                        >
+                          <Trash size={14} />
+                        </button>
+
+                        {uploadingInfo?.groupIndex === groupIndex && uploadingInfo?.imageIndex === imageIndex ? (
+                          <p className="text-sm text-blue-600 py-20 text-center">Uploading...</p>
+                        ) : (
+                          <FileUpload
+                            label=""
+                            uploadedText="Image uploaded"
+                            accept="image/*"
+                            maxSize="5MB"
+                            previewUrl={img.url}
+                            previewClassName="w-full h-44 object-cover rounded-2xl"
+                            onFileSelect={(file) => handleGalleryFileSelect(groupIndex, imageIndex, file)}
+                            onClearPreview={() => updateGalleryImage(groupIndex, imageIndex, "url", "")}
+                          />
+                        )}
+
+                        <div className="mt-4">
+                          <label className="text-sm font-medium text-gray-700 block mb-1.5">
+                            Image Title
+                          </label>
+                          <input
+                            type="text"
+                            className="w-full px-4 py-2.5 rounded-lg border border-gray-200 bg-white text-gray-900 focus:outline-none focus:border-blue-500"
+                            placeholder="Leadership Training"
+                            value={img.title}
+                            onChange={(e) => updateGalleryImage(groupIndex, imageIndex, "title", e.target.value)}
+                          />
+                        </div>
+                      </div>
+                    ))}
+
+                    {group.images.length < 8 && (
+                      <button
+                        type="button"
+                        className="border-2 border-dashed border-gray-300 rounded-2xl min-h-[280px] flex flex-col items-center justify-center hover:border-blue-500 hover:bg-blue-50/40 transition"
+                        onClick={() => addGalleryImage(groupIndex)}
+                      >
+                        <div className="w-14 h-14 rounded-2xl bg-blue-100 flex items-center justify-center text-blue-600 text-3xl mb-4">
+                          +
+                        </div>
+                        <p className="font-semibold text-gray-800">Add Image</p>
+                        <p className="text-sm text-gray-400 mt-1">Maximum 8 images</p>
+                      </button>
+                    )}
+                  </div>
+
+                  <div className="mt-5 text-xs text-gray-400">
+                    Max 3 cards per row • Max 8 images per folder
+                  </div>
+                </div>
+              ))}
+
+              {galleryGroups.length === 0 && (
+                <p className="text-sm text-gray-500 text-center py-4">No images added yet.</p>
+              )}
+            </div>
           </div>
 
           {/* ─── Downloads ─── */}
           <div className="bg-white p-6 rounded-md  border border-gray-200">
-            <div className="flex justify-between items-center mb-5 border-b pb-3">
+            <div className="flex justify-between items-center mb-5">
               <h3 className="text-lg font-semibold text-gray-800">
                 <i className="fa-solid fa-download text-blue-500 mr-2"></i>Downloads / Resources
               </h3>
@@ -621,7 +764,7 @@ const ProfilePage: React.FC = () => {
             </div>
             <div className="space-y-3">
               {downloads.map(d => (
-                <div key={d.id} className="flex items-center gap-3 bg-gray-50 border border-gray-200 rounded-md p-3 relative group">
+                <div key={d.id} className="flex items-center gap-3 bg-gray-50 border border-gray-200 rounded-md p-3 pr-10 relative group">
                   <button type="button" onClick={() => removeItem(setDownloads, d.id)}
                     className="absolute top-2 right-2 text-red-400 hover:text-red-600 hover:bg-red-50 p-1.5 rounded-md transition-colors opacity-0 group-hover:opacity-100">
                     <i className="fa-solid fa-trash"></i>
@@ -630,17 +773,37 @@ const ProfilePage: React.FC = () => {
                     <i className="fa-regular fa-file-lines"></i>
                   </div>
                   <input className={`${inputClass} text-sm flex-1`} placeholder="Document name" value={d.name} onChange={e => updateItem(setDownloads, d.id, "name", e.target.value)} />
-                  <label className="px-4 py-2 bg-white border border-gray-300 rounded-md text-sm text-gray-600 cursor-pointer hover:bg-gray-50 whitespace-nowrap flex items-center gap-1 flex-shrink-0">
-                    <i className="fa-solid fa-upload"></i> Choose File
-                    <input type="file" className="hidden" onChange={async e => {
-                      const file = e.target.files?.[0];
-                      if (!file) return;
-                      try {
-                        const url = await uploadFile(file, "institution/downloads");
-                        updateItem(setDownloads, d.id, "file", url);
-                      } catch { /* skip */ }
-                    }} />
-                  </label>
+                  {d.file ? (
+                    <div className="flex items-center gap-2 flex-shrink-0">
+                      <a href={d.file} target="_blank" rel="noopener noreferrer"
+                        className="px-3 py-2 bg-green-50 border border-green-300 rounded-md text-sm text-green-700 hover:bg-green-100 flex items-center gap-1">
+                        <i className="fa-solid fa-eye"></i> Preview
+                      </a>
+                      <label className="px-3 py-2 bg-white border border-gray-300 rounded-md text-sm text-gray-600 cursor-pointer hover:bg-gray-50 whitespace-nowrap flex items-center gap-1">
+                        <i className="fa-solid fa-upload"></i>
+                        <input type="file" className="hidden" onChange={async e => {
+                          const file = e.target.files?.[0];
+                          if (!file) return;
+                          try {
+                            const url = await uploadFile(file, "institution/downloads");
+                            updateItem(setDownloads, d.id, "file", url);
+                          } catch { /* skip */ }
+                        }} />
+                      </label>
+                    </div>
+                  ) : (
+                    <label className="px-4 py-2 bg-white border border-gray-300 rounded-md text-sm text-gray-600 cursor-pointer hover:bg-gray-50 whitespace-nowrap flex items-center gap-1 flex-shrink-0">
+                      <i className="fa-solid fa-upload"></i> Choose File
+                      <input type="file" className="hidden" onChange={async e => {
+                        const file = e.target.files?.[0];
+                        if (!file) return;
+                        try {
+                          const url = await uploadFile(file, "institution/downloads");
+                          updateItem(setDownloads, d.id, "file", url);
+                        } catch { /* skip */ }
+                      }} />
+                    </label>
+                  )}
                 </div>
               ))}
               {downloads.length === 0 && <p className="text-sm text-gray-400 py-4 text-center">No documents added.</p>}
@@ -664,6 +827,14 @@ const ProfilePage: React.FC = () => {
 
         </div>
       </form>
+
+      {cropperOpen && cropImageSrc && (
+        <ImageCropperModal
+          imageSrc={cropImageSrc}
+          onCropComplete={handleBannerCrop}
+          onCancel={() => { setCropperOpen(false); setCropImageSrc(null); }}
+        />
+      )}
     </div>
   );
 };

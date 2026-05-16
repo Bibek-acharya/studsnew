@@ -12,7 +12,7 @@ const CounsellingHistoryPage = () => {
 
   useEffect(() => {
     institutionCounsellingApi.getSessions()
-      .then(setSessions)
+      .then(res => setSessions(Array.isArray(res) ? res : []))
       .catch(() => setSessions([]))
       .finally(() => setLoading(false));
   }, []);

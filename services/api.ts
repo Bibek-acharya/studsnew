@@ -2171,6 +2171,17 @@ export const apiService = {
   async getPublicInstitutionById(id: number): Promise<any> {
     return apiRequest<any>(`/api/v1/institutions/public/${id}`);
   },
+
+  async getSuperadminInstitution(id: number): Promise<any> {
+    return apiRequest<any>(`/api/v1/superadmin/institutions/${id}`);
+  },
+
+  async updateSuperadminInstitution(id: number, data: any): Promise<any> {
+    return apiRequest<any>(`/api/v1/superadmin/institutions/${id}`, {
+      method: "PUT",
+      body: JSON.stringify(data),
+    });
+  },
 };
 
 export const callApi = async <T>(path: string): Promise<T> => {

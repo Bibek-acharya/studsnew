@@ -26,10 +26,18 @@ export interface InstitutionEntrance {
   institution_id: number;
   title: string;
   description: string;
+  program: string;
   date: string;
+  start_time: string;
+  end_time: string;
   duration: number;
+  total_marks: number;
+  passing_marks: number;
   total_seats: number;
   filled_seats: number;
+  instructions: string;
+  hero_banner: string;
+  questions: any;
   status: string;
   created_at: string;
   updated_at: string;
@@ -46,20 +54,21 @@ export interface EntranceApplicant {
 }
 
 export const institutionEntranceApi = {
-  async list(page = 1, limit = 50): Promise<{ entrances: InstitutionEntrance[]; meta: { total: number } }> {
-    const params = new URLSearchParams({ page: String(page), limit: String(limit) }).toString();
-    return apiCall(`/api/v1/institution/entrances?${params}`);
+  async list(page = 1, limit = 50, status?: string): Promise<{ entrances: InstitutionEntrance[]; meta: { total: number } }> {
+    const params = new URLSearchParams({ page: String(page), limit: String(limit) });
+    if (status) params.set("status", status);
+    return apiCall(`/api/v1/institution/entrances?${params.toString()}`);
   },
 
   async getById(id: number): Promise<InstitutionEntrance> {
     return apiCall(`/api/v1/institution/entrances/${id}`);
   },
 
-  async create(data: { title: string; description?: string; date: string; duration?: number; total_seats?: number }): Promise<InstitutionEntrance> {
+  async create(data: any): Promise<InstitutionEntrance> {
     return apiCall("/api/v1/institution/entrances", { method: "POST", body: JSON.stringify(data) });
   },
 
-  async update(id: number, data: { title?: string; description?: string; date?: string; duration?: number; total_seats?: number; status?: string }): Promise<InstitutionEntrance> {
+  async update(id: number, data: any): Promise<InstitutionEntrance> {
     return apiCall(`/api/v1/institution/entrances/${id}`, { method: "PUT", body: JSON.stringify(data) });
   },
 

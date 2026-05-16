@@ -25,6 +25,8 @@ export interface InstitutionProgram {
   fee: string;
   eligibility: string;
   capacity: number;
+  banner_url: string;
+  data: any;
   status: string;
   created_at: string;
 }
@@ -39,11 +41,11 @@ export const institutionProgramApi = {
     return apiCall(`/api/v1/institution/programs/${id}`);
   },
 
-  async create(data: { name: string; description?: string; duration?: string; fee?: string; eligibility?: string; capacity?: number }): Promise<InstitutionProgram> {
+  async create(data: any): Promise<InstitutionProgram> {
     return apiCall("/api/v1/institution/programs", { method: "POST", body: JSON.stringify(data) });
   },
 
-  async update(id: number, data: { name?: string; description?: string; duration?: string; fee?: string; eligibility?: string; capacity?: number; status?: string }): Promise<InstitutionProgram> {
+  async update(id: number, data: any): Promise<InstitutionProgram> {
     return apiCall(`/api/v1/institution/programs/${id}`, { method: "PUT", body: JSON.stringify(data) });
   },
 

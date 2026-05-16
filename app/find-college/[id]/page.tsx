@@ -7,10 +7,10 @@ import React, {
   useRef,
   useCallback,
 } from "react";
-import { useParams, useRouter } from "next/navigation";
+import { useRouter } from "next/navigation";
 import { apiService } from "@/services/api";
 import CollegeCard from "@/components/admissions/CollegeCard";
-import { BadgeCheckIcon, ChevronLeft, ChevronRight, MessageSquarePlus } from "lucide-react";
+import { BadgeCheckIcon, Building2, ChevronLeft, ChevronRight, MessageSquarePlus } from "lucide-react";
 import ShareCollegeModal from "./ShareCollegeModal";
 import {
   AboutVideoInteractive,
@@ -42,361 +42,25 @@ type TabKey =
 
 type LevelFilter = "all" | "+2" | "Bachelor" | "Master";
 
-const fallbackCollege = {
-  name: "GoldenGate International College",
-  location: "Kamalpokhari, Kathmandu",
-  rating: 4.5,
-  reviewsCount: "1,024",
-  website: "www.goldengate.edu.np",
-  logo: "https://goldengateintl.com/wp-content/uploads/2023/05/Untitled-design-1.png",
-  banner:
-    "https://images.unsplash.com/photo-1541339907198-e08756dedf3f?q=80&w=2070&auto=format&fit=crop",
-  description:
-    "The B.Sc. in Data Science & Artificial Intelligence is designed to bridge the gap between theoretical mathematics and practical engineering. Students will dive deep into machine learning algorithms, big data analytics, and neural networks.",
-  secondDescription:
-    "This program is suitable for analytical thinkers who want to shape the future of automation. By the end of this course, you will be proficient in Python, R, TensorFlow, and cloud computing platforms.",
-};
+const courses: { level: LevelFilter; name: string; specialization: string; duration: string; type: string; fees: string; eligibility: string; seats: string }[] = [];
 
-const courses = [
-  {
-    level: "+2" as LevelFilter,
-    name: "+2 Science (Biology)",
-    specialization: "Bio",
-    duration: "2 Year",
-    type: "Full Time",
-    fees: "Rs. 75,000",
-    eligibility: "SEE with GPA 3.0",
-    seats: "240 Seats",
-  },
-  {
-    level: "+2" as LevelFilter,
-    name: "+2 Management",
-    specialization: "Finance",
-    duration: "2 Year",
-    type: "Full Time",
-    fees: "Rs. 65,000",
-    eligibility: "SEE with GPA 2.5",
-    seats: "200 Seats",
-  },
-  {
-    level: "Bachelor" as LevelFilter,
-    name: "B.Sc. Computer Science",
-    specialization: "AI, Data Science",
-    duration: "4 Year",
-    type: "Full Time",
-    fees: "Rs. 1,50,000",
-    eligibility: "10+2 with 60% (Science)",
-    seats: "120 Seats",
-  },
-  {
-    level: "Bachelor" as LevelFilter,
-    name: "BBA Finance",
-    specialization: "Corporate Finance",
-    duration: "4 Year",
-    type: "Full Time",
-    fees: "Rs. 1,20,000",
-    eligibility: "10+2 with 50% (Any)",
-    seats: "80 Seats",
-  },
-  {
-    level: "Master" as LevelFilter,
-    name: "MBA",
-    specialization: "General",
-    duration: "2 Year",
-    type: "Full Time",
-    fees: "Rs. 2,50,000",
-    eligibility: "Bachelor with 55%",
-    seats: "60 Seats",
-  },
-  {
-    level: "Master" as LevelFilter,
-    name: "M.Sc. Data Science",
-    specialization: "AI",
-    duration: "2 Year",
-    type: "Full Time",
-    fees: "Rs. 2,20,000",
-    eligibility: "B.Sc. CSIT/BCA 60%",
-    seats: "40 Seats",
-  },
-];
+const admissions: { level: LevelFilter; status: string; title: string; affiliation: string; openDate: string; deadline: string; image?: string }[] = [];
 
-const admissions = [
-  {
-    level: "+2" as LevelFilter,
-    status: "Ongoing",
-    title: "+2 Science (Biology)",
-    affiliation: "NEB",
-    openDate: "1st June, 2025",
-    deadline: "30th July, 2025",
-    image:
-      "https://images.unsplash.com/photo-1523240795612-9a054b0db644?q=80&w=2070&auto=format&fit=crop",
-  },
-  {
-    level: "Bachelor" as LevelFilter,
-    status: "Ongoing",
-    title: "Bachelor In Information Technology",
-    affiliation: "Tribhuvan University",
-    openDate: "20th Dec, 2025",
-    deadline: "20th Jan, 2026",
-    image:
-      "https://images.unsplash.com/photo-1523240795612-9a054b0db644?q=80&w=2070&auto=format&fit=crop",
-  },
-  {
-    level: "Master" as LevelFilter,
-    status: "Closed",
-    title: "Master in Business Administration",
-    affiliation: "Tribhuvan University",
-    openDate: "--",
-    deadline: "Passed",
-    image:
-      "https://images.unsplash.com/photo-1434030216411-0b793f4b4173?q=80&w=2070&auto=format&fit=crop",
-  },
-];
+const offeredPrograms: { level: LevelFilter; name: string; affiliation: string; status: string }[] = [];
 
-const offeredPrograms = [
-  {
-    level: "+2" as LevelFilter,
-    name: "Science (Biology)",
-    affiliation: "NEB",
-    status: "Ongoing",
-  },
-  {
-    level: "+2" as LevelFilter,
-    name: "Management",
-    affiliation: "NEB",
-    status: "Closed",
-  },
-  {
-    level: "Bachelor" as LevelFilter,
-    name: "B.Sc. CSIT",
-    affiliation: "Tribhuvan University",
-    status: "Ongoing",
-  },
-  {
-    level: "Bachelor" as LevelFilter,
-    name: "BBA Finance",
-    affiliation: "Purwanchal University",
-    status: "Closed",
-  },
-  {
-    level: "Master" as LevelFilter,
-    name: "MBA",
-    affiliation: "Tribhuvan University",
-    status: "Ongoing",
-  },
-  {
-    level: "Master" as LevelFilter,
-    name: "M.Sc. Data Science",
-    affiliation: "Kathmandu University",
-    status: "Closed",
-  },
-];
+const scholarships: { level: LevelFilter; program: string; scholarship: string; benefit: string; audience: string }[] = [];
 
-const scholarships = [
-  {
-    level: "+2" as LevelFilter,
-    program: "+2 Science",
-    scholarship: "Merit Scholarship",
-    benefit: "Up to 100% waiver",
-    audience: "Top 5% in SEE",
-  },
-  {
-    level: "+2" as LevelFilter,
-    program: "+2 Management",
-    scholarship: "Need-Based Grant",
-    benefit: "Variable",
-    audience: "Low income families",
-  },
-  {
-    level: "Bachelor" as LevelFilter,
-    program: "B.Sc. CSIT",
-    scholarship: "Merit Scholarship",
-    benefit: "Up to 100% waiver",
-    audience: "60%+ in +2",
-  },
-  {
-    level: "Bachelor" as LevelFilter,
-    program: "BBA Finance",
-    scholarship: "Need-Based Grant",
-    benefit: "Variable",
-    audience: "Economically weak",
-  },
-  {
-    level: "Master" as LevelFilter,
-    program: "MBA",
-    scholarship: "Merit Scholarship",
-    benefit: "50% waiver",
-    audience: "70% in Bachelor",
-  },
-  {
-    level: "Master" as LevelFilter,
-    program: "M.Sc. Data Science",
-    scholarship: "Research Assistantship",
-    benefit: "Stipend + tuition",
-    audience: "Strong academic record",
-  },
-];
+const facilities: { icon: string; title: string; desc: string }[] = [];
 
-const facilities = [
-  {
-    icon: "fa-book-open",
-    title: "Central Library",
-    desc: "50,000+ books, digital resources, 24/7 reading hall.",
-  },
-  {
-    icon: "fa-flask",
-    title: "Science Labs",
-    desc: "Physics, Chemistry, CS labs with modern equipment.",
-  },
-  {
-    icon: "fa-dumbbell",
-    title: "Sports Complex",
-    desc: "Indoor basketball, badminton, gymnasium and football field.",
-  },
-  {
-    icon: "fa-wifi",
-    title: "High-Speed WiFi",
-    desc: "Campus-wide gigabit connectivity and smart classrooms.",
-  },
-  {
-    icon: "fa-bus",
-    title: "Transportation",
-    desc: "Fleet of buses covering all major city routes.",
-  },
-  {
-    icon: "fa-utensils",
-    title: "Cafeteria",
-    desc: "Multi-cuisine, hygienic, and student-friendly prices.",
-  },
-];
+const events: { image: string; title: string; date: string; desc: string }[] = [];
 
-const events = [
-  {
-    image:
-      "https://images.unsplash.com/photo-1523580494863-6f3031224c94?q=80&w=800&auto=format&fit=crop",
-    title: "Technika 2025",
-    date: "15-17 May 2025 | Main Auditorium",
-    desc: "Annual tech symposium with hackathons, workshops, and robotics.",
-  },
-  {
-    image:
-      "https://images.unsplash.com/photo-1540575467063-178a50c2df87?q=80&w=800&auto=format&fit=crop",
-    title: "Unity Day Celebration",
-    date: "10 June 2025 | Open Air Theatre",
-    desc: "Cultural performances, food stalls, and charity drive.",
-  },
-  {
-    image:
-      "https://images.unsplash.com/photo-1557804506-669a67965ba0?q=80&w=800&auto=format&fit=crop",
-    title: "Inter-college Basketball",
-    date: "22-25 June 2025 | Sports Complex",
-    desc: "Teams from 10+ colleges competing for the championship.",
-  },
-  {
-    image:
-      "https://images.unsplash.com/photo-1527529482837-4698179dc6ce?q=80&w=800&auto=format&fit=crop",
-    title: "Guest Lecture: AI Ethics",
-    date: "5 July 2025 | Seminar Hall",
-    desc: "By Dr. Anil Gupta, lead researcher at Google AI.",
-  },
-];
+const alumni: { image: string; name: string; role: string; batch: string }[] = [];
 
-const alumni = [
-  {
-    image:
-      "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?q=80&w=100&auto=format&fit=crop",
-    name: "Bikash Sharma",
-    role: "Software Engineer at Google",
-    batch: "B.Sc. CSIT, 2018",
-  },
-  {
-    image:
-      "https://images.unsplash.com/photo-1494790108377-be9c29b29330?q=80&w=100&auto=format&fit=crop",
-    name: "Anjali Thapa",
-    role: "Investment Banker at J.P. Morgan",
-    batch: "BBA, 2017",
-  },
-  {
-    image:
-      "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?q=80&w=100&auto=format&fit=crop",
-    name: "Ramesh KC",
-    role: "Data Scientist at Amazon",
-    batch: "B.Sc. CSIT, 2019",
-  },
-  {
-    image:
-      "https://images.unsplash.com/photo-1534528741775-53994a69daeb?q=80&w=100&auto=format&fit=crop",
-    name: "Sushma Shrestha",
-    role: "HR Manager at Ncell",
-    batch: "MBA, 2016",
-  },
-];
+const galleryImages: string[] = [];
 
-const galleryImages = [
-  "https://images.unsplash.com/photo-1541339907198-e08756dedf3f?q=80&w=800&auto=format&fit=crop",
-  "https://images.unsplash.com/photo-1523050854058-8df90110c9f1?q=80&w=800&auto=format&fit=crop",
-  "https://images.unsplash.com/photo-1562774053-701939374585?q=80&w=800&auto=format&fit=crop",
-  "https://images.unsplash.com/photo-1571260899304-425dea4cf861?q=80&w=800&auto=format&fit=crop",
-  "https://images.unsplash.com/photo-1509062522246-3755977927d7?q=80&w=800&auto=format&fit=crop",
-  "https://images.unsplash.com/photo-1522202176988-66273c2fd55f?q=80&w=800&auto=format&fit=crop",
-];
+const newsCards: { badge: string; badgeClass: string; image: string; title: string; desc: string; time: string }[] = [];
 
-const newsCards = [
-  {
-    badge: "Exam",
-    badgeClass: "bg-orange-50 text-orange-500",
-    image:
-      "https://images.unsplash.com/photo-1606326608606-aa0b62935f2b?q=80&w=800&auto=format&fit=crop",
-    title: "JEE Main 2025: Registration Extended",
-    desc: "NTA extends JEE Main 2025 deadline due to high volume of applications.",
-    time: "90 Days ago",
-  },
-  {
-    badge: "Admission",
-    badgeClass: "bg-brand-blue/5 text-brand-blue",
-    image:
-      "https://images.unsplash.com/photo-1541339907198-e08756dedf3f?q=80&w=800&auto=format&fit=crop",
-    title: "MBA Admission Open 2025",
-    desc: "Apply for MBA at GoldenGate, last date 30th June.",
-    time: "30 Days ago",
-  },
-  {
-    badge: "Scholarship",
-    badgeClass: "bg-green-50 text-green-600",
-    image:
-      "https://images.unsplash.com/photo-1523050854058-8df90110c9f1?q=80&w=800&auto=format&fit=crop",
-    title: "Merit Scholarship 2025",
-    desc: "Applications open for merit-based scholarships for +2 & Bachelor.",
-    time: "15 Days ago",
-  },
-];
-
-const downloads = [
-  {
-    title: "Prospectus 2025",
-    size: "PDF, 8.2 MB",
-    color: "bg-brand-blue/5 text-brand-blue",
-    btn: "bg-brand-blue hover:bg-[#0000CC]",
-  },
-  {
-    title: "Application Form",
-    size: "PDF, 2.1 MB",
-    color: "bg-brand-blue/5 text-brand-blue",
-    btn: "bg-brand-blue hover:bg-[#0000CC]",
-  },
-  {
-    title: "Scholarship Guidelines",
-    size: "PDF, 1.5 MB",
-    color: "bg-brand-blue/5 text-brand-blue",
-    btn: "bg-brand-blue hover:bg-[#0000CC]",
-  },
-  {
-    title: "Course Catalogue 2025",
-    size: "PDF, 12.0 MB",
-    color: "bg-brand-blue/5 text-brand-blue",
-    btn: "bg-brand-blue hover:bg-[#0000CC]",
-  },
-];
+const downloads: { title: string; size: string; color: string; btn: string }[] = [];
 
 const isCollegeVerified = (value: unknown): boolean => {
   if (typeof value === "boolean") return value;
@@ -408,11 +72,10 @@ const isCollegeVerified = (value: unknown): boolean => {
   return false;
 };
 
-const CollegeDetailsPage: React.FC = () => {
-  const params = useParams();
+const CollegeDetailsPage = ({ params }: { params: Promise<{ id: string }> }) => {
+  const { id: idStr } = React.use(params);
   const router = useRouter();
-  const idStr = params.id as string;
-  const collegeId = idStr && !idStr.startsWith("inst_") ? Number(idStr) : null;
+  const collegeId = idStr ? Number(idStr.replace("inst_", "")) : null;
 
   const [activeTab, setActiveTab] = useState<TabKey>("about");
   const [courseFilter, setCourseFilter] = useState<LevelFilter>("all");
@@ -491,33 +154,34 @@ const CollegeDetailsPage: React.FC = () => {
   };
 
   useEffect(() => {
-    const idStr = params.id as string;
     if (!idStr) {
       setLoading(false);
       return;
     }
 
-    setLoading(true);
-    // Check if it's an institution (prefixed with inst_)
-    if (idStr.startsWith("inst_")) {
-      const actualId = parseInt(idStr.replace("inst_", ""), 10);
-      apiService
-        .getPublicInstitutionById(actualId)
-        .then((res) => {
-          setCollege(res.data);
-          setLoading(false);
-        })
-        .catch(() => setLoading(false));
-    } else {
-      apiService
-        .getCollegeById(Number(idStr))
-        .then((res) => {
-          setCollege(res.data);
-          setLoading(false);
-        })
-        .catch(() => setLoading(false));
+    const numericId = Number(idStr.replace("inst_", ""));
+    if (!numericId) {
+      setLoading(false);
+      return;
     }
-  }, [params.id]);
+
+    setLoading(true);
+    apiService
+      .getPublicInstitutionById(numericId)
+      .then((res) => {
+        setCollege(res.data);
+        setLoading(false);
+      })
+      .catch(() => {
+        apiService
+          .getCollegeById(numericId)
+          .then((res) => {
+            setCollege(res.data);
+            setLoading(false);
+          })
+          .catch(() => setLoading(false));
+      });
+  }, [idStr]);
 
   useEffect(() => {
     if (activeTab === "review" && collegeId && !reviewsData) {
@@ -570,7 +234,7 @@ const CollegeDetailsPage: React.FC = () => {
     setShareUrl(window.location.href);
   }, [collegeId]);
 
-  const isInstitution = (params.id as string)?.startsWith("inst_");
+  const isInstitution = !!college?.institution_name;
 
   // For institution: map fields from institution API response
   const instName = isInstitution ? college?.institution_name : null;
@@ -592,19 +256,19 @@ const CollegeDetailsPage: React.FC = () => {
   const instLogo = isInstitution ? college?.logo_url : null;
   const instBanner = isInstitution ? college?.banner_url : null;
 
-  const name = instName || college?.name || fallbackCollege.name;
-  const locationText = instLocation || college?.location || fallbackCollege.location;
-  const rating = college?.rating ?? fallbackCollege.rating;
+  const name = instName || college?.name || "";
+  const locationText = instLocation || college?.location || "";
+  const rating = college?.rating ?? 0;
   const reviewsCount =
     college?.reviews !== undefined
       ? Number(college.reviews || 0).toLocaleString()
-      : fallbackCollege.reviewsCount;
-  const website = instWebsite || college?.website || fallbackCollege.website;
+      : "0";
+  const website = instWebsite || college?.website || "";
   const websiteHref =
     website.startsWith("http://") || website.startsWith("https://")
       ? website
-      : `https://${website}`;
-  const description = instDescription || college?.description || fallbackCollege.description;
+      : website ? `https://${website}` : "";
+  const description = instDescription || college?.description || "";
   const isVerified = isCollegeVerified(college?.verified) || college?.claimed === true;
   const shareTitle = `${name} - Studsphere`;
   const shareText = `Check out ${name} on Studsphere`;
@@ -662,7 +326,7 @@ const CollegeDetailsPage: React.FC = () => {
     <div className="w-full">
       <div
         className="relative h-55 w-full bg-blue-800 bg-center md:h-90"
-        style={{ backgroundImage: `url('${instBanner || fallbackCollege.banner}')` }}
+        style={{ ...(instBanner ? { backgroundImage: `url('${instBanner}')` } : {}) }}
       >
         <div className="absolute bottom-4 right-4 z-20 md:bottom-6 md:right-6">
           {isVerified ? (
@@ -685,11 +349,11 @@ const CollegeDetailsPage: React.FC = () => {
       <div className="relative bg-white">
         <div className="relative px-6 pb-8 md:px-12 lg:px-24 xl:px-32">
           <div className="relative z-10 mr-auto -mt-12 flex h-30 w-30 items-center justify-center overflow-hidden rounded-md border border-gray-200 bg-white p-2 md:absolute md:-top-4 md:left-12 md:mx-0 md:mt-0 md:h-37.5 md:w-37.5 lg:left-24 xl:left-32">
-            <img
-              src={instLogo || fallbackCollege.logo}
-              alt="College Logo"
-              className="h-full w-full object-contain"
-            />
+            {instLogo ? (
+              <img src={instLogo} alt="College Logo" className="h-full w-full object-contain" />
+            ) : (
+              <Building2 className="h-12 w-12 text-gray-300" />
+            )}
           </div>
 
           <div className="mt-4 flex flex-col items-center justify-between gap-6 lg:mt-0 lg:flex-row lg:items-end lg:gap-0 lg:pl-42.5">
@@ -714,15 +378,17 @@ const CollegeDetailsPage: React.FC = () => {
                     ({reviewsCount} Reviews)
                   </span>
                 </div>
-                <a
-                  href={websiteHref}
-                  target="_blank"
-                  rel="noreferrer"
-                  className="flex items-center gap-1 text-[13px] font-medium tracking-wide text-brand-blue transition-colors hover:text-brand-hover"
-                >
-                  <i className="fa-solid fa-globe text-gray-500 text-[12px]"></i>
-                  {website.toLowerCase()}
-                </a>
+                {college?.featured && website && (
+                  <a
+                    href={websiteHref}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="flex items-center gap-1 text-[13px] font-medium tracking-wide text-brand-blue transition-colors hover:text-brand-hover"
+                  >
+                    <i className="fa-solid fa-globe text-gray-500 text-[12px]"></i>
+                    {website.toLowerCase()}
+                  </a>
+                )}
               </div>
               <button
                 type="button"
@@ -838,7 +504,6 @@ const CollegeDetailsPage: React.FC = () => {
 
               <div className="space-y-6 text-[15px] leading-[1.8] text-gray-600 md:text-[16px] [word-break:keep-all] [&_*]:[word-break:keep-all] [overflow-wrap:anywhere] [&_*]:[overflow-wrap:anywhere]">
                 <div dangerouslySetInnerHTML={{ __html: description }} />
-                {!isInstitution && <p>{fallbackCollege.secondDescription}</p>}
               </div>
 
               <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
@@ -864,61 +529,42 @@ const CollegeDetailsPage: React.FC = () => {
                 )}
               </div>
 
-              <div className="space-y-6 rounded-md">
-                <h2 className="text-[22px] font-bold text-gray-900">
-                  University Overview
-                </h2>
-                <div className="overflow-x-auto">
-                  <table className="w-full rounded-md border border-gray-200 text-left text-sm">
-                    <tbody className="divide-y divide-gray-200 text-gray-600">
-                      {instOverviewData && Array.isArray(instOverviewData) && instOverviewData.length > 0 ? (
-                        instOverviewData.map((row: any, i: number) => (
+              {instOverviewData && Array.isArray(instOverviewData) && instOverviewData.length > 0 && (
+                <div className="space-y-6 rounded-md">
+                  <h2 className="text-[22px] font-bold text-gray-900">University Overview</h2>
+                  <div className="overflow-x-auto">
+                    <table className="w-full rounded-md border border-gray-200 text-left text-sm">
+                      <tbody className="divide-y divide-gray-200 text-gray-600">
+                        {instOverviewData.map((row: any, i: number) => (
                           <OverviewRow key={i} label={row.key || row.label || ""} value={row.value || ""} />
-                        ))
-                      ) : (
-                        <>
-                          <OverviewRow label="Established" value="1959" />
-                          <OverviewRow label="Location" value="Kirtipur, 5 km from Kathmandu's city center" />
-                          <OverviewRow label="Campus Size" value="154.77 hectares (3,042-5-2 ropanis)" />
-                          <OverviewRow label="Type" value="Non-profit, autonomous, funded by Government of Nepal" />
-                          <OverviewRow label="Status" value="Declared Central University on January 8, 2013" />
-                          <OverviewRow label="Global Ranking" value="One of the world's largest universities by size and program diversity" />
-                        </>
-                      )}
-                    </tbody>
-                  </table>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
                 </div>
+              )}
 
-                <h2 className="pt-4 text-[22px] font-bold text-gray-900">
-                  Leadership & Administration
-                </h2>
-                <div className="overflow-x-auto">
-                  <table className="w-full rounded-md border border-gray-200 text-left text-sm">
-                    <thead className="bg-gray-50 text-[13px] font-bold uppercase text-gray-700">
-                      <tr>
-                        <th className="px-4 py-3">Position</th>
-                        <th className="px-4 py-3">Role</th>
-                        <th className="px-4 py-3">Current Holder</th>
-                      </tr>
-                    </thead>
-                    <tbody className="divide-y divide-gray-200 text-gray-600">
-                      {instLeadershipData && Array.isArray(instLeadershipData) && instLeadershipData.length > 0 ? (
-                        instLeadershipData.map((row: any, i: number) => (
+              {instLeadershipData && Array.isArray(instLeadershipData) && instLeadershipData.length > 0 && (
+                <div className="space-y-6 rounded-md">
+                  <h2 className="text-[22px] font-bold text-gray-900">Leadership & Administration</h2>
+                  <div className="overflow-x-auto">
+                    <table className="w-full rounded-md border border-gray-200 text-left text-sm">
+                      <thead className="bg-gray-50 text-[13px] font-bold uppercase text-gray-700">
+                        <tr>
+                          <th className="px-4 py-3">Position</th>
+                          <th className="px-4 py-3">Role</th>
+                          <th className="px-4 py-3">Current Holder</th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-gray-200 text-gray-600">
+                        {instLeadershipData.map((row: any, i: number) => (
                           <AdminRow key={i} position={row.position || ""} role={row.role || ""} holder={row.holder || ""} />
-                        ))
-                      ) : (
-                        <>
-                          <AdminRow position="Chancellor" role="Ceremonial head (Prime Minister)" holder="Sushila Karki, Rt. Hon'ble Prime Minister" />
-                          <AdminRow position="Pro-Chancellor" role="Minister of Education" holder="Mahabir Pun" />
-                          <AdminRow position="Vice Chancellor" role="Chief Executive, oversees operations" holder="Prof. Deepak Aryal, PhD" />
-                          <AdminRow position="Rector" role="Manages academic programs" holder="Prof. Khadga K.C, PhD" />
-                          <AdminRow position="Registrar" role="Handles financial and administrative affairs" holder="Prof. Kedar Prasad Rijal, PhD" />
-                        </>
-                      )}
-                    </tbody>
-                  </table>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
                 </div>
-              </div>
+              )}
             </div>
           )}
 
@@ -995,7 +641,7 @@ const CollegeDetailsPage: React.FC = () => {
                 {filteredAdmissions.slice((admissionPage - 1) * 9, admissionPage * 9).map((admission) => (
                   <CollegeCard
                     key={admission.title}
-                    images={[admission.image, admission.image, admission.image]}
+                    images={[admission.image || "", admission.image || "", admission.image || ""]}
                     tag={{
                       text:
                         admission.status === "Ongoing"

@@ -67,6 +67,7 @@ const RejectedInstitutionsSection = lazy(() => import("./RejectedInstitutionsSec
 type SectionType =
   | "overview"
   | "add-college"
+  | `edit-institution-${number}`
   | "manage-college"
   | "add-course"
   | "manage-course"
@@ -127,7 +128,7 @@ interface NavItemData {
 const navItems: NavItemData[] = [
   { icon: <LayoutDashboard size={20} />, label: "Overview", section: "overview" },
   { icon: <GraduationCap size={20} />, label: "Student Dashboard", section: "student-overview", children: [{ section: "student-overview", label: "Overview" }, { section: "student-manage-user", label: "Manage User" }, { section: "student-faq", label: "FAQ" }] },
-  { icon: <Building2 size={20} />, label: "Institution Dashboard", section: "institution-overview", children: [{ section: "institution-overview", label: "Overview" }, { section: "add-college", label: "Create Institution" }, { section: "manage-college", label: "Listed Institutions" }, { section: "manage-profile-access", label: "Manage Profile Access" }, { section: "advertise-request", label: "Advertise Request" }, { section: "pending-institutions", label: "Pending Institutions Request" }, { section: "rejected-institutions", label: "Rejected Institutions" }] },
+  { icon: <Building2 size={20} />, label: "Institution Dashboard", section: "institution-overview", children: [{ section: "add-college", label: "Create Institution" }, { section: "manage-college", label: "Listed Institutions" }, { section: "manage-profile-access", label: "Manage Profile Access" }, { section: "advertise-request", label: "Advertise Request" }, { section: "pending-institutions", label: "Pending Institutions Request" }, { section: "rejected-institutions", label: "Rejected Institutions" }] },
   { icon: <HandHeart size={20} />, label: "Provider Dashboard", section: "provider-overview", children: [{ section: "provider-overview", label: "Overview" }, { section: "manage-scholarship", label: "Manage Scholarship" }, { section: "pending-providers", label: "Pending Providers" }, { section: "scholarship-provider", label: "Scholarship Provider" }, { section: "provider-calendar", label: "Calendar" }, { section: "provider-evaluation", label: "Evaluation & Results" }, { section: "manage-news", label: "Manage News" }, { section: "manage-events", label: "Manage Events" }, { section: "manage-blog", label: "Manage Blogs" }, { section: "assign-access", label: "Assign Access" }] },
   { icon: <ShieldCheck size={20} />, label: "Assign Access", section: "access-control" },
   { icon: <CreditCard size={20} />, label: "Revenue", section: "payment" },
@@ -188,6 +189,12 @@ export default function DashboardShell() {
       const editId = parseInt(activeSection.replace("edit-blog-", ""), 10);
       if (!isNaN(editId)) {
         return <CreateBlogSection setActiveSection={navigateTo} editId={editId} />;
+      }
+    }
+    if (activeSection.startsWith("edit-institution-")) {
+      const editId = parseInt(activeSection.replace("edit-institution-", ""), 10);
+      if (!isNaN(editId)) {
+        return <AddCollegeSection setActiveSection={navigateTo} editId={editId} />;
       }
     }
     switch (activeSection) {

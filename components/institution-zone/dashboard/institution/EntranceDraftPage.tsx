@@ -14,8 +14,8 @@ const EntranceDraftPage: React.FC = () => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    institutionEntranceApi.list(1, 50)
-      .then(res => setDrafts(res.entrances?.filter(e => e.status === "upcoming") || []))
+    institutionEntranceApi.list(1, 50, "draft")
+      .then(res => setDrafts(res.entrances || []))
       .catch(() => setDrafts([]))
       .finally(() => setLoading(false));
   }, []);

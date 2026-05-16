@@ -83,6 +83,7 @@ interface ContactPerson {
   number: string;
   email: string;
   whatsapp: string;
+  image: string;
 }
 
 interface ScholarshipCard {
@@ -93,6 +94,7 @@ interface ScholarshipCard {
   coverage: string;
   eligibility: string;
   seats: string;
+  pdfUrl: string;
 }
 
 interface EligibilityCriteria {
@@ -169,6 +171,26 @@ const AdmissionCreatePage: React.FC = () => {
   const [overviewDesc, setOverviewDesc] = useState("");
   const [applicationFormLink, setApplicationFormLink] = useState("");
   const [level, setLevel] = useState("");
+  const [heroBanner, setHeroBanner] = useState("");
+
+  const getToken = () => localStorage.getItem("institutionToken");
+  const apiBase = () => process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080";
+
+  const uploadFile = async (file: File, folder: string): Promise<string> => {
+    const base = apiBase();
+    const token = getToken();
+    const formData = new FormData();
+    formData.append("file", file);
+    const res = await fetch(`${base}/api/v1/institution/upload?folder=${folder}`, {
+      method: "POST",
+      headers: { ...(token ? { Authorization: `Bearer ${token}` } : {}) },
+      body: formData,
+    });
+    if (!res.ok) throw new Error(`Upload error: ${res.status}`);
+    const data = await res.json();
+    const url = data?.data?.url || "";
+    return url.startsWith("/") ? `${base}${url}` : url;
+  };
 
   const [whatsNewTitle, setWhatsNewTitle] = useState("");
   const [whatsNewDesc, setWhatsNewDesc] = useState("");
@@ -202,6 +224,7 @@ const AdmissionCreatePage: React.FC = () => {
       setOverviewDesc(String(od.overviewDesc ?? ""));
       setApplicationFormLink(String(od.applicationFormLink ?? ""));
       setLevel(String(od.level ?? ""));
+      setHeroBanner(String(od.heroBanner ?? ""));
     }
     const wnd = data.whats_new_data;
     if (wnd) {
@@ -276,13 +299,14 @@ const AdmissionCreatePage: React.FC = () => {
     const cpd = data.contact_persons_data;
     if (cpd && Array.isArray(cpd)) {
       setContactPersons(
-        cpd.map((cp: AnyRecord, i: number) => ({
+        cpd.map((item: AnyRecord, i: number) => ({
           id: i + 1,
-          name: String(cp.name ?? ""),
-          designation: String(cp.designation ?? ""),
-          number: String(cp.number ?? ""),
-          email: String(cp.email ?? ""),
-          whatsapp: String(cp.whatsapp ?? ""),
+          name: String(item.name ?? ""),
+          designation: String(item.designation ?? ""),
+          number: String(item.number ?? ""),
+          email: String(item.email ?? ""),
+          whatsapp: String(item.whatsapp ?? ""),
+          image: String(item.image ?? ""),
         }))
       );
     }
@@ -297,6 +321,7 @@ const AdmissionCreatePage: React.FC = () => {
           coverage: String(s.coverage ?? ""),
           eligibility: String(s.eligibility ?? ""),
           seats: String(s.seats ?? ""),
+          pdfUrl: String(s.pdfUrl ?? ""),
         }))
       );
     }
@@ -377,6 +402,7 @@ const AdmissionCreatePage: React.FC = () => {
       overviewDesc,
       applicationFormLink,
       level,
+      heroBanner,
     },
     whats_new_data: {
       title: whatsNewTitle,
@@ -423,6 +449,9 @@ const AdmissionCreatePage: React.FC = () => {
       const data = collectData();
       if (editId) {
         await institutionAdmissionApi.update(Number(editId), data, publish);
+        if (publish) {
+          router.push("/institution-zone/dashboard/admission/directory");
+        }
       } else {
         const res = await institutionAdmissionApi.create(data, publish);
         if (res.success && res.data?.id) {
@@ -440,10 +469,10 @@ const AdmissionCreatePage: React.FC = () => {
     return (
       <div className="p-4 md:p-6 lg:p-8 min-h-full">
         <SectionHeader
-          title="Create Admission"
+          title={editId ? "Edit Admission" : "Create Admission"}
           breadcrumbItems={[
             { label: "Dashboard", href: "/institution-zone/dashboard/overview" },
-            { label: "Create Admission" },
+            { label: editId ? "Edit Admission" : "Create Admission" },
           ]}
         />
         <div className="flex items-center justify-center h-64 text-gray-400">
@@ -456,10 +485,10 @@ const AdmissionCreatePage: React.FC = () => {
   return (
     <div className="p-4 md:p-6 lg:p-8 min-h-full">
       <SectionHeader
-        title="Create Admission"
+        title={editId ? "Edit Admission" : "Create Admission"}
         breadcrumbItems={[
           { label: "Dashboard", href: "/institution-zone/dashboard/overview" },
-          { label: "Create Admission" },
+          { label: editId ? "Edit Admission" : "Create Admission" },
         ]}
       />
 
@@ -507,6 +536,8 @@ const AdmissionCreatePage: React.FC = () => {
                   <option value="+2">+2</option>
                   <option value="A-Level">A-Level</option>
                   <option value="Diploma/CTEVT">Diploma/CTEVT</option>
+                  <option value="Bachelor">Bachelor</option>
+                  <option value="Master">Master</option>
                 </select>
                 <p className="text-xs text-gray-500 mt-1">Select the academic level for this admission</p>
               </div>
@@ -530,8 +561,23 @@ const AdmissionCreatePage: React.FC = () => {
                 </div>
                 <span className="mt-4 text-sm font-medium text-gray-900">Click to change banner image</span>
                 <span className="mt-1 text-xs text-gray-500">Recommended size: 1920x600px (JPG/PNG)</span>
-                <input type="file" className="hidden" />
+                <input type="file" className="hidden" accept="image/*" onChange={async e => {
+                  const file = e.target.files?.[0];
+                  if (!file) return;
+                  try {
+                    const url = await uploadFile(file, "institution/admission");
+                    setHeroBanner(url);
+                  } catch { /* skip */ }
+                }} />
               </label>
+              {heroBanner && (
+                <div className="mt-3 relative rounded-xl overflow-hidden">
+                  <img src={heroBanner} className="w-full h-48 object-cover rounded-xl" alt="Hero Banner" />
+                  <button type="button" onClick={() => setHeroBanner("")} className="absolute top-2 right-2 p-1.5 bg-red-500 text-white rounded-lg hover:bg-red-600">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+                  </button>
+                </div>
+              )}
             </div>
             <div>
               <label className={labelClass}>Overview Description <span className="text-red-500">*</span></label>
@@ -1244,7 +1290,7 @@ const AdmissionCreatePage: React.FC = () => {
             onAdd={() =>
               setScholarships((prev) => [
                 ...prev,
-                { id: nextId(prev), name: "", level: "", stream: "", coverage: "", eligibility: "", seats: "" },
+                { id: nextId(prev), name: "", level: "", stream: "", coverage: "", eligibility: "", seats: "", pdfUrl: "" },
               ])
             }
             addLabel="Add Scholarship"
@@ -1345,14 +1391,30 @@ const AdmissionCreatePage: React.FC = () => {
                     />
                   </div>
                   <div className="md:col-span-2">
-                    <label className={labelClass}>Upload PDF/Doc <span className="text-red-500">*</span></label>
+                    <label className={labelClass}>Upload PDF/Doc</label>
                     <label className="border-2 border-dashed border-gray-300 rounded-xl p-4 flex flex-col items-center justify-center text-center hover:bg-gray-50 hover:border-blue-400 transition-colors cursor-pointer group">
                       <div className="p-2 bg-blue-50 text-blue-600 rounded-full group-hover:scale-110 transition-transform">
                         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
                       </div>
-                      <span className="mt-2 text-sm font-medium text-gray-900">Upload PDF/Doc</span>
-                      <input type="file" className="hidden" />
+                      <span className="mt-2 text-sm font-medium text-gray-900">{s.pdfUrl ? "Click to change PDF" : "Upload PDF/Doc"}</span>
+                      <input type="file" className="hidden" accept=".pdf,.doc,.docx" onChange={async e => {
+                        const file = e.target.files?.[0];
+                        if (!file) return;
+                        try {
+                          const url = await uploadFile(file, "institution/admission");
+                          setScholarships((prev) => prev.map((x) => x.id === s.id ? { ...x, pdfUrl: url } : x));
+                        } catch { /* skip */ }
+                      }} />
                     </label>
+                    {s.pdfUrl && (
+                      <div className="mt-2 flex items-center gap-2 p-2 bg-blue-50 rounded-lg">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-blue-600 shrink-0"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+                        <a href={s.pdfUrl} target="_blank" rel="noreferrer" className="text-sm text-blue-700 truncate">View PDF</a>
+                        <button type="button" onClick={() => setScholarships((prev) => prev.map((x) => x.id === s.id ? { ...x, pdfUrl: "" } : x))} className="p-1 text-red-500 hover:bg-red-50 rounded ml-auto">
+                          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+                        </button>
+                      </div>
+                    )}
                   </div>
                 </div>
               </div>
@@ -1369,7 +1431,7 @@ const AdmissionCreatePage: React.FC = () => {
             onAdd={() =>
               setContactPersons((prev) => [
                 ...prev,
-                { id: nextId(prev), name: "", designation: "", number: "", email: "", whatsapp: "" },
+                { id: nextId(prev), name: "", designation: "", number: "", email: "", whatsapp: "", image: "" },
               ])
             }
             addLabel="Add Contact Person"
@@ -1384,17 +1446,34 @@ const AdmissionCreatePage: React.FC = () => {
                   <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
                 </button>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pr-12">
-                  <div className="md:col-span-2">
-                    <label className={labelClass}>Contact Person Image <span className="text-red-500">*</span></label>
-                    <div className="flex items-center gap-4">
-                      <div className="w-20 h-20 bg-gray-200 rounded-lg flex items-center justify-center text-gray-400 border border-gray-300">
-                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+                    <div className="md:col-span-2">
+                      <label className={labelClass}>Contact Person Image</label>
+                      <div className="flex items-center gap-4">
+                        <div className="w-20 h-20 bg-gray-200 rounded-lg flex items-center justify-center text-gray-400 border border-gray-300 overflow-hidden">
+                          {cp.image ? (
+                            <img src={cp.image} className="w-full h-full object-cover" alt="" />
+                          ) : (
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+                          )}
+                        </div>
+                        <label className="px-4 py-2 bg-white border border-gray-300 text-sm font-medium rounded-lg hover:bg-gray-50 shadow-sm cursor-pointer">
+                          {cp.image ? "Change" : "Upload Image"}
+                          <input type="file" className="hidden" accept="image/*" onChange={async e => {
+                            const file = e.target.files?.[0];
+                            if (!file) return;
+                            try {
+                              const url = await uploadFile(file, "institution/admission");
+                              setContactPersons((prev) => prev.map((x) => x.id === cp.id ? { ...x, image: url } : x));
+                            } catch { /* skip */ }
+                          }} />
+                        </label>
+                        {cp.image && (
+                          <button type="button" onClick={() => setContactPersons((prev) => prev.map((x) => x.id === cp.id ? { ...x, image: "" } : x))} className="p-2 text-red-500 hover:bg-red-50 rounded-lg">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+                          </button>
+                        )}
                       </div>
-                      <button className="px-4 py-2 bg-white border border-gray-300 text-sm font-medium rounded-lg hover:bg-gray-50 shadow-sm">
-                        Upload Image
-                      </button>
                     </div>
-                  </div>
                   <div>
                     <label className={labelClass}>Name <span className="text-red-500">*</span></label>
                     <input
@@ -1540,28 +1619,37 @@ const AdmissionCreatePage: React.FC = () => {
             </div>
           </div>
           <div className="p-6">
-            <label className="border-2 border-dashed border-gray-300 rounded-xl p-8 flex flex-col items-center justify-center text-center hover:bg-gray-50 hover:border-blue-400 transition-colors cursor-pointer group">
-              <div className="p-3 bg-blue-50 text-blue-600 rounded-full group-hover:scale-110 transition-transform">
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
-              </div>
-              <span className="mt-4 text-sm font-medium text-gray-900">
-                {brochureUrl ? "Click to change brochure" : "Click to upload brochure"}
-              </span>
-              <span className="mt-1 text-xs text-gray-500">PDF format recommended</span>
-              <input type="file" className="hidden" accept=".pdf" />
+            <label className="border-2 border-dashed border-gray-300 rounded-xl p-8 flex flex-col items-center justify-center text-center hover:bg-gray-50 hover:border-blue-400 transition-colors cursor-pointer group relative">
+              {brochureUrl ? (
+                <div className="flex flex-col items-center gap-3">
+                  <div className="p-4 bg-blue-50 text-blue-600 rounded-full">
+                    <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+                  </div>
+                  <span className="text-sm font-medium text-gray-900">Brochure uploaded</span>
+                  <span className="text-xs text-gray-500">Click anywhere to replace</span>
+                  <button type="button" onClick={(e) => { e.preventDefault(); e.stopPropagation(); setBrochureUrl(""); }}
+                    className="px-4 py-1.5 text-sm font-medium text-red-600 bg-red-50 rounded-lg hover:bg-red-100 transition-colors">
+                    Remove
+                  </button>
+                </div>
+              ) : (
+                <>
+                  <div className="p-3 bg-blue-50 text-blue-600 rounded-full group-hover:scale-110 transition-transform">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+                  </div>
+                  <span className="mt-4 text-sm font-medium text-gray-900">Click to upload brochure</span>
+                  <span className="mt-1 text-xs text-gray-500">PDF format recommended</span>
+                </>
+              )}
+              <input type="file" className="hidden" accept=".pdf" onChange={async e => {
+                const file = e.target.files?.[0];
+                if (!file) return;
+                try {
+                  const url = await uploadFile(file, "institution/admission");
+                  setBrochureUrl(url);
+                } catch { /* skip */ }
+              }} />
             </label>
-            {brochureUrl && (
-              <div className="mt-4 flex items-center gap-3 p-3 bg-blue-50 rounded-lg">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-blue-600"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
-                <span className="text-sm text-blue-700 flex-1 truncate">{brochureUrl}</span>
-                <button
-                  onClick={() => setBrochureUrl("")}
-                  className="p-1 text-red-500 hover:bg-red-50 rounded"
-                >
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
-                </button>
-              </div>
-            )}
           </div>
         </div>
 
@@ -1581,7 +1669,7 @@ const AdmissionCreatePage: React.FC = () => {
             className="px-6 py-3 text-base font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 flex items-center gap-2 transition-colors shadow-sm disabled:opacity-50"
           >
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
-            {saving ? "Saving..." : "Publish Changes"}
+            {saving ? "Saving..." : editId ? "Publish Changes" : "Publish"}
           </button>
         </div>
       </div>

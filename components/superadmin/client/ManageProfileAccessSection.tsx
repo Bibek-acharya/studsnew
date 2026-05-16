@@ -17,6 +17,7 @@ interface Institution {
   id: number;
   institution_name: string;
   profile_access?: string;
+  claimed?: boolean;
 }
 
 interface InstitutionAccess {
@@ -62,7 +63,7 @@ export default function ManageProfileAccessSection() {
     setAuthError(false);
     try {
       const response = await superadminFetch<{ data: { institutions: Institution[] }; message: string }>("/api/v1/superadmin/institutions");
-      const data = response.data?.institutions || [];
+      const data = (response.data?.institutions || []).filter(inst => inst.claimed);
       const allToggles = [...defaultToggles, ...socialToggles];
       setInstitutions(
         data.map((inst) => ({

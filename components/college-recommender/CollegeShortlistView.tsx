@@ -357,7 +357,7 @@ export default function CollegeShortlistView({
                        <button
                          onClick={(e) => {
                            e.stopPropagation();
-                           onNavigate("collegeProfile", { id: item.id });
+                            onNavigate("collegeProfile", { id: item.id });
                          }}
                          className="w-full py-2 bg-white border border-slate-200 rounded-md text-xs font-bold text-slate-700 hover:bg-brand-blue hover:text-white hover:border-brand-blue transition-all"
                        >
