@@ -1,7 +1,8 @@
 "use client";
 
-import React, { useState, useRef } from "react";
+import React, { useState, useRef, useCallback } from "react";
 import RichTextEditor from "@/components/ScholarshipProvider/common/RichTextEditor";
+import ImageCropperModal from "@/components/ScholarshipProvider/common/ImageCropperModal";
 import { NEPAL_DISTRICTS } from "@/lib/location-data";
 
 interface VideoItem { id: number; url: string; message: string; name: string; designation: string; }
@@ -34,6 +35,8 @@ export default function AddCollegeSection({
   const [bannerUrl, setBannerUrl] = useState("");
   const [logoFile, setLogoFile] = useState<File | null>(null);
   const [bannerFile, setBannerFile] = useState<File | null>(null);
+  const [cropperOpen, setCropperOpen] = useState(false);
+  const [cropImageSrc, setCropImageSrc] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
   const [formError, setFormError] = useState("");
   const [formSuccess, setFormSuccess] = useState(false);
@@ -103,6 +106,16 @@ export default function AddCollegeSection({
   const updateItem = (setter: any, id: number, field: string, value: string) => {
     setter((prev: any[]) => prev.map(x => x.id === id ? { ...x, [field]: value } : x));
   };
+
+  const handleBannerCrop = useCallback((croppedBlob: Blob) => {
+    const croppedFile = new File([croppedBlob], bannerFile?.name || "banner.jpg", { type: "image/jpeg" });
+    setBannerFile(croppedFile);
+    const reader = new FileReader();
+    reader.onload = ev => { if (ev.target?.result) setBannerUrl(ev.target.result as string); };
+    reader.readAsDataURL(croppedBlob);
+    setCropperOpen(false);
+    setCropImageSrc(null);
+  }, [bannerFile]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -232,7 +245,12 @@ export default function AddCollegeSection({
                     if (!file) return;
                     setBannerFile(file);
                     const reader = new FileReader();
-                    reader.onload = ev => { if (ev.target?.result) setBannerUrl(ev.target.result as string); };
+                    reader.onload = ev => {
+                      if (ev.target?.result) {
+                        setCropImageSrc(ev.target.result as string);
+                        setCropperOpen(true);
+                      }
+                    };
                     reader.readAsDataURL(file);
                   }} />
                 </div>
@@ -591,6 +609,14 @@ export default function AddCollegeSection({
 
         </div>
       </form>
+
+      {cropperOpen && cropImageSrc && (
+        <ImageCropperModal
+          imageSrc={cropImageSrc}
+          onCropComplete={handleBannerCrop}
+          onCancel={() => { setCropperOpen(false); setCropImageSrc(null); }}
+        />
+      )}
     </div>
   );
 }
