@@ -605,7 +605,7 @@ const CollegeDetailsPage: React.FC = () => {
       ? website
       : `https://${website}`;
   const description = instDescription || college?.description || fallbackCollege.description;
-  const isVerified = isCollegeVerified(college?.verified);
+  const isVerified = isCollegeVerified(college?.verified) || college?.claimed === true;
   const shareTitle = `${name} - Studsphere`;
   const shareText = `Check out ${name} on Studsphere`;
 
@@ -698,7 +698,7 @@ const CollegeDetailsPage: React.FC = () => {
                 <h1 className="text-[24px] font-bold tracking-tight text-gray-900 md:text-3xl ">
                   {name}
                 </h1>
-                {isVerified && (
+                {isCollegeVerified(college?.verified) && (
                   <BadgeCheckIcon className="text-white fill-brand-blue" />
                 )}
               </div>
@@ -1723,6 +1723,7 @@ const CollegeDetailsPage: React.FC = () => {
 
       <ClaimCollegeModal
         collegeName={name}
+        collegeId={college?.id || collegeId || 0}
         isOpen={isClaimModalOpen}
         onClose={() => setIsClaimModalOpen(false)}
       />

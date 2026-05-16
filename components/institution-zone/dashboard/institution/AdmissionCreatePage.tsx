@@ -427,7 +427,7 @@ const AdmissionCreatePage: React.FC = () => {
         const res = await institutionAdmissionApi.create(data, publish);
         if (res.success && res.data?.id) {
           router.replace(`/institution-zone/dashboard/admission/create?id=${res.data.id}`);
-        }
+        } 
       }
     } catch {
       // silent

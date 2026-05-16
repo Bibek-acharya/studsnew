@@ -8,7 +8,6 @@ interface VideoItem { id: number; url: string; message: string; name: string; de
 interface OverviewRow { id: number; key: string; value: string; }
 interface LeadershipRow { id: number; position: string; role: string; holder: string; }
 interface CourseRow { id: number; name: string; duration: string; fees: string; eligibility: string; }
-interface ProgramRow { id: number; name: string; level: string; affiliation: string; status: string; }
 interface FacilityRow { id: number; icon: string; heading: string; desc: string; }
 interface AlumniRow { id: number; photo: string; name: string; job: string; batch: string; linkedin: string; }
 interface GalleryItem { id: number; url: string; }
@@ -26,18 +25,24 @@ export default function AddCollegeSection({
   const [collegeName, setCollegeName] = useState("");
   const [location, setLocation] = useState("");
   const [website, setWebsite] = useState("");
+  const [level, setLevel] = useState("");
+  const [affiliation, setAffiliation] = useState("");
   const [about, setAbout] = useState("");
   const [vision, setVision] = useState("");
   const [mission, setMission] = useState("");
   const [logoUrl, setLogoUrl] = useState("");
   const [bannerUrl, setBannerUrl] = useState("");
+  const [logoFile, setLogoFile] = useState<File | null>(null);
+  const [bannerFile, setBannerFile] = useState<File | null>(null);
   const [saving, setSaving] = useState(false);
+  const [formError, setFormError] = useState("");
+  const [formSuccess, setFormSuccess] = useState(false);
 
   const [videos, setVideos] = useState<VideoItem[]>([]);
   const [overviewRows, setOverviewRows] = useState<OverviewRow[]>([]);
   const [leadershipRows, setLeadershipRows] = useState<LeadershipRow[]>([]);
   const [courses, setCourses] = useState<CourseRow[]>([]);
-  const [programs, setPrograms] = useState<ProgramRow[]>([]);
+
   const [facilities, setFacilities] = useState<FacilityRow[]>([]);
   const [alumni, setAlumni] = useState<AlumniRow[]>([]);
   const [gallery, setGallery] = useState<GalleryItem[]>([]);
@@ -78,14 +83,15 @@ export default function AddCollegeSection({
     const token = getToken();
     const formData = new FormData();
     formData.append("file", file);
-    const res = await fetch(`${base}/api/v1/institution/upload?folder=${folder}`, {
+    const res = await fetch(`${base}/api/v1/superadmin/upload?folder=${folder}`, {
       method: "POST",
       headers: { ...(token ? { Authorization: `Bearer ${token}` } : {}) },
       body: formData,
     });
     if (!res.ok) throw new Error(`Upload error: ${res.status}`);
     const data = await res.json();
-    return data?.data?.url || "";
+    const path = data?.data?.url || "";
+    return path.startsWith("http") ? path : `${apiBase()}${path}`;
   };
 
   const addItem = <T extends { id: number }>(setter: React.Dispatch<React.SetStateAction<T[]>>, defaultItem: Omit<T, 'id'>) => {
@@ -100,22 +106,31 @@ export default function AddCollegeSection({
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setFormError("");
+    setFormSuccess(false);
     try {
       setSaving(true);
+      let finalLogoUrl = logoUrl;
+      let finalBannerUrl = bannerUrl;
+      if (logoFile) {
+        try { finalLogoUrl = await uploadFile(logoFile, "institution/logo"); } catch {}
+      }
+      if (bannerFile) {
+        try { finalBannerUrl = await uploadFile(bannerFile, "institution/banner"); } catch {}
+      }
       const body = {
         institution_name: collegeName,
         location,
         website,
-        logo_url: logoUrl,
-        banner_url: bannerUrl,
-        about,
-        vision,
-        mission,
+        level,
+        affiliation,
+        logo_url: finalLogoUrl.startsWith("data:") ? "" : finalLogoUrl,
+        banner_url: finalBannerUrl.startsWith("data:") ? "" : finalBannerUrl,
+        about, vision, mission,
         videos: videos.map(({ id, ...rest }) => rest),
         overview_data: overviewRows.map(({ id, ...rest }) => rest),
         leadership_data: leadershipRows.map(({ id, ...rest }) => rest),
         courses_data: courses.map(({ id, ...rest }) => rest),
-        programs_data: programs.map(({ id, ...rest }) => rest),
         facilities_data: facilities.map(({ id, ...rest }) => rest),
         alumni_data: alumni.map(({ id, ...rest }) => rest),
         gallery_data: gallery.map(({ id, ...rest }) => rest),
@@ -125,9 +140,11 @@ export default function AddCollegeSection({
         method: "POST",
         body: JSON.stringify(body),
       });
-      setActiveSection("manage-college");
-    } catch (err) {
-      console.error("Failed to create institution:", err);
+      setFormSuccess(true);
+      setFormError("");
+      setTimeout(() => setActiveSection("manage-college"), 1500);
+    } catch (err: any) {
+      setFormError(err?.message || "Failed to create institution. Please try again.");
     } finally {
       setSaving(false);
     }
@@ -155,9 +172,20 @@ export default function AddCollegeSection({
             </div>
           </div>
 
+          {formSuccess && (
+            <div className="flex items-center gap-3 bg-green-50 border border-green-200 text-green-800 rounded-lg px-4 py-3 text-sm font-medium">
+              <i className="fa-solid fa-check-circle text-green-600"></i> Institution created successfully! Redirecting...
+            </div>
+          )}
+          {formError && (
+            <div className="flex items-center gap-3 bg-red-50 border border-red-200 text-red-800 rounded-lg px-4 py-3 text-sm font-medium">
+              <i className="fa-solid fa-exclamation-circle text-red-600"></i> {formError}
+            </div>
+          )}
+
           {/* ─── Logo & Banner ─── */}
           <div className="bg-white p-6 rounded-md border border-gray-200">
-            <h3 className="text-lg font-semibold text-gray-800 mb-5 border-b pb-3">
+            <h3 className="text-lg font-semibold text-gray-800 mb-5">
               <i className="fa-solid fa-image text-blue-500 mr-2"></i>Logo & Banner
             </h3>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -175,13 +203,13 @@ export default function AddCollegeSection({
                       </div>
                     </div>
                   )}
-                  <input ref={logoInputRef} type="file" className="sr-only" accept="image/*" onChange={async e => {
+                  <input ref={logoInputRef} type="file" className="sr-only" accept="image/*" onChange={e => {
                     const file = e.target.files?.[0];
                     if (!file) return;
-                    try {
-                      const url = await uploadFile(file, "institution/logo");
-                      setLogoUrl(url);
-                    } catch { /* skip */ }
+                    setLogoFile(file);
+                    const reader = new FileReader();
+                    reader.onload = ev => { if (ev.target?.result) setLogoUrl(ev.target.result as string); };
+                    reader.readAsDataURL(file);
                   }} />
                 </div>
               </div>
@@ -199,13 +227,13 @@ export default function AddCollegeSection({
                       </div>
                     </div>
                   )}
-                  <input ref={bannerInputRef} type="file" className="sr-only" accept="image/*" onChange={async e => {
+                  <input ref={bannerInputRef} type="file" className="sr-only" accept="image/*" onChange={e => {
                     const file = e.target.files?.[0];
                     if (!file) return;
-                    try {
-                      const url = await uploadFile(file, "institution/banner");
-                      setBannerUrl(url);
-                    } catch { /* skip */ }
+                    setBannerFile(file);
+                    const reader = new FileReader();
+                    reader.onload = ev => { if (ev.target?.result) setBannerUrl(ev.target.result as string); };
+                    reader.readAsDataURL(file);
                   }} />
                 </div>
               </div>
@@ -214,7 +242,7 @@ export default function AddCollegeSection({
 
           {/* ─── General Information ─── */}
           <div className="bg-white p-6 rounded-md border border-gray-200">
-            <h3 className="text-lg font-semibold text-gray-800 mb-5 border-b pb-3">
+            <h3 className="text-lg font-semibold text-gray-800 mb-5">
               <i className="fa-solid fa-building text-blue-500 mr-2"></i>General Information
             </h3>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -241,6 +269,21 @@ export default function AddCollegeSection({
                 )}
               </div>
               <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Level</label>
+                <select className={inputClass} value={level} onChange={e => setLevel(e.target.value)}>
+                  <option value="">Select Level</option>
+                  <option value="+2">+2</option>
+                  <option value="Bachelor">Bachelor</option>
+                  <option value="Master">Master</option>
+                  <option value="A Level">A Level</option>
+                  <option value="CTEVT">CTEVT</option>
+                </select>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Affiliated University</label>
+                <input type="text" className={inputClass} placeholder="e.g. Tribhuvan University" value={affiliation} onChange={e => setAffiliation(e.target.value)} />
+              </div>
+              <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">Website</label>
                 <input type="text" className={inputClass} placeholder="www.college.edu.np" value={website} onChange={e => setWebsite(e.target.value)} />
               </div>
@@ -249,7 +292,7 @@ export default function AddCollegeSection({
 
           {/* ─── About Section ─── */}
           <div className="bg-white p-6 rounded-md border border-gray-200">
-            <h3 className="text-lg font-semibold text-gray-800 mb-5 border-b pb-3">
+            <h3 className="text-lg font-semibold text-gray-800 mb-5">
               <i className="fa-solid fa-circle-info text-blue-500 mr-2"></i>About Section
             </h3>
 
@@ -352,7 +395,7 @@ export default function AddCollegeSection({
 
           {/* ─── Courses & Fees ─── */}
           <div className="bg-white p-6 rounded-md border border-gray-200">
-            <div className="flex justify-between items-center mb-5 border-b pb-3">
+            <div className="flex justify-between items-center mb-5">
               <h3 className="text-lg font-semibold text-gray-800">
                 <i className="fa-solid fa-book-open text-blue-500 mr-2"></i>Courses & Fees
               </h3>
@@ -380,44 +423,10 @@ export default function AddCollegeSection({
             </div>
           </div>
 
-          {/* ─── Offered Programs ─── */}
-          <div className="bg-white p-6 rounded-md border border-gray-200">
-            <div className="flex justify-between items-center mb-5 border-b pb-3">
-              <h3 className="text-lg font-semibold text-gray-800">
-                <i className="fa-solid fa-layer-group text-blue-500 mr-2"></i>Offered Programs
-              </h3>
-              <button type="button" onClick={() => addItem(setPrograms, { name: "", level: "Bachelor", affiliation: "", status: "Ongoing" })}
-                className="text-sm text-blue-600 bg-blue-50 px-3 py-1.5 rounded-md hover:bg-blue-100 transition-colors font-medium">
-                <i className="fa-solid fa-plus mr-1"></i> Add Program
-              </button>
-            </div>
-            <div className="space-y-3">
-              {programs.map(p => (
-                <div key={p.id} className="bg-gray-50 border border-gray-200 rounded-md p-4 relative group">
-                  <button type="button" onClick={() => removeItem(setPrograms, p.id)}
-                    className="absolute top-3 right-3 text-red-400 hover:text-red-600 hover:bg-red-50 p-1.5 rounded-md transition-colors opacity-0 group-hover:opacity-100">
-                    <i className="fa-solid fa-trash"></i>
-                  </button>
-                  <div className="grid grid-cols-1 md:grid-cols-4 gap-3 pr-10">
-                    <input type="text" className={`${inputClass} text-sm`} placeholder="Program name" value={p.name} onChange={e => updateItem(setPrograms, p.id, "name", e.target.value)} />
-                    <select className={`${inputClass} text-sm bg-white`} value={p.level} onChange={e => updateItem(setPrograms, p.id, "level", e.target.value)}>
-                      <option>+2</option><option>Bachelor</option><option>Master</option>
-                    </select>
-                    <input type="text" className={`${inputClass} text-sm`} placeholder="Affiliation" value={p.affiliation} onChange={e => updateItem(setPrograms, p.id, "affiliation", e.target.value)} />
-                    <select className={`${inputClass} text-sm bg-white`} value={p.status} onChange={e => updateItem(setPrograms, p.id, "status", e.target.value)}>
-                      <option value="Ongoing">Ongoing</option>
-                      <option value="Closed">Closed</option>
-                    </select>
-                  </div>
-                </div>
-              ))}
-              {programs.length === 0 && <p className="text-sm text-gray-400 py-4 text-center">No programs added.</p>}
-            </div>
-          </div>
 
           {/* ─── Facilities ─── */}
           <div className="bg-white p-6 rounded-md border border-gray-200">
-            <div className="flex justify-between items-center mb-5 border-b pb-3">
+            <div className="flex justify-between items-center mb-5">
               <h3 className="text-lg font-semibold text-gray-800">
                 <i className="fa-solid fa-building text-blue-500 mr-2"></i>College Facilities
               </h3>
@@ -448,7 +457,7 @@ export default function AddCollegeSection({
 
           {/* ─── Alumni ─── */}
           <div className="bg-white p-6 rounded-md border border-gray-200">
-            <div className="flex justify-between items-center mb-5 border-b pb-3">
+            <div className="flex justify-between items-center mb-5">
               <h3 className="text-lg font-semibold text-gray-800">
                 <i className="fa-solid fa-users text-blue-500 mr-2"></i>Notable Alumni
               </h3>
@@ -485,52 +494,52 @@ export default function AddCollegeSection({
 
           {/* ─── Gallery ─── */}
           <div className="bg-white p-6 rounded-md border border-gray-200">
-            <h3 className="text-lg font-semibold text-gray-800 mb-5 border-b pb-3">
+            <h3 className="text-lg font-semibold text-gray-800 mb-5">
               <i className="fa-solid fa-image text-blue-500 mr-2"></i>Gallery
             </h3>
-            <div className="space-y-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Gallery Image URLs</label>
-                <p className="text-xs text-gray-400 mb-3">Enter image URLs one per line or add individually below.</p>
-              </div>
-              {gallery.length > 0 && (
-                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3">
-                  {gallery.map(g => (
-                    <div key={g.id} className="relative group rounded-md overflow-hidden aspect-square bg-gray-200">
-                      <img src={g.url} className="w-full h-full object-cover" alt="Gallery" />
-                      <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                        <button type="button" onClick={() => removeItem(setGallery, g.id)} className="text-white hover:text-red-300">
-                          <i className="fa-solid fa-trash text-lg"></i>
-                        </button>
-                      </div>
-                    </div>
-                  ))}
+            <div className="mb-6">
+              <div onClick={() => galleryRef.current?.click()}
+                className="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-gray-300 border-dashed rounded-md hover:border-blue-400 transition cursor-pointer bg-gray-50 relative overflow-hidden">
+                <div className="space-y-1 text-center">
+                  <i className="fa-regular fa-image text-4xl text-gray-400"></i>
+                  <div className="flex text-sm text-gray-600 justify-center mt-3">
+                    <span className="font-medium text-blue-600 hover:text-blue-500">Upload images</span>
+                  </div>
+                  <p className="text-xs text-gray-400">PNG, JPG up to 5MB each</p>
                 </div>
-              )}
-              <div className="flex items-center gap-3">
-                <input type="url" className={`${inputClass} flex-1`} placeholder="https://example.com/image.jpg"
-                  onKeyDown={e => {
-                    if (e.key === "Enter") {
-                      e.preventDefault();
-                      const input = e.target as HTMLInputElement;
-                      if (input.value) {
-                        setGallery(prev => [...prev, { id: Date.now(), url: input.value }]);
-                        input.value = "";
-                      }
+                <input ref={galleryRef} type="file" className="sr-only" accept="image/*" multiple
+                  onChange={async e => {
+                    const files = Array.from(e.target.files || []);
+                    const newItems: GalleryItem[] = [];
+                    for (let i = 0; i < files.length; i++) {
+                      try {
+                        const url = await uploadFile(files[i], "institution/gallery");
+                        newItems.push({ id: Date.now() + i, url });
+                      } catch { /* skip failed uploads */ }
                     }
+                    if (newItems.length > 0) setGallery(prev => [...prev, ...newItems]);
                   }} />
-                <button type="button" onClick={() => addItem(setGallery, { url: "" })}
-                  className="text-sm text-blue-600 bg-blue-50 px-3 py-2 rounded-md hover:bg-blue-100 transition-colors font-medium flex-shrink-0">
-                  <i className="fa-solid fa-plus mr-1"></i> Add URL
-                </button>
               </div>
-              {gallery.length === 0 && <p className="text-sm text-gray-400 py-4 text-center">No images added.</p>}
             </div>
+            {gallery.length > 0 && (
+              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3">
+                {gallery.map(g => (
+                  <div key={g.id} className="relative group rounded-md overflow-hidden aspect-square bg-gray-200">
+                    <img src={g.url} className="w-full h-full object-cover" alt="Gallery" />
+                    <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                      <button type="button" onClick={() => removeItem(setGallery, g.id)} className="text-white hover:text-red-300">
+                        <i className="fa-solid fa-trash text-lg"></i>
+                      </button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
 
           {/* ─── Downloads ─── */}
           <div className="bg-white p-6 rounded-md border border-gray-200">
-            <div className="flex justify-between items-center mb-5 border-b pb-3">
+            <div className="flex justify-between items-center mb-5">
               <h3 className="text-lg font-semibold text-gray-800">
                 <i className="fa-solid fa-download text-blue-500 mr-2"></i>Downloads / Resources
               </h3>
@@ -550,7 +559,17 @@ export default function AddCollegeSection({
                     <i className="fa-regular fa-file-lines"></i>
                   </div>
                   <input className={`${inputClass} text-sm flex-1`} placeholder="Document name" value={d.name} onChange={e => updateItem(setDownloads, d.id, "name", e.target.value)} />
-                  <input className={`${inputClass} text-sm w-64`} placeholder="File URL" value={d.file} onChange={e => updateItem(setDownloads, d.id, "file", e.target.value)} />
+                  <label className="px-4 py-2 bg-white border border-gray-300 rounded-md text-sm text-gray-600 cursor-pointer hover:bg-gray-50 whitespace-nowrap flex items-center gap-1 flex-shrink-0">
+                    <i className="fa-solid fa-upload"></i> Choose File
+                    <input type="file" className="hidden" onChange={async e => {
+                      const file = e.target.files?.[0];
+                      if (!file) return;
+                      try {
+                        const url = await uploadFile(file, "institution/downloads");
+                        updateItem(setDownloads, d.id, "file", url);
+                      } catch { /* skip */ }
+                    }} />
+                  </label>
                 </div>
               ))}
               {downloads.length === 0 && <p className="text-sm text-gray-400 py-4 text-center">No documents added.</p>}

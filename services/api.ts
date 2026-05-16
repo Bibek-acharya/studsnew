@@ -460,6 +460,7 @@ export interface College {
   location?: string;
   affiliation?: string;
   verified?: boolean;
+  claimed?: boolean;
   featured?: boolean;
   popular?: boolean;
   website?: string;
@@ -1758,6 +1759,28 @@ export const apiService = {
     contact_person_phone?: string;
   }): Promise<RegisterResponse> {
     return apiRequest<RegisterResponse>("/api/v1/institutions/auth/register", {
+      method: "POST",
+      body: JSON.stringify(data),
+    });
+  },
+
+  async claimRegister(data: {
+    college_id: number;
+    institution_name: string;
+    registration_number: string;
+    email: string;
+    contact_number?: string;
+    province?: string;
+    district?: string;
+    local_body?: string;
+    organization_type?: string;
+    pan_number?: string;
+    website_url?: string;
+    contact_person?: string;
+    contact_person_designation?: string;
+    contact_person_phone?: string;
+  }): Promise<RegisterResponse> {
+    return apiRequest<RegisterResponse>("/api/v1/institutions/auth/claim", {
       method: "POST",
       body: JSON.stringify(data),
     });

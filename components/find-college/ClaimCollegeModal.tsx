@@ -1,259 +1,252 @@
-import React, { useEffect, useState } from "react";
-import {
-  X,
-  User,
-  Briefcase,
-  Mail,
-  Building2,
-  Send,
-  Check,
-} from "lucide-react";
-import type { College } from "@/services/api";
+"use client";
 
-import { RiWhatsappFill } from "react-icons/ri";
+import React, { useState } from "react";
+import { X, Loader2, Mail, Check, Send } from "lucide-react";
+import { apiService } from "@/services/api";
+import { NEPAL_PROVINCES, NEPAL_DISTRICTS } from "@/lib/location-data";
+
+interface College {
+  id: number;
+  name: string;
+}
 
 interface ClaimCollegeModalProps {
   college: College | null;
   onClose: () => void;
 }
 
-interface ClaimFormData {
-  fullName: string;
-  designation: string;
-  email: string;
-  phone: string;
-  whatsapp: string;
-  department: string;
-}
+const inputClass = "w-full px-3 py-2 border border-gray-300 rounded-md focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none transition-colors text-sm";
 
-const initialForm: ClaimFormData = {
-  fullName: "",
-  designation: "",
-  email: "",
-  phone: "",
-  whatsapp: "",
-  department: "",
-};
+export default function ClaimCollegeModal({ college, onClose }: ClaimCollegeModalProps) {
+  const [step, setStep] = useState<"form" | "otp" | "success" | "error">("form");
 
-const ClaimCollegeModal: React.FC<ClaimCollegeModalProps> = ({ college, onClose }) => {
-  const isOpen = college !== null;
-  const [formData, setFormData] = useState<ClaimFormData>(initialForm);
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [isSubmitted, setIsSubmitted] = useState(false);
+  const [formData, setFormData] = useState({
+    institution_name: college?.name || "",
+    email: "",
+    contact_number: "",
+    province: "",
+    district: "",
+    local_body: "",
+    organization_type: "",
+    pan_number: "",
+    registration_number: "",
+    website_url: "",
+    contact_person: "",
+    contact_person_designation: "",
+    contact_person_phone: "",
+  });
 
-  useEffect(() => {
-    if (isOpen) {
-      setFormData(initialForm);
-      setIsSubmitting(false);
-      setIsSubmitted(false);
+  const [otp, setOtp] = useState("");
+  const [submitting, setSubmitting] = useState(false);
+  const [otpSending, setOtpSending] = useState(false);
+  const [otpVerified, setOtpVerified] = useState(false);
+  const [errorMsg, setErrorMsg] = useState("");
+  const [successMsg, setSuccessMsg] = useState("");
+
+  const districts = formData.province ? (NEPAL_DISTRICTS as Record<string, string[]>)[formData.province] || [] : [];
+
+  const updateField = (key: string, value: string) => {
+    setFormData(prev => {
+      const next = { ...prev, [key]: value };
+      if (key === "province") { next.district = ""; next.local_body = ""; }
+      if (key === "district") next.local_body = "";
+      return next;
+    });
+  };
+
+  const submitClaim = async () => {
+    if (!college) return;
+    setSubmitting(true);
+    setErrorMsg("");
+    try {
+      await apiService.claimRegister({
+        college_id: college.id,
+        institution_name: formData.institution_name,
+        registration_number: formData.registration_number,
+        email: formData.email.trim(),
+        contact_number: formData.contact_number,
+        province: formData.province,
+        district: formData.district,
+        local_body: formData.local_body,
+        organization_type: formData.organization_type,
+        pan_number: formData.pan_number,
+        website_url: formData.website_url,
+        contact_person: formData.contact_person,
+        contact_person_designation: formData.contact_person_designation,
+        contact_person_phone: formData.contact_person_phone,
+      });
+      await apiService.sendOTP(formData.email.trim(), "verification");
+      setStep("otp");
+    } catch (e: any) {
+      setErrorMsg(e?.message || "Failed to submit claim request");
+    } finally {
+      setSubmitting(false);
     }
-  }, [isOpen]);
-
-  const handleChange = (key: keyof ClaimFormData, value: string) => {
-    setFormData((prev) => ({ ...prev, [key]: value }));
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setIsSubmitting(true);
-
-    // Placeholder submit behavior until API endpoint is available.
-    setTimeout(() => {
-      setIsSubmitting(false);
-      setIsSubmitted(true);
-    }, 700);
+  const handleSendOTP = async () => {
+    if (!formData.email) { setErrorMsg("Please enter your email first"); return; }
+    setOtpSending(true);
+    setErrorMsg("");
+    try {
+      await apiService.sendOTP(formData.email.trim(), "verification");
+    } catch (e: any) {
+      setErrorMsg(e?.message || "Failed to send OTP");
+    } finally {
+      setOtpSending(false);
+    }
   };
 
-  if (!isOpen) return null;
+  const handleVerifyOTP = async () => {
+    if (!otp) { setErrorMsg("Please enter the OTP"); return; }
+    setSubmitting(true);
+    setErrorMsg("");
+    try {
+      await apiService.verifyOTP(formData.email.trim(), otp);
+      setOtpVerified(true);
+      setStep("success");
+      setSuccessMsg("Claim request submitted successfully! Our team will verify and grant you access.");
+    } catch (e: any) {
+      setErrorMsg(e?.message || "Invalid OTP or verification failed");
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  if (!college) return null;
 
   return (
-    <div
-      className="fixed inset-0 z-60 flex items-center justify-center bg-black/50 p-4 backdrop-blur-sm"
-      onClick={onClose}
-    >
-      <main
-        className="relative max-h-[95vh] w-full max-w-105 overflow-y-auto rounded-md  bg-white"
-        onClick={(e) => e.stopPropagation()}
-      >
-        {!isSubmitted && (
-          <button
-            type="button"
-            onClick={onClose}
-            className="absolute right-4 top-4 z-20 rounded-full p-1 text-white/90 transition-colors hover:bg-white/10"
-          >
-            <X className="h-5 w-5" />
+    <div className="fixed inset-0 z-[210] flex items-center justify-center bg-black/50 p-4" onClick={onClose}>
+      <div className="bg-white rounded-xl shadow-xl w-full max-w-lg max-h-[90vh] overflow-y-auto" onClick={e => e.stopPropagation()}>
+        <div className="flex items-center justify-between p-5 border-b border-gray-100">
+          <h3 className="text-lg font-bold text-gray-900">Claim {college.name}</h3>
+          <button type="button" onClick={onClose} className="p-2 hover:bg-gray-100 rounded-lg transition-colors">
+            <X size={20} className="text-gray-500" />
           </button>
-        )}
+        </div>
 
-        {!isSubmitted && (
-          <div className="bg-brand-blue px-5 py-5 text-center text-white">
-            <h2 className="text-xl font-bold tracking-tight">College Registration</h2>
-            <p className="mt-1 text-[11px] font-medium text-white/80">
-              Please fill out the form below for {college?.name || "this college"}.
-            </p>
-          </div>
-        )}
+        <div className="p-5">
+          {errorMsg && (
+            <div className="mb-4 flex items-center gap-2 bg-red-50 border border-red-200 text-red-800 rounded-lg px-4 py-3 text-sm">
+              <span>{errorMsg}</span>
+            </div>
+          )}
 
-        {!isSubmitted ? (
-          <div className="p-5">
-            <form onSubmit={handleSubmit} className="space-y-3.5">
-              <div>
-                <label className="mb-1 block text-xs font-semibold text-gray-700">
-                  Full Name <span className="text-red-500">*</span>
-                </label>
-                <div className="relative">
-                  <User className="pointer-events-none absolute left-2.5 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
-                  <input
-                    type="text"
-                    required
-                    value={formData.fullName}
-                    onChange={(e) => handleChange("fullName", e.target.value)}
-                    placeholder="Enter your full name"
-                    className="w-full rounded-md border border-gray-200 bg-gray-50 py-2 pl-8 pr-3 text-sm outline-none transition focus:border-brand-blue focus:bg-white"
-                  />
-                </div>
+          {step === "success" ? (
+            <div className="text-center py-8">
+              <div className="w-16 h-16 rounded-full bg-green-100 flex items-center justify-center mx-auto mb-4">
+                <Check size={32} className="text-green-600" />
               </div>
-
-              <div>
-                <label className="mb-1 block text-xs font-semibold text-gray-700">
-                  Designation <span className="text-red-500">*</span>
-                </label>
-                <div className="relative">
-                  <Briefcase className="pointer-events-none absolute left-2.5 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
-                  <input
-                    type="text"
-                    required
-                    value={formData.designation}
-                    onChange={(e) => handleChange("designation", e.target.value)}
-                    placeholder="Enter your designation (e.g. Principal)"
-                    className="w-full rounded-md border border-gray-200 bg-gray-50 py-2 pl-8 pr-3 text-sm text-gray-700 outline-none transition focus:border-brand-blue focus:bg-white"
-                  />
-                </div>
-              </div>
-
-              <div>
-                <label className="mb-1 block text-xs font-semibold text-gray-700">
-                  Official Email <span className="text-red-500">*</span>
-                </label>
-                <div className="relative">
-                  <Mail className="pointer-events-none absolute left-2.5 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
-                  <input
-                    type="email"
-                    required
-                    value={formData.email}
-                    onChange={(e) => handleChange("email", e.target.value)}
-                    placeholder="Enter your official email address"
-                    className="w-full rounded-md border border-gray-200 bg-gray-50 py-2 pl-8 pr-3 text-sm outline-none transition focus:border-brand-blue focus:bg-white"
-                  />
-                </div>
-              </div>
-
-              <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <label className="mb-1 block text-xs font-semibold text-gray-700">
-                    Phone <span className="text-red-500">*</span>
-                  </label>
-                  <div className="flex rounded-md border border-gray-200 bg-gray-50 transition focus-within:border-brand-blue focus-within:bg-white">
-                    <span className="inline-flex items-center border-r border-gray-200/50 px-2 text-[11px] font-bold text-gray-500">
-                      +977
-                    </span>
-                    <input
-                      type="tel"
-                      required
-                      pattern="[0-9]{10}"
-                      value={formData.phone}
-                      onChange={(e) => handleChange("phone", e.target.value)}
-                      placeholder="98XXXXXXXX"
-                      className="w-full min-w-0 bg-transparent px-2 py-2 text-sm outline-none"
-                    />
-                  </div>
-                </div>
-
-                <div>
-                  <label className="mb-1 block text-xs font-semibold text-gray-700">
-                    WhatsApp <span className="text-[10px] font-normal text-gray-400">(Opt)</span>
-                  </label>
-                  <div className="flex rounded-md border border-gray-200 bg-gray-50 transition focus-within:border-brand-blue focus-within:bg-white">
-                    <span className="inline-flex items-center border-r border-gray-200/50 px-2 text-[11px] font-bold text-green-600">
-                      <RiWhatsappFill className="h-3.5 w-3.5" />
-                    </span>
-                    <input
-                      type="tel"
-                      pattern="[0-9]{10}"
-                      value={formData.whatsapp}
-                      onChange={(e) => handleChange("whatsapp", e.target.value)}
-                      placeholder="98XXXXXXXX"
-                      className="w-full min-w-0 bg-transparent px-2 py-2 text-sm outline-none"
-                    />
-                  </div>
-                </div>
-              </div>
-
-              <div>
-                <label className="mb-1 block text-xs font-semibold text-gray-700">
-                  Department <span className="text-red-500">*</span>
-                </label>
-                <div className="relative">
-                  <Building2 className="pointer-events-none absolute left-2.5 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
-                  <input
-                    type="text"
-                    required
-                    value={formData.department}
-                    onChange={(e) => handleChange("department", e.target.value)}
-                    placeholder="e.g. Administration"
-                    className="w-full rounded-md border border-gray-200 bg-gray-50 py-2 pl-8 pr-3 text-sm outline-none transition focus:border-brand-blue focus:bg-white"
-                  />
-                </div>
-              </div>
-
-              <div className="pt-2">
-                <button
-                  type="submit"
-                  disabled={isSubmitting}
-                  className="flex w-full items-center justify-center gap-2 rounded-md bg-brand-blue px-4 py-2.5 text-sm font-bold text-white transition-colors hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-75"
-                >
-                  {isSubmitting ? (
-                    <>
-                      <span className="h-3.5 w-3.5 animate-spin rounded-full border-2 border-white border-r-transparent" />
-                      Sending...
-                    </>
-                  ) : (
-                    <>
-                      <Send className="h-3.5 w-3.5" />
-                      Submit Request
-                    </>
-                  )}
+              <h4 className="text-lg font-bold text-gray-900 mb-2">Request Received!</h4>
+              <p className="text-sm text-gray-500">{successMsg}</p>
+            </div>
+          ) : step === "otp" ? (
+            <div>
+              <p className="text-sm text-gray-600 mb-4">Enter the 6-digit OTP sent to <strong>{formData.email}</strong></p>
+              <input type="text" maxLength={6} value={otp} onChange={e => setOtp(e.target.value.replace(/\D/g, ""))}
+                className={`${inputClass} text-center text-2xl tracking-widest mb-4`} placeholder="000000" />
+              <div className="flex items-center gap-3">
+                <button type="button" onClick={() => setStep("form")}
+                  className="px-4 py-2 border border-gray-300 rounded-lg text-sm text-gray-700 hover:bg-gray-50 transition-colors">
+                  Back
+                </button>
+                <button type="button" onClick={handleVerifyOTP} disabled={submitting || otp.length !== 6}
+                  className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg text-sm font-semibold hover:bg-blue-700 transition-colors disabled:opacity-50 flex items-center justify-center gap-2">
+                  {submitting ? <Loader2 size={16} className="animate-spin" /> : <Check size={16} />}
+                  Verify & Submit
                 </button>
               </div>
-            </form>
-          </div>
-        ) : (
-          <div className="flex flex-col items-center justify-center p-6 py-10 text-center">
-            <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-green-100 ">
-              <Check className="h-7 w-7 text-green-500" />
+              <button type="button" onClick={handleSendOTP} disabled={otpSending}
+                className="mt-3 text-sm text-blue-600 hover:underline flex items-center gap-1">
+                <Send size={14} /> Resend OTP
+              </button>
             </div>
-            <h3 className="mb-1 text-lg font-bold text-gray-900">Request Received!</h3>
-            <p className="mb-5 max-w-55 text-xs leading-relaxed text-gray-600">
-              We will review your details and get back to you shortly.
-            </p>
-            <a
-              href="mailto:info@studsphere.com"
-              className="mb-6 inline-block rounded bg-brand-blue/10 px-3 py-1.5 text-xs font-bold text-brand-blue transition-colors hover:bg-brand-blue/20"
-            >
-              info@studsphere.com
-            </a>
-            <button
-              type="button"
-              onClick={onClose}
-              className="flex w-full max-w-55 items-center justify-center gap-2 rounded-md bg-brand-blue px-4 py-2.5 text-sm font-bold text-white transition-colors hover:bg-blue-700"
-            >
-              Close Window
-            </button>
-          </div>
-        )}
-      </main>
+          ) : (
+            <div className="space-y-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="md:col-span-2">
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Institution Name *</label>
+                  <input type="text" value={formData.institution_name} onChange={e => updateField("institution_name", e.target.value)}
+                    className={inputClass} placeholder="Enter full institution name" required />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Official Email *</label>
+                  <input type="email" value={formData.email} onChange={e => updateField("email", e.target.value)}
+                    className={inputClass} placeholder="admin@institution.edu.np" required />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Contact Number</label>
+                  <input type="tel" value={formData.contact_number} onChange={e => updateField("contact_number", e.target.value)}
+                    className={inputClass} placeholder="+977-XXXXXXXXX" />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Province</label>
+                  <select value={formData.province} onChange={e => updateField("province", e.target.value)}
+                    className={inputClass}>
+                    <option value="">Select Province</option>
+                    {NEPAL_PROVINCES.map(p => <option key={p} value={p}>{p}</option>)}
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">District</label>
+                  <select value={formData.district} onChange={e => updateField("district", e.target.value)}
+                    className={inputClass} disabled={!formData.province}>
+                    <option value="">Select District</option>
+                    {districts.map(d => <option key={d} value={d}>{d}</option>)}
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Organization Type</label>
+                  <select value={formData.organization_type} onChange={e => updateField("organization_type", e.target.value)}
+                    className={inputClass}>
+                    <option value="">Select Type</option>
+                    <option value="private">Private</option>
+                    <option value="public">Public</option>
+                    <option value="community">Community</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">PAN Number</label>
+                  <input type="text" value={formData.pan_number} onChange={e => updateField("pan_number", e.target.value)}
+                    className={inputClass} placeholder="PAN number" />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Registration Number *</label>
+                  <input type="text" value={formData.registration_number} onChange={e => updateField("registration_number", e.target.value)}
+                    className={inputClass} placeholder="e.g. 12345/078" required />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Website URL</label>
+                  <input type="url" value={formData.website_url} onChange={e => updateField("website_url", e.target.value)}
+                    className={inputClass} placeholder="https://www.college.edu.np" />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Contact Person Name</label>
+                  <input type="text" value={formData.contact_person} onChange={e => updateField("contact_person", e.target.value)}
+                    className={inputClass} placeholder="Full name" />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Contact Person Designation</label>
+                  <input type="text" value={formData.contact_person_designation} onChange={e => updateField("contact_person_designation", e.target.value)}
+                    className={inputClass} placeholder="e.g. Principal" />
+                </div>
+              </div>
+
+              <div className="flex items-center justify-end gap-3 pt-4 border-t border-gray-200">
+                <button type="button" onClick={onClose}
+                  className="px-4 py-2 border border-gray-300 rounded-lg text-sm text-gray-700 hover:bg-gray-50 transition-colors">
+                  Cancel
+                </button>
+                <button type="button" onClick={submitClaim} disabled={submitting || !formData.email || !formData.institution_name}
+                  className="px-4 py-2 bg-blue-600 text-white rounded-lg text-sm font-semibold hover:bg-blue-700 transition-colors disabled:opacity-50 flex items-center gap-2">
+                  {submitting ? <Loader2 size={16} className="animate-spin" /> : <Mail size={16} />}
+                  {submitting ? "Submitting..." : "Submit & Verify Email"}
+                </button>
+              </div>
+            </div>
+          )}
+        </div>
+      </div>
     </div>
   );
-};
-
-export default ClaimCollegeModal;
+}

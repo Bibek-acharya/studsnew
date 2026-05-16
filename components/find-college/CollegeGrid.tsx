@@ -455,7 +455,7 @@ const CollegeGrid: React.FC<CollegeGridProps> = ({
             <React.Fragment key={college.id}>
               <ProgramCard
                 college={college}
-                isVerified={Boolean(college.verified)}
+                isVerified={Boolean(college.verified) || Boolean((college as any).claimed)}
                 isSaved={savedColleges.includes(college.id)}
                 isSelected={selectedForInquiry.includes(college.id)}
                 isQuickInquiryMode={isQuickInquiryMode}
@@ -764,7 +764,7 @@ const ProgramCard: React.FC<{
               <span className="absolute top-full left-4 -mt-px border-[5px] border-transparent border-t-gray-900"></span>
             </span>
           </button>
-          {isVerified && (
+          {Boolean(college.verified) && (
             <BadgeCheckIcon className="w-5 h-5 text-white fill-blue-500 shrink-0" />
           )}
         </div>
