@@ -1764,6 +1764,20 @@ export const apiService = {
     });
   },
 
+  async institutionSendOTP(email: string, type: "verification" | "password_reset"): Promise<void> {
+    await apiRequest("/api/v1/institutions/auth/send-otp", {
+      method: "POST",
+      body: JSON.stringify({ email, type }),
+    });
+  },
+
+  async institutionResetPassword(email: string, otp: string, password: string): Promise<void> {
+    await apiRequest("/api/v1/institutions/auth/reset-password", {
+      method: "POST",
+      body: JSON.stringify({ email, otp, password }),
+    });
+  },
+
   async claimRegister(data: {
     college_id: number;
     institution_name: string;

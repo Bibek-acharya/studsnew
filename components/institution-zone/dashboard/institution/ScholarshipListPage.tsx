@@ -49,7 +49,7 @@ const ScholarshipListPage: React.FC = () => {
     async function fetchData() {
       try {
         const token = localStorage.getItem("institutionToken");
-        const res = await fetch(`${API_BASE}/api/v1/scholarship-providers/scholarships?page=1&limit=50`, {
+        const res = await fetch(`${API_BASE}/api/v1/institution/scholarships?page=1&limit=50`, {
           headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" },
         });
         const json = await res.json();
@@ -81,7 +81,7 @@ const ScholarshipListPage: React.FC = () => {
     setDeleteModal({ isOpen: false, scholarshipId: null, title: "" });
     try {
       const token = localStorage.getItem("institutionToken");
-      await fetch(`${API_BASE}/api/v1/scholarship-providers/scholarships/${scholarshipId}`, {
+      await fetch(`${API_BASE}/api/v1/institution/scholarships/${scholarshipId}`, {
         method: "DELETE",
         headers: { Authorization: `Bearer ${token}` },
       });

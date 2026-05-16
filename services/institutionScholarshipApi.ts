@@ -62,18 +62,18 @@ export const institutionScholarshipApi = {
   },
 
   async getScholarshipById(id: number): Promise<any> {
-    return apiCall(`/api/v1/scholarship-providers/scholarships/${id}`);
+    return apiCall(`/api/v1/institution/scholarships/${id}`);
   },
 
   async createScholarship(data: any): Promise<any> {
-    return apiCall("/api/v1/scholarship-providers/scholarships", {
+    return apiCall("/api/v1/institution/scholarships", {
       method: "POST",
       body: JSON.stringify(data),
     });
   },
 
   async updateScholarship(id: number, data: any): Promise<any> {
-    return apiCall(`/api/v1/scholarship-providers/scholarships/${id}`, {
+    return apiCall(`/api/v1/institution/scholarships/${id}`, {
       method: "PUT",
       body: JSON.stringify(data),
     });

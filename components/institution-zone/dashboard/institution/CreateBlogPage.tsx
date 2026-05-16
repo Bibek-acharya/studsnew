@@ -82,10 +82,8 @@ function CreateBlogForm() {
         .then((blog) => {
           setTitle(blog.title || "");
           setContent(blog.content || "");
-          setPublishedBy(blog.author?.toLowerCase() || "admin");
-          setStatus(blog.status || "draft");
-          setFeaturedImageUrl(blog.image_url || "");
-          setFeaturedImagePreview(blog.image_url || "");
+          setFeaturedImageUrl(blog.image || "");
+          setFeaturedImagePreview(blog.image || "");
         })
         .catch(() => setError("Failed to load blog"))
         .finally(() => setLoadingBlog(false));
@@ -130,9 +128,9 @@ function CreateBlogForm() {
       const payload = {
         title,
         content: content || shortDesc,
-        author: PUBLISHED_BY.find((p) => p.value === publishedBy)?.label || "Admin",
-        image_url: featuredImageUrl,
-        status: draft ? "draft" : status,
+        excerpt: shortDesc.replace(/<[^>]*>/g, "").trim(),
+        image: featuredImageUrl,
+        category: blogType,
       };
 
       if (isEditing && blogId) {

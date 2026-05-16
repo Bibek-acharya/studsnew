@@ -20,12 +20,20 @@ function formatTimer(seconds: number) {
 }
 
 export default function InstitutionZone() {
-  const [view, setView] = useState<"login" | "register">("login");
+  const [view, setView] = useState<"login" | "register" | "forgotPassword">("login");
   const [currentView, setCurrentView] = useState<"landing" | "pending-approval">("landing");
 
   const [rememberMe, setRememberMe] = useState(false);
   const [showLoginPassword, setShowLoginPassword] = useState(false);
   const [loginEmail, setLoginEmail] = useState("");
+  const [fpStep, setFpStep] = useState<"email" | "otp" | "newPassword" | "success">("email");
+  const [fpEmail, setFpEmail] = useState("");
+  const [fpOtp, setFpOtp] = useState("");
+  const [fpNewPassword, setFpNewPassword] = useState("");
+  const [fpConfirmPassword, setFpConfirmPassword] = useState("");
+  const [fpError, setFpError] = useState<string | null>(null);
+  const [fpSuccess, setFpSuccess] = useState<string | null>(null);
+  const [fpLoading, setFpLoading] = useState(false);
   const [loginPassword, setLoginPassword] = useState("");
   const [loginFieldErrors, setLoginFieldErrors] = useState<
     Record<string, string>
@@ -106,12 +114,11 @@ export default function InstitutionZone() {
       );
       const token = (response as any).data?.token || (response as any).token;
       const user = (response as any).data?.user || (response as any).user;
-      const storage = rememberMe ? localStorage : sessionStorage;
       if (token) {
-        storage.setItem("institutionToken", token);
+        localStorage.setItem("institutionToken", token);
       }
       if (user) {
-        storage.setItem("institutionUser", JSON.stringify(user));
+        localStorage.setItem("institutionUser", JSON.stringify(user));
       }
       router.push("/institution-zone/dashboard");
     } catch (error) {
@@ -119,6 +126,42 @@ export default function InstitutionZone() {
       setAuthError(msg);
     } finally {
       setAuthLoading(false);
+    }
+  };
+
+  const handleFpSendOtp = async () => {
+    if (!fpEmail.trim()) { setFpError("Email is required"); return; }
+    setFpLoading(true);
+    setFpError(null);
+    try {
+      await apiService.institutionSendOTP(fpEmail.trim(), "password_reset");
+      setFpStep("otp");
+    } catch (e: any) {
+      setFpError(e?.message || "Failed to send OTP");
+    } finally {
+      setFpLoading(false);
+    }
+  };
+
+  const handleFpVerifyOtp = () => {
+    if (fpOtp.length !== 6) { setFpError("Please enter a valid 6-digit OTP"); return; }
+    setFpStep("newPassword");
+  };
+
+  const handleFpResetPassword = async () => {
+    if (fpNewPassword.length < 6) { setFpError("Password must be at least 6 characters"); return; }
+    if (fpNewPassword !== fpConfirmPassword) { setFpError("Passwords do not match"); return; }
+    setFpLoading(true);
+    setFpError(null);
+    try {
+      await apiService.institutionResetPassword(fpEmail.trim(), fpOtp, fpNewPassword);
+      setFpStep("success");
+      setFpSuccess("Password reset successfully!");
+      setTimeout(() => { setView("login"); setFpStep("email"); setFpEmail(""); setFpOtp(""); setFpNewPassword(""); setFpConfirmPassword(""); }, 2000);
+    } catch (e: any) {
+      setFpError(e?.message || "Failed to reset password");
+    } finally {
+      setFpLoading(false);
     }
   };
 
@@ -429,12 +472,13 @@ export default function InstitutionZone() {
                               Remember me
                             </span>
                           </label>
-                          <Link
-                            href="#"
+                          <button
+                            type="button"
+                            onClick={() => { setView("forgotPassword"); setFpStep("email"); setFpError(null); setFpSuccess(null); }}
                             className="text-[13px] font-semibold text-[#0000ff] hover:text-[#0000cc] hover:underline transition-colors"
                           >
                             Forgot password?
-                          </Link>
+                          </button>
                         </div>
                         {authError && (
                           <p className="text-sm text-red-500">{authError}</p>
@@ -459,6 +503,78 @@ export default function InstitutionZone() {
                           className="text-[#0000ff] font-semibold hover:underline transition-all"
                         >
                           Register here
+                        </button>
+                      </div>
+                    </div>
+                  )}
+
+                  {view === "forgotPassword" && (
+                    <div className="animate-[fadeIn_0.4s_cubic-bezier(0.16,1,0.3,1)_forwards]">
+                      <div className="text-center mb-5">
+                        <h1 className="text-xl font-bold text-gray-900 mb-1.5">
+                          Reset Password
+                        </h1>
+                        <p className="text-[13px] text-gray-500 font-medium">
+                          {fpStep === "email" && "Enter your email to receive a reset code"}
+                          {fpStep === "otp" && "Enter the 6-digit code sent to your email"}
+                          {fpStep === "newPassword" && "Choose a new password"}
+                          {fpStep === "success" && "Password reset successful!"}
+                        </p>
+                      </div>
+
+                      {fpError && <p className="text-sm text-red-500 text-center mb-4 bg-red-50 rounded-lg px-4 py-3">{fpError}</p>}
+                      {fpSuccess && <p className="text-sm text-green-700 text-center mb-4 bg-green-50 rounded-lg px-4 py-3">{fpSuccess}</p>}
+
+                      {fpStep === "email" && (
+                        <div className="space-y-4">
+                          <input type="email" placeholder="Enter your email" value={fpEmail}
+                            onChange={e => setFpEmail(e.target.value)}
+                            className="w-full px-4 py-3 border border-gray-300 rounded-xl text-sm focus:border-[#0000ff] focus:ring-1 focus:ring-[#0000ff] outline-none transition-colors" />
+                          <button type="button" onClick={handleFpSendOtp} disabled={fpLoading}
+                            className="w-full py-3 bg-[#0000ff] text-white font-semibold rounded-xl hover:bg-[#0000cc] transition-colors disabled:opacity-50">
+                            {fpLoading ? "Sending..." : "Send Reset Code"}
+                          </button>
+                        </div>
+                      )}
+
+                      {fpStep === "otp" && (
+                        <div className="space-y-4">
+                          <input type="text" maxLength={6} placeholder="Enter 6-digit OTP" value={fpOtp}
+                            onChange={e => setFpOtp(e.target.value.replace(/\D/g, ""))}
+                            className="w-full px-4 py-3 border border-gray-300 rounded-xl text-sm text-center text-2xl tracking-widest focus:border-[#0000ff] focus:ring-1 focus:ring-[#0000ff] outline-none transition-colors" />
+                          <button type="button" onClick={handleFpVerifyOtp} disabled={fpOtp.length !== 6}
+                            className="w-full py-3 bg-[#0000ff] text-white font-semibold rounded-xl hover:bg-[#0000cc] transition-colors disabled:opacity-50">
+                            Verify Code
+                          </button>
+                        </div>
+                      )}
+
+                      {fpStep === "newPassword" && (
+                        <div className="space-y-4">
+                          <input type="password" placeholder="New Password (min 6 chars)" value={fpNewPassword}
+                            onChange={e => setFpNewPassword(e.target.value)}
+                            className="w-full px-4 py-3 border border-gray-300 rounded-xl text-sm focus:border-[#0000ff] focus:ring-1 focus:ring-[#0000ff] outline-none transition-colors" />
+                          <input type="password" placeholder="Confirm New Password" value={fpConfirmPassword}
+                            onChange={e => setFpConfirmPassword(e.target.value)}
+                            className="w-full px-4 py-3 border border-gray-300 rounded-xl text-sm focus:border-[#0000ff] focus:ring-1 focus:ring-[#0000ff] outline-none transition-colors" />
+                          <button type="button" onClick={handleFpResetPassword} disabled={fpLoading}
+                            className="w-full py-3 bg-[#0000ff] text-white font-semibold rounded-xl hover:bg-[#0000cc] transition-colors disabled:opacity-50">
+                            {fpLoading ? "Resetting..." : "Reset Password"}
+                          </button>
+                        </div>
+                      )}
+
+                      {fpStep === "success" && (
+                        <button type="button" onClick={() => { setView("login"); setFpStep("email"); }}
+                          className="w-full py-3 bg-[#0000ff] text-white font-semibold rounded-xl hover:bg-[#0000cc] transition-colors">
+                          Back to Login
+                        </button>
+                      )}
+
+                      <div className="mt-5 text-center text-[13px] text-gray-500 font-medium">
+                        <button type="button" onClick={() => { setView("login"); setFpStep("email"); setFpError(null); }}
+                          className="text-[#0000ff] font-semibold hover:underline transition-all">
+                          Back to Sign In
                         </button>
                       </div>
                     </div>

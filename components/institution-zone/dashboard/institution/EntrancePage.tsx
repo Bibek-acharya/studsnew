@@ -4,6 +4,7 @@ import React, { useState, useRef, useEffect } from "react";
 import dynamic from "next/dynamic";
 import * as LucideIcons from "lucide-react";
 import SectionHeader from "@/components/institution-zone/dashboard/shared/SectionHeader";
+import { institutionEntranceApi } from "@/services/institutionEntranceApi";
 import "react-quill-new/dist/quill.snow.css";
 
 const kebabToPascal = (name: string): string =>
@@ -338,7 +339,27 @@ const EntrancePage: React.FC = () => {
   const handleSave = async (publish: boolean) => {
     if (publish && !validate()) return;
     setSaving(true);
-    setTimeout(() => setSaving(false), 1000);
+    try {
+      const title = overviewDetails[0]?.detail || "Entrance Exam";
+      const startDate = examDateSchedules[0]?.date || new Date().toISOString().split("T")[0];
+      const extraData = JSON.stringify({
+        applicationFee, eligibilityList, applicationSteps, examPattern,
+        subjectMarks, modelSets, upcomingDates, contactPersons, faqs,
+        examDateSchedules, overviewDetails,
+      });
+      const fullDescription = `# ${title}\n\n${description}\n\n__extra__:${extraData}`;
+
+      await institutionEntranceApi.create({
+        title,
+        description: fullDescription,
+        date: startDate,
+        total_seats: 0,
+      });
+    } catch (e: any) {
+      console.error("Failed to save entrance:", e);
+    } finally {
+      setSaving(false);
+    }
   };
 
   return (

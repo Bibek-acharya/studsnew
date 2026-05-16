@@ -1,107 +1,96 @@
 "use client";
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { DownloadSimple } from "@phosphor-icons/react";
 import SectionHeader from "@/components/institution-zone/dashboard/shared/SectionHeader";
-
-const breadcrumb = [
-  { label: "Dashboard", href: "/institution-zone/dashboard" },
-  { label: "Entrance", href: "/institution-zone/dashboard/entrance" },
-  { label: "Results" },
-];
-
-const initialData: any[] = [];
+import { institutionEntranceApi, InstitutionEntrance, EntranceApplicant } from "@/services/institutionEntranceApi";
 
 const EntranceResultsPage = () => {
-  const [data] = useState(initialData);
-  const [selectedExam, setSelectedExam] = useState("All");
+  const [entrances, setEntrances] = useState<InstitutionEntrance[]>([]);
+  const [selectedExam, setSelectedExam] = useState("");
+  const [applicants, setApplicants] = useState<EntranceApplicant[]>([]);
+  const [loading, setLoading] = useState(true);
 
-  const exams = [...new Set(data.map((d) => d.exam))];
+  useEffect(() => {
+    institutionEntranceApi.list(1, 100)
+      .then(res => setEntrances(res.entrances || []))
+      .catch(() => setEntrances([]))
+      .finally(() => setLoading(false));
+  }, []);
 
-  const filtered = selectedExam === "All" ? data : data.filter((d) => d.exam === selectedExam);
+  useEffect(() => {
+    if (!selectedExam) { setApplicants([]); return; }
+    institutionEntranceApi.getApplicants(Number(selectedExam))
+      .then(setApplicants)
+      .catch(() => setApplicants([]));
+  }, [selectedExam]);
+
+  const filtered = applicants.filter(a => a.score > 0 || a.rank > 0);
 
   return (
     <div className="p-4 md:p-6 lg:p-8">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-6">
-        <SectionHeader title="Results" breadcrumbItems={breadcrumb} />
+        <SectionHeader title="Results" breadcrumbItems={[
+          { label: "Dashboard", href: "/institution-zone/dashboard" },
+          { label: "Entrance", href: "/institution-zone/dashboard/entrance" },
+          { label: "Results" },
+        ]} />
       </div>
 
       <div className="bg-white rounded-xl p-6 border border-gray-100 shadow-sm">
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-6">
           <div className="flex items-center gap-3">
             <label className="block text-sm font-medium text-gray-700">Exam:</label>
-            <select
-              value={selectedExam}
-              onChange={(e) => setSelectedExam(e.target.value)}
-              className="px-4 py-2.5 border border-gray-300 rounded-lg text-sm focus:border-blue-600 outline-none"
-            >
-              <option value="All">All Exams</option>
-              {exams.map((e) => (
-                <option key={e} value={e}>
-                  {e}
-                </option>
-              ))}
+            <select value={selectedExam} onChange={e => setSelectedExam(e.target.value)}
+              className="px-4 py-2.5 border border-gray-300 rounded-lg text-sm focus:border-blue-600 outline-none">
+              <option value="">Select Exam</option>
+              {entrances.map(e => <option key={e.id} value={e.id}>{e.title}</option>)}
             </select>
           </div>
-          <button className="px-4 py-2 border border-gray-300 text-gray-700 rounded-lg text-sm font-medium hover:bg-gray-50 flex items-center gap-2">
-            <DownloadSimple />
-            Download PDF
-          </button>
+          {filtered.length > 0 && (
+            <button className="px-4 py-2.5 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-700 flex items-center gap-2">
+              <DownloadSimple size={18} /> Download Results
+            </button>
+          )}
         </div>
 
-        <div className="overflow-x-auto">
-          <table className="w-full">
-            <thead>
-              <tr className="bg-gray-50 border-b border-gray-200">
-                <th className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase">Rank</th>
-                <th className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase">Student Name</th>
-                <th className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase">Registration No</th>
-                <th className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase">Marks Obtained</th>
-                <th className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase">Total Marks</th>
-                <th className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase">Percentage</th>
-                <th className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase">Result</th>
-              </tr>
-            </thead>
-            <tbody>
-              {filtered
-                .sort((a, b) => a.rank - b.rank)
-                .map((r) => (
-                  <tr key={r.id} className="hover:bg-gray-50 border-b border-gray-200">
-                    <td className="px-4 py-3">
-                      <span
-                        className={`inline-flex items-center justify-center w-8 h-8 rounded-full text-sm font-bold ${
-                          r.rank === 1
-                            ? "bg-yellow-100 text-yellow-700"
-                            : r.rank === 2
-                              ? "bg-gray-100 text-gray-600"
-                              : r.rank === 3
-                                ? "bg-amber-100 text-amber-700"
-                                : "bg-gray-50 text-gray-500"
-                        }`}
-                      >
-                        {r.rank}
-                      </span>
-                    </td>
-                    <td className="px-4 py-3 text-sm font-medium text-gray-800">{r.studentName}</td>
-                    <td className="px-4 py-3 text-sm text-gray-600 font-mono">{r.registrationNo}</td>
-                    <td className="px-4 py-3 text-sm text-gray-600">{r.marksObtained}</td>
-                    <td className="px-4 py-3 text-sm text-gray-600">{r.totalMarks}</td>
-                    <td className="px-4 py-3 text-sm text-gray-600">{r.percentage}%</td>
-                    <td className="px-4 py-3">
-                      <span
-                        className={`px-2 py-1 rounded-full text-xs font-medium ${
-                          r.result === "pass"
-                            ? "bg-green-100 text-green-700"
-                            : "bg-red-100 text-red-700"
-                        }`}
-                      >
-                        {r.result === "pass" ? "Pass" : "Fail"}
-                      </span>
+        {loading ? (
+          <div className="text-center py-12 text-gray-400"><p className="text-sm">Loading...</p></div>
+        ) : !selectedExam ? (
+          <div className="text-center py-12 text-gray-400"><p className="text-sm">Select an exam to view results</p></div>
+        ) : filtered.length === 0 ? (
+          <div className="text-center py-12 text-gray-400">
+            <p className="text-sm">No results published yet for this exam.</p>
+          </div>
+        ) : (
+          <div className="overflow-x-auto">
+            <table className="w-full text-sm">
+              <thead className="bg-gray-50">
+                <tr>
+                  <th className="text-left px-4 py-3 font-semibold text-gray-700">User ID</th>
+                  <th className="text-center px-4 py-3 font-semibold text-gray-700">Score</th>
+                  <th className="text-center px-4 py-3 font-semibold text-gray-700">Rank</th>
+                  <th className="text-center px-4 py-3 font-semibold text-gray-700">Status</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-gray-100">
+                {filtered.map(a => (
+                  <tr key={a.id} className="hover:bg-gray-50">
+                    <td className="px-4 py-3 font-medium text-gray-900">{a.user_id}</td>
+                    <td className="text-center px-4 py-3 font-semibold text-gray-900">{a.score}</td>
+                    <td className="text-center px-4 py-3 font-semibold text-gray-900">{a.rank}</td>
+                    <td className="text-center px-4 py-3">
+                      <span className={`px-2 py-1 rounded-full text-xs font-medium ${
+                        a.status === "approved" ? "bg-green-100 text-green-700" :
+                        a.status === "rejected" ? "bg-red-100 text-red-700" :
+                        "bg-yellow-100 text-yellow-700"
+                      }`}>{a.status}</span>
                     </td>
                   </tr>
                 ))}
-            </tbody>
-          </table>
-        </div>
+              </tbody>
+            </table>
+          </div>
+        )}
       </div>
     </div>
   );

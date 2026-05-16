@@ -156,7 +156,6 @@ const BlogDirectoryPage: React.FC = () => {
                   <tr>
                     <th className="text-left py-3 px-6 font-semibold text-gray-700">Image</th>
                     <th className="text-left py-3 px-6 font-semibold text-gray-700">Title</th>
-                    <th className="text-center py-3 px-6 font-semibold text-gray-700">Author</th>
                     <th className="text-center py-3 px-6 font-semibold text-gray-700">Published</th>
                     <th className="text-center py-3 px-6 font-semibold text-gray-700">Status</th>
                     <th className="text-center py-3 px-6 font-semibold text-gray-700">Actions</th>
@@ -165,7 +164,7 @@ const BlogDirectoryPage: React.FC = () => {
                 <tbody className="divide-y divide-gray-100">
                   {filtered.length === 0 ? (
                     <tr>
-                      <td colSpan={6} className="py-12 text-center text-gray-500">
+                      <td colSpan={5} className="py-12 text-center text-gray-500">
                         {search ? "No blogs found matching your search." : "No blogs yet. Create your first blog!"}
                       </td>
                     </tr>
@@ -173,7 +172,7 @@ const BlogDirectoryPage: React.FC = () => {
                     <tr key={blog.id} className="hover:bg-gray-50">
                       <td className="py-3 px-6">
                         <img
-                          src={blog.image_url || FALLBACK_IMAGE}
+                          src={blog.image || FALLBACK_IMAGE}
                           alt={blog.title}
                           className="w-20 h-14 object-cover rounded-lg border border-gray-200"
                         />
@@ -184,16 +183,17 @@ const BlogDirectoryPage: React.FC = () => {
                           {stripHtml(blog.content || "").slice(0, 60)}
                         </p>
                       </td>
-                      <td className="text-center py-3 px-6 text-gray-600">{blog.author || "Admin"}</td>
                       <td className="text-center py-3 px-6 text-gray-500">
                         {blog.created_at
                           ? new Date(blog.created_at).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })
                           : "N/A"}
                       </td>
                       <td className="text-center py-3 px-6">
-                        <span className={`px-2 py-1 rounded text-xs font-semibold ${STATUS_COLORS[blog.status] || "bg-gray-100 text-gray-700"}`}>
-                          {blog.status ? blog.status.charAt(0).toUpperCase() + blog.status.slice(1) : "Draft"}
-                        </span>
+                        {blog.published ? (
+                          <span className="bg-green-100 text-green-700 px-2 py-1 rounded text-xs font-semibold">Published</span>
+                        ) : (
+                          <span className="bg-amber-100 text-amber-700 px-2 py-1 rounded text-xs font-semibold">Draft</span>
+                        )}
                       </td>
                       <td className="text-center py-3 px-6">
                         <div className="flex items-center justify-center gap-2">

@@ -61,12 +61,10 @@ export interface InstitutionBlog {
   institution_id: number;
   title: string;
   content: string;
-  image_url: string | null;
-  author: string;
-  status: string;
-  published_at: string | null;
-  views: number;
-  likes: number;
+  image: string;
+  excerpt: string;
+  category: string;
+  published: boolean;
   created_at: string;
   updated_at: string;
 }
@@ -84,9 +82,9 @@ export const institutionBlogsApi = {
   async create(data: {
     title: string;
     content: string;
-    image_url?: string;
-    author?: string;
-    status?: string;
+    image?: string;
+    excerpt?: string;
+    category?: string;
   }): Promise<InstitutionBlog> {
     return apiCall("/api/v1/institution/blogs", {
       method: "POST",
@@ -95,11 +93,11 @@ export const institutionBlogsApi = {
   },
 
   async update(id: number, data: {
-    title: string;
-    content: string;
-    image_url?: string;
-    author?: string;
-    status?: string;
+    title?: string;
+    content?: string;
+    image?: string;
+    excerpt?: string;
+    category?: string;
   }): Promise<InstitutionBlog> {
     return apiCall(`/api/v1/institution/blogs/${id}`, {
       method: "PUT",

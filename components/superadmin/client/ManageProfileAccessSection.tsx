@@ -61,8 +61,8 @@ export default function ManageProfileAccessSection() {
     setLoading(true);
     setAuthError(false);
     try {
-      const response = await superadminFetch<{ data: Institution[]; message: string }>("/api/v1/superadmin/institutions");
-      const data = response.data || [];
+      const response = await superadminFetch<{ data: { institutions: Institution[] }; message: string }>("/api/v1/superadmin/institutions");
+      const data = response.data?.institutions || [];
       const allToggles = [...defaultToggles, ...socialToggles];
       setInstitutions(
         data.map((inst) => ({

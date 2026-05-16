@@ -4,6 +4,7 @@ import React, { useState } from "react";
 import dynamic from "next/dynamic";
 import * as LucideIcons from "lucide-react";
 import SectionHeader from "@/components/institution-zone/dashboard/shared/SectionHeader";
+import { institutionProgramApi } from "@/services/institutionProgramApi";
 import "react-quill-new/dist/quill.snow.css";
 
 const kebabToPascal = (name: string): string =>
@@ -179,7 +180,18 @@ const CourseCreatePage: React.FC = () => {
   const handleSave = async (publish: boolean) => {
     if (publish && !validate()) return;
     setSaving(true);
-    setTimeout(() => setSaving(false), 1000);
+    try {
+      await institutionProgramApi.create({
+        name: title,
+        description: `${level ? `Level: ${level}\n` : ""}${affiliation ? `Affiliation: ${affiliation}\n` : ""}${description}`,
+        duration,
+        fee: estFee,
+      });
+    } catch (e: any) {
+      console.error("Failed to save course:", e);
+    } finally {
+      setSaving(false);
+    }
   };
 
   return (

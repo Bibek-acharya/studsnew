@@ -1,40 +1,38 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { FileText, Pencil, Trash, CaretLeft, CaretRight } from "@phosphor-icons/react";
-
-interface DraftEntrance {
-  id: number;
-  title: string;
-  program: string;
-  level: string;
-  lastEdited: string;
-}
-
-const DRAFT_ENTRANCES: DraftEntrance[] = [
-  { id: 1, title: "IOE Entrance 2081", program: "BE/B.Arch", level: "Bachelor", lastEdited: "2026-05-11" },
-  { id: 2, title: "CEE Medical 2081", program: "MBBS/BDS", level: "Bachelor", lastEdited: "2026-05-10" },
-  { id: 3, title: "CMAT Management 2081", program: "BBA/BBM", level: "Bachelor", lastEdited: "2026-05-09" },
-  { id: 4, title: "KUUMAT 2081", program: "BBA/BBA-Finance", level: "Bachelor", lastEdited: "2026-05-08" },
-];
+import { institutionEntranceApi, InstitutionEntrance } from "@/services/institutionEntranceApi";
 
 const ITEMS_PER_PAGE = 5;
 
 const EntranceDraftPage: React.FC = () => {
   const router = useRouter();
   const [page, setPage] = useState(1);
+  const [drafts, setDrafts] = useState<InstitutionEntrance[]>([]);
+  const [loading, setLoading] = useState(true);
 
-  const totalPages = Math.max(1, Math.ceil(DRAFT_ENTRANCES.length / ITEMS_PER_PAGE));
+  useEffect(() => {
+    institutionEntranceApi.list(1, 50)
+      .then(res => setDrafts(res.entrances?.filter(e => e.status === "upcoming") || []))
+      .catch(() => setDrafts([]))
+      .finally(() => setLoading(false));
+  }, []);
+
+  const totalPages = Math.max(1, Math.ceil(drafts.length / ITEMS_PER_PAGE));
   const safePage = Math.min(page, totalPages);
-  const paginated = DRAFT_ENTRANCES.slice((safePage - 1) * ITEMS_PER_PAGE, safePage * ITEMS_PER_PAGE);
+  const paginated = drafts.slice((safePage - 1) * ITEMS_PER_PAGE, safePage * ITEMS_PER_PAGE);
 
   const handleEdit = (id: number) => {
-    router.push(`/institution-zone/dashboard/entrance?id=${id}`);
+    router.push(`/institution-zone/dashboard/entrance/create?id=${id}`);
   };
 
-  const handleDelete = (id: number) => {
-    console.log("Delete draft", id);
+  const handleDelete = async (id: number) => {
+    try {
+      await institutionEntranceApi.delete(id);
+      setDrafts(prev => prev.filter(d => d.id !== id));
+    } catch (e) { console.error(e); }
   };
 
   return (
@@ -56,7 +54,11 @@ const EntranceDraftPage: React.FC = () => {
           </h2>
         </div>
 
-        {paginated.length === 0 ? (
+        {loading ? (
+          <div className="text-center py-12 text-gray-400">
+            <p className="text-sm">Loading...</p>
+          </div>
+        ) : paginated.length === 0 ? (
           <div className="text-center py-12 text-gray-400">
             <FileText className="w-12 h-12 mx-auto mb-3 opacity-40" />
             <p className="text-sm">No draft entrance exams found</p>
@@ -71,20 +73,16 @@ const EntranceDraftPage: React.FC = () => {
                   </div>
                   <div>
                     <h3 className="font-semibold text-gray-900">{draft.title}</h3>
-                    <p className="text-sm text-gray-500">{draft.level} - {draft.program} &middot; Last edited: {draft.lastEdited}</p>
+                    <p className="text-sm text-gray-500">{draft.status} &middot; {new Date(draft.created_at).toLocaleDateString()}</p>
                   </div>
                 </div>
                 <div className="flex items-center gap-2">
-                  <button
-                    onClick={() => handleEdit(draft.id)}
-                    className="px-4 py-2 text-sm font-medium text-blue-600 bg-blue-50 rounded-lg hover:bg-blue-100 transition-colors flex items-center gap-1.5"
-                  >
+                  <button onClick={() => handleEdit(draft.id)}
+                    className="px-4 py-2 text-sm font-medium text-blue-600 bg-blue-50 rounded-lg hover:bg-blue-100 transition-colors flex items-center gap-1.5">
                     <Pencil size={14} weight="fill" /> Edit
                   </button>
-                  <button
-                    onClick={() => handleDelete(draft.id)}
-                    className="px-4 py-2 text-sm font-medium text-red-600 bg-red-50 rounded-lg hover:bg-red-100 transition-colors flex items-center gap-1.5"
-                  >
+                  <button onClick={() => handleDelete(draft.id)}
+                    className="px-4 py-2 text-sm font-medium text-red-600 bg-red-50 rounded-lg hover:bg-red-100 transition-colors flex items-center gap-1.5">
                     <Trash size={14} weight="fill" /> Delete
                   </button>
                 </div>
@@ -93,20 +91,25 @@ const EntranceDraftPage: React.FC = () => {
           </div>
         )}
 
-        {DRAFT_ENTRANCES.length > ITEMS_PER_PAGE && (
+        {drafts.length > ITEMS_PER_PAGE && (
           <div className="flex items-center justify-between px-6 py-4 border-t border-gray-200 bg-gray-50/50">
             <p className="text-sm text-gray-500">
-              Showing <span className="font-medium">{(safePage - 1) * ITEMS_PER_PAGE + 1}-{Math.min(safePage * ITEMS_PER_PAGE, DRAFT_ENTRANCES.length)}</span> of <span className="font-medium">{DRAFT_ENTRANCES.length}</span>
+              Showing <span className="font-medium">{(safePage - 1) * ITEMS_PER_PAGE + 1}-{Math.min(safePage * ITEMS_PER_PAGE, drafts.length)}</span> of <span className="font-medium">{drafts.length}</span>
             </p>
             <div className="flex items-center gap-2">
-              <button onClick={() => setPage((p) => Math.max(1, p - 1))} disabled={safePage === 1} className={`w-8 h-8 flex items-center justify-center rounded-lg border ${safePage === 1 ? "border-gray-200 text-gray-400 cursor-not-allowed" : "border-gray-200 text-gray-600 hover:bg-gray-50"}`}>
-                <CaretLeft size={14} />
+              <button onClick={() => setPage(p => Math.max(1, p - 1))} disabled={safePage <= 1}
+                className="w-8 h-8 flex items-center justify-center rounded-lg border border-gray-200 text-gray-400 disabled:opacity-50 hover:bg-gray-50">
+                <CaretLeft className="w-4 h-4" />
               </button>
-              {Array.from({ length: totalPages }, (_, i) => (
-                <button key={i} onClick={() => setPage(i + 1)} className={`w-8 h-8 flex items-center justify-center rounded-lg text-sm font-medium ${safePage === i + 1 ? "bg-blue-600 text-white" : "border border-gray-200 text-gray-600 hover:bg-gray-50"}`}>{i + 1}</button>
+              {Array.from({ length: Math.min(totalPages, 5) }, (_, i) => (
+                <button key={i} onClick={() => setPage(i + 1)}
+                  className={`w-8 h-8 flex items-center justify-center rounded-lg text-sm font-medium ${page === i + 1 ? "bg-blue-600 text-white" : "border border-gray-200 text-gray-600 hover:bg-gray-50"}`}>
+                  {i + 1}
+                </button>
               ))}
-              <button onClick={() => setPage((p) => Math.min(totalPages, p + 1))} disabled={safePage === totalPages} className={`w-8 h-8 flex items-center justify-center rounded-lg border ${safePage === totalPages ? "border-gray-200 text-gray-400 cursor-not-allowed" : "border-gray-200 text-gray-600 hover:bg-gray-50"}`}>
-                <CaretRight size={14} />
+              <button onClick={() => setPage(p => Math.min(totalPages, p + 1))} disabled={safePage >= totalPages}
+                className="w-8 h-8 flex items-center justify-center rounded-lg border border-gray-200 text-gray-400 disabled:opacity-50 hover:bg-gray-50">
+                <CaretRight className="w-4 h-4" />
               </button>
             </div>
           </div>

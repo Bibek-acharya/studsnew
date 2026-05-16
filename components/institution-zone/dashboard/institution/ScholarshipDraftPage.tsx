@@ -142,7 +142,7 @@ const ScholarshipDraftPage: React.FC = () => {
   useEffect(() => {
     async function fetchDrafts() {
       try {
-        const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080"}/api/v1/scholarship-providers/scholarships?page=1&limit=50`, {
+        const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080"}/api/v1/institution/scholarships?page=1&limit=50`, {
           headers: { Authorization: `Bearer ${localStorage.getItem("institutionToken")}`, "Content-Type": "application/json" },
         });
         const json = await res.json();
