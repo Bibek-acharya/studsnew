@@ -2,6 +2,49 @@ import { Exam } from "@/components/entrance/types";
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080";
 
+function resolveImageUrl(url: string | undefined): string {
+  if (!url) return "";
+  if (url.startsWith("http://") || url.startsWith("https://")) return url;
+  if (url.startsWith("/")) return `${API_BASE_URL}${url}`;
+  return url;
+}
+
+function stripHtml(html: string): string {
+  if (!html) return "";
+  return html.replace(/<[^>]*>/g, "").replace(/&nbsp;/g, " ").replace(/\s+/g, " ").trim();
+}
+
+function mapRawEntrance(raw: any): Exam {
+  const badges: string[] = raw.badges || [];
+  const img = resolveImageUrl(raw.imageUrl || raw.institutionLogo);
+  return {
+    id: raw.slug || String(raw.id),
+    slug: raw.slug || "",
+    institution: raw.university || raw.board || "",
+    verified: false,
+    location: raw.location || "",
+    affiliation: raw.board || "",
+    website: raw.website || "",
+    logo: img,
+    title: raw.title || "",
+    tags: badges.map((b: string) => ({
+      text: b,
+      icon: "award",
+      type: "default",
+    })),
+    deadline: raw.formDeadline || "",
+    eligibility: stripHtml(raw.description || raw.overview || ""),
+    whatsapp: "",
+    viber: "",
+    status: raw.status || "Ongoing",
+    examDate: raw.examDate || "",
+    nepaliDate: raw.nepaliDate || "",
+    imageUrl: img,
+    phone: raw.phone || "",
+    email: raw.email || "",
+  };
+}
+
 async function apiRequest<T>(path: string, options: RequestInit = {}): Promise<T> {
   const token = typeof window !== "undefined" ? localStorage.getItem("token") : null;
   const headers: Record<string, string> = {
@@ -72,14 +115,17 @@ export const entranceService = {
     page: number = 1,
     pageSize: number = 10
   ): Promise<EntrancesResponse> {
-    try {
-      return await apiRequest<EntrancesResponse>("/api/v1/entrances", {
-        method: "POST",
-        body: JSON.stringify({ ...filters, page, pageSize }),
-      });
-    } catch (error) {
-      throw error;
-    }
+    const response = await apiRequest<any>("/api/v1/entrances", {
+      method: "POST",
+      body: JSON.stringify({ ...filters, page, pageSize }),
+    });
+    return {
+      ...response,
+      data: {
+        ...response.data,
+        entrances: (response.data?.entrances || []).map(mapRawEntrance),
+      },
+    };
   },
 
   async getEntranceFilterCounts(): Promise<EntranceFilterCountsResponse> {
@@ -91,11 +137,11 @@ export const entranceService = {
   },
 
   async getEntranceById(id: string): Promise<EntranceDetailsResponse> {
-    try {
-      return await apiRequest<EntranceDetailsResponse>(`/api/v1/entrances/${id}`);
-    } catch (error) {
-      throw error;
-    }
+    const response = await apiRequest<any>(`/api/v1/entrances/${id}`);
+    return {
+      ...response,
+      data: mapRawEntrance(response.data),
+    };
   },
 
   // ─── Institution Entrance Management ─────────────────────────────────

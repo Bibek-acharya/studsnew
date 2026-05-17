@@ -136,7 +136,24 @@ export interface CourseListParams {
   level?: string;
   field?: string;
   affiliation?: string;
-  sort?: string;
+}
+
+export interface CourseFullDetails {
+  course: Course;
+  about?: string[];
+  mode?: string;
+  degreeLabel?: string;
+  curriculum?: any[];
+  admissionRequirements?: string[];
+  careerOpportunities?: any[];
+  universities?: string[];
+  contact?: { email?: string; phone?: string };
+  otherPrograms?: any[];
+  highlightsUniversity?: string;
+  highlightsFaculty?: string;
+  highlightsDuration?: string;
+  highlightsDegreeLevel?: string;
+  offeringCollegesCount?: number;
 }
 
 export async function fetchCourses(params: CourseListParams = {}): Promise<{ courses: Course[]; meta: CourseMeta }> {
@@ -222,6 +239,16 @@ export async function fetchCourseById(id: string): Promise<CourseDetails | null>
     careerPath: "",
     description: "",
   };
+}
+
+export async function fetchCourseDetailsById(id: string): Promise<CourseFullDetails | null> {
+  try {
+    const result = await apiFetch<{ data: CourseFullDetails }>(
+      `/api/v1/education/courses/${id}/details`
+    );
+    if (result?.data) return result.data;
+  } catch {}
+  return null;
 }
 
 export async function fetchCourseFilterCounts(): Promise<CourseFilterCounts> {

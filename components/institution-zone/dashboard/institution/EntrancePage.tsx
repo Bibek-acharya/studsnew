@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useRef, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import dynamic from "next/dynamic";
 import * as LucideIcons from "lucide-react";
 import SectionHeader from "@/components/institution-zone/dashboard/shared/SectionHeader";
@@ -290,7 +291,11 @@ function SectionItemHeader({
 }
 
 const EntrancePage: React.FC = () => {
+  const router = useRouter();
   const [saving, setSaving] = useState(false);
+  const [loadingEdit, setLoadingEdit] = useState(false);
+
+  const editId = typeof window !== "undefined" ? new URLSearchParams(window.location.search).get("id") : null;
 
   const [overviewDetails, setOverviewDetails] = useState<OverviewDetail[]>([]);
   const [description, setDescription] = useState("");
@@ -311,6 +316,30 @@ const EntrancePage: React.FC = () => {
   const [cropperOpen, setCropperOpen] = useState(false);
   const [cropImageSrc, setCropImageSrc] = useState<string | null>(null);
   const [uploadingInfo, setUploadingInfo] = useState<{ id: number } | null>(null);
+
+  useEffect(() => {
+    if (!editId) return;
+    setLoadingEdit(true);
+    institutionEntranceApi.getById(Number(editId))
+      .then((exam) => {
+        const heroUrl = exam.hero_banner || "";
+        setHeroBanner(heroUrl.startsWith("/") ? `${apiBase()}${heroUrl}` : heroUrl);
+        setDescription(exam.description || "");
+        setApplicationFee(exam.application_fee || "");
+        if (exam.overview_details) setOverviewDetails(exam.overview_details);
+        if (exam.exam_date_schedules) setExamDateSchedules(exam.exam_date_schedules);
+        if (exam.eligibility_list) setEligibilityList(exam.eligibility_list);
+        if (exam.application_steps) setApplicationSteps(exam.application_steps);
+        if (exam.exam_pattern) setExamPattern(exam.exam_pattern);
+        if (exam.subject_marks) setSubjectMarks(exam.subject_marks);
+        if (exam.model_sets) setModelSets(exam.model_sets);
+        if (exam.upcoming_dates) setUpcomingDates(exam.upcoming_dates);
+        if (exam.contact_persons) setContactPersons(exam.contact_persons);
+        if (exam.faqs) setFaqs(exam.faqs);
+      })
+      .catch((e) => console.error("Failed to load entrance for edit", e))
+      .finally(() => setLoadingEdit(false));
+  }, [editId]);
 
   const getToken = () => localStorage.getItem("institutionToken");
   const apiBase = () => process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080";
@@ -390,19 +419,36 @@ const EntrancePage: React.FC = () => {
     try {
       const title = overviewDetails[0]?.detail || "Entrance Exam";
       const startDate = examDateSchedules[0]?.date || new Date().toISOString().split("T")[0];
-      const extraData = JSON.stringify({
-        applicationFee, eligibilityList, applicationSteps, examPattern,
-        subjectMarks, modelSets, upcomingDates, contactPersons, faqs,
-        examDateSchedules, overviewDetails,
-      });
-      const fullDescription = `# ${title}\n\n${description}\n\n__extra__:${extraData}`;
 
-      await institutionEntranceApi.create({
+      const payload: Record<string, any> = {
         title,
-        description: fullDescription,
+        description,
         date: startDate,
         total_seats: 0,
-      });
+        hero_banner: heroBanner,
+        status: publish ? "published" : "draft",
+        application_fee: applicationFee,
+        overview_details: overviewDetails,
+        exam_date_schedules: examDateSchedules,
+        eligibility_list: eligibilityList,
+        application_steps: applicationSteps,
+        exam_pattern: examPattern,
+        subject_marks: subjectMarks,
+        model_sets: modelSets,
+        upcoming_dates: upcomingDates,
+        contact_persons: contactPersons,
+        faqs: faqs,
+      };
+      if (editId) {
+        await institutionEntranceApi.update(Number(editId), payload);
+      } else {
+        await institutionEntranceApi.create(payload);
+      }
+      if (publish) {
+        router.push("/institution-zone/dashboard/entrance/directory");
+      } else {
+        router.push("/institution-zone/dashboard/entrance/draft");
+      }
     } catch (e: any) {
       console.error("Failed to save entrance:", e);
     } finally {
@@ -413,12 +459,18 @@ const EntrancePage: React.FC = () => {
   return (
     <div className="p-4 md:p-6 lg:p-8 min-h-full">
       <SectionHeader
-        title="Create Entrance"
+        title={editId ? "Edit Entrance" : "Create Entrance"}
         breadcrumbItems={[
           { label: "Dashboard", href: "/institution-zone/dashboard/overview" },
-          { label: "Create Entrance" },
+          { label: editId ? "Edit Entrance" : "Create Entrance" },
         ]}
       />
+      {loadingEdit && (
+        <div className="flex items-center gap-2 text-blue-600 bg-blue-50 px-4 py-2 rounded-lg mb-4 text-sm">
+          <div className="w-4 h-4 border-2 border-blue-600 border-t-transparent rounded-full animate-spin" />
+          Loading entrance data...
+        </div>
+      )}
 
       <div className="space-y-6">
         {/* 1. Exam Overview */}
@@ -1343,7 +1395,7 @@ const EntrancePage: React.FC = () => {
             className="px-6 py-3 text-base font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 flex items-center gap-2 transition-colors shadow-sm disabled:opacity-50"
           >
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
-            {saving ? "Saving..." : "Publish Changes"}
+            {saving ? "Saving..." : editId ? "Publish Changes" : "Publish Exam"}
           </button>
         </div>
       </div>

@@ -27,7 +27,7 @@ const CourseFinderPage: React.FC<CourseFinderPageProps> = ({ onNavigate }) => {
   });
 
   const allCourses = useMemo(
-    () => ((data?.data?.courses || []) as EducationCourse[]).filter((c) => c.source !== "institution"),
+    () => (data?.data?.courses || []) as EducationCourse[],
     [data],
   );
 

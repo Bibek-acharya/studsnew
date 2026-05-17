@@ -3,30 +3,16 @@
 import React, { useState, useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { apiService, EducationCourse } from "../../services/api";
+import { fetchCourseDetailsById, CourseFullDetails } from "../../services/course-api";
 import CourseGrid from "./CourseGrid";
 import { CourseFinderFilters, defaultCourseFinderFilters } from "./types";
 import {
-  ArrowLeft,
   Clock,
-  GraduationCap,
-  LayoutGrid,
-  Info,
-  ClipboardCheck,
-  UserPlus,
-  BookOpen,
-  Coins,
   Award,
-  FileText,
-  Star,
-  Trophy,
+  BookOpen,
+  Info,
   ArrowRight,
-  FileCheck2,
-  Download,
-  AlertCircle,
-  CheckCircle2,
-  ExternalLink,
   MapPin,
-  Newspaper,
 } from "lucide-react";
 
 interface CourseDetailsPageProps {
@@ -35,970 +21,229 @@ interface CourseDetailsPageProps {
   onNavigate: (view: string, data?: any) => void;
 }
 
-type TabKey =
-  | "overview"
-  | "eligibility"
-  | "admission"
-  | "courses"
-  | "fee"
-  | "scholarships"
-  | "model-questions"
-  | "news"
-  | "related-programs";
-
-const courseData: Record<
-  string,
-  {
-    title: string;
-    duration: string;
-    level: string;
-    field: string;
-  }
-> = {
-  "1": {
-    title: "10+2 Science",
-    duration: "2 Years",
-    level: "+2",
-    field: "Science",
-  },
-  "2": {
-    title: "10+2 Management",
-    duration: "2 Years",
-    level: "+2",
-    field: "Management",
-  },
-  "3": {
-    title: "BSc CSIT",
-    duration: "4 Years",
-    level: "Bachelor",
-    field: "IT / Computer Science",
-  },
-  "4": {
-    title: "BBA",
-    duration: "4 Years",
-    level: "Bachelor",
-    field: "Management",
-  },
-  "5": {
-    title: "MBA",
-    duration: "2 Years",
-    level: "Master",
-    field: "Management",
-  },
-};
-
-const sponsoredColleges = [
-  {
-    name: "Advance Foundation",
-    location: "Kumaripati, Lalitpur",
-    website: "advancefoundation.edu.np",
-    url: "https://advancefoundation.edu.np",
-    logo: "https://advancefoundation.edu.np/public/assets/img/logo.jpg",
-    verified: true,
-  },
-  {
-    name: "Trinity Int'l College",
-    location: "Dillibazar, Kathmandu",
-    website: "trinity.edu.np",
-    url: "https://www.trinity.edu.np",
-    logo: "https://www.trinity.edu.np/assets/backend/uploads/Logo/trinity%20college%20logo.jpg",
-    verified: true,
-  },
-  {
-    name: "KIST College",
-    location: "Kamalpokhari, Kathmandu",
-    website: "kist.edu.np",
-    url: "https://kist.edu.np",
-    logo: "https://kist.edu.np/resources/assets/img/logo_small.jpg",
-    verified: true,
-  },
-  {
-    name: "KMC Network",
-    location: "Bagbazar, Kathmandu",
-    website: "kmc.edu.np",
-    url: "https://kmc.edu.np",
-    logo: null,
-    verified: true,
-    logoFallback: "KMC",
-    logoFallbackColor: "bg-green-50 text-green-800",
-  },
-];
+function stripHtml(html: string): string {
+  if (!html) return "";
+  return html.replace(/<[^>]*>/g, "").replace(/&nbsp;/g, " ").replace(/\s+/g, " ").trim();
+}
 
 const CourseDetailsPage: React.FC<CourseDetailsPageProps> = ({
   courseId,
   onBack,
   onNavigate,
 }) => {
-  const [activeTab, setActiveTab] = useState<TabKey>("overview");
   const [filters, setFilters] = useState<CourseFinderFilters>(defaultCourseFinderFilters);
 
-  const { data, isLoading: isCoursesLoading } = useQuery({
+  const { data: listData } = useQuery({
     queryKey: ["education-courses"],
     queryFn: () => apiService.getEducationCourses(),
   });
 
-  const allCourses = useMemo(() => (data?.data?.courses || []) as EducationCourse[], [data]);
+  const { data: detailsData } = useQuery({
+    queryKey: ["course-details", courseId],
+    queryFn: () => fetchCourseDetailsById(String(courseId)),
+  });
+
+  const allCourses = useMemo(() => (listData?.data?.courses || []) as EducationCourse[], [listData]);
 
   const course = useMemo(() => {
     const found = allCourses.find(c => String(c.id) === String(courseId));
-    if (found) return {
-      title: found.title,
-      duration: found.duration || "2 Years",
-      level: found.level || "+2",
-      field: found.field || "Science",
-    };
-    return courseData[String(courseId)] || courseData["1"];
+    if (found) return found;
+    return null;
   }, [allCourses, courseId]);
 
-  const courseTitle = course.title;
-  const courseDuration = course.duration;
-  const courseLevel = course.level;
-  const courseField = course.field;
+  const details = detailsData || null;
 
-  const handleTabClick = (tab: TabKey) => {
+  const courseTitle = stripHtml(course?.title || details?.course?.title || "");
+  const courseDuration = stripHtml(course?.duration || details?.course?.duration || "");
+  const courseLevel = stripHtml(course?.level || details?.course?.level || "");
+  const courseField = stripHtml(course?.field || details?.course?.field || "");
+  const courseDescription = stripHtml(course?.description || details?.course?.description || details?.about?.join(" ") || "");
+  const courseEstFee = stripHtml(course?.estFee || details?.course?.estFee || "");
+  const courseAffiliation = stripHtml(course?.affiliation || details?.course?.affiliation || "");
+  const courseLocation = stripHtml((course as any)?.location || details?.course?.location || "");
+
+  const tabs: { id: string; label: string; visible: boolean }[] = [
+    { id: "overview", label: "Overview", visible: true },
+    { id: "eligibility", label: "Eligibility", visible: !!(details?.admissionRequirements?.length) },
+    { id: "curriculum", label: "Curriculum", visible: !!(details?.curriculum?.length) },
+    { id: "career", label: "Career", visible: !!(details?.careerOpportunities?.length) },
+  ];
+
+  const visibleTabs = tabs.filter(t => t.visible);
+  const [activeTab, setActiveTab] = useState(visibleTabs[0]?.id || "overview");
+
+  const handleTabClick = (tab: string) => {
     setActiveTab(tab);
   };
+
+  if (!course && !details) {
+    return (
+      <div className="min-h-screen bg-white flex items-center justify-center">
+        <p className="text-gray-500">Loading course details...</p>
+      </div>
+    );
+  }
 
   return (
     <>
       <style>{`
         .hide-scrollbar::-webkit-scrollbar { display: none; }
         .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
-        .banner-bg {
-            background-color: #0b71d1;
-            background-image: 
-                radial-gradient(circle at 5% 150%, rgba(20, 160, 255, 0.3) 0%, transparent 40%),
-                radial-gradient(circle at 80% 150%, rgba(0, 80, 180, 0.3) 0%, transparent 50%);
-        }
-        .ring-decor-1 {
-            border: 1px solid rgba(255, 255, 255, 0.15);
-            border-radius: 50%;
-            position: absolute;
-            pointer-events: none;
-        }
-        .custom-scrollbar::-webkit-scrollbar { width: 6px; }
-        .custom-scrollbar::-webkit-scrollbar-track { background: #f1f5f9; border-radius: 8px; }
-        .custom-scrollbar::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 8px; }
-        .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
         .animate-fade-in { animation: fadeIn 0.4s ease-in-out; }
       `}</style>
-      <div className="bg-white text-gray-900 antialiased selection:bg-blue-100 selection:text-blue-900 pb-20">
+      <div className="bg-white text-gray-900 antialiased pb-20">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12 flex flex-col gap-6">
-          {/* Outer Breadcrumbs */}
+          {/* Breadcrumbs */}
           <nav className="flex items-center space-x-2 text-sm text-gray-500 px-2 font-medium">
-            <button 
-              onClick={() => onNavigate("finder")}
-              className="hover:text-blue-600 transition-colors bg-transparent border-none p-0 cursor-pointer"
-            >
-              Home
-            </button>
+            <button onClick={() => onNavigate("finder")} className="hover:text-blue-600 transition-colors bg-transparent border-none p-0 cursor-pointer">Home</button>
             <ArrowRight size={10} className="text-gray-400" />
-            <button 
-              onClick={onBack}
-              className="hover:text-blue-600 transition-colors bg-transparent border-none p-0 cursor-pointer"
-            >
-              Course Finder
-            </button>
+            <button onClick={onBack} className="hover:text-blue-600 transition-colors bg-transparent border-none p-0 cursor-pointer">Course Finder</button>
             <ArrowRight size={10} className="text-gray-400" />
-            <span className="text-gray-900 font-semibold">{courseField}</span>
+            <span className="text-gray-900 font-semibold">{courseField || "Course"}</span>
           </nav>
 
-          {/* Banner/Hero Section - Upgraded Design */}
-          <header className="w-full bg-[#0000ff] rounded-md relative overflow-hidden flex flex-col justify-between  min-h-[320px] md:min-h-[400px]">
-            {/* Background Overlay / Pattern */}
-            <div className="absolute inset-0 z-0">
-              <div className="absolute bottom-0 left-0 -mb-20 -ml-20 w-72 h-72 bg-indigo-400 rounded-full mix-blend-multiply filter blur-3xl opacity-20"></div>
-            </div>
-
-            <div className="relative z-10 px-8 py-10 md:px-14 md:py-16 flex flex-col lg:flex-row items-center gap-12 lg:gap-8 h-full">
-              {/* Left Column: Content */}
-              <div className="flex-1 text-white w-full max-w-2xl">
-                {/* Headings */}
-                <h1 className="text-4xl md:text-5xl lg:text-[54px] font-extrabold leading-tight mb-2 tracking-tight">
+          {/* Hero Section */}
+          <header className="w-full bg-[#0000ff] rounded-md relative overflow-hidden min-h-[280px] md:min-h-[320px]">
+            <div className="relative z-10 px-8 py-10 md:px-14 md:py-16">
+              <div className="text-white max-w-2xl">
+                <h1 className="text-3xl md:text-4xl lg:text-5xl font-extrabold leading-tight mb-3 tracking-tight break-words">
                   {courseTitle}
                 </h1>
-                
-                {/* Subtitle / Affiliation */}
-                <p className="text-blue-200 font-semibold text-base md:text-lg mb-6 flex items-center gap-3">
-                  NEB Affiliated <span className="w-1.5 h-1.5 rounded-full bg-blue-400"></span> Available Nationwide
-                </p>
-
-                {/* Course Meta Info Badges */}
-                <div className="flex flex-col sm:flex-row sm:items-center gap-3 mb-6 text-sm md:text-sm font-medium flex-wrap">
-                  <div className="flex items-center space-x-2 text-blue-50 bg-white/10 px-3 py-1.5 rounded-md backdrop-blur-sm border border-white/10">
-                    <Clock className="w-4 h-4 text-blue-200" />
-                    <span>{courseDuration}</span>
-                  </div>
-                  <div className="flex items-center space-x-2 text-blue-50 bg-white/10 px-3 py-1.5 rounded-md backdrop-blur-sm border border-white/10">
-                    <Award className="w-4 h-4 text-blue-200" />
-                    <span>{courseLevel} Equivalent</span>
-                  </div>
-                  <div className="flex items-center space-x-2 text-blue-50 bg-white/10 px-3 py-1.5 rounded-md backdrop-blur-sm border border-white/10">
-                    <BookOpen className="w-4 h-4 text-blue-200" />
-                    <span>{courseField} Faculty</span>
-                  </div>
+                {courseAffiliation && (
+                  <p className="text-blue-200 font-semibold text-base md:text-lg mb-4">
+                    {courseAffiliation}
+                  </p>
+                )}
+                <div className="flex flex-wrap gap-3 mb-4 text-sm font-medium">
+                  {courseDuration && (
+                    <span className="flex items-center gap-1.5 text-blue-50 bg-white/10 px-3 py-1.5 rounded-md">
+                      <Clock className="w-4 h-4 text-blue-200" />
+                      {courseDuration}
+                    </span>
+                  )}
+                  {courseLevel && (
+                    <span className="flex items-center gap-1.5 text-blue-50 bg-white/10 px-3 py-1.5 rounded-md">
+                      <Award className="w-4 h-4 text-blue-200" />
+                      {courseLevel}
+                    </span>
+                  )}
+                  {courseField && (
+                    <span className="flex items-center gap-1.5 text-blue-50 bg-white/10 px-3 py-1.5 rounded-md">
+                      <BookOpen className="w-4 h-4 text-blue-200" />
+                      {courseField}
+                    </span>
+                  )}
                 </div>
-
-                {/* Main Description */}
-                <p className="text-blue-50 text-base md:text-lg leading-relaxed mb-6 max-w-xl">
-                  A foundational {courseField.toLowerCase()} program for careers in engineering, medicine, and technology.
-                </p>
-
-                {/* Eligibility & Fee Grid */}
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 mb-8 max-w-xl">
-                  <div>
-                    <p className="text-blue-200 text-xs font-bold mb-1.5 uppercase tracking-wider">Eligibility</p>
-                    <p className="text-white font-semibold">SEE Passed (2.0+ GPA)</p>
-                  </div>
-                  <div>
-                    <p className="text-blue-200 text-xs font-bold mb-1.5 uppercase tracking-wider">Avg Fee</p>
-                    <p className="text-white font-semibold">NPR 1.5L – 5L</p>
-                  </div>
-                </div>
-
-                {/* Call to Action Buttons */}
-                <div className="flex flex-col sm:flex-row items-center gap-4 mt-4">
-                  <button 
-                    onClick={() => setActiveTab("admission")}
-                    className="w-full sm:w-auto bg-[#10b981] hover:bg-[#059669] text-white px-8 py-3.5 rounded-md font-bold text-sm transition-all flex items-center justify-center border-none cursor-pointer"
-                  >
-                    View Admissions
-                  </button>
-                  <button 
-                    onClick={() =>
-                      onNavigate("universitiesPage", {
-                        courseId,
-                        courseTitle,
-                        collegesCount: courseField,
-                      })
-                    }
-                    className="w-full sm:w-auto bg-white/10 hover:bg-white/20 text-white px-6 py-3.5 rounded-md font-semibold text-sm transition-all flex items-center justify-center backdrop-blur-sm border border-white/20 cursor-pointer"
-                  >
-                    View Colleges
-                  </button>
-                </div>
-              </div>
-
-              {/* Right Column: Science Visual */}
-              <div className="hidden lg:flex flex-1 justify-center items-center relative w-full h-full">
-                <div className="relative w-72 h-72 lg:w-80 lg:h-80 xl:w-96 xl:h-96">
-                  {/* Static Science Illustration */}
-                  <div>
-                    <svg viewBox="0 0 200 200" className="w-full h-full text-blue-200 drop-shadow-2xl" fill="none" xmlns="http://www.w3.org/2000/svg">
-                      {/* Orbit 1 */}
-                      <ellipse cx="100" cy="100" rx="40" ry="90" transform="rotate(30 100 100)" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeOpacity="0.6"></ellipse>
-                      {/* Orbit 2 */}
-                      <ellipse cx="100" cy="100" rx="40" ry="90" transform="rotate(-30 100 100)" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeOpacity="0.6"></ellipse>
-                      {/* Orbit 3 */}
-                      <ellipse cx="100" cy="100" rx="40" ry="90" transform="rotate(90 100 100)" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeOpacity="0.6"></ellipse>
-                      
-                      {/* Electrons */}
-                      <circle cx="100" cy="10" r="6" fill="#ff4a17" transform="rotate(30 100 100)"></circle>
-                      <circle cx="100" cy="190" r="4" fill="#60a5fa" transform="rotate(-30 100 100)"></circle>
-                      <circle cx="10" cy="100" r="5" fill="#a78bfa" transform="rotate(90 100 100)"></circle>
-
-                      {/* Core */}
-                      <circle cx="100" cy="100" r="16" fill="currentColor"></circle>
-                      <circle cx="100" cy="100" r="24" stroke="currentColor" strokeWidth="2" strokeOpacity="0.3" strokeDasharray="4 4"></circle>
-                    </svg>
-                  </div>
-                  
-                  {/* Decorative Stars */}
-                  <Star className="absolute top-0 right-10 w-6 h-6 text-yellow-400 fill-yellow-400" />
-                  <Star className="absolute bottom-10 left-0 w-8 h-8 text-blue-300 opacity-50 fill-blue-300" />
-                </div>
+                {courseEstFee && (
+                  <p className="text-blue-100 text-sm">Est. Fee: {courseEstFee}</p>
+                )}
+                {courseLocation && (
+                  <p className="text-blue-100 text-sm mt-1 flex items-center gap-1">
+                    <MapPin className="w-3.5 h-3.5" /> {courseLocation}
+                  </p>
+                )}
               </div>
             </div>
           </header>
 
-          {/* Sticky Tab Navigation */}
-          <div className="sticky top-0 z-40 bg-white/95 backdrop-blur-md relative mb-12 border-b border-gray-200">
-            <nav className="flex overflow-x-auto hide-scrollbar space-x-8 text-gray-500 font-medium whitespace-nowrap">
-              {[
-                { id: "overview", label: "Overview" },
-                { id: "eligibility", label: "Eligibility" },
-                { id: "admission", label: "Admission" },
-                { id: "courses", label: "Courses" },
-                { id: "fee", label: "Program Fee" },
-                { id: "scholarships", label: "Scholarships" },
-                { id: "model-questions", label: "Model Questions" },
-                { id: "news", label: "News" },
-                { id: "related-programs", label: "Related Programs" },
-              ].map((tab) => (
-                <button
-                  key={tab.id}
-                  onClick={() => handleTabClick(tab.id as TabKey)}
-                  className={`pb-4 -mb-px transition-colors hover:text-gray-900 border-b-2 appearance-none outline-none bg-transparent cursor-pointer ${
-                    activeTab === tab.id
-                      ? "text-gray-900 border-blue-600"
-                      : "border-transparent"
-                  }`}
-                >
-                  {tab.label}
-                </button>
-              ))}
-            </nav>
-          </div>
+          {/* Tabs */}
+          {visibleTabs.length > 0 && (
+            <div className="sticky top-0 z-40 bg-white/95 backdrop-blur-md border-b border-gray-200">
+              <nav className="flex overflow-x-auto hide-scrollbar space-x-8 text-gray-500 font-medium">
+                {visibleTabs.map(tab => (
+                  <button key={tab.id} onClick={() => handleTabClick(tab.id)}
+                    className={`pb-4 -mb-px transition-colors hover:text-gray-900 border-b-2 bg-transparent cursor-pointer whitespace-nowrap ${
+                      activeTab === tab.id ? "text-gray-900 border-blue-600" : "border-transparent"
+                    }`}>
+                    {tab.label}
+                  </button>
+                ))}
+              </nav>
+            </div>
+          )}
 
-          {/* Main Content Grid */}
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-12 lg:gap-16">
-            {/* Left Column: Content */}
-            <div className="lg:col-span-2 min-h-[60vh]">
-              <section
-                id="overview"
-                className={`content-section ${activeTab === "overview" ? "block animate-fade-in" : "hidden"}`}
-              >
-                <h2 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-6 flex items-center">
-                  <Info className="w-6 h-6 mr-3 text-blue-600" />
+          {/* Content */}
+          <div className="min-h-[40vh]">
+            {activeTab === "overview" && (
+              <section className="animate-fade-in">
+                <h2 className="text-2xl font-bold text-gray-900 mb-4 flex items-center gap-2">
+                  <Info className="w-5 h-5 text-blue-600" />
                   Overview
                 </h2>
-
-                <div className="prose prose-lg text-gray-600 space-y-6">
-                  <p>
-                    The{" "}
-                    <strong className="text-gray-900 font-semibold">
-                      {courseTitle}
-                    </strong>{" "}
-                    program is meticulously designed to bridge the gap between
-                    secondary education and advanced university studies.
-                    Students will dive deep into fundamental scientific
-                    principles, mathematical logic, and practical applications.
-                  </p>
-                  <p>
-                    This program is highly suitable for curious and analytical
-                    thinkers who want to shape the future of their chosen field.
-                    By the end of this course, you will be proficient in
-                    theoretical concepts and practical skills, preparing you for
-                    competitive entrance examinations.
-                  </p>
-                  <p>
-                    The curriculum emphasizes hands-on learning, encouraging
-                    students to apply theoretical knowledge to real-world
-                    problems. By enrolling in top colleges with state-of-the-art
-                    facilities and expert faculty members, students receive an
-                    immersive educational experience that lays a robust
-                    foundation for a successful career.
-                  </p>
+                <div className="text-gray-600 leading-relaxed space-y-4 break-words overflow-hidden">
+                  {courseDescription ? (
+                    courseDescription.split("\n").map((para, i) => (
+                      <p key={i}>{para}</p>
+                    ))
+                  ) : (
+                    <p className="text-gray-400 italic">No description available.</p>
+                  )}
                 </div>
               </section>
+            )}
 
-              <section
-                id="eligibility"
-                className={`content-section ${activeTab === "eligibility" ? "block animate-fade-in" : "hidden"}`}
-              >
-                <h2 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-6 flex items-center">
-                  <ClipboardCheck className="w-6 h-6 mr-3 text-blue-600" />
-                  Eligibility Criteria
-                </h2>
-                <div className="bg-blue-50 border border-blue-100 rounded-md p-6 mb-8">
-                  <p className="text-gray-800 font-medium mb-2">
-                    To be eligible for the {courseTitle} program, applicants
-                    must meet the following criteria:
-                  </p>
-                  <ul className="list-disc pl-5 text-gray-600 space-y-2 mt-4">
-                    <li>
-                      Must have completed the Secondary Education Examination
-                      (SEE) or an equivalent recognized board exam.
+            {activeTab === "eligibility" && details?.admissionRequirements && (
+              <section className="animate-fade-in">
+                <h2 className="text-2xl font-bold text-gray-900 mb-4">Eligibility Criteria</h2>
+                <ul className="space-y-3">
+                  {details.admissionRequirements.map((req, i) => (
+                    <li key={i} className="flex items-start gap-3 p-4 bg-blue-50 rounded-md">
+                      <span className="w-6 h-6 rounded-full bg-blue-600 text-white flex items-center justify-center text-xs font-bold shrink-0 mt-0.5">{i + 1}</span>
+                      <span className="text-gray-700 break-words overflow-hidden">{stripHtml(req)}</span>
                     </li>
-                    <li>
-                      Must have achieved a minimum GPA of{" "}
-                      <strong className="text-gray-900">2.0</strong> in
-                      aggregate.
-                    </li>
-                    <li>
-                      Must have secured at least a{" "}
-                      <strong className="text-gray-900">C+ grade</strong> in
-                      core subjects and a minimum of{" "}
-                      <strong className="text-gray-900">D+ grade</strong> in
-                      English and Nepali.
-                    </li>
-                  </ul>
-                </div>
+                  ))}
+                </ul>
               </section>
+            )}
 
-              <section
-                id="admission"
-                className={`content-section ${activeTab === "admission" ? "block animate-fade-in" : "hidden"}`}
-              >
-                <h2 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-6 flex items-center">
-                  <UserPlus className="w-6 h-6 mr-3 text-blue-600" />
-                  Admission Process
-                </h2>
-
-                <div className="bg-blue-50/50 border border-blue-100 rounded-md p-5 mb-8 text-gray-700 leading-relaxed">
-                  The admission is mainly open from{" "}
-                  <strong className="text-gray-900">July to August</strong>{" "}
-                  (shortly after SEE results), but the exact timeline is also
-                  heavily based on the individual college.
-                </div>
-
+            {activeTab === "curriculum" && details?.curriculum && (
+              <section className="animate-fade-in">
+                <h2 className="text-2xl font-bold text-gray-900 mb-4">Curriculum</h2>
                 <div className="space-y-6">
-                  <div className="flex">
-                    <div className="flex-shrink-0 w-10 h-10 rounded-full bg-blue-600 text-white flex items-center justify-center font-bold text-lg">
-                      1
+                  {details.curriculum.map((sem: any, i: number) => (
+                    <div key={i} className="border border-gray-200 rounded-md p-5">
+                      <h3 className="font-bold text-gray-900 mb-2">{sem.title || `Semester ${sem.semester || i + 1}`}</h3>
+                      {sem.subtitle && <p className="text-sm text-gray-500 mb-3">{sem.subtitle}</p>}
+                      {sem.subjects?.length > 0 && (
+                        <ul className="list-disc list-inside text-gray-600 text-sm space-y-1">
+                          {sem.subjects.map((sub: string, j: number) => (
+                            <li key={j}>{sub}</li>
+                          ))}
+                        </ul>
+                      )}
                     </div>
-                    <div className="ml-4">
-                      <h3 className="text-xl font-semibold text-gray-900">
-                        Application Form
-                      </h3>
-                      <p className="text-gray-600 mt-2 leading-relaxed">
-                        Many colleges open online admission forms, while many
-                        others still require you to submit the form physically
-                        at the college.
-                      </p>
-                    </div>
-                  </div>
-                  <div className="flex">
-                    <div className="flex-shrink-0 w-10 h-10 rounded-full bg-blue-600 text-white flex items-center justify-center font-bold text-lg">
-                      2
-                    </div>
-                    <div className="ml-4">
-                      <h3 className="text-xl font-semibold text-gray-900">
-                        Entrance Examination
-                      </h3>
-                      <p className="text-gray-600 mt-2 leading-relaxed">
-                        Colleges can have different admission times and
-                        schedules for their entrance exams. You can find
-                        detailed entrance notices from the specific college page
-                        via{" "}
-                        <span className="text-blue-600 font-medium">
-                          Find College
-                        </span>
-                        .
-                      </p>
-                    </div>
-                  </div>
+                  ))}
                 </div>
               </section>
+            )}
 
-              <section
-                id="courses"
-                className={`content-section ${activeTab === "courses" ? "block animate-fade-in" : "hidden"}`}
-              >
-                <h2 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-6 flex items-center">
-                  <BookOpen className="w-6 h-6 mr-3 text-blue-600" />
-                  Course Structure & Career Opportunities
-                </h2>
-
-                <p className="text-gray-600 mb-6">
-                  The program generally has two main sections: the{" "}
-                  <strong>Physical Group</strong> and the{" "}
-                  <strong>Biology Group</strong>. Below is the detailed
-                  breakdown of subjects and opportunities for each.
-                </p>
-
-                {/* Grade 11 Tables */}
-                <h3 className="text-xl font-bold text-gray-900 mb-4 border-b pb-2">
-                  Grade 11 Subjects
-                </h3>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
-                  <div className="bg-white border border-gray-200 rounded-md  overflow-hidden">
-                    <div className="bg-blue-50 border-b border-gray-200 px-6 py-3">
-                      <h4 className="font-bold text-blue-900">
-                        Physical Group
-                      </h4>
-                    </div>
-                    <ul className="divide-y divide-gray-100 text-gray-600 text-sm">
-                      <li className="px-6 py-3">Compulsory English</li>
-                      <li className="px-6 py-3">Compulsory Nepali</li>
-                      <li className="px-6 py-3 font-medium text-gray-800">
-                        Physics
-                      </li>
-                      <li className="px-6 py-3 font-medium text-gray-800">
-                        Chemistry
-                      </li>
-                      <li className="px-6 py-3 font-medium text-gray-800">
-                        Mathematics
-                      </li>
-                      <li className="px-6 py-3">Computer Science (Optional)</li>
-                    </ul>
-                  </div>
-                  <div className="bg-white border border-gray-200 rounded-md  overflow-hidden">
-                    <div className="bg-emerald-50 border-b border-gray-200 px-6 py-3">
-                      <h4 className="font-bold text-emerald-900">
-                        Biology Group
-                      </h4>
-                    </div>
-                    <ul className="divide-y divide-gray-100 text-gray-600 text-sm">
-                      <li className="px-6 py-3">Compulsory English</li>
-                      <li className="px-6 py-3">Compulsory Nepali</li>
-                      <li className="px-6 py-3 font-medium text-gray-800">
-                        Physics
-                      </li>
-                      <li className="px-6 py-3 font-medium text-gray-800">
-                        Chemistry
-                      </li>
-                      <li className="px-6 py-3 font-medium text-gray-800">
-                        Biology
-                      </li>
-                      <li className="px-6 py-3">
-                        Mathematics / Extra Math (Optional)
-                      </li>
-                    </ul>
-                  </div>
-                </div>
-
-                {/* Grade 12 Tables */}
-                <h3 className="text-xl font-bold text-gray-900 mb-4 border-b pb-2">
-                  Grade 12 Subjects
-                </h3>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
-                  <div className="bg-white border border-gray-200 rounded-md  overflow-hidden">
-                    <div className="bg-blue-50 border-b border-gray-200 px-6 py-3">
-                      <h4 className="font-bold text-blue-900">
-                        Physical Group
-                      </h4>
-                    </div>
-                    <ul className="divide-y divide-gray-100 text-gray-600 text-sm">
-                      <li className="px-6 py-3">Compulsory English</li>
-                      <li className="px-6 py-3">
-                        Compulsory Nepali / Life Skills
-                      </li>
-                      <li className="px-6 py-3 font-medium text-gray-800">
-                        Physics
-                      </li>
-                      <li className="px-6 py-3 font-medium text-gray-800">
-                        Chemistry
-                      </li>
-                      <li className="px-6 py-3 font-medium text-gray-800">
-                        Mathematics
-                      </li>
-                      <li className="px-6 py-3">Computer Science (Optional)</li>
-                    </ul>
-                  </div>
-                  <div className="bg-white border border-gray-200 rounded-md  overflow-hidden">
-                    <div className="bg-emerald-50 border-b border-gray-200 px-6 py-3">
-                      <h4 className="font-bold text-emerald-900">
-                        Biology Group
-                      </h4>
-                    </div>
-                    <ul className="divide-y divide-gray-100 text-gray-600 text-sm">
-                      <li className="px-6 py-3">Compulsory English</li>
-                      <li className="px-6 py-3">
-                        Compulsory Nepali / Life Skills
-                      </li>
-                      <li className="px-6 py-3 font-medium text-gray-800">
-                        Physics
-                      </li>
-                      <li className="px-6 py-3 font-medium text-gray-800">
-                        Chemistry
-                      </li>
-                      <li className="px-6 py-3 font-medium text-gray-800">
-                        Biology
-                      </li>
-                      <li className="px-6 py-3">
-                        Mathematics / Extra Math (Optional)
-                      </li>
-                    </ul>
-                  </div>
-                </div>
-
-                {/* Entrance Preparation & Careers */}
-                <div className="space-y-6 mb-8">
-                  <div className="bg-gray-50 border border-gray-200 p-5 rounded-md">
-                    <h3 className="text-lg font-bold text-gray-900 mb-2">
-                      Physical Group Focus
-                    </h3>
-                    <p className="text-gray-600 text-sm mb-3">
-                      <strong>Entrance you get prepared for:</strong> IOE
-                      (Institute of Engineering Entrance), BSc. CSIT, BIT, and
-                      other university-specific engineering and IT entrance
-                      exams.
-                    </p>
-                    <div className="flex flex-wrap gap-2">
-                      <span className="bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-xs font-semibold">
-                        Civil Engineering
-                      </span>
-                      <span className="bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-xs font-semibold">
-                        Computer Engineering
-                      </span>
-                      <span className="bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-xs font-semibold">
-                        Software Development
-                      </span>
-                      <span className="bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-xs font-semibold">
-                        Architecture
-                      </span>
-                    </div>
-                  </div>
-
-                  <div className="bg-gray-50 border border-gray-200 p-5 rounded-md">
-                    <h3 className="text-lg font-bold text-gray-900 mb-2">
-                      Biology Group Focus
-                    </h3>
-                    <p className="text-gray-600 text-sm mb-3">
-                      <strong>Entrance you get prepared for:</strong> CEE
-                      (Common Entrance Examination for Medical Education),
-                      Agriculture Entrance, Forestry Entrance, and Nursing
-                      parameters.
-                    </p>
-                    <div className="flex flex-wrap gap-2">
-                      <span className="bg-emerald-100 text-emerald-800 px-3 py-1 rounded-full text-xs font-semibold">
-                        Medicine (MBBS/BDS)
-                      </span>
-                      <span className="bg-emerald-100 text-emerald-800 px-3 py-1 rounded-full text-xs font-semibold">
-                        Nursing
-                      </span>
-                      <span className="bg-emerald-100 text-emerald-800 px-3 py-1 rounded-full text-xs font-semibold">
-                        Pharmacy
-                      </span>
-                      <span className="bg-emerald-100 text-emerald-800 px-3 py-1 rounded-full text-xs font-semibold">
-                        Agriculture
-                      </span>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Note Block */}
-                <div className="bg-yellow-50 border-l-4 border-yellow-400 p-4 rounded-r-lg">
-                  <div className="flex">
-                    <div className="flex-shrink-0">
-                      <AlertCircle className="h-5 w-5 text-yellow-600" />
-                    </div>
-                    <div className="ml-3">
-                      <p className="text-sm text-yellow-800 leading-relaxed">
-                        <strong>Note:</strong> Many colleges allow you to freely
-                        choose the optional subject (such as Computer Science or
-                        Extra Math). However, in many colleges, it is a
-                        mandatory subject that must be read based on their
-                        specific curriculum packages.
-                      </p>
-                    </div>
-                  </div>
-                </div>
-              </section>
-
-              <section
-                id="fee"
-                className={`content-section ${activeTab === "fee" ? "block animate-fade-in" : "hidden"}`}
-              >
-                <h2 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-6 flex items-center">
-                  <Coins className="w-6 h-6 mr-3 text-blue-600" />
-                  Fee Structure
-                </h2>
-                <p className="text-gray-600 mb-6">
-                  Based on the college, here is the minimum and estimated fee
-                  structure in the tables below for a standard program.
-                </p>
-
-                <div className="overflow-x-auto border border-gray-200 rounded-md ">
-                  <table className="w-full text-left border-collapse">
-                    <thead>
-                      <tr className="bg-gray-50 text-gray-900">
-                        <th className="py-4 px-6 font-semibold border-b border-gray-200">
-                          Particulars
-                        </th>
-                        <th className="py-4 px-6 font-semibold border-b border-gray-200 text-right">
-                          Amount (NPR)
-                        </th>
-                      </tr>
-                    </thead>
-                    <tbody className="divide-y divide-gray-100 text-gray-600">
-                      <tr>
-                        <td className="py-4 px-6">Admission Fee (One-time)</td>
-                        <td className="py-4 px-6 text-right">25,000</td>
-                      </tr>
-                      <tr>
-                        <td className="py-4 px-6">
-                          Monthly Tuition Fee (x 12 months)
-                        </td>
-                        <td className="py-4 px-6 text-right">6,500</td>
-                      </tr>
-                      <tr>
-                        <td className="py-4 px-6">Laboratory Fee (Annual)</td>
-                        <td className="py-4 px-6 text-right">10,000</td>
-                      </tr>
-                      <tr>
-                        <td className="py-4 px-6">
-                          Library & Extra-curricular (Annual)
-                        </td>
-                        <td className="py-4 px-6 text-right">5,000</td>
-                      </tr>
-                      <tr className="bg-gray-50 font-bold text-gray-900">
-                        <td className="py-4 px-6">
-                          Total Estimated first Year Fee
-                        </td>
-                        <td className="py-4 px-6 text-right">
-                          90,000 - 150,000+
-                        </td>
-                      </tr>
-                    </tbody>
-                  </table>
-                </div>
-              </section>
-
-              <section
-                id="scholarships"
-                className={`content-section ${activeTab === "scholarships" ? "block animate-fade-in" : "hidden"}`}
-              >
-                <h2 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-6 flex items-center">
-                  <Award className="w-6 h-6 mr-3 text-blue-600" />
-                  Scholarships & Financial Aid
-                </h2>
-
-                <div className="bg-indigo-50 border border-indigo-100 rounded-md p-5 mb-8">
-                  <p className="text-indigo-900 font-medium">
-                    Many colleges provide scholarships based on the{" "}
-                    <strong className="font-bold">SEE GPA</strong>,{" "}
-                    <strong className="font-bold">government quotas</strong>,{" "}
-                    <strong className="font-bold">
-                      extracurricular activities
-                    </strong>
-                    , and based on the{" "}
-                    <strong className="font-bold">
-                      college entrance examination
-                    </strong>{" "}
-                    scores.
-                  </p>
-                </div>
-
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 mb-8">
-                  <div className="bg-yellow-50 border border-yellow-200 rounded-md p-6">
-                    <h3 className="font-bold text-yellow-900 text-lg mb-2 flex items-center">
-                      <Star className="w-5 h-5 mr-2" />
-                      SEE Merit Scholarship
-                    </h3>
-                    <p className="text-gray-700 text-sm">
-                      Students achieving a high GPA (usually 3.6 to 4.0) in SEE
-                      are highly likely to receive a 50% to 100% waiver on
-                      tuition fees.
-                    </p>
-                  </div>
-                  <div className="bg-blue-50 border border-blue-200 rounded-md p-6">
-                    <h3 className="font-bold text-blue-900 text-lg mb-2 flex items-center">
-                      <Trophy className="w-5 h-5 mr-2" />
-                      Entrance Topper Award
-                    </h3>
-                    <p className="text-gray-700 text-sm">
-                      Top performers in a specific college's entrance
-                      examination generally receive full or partial scholarships
-                      for the first academic year.
-                    </p>
-                  </div>
-                </div>
-
-                <div className="flex flex-col sm:flex-row items-center justify-between bg-white border border-gray-200 p-6 rounded-md ">
-                  <div className="mb-4 sm:mb-0">
-                    <h3 className="text-lg font-bold text-gray-900">
-                      Looking for Scholarships?
-                    </h3>
-                    <p className="text-gray-600 text-sm mt-1">
-                      Here you can find the many scholarship programs available
-                      tailored to your scores.
-                    </p>
-                  </div>
-                  <button className="inline-flex items-center px-5 py-2.5 bg-blue-600 text-white font-medium rounded-md hover:bg-blue-700 transition-colors focus:ring-4 focus:ring-blue-100 whitespace-nowrap">
-                    Scholarship Finder
-                    <ArrowRight className="w-4 h-4 ml-2" />
-                  </button>
-                </div>
-              </section>
-
-              <section
-                id="model-questions"
-                className={`content-section ${activeTab === "model-questions" ? "block animate-fade-in" : "hidden"}`}
-              >
-                <h2 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-6 flex items-center">
-                  <FileText className="w-6 h-6 mr-3 text-blue-600" />
-                  Model Questions
-                </h2>
-                <p className="text-gray-600 mb-6">
-                  Download sample entrance exam papers and previous NEB board
-                  exam model questions to help with your preparation.
-                </p>
-
+            {activeTab === "career" && details?.careerOpportunities && (
+              <section className="animate-fade-in">
+                <h2 className="text-2xl font-bold text-gray-900 mb-4">Career Opportunities</h2>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  <a
-                    href="#"
-                    className="flex items-center p-4 border border-gray-200 rounded-md hover:border-blue-500 hover:bg-blue-50 transition-colors group"
-                  >
-                    <div className="w-12 h-12 bg-red-100 text-red-600 rounded-md flex items-center justify-center flex-shrink-0">
-                      <FileCheck2 className="w-6 h-6" />
+                  {details.careerOpportunities.map((career: any, i: number) => (
+                    <div key={i} className="border border-gray-200 rounded-md p-4">
+                      <h3 className="font-semibold text-gray-900">{career.title}</h3>
                     </div>
-                    <div className="ml-4">
-                      <h3 className="font-semibold text-gray-900 group-hover:text-blue-600 transition-colors">
-                        Entrance Model Set 1
-                      </h3>
-                      <p className="text-xs text-gray-500 mt-1">PDF • 2.4 MB</p>
-                    </div>
-                    <Download className="w-5 h-5 ml-auto text-gray-400 group-hover:text-blue-600" />
-                  </a>
-
-                  <a
-                    href="#"
-                    className="flex items-center p-4 border border-gray-200 rounded-md hover:border-blue-500 hover:bg-blue-50 transition-colors group"
-                  >
-                    <div className="w-12 h-12 bg-red-100 text-red-600 rounded-md flex items-center justify-center flex-shrink-0">
-                      <FileCheck2 className="w-6 h-6" />
-                    </div>
-                    <div className="ml-4">
-                      <h3 className="font-semibold text-gray-900 group-hover:text-blue-600 transition-colors">
-                        NEB Physics Past Papers
-                      </h3>
-                      <p className="text-xs text-gray-500 mt-1">PDF • 5.1 MB</p>
-                    </div>
-                    <Download className="w-5 h-5 ml-auto text-gray-400 group-hover:text-blue-600" />
-                  </a>
+                  ))}
                 </div>
               </section>
-
-              {/* News Section */}
-              <section
-                id="news"
-                className={`content-section ${activeTab === "news" ? "block animate-fade-in" : "hidden"}`}
-              >
-                <h2 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-6 flex items-center">
-                  <Newspaper className="w-6 h-6 mr-3 text-blue-600" />
-                  Latest News & Notices
-                </h2>
-                <div className="space-y-4">
-                  <a
-                    href="#"
-                    className="bg-white border border-gray-200 p-5 rounded-md flex flex-col sm:flex-row gap-5 hover:border-blue-600 hover: transition-all group block"
-                  >
-                    <div className="w-full sm:w-16 h-16 bg-blue-50 rounded-md flex flex-col items-center justify-center shrink-0 text-blue-600 border border-blue-100">
-                      <span className="text-xl font-bold">12</span>
-                      <span className="text-xs uppercase tracking-wider font-semibold">
-                        Aug
-                      </span>
-                    </div>
-                    <div className="flex-1">
-                      <div className="flex items-center gap-2 mb-1">
-                        <span className="bg-emerald-100 text-emerald-700 text-[10px] px-2 py-0.5 rounded font-bold uppercase tracking-wide">
-                          Admission
-                        </span>
-                      </div>
-                      <h3 className="font-bold text-gray-900 text-lg group-hover:text-blue-600 transition-colors">
-                        NEB Class 11 Science Admission Open
-                      </h3>
-                      <p className="text-sm text-gray-600 mt-1.5 leading-relaxed">
-                        Various top colleges across the valley have started
-                        taking applications and entrance exams for the upcoming
-                        session.
-                      </p>
-                    </div>
-                  </a>
-
-                  <a
-                    href="#"
-                    className="bg-white border border-gray-200 p-5 rounded-md flex flex-col sm:flex-row gap-5 hover:border-blue-600 hover: transition-all group block"
-                  >
-                    <div className="w-full sm:w-16 h-16 bg-blue-50 rounded-md flex flex-col items-center justify-center shrink-0 text-blue-600 border border-blue-100">
-                      <span className="text-xl font-bold">05</span>
-                      <span className="text-xs uppercase tracking-wider font-semibold">
-                        Aug
-                      </span>
-                    </div>
-                    <div className="flex-1">
-                      <div className="flex items-center gap-2 mb-1">
-                        <span className="bg-red-100 text-red-700 text-[10px] px-2 py-0.5 rounded font-bold uppercase tracking-wide">
-                          Results
-                        </span>
-                      </div>
-                      <h3 className="font-bold text-gray-900 text-lg group-hover:text-blue-600 transition-colors">
-                        SEE Results Published Successfully
-                      </h3>
-                      <p className="text-sm text-gray-600 mt-1.5 leading-relaxed">
-                        The National Examination Board has officially published
-                        the SEE results. Check your GPA and find eligibility.
-                      </p>
-                    </div>
-                  </a>
-                </div>
-              </section>
-
-              {/* Related Programs Section using CourseGrid */}
-              <section
-                id="related-programs"
-                className={`content-section ${activeTab === "related-programs" ? "block animate-fade-in" : "hidden"}`}
-              >
-                <h2 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-6 flex items-center">
-                  <LayoutGrid className="w-6 h-6 mr-3 text-blue-600" />
-                  Related Programs
-                </h2>
-                <div className="mt-8">
-                  <CourseGrid 
-                    courses={allCourses.filter(c => String(c.id) !== String(courseId)).slice(0, 6)} 
-                    totalCourses={allCourses.length - 1}
-                    onNavigate={onNavigate}
-                    filters={filters}
-                    onFiltersChange={setFilters}
-                    isLoading={isCoursesLoading}
-                  />
-                </div>
-              </section>
-            </div>
-
-            {/* Right Column: Interactive Sidebar */}
-            <div className="lg:col-span-1">
-              <div className="sticky top-28 space-y-6">
-                {/* Sponsored Colleges List */}
-                <div className="mt-8">
-                  <div className="flex items-center justify-between mb-4">
-                    <h3 className="font-bold text-gray-900 text-lg flex items-center">
-                      Sponsored Colleges
-                    </h3>
-                    <span className="text-[10px] uppercase font-bold text-gray-400 tracking-wider">
-                      Ad
-                    </span>
-                  </div>
-
-                  {/* Scrollable container for the cards */}
-                  <div className="space-y-4 max-h-[calc(100vh-16rem)] overflow-y-auto pr-2 pb-4 custom-scrollbar">
-                    {sponsoredColleges.map((college) => (
-                      <a
-                        key={college.name}
-                        href={college.url}
-                        target="_blank"
-                        rel="noreferrer"
-                        className="bg-white border border-gray-200 rounded-md p-4 flex gap-4 w-full hover:border-blue-600 hover: transition-all group block relative overflow-hidden"
-                      >
-                        <div
-                          className={`w-16 h-16 rounded-md border border-gray-100 flex items-center justify-center shrink-0 p-1 ${college.logoFallbackColor || "bg-white"}`}
-                        >
-                          {college.logo ? (
-                            <img
-                              src={college.logo}
-                              alt={`${college.name} Logo`}
-                              className="w-full h-full object-contain"
-                              onError={(e) => {
-                                (e.target as HTMLImageElement).style.display =
-                                  "none";
-                              }}
-                            />
-                          ) : (
-                            <div className="flex flex-col items-center justify-center w-full h-full">
-                              <span className="font-bold text-[11px] leading-tight text-center">
-                                {college.logoFallback}
-                              </span>
-                            </div>
-                          )}
-                        </div>
-                        <div className="flex flex-col flex-1 justify-center">
-                          <div className="flex items-center gap-1.5">
-                            <h4 className="font-bold text-gray-900 text-sm sm:text-base group-hover:text-blue-600 transition-colors line-clamp-1">
-                              {college.name}
-                            </h4>
-                            {college.verified && (
-                              <CheckCircle2 className="w-4 h-4 text-blue-600 shrink-0" />
-                            )}
-                          </div>
-                          <div className="flex items-center mt-1 text-xs text-gray-500">
-                            <MapPin className="w-3 h-3 mr-1 shrink-0" />
-                            <span className="truncate">{college.location}</span>
-                          </div>
-                          <div className="flex items-center mt-2 text-[11px] font-semibold text-blue-600 group-hover:text-blue-800 transition-colors">
-                            <ExternalLink className="w-3 h-3 mr-1" />{" "}
-                            {college.website}
-                          </div>
-                        </div>
-                      </a>
-                    ))}
-                  </div>
-                </div>
-              </div>
-            </div>
+            )}
           </div>
+
+          {/* Related Programs */}
+          <section className="mt-12">
+            <h2 className="text-2xl font-bold text-gray-900 mb-6">Related Programs</h2>
+            <CourseGrid 
+              courses={allCourses.filter(c => String(c.id) !== String(courseId)).slice(0, 6)} 
+              totalCourses={allCourses.length - 1}
+              onNavigate={onNavigate}
+              filters={filters}
+              onFiltersChange={setFilters}
+              isLoading={false}
+            />
+          </section>
         </div>
       </div>
     </>

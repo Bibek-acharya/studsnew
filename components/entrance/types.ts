@@ -1,5 +1,6 @@
 export interface Exam {
   id: string;
+  slug: string;
   institution: string;
   verified: boolean;
   location: string;
@@ -12,8 +13,10 @@ export interface Exam {
   eligibility: string;
   whatsapp: string;
   viber: string;
-  status: 'Ongoing' | 'Upcoming' | 'Closing Soon' | 'Closed';
+  status: string;
   examDate: string;
   nepaliDate: string;
   imageUrl: string;
+  phone: string;
+  email: string;
 }

@@ -41,6 +41,17 @@ export interface InstitutionEntrance {
   status: string;
   created_at: string;
   updated_at: string;
+  application_fee: string;
+  overview_details: any[];
+  exam_date_schedules: any[];
+  eligibility_list: any[];
+  application_steps: any[];
+  exam_pattern: any[];
+  subject_marks: any[];
+  model_sets: any[];
+  upcoming_dates: any[];
+  contact_persons: any[];
+  faqs: any[];
 }
 
 export interface EntranceApplicant {

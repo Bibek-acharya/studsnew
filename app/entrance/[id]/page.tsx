@@ -2,8 +2,10 @@
 
 import React, { useState, useRef } from "react";
 import { useParams, useRouter } from "next/navigation";
-import { MOCK_EXAM_DETAILS } from "@/components/entrance/examDetailsData";
-import { ExamDetails } from "@/app/entrance/types";
+import { useQuery } from "@tanstack/react-query";
+import { entranceService, EntranceDetailsResponse } from "@/services/entrance.api";
+import { Exam } from "@/components/entrance/types";
+import type { ExamDetails } from "@/app/entrance/types";
 import {
   Bell,
   ChevronDown,
@@ -45,6 +47,48 @@ const TABS = [
 
 type TabId = (typeof TABS)[number]["id"];
 
+function mapExamToDetails(exam: Exam): ExamDetails {
+  return {
+    id: exam.id,
+    title: exam.title || "",
+    university: exam.institution || "",
+    faculty: "",
+    status: (exam.status as ExamDetails["status"]) || "Ongoing",
+    examDate: exam.examDate || "",
+    nepaliDate: exam.nepaliDate || "",
+    imageUrl: exam.imageUrl || "",
+    registrationStart: "",
+    registrationEnd: "",
+    examLevel: "",
+    duration: "",
+    questionType: "",
+    description: exam.eligibility || "",
+    conductingBody: exam.institution || exam.affiliation || "",
+    examFrequency: "",
+    examMode: "",
+    applicationFee: "",
+    foreignFee: "",
+    phone: exam.phone || "",
+    email: exam.email || "",
+    website: exam.website || "",
+    location: exam.location || "",
+    applicationSteps: [],
+    eligibility: [],
+    examPattern: [],
+    subjectMarks: [],
+    modelSets: [],
+    courses: [],
+    admissionSteps: [],
+    admitCardInfo: "",
+    upcomingDates: exam.examDate
+      ? [{ date: exam.examDate, dateEn: exam.examDate, event: `${exam.title} Exam`, status: exam.status }]
+      : [],
+    pastDates: [],
+    faqs: [],
+    contactPersons: [],
+  };
+}
+
 const EntranceDetailsPage: React.FC = () => {
   const params = useParams();
   const router = useRouter();
@@ -54,14 +98,33 @@ const EntranceDetailsPage: React.FC = () => {
   const [showNotificationModal, setShowNotificationModal] = useState(false);
   const tabNavRef = useRef<HTMLDivElement>(null);
 
-  const exam: ExamDetails | undefined = MOCK_EXAM_DETAILS[id];
+  const { data: apiData, isLoading } = useQuery({
+    queryKey: ["entrance", id],
+    queryFn: () => entranceService.getEntranceById(id),
+    staleTime: 5 * 60 * 1000,
+  });
+
+  const entrance = apiData?.data;
   const currentYear = new Date().getFullYear();
+
+  const exam: ExamDetails | undefined = entrance ? mapExamToDetails(entrance) : undefined;
 
   const scrollTabs = (direction: number) => {
     if (tabNavRef.current) {
       tabNavRef.current.scrollBy({ left: direction * 200, behavior: "smooth" });
     }
   };
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-white flex items-center justify-center">
+        <div className="text-center">
+          <div className="w-8 h-8 border-4 border-blue-600 border-t-transparent rounded-full animate-spin mx-auto mb-4" />
+          <p className="text-gray-500">Loading entrance details...</p>
+        </div>
+      </div>
+    );
+  }
 
   if (!exam) {
     return (

@@ -92,7 +92,7 @@ const EntranceDirectoryPage: React.FC = () => {
                     <td className="text-center py-3 px-6">
                       <div className="flex items-center justify-center gap-2">
                         <button className="p-1.5 hover:bg-blue-50 rounded text-blue-600" title="View"><Eye className="w-4 h-4" /></button>
-                        <button onClick={() => router.push(`/institution-zone/dashboard/entrance/create?id=${exam.id}`)} className="p-1.5 hover:bg-blue-50 rounded text-blue-600" title="Edit"><Pencil className="w-4 h-4" /></button>
+                        <button onClick={() => router.push(`/institution-zone/dashboard/entrance?id=${exam.id}`)} className="p-1.5 hover:bg-blue-50 rounded text-blue-600" title="Edit"><Pencil className="w-4 h-4" /></button>
                         <button onClick={() => handleDelete(exam.id)} className="p-1.5 hover:bg-red-50 rounded text-red-600" title="Delete"><Trash className="w-4 h-4" /></button>
                       </div>
                     </td>

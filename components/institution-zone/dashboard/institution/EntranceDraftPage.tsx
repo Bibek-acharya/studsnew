@@ -25,7 +25,7 @@ const EntranceDraftPage: React.FC = () => {
   const paginated = drafts.slice((safePage - 1) * ITEMS_PER_PAGE, safePage * ITEMS_PER_PAGE);
 
   const handleEdit = (id: number) => {
-    router.push(`/institution-zone/dashboard/entrance/create?id=${id}`);
+    router.push(`/institution-zone/dashboard/entrance?id=${id}`);
   };
 
   const handleDelete = async (id: number) => {
