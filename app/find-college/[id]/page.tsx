@@ -24,6 +24,7 @@ import {
   ContactInfoRow,
 } from "./components";
 import ClaimCollegeModal from "./components/ClaimCollegeModal";
+import OpenCounsellingModal from "./components/OpenCounsellingModal";
 import { getInstitutionCourses } from "@/services/institutionCourses";
 
 type TabKey =
@@ -85,6 +86,7 @@ const CollegeDetailsPage = ({ params }: { params: Promise<{ id: string }> }) => 
     useState<LevelFilter>("all");
   const [isClaimModalOpen, setIsClaimModalOpen] = useState(false);
   const [isShareModalOpen, setIsShareModalOpen] = useState(false);
+  const [isCounsellingModalOpen, setIsCounsellingModalOpen] = useState(false);
   const [isFollowed, setIsFollowed] = useState(false);
   const [showUnfollowDialog, setShowUnfollowDialog] = useState(false);
   const [selectedImageIndex, setSelectedImageIndex] = useState<number | null>(null);
@@ -330,7 +332,10 @@ const CollegeDetailsPage = ({ params }: { params: Promise<{ id: string }> }) => 
       >
         <div className="absolute bottom-4 right-4 z-20 md:bottom-6 md:right-6">
           {isVerified ? (
-            <button className="flex items-center gap-2 rounded-md bg-black/60 cursor-pointer px-5 py-2.5 text-sm font-bold text-white transition-all duration-300  md:px-6 md:py-3 md:text-base">
+            <button
+              onClick={() => setIsCounsellingModalOpen(true)}
+              className="flex items-center gap-2 rounded-md bg-black/60 cursor-pointer px-5 py-2.5 text-sm font-bold text-white transition-all duration-300  md:px-6 md:py-3 md:text-base"
+            >
               <MessageSquarePlus />
               <span>Open Counselling</span>
             </button>
@@ -1382,6 +1387,15 @@ const CollegeDetailsPage = ({ params }: { params: Promise<{ id: string }> }) => 
         shareTitle={shareTitle}
         shareText={shareText}
       />
+
+      {isInstitution && (
+        <OpenCounsellingModal
+          isOpen={isCounsellingModalOpen}
+          onClose={() => setIsCounsellingModalOpen(false)}
+          institutionId={college?.id || collegeId || 0}
+          collegeName={name}
+        />
+      )}
 
       {showUnfollowDialog && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">

@@ -15,6 +15,7 @@ import {
 } from "@phosphor-icons/react";
 import SectionHeader from "@/components/institution-zone/dashboard/shared/SectionHeader";
 import { apiService, InstitutionCounsellingBookingItem } from "@/services/api";
+import { institutionCounsellingApi, CounsellingSession } from "@/services/institutionCounsellingApi";
 
 const breadcrumb = [
   { label: "Dashboard", href: "/institution-zone/dashboard" },
@@ -25,17 +26,13 @@ type RequestStatus = "pending" | "confirmed" | "cancelled" | "completed";
 
 interface SlotItem {
   id: number;
+  sessionId: number;
   date: string;
   start: string;
   end: string;
   capacity: number;
   booked: number;
 }
-
-const DEFAULT_SLOTS: SlotItem[] = [
-  { id: 1, date: "2024-03-20", start: "09:00", end: "12:00", capacity: 5, booked: 3 },
-  { id: 2, date: "2024-03-22", start: "14:00", end: "17:00", capacity: 4, booked: 1 },
-];
 
 const statusColors: Record<RequestStatus, string> = {
   pending: "bg-yellow-100 text-yellow-700",
@@ -49,7 +46,8 @@ const CounsellingPage: React.FC = () => {
   const [bookings, setBookings] = useState<InstitutionCounsellingBookingItem[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [fetchError, setFetchError] = useState("");
-  const [slots, setSlots] = useState(DEFAULT_SLOTS);
+  const [slots, setSlots] = useState<SlotItem[]>([]);
+  const [slotsLoading, setSlotsLoading] = useState(true);
 
   /* filters */
   const [search, setSearch] = useState("");
@@ -61,6 +59,7 @@ const CounsellingPage: React.FC = () => {
   const [slotStart, setSlotStart] = useState("");
   const [slotEnd, setSlotEnd] = useState("");
   const [slotCapacity, setSlotCapacity] = useState("5");
+  const [slotTitle, setSlotTitle] = useState("");
 
   /* meeting link modal */
   const [showLinkModal, setShowLinkModal] = useState(false);
@@ -68,18 +67,45 @@ const CounsellingPage: React.FC = () => {
   const [platform, setPlatform] = useState("Google Meet");
   const [meetUrl, setMeetUrl] = useState("");
 
+  /* detail modal */
+  const [detailBooking, setDetailBooking] = useState<InstitutionCounsellingBookingItem | null>(null);
+
   useEffect(() => {
     const loadCounsellingData = async () => {
       setIsLoading(true);
       setFetchError("");
 
       try {
-        const bookingsResponse = await apiService.getInstitutionCounsellingBookings();
+        const [bookingsResponse, sessions] = await Promise.all([
+          apiService.getInstitutionCounsellingBookings(),
+          institutionCounsellingApi.getSessions().catch(() => [] as CounsellingSession[]),
+        ]);
         setBookings(bookingsResponse.data || []);
+
+        const now = new Date();
+        const futureSlots: SlotItem[] = [];
+        for (const s of sessions) {
+          const d = new Date(s.scheduled_at);
+          if (d < now) {
+            institutionCounsellingApi.deleteSession(s.id).catch(() => {});
+          } else {
+            futureSlots.push({
+              id: s.id,
+              sessionId: s.id,
+              date: d.toISOString().slice(0, 10),
+              start: d.toTimeString().slice(0, 5),
+              end: new Date(d.getTime() + s.duration * 60000).toTimeString().slice(0, 5),
+              capacity: s.max_seats,
+              booked: s.booked_seats,
+            });
+          }
+        }
+        setSlots(futureSlots);
       } catch (error) {
         setFetchError(error instanceof Error ? error.message : "Failed to load counselling data");
       } finally {
         setIsLoading(false);
+        setSlotsLoading(false);
       }
     };
 
@@ -116,15 +142,31 @@ const CounsellingPage: React.FC = () => {
     setShowLinkModal(false);
   };
 
-  const addSlot = () => {
+  const addSlot = async () => {
     if (!slotDate || !slotStart || !slotEnd) return;
-    const newSlot: SlotItem = {
-      id: Math.max(0, ...slots.map(s => s.id)) + 1,
-      date: slotDate, start: slotStart, end: slotEnd,
-      capacity: parseInt(slotCapacity) || 5, booked: 0,
-    };
-    setSlots(prev => [...prev, newSlot]);
-    setSlotDate(""); setSlotStart(""); setSlotEnd(""); setSlotCapacity("5");
+    try {
+      const session = await institutionCounsellingApi.createSession({
+        title: slotTitle || "Counselling Session",
+        description: "",
+        scheduled_at: `${slotDate}T${slotStart}`,
+        duration: 60,
+        max_seats: parseInt(slotCapacity) || 10,
+      });
+      const d = new Date(session.scheduled_at);
+      const newSlot: SlotItem = {
+        id: session.id,
+        sessionId: session.id,
+        date: d.toISOString().slice(0, 10),
+        start: d.toTimeString().slice(0, 5),
+        end: new Date(d.getTime() + session.duration * 60000).toTimeString().slice(0, 5),
+        capacity: session.max_seats,
+        booked: session.booked_seats,
+      };
+      setSlots(prev => [...prev, newSlot]);
+      setSlotDate(""); setSlotStart(""); setSlotEnd(""); setSlotCapacity("5"); setSlotTitle("");
+    } catch (error) {
+      console.error("Failed to create slot:", error);
+    }
   };
 
   const totalStat = bookings.length;
@@ -191,7 +233,7 @@ const CounsellingPage: React.FC = () => {
               <table className="w-full">
                 <thead className="bg-gray-50 border-b border-gray-200">
                   <tr>
-                    {["Booking", "Session", "Date", "Notes", "Status", "Actions"].map(h => (
+                    {["Student", "Session", "Date", "Notes", "Status", "Actions"].map(h => (
                       <th key={h} className="px-5 py-3 text-left text-xs font-semibold text-gray-500 uppercase">{h}</th>
                     ))}
                   </tr>
@@ -201,7 +243,7 @@ const CounsellingPage: React.FC = () => {
                     <tr><td colSpan={6} className="p-8 text-center text-gray-400 text-sm">No requests found.</td></tr>
                   ) : filtered.map((booking) => (
                     <tr key={booking.id} className="hover:bg-gray-50 transition-colors">
-                      <td className="px-5 py-3 text-sm text-gray-600">#{booking.id}</td>
+                      <td className="px-5 py-3 text-sm text-gray-600 font-medium">{booking.student_name || `User #${booking.user_id}`}</td>
                       <td className="px-5 py-3 text-sm text-gray-600">{booking.session?.title || 'Untitled session'}</td>
                       <td className="px-5 py-3 text-sm text-gray-600">{booking.session?.scheduled_at ? new Date(booking.session.scheduled_at).toLocaleDateString() : '-'}</td>
                       <td className="px-5 py-3 text-sm text-gray-600">{booking.notes || '-'}</td>
@@ -210,6 +252,9 @@ const CounsellingPage: React.FC = () => {
                       </td>
                       <td className="px-5 py-3">
                         <div className="flex gap-1.5 flex-wrap">
+                          <button onClick={() => setDetailBooking(booking)} className="h-8 px-3 bg-gray-50 hover:bg-gray-100 text-gray-600 rounded-md text-xs font-medium flex items-center gap-1 transition-colors">
+                            View Details
+                          </button>
                           {booking.status === 'pending' && (
                             <button onClick={() => updateStatus(booking.id, 'confirmed')} className="h-8 px-3 bg-green-500 hover:bg-green-600 text-white rounded-md text-xs font-medium flex items-center gap-1 transition-colors">
                               <CheckCircle className="w-3.5 h-3.5" /> Confirm
@@ -237,6 +282,10 @@ const CounsellingPage: React.FC = () => {
           <div className="lg:col-span-2 bg-white rounded-xl border border-gray-100 shadow-sm p-6 space-y-4 h-fit">
             <h3 className="font-bold text-gray-800">Create New Slot</h3>
             <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Title</label>
+              <input type="text" value={slotTitle} onChange={e => setSlotTitle(e.target.value)} placeholder="Counselling Session" className="w-full px-4 py-2.5 border border-gray-300 rounded-lg text-sm focus:border-blue-600 outline-none" />
+            </div>
+            <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">Date</label>
               <input type="date" value={slotDate} onChange={e => setSlotDate(e.target.value)} className="w-full px-4 py-2.5 border border-gray-300 rounded-lg text-sm focus:border-blue-600 outline-none" />
             </div>
@@ -262,7 +311,11 @@ const CounsellingPage: React.FC = () => {
           {/* Available Slots */}
           <div className="lg:col-span-3 space-y-3">
             <h3 className="font-bold text-gray-800">Current Availability</h3>
-            {slots.length === 0 ? (
+            {slotsLoading ? (
+              <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-8 text-center text-gray-400 text-sm">
+                Loading slots...
+              </div>
+            ) : slots.length === 0 ? (
               <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-8 text-center text-gray-400 text-sm">
                 No slots created yet.
               </div>
@@ -287,7 +340,7 @@ const CounsellingPage: React.FC = () => {
                   </div>
                   <p className="text-xs text-gray-400 mt-1 text-right">{s.capacity - s.booked} free</p>
                 </div>
-                <button onClick={() => setSlots(prev => prev.filter(x => x.id !== s.id))} className="text-gray-400 hover:text-red-500 p-1">
+                <button onClick={async () => { try { await institutionCounsellingApi.deleteSession(s.sessionId); setSlots(prev => prev.filter(x => x.id !== s.id)); } catch {} }} className="text-gray-400 hover:text-red-500 p-1">
                   <Trash className="w-4 h-4" />
                 </button>
               </div>
@@ -320,6 +373,71 @@ const CounsellingPage: React.FC = () => {
                 <button onClick={provideLink} className="h-10 px-5 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-sm font-semibold flex items-center gap-2">
                   <LinkIcon className="w-4 h-4" /> Send Link
                 </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Booking Detail Modal */}
+      {detailBooking && (
+        <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center" onClick={() => setDetailBooking(null)}>
+          <div className="bg-white w-full max-w-lg rounded-xl shadow-xl overflow-hidden m-4" onClick={e => e.stopPropagation()}>
+            <div className="px-6 py-4 border-b border-gray-100 flex justify-between items-center">
+              <h3 className="font-bold text-gray-800">Booking Details</h3>
+              <button onClick={() => setDetailBooking(null)} className="text-gray-400 hover:text-gray-600"><X className="w-5 h-5" /></button>
+            </div>
+            <div className="p-6 space-y-4">
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <p className="text-xs font-medium text-gray-500 uppercase">Student Name</p>
+                  <p className="text-sm font-semibold text-gray-800">{detailBooking.student_name || `User #${detailBooking.user_id}`}</p>
+                </div>
+                <div>
+                  <p className="text-xs font-medium text-gray-500 uppercase">Phone</p>
+                  <p className="text-sm text-gray-800">{detailBooking.student_phone || '-'}</p>
+                </div>
+                <div className="col-span-2">
+                  <p className="text-xs font-medium text-gray-500 uppercase">Email</p>
+                  <p className="text-sm text-gray-800">{detailBooking.student_email || '-'}</p>
+                </div>
+                <div>
+                  <p className="text-xs font-medium text-gray-500 uppercase">Session</p>
+                  <p className="text-sm text-gray-800">{detailBooking.session?.title || '-'}</p>
+                </div>
+                <div>
+                  <p className="text-xs font-medium text-gray-500 uppercase">Session Date</p>
+                  <p className="text-sm text-gray-800">{detailBooking.session?.scheduled_at ? new Date(detailBooking.session.scheduled_at).toLocaleDateString() : '-'}</p>
+                </div>
+                <div>
+                  <p className="text-xs font-medium text-gray-500 uppercase">Status</p>
+                  <span className={`inline-block px-2.5 py-1 rounded-full text-xs font-semibold mt-1 ${statusColors[detailBooking.status as RequestStatus]}`}>{detailBooking.status}</span>
+                </div>
+                <div>
+                  <p className="text-xs font-medium text-gray-500 uppercase">Session Mode</p>
+                  <p className="text-sm text-gray-800 capitalize">{detailBooking.session_mode || '-'}</p>
+                </div>
+                <div>
+                  <p className="text-xs font-medium text-gray-500 uppercase">Program Level</p>
+                  <p className="text-sm text-gray-800">{detailBooking.program_level || '-'}</p>
+                </div>
+                <div className="col-span-2">
+                  <p className="text-xs font-medium text-gray-500 uppercase">Interested Course</p>
+                  <p className="text-sm text-gray-800">{detailBooking.interested_course || '-'}</p>
+                </div>
+                <div className="col-span-2">
+                  <p className="text-xs font-medium text-gray-500 uppercase">Notes</p>
+                  <p className="text-sm text-gray-800">{detailBooking.notes || '-'}</p>
+                </div>
+              </div>
+              <div className="flex gap-3 justify-end pt-2 border-t border-gray-100">
+                <button onClick={() => setDetailBooking(null)} className="h-10 px-4 border border-gray-300 rounded-lg text-gray-600 text-sm font-medium hover:bg-gray-50">Close</button>
+                {detailBooking.status === 'pending' && (
+                  <button onClick={() => { updateStatus(detailBooking.id, 'confirmed'); setDetailBooking(null); }} className="h-10 px-5 bg-green-500 hover:bg-green-600 text-white rounded-lg text-sm font-semibold">Confirm</button>
+                )}
+                {detailBooking.status !== 'cancelled' && detailBooking.status !== 'completed' && (
+                  <button onClick={() => { updateStatus(detailBooking.id, 'cancelled'); setDetailBooking(null); }} className="h-10 px-5 bg-red-50 hover:bg-red-100 text-red-600 rounded-lg text-sm font-semibold">Cancel</button>
+                )}
               </div>
             </div>
           </div>

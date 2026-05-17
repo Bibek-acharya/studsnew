@@ -415,6 +415,12 @@ export interface InstitutionCounsellingBookingItem {
   user_id: number;
   status: string;
   notes: string;
+  student_name?: string;
+  student_phone?: string;
+  student_email?: string;
+  program_level?: string;
+  interested_course?: string;
+  session_mode?: string;
   session?: CounsellingSessionItem;
 }
 
@@ -2170,6 +2176,26 @@ export const apiService = {
 
   async getPublicInstitutionById(id: number): Promise<any> {
     return apiRequest<any>(`/api/v1/institutions/public/${id}`);
+  },
+
+  async getPublicCounsellingSessions(institutionId: number): Promise<any> {
+    return apiRequest<any>(`/api/v1/institutions/public/${institutionId}/counselling-sessions`);
+  },
+
+  async createPublicCounsellingBooking(data: {
+    session_id: number;
+    program_level: string;
+    interested_course: string;
+    session_mode: string;
+    student_name: string;
+    student_phone: string;
+    student_email: string;
+    student_notes?: string;
+  }): Promise<any> {
+    return apiRequest<any>("/api/v1/counselling/sessions/book", {
+      method: "POST",
+      body: JSON.stringify(data),
+    });
   },
 
   async getSuperadminInstitution(id: number): Promise<any> {

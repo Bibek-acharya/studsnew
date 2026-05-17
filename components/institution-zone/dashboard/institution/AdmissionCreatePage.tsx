@@ -165,8 +165,10 @@ const AdmissionCreatePage: React.FC = () => {
   const router = useRouter();
   const editId = typeof window !== "undefined" ? new URLSearchParams(window.location.search).get("id") : null;
 
-  const [loading, setLoading] = useState(!!editId);
+  const [dataLoaded, setDataLoaded] = useState(false);
   const [saving, setSaving] = useState(false);
+
+  const showLoading = !!editId && !dataLoaded;
 
   const [overviewHeading, setOverviewHeading] = useState("");
   const [overviewDesc, setOverviewDesc] = useState("");
@@ -372,7 +374,7 @@ const AdmissionCreatePage: React.FC = () => {
 
   useEffect(() => {
     if (!editId) {
-      setLoading(false);
+      setDataLoaded(true);
       return;
     }
     const fetchAdmission = async () => {
@@ -385,7 +387,7 @@ const AdmissionCreatePage: React.FC = () => {
       } catch {
         // silent
       } finally {
-        setLoading(false);
+        setDataLoaded(true);
       }
     };
     fetchAdmission();
@@ -468,14 +470,14 @@ const AdmissionCreatePage: React.FC = () => {
     }
   };
 
-  if (loading) {
+  if (showLoading) {
     return (
       <div className="p-4 md:p-6 lg:p-8 min-h-full">
         <SectionHeader
-          title={editId ? "Edit Admission" : "Create Admission"}
+          title="Edit Admission"
           breadcrumbItems={[
             { label: "Dashboard", href: "/institution-zone/dashboard/overview" },
-            { label: editId ? "Edit Admission" : "Create Admission" },
+            { label: "Edit Admission" },
           ]}
         />
         <div className="flex items-center justify-center h-64 text-gray-400">
