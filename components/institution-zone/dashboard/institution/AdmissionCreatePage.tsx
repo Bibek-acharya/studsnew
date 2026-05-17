@@ -8,6 +8,7 @@ import SectionHeader from "@/components/institution-zone/dashboard/shared/Sectio
 import "react-quill-new/dist/quill.snow.css";
 import { apiService } from "@/services/api";
 import { institutionAdmissionApi } from "@/services/institutionAdmissionApi";
+import ImageCropperModal from "@/components/ScholarshipProvider/common/ImageCropperModal";
 
 const kebabToPascal = (name: string): string =>
   name.replace(/-./g, (m) => m[1].toUpperCase()).replace(/^./, (m) => m.toUpperCase());
@@ -172,6 +173,8 @@ const AdmissionCreatePage: React.FC = () => {
   const [applicationFormLink, setApplicationFormLink] = useState("");
   const [level, setLevel] = useState("");
   const [heroBanner, setHeroBanner] = useState("");
+  const [cropperOpen, setCropperOpen] = useState(false);
+  const [cropImageSrc, setCropImageSrc] = useState<string | null>(null);
 
   const getToken = () => localStorage.getItem("institutionToken");
   const apiBase = () => process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080";
@@ -449,14 +452,14 @@ const AdmissionCreatePage: React.FC = () => {
       const data = collectData();
       if (editId) {
         await institutionAdmissionApi.update(Number(editId), data, publish);
-        if (publish) {
-          router.push("/institution-zone/dashboard/admission/directory");
-        }
+        router.push(
+          publish
+            ? "/institution-zone/dashboard/admission/directory"
+            : "/institution-zone/dashboard/admission/draft"
+        );
       } else {
-        const res = await institutionAdmissionApi.create(data, publish);
-        if (res.success && res.data?.id) {
-          router.replace(`/institution-zone/dashboard/admission/create?id=${res.data.id}`);
-        } 
+        await institutionAdmissionApi.create(data, publish);
+        router.push("/institution-zone/dashboard/admission/draft");
       }
     } catch {
       // silent
@@ -555,29 +558,36 @@ const AdmissionCreatePage: React.FC = () => {
             </div>
             <div>
               <label className={labelClass}>Hero Banner Image <span className="text-red-500">*</span></label>
-              <label className="border-2 border-dashed border-gray-300 rounded-xl p-8 flex flex-col items-center justify-center text-center hover:bg-gray-50 hover:border-blue-400 transition-colors cursor-pointer group">
-                <div className="p-3 bg-blue-50 text-blue-600 rounded-full group-hover:scale-110 transition-transform">
-                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
-                </div>
-                <span className="mt-4 text-sm font-medium text-gray-900">Click to change banner image</span>
-                <span className="mt-1 text-xs text-gray-500">Recommended size: 1920x600px (JPG/PNG)</span>
-                <input type="file" className="hidden" accept="image/*" onChange={async e => {
+              <div onClick={() => document.getElementById("admission-banner-input")?.click()}
+                className="border-2 border-dashed border-gray-300 rounded-xl flex flex-col items-center justify-center text-center hover:bg-gray-50 hover:border-blue-400 transition-colors cursor-pointer relative overflow-hidden min-h-[200px]">
+                {heroBanner ? (
+                  <div className="relative w-full h-full">
+                    <img src={heroBanner} className="w-full h-48 object-cover" alt="Hero Banner" />
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/30 via-transparent to-transparent" />
+                    <span className="absolute bottom-3 left-3 text-xs text-white/80">Click anywhere to replace</span>
+                    <button type="button" onClick={e => { e.stopPropagation(); setHeroBanner(""); }}
+                      className="absolute top-3 right-3 p-2 bg-white/95 rounded-full text-red-500 hover:bg-white shadow-md">
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+                    </button>
+                  </div>
+                ) : (
+                  <>
+                    <div className="p-3 bg-blue-50 text-blue-600 rounded-full">
+                      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+                    </div>
+                    <span className="mt-3 text-sm font-medium text-gray-900">Click to upload banner image</span>
+                    <span className="mt-1 text-xs text-gray-500">Recommended size: 1920x600px (JPG/PNG)</span>
+                  </>
+                )}
+                <input id="admission-banner-input" type="file" className="hidden" accept="image/*" onChange={e => {
                   const file = e.target.files?.[0];
                   if (!file) return;
-                  try {
-                    const url = await uploadFile(file, "institution/admission");
-                    setHeroBanner(url);
-                  } catch { /* skip */ }
+                  if (!file.type.startsWith("image/")) { alert("Please select an image file."); return; }
+                  const reader = new FileReader();
+                  reader.onload = ev => { if (ev.target?.result) { setCropImageSrc(ev.target.result as string); setCropperOpen(true); } };
+                  reader.readAsDataURL(file);
                 }} />
-              </label>
-              {heroBanner && (
-                <div className="mt-3 relative rounded-xl overflow-hidden">
-                  <img src={heroBanner} className="w-full h-48 object-cover rounded-xl" alt="Hero Banner" />
-                  <button type="button" onClick={() => setHeroBanner("")} className="absolute top-2 right-2 p-1.5 bg-red-500 text-white rounded-lg hover:bg-red-600">
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
-                  </button>
-                </div>
-              )}
+              </div>
             </div>
             <div>
               <label className={labelClass}>Overview Description <span className="text-red-500">*</span></label>
@@ -1673,6 +1683,24 @@ const AdmissionCreatePage: React.FC = () => {
           </button>
         </div>
       </div>
+
+      {cropperOpen && cropImageSrc && (
+        <ImageCropperModal
+          imageSrc={cropImageSrc}
+          onCropComplete={async (blob) => {
+            const croppedFile = new File([blob], "banner.jpg", { type: "image/jpeg" });
+            try {
+              const url = await uploadFile(croppedFile, "institution/admission");
+              setHeroBanner(url);
+            } catch {
+              // skip
+            }
+            setCropperOpen(false);
+            setCropImageSrc(null);
+          }}
+          onCancel={() => { setCropperOpen(false); setCropImageSrc(null); }}
+        />
+      )}
     </div>
   );
 };

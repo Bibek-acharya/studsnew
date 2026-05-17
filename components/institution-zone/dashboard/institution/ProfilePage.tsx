@@ -1,5 +1,6 @@
 "use client";
 import React, { useState, useRef, useEffect, useCallback } from "react";
+import { useRouter } from "next/navigation";
 import { Plus, Trash } from "@phosphor-icons/react";
 import RichTextEditor from "@/components/ScholarshipProvider/common/RichTextEditor";
 import ImageCropperModal from "@/components/ScholarshipProvider/common/ImageCropperModal";
@@ -30,9 +31,12 @@ const DISTRICTS = [
 const inputClass = "w-full px-3 py-2 border border-gray-300 rounded-md focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none transition-colors";
 
 const ProfilePage: React.FC = () => {
+  const router = useRouter();
   const [collegeName, setCollegeName] = useState("");
   const [location, setLocation] = useState("");
   const [website, setWebsite] = useState("");
+  const [contactEmail, setContactEmail] = useState("");
+  const [contactPhone, setContactPhone] = useState("");
   const [about, setAbout] = useState("");
   const [vision, setVision] = useState("");
   const [mission, setMission] = useState("");
@@ -125,6 +129,8 @@ const ProfilePage: React.FC = () => {
         setCollegeName(data.institution_name || "");
         setLocation(data.location || "");
         setWebsite(data.website || "");
+        setContactEmail(data.contact_email || "");
+        setContactPhone(data.contact_phone || "");
         setLogoUrl(data.logo_url || "");
         setBannerUrl(data.banner_url || "");
         setAbout(data.about || "");
@@ -262,6 +268,8 @@ const ProfilePage: React.FC = () => {
         institution_name: collegeName,
         location,
         website,
+        contact_email: contactEmail,
+        contact_phone: contactPhone,
         logo_url: logoUrl,
         banner_url: bannerUrl,
         about,
@@ -281,8 +289,7 @@ const ProfilePage: React.FC = () => {
         method: "PUT",
         body: JSON.stringify(body),
       });
-      setSaved(true);
-      setTimeout(() => setSaved(false), 3000);
+      router.push("/institution-zone/dashboard");
     } catch (e) {
       console.error("Failed to save profile:", e);
     } finally {
@@ -430,6 +437,14 @@ const ProfilePage: React.FC = () => {
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">Website</label>
                 <input type="text" className={inputClass} placeholder="www.college.edu.np" value={website} onChange={e => setWebsite(e.target.value)} />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Contact Email</label>
+                <input type="email" className={inputClass} placeholder="admission@college.edu.np" value={contactEmail} onChange={e => setContactEmail(e.target.value)} />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Contact Phone</label>
+                <input type="text" className={inputClass} placeholder="01-4XXXXXX" value={contactPhone} onChange={e => setContactPhone(e.target.value)} />
               </div>
             </div>
           </div>

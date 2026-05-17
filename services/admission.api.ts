@@ -39,6 +39,8 @@ export interface AdmissionCollegeItem {
   admission_cards?: any;
   programs_list?: any;
   featured_programs?: any;
+  contact_email?: string;
+  contact_phone?: string;
 }
 
 export interface AdmissionPagination {
@@ -117,6 +119,24 @@ export const admissionService = {
   async getAdmissionFilterCounts(level: string): Promise<AdmissionFilterCountsResponse> {
     const query = buildQueryParams({ level });
     return await apiRequest<AdmissionFilterCountsResponse>(`/api/v1/admissions/colleges/filter-counts?${query}`);
+  },
+
+  async getPublishedAdmissionCollegeById(id: number): Promise<{
+    data: { institution: AdmissionCollegeItem; data: Record<string, any>; created_at: string; updated_at: string; published_at?: string }
+  }> {
+    return await apiRequest(`/api/v1/admissions/published/institutions/${id}`);
+  },
+
+  async getPublishedAdmissionColleges(
+    level: string,
+    page: number = 1,
+    pageSize: number = 18,
+  ): Promise<AdmissionCollegeListResponse> {
+    const params = new URLSearchParams();
+    if (level) params.append("level", level);
+    params.append("page", String(page));
+    params.append("limit", String(pageSize));
+    return await apiRequest<AdmissionCollegeListResponse>(`/api/v1/admissions/published/institutions?${params}`);
   },
 
   async getDirectAdmissionColleges(

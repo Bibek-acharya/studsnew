@@ -64,202 +64,18 @@ const YoutubeIcon = ({ className }: { className?: string }) => (
   </svg>
 );
 
-const eligibilityData = [
-  {
-    sn: 1,
-    level: "+2 Science",
-    stream: "PCB, PCM, Computer Science",
-    eligibility: "Minimum 2.5 GPA in SEE with Compulsory Mathematics",
-    docs: ["SEE Mark Sheet", "Character Certificate", "8 Photos"],
-  },
-  {
-    sn: 2,
-    level: "+2 Management",
-    stream: "Business Studies, Finance",
-    eligibility: "Minimum 2.0 GPA in SEE (Any stream)",
-    docs: ["SEE Mark Sheet", "Character Certificate", "8 Photos"],
-  },
-  {
-    sn: 3,
-    level: "+2 Humanities",
-    stream: "Social Sciences, Arts",
-    eligibility: "Minimum 2.0 GPA in SEE (Any stream)",
-    docs: ["SEE Mark Sheet", "Character Certificate", "8 Photos"],
-  },
-];
+const iconMap: Record<string, any> = {
+  FlaskConical, Briefcase, BookOpen, Monitor, Trophy, Wifi, Bus, Utensils, Users, ShieldCheck,
+};
 
-const programsData = [
-  {
-    icon: FlaskConical,
-    title: "Science (+2)",
-    badge: "Admissions Open",
-    badgeClass: "bg-green-100 text-green-700",
-    desc: "Our Science program is designed for students who aspire to pursue careers in medicine, engineering, technology, and pure sciences. The curriculum combines theoretical knowledge with practical laboratory experience to build a strong foundation in scientific concepts.",
-    leftTitle: "Available Streams:",
-    leftItems: [
-      "Physics, Chemistry, Biology (PCB)",
-      "Physics, Chemistry, Mathematics (PCM)",
-      "Computer Science & IT",
-      "Statistics & Mathematics",
-    ],
-    rightTitle: "Career Opportunities:",
-    rightItems: [
-      "Medicine (MBBS, BDS)",
-      "Engineering (BE, BTech)",
-      "B.Sc. (Pure Sciences)",
-      "Research & Development",
-    ],
-  },
-  {
-    icon: Briefcase,
-    title: "Management (+2)",
-    badge: "Ongoing",
-    badgeClass: "bg-blue-100 text-blue-700",
-    desc: "Our Management program prepares students for careers in business, finance, accounting, and entrepreneurship. The curriculum focuses on developing analytical skills, business acumen, and leadership qualities essential for the corporate world.",
-    leftTitle: "Key Subjects:",
-    leftItems: [
-      "Accountancy & Finance",
-      "Business Studies",
-      "Economics & Marketing",
-      "Computer Applications",
-    ],
-    rightTitle: "Career Opportunities:",
-    rightItems: [
-      "BBA / BBS Programs",
-      "Chartered Accountancy (CA)",
-      "Banking & Finance",
-      "Entrepreneurship",
-    ],
-  },
-  {
-    icon: BookOpen,
-    title: "Humanities (+2)",
-    badge: "Coming Soon",
-    badgeClass: "bg-gray-100 text-gray-700",
-    desc: "Our Humanities program offers a diverse range of subjects that develop critical thinking, communication skills, and cultural understanding. This program is ideal for students interested in social sciences, arts, law, journalism, and public service.",
-    leftTitle: "Available Subjects:",
-    leftItems: [
-      "English Literature & Language",
-      "History & Political Science",
-      "Sociology & Psychology",
-      "Economics & Geography",
-    ],
-    rightTitle: "Career Opportunities:",
-    rightItems: [
-      "Law (LLB)",
-      "Journalism & Mass Communication",
-      "Public Administration",
-      "Teaching & Research",
-    ],
-  },
-];
+const eligibilityData: any[] = [];
+const programsData: any[] = [];
+const facilitiesData: any[] = [];
+const coursesData: any[] = [];
+const scholarshipData: any[] = [];
+const staffData: any[] = [];
+const faqData: any[] = [];
 
-const facilitiesData = [
-  { icon: FlaskConical, title: "Science Laboratories", desc: "Fully equipped Physics, Chemistry, and Biology labs with modern instruments for practical learning." },
-  { icon: Monitor, title: "Computer Lab", desc: "State-of-the-art computer laboratory with high-speed internet and latest software applications." },
-  { icon: BookOpen, title: "Library", desc: "Well-stocked library with thousands of books, journals, and digital resources for research and study." },
-  { icon: Trophy, title: "Sports Complex", desc: "Indoor and outdoor sports facilities including basketball, volleyball, football, and table tennis." },
-  { icon: Wifi, title: "WiFi Campus", desc: "High-speed WiFi connectivity throughout the campus for seamless digital learning experience." },
-  { icon: Bus, title: "Transportation", desc: "College bus service covering major routes across Kathmandu valley for student convenience." },
-  { icon: Utensils, title: "Cafeteria", desc: "Clean and hygienic cafeteria serving nutritious meals and refreshments at affordable prices." },
-  { icon: Users, title: "Auditorium", desc: "Spacious auditorium for seminars, workshops, cultural programs, and annual functions." },
-  { icon: ShieldCheck, title: "Security", desc: "24/7 security with CCTV surveillance ensuring safe and secure environment for all students." },
-];
-
-const coursesData = [
-  {
-    course: "Science (+2)",
-    fees: "Contact College for Details",
-    appDate: "Aug 2026",
-  },
-  {
-    course: "Management (+2)",
-    fees: "Contact College for Details",
-    appDate: "Aug 2026",
-  },
-  {
-    course: "Humanities (+2)",
-    fees: "Contact College for Details",
-    appDate: "Aug 2026",
-  },
-];
-
-const scholarshipData = [
-  {
-    name: "Merit Scholarship",
-    level: "+2",
-    stream: "Science",
-    coverage: "100%",
-    eligibility: "GPA 3.8+",
-    seats: 2,
-  },
-  {
-    name: "Entrance Topper",
-    level: "+2",
-    stream: "All",
-    coverage: "50%",
-    eligibility: "Top 5 rank",
-    seats: 5,
-  },
-  {
-    name: "Need Based",
-    level: "Bachelor",
-    stream: "BBA",
-    coverage: "30%",
-    eligibility: "Interview",
-    seats: 10,
-  },
-];
-
-const staffData = [
-  {
-    name: "Ram Shrestha",
-    role: "Admission Director",
-    img: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&h=150&fit=crop&crop=face",
-    phone: "01-4112222 Ext. 101",
-    email: "ram.shrestha@kist.edu.np",
-    wa: "9779800000001",
-  },
-  {
-    name: "Sita Gurung",
-    role: "Senior Admission Officer",
-    img: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=150&h=150&fit=crop&crop=face",
-    phone: "01-4112222 Ext. 102",
-    email: "sita.gurung@kist.edu.np",
-    wa: "9779800000002",
-  },
-];
-
-const faqData = [
-  {
-    q: "How can I get admission in KIST College?",
-    a: "You can apply online through our portal or visit the college administration office directly. Admission is based on your SEE GPA and performance in the entrance test.",
-  },
-  {
-    q: "Is it difficult to get admission in KIST College?",
-    a: "Admission is competitive but straightforward. Meeting the minimum GPA requirements and performing well in the entrance examination greatly improves your chances.",
-  },
-  {
-    q: "Can I get admission in KIST College with 2.5 GPA in SEE?",
-    a: "Yes, a minimum of 2.5 GPA in SEE meets the basic eligibility criteria for Science, Management, and Humanities courses. However, final admission also depends on the entrance test results.",
-  },
-  {
-    q: "What is the fees for the Science (+2) course at KIST College?",
-    a: "The total fee structure varies based on the course and merit scholarships. Please contact the college administration directly or download the brochure for a detailed fee breakdown.",
-  },
-  {
-    q: "What is the step-by-step admission process for KIST College?",
-    a: "The process involves filling out the online application, submitting academic documents, appearing for the KIST Entrance Test, and finally attending a Personal Interview if shortlisted.",
-  },
-  {
-    q: "Is the entrance exam mandatory for all courses?",
-    a: "Yes, appearing for the KIST Entrance Examination is mandatory for admission into Science, Management, Humanities, and undergraduate programs.",
-  },
-  {
-    q: "When will the final merit list be published?",
-    a: "The final merit list is typically published a few days after all entrance exams and personal interviews have concluded. You can check your dashboard for updates.",
-  },
-];
 
 export default function AdmissionDetailPage() {
   const params = useParams();
@@ -272,12 +88,131 @@ export default function AdmissionDetailPage() {
   const tabNavRef = useRef<HTMLDivElement>(null);
 
   const { data: collegeData } = useQuery({
-    queryKey: ["admissionCollege", collegeIdNum],
-    queryFn: () => admissionService.getAdmissionCollegeById(collegeIdNum),
+    queryKey: ["publishedAdmissionCollege", collegeIdNum],
+    queryFn: () => admissionService.getPublishedAdmissionCollegeById(collegeIdNum),
     enabled: !isNaN(collegeIdNum),
   });
 
-  const collegeName = collegeData?.data?.college?.name || "KIST College";
+  const apData = collegeData?.data?.data || {};
+  const institution = collegeData?.data?.institution;
+  const collegeName = institution?.name || "College";
+  const applicationFormLink = (apData?.overview_data as any)?.applicationFormLink || "";
+  const heroBanner = (apData?.overview_data as any)?.heroBanner || "";
+  const admissionLevel = (apData?.overview_data as any)?.level || params.level as string || "";
+
+  const timeAgo = (dateStr?: string) => {
+    if (!dateStr) return "";
+    const date = new Date(dateStr);
+    const now = new Date();
+    const diff = now.getTime() - date.getTime();
+    const mins = Math.floor(diff / 60000);
+    if (mins < 1) return "just now";
+    if (mins < 60) return `${mins} minutes ago`;
+    const hours = Math.floor(mins / 60);
+    if (hours < 24) return `${hours} hours ago`;
+    const days = Math.floor(hours / 24);
+    if (days < 30) return `${days} days ago`;
+    const months = Math.floor(days / 30);
+    if (months < 12) return `${months} months ago`;
+    return `${Math.floor(months / 12)} years ago`;
+  };
+
+  const createdAt = collegeData?.data?.created_at;
+  const updatedAt = collegeData?.data?.updated_at;
+
+  const brochureUrl = (apData as any)?.brochure_data?.url || "";
+
+  const handleDownloadBrochure = async () => {
+    if (!brochureUrl) return;
+    try {
+      const resp = await fetch(brochureUrl);
+      const blob = await resp.blob();
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = brochureUrl.split("/").pop() || "brochure.pdf";
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    } catch {
+      window.open(brochureUrl, "_blank");
+    }
+  };
+
+  const programsData = ((apData?.programs_data as any[]) || []).map((p: any) => ({
+    icon: FlaskConical,
+    title: p.title || "",
+    badge: p.admissionStatus === "open" ? "Admissions Open" : p.admissionStatus || "",
+    badgeClass: p.admissionStatus === "open" ? "bg-green-100 text-green-700" : "bg-blue-100 text-blue-700",
+    desc: p.description || "",
+    leftTitle: "Available Streams:",
+    leftItems: p.streams || [],
+    rightTitle: "Career Opportunities:",
+    rightItems: p.careers || [],
+  }));
+
+  const facilitiesData = ((apData?.facilities_data as any[]) || []).map((f: any) => ({
+    icon: iconMap[f.facilityIcon] || ShieldCheck,
+    title: f.heading || "",
+    desc: f.description || "",
+  }));
+
+  const coursesData = ((apData?.courses_data as any[]) || []).map((c: any) => ({
+    course: c.courseName || "",
+    fees: c.feesText || "Contact College for Details",
+    appDate: c.applicationDate || "",
+    applyLink: c.applyLink || "",
+  }));
+
+  const scholarshipData = ((apData?.scholarships_data as any[]) || []).map((s: any) => ({
+    name: s.name || "",
+    level: s.level || "",
+    stream: s.stream || "",
+    coverage: s.coverage || "",
+    eligibility: s.eligibility || "",
+    seats: s.seats || "",
+  }));
+
+  const eligibilityData = (() => {
+    const ed = (apData as any)?.eligibility_data;
+    const criteria = ed?.criteria || (Array.isArray(ed) ? ed : []);
+    return criteria.map((e: any, i: number) => ({
+      sn: i + 1,
+      level: e.level || "",
+      stream: e.stream || "",
+      eligibility: (e.eligibility || []).join(", "),
+      docs: e.documents || [],
+    }));
+  })();
+
+  const faqData = ((apData?.faqs_data as any[]) || []).map((f: any) => ({
+    q: f.question || "",
+    a: f.answer || "",
+  }));
+
+  const staffData = ((apData?.contact_persons_data as any[]) || []).map((s: any) => ({
+    name: s.name || "",
+    role: s.designation || "",
+    img: "",
+    phone: s.number || "",
+    email: s.email || "",
+    wa: s.whatsapp || "",
+  }));
+
+  const admissionProcess = (apData?.admission_process_data as any[]) || [];
+
+  const whatsNewData = (apData as any)?.whats_new_data || {};
+  const overviewDesc = (apData?.overview_data as any)?.overviewDesc || "";
+  const overviewHeading = (apData?.overview_data as any)?.overviewHeading || "";
+
+  const handleApplyNow = () => {
+    if (applicationFormLink) {
+      window.open(applicationFormLink, "_blank", "noopener,noreferrer");
+    } else {
+      window.open(`/admissions/apply/${collegeIdNum}`, "_blank");
+    }
+  };
 
   const scrollTabs = (direction: number) => {
     if (tabNavRef.current) {
@@ -306,18 +241,17 @@ export default function AdmissionDetailPage() {
 
         <div className="mb-6">
           <h1 className="text-[28px] md:text-4xl font-bold text-gray-900">
-            {collegeName} opens college visits and registration for top-25 merit scholarships
+            {collegeName} opens admission for {admissionLevel}
           </h1>
           <p className="text-sm text-gray-400 font-medium mt-2">
-            Created 17 days ago &middot; Last modified 17 hours ago
+            Created {timeAgo(createdAt)} &middot; Last modified {timeAgo(updatedAt)}
           </p>
         </div>
 
         <div
           className="relative w-full h-[280px] md:h-[380px] bg-cover bg-center rounded-md overflow-hidden"
           style={{
-            backgroundImage:
-              "url('https://kist-edu-np.s3.ap-south-1.amazonaws.com/uploads/album/value/c0374b68ef663e539f7e6aea4b84625b2a207a981656053172.jpg')",
+            backgroundImage: heroBanner ? `url('${heroBanner}')` : "url('https://kist-edu-np.s3.ap-south-1.amazonaws.com/uploads/album/value/c0374b68ef663e539f7e6aea4b84625b2a207a981656053172.jpg')",
             backgroundPosition: "center 20%",
           }}
         >
@@ -389,29 +323,29 @@ export default function AdmissionDetailPage() {
                 </div>
 
                 <div className="mt-5 text-gray-700 text-[15px] leading-relaxed">
-                  <p className="mb-4">
-                    All the latest updates regarding{" "}
-                    <span className="font-semibold text-gray-900">
-                      {collegeName} admissions 2026
-                    </span>{" "}
-                    are as follows:
-                  </p>
-                  <ul className="list-disc pl-5 space-y-3 mb-8">
-                    <li>
-                      The Registration for Grade 11 is expected to start in Aug, 2026 for admission to
-                      the Science, Management, and Humanities courses.
-                    </li>
-                    <li>
-                      The Pre-Registration portal is active. Students need to log in to the official
-                      college portal to reserve their seats early and access their dashboard.
-                    </li>
-                    <li>
-                      The KIST Entrance Examination registration link is active for admission to the +2
-                      programmes. The round 1 window to view offers and make a decision will be opened
-                      on{" "}
-                      <span className="font-semibold text-gray-900">May 11, 2026</span> (10 AM).
-                    </li>
-                  </ul>
+                  {whatsNewData.description ? (
+                    <div dangerouslySetInnerHTML={{ __html: whatsNewData.description }} />
+                  ) : (
+                    <p className="mb-4">
+                      All the latest updates regarding{" "}
+                      <span className="font-semibold text-gray-900">
+                        {collegeName} admissions
+                      </span>{" "}
+                      are as follows:
+                    </p>
+                  )}
+                  {whatsNewData.btnText && whatsNewData.btnLink && (
+                    <div className="flex justify-center mb-8">
+                      <a
+                        href={whatsNewData.btnLink}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="bg-[#0000ff] hover:bg-[#0000cc] text-white font-semibold py-2.5 px-6 rounded-md inline-flex items-center transition-colors text-sm"
+                      >
+                        {whatsNewData.btnText}
+                      </a>
+                    </div>
+                  )}
 
                   <div className="flex justify-center">
                     <button
@@ -427,16 +361,16 @@ export default function AdmissionDetailPage() {
 
               <div className="space-y-6 text-gray-600 text-[15px] md:text-[15.5px] leading-[1.8]">
                 <h2 className="text-2xl font-bold text-gray-900">
-                  Admissions Now Open for New Session
+                  {overviewHeading || "Admissions Now Open for New Session"}
                 </h2>
-                <p className="text-gray-600">
-                  {collegeName} announces the official opening of admissions for the upcoming academic
-                  session. We invite prospective students to explore our comprehensive programs in
-                  Science, Management, and Humanities. Our institution is dedicated to fostering an
-                  environment of academic excellence, critical thinking, and holistic development. With
-                  state-of-the-art facilities, highly qualified faculty, and a robust curriculum, KIST
-                  prepares students to meet global challenges and excel in their chosen career paths.
-                </p>
+                {overviewDesc ? (
+                  <div className="prose prose-sm max-w-none text-gray-600 break-words overflow-hidden [&_p]:break-words [&_p]:overflow-hidden" dangerouslySetInnerHTML={{ __html: overviewDesc }} />
+                ) : (
+                  <p className="text-gray-600">
+                    {collegeName} announces the official opening of admissions for the upcoming academic
+                    session. We invite prospective students to explore our comprehensive programs.
+                  </p>
+                )}
               </div>
 
               <div className="pt-6">
@@ -465,7 +399,7 @@ export default function AdmissionDetailPage() {
                         <div className="bg-gray-50 rounded-md p-4">
                           <h4 className="font-semibold text-gray-900 mb-2">{prog.leftTitle}</h4>
                           <ul className="space-y-1 text-sm text-gray-600">
-                            {prog.leftItems.map((item, i) => (
+                            {prog.leftItems.map((item: any, i: number) => (
                               <li key={i} className="flex items-center gap-2">
                                 <span className="w-1.5 h-1.5 rounded-full bg-[#0000ff]" />
                                 {item}
@@ -476,7 +410,7 @@ export default function AdmissionDetailPage() {
                         <div className="bg-gray-50 rounded-md p-4">
                           <h4 className="font-semibold text-gray-900 mb-2">{prog.rightTitle}</h4>
                           <ul className="space-y-1 text-sm text-gray-600">
-                            {prog.rightItems.map((item, i) => (
+                            {prog.rightItems.map((item: any, i: number) => (
                               <li key={i} className="flex items-center gap-2">
                                 <span className="w-1.5 h-1.5 rounded-full bg-[#0000ff]" />
                                 {item}
@@ -521,7 +455,7 @@ export default function AdmissionDetailPage() {
                       </tr>
                     </thead>
                     <tbody className="text-[15px]">
-                      {eligibilityData.map((row, idx) => (
+                      {eligibilityData.map((row: any, idx: number) => (
                         <tr
                           key={idx}
                           className={
@@ -544,7 +478,7 @@ export default function AdmissionDetailPage() {
                           </td>
                           <td className="p-4 align-top text-gray-700">
                             <ul className="space-y-1 text-sm">
-                              {row.docs.map((doc, i) => (
+                              {row.docs.map((doc: any, i: number) => (
                                 <li key={i} className="flex items-center gap-2">
                                   <span className="w-1.5 h-1.5 rounded-full bg-[#0000ff]" />
                                   {doc}
@@ -573,102 +507,25 @@ export default function AdmissionDetailPage() {
                 </p>
               </div>
 
-              <div className="border border-gray-200 rounded-md p-6 mb-6">
-                <div className="flex items-start gap-4 mb-4">
-                  <div className="w-10 h-10 rounded-full bg-[#0000ff] text-white flex items-center justify-center font-bold text-sm flex-shrink-0">
-                    1
-                  </div>
-                  <div>
-                    <h3 className="font-bold text-gray-900 text-lg mb-3">
-                      Entrance Form Fill Up
-                    </h3>
-                    <div className="space-y-3 text-sm text-gray-600">
-                      <p>
-                        Students should fill up the online admission form which will be available on
-                        the college&apos;s website after the announcement of the Grade 10 (SEE) results.
-                      </p>
-                      <p>
-                        The prospectus, fee structure, model questions, entrance center, entrance
-                        symbol number, entrance date, and time will be sent to your registered email
-                        ID. Along with the application form, students should attach a recently taken
-                        photograph with a white background.
-                      </p>
+              {admissionProcess.length > 0 ? admissionProcess.map((step: any, idx: number) => (
+                <div key={idx} className="border border-gray-200 rounded-md p-6 mb-6">
+                  <div className="flex items-start gap-4 mb-4">
+                    <div className="w-10 h-10 rounded-full bg-[#0000ff] text-white flex items-center justify-center font-bold text-sm flex-shrink-0">
+                      {step.stepNumber || idx + 1}
+                    </div>
+                    <div>
+                      <h3 className="font-bold text-gray-900 text-lg mb-3">{step.title}</h3>
+                      <div className="space-y-3 text-sm text-gray-600">
+                        <p>{step.description}</p>
+                      </div>
                     </div>
                   </div>
                 </div>
-              </div>
-
-              <div className="border border-gray-200 rounded-md p-6 mb-6">
-                <div className="flex items-start gap-4 mb-4">
-                  <div className="w-10 h-10 rounded-full bg-[#0000ff] text-white flex items-center justify-center font-bold text-sm flex-shrink-0">
-                    2
-                  </div>
-                  <div>
-                    <h3 className="font-bold text-gray-900 text-lg mb-3">Entrance Exam</h3>
-                    <div className="space-y-3 text-sm text-gray-600">
-                      <ol className="space-y-3 list-decimal pl-5">
-                        <li>
-                          KMC will set an entrance exam. The date, time, and center of the entrance
-                          exam will be sent to your email.
-                        </li>
-                        <li>
-                          Entrance exam will be paper-based. Model questions will be provided through
-                          email.
-                        </li>
-                        <li>
-                          Students&apos; answer sheets will be checked by computer, so students are
-                          advised to follow instructions given by invigilators.
-                        </li>
-                        <li>
-                          Result of entrance will be published after 2nd day of the examination or
-                          informed during examination.
-                        </li>
-                        <li>
-                          Students who are listed in the merit list (all entrance-passed students may
-                          not be included in the merit list) are informed to either proceed for direct
-                          admission or an interview. Date of the interview will be given along with
-                          the result.
-                        </li>
-                      </ol>
-                    </div>
-                  </div>
+              )) : (
+                <div className="border border-gray-200 rounded-md p-6">
+                  <p className="text-gray-500">Admission process details not available.</p>
                 </div>
-              </div>
-
-              <div className="border border-gray-200 rounded-md p-6">
-                <div className="flex items-start gap-4 mb-4">
-                  <div className="w-10 h-10 rounded-full bg-[#0000ff] text-white flex items-center justify-center font-bold text-sm flex-shrink-0">
-                    3
-                  </div>
-                  <div>
-                    <h3 className="font-bold text-gray-900 text-lg mb-3">Admission</h3>
-                    <div className="space-y-3 text-sm text-gray-600">
-                      <ol className="space-y-3 list-decimal pl-5">
-                        <li>
-                          Students who are enlisted in direct admission from the entrance result
-                          should not appear for the interview. They can get admitted directly within
-                          the deadline. Those students who are listed for interview can get admission
-                          only when they pass the interview.
-                        </li>
-                        <li>
-                          KMC will publish a higher number of students on the merit list than its
-                          intake capacity, so students are advised to secure admission before the
-                          seats are filled.
-                        </li>
-                        <li>
-                          KMC will provide scholarships to deserving students on a first-come,
-                          first-served basis. Students are advised to secure admission before the
-                          scholarship quota is filled (refer to the scholarship section for details).
-                        </li>
-                        <li>
-                          Please ensure that you have accurate knowledge about the fee structure,
-                          scholarships, and payment process.
-                        </li>
-                      </ol>
-                    </div>
-                  </div>
-                </div>
-              </div>
+              )}
             </div>
           )}
 
@@ -747,7 +604,14 @@ export default function AdmissionDetailPage() {
                             {row.appDate}
                           </td>
                           <td className="p-4 align-top">
-                            <span className="text-[#2563eb] hover:underline cursor-pointer flex items-center">
+                            <span
+                              className="text-[#2563eb] hover:underline cursor-pointer flex items-center"
+                              onClick={() => {
+                                const link = row.applyLink || applicationFormLink;
+                                if (link) window.open(link, "_blank", "noopener,noreferrer");
+                                else handleApplyNow();
+                              }}
+                            >
                               Apply Now <ChevronRight className="w-4 h-4 ml-1" />
                             </span>
                           </td>
@@ -947,10 +811,16 @@ export default function AdmissionDetailPage() {
                 </p>
               </div>
               <div className="space-y-3 pt-4 border-t border-blue-500/50">
-                <button className="w-full flex items-center justify-center bg-white text-blue-600 hover:bg-blue-50 font-semibold py-3 px-4 rounded-md transition-colors text-sm">
+                <button
+                  onClick={handleApplyNow}
+                  className="w-full flex items-center justify-center bg-white text-blue-600 hover:bg-blue-50 font-semibold py-3 px-4 rounded-md transition-colors text-sm"
+                >
                   Apply Now
                 </button>
-                <button className="w-full flex items-center justify-center bg-blue-500 hover:bg-blue-400 text-white font-semibold py-3 px-4 rounded-md transition-colors text-sm">
+                <button
+                  onClick={handleDownloadBrochure}
+                  className="w-full flex items-center justify-center bg-blue-500 hover:bg-blue-400 text-white font-semibold py-3 px-4 rounded-md transition-colors text-sm"
+                >
                   Download Brochure
                   <Download className="w-4 h-4 ml-2" />
                 </button>
@@ -969,9 +839,7 @@ export default function AdmissionDetailPage() {
                 <div>
                   <span className="block text-gray-900 font-bold text-[13px]">Address</span>
                   <span className="text-gray-500 font-medium text-[12px]">
-                    Kamalpokhari, Kathmandu
-                    <br />
-                    Bagmati Province, Nepal
+                    {institution?.location || "N/A"}
                   </span>
                 </div>
               </li>
@@ -981,12 +849,9 @@ export default function AdmissionDetailPage() {
                 </div>
                 <div>
                   <span className="block text-gray-900 font-bold text-[13px]">Phone</span>
-                  <a
-                    href="tel:01-4112222"
-                    className="text-gray-500 font-medium text-[12px] hover:text-emerald-600 transition"
-                  >
-                    01-4112222, 4112233
-                  </a>
+                  <span className="text-gray-500 font-medium text-[12px]">
+                    {institution?.contact_phone || staffData[0]?.phone || "N/A"}
+                  </span>
                 </div>
               </li>
               <li className="flex items-center gap-3 text-[13px]">
@@ -995,12 +860,9 @@ export default function AdmissionDetailPage() {
                 </div>
                 <div>
                   <span className="block text-gray-900 font-bold text-[13px]">Email</span>
-                  <a
-                    href="mailto:admission@kist.edu.np"
-                    className="text-gray-500 font-medium text-[12px] hover:text-red-500 transition"
-                  >
-                    admission@kist.edu.np
-                  </a>
+                  <span className="text-gray-500 font-medium text-[12px]">
+                    {institution?.contact_email || staffData[0]?.email || "N/A"}
+                  </span>
                 </div>
               </li>
               <li className="flex items-center gap-3 text-[13px]">
@@ -1010,12 +872,12 @@ export default function AdmissionDetailPage() {
                 <div>
                   <span className="block text-gray-900 font-bold text-[13px]">Website</span>
                   <a
-                    href="https://kist.edu.np"
+                    href={institution?.website || "#"}
                     target="_blank"
                     rel="noopener noreferrer"
                     className="text-blue-500 font-medium text-[12px] hover:underline transition"
                   >
-                    kist.edu.np
+                    {institution?.website ? (() => { try { return new URL(institution.website).hostname; } catch { return institution.website; } })() : "N/A"}
                   </a>
                 </div>
               </li>

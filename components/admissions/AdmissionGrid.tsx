@@ -46,20 +46,7 @@ const AdmissionGrid: React.FC<AdmissionGridProps> = ({
       setIsLoading(true);
       setFetchError(null);
       try {
-        const response = await admissionService.getAdmissionColleges(level, {
-          search: filters.search,
-          academic: filters.academic,
-          program: filters.program,
-          province: filters.province,
-          district: filters.district,
-          local: filters.local,
-          type: filters.type,
-          scholarship: filters.scholarship,
-          facilities: filters.facilities,
-          feeMax: filters.feeMax,
-          sortBy: filters.sortBy,
-          directAdmission: filters.directAdmission,
-        }, currentPage, COLLEGES_PER_PAGE);
+        const response = await admissionService.getPublishedAdmissionColleges(level, currentPage, COLLEGES_PER_PAGE);
 
         setColleges(response.data.colleges);
         setPagination(response.data.pagination);
@@ -178,6 +165,7 @@ const AdmissionGrid: React.FC<AdmissionGridProps> = ({
                       : [{ name: college.affiliation || "Admission Open", status: "Seats Available" }]}
                     moreProgramsCount={college.programs}
                     onNavigate={() => onNavigate("collegeDetails", { id: college.id })}
+                    onApply={() => onNavigate("collegeDetails", { id: college.id })}
                   />
 
                   {adType === "featured" && filteredFeatured.length > 0 && (
