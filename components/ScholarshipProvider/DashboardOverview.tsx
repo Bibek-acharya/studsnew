@@ -102,12 +102,12 @@ const DashboardOverview: React.FC<DashboardOverviewProps> = memo(({ onNavigate }
   const pendingApplications = stats?.pending_applications ?? 0;
 
   const statCards = [
-    { label: "Total Applications", value: applicationTotal.toLocaleString(), icon: FileText, bgColor: "bg-blue-50", iconColor: "text-blue-500", footer: "Increase by +8.2% this month" },
-    { label: "Total Scholarship", value: scholarshipTotal.toLocaleString(), icon: GraduationCap, bgColor: "bg-green-50", iconColor: "text-green-500", footer: `${totalActive} active scholarships` },
-    { label: "Draft", value: totalDraft.toString(), icon: FilePen, bgColor: "bg-yellow-50", iconColor: "text-yellow-600", footer: "Pending review" },
-    { label: "Published", value: totalActive.toString(), icon: CheckCircle, bgColor: "bg-purple-50", iconColor: "text-purple-600", footer: "Live and accepting applications" },
-    { label: "Pending", value: pendingApplications.toLocaleString(), icon: Clock, bgColor: "bg-orange-50", iconColor: "text-orange-500", footer: "Awaiting review" },
-    { label: "Shortlisted", value: shortlistedCount.toString(), icon: Star, bgColor: "bg-pink-50", iconColor: "text-pink-500", footer: "Increase by +5.1% this month" },
+    { label: "Total Applications", value: applicationTotal.toLocaleString(), icon: FileText, bgColor: "bg-blue-50", iconColor: "text-blue-500" },
+    { label: "Total Scholarship", value: scholarshipTotal.toLocaleString(), icon: GraduationCap, bgColor: "bg-green-50", iconColor: "text-green-500" },
+    { label: "Draft", value: totalDraft.toString(), icon: FilePen, bgColor: "bg-yellow-50", iconColor: "text-yellow-600" },
+    { label: "Published", value: totalActive.toString(), icon: CheckCircle, bgColor: "bg-purple-50", iconColor: "text-purple-600" },
+    { label: "Pending", value: pendingApplications.toLocaleString(), icon: Clock, bgColor: "bg-orange-50", iconColor: "text-orange-500" },
+    { label: "Shortlisted", value: shortlistedCount.toString(), icon: Star, bgColor: "bg-pink-50", iconColor: "text-pink-500" },
   ];
 
   const activeScholarships = scholarships.filter((s) => ["active", "published"].includes(s.status)).slice(0, 3);
@@ -228,12 +228,11 @@ const DashboardOverview: React.FC<DashboardOverviewProps> = memo(({ onNavigate }
               </p>
 
             </div>
-            <div className="absolute -right-[100px] top-1/2 -translate-y-1/2 w-[400px] h-[400px] bg-white/40 rounded-full pointer-events-none" />
+            <div className="absolute right-[-100px] top-1/2 -translate-y-1/2 w-[400px] h-[400px] bg-white/40 rounded-full pointer-events-none" />
             <div className="absolute right-4 bottom-0 w-[260px] h-[200px] pointer-events-none">
               <img src="/hello.svg" alt="" className="w-full h-full object-contain" />
             </div>
           </div>
-
           {/* 6 Mini Cards Grid */}
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 xl:gap-6">
             {statCards.map((card) => (
@@ -247,9 +246,7 @@ const DashboardOverview: React.FC<DashboardOverviewProps> = memo(({ onNavigate }
                     <h3 className="text-xl font-bold text-gray-800">{card.value}</h3>
                   </div>
                 </div>
-                <div className="text-xs text-gray-500 flex items-center gap-1 mt-2">
-                  {card.footer}
-                </div>
+                
               </div>
             ))}
           </div>
