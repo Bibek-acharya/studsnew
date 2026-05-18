@@ -788,7 +788,7 @@ export default function ShikshaApplicationForm({
               </div>
 
               <div className="col-span-1 sm:col-span-2">
-                <label className="block text-[14px] font-semibold text-gray-700 mb-1.5">Tole / Village</label>
+                <label className="block text-[14px] font-semibold text-gray-700 mb-1.5">Tole / Village <span className="text-red-500">*</span></label>
                 <input
                   type="text"
                   id="permTole"
@@ -904,7 +904,7 @@ export default function ShikshaApplicationForm({
               </div>
 
               <div className="col-span-1 sm:col-span-2">
-                <label className="block text-[14px] font-semibold text-gray-700 mb-1.5">Tole / Village</label>
+                <label className="block text-[14px] font-semibold text-gray-700 mb-1.5">Tole / Village <span className="text-red-500">*</span></label>
                 <input
                   type="text"
                   id="tempTole"
@@ -962,7 +962,7 @@ export default function ShikshaApplicationForm({
 
               <div>
                 <label className="block text-[14px] font-semibold text-gray-700 mb-1.5">
-                  Parent's Email
+                  Parent's Email <span className="text-red-500">*</span>
                 </label>
                 <input
                   type="email"

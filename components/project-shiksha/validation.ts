@@ -9,6 +9,8 @@ export function validateForm(data: ProjectShikshaFormData): {
   // Personal Details
   if (!data.fullName.trim()) errors.fullName = "Full name is required";
   if (!data.gender) errors.gender = "Gender is required";
+  if (!data.ethnicity) errors.ethnicity = "Ethnicity is required";
+  if (data.ethnicity === "Other" && !data.ethnicityOther.trim()) errors.ethnicityOther = "Please specify your ethnicity";
   if (!data.dobBS) errors.dobBS = "Date of birth is required";
   if (data.dobBS && data.age && parseInt(data.age) < 14) {
     errors.dobBS = "You must be at least 14 years old to apply";
@@ -22,27 +24,33 @@ export function validateForm(data: ProjectShikshaFormData): {
     errors.email = "Invalid email format";
   }
   if (!data.email.trim()) errors.email = "Email is required";
+
+  // Education
   if (!data.seeSchoolType) errors.seeSchoolType = "School type is required";
   if (data.seeSchoolType && !data.schoolName.trim()) {
     errors.schoolName = "School name is required";
   }
-
-  // Education
   if (!data.seeGpa.trim()) errors.seeGpa = "SEE GPA is required";
   if (data.seeGpa.trim() && (isNaN(parseFloat(data.seeGpa)) || parseFloat(data.seeGpa) < 0 || parseFloat(data.seeGpa) > 4)) {
     errors.seeGpa = "GPA must be between 0 and 4";
   }
+  if (!data.schoolProvince) errors.schoolProvince = "School province is required";
+  if (!data.schoolDistrict.trim()) errors.schoolDistrict = "School district is required";
+  if (!data.schoolMunicipality.trim()) errors.schoolMunicipality = "School municipality is required";
+  if (!data.schoolTole.trim()) errors.schoolTole = "School tole/village is required";
 
   // Address
   if (!data.permProvince) errors.permProvince = "Province is required";
   if (!data.permDistrict.trim()) errors.permDistrict = "District is required";
   if (!data.permMunicipality.trim()) errors.permMunicipality = "Municipality is required";
   if (!data.permWard) errors.permWard = "Ward number is required";
+  if (!data.permTole.trim()) errors.permTole = "Tole/village is required";
 
   if (!data.tempProvince) errors.tempProvince = "Province is required";
   if (!data.tempDistrict.trim()) errors.tempDistrict = "District is required";
   if (!data.tempMunicipality.trim()) errors.tempMunicipality = "Municipality is required";
   if (!data.tempWard) errors.tempWard = "Ward number is required";
+  if (!data.tempTole.trim()) errors.tempTole = "Tole/village is required";
 
   // Family
   if (!data.guardianName.trim()) errors.guardianName = "Parent's name is required";
@@ -51,11 +59,14 @@ export function validateForm(data: ProjectShikshaFormData): {
   } else if (!data.guardianPhone.startsWith("9")) {
     errors.guardianPhone = "Phone number must start with 9";
   }
+  if (!data.guardianEmail.trim()) errors.guardianEmail = "Parent's email is required";
   if (data.guardianEmail && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(data.guardianEmail)) {
     errors.guardianEmail = "Invalid email format";
   }
   if (!data.fatherOccupation) errors.fatherOccupation = "Father's occupation is required";
+  if (data.fatherOccupation === "Other" && !data.fatherOccupationOther.trim()) errors.fatherOccupationOther = "Please specify father's occupation";
   if (!data.motherOccupation) errors.motherOccupation = "Mother's occupation is required";
+  if (data.motherOccupation === "Other" && !data.motherOccupationOther.trim()) errors.motherOccupationOther = "Please specify mother's occupation";
   if (!data.familyIncome || parseInt(data.familyIncome) <= 0) {
     errors.familyIncome = "Family income is required";
   }
