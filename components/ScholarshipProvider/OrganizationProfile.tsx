@@ -402,7 +402,7 @@ const OrganizationProfile: React.FC = memo(() => {
                 {isEditing ? (
                   <RichTextEditor value={aboutText} onChange={setAboutText} placeholder="Describe your organization..." minHeight={200} />
                 ) : (
-                  <div className="prose prose-sm max-w-none text-gray-700" dangerouslySetInnerHTML={{ __html: aboutText }} />
+                  <div className="prose prose-sm max-w-none text-gray-700 break-words" dangerouslySetInnerHTML={{ __html: aboutText }} />
                 )}
               </Field>
               <Field label="Mission" value={mission} isEditing={isEditing}><textarea className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:border-blue-500" value={mission} onChange={(e) => setMission(e.target.value)} rows={3} placeholder="Our mission..." /></Field>
