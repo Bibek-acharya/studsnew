@@ -45,7 +45,11 @@ export default function ApplicationsDirectory() {
     async function fetchData() {
       setLoading(true);
       try {
-        const res = await scholarshipProviderApi.getApplications({ page, limit });
+        const res = await scholarshipProviderApi.getApplications({
+          page,
+          limit,
+          exam_center: filterExamCenter || undefined,
+        });
         setApplications(res.applications);
         setTotal(res.meta.total);
       } catch {
@@ -55,7 +59,7 @@ export default function ApplicationsDirectory() {
       }
     }
     fetchData();
-  }, [page]);
+  }, [page, filterExamCenter]);
 
   const handlePaymentAction = (applicationId: number, approve: boolean) => {
     setSelectedAppId(applicationId);
@@ -130,7 +134,6 @@ export default function ApplicationsDirectory() {
     if (filterDistrict && a.district !== filterDistrict) return false;
     if (filterSchool && a.school_type !== filterSchool) return false;
     if (filterStatus && a.status !== filterStatus.toLowerCase()) return false;
-    if (filterExamCenter && a.exam_center !== filterExamCenter) return false;
     if (paymentStatusFilter !== 'all') {
       const paymentStatus = a.payment?.status;
       if (paymentStatus !== paymentStatusFilter) return false;
@@ -223,7 +226,7 @@ export default function ApplicationsDirectory() {
             <option value="">All Status</option>
             {STATUS_OPTIONS.map((o) => <option key={o} value={o}>{o}</option>)}
           </select>
-          <select value={filterExamCenter} onChange={(e) => setFilterExamCenter(e.target.value)} className="px-3 py-1.5 border border-gray-200 rounded-lg text-xs bg-white focus:outline-none focus:border-blue-500">
+          <select value={filterExamCenter} onChange={(e) => { setFilterExamCenter(e.target.value); setPage(1); }} className="px-3 py-1.5 border border-gray-200 rounded-lg text-xs bg-white focus:outline-none focus:border-blue-500">
             <option value="">All Centers</option>
             {[...new Set(applications.map((a) => a.exam_center).filter(Boolean))].sort().map((c) => <option key={c} value={c}>{c}</option>)}
           </select>

@@ -752,12 +752,13 @@ export const scholarshipProviderApi = {
     });
   },
 
-  async getApplications(params?: { page?: number; limit?: number; status?: string; scholarship_id?: string }): Promise<{ applications: ProviderApplication[]; meta: { total: number; page: number; limit: number } }> {
+  async getApplications(params?: { page?: number; limit?: number; status?: string; scholarship_id?: string; exam_center?: string }): Promise<{ applications: ProviderApplication[]; meta: { total: number; page: number; limit: number } }> {
     const queryParams = new URLSearchParams();
     queryParams.set('page', String(params?.page || 1));
     queryParams.set('limit', String(params?.limit || 10));
     if (params?.status) queryParams.set('status', params.status);
     if (params?.scholarship_id) queryParams.set('scholarship_id', params.scholarship_id);
+    if (params?.exam_center) queryParams.set('exam_center', params.exam_center);
     return callApi(`/api/v1/scholarship-providers/applications?${queryParams}`);
   },
 
