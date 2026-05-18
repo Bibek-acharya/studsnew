@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useCallback, useRef } from "react";
-import { format, addDays } from "date-fns";
+import { format } from "date-fns";
 import FileUpload from "../common/FileUpload";
 import DatePicker from "../common/DatePicker";
 import ImageCropperModal from "../common/ImageCropperModal";
@@ -116,7 +116,7 @@ export const GeneralSettingsSection: React.FC<GeneralSettingsSectionProps> = ({
   locationError,
   bannerError,
 }) => {
-  const tomorrow = format(addDays(new Date(), 1), "yyyy-MM-dd");
+  const today = format(new Date(), "yyyy-MM-dd");
   const [showSuggestions, setShowSuggestions] = React.useState(false);
   const [filteredDistricts, setFilteredDistricts] = React.useState<string[]>([]);
   const suggestionRef = React.useRef<HTMLDivElement>(null);
@@ -352,7 +352,7 @@ export const GeneralSettingsSection: React.FC<GeneralSettingsSectionProps> = ({
               onChange={setStartDate}
               placeholder="Select start date"
               required
-              minDate={tomorrow}
+              minDate={today}
               error={startDateError}
             />
           </div>

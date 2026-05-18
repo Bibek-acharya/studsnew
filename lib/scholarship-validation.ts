@@ -148,7 +148,7 @@ export function validateDates(startDate: string, endDate: string): ValidationRes
     } else {
       const today = new Date();
       today.setHours(0, 0, 0, 0);
-      if (start <= today) {
+      if (start < today) {
         errors.push({ field: "startDate", message: "Start date must be in the future" });
       }
     }
