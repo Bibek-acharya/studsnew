@@ -510,11 +510,17 @@ export default function ShikshaApplicationForm({
                 <input
                   type="file"
                   id="photo"
-                  accept="image/*"
+                  accept=".jpg,.jpeg,.png,.webp"
                   className="hidden"
                   onChange={(e) => {
                     const file = e.target.files?.[0] || null;
                     if (file) {
+                      const allowedTypes = ["image/jpeg", "image/png", "image/webp"];
+                      if (!allowedTypes.includes(file.type)) {
+                        setAlertMessage("Unsupported format. Please upload JPG, PNG, or WebP image.");
+                        e.target.value = "";
+                        return;
+                      }
                       if (file.size > 2 * 1024 * 1024) {
                         setAlertMessage("File is too large. Please upload an image smaller than 2MB.");
                         e.target.value = "";
