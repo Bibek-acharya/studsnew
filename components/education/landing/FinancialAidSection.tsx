@@ -6,6 +6,67 @@ import { Bookmark, MapPin, GraduationCap, Calendar, Building, BadgeCheckIcon } f
 import { ScholarshipItem } from "@/services/api";
 import HoverTooltip from "./HoverTooltip";
 
+function getScholarshipDateStatus(startDate?: string, endDate?: string): string {
+  if (!startDate && !endDate) return "Ongoing";
+  const now = new Date();
+  const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+
+  if (startDate) {
+    const start = new Date(startDate);
+    if (!isNaN(start.getTime()) && start > today) return "Coming Soon";
+  }
+
+  if (endDate) {
+    const end = new Date(endDate);
+    if (!isNaN(end.getTime())) {
+      const endDay = new Date(end.getFullYear(), end.getMonth(), end.getDate());
+      if (endDay < today) return "Closed";
+
+      const msPerDay = 1000 * 60 * 60 * 24;
+      const daysLeft = Math.round((endDay.getTime() - today.getTime()) / msPerDay);
+
+      if (daysLeft <= 2) return "Ending Soon";
+    }
+  }
+
+  return "Ongoing";
+}
+
+const getStatusStyle = (status: string) => {
+  switch (status) {
+    case "Ongoing":
+      return {
+        statusDot: "bg-[#22c55e]",
+        statusText: "text-[#22c55e]",
+        statusBg: "bg-green-50",
+      };
+    case "Ending Soon":
+      return {
+        statusDot: "bg-[#eab308]",
+        statusText: "text-[#eab308]",
+        statusBg: "bg-yellow-50",
+      };
+    case "Coming Soon":
+      return {
+        statusDot: "bg-[#3b82f6]",
+        statusText: "text-[#3b82f6]",
+        statusBg: "bg-blue-50",
+      };
+    case "Closed":
+      return {
+        statusDot: "bg-gray-400",
+        statusText: "text-gray-500",
+        statusBg: "bg-gray-100",
+      };
+    default:
+      return {
+        statusDot: "bg-gray-400",
+        statusText: "text-gray-500",
+        statusBg: "bg-gray-100",
+      };
+  }
+};
+
 interface FinancialAidSectionProps {
   onNavigate: (view: string, data?: { [key: string]: unknown }) => void;
   scholarships?: ScholarshipItem[];
@@ -14,15 +75,7 @@ interface FinancialAidSectionProps {
 const FinancialAidSection: React.FC<FinancialAidSectionProps> = ({ onNavigate, scholarships = [] }) => {
   const [bookmarked, setBookmarked] = useState<Set<number>>(new Set());
 
-  const items = (scholarships.length
-    ? scholarships
-    : [
-      { id: 1, title: "National IT Excellence Scholarship (BSc. CSIT)", provider: "Tribhuvan University, Nepal", type: "MERIT-BASED", status: "Open", amount: "100% Tuition", location: "Bagmati", eligibility: "Bachelor (+2 Sci: 2.8+ GPA)", deadline: "Aug 15, 2026", image: "https://images.unsplash.com/photo-1498050108023-c5249f4df085?q=80&w=600&auto=format&fit=crop" },
-      { id: 2, title: "STEM Women Scholars Award", provider: "Kathmandu University", type: "MERIT-BASED", status: "Open", amount: "75% Scholarship", location: "Province 3", eligibility: "Female Students (3.0+ GPA)", deadline: "Sep 20, 2026", image: "https://images.unsplash.com/photo-1523240795612-9a054b0db644?q=80&w=600&auto=format&fit=crop" },
-      { id: 3, title: "Social Impact Leadership Grant", provider: "Social Welfare Board", type: "NEED-BASED", status: "Closing", amount: "NRs. 50,000", location: "National", eligibility: "Community Service Record", deadline: "Jul 30, 2026", image: "https://images.unsplash.com/photo-1544652478-6653e09f18a2?q=80&w=600&auto=format&fit=crop" },
-      { id: 4, title: "Future Educators Excellence Fund", provider: "Tribhuvan University", type: "MERIT-BASED", status: "Open", amount: "Full Ride", location: "Bagmati", eligibility: "Education Majors", deadline: "Oct 05, 2026", image: "https://images.unsplash.com/photo-1509062522246-3755977927d7?q=80&w=600&auto=format&fit=crop" }
-    ])
-    .slice(0, 4);
+  const items = scholarships.slice(0, 4);
 
   const toggleBookmark = (e: MouseEvent<HTMLButtonElement>, id: number) => {
     e.stopPropagation();
@@ -47,8 +100,11 @@ const FinancialAidSection: React.FC<FinancialAidSectionProps> = ({ onNavigate, s
 
       {/* Grid Container for Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-5 md:gap-6">
-        {items.map((scholarship) => (
-          <div key={scholarship.id} className="bg-white rounded-xl sm:rounded-xl p-3 sm:p-3.5 border border-[#e2e8f0] flex flex-col h-full group hover:border-blue-500/20 transition-all duration-300">
+        {items.map((scholarship) => {
+          const dateStatus = getScholarshipDateStatus(scholarship.start_date, scholarship.end_date);
+          const statusStyle = getStatusStyle(dateStatus);
+          return (
+          <div key={scholarship.id} className="bg-white rounded-xl p-5 sm:p-6 md:p-7 flex flex-col h-full hover:-translate-y-1 border border-gray-200 hover:border-blue-500/20 transition-all duration-300 cursor-pointer">
             {/* Image Area */}
             <div className="w-full h-30 rounded-[10px] sm:rounded-md overflow-hidden mb-3 sm:mb-4 relative">
               <Image
@@ -57,7 +113,7 @@ const FinancialAidSection: React.FC<FinancialAidSectionProps> = ({ onNavigate, s
                 width={600}
                 height={400}
                 unoptimized
-                className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                className="w-full h-full object-cover"
                 onError={(e: SyntheticEvent<HTMLImageElement>) => {
                   e.currentTarget.src = "https://placehold.co/600x400/f1f5f9/94a3b8?text=Scholarship";
                 }}
@@ -68,13 +124,15 @@ const FinancialAidSection: React.FC<FinancialAidSectionProps> = ({ onNavigate, s
             <div className="flex flex-col grow px-0.5 sm:px-1">
               {/* Tags */}
               <div className="flex items-center gap-2 sm:gap-2.5 mb-2.5 sm:mb-3">
-                <span className="text-[#2563eb] bg-[#eff6ff] px-2 py-0.5 sm:py-1 rounded text-[10px] sm:text-[11px] font-bold tracking-wider uppercase truncate max-w-[100px] shrink-0">
-                  {"type" in scholarship ? scholarship.type : scholarship.scholarship_type || "MERIT-BASED"}
+                <span className="text-blue-600 bg-blue-50 px-2 py-1 rounded-md text-[10px] font-bold uppercase tracking-wide max-w-[100px] truncate">
+                  {scholarship.scholarship_type || "MERIT-BASED"}
                 </span>
-                <span className={`px-2 py-0.5 sm:py-1 rounded text-[10px] sm:text-[11px] md:text-[12px] font-semibold flex items-center gap-1 sm:gap-1.5 truncate max-w-[90px] shrink-0 ${scholarship.status === 'Open' ? 'text-[#16a34a] bg-[#f0fdf4]' : 'text-amber-600 bg-amber-50'}`}>
-                  <span className={`w-1.5 h-1.5 rounded-full shrink-0 ${scholarship.status === 'Open' ? 'bg-[#16a34a]' : 'bg-amber-500'}`}></span>
-                  {scholarship.status || "Open"}
-                </span>
+                <div className={`flex items-center gap-1.5 px-2 py-1 rounded-md ${statusStyle.statusBg}`}>
+                  <span className={`w-1.5 h-1.5 rounded-full ${statusStyle.statusDot}`}></span>
+                  <span className={`text-[10px] font-bold uppercase tracking-wide ${statusStyle.statusText}`}>
+                    {dateStatus}
+                  </span>
+                </div>
               </div>
 
               {/* Title & Institution */}
@@ -119,7 +177,7 @@ const FinancialAidSection: React.FC<FinancialAidSectionProps> = ({ onNavigate, s
               {/* Action Buttons */}
               <div className="flex gap-2 sm:gap-2.5 mt-4 sm:mt-5 mb-1">
                 <button 
-                  onClick={() => onNavigate("scholarshipDetails", scholarship as { [key: string]: unknown })}
+                  onClick={() => onNavigate("scholarshipDetails", scholarship as unknown as { [key: string]: unknown })}
                   className="flex-1 bg-white border border-[#cbd5e1] text-[#334155] rounded-md py-2 sm:py-2.5 text-[12px] sm:text-[13px] md:text-[14px] font-semibold hover:bg-[#f8fafc] hover:text-[#0f172a] transition-all duration-200"
                 >
                   Details
@@ -145,7 +203,8 @@ const FinancialAidSection: React.FC<FinancialAidSectionProps> = ({ onNavigate, s
               </div>
             </div>
           </div>
-        ))}
+          );
+        })}
       </div>
       </div>
     </section>
