@@ -240,6 +240,7 @@ export default function ApplicationsDirectory() {
                   <tr>
                     <th className="text-center py-3 px-3 w-10"><input type="checkbox" className="rounded" /></th>
                     <th className="text-center py-3 px-3 font-semibold text-gray-700">App ID</th>
+                    <th className="text-center py-3 px-3 font-semibold text-gray-700">Roll No</th>
                     <th className="text-left py-3 px-3 font-semibold text-gray-700">Full Name</th>
                     <th className="text-center py-3 px-3 font-semibold text-gray-700">Gender</th>
                     <th className="text-center py-3 px-3 font-semibold text-gray-700">Ethnicity</th>
@@ -257,11 +258,12 @@ export default function ApplicationsDirectory() {
                 </thead>
                 <tbody className="divide-y divide-gray-100">
                   {filtered.length === 0 ? (
-                    <tr><td colSpan={15} className="py-8 text-center text-slate-500">No applications found</td></tr>
+                    <tr><td colSpan={16} className="py-8 text-center text-slate-500">No applications found</td></tr>
                   ) : filtered.map((app, idx) => (
                     <tr key={app.id} className="hover:bg-gray-50">
                       <td className="text-center py-3 px-3"><input type="checkbox" className="rounded" /></td>
                       <td className="text-center py-3 px-3 font-mono font-medium text-blue-600">{appId(app.id)}</td>
+                      <td className="text-center py-3 px-3 font-mono font-medium text-gray-700">{app.roll_number || "—"}</td>
                       <td className="py-3 px-3 font-medium text-gray-900">{app.first_name} {app.last_name}</td>
                       <td className="text-center py-3 px-3">
                         <span className={`px-2 py-1 rounded text-xs font-semibold ${app.gender === "Female" ? "bg-pink-100 text-pink-700" : "bg-blue-100 text-blue-700"}`}>{app.gender || "N/A"}</span>

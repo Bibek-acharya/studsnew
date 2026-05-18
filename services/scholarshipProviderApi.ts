@@ -479,6 +479,7 @@ export interface ProviderApplication {
   family_members_count?: number;
   school_type?: string;
   exam_center?: string;
+  roll_number?: string;
   payment?: ProviderPayment;
 }
 
