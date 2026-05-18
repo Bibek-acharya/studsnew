@@ -508,6 +508,7 @@ const CreateScholarship: React.FC<CreateScholarshipProps> = memo(({ scholarshipI
             firstErrorElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
           }
         }, 0);
+        submittingRef.current = false;
         return;
       }
 
@@ -516,6 +517,7 @@ const CreateScholarship: React.FC<CreateScholarshipProps> = memo(({ scholarshipI
         if (dateValidation.field) {
           scrollToField(dateValidation.field);
         }
+        submittingRef.current = false;
         return;
       }
     }
