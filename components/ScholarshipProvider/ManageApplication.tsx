@@ -54,12 +54,7 @@ const ManageApplication = () => {
       if (filterDistrict && v.district !== filterDistrict) return false;
       if (filterGender && v.gender !== filterGender) return false;
       if (filterDay) {
-        const dayNum = parseInt(filterDay, 10);
-        const hasDay = v.available_days.some((d: string) => {
-          const parts = d.split('-');
-          return parts.length === 3 && parseInt(parts[2], 10) === dayNum;
-        });
-        if (!hasDay) return false;
+        if (v.available_days.length !== parseInt(filterDay, 10)) return false;
       }
       return true;
     });
@@ -245,7 +240,7 @@ const ManageApplication = () => {
                 <Dropdown
                   value={filterDay}
                   onChange={v => { setFilterDay(v); setPage(1); }}
-                  options={[{ value: "", label: "All" }, ...ALL_DAYS.map(d => ({ value: d, label: `Day ${d}` }))]}
+                  options={[{ value: "", label: "All" }, ...ALL_DAYS.map(d => ({ value: d, label: `${d} Days` }))]}
                   placeholder="All"
                 />
               </div>
