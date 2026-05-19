@@ -822,6 +822,14 @@ export const scholarshipProviderApi = {
     return callApi(`/api/v1/scholarship-providers/applications?${queryParams}`);
   },
 
+  async getPendingPaymentApplications(params?: { page?: number; limit?: number; search?: string }): Promise<{ applications: ProviderApplication[]; meta: { total: number; page: number; limit: number } }> {
+    const queryParams = new URLSearchParams();
+    queryParams.set('page', String(params?.page || 1));
+    queryParams.set('limit', String(params?.limit || 10));
+    if (params?.search) queryParams.set('search', params.search);
+    return callApi(`/api/v1/scholarship-providers/applications/pending-payment?${queryParams}`);
+  },
+
   async getApplicationById(id: number): Promise<ProviderApplication> {
     return callApi<ProviderApplication>(`/api/v1/scholarship-providers/applications/${id}`);
   },

@@ -17,9 +17,8 @@ export default function PaymentDisputes() {
 
   useEffect(() => {
     setLoading(true);
-    scholarshipProviderApi.getApplications({
+    scholarshipProviderApi.getPendingPaymentApplications({
       page, limit,
-      status: "pending_payment",
       search: search || undefined,
     }).then((res) => {
       setApplications(res.applications);
@@ -211,7 +210,7 @@ export default function PaymentDisputes() {
           applicationId={selectedApplicantId}
           onClose={() => setSelectedApplicantId(null)}
           onStatusUpdate={() => {
-            scholarshipProviderApi.getApplications({ page, limit, status: "pending_payment", search: search || undefined }).then((res) => {
+            scholarshipProviderApi.getPendingPaymentApplications({ page, limit, search: search || undefined }).then((res) => {
               setApplications(res.applications);
               setTotal(res.meta.total);
             }).catch(() => {});
