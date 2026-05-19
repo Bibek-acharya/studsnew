@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from "react";
 import { createPortal } from "react-dom";
-import { Search, Settings, Users, Download, CheckCircle, Trash2 } from "lucide-react";
+import { Search, Settings, Users, Download, CheckCircle, Trash2, Eye, X } from "lucide-react";
 import Dropdown from "@/components/college-recommender/Dropdown";
 import { NEPAL_DISTRICTS, NEPAL_PROVINCES } from "@/lib/location-data";
 import { toast } from "sonner";
@@ -31,6 +31,7 @@ const ManageApplication = () => {
   const perPage = 10;
   const [totalItems, setTotalItems] = useState(0);
   const [rejectTarget, setRejectTarget] = useState<{ id: number; name: string } | null>(null);
+  const [previewCvPath, setPreviewCvPath] = useState<string | null>(null);
 
   useEffect(() => {
     scholarshipProviderApi.getVolunteerApplications({
@@ -96,6 +97,38 @@ const ManageApplication = () => {
         onCancel={() => setRejectTarget(null)}
         destructive
       />
+      {previewCvPath && createPortal(
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-gray-900/50 backdrop-blur-sm p-4" onClick={() => setPreviewCvPath(null)}>
+          <div className="bg-white rounded-2xl shadow-xl w-full max-w-2xl max-h-[90vh] overflow-hidden flex flex-col" onClick={e => e.stopPropagation()}>
+            <div className="flex items-center justify-between px-5 pt-5 pb-3 border-b border-gray-100">
+              <h3 className="text-base font-bold text-gray-900">CV / Resume Preview</h3>
+              <button onClick={() => setPreviewCvPath(null)} className="p-1 rounded-lg hover:bg-gray-100 transition-colors">
+                <X size={20} />
+              </button>
+            </div>
+            <div className="flex-1 overflow-auto p-5">
+              {(() => {
+                const url = getImageUrl(previewCvPath);
+                const ext = previewCvPath.split('.').pop()?.toLowerCase();
+                if (ext && ['jpg', 'jpeg', 'png', 'gif', 'webp', 'bmp', 'svg'].includes(ext)) {
+                  return <img src={url} alt="CV Preview" className="w-full h-auto rounded-lg" />;
+                }
+                if (ext === 'pdf') {
+                  return <embed src={url} type="application/pdf" className="w-full h-[70vh] rounded-lg" title="CV Preview" />;
+                }
+                return (
+                  <div className="flex flex-col items-center justify-center py-16 text-gray-500 gap-4">
+                    <p>Preview not available for this file type.</p>
+                    <a href={url} download className="px-4 py-2 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-700 transition-colors">
+                      Download File
+                    </a>
+                  </div>
+                );
+              })()}
+            </div>
+          </div>
+        </div>, document.body
+      )}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-6 pt-6">
         <h2 className="text-2xl font-bold text-slate-900 tracking-tight">Manage Applications</h2>
         <div className="flex items-center text-sm text-slate-500 mt-2 sm:mt-0 gap-2">
@@ -224,13 +257,18 @@ const ManageApplication = () => {
                     <span className="bg-purple-100 text-purple-700 px-3 py-1 rounded-full text-xs font-bold whitespace-nowrap">{v.designation}</span>
                   </td>
                   <td className="py-4 px-4 text-center">
-                    {(() => { const cvPath = v.cv_path; return cvPath ? (
-                      <button onClick={async () => { const r = await fetch(getImageUrl(cvPath)); const b = await r.blob(); const u = URL.createObjectURL(b); const a = document.createElement('a'); a.href = u; a.download = cvPath.split('/').pop() || 'cv'; document.body.appendChild(a); a.click(); document.body.removeChild(a); URL.revokeObjectURL(u); }} className="p-2 hover:bg-blue-100 rounded-lg text-blue-600 transition-colors inline-flex" title="Download CV / Resume">
-                        <Download size={18} />
-                      </button>
+                    {v.cv_path ? (
+                      <div className="flex items-center justify-center gap-1">
+                        <button onClick={() => setPreviewCvPath(v.cv_path!)} className="p-2 hover:bg-purple-100 rounded-lg text-purple-600 transition-colors inline-flex" title="Preview CV / Resume">
+                          <Eye size={18} />
+                        </button>
+                        <button onClick={async () => { const r = await fetch(getImageUrl(v.cv_path!)); const b = await r.blob(); const u = URL.createObjectURL(b); const a = document.createElement('a'); a.href = u; a.download = v.cv_path!.split('/').pop() || 'cv'; document.body.appendChild(a); a.click(); document.body.removeChild(a); URL.revokeObjectURL(u); }} className="p-2 hover:bg-blue-100 rounded-lg text-blue-600 transition-colors inline-flex" title="Download CV / Resume">
+                          <Download size={18} />
+                        </button>
+                      </div>
                     ) : (
                       <span className="text-gray-300">-</span>
-                    ); })()}
+                    )}
                   </td>
                   <td className="py-4 px-4 text-center">
                     {v.volunteered_before === "Yes" ? (
