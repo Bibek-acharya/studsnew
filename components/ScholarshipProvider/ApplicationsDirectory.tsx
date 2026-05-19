@@ -2,16 +2,20 @@
 
 import React, { useEffect, useState, useCallback } from "react";
 import { Home, Star, Search, Eye, CheckCircle, XCircle, ChevronLeft, ChevronRight } from "lucide-react";
-import { scholarshipProviderApi, ProviderApplication } from "@/services/scholarshipProviderApi";
+import { scholarshipProviderApi, ProviderApplication, ExamCenterItem } from "@/services/scholarshipProviderApi";
+import { NEPAL_DISTRICTS, NEPAL_PROVINCES } from "@/lib/location-data";
 import { toast } from "sonner";
 import ApplicantProfileModal from "./ApplicantProfileModal";
 
 const GENDER_OPTIONS = ["Male", "Female"];
 const ETHNICITY_OPTIONS = ["Bahun", "Chhetri", "Magar", "Tamang", "Gurung", "Rai", "Tharu", "Sherpa", "Madhesi", "Dalit"];
-const PROVINCE_OPTIONS = ["Koshi", "Madhesh", "Bagmati", "Gandaki", "Lumbini", "Karnali", "Sudurpashchim"];
-const DISTRICT_OPTIONS = ["Kathmandu", "Lalitpur", "Kaski", "Chitwan", "Morang", "Sunsari", "Rupandehi", "Dhanusha", "Surkhet", "Solukhumbu"];
 const SCHOOL_TYPE_OPTIONS = ["Private", "Public", "Community"];
 const STATUS_OPTIONS = ["Pending", "Shortlisted", "Approved", "Rejected"];
+const allDistricts = Array.from(new Set(Object.values(NEPAL_DISTRICTS).flat().filter(Boolean))).sort();
+const getDistrictsForProvince = (province: string) =>
+  province && NEPAL_DISTRICTS[province as keyof typeof NEPAL_DISTRICTS]
+    ? (NEPAL_DISTRICTS[province as keyof typeof NEPAL_DISTRICTS] as string[])
+    : allDistricts;
 
 export default function ApplicationsDirectory() {
   const [applications, setApplications] = useState<ProviderApplication[]>([]);
@@ -40,6 +44,19 @@ export default function ApplicationsDirectory() {
   const [showAppRejectModal, setShowAppRejectModal] = useState(false);
   const [appRejectReason, setAppRejectReason] = useState('');
   const [rejectingAppId, setRejectingAppId] = useState<number | null>(null);
+  const [examCenters, setExamCenters] = useState<string[]>([]);
+
+  useEffect(() => {
+    scholarshipProviderApi.getScholarships(1, 100).then((res) => {
+      const centers = new Set<string>();
+      res.scholarships.forEach((s) => {
+        s.exam_centers_new?.forEach((ec: ExamCenterItem) => {
+          if (ec.center_name) centers.add(ec.center_name);
+        });
+      });
+      setExamCenters([...centers].sort());
+    }).catch(() => {});
+  }, []);
 
   useEffect(() => {
     async function fetchData() {
@@ -191,13 +208,13 @@ export default function ApplicationsDirectory() {
             <option value="">All Ethnicity</option>
             {ETHNICITY_OPTIONS.map((o) => <option key={o} value={o}>{o}</option>)}
           </select>
-          <select value={filterProvince} onChange={(e) => { setFilterProvince(e.target.value); setPage(1); }} className="px-3 py-1.5 border border-gray-200 rounded-lg text-xs bg-white focus:outline-none focus:border-blue-500">
+          <select value={filterProvince} onChange={(e) => { setFilterProvince(e.target.value); setFilterDistrict(""); setPage(1); }} className="px-3 py-1.5 border border-gray-200 rounded-lg text-xs bg-white focus:outline-none focus:border-blue-500">
             <option value="">All Province</option>
-            {PROVINCE_OPTIONS.map((o) => <option key={o} value={o}>{o}</option>)}
+            {NEPAL_PROVINCES.map((o) => <option key={o} value={o}>{o}</option>)}
           </select>
           <select value={filterDistrict} onChange={(e) => { setFilterDistrict(e.target.value); setPage(1); }} className="px-3 py-1.5 border border-gray-200 rounded-lg text-xs bg-white focus:outline-none focus:border-blue-500">
             <option value="">All District</option>
-            {DISTRICT_OPTIONS.map((o) => <option key={o} value={o}>{o}</option>)}
+            {getDistrictsForProvince(filterProvince).map((o) => <option key={o} value={o}>{o}</option>)}
           </select>
           <select value={filterSchool} onChange={(e) => { setFilterSchool(e.target.value); setPage(1); }} className="px-3 py-1.5 border border-gray-200 rounded-lg text-xs bg-white focus:outline-none focus:border-blue-500">
             <option value="">All School Type</option>
@@ -209,7 +226,7 @@ export default function ApplicationsDirectory() {
           </select>
           <select value={filterExamCenter} onChange={(e) => { setFilterExamCenter(e.target.value); setPage(1); }} className="px-3 py-1.5 border border-gray-200 rounded-lg text-xs bg-white focus:outline-none focus:border-blue-500">
             <option value="">All Centers</option>
-            {[...new Set(applications.map((a) => a.exam_center).filter(Boolean))].sort().map((c) => <option key={c} value={c}>{c}</option>)}
+            {examCenters.map((c) => <option key={c} value={c}>{c}</option>)}
           </select>
           <select value={paymentStatusFilter} onChange={(e) => { setPaymentStatusFilter(e.target.value as 'all' | 'pending' | 'completed' | 'pending_approval'); setPage(1); }} className="px-3 py-1.5 border border-gray-200 rounded-lg text-xs bg-white focus:outline-none focus:border-blue-500">
             <option value="all">All Payment</option>
