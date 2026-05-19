@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import { createPortal } from "react-dom";
 import { Search, Settings, Users, Download, CheckCircle, Trash2, Eye, X } from "lucide-react";
 import Dropdown from "@/components/college-recommender/Dropdown";
@@ -9,6 +9,7 @@ import { toast } from "sonner";
 import { scholarshipProviderApi, VolunteerApplicationItem } from "@/services/scholarshipProviderApi";
 import { getImageUrl } from "@/services/api";
 import ConfirmationModal from "./common/ConfirmationModal";
+import * as XLSX from "xlsx";
 
 
 
@@ -29,26 +30,40 @@ const ManageApplication = () => {
   const [filterDay, setFilterDay] = useState("");
   const [page, setPage] = useState(1);
   const perPage = 10;
-  const [totalItems, setTotalItems] = useState(0);
   const [rejectTarget, setRejectTarget] = useState<{ id: number; name: string } | null>(null);
   const [previewCvPath, setPreviewCvPath] = useState<string | null>(null);
 
   useEffect(() => {
     scholarshipProviderApi.getVolunteerApplications({
-      page, limit: perPage, status: "pending",
-      search: search || undefined,
-      province: filterProvince || undefined,
-      district: filterDistrict || undefined,
-      gender: filterGender || undefined,
-      day: filterDay || undefined,
+      page: 1, limit: 10000, status: "pending",
     })
       .then((res) => {
         setVolunteers(res?.applications || []);
-        setTotalItems(res?.meta?.total || 0);
         setLoading(false);
       })
       .catch(() => { setLoading(false); toast.error("Failed to load applications"); });
-  }, [page, search, filterProvince, filterDistrict, filterGender, filterDay]);
+  }, []);
+
+  const filtered = useMemo(() => {
+    return volunteers.filter(v => {
+      if (search) {
+        const q = search.toLowerCase();
+        if (!v.full_name.toLowerCase().includes(q) && !v.email.toLowerCase().includes(q)) return false;
+      }
+      if (filterProvince && v.province !== filterProvince) return false;
+      if (filterDistrict && v.district !== filterDistrict) return false;
+      if (filterGender && v.gender !== filterGender) return false;
+      if (filterDay) {
+        const dayNum = parseInt(filterDay, 10);
+        const hasDay = v.available_days.some((d: string) => {
+          const parts = d.split('-');
+          return parts.length === 3 && parseInt(parts[2], 10) === dayNum;
+        });
+        if (!hasDay) return false;
+      }
+      return true;
+    });
+  }, [volunteers, search, filterProvince, filterDistrict, filterGender, filterDay]);
 
   const handleShortlist = async (id: number) => {
     try {
@@ -73,8 +88,33 @@ const ManageApplication = () => {
     }
   };
 
-  const totalPages = Math.ceil(totalItems / perPage);
-  const paginated = volunteers;
+  const totalFiltered = filtered.length;
+  const totalPages = Math.ceil(totalFiltered / perPage);
+  const paginated = filtered.slice((page - 1) * perPage, page * perPage);
+
+  const handleExport = () => {
+    const rows = filtered.map((v, i) => ({
+      "S.N": i + 1,
+      "Full Name": v.full_name,
+      Gender: v.gender,
+      Email: v.email,
+      Phone: v.phone,
+      Province: v.province,
+      District: v.district,
+      Municipality: v.municipality,
+      Ward: v.ward,
+      "Participate District": v.participate_district,
+      Designation: v.designation,
+      "Previous Volunteer": v.volunteered_before,
+      "Volunteer Details": v.volunteer_details || "",
+      "Available Days": v.available_days?.join(", ") || "",
+      Registered: v.created_at ? new Date(v.created_at).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" }) : "",
+    }));
+    const ws = XLSX.utils.json_to_sheet(rows);
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, "Applications");
+    XLSX.writeFile(wb, "volunteer_applications.xlsx");
+  };
 
   const resetFilters = () => {
     setSearch("");
@@ -156,7 +196,7 @@ const ManageApplication = () => {
                   className="w-64 pl-9 pr-4 py-2 text-sm border border-gray-200 rounded-lg bg-white focus:outline-none focus:border-blue-500"
                 />
               </div>
-              <button className="px-4 py-2 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-700 flex items-center gap-1.5 transition-colors">
+              <button onClick={handleExport} className="px-4 py-2 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-700 flex items-center gap-1.5 transition-colors">
                 <Download size={16} /> Export
               </button>
             </div>
@@ -305,7 +345,7 @@ const ManageApplication = () => {
 
         <div className="flex items-center justify-between px-6 py-4 border-t border-gray-100">
           <p className="text-sm text-gray-500">
-            Showing <span className="font-medium">{paginated.length}</span> of <span className="font-medium">{totalItems}</span> volunteers
+            Showing <span className="font-medium">{paginated.length}</span> of <span className="font-medium">{totalFiltered}</span> volunteers
           </p>
           <div className="flex items-center gap-2">
             <button
