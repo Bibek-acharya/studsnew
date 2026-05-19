@@ -398,13 +398,20 @@ const OrganizationProfile: React.FC = memo(() => {
               <Field label="PAN Number" value={panNumber} isEditing={isEditing}><input type="text" className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:border-blue-500" value={panNumber} onChange={(e) => setPanNumber(e.target.value)} placeholder="PAN / VAT number" /></Field>
               <Field label="Address" value={address} isEditing={isEditing} span={2}><input type="text" className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:border-blue-500" value={address} onChange={(e) => setAddress(e.target.value)} placeholder="Organization address" /></Field>
               <Field label="Website URL" value={websiteUrl} isEditing={isEditing} span={2}><input type="url" className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:border-blue-500" value={websiteUrl} onChange={(e) => setWebsiteUrl(e.target.value)} placeholder="https://www.example.com" /></Field>
-              <Field label="About Text" value={aboutText} isEditing={isEditing} span={2}>
-                {isEditing ? (
+              {isEditing ? (
+                <Field label="About Text" value={aboutText} isEditing={true} span={2}>
                   <RichTextEditor value={aboutText} onChange={setAboutText} placeholder="Describe your organization..." minHeight={200} />
-                ) : (
-                  <div className="prose prose-sm max-w-none text-gray-700 break-words" dangerouslySetInnerHTML={{ __html: aboutText }} />
-                )}
-              </Field>
+                </Field>
+              ) : (
+                <div className="md:col-span-2">
+                  <label className="block text-sm font-medium text-gray-700 mb-1">About Text</label>
+                  {aboutText ? (
+                    <div className="prose prose-sm max-w-none text-gray-700 break-words [&_*]:break-words" dangerouslySetInnerHTML={{ __html: aboutText }} />
+                  ) : (
+                    <p className="text-sm text-gray-400 py-2">Not provided</p>
+                  )}
+                </div>
+              )}
               <Field label="Mission" value={mission} isEditing={isEditing}><textarea className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:border-blue-500" value={mission} onChange={(e) => setMission(e.target.value)} rows={3} placeholder="Our mission..." /></Field>
               <Field label="Values" value={values} isEditing={isEditing}><textarea className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:border-blue-500" value={values} onChange={(e) => setValues(e.target.value)} rows={3} placeholder="Our values..." /></Field>
             </div>
