@@ -306,7 +306,11 @@ export default function ShikshaApplicationForm({
       console.error("Submission error:", error);
       const msg = error instanceof Error ? error.message : "An error occurred. Please try again.";
       if (msg.toLowerCase().includes("email already exists") || msg.toLowerCase().includes("email already in use")) {
-        setErrors({ email: msg });
+        const formatted = msg.charAt(0).toUpperCase() + msg.slice(1);
+        setErrors({ email: formatted });
+        setTimeout(() => {
+          document.getElementById("email")?.scrollIntoView({ behavior: "smooth", block: "center" });
+        }, 100);
       } else {
         setErrors({ fullName: msg });
       }
