@@ -543,6 +543,8 @@ export interface DashboardStats {
   total_scholarships: number;
   total_applications: number;
   pending_applications: number;
+  approved_applications: number;
+  rejected_applications: number;
   total_interviews: number;
   unread_messages: number;
 }

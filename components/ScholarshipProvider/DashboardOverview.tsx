@@ -98,6 +98,8 @@ const DashboardOverview: React.FC<DashboardOverviewProps> = memo(({ onNavigate }
   const totalDraft = scholarships.filter((s) => s.status === "draft").length;
   const shortlistedCount = analytics?.status_breakdown?.shortlisted || 0;
   const applicationTotal = stats?.total_applications ?? analytics?.total_applications ?? 0;
+  const approvedCount = stats?.approved_applications ?? 0;
+  const rejectedCount = stats?.rejected_applications ?? 0;
   const scholarshipTotal = stats?.total_scholarships ?? scholarships.length;
   const pendingApplications = stats?.pending_applications ?? 0;
 
@@ -246,7 +248,20 @@ const DashboardOverview: React.FC<DashboardOverviewProps> = memo(({ onNavigate }
                     <h3 className="text-xl font-bold text-gray-800">{card.value}</h3>
                   </div>
                 </div>
-                
+                {card.label === "Total Applications" && (
+                  <div className="flex items-center gap-4 mt-3 pt-3 border-t border-gray-100 text-xs">
+                    <span className="flex items-center gap-1.5">
+                      <span className="w-2 h-2 rounded-full bg-green-500" />
+                      <span className="text-gray-500">Approved</span>
+                      <span className="font-semibold text-gray-800">{approvedCount.toLocaleString()}</span>
+                    </span>
+                    <span className="flex items-center gap-1.5">
+                      <span className="w-2 h-2 rounded-full bg-red-500" />
+                      <span className="text-gray-500">Rejected</span>
+                      <span className="font-semibold text-gray-800">{rejectedCount.toLocaleString()}</span>
+                    </span>
+                  </div>
+                )}
               </div>
             ))}
           </div>
