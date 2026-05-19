@@ -32,6 +32,7 @@ export default function ApplicationsDirectory() {
   const [filterProvince, setFilterProvince] = useState("");
   const [filterDistrict, setFilterDistrict] = useState("");
   const [filterSchool, setFilterSchool] = useState("");
+  const [filterStream, setFilterStream] = useState("");
   const [filterStatus, setFilterStatus] = useState("");
   const [filterExamCenter, setFilterExamCenter] = useState("");
   const [paymentStatusFilter, setPaymentStatusFilter] = useState<'all' | 'pending' | 'completed' | 'pending_approval'>('all');
@@ -51,7 +52,7 @@ export default function ApplicationsDirectory() {
       const centers = new Set<string>();
       res.scholarships.forEach((s) => {
         s.exam_centers_new?.forEach((ec: ExamCenterItem) => {
-          if (ec.center_name) centers.add(ec.center_name);
+          if (ec.centerName) centers.add(ec.centerName);
         });
       });
       setExamCenters([...centers].sort());
@@ -71,6 +72,7 @@ export default function ApplicationsDirectory() {
           province: filterProvince || undefined,
           district: filterDistrict || undefined,
           school_type: filterSchool || undefined,
+          stream: filterStream || undefined,
           status: filterStatus?.toLowerCase() || undefined,
           exam_center: filterExamCenter || undefined,
           payment_status: paymentStatusFilter !== 'all' ? paymentStatusFilter : undefined,
@@ -84,7 +86,7 @@ export default function ApplicationsDirectory() {
       }
     }
     fetchData();
-  }, [page, search, filterGender, filterEthnicity, filterProvince, filterDistrict, filterSchool, filterStatus, filterExamCenter, paymentStatusFilter]);
+  }, [page, search, filterGender, filterEthnicity, filterProvince, filterDistrict, filterSchool, filterStream, filterStatus, filterExamCenter, paymentStatusFilter]);
 
   const handleConfirmPayment = async () => {
     if (!selectedAppId) return;
@@ -145,6 +147,7 @@ export default function ApplicationsDirectory() {
     setFilterProvince("");
     setFilterDistrict("");
     setFilterSchool("");
+    setFilterStream("");
     setFilterStatus("");
     setFilterExamCenter("");
     setPaymentStatusFilter("all");
@@ -219,6 +222,11 @@ export default function ApplicationsDirectory() {
           <select value={filterSchool} onChange={(e) => { setFilterSchool(e.target.value); setPage(1); }} className="px-3 py-1.5 border border-gray-200 rounded-lg text-xs bg-white focus:outline-none focus:border-blue-500">
             <option value="">All School Type</option>
             {SCHOOL_TYPE_OPTIONS.map((o) => <option key={o} value={o}>{o}</option>)}
+          </select>
+          <select value={filterStream} onChange={(e) => { setFilterStream(e.target.value); setPage(1); }} className="px-3 py-1.5 border border-gray-200 rounded-lg text-xs bg-white focus:outline-none focus:border-blue-500">
+            <option value="">All Stream</option>
+            <option value="Science">Science</option>
+            <option value="Management">Management</option>
           </select>
           <select value={filterStatus} onChange={(e) => { setFilterStatus(e.target.value); setPage(1); }} className="px-3 py-1.5 border border-gray-200 rounded-lg text-xs bg-white focus:outline-none focus:border-blue-500">
             <option value="">All Status</option>
@@ -471,6 +479,7 @@ export default function ApplicationsDirectory() {
               province: filterProvince || undefined,
               district: filterDistrict || undefined,
               school_type: filterSchool || undefined,
+              stream: filterStream || undefined,
               status: filterStatus?.toLowerCase() || undefined,
               exam_center: filterExamCenter || undefined,
               payment_status: paymentStatusFilter !== 'all' ? paymentStatusFilter : undefined,

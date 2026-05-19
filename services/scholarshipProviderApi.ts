@@ -165,10 +165,13 @@ export interface PartnerMessageItem {
 
 export interface ExamCenterItem {
   province: string;
-  center_name: string;
-  contact_person: string;
-  phone_number: string;
-  map_coordinates: string;
+  centerName: string;
+  contactPerson: string;
+  phoneNumber: string;
+  mapCoordinates: string;
+  headerColor?: string;
+  info?: string;
+  allocatedSeats?: number;
 }
 
 export interface DownloadItem {
@@ -798,6 +801,7 @@ export const scholarshipProviderApi = {
     province?: string;
     district?: string;
     school_type?: string;
+    stream?: string;
     exam_center?: string;
     payment_status?: string;
   }): Promise<{ applications: ProviderApplication[]; meta: { total: number; page: number; limit: number } }> {
@@ -812,6 +816,7 @@ export const scholarshipProviderApi = {
     if (params?.province) queryParams.set('province', params.province);
     if (params?.district) queryParams.set('district', params.district);
     if (params?.school_type) queryParams.set('school_type', params.school_type);
+    if (params?.stream) queryParams.set('stream', params.stream);
     if (params?.exam_center) queryParams.set('exam_center', params.exam_center);
     if (params?.payment_status) queryParams.set('payment_status', params.payment_status);
     return callApi(`/api/v1/scholarship-providers/applications?${queryParams}`);
