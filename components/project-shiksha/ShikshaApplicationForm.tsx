@@ -168,6 +168,7 @@ export default function ShikshaApplicationForm({
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (isSubmitting) return;
 
     const validation = validateForm(formData);
     if (!validation.valid) {
