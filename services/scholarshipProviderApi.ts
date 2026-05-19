@@ -1,12 +1,11 @@
-import apiService from './apiService';
 import { apiRequest } from './api';
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080";
 
 async function callApi<T>(path: string, options: RequestInit = {}): Promise<T> {
-  const res = await apiRequest<any>(path, options);
+  const res = await apiRequest<Record<string, unknown>>(path, options);
   if (res && typeof res === 'object' && 'data' in res) return res.data as T;
-  return res as T;
+  return res as unknown as T;
 }
 
 const FIELD_MAPPINGS = {} as Record<string, string>;
@@ -16,7 +15,7 @@ function mapScholarshipFields(data: Partial<CreateScholarshipPayload>) {
 
   Object.entries(FIELD_MAPPINGS).forEach(([newField, oldField]) => {
     if (newField in mapped) {
-      (mapped as any)[oldField] = mapped[newField];
+      (mapped as Record<string, unknown>)[oldField] = mapped[newField];
       delete mapped[newField];
     }
   });
@@ -35,7 +34,7 @@ async function extractUploadedUrl<T extends { data?: { url?: string }; url?: str
 }
 
 export interface ScholarshipProviderAuthResponse {
-  user: any;
+  user: Record<string, unknown>;
   token: string;
 }
 
@@ -436,7 +435,7 @@ export interface ProviderApplication {
   evaluation_score?: number;
   evaluation_passed?: boolean;
   evaluation_notes: string;
-  documents: any;
+  documents: Array<{ url: string; name?: string; title?: string; type?: string }>;
   personal_statement: string;
   scholarship?: ProviderScholarship;
   created_at: string;
@@ -674,7 +673,7 @@ export interface ProviderResult {
   title: string;
   status: string;
   published_at: string | null;
-  results: any;
+  results: Record<string, unknown>;
   created_at: string;
   updated_at: string;
 }
@@ -687,6 +686,42 @@ export interface ProviderAccess {
   status: string;
   created_at: string;
   updated_at: string;
+}
+
+export interface VolunteerItem {
+  id: number;
+  title: string;
+  banner_image: string;
+  description: string;
+  volunteer_type: string;
+  volunteer_payment: string;
+  date_mode: string;
+  application_deadline: string;
+  specific_dates: string[];
+  districts: string[];
+  active: boolean;
+  applicant_count: number;
+  organizer: string;
+  location: string;
+}
+
+export interface VolunteerApplicationItem {
+  id: number;
+  full_name: string;
+  email: string;
+  phone: string;
+  gender: string;
+  province: string;
+  district: string;
+  municipality: string;
+  ward: string;
+  participate_district: string;
+  designation: string;
+  cv_path: string | null;
+  volunteered_before: string;
+  volunteer_details: string | null;
+  available_days: string[];
+  created_at: string;
 }
 
 export const scholarshipProviderApi = {
@@ -752,13 +787,33 @@ export const scholarshipProviderApi = {
     });
   },
 
-  async getApplications(params?: { page?: number; limit?: number; status?: string; scholarship_id?: string; exam_center?: string }): Promise<{ applications: ProviderApplication[]; meta: { total: number; page: number; limit: number } }> {
+  async getApplications(params?: {
+    page?: number;
+    limit?: number;
+    status?: string;
+    scholarship_id?: string;
+    search?: string;
+    gender?: string;
+    ethnicity?: string;
+    province?: string;
+    district?: string;
+    school_type?: string;
+    exam_center?: string;
+    payment_status?: string;
+  }): Promise<{ applications: ProviderApplication[]; meta: { total: number; page: number; limit: number } }> {
     const queryParams = new URLSearchParams();
     queryParams.set('page', String(params?.page || 1));
     queryParams.set('limit', String(params?.limit || 10));
     if (params?.status) queryParams.set('status', params.status);
     if (params?.scholarship_id) queryParams.set('scholarship_id', params.scholarship_id);
+    if (params?.search) queryParams.set('search', params.search);
+    if (params?.gender) queryParams.set('gender', params.gender);
+    if (params?.ethnicity) queryParams.set('ethnicity', params.ethnicity);
+    if (params?.province) queryParams.set('province', params.province);
+    if (params?.district) queryParams.set('district', params.district);
+    if (params?.school_type) queryParams.set('school_type', params.school_type);
     if (params?.exam_center) queryParams.set('exam_center', params.exam_center);
+    if (params?.payment_status) queryParams.set('payment_status', params.payment_status);
     return callApi(`/api/v1/scholarship-providers/applications?${queryParams}`);
   },
 
@@ -1077,7 +1132,7 @@ export const scholarshipProviderApi = {
     await apiRequest(`/api/v1/scholarship-providers/blogs/${id}`, { method: "DELETE" });
   },
 
-  async createResult(data: { scholarship_id: number; title: string; status?: string; results?: any }): Promise<ProviderResult> {
+  async createResult(data: { scholarship_id: number; title: string; status?: string; results?: Record<string, unknown>[] }): Promise<ProviderResult> {
     return apiRequest<ProviderResult>("/api/v1/scholarship-providers/results", {
       method: "POST",
       body: JSON.stringify(data),
@@ -1086,14 +1141,14 @@ export const scholarshipProviderApi = {
 
   async getResults(page = 1, limit = 10): Promise<{ results: ProviderResult[]; meta: { total: number; page: number; limit: number } }> {
     const params = new URLSearchParams({ page: String(page), limit: String(limit) }).toString();
-    return apiRequest(`/api/v1/scholarship-providers/results?${params}`);
+    return apiRequest<{ results: ProviderResult[]; meta: { total: number; page: number; limit: number } }>(`/api/v1/scholarship-providers/results?${params}`);
   },
 
   async getResultById(id: number): Promise<ProviderResult> {
     return apiRequest<ProviderResult>(`/api/v1/scholarship-providers/results/${id}`);
   },
 
-  async updateResult(id: number, data: { scholarship_id: number; title: string; status?: string; results?: any }): Promise<ProviderResult> {
+  async updateResult(id: number, data: { scholarship_id: number; title: string; status?: string; results?: Record<string, unknown>[] }): Promise<ProviderResult> {
     return apiRequest<ProviderResult>(`/api/v1/scholarship-providers/results/${id}`, {
       method: "PUT",
       body: JSON.stringify(data),
@@ -1154,47 +1209,62 @@ export const scholarshipProviderApi = {
 
   // ─── Volunteer API ──────────────────────────────────────────────────
 
-  async getVolunteers(page = 1, limit = 20): Promise<any> {
+  async getVolunteers(page = 1, limit = 20): Promise<{ volunteers: VolunteerItem[]; meta: { total: number; page: number; limit: number } }> {
     return callApi(`/api/v1/scholarship-providers/volunteers?page=${page}&limit=${limit}`);
   },
 
-  async getVolunteerByID(id: number): Promise<any> {
+  async getVolunteerByID(id: number): Promise<{ data: Record<string, unknown> } | Record<string, unknown>> {
     return callApi(`/api/v1/scholarship-providers/volunteers/${id}`);
   },
 
-  async createVolunteer(data: any): Promise<any> {
-    return callApi('/api/v1/scholarship-providers/volunteers', {
+  async createVolunteer(data: Record<string, unknown>): Promise<void> {
+    await callApi('/api/v1/scholarship-providers/volunteers', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(data),
     });
   },
 
-  async updateVolunteer(id: number, data: any): Promise<any> {
-    return callApi(`/api/v1/scholarship-providers/volunteers/${id}`, {
+  async updateVolunteer(id: number, data: Record<string, unknown>): Promise<void> {
+    await callApi(`/api/v1/scholarship-providers/volunteers/${id}`, {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(data),
     });
   },
 
-  async deleteVolunteer(id: number): Promise<any> {
-    return callApi(`/api/v1/scholarship-providers/volunteers/${id}`, {
+  async deleteVolunteer(id: number): Promise<void> {
+    await callApi(`/api/v1/scholarship-providers/volunteers/${id}`, {
       method: 'DELETE',
     });
   },
 
-  async toggleVolunteer(id: number): Promise<any> {
-    return callApi(`/api/v1/scholarship-providers/volunteers/${id}/toggle`, {
+  async toggleVolunteer(id: number): Promise<void> {
+    await callApi(`/api/v1/scholarship-providers/volunteers/${id}/toggle`, {
       method: 'PUT',
     });
   },
 
-  async getVolunteerApplications(params?: { volunteerId?: number; page?: number; limit?: number; status?: string }): Promise<any> {
+  async getVolunteerApplications(params?: {
+    volunteerId?: number;
+    page?: number;
+    limit?: number;
+    status?: string;
+    search?: string;
+    province?: string;
+    district?: string;
+    gender?: string;
+    day?: string;
+  }): Promise<{ applications: VolunteerApplicationItem[]; meta: { total: number; page: number; limit: number } }> {
     const queryParams = new URLSearchParams();
     queryParams.set('page', String(params?.page || 1));
     queryParams.set('limit', String(params?.limit || 10));
     if (params?.status) queryParams.set('status', params.status);
+    if (params?.search) queryParams.set('search', params.search);
+    if (params?.province) queryParams.set('province', params.province);
+    if (params?.district) queryParams.set('district', params.district);
+    if (params?.gender) queryParams.set('gender', params.gender);
+    if (params?.day) queryParams.set('day', params.day);
     let path = `/api/v1/scholarship-providers/volunteers/applications?${queryParams}`;
     if (params?.volunteerId) {
       path = `/api/v1/scholarship-providers/volunteers/${params.volunteerId}/applications?${queryParams}`;
@@ -1202,20 +1272,20 @@ export const scholarshipProviderApi = {
     return callApi(path);
   },
 
-  async shortlistVolunteerApplication(id: number): Promise<any> {
-    return callApi(`/api/v1/scholarship-providers/volunteers/applications/${id}/shortlist`, {
+  async shortlistVolunteerApplication(id: number): Promise<void> {
+    await callApi(`/api/v1/scholarship-providers/volunteers/applications/${id}/shortlist`, {
       method: 'PUT',
     });
   },
 
-  async unshortlistVolunteerApplication(id: number): Promise<any> {
-    return callApi(`/api/v1/scholarship-providers/volunteers/applications/${id}/unshortlist`, {
+  async unshortlistVolunteerApplication(id: number): Promise<void> {
+    await callApi(`/api/v1/scholarship-providers/volunteers/applications/${id}/unshortlist`, {
       method: 'PUT',
     });
   },
 
-  async rejectVolunteerApplication(id: number): Promise<any> {
-    return callApi(`/api/v1/scholarship-providers/volunteers/applications/${id}/reject`, {
+  async rejectVolunteerApplication(id: number): Promise<void> {
+    await callApi(`/api/v1/scholarship-providers/volunteers/applications/${id}/reject`, {
       method: 'PUT',
     });
   },
@@ -1234,39 +1304,39 @@ export const createCalendarEvent = async (data: Partial<ProviderCalendarEvent>):
   return res.data;
 };
 
-export const updateCalendarEvent = async (id: number, data: any) => {
-  return apiRequest(`/api/v1/scholarship-providers/calendar-events/${id}`, {
+export const updateCalendarEvent = async (id: number, data: Record<string, unknown>): Promise<Record<string, unknown>> => {
+  return apiRequest<Record<string, unknown>>(`/api/v1/scholarship-providers/calendar-events/${id}`, {
     method: 'PUT',
     body: JSON.stringify(data),
   });
 };
 
-export const deleteCalendarEvent = async (id: number) => {
-  return apiRequest(`/api/v1/scholarship-providers/calendar-events/${id}`, { method: 'DELETE' });
+export const deleteCalendarEvent = async (id: number): Promise<void> => {
+  await apiRequest(`/api/v1/scholarship-providers/calendar-events/${id}`, { method: 'DELETE' });
 };
 
-export const getPublicNews = async (page = 1, limit = 12) => {
-  const res = await apiRequest<{ data: { news: ProviderNews[]; meta: any } }>(
+export const getPublicNews = async (page = 1, limit = 12): Promise<{ news: ProviderNews[]; meta: Record<string, unknown> }> => {
+  const res = await apiRequest<{ data: { news: ProviderNews[]; meta: Record<string, unknown> } }>(
     `/api/v1/public/news?page=${page}&limit=${limit}`
   );
   return res.data;
 };
 
-export const getPublicEvents = async (page = 1, limit = 12) => {
-  const res = await apiRequest<{ data: { events: ProviderEvent[]; meta: any } }>(
+export const getPublicEvents = async (page = 1, limit = 12): Promise<{ events: ProviderEvent[]; meta: Record<string, unknown> }> => {
+  const res = await apiRequest<{ data: { events: ProviderEvent[]; meta: Record<string, unknown> } }>(
     `/api/v1/public/events?page=${page}&limit=${limit}`
   );
   return res.data;
 };
 
-export const getPublicBlogs = async (page = 1, limit = 12) => {
-  const res = await apiRequest<{ data: { blogs: ProviderBlog[]; meta: any } }>(
+export const getPublicBlogs = async (page = 1, limit = 12): Promise<{ blogs: ProviderBlog[]; meta: Record<string, unknown> }> => {
+  const res = await apiRequest<{ data: { blogs: ProviderBlog[]; meta: Record<string, unknown> } }>(
     `/api/v1/public/blogs?page=${page}&limit=${limit}`
   );
   return res.data;
 };
 
-export const getPublicBlogByID = async (id: number) => {
+export const getPublicBlogByID = async (id: number): Promise<ProviderBlog> => {
   const res = await apiRequest<{ data: ProviderBlog }>(
     `/api/v1/public/blogs/${id}`
   );
@@ -1274,20 +1344,20 @@ export const getPublicBlogByID = async (id: number) => {
 };
 
 // ─── Provider Profile Content CRUD ──────────────────────────────
-export const getServices = async () => {
-  const res = await apiRequest<any>(`/api/v1/scholarship-providers/services`);
+export const getServices = async (): Promise<unknown[]> => {
+  const res = await apiRequest<{ data: unknown[] }>(`/api/v1/scholarship-providers/services`);
   return res.data;
 };
 
-export const createService = async (data: any) => {
-  const res = await apiRequest<any>(`/api/v1/scholarship-providers/services`, {
+export const createService = async (data: Record<string, unknown>): Promise<unknown> => {
+  const res = await apiRequest<{ data: unknown }>(`/api/v1/scholarship-providers/services`, {
     method: 'POST', body: JSON.stringify(data),
   });
   return res.data;
 };
 
-export const updateService = async (id: number, data: any) => {
-  const res = await apiRequest<any>(`/api/v1/scholarship-providers/services/${id}`, {
+export const updateService = async (id: number, data: Record<string, unknown>): Promise<unknown> => {
+  const res = await apiRequest<{ data: unknown }>(`/api/v1/scholarship-providers/services/${id}`, {
     method: 'PUT', body: JSON.stringify(data),
   });
   return res.data;
@@ -1406,98 +1476,98 @@ export const writtenExamApi = {
   },
 };
 
-export const deleteService = async (id: number) => {
+export const deleteService = async (id: number): Promise<void> => {
   await apiRequest(`/api/v1/scholarship-providers/services/${id}`, { method: 'DELETE' });
 };
 
-export const getSectors = async () => {
-  const res = await apiRequest<any>(`/api/v1/scholarship-providers/sectors`);
+export const getSectors = async (): Promise<unknown[]> => {
+  const res = await apiRequest<{ data: unknown[] }>(`/api/v1/scholarship-providers/sectors`);
   return res.data;
 };
 
-export const createSector = async (data: any) => {
-  const res = await apiRequest<any>(`/api/v1/scholarship-providers/sectors`, {
+export const createSector = async (data: Record<string, unknown>): Promise<unknown> => {
+  const res = await apiRequest<{ data: unknown }>(`/api/v1/scholarship-providers/sectors`, {
     method: 'POST', body: JSON.stringify(data),
   });
   return res.data;
 };
 
-export const updateSector = async (id: number, data: any) => {
-  const res = await apiRequest<any>(`/api/v1/scholarship-providers/sectors/${id}`, {
+export const updateSector = async (id: number, data: Record<string, unknown>): Promise<unknown> => {
+  const res = await apiRequest<{ data: unknown }>(`/api/v1/scholarship-providers/sectors/${id}`, {
     method: 'PUT', body: JSON.stringify(data),
   });
   return res.data;
 };
 
-export const deleteSector = async (id: number) => {
+export const deleteSector = async (id: number): Promise<void> => {
   await apiRequest(`/api/v1/scholarship-providers/sectors/${id}`, { method: 'DELETE' });
 };
 
-export const getProjects = async () => {
-  const res = await apiRequest<any>(`/api/v1/scholarship-providers/projects`);
+export const getProjects = async (): Promise<unknown[]> => {
+  const res = await apiRequest<{ data: unknown[] }>(`/api/v1/scholarship-providers/projects`);
   return res.data;
 };
 
-export const createProject = async (data: any) => {
-  const res = await apiRequest<any>(`/api/v1/scholarship-providers/projects`, {
+export const createProject = async (data: Record<string, unknown>): Promise<unknown> => {
+  const res = await apiRequest<{ data: unknown }>(`/api/v1/scholarship-providers/projects`, {
     method: 'POST', body: JSON.stringify(data),
   });
   return res.data;
 };
 
-export const updateProject = async (id: number, data: any) => {
-  const res = await apiRequest<any>(`/api/v1/scholarship-providers/projects/${id}`, {
+export const updateProject = async (id: number, data: Record<string, unknown>): Promise<unknown> => {
+  const res = await apiRequest<{ data: unknown }>(`/api/v1/scholarship-providers/projects/${id}`, {
     method: 'PUT', body: JSON.stringify(data),
   });
   return res.data;
 };
 
-export const deleteProject = async (id: number) => {
+export const deleteProject = async (id: number): Promise<void> => {
   await apiRequest(`/api/v1/scholarship-providers/projects/${id}`, { method: 'DELETE' });
 };
 
-export const getGalleryImages = async () => {
-  const res = await apiRequest<any>(`/api/v1/scholarship-providers/gallery`);
+export const getGalleryImages = async (): Promise<unknown[]> => {
+  const res = await apiRequest<{ data: unknown[] }>(`/api/v1/scholarship-providers/gallery`);
   return res.data;
 };
 
-export const createGalleryImage = async (data: any) => {
-  const res = await apiRequest<any>(`/api/v1/scholarship-providers/gallery`, {
+export const createGalleryImage = async (data: Record<string, unknown>): Promise<unknown> => {
+  const res = await apiRequest<{ data: unknown }>(`/api/v1/scholarship-providers/gallery`, {
     method: 'POST', body: JSON.stringify(data),
   });
   return res.data;
 };
 
-export const updateGalleryImage = async (id: number, data: any) => {
-  const res = await apiRequest<any>(`/api/v1/scholarship-providers/gallery/${id}`, {
+export const updateGalleryImage = async (id: number, data: Record<string, unknown>): Promise<unknown> => {
+  const res = await apiRequest<{ data: unknown }>(`/api/v1/scholarship-providers/gallery/${id}`, {
     method: 'PUT', body: JSON.stringify(data),
   });
   return res.data;
 };
 
-export const deleteGalleryImage = async (id: number) => {
+export const deleteGalleryImage = async (id: number): Promise<void> => {
   await apiRequest(`/api/v1/scholarship-providers/gallery/${id}`, { method: 'DELETE' });
 };
 
-export const getReviews = async () => {
-  const res = await apiRequest<any>(`/api/v1/scholarship-providers/reviews`);
+export const getReviews = async (): Promise<unknown[]> => {
+  const res = await apiRequest<{ data: unknown[] }>(`/api/v1/scholarship-providers/reviews`);
   return res.data;
 };
 
-export const createReview = async (data: any) => {
-  const res = await apiRequest<any>(`/api/v1/scholarship-providers/reviews`, {
+export const createReview = async (data: Record<string, unknown>): Promise<unknown> => {
+  const res = await apiRequest<{ data: unknown }>(`/api/v1/scholarship-providers/reviews`, {
     method: 'POST', body: JSON.stringify(data),
   });
   return res.data;
 };
 
-export const updateReview = async (id: number, data: any) => {
-  const res = await apiRequest<any>(`/api/v1/scholarship-providers/reviews/${id}`, {
+export const updateReview = async (id: number, data: Record<string, unknown>): Promise<unknown> => {
+  const res = await apiRequest<{ data: unknown }>(`/api/v1/scholarship-providers/reviews/${id}`, {
     method: 'PUT', body: JSON.stringify(data),
   });
   return res.data;
 };
 
-export const deleteReview = async (id: number) => {
+export const deleteReview = async (id: number): Promise<void> => {
   await apiRequest(`/api/v1/scholarship-providers/reviews/${id}`, { method: 'DELETE' });
 };

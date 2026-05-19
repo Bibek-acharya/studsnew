@@ -35,7 +35,7 @@ export default function ApplicationsDirectory() {
   const [showRejectModal, setShowRejectModal] = useState(false);
   const [showConfirmModal, setShowConfirmModal] = useState(false);
   const [selectedAppId, setSelectedAppId] = useState<number | null>(null);
-  const [isApproveAction, setIsApproveAction] = useState(true);
+  const [isApproveAction] = useState(true);
   const [rejectionReason, setRejectionReason] = useState('');
   const [showAppRejectModal, setShowAppRejectModal] = useState(false);
   const [appRejectReason, setAppRejectReason] = useState('');
@@ -48,7 +48,15 @@ export default function ApplicationsDirectory() {
         const res = await scholarshipProviderApi.getApplications({
           page,
           limit,
+          search: search || undefined,
+          gender: filterGender || undefined,
+          ethnicity: filterEthnicity || undefined,
+          province: filterProvince || undefined,
+          district: filterDistrict || undefined,
+          school_type: filterSchool || undefined,
+          status: filterStatus?.toLowerCase() || undefined,
           exam_center: filterExamCenter || undefined,
+          payment_status: paymentStatusFilter !== 'all' ? paymentStatusFilter : undefined,
         });
         setApplications(res.applications);
         setTotal(res.meta.total);
@@ -59,18 +67,7 @@ export default function ApplicationsDirectory() {
       }
     }
     fetchData();
-  }, [page, filterExamCenter]);
-
-  const handlePaymentAction = (applicationId: number, approve: boolean) => {
-    setSelectedAppId(applicationId);
-    setIsApproveAction(approve);
-    if (approve) {
-      setShowConfirmModal(true);
-    } else {
-      setRejectionReason('');
-      setShowRejectModal(true);
-    }
-  };
+  }, [page, search, filterGender, filterEthnicity, filterProvince, filterDistrict, filterSchool, filterStatus, filterExamCenter, paymentStatusFilter]);
 
   const handleConfirmPayment = async () => {
     if (!selectedAppId) return;
@@ -87,7 +84,7 @@ export default function ApplicationsDirectory() {
       setShowRejectModal(false);
       setSelectedAppId(null);
       setRejectionReason('');
-    } catch (err) {
+    } catch {
       toast.error('Failed to process payment');
     }
   };
@@ -124,23 +121,6 @@ export default function ApplicationsDirectory() {
     }
   };
 
-  const filtered = applications.filter((a) => {
-    if (a.status === "shortlisted") return false;
-    const name = `${a.first_name} ${a.last_name}`.toLowerCase();
-    if (search && !name.includes(search.toLowerCase())) return false;
-    if (filterGender && a.gender !== filterGender) return false;
-    if (filterEthnicity && a.ethnicity !== filterEthnicity) return false;
-    if (filterProvince && a.province !== filterProvince) return false;
-    if (filterDistrict && a.district !== filterDistrict) return false;
-    if (filterSchool && a.school_type !== filterSchool) return false;
-    if (filterStatus && a.status !== filterStatus.toLowerCase()) return false;
-    if (paymentStatusFilter !== 'all') {
-      const paymentStatus = a.payment?.status;
-      if (paymentStatus !== paymentStatusFilter) return false;
-    }
-    return true;
-  });
-
   const clearFilters = () => {
     setSearch("");
     setFilterGender("");
@@ -151,6 +131,7 @@ export default function ApplicationsDirectory() {
     setFilterStatus("");
     setFilterExamCenter("");
     setPaymentStatusFilter("all");
+    setPage(1);
   };
 
   const totalPages = Math.ceil(total / limit);
@@ -194,7 +175,7 @@ export default function ApplicationsDirectory() {
               className="w-full pl-10 pr-3 py-2 border border-gray-200 rounded-lg text-sm bg-white focus:outline-none focus:border-blue-500"
               placeholder="Search by name, phone..."
               value={search}
-              onChange={(e) => setSearch(e.target.value)}
+              onChange={(e) => { setSearch(e.target.value); setPage(1); }}
             />
           </div>
         </div>
@@ -202,27 +183,27 @@ export default function ApplicationsDirectory() {
         <div className="flex flex-wrap items-center gap-3 mb-6 p-4 bg-gray-50 rounded-lg border border-gray-100">
           <span className="text-xs font-semibold text-gray-700 mr-1">Filters:</span>
 
-          <select value={filterGender} onChange={(e) => setFilterGender(e.target.value)} className="px-3 py-1.5 border border-gray-200 rounded-lg text-xs bg-white focus:outline-none focus:border-blue-500">
+          <select value={filterGender} onChange={(e) => { setFilterGender(e.target.value); setPage(1); }} className="px-3 py-1.5 border border-gray-200 rounded-lg text-xs bg-white focus:outline-none focus:border-blue-500">
             <option value="">All Gender</option>
             {GENDER_OPTIONS.map((o) => <option key={o} value={o}>{o}</option>)}
           </select>
-          <select value={filterEthnicity} onChange={(e) => setFilterEthnicity(e.target.value)} className="px-3 py-1.5 border border-gray-200 rounded-lg text-xs bg-white focus:outline-none focus:border-blue-500">
+          <select value={filterEthnicity} onChange={(e) => { setFilterEthnicity(e.target.value); setPage(1); }} className="px-3 py-1.5 border border-gray-200 rounded-lg text-xs bg-white focus:outline-none focus:border-blue-500">
             <option value="">All Ethnicity</option>
             {ETHNICITY_OPTIONS.map((o) => <option key={o} value={o}>{o}</option>)}
           </select>
-          <select value={filterProvince} onChange={(e) => setFilterProvince(e.target.value)} className="px-3 py-1.5 border border-gray-200 rounded-lg text-xs bg-white focus:outline-none focus:border-blue-500">
+          <select value={filterProvince} onChange={(e) => { setFilterProvince(e.target.value); setPage(1); }} className="px-3 py-1.5 border border-gray-200 rounded-lg text-xs bg-white focus:outline-none focus:border-blue-500">
             <option value="">All Province</option>
             {PROVINCE_OPTIONS.map((o) => <option key={o} value={o}>{o}</option>)}
           </select>
-          <select value={filterDistrict} onChange={(e) => setFilterDistrict(e.target.value)} className="px-3 py-1.5 border border-gray-200 rounded-lg text-xs bg-white focus:outline-none focus:border-blue-500">
+          <select value={filterDistrict} onChange={(e) => { setFilterDistrict(e.target.value); setPage(1); }} className="px-3 py-1.5 border border-gray-200 rounded-lg text-xs bg-white focus:outline-none focus:border-blue-500">
             <option value="">All District</option>
             {DISTRICT_OPTIONS.map((o) => <option key={o} value={o}>{o}</option>)}
           </select>
-          <select value={filterSchool} onChange={(e) => setFilterSchool(e.target.value)} className="px-3 py-1.5 border border-gray-200 rounded-lg text-xs bg-white focus:outline-none focus:border-blue-500">
+          <select value={filterSchool} onChange={(e) => { setFilterSchool(e.target.value); setPage(1); }} className="px-3 py-1.5 border border-gray-200 rounded-lg text-xs bg-white focus:outline-none focus:border-blue-500">
             <option value="">All School Type</option>
             {SCHOOL_TYPE_OPTIONS.map((o) => <option key={o} value={o}>{o}</option>)}
           </select>
-          <select value={filterStatus} onChange={(e) => setFilterStatus(e.target.value)} className="px-3 py-1.5 border border-gray-200 rounded-lg text-xs bg-white focus:outline-none focus:border-blue-500">
+          <select value={filterStatus} onChange={(e) => { setFilterStatus(e.target.value); setPage(1); }} className="px-3 py-1.5 border border-gray-200 rounded-lg text-xs bg-white focus:outline-none focus:border-blue-500">
             <option value="">All Status</option>
             {STATUS_OPTIONS.map((o) => <option key={o} value={o}>{o}</option>)}
           </select>
@@ -230,14 +211,14 @@ export default function ApplicationsDirectory() {
             <option value="">All Centers</option>
             {[...new Set(applications.map((a) => a.exam_center).filter(Boolean))].sort().map((c) => <option key={c} value={c}>{c}</option>)}
           </select>
-          <select value={paymentStatusFilter} onChange={(e) => setPaymentStatusFilter(e.target.value as 'all' | 'pending' | 'completed' | 'pending_approval')} className="px-3 py-1.5 border border-gray-200 rounded-lg text-xs bg-white focus:outline-none focus:border-blue-500">
+          <select value={paymentStatusFilter} onChange={(e) => { setPaymentStatusFilter(e.target.value as 'all' | 'pending' | 'completed' | 'pending_approval'); setPage(1); }} className="px-3 py-1.5 border border-gray-200 rounded-lg text-xs bg-white focus:outline-none focus:border-blue-500">
             <option value="all">All Payment</option>
             <option value="pending">Pending</option>
             <option value="completed">Completed</option>
             <option value="pending_approval">Pending Approval</option>
           </select>
           <button onClick={clearFilters} className="text-xs text-blue-600 font-medium hover:underline">Clear All</button>
-          <span className="text-xs text-gray-400 ml-auto">{filtered.length} of {total} applications</span>
+            <span className="text-xs text-gray-400 ml-auto">{applications.length} of {total} applications</span>
         </div>
 
         {loading ? (
@@ -267,9 +248,9 @@ export default function ApplicationsDirectory() {
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-gray-100">
-                  {filtered.length === 0 ? (
+                  {applications.length === 0 ? (
                     <tr><td colSpan={16} className="py-8 text-center text-slate-500">No applications found</td></tr>
-                  ) : filtered.map((app, idx) => (
+                  ) : applications.map((app) => (
                     <tr key={app.id} className="hover:bg-gray-50">
                       <td className="text-center py-3 px-3"><input type="checkbox" className="rounded" /></td>
                       <td className="text-center py-3 px-3 font-mono font-medium text-blue-600">{appId(app.id)}</td>
@@ -353,11 +334,25 @@ export default function ApplicationsDirectory() {
                 <button onClick={() => setPage((p) => Math.max(1, p - 1))} disabled={page === 1} className="w-8 h-8 flex items-center justify-center rounded-lg border border-gray-200 text-gray-400 disabled:cursor-not-allowed disabled:opacity-50 hover:bg-gray-50">
                   <ChevronLeft className="w-4 h-4" />
                 </button>
-                {Array.from({ length: Math.min(totalPages, 5) }, (_, i) => i + 1).map((p) => (
-                  <button key={p} onClick={() => setPage(p)} className={`w-8 h-8 flex items-center justify-center rounded-lg text-sm font-medium ${p === page ? "bg-blue-600 text-white" : "border border-gray-200 text-gray-600 hover:bg-gray-50"}`}>{p}</button>
-                ))}
-                {totalPages > 5 && <span className="text-gray-400">...</span>}
-                {totalPages > 5 && <button onClick={() => setPage(totalPages)} className="w-8 h-8 flex items-center justify-center rounded-lg border border-gray-200 text-gray-600 hover:bg-gray-50 text-sm">{totalPages}</button>}
+                {(() => {
+                  const pages: (number | string)[] = [];
+                  if (totalPages <= 7) {
+                    for (let i = 1; i <= totalPages; i++) pages.push(i);
+                  } else {
+                    pages.push(1);
+                    if (page > 3) pages.push('...');
+                    for (let i = Math.max(2, page - 1); i <= Math.min(totalPages - 1, page + 1); i++) pages.push(i);
+                    if (page < totalPages - 2) pages.push('...');
+                    pages.push(totalPages);
+                  }
+                  return pages.map((p, i) =>
+                    typeof p === 'string' ? (
+                      <span key={`e-${i}`} className="text-gray-400 px-1">...</span>
+                    ) : (
+                      <button key={p} onClick={() => setPage(p)} className={`w-8 h-8 flex items-center justify-center rounded-lg text-sm font-medium ${p === page ? "bg-blue-600 text-white" : "border border-gray-200 text-gray-600 hover:bg-gray-50"}`}>{p}</button>
+                    )
+                  );
+                })()}
                 <button onClick={() => setPage((p) => Math.min(totalPages, p + 1))} disabled={page === totalPages} className="w-8 h-8 flex items-center justify-center rounded-lg border border-gray-200 text-gray-400 disabled:cursor-not-allowed disabled:opacity-50 hover:bg-gray-50">
                   <ChevronRight className="w-4 h-4" />
                 </button>
@@ -451,8 +446,18 @@ export default function ApplicationsDirectory() {
           applicationId={selectedApplicantId}
           onClose={() => setSelectedApplicantId(null)}
           onStatusUpdate={() => {
-            // Refresh the list after status change
-            scholarshipProviderApi.getApplications({ page, limit }).then((res) => {
+            scholarshipProviderApi.getApplications({
+              page, limit,
+              search: search || undefined,
+              gender: filterGender || undefined,
+              ethnicity: filterEthnicity || undefined,
+              province: filterProvince || undefined,
+              district: filterDistrict || undefined,
+              school_type: filterSchool || undefined,
+              status: filterStatus?.toLowerCase() || undefined,
+              exam_center: filterExamCenter || undefined,
+              payment_status: paymentStatusFilter !== 'all' ? paymentStatusFilter : undefined,
+            }).then((res) => {
               setApplications(res.applications);
               setTotal(res.meta.total);
             }).catch(() => {});

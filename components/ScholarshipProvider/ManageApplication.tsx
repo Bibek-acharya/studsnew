@@ -1,12 +1,12 @@
 "use client";
 
-import React, { useState, useMemo, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import { createPortal } from "react-dom";
 import { Search, Settings, Users, Download, CheckCircle, Trash2 } from "lucide-react";
 import Dropdown from "@/components/college-recommender/Dropdown";
 import { NEPAL_DISTRICTS, NEPAL_PROVINCES } from "@/lib/location-data";
 import { toast } from "sonner";
-import { scholarshipProviderApi } from "@/services/scholarshipProviderApi";
+import { scholarshipProviderApi, VolunteerApplicationItem } from "@/services/scholarshipProviderApi";
 import { getImageUrl } from "@/services/api";
 import ConfirmationModal from "./common/ConfirmationModal";
 
@@ -20,7 +20,7 @@ const getDistrictsForProvince = (province: string) =>
     : allDistricts;
 
 const ManageApplication = () => {
-  const [volunteers, setVolunteers] = useState<any[]>([]);
+  const [volunteers, setVolunteers] = useState<VolunteerApplicationItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
   const [filterProvince, setFilterProvince] = useState("");
@@ -33,15 +33,21 @@ const ManageApplication = () => {
   const [rejectTarget, setRejectTarget] = useState<{ id: number; name: string } | null>(null);
 
   useEffect(() => {
-    setLoading(true);
-    scholarshipProviderApi.getVolunteerApplications({ page, limit: perPage, status: "pending" })
-      .then((res: any) => {
+    scholarshipProviderApi.getVolunteerApplications({
+      page, limit: perPage, status: "pending",
+      search: search || undefined,
+      province: filterProvince || undefined,
+      district: filterDistrict || undefined,
+      gender: filterGender || undefined,
+      day: filterDay || undefined,
+    })
+      .then((res) => {
         setVolunteers(res?.applications || []);
         setTotalItems(res?.meta?.total || 0);
         setLoading(false);
       })
       .catch(() => { setLoading(false); toast.error("Failed to load applications"); });
-  }, [page]);
+  }, [page, search, filterProvince, filterDistrict, filterGender, filterDay]);
 
   const handleShortlist = async (id: number) => {
     try {
@@ -66,27 +72,8 @@ const ManageApplication = () => {
     }
   };
 
-  const filtered = useMemo(() => {
-    return volunteers.filter(v => {
-      const q = search.toLowerCase();
-      if (q && !v.full_name.toLowerCase().includes(q) && !v.email.toLowerCase().includes(q)) return false;
-      if (filterProvince && v.province !== filterProvince) return false;
-      if (filterDistrict && v.district !== filterDistrict) return false;
-      if (filterGender && v.gender !== filterGender) return false;
-      if (filterDay) {
-        const dayNum = parseInt(filterDay, 10);
-        const hasDay = v.available_days.some((d: string) => {
-          const parts = d.split('-');
-          return parts.length === 3 && parseInt(parts[2], 10) === dayNum;
-        });
-        if (!hasDay) return false;
-      }
-      return true;
-    });
-  }, [volunteers, search, filterProvince, filterDistrict, filterGender, filterDay]);
-
   const totalPages = Math.ceil(totalItems / perPage);
-  const paginated = filtered;
+  const paginated = volunteers;
 
   const resetFilters = () => {
     setSearch("");
@@ -237,13 +224,13 @@ const ManageApplication = () => {
                     <span className="bg-purple-100 text-purple-700 px-3 py-1 rounded-full text-xs font-bold whitespace-nowrap">{v.designation}</span>
                   </td>
                   <td className="py-4 px-4 text-center">
-                    {v.cv_path ? (
-                      <button onClick={async () => { const r = await fetch(getImageUrl(v.cv_path)); const b = await r.blob(); const u = URL.createObjectURL(b); const a = document.createElement('a'); a.href = u; a.download = v.cv_path.split('/').pop() || 'cv'; document.body.appendChild(a); a.click(); document.body.removeChild(a); URL.revokeObjectURL(u); }} className="p-2 hover:bg-blue-100 rounded-lg text-blue-600 transition-colors inline-flex" title="Download CV / Resume">
+                    {(() => { const cvPath = v.cv_path; return cvPath ? (
+                      <button onClick={async () => { const r = await fetch(getImageUrl(cvPath)); const b = await r.blob(); const u = URL.createObjectURL(b); const a = document.createElement('a'); a.href = u; a.download = cvPath.split('/').pop() || 'cv'; document.body.appendChild(a); a.click(); document.body.removeChild(a); URL.revokeObjectURL(u); }} className="p-2 hover:bg-blue-100 rounded-lg text-blue-600 transition-colors inline-flex" title="Download CV / Resume">
                         <Download size={18} />
                       </button>
                     ) : (
                       <span className="text-gray-300">-</span>
-                    )}
+                    ); })()}
                   </td>
                   <td className="py-4 px-4 text-center">
                     {v.volunteered_before === "Yes" ? (
@@ -290,22 +277,33 @@ const ManageApplication = () => {
             >
               <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" /></svg>
             </button>
-            {Array.from({ length: Math.min(totalPages, 5) }, (_, i) => {
-              const start = Math.max(1, page - 2);
-              const p = start + i;
-              if (p > totalPages) return null;
-              return (
-                <button
-                  key={p}
-                  onClick={() => setPage(p)}
-                  className={`w-8 h-8 flex items-center justify-center rounded-lg text-sm font-medium ${
-                    page === p ? "bg-blue-600 text-white" : "border border-gray-200 text-gray-600 hover:bg-gray-50"
-                  }`}
-                >
-                  {p}
-                </button>
+            {(() => {
+              const pages: (number | string)[] = [];
+              if (totalPages <= 7) {
+                for (let i = 1; i <= totalPages; i++) pages.push(i);
+              } else {
+                pages.push(1);
+                if (page > 3) pages.push('...');
+                for (let i = Math.max(2, page - 1); i <= Math.min(totalPages - 1, page + 1); i++) pages.push(i);
+                if (page < totalPages - 2) pages.push('...');
+                pages.push(totalPages);
+              }
+              return pages.map((p, i) =>
+                typeof p === 'string' ? (
+                  <span key={`e-${i}`} className="text-gray-400 px-1">...</span>
+                ) : (
+                  <button
+                    key={p}
+                    onClick={() => setPage(p)}
+                    className={`w-8 h-8 flex items-center justify-center rounded-lg text-sm font-medium ${
+                      page === p ? "bg-blue-600 text-white" : "border border-gray-200 text-gray-600 hover:bg-gray-50"
+                    }`}
+                  >
+                    {p}
+                  </button>
+                )
               );
-            })}
+            })()}
             <button
               disabled={page >= totalPages}
               onClick={() => setPage(p => p + 1)}
