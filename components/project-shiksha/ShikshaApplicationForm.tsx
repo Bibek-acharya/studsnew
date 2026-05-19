@@ -192,8 +192,16 @@ export default function ShikshaApplicationForm({
       if (formData.photo) {
         try {
           photo_url = await apiService.uploadScholarshipFile(formData.photo, "photos");
+          if (!photo_url) {
+            setErrors((prev) => ({ ...prev, photo: "Photo upload failed. Please try again." }));
+            setIsSubmitting(false);
+            return;
+          }
         } catch (uploadError) {
           console.error("Photo upload error:", uploadError);
+          setErrors((prev) => ({ ...prev, photo: "Photo upload failed. Please try again." }));
+          setIsSubmitting(false);
+          return;
         }
       }
 
@@ -208,12 +216,20 @@ export default function ShikshaApplicationForm({
         if (file instanceof File) {
           try {
             const url = await apiService.uploadScholarshipFile(file, "documents");
+            if (!url) {
+              setErrors((prev) => ({ ...prev, seeMarksheet: `${docField.title} upload failed. Please try again.` }));
+              setIsSubmitting(false);
+              return;
+            }
             documents.push({
               name: docField.title,
               url: url,
             });
           } catch (uploadError) {
             console.error(`${docField.title} upload error:`, uploadError);
+            setErrors((prev) => ({ ...prev, seeMarksheet: `${docField.title} upload failed. Please try again.` }));
+            setIsSubmitting(false);
+            return;
           }
         }
       }
