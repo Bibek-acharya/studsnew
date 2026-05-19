@@ -37,6 +37,7 @@ const VolunteerDirectory = dynamic(() => import('./VolunteerDirectory'));
 const CreateVolunteer = dynamic(() => import('./CreateVolunteer'));
 const ManageApplication = dynamic(() => import('./ManageApplication'));
 const VolunteerShortlist = dynamic(() => import('./VolunteerShortlist'));
+const PaymentDisputes = dynamic(() => import('./PaymentDisputes'));
 
 
 interface DashboardProps {
@@ -104,6 +105,7 @@ const ScholarshipProviderDashboard: React.FC<DashboardProps> = ({ onLogout }) =>
     "sec-blog-directory": "blogs",
     "sec-org-profile": "profile",
     "sec-shortlist": "shortlists",
+    "sec-payment-disputes": "applications",
     "sec-written-exam": "evaluation",
     "sec-results": "evaluation",
     "sec-customize-form": "scholarships",
@@ -206,6 +208,8 @@ const ScholarshipProviderDashboard: React.FC<DashboardProps> = ({ onLogout }) =>
         return <ResultPublish />;
       case 'sec-shortlist':
         return <ShortlistManagement />;
+      case 'sec-payment-disputes':
+        return <PaymentDisputes />;
       case 'sec-written-exam':
         return <WrittenExam />;
       case 'sec-customize-form':

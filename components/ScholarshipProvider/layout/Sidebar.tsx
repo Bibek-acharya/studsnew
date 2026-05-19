@@ -192,6 +192,7 @@ const Sidebar: React.FC<SidebarProps> = ({ activeTab, onNavigate, onLogout, perm
           <DropdownItem label="Draft Scholarship" section="sec-draft-scholarship" />
           <DropdownItem label="Scholarship Directory" section="sec-scholarship-directory" />
           <DropdownItem label="Manage Application" section="sec-applications" />
+          <DropdownItem label="Payment Disputes" section="sec-payment-disputes" />
           <DropdownItem label="Manage Shortlist" section="sec-shortlist" />
         </NavItem>
 
