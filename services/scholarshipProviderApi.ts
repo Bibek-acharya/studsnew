@@ -590,6 +590,7 @@ export interface DetailedAnalyticsData {
   school_type_by_province?: CrossMetric[];
   exam_centers?: ExamCenterMetric[];
   district_count?: number;
+  applications_per_day?: MetricCount[];
 }
 
 export interface DetailedAnalyticsFilters {

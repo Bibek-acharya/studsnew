@@ -229,8 +229,8 @@ export default function Analytics() {
             </div>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-            <div data-chart className="bg-white rounded-xl border border-slate-100 p-6 col-span-1 md:col-span-2 lg:col-span-1">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div data-chart className="bg-white rounded-xl border border-slate-100 p-6">
               <div className="flex justify-between items-center mb-4">
                 <h3 className="text-base font-bold text-slate-800">Payment Methods</h3>
                 <button onClick={(e) => downloadChart(e, 'payment-methods')} className="text-slate-400 hover:text-blue-600 transition-colors"><Download className="w-3.5 h-3.5" /></button>
@@ -255,6 +255,43 @@ export default function Analytics() {
                         tooltip: tooltipConfig,
                       },
                       cutout: '65%',
+                    }}
+                  />
+                ) : (
+                  <div className="flex items-center justify-center h-full text-sm text-slate-400">No data</div>
+                )}
+              </div>
+            </div>
+
+            <div data-chart className="bg-white rounded-xl border border-slate-100 p-6">
+              <div className="flex justify-between items-center mb-1">
+                <h3 className="text-base font-bold text-slate-800">Applications Per Day</h3>
+                <button onClick={(e) => downloadChart(e, 'applications-per-day')} className="text-slate-400 hover:text-blue-600 transition-colors"><Download className="w-3.5 h-3.5" /></button>
+              </div>
+              <p className="text-sm text-slate-500 mb-4">Daily application submissions over time.</p>
+              <div className="relative h-[220px] w-full">
+                {data?.applications_per_day?.length ? (
+                  <Bar
+                    data={{
+                      labels: data.applications_per_day.map(m => m.label),
+                      datasets: [{
+                        label: 'Applications',
+                        data: data.applications_per_day.map(m => m.count),
+                        backgroundColor: '#3b82f6',
+                        borderRadius: 4,
+                      }]
+                    }}
+                    options={{
+                      responsive: true,
+                      maintainAspectRatio: false,
+                      plugins: {
+                        legend: { display: false },
+                        tooltip: tooltipConfig,
+                      },
+                      scales: {
+                        y: { grid: { color: '#f1f5f9' }, beginAtZero: true, ticks: { stepSize: 1 } },
+                        x: { grid: { display: false }, ticks: { maxRotation: 45, font: { size: 10 } } },
+                      },
                     }}
                   />
                 ) : (
