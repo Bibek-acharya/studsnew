@@ -348,10 +348,22 @@ export default function ShikshaApplicationForm({
   return (
     <div className="min-h-screen flex flex-col items-center pt-8 pb-20 px-4 sm:px-6" style={{ backgroundColor: "#08bd80" }}>
       <header className="w-full max-w-350 mb-8 text-left px-4 sm:px-0">
-        <h1 className="text-[32px] sm:text-[40px] font-extrabold text-white mb-2 leading-tight drop-shadow-sm">
-          {scholarshipTitle || "Project Shiksha Entrance 2082"}
-        </h1>
-        <p className="text-[18px] text-white/90 font-medium">Empowering Education, Shaping Futures.</p>
+        <div className="flex items-start justify-between gap-4">
+          <div className="min-w-0">
+            <h1 className="text-[32px] sm:text-[40px] font-extrabold text-white mb-2 leading-tight drop-shadow-sm">
+              {scholarshipTitle || "Project Shiksha Entrance 2082"}
+            </h1>
+            <p className="text-[18px] text-white/90 font-medium">Empowering Education, Shaping Futures.</p>
+          </div>
+          {scholarshipSlug && (
+            <button
+              onClick={() => router.push(`/scholarship-finder/${scholarshipSlug}`)}
+              className="shrink-0 mt-1 bg-white/20 hover:bg-white/30 text-white text-sm font-semibold px-4 py-2 rounded-lg transition-colors border border-white/30"
+            >
+              View Details
+            </button>
+          )}
+        </div>
       </header>
 
       <div className="w-full max-w-350 flex flex-col lg:flex-row gap-6 items-start">
