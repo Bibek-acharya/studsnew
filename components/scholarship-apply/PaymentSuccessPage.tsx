@@ -104,8 +104,8 @@ export default function PaymentSuccessPage({ scholarshipSlug }: { scholarshipSlu
         )}
         <p className="text-gray-600 mb-8">
           {isBankPayment
-            ? "Your payment receipt has been received and is under review. We will notify you once the verification is complete."
-            : "Your payment has been processed successfully and your application is now complete. We will contact you with further updates soon."}
+            ? "Receipt Uploaded Successfully! Your payment is under verification After approval within 24 hours, your admit card will be sent to your email."
+            : "Application Completed Successfully! Your payment has been confirmed, and your admit card has been sent to your registered email address. Please check your inbox/spam folder."}
         </p>
 
         <button
