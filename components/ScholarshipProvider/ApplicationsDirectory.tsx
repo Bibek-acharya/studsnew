@@ -47,6 +47,8 @@ export default function ApplicationsDirectory() {
   const [rejectingAppId, setRejectingAppId] = useState<number | null>(null);
   const [examCenters, setExamCenters] = useState<string[]>([]);
   const [resendingId, setResendingId] = useState<number | null>(null);
+  const [showResendModal, setShowResendModal] = useState(false);
+  const [resendAppId, setResendAppId] = useState<number | null>(null);
 
   useEffect(() => {
     scholarshipProviderApi.getScholarships(1, 100).then((res) => {
@@ -359,9 +361,8 @@ export default function ApplicationsDirectory() {
                           )}
                           {app.payment?.status === "completed" && (
                             <button
-                              onClick={() => handleResendAdmitCard(app.id)}
-                              disabled={resendingId === app.id}
-                              className={`p-1.5 rounded ${resendingId === app.id ? 'text-gray-400 cursor-not-allowed' : 'hover:bg-orange-50 text-orange-600'}`}
+                              onClick={() => { setResendAppId(app.id); setShowResendModal(true); }}
+                              className="p-1.5 hover:bg-orange-50 rounded text-orange-600"
                               title="Resend Admit Card"
                             >
                               <Mail className="w-4 h-4" />
@@ -482,6 +483,31 @@ export default function ApplicationsDirectory() {
               </button>
               <button onClick={handleConfirmAppRejection} className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700">
                 Confirm Reject
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {showResendModal && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+          <div className="bg-white p-6 rounded-lg shadow-xl max-w-md">
+            <h3 className="text-lg font-semibold mb-4">Resend Admit Card</h3>
+            <p className="text-gray-600 mb-6">Are you sure you want to resend the admit card to this applicant?</p>
+            <div className="flex justify-end gap-3">
+              <button onClick={() => { setShowResendModal(false); setResendAppId(null); }} className="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50">
+                Cancel
+              </button>
+              <button
+                onClick={() => {
+                  if (resendAppId) handleResendAdmitCard(resendAppId);
+                  setShowResendModal(false);
+                  setResendAppId(null);
+                }}
+                disabled={resendingId === resendAppId}
+                className="px-4 py-2 bg-orange-600 text-white rounded-lg hover:bg-orange-700 disabled:opacity-50"
+              >
+                {resendingId === resendAppId ? 'Resending...' : 'Confirm Resend'}
               </button>
             </div>
           </div>
