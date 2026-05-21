@@ -1202,6 +1202,12 @@ export const scholarshipProviderApi = {
     await apiRequest(`/api/v1/scholarship-providers/access/${id}`, { method: "DELETE" });
   },
 
+  async resendAdmitCard(applicationId: number): Promise<{ success: boolean }> {
+    return apiRequest<{ success: boolean }>(`/api/v1/scholarship-providers/applications/${applicationId}/resend-admit-card`, {
+      method: "PUT",
+    });
+  },
+
   async approvePayment(applicationId: number, approve: boolean, reason?: string): Promise<{ success: boolean }> {
     return apiRequest<{ success: boolean }>(`/api/v1/scholarship-providers/applications/${applicationId}/payment`, {
       method: "PUT",

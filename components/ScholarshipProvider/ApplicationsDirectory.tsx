@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useEffect, useState, useCallback } from "react";
-import { Home, Star, Search, Eye, CheckCircle, XCircle, ChevronLeft, ChevronRight } from "lucide-react";
+import { Home, Star, Search, Eye, CheckCircle, XCircle, ChevronLeft, ChevronRight, Mail } from "lucide-react";
 import { scholarshipProviderApi, ProviderApplication, ExamCenterItem } from "@/services/scholarshipProviderApi";
 import { NEPAL_DISTRICTS, NEPAL_PROVINCES } from "@/lib/location-data";
 import { toast } from "sonner";
@@ -46,6 +46,7 @@ export default function ApplicationsDirectory() {
   const [appRejectReason, setAppRejectReason] = useState('');
   const [rejectingAppId, setRejectingAppId] = useState<number | null>(null);
   const [examCenters, setExamCenters] = useState<string[]>([]);
+  const [resendingId, setResendingId] = useState<number | null>(null);
 
   useEffect(() => {
     scholarshipProviderApi.getScholarships(1, 100).then((res) => {
@@ -137,6 +138,18 @@ export default function ApplicationsDirectory() {
       setAppRejectReason('');
     } catch {
       toast.error('Failed to reject application');
+    }
+  };
+
+  const handleResendAdmitCard = async (id: number) => {
+    setResendingId(id);
+    try {
+      await scholarshipProviderApi.resendAdmitCard(id);
+      toast.success('Admit card resent successfully');
+    } catch {
+      toast.error('Failed to resend admit card');
+    } finally {
+      setResendingId(null);
     }
   };
 
@@ -342,6 +355,16 @@ export default function ApplicationsDirectory() {
                           {app.status === "approved" && (
                             <button onClick={() => handleStatusChange(app.id, "shortlisted")} className="p-1.5 hover:bg-purple-50 rounded text-purple-600" title="Shortlist">
                               <Star className="w-4 h-4" />
+                            </button>
+                          )}
+                          {app.payment?.status === "completed" && (
+                            <button
+                              onClick={() => handleResendAdmitCard(app.id)}
+                              disabled={resendingId === app.id}
+                              className={`p-1.5 rounded ${resendingId === app.id ? 'text-gray-400 cursor-not-allowed' : 'hover:bg-orange-50 text-orange-600'}`}
+                              title="Resend Admit Card"
+                            >
+                              <Mail className="w-4 h-4" />
                             </button>
                           )}
                         </div>
