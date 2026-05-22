@@ -90,10 +90,9 @@ export default function AdmitCardDownloadModal({
           <div ref={cardRef} className="a4-paper">
             <div className="absolute inset-0 flex items-center justify-center pointer-events-none z-0">
               <img
-                src="https://projectshiksha.hundredgroupnepal.org/images/shiks.jpg"
+                src="/images/project-shiksha.jpg"
                 alt=""
                 className="w-[65%] object-contain opacity-5"
-                crossOrigin="anonymous"
                 onError={(e) => { (e.target as HTMLImageElement).style.display = "none"; }}
               />
             </div>
@@ -102,10 +101,9 @@ export default function AdmitCardDownloadModal({
               <div className="flex items-center justify-between pb-2 w-full">
                 <div className="w-32 h-32 shrink-0 flex items-center justify-center">
                   <img
-                    src="https://projectshiksha.hundredgroupnepal.org/images/shiks.jpg"
+                    src="/images/project-shiksha.jpg"
                     alt="Logo"
                     className="max-w-full max-h-full object-contain"
-                    crossOrigin="anonymous"
                     onError={(e) => {
                       (e.target as HTMLImageElement).style.display = "none";
                     }}
