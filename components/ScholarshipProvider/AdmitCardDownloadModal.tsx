@@ -43,6 +43,7 @@ export default function AdmitCardDownloadModal({
     try {
       const canvas = await html2canvas(cardRef.current, {
         useCORS: true,
+        proxy: `${API_BASE_URL}/api/v1/proxy-image`,
         scale: 3,
         backgroundColor: "#ffffff",
       });
@@ -92,6 +93,7 @@ export default function AdmitCardDownloadModal({
                 src="https://projectshiksha.hundredgroupnepal.org/images/shiks.jpg"
                 alt=""
                 className="w-[65%] object-contain opacity-5"
+                crossOrigin="anonymous"
                 onError={(e) => { (e.target as HTMLImageElement).style.display = "none"; }}
               />
             </div>
@@ -103,8 +105,9 @@ export default function AdmitCardDownloadModal({
                     src="https://projectshiksha.hundredgroupnepal.org/images/shiks.jpg"
                     alt="Logo"
                     className="max-w-full max-h-full object-contain"
+                    crossOrigin="anonymous"
                     onError={(e) => {
-                      (e.target as HTMLImageElement).src = "https://via.placeholder.com/150?text=Logo";
+                      (e.target as HTMLImageElement).style.display = "none";
                     }}
                   />
                 </div>
@@ -125,6 +128,7 @@ export default function AdmitCardDownloadModal({
                       src="https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=https://studsphere.com/"
                       alt="QR Code"
                       className="w-full h-full object-contain"
+                      crossOrigin="anonymous"
                       onError={(e) => {
                         (e.target as HTMLImageElement).src = "https://chart.googleapis.com/chart?chs=200x200&cht=qr&chl=https://studsphere.com/";
                       }}
