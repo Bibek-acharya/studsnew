@@ -24,7 +24,7 @@ export default function AdmitCardDownloadModal({
 
   const fullName = `${application.first_name} ${application.last_name}`;
   const rollNumber = application.roll_number || "—";
-  const dob = application.date_of_birth_bs || application.date_of_birth_ad || "—";
+  const dob = application.date_of_birth_ad || application.date_of_birth_bs || "—";
   const gender = application.gender || "—";
   const stream = application.stream || "—";
   const examCentre = application.exam_center || "—";
