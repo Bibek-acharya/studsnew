@@ -19,14 +19,20 @@ export default function AdmitCardDownloadModal({
   const cardRef = useRef<HTMLDivElement>(null);
   const [downloading, setDownloading] = useState(false);
 
+  const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080";
+  const toAbsoluteUrl = (path: string | undefined | null): string => {
+    if (!path) return "";
+    if (path.startsWith("http") || path.startsWith("data:")) return path;
+    return `${API_BASE_URL}${path.startsWith("/") ? "" : "/"}${path}`;
+  };
+
   const fullName = `${application.first_name} ${application.last_name}`;
   const rollNumber = application.roll_number || "—";
-  const appId = `#APP-2026-${String(application.id).padStart(3, "0")}`;
   const dob = application.date_of_birth_bs || application.date_of_birth_ad || "—";
   const gender = application.gender || "—";
   const stream = application.stream || "—";
   const examCentre = application.exam_center || "—";
-  const photoUrl = application.photo_url || "";
+  const photoUrl = toAbsoluteUrl(application.photo_url);
   const scholarshipTitle = application.scholarship?.title || stream;
   const examDate = application.scholarship?.exam_date || "—";
   const examTime = application.scholarship?.exam_time || "—";
@@ -143,10 +149,6 @@ export default function AdmitCardDownloadModal({
                   <div>:</div>
                   <div className="font-semibold text-black">{gender}</div>
 
-                  <div className="font-semibold">Application No.</div>
-                  <div>:</div>
-                  <div className="font-semibold text-black">{appId}</div>
-
                   <div className="font-semibold">Roll Number</div>
                   <div>:</div>
                   <div className="font-semibold text-black">{rollNumber}</div>
@@ -199,7 +201,7 @@ export default function AdmitCardDownloadModal({
                   </thead>
                   <tbody className="text-black font-medium">
                     <tr>
-                      <td className="border border-gray-400 py-3 px-2 text-left pl-4 font-bold">{scholarshipTitle}</td>
+                      <td className="border border-gray-400 py-3 px-2 text-left pl-4 font-bold">{stream}</td>
                       <td className="border border-gray-400 py-3 px-2">{examDate}</td>
                       <td className="border border-gray-400 py-3 px-2">1st</td>
                       <td className="border border-gray-400 py-3 px-2">{examTime}</td>
