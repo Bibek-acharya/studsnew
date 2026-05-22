@@ -1,11 +1,12 @@
 "use client";
 
 import React, { useEffect, useState, useCallback } from "react";
-import { Home, Star, Search, Eye, CheckCircle, XCircle, ChevronLeft, ChevronRight, Mail } from "lucide-react";
+import { Home, Star, Search, Eye, CheckCircle, XCircle, ChevronLeft, ChevronRight, Mail, Download } from "lucide-react";
 import { scholarshipProviderApi, ProviderApplication, ExamCenterItem } from "@/services/scholarshipProviderApi";
 import { NEPAL_DISTRICTS, NEPAL_PROVINCES } from "@/lib/location-data";
 import { toast } from "sonner";
 import ApplicantProfileModal from "./ApplicantProfileModal";
+import AdmitCardDownloadModal from "./AdmitCardDownloadModal";
 
 const GENDER_OPTIONS = ["Male", "Female"];
 const ETHNICITY_OPTIONS = ["Bahun", "Chhetri", "Magar", "Tamang", "Gurung", "Rai", "Tharu", "Sherpa", "Madhesi", "Dalit"];
@@ -49,6 +50,7 @@ export default function ApplicationsDirectory() {
   const [resendingId, setResendingId] = useState<number | null>(null);
   const [showResendModal, setShowResendModal] = useState(false);
   const [resendAppId, setResendAppId] = useState<number | null>(null);
+  const [downloadAppId, setDownloadAppId] = useState<number | null>(null);
 
   useEffect(() => {
     scholarshipProviderApi.getScholarships(1, 100).then((res) => {
@@ -360,13 +362,22 @@ export default function ApplicationsDirectory() {
                             </button>
                           )}
                           {app.payment?.status === "completed" && (
-                            <button
-                              onClick={() => { setResendAppId(app.id); setShowResendModal(true); }}
-                              className="p-1.5 hover:bg-orange-50 rounded text-orange-600"
-                              title="Resend Admit Card"
-                            >
-                              <Mail className="w-4 h-4" />
-                            </button>
+                            <>
+                              <button
+                                onClick={() => { setResendAppId(app.id); setShowResendModal(true); }}
+                                className="p-1.5 hover:bg-orange-50 rounded text-orange-600"
+                                title="Resend Admit Card"
+                              >
+                                <Mail className="w-4 h-4" />
+                              </button>
+                              <button
+                                onClick={() => setDownloadAppId(app.id)}
+                                className="p-1.5 hover:bg-green-50 rounded text-green-600"
+                                title="Download Admit Card"
+                              >
+                                <Download className="w-4 h-4" />
+                              </button>
+                            </>
                           )}
                         </div>
 
@@ -514,6 +525,16 @@ export default function ApplicationsDirectory() {
         </div>
       )}
 
+      {downloadAppId && (() => {
+        const app = applications.find((a) => a.id === downloadAppId);
+        if (!app) return null;
+        return (
+          <AdmitCardDownloadModal
+            application={app}
+            onClose={() => setDownloadAppId(null)}
+          />
+        );
+      })()}
       {/* Applicant Profile Modal */}
       {selectedApplicantId && (
         <ApplicantProfileModal
