@@ -70,6 +70,17 @@ export default function PaymentDisputes() {
     }
   };
 
+  const handleUpdateDisputeStatus = async (id: number, status: string) => {
+    try {
+      await scholarshipProviderApi.updateDisputeStatus(id, status);
+      setApplications((prev) => prev.map((a) =>
+        a.id === id ? { ...a, payment: a.payment ? { ...a.payment, dispute_status: status } : a.payment } : a
+      ));
+    } catch {
+      toast.error("Failed to update dispute status");
+    }
+  };
+
   const totalPages = Math.ceil(total / limit);
 
   return (
@@ -116,12 +127,13 @@ export default function PaymentDisputes() {
                     <th className="text-center py-3 px-3 font-semibold text-gray-700">Payment Status</th>
                     <th className="text-center py-3 px-3 font-semibold text-gray-700">Amount</th>
                     <th className="text-center py-3 px-3 font-semibold text-gray-700">Receipt</th>
+                    <th className="text-center py-3 px-3 font-semibold text-gray-700">Dispute Status</th>
                     <th className="text-center py-3 px-3 font-semibold text-gray-700">Actions</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-gray-100">
                   {applications.length === 0 ? (
-                    <tr><td colSpan={6} className="py-12 text-center text-slate-500">No pending payment applications found</td></tr>
+                    <tr><td colSpan={7} className="py-12 text-center text-slate-500">No pending payment applications found</td></tr>
                   ) : applications.map((app, i) => (
                     <tr key={app.id} className="hover:bg-gray-50">
                       <td className="text-center py-3 px-3 text-gray-500">{(page - 1) * limit + i + 1}</td>
@@ -149,6 +161,19 @@ export default function PaymentDisputes() {
                         ) : (
                           <span className="text-gray-400">-</span>
                         )}
+                      </td>
+                      <td className="text-center py-3 px-3">
+                        <select
+                          value={app.payment?.dispute_status || "pending"}
+                          onChange={(e) => handleUpdateDisputeStatus(app.id, e.target.value)}
+                          className="px-2 py-1 text-xs border border-gray-200 rounded-lg bg-white focus:outline-none focus:border-blue-500 cursor-pointer"
+                        >
+                          <option value="pending">Pending</option>
+                          <option value="called">Called</option>
+                          <option value="no_response">No Response</option>
+                          <option value="follow_up_required">Follow-up Required</option>
+                          <option value="resolved">Resolved</option>
+                        </select>
                       </td>
                       <td className="text-center py-3 px-3">
                         <div className="flex items-center justify-center gap-2">

@@ -391,6 +391,7 @@ export interface ProviderPayment {
   receipt_url?: string;
   transaction_id?: string;
   paid_at?: string;
+  dispute_status?: string;
 }
 
 export interface ProviderProfile {
@@ -1212,6 +1213,13 @@ export const scholarshipProviderApi = {
     return apiRequest<{ success: boolean }>(`/api/v1/scholarship-providers/applications/${applicationId}/payment`, {
       method: "PUT",
       body: JSON.stringify({ approve, reason }),
+    });
+  },
+
+  async updateDisputeStatus(applicationId: number, disputeStatus: string): Promise<{ success: boolean }> {
+    return apiRequest<{ success: boolean }>(`/api/v1/scholarship-providers/applications/${applicationId}/dispute-status`, {
+      method: "PUT",
+      body: JSON.stringify({ dispute_status: disputeStatus }),
     });
   },
 
