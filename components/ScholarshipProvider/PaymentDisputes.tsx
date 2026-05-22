@@ -161,13 +161,20 @@ export default function PaymentDisputes() {
                         <select
                           value={app.payment?.dispute_status || "pending"}
                           onChange={(e) => handleUpdateDisputeStatus(app.id, e.target.value)}
-                          className="px-2 py-1 text-xs border border-gray-200 rounded-lg bg-white focus:outline-none focus:border-blue-500 cursor-pointer"
+                          className={`px-2 py-1 text-xs font-semibold rounded-lg border-0 cursor-pointer ${
+                            (app.payment?.dispute_status || "pending") === "pending" ? "bg-yellow-100 text-yellow-800" :
+                            app.payment?.dispute_status === "called" ? "bg-blue-100 text-blue-800" :
+                            app.payment?.dispute_status === "no_response" ? "bg-red-100 text-red-800" :
+                            app.payment?.dispute_status === "follow_up_required" ? "bg-orange-100 text-orange-800" :
+                            app.payment?.dispute_status === "resolved" ? "bg-green-100 text-green-800" :
+                            "bg-gray-100 text-gray-800"
+                          }`}
                         >
-                          <option value="pending">Pending</option>
-                          <option value="called">Called</option>
-                          <option value="no_response">No Response</option>
-                          <option value="follow_up_required">Follow-up Required</option>
-                          <option value="resolved">Resolved</option>
+                          <option className="bg-white text-gray-800" value="pending">Pending</option>
+                          <option className="bg-white text-gray-800" value="called">Called</option>
+                          <option className="bg-white text-gray-800" value="no_response">No Response</option>
+                          <option className="bg-white text-gray-800" value="follow_up_required">Follow-up Required</option>
+                          <option className="bg-white text-gray-800" value="resolved">Resolved</option>
                         </select>
                       </td>
                       <td className="text-center py-3 px-3">
