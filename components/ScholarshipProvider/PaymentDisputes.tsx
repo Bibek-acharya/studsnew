@@ -14,6 +14,10 @@ export default function PaymentDisputes() {
   const limit = 10;
   const [selectedApplicantId, setSelectedApplicantId] = useState<number | null>(null);
   const [search, setSearch] = useState("");
+  const [showApproveConfirm, setShowApproveConfirm] = useState(false);
+  const [showRejectDialog, setShowRejectDialog] = useState(false);
+  const [selectedActionId, setSelectedActionId] = useState<number | null>(null);
+  const [rejectReason, setRejectReason] = useState("");
 
   useEffect(() => {
     setLoading(true);
@@ -30,43 +34,34 @@ export default function PaymentDisputes() {
     });
   }, [page, search]);
 
-  const handleApprovePayment = async (id: number) => {
+  const handleConfirmApprove = async () => {
+    if (!selectedActionId) return;
     try {
-      await scholarshipProviderApi.approvePayment(id, true);
+      await scholarshipProviderApi.approvePayment(selectedActionId, true);
       toast.success("Payment approved");
-      setApplications((prev) => prev.filter((a) => a.id !== id));
-    } catch {
-      toast.error("Failed to approve payment");
+      setApplications((prev) => prev.filter((a) => a.id !== selectedActionId));
+    } catch (e) {
+      const msg = e instanceof Error ? e.message : "Failed to approve payment";
+      toast.error(msg);
+    } finally {
+      setShowApproveConfirm(false);
+      setSelectedActionId(null);
     }
   };
 
-  const handleRejectPayment = async (id: number) => {
+  const handleConfirmReject = async () => {
+    if (!selectedActionId) return;
     try {
-      await scholarshipProviderApi.approvePayment(id, false);
+      await scholarshipProviderApi.approvePayment(selectedActionId, false, rejectReason);
       toast.success("Payment rejected");
-      setApplications((prev) => prev.filter((a) => a.id !== id));
-    } catch {
-      toast.error("Failed to reject payment");
-    }
-  };
-
-  const handleApproveApplication = async (id: number) => {
-    try {
-      await scholarshipProviderApi.updateApplicationStatus(id, "approved");
-      toast.success("Application approved");
-      setApplications((prev) => prev.filter((a) => a.id !== id));
-    } catch {
-      toast.error("Failed to approve application");
-    }
-  };
-
-  const handleRejectApplication = async (id: number) => {
-    try {
-      await scholarshipProviderApi.updateApplicationStatus(id, "rejected");
-      toast.success("Application rejected");
-      setApplications((prev) => prev.filter((a) => a.id !== id));
-    } catch {
-      toast.error("Failed to reject application");
+      setApplications((prev) => prev.filter((a) => a.id !== selectedActionId));
+    } catch (e) {
+      const msg = e instanceof Error ? e.message : "Failed to reject payment";
+      toast.error(msg);
+    } finally {
+      setShowRejectDialog(false);
+      setSelectedActionId(null);
+      setRejectReason("");
     }
   };
 
@@ -180,10 +175,10 @@ export default function PaymentDisputes() {
                           <button onClick={() => setSelectedApplicantId(app.id)} className="p-1.5 hover:bg-blue-50 rounded text-blue-600" title="View Profile">
                             <Eye className="w-4 h-4" />
                           </button>
-                          <button onClick={() => handleApprovePayment(app.id)} className="p-1.5 hover:bg-green-50 rounded text-green-600" title="Approve Payment">
+                          <button onClick={() => { setSelectedActionId(app.id); setShowApproveConfirm(true); }} className="p-1.5 hover:bg-green-50 rounded text-green-600" title="Approve Payment">
                             <CheckCircle className="w-4 h-4" />
                           </button>
-                          <button onClick={() => handleRejectPayment(app.id)} className="p-1.5 hover:bg-red-50 rounded text-red-600" title="Reject Payment">
+                          <button onClick={() => { setSelectedActionId(app.id); setShowRejectDialog(true); }} className="p-1.5 hover:bg-red-50 rounded text-red-600" title="Reject Payment">
                             <XCircle className="w-4 h-4" />
                           </button>
                         </div>
@@ -229,6 +224,47 @@ export default function PaymentDisputes() {
           </>
         )}
       </div>
+
+      {showApproveConfirm && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+          <div className="bg-white p-6 rounded-lg shadow-xl max-w-md">
+            <h3 className="text-lg font-semibold mb-4">Confirm Payment Approval</h3>
+            <p className="text-gray-600 mb-6">Are you sure you want to approve this payment?</p>
+            <div className="flex justify-end gap-3">
+              <button onClick={() => { setShowApproveConfirm(false); setSelectedActionId(null); }} className="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50">
+                Cancel
+              </button>
+              <button onClick={handleConfirmApprove} className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700">
+                Confirm Approve
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {showRejectDialog && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+          <div className="bg-white p-6 rounded-lg shadow-xl max-w-md">
+            <h3 className="text-lg font-semibold mb-4">Reject Payment</h3>
+            <p className="text-gray-600 mb-4">Provide a reason for rejecting this payment:</p>
+            <textarea
+              value={rejectReason}
+              onChange={(e) => setRejectReason(e.target.value)}
+              placeholder="Reason for rejection..."
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg mb-6 focus:outline-none focus:border-blue-500"
+              rows={3}
+            />
+            <div className="flex justify-end gap-3">
+              <button onClick={() => { setShowRejectDialog(false); setSelectedActionId(null); setRejectReason(""); }} className="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50">
+                Cancel
+              </button>
+              <button onClick={handleConfirmReject} className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700">
+                Confirm Reject
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {selectedApplicantId && (
         <ApplicantProfileModal
