@@ -226,12 +226,9 @@ export default function AdmitCardDownloadModal({
                   </span>
                 </div>
                 <div className="flex flex-col items-center">
-                  <img
-                    src="https://upload.wikimedia.org/wikipedia/commons/f/fa/Signature_of_John_Hancock.svg"
-                    className="h-8 mb-1 opacity-80"
-                    alt="Signature"
-                    onError={(e) => { (e.target as HTMLImageElement).style.display = "none"; }}
-                  />
+                  <svg className="h-8 mb-1 opacity-60" viewBox="0 0 120 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M5 20 Q20 8 35 18 T55 15 T75 22 T95 14 T115 20" stroke="#374151" strokeWidth="1.5" fill="none" strokeLinecap="round"/>
+                  </svg>
                   <div className="w-48 border-b-[2px] border-dotted border-gray-800 mb-2" />
                   <span className="text-[11.5px] font-bold text-black">
                     Controller of Examination
