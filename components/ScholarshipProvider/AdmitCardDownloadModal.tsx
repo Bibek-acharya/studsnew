@@ -24,7 +24,13 @@ export default function AdmitCardDownloadModal({
 
   const fullName = `${application.first_name} ${application.last_name}`;
   const rollNumber = application.roll_number || "—";
-  const dob = application.date_of_birth_ad || application.date_of_birth_bs || "—";
+  const formatDate = (d: string | undefined | null) => {
+    if (!d) return "";
+    const date = new Date(d);
+    if (isNaN(date.getTime())) return d;
+    return date.toISOString().split("T")[0];
+  };
+  const dob = application.date_of_birth_ad ? formatDate(application.date_of_birth_ad) : application.date_of_birth_bs || "—";
   const gender = application.gender || "—";
   const stream = application.stream || "—";
   const examCentre = application.exam_center || "—";
