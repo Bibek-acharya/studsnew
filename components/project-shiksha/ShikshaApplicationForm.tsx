@@ -285,16 +285,25 @@ export default function ShikshaApplicationForm({
       const response = await apiService.applyScholarship(scholarshipId, payload);
       const applicationId = response.data?.id || response.id;
 
+      const { photo, seeMarksheet, ...formDataWithoutFiles } = formData;
       const appData = {
-        ...formData,
+        ...formDataWithoutFiles,
         photo_url,
         applicationId,
-        photoPreview,
         scholarshipId,
         paymentConfig,
       };
-      sessionStorage.setItem("shiksha_application_data", JSON.stringify(appData));
-      sessionStorage.setItem("scholarship_application_data", JSON.stringify(appData));
+      try {
+        sessionStorage.setItem("shiksha_application_data", JSON.stringify(appData));
+        sessionStorage.setItem("scholarship_application_data", JSON.stringify(appData));
+      } catch (e) {
+        if (e instanceof DOMException && e.name === "QuotaExceededError") {
+          setAlertMessage("Your data is too large to save locally. Please use a smaller photo (under 500KB) and try again.");
+          setIsSubmitting(false);
+          return;
+        }
+        throw e;
+      }
 
       // Check if payment is active
       if (paymentConfig?.enabled && paymentConfig.fee_amount > 0) {
@@ -488,7 +497,7 @@ export default function ShikshaApplicationForm({
 
                 <div>
                   <label className="block text-[14px] font-semibold text-gray-700 mb-1.5">
-                    Phone Number (Ncell Preferred) <span className="text-red-500">*</span>
+                    Phone Number<span className="text-red-500">*</span>
                   </label>
                   <input
                     type="tel"
@@ -1000,7 +1009,7 @@ export default function ShikshaApplicationForm({
 
               <div>
                 <label className="block text-[14px] font-semibold text-gray-700 mb-1.5">
-                  Parent's Email <span className="text-red-500">*</span>
+                  Parent's Email
                 </label>
                 <input
                   type="email"

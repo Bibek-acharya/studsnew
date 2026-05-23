@@ -59,7 +59,6 @@ export function validateForm(data: ProjectShikshaFormData): {
   } else if (!data.guardianPhone.startsWith("9")) {
     errors.guardianPhone = "Phone number must start with 9";
   }
-  if (!data.guardianEmail.trim()) errors.guardianEmail = "Parent's email is required";
   if (data.guardianEmail && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(data.guardianEmail)) {
     errors.guardianEmail = "Invalid email format";
   }

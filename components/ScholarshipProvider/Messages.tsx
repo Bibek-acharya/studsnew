@@ -100,7 +100,7 @@ const Messages: React.FC<{ onUnreadChange?: (count: number) => void }> = ({ onUn
   useEffect(() => {
     (async () => {
       try {
-        const res = await scholarshipProviderApi.getMessages(1, 100);
+        const res = await scholarshipProviderApi.getMessages(1, 500);
         const byUser: Record<number, ProviderMessage[]> = {};
         for (const msg of res.messages) {
           if (!byUser[msg.user_id]) byUser[msg.user_id] = [];
@@ -236,7 +236,15 @@ const Messages: React.FC<{ onUnreadChange?: (count: number) => void }> = ({ onUn
           .forEach((m) => scholarshipProviderApi.markMessageRead(m.id).catch(() => {}));
       }
       const updated = prev.map((c) =>
-        c.userId === userId ? { ...c, unread: false } : c
+        c.userId === userId
+          ? {
+              ...c,
+              unread: false,
+              messages: c.messages.map((m) =>
+                !m.read && m.direction === "incoming" ? { ...m, read: true } : m
+              ),
+            }
+          : c
       );
       onUnreadChange?.(updated.filter((c) => c.unread).length);
       return updated;
