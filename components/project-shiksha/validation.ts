@@ -59,19 +59,7 @@ export function validateForm(data: ProjectShikshaFormData): {
   } else if (!data.guardianPhone.startsWith("9")) {
     errors.guardianPhone = "Phone number must start with 9";
   }
-  if (data.guardianEmail && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(data.guardianEmail)) {
-    errors.guardianEmail = "Invalid email format";
-  }
-  if (!data.fatherOccupation) errors.fatherOccupation = "Father's occupation is required";
-  if (data.fatherOccupation === "Other" && !data.fatherOccupationOther.trim()) errors.fatherOccupationOther = "Please specify father's occupation";
-  if (!data.motherOccupation) errors.motherOccupation = "Mother's occupation is required";
-  if (data.motherOccupation === "Other" && !data.motherOccupationOther.trim()) errors.motherOccupationOther = "Please specify mother's occupation";
-  if (!data.familyIncome || parseInt(data.familyIncome) <= 0) {
-    errors.familyIncome = "Family income is required";
-  }
-  if (!data.familyMembers || parseInt(data.familyMembers) <= 0) {
-    errors.familyMembers = "Family members count is required";
-  }
+
 
   // Documents
   if (!data.seeMarksheet) errors.seeMarksheet = "SEE marksheet is required";

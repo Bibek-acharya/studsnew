@@ -34,13 +34,6 @@ export interface ProjectShikshaFormData {
   // Family
   guardianName: string;
   guardianPhone: string;
-  guardianEmail: string;
-  fatherOccupation: string;
-  fatherOccupationOther: string;
-  motherOccupation: string;
-  motherOccupationOther: string;
-  familyIncome: string;
-  familyMembers: string;
 
   // Documents
   seeMarksheet: File | null;

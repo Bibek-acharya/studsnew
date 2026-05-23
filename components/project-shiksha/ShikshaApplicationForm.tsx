@@ -55,13 +55,6 @@ const initialFormData: ProjectShikshaFormData = {
 
   guardianName: "",
   guardianPhone: "",
-  guardianEmail: "",
-  fatherOccupation: "",
-  fatherOccupationOther: "",
-  motherOccupation: "",
-  motherOccupationOther: "",
-  familyIncome: "",
-  familyMembers: "",
 
   seeMarksheet: null,
   photo: null,
@@ -269,13 +262,7 @@ export default function ShikshaApplicationForm({
 
         guardian_name: formData.guardianName,
         guardian_phone: formData.guardianPhone,
-        guardian_email: formData.guardianEmail || "",
-        father_occupation: formData.fatherOccupation,
-        father_occupation_other: formData.fatherOccupation === "Other" ? formData.fatherOccupationOther : "",
-        mother_occupation: formData.motherOccupation,
-        mother_occupation_other: formData.motherOccupation === "Other" ? formData.motherOccupationOther : "",
-        family_monthly_income: parseFloat(formData.familyIncome) || 0,
-        family_members_count: parseInt(formData.familyMembers) || 0,
+
 
         stream: formData.stream,
         exam_center: formData.examCenter,
@@ -1007,112 +994,7 @@ export default function ShikshaApplicationForm({
                 {errors.guardianPhone && <p className="text-red-500 text-[12px] mt-1">{errors.guardianPhone}</p>}
               </div>
 
-              <div>
-                <label className="block text-[14px] font-semibold text-gray-700 mb-1.5">
-                  Parent's Email
-                </label>
-                <input
-                  type="email"
-                  id="guardianEmail"
-                  value={formData.guardianEmail}
-                  onChange={(e) => handleInputChange("guardianEmail", e.target.value)}
-                  className="w-full border border-gray-300 rounded py-3 px-4 text-[15px] text-gray-800 outline-none focus:ring-0 focus:border-brand-blue transition-all bg-white"
-                  placeholder="parent@email.com"
-                />
-                {errors.guardianEmail && <p className="text-red-500 text-[12px] mt-1">{errors.guardianEmail}</p>}
-              </div>
 
-              <div className="col-span-1 sm:col-span-2 grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-5">
-                <div>
-                  <label className="block text-[14px] font-semibold text-gray-700 mb-1.5">
-                    Father&apos;s Occupation <span className="text-red-500">*</span>
-                  </label>
-                  <SelectArrow
-                    id="fatherOccupation"
-                    value={formData.fatherOccupation}
-                    onChange={(e) => handleInputChange("fatherOccupation", e.target.value)}
-                    className="w-full border border-gray-300 rounded py-3 px-4 text-[15px] text-gray-800 outline-none focus:ring-0 focus:border-brand-blue transition-all bg-white cursor-pointer"
-                  >
-                    <option value="" disabled>Select Occupation</option>
-                    {occupations.map((occ) => (
-                      <option key={occ} value={occ}>{occ}</option>
-                    ))}
-                  </SelectArrow>
-                  {formData.fatherOccupation === "Other" && (
-                    <input
-                      type="text"
-                      id="fatherOccupationOther"
-                      value={formData.fatherOccupationOther}
-                      onChange={(e) => handleInputChange("fatherOccupationOther", e.target.value)}
-                      className="mt-2 w-full border border-gray-300 rounded py-3 px-4 text-[15px] text-gray-800 outline-none focus:ring-0 focus:border-brand-blue transition-all bg-white"
-                      placeholder="Please specify occupation"
-                    />
-                  )}
-                  {errors.fatherOccupation && <p className="text-red-500 text-[12px] mt-1">{errors.fatherOccupation}</p>}
-                </div>
-
-                <div>
-                  <label className="block text-[14px] font-semibold text-gray-700 mb-1.5">
-                    Mother&apos;s Occupation <span className="text-red-500">*</span>
-                  </label>
-                  <SelectArrow
-                    id="motherOccupation"
-                    value={formData.motherOccupation}
-                    onChange={(e) => handleInputChange("motherOccupation", e.target.value)}
-                    className="w-full border border-gray-300 rounded py-3 px-4 text-[15px] text-gray-800 outline-none focus:ring-0 focus:border-brand-blue transition-all bg-white cursor-pointer"
-                  >
-                    <option value="" disabled>Select Occupation</option>
-                    {occupations.map((occ) => (
-                      <option key={occ} value={occ}>{occ}</option>
-                    ))}
-                  </SelectArrow>
-                  {formData.motherOccupation === "Other" && (
-                    <input
-                      type="text"
-                      id="motherOccupationOther"
-                      value={formData.motherOccupationOther}
-                      onChange={(e) => handleInputChange("motherOccupationOther", e.target.value)}
-                      className="mt-2 w-full border border-gray-300 rounded py-3 px-4 text-[15px] text-gray-800 outline-none focus:ring-0 focus:border-brand-blue transition-all bg-white"
-                      placeholder="Please specify occupation"
-                    />
-                  )}
-                  {errors.motherOccupation && <p className="text-red-500 text-[12px] mt-1">{errors.motherOccupation}</p>}
-                </div>
-              </div>
-
-              <div>
-                <label className="block text-[14px] font-semibold text-gray-700 mb-1.5">
-                  Family Monthly Income (NPR) <span className="text-red-500">*</span>
-                </label>
-                <input
-                  type="number"
-                  id="familyIncome"
-                  value={formData.familyIncome}
-                  onChange={(e) => handleInputChange("familyIncome", e.target.value)}
-                  className="w-full border border-gray-300 rounded py-3 px-4 text-[15px] text-gray-800 outline-none focus:ring-0 focus:border-brand-blue transition-all bg-white"
-                  placeholder="Estimated monthly income"
-                  min={0}
-                  max={500000}
-                />
-                {errors.familyIncome && <p className="text-red-500 text-[12px] mt-1">{errors.familyIncome}</p>}
-              </div>
-
-              <div>
-                <label className="block text-[14px] font-semibold text-gray-700 mb-1.5">
-                  Total Family Members Count <span className="text-red-500">*</span>
-                </label>
-                <input
-                  type="number"
-                  id="familyMembers"
-                  value={formData.familyMembers}
-                  onChange={(e) => handleInputChange("familyMembers", e.target.value)}
-                  className="w-full border border-gray-300 rounded py-3 px-4 text-[15px] text-gray-800 outline-none focus:ring-0 focus:border-brand-blue transition-all bg-white"
-                  placeholder="Total number of members"
-                  min={1}
-                  max={20}
-                />
-                {errors.familyMembers && <p className="text-red-500 text-[12px] mt-1">{errors.familyMembers}</p>}
-              </div>
             </div>
           </section>
 
