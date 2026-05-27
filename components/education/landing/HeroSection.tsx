@@ -60,12 +60,16 @@ const HeroSection: React.FC<HeroSectionProps> = ({ onNavigate, slides = [] }) =>
     url: s.link_url || "https://studsphere.com",
   })) : DEFAULT_SLIDES;
 
+  const slideCount = heroSlides.length;
+  const safeIndex = slideCount > 0 ? currentSlide % slideCount : 0;
+
   useEffect(() => {
+    if (slideCount === 0) return;
     const interval = setInterval(() => {
-      setCurrentSlide((prev) => (prev + 1) % heroSlides.length);
+      setCurrentSlide((prev) => (prev + 1) % slideCount);
     }, 5000);
     return () => clearInterval(interval);
-  }, [heroSlides.length]);
+  }, [slideCount]);
 
   useEffect(() => {
     let timeoutId: ReturnType<typeof setTimeout> | undefined;
@@ -182,12 +186,12 @@ const HeroSection: React.FC<HeroSectionProps> = ({ onNavigate, slides = [] }) =>
         {/* BOTTOM CONTROLS */}
         <div className="absolute bottom-4 md:bottom-8 left-0 w-full flex flex-col items-center z-30">
           <a
-            href={heroSlides[currentSlide].url}
+            href={heroSlides[safeIndex].url}
             target="_blank"
             rel="noopener noreferrer"
             className={`md:hidden fade-text text-white text-[13px] font-semibold underline decoration-white/80 underline-offset-4 drop-shadow-lg hover:text-gray-200 transition-opacity duration-300 mb-3 ${fade ? "opacity-100" : "opacity-0"}`}
           >
-            {heroSlides[currentSlide].text}
+            {heroSlides[safeIndex].text}
           </a>
 
           <div className="flex items-center space-x-2 md:space-x-3">
@@ -208,13 +212,13 @@ const HeroSection: React.FC<HeroSectionProps> = ({ onNavigate, slides = [] }) =>
 
         {/* Floating Link (Desktop) */}
         <a
-          href={heroSlides[currentSlide].url}
+          href={heroSlides[safeIndex].url}
           target="_blank"
           rel="noopener noreferrer"
           className="hidden md:flex absolute bottom-8 right-8 z-30 bg-white text-brand-blue items-center gap-2 px-5 py-2.5 rounded-full font-semibold shadow-lg hover:shadow-xl hover:-translate-y-1 transition-all duration-300 group"
         >
           <LinkIcon className="w-5 h-5 text-brand-blue group-hover:rotate-12 transition-transform" />
-          <span className="text-base">{heroSlides[currentSlide].text}</span>
+          <span className="text-base">{heroSlides[safeIndex].text}</span>
         </a>
 
         <FeedbackWidget />

@@ -9,6 +9,7 @@ import {
   Trash,
   CaretLeft,
   CaretRight,
+  FolderOpen,
 } from "@phosphor-icons/react";
 import { institutionAdmissionApi } from "@/services/institutionAdmissionApi";
 
@@ -70,7 +71,12 @@ const AdmissionDirectoryPage: React.FC = () => {
     fetchPublished();
   }, []);
 
+  const [activeLevel, setActiveLevel] = useState<string>("all");
+
+  const ALL_LEVELS = ["+2", "A-Level", "Diploma/CTEVT", "Bachelor", "Master"];
+
   const filtered = admissions.filter((a) => {
+    if (activeLevel !== "all" && a.level !== activeLevel) return false;
     const s = search.toLowerCase();
     if (!s) return true;
     return (
@@ -95,6 +101,33 @@ const AdmissionDirectoryPage: React.FC = () => {
       />
 
       <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+        {/* Level Tabs */}
+        <div className="flex items-center gap-1 px-6 pt-4 pb-2 overflow-x-auto">
+          <button
+            onClick={() => { setActiveLevel("all"); setPage(1); }}
+            className={`whitespace-nowrap px-4 py-1.5 text-sm font-semibold rounded-md transition-colors ${
+              activeLevel === "all"
+                ? "bg-[#0000ff] text-white shadow-sm"
+                : "text-gray-600 hover:text-gray-900 hover:bg-gray-100"
+            }`}
+          >
+            All
+          </button>
+          {ALL_LEVELS.map((level) => (
+            <button
+              key={level}
+              onClick={() => { setActiveLevel(level); setPage(1); }}
+              className={`whitespace-nowrap px-4 py-1.5 text-sm font-semibold rounded-md transition-colors ${
+                activeLevel === level
+                  ? "bg-[#0000ff] text-white shadow-sm"
+                  : "text-gray-600 hover:text-gray-900 hover:bg-gray-100"
+              }`}
+            >
+              {level}
+            </button>
+          ))}
+        </div>
+
         <div className="bg-gray-50/50 px-6 py-4 border-b border-gray-200 flex flex-col sm:flex-row justify-between gap-4">
           <h2 className="text-lg font-bold text-gray-900 flex items-center gap-2 self-center">
             Published Admissions
@@ -138,8 +171,21 @@ const AdmissionDirectoryPage: React.FC = () => {
                 </tr>
               ) : paginated.length === 0 ? (
                 <tr>
-                  <td colSpan={7} className="px-4 py-8 text-center text-gray-500">
-                    No admissions found.
+                  <td colSpan={7}>
+                    <div className="flex flex-col items-center justify-center py-16">
+                      <FolderOpen className="w-16 h-16 text-gray-300 mb-4" />
+                      <p className="text-gray-500 text-lg font-medium mb-6">
+                        {activeLevel === "all"
+                          ? "No admissions found."
+                          : `No ${activeLevel} admissions found.`}
+                      </p>
+                      <button
+                        onClick={() => router.push("/institution-zone/dashboard/admission/create")}
+                        className="bg-[#0000ff] hover:bg-[#0000cc] text-white font-semibold py-2.5 px-6 rounded-md transition-colors text-sm"
+                      >
+                        Create Admission
+                      </button>
+                    </div>
                   </td>
                 </tr>
               ) : (
@@ -181,6 +227,7 @@ const AdmissionDirectoryPage: React.FC = () => {
           </table>
         </div>
 
+        {totalPages > 1 && (
         <div className="px-6 py-4 border-t border-gray-200 flex flex-col sm:flex-row items-center justify-between gap-4 bg-gray-50/30">
           <p className="text-sm text-gray-500">
             Showing {(safePage - 1) * ITEMS_PER_PAGE + 1} to {Math.min(safePage * ITEMS_PER_PAGE, filtered.length)} of {filtered.length} records
@@ -217,6 +264,7 @@ const AdmissionDirectoryPage: React.FC = () => {
             </button>
           </div>
         </div>
+        )}
       </div>
     </div>
   );

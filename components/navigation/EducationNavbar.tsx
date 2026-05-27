@@ -386,6 +386,9 @@ const EducationNavbar: React.FC<EducationNavbarProps> = ({
   const scholarshipsSection = desktopMenuSections.find(
     (section) => section.key === "scholarships",
   );
+  const universitiesSection = desktopMenuSections.find(
+    (section) => section.key === "universities",
+  );
   const admissionSection = desktopMenuSections.find(
     (section) => section.key === "admission",
   );
@@ -398,6 +401,9 @@ const EducationNavbar: React.FC<EducationNavbarProps> = ({
   );
   const mobileScholarshipsSection = mobileMenuSections.find(
     (section) => section.key === "scholarships",
+  );
+  const mobileUniversitiesSection = mobileMenuSections.find(
+    (section) => section.key === "universities",
   );
   const mobileAdmissionSection = mobileMenuSections.find(
     (section) => section.key === "admission",
@@ -1101,6 +1107,7 @@ const EducationNavbar: React.FC<EducationNavbarProps> = ({
               >
                 Find College
               </NavItem>
+              
 
               {toolsSection && (
                 <DesktopDropdown
@@ -1185,6 +1192,36 @@ const EducationNavbar: React.FC<EducationNavbarProps> = ({
                   onMouseLeave={handleDropdownMouseLeave}
                 >
                   {admissionSection.items.map((item) => (
+                    <DropdownCard
+                      key={item.title}
+                      icon={item.icon}
+                      color={item.color}
+                      title={item.title}
+                      desc={item.desc}
+                      onClick={getDropdownClick(item)}
+                    />
+                  ))}
+                </DesktopDropdown>
+              )}
+
+              {universitiesSection && (
+                <DesktopDropdown
+                  key={universitiesSection.key}
+                  label={universitiesSection.label}
+                  alignRight={universitiesSection.alignRight}
+                  isOpen={activeMenu === universitiesSection.key}
+                  isActive={isSectionActive(universitiesSection)}
+                  onToggle={() =>
+                    setActiveMenu((prev) =>
+                      prev === universitiesSection.key
+                        ? null
+                        : universitiesSection.key,
+                    )
+                  }
+                  onMouseEnter={() => handleDropdownMouseEnter(universitiesSection.key)}
+                  onMouseLeave={handleDropdownMouseLeave}
+                >
+                  {universitiesSection.items.map((item) => (
                     <DropdownCard
                       key={item.title}
                       icon={item.icon}
@@ -1414,6 +1451,27 @@ const EducationNavbar: React.FC<EducationNavbarProps> = ({
                 >
                   <span>Entrance</span>
                 </button>
+
+                {mobileUniversitiesSection && (
+                  <div>
+                    <button
+                      type="button"
+                      className={`flex w-full items-center justify-between rounded-md p-2 text-left transition-colors hover:bg-gray-50 hover:text-blue-600 ${mobileMenus[mobileUniversitiesSection.key] ? "text-blue-600" : ""}`}
+                      onClick={() => toggleMobileMenu(mobileUniversitiesSection.key)}
+                    >
+                      <span>{mobileUniversitiesSection.label}</span>
+                      <ChevronDown
+                        size={14}
+                        className={`text-gray-400 transition-transform duration-200 ${mobileMenus[mobileUniversitiesSection.key] ? "rotate-180" : ""}`}
+                      />
+                    </button>
+                    <div
+                      className={`${mobileMenus[mobileUniversitiesSection.key] ? "flex" : "hidden"} ml-2 mt-1 flex-col gap-1 pl-4 py-2 font-medium`}
+                    >
+                      {mobileUniversitiesSection.items.map(renderMobileAction)}
+                    </div>
+                  </div>
+                )}
 
                 {mobileMoreSection && (
                   <div>

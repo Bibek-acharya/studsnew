@@ -316,6 +316,9 @@ const EntrancePage: React.FC = () => {
   const [cropperOpen, setCropperOpen] = useState(false);
   const [cropImageSrc, setCropImageSrc] = useState<string | null>(null);
   const [uploadingInfo, setUploadingInfo] = useState<{ id: number } | null>(null);
+  const [applicationLink, setApplicationLink] = useState("");
+  const [noticeFile, setNoticeFile] = useState("");
+  const [uploadingNotice, setUploadingNotice] = useState(false);
 
   useEffect(() => {
     if (!editId) return;
@@ -336,6 +339,8 @@ const EntrancePage: React.FC = () => {
         if (exam.upcoming_dates) setUpcomingDates(exam.upcoming_dates);
         if (exam.contact_persons) setContactPersons(exam.contact_persons);
         if (exam.faqs) setFaqs(exam.faqs);
+        setApplicationLink(exam.application_link || "");
+        setNoticeFile(exam.notice_file || "");
       })
       .catch((e) => console.error("Failed to load entrance for edit", e))
       .finally(() => setLoadingEdit(false));
@@ -438,6 +443,8 @@ const EntrancePage: React.FC = () => {
         upcoming_dates: upcomingDates,
         contact_persons: contactPersons,
         faqs: faqs,
+        application_link: applicationLink,
+        notice_file: noticeFile,
       };
       if (editId) {
         await institutionEntranceApi.update(Number(editId), payload);
@@ -542,6 +549,17 @@ const EntrancePage: React.FC = () => {
                 onChange={(e) => setApplicationFee(e.target.value)}
               />
               <p className="text-xs text-gray-500 mt-1">Application fee for the examination</p>
+            </div>
+            <div>
+              <label className={labelClass}>Application Link</label>
+              <input
+                type="url"
+                className={inputClass}
+                placeholder="https://example.com/apply"
+                value={applicationLink}
+                onChange={(e) => setApplicationLink(e.target.value)}
+              />
+              <p className="text-xs text-gray-500 mt-1">External application form URL for this entrance</p>
             </div>
             <div>
               <div className="flex items-center justify-between mb-4">
@@ -1376,6 +1394,40 @@ const EntrancePage: React.FC = () => {
                 </div>
               </div>
             ))}
+          </div>
+        </div>
+
+        {/* 10. Entrance Notice */}
+        <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+          <SectionItemHeader
+            icon="file-text"
+            title="Entrance Notice"
+            subtitle="Upload notice PDF, DOC, or image for this exam"
+          />
+          <div className="p-6">
+            <div className="flex items-center gap-3">
+              <label className="flex items-center gap-2 px-4 py-2.5 border border-gray-300 border-dashed rounded-lg text-sm text-gray-500 cursor-pointer hover:border-blue-400 transition-colors">
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2"><path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4"/></svg>
+                {uploadingNotice ? "Uploading..." : noticeFile ? "Replace File" : "Upload File"}
+                <input type="file" className="hidden" accept=".pdf,.doc,.docx,image/*" onChange={async (e) => {
+                  const file = e.target.files?.[0];
+                  if (!file) return;
+                  const allowed = ["application/pdf", "image/jpeg", "image/png", "image/jpg", "application/msword", "application/vnd.openxmlformats-officedocument.wordprocessingml.document"];
+                  if (!allowed.includes(file.type)) { alert("Only PDF, DOC, or image files are allowed."); return; }
+                  setUploadingNotice(true);
+                  try {
+                    const ext = file.name.split(".").pop() || "pdf";
+                    const url = await uploadFile(new File([file], `notice.${ext}`, { type: file.type }), "institution/entrance");
+                    setNoticeFile(url);
+                  } catch (e) { console.error("Notice upload failed:", e); }
+                  setUploadingNotice(false);
+                }} />
+              </label>
+              {noticeFile && (
+                <button onClick={() => setNoticeFile("")} className="text-sm text-red-500 hover:text-red-700">Remove</button>
+              )}
+            </div>
+            {noticeFile && <p className="mt-2 text-xs text-green-600">File uploaded successfully</p>}
           </div>
         </div>
 

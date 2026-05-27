@@ -1,5 +1,4 @@
 @import "tailwindcss";
-@import "react-quill-new/dist/quill.snow.css";
 
 :root {
   --background: #ffffff;
@@ -84,6 +83,9 @@ body {
 .no-scrollbar::-webkit-scrollbar {
   display: none;
 }
+
+.hide-scrollbar::-webkit-scrollbar { display: none; }
+.hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
 
 .custom-scrollbar {
   scrollbar-width: thin;
@@ -403,3 +405,134 @@ body {
 .icon-btn-circle:hover {
   background: #fecaca;
 }
+
+/* Filter accordion transition */
+.filter-content {
+  display: grid;
+  grid-template-rows: 1fr;
+  transition: grid-template-rows 0.3s ease-in-out;
+}
+.filter-content > div { overflow: hidden; }
+.filter-content.collapsed { grid-template-rows: 0fr; }
+
+/* Check icon animation */
+.check-icon { animation: popIn 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards; }
+@keyframes popIn {
+  0% { transform: scale(0.5); opacity: 0; }
+  100% { transform: scale(1); opacity: 1; }
+}
+
+/* University detail table */
+.prog-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+.prog-table th { background-color: #f8fafc; padding: 10px 8px; text-align: left; font-weight: 600; color: #1e293b; border-bottom: 1px solid #e2e8f0; }
+.prog-table td { padding: 8px; border-bottom: 1px solid #f1f5f9; color: #334155; }
+.prog-table tr:last-child td { border-bottom: none; }
+
+/* Event card */
+.event-card { transition: all 0.2s; }
+.event-card:hover { transform: translateY(-2px); box-shadow: 0 10px 25px -5px rgba(0,0,0,0.1); }
+
+/* Download card */
+.download-card { transition: transform 0.2s, box-shadow 0.2s; }
+.download-card:hover { transform: translateY(-3px); box-shadow: 0 8px 20px rgba(0,0,0,0.08); }
+
+/* University listing custom checkbox */
+.custom-checkbox {
+  appearance: none;
+  background-color: #fff;
+  margin: 0;
+  font: inherit;
+  color: currentColor;
+  width: 1.25em;
+  height: 1.25em;
+  border: 1px solid #cbd5e1;
+  border-radius: 0.35em;
+  display: grid;
+  place-content: center;
+  cursor: pointer;
+  transition: all 0.2s ease-in-out;
+}
+
+.custom-checkbox::before {
+  content: "";
+  width: 0.75em;
+  height: 0.75em;
+  transform: scale(0);
+  transition: 120ms transform ease-in-out;
+  box-shadow: inset 1em 1em white;
+  background-color: white;
+  transform-origin: center;
+  clip-path: polygon(14% 44%, 0 65%, 50% 100%, 100% 16%, 80% 0%, 43% 62%);
+}
+
+.custom-checkbox:checked {
+  background-color: #2563eb;
+  border-color: #2563eb;
+}
+
+.custom-checkbox:checked::before {
+  transform: scale(1);
+}
+
+.custom-radio {
+  appearance: none;
+  background-color: #fff;
+  margin: 0;
+  width: 1.15em;
+  height: 1.15em;
+  border: 1px solid #94a3b8;
+  border-radius: 50%;
+  display: grid;
+  place-content: center;
+  cursor: pointer;
+  transition: all 0.2s ease-in-out;
+  flex-shrink: 0;
+}
+.custom-radio::before {
+  content: "";
+  width: 0.5em;
+  height: 0.5em;
+  border-radius: 50%;
+  transform: scale(0);
+  transition: 120ms transform ease-in-out;
+  background-color: white;
+}
+.custom-radio:checked {
+  background-color: #2563eb;
+  border-color: #2563eb;
+}
+.custom-radio:checked::before { transform: scale(1); }
+.custom-radio:hover { border-color: #64748b; }
+
+.fee-range {
+  -webkit-appearance: none;
+  width: 100%;
+  height: 4px;
+  border-radius: 2px;
+  background: #2563eb;
+}
+.fee-range::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  height: 16px;
+  width: 16px;
+  border-radius: 50%;
+  background: #2563eb;
+  cursor: pointer;
+  margin-top: -6px;
+  box-shadow: 0 0 0 4px #eff6ff;
+  transition: box-shadow 0.2s;
+}
+.fee-range::-webkit-slider-thumb:hover { box-shadow: 0 0 0 6px #dbeafe; }
+.fee-range::-webkit-slider-runnable-track {
+  width: 100%;
+  height: 4px;
+  cursor: pointer;
+  background: #e2e8f0;
+  border-radius: 2px;
+}
+.fee-range:focus { outline: none; }
+
+.custom-scrollbar::-webkit-scrollbar { width: 4px; }
+.custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
+.custom-scrollbar::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+.custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #94a3b8; }

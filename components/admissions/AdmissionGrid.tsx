@@ -16,8 +16,6 @@ interface AdmissionGridProps {
   level: string;
 }
 
-const COLS_PER_ROW = 3;
-const ROWS_BEFORE_FEATURED = 3;
 const COLLEGES_PER_PAGE = 18;
 
 const AdmissionGrid: React.FC<AdmissionGridProps> = ({
@@ -161,8 +159,17 @@ const AdmissionGrid: React.FC<AdmissionGridProps> = ({
                     location={college.location}
                     website={college.website || college.affiliation}
                     programs={Array.isArray(college.featured_programs)
-                      ? (college.featured_programs as string[]).slice(0, 3).map((name) => ({ name, status: "Seats Available" }))
-                      : [{ name: college.affiliation || "Admission Open", status: "Seats Available" }]}
+                      ? (college.featured_programs as any[]).slice(0, 3).map((p) => {
+                          const name = p.title || "";
+                          const rawStatus = p.admissionStatus || "";
+                          const statusMap: Record<string, "Seats Available" | "Closing Soon" | "Opening Soon"> = {
+                            "seats-available": "Seats Available",
+                            "limited-seats": "Closing Soon",
+                            "opening-soon": "Opening Soon",
+                          };
+                          return { name, status: statusMap[rawStatus] || "Seats Available" };
+                        })
+                      : [{ name: college.affiliation || college.name || "Admission Open", status: "Seats Available" }]}
                     moreProgramsCount={college.programs}
                     onNavigate={() => onNavigate("collegeDetails", { id: college.id })}
                     onApply={() => onNavigate("collegeDetails", { id: college.id })}

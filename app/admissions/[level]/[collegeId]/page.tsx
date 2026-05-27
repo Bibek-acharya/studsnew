@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useRef } from "react";
-import { useParams } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import { useQuery } from "@tanstack/react-query";
 import { admissionService } from "@/services/admission.api";
 import {
@@ -25,6 +25,8 @@ import {
   Users,
   ShieldCheck,
   X,
+  SearchX,
+  FolderOpen,
 } from "lucide-react";
 
 const TABS = [
@@ -68,14 +70,21 @@ const iconMap: Record<string, any> = {
   FlaskConical, Briefcase, BookOpen, Monitor, Trophy, Wifi, Bus, Utensils, Users, ShieldCheck,
 };
 
-const eligibilityData: any[] = [];
-const programsData: any[] = [];
-const facilitiesData: any[] = [];
-const coursesData: any[] = [];
-const scholarshipData: any[] = [];
-const staffData: any[] = [];
-const faqData: any[] = [];
-
+const EmptyTabState = ({ tabName }: { tabName: string }) => {
+  const router = useRouter();
+  return (
+    <div className="flex flex-col items-center justify-center py-16">
+      <FolderOpen className="w-32 h-32 text-gray-300 mb-4" />
+      <p className="text-gray-500 text-lg font-medium mb-6">No {tabName} information is currently available.</p>
+      <button
+        onClick={() => router.push("/")}
+        className="bg-[#0000ff] hover:bg-[#0000cc] cursor-pointer text-white font-semibold py-2.5 px-6 rounded-md transition-colors text-sm"
+      >
+        Explore More
+      </button>
+    </div>
+  );
+};
 
 export default function AdmissionDetailPage() {
   const params = useParams();
@@ -374,6 +383,8 @@ export default function AdmissionDetailPage() {
               </div>
 
               <div className="pt-6">
+                {programsData.length > 0 ? (
+                <>
                 <h2 className="text-2xl font-bold text-gray-900 mb-6">Our Programs</h2>
                 <div className="space-y-6">
                   {programsData.map((prog, idx) => (
@@ -420,21 +431,25 @@ export default function AdmissionDetailPage() {
                         </div>
                       </div>
                     </div>
-                  ))}
-                </div>
+                    ))}
+                  </div>
+                </>
+                ) : (
+                  <EmptyTabState tabName="Programs" />
+                )}
               </div>
             </div>
           )}
-
-          {/* Eligibility Tab */}
+   
+        {/* Eligibility Tab */}
           {activeTab === "eligibility" && (
             <div>
               <div className="mb-6">
+                {eligibilityData.length > 0 ? (
+                <>
                 <h2 className="text-[22px] font-bold text-gray-900 mb-4">
                   Eligibility Criteria 2026
                 </h2>
-                <h3 className="text-[17px] font-bold text-gray-900 mb-4">Full time Courses</h3>
-
                 <div className="overflow-x-auto rounded-md border border-gray-200">
                   <table className="w-full text-left border-collapse min-w-[800px]">
                     <thead>
@@ -491,6 +506,10 @@ export default function AdmissionDetailPage() {
                     </tbody>
                   </table>
                 </div>
+                </>
+                ) : (
+                  <EmptyTabState tabName="Eligibility Criteria" />
+                )}
               </div>
             </div>
           )}
@@ -498,6 +517,8 @@ export default function AdmissionDetailPage() {
           {/* Admission Process Tab */}
           {activeTab === "process" && (
             <div>
+              {admissionProcess.length > 0 ? (
+              <div>
               <div className="mb-8">
                 <h2 className="text-2xl font-bold text-gray-900 mb-2">
                   Admission Process 2026
@@ -506,8 +527,7 @@ export default function AdmissionDetailPage() {
                   Step-by-step guide for Science (+2) admission
                 </p>
               </div>
-
-              {admissionProcess.length > 0 ? admissionProcess.map((step: any, idx: number) => (
+              {admissionProcess.map((step: any, idx: number) => (
                 <div key={idx} className="border border-gray-200 rounded-md p-6 mb-6">
                   <div className="flex items-start gap-4 mb-4">
                     <div className="w-10 h-10 rounded-full bg-[#0000ff] text-white flex items-center justify-center font-bold text-sm flex-shrink-0">
@@ -521,10 +541,10 @@ export default function AdmissionDetailPage() {
                     </div>
                   </div>
                 </div>
-              )) : (
-                <div className="border border-gray-200 rounded-md p-6">
-                  <p className="text-gray-500">Admission process details not available.</p>
-                </div>
+                ))}
+              </div>
+              ) : (
+                <EmptyTabState tabName="Admission Process" />
               )}
             </div>
           )}
@@ -532,13 +552,14 @@ export default function AdmissionDetailPage() {
           {/* Facilities Tab */}
           {activeTab === "facilities" && (
             <div>
+              {facilitiesData.length > 0 ? (
+              <div>
               <div className="mb-8">
                 <h2 className="text-2xl font-bold text-gray-900 mb-2">Our Facilities</h2>
                 <p className="text-gray-600">
                   World-class infrastructure for holistic learning
                 </p>
               </div>
-
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {facilitiesData.map((fac, idx) => (
                   <div key={idx} className="border border-gray-200 rounded-md p-6">
@@ -550,6 +571,10 @@ export default function AdmissionDetailPage() {
                   </div>
                 ))}
               </div>
+              </div>
+              ) : (
+                <EmptyTabState tabName="Facilities" />
+              )}
             </div>
           )}
 
@@ -557,11 +582,12 @@ export default function AdmissionDetailPage() {
           {activeTab === "courses" && (
             <div>
               <div className="mb-6">
+                {coursesData.length > 0 ? (
+                <>
                 <h2 className="text-[22px] font-bold text-gray-900 mb-4">
                   {collegeName} of Science Fees & Eligibility
                 </h2>
                 <h3 className="text-[17px] font-bold text-gray-900 mb-4">Full time Courses</h3>
-
                 <div className="overflow-x-auto rounded-md border border-gray-200">
                   <table className="w-full text-left border-collapse min-w-[800px]">
                     <thead>
@@ -620,6 +646,10 @@ export default function AdmissionDetailPage() {
                     </tbody>
                   </table>
                 </div>
+                </>
+                ) : (
+                  <EmptyTabState tabName="Courses &amp; Fees" />
+                )}
               </div>
             </div>
           )}
@@ -627,11 +657,12 @@ export default function AdmissionDetailPage() {
           {/* Scholarships Tab */}
           {activeTab === "scholarship" && (
             <div>
-              <div className="pt-8">
+              <div>
+                {scholarshipData.length > 0 ? (
+                <>
                 <h2 className="text-[22px] font-bold text-gray-900 mb-4">
                   Scholarships Overview
                 </h2>
-
                 <div className="overflow-x-auto rounded-md border border-gray-200">
                   <table className="w-full text-left border-collapse min-w-[800px]">
                     <thead>
@@ -698,6 +729,10 @@ export default function AdmissionDetailPage() {
                     </tbody>
                   </table>
                 </div>
+                </>
+                ) : (
+                  <EmptyTabState tabName="Scholarships" />
+                )}
               </div>
             </div>
           )}
@@ -705,11 +740,12 @@ export default function AdmissionDetailPage() {
           {/* Contact Tab */}
           {activeTab === "contact" && (
             <div>
+              {staffData.length > 0 ? (
+              <div>
               <div className="mb-8">
                 <h2 className="text-2xl font-bold text-gray-900 mb-2">Contact Information</h2>
                 <p className="text-gray-600">Get in touch with our admission team</p>
               </div>
-
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 {staffData.map((staff, idx) => (
                   <div key={idx} className="border border-gray-200 rounded-md p-6 bg-white">
@@ -751,12 +787,18 @@ export default function AdmissionDetailPage() {
                   </div>
                 ))}
               </div>
+              </div>
+              ) : (
+                <EmptyTabState tabName="Contact" />
+              )}
             </div>
           )}
 
           {/* FAQ Tab */}
           {activeTab === "faq" && (
             <div>
+              {faqData.length > 0 ? (
+              <div>
               <div className="mb-6">
                 <h2 className="text-[20px] font-bold text-gray-900">
                   Frequently Asked Questions
@@ -765,7 +807,6 @@ export default function AdmissionDetailPage() {
                   Find answers to common questions
                 </p>
               </div>
-
               <div className="space-y-3">
                 {faqData.map((faq, idx) => (
                   <div
@@ -793,6 +834,10 @@ export default function AdmissionDetailPage() {
                   </div>
                 ))}
               </div>
+              </div>
+              ) : (
+                <EmptyTabState tabName="FAQ" />
+              )}
             </div>
           )}
         </div>

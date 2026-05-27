@@ -42,6 +42,9 @@ function mapRawEntrance(raw: any): Exam {
     imageUrl: img,
     phone: raw.phone || "",
     email: raw.email || "",
+    overviewDetails: raw.overview_details || undefined,
+    applicationLink: raw.application_link || "",
+    noticeFile: raw.notice_file || "",
   };
 }
 

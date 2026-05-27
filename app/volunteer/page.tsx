@@ -1,7 +1,8 @@
 "use client";
 
 import React, { useState, useMemo, useCallback, useEffect } from "react";
-import { SlidersHorizontal } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { SlidersHorizontal, FolderOpen } from "lucide-react";
 import VolunteerCard from "@/components/volunteer/VolunteerCard";
 import type { Volunteer } from "@/components/volunteer/VolunteerCard";
 import VolunteerFilter, { VolunteerFilters, DEFAULT_VOLUNTEER_FILTERS } from "@/components/volunteer/VolunteerFilter";
@@ -50,6 +51,7 @@ function mapVolunteer(apiVol: any): Volunteer {
 }
 
 export default function VolunteerPage() {
+  const router = useRouter();
   const [filters, setFilters] = useState<VolunteerFilters>(DEFAULT_VOLUNTEER_FILTERS);
   const [currentPage, setCurrentPage] = useState(1);
   const [volunteers, setVolunteers] = useState<Volunteer[]>([]);
@@ -158,16 +160,23 @@ export default function VolunteerPage() {
             </div>
           </div>
           {loading ? (
-            <div className="flex flex-col items-center justify-center rounded-xl border-2 border-dashed border-gray-200 py-20 text-center">
-              <p className="text-lg font-bold text-gray-500">Loading volunteer opportunities...</p>
+            <div className="flex flex-col items-center justify-center py-16">
+              <p className="text-lg font-semibold text-gray-500">Loading volunteer opportunities...</p>
             </div>
           ) : error ? (
-            <div className="flex flex-col items-center justify-center rounded-xl border-2 border-dashed border-red-200 py-20 text-center">
-              <p className="text-lg font-bold text-red-500">{error}</p>
+            <div className="flex flex-col items-center justify-center py-16">
+              <p className="text-lg font-semibold text-red-500">{error}</p>
             </div>
           ) : sorted.length === 0 ? (
-            <div className="flex flex-col items-center justify-center rounded-xl border-2 border-dashed border-gray-200 py-20 text-center">
-              <p className="text-lg font-bold text-gray-500">No volunteer opportunities found</p>
+            <div className="flex flex-col items-center justify-center py-16">
+              <FolderOpen className="w-32 h-32 text-gray-300 mb-4" />
+              <p className="text-gray-500 text-lg font-medium mb-6">No volunteer opportunities found</p>
+              <button
+                onClick={() => router.push("/")}
+                className="bg-[#0000ff] hover:bg-[#0000cc] cursor-pointer text-white font-semibold py-2.5 px-6 rounded-md transition-colors text-sm"
+              >
+                Explore More
+              </button>
             </div>
           ) : (
             <>

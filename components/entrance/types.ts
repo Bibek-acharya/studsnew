@@ -19,4 +19,7 @@ export interface Exam {
   imageUrl: string;
   phone: string;
   email: string;
+  overviewDetails?: { detail: string; information: string }[];
+  applicationLink?: string;
+  noticeFile?: string;
 }

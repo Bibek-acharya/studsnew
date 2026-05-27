@@ -40,6 +40,8 @@ export type ViewKey =
   | "notificationSettings"
   | "userSettings"
   | "volunteer"
+  | "nepaliUniversities"
+  | "foreignUniversities"
   ;
 
 export type NotificationTab = "all" | "following" | "system" | "archive";

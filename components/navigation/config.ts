@@ -36,6 +36,8 @@ export const routeMap: Record<ViewKey, string> = {
   login: "/login",
   signup: "/register",
   volunteer: "/volunteer",
+  nepaliUniversities: "/universities/nepali",
+  foreignUniversities: "/universities/foreign",
 };
 
 export const notificationTabs: NotificationTab[] = [
@@ -97,6 +99,26 @@ export const desktopMenuSections: DesktopMenuSection[] = [
         title: "Scholarship Provider",
         desc: "List and manage scholarship programs with us.",
         viewKey: "scholarshipProviderZone",
+      },
+    ],
+  },
+  {
+    key: "universities",
+    label: "Universities",
+    items: [
+      {
+        icon: "fa-university",
+        color: "text-red-500",
+        title: "Nepali University",
+        desc: "Explore universities and colleges in Nepal offering diverse programs.",
+        viewKey: "nepaliUniversities",
+      },
+      {
+        icon: "fa-globe",
+        color: "text-blue-500",
+        title: "Foreign University",
+        desc: "Discover top universities abroad and international study opportunities.",
+        viewKey: "foreignUniversities",
       },
     ],
   },
@@ -236,6 +258,24 @@ export const mobileMenuSections: MobileMenuSection[] = [
         icon: "fa-building",
         color: "text-indigo-500",
         viewKey: "scholarshipProviderZone",
+      },
+    ],
+  },
+  {
+    key: "universities",
+    label: "Universities",
+    items: [
+      {
+        label: "Nepali University",
+        icon: "fa-university",
+        color: "text-red-500",
+        viewKey: "nepaliUniversities",
+      },
+      {
+        label: "Foreign University",
+        icon: "fa-globe",
+        color: "text-blue-500",
+        viewKey: "foreignUniversities",
       },
     ],
   },

@@ -52,6 +52,8 @@ export interface InstitutionEntrance {
   upcoming_dates: any[];
   contact_persons: any[];
   faqs: any[];
+  application_link: string;
+  notice_file: string;
 }
 
 export interface EntranceApplicant {

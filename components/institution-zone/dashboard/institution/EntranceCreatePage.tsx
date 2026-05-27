@@ -37,6 +37,9 @@ const EntranceCreatePage = () => {
   const [loading, setLoading] = useState(!!editId);
   const [cropperOpen, setCropperOpen] = useState(false);
   const [cropImageSrc, setCropImageSrc] = useState<string | null>(null);
+  const [applicationLink, setApplicationLink] = useState("");
+  const [noticeFile, setNoticeFile] = useState("");
+  const [uploadingNotice, setUploadingNotice] = useState(false);
 
   const getToken = () => localStorage.getItem("institutionToken");
   const apiBase = () => process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080";
@@ -66,6 +69,24 @@ const EntranceCreatePage = () => {
     setCropImageSrc(null);
   };
 
+  const handleNoticeUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    const allowed = ["application/pdf", "image/jpeg", "image/png", "image/jpg", "application/msword", "application/vnd.openxmlformats-officedocument.wordprocessingml.document"];
+    if (!allowed.includes(file.type)) {
+      alert("Only PDF, DOC, or image files are allowed.");
+      return;
+    }
+    setUploadingNotice(true);
+    try {
+      const ext = file.name.split(".").pop() || "pdf";
+      const noticeFileObj = new File([file], `notice.${ext}`, { type: file.type });
+      const url = await uploadFile(noticeFileObj, "institution/entrance");
+      setNoticeFile(url);
+    } catch (e) { console.error("Notice upload failed:", e); }
+    setUploadingNotice(false);
+  };
+
   useEffect(() => {
     if (!editId) {
       setLoading(false);
@@ -89,6 +110,8 @@ const EntranceCreatePage = () => {
           setQuestions(res.questions.map((q: any, i: number) => ({ ...q, id: i + 1 })));
           nextQuestionId = res.questions.length + 1;
         }
+        setApplicationLink(res.application_link || "");
+        setNoticeFile(res.notice_file || "");
       })
       .catch(() => {})
       .finally(() => setLoading(false));
@@ -137,6 +160,8 @@ const EntranceCreatePage = () => {
     hero_banner: heroBanner,
     questions: questions.map(({ id, ...rest }) => rest),
     status: publish ? "published" : "draft",
+    application_link: applicationLink,
+    notice_file: noticeFile,
   });
 
   const handleSave = async (publish: boolean) => {
@@ -282,6 +307,28 @@ const EntranceCreatePage = () => {
             <textarea value={instructions} onChange={e => setInstructions(e.target.value)} rows={3}
               placeholder="Exam instructions for students..."
               className="w-full px-4 py-2.5 border border-gray-300 rounded-lg text-sm focus:border-blue-600 outline-none resize-none" />
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1.5">Application Link</label>
+            <input type="url" value={applicationLink} onChange={e => setApplicationLink(e.target.value)}
+              placeholder="https://example.com/apply"
+              className="w-full px-4 py-2.5 border border-gray-300 rounded-lg text-sm focus:border-blue-600 outline-none" />
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1.5">Entrance Notice (PDF, DOC, or Image)</label>
+            <div className="flex items-center gap-3">
+              <label className="flex items-center gap-2 px-4 py-2.5 border border-gray-300 border-dashed rounded-lg text-sm text-gray-500 cursor-pointer hover:border-blue-400 transition-colors">
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2"><path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4"/></svg>
+                {uploadingNotice ? "Uploading..." : noticeFile ? "Replace File" : "Upload File"}
+                <input type="file" className="hidden" accept=".pdf,.doc,.docx,image/*" onChange={handleNoticeUpload} />
+              </label>
+              {noticeFile && (
+                <button onClick={() => setNoticeFile("")} className="text-sm text-red-500 hover:text-red-700">Remove</button>
+              )}
+            </div>
+            {noticeFile && (
+              <p className="mt-1 text-xs text-green-600">File uploaded successfully</p>
+            )}
           </div>
         </div>
       </div>

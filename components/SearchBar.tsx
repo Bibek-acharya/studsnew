@@ -2,19 +2,10 @@
 
 import React, { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
-import { Search } from "lucide-react";
-import {
-  SearchItem,
-  searchDatabase,
-  searchData,
-  trendingSearches,
-  suggestionCategoryMap,
-  categoryMap,
-} from "@/utils/searchDatabase";
+import { Search, ChevronDown } from "lucide-react";
+import { suggestionCategoryMap, categoryMap } from "@/utils/searchDatabase";
 
-interface RecentSearch {
-  text: string;
-}
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080";
 
 const defaultSuggestions = [
   { text: "College" },
@@ -30,7 +21,7 @@ export const SearchBar: React.FC<{
   isMobile?: boolean;
   defaultSearchOpen?: boolean;
   showSuggestionDropdown?: boolean;
-  onQueryStateChange?: (query: string, suggestions: SearchItem[]) => void;
+  onQueryStateChange?: (query: string, suggestions: { title: string; type: string }[]) => void;
 }> = ({
   isMobile,
   defaultSearchOpen = false,
@@ -39,10 +30,68 @@ export const SearchBar: React.FC<{
 }) => {
   const [isSearchOpen, setIsSearchOpen] = useState(defaultSearchOpen);
   const [searchQuery, setSearchQuery] = useState("");
-  const [recentSearches, setRecentSearches] = useState<RecentSearch[]>([
-    { text: "shortlist universities" },
-    { text: "education dashboard" },
-  ]);
+  const [searchCategory, setSearchCategory] = useState("colleges");
+  const [categoryOpen, setCategoryOpen] = useState(false);
+  const [suggestions, setSuggestions] = useState<{ title: string; type: string }[]>([]);
+  const [isLoadingSuggestions, setIsLoadingSuggestions] = useState(false);
+  const categoryRef = useRef<HTMLDivElement>(null);
+  const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  const categoryOptions = [
+    { value: "colleges", label: "Colleges" },
+    { value: "courses", label: "Courses" },
+    { value: "admission", label: "Admission" },
+    { value: "events", label: "Events" },
+    { value: "news", label: "News" },
+    { value: "blogs", label: "Blogs" },
+    { value: "entrance", label: "Entrance" },
+  ];
+
+  const selectedLabel = categoryOptions.find((o) => o.value === searchCategory)?.label || "Colleges";
+
+  useEffect(() => {
+    return () => {
+      if (debounceRef.current) clearTimeout(debounceRef.current);
+    };
+  }, []);
+
+  useEffect(() => {
+    const handleClick = (e: MouseEvent) => {
+      if (categoryRef.current && !categoryRef.current.contains(e.target as Node)) {
+        setCategoryOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClick);
+    return () => document.removeEventListener("mousedown", handleClick);
+  }, []);
+
+  useEffect(() => {
+    if (debounceRef.current) clearTimeout(debounceRef.current);
+    const query = searchQuery.trim();
+    if (!query) {
+      setSuggestions([]);
+      setIsLoadingSuggestions(false);
+      return;
+    }
+    const local = defaultSuggestions.filter((s) => s.text.toLowerCase().includes(query.toLowerCase()));
+    if (local.length > 0) {
+      setSuggestions(local.map((s) => ({ title: s.text, type: "suggestion" })));
+    }
+    setIsLoadingSuggestions(true);
+    debounceRef.current = setTimeout(async () => {
+      try {
+        const res = await fetch(`${API_BASE_URL}/api/v1/search?q=${encodeURIComponent(query)}&cat=${searchCategory}&limit=5`, { credentials: "include" });
+        const json = await res.json();
+        if (json.success && json.data?.items) {
+          setSuggestions(json.data.items.map((item: any) => ({ title: item.title, type: item.type })));
+        }
+      } catch {
+        // ignore, keep local results
+      } finally {
+        setIsLoadingSuggestions(false);
+      }
+    }, 200);
+  }, [searchQuery, searchCategory]);
 
   const router = useRouter();
   const searchContainerRef = useRef<HTMLDivElement>(null);
@@ -67,66 +116,17 @@ export const SearchBar: React.FC<{
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
-  const getFilteredSuggestions = (query: string) => {
-    const lowerQuery = query.toLowerCase();
-    const allSuggestions: string[] = [];
-
-    Object.entries(searchData).forEach(([, data]) => {
-      data.suggestions.forEach((suggestion: string) => {
-        if (
-          suggestion.toLowerCase().includes(lowerQuery) &&
-          !allSuggestions.includes(suggestion)
-        ) {
-          allSuggestions.push(suggestion);
-        }
-      });
-    });
-
-    return allSuggestions.slice(0, 7);
-  };
-
-  const addToRecentSearch = (text: string) => {
-    setRecentSearches((prev) => {
-      if (prev.find((s) => s.text.toLowerCase() === text.toLowerCase()))
-        return prev;
-      const updated = [{ text }, ...prev];
-      return updated.slice(0, 5);
-    });
-  };
-
-  const removeRecentSearch = (text: string) => {
-    setRecentSearches((prev) => prev.filter((s) => s.text !== text));
-  };
-
-  const buildSuggestions = (query: string) => {
-    if (query.trim() === "") return trendingSearches;
-
-    const keywords = query
-      .toLowerCase()
-      .split(" ")
-      .filter((k) => k.length > 0);
-
-    return searchDatabase
-      .filter((item) => {
-        const searchableText = `${item.title} ${item.type}`.toLowerCase();
-        return keywords.every((keyword) => searchableText.includes(keyword));
-      })
-      .slice(0, 10);
-  };
-
   const handleSearchInput = (e: React.ChangeEvent<HTMLInputElement>) => {
     const query = e.target.value;
     setSearchQuery(query);
     setIsSearchOpen(true);
-    const suggestions = buildSuggestions(query);
-    onQueryStateChange?.(query, suggestions);
+    onQueryStateChange?.(query, []);
   };
 
   const handleSearchExecute = (query: string) => {
     if (!query || query.trim() === "") return;
     setIsSearchOpen(false);
-    addToRecentSearch(query);
-    router.push(`/search?q=${encodeURIComponent(query)}`);
+    router.push(`/search?q=${encodeURIComponent(query)}&cat=${searchCategory}`);
   };
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
@@ -139,14 +139,11 @@ export const SearchBar: React.FC<{
   const handleDropdownItemClick = (text: string) => {
     setSearchQuery(text);
     setIsSearchOpen(false);
-    addToRecentSearch(text);
 
     const category = suggestionCategoryMap[text] || categoryMap[text.toLowerCase()] || null;
-    if (category && searchData[category]) {
-      router.push(`/search?q=${encodeURIComponent(text)}&cat=${category}`);
-    } else {
-      router.push(`/search?q=${encodeURIComponent(text)}`);
-    }
+    const cat = category ? `&cat=${category}` : "";
+    const query = `/search?q=${encodeURIComponent(text)}${cat}`;
+    router.push(query);
   };
 
   const renderDropdown = () => {
@@ -155,39 +152,6 @@ export const SearchBar: React.FC<{
     if (query.length === 0) {
       return (
         <>
-          {recentSearches.length > 0 && (
-            <>
-              {recentSearches.map((item, idx) => (
-                <div
-                  key={idx}
-                  className="search-item flex items-center justify-between px-6 py-3.5 hover:bg-gray-50 cursor-pointer transition-colors group"
-                  onClick={() => handleDropdownItemClick(item.text)}
-                >
-                  <div className="flex items-center gap-4">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-gray-600">
-                      <circle cx="12" cy="12" r="10"></circle>
-                      <polyline points="12 6 12 12 16 14"></polyline>
-                    </svg>
-                    <span className="text-[15px] text-gray-700">{item.text}</span>
-                  </div>
-                  <button
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      removeRecentSearch(item.text);
-                    }}
-                    className="delete-btn text-[#b0b8c4] hover:text-red-500 transition-colors p-1"
-                    aria-label="Delete history"
-                  >
-                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                      <polyline points="3 6 5 6 21 6"></polyline>
-                      <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
-                    </svg>
-                  </button>
-                </div>
-              ))}
-              <div className="h-2"></div>
-            </>
-          )}
           {defaultSuggestions.map((item, idx) => (
             <div
               key={idx}
@@ -205,21 +169,25 @@ export const SearchBar: React.FC<{
       );
     }
 
-    const filtered = getFilteredSuggestions(query);
-    if (filtered.length > 0) {
-      return filtered.map((text, idx) => (
-        <div
-          key={idx}
-          className="search-item flex items-center gap-4 px-6 py-3.5 hover:bg-gray-50 cursor-pointer transition-colors"
-          onClick={() => handleDropdownItemClick(text)}
-        >
-          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-gray-600">
-            <circle cx="11" cy="11" r="8"></circle>
-            <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
-          </svg>
-          <span className="text-[15px] text-gray-700">{text}</span>
-        </div>
-      ));
+    if (suggestions.length > 0) {
+      return (
+        <>
+          {suggestions.map((item, idx) => (
+            <div
+              key={idx}
+              className={`search-item flex items-center gap-4 px-6 py-3.5 hover:bg-gray-50 cursor-pointer transition-colors ${isLoadingSuggestions ? "opacity-60" : ""}`}
+              onClick={() => handleDropdownItemClick(item.title)}
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-gray-600">
+                <circle cx="11" cy="11" r="8"></circle>
+                <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+              </svg>
+              <span className="text-[15px] text-gray-700">{item.title}</span>
+              <span className="ml-auto text-[12px] text-gray-400 capitalize">{item.type}</span>
+            </div>
+          ))}
+        </>
+      );
     }
 
     return (
@@ -247,6 +215,33 @@ export const SearchBar: React.FC<{
         />
 
         <div className="flex items-center shrink-0 pr-[6px]">
+          <div className="relative hidden sm:block" ref={categoryRef}>
+            <button
+              onClick={() => setCategoryOpen((prev) => !prev)}
+              className="flex items-center gap-1 pl-2 pr-1 py-1 text-[14px] font-medium text-gray-800 hover:text-gray-900 transition-colors"
+            >
+              {selectedLabel}
+              <ChevronDown size={14} className={`text-gray-500 transition-transform ${categoryOpen ? "rotate-180" : ""}`} />
+            </button>
+            {categoryOpen && (
+              <div className="absolute top-full left-0 mt-1 w-44 rounded-lg border border-gray-200 bg-white py-1 shadow-lg z-50">
+                {categoryOptions.map((opt) => (
+                  <button
+                    key={opt.value}
+                    onClick={() => { setSearchCategory(opt.value); setCategoryOpen(false); }}
+                    className={`w-full text-left px-3 py-2 text-[14px] transition-colors ${
+                      searchCategory === opt.value
+                        ? "text-brand-blue font-bold bg-blue-50"
+                        : "text-gray-700 hover:bg-gray-50"
+                    }`}
+                  >
+                    {opt.label}
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
+          <div className="h-5 w-px bg-gray-300 mx-1 hidden sm:block"></div>
           <button
             onClick={() => handleSearchExecute(searchQuery)}
             className="flex items-center justify-center w-9 h-9 rounded-full text-white bg-brand-blue hover:bg-brand-hover transition-colors"
@@ -264,9 +259,9 @@ export const SearchBar: React.FC<{
               const target = e.target as HTMLElement;
               if (target.closest(".delete-btn")) return;
               if (target.closest(".search-item")) {
-                const itemText = target.closest(".search-item")?.querySelector("span:last-child")?.textContent;
-                if (itemText) {
-                  handleDropdownItemClick(itemText);
+                const titleEl = target.closest(".search-item")?.querySelector("span:first-of-type");
+                if (titleEl?.textContent) {
+                  handleDropdownItemClick(titleEl.textContent);
                 }
               }
             }}

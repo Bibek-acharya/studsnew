@@ -79,7 +79,7 @@ const EntranceGrid: React.FC<EntranceGridProps> = ({ filters, setFilters }) => {
         <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-center">
           <div className="flex flex-col justify-start">
             <h1 className="mb-3 text-base text-gray-900">
-              {isLoading ? "Loading..." : total === 0 ? (
+              {total === 0 ? (
                 <>0 of 0 <span className="font-bold">Entrance Exams</span></>
               ) : (
                 <>
@@ -110,13 +110,16 @@ const EntranceGrid: React.FC<EntranceGridProps> = ({ filters, setFilters }) => {
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4 sm:gap-5 md:gap-6">
-        {filteredExams.length === 0 && (
+        {isLoading ? (
+          <div className="col-span-1 md:col-span-2 xl:col-span-3 rounded-md border border-gray-100 bg-white py-16 text-center text-gray-500 shadow-[0_2px_15px_rgb(0,0,0,0.04)]">
+            Loading entrance exams...
+          </div>
+        ) : filteredExams.length === 0 ? (
           <div className="col-span-1 md:col-span-2 xl:col-span-3 rounded-md border border-gray-100 bg-white py-16 text-center text-gray-500 shadow-[0_2px_15px_rgb(0,0,0,0.04)]">
             No entrance exams found matching your filters.
           </div>
-        )}
-
-        {pagedExams.map((exam, index) => (
+        ) : (
+        pagedExams.map((exam, index) => (
           <React.Fragment key={exam.id}>
             <EntranceCard exam={exam} />
             {showEntranceAds && index === 5 && (
@@ -130,7 +133,7 @@ const EntranceGrid: React.FC<EntranceGridProps> = ({ filters, setFilters }) => {
               </div>
             )}
           </React.Fragment>
-        ))}
+        )))}
       </div>
 
       {totalPages > 1 && (
@@ -157,6 +160,17 @@ const iconMap: Record<string, React.ReactNode> = {
 const truncateText = (text: string, maxLength: number) => {
   if (!text || text.length <= maxLength) return text || "";
   return text.slice(0, maxLength) + "...";
+};
+
+const formatDate = (dateStr: string) => {
+  if (!dateStr) return "";
+  try {
+    const d = new Date(dateStr);
+    if (isNaN(d.getTime())) return dateStr;
+    return d.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" });
+  } catch {
+    return dateStr;
+  }
 };
 
 const EntranceCard: React.FC<{ exam: Exam }> = ({ exam }) => {
@@ -191,22 +205,28 @@ const EntranceCard: React.FC<{ exam: Exam }> = ({ exam }) => {
               </div>
             </h3>
             <div className="flex flex-col gap-1 text-[10px] xs:text-[11px] sm:text-[11px] text-[#6b7280] mt-0.5">
+              {exam.location && (
               <span className="flex items-center gap-1">
                 <MapPin className="w-2.5 h-2.5 sm:w-3 sm:h-3 shrink-0" />
                 <span className="truncate" title={exam.location}>{exam.location}</span>
               </span>
+              )}
               <span className="flex items-center gap-1">
                 <Award className="w-2.5 h-2.5 sm:w-3 sm:h-3 shrink-0" />
                 <span className="truncate" title={exam.affiliation}>{exam.affiliation}</span>
               </span>
             </div>
-            <a
-              href="#"
-              className="text-[#2563eb] text-[10px] xs:text-[11px] sm:text-[11px] font-medium mt-0.5 sm:mt-1 flex items-center gap-1 hover:underline"
-            >
-              <ExternalLink className="w-2.5 h-2.5 sm:w-3 sm:h-3" />{" "}
-              {exam.website}
-            </a>
+            {exam.website && (
+              <a
+                href={exam.website.startsWith("http") ? exam.website : `https://${exam.website}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-[#2563eb] text-[10px] xs:text-[11px] sm:text-[11px] font-medium mt-0.5 sm:mt-1 flex items-center gap-1 hover:underline"
+              >
+                <ExternalLink className="w-2.5 h-2.5 sm:w-3 sm:h-3" />{" "}
+                {exam.website}
+              </a>
+            )}
           </div>
         </div>
         <div className="w-8 h-8 opacity-0"></div>
@@ -249,7 +269,7 @@ const EntranceCard: React.FC<{ exam: Exam }> = ({ exam }) => {
           <div className="flex items-center gap-2 sm:gap-2.5 text-[11px] xs:text-[12px] sm:text-[13px] text-[#475569]">
             <Clock className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-[#94a3b8] shrink-0" />
             <span className="truncate font-medium text-red-500 text-[11px] sm:text-[12px]">
-              Ends: {exam.deadline}
+              Ends: {formatDate(exam.deadline || exam.examDate) || "TBA"}
             </span>
           </div>
           <div className="flex items-center gap-2 sm:gap-2.5 text-[11px] xs:text-[12px] sm:text-[13px] text-[#475569]">

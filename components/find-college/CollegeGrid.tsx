@@ -11,6 +11,7 @@ import {
   MessageSquare,
   Bookmark,
   Globe,
+  GraduationCap,
 } from "lucide-react";
 import Pagination from "@/components/ui/Pagination";
 
@@ -479,8 +480,11 @@ const CollegeGrid: React.FC<CollegeGridProps> = ({
         })}
 
         {!isLoading && colleges.length === 0 && (
-          <div className="col-span-1 rounded-md border border-gray-100 bg-white py-16 text-center text-gray-500 shadow-[0_2px_15px_rgb(0,0,0,0.04)] md:col-span-2 xl:col-span-3">
-            No colleges found matching your filters.
+          <div className="col-span-1 flex flex-col items-center justify-center py-20 px-4 md:col-span-2 xl:col-span-3">
+            <div className="w-24 h-24 rounded-full bg-gray-50 flex items-center justify-center mb-6">
+              <GraduationCap className="w-10 h-10 text-gray-300" />
+            </div>
+            <h3 className="text-xl font-bold text-gray-900">No Colleges Found</h3>
           </div>
         )}
       </div>
@@ -657,7 +661,7 @@ const CollegeGrid: React.FC<CollegeGridProps> = ({
   );
 };
 
-const ProgramCard: React.FC<{
+export const ProgramCard: React.FC<{
   college: College;
   isVerified: boolean;
   isSaved: boolean;

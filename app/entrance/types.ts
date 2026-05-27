@@ -77,4 +77,7 @@ export interface ExamDetails {
   pastDates: { date: string; dateEn: string; event: string }[];
   faqs: { question: string; answer: string }[];
   contactPersons: { name: string; role: string; img: string; phone: string; email: string; wa: string }[];
+  overviewDetails?: { detail: string; information: string }[];
+  applicationLink?: string;
+  noticeFile?: string;
 }

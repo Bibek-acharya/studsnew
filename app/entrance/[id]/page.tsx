@@ -26,6 +26,7 @@ import {
   MapPin,
   ExternalLink,
   X,
+  FolderOpen,
 } from "lucide-react";
 
 const WhatsAppIcon = ({ className }: { className?: string }) => (
@@ -33,6 +34,22 @@ const WhatsAppIcon = ({ className }: { className?: string }) => (
     <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z" />
   </svg>
 );
+
+const EmptyTabState = ({ tabName }: { tabName: string }) => {
+  const router = useRouter();
+  return (
+    <div className="flex flex-col items-center justify-center py-16">
+      <FolderOpen className="w-32 h-32 text-gray-300 mb-4" />
+      <p className="text-gray-500 text-lg font-medium mb-6">No {tabName} information is currently available.</p>
+      <button
+        onClick={() => router.push("/")}
+        className="bg-[#0000ff] hover:bg-[#0000cc] cursor-pointer text-white font-semibold py-2.5 px-6 rounded-md transition-colors text-sm"
+      >
+        Explore More
+      </button>
+    </div>
+  );
+};
 
 const TABS = [
   { id: "overview", label: "Overview" },
@@ -81,11 +98,24 @@ function mapExamToDetails(exam: Exam): ExamDetails {
     admissionSteps: [],
     admitCardInfo: "",
     upcomingDates: exam.examDate
-      ? [{ date: exam.examDate, dateEn: exam.examDate, event: `${exam.title} Exam`, status: exam.status }]
+      ? [{
+          date: exam.examDate,
+          dateEn: (() => {
+            try {
+              const d = new Date(exam.examDate);
+              return isNaN(d.getTime()) ? exam.examDate : d.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" });
+            } catch { return exam.examDate; }
+          })(),
+          event: `${exam.title} Exam`,
+          status: exam.status,
+        }]
       : [],
     pastDates: [],
     faqs: [],
     contactPersons: [],
+    overviewDetails: exam.overviewDetails,
+    applicationLink: exam.applicationLink,
+    noticeFile: exam.noticeFile,
   };
 }
 
@@ -228,6 +258,7 @@ const EntranceDetailsPage: React.FC = () => {
                 <p className="text-gray-600">{exam.description}</p>
               </div>
 
+              {exam.overviewDetails && exam.overviewDetails.length > 0 && (
               <div className="border border-gray-200 rounded-md overflow-hidden">
                 <table className="min-w-full divide-y divide-gray-200">
                   <thead className="bg-[#eff4fc]">
@@ -237,25 +268,16 @@ const EntranceDetailsPage: React.FC = () => {
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-gray-200 bg-white">
-                    <tr className="hover:bg-gray-50">
-                      <td className="py-3 px-4 text-sm font-semibold text-gray-900">Exam Name</td>
-                      <td className="py-3 px-4 text-sm text-gray-700">{exam.title}</td>
+                    {exam.overviewDetails.map((item, idx) => (
+                    <tr key={idx} className="hover:bg-gray-50">
+                      <td className="py-3 px-4 text-sm font-semibold text-gray-900">{item.detail}</td>
+                      <td className="py-3 px-4 text-sm text-gray-700">{item.information}</td>
                     </tr>
-                    <tr className="hover:bg-gray-50">
-                      <td className="py-3 px-4 text-sm font-semibold text-gray-900">Conducting Body</td>
-                      <td className="py-3 px-4 text-sm text-gray-700">{exam.conductingBody}</td>
-                    </tr>
-                    <tr className="hover:bg-gray-50">
-                      <td className="py-3 px-4 text-sm font-semibold text-gray-900">Exam Frequency</td>
-                      <td className="py-3 px-4 text-sm text-gray-700">{exam.examFrequency}</td>
-                    </tr>
-                    <tr className="hover:bg-gray-50">
-                      <td className="py-3 px-4 text-sm font-semibold text-gray-900">Mode of Exam</td>
-                      <td className="py-3 px-4 text-sm text-gray-700">{exam.examMode}</td>
-                    </tr>
+                    ))}
                   </tbody>
                 </table>
               </div>
+              )}
 
 
 
@@ -308,13 +330,14 @@ const EntranceDetailsPage: React.FC = () => {
           {activeTab === "eligibility" && (
             <div>
               <div className="mb-6">
+                {exam.eligibility.length > 0 ? (
+                <>
                 <h2 className="text-[22px] font-bold text-gray-900 mb-4">
                   Eligibility Criteria {currentYear}
                 </h2>
                 <p className="text-gray-600 mb-6">
                   Candidates must meet the following mandatory eligibility criteria to appear for the {exam.title} examination.
                 </p>
-
                 <div className="space-y-4">
                   {exam.eligibility.map((item, idx) => (
                     <div key={idx} className="border border-gray-200 rounded-md p-5 bg-white">
@@ -325,6 +348,10 @@ const EntranceDetailsPage: React.FC = () => {
                     </div>
                 ))}
               </div>
+                </>
+                ) : (
+                  <EmptyTabState tabName="Eligibility" />
+                )}
             </div>
             </div>
           )}
@@ -332,6 +359,8 @@ const EntranceDetailsPage: React.FC = () => {
           {/* Application Tab */}
           {activeTab === "application" && (
             <div>
+              {exam.applicationSteps.length > 0 ? (
+              <div>
               <div className="mb-8">
                 <h2 className="text-[22px] font-bold text-gray-900 mb-2">
                   Application Form Process {currentYear}
@@ -340,7 +369,6 @@ const EntranceDetailsPage: React.FC = () => {
                   The application process for {exam.title} is entirely online. Candidates must visit the official portal to submit their forms.
                 </p>
               </div>
-
               <div className="space-y-6">
                 {exam.applicationSteps.map((step, idx) => (
                   <div key={idx} className="border border-gray-200 rounded-md p-6">
@@ -355,26 +383,31 @@ const EntranceDetailsPage: React.FC = () => {
                     </div>
                   </div>
                 ))}
-              </div>
-
-              <div className="mt-6 border border-gray-200 rounded-md p-5">
-                <div className="flex items-start gap-3">
-                  <div className="w-6 h-6 rounded-full bg-amber-50 flex items-center justify-center text-amber-500 shrink-0 mt-0.5">
-                    <AlertTriangle className="w-4 h-4" />
-                  </div>
-                  <div>
-                    <h4 className="font-semibold text-gray-900 text-sm mb-1">Application Fee</h4>
-                    <p className="text-sm text-gray-600">Regular: {exam.applicationFee}</p>
-                    {exam.foreignFee && <p className="text-sm text-gray-600">Foreign: {exam.foreignFee}</p>}
+                <div className="mt-6 border border-gray-200 rounded-md p-5">
+                  <div className="flex items-start gap-3">
+                    <div className="w-6 h-6 rounded-full bg-amber-50 flex items-center justify-center text-amber-500 shrink-0 mt-0.5">
+                      <AlertTriangle className="w-4 h-4" />
+                    </div>
+                    <div>
+                      <h4 className="font-semibold text-gray-900 text-sm mb-1">Application Fee</h4>
+                      <p className="text-sm text-gray-600">Regular: {exam.applicationFee}</p>
+                      {exam.foreignFee && <p className="text-sm text-gray-600">Foreign: {exam.foreignFee}</p>}
+                    </div>
                   </div>
                 </div>
               </div>
+              </div>
+              ) : (
+                <EmptyTabState tabName="Application Process" />
+              )}
             </div>
           )}
 
           {/* Syllabus & Pattern Tab */}
           {activeTab === "syllabus" && (
             <div>
+              {exam.examPattern.length > 0 || exam.subjectMarks.length > 0 ? (
+              <div>
               <div className="mb-8">
                 <h2 className="text-[22px] font-bold text-gray-900 mb-2">
                   Exam Pattern & Syllabus
@@ -416,12 +449,18 @@ const EntranceDetailsPage: React.FC = () => {
                   </table>
                 </div>
               </div>
+              </div>
+              ) : (
+                <EmptyTabState tabName="Syllabus" />
+              )}
             </div>
           )}
 
           {/* Model Sets Tab */}
           {activeTab === "modelsets" && (
             <div>
+              {exam.modelSets.length > 0 ? (
+              <div>
               <div className="mb-8">
                 <h2 className="text-[22px] font-bold text-gray-900 mb-2">
                   Model Sets & Past Papers
@@ -430,7 +469,6 @@ const EntranceDetailsPage: React.FC = () => {
                   Practicing with model sets and past year question papers is crucial to understand the exam format and time management.
                 </p>
               </div>
-
               <div className="space-y-3">
                 {exam.modelSets.map((set, idx) => (
                   <div key={idx} className="flex items-center justify-between p-4 border border-gray-200 rounded-md bg-white">
@@ -449,49 +487,66 @@ const EntranceDetailsPage: React.FC = () => {
                   </div>
                 ))}
               </div>
+              </div>
+              ) : (
+                <EmptyTabState tabName="Model Sets" />
+              )}
             </div>
           )}
 
           {/* Timeline Tab */}
           {activeTab === "timeline" && (
             <div>
-              <div className="mb-6">
-                <h2 className="text-[20px] font-bold text-gray-900">Key Dates & Timeline</h2>
-                <p className="mt-1 text-[14px] text-gray-500">Important dates for {exam.title}</p>
-              </div>
-              <div className="space-y-4">
-                {[...exam.upcomingDates.map(d => ({ ...d, icon: "Calendar", type: "upcoming" })), ...exam.pastDates.map(d => ({ ...d, icon: "Calendar", type: "past" }))].map((ev, i, arr) => {
-                  const colors = ["bg-blue-600", "bg-green-600", "bg-orange-600", "bg-purple-600", "bg-red-600"];
-                  const color = colors[i % colors.length];
-                  const isLast = i === arr.length - 1;
-                  return (
-                    <div key={i} className="flex gap-4">
-                      <div className="flex flex-col items-center">
-                        <div className={`flex h-8 w-8 items-center justify-center rounded-full ${color} text-white`}>
-                          <Calendar size={16} />
+              {exam.upcomingDates.length > 0 || exam.pastDates.length > 0 ? (
+              <div>
+                <div className="mb-6">
+                  <h2 className="text-[20px] font-bold text-gray-900">Key Dates & Timeline</h2>
+                  <p className="mt-1 text-[14px] text-gray-500">Important dates for {exam.title}</p>
+                </div>
+                <div className="space-y-4">
+                  {[...exam.upcomingDates.map(d => ({ ...d, icon: "Calendar", type: "upcoming" })), ...exam.pastDates.map(d => ({ ...d, icon: "Calendar", type: "past" }))].map((ev, i, arr) => {
+                    const colors = ["bg-blue-600", "bg-green-600", "bg-orange-600", "bg-purple-600", "bg-red-600"];
+                    const color = colors[i % colors.length];
+                    const isLast = i === arr.length - 1;
+                    const displayDate = (() => {
+                      try {
+                        const d = new Date(ev.date);
+                        return isNaN(d.getTime()) ? ev.date : d.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" });
+                      } catch { return ev.date; }
+                    })();
+                    return (
+                      <div key={i} className="flex gap-4">
+                        <div className="flex flex-col items-center">
+                          <div className={`flex h-8 w-8 items-center justify-center rounded-full ${color} text-white`}>
+                            <Calendar size={16} />
+                          </div>
+                          {!isLast && <div className="mt-2 w-0.5 flex-1 bg-gray-200" />}
                         </div>
-                        {!isLast && <div className="mt-2 w-0.5 flex-1 bg-gray-200" />}
+                        <div className={!isLast ? "pb-6" : ""}>
+                          <h3 className="text-[15px] font-bold text-gray-900">{ev.event}</h3>
+                          <p className={`text-[13px] font-semibold ${color.replace("bg-", "text-")}`}>{displayDate}</p>
+                          <p className="mt-1 text-[13px] text-gray-600">{ev.type === "upcoming" ? "Upcoming" : "Past"} event</p>
+                        </div>
                       </div>
-                      <div className={!isLast ? "pb-6" : ""}>
-                        <h3 className="text-[15px] font-bold text-gray-900">{ev.event}</h3>
-                        <p className={`text-[13px] font-semibold ${color.replace("bg-", "text-")}`}>{ev.date}</p>
-                        <p className="mt-1 text-[13px] text-gray-600">{ev.type === "upcoming" ? "Upcoming" : "Past"} event</p>
-                      </div>
-                    </div>
-                  );
-                })}
+                    );
+                  })}
+                </div>
               </div>
+              ) : (
+                <EmptyTabState tabName="Timeline" />
+              )}
             </div>
           )}
 
           {/* Contact Tab */}
           {activeTab === "contact" && (
             <div>
+              {exam.contactPersons.length > 0 ? (
+              <div>
               <div className="mb-8">
                 <h2 className="text-2xl font-bold text-gray-900 mb-2">Contact Information</h2>
                 <p className="text-gray-600">Get in touch with our admission team</p>
               </div>
-
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 {exam.contactPersons.map((person, idx) => (
                   <div key={idx} className="border border-gray-200 rounded-md p-6 bg-white">
@@ -528,13 +583,18 @@ const EntranceDetailsPage: React.FC = () => {
                   </div>
                 ))}
               </div>
-
+              </div>
+              ) : (
+                <EmptyTabState tabName="Contact" />
+              )}
             </div>
           )}
 
           {/* FAQ Tab */}
           {activeTab === "faq" && (
             <div>
+              {exam.faqs.length > 0 ? (
+              <div>
               <div className="mb-6">
                 <h2 className="text-[20px] font-bold text-gray-900">
                   Frequently Asked Questions
@@ -543,7 +603,6 @@ const EntranceDetailsPage: React.FC = () => {
                   Find answers to common questions about {exam.title}
                 </p>
               </div>
-
               <div className="space-y-3">
                 {exam.faqs.map((faq, idx) => (
                   <div key={idx} className="bg-white rounded-md overflow-hidden border border-gray-100">
@@ -566,6 +625,10 @@ const EntranceDetailsPage: React.FC = () => {
                   </div>
                 ))}
               </div>
+              </div>
+              ) : (
+                <EmptyTabState tabName="FAQ" />
+              )}
             </div>
           )}
         </div>
@@ -583,20 +646,36 @@ const EntranceDetailsPage: React.FC = () => {
                 </p>
               </div>
               <div className="space-y-3 pt-4 border-t border-blue-500/50">
-                <button className="w-full flex items-center justify-center bg-white text-blue-600 hover:bg-blue-50 font-semibold py-3 px-4 rounded-md transition-colors text-sm">
+                <button
+                  onClick={() => {
+                    if (exam.applicationLink) {
+                      window.open(exam.applicationLink, "_blank", "noopener,noreferrer");
+                    } else {
+                      window.open(`/entrance/apply/${exam.id}`, "_blank");
+                    }
+                  }}
+                  className="w-full flex items-center justify-center bg-white text-blue-600 hover:bg-blue-50 font-semibold py-3 px-4 rounded-md transition-colors text-sm"
+                >
                   Apply Now
                 </button>
-                <button className="w-full flex items-center justify-center bg-blue-500 hover:bg-blue-400 text-white font-semibold py-3 px-4 rounded-md transition-colors text-sm">
+                {exam.noticeFile && (
+                <button
+                  onClick={() => window.open(exam.noticeFile, "_blank", "noopener,noreferrer")}
+                  className="w-full flex items-center justify-center bg-blue-500 hover:bg-blue-400 text-white font-semibold py-3 px-4 rounded-md transition-colors text-sm"
+                >
                   Download Notice
                   <Download className="w-4 h-4 ml-2" />
                 </button>
+                )}
               </div>
             </div>
           </div>
 
+          {(exam.conductingBody || exam.phone || exam.email || exam.website || exam.location) && (
           <div className="bg-white border border-gray-100 rounded-md p-5">
             <h3 className="font-bold text-gray-900 text-[18px] mb-5">Contact Information</h3>
             <ul className="space-y-4">
+              {exam.conductingBody && (
               <li className="flex items-start gap-3 text-[13px]">
                 <div className="w-8 h-8 rounded-full bg-blue-50 flex items-center justify-center text-blue-600 shrink-0">
                   <Building className="w-4 h-4" />
@@ -606,6 +685,8 @@ const EntranceDetailsPage: React.FC = () => {
                   <span className="text-gray-500 font-medium text-[12px]">{exam.conductingBody}</span>
                 </div>
               </li>
+              )}
+              {exam.phone && (
               <li className="flex items-start gap-3 text-[13px]">
                 <div className="w-8 h-8 rounded-full bg-emerald-50 flex items-center justify-center text-emerald-600 shrink-0">
                   <Phone className="w-4 h-4" />
@@ -615,6 +696,8 @@ const EntranceDetailsPage: React.FC = () => {
                   <span className="text-gray-500 font-medium text-[12px]">{exam.phone}</span>
                 </div>
               </li>
+              )}
+              {exam.email && (
               <li className="flex items-start gap-3 text-[13px]">
                 <div className="w-8 h-8 rounded-full bg-red-50 flex items-center justify-center text-red-500 shrink-0">
                   <Mail className="w-4 h-4" />
@@ -624,6 +707,8 @@ const EntranceDetailsPage: React.FC = () => {
                   <span className="text-gray-500 font-medium text-[12px]">{exam.email}</span>
                 </div>
               </li>
+              )}
+              {exam.website && (
               <li className="flex items-start gap-3 text-[13px]">
                 <div className="w-8 h-8 rounded-full bg-purple-50 flex items-center justify-center text-purple-600 shrink-0">
                   <Globe className="w-4 h-4" />
@@ -633,8 +718,10 @@ const EntranceDetailsPage: React.FC = () => {
                   <span className="text-[#0000ff] font-medium text-[12px] hover:underline cursor-pointer">{exam.website}</span>
                 </div>
               </li>
+              )}
             </ul>
 
+            {exam.location && (
             <div className="mt-5 pt-5 border-t border-gray-100">
               <div
                 onClick={() => window.open("https://www.google.com/maps/search/" + encodeURIComponent(exam.location), "_blank")}
@@ -653,11 +740,15 @@ const EntranceDetailsPage: React.FC = () => {
                 </div>
               </div>
             </div>
+            )}
           </div>
+          )}
 
+          {(exam.examLevel || exam.duration || exam.questionType || exam.applicationFee) && (
           <div className="bg-white border border-gray-100 rounded-md p-5">
             <h3 className="font-bold text-gray-900 text-[18px] mb-5">Exam Highlights</h3>
             <ul className="space-y-4">
+              {exam.examLevel && (
               <li className="flex items-start gap-3">
                 <div className="w-8 h-8 rounded-full bg-blue-50 flex items-center justify-center text-blue-600 shrink-0">
                   <Globe2 className="w-4 h-4" />
@@ -667,6 +758,8 @@ const EntranceDetailsPage: React.FC = () => {
                   <span className="text-gray-500 font-medium text-[12px]">{exam.examLevel}</span>
                 </div>
               </li>
+              )}
+              {exam.duration && (
               <li className="flex items-start gap-3">
                 <div className="w-8 h-8 rounded-full bg-orange-50 flex items-center justify-center text-orange-500 shrink-0">
                   <Timer className="w-4 h-4" />
@@ -676,6 +769,8 @@ const EntranceDetailsPage: React.FC = () => {
                   <span className="text-gray-500 font-medium text-[12px]">{exam.duration}</span>
                 </div>
               </li>
+              )}
+              {exam.questionType && (
               <li className="flex items-start gap-3">
                 <div className="w-8 h-8 rounded-full bg-emerald-50 flex items-center justify-center text-emerald-600 shrink-0">
                   <FileCheck2 className="w-4 h-4" />
@@ -685,6 +780,8 @@ const EntranceDetailsPage: React.FC = () => {
                   <span className="text-gray-500 font-medium text-[12px]">{exam.questionType}</span>
                 </div>
               </li>
+              )}
+              {exam.applicationFee && (
               <li className="flex items-start gap-3">
                 <div className="w-8 h-8 rounded-full bg-red-50 flex items-center justify-center text-red-500 shrink-0">
                   <Calendar className="w-4 h-4" />
@@ -694,8 +791,10 @@ const EntranceDetailsPage: React.FC = () => {
                   <span className="text-gray-500 font-medium text-[12px]">{exam.applicationFee}</span>
                 </div>
               </li>
+              )}
             </ul>
           </div>
+          )}
 
         </div>
       </div>

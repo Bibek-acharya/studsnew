@@ -240,7 +240,6 @@ const EntranceFilters: React.FC<EntranceFiltersProps> = ({
 }) => {
   const [showAppliedDropdown, setShowAppliedDropdown] = useState(false);
   const [streamSearch, setStreamSearch] = useState("");
-  const [locating, setLocating] = useState(false);
 
   const toggle = (key: keyof EntranceFilterState, value: string) => {
     if (key === "location") return;
@@ -399,69 +398,6 @@ className="inline-flex items-center gap-1.5 rounded-full border border-blue-100 
             )}
           </div>
         )}
-
-        <div className="border-b border-gray-100 py-3">
-          <button
-            type="button"
-            onClick={() => {
-              if (locating) return;
-              setLocating(true);
-              
-              const resolveLocation = (lat?: number, lon?: number) => {
-                fetch(`https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${lat || "27.7172"}&longitude=${lon || "85.324"}&localityLanguage=en`)
-                  .then(res => res.json())
-                  .then(data => {
-                    const city = data.city || data.locality || "Kathmandu";
-                    setFilters((prev) => ({ ...prev, location: city }));
-                    sessionStorage.setItem("navLocation", city);
-                    window.dispatchEvent(new CustomEvent("navLocationChange", { detail: city }));
-                  })
-                  .catch(() => {
-                    setFilters((prev) => ({ ...prev, location: "Kathmandu" }));
-                  })
-                  .finally(() => setLocating(false));
-              };
-
-              if (navigator.geolocation) {
-                navigator.geolocation.getCurrentPosition(
-                  (pos) => resolveLocation(pos.coords.latitude, pos.coords.longitude),
-                  () => resolveLocation(),
-                  { enableHighAccuracy: true, timeout: 5000, maximumAge: 0 }
-                );
-              } else {
-                resolveLocation();
-              }
-            }}
-            className="flex w-full items-center justify-start gap-2 rounded-md border border-black/20 px-4 py-3 text-gray-700 hover:text-brand-blue outline-none transition-all duration-200"
-          >
-            {locating ? (
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                width="18"
-                height="18"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                className="animate-spin"
-              >
-                <circle cx="12" cy="12" r="3" />
-                <circle cx="12" cy="12" r="7" />
-                <line x1="12" y1="1" x2="12" y2="5" />
-                <line x1="12" y1="19" x2="12" y2="23" />
-                <line x1="1" y1="12" x2="5" y2="12" />
-                <line x1="19" y1="12" x2="23" y2="12" />
-              </svg>
-            ) : (
-              <i className={`fa-solid ${filters.location ? "fa-location-dot" : "fa-location-crosshairs"} text-[16px]`}></i>
-            )}
-            <span className="text-[15px] font-medium">
-              {locating ? "Locating..." : filters.location || "Exam Near Me"}
-            </span>
-          </button>
-        </div>
 
         <Accordion title="Academic Level" defaultOpen>
           <div className="flex flex-col gap-3.5 pt-1">
