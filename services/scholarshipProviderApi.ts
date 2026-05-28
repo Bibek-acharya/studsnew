@@ -826,6 +826,32 @@ export const scholarshipProviderApi = {
     return callApi(`/api/v1/scholarship-providers/applications?${queryParams}`);
   },
 
+  async exportFilteredApplications(params?: {
+    status?: string;
+    search?: string;
+    gender?: string;
+    ethnicity?: string;
+    province?: string;
+    district?: string;
+    school_type?: string;
+    stream?: string;
+    exam_center?: string;
+    payment_status?: string;
+  }): Promise<{ applications: ProviderApplication[] }> {
+    const queryParams = new URLSearchParams();
+    if (params?.status) queryParams.set('status', params.status);
+    if (params?.search) queryParams.set('search', params.search);
+    if (params?.gender) queryParams.set('gender', params.gender);
+    if (params?.ethnicity) queryParams.set('ethnicity', params.ethnicity);
+    if (params?.province) queryParams.set('province', params.province);
+    if (params?.district) queryParams.set('district', params.district);
+    if (params?.school_type) queryParams.set('school_type', params.school_type);
+    if (params?.stream) queryParams.set('stream', params.stream);
+    if (params?.exam_center) queryParams.set('exam_center', params.exam_center);
+    if (params?.payment_status) queryParams.set('payment_status', params.payment_status);
+    return callApi(`/api/v1/scholarship-providers/applications/export-filtered?${queryParams}`);
+  },
+
   async getPendingPaymentApplications(params?: { page?: number; limit?: number; search?: string }): Promise<{ applications: ProviderApplication[]; meta: { total: number; page: number; limit: number } }> {
     const queryParams = new URLSearchParams();
     queryParams.set('page', String(params?.page || 1));

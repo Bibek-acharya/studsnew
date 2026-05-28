@@ -1,10 +1,11 @@
 "use client";
 
 import React, { useEffect, useState, useCallback } from "react";
-import { Home, Star, Search, Eye, CheckCircle, XCircle, ChevronLeft, ChevronRight, Mail, Download } from "lucide-react";
+import { Home, Star, Search, Eye, CheckCircle, XCircle, ChevronLeft, ChevronRight, Mail, Download, FileSpreadsheet } from "lucide-react";
 import { scholarshipProviderApi, ProviderApplication, ExamCenterItem } from "@/services/scholarshipProviderApi";
 import { NEPAL_DISTRICTS, NEPAL_PROVINCES } from "@/lib/location-data";
 import { toast } from "sonner";
+import * as XLSX from "xlsx";
 import ApplicantProfileModal from "./ApplicantProfileModal";
 import AdmitCardDownloadModal from "./AdmitCardDownloadModal";
 
@@ -51,6 +52,7 @@ export default function ApplicationsDirectory() {
   const [showResendModal, setShowResendModal] = useState(false);
   const [resendAppId, setResendAppId] = useState<number | null>(null);
   const [downloadAppId, setDownloadAppId] = useState<number | null>(null);
+  const [exporting, setExporting] = useState(false);
 
   useEffect(() => {
     scholarshipProviderApi.getScholarships(1, 100).then((res) => {
@@ -186,6 +188,74 @@ export default function ApplicationsDirectory() {
 
   const statusLabel = (s: string) => s.charAt(0).toUpperCase() + s.slice(1);
 
+  const handleExport = async () => {
+    setExporting(true);
+    try {
+      const res = await scholarshipProviderApi.exportFilteredApplications({
+        status: filterStatus?.toLowerCase() || undefined,
+        search: search || undefined,
+        gender: filterGender || undefined,
+        ethnicity: filterEthnicity || undefined,
+        province: filterProvince || undefined,
+        district: filterDistrict || undefined,
+        school_type: filterSchool || undefined,
+        stream: filterStream || undefined,
+        exam_center: filterExamCenter || undefined,
+        payment_status: paymentStatusFilter !== 'all' ? paymentStatusFilter : undefined,
+      });
+      const sorted = [...res.applications].sort((a, b) => {
+        const ra = parseInt((a.roll_number || "").replace(/\D/g, ""), 10) || 0;
+        const rb = parseInt((b.roll_number || "").replace(/\D/g, ""), 10) || 0;
+        return ra - rb;
+      });
+      const rows = sorted.map((a) => ({
+        "Roll No": a.roll_number || "",
+        "Full Name": `${a.first_name || ""} ${a.last_name || ""}`.trim(),
+        "Email": a.email || "",
+        "Phone": a.phone_number || "",
+        "Gender": a.gender || "",
+        "Ethnicity": a.ethnicity || "",
+        "Date of Birth (BS)": a.date_of_birth_bs || "",
+        "Date of Birth (AD)": a.date_of_birth_ad ? new Date(a.date_of_birth_ad).toLocaleDateString("en-US", { year: "numeric", month: "short", day: "numeric" }) : "",
+        "Age": a.age || "",
+        "GPA (SEE)": a.see_gpa || "",
+        "School Name": a.school_name || "",
+        "School Province": a.school_province || "",
+        "School District": a.school_district || "",
+        "School Municipality": a.school_municipality || "",
+        "School Tole": a.school_tole || "",
+        "School Type": a.school_type || "",
+        "Stream": a.stream || "",
+        "Exam Center": a.exam_center || "",
+        "Province (Permanent)": a.permanent_province || "",
+        "District (Permanent)": a.permanent_district || "",
+        "Municipality (Permanent)": a.permanent_municipality || "",
+        "Ward (Permanent)": a.permanent_ward || "",
+        "Tole (Permanent)": a.permanent_tole || "",
+        "Province (Temporary)": a.temporary_province || "",
+        "District (Temporary)": a.temporary_district || "",
+        "Municipality (Temporary)": a.temporary_municipality || "",
+        "Ward (Temporary)": a.temporary_ward || "",
+        "Tole (Temporary)": a.temporary_tole || "",
+        "Guardian Name": a.guardian_name || "",
+        "Guardian Phone": a.guardian_phone || "",
+        "Status": a.status || "",
+        "Payment Method": a.payment?.method || "",
+        "Payment Amount": a.payment?.amount || "",
+        "Payment Status": a.payment?.status || "",
+      }));
+      const ws = XLSX.utils.json_to_sheet(rows);
+      const wb = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(wb, ws, "Applications");
+      XLSX.writeFile(wb, "applications_export.xlsx");
+      toast.success(`Exported ${rows.length} applications`);
+    } catch {
+      toast.error("Failed to export applications");
+    } finally {
+      setExporting(false);
+    }
+  };
+
   return (
     <div className="space-y-6">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-2">
@@ -260,6 +330,14 @@ export default function ApplicationsDirectory() {
             <option value="pending_approval">Pending Approval</option>
           </select>
           <button onClick={clearFilters} className="text-xs text-blue-600 font-medium hover:underline">Clear All</button>
+            <button
+              onClick={handleExport}
+              disabled={exporting}
+              className="px-3 py-1.5 bg-blue-600 text-white rounded-lg text-xs font-medium hover:bg-blue-700 transition-colors flex items-center gap-1.5 disabled:opacity-50"
+            >
+              <FileSpreadsheet className="w-3.5 h-3.5" />
+              {exporting ? "Exporting..." : "Export"}
+            </button>
             <span className="text-xs text-gray-400 ml-auto">{applications.length} of {total} applications</span>
         </div>
 
