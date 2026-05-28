@@ -444,6 +444,7 @@ export interface ProviderApplication {
   scholarship?: ProviderScholarship;
   created_at: string;
   updated_at?: string;
+  roll_no?: string;
   province?: string;
   district?: string;
   stream?: string;

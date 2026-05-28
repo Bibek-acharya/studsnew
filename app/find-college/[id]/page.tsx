@@ -318,8 +318,31 @@ const CollegeDetailsPage = ({ params }: { params: Promise<{ id: string }> }) => 
 
   if (loading) {
     return (
-      <div className="flex min-h-[60vh] items-center justify-center">
-        <div className="h-10 w-10 animate-spin rounded-full border-4 border-gray-200 border-t-brand-blue"></div>
+      <div className="w-full animate-pulse">
+        <div className="relative h-55 w-full bg-gray-200 md:h-90" />
+        <div className="mx-auto max-w-350 px-4 py-6 sm:px-6 lg:px-8">
+          <div className="flex flex-col gap-6 md:flex-row">
+            <div className="-mt-16 shrink-0 md:-mt-20">
+              <div className="h-24 w-24 rounded-lg bg-gray-300 md:h-32 md:w-32" />
+            </div>
+            <div className="flex-1 space-y-3 pt-2">
+              <div className="h-7 w-72 rounded bg-gray-300" />
+              <div className="h-4 w-48 rounded bg-gray-200" />
+              <div className="h-4 w-96 rounded bg-gray-200" />
+            </div>
+          </div>
+          <div className="mt-8 flex gap-6 border-b border-gray-200 pb-2">
+            {[1, 2, 3, 4, 5, 6].map((i) => (
+              <div key={i} className="h-6 w-20 rounded bg-gray-200" />
+            ))}
+          </div>
+          <div className="mt-8 space-y-4">
+            <div className="h-4 w-full rounded bg-gray-200" />
+            <div className="h-4 w-3/4 rounded bg-gray-200" />
+            <div className="h-4 w-5/6 rounded bg-gray-200" />
+            <div className="h-4 w-2/3 rounded bg-gray-200" />
+          </div>
+        </div>
       </div>
     );
   }
@@ -1040,8 +1063,21 @@ const CollegeDetailsPage = ({ params }: { params: Promise<{ id: string }> }) => 
           {activeTab === "review" && (
             <div>
               {reviewsLoading ? (
-                <div className="flex items-center justify-center py-12">
-                  <div className="h-8 w-8 animate-spin rounded-full border-4 border-gray-200 border-t-brand-blue"></div>
+                <div className="animate-pulse space-y-4 py-8">
+                  <div className="flex items-center gap-6">
+                    <div className="h-20 w-20 rounded-full bg-gray-200" />
+                    <div className="space-y-2">
+                      <div className="h-4 w-40 rounded bg-gray-200" />
+                      <div className="h-3 w-24 rounded bg-gray-200" />
+                    </div>
+                  </div>
+                  {[1, 2, 3].map((i) => (
+                    <div key={i} className="space-y-2 rounded-lg border border-gray-100 p-4">
+                      <div className="h-4 w-48 rounded bg-gray-200" />
+                      <div className="h-3 w-full rounded bg-gray-100" />
+                      <div className="h-3 w-3/4 rounded bg-gray-100" />
+                    </div>
+                  ))}
                 </div>
               ) : (
                 <>

@@ -12,6 +12,7 @@ import {
   Bookmark,
   Globe,
   GraduationCap,
+  FolderOpen,
 } from "lucide-react";
 import Pagination from "@/components/ui/Pagination";
 
@@ -338,31 +339,7 @@ const CollegeGrid: React.FC<CollegeGridProps> = ({
               Showing {showingFrom.toLocaleString()}-{showingTo.toLocaleString()} of {totalResults.toLocaleString()} <span className="font-bold">Colleges</span>
             </h1>
 
-            {isLoading && (
-              <div className="mb-2 inline-flex items-center gap-2 rounded-full border border-blue-100 bg-blue-50 px-3 py-1.5 text-[12px] font-medium text-blue-700">
-                <svg
-                  className="h-3.5 w-3.5 animate-spin"
-                  xmlns="http://www.w3.org/2000/svg"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                >
-                  <circle
-                    className="opacity-25"
-                    cx="12"
-                    cy="12"
-                    r="10"
-                    stroke="currentColor"
-                    strokeWidth="4"
-                  ></circle>
-                  <path
-                    className="opacity-75"
-                    fill="currentColor"
-                    d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-                  ></path>
-                </svg>
-                Updating results...
-              </div>
-            )}
+
 
             <label className="group mt-auto flex cursor-pointer items-center gap-2.5">
               <div className="relative flex h-5 w-5 items-center justify-center">
@@ -442,9 +419,24 @@ const CollegeGrid: React.FC<CollegeGridProps> = ({
         id="card-grid"
       >
         {isLoading && colleges.length === 0 && (
-          <div className="col-span-1 rounded-md border border-gray-100 bg-white py-16 text-center text-gray-500 shadow-[0_2px_15px_rgb(0,0,0,0.04)] md:col-span-2 xl:col-span-3">
-            Loading colleges...
-          </div>
+          <>
+            {Array.from({ length: 6 }).map((_, i) => (
+              <div key={i} className="flex animate-pulse flex-col rounded-md border border-gray-200 bg-white p-4">
+                <div className="h-35 w-full rounded-md bg-gray-200" />
+                <div className="mt-3 space-y-2.5">
+                  <div className="h-5 w-3/4 rounded bg-gray-200" />
+                  <div className="h-3 w-1/2 rounded bg-gray-100" />
+                  <div className="h-3 w-2/3 rounded bg-gray-100" />
+                  <div className="h-3 w-1/2 rounded bg-gray-100" />
+                </div>
+                <div className="mt-4 flex gap-2">
+                  <div className="h-9 flex-1 rounded-md bg-gray-200" />
+                  <div className="h-9 flex-1 rounded-md bg-gray-200" />
+                  <div className="h-9 w-10 rounded-md bg-gray-200" />
+                </div>
+              </div>
+            ))}
+          </>
         )}
 
         {colleges.map((college: College, index: number) => {
@@ -482,7 +474,7 @@ const CollegeGrid: React.FC<CollegeGridProps> = ({
         {!isLoading && colleges.length === 0 && (
           <div className="col-span-1 flex flex-col items-center justify-center py-20 px-4 md:col-span-2 xl:col-span-3">
             <div className="w-24 h-24 rounded-full bg-gray-50 flex items-center justify-center mb-6">
-              <GraduationCap className="w-10 h-10 text-gray-300" />
+              <FolderOpen className="w-10 h-10 text-gray-300" />
             </div>
             <h3 className="text-xl font-bold text-gray-900">No Colleges Found</h3>
           </div>

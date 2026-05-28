@@ -42,6 +42,7 @@ export type ViewKey =
   | "volunteer"
   | "nepaliUniversities"
   | "foreignUniversities"
+  | "scholarshipResultCheck"
   ;
 
 export type NotificationTab = "all" | "following" | "system" | "archive";
@@ -54,6 +55,7 @@ export interface DropdownItem {
   viewKey?: ViewKey;
   data?: { level?: string };
   disabled?: boolean;
+  lucideIcon?: string;
 }
 
 export interface DesktopMenuSection {

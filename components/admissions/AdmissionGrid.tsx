@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useEffect, useMemo, useState } from "react";
+import { FolderOpen } from "lucide-react";
 import { AdmissionFilters } from "@/app/admissions/[level]/types";
 import CollegeCard from "@/components/admissions/CollegeCard";
 import FeaturedAdmissionAd from "@/components/admissions/FeaturedAdmissionAd";
@@ -135,12 +136,31 @@ const AdmissionGrid: React.FC<AdmissionGridProps> = ({
       <section>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
           {isLoading ? (
-            <div className="col-span-1 md:col-span-2 xl:col-span-3 rounded-md border border-gray-100 bg-white py-16 text-center text-gray-500">
-              Loading admission colleges...
-            </div>
+            <>
+              {Array.from({ length: 6 }).map((_, i) => (
+                <div key={i} className="flex animate-pulse flex-col rounded-md border border-gray-200 bg-white p-4">
+                  <div className="h-35 w-full rounded-md bg-gray-200" />
+                  <div className="mt-3 space-y-2.5">
+                    <div className="h-5 w-3/4 rounded bg-gray-200" />
+                    <div className="h-3 w-1/2 rounded bg-gray-100" />
+                    <div className="h-3 w-2/3 rounded bg-gray-100" />
+                    <div className="h-3 w-1/2 rounded bg-gray-100" />
+                  </div>
+                  <div className="mt-4 flex gap-2">
+                    <div className="h-9 flex-1 rounded-md bg-gray-200" />
+                    <div className="h-9 flex-1 rounded-md bg-gray-200" />
+                    <div className="h-9 w-10 rounded-md bg-gray-200" />
+                  </div>
+                </div>
+              ))}
+            </>
           ) : colleges.length === 0 ? (
-            <div className="col-span-1 md:col-span-2 xl:col-span-3 rounded-md border border-gray-100 bg-white py-16 text-center text-gray-500">
-              No colleges found matching your filters.
+            <div className="col-span-1 flex flex-col items-center justify-center py-20 px-4 md:col-span-2 xl:col-span-3">
+              <div className="mb-6 flex h-24 w-24 items-center justify-center rounded-full bg-gray-50">
+                <FolderOpen className="h-36 w-36 text-gray-300" />
+              </div>
+              <h3 className="text-xl font-bold text-gray-900">No Colleges Found</h3>
+              <p className="mt-1 text-sm text-gray-500">No colleges match your current filters. Try adjusting your search criteria.</p>
             </div>
           ) : (
             colleges.map((college, index) => {

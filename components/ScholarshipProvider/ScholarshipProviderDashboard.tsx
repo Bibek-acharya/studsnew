@@ -211,7 +211,7 @@ const ScholarshipProviderDashboard: React.FC<DashboardProps> = ({ onLogout }) =>
       case 'sec-payment-disputes':
         return <PaymentDisputes />;
       case 'sec-written-exam':
-        return <WrittenExam />;
+        return <WrittenExam onNavigate={navigateTo} />;
       case 'sec-customize-form':
         return <CustomizeForm />;
       case 'sec-draft-scholarship':

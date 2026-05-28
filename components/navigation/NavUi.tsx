@@ -73,7 +73,8 @@ export const DropdownCard: React.FC<{
   title: string;
   desc: string;
   onClick?: () => void;
-}> = ({ icon, color, title, desc, onClick }) => (
+  iconElement?: React.ReactNode;
+}> = ({ icon, color, title, desc, onClick, iconElement }) => (
   <button
     onClick={onClick}
     disabled={!onClick}
@@ -82,7 +83,11 @@ export const DropdownCard: React.FC<{
     <div
       className={`flex h-10 w-10 sm:h-12 sm:w-12 shrink-0 items-center justify-center rounded-md border border-gray-100 bg-gray-50 transition-colors group-hover/card:bg-white ${color}`}
     >
-      <i className={`fa-solid ${icon} text-base sm:text-lg`}></i>
+      {iconElement ? (
+        iconElement
+      ) : (
+        <i className={`fa-solid ${icon} text-base sm:text-lg`}></i>
+      )}
     </div>
     <div className="ml-3 sm:ml-4 min-w-0 flex-1">
       <h4 className="text-[13px] sm:text-[15px] font-bold leading-tight text-gray-900">

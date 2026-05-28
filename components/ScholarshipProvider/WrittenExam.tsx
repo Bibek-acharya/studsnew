@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect, useCallback, useMemo, memo } from "react";
-import { Home, Search, Plus, Pencil, Trash2, X, Loader2, ChevronLeft, ChevronRight } from "lucide-react";
+import { Home, Search, Plus, Pencil, Trash2, X, Loader2, ChevronLeft, ChevronRight, Megaphone } from "lucide-react";
 import { toast } from "sonner";
 import { scholarshipProviderApi, writtenExamApi, WrittenExamData, WrittenExamResultData, ProviderApplication } from "@/services/scholarshipProviderApi";
 
@@ -25,7 +25,7 @@ const STREAM_COLORS: Record<string, string> = {
 
 const LS_KEY = "written_exam_scholarship_id";
 
-const WrittenExam: React.FC = memo(() => {
+const WrittenExam: React.FC<{ onNavigate?: (section: string) => void }> = memo(({ onNavigate }) => {
   const [scholarships, setScholarships] = useState<{ id: number; title: string; status: string }[]>([]);
   const [scholarshipId, setScholarshipId] = useState(() => {
     if (typeof window !== "undefined") return localStorage.getItem(LS_KEY) || "";
@@ -60,6 +60,7 @@ const WrittenExam: React.FC = memo(() => {
   const [editMarks, setEditMarks] = useState("");
   const [savingEdit, setSavingEdit] = useState(false);
   const [deleteId, setDeleteId] = useState<number | null>(null);
+  const [publishConfirmOpen, setPublishConfirmOpen] = useState(false);
 
   useEffect(() => {
     (async () => {
@@ -81,7 +82,7 @@ const WrittenExam: React.FC = memo(() => {
     try {
       const [exams, appsResp] = await Promise.all([
         writtenExamApi.getList({ scholarship_id: sid }),
-        scholarshipProviderApi.getApplications({ scholarship_id: String(sid), status: "shortlisted", page: 1, limit: 500 }),
+        scholarshipProviderApi.getApplications({ scholarship_id: String(sid), page: 1, limit: 1000 }),
       ]);
 
       // Build apps lookup map
@@ -125,7 +126,7 @@ const WrittenExam: React.FC = memo(() => {
     try {
       const [updated, appsResp] = await Promise.all([
         writtenExamApi.getById(exam.id),
-        scholarshipProviderApi.getApplications({ scholarship_id: String(scholarshipId), status: "shortlisted", page: 1, limit: 500 }),
+        scholarshipProviderApi.getApplications({ scholarship_id: String(scholarshipId), page: 1, limit: 1000 }),
       ]);
       setExam(updated);
       const map: Record<number, ProviderApplication> = {};
@@ -179,22 +180,17 @@ const WrittenExam: React.FC = memo(() => {
     setLookedUpStudent(null);
 
     try {
-      // Search shortlisted applications for this scholarship
+      // Search all applications for this scholarship
       const resp = await scholarshipProviderApi.getApplications({
-        status: "shortlisted",
         scholarship_id: scholarshipId,
+        search: val,
         page: 1,
-        limit: 200,
+        limit: 50,
       });
 
-      // Try match by raw ID, formatted APP-YYYY-XXX ID, or name
-      const parsedId = parseAppId(val);
-      const match = resp.applications.find(
-        (a) =>
-          String(a.id) === val ||
-          (parsedId !== null && a.id === parsedId) ||
-          formatAppId(a.id) === val.toUpperCase() ||
-          a.full_name?.toLowerCase().includes(val.toLowerCase())
+      const match = resp.applications.find((a) =>
+        (a.roll_number && a.roll_number.toLowerCase().includes(val.toLowerCase())) ||
+        a.full_name?.toLowerCase().includes(val.toLowerCase())
       );
 
       if (!match) {
@@ -212,6 +208,7 @@ const WrittenExam: React.FC = memo(() => {
       setLookedUpStudent({
         application_id: match.id,
         full_name: match.full_name || `${match.first_name} ${match.last_name}`,
+        roll_no: match.roll_number,
         stream: match.stream,
         exam_center: match.exam_center,
       });
@@ -355,6 +352,12 @@ const WrittenExam: React.FC = memo(() => {
               >
                 <Plus className="w-4 h-4" /> Add Student
               </button>
+              <button
+                onClick={() => setPublishConfirmOpen(true)}
+                className="px-4 py-2 bg-green-600 text-white rounded-lg text-sm font-semibold hover:bg-green-700 transition-colors flex items-center gap-1"
+              >
+                <Megaphone className="w-4 h-4" /> Publish Result
+              </button>
             </div>
           )}
         </div>
@@ -383,6 +386,7 @@ const WrittenExam: React.FC = memo(() => {
                   {paginatedResults.map((r) => {
                     const app = appsMap[r.application_id];
                     const studentName = r.student_name || (app ? `${app.first_name} ${app.last_name}` : "—");
+                    const rollNo = r.roll_no || app?.roll_number || "—";
                     const stream = r.stream || app?.stream;
                     const examCenter = r.exam_center || app?.exam_center;
                     const streamColor = STREAM_COLORS[stream || ""] || "bg-gray-100 text-gray-700";
@@ -396,7 +400,7 @@ const WrittenExam: React.FC = memo(() => {
                       <tr key={r.id} className="hover:bg-gray-50">
                         <td className="py-3 px-4 font-medium text-gray-900">{studentName}</td>
                         <td className="text-center py-3 px-4 font-mono text-gray-600">{formatAppId(r.application_id)}</td>
-                        <td className="text-center py-3 px-4 font-mono text-gray-600">{r.roll_no || "—"}</td>
+                        <td className="text-center py-3 px-4 font-mono text-gray-600">{rollNo}</td>
                         <td className="text-center py-3 px-4">
                           <span className={`px-2 py-1 rounded text-xs font-semibold ${streamColor}`}>{stream || "N/A"}</span>
                         </td>
@@ -475,20 +479,20 @@ const WrittenExam: React.FC = memo(() => {
 
             {addStep === 1 ? (
               <div className="p-6">
-                <p className="text-sm text-gray-600 mb-4">Enter the Application ID or Student Name to look up student details.</p>
+                <p className="text-sm text-gray-600 mb-4">Enter the Roll Number or Student Name to look up student details.</p>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Application ID / Name <span className="text-red-500">*</span></label>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Roll Number / Name <span className="text-red-500">*</span></label>
                   <input
                     type="text"
                     className="w-full px-3 py-2 border border-gray-200 rounded-lg text-lg text-center font-mono tracking-widest focus:outline-none focus:border-blue-500"
-                    placeholder="e.g., 42 or Ram Bahadur"
+                    placeholder="e.g., PS-001 or Ram Bahadur"
                     value={lookupValue}
                     onChange={(e) => { setLookupValue(e.target.value); setLookupError(false); }}
                     onKeyDown={(e) => e.key === "Enter" && handleLookup()}
                   />
                 </div>
                 {lookupError && (
-                  <p className="mt-4 text-sm text-red-600">Student not found. Try again with a different Application ID or name.</p>
+                  <p className="mt-4 text-sm text-red-600">Student not found. Try again with a different Roll Number or name.</p>
                 )}
                 <div className="flex justify-end gap-3 mt-6">
                   <button onClick={closeAddModal} className="px-6 py-2.5 border border-gray-300 rounded-lg text-gray-700 font-medium hover:bg-gray-50 transition-colors">Cancel</button>
@@ -504,6 +508,10 @@ const WrittenExam: React.FC = memo(() => {
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">Application ID</label>
                   <input type="text" className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm bg-gray-50" value={lookedUpStudent ? formatAppId(lookedUpStudent.application_id) : ""} readOnly />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Roll Number</label>
+                  <input type="text" className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm bg-gray-50" value={lookedUpStudent?.roll_no || "—"} readOnly />
                 </div>
                 <div className="grid grid-cols-2 gap-4">
                   <div>
@@ -559,6 +567,22 @@ const WrittenExam: React.FC = memo(() => {
             <div className="px-6 py-4 border-t border-gray-200 flex justify-end gap-3">
               <button onClick={() => setDeleteId(null)} className="px-6 py-2.5 border border-gray-300 rounded-lg text-gray-700 font-medium hover:bg-gray-50">Cancel</button>
               <button onClick={handleDeleteResult} className="px-6 py-2.5 bg-red-600 text-white rounded-lg font-medium hover:bg-red-700">Remove</button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Publish Result Confirmation */}
+      {publishConfirmOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
+          <div className="bg-white rounded-lg max-w-sm w-full overflow-hidden shadow-xl">
+            <div className="px-6 py-4">
+              <h2 className="text-lg font-bold text-gray-900 mb-2">Publish Result</h2>
+              <p className="text-sm text-gray-600">Are you sure you want to proceed to publish results? Students who have been added to this exam will have their results published.</p>
+            </div>
+            <div className="px-6 py-4 border-t border-gray-200 flex justify-end gap-3">
+              <button onClick={() => setPublishConfirmOpen(false)} className="px-6 py-2.5 border border-gray-300 rounded-lg text-gray-700 font-medium hover:bg-gray-50">Cancel</button>
+              <button onClick={() => { setPublishConfirmOpen(false); onNavigate?.("sec-results"); }} className="px-6 py-2.5 bg-green-600 text-white rounded-lg font-medium hover:bg-green-700">Proceed</button>
             </div>
           </div>
         </div>

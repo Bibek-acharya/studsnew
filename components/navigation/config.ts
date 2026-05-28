@@ -38,6 +38,7 @@ export const routeMap: Record<ViewKey, string> = {
   volunteer: "/volunteer",
   nepaliUniversities: "/universities/nepali",
   foreignUniversities: "/universities/foreign",
+  scholarshipResultCheck: "/scholarship-result",
 };
 
 export const notificationTabs: NotificationTab[] = [
@@ -99,6 +100,14 @@ export const desktopMenuSections: DesktopMenuSection[] = [
         title: "Scholarship Provider",
         desc: "List and manage scholarship programs with us.",
         viewKey: "scholarshipProviderZone",
+      },
+      {
+        icon: "fa-check-circle",
+        color: "text-green-500",
+        title: "Scholarship Result",
+        desc: "View your scholarship application result.",
+        viewKey: "scholarshipResultCheck",
+        lucideIcon: "FileSpreadsheet",
       },
     ],
   },
@@ -258,6 +267,12 @@ export const mobileMenuSections: MobileMenuSection[] = [
         icon: "fa-building",
         color: "text-indigo-500",
         viewKey: "scholarshipProviderZone",
+      },
+      {
+        label: "Scholarship Result",
+        icon: "fa-check-circle",
+        color: "text-green-500",
+        viewKey: "scholarshipResultCheck",
       },
     ],
   },

@@ -20,6 +20,7 @@ import {
   ChevronDown,
   X,
   Menu,
+  FileSpreadsheet,
 } from "lucide-react";
 import {
   desktopMenuSections,
@@ -456,6 +457,22 @@ const EducationNavbar: React.FC<EducationNavbarProps> = ({
           isVisible ? "translate-y-0" : "-translate-y-full"
         } ${isScrolled ? "" : ""}`}
       >
+        {pathname === "/" && (
+          <div className="bg-brand-blue text-white">
+            <div className="mx-auto flex max-w-350 items-center justify-center gap-1 px-4 py-2 text-center text-sm font-medium">
+              <span>
+                Scholarship results are out.{" "}
+                <button
+                  type="button"
+                  onClick={() => router.push("/scholarship-result")}
+                  className="font-semibold underline underline-offset-2 hover:opacity-90 transition-opacity cursor-pointer"
+                >
+                  Click here to check.
+                </button>
+              </span>
+            </div>
+          </div>
+        )}
         <div className="w-full px-3 xs:px-4 sm:px-6 lg:px-8">
           <div className="mx-auto flex w-full max-w-350 items-center justify-between gap-2 sm:gap-4 py-2.5 sm:py-3">
             {!user ? (
@@ -1162,6 +1179,11 @@ const EducationNavbar: React.FC<EducationNavbarProps> = ({
                       title={item.title}
                       desc={item.desc}
                       onClick={getDropdownClick(item)}
+                      iconElement={
+                        item.lucideIcon === "FileSpreadsheet"
+                          ? <FileSpreadsheet className="text-base sm:text-lg" />
+                          : undefined
+                      }
                     />
                   ))}
                 </DesktopDropdown>
