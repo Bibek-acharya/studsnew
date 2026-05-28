@@ -59,7 +59,7 @@ const EducationNavbar: React.FC<EducationNavbarProps> = ({
   const [mobileMenus, setMobileMenus] = useState<Record<string, boolean>>({});
   const drawerDirection = user ? "right" : "left";
   const mobileSearchSuggestions = trendingSearches.slice(0, 4);
-  const [mobileLiveSuggestions, setMobileLiveSuggestions] = useState(
+  const [mobileLiveSuggestions, setMobileLiveSuggestions] = useState<{ title: string; type: string }[]>(
     mobileSearchSuggestions,
   );
 
@@ -116,7 +116,7 @@ const EducationNavbar: React.FC<EducationNavbarProps> = ({
 
   const handleMobileSearchStateChange = (
     query: string,
-    suggestions: typeof mobileSearchSuggestions,
+    suggestions: { title: string; type: string }[],
   ) => {
     setMobileLiveSuggestions(
       query.trim() === "" ? mobileSearchSuggestions : suggestions,
