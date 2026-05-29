@@ -426,7 +426,8 @@ const WrittenExam: React.FC<{ onNavigate?: (section: string) => void }> = memo((
       const rollToAppId: Record<string, number> = {};
       for (const app of Object.values(appsMap)) {
         const parts = (app.roll_number || "").split("-");
-        const normalized = parts[parts.length - 1].trim();
+        let normalized = parts[parts.length - 1].trim();
+        normalized = normalized.replace(/^0+/, "");
         if (normalized) rollToAppId[normalized] = app.id;
       }
 
