@@ -4,7 +4,7 @@ import React, { useState, useEffect, useCallback, useMemo, memo } from "react";
 import { Home, Search, Plus, Pencil, Trash2, X, Loader2, ChevronLeft, ChevronRight, Megaphone, Upload, FileSpreadsheet } from "lucide-react";
 import { toast } from "sonner";
 import * as XLSX from "xlsx";
-import { scholarshipProviderApi, writtenExamApi, WrittenExamData, WrittenExamResultData, ProviderApplication, BatchImportResponse } from "@/services/scholarshipProviderApi";
+import { scholarshipProviderApi, writtenExamApi, WrittenExamData, WrittenExamResultData, ProviderApplication, BatchImportResponse, ProviderResult } from "@/services/scholarshipProviderApi";
 
 const PAGE_SIZE = 20;
 
@@ -62,6 +62,8 @@ const WrittenExam: React.FC<{ onNavigate?: (section: string) => void }> = memo((
   const [savingEdit, setSavingEdit] = useState(false);
   const [deleteId, setDeleteId] = useState<number | null>(null);
   const [publishConfirmOpen, setPublishConfirmOpen] = useState(false);
+  const [publishing, setPublishing] = useState(false);
+  const [isPublished, setIsPublished] = useState(false);
 
   // Import Excel modal
   const [importOpen, setImportOpen] = useState(false);
@@ -74,6 +76,11 @@ const WrittenExam: React.FC<{ onNavigate?: (section: string) => void }> = memo((
   const [importing, setImporting] = useState(false);
   const [importResult, setImportResult] = useState<BatchImportResponse | null>(null);
   const [duplicateError, setDuplicateError] = useState<string | null>(null);
+  const [interviewLocation, setInterviewLocation] = useState("");
+  const [interviewDate, setInterviewDate] = useState("");
+  const [reportingTime, setReportingTime] = useState("");
+  const [requiredDocs, setRequiredDocs] = useState<string[]>([]);
+  const [newDocInput, setNewDocInput] = useState("");
 
   useEffect(() => {
     (async () => {
@@ -115,6 +122,8 @@ const WrittenExam: React.FC<{ onNavigate?: (section: string) => void }> = memo((
         });
         setExam(created);
       }
+
+      checkPublished(sid);
     } catch {
       toast.error("Failed to load written exam");
       setExam(null);
@@ -133,6 +142,15 @@ const WrittenExam: React.FC<{ onNavigate?: (section: string) => void }> = memo((
       setExam(null);
     }
   }, [scholarshipId, getOrCreateExam]);
+
+  const checkPublished = useCallback(async (sid: number) => {
+    try {
+      const res = await scholarshipProviderApi.getResults(1, 1, sid);
+      setIsPublished(res.results.length > 0);
+    } catch {
+      setIsPublished(false);
+    }
+  }, []);
 
   const refreshExam = useCallback(async () => {
     if (!exam?.id) return;
@@ -169,6 +187,16 @@ const WrittenExam: React.FC<{ onNavigate?: (section: string) => void }> = memo((
   const totalPages = Math.max(1, Math.ceil(filteredResults.length / PAGE_SIZE));
   const safePage = Math.min(page, totalPages);
   const paginatedResults = filteredResults.slice((safePage - 1) * PAGE_SIZE, safePage * PAGE_SIZE);
+
+  const examCenters = useMemo(() => {
+    const centers = new Set<string>();
+    const currentScholarshipId = exam?.scholarship_id;
+    for (const app of Object.values(appsMap)) {
+      if (app.scholarship_id !== currentScholarshipId) continue;
+      if (app.exam_center) centers.add(app.exam_center);
+    }
+    return Array.from(centers).sort();
+  }, [appsMap, exam?.scholarship_id]);
 
   // --- Add Student Modal ---
   const openAddModal = () => {
@@ -254,6 +282,7 @@ const WrittenExam: React.FC<{ onNavigate?: (section: string) => void }> = memo((
           } as ProviderApplication,
         }));
       }
+      setIsPublished(false);
       toast.success("Student added");
       closeAddModal();
     } catch {
@@ -284,6 +313,7 @@ const WrittenExam: React.FC<{ onNavigate?: (section: string) => void }> = memo((
         marks_obtained: Number(editMarks),
       });
       setExam(updated);
+      setIsPublished(false);
       toast.success("Marks updated");
       setEditOpen(false);
     } catch {
@@ -299,6 +329,7 @@ const WrittenExam: React.FC<{ onNavigate?: (section: string) => void }> = memo((
     setDeleteId(null);
     try {
       await writtenExamApi.deleteResult(exam.id, resultId);
+      setIsPublished(false);
       refreshExam();
       toast.success("Student removed");
     } catch {
@@ -311,6 +342,11 @@ const WrittenExam: React.FC<{ onNavigate?: (section: string) => void }> = memo((
     setImportRows([]);
     setImportResult(null);
     setDuplicateError(null);
+    setInterviewLocation("");
+    setInterviewDate("");
+    setReportingTime("");
+    setRequiredDocs([]);
+    setNewDocInput("");
   };
 
   const closeImportModal = () => {
@@ -318,6 +354,11 @@ const WrittenExam: React.FC<{ onNavigate?: (section: string) => void }> = memo((
     setImportRows([]);
     setImportResult(null);
     setDuplicateError(null);
+    setInterviewLocation("");
+    setInterviewDate("");
+    setReportingTime("");
+    setRequiredDocs([]);
+    setNewDocInput("");
   };
 
   const handleFileSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -415,9 +456,19 @@ const WrittenExam: React.FC<{ onNavigate?: (section: string) => void }> = memo((
     try {
       const result = await writtenExamApi.batchImportResults(
         exam.id,
-        { results: validRows.map((r) => ({ roll_number: r.rollNumber, marks: r.marks })) }
+        {
+          results: validRows.map((r) => ({
+            roll_number: r.rollNumber,
+            marks: r.marks,
+            interview_location: interviewLocation || undefined,
+            interview_date: interviewDate || undefined,
+            reporting_time: reportingTime || undefined,
+            required_documents: requiredDocs.length > 0 ? requiredDocs : undefined,
+          })),
+        }
       );
       await refreshExam();
+      setIsPublished(false);
       closeImportModal();
       toast.success(
         `Imported ${result.summary.imported}, overwritten ${result.summary.overwritten}, skipped ${result.summary.skipped}`
@@ -499,10 +550,18 @@ const WrittenExam: React.FC<{ onNavigate?: (section: string) => void }> = memo((
                 <Upload className="w-4 h-4" /> Import Excel
               </button>
               <button
-                onClick={() => setPublishConfirmOpen(true)}
-                className="px-4 py-2 bg-green-600 text-white rounded-lg text-sm font-semibold hover:bg-green-700 transition-colors flex items-center gap-1"
+                onClick={() => {
+                  if (isPublished) { onNavigate?.("sec-results"); return; }
+                  setPublishConfirmOpen(true);
+                }}
+                disabled={publishing}
+                className={`px-4 py-2 rounded-lg text-sm font-semibold transition-colors flex items-center gap-1 ${
+                  isPublished
+                    ? "bg-green-100 text-green-700 cursor-pointer hover:bg-green-200"
+                    : "bg-green-600 text-white hover:bg-green-700"
+                }`}
               >
-                <Megaphone className="w-4 h-4" /> Publish Result
+                <Megaphone className="w-4 h-4" /> {isPublished ? "Published (View)" : "Publish Result"}
               </button>
             </div>
           )}
@@ -781,7 +840,100 @@ const WrittenExam: React.FC<{ onNavigate?: (section: string) => void }> = memo((
                     </span>
                   )}
                 </p>
-                <div className="overflow-x-auto max-h-64 overflow-y-auto border border-gray-200 rounded-lg">
+
+                {/* Interview Fields — same for all rows */}
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 p-4 bg-gray-50 rounded-lg border border-gray-200">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Interview Location</label>
+                    {examCenters.length > 0 ? (
+                      <select
+                        className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:border-blue-500"
+                        value={interviewLocation}
+                        onChange={(e) => setInterviewLocation(e.target.value)}
+                      >
+                        <option value="">Select exam center</option>
+                        {examCenters.map((c) => (
+                          <option key={c} value={c}>{c}</option>
+                        ))}
+                      </select>
+                    ) : (
+                      <input
+                        type="text"
+                        className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:border-blue-500"
+                        placeholder="Enter interview location..."
+                        value={interviewLocation}
+                        onChange={(e) => setInterviewLocation(e.target.value)}
+                      />
+                    )}
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Interview Date</label>
+                    <input
+                      type="date"
+                      className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:border-blue-500"
+                      value={interviewDate}
+                      min={new Date().toISOString().split("T")[0]}
+                      onChange={(e) => setInterviewDate(e.target.value)}
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Reporting Time</label>
+                    <input
+                      type="time"
+                      className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:border-blue-500"
+                      value={reportingTime}
+                      onChange={(e) => setReportingTime(e.target.value)}
+                    />
+                  </div>
+                </div>
+
+                {/* Required Documents */}
+                <div className="p-4 bg-gray-50 rounded-lg border border-gray-200">
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Required Documents</label>
+                  <div className="flex gap-2 mb-2">
+                    <input
+                      type="text"
+                      className="flex-1 px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:border-blue-500"
+                      placeholder="e.g., Citizenship, Transcript, etc."
+                      value={newDocInput}
+                      onChange={(e) => setNewDocInput(e.target.value)}
+                      onKeyDown={(e) => {
+                        if (e.key === "Enter" && newDocInput.trim()) {
+                          setRequiredDocs([...requiredDocs, newDocInput.trim()]);
+                          setNewDocInput("");
+                        }
+                      }}
+                    />
+                    <button
+                      onClick={() => {
+                        if (newDocInput.trim()) {
+                          setRequiredDocs([...requiredDocs, newDocInput.trim()]);
+                          setNewDocInput("");
+                        }
+                      }}
+                      className="px-3 py-2 bg-gray-600 text-white rounded-lg text-sm hover:bg-gray-700"
+                    >
+                      Add
+                    </button>
+                  </div>
+                  {requiredDocs.length > 0 && (
+                    <div className="flex flex-wrap gap-2">
+                      {requiredDocs.map((doc, i) => (
+                        <span key={i} className="inline-flex items-center gap-1 px-3 py-1 bg-blue-100 text-blue-700 rounded-full text-xs font-medium">
+                          {doc}
+                          <button
+                            onClick={() => setRequiredDocs(requiredDocs.filter((_, j) => j !== i))}
+                            className="ml-1 hover:text-blue-900"
+                          >
+                            <X className="w-3 h-3" />
+                          </button>
+                        </span>
+                      ))}
+                    </div>
+                  )}
+                </div>
+
+                <div className="overflow-x-auto max-h-48 overflow-y-auto border border-gray-200 rounded-lg">
                   <table className="w-full text-sm">
                     <thead className="bg-gray-50 border-b border-gray-200 sticky top-0">
                       <tr>
@@ -868,11 +1020,58 @@ const WrittenExam: React.FC<{ onNavigate?: (section: string) => void }> = memo((
           <div className="bg-white rounded-lg max-w-sm w-full overflow-hidden shadow-xl">
             <div className="px-6 py-4">
               <h2 className="text-lg font-bold text-gray-900 mb-2">Publish Result</h2>
-              <p className="text-sm text-gray-600">Are you sure you want to proceed to publish results? Students who have been added to this exam will have their results published.</p>
+              <p className="text-sm text-gray-600">
+                This will publish the written exam results for <strong>{exam?.results?.length || 0}</strong> students.
+                Interview location and required documents will also be included. Continue?
+              </p>
             </div>
             <div className="px-6 py-4 border-t border-gray-200 flex justify-end gap-3">
-              <button onClick={() => setPublishConfirmOpen(false)} className="px-6 py-2.5 border border-gray-300 rounded-lg text-gray-700 font-medium hover:bg-gray-50">Cancel</button>
-              <button onClick={() => { setPublishConfirmOpen(false); onNavigate?.("sec-results"); }} className="px-6 py-2.5 bg-green-600 text-white rounded-lg font-medium hover:bg-green-700">Proceed</button>
+              <button
+                onClick={() => setPublishConfirmOpen(false)}
+                className="px-6 py-2.5 border border-gray-300 rounded-lg text-gray-700 font-medium hover:bg-gray-50"
+                disabled={publishing}
+              >
+                Cancel
+              </button>
+              <button
+                onClick={async () => {
+                  if (!exam?.id || !scholarshipId) return;
+                  setPublishing(true);
+                  try {
+                    const payload = (exam.results || []).map((r) => ({
+                      application_id: r.application_id,
+                      student_name: appsMap[r.application_id]
+                        ? `${appsMap[r.application_id].first_name} ${appsMap[r.application_id].last_name}`
+                        : "",
+                      marks_obtained: r.marks_obtained,
+                      interview_location: r.interview_location || "",
+                      interview_date: r.interview_date || "",
+                      reporting_time: r.reporting_time || "",
+                      required_documents: r.required_documents || [],
+                      stream: appsMap[r.application_id]?.stream || "",
+                      exam_center: appsMap[r.application_id]?.exam_center || "",
+                      roll_number: appsMap[r.application_id]?.roll_number || "",
+                    }));
+                    await scholarshipProviderApi.createResult({
+                      scholarship_id: Number(scholarshipId),
+                      title: `${exam.title} - Published Result`,
+                      status: "published",
+                      results: payload as unknown as Record<string, unknown>[],
+                    });
+                    setPublishConfirmOpen(false);
+                    toast.success("Written exam results published successfully");
+                    onNavigate?.("sec-results");
+                  } catch {
+                    toast.error("Failed to publish results");
+                  } finally {
+                    setPublishing(false);
+                  }
+                }}
+                disabled={publishing || (exam?.results?.length ?? 0) === 0}
+                className="px-6 py-2.5 bg-green-600 text-white rounded-lg font-medium hover:bg-green-700 disabled:opacity-50 flex items-center gap-2"
+              >
+                {publishing ? <><Loader2 className="w-4 h-4 animate-spin" /> Publishing...</> : "Publish"}
+              </button>
             </div>
           </div>
         </div>

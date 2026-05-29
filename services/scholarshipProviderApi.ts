@@ -234,64 +234,7 @@ export interface CreateScholarshipPayload {
   selection_criteria?: string;
   interview_rounds?: number;
   interview_location?: string;
-  scholarship_types?: ScholarshipType[];
-  selection_rubric?: SelectionRubric[];
-  eligibility_criteria?: string[];
-  fully_funded_criteria?: string[];
-  partially_funded_criteria?: string[];
-  selection_process?: SelectionProcessStep[];
-  required_documents?: string[];
-  timeline?: TimelineEvent[];
-  journey_timeline?: JourneyTimelineItem[];
-  exam_centers?: ExamCenter[];
-  faqs?: FAQ[];
-  partners?: Partner[];
-  achievements?: Achievement[];
-  gallery_images?: GalleryImageItem[];
-  guidelines_url?: string;
-  news_items?: NewsItem[];
-  map_embed_url?: string;
-  social_links?: SocialLinks;
-
-  // Prototype fields
-  banner_background_image_url?: string;
-  about_paragraph_1?: string;
-  about_paragraph_2?: string;
-  video_tutorials?: VideoTutorial[];
-  scholarship_section_title?: string;
-  scholarship_subtitle?: string;
-  scholarship_description_1?: string;
-  scholarship_description_2?: string;
-  scholarship_types_new?: ScholarshipTypeItem[];
-  selection_rubric_new?: SelectionRubricItem[];
-  eligibility_section_title?: string;
-  eligibility_subtitle?: string;
-  basic_eligibility_criteria?: string[];
-  selection_process_steps?: SelectionProcessStepItem[];
-  faqs_new?: FAQItem[];
-  gallery_images_new?: GalleryImageItem[];
-  partner_groups?: PartnerGroup[];
-  partner_messages?: PartnerMessageItem[];
-  exam_centers_new?: ExamCenterItem[];
-  downloads?: DownloadItem[];
-
-  // New fields from prototype
-  provider_name?: string;
-  funding_type_other?: string;
-  scholarship_type_other?: string;
-  education_level?: string;
-  education_level_other?: string;
-  apply_link?: string;
-  coverage_area?: string;
-  contact_email?: string;
-  primary_phone?: string;
-  secondary_phone?: string;
-  website_url?: string;
-  office_address?: string;
-  map_url?: string;
-  payment_config?: PaymentConfig;
-  exam_date?: string;
-  exam_time?: string;
+  interview_date?: string;
 }
 
 export interface ProviderScholarship {
@@ -1183,8 +1126,9 @@ export const scholarshipProviderApi = {
     });
   },
 
-  async getResults(page = 1, limit = 10): Promise<{ results: ProviderResult[]; meta: { total: number; page: number; limit: number } }> {
-    const params = new URLSearchParams({ page: String(page), limit: String(limit) }).toString();
+  async getResults(page = 1, limit = 10, scholarship_id?: number): Promise<{ results: ProviderResult[]; meta: { total: number; page: number; limit: number } }> {
+    const params = new URLSearchParams({ page: String(page), limit: String(limit) });
+    if (scholarship_id) params.set("scholarship_id", String(scholarship_id));
     return apiRequest<{ results: ProviderResult[]; meta: { total: number; page: number; limit: number } }>(`/api/v1/scholarship-providers/results?${params}`);
   },
 
@@ -1447,6 +1391,10 @@ export interface WrittenExamResultData {
   stream?: string;
   exam_center?: string;
   roll_no?: string;
+  interview_location?: string;
+  interview_date?: string;
+  reporting_time?: string;
+  required_documents?: string[];
 }
 
 export interface WrittenExamsResponse {
@@ -1543,6 +1491,10 @@ export const writtenExamApi = {
 export interface BatchImportItem {
   roll_number: string;
   marks: number;
+  interview_location?: string;
+  interview_date?: string;
+  reporting_time?: string;
+  required_documents?: string[];
 }
 
 export interface BatchImportSummary {
@@ -1655,4 +1607,45 @@ export const updateReview = async (id: number, data: Record<string, unknown>): P
 
 export const deleteReview = async (id: number): Promise<void> => {
   await apiRequest(`/api/v1/scholarship-providers/reviews/${id}`, { method: 'DELETE' });
+};
+
+// Public result-checking API (no auth required)
+export interface PublishedResultScholarship {
+  id: number;
+  slug?: string;
+  title?: string;
+  provider_name?: string;
+  location?: string;
+  office_address?: string;
+  image_url?: string;
+  banner_background_image_url?: string;
+}
+
+export interface StudentResult {
+  application_id?: number;
+  student_name?: string;
+  scholarship_title?: string;
+  evaluation_score?: number;
+  marks_obtained?: number;
+  final_score?: number;
+  rank?: number;
+  result?: string;
+  interview_location?: string;
+  interview_date?: string;
+  reporting_time?: string;
+  required_documents?: string[];
+  stream?: string;
+  exam_center?: string;
+  roll_number?: string;
+  notes?: string;
+}
+
+export const publicResultApi = {
+  async getScholarships(): Promise<PublishedResultScholarship[]> {
+    return callApi<PublishedResultScholarship[]>("/api/v1/public/results/scholarships");
+  },
+  async checkResult(scholarshipId: number, rollNumber: string): Promise<StudentResult | null> {
+    const params = new URLSearchParams({ scholarship_id: String(scholarshipId), roll_number: rollNumber });
+    return callApi<StudentResult | null>(`/api/v1/public/results/check?${params}`);
+  },
 };

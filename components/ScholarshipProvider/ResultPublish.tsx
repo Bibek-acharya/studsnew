@@ -1,9 +1,9 @@
 "use client";
 
 import React, { memo, useEffect, useMemo, useState } from "react";
-import { ChevronLeft, ChevronRight, Download, GraduationCap, Home, Search, Trophy } from "lucide-react";
+import { ChevronLeft, ChevronRight, Download, GraduationCap, Home, Search, Trophy, Trash2, X } from "lucide-react";
 import { toast } from "sonner";
-import { scholarshipProviderApi, ProviderApplication, ProviderScholarship } from "@/services/scholarshipProviderApi";
+import { scholarshipProviderApi, writtenExamApi, ProviderApplication, ProviderScholarship, ProviderResult } from "@/services/scholarshipProviderApi";
 
 type FinalResultRow = {
   application_id: number;
@@ -12,6 +12,16 @@ type FinalResultRow = {
   student_name: string;
   evaluation_score: number;
   evaluation_passed: boolean;
+  stream?: string;
+  exam_center?: string;
+  roll_number?: string;
+  marks_obtained?: number;
+  interview_location?: string;
+  interview_date?: string;
+  reporting_time?: string;
+  required_documents?: string[];
+  written_exam_marks?: number;
+  final_score?: number;
   rank: number;
   result: string;
   notes: string;
@@ -35,9 +45,10 @@ const FinalResult: React.FC = memo(() => {
   const [selectedScholarshipId, setSelectedScholarshipId] = useState<string>("");
   const [applications, setApplications] = useState<ProviderApplication[]>([]);
   const [results, setResults] = useState<FinalResultRow[]>([]);
-  const [existingPublished, setExistingPublished] = useState<any[]>([]);
+  const [existingPublished, setExistingPublished] = useState<ProviderResult[]>([]);
   const [loading, setLoading] = useState(true);
   const [publishing, setPublishing] = useState(false);
+  const [deleteId, setDeleteId] = useState<number | null>(null);
   const [search, setSearch] = useState("");
   const [page, setPage] = useState(1);
   const limit = 10;
@@ -71,33 +82,58 @@ const FinalResult: React.FC = memo(() => {
     async function loadData() {
       setLoading(true);
       try {
-        const [appsRes, resultsRes] = await Promise.all([
+        const sid = selectedScholarshipId ? Number(selectedScholarshipId) : undefined;
+        const [appsRes, resultsRes, writtenExamsRes] = await Promise.all([
           scholarshipProviderApi.getApplications({
             page: 1,
-            limit: 100,
+            limit: 200,
             status: "shortlisted",
             scholarship_id: selectedScholarshipId || undefined,
           }),
-          scholarshipProviderApi.getResults(1, 100),
+          sid ? scholarshipProviderApi.getResults(1, 100, sid) : Promise.resolve({ results: [], meta: { total: 0, page: 1, limit: 100 } }),
+          sid ? writtenExamApi.getList({ scholarship_id: sid }) : Promise.resolve({ exams: [], meta: { total: 0, page: 1, limit: 10 } }),
         ]);
 
         if (!mounted) return;
 
-        const shortlist = appsRes.applications.filter((application) => application.status === "shortlisted");
+        const shortlist = appsRes.applications;
         setApplications(shortlist);
-        setExistingPublished(resultsRes.results.filter((entry) => !selectedScholarshipId || String(entry.scholarship_id) === selectedScholarshipId));
+        setExistingPublished(resultsRes.results || []);
+
+        // Load written exam marks
+        let writtenMarksMap: Record<number, { marks_obtained: number; interview_location?: string; interview_date?: string; reporting_time?: string; required_documents?: string[] }> = {};
+        if (writtenExamsRes.exams.length > 0) {
+          for (const exam of writtenExamsRes.exams) {
+            const fullExam = await writtenExamApi.getById(exam.id);
+            for (const r of fullExam.results || []) {
+              writtenMarksMap[r.application_id] = {
+                marks_obtained: r.marks_obtained,
+                interview_location: r.interview_location,
+                interview_date: r.interview_date,
+                reporting_time: r.reporting_time,
+                required_documents: r.required_documents,
+              };
+            }
+          }
+        }
 
         const ordered = shortlist
           .map((application) => {
-            const score = application.evaluation_score ?? 0;
-            const passing = application.evaluation_passed ?? score >= 40;
+            const evalScore = application.evaluation_score ?? 0;
+            const passing = application.evaluation_passed ?? evalScore >= 40;
+            const written = writtenMarksMap[application.id];
+            const writtenMarks = written?.marks_obtained ?? 0;
+            const finalScore = evalScore + writtenMarks;
             return {
               application,
-              score,
+              evalScore,
+              writtenMarks,
+              finalScore,
               passing,
+              interview: written,
             };
           })
-          .sort((left, right) => right.score - left.score || `${left.application.first_name} ${left.application.last_name}`.localeCompare(`${right.application.first_name} ${right.application.last_name}`));
+          .sort((left, right) => right.finalScore - left.finalScore || `${left.application.first_name} ${left.application.last_name}`.localeCompare(`${right.application.first_name} ${right.application.last_name}`));
 
         const nextResults = ordered.map((item, index): FinalResultRow => {
           const rank = index + 1;
@@ -107,8 +143,16 @@ const FinalResult: React.FC = memo(() => {
             scholarship_id: item.application.scholarship_id,
             scholarship_title: item.application.scholarship?.title || "Scholarship",
             student_name: item.application.full_name || `${item.application.first_name} ${item.application.last_name}`,
-            evaluation_score: item.score,
+            evaluation_score: item.evalScore,
             evaluation_passed: item.passing,
+            stream: item.application.stream,
+            exam_center: item.application.exam_center,
+            roll_number: item.application.roll_number,
+            marks_obtained: item.writtenMarks,
+            interview_location: item.interview?.interview_location,
+            interview_date: item.interview?.interview_date,
+            required_documents: item.interview?.required_documents,
+            final_score: item.finalScore,
             rank,
             result,
             notes: item.application.evaluation_notes || "",
@@ -176,6 +220,15 @@ const FinalResult: React.FC = memo(() => {
         student_name: row.student_name,
         evaluation_score: row.evaluation_score,
         evaluation_passed: row.evaluation_passed,
+        marks_obtained: row.marks_obtained || 0,
+        final_score: (row.evaluation_score || 0) + (row.marks_obtained || 0),
+        interview_location: row.interview_location || "",
+        interview_date: row.interview_date || "",
+        reporting_time: row.reporting_time || "",
+        required_documents: row.required_documents || [],
+        stream: row.stream || "",
+        exam_center: row.exam_center || "",
+        roll_number: row.roll_number || "",
         rank: row.rank,
         result: row.result,
         notes: row.notes,
@@ -187,11 +240,28 @@ const FinalResult: React.FC = memo(() => {
         status: "published",
         results: payloadResults,
       });
+      // Reload published results
+      const reloaded = await scholarshipProviderApi.getResults(1, 100, scholarshipId);
+      setExistingPublished(reloaded.results || []);
       toast.success("Results have been published successfully.");
     } catch (err) {
       toast.error(err instanceof Error ? err.message : "Failed to publish final result");
     } finally {
       setPublishing(false);
+    }
+  };
+
+  const handleDeleteResult = async () => {
+    if (deleteId == null) return;
+    try {
+      await scholarshipProviderApi.deleteResult(deleteId);
+      const sid = selectedScholarshipId ? Number(selectedScholarshipId) : undefined;
+      const reloaded = sid ? await scholarshipProviderApi.getResults(1, 100, sid) : { results: [] };
+      setExistingPublished(reloaded.results || []);
+      setDeleteId(null);
+      toast.success("Published result deleted");
+    } catch {
+      toast.error("Failed to delete result");
     }
   };
 
@@ -358,16 +428,46 @@ const FinalResult: React.FC = memo(() => {
         )}
       </div>
 
-      {existingPublished.length > 0 && (
+      {(existingPublished?.length ?? 0) > 0 && (
         <div className="bg-white rounded-lg p-8 border border-slate-100">
           <h2 className="text-lg font-bold text-gray-900 mb-4">Published result records</h2>
           <div className="space-y-3 text-sm text-gray-600">
-            {existingPublished.slice(0, 3).map((record) => (
-              <div key={record.id} className="rounded-lg border border-gray-200 px-4 py-3">
-                <div className="font-medium text-gray-900">{record.title}</div>
-                <div className="text-xs text-gray-500">Status: {record.status}</div>
+            {(existingPublished ?? []).map((record) => (
+              <div key={record.id} className="rounded-lg border border-gray-200 px-4 py-3 flex items-center justify-between">
+                <div>
+                  <div className="font-medium text-gray-900">{record.title}</div>
+                  <div className="text-xs text-gray-500">
+                    Status: {record.status}
+                    {record.published_at && ` | Published: ${new Date(record.published_at).toLocaleDateString()}`}
+                  </div>
+                  <div className="text-xs text-gray-400 mt-1">
+                    Results: {Array.isArray(record.results) ? record.results.length : 0} students
+                  </div>
+                </div>
+                <button
+                  onClick={() => setDeleteId(record.id)}
+                  className="p-1.5 hover:bg-red-50 rounded text-red-600"
+                  title="Delete result"
+                >
+                  <Trash2 className="w-4 h-4" />
+                </button>
               </div>
             ))}
+          </div>
+        </div>
+      )}
+
+      {/* Delete Confirmation */}
+      {deleteId != null && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
+          <div className="bg-white rounded-lg max-w-sm w-full overflow-hidden shadow-xl">
+            <div className="px-6 py-4">
+              <p className="text-sm text-gray-700">Delete this published result? This cannot be undone.</p>
+            </div>
+            <div className="px-6 py-4 border-t border-gray-200 flex justify-end gap-3">
+              <button onClick={() => setDeleteId(null)} className="px-6 py-2.5 border border-gray-300 rounded-lg text-gray-700 font-medium hover:bg-gray-50">Cancel</button>
+              <button onClick={handleDeleteResult} className="px-6 py-2.5 bg-red-600 text-white rounded-lg font-medium hover:bg-red-700">Delete</button>
+            </div>
           </div>
         </div>
       )}
