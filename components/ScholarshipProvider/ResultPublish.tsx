@@ -86,7 +86,7 @@ const FinalResult: React.FC = memo(() => {
         const [appsRes, resultsRes, writtenExamsRes] = await Promise.all([
           scholarshipProviderApi.getApplications({
             page: 1,
-            limit: 200,
+            limit: 100000,
             status: "shortlisted",
             scholarship_id: selectedScholarshipId || undefined,
           }),

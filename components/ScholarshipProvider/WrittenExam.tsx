@@ -102,7 +102,7 @@ const WrittenExam: React.FC<{ onNavigate?: (section: string) => void }> = memo((
     try {
       const [exams, appsResp] = await Promise.all([
         writtenExamApi.getList({ scholarship_id: sid }),
-        scholarshipProviderApi.getApplications({ scholarship_id: String(sid), page: 1, limit: 1000 }),
+        scholarshipProviderApi.getApplications({ scholarship_id: String(sid), page: 1, limit: 100000 }),
       ]);
 
       // Build apps lookup map
@@ -157,7 +157,7 @@ const WrittenExam: React.FC<{ onNavigate?: (section: string) => void }> = memo((
     try {
       const [updated, appsResp] = await Promise.all([
         writtenExamApi.getById(exam.id),
-        scholarshipProviderApi.getApplications({ scholarship_id: String(scholarshipId), page: 1, limit: 1000 }),
+        scholarshipProviderApi.getApplications({ scholarship_id: String(scholarshipId), page: 1, limit: 100000 }),
       ]);
       setExam(updated);
       const map: Record<number, ProviderApplication> = {};
@@ -452,6 +452,10 @@ const WrittenExam: React.FC<{ onNavigate?: (section: string) => void }> = memo((
 
   const handleConfirmImport = async () => {
     if (!exam?.id) return;
+    if (!interviewLocation || !interviewDate || !reportingTime) {
+      toast.error("Interview Location, Date, and Reporting Time are required");
+      return;
+    }
     const validRows = importRows.filter((r) => r.status !== "notfound");
     if (validRows.length === 0) return;
 
@@ -847,10 +851,10 @@ const WrittenExam: React.FC<{ onNavigate?: (section: string) => void }> = memo((
                 {/* Interview Fields — same for all rows */}
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 p-4 bg-gray-50 rounded-lg border border-gray-200">
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">Interview Location</label>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Interview Location <span className="text-red-500">*</span></label>
                     {examCenters.length > 0 ? (
                       <select
-                        className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:border-blue-500"
+                        className={`w-full px-3 py-2 border rounded-lg text-sm focus:outline-none focus:border-blue-500 ${!interviewLocation ? "border-red-300" : "border-gray-200"}`}
                         value={interviewLocation}
                         onChange={(e) => setInterviewLocation(e.target.value)}
                       >
@@ -862,7 +866,7 @@ const WrittenExam: React.FC<{ onNavigate?: (section: string) => void }> = memo((
                     ) : (
                       <input
                         type="text"
-                        className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:border-blue-500"
+                        className={`w-full px-3 py-2 border rounded-lg text-sm focus:outline-none focus:border-blue-500 ${!interviewLocation ? "border-red-300" : "border-gray-200"}`}
                         placeholder="Enter interview location..."
                         value={interviewLocation}
                         onChange={(e) => setInterviewLocation(e.target.value)}
@@ -870,20 +874,20 @@ const WrittenExam: React.FC<{ onNavigate?: (section: string) => void }> = memo((
                     )}
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">Interview Date</label>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Interview Date <span className="text-red-500">*</span></label>
                     <input
                       type="date"
-                      className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:border-blue-500"
+                      className={`w-full px-3 py-2 border rounded-lg text-sm focus:outline-none focus:border-blue-500 ${!interviewDate ? "border-red-300" : "border-gray-200"}`}
                       value={interviewDate}
                       min={new Date().toISOString().split("T")[0]}
                       onChange={(e) => setInterviewDate(e.target.value)}
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">Reporting Time</label>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Reporting Time <span className="text-red-500">*</span></label>
                     <input
                       type="time"
-                      className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:border-blue-500"
+                      className={`w-full px-3 py-2 border rounded-lg text-sm focus:outline-none focus:border-blue-500 ${!reportingTime ? "border-red-300" : "border-gray-200"}`}
                       value={reportingTime}
                       onChange={(e) => setReportingTime(e.target.value)}
                     />
@@ -977,8 +981,18 @@ const WrittenExam: React.FC<{ onNavigate?: (section: string) => void }> = memo((
                     Cancel
                   </button>
                   <button
-                    onClick={handleConfirmImport}
-                    disabled={importing || importRows.filter((r) => r.status !== "notfound").length === 0}
+                    onClick={() => {
+                      if (!interviewLocation || !interviewDate || !reportingTime) {
+                        toast.error("Interview Location, Date, and Reporting Time are required");
+                        return;
+                      }
+                      handleConfirmImport();
+                    }}
+                    disabled={
+                      importing ||
+                      importRows.filter((r) => r.status !== "notfound").length === 0 ||
+                      !interviewLocation || !interviewDate || !reportingTime
+                    }
                     className="px-6 py-2.5 bg-emerald-600 text-white rounded-lg font-medium hover:bg-emerald-700 disabled:opacity-50 flex items-center gap-2"
                   >
                     {importing ? <><Loader2 className="w-4 h-4 animate-spin" /> Importing...</> : "Import"}
