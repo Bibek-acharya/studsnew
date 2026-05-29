@@ -433,6 +433,8 @@ const WrittenExam: React.FC<{ onNavigate?: (section: string) => void }> = memo((
 
       const existingAppIds = new Set(exam?.results?.map((r) => r.application_id) || []);
 
+      console.log("Import: appsMap keys", Object.keys(appsMap).length, "rollToAppId", Object.keys(rollToAppId).length, "rollToAppId keys:", Object.keys(rollToAppId).slice(0, 5));
+
       const rows = rawRows.map((row) => {
         const appId = rollToAppId[row.rollNumber];
         if (!appId) return { ...row, status: "notfound" as const };
