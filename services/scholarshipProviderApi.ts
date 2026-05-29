@@ -1531,7 +1531,35 @@ export const writtenExamApi = {
       method: "DELETE",
     });
   },
+
+  async batchImportResults(examId: number, data: { results: BatchImportItem[] }): Promise<BatchImportResponse> {
+    return callApi<BatchImportResponse>(`/api/v1/scholarship-providers/written-exams/${examId}/results/batch-import`, {
+      method: "POST",
+      body: JSON.stringify(data),
+    });
+  },
 };
+
+export interface BatchImportItem {
+  roll_number: string;
+  marks: number;
+}
+
+export interface BatchImportSummary {
+  imported: number;
+  overwritten: number;
+  skipped: number;
+}
+
+export interface FailedRow {
+  roll_number: string;
+  reason: string;
+}
+
+export interface BatchImportResponse {
+  summary: BatchImportSummary;
+  failed_rows: FailedRow[];
+}
 
 export const deleteService = async (id: number): Promise<void> => {
   await apiRequest(`/api/v1/scholarship-providers/services/${id}`, { method: 'DELETE' });

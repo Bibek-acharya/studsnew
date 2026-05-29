@@ -1,9 +1,10 @@
 "use client";
 
 import React, { useState, useEffect, useCallback, useMemo, memo } from "react";
-import { Home, Search, Plus, Pencil, Trash2, X, Loader2, ChevronLeft, ChevronRight, Megaphone } from "lucide-react";
+import { Home, Search, Plus, Pencil, Trash2, X, Loader2, ChevronLeft, ChevronRight, Megaphone, Upload, FileSpreadsheet } from "lucide-react";
 import { toast } from "sonner";
-import { scholarshipProviderApi, writtenExamApi, WrittenExamData, WrittenExamResultData, ProviderApplication } from "@/services/scholarshipProviderApi";
+import * as XLSX from "xlsx";
+import { scholarshipProviderApi, writtenExamApi, WrittenExamData, WrittenExamResultData, ProviderApplication, BatchImportResponse } from "@/services/scholarshipProviderApi";
 
 const PAGE_SIZE = 20;
 
@@ -61,6 +62,18 @@ const WrittenExam: React.FC<{ onNavigate?: (section: string) => void }> = memo((
   const [savingEdit, setSavingEdit] = useState(false);
   const [deleteId, setDeleteId] = useState<number | null>(null);
   const [publishConfirmOpen, setPublishConfirmOpen] = useState(false);
+
+  // Import Excel modal
+  const [importOpen, setImportOpen] = useState(false);
+  const [importRows, setImportRows] = useState<{
+    rollNumber: string;
+    name: string;
+    marks: number;
+    status: "found" | "overwrite" | "notfound";
+  }[]>([]);
+  const [importing, setImporting] = useState(false);
+  const [importResult, setImportResult] = useState<BatchImportResponse | null>(null);
+  const [duplicateError, setDuplicateError] = useState<string | null>(null);
 
   useEffect(() => {
     (async () => {
@@ -293,6 +306,133 @@ const WrittenExam: React.FC<{ onNavigate?: (section: string) => void }> = memo((
     }
   };
 
+  const openImportModal = () => {
+    setImportOpen(true);
+    setImportRows([]);
+    setImportResult(null);
+    setDuplicateError(null);
+  };
+
+  const closeImportModal = () => {
+    setImportOpen(false);
+    setImportRows([]);
+    setImportResult(null);
+    setDuplicateError(null);
+  };
+
+  const handleFileSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setDuplicateError(null);
+    setImportRows([]);
+    setImportResult(null);
+
+    try {
+      const data = await file.arrayBuffer();
+      const workbook = XLSX.read(data, { type: "array" });
+      const sheet = workbook.Sheets[workbook.SheetNames[0]];
+      const json = XLSX.utils.sheet_to_json<Record<string, string | number>>(sheet);
+
+      if (json.length === 0) {
+        toast.error("Excel file is empty");
+        return;
+      }
+
+      // Detect columns from headers
+      const headers = Object.keys(json[0]);
+      const rollKey = headers.find((h) => /candidate/i.test(h) && /id|no|number/i.test(h));
+      const nameKey = headers.find((h) => /candidate/i.test(h) && /name/i.test(h));
+      const marksKey = headers.find((h) => /total|marks|score/i.test(h));
+
+      if (!rollKey || !marksKey) {
+        toast.error("Could not find required columns (CANDIDATE ID and Total)");
+        return;
+      }
+
+      // Check for duplicate roll numbers in Excel
+      const rollCounts = new Map<string, number>();
+      const rawRows: { rollNumber: string; name: string; marks: number }[] = [];
+
+      for (const row of json) {
+        const rawRoll = String(row[rollKey] ?? "").trim();
+        if (!rawRoll) continue;
+        const marks = Number(row[marksKey]);
+        if (isNaN(marks)) continue;
+        rawRows.push({
+          rollNumber: rawRoll,
+          name: nameKey ? String(row[nameKey] ?? "").trim() : "",
+          marks,
+        });
+        rollCounts.set(rawRoll, (rollCounts.get(rawRoll) || 0) + 1);
+      }
+
+      if (rawRows.length === 0) {
+        toast.error("No valid rows found in the Excel file");
+        return;
+      }
+
+      // Duplicate detection
+      const dupes = Array.from(rollCounts.entries()).filter(([, c]) => c > 1);
+      if (dupes.length > 0) {
+        setDuplicateError(
+          `Duplicate CANDIDATE ID found: ${dupes.map(([id]) => id).join(", ")}. Please fix the Excel and re-upload.`
+        );
+        return;
+      }
+
+      // Build lookup maps from apps
+      const rollToAppId: Record<string, number> = {};
+      for (const app of Object.values(appsMap)) {
+        const parts = (app.roll_number || "").split("-");
+        const normalized = parts[parts.length - 1].trim();
+        if (normalized) rollToAppId[normalized] = app.id;
+      }
+
+      const existingAppIds = new Set(exam?.results?.map((r) => r.application_id) || []);
+
+      const rows = rawRows.map((row) => {
+        const appId = rollToAppId[row.rollNumber];
+        if (!appId) return { ...row, status: "notfound" as const };
+        return {
+          ...row,
+          status: (existingAppIds.has(appId) ? "overwrite" : "found") as "overwrite" | "found",
+        };
+      });
+
+      setImportRows(rows);
+    } catch {
+      toast.error("Failed to parse Excel file. Make sure it's a valid .xlsx file.");
+    }
+  };
+
+  const handleConfirmImport = async () => {
+    if (!exam?.id) return;
+    const validRows = importRows.filter((r) => r.status !== "notfound");
+    if (validRows.length === 0) return;
+
+    setImporting(true);
+    try {
+      const result = await writtenExamApi.batchImportResults(
+        exam.id,
+        { results: validRows.map((r) => ({ roll_number: r.rollNumber, marks: r.marks })) }
+      );
+      await refreshExam();
+      closeImportModal();
+      toast.success(
+        `Imported ${result.summary.imported}, overwritten ${result.summary.overwritten}, skipped ${result.summary.skipped}`
+      );
+      if (result.failed_rows?.length > 0) {
+        const failedList = result.failed_rows.map((f) => `${f.roll_number} (${f.reason})`).join(", ");
+        toast.error(`Failed: ${failedList}`, { duration: 5000 });
+      }
+    } catch {
+      toast.error("Failed to import results");
+    } finally {
+      setImporting(false);
+    }
+  };
+
   const autoStatus = (marks: number) => {
     if (!marks && marks !== 0) return "";
     return marks >= 40 ? "Pass" : "Fail";
@@ -351,6 +491,12 @@ const WrittenExam: React.FC<{ onNavigate?: (section: string) => void }> = memo((
                 className="px-4 py-2 bg-blue-600 text-white rounded-lg text-sm font-semibold hover:bg-blue-700 transition-colors flex items-center gap-1"
               >
                 <Plus className="w-4 h-4" /> Add Student
+              </button>
+              <button
+                onClick={openImportModal}
+                className="px-4 py-2 bg-emerald-600 text-white rounded-lg text-sm font-semibold hover:bg-emerald-700 transition-colors flex items-center gap-1"
+              >
+                <Upload className="w-4 h-4" /> Import Excel
               </button>
               <button
                 onClick={() => setPublishConfirmOpen(true)}
@@ -568,6 +714,150 @@ const WrittenExam: React.FC<{ onNavigate?: (section: string) => void }> = memo((
               <button onClick={() => setDeleteId(null)} className="px-6 py-2.5 border border-gray-300 rounded-lg text-gray-700 font-medium hover:bg-gray-50">Cancel</button>
               <button onClick={handleDeleteResult} className="px-6 py-2.5 bg-red-600 text-white rounded-lg font-medium hover:bg-red-700">Remove</button>
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* Import Excel Modal */}
+      {importOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
+          <div className="bg-white rounded-lg max-w-3xl w-full overflow-hidden shadow-xl">
+            <div className="px-6 py-4 border-b border-gray-200 flex items-center justify-between">
+              <h2 className="text-lg font-bold text-gray-900 flex items-center gap-2">
+                <FileSpreadsheet className="w-5 h-5 text-emerald-600" /> Import Excel Results
+              </h2>
+              <button onClick={closeImportModal} className="p-2 hover:bg-gray-100 rounded-lg">
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            {importResult ? (
+              <div className="p-6 space-y-4">
+                <h3 className="font-semibold text-gray-800">Import Complete</h3>
+                <div className="grid grid-cols-3 gap-4">
+                  <div className="bg-green-50 border border-green-200 rounded-lg p-4 text-center">
+                    <p className="text-2xl font-bold text-green-700">{importResult.summary.imported}</p>
+                    <p className="text-sm text-green-600">Imported</p>
+                  </div>
+                  <div className="bg-amber-50 border border-amber-200 rounded-lg p-4 text-center">
+                    <p className="text-2xl font-bold text-amber-700">{importResult.summary.overwritten}</p>
+                    <p className="text-sm text-amber-600">Overwritten</p>
+                  </div>
+                  <div className="bg-gray-50 border border-gray-200 rounded-lg p-4 text-center">
+                    <p className="text-2xl font-bold text-gray-700">{importResult.summary.skipped}</p>
+                    <p className="text-sm text-gray-600">Skipped</p>
+                  </div>
+                </div>
+                {(importResult.failed_rows?.length ?? 0) > 0 && (
+                  <div>
+                    <p className="text-sm font-medium text-red-700 mb-2">
+                      Failed rows ({importResult.failed_rows?.length ?? 0}):
+                    </p>
+                    <div className="max-h-32 overflow-y-auto space-y-1">
+                      {(importResult.failed_rows ?? []).map((f, i) => (
+                        <div key={i} className="text-sm bg-red-50 border border-red-200 rounded px-3 py-2 text-red-700">
+                          Roll No: {f.roll_number} — {f.reason}
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+                <div className="flex justify-end">
+                  <button
+                    onClick={closeImportModal}
+                    className="px-6 py-2.5 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700"
+                  >
+                    Done
+                  </button>
+                </div>
+              </div>
+            ) : importRows.length > 0 ? (
+              <div className="p-6 space-y-4">
+                <p className="text-sm text-gray-600">
+                  Preview: <span className="font-medium">{importRows.length}</span> rows found.
+                  {importRows.filter((r) => r.status === "notfound").length > 0 && (
+                    <span className="text-amber-600">
+                      {" "}{importRows.filter((r) => r.status === "notfound").length} will be skipped (no matching applicant).
+                    </span>
+                  )}
+                </p>
+                <div className="overflow-x-auto max-h-64 overflow-y-auto border border-gray-200 rounded-lg">
+                  <table className="w-full text-sm">
+                    <thead className="bg-gray-50 border-b border-gray-200 sticky top-0">
+                      <tr>
+                        <th className="text-left py-2 px-3 font-semibold text-gray-700">CANDIDATE ID</th>
+                        <th className="text-left py-2 px-3 font-semibold text-gray-700">Name</th>
+                        <th className="text-center py-2 px-3 font-semibold text-gray-700">Marks</th>
+                        <th className="text-center py-2 px-3 font-semibold text-gray-700">Status</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-gray-100">
+                      {importRows.map((row, i) => {
+                        const statusLabel =
+                          row.status === "found" ? "Will import" :
+                          row.status === "overwrite" ? "Will overwrite" :
+                          "Skipped";
+                        const statusClass =
+                          row.status === "found" ? "bg-green-100 text-green-700" :
+                          row.status === "overwrite" ? "bg-amber-100 text-amber-700" :
+                          "bg-gray-100 text-gray-500";
+                        return (
+                          <tr key={i} className="hover:bg-gray-50">
+                            <td className="py-2 px-3 font-mono text-gray-800">{row.rollNumber}</td>
+                            <td className="py-2 px-3 text-gray-700">{row.name || "—"}</td>
+                            <td className="py-2 px-3 text-center font-semibold text-gray-900">{row.marks}</td>
+                            <td className="py-2 px-3 text-center">
+                              <span className={`px-2 py-0.5 rounded text-xs font-semibold ${statusClass}`}>
+                                {statusLabel}
+                              </span>
+                            </td>
+                          </tr>
+                        );
+                      })}
+                    </tbody>
+                  </table>
+                </div>
+                <div className="flex justify-end gap-3 pt-2">
+                  <button onClick={closeImportModal} className="px-6 py-2.5 border border-gray-300 rounded-lg text-gray-700 font-medium hover:bg-gray-50">
+                    Cancel
+                  </button>
+                  <button
+                    onClick={handleConfirmImport}
+                    disabled={importing || importRows.filter((r) => r.status !== "notfound").length === 0}
+                    className="px-6 py-2.5 bg-emerald-600 text-white rounded-lg font-medium hover:bg-emerald-700 disabled:opacity-50 flex items-center gap-2"
+                  >
+                    {importing ? <><Loader2 className="w-4 h-4 animate-spin" /> Importing...</> : "Import"}
+                  </button>
+                </div>
+              </div>
+            ) : (
+              <div className="p-6">
+                <div className="border-2 border-dashed border-gray-300 rounded-lg p-10 text-center hover:border-emerald-400 transition-colors cursor-pointer"
+                  onClick={() => document.getElementById("excel-file-input")?.click()}
+                >
+                  <Upload className="w-10 h-10 text-gray-400 mx-auto mb-3" />
+                  <p className="text-sm text-gray-600 font-medium mb-1">Upload Excel File</p>
+                  <p className="text-xs text-gray-400">.xlsx files only</p>
+                </div>
+                {duplicateError && (
+                  <div className="mt-4 bg-red-50 border border-red-200 rounded-lg p-3 text-sm text-red-700">
+                    {duplicateError}
+                  </div>
+                )}
+                <input
+                  id="excel-file-input"
+                  type="file"
+                  accept=".xlsx"
+                  className="hidden"
+                  onChange={handleFileSelect}
+                />
+                <div className="flex justify-end mt-6">
+                  <button onClick={closeImportModal} className="px-6 py-2.5 border border-gray-300 rounded-lg text-gray-700 font-medium hover:bg-gray-50">
+                    Cancel
+                  </button>
+                </div>
+              </div>
+            )}
           </div>
         </div>
       )}
