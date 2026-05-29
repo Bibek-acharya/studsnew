@@ -30,7 +30,15 @@ export default function ScholarshipResultCheckPage({
   return (
     <div className="flex min-h-screen flex-col bg-white text-gray-900 lg:flex-row">
       <div className="hidden lg:flex lg:w-1/2 items-center justify-center p-4 bg-white">
-        <div className="mx-4 my-4 h-full w-full overflow-hidden rounded-md shadow-lg bg-[#0000ff] opacity-20" />
+        <div
+          className="mx-4 my-4 h-full w-full overflow-hidden rounded-md shadow-lg"
+          style={{
+            backgroundColor: "#0000ff",
+            backgroundImage: 'url("data:image/svg+xml,%3Csvg width=\'520\' height=\'150\' xmlns=\'http://www.w3.org/2000/svg\'%3E%3Ctext x=\'0\' y=\'70\' font-family=\'system-ui, sans-serif\' font-weight=\'200\' font-size=\'85\' fill=\'none\' stroke=\'%233333FF\' stroke-width=\'1.5\' letter-spacing=\'-6\'%3EStud%20Sphere%3C/text%3E%3Ctext x=\'-200\' y=\'145\' font-family=\'system-ui, sans-serif\' font-weight=\'200\' font-size=\'85\' fill=\'none\' stroke=\'%233333FF\' stroke-width=\'1.5\' letter-spacing=\'-6\'%3EStud%20Sphere%3C/text%3E%3C/svg%3E")',
+            backgroundSize: "520px 150px",
+            backgroundRepeat: "repeat",
+          }}
+        />
       </div>
 
       <div className="flex w-full items-center justify-center p-6 sm:p-12 lg:w-1/2">

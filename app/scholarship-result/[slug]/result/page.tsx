@@ -116,9 +116,9 @@ export default function ScholarshipResultPage({
       )}
 
       <div className="relative mx-auto max-w-3xl">
-        {/* Provider Header */}
+        {/* Scholarship Header */}
         <div className="text-center mb-8">
-          <h1 className="text-2xl font-bold text-gray-800">{scholarship?.provider_name || scholarship?.title || "Scholarship Result"}</h1>
+          <h1 className="text-2xl font-bold text-gray-800">{scholarship?.title || scholarship?.provider_name || "Scholarship Result"}</h1>
           <p className="text-sm text-gray-500 mt-1">{scholarship?.location || scholarship?.office_address || ""}</p>
         </div>
 
@@ -144,7 +144,6 @@ export default function ScholarshipResultPage({
               <>
                 <p className="text-2xl font-bold text-red-700">Sorry!</p>
                 <p className="text-base text-red-600 mt-1">You Have Failed.</p>
-                <p className="text-xs text-red-500 mt-1">(Pass marks: {PASS_MARKS})</p>
               </>
             )}
           </div>

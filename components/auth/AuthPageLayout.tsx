@@ -15,7 +15,7 @@ interface AuthPageLayoutProps {
 const patternBackground = {
   backgroundColor: "#0000ff",
   backgroundImage:
-    'url("data:image/svg+xml,%3Csvg width=\'520\' height=\'150\' xmlns=\'http://www.w3.org/2000/svg\'%3E%3Ctext x=\'0\' y=\'70\' font-family=\'system-ui, sans-serif\' font-weight=\'200\' font-size=\'85\' fill=\'none\' stroke=\'%233333FF\' stroke-width=\'1.5\' letter-spacing=\'-6\'%3Eostudssphere%3C/text%3E%3Ctext x=\'-200\' y=\'145\' font-family=\'system-ui, sans-serif\' font-weight=\'200\' font-size=\'85\' fill=\'none\' stroke=\'%233333FF\' stroke-width=\'1.5\' letter-spacing=\'-6\'%3Eostudssphere%3C/text%3E%3C/svg%3E")',
+    'url("data:image/svg+xml,%3Csvg width=\'520\' height=\'150\' xmlns=\'http://www.w3.org/2000/svg\'%3E%3Ctext x=\'0\' y=\'70\' font-family=\'system-ui, sans-serif\' font-weight=\'200\' font-size=\'85\' fill=\'none\' stroke=\'%233333FF\' stroke-width=\'1.5\' letter-spacing=\'-6\'%3EStud%20Sphere%3C/text%3E%3Ctext x=\'-200\' y=\'145\' font-family=\'system-ui, sans-serif\' font-weight=\'200\' font-size=\'85\' fill=\'none\' stroke=\'%233333FF\' stroke-width=\'1.5\' letter-spacing=\'-6\'%3EStud%20Sphere%3C/text%3E%3C/svg%3E")',
   backgroundSize: "520px 150px",
   backgroundRepeat: "repeat",
 };
