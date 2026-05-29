@@ -1617,7 +1617,7 @@ export interface PublishedResultScholarship {
   provider_name?: string;
   location?: string;
   office_address?: string;
-  image_url?: string;
+  image_url?: string ;
   banner_background_image_url?: string;
 }
 
