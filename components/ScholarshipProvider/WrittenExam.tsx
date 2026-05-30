@@ -1,10 +1,11 @@
 "use client";
 
 import React, { useState, useEffect, useCallback, useMemo, memo } from "react";
-import { Home, Search, Plus, Pencil, Trash2, X, Loader2, ChevronLeft, ChevronRight, Megaphone, Upload, FileSpreadsheet } from "lucide-react";
+import { Home, Search, Plus, Pencil, Trash2, X, Loader2, ChevronLeft, ChevronRight, Megaphone, Upload, FileSpreadsheet, Eye, UserCheck, ArrowUpDown, ArrowUp, ArrowDown } from "lucide-react";
 import { toast } from "sonner";
 import * as XLSX from "xlsx";
 import { scholarshipProviderApi, writtenExamApi, WrittenExamData, WrittenExamResultData, ProviderApplication, BatchImportResponse, ProviderResult } from "@/services/scholarshipProviderApi";
+import ApplicantProfileModal from "./ApplicantProfileModal";
 
 const PAGE_SIZE = 20;
 
@@ -36,9 +37,8 @@ const WrittenExam: React.FC<{ onNavigate?: (section: string) => void }> = memo((
   const [appsMap, setAppsMap] = useState<Record<number, ProviderApplication>>({});
   const [loading, setLoading] = useState(false);
 
-  // Search & pagination
+  // Search (client-side)
   const [search, setSearch] = useState("");
-  const [page, setPage] = useState(1);
 
   // Add student modal — 2-step flow
   const [addOpen, setAddOpen] = useState(false);
@@ -64,6 +64,9 @@ const WrittenExam: React.FC<{ onNavigate?: (section: string) => void }> = memo((
   const [publishConfirmOpen, setPublishConfirmOpen] = useState(false);
   const [publishing, setPublishing] = useState(false);
   const [isPublished, setIsPublished] = useState(false);
+  const [selectedApplicantId, setSelectedApplicantId] = useState<number | null>(null);
+  const [shortlistingId, setShortlistingId] = useState<number | null>(null);
+  const [shortlistConfirmId, setShortlistConfirmId] = useState<number | null>(null);
 
   // Import Excel modal
   const [importOpen, setImportOpen] = useState(false);
@@ -81,6 +84,69 @@ const WrittenExam: React.FC<{ onNavigate?: (section: string) => void }> = memo((
   const [reportingTime, setReportingTime] = useState("");
   const [requiredDocs, setRequiredDocs] = useState<string[]>([]);
   const [newDocInput, setNewDocInput] = useState("");
+
+  // Pagination & filter state
+  const [paginatedResults, setPaginatedResults] = useState<WrittenExamResultData[]>([]);
+  const [totalCount, setTotalCount] = useState(0);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [sortBy, setSortBy] = useState("id");
+  const [sortOrder, setSortOrder] = useState("asc");
+  const [marksMin, setMarksMin] = useState("");
+  const [marksMax, setMarksMax] = useState("");
+  const [schoolTypeFilter, setSchoolTypeFilter] = useState("");
+  const [genderFilter, setGenderFilter] = useState("");
+  const [examCenterFilter, setExamCenterFilter] = useState("");
+  const [loadingResults, setLoadingResults] = useState(false);
+
+  const schoolTypes = useMemo(() => {
+    const types = new Set<string>();
+    for (const app of Object.values(appsMap)) {
+      if (app.school_type) types.add(app.school_type);
+    }
+    return Array.from(types).sort();
+  }, [appsMap]);
+
+  const genders = useMemo(() => {
+    const g = new Set<string>();
+    for (const app of Object.values(appsMap)) {
+      if (app.gender) g.add(app.gender);
+    }
+    return Array.from(g).sort();
+  }, [appsMap]);
+
+  const fetchPaginatedResults = useCallback(async () => {
+    if (!exam?.id) return;
+    setLoadingResults(true);
+    try {
+      const res = await writtenExamApi.getResultsPaginated(exam.id, {
+        page: currentPage,
+        limit: PAGE_SIZE,
+        sort_by: sortBy,
+        sort_order: sortOrder,
+        marks_min: marksMin ? Number(marksMin) : undefined,
+        marks_max: marksMax ? Number(marksMax) : undefined,
+        school_type: schoolTypeFilter || undefined,
+        gender: genderFilter || undefined,
+        exam_center: examCenterFilter || undefined,
+        search: search || undefined,
+      });
+      setPaginatedResults(res.results);
+      setTotalCount(res.meta.total);
+    } catch {
+      setPaginatedResults([]);
+      setTotalCount(0);
+    } finally {
+      setLoadingResults(false);
+    }
+  }, [exam?.id, currentPage, sortBy, sortOrder, marksMin, marksMax, schoolTypeFilter, genderFilter, examCenterFilter, search]);
+
+  useEffect(() => {
+    if (exam?.id) fetchPaginatedResults();
+  }, [exam?.id, currentPage, sortBy, sortOrder, marksMin, marksMax, schoolTypeFilter, genderFilter, examCenterFilter, search, fetchPaginatedResults]);
+
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [sortBy, sortOrder, marksMin, marksMax, schoolTypeFilter, genderFilter, examCenterFilter, search]);
 
   useEffect(() => {
     (async () => {
@@ -135,7 +201,7 @@ const WrittenExam: React.FC<{ onNavigate?: (section: string) => void }> = memo((
 
   useEffect(() => {
     if (scholarshipId) {
-      setPage(1);
+      setCurrentPage(1);
       setSearch("");
       getOrCreateExam(Number(scholarshipId));
     } else {
@@ -170,23 +236,17 @@ const WrittenExam: React.FC<{ onNavigate?: (section: string) => void }> = memo((
     }
   }, [exam?.id, scholarshipId]);
 
-  // --- Filtered & paginated results ---
-  const allResults = exam?.results || [];
-
-  const filteredResults = useMemo(() => {
-    if (!search) return allResults;
+  // Client-side search within paginated results
+  const searchedResults = useMemo(() => {
+    if (!search) return paginatedResults;
     const q = search.toLowerCase();
-    return allResults.filter(
+    return paginatedResults.filter(
       (r) =>
         (r.student_name || "").toLowerCase().includes(q) ||
         String(r.application_id).includes(q) ||
         (r.roll_no || "").toLowerCase().includes(q)
     );
-  }, [allResults, search]);
-
-  const totalPages = Math.max(1, Math.ceil(filteredResults.length / PAGE_SIZE));
-  const safePage = Math.min(page, totalPages);
-  const paginatedResults = filteredResults.slice((safePage - 1) * PAGE_SIZE, safePage * PAGE_SIZE);
+  }, [paginatedResults, search]);
 
   const examCenters = useMemo(() => {
     const centers = new Set<string>();
@@ -334,6 +394,21 @@ const WrittenExam: React.FC<{ onNavigate?: (section: string) => void }> = memo((
       toast.success("Student removed");
     } catch {
       toast.error("Failed to remove student");
+    }
+  };
+
+  const handleShortlist = async () => {
+    const appId = shortlistConfirmId;
+    if (appId == null) return;
+    setShortlistingId(appId);
+    setShortlistConfirmId(null);
+    try {
+      await scholarshipProviderApi.updateApplicationStatus(appId, "shortlisted");
+      toast.success("Applicant shortlisted");
+    } catch {
+      toast.error("Failed to shortlist applicant");
+    } finally {
+      setShortlistingId(null);
     }
   };
 
@@ -541,7 +616,7 @@ const WrittenExam: React.FC<{ onNavigate?: (section: string) => void }> = memo((
                   className="w-full pl-10 pr-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:border-blue-500"
                   placeholder="Search by name or symbol..."
                   value={search}
-                  onChange={(e) => { setSearch(e.target.value); setPage(1); }}
+                  onChange={(e) => { setSearch(e.target.value); setCurrentPage(1); }}
                 />
               </div>
               <button
@@ -570,110 +645,221 @@ const WrittenExam: React.FC<{ onNavigate?: (section: string) => void }> = memo((
               >
                 <Megaphone className="w-4 h-4" /> {isPublished ? "Published (View)" : "Publish Result"}
               </button>
-            </div>
-          )}
-        </div>
-
-        {!scholarshipId ? (
-          <div className="py-12 text-center text-gray-400 text-sm">Select a scholarship to manage written exam</div>
-        ) : loading ? (
-          <div className="py-12 flex items-center justify-center text-gray-400"><Loader2 className="w-5 h-5 animate-spin mr-2" /> Loading...</div>
-        ) : allResults.length > 0 ? (
-          <>
-            <div className="overflow-x-auto" style={{ maxWidth: "100%" }}>
-              <table className="w-full text-sm" style={{ minWidth: 1000 }}>
-                <thead className="bg-gray-50 border-b border-gray-200">
-                  <tr>
-                    <th className="text-left py-3 px-4 font-semibold text-gray-700">Student Name</th>
-                    <th className="text-center py-3 px-4 font-semibold text-gray-700">Application ID</th>
-                    <th className="text-center py-3 px-4 font-semibold text-gray-700">Symbol No.</th>
-                    <th className="text-center py-3 px-4 font-semibold text-gray-700">Stream</th>
-                    <th className="text-center py-3 px-4 font-semibold text-gray-700">Exam Center</th>
-                    <th className="text-center py-3 px-4 font-semibold text-gray-700">Marks</th>
-                    <th className="text-center py-3 px-4 font-semibold text-gray-700">Status</th>
-                    <th className="text-center py-3 px-4 font-semibold text-gray-700">Actions</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-gray-100">
-                  {paginatedResults.map((r) => {
-                    const app = appsMap[r.application_id];
-                    const studentName = r.student_name || (app ? `${app.first_name} ${app.last_name}` : "—");
-                    const rollNo = r.roll_no || app?.roll_number || "—";
-                    const stream = r.stream || app?.stream;
-                    const examCenter = r.exam_center || app?.exam_center;
-                    const streamColor = STREAM_COLORS[stream || ""] || "bg-gray-100 text-gray-700";
-                    const statusClass = r.marks_obtained != null
-                      ? (r.marks_obtained >= 40 ? "bg-green-100 text-green-700" : "bg-red-100 text-red-700")
-                      : "";
-                    const statusText = r.marks_obtained != null
-                      ? (r.marks_obtained >= 40 ? "Pass" : "Fail")
-                      : "";
-                    return (
-                      <tr key={r.id} className="hover:bg-gray-50">
-                        <td className="py-3 px-4 font-medium text-gray-900">{studentName}</td>
-                        <td className="text-center py-3 px-4 font-mono text-gray-600">{formatAppId(r.application_id)}</td>
-                        <td className="text-center py-3 px-4 font-mono text-gray-600">{rollNo}</td>
-                        <td className="text-center py-3 px-4">
-                          <span className={`px-2 py-1 rounded text-xs font-semibold ${streamColor}`}>{stream || "N/A"}</span>
-                        </td>
-                        <td className="text-center py-3 px-4 text-gray-600">{examCenter || "—"}</td>
-                        <td className="text-center py-3 px-4 font-bold text-gray-900">{r.marks_obtained ?? "—"}</td>
-                        <td className="text-center py-3 px-4">
-                          {statusText ? (
-                            <span className={`px-2 py-1 rounded text-xs font-semibold ${statusClass}`}>{statusText}</span>
-                          ) : (
-                            <span className="text-xs text-gray-400">—</span>
-                          )}
-                        </td>
-                        <td className="text-center py-3 px-4">
-                          <div className="flex items-center justify-center gap-2">
-                            <button onClick={() => openEditMarks(r)} className="p-1.5 hover:bg-blue-50 rounded text-blue-600" title="Edit marks"><Pencil className="w-4 h-4" /></button>
-                            <button onClick={() => setDeleteId(r.id)} className="p-1.5 hover:bg-red-50 rounded text-red-600" title="Remove"><Trash2 className="w-4 h-4" /></button>
-                          </div>
-                        </td>
-                      </tr>
-                    );
-                  })}
-                </tbody>
-              </table>
-            </div>
-
-            {/* Pagination */}
-            <div className="flex items-center justify-between mt-6">
-              <p className="text-sm text-gray-500">
-                Showing <span className="font-medium">{(safePage - 1) * PAGE_SIZE + 1}-{Math.min(safePage * PAGE_SIZE, filteredResults.length)}</span> of{" "}
-                <span className="font-medium">{filteredResults.length}</span> students
-              </p>
-              <div className="flex items-center gap-2">
-                <button
-                  disabled={safePage <= 1}
-                  onClick={() => setPage(safePage - 1)}
-                  className="w-8 h-8 flex items-center justify-center rounded-lg border border-gray-200 text-gray-600 hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed"
-                >
-                  <ChevronLeft className="w-4 h-4" />
-                </button>
-                {Array.from({ length: totalPages }, (_, i) => i + 1).map((p) => (
-                  <button
-                    key={p}
-                    onClick={() => setPage(p)}
-                    className={`w-8 h-8 flex items-center justify-center rounded-lg text-sm font-medium ${
-                      p === safePage ? "bg-blue-600 text-white" : "border border-gray-200 text-gray-600 hover:bg-gray-50"
-                    }`}
-                  >
-                    {p}
-                  </button>
-                ))}
-                <button
-                  disabled={safePage >= totalPages}
-                  onClick={() => setPage(safePage + 1)}
-                  className="w-8 h-8 flex items-center justify-center rounded-lg border border-gray-200 text-gray-600 hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed"
-                >
-                  <ChevronRight className="w-4 h-4" />
-                </button>
               </div>
+            )}
+
+          </div>
+
+          {/* Filter Bar — always visible when exam is loaded */}
+            <div className="flex flex-wrap items-center gap-3 mb-4 p-3 bg-gray-50 rounded-lg border border-gray-200">
+              <div className="flex items-center gap-2">
+                <span className="text-xs font-medium text-gray-500">Marks:</span>
+                <input
+                  type="number"
+                  placeholder="Min"
+                  className="w-16 px-2 py-1 border border-gray-200 rounded text-xs focus:outline-none focus:border-blue-500"
+                  value={marksMin}
+                  onChange={(e) => setMarksMin(e.target.value)}
+                />
+                <span className="text-xs text-gray-400">-</span>
+                <input
+                  type="number"
+                  placeholder="Max"
+                  className="w-16 px-2 py-1 border border-gray-200 rounded text-xs focus:outline-none focus:border-blue-500"
+                  value={marksMax}
+                  onChange={(e) => setMarksMax(e.target.value)}
+                />
+              </div>
+              {schoolTypes.length > 0 && (
+                <select
+                  className="px-2 py-1 border border-gray-200 rounded text-xs focus:outline-none focus:border-blue-500"
+                  value={schoolTypeFilter}
+                  onChange={(e) => setSchoolTypeFilter(e.target.value)}
+                >
+                  <option value="">All Schools</option>
+                  <option value="Public">Public</option>
+                  <option value="Private">Private</option>
+                  <option value="Community">Community</option>
+                </select>
+              )}
+              <select
+                className="px-2 py-1 border border-gray-200 rounded text-xs focus:outline-none focus:border-blue-500"
+                value={genderFilter}
+                onChange={(e) => setGenderFilter(e.target.value)}
+              >
+                <option value="">All Genders</option>
+                <option value="Male">Male</option>
+                <option value="Female">Female</option>
+                <option value="Other">Others</option>
+              </select>
+              {examCenters.length > 0 && (
+                <select
+                  className="px-2 py-1 border border-gray-200 rounded text-xs focus:outline-none focus:border-blue-500"
+                  value={examCenterFilter}
+                  onChange={(e) => setExamCenterFilter(e.target.value)}
+                >
+                  <option value="">All Exam Centers</option>
+                  {examCenters.map((c) => <option key={c} value={c}>{c}</option>)}
+                </select>
+              )}
+              <button
+                onClick={() => { setMarksMin(""); setMarksMax(""); setSchoolTypeFilter(""); setGenderFilter(""); setExamCenterFilter(""); }}
+                className="px-2 py-1 text-xs text-gray-500 hover:text-gray-700"
+              >
+                Clear
+              </button>
+              {loadingResults && <Loader2 className="w-3 h-3 animate-spin text-gray-400 ml-auto" />}
             </div>
-          </>
-        ) : (
+
+            {/* Results table or empty state */}
+            {loadingResults ? (
+              <div className="py-8 flex items-center justify-center text-gray-400"><Loader2 className="w-5 h-5 animate-spin mr-2" /> Loading...</div>
+            ) : totalCount > 0 ? (
+              <>
+                <div className="overflow-x-auto" style={{ maxWidth: "100%" }}>
+                  <table className="w-full text-sm" style={{ minWidth: 1000 }}>
+                    <thead className="bg-gray-50 border-b border-gray-200">
+                      <tr>
+                        <th className="text-left py-3 px-4 font-semibold text-gray-700">Student Name</th>
+                        <th className="text-center py-3 px-4 font-semibold text-gray-700">Application ID</th>
+                        <th className="text-center py-3 px-4 font-semibold text-gray-700">Symbol No.</th>
+                        <th className="text-center py-3 px-4 font-semibold text-gray-700">Gender</th>
+                        <th className="text-center py-3 px-4 font-semibold text-gray-700">Stream</th>
+                        <th className="text-center py-3 px-4 font-semibold text-gray-700">School Type</th>
+                        <th className="text-center py-3 px-4 font-semibold text-gray-700">Exam Center</th>
+                        <th className="text-center py-3 px-4 font-semibold text-gray-700">
+                          <button
+                            onClick={() => {
+                              if (sortBy !== "marks_obtained") {
+                                setSortBy("marks_obtained");
+                                setSortOrder("asc");
+                              } else if (sortOrder === "asc") {
+                                setSortOrder("desc");
+                              } else {
+                                setSortBy("id");
+                                setSortOrder("asc");
+                              }
+                            }}
+                            className="flex items-center justify-center gap-1 mx-auto hover:text-blue-600"
+                          >
+                            Marks
+                            {sortBy === "marks_obtained" ? (
+                              sortOrder === "asc" ? <ArrowUp className="w-3 h-3" /> : <ArrowDown className="w-3 h-3" />
+                            ) : (
+                              <ArrowUpDown className="w-3 h-3 text-gray-400" />
+                            )}
+                          </button>
+                        </th>
+                        <th className="text-center py-3 px-4 font-semibold text-gray-700">Status</th>
+                        <th className="text-center py-3 px-4 font-semibold text-gray-700">Actions</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-gray-100">
+                      {paginatedResults.map((r) => {
+                        const app = appsMap[r.application_id];
+                        const studentName = r.student_name || (app ? `${app.first_name} ${app.last_name}` : "—");
+                        const rollNo = r.roll_no || app?.roll_number || "—";
+                        const gender = app?.gender || (r as any).gender || "—";
+                        const stream = r.stream || app?.stream;
+                        const schoolType = app?.school_type || "—";
+                        const examCenter = r.exam_center || app?.exam_center || "—";
+                        const streamColor = STREAM_COLORS[stream || ""] || "bg-gray-100 text-gray-700";
+                        const statusClass = r.marks_obtained != null
+                          ? (r.marks_obtained >= 40 ? "bg-green-100 text-green-700" : "bg-red-100 text-red-700")
+                          : "";
+                        const statusText = r.marks_obtained != null
+                          ? (r.marks_obtained >= 40 ? "Pass" : "Fail")
+                          : "";
+                        return (
+                          <tr key={r.id} className="hover:bg-gray-50">
+                            <td className="py-3 px-4 font-medium text-gray-900">{studentName}</td>
+                            <td className="text-center py-3 px-4 font-mono text-gray-600">{formatAppId(r.application_id)}</td>
+                            <td className="text-center py-3 px-4 font-mono text-gray-600">{rollNo}</td>
+                            <td className="text-center py-3 px-4 text-gray-600">{gender}</td>
+                            <td className="text-center py-3 px-4">
+                              <span className={`px-2 py-1 rounded text-xs font-semibold ${streamColor}`}>{stream || "N/A"}</span>
+                            </td>
+                            <td className="text-center py-3 px-4 text-gray-600">{schoolType}</td>
+                            <td className="text-center py-3 px-4 text-gray-600">{examCenter}</td>
+                            <td className="text-center py-3 px-4 font-bold text-gray-900">{r.marks_obtained ?? "—"}</td>
+                            <td className="text-center py-3 px-4">
+                              {statusText ? (
+                                <span className={`px-2 py-1 rounded text-xs font-semibold ${statusClass}`}>{statusText}</span>
+                              ) : (
+                                <span className="text-xs text-gray-400">—</span>
+                              )}
+                            </td>
+                            <td className="text-center py-3 px-4">
+                              <div className="flex items-center justify-center gap-1">
+                                <button onClick={() => setSelectedApplicantId(r.application_id)} className="p-1.5 hover:bg-blue-50 rounded text-blue-600" title="View Profile"><Eye className="w-4 h-4" /></button>
+                                <button onClick={() => openEditMarks(r)} className="p-1.5 hover:bg-blue-50 rounded text-blue-600" title="Edit marks"><Pencil className="w-4 h-4" /></button>
+                                <button onClick={() => setShortlistConfirmId(r.application_id)} disabled={shortlistingId === r.application_id} className="p-1.5 hover:bg-green-50 rounded text-green-600" title="Shortlist for Interview">
+                                  {shortlistingId === r.application_id ? <Loader2 className="w-4 h-4 animate-spin" /> : <UserCheck className="w-4 h-4" />}
+                                </button>
+                                <button onClick={() => setDeleteId(r.id)} className="p-1.5 hover:bg-red-50 rounded text-red-600" title="Remove"><Trash2 className="w-4 h-4" /></button>
+                              </div>
+                            </td>
+                          </tr>
+                        );
+                      })}
+                    </tbody>
+                  </table>
+                </div>
+
+                {/* Pagination */}
+                <div className="flex items-center justify-between mt-6">
+                <p className="text-sm text-gray-500">
+                  Showing <span className="font-medium">{paginatedResults.length}</span> of{" "}
+                  <span className="font-medium">{totalCount}</span> students
+                </p>
+                <div className="flex items-center gap-2">
+                  <button
+                    disabled={currentPage <= 1}
+                    onClick={() => setCurrentPage(currentPage - 1)}
+                    className="w-8 h-8 flex items-center justify-center rounded-lg border border-gray-200 text-gray-600 hover:bg-gray-50 disabled:opacity-30 disabled:cursor-not-allowed"
+                  >
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" /></svg>
+                  </button>
+                  {(() => {
+                    const totalPages = Math.ceil(totalCount / PAGE_SIZE);
+                    const pages: (number | string)[] = [];
+                    if (totalPages <= 7) {
+                      for (let i = 1; i <= totalPages; i++) pages.push(i);
+                    } else {
+                      pages.push(1);
+                      if (currentPage > 3) pages.push('...');
+                      for (let i = Math.max(2, currentPage - 1); i <= Math.min(totalPages - 1, currentPage + 1); i++) pages.push(i);
+                      if (currentPage < totalPages - 2) pages.push('...');
+                      pages.push(totalPages);
+                    }
+                    return pages.map((p, i) =>
+                      typeof p === 'string' ? (
+                        <span key={`e-${i}`} className="text-gray-400 px-1">...</span>
+                      ) : (
+                        <button
+                          key={p}
+                          onClick={() => setCurrentPage(p)}
+                          className={`w-8 h-8 flex items-center justify-center rounded-lg text-sm font-medium ${
+                            currentPage === p ? "bg-blue-600 text-white" : "border border-gray-200 text-gray-600 hover:bg-gray-50"
+                          }`}
+                        >
+                          {p}
+                        </button>
+                      )
+                    );
+                  })()}
+                  <button
+                    disabled={currentPage >= Math.ceil(totalCount / PAGE_SIZE)}
+                    onClick={() => setCurrentPage(currentPage + 1)}
+                    className="w-8 h-8 flex items-center justify-center rounded-lg border border-gray-200 text-gray-600 hover:bg-gray-50 disabled:opacity-30 disabled:cursor-not-allowed"
+                  >
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" /></svg>
+                  </button>
+                </div>
+              </div>
+            </>
+          )
+        : (
           <div className="py-12 text-center text-gray-400 text-sm">No students added yet. Click &quot;Add Student&quot; to begin.</div>
         )}
       </div>
@@ -779,6 +965,21 @@ const WrittenExam: React.FC<{ onNavigate?: (section: string) => void }> = memo((
             <div className="px-6 py-4 border-t border-gray-200 flex justify-end gap-3">
               <button onClick={() => setDeleteId(null)} className="px-6 py-2.5 border border-gray-300 rounded-lg text-gray-700 font-medium hover:bg-gray-50">Cancel</button>
               <button onClick={handleDeleteResult} className="px-6 py-2.5 bg-red-600 text-white rounded-lg font-medium hover:bg-red-700">Remove</button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Shortlist Confirmation Modal */}
+      {shortlistConfirmId != null && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
+          <div className="bg-white rounded-lg max-w-sm w-full overflow-hidden shadow-xl">
+            <div className="px-6 py-4">
+              <p className="text-sm text-gray-700">Shortlist this applicant for interview?</p>
+            </div>
+            <div className="px-6 py-4 border-t border-gray-200 flex justify-end gap-3">
+              <button onClick={() => setShortlistConfirmId(null)} className="px-6 py-2.5 border border-gray-300 rounded-lg text-gray-700 font-medium hover:bg-gray-50">Cancel</button>
+              <button onClick={handleShortlist} className="px-6 py-2.5 bg-green-600 text-white rounded-lg font-medium hover:bg-green-700">Shortlist</button>
             </div>
           </div>
         </div>
@@ -1135,6 +1336,14 @@ const WrittenExam: React.FC<{ onNavigate?: (section: string) => void }> = memo((
             </div>
           </div>
         </div>
+      )}
+
+      {/* Applicant Profile Modal */}
+      {selectedApplicantId && (
+        <ApplicantProfileModal
+          applicationId={selectedApplicantId}
+          onClose={() => setSelectedApplicantId(null)}
+        />
       )}
     </div>
   );
