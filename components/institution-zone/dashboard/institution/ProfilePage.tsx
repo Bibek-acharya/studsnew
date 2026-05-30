@@ -37,6 +37,13 @@ const ProfilePage: React.FC = () => {
   const [website, setWebsite] = useState("");
   const [contactEmail, setContactEmail] = useState("");
   const [contactPhone, setContactPhone] = useState("");
+  const [mapUrl, setMapUrl] = useState("");
+  const [facebookUrl, setFacebookUrl] = useState("");
+  const [instagramUrl, setInstagramUrl] = useState("");
+  const [tiktokUrl, setTiktokUrl] = useState("");
+  const [youtubeUrl, setYoutubeUrl] = useState("");
+  const [linkedinUrl, setLinkedinUrl] = useState("");
+  const [brochureUrl, setBrochureUrl] = useState("");
   const [about, setAbout] = useState("");
   const [vision, setVision] = useState("");
   const [mission, setMission] = useState("");
@@ -131,6 +138,13 @@ const ProfilePage: React.FC = () => {
         setWebsite(data.website || "");
         setContactEmail(data.contact_email || "");
         setContactPhone(data.contact_phone || "");
+        setMapUrl(data.map_url || "");
+        setFacebookUrl(data.facebook_url || "");
+        setInstagramUrl(data.instagram_url || "");
+        setTiktokUrl(data.tiktok_url || "");
+        setYoutubeUrl(data.youtube_url || "");
+        setLinkedinUrl(data.linkedin_url || "");
+        setBrochureUrl(data.brochure_data?.url || "");
         setLogoUrl(data.logo_url || "");
         setBannerUrl(data.banner_url || "");
         setAbout(data.about || "");
@@ -270,6 +284,13 @@ const ProfilePage: React.FC = () => {
         website,
         contact_email: contactEmail,
         contact_phone: contactPhone,
+        map_url: mapUrl,
+        facebook_url: facebookUrl,
+        instagram_url: instagramUrl,
+        tiktok_url: tiktokUrl,
+        youtube_url: youtubeUrl,
+        linkedin_url: linkedinUrl,
+        brochure_data: brochureUrl ? { url: brochureUrl } : null,
         logo_url: logoUrl,
         banner_url: bannerUrl,
         about,
@@ -445,6 +466,37 @@ const ProfilePage: React.FC = () => {
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">Contact Phone</label>
                 <input type="text" className={inputClass} placeholder="01-4XXXXXX" value={contactPhone} onChange={e => setContactPhone(e.target.value)} />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Google Maps Embed URL</label>
+                <input type="text" className={inputClass} placeholder="https://www.google.com/maps/embed?pb=..." value={mapUrl} onChange={e => setMapUrl(e.target.value)} />
+              </div>
+            </div>
+          </div>
+
+          {/* ─── Social Links ─── */}
+          <div className="bg-white p-6 rounded-md border border-gray-200">
+            <h3 className="text-lg font-semibold text-gray-800 mb-5">Social Links</h3>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Facebook URL</label>
+                <input type="text" className={inputClass} placeholder="https://facebook.com/..." value={facebookUrl} onChange={e => setFacebookUrl(e.target.value)} />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Instagram URL</label>
+                <input type="text" className={inputClass} placeholder="https://instagram.com/..." value={instagramUrl} onChange={e => setInstagramUrl(e.target.value)} />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">TikTok URL</label>
+                <input type="text" className={inputClass} placeholder="https://tiktok.com/..." value={tiktokUrl} onChange={e => setTiktokUrl(e.target.value)} />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">YouTube URL</label>
+                <input type="text" className={inputClass} placeholder="https://youtube.com/..." value={youtubeUrl} onChange={e => setYoutubeUrl(e.target.value)} />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">LinkedIn URL</label>
+                <input type="text" className={inputClass} placeholder="https://linkedin.com/..." value={linkedinUrl} onChange={e => setLinkedinUrl(e.target.value)} />
               </div>
             </div>
           </div>
@@ -822,6 +874,51 @@ const ProfilePage: React.FC = () => {
                 </div>
               ))}
               {downloads.length === 0 && <p className="text-sm text-gray-400 py-4 text-center">No documents added.</p>}
+            </div>
+          </div>
+
+          {/* ─── Brochure ─── */}
+          <div className="bg-white p-6 rounded-md border border-gray-200">
+            <h3 className="text-lg font-semibold text-gray-800 mb-5">
+              <i className="fa-solid fa-file-pdf text-red-500 mr-2"></i>Brochure
+            </h3>
+            <div className="flex items-center gap-4">
+              <label className="flex items-center gap-2 rounded-md bg-brand-blue px-5 py-2.5 text-sm font-bold text-white cursor-pointer hover:bg-brand-hover transition-colors">
+                <i className="fa-solid fa-upload"></i> Upload Brochure
+                <input
+                  type="file"
+                  className="hidden"
+                  accept=".pdf,.doc,.docx,image/*"
+                  onChange={async e => {
+                    const file = e.target.files?.[0];
+                    if (!file) return;
+                    try {
+                      const url = await uploadFile(file, "institution/brochure");
+                      setBrochureUrl(url);
+                    } catch { /* skip */ }
+                  }}
+                />
+              </label>
+              {brochureUrl ? (
+                <div className="flex items-center gap-3 bg-gray-50 border border-gray-200 rounded-md p-3">
+                  <div className="w-10 h-10 rounded bg-red-50 text-red-500 flex items-center justify-center flex-shrink-0">
+                    <i className="fa-solid fa-file-pdf"></i>
+                  </div>
+                  <span className="text-sm text-gray-700 font-medium truncate max-w-[200px]">
+                    {decodeURIComponent(brochureUrl.split("/").pop() || "Brochure")}
+                  </span>
+                  <a href={brochureUrl} target="_blank" rel="noreferrer"
+                    className="px-3 py-2 bg-green-50 border border-green-300 rounded-md text-sm text-green-700 hover:bg-green-100 flex items-center gap-1 flex-shrink-0">
+                    <i className="fa-solid fa-eye"></i> Preview
+                  </a>
+                  <button type="button" onClick={() => setBrochureUrl("")}
+                    className="text-red-400 hover:text-red-600 hover:bg-red-50 p-1.5 rounded-md transition-colors flex-shrink-0">
+                    <i className="fa-solid fa-trash"></i>
+                  </button>
+                </div>
+              ) : (
+                <p className="text-sm text-gray-400">No brochure uploaded.</p>
+              )}
             </div>
           </div>
 

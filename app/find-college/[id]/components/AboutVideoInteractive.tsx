@@ -75,6 +75,14 @@ interface VideoEntry {
   designation: string;
 }
 
+const getYouTubeId = (url: string): string | null => {
+  if (!url) return null;
+  const match = url.match(
+    /(?:youtube\.com\/(?:watch\?v=|embed\/|v\/|shorts\/)|youtu\.be\/)([a-zA-Z0-9_-]{11})/
+  );
+  return match ? match[1] : null;
+};
+
 const AboutVideoInteractive: React.FC<{ videos?: VideoEntry[] }> = ({ videos }) => {
   const cardData = React.useMemo(() => {
     if (videos && videos.length > 0) {
@@ -118,17 +126,29 @@ const AboutVideoInteractive: React.FC<{ videos?: VideoEntry[] }> = ({ videos }) 
 
   if (!mainData || allKeys.length === 0) return null;
 
+  const mainYouTubeId = getYouTubeId(mainData.video);
+
   return (
     <div className="mx-auto mb-10 flex w-full max-w-212.5 flex-col items-center justify-center gap-6 xl:flex-row xl:gap-8">
       <div className="relative h-[50vh] w-full max-w-125 shrink-0 overflow-hidden rounded-md bg-brand-blue ring-1 ring-gray-200/50 sm:h-85 sm:rounded-md">
-        <video
-          className="absolute inset-0 h-full w-full bg-brand-blue object-cover transition-opacity duration-300"
-          src={mainData.video}
-          autoPlay
-          loop
-          muted
-          playsInline
-        />
+        {mainYouTubeId ? (
+          <iframe
+            className="absolute inset-0 h-full w-full"
+            src={`https://www.youtube.com/embed/${mainYouTubeId}?autoplay=1&mute=1&loop=1&playlist=${mainYouTubeId}`}
+            allow="autoplay; encrypted-media"
+            allowFullScreen
+            title={mainData.title}
+          />
+        ) : (
+          <video
+            className="absolute inset-0 h-full w-full bg-brand-blue object-cover transition-opacity duration-300"
+            src={mainData.video}
+            autoPlay
+            loop
+            muted
+            playsInline
+          />
+        )}
         <div className="absolute bottom-5 left-5 z-10 max-w-[70%]">
           <div
             className="flex flex-col rounded-md border border-white/10 bg-black/60 px-4 py-2 text-white backdrop-blur-md sm:px-5 sm:py-3"
@@ -146,6 +166,7 @@ const AboutVideoInteractive: React.FC<{ videos?: VideoEntry[] }> = ({ videos }) 
         <div className="absolute right-5 top-5 z-20 flex max-h-[calc(100%-40px)] flex-col gap-2 overflow-y-auto pb-4 pr-1 [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
           {others.map((key) => {
             const data = cardData[key];
+            const ytId = getYouTubeId(data.video);
             return (
               <div
                 key={key}
@@ -153,14 +174,23 @@ const AboutVideoInteractive: React.FC<{ videos?: VideoEntry[] }> = ({ videos }) 
                 className="group relative h-12.5 w-[70px] shrink-0 cursor-pointer transition-transform sm:h-[55px] sm:w-[85px]"
               >
                 <div className="relative h-full w-full overflow-hidden rounded-md border-2 border-white bg-brand-blue sm:rounded-md">
-                  <video
-                    className="absolute inset-0 h-full w-full object-cover opacity-90 transition-opacity group-hover:opacity-100"
-                    src={data.video}
-                    autoPlay
-                    loop
-                    muted
-                    playsInline
-                  />
+                  {ytId ? (
+                    <iframe
+                      className="absolute inset-0 h-full w-full pointer-events-none"
+                      src={`https://www.youtube.com/embed/${ytId}?autoplay=1&mute=1&controls=0`}
+                      allow="autoplay; encrypted-media"
+                      title={key}
+                    />
+                  ) : (
+                    <video
+                      className="absolute inset-0 h-full w-full object-cover opacity-90 transition-opacity group-hover:opacity-100"
+                      src={data.video}
+                      autoPlay
+                      loop
+                      muted
+                      playsInline
+                    />
+                  )}
                   <div className="absolute bottom-0 left-0 right-0 z-30 flex h-[80%] flex-col justify-end bg-linear-to-t from-black/90 via-black/40 to-transparent p-1">
                     <span
                       className="truncate text-[8px] font-bold leading-tight text-white sm:text-[9px]"

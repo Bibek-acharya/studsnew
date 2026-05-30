@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { College, apiService } from "@/services/api";
+import { College, apiService, getImageUrl } from "@/services/api";
 import { CollegeFilters } from "@/app/find-college/types";
 import {
   BadgeCheckIcon,
@@ -695,7 +695,7 @@ export const ProgramCard: React.FC<{
           <Image
             height={200}
             width={200}
-            src={college.image_url}
+            src={getImageUrl(college.image_url)}
             alt={college.name}
             className="h-full w-full object-cover"
           />

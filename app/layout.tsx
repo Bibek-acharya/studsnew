@@ -12,21 +12,23 @@ import "./globals.css";
 const plusJakartaSans = Plus_Jakarta_Sans({
   variable: "--font-plus-jakarta",
   subsets: ["latin"],
+  display: "swap",
 });
 
 const geistMono = Geist_Mono({
   variable: "--font-geist-mono",
   subsets: ["latin"],
+  display: "swap",
 });
 
 export const metadata: Metadata = {
   metadataBase: new URL("https://studsphere.com"),
   title: {
-    default: "Studsphere - Nepal's #1 College & Scholarship Finder",
+    default: "Studsphere - Connecting Students with Colleges & Opportunities",
     template: "%s | Studsphere",
   },
   description:
-    "Find top colleges in Nepal, compare courses, apply for scholarships, and get admission guidance. Studsphere helps students discover the perfect college.",
+    "Discover top colleges in Nepal, compare courses, find scholarships, and get expert admission guidance — all in one place.",
   keywords: [
     "colleges in Nepal",
     "scholarships in Nepal",
@@ -42,9 +44,9 @@ export const metadata: Metadata = {
     apple: [{ url: "/icon.png", sizes: "199x199", type: "image/png" }],
   },
   openGraph: {
-    title: "Studsphere - Nepal's #1 College & Scholarship Finder",
+    title: "Studsphere - Connecting Students with Colleges & Opportunities",
     description:
-      "Find top colleges in Nepal, compare courses, apply for scholarships, and get admission guidance.",
+      "Discover top colleges in Nepal, compare courses, find scholarships, and get expert admission guidance.",
     url: "https://studsphere.com",
     siteName: "Studsphere",
     images: [
@@ -57,13 +59,12 @@ export const metadata: Metadata = {
     ],
     locale: "en_US",
     type: "website",
-    countryName: "Nepal",
   },
   twitter: {
     card: "summary_large_image",
-    title: "Studsphere - Nepal's #1 College & Scholarship Finder",
+    title: "Studsphere - Connecting Students with Colleges & Opportunities",
     description:
-      "Find top colleges in Nepal, compare courses, apply for scholarships, and get admission guidance.",
+      "Discover top colleges in Nepal, compare courses, find scholarships, and get expert admission guidance.",
     images: ["/icon.png"],
   },
   robots: {
@@ -84,10 +85,6 @@ export default function RootLayout({
       className={`${plusJakartaSans.variable} ${geistMono.variable} h-full antialiased`}
     >
       <head>
-        <link
-          rel="stylesheet"
-          href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.2.0/css/all.min.css"
-        />
         <Script
           id="schema-org"
           type="application/ld+json"
@@ -107,7 +104,11 @@ export default function RootLayout({
                     contactType: "customer support",
                     url: "https://studsphere.com/contact-us",
                   },
-                  sameAs: [],
+                  sameAs: [
+                    "https://www.facebook.com/share/1CEcyRH9ZZ/",
+                    "https://www.instagram.com/stud.sphere",
+                    "https://www.tiktok.com/@stud.sphere",
+                  ],
                 },
                 {
                   "@type": "WebSite",
