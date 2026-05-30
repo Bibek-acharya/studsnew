@@ -1,8 +1,9 @@
 "use client";
 
 import React, { memo, useCallback, useEffect, useMemo, useState } from "react";
-import { Home, Mic, Pencil, Plus, Search, Trash2, Users, X, Loader2, ArrowUpDown, ArrowUp, ArrowDown, Eye, CheckCircle } from "lucide-react";
+import { Home, Mic, Pencil, Plus, Search, Trash2, Users, X, Loader2, ArrowUpDown, ArrowUp, ArrowDown, Eye, CheckCircle, Download } from "lucide-react";
 import { toast } from "sonner";
+import * as XLSX from "xlsx";
 import { scholarshipProviderApi, writtenExamApi, ProviderApplication, ProviderScholarship } from "@/services/scholarshipProviderApi";
 import ApplicantProfileModal from "./ApplicantProfileModal";
 
@@ -28,6 +29,7 @@ const Interviews: React.FC = memo(() => {
   const [scholarships, setScholarships] = useState<ProviderScholarship[]>([]);
   const [selectedScholarshipId, setSelectedScholarshipId] = useState<string>("");
   const [applications, setApplications] = useState<ProviderApplication[]>([]);
+  const [allApps, setAllApps] = useState<ProviderApplication[]>([]);
   const [writtenMarksMap, setWrittenMarksMap] = useState<Record<number, number>>({});
   const [loading, setLoading] = useState(true);
   const [savingId, setSavingId] = useState<number | null>(null);
@@ -132,20 +134,48 @@ const Interviews: React.FC = memo(() => {
     fetchData();
   }, [selectedScholarshipId, schoolTypeFilter, genderFilter, examCenterFilter, search]);
 
+  // Load all shortlisted apps for filter dropdowns (not paginated)
+  useEffect(() => {
+    if (!selectedScholarshipId) return;
+    (async () => {
+      try {
+        const res = await scholarshipProviderApi.getApplications({
+          page: 1, limit: 100000,
+          status: "shortlisted",
+          scholarship_id: selectedScholarshipId,
+        });
+        setAllApps(res.applications);
+      } catch { /* keep existing */ }
+    })();
+  }, [selectedScholarshipId]);
+
   const examCenters = useMemo(() => {
     const centers = new Set<string>();
-    applications.forEach((a) => { if (a.exam_center) centers.add(a.exam_center); });
+    allApps.forEach((a) => { if (a.exam_center) centers.add(a.exam_center); });
     return Array.from(centers).sort();
-  }, [applications]);
+  }, [allApps]);
+
+  const schoolTypes = useMemo(() => {
+    const types = new Set<string>();
+    allApps.forEach((a) => { if (a.school_type) types.add(a.school_type); });
+    return Array.from(types).sort();
+  }, [allApps]);
+
+  const genders = useMemo(() => {
+    const g = new Set<string>();
+    allApps.forEach((a) => { if (a.gender) g.add(a.gender); });
+    return Array.from(g).sort();
+  }, [allApps]);
 
   // Client-side mark filtering (since marks aren't in applications endpoint)
   const displayApps = useMemo(() => {
     return applications.filter((app) => {
       const wm = writtenMarksMap[app.id];
+      if (wm == null) return false;
       const mmin = marksMin ? Number(marksMin) : null;
       const mmax = marksMax ? Number(marksMax) : null;
-      if (mmin != null && (wm == null || wm < mmin)) return false;
-      if (mmax != null && (wm == null || wm > mmax)) return false;
+      if (mmin != null && wm < mmin) return false;
+      if (mmax != null && wm > mmax) return false;
       return true;
     });
   }, [applications, marksMin, marksMax, writtenMarksMap]);
@@ -279,8 +309,9 @@ const Interviews: React.FC = memo(() => {
         notes: "",
         passing: false,
       });
+      await scholarshipProviderApi.updateApplicationStatus(appId, "under_review");
       await fetchData();
-      toast.success("Interview score removed");
+      toast.success("Interview score removed and applicant moved back to under review");
     } catch {
       toast.error("Failed to remove score");
     }
@@ -314,6 +345,48 @@ const Interviews: React.FC = memo(() => {
     return score >= PASSING
       ? { text: "Pass", cls: "bg-green-100 text-green-700" }
       : { text: "Fail", cls: "bg-red-100 text-red-700" };
+  };
+
+  const handleExport = async () => {
+    try {
+      const res = await scholarshipProviderApi.getApplications({
+        page: 1, limit: 100000,
+        status: "shortlisted",
+        scholarship_id: selectedScholarshipId,
+        school_type: schoolTypeFilter || undefined,
+        gender: genderFilter || undefined,
+        exam_center: examCenterFilter || undefined,
+        search: search || undefined,
+      });
+      const filtered = res.applications.filter((app) => {
+        const wm = writtenMarksMap[app.id];
+        if (wm == null) return false;
+        const mmin = marksMin ? Number(marksMin) : null;
+        const mmax = marksMax ? Number(marksMax) : null;
+        if (mmin != null && wm < mmin) return false;
+        if (mmax != null && wm > mmax) return false;
+        return true;
+      });
+      const rows = filtered.map((app) => ({
+        "Student Name": app.full_name || `${app.first_name} ${app.last_name}`,
+        "Application ID": `APP-${APP_ID_YEAR}-${String(app.id).padStart(3, "0")}`,
+        "Symbol No": app.roll_number || "—",
+        Gender: app.gender || "—",
+        Stream: app.stream || "—",
+        "School Type": app.school_type || "—",
+        "Exam Center": app.exam_center || "—",
+        "Written Marks": writtenMarksMap[app.id] ?? "—",
+        "Interview Score": app.evaluation_score ?? "—",
+        Status: app.evaluation_score != null ? (app.evaluation_score >= PASSING ? "Pass" : "Fail") : "—",
+      }));
+      const ws = XLSX.utils.json_to_sheet(rows);
+      const wb = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(wb, ws, "Interview Results");
+      XLSX.writeFile(wb, `interview_results_scholarship_${selectedScholarshipId}.xlsx`);
+      toast.success(`Exported ${rows.length} results`);
+    } catch {
+      toast.error("Failed to export");
+    }
   };
 
   if (loading && applications.length === 0) {
@@ -367,6 +440,12 @@ const Interviews: React.FC = memo(() => {
               >
                 <Plus className="w-4 h-4" /> Add Interview Score
               </button>
+              <button
+                onClick={handleExport}
+                className="px-4 py-2 bg-gray-600 text-white rounded-lg text-sm font-semibold hover:bg-gray-700 transition-colors flex items-center gap-1"
+              >
+                <Download className="w-4 h-4" /> Export Excel
+              </button>
             </div>
           )}
         </div>
@@ -382,15 +461,11 @@ const Interviews: React.FC = memo(() => {
             </div>
             <select className="px-2 py-1 border border-gray-200 rounded text-xs focus:outline-none focus:border-blue-500" value={schoolTypeFilter} onChange={(e) => setSchoolTypeFilter(e.target.value)}>
               <option value="">All Schools</option>
-              <option value="Public">Public</option>
-              <option value="Private">Private</option>
-              <option value="Community">Community</option>
+              {schoolTypes.map((t) => <option key={t} value={t}>{t}</option>)}
             </select>
             <select className="px-2 py-1 border border-gray-200 rounded text-xs focus:outline-none focus:border-blue-500" value={genderFilter} onChange={(e) => setGenderFilter(e.target.value)}>
               <option value="">All Genders</option>
-              <option value="Male">Male</option>
-              <option value="Female">Female</option>
-              <option value="Other">Others</option>
+              {genders.map((g) => <option key={g} value={g}>{g}</option>)}
             </select>
             {examCenters.length > 0 && (
               <select className="px-2 py-1 border border-gray-200 rounded text-xs focus:outline-none focus:border-blue-500" value={examCenterFilter} onChange={(e) => setExamCenterFilter(e.target.value)}>
@@ -582,7 +657,7 @@ const Interviews: React.FC = memo(() => {
       {deleteId != null && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
           <div className="bg-white rounded-lg max-w-sm w-full overflow-hidden shadow-xl">
-            <div className="px-6 py-4"><p className="text-sm text-gray-700">Remove this student from interview results?</p></div>
+            <div className="px-6 py-4"><p className="text-sm text-gray-700">Remove this applicant from interview? This will clear the interview score and move them back to under review.</p></div>
             <div className="px-6 py-4 border-t border-gray-200 flex justify-end gap-3">
               <button onClick={() => setDeleteId(null)} className="px-6 py-2.5 border border-gray-300 rounded-lg text-gray-700 font-medium hover:bg-gray-50">Cancel</button>
               <button onClick={handleDeleteScore} className="px-6 py-2.5 bg-red-600 text-white rounded-lg font-medium hover:bg-red-700">Remove</button>

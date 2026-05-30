@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect, useCallback, useMemo, memo } from "react";
-import { Home, Search, Plus, Pencil, Trash2, X, Loader2, ChevronLeft, ChevronRight, Megaphone, Upload, FileSpreadsheet, Eye, UserCheck, ArrowUpDown, ArrowUp, ArrowDown } from "lucide-react";
+import { Home, Search, Plus, Pencil, Trash2, X, Loader2, ChevronLeft, ChevronRight, Megaphone, Upload, FileSpreadsheet, Eye, UserCheck, ArrowUpDown, ArrowUp, ArrowDown, Download } from "lucide-react";
 import { toast } from "sonner";
 import * as XLSX from "xlsx";
 import { scholarshipProviderApi, writtenExamApi, WrittenExamData, WrittenExamResultData, ProviderApplication, BatchImportResponse, ProviderResult } from "@/services/scholarshipProviderApi";
@@ -571,6 +571,46 @@ const WrittenExam: React.FC<{ onNavigate?: (section: string) => void }> = memo((
     return marks >= 40 ? "Pass" : "Fail";
   };
 
+  const handleExport = async () => {
+    if (!exam?.id) return;
+    try {
+      const res = await writtenExamApi.getResultsPaginated(exam.id, {
+        page: 1, limit: 100000,
+        sort_by: sortBy, sort_order: sortOrder,
+        marks_min: marksMin ? Number(marksMin) : undefined,
+        marks_max: marksMax ? Number(marksMax) : undefined,
+        school_type: schoolTypeFilter || undefined,
+        gender: genderFilter || undefined,
+        exam_center: examCenterFilter || undefined,
+        search: search || undefined,
+      });
+      const rows = res.results.map((r) => {
+        const app = appsMap[r.application_id];
+        return {
+          "Student Name": app ? `${app.first_name || ""} ${app.last_name || ""}`.trim() || "—" : "—",
+          "Application ID": `APP-${APP_ID_YEAR}-${String(r.application_id).padStart(3, "0")}`,
+          "Symbol No": app?.roll_number || r.roll_no || "—",
+          Gender: app?.gender || "—",
+          Stream: app?.stream || "—",
+          "School Type": app?.school_type || "—",
+          "Exam Center": app?.exam_center || r.exam_center || "—",
+          Marks: r.marks_obtained ?? "—",
+          Status: r.marks_obtained != null ? (r.marks_obtained >= 40 ? "Pass" : "Fail") : "—",
+          "Interview Location": r.interview_location || "",
+          "Interview Date": r.interview_date || "",
+          "Reporting Time": r.reporting_time || "",
+        };
+      });
+      const ws = XLSX.utils.json_to_sheet(rows);
+      const wb = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(wb, ws, "Written Exam Results");
+      XLSX.writeFile(wb, `written_exam_${exam.id}.xlsx`);
+      toast.success(`Exported ${res.results.length} results`);
+    } catch {
+      toast.error("Failed to export");
+    }
+  };
+
   const autoStatusClass = (marks: number) => {
     const s = autoStatus(marks);
     if (s === "Pass") return "bg-green-100 text-green-700";
@@ -632,6 +672,12 @@ const WrittenExam: React.FC<{ onNavigate?: (section: string) => void }> = memo((
                 <Upload className="w-4 h-4" /> Import Excel
               </button>
               <button
+                onClick={handleExport}
+                className="px-4 py-2 bg-gray-600 text-white rounded-lg text-sm font-semibold hover:bg-gray-700 transition-colors flex items-center gap-1"
+              >
+                <Download className="w-4 h-4" /> Export Excel
+              </button>
+              <button
                 onClick={() => {
                   if (isPublished) { onNavigate?.("sec-results"); return; }
                   setPublishConfirmOpen(true);
@@ -670,27 +716,21 @@ const WrittenExam: React.FC<{ onNavigate?: (section: string) => void }> = memo((
                   onChange={(e) => setMarksMax(e.target.value)}
                 />
               </div>
-              {schoolTypes.length > 0 && (
-                <select
-                  className="px-2 py-1 border border-gray-200 rounded text-xs focus:outline-none focus:border-blue-500"
-                  value={schoolTypeFilter}
-                  onChange={(e) => setSchoolTypeFilter(e.target.value)}
-                >
-                  <option value="">All Schools</option>
-                  <option value="Public">Public</option>
-                  <option value="Private">Private</option>
-                  <option value="Community">Community</option>
-                </select>
-              )}
+              <select
+                className="px-2 py-1 border border-gray-200 rounded text-xs focus:outline-none focus:border-blue-500"
+                value={schoolTypeFilter}
+                onChange={(e) => setSchoolTypeFilter(e.target.value)}
+              >
+                <option value="">All Schools</option>
+                {schoolTypes.map((t) => <option key={t} value={t}>{t}</option>)}
+              </select>
               <select
                 className="px-2 py-1 border border-gray-200 rounded text-xs focus:outline-none focus:border-blue-500"
                 value={genderFilter}
                 onChange={(e) => setGenderFilter(e.target.value)}
               >
                 <option value="">All Genders</option>
-                <option value="Male">Male</option>
-                <option value="Female">Female</option>
-                <option value="Other">Others</option>
+                {genders.map((g) => <option key={g} value={g}>{g}</option>)}
               </select>
               {examCenters.length > 0 && (
                 <select
