@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useRef } from "react";
+import React, { useState, useRef, useEffect, useCallback } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { useQuery } from "@tanstack/react-query";
 import { admissionService } from "@/services/admission.api";
@@ -107,7 +107,40 @@ export default function AdmissionDetailPage() {
   const collegeName = institution?.name || "College";
   const applicationFormLink = (apData?.overview_data as any)?.applicationFormLink || "";
   const heroBanner = (apData?.overview_data as any)?.heroBanner || "";
+  const heroBanners: string[] = (() => {
+    if (Array.isArray(heroBanner)) return heroBanner.map(String).filter(Boolean);
+    if (typeof heroBanner === "string" && heroBanner) {
+      try {
+        const parsed = JSON.parse(heroBanner);
+        return Array.isArray(parsed) ? parsed.map(String).filter(Boolean) : [heroBanner];
+      } catch {
+        return [heroBanner];
+      }
+    }
+    return [];
+  })();
   const admissionLevel = (apData?.overview_data as any)?.level || params.level as string || "";
+
+  const [heroSlide, setHeroSlide] = useState(0);
+  const heroIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
+
+  const nextHeroSlide = useCallback(() => {
+    if (heroBanners.length <= 1) return;
+    setHeroSlide((prev) => (prev + 1) % heroBanners.length);
+  }, [heroBanners.length]);
+
+  const prevHeroSlide = useCallback(() => {
+    if (heroBanners.length <= 1) return;
+    setHeroSlide((prev) => (prev === 0 ? heroBanners.length - 1 : prev - 1));
+  }, [heroBanners.length]);
+
+  useEffect(() => {
+    if (heroBanners.length <= 1) return;
+    heroIntervalRef.current = setInterval(nextHeroSlide, 4000);
+    return () => {
+      if (heroIntervalRef.current) clearInterval(heroIntervalRef.current);
+    };
+  }, [heroBanners.length, nextHeroSlide]);
 
   const timeAgo = (dateStr?: string) => {
     if (!dateStr) return "";
@@ -257,15 +290,60 @@ export default function AdmissionDetailPage() {
           </p>
         </div>
 
-        <div
-          className="relative w-full h-[280px] md:h-[380px] bg-cover bg-center rounded-md overflow-hidden"
-          style={{
-            backgroundImage: heroBanner ? `url('${heroBanner}')` : "url('https://kist-edu-np.s3.ap-south-1.amazonaws.com/uploads/album/value/c0374b68ef663e539f7e6aea4b84625b2a207a981656053172.jpg')",
-            backgroundPosition: "center 20%",
-          }}
-        >
-          <div className="absolute inset-0 bg-black/10" />
-        </div>
+        {heroBanners.length > 0 ? (
+          <div className="relative w-full h-[280px] md:h-[380px] rounded-md overflow-hidden group">
+            <div
+              className="flex w-full h-full transition-transform duration-500 ease-in-out"
+              style={{ transform: `translateX(-${heroSlide * 100}%)` }}
+            >
+              {heroBanners.map((url, idx) => (
+                <div
+                  key={idx}
+                  className="w-full h-full shrink-0 bg-cover bg-center"
+                  style={{ backgroundImage: `url('${url}')`, backgroundPosition: "center 20%" }}
+                />
+              ))}
+            </div>
+            <div className="absolute inset-0 bg-black/10 pointer-events-none" />
+            {heroBanners.length > 1 && (
+              <>
+                <button
+                  onClick={prevHeroSlide}
+                  className="absolute left-3 top-1/2 -translate-y-1/2 w-10 h-10 bg-white/80 hover:bg-white text-gray-800 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity shadow-lg"
+                >
+                  <ChevronLeft className="w-5 h-5" />
+                </button>
+                <button
+                  onClick={nextHeroSlide}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 w-10 h-10 bg-white/80 hover:bg-white text-gray-800 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity shadow-lg"
+                >
+                  <ChevronRight className="w-5 h-5" />
+                </button>
+                <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex items-center gap-2 z-10">
+                  {heroBanners.map((_, idx) => (
+                    <button
+                      key={idx}
+                      onClick={() => setHeroSlide(idx)}
+                      className={`rounded-full transition-all duration-300 ${
+                        idx === heroSlide ? "w-3 h-3 bg-white" : "w-2 h-2 bg-white/50"
+                      }`}
+                    />
+                  ))}
+                </div>
+              </>
+            )}
+          </div>
+        ) : (
+          <div
+            className="relative w-full h-[280px] md:h-[380px] bg-cover bg-center rounded-md overflow-hidden"
+            style={{
+              backgroundImage: "url('https://kist-edu-np.s3.ap-south-1.amazonaws.com/uploads/album/value/c0374b68ef663e539f7e6aea4b84625b2a207a981656053172.jpg')",
+              backgroundPosition: "center 20%",
+            }}
+          >
+            <div className="absolute inset-0 bg-black/10" />
+          </div>
+        )}
       </div>
 
       {/* Sticky Tab Navigation */}

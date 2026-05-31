@@ -19,6 +19,19 @@ interface AdmissionGridProps {
 
 const COLLEGES_PER_PAGE = 18;
 
+function extractHeroBanners(college: AdmissionCollegeItem): string[] {
+  const raw = college.hero_banner;
+
+  if (!raw) return [];
+  try {
+    const parsed = JSON.parse(raw);
+    if (Array.isArray(parsed)) return parsed.map(String).filter(Boolean);
+  } catch {
+    // single URL string
+  }
+  return [raw];
+}
+
 const AdmissionGrid: React.FC<AdmissionGridProps> = ({
   filters,
   setFilters,
@@ -168,7 +181,11 @@ const AdmissionGrid: React.FC<AdmissionGridProps> = ({
               return (
                 <React.Fragment key={college.id}>
                   <CollegeCard
-                    images={college.image_url ? [college.image_url] : ["/images/college-placeholder.png"]}
+                    images={(() => {
+                      const banners = extractHeroBanners(college);
+                      if (banners.length > 0) return banners;
+                      return college.image_url ? [college.image_url] : ["/images/college-placeholder.png"];
+                    })()}
                     tag={{
                       text: college.verified ? "Verified" : "Admission",
                       color: college.verified ? "bg-blue-600" : "bg-slate-500",

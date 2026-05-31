@@ -15,6 +15,7 @@ interface FileUploadProps {
   previewUrl?: string;
   previewClassName?: string;
   onClearPreview?: () => void;
+  hideClearButton?: boolean;
 }
 
 const FileUpload: React.FC<FileUploadProps> = ({
@@ -29,6 +30,7 @@ const FileUpload: React.FC<FileUploadProps> = ({
   previewUrl,
   previewClassName = "w-full h-32 object-cover rounded-lg mt-2",
   onClearPreview,
+  hideClearButton = false,
 }) => {
   const [isDragOver, setIsDragOver] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -101,15 +103,17 @@ const FileUpload: React.FC<FileUploadProps> = ({
           <div className="relative">
             <img src={previewUrl} className={previewClassName} alt="Preview" />
             <div className="absolute inset-0 bg-gradient-to-t from-black/35 via-black/10 to-transparent" />
-            <button
-              type="button"
-              onClick={handleClear}
-              className="absolute top-3 right-3 inline-flex items-center justify-center rounded-full bg-white/95 p-2 text-slate-700 shadow-md hover:bg-white"
-              aria-label="Remove uploaded image"
-              title="Remove uploaded image"
-            >
-              <Trash2 className="w-4 h-4" />
-            </button>
+            {!hideClearButton && (
+              <button
+                type="button"
+                onClick={handleClear}
+                className="absolute top-3 right-3 inline-flex items-center justify-center rounded-full bg-white/95 p-2 text-slate-700 shadow-md hover:bg-white"
+                aria-label="Remove uploaded image"
+                title="Remove uploaded image"
+              >
+                <Trash2 className="w-4 h-4" />
+              </button>
+            )}
             <div className="absolute bottom-3 left-3 right-12 text-left text-white">
               <p className="text-sm font-semibold">{uploadedText}</p>
               <p className="text-xs text-white/80">Click anywhere to replace the image</p>

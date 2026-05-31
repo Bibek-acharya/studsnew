@@ -6,7 +6,7 @@ import RichTextEditor from "@/components/ScholarshipProvider/common/RichTextEdit
 import ImageCropperModal from "@/components/ScholarshipProvider/common/ImageCropperModal";
 import FileUpload from "@/components/ScholarshipProvider/common/FileUpload";
 
-interface VideoItem { id: number; url: string; message: string; name: string; designation: string; }
+interface VideoItem { id: number; url: string; message: string; name: string; designation: string; avatar: string; }
 interface OverviewRow { id: number; key: string; value: string; }
 interface LeadershipRow { id: number; position: string; role: string; holder: string; }
 interface CourseRow { id: number; name: string; duration: string; fees: string; eligibility: string; }
@@ -510,7 +510,7 @@ const ProfilePage: React.FC = () => {
             <div className="mb-8">
               <div className="flex justify-between items-center mb-3">
                 <label className="block text-sm font-medium text-gray-700 mb-0">Video Links (Max 4)</label>
-                <button type="button" onClick={() => videos.length < 4 && addItem(setVideos, { url: "", message: "", name: "", designation: "" })}
+                <button type="button" onClick={() => videos.length < 4 && addItem(setVideos, { url: "", message: "", name: "", designation: "", avatar: "" })}
                   className={`text-sm px-3 py-1.5 rounded-md font-medium ${videos.length >= 4 ? "text-gray-400 bg-gray-100 cursor-not-allowed" : "text-blue-600 bg-blue-50 hover:bg-blue-100"}`}>
                   <i className="fa-solid fa-plus mr-1"></i> Add Video
                 </button>
@@ -519,11 +519,31 @@ const ProfilePage: React.FC = () => {
                 {videos.map(v => (
                   <div key={v.id} className="bg-gray-50 border border-gray-200 rounded-md p-4 relative group">
                     <button type="button" onClick={() => removeItem(setVideos, v.id)}
-                      className="absolute top-3 right-3 text-red-400 hover:text-red-600 hover:bg-red-50 p-1.5 rounded-md transition-colors opacity-0 group-hover:opacity-100">
+                      className="absolute top-3 right-3 text-red-400 hover:text-red-600 hover:bg-red-50 p-1.5 rounded-md transition-colors opacity-0 group-hover:opacity-100 z-10">
                       <i className="fa-solid fa-trash"></i>
                     </button>
                     <div className="space-y-3 pr-10">
-                      <input type="url" className={`${inputClass} text-sm`} placeholder="Video URL" value={v.url} onChange={e => updateItem(setVideos, v.id, "url", e.target.value)} />
+                      <div className="flex items-center gap-3">
+                        <div className="w-12 h-12 rounded-full bg-gray-200 overflow-hidden flex items-center justify-center border-2 border-gray-300 flex-shrink-0">
+                          {v.avatar ? (
+                            <img src={v.avatar} className="w-full h-full object-cover" alt="" />
+                          ) : (
+                            <i className="fa-solid fa-user text-gray-400 text-lg"></i>
+                          )}
+                        </div>
+                        <label className="cursor-pointer text-xs font-medium text-brand-blue hover:text-brand-hover bg-brand-blue/5 hover:bg-brand-blue/10 px-3 py-1.5 rounded transition-colors">
+                          <i className="fa-solid fa-camera mr-1"></i> Photo
+                          <input type="file" className="hidden" accept="image/*" onChange={async e => {
+                            const file = e.target.files?.[0];
+                            if (!file) return;
+                            try {
+                              const url = await uploadFile(file, "institution/video-avatars");
+                              updateItem(setVideos, v.id, "avatar", url);
+                            } catch { /* skip */ }
+                          }} />
+                        </label>
+                        <input type="url" className={`${inputClass} text-sm flex-1`} placeholder="Video URL" value={v.url} onChange={e => updateItem(setVideos, v.id, "url", e.target.value)} />
+                      </div>
                       <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
                         <input type="text" className={`${inputClass} text-sm`} placeholder="Message / Title" value={v.message} onChange={e => updateItem(setVideos, v.id, "message", e.target.value)} />
                         <input type="text" className={`${inputClass} text-sm`} placeholder="Person Name" value={v.name} onChange={e => updateItem(setVideos, v.id, "name", e.target.value)} />
@@ -806,16 +826,17 @@ const ProfilePage: React.FC = () => {
                         {uploadingInfo?.groupIndex === groupIndex && uploadingInfo?.imageIndex === imageIndex ? (
                           <p className="text-sm text-blue-600 py-20 text-center">Uploading...</p>
                         ) : (
-                          <FileUpload
-                            label=""
-                            uploadedText="Image uploaded"
-                            accept="image/*"
-                            maxSize="5MB"
-                            previewUrl={img.url}
-                            previewClassName="w-full h-44 object-cover rounded-2xl"
-                            onFileSelect={(file) => handleGalleryFileSelect(groupIndex, imageIndex, file)}
-                            onClearPreview={() => updateGalleryImage(groupIndex, imageIndex, "url", "")}
-                          />
+                            <FileUpload
+                              label=""
+                              uploadedText="Image uploaded"
+                              accept="image/*"
+                              maxSize="5MB"
+                              previewUrl={img.url}
+                              previewClassName="w-full h-44 object-cover rounded-2xl"
+                              onFileSelect={(file) => handleGalleryFileSelect(groupIndex, imageIndex, file)}
+                              onClearPreview={() => updateGalleryImage(groupIndex, imageIndex, "url", "")}
+                              hideClearButton
+                            />
                         )}
 
                         <div className="mt-4">

@@ -174,9 +174,10 @@ const AdmissionCreatePage: React.FC = () => {
   const [overviewDesc, setOverviewDesc] = useState("");
   const [applicationFormLink, setApplicationFormLink] = useState("");
   const [level, setLevel] = useState("");
-  const [heroBanner, setHeroBanner] = useState("");
+  const [heroBanners, setHeroBanners] = useState<string[]>([]);
   const [cropperOpen, setCropperOpen] = useState(false);
   const [cropImageSrc, setCropImageSrc] = useState<string | null>(null);
+  const [cropTargetIndex, setCropTargetIndex] = useState<number | null>(null);
 
   const getToken = () => localStorage.getItem("institutionToken");
   const apiBase = () => process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080";
@@ -229,7 +230,19 @@ const AdmissionCreatePage: React.FC = () => {
       setOverviewDesc(String(od.overviewDesc ?? ""));
       setApplicationFormLink(String(od.applicationFormLink ?? ""));
       setLevel(String(od.level ?? ""));
-      setHeroBanner(String(od.heroBanner ?? ""));
+      const hb = od.heroBanner;
+      if (Array.isArray(hb)) {
+        setHeroBanners(hb.map(String).filter(Boolean));
+      } else if (typeof hb === "string" && hb) {
+        try {
+          const parsed = JSON.parse(hb);
+          setHeroBanners(Array.isArray(parsed) ? parsed.map(String).filter(Boolean) : [hb]);
+        } catch {
+          setHeroBanners([hb]);
+        }
+      } else {
+        setHeroBanners([]);
+      }
     }
     const wnd = data.whats_new_data;
     if (wnd) {
@@ -407,7 +420,7 @@ const AdmissionCreatePage: React.FC = () => {
       overviewDesc,
       applicationFormLink,
       level,
-      heroBanner,
+      heroBanner: heroBanners.length > 0 ? JSON.stringify(heroBanners) : "",
     },
     whats_new_data: {
       title: whatsNewTitle,
@@ -560,36 +573,52 @@ const AdmissionCreatePage: React.FC = () => {
             </div>
             <div>
               <label className={labelClass}>Hero Banner Image <span className="text-red-500">*</span></label>
-              <div onClick={() => document.getElementById("admission-banner-input")?.click()}
-                className="border-2 border-dashed border-gray-300 rounded-xl flex flex-col items-center justify-center text-center hover:bg-gray-50 hover:border-blue-400 transition-colors cursor-pointer relative overflow-hidden min-h-[200px]">
-                {heroBanner ? (
-                  <div className="relative w-full h-full">
-                    <img src={heroBanner} className="w-full h-48 object-cover" alt="Hero Banner" />
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/30 via-transparent to-transparent" />
-                    <span className="absolute bottom-3 left-3 text-xs text-white/80">Click anywhere to replace</span>
-                    <button type="button" onClick={e => { e.stopPropagation(); setHeroBanner(""); }}
-                      className="absolute top-3 right-3 p-2 bg-white/95 rounded-full text-red-500 hover:bg-white shadow-md">
-                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+              <div className="grid grid-cols-5 gap-3">
+                {heroBanners.map((url, idx) => (
+                  <div
+                    key={idx}
+                    onClick={() => document.getElementById(`admission-banner-input-${idx}`)?.click()}
+                    className="relative aspect-video rounded-lg overflow-hidden border-2 border-gray-200 cursor-pointer hover:border-blue-400 transition-colors group"
+                  >
+                    <img src={url} className="w-full h-full object-cover" alt={`Hero Banner ${idx + 1}`} />
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+                    <span className="absolute bottom-2 left-2 text-xs text-white/80 opacity-0 group-hover:opacity-100 transition-opacity">Click to replace</span>
+                    <button type="button" onClick={e => { e.stopPropagation(); setHeroBanners(prev => prev.filter((_, i) => i !== idx)); }}
+                      className="absolute top-2 right-2 p-1.5 bg-white/95 rounded-full text-red-500 hover:bg-white shadow-md opacity-0 group-hover:opacity-100 transition-opacity">
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
                     </button>
+                    <input id={`admission-banner-input-${idx}`} type="file" className="hidden" accept="image/*" onChange={e => {
+                      const file = e.target.files?.[0];
+                      if (!file) return;
+                      if (!file.type.startsWith("image/")) { alert("Please select an image file."); return; }
+                      const reader = new FileReader();
+                      reader.onload = ev => { if (ev.target?.result) { setCropImageSrc(ev.target.result as string); setCropTargetIndex(idx); setCropperOpen(true); } };
+                      reader.readAsDataURL(file);
+                    }} />
                   </div>
-                ) : (
-                  <>
+                ))}
+                {heroBanners.length < 5 && (
+                  <div
+                    onClick={() => document.getElementById("admission-banner-input-new")?.click()}
+                    className="aspect-video rounded-lg border-2 border-dashed border-gray-300 flex flex-col items-center justify-center text-center hover:bg-gray-50 hover:border-blue-400 transition-colors cursor-pointer"
+                  >
                     <div className="p-3 bg-blue-50 text-blue-600 rounded-full">
                       <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
                     </div>
-                    <span className="mt-3 text-sm font-medium text-gray-900">Click to upload banner image</span>
-                    <span className="mt-1 text-xs text-gray-500">Recommended size: 1920x600px (JPG/PNG)</span>
-                  </>
+                    <span className="mt-2 text-xs font-medium text-gray-600">Add Image</span>
+                    <span className="mt-0.5 text-[10px] text-gray-400">({heroBanners.length}/5)</span>
+                    <input id="admission-banner-input-new" type="file" className="hidden" accept="image/*" onChange={e => {
+                      const file = e.target.files?.[0];
+                      if (!file) return;
+                      if (!file.type.startsWith("image/")) { alert("Please select an image file."); return; }
+                      const reader = new FileReader();
+                      reader.onload = ev => { if (ev.target?.result) { setCropImageSrc(ev.target.result as string); setCropTargetIndex(heroBanners.length); setCropperOpen(true); } };
+                      reader.readAsDataURL(file);
+                    }} />
+                  </div>
                 )}
-                <input id="admission-banner-input" type="file" className="hidden" accept="image/*" onChange={e => {
-                  const file = e.target.files?.[0];
-                  if (!file) return;
-                  if (!file.type.startsWith("image/")) { alert("Please select an image file."); return; }
-                  const reader = new FileReader();
-                  reader.onload = ev => { if (ev.target?.result) { setCropImageSrc(ev.target.result as string); setCropperOpen(true); } };
-                  reader.readAsDataURL(file);
-                }} />
               </div>
+              <p className="text-xs text-gray-500 mt-1">Upload up to 5 banner images. Recommended size: 1920x600px (JPG/PNG)</p>
             </div>
             <div>
               <label className={labelClass}>Overview Description <span className="text-red-500">*</span></label>
@@ -1693,14 +1722,22 @@ const AdmissionCreatePage: React.FC = () => {
             const croppedFile = new File([blob], "banner.jpg", { type: "image/jpeg" });
             try {
               const url = await uploadFile(croppedFile, "institution/admission");
-              setHeroBanner(url);
+              setHeroBanners(prev => {
+                if (cropTargetIndex !== null && cropTargetIndex < prev.length) {
+                  const copy = [...prev];
+                  copy[cropTargetIndex] = url;
+                  return copy;
+                }
+                return [...prev, url];
+              });
             } catch {
               // skip
             }
             setCropperOpen(false);
             setCropImageSrc(null);
+            setCropTargetIndex(null);
           }}
-          onCancel={() => { setCropperOpen(false); setCropImageSrc(null); }}
+          onCancel={() => { setCropperOpen(false); setCropImageSrc(null); setCropTargetIndex(null); }}
         />
       )}
     </div>

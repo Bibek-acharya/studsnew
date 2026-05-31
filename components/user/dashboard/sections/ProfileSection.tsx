@@ -1,7 +1,8 @@
 'use client'
 
 import { useState, useMemo, useEffect } from 'react'
-import { apiService, type EducationEntryItem } from '@/services/api'
+import { apiService, type EducationEntryItem, getImageUrl } from '@/services/api'
+import { useAuth } from '@/services/AuthContext'
 import { 
   User, 
   Mail, 
@@ -40,9 +41,11 @@ interface EducationEntry {
 }
 
 export default function ProfileSection() {
+  const { user, setUser } = useAuth()
   const [profileTab, setProfileTab] = useState('personal')
   const [editMode, setEditMode] = useState(false)
   const [profileImage, setProfileImage] = useState<string | null>(null)
+  const [selectedImageFile, setSelectedImageFile] = useState<File | null>(null)
   const [rawPreferences, setRawPreferences] = useState<Record<string, any>>({})
   
   const [personalData, setPersonalData] = useState({
@@ -178,6 +181,22 @@ export default function ProfileSection() {
         }
       }, '')
 
+      if (selectedImageFile) {
+        try {
+          const uploadRes = await apiService.uploadProfilePicture(selectedImageFile)
+          if (uploadRes.data?.image_url) {
+            setProfileImage(getImageUrl(uploadRes.data.image_url))
+            if (user) {
+              setUser({ ...user, image_url: uploadRes.data.image_url })
+            }
+          }
+          setSelectedImageFile(null)
+        } catch (uploadErr: any) {
+          setToast({ message: 'Profile saved but image upload failed: ' + (uploadErr.message || 'Unknown error'), type: 'error' })
+          setTimeout(() => setToast(null), 5000)
+        }
+      }
+
       setEditMode(false)
       setToast({ message: 'Profile saved', type: 'success' })
       setTimeout(() => setToast(null), 3000)
@@ -192,6 +211,7 @@ export default function ProfileSection() {
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
     if (file) {
+      setSelectedImageFile(file)
       const reader = new FileReader()
       reader.onloadend = () => {
         setProfileImage(reader.result as string)
@@ -264,6 +284,10 @@ export default function ProfileSection() {
           scholarshipRequired: prefs.scholarship_required || prefs.scholarship || 'No',
           scholarshipType: prefs.scholarship_type || 'Merit Based'
         })
+
+        if (profile.image_url) {
+          setProfileImage(getImageUrl(profile.image_url))
+        }
 
         setSelectedProvince(province || '')
         setSelectedDistrict(district || '')

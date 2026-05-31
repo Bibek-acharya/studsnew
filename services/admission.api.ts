@@ -29,6 +29,7 @@ export interface AdmissionCollegeItem {
   reviews: number;
   programs: number;
   image_url?: string;
+  hero_banner?: string;
   website?: string;
   email?: string;
   phone?: string;

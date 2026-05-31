@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
+import { getImageUrl } from "@/services/api";
 
 type CardData = {
   avatar: string;
@@ -73,6 +74,7 @@ interface VideoEntry {
   message: string;
   name: string;
   designation: string;
+  avatar: string;
 }
 
 const getYouTubeId = (url: string): string | null => {
@@ -90,7 +92,7 @@ const AboutVideoInteractive: React.FC<{ videos?: VideoEntry[] }> = ({ videos }) 
       videos.forEach((v, i) => {
         const key = v.name || `Video ${i + 1}`;
         data[key] = {
-          avatar: "",
+          avatar: v.avatar || "",
           title: v.message || "Video",
           quote: "",
           author: v.name || "",
@@ -218,7 +220,7 @@ const AboutVideoInteractive: React.FC<{ videos?: VideoEntry[] }> = ({ videos }) 
         >
           {mainData.avatar ? (
             <img
-              src={mainData.avatar}
+              src={getImageUrl(mainData.avatar)}
               alt="Avatar"
               className="mb-3 h-12 w-12 rounded-md border border-white/20 object-cover sm:mb-4 sm:h-14 sm:w-14"
             />
