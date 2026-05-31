@@ -236,7 +236,7 @@ export default function AdmissionDetailPage() {
   const staffData = ((apData?.contact_persons_data as any[]) || []).map((s: any) => ({
     name: s.name || "",
     role: s.designation || "",
-    img: "",
+    img: s.image || "",
     phone: s.number || "",
     email: s.email || "",
     wa: s.whatsapp || "",

@@ -336,11 +336,15 @@ const CollegeDetailsPage = ({ params }: { params: Promise<{ id: string }> }) => 
 
   const mappedFacilities = useMemo(() => {
     if (instFacilities && Array.isArray(instFacilities)) {
-      return instFacilities.map((f: any) => ({
-        icon: f.facilityIcon || f.icon || "",
-        title: f.heading || f.title || "",
-        desc: f.description || f.desc || "",
-      }));
+      return instFacilities.map((f: any) => {
+        const rawIcon = (f.facilityIcon || f.icon || "").trim();
+        const icon = rawIcon ? `fa-${rawIcon.replace(/^fa-/, "").toLowerCase()}` : "";
+        return {
+          icon,
+          title: f.heading || f.title || "",
+          desc: f.description || f.desc || "",
+        };
+      });
     }
     return null;
   }, [instFacilities]);
@@ -924,7 +928,7 @@ const CollegeDetailsPage = ({ params }: { params: Promise<{ id: string }> }) => 
                   {(mappedFacilities || facilities).map((facility: any, i: number) => (
                     <div key={facility.title || facility.heading || i} className="flex items-start gap-4 rounded-md border border-gray-200 bg-white p-5">
                       <div className="flex h-10 w-10 items-center justify-center rounded-md bg-brand-blue/5 text-brand-blue">
-                        <i className={`fa-solid ${facility.icon}`}></i>
+                        <i className={`fa-solid ${facility.icon || "fa-question"}`}></i>
                       </div>
                       <div>
                         <h4 className="text-[16px] font-bold text-gray-900">{facility.title || facility.heading}</h4>
