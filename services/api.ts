@@ -13,6 +13,7 @@ const PLACEHOLDER_IMAGE = "https://placehold.co/800x400?text=No+Image";
 
 export function getImageUrl(url: string | null | undefined): string {
   if (!url) return PLACEHOLDER_IMAGE;
+  if (url.startsWith("blob:") || url.startsWith("data:")) return PLACEHOLDER_IMAGE;
   if (url.startsWith("http://") || url.startsWith("https://")) return url;
   if (url.startsWith("/")) return `${API_BASE_URL}${url}`;
   return `${API_BASE_URL}/${url}`;

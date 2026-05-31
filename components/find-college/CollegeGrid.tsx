@@ -19,7 +19,6 @@ import Pagination from "@/components/ui/Pagination";
 import TrendingCollegesAd from "./ads/TrendingCollegesAd";
 import RecommendationFeedback from "./ads/RecommendationFeedback";
 import ClaimCollegeModal from "./ClaimCollegeModal";
-import Image from "next/image";
 
 interface CollegeGridProps {
   filters: CollegeFilters;
@@ -692,9 +691,7 @@ export const ProgramCard: React.FC<{
           </div>
         )}
         {isVerified && college.image_url ? (
-          <Image
-            height={200}
-            width={200}
+          <img
             src={getImageUrl(college.image_url)}
             alt={college.name}
             className="h-full w-full object-cover"

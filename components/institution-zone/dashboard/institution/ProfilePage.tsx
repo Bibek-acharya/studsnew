@@ -635,7 +635,8 @@ const ProfilePage: React.FC = () => {
           </div>
 
           {/* ─── Facilities ─── */}
-          <div className="bg-white p-6 rounded-md  border border-gray-200">
+          {/* ─── College Facilities ─── */}
+          <div className="bg-white p-6 rounded-md border border-gray-200">
             <div className="flex justify-between items-center mb-5">
               <h3 className="text-lg font-semibold text-gray-800">
                 <i className="fa-solid fa-building text-blue-500 mr-2"></i>College Facilities
@@ -646,27 +647,51 @@ const ProfilePage: React.FC = () => {
               </button>
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {facilities.map(f => (
-                <div key={f.id} className="bg-gray-50 border border-gray-200 rounded-md p-4 relative group">
-                  <button type="button" onClick={() => removeItem(setFacilities, f.id)}
-                    className="absolute top-3 right-3 text-red-400 hover:text-red-600 hover:bg-red-50 p-1.5 rounded-md transition-colors opacity-0 group-hover:opacity-100">
-                    <i className="fa-solid fa-trash"></i>
-                  </button>
-                  <div className="space-y-3 pr-10">
-                    <div className="flex gap-3">
-                      <input className={`${inputClass} text-sm font-mono w-24`} placeholder="Icon name" value={f.icon} onChange={e => updateItem(setFacilities, f.id, "icon", e.target.value)} />
-                      <input className={`${inputClass} text-sm flex-1`} placeholder="Facility title" value={f.heading} onChange={e => updateItem(setFacilities, f.id, "heading", e.target.value)} />
+              {facilities.map(f => {
+                const iconName = f.icon?.trim() || "";
+                const iconValid = iconName.length > 0;
+                return (
+                  <div key={f.id} className="bg-gray-50 border border-gray-200 rounded-md p-4 relative group">
+                    <button type="button" onClick={() => removeItem(setFacilities, f.id)}
+                      className="absolute top-3 right-3 text-red-400 hover:text-red-600 hover:bg-red-50 p-1.5 rounded-md transition-colors opacity-0 group-hover:opacity-100 z-10">
+                      <i className="fa-solid fa-trash"></i>
+                    </button>
+                    <div className="space-y-3 pr-10">
+                      <input className={`${inputClass} text-sm`} placeholder="Facility title (e.g. Library, Sports Complex)" value={f.heading} onChange={e => updateItem(setFacilities, f.id, "heading", e.target.value)} />
+                      <textarea className={`${inputClass} text-sm h-16`} placeholder="Short description" value={f.desc} onChange={e => updateItem(setFacilities, f.id, "desc", e.target.value)}></textarea>
+                      <div>
+                        <div className="flex items-center gap-3">
+                          <div className={`flex h-10 w-10 items-center justify-center rounded-md border ${iconValid ? "bg-brand-blue/10 border-brand-blue/30 text-brand-blue" : "bg-gray-100 border-gray-200 text-gray-400"}`}>
+                            {iconValid ? (
+                              <i className={`fa-solid fa-${iconName} text-lg`}></i>
+                            ) : (
+                              <i className="fa-solid fa-icons text-lg"></i>
+                            )}
+                          </div>
+                          <div className="flex-1">
+                            <input className={`${inputClass} text-sm font-mono`} placeholder="Icon name (e.g. book, laptop, flask)" value={f.icon}
+                              onChange={e => {
+                                const v = e.target.value.replace(/\s+/g, "-").toLowerCase();
+                                updateItem(setFacilities, f.id, "icon", v);
+                              }} />
+                            <p className="mt-1 text-[11px] text-gray-400">
+                              Browse icons at{" "}
+                              <a href="https://fontawesome.com/icons" target="_blank" rel="noreferrer" className="text-brand-blue hover:underline font-medium">fontawesome.com/icons</a>
+                            </p>
+                          </div>
+                        </div>
+                      </div>
                     </div>
-                    <textarea className={`${inputClass} text-sm h-16`} placeholder="Short description" value={f.desc} onChange={e => updateItem(setFacilities, f.id, "desc", e.target.value)}></textarea>
                   </div>
-                </div>
-              ))}
-              {facilities.length === 0 && <p className="text-sm text-gray-400 py-4 text-center">No facilities added.</p>}
+                );
+              })}
+              {facilities.length === 0 && <p className="text-sm text-gray-400 py-4 text-center col-span-2">No facilities added.</p>}
             </div>
           </div>
 
           {/* ─── Alumni ─── */}
-          <div className="bg-white p-6 rounded-md  border border-gray-200">
+          {/* ─── Notable Alumni ─── */}
+          <div className="bg-white p-6 rounded-md border border-gray-200">
             <div className="flex justify-between items-center mb-5">
               <h3 className="text-lg font-semibold text-gray-800">
                 <i className="fa-solid fa-users text-blue-500 mr-2"></i>Notable Alumni
@@ -680,12 +705,29 @@ const ProfilePage: React.FC = () => {
               {alumni.map(a => (
                 <div key={a.id} className="bg-gray-50 border border-gray-200 rounded-md p-4 relative group">
                   <button type="button" onClick={() => removeItem(setAlumni, a.id)}
-                    className="absolute top-3 right-3 text-red-400 hover:text-red-600 hover:bg-red-50 p-1.5 rounded-md transition-colors opacity-0 group-hover:opacity-100">
+                    className="absolute top-3 right-3 text-red-400 hover:text-red-600 hover:bg-red-50 p-1.5 rounded-md transition-colors opacity-0 group-hover:opacity-100 z-10">
                     <i className="fa-solid fa-trash"></i>
                   </button>
                   <div className="flex gap-4 pr-10">
-                    <div className="w-16 h-16 rounded-full bg-gray-200 flex-shrink-0 overflow-hidden flex items-center justify-center">
-                      {a.photo ? <img src={a.photo} className="w-full h-full object-cover" alt="" /> : <i className="fa-solid fa-user text-gray-400 text-xl"></i>}
+                    <div className="flex flex-col items-center gap-2 flex-shrink-0">
+                      <div className="w-16 h-16 rounded-full bg-gray-200 overflow-hidden flex items-center justify-center border-2 border-gray-300">
+                        {a.photo ? (
+                          <img src={a.photo} className="w-full h-full object-cover" alt="" />
+                        ) : (
+                          <i className="fa-solid fa-user text-gray-400 text-xl"></i>
+                        )}
+                      </div>
+                      <label className="cursor-pointer text-[10px] font-medium text-brand-blue hover:text-brand-hover bg-brand-blue/5 hover:bg-brand-blue/10 px-2 py-1 rounded transition-colors whitespace-nowrap">
+                        <i className="fa-solid fa-camera mr-0.5"></i> Photo
+                        <input type="file" className="hidden" accept="image/*" onChange={async e => {
+                          const file = e.target.files?.[0];
+                          if (!file) return;
+                          try {
+                            const url = await uploadFile(file, "institution/alumni");
+                            updateItem(setAlumni, a.id, "photo", url);
+                          } catch { /* skip */ }
+                        }} />
+                      </label>
                     </div>
                     <div className="flex-1 space-y-2">
                       <input className={`${inputClass} text-sm`} placeholder="Full name" value={a.name} onChange={e => updateItem(setAlumni, a.id, "name", e.target.value)} />

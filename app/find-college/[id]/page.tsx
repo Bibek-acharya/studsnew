@@ -1051,7 +1051,7 @@ const CollegeDetailsPage = ({ params }: { params: Promise<{ id: string }> }) => 
                   {(instAlumni && Array.isArray(instAlumni) ? instAlumni : alumni).map((person: any, i: number) => (
                     <div key={person.name || i} className="flex items-center gap-4 rounded-md border border-gray-200 bg-white p-5">
                       {person.photo || person.image ? (
-                        <img src={person.photo || person.image} className="h-16 w-16 rounded-full object-cover" alt={person.name} />
+                        <img src={getImageUrl(person.photo || person.image)} className="h-16 w-16 rounded-full object-cover" alt={person.name} />
                       ) : (
                         <div className="h-16 w-16 rounded-full bg-gray-100 flex items-center justify-center"><i className="fa-solid fa-user text-gray-400"></i></div>
                       )}
