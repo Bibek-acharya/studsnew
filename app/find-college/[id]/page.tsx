@@ -1065,7 +1065,12 @@ const CollegeDetailsPage = ({ params }: { params: Promise<{ id: string }> }) => 
                         <p className="text-[11.5px] text-gray-400">{person.batch}</p>
                       </div>
                       {person.linkedin && (
-                        <a href={person.linkedin} target="_blank" rel="noreferrer" className="flex h-10 w-10 items-center justify-center rounded-full bg-brand-blue/5 text-brand-blue hover:bg-brand-blue/10"><i className="fa-brands fa-linkedin-in"></i></a>
+                        <a
+                          href={person.linkedin.startsWith("http") ? person.linkedin : `https://${person.linkedin}`}
+                          target="_blank"
+                          rel="noreferrer"
+                          className="flex h-10 w-10 items-center justify-center rounded-full bg-brand-blue/5 text-brand-blue hover:bg-brand-blue/10"
+                        ><i className="fa-brands fa-linkedin-in"></i></a>
                       )}
                     </div>
                   ))}
