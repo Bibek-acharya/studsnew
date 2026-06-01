@@ -1,7 +1,7 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { College, apiService, getImageUrl } from "@/services/api";
-import { CollegeFilters } from "@/app/find-college/types";
+import { CollegeFilters, isCollegeVerified } from "@/app/find-college/types";
 import {
   BadgeCheckIcon,
   LockIcon,
@@ -459,7 +459,7 @@ const CollegeGrid: React.FC<CollegeGridProps> = ({
             <React.Fragment key={college.id}>
               <ProgramCard
                 college={college}
-                isVerified={Boolean(college.verified) || Boolean((college as any).claimed)}
+                isVerified={isCollegeVerified(college.verified)}
                 isSaved={savedColleges.includes(college.id)}
                 isSelected={selectedForInquiry.includes(college.id)}
                 isQuickInquiryMode={isQuickInquiryMode}
@@ -769,7 +769,7 @@ export const ProgramCard: React.FC<{
               <span className="absolute top-full left-4 -mt-px border-[5px] border-transparent border-t-gray-900"></span>
             </span>
           </button>
-          {Boolean(college.verified) && (
+          {isCollegeVerified(college.verified) && (
             <BadgeCheckIcon className="w-5 h-5 text-white fill-blue-500 shrink-0" />
           )}
         </div>

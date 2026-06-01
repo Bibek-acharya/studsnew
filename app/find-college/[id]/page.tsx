@@ -27,6 +27,7 @@ import {
 import ClaimCollegeModal from "./components/ClaimCollegeModal";
 import OpenCounsellingModal from "./components/OpenCounsellingModal";
 import { getInstitutionCourses } from "@/services/institutionCourses";
+import { isCollegeVerified } from "../types";
 
 type TabKey =
   | "about"
@@ -63,16 +64,6 @@ const galleryImages: string[] = [];
 const newsCards: { badge: string; badgeClass: string; image: string; title: string; desc: string; time: string }[] = [];
 
 const downloads: { title: string; size: string; color: string; btn: string }[] = [];
-
-const isCollegeVerified = (value: unknown): boolean => {
-  if (typeof value === "boolean") return value;
-  if (typeof value === "number") return value === 1;
-  if (typeof value === "string") {
-    const normalized = value.trim().toLowerCase();
-    return ["true", "1", "yes", "verified", "active"].includes(normalized);
-  }
-  return false;
-};
 
 const EmptyTabState = ({ tabName }: { tabName: string }) => {
   const router = useRouter();
@@ -503,7 +494,7 @@ const CollegeDetailsPage = ({ params }: { params: Promise<{ id: string }> }) => 
         <div className="mx-auto max-w-350 px-4 py-6 sm:px-6 lg:px-8">
           <div className="flex flex-col gap-6 md:flex-row">
             <div className="-mt-16 shrink-0 md:-mt-20">
-              <div className="h-24 w-24 rounded-lg bg-gray-300 md:h-32 md:w-32" />
+              <div className="h-24 w-24 rounded-lg bg-brand-blue md:h-32 md:w-32" />
             </div>
             <div className="flex-1 space-y-3 pt-2">
               <div className="h-7 w-72 rounded bg-gray-300" />
@@ -558,7 +549,9 @@ const CollegeDetailsPage = ({ params }: { params: Promise<{ id: string }> }) => 
           <div className="relative z-10 -mt-2 flex h-20 w-20 shrink-0 items-center justify-center overflow-hidden rounded-md border border-gray-200 bg-white p-1.5 md:absolute md:-top-4 md:left-12 md:mx-0 md:mt-0 md:h-37.5 md:w-37.5 lg:left-24 xl:left-32">
             {instLogo ? (
               <img src={instLogo} alt="College Logo" className="h-full w-full object-contain" />
-            ) : null}
+            ) : (
+              <div className="h-full w-full rounded-sm bg-brand-blue" />
+            )}
           </div>
 
           <div className="min-w-0 flex-1 pt-1 flex flex-col items-start gap-3 md:items-center md:mt-4 md:pt-0 md:gap-6 lg:mt-0 lg:flex-row lg:items-end lg:justify-between lg:gap-0 lg:pl-42.5">
@@ -748,7 +741,7 @@ const CollegeDetailsPage = ({ params }: { params: Promise<{ id: string }> }) => 
       <div className="grid grid-cols-1 gap-10 bg-[#f8fafc] px-6 py-8 md:gap-14 md:px-12 md:py-12 lg:grid-cols-3 lg:px-24 xl:px-32">
         <div className="lg:col-span-2">
           {activeTab === "about" && (
-            (description || instVideos || instVision || instMission ||
+            (description || (Array.isArray(instVideos) && instVideos.length > 0) || instVision || instMission ||
              (instOverviewData && Array.isArray(instOverviewData) && instOverviewData.length > 0) ||
              (instLeadershipData && Array.isArray(instLeadershipData) && instLeadershipData.length > 0)) ? (
             <div className="space-y-10">
