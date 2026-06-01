@@ -236,7 +236,7 @@ const CollegeGrid: React.FC<CollegeGridProps> = ({
           description: inst.about,
           location: inst.district,
           website: inst.website_url,
-          verified: true,
+          verified: inst.verified ?? false,
           featured: inst.featured || false,
           rating: 0,
           reviews: 0,
