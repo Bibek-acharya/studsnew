@@ -1,11 +1,5 @@
 export function isCollegeVerified(value: unknown): boolean {
-  if (typeof value === "boolean") return value;
-  if (typeof value === "number") return value === 1;
-  if (typeof value === "string") {
-    const normalized = value.trim().toLowerCase();
-    return ["true", "1", "yes", "verified", "active"].includes(normalized);
-  }
-  return false;
+  return value === true;
 }
 
 export interface CollegeFilters {
