@@ -307,17 +307,23 @@ const CollegeDetailsPage = ({ params }: { params: Promise<{ id: string }> }) => 
   const instInstitutionNews = isInstitution ? college?.institution_news : null;
   const instInstitutionScholarships = isInstitution ? college?.institution_scholarships : null;
   const instAdmissionPageData = isInstitution ? college?.admission_page_data : null;
+
+  const safeImageUrl = (url: string | null | undefined): string | null => {
+    if (!url || url.startsWith("blob:") || url.startsWith("data:")) return null;
+    return getImageUrl(url);
+  };
+
   const galleryImagesSource = useMemo(() => {
     if (!instGallery || !Array.isArray(instGallery)) return galleryImages;
     return instGallery.flatMap((g: any) => {
       if (g.images && Array.isArray(g.images)) {
-        return g.images.map((img: any) => getImageUrl(img.url || img));
+        return g.images.map((img: any) => safeImageUrl(img.url || img));
       }
-      return getImageUrl(g.url || g);
+      return safeImageUrl(g.url || g);
     }).filter(Boolean);
   }, [instGallery]);
-  const instLogo = isInstitution ? getImageUrl(college?.logo_url) : null;
-  const instBanner = isInstitution ? getImageUrl(college?.banner_url) : null;
+  const instLogo = isInstitution && college?.logo_url ? getImageUrl(college.logo_url) : null;
+  const instBanner = isInstitution && college?.banner_url ? getImageUrl(college.banner_url) : null;
 
   const mappedCourses = useMemo(() => {
     if (instCourses && Array.isArray(instCourses)) {
@@ -409,7 +415,7 @@ const CollegeDetailsPage = ({ params }: { params: Promise<{ id: string }> }) => 
   const mappedEvents = useMemo(() => {
     if (!instInstitutionEvents || !Array.isArray(instInstitutionEvents)) return null;
     return instInstitutionEvents.map((e: any) => ({
-      image: getImageUrl(e.image) || "",
+      image: safeImageUrl(e.image) || "",
       title: e.title || "",
       date: `${e.date || ""} | ${e.location || "TBD"}`,
       desc: e.description || "",
@@ -421,7 +427,7 @@ const CollegeDetailsPage = ({ params }: { params: Promise<{ id: string }> }) => 
     return instInstitutionNews.map((n: any) => ({
       badge: n.category || "News",
       badgeClass: "bg-blue-500 text-white",
-      image: getImageUrl(n.image) || "",
+      image: safeImageUrl(n.image) || "",
       title: n.title || "",
       desc: n.excerpt || n.content || "",
       time: n.created_at ? new Date(n.created_at).toLocaleDateString() : "",
@@ -742,12 +748,17 @@ const CollegeDetailsPage = ({ params }: { params: Promise<{ id: string }> }) => 
       <div className="grid grid-cols-1 gap-10 bg-[#f8fafc] px-6 py-8 md:gap-14 md:px-12 md:py-12 lg:grid-cols-3 lg:px-24 xl:px-32">
         <div className="lg:col-span-2">
           {activeTab === "about" && (
+            (description || instVideos || instVision || instMission ||
+             (instOverviewData && Array.isArray(instOverviewData) && instOverviewData.length > 0) ||
+             (instLeadershipData && Array.isArray(instLeadershipData) && instLeadershipData.length > 0)) ? (
             <div className="space-y-10">
               <AboutVideoInteractive videos={instVideos || undefined} />
 
-              <div className="space-y-6 text-[15px] leading-[1.8] text-gray-600 md:text-[16px] [word-break:keep-all] [&_*]:[word-break:keep-all] [overflow-wrap:anywhere] [&_*]:[overflow-wrap:anywhere]">
-                <div dangerouslySetInnerHTML={{ __html: description }} />
-              </div>
+              {description && (
+                <div className="prose prose-gray max-w-none text-[15px] leading-[1.8] md:text-[16px]">
+                  <div dangerouslySetInnerHTML={{ __html: description }} />
+                </div>
+              )}
 
               <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
                 {instVision && (
@@ -795,6 +806,9 @@ const CollegeDetailsPage = ({ params }: { params: Promise<{ id: string }> }) => 
                 </div>
               )}
             </div>
+            ) : (
+              <EmptyTabState tabName="about" />
+            )
           )}
 
           {activeTab === "courses" && (
@@ -977,8 +991,10 @@ const CollegeDetailsPage = ({ params }: { params: Promise<{ id: string }> }) => 
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {(mappedEvents || events).slice((eventsPage - 1) * 9, eventsPage * 9).map((event) => (
                   <article key={event.title} className="bg-white rounded-md border border-gray-200 hover:border-blue-500/20 overflow-hidden flex flex-col duration-300 cursor-pointer">
-                    <div className="h-35 w-full overflow-hidden p-4">
-                      <img src={event.image} alt={event.title} className="w-full h-full object-cover rounded-md" />
+                    <div className="h-35 w-full overflow-hidden p-4 bg-brand-blue rounded-md">
+                      {event.image ? (
+                        <img src={event.image} alt={event.title} className="w-full h-full object-cover rounded-md" />
+                      ) : null}
                     </div>
                     <div className="p-5 flex flex-col grow">
                       <div className="flex justify-between items-center mb-3">
@@ -1066,7 +1082,7 @@ const CollegeDetailsPage = ({ params }: { params: Promise<{ id: string }> }) => 
                       {person.photo || person.image ? (
                         <img src={getImageUrl(person.photo || person.image)} className="h-16 w-16 rounded-full object-cover" alt={person.name} />
                       ) : (
-                        <div className="h-16 w-16 rounded-full bg-gray-100 flex items-center justify-center"><i className="fa-solid fa-user text-gray-400"></i></div>
+                        <div className="h-16 w-16 rounded-full bg-brand-blue flex items-center justify-center shrink-0"><i className="fa-solid fa-user text-white/60"></i></div>
                       )}
                       <div className="flex-1">
                         <h4 className="font-bold text-gray-900">{person.name}</h4>
@@ -1102,7 +1118,7 @@ const CollegeDetailsPage = ({ params }: { params: Promise<{ id: string }> }) => 
                 {galleryImagesSource.slice(0, visibleImageCount).map((image: string, index: number) => (
                   <div
                     key={image}
-                    className="aspect-[16/10] overflow-hidden rounded-md cursor-pointer"
+                    className="aspect-[16/10] overflow-hidden rounded-md cursor-pointer bg-brand-blue"
                     onClick={() => setSelectedImageIndex(index)}
                   >
                     <img
@@ -1284,12 +1300,14 @@ const CollegeDetailsPage = ({ params }: { params: Promise<{ id: string }> }) => 
                           {news.badge}
                         </span>
                       </div>
-                      <div className="mb-4 h-[140px] w-full overflow-hidden rounded-md">
-                        <img
-                          src={news.image}
-                          className="h-full w-full object-cover transition hover:scale-105"
-                          alt={news.title}
-                        />
+                      <div className="mb-4 h-[140px] w-full overflow-hidden rounded-md bg-brand-blue">
+                        {news.image ? (
+                          <img
+                            src={news.image}
+                            className="h-full w-full object-cover transition hover:scale-105"
+                            alt={news.title}
+                          />
+                        ) : null}
                       </div>
                       <h3 className="mb-2 text-[17px] font-bold text-gray-900">
                         {news.title}
