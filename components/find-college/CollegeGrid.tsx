@@ -5,6 +5,7 @@ import { CollegeFilters } from "@/app/find-college/types";
 import {
   BadgeCheckIcon,
   LockIcon,
+  SlidersHorizontal,
   Star,
   MapPin,
   Award,
@@ -24,6 +25,7 @@ interface CollegeGridProps {
   filters: CollegeFilters;
   setFilters: React.Dispatch<React.SetStateAction<CollegeFilters>>;
   onNavigate: (view: any, data?: any) => void;
+  onMobileFilterClick?: () => void;
 }
 
 type ArrayFilterKey = {
@@ -140,6 +142,7 @@ const CollegeGrid: React.FC<CollegeGridProps> = ({
   filters,
   setFilters,
   onNavigate,
+  onMobileFilterClick,
 }) => {
   const [currentPage, setCurrentPage] = useState(1);
   const [savedColleges, setSavedColleges] = useState<(number | string)[]>([]);
@@ -332,51 +335,13 @@ const CollegeGrid: React.FC<CollegeGridProps> = ({
   return (
     <>
       <div className="mb-6">
-        <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-center">
-          <div className="flex flex-col justify-start">
-            <h1 className="mb-3 text-base text-gray-900">
-              Showing {showingFrom.toLocaleString()}-{showingTo.toLocaleString()} of {totalResults.toLocaleString()} <span className="font-bold">Colleges</span>
-            </h1>
-
-
-
-            <label className="group mt-auto flex cursor-pointer items-center gap-2.5">
-              <div className="relative flex h-5 w-5 items-center justify-center">
-                <input
-                  type="checkbox"
-                  checked={
-                    selectedForInquiry.length > 0 &&
-                    selectedForInquiry.length === Math.min(colleges.length, 5)
-                  }
-                  onChange={handleSelectAll}
-                  className="peer sr-only"
-                />
-                <div className="absolute inset-0 rounded-sm border-[1.5px] border-slate-300 bg-white transition-colors group-hover:border-slate-400 peer-checked:border-brand-blue peer-checked:bg-brand-blue"></div>
-                <svg
-                  className="pointer-events-none absolute z-10 h-3.5 w-3.5 text-white opacity-0 transition-opacity peer-checked:opacity-100"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                  strokeWidth="3.5"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    d="M5 13l4 4L19 7"
-                  />
-                </svg>
-              </div>
-              <div className="flex items-baseline gap-1.5 text-[14px]">
-                <span className="font-semibold text-slate-900">Select all</span>
-                <span className="hidden text-[12.5px] text-slate-500 sm:inline">
-                  (upto 5 quick apply colleges)
-                </span>
-              </div>
-            </label>
-          </div>
-
-          <div className="mt-2 flex w-full shrink-0 flex-col gap-3 sm:mt-0 sm:w-[320px] sm:items-end">
-            <div className="relative w-full">
+        {/* Top Row: Count and Search */}
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 pb-2">
+          <h1 className="text-base text-gray-900">
+            Showing {showingFrom.toLocaleString()}-{showingTo.toLocaleString()} of {totalResults.toLocaleString()} <span className="font-bold">Colleges</span>
+          </h1>
+          <div className="relative w-full sm:w-95 flex items-center gap-2">
+            <div className="relative flex-1">
               <i className="fa-solid fa-magnifying-glass absolute left-3.5 top-1/2 -translate-y-1/2 text-sm text-gray-400"></i>
               <input
                 type="text"
@@ -391,11 +356,58 @@ const CollegeGrid: React.FC<CollegeGridProps> = ({
                 className="w-full rounded-md border border-gray-200 bg-white py-2.5 pl-10 pr-4 text-sm transition-all placeholder-gray-400 focus:border-transparent focus:outline-none focus:ring-1 focus:ring-brand-blue"
               />
             </div>
+            <button
+              type="button"
+              onClick={onMobileFilterClick}
+              className="lg:hidden flex items-center justify-center gap-1.5 shrink-0 px-3 py-2.5 bg-white border border-gray-200 rounded-md text-[13px] font-semibold text-gray-700 hover:bg-gray-50 transition-colors"
+            >
+              <SlidersHorizontal size={14} />
+              Filters
+            </button>
+          </div>
+        </div>
 
-            <label className="group flex cursor-pointer items-center gap-2">
-              <span className="text-[13px] font-semibold text-slate-800">
-                Quick Apply
+        {/* Bottom Row: Select All and Quick Apply */}
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 pt-2 pb-4">
+          <label className="group flex cursor-pointer items-center gap-2.5">
+            <div className="relative flex h-5 w-5 items-center justify-center">
+              <input
+                type="checkbox"
+                checked={
+                  selectedForInquiry.length > 0 &&
+                  selectedForInquiry.length === Math.min(colleges.length, 5)
+                }
+                onChange={handleSelectAll}
+                className="peer sr-only"
+              />
+              <div className="absolute inset-0 rounded-sm border-[1.5px] border-slate-300 bg-white transition-colors group-hover:border-slate-400 peer-checked:border-brand-blue peer-checked:bg-brand-blue"></div>
+              <svg
+                className="pointer-events-none absolute z-10 h-3.5 w-3.5 text-white opacity-0 transition-opacity peer-checked:opacity-100"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+                strokeWidth="3.5"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  d="M5 13l4 4L19 7"
+                />
+              </svg>
+            </div>
+            <div className="flex items-baseline gap-1.5 text-[14px]">
+              <span className="font-semibold text-slate-900">Select all</span>
+              <span className="hidden text-[12.5px] text-slate-500 sm:inline">
+                (upto 5 quick apply colleges)
               </span>
+            </div>
+          </label>
+
+          <div className="flex items-center gap-3">
+            <span className="text-[13px] font-semibold text-slate-800">
+              Quick Apply
+            </span>
+            <label className="group flex cursor-pointer items-center gap-2">
               <div className="relative inline-flex cursor-pointer items-center">
                 <input
                   type="checkbox"

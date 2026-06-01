@@ -12,63 +12,6 @@ type CardData = {
   video: string;
 };
 
-const hardcodedCardData: Record<string, CardData> = {
-  "Samir Sharma": {
-    avatar:
-      "https://images.unsplash.com/photo-1480455624313-e29b44bbfde1?auto=format&fit=crop&w=150&h=150&q=80",
-    title: "Industry-Aligned<br/>Curriculum",
-    quote:
-      '"Our program bridges the gap between theoretical foundations and the practical skills needed in today\'s rapidly evolving tech landscape."',
-    author: "Prof. Michael Chen",
-    role: "Head of Computer Science",
-    video:
-      "https://storage.googleapis.com/gtv-videos-bucket/sample/TearsOfSteel.mp4",
-  },
-  "Deepak Khadka": {
-    avatar:
-      "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?auto=format&fit=crop&w=150&h=150&q=80",
-    title: "Seamless<br/>Admissions",
-    quote:
-      '"We ensure a smooth, transparent, and welcoming enrollment process for every prospective student joining our community."',
-    author: "Deepak Khadka",
-    role: "Admission Head",
-    video: "https://storage.googleapis.com/gtv-videos-bucket/sample/Sintel.mp4",
-  },
-  "Basanta Blown": {
-    avatar:
-      "https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?auto=format&fit=crop&w=150&h=150&q=80",
-    title: "Student-Centric<br/>Support",
-    quote:
-      '"Guiding students through their academic journey with personalized assistance, care, and continuous mentorship."',
-    author: "Basanta Blown",
-    role: "Asst Coordinator",
-    video:
-      "https://storage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4",
-  },
-  "Tribendra Timsina": {
-    avatar:
-      "https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?auto=format&fit=crop&w=150&h=150&q=80",
-    title: "Academic<br/>Excellence",
-    quote:
-      '"Maintaining rigorous standards in our curriculum to foster critical thinking, innovation, and professional growth."',
-    author: "Tribendra Timsina",
-    role: "Coordinator",
-    video:
-      "https://storage.googleapis.com/gtv-videos-bucket/sample/ElephantsDream.mp4",
-  },
-  "Kush Shrestha": {
-    avatar:
-      "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=150&h=150&q=80",
-    title: "Efficient<br/>Operations",
-    quote:
-      '"Behind every great institution is a dedicated administrative team ensuring smooth and efficient day-to-day operations."',
-    author: "Kush Shrestha",
-    role: "Administration",
-    video:
-      "https://storage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4",
-  },
-};
-
 interface VideoEntry {
   url: string;
   message: string;
@@ -87,22 +30,20 @@ const getYouTubeId = (url: string): string | null => {
 
 const AboutVideoInteractive: React.FC<{ videos?: VideoEntry[] }> = ({ videos }) => {
   const cardData = React.useMemo(() => {
-    if (videos && videos.length > 0) {
-      const data: Record<string, CardData> = {};
-      videos.forEach((v, i) => {
-        const key = v.name || `Video ${i + 1}`;
-        data[key] = {
-          avatar: v.avatar || "",
-          title: v.message || "Video",
-          quote: "",
-          author: v.name || "",
-          role: v.designation || "",
-          video: v.url,
-        };
-      });
-      return data;
-    }
-    return hardcodedCardData;
+    if (!videos || videos.length === 0) return {};
+    const data: Record<string, CardData> = {};
+    videos.forEach((v, i) => {
+      const key = v.name || `Video ${i + 1}`;
+      data[key] = {
+        avatar: v.avatar || "",
+        title: v.message || "Video",
+        quote: "",
+        author: v.name || "",
+        role: v.designation || "",
+        video: v.url,
+      };
+    });
+    return data;
   }, [videos]);
 
   const allKeys = Object.keys(cardData);

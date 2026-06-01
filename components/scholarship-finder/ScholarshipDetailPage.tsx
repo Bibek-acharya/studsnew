@@ -2,7 +2,7 @@
 
 import { useState, useRef, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
-import { ChevronLeft, ChevronRight, ExternalLink, FileText, FileX, SearchX, Share2 } from "lucide-react";
+import { ChevronLeft, ChevronRight, FileText, FileX, SearchX, Share2 } from "lucide-react";
 import { EligibilityTab } from "./ScholarshipDetailEligibility";
 import TimelineTab from "./ScholarshipDetailTimeline";
 import ExamCentersTab from "./ScholarshipDetailExamCenters";

@@ -16,6 +16,7 @@ import {
 interface FilterSidebarProps {
   filters: CollegeFilters;
   setFilters: React.Dispatch<React.SetStateAction<CollegeFilters>>;
+  onClose?: () => void;
 }
 
 // ── Nepal Data ────────────────────────────────────────────────────────────────
@@ -481,6 +482,7 @@ const Accordion: React.FC<{
 const FilterSidebar: React.FC<FilterSidebarProps> = ({
   filters,
   setFilters,
+  onClose,
 }) => {
   const { data: collegeFilterCounts } = useQuery({
     queryKey: ["collegeFilterCounts"],
@@ -488,43 +490,43 @@ const FilterSidebar: React.FC<FilterSidebarProps> = ({
     staleTime: 5 * 60 * 1000,
   });
 
-  const [locating, setLocating] = useState(false);
+  // const [locating, setLocating] = useState(false);
   const [showAppliedDropdown, setShowAppliedDropdown] = useState(false);
   const [programSearch, setProgramSearch] = useState("");
   const [courseSearch, setCourseSearch] = useState("");
-  const [navLocString, setNavLocString] = useState("");
+  // const [navLocString, setNavLocString] = useState("");
 
   const getFacetCount = (id: string): number | undefined => {
     if (!collegeFilterCounts?.data?.facet_counts_by_id) return undefined;
     return collegeFilterCounts.data.facet_counts_by_id[id] ?? 0;
   };
 
-  useEffect(() => {
-    const updateLocation = (cityStr: string) => {
-      if (
-        !cityStr ||
-        cityStr === "Detect Location" ||
-        cityStr === "Detecting..." ||
-        cityStr === "Location Found"
-      )
-        return;
-      setNavLocString(cityStr);
-    };
+  // useEffect(() => {
+  //   const updateLocation = (cityStr: string) => {
+  //     if (
+  //       !cityStr ||
+  //       cityStr === "Detect Location" ||
+  //       cityStr === "Detecting..." ||
+  //       cityStr === "Location Found"
+  //     )
+  //       return;
+  //     setNavLocString(cityStr);
+  //   };
 
-    const savedLoc = sessionStorage.getItem("navLocation");
-    if (savedLoc) {
-      updateLocation(savedLoc);
-    }
+  //   const savedLoc = sessionStorage.getItem("navLocation");
+  //   if (savedLoc) {
+  //     updateLocation(savedLoc);
+  //   }
 
-    const handleNavLocation = (e: Event) => {
-      const customEvent = e as CustomEvent<string>;
-      updateLocation(customEvent.detail);
-    };
+  //   const handleNavLocation = (e: Event) => {
+  //     const customEvent = e as CustomEvent<string>;
+  //     updateLocation(customEvent.detail);
+  //   };
 
-    window.addEventListener("navLocationChange", handleNavLocation);
-    return () =>
-      window.removeEventListener("navLocationChange", handleNavLocation);
-  }, [setFilters]);
+  //   window.addEventListener("navLocationChange", handleNavLocation);
+  //   return () =>
+  //     window.removeEventListener("navLocationChange", handleNavLocation);
+  // }, [setFilters]);
 
   // Derived cascade data
   const availablePrograms = useMemo(() => {
@@ -614,114 +616,114 @@ const FilterSidebar: React.FC<FilterSidebarProps> = ({
 
   const clearAll = () => setFilters(DEFAULT_COLLEGE_FILTERS);
 
-  const handleLocate = () => {
-    if (locating) return;
-    setLocating(true);
+  // const handleLocate = () => {
+  //   if (locating) return;
+  //   setLocating(true);
 
-    const resolveLocation = async (lat?: number, lon?: number) => {
-      try {
-        let cityStr = "";
+  //   const resolveLocation = async (lat?: number, lon?: number) => {
+  //     try {
+  //       let cityStr = "";
 
-        // 1. Try precise GPS via OpenStreetMap Nominatim (zoom=10 for city/district level)
-        if (lat && lon) {
-          const res = await fetch(
-            `https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lon}&format=json&zoom=10&addressdetails=1`,
-          );
-          if (res.ok) {
-            const data = await res.json();
-            if (data && data.address) {
-              cityStr =
-                data.address.county ||
-                data.address.city ||
-                data.address.state_district ||
-                "";
-            }
-          }
-        }
+  //       // 1. Try precise GPS via OpenStreetMap Nominatim (zoom=10 for city/district level)
+  //       if (lat && lon) {
+  //         const res = await fetch(
+  //           `https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lon}&format=json&zoom=10&addressdetails=1`,
+  //         );
+  //         if (res.ok) {
+  //           const data = await res.json();
+  //           if (data && data.address) {
+  //             cityStr =
+  //               data.address.county ||
+  //               data.address.city ||
+  //               data.address.state_district ||
+  //               "";
+  //           }
+  //         }
+  //       }
 
-        // 2. Try generic IP-based location if GPS failed or permission denied
-        if (!cityStr) {
-          const res = await fetch(
-            `https://api.bigdatacloud.net/data/reverse-geocode-client?localityLanguage=en`,
-          );
-          if (res.ok) {
-            const data = await res.json();
-            if (data) {
-              cityStr = data.city || data.principalSubdivision || "";
-            }
-          }
-        }
+  //       // 2. Try generic IP-based location if GPS failed or permission denied
+  //       if (!cityStr) {
+  //         const res = await fetch(
+  //           `https://api.bigdatacloud.net/data/reverse-geocode-client?localityLanguage=en`,
+  //         );
+  //         if (res.ok) {
+  //           const data = await res.json();
+  //           if (data) {
+  //             cityStr = data.city || data.principalSubdivision || "";
+  //           }
+  //         }
+  //       }
 
-        // 3. Map detected location to Province/District filters
-        if (cityStr) {
-          const normalizedSearch = cityStr.toLowerCase();
-          let foundProvId = "";
-          let foundDistId = "";
+  //       // 3. Map detected location to Province/District filters
+  //       if (cityStr) {
+  //         const normalizedSearch = cityStr.toLowerCase();
+  //         let foundProvId = "";
+  //         let foundDistId = "";
 
-          // Match Province
-          for (const prov of provinceOptions) {
-            if (normalizedSearch.includes(prov.label.toLowerCase())) {
-              foundProvId = prov.id;
-            }
-          }
+  //         // Match Province
+  //         for (const prov of provinceOptions) {
+  //           if (normalizedSearch.includes(prov.label.toLowerCase())) {
+  //             foundProvId = prov.id;
+  //           }
+  //         }
 
-          // Match District
-          for (const prov of provinceOptions) {
-            for (const dist of prov.districts) {
-              const distLower = dist.label.toLowerCase();
-              if (
-                normalizedSearch.includes(distLower) ||
-                distLower.includes(normalizedSearch)
-              ) {
-                foundDistId = dist.id;
-                foundProvId = prov.id; // Auto-select parent province
-              }
-            }
-          }
+  //         // Match District
+  //         for (const prov of provinceOptions) {
+  //           for (const dist of prov.districts) {
+  //             const distLower = dist.label.toLowerCase();
+  //             if (
+  //               normalizedSearch.includes(distLower) ||
+  //               distLower.includes(normalizedSearch)
+  //             ) {
+  //               foundDistId = dist.id;
+  //               foundProvId = prov.id; // Auto-select parent province
+  //             }
+  //           }
+  //         }
 
-          setFilters((prev) => {
-            if (!foundProvId && !foundDistId) {
-              return { ...prev, search: cityStr };
-            }
+  //         setFilters((prev) => {
+  //           if (!foundProvId && !foundDistId) {
+  //             return { ...prev, search: cityStr };
+  //           }
 
-            const nextProv = new Set(prev.province);
-            const nextDist = new Set(prev.district);
+  //           const nextProv = new Set(prev.province);
+  //           const nextDist = new Set(prev.district);
 
-            if (foundProvId) nextProv.add(foundProvId);
-            if (foundDistId) nextDist.add(foundDistId);
+  //           if (foundProvId) nextProv.add(foundProvId);
+  //           if (foundDistId) nextDist.add(foundDistId);
 
-            return {
-              ...prev,
-              province: Array.from(nextProv),
-              district: Array.from(nextDist),
-            };
-          });
+  //           return {
+  //             ...prev,
+  //             province: Array.from(nextProv),
+  //             district: Array.from(nextDist),
+  //           };
+  //         });
 
-          sessionStorage.setItem("navLocation", cityStr);
-          window.dispatchEvent(
-            new CustomEvent("navLocationChange", { detail: cityStr }),
-          );
-        } else {
-          alert("Could not detect your district. Please select it manually.");
-        }
-      } catch (e) {
-        console.error(e);
-        alert("Could not detect location.");
-      } finally {
-        setLocating(false);
-      }
-    };
+  //         sessionStorage.setItem("navLocation", cityStr);
+  //         window.dispatchEvent(
+  //           new CustomEvent("navLocationChange", { detail: cityStr }),
+  //         );
+  //       } else {
+  //         alert("Could not detect your district. Please select it manually.");
+  //       }
+  //     } catch (e) {
+  //       console.error(e);
+  //       alert("Could not detect location.");
+  //     } finally {
+  //       setLocating(false);
+  //     }
+  //   };
 
-    if (navigator.geolocation) {
-      navigator.geolocation.getCurrentPosition(
-        (pos) => resolveLocation(pos.coords.latitude, pos.coords.longitude),
-        () => resolveLocation(), // Fallback to IP if denied
-        { enableHighAccuracy: true, timeout: 5000, maximumAge: 0 },
-      );
-    } else {
-      resolveLocation(); // Fallback instantly if geolocation unavailable
-    }
-  };
+  //   if (navigator.geolocation) {
+  //     navigator.geolocation.getCurrentPosition(
+  //       (pos) => resolveLocation(pos.coords.latitude, pos.coords.longitude),
+  //       () => resolveLocation(), // Fallback to IP if denied
+  //       { enableHighAccuracy: true, timeout: 5000, maximumAge: 0 },
+  //     );
+  //   } else {
+  //     resolveLocation(); // Fallback instantly if geolocation unavailable
+  //   }
+  // };
   
   const academicLevelsWithCounts = useMemo(
 
@@ -762,6 +764,14 @@ const FilterSidebar: React.FC<FilterSidebarProps> = ({
                       Filters
                     </h3>
                   </div>
+          <div className="flex items-center gap-2">
+          {onClose && (
+            <button type="button" onClick={onClose} className="lg:hidden flex items-center justify-center w-8 h-8 rounded-md text-gray-500 hover:bg-gray-100 hover:text-gray-700 transition-colors">
+              <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </button>
+          )}
           {hasActiveFilters && (
             <button
               type="button"
@@ -774,6 +784,7 @@ const FilterSidebar: React.FC<FilterSidebarProps> = ({
               ></i>
             </button>
           )}
+          </div>
         </div>
 
         {hasActiveFilters && showAppliedDropdown && (
@@ -838,8 +849,8 @@ const FilterSidebar: React.FC<FilterSidebarProps> = ({
           </div>
         )}
 
-        {/* College Near Me */}
-        <div className="border-b border-gray-100 py-3">
+        {/* College Near Me — planned for later */}
+        {/* <div className="border-b border-gray-100 py-3">
           <button
             type="button"
             onClick={handleLocate}
@@ -878,7 +889,7 @@ const FilterSidebar: React.FC<FilterSidebarProps> = ({
                   : "College Near Me"}
             </span>
           </button>
-        </div>
+        </div> */}
 
         {/* Accordions */}
 

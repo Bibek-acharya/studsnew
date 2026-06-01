@@ -537,6 +537,7 @@ const FeaturedScholarshipsPage = () => {
                 </div>
 
                 {/* Bottom Row: Select All and Toggle */}
+                {scholarships.length > 0 && (
                 <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 pt-2 pb-4">
                   <label className="flex items-center gap-1.5 cursor-pointer">
                     <div className="relative flex h-5 w-5 items-center justify-center">
@@ -580,6 +581,7 @@ const FeaturedScholarshipsPage = () => {
                     </label>
                   </div>
                 </div>
+                )}
               </div>
 
               {/* Scholarship Cards Grid */}
@@ -620,6 +622,7 @@ const FeaturedScholarshipsPage = () => {
               )}
 
               {/* Pagination */}
+              {scholarships.length > 0 && (
               <div className="flex items-center justify-center gap-2 mt-12 mb-4">
                 <button 
                   onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
@@ -649,12 +652,14 @@ const FeaturedScholarshipsPage = () => {
                   Next
                 </button>
               </div>
+              )}
             </div>
           </div>
         </div>
       </div>
 
       {/* Quick Apply Bottom Action Bar */}
+      {scholarships.length > 0 && (
       <div
         className={`fixed bottom-0 left-0 z-40 flex w-full transform justify-center border-t border-slate-200 bg-white px-4 py-4 shadow-[0_-4px_15px_rgb(0,0,0,0.05)] transition-transform duration-300 sm:px-6 ${selectedForApply.length > 0 ? "translate-y-0" : "translate-y-full"}`}
       >
@@ -685,6 +690,7 @@ const FeaturedScholarshipsPage = () => {
           </button>
         </div>
       </div>
+      )}
 
       {/* Quick Apply Modal */}
       <div

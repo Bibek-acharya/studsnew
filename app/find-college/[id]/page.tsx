@@ -11,7 +11,7 @@ import { useRouter } from "next/navigation";
 import { apiService, getImageUrl } from "@/services/api";
 import { useAuth } from "@/services/AuthContext";
 import CollegeCard from "@/components/admissions/CollegeCard";
-import { BadgeCheckIcon, Building2, ChevronLeft, ChevronRight, MessageSquarePlus, FileX } from "lucide-react";
+import { BadgeCheckIcon, ChevronLeft, ChevronRight, FolderOpen, MessageSquarePlus, FileX } from "lucide-react";
 import ShareCollegeModal from "./ShareCollegeModal";
 import {
   AboutVideoInteractive,
@@ -72,6 +72,22 @@ const isCollegeVerified = (value: unknown): boolean => {
     return ["true", "1", "yes", "verified", "active"].includes(normalized);
   }
   return false;
+};
+
+const EmptyTabState = ({ tabName }: { tabName: string }) => {
+  const router = useRouter();
+  return (
+    <div className="flex flex-col items-center justify-center py-16">
+      <FolderOpen className="w-32 h-32 text-gray-300 mb-4" />
+      <p className="text-gray-500 text-lg font-medium mb-6">No {tabName} information is currently available.</p>
+      <button
+        onClick={() => router.push("/")}
+        className="bg-[#0000ff] hover:bg-[#0000cc] cursor-pointer text-white font-semibold py-2.5 px-6 rounded-md transition-colors text-sm"
+      >
+        Explore More
+      </button>
+    </div>
+  );
 };
 
 const CollegeDetailsPage = ({ params }: { params: Promise<{ id: string }> }) => {
@@ -220,7 +236,7 @@ const CollegeDetailsPage = ({ params }: { params: Promise<{ id: string }> }) => 
   useEffect(() => {
     if (activeTab === "review" && collegeId && !reviewsData) {
       setReviewsLoading(true);
-      apiService.getCollegeReviews(collegeId, { page: 1, limit: 10 })
+      apiService.getCollegeReviews(collegeId, { page: 1, limit: 10 }, { suppressAuthExpired: true })
         .then((res) => {
           if (res?.data) {
             setReviewsData(res.data);
@@ -477,7 +493,7 @@ const CollegeDetailsPage = ({ params }: { params: Promise<{ id: string }> }) => 
   if (loading) {
     return (
       <div className="w-full animate-pulse">
-        <div className="relative h-55 w-full bg-gray-200 md:h-90" />
+        <div className="relative h-55 w-full bg-brand-blue md:h-90" />
         <div className="mx-auto max-w-350 px-4 py-6 sm:px-6 lg:px-8">
           <div className="flex flex-col gap-6 md:flex-row">
             <div className="-mt-16 shrink-0 md:-mt-20">
@@ -508,24 +524,23 @@ const CollegeDetailsPage = ({ params }: { params: Promise<{ id: string }> }) => 
   return (
     <div className="w-full">
       <div
-        className="relative h-55 w-full bg-blue-800 bg-center md:h-90"
+        className="relative h-55 w-full bg-brand-blue bg-center md:h-90"
         style={{ ...(instBanner ? { backgroundImage: `url('${instBanner}')` } : {}) }}
       >
-        <div className="absolute bottom-4 right-4 z-20 md:bottom-6 md:right-6">
+        <div className="absolute bottom-10 right-4 z-20 md:bottom-6 md:right-6">
           {isVerified ? (
             <button
               onClick={() => setIsCounsellingModalOpen(true)}
-              className="flex items-center gap-2 rounded-md bg-black/60 cursor-pointer px-5 py-2.5 text-sm font-bold text-white transition-all duration-300  md:px-6 md:py-3 md:text-base"
+              className="flex items-center gap-2 rounded-md bg-blue-200 text-blue-800 cursor-pointer px-4 py-2 text-xs font-bold transition-all duration-300 md:bg-black/60 md:text-white md:px-6 md:py-3 md:text-base"
             >
-              <MessageSquarePlus />
+              <MessageSquarePlus className="w-4 h-4 md:w-5 md:h-5" />
               <span>Open Counselling</span>
             </button>
           ) : (
             <button
               onClick={() => setIsClaimModalOpen(true)}
-              className="flex items-center gap-2 rounded-md bg-black/50 px-5 py-1 text-sm font-bold text-white transition-all duration-300 md:px-6 md:py-1 md:text-base"
+              className="flex items-center gap-2 rounded-md bg-blue-200 text-blue-800 px-4 py-1 text-xs font-bold transition-all duration-300 md:bg-black/50 md:text-white md:px-6 md:py-1 md:text-base"
             >
-              {/* <i className="fa-solid fa-building-shield text-brand-blue"></i> */}
               Is this your college? <span className="underline hover:text-brand-blue cursor-pointer">Claim now</span>
             </button>
           )}
@@ -533,34 +548,32 @@ const CollegeDetailsPage = ({ params }: { params: Promise<{ id: string }> }) => 
       </div>
 
       <div className="relative bg-white">
-        <div className="relative px-6 pb-8 md:px-12 lg:px-24 xl:px-32">
-          <div className="relative z-10 mr-auto -mt-12 flex h-30 w-30 items-center justify-center overflow-hidden rounded-md border border-gray-200 bg-white p-2 md:absolute md:-top-4 md:left-12 md:mx-0 md:mt-0 md:h-37.5 md:w-37.5 lg:left-24 xl:left-32">
+        <div className="relative flex flex-row items-start gap-3 px-6 pb-8 md:block md:px-12 lg:px-24 xl:px-32">
+          <div className="relative z-10 -mt-2 flex h-20 w-20 shrink-0 items-center justify-center overflow-hidden rounded-md border border-gray-200 bg-white p-1.5 md:absolute md:-top-4 md:left-12 md:mx-0 md:mt-0 md:h-37.5 md:w-37.5 lg:left-24 xl:left-32">
             {instLogo ? (
               <img src={instLogo} alt="College Logo" className="h-full w-full object-contain" />
-            ) : (
-              <Building2 className="h-12 w-12 text-gray-300" />
-            )}
+            ) : null}
           </div>
 
-          <div className="mt-4 flex flex-col items-center justify-between gap-6 lg:mt-0 lg:flex-row lg:items-end lg:gap-0 lg:pl-42.5">
-            <div className="w-full space-y-3 text-left lg:w-auto">
-              <div className="flex items-center justify-start gap-2 pt-4">
-                <h1 className="text-[24px] font-bold tracking-tight text-gray-900 md:text-3xl ">
+          <div className="min-w-0 flex-1 pt-1 flex flex-col items-start gap-3 md:items-center md:mt-4 md:pt-0 md:gap-6 lg:mt-0 lg:flex-row lg:items-end lg:justify-between lg:gap-0 lg:pl-42.5">
+            <div className="w-full space-y-1.5 md:space-y-3 text-left lg:w-auto">
+              <div className="flex items-center justify-start gap-2 pt-0 md:pt-4">
+                <h1 className="min-w-0 text-[18px] font-bold tracking-tight text-gray-900 truncate md:text-[24px] md:overflow-visible md:whitespace-normal lg:text-3xl">
                   {name}
                 </h1>
                 {isCollegeVerified(college?.verified) && (
-                  <BadgeCheckIcon className="text-white fill-brand-blue" />
+                  <BadgeCheckIcon className="shrink-0 text-white fill-brand-blue" />
                 )}
               </div>
-              <div className="flex flex-wrap items-center justify-start gap-x-5 gap-y-1 text-[14px] font-medium">
-                <div className="flex items-center gap-1.5">
-                  <i className="fa-solid fa-location-dot text-gray-500"></i>
-                  <span className="text-gray-600">{locationText}</span>
+              <div className="flex flex-wrap items-center justify-start gap-x-3 gap-y-0.5 text-[12px] font-medium md:gap-x-5 md:gap-y-1 md:text-[14px]">
+                <div className="flex items-center gap-1.5 min-w-0">
+                  <i className="fa-solid fa-location-dot text-gray-500 shrink-0"></i>
+                  <span className="text-gray-600 truncate max-w-[120px] md:max-w-none">{locationText}</span>
                 </div>
-                <div className="flex items-center gap-1.5">
+                <div className="flex items-center gap-1.5 shrink-0">
                   <i className="fa-solid fa-star text-yellow-400"></i>
                   <span className="font-bold text-gray-900">{rating}</span>
-                  <span className="text-gray-500">
+                  <span className="text-gray-500 whitespace-nowrap">
                     ({reviewsCount} Reviews)
                   </span>
                 </div>
@@ -569,7 +582,7 @@ const CollegeDetailsPage = ({ params }: { params: Promise<{ id: string }> }) => 
                     href={websiteHref}
                     target="_blank"
                     rel="noreferrer"
-                    className="flex items-center gap-1 text-[13px] font-medium tracking-wide text-brand-blue transition-colors hover:text-brand-hover"
+                    className="hidden md:flex items-center gap-1 text-[13px] font-medium tracking-wide text-brand-blue transition-colors hover:text-brand-hover"
                   >
                     <i className="fa-solid fa-globe text-gray-500 text-[12px]"></i>
                     {website.toLowerCase()}
@@ -585,7 +598,7 @@ const CollegeDetailsPage = ({ params }: { params: Promise<{ id: string }> }) => 
                     setIsFollowed(true);
                   }
                 }}
-                className={`flex items-center justify-center gap-1.5 rounded-full px-4 py-1.5 text-[13px] font-semibold transition-colors ${
+                className={`flex items-center justify-center gap-1.5 rounded-full px-3 py-1 text-[12px] font-semibold transition-colors md:px-4 md:py-1.5 md:text-[13px] ${
                   isFollowed
                     ? "bg-green-300 text-gray-800 hover:bg-green-400"
                     : "bg-brand-blue text-white hover:bg-brand-hover"
@@ -600,7 +613,7 @@ const CollegeDetailsPage = ({ params }: { params: Promise<{ id: string }> }) => 
               </button>
             </div>
 
-            <div className="mt-8 flex w-full flex-nowrap items-center gap-2 overflow-x-auto pb-1 lg:mt-0 lg:w-auto lg:gap-3 lg:overflow-visible lg:pb-0">
+            <div className="hidden mt-8 w-full flex-nowrap items-center gap-2 overflow-x-auto pb-1 md:flex lg:mt-0 lg:w-auto lg:gap-3 lg:overflow-visible lg:pb-0">
               {college?.brochure_data?.url ? (
                 <a
                   href={getImageUrl(college.brochure_data.url)}
@@ -630,6 +643,37 @@ const CollegeDetailsPage = ({ params }: { params: Promise<{ id: string }> }) => 
               </button>
             </div>
           </div>
+        </div>
+
+        {/* Mobile action buttons — full width, left-aligned with logo */}
+        <div className="grid grid-cols-3 gap-2 px-6 pb-6 md:hidden">
+          {college?.brochure_data?.url ? (
+            <a
+              href={getImageUrl(college.brochure_data.url)}
+              target="_blank"
+              rel="noreferrer"
+              className="flex items-center justify-center gap-2 rounded-md border border-gray-200 bg-white px-4 py-2.5 text-[14px] font-semibold text-gray-700 transition-colors hover:bg-gray-50"
+            >
+              <i className="fa-solid fa-download"></i>Brochure
+            </a>
+          ) : (
+            <button className="flex items-center justify-center gap-2 rounded-md border border-gray-200 bg-white px-4 py-2.5 text-[14px] font-semibold text-gray-400 cursor-not-allowed" disabled>
+              <i className="fa-solid fa-download"></i>Brochure
+            </button>
+          )}
+          <button
+            onClick={() => setIsAskQuestionOpen(true)}
+            className="flex items-center justify-center gap-2 rounded-md border border-gray-200 bg-white px-4 py-2.5 text-[14px] font-semibold text-gray-700 transition-colors hover:bg-gray-50">
+            <i className="fa-regular fa-circle-question"></i>Ask Question
+          </button>
+          <button
+            type="button"
+            onClick={() => setIsShareModalOpen(true)}
+            className="flex items-center justify-center rounded-md border border-gray-200 bg-white p-2.5 text-gray-700 transition-colors hover:bg-gray-50"
+            aria-label="Share college profile"
+          >
+            <i className="fa-solid fa-share-nodes"></i>
+          </button>
         </div>
       </div>
 
@@ -706,25 +750,11 @@ const CollegeDetailsPage = ({ params }: { params: Promise<{ id: string }> }) => 
               </div>
 
               <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
-                {instVision ? (
+                {instVision && (
                   <InfoBlock title="Our Vision" desc={instVision} icon="fa-solid fa-eye" color="blue" />
-                ) : (
-                  <InfoBlock
-                    title="Our Vision"
-                    desc="To become a center of excellence by imparting quality education, focusing on research, innovation, and holistic development."
-                    icon="fa-solid fa-eye"
-                    color="blue"
-                  />
                 )}
-                {instMission ? (
+                {instMission && (
                   <InfoBlock title="Our Mission" desc={instMission} icon="fa-solid fa-bullseye" color="green" />
-                ) : (
-                  <InfoBlock
-                    title="Our Mission"
-                    desc="Equipping students with the knowledge and skills necessary to excel in a dynamic global environment while upholding strong ethical values."
-                    icon="fa-solid fa-bullseye"
-                    color="green"
-                  />
                 )}
               </div>
 
@@ -768,6 +798,7 @@ const CollegeDetailsPage = ({ params }: { params: Promise<{ id: string }> }) => 
           )}
 
           {activeTab === "courses" && (
+            (mappedCourses || filteredCourses).length > 0 ? (
             <div className="overflow-hidden rounded-[20px] border border-gray-200">
               <div className="flex flex-wrap items-center justify-between gap-4 border-b border-gray-100 px-6 py-4">
                 <p className="text-[14px] font-semibold text-brand-blue">
@@ -775,47 +806,44 @@ const CollegeDetailsPage = ({ params }: { params: Promise<{ id: string }> }) => 
                 </p>
                 {!mappedCourses && <FilterPills active={courseFilter} onChange={setCourseFilter} />}
               </div>
-              {(mappedCourses || filteredCourses).length > 0 ? (
-                <div className="w-full overflow-x-auto">
-                  <div className="min-w-175">
-                    <div className="grid grid-cols-12 items-center gap-4 border-b border-gray-200 px-6 py-5">
-                      <ProgTh className="col-span-4">COURSES NAME</ProgTh>
-                      <ProgTh className="col-span-2">DURATION</ProgTh>
-                      <ProgTh className="col-span-3">FEES / YEAR</ProgTh>
-                      <ProgTh className="col-span-3">ELIGIBILITY & SEAT</ProgTh>
-                    </div>
-                    {(mappedCourses || filteredCourses).map((course: any, i: number) => (
-                      <div key={course.name || i} className="grid grid-cols-12 items-center gap-4 border-b border-gray-100 px-6 py-5 hover:bg-gray-50/50">
-                        <div className="col-span-4">
-                          <h4 className="text-[15.5px] font-bold text-gray-900">{course.name}</h4>
-                          <p className="text-[12px] text-gray-500">{course.specialization || ""}</p>
-                        </div>
-                        <div className="col-span-2">
-                          <h4 className="text-[15.5px] font-bold text-gray-900">{course.duration}</h4>
-                          <p className="text-[12px] text-gray-500">{course.type || ""}</p>
-                        </div>
-                        <div className="col-span-3">
-                          <h4 className="text-[15.5px] font-bold text-brand-blue">{course.fees}</h4>
-                          <p className="text-[12px] text-gray-500">/ Year</p>
-                        </div>
-                        <div className="col-span-3">
-                          <p className="mb-2 text-[12.5px] font-medium text-gray-600">{course.eligibility}</p>
-                          <span className="inline-block rounded bg-[#eafaef] px-2.5 py-1 text-[11px] font-bold text-[#16a34a]">{course.seats || ""}</span>
-                        </div>
-                      </div>
-                    ))}
+              <div className="w-full overflow-x-auto">
+                <div className="min-w-175">
+                  <div className="grid grid-cols-12 items-center gap-4 border-b border-gray-200 px-6 py-5">
+                    <ProgTh className="col-span-4">COURSES NAME</ProgTh>
+                    <ProgTh className="col-span-2">DURATION</ProgTh>
+                    <ProgTh className="col-span-3">FEES / YEAR</ProgTh>
+                    <ProgTh className="col-span-3">ELIGIBILITY & SEAT</ProgTh>
                   </div>
+                  {(mappedCourses || filteredCourses).map((course: any, i: number) => (
+                    <div key={course.name || i} className="grid grid-cols-12 items-center gap-4 border-b border-gray-100 px-6 py-5 hover:bg-gray-50/50">
+                      <div className="col-span-4">
+                        <h4 className="text-[15.5px] font-bold text-gray-900">{course.name}</h4>
+                        <p className="text-[12px] text-gray-500">{course.specialization || ""}</p>
+                      </div>
+                      <div className="col-span-2">
+                        <h4 className="text-[15.5px] font-bold text-gray-900">{course.duration}</h4>
+                        <p className="text-[12px] text-gray-500">{course.type || ""}</p>
+                      </div>
+                      <div className="col-span-3">
+                        <h4 className="text-[15.5px] font-bold text-brand-blue">{course.fees}</h4>
+                        <p className="text-[12px] text-gray-500">/ Year</p>
+                      </div>
+                      <div className="col-span-3">
+                        <p className="mb-2 text-[12.5px] font-medium text-gray-600">{course.eligibility}</p>
+                        <span className="inline-block rounded bg-[#eafaef] px-2.5 py-1 text-[11px] font-bold text-[#16a34a]">{course.seats || ""}</span>
+                      </div>
+                    </div>
+                  ))}
                 </div>
-              ) : (
-                <div className="py-16 text-center text-gray-400">
-                  <FileX size={56} className="mx-auto mb-3" />
-                  <p className="text-[15px] font-medium">No courses available</p>
-                </div>
-              )}
+              </div>
             </div>
+            ) : (
+              <EmptyTabState tabName="courses" />
+            )
           )}
 
           {activeTab === "admissions" && (
+            mappedAdmissions && mappedAdmissions.length > 0 ? (
             <div className="rounded-[20px] border border-gray-200 bg-white">
               <div className="flex flex-wrap items-center justify-between gap-4 border-b border-gray-100 bg-[#f4f8fc] px-6 py-4">
                 <p className="text-[14px] font-semibold text-brand-blue">
@@ -825,55 +853,51 @@ const CollegeDetailsPage = ({ params }: { params: Promise<{ id: string }> }) => 
                   <FilterPills active={admissionFilter} onChange={setAdmissionFilter} />
                 )}
               </div>
-              {mappedAdmissions && mappedAdmissions.length > 0 ? (
-                <div className="w-full overflow-x-auto">
-                  <div className="min-w-[800px]">
-                    <div className="grid grid-cols-12 items-center gap-4 border-b border-gray-100 bg-white px-6 py-5">
-                      <ProgTh className="col-span-3">PROGRAM NAME</ProgTh>
-                      <ProgTh className="col-span-2">LEVEL</ProgTh>
-                      <ProgTh className="col-span-3">AFFILIATION</ProgTh>
-                      <ProgTh className="col-span-2">STATUS</ProgTh>
-                      <ProgTh className="col-span-2">ACTION</ProgTh>
-                    </div>
-                    {mappedAdmissions.map((admission: any, i: number) => (
-                      <div key={admission.title || i} className="grid grid-cols-12 items-center gap-4 border-b border-gray-100 px-6 py-5 hover:bg-gray-50/50">
-                        <div className="col-span-3">
-                          <h4 className="text-[15.5px] font-bold text-gray-900">{admission.title}</h4>
-                        </div>
-                        <div className="col-span-2">
-                          <span className="text-[14px] text-gray-600">{admission.level}</span>
-                        </div>
-                        <div className="col-span-3">
-                          <span className="text-[13px] text-gray-600">{admission.affiliation}</span>
-                        </div>
-                        <div className="col-span-2">
-                          <span className={`rounded-md px-3 py-1.5 text-[12px] font-bold ${admission.status === "Ongoing" ? "bg-[#ecfdf5] text-[#10b981]" : "bg-[#fef2f2] text-[#ef4444]"}`}>
-                            {admission.status}
-                          </span>
-                        </div>
-                        <div className="col-span-2">
-                          <button
-                            onClick={() => router.push(`/admissions/${encodeURIComponent(admission.level)}/${collegeId}`)}
-                            className="rounded-md bg-brand-blue/5 px-4 py-2 text-xs font-bold text-brand-blue hover:bg-brand-blue/10"
-                          >
-                            Apply Now
-                          </button>
-                        </div>
-                      </div>
-                    ))}
+              <div className="w-full overflow-x-auto">
+                <div className="min-w-[800px]">
+                  <div className="grid grid-cols-12 items-center gap-4 border-b border-gray-100 bg-white px-6 py-5">
+                    <ProgTh className="col-span-3">PROGRAM NAME</ProgTh>
+                    <ProgTh className="col-span-2">LEVEL</ProgTh>
+                    <ProgTh className="col-span-3">AFFILIATION</ProgTh>
+                    <ProgTh className="col-span-2">STATUS</ProgTh>
+                    <ProgTh className="col-span-2">ACTION</ProgTh>
                   </div>
+                  {mappedAdmissions.map((admission: any, i: number) => (
+                    <div key={admission.title || i} className="grid grid-cols-12 items-center gap-4 border-b border-gray-100 px-6 py-5 hover:bg-gray-50/50">
+                      <div className="col-span-3">
+                        <h4 className="text-[15.5px] font-bold text-gray-900">{admission.title}</h4>
+                      </div>
+                      <div className="col-span-2">
+                        <span className="text-[14px] text-gray-600">{admission.level}</span>
+                      </div>
+                      <div className="col-span-3">
+                        <span className="text-[13px] text-gray-600">{admission.affiliation}</span>
+                      </div>
+                      <div className="col-span-2">
+                        <span className={`rounded-md px-3 py-1.5 text-[12px] font-bold ${admission.status === "Ongoing" ? "bg-[#ecfdf5] text-[#10b981]" : "bg-[#fef2f2] text-[#ef4444]"}`}>
+                          {admission.status}
+                        </span>
+                      </div>
+                      <div className="col-span-2">
+                        <button
+                          onClick={() => router.push(`/admissions/${encodeURIComponent(admission.level)}/${collegeId}`)}
+                          className="rounded-md bg-brand-blue/5 px-4 py-2 text-xs font-bold text-brand-blue hover:bg-brand-blue/10"
+                        >
+                          Apply Now
+                        </button>
+                      </div>
+                    </div>
+                  ))}
                 </div>
-              ) : (
-                <div className="p-8 text-center text-gray-500">
-                  <i className="fa-solid fa-inbox text-4xl mb-4 text-gray-300"></i>
-                  <p className="font-medium">No admission notices available at the moment.</p>
-                  <p className="text-sm mt-1">Check back later or contact the institution directly.</p>
-                </div>
-              )}
+              </div>
             </div>
+            ) : (
+              <EmptyTabState tabName="admission notices" />
+            )
           )}
 
           {activeTab === "offered" && (
+            (mappedPrograms ? [...mappedPrograms, ...institutionProgramsFromTable, ...institutionCoursesFromStorage] : [...institutionProgramsFromTable, ...filteredPrograms, ...institutionCoursesFromStorage]).length > 0 ? (
             <div className="overflow-hidden rounded-[20px] border border-gray-200 bg-white">
               <div className="flex flex-wrap items-center justify-between gap-4 border-b border-gray-100 bg-[#f4f8fc] px-6 py-4">
                 <p className="text-[14px] font-semibold text-brand-blue">
@@ -883,37 +907,34 @@ const CollegeDetailsPage = ({ params }: { params: Promise<{ id: string }> }) => 
                   <FilterPills active={programFilter} onChange={setProgramFilter} />
                 )}
               </div>
-              {(mappedPrograms ? [...mappedPrograms, ...institutionProgramsFromTable, ...institutionCoursesFromStorage] : [...institutionProgramsFromTable, ...filteredPrograms, ...institutionCoursesFromStorage]).length > 0 ? (
-                <div className="w-full overflow-x-auto">
-                  <div className="min-w-[800px]">
-                    <div className="grid grid-cols-12 items-center gap-4 border-b border-gray-100 bg-white px-6 py-5">
-                      <ProgTh className="col-span-3">PROGRAM NAME</ProgTh>
-                      <ProgTh className="col-span-2">LEVEL</ProgTh>
-                      <ProgTh className="col-span-3">AFFILIATION</ProgTh>
-                      <ProgTh className="col-span-2">STATUS</ProgTh>
-                      <ProgTh className="col-span-2">ACTION</ProgTh>
-                    </div>
-                    {(mappedPrograms ? [...mappedPrograms, ...institutionProgramsFromTable, ...institutionCoursesFromStorage] : [...institutionProgramsFromTable, ...filteredPrograms, ...institutionCoursesFromStorage]).map((program: any, i: number) => (
-                      <div key={program.name || program.courseId || i} className="grid grid-cols-12 items-center gap-4 border-b border-gray-100 px-6 py-5 hover:bg-gray-50/50">
-                        <div className="col-span-3"><h4 className="text-[15.5px] font-bold text-gray-900">{program.name}</h4></div>
-                        <div className="col-span-2"><span className="text-[14px] text-gray-600">{program.level}</span></div>
-                        <div className="col-span-3"><span className="text-[13px] text-gray-600">{program.affiliation}</span></div>
-                        <div className="col-span-2"><span className={`rounded-md px-3 py-1.5 text-[12px] font-bold ${program.status === "Ongoing" ? "bg-[#ecfdf5] text-[#10b981]" : "bg-[#fef2f2] text-[#ef4444]"}`}>{program.status}</span></div>
-                        <div className="col-span-2"><button onClick={() => program.courseId ? router.push(`/course-finder/${program.courseId}`) : undefined} className="rounded-md bg-brand-blue/5 px-4 py-2 text-xs font-bold text-brand-blue hover:bg-brand-blue/10">View Details</button></div>
-                      </div>
-                    ))}
+              <div className="w-full overflow-x-auto">
+                <div className="min-w-[800px]">
+                  <div className="grid grid-cols-12 items-center gap-4 border-b border-gray-100 bg-white px-6 py-5">
+                    <ProgTh className="col-span-3">PROGRAM NAME</ProgTh>
+                    <ProgTh className="col-span-2">LEVEL</ProgTh>
+                    <ProgTh className="col-span-3">AFFILIATION</ProgTh>
+                    <ProgTh className="col-span-2">STATUS</ProgTh>
+                    <ProgTh className="col-span-2">ACTION</ProgTh>
                   </div>
+                  {(mappedPrograms ? [...mappedPrograms, ...institutionProgramsFromTable, ...institutionCoursesFromStorage] : [...institutionProgramsFromTable, ...filteredPrograms, ...institutionCoursesFromStorage]).map((program: any, i: number) => (
+                    <div key={program.name || program.courseId || i} className="grid grid-cols-12 items-center gap-4 border-b border-gray-100 px-6 py-5 hover:bg-gray-50/50">
+                      <div className="col-span-3"><h4 className="text-[15.5px] font-bold text-gray-900">{program.name}</h4></div>
+                      <div className="col-span-2"><span className="text-[14px] text-gray-600">{program.level}</span></div>
+                      <div className="col-span-3"><span className="text-[13px] text-gray-600">{program.affiliation}</span></div>
+                      <div className="col-span-2"><span className={`rounded-md px-3 py-1.5 text-[12px] font-bold ${program.status === "Ongoing" ? "bg-[#ecfdf5] text-[#10b981]" : "bg-[#fef2f2] text-[#ef4444]"}`}>{program.status}</span></div>
+                      <div className="col-span-2"><button onClick={() => program.courseId ? router.push(`/course-finder/${program.courseId}`) : undefined} className="rounded-md bg-brand-blue/5 px-4 py-2 text-xs font-bold text-brand-blue hover:bg-brand-blue/10">View Details</button></div>
+                    </div>
+                  ))}
                 </div>
-              ) : (
-                <div className="py-16 text-center text-gray-400">
-                  <FileX size={56} className="mx-auto mb-3" />
-                  <p className="text-[15px] font-medium">No programs available</p>
-                </div>
-              )}
+              </div>
             </div>
+            ) : (
+              <EmptyTabState tabName="programs" />
+            )
           )}
 
           {activeTab === "facilities" && (
+            (mappedFacilities || facilities).length > 0 ? (
             <div>
               <div className="mb-6">
                 <h2 className="text-[20px] font-bold text-gray-900">
@@ -923,30 +944,27 @@ const CollegeDetailsPage = ({ params }: { params: Promise<{ id: string }> }) => 
                   State-of-the-art infrastructure for holistic learning.
                 </p>
               </div>
-              {(mappedFacilities || facilities).length > 0 ? (
-                <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
-                  {(mappedFacilities || facilities).map((facility: any, i: number) => (
-                    <div key={facility.title || facility.heading || i} className="flex items-start gap-4 rounded-md border border-gray-200 bg-white p-5">
-                      <div className="flex h-10 w-10 items-center justify-center rounded-md bg-brand-blue/5 text-brand-blue">
-                        <i className={`fa-solid ${facility.icon || "fa-question"}`}></i>
-                      </div>
-                      <div>
-                        <h4 className="text-[16px] font-bold text-gray-900">{facility.title || facility.heading}</h4>
-                        <p className="text-[13px] text-gray-600">{facility.desc}</p>
-                      </div>
+              <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
+                {(mappedFacilities || facilities).map((facility: any, i: number) => (
+                  <div key={facility.title || facility.heading || i} className="flex items-start gap-4 rounded-md border border-gray-200 bg-white p-5">
+                    <div className="flex h-10 w-10 items-center justify-center rounded-md bg-brand-blue/5 text-brand-blue">
+                      <i className={`fa-solid ${facility.icon || "fa-question"}`}></i>
                     </div>
-                  ))}
-                </div>
-              ) : (
-                <div className="py-16 text-center text-gray-400">
-                  <FileX size={56} className="mx-auto mb-3" />
-                  <p className="text-[15px] font-medium">No facilities information available</p>
-                </div>
-              )}
+                    <div>
+                      <h4 className="text-[16px] font-bold text-gray-900">{facility.title || facility.heading}</h4>
+                      <p className="text-[13px] text-gray-600">{facility.desc}</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
             </div>
+            ) : (
+              <EmptyTabState tabName="facilities" />
+            )
           )}
 
           {activeTab === "events" && (
+            (mappedEvents || events).length > 0 ? (
             <div>
               <div className="mb-6">
                 <h2 className="text-[20px] font-bold text-gray-900">
@@ -956,48 +974,43 @@ const CollegeDetailsPage = ({ params }: { params: Promise<{ id: string }> }) => 
                   Happening around the campus – join the vibe.
                 </p>
               </div>
-              {(mappedEvents || events).length > 0 ? (
-                <>
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                    {(mappedEvents || events).slice((eventsPage - 1) * 9, eventsPage * 9).map((event) => (
-                      <article key={event.title} className="bg-white rounded-md border border-gray-200 hover:border-blue-500/20 overflow-hidden flex flex-col duration-300 cursor-pointer">
-                        <div className="h-35 w-full overflow-hidden p-4">
-                          <img src={event.image} alt={event.title} className="w-full h-full object-cover rounded-md" />
-                        </div>
-                        <div className="p-5 flex flex-col grow">
-                          <div className="flex justify-between items-center mb-3">
-                            <span className="bg-blue-500 text-white text-[10px] font-bold px-2 py-1 rounded-full uppercase tracking-wider">Event</span>
-                            <span className="flex items-center text-xs text-gray-500 font-semibold"><i className="fa-regular fa-calendar mr-1.5"></i> {event.date.split(" | ")[0]}</span>
-                          </div>
-                          <h4 className="font-bold text-lg mb-3 leading-tight text-gray-900">{event.title}</h4>
-                          <div className="flex items-center text-xs text-gray-600 mb-2 font-semibold"><i className="fa-solid fa-location-dot mr-2 text-gray-500"></i> {event.date.split(" | ")[1] || "TBD"}</div>
-                          <p className="text-xs text-gray-500 mb-5 line-clamp-3 leading-relaxed font-medium">{event.desc}</p>
-                          <div className="mt-auto flex gap-2">
-                            <button className="flex-1 bg-white border border-gray-300 text-gray-700 text-sm font-bold py-2 rounded-md hover:bg-gray-50 transition text-center">Details</button>
-                            <button className="flex-1 text-white text-sm font-bold py-2 rounded-md transition bg-brand-blue cursor-pointer hover:bg-blue-600">Register</button>
-                          </div>
-                        </div>
-                      </article>
-                    ))}
-                  </div>
-                  {(mappedEvents || events).length > 9 && (
-                    <div className="mt-8 flex justify-center gap-2">
-                      {Array.from({ length: Math.ceil((mappedEvents || events).length / 9) }).map((_, idx) => (
-                        <button key={idx} className={`h-10 w-10 rounded-md text-sm font-bold transition ${eventsPage === idx + 1 ? "bg-brand-blue text-white" : "bg-gray-100 text-gray-700 hover:bg-gray-200"}`} onClick={() => setEventsPage(idx + 1)}>{idx + 1}</button>
-                      ))}
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {(mappedEvents || events).slice((eventsPage - 1) * 9, eventsPage * 9).map((event) => (
+                  <article key={event.title} className="bg-white rounded-md border border-gray-200 hover:border-blue-500/20 overflow-hidden flex flex-col duration-300 cursor-pointer">
+                    <div className="h-35 w-full overflow-hidden p-4">
+                      <img src={event.image} alt={event.title} className="w-full h-full object-cover rounded-md" />
                     </div>
-                  )}
-                </>
-              ) : (
-                <div className="py-16 text-center text-gray-400">
-                  <FileX size={56} className="mx-auto mb-3" />
-                  <p className="text-[15px] font-medium">No events available</p>
+                    <div className="p-5 flex flex-col grow">
+                      <div className="flex justify-between items-center mb-3">
+                        <span className="bg-blue-500 text-white text-[10px] font-bold px-2 py-1 rounded-full uppercase tracking-wider">Event</span>
+                        <span className="flex items-center text-xs text-gray-500 font-semibold"><i className="fa-regular fa-calendar mr-1.5"></i> {event.date.split(" | ")[0]}</span>
+                      </div>
+                      <h4 className="font-bold text-lg mb-3 leading-tight text-gray-900">{event.title}</h4>
+                      <div className="flex items-center text-xs text-gray-600 mb-2 font-semibold"><i className="fa-solid fa-location-dot mr-2 text-gray-500"></i> {event.date.split(" | ")[1] || "TBD"}</div>
+                      <p className="text-xs text-gray-500 mb-5 line-clamp-3 leading-relaxed font-medium">{event.desc}</p>
+                      <div className="mt-auto flex gap-2">
+                        <button className="flex-1 bg-white border border-gray-300 text-gray-700 text-sm font-bold py-2 rounded-md hover:bg-gray-50 transition text-center">Details</button>
+                        <button className="flex-1 text-white text-sm font-bold py-2 rounded-md transition bg-brand-blue cursor-pointer hover:bg-blue-600">Register</button>
+                      </div>
+                    </div>
+                  </article>
+                ))}
+              </div>
+              {(mappedEvents || events).length > 9 && (
+                <div className="mt-8 flex justify-center gap-2">
+                  {Array.from({ length: Math.ceil((mappedEvents || events).length / 9) }).map((_, idx) => (
+                    <button key={idx} className={`h-10 w-10 rounded-md text-sm font-bold transition ${eventsPage === idx + 1 ? "bg-brand-blue text-white" : "bg-gray-100 text-gray-700 hover:bg-gray-200"}`} onClick={() => setEventsPage(idx + 1)}>{idx + 1}</button>
+                  ))}
                 </div>
               )}
             </div>
+            ) : (
+              <EmptyTabState tabName="events" />
+            )
           )}
 
           {activeTab === "scholarship" && (
+            (mappedScholarships || filteredScholarships).length > 0 ? (
             <div className="overflow-hidden rounded-[20px] border border-gray-200 bg-white">
               <div className="flex flex-wrap items-center justify-between gap-4 border-b border-gray-100 bg-[#f4f8fc] px-6 py-4">
                 <p className="text-[14px] font-semibold text-brand-blue">
@@ -1010,37 +1023,34 @@ const CollegeDetailsPage = ({ params }: { params: Promise<{ id: string }> }) => 
                 />
                 )}
               </div>
-              {(mappedScholarships || filteredScholarships).length > 0 ? (
-                <div className="w-full overflow-x-auto">
-                  <div className="min-w-[800px]">
-                    <div className="grid grid-cols-12 items-center gap-4 border-b border-gray-100 bg-white px-6 py-5">
-                      <ProgTh className="col-span-2">PROGRAM</ProgTh>
-                      <ProgTh className="col-span-2">SCHOLARSHIP</ProgTh>
-                      <ProgTh className="col-span-2">BENEFIT</ProgTh>
-                      <ProgTh className="col-span-3">FOR WHOM</ProgTh>
-                      <ProgTh className="col-span-3"></ProgTh>
-                    </div>
-                    {(mappedScholarships || filteredScholarships).map((scholarship) => (
-                      <div key={`${scholarship.program}-${scholarship.scholarship}`} className="grid grid-cols-12 items-center gap-4 border-b border-gray-100 px-6 py-5 hover:bg-gray-50/50">
-                        <div className="col-span-2"><h4 className="text-[14px] font-bold text-gray-900">{scholarship.program}</h4></div>
-                        <div className="col-span-2">{scholarship.scholarship}</div>
-                        <div className="col-span-2"><span className="text-[13px] font-medium text-green-600">{scholarship.benefit}</span></div>
-                        <div className="col-span-3">{scholarship.audience}</div>
-                        <div className="col-span-3"><button className="rounded-md bg-brand-blue px-5 py-2 text-xs font-bold text-white hover:bg-brand-hover">Get Scholarship</button></div>
-                      </div>
-                    ))}
+              <div className="w-full overflow-x-auto">
+                <div className="min-w-[800px]">
+                  <div className="grid grid-cols-12 items-center gap-4 border-b border-gray-100 bg-white px-6 py-5">
+                    <ProgTh className="col-span-2">PROGRAM</ProgTh>
+                    <ProgTh className="col-span-2">SCHOLARSHIP</ProgTh>
+                    <ProgTh className="col-span-2">BENEFIT</ProgTh>
+                    <ProgTh className="col-span-3">FOR WHOM</ProgTh>
+                    <ProgTh className="col-span-3"></ProgTh>
                   </div>
+                  {(mappedScholarships || filteredScholarships).map((scholarship) => (
+                    <div key={`${scholarship.program}-${scholarship.scholarship}`} className="grid grid-cols-12 items-center gap-4 border-b border-gray-100 px-6 py-5 hover:bg-gray-50/50">
+                      <div className="col-span-2"><h4 className="text-[14px] font-bold text-gray-900">{scholarship.program}</h4></div>
+                      <div className="col-span-2">{scholarship.scholarship}</div>
+                      <div className="col-span-2"><span className="text-[13px] font-medium text-green-600">{scholarship.benefit}</span></div>
+                      <div className="col-span-3">{scholarship.audience}</div>
+                      <div className="col-span-3"><button className="rounded-md bg-brand-blue px-5 py-2 text-xs font-bold text-white hover:bg-brand-hover">Get Scholarship</button></div>
+                    </div>
+                  ))}
                 </div>
-              ) : (
-                <div className="py-16 text-center text-gray-400">
-                  <FileX size={56} className="mx-auto mb-3" />
-                  <p className="text-[15px] font-medium">No scholarships available</p>
-                </div>
-              )}
+              </div>
             </div>
+            ) : (
+              <EmptyTabState tabName="scholarships" />
+            )
           )}
 
           {activeTab === "alumni" && (
+            (instAlumni && Array.isArray(instAlumni) ? instAlumni : alumni).length > 0 ? (
             <div>
               <div className="mb-6">
                 <h2 className="text-[20px] font-bold text-gray-900">
@@ -1050,9 +1060,8 @@ const CollegeDetailsPage = ({ params }: { params: Promise<{ id: string }> }) => 
                   Connect with our proud graduates working globally.
                 </p>
               </div>
-              {(instAlumni && Array.isArray(instAlumni) ? instAlumni : alumni).length > 0 ? (
-                <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
-                  {(instAlumni && Array.isArray(instAlumni) ? instAlumni : alumni).map((person: any, i: number) => (
+              <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
+                {(instAlumni && Array.isArray(instAlumni) ? instAlumni : alumni).map((person: any, i: number) => (
                     <div key={person.name || i} className="flex items-center gap-4 rounded-md border border-gray-200 bg-white p-5">
                       {person.photo || person.image ? (
                         <img src={getImageUrl(person.photo || person.image)} className="h-16 w-16 rounded-full object-cover" alt={person.name} />
@@ -1075,16 +1084,14 @@ const CollegeDetailsPage = ({ params }: { params: Promise<{ id: string }> }) => 
                     </div>
                   ))}
                 </div>
-              ) : (
-                <div className="py-16 text-center text-gray-400">
-                  <FileX size={56} className="mx-auto mb-3" />
-                  <p className="text-[15px] font-medium">No alumni information available</p>
-                </div>
-              )}
             </div>
+            ) : (
+              <EmptyTabState tabName="alumni" />
+            )
           )}
 
           {activeTab === "gallery" && (
+            galleryImagesSource.length > 0 ? (
             <div>
               <div className="mb-6">
                 <h2 className="text-[20px] font-bold text-gray-900">
@@ -1158,13 +1165,10 @@ const CollegeDetailsPage = ({ params }: { params: Promise<{ id: string }> }) => 
                   </button>
                 </div>
               )}
-              {galleryImagesSource.length === 0 && (
-                <div className="py-16 text-center text-gray-400">
-                  <FileX size={56} className="mx-auto mb-3" />
-                  <p className="text-[15px] font-medium">No gallery images available</p>
-                </div>
-              )}
             </div>
+            ) : (
+              <EmptyTabState tabName="gallery images" />
+            )
           )}
 
           {activeTab === "review" && (
@@ -1256,15 +1260,7 @@ const CollegeDetailsPage = ({ params }: { params: Promise<{ id: string }> }) => 
                       })}
                     </div>
                   ) : (
-                    <div className="text-center py-12">
-                      <p className="text-gray-500 mb-4">No reviews yet. Be the first to review!</p>
-                      <a
-                        href="/write-review"
-                        className="inline-block px-6 py-3 bg-brand-blue text-white rounded-md font-medium hover:bg-brand-hover transition-colors"
-                      >
-                        Write a Review
-                      </a>
-                    </div>
+                    <EmptyTabState tabName="reviews" />
                   )}
                 </>
               )}
@@ -1272,6 +1268,7 @@ const CollegeDetailsPage = ({ params }: { params: Promise<{ id: string }> }) => 
           )}
 
           {activeTab === "news" && (
+            (mappedNews || newsCards).length > 0 ? (
             <div>
               <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
                 {(mappedNews || newsCards).slice((newsPage - 1) * 9, newsPage * 9).map((news) => (
@@ -1330,16 +1327,14 @@ const CollegeDetailsPage = ({ params }: { params: Promise<{ id: string }> }) => 
                   ))}
                 </div>
               )}
-              {(mappedNews || newsCards).length === 0 && (
-                <div className="py-16 text-center text-gray-400">
-                  <FileX size={56} className="mx-auto mb-3" />
-                  <p className="text-[15px] font-medium">No news or notices available</p>
-                </div>
-              )}
             </div>
+            ) : (
+              <EmptyTabState tabName="news" />
+            )
           )}
 
           {activeTab === "download" && (
+            (mappedDownloads || downloads).length > 0 ? (
             <div>
               <div className="mb-6">
                 <h2 className="text-[20px] font-bold text-gray-900">
@@ -1351,39 +1346,42 @@ const CollegeDetailsPage = ({ params }: { params: Promise<{ id: string }> }) => 
               </div>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 {(mappedDownloads || downloads).map((download: any, i: number) => {
-                  const isInst = !!mappedDownloads;
-                  return (
-                    <div
-                      key={download.title || download.name || i}
-                      className="flex items-center justify-between rounded-md border border-gray-200 bg-white p-5 transition"
-                    >
-                      <div className="flex items-center gap-4">
-                        <div className="flex h-12 w-12 items-center justify-center rounded-md bg-brand-blue/5 text-brand-blue">
-                          <i className="fa-regular fa-file-lines text-xl"></i>
-                        </div>
-                        <div>
-                          <h4 className="font-bold text-gray-900">
-                            {download.title || download.name}
-                          </h4>
-                          <p className="text-[12.5px] text-gray-500">
-                            {download.size || (isInst ? "Download file" : "")}
-                          </p>
-                        </div>
+                const isInst = !!mappedDownloads;
+                return (
+                  <div
+                    key={download.title || download.name || i}
+                    className="flex items-center justify-between rounded-md border border-gray-200 bg-white p-5 transition"
+                  >
+                    <div className="flex items-center gap-4">
+                      <div className="flex h-12 w-12 items-center justify-center rounded-md bg-brand-blue/5 text-brand-blue">
+                        <i className="fa-regular fa-file-lines text-xl"></i>
                       </div>
-                      {download.file ? (
-                        <a href={download.file} target="_blank" rel="noreferrer" className="flex items-center gap-2 rounded-md bg-brand-blue hover:bg-brand-hover px-5 py-2.5 text-sm font-bold text-white">
-                          <i className="fa-solid fa-download"></i>Download
-                        </a>
-                      ) : (
-                        <button className="flex items-center gap-2 rounded-md bg-brand-blue hover:bg-brand-hover px-5 py-2.5 text-sm font-bold text-white">
-                          <i className="fa-solid fa-download"></i>Download
-                        </button>
-                      )}
+                      <div>
+                        <h4 className="font-bold text-gray-900">
+                          {download.title || download.name}
+                        </h4>
+                        <p className="text-[12.5px] text-gray-500">
+                          {download.size || (isInst ? "Download file" : "")}
+                        </p>
+                      </div>
                     </div>
-                  );
-                })}
-              </div>
+                    {download.file ? (
+                      <a href={download.file} target="_blank" rel="noreferrer" className="flex items-center gap-2 rounded-md bg-brand-blue hover:bg-brand-hover px-5 py-2.5 text-sm font-bold text-white">
+                        <i className="fa-solid fa-download"></i>Download
+                      </a>
+                    ) : (
+                      <button className="flex items-center gap-2 rounded-md bg-brand-blue hover:bg-brand-hover px-5 py-2.5 text-sm font-bold text-white">
+                        <i className="fa-solid fa-download"></i>Download
+                      </button>
+                    )}
+                  </div>
+                );
+              })}
             </div>
+            </div>
+            ) : (
+              <EmptyTabState tabName="downloads" />
+            )
           )}
         </div>
 
