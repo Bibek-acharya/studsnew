@@ -1,13 +1,11 @@
 import AffiliatedColleges from "@/components/education/university-listing/AffiliatedColleges";
 import { nepaliUniversities } from "@/components/education/university-listing/nepaliUniversitiesData";
-import { foreignUniversities } from "@/components/education/university-listing/foreignUniversitiesData";
 import type { College } from "@/services/api";
 
 const toSlug = (name: string) =>
   name.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "");
 
 const nepaliSlugs = new Set(nepaliUniversities.map((u) => toSlug(u.name)));
-const foreignSlugs = new Set(foreignUniversities.map((u) => toSlug(u.name)));
 
 const nepaliUnis = [
   { id: "tu", name: "Tribhuwan University", collegeCount: "950+" },

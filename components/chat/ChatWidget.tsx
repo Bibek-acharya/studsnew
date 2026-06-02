@@ -84,7 +84,6 @@ const ChatWidget: React.FC = () => {
     setMessages((p) => [...p, { role: "user", text }]); setChatStarted(true);
   }, []);
 
-  const expandFromMinimized = isFullscreen;
 
   const handleFlow = useCallback(() => {
     const fs = flowState.current;
@@ -292,7 +291,7 @@ const ChatWidget: React.FC = () => {
 
       {/* Bubble */}
       {showBubble && !isOpen && (
-        <div onClick={() => { setIsOpen(true); setShowBubble(false); }} className="fixed bottom-28 right-6 z-[210] w-[260px] cursor-pointer rounded-[16px] bg-white p-5 shadow-[0_4px_25px_rgba(0,0,0,0.15)] fade-in-up">
+        <div onClick={() => { setIsOpen(true); setShowBubble(false); }} className="fixed bottom-6 right-[92px] z-[210] w-[260px] cursor-pointer rounded-[16px] bg-white p-5 shadow-[0_4px_25px_rgba(0,0,0,0.15)] fade-in-up">
           <button onClick={(e) => { e.stopPropagation(); setShowBubble(false); }} type="button" className="absolute -left-[14px] -top-[14px] flex h-7 w-7 items-center justify-center rounded-full bg-[#cbd5e1] text-white shadow-sm transition hover:bg-[#94a3b8]">
             <svg className="h-[14px] w-[14px]" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="3.5"><path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12"></path></svg>
           </button>

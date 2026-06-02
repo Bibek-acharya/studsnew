@@ -120,7 +120,6 @@ const SORT_OPTIONS = [
 const AffiliatedColleges: React.FC<AffiliatedCollegesProps> = ({
   universities,
   colleges: sampleColleges,
-  type,
 }) => {
   const router = useRouter();
   const [activeUni, setActiveUni] = useState(universities[0]?.id || "");
@@ -157,11 +156,8 @@ const AffiliatedColleges: React.FC<AffiliatedCollegesProps> = ({
     currentPage * ITEMS_PER_PAGE,
   );
 
-  const activeUniName = universities.find((u) => u.id === activeUni)?.name || "University";
-  const shortName = activeUniName.replace(/\s+University$/, "");
-
   return (
-    <div className="w-full bg-[#f8fafc] font-sans text-slate-800">
+    <div className="w-full font-sans text-slate-800">
       {/* Header - University Selector (matching course finder view college) */}
       <header className="pb-4 pt-8">
         <div className="mx-auto w-full max-w-[1340px] px-6">

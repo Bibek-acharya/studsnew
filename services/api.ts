@@ -2278,6 +2278,36 @@ export const scholarshipApi = {
   },
 };
 
+export const feedbackApi = {
+  async submitFeedback(data: { rating: number; experience: string; email?: string }): Promise<{ success: boolean; message: string }> {
+    return apiRequest<{ success: boolean; message: string }>("/api/v1/feedback", {
+      method: "POST",
+      body: JSON.stringify(data),
+    });
+  },
+
+  async listFeedback(): Promise<{ success: boolean; data: Array<{ id: number; user_name: string; image_url: string; rating: number; experience: string; email: string; created_at: string }>; message: string }> {
+    return apiRequest("/api/v1/feedback");
+  },
+
+  async deleteFeedback(id: number): Promise<{ success: boolean; message: string }> {
+    return apiRequest(`/api/v1/feedback/${id}`, {
+      method: "DELETE",
+    });
+  },
+
+  async getPublicFeedbacks(): Promise<{ success: boolean; data: Array<{ id: number; user_name: string; image_url: string; rating: number; experience: string; created_at: string }>; message: string }> {
+    return apiRequest("/api/v1/public/feedback");
+  },
+
+  async submitTestimonial(data: { name: string; designation: string; rating: number; review: string }): Promise<{ success: boolean; message: string }> {
+    return apiRequest("/api/v1/public/testimonials", {
+      method: "POST",
+      body: JSON.stringify(data),
+    });
+  },
+};
+
 export const scholarshipProviderApi = {
   async getScholarships() {
     return apiRequest<any[]>('/api/v1/scholarship-providers/scholarships');

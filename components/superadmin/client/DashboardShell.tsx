@@ -63,6 +63,7 @@ const ManageProfileAccessSection = lazy(() => import("./ManageProfileAccessSecti
 const AdvertiseRequestSection = lazy(() => import("./AdvertiseRequestSection"));
 const ManageAdsSection = lazy(() => import("./ManageAdsSection"));
 const RejectedInstitutionsSection = lazy(() => import("./RejectedInstitutionsSection"));
+const FeedbackListSection = lazy(() => import("./FeedbackListSection"));
 
 type SectionType =
   | "overview"
@@ -111,7 +112,8 @@ type SectionType =
   | "manage-ads"
   | "news-directory"
   | "events-directory"
-  | "blogs-directory";
+  | "blogs-directory"
+  | "manage-feedback";
 
 interface NavChild {
   section: SectionType;
@@ -138,6 +140,7 @@ const navItems: NavItemData[] = [
   { icon: <FileText size={20} />, label: "Blogs", section: "blogs-directory", children: [{ section: "create-blog", label: "Create Blogs" }, { section: "manage-blog", label: "Blogs Directory" }] },
   { icon: <Building size={20} />, label: "Manage Campus Feed", section: "manage-campus-feed" },
   { icon: <Bell size={20} />, label: "Notification", section: "manage-notification" },
+  { icon: <MessageSquare size={20} />, label: "Feedback", section: "manage-feedback" },
   { icon: <MessageSquare size={20} />, label: "Message", section: "message-inquiry" },
   { icon: <BarChart3 size={20} />, label: "Analytics", section: "analytics" },
   { icon: <Settings size={20} />, label: "Settings", section: "settings" },
@@ -268,6 +271,8 @@ export default function DashboardShell() {
         return <AnalyticsSection />;
       case "manage-ads":
         return <ManageAdsSection />;
+      case "manage-feedback":
+        return <FeedbackListSection />;
       default:
         return <PlaceholderSection section={activeSection} />;
     }

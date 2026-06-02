@@ -25,6 +25,8 @@ const ACADEMIC_LEVELS = [
   { id: "plus2", label: "+2 / Higher Secondary", count: 3200 },
   { id: "alevel", label: "A Level", count: 85 },
   { id: "diploma", label: "Diploma / CTEVT", count: 410 },
+  { id: "bachelors", label: "Bachelors", count: 2500 },
+  { id: "masters", label: "Masters", count: 800 },
 ];
 
 const PROGRAMS: Record<
@@ -47,6 +49,17 @@ const PROGRAMS: Record<
     { id: "d_med", label: "Medical & Nursing (CTEVT)", count: 120 },
     { id: "d_hm", label: "Hotel Management & Tourism", count: 90 },
     { id: "d_agr", label: "Agriculture & Forestry (CTEVT)", count: 50 },
+  ],
+  bachelors: [
+    { id: "b_it", label: "IT & Computing", count: 500 },
+    { id: "b_eng", label: "Engineering", count: 350 },
+    { id: "b_biz", label: "Business & Management", count: 800 },
+    { id: "b_med", label: "Medical & Health Sciences", count: 400 },
+    { id: "b_agr", label: "Agriculture & Forestry", count: 250 },
+  ],
+  masters: [
+    { id: "m_biz", label: "Business & Management", count: 300 },
+    { id: "m_it", label: "IT & Computing", count: 150 },
   ],
 };
 
@@ -541,7 +554,7 @@ const FilterSidebar: React.FC<FilterSidebarProps> = ({
 
   const availableCourses = useMemo(() => {
     const showCourse = filters.academic.some((a) =>
-      ["diploma"].includes(a),
+      ["diploma", "bachelors", "masters"].includes(a),
     );
     if (!showCourse) return [];
     const courses = filters.program
@@ -554,7 +567,7 @@ const FilterSidebar: React.FC<FilterSidebarProps> = ({
   }, [filters.academic, filters.program, courseSearch, getFacetCount]);
 
   const showCourseSection = filters.academic.some((a) =>
-    ["diploma"].includes(a),
+    ["diploma", "bachelors", "masters"].includes(a),
   );
 
   const filterLabelMap = useMemo(() => {
@@ -755,7 +768,7 @@ const FilterSidebar: React.FC<FilterSidebarProps> = ({
   return (
     <>
       {/* ── Filter Card ───────────────────────────────────── */}
-      <div className="relative w-full rounded-[20px] border border-gray-200 bg-white p-6 ">
+      <div className="relative w-full rounded-md border border-gray-200 bg-white p-6 ">
         {/* Header */}
         <div className="mb-2 flex items-center justify-between">
           <div className="flex items-center gap-3">
@@ -894,7 +907,7 @@ const FilterSidebar: React.FC<FilterSidebarProps> = ({
         {/* Accordions */}
 
         {/* 1. Academic Level */}
-        <Accordion title="Academic Level" defaultOpen>
+        <Accordion title="Academic Level">
           <div className="flex flex-col gap-3.5 pt-1">
             {academicLevelsWithCounts.map((item) => (
               <CheckboxItem
@@ -914,7 +927,7 @@ const FilterSidebar: React.FC<FilterSidebarProps> = ({
         </Accordion>
 
         {/* 2. Program */}
-        <Accordion title="Program" defaultOpen>
+        <Accordion title="Program">
           <SearchInput
             placeholder="Search programs..."
             value={programSearch}
@@ -974,7 +987,7 @@ const FilterSidebar: React.FC<FilterSidebarProps> = ({
         )}
 
         {/* 4. Location (Province/District/Local Body) */}
-        <Accordion title="Location" defaultOpen>
+        <Accordion title="Location">
           <div className="flex flex-col gap-2 pt-1">
             <CustomSelect
               placeholder="Select Province"
@@ -1162,7 +1175,7 @@ const FilterSidebar: React.FC<FilterSidebarProps> = ({
         </Accordion>
 
         {/* 12. Sort By */}
-        <Accordion title="Sort By" defaultOpen hideDivider>
+        <Accordion title="Sort By" hideDivider>
           <div className="flex flex-col gap-3.5">
             {SORT_OPTIONS.map((opt) => (
               <RadioItem

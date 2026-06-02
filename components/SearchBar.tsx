@@ -215,7 +215,7 @@ export const SearchBar: React.FC<{
         />
 
         <div className="flex items-center shrink-0 pr-[6px]">
-          <div className="relative hidden sm:block" ref={categoryRef}>
+          <div className="relative hidden sm:block pr-4" ref={categoryRef}>
             <button
               onClick={() => setCategoryOpen((prev) => !prev)}
               className="flex items-center gap-1 pl-2 pr-1 py-1 text-[14px] font-medium text-gray-800 hover:text-gray-900 transition-colors"
@@ -241,7 +241,6 @@ export const SearchBar: React.FC<{
               </div>
             )}
           </div>
-          <div className="h-5 w-px bg-gray-300 mx-1 hidden sm:block"></div>
           <button
             onClick={() => handleSearchExecute(searchQuery)}
             className="flex items-center justify-center w-9 h-9 rounded-full text-white bg-brand-blue hover:bg-brand-hover transition-colors"

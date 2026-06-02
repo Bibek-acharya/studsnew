@@ -650,7 +650,7 @@ const CollegesAndCoursesPage: React.FC<CollegesAndCoursesPageProps> = ({
   };
 
   return (
-    <div className="min-h-screen bg-slate-50 flex flex-col items-center justify-start p-4 sm:p-8 gap-8 md:gap-10 font-sans">
+    <div className="min-h-screen flex flex-col items-center justify-start p-4 sm:p-8 gap-8 md:gap-10 font-sans">
       {/* Top Bar for Courses */}
       <div className="bg-blue-50 w-full max-w-[1440px] rounded-md py-5 px-6 md:py-6 md:px-8 overflow-hidden  border border-blue-100">
         <div className="flex gap-4 md:gap-5 overflow-x-auto snap-x pb-2 no-scrollbar">

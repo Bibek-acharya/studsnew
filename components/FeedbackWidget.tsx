@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useAuth } from "@/services/AuthContext";
 
 const faces = [
@@ -38,7 +38,36 @@ export default function FeedbackWidget() {
   const [step, setStep] = useState(1);
   const [rating, setRating] = useState<number | null>(null);
   const [experience, setExperience] = useState("");
+  const [designation, setDesignation] = useState("");
   const [email, setEmail] = useState("");
+  const [submitting, setSubmitting] = useState(false);
+  const [alreadySubmitted, setAlreadySubmitted] = useState(false);
+  const [checking, setChecking] = useState(false);
+
+  useEffect(() => {
+    if (!isAuthenticated) return;
+    const checkSubmitted = async () => {
+      setChecking(true);
+      try {
+        const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080";
+        const token = localStorage.getItem("token") || sessionStorage.getItem("token");
+        const res = await fetch(`${API_BASE}/api/v1/feedback/status`, {
+          headers: token ? { Authorization: `Bearer ${token}` } : {},
+        });
+        if (res.ok) {
+          const data = await res.json();
+          if (data?.data?.submitted) {
+            setAlreadySubmitted(true);
+          }
+        }
+      } catch {
+        // silently fail — widget remains visible
+      } finally {
+        setChecking(false);
+      }
+    };
+    checkSubmitted();
+  }, [isAuthenticated]);
 
   const handleRating = (value: number) => {
     setRating(value);
@@ -56,8 +85,30 @@ export default function FeedbackWidget() {
     setStep(4);
   };
 
-  const submitFeedback = () => {
-    console.log("Feedback Submitted:", { rating, experience, email });
+  const submitFeedback = async () => {
+    if (!rating) return;
+    setSubmitting(true);
+    try {
+      const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080";
+      const token = localStorage.getItem("token") || sessionStorage.getItem("token");
+      await fetch(`${API_BASE}/api/v1/feedback`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          ...(token ? { Authorization: `Bearer ${token}` } : {}),
+        },
+        body: JSON.stringify({
+          rating,
+          experience,
+          designation: designation || undefined,
+          email: email || undefined,
+        }),
+      });
+    } catch {
+      // silently fail
+    } finally {
+      setSubmitting(false);
+    }
     setStep(4);
   };
 
@@ -108,6 +159,12 @@ export default function FeedbackWidget() {
             <h2 className="text-[#202124] text-[13px] font-semibold mb-2 tracking-tight">
               Tell us about your experience...
             </h2>
+            <input
+              value={designation}
+              onChange={(e) => setDesignation(e.target.value)}
+              className="w-full border border-gray-200 rounded-md p-2 text-[13px] focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 mb-2"
+              placeholder="Your designation (optional)..."
+            />
             <textarea
               value={experience}
               onChange={(e) => setExperience(e.target.value)}
@@ -145,9 +202,10 @@ export default function FeedbackWidget() {
               </button>
               <button
                 onClick={submitFeedback}
-                className="bg-brand-blue hover:bg-brand-hover text-white px-4 py-1.5 rounded-md font-medium text-[14px] transition-colors"
+                disabled={submitting}
+                className="bg-brand-blue hover:bg-brand-hover text-white px-4 py-1.5 rounded-md font-medium text-[14px] transition-colors disabled:opacity-50"
               >
-                Submit
+                {submitting ? "Sending..." : "Submit"}
               </button>
             </div>
           </div>
@@ -169,7 +227,7 @@ export default function FeedbackWidget() {
     }
   };
 
-  if (!isAuthenticated) {
+  if (!isAuthenticated || alreadySubmitted || checking) {
     return null;
   }
 

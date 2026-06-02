@@ -967,7 +967,7 @@ const UniversityDetail: React.FC = () => {
           </div>
 
           {/* Right Column - matching college details page */}
-          <div className="space-y-6 lg:col-span-1 lg:w-full lg:max-w-[500px] lg:ml-8 xl:ml-12">
+          <div className="space-y-6 lg:col-span-1 lg:w-full lg:max-w-[400px] lg:ml-8 xl:ml-12">
             <div className="w-full rounded-2xl border border-gray-200 bg-white p-4 sm:p-10">
               <h3 className="mb-8 text-2xl font-bold text-gray-900">Contact Information</h3>
               <div className="flex flex-col gap-6">

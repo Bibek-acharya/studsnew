@@ -26,7 +26,7 @@ export default function FindCoursePage() {
   };
 
   return (
-    <div className="bg-slate-50 min-h-screen font-sans">
+    <div className="min-h-screen font-sans">
       {view === "finder" ? (
         <CourseFinderPage onNavigate={handleNavigate} />
       ) : view === "details" ? (

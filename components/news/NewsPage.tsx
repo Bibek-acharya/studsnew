@@ -2,6 +2,7 @@
 
 import React, { useMemo, useState, useEffect } from "react";
 import Link from "next/link";
+import { FolderOpen } from "lucide-react";
 import Pagination from "@/components/ui/Pagination";
 import { getPublicNews } from "@/services/scholarshipProviderApi";
 import { apiService } from "@/services/api";
@@ -316,8 +317,15 @@ const NewsPage: React.FC = () => {
         </div>
 
         {processedNews.length === 0 && (
-          <div className="text-center py-10 text-slate-500 bg-white border border-gray-200 rounded-md mt-6">
-            No news available for this category.
+          <div className="flex flex-col items-center justify-center py-16">
+            <FolderOpen className="w-32 h-32 text-gray-300 mb-4" />
+            <p className="text-gray-500 text-lg font-medium mb-6">No news information is currently available.</p>
+            <Link
+              href="/"
+              className="bg-[#0000ff] hover:bg-[#0000cc] cursor-pointer text-white font-semibold py-2.5 px-6 rounded-md transition-colors text-sm"
+            >
+              Explore More
+            </Link>
           </div>
         )}
       </section>

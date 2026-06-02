@@ -24,6 +24,7 @@ interface EducationPageProps {
   exams?: any[];
   heroSlides?: any[];
   ads?: any[];
+  testimonials?: Array<{ id: number; user_name: string; rating: number; experience: string }>;
 }
 
 const EducationPage: React.FC<EducationPageProps> = ({
@@ -34,6 +35,7 @@ const EducationPage: React.FC<EducationPageProps> = ({
   exams = [],
   heroSlides = [],
   ads = [],
+  testimonials = [],
 }) => {
   const router = useRouter();
 
@@ -84,9 +86,9 @@ const EducationPage: React.FC<EducationPageProps> = ({
       {/* Section 10: Top College Events */}
       {eventSlides.length > 0 && <CampusEventsSection onNavigate={handleNavigate} events={eventSlides} />}
       {/* Section 11: What Our Students Say */}
-      <TestimonialsSection onNavigate={handleNavigate} />
+      {testimonials.length > 0 && <TestimonialsSection onNavigate={handleNavigate} testimonials={testimonials} />}
       {/* Section 12: Not sure where to start? */}
-      {/* <RecommendedForYouSection onNavigate={onNavigate} /> */}
+    {/* <RecommendedForYouSection onNavigate={onNavigate} /> */}
       {/* Floating Popups */}
       <LandingPopups />
     </div>

@@ -2,6 +2,22 @@ export function isCollegeVerified(value: unknown): boolean {
   return value === true;
 }
 
+export type TabKey =
+  | "about"
+  | "courses"
+  | "admissions"
+  | "offered"
+  | "facilities"
+  | "events"
+  | "scholarship"
+  | "alumni"
+  | "gallery"
+  | "review"
+  | "news"
+  | "download";
+
+export type LevelFilter = "all" | "+2" | "Bachelor" | "Master";
+
 export interface CollegeFilters {
   search: string;
   academic: string[];

@@ -26,7 +26,8 @@ export type NavSection =
   | "organization-settings"
   | "history"
   | "backup"
-  | "settings";
+  | "settings"
+  | "manage-feedback";
 
 export interface VideoParticipant {
   id: string;

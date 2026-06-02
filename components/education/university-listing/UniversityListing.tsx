@@ -86,7 +86,7 @@ const UniversityListing: React.FC<UniversityListingProps> = ({
   );
 
   return (
-    <div className="min-h-screen bg-[#f8fafc] p-4 md:p-8">
+    <div className="min-h-screen p-4 md:p-8">
       <div className="mx-auto max-w-[1400px]">
         <div className="flex flex-col gap-8 lg:flex-row lg:items-start">
           <aside className="w-full shrink-0 lg:w-[300px]">
@@ -101,7 +101,7 @@ const UniversityListing: React.FC<UniversityListingProps> = ({
 
           <main className="min-w-0 flex-1">
             <div className="mb-6 mt-2 flex flex-col items-start justify-between gap-4 sm:flex-row sm:items-center">
-              <div className="text-[14px] font-bold text-gray-800">
+              <div className="text-[14px] text-gray-800">
                 <h1 className="text-base text-gray-900">
                   Showing {filtered.length === 0 ? 0 : (currentPage - 1) * ITEMS_PER_PAGE + 1}-{Math.min(currentPage * ITEMS_PER_PAGE, filtered.length)} of {filtered.length} <span className="font-bold">Universities</span>
                 </h1>

@@ -1,6 +1,8 @@
 "use client";
 
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useRef, useState, useCallback } from "react";
+import TestimonialCard from "@/components/ui/TestimonialCard";
+import { feedbackApi } from "@/services/api";
 
 const partners = [
   { src: "https://projectshiksha.hundredgroupnepal.org/images/sa_new.jpeg", alt: "Sowers Action Nepal" },
@@ -11,48 +13,30 @@ const partners = [
   { src: "https://projectshiksha.hundredgroupnepal.org/images/dari-club.jpeg", alt: "Dari Club USA" },
 ];
 
-const testimonials = [
-  {
-    name: "Sunil Kumar Mandal",
-    role: "Project Shiksha Scholarship Holder-2081",
-    rating: 5.0,
-    date: "22 Apr 2026",
-    pros: "Full financial support, accommodation, meals, and mentoring. The program gave me hope for a better future and the support system is amazing.",
-    cons: "Competitive selection process makes it difficult for many deserving students to get selected.",
-  },
-  {
-    name: "Rita Pariyar",
-    role: "Project Shiksha Scholarship Holder-2081",
-    rating: 5.0,
-    date: "20 Apr 2026",
-    pros: "Safe accommodation, supportive environment, quality education. As a girl from a remote village, this scholarship opened doors I never thought possible.",
-    cons: "Limited seats available. Many deserving students miss out due to the limited capacity.",
-  },
-  {
-    name: "Aman Thapa",
-    role: "Partially Funded Recipient-2081",
-    rating: 4.0,
-    date: "18 Apr 2026",
-    pros: "Tuition support, guidance, networking opportunities. The program is well-organized and the team is very supportive throughout the journey.",
-    cons: "Need more partial scholarship options. The current coverage is limited and doesn't cover accommodation and meals.",
-  },
-  {
-    name: "Sita Devi",
-    role: "Fully Funded Recipient-2081",
-    rating: 5.0,
-    date: "25 Apr 2026",
-    pros: "Excellent mentorship, career guidance, and a supportive community. The scholarship changed my life and opened doors to opportunities I never dreamed possible.",
-    cons: "The application process could be simplified for students from remote areas with limited internet access.",
-  },
-];
-
 export default function AboutPage() {
   const [showReviewModal, setShowReviewModal] = useState(false);
   const [showPartnerModal, setShowPartnerModal] = useState(false);
   const [selectedRating, setSelectedRating] = useState(0);
   const [hoverRating, setHoverRating] = useState(0);
+  const [testimonials, setTestimonials] = useState<any[]>([]);
+  const [submitting, setSubmitting] = useState(false);
+  const [submitted, setSubmitted] = useState(false);
   const testimonialRef = useRef<HTMLDivElement>(null);
   const statsRef = useRef<HTMLDivElement>(null);
+  const formRef = useRef<HTMLFormElement>(null);
+
+  const fetchTestimonials = useCallback(async () => {
+    try {
+      const res = await feedbackApi.getPublicFeedbacks();
+      setTestimonials(res.data || []);
+    } catch {
+      // silently fail, testimonials section won't render
+    }
+  }, []);
+
+  useEffect(() => {
+    fetchTestimonials();
+  }, [fetchTestimonials]);
 
   useEffect(() => {
     const counters = document.querySelectorAll<HTMLElement>(".counter");
@@ -110,15 +94,43 @@ export default function AboutPage() {
     }
   };
 
-  const handleReviewSubmit = (e: React.FormEvent) => {
+  const formatTestimonialDate = (dateStr?: string) => {
+    if (!dateStr) return "";
+    try {
+      return new Date(dateStr).toLocaleDateString("en-US", { day: "numeric", month: "short", year: "numeric" });
+    } catch {
+      return "";
+    }
+  };
+
+  const handleReviewSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (selectedRating === 0) {
       alert("Please select a rating.");
       return;
     }
-    alert("Thank you for your review!");
-    setShowReviewModal(false);
-    setSelectedRating(0);
+    const form = formRef.current;
+    if (!form) return;
+    const formData = new FormData(form);
+    const name = formData.get("name") as string;
+    const designation = formData.get("designation") as string;
+    const review = formData.get("review") as string;
+
+    setSubmitting(true);
+    try {
+      await feedbackApi.submitTestimonial({ name, designation, rating: selectedRating, review });
+      setSubmitted(true);
+      setTimeout(() => {
+        setShowReviewModal(false);
+        setSelectedRating(0);
+        setSubmitted(false);
+        fetchTestimonials();
+      }, 2000);
+    } catch {
+      alert("Failed to submit review. Please try again.");
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   const handlePartnerSubmit = (e: React.FormEvent) => {
@@ -132,7 +144,7 @@ export default function AboutPage() {
       <main className="flex-grow flex flex-col items-center px-4 overflow-x-hidden pt-8 md:pt-12">
         {/* ==================== HERO SECTION ==================== */}
         <section
-          className="relative w-full max-w-350 mx-auto mb-16 md:mb-24 rounded-2xl h-[80svh] min-h-[450px] max-h-[700px] bg-cover bg-center overflow-hidden"
+          className="relative w-full max-w-350 mx-auto mb-16 md:mb-24 rounded-2xl h-[80svh] min-h-[450px] max-h-[70px] bg-cover bg-center overflow-hidden"
           style={{
             backgroundImage:
               "url('https://images.unsplash.com/photo-1522071820081-009f0129c71c?auto=format&fit=crop&w=2850&q=80')",
@@ -346,6 +358,7 @@ export default function AboutPage() {
         </section>
 
         {/* ==================== TESTIMONIALS ==================== */}
+        {testimonials.length > 0 && (
         <section className="w-full max-w-350 mb-20 md:mb-32 px-2">
           <h2 className="text-3xl md:text-4xl font-bold text-center text-slate-900 mb-4">Testimonials</h2>
           <p className="text-center text-gray-500 text-[15px] mb-8 md:mb-12">What our scholarship recipients have to say about us</p>
@@ -355,49 +368,15 @@ export default function AboutPage() {
             className="flex flex-nowrap gap-6 overflow-x-auto no-scrollbar pb-2"
             style={{ scrollBehavior: "smooth", scrollSnapType: "x mandatory" }}
           >
-            {testimonials.map((t, i) => (
-              <div
-                key={i}
-                className="bg-white rounded-xl shadow-sm border border-gray-100 relative overflow-hidden pb-8 flex-shrink-0 w-[350px] md:w-[400px]"
-                style={{ scrollSnapAlign: "start" }}
-              >
-                <div className="absolute left-0 top-[36px] w-[4px] h-[48px] bg-blue-600 rounded-tr-[2px] rounded-br-[2px]" />
-                <div className="p-6 md:p-8 pt-7">
-                  <div className="flex items-start gap-4">
-                    <div className="w-[60px] h-[60px] rounded-full bg-blue-100 border-2 border-white overflow-hidden flex items-end justify-center flex-shrink-0 shadow-sm">
-                      <svg width="50" height="50" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
-                        <path d="M6 38C6 32 14 26 20 26C26 26 34 32 34 38" fill="#0000ff" />
-                        <path d="M10 40C10 33 15 28 20 28C25 28 30 33 30 40" fill="#60a5fa" />
-                        <rect x="17" y="18" width="6" height="10" fill="#fca5a5" />
-                        <circle cx="20" cy="15" r="7" fill="#ffbda7" />
-                        <path d="M13 14C13 9 17 6 20 6C23 6 27 9 27 14C27 15 28 17 25 18C25 15 22 13 20 13C18 13 15 15 15 18C12 17 13 15 13 14Z" fill="#3f3f46" />
-                      </svg>
-                    </div>
-                    <div className="flex flex-col mt-[-2px]">
-                      <h2 className="text-blue-600 font-bold text-lg leading-tight">{t.name}</h2>
-                      <h3 className="text-gray-600 font-medium text-[15px] mt-0.5">{t.role}</h3>
-                      <div className="flex items-center gap-2 mt-2">
-                        <div className="bg-blue-600 text-white flex items-center gap-1 px-1.5 py-0.5 rounded-[4px] text-xs font-bold shadow-sm">
-                          <svg width="10" height="10" viewBox="0 0 24 24" fill="white" xmlns="http://www.w3.org/2000/svg">
-                            <path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z" fill="white" />
-                          </svg>
-                          {t.rating}
-                        </div>
-                        <span className="text-gray-400 text-xs font-bold">.</span>
-                        <span className="text-gray-400 text-[13px]">updated on {t.date}</span>
-                      </div>
-                    </div>
-                  </div>
-                  <div className="mt-6 space-y-4">
-                    <div>
-                      <p className="text-gray-600 text-[15px] leading-relaxed">{t.pros}</p>
-                    </div>
-                    <div>
-                      <p className="text-gray-600 text-[15px] leading-relaxed">{t.cons}</p>
-                    </div>
-                  </div>
-                </div>
-              </div>
+            {testimonials.map((t) => (
+              <TestimonialCard
+                key={t.id}
+                name={t.user_name || "Anonymous"}
+                rating={t.rating}
+                text={t.experience}
+                imageUrl={t.image_url}
+                date={formatTestimonialDate(t.created_at)}
+              />
             ))}
 
             <div
@@ -435,6 +414,7 @@ export default function AboutPage() {
             </button>
           </div>
         </section>
+        )}
       </main>
 
       {/* ==================== REVIEW MODAL ==================== */}
@@ -463,10 +443,11 @@ export default function AboutPage() {
                   <i className="fa-solid fa-xmark text-gray-500 text-lg" />
                 </button>
               </div>
-              <form className="space-y-5" onSubmit={handleReviewSubmit}>
+              <form ref={formRef} className="space-y-5" onSubmit={handleReviewSubmit}>
                 <div>
                   <label className="block text-[14px] font-semibold text-gray-700 mb-1.5">Name <span className="text-red-500">*</span></label>
                   <input
+                    name="name"
                     type="text"
                     className="w-full border border-gray-300 rounded py-3 px-4 text-[15px] text-gray-800 outline-none focus:border-[#0000ff] transition-all bg-white"
                     placeholder="Enter your full name"
@@ -476,6 +457,7 @@ export default function AboutPage() {
                 <div>
                   <label className="block text-[14px] font-semibold text-gray-700 mb-1.5">Designation <span className="text-red-500">*</span></label>
                   <input
+                    name="designation"
                     type="text"
                     className="w-full border border-gray-300 rounded py-3 px-4 text-[15px] text-gray-800 outline-none focus:border-[#0000ff] transition-all bg-white"
                     placeholder="Enter your designation"
@@ -506,20 +488,31 @@ export default function AboutPage() {
                 <div>
                   <label className="block text-[14px] font-semibold text-gray-700 mb-1.5">Write a Review <span className="text-red-500">*</span></label>
                   <textarea
+                    name="review"
                     className="w-full border border-gray-300 rounded py-3 px-4 text-[15px] text-gray-800 outline-none focus:border-[#0000ff] transition-all bg-white resize-none"
                     rows={4}
                     placeholder="Share your experience..."
                     required
                   />
                 </div>
-                <div className="pt-4">
-                  <button
-                    type="submit"
-                    className="w-full bg-[#0000ff] hover:bg-[#0000cc] text-white font-bold text-[16px] py-3.5 rounded-lg transition-all cursor-pointer"
-                  >
-                    Submit Review
-                  </button>
-                </div>
+                {submitted ? (
+                  <div className="pt-4 text-center">
+                    <div className="mb-3 flex h-12 w-12 items-center justify-center rounded-full bg-green-100 mx-auto">
+                      <i className="fa-solid fa-check text-green-600 text-xl"></i>
+                    </div>
+                    <p className="text-gray-900 font-semibold">Thank you for your review!</p>
+                  </div>
+                ) : (
+                  <div className="pt-4">
+                    <button
+                      type="submit"
+                      disabled={submitting}
+                      className="w-full bg-[#0000ff] hover:bg-[#0000cc] text-white font-bold text-[16px] py-3.5 rounded-lg transition-all cursor-pointer disabled:opacity-50"
+                    >
+                      {submitting ? "Submitting..." : "Submit Review"}
+                    </button>
+                  </div>
+                )}
               </form>
             </div>
           </div>
