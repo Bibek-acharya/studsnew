@@ -1506,6 +1506,28 @@ export const writtenExamApi = {
     return callApi(`/api/v1/scholarship-providers/written-exams/${examId}/results?${qp}`);
   },
 
+  async exportResults(examId: number, params?: {
+    sort_by?: string;
+    sort_order?: string;
+    marks_min?: number;
+    marks_max?: number;
+    school_type?: string;
+    gender?: string;
+    exam_center?: string;
+    search?: string;
+  }): Promise<{ results: WrittenExamResultData[]; total: number }> {
+    const qp = new URLSearchParams();
+    if (params?.sort_by) qp.set("sort_by", params.sort_by);
+    if (params?.sort_order) qp.set("sort_order", params.sort_order);
+    if (params?.marks_min != null) qp.set("marks_min", String(params.marks_min));
+    if (params?.marks_max != null) qp.set("marks_max", String(params.marks_max));
+    if (params?.school_type) qp.set("school_type", params.school_type);
+    if (params?.gender) qp.set("gender", params.gender);
+    if (params?.exam_center) qp.set("exam_center", params.exam_center);
+    if (params?.search) qp.set("search", params.search);
+    return callApi(`/api/v1/scholarship-providers/written-exams/${examId}/results/export?${qp}`);
+  },
+
   async batchImportResults(examId: number, data: { results: BatchImportItem[] }): Promise<BatchImportResponse> {
     return callApi<BatchImportResponse>(`/api/v1/scholarship-providers/written-exams/${examId}/results/batch-import`, {
       method: "POST",

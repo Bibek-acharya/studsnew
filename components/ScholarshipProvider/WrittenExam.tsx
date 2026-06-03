@@ -574,8 +574,7 @@ const WrittenExam: React.FC<{ onNavigate?: (section: string) => void }> = memo((
   const handleExport = async () => {
     if (!exam?.id) return;
     try {
-      const res = await writtenExamApi.getResultsPaginated(exam.id, {
-        page: 1, limit: 100000,
+      const res = await writtenExamApi.exportResults(exam.id, {
         sort_by: sortBy, sort_order: sortOrder,
         marks_min: marksMin ? Number(marksMin) : undefined,
         marks_max: marksMax ? Number(marksMax) : undefined,
