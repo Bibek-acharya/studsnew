@@ -35,6 +35,11 @@ const WrittenExam: React.FC<{ onNavigate?: (section: string) => void }> = memo((
   });
   const [exam, setExam] = useState<WrittenExamData | null>(null);
   const [appsMap, setAppsMap] = useState<Record<number, ProviderApplication>>({});
+  const [filterOptions, setFilterOptions] = useState<{ school_types: string[]; genders: string[]; exam_centers: string[] }>({
+    school_types: [],
+    genders: [],
+    exam_centers: [],
+  });
   const [loading, setLoading] = useState(false);
 
   // Search (client-side)
@@ -98,21 +103,9 @@ const WrittenExam: React.FC<{ onNavigate?: (section: string) => void }> = memo((
   const [examCenterFilter, setExamCenterFilter] = useState("");
   const [loadingResults, setLoadingResults] = useState(false);
 
-  const schoolTypes = useMemo(() => {
-    const types = new Set<string>();
-    for (const app of Object.values(appsMap)) {
-      if (app.school_type) types.add(app.school_type);
-    }
-    return Array.from(types).sort();
-  }, [appsMap]);
+  const schoolTypes = useMemo(() => filterOptions.school_types, [filterOptions]);
 
-  const genders = useMemo(() => {
-    const g = new Set<string>();
-    for (const app of Object.values(appsMap)) {
-      if (app.gender) g.add(app.gender);
-    }
-    return Array.from(g).sort();
-  }, [appsMap]);
+  const genders = useMemo(() => filterOptions.genders, [filterOptions]);
 
   const fetchPaginatedResults = useCallback(async () => {
     if (!exam?.id) return;
@@ -166,20 +159,12 @@ const WrittenExam: React.FC<{ onNavigate?: (section: string) => void }> = memo((
   const getOrCreateExam = useCallback(async (sid: number) => {
     setLoading(true);
     try {
-      const [exams, appsResp] = await Promise.all([
-        writtenExamApi.getList({ scholarship_id: sid }),
-        scholarshipProviderApi.getApplications({ scholarship_id: String(sid), page: 1, limit: 100000 }),
-      ]);
-
-      // Build apps lookup map
-      const map: Record<number, ProviderApplication> = {};
-      for (const a of appsResp.applications) {
-        map[a.id] = a;
-      }
-      setAppsMap(map);
+      const exams = await writtenExamApi.getList({ scholarship_id: sid });
 
       if (exams.exams && exams.exams.length > 0) {
-        setExam(await writtenExamApi.getById(exams.exams[0].id));
+        const examData = await writtenExamApi.getById(exams.exams[0].id);
+        setExam(examData);
+        writtenExamApi.getFilterOptions(examData.id).then(opts => setFilterOptions(opts)).catch(() => {});
       } else {
         const created = await writtenExamApi.create({
           scholarship_id: sid,
@@ -187,13 +172,13 @@ const WrittenExam: React.FC<{ onNavigate?: (section: string) => void }> = memo((
           status: "draft",
         });
         setExam(created);
+        writtenExamApi.getFilterOptions(created.id).then(opts => setFilterOptions(opts)).catch(() => {});
       }
 
       checkPublished(sid);
     } catch {
       toast.error("Failed to load written exam");
       setExam(null);
-      setAppsMap({});
     } finally {
       setLoading(false);
     }
@@ -248,15 +233,7 @@ const WrittenExam: React.FC<{ onNavigate?: (section: string) => void }> = memo((
     );
   }, [paginatedResults, search]);
 
-  const examCenters = useMemo(() => {
-    const centers = new Set<string>();
-    const currentScholarshipId = exam?.scholarship_id;
-    for (const app of Object.values(appsMap)) {
-      if (app.scholarship_id !== currentScholarshipId) continue;
-      if (app.exam_center) centers.add(app.exam_center);
-    }
-    return Array.from(centers).sort();
-  }, [appsMap, exam?.scholarship_id]);
+  const examCenters = useMemo(() => filterOptions.exam_centers, [filterOptions]);
 
   // --- Add Student Modal ---
   const openAddModal = () => {
@@ -329,19 +306,6 @@ const WrittenExam: React.FC<{ onNavigate?: (section: string) => void }> = memo((
         marks_obtained: Number(addMarks),
       });
       setExam(updated);
-      // Merge looked-up student into apps map so name shows immediately
-      if (lookedUpStudent && !appsMap[lookedUpStudent.application_id]) {
-        setAppsMap((prev) => ({
-          ...prev,
-          [lookedUpStudent.application_id]: {
-            id: lookedUpStudent.application_id,
-            first_name: lookedUpStudent.full_name.split(" ")[0] || "",
-            last_name: lookedUpStudent.full_name.split(" ").slice(1).join(" ") || "",
-            stream: lookedUpStudent.stream,
-            exam_center: lookedUpStudent.exam_center,
-          } as ProviderApplication,
-        }));
-      }
       setIsPublished(false);
       toast.success("Student added");
       closeAddModal();
@@ -360,9 +324,7 @@ const WrittenExam: React.FC<{ onNavigate?: (section: string) => void }> = memo((
   };
 
   const getStudentName = (r: WrittenExamResultData) => {
-    if (r.student_name) return r.student_name;
-    const app = appsMap[r.application_id];
-    return app ? `${app.first_name} ${app.last_name}` : "—";
+    return r.student_name || "—";
   };
 
   const handleEditMarks = async () => {
@@ -412,7 +374,7 @@ const WrittenExam: React.FC<{ onNavigate?: (section: string) => void }> = memo((
     }
   };
 
-  const openImportModal = () => {
+  const openImportModal = async () => {
     setImportOpen(true);
     setImportRows([]);
     setImportResult(null);
@@ -422,6 +384,18 @@ const WrittenExam: React.FC<{ onNavigate?: (section: string) => void }> = memo((
     setReportingTime("");
     setRequiredDocs([]);
     setNewDocInput("");
+    if (Object.keys(appsMap).length === 0 && exam?.scholarship_id) {
+      try {
+        const appsResp = await scholarshipProviderApi.getApplications({ scholarship_id: String(exam.scholarship_id), page: 1, limit: 100000 });
+        const map: Record<number, ProviderApplication> = {};
+        for (const a of appsResp.applications) {
+          map[a.id] = a;
+        }
+        setAppsMap(map);
+      } catch {
+        // silently fail, import will show notfound for unmatched rolls
+      }
+    }
   };
 
   const closeImportModal = () => {
@@ -584,15 +558,15 @@ const WrittenExam: React.FC<{ onNavigate?: (section: string) => void }> = memo((
         search: search || undefined,
       });
       const rows = res.results.map((r) => {
-        const app = appsMap[r.application_id];
         return {
-          "Student Name": app ? `${app.first_name || ""} ${app.last_name || ""}`.trim() || "—" : "—",
+          "Student Name": r.student_name || "—",
           "Application ID": `APP-${APP_ID_YEAR}-${String(r.application_id).padStart(3, "0")}`,
-          "Symbol No": app?.roll_number || r.roll_no || "—",
-          Gender: app?.gender || "—",
-          Stream: app?.stream || "—",
-          "School Type": app?.school_type || "—",
-          "Exam Center": app?.exam_center || r.exam_center || "—",
+          "Symbol No": r.roll_no || "—",
+          Gender: r.gender || "—",
+          GPA: r.gpa ?? "—",
+          Stream: r.stream || "—",
+          "School Type": r.school_type || "—",
+          "Exam Center": r.exam_center || "—",
           Marks: r.marks_obtained ?? "—",
           Status: r.marks_obtained != null ? (r.marks_obtained >= 40 ? "Pass" : "Fail") : "—",
           "Interview Location": r.interview_location || "",
@@ -795,13 +769,12 @@ const WrittenExam: React.FC<{ onNavigate?: (section: string) => void }> = memo((
                     </thead>
                     <tbody className="divide-y divide-gray-100">
                       {paginatedResults.map((r) => {
-                        const app = appsMap[r.application_id];
-                        const studentName = r.student_name || (app ? `${app.first_name} ${app.last_name}` : "—");
-                        const rollNo = r.roll_no || app?.roll_number || "—";
-                        const gender = app?.gender || (r as any).gender || "—";
-                        const stream = r.stream || app?.stream;
-                        const schoolType = app?.school_type || "—";
-                        const examCenter = r.exam_center || app?.exam_center || "—";
+                        const studentName = r.student_name || "—";
+                        const rollNo = r.roll_no || "—";
+                        const gender = r.gender || "—";
+                        const stream = r.stream;
+                        const schoolType = r.school_type || "—";
+                        const examCenter = r.exam_center || "—";
                         const streamColor = STREAM_COLORS[stream || ""] || "bg-gray-100 text-gray-700";
                         const statusClass = r.marks_obtained != null
                           ? (r.marks_obtained >= 40 ? "bg-green-100 text-green-700" : "bg-red-100 text-red-700")
@@ -1278,7 +1251,7 @@ const WrittenExam: React.FC<{ onNavigate?: (section: string) => void }> = memo((
             <div className="px-6 py-4">
               <h2 className="text-lg font-bold text-gray-900 mb-2">Publish Result</h2>
               <p className="text-sm text-gray-600">
-                This will publish the written exam results for <strong>{exam?.results?.length || 0}</strong> students.
+                This will publish the written exam results for <strong>{totalCount}</strong> students.
                 Interview location and required documents will also be included. Continue?
               </p>
             </div>
@@ -1295,19 +1268,18 @@ const WrittenExam: React.FC<{ onNavigate?: (section: string) => void }> = memo((
                   if (!exam?.id || !scholarshipId) return;
                   setPublishing(true);
                   try {
-                    const payload = (exam.results || []).map((r) => ({
+                    const allResults = await writtenExamApi.exportResults(exam.id);
+                    const payload = allResults.results.map((r) => ({
                       application_id: r.application_id,
-                      student_name: appsMap[r.application_id]
-                        ? `${appsMap[r.application_id].first_name} ${appsMap[r.application_id].last_name}`
-                        : "",
+                      student_name: r.student_name || "",
                       marks_obtained: r.marks_obtained,
                       interview_location: r.interview_location || "",
                       interview_date: r.interview_date || "",
                       reporting_time: r.reporting_time || "",
                       required_documents: r.required_documents || [],
-                      stream: appsMap[r.application_id]?.stream || "",
-                      exam_center: appsMap[r.application_id]?.exam_center || "",
-                      roll_number: appsMap[r.application_id]?.roll_number || "",
+                      stream: r.stream || "",
+                      exam_center: r.exam_center || "",
+                      roll_number: r.roll_no || "",
                     }));
                     await scholarshipProviderApi.createResult({
                       scholarship_id: Number(scholarshipId),
@@ -1324,7 +1296,7 @@ const WrittenExam: React.FC<{ onNavigate?: (section: string) => void }> = memo((
                     setPublishing(false);
                   }
                 }}
-                disabled={publishing || (exam?.results?.length ?? 0) === 0}
+                disabled={publishing || totalCount === 0}
                 className="px-6 py-2.5 bg-green-600 text-white rounded-lg font-medium hover:bg-green-700 disabled:opacity-50 flex items-center gap-2"
               >
                 {publishing ? <><Loader2 className="w-4 h-4 animate-spin" /> Publishing...</> : "Publish"}

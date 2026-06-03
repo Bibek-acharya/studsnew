@@ -1391,6 +1391,9 @@ export interface WrittenExamResultData {
   stream?: string;
   exam_center?: string;
   roll_no?: string;
+  gender?: string;
+  school_type?: string;
+  gpa?: number;
   interview_location?: string;
   interview_date?: string;
   reporting_time?: string;
@@ -1533,6 +1536,10 @@ export const writtenExamApi = {
       method: "POST",
       body: JSON.stringify(data),
     });
+  },
+
+  async getFilterOptions(examId: number): Promise<{ school_types: string[]; genders: string[]; exam_centers: string[] }> {
+    return callApi(`/api/v1/scholarship-providers/written-exams/${examId}/filter-options`);
   },
 };
 
