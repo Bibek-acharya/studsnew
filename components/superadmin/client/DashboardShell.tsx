@@ -26,6 +26,7 @@ import {
   UserPlus,
   ClipboardList,
   BookOpen,
+  School,
 } from "lucide-react";
 
 const OverviewSection = lazy(() => import("./OverviewSection"));
@@ -64,6 +65,9 @@ const AdvertiseRequestSection = lazy(() => import("./AdvertiseRequestSection"));
 const ManageAdsSection = lazy(() => import("./ManageAdsSection"));
 const RejectedInstitutionsSection = lazy(() => import("./RejectedInstitutionsSection"));
 const FeedbackListSection = lazy(() => import("./FeedbackListSection"));
+const AddUniversitySection = lazy(() => import("./AddUniversitySection"));
+const ListUniversitiesSection = lazy(() => import("./ListUniversitiesSection"));
+const DraftUniversitiesSection = lazy(() => import("./DraftUniversitiesSection"));
 
 type SectionType =
   | "overview"
@@ -113,7 +117,11 @@ type SectionType =
   | "news-directory"
   | "events-directory"
   | "blogs-directory"
-  | "manage-feedback";
+  | "manage-feedback"
+  | "create-universities"
+  | "draft-universities"
+  | "list-universities"
+  | `edit-university-${number}`;
 
 interface NavChild {
   section: SectionType;
@@ -131,6 +139,7 @@ const navItems: NavItemData[] = [
   { icon: <LayoutDashboard size={20} />, label: "Overview", section: "overview" },
   { icon: <GraduationCap size={20} />, label: "Student Dashboard", section: "student-overview", children: [{ section: "student-overview", label: "Overview" }, { section: "student-manage-user", label: "Manage User" }, { section: "student-faq", label: "FAQ" }] },
   { icon: <Building2 size={20} />, label: "Institution Dashboard", section: "institution-overview", children: [{ section: "add-college", label: "Create Institution" }, { section: "manage-college", label: "Listed Institutions" }, { section: "manage-profile-access", label: "Manage Profile Access" }, { section: "advertise-request", label: "Advertise Request" }, { section: "pending-institutions", label: "Pending Institutions Request" }, { section: "rejected-institutions", label: "Rejected Institutions" }] },
+  { icon: <School size={20} />, label: "Manage Universities", section: "create-universities", children: [{ section: "create-universities", label: "Create Universities" }, { section: "draft-universities", label: "Drafts" }, { section: "list-universities", label: "List Universities" }] },
   { icon: <HandHeart size={20} />, label: "Provider Dashboard", section: "provider-overview", children: [{ section: "provider-overview", label: "Overview" }, { section: "manage-scholarship", label: "Manage Scholarship" }, { section: "pending-providers", label: "Pending Providers" }, { section: "scholarship-provider", label: "Scholarship Provider" }, { section: "provider-calendar", label: "Calendar" }, { section: "provider-evaluation", label: "Evaluation & Results" }, { section: "manage-news", label: "Manage News" }, { section: "manage-events", label: "Manage Events" }, { section: "manage-blog", label: "Manage Blogs" }, { section: "assign-access", label: "Assign Access" }] },
   { icon: <ShieldCheck size={20} />, label: "Assign Access", section: "access-control" },
   { icon: <CreditCard size={20} />, label: "Revenue", section: "payment" },
@@ -200,6 +209,12 @@ export default function DashboardShell() {
         return <AddCollegeSection setActiveSection={navigateTo} editId={editId} />;
       }
     }
+    if (activeSection.startsWith("edit-university-")) {
+      const editId = parseInt(activeSection.replace("edit-university-", ""), 10);
+      if (!isNaN(editId)) {
+        return <AddUniversitySection setActiveSection={navigateTo} editId={editId} />;
+      }
+    }
     switch (activeSection) {
       case "overview":
         return <OverviewSection setActiveSection={navigateTo} />;
@@ -252,7 +267,8 @@ export default function DashboardShell() {
       case "settings":
         return <SettingsSection />;
       case "user-management":
-        return <UserListSection setActiveSection={navigateTo} />;
+      case "student-manage-user":
+        return <UserListSection />;
       case "add-user":
         return <AddUserSection setActiveSection={navigateTo} />;
       case "manage-profile-access":
@@ -273,6 +289,12 @@ export default function DashboardShell() {
         return <ManageAdsSection />;
       case "manage-feedback":
         return <FeedbackListSection />;
+      case "create-universities":
+        return <AddUniversitySection setActiveSection={navigateTo} />;
+      case "draft-universities":
+        return <DraftUniversitiesSection setActiveSection={navigateTo} />;
+      case "list-universities":
+        return <ListUniversitiesSection setActiveSection={navigateTo} />;
       default:
         return <PlaceholderSection section={activeSection} />;
     }

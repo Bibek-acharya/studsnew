@@ -9,7 +9,6 @@ interface Program {
 
 interface CollegeCardProps {
   images: string[];
-  tag: { text: string; color: string };
   collegeName: string;
   rating: number;
   type: string;
@@ -25,7 +24,6 @@ interface CollegeCardProps {
 
 export default function CollegeCard({
   images,
-  tag,
   collegeName,
   rating,
   type,
@@ -60,29 +58,7 @@ export default function CollegeCard({
     return () => clearInterval(interval);
   }, [currentSlide]);
 
-  const statusColor = (status: string) => {
-    switch (status) {
-      case "Closing Soon":
-        return "text-[#ef4444]";
-      case "Opening Soon":
-      case "Seats Available":
-        return "text-[#059669]";
-      default:
-        return "text-[#059669]";
-    }
-  };
-
-  const statusBg = (status: string) => {
-    switch (status) {
-      case "Closing Soon":
-        return "bg-[#ef4444]";
-      case "Opening Soon":
-      case "Seats Available":
-        return "bg-[#059669]";
-      default:
-        return "bg-[#059669]";
-    }
-  };
+  const displayUrl = website?.replace(/^https?:\/\//, "").replace(/\/+$/, "") || "";
 
   return (
     <div 
@@ -128,11 +104,6 @@ export default function CollegeCard({
               <path fillRule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clipRule="evenodd" />
             </svg>
           </button>
-
-          {/* Dynamic Status Tag */}
-          <div className={`absolute top-2.5 left-0 ${tag.color} text-white text-[10px] font-bold px-2.5 py-1 tracking-wide rounded-r-md z-10 uppercase `}>
-            {tag.text}
-          </div>
 
           {/* Tiny Integrated Text Links */}
           <div className="absolute bottom-2 left-2 z-20 flex items-center gap-1 bg-black/30 backdrop-blur-sm px-1.5 py-0.5 rounded border border-white/10">
@@ -205,7 +176,7 @@ export default function CollegeCard({
           <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2">
             <path strokeLinecap="round" strokeLinejoin="round" d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9" />
           </svg>
-          <span>{website}</span>
+          <span>{displayUrl}</span>
         </div>
 
         <hr className="border-gray-100 mb-2" />
@@ -219,15 +190,8 @@ export default function CollegeCard({
         {/* Programs List */}
         <ul className="space-y-1 mb-2">
           {programs.map((program, index) => (
-            <li key={index} className="flex justify-between items-center text-[12.5px]">
-              <span className="font-semibold text-[#1e293b]">{program.name}</span>
-              <div className={`flex items-center gap-1.5 font-medium text-[11px] ${statusColor(program.status)}`}>
-                <span className="relative flex h-2 w-2 justify-center items-center">
-                  <span className={`animate-ping absolute inline-flex h-full w-full rounded-full opacity-75 ${statusBg(program.status)}`}></span>
-                  <span className={`relative inline-flex rounded-full h-1.5 w-1.5 ${statusBg(program.status)}`}></span>
-                </span>
-                {program.status}
-              </div>
+            <li key={index} className="text-[12.5px] font-semibold text-[#1e293b]">
+              {program.name}
             </li>
           ))}
         </ul>

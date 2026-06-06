@@ -145,6 +145,14 @@ export interface ContactInquiryResponse {
   message: string;
 }
 
+export interface SuperadminDashboardStats {
+  total_students: number;
+  total_institutions: number;
+  total_providers: number;
+  pending_institutions: number;
+  pending_providers: number;
+}
+
 export interface PublicNotificationItem {
   id: number;
   created_at: string;
@@ -1849,6 +1857,35 @@ export const apiService = {
       body: JSON.stringify(data),
       authToken: token || undefined,
     });
+  },
+
+  async getSuperadminDashboardStats(): Promise<{ data: SuperadminDashboardStats }> {
+    return apiRequest<{ data: SuperadminDashboardStats }>("/api/v1/superadmin/dashboard/stats");
+  },
+
+  async listAllUsers(params?: { search?: string; page?: number; limit?: number }): Promise<{ data: { users: any[]; pagination: any } }> {
+    const query = new URLSearchParams();
+    if (params?.search) query.set("search", params.search);
+    if (params?.page) query.set("page", String(params.page));
+    if (params?.limit) query.set("limit", String(params.limit));
+    const qs = query.toString();
+    return apiRequest<{ data: { users: any[]; pagination: any } }>(`/api/v1/superadmin/users${qs ? `?${qs}` : ""}`);
+  },
+
+  async getUserDetail(id: number): Promise<{ data: any }> {
+    return apiRequest<{ data: any }>(`/api/v1/superadmin/users/${id}`);
+  },
+
+  async suspendUser(id: number): Promise<{ message: string }> {
+    return apiRequest<{ message: string }>(`/api/v1/superadmin/users/${id}/suspend`, { method: "PUT" });
+  },
+
+  async reinstateUser(id: number): Promise<{ message: string }> {
+    return apiRequest<{ message: string }>(`/api/v1/superadmin/users/${id}/reinstate`, { method: "PUT" });
+  },
+
+  async getUserEducation(id: number): Promise<{ data: any[] }> {
+    return apiRequest<{ data: any[] }>(`/api/v1/superadmin/users/${id}/education`);
   },
 
   async listPendingInstitutions(): Promise<{ data: any[]; message: string }> {

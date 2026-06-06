@@ -50,8 +50,8 @@ const CollegeHeader: React.FC<CollegeHeaderProps> = ({
   return (
     <>
       <div
-        className="relative h-55 w-full bg-brand-blue bg-center md:h-90"
-        style={{ ...(instBanner ? { backgroundImage: `url('${instBanner}')` } : {}) }}
+        className="relative w-full bg-brand-blue bg-cover bg-center bg-no-repeat aspect-[16/3]"
+        style={instBanner ? { backgroundImage: `url('${instBanner}')` } : undefined}
       >
         <div className="absolute bottom-10 right-4 z-20 md:bottom-6 md:right-6">
           {isVerified ? (

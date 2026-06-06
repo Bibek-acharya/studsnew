@@ -43,6 +43,7 @@ const ProfilePage: React.FC = () => {
   const [tiktokUrl, setTiktokUrl] = useState("");
   const [youtubeUrl, setYoutubeUrl] = useState("");
   const [linkedinUrl, setLinkedinUrl] = useState("");
+  const [affiliation, setAffiliation] = useState("");
   const [brochureUrl, setBrochureUrl] = useState("");
   const [about, setAbout] = useState("");
   const [vision, setVision] = useState("");
@@ -144,6 +145,7 @@ const ProfilePage: React.FC = () => {
         setTiktokUrl(data.tiktok_url || "");
         setYoutubeUrl(data.youtube_url || "");
         setLinkedinUrl(data.linkedin_url || "");
+        setAffiliation(data.affiliation || "");
         setBrochureUrl(data.brochure_data?.url || "");
         setLogoUrl(data.logo_url || "");
         setBannerUrl(data.banner_url || "");
@@ -290,6 +292,7 @@ const ProfilePage: React.FC = () => {
         tiktok_url: tiktokUrl,
         youtube_url: youtubeUrl,
         linkedin_url: linkedinUrl,
+        affiliation,
         brochure_data: brochureUrl ? { url: brochureUrl } : null,
         logo_url: logoUrl,
         banner_url: bannerUrl,
@@ -466,6 +469,10 @@ const ProfilePage: React.FC = () => {
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">Contact Phone</label>
                 <input type="text" className={inputClass} placeholder="01-4XXXXXX" value={contactPhone} onChange={e => setContactPhone(e.target.value)} />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Affiliation</label>
+                <input type="text" className={inputClass} placeholder="Tribhuvan University" value={affiliation} onChange={e => setAffiliation(e.target.value)} />
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">Google Maps Embed URL</label>
