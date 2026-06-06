@@ -1284,6 +1284,10 @@ export const apiService = {
     return apiRequest<CollegeFilterCountsResponse>("/api/v1/colleges/filter-counts");
   },
 
+  async getPublicInstitutionFilterCounts(): Promise<CollegeFilterCountsResponse> {
+    return apiRequest<CollegeFilterCountsResponse>("/api/v1/institutions/public/filter-counts");
+  },
+
   async getUniversities(params?: {
     search?: string;
     type?: string;

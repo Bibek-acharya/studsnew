@@ -503,6 +503,12 @@ const FilterSidebar: React.FC<FilterSidebarProps> = ({
     staleTime: 5 * 60 * 1000,
   });
 
+  const { data: institutionFilterCounts } = useQuery({
+    queryKey: ["institutionFilterCounts"],
+    queryFn: () => apiService.getPublicInstitutionFilterCounts(),
+    staleTime: 5 * 60 * 1000,
+  });
+
   // const [locating, setLocating] = useState(false);
   const [showAppliedDropdown, setShowAppliedDropdown] = useState(false);
   const [programSearch, setProgramSearch] = useState("");
@@ -510,8 +516,17 @@ const FilterSidebar: React.FC<FilterSidebarProps> = ({
   // const [navLocString, setNavLocString] = useState("");
 
   const getFacetCount = (id: string): number | undefined => {
-    if (!collegeFilterCounts?.data?.facet_counts_by_id) return undefined;
-    return collegeFilterCounts.data.facet_counts_by_id[id] ?? 0;
+    let count = 0;
+    let hasAnyData = false;
+    if (collegeFilterCounts?.data?.facet_counts_by_id) {
+      count += collegeFilterCounts.data.facet_counts_by_id[id] ?? 0;
+      hasAnyData = true;
+    }
+    if (institutionFilterCounts?.data?.facet_counts_by_id) {
+      count += institutionFilterCounts.data.facet_counts_by_id[id] ?? 0;
+      hasAnyData = true;
+    }
+    return hasAnyData ? count : undefined;
   };
 
   // useEffect(() => {
@@ -746,13 +761,23 @@ const FilterSidebar: React.FC<FilterSidebarProps> = ({
 
   const collegeTypesWithCounts = useMemo(
     () =>
-      COLLEGE_TYPES.map((item) => ({
-        ...item,
-        count: collegeFilterCounts?.data?.type_counts_by_id
-          ? (collegeFilterCounts.data.type_counts_by_id[item.id] ?? 0)
-          : undefined,
-      })),
-    [collegeFilterCounts],
+      COLLEGE_TYPES.map((item) => {
+        let count = 0;
+        let hasAnyData = false;
+        if (collegeFilterCounts?.data?.type_counts_by_id) {
+          count += collegeFilterCounts.data.type_counts_by_id[item.id] ?? 0;
+          hasAnyData = true;
+        }
+        if (institutionFilterCounts?.data?.type_counts_by_id) {
+          count += institutionFilterCounts.data.type_counts_by_id[item.id] ?? 0;
+          hasAnyData = true;
+        }
+        return {
+          ...item,
+          count: hasAnyData ? count : undefined,
+        };
+      }),
+    [collegeFilterCounts, institutionFilterCounts],
   );
 
   const courseDurationsWithCounts = useMemo(

@@ -156,6 +156,7 @@ const CollegeGrid: React.FC<CollegeGridProps> = ({
   const [inquiryMessageSingle, setInquiryMessageSingle] = useState("");
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setCurrentPage(1);
   }, [filters]);
 
@@ -245,20 +246,44 @@ const CollegeGrid: React.FC<CollegeGridProps> = ({
         })
       );
 
-      // Merge: institutions first, then old colleges
+      // Build set of college IDs that are claimed by institutions
+      const claimedCollegeIds = new Set(
+        (institutionRes?.data?.institutions || [])
+          .filter((inst: any) => inst.college_id > 0)
+          .map((inst: any) => inst.college_id),
+      );
+
+      // Filter out colleges that are already represented by an institution
+      const filteredColleges = (collegeRes?.data?.colleges || []).filter(
+        (c: any) => !claimedCollegeIds.has(c.id),
+      );
+
+      // Merge: institutions first, then remaining colleges (no duplicates)
       const merged = [
         ...institutionColleges,
-        ...(collegeRes?.data?.colleges || []),
+        ...filteredColleges,
       ];
+
+      const collegePagination = collegeRes?.data?.pagination || {};
+      const collegeTotal = collegePagination.total || 0;
+      const instData = institutionRes?.data || {};
+      const instTotal =
+        instData.pagination?.total ??
+        instData.total ??
+        institutionRes?.total ??
+        instData.count ??
+        instData.meta?.total ??
+        (instData.institutions || []).length;
+      const duplicateCount = claimedCollegeIds.size;
+      const combinedTotal = (collegeTotal - duplicateCount) + instTotal;
 
       return {
         data: {
           colleges: merged,
-          pagination: collegeRes?.data?.pagination || {
-            total: merged.length,
-            totalPages: 1,
-            page: 1,
-            pageSize: COLLEGES_PER_PAGE,
+          pagination: {
+            ...collegePagination,
+            total: combinedTotal || merged.length,
+            totalPages: Math.ceil((combinedTotal || merged.length) / COLLEGES_PER_PAGE),
           },
         },
       };
@@ -281,15 +306,19 @@ const CollegeGrid: React.FC<CollegeGridProps> = ({
   };
 
   const toggleSelection = (collegeId: number) => {
-    setSelectedForInquiry((prev) => {
-      if (prev.includes(collegeId))
-        return prev.filter((id) => id !== collegeId);
-      if (prev.length >= 5) {
-        alert("You can select up to 5 colleges for Quick Apply.");
-        return prev;
-      }
-      return [...prev, collegeId];
-    });
+    const isAdding = !selectedForInquiry.includes(collegeId);
+    if (isAdding && selectedForInquiry.length >= 5) {
+      alert("You can select up to 5 colleges for Quick Apply.");
+      return;
+    }
+    if (isAdding) {
+      setIsQuickInquiryMode(true);
+    }
+    setSelectedForInquiry((prev) =>
+      prev.includes(collegeId)
+        ? prev.filter((id) => id !== collegeId)
+        : [...prev, collegeId],
+    );
   };
 
   const handleSelectAll = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -302,12 +331,6 @@ const CollegeGrid: React.FC<CollegeGridProps> = ({
       setIsQuickInquiryMode(false);
     }
   };
-
-  useEffect(() => {
-    if (selectedForInquiry.length > 0) {
-      setIsQuickInquiryMode(true);
-    }
-  }, [selectedForInquiry]);
 
   const handleInquirySubmit = (e: React.FormEvent) => {
     e.preventDefault();
