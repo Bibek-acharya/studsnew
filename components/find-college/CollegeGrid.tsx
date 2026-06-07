@@ -711,9 +711,6 @@ export const ProgramCard: React.FC<{
   onClaim,
   onSingleInquiry,
 }) => {
-  const description =
-    (typeof college.description === "string" && college.description) ||
-    "Explore academics, facilities, and counselling support for this college.";
 
   return (
     <div className="flex h-full cursor-pointer flex-col rounded-md border border-gray-200 bg-white p-4 transition-all duration-300 hover:border-blue-500/20 overflow-visible">
@@ -853,7 +850,7 @@ export const ProgramCard: React.FC<{
         </div>
       )}
 
-        <div className="mt-2 flex items-center gap-4 mb-2">
+        <div className="mt-2 flex items-center gap-4 mb-3">
           <a
             href="#"
             className="interaction-btn text-[12px] font-medium text-brand-blue hover:text-blue-800 flex items-center transition-colors"

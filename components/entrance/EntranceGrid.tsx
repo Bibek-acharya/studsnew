@@ -27,13 +27,15 @@ import {
   BadgeCheckIcon,
   FileText,
 } from "lucide-react";
+import { FaSliders } from "react-icons/fa6";
 
 interface EntranceGridProps {
   filters: EntranceFilterState;
   setFilters: React.Dispatch<React.SetStateAction<EntranceFilterState>>;
+  onMobileFilterClick?: () => void;
 }
 
-const EntranceGrid: React.FC<EntranceGridProps> = ({ filters, setFilters }) => {
+const EntranceGrid: React.FC<EntranceGridProps> = ({ filters, setFilters, onMobileFilterClick }) => {
   const [currentPage, setCurrentPage] = useState(1);
 
   useEffect(() => {
@@ -89,8 +91,8 @@ const EntranceGrid: React.FC<EntranceGridProps> = ({ filters, setFilters }) => {
             </h1>
           </div>
 
-          <div className="mt-2 flex w-full shrink-0 flex-col gap-3 sm:mt-0 sm:w-[320px] sm:items-end">
-            <div className="relative w-full">
+          <div className="flex w-full flex-row items-center gap-3 sm:w-[320px] sm:flex-col sm:items-end">
+            <div className="relative flex-1 sm:w-full">
               <i className="fa-solid fa-magnifying-glass absolute left-3.5 top-1/2 -translate-y-1/2 text-sm text-gray-400"></i>
               <input
                 type="text"
@@ -105,6 +107,16 @@ const EntranceGrid: React.FC<EntranceGridProps> = ({ filters, setFilters }) => {
                 className="w-full rounded-md border border-gray-200 bg-white py-2.5 pl-10 pr-4 text-sm transition-all placeholder-gray-400 focus:border-transparent focus:outline-none focus:ring-2 focus:ring-brand-blue"
               />
             </div>
+            {onMobileFilterClick && (
+              <button
+                type="button"
+                onClick={onMobileFilterClick}
+                className="lg:hidden inline-flex items-center gap-2 rounded-md border border-gray-200 bg-white px-4 py-2.5 text-[14px] font-medium text-gray-700 transition-colors hover:bg-gray-50"
+              >
+                <FaSliders className="h-4 w-4" />
+                Filters
+              </button>
+            )}
           </div>
         </div>
       </div>

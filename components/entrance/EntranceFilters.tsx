@@ -10,6 +10,7 @@ import { NEPAL_PROVINCES, NEPAL_DISTRICTS, NEPAL_LOCAL_BODIES } from "@/lib/loca
 interface EntranceFiltersProps {
   filters: EntranceFilterState;
   setFilters: React.Dispatch<React.SetStateAction<EntranceFilterState>>;
+  onClose?: () => void;
 }
 
 const ACADEMIC_LEVELS = [
@@ -237,6 +238,7 @@ const Accordion: React.FC<{
 const EntranceFilters: React.FC<EntranceFiltersProps> = ({
   filters,
   setFilters,
+  onClose,
 }) => {
   const [showAppliedDropdown, setShowAppliedDropdown] = useState(false);
   const [streamSearch, setStreamSearch] = useState("");
@@ -316,7 +318,7 @@ const EntranceFilters: React.FC<EntranceFiltersProps> = ({
 
   return (
     <>
-      <div className="relative w-full rounded-[20px] border border-gray-200 bg-white p-6">
+      <div className="relative w-full rounded-xl border border-gray-200 bg-white p-6">
         <div className="mb-2 flex items-center justify-between">
           <div className="flex items-center gap-3">
             <FaSliders size={18} className="text-black" />
@@ -324,6 +326,7 @@ const EntranceFilters: React.FC<EntranceFiltersProps> = ({
               Filters
             </h3>
           </div>
+          <div className="flex items-center gap-2">
           {hasActiveFilters && (
             <button
               type="button"
@@ -336,6 +339,12 @@ const EntranceFilters: React.FC<EntranceFiltersProps> = ({
               ></i>
             </button>
           )}
+          {onClose && (
+            <button type="button" onClick={onClose} className="lg:hidden flex items-center justify-center h-8 w-8 rounded-md hover:bg-gray-100 transition-colors">
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-gray-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>
+            </button>
+          )}
+          </div>
         </div>
 
         {hasActiveFilters && showAppliedDropdown && (

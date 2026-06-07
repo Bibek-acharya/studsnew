@@ -128,7 +128,7 @@ const CollegeDetailsPage = ({ params }: { params: Promise<{ id: string }> }) => 
 
       <TabNavigation activeTab={activeTab} onTabChange={setActiveTab} />
 
-      <div className="grid grid-cols-1 gap-10 bg-[#f8fafc] px-6 py-8 md:gap-14 md:px-12 md:py-12 lg:grid-cols-3 lg:px-24 xl:px-32">
+      <div className="grid grid-cols-1 gap-10 px-6 py-8 md:gap-14 md:px-12 md:py-12 lg:grid-cols-3 lg:px-24 xl:px-32">
         <div className="lg:col-span-2">
           {activeTab === "about" && (
             <TabAbout description={data.description} instVideos={data.instVideos} instVision={data.instVision} instMission={data.instMission} instOverviewData={data.instOverviewData} instLeadershipData={data.instLeadershipData} />

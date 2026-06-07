@@ -52,11 +52,15 @@ export default function ClaimCollegeModal({ collegeName, collegeId, isOpen, onCl
   };
 
   const submitClaim = async () => {
+    if (formData.pan_number && formData.pan_number.length !== 9) {
+      setErrorMsg("PAN number must be exactly 9 digits");
+      return;
+    }
     setSubmitting(true);
     setErrorMsg("");
     try {
       await apiService.claimRegister({
-        college_id: collegeId,
+        college_id: Number(collegeId),
         institution_name: formData.institution_name,
         registration_number: formData.registration_number,
         email: formData.email.trim(),
@@ -203,8 +207,8 @@ export default function ClaimCollegeModal({ collegeName, collegeId, isOpen, onCl
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">PAN Number</label>
-                  <input type="text" value={formData.pan_number} onChange={e => updateField("pan_number", e.target.value)}
-                    className={inputClass} placeholder="PAN number" />
+                  <input type="text" value={formData.pan_number} onChange={e => updateField("pan_number", e.target.value.replace(/\D/g, "").slice(0, 9))}
+                    className={inputClass} placeholder="9-digit PAN number" maxLength={9} />
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">Registration Number *</label>
@@ -233,7 +237,7 @@ export default function ClaimCollegeModal({ collegeName, collegeId, isOpen, onCl
                   className="px-4 py-2 border border-gray-300 rounded-lg text-sm text-gray-700 hover:bg-gray-50 transition-colors">
                   Cancel
                 </button>
-                <button type="button" onClick={submitClaim} disabled={submitting || !formData.email || !formData.institution_name}
+                <button type="button" onClick={submitClaim} disabled={submitting || !formData.email || !formData.institution_name || !formData.registration_number}
                   className="px-4 py-2 bg-blue-600 text-white rounded-lg text-sm font-semibold hover:bg-blue-700 transition-colors disabled:opacity-50 flex items-center gap-2">
                   {submitting ? <Loader2 size={16} className="animate-spin" /> : <Mail size={16} />}
                   {submitting ? "Submitting..." : "Submit & Verify Email"}
