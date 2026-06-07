@@ -12,20 +12,20 @@ import {
   Globe,
 } from "lucide-react";
 
-const toSlug = (name: string) =>
-  name.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "");
-
 const UniversityCard: React.FC<{ university: UniversityData }> = ({
   university: uni,
 }) => {
-  const slug = toSlug(uni.name);
+  const toSlug = (name: string) =>
+    name.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "");
+  const detailHref = uni.id ? `/universities/${uni.id}` : `/universities/${toSlug(uni.name)}`;
+  const collegesHref = uni.id ? `/universities/${uni.id}/affiliated-colleges` : `/universities/${toSlug(uni.name)}/affiliated-colleges`;
   const website = `www.${uni.name.toLowerCase().replace(/[^a-z0-9]+/g, "")}.edu.np`;
 
   return (
     <div className="flex h-full flex-col rounded-md border border-gray-200 bg-white p-4 transition-all duration-300 hover:border-blue-500/20 overflow-visible">
       {/* Image Section */}
       <Link
-        href={`/universities/${slug}`}
+        href={detailHref}
         className="group relative h-35 shrink-0 cursor-pointer overflow-hidden rounded-md"
       >
         <div className="flex h-full w-full items-center justify-center bg-brand-blue"></div>
@@ -36,7 +36,7 @@ const UniversityCard: React.FC<{ university: UniversityData }> = ({
         {/* Name */}
         <div className="mb-2 flex items-center gap-1.5">
           <Link
-            href={`/universities/${slug}`}
+            href={detailHref}
             className="group/title relative cursor-pointer truncate text-left text-[20px] font-bold tracking-tight text-slate-800 transition-colors hover:text-blue-600"
           >
             <span className="block truncate" title={uni.name}>
@@ -135,13 +135,13 @@ const UniversityCard: React.FC<{ university: UniversityData }> = ({
         <div className="mt-auto flex flex-col gap-3">
           <div className="flex gap-2">
             <Link
-              href={`/universities/${slug}`}
+              href={detailHref}
               className="flex flex-1 cursor-pointer items-center justify-center gap-1.5 rounded-md border border-gray-200 bg-white py-2 px-2 text-[13px] font-medium text-slate-600 transition-colors hover:bg-gray-50"
             >
               Details
             </Link>
             <Link
-              href={`/universities/${slug}/affiliated-colleges`}
+              href={collegesHref}
               className="flex-[1.2] flex cursor-pointer items-center justify-center gap-1.5 rounded-md bg-brand-blue py-2 px-2 text-[13px] font-medium text-white transition-colors hover:bg-brand-hover"
             >
               View Colleges

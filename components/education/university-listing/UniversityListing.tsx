@@ -13,6 +13,7 @@ interface UniversityListingProps {
 }
 
 const mapUniversity = (uni: University): UniversityData => ({
+  id: uni.id,
   name: uni.name || "",
   location: uni.location || "",
   rating: uni.rating?.toString() || "0",

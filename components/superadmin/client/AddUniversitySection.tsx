@@ -572,9 +572,9 @@ export default function AddUniversitySection({
             </h3>
             <div className="mb-8">
               <div className="flex justify-between items-center mb-3">
-                <label className="block text-sm font-medium text-gray-700 mb-0">Video Links (Max 4)</label>
-                <button type="button" onClick={() => videos.length < 4 && addItem(setVideos, { url: "", message: "", name: "", designation: "" })}
-                  className={`text-sm px-3 py-1.5 rounded-md font-medium ${videos.length >= 4 ? "text-gray-400 bg-gray-100 cursor-not-allowed" : "text-blue-600 bg-blue-50 hover:bg-blue-100"}`}>
+                <label className="block text-sm font-medium text-gray-700 mb-0">Video Link</label>
+                <button type="button" onClick={() => videos.length < 1 && addItem(setVideos, { url: "", message: "", name: "", designation: "" })}
+                  className={`text-sm px-3 py-1.5 rounded-md font-medium ${videos.length >= 1 ? "text-gray-400 bg-gray-100 cursor-not-allowed" : "text-blue-600 bg-blue-50 hover:bg-blue-100"}`}>
                   <i className="fa-solid fa-plus mr-1"></i> Add Video
                 </button>
               </div>

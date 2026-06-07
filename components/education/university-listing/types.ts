@@ -1,4 +1,5 @@
 export interface UniversityData {
+  id?: number;
   name: string;
   location: string;
   rating: string;

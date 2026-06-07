@@ -517,6 +517,44 @@ export interface University {
   status?: string;
   website?: string;
   cover?: string;
+  description?: string;
+  established?: string;
+  students?: string;
+  chancellor?: string;
+  vice_chancellor?: string;
+  founder?: string;
+  popularPrograms?: string[];
+  about?: any;
+  contact?: any;
+  quick?: any;
+  overview?: any;
+  leadership?: any;
+  courses?: any;
+  programs?: any;
+  scholarships?: any;
+  events?: any;
+  news?: any;
+  downloads?: any;
+  gallery?: any;
+  faculties?: any;
+  admissions?: any;
+  reviews?: any;
+}
+
+export interface UniversityCollege {
+  id: number;
+  universityId: number;
+  name: string;
+  logo: string;
+  rating: number;
+  reviews: number;
+  affiliation: string;
+  type: string;
+}
+
+export interface UniversityDetailResponse {
+  university: University;
+  colleges: UniversityCollege[];
 }
 
 export interface UniversityFilterCountsResponse {
@@ -1289,6 +1327,10 @@ export const apiService = {
 
     const query = new URLSearchParams(normalizedParams).toString();
     return apiRequest<CollegesResponse>(`/api/v1/colleges${query ? `?${query}` : ""}`);
+  },
+
+  async getUniversityById(id: number): Promise<{ data: UniversityDetailResponse }> {
+    return apiRequest<{ data: UniversityDetailResponse }>(`/api/v1/universities/${id}`);
   },
 
   async getCollegeFilterCounts(): Promise<CollegeFilterCountsResponse> {
