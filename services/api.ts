@@ -510,8 +510,24 @@ export interface University {
   review_count?: number;
   verified?: boolean;
   popular?: boolean;
+  isPopular?: boolean;
+  is_nepali?: boolean;
+  programsCount?: number;
+  collegesCount?: number;
+  status?: string;
   website?: string;
   cover?: string;
+}
+
+export interface UniversityFilterCountsResponse {
+  data: {
+    total: number;
+    type_counts: Record<string, number>;
+    type_counts_by_id: Record<string, number>;
+    rating_counts: Record<string, number>;
+    academic_counts: Record<string, number>;
+  };
+  message?: string;
 }
 
 export interface CollegeFilterCountsResponse {
@@ -534,19 +550,6 @@ export interface CollegeRecommendation {
   type?: string;
   match_score: number;
   reasons?: string[];
-}
-
-export interface CollegeRecommenderPayload {
-  student_type: string;
-  program_interest: string;
-  preferred_location: string;
-  budget_preference: string;
-  campus_life_priority: string;
-  career_goal: string;
-  need_scholarship: boolean;
-  preferred_mode: string;
-  college_type: string;
-  final_priority: string;
 }
 
 export interface CollegePagination {
@@ -1300,13 +1303,20 @@ export const apiService = {
     search?: string;
     type?: string;
     popular?: boolean;
+    isNepali?: string;
   }): Promise<{ data: { universities: University[] } }> {
     const query = new URLSearchParams();
     if (params?.search) query.set("search", params.search);
     if (params?.type) query.set("type", params.type);
     if (params?.popular) query.set("popular", "true");
+    if (params?.isNepali) query.set("isNepali", params.isNepali);
 
     return apiRequest<{ data: { universities: University[] } }>(`/api/v1/universities${query.toString() ? `?${query.toString()}` : ""}`);
+  },
+
+  async getUniversityFilterCounts(isNepali?: string): Promise<UniversityFilterCountsResponse> {
+    const query = isNepali ? `?isNepali=${isNepali}` : "";
+    return apiRequest<UniversityFilterCountsResponse>(`/api/v1/universities/filter-counts${query}`);
   },
 
   async getAdminColleges(params?: Record<string, any>): Promise<CollegesResponse> {
@@ -1699,41 +1709,15 @@ export const apiService = {
     return result.data || result;
   },
 
-  async getCollegeRecommenderRecommendations(payload: CollegeRecommenderPayload): Promise<{ data: { recommendations: CollegeRecommendation[] } }> {
-    await new Promise(resolve => setTimeout(resolve, 1200));
-    return {
-      data: {
-        recommendations: [
-          {
-            id: 1,
-            name: "Pulchowk Campus, IOE",
-            location: "Lalitpur",
-            type: "Engineering",
-            match_score: 9,
-            tuition: "Rs. 50,000/year",
-            reasons: ["Strong academics", "High placement rate", "Low tuition fees"],
-          },
-          {
-            id: 2,
-            name: "Thapathali Campus, IOE",
-            location: "Kathmandu",
-            type: "Engineering",
-            match_score: 8,
-            tuition: "Rs. 60,000/year",
-            reasons: ["Good infrastructure", "Affordable fees", "Central location"],
-          },
-          {
-            id: 3,
-            name: "Kathmandu University",
-            location: "Dhulikhel",
-            type: "Engineering",
-            match_score: 7,
-            tuition: "Rs. 1,20,000/year",
-            reasons: ["Excellent campus life", "Modern labs", "International exposure"],
-          },
-        ],
+  async getCollegeRecommenderRecommendations(payload: object): Promise<{ data: { recommendations: CollegeRecommendation[] } }> {
+    const res = await apiRequest<{ data: { recommendations: CollegeRecommendation[] } }>(
+      "/api/v1/colleges/recommend",
+      {
+        method: "POST",
+        body: JSON.stringify(payload),
       },
-    };
+    );
+    return res;
   },
 
   async institutionLogin(email: string, password: string): Promise<AuthResponse> {
@@ -2317,6 +2301,31 @@ export const scholarshipApi = {
       }),
     });
   },
+
+  async recommendScholarships(data: {
+    educationLevel: string;
+    studyMode: string;
+    academicScoreType: string;
+    academicScore: string;
+    fieldOfStudy: string;
+    willingEssay: string;
+    willingInterview: string;
+    willingGpa: string;
+    province: string;
+    district: string;
+    studyLocation: string;
+    category: string;
+    gender: string;
+    income: string;
+    talents: string[];
+    achievements: string[];
+    involvement: string[];
+  }): Promise<{ success: boolean; data: { scholarships: Array<{ id: number; title: string; providerType: string; coverage: string; deadline: string; description: string; tagColorClass: string }> }; message: string }> {
+    return apiRequest("/api/v1/education/scholarships/recommend", {
+      method: "POST",
+      body: JSON.stringify(data),
+    });
+  },
 };
 
 export const feedbackApi = {
@@ -2395,5 +2404,140 @@ export const scholarshipProviderApi = {
       body: JSON.stringify({ approve, reason: reason || '' }),
     });
   },
-
 };
+
+export type SphereAIRole = "user" | "assistant" | "system";
+
+export interface SphereAIMessage {
+  role: SphereAIRole;
+  content: string;
+}
+
+export interface SphereAIStreamHandlers {
+  onToken: (token: string) => void;
+  onDone: () => void;
+  onError: (error: string) => void;
+}
+
+let sphereAISessionCounter = 0;
+function getSphereAISessionId(): string {
+  if (typeof window === "undefined") return "ssr";
+  const key = "studsphere_ai_session";
+  let id = sessionStorage.getItem(key);
+  if (!id) {
+    sphereAISessionCounter += 1;
+    id = `sai_${Date.now()}_${sphereAISessionCounter}`;
+    sessionStorage.setItem(key, id);
+  }
+  return id;
+}
+
+export function streamSphereAIChat(
+  message: string,
+  history: SphereAIMessage[],
+  handlers: SphereAIStreamHandlers,
+): () => void {
+  const controller = new AbortController();
+
+  (async () => {
+    try {
+      const response = await fetch(`${API_BASE_URL}/api/v1/ai/chat`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify({
+          message,
+          session_id: getSphereAISessionId(),
+          history,
+        }),
+        signal: controller.signal,
+      });
+
+      if (!response.ok) {
+        const err = await response.json().catch(() => ({}));
+        handlers.onError(err.error || err.message || `Sphere AI returned ${response.status}`);
+        return;
+      }
+
+      const reader = response.body?.getReader();
+      if (!reader) {
+        handlers.onError("No response stream from Sphere AI");
+        return;
+      }
+
+      const decoder = new TextDecoder();
+      let buffer = "";
+
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+        buffer += decoder.decode(value, { stream: true });
+
+        let sep = buffer.indexOf("\n\n");
+        while (sep !== -1) {
+          const event = buffer.slice(0, sep);
+          buffer = buffer.slice(sep + 2);
+          if (event.startsWith("data:")) {
+            const data = event.slice(5).trim();
+            if (!data) {
+              sep = buffer.indexOf("\n\n");
+              continue;
+            }
+            try {
+              const parsed = JSON.parse(data);
+              if (typeof parsed.token === "string" && parsed.token.length > 0) {
+                handlers.onToken(parsed.token);
+              } else if (parsed.done) {
+                handlers.onDone();
+              } else if (parsed.error) {
+                handlers.onError(parsed.error);
+              }
+            } catch {
+              // ignore malformed chunk
+            }
+          }
+          sep = buffer.indexOf("\n\n");
+        }
+      }
+
+      if (buffer.trim().startsWith("data:")) {
+        const data = buffer.trim().slice(5).trim();
+        try {
+          const parsed = JSON.parse(data);
+          if (parsed.done) handlers.onDone();
+          else if (parsed.error) handlers.onError(parsed.error);
+        } catch {
+          // ignore
+        }
+      } else {
+        handlers.onDone();
+      }
+    } catch (err: any) {
+      if (err?.name === "AbortError") return;
+      handlers.onError(err?.message || "Connection to Sphere AI failed");
+    }
+  })();
+
+  return () => controller.abort();
+}
+
+export interface SphereAIModelInfo {
+  id: string;
+  owned_by?: string;
+}
+
+export interface SphereAIModelsResponse {
+  models: SphereAIModelInfo[];
+  active_model: string;
+  base_url: string;
+}
+
+export async function listSphereAIModels(): Promise<SphereAIModelsResponse> {
+  const res = await fetch(`${API_BASE_URL}/api/v1/ai/models`, { credentials: "include" });
+  const json = await res.json();
+  if (!res.ok || !json.success) {
+    throw new Error(json.error || `Could not list models (${res.status})`);
+  }
+  return json.data as SphereAIModelsResponse;
+}
+

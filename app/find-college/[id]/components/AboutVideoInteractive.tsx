@@ -72,8 +72,8 @@ const AboutVideoInteractive: React.FC<{ videos?: VideoEntry[] }> = ({ videos }) 
   const mainYouTubeId = getYouTubeId(mainData.video);
 
   return (
-    <div className="mx-auto mb-10 flex w-full max-w-212.5 flex-col items-center justify-center gap-6 xl:flex-row xl:gap-8">
-      <div className="relative h-[50vh] w-full max-w-125 shrink-0 overflow-hidden rounded-md bg-brand-blue ring-1 ring-gray-200/50 sm:h-85 sm:rounded-md">
+    <div className="mx-auto mb-10 flex w-full flex-col gap-6 xl:flex-row xl:gap-8">
+      <div className="relative h-[50vh] w-full min-w-0 flex-1 overflow-hidden rounded-md bg-brand-blue ring-1 ring-gray-200/50 sm:h-85 sm:rounded-md">
         {mainYouTubeId ? (
           <iframe
             className="absolute inset-0 h-full w-full"
@@ -92,20 +92,6 @@ const AboutVideoInteractive: React.FC<{ videos?: VideoEntry[] }> = ({ videos }) 
             playsInline
           />
         )}
-        <div className="absolute bottom-5 left-5 z-10 max-w-[70%]">
-          <div
-            className="flex flex-col rounded-md border border-white/10 bg-black/60 px-4 py-2 text-white backdrop-blur-md sm:px-5 sm:py-3"
-            style={{ textShadow: "0 1px 2px rgba(0,0,0,0.8)" }}
-          >
-            <span className="text-sm font-semibold tracking-wide sm:text-base">
-              {mainKey}
-            </span>
-            <span className="mt-0.5 text-[10px] font-medium text-gray-300 sm:text-xs">
-              {mainData.role}
-            </span>
-          </div>
-        </div>
-
         <div className="absolute right-5 top-5 z-20 flex max-h-[calc(100%-40px)] flex-col gap-2 overflow-y-auto pb-4 pr-1 [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
           {others.map((key) => {
             const data = cardData[key];
@@ -155,9 +141,9 @@ const AboutVideoInteractive: React.FC<{ videos?: VideoEntry[] }> = ({ videos }) 
         </div>
       </div>
 
-      <div className="relative h-[50vh] w-full max-w-[280px] shrink-0 overflow-hidden rounded-md border border-white/10 bg-brand-blue p-5 sm:h-[340px] sm:p-6">
+      <div className="relative h-[50vh] w-full max-w-[380px] shrink-0 overflow-hidden rounded-md border border-white/10 bg-brand-blue sm:h-[340px]">
         <div
-          className={`relative z-10 flex h-full flex-col justify-center transition-opacity duration-150 ${fading ? "opacity-50" : "opacity-100"}`}
+          className={`relative z-10 flex h-full flex-col justify-center px-5 py-6 transition-opacity duration-150 sm:px-6 ${fading ? "opacity-50" : "opacity-100"}`}
         >
           {mainData.avatar ? (
             <img
@@ -172,7 +158,7 @@ const AboutVideoInteractive: React.FC<{ videos?: VideoEntry[] }> = ({ videos }) 
           )}
           <h2
             dangerouslySetInnerHTML={{ __html: mainData.title }}
-            className="mb-2 text-[16px] font-bold leading-tight tracking-tight text-white sm:mb-3 sm:text-[18px]"
+            className="mb-2 text-[16px] font-normal leading-tight tracking-tight text-white sm:mb-3 sm:text-[18px]"
           />
           <p className="mb-4 text-[12px] leading-relaxed text-blue-100/80 sm:text-[13px]">
             {mainData.quote}

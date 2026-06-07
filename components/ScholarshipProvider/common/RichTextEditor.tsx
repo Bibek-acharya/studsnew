@@ -43,16 +43,24 @@ const RichTextEditor: React.FC<RichTextEditorProps> = memo(({
   minHeight = 120,
 }) => {
   return (
-    <div className="border border-slate-200 rounded-lg overflow-hidden">
+    <div className="border border-slate-200 rounded-lg overflow-visible">
       <QuillEditor
         value={value}
         onChange={onChange}
         modules={quillModules}
         formats={quillFormats}
         placeholder={placeholder}
-        style={{ minHeight: `${minHeight}px` }}
         className="bg-white"
       />
+      <style>{`
+        .ql-container {
+          height: ${minHeight}px;
+          overflow-y: auto;
+        }
+        .ql-editor {
+          min-height: ${minHeight}px;
+        }
+      `}</style>
     </div>
   );
 });

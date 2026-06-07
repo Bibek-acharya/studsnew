@@ -23,7 +23,6 @@ import CollegeShortlistView from './CollegeShortlistView'
 import {
   apiService,
   CollegeRecommendation,
-  CollegeRecommenderPayload,
 } from '@/services/api'
 
 interface CollegeRecommenderToolPageProps {
@@ -198,26 +197,13 @@ const CollegeRecommenderToolPage: React.FC<CollegeRecommenderToolPageProps> = ({
   const fetchRecommendations = async () => {
     setLoading(true);
     try {
-      const payload: CollegeRecommenderPayload = {
-        student_type: form.student_type,
-        program_interest: form.preferred_field,
-        preferred_location: form.province === 'No preference'
-          ? `${form.setting}, ${form.distance_from_home}`
-          : `${form.province}, ${form.district ? `${form.district}, ` : ''}${form.setting}, ${form.distance_from_home}`,
-        budget_preference: `${form.yearly_budget}; ${form.tuition_factor}`,
-        campus_life_priority: `${form.academics_vs_campus}; ${form.activities_importance}; ${form.facility_choice}`,
-        career_goal: form.reputation_importance,
-        need_scholarship:
-          form.financial_support.startsWith("Yes") ||
-          form.tuition_factor.includes("scholarship"),
-        preferred_mode: form.class_size,
-        college_type: form.preferred_field,
-        final_priority: form.knows_course,
-      };
-
       const res =
-        await apiService.getCollegeRecommenderRecommendations(payload);
+        await apiService.getCollegeRecommenderRecommendations(form);
       setResults(res.data?.recommendations || []);
+      setStep(11);
+    } catch (err) {
+      console.error("Failed to fetch recommendations:", err);
+      setResults([]);
       setStep(11);
     } finally {
       setLoading(false);

@@ -8,12 +8,20 @@ import RadioItem from "./RadioItem";
 import { FilterKey, FiltersState } from "./types";
 import { ACADEMIC_LEVELS, UNIVERSITY_TYPES, SORT_OPTIONS } from "./constants";
 
+interface FilterCounts {
+  type_counts_by_id?: Record<string, number>;
+  rating_counts?: Record<string, number>;
+  academic_counts?: Record<string, number>;
+}
+
 interface FilterSidebarProps {
   filters: FiltersState;
   onToggle: (key: FilterKey, value: string) => void;
   onSortBy: (value: string) => void;
   sortBy: string;
   onClearAll: () => void;
+  filterCounts?: FilterCounts;
+  onClose?: () => void;
 }
 
 const FilterSidebar: React.FC<FilterSidebarProps> = ({
@@ -22,6 +30,8 @@ const FilterSidebar: React.FC<FilterSidebarProps> = ({
   onSortBy,
   sortBy,
   onClearAll,
+  filterCounts,
+  onClose,
 }) => {
   const [showAppliedDropdown, setShowAppliedDropdown] = useState(false);
 
@@ -46,12 +56,13 @@ const FilterSidebar: React.FC<FilterSidebarProps> = ({
   };
 
   return (
-    <div className="relative w-full rounded-[20px] border border-gray-200 bg-white p-6">
+    <div className="relative w-full rounded-md border border-gray-200 bg-white p-6">
       <div className="mb-2 flex items-center justify-between">
         <div className="flex items-center gap-3">
           <FaSliders size={18} className="text-black" />
           <h3 className="text-xl font-black tracking-tight text-slate-900">Filters</h3>
         </div>
+        <div className="flex items-center gap-2">
         {hasActiveFilters && (
           <button
             type="button"
@@ -64,6 +75,14 @@ const FilterSidebar: React.FC<FilterSidebarProps> = ({
             ></i>
           </button>
         )}
+          {onClose && (
+            <button type="button" onClick={onClose} className="flex lg:hidden items-center justify-center w-8 h-8 rounded-md text-gray-500 hover:bg-gray-100 hover:text-gray-700 transition-colors">
+              <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </button>
+          )}
+        </div>
       </div>
 
       {hasActiveFilters && showAppliedDropdown && (
@@ -98,12 +117,12 @@ const FilterSidebar: React.FC<FilterSidebarProps> = ({
 
       <Accordion title="Academic Level" defaultOpen>
         <div className="flex flex-col gap-3.5 pt-1">
-          {ACADEMIC_LEVELS.map((item) => (
+            {ACADEMIC_LEVELS.map((item) => (
             <CheckboxItem
               key={item.id}
               id={`acad-${item.id}`}
               label={item.label}
-              count={item.count}
+              count={filterCounts?.academic_counts?.[item.id]}
               checked={filters.academic.includes(item.id)}
               onChange={() => onToggle("academic", item.id)}
             />
@@ -118,7 +137,7 @@ const FilterSidebar: React.FC<FilterSidebarProps> = ({
               key={item.id}
               id={`type-${item.id}`}
               label={item.label}
-              count={item.count}
+              count={filterCounts?.type_counts_by_id?.[item.id]}
               checked={filters.type.includes(item.id)}
               onChange={() => onToggle("type", item.id)}
             />
@@ -131,24 +150,28 @@ const FilterSidebar: React.FC<FilterSidebarProps> = ({
           <CheckboxItem
             id="rating-4.5"
             label={<><FaStar className="inline text-yellow-500" /> 4.5 & above (Top Rated)</>}
+            count={filterCounts?.rating_counts?.["4.5"]}
             checked={filters.rating.includes("4.5")}
             onChange={() => onToggle("rating", "4.5")}
           />
           <CheckboxItem
             id="rating-4.0"
             label={<><FaStar className="inline text-yellow-500" /> 4.0 & above</>}
+            count={filterCounts?.rating_counts?.["4.0"]}
             checked={filters.rating.includes("4.0")}
             onChange={() => onToggle("rating", "4.0")}
           />
           <CheckboxItem
             id="rating-3.5"
             label={<><FaStar className="inline text-yellow-500" /> 3.5 & above</>}
+            count={filterCounts?.rating_counts?.["3.5"]}
             checked={filters.rating.includes("3.5")}
             onChange={() => onToggle("rating", "3.5")}
           />
           <CheckboxItem
             id="rating-3.0"
             label={<><FaStar className="inline text-yellow-500" /> 3.0 & above</>}
+            count={filterCounts?.rating_counts?.["3.0"]}
             checked={filters.rating.includes("3.0")}
             onChange={() => onToggle("rating", "3.0")}
           />

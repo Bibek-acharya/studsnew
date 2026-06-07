@@ -552,7 +552,7 @@ const ProfilePage: React.FC = () => {
                         <input type="url" className={`${inputClass} text-sm flex-1`} placeholder="Video URL" value={v.url} onChange={e => updateItem(setVideos, v.id, "url", e.target.value)} />
                       </div>
                       <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-                        <input type="text" className={`${inputClass} text-sm`} placeholder="Message / Title" value={v.message} onChange={e => updateItem(setVideos, v.id, "message", e.target.value)} />
+                        <input type="text" className={`${inputClass} text-sm`} placeholder="Message / Title" maxLength={240} value={v.message} onChange={e => updateItem(setVideos, v.id, "message", e.target.value)} />
                         <input type="text" className={`${inputClass} text-sm`} placeholder="Person Name" value={v.name} onChange={e => updateItem(setVideos, v.id, "name", e.target.value)} />
                         <input type="text" className={`${inputClass} text-sm`} placeholder="Designation" value={v.designation} onChange={e => updateItem(setVideos, v.id, "designation", e.target.value)} />
                       </div>

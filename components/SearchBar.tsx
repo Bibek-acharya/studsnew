@@ -34,6 +34,8 @@ export const SearchBar: React.FC<{
   const [categoryOpen, setCategoryOpen] = useState(false);
   const [suggestions, setSuggestions] = useState<{ title: string; type: string }[]>([]);
   const [isLoadingSuggestions, setIsLoadingSuggestions] = useState(false);
+  const [showBorder, setShowBorder] = useState(false);
+  const [hoverAngle, setHoverAngle] = useState(0);
   const categoryRef = useRef<HTMLDivElement>(null);
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
@@ -200,6 +202,38 @@ export const SearchBar: React.FC<{
   return (
     <div className={isMobile ? "w-full" : "hidden max-w-480 flex-1 md:block"}>
       <div className="group relative flex h-10 w-full items-center overflow-visible rounded-full border border-gray-300 bg-white transition-all focus-within:border-gray-400 focus-within:shadow-sm sm:h-11.5" ref={searchContainerRef}>
+        <button
+          type="button"
+          onClick={() => router.push("/sphere-ai")}
+          onMouseMove={(e) => {
+            const r = e.currentTarget.getBoundingClientRect();
+            const x = e.clientX - r.left - r.width / 2;
+            const y = e.clientY - r.top - r.height / 2;
+            const a = Math.atan2(y, x) * (180 / Math.PI) + 90;
+            setHoverAngle(a);
+          }}
+          onMouseEnter={() => setShowBorder(true)}
+          onMouseLeave={() => setShowBorder(false)}
+          className="relative flex items-center gap-2 bg-gray-100 hover:bg-blue-100 rounded-full px-3 py-1.5 shrink-0 ml-2 cursor-pointer transition-colors overflow-hidden"
+          aria-label="Open Sphere AI"
+        >
+          <span
+            className="absolute inset-0 rounded-full pointer-events-none transition-opacity duration-300"
+            style={{
+              border: "1.5px solid #0000FF",
+              opacity: showBorder ? 1 : 0,
+              maskImage: showBorder
+                ? `conic-gradient(from ${hoverAngle - 60}deg, transparent 0deg, black 30deg, black 150deg, transparent 180deg)`
+                : "none",
+              WebkitMaskImage: showBorder
+                ? `conic-gradient(from ${hoverAngle - 60}deg, transparent 0deg, black 30deg, black 150deg, transparent 180deg)`
+                : "none",
+            }}
+          />
+          <Search size={14} className="text-gray-700 relative z-10" />
+          <span className="text-sm font-medium text-gray-800 relative z-10">Sphere AI</span>
+        </button>
+        <div className="w-px h-6 bg-gray-300 shrink-0 mx-3" aria-hidden="true"></div>
         <input
           ref={searchInputRef}
           type="text"
@@ -210,7 +244,7 @@ export const SearchBar: React.FC<{
             setIsSearchOpen(true);
           }}
           placeholder={isMobile ? "Search for courses, exams, scholarships..." : "Search for courses, exams, scholarships..."}
-          className="flex-1 bg-transparent border-none py-3.5 pl-5 pr-2 text-[15px] text-gray-800 placeholder-[#6b7280] focus:outline-none focus:ring-0"
+          className="flex-1 bg-transparent border-none py-3.5 pl-1 pr-2 text-[15px] text-gray-800 placeholder-[#6b7280] focus:outline-none focus:ring-0"
           autoComplete="off"
         />
 

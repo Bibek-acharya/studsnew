@@ -119,7 +119,7 @@ const InquiryForm: React.FC<InquiryFormProps> = ({
               </div>
             </div>
           )}
-          <div className="mt-8 h-45 w-full overflow-hidden rounded-md border border-gray-200">
+          <div className="mt-4 h-32 w-full overflow-hidden rounded-md border border-gray-200">
             <iframe src={college?.map_url || `https://www.google.com/maps?q=${encodeURIComponent(name + " " + locationText)}&output=embed`} width="100%" height="100%" style={{ border: 0 }} allowFullScreen loading="lazy" referrerPolicy="no-referrer-when-downgrade" className="h-full w-full" title={`Map of ${name}`}></iframe>
           </div>
         </div>

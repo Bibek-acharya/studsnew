@@ -33,3 +33,23 @@ export interface ScholarshipCardItem {
   description: string;
   tagColorClass: string;
 }
+
+export interface RecommenderRequest {
+  educationLevel: string;
+  studyMode: string;
+  academicScoreType: string;
+  academicScore: string;
+  fieldOfStudy: string;
+  willingEssay: string;
+  willingInterview: string;
+  willingGpa: string;
+  province: string;
+  district: string;
+  studyLocation: string;
+  category: string;
+  gender: string;
+  income: string;
+  talents: string[];
+  achievements: string[];
+  involvement: string[];
+}

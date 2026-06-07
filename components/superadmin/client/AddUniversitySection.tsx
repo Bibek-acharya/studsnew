@@ -39,6 +39,7 @@ export default function AddUniversitySection({
   const [name, setName] = useState("");
   const [location, setLocation] = useState("");
   const [type, setType] = useState("");
+  const [isNepali, setIsNepali] = useState(true);
   const [rank, setRank] = useState<number>(0);
   const [rating, setRating] = useState<number>(0);
   const [reviewCount, setReviewCount] = useState<number>(0);
@@ -143,6 +144,7 @@ export default function AddUniversitySection({
         setName(d.name || "");
         setLocation(d.location || "");
         setType(d.type || "");
+        setIsNepali(d.is_nepali !== false);
         setRank(d.rank || 0);
         setRating(d.rating || 0);
         setReviewCount(d.review_count || 0);
@@ -273,6 +275,7 @@ export default function AddUniversitySection({
         cover: finalCoverUrl.startsWith("data:") ? "" : finalCoverUrl,
         location,
         type,
+        is_nepali: isNepali,
         rank,
         rating,
         review_count: reviewCount,
@@ -473,6 +476,19 @@ export default function AddUniversitySection({
                     <option key={t} value={t}>{t}</option>
                   ))}
                 </select>
+              </div>
+              <div>
+                <label className="flex items-center gap-3 cursor-pointer h-full pt-6">
+                  <div
+                    role="switch"
+                    aria-checked={isNepali}
+                    onClick={() => setIsNepali(!isNepali)}
+                    className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors ${isNepali ? "bg-blue-600" : "bg-gray-300"}`}
+                  >
+                    <span className={`inline-block h-5 w-5 transform rounded-full bg-white shadow transition-transform ${isNepali ? "translate-x-5" : "translate-x-0"}`} />
+                  </div>
+                  <span className="text-sm font-medium text-gray-700">Nepali University</span>
+                </label>
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">Established Year</label>

@@ -1,20 +1,36 @@
 "use client";
 
-import React, { useState, useMemo } from "react";
+import React, { useState, useMemo, useEffect } from "react";
+import { FaSliders } from "react-icons/fa6";
 import FilterSidebar from "./FilterSidebar";
 import UniversityCard from "./UniversityCard";
 import Pagination from "@/components/ui/Pagination";
 import { UniversityData, FilterKey, FiltersState, ITEMS_PER_PAGE } from "./types";
-import { UNIVERSITY_TYPES } from "./constants";
+import { apiService, University, UniversityFilterCountsResponse } from "@/services/api";
 
 interface UniversityListingProps {
-  universities: UniversityData[];
   type: "nepali" | "foreign";
 }
 
-const UniversityListing: React.FC<UniversityListingProps> = ({
-  universities: allUniversities,
-}) => {
+const mapUniversity = (uni: University): UniversityData => ({
+  name: uni.name || "",
+  location: uni.location || "",
+  rating: uni.rating?.toString() || "0",
+  type: uni.type === "Private" ? "Private" : "Public",
+  rank: uni.rank?.toString() || "0",
+  programs: uni.programsCount || 0,
+  colleges: uni.collegesCount || 0,
+  tags: [],
+});
+
+const UniversityListing: React.FC<UniversityListingProps> = ({ type }) => {
+  const [allUniversities, setAllUniversities] = useState<UniversityData[]>([]);
+  const [filterCounts, setFilterCounts] = useState<UniversityFilterCountsResponse["data"] | undefined>(undefined);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  const [showMobileFilters, setShowMobileFilters] = useState(false);
+
   const [searchQuery, setSearchQuery] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
   const [sortBy, setSortBy] = useState("popularity");
@@ -24,6 +40,27 @@ const UniversityListing: React.FC<UniversityListingProps> = ({
     type: [],
     rating: [],
   });
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        setLoading(true);
+        const isNepaliParam = type === "nepali" ? "true" : "false";
+        const [uniRes, countsRes] = await Promise.all([
+          apiService.getUniversities({ isNepali: isNepaliParam }),
+          apiService.getUniversityFilterCounts(isNepaliParam),
+        ]);
+        const universities = (uniRes?.data?.universities || []).map(mapUniversity);
+        setAllUniversities(universities);
+        setFilterCounts(countsRes?.data || undefined);
+      } catch (err) {
+        setError("Failed to load universities");
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchData();
+  }, []);
 
   const toggle = (key: FilterKey, value: string) => {
     setFilters((prev) => {
@@ -85,19 +122,55 @@ const UniversityListing: React.FC<UniversityListingProps> = ({
     currentPage * ITEMS_PER_PAGE,
   );
 
+  if (loading) {
+    return (
+      <div className="flex h-64 items-center justify-center">
+        <div className="text-gray-500">Loading universities...</div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="flex h-64 items-center justify-center">
+        <div className="text-red-500">{error}</div>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen p-4 md:p-8">
       <div className="mx-auto max-w-[1400px]">
         <div className="flex flex-col gap-8 lg:flex-row lg:items-start">
-          <aside className="w-full shrink-0 lg:w-[300px]">
+          {/* Desktop sidebar */}
+          <aside className="hidden lg:block w-full shrink-0 lg:w-[300px]">
             <FilterSidebar
               filters={filters}
               onToggle={toggle}
               onSortBy={(v) => { setSortBy(v); setCurrentPage(1); }}
               sortBy={sortBy}
               onClearAll={clearAll}
+              filterCounts={filterCounts}
             />
           </aside>
+
+          {/* Mobile filter bottom drawer */}
+          {showMobileFilters && (
+            <div className="fixed inset-0 z-50 lg:hidden" onClick={() => setShowMobileFilters(false)}>
+              <div className="absolute inset-0 bg-black/50" />
+              <div className="absolute bottom-0 left-0 right-0 max-h-[70vh] bg-white rounded-t-2xl shadow-xl overflow-y-auto" onClick={(e) => e.stopPropagation()}>
+                <FilterSidebar
+                  filters={filters}
+                  onToggle={toggle}
+                  onSortBy={(v) => { setSortBy(v); setCurrentPage(1); }}
+                  sortBy={sortBy}
+                  onClearAll={clearAll}
+                  filterCounts={filterCounts}
+                  onClose={() => setShowMobileFilters(false)}
+                />
+              </div>
+            </div>
+          )}
 
           <main className="min-w-0 flex-1">
             <div className="mb-6 mt-2 flex flex-col items-start justify-between gap-4 sm:flex-row sm:items-center">
@@ -107,7 +180,8 @@ const UniversityListing: React.FC<UniversityListingProps> = ({
                 </h1>
               </div>
 
-              <div className="relative w-full sm:w-auto">
+              <div className="flex w-full flex-row items-center gap-3 sm:w-auto">
+              <div className="relative flex-1 sm:flex-initial">
                 <input
                   type="text"
                   placeholder="Search universities..."
@@ -119,6 +193,15 @@ const UniversityListing: React.FC<UniversityListingProps> = ({
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
                 </svg>
               </div>
+              <button
+                type="button"
+                onClick={() => setShowMobileFilters(true)}
+                className="lg:hidden inline-flex items-center gap-2 rounded-md border border-gray-200 bg-white px-4 py-2.5 text-[14px] font-medium text-gray-700 transition-colors hover:bg-gray-50"
+              >
+                <FaSliders className="h-4 w-4" />
+                Filters
+              </button>
+            </div>
             </div>
 
             {currentItems.length === 0 ? (

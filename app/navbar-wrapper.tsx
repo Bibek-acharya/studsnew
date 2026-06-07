@@ -18,7 +18,8 @@ export default function NavbarWrapper() {
     pathname.startsWith("/superadmin") ||
     pathname === "/login" ||
     pathname === "/register" ||
-    pathname === "/forgot-password";
+    pathname === "/forgot-password" ||
+    pathname === "/sphere-ai";
 
   const handleNavigate = useCallback((viewKey: string) => {
     const route = routeMap[viewKey as keyof typeof routeMap];

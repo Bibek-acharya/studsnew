@@ -15,6 +15,7 @@ interface CourseFiltersProps {
   filters: CourseFinderFilters;
   counts: CourseFilterCounts;
   onChange: (next: CourseFinderFilters) => void;
+  onClose?: () => void;
 }
 
 type DistrictOption = {
@@ -118,6 +119,7 @@ const CourseFilters: React.FC<CourseFiltersProps> = ({
   filters,
   counts,
   onChange,
+  onClose,
 }) => {
   const [showAppliedDropdown, setShowAppliedDropdown] = useState(false);
   const [fieldSearch, setFieldSearch] = useState("");
@@ -165,7 +167,18 @@ const CourseFilters: React.FC<CourseFiltersProps> = ({
 
   return (
     <>
-      <div className="relative w-full rounded-[20px] border border-gray-200 bg-white p-6 ">
+      <div className="relative w-full rounded-[20px] border border-gray-200 bg-white p-6">
+        {onClose && (
+          <button
+            type="button"
+            onClick={onClose}
+            className="absolute right-4 top-4 z-10 flex h-8 w-8 items-center justify-center rounded-full border border-gray-200 bg-white text-gray-500 transition-colors hover:bg-gray-50 lg:hidden"
+            aria-label="Close filters"
+          >
+            <i className="fa-solid fa-xmark"></i>
+          </button>
+        )}
+
         <div className="mb-2 flex items-center justify-between">
           <div className="flex items-center gap-3">
             <FaSliders size={18} className="text-black" />
@@ -217,7 +230,7 @@ const CourseFilters: React.FC<CourseFiltersProps> = ({
 
 
         <div className="space-y-4 pt-4">
-          <Accordion title="Academic Level / Program" defaultOpen>
+          <Accordion title="Academic Level / Program">
             <div className="flex flex-col gap-3.5 pt-1">
               {ACADEMIC_LEVELS.map((level) => (
                 <CheckboxItem
@@ -232,7 +245,7 @@ const CourseFilters: React.FC<CourseFiltersProps> = ({
             </div>
           </Accordion>
 
-          <Accordion title="Field of Study" defaultOpen>
+          <Accordion title="Field of Study">
             <div className="pt-1">
               <div className="relative mb-4 group">
                 <input
@@ -261,7 +274,7 @@ const CourseFilters: React.FC<CourseFiltersProps> = ({
             </div>
           </Accordion>
 
-          <Accordion title="Fee Range" defaultOpen>
+          <Accordion title="Fee Range">
             <div className="pt-2">
               <div className="mb-6">
                 <div className="flex justify-between items-center mb-4">
@@ -302,7 +315,7 @@ const CourseFilters: React.FC<CourseFiltersProps> = ({
             </div>
           </Accordion>
 
-          <Accordion title="Admission Status" defaultOpen>
+          <Accordion title="Admission Status">
             <div className="flex flex-col gap-3.5 pt-1">
               {ADMISSION_OPTIONS.map((opt) => (
                 <CheckboxItem

@@ -19,7 +19,8 @@ export default function LayoutPaddingWrapper({
   const hidePaddingRoute =
     pathname === "/login" ||
     pathname === "/register" ||
-    pathname === "/forgot-password";
+    pathname === "/forgot-password" ||
+    pathname === "/sphere-ai";
 
   return (
     <div

@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useCallback } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import HeroSection from "./landing/HeroSection";
 import SmarterToolsSection from "./landing/SmarterToolsSection";
@@ -63,10 +63,52 @@ const EducationPage: React.FC<EducationPageProps> = ({
     },
     [router],
   );
+  const heroRef = useRef<HTMLDivElement>(null);
+  const [showBackToTop, setShowBackToTop] = useState(false);
+  const [scrollProgress, setScrollProgress] = useState(0);
+
+  useEffect(() => {
+    const hero = heroRef.current;
+    if (!hero) return;
+
+    const onScroll = () => {
+      const heroBottom = hero.getBoundingClientRect().bottom;
+      setShowBackToTop(heroBottom < 0);
+
+      const scrollTop = window.scrollY;
+      const docHeight = document.documentElement.scrollHeight - window.innerHeight;
+      setScrollProgress(docHeight > 0 ? Math.min(scrollTop / docHeight, 1) : 0);
+    };
+
+    // observe hero visibility
+    const observer = new IntersectionObserver(
+      ([entry]) => setShowBackToTop(!entry.isIntersecting),
+      { threshold: 0 },
+    );
+    observer.observe(hero);
+
+    window.addEventListener("scroll", onScroll, { passive: true });
+    onScroll();
+
+    return () => {
+      observer.disconnect();
+      window.removeEventListener("scroll", onScroll);
+    };
+  }, []);
+
+  const scrollToTop = () => {
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  };
+
+  const radius = 42;
+  const circumference = 2 * Math.PI * radius;
+
   return (
     <div className="bg-white min-h-screen font-sans text-[#111827] antialiased pt-4 sm:pt-6 overflow-x-hidden">
       {/* Section 1: Hero */}
-      <HeroSection onNavigate={handleNavigate} slides={heroSlides} />
+      <div ref={heroRef}>
+        <HeroSection onNavigate={handleNavigate} slides={heroSlides} />
+      </div>
       {/* Section 2: Smarter Tools, Greater Success */}
       <SmarterToolsSection onNavigate={handleNavigate} />
       {/* Section 3: Event Carousel */}
@@ -91,6 +133,32 @@ const EducationPage: React.FC<EducationPageProps> = ({
     {/* <RecommendedForYouSection onNavigate={onNavigate} /> */}
       {/* Floating Popups */}
       <LandingPopups />
+
+      {/* Back to Top */}
+      <div
+        onClick={scrollToTop}
+        role="button"
+        tabIndex={0}
+        aria-label="Back to top"
+        onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") scrollToTop(); }}
+        className={`fixed bottom-6 right-6 z-50 cursor-pointer transition-all duration-300 max-md:hidden ${
+          showBackToTop ? "opacity-100 visible" : "opacity-0 invisible pointer-events-none"
+        }`}
+      >
+        <div className="relative flex items-center justify-center h-16 w-16">
+          <svg className="absolute inset-0 w-full h-full pointer-events-none" viewBox="0 0 100 100" style={{ transform: 'rotate(-90deg)' }}>
+            <circle cx="50" cy="50" r={radius} fill="none" stroke="#e5e7eb" strokeWidth="5" />
+            <circle
+              cx="50" cy="50" r={radius} fill="none" stroke="#0000FF" strokeWidth="5"
+              strokeDasharray={`${scrollProgress * circumference} ${circumference}`}
+              strokeLinecap="round"
+            />
+          </svg>
+          <div className="flex h-10 w-10 items-center justify-center rounded-full transition-all duration-500 hover:scale-110 pointer-events-none">
+            <i className="fa-solid fa-arrow-up text-base text-brand-blue"></i>
+          </div>
+        </div>
+      </div>
     </div>
   );
 };

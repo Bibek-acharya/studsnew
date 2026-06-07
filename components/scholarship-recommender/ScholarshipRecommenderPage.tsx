@@ -1,13 +1,14 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { initialRecommenderState, recommendations } from "./data";
+import { initialRecommenderState } from "./data";
 import ResultsGrid from "@/components/scholarship-recommender/ResultsGrid";
 import CustomSelect from "@/components/scholarship-recommender/CustomSelect";
 import MultiSelect from "@/components/scholarship-recommender/MultiSelect";
 import { NEPAL_PROVINCES, NEPAL_DISTRICTS } from "@/lib/location-data";
-import { RecommenderState, StepIndex } from "./types";
+import { RecommenderState, StepIndex, ScholarshipCardItem } from "./types";
 import ShortlistView from "./ShortlistView";
+import { scholarshipApi } from "@/services/api";
 
 const stepTitles: Record<number, { title: string; subtitle: string }> = {
   1: {
@@ -146,6 +147,9 @@ export default function ScholarshipRecommenderPage() {
   const [selectedIds, setSelectedIds] = useState<number[]>([]);
   const [shortlistedIds, setShortlistedIds] = useState<number[]>([]);
   const [academicScoreError, setAcademicScoreError] = useState("");
+  const [results, setResults] = useState<ScholarshipCardItem[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState("");
 
   const canContinue = useMemo(() => isStepValid(step, state), [step, state]);
 
@@ -153,13 +157,36 @@ export default function ScholarshipRecommenderPage() {
     setState((prev) => ({ ...prev, [key]: value }));
   };
 
-  const next = () => {
+  const next = async () => {
     if (step < 5 && canContinue) {
       setStep((prev) => (prev + 1) as StepIndex);
       return;
     }
     if (step === 5) {
-      setStep(6);
+      setIsLoading(true);
+      setError("");
+      try {
+        const res = await scholarshipApi.recommendScholarships(state);
+        if (res.success && res.data?.scholarships) {
+          const items: ScholarshipCardItem[] = res.data.scholarships.map((s) => ({
+            id: s.id,
+            title: s.title,
+            providerType: s.providerType,
+            coverage: s.coverage,
+            deadline: s.deadline,
+            description: s.description,
+            tagColorClass: s.tagColorClass,
+          }));
+          setResults(items);
+          setStep(6);
+        } else {
+          setError("No matching scholarships found. Try adjusting your preferences.");
+        }
+      } catch {
+        setError("Failed to fetch recommendations. Please try again.");
+      } finally {
+        setIsLoading(false);
+      }
     }
   };
 
@@ -170,7 +197,7 @@ export default function ScholarshipRecommenderPage() {
   };
 
   const handleSelectAll = (checked: boolean) => {
-    setSelectedIds(checked ? recommendations.map((item) => item.id) : []);
+    setSelectedIds(checked ? results.map((item) => item.id) : []);
   };
 
   const handleToggleCard = (id: number) => {
@@ -214,7 +241,7 @@ export default function ScholarshipRecommenderPage() {
   if (step === 6) {
     return (
       <ResultsGrid
-        items={recommendations}
+        items={results}
         selectedIds={selectedIds}
         onToggleAll={handleSelectAll}
         onToggleOne={handleToggleCard}
@@ -230,7 +257,7 @@ export default function ScholarshipRecommenderPage() {
   if (step === 7) {
     return (
       <ShortlistView
-        recommendedItems={recommendations}
+        recommendedItems={results}
         shortlistedIds={shortlistedIds}
         onToggleShortlist={(id) => {
           setShortlistedIds((prev) =>
@@ -285,12 +312,26 @@ export default function ScholarshipRecommenderPage() {
           </div>
         ) : step === 5 ? (
           <div className="mt-5">
+            {error && (
+              <p className="text-red-500 text-sm mb-3 text-center">{error}</p>
+            )}
             <button
               type="button"
               onClick={next}
-              className="w-full py-3 px-4 bg-brand-blue hover:bg-brand-hover text-white text-[1.125rem] font-medium rounded-md transition-colors duration-200"
+              disabled={isLoading}
+              className="w-full py-3 px-4 bg-brand-blue hover:bg-brand-hover text-white text-[1.125rem] font-medium rounded-md transition-colors duration-200 disabled:opacity-60 disabled:cursor-not-allowed flex items-center justify-center gap-2"
             >
-              Find Scholarship
+              {isLoading ? (
+                <>
+                  <svg className="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+                  </svg>
+                  Finding Scholarships...
+                </>
+              ) : (
+                "Find Scholarship"
+              )}
             </button>
           </div>
         ) : (

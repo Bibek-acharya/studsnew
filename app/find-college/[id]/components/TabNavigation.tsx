@@ -84,7 +84,7 @@ const TabNavigation: React.FC<TabNavigationProps> = ({ activeTab, onTabChange })
             <ChevronRight className="h-4 w-4" />
           </button>
         )}
-        <div ref={tabsScrollRef} className="overflow-x-auto scroll-smooth px-8 sm:px-9 [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
+        <div ref={tabsScrollRef} className={`overflow-x-auto scroll-smooth ${canScrollTabsLeft ? "pl-8 sm:pl-9" : "pl-0"} pr-8 sm:pr-9 [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]`}>
           <nav ref={tabsNavRef} className="flex w-max space-x-8 whitespace-nowrap pr-6 md:pr-12 lg:pr-24 xl:pr-32">
             {TAB_DEFINITIONS.map(([key, label]) => {
               const selected = activeTab === key;

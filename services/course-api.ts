@@ -25,6 +25,9 @@ export interface Course {
   location?: string;
   govtFee?: string;
   privateFee?: string;
+  image?: string;
+  source?: string;
+  institutionName?: string;
 }
 
 export interface CourseDetails extends Course {

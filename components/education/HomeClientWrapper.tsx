@@ -5,7 +5,6 @@ import { useAuth } from "@/services/AuthContext";
 import { apiService } from "@/services/api";
 import OnboardingModal from "@/components/auth/OnboardingModal";
 import ProjectShikshaPopup from "@/components/project-shiksha/ShikshaPopup";
-import ChatWidget from "@/components/chat/ChatWidget";
 
 const ONBOARDING_KEY = "onboarding_completed";
 
@@ -65,7 +64,6 @@ export default function HomeClientWrapper({ children }: HomeClientWrapperProps) 
   return (
     <>
       {children}
-      <ChatWidget />
       <ProjectShikshaPopup />
       <OnboardingModal
         isOpen={showOnboarding}
