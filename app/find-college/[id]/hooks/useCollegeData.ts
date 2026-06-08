@@ -173,35 +173,44 @@ export function useCollegeData(idStr: string) {
 
   const mappedEvents = useMemo(() => {
     if (!instInstitutionEvents || !Array.isArray(instInstitutionEvents)) return null;
-    return instInstitutionEvents.map((e: any) => ({
-      image: safeImageUrl(e.image) || "",
-      title: e.title || "",
-      date: `${e.date || ""} | ${e.location || "TBD"}`,
-      desc: e.description || "",
-    }));
+    return instInstitutionEvents
+      .filter((e: any) => e.status === "upcoming" || e.status === "published")
+      .map((e: any) => ({
+        id: e.id,
+        image: safeImageUrl(e.image_url || e.image) || "",
+        title: e.name || e.title || "",
+        date: `${e.start_date || e.date || ""} | ${e.location || "TBD"}`,
+        desc: (e.short_desc || e.description || "").replace(/<[^>]*>/g, "").replace(/&nbsp;/g, " ").replace(/&amp;/g, "&").replace(/\s+/g, " ").trim(),
+      }));
   }, [instInstitutionEvents, safeImageUrl]);
 
   const mappedNews = useMemo(() => {
     if (!instInstitutionNews || !Array.isArray(instInstitutionNews)) return null;
-    return instInstitutionNews.map((n: any) => ({
-      badge: n.category || "News",
-      badgeClass: "bg-blue-500 text-white",
-      image: safeImageUrl(n.image) || "",
-      title: n.title || "",
-      desc: n.excerpt || n.content || "",
-      time: n.created_at ? new Date(n.created_at).toLocaleDateString() : "",
-    }));
+    return instInstitutionNews
+      .filter((n: any) => n.status === "published")
+      .map((n: any) => ({
+        id: n.id,
+        badge: n.news_type || n.category || "News",
+        badgeClass: "bg-blue-500 text-white",
+        image: safeImageUrl(n.image_url || n.image) || "",
+        title: n.title || "",
+        desc: (n.short_desc || n.excerpt || n.content || "").replace(/<[^>]*>/g, "").replace(/&nbsp;/g, " ").replace(/&amp;/g, "&").replace(/\s+/g, " ").trim(),
+        time: n.created_at ? new Date(n.created_at).toLocaleDateString() : "",
+      }));
   }, [instInstitutionNews, safeImageUrl]);
 
   const mappedScholarships = useMemo(() => {
     if (!instInstitutionScholarships || !Array.isArray(instInstitutionScholarships)) return null;
-    return instInstitutionScholarships.map((s: any) => ({
-      level: s.degree_level || "",
-      program: s.field_of_study?.join(", ") || s.title || "",
-      scholarship: s.title || "",
-      benefit: s.value || "",
-      audience: s.eligibility || s.description || "",
-    }));
+    return instInstitutionScholarships
+      .filter((s: any) => s.status === "published")
+      .map((s: any) => ({
+        id: s.id,
+        level: s.degree_level || "",
+        program: s.field_of_study?.join(", ") || s.title || "",
+        scholarship: s.title || "",
+        benefit: s.value || "",
+        audience: (s.short_desc || s.description || "").replace(/<[^>]*>/g, "").replace(/&nbsp;/g, " ").replace(/&amp;/g, "&").replace(/\s+/g, " ").trim(),
+      }));
   }, [instInstitutionScholarships]);
 
   const name = isInstitution ? instName : college?.name || "";

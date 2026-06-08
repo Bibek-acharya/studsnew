@@ -1,10 +1,12 @@
 "use client";
 import React, { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import { MagnifyingGlass, Pencil, Trash, BookOpen, X } from "@phosphor-icons/react";
 import SectionHeader from "../shared/SectionHeader";
 import { institutionProgramApi, InstitutionProgram } from "@/services/institutionProgramApi";
 
 const CourseListPage: React.FC = () => {
+  const router = useRouter();
   const [courses, setCourses] = useState<InstitutionProgram[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
@@ -53,7 +55,6 @@ const CourseListPage: React.FC = () => {
                   <th className="text-left py-3 px-6 font-semibold text-gray-700">Name</th>
                   <th className="text-left py-3 px-6 font-semibold text-gray-700">Duration</th>
                   <th className="text-left py-3 px-6 font-semibold text-gray-700">Fee</th>
-                  <th className="text-center py-3 px-6 font-semibold text-gray-700">Seats</th>
                   <th className="text-center py-3 px-6 font-semibold text-gray-700">Status</th>
                   <th className="text-center py-3 px-6 font-semibold text-gray-700">Actions</th>
                 </tr>
@@ -64,14 +65,18 @@ const CourseListPage: React.FC = () => {
                     <td className="py-3 px-6 font-medium text-gray-900">{c.name}</td>
                     <td className="py-3 px-6 text-gray-600">{c.duration || "-"}</td>
                     <td className="py-3 px-6 text-gray-600">{c.fee || "-"}</td>
-                    <td className="text-center py-3 px-6 text-gray-600">{c.capacity || "-"}</td>
                     <td className="text-center py-3 px-6">
                       <span className={`px-2 py-1 rounded text-xs font-medium ${c.status === "active" ? "bg-green-100 text-green-700" : "bg-gray-100 text-gray-700"}`}>{c.status}</span>
                     </td>
                     <td className="text-center py-3 px-6">
-                      <button onClick={() => handleDelete(c.id)} className="p-1.5 hover:bg-red-50 rounded text-red-600" title="Delete">
-                        <Trash className="w-4 h-4" />
-                      </button>
+                      <div className="flex items-center justify-center gap-1">
+                        <button onClick={() => router.push(`/institution-zone/dashboard/course/create?id=${c.id}`)} className="p-1.5 hover:bg-blue-50 rounded text-blue-600" title="Edit">
+                          <Pencil className="w-4 h-4" />
+                        </button>
+                        <button onClick={() => handleDelete(c.id)} className="p-1.5 hover:bg-red-50 rounded text-red-600" title="Delete">
+                          <Trash className="w-4 h-4" />
+                        </button>
+                      </div>
                     </td>
                   </tr>
                 ))}

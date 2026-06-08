@@ -9,7 +9,7 @@ import FileUpload from "@/components/ScholarshipProvider/common/FileUpload";
 interface VideoItem { id: number; url: string; message: string; name: string; designation: string; avatar: string; }
 interface OverviewRow { id: number; key: string; value: string; }
 interface LeadershipRow { id: number; position: string; role: string; holder: string; }
-interface CourseRow { id: number; name: string; duration: string; fees: string; eligibility: string; }
+interface CourseRow { id: number; name: string; duration: string; fees: string; eligibility: string; seats: string; }
 interface ProgramRow { id: number; name: string; level: string; affiliation: string; status: string; }
 interface FacilityRow { id: number; icon: string; heading: string; desc: string; }
 interface AlumniRow { id: number; photo: string; name: string; job: string; batch: string; linkedin: string; }
@@ -637,7 +637,7 @@ const ProfilePage: React.FC = () => {
               <h3 className="text-lg font-semibold text-gray-800">
                 <i className="fa-solid fa-book-open text-blue-500 mr-2"></i>Courses & Fees
               </h3>
-              <button type="button" onClick={() => addItem(setCourses, { name: "", duration: "", fees: "", eligibility: "" })}
+              <button type="button" onClick={() => addItem(setCourses, { name: "", duration: "", fees: "", eligibility: "", seats: "" })}
                 className="text-sm text-blue-600 bg-blue-50 px-3 py-1.5 rounded-md hover:bg-blue-100 transition-colors font-medium">
                 <i className="fa-solid fa-plus mr-1"></i> Add Course
               </button>
@@ -649,11 +649,12 @@ const ProfilePage: React.FC = () => {
                     className="absolute top-3 right-3 text-red-400 hover:text-red-600 hover:bg-red-50 p-1.5 rounded-md transition-colors opacity-0 group-hover:opacity-100">
                     <i className="fa-solid fa-trash"></i>
                   </button>
-                  <div className="grid grid-cols-1 md:grid-cols-4 gap-3 pr-10">
+                  <div className="grid grid-cols-1 md:grid-cols-5 gap-3 pr-10">
                     <input type="text" className={`${inputClass} text-sm`} placeholder="Course name" value={c.name} onChange={e => updateItem(setCourses, c.id, "name", e.target.value)} />
                     <input type="text" className={`${inputClass} text-sm`} placeholder="Duration" value={c.duration} onChange={e => updateItem(setCourses, c.id, "duration", e.target.value)} />
                     <input type="text" className={`${inputClass} text-sm`} placeholder="Fees / Year" value={c.fees} onChange={e => updateItem(setCourses, c.id, "fees", e.target.value)} />
-                    <input type="text" className={`${inputClass} text-sm`} placeholder="Eligibility & Seat" value={c.eligibility} onChange={e => updateItem(setCourses, c.id, "eligibility", e.target.value)} />
+                    <input type="number" min="0" className={`${inputClass} text-sm`} placeholder="Seats" value={c.seats} onChange={e => updateItem(setCourses, c.id, "seats", e.target.value)} />
+                    <input type="text" className={`${inputClass} text-sm`} placeholder="Eligibility" value={c.eligibility} onChange={e => updateItem(setCourses, c.id, "eligibility", e.target.value)} />
                   </div>
                 </div>
               ))}

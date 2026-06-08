@@ -17,7 +17,8 @@ const EventDetailsPage: React.FC<{ params: Promise<{ id: string }> }> = ({ param
       setId(p.id);
       try {
         const isProvider = p.id.startsWith("provider-");
-        const actualId = isProvider ? p.id.replace("provider-", "") : p.id;
+        const isInst = p.id.startsWith("inst-");
+        const actualId = isProvider ? p.id.replace("provider-", "") : isInst ? p.id.replace("inst-", "") : p.id;
 
         let eventData: EventEntry | null;
         if (isProvider) {
@@ -39,6 +40,31 @@ const EventDetailsPage: React.FC<{ params: Promise<{ id: string }> }> = ({ param
               interestedCount: 0,
               published: true,
               created_at: found.created_at,
+            } : null;
+          } catch {
+            eventData = null;
+          }
+        } else if (isInst) {
+          try {
+            const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080";
+            const res = await fetch(`${API_BASE}/api/v1/institutions/public/events/${actualId}`);
+            const json = await res.json();
+            const e = json?.data;
+            eventData = e ? {
+              id: `inst-${e.id}`,
+              title: e.name || e.title,
+              excerpt: e.short_desc || "",
+              description: e.description || "",
+              category: e.event_type || e.category || "Event",
+              image: e.image_url || "",
+              organizer: e.organized_by || "",
+              location: e.location || "",
+              date: e.start_date ? new Date(e.start_date).toLocaleDateString() : "",
+              time: e.start_date ? new Date(e.start_date).toLocaleTimeString() : "",
+              registrationFee: "",
+              interestedCount: 0,
+              published: true,
+              created_at: e.created_at,
             } : null;
           } catch {
             eventData = null;
@@ -115,7 +141,7 @@ const EventDetailsPage: React.FC<{ params: Promise<{ id: string }> }> = ({ param
           <h1 className="text-2xl sm:text-3xl lg:text-5xl font-extrabold text-white leading-tight mb-3 sm:mb-4 max-w-4xl">
             {event.title}
           </h1>
-          <div className="text-gray-200 text-xs sm:text-sm lg:text-lg max-w-2xl leading-relaxed hidden sm:block news-content">
+          <div className="hidden sm:block max-w-2xl news-content prose prose-invert prose-sm max-w-none prose-p:text-gray-200 prose-a:text-blue-300">
             <div dangerouslySetInnerHTML={{ __html: event.excerpt }} />
           </div>
         </div>
@@ -129,107 +155,10 @@ const EventDetailsPage: React.FC<{ params: Promise<{ id: string }> }> = ({ param
               <h2 className="text-xl font-bold text-gray-900">Events Description</h2>
             </div>
 
-            <div className="space-y-4 text-[15px] leading-relaxed text-gray-600 [&_pre]:overflow-x-auto [&_pre]:whitespace-pre-wrap [&_pre]:break-words [&_code]:break-words [&_img]:max-w-full news-content">
-              <div dangerouslySetInnerHTML={{ __html: event.description || "" }} />
-              <p>
-                This seminar provides a comprehensive overview of fully funded and partial scholarships available for Nepalese students in Australia, USA, UK, and Europe. We bring together expert counselors, past scholarship winners, and university representatives to guide you through the application process.
-              </p>
-              <p>
-                Don&apos;t miss this opportunity to unlock your academic potential and build a roadmap for your future career without the burden of financial stress.
-              </p>
-            </div>
-
-            <div className="mt-8 bg-[#f4f7ff] rounded-md p-6 md:p-8">
-              <h3 className="font-bold text-gray-900 mb-6">Key Highlights & Objectives</h3>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-y-4 gap-x-6">
-                {[1, 2, 3, 4].map((item) => (
-                  <div key={item} className="flex items-start gap-3">
-                    <i className="fa-regular fa-circle-check text-blue-600 shrink-0 mt-0.5"></i>
-                    <span className="text-sm text-gray-600">
-                      The Institute of Engineering (IOE) entrance exam is tough.
-                    </span>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </section>
-
-          <section>
-            <div className="flex items-center gap-3 mb-6">
-              <i className="fa-solid fa-users text-blue-600"></i>
-              <h2 className="text-xl font-bold text-gray-900">Who Should Attend?</h2>
-            </div>
-
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-              {[
-                { icon: "fa-graduation-cap", color: "text-blue-500" },
-                { icon: "fa-user-plus", color: "text-emerald-500" },
-                { icon: "fa-book-open", color: "text-purple-500" },
-                { icon: "fa-display", color: "text-orange-500" },
-              ].map((entry, index) => (
-                <div
-                  key={`${entry.icon}-${index}`}
-                  className="bg-gray-50/80 rounded-md p-6 flex flex-col items-center justify-center text-center gap-2"
-                >
-                  <i className={`fa-solid ${entry.icon} ${entry.color} mb-1`}></i>
-                  <h4 className="font-bold text-gray-900 text-sm">Students</h4>
-                  <span className="text-xs text-gray-500">+2 & Bachelor&apos;s</span>
-                </div>
-              ))}
-            </div>
-          </section>
-
-          <section>
-            <div className="flex items-center gap-3 mb-6">
-              <i className="fa-regular fa-clock text-blue-600"></i>
-              <h2 className="text-xl font-bold text-gray-900">Events Schedule</h2>
-            </div>
-
-            <div className="flex flex-col border-t border-gray-100 mt-4">
-              {[1, 2, 3].map((item) => (
-                <div key={item} className="py-5 border-b border-gray-100 flex justify-between items-start gap-4">
-                  <div>
-                    <h4 className="font-bold text-gray-900 text-sm mb-1">Registration & Welcome Tea</h4>
-                    <p className="text-xs text-gray-500">Main Lobby. Collect your information kit and name tag.</p>
-                  </div>
-                  <div className="bg-[#f0f5ff] text-blue-600 text-xs font-semibold px-3 py-1.5 rounded-full whitespace-nowrap">
-                    {event.time}
-                  </div>
-                </div>
-              ))}
-            </div>
-          </section>
-
-          <section>
-            <div className="flex items-center gap-3 mb-6">
-              <i className="fa-solid fa-paperclip text-blue-600 -rotate-45"></i>
-              <h2 className="text-xl font-bold text-gray-900">Resources</h2>
-            </div>
-
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              {[
-                { icon: "fa-file-lines", title: "Date & Time", meta: "PDF , 2.4 MB", color: "bg-red-50 text-red-500" },
-                { icon: "fa-image", title: "Event Poster", meta: "PDF , 2.4 MB", color: "bg-blue-50 text-blue-600" },
-              ].map((resource) => (
-                <button
-                  key={resource.title}
-                  className="border border-gray-100 rounded-md p-4 flex items-center justify-between  hover: transition-shadow cursor-pointer group text-left"
-                >
-                  <div className="flex items-center gap-4">
-                    <div className={`w-10 h-10 rounded flex items-center justify-center ${resource.color}`}>
-                      <i className={`fa-solid ${resource.icon}`}></i>
-                    </div>
-                    <div>
-                      <h4 className="font-bold text-gray-900 text-sm">{resource.title}</h4>
-                      <p className="text-[11px] text-gray-500 mt-0.5">{resource.meta}</p>
-                    </div>
-                  </div>
-                  <span className="text-gray-400 hover:text-gray-600">
-                    <i className="fa-solid fa-download"></i>
-                  </span>
-                </button>
-              ))}
-            </div>
+            <div
+              className="news-content prose prose-slate max-w-none break-words overflow-hidden prose-img:max-w-full prose-img:h-auto prose-img:rounded-xl prose-pre:overflow-x-auto prose-pre:whitespace-pre-wrap prose-table:block prose-table:overflow-x-auto prose-a:text-blue-600 hover:prose-a:text-blue-700 prose-headings:text-gray-900 prose-p:text-gray-700 prose-li:text-gray-700"
+              dangerouslySetInnerHTML={{ __html: event.description || "" }}
+            />
           </section>
         </div>
 
@@ -238,9 +167,7 @@ const EventDetailsPage: React.FC<{ params: Promise<{ id: string }> }> = ({ param
             <div className="mb-10">
               <div className="flex items-center justify-between mb-8">
                 <h2 className="text-lg font-bold text-gray-900">Events Details</h2>
-                <span className="bg-emerald-50 text-emerald-600 text-[10px] uppercase font-bold tracking-wider px-2.5 py-1 rounded">
-                  {event.registrationFee === "Free" ? "Free Entry" : "Paid Entry"}
-                </span>
+
               </div>
 
               <div className="space-y-6">
@@ -271,14 +198,6 @@ const EventDetailsPage: React.FC<{ params: Promise<{ id: string }> }> = ({ param
                     <p className="text-xs text-red-500">Closes on oct 24,2025</p>
                   </div>
                 </div>
-              </div>
-
-              <div className="mt-6 rounded-md overflow-hidden h-32 relative border border-gray-100 ">
-                <img
-                  src="https://images.unsplash.com/photo-1524661135-423995f22d0b?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80"
-                  alt="Map Placeholder"
-                  className="w-full h-full object-cover"
-                />
               </div>
 
               <div className="mt-6 space-y-3">

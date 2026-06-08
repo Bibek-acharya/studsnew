@@ -1,5 +1,6 @@
 export interface Exam {
   id: string;
+  numericId: number;
   slug: string;
   institution: string;
   verified: boolean;

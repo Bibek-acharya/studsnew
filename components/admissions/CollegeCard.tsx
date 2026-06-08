@@ -20,6 +20,10 @@ interface CollegeCardProps {
   onMockTest?: () => void;
   onAskQuestion?: () => void;
   onNavigate?: () => void;
+  collegeId?: number;
+  isSaved?: boolean;
+  isBookmarkPending?: boolean;
+  onToggleSaved?: () => void;
 }
 
 export default function CollegeCard({
@@ -34,9 +38,11 @@ export default function CollegeCard({
   onApply,
   onAskQuestion,
   onNavigate,
+  isSaved = false,
+  isBookmarkPending = false,
+  onToggleSaved,
 }: CollegeCardProps) {
   const [currentSlide, setCurrentSlide] = useState(0);
-  const [favorited, setFavorited] = useState(false);
   const carouselRef = useRef<HTMLDivElement>(null);
 
   const goToSlide = (index: number) => {
@@ -231,17 +237,27 @@ export default function CollegeCard({
             Apply Now
           </button>
           <button
+            disabled={isBookmarkPending}
             onClick={(e) => {
               e.stopPropagation();
-              setFavorited(!favorited);
+              onToggleSaved?.();
             }}
             className={`flex-none w-9 h-9 flex items-center justify-center border rounded-md transition-colors ${
-              favorited
-                ? "border-blue-100 bg-blue-50 text-blue-600"
-                : "border-gray-200 text-[#64748b] hover:bg-gray-50"
+              isBookmarkPending
+                ? "border-gray-100 bg-gray-50 cursor-not-allowed"
+                : isSaved
+                  ? "border-blue-100 bg-blue-50 text-blue-600"
+                  : "border-gray-200 text-[#64748b] hover:bg-gray-50"
             }`}
           >
-            <i className={`fa-${favorited ? "solid" : "regular"} fa-bookmark text-[16px]`}></i>
+            {isBookmarkPending ? (
+              <svg className="w-4 h-4 animate-spin text-gray-400" fill="none" viewBox="0 0 24 24">
+                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+              </svg>
+            ) : (
+              <i className={`fa-${isSaved ? "solid" : "regular"} fa-bookmark text-[16px]`}></i>
+            )}
           </button>
         </div>
       </div>

@@ -3,12 +3,14 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { FolderOpen } from "lucide-react";
+import { toast } from "sonner";
 import { AdmissionFilters } from "@/app/admissions/[level]/types";
 import CollegeCard from "@/components/admissions/CollegeCard";
 import FeaturedAdmissionAd from "@/components/admissions/FeaturedAdmissionAd";
 import DirectAdmissionAd from "@/components/admissions/DirectAdmissionAd";
 import Pagination from "@/components/ui/Pagination";
 import { admissionService, AdmissionCollegeItem } from "@/services/admission.api";
+import { apiService } from "@/services/api";
 import { useAuth } from "@/services/AuthContext";
 import { sampleFeaturedColleges, sampleDirectAdmissions, levelConfig } from "./data";
 
@@ -50,6 +52,9 @@ const AdmissionGrid: React.FC<AdmissionGridProps> = ({
   });
   const [isLoading, setIsLoading] = useState(false);
   const [fetchError, setFetchError] = useState<string | null>(null);
+  const [savedIds, setSavedIds] = useState<number[]>([]);
+  const [bookmarkMap, setBookmarkMap] = useState<Record<number, number>>({});
+  const [pendingBookmarks, setPendingBookmarks] = useState<Record<number, boolean>>({});
 
   const router = useRouter();
   const { isAuthenticated } = useAuth();
@@ -104,6 +109,51 @@ const AdmissionGrid: React.FC<AdmissionGridProps> = ({
     setInquiryCollege(null);
     setAskSent(false);
   };
+
+  const toggleSavedCollege = async (collegeId: number) => {
+    if (!isAuthenticated) {
+      toast.error('Please login to save bookmarks')
+      return
+    }
+    if (pendingBookmarks[collegeId]) return
+    setPendingBookmarks(prev => ({ ...prev, [collegeId]: true }))
+    const existingBookmarkId = bookmarkMap[collegeId]
+    try {
+      if (existingBookmarkId) {
+        await apiService.deleteBookmark(existingBookmarkId)
+        setBookmarkMap(prev => {
+          const next = { ...prev }
+          delete next[collegeId]
+          return next
+        })
+        setSavedIds(prev => prev.filter(id => id !== collegeId))
+        toast.success('Removed from bookmarks')
+      } else {
+        const res = await apiService.createBookmark(collegeId, 'admissions')
+        setBookmarkMap(prev => ({ ...prev, [collegeId]: res.data.id }))
+        setSavedIds(prev => [...prev, collegeId])
+        toast.success('Added to bookmarks!')
+      }
+    } catch {
+      toast.error('Failed to save bookmark')
+    } finally {
+      setPendingBookmarks(prev => { const next = { ...prev }; delete next[collegeId]; return next })
+    }
+  }
+
+  useEffect(() => {
+    if (!isAuthenticated) return
+    apiService.getBookmarksByType('admissions').then(items => {
+      const ids: number[] = []
+      const map: Record<number, number> = {}
+      items.forEach(b => {
+        ids.push(b.item_id)
+        map[b.item_id] = b.id
+      })
+      setSavedIds(ids)
+      setBookmarkMap(map)
+    }).catch(() => {})
+  }, [isAuthenticated])
 
   useEffect(() => {
     setCurrentPage(1);
@@ -260,6 +310,10 @@ const AdmissionGrid: React.FC<AdmissionGridProps> = ({
                         })
                       : [{ name: college.affiliation || college.name || "Admission Open", status: "Seats Available" }]}
                     moreProgramsCount={college.programs}
+                    collegeId={college.id}
+                    isSaved={savedIds.includes(college.id)}
+                    isBookmarkPending={!!pendingBookmarks[college.id]}
+                    onToggleSaved={() => toggleSavedCollege(college.id)}
                     onNavigate={() => onNavigate("collegeDetails", { id: college.id })}
                     onApply={() => onNavigate("collegeDetails", { id: college.id })}
                     onAskQuestion={() => openInquiry(college)}

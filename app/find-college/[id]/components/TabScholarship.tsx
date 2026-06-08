@@ -1,6 +1,7 @@
 "use client";
 
 import React from "react";
+import { useRouter } from "next/navigation";
 import { FilterPills, ProgTh } from "./index";
 import type { LevelFilter } from "../../types";
 import EmptyTabState from "./EmptyTabState";
@@ -13,6 +14,8 @@ interface TabScholarshipProps {
 }
 
 const TabScholarship: React.FC<TabScholarshipProps> = ({ scholarships, filter, onFilterChange, hasApiData }) => {
+  const router = useRouter();
+
   if (scholarships.length === 0) return <EmptyTabState tabName="scholarships" />;
 
   return (
@@ -31,12 +34,14 @@ const TabScholarship: React.FC<TabScholarshipProps> = ({ scholarships, filter, o
             <ProgTh className="col-span-3"></ProgTh>
           </div>
           {scholarships.map((scholarship) => (
-            <div key={`${scholarship.program}-${scholarship.scholarship}`} className="grid grid-cols-12 items-center gap-4 border-b border-gray-100 px-6 py-5 hover:bg-gray-50/50">
+            <div key={scholarship.id || `${scholarship.program}-${scholarship.scholarship}`} className="grid grid-cols-12 items-center gap-4 border-b border-gray-100 px-6 py-5 hover:bg-gray-50/50">
               <div className="col-span-2"><h4 className="text-[14px] font-bold text-gray-900">{scholarship.program}</h4></div>
               <div className="col-span-2">{scholarship.scholarship}</div>
               <div className="col-span-2"><span className="text-[13px] font-medium text-green-600">{scholarship.benefit}</span></div>
               <div className="col-span-3">{scholarship.audience}</div>
-              <div className="col-span-3"><button className="rounded-md bg-brand-blue px-5 py-2 text-xs font-bold text-white hover:bg-brand-hover">Get Scholarship</button></div>
+              <div className="col-span-3">
+                <button onClick={() => router.push(`/scholarship-finder/${scholarship.id}`)} className="rounded-md bg-brand-blue px-5 py-2 text-xs font-bold text-white hover:bg-brand-hover">View Details</button>
+              </div>
             </div>
           ))}
         </div>

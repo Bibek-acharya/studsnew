@@ -58,33 +58,66 @@ const EventsPage: React.FC = () => {
   const [bookmarkedEventIds, setBookmarkedEventIds] = useState<Set<string>>(new Set());
 
   useEffect(() => {
+    let cancelled = false;
     const loadEvents = async () => {
       setLoading(true);
       setError(null);
 
+      let allEvents: any[] = [];
+
       try {
         const result = await fetchPublicEvents({ limit: 50 });
-        setEvents(result.events || []);
-
-        const stored = window.localStorage.getItem("events-bookmarks");
-        if (stored) {
-          try {
-            const parsed = JSON.parse(stored) as string[];
-            if (Array.isArray(parsed)) {
-              setBookmarkedEventIds(new Set(parsed));
-            }
-          } catch {
-            // Ignore invalid local storage and continue with empty bookmarks.
-          }
-        }
+        allEvents = result.events || [];
       } catch (err) {
         setError((err as Error).message || "Unable to load events.");
+      }
+
+      try {
+        const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080";
+        const instRes = await fetch(`${API_BASE}/api/v1/institutions/public/events?page=1&limit=20`);
+        const instData = await instRes.json();
+        const instEvents = instData?.data?.events || [];
+        allEvents = [...allEvents, ...instEvents.map((e: any) => ({
+          id: `inst-${e.id}`,
+          title: e.name || e.title,
+          excerpt: e.short_desc || "",
+          description: e.description || "",
+          category: e.event_type || e.category || "Event",
+          image: e.image_url || "",
+          organizer: e.organized_by || "",
+          location: e.location || "",
+          date: e.start_date ? new Date(e.start_date).toLocaleDateString() : "",
+          time: e.start_date ? new Date(e.start_date).toLocaleTimeString() : "",
+          registrationFee: "",
+          interested: 0,
+          published: true,
+          created_at: e.created_at,
+        }))];
+      } catch {
+        // Institution events fetch failed silently
+      }
+
+      if (!cancelled) {
+        setEvents(allEvents);
+      }
+
+      try {
+        const stored = window.localStorage.getItem("events-bookmarks");
+        if (stored) {
+          const parsed = JSON.parse(stored) as string[];
+          if (Array.isArray(parsed)) {
+            setBookmarkedEventIds(new Set(parsed));
+          }
+        }
+      } catch {
+        // Ignore invalid local storage
       } finally {
-        setLoading(false);
+        if (!cancelled) setLoading(false);
       }
     };
 
     loadEvents();
+    return () => { cancelled = true; };
   }, []);
 
   useEffect(() => {

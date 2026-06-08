@@ -114,37 +114,31 @@ const NewsDetailsPage: React.FC<{
       try {
         if (safeId.startsWith("provider-")) {
           const actualId = safeId.replace("provider-", "");
-
-          const res = await fetch(
-            `${API_BASE}/api/v1/public/news/${actualId}`
-          );
-
+          const res = await fetch(`${API_BASE}/api/v1/public/news/${actualId}`);
           const data = await res.json();
-
+          if (data?.data) {
+            setArticle(normalizeArticle(data.data));
+            return;
+          }
+        } else if (safeId.startsWith("inst-")) {
+          const actualId = safeId.replace("inst-", "");
+          const res = await fetch(`${API_BASE}/api/v1/institutions/public/news/${actualId}`);
+          const data = await res.json();
           if (data?.data) {
             setArticle(normalizeArticle(data.data));
             return;
           }
         } else if (safeId.startsWith("edu-")) {
           const actualId = safeId.replace("edu-", "");
-
-          const res = await fetch(
-            `${API_BASE}/api/v1/education/news/${actualId}`
-          );
-
+          const res = await fetch(`${API_BASE}/api/v1/education/news/${actualId}`);
           const data = await res.json();
-
           if (data?.data) {
             setArticle(normalizeArticle(data.data));
             return;
           }
         } else {
-          const res = await fetch(
-            `${API_BASE}/api/v1/public/news/${safeId}`
-          );
-
+          const res = await fetch(`${API_BASE}/api/v1/public/news/${safeId}`);
           const data = await res.json();
-
           if (data?.data) {
             setArticle(normalizeArticle(data.data));
             return;

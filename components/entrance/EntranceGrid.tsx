@@ -1,9 +1,12 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useQuery } from "@tanstack/react-query";
+import { toast } from "sonner";
 import { EntranceFilterState } from "@/app/entrance/types";
 import { Exam } from "@/components/entrance/types";
 import { entranceService, EntranceFilters } from "@/services/entrance.api";
+import { apiService } from "@/services/api";
+import { useAuth } from "@/services/AuthContext";
 import Pagination from "@/components/ui/Pagination";
 import { EntranceAds } from "./ads/EntranceAds";
 import { ApplicationAds } from "./ads/ApplicationAds";
@@ -37,6 +40,42 @@ interface EntranceGridProps {
 
 const EntranceGrid: React.FC<EntranceGridProps> = ({ filters, setFilters, onMobileFilterClick }) => {
   const [currentPage, setCurrentPage] = useState(1);
+  const [savedIds, setSavedIds] = useState<number[]>([]);
+  const [bookmarkMap, setBookmarkMap] = useState<Record<number, number>>({});
+  const [pendingBookmarks, setPendingBookmarks] = useState<Record<number, boolean>>({});
+  const { isAuthenticated } = useAuth()
+
+  const toggleSaved = async (examId: number) => {
+    if (!isAuthenticated) { toast.error('Please login to save bookmarks'); return }
+    if (pendingBookmarks[examId]) return
+    setPendingBookmarks(prev => ({ ...prev, [examId]: true }))
+    const existingBookmarkId = bookmarkMap[examId]
+    try {
+      if (existingBookmarkId) {
+        await apiService.deleteBookmark(existingBookmarkId)
+        setBookmarkMap(prev => { const n = { ...prev }; delete n[examId]; return n })
+        setSavedIds(prev => prev.filter(id => id !== examId))
+        toast.success('Removed from bookmarks')
+      } else {
+        const res = await apiService.createBookmark(examId, 'entrance')
+        setBookmarkMap(prev => ({ ...prev, [examId]: res.data.id }))
+        setSavedIds(prev => [...prev, examId])
+        toast.success('Added to bookmarks!')
+      }
+    } catch { toast.error('Failed to save bookmark') }
+    finally { setPendingBookmarks(prev => { const n = { ...prev }; delete n[examId]; return n }) }
+  }
+
+  useEffect(() => {
+    if (!isAuthenticated) return
+    apiService.getBookmarksByType('entrance').then(items => {
+      const ids: number[] = []
+      const map: Record<number, number> = {}
+      items.forEach(b => { ids.push(b.item_id); map[b.item_id] = b.id })
+      setSavedIds(ids)
+      setBookmarkMap(map)
+    }).catch(() => {})
+  }, [isAuthenticated])
 
   useEffect(() => {
     setCurrentPage(1);
@@ -133,7 +172,7 @@ const EntranceGrid: React.FC<EntranceGridProps> = ({ filters, setFilters, onMobi
         ) : (
         pagedExams.map((exam, index) => (
           <React.Fragment key={exam.id}>
-            <EntranceCard exam={exam} />
+            <EntranceCard exam={exam} isSaved={savedIds.includes(exam.numericId)} isPending={!!pendingBookmarks[exam.numericId]} onToggleSaved={(e) => { e.stopPropagation(); toggleSaved(exam.numericId) }} />
             {showEntranceAds && index === 5 && (
               <div className="col-span-1 md:col-span-2 xl:col-span-3 -mx-2">
                 <EntranceAds />
@@ -185,14 +224,8 @@ const formatDate = (dateStr: string) => {
   }
 };
 
-const EntranceCard: React.FC<{ exam: Exam }> = ({ exam }) => {
+export const EntranceCard: React.FC<{ exam: Exam; isSaved: boolean; isPending: boolean; onToggleSaved: (e: React.MouseEvent) => void }> = ({ exam, isSaved, isPending, onToggleSaved }) => {
   const router = useRouter();
-  const [bookmarked, setBookmarked] = useState(false);
-
-  const toggleBookmark = (e: React.MouseEvent) => {
-    e.stopPropagation();
-    setBookmarked((prev) => !prev);
-  };
 
   return (
     <article className="bg-white rounded-md p-4 sm:p-5 border border-gray-200 flex flex-col h-full hover:border-blue-500/20 transition-all duration-300 overflow-visible">
@@ -332,17 +365,25 @@ const EntranceCard: React.FC<{ exam: Exam }> = ({ exam }) => {
             <Bell className="w-3.5 h-3.5" /> Notify
           </button>
           <button
+            disabled={isPending}
             className={`w-9 sm:w-10 shrink-0 rounded-md flex items-center justify-center transition-all duration-200 ${
-              bookmarked
-                ? "border-blue-200 bg-blue-50"
-                : "bg-white border border-[#e2e8f0] text-[#94a3b8] hover:bg-[#f8fafc] hover:text-[#64748b]"
+              isPending
+                ? "bg-gray-50 border border-gray-100 cursor-not-allowed"
+                : isSaved
+                  ? "border-blue-200 bg-blue-50"
+                  : "bg-white border border-[#e2e8f0] text-[#94a3b8] hover:bg-[#f8fafc] hover:text-[#64748b]"
             }`}
-            title={bookmarked ? "Remove Bookmark" : "Bookmark"}
-            onClick={toggleBookmark}
+            title={isSaved ? "Remove Bookmark" : "Bookmark"}
+            onClick={isPending ? undefined : onToggleSaved}
           >
-            <Bookmark
-              className={`w-3.5 h-3.5 sm:w-4 sm:h-4 ${bookmarked ? "text-[#0000ff] fill-[#0000ff]" : ""}`}
-            />
+            {isPending ? (
+              <svg className="w-3.5 h-3.5 animate-spin text-gray-400" fill="none" viewBox="0 0 24 24">
+                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+              </svg>
+            ) : (
+              <Bookmark className={`w-3.5 h-3.5 sm:w-4 sm:h-4 ${isSaved ? "text-[#0000ff] fill-[#0000ff]" : ""}`} />
+            )}
           </button>
         </div>
       </div>

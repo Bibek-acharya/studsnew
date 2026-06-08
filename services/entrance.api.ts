@@ -19,6 +19,7 @@ function mapRawEntrance(raw: any): Exam {
   const img = resolveImageUrl(raw.imageUrl || raw.institutionLogo);
   return {
     id: raw.slug || String(raw.id),
+    numericId: Number(raw.id) || 0,
     slug: raw.slug || "",
     institution: raw.university || raw.board || "",
     verified: false,

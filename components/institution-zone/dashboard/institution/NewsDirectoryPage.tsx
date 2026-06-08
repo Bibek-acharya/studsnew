@@ -192,16 +192,13 @@ const NewsDirectoryPage: React.FC = () => {
                       <td className="py-3 px-6">
                         <p className="font-medium text-gray-900">{item.title}</p>
                         {item.short_desc && (
-                          <p
-                            className="text-xs text-gray-500 mt-0.5"
-                            dangerouslySetInnerHTML={{
-                              __html: item.short_desc.replace(/<[^>]*>/g, "").slice(0, 60) + (item.short_desc.replace(/<[^>]*>/g, "").length > 60 ? "..." : ""),
-                            }}
-                          />
+                          <p className="text-xs text-gray-500 mt-0.5">
+                            {item.short_desc.replace(/<[^>]*>/g, "").replace(/&nbsp;/g, " ").replace(/&amp;/g, "&").replace(/\s+/g, " ").trim().slice(0, 60)}
+                          </p>
                         )}
                         {!item.short_desc && item.content && (
                           <p className="text-xs text-gray-500 mt-0.5">
-                            {item.content.replace(/<[^>]*>/g, "").slice(0, 60)}
+                            {item.content.replace(/<[^>]*>/g, "").replace(/&nbsp;/g, " ").replace(/&amp;/g, "&").replace(/\s+/g, " ").trim().slice(0, 60)}
                           </p>
                         )}
                       </td>

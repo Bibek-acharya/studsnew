@@ -1,5 +1,6 @@
-import React, { useState, useMemo } from "react";
+import React, { useState, useMemo, useEffect } from "react";
 import { useRouter } from "next/navigation";
+import { toast } from "sonner";
 import {
   Clock,
   Building2,
@@ -9,7 +10,8 @@ import {
   Briefcase,
   Bookmark,
 } from "lucide-react";
-import { EducationCourse } from "../../services/api";
+import { EducationCourse, apiService } from "../../services/api";
+import { useAuth } from "@/services/AuthContext";
 import { CourseFinderFilters } from "./types";
 import Pagination from "@/components/ui/Pagination";
 import { mockCourses } from "./mockCourses";
@@ -28,14 +30,25 @@ interface CourseGridProps {
 
 const COURSES_PER_PAGE = 18;
 
+const levelBadgeColor = (level?: string) => {
+  const l = (level || '').toLowerCase()
+  if (l.includes('+2') || l.includes('plus two') || l.includes('higher secondary')) return 'bg-[#7c3aed]/10 text-[#7c3aed]'
+  if (l.includes('bachelor') || l.includes('bach') || l.includes('diploma')) return 'bg-[#db2777]/10 text-[#db2777]'
+  if (l.includes('master') || l.includes('post')) return 'bg-[#ea580c]/10 text-[#ea580c]'
+  return 'bg-gray-100 text-gray-600'
+}
+
 const CourseGrid: React.FC<CourseGridProps> = ({
   onNavigate,
   courses,
   isLoading,
 }) => {
   const router = useRouter();
+  const { isAuthenticated } = useAuth()
   const [currentPage, setCurrentPage] = useState(1);
-  const [savedCourseIds, setSavedCourseIds] = useState<string[]>([]);
+  const [savedCourseIds, setSavedCourseIds] = useState<number[]>([]);
+  const [bookmarkMap, setBookmarkMap] = useState<Record<number, number>>({});
+  const [pendingBookmarks, setPendingBookmarks] = useState<Record<number, boolean>>({});
 
   const ads = [
     <CourseCarouselAd key="0" />,
@@ -43,11 +56,37 @@ const CourseGrid: React.FC<CourseGridProps> = ({
     <SudsphereBannerAd key="2" />,
   ];
 
-  const toggleBookmark = (id: string) => {
-    setSavedCourseIds((prev) =>
-      prev.includes(id) ? prev.filter((i) => i !== id) : [...prev, id],
-    );
-  };
+  const toggleSaved = async (courseId: number) => {
+    if (!isAuthenticated) { toast.error('Please login to save bookmarks'); return }
+    if (pendingBookmarks[courseId]) return
+    setPendingBookmarks(prev => ({ ...prev, [courseId]: true }))
+    const existingBookmarkId = bookmarkMap[courseId]
+    try {
+      if (existingBookmarkId) {
+        await apiService.deleteBookmark(existingBookmarkId)
+        setBookmarkMap(prev => { const n = { ...prev }; delete n[courseId]; return n })
+        setSavedCourseIds(prev => prev.filter(id => id !== courseId))
+        toast.success('Removed from bookmarks')
+      } else {
+        const res = await apiService.createBookmark(courseId, 'courses')
+        setBookmarkMap(prev => ({ ...prev, [courseId]: res.data.id }))
+        setSavedCourseIds(prev => [...prev, courseId])
+        toast.success('Added to bookmarks!')
+      }
+    } catch { toast.error('Failed to save bookmark') }
+    finally { setPendingBookmarks(prev => { const n = { ...prev }; delete n[courseId]; return n }) }
+  }
+
+  useEffect(() => {
+    if (!isAuthenticated) return
+    apiService.getBookmarksByType('courses').then(items => {
+      const ids: number[] = []
+      const map: Record<number, number> = {}
+      items.forEach(b => { ids.push(b.item_id); map[b.item_id] = b.id })
+      setSavedCourseIds(ids)
+      setBookmarkMap(map)
+    }).catch(() => {})
+  }, [isAuthenticated])
 
   const allCourses = useMemo(() => {
     if (courses.length > 0) return courses;
@@ -114,12 +153,6 @@ const CourseGrid: React.FC<CourseGridProps> = ({
       <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
         {currentCourses.map((course, index) => {
           const levelText = course.level || "+2(plus two)";
-          const badgeStyle =
-            index % 3 === 0
-              ? "bg-[#7c3aed]/10 text-[#7c3aed]"
-              : index % 3 === 1
-                ? "bg-[#db2777]/10 text-[#db2777]"
-                : "bg-[#ea580c]/10 text-[#ea580c]";
 
           return (
             <React.Fragment key={course.id || index}>
@@ -141,7 +174,7 @@ const CourseGrid: React.FC<CourseGridProps> = ({
                   {/* Level & Duration */}
                   <div className="flex justify-between items-center mb-1.5 text-[12px] font-bold">
                     <span
-                      className={`${badgeStyle} px-2 py-0.5 rounded-md tracking-wide uppercase`}
+                      className={`${levelBadgeColor(levelText)} px-2 py-0.5 rounded-md tracking-wide uppercase`}
                     >
                       {levelText}
                     </span>
@@ -245,23 +278,33 @@ const CourseGrid: React.FC<CourseGridProps> = ({
 
                     <button
                       type="button"
+                      disabled={!!pendingBookmarks[Number(course.id)]}
                       onClick={(e) => {
                         e.stopPropagation();
-                        toggleBookmark(String(course.id));
+                        toggleSaved(Number(course.id));
                       }}
                       className={`shrink-0 w-10 flex items-center justify-center border rounded-md transition-colors ${
-                        savedCourseIds.includes(String(course.id))
-                          ? "border-blue-200 bg-blue-50"
-                          : "border-gray-200 hover:bg-gray-50"
+                        pendingBookmarks[Number(course.id)]
+                          ? "border-gray-100 bg-gray-50 cursor-not-allowed"
+                          : savedCourseIds.includes(Number(course.id))
+                            ? "border-blue-200 bg-blue-50"
+                            : "border-gray-200 hover:bg-gray-50"
                       }`}
                     >
-                      <Bookmark
-                        className={`w-4 h-4 transition-all ${
-                          savedCourseIds.includes(String(course.id))
-                            ? "text-[#0000ff] fill-[#0000ff]"
-                            : "text-gray-400"
-                        }`}
-                      />
+                      {pendingBookmarks[Number(course.id)] ? (
+                        <svg className="w-4 h-4 animate-spin text-gray-400" fill="none" viewBox="0 0 24 24">
+                          <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                          <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+                        </svg>
+                      ) : (
+                        <Bookmark
+                          className={`w-4 h-4 transition-all ${
+                            savedCourseIds.includes(Number(course.id))
+                              ? "text-[#0000ff] fill-[#0000ff]"
+                              : "text-gray-400"
+                          }`}
+                        />
+                      )}
                     </button>
                   </div>
                 </div>

@@ -1,6 +1,7 @@
 "use client";
 
 import React from "react";
+import { useRouter } from "next/navigation";
 import EmptyTabState from "./EmptyTabState";
 
 interface TabEventsProps {
@@ -12,6 +13,8 @@ interface TabEventsProps {
 const ITEMS_PER_PAGE = 9;
 
 const TabEvents: React.FC<TabEventsProps> = ({ events, page, onPageChange }) => {
+  const router = useRouter();
+
   if (events.length === 0) return <EmptyTabState tabName="events" />;
 
   const paginated = events.slice((page - 1) * ITEMS_PER_PAGE, page * ITEMS_PER_PAGE);
@@ -25,7 +28,7 @@ const TabEvents: React.FC<TabEventsProps> = ({ events, page, onPageChange }) => 
       </div>
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {paginated.map((event) => (
-          <article key={event.title} className="bg-white rounded-md border border-gray-200 hover:border-blue-500/20 overflow-hidden flex flex-col duration-300 cursor-pointer">
+          <article key={event.id || event.title} className="bg-white rounded-md border border-gray-200 hover:border-blue-500/20 overflow-hidden flex flex-col duration-300 cursor-pointer">
             <div className="h-35 w-full overflow-hidden p-4 bg-brand-blue rounded-md">
               {event.image ? <img src={event.image} alt={event.title} className="w-full h-full object-cover rounded-md" /> : null}
             </div>
@@ -38,7 +41,7 @@ const TabEvents: React.FC<TabEventsProps> = ({ events, page, onPageChange }) => 
               <div className="flex items-center text-xs text-gray-600 mb-2 font-semibold"><i className="fa-solid fa-location-dot mr-2 text-gray-500"></i> {event.date.split(" | ")[1] || "TBD"}</div>
               <p className="text-xs text-gray-500 mb-5 line-clamp-3 leading-relaxed font-medium">{event.desc}</p>
               <div className="mt-auto flex gap-2">
-                <button className="flex-1 bg-white border border-gray-300 text-gray-700 text-sm font-bold py-2 rounded-md hover:bg-gray-50 transition text-center">Details</button>
+                <button onClick={() => router.push(`/events/inst-${event.id}`)} className="flex-1 bg-white border border-gray-300 text-gray-700 text-sm font-bold py-2 rounded-md hover:bg-gray-50 transition text-center">Details</button>
                 <button className="flex-1 text-white text-sm font-bold py-2 rounded-md transition bg-brand-blue cursor-pointer hover:bg-blue-600">Register</button>
               </div>
             </div>

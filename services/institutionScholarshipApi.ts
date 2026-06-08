@@ -61,6 +61,11 @@ export const institutionScholarshipApi = {
     return uploadFile(file, folder);
   },
 
+  async list(page = 1, limit = 50): Promise<{ scholarships: any[]; meta: { total: number } }> {
+    const params = new URLSearchParams({ page: String(page), limit: String(limit) }).toString();
+    return apiCall(`/api/v1/institution/scholarships?${params}`);
+  },
+
   async getScholarshipById(id: number): Promise<any> {
     return apiCall(`/api/v1/institution/scholarships/${id}`);
   },
@@ -77,5 +82,9 @@ export const institutionScholarshipApi = {
       method: "PUT",
       body: JSON.stringify(data),
     });
+  },
+
+  async delete(id: number): Promise<void> {
+    await apiCall(`/api/v1/institution/scholarships/${id}`, { method: "DELETE" });
   },
 };

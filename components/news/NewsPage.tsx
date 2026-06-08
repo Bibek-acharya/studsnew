@@ -126,6 +126,29 @@ const NewsPage: React.FC = () => {
         console.warn("Failed to fetch provider news:", e);
       }
       try {
+        const instRes = await fetch(`${process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080"}/api/v1/institutions/public/news?page=1&limit=20`);
+        const instData = await instRes.json();
+        const instNews = instData?.data?.news || [];
+        if (instNews.length > 0) {
+          const mapped = instNews.map((n: any): NewsArticle => ({
+            id: `inst-${n.id}`,
+            title: n.title,
+            excerpt: n.short_desc || "",
+            content: n.content || n.short_desc || "",
+            category: n.news_type || "News",
+            image: n.image_url || "",
+            author: n.published_by || "Institution",
+            date: n.publish_date || n.published_at || n.created_at || "",
+            readTime: "3 min",
+            source: n.published_by || "Institution",
+            tags: n.tags || [],
+          }));
+          news = [...news, ...mapped];
+        }
+      } catch (e) {
+        console.warn("Failed to fetch institution news:", e);
+      }
+      try {
         const eduData = await apiService.getEducationNews({ page: 1, limit: 20 });
         const eduNews = eduData?.data?.news || [];
         if (eduNews.length > 0) {
@@ -268,6 +291,22 @@ const NewsPage: React.FC = () => {
           </div>
         </div>
 
+        {loading ? (
+          <div id="news-grid" className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+            {Array.from({ length: 8 }).map((_, i) => (
+              <div key={i} className="bg-white border border-gray-100 rounded-md p-5 animate-pulse">
+                <div className="mb-4 h-5 w-20 bg-gray-200 rounded-full" />
+                <div className="rounded-md overflow-hidden aspect-16/10 mb-5 bg-gray-200 h-30" />
+                <div className="h-5 bg-gray-200 rounded mb-2" />
+                <div className="h-5 bg-gray-200 rounded w-3/4 mb-2" />
+                <div className="h-4 bg-gray-200 rounded w-1/2 mb-5" />
+                <div className="pt-4 border-t border-gray-100">
+                  <div className="h-4 bg-gray-200 rounded w-24" />
+                </div>
+              </div>
+            ))}
+          </div>
+        ) : (
         <div id="news-grid" className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
           {paginatedNews.map((item) => {
             const uiCategory = mapNewsToUiCategory(item);
@@ -315,8 +354,9 @@ const NewsPage: React.FC = () => {
             );
           })}
         </div>
+        )}
 
-        {processedNews.length === 0 && (
+        {!loading && processedNews.length === 0 && (
           <div className="flex flex-col items-center justify-center py-16">
             <FolderOpen className="w-32 h-32 text-gray-300 mb-4" />
             <p className="text-gray-500 text-lg font-medium mb-6">No news information is currently available.</p>

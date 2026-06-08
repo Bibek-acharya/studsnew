@@ -1,6 +1,7 @@
 "use client";
 
 import React from "react";
+import { useRouter } from "next/navigation";
 import EmptyTabState from "./EmptyTabState";
 
 interface TabNewsProps {
@@ -12,6 +13,8 @@ interface TabNewsProps {
 const ITEMS_PER_PAGE = 9;
 
 const TabNews: React.FC<TabNewsProps> = ({ news, page, onPageChange }) => {
+  const router = useRouter();
+
   if (news.length === 0) return <EmptyTabState tabName="news" />;
 
   const paginated = news.slice((page - 1) * ITEMS_PER_PAGE, page * ITEMS_PER_PAGE);
@@ -21,7 +24,7 @@ const TabNews: React.FC<TabNewsProps> = ({ news, page, onPageChange }) => {
     <div>
       <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
         {paginated.map((news) => (
-          <div key={news.title} className="flex flex-col overflow-hidden rounded-md border border-gray-200 bg-white transition">
+          <div key={news.id || news.title} className="flex flex-col overflow-hidden rounded-md border border-gray-200 bg-white transition">
             <div className="flex-1 p-5">
               <div className="mb-4">
                 <span className={`inline-block rounded-full px-3.5 py-1 text-[12px] font-bold ${news.badgeClass}`}>{news.badge}</span>
@@ -37,7 +40,7 @@ const TabNews: React.FC<TabNewsProps> = ({ news, page, onPageChange }) => {
                 <i className="fa-regular fa-clock"></i>
                 <span className="text-[12.5px] font-medium">{news.time}</span>
               </div>
-              <button className="flex items-center text-[13px] font-bold text-brand-blue hover:text-brand-hover">View Details <i className="fa-solid fa-chevron-right ml-1 text-[11px]"></i></button>
+              <button onClick={() => router.push(`/news/inst-${news.id}`)} className="flex items-center text-[13px] font-bold text-brand-blue hover:text-brand-hover">View Details <i className="fa-solid fa-chevron-right ml-1 text-[11px]"></i></button>
             </div>
           </div>
         ))}

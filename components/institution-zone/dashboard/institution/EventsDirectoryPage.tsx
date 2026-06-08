@@ -199,16 +199,13 @@ const EventsDirectoryPage: React.FC = () => {
                       <td className="py-3 px-6">
                         <p className="font-medium text-gray-900">{event.name}</p>
                         {event.short_desc && (
-                          <p
-                            className="text-xs text-gray-500 mt-0.5"
-                            dangerouslySetInnerHTML={{
-                              __html: event.short_desc.replace(/<[^>]*>/g, "").slice(0, 60) + (event.short_desc.replace(/<[^>]*>/g, "").length > 60 ? "..." : ""),
-                            }}
-                          />
+                          <p className="text-xs text-gray-500 mt-0.5">
+                            {event.short_desc.replace(/<[^>]*>/g, "").replace(/&nbsp;/g, " ").replace(/&amp;/g, "&").replace(/\s+/g, " ").trim().slice(0, 60)}
+                          </p>
                         )}
                         {!event.short_desc && event.description && (
                           <p className="text-xs text-gray-500 mt-0.5">
-                            {event.description.replace(/<[^>]*>/g, "").slice(0, 60)}
+                            {event.description.replace(/<[^>]*>/g, "").replace(/&nbsp;/g, " ").replace(/&amp;/g, "&").replace(/\s+/g, " ").trim().slice(0, 60)}
                           </p>
                         )}
                       </td>

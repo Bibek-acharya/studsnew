@@ -1,7 +1,10 @@
 'use client'
 
 import Link from 'next/link'
+import { useRouter } from 'next/navigation'
 import { useState, useEffect } from 'react'
+import { ProgramCard } from '@/components/find-college/CollegeGrid'
+import { EntranceCard } from '@/components/entrance/EntranceGrid'
 import { 
   Bookmark, 
   MapPin, 
@@ -38,6 +41,10 @@ import {
   Loader2
 } from 'lucide-react'
 import { apiService } from "@/services/api"
+import { admissionService } from "@/services/admission.api"
+import { entranceService } from "@/services/entrance.api"
+import { fetchCourseById } from "@/services/course-api"
+import CollegeCard from "@/components/admissions/CollegeCard"
 
 type BookmarkType = 'Colleges' | 'Courses' | 'Scholarships' | 'Events' | 'Entrance' | 'Admissions'
 
@@ -135,6 +142,7 @@ const iconMap: Record<string, React.ReactNode> = {
 };
 
 export default function BookmarksSection() {
+  const router = useRouter()
   const [activeTab, setActiveTab] = useState<BookmarkType>('Colleges')
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const [bookmarks, setBookmarks] = useState<any[]>([])
@@ -143,27 +151,110 @@ export default function BookmarksSection() {
   const [toast, setToast] = useState<{message: string; type: 'success' | 'error'} | null>(null)
 
   useEffect(() => {
-    apiService.getBookmarksByType(activeTab.toLowerCase())
-      .then(res => {
-        const items = res.data?.bookmarks || []
-        setBookmarks(items.map(b => ({ ...b, type: activeTab })))
+    let cancelled = false
+    const fetch = async () => {
+      try {
+        setLoading(true)
+        const items = await apiService.getBookmarksByType(activeTab.toLowerCase())
+        if (cancelled) return
+
+        if (activeTab === 'Colleges') {
+          const details = await Promise.all(
+            items.map(b =>
+              apiService.getCollegeById(b.item_id).then(r => r.data).catch(() => null)
+            )
+          )
+          if (cancelled) return
+          const enriched = items.map((b, i) => {
+            const c = details[i]
+            if (!c) return null
+            return { bookmarkId: b.id, college: c, type: 'Colleges' as const, id: c.id }
+          }).filter(Boolean)
+          setBookmarks(enriched)
+        } else if (activeTab === 'Entrance') {
+          const details = await Promise.all(
+            items.map(b =>
+              entranceService.getEntranceById(String(b.item_id)).then(r => r.data).catch(() => null)
+            )
+          )
+          if (cancelled) return
+          const enriched = items.map((b, i) => {
+            const e = details[i]
+            if (!e) return null
+            return { bookmarkId: b.id, exam: e, type: 'Entrance' as const, id: b.id }
+          }).filter(Boolean)
+          setBookmarks(enriched)
+        } else if (activeTab === 'Courses') {
+          const details = await Promise.all(
+            items.map(b =>
+              fetchCourseById(String(b.item_id)).catch(() => null)
+            )
+          )
+          if (cancelled) return
+          const enriched = items.map((b, i) => {
+            const c = details[i]
+            if (!c) return null
+            return {
+              bookmarkId: b.id,
+              id: b.id,
+              type: 'Courses' as const,
+              name: c.title,
+              imageUrl: c.image,
+              duration: c.duration,
+              offeredBy: c.careerPath || c.institutionName || '',
+              affiliation: c.affiliation,
+              level: c.level,
+              estFee: c.estFee,
+            }
+          }).filter(Boolean)
+          setBookmarks(enriched)
+        } else if (activeTab === 'Admissions') {
+          const details = await Promise.all(
+            items.map(b =>
+              admissionService.getPublishedAdmissionCollegeById(b.item_id)
+                .then(r => r.data.institution).catch(() => null)
+            )
+          )
+          if (cancelled) return
+          const enriched = items.map((b, i) => {
+            const c = details[i]
+            if (!c) return null
+            return { bookmarkId: b.id, college: c, type: 'Admissions' as const, id: c.id }
+          }).filter(Boolean)
+          setBookmarks(enriched)
+        } else {
+          setBookmarks(items.map(b => ({ ...b, type: activeTab })))
+        }
         setError(null)
-      })
-      .catch((err: Error) => setError(err.message))
-      .finally(() => setLoading(false))
+      } catch (err) {
+        if (!cancelled) setError(err instanceof Error ? err.message : 'Failed to load bookmarks')
+      } finally {
+        if (!cancelled) setLoading(false)
+      }
+    }
+    fetch()
+    return () => { cancelled = true }
   }, [activeTab])
 
   const filteredBookmarks = bookmarks.filter(b => b.type === activeTab)
 
-  const removeBookmark = async (id: number) => {
+  const removeBookmark = async (bookmarkId: number) => {
     try {
-      await apiService.deleteBookmark(id)
-      setBookmarks(prev => prev.filter(b => b.id !== id))
+      await apiService.deleteBookmark(bookmarkId)
+      setBookmarks(prev => prev.filter(b => b.bookmarkId !== bookmarkId))
       setToast({ message: 'Bookmark removed', type: 'success' })
       setTimeout(() => setToast(null), 3000)
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to remove bookmark')
     }
+  }
+
+  const levelBadgeColor = (level?: string) => {
+    const l = (level || '').toLowerCase()
+    if (l.includes('+2') || l.includes('plus two') || l.includes('higher secondary')) return 'bg-[#7c3aed]/10 text-[#7c3aed]'
+    if (l.includes('bachelor') || l.includes('bach') || l.includes('diploma')) return 'bg-[#db2777]/10 text-[#db2777]'
+    if (l.includes('master') || l.includes('post')) return 'bg-[#ea580c]/10 text-[#ea580c]'
+    return 'bg-gray-100 text-gray-600'
   }
 
   const getStatusStyle = (status: string) => {
@@ -287,188 +378,22 @@ export default function BookmarksSection() {
           {filteredBookmarks.map((item) => (
             <div key={item.id} className="fade-in card-stagger h-full">
               {item.type === 'Colleges' && (
-                <div className="flex h-full cursor-pointer flex-col rounded-md border border-gray-200 bg-white p-4 transition-all duration-300 hover:border-blue-500/20 overflow-visible">
-                  <div
-                    className="group relative h-35 shrink-0 overflow-hidden rounded-md"
-                  >
-                    
-                    {(item as CollegeBookmark).isVerified && item.imageUrl ? (
-                      <img
-                        src={item.imageUrl || 'https://images.unsplash.com/photo-1541339907198-e08756ebafe3?auto=format&fit=crop&w=400&q=80'}
-                        alt={item.name}
-                        className="h-full w-full object-cover"
-                      />
-                    ) : (
-                      <div className="flex h-full w-full items-center justify-center bg-brand-blue">
-                        
-                      </div>
-                    )}
-                  </div>
-
-                  <div className="flex flex-1 flex-col px-0 pt-3 overflow-visible">
-                    <div className="flex items-center gap-1.5 mb-2">
-                      <button
-                        type="button"
-                        className="group/title relative truncate text-left text-[20px] font-bold text-slate-800 tracking-tight transition-colors hover:text-blue-600 line-clamp-2"
-                      >
-                        <span className="truncate block" title={item.name}>{item.name}</span>
-                        <span className="absolute bottom-full left-0 mb-2 invisible opacity-0 group-hover/title:visible group-hover/title:opacity-100 bg-gray-900 text-white text-[13px] font-medium py-1.5 px-3 rounded  whitespace-nowrap transition-all duration-200 z-50 pointer-events-none">
-                          {item.name}
-                          <span className="absolute top-full left-4 -mt-px border-[5px] border-transparent border-t-gray-900"></span>
-                        </span>
-                      </button>
-                      {(item as CollegeBookmark).isVerified && (
-                        <BadgeCheck className="w-5 h-5 text-white fill-blue-500 shrink-0" />
-                      )}
-                    </div>
-
-                    <div className="mb-2 flex min-w-0 items-center text-[14px] text-gray-500">
-                      <div className="flex items-center gap-1 font-bold text-slate-700">
-                        <Star className="w-4 h-4 text-amber-500 fill-amber-500" />
-                        <span>{(item as CollegeBookmark).rating}</span>
-                      </div>
-                      <span className="mx-3 text-gray-300 font-light">|</span>
-                      <div className="flex items-center gap-1.5">
-                        <Award className="w-4.5 h-4.5 text-gray-400" />
-                        <span className="font-semibold text-slate-700">
-                          {(item as CollegeBookmark).collegeType}
-                        </span>
-                      </div>
-                      <span className="mx-3 text-gray-300 font-light">|</span>
-                      <div className="flex min-w-0 flex-1 items-center gap-1.5">
-                        <MapPin className="w-4.5 h-4.5 text-gray-400" />
-                        <span className="group/location block min-w-0 truncate font-semibold text-slate-700 line-clamp-1" title={(item as CollegeBookmark).location}>
-                          <span className="truncate block">{(item as CollegeBookmark).location.split(',')[0]}</span>
-                          <span className="absolute bottom-full left-0 mb-2 invisible opacity-0 group-hover/location:visible group-hover/location:opacity-100 bg-gray-900 text-white text-[13px] font-medium py-1.5 px-3 rounded  whitespace-nowrap transition-all duration-200 z-50 pointer-events-none">
-                            {(item as CollegeBookmark).location}
-                            <span className="absolute top-full left-4 -mt-px border-[5px] border-transparent border-t-gray-900"></span>
-                          </span>
-                        </span>
-                      </div>
-                    </div>
-
-                    <div className="flex items-start gap-2 text-[14px] text-gray-500 mb-2">
-                      <Award className="w-4.5 h-4.5 text-gray-400 shrink-0 mt-0.75" />
-                      <p className="group/affil leading-snug pr-4 font-semibold text-slate-700 line-clamp-1" title={(item as CollegeBookmark).affiliation}>
-                        <span className="truncate block">
-                          {(item as CollegeBookmark).affiliation}
-                        </span>
-                        <span className="absolute bottom-full left-0 mb-2 invisible opacity-0 group-hover/affil:visible group-hover/affil:opacity-100 bg-gray-900 text-white text-[13px] font-medium py-1.5 px-3 rounded  whitespace-nowrap transition-all duration-200 z-50 pointer-events-none">
-                          {(item as CollegeBookmark).affiliation}
-                          <span className="absolute top-full left-4 -mt-px border-[5px] border-transparent border-t-gray-900"></span>
-                        </span>
-                      </p>
-                    </div>
-
-                    <div className="mb-4 pr-2 h-14">
-                      <p className="text-[14px] leading-relaxed text-gray-500 line-clamp-2">
-                        Explore academics, facilities, and counselling support for this college.
-                      </p>
-                      <button
-                        type="button"
-                        className="text-[14px] font-semibold text-brand-blue hover:underline"
-                      >
-                        Read more
-                      </button>
-                    </div>
-
-                    <div className="mt-2 flex items-center gap-4">
-                      <a
-                        href="#"
-                        className="interaction-btn text-[12px] font-medium text-brand-blue hover:text-blue-800 flex items-center transition-colors"
-                      >
-                        Admission
-                        <svg
-                          className="w-3 h-3 ml-1"
-                          fill="none"
-                          stroke="currentColor"
-                          strokeWidth="2.5"
-                          viewBox="0 0 24 24"
-                        >
-                          <path
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            d="M7 17L17 7M7 7h10v10"
-                          />
-                        </svg>
-                      </a>
-                      <a
-                        href="#"
-                        className="interaction-btn text-[12px] font-medium text-brand-blue hover:text-blue-800 flex items-center transition-colors"
-                      >
-                        Courses & Fees
-                        <svg
-                          className="w-3 h-3 ml-1"
-                          fill="none"
-                          stroke="currentColor"
-                          strokeWidth="2.5"
-                          viewBox="0 0 24 24"
-                        >
-                          <path
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            d="M7 17L17 7M7 7h10v10"
-                          />
-                        </svg>
-                      </a>
-                    </div>
-
-                    <div className="border-t border-dashed border-gray-200 mb-4" />
-
-                    <div className="flex flex-col gap-3 mt-auto">
-                      <button
-                        type="button"
-                        disabled={!(item as CollegeBookmark).isVerified}
-                        className={`w-full text-white font-medium text-[14px] py-2.5 px-4 rounded-md transition-colors flex items-center justify-center gap-1.5 ${
-                          (item as CollegeBookmark).isVerified
-                            ? "bg-brand-blue hover:bg-blue-700"
-                            : "bg-brand-blue cursor-not-allowed"
-                        }`}
-                      >
-                        {!(item as CollegeBookmark).isVerified && <LockIcon size={14} />}
-                        Get counselling
-                      </button>
-
-                      <div className="flex gap-2">
-                        <button
-                          type="button"
-                          className="flex-1 flex items-center justify-center gap-1.5 border border-gray-200 hover:bg-gray-50 text-slate-600 font-medium py-2 px-2 rounded-md transition-colors text-[13px]"
-                        >
-                          <MessageSquare className="w-4 h-4 text-gray-500" />
-                          Inquiry
-                        </button>
-
-                        <button
-                          type="button"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                          }}
-                          className="flex-1 bg-[#EAB308] hover:bg-yellow-500 text-white font-semibold py-2 px-2 rounded-md transition-colors text-[13px]"
-                        >
-                          Compare now
-                        </button>
-
-                        <button
-                          type="button"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            removeBookmark(item.id);
-                          }}
-                          className={`w-10 flex items-center justify-center border rounded-md transition-colors shrink-0 ${
-                            true
-                              ? "border-blue-200 bg-blue-50"
-                              : "border-gray-200 hover:bg-gray-50"
-                          }`}
-                          title="Remove Bookmark"
-                        >
-                          <Bookmark
-                            className={`w-4 h-4 transition-all text-[#0000ff] fill-[#0000ff]`}
-                          />
-                        </button>
-                      </div>
-                    </div>
-                  </div>
-                </div>
+                <ProgramCard
+                  college={item.college}
+                  isVerified={item.college.verified || false}
+                  isSaved={true}
+                  isSelected={false}
+                  isQuickInquiryMode={false}
+                  onNavigate={(view, data) => {
+                    if (view === 'collegeDetails' && data?.id) {
+                      router.push(`/find-college/${data.id}`)
+                    }
+                  }}
+                  onToggleSaved={() => removeBookmark(item.bookmarkId)}
+                  onToggleSelection={() => {}}
+                  onClaim={() => {}}
+                  onSingleInquiry={() => {}}
+                />
               )}
 
               {item.type === 'Courses' && (
@@ -486,7 +411,7 @@ export default function BookmarksSection() {
 
                   <div className="px-3 pb-3 pt-0 flex-1 flex flex-col">
                     <div className="flex justify-between items-center mb-1.5 text-[12px] font-bold">
-                      <span className="bg-indigo-50 text-indigo-600 px-2 py-0.5 rounded-md tracking-wide uppercase">
+                      <span className={`${levelBadgeColor((item as CourseBookmark).level)} px-2 py-0.5 rounded-md tracking-wide uppercase`}>
                         {(item as CourseBookmark).level}
                       </span>
                       <div className="flex items-center text-gray-500 gap-1 font-medium">
@@ -746,252 +671,48 @@ export default function BookmarksSection() {
               )}
 
               {item.type === 'Entrance' && (
-                <div className="bg-white rounded-md p-4 sm:p-5 border border-gray-200 flex flex-col h-full hover:border-blue-500/20 transition-all duration-300 overflow-visible">
-                  <header className="flex justify-between items-start mb-4 sm:mb-5">
-                    <div className="flex gap-2.5 sm:gap-3">
-                      <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-md border border-gray-100 flex items-center justify-center bg-white shrink-0">
-                        <img
-                          src={item.imageUrl}
-                          alt={item.name}
-                          className="w-full h-full rounded-md object-contain"
-                        />
-                      </div>
-                      <div className="flex flex-col min-w-0">
-                        <h3 className="group relative text-[13px] xs:text-[14px] sm:text-[15px] font-bold text-[#111827] flex items-center gap-1 sm:gap-1.5 min-w-0">
-                          <span className="truncate">{(item as EntranceBookmark).institution}</span>
-                          {(item as EntranceBookmark).verified && (
-                            <BadgeCheck className="w-3.25 h-3.25 sm:w-3.75 sm:h-3.75 text-white fill-blue-500 ml-0.5 sm:ml-1 shrink-0" />
-                          )}
-                          <div className="absolute bottom-full left-0 mb-2 invisible opacity-0 group-hover:visible group-hover:opacity-100 bg-gray-900 text-white text-[13px] font-medium py-1.5 px-3 rounded  whitespace-nowrap transition-all duration-200 z-100 pointer-events-none">
-                            {(item as EntranceBookmark).institution}
-                            <div className="absolute top-full left-4 -mt-px border-[5px] border-transparent border-t-gray-900"></div>
-                          </div>
-                        </h3>
-                        <div className="flex flex-col gap-1 text-[10px] xs:text-[11px] sm:text-[11px] text-[#6b7280] mt-0.5">
-                          <span className="flex items-center gap-1">
-                            <MapPin className="w-2.5 h-2.5 sm:w-3 sm:h-3 shrink-0" />
-                            <span className="truncate" title={(item as EntranceBookmark).location || 'Nepal'}>{(item as EntranceBookmark).location || 'Nepal'}</span>
-                          </span>
-                          <span className="flex items-center gap-1">
-                            <Award className="w-2.5 h-2.5 sm:w-3 sm:h-3 shrink-0" />
-                            <span className="truncate" title={(item as EntranceBookmark).affiliation || 'NEB'}>{(item as EntranceBookmark).affiliation || 'NEB'}</span>
-                          </span>
-                        </div>
-                        <a
-                          href="#"
-                          className="text-[#2563eb] text-[10px] xs:text-[11px] sm:text-[11px] font-medium mt-0.5 sm:mt-1 flex items-center gap-1 hover:underline"
-                        >
-                          <ExternalLink className="w-2.5 h-2.5 sm:w-3 sm:h-3" />{" "}
-                          {(item as EntranceBookmark).website || 'exam.org'}
-                        </a>
-                      </div>
-                    </div>
-                    <div className="w-8 h-8 opacity-0"></div>
-                  </header>
-
-                  <main className="grow overflow-visible">
-                    <h4
-                      className="group relative text-[15px] xs:text-[16px] sm:text-[17px] font-bold text-[#111827] mb-2.5 sm:mb-3 leading-tight cursor-pointer hover:text-brand-blue transition-colors"
-                    >
-                      <span className="truncate block">{item.name}</span>
-                      <div className="absolute bottom-full left-0 mb-2 invisible opacity-0 group-hover:visible group-hover:opacity-100 bg-gray-900 text-white text-[13px] font-medium py-1.5 px-3 rounded  whitespace-nowrap transition-all duration-200 z-100 pointer-events-none">
-                        {item.name}
-                        <div className="absolute top-full left-4 -mt-px border-[5px] border-transparent border-t-gray-900"></div>
-                      </div>
-                    </h4>
-
-                    <div className="flex flex-wrap gap-1.5 sm:gap-2 mb-3 sm:mb-4">
-                      {(item as EntranceBookmark).tags?.map((tag, idx) => (
-                        <span
-                          key={idx}
-                          className={`px-1.5 sm:px-2 py-0.5 sm:py-1 rounded-md text-[9px] xs:text-[10px] sm:text-[10px] font-bold flex items-center gap-1 sm:gap-1.5 ${
-                            tag.type === "alert"
-                              ? "bg-red-50 text-red-500"
-                              : tag.type === "warning"
-                                ? "bg-amber-50 text-amber-600"
-                                : tag.type === "success"
-                                  ? "bg-emerald-50 text-emerald-600"
-                                  : tag.type === "purple"
-                                    ? "bg-purple-50 text-purple-600"
-                                    : "bg-gray-50 text-gray-600"
-                          }`}
-                        >
-                          {iconMap[tag.icon]} {tag.text}
-                        </span>
-                      ))}
-                    </div>
-
-                    <div className="bg-[#f8fafc] rounded-md sm:rounded-md p-2 sm:p-2.5 flex flex-col gap-1.5 sm:gap-2 mt-auto border border-[#f1f5f9]">
-                      <div className="flex items-center gap-2 sm:gap-2.5 text-[11px] xs:text-[12px] sm:text-[13px] text-[#475569]">
-                        <Clock className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-[#94a3b8] shrink-0" />
-                        <span className="truncate font-medium text-red-500 text-[11px] sm:text-[12px]">
-                          Ends: {(item as EntranceBookmark).deadline}
-                        </span>
-                      </div>
-                      <div className="flex items-center gap-2 sm:gap-2.5 text-[11px] xs:text-[12px] sm:text-[13px] text-[#475569]">
-                        <GraduationCap className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-[#94a3b8] shrink-0" />
-                        <span className="truncate text-[11px] sm:text-[12px]">
-                          {(item as EntranceBookmark).eligibility}
-                        </span>
-                      </div>
-                      <div className="flex items-center gap-2 sm:gap-2.5 text-[11px] xs:text-[12px] sm:text-[13px] text-[#475569]">
-                        <Users className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-[#94a3b8] shrink-0" />
-                        <div className="flex gap-1.5 sm:gap-2 text-[10px] sm:text-[11px]">
-                          <a
-                            href={(item as EntranceBookmark).whatsapp || '#'}
-                            className="text-[#059669] hover:underline font-bold"
-                          >
-                            WhatsApp
-                          </a>
-                          <span className="text-gray-300">|</span>
-                          <a
-                            href={(item as EntranceBookmark).viber || '#'}
-                            className="text-[#6d28d9] hover:underline font-bold"
-                          >
-                            Viber
-                          </a>
-                        </div>
-                      </div>
-                    </div>
-                  </main>
-
-                  <div className="mt-3 sm:mt-4 pt-1 flex flex-col gap-2 sm:gap-2.5">
-                    <button
-                      className="w-full flex items-center justify-center gap-2 py-2 sm:py-2.5 px-3 bg-brand-blue text-white font-bold text-[12px] sm:text-[13px] rounded-md hover:bg-brand-hover transition-colors "
-                    >
-                      <PlayCircle className="w-4 h-4" /> Start Mock Test
-                    </button>
-                    <div className="grid grid-cols-[1fr_1fr_auto] gap-2 sm:gap-2.5">
-                      <button className="flex items-center justify-center gap-1.5 py-1.5 sm:py-2 px-2 sm:px-3 border border-[#e2e8f0] text-[#475569] font-bold text-[11px] xs:text-[12px] rounded-md hover:bg-gray-50 transition-colors">
-                        <Bell className="w-3.5 h-3.5" /> <span>Notify</span>
-                      </button>
-                      <button
-                        className="flex items-center justify-center gap-1.5 py-1.5 sm:py-2 px-2 sm:px-3 border border-[#e2e8f0] text-[#475569] font-bold text-[11px] xs:text-[12px] rounded-md hover:bg-gray-50 transition-colors"
-                      >
-                        <Send className="w-3.5 h-3.5" /> Apply
-                      </button>
-                      <button
-                        className={`w-9 sm:w-10 shrink-0 rounded-md flex items-center justify-center transition-all duration-200 ${
-                          true
-                            ? "border-blue-200 bg-blue-50"
-                            : "bg-white border border-[#e2e8f0] text-[#94a3b8] hover:bg-[#f8fafc] hover:text-[#64748b]"
-                        }`}
-                        title="Remove Bookmark"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          removeBookmark(item.id);
-                        }}
-                      >
-                        <Bookmark
-                          className={`w-3.5 h-3.5 sm:w-4 sm:h-4 ${true ? "text-[#0000ff] fill-[#0000ff]" : ""}`}
-                        />
-                      </button>
-                    </div>
-                  </div>
-                </div>
+                <EntranceCard
+                  exam={item.exam}
+                  isSaved={true}
+                  isPending={false}
+                  onToggleSaved={(e) => {
+                    e.stopPropagation()
+                    removeBookmark(item.bookmarkId)
+                  }}
+                />
               )}
 
               {item.type === 'Admissions' && (
-                <div className="bg-white rounded-md border border-gray-200 hover:border-blue-200 overflow-hidden w-full max-w-85 flex flex-col h-full transition-transform cursor-pointer">
-                  <div className="p-2.5 pb-0 shrink-0">
-                    <div className="relative h-28 w-full bg-gray-200 rounded-md overflow-hidden">
-                      <img src={item.imageUrl} alt={item.name} className="w-full h-full object-cover" />
-                      <div className={`absolute top-2.5 left-0 bg-red-500 text-white text-[10px] font-bold px-2.5 py-1 tracking-wide rounded-r-md z-10 uppercase`}>
-                        Admission Open
-                      </div>
-                    </div>
-                  </div>
-
-                  <div className="p-3 pb-3 flex flex-col grow">
-                    <div className="flex items-center gap-1.5 mb-1 group/name relative">
-                      <h2 
-                        title={item.name}
-                        className="text-[#0f172a] text-[18px] font-bold leading-tight truncate transition-colors group-hover/name:text-brand-blue"
-                      >
-                        {item.name}
-                      </h2>
-                      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="#0d6efd" className="w-5 h-5 shrink-0 mt-0.5">
-                        <path fillRule="evenodd" d="M8.603 3.799A4.49 4.49 0 0112 2.25c1.357 0 2.573.6 3.397 1.549a4.49 4.49 0 013.498 1.307 4.491 4.491 0 011.307 3.497A4.49 4.49 0 0121.75 12a4.49 4.49 0 01-1.549 3.397 4.491 4.491 0 01-1.307 3.497 4.491 4.491 0 01-3.497 1.307A4.49 4.49 0 0112 21.75a4.49 4.49 0 01-3.397-1.549 4.49 4.49 0 01-3.498-1.306 4.491 4.491 0 01-1.307-3.498A4.49 4.49 0 012.25 12c0-1.357.6-2.573 1.549-3.397a4.49 4.49 0 011.307-3.497 4.49 4.49 0 013.497-1.307zm7.007 6.387a.75.75 0 10-1.22-.872l-3.236 4.53L9.53 12.22a.75.75 0 00-1.06 1.06l2.25 2.25a.75.75 0 001.14-.094l3.75-5.25z" clipRule="evenodd" />
-                      </svg>
-                    </div>
-
-                    <div className="flex items-center text-[12px] text-[#64748b] mb-1.5 whitespace-nowrap overflow-hidden">
-                      <div className="flex items-center gap-1">
-                        <Star className="w-3.75 h-3.75 fill-[#f59e0b]" />
-                        <span className="font-bold text-[#334155]">{(item as AdmissionBookmark).rating}</span>
-                      </div>
-                      <span className="mx-2 text-gray-300">|</span>
-                      <div className="flex items-center gap-1.5">
-                        <Award className="w-4 h-4 text-gray-400" />
-                        <span>{(item as AdmissionBookmark).collegeType}</span>
-                      </div>
-                      <span className="mx-2 text-gray-300">|</span>
-                      <div className="flex items-center gap-1.5 truncate">
-                        <MapPin className="w-4 h-4 text-gray-400 shrink-0" />
-                        <span className="truncate" title={(item as AdmissionBookmark).location}>{(item as AdmissionBookmark).location}</span>
-                      </div>
-                    </div>
-
-                    <div className="flex items-center gap-1.5 text-[12.5px] text-[#64748b] mb-2 hover:text-[#0d6efd] transition-colors cursor-pointer w-fit">
-                      <Globe className="w-4 h-4" />
-                      <span>{(item as AdmissionBookmark).website}</span>
-                    </div>
-
-                    <hr className="border-gray-100 mb-2" />
-
-                    <div className="flex justify-between items-center mb-1.5">
-                      <span className="text-[12.5px] font-medium text-[#64748b]">Programs Offered</span>
-                      <span className="text-[12.5px] font-semibold text-[#2563eb]">Admission Open</span>
-                    </div>
-
-                    <ul className="space-y-1 mb-2">
-                      {(item as AdmissionBookmark).programs?.map((prog, pIdx) => (
-                        <li key={pIdx} className="flex justify-between items-center text-[12.5px]">
-                          <span className="font-semibold text-[#1e293b]">{prog.name}</span>
-                          <div className={`flex items-center gap-1.5 font-medium text-[11px] ${prog.status === 'Closing Soon' ? 'text-red-500' : 'text-emerald-500'}`}>
-                            <span className="relative flex h-2 w-2 justify-center items-center">
-                              <span className={`animate-ping absolute inline-flex h-full w-full rounded-full opacity-75 ${prog.status === 'Closing Soon' ? 'bg-red-500' : 'bg-emerald-500'}`}></span>
-                              <span className={`relative inline-flex rounded-full h-1.5 w-1.5 ${prog.status === 'Closing Soon' ? 'bg-red-500' : 'bg-emerald-500'}`}></span>
-                            </span>
-                            {prog.status}
-                          </div>
-                        </li>
-                      ))}
-                    </ul>
-
-                    <div className="border-b border-dotted border-gray-200 mt-auto mb-3 w-full pt-2" style={{ borderBottomWidth: "1.5px", borderBottomStyle: "dotted" }}></div>
-
-                    <div className="flex items-center gap-1.5 mb-2">
-                      <button className="flex-1 py-1.5 px-2 bg-gray-50 text-[#334155] hover:bg-gray-100 border border-gray-200 rounded-md text-[11px] font-semibold transition-colors flex justify-center items-center gap-1 whitespace-nowrap">
-                        <PlayCircle className="w-3.5 h-3.5" />
-                        Mock Test
-                      </button>
-                      <button className="flex-1 py-1.5 px-2 bg-blue-50 text-blue-700 hover:bg-blue-100 border border-blue-100 rounded-md text-[11px] font-semibold transition-colors flex justify-center items-center gap-1 whitespace-nowrap">
-                        <MessageSquare className="w-3.5 h-3.5" />
-                        Ask Question
-                      </button>
-                    </div>
-
-                    <div className="flex items-center gap-1.5">
-                      <button className="flex-1 py-2 px-2 bg-brand-blue hover:bg-brand-hover text-white rounded-md text-[12px] font-bold transition-colors">
-                        Apply Now
-                      </button>
-                      <button
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          removeBookmark(item.id);
-                        }}
-                        className={`flex-none w-9 h-9 flex items-center justify-center border rounded-md transition-colors ${
-                          true
-                            ? "border-blue-100 bg-blue-50 text-blue-600"
-                            : "border-gray-200 text-[#64748b] hover:bg-gray-50"
-                        }`}
-                      >
-                        <Bookmark className={`w-4 h-4 ${true ? "text-[#0000ff] fill-[#0000ff]" : ""}`} />
-                      </button>
-                    </div>
-                  </div>
-                </div>
+                <CollegeCard
+                  images={item.college.image_url ? [item.college.image_url] : ['/images/college-placeholder.png']}
+                  collegeName={item.college.name}
+                  rating={item.college.rating ?? 4.0}
+                  type={item.college.type || 'College'}
+                  location={item.college.location}
+                  website={item.college.website || item.college.affiliation}
+                  programs={(() => {
+                    const fp = (item.college as any).featured_programs
+                    if (Array.isArray(fp)) {
+                      return fp.slice(0, 3).map((p: any) => {
+                        const name = p.title || ''
+                        const rawStatus = p.admissionStatus || ''
+                        const statusMap: Record<string, 'Seats Available' | 'Closing Soon' | 'Opening Soon'> = {
+                          'seats-available': 'Seats Available',
+                          'limited-seats': 'Closing Soon',
+                          'opening-soon': 'Opening Soon',
+                        }
+                        return { name, status: statusMap[rawStatus] || 'Seats Available' }
+                      })
+                    }
+                    return [{ name: item.college.affiliation || item.college.name || 'Admission Open', status: 'Seats Available' as const }]
+                  })()}
+                  moreProgramsCount={item.college.programs}
+                  isSaved={true}
+                  onNavigate={() => router.push(`/find-college/${item.college.id}`)}
+                  onToggleSaved={() => removeBookmark(item.bookmarkId)}
+                  onApply={() => router.push(`/find-college/${item.college.id}`)}
+                  onAskQuestion={() => {}}
+                />
               )}
             </div>
           ))}

@@ -1,5 +1,7 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
+import { useAuth } from '@/services/AuthContext'
+import { toast } from 'sonner'
 import { College, apiService, getImageUrl } from "@/services/api";
 import { CollegeFilters, isCollegeVerified } from "@/app/find-college/types";
 import {
@@ -14,6 +16,7 @@ import {
   Globe,
   GraduationCap,
   FolderOpen,
+  Loader2,
 } from "lucide-react";
 import Pagination from "@/components/ui/Pagination";
 
@@ -144,8 +147,11 @@ const CollegeGrid: React.FC<CollegeGridProps> = ({
   onNavigate,
   onMobileFilterClick,
 }) => {
+  const { isAuthenticated } = useAuth()
   const [currentPage, setCurrentPage] = useState(1);
   const [savedColleges, setSavedColleges] = useState<(number | string)[]>([]);
+  const [bookmarkMap, setBookmarkMap] = useState<Record<string | number, number>>({})
+  const [pendingBookmarks, setPendingBookmarks] = useState<Record<string | number, boolean>>({})
   const [selectedForInquiry, setSelectedForInquiry] = useState<(number | string)[]>([]);
   const [isQuickInquiryMode, setIsQuickInquiryMode] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -154,6 +160,20 @@ const CollegeGrid: React.FC<CollegeGridProps> = ({
   const [collegeForInquiry, setCollegeForInquiry] = useState<College | null>(null);
   const [isInquiryModalOpen, setIsInquiryModalOpen] = useState(false);
   const [inquiryMessageSingle, setInquiryMessageSingle] = useState("");
+
+  useEffect(() => {
+    if (!isAuthenticated) return
+    apiService.getBookmarksByType('colleges').then(items => {
+      const ids: (number | string)[] = []
+      const map: Record<string | number, number> = {}
+      items.forEach(b => {
+        ids.push(b.item_id)
+        map[b.item_id] = b.id
+      })
+      setSavedColleges(ids)
+      setBookmarkMap(map)
+    }).catch(() => {})
+  }, [isAuthenticated])
 
   useEffect(() => {
     // eslint-disable-next-line react-hooks/set-state-in-effect
@@ -228,16 +248,17 @@ const CollegeGrid: React.FC<CollegeGridProps> = ({
         }),
       ]);
 
-      // Map institution results to College shape with inst_ prefix
+      // Map institution results to College shape
       const institutionColleges: College[] = (institutionRes?.data?.institutions || []).map(
         (inst: any) => ({
-          id: `inst_${inst.id}` as any,
+          id: inst.college_id > 0 ? inst.college_id : (`inst_${inst.id}` as any),
           name: inst.institution_name,
           image_url: inst.banner_url || inst.logo_url,
           description: inst.about,
           location: inst.district,
           website: inst.website_url,
           verified: inst.verified ?? false,
+          claimed: inst.claimed ?? false,
           affiliation: inst.affiliation || "",
           featured: inst.featured || false,
           rating: 0,
@@ -297,12 +318,37 @@ const CollegeGrid: React.FC<CollegeGridProps> = ({
   const showingFrom = totalResults === 0 ? 0 : (currentPage - 1) * COLLEGES_PER_PAGE + 1;
   const showingTo = Math.min((currentPage - 1) * COLLEGES_PER_PAGE + colleges.length, totalResults);
 
-  const toggleSavedCollege = (collegeId: number) => {
-    setSavedColleges((prev) =>
-      prev.includes(collegeId)
-        ? prev.filter((id) => id !== collegeId)
-        : [...prev, collegeId],
-    );
+  const toggleSavedCollege = async (collegeId: number | string) => {
+    if (!isAuthenticated) {
+      toast.error('Please login to save bookmarks')
+      return
+    }
+    if (typeof collegeId !== 'number') return
+    if (pendingBookmarks[collegeId]) return
+    setPendingBookmarks(prev => ({ ...prev, [collegeId]: true }))
+    const existingBookmarkId = bookmarkMap[collegeId]
+    try {
+      if (existingBookmarkId) {
+        await apiService.deleteBookmark(existingBookmarkId)
+        setBookmarkMap(prev => {
+          const next = { ...prev }
+          delete next[collegeId]
+          return next
+        })
+        setSavedColleges(prev => prev.filter(id => id !== collegeId))
+        toast.success('Removed from bookmarks')
+      } else {
+        const res = await apiService.createBookmark(collegeId as number, 'colleges')
+        const newBookmarkId = res.data.id
+        setBookmarkMap(prev => ({ ...prev, [collegeId]: newBookmarkId }))
+        setSavedColleges(prev => [...prev, collegeId])
+        toast.success('Added to bookmarks!')
+      }
+    } catch {
+      toast.error('Failed to save bookmark')
+    } finally {
+      setPendingBookmarks(prev => { const next = { ...prev }; delete next[collegeId]; return next })
+    }
   };
 
   const toggleSelection = (collegeId: number) => {
@@ -484,7 +530,9 @@ const CollegeGrid: React.FC<CollegeGridProps> = ({
               <ProgramCard
                 college={college}
                 isVerified={isCollegeVerified(college.verified)}
+                isClaimed={!!college.claimed}
                 isSaved={savedColleges.includes(college.id)}
+                isBookmarkPending={!!pendingBookmarks[college.id]}
                 isSelected={selectedForInquiry.includes(college.id)}
                 isQuickInquiryMode={isQuickInquiryMode}
                 onNavigate={onNavigate}
@@ -691,7 +739,9 @@ const CollegeGrid: React.FC<CollegeGridProps> = ({
 export const ProgramCard: React.FC<{
   college: College;
   isVerified: boolean;
+  isClaimed?: boolean;
   isSaved: boolean;
+  isBookmarkPending?: boolean;
   isSelected: boolean;
   isQuickInquiryMode: boolean;
   onNavigate: (view: any, data?: any) => void;
@@ -702,7 +752,9 @@ export const ProgramCard: React.FC<{
 }> = ({
   college,
   isVerified,
+  isClaimed = false,
   isSaved,
+  isBookmarkPending = false,
   isSelected,
   isQuickInquiryMode,
   onNavigate,
@@ -734,7 +786,7 @@ export const ProgramCard: React.FC<{
             
           </div>
         )}
-        {!isVerified && (
+        {!isClaimed && (
           <button
             type="button"
             onClick={(e) => {
@@ -921,20 +973,27 @@ export const ProgramCard: React.FC<{
 
             <button
               type="button"
+              disabled={isBookmarkPending}
               onClick={(e) => {
                 e.stopPropagation();
                 onToggleSaved();
               }}
               className={`w-10 flex items-center justify-center border rounded-md transition-colors shrink-0 ${
-                isSaved
-                  ? "border-blue-200 bg-blue-50"
-                  : "border-gray-200 hover:bg-gray-50"
+                isBookmarkPending
+                  ? "border-gray-100 bg-gray-50 cursor-not-allowed"
+                  : isSaved
+                    ? "border-blue-200 bg-blue-50"
+                    : "border-gray-200 hover:bg-gray-50"
               }`}
               title={isSaved ? "Remove Bookmark" : "Bookmark"}
             >
-              <Bookmark
-                className={`w-4 h-4 transition-all ${isSaved ? "text-[#0000ff] fill-[#0000ff]" : "text-gray-400"}`}
-              />
+              {isBookmarkPending ? (
+                <Loader2 className="w-4 h-4 animate-spin text-gray-400" />
+              ) : (
+                <Bookmark
+                  className={`w-4 h-4 transition-all ${isSaved ? "text-[#0000ff] fill-[#0000ff]" : "text-gray-400"}`}
+                />
+              )}
             </button>
           </div>
         </div>

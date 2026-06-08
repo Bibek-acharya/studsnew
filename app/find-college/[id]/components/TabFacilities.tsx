@@ -19,8 +19,8 @@ const TabFacilities: React.FC<TabFacilitiesProps> = ({ facilities }) => {
       <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
         {facilities.map((facility: any, i: number) => (
           <div key={facility.title || facility.heading || i} className="flex items-start gap-4 rounded-md border border-gray-200 bg-white p-5">
-            <div className="flex h-10 w-10 items-center justify-center rounded-md bg-brand-blue/5 text-brand-blue">
-              <i className={`fa-solid ${facility.icon || "fa-question"}`}></i>
+            <div className="flex h-12 w-12 items-center justify-center rounded-md bg-brand-blue/5 text-brand-blue">
+              <i className={`fa-solid ${facility.icon || "fa-question"} text-[18px]`}></i>
             </div>
             <div>
               <h4 className="text-[16px] font-bold text-gray-900">{facility.title || facility.heading}</h4>

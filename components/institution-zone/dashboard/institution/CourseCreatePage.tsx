@@ -63,6 +63,7 @@ interface FullTimeCourse {
   id: number;
   course: string;
   totalFees: string;
+  seats: string;
   startDate: string;
   endDate: string;
 }
@@ -555,7 +556,7 @@ const CourseCreatePage: React.FC = () => {
                 <p className="text-sm text-gray-500 mt-0.5">Manage full-time course listings, fees, and durations</p>
               </div>
             </div>
-            <button onClick={() => setFullTimeCourses(prev => [...prev, { id: nextId(prev), course: "", totalFees: "", startDate: "", endDate: "" }])}
+            <button onClick={() => setFullTimeCourses(prev => [...prev, { id: nextId(prev), course: "", totalFees: "", seats: "", startDate: "", endDate: "" }])}
               className="px-3 py-1.5 text-sm font-medium text-blue-600 bg-white border border-gray-200 rounded-lg hover:bg-blue-50 flex items-center gap-1.5 transition-colors shadow-sm shrink-0">
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="12" y1="5" x2="12" y2="19" /><line x1="5" y1="12" x2="19" y2="12" /></svg> Add Row
             </button>
@@ -567,6 +568,7 @@ const CourseCreatePage: React.FC = () => {
                   <tr>
                     <th className="px-4 py-3 text-sm font-semibold text-gray-700 border-b border-gray-200">Course</th>
                     <th className="px-4 py-3 text-sm font-semibold text-gray-700 border-b border-gray-200">Total Fees</th>
+                    <th className="px-4 py-3 text-sm font-semibold text-gray-700 border-b border-gray-200">Seats</th>
                     <th className="px-4 py-3 text-sm font-semibold text-gray-700 border-b border-gray-200">Start Date</th>
                     <th className="px-4 py-3 text-sm font-semibold text-gray-700 border-b border-gray-200">End Date</th>
                     <th className="px-4 py-3 text-sm font-semibold text-gray-700 border-b border-gray-200 w-16"></th>
@@ -582,6 +584,10 @@ const CourseCreatePage: React.FC = () => {
                       <td className="px-4 py-2 border-b border-gray-200">
                         <input type="text" className="w-full border-0 rounded-none px-1 py-1.5 text-sm focus:border-blue-400 outline-none bg-white" placeholder="e.g. NPR 250,000"
                           value={ft.totalFees} onChange={e => setFullTimeCourses(prev => prev.map(x => x.id === ft.id ? { ...x, totalFees: e.target.value } : x))} />
+                      </td>
+                      <td className="px-4 py-2 border-b border-gray-200">
+                        <input type="number" min="0" className="w-full border-0 rounded-none px-1 py-1.5 text-sm focus:border-blue-400 outline-none bg-white" placeholder="e.g. 60"
+                          value={ft.seats} onChange={e => setFullTimeCourses(prev => prev.map(x => x.id === ft.id ? { ...x, seats: e.target.value } : x))} />
                       </td>
                       <td className="px-4 py-2 border-b border-gray-200">
                         <input type="date" className="w-full border-0 rounded-none px-1 py-1.5 text-sm focus:border-blue-400 outline-none bg-white"
