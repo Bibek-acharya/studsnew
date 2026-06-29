@@ -4,6 +4,8 @@ import React, { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { Bookmark, FolderOpen, Loader2 } from "lucide-react";
 import { fetchPublicEvents } from "@/services/eventApi";
+import { apiService } from "@/services/api";
+import { useAuth } from "@/services/AuthContext";
 import Pagination from "@/components/ui/Pagination";
 
 type EventFilter =
@@ -28,14 +30,14 @@ const filterPills: EventFilter[] = [
 ];
 
 const stripHtml = (html: string) => {
-  if (typeof window === 'undefined') return html;
-  const doc = new DOMParser().parseFromString(html, 'text/html');
+  if (typeof window === "undefined") return html;
+  const doc = new DOMParser().parseFromString(html, "text/html");
   return doc.body.textContent || "";
 };
 
-
 const mapCategory = (category: string): EventFilter => {
-  if (category === "Workshop" || category === "Seminar") return "Seminar & Workshop";
+  if (category === "Workshop" || category === "Seminar")
+    return "Seminar & Workshop";
   if (category === "Job Fair") return "Career Fairs";
   if (category === "Hackathon") return "Hackthons";
   return "Others";
@@ -49,13 +51,22 @@ const badgeClass = (filter: EventFilter) => {
 };
 
 const EventsPage: React.FC = () => {
+  const { isAuthenticated } = useAuth();
   const [activeFilter, setActiveFilter] = useState<EventFilter>("All News");
-  const [sortBy, setSortBy] = useState<"Newest First" | "Oldest First" | "Popular">("Newest First");
+  const [sortBy, setSortBy] = useState<
+    "Newest First" | "Oldest First" | "Popular"
+  >("Newest First");
   const [currentPage, setCurrentPage] = useState(1);
   const [events, setEvents] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [bookmarkedEventIds, setBookmarkedEventIds] = useState<Set<string>>(new Set());
+  const [bookmarkedEventIds, setBookmarkedEventIds] = useState<Set<string>>(
+    new Set(),
+  );
+  const [bookmarkMap, setBookmarkMap] = useState<Record<string, number>>({});
+  const [pendingBookmarks, setPendingBookmarks] = useState<
+    Record<string, boolean>
+  >({});
 
   useEffect(() => {
     let cancelled = false;
@@ -73,26 +84,36 @@ const EventsPage: React.FC = () => {
       }
 
       try {
-        const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080";
-        const instRes = await fetch(`${API_BASE}/api/v1/institutions/public/events?page=1&limit=20`);
+        const API_BASE =
+          process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080";
+        const instRes = await fetch(
+          `${API_BASE}/api/v1/institutions/public/events?page=1&limit=20`,
+        );
         const instData = await instRes.json();
         const instEvents = instData?.data?.events || [];
-        allEvents = [...allEvents, ...instEvents.map((e: any) => ({
-          id: `inst-${e.id}`,
-          title: e.name || e.title,
-          excerpt: e.short_desc || "",
-          description: e.description || "",
-          category: e.event_type || e.category || "Event",
-          image: e.image_url || "",
-          organizer: e.organized_by || "",
-          location: e.location || "",
-          date: e.start_date ? new Date(e.start_date).toLocaleDateString() : "",
-          time: e.start_date ? new Date(e.start_date).toLocaleTimeString() : "",
-          registrationFee: "",
-          interested: 0,
-          published: true,
-          created_at: e.created_at,
-        }))];
+        allEvents = [
+          ...allEvents,
+          ...instEvents.map((e: any) => ({
+            id: `inst-${e.id}`,
+            title: e.name || e.title,
+            excerpt: e.short_desc || "",
+            description: e.description || "",
+            category: e.event_type || e.category || "Event",
+            image: e.image_url || "",
+            organizer: e.organized_by || "",
+            location: e.location || "",
+            date: e.start_date
+              ? new Date(e.start_date).toLocaleDateString()
+              : "",
+            time: e.start_date
+              ? new Date(e.start_date).toLocaleTimeString()
+              : "",
+            registrationFee: "",
+            interested: 0,
+            published: true,
+            created_at: e.created_at,
+          })),
+        ];
       } catch {
         // Institution events fetch failed silently
       }
@@ -101,44 +122,83 @@ const EventsPage: React.FC = () => {
         setEvents(allEvents);
       }
 
-      try {
-        const stored = window.localStorage.getItem("events-bookmarks");
-        if (stored) {
-          const parsed = JSON.parse(stored) as string[];
-          if (Array.isArray(parsed)) {
-            setBookmarkedEventIds(new Set(parsed));
-          }
-        }
-      } catch {
-        // Ignore invalid local storage
-      } finally {
-        if (!cancelled) setLoading(false);
-      }
+      if (!cancelled) setLoading(false);
     };
 
     loadEvents();
-    return () => { cancelled = true; };
+    return () => {
+      cancelled = true;
+    };
   }, []);
 
   useEffect(() => {
-    window.localStorage.setItem("events-bookmarks", JSON.stringify(Array.from(bookmarkedEventIds)));
-  }, [bookmarkedEventIds]);
+    if (!isAuthenticated) return;
+    let cancelled = false;
+    apiService
+      .getBookmarksByType("events")
+      .then((items) => {
+        if (cancelled) return;
+        const ids: Set<string> = new Set();
+        const map: Record<string, number> = {};
+        items.forEach((b) => {
+          ids.add(String(b.item_id));
+          map[b.item_id] = b.id;
+        });
+        setBookmarkedEventIds(ids);
+        setBookmarkMap(map);
+      })
+      .catch(() => {});
+    return () => {
+      cancelled = true;
+    };
+  }, [isAuthenticated]);
 
   const toggleBookmark = async (e: React.MouseEvent, id: string | number) => {
     e.preventDefault();
     e.stopPropagation();
 
     const key = String(id);
+    const numId = Number(id);
+    if (isNaN(numId)) return;
 
-    setBookmarkedEventIds((prev) => {
-      const next = new Set(prev);
-      if (next.has(key)) {
-        next.delete(key);
+    if (!isAuthenticated) return;
+    if (pendingBookmarks[key]) return;
+    setPendingBookmarks((prev) => ({ ...prev, [key]: true }));
+
+    const existingBookmarkId = bookmarkMap[key];
+    try {
+      if (existingBookmarkId) {
+        await apiService.deleteBookmark(existingBookmarkId);
+        setBookmarkMap((prev) => {
+          const next = { ...prev };
+          delete next[key];
+          return next;
+        });
+        setBookmarkedEventIds((prev) => {
+          const next = new Set(prev);
+          next.delete(key);
+          return next;
+        });
       } else {
-        next.add(key);
+        const res = await apiService.createBookmark(numId, "events");
+        if (res.data?.id) {
+          setBookmarkMap((prev) => ({ ...prev, [key]: res.data.id }));
+          setBookmarkedEventIds((prev) => {
+            const next = new Set(prev);
+            next.add(key);
+            return next;
+          });
+        }
       }
-      return next;
-    });
+    } catch {
+      // silently fail
+    } finally {
+      setPendingBookmarks((prev) => {
+        const next = { ...prev };
+        delete next[key];
+        return next;
+      });
+    }
   };
 
   const allEvents = events;
@@ -148,7 +208,9 @@ const EventsPage: React.FC = () => {
     const filtered =
       activeFilter === "All News"
         ? events
-        : events.filter((event) => mapCategory(event.category) === activeFilter);
+        : events.filter(
+            (event) => mapCategory(event.category) === activeFilter,
+          );
 
     return [...filtered].sort((a, b) => {
       if (sortBy === "Newest First") return Number(b.id) - Number(a.id);
@@ -158,7 +220,10 @@ const EventsPage: React.FC = () => {
   }, [activeFilter, events, sortBy]);
 
   const itemsPerPage = 12;
-  const totalPages = Math.max(1, Math.ceil(visibleEvents.length / itemsPerPage));
+  const totalPages = Math.max(
+    1,
+    Math.ceil(visibleEvents.length / itemsPerPage),
+  );
   const paginatedEvents = visibleEvents.slice(
     (currentPage - 1) * itemsPerPage,
     currentPage * itemsPerPage,
@@ -202,18 +267,22 @@ const EventsPage: React.FC = () => {
         {loading && (
           <div className="mb-8 text-center text-gray-500">Loading events…</div>
         )}
-        {error && (
-          <div className="mb-8 text-center text-red-500">{error}</div>
-        )}
+        {error && <div className="mb-8 text-center text-red-500">{error}</div>}
 
         {featured && (
           <section className="mb-14">
-            <h2 className="text-3xl font-bold mb-4">Featured Story of the Week</h2>
+            <h2 className="text-3xl font-bold mb-4">
+              Featured Story of the Week
+            </h2>
             <Link
               href={`/events/${featured.id}`}
               className="relative rounded-md overflow-hidden  h-87.5 sm:h-100 group  cursor-pointer block"
             >
-              <img src={featured.image} alt={featured.title} className="absolute inset-0 w-full h-full object-cover" />
+              <img
+                src={featured.image}
+                alt={featured.title}
+                className="absolute inset-0 w-full h-full object-cover"
+              />
               <div className="absolute inset-0 bg-linear-to-t from-black/80 via-black/40 to-transparent"></div>
 
               <div className="absolute bottom-0 left-0 right-0 p-8 flex flex-col md:flex-row justify-between items-start md:items-end gap-6">
@@ -223,12 +292,14 @@ const EventsPage: React.FC = () => {
                       Featured
                     </span>
                     <span className="flex items-center text-sm text-gray-200 font-medium">
-                      <i className="fa-regular fa-clock mr-1.5 opacity-80"></i> 90 days ago
+                      <i className="fa-regular fa-clock mr-1.5 opacity-80"></i>{" "}
+                      90 days ago
                     </span>
                   </div>
                   <h3 className="text-3xl font-bold mb-2">{featured.title}</h3>
-                  <p className="text-gray-200 text-base font-medium line-clamp-2">{stripHtml(featured.excerpt || "")}</p>
-
+                  <p className="text-gray-200 text-base font-medium line-clamp-2">
+                    {stripHtml(featured.excerpt || "")}
+                  </p>
                 </div>
                 <button className="bg-white text-black px-6 py-3 rounded-md font-bold hover:bg-gray-100 transition whitespace-nowrap ">
                   Read Full Story
@@ -246,7 +317,10 @@ const EventsPage: React.FC = () => {
               <select
                 value={sortBy}
                 onChange={(event) =>
-                  setSortBy(event.target.value as "Newest First" | "Oldest First" | "Popular")
+                  setSortBy(
+                    event.target.value as
+                      "Newest First" | "Oldest First" | "Popular",
+                  )
                 }
                 className="border border-gray-300 rounded-md px-3 py-1.5 bg-white text-gray-800 font-semibold outline-none focus:border-blue-500  cursor-pointer"
               >
@@ -267,7 +341,11 @@ const EventsPage: React.FC = () => {
                   className="bg-white rounded-md border border-gray-200 hover:border-blue-500/20 overflow-hidden flex flex-col duration-300 cursor-pointer"
                 >
                   <div className="h-35 w-full overflow-hidden p-4">
-                  <img src={event.image} alt={event.title} className="w-full h-full object-cover rounded-md" />
+                    <img
+                      src={event.image}
+                      alt={event.title}
+                      className="w-full h-full object-cover rounded-md"
+                    />
                   </div>
                   <div className="p-5 flex flex-col grow">
                     <div className="flex justify-between items-center mb-3">
@@ -277,7 +355,8 @@ const EventsPage: React.FC = () => {
                         {mapped}
                       </span>
                       <span className="flex items-center text-xs text-gray-500 font-semibold">
-                        <i className="fa-regular fa-calendar mr-1.5"></i> Oct 25 , 2024
+                        <i className="fa-regular fa-calendar mr-1.5"></i> Oct 25
+                        , 2024
                       </span>
                     </div>
 
@@ -289,14 +368,17 @@ const EventsPage: React.FC = () => {
                     </Link>
 
                     <div className="flex items-center text-xs text-gray-600 mb-2 font-semibold">
-                      <i className="fa-regular fa-building mr-2 text-gray-500"></i> {event.organizer}
+                      <i className="fa-regular fa-building mr-2 text-gray-500"></i>{" "}
+                      {event.organizer}
                     </div>
                     <div className="flex items-center text-xs text-gray-600 mb-3 font-semibold">
-                      <i className="fa-solid fa-location-dot mr-2 text-gray-500"></i> {event.location}
+                      <i className="fa-solid fa-location-dot mr-2 text-gray-500"></i>{" "}
+                      {event.location}
                     </div>
 
-                    <p className="text-xs text-gray-500 mb-5 line-clamp-3 leading-relaxed font-medium">{stripHtml(event.excerpt || "")}</p>
-
+                    <p className="text-xs text-gray-500 mb-5 line-clamp-3 leading-relaxed font-medium">
+                      {stripHtml(event.excerpt || "")}
+                    </p>
 
                     <div className="mt-auto flex gap-2">
                       <Link
@@ -305,7 +387,9 @@ const EventsPage: React.FC = () => {
                       >
                         Details
                       </Link>
-                      <button className={`flex-1 text-white text-sm font-bold py-2 rounded-md transition bg-brand-blue cursor-pointer hover:bg-blue-600`}>
+                      <button
+                        className={`flex-1 text-white text-sm font-bold py-2 rounded-md transition bg-brand-blue cursor-pointer hover:bg-blue-600`}
+                      >
                         Register Now
                       </button>
                       <button
@@ -319,7 +403,9 @@ const EventsPage: React.FC = () => {
                       >
                         <Bookmark
                           className={`w-4 h-4 transition-all ${
-                            isBookmarked ? "text-[#0000ff] fill-[#0000ff]" : "text-gray-400"
+                            isBookmarked
+                              ? "text-[#0000ff] fill-[#0000ff]"
+                              : "text-gray-400"
                           }`}
                         />
                       </button>
@@ -333,7 +419,9 @@ const EventsPage: React.FC = () => {
           {visibleEvents.length === 0 && (
             <div className="flex flex-col items-center justify-center py-16">
               <FolderOpen className="w-32 h-32 text-gray-300 mb-4" />
-              <p className="text-gray-500 text-lg font-medium mb-6">No events information is currently available.</p>
+              <p className="text-gray-500 text-lg font-medium mb-6">
+                No events information is currently available.
+              </p>
               <Link
                 href="/"
                 className="bg-[#0000ff] hover:bg-[#0000cc] cursor-pointer text-white font-semibold py-2.5 px-6 rounded-md transition-colors text-sm"

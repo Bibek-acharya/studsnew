@@ -47,6 +47,8 @@ export default function ProfileSection() {
   const [profileImage, setProfileImage] = useState<string | null>(null)
   const [selectedImageFile, setSelectedImageFile] = useState<File | null>(null)
   const [rawPreferences, setRawPreferences] = useState<Record<string, any>>({})
+  const [onboardingCompleted, setOnboardingCompleted] = useState(false)
+  const [profileAddress, setProfileAddress] = useState('')
   
   const [personalData, setPersonalData] = useState({
     firstName: '',
@@ -242,6 +244,9 @@ export default function ProfileSection() {
 
         const prefs = profile.preferences?.preferences || {}
 
+        setOnboardingCompleted(!!profile.preferences?.onboarding_completed)
+        setProfileAddress(profile.address || '')
+
         setPersonalData({
           firstName: profile.first_name || '',
           lastName: profile.last_name || '',
@@ -309,28 +314,18 @@ export default function ProfileSection() {
 
   const calculateCompletion = () => {
     let filled = 0
-    const total = 18
+    const total = 10
     
     if (personalData.firstName) filled++
     if (personalData.lastName) filled++
+    if (personalData.phone) filled++
     if (personalData.dateOfBirth) filled++
     if (personalData.gender) filled++
     if (personalData.nationality) filled++
-    if (personalData.email) filled++
-    if (personalData.phone) filled++
-    if (personalData.province) filled++
-    if (personalData.district) filled++
-    if (personalData.localLevel) filled++
+    if (personalData.province || personalData.district || personalData.localLevel || profileAddress) filled++
     if (personalData.bio) filled++
-    
-    if (education.length > 0 && education[0].level) filled++
-    if (education.length > 0 && education[0].institutionName) filled++
-    if (education.length > 0 && education[0].boardUniversity) filled++
-    if (education.length > 0 && education[0].stream) filled++
-    if (education.length > 0 && education[0].grade) filled++
-    
-    if (preferredStudy.preferredField) filled++
-    if (preferredStudy.budgetRange) filled++
+    if (onboardingCompleted) filled++
+    if (user?.role) filled++
     
     return Math.round((filled / total) * 100)
   }
