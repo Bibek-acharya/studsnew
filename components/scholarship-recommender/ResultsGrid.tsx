@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { ScholarshipCardItem } from "./types";
+import { ScholarshipCardItem, BreakdownDimension } from "./types";
 import ConfirmDialog from "./ConfirmDialog";
 
 interface ResultsGridProps {
@@ -23,12 +23,15 @@ export default function ResultsGrid({
 }: ResultsGridProps) {
   const [savedIds, setSavedIds] = useState<number[]>([]);
   const [showDialog, setShowDialog] = useState(false);
+  const [expandedBreakdown, setExpandedBreakdown] = useState<number | null>(
+    null,
+  );
   const allSelected = selectedIds.length === items.length;
   const selectedCount = selectedIds.length;
 
   const toggleSave = (id: number) => {
     setSavedIds((prev) =>
-      prev.includes(id) ? prev.filter((item) => item !== id) : [...prev, id]
+      prev.includes(id) ? prev.filter((item) => item !== id) : [...prev, id],
     );
   };
 
@@ -40,21 +43,30 @@ export default function ResultsGrid({
     <div className="min-h-screen text-gray-900 antialiased pb-32 bg-white">
       <div className="max-w-350 mx-auto mt-8">
         <div className="mb-8">
-
           <h1 className="text-[2rem] md:text-[2.5rem] leading-tight font-bold text-gray-900 mb-3">
             Scholarships that fit you best
           </h1>
           <p className="text-gray-600 max-w-4xl text-[1.05rem] leading-relaxed">
-            These scholarships were handpicked based on your background, interests, and academic profile. You meet the
-            key eligibility criteria, now it&apos;s time to explore and apply with confidence. You&apos;re eligible for
+            These scholarships were handpicked based on your background,
+            interests, and academic profile. You meet the key eligibility
+            criteria, now it&apos;s time to explore and apply with confidence.
+            You&apos;re eligible for
             <span className="font-bold text-brand-blue"> $62,000+ </span>
             in scholarships. Let&apos;s help you apply!
           </p>
         </div>
 
         <div className="flex flex-col sm:flex-row justify-between items-center gap-4 mb-8">
-          <button onClick={handleRefineAnswers} className="flex items-center gap-2 border border-gray-300 bg-white hover:bg-gray-50 text-gray-800 font-semibold py-2.5 px-5 rounded-md transition-colors w-full sm:w-auto">
-            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <button
+            onClick={handleRefineAnswers}
+            className="flex items-center gap-2 border border-gray-300 bg-white hover:bg-gray-50 text-gray-800 font-semibold py-2.5 px-5 rounded-md transition-colors w-full sm:w-auto"
+          >
+            <svg
+              className="w-5 h-5"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
               <path
                 strokeLinecap="round"
                 strokeLinejoin="round"
@@ -73,8 +85,18 @@ export default function ResultsGrid({
                 <option>Amount (Highest)</option>
               </select>
               <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-4 text-gray-500">
-                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
+                <svg
+                  className="w-4 h-4"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth="2"
+                    d="M19 9l-7 7-7-7"
+                  />
                 </svg>
               </div>
             </div>
@@ -86,8 +108,18 @@ export default function ResultsGrid({
                 <option>Newest</option>
               </select>
               <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-4 text-gray-500">
-                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
+                <svg
+                  className="w-4 h-4"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth="2"
+                    d="M19 9l-7 7-7-7"
+                  />
                 </svg>
               </div>
             </div>
@@ -104,7 +136,10 @@ export default function ResultsGrid({
                 className="bg-white border border-gray-200 rounded-md p-5 transition-all flex flex-col h-full relative group"
               >
                 <div className="flex justify-between items-start mb-3 gap-3">
-                  <h3 className="font-bold text-gray-900 text-[1.05rem] leading-snug group-hover:text-brand-hover transition-colors truncate" title={item.title}>
+                  <h3
+                    className="font-bold text-gray-900 text-[1.05rem] leading-snug group-hover:text-brand-hover transition-colors truncate"
+                    title={item.title}
+                  >
                     {item.title}
                   </h3>
                   <input
@@ -116,7 +151,9 @@ export default function ResultsGrid({
                 </div>
 
                 <div className="flex flex-wrap gap-2 mb-3">
-                  <span className={`${item.tagColorClass} text-white text-[0.65rem] font-bold px-2.5 py-1 rounded-full uppercase tracking-wider`}>
+                  <span
+                    className={`${item.tagColorClass} text-white text-[0.65rem] font-bold px-2.5 py-1 rounded-full uppercase tracking-wider`}
+                  >
                     {item.providerType}
                   </span>
                   <span className="bg-blue-50 text-brand-blue border border-blue-100 text-[0.65rem] font-bold px-2.5 py-1 rounded-full uppercase tracking-wider">
@@ -124,29 +161,153 @@ export default function ResultsGrid({
                   </span>
                 </div>
 
-                <p className="text-sm text-gray-600 mb-5 grow line-clamp-3">{item.description}</p>
+                <p className="text-sm text-gray-600 mb-5 grow line-clamp-3">
+                  {item.description}
+                </p>
+
+                {item.breakdown && (
+                  <div className="mt-3 mb-3">
+                    <button
+                      type="button"
+                      onClick={() =>
+                        setExpandedBreakdown(
+                          expandedBreakdown === item.id ? null : item.id,
+                        )
+                      }
+                      className="text-xs text-blue-600 hover:text-blue-800 font-medium cursor-pointer"
+                    >
+                      {expandedBreakdown === item.id
+                        ? "Hide match breakdown"
+                        : "Show match breakdown"}
+                    </button>
+
+                    {expandedBreakdown === item.id && (
+                      <div className="mt-2 space-y-1.5 bg-slate-50 rounded-lg p-3">
+                        {[
+                          {
+                            label: "Education Level",
+                            key: "educationLevel" as const,
+                            color: "bg-blue-500",
+                          },
+                          {
+                            label: "Field of Study",
+                            key: "fieldOfStudy" as const,
+                            color: "bg-green-500",
+                          },
+                          {
+                            label: "Location",
+                            key: "location" as const,
+                            color: "bg-purple-500",
+                          },
+                          {
+                            label: "Financial Fit",
+                            key: "financialFit" as const,
+                            color: "bg-amber-500",
+                          },
+                          {
+                            label: "Study Location",
+                            key: "studyLocation" as const,
+                            color: "bg-teal-500",
+                          },
+                          {
+                            label: "Category/Gender",
+                            key: "categoryGender" as const,
+                            color: "bg-pink-500",
+                          },
+                          {
+                            label: "GPA Match",
+                            key: "gpaMatch" as const,
+                            color: "bg-indigo-500",
+                          },
+                          {
+                            label: "Willingness",
+                            key: "willingness" as const,
+                            color: "bg-cyan-500",
+                          },
+                          {
+                            label: "Talents",
+                            key: "talents" as const,
+                            color: "bg-orange-500",
+                          },
+                          {
+                            label: "Achievements",
+                            key: "achievements" as const,
+                            color: "bg-red-500",
+                          },
+                          ...(item.breakdown.profileCompatibility !== undefined
+                            ? [
+                                {
+                                  label: "Profile Match",
+                                  key: "profileCompatibility" as const,
+                                  color: "bg-emerald-500",
+                                },
+                              ]
+                            : []),
+                        ].map(
+                          (dim: {
+                            label: string;
+                            key: keyof BreakdownDimension;
+                            color: string;
+                          }) => (
+                            <div
+                              key={dim.key}
+                              className="flex items-center gap-2"
+                            >
+                              <span className="text-xs text-slate-600 w-24 shrink-0">
+                                {dim.label}
+                              </span>
+                              <div className="flex-1 bg-slate-200 rounded-full h-2">
+                                <div
+                                  className={`${dim.color} h-2 rounded-full transition-all duration-300`}
+                                  style={{
+                                    width: `${Math.min((item.breakdown?.[dim.key] ?? 0) * 10, 100)}%`,
+                                  }}
+                                />
+                              </div>
+                              <span className="text-xs text-slate-500 w-6 text-right">
+                                {item.breakdown?.[dim.key] ?? 0}
+                              </span>
+                            </div>
+                          ),
+                        )}
+                      </div>
+                    )}
+                  </div>
+                )}
 
                 <div className="pt-4 border-t border-gray-100 flex items-end justify-between mt-auto">
                   <div>
-                    <span className="block text-[0.7rem] text-gray-400 font-bold uppercase tracking-wider mb-1">Deadline</span>
-                    <span className="text-brand-blue font-bold text-[0.95rem]">{item.deadline}</span>
+                    <span className="block text-[0.7rem] text-gray-400 font-bold uppercase tracking-wider mb-1">
+                      Deadline
+                    </span>
+                    <span className="text-brand-blue font-bold text-[0.95rem]">
+                      {item.deadline}
+                    </span>
                   </div>
                   <div className="flex gap-2">
                     <button
                       onClick={() => toggleSave(item.id)}
-                      className={`p-2 rounded-md transition-colors border ${savedIds.includes(item.id)
-                        ? "bg-blue-100 text-brand-blue border-blue-200"
-                        : "bg-gray-50 text-gray-400 hover:text-brand-blue hover:bg-blue-100 border-gray-200"
-                        }`}
+                      className={`p-2 rounded-md transition-colors border ${
+                        savedIds.includes(item.id)
+                          ? "bg-blue-100 text-brand-blue border-blue-200"
+                          : "bg-gray-50 text-gray-400 hover:text-brand-blue hover:bg-blue-100 border-gray-200"
+                      }`}
                       title="Save"
                     >
                       <svg
                         className="w-4 h-4"
-                        fill={savedIds.includes(item.id) ? "currentColor" : "none"}
+                        fill={
+                          savedIds.includes(item.id) ? "currentColor" : "none"
+                        }
                         stroke="currentColor"
                         viewBox="0 0 24 24"
                       >
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z" />
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth="2"
+                          d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z"
+                        />
                       </svg>
                     </button>
                     <button className="bg-brand-blue hover:bg-brand-hover text-white px-3.5 py-1.5 rounded-md text-sm font-semibold transition-colors ">
@@ -162,7 +323,9 @@ export default function ResultsGrid({
 
       <div className="fixed bottom-6 left-1/2 transform -translate-x-1/2 w-[90%] max-w-4xl bg-white border border-gray-200 rounded-md shadow-[0_10px_40px_-10px_rgba(0,0,0,0.15)] p-4 flex items-center justify-between z-50">
         <div className="flex items-center gap-4">
-          <span className="text-[0.95rem] font-bold text-gray-800">Select all</span>
+          <span className="text-[0.95rem] font-bold text-gray-800">
+            Select all
+          </span>
 
           <div className="relative inline-block w-10 mr-2 align-middle select-none transition duration-200 ease-in">
             <input
@@ -173,17 +336,24 @@ export default function ResultsGrid({
               className="toggle-checkbox absolute block w-5 h-5 rounded-full bg-white border-4 border-gray-300 appearance-none cursor-pointer z-10 transition-transform duration-200"
               style={{ top: 2, left: 2 }}
             />
-            <label htmlFor="toggle-all" className="toggle-label block overflow-hidden h-6 rounded-full bg-gray-300 cursor-pointer transition-colors duration-200" />
+            <label
+              htmlFor="toggle-all"
+              className="toggle-label block overflow-hidden h-6 rounded-full bg-gray-300 cursor-pointer transition-colors duration-200"
+            />
           </div>
 
-          <span className="text-sm font-semibold text-gray-500 hidden sm:inline">({selectedCount}/{items.length} Selected)</span>
+          <span className="text-sm font-semibold text-gray-500 hidden sm:inline">
+            ({selectedCount}/{items.length} Selected)
+          </span>
         </div>
 
         <button
           onClick={onShortlist}
           className={`px-6 py-3 rounded-md font-bold transition-colors  text-white bg-brand-blue hover:bg-brand-hover`}
         >
-          {selectedCount > 0 ? `Add to shortlist (${selectedCount})` : "View Shortlist"}
+          {selectedCount > 0
+            ? `Add to shortlist (${selectedCount})`
+            : "View Shortlist"}
         </button>
       </div>
 
@@ -216,12 +386,12 @@ export default function ResultsGrid({
         }
 
         .card-checkbox:checked {
-          background-color: #0000FF;
-          border-color: #0000FF;
+          background-color: #0000ff;
+          border-color: #0000ff;
         }
 
         .card-checkbox:checked::after {
-          content: '';
+          content: "";
           position: absolute;
           top: 2px;
           left: 6px;
@@ -238,11 +408,11 @@ export default function ResultsGrid({
 
         .toggle-checkbox:checked {
           right: 0;
-          border-color: #0000FF;
+          border-color: #0000ff;
         }
 
         .toggle-checkbox:checked + .toggle-label {
-          background-color: #0000FF;
+          background-color: #0000ff;
         }
       `}</style>
     </div>

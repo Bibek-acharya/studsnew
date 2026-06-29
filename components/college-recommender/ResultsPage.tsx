@@ -45,20 +45,21 @@ export default function ResultsPage({
   setIsRefineModalOpen,
   toggleSelection,
   onNavigate,
-  onShortlist}: ResultsPageProps) {
+  onShortlist,
+}: ResultsPageProps) {
   const selectedCount = selectedIds.size;
   const previewItem = results.find((r) => r.id === previewId) || results[0];
 
-return (
+  return (
     <div className="min-h-screen bg-white text-slate-800 antialiased font-sans overflow-x-hidden relative">
       {/* Backdrop */}
       {previewId && (
-        <div 
+        <div
           className="fixed inset-0 bg-slate-900/30 backdrop-blur-sm z-150"
           onClick={() => setPreviewId(null)}
         />
       )}
-      
+
       {/* Side Preview Panel */}
       <aside
         className={`fixed top-0 right-0 h-screen w-100 bg-white border-l border-slate-200 z-200 overflow-y-auto transition-transform duration-400 ease-in-out ${
@@ -71,7 +72,7 @@ return (
             <div className="flex flex-col items-center justify-center h-[60vh] text-slate-400">
               <Building2 className="w-16 h-16 mb-4 opacity-20" />
               <p className="font-medium text-slate-500">
-                Select a college to see details 
+                Select a college to see details
               </p>
             </div>
           ) : (
@@ -100,14 +101,23 @@ return (
                     </p>
                   </div>
                 </div>
-                
               </div>
 
               <div className="border-t border-slate-50 pt-8 grid grid-cols-2 gap-y-10 gap-x-6">
                 <div>
                   <div className="flex items-center gap-2 text-slate-500 font-extrabold mb-2 text-[13px] uppercase tracking-wide">
-                    <svg className="w-4 h-4 text-brand-blue" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                    <svg
+                      className="w-4 h-4 text-brand-blue"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth="2.5"
+                        d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"
+                      />
                     </svg>
                     Status
                   </div>
@@ -128,8 +138,18 @@ return (
 
                 <div>
                   <div className="flex items-center gap-2 text-slate-500 font-extrabold mb-2 text-[13px] uppercase tracking-wide">
-                    <svg className="w-4 h-4 text-slate-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                    <svg
+                      className="w-4 h-4 text-slate-700"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth="2"
+                        d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"
+                      />
                     </svg>
                     Application Fee
                   </div>
@@ -150,8 +170,18 @@ return (
 
                 <div>
                   <div className="flex items-center gap-2 text-slate-500 font-extrabold mb-2 text-[13px] uppercase tracking-wide">
-                    <svg className="w-4 h-4 text-slate-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    <svg
+                      className="w-4 h-4 text-slate-700"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth="2.5"
+                        d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
+                      />
                     </svg>
                     Admission rate
                   </div>
@@ -162,8 +192,18 @@ return (
 
                 <div>
                   <div className="flex items-center gap-2 text-slate-500 font-extrabold mb-2 text-[13px] uppercase tracking-wide">
-                    <svg className="w-4 h-4 text-slate-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
+                    <svg
+                      className="w-4 h-4 text-slate-700"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth="2"
+                        d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"
+                      />
                     </svg>
                     Avg. cost after aid
                   </div>
@@ -178,7 +218,10 @@ return (
                   About
                 </h3>
                 <p className="text-slate-600 font-medium leading-relaxed text-[15px]">
-                  A dynamic university located in the scenic city of Pokhara offering diverse programs. It focuses on higher education and research, particularly in business, science, and technology. For more information, visit http://www.edu.np.
+                  A dynamic university located in the scenic city of Pokhara
+                  offering diverse programs. It focuses on higher education and
+                  research, particularly in business, science, and technology.
+                  For more information, visit http://www.edu.np.
                 </p>
               </div>
             </div>
@@ -186,10 +229,8 @@ return (
         </div>
       </aside>
 
-{/* Main Content Wrapper */}
-      <div
-        className='transition-all duration-400'
-      >
+      {/* Main Content Wrapper */}
+      <div className="transition-all duration-400">
         <header className="max-w-350 mx-auto px-4 pt-12 pb-4">
           <h1 className="text-3xl sm:text-4xl font-extrabold text-slate-900 tracking-tight mb-2">
             Colleges that fit you best
@@ -286,9 +327,7 @@ return (
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-2 text-brand-blue font-bold text-sm tracking-tight">
                         <Star className="w-5 h-5 fill-brand-blue/10 text-brand-blue" />
-                        <span>
-                          {Math.floor(item.match_score * 10)}% Overall match
-                        </span>
+                        <span>{item.match_score}% Overall match</span>
                       </div>
                       <ChevronDown
                         className={`w-5 h-5 text-slate-400 transition-transform duration-300 ${
@@ -297,29 +336,102 @@ return (
                       />
                     </div>
 
-                    {isExpanded && (
+                    {isExpanded && item.breakdown && (
                       <div className="pt-4 pb-1 space-y-3">
-                        <div className="flex justify-between items-center text-sm font-medium text-slate-600">
-                          <div className="flex items-center gap-2">
-                            <MapPin className="w-4 h-4 text-slate-400" />
-                            <span>Location preference match</span>
+                        {[
+                          {
+                            label: "Student type fit",
+                            key: "studentType" as const,
+                            color: "bg-blue-500",
+                          },
+                          {
+                            label: "Preferred field",
+                            key: "preferredField" as const,
+                            color: "bg-green-500",
+                          },
+                          {
+                            label: "Location",
+                            key: "location" as const,
+                            color: "bg-purple-500",
+                          },
+                          {
+                            label: "Budget",
+                            key: "budget" as const,
+                            color: "bg-amber-500",
+                          },
+                          {
+                            label: "Financial aid",
+                            key: "financialAid" as const,
+                            color: "bg-teal-500",
+                          },
+                          {
+                            label: "Academics vs Campus",
+                            key: "academicsVsCampus" as const,
+                            color: "bg-pink-500",
+                          },
+                          {
+                            label: "Activities",
+                            key: "activities" as const,
+                            color: "bg-cyan-500",
+                          },
+                          {
+                            label: "Facilities",
+                            key: "facilities" as const,
+                            color: "bg-orange-500",
+                          },
+                          {
+                            label: "Reputation",
+                            key: "reputation" as const,
+                            color: "bg-indigo-500",
+                          },
+                          ...(item.breakdown.distanceFromHome !== undefined
+                            ? [
+                                {
+                                  label: "Distance",
+                                  key: "distanceFromHome" as const,
+                                  color: "bg-red-500",
+                                },
+                              ]
+                            : []),
+                          ...(item.breakdown.classSize !== undefined
+                            ? [
+                                {
+                                  label: "Class size",
+                                  key: "classSize" as const,
+                                  color: "bg-slate-500",
+                                },
+                              ]
+                            : []),
+                          ...(item.breakdown.profileCompatibility !== undefined
+                            ? [
+                                {
+                                  label: "Profile match",
+                                  key: "profileCompatibility" as const,
+                                  color: "bg-emerald-500",
+                                },
+                              ]
+                            : []),
+                        ].map((dim) => (
+                          <div
+                            key={dim.key}
+                            className="flex items-center gap-2"
+                          >
+                            <span className="text-xs text-slate-600 w-28 shrink-0 font-medium">
+                              {dim.label}
+                            </span>
+                            <div className="flex-1 bg-slate-200 rounded-full h-2">
+                              <div
+                                className={`${dim.color} h-2 rounded-full transition-all duration-300`}
+                                style={{
+                                  width: `${Math.min((item.breakdown?.[dim.key] ?? 0) * 5, 100)}%`,
+                                }}
+                              />
+                            </div>
+                            <span className="text-xs text-slate-500 w-6 text-right font-bold">
+                              {item.breakdown?.[dim.key] ?? 0}
+                            </span>
                           </div>
-                          <span className="font-bold text-slate-800">100%</span>
-                        </div>
-                        <div className="flex justify-between items-center text-sm font-medium text-slate-600">
-                          <div className="flex items-center gap-2">
-                            <Banknote className="w-4 h-4 text-slate-400" />
-                            <span>Good financial fit</span>
-                          </div>
-                          <span className="font-bold text-slate-800">85%</span>
-                        </div>
-                        <div className="flex justify-between items-center text-sm font-medium text-slate-600">
-                          <div className="flex items-center gap-2">
-                            <TrendingUp className="w-4 h-4 text-slate-400" />
-                            <span>Strong academic fit</span>
-                          </div>
-                          <span className="font-bold text-slate-800">92%</span>
-                        </div>
+                        ))}
                       </div>
                     )}
                   </div>
@@ -331,18 +443,13 @@ return (
       </div>
 
       {/* Global Select & Shortlist Bar */}
-      <div
-        className="fixed bottom-0 left-0 right-0 bg-white border-t border-slate-200 z-50 transition-all duration-400 flex-row"
-      >
+      <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-slate-200 z-50 transition-all duration-400 flex-row">
         <div className="max-w-350 mx-auto px-4 py-4 flex flex-col sm:flex-row justify-between items-center gap-4">
           <div className="flex items-center gap-4">
-            <span className="font-bold text-slate-800">
-              Select All
-            </span>
+            <span className="font-bold text-slate-800">Select All</span>
             <button
               onClick={() => {
-                if (selectedCount === results.length)
-                  setSelectedIds(new Set());
+                if (selectedCount === results.length) setSelectedIds(new Set());
                 else setSelectedIds(new Set(results.map((r) => r.id)));
               }}
               className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none ${
@@ -370,7 +477,9 @@ return (
             onClick={onShortlist}
             className={`w-full sm:w-auto px-6 py-2.5 rounded-md font-bold text-white transition-all duration-300 bg-brand-blue hover:bg-brand-hover cursor-pointer`}
           >
-            {selectedCount > 0 ? `Add to shortlist (${selectedCount})` : "View Shortlist"}
+            {selectedCount > 0
+              ? `Add to shortlist (${selectedCount})`
+              : "View Shortlist"}
           </button>
         </div>
       </div>
@@ -393,22 +502,22 @@ return (
                 Are you sure?
               </h2>
               <p className="text-slate-600 text-lg leading-relaxed mb-10 font-medium">
-                Changing preferences will result in your current recommendations being lost
+                Changing preferences will result in your current recommendations
+                being lost
               </p>
               <div className="flex items-center justify-end gap-6">
-<button
+                <button
                   onClick={() => {
                     setIsRefineModalOpen(false);
                     onNavigate(1);
                   }}
-                  className='px-6 py-3 rounded-md bg-slate-50 text-slate-900 font-semibold text-md hover:bg-blue-100 transition-all'
+                  className="px-6 py-3 rounded-md bg-slate-50 text-slate-900 font-semibold text-md hover:bg-blue-100 transition-all"
                 >
                   Leave Page
                 </button>
                 <button
                   onClick={() => {
                     setIsRefineModalOpen(false);
-                    
                   }}
                   className="px-6 py-3 rounded-md bg-slate-50 text-slate-900 font-semibold text-md hover:bg-blue-100 transition-all"
                 >

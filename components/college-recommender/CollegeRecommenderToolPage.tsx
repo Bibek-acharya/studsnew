@@ -1,32 +1,25 @@
 "use client";
 
-import React, { useState } from 'react'
-import {
-  BookOpen,
-  Music,
-  Briefcase,
-  Compass,
-} from 'lucide-react'
-import Step1 from './steps/Step1'
-import Step2 from './steps/Step2'
-import Step3 from './steps/Step3'
-import Step4 from './steps/Step4'
-import Step5 from './steps/Step5'
-import Step6 from './steps/Step6'
-import Step7 from './steps/Step7'
-import Step8 from './steps/Step8'
-import Step9 from './steps/Step9'
-import Step10 from './steps/Step10'
-import ResultsPage from './ResultsPage'
-import CollegeShortlistView from './CollegeShortlistView'
+import React, { useState } from "react";
+import { BookOpen, Music, Briefcase, Compass } from "lucide-react";
+import Step1 from "./steps/Step1";
+import Step2 from "./steps/Step2";
+import Step3 from "./steps/Step3";
+import Step4 from "./steps/Step4";
+import Step5 from "./steps/Step5";
+import Step6 from "./steps/Step6";
+import Step7 from "./steps/Step7";
+import Step8 from "./steps/Step8";
+import Step9 from "./steps/Step9";
+import Step10 from "./steps/Step10";
+import ResultsPage from "./ResultsPage";
+import CollegeShortlistView from "./CollegeShortlistView";
 
-import {
-  apiService,
-  CollegeRecommendation,
-} from '@/services/api'
+import { apiService, CollegeRecommendation } from "@/services/api";
 
 interface CollegeRecommenderToolPageProps {
-  onNavigate: (view: any, data?: any) => void;
+  onNavigate?: (view: any, data?: any) => void;
+  prefill?: Partial<CollegeRecommenderForm>;
 }
 
 const stepTitles: Record<number, string> = {
@@ -135,12 +128,28 @@ export const initialForm: CollegeRecommenderForm = {
 export { stepTitles, stepImages };
 
 const CollegeRecommenderToolPage: React.FC<CollegeRecommenderToolPageProps> = ({
-  onNavigate,
+  onNavigate: onNavigateProp,
+  prefill,
 }) => {
+  const onNavigate =
+    onNavigateProp ??
+    ((view: string, data?: any) => {
+      if (view === "step1") {
+        window.location.reload();
+      } else if (view === "educationPage") {
+        window.location.href = "/";
+      } else if (view === "collegeProfile") {
+        window.location.href = `/find-college/${data.id}`;
+      } else {
+        console.log("Navigating to", view, data);
+      }
+    });
   const [step, setStep] = useState(1);
   const [loading, setLoading] = useState(false);
   const [results, setResults] = useState<CollegeRecommendation[]>([]);
-  const [shortlistedIds, setShortlistedIds] = useState<Set<number | string>>(new Set());
+  const [shortlistedIds, setShortlistedIds] = useState<Set<number | string>>(
+    new Set(),
+  );
 
   const [previewId, setPreviewId] = useState<number | string | null>(null);
   const [selectedIds, setSelectedIds] = useState<Set<number | string>>(
@@ -158,9 +167,15 @@ const CollegeRecommenderToolPage: React.FC<CollegeRecommenderToolPageProps> = ({
     setSelectedIds(next);
   };
 
-  const [form, setForm] = useState<CollegeRecommenderForm>(initialForm);
+  const [form, setForm] = useState<CollegeRecommenderForm>({
+    ...initialForm,
+    ...prefill,
+  });
 
-  const handleInputChange = (field: keyof CollegeRecommenderForm, value: string) => {
+  const handleInputChange = (
+    field: keyof CollegeRecommenderForm,
+    value: string,
+  ) => {
     setForm((prev) => ({ ...prev, [field]: value }));
   };
 
@@ -171,11 +186,15 @@ const CollegeRecommenderToolPage: React.FC<CollegeRecommenderToolPageProps> = ({
       case 2:
         return !!form.financial_support && !!form.yearly_budget;
       case 3:
-        return !!form.knows_course && !!form.preferred_field && !!form.reputation_importance;
+        return (
+          !!form.knows_course &&
+          !!form.preferred_field &&
+          !!form.reputation_importance
+        );
       case 4:
         return (
           !!form.province &&
-          (form.province === 'No preference' || !!form.district)
+          (form.province === "No preference" || !!form.district)
         );
       case 5:
         return !!form.distance_from_home;
@@ -197,8 +216,7 @@ const CollegeRecommenderToolPage: React.FC<CollegeRecommenderToolPageProps> = ({
   const fetchRecommendations = async () => {
     setLoading(true);
     try {
-      const res =
-        await apiService.getCollegeRecommenderRecommendations(form);
+      const res = await apiService.getCollegeRecommenderRecommendations(form);
       setResults(res.data?.recommendations || []);
       setStep(11);
     } catch (err) {
@@ -252,7 +270,7 @@ const CollegeRecommenderToolPage: React.FC<CollegeRecommenderToolPageProps> = ({
   }
 
   return (
-    <div className='flex flex-col overflow-visible bg-white text-slate-800 lg:flex-row'>
+    <div className="flex flex-col overflow-visible bg-white text-slate-800 lg:flex-row">
       {step === 1 && (
         <Step1
           step={step}

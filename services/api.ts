@@ -5,7 +5,7 @@ const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080";
 
 if (typeof window !== "undefined") {
   // log base URL in browser console to help debugging routing to backend
-   
+
   console.info("API_BASE_URL:", API_BASE_URL);
 }
 
@@ -13,7 +13,8 @@ const PLACEHOLDER_IMAGE = "https://placehold.co/800x400?text=No+Image";
 
 export function getImageUrl(url: string | null | undefined): string {
   if (!url) return PLACEHOLDER_IMAGE;
-  if (url.startsWith("blob:") || url.startsWith("data:")) return PLACEHOLDER_IMAGE;
+  if (url.startsWith("blob:") || url.startsWith("data:"))
+    return PLACEHOLDER_IMAGE;
   if (url.startsWith("http://") || url.startsWith("https://")) return url;
   if (url.startsWith("/")) return `${API_BASE_URL}${url}`;
   return `${API_BASE_URL}/${url}`;
@@ -38,12 +39,17 @@ type ApiRequestOptions = RequestInit & {
   authToken?: string;
 };
 
-export async function apiRequest<T>(path: string, options: ApiRequestOptions = {}): Promise<T> {
+export async function apiRequest<T>(
+  path: string,
+  options: ApiRequestOptions = {},
+): Promise<T> {
   const { suppressAuthExpired, authToken, ...requestOptions } = options;
   let token: string | null = authToken ?? null;
   if (!token && typeof window !== "undefined") {
     if (path.includes("/scholarship-providers/")) {
-      token = localStorage.getItem("scholarshipProviderToken") || localStorage.getItem("token");
+      token =
+        localStorage.getItem("scholarshipProviderToken") ||
+        localStorage.getItem("token");
     } else {
       token = localStorage.getItem("token");
     }
@@ -76,7 +82,9 @@ export async function apiRequest<T>(path: string, options: ApiRequestOptions = {
     data = JSON.parse(text);
   } catch (e) {
     console.error(`API Error: ${path} - Non-JSON response:`, text);
-    throw new Error(`Unexpected response from server: ${text.substring(0, 100)}`);
+    throw new Error(
+      `Unexpected response from server: ${text.substring(0, 100)}`,
+    );
   }
 
   if (!response.ok) {
@@ -588,6 +596,20 @@ export interface CollegeRecommendation {
   type?: string;
   match_score: number;
   reasons?: string[];
+  breakdown?: {
+    studentType: number;
+    preferredField: number;
+    location: number;
+    budget: number;
+    financialAid: number;
+    academicsVsCampus: number;
+    activities: number;
+    facilities: number;
+    reputation: number;
+    distanceFromHome?: number;
+    classSize?: number;
+    profileCompatibility?: number;
+  };
 }
 
 export interface CollegePagination {
@@ -990,7 +1012,11 @@ export const apiService = {
     if (typeof window === "undefined") return null;
     const stored = localStorage.getItem("user");
     if (stored) {
-      try { return JSON.parse(stored); } catch { return null; }
+      try {
+        return JSON.parse(stored);
+      } catch {
+        return null;
+      }
     }
     return null;
   },
@@ -1052,7 +1078,10 @@ export const apiService = {
     return false;
   },
   async logout(): Promise<void> {
-    await apiRequest("/api/v1/auth/logout", { method: "POST", suppressAuthExpired: true });
+    await apiRequest("/api/v1/auth/logout", {
+      method: "POST",
+      suppressAuthExpired: true,
+    });
   },
 
   async login(email: string, password: string): Promise<AuthResponse> {
@@ -1084,7 +1113,10 @@ export const apiService = {
     });
   },
 
-  async sendOTP(email: string, type: "verification" | "password_reset" = "verification"): Promise<OTPResponse> {
+  async sendOTP(
+    email: string,
+    type: "verification" | "password_reset" = "verification",
+  ): Promise<OTPResponse> {
     return apiRequest<OTPResponse>("/api/v1/auth/send-otp", {
       method: "POST",
       body: JSON.stringify({ email, type }),
@@ -1098,7 +1130,9 @@ export const apiService = {
     });
   },
 
-  async getProfile(options: { suppressAuthExpired?: boolean } = {}): Promise<ProfileResponse> {
+  async getProfile(
+    options: { suppressAuthExpired?: boolean } = {},
+  ): Promise<ProfileResponse> {
     return apiRequest<ProfileResponse>("/api/v1/profile", options);
   },
 
@@ -1119,7 +1153,9 @@ export const apiService = {
     if (params?.featured) query.set("featured", params.featured);
 
     const queryStr = query.toString();
-    return apiRequest<EducationEventsResponse>(`/api/v1/education/events${queryStr ? `?${queryStr}` : ""}`);
+    return apiRequest<EducationEventsResponse>(
+      `/api/v1/education/events${queryStr ? `?${queryStr}` : ""}`,
+    );
   },
 
   async getEducationEventFilterCounts(): Promise<any> {
@@ -1183,14 +1219,27 @@ export const apiService = {
     if (params?.featured) query.set("featured", params.featured);
 
     const queryStr = query.toString();
-    return apiRequest<EducationNewsResponse>(`/api/v1/education/news${queryStr ? `?${queryStr}` : ""}`);
+    return apiRequest<EducationNewsResponse>(
+      `/api/v1/education/news${queryStr ? `?${queryStr}` : ""}`,
+    );
   },
 
   async getEducationNewsFilterCounts(): Promise<any> {
     return apiRequest<any>("/api/v1/education/news/filter-counts");
   },
 
-  async getEducationScholarships(params: { page?: number; limit?: number; degree_level?: string; funding_type?: string; search?: string; category?: string; status?: string; sort?: string } = {}): Promise<ScholarshipsResponse> {
+  async getEducationScholarships(
+    params: {
+      page?: number;
+      limit?: number;
+      degree_level?: string;
+      funding_type?: string;
+      search?: string;
+      category?: string;
+      status?: string;
+      sort?: string;
+    } = {},
+  ): Promise<ScholarshipsResponse> {
     const query = new URLSearchParams();
     if (params.page) query.set("page", String(params.page));
     if (params.limit) query.set("limit", String(params.limit));
@@ -1202,21 +1251,32 @@ export const apiService = {
     if (params.sort) query.set("sort", params.sort);
 
     const queryStr = query.toString();
-    return apiRequest<ScholarshipsResponse>(`/api/v1/education/scholarships${queryStr ? `?${queryStr}` : ""}`);
+    return apiRequest<ScholarshipsResponse>(
+      `/api/v1/education/scholarships${queryStr ? `?${queryStr}` : ""}`,
+    );
   },
 
   async getFeaturedColleges(limit = 4): Promise<CollegesResponse> {
     const query = new URLSearchParams();
     query.set("limit", String(limit));
-    return apiRequest<CollegesResponse>(`/api/v1/colleges/featured?${query.toString()}`);
+    return apiRequest<CollegesResponse>(
+      `/api/v1/colleges/featured?${query.toString()}`,
+    );
   },
 
   async getBookmarksByType(type: string): Promise<BookmarkItem[]> {
-    const res = await apiRequest<{ success: boolean; data: BookmarkItem[] | { bookmarks: BookmarkItem[] }; message: string }>(`/api/v1/bookmarks/${type}`);
-    return Array.isArray(res.data) ? res.data : (res.data?.bookmarks || []);
+    const res = await apiRequest<{
+      success: boolean;
+      data: BookmarkItem[] | { bookmarks: BookmarkItem[] };
+      message: string;
+    }>(`/api/v1/bookmarks/${type}`);
+    return Array.isArray(res.data) ? res.data : res.data?.bookmarks || [];
   },
 
-  async createBookmark(item_id: number, item_type: string): Promise<CreateBookmarkResponse> {
+  async createBookmark(
+    item_id: number,
+    item_type: string,
+  ): Promise<CreateBookmarkResponse> {
     return apiRequest<CreateBookmarkResponse>("/api/v1/bookmarks", {
       method: "POST",
       body: JSON.stringify({ item_id, type: item_type }),
@@ -1244,22 +1304,37 @@ export const apiService = {
   },
 
   async getPublicNotifications(): Promise<PublicNotificationsResponse> {
-    return apiRequest<PublicNotificationsResponse>("/api/v1/system/notifications");
+    return apiRequest<PublicNotificationsResponse>(
+      "/api/v1/system/notifications",
+    );
   },
 
-  async getStudentNotifications(page = 1, limit = 20): Promise<StudentNotificationsResponse> {
-    return apiRequest<StudentNotificationsResponse>(`/api/v1/notifications?page=${page}&limit=${limit}`);
+  async getStudentNotifications(
+    page = 1,
+    limit = 20,
+  ): Promise<StudentNotificationsResponse> {
+    return apiRequest<StudentNotificationsResponse>(
+      `/api/v1/notifications?page=${page}&limit=${limit}`,
+    );
   },
 
   async markNotificationRead(id: number): Promise<void> {
-    return apiRequest<void>(`/api/v1/notifications/${id}/read`, { method: "PUT" });
+    return apiRequest<void>(`/api/v1/notifications/${id}/read`, {
+      method: "PUT",
+    });
   },
 
   async markAllNotificationsRead(): Promise<void> {
-    return apiRequest<void>("/api/v1/notifications/read-all", { method: "PUT" });
+    return apiRequest<void>("/api/v1/notifications/read-all", {
+      method: "PUT",
+    });
   },
 
-  async resetPassword(email: string, otp: string, password: string): Promise<any> {
+  async resetPassword(
+    email: string,
+    otp: string,
+    password: string,
+  ): Promise<any> {
     return apiRequest<any>("/api/v1/auth/reset-password", {
       method: "POST",
       body: JSON.stringify({ email, otp, password }),
@@ -1270,29 +1345,41 @@ export const apiService = {
     token: string,
     data: CounsellingBookingPayload,
   ): Promise<{ data: any; message: string }> {
-    return apiRequest<{ data: any; message: string }>("/api/v1/counselling/bookings", {
-      method: "POST",
-      body: JSON.stringify(data),
-    });
+    return apiRequest<{ data: any; message: string }>(
+      "/api/v1/counselling/bookings",
+      {
+        method: "POST",
+        body: JSON.stringify(data),
+      },
+    );
   },
 
   async getMyCounsellingBookings(): Promise<MyCounsellingBookingsResponse> {
-    return apiRequest<MyCounsellingBookingsResponse>("/api/v1/counselling/bookings/my");
+    return apiRequest<MyCounsellingBookingsResponse>(
+      "/api/v1/counselling/bookings/my",
+    );
   },
 
   async getInstitutionCounsellingSessions(): Promise<InstitutionCounsellingSessionsResponse> {
-    return apiRequest<InstitutionCounsellingSessionsResponse>("/api/v1/institution/counselling/sessions");
+    return apiRequest<InstitutionCounsellingSessionsResponse>(
+      "/api/v1/institution/counselling/sessions",
+    );
   },
 
   async getInstitutionCounsellingBookings(): Promise<InstitutionCounsellingBookingsResponse> {
-    return apiRequest<InstitutionCounsellingBookingsResponse>("/api/v1/institution/counselling/bookings");
+    return apiRequest<InstitutionCounsellingBookingsResponse>(
+      "/api/v1/institution/counselling/bookings",
+    );
   },
 
   async updateInstitutionBookingStatus(
     id: number,
     status: string,
   ): Promise<{ data: InstitutionCounsellingBookingItem; message: string }> {
-    return apiRequest<{ data: InstitutionCounsellingBookingItem; message: string }>(`/api/v1/institution/counselling/bookings/${id}/status`, {
+    return apiRequest<{
+      data: InstitutionCounsellingBookingItem;
+      message: string;
+    }>(`/api/v1/institution/counselling/bookings/${id}/status`, {
       method: "PUT",
       body: JSON.stringify({ status }),
     });
@@ -1327,19 +1414,29 @@ export const apiService = {
     });
 
     const query = new URLSearchParams(normalizedParams).toString();
-    return apiRequest<CollegesResponse>(`/api/v1/colleges${query ? `?${query}` : ""}`);
+    return apiRequest<CollegesResponse>(
+      `/api/v1/colleges${query ? `?${query}` : ""}`,
+    );
   },
 
-  async getUniversityById(id: number): Promise<{ data: UniversityDetailResponse }> {
-    return apiRequest<{ data: UniversityDetailResponse }>(`/api/v1/universities/${id}`);
+  async getUniversityById(
+    id: number,
+  ): Promise<{ data: UniversityDetailResponse }> {
+    return apiRequest<{ data: UniversityDetailResponse }>(
+      `/api/v1/universities/${id}`,
+    );
   },
 
   async getCollegeFilterCounts(): Promise<CollegeFilterCountsResponse> {
-    return apiRequest<CollegeFilterCountsResponse>("/api/v1/colleges/filter-counts");
+    return apiRequest<CollegeFilterCountsResponse>(
+      "/api/v1/colleges/filter-counts",
+    );
   },
 
   async getPublicInstitutionFilterCounts(): Promise<CollegeFilterCountsResponse> {
-    return apiRequest<CollegeFilterCountsResponse>("/api/v1/institutions/public/filter-counts");
+    return apiRequest<CollegeFilterCountsResponse>(
+      "/api/v1/institutions/public/filter-counts",
+    );
   },
 
   async getUniversities(params?: {
@@ -1354,22 +1451,32 @@ export const apiService = {
     if (params?.popular) query.set("popular", "true");
     if (params?.isNepali) query.set("isNepali", params.isNepali);
 
-    return apiRequest<{ data: { universities: University[] } }>(`/api/v1/universities${query.toString() ? `?${query.toString()}` : ""}`);
+    return apiRequest<{ data: { universities: University[] } }>(
+      `/api/v1/universities${query.toString() ? `?${query.toString()}` : ""}`,
+    );
   },
 
-  async getUniversityFilterCounts(isNepali?: string): Promise<UniversityFilterCountsResponse> {
+  async getUniversityFilterCounts(
+    isNepali?: string,
+  ): Promise<UniversityFilterCountsResponse> {
     const query = isNepali ? `?isNepali=${isNepali}` : "";
-    return apiRequest<UniversityFilterCountsResponse>(`/api/v1/universities/filter-counts${query}`);
+    return apiRequest<UniversityFilterCountsResponse>(
+      `/api/v1/universities/filter-counts${query}`,
+    );
   },
 
-  async getAdminColleges(params?: Record<string, any>): Promise<CollegesResponse> {
+  async getAdminColleges(
+    params?: Record<string, any>,
+  ): Promise<CollegesResponse> {
     const query = new URLSearchParams();
     Object.entries(params || {}).forEach(([key, value]) => {
       if (value === undefined || value === null || value === "") return;
       query.set(key, String(value));
     });
 
-    return apiRequest<CollegesResponse>(`/api/v1/admin/colleges${query.toString() ? `?${query.toString()}` : ""}`);
+    return apiRequest<CollegesResponse>(
+      `/api/v1/admin/colleges${query.toString() ? `?${query.toString()}` : ""}`,
+    );
   },
 
   async getAdminCollegeById(id: number): Promise<{ data: College }> {
@@ -1409,33 +1516,36 @@ export const apiService = {
     });
   },
 
-  async updateCollege(id: number, data: Partial<{
-    university_id: number;
-    name: string;
-    full_name: string;
-    location: string;
-    affiliation: string;
-    type: string;
-    verified: boolean;
-    popular: boolean;
-    rating: number;
-    reviews: number;
-    programs: number;
-    established: string;
-    students: string;
-    description: string;
-    website: string;
-    email: string;
-    phone: string;
-    image_url: string;
-    featured_programs: string[];
-    amenities: string[];
-    academic_fit_score: number;
-    campus_life_score: number;
-    career_fit_score: number;
-    balanced_fit_score: number;
-    profile_tags: string[];
-  }>): Promise<{ data: College }> {
+  async updateCollege(
+    id: number,
+    data: Partial<{
+      university_id: number;
+      name: string;
+      full_name: string;
+      location: string;
+      affiliation: string;
+      type: string;
+      verified: boolean;
+      popular: boolean;
+      rating: number;
+      reviews: number;
+      programs: number;
+      established: string;
+      students: string;
+      description: string;
+      website: string;
+      email: string;
+      phone: string;
+      image_url: string;
+      featured_programs: string[];
+      amenities: string[];
+      academic_fit_score: number;
+      campus_life_score: number;
+      career_fit_score: number;
+      balanced_fit_score: number;
+      profile_tags: string[];
+    }>,
+  ): Promise<{ data: College }> {
     return apiRequest<{ data: College }>(`/api/v1/admin/colleges/${id}`, {
       method: "PUT",
       body: JSON.stringify(data),
@@ -1449,15 +1559,21 @@ export const apiService = {
   },
 
   async approveCollege(id: number): Promise<{ data: College }> {
-    return apiRequest<{ data: College }>(`/api/v1/admin/colleges/${id}/approve`, {
-      method: "PUT",
-    });
+    return apiRequest<{ data: College }>(
+      `/api/v1/admin/colleges/${id}/approve`,
+      {
+        method: "PUT",
+      },
+    );
   },
 
   async toggleCollegeFeatured(id: number): Promise<{ data: College }> {
-    return apiRequest<{ data: College }>(`/api/v1/admin/colleges/${id}/featured`, {
-      method: "PUT",
-    });
+    return apiRequest<{ data: College }>(
+      `/api/v1/admin/colleges/${id}/featured`,
+      {
+        method: "PUT",
+      },
+    );
   },
 
   async uploadCollegeImage(file: File): Promise<string> {
@@ -1465,13 +1581,16 @@ export const apiService = {
     const formData = new FormData();
     formData.append("image", file);
 
-    const response = await fetch(`${API_BASE_URL}/api/v1/admin/colleges/upload-image`, {
-      method: "POST",
-      headers: {
-        ...(token ? { Authorization: `Bearer ${token}` } : {}),
+    const response = await fetch(
+      `${API_BASE_URL}/api/v1/admin/colleges/upload-image`,
+      {
+        method: "POST",
+        headers: {
+          ...(token ? { Authorization: `Bearer ${token}` } : {}),
+        },
+        body: formData,
       },
-      body: formData,
-    });
+    );
 
     const data = await response.json().catch(() => ({}));
     if (!response.ok) {
@@ -1513,7 +1632,9 @@ export const apiService = {
     if (params?.page) query.set("page", String(params.page));
     if (params?.limit) query.set("limit", String(params.limit));
     const queryStr = query.toString();
-    return apiRequest<EducationExamsResponse>(`/api/v1/education/exams${queryStr ? `?${queryStr}` : ""}`);
+    return apiRequest<EducationExamsResponse>(
+      `/api/v1/education/exams${queryStr ? `?${queryStr}` : ""}`,
+    );
   },
 
   async getActiveAds(page?: string): Promise<AdsResponse> {
@@ -1527,35 +1648,52 @@ export const apiService = {
   },
 
   async getEducationScholarshipById(id: string | number): Promise<any> {
-    return apiRequest<ScholarshipDetailResponse>(`/api/v1/education/scholarships/${id}`, {
-      cache: "no-store",
-    });
+    return apiRequest<ScholarshipDetailResponse>(
+      `/api/v1/education/scholarships/${id}`,
+      {
+        cache: "no-store",
+      },
+    );
   },
 
   async getAvailableExamCenters(id: string | number): Promise<string[]> {
-    const res = await apiRequest<any>(`/api/v1/education/scholarships/${id}/exam-centers`, {
-      cache: "no-store",
-    });
+    const res = await apiRequest<any>(
+      `/api/v1/education/scholarships/${id}/exam-centers`,
+      {
+        cache: "no-store",
+      },
+    );
     return res?.data?.exam_centers || [];
   },
 
   async getEducationSimilarScholarships(id: string | number): Promise<any> {
-    return apiRequest<ScholarshipDetailResponse>(`/api/v1/education/scholarships/${id}/similar`, {
-      cache: "no-store",
-    });
+    return apiRequest<ScholarshipDetailResponse>(
+      `/api/v1/education/scholarships/${id}/similar`,
+      {
+        cache: "no-store",
+      },
+    );
   },
 
-  async applyScholarship(scholarshipId: string | number, data: any): Promise<any> {
-    const headers: Record<string, string> = { "Content-Type": "application/json" };
+  async applyScholarship(
+    scholarshipId: string | number,
+    data: any,
+  ): Promise<any> {
+    const headers: Record<string, string> = {
+      "Content-Type": "application/json",
+    };
     const token = this.getToken();
     if (token) headers.Authorization = `Bearer ${token}`;
-    return apiRequest<any>(`/api/v1/education/scholarships/${scholarshipId}/apply`, {
-      method: "POST",
-      body: JSON.stringify(data),
-      headers,
-    });
+    return apiRequest<any>(
+      `/api/v1/education/scholarships/${scholarshipId}/apply`,
+      {
+        method: "POST",
+        body: JSON.stringify(data),
+        headers,
+      },
+    );
   },
- 
+
   async uploadScholarshipFile(file: File, folder: string): Promise<string> {
     const formData = new FormData();
     formData.append("file", file);
@@ -1563,11 +1701,14 @@ export const apiService = {
     const headers: Record<string, string> = {};
     if (token) headers.Authorization = `Bearer ${token}`;
 
-    const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080"}/api/v1/scholarships/upload?folder=${encodeURIComponent(folder)}`, {
-      method: "POST",
-      body: formData,
-      headers,
-    });
+    const response = await fetch(
+      `${process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080"}/api/v1/scholarships/upload?folder=${encodeURIComponent(folder)}`,
+      {
+        method: "POST",
+        body: formData,
+        headers,
+      },
+    );
 
     if (!response.ok) {
       const errorData = await response.json().catch(() => ({}));
@@ -1588,97 +1729,138 @@ export const apiService = {
     return data.data || data;
   },
 
-  async getForumPosts(limit?: number, _token?: string, communityId?: number, page?: number): Promise<{ posts: ForumPost[]; has_more: boolean }> {
+  async getForumPosts(
+    limit?: number,
+    _token?: string,
+    communityId?: number,
+    page?: number,
+  ): Promise<{ posts: ForumPost[]; has_more: boolean }> {
     const params = new URLSearchParams();
     if (limit) params.set("limit", String(limit));
     if (communityId) params.set("community_id", String(communityId));
     if (page) params.set("page", String(page));
 
-    const response = await fetch(`${API_BASE_URL}/api/v1/forum/posts?${params.toString()}`, {
-      headers: { "Content-Type": "application/json" },
-      credentials: "include",
-    });
+    const response = await fetch(
+      `${API_BASE_URL}/api/v1/forum/posts?${params.toString()}`,
+      {
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+      },
+    );
     if (!response.ok) throw new Error("Failed to fetch posts");
     const data = await response.json();
     return data.data || data;
   },
 
   async joinForumCommunity(_token: string, id: number): Promise<any> {
-    const response = await fetch(`${API_BASE_URL}/api/v1/forum/communities/${id}/join`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      credentials: "include",
-    });
+    const response = await fetch(
+      `${API_BASE_URL}/api/v1/forum/communities/${id}/join`,
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+      },
+    );
     if (!response.ok) throw new Error("Failed to join community");
     const data = await response.json();
     return data.data || data;
   },
 
-  async getForumPostComments(postId: number, limit?: number, offset?: number): Promise<any> {
+  async getForumPostComments(
+    postId: number,
+    limit?: number,
+    offset?: number,
+  ): Promise<any> {
     const params = new URLSearchParams();
     if (limit) params.set("limit", String(limit));
     if (offset) params.set("offset", String(offset));
 
-    const response = await fetch(`${API_BASE_URL}/api/v1/forum/posts/${postId}/comments?${params.toString()}`, {
-      credentials: "include",
-    });
+    const response = await fetch(
+      `${API_BASE_URL}/api/v1/forum/posts/${postId}/comments?${params.toString()}`,
+      {
+        credentials: "include",
+      },
+    );
     if (!response.ok) throw new Error("Failed to fetch comments");
     const data = await response.json();
     return data.data || data;
   },
 
-  async createForumComment(_token: string, postId: number, data: any): Promise<ForumComment> {
-    const response = await fetch(`${API_BASE_URL}/api/v1/forum/posts/${postId}/comments`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      credentials: "include",
-      body: JSON.stringify(data),
-    });
+  async createForumComment(
+    _token: string,
+    postId: number,
+    data: any,
+  ): Promise<ForumComment> {
+    const response = await fetch(
+      `${API_BASE_URL}/api/v1/forum/posts/${postId}/comments`,
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify(data),
+      },
+    );
     if (!response.ok) throw new Error("Failed to create comment");
     const result = await response.json();
     return result.data || result;
   },
 
-  async voteForumPoll(_token: string, postId: number, optionIdx: number): Promise<any> {
-    const response = await fetch(`${API_BASE_URL}/api/v1/forum/posts/${postId}/poll/vote`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      credentials: "include",
-      body: JSON.stringify({ option_index: optionIdx }),
-    });
+  async voteForumPoll(
+    _token: string,
+    postId: number,
+    optionIdx: number,
+  ): Promise<any> {
+    const response = await fetch(
+      `${API_BASE_URL}/api/v1/forum/posts/${postId}/poll/vote`,
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify({ option_index: optionIdx }),
+      },
+    );
     if (!response.ok) throw new Error("Failed to vote");
     const data = await response.json();
     return data.data || data;
   },
 
   async likeForumPost(_token: string, postId: number): Promise<any> {
-    const response = await fetch(`${API_BASE_URL}/api/v1/forum/posts/${postId}/like`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      credentials: "include",
-    });
+    const response = await fetch(
+      `${API_BASE_URL}/api/v1/forum/posts/${postId}/like`,
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+      },
+    );
     if (!response.ok) throw new Error("Failed to like post");
     const data = await response.json();
     return data.data || data;
   },
 
   async dislikeForumPost(_token: string, postId: number): Promise<any> {
-    const response = await fetch(`${API_BASE_URL}/api/v1/forum/posts/${postId}/dislike`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      credentials: "include",
-    });
+    const response = await fetch(
+      `${API_BASE_URL}/api/v1/forum/posts/${postId}/dislike`,
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+      },
+    );
     if (!response.ok) throw new Error("Failed to dislike post");
     const data = await response.json();
     return data.data || data;
   },
 
   async saveForumPost(_token: string, postId: number): Promise<any> {
-    const response = await fetch(`${API_BASE_URL}/api/v1/forum/posts/${postId}/save`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      credentials: "include",
-    });
+    const response = await fetch(
+      `${API_BASE_URL}/api/v1/forum/posts/${postId}/save`,
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+      },
+    );
     if (!response.ok) throw new Error("Failed to save post");
     const data = await response.json();
     return data.data || data;
@@ -1696,7 +1878,11 @@ export const apiService = {
     return result.data || result;
   },
 
-  async updateForumPost(_token: string, id: number, data: any): Promise<ForumPost> {
+  async updateForumPost(
+    _token: string,
+    id: number,
+    data: any,
+  ): Promise<ForumPost> {
     const response = await fetch(`${API_BASE_URL}/api/v1/forum/posts/${id}`, {
       method: "PUT",
       headers: { "Content-Type": "application/json" },
@@ -1736,11 +1922,14 @@ export const apiService = {
     return data.data?.urls || data.urls || [];
   },
 
-  async savePreferences(data: {
-    preference_role: string;
-    preference_flow: string;
-    preferences: Record<string, any>;
-  }, _token?: string): Promise<any> {
+  async savePreferences(
+    data: {
+      preference_role: string;
+      preference_flow: string;
+      preferences: Record<string, any>;
+    },
+    _token?: string,
+  ): Promise<any> {
     const response = await fetch(`${API_BASE_URL}/api/v1/preferences`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -1752,28 +1941,38 @@ export const apiService = {
     return result.data || result;
   },
 
-  async getCollegeRecommenderRecommendations(payload: object): Promise<{ data: { recommendations: CollegeRecommendation[] } }> {
-    const res = await apiRequest<{ data: { recommendations: CollegeRecommendation[] } }>(
-      "/api/v1/colleges/recommend",
-      {
-        method: "POST",
-        body: JSON.stringify(payload),
-      },
-    );
+  async getCollegeRecommenderRecommendations(
+    payload: object,
+  ): Promise<{ data: { recommendations: CollegeRecommendation[] } }> {
+    const res = await apiRequest<{
+      data: { recommendations: CollegeRecommendation[] };
+    }>("/api/v1/colleges/recommend", {
+      method: "POST",
+      body: JSON.stringify(payload),
+    });
     return res;
   },
 
-  async institutionLogin(email: string, password: string): Promise<AuthResponse> {
+  async institutionLogin(
+    email: string,
+    password: string,
+  ): Promise<AuthResponse> {
     return apiRequest<AuthResponse>("/api/v1/institutions/auth/login", {
       method: "POST",
       body: JSON.stringify({ email, password }),
     });
   },
-  async scholarshipProviderLogin(email: string, password: string): Promise<AuthResponse> {
-    return apiRequest<AuthResponse>("/api/v1/scholarship-providers/auth/login", {
-      method: "POST",
-      body: JSON.stringify({ email, password }),
-    });
+  async scholarshipProviderLogin(
+    email: string,
+    password: string,
+  ): Promise<AuthResponse> {
+    return apiRequest<AuthResponse>(
+      "/api/v1/scholarship-providers/auth/login",
+      {
+        method: "POST",
+        body: JSON.stringify({ email, password }),
+      },
+    );
   },
   async scholarshipProviderRegister(data: {
     provider_name: string;
@@ -1783,10 +1982,13 @@ export const apiService = {
     pan_number?: string;
     website_url?: string;
   }): Promise<RegisterResponse> {
-    return apiRequest<RegisterResponse>("/api/v1/scholarship-providers/auth/register", {
-      method: "POST",
-      body: JSON.stringify(data),
-    });
+    return apiRequest<RegisterResponse>(
+      "/api/v1/scholarship-providers/auth/register",
+      {
+        method: "POST",
+        body: JSON.stringify(data),
+      },
+    );
   },
 
   async institutionRegister(data: {
@@ -1810,14 +2012,21 @@ export const apiService = {
     });
   },
 
-  async institutionSendOTP(email: string, type: "verification" | "password_reset"): Promise<void> {
+  async institutionSendOTP(
+    email: string,
+    type: "verification" | "password_reset",
+  ): Promise<void> {
     await apiRequest("/api/v1/institutions/auth/send-otp", {
       method: "POST",
       body: JSON.stringify({ email, type }),
     });
   },
 
-  async institutionResetPassword(email: string, otp: string, password: string): Promise<void> {
+  async institutionResetPassword(
+    email: string,
+    otp: string,
+    password: string,
+  ): Promise<void> {
     await apiRequest("/api/v1/institutions/auth/reset-password", {
       method: "POST",
       body: JSON.stringify({ email, otp, password }),
@@ -1847,24 +2056,56 @@ export const apiService = {
   },
 
   // === Institution Dashboard ===
-  async getInstitutionDashboard(): Promise<{ success: boolean; data: InstitutionDashboardData; message: string }> {
-    const token = typeof window !== "undefined" ? localStorage.getItem("institutionToken") : null;
-    return apiRequest("/api/v1/institution/dashboard", { authToken: token || undefined });
+  async getInstitutionDashboard(): Promise<{
+    success: boolean;
+    data: InstitutionDashboardData;
+    message: string;
+  }> {
+    const token =
+      typeof window !== "undefined"
+        ? localStorage.getItem("institutionToken")
+        : null;
+    return apiRequest("/api/v1/institution/dashboard", {
+      authToken: token || undefined,
+    });
   },
 
-  async getInstitutionAnalytics(): Promise<{ success: boolean; data: InstitutionAnalyticsData; message: string }> {
-    const token = typeof window !== "undefined" ? localStorage.getItem("institutionToken") : null;
-    return apiRequest("/api/v1/institution/analytics", { authToken: token || undefined });
+  async getInstitutionAnalytics(): Promise<{
+    success: boolean;
+    data: InstitutionAnalyticsData;
+    message: string;
+  }> {
+    const token =
+      typeof window !== "undefined"
+        ? localStorage.getItem("institutionToken")
+        : null;
+    return apiRequest("/api/v1/institution/analytics", {
+      authToken: token || undefined,
+    });
   },
 
-  async getInstitutionAdmissions(status?: string): Promise<{ success: boolean; data: any[]; message: string }> {
-    const token = typeof window !== "undefined" ? localStorage.getItem("institutionToken") : null;
+  async getInstitutionAdmissions(
+    status?: string,
+  ): Promise<{ success: boolean; data: any[]; message: string }> {
+    const token =
+      typeof window !== "undefined"
+        ? localStorage.getItem("institutionToken")
+        : null;
     const query = status ? `?status=${status}` : "";
-    return apiRequest(`/api/v1/institution/admissions${query}`, { authToken: token || undefined });
+    return apiRequest(`/api/v1/institution/admissions${query}`, {
+      authToken: token || undefined,
+    });
   },
 
-  async updateAdmissionStatus(id: number, status: string, notes?: string): Promise<{ success: boolean; data: any; message: string }> {
-    const token = typeof window !== "undefined" ? localStorage.getItem("institutionToken") : null;
+  async updateAdmissionStatus(
+    id: number,
+    status: string,
+    notes?: string,
+  ): Promise<{ success: boolean; data: any; message: string }> {
+    const token =
+      typeof window !== "undefined"
+        ? localStorage.getItem("institutionToken")
+        : null;
     return apiRequest(`/api/v1/institution/admissions/${id}/status`, {
       method: "PUT",
       body: JSON.stringify({ status, notes: notes || "" }),
@@ -1872,13 +2113,31 @@ export const apiService = {
     });
   },
 
-  async getInstitutionProfile(): Promise<{ success: boolean; data: InstitutionProfileData; message: string }> {
-    const token = typeof window !== "undefined" ? localStorage.getItem("institutionToken") : null;
-    return apiRequest("/api/v1/institution/profile", { authToken: token || undefined });
+  async getInstitutionProfile(): Promise<{
+    success: boolean;
+    data: InstitutionProfileData;
+    message: string;
+  }> {
+    const token =
+      typeof window !== "undefined"
+        ? localStorage.getItem("institutionToken")
+        : null;
+    return apiRequest("/api/v1/institution/profile", {
+      authToken: token || undefined,
+    });
   },
 
-  async updateInstitutionProfile(data: Partial<InstitutionProfileData>): Promise<{ success: boolean; data: InstitutionProfileData; message: string }> {
-    const token = typeof window !== "undefined" ? localStorage.getItem("institutionToken") : null;
+  async updateInstitutionProfile(
+    data: Partial<InstitutionProfileData>,
+  ): Promise<{
+    success: boolean;
+    data: InstitutionProfileData;
+    message: string;
+  }> {
+    const token =
+      typeof window !== "undefined"
+        ? localStorage.getItem("institutionToken")
+        : null;
     return apiRequest("/api/v1/institution/profile", {
       method: "PUT",
       body: JSON.stringify(data),
@@ -1886,17 +2145,27 @@ export const apiService = {
     });
   },
 
-  async getSuperadminDashboardStats(): Promise<{ data: SuperadminDashboardStats }> {
-    return apiRequest<{ data: SuperadminDashboardStats }>("/api/v1/superadmin/dashboard/stats");
+  async getSuperadminDashboardStats(): Promise<{
+    data: SuperadminDashboardStats;
+  }> {
+    return apiRequest<{ data: SuperadminDashboardStats }>(
+      "/api/v1/superadmin/dashboard/stats",
+    );
   },
 
-  async listAllUsers(params?: { search?: string; page?: number; limit?: number }): Promise<{ data: { users: any[]; pagination: any } }> {
+  async listAllUsers(params?: {
+    search?: string;
+    page?: number;
+    limit?: number;
+  }): Promise<{ data: { users: any[]; pagination: any } }> {
     const query = new URLSearchParams();
     if (params?.search) query.set("search", params.search);
     if (params?.page) query.set("page", String(params.page));
     if (params?.limit) query.set("limit", String(params.limit));
     const qs = query.toString();
-    return apiRequest<{ data: { users: any[]; pagination: any } }>(`/api/v1/superadmin/users${qs ? `?${qs}` : ""}`);
+    return apiRequest<{ data: { users: any[]; pagination: any } }>(
+      `/api/v1/superadmin/users${qs ? `?${qs}` : ""}`,
+    );
   },
 
   async getUserDetail(id: number): Promise<{ data: any }> {
@@ -1904,88 +2173,126 @@ export const apiService = {
   },
 
   async suspendUser(id: number): Promise<{ message: string }> {
-    return apiRequest<{ message: string }>(`/api/v1/superadmin/users/${id}/suspend`, { method: "PUT" });
+    return apiRequest<{ message: string }>(
+      `/api/v1/superadmin/users/${id}/suspend`,
+      { method: "PUT" },
+    );
   },
 
   async reinstateUser(id: number): Promise<{ message: string }> {
-    return apiRequest<{ message: string }>(`/api/v1/superadmin/users/${id}/reinstate`, { method: "PUT" });
+    return apiRequest<{ message: string }>(
+      `/api/v1/superadmin/users/${id}/reinstate`,
+      { method: "PUT" },
+    );
   },
 
   async getUserEducation(id: number): Promise<{ data: any[] }> {
-    return apiRequest<{ data: any[] }>(`/api/v1/superadmin/users/${id}/education`);
+    return apiRequest<{ data: any[] }>(
+      `/api/v1/superadmin/users/${id}/education`,
+    );
   },
 
   async listPendingInstitutions(): Promise<{ data: any[]; message: string }> {
-    return apiRequest<{ data: any[]; message: string }>("/api/v1/superadmin/pending-institutions");
+    return apiRequest<{ data: any[]; message: string }>(
+      "/api/v1/superadmin/pending-institutions",
+    );
   },
 
   async listVerifiedInstitutions(): Promise<{ data: any[]; message: string }> {
-    return apiRequest<{ data: any[]; message: string }>("/api/v1/superadmin/institutions");
+    return apiRequest<{ data: any[]; message: string }>(
+      "/api/v1/superadmin/institutions",
+    );
   },
 
   async listRejectedInstitutions(): Promise<{ data: any[]; message: string }> {
-    return apiRequest<{ data: any[]; message: string }>("/api/v1/superadmin/rejected-institutions");
+    return apiRequest<{ data: any[]; message: string }>(
+      "/api/v1/superadmin/rejected-institutions",
+    );
   },
 
-  async approveInstitution(institutionId: number, action: string): Promise<{ message: string }> {
-    return apiRequest<{ message: string }>("/api/v1/superadmin/institutions/approve", {
-      method: "POST",
-      body: JSON.stringify({ institution_id: institutionId, action }),
-    });
+  async approveInstitution(
+    institutionId: number,
+    action: string,
+  ): Promise<{ message: string }> {
+    return apiRequest<{ message: string }>(
+      "/api/v1/superadmin/institutions/approve",
+      {
+        method: "POST",
+        body: JSON.stringify({ institution_id: institutionId, action }),
+      },
+    );
   },
 
   async listPendingProviders(): Promise<{ data: any[]; message: string }> {
-    return apiRequest<{ data: any[]; message: string }>("/api/v1/superadmin/pending-providers");
+    return apiRequest<{ data: any[]; message: string }>(
+      "/api/v1/superadmin/pending-providers",
+    );
   },
 
   async approveProvider(providerId: number): Promise<{ message: string }> {
-    return apiRequest<{ message: string }>("/api/v1/superadmin/providers/approve", {
-      method: "POST",
-      body: JSON.stringify({ provider_id: providerId, action: "approved" }),
-    });
+    return apiRequest<{ message: string }>(
+      "/api/v1/superadmin/providers/approve",
+      {
+        method: "POST",
+        body: JSON.stringify({ provider_id: providerId, action: "approved" }),
+      },
+    );
   },
 
   async rejectProvider(providerId: number): Promise<{ message: string }> {
-    return apiRequest<{ message: string }>("/api/v1/superadmin/providers/approve", {
-      method: "POST",
-      body: JSON.stringify({ provider_id: providerId, action: "rejected" }),
-    });
+    return apiRequest<{ message: string }>(
+      "/api/v1/superadmin/providers/approve",
+      {
+        method: "POST",
+        body: JSON.stringify({ provider_id: providerId, action: "rejected" }),
+      },
+    );
   },
   scholarshipProviderLogout(): void {
     if (typeof window === "undefined") return;
     clearAllAuthSessions();
   },
 
-  async getCollegeReviews(collegeId: number, params?: {
-    page?: number;
-    limit?: number;
-    sort?: string;
-  }, options?: ApiRequestOptions): Promise<any> {
+  async getCollegeReviews(
+    collegeId: number,
+    params?: {
+      page?: number;
+      limit?: number;
+      sort?: string;
+    },
+    options?: ApiRequestOptions,
+  ): Promise<any> {
     const query = new URLSearchParams();
     if (params?.page) query.set("page", String(params.page));
     if (params?.limit) query.set("limit", String(params.limit));
     if (params?.sort) query.set("sort", params.sort);
 
     const queryStr = query.toString();
-    return apiRequest<any>(`/api/v1/education/reviews/college/${collegeId}${queryStr ? `?${queryStr}` : ""}`, options);
+    return apiRequest<any>(
+      `/api/v1/education/reviews/college/${collegeId}${queryStr ? `?${queryStr}` : ""}`,
+      options,
+    );
   },
 
-  async submitReview(data: {
-    collegeId: number;
-    collegeName?: string;
-    studentType: "current" | "alumni";
-    course: string;
-    level: string;
-    batchYear: number;
-    ratings: Record<string, number>;
-    pros: string;
-    cons: string;
-    summaryTitle: string;
-    yearlyFee?: number;
-    scholarship?: boolean;
-    internshipOutcome?: string;
-    email: string;
-  }, options?: ApiRequestOptions): Promise<any> {
+  async submitReview(
+    data: {
+      collegeId: number;
+      collegeName?: string;
+      studentType: "current" | "alumni";
+      course: string;
+      level: string;
+      batchYear: number;
+      ratings: Record<string, number>;
+      pros: string;
+      cons: string;
+      summaryTitle: string;
+      yearlyFee?: number;
+      scholarship?: boolean;
+      internshipOutcome?: string;
+      email: string;
+    },
+    options?: ApiRequestOptions,
+  ): Promise<any> {
     return apiRequest<any>("/api/v1/user/reviews", {
       method: "POST",
       body: JSON.stringify(data),
@@ -1993,24 +2300,34 @@ export const apiService = {
     });
   },
 
-  async getUserReviews(params?: {
-    page?: number;
-    limit?: number;
-  }, options?: ApiRequestOptions): Promise<any> {
+  async getUserReviews(
+    params?: {
+      page?: number;
+      limit?: number;
+    },
+    options?: ApiRequestOptions,
+  ): Promise<any> {
     const query = new URLSearchParams();
     if (params?.page) query.set("page", String(params.page));
     if (params?.limit) query.set("limit", String(params.limit));
 
     const queryStr = query.toString();
-    return apiRequest<any>(`/api/v1/user/reviews${queryStr ? `?${queryStr}` : ""}`, options);
+    return apiRequest<any>(
+      `/api/v1/user/reviews${queryStr ? `?${queryStr}` : ""}`,
+      options,
+    );
   },
 
-  async updateReview(reviewId: number, data: Partial<{
-    pros: string;
-    cons: string;
-    summaryTitle: string;
-    ratings: Record<string, number>;
-  }>, options?: ApiRequestOptions): Promise<any> {
+  async updateReview(
+    reviewId: number,
+    data: Partial<{
+      pros: string;
+      cons: string;
+      summaryTitle: string;
+      ratings: Record<string, number>;
+    }>,
+    options?: ApiRequestOptions,
+  ): Promise<any> {
     return apiRequest<any>(`/api/v1/user/reviews/${reviewId}`, {
       method: "PUT",
       body: JSON.stringify(data),
@@ -2018,21 +2335,31 @@ export const apiService = {
     });
   },
 
-  async deleteReview(reviewId: number, options?: ApiRequestOptions): Promise<any> {
+  async deleteReview(
+    reviewId: number,
+    options?: ApiRequestOptions,
+  ): Promise<any> {
     return apiRequest<any>(`/api/v1/user/reviews/${reviewId}`, {
       method: "DELETE",
       ...options,
     });
   },
 
-  async markReviewHelpful(reviewId: number, options?: ApiRequestOptions): Promise<any> {
+  async markReviewHelpful(
+    reviewId: number,
+    options?: ApiRequestOptions,
+  ): Promise<any> {
     return apiRequest<any>(`/api/v1/education/reviews/${reviewId}/helpful`, {
       method: "POST",
       ...options,
     });
   },
 
-  async reportReview(reviewId: number, reason: string, options?: ApiRequestOptions): Promise<any> {
+  async reportReview(
+    reviewId: number,
+    reason: string,
+    options?: ApiRequestOptions,
+  ): Promise<any> {
     return apiRequest<any>(`/api/v1/user/reviews/${reviewId}/report`, {
       method: "POST",
       body: JSON.stringify({ reason }),
@@ -2046,25 +2373,37 @@ export const apiService = {
   },
 
   async getRecentApplications(): Promise<RecentApplicationsResponse> {
-    return apiRequest<RecentApplicationsResponse>("/api/v1/dashboard/recent-applications");
+    return apiRequest<RecentApplicationsResponse>(
+      "/api/v1/dashboard/recent-applications",
+    );
   },
 
   // === My Applications ===
-  async getMyApplications(params?: { page?: number; limit?: number }): Promise<MyApplicationsResponse> {
+  async getMyApplications(params?: {
+    page?: number;
+    limit?: number;
+  }): Promise<MyApplicationsResponse> {
     const query = new URLSearchParams();
     if (params?.page) query.set("page", String(params.page));
     if (params?.limit) query.set("limit", String(params.limit));
     const qs = query.toString();
-    return apiRequest<MyApplicationsResponse>(`/api/v1/my-applications${qs ? `?${qs}` : ""}`);
+    return apiRequest<MyApplicationsResponse>(
+      `/api/v1/my-applications${qs ? `?${qs}` : ""}`,
+    );
   },
 
   // === Messages ===
-  async getMessages(params?: { page?: number; limit?: number }): Promise<MessagesResponse> {
+  async getMessages(params?: {
+    page?: number;
+    limit?: number;
+  }): Promise<MessagesResponse> {
     const query = new URLSearchParams();
     if (params?.page) query.set("page", String(params.page));
     if (params?.limit) query.set("limit", String(params.limit));
     const qs = query.toString();
-    return apiRequest<MessagesResponse>(`/api/v1/messages${qs ? `?${qs}` : ""}`);
+    return apiRequest<MessagesResponse>(
+      `/api/v1/messages${qs ? `?${qs}` : ""}`,
+    );
   },
 
   async getMessageById(id: number): Promise<MessageResponse> {
@@ -2098,14 +2437,19 @@ export const apiService = {
     return apiRequest<CalendarEventResponse>(`/api/v1/calendar/events/${id}`);
   },
 
-  async createCalendarEvent(data: CreateEventPayload): Promise<CalendarEventResponse> {
+  async createCalendarEvent(
+    data: CreateEventPayload,
+  ): Promise<CalendarEventResponse> {
     return apiRequest<CalendarEventResponse>("/api/v1/calendar/events", {
       method: "POST",
       body: JSON.stringify(data),
     });
   },
 
-  async updateCalendarEvent(id: number, data: UpdateEventPayload): Promise<CalendarEventResponse> {
+  async updateCalendarEvent(
+    id: number,
+    data: UpdateEventPayload,
+  ): Promise<CalendarEventResponse> {
     return apiRequest<CalendarEventResponse>(`/api/v1/calendar/events/${id}`, {
       method: "PUT",
       body: JSON.stringify(data),
@@ -2119,7 +2463,10 @@ export const apiService = {
   },
 
   // === Invites ===
-  async getInvites(params?: { page?: number; limit?: number }): Promise<InvitesResponse> {
+  async getInvites(params?: {
+    page?: number;
+    limit?: number;
+  }): Promise<InvitesResponse> {
     const query = new URLSearchParams();
     if (params?.page) query.set("page", String(params.page));
     if (params?.limit) query.set("limit", String(params.limit));
@@ -2155,19 +2502,23 @@ export const apiService = {
   },
 
   async uploadProfilePicture(file: File): Promise<ProfileResponse> {
-    const token = typeof window !== 'undefined'
-      ? (localStorage.getItem('token') || sessionStorage.getItem('token'))
-      : null;
+    const token =
+      typeof window !== "undefined"
+        ? localStorage.getItem("token") || sessionStorage.getItem("token")
+        : null;
     const formData = new FormData();
-    formData.append('file', file);
-    const response = await fetch(`${API_BASE_URL}/api/v1/auth/profile/picture`, {
-      method: 'POST',
-      headers: token ? { Authorization: `Bearer ${token}` } : {},
-      body: formData,
-    });
+    formData.append("file", file);
+    const response = await fetch(
+      `${API_BASE_URL}/api/v1/auth/profile/picture`,
+      {
+        method: "POST",
+        headers: token ? { Authorization: `Bearer ${token}` } : {},
+        body: formData,
+      },
+    );
     if (!response.ok) {
       const errorData = await response.json().catch(() => ({}));
-      throw new Error(errorData.message || 'Failed to upload profile picture');
+      throw new Error(errorData.message || "Failed to upload profile picture");
     }
     return response.json();
   },
@@ -2177,18 +2528,26 @@ export const apiService = {
     return apiRequest<EducationEntriesResponse>("/api/v1/profile/education");
   },
 
-  async createEducationEntry(data: EducationEntryPayload): Promise<EducationEntryResponse> {
+  async createEducationEntry(
+    data: EducationEntryPayload,
+  ): Promise<EducationEntryResponse> {
     return apiRequest<EducationEntryResponse>("/api/v1/profile/education", {
       method: "POST",
       body: JSON.stringify(data),
     });
   },
 
-  async updateEducationEntry(id: number, data: EducationEntryPayload): Promise<EducationEntryResponse> {
-    return apiRequest<EducationEntryResponse>(`/api/v1/profile/education/${id}`, {
-      method: "PUT",
-      body: JSON.stringify(data),
-    });
+  async updateEducationEntry(
+    id: number,
+    data: EducationEntryPayload,
+  ): Promise<EducationEntryResponse> {
+    return apiRequest<EducationEntryResponse>(
+      `/api/v1/profile/education/${id}`,
+      {
+        method: "PUT",
+        body: JSON.stringify(data),
+      },
+    );
   },
 
   async deleteEducationEntry(id: number): Promise<void> {
@@ -2199,22 +2558,32 @@ export const apiService = {
 
   // ─── Public Volunteer API ─────────────────────────────────────────
 
-  async getPublicVolunteers(params?: { search?: string; type?: string; province?: string; page?: number; limit?: number }): Promise<any> {
+  async getPublicVolunteers(params?: {
+    search?: string;
+    type?: string;
+    province?: string;
+    page?: number;
+    limit?: number;
+  }): Promise<any> {
     const searchParams = new URLSearchParams();
-    if (params?.search) searchParams.set('search', params.search);
-    if (params?.type) searchParams.set('type', params.type);
-    if (params?.province) searchParams.set('province', params.province);
-    if (params?.page) searchParams.set('page', String(params.page));
-    if (params?.limit) searchParams.set('limit', String(params.limit));
+    if (params?.search) searchParams.set("search", params.search);
+    if (params?.type) searchParams.set("type", params.type);
+    if (params?.province) searchParams.set("province", params.province);
+    if (params?.page) searchParams.set("page", String(params.page));
+    if (params?.limit) searchParams.set("limit", String(params.limit));
     const qs = searchParams.toString();
-    return apiRequest(`/api/v1/public/volunteers${qs ? `?${qs}` : ''}`);
+    return apiRequest(`/api/v1/public/volunteers${qs ? `?${qs}` : ""}`);
   },
 
   async getPublicVolunteerByID(id: string | number): Promise<any> {
     return apiRequest(`/api/v1/public/volunteers/${id}`);
   },
 
-  async submitVolunteerApplication(volunteerId: string | number, data: any, cvFile?: File): Promise<any> {
+  async submitVolunteerApplication(
+    volunteerId: string | number,
+    data: any,
+    cvFile?: File,
+  ): Promise<any> {
     const formData = new FormData();
     Object.entries(data).forEach(([key, value]) => {
       if (Array.isArray(value)) {
@@ -2224,10 +2593,10 @@ export const apiService = {
       }
     });
     if (cvFile) {
-      formData.append('cv_file', cvFile);
+      formData.append("cv_file", cvFile);
     }
     return apiRequest(`/api/v1/public/volunteers/${volunteerId}/apply`, {
-      method: 'POST',
+      method: "POST",
       body: formData,
     });
   },
@@ -2235,12 +2604,12 @@ export const apiService = {
   async getPublicInstitutions(params: Record<string, any>): Promise<any> {
     const query = new URLSearchParams();
     Object.entries(params || {}).forEach(([key, value]) => {
-      if (value !== undefined && value !== null && value !== '') {
+      if (value !== undefined && value !== null && value !== "") {
         query.set(key, String(value));
       }
     });
     const qs = query.toString();
-    return apiRequest<any>(`/api/v1/institutions/public${qs ? `?${qs}` : ''}`);
+    return apiRequest<any>(`/api/v1/institutions/public${qs ? `?${qs}` : ""}`);
   },
 
   async getPublicInstitutionById(id: number): Promise<any> {
@@ -2248,7 +2617,9 @@ export const apiService = {
   },
 
   async getPublicCounsellingSessions(institutionId: number): Promise<any> {
-    return apiRequest<any>(`/api/v1/institutions/public/${institutionId}/counselling-sessions`);
+    return apiRequest<any>(
+      `/api/v1/institutions/public/${institutionId}/counselling-sessions`,
+    );
   },
 
   async createPublicCounsellingBooking(data: {
@@ -2285,44 +2656,47 @@ export const callApi = async <T>(path: string): Promise<T> => {
 
 export const scholarshipApi = {
   async getScholarships() {
-    return callApi<{ scholarships: any[] }>('/api/v1/scholarships');
+    return callApi<{ scholarships: any[] }>("/api/v1/scholarships");
   },
-  
+
   async getScholarshipById(id: string | number) {
     return callApi<any>(`/api/v1/education/scholarships/${id}`);
   },
-  
+
   async applyScholarship(scholarshipId: number, data: any) {
     return apiRequest(`/api/v1/scholarships/${scholarshipId}/apply`, {
-      method: 'POST',
+      method: "POST",
       body: JSON.stringify(data),
     });
   },
-  
-  async initiatePayment(scholarshipId: number, data: { method: string; amount: number; application_id?: number }) {
+
+  async initiatePayment(
+    scholarshipId: number,
+    data: { method: string; amount: number; application_id?: number },
+  ) {
     return apiRequest(`/api/v1/scholarships/${scholarshipId}/pay`, {
-      method: 'POST',
+      method: "POST",
       body: JSON.stringify(data),
     });
   },
-  
+
   async confirmPayment(paymentId: number, transactionId: string) {
     return apiRequest(`/api/v1/scholarships/pay/${paymentId}/confirm`, {
-      method: 'POST',
+      method: "POST",
       body: JSON.stringify({ transaction_id: transactionId }),
     });
   },
-  
+
   async uploadBankReceipt(paymentId: number, receiptImage: string) {
     return apiRequest(`/api/v1/scholarships/pay/${paymentId}/receipt`, {
-      method: 'POST',
+      method: "POST",
       body: JSON.stringify({ receipt_image: receiptImage }),
     });
   },
 
   async esewaInitiate(applicationId: number, amount: number) {
     return apiRequest("/api/v1/scholarships/pay/esewa/initiate", {
-      method: 'POST',
+      method: "POST",
       body: JSON.stringify({
         application_id: applicationId,
         amount,
@@ -2332,7 +2706,7 @@ export const scholarshipApi = {
 
   async esewaVerifyPayment(applicationId: number, data: any) {
     return apiRequest("/api/v1/scholarships/pay/esewa/verify", {
-      method: 'POST',
+      method: "POST",
       body: JSON.stringify({
         application_id: applicationId,
         transaction_uuid: data.transaction_uuid || data.transactionUuid,
@@ -2363,7 +2737,35 @@ export const scholarshipApi = {
     talents: string[];
     achievements: string[];
     involvement: string[];
-  }): Promise<{ success: boolean; data: { scholarships: Array<{ id: number; title: string; providerType: string; coverage: string; deadline: string; description: string; tagColorClass: string }> }; message: string }> {
+  }): Promise<{
+    success: boolean;
+    data: {
+      scholarships: Array<{
+        id: number;
+        title: string;
+        providerType: string;
+        coverage: string;
+        deadline: string;
+        description: string;
+        tagColorClass: string;
+        score?: number;
+        breakdown?: {
+          educationLevel: number;
+          fieldOfStudy: number;
+          location: number;
+          financialFit: number;
+          studyLocation: number;
+          categoryGender: number;
+          gpaMatch: number;
+          willingness: number;
+          talents: number;
+          achievements: number;
+          profileCompatibility?: number;
+        };
+      }>;
+    };
+    message: string;
+  }> {
     return apiRequest("/api/v1/education/scholarships/recommend", {
       method: "POST",
       body: JSON.stringify(data),
@@ -2372,28 +2774,65 @@ export const scholarshipApi = {
 };
 
 export const feedbackApi = {
-  async submitFeedback(data: { rating: number; experience: string; email?: string }): Promise<{ success: boolean; message: string }> {
-    return apiRequest<{ success: boolean; message: string }>("/api/v1/feedback", {
-      method: "POST",
-      body: JSON.stringify(data),
-    });
+  async submitFeedback(data: {
+    rating: number;
+    experience: string;
+    email?: string;
+  }): Promise<{ success: boolean; message: string }> {
+    return apiRequest<{ success: boolean; message: string }>(
+      "/api/v1/feedback",
+      {
+        method: "POST",
+        body: JSON.stringify(data),
+      },
+    );
   },
 
-  async listFeedback(): Promise<{ success: boolean; data: Array<{ id: number; user_name: string; image_url: string; rating: number; experience: string; email: string; created_at: string }>; message: string }> {
+  async listFeedback(): Promise<{
+    success: boolean;
+    data: Array<{
+      id: number;
+      user_name: string;
+      image_url: string;
+      rating: number;
+      experience: string;
+      email: string;
+      created_at: string;
+    }>;
+    message: string;
+  }> {
     return apiRequest("/api/v1/feedback");
   },
 
-  async deleteFeedback(id: number): Promise<{ success: boolean; message: string }> {
+  async deleteFeedback(
+    id: number,
+  ): Promise<{ success: boolean; message: string }> {
     return apiRequest(`/api/v1/feedback/${id}`, {
       method: "DELETE",
     });
   },
 
-  async getPublicFeedbacks(): Promise<{ success: boolean; data: Array<{ id: number; user_name: string; image_url: string; rating: number; experience: string; created_at: string }>; message: string }> {
+  async getPublicFeedbacks(): Promise<{
+    success: boolean;
+    data: Array<{
+      id: number;
+      user_name: string;
+      image_url: string;
+      rating: number;
+      experience: string;
+      created_at: string;
+    }>;
+    message: string;
+  }> {
     return apiRequest("/api/v1/public/feedback");
   },
 
-  async submitTestimonial(data: { name: string; designation: string; rating: number; review: string }): Promise<{ success: boolean; message: string }> {
+  async submitTestimonial(data: {
+    name: string;
+    designation: string;
+    rating: number;
+    review: string;
+  }): Promise<{ success: boolean; message: string }> {
     return apiRequest("/api/v1/public/testimonials", {
       method: "POST",
       body: JSON.stringify(data),
@@ -2403,49 +2842,58 @@ export const feedbackApi = {
 
 export const scholarshipProviderApi = {
   async getScholarships() {
-    return apiRequest<any[]>('/api/v1/scholarship-providers/scholarships');
+    return apiRequest<any[]>("/api/v1/scholarship-providers/scholarships");
   },
-  
+
   async createScholarship(data: any) {
-    return apiRequest('/api/v1/scholarship-providers/scholarships', {
-      method: 'POST',
+    return apiRequest("/api/v1/scholarship-providers/scholarships", {
+      method: "POST",
       body: JSON.stringify(data),
     });
   },
-  
+
   async updateScholarship(id: number, data: any) {
     return apiRequest(`/api/v1/scholarship-providers/scholarships/${id}`, {
-      method: 'PUT',
+      method: "PUT",
       body: JSON.stringify(data),
     });
   },
-  
+
   async publishScholarship(id: number) {
     return apiRequest(`/api/v1/scholarship-providers/scholarships/${id}`, {
-      method: 'PUT',
-      body: JSON.stringify({ status: 'published' }),
+      method: "PUT",
+      body: JSON.stringify({ status: "published" }),
     });
   },
-  
+
   async saveFormConfig(scholarshipId: number, formConfig: any) {
-    return apiRequest(`/api/v1/scholarship-providers/scholarships/${scholarshipId}`, {
-      method: 'PUT',
-      body: JSON.stringify({ form_config: formConfig }),
-    });
+    return apiRequest(
+      `/api/v1/scholarship-providers/scholarships/${scholarshipId}`,
+      {
+        method: "PUT",
+        body: JSON.stringify({ form_config: formConfig }),
+      },
+    );
   },
-  
+
   async savePaymentConfig(scholarshipId: number, paymentConfig: any) {
-    return apiRequest(`/api/v1/scholarship-providers/scholarships/${scholarshipId}`, {
-      method: 'PUT',
-      body: JSON.stringify({ payment_config: paymentConfig }),
-    });
+    return apiRequest(
+      `/api/v1/scholarship-providers/scholarships/${scholarshipId}`,
+      {
+        method: "PUT",
+        body: JSON.stringify({ payment_config: paymentConfig }),
+      },
+    );
   },
-  
+
   async approvePayment(paymentId: number, approve: boolean, reason?: string) {
-    return apiRequest(`/api/v1/scholarship-providers/payments/${paymentId}/approve`, {
-      method: 'POST',
-      body: JSON.stringify({ approve, reason: reason || '' }),
-    });
+    return apiRequest(
+      `/api/v1/scholarship-providers/payments/${paymentId}/approve`,
+      {
+        method: "POST",
+        body: JSON.stringify({ approve, reason: reason || "" }),
+      },
+    );
   },
 };
 
@@ -2498,7 +2946,9 @@ export function streamSphereAIChat(
 
       if (!response.ok) {
         const err = await response.json().catch(() => ({}));
-        handlers.onError(err.error || err.message || `Sphere AI returned ${response.status}`);
+        handlers.onError(
+          err.error || err.message || `Sphere AI returned ${response.status}`,
+        );
         return;
       }
 
@@ -2576,11 +3026,12 @@ export interface SphereAIModelsResponse {
 }
 
 export async function listSphereAIModels(): Promise<SphereAIModelsResponse> {
-  const res = await fetch(`${API_BASE_URL}/api/v1/ai/models`, { credentials: "include" });
+  const res = await fetch(`${API_BASE_URL}/api/v1/ai/models`, {
+    credentials: "include",
+  });
   const json = await res.json();
   if (!res.ok || !json.success) {
     throw new Error(json.error || `Could not list models (${res.status})`);
   }
   return json.data as SphereAIModelsResponse;
 }
-

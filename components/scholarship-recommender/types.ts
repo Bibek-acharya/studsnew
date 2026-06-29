@@ -24,6 +24,20 @@ export interface RecommenderState {
   involvement: string[];
 }
 
+export interface BreakdownDimension {
+  educationLevel: number;
+  fieldOfStudy: number;
+  location: number;
+  financialFit: number;
+  studyLocation: number;
+  categoryGender: number;
+  gpaMatch: number;
+  willingness: number;
+  talents: number;
+  achievements: number;
+  profileCompatibility?: number;
+}
+
 export interface ScholarshipCardItem {
   id: number;
   title: string;
@@ -32,6 +46,8 @@ export interface ScholarshipCardItem {
   deadline: string;
   description: string;
   tagColorClass: string;
+  score?: number;
+  breakdown?: BreakdownDimension;
 }
 
 export interface RecommenderRequest {
