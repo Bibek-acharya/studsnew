@@ -47,13 +47,19 @@ function getAdminToken(): string | null {
       const parsed = JSON.parse(raw);
       return parsed.token || null;
     }
-  } catch { /* ignore */ }
+  } catch {
+    /* ignore */
+  }
   return null;
 }
 
 // ─── Network helper ──────────────────────────────────────────────────────────
 
-async function apiFetch<T>(path: string, options: RequestInit = {}, token?: string): Promise<T | null> {
+async function apiFetch<T>(
+  path: string,
+  options: RequestInit = {},
+  token?: string,
+): Promise<T | null> {
   try {
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), 3000);
@@ -61,7 +67,7 @@ async function apiFetch<T>(path: string, options: RequestInit = {}, token?: stri
     const headers: Record<string, string> = {
       "Content-Type": "application/json",
       ...(token ? { Authorization: `Bearer ${token}` } : {}),
-      ...(options.headers as Record<string, string> || {}),
+      ...((options.headers as Record<string, string>) || {}),
     };
 
     const res = await fetch(`${API_BASE_URL}${path}`, {
@@ -99,14 +105,16 @@ async function apiFetch<T>(path: string, options: RequestInit = {}, token?: stri
 
 // ─── Public API (used by main blog page) ─────────────────────────────────────
 
-export async function fetchPublicBlogs(params: {
-  page?: number;
-  limit?: number;
-  category?: string;
-  search?: string;
-  sort?: "newest" | "oldest" | "popular" | "title";
-  tags?: string;
-} = {}): Promise<{ blogs: BlogEntry[]; meta: BlogMeta }> {
+export async function fetchPublicBlogs(
+  params: {
+    page?: number;
+    limit?: number;
+    category?: string;
+    search?: string;
+    sort?: "newest" | "oldest" | "popular" | "title";
+    tags?: string;
+  } = {},
+): Promise<{ blogs: BlogEntry[]; meta: BlogMeta }> {
   try {
     const query = new URLSearchParams();
     if (params.page) query.set("page", String(params.page));
@@ -114,7 +122,9 @@ export async function fetchPublicBlogs(params: {
     if (params.category) query.set("category", params.category);
     if (params.search) query.set("search", params.search);
 
-    const res = await fetch(`/api/v1/education/blogs?${query.toString()}`);
+    const res = await fetch(
+      `${API_BASE_URL}/api/v1/education/blogs?${query.toString()}`,
+    );
 
     if (!res.ok) {
       throw new Error("Failed to fetch blogs");
@@ -131,9 +141,11 @@ export async function fetchPublicBlogs(params: {
   }
 }
 
-export async function fetchPublicBlogById(id: string): Promise<{ blog: BlogEntry; related: BlogEntry[] } | null> {
+export async function fetchPublicBlogById(
+  id: string,
+): Promise<{ blog: BlogEntry; related: BlogEntry[] } | null> {
   try {
-    const res = await fetch(`/api/v1/education/blogs/${id}`);
+    const res = await fetch(`${API_BASE_URL}/api/v1/education/blogs/${id}`);
 
     if (!res.ok) {
       return null;
@@ -146,7 +158,8 @@ export async function fetchPublicBlogById(id: string): Promise<{ blog: BlogEntry
         id: raw.id ?? raw.blog_id,
         title: raw.title || "",
         slug: raw.slug || raw.title?.toLowerCase().replace(/\s+/g, "-") || "",
-        excerpt: raw.excerpt || raw.short_desc || raw.content?.slice(0, 200) || "",
+        excerpt:
+          raw.excerpt || raw.short_desc || raw.content?.slice(0, 200) || "",
         content: raw.content || "",
         image: raw.image || raw.image_url || raw.banner_image || "",
         author: raw.author || raw.published_by || "Admin",
@@ -156,7 +169,11 @@ export async function fetchPublicBlogById(id: string): Promise<{ blog: BlogEntry
         featured: raw.featured ?? false,
         published: raw.published ?? raw.status === "published",
         views: raw.views || 0,
-        created_at: raw.created_at || raw.published_at || raw.publish_date || new Date().toISOString(),
+        created_at:
+          raw.created_at ||
+          raw.published_at ||
+          raw.publish_date ||
+          new Date().toISOString(),
       };
       const rawRelated = raw.related || [];
       const related: BlogEntry[] = Array.isArray(rawRelated)
@@ -164,7 +181,8 @@ export async function fetchPublicBlogById(id: string): Promise<{ blog: BlogEntry
             id: r.id ?? r.blog_id,
             title: r.title || "",
             slug: r.slug || r.title?.toLowerCase().replace(/\s+/g, "-") || "",
-            excerpt: r.excerpt || r.short_desc || r.content?.slice(0, 200) || "",
+            excerpt:
+              r.excerpt || r.short_desc || r.content?.slice(0, 200) || "",
             content: r.content || "",
             image: r.image || r.image_url || r.banner_image || "",
             author: r.author || r.published_by || "Admin",
@@ -174,7 +192,8 @@ export async function fetchPublicBlogById(id: string): Promise<{ blog: BlogEntry
             featured: r.featured ?? false,
             published: r.published ?? r.status === "published",
             views: r.views || 0,
-            created_at: r.created_at || r.published_at || new Date().toISOString(),
+            created_at:
+              r.created_at || r.published_at || new Date().toISOString(),
           }))
         : [];
       return { blog, related };
@@ -188,13 +207,15 @@ export async function fetchPublicBlogById(id: string): Promise<{ blog: BlogEntry
 
 // ─── Admin API ────────────────────────────────────────────────────────────────
 
-export async function fetchAdminBlogs(params: {
-  page?: number;
-  limit?: number;
-  category?: string;
-  search?: string;
-  sort?: "newest" | "oldest" | "popular" | "title";
-} = {}): Promise<{ blogs: BlogEntry[]; meta: BlogMeta }> {
+export async function fetchAdminBlogs(
+  params: {
+    page?: number;
+    limit?: number;
+    category?: string;
+    search?: string;
+    sort?: "newest" | "oldest" | "popular" | "title";
+  } = {},
+): Promise<{ blogs: BlogEntry[]; meta: BlogMeta }> {
   try {
     const query = new URLSearchParams();
     if (params.category) query.set("category", params.category);
@@ -252,17 +273,20 @@ export async function createBlog(data: {
   }
 }
 
-export async function updateBlog(id: string, data: Partial<{
-  title: string;
-  excerpt: string;
-  content: string;
-  image: string;
-  author: string;
-  category: string;
-  tags: string[];
-  featured: boolean;
-  published: boolean;
-}>): Promise<BlogEntry> {
+export async function updateBlog(
+  id: string,
+  data: Partial<{
+    title: string;
+    excerpt: string;
+    content: string;
+    image: string;
+    author: string;
+    category: string;
+    tags: string[];
+    featured: boolean;
+    published: boolean;
+  }>,
+): Promise<BlogEntry> {
   try {
     const res = await fetch(`/api/v1/admin/blogs/${id}`, {
       method: "PUT",
@@ -335,9 +359,11 @@ export interface BlogComment {
   time: string;
 }
 
-export async function fetchBlogComments(blogId: string): Promise<BlogComment[]> {
+export async function fetchBlogComments(
+  blogId: string,
+): Promise<BlogComment[]> {
   const result = await apiFetch<{ data: BlogComment[] }>(
-    `/api/v1/blogs/${blogId}/comments`
+    `/api/v1/blogs/${blogId}/comments`,
   );
 
   if (result?.data) {
@@ -347,20 +373,23 @@ export async function fetchBlogComments(blogId: string): Promise<BlogComment[]> 
   return [];
 }
 
-export async function postBlogComment(blogId: string, data: {
-  author: string;
-  avatar?: string;
-  message: string;
-}): Promise<BlogComment> {
+export async function postBlogComment(
+  blogId: string,
+  data: {
+    author: string;
+    avatar?: string;
+    message: string;
+  },
+): Promise<BlogComment> {
   const result = await apiFetch<{ data: BlogComment }>(
     `/api/v1/blogs/${blogId}/comments`,
     {
       method: "POST",
       body: JSON.stringify({
         ...data,
-        blog_id: Number(blogId) || 0
-      })
-    }
+        blog_id: Number(blogId) || 0,
+      }),
+    },
   );
 
   if (result?.data) {
