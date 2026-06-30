@@ -206,7 +206,10 @@ const BlogDetailsPage: React.FC<{ params: Promise<{ id: string }> }> = ({
           </div>
 
           <div className="prose max-w-none text-gray-700 [&_pre]:overflow-x-auto [&_pre]:whitespace-pre-wrap [&_pre]:break-words [&_code]:break-words [&_img]:max-w-full news-content">
-            <div className="text-gray-700 mb-8" dangerouslySetInnerHTML={{ __html: blog.content }} />
+            <div
+              className="text-gray-700 mb-8"
+              dangerouslySetInnerHTML={{ __html: blog.content }}
+            />
           </div>
 
           <div className="mt-8 mb-6 flex flex-wrap items-center gap-3">
@@ -410,6 +413,7 @@ const BlogDetailsPage: React.FC<{ params: Promise<{ id: string }> }> = ({
         </aside>
       </div>
       <style>{`
+        .news-content { overflow-wrap: break-word; word-break: break-word; }
         .news-content a { color: #2563eb !important; text-decoration: underline !important; font-weight: 500 !important; }
         .news-content a:hover { color: #1d4ed8 !important; }
       `}</style>

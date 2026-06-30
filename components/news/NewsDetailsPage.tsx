@@ -25,11 +25,7 @@ function normalizeArticle(data: any): any {
       author: data.published_by || "Unknown",
       excerpt: data.short_desc || "",
       category: data.news_type || "News",
-      date:
-        data.publish_date ||
-        data.published_at ||
-        data.created_at ||
-        "",
+      date: data.publish_date || data.published_at || data.created_at || "",
     };
   }
 
@@ -80,10 +76,7 @@ function formatDate(dateStr: string): string {
 function getImageUrl(image: string | null | undefined): string | null {
   if (!image) return null;
 
-  if (
-    image.startsWith("http://") ||
-    image.startsWith("https://")
-  ) {
+  if (image.startsWith("http://") || image.startsWith("https://")) {
     return image;
   }
 
@@ -108,8 +101,7 @@ const NewsDetailsPage: React.FC<{
     async function fetchNews() {
       const safeId = id!;
       const API_BASE =
-        process.env.NEXT_PUBLIC_API_URL ||
-        "http://localhost:8080";
+        process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080";
 
       try {
         if (safeId.startsWith("provider-")) {
@@ -122,7 +114,9 @@ const NewsDetailsPage: React.FC<{
           }
         } else if (safeId.startsWith("inst-")) {
           const actualId = safeId.replace("inst-", "");
-          const res = await fetch(`${API_BASE}/api/v1/institutions/public/news/${actualId}`);
+          const res = await fetch(
+            `${API_BASE}/api/v1/institutions/public/news/${actualId}`,
+          );
           const data = await res.json();
           if (data?.data) {
             setArticle(normalizeArticle(data.data));
@@ -130,7 +124,9 @@ const NewsDetailsPage: React.FC<{
           }
         } else if (safeId.startsWith("edu-")) {
           const actualId = safeId.replace("edu-", "");
-          const res = await fetch(`${API_BASE}/api/v1/education/news/${actualId}`);
+          const res = await fetch(
+            `${API_BASE}/api/v1/education/news/${actualId}`,
+          );
           const data = await res.json();
           if (data?.data) {
             setArticle(normalizeArticle(data.data));
@@ -307,15 +303,15 @@ const NewsDetailsPage: React.FC<{
 
           <div
             className="news-content prose prose-slate max-w-none break-words overflow-hidden mb-12 prose-img:max-w-full prose-img:h-auto prose-img:rounded-xl prose-pre:overflow-x-auto prose-pre:whitespace-pre-wrap prose-table:block prose-table:overflow-x-auto prose-a:text-blue-600 hover:prose-a:text-blue-700 prose-headings:text-gray-900 prose-p:text-gray-700 prose-li:text-gray-700"
-            dangerouslySetInnerHTML={{ __html: article.content || article.excerpt || "" }}
+            dangerouslySetInnerHTML={{
+              __html: article.content || article.excerpt || "",
+            }}
           />
 
           <hr className="border-gray-100 mb-8" />
 
           <div className="mb-10">
-            <h3 className="text-lg font-bold mb-4 text-gray-900">
-              Tags:
-            </h3>
+            <h3 className="text-lg font-bold mb-4 text-gray-900">Tags:</h3>
 
             <div className="flex flex-wrap gap-2.5">
               {(article.tags || []).map((tag: string) => (
@@ -341,9 +337,7 @@ const NewsDetailsPage: React.FC<{
             <div className="mb-8 bg-white border border-gray-200 rounded-xl overflow-hidden focus-within:border-blue-500 focus-within:ring-1 focus-within:ring-blue-500 transition-all">
               <textarea
                 value={commentInput}
-                onChange={(event) =>
-                  setCommentInput(event.target.value)
-                }
+                onChange={(event) => setCommentInput(event.target.value)}
                 rows={4}
                 className="w-full p-4 outline-none resize-y text-gray-700 placeholder-gray-400"
                 placeholder="Join the discussion..."
@@ -353,9 +347,7 @@ const NewsDetailsPage: React.FC<{
                 <div className="flex items-center gap-1.5 text-xs text-gray-500">
                   <i className="fa-solid fa-circle-info text-gray-400"></i>
 
-                  <span>
-                    Please keep comments respectful
-                  </span>
+                  <span>Please keep comments respectful</span>
                 </div>
 
                 <button
@@ -432,19 +424,19 @@ const NewsDetailsPage: React.FC<{
                     rel.category === "Academic"
                       ? "Admission"
                       : rel.category === "Tech"
-                      ? "Exam"
-                      : rel.category === "Jobs"
-                      ? "Fee"
-                      : "Notice";
+                        ? "Exam"
+                        : rel.category === "Jobs"
+                          ? "Fee"
+                          : "Notice";
 
                   const relBadge =
                     relCategoryUi === "Admission"
                       ? "bg-blue-600"
                       : relCategoryUi === "Exam"
-                      ? "bg-red-500"
-                      : relCategoryUi === "Fee"
-                      ? "bg-orange-500"
-                      : "bg-indigo-600";
+                        ? "bg-red-500"
+                        : relCategoryUi === "Fee"
+                          ? "bg-orange-500"
+                          : "bg-indigo-600";
 
                   return (
                     <div key={rel.id}>
@@ -502,6 +494,10 @@ const NewsDetailsPage: React.FC<{
       </div>
 
       <style jsx global>{`
+        .news-content {
+          overflow-wrap: break-word;
+          word-break: break-word;
+        }
         .news-content iframe {
           width: 100%;
           min-height: 400px;

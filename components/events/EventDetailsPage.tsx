@@ -2,11 +2,17 @@
 
 import React, { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
-import { fetchPublicEventById, fetchPublicEvents, EventEntry } from "@/services/eventApi";
+import {
+  fetchPublicEventById,
+  fetchPublicEvents,
+  EventEntry,
+} from "@/services/eventApi";
 import { getPublicEvents as getProviderPublicEvents } from "@/services/scholarshipProviderApi";
 import { getImageUrl, stripHtml } from "@/services/api";
 
-const EventDetailsPage: React.FC<{ params: Promise<{ id: string }> }> = ({ params }) => {
+const EventDetailsPage: React.FC<{ params: Promise<{ id: string }> }> = ({
+  params,
+}) => {
   const [id, setId] = useState<string | null>(null);
   const [event, setEvent] = useState<EventEntry | null>(null);
   const [related, setRelated] = useState<EventEntry[]>([]);
@@ -18,54 +24,75 @@ const EventDetailsPage: React.FC<{ params: Promise<{ id: string }> }> = ({ param
       try {
         const isProvider = p.id.startsWith("provider-");
         const isInst = p.id.startsWith("inst-");
-        const actualId = isProvider ? p.id.replace("provider-", "") : isInst ? p.id.replace("inst-", "") : p.id;
+        const actualId = isProvider
+          ? p.id.replace("provider-", "")
+          : isInst
+            ? p.id.replace("inst-", "")
+            : p.id;
 
         let eventData: EventEntry | null;
         if (isProvider) {
           try {
             const providerData = await getProviderPublicEvents(1, 100);
-            const found = providerData.events.find((e: any) => String(e.id) === actualId);
-            eventData = found ? {
-              id: `provider-${found.id}`,
-              title: found.name,
-              excerpt: found.short_desc || "",
-              description: found.description || "",
-              category: found.category || found.event_type || "Event",
-              image: found.image_url || "",
-              organizer: found.organized_by || "",
-              location: found.location || "",
-              date: found.start_date ? new Date(found.start_date).toLocaleDateString() : "",
-              time: found.start_date ? new Date(found.start_date).toLocaleTimeString() : "",
-              registrationFee: "",
-              interestedCount: 0,
-              published: true,
-              created_at: found.created_at,
-            } : null;
+            const found = providerData.events.find(
+              (e: any) => String(e.id) === actualId,
+            );
+            eventData = found
+              ? {
+                  id: `provider-${found.id}`,
+                  title: found.name,
+                  excerpt: found.short_desc || "",
+                  description: found.description || "",
+                  category: found.category || found.event_type || "Event",
+                  image: found.image_url || "",
+                  organizer: found.organized_by || "",
+                  location: found.location || "",
+                  date: found.start_date
+                    ? new Date(found.start_date).toLocaleDateString()
+                    : "",
+                  time: found.start_date
+                    ? new Date(found.start_date).toLocaleTimeString()
+                    : "",
+                  registrationFee: "",
+                  interestedCount: 0,
+                  published: true,
+                  created_at: found.created_at,
+                }
+              : null;
           } catch {
             eventData = null;
           }
         } else if (isInst) {
           try {
-            const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080";
-            const res = await fetch(`${API_BASE}/api/v1/institutions/public/events/${actualId}`);
+            const API_BASE =
+              process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080";
+            const res = await fetch(
+              `${API_BASE}/api/v1/institutions/public/events/${actualId}`,
+            );
             const json = await res.json();
             const e = json?.data;
-            eventData = e ? {
-              id: `inst-${e.id}`,
-              title: e.name || e.title,
-              excerpt: e.short_desc || "",
-              description: e.description || "",
-              category: e.event_type || e.category || "Event",
-              image: e.image_url || "",
-              organizer: e.organized_by || "",
-              location: e.location || "",
-              date: e.start_date ? new Date(e.start_date).toLocaleDateString() : "",
-              time: e.start_date ? new Date(e.start_date).toLocaleTimeString() : "",
-              registrationFee: "",
-              interestedCount: 0,
-              published: true,
-              created_at: e.created_at,
-            } : null;
+            eventData = e
+              ? {
+                  id: `inst-${e.id}`,
+                  title: e.name || e.title,
+                  excerpt: e.short_desc || "",
+                  description: e.description || "",
+                  category: e.event_type || e.category || "Event",
+                  image: e.image_url || "",
+                  organizer: e.organized_by || "",
+                  location: e.location || "",
+                  date: e.start_date
+                    ? new Date(e.start_date).toLocaleDateString()
+                    : "",
+                  time: e.start_date
+                    ? new Date(e.start_date).toLocaleTimeString()
+                    : "",
+                  registrationFee: "",
+                  interestedCount: 0,
+                  published: true,
+                  created_at: e.created_at,
+                }
+              : null;
           } catch {
             eventData = null;
           }
@@ -73,7 +100,7 @@ const EventDetailsPage: React.FC<{ params: Promise<{ id: string }> }> = ({ param
           eventData = await fetchPublicEventById(p.id);
         }
         setEvent(eventData);
-        
+
         if (eventData) {
           const eventsResult = await fetchPublicEvents({ limit: 10 });
           const relatedEvents = eventsResult.events
@@ -118,7 +145,7 @@ const EventDetailsPage: React.FC<{ params: Promise<{ id: string }> }> = ({ param
 
   return (
     <main className="max-w-350 mx-auto pt-6 pb-10 lg:pb-14 bg-white min-h-screen">
-        <div className="relative w-full h-62.5 sm:h-75 lg:h-90 rounded-md lg:rounded-md overflow-hidden shadow-xl mb-10 lg:mb-16 bg-gray-100">
+      <div className="relative w-full h-62.5 sm:h-75 lg:h-90 rounded-md lg:rounded-md overflow-hidden shadow-xl mb-10 lg:mb-16 bg-gray-100">
         <img
           src={getImageUrl(event.image)}
           alt={event.title}
@@ -152,7 +179,9 @@ const EventDetailsPage: React.FC<{ params: Promise<{ id: string }> }> = ({ param
           <section>
             <div className="flex items-center gap-3 mb-6">
               <i className="fa-regular fa-calendar-check text-blue-600"></i>
-              <h2 className="text-xl font-bold text-gray-900">Events Description</h2>
+              <h2 className="text-xl font-bold text-gray-900">
+                Events Description
+              </h2>
             </div>
 
             <div
@@ -166,15 +195,18 @@ const EventDetailsPage: React.FC<{ params: Promise<{ id: string }> }> = ({ param
           <div className="sticky top-8">
             <div className="mb-10">
               <div className="flex items-center justify-between mb-8">
-                <h2 className="text-lg font-bold text-gray-900">Events Details</h2>
-
+                <h2 className="text-lg font-bold text-gray-900">
+                  Events Details
+                </h2>
               </div>
 
               <div className="space-y-6">
                 <div className="flex gap-4">
                   <i className="fa-regular fa-clock text-blue-600 shrink-0 mt-0.5"></i>
                   <div>
-                    <h4 className="font-bold text-gray-900 text-sm mb-1">Date & Time</h4>
+                    <h4 className="font-bold text-gray-900 text-sm mb-1">
+                      Date & Time
+                    </h4>
                     <p className="text-xs text-gray-500 leading-relaxed">
                       {event.date}
                       <br />
@@ -186,16 +218,24 @@ const EventDetailsPage: React.FC<{ params: Promise<{ id: string }> }> = ({ param
                 <div className="flex gap-4">
                   <i className="fa-solid fa-location-dot text-blue-600 shrink-0 mt-0.5"></i>
                   <div>
-                    <h4 className="font-bold text-gray-900 text-sm mb-1">Venue</h4>
-                    <p className="text-xs text-gray-500 leading-relaxed">{event.location}</p>
+                    <h4 className="font-bold text-gray-900 text-sm mb-1">
+                      Venue
+                    </h4>
+                    <p className="text-xs text-gray-500 leading-relaxed">
+                      {event.location}
+                    </p>
                   </div>
                 </div>
 
                 <div className="flex gap-4">
                   <i className="fa-regular fa-calendar-xmark text-blue-600 shrink-0 mt-0.5"></i>
                   <div>
-                    <h4 className="font-bold text-gray-900 text-sm mb-1">Venue</h4>
-                    <p className="text-xs text-red-500">Closes on oct 24,2025</p>
+                    <h4 className="font-bold text-gray-900 text-sm mb-1">
+                      Venue
+                    </h4>
+                    <p className="text-xs text-red-500">
+                      Closes on oct 24,2025
+                    </p>
                   </div>
                 </div>
               </div>
@@ -216,13 +256,17 @@ const EventDetailsPage: React.FC<{ params: Promise<{ id: string }> }> = ({ param
             </div>
 
             <div>
-              <h2 className="text-lg font-bold text-gray-900 mb-6">Organized By</h2>
+              <h2 className="text-lg font-bold text-gray-900 mb-6">
+                Organized By
+              </h2>
 
               <div className="flex items-center gap-3 mb-6">
                 <div className="w-12 h-12 rounded-full bg-gray-900 flex items-center justify-center overflow-hidden shrink-0">
                   <div className="w-6 h-6 border-2 border-orange-500 rotate-45"></div>
                 </div>
-                <h3 className="font-bold text-gray-900 text-sm">{event.organizer}</h3>
+                <h3 className="font-bold text-gray-900 text-sm">
+                  {event.organizer}
+                </h3>
               </div>
 
               <div className="space-y-4">
@@ -230,7 +274,10 @@ const EventDetailsPage: React.FC<{ params: Promise<{ id: string }> }> = ({ param
                   <div className="w-8 h-8 rounded-full bg-blue-50 flex items-center justify-center text-blue-600 shrink-0">
                     <i className="fa-regular fa-envelope"></i>
                   </div>
-                  <a href="mailto:info@gmail.com" className="text-gray-900 font-medium hover:text-blue-600 transition-colors">
+                  <a
+                    href="mailto:info@gmail.com"
+                    className="text-gray-900 font-medium hover:text-blue-600 transition-colors"
+                  >
                     info@gmail.com
                   </a>
                 </div>
@@ -238,7 +285,10 @@ const EventDetailsPage: React.FC<{ params: Promise<{ id: string }> }> = ({ param
                   <div className="w-8 h-8 rounded-full bg-blue-50 flex items-center justify-center text-blue-600 shrink-0">
                     <i className="fa-solid fa-phone"></i>
                   </div>
-                  <a href="tel:+977987654321" className="text-gray-900 font-medium hover:text-blue-600 transition-colors">
+                  <a
+                    href="tel:+977987654321"
+                    className="text-gray-900 font-medium hover:text-blue-600 transition-colors"
+                  >
                     +977-987654321
                   </a>
                 </div>
@@ -246,7 +296,12 @@ const EventDetailsPage: React.FC<{ params: Promise<{ id: string }> }> = ({ param
                   <div className="w-8 h-8 rounded-full bg-blue-50 flex items-center justify-center text-blue-600 shrink-0">
                     <i className="fa-solid fa-globe"></i>
                   </div>
-                  <a href="http://www.studsphere.com" target="_blank" rel="noreferrer" className="text-gray-900 font-medium hover:text-blue-600 transition-colors">
+                  <a
+                    href="http://www.studsphere.com"
+                    target="_blank"
+                    rel="noreferrer"
+                    className="text-gray-900 font-medium hover:text-blue-600 transition-colors"
+                  >
                     www.studsphere.com
                   </a>
                 </div>
@@ -259,85 +314,102 @@ const EventDetailsPage: React.FC<{ params: Promise<{ id: string }> }> = ({ param
       <div className="mt-16 lg:mt-24 border-t border-gray-100 pt-10">
         <div className="flex items-center justify-between mb-8">
           <h2 className="text-2xl font-bold text-gray-900">Similar Events</h2>
-          <Link href="/events" className="text-blue-600 text-sm font-medium hover:underline">
+          <Link
+            href="/events"
+            className="text-blue-600 text-sm font-medium hover:underline"
+          >
             View All
           </Link>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {(related.length > 0 ? related : [event]).slice(0, 3).map((rel, idx) => {
-            const relBadge =
-              idx % 3 === 0
-                ? { label: "Seminars & Workshops", className: "bg-[#0f9d86]" }
-                : idx % 3 === 1
-                  ? { label: "Career Fairs", className: "bg-amber-400" }
-                  : { label: "Competitions", className: "bg-blue-500" };
+          {(related.length > 0 ? related : [event])
+            .slice(0, 3)
+            .map((rel, idx) => {
+              const relBadge =
+                idx % 3 === 0
+                  ? { label: "Seminars & Workshops", className: "bg-[#0f9d86]" }
+                  : idx % 3 === 1
+                    ? { label: "Career Fairs", className: "bg-amber-400" }
+                    : { label: "Competitions", className: "bg-blue-500" };
 
-            return (
-              <article
-                key={`${rel.id}-${idx}`}
-                className="bg-white border border-gray-200 rounded-md overflow-hidden hover:shadow-lg transition-shadow duration-300"
-              >
-                <img
-                  src={getImageUrl(rel.image)}
-                  alt={rel.title}
-                  className="w-full h-44 object-cover"
-                  onError={(e) => {
-                    (e.target as HTMLImageElement).src = getImageUrl("");
-                  }}
-                />
-                <div className="p-5">
-                  <div className="flex justify-between items-center mb-3">
-                    <span className={`${relBadge.className} text-white text-[11px] px-2.5 py-1 rounded-full font-medium tracking-wide`}>
-                      {relBadge.label}
-                    </span>
-                    <div className="flex items-center text-gray-500 text-[12px] font-medium gap-1.5">
-                      <i className="fa-regular fa-calendar"></i> Oct 25 , 2024
+              return (
+                <article
+                  key={`${rel.id}-${idx}`}
+                  className="bg-white border border-gray-200 rounded-md overflow-hidden hover:shadow-lg transition-shadow duration-300"
+                >
+                  <img
+                    src={getImageUrl(rel.image)}
+                    alt={rel.title}
+                    className="w-full h-44 object-cover"
+                    onError={(e) => {
+                      (e.target as HTMLImageElement).src = getImageUrl("");
+                    }}
+                  />
+                  <div className="p-5">
+                    <div className="flex justify-between items-center mb-3">
+                      <span
+                        className={`${relBadge.className} text-white text-[11px] px-2.5 py-1 rounded-full font-medium tracking-wide`}
+                      >
+                        {relBadge.label}
+                      </span>
+                      <div className="flex items-center text-gray-500 text-[12px] font-medium gap-1.5">
+                        <i className="fa-regular fa-calendar"></i> Oct 25 , 2024
+                      </div>
                     </div>
-                  </div>
 
-                  <h3 className={`text-[17px] font-bold mb-3 leading-snug ${idx === 0 ? "text-blue-600" : "text-gray-900"}`}>
-                    {rel.title}
-                  </h3>
-
-                  <div className="space-y-2 mb-4">
-                    <div className="flex items-center text-gray-700 text-[13px] font-medium gap-2">
-                      <i className="fa-regular fa-building text-gray-400"></i> {rel.organizer}
-                    </div>
-                    <div className="flex items-center text-gray-700 text-[13px] font-medium gap-2">
-                      <i className="fa-solid fa-location-dot text-gray-400"></i> {rel.location}
-                    </div>
-                  </div>
-
-                  <p className="text-gray-500 text-[13px] leading-relaxed mb-5 line-clamp-3 news-content" dangerouslySetInnerHTML={{ __html: rel.excerpt }} />
-
-                  <div className="border-t border-dashed border-gray-200 mb-4"></div>
-
-                  <div className="flex items-center gap-3">
-                    <Link
-                      href={`/events/${rel.id}`}
-                      className="flex-1 border border-gray-200 text-gray-700 text-[13px] font-semibold py-2.5 rounded-md hover:bg-gray-50 transition-colors text-center"
+                    <h3
+                      className={`text-[17px] font-bold mb-3 leading-snug ${idx === 0 ? "text-blue-600" : "text-gray-900"}`}
                     >
-                      Details
-                    </Link>
-                    <button
-                      className={`flex-[1.5] text-white text-[13px] font-semibold py-2.5 rounded-md transition-colors ${
-                        idx === 1 ? "bg-[#1a233a] hover:bg-gray-900" : "bg-blue-500 hover:bg-blue-600"
-                      }`}
-                    >
-                      Register Now
-                    </button>
-                    <button className="border border-gray-200 p-2.5 rounded-md hover:bg-gray-50 text-gray-600 transition-colors group">
-                      <i className="fa-regular fa-heart w-4 h-4 group-hover:text-red-500 transition-colors"></i>
-                    </button>
+                      {rel.title}
+                    </h3>
+
+                    <div className="space-y-2 mb-4">
+                      <div className="flex items-center text-gray-700 text-[13px] font-medium gap-2">
+                        <i className="fa-regular fa-building text-gray-400"></i>{" "}
+                        {rel.organizer}
+                      </div>
+                      <div className="flex items-center text-gray-700 text-[13px] font-medium gap-2">
+                        <i className="fa-solid fa-location-dot text-gray-400"></i>{" "}
+                        {rel.location}
+                      </div>
+                    </div>
+
+                    <p
+                      className="text-gray-500 text-[13px] leading-relaxed mb-5 line-clamp-3 news-content"
+                      dangerouslySetInnerHTML={{ __html: rel.excerpt }}
+                    />
+
+                    <div className="border-t border-dashed border-gray-200 mb-4"></div>
+
+                    <div className="flex items-center gap-3">
+                      <Link
+                        href={`/events/${rel.id}`}
+                        className="flex-1 border border-gray-200 text-gray-700 text-[13px] font-semibold py-2.5 rounded-md hover:bg-gray-50 transition-colors text-center"
+                      >
+                        Details
+                      </Link>
+                      <button
+                        className={`flex-[1.5] text-white text-[13px] font-semibold py-2.5 rounded-md transition-colors ${
+                          idx === 1
+                            ? "bg-[#1a233a] hover:bg-gray-900"
+                            : "bg-blue-500 hover:bg-blue-600"
+                        }`}
+                      >
+                        Register Now
+                      </button>
+                      <button className="border border-gray-200 p-2.5 rounded-md hover:bg-gray-50 text-gray-600 transition-colors group">
+                        <i className="fa-regular fa-heart w-4 h-4 group-hover:text-red-500 transition-colors"></i>
+                      </button>
+                    </div>
                   </div>
-                </div>
-              </article>
-            );
-          })}
+                </article>
+              );
+            })}
         </div>
       </div>
       <style>{`
+        .news-content { overflow-wrap: break-word; word-break: break-word; }
         .news-content a { color: #2563eb !important; text-decoration: underline !important; font-weight: 500 !important; }
         .news-content a:hover { color: #1d4ed8 !important; }
       `}</style>
