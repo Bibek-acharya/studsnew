@@ -1,7 +1,7 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { useAuth } from '@/services/AuthContext'
-import { toast } from 'sonner'
+import { useAuth } from "@/services/AuthContext";
+import { toast } from "sonner";
 import { College, apiService, getImageUrl } from "@/services/api";
 import { CollegeFilters, isCollegeVerified } from "@/app/find-college/types";
 import {
@@ -20,8 +20,8 @@ import {
 } from "lucide-react";
 import Pagination from "@/components/ui/Pagination";
 
-import TrendingCollegesAd from "./ads/TrendingCollegesAd";
-import RecommendationFeedback from "./ads/RecommendationFeedback";
+// import TrendingCollegesAd from "./ads/TrendingCollegesAd";
+// import RecommendationFeedback from "./ads/RecommendationFeedback";
 import ClaimCollegeModal from "./ClaimCollegeModal";
 
 interface CollegeGridProps {
@@ -147,33 +147,44 @@ const CollegeGrid: React.FC<CollegeGridProps> = ({
   onNavigate,
   onMobileFilterClick,
 }) => {
-  const { isAuthenticated } = useAuth()
+  const { isAuthenticated } = useAuth();
   const [currentPage, setCurrentPage] = useState(1);
   const [savedColleges, setSavedColleges] = useState<(number | string)[]>([]);
-  const [bookmarkMap, setBookmarkMap] = useState<Record<string | number, number>>({})
-  const [pendingBookmarks, setPendingBookmarks] = useState<Record<string | number, boolean>>({})
-  const [selectedForInquiry, setSelectedForInquiry] = useState<(number | string)[]>([]);
+  const [bookmarkMap, setBookmarkMap] = useState<
+    Record<string | number, number>
+  >({});
+  const [pendingBookmarks, setPendingBookmarks] = useState<
+    Record<string | number, boolean>
+  >({});
+  const [selectedForInquiry, setSelectedForInquiry] = useState<
+    (number | string)[]
+  >([]);
   const [isQuickInquiryMode, setIsQuickInquiryMode] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [inquiryMessage, setInquiryMessage] = useState("");
   const [collegeToClaim, setCollegeToClaim] = useState<College | null>(null);
-  const [collegeForInquiry, setCollegeForInquiry] = useState<College | null>(null);
+  const [collegeForInquiry, setCollegeForInquiry] = useState<College | null>(
+    null,
+  );
   const [isInquiryModalOpen, setIsInquiryModalOpen] = useState(false);
   const [inquiryMessageSingle, setInquiryMessageSingle] = useState("");
 
   useEffect(() => {
-    if (!isAuthenticated) return
-    apiService.getBookmarksByType('colleges').then(items => {
-      const ids: (number | string)[] = []
-      const map: Record<string | number, number> = {}
-      items.forEach(b => {
-        ids.push(b.item_id)
-        map[b.item_id] = b.id
+    if (!isAuthenticated) return;
+    apiService
+      .getBookmarksByType("colleges")
+      .then((items) => {
+        const ids: (number | string)[] = [];
+        const map: Record<string | number, number> = {};
+        items.forEach((b) => {
+          ids.push(b.item_id);
+          map[b.item_id] = b.id;
+        });
+        setSavedColleges(ids);
+        setBookmarkMap(map);
       })
-      setSavedColleges(ids)
-      setBookmarkMap(map)
-    }).catch(() => {})
-  }, [isAuthenticated])
+      .catch(() => {});
+  }, [isAuthenticated]);
 
   useEffect(() => {
     // eslint-disable-next-line react-hooks/set-state-in-effect
@@ -188,7 +199,9 @@ const CollegeGrid: React.FC<CollegeGridProps> = ({
         ...filters.program.map(toFilterLabel),
         ...filters.course.map(toFilterLabel),
         ...filters.courseDuration.map(toFilterLabel),
-        ...SEARCHABLE_FILTER_KEYS.flatMap((key) => filters[key]).map(toFilterLabel),
+        ...SEARCHABLE_FILTER_KEYS.flatMap((key) => filters[key]).map(
+          toFilterLabel,
+        ),
       ]
         .map((value) => String(value).trim())
         .filter(Boolean),
@@ -196,7 +209,10 @@ const CollegeGrid: React.FC<CollegeGridProps> = ({
   );
 
   const locationTerms = useMemo(
-    () => [...filters.province, ...filters.district, ...filters.location].map(toFilterLabel),
+    () =>
+      [...filters.province, ...filters.district, ...filters.location].map(
+        toFilterLabel,
+      ),
     [filters],
   );
 
@@ -208,7 +224,10 @@ const CollegeGrid: React.FC<CollegeGridProps> = ({
   const { data, isLoading, error } = useQuery({
     queryKey: ["colleges", currentPage, filters, isQuickInquiryMode],
     queryFn: async () => {
-      const sortConfig: Record<string, { sort: string; order: "ASC" | "DESC" }> = {
+      const sortConfig: Record<
+        string,
+        { sort: string; order: "ASC" | "DESC" }
+      > = {
         popularity: { sort: "rating", order: "DESC" },
         rating: { sort: "rating", order: "DESC" },
         verified: { sort: "verified", order: "DESC" },
@@ -233,7 +252,8 @@ const CollegeGrid: React.FC<CollegeGridProps> = ({
       }
       if (filters.type.length > 0) params.type = filters.type.join(",");
       if (locationTerms.length > 0) params.location = locationTerms.join(",");
-      if (universityTerms.length > 0) params.affiliation = universityTerms.join(",");
+      if (universityTerms.length > 0)
+        params.affiliation = universityTerms.join(",");
       if (filters.feeMax < 2000000) params.feeMax = filters.feeMax;
       if (searchTerms.length > 0) params.search = searchTerms.join(" ");
 
@@ -244,28 +264,29 @@ const CollegeGrid: React.FC<CollegeGridProps> = ({
           page: currentPage,
           limit: COLLEGES_PER_PAGE,
           search: filters.search || undefined,
-          location: locationTerms.length > 0 ? locationTerms.join(",") : undefined,
+          location:
+            locationTerms.length > 0 ? locationTerms.join(",") : undefined,
         }),
       ]);
 
       // Map institution results to College shape
-      const institutionColleges: College[] = (institutionRes?.data?.institutions || []).map(
-        (inst: any) => ({
-          id: inst.college_id > 0 ? inst.college_id : (`inst_${inst.id}` as any),
-          name: inst.institution_name,
-          image_url: inst.banner_url || inst.logo_url,
-          description: inst.about,
-          location: inst.district,
-          website: inst.website_url,
-          verified: inst.verified ?? false,
-          claimed: inst.claimed ?? false,
-          affiliation: inst.affiliation || "",
-          featured: inst.featured || false,
-          rating: 0,
-          reviews: 0,
-          type: "College",
-        })
-      );
+      const institutionColleges: College[] = (
+        institutionRes?.data?.institutions || []
+      ).map((inst: any) => ({
+        id: inst.college_id > 0 ? inst.college_id : (`inst_${inst.id}` as any),
+        name: inst.institution_name,
+        image_url: inst.banner_url || inst.logo_url,
+        description: inst.about,
+        location: inst.district,
+        website: inst.website_url,
+        verified: inst.verified ?? false,
+        claimed: inst.claimed ?? false,
+        affiliation: inst.affiliation || "",
+        featured: inst.featured || false,
+        rating: 0,
+        reviews: 0,
+        type: "College",
+      }));
 
       // Build set of college IDs that are claimed by institutions
       const claimedCollegeIds = new Set(
@@ -280,10 +301,7 @@ const CollegeGrid: React.FC<CollegeGridProps> = ({
       );
 
       // Merge: institutions first, then remaining colleges (no duplicates)
-      const merged = [
-        ...institutionColleges,
-        ...filteredColleges,
-      ];
+      const merged = [...institutionColleges, ...filteredColleges];
 
       const collegePagination = collegeRes?.data?.pagination || {};
       const collegeTotal = collegePagination.total || 0;
@@ -296,7 +314,7 @@ const CollegeGrid: React.FC<CollegeGridProps> = ({
         instData.meta?.total ??
         (instData.institutions || []).length;
       const duplicateCount = claimedCollegeIds.size;
-      const combinedTotal = (collegeTotal - duplicateCount) + instTotal;
+      const combinedTotal = collegeTotal - duplicateCount + instTotal;
 
       return {
         data: {
@@ -304,7 +322,9 @@ const CollegeGrid: React.FC<CollegeGridProps> = ({
           pagination: {
             ...collegePagination,
             total: combinedTotal || merged.length,
-            totalPages: Math.ceil((combinedTotal || merged.length) / COLLEGES_PER_PAGE),
+            totalPages: Math.ceil(
+              (combinedTotal || merged.length) / COLLEGES_PER_PAGE,
+            ),
           },
         },
       };
@@ -315,39 +335,50 @@ const CollegeGrid: React.FC<CollegeGridProps> = ({
   const colleges = data?.data?.colleges || [];
   const totalResults = data?.data?.pagination?.total || 0;
   const totalPages = data?.data?.pagination?.totalPages || 1;
-  const showingFrom = totalResults === 0 ? 0 : (currentPage - 1) * COLLEGES_PER_PAGE + 1;
-  const showingTo = Math.min((currentPage - 1) * COLLEGES_PER_PAGE + colleges.length, totalResults);
+  const showingFrom =
+    totalResults === 0 ? 0 : (currentPage - 1) * COLLEGES_PER_PAGE + 1;
+  const showingTo = Math.min(
+    (currentPage - 1) * COLLEGES_PER_PAGE + colleges.length,
+    totalResults,
+  );
 
   const toggleSavedCollege = async (collegeId: number | string) => {
     if (!isAuthenticated) {
-      toast.error('Please login to save bookmarks')
-      return
+      toast.error("Please login to save bookmarks");
+      return;
     }
-    if (typeof collegeId !== 'number') return
-    if (pendingBookmarks[collegeId]) return
-    setPendingBookmarks(prev => ({ ...prev, [collegeId]: true }))
-    const existingBookmarkId = bookmarkMap[collegeId]
+    if (typeof collegeId !== "number") return;
+    if (pendingBookmarks[collegeId]) return;
+    setPendingBookmarks((prev) => ({ ...prev, [collegeId]: true }));
+    const existingBookmarkId = bookmarkMap[collegeId];
     try {
       if (existingBookmarkId) {
-        await apiService.deleteBookmark(existingBookmarkId)
-        setBookmarkMap(prev => {
-          const next = { ...prev }
-          delete next[collegeId]
-          return next
-        })
-        setSavedColleges(prev => prev.filter(id => id !== collegeId))
-        toast.success('Removed from bookmarks')
+        await apiService.deleteBookmark(existingBookmarkId);
+        setBookmarkMap((prev) => {
+          const next = { ...prev };
+          delete next[collegeId];
+          return next;
+        });
+        setSavedColleges((prev) => prev.filter((id) => id !== collegeId));
+        toast.success("Removed from bookmarks");
       } else {
-        const res = await apiService.createBookmark(collegeId as number, 'colleges')
-        const newBookmarkId = res.data.id
-        setBookmarkMap(prev => ({ ...prev, [collegeId]: newBookmarkId }))
-        setSavedColleges(prev => [...prev, collegeId])
-        toast.success('Added to bookmarks!')
+        const res = await apiService.createBookmark(
+          collegeId as number,
+          "colleges",
+        );
+        const newBookmarkId = res.data.id;
+        setBookmarkMap((prev) => ({ ...prev, [collegeId]: newBookmarkId }));
+        setSavedColleges((prev) => [...prev, collegeId]);
+        toast.success("Added to bookmarks!");
       }
     } catch {
-      toast.error('Failed to save bookmark')
+      toast.error("Failed to save bookmark");
     } finally {
-      setPendingBookmarks(prev => { const next = { ...prev }; delete next[collegeId]; return next })
+      setPendingBookmarks((prev) => {
+        const next = { ...prev };
+        delete next[collegeId];
+        return next;
+      });
     }
   };
 
@@ -388,7 +419,9 @@ const CollegeGrid: React.FC<CollegeGridProps> = ({
 
   const handleSingleInquirySubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    alert(`Success! Your inquiry for ${collegeForInquiry?.name} has been sent.`);
+    alert(
+      `Success! Your inquiry for ${collegeForInquiry?.name} has been sent.`,
+    );
     setIsInquiryModalOpen(false);
     setInquiryMessageSingle("");
     setCollegeForInquiry(null);
@@ -408,7 +441,9 @@ const CollegeGrid: React.FC<CollegeGridProps> = ({
         {/* Top Row: Count and Search */}
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 pb-2">
           <h1 className="text-base text-gray-900">
-            Showing {showingFrom.toLocaleString()}-{showingTo.toLocaleString()} of {totalResults.toLocaleString()} <span className="font-bold">Colleges</span>
+            Showing {showingFrom.toLocaleString()}-{showingTo.toLocaleString()}{" "}
+            of {totalResults.toLocaleString()}{" "}
+            <span className="font-bold">Colleges</span>
           </h1>
           <div className="relative w-full sm:w-95 flex items-center gap-2">
             <div className="relative flex-1">
@@ -502,7 +537,10 @@ const CollegeGrid: React.FC<CollegeGridProps> = ({
         {isLoading && colleges.length === 0 && (
           <>
             {Array.from({ length: 6 }).map((_, i) => (
-              <div key={i} className="flex animate-pulse flex-col rounded-md border border-gray-200 bg-white p-4">
+              <div
+                key={i}
+                className="flex animate-pulse flex-col rounded-md border border-gray-200 bg-white p-4"
+              >
                 <div className="h-35 w-full rounded-md bg-gray-200" />
                 <div className="mt-3 space-y-2.5">
                   <div className="h-5 w-3/4 rounded bg-gray-200" />
@@ -521,10 +559,6 @@ const CollegeGrid: React.FC<CollegeGridProps> = ({
         )}
 
         {colleges.map((college: College, index: number) => {
-          const globalIndex = (currentPage - 1) * COLLEGES_PER_PAGE + index;
-          const isAfter2Rows = (index + 1) % 6 === 0;
-          const adCycleIndex = Math.floor(globalIndex / 6) % 3;
-
           return (
             <React.Fragment key={college.id}>
               <ProgramCard
@@ -544,12 +578,12 @@ const CollegeGrid: React.FC<CollegeGridProps> = ({
                   setIsInquiryModalOpen(true);
                 }}
               />
-              {isAfter2Rows && (
+              {/* {isAfter2Rows && (
                 <div className="col-span-1 md:col-span-2 xl:col-span-3 w-full">
                   {adCycleIndex === 0 && <TrendingCollegesAd />}
                   {adCycleIndex === 1 && <RecommendationFeedback />}
                 </div>
-              )}
+              )} */}
             </React.Fragment>
           );
         })}
@@ -559,7 +593,9 @@ const CollegeGrid: React.FC<CollegeGridProps> = ({
             <div className="w-24 h-24 rounded-full bg-gray-50 flex items-center justify-center mb-6">
               <FolderOpen className="w-10 h-10 text-gray-300" />
             </div>
-            <h3 className="text-xl font-bold text-gray-900">No Colleges Found</h3>
+            <h3 className="text-xl font-bold text-gray-900">
+              No Colleges Found
+            </h3>
           </div>
         )}
       </div>
@@ -763,7 +799,6 @@ export const ProgramCard: React.FC<{
   onClaim,
   onSingleInquiry,
 }) => {
-
   return (
     <div className="flex h-full cursor-pointer flex-col rounded-md border border-gray-200 bg-white p-4 transition-all duration-300 hover:border-blue-500/20 overflow-visible">
       <div
@@ -782,9 +817,7 @@ export const ProgramCard: React.FC<{
             className="h-full w-full object-cover"
           />
         ) : (
-          <div className="flex h-full w-full items-center justify-center bg-brand-blue">
-            
-          </div>
+          <div className="flex h-full w-full items-center justify-center bg-brand-blue"></div>
         )}
         {!isClaimed && (
           <button
@@ -795,7 +828,8 @@ export const ProgramCard: React.FC<{
             }}
             className="absolute bottom-2 left-2 z-10 rounded-md bg-black/65 px-2.5 py-1 text-[11px] font-semibold text-white backdrop-blur-sm transition-colors hover:bg-black/75"
           >
-            Is this your college? <span className="underline text-brand-blue">Claim now</span>
+            Is this your college?{" "}
+            <span className="underline text-brand-blue">Claim now</span>
           </button>
         )}
         {isQuickInquiryMode && (
@@ -831,12 +865,14 @@ export const ProgramCard: React.FC<{
 
       <div className="flex flex-1 flex-col px-0 pt-3 overflow-visible">
         <div className="flex items-center gap-1.5 mb-2">
-<button
+          <button
             type="button"
             onClick={() => onNavigate("collegeDetails", { id: college.id })}
             className="group/title relative truncate text-left text-[20px] font-bold text-slate-800 tracking-tight transition-colors hover:text-blue-600 line-clamp-2"
           >
-            <span className="truncate block" title={college.name}>{college.name}</span>
+            <span className="truncate block" title={college.name}>
+              {college.name}
+            </span>
             <span className="absolute bottom-full left-0 mb-2 invisible opacity-0 group-hover/title:visible group-hover/title:opacity-100 bg-gray-900 text-white text-[13px] font-medium py-1.5 px-3 rounded  whitespace-nowrap transition-all duration-200 z-50 pointer-events-none">
               {college.name}
               <span className="absolute top-full left-4 -mt-px border-[5px] border-transparent border-t-gray-900"></span>
@@ -862,8 +898,13 @@ export const ProgramCard: React.FC<{
           <span className="mx-3 text-gray-300 font-light">|</span>
           <div className="flex min-w-0 flex-1 items-center gap-1.5">
             <MapPin className="w-4.5 h-4.5 text-gray-400" />
-<span className="group/location block min-w-0 truncate font-semibold text-slate-700 line-clamp-1" title={college.location || "Kathmandu"}>
-              <span className="truncate block">{college.location || "Kathmandu"}</span>
+            <span
+              className="group/location block min-w-0 truncate font-semibold text-slate-700 line-clamp-1"
+              title={college.location || "Kathmandu"}
+            >
+              <span className="truncate block">
+                {college.location || "Kathmandu"}
+              </span>
               <span className="absolute bottom-full left-0 mb-2 invisible opacity-0 group-hover/location:visible group-hover/location:opacity-100 bg-gray-900 text-white text-[13px] font-medium py-1.5 px-3 rounded  whitespace-nowrap transition-all duration-200 z-50 pointer-events-none">
                 {college.location || "Kathmandu"}
                 <span className="absolute top-full left-4 -mt-px border-[5px] border-transparent border-t-gray-900"></span>
@@ -874,33 +915,34 @@ export const ProgramCard: React.FC<{
 
         <div className="flex items-start gap-2 text-[14px] text-gray-500 mb-2">
           <Award className="w-4.5 h-4.5 text-gray-400 shrink-0 mt-0.75" />
-<p className="group/affil leading-snug pr-4 font-semibold text-slate-700 line-clamp-1" title={college.affiliation || ""}>
-            <span className="truncate block">
-              {college.affiliation || ""}
-            </span>
+          <p
+            className="group/affil leading-snug pr-4 font-semibold text-slate-700 line-clamp-1"
+            title={college.affiliation || ""}
+          >
+            <span className="truncate block">{college.affiliation || ""}</span>
             {college.affiliation && (
-            <span className="absolute bottom-full left-0 mb-2 invisible opacity-0 group-hover/affil:visible group-hover/affil:opacity-100 bg-gray-900 text-white text-[13px] font-medium py-1.5 px-3 rounded  whitespace-nowrap transition-all duration-200 z-50 pointer-events-none">
-              {college.affiliation}
-              <span className="absolute top-full left-4 -mt-px border-[5px] border-transparent border-t-gray-900"></span>
-            </span>
+              <span className="absolute bottom-full left-0 mb-2 invisible opacity-0 group-hover/affil:visible group-hover/affil:opacity-100 bg-gray-900 text-white text-[13px] font-medium py-1.5 px-3 rounded  whitespace-nowrap transition-all duration-200 z-50 pointer-events-none">
+                {college.affiliation}
+                <span className="absolute top-full left-4 -mt-px border-[5px] border-transparent border-t-gray-900"></span>
+              </span>
             )}
           </p>
         </div>
 
-       {college.featured && college.website && (
-        <div className="flex items-center gap-2 text-[14px] text-gray-500 mb-3">
-          <Globe className="w-4.5 h-4.5 text-gray-400 shrink-0" />
-          <a
-            href={college.website}
-            target="_blank"
-            rel="noopener noreferrer"
-            onClick={(e) => e.stopPropagation()}
-            className="text-brand-blue hover:underline font-medium truncate"
-          >
-            {college.website.replace(/^https?:\/\//, "")}
-          </a>
-        </div>
-      )}
+        {college.featured && college.website && (
+          <div className="flex items-center gap-2 text-[14px] text-gray-500 mb-3">
+            <Globe className="w-4.5 h-4.5 text-gray-400 shrink-0" />
+            <a
+              href={college.website}
+              target="_blank"
+              rel="noopener noreferrer"
+              onClick={(e) => e.stopPropagation()}
+              className="text-brand-blue hover:underline font-medium truncate"
+            >
+              {college.website.replace(/^https?:\/\//, "")}
+            </a>
+          </div>
+        )}
 
         <div className="mt-2 flex items-center gap-4 mb-3">
           <a
@@ -944,10 +986,7 @@ export const ProgramCard: React.FC<{
         </div>
 
         <div className="flex flex-col gap-3 mt-auto">
-          
-
           <div className="flex gap-2">
-
             <button
               type="button"
               onClick={(e) => {
