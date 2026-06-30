@@ -153,7 +153,7 @@ export async function fetchPublicBlogById(
 
     const result = await res.json();
     if (result?.data) {
-      const raw = result.data;
+      const raw = result.data.blog || result.data;
       const blog: BlogEntry = {
         id: raw.id ?? raw.blog_id,
         title: raw.title || "",
@@ -175,7 +175,7 @@ export async function fetchPublicBlogById(
           raw.publish_date ||
           new Date().toISOString(),
       };
-      const rawRelated = raw.related || [];
+      const rawRelated = result.data.related || [];
       const related: BlogEntry[] = Array.isArray(rawRelated)
         ? rawRelated.map((r: any): BlogEntry => ({
             id: r.id ?? r.blog_id,

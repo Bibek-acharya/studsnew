@@ -26,18 +26,22 @@ export interface EventMeta {
   pages: number;
 }
 
-export async function fetchPublicEvents(params: {
-  page?: number;
-  limit?: number;
-  category?: string;
-} = {}): Promise<{ events: EventEntry[]; meta: EventMeta }> {
+export async function fetchPublicEvents(
+  params: {
+    page?: number;
+    limit?: number;
+    category?: string;
+  } = {},
+): Promise<{ events: EventEntry[]; meta: EventMeta }> {
   try {
     const query = new URLSearchParams();
     if (params.page) query.set("page", String(params.page));
     if (params.limit) query.set("limit", String(params.limit));
     if (params.category) query.set("category", params.category);
 
-    const res = await fetch(`/api/v1/events?${query.toString()}`);
+    const res = await fetch(
+      `${API_BASE_URL}/api/v1/education/events?${query.toString()}`,
+    );
 
     if (!res.ok) {
       throw new Error("Failed to fetch events");
@@ -53,26 +57,37 @@ export async function fetchPublicEvents(params: {
     }
 
     try {
-      const providerRes = await fetch(`${API_BASE_URL}/api/v1/public/events?page=1&limit=50`);
+      const providerRes = await fetch(
+        `${API_BASE_URL}/api/v1/public/events?page=1&limit=50`,
+      );
       if (providerRes.ok) {
         const providerResult = await providerRes.json();
-        if (providerResult?.data?.events && providerResult.data.events.length > 0) {
-          const providerEvents = providerResult.data.events.map((e: any): EventEntry => ({
-            id: `provider-${e.id}`,
-            title: e.name,
-            excerpt: e.short_desc || "",
-            description: e.description || "",
-            category: e.category || e.event_type || "Event",
-            image: e.image_url || "",
-            organizer: e.organized_by || "",
-            location: e.location || "",
-            date: e.start_date ? new Date(e.start_date).toLocaleDateString() : "",
-            time: e.start_date ? new Date(e.start_date).toLocaleTimeString() : "",
-            registrationFee: "",
-            interestedCount: 0,
-            published: true,
-            created_at: e.created_at,
-          }));
+        if (
+          providerResult?.data?.events &&
+          providerResult.data.events.length > 0
+        ) {
+          const providerEvents = providerResult.data.events.map(
+            (e: any): EventEntry => ({
+              id: `provider-${e.id}`,
+              title: e.name,
+              excerpt: e.short_desc || "",
+              description: e.description || "",
+              category: e.category || e.event_type || "Event",
+              image: e.image_url || "",
+              organizer: e.organized_by || "",
+              location: e.location || "",
+              date: e.start_date
+                ? new Date(e.start_date).toLocaleDateString()
+                : "",
+              time: e.start_date
+                ? new Date(e.start_date).toLocaleTimeString()
+                : "",
+              registrationFee: "",
+              interestedCount: 0,
+              published: true,
+              created_at: e.created_at,
+            }),
+          );
           events = [...events, ...providerEvents];
           total += providerResult.data.meta?.total || 0;
         }
@@ -81,18 +96,25 @@ export async function fetchPublicEvents(params: {
       console.warn("Failed to fetch provider events:", providerErr);
     }
 
-    return { 
-      events, 
-      meta: { total, page: params.page || 1, limit: params.limit || 12, pages: Math.ceil(total / (params.limit || 12)) } 
+    return {
+      events,
+      meta: {
+        total,
+        page: params.page || 1,
+        limit: params.limit || 12,
+        pages: Math.ceil(total / (params.limit || 12)),
+      },
     };
   } catch {
     return { events: [], meta: { total: 0, page: 1, limit: 12, pages: 0 } };
   }
 }
 
-export async function fetchPublicEventById(id: string): Promise<EventEntry | null> {
+export async function fetchPublicEventById(
+  id: string,
+): Promise<EventEntry | null> {
   try {
-    const res = await fetch(`/api/v1/events/${id}`);
+    const res = await fetch(`${API_BASE_URL}/api/v1/education/events/${id}`);
 
     if (!res.ok) {
       return null;
@@ -104,29 +126,33 @@ export async function fetchPublicEventById(id: string): Promise<EventEntry | nul
       return {
         id: String(raw.id ?? raw.event_id),
         title: raw.title || raw.name || "",
-        excerpt: raw.excerpt || raw.short_desc || raw.description?.slice(0, 200) || "",
+        excerpt:
+          raw.excerpt || raw.short_desc || raw.description?.slice(0, 200) || "",
         description: raw.description || "",
         category: raw.category || raw.event_type || "Event",
         image: raw.image || raw.image_url || raw.banner_image || "",
         organizer: raw.organizer || raw.organized_by || "",
         location: raw.location || "",
-        date: raw.date || raw.start_date
-          ? new Date(raw.date || raw.start_date).toLocaleDateString("en-US", {
-              month: "short",
-              day: "numeric",
-              year: "numeric",
-            })
-          : "",
-        time: raw.time || raw.start_date
-          ? new Date(raw.start_date).toLocaleTimeString("en-US", {
-              hour: "2-digit",
-              minute: "2-digit",
-            })
-          : "",
+        date:
+          raw.date || raw.start_date
+            ? new Date(raw.date || raw.start_date).toLocaleDateString("en-US", {
+                month: "short",
+                day: "numeric",
+                year: "numeric",
+              })
+            : "",
+        time:
+          raw.time || raw.start_date
+            ? new Date(raw.start_date).toLocaleTimeString("en-US", {
+                hour: "2-digit",
+                minute: "2-digit",
+              })
+            : "",
         registrationFee: raw.registrationFee ?? raw.registration_fee ?? "",
         interestedCount: raw.interestedCount ?? raw.interested_count ?? 0,
         published: raw.published ?? raw.status === "published",
-        created_at: raw.created_at || raw.publish_date || new Date().toISOString(),
+        created_at:
+          raw.created_at || raw.publish_date || new Date().toISOString(),
       };
     }
 
@@ -172,18 +198,33 @@ async function extractData<T>(promise: Promise<any>): Promise<T> {
 }
 
 export const adminEventApi = {
-  async list(params: { page?: number; limit?: number; category?: string; search?: string } = {}): Promise<{ events: AdminEvent[]; meta: EventMeta }> {
+  async list(
+    params: {
+      page?: number;
+      limit?: number;
+      category?: string;
+      search?: string;
+    } = {},
+  ): Promise<{ events: AdminEvent[]; meta: EventMeta }> {
     const query = new URLSearchParams();
     if (params.page) query.set("page", String(params.page));
     if (params.limit) query.set("limit", String(params.limit));
     if (params.category) query.set("category", params.category);
     if (params.search) query.set("search", params.search);
     const qs = query.toString();
-    return extractData(apiRequest(`/api/v1/admin/events${qs ? "?" + qs : ""}`, { authToken: getSuperadminToken() ?? undefined }));
+    return extractData(
+      apiRequest(`/api/v1/admin/events${qs ? "?" + qs : ""}`, {
+        authToken: getSuperadminToken() ?? undefined,
+      }),
+    );
   },
 
   async getById(id: number): Promise<AdminEvent> {
-    return extractData(apiRequest(`/api/v1/admin/events/${id}`, { authToken: getSuperadminToken() ?? undefined }));
+    return extractData(
+      apiRequest(`/api/v1/admin/events/${id}`, {
+        authToken: getSuperadminToken() ?? undefined,
+      }),
+    );
   },
 
   async create(data: {
@@ -198,30 +239,37 @@ export const adminEventApi = {
     registrationFee?: string;
     image?: string;
   }): Promise<AdminEvent> {
-    return extractData(apiRequest("/api/v1/admin/events", {
-      method: "POST",
-      body: JSON.stringify(data),
-      authToken: getSuperadminToken() ?? undefined,
-    }));
+    return extractData(
+      apiRequest("/api/v1/admin/events", {
+        method: "POST",
+        body: JSON.stringify(data),
+        authToken: getSuperadminToken() ?? undefined,
+      }),
+    );
   },
 
-  async update(id: number, data: {
-    title?: string;
-    excerpt?: string;
-    description?: string;
-    category?: string;
-    organizer?: string;
-    location?: string;
-    date?: string;
-    time?: string;
-    registrationFee?: string;
-    image?: string;
-  }): Promise<AdminEvent> {
-    return extractData(apiRequest(`/api/v1/admin/events/${id}`, {
-      method: "PUT",
-      body: JSON.stringify(data),
-      authToken: getSuperadminToken() ?? undefined,
-    }));
+  async update(
+    id: number,
+    data: {
+      title?: string;
+      excerpt?: string;
+      description?: string;
+      category?: string;
+      organizer?: string;
+      location?: string;
+      date?: string;
+      time?: string;
+      registrationFee?: string;
+      image?: string;
+    },
+  ): Promise<AdminEvent> {
+    return extractData(
+      apiRequest(`/api/v1/admin/events/${id}`, {
+        method: "PUT",
+        body: JSON.stringify(data),
+        authToken: getSuperadminToken() ?? undefined,
+      }),
+    );
   },
 
   async delete(id: number): Promise<void> {
@@ -232,23 +280,28 @@ export const adminEventApi = {
   },
 
   async toggleFeatured(id: number): Promise<AdminEvent> {
-    return extractData(apiRequest(`/api/v1/admin/events/${id}/feature`, {
-      method: "PUT",
-      authToken: getSuperadminToken() ?? undefined,
-    }));
+    return extractData(
+      apiRequest(`/api/v1/admin/events/${id}/feature`, {
+        method: "PUT",
+        authToken: getSuperadminToken() ?? undefined,
+      }),
+    );
   },
 
   async uploadImage(file: File): Promise<string> {
     const formData = new FormData();
     formData.append("image", file);
-    const res = await extractData<{ url?: string }>(apiRequest("/api/v1/admin/news/upload-image", {
-      method: "POST",
-      body: formData,
-      authToken: getSuperadminToken() ?? undefined,
-    }));
+    const res = await extractData<{ url?: string }>(
+      apiRequest("/api/v1/admin/news/upload-image", {
+        method: "POST",
+        body: formData,
+        authToken: getSuperadminToken() ?? undefined,
+      }),
+    );
     const rawUrl = res?.url || "";
     if (!rawUrl) return "";
-    if (rawUrl.startsWith("http://") || rawUrl.startsWith("https://")) return rawUrl;
+    if (rawUrl.startsWith("http://") || rawUrl.startsWith("https://"))
+      return rawUrl;
     const base = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080";
     return `${base}${rawUrl.startsWith("/") ? "" : "/"}${rawUrl}`;
   },
