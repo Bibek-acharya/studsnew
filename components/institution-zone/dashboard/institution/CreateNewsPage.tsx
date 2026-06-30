@@ -1,9 +1,18 @@
 "use client";
 
+import "react-quill-new/dist/quill.snow.css";
+
 import React, { useState, useCallback, useEffect, Suspense } from "react";
 import dynamic from "next/dynamic";
 import { useSearchParams, useRouter } from "next/navigation";
-import { Newspaper, FloppyDisk, PaperPlaneTilt, Image, Spinner, X } from "@phosphor-icons/react";
+import {
+  Newspaper,
+  FloppyDisk,
+  PaperPlaneTilt,
+  Image,
+  Spinner,
+  X,
+} from "@phosphor-icons/react";
 import { toast } from "sonner";
 import SectionHeader from "@/components/institution-zone/dashboard/shared/SectionHeader";
 import { institutionNewsApi } from "@/services/institutionNewsApi";
@@ -20,7 +29,16 @@ const quillModules = {
   ],
 };
 
-const quillFormats = ["bold", "italic", "underline", "strike", "list", "align", "link", "image"];
+const quillFormats = [
+  "bold",
+  "italic",
+  "underline",
+  "strike",
+  "list",
+  "align",
+  "link",
+  "image",
+];
 
 const NEWS_TYPES = [
   { value: "notice", label: "Notice" },
@@ -33,7 +51,9 @@ const NEWS_TYPES = [
 function CreateNewsForm() {
   const searchParams = useSearchParams();
   const router = useRouter();
-  const newsId = searchParams.get("edit") ? Number(searchParams.get("edit")) : null;
+  const newsId = searchParams.get("edit")
+    ? Number(searchParams.get("edit"))
+    : null;
   const isEditing = !!newsId;
 
   const [title, setTitle] = useState("");
@@ -54,7 +74,8 @@ function CreateNewsForm() {
   useEffect(() => {
     if (newsId) {
       setLoadingNews(true);
-      institutionNewsApi.getById(newsId)
+      institutionNewsApi
+        .getById(newsId)
         .then((news) => {
           setTitle(news.title || "");
           setNewsType(news.news_type || "");
@@ -90,45 +111,74 @@ function CreateNewsForm() {
     }
   }, []);
 
-  const handleSave = useCallback(async (draft: boolean) => {
-    if (!title.trim()) { setError("Title is required"); return; }
-    if (!featuredImageUrl) { setError("Featured image is required"); return; }
-    setSubmitting(true);
-    setError("");
-
-    try {
-      const payload = {
-        title,
-        short_desc: shortDesc,
-        content,
-        image_url: featuredImageUrl,
-        news_type: newsType,
-        published_by: publishedBy,
-        publish_date: publishDate,
-        tags: tags ? tags.split(",").map((t) => t.trim()) : [],
-        allow_comments: allowComments,
-        status: draft ? "draft" : "published",
-      };
-
-      if (isEditing && newsId) {
-        await institutionNewsApi.update(newsId, payload);
-        toast.success(draft ? "News updated as draft." : "News updated successfully.");
-      } else {
-        await institutionNewsApi.create(payload);
-        toast.success(draft ? "News saved as draft." : "News published successfully.");
+  const handleSave = useCallback(
+    async (draft: boolean) => {
+      if (!title.trim()) {
+        setError("Title is required");
+        return;
       }
-      router.push("/institution-zone/dashboard/news/directory");
-    } catch (err: any) {
-      setError(err.message || "Failed to save news");
-    } finally {
-      setSubmitting(false);
-    }
-  }, [title, shortDesc, content, featuredImageUrl, newsType, publishedBy, publishDate, tags, allowComments, isEditing, newsId, router]);
+      if (!featuredImageUrl) {
+        setError("Featured image is required");
+        return;
+      }
+      setSubmitting(true);
+      setError("");
 
-  const handleImageFileChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) handleImageSelect(file);
-  }, [handleImageSelect]);
+      try {
+        const payload = {
+          title,
+          short_desc: shortDesc,
+          content,
+          image_url: featuredImageUrl,
+          news_type: newsType,
+          published_by: publishedBy,
+          publish_date: publishDate,
+          tags: tags ? tags.split(",").map((t) => t.trim()) : [],
+          allow_comments: allowComments,
+          status: draft ? "draft" : "published",
+        };
+
+        if (isEditing && newsId) {
+          await institutionNewsApi.update(newsId, payload);
+          toast.success(
+            draft ? "News updated as draft." : "News updated successfully.",
+          );
+        } else {
+          await institutionNewsApi.create(payload);
+          toast.success(
+            draft ? "News saved as draft." : "News published successfully.",
+          );
+        }
+        router.push("/institution-zone/dashboard/news/directory");
+      } catch (err: any) {
+        setError(err.message || "Failed to save news");
+      } finally {
+        setSubmitting(false);
+      }
+    },
+    [
+      title,
+      shortDesc,
+      content,
+      featuredImageUrl,
+      newsType,
+      publishedBy,
+      publishDate,
+      tags,
+      allowComments,
+      isEditing,
+      newsId,
+      router,
+    ],
+  );
+
+  const handleImageFileChange = useCallback(
+    (e: React.ChangeEvent<HTMLInputElement>) => {
+      const file = e.target.files?.[0];
+      if (file) handleImageSelect(file);
+    },
+    [handleImageSelect],
+  );
 
   if (loadingNews) {
     return (
@@ -137,7 +187,10 @@ function CreateNewsForm() {
           title="Edit News"
           breadcrumbItems={[
             { label: "Dashboard", href: "/institution-zone/dashboard" },
-            { label: "News", href: "/institution-zone/dashboard/news/directory" },
+            {
+              label: "News",
+              href: "/institution-zone/dashboard/news/directory",
+            },
             { label: "Edit" },
           ]}
         />
@@ -177,7 +230,9 @@ function CreateNewsForm() {
         <div className="bg-white rounded-xl p-6 border border-gray-100 shadow-sm">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1.5">News Type <span className="text-red-500">*</span></label>
+              <label className="block text-sm font-medium text-gray-700 mb-1.5">
+                News Type <span className="text-red-500">*</span>
+              </label>
               <select
                 value={newsType}
                 onChange={(e) => setNewsType(e.target.value)}
@@ -185,12 +240,16 @@ function CreateNewsForm() {
               >
                 <option value="">Select Type</option>
                 {NEWS_TYPES.map((t) => (
-                  <option key={t.value} value={t.value}>{t.label}</option>
+                  <option key={t.value} value={t.value}>
+                    {t.label}
+                  </option>
                 ))}
               </select>
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1.5">Published By</label>
+              <label className="block text-sm font-medium text-gray-700 mb-1.5">
+                Published By
+              </label>
               <input
                 type="text"
                 value={publishedBy}
@@ -200,7 +259,9 @@ function CreateNewsForm() {
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1.5">Publish Date</label>
+              <label className="block text-sm font-medium text-gray-700 mb-1.5">
+                Publish Date
+              </label>
               <input
                 type="date"
                 value={publishDate}
@@ -224,7 +285,10 @@ function CreateNewsForm() {
               />
               <button
                 type="button"
-                onClick={() => { setFeaturedImageUrl(""); setFeaturedImagePreview(""); }}
+                onClick={() => {
+                  setFeaturedImageUrl("");
+                  setFeaturedImagePreview("");
+                }}
                 className="absolute top-2 right-2 p-1.5 bg-white/90 rounded-full text-gray-600 hover:bg-white"
               >
                 <X className="w-4 h-4" />
@@ -233,16 +297,31 @@ function CreateNewsForm() {
           ) : (
             <label className="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center hover:border-blue-500 cursor-pointer transition-colors block">
               <Image className="w-12 h-12 text-gray-300 mx-auto mb-3" />
-              <p className="text-sm text-gray-500">Click to upload or drag and drop</p>
-              <p className="text-xs text-gray-400 mt-1">PNG, JPG or WEBP (Max 5MB)</p>
-              <input type="file" accept="image/*" onChange={handleImageFileChange} className="hidden" />
+              <p className="text-sm text-gray-500">
+                Click to upload or drag and drop
+              </p>
+              <p className="text-xs text-gray-400 mt-1">
+                PNG, JPG or WEBP (Max 5MB)
+              </p>
+              <input
+                type="file"
+                accept="image/*"
+                onChange={handleImageFileChange}
+                className="hidden"
+              />
             </label>
           )}
-          {uploadingImage && <p className="mt-2 text-xs text-blue-600">Uploading featured image...</p>}
+          {uploadingImage && (
+            <p className="mt-2 text-xs text-blue-600">
+              Uploading featured image...
+            </p>
+          )}
         </div>
 
         <div className="bg-white rounded-xl p-6 border border-gray-100 shadow-sm">
-          <label className="block text-sm font-medium text-gray-700 mb-1.5">Short Description / Summary</label>
+          <label className="block text-sm font-medium text-gray-700 mb-1.5">
+            Short Description / Summary
+          </label>
           <div className="border border-gray-200 rounded-lg overflow-hidden">
             <ReactQuill
               theme="snow"
@@ -259,7 +338,9 @@ function CreateNewsForm() {
         </div>
 
         <div className="bg-white rounded-xl p-6 border border-gray-100 shadow-sm">
-          <label className="block text-sm font-medium text-gray-700 mb-1.5">Full Content <span className="text-red-500">*</span></label>
+          <label className="block text-sm font-medium text-gray-700 mb-1.5">
+            Full Content <span className="text-red-500">*</span>
+          </label>
           <div className="border border-gray-200 rounded-lg overflow-hidden">
             <ReactQuill
               theme="snow"
@@ -275,7 +356,9 @@ function CreateNewsForm() {
         <div className="bg-white rounded-xl p-6 border border-gray-100 shadow-sm">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1.5">Tags</label>
+              <label className="block text-sm font-medium text-gray-700 mb-1.5">
+                Tags
+              </label>
               <input
                 type="text"
                 value={tags}
@@ -286,8 +369,12 @@ function CreateNewsForm() {
             </div>
             <div className="flex items-center justify-between p-4 border border-gray-200 rounded-lg">
               <div>
-                <label className="block text-sm font-medium text-gray-700">Allow Comments</label>
-                <p className="text-xs text-gray-500">Enable users to comment on this news</p>
+                <label className="block text-sm font-medium text-gray-700">
+                  Allow Comments
+                </label>
+                <p className="text-xs text-gray-500">
+                  Enable users to comment on this news
+                </p>
               </div>
               <label className="relative inline-flex items-center cursor-pointer">
                 <input
@@ -313,7 +400,9 @@ function CreateNewsForm() {
           </button>
           <button
             onClick={() => handleSave(false)}
-            disabled={submitting || uploadingImage || !title.trim() || !featuredImageUrl}
+            disabled={
+              submitting || uploadingImage || !title.trim() || !featuredImageUrl
+            }
             className="px-4 py-2 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-700 flex items-center gap-2 disabled:opacity-50"
           >
             <PaperPlaneTilt />
@@ -333,13 +422,15 @@ function CreateNewsForm() {
 
 export default function CreateNewsPage() {
   return (
-    <Suspense fallback={
-      <div className="p-4 md:p-6 lg:p-8">
-        <div className="flex items-center justify-center py-20">
-          <Spinner className="w-8 h-8 text-blue-600 animate-spin" />
+    <Suspense
+      fallback={
+        <div className="p-4 md:p-6 lg:p-8">
+          <div className="flex items-center justify-center py-20">
+            <Spinner className="w-8 h-8 text-blue-600 animate-spin" />
+          </div>
         </div>
-      </div>
-    }>
+      }
+    >
       <CreateNewsForm />
     </Suspense>
   );

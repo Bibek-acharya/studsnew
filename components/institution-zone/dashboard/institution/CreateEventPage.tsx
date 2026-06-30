@@ -1,9 +1,18 @@
 "use client";
 
+import "react-quill-new/dist/quill.snow.css";
+
 import React, { useState, useCallback, useEffect, Suspense } from "react";
 import dynamic from "next/dynamic";
 import { useSearchParams, useRouter } from "next/navigation";
-import { CalendarBlank, FloppyDisk, PaperPlaneTilt, Image, Spinner, X } from "@phosphor-icons/react";
+import {
+  CalendarBlank,
+  FloppyDisk,
+  PaperPlaneTilt,
+  Image,
+  Spinner,
+  X,
+} from "@phosphor-icons/react";
 import { toast } from "sonner";
 import SectionHeader from "@/components/institution-zone/dashboard/shared/SectionHeader";
 import { institutionEventsApi } from "@/services/institutionEventsApi";
@@ -20,7 +29,16 @@ const quillModules = {
   ],
 };
 
-const quillFormats = ["bold", "italic", "underline", "strike", "list", "align", "link", "image"];
+const quillFormats = [
+  "bold",
+  "italic",
+  "underline",
+  "strike",
+  "list",
+  "align",
+  "link",
+  "image",
+];
 
 const EVENT_TYPES = [
   { value: "workshop", label: "Workshop" },
@@ -44,7 +62,9 @@ const CATEGORIES = [
 function CreateEventForm() {
   const searchParams = useSearchParams();
   const router = useRouter();
-  const eventId = searchParams.get("edit") ? Number(searchParams.get("edit")) : null;
+  const eventId = searchParams.get("edit")
+    ? Number(searchParams.get("edit"))
+    : null;
   const isEditing = !!eventId;
 
   const [title, setTitle] = useState("");
@@ -74,7 +94,8 @@ function CreateEventForm() {
   useEffect(() => {
     if (eventId) {
       setLoadingEvent(true);
-      institutionEventsApi.getById(eventId)
+      institutionEventsApi
+        .getById(eventId)
         .then((event) => {
           setTitle(event.name || "");
           setEventType(event.event_type || "");
@@ -82,11 +103,13 @@ function CreateEventForm() {
           if (event.start_date) {
             const datePart = event.start_date.split("T")[0];
             setEventDate(datePart);
-            const timePart = event.start_date.split("T")[1]?.substring(0, 5) || "";
+            const timePart =
+              event.start_date.split("T")[1]?.substring(0, 5) || "";
             setStartTime(timePart);
           }
           if (event.end_date) {
-            const endTimePart = event.end_date.split("T")[1]?.substring(0, 5) || "";
+            const endTimePart =
+              event.end_date.split("T")[1]?.substring(0, 5) || "";
             setEndTime(endTimePart);
           }
           setMaxParticipants(event.max_participants?.toString() || "");
@@ -132,70 +155,124 @@ function CreateEventForm() {
     else {
       const today = new Date();
       today.setHours(0, 0, 0, 0);
-      if (new Date(eventDate) < today) errs.eventDate = "Event date cannot be in the past";
+      if (new Date(eventDate) < today)
+        errs.eventDate = "Event date cannot be in the past";
     }
     if (!eventType) errs.eventType = "Event type is required";
     if (!venue.trim()) errs.venue = "Venue is required";
     if (!featuredImageUrl) errs.featuredImage = "Featured image is required";
-    if (!shortDesc.replace(/<[^>]*>/g, "").trim()) errs.shortDesc = "Summary is required";
-    if (!description.replace(/<[^>]*>/g, "").trim()) errs.description = "Description is required";
-    if (contactEmail && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(contactEmail)) errs.contactEmail = "Invalid email format";
+    if (!shortDesc.replace(/<[^>]*>/g, "").trim())
+      errs.shortDesc = "Summary is required";
+    if (!description.replace(/<[^>]*>/g, "").trim())
+      errs.description = "Description is required";
+    if (contactEmail && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(contactEmail))
+      errs.contactEmail = "Invalid email format";
     if (startTime && endTime && startTime >= endTime) {
       errs.endTime = "End time must be after start time";
     }
     setErrors(errs);
     return Object.keys(errs).length === 0;
-  }, [title, eventDate, eventType, venue, featuredImageUrl, shortDesc, description, contactEmail, startTime, endTime]);
+  }, [
+    title,
+    eventDate,
+    eventType,
+    venue,
+    featuredImageUrl,
+    shortDesc,
+    description,
+    contactEmail,
+    startTime,
+    endTime,
+  ]);
 
-  const handleSave = useCallback(async (draft: boolean) => {
-    if (!validate()) return;
-    setSubmitting(true);
-    setError("");
+  const handleSave = useCallback(
+    async (draft: boolean) => {
+      if (!validate()) return;
+      setSubmitting(true);
+      setError("");
 
-    try {
-      const startDateTime = startTime ? `${eventDate}T${startTime}:00` : `${eventDate}T00:00:00`;
-      const endDateTime = endTime ? `${eventDate}T${endTime}:00` : startDateTime;
-      const payload = {
-        name: title,
-        short_desc: shortDesc,
-        description,
-        image_url: featuredImageUrl,
-        event_type: eventType,
-        category,
-        max_participants: maxParticipants ? parseInt(maxParticipants) : undefined,
-        online_link: onlineLink,
-        organized_by: organizedBy,
-        contact_person: contactPerson,
-        contact_email: contactEmail,
-        start_date: startDateTime,
-        end_date: endDateTime,
-        location: venue,
-        tags: tags ? tags.split(",").map((t) => t.trim()) : [],
-        enable_registration: enableRegistration,
-        status: draft ? "draft" : "upcoming",
-      };
+      try {
+        const startDateTime = startTime
+          ? `${eventDate}T${startTime}:00`
+          : `${eventDate}T00:00:00`;
+        const endDateTime = endTime
+          ? `${eventDate}T${endTime}:00`
+          : startDateTime;
+        const payload = {
+          name: title,
+          short_desc: shortDesc,
+          description,
+          image_url: featuredImageUrl,
+          event_type: eventType,
+          category,
+          max_participants: maxParticipants
+            ? parseInt(maxParticipants)
+            : undefined,
+          online_link: onlineLink,
+          organized_by: organizedBy,
+          contact_person: contactPerson,
+          contact_email: contactEmail,
+          start_date: startDateTime,
+          end_date: endDateTime,
+          location: venue,
+          tags: tags ? tags.split(",").map((t) => t.trim()) : [],
+          enable_registration: enableRegistration,
+          status: draft ? "draft" : "upcoming",
+        };
 
-      if (isEditing && eventId) {
-        await institutionEventsApi.update(eventId, payload);
-        toast.success(draft ? "Event updated as draft." : "Event updated successfully.");
-      } else {
-        await institutionEventsApi.create(payload);
-        toast.success(draft ? "Event saved as draft." : "Event published successfully.");
+        if (isEditing && eventId) {
+          await institutionEventsApi.update(eventId, payload);
+          toast.success(
+            draft ? "Event updated as draft." : "Event updated successfully.",
+          );
+        } else {
+          await institutionEventsApi.create(payload);
+          toast.success(
+            draft ? "Event saved as draft." : "Event published successfully.",
+          );
+        }
+        router.push("/institution-zone/dashboard/events/directory");
+      } catch (err: any) {
+        setError(err.message || "Failed to save event");
+      } finally {
+        setSubmitting(false);
       }
-      router.push("/institution-zone/dashboard/events/directory");
-    } catch (err: any) {
-      setError(err.message || "Failed to save event");
-    } finally {
-      setSubmitting(false);
-    }
-  }, [validate, title, eventDate, startTime, endTime, eventType, category, maxParticipants, onlineLink, organizedBy, contactPerson, contactEmail, shortDesc, description, tags, enableRegistration, venue, featuredImageUrl, isEditing, eventId, router]);
+    },
+    [
+      validate,
+      title,
+      eventDate,
+      startTime,
+      endTime,
+      eventType,
+      category,
+      maxParticipants,
+      onlineLink,
+      organizedBy,
+      contactPerson,
+      contactEmail,
+      shortDesc,
+      description,
+      tags,
+      enableRegistration,
+      venue,
+      featuredImageUrl,
+      isEditing,
+      eventId,
+      router,
+    ],
+  );
 
-  const handleImageFileChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) handleImageSelect(file);
-  }, [handleImageSelect]);
+  const handleImageFileChange = useCallback(
+    (e: React.ChangeEvent<HTMLInputElement>) => {
+      const file = e.target.files?.[0];
+      if (file) handleImageSelect(file);
+    },
+    [handleImageSelect],
+  );
 
-  const clearError = (field: string) => setErrors((prev) => ({ ...prev, [field]: "" }));
+  const clearError = (field: string) =>
+    setErrors((prev) => ({ ...prev, [field]: "" }));
 
   if (loadingEvent) {
     return (
@@ -204,7 +281,10 @@ function CreateEventForm() {
           title="Edit Event"
           breadcrumbItems={[
             { label: "Dashboard", href: "/institution-zone/dashboard" },
-            { label: "Events", href: "/institution-zone/dashboard/events/directory" },
+            {
+              label: "Events",
+              href: "/institution-zone/dashboard/events/directory",
+            },
             { label: "Edit" },
           ]}
         />
@@ -222,7 +302,10 @@ function CreateEventForm() {
         title={isEditing ? "Edit Event" : "Create Event"}
         breadcrumbItems={[
           { label: "Dashboard", href: "/institution-zone/dashboard" },
-          { label: "Events", href: "/institution-zone/dashboard/events/directory" },
+          {
+            label: "Events",
+            href: "/institution-zone/dashboard/events/directory",
+          },
           { label: isEditing ? "Edit" : "Create" },
         ]}
       />
@@ -235,31 +318,47 @@ function CreateEventForm() {
           <input
             type="text"
             value={title}
-            onChange={(e) => { setTitle(e.target.value); clearError("title"); }}
+            onChange={(e) => {
+              setTitle(e.target.value);
+              clearError("title");
+            }}
             placeholder="Enter event title..."
             className={`w-full px-4 py-2.5 border rounded-lg text-sm focus:border-blue-600 outline-none ${errors.title ? "border-red-500" : "border-gray-300"}`}
           />
-          {errors.title && <p className="mt-1 text-xs text-red-500">{errors.title}</p>}
+          {errors.title && (
+            <p className="mt-1 text-xs text-red-500">{errors.title}</p>
+          )}
         </div>
 
         <div className="bg-white rounded-xl p-6 border border-gray-100 shadow-sm">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1.5">Event Type <span className="text-red-500">*</span></label>
+              <label className="block text-sm font-medium text-gray-700 mb-1.5">
+                Event Type <span className="text-red-500">*</span>
+              </label>
               <select
                 value={eventType}
-                onChange={(e) => { setEventType(e.target.value); clearError("eventType"); }}
+                onChange={(e) => {
+                  setEventType(e.target.value);
+                  clearError("eventType");
+                }}
                 className={`w-full px-4 py-2.5 border rounded-lg text-sm focus:border-blue-600 outline-none ${errors.eventType ? "border-red-500" : "border-gray-300"}`}
               >
                 <option value="">Select Type</option>
                 {EVENT_TYPES.map((t) => (
-                  <option key={t.value} value={t.value}>{t.label}</option>
+                  <option key={t.value} value={t.value}>
+                    {t.label}
+                  </option>
                 ))}
               </select>
-              {errors.eventType && <p className="mt-1 text-xs text-red-500">{errors.eventType}</p>}
+              {errors.eventType && (
+                <p className="mt-1 text-xs text-red-500">{errors.eventType}</p>
+              )}
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1.5">Category</label>
+              <label className="block text-sm font-medium text-gray-700 mb-1.5">
+                Category
+              </label>
               <select
                 value={category}
                 onChange={(e) => setCategory(e.target.value)}
@@ -267,7 +366,9 @@ function CreateEventForm() {
               >
                 <option value="">Select Category</option>
                 {CATEGORIES.map((c) => (
-                  <option key={c.value} value={c.value}>{c.label}</option>
+                  <option key={c.value} value={c.value}>
+                    {c.label}
+                  </option>
                 ))}
               </select>
             </div>
@@ -277,17 +378,26 @@ function CreateEventForm() {
         <div className="bg-white rounded-xl p-6 border border-gray-100 shadow-sm">
           <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1.5">Event Date <span className="text-red-500">*</span></label>
+              <label className="block text-sm font-medium text-gray-700 mb-1.5">
+                Event Date <span className="text-red-500">*</span>
+              </label>
               <input
                 type="date"
                 value={eventDate}
-                onChange={(e) => { setEventDate(e.target.value); clearError("eventDate"); }}
+                onChange={(e) => {
+                  setEventDate(e.target.value);
+                  clearError("eventDate");
+                }}
                 className={`w-full px-4 py-2.5 border rounded-lg text-sm focus:border-blue-600 outline-none ${errors.eventDate ? "border-red-500" : "border-gray-300"}`}
               />
-              {errors.eventDate && <p className="mt-1 text-xs text-red-500">{errors.eventDate}</p>}
+              {errors.eventDate && (
+                <p className="mt-1 text-xs text-red-500">{errors.eventDate}</p>
+              )}
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1.5">Start Time</label>
+              <label className="block text-sm font-medium text-gray-700 mb-1.5">
+                Start Time
+              </label>
               <input
                 type="time"
                 value={startTime}
@@ -296,17 +406,26 @@ function CreateEventForm() {
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1.5">End Time</label>
+              <label className="block text-sm font-medium text-gray-700 mb-1.5">
+                End Time
+              </label>
               <input
                 type="time"
                 value={endTime}
-                onChange={(e) => { setEndTime(e.target.value); clearError("endTime"); }}
+                onChange={(e) => {
+                  setEndTime(e.target.value);
+                  clearError("endTime");
+                }}
                 className={`w-full px-4 py-2.5 border rounded-lg text-sm focus:border-blue-600 outline-none ${errors.endTime ? "border-red-500" : "border-gray-300"}`}
               />
-              {errors.endTime && <p className="mt-1 text-xs text-red-500">{errors.endTime}</p>}
+              {errors.endTime && (
+                <p className="mt-1 text-xs text-red-500">{errors.endTime}</p>
+              )}
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1.5">Max Participants</label>
+              <label className="block text-sm font-medium text-gray-700 mb-1.5">
+                Max Participants
+              </label>
               <input
                 type="number"
                 value={maxParticipants}
@@ -321,18 +440,27 @@ function CreateEventForm() {
         <div className="bg-white rounded-xl p-6 border border-gray-100 shadow-sm">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1.5">Venue / Location <span className="text-red-500">*</span></label>
+              <label className="block text-sm font-medium text-gray-700 mb-1.5">
+                Venue / Location <span className="text-red-500">*</span>
+              </label>
               <input
                 type="text"
                 value={venue}
-                onChange={(e) => { setVenue(e.target.value); clearError("venue"); }}
+                onChange={(e) => {
+                  setVenue(e.target.value);
+                  clearError("venue");
+                }}
                 placeholder="e.g. Main Auditorium"
                 className={`w-full px-4 py-2.5 border rounded-lg text-sm focus:border-blue-600 outline-none ${errors.venue ? "border-red-500" : "border-gray-300"}`}
               />
-              {errors.venue && <p className="mt-1 text-xs text-red-500">{errors.venue}</p>}
+              {errors.venue && (
+                <p className="mt-1 text-xs text-red-500">{errors.venue}</p>
+              )}
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1.5">Online Meeting Link</label>
+              <label className="block text-sm font-medium text-gray-700 mb-1.5">
+                Online Meeting Link
+              </label>
               <input
                 type="url"
                 value={onlineLink}
@@ -347,7 +475,9 @@ function CreateEventForm() {
         <div className="bg-white rounded-xl p-6 border border-gray-100 shadow-sm">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1.5">Organized By</label>
+              <label className="block text-sm font-medium text-gray-700 mb-1.5">
+                Organized By
+              </label>
               <input
                 type="text"
                 value={organizedBy}
@@ -357,7 +487,9 @@ function CreateEventForm() {
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1.5">Contact Person</label>
+              <label className="block text-sm font-medium text-gray-700 mb-1.5">
+                Contact Person
+              </label>
               <input
                 type="text"
                 value={contactPerson}
@@ -367,15 +499,24 @@ function CreateEventForm() {
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1.5">Contact Email</label>
+              <label className="block text-sm font-medium text-gray-700 mb-1.5">
+                Contact Email
+              </label>
               <input
                 type="email"
                 value={contactEmail}
-                onChange={(e) => { setContactEmail(e.target.value); clearError("contactEmail"); }}
+                onChange={(e) => {
+                  setContactEmail(e.target.value);
+                  clearError("contactEmail");
+                }}
                 placeholder="events@example.com"
                 className={`w-full px-4 py-2.5 border rounded-lg text-sm focus:border-blue-600 outline-none ${errors.contactEmail ? "border-red-500" : "border-gray-300"}`}
               />
-              {errors.contactEmail && <p className="mt-1 text-xs text-red-500">{errors.contactEmail}</p>}
+              {errors.contactEmail && (
+                <p className="mt-1 text-xs text-red-500">
+                  {errors.contactEmail}
+                </p>
+              )}
             </div>
           </div>
         </div>
@@ -393,27 +534,51 @@ function CreateEventForm() {
               />
               <button
                 type="button"
-                onClick={() => { setFeaturedImageUrl(""); setFeaturedImagePreview(""); }}
+                onClick={() => {
+                  setFeaturedImageUrl("");
+                  setFeaturedImagePreview("");
+                }}
                 className="absolute top-2 right-2 p-1.5 bg-white/90 rounded-full text-gray-600 hover:bg-white"
               >
                 <X className="w-4 h-4" />
               </button>
             </div>
           ) : (
-            <label className={`border-2 border-dashed rounded-lg p-8 text-center hover:border-blue-500 cursor-pointer transition-colors block ${errors.featuredImage ? "border-red-500" : "border-gray-300"}`}>
+            <label
+              className={`border-2 border-dashed rounded-lg p-8 text-center hover:border-blue-500 cursor-pointer transition-colors block ${errors.featuredImage ? "border-red-500" : "border-gray-300"}`}
+            >
               <Image className="w-12 h-12 text-gray-300 mx-auto mb-3" />
-              <p className="text-sm text-gray-500">Click to upload or drag and drop</p>
-              <p className="text-xs text-gray-400 mt-1">PNG, JPG or WEBP (Max 5MB)</p>
-              <input type="file" accept="image/*" onChange={handleImageFileChange} className="hidden" />
+              <p className="text-sm text-gray-500">
+                Click to upload or drag and drop
+              </p>
+              <p className="text-xs text-gray-400 mt-1">
+                PNG, JPG or WEBP (Max 5MB)
+              </p>
+              <input
+                type="file"
+                accept="image/*"
+                onChange={handleImageFileChange}
+                className="hidden"
+              />
             </label>
           )}
-          {uploadingImage && <p className="mt-2 text-xs text-blue-600">Uploading featured image...</p>}
-          {errors.featuredImage && <p className="mt-1 text-xs text-red-500">{errors.featuredImage}</p>}
+          {uploadingImage && (
+            <p className="mt-2 text-xs text-blue-600">
+              Uploading featured image...
+            </p>
+          )}
+          {errors.featuredImage && (
+            <p className="mt-1 text-xs text-red-500">{errors.featuredImage}</p>
+          )}
         </div>
 
         <div className="bg-white rounded-xl p-6 border border-gray-100 shadow-sm">
-          <label className="block text-sm font-medium text-gray-700 mb-1.5">Short Description / Summary <span className="text-red-500">*</span></label>
-          <div className={`border rounded-lg overflow-hidden ${errors.shortDesc ? "border-red-500" : "border-gray-200"}`}>
+          <label className="block text-sm font-medium text-gray-700 mb-1.5">
+            Short Description / Summary <span className="text-red-500">*</span>
+          </label>
+          <div
+            className={`border rounded-lg overflow-hidden ${errors.shortDesc ? "border-red-500" : "border-gray-200"}`}
+          >
             <ReactQuill
               theme="snow"
               value={shortDesc}
@@ -426,12 +591,18 @@ function CreateEventForm() {
           <p className="text-xs text-gray-500 text-right mt-1">
             {shortDesc.replace(/<[^>]*>/g, "").length}/300 characters
           </p>
-          {errors.shortDesc && <p className="mt-1 text-xs text-red-500">{errors.shortDesc}</p>}
+          {errors.shortDesc && (
+            <p className="mt-1 text-xs text-red-500">{errors.shortDesc}</p>
+          )}
         </div>
 
         <div className="bg-white rounded-xl p-6 border border-gray-100 shadow-sm">
-          <label className="block text-sm font-medium text-gray-700 mb-1.5">Full Event Description <span className="text-red-500">*</span></label>
-          <div className={`border rounded-lg overflow-hidden ${errors.description ? "border-red-500" : "border-gray-200"}`}>
+          <label className="block text-sm font-medium text-gray-700 mb-1.5">
+            Full Event Description <span className="text-red-500">*</span>
+          </label>
+          <div
+            className={`border rounded-lg overflow-hidden ${errors.description ? "border-red-500" : "border-gray-200"}`}
+          >
             <ReactQuill
               theme="snow"
               value={description}
@@ -441,13 +612,17 @@ function CreateEventForm() {
               className="bg-white"
             />
           </div>
-          {errors.description && <p className="mt-1 text-xs text-red-500">{errors.description}</p>}
+          {errors.description && (
+            <p className="mt-1 text-xs text-red-500">{errors.description}</p>
+          )}
         </div>
 
         <div className="bg-white rounded-xl p-6 border border-gray-100 shadow-sm">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1.5">Tags</label>
+              <label className="block text-sm font-medium text-gray-700 mb-1.5">
+                Tags
+              </label>
               <input
                 type="text"
                 value={tags}
@@ -458,8 +633,12 @@ function CreateEventForm() {
             </div>
             <div className="flex items-center justify-between p-4 border border-gray-200 rounded-lg">
               <div>
-                <label className="block text-sm font-medium text-gray-700">Enable Registration</label>
-                <p className="text-xs text-gray-500">Allow users to register for this event</p>
+                <label className="block text-sm font-medium text-gray-700">
+                  Enable Registration
+                </label>
+                <p className="text-xs text-gray-500">
+                  Allow users to register for this event
+                </p>
               </div>
               <label className="relative inline-flex items-center cursor-pointer">
                 <input
@@ -505,13 +684,15 @@ function CreateEventForm() {
 
 export default function CreateEventPage() {
   return (
-    <Suspense fallback={
-      <div className="p-4 md:p-6 lg:p-8">
-        <div className="flex items-center justify-center py-20">
-          <Spinner className="w-8 h-8 text-blue-600 animate-spin" />
+    <Suspense
+      fallback={
+        <div className="p-4 md:p-6 lg:p-8">
+          <div className="flex items-center justify-center py-20">
+            <Spinner className="w-8 h-8 text-blue-600 animate-spin" />
+          </div>
         </div>
-      </div>
-    }>
+      }
+    >
       <CreateEventForm />
     </Suspense>
   );

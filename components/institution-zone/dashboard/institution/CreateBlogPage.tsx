@@ -1,9 +1,17 @@
 "use client";
 
+import "react-quill-new/dist/quill.snow.css";
+
 import React, { useState, useCallback, useEffect, Suspense } from "react";
 import dynamic from "next/dynamic";
 import { useSearchParams, useRouter } from "next/navigation";
-import { FloppyDisk, PaperPlaneTilt, Image, Spinner, X } from "@phosphor-icons/react";
+import {
+  FloppyDisk,
+  PaperPlaneTilt,
+  Image,
+  Spinner,
+  X,
+} from "@phosphor-icons/react";
 import { toast } from "sonner";
 import SectionHeader from "@/components/institution-zone/dashboard/shared/SectionHeader";
 import { institutionBlogsApi } from "@/services/institutionBlogsApi";
@@ -20,7 +28,16 @@ const quillModules = {
   ],
 };
 
-const quillFormats = ["bold", "italic", "underline", "strike", "list", "align", "link", "image"];
+const quillFormats = [
+  "bold",
+  "italic",
+  "underline",
+  "strike",
+  "list",
+  "align",
+  "link",
+  "image",
+];
 
 const BLOG_TYPES = [
   { value: "story", label: "Success Story" },
@@ -55,7 +72,9 @@ const STATUS_OPTIONS = [
 function CreateBlogForm() {
   const searchParams = useSearchParams();
   const router = useRouter();
-  const blogId = searchParams.get("edit") ? Number(searchParams.get("edit")) : null;
+  const blogId = searchParams.get("edit")
+    ? Number(searchParams.get("edit"))
+    : null;
   const isEditing = !!blogId;
 
   const [title, setTitle] = useState("");
@@ -78,7 +97,8 @@ function CreateBlogForm() {
   useEffect(() => {
     if (blogId) {
       setLoadingBlog(true);
-      institutionBlogsApi.getById(blogId)
+      institutionBlogsApi
+        .getById(blogId)
         .then((blog) => {
           setTitle(blog.title || "");
           setContent(blog.content || "");
@@ -113,47 +133,71 @@ function CreateBlogForm() {
     if (!title.trim()) errs.title = "Blog title is required";
     if (!blogType) errs.blogType = "Blog type is required";
     if (!featuredImageUrl) errs.featuredImage = "Featured image is required";
-    if (!shortDesc.replace(/<[^>]*>/g, "").trim()) errs.shortDesc = "Excerpt is required";
-    if (!content.replace(/<[^>]*>/g, "").trim()) errs.content = "Content is required";
+    if (!shortDesc.replace(/<[^>]*>/g, "").trim())
+      errs.shortDesc = "Excerpt is required";
+    if (!content.replace(/<[^>]*>/g, "").trim())
+      errs.content = "Content is required";
     setErrors(errs);
     return Object.keys(errs).length === 0;
   }, [title, blogType, featuredImageUrl, shortDesc, content]);
 
-  const handleSave = useCallback(async (draft: boolean) => {
-    if (!validate()) return;
-    setSubmitting(true);
-    setError("");
+  const handleSave = useCallback(
+    async (draft: boolean) => {
+      if (!validate()) return;
+      setSubmitting(true);
+      setError("");
 
-    try {
-      const payload = {
-        title,
-        content: content || shortDesc,
-        excerpt: shortDesc.replace(/<[^>]*>/g, "").trim(),
-        image: featuredImageUrl,
-        category: blogType,
-      };
+      try {
+        const payload = {
+          title,
+          content: content || shortDesc,
+          excerpt: shortDesc.replace(/<[^>]*>/g, "").trim(),
+          image: featuredImageUrl,
+          category: blogType,
+        };
 
-      if (isEditing && blogId) {
-        await institutionBlogsApi.update(blogId, payload);
-        toast.success(draft ? "Blog updated as draft." : "Blog updated successfully.");
-      } else {
-        await institutionBlogsApi.create(payload);
-        toast.success(draft ? "Blog saved as draft." : "Blog published successfully.");
+        if (isEditing && blogId) {
+          await institutionBlogsApi.update(blogId, payload);
+          toast.success(
+            draft ? "Blog updated as draft." : "Blog updated successfully.",
+          );
+        } else {
+          await institutionBlogsApi.create(payload);
+          toast.success(
+            draft ? "Blog saved as draft." : "Blog published successfully.",
+          );
+        }
+        router.push("/institution-zone/dashboard/blogs/directory");
+      } catch (err: any) {
+        setError(err.message || "Failed to save blog");
+      } finally {
+        setSubmitting(false);
       }
-      router.push("/institution-zone/dashboard/blogs/directory");
-    } catch (err: any) {
-      setError(err.message || "Failed to save blog");
-    } finally {
-      setSubmitting(false);
-    }
-  }, [validate, title, content, shortDesc, publishedBy, status, featuredImageUrl, isEditing, blogId, router]);
+    },
+    [
+      validate,
+      title,
+      content,
+      shortDesc,
+      publishedBy,
+      status,
+      featuredImageUrl,
+      isEditing,
+      blogId,
+      router,
+    ],
+  );
 
-  const handleImageFileChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) handleImageSelect(file);
-  }, [handleImageSelect]);
+  const handleImageFileChange = useCallback(
+    (e: React.ChangeEvent<HTMLInputElement>) => {
+      const file = e.target.files?.[0];
+      if (file) handleImageSelect(file);
+    },
+    [handleImageSelect],
+  );
 
-  const clearError = (field: string) => setErrors((prev) => ({ ...prev, [field]: "" }));
+  const clearError = (field: string) =>
+    setErrors((prev) => ({ ...prev, [field]: "" }));
 
   if (loadingBlog) {
     return (
@@ -162,7 +206,10 @@ function CreateBlogForm() {
           title="Edit Blog"
           breadcrumbItems={[
             { label: "Dashboard", href: "/institution-zone/dashboard" },
-            { label: "Blogs", href: "/institution-zone/dashboard/blogs/directory" },
+            {
+              label: "Blogs",
+              href: "/institution-zone/dashboard/blogs/directory",
+            },
             { label: "Edit" },
           ]}
         />
@@ -180,7 +227,10 @@ function CreateBlogForm() {
         title={isEditing ? "Edit Blog" : "Create Blog"}
         breadcrumbItems={[
           { label: "Dashboard", href: "/institution-zone/dashboard" },
-          { label: "Blogs", href: "/institution-zone/dashboard/blogs/directory" },
+          {
+            label: "Blogs",
+            href: "/institution-zone/dashboard/blogs/directory",
+          },
           { label: isEditing ? "Edit" : "Create" },
         ]}
       />
@@ -193,31 +243,47 @@ function CreateBlogForm() {
           <input
             type="text"
             value={title}
-            onChange={(e) => { setTitle(e.target.value); clearError("title"); }}
+            onChange={(e) => {
+              setTitle(e.target.value);
+              clearError("title");
+            }}
             placeholder="Enter blog title..."
             className={`w-full px-4 py-2.5 border rounded-lg text-sm focus:border-blue-600 outline-none ${errors.title ? "border-red-500" : "border-gray-300"}`}
           />
-          {errors.title && <p className="mt-1 text-xs text-red-500">{errors.title}</p>}
+          {errors.title && (
+            <p className="mt-1 text-xs text-red-500">{errors.title}</p>
+          )}
         </div>
 
         <div className="bg-white rounded-xl p-6 border border-gray-100 shadow-sm">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1.5">Blog Type <span className="text-red-500">*</span></label>
+              <label className="block text-sm font-medium text-gray-700 mb-1.5">
+                Blog Type <span className="text-red-500">*</span>
+              </label>
               <select
                 value={blogType}
-                onChange={(e) => { setBlogType(e.target.value); clearError("blogType"); }}
+                onChange={(e) => {
+                  setBlogType(e.target.value);
+                  clearError("blogType");
+                }}
                 className={`w-full px-4 py-2.5 border rounded-lg text-sm focus:border-blue-600 outline-none ${errors.blogType ? "border-red-500" : "border-gray-300"}`}
               >
                 <option value="">Select Type</option>
                 {BLOG_TYPES.map((t) => (
-                  <option key={t.value} value={t.value}>{t.label}</option>
+                  <option key={t.value} value={t.value}>
+                    {t.label}
+                  </option>
                 ))}
               </select>
-              {errors.blogType && <p className="mt-1 text-xs text-red-500">{errors.blogType}</p>}
+              {errors.blogType && (
+                <p className="mt-1 text-xs text-red-500">{errors.blogType}</p>
+              )}
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1.5">Category</label>
+              <label className="block text-sm font-medium text-gray-700 mb-1.5">
+                Category
+              </label>
               <select
                 value={category}
                 onChange={(e) => setCategory(e.target.value)}
@@ -225,7 +291,9 @@ function CreateBlogForm() {
               >
                 <option value="">Select Category</option>
                 {CATEGORIES.map((c) => (
-                  <option key={c.value} value={c.value}>{c.label}</option>
+                  <option key={c.value} value={c.value}>
+                    {c.label}
+                  </option>
                 ))}
               </select>
             </div>
@@ -235,19 +303,25 @@ function CreateBlogForm() {
         <div className="bg-white rounded-xl p-6 border border-gray-100 shadow-sm">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1.5">Published By</label>
+              <label className="block text-sm font-medium text-gray-700 mb-1.5">
+                Published By
+              </label>
               <select
                 value={publishedBy}
                 onChange={(e) => setPublishedBy(e.target.value)}
                 className="w-full px-4 py-2.5 border border-gray-300 rounded-lg text-sm focus:border-blue-600 outline-none"
               >
                 {PUBLISHED_BY.map((p) => (
-                  <option key={p.value} value={p.value}>{p.label}</option>
+                  <option key={p.value} value={p.value}>
+                    {p.label}
+                  </option>
                 ))}
               </select>
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1.5">Reading Time</label>
+              <label className="block text-sm font-medium text-gray-700 mb-1.5">
+                Reading Time
+              </label>
               <input
                 type="text"
                 value={readingTime}
@@ -272,27 +346,51 @@ function CreateBlogForm() {
               />
               <button
                 type="button"
-                onClick={() => { setFeaturedImageUrl(""); setFeaturedImagePreview(""); }}
+                onClick={() => {
+                  setFeaturedImageUrl("");
+                  setFeaturedImagePreview("");
+                }}
                 className="absolute top-2 right-2 p-1.5 bg-white/90 rounded-full text-gray-600 hover:bg-white"
               >
                 <X className="w-4 h-4" />
               </button>
             </div>
           ) : (
-            <label className={`border-2 border-dashed rounded-lg p-8 text-center hover:border-blue-500 cursor-pointer transition-colors block ${errors.featuredImage ? "border-red-500" : "border-gray-300"}`}>
+            <label
+              className={`border-2 border-dashed rounded-lg p-8 text-center hover:border-blue-500 cursor-pointer transition-colors block ${errors.featuredImage ? "border-red-500" : "border-gray-300"}`}
+            >
               <Image className="w-12 h-12 text-gray-300 mx-auto mb-3" />
-              <p className="text-sm text-gray-500">Click to upload or drag and drop</p>
-              <p className="text-xs text-gray-400 mt-1">PNG, JPG or WEBP (Max 5MB)</p>
-              <input type="file" accept="image/*" onChange={handleImageFileChange} className="hidden" />
+              <p className="text-sm text-gray-500">
+                Click to upload or drag and drop
+              </p>
+              <p className="text-xs text-gray-400 mt-1">
+                PNG, JPG or WEBP (Max 5MB)
+              </p>
+              <input
+                type="file"
+                accept="image/*"
+                onChange={handleImageFileChange}
+                className="hidden"
+              />
             </label>
           )}
-          {uploadingImage && <p className="mt-2 text-xs text-blue-600">Uploading featured image...</p>}
-          {errors.featuredImage && <p className="mt-1 text-xs text-red-500">{errors.featuredImage}</p>}
+          {uploadingImage && (
+            <p className="mt-2 text-xs text-blue-600">
+              Uploading featured image...
+            </p>
+          )}
+          {errors.featuredImage && (
+            <p className="mt-1 text-xs text-red-500">{errors.featuredImage}</p>
+          )}
         </div>
 
         <div className="bg-white rounded-xl p-6 border border-gray-100 shadow-sm">
-          <label className="block text-sm font-medium text-gray-700 mb-1.5">Short Description / Excerpt <span className="text-red-500">*</span></label>
-          <div className={`border rounded-lg overflow-hidden ${errors.shortDesc ? "border-red-500" : "border-gray-200"}`}>
+          <label className="block text-sm font-medium text-gray-700 mb-1.5">
+            Short Description / Excerpt <span className="text-red-500">*</span>
+          </label>
+          <div
+            className={`border rounded-lg overflow-hidden ${errors.shortDesc ? "border-red-500" : "border-gray-200"}`}
+          >
             <ReactQuill
               theme="snow"
               value={shortDesc}
@@ -305,12 +403,18 @@ function CreateBlogForm() {
           <p className="text-xs text-gray-500 text-right mt-1">
             {shortDesc.replace(/<[^>]*>/g, "").length}/250 characters
           </p>
-          {errors.shortDesc && <p className="mt-1 text-xs text-red-500">{errors.shortDesc}</p>}
+          {errors.shortDesc && (
+            <p className="mt-1 text-xs text-red-500">{errors.shortDesc}</p>
+          )}
         </div>
 
         <div className="bg-white rounded-xl p-6 border border-gray-100 shadow-sm">
-          <label className="block text-sm font-medium text-gray-700 mb-1.5">Full Blog Content <span className="text-red-500">*</span></label>
-          <div className={`border rounded-lg overflow-hidden ${errors.content ? "border-red-500" : "border-gray-200"}`}>
+          <label className="block text-sm font-medium text-gray-700 mb-1.5">
+            Full Blog Content <span className="text-red-500">*</span>
+          </label>
+          <div
+            className={`border rounded-lg overflow-hidden ${errors.content ? "border-red-500" : "border-gray-200"}`}
+          >
             <ReactQuill
               theme="snow"
               value={content}
@@ -320,13 +424,17 @@ function CreateBlogForm() {
               className="bg-white"
             />
           </div>
-          {errors.content && <p className="mt-1 text-xs text-red-500">{errors.content}</p>}
+          {errors.content && (
+            <p className="mt-1 text-xs text-red-500">{errors.content}</p>
+          )}
         </div>
 
         <div className="bg-white rounded-xl p-6 border border-gray-100 shadow-sm">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1.5">Tags</label>
+              <label className="block text-sm font-medium text-gray-700 mb-1.5">
+                Tags
+              </label>
               <input
                 type="text"
                 value={tags}
@@ -336,14 +444,18 @@ function CreateBlogForm() {
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1.5">Status</label>
+              <label className="block text-sm font-medium text-gray-700 mb-1.5">
+                Status
+              </label>
               <select
                 value={status}
                 onChange={(e) => setStatus(e.target.value)}
                 className="w-full px-4 py-2.5 border border-gray-300 rounded-lg text-sm focus:border-blue-600 outline-none"
               >
                 {STATUS_OPTIONS.map((s) => (
-                  <option key={s.value} value={s.value}>{s.label}</option>
+                  <option key={s.value} value={s.value}>
+                    {s.label}
+                  </option>
                 ))}
               </select>
             </div>
@@ -381,13 +493,15 @@ function CreateBlogForm() {
 
 export default function CreateBlogPage() {
   return (
-    <Suspense fallback={
-      <div className="p-4 md:p-6 lg:p-8">
-        <div className="flex items-center justify-center py-20">
-          <Spinner className="w-8 h-8 text-blue-600 animate-spin" />
+    <Suspense
+      fallback={
+        <div className="p-4 md:p-6 lg:p-8">
+          <div className="flex items-center justify-center py-20">
+            <Spinner className="w-8 h-8 text-blue-600 animate-spin" />
+          </div>
         </div>
-      </div>
-    }>
+      }
+    >
       <CreateBlogForm />
     </Suspense>
   );
