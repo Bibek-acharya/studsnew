@@ -16,7 +16,7 @@ export default async function Home() {
     testimonialsResponse,
   ] = await Promise.all([
     apiService
-      .getFeaturedColleges(4)
+      .getColleges({ featured: "true", limit: 4 })
       .then((res) => res.data.colleges)
       .catch(() => []),
     apiService
