@@ -14,7 +14,12 @@ import AdWidgetsSection from "./landing/AdWidgetsSection";
 import CampusEventsSection from "./landing/CampusEventsSection";
 import TestimonialsSection from "./landing/TestimonialsSection";
 import LandingPopups from "./landing/LandingPopups";
-import { College, EducationEvent, EducationNewsItem, ScholarshipItem } from "@/services/api";
+import {
+  College,
+  EducationEvent,
+  EducationNewsItem,
+  ScholarshipItem,
+} from "@/services/api";
 
 interface EducationPageProps {
   featuredColleges: College[];
@@ -24,7 +29,12 @@ interface EducationPageProps {
   exams?: any[];
   heroSlides?: any[];
   ads?: any[];
-  testimonials?: Array<{ id: number; user_name: string; rating: number; experience: string }>;
+  testimonials?: Array<{
+    id: number;
+    user_name: string;
+    rating: number;
+    experience: string;
+  }>;
 }
 
 const EducationPage: React.FC<EducationPageProps> = ({
@@ -41,25 +51,29 @@ const EducationPage: React.FC<EducationPageProps> = ({
 
   const handleNavigate = useCallback(
     (view: string, data?: { search?: string; [key: string]: unknown }) => {
-    if (view.startsWith("search")) {
-      router.push(`/${view}`);
-    } else if (view === "compareColleges") {
-      router.push("/compare-colleges");
-    } else if (view === "bookCounselling") {
-      router.push("/counseling");
-    } else if (view === "collegeRecommenderTool") {
-      router.push("/college-recommender");
-    } else if (view === "scholarshipRecommenderTool") {
-      router.push("/scholarship-recommender");
-    } else if (view === "collegeDetails" && data?.id) {
-      router.push(`/find-college/${data.id}`);
-    } else if (view === "newsDetails" && data?.id) {
-      router.push(`/news/edu-${data.id}`);
-    } else if (view.startsWith("http")) {
-      window.open(view, "_blank");
-    } else {
-      console.log("Navigate to:", view, data);
-    }
+      if (view.startsWith("search")) {
+        router.push(`/${view}`);
+      } else if (view === "compareColleges") {
+        router.push("/compare-colleges");
+      } else if (view === "bookCounselling") {
+        router.push("/counseling");
+      } else if (view === "collegeRecommenderTool") {
+        router.push("/college-recommender");
+      } else if (view === "scholarshipRecommenderTool") {
+        router.push("/scholarship-recommender");
+      } else if (view === "courseFinder") {
+        router.push("/course-finder");
+      } else if (view === "scholarshipFinderTool") {
+        router.push("/scholarship-finder");
+      } else if (view === "collegeDetails" && data?.id) {
+        router.push(`/find-college/${data.id}`);
+      } else if (view === "newsDetails" && data?.id) {
+        router.push(`/news/edu-${data.id}`);
+      } else if (view.startsWith("http")) {
+        window.open(view, "_blank");
+      } else {
+        console.log("Navigate to:", view, data);
+      }
     },
     [router],
   );
@@ -76,7 +90,8 @@ const EducationPage: React.FC<EducationPageProps> = ({
       setShowBackToTop(heroBottom < 0);
 
       const scrollTop = window.scrollY;
-      const docHeight = document.documentElement.scrollHeight - window.innerHeight;
+      const docHeight =
+        document.documentElement.scrollHeight - window.innerHeight;
       setScrollProgress(docHeight > 0 ? Math.min(scrollTop / docHeight, 1) : 0);
     };
 
@@ -116,21 +131,45 @@ const EducationPage: React.FC<EducationPageProps> = ({
       {/* Section 4: Right Course. Right College. */}
       {/* <CourseCategoriesSection onNavigate={handleNavigate} /> */}
       {/* Section 5: Explore Featured Colleges & Universities */}
-      {featuredColleges.length > 0 && <FeaturedInstitutionsSection onNavigate={handleNavigate} featuredColleges={featuredColleges} />}
+      {featuredColleges.length > 0 && (
+        <FeaturedInstitutionsSection
+          onNavigate={handleNavigate}
+          featuredColleges={featuredColleges}
+        />
+      )}
       {/* Section 6: Featured Financial Aid */}
-      {scholarships.length > 0 && <FinancialAidSection onNavigate={handleNavigate} scholarships={scholarships} />}
+      {scholarships.length > 0 && (
+        <FinancialAidSection
+          onNavigate={handleNavigate}
+          scholarships={scholarships}
+        />
+      )}
       {/* Section 7: Find All Exam Announcements Easily */}
-      {exams.length > 0 && <ExamAnnouncementsSection onNavigate={handleNavigate} exams={exams} />}
+      {exams.length > 0 && (
+        <ExamAnnouncementsSection onNavigate={handleNavigate} exams={exams} />
+      )}
       {/* Section 8: Latest News & Stories */}
-      {newsArticles.length > 0 && <NewsStoriesSection onNavigate={handleNavigate} newsArticles={newsArticles} />}
+      {newsArticles.length > 0 && (
+        <NewsStoriesSection
+          onNavigate={handleNavigate}
+          newsArticles={newsArticles}
+        />
+      )}
       {/* Section 9: Ad Widgets */}
       <AdWidgetsSection ads={ads} />
       {/* Section 10: Top College Events */}
-      {eventSlides.length > 0 && <CampusEventsSection onNavigate={handleNavigate} events={eventSlides} />}
+      {eventSlides.length > 0 && (
+        <CampusEventsSection onNavigate={handleNavigate} events={eventSlides} />
+      )}
       {/* Section 11: What Our Students Say */}
-      {testimonials.length > 0 && <TestimonialsSection onNavigate={handleNavigate} testimonials={testimonials} />}
+      {testimonials.length > 0 && (
+        <TestimonialsSection
+          onNavigate={handleNavigate}
+          testimonials={testimonials}
+        />
+      )}
       {/* Section 12: Not sure where to start? */}
-    {/* <RecommendedForYouSection onNavigate={onNavigate} /> */}
+      {/* <RecommendedForYouSection onNavigate={onNavigate} /> */}
       {/* Floating Popups */}
       <LandingPopups />
 
@@ -140,16 +179,36 @@ const EducationPage: React.FC<EducationPageProps> = ({
         role="button"
         tabIndex={0}
         aria-label="Back to top"
-        onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") scrollToTop(); }}
+        onKeyDown={(e) => {
+          if (e.key === "Enter" || e.key === " ") scrollToTop();
+        }}
         className={`fixed bottom-6 right-6 z-50 cursor-pointer transition-all duration-300 max-md:hidden ${
-          showBackToTop ? "opacity-100 visible" : "opacity-0 invisible pointer-events-none"
+          showBackToTop
+            ? "opacity-100 visible"
+            : "opacity-0 invisible pointer-events-none"
         }`}
       >
         <div className="relative flex items-center justify-center h-16 w-16">
-          <svg className="absolute inset-0 w-full h-full pointer-events-none" viewBox="0 0 100 100" style={{ transform: 'rotate(-90deg)' }}>
-            <circle cx="50" cy="50" r={radius} fill="none" stroke="#e5e7eb" strokeWidth="5" />
+          <svg
+            className="absolute inset-0 w-full h-full pointer-events-none"
+            viewBox="0 0 100 100"
+            style={{ transform: "rotate(-90deg)" }}
+          >
             <circle
-              cx="50" cy="50" r={radius} fill="none" stroke="#0000FF" strokeWidth="5"
+              cx="50"
+              cy="50"
+              r={radius}
+              fill="none"
+              stroke="#e5e7eb"
+              strokeWidth="5"
+            />
+            <circle
+              cx="50"
+              cy="50"
+              r={radius}
+              fill="none"
+              stroke="#0000FF"
+              strokeWidth="5"
               strokeDasharray={`${scrollProgress * circumference} ${circumference}`}
               strokeLinecap="round"
             />
