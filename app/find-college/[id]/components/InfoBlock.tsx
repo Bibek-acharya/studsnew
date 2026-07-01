@@ -17,7 +17,10 @@ const InfoBlock: React.FC<{
       </div>
       <h3 className="text-[16px] font-bold text-gray-900">{title}</h3>
     </div>
-    <div className="prose prose-gray max-w-none text-[14.5px] leading-[1.7] break-words [&_img]:max-w-full" dangerouslySetInnerHTML={{ __html: desc }} />
+    <div
+      className="prose prose-gray max-w-none text-[14.5px] leading-[1.7] break-words overflow-x-auto [&_pre]:overflow-x-auto [&_pre]:whitespace-pre-wrap [&_img]:max-w-full [&_table]:block [&_table]:overflow-x-auto"
+      dangerouslySetInnerHTML={{ __html: desc }}
+    />
   </div>
 );
 

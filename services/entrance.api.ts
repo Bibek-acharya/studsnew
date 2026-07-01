@@ -18,7 +18,7 @@ function stripHtml(html: string): string {
     .trim();
 }
 
-function mapRawEntrance(raw: any): Exam {
+export function mapRawEntrance(raw: any): Exam {
   const badges: string[] = raw.badges || [];
   const img = resolveImageUrl(
     raw.imageUrl || raw.institutionLogo || raw.hero_banner || "",

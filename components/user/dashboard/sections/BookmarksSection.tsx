@@ -222,7 +222,7 @@ export default function BookmarksSection() {
                 college: {
                   id: c.id,
                   name: c.institution_name || c.name,
-                  image_url: c.logo_url || c.image_url,
+                  image_url: c.logo_url || c.image_url || c.banner_url,
                   rating: c.rating,
                   type: c.organization_type || c.type,
                   location: c.district || c.location,
@@ -230,6 +230,8 @@ export default function BookmarksSection() {
                   website: c.website_url || c.website,
                   description: c.about || c.description,
                   featured: c.featured,
+                  claimed: c.claimed,
+                  verified: c.verified,
                 },
                 type: "Colleges" as const,
                 id: c.id,
@@ -508,7 +510,8 @@ export default function BookmarksSection() {
               {item.type === "Colleges" && (
                 <ProgramCard
                   college={item.college}
-                  isVerified={item.college.verified || false}
+                  isVerified={item.college.verified === true}
+                  isClaimed={item.college.claimed === true}
                   isSaved={true}
                   isSelected={false}
                   isQuickInquiryMode={false}

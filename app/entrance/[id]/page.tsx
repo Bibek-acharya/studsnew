@@ -6,7 +6,9 @@ import { useQuery } from "@tanstack/react-query";
 import {
   entranceService,
   EntranceDetailsResponse,
+  mapRawEntrance,
 } from "@/services/entrance.api";
+import { institutionEntranceApi } from "@/services/institutionEntranceApi";
 import { Exam } from "@/components/entrance/types";
 import type { ExamDetails } from "@/app/entrance/types";
 import {
@@ -198,7 +200,27 @@ const EntranceDetailsPage: React.FC = () => {
 
   const { data: apiData, isLoading } = useQuery({
     queryKey: ["entrance", id],
-    queryFn: () => entranceService.getEntranceById(id),
+    queryFn: async () => {
+      const token =
+        typeof window !== "undefined"
+          ? localStorage.getItem("institutionToken")
+          : null;
+      if (token) {
+        try {
+          const instData = await institutionEntranceApi.getById(
+            Number(id) || 0,
+          );
+          if (instData) {
+            return {
+              data: mapRawEntrance(instData),
+            } as EntranceDetailsResponse;
+          }
+        } catch {
+          /* fallback to public */
+        }
+      }
+      return entranceService.getEntranceById(id);
+    },
     staleTime: 5 * 60 * 1000,
   });
 
