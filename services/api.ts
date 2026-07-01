@@ -2602,10 +2602,25 @@ export const apiService = {
   },
 
   async getPublicInstitutions(params: Record<string, any>): Promise<any> {
+    const typeIdToBackendValue: Record<string, string> = {
+      ct_private: "Private",
+      ct_public: "Public / Govt",
+      ct_community: "Community",
+      ct_constituent: "Constituent",
+      ct_foreign: "Foreign Affiliated",
+    };
     const query = new URLSearchParams();
     Object.entries(params || {}).forEach(([key, value]) => {
       if (value !== undefined && value !== null && value !== "") {
-        query.set(key, String(value));
+        const normalized =
+          key === "type" && typeof value === "string"
+            ? value
+                .split(",")
+                .map((t) => typeIdToBackendValue[t.trim()] || t.trim())
+                .filter(Boolean)
+                .join(",")
+            : String(value);
+        query.set(key, normalized);
       }
     });
     const qs = query.toString();
