@@ -158,6 +158,13 @@ const CollegeGrid: React.FC<CollegeGridProps> = ({
   const [pendingBookmarks, setPendingBookmarks] = useState<
     Record<string | number, boolean>
   >({});
+  const [savedInstIds, setSavedInstIds] = useState<number[]>([]);
+  const [instBookmarkMap, setInstBookmarkMap] = useState<
+    Record<number, number>
+  >({});
+  const [pendingInstBookmarks, setPendingInstBookmarks] = useState<
+    Record<number, boolean>
+  >({});
   const [selectedForInquiry, setSelectedForInquiry] = useState<
     (number | string)[]
   >([]);
@@ -186,6 +193,19 @@ const CollegeGrid: React.FC<CollegeGridProps> = ({
         });
         setSavedColleges(ids);
         setBookmarkMap(map);
+      })
+      .catch(() => {});
+    apiService
+      .getBookmarksByType("institutions")
+      .then((items) => {
+        const ids: number[] = [];
+        const map: Record<number, number> = {};
+        items.forEach((b) => {
+          ids.push(b.item_id);
+          map[b.item_id] = b.id;
+        });
+        setSavedInstIds(ids);
+        setInstBookmarkMap(map);
       })
       .catch(() => {});
   }, [isAuthenticated]);
@@ -354,30 +374,57 @@ const CollegeGrid: React.FC<CollegeGridProps> = ({
       toast.error("Please login to save bookmarks");
       return;
     }
+
     if (typeof collegeId !== "number") {
-      toast.error("This institution cannot be bookmarked yet");
+      const instId = Number(String(collegeId).replace("inst_", ""));
+      if (!instId) return;
+      if (pendingInstBookmarks[instId]) return;
+      setPendingInstBookmarks((prev) => ({ ...prev, [instId]: true }));
+      const existing = instBookmarkMap[instId];
+      try {
+        if (existing) {
+          await apiService.deleteBookmark(existing);
+          setInstBookmarkMap((prev) => {
+            const n = { ...prev };
+            delete n[instId];
+            return n;
+          });
+          setSavedInstIds((prev) => prev.filter((id) => id !== instId));
+          toast.success("Removed from bookmarks");
+        } else {
+          const res = await apiService.createBookmark(instId, "institutions");
+          setInstBookmarkMap((prev) => ({ ...prev, [instId]: res.data.id }));
+          setSavedInstIds((prev) => [...prev, instId]);
+          toast.success("Added to bookmarks!");
+        }
+      } catch {
+        toast.error("Failed to save bookmark");
+      } finally {
+        setPendingInstBookmarks((prev) => {
+          const n = { ...prev };
+          delete n[instId];
+          return n;
+        });
+      }
       return;
     }
+
     if (pendingBookmarks[collegeId]) return;
     setPendingBookmarks((prev) => ({ ...prev, [collegeId]: true }));
-    const existingBookmarkId = bookmarkMap[collegeId];
+    const existing = bookmarkMap[collegeId];
     try {
-      if (existingBookmarkId) {
-        await apiService.deleteBookmark(existingBookmarkId);
+      if (existing) {
+        await apiService.deleteBookmark(existing);
         setBookmarkMap((prev) => {
-          const next = { ...prev };
-          delete next[collegeId];
-          return next;
+          const n = { ...prev };
+          delete n[collegeId];
+          return n;
         });
         setSavedColleges((prev) => prev.filter((id) => id !== collegeId));
         toast.success("Removed from bookmarks");
       } else {
-        const res = await apiService.createBookmark(
-          collegeId as number,
-          "colleges",
-        );
-        const newBookmarkId = res.data.id;
-        setBookmarkMap((prev) => ({ ...prev, [collegeId]: newBookmarkId }));
+        const res = await apiService.createBookmark(collegeId, "colleges");
+        setBookmarkMap((prev) => ({ ...prev, [collegeId]: res.data.id }));
         setSavedColleges((prev) => [...prev, collegeId]);
         toast.success("Added to bookmarks!");
       }
@@ -385,9 +432,9 @@ const CollegeGrid: React.FC<CollegeGridProps> = ({
       toast.error("Failed to save bookmark");
     } finally {
       setPendingBookmarks((prev) => {
-        const next = { ...prev };
-        delete next[collegeId];
-        return next;
+        const n = { ...prev };
+        delete n[collegeId];
+        return n;
       });
     }
   };
@@ -610,8 +657,20 @@ const CollegeGrid: React.FC<CollegeGridProps> = ({
                 college={college}
                 isVerified={isCollegeVerified(college.verified)}
                 isClaimed={!!college.claimed}
-                isSaved={savedColleges.includes(college.id)}
-                isBookmarkPending={!!pendingBookmarks[college.id]}
+                isSaved={
+                  typeof college.id === "number"
+                    ? savedColleges.includes(college.id)
+                    : savedInstIds.includes(
+                        Number(String(college.id).replace("inst_", "")),
+                      )
+                }
+                isBookmarkPending={
+                  typeof college.id === "number"
+                    ? !!pendingBookmarks[college.id]
+                    : !!pendingInstBookmarks[
+                        Number(String(college.id).replace("inst_", ""))
+                      ]
+                }
                 isSelected={selectedForInquiry.includes(college.id)}
                 isQuickInquiryMode={isQuickInquiryMode}
                 onNavigate={onNavigate}
