@@ -362,7 +362,10 @@ const EntranceDetailsPage: React.FC = () => {
                 <h2 className="text-2xl font-bold text-gray-900">
                   About {exam.title}
                 </h2>
-                <p className="text-gray-600">{exam.description}</p>
+                <div
+                  className="prose prose-gray max-w-none text-gray-600 break-words overflow-x-auto [&_pre]:overflow-x-auto [&_pre]:whitespace-pre-wrap [&_img]:max-w-full [&_table]:block [&_table]:overflow-x-auto [&_iframe]:max-w-full"
+                  dangerouslySetInnerHTML={{ __html: exam.description }}
+                />
               </div>
 
               {exam.overviewDetails && exam.overviewDetails.length > 0 && (

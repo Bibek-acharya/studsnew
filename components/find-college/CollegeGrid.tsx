@@ -302,7 +302,7 @@ const CollegeGrid: React.FC<CollegeGridProps> = ({
       ).map((inst: any) => ({
         id: inst.college_id > 0 ? inst.college_id : (`inst_${inst.id}` as any),
         name: inst.institution_name,
-        image_url: inst.banner_url || inst.logo_url,
+        image_url: inst.logo_url || inst.banner_url,
         description: inst.about,
         location: inst.district,
         website: inst.website_url,

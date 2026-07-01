@@ -20,8 +20,9 @@ function stripHtml(html: string): string {
 
 export function mapRawEntrance(raw: any): Exam {
   const badges: string[] = raw.badges || [];
-  const img = resolveImageUrl(
-    raw.imageUrl || raw.institutionLogo || raw.hero_banner || "",
+  const bannerImg = resolveImageUrl(raw.imageUrl || raw.hero_banner || "");
+  const logoImg = resolveImageUrl(
+    raw.institutionLogo || raw.logo || bannerImg || "",
   );
   return {
     id: raw.slug || String(raw.id),
@@ -37,7 +38,7 @@ export function mapRawEntrance(raw: any): Exam {
     location: raw.location || "",
     affiliation: raw.board || "",
     website: raw.website || "",
-    logo: img,
+    logo: logoImg,
     title: raw.title || "",
     tags: badges.map((b: string) => ({
       text: b,
@@ -51,7 +52,7 @@ export function mapRawEntrance(raw: any): Exam {
     status: raw.status || "Ongoing",
     examDate: raw.examDate || raw.date || "",
     nepaliDate: raw.nepaliDate || "",
-    imageUrl: img,
+    imageUrl: bannerImg,
     phone: raw.phone || "",
     email: raw.email || "",
     description: raw.description || "",
