@@ -28,6 +28,7 @@ const CounsellingRequestsPage = () => {
   const [slotTitle, setSlotTitle] = useState("");
   const [slotCapacity, setSlotCapacity] = useState("10");
   const [slotSubmitting, setSlotSubmitting] = useState(false);
+  const [actionError, setActionError] = useState("");
 
   useEffect(() => {
     Promise.all([
@@ -43,13 +44,16 @@ const CounsellingRequestsPage = () => {
   }, []);
 
   const handleStatus = async (id: number, status: string) => {
+    setActionError("");
     try {
       await institutionCounsellingApi.updateBookingStatus(id, status);
       setBookings((prev) =>
         prev.map((b) => (b.id === id ? { ...b, status } : b)),
       );
     } catch (e) {
-      console.error(e);
+      setActionError(
+        e instanceof Error ? e.message : "Failed to update status",
+      );
     }
   };
 
@@ -138,6 +142,13 @@ const CounsellingRequestsPage = () => {
         </button>
       </div>
 
+      {actionError && (
+        <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg text-sm text-red-700 flex items-center gap-2">
+          <X size={16} className="flex-shrink-0" />
+          {actionError}
+        </div>
+      )}
+
       <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
         <div className="p-6 border-b border-gray-200 flex flex-wrap items-center gap-4">
           <div className="relative w-full sm:w-64">
@@ -178,60 +189,128 @@ const CounsellingRequestsPage = () => {
         ) : (
           <div className="divide-y divide-gray-100">
             {filtered.map((b) => (
-              <div
-                key={b.id}
-                className="px-6 py-4 flex items-center justify-between hover:bg-gray-50"
-              >
-                <div className="flex items-center gap-4">
-                  <div className="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center text-blue-600 font-semibold text-sm">
-                    {b.student_name
-                      ? b.student_name.charAt(0).toUpperCase()
-                      : b.user_id}
-                  </div>
-                  <div>
-                    <p className="font-medium text-gray-900">
-                      {b.student_name || `User #${b.user_id}`}
-                    </p>
-                    <p className="text-xs text-gray-500">
-                      {b.session?.title || "No session"} &middot;{" "}
-                      {b.notes ? b.notes.substring(0, 50) : ""}
-                    </p>
-                  </div>
-                </div>
-                <div className="flex items-center gap-3">
-                  <span
-                    className={`px-2 py-1 rounded text-xs font-medium ${
-                      b.status === "confirmed"
-                        ? "bg-green-100 text-green-700"
-                        : b.status === "pending"
-                          ? "bg-yellow-100 text-yellow-700"
-                          : b.status === "completed"
-                            ? "bg-blue-100 text-blue-700"
-                            : b.status === "cancelled"
-                              ? "bg-red-100 text-red-700"
-                              : "bg-gray-100 text-gray-700"
-                    }`}
-                  >
-                    {b.status}
-                  </span>
-                  {b.status === "pending" && (
-                    <div className="flex gap-1">
-                      <button
-                        onClick={() => handleStatus(b.id, "confirmed")}
-                        className="p-1.5 hover:bg-green-50 rounded text-green-600"
-                        title="Confirm"
-                      >
-                        <CheckCircle className="w-4 h-4" />
-                      </button>
-                      <button
-                        onClick={() => handleStatus(b.id, "cancelled")}
-                        className="p-1.5 hover:bg-red-50 rounded text-red-600"
-                        title="Reject"
-                      >
-                        <Clock className="w-4 h-4" />
-                      </button>
+              <div key={b.id} className="px-6 py-5 hover:bg-gray-50">
+                <div className="flex items-start justify-between">
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-3 mb-3">
+                      <div className="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center text-blue-600 font-semibold text-sm flex-shrink-0">
+                        {b.student_name
+                          ? b.student_name.charAt(0).toUpperCase()
+                          : b.user_id}
+                      </div>
+                      <div>
+                        <p className="font-medium text-gray-900">
+                          {b.student_name || `User #${b.user_id}`}
+                        </p>
+                        <p className="text-xs text-gray-500">
+                          {b.student_phone} &middot; {b.student_email}
+                        </p>
+                      </div>
                     </div>
-                  )}
+                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
+                      <div>
+                        <p className="text-xs font-semibold text-gray-400 uppercase tracking-wide">
+                          Session
+                        </p>
+                        <p className="font-medium text-gray-800">
+                          {b.session?.title || "N/A"}
+                        </p>
+                      </div>
+                      <div>
+                        <p className="text-xs font-semibold text-gray-400 uppercase tracking-wide">
+                          Program
+                        </p>
+                        <p className="font-medium text-gray-800">
+                          {b.program_level || "N/A"}
+                        </p>
+                      </div>
+                      <div>
+                        <p className="text-xs font-semibold text-gray-400 uppercase tracking-wide">
+                          Course
+                        </p>
+                        <p className="font-medium text-gray-800">
+                          {b.interested_course || "N/A"}
+                        </p>
+                      </div>
+                      <div>
+                        <p className="text-xs font-semibold text-gray-400 uppercase tracking-wide">
+                          Mode
+                        </p>
+                        <p className="font-medium text-gray-800">
+                          {b.session_mode === "online" ? "Online" : "In Person"}
+                        </p>
+                      </div>
+                      {b.session?.scheduled_at && (
+                        <div>
+                          <p className="text-xs font-semibold text-gray-400 uppercase tracking-wide">
+                            Date & Time
+                          </p>
+                          <p className="font-medium text-gray-800">
+                            {new Date(
+                              b.session.scheduled_at,
+                            ).toLocaleDateString("en-US", {
+                              weekday: "short",
+                              month: "short",
+                              day: "numeric",
+                              year: "numeric",
+                            })}
+                            &nbsp;
+                            {new Date(
+                              b.session.scheduled_at,
+                            ).toLocaleTimeString("en-US", {
+                              hour: "2-digit",
+                              minute: "2-digit",
+                            })}
+                          </p>
+                        </div>
+                      )}
+                      {b.notes && (
+                        <div className="col-span-2">
+                          <p className="text-xs font-semibold text-gray-400 uppercase tracking-wide">
+                            Notes
+                          </p>
+                          <p className="font-medium text-gray-800 truncate">
+                            {b.notes}
+                          </p>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                  <div className="flex flex-col items-end gap-2 ml-4 flex-shrink-0">
+                    <span
+                      className={`px-2.5 py-1 rounded text-xs font-medium ${
+                        b.status === "confirmed"
+                          ? "bg-green-100 text-green-700"
+                          : b.status === "pending"
+                            ? "bg-yellow-100 text-yellow-700"
+                            : b.status === "completed"
+                              ? "bg-blue-100 text-blue-700"
+                              : b.status === "cancelled"
+                                ? "bg-red-100 text-red-700"
+                                : "bg-gray-100 text-gray-700"
+                      }`}
+                    >
+                      {b.status}
+                    </span>
+                    {b.status === "pending" && (
+                      <div className="flex gap-1 mt-1">
+                        <button
+                          onClick={() => handleStatus(b.id, "confirmed")}
+                          className="p-2 bg-green-50 text-green-600 rounded-md hover:bg-green-100 transition-colors"
+                          title="Confirm"
+                        >
+                          <CheckCircle className="w-5 h-5" />
+                        </button>
+                        <button
+                          onClick={() => handleStatus(b.id, "cancelled")}
+                          className="p-2 bg-red-50 text-red-600 rounded-md hover:bg-red-100 transition-colors"
+                          title="Reject"
+                        >
+                          <X className="w-5 h-5" />
+                        </button>
+                      </div>
+                    )}
+                  </div>
                 </div>
               </div>
             ))}
