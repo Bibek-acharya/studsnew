@@ -2,7 +2,7 @@
 
 import React, { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
-import { FolderOpen } from "lucide-react";
+import { FolderOpen, SlidersHorizontal } from "lucide-react";
 import { toast } from "sonner";
 import { AdmissionFilters } from "@/app/admissions/[level]/types";
 import CollegeCard from "@/components/admissions/CollegeCard";
@@ -26,6 +26,7 @@ interface AdmissionGridProps {
   setFilters: React.Dispatch<React.SetStateAction<AdmissionFilters>>;
   onNavigate: (view: string, data?: any) => void;
   level: string;
+  onMobileFilterClick?: () => void;
 }
 
 const COLLEGES_PER_PAGE = 18;
@@ -48,6 +49,7 @@ const AdmissionGrid: React.FC<AdmissionGridProps> = ({
   setFilters,
   onNavigate,
   level,
+  onMobileFilterClick,
 }) => {
   const [currentPage, setCurrentPage] = useState(1);
   const [colleges, setColleges] = useState<AdmissionCollegeItem[]>([]);
@@ -311,17 +313,25 @@ const AdmissionGrid: React.FC<AdmissionGridProps> = ({
             {fetchError && <p className="text-sm text-red-600">{fetchError}</p>}
           </div>
 
-          <div className="mt-2 flex w-full shrink-0 flex-col gap-3 sm:mt-0 sm:w-[320px] sm:items-end">
-            <div className="relative w-full">
+          <div className="mt-2 flex w-full shrink-0 flex-row items-center gap-2 sm:mt-0 sm:w-[320px] sm:items-end">
+            <div className="relative flex-1">
               <i className="fa-solid fa-magnifying-glass absolute left-3.5 top-1/2 -translate-y-1/2 text-sm text-gray-400"></i>
               <input
                 type="text"
                 value={filters.search}
                 onChange={(event) => handleSearchChange(event.target.value)}
                 placeholder="Search colleges, locations, courses..."
-                className="w-full rounded-md border border-gray-200 bg-white py-2.5 pl-10 pr-4 text-sm transition-all placeholder-gray-400 focus:border-transparent focus:outline-none focus:ring-2 focus:ring-brand-blue"
+                className="w-full rounded-md border border-gray-200 bg-white py-2.5 pl-10 pr-4 text-sm transition-all placeholder-gray-400 focus:border-transparent focus:outline-none focus:ring-1 focus:ring-brand-blue"
               />
             </div>
+            <button
+              type="button"
+              onClick={onMobileFilterClick}
+              className="lg:hidden flex items-center justify-center gap-1.5 shrink-0 px-3 py-2.5 bg-white border border-gray-200 rounded-md text-[13px] font-semibold text-gray-700 hover:bg-gray-50 transition-colors"
+            >
+              <SlidersHorizontal size={14} />
+              Filters
+            </button>
           </div>
         </div>
       </div>
