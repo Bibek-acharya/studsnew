@@ -40,7 +40,12 @@ const timeAgo = (dateStr: string) => {
   if (isNaN(date.getTime())) return dateStr;
   const now = new Date();
   const diff = now.getTime() - date.getTime();
-  if (diff < 0) return date.toLocaleDateString("en-US", { year: "numeric", month: "short", day: "numeric" });
+  if (diff < 0)
+    return date.toLocaleDateString("en-US", {
+      year: "numeric",
+      month: "short",
+      day: "numeric",
+    });
   const days = Math.floor(diff / (1000 * 60 * 60 * 24));
   if (days === 0) return "Today";
   if (days === 1) return "1 day ago";
@@ -49,9 +54,12 @@ const timeAgo = (dateStr: string) => {
     const months = Math.floor(days / 30);
     return `${months} month${months > 1 ? "s" : ""} ago`;
   }
-  return date.toLocaleDateString("en-US", { year: "numeric", month: "short", day: "numeric" });
+  return date.toLocaleDateString("en-US", {
+    year: "numeric",
+    month: "short",
+    day: "numeric",
+  });
 };
-
 
 type NewsCategoryFilter =
   | "All News"
@@ -89,15 +97,29 @@ const mapNewsToUiCategory = (article: NewsArticle): NewsCategoryFilter => {
   if (["admission", "academic", "academics"].includes(cat)) return "Admission";
   if (["scholarship"].includes(cat)) return "Scholarship";
   if (["exam", "exams", "tech"].includes(cat)) return "Exams";
-  if (["notice", "announcement", "announcements", "policy", "press-release", "update", "news"].includes(cat)) return "Notice";
+  if (
+    [
+      "notice",
+      "announcement",
+      "announcements",
+      "policy",
+      "press-release",
+      "update",
+      "news",
+    ].includes(cat)
+  )
+    return "Notice";
   if (["event", "events", "sports"].includes(cat)) return "Events";
   if (["achievement", "achievements"].includes(cat)) return "Achievements";
   return "Others";
 };
 
 const NewsPage: React.FC = () => {
-  const [activeCategory, setActiveCategory] = useState<NewsCategoryFilter>("All News");
-  const [sortBy, setSortBy] = useState<"Newest First" | "Oldest First">("Newest First");
+  const [activeCategory, setActiveCategory] =
+    useState<NewsCategoryFilter>("All News");
+  const [sortBy, setSortBy] = useState<"Newest First" | "Oldest First">(
+    "Newest First",
+  );
   const [currentPage, setCurrentPage] = useState(1);
   const [allNews, setAllNews] = useState<NewsArticle[]>([]);
   const [loading, setLoading] = useState(true);
@@ -126,7 +148,9 @@ const NewsPage: React.FC = () => {
         console.warn("Failed to fetch provider news:", e);
       }
       try {
-        const instRes = await fetch(`${process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080"}/api/v1/institutions/public/news?page=1&limit=20`);
+        const instRes = await fetch(
+          `${process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080"}/api/v1/institutions/public/news?page=1&limit=20`,
+        );
         const instData = await instRes.json();
         const instNews = instData?.data?.news || [];
         if (instNews.length > 0) {
@@ -149,7 +173,10 @@ const NewsPage: React.FC = () => {
         console.warn("Failed to fetch institution news:", e);
       }
       try {
-        const eduData = await apiService.getEducationNews({ page: 1, limit: 20 });
+        const eduData = await apiService.getEducationNews({
+          page: 1,
+          limit: 20,
+        });
         const eduNews = eduData?.data?.news || [];
         if (eduNews.length > 0) {
           const mapped = eduNews.map((n: any): NewsArticle => ({
@@ -177,13 +204,19 @@ const NewsPage: React.FC = () => {
     fetchNews();
   }, []);
 
-  const featuredNews = allNews.find((n) => n.featured === true) || allNews.toSorted((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())[0];
+  const featuredNews =
+    allNews.find((n) => n.featured === true) ||
+    allNews.toSorted(
+      (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime(),
+    )[0];
 
   const processedNews = useMemo(() => {
     const filtered =
       activeCategory === "All News"
         ? allNews
-        : allNews.filter((article) => mapNewsToUiCategory(article) === activeCategory);
+        : allNews.filter(
+            (article) => mapNewsToUiCategory(article) === activeCategory,
+          );
 
     const sorted = [...filtered].sort((a, b) => {
       const dateA = new Date(a.date).getTime();
@@ -197,16 +230,21 @@ const NewsPage: React.FC = () => {
   }, [activeCategory, allNews, sortBy]);
 
   const itemsPerPage = 8;
-  const totalPages = Math.max(1, Math.ceil(processedNews.length / itemsPerPage));
+  const totalPages = Math.max(
+    1,
+    Math.ceil(processedNews.length / itemsPerPage),
+  );
   const paginatedNews = processedNews.slice(
     (currentPage - 1) * itemsPerPage,
     currentPage * itemsPerPage,
   );
 
   return (
-    <main className="max-w-350 mx-auto py-10 space-y-14 min-h-screen text-slate-800">
+    <main className="max-w-350 mx-auto py-10 space-y-14 min-h-screen text-slate-800 px-4 sm:px-6">
       <section>
-        <h1 className="text-3xl font-bold text-slate-900 mb-5">Browse by category</h1>
+        <h1 className="text-3xl font-bold text-slate-900 mb-5">
+          Browse by category
+        </h1>
         <div className="flex items-center gap-3 overflow-x-auto pb-4 -mx-4 px-4 sm:mx-0 sm:px-0 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
           {categoryPills.map((pill) => {
             const isActive = activeCategory === pill;
@@ -229,7 +267,9 @@ const NewsPage: React.FC = () => {
 
       {featuredNews && (
         <section>
-          <h2 className="text-3xl font-bold text-slate-900 mb-5">Featured Story of the Week</h2>
+          <h2 className="text-3xl font-bold text-slate-900 mb-5">
+            Featured Story of the Week
+          </h2>
           <Link
             href={`/news/${featuredNews.id}`}
             className="relative w-full h-112.5 sm:h-100 rounded-md overflow-hidden shadow-lg group cursor-pointer block"
@@ -274,13 +314,19 @@ const NewsPage: React.FC = () => {
 
       <section>
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
-          <h2 className="text-3xl font-bold text-slate-900">Latest News & stories</h2>
+          <h2 className="text-3xl font-bold text-slate-900">
+            Latest News & stories
+          </h2>
           <div className="flex items-center text-sm font-medium text-slate-600">
             <span className="mr-2">Sort by:</span>
             <label className="flex items-center gap-1 bg-white border border-gray-200 rounded-md px-3 py-1.5 hover:bg-gray-50 focus-within:ring-2 focus-within:ring-blue-500">
               <select
                 value={sortBy}
-                onChange={(event) => setSortBy(event.target.value as "Newest First" | "Oldest First")}
+                onChange={(event) =>
+                  setSortBy(
+                    event.target.value as "Newest First" | "Oldest First",
+                  )
+                }
                 className="bg-transparent outline-none"
               >
                 <option>Newest First</option>
@@ -292,9 +338,15 @@ const NewsPage: React.FC = () => {
         </div>
 
         {loading ? (
-          <div id="news-grid" className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+          <div
+            id="news-grid"
+            className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8"
+          >
             {Array.from({ length: 8 }).map((_, i) => (
-              <div key={i} className="bg-white border border-gray-100 rounded-md p-5 animate-pulse">
+              <div
+                key={i}
+                className="bg-white border border-gray-100 rounded-md p-5 animate-pulse"
+              >
                 <div className="mb-4 h-5 w-20 bg-gray-200 rounded-full" />
                 <div className="rounded-md overflow-hidden aspect-16/10 mb-5 bg-gray-200 h-30" />
                 <div className="h-5 bg-gray-200 rounded mb-2" />
@@ -307,59 +359,70 @@ const NewsPage: React.FC = () => {
             ))}
           </div>
         ) : (
-        <div id="news-grid" className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
-          {paginatedNews.map((item) => {
-            const uiCategory = mapNewsToUiCategory(item);
+          <div
+            id="news-grid"
+            className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8"
+          >
+            {paginatedNews.map((item) => {
+              const uiCategory = mapNewsToUiCategory(item);
 
-            return (
-              <article
-                key={item.id}
-                className="bg-white border border-gray-100 hover:border-blue-500/20 rounded-md p-5 flex flex-col transition-all duration-300 group cursor-pointer"
-              >
-                <div className="mb-4">
-                  <span
-                    className={`inline-flex items-center px-3 py-1 rounded-full text-[11px] font-bold uppercase tracking-wider ${categoryBadgeClass(
-                      uiCategory,
-                    )}`}
+              return (
+                <article
+                  key={item.id}
+                  className="bg-white border border-gray-100 hover:border-blue-500/20 rounded-md p-5 flex flex-col transition-all duration-300 group cursor-pointer"
+                >
+                  <div className="mb-4">
+                    <span
+                      className={`inline-flex items-center px-3 py-1 rounded-full text-[11px] font-bold uppercase tracking-wider ${categoryBadgeClass(
+                        uiCategory,
+                      )}`}
+                    >
+                      {uiCategory}
+                    </span>
+                  </div>
+
+                  <div className="rounded-md overflow-hidden aspect-16/10 mb-5 bg-gray-100 h-30">
+                    <img
+                      src={item.image}
+                      alt={item.title}
+                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 ease-out"
+                    />
+                  </div>
+
+                  <Link
+                    href={`/news/${item.id}`}
+                    className="font-bold text-lg text-slate-900 leading-snug mb-2 group-hover:text-blue-600 transition-colors "
                   >
-                    {uiCategory}
-                  </span>
-                </div>
-
-                <div className="rounded-md overflow-hidden aspect-16/10 mb-5 bg-gray-100 h-30">
-                  <img
-                    src={item.image}
-                    alt={item.title}
-                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 ease-out"
-                  />
-                </div>
-
-                <Link href={`/news/${item.id}`} className="font-bold text-lg text-slate-900 leading-snug mb-2 group-hover:text-blue-600 transition-colors ">
-                  {item.title}
-                </Link>
-                <p className="text-slate-500 text-sm mb-5 grow line-clamp-2 leading-relaxed">
-                  {stripHtml(item.excerpt)}
-                </p>
-
-
-                <div className="pt-4 border-t border-gray-100 flex justify-between items-center text-sm mt-auto">
-                  <span className="text-slate-400 flex items-center font-medium">
-                    <i className="fa-regular fa-clock mr-1.5"></i> {timeAgo(item.date)}
-                  </span>
-                  <Link href={`/news/${item.id}`} className="text-blue-600 font-semibold flex items-center group-hover:translate-x-1 transition-transform duration-200">
-                    View Details 
+                    {item.title}
                   </Link>
-                </div>
-              </article>
-            );
-          })}
-        </div>
+                  <p className="text-slate-500 text-sm mb-5 grow line-clamp-2 leading-relaxed">
+                    {stripHtml(item.excerpt)}
+                  </p>
+
+                  <div className="pt-4 border-t border-gray-100 flex justify-between items-center text-sm mt-auto">
+                    <span className="text-slate-400 flex items-center font-medium">
+                      <i className="fa-regular fa-clock mr-1.5"></i>{" "}
+                      {timeAgo(item.date)}
+                    </span>
+                    <Link
+                      href={`/news/${item.id}`}
+                      className="text-blue-600 font-semibold flex items-center group-hover:translate-x-1 transition-transform duration-200"
+                    >
+                      View Details
+                    </Link>
+                  </div>
+                </article>
+              );
+            })}
+          </div>
         )}
 
         {!loading && processedNews.length === 0 && (
           <div className="flex flex-col items-center justify-center py-16">
             <FolderOpen className="w-32 h-32 text-gray-300 mb-4" />
-            <p className="text-gray-500 text-lg font-medium mb-6">No news information is currently available.</p>
+            <p className="text-gray-500 text-lg font-medium mb-6">
+              No news information is currently available.
+            </p>
             <Link
               href="/"
               className="bg-[#0000ff] hover:bg-[#0000cc] cursor-pointer text-white font-semibold py-2.5 px-6 rounded-md transition-colors text-sm"

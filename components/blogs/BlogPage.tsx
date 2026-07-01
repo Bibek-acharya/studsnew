@@ -29,11 +29,10 @@ const categoryPills: BlogCategoryFilter[] = [
 ];
 
 const stripHtml = (html: string) => {
-  if (typeof window === 'undefined') return html;
-  const doc = new DOMParser().parseFromString(html, 'text/html');
+  if (typeof window === "undefined") return html;
+  const doc = new DOMParser().parseFromString(html, "text/html");
   return doc.body.textContent || "";
 };
-
 
 const badgeClassFromCategory = (category: string) => {
   if (category === "Scholarship") return "bg-emerald-500";
@@ -46,8 +45,11 @@ const badgeClassFromCategory = (category: string) => {
 };
 
 const BlogPage: React.FC = () => {
-  const [activeCategory, setActiveCategory] = useState<BlogCategoryFilter>("All News");
-  const [sortBy, setSortBy] = useState<"Newest" | "Oldest" | "Most Popular">("Newest");
+  const [activeCategory, setActiveCategory] =
+    useState<BlogCategoryFilter>("All News");
+  const [sortBy, setSortBy] = useState<"Newest" | "Oldest" | "Most Popular">(
+    "Newest",
+  );
   const [currentPage, setCurrentPage] = useState(1);
   const [blogs, setBlogs] = useState<BlogEntry[]>([]);
   const [loading, setLoading] = useState(true);
@@ -56,29 +58,32 @@ const BlogPage: React.FC = () => {
     const loadBlogs = async () => {
       setLoading(true);
       try {
-        const category = activeCategory === "All News" ? undefined : activeCategory;
+        const category =
+          activeCategory === "All News" ? undefined : activeCategory;
         const result = await fetchPublicBlogs({ page: 1, limit: 50, category });
         let allBlogs: BlogEntry[] = result.blogs;
 
         try {
           const providerData = await getPublicBlogs(1, 50);
           if (providerData?.blogs && providerData.blogs.length > 0) {
-            const providerBlogs = providerData.blogs.map((b: any): BlogEntry => ({
-              id: b.id,
-              title: b.title,
-              slug: b.title?.toLowerCase().replace(/\s+/g, "-") || "",
-              excerpt: stripHtml(b.content || "").slice(0, 200) || "",
-              content: b.content || "",
-              image: b.image_url || "",
-              author: b.author || "Provider",
-              category: category || "Others",
-              tags: [],
-              read_time: "3 min",
-              featured: false,
-              published: b.status === "published",
-              views: b.views || 0,
-              created_at: b.published_at || b.created_at,
-            }));
+            const providerBlogs = providerData.blogs.map(
+              (b: any): BlogEntry => ({
+                id: b.id,
+                title: b.title,
+                slug: b.title?.toLowerCase().replace(/\s+/g, "-") || "",
+                excerpt: stripHtml(b.content || "").slice(0, 200) || "",
+                content: b.content || "",
+                image: b.image_url || "",
+                author: b.author || "Provider",
+                category: category || "Others",
+                tags: [],
+                read_time: "3 min",
+                featured: false,
+                published: b.status === "published",
+                views: b.views || 0,
+                created_at: b.published_at || b.created_at,
+              }),
+            );
 
             allBlogs = [...allBlogs, ...providerBlogs];
           }
@@ -96,12 +101,18 @@ const BlogPage: React.FC = () => {
     loadBlogs();
   }, [activeCategory]);
 
-  const featuredBlog = blogs.find(b => b.featured) || blogs[0];
+  const featuredBlog = blogs.find((b) => b.featured) || blogs[0];
 
   const sortedBlogs = useMemo(() => {
     return [...blogs].sort((a, b) => {
-      if (sortBy === "Newest") return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
-      if (sortBy === "Oldest") return new Date(a.created_at).getTime() - new Date(b.created_at).getTime();
+      if (sortBy === "Newest")
+        return (
+          new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+        );
+      if (sortBy === "Oldest")
+        return (
+          new Date(a.created_at).getTime() - new Date(b.created_at).getTime()
+        );
       return b.views - a.views;
     });
   }, [blogs, sortBy]);
@@ -115,7 +126,11 @@ const BlogPage: React.FC = () => {
 
   const formatDate = (dateStr: string) => {
     try {
-      return new Date(dateStr).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" });
+      return new Date(dateStr).toLocaleDateString("en-US", {
+        month: "short",
+        day: "numeric",
+        year: "numeric",
+      });
     } catch {
       return dateStr;
     }
@@ -123,16 +138,21 @@ const BlogPage: React.FC = () => {
 
   return (
     <div className="bg-white text-gray-800 antialiased pb-16 min-h-screen">
-      <div className="max-w-350 mx-auto py-8">
+      <div className="max-w-350 mx-auto py-8 px-4 sm:px-6">
         <section className="mb-10">
-          <h2 className="text-3xl font-bold text-gray-900 mb-5">Browse by category</h2>
+          <h2 className="text-3xl font-bold text-gray-900 mb-5">
+            Browse by category
+          </h2>
           <div className="flex gap-3 overflow-x-auto pb-2 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
             {categoryPills.map((pill) => {
               const isActive = activeCategory === pill;
               return (
                 <button
                   key={pill}
-                  onClick={() => { setActiveCategory(pill); setCurrentPage(1); }}
+                  onClick={() => {
+                    setActiveCategory(pill);
+                    setCurrentPage(1);
+                  }}
                   className={`px-5 py-2 rounded-full text-sm font-medium whitespace-nowrap transition-colors ${
                     isActive
                       ? "bg-brand-blue text-white "
@@ -154,7 +174,9 @@ const BlogPage: React.FC = () => {
 
         {!loading && featuredBlog && (
           <section className="mb-12">
-            <h2 className="text-3xl font-bold text-gray-900 mb-5">Featured Story of the Week</h2>
+            <h2 className="text-3xl font-bold text-gray-900 mb-5">
+              Featured Story of the Week
+            </h2>
             <Link
               href={`/blogs/${featuredBlog.id}`}
               className="relative w-full h-87.5 sm:h-100 rounded-md overflow-hidden group cursor-pointer block"
@@ -169,7 +191,9 @@ const BlogPage: React.FC = () => {
                 <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
                   <div className="max-w-3xl">
                     <div className="flex items-center gap-4 mb-3">
-                      <span className="bg-emerald-500 text-white text-xs font-bold px-3 py-1 rounded-full">Featured</span>
+                      <span className="bg-emerald-500 text-white text-xs font-bold px-3 py-1 rounded-full">
+                        Featured
+                      </span>
                       <div className="flex items-center text-gray-300 text-sm font-medium">
                         <i className="fa-regular fa-clock mr-1.5"></i>
                         {formatDate(featuredBlog.created_at)}
@@ -178,8 +202,9 @@ const BlogPage: React.FC = () => {
                     <h3 className="text-2xl sm:text-3xl md:text-4xl font-bold text-white mb-2 leading-tight">
                       {featuredBlog.title}
                     </h3>
-                    <p className="text-gray-200 text-sm sm:text-base line-clamp-2">{stripHtml(featuredBlog.excerpt)}</p>
-
+                    <p className="text-gray-200 text-sm sm:text-base line-clamp-2">
+                      {stripHtml(featuredBlog.excerpt)}
+                    </p>
                   </div>
                   <button className="bg-white text-gray-900 font-semibold px-6 py-2.5 rounded-md hover:bg-gray-100 transition-colors whitespace-nowrap  self-start md:self-auto">
                     Read Full Story
@@ -195,12 +220,17 @@ const BlogPage: React.FC = () => {
             <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
               <h2 className="text-3xl font-bold text-gray-900">Latest Blogs</h2>
               <div className="flex items-center gap-2">
-                <span className="text-sm font-medium text-gray-500">Sort by:</span>
+                <span className="text-sm font-medium text-gray-500">
+                  Sort by:
+                </span>
                 <div className="relative">
                   <select
                     value={sortBy}
                     onChange={(event) =>
-                      setSortBy(event.target.value as "Newest" | "Oldest" | "Most Popular")
+                      setSortBy(
+                        event.target.value as
+                          "Newest" | "Oldest" | "Most Popular",
+                      )
                     }
                     className="appearance-none bg-white border border-gray-200 text-gray-700 text-sm font-medium rounded-md px-4 py-2 pr-9 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-colors cursor-pointer "
                   >
@@ -221,8 +251,15 @@ const BlogPage: React.FC = () => {
                   key={blog.id}
                   className="bg-white rounded-md border border-gray-200 hover:border-blue-500/20 overflow-hidden flex flex-col duration-300 cursor-pointer"
                 >
-                  <Link href={`/blogs/${blog.id}`} className="h-32 w-full overflow-hidden p-4 ">
-                    <img src={blog.image} alt={blog.title} className="w-full h-full object-cover rounded-md" />
+                  <Link
+                    href={`/blogs/${blog.id}`}
+                    className="h-32 w-full overflow-hidden p-4 "
+                  >
+                    <img
+                      src={blog.image}
+                      alt={blog.title}
+                      className="w-full h-full object-cover rounded-md"
+                    />
                   </Link>
 
                   <div className="p-5 flex-1 flex flex-col">
@@ -238,11 +275,15 @@ const BlogPage: React.FC = () => {
                       </div>
                     </div>
 
-                    <Link href={`/blogs/${blog.id}`} className="text-lg font-bold text-gray-900 leading-snug mb-2 line-clamp-2 hover:text-[#0000ff]">
+                    <Link
+                      href={`/blogs/${blog.id}`}
+                      className="text-lg font-bold text-gray-900 leading-snug mb-2 line-clamp-2 hover:text-[#0000ff]"
+                    >
                       {blog.title}
                     </Link>
-                    <p className="text-sm text-gray-500 line-clamp-3 mb-5 flex-1">{stripHtml(blog.excerpt)}</p>
-
+                    <p className="text-sm text-gray-500 line-clamp-3 mb-5 flex-1">
+                      {stripHtml(blog.excerpt)}
+                    </p>
 
                     <div className="flex justify-between items-center pt-4 border-t border-gray-100 mt-auto">
                       <div className="flex items-center gap-2.5">
@@ -252,11 +293,18 @@ const BlogPage: React.FC = () => {
                           className="w-8 h-8 rounded-full object-cover"
                         />
                         <div className="flex flex-col justify-center">
-                          <span className="text-xs font-bold text-gray-900 leading-none mb-1">{blog.author}</span>
-                          <span className="text-[10px] text-gray-500 font-medium leading-none">Educator</span>
+                          <span className="text-xs font-bold text-gray-900 leading-none mb-1">
+                            {blog.author}
+                          </span>
+                          <span className="text-[10px] text-gray-500 font-medium leading-none">
+                            Educator
+                          </span>
                         </div>
                       </div>
-                      <Link href={`/blogs/${blog.id}`} className="text-xs font-semibold text-[#0000ff] flex items-center ">
+                      <Link
+                        href={`/blogs/${blog.id}`}
+                        className="text-xs font-semibold text-[#0000ff] flex items-center "
+                      >
                         View Details
                       </Link>
                     </div>
@@ -268,7 +316,9 @@ const BlogPage: React.FC = () => {
             {sortedBlogs.length === 0 && (
               <div className="flex flex-col items-center justify-center py-16">
                 <FolderOpen className="w-32 h-32 text-gray-300 mb-4" />
-                <p className="text-gray-500 text-lg font-medium mb-6">No blogs information is currently available.</p>
+                <p className="text-gray-500 text-lg font-medium mb-6">
+                  No blogs information is currently available.
+                </p>
                 <Link
                   href="/"
                   className="bg-[#0000ff] hover:bg-[#0000cc] cursor-pointer text-white font-semibold py-2.5 px-6 rounded-md transition-colors text-sm"

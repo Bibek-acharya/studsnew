@@ -145,7 +145,7 @@ const BlogDetailsPage: React.FC<{ params: Promise<{ id: string }> }> = ({
 
   return (
     <div className="text-gray-800 antialiased selection:bg-blue-200 selection:text-blue-900 bg-white">
-      <div className="max-w-350 mx-auto py-8 lg:py-12 flex flex-col lg:flex-row gap-8 lg:gap-12">
+      <div className="max-w-350 mx-auto py-8 lg:py-12 flex flex-col lg:flex-row gap-8 lg:gap-12 px-4 sm:px-6">
         <main className="lg:w-2/3">
           <div className="flex items-center gap-4 text-sm mb-4">
             <span

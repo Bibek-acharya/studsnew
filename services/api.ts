@@ -878,8 +878,10 @@ export interface ProfileData {
   email: string;
   first_name: string;
   last_name: string;
+  middle_name?: string;
   image_url: string;
   phone: string;
+  alternate_phone?: string;
   date_of_birth: string;
   gender: string;
   nationality: string;
@@ -905,7 +907,9 @@ export interface ProfileResponse {
 export interface UpdateProfilePayload {
   first_name?: string;
   last_name?: string;
+  middle_name?: string;
   phone?: string;
+  alternate_phone?: string;
   date_of_birth?: string;
   gender?: string;
   nationality?: string;
