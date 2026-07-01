@@ -21,9 +21,10 @@ const nextConfig: NextConfig = {
       { protocol: "https", hostname: "api.qrserver.com" },
       { protocol: "https", hostname: "placehold.co" },
       { protocol: "http", hostname: "localhost" },
+      { protocol: "https", hostname: "api.studsphere.com" },
     ],
   },
-  allowedDevOrigins: ['petersburg-inside-grande-llp.trycloudflare.com'],
+  allowedDevOrigins: ["petersburg-inside-grande-llp.trycloudflare.com"],
   experimental: {
     optimizePackageImports: [
       "lucide-react",
