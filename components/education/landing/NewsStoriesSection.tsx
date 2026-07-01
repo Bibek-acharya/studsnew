@@ -21,76 +21,38 @@ type NewsCard = {
   timeAgo: string;
 };
 
-const newsData: NewsCard[] = [
-  {
-    id: 0,
-    badgeText: "Admission",
-    badgeColorClass: "bg-blue-50 text-blue-600",
-    imgSrc: "https://images.unsplash.com/photo-1541339907198-e08756dedf3f?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80",
-    title: "KIST College Opens Admissions for BIM & BBA.",
-    description: "KIST College has officially opened its admission portal for the upcoming fall intake. Apply now to secure your spot in top-tier management and IT programs.",
-    timeAgo: "2 Hours ago",
-  },
-  {
-    id: 0,
-    badgeText: "Exam",
-    badgeColorClass: "bg-orange-50 text-orange-600",
-    imgSrc: "https://images.unsplash.com/photo-1434030216411-0b793f4b4173?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80",
-    title: "St. Xavier's College +2 Entrance Exam Dates.",
-    description: "St. Xavier's College, Maitighar has published the official schedule for the +2 Science and Management entrance examinations. Students are advised to download their admit cards.",
-    timeAgo: "1 Day ago",
-  },
-  {
-    id: 0,
-    badgeText: "Scholarship",
-    badgeColorClass: "bg-purple-50 text-purple-600",
-    imgSrc: "https://images.unsplash.com/photo-1523050854058-8df90110c9f1?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80",
-    title: "Kathmandu University Merit Scholarships.",
-    description: "KU announces a new tier of merit-based scholarships for undergraduate engineering and science students securing top ranks in the CBT entrance test.",
-    timeAgo: "3 Days ago",
-  },
-  {
-    id: 0,
-    badgeText: "Event",
-    badgeColorClass: "bg-blue-50 text-blue-600",
-    imgSrc: "https://images.unsplash.com/photo-1540575467063-178a50c2df87?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80",
-    title: "Trinity International College IT Fest 2026.",
-    description: "Join us at Trinity International College for a two-day Tech Fest featuring hackathons, innovative projects, and guest lectures from industry experts.",
-    timeAgo: "1 Week ago",
-  },
-  {
-    id: 0,
-    badgeText: "Notice",
-    badgeColorClass: "bg-emerald-50 text-emerald-600",
-    imgSrc: "https://images.unsplash.com/photo-1498243691581-b145c3f54a5a?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80",
-    title: "IOE Pulchowk Entrance Admit Cards Available.",
-    description: "The Institute of Engineering (IOE), Pulchowk Campus has officially released the admit cards for the BE/BArch entrance examination. Login to your portal to download.",
-    timeAgo: "2 Weeks ago",
-  },
-];
-
-const NewsStoriesSection: React.FC<NewsStoriesSectionProps> = ({ onNavigate, newsArticles }) => {
+const NewsStoriesSection: React.FC<NewsStoriesSectionProps> = ({
+  onNavigate,
+  newsArticles,
+}) => {
   const containerRef = useRef<HTMLDivElement | null>(null);
-  const stripHtml = (html: string) => html.replace(/<[^>]*>/g, "").replace(/&nbsp;/g, " ").replace(/&amp;/g, "&").trim();
+  const stripHtml = (html: string) =>
+    html
+      .replace(/<[^>]*>/g, "")
+      .replace(/&nbsp;/g, " ")
+      .replace(/&amp;/g, "&")
+      .trim();
 
-  const data: NewsCard[] = newsArticles?.length
-    ? newsArticles.map((item) => ({
-        id: item.id,
-        badgeText: item.category || "News",
-        badgeColorClass:
-          item.category?.toLowerCase().includes("exam")
-            ? "bg-orange-50 text-orange-600"
-            : item.category?.toLowerCase().includes("scholarship")
-            ? "bg-purple-50 text-purple-600"
-            : item.category?.toLowerCase().includes("admission")
-            ? "bg-blue-50 text-blue-600"
-            : "bg-emerald-50 text-emerald-600",
-        imgSrc: item.image || "https://placehold.co/600x400/f1f5f9/94a3b8?text=News",
-        title: item.title,
-        description: stripHtml(item.excerpt || item.content || "Stay updated with the latest education announcements."),
-        timeAgo: item.date || "Today",
-      }))
-    : newsData;
+  const data: NewsCard[] = (newsArticles || []).map((item) => ({
+    id: item.id,
+    badgeText: item.category || "News",
+    badgeColorClass: item.category?.toLowerCase().includes("exam")
+      ? "bg-orange-50 text-orange-600"
+      : item.category?.toLowerCase().includes("scholarship")
+        ? "bg-purple-50 text-purple-600"
+        : item.category?.toLowerCase().includes("admission")
+          ? "bg-blue-50 text-blue-600"
+          : "bg-emerald-50 text-emerald-600",
+    imgSrc:
+      item.image || "https://placehold.co/600x400/f1f5f9/94a3b8?text=News",
+    title: item.title,
+    description: stripHtml(
+      item.excerpt ||
+        item.content ||
+        "Stay updated with the latest education announcements.",
+    ),
+    timeAgo: item.date || "Today",
+  }));
 
   const scrollByWidth = (direction: -1 | 1) => {
     const container = containerRef.current;
@@ -150,7 +112,9 @@ const NewsStoriesSection: React.FC<NewsStoriesSectionProps> = ({ onNavigate, new
                 onClick={() => onNavigate("newsDetails", card)}
               >
                 <div className="mb-2.5 sm:mb-3">
-                  <span className={`inline-flex items-center px-2.5 sm:px-3 py-0.5 sm:py-1 text-[10px] xs:text-[11px] sm:text-[11px] font-bold uppercase tracking-wider rounded-full ${card.badgeColorClass}`}>
+                  <span
+                    className={`inline-flex items-center px-2.5 sm:px-3 py-0.5 sm:py-1 text-[10px] xs:text-[11px] sm:text-[11px] font-bold uppercase tracking-wider rounded-full ${card.badgeColorClass}`}
+                  >
                     {card.badgeText}
                   </span>
                 </div>

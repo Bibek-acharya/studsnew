@@ -1,10 +1,12 @@
 "use client";
 
-import React, { useMemo, useState } from "react";
+import React, { useMemo, useState, useEffect } from "react";
+import Link from "next/link";
 import { submitReviewAction } from "@/actions/review-actions";
 import { getCollegesBySearch } from "@/lib/college-suggestions";
 import { courseDataByLevel, searchCourses } from "@/lib/course-suggestions";
 import { ratingCategories, ratingStatusLabels } from "@/lib/review-types";
+import { useAuth } from "@/services/AuthContext";
 
 type StudentType = "current" | "alumni" | null;
 
@@ -13,6 +15,7 @@ const popularColleges = getCollegesBySearch("");
 const courseDataMap: Record<string, string[]> = courseDataByLevel;
 
 const WriteReviewPage: React.FC = () => {
+  const { user, isAuthenticated } = useAuth();
   const currentYear = new Date().getFullYear();
   const years = Array.from(
     { length: currentYear - 1989 },
@@ -34,9 +37,16 @@ const WriteReviewPage: React.FC = () => {
   const [certify, setCertify] = useState(false);
   const [ratings, setRatings] = useState<Record<string, number>>({});
 
+  useEffect(() => {
+    if (user?.email) {
+      setEmail(user.email);
+    }
+  }, [user]);
+
   const [showCollegeList, setShowCollegeList] = useState(false);
   const [showCourseList, setShowCourseList] = useState(false);
 
+  const [submitting, setSubmitting] = useState(false);
   const [modal, setModal] = useState<{
     open: boolean;
     title: string;
@@ -108,13 +118,22 @@ const WriteReviewPage: React.FC = () => {
     setYearlyFee("");
     setScholarship("");
     setInternshipOutcome("");
-    setEmail("");
+    if (!user?.email) setEmail("");
     setCertify(false);
     setRatings({});
   };
 
   const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
+
+    if (!isAuthenticated) {
+      showMessage(
+        "error",
+        "Login Required",
+        "Please log in to submit a review.",
+      );
+      return;
+    }
 
     if (!studentType) {
       showMessage(
@@ -152,39 +171,50 @@ const WriteReviewPage: React.FC = () => {
     }
 
     const selectedCollege = popularColleges.find(
-      c => c.name.toLowerCase() === collegeInput.toLowerCase()
+      (c) => c.name.toLowerCase() === collegeInput.toLowerCase(),
     );
 
-    const result = await submitReviewAction({
-      collegeId: selectedCollege?.id || Math.floor(Math.random() * 1000),
-      collegeName: collegeInput,
-      studentType,
-      course: courseInput,
-      level,
-      batchYear: parseInt(batchYear),
-      ratings,
-      pros,
-      cons,
-      summaryTitle,
-      yearlyFee: yearlyFee ? parseInt(yearlyFee) : undefined,
-      scholarship: scholarship === "yes",
-      internshipOutcome: internshipOutcome || undefined,
-      email,
-    });
+    setSubmitting(true);
+    try {
+      const result = await submitReviewAction({
+        collegeId: selectedCollege?.id || Math.floor(Math.random() * 1000),
+        collegeName: collegeInput,
+        studentType,
+        course: courseInput,
+        level,
+        batchYear: parseInt(batchYear),
+        ratings,
+        pros,
+        cons,
+        summaryTitle,
+        yearlyFee: yearlyFee ? parseInt(yearlyFee) : undefined,
+        scholarship: scholarship === "yes",
+        internshipOutcome: internshipOutcome || undefined,
+        email,
+      });
 
-    if (result.success) {
-      showMessage(
-        "success",
-        "Review Submitted!",
-        "Thank you for sharing your experience. Your review will help future students make better choices.",
-      );
-      resetForm();
-    } else {
+      if (result.success) {
+        showMessage(
+          "success",
+          "Review Submitted!",
+          "Thank you for sharing your experience. Your review will help future students make better choices.",
+        );
+        resetForm();
+      } else {
+        showMessage(
+          "error",
+          "Submission Failed",
+          result.error || "Something went wrong. Please try again.",
+        );
+      }
+    } catch {
       showMessage(
         "error",
         "Submission Failed",
-        result.error || "Something went wrong. Please try again.",
+        "An unexpected error occurred. Please try again.",
       );
+    } finally {
+      setSubmitting(false);
     }
   };
 
@@ -200,6 +230,20 @@ const WriteReviewPage: React.FC = () => {
             honest feedback on academics, facilities, and costs.
           </p>
         </div>
+
+        {!isAuthenticated && (
+          <div className="mb-8 rounded-md border border-amber-200 bg-amber-50 p-6 text-center">
+            <p className="text-amber-800 font-semibold">
+              You need to log in to submit a review.
+            </p>
+            <Link
+              href="/login"
+              className="mt-3 inline-block rounded-md bg-amber-600 px-6 py-2 text-sm font-semibold text-white hover:bg-amber-700 transition-colors"
+            >
+              Log in to Write a Review
+            </Link>
+          </div>
+        )}
 
         <form
           className="grid grid-cols-1 gap-8 lg:grid-cols-12"
@@ -262,7 +306,9 @@ const WriteReviewPage: React.FC = () => {
                             }}
                           >
                             <div className="font-medium">{item.name}</div>
-                            <div className="text-xs text-slate-500">{item.location} • {item.type}</div>
+                            <div className="text-xs text-slate-500">
+                              {item.location} • {item.type}
+                            </div>
                           </button>
                         </li>
                       ))}
@@ -516,11 +562,14 @@ const WriteReviewPage: React.FC = () => {
                   type="email"
                   value={email}
                   onChange={(event) => setEmail(event.target.value)}
+                  readOnly={!!user?.email}
                   placeholder="example@gmail.com"
-                  className="w-full rounded-md border border-slate-200 bg-white p-4 text-sm placeholder-slate-400 focus:border-transparent focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className={`w-full rounded-md border border-slate-200 bg-white p-4 text-sm placeholder-slate-400 focus:border-transparent focus:outline-none focus:ring-2 focus:ring-blue-500 ${user?.email ? "bg-gray-50 text-gray-500 cursor-not-allowed" : ""}`}
                 />
                 <p className="mt-2 text-xs font-medium text-slate-400">
-                  We may send a verification link to this email.
+                  {user?.email
+                    ? "Using your account email."
+                    : "We may send a verification link to this email."}
                 </p>
               </div>
 
@@ -544,9 +593,10 @@ const WriteReviewPage: React.FC = () => {
               <div className="flex justify-end">
                 <button
                   type="submit"
-                  className="flex items-center justify-center gap-2 rounded-md bg-blue-600 px-8 py-3 font-bold text-white transition-colors hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+                  disabled={submitting}
+                  className="flex items-center justify-center gap-2 rounded-md bg-blue-600 px-8 py-3 font-bold text-white transition-colors hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
                 >
-                  <span>Submit Review</span>
+                  {submitting ? "Submitting..." : "Submit Review"}
                 </button>
               </div>
             </section>
