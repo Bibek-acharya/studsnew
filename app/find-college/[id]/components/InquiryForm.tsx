@@ -103,7 +103,7 @@ const InquiryForm: React.FC<InquiryFormProps> = ({
       const token =
         localStorage.getItem("token") || sessionStorage.getItem("token");
       const subject = `Inquiry about ${name} - ${inquiryCourse || "General"}`;
-      const content = `Name: ${inquiryName}\nEmail: ${inquiryEmail}\nPhone: ${inquiryPhone}\nCourse of Interest: ${inquiryCourse || "Not specified"}`;
+      const content = inquiryCourse || "General inquiry";
       await fetch(`${API_BASE}/api/v1/institutions/${collegeId}/inquiry`, {
         method: "POST",
         headers: {
@@ -128,7 +128,7 @@ const InquiryForm: React.FC<InquiryFormProps> = ({
       const token =
         localStorage.getItem("token") || sessionStorage.getItem("token");
       const subject = `Question about ${name}`;
-      const content = `Name: ${askName}\nEmail: ${askEmail}\nPhone: ${askPhone}\n\nMessage:\n${askMessage}`;
+      const content = askMessage;
       await fetch(`${API_BASE}/api/v1/institutions/${collegeId}/inquiry`, {
         method: "POST",
         headers: {

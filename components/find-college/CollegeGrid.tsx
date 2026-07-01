@@ -354,7 +354,10 @@ const CollegeGrid: React.FC<CollegeGridProps> = ({
       toast.error("Please login to save bookmarks");
       return;
     }
-    if (typeof collegeId !== "number") return;
+    if (typeof collegeId !== "number") {
+      toast.error("This institution cannot be bookmarked yet");
+      return;
+    }
     if (pendingBookmarks[collegeId]) return;
     setPendingBookmarks((prev) => ({ ...prev, [collegeId]: true }));
     const existingBookmarkId = bookmarkMap[collegeId];

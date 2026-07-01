@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { FaSliders, FaStar } from "react-icons/fa6";
@@ -8,11 +8,10 @@ import GlobalFilterSection from "@/components/ui/GlobalFilterSection";
 import { ProgramCard } from "@/components/find-college/CollegeGrid";
 import Pagination from "@/components/ui/Pagination";
 import type { College } from "@/services/api";
-import {
-  Search,
-  ChevronDown,
-  Check,
-} from "lucide-react";
+import { apiService } from "@/services/api";
+import { useAuth } from "@/services/AuthContext";
+import { toast } from "sonner";
+import { Search, ChevronDown, Check } from "lucide-react";
 
 interface UniversityOption {
   id: string;
@@ -51,7 +50,10 @@ const CheckboxItem: React.FC<{
   count?: number;
   checked?: boolean;
 }> = ({ id, label, count, checked = false }) => (
-  <label htmlFor={id} className="group flex w-full cursor-pointer items-center justify-between">
+  <label
+    htmlFor={id}
+    className="group flex w-full cursor-pointer items-center justify-between"
+  >
     <div className="flex items-center gap-3">
       <input
         id={id}
@@ -105,9 +107,22 @@ const COLLEGE_TYPES = [
   { id: "ct_foreign", label: "Foreign Affiliated", count: 35 },
 ];
 
-const COURSE_DURATIONS = ["1 Year", "2 Years", "3 Years", "4 Years", "5+ Years"];
+const COURSE_DURATIONS = [
+  "1 Year",
+  "2 Years",
+  "3 Years",
+  "4 Years",
+  "5+ Years",
+];
 
-const FACILITIES = ["Hostel", "Transportation", "Library", "Lab", "Sports", "Cafeteria"];
+const FACILITIES = [
+  "Hostel",
+  "Transportation",
+  "Library",
+  "Lab",
+  "Sports",
+  "Cafeteria",
+];
 
 const SORT_OPTIONS = [
   { id: "popularity", label: "Popularity" },
@@ -122,13 +137,35 @@ const AffiliatedColleges: React.FC<AffiliatedCollegesProps> = ({
   colleges: sampleColleges,
 }) => {
   const router = useRouter();
+  const { isAuthenticated } = useAuth();
   const [activeUni, setActiveUni] = useState(universities[0]?.id || "");
   const [searchQuery, setSearchQuery] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
   const [savedIds, setSavedIds] = useState<number[]>([]);
+  const [bookmarkMap, setBookmarkMap] = useState<Record<number, number>>({});
+  const [pendingBookmarks, setPendingBookmarks] = useState<
+    Record<number, boolean>
+  >({});
   const [selectedIds, setSelectedIds] = useState<number[]>([]);
   const [quickInquiryMode, setQuickInquiryMode] = useState(false);
   const ITEMS_PER_PAGE = 18;
+
+  useEffect(() => {
+    if (!isAuthenticated) return;
+    apiService
+      .getBookmarksByType("colleges")
+      .then((items) => {
+        const ids: number[] = [];
+        const map: Record<number, number> = {};
+        items.forEach((b) => {
+          ids.push(b.item_id);
+          map[b.item_id] = b.id;
+        });
+        setSavedIds(ids);
+        setBookmarkMap(map);
+      })
+      .catch(() => {});
+  }, [isAuthenticated]);
 
   const handleNavigate = (view: string, data?: any) => {
     if (view === "collegeDetails" && data?.id) {
@@ -136,10 +173,40 @@ const AffiliatedColleges: React.FC<AffiliatedCollegesProps> = ({
     }
   };
 
-  const toggleSaved = (id: number) => {
-    setSavedIds((prev) =>
-      prev.includes(id) ? prev.filter((i) => i !== id) : [...prev, id],
-    );
+  const toggleSaved = async (id: number) => {
+    if (!isAuthenticated) {
+      toast.error("Please login to save bookmarks");
+      return;
+    }
+    if (pendingBookmarks[id]) return;
+    setPendingBookmarks((prev) => ({ ...prev, [id]: true }));
+    const existingBookmarkId = bookmarkMap[id];
+    try {
+      if (existingBookmarkId) {
+        await apiService.deleteBookmark(existingBookmarkId);
+        setBookmarkMap((prev) => {
+          const next = { ...prev };
+          delete next[id];
+          return next;
+        });
+        setSavedIds((prev) => prev.filter((i) => i !== id));
+        toast.success("Removed from bookmarks");
+      } else {
+        const res = await apiService.createBookmark(id, "colleges");
+        const newBookmarkId = res.data.id;
+        setBookmarkMap((prev) => ({ ...prev, [id]: newBookmarkId }));
+        setSavedIds((prev) => [...prev, id]);
+        toast.success("Added to bookmarks!");
+      }
+    } catch {
+      toast.error("Failed to save bookmark");
+    } finally {
+      setPendingBookmarks((prev) => {
+        const next = { ...prev };
+        delete next[id];
+        return next;
+      });
+    }
   };
 
   const handleClaim = () => {};
@@ -186,7 +253,10 @@ const AffiliatedColleges: React.FC<AffiliatedCollegesProps> = ({
                   </div>
                   {activeUni === uni.id && (
                     <div className="absolute right-[14px] top-[14px]">
-                      <Check size={16} className="rounded-full bg-blue-600 p-0.5 text-white" />
+                      <Check
+                        size={16}
+                        className="rounded-full bg-blue-600 p-0.5 text-white"
+                      />
                     </div>
                   )}
                 </button>
@@ -204,7 +274,9 @@ const AffiliatedColleges: React.FC<AffiliatedCollegesProps> = ({
             <div className="mb-2 flex items-center justify-between">
               <div className="flex items-center gap-3">
                 <FaSliders size={18} className="text-black" />
-                <h3 className="text-xl font-black tracking-tight text-slate-900">Filters</h3>
+                <h3 className="text-xl font-black tracking-tight text-slate-900">
+                  Filters
+                </h3>
               </div>
             </div>
 
@@ -212,7 +284,12 @@ const AffiliatedColleges: React.FC<AffiliatedCollegesProps> = ({
               <Accordion title="Academic Level">
                 <div className="flex flex-col gap-3.5 pt-1">
                   {ACADEMIC_LEVELS.map((item) => (
-                    <CheckboxItem key={item.id} id={`acad-${item.id}`} label={item.label} count={item.count} />
+                    <CheckboxItem
+                      key={item.id}
+                      id={`acad-${item.id}`}
+                      label={item.label}
+                      count={item.count}
+                    />
                   ))}
                 </div>
               </Accordion>
@@ -227,7 +304,17 @@ const AffiliatedColleges: React.FC<AffiliatedCollegesProps> = ({
                   <i className="fa-solid fa-magnifying-glass absolute right-3 top-1/2 -translate-y-1/2 text-[11px] text-slate-400"></i>
                 </div>
                 <div className="custom-scrollbar flex max-h-55 flex-col gap-3.5 overflow-y-auto pr-1">
-                  {["BBA", "BBS", "BCA", "BIT", "BIM", "BHM", "BA", "BSc", "MBA"].map((prog) => (
+                  {[
+                    "BBA",
+                    "BBS",
+                    "BCA",
+                    "BIT",
+                    "BIM",
+                    "BHM",
+                    "BA",
+                    "BSc",
+                    "MBA",
+                  ].map((prog) => (
                     <CheckboxItem key={prog} id={`prog-${prog}`} label={prog} />
                   ))}
                 </div>
@@ -253,7 +340,12 @@ const AffiliatedColleges: React.FC<AffiliatedCollegesProps> = ({
               <Accordion title="Colleges Type">
                 <div className="flex flex-col gap-3.5 pt-1">
                   {COLLEGE_TYPES.map((item) => (
-                    <CheckboxItem key={item.id} id={`type-${item.id}`} label={item.label} count={item.count} />
+                    <CheckboxItem
+                      key={item.id}
+                      id={`type-${item.id}`}
+                      label={item.label}
+                      count={item.count}
+                    />
                   ))}
                 </div>
               </Accordion>
@@ -261,10 +353,21 @@ const AffiliatedColleges: React.FC<AffiliatedCollegesProps> = ({
               <Accordion title="Total Fee Range">
                 <div className="px-2 pb-2 pt-2">
                   <div className="mb-4 flex items-center justify-between">
-                    <span className="text-[13px] font-medium text-gray-400">NPR 0</span>
-                    <span className="rounded-md bg-blue-50 px-2.5 py-1 text-[14px] font-bold text-blue-600">NPR 20,00,000+</span>
+                    <span className="text-[13px] font-medium text-gray-400">
+                      NPR 0
+                    </span>
+                    <span className="rounded-md bg-blue-50 px-2.5 py-1 text-[14px] font-bold text-blue-600">
+                      NPR 20,00,000+
+                    </span>
                   </div>
-                  <input type="range" min={0} max={2000000} step={50000} defaultValue={1000000} className="fee-range w-full" />
+                  <input
+                    type="range"
+                    min={0}
+                    max={2000000}
+                    step={50000}
+                    defaultValue={1000000}
+                    className="fee-range w-full"
+                  />
                 </div>
               </Accordion>
 
@@ -279,24 +382,65 @@ const AffiliatedColleges: React.FC<AffiliatedCollegesProps> = ({
               <Accordion title="Facilities">
                 <div className="flex flex-col gap-3.5 pt-1">
                   {FACILITIES.map((fac) => (
-                    <CheckboxItem key={fac} id={`fac-${fac.toLowerCase()}`} label={fac} />
+                    <CheckboxItem
+                      key={fac}
+                      id={`fac-${fac.toLowerCase()}`}
+                      label={fac}
+                    />
                   ))}
                 </div>
               </Accordion>
 
               <Accordion title="Rating">
                 <div className="flex flex-col gap-3.5 pt-1">
-                  <CheckboxItem id="rating-4.5" label={<><FaStar className="inline text-yellow-500" /> 4.5 & above (Top Rated)</>} />
-                  <CheckboxItem id="rating-4.0" label={<><FaStar className="inline text-yellow-500" /> 4.0 & above</>} />
-                  <CheckboxItem id="rating-3.5" label={<><FaStar className="inline text-yellow-500" /> 3.5 & above</>} />
-                  <CheckboxItem id="rating-3.0" label={<><FaStar className="inline text-yellow-500" /> 3.0 & above</>} />
+                  <CheckboxItem
+                    id="rating-4.5"
+                    label={
+                      <>
+                        <FaStar className="inline text-yellow-500" /> 4.5 &
+                        above (Top Rated)
+                      </>
+                    }
+                  />
+                  <CheckboxItem
+                    id="rating-4.0"
+                    label={
+                      <>
+                        <FaStar className="inline text-yellow-500" /> 4.0 &
+                        above
+                      </>
+                    }
+                  />
+                  <CheckboxItem
+                    id="rating-3.5"
+                    label={
+                      <>
+                        <FaStar className="inline text-yellow-500" /> 3.5 &
+                        above
+                      </>
+                    }
+                  />
+                  <CheckboxItem
+                    id="rating-3.0"
+                    label={
+                      <>
+                        <FaStar className="inline text-yellow-500" /> 3.0 &
+                        above
+                      </>
+                    }
+                  />
                 </div>
               </Accordion>
 
               <Accordion title="Sort By" hideDivider>
                 <div className="flex flex-col gap-3.5">
                   {SORT_OPTIONS.map((opt) => (
-                    <RadioItem key={opt.id} id={`sort-${opt.id}`} name="sort" label={opt.label} />
+                    <RadioItem
+                      key={opt.id}
+                      id={`sort-${opt.id}`}
+                      name="sort"
+                      label={opt.label}
+                    />
                   ))}
                 </div>
               </Accordion>
@@ -309,7 +453,17 @@ const AffiliatedColleges: React.FC<AffiliatedCollegesProps> = ({
           <div className="mb-6">
             <div className="mb-4 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
               <h1 className="text-base text-gray-900">
-                Showing {filteredColleges.length === 0 ? 0 : (currentPage - 1) * ITEMS_PER_PAGE + 1}-{Math.min(currentPage * ITEMS_PER_PAGE, filteredColleges.length)} of {filteredColleges.length} <span className="font-bold">Colleges</span>
+                Showing{" "}
+                {filteredColleges.length === 0
+                  ? 0
+                  : (currentPage - 1) * ITEMS_PER_PAGE + 1}
+                -
+                {Math.min(
+                  currentPage * ITEMS_PER_PAGE,
+                  filteredColleges.length,
+                )}{" "}
+                of {filteredColleges.length}{" "}
+                <span className="font-bold">Colleges</span>
               </h1>
               <div className="relative w-full sm:w-72">
                 <Search className="absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
@@ -317,7 +471,10 @@ const AffiliatedColleges: React.FC<AffiliatedCollegesProps> = ({
                   type="text"
                   placeholder="Search colleges..."
                   value={searchQuery}
-                  onChange={(e) => { setSearchQuery(e.target.value); setCurrentPage(1); }}
+                  onChange={(e) => {
+                    setSearchQuery(e.target.value);
+                    setCurrentPage(1);
+                  }}
                   className="w-full rounded-xl border border-gray-200 bg-white py-2.5 pl-10 pr-4 text-sm shadow-sm transition-colors focus:border-blue-500 focus:outline-none"
                 />
               </div>

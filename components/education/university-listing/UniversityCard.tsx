@@ -10,15 +10,31 @@ import {
   Bookmark,
   GraduationCap,
   Globe,
+  Loader2,
 } from "lucide-react";
 
-const UniversityCard: React.FC<{ university: UniversityData }> = ({
+const UniversityCard: React.FC<{
+  university: UniversityData;
+  isSaved?: boolean;
+  isPending?: boolean;
+  onToggleSaved?: () => void;
+}> = ({
   university: uni,
+  isSaved = false,
+  isPending = false,
+  onToggleSaved,
 }) => {
   const toSlug = (name: string) =>
-    name.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "");
-  const detailHref = uni.id ? `/universities/${uni.id}` : `/universities/${toSlug(uni.name)}`;
-  const collegesHref = uni.id ? `/universities/${uni.id}/affiliated-colleges` : `/universities/${toSlug(uni.name)}/affiliated-colleges`;
+    name
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, "-")
+      .replace(/(^-|-$)/g, "");
+  const detailHref = uni.id
+    ? `/universities/${uni.id}`
+    : `/universities/${toSlug(uni.name)}`;
+  const collegesHref = uni.id
+    ? `/universities/${uni.id}/affiliated-colleges`
+    : `/universities/${toSlug(uni.name)}/affiliated-colleges`;
   const website = `www.${uni.name.toLowerCase().replace(/[^a-z0-9]+/g, "")}.edu.np`;
 
   return (
@@ -64,7 +80,10 @@ const UniversityCard: React.FC<{ university: UniversityData }> = ({
           <span className="mx-3 font-light text-gray-300">|</span>
           <div className="flex min-w-0 flex-1 items-center gap-1.5">
             <MapPin className="h-4.5 w-4.5 shrink-0 text-gray-400" />
-            <span className="group/location block min-w-0 truncate font-semibold text-slate-700" title={uni.location}>
+            <span
+              className="group/location block min-w-0 truncate font-semibold text-slate-700"
+              title={uni.location}
+            >
               <span className="block truncate">{uni.location}</span>
               <span className="invisible absolute bottom-full left-0 mb-2 whitespace-nowrap rounded bg-gray-900 px-3 py-1.5 text-[13px] font-medium text-white opacity-0 transition-all duration-200 group-hover/location:visible group-hover/location:opacity-100">
                 {uni.location}
@@ -148,10 +167,24 @@ const UniversityCard: React.FC<{ university: UniversityData }> = ({
             </Link>
             <button
               type="button"
-              className="flex w-10 shrink-0 cursor-pointer items-center justify-center rounded-md border border-gray-200 transition-colors hover:bg-gray-50"
-              title="Bookmark"
+              disabled={isPending || !uni.id}
+              onClick={onToggleSaved}
+              className={`flex w-10 shrink-0 items-center justify-center rounded-md border transition-colors ${
+                isPending || !uni.id
+                  ? "border-gray-100 bg-gray-50 cursor-not-allowed"
+                  : isSaved
+                    ? "border-blue-200 bg-blue-50 cursor-pointer"
+                    : "border-gray-200 cursor-pointer hover:bg-gray-50"
+              }`}
+              title={isSaved ? "Remove Bookmark" : "Bookmark"}
             >
-              <Bookmark className="h-4 w-4 text-gray-400" />
+              {isPending ? (
+                <Loader2 className="h-4 w-4 animate-spin text-gray-400" />
+              ) : (
+                <Bookmark
+                  className={`h-4 w-4 transition-all ${isSaved ? "text-[#0000ff] fill-[#0000ff]" : "text-gray-400"}`}
+                />
+              )}
             </button>
           </div>
         </div>

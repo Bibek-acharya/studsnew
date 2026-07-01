@@ -9,10 +9,17 @@ import CollegeCard from "@/components/admissions/CollegeCard";
 import FeaturedAdmissionAd from "@/components/admissions/FeaturedAdmissionAd";
 import DirectAdmissionAd from "@/components/admissions/DirectAdmissionAd";
 import Pagination from "@/components/ui/Pagination";
-import { admissionService, AdmissionCollegeItem } from "@/services/admission.api";
+import {
+  admissionService,
+  AdmissionCollegeItem,
+} from "@/services/admission.api";
 import { apiService } from "@/services/api";
 import { useAuth } from "@/services/AuthContext";
-import { sampleFeaturedColleges, sampleDirectAdmissions, levelConfig } from "./data";
+import {
+  sampleFeaturedColleges,
+  sampleDirectAdmissions,
+  levelConfig,
+} from "./data";
 
 interface AdmissionGridProps {
   filters: AdmissionFilters;
@@ -54,12 +61,15 @@ const AdmissionGrid: React.FC<AdmissionGridProps> = ({
   const [fetchError, setFetchError] = useState<string | null>(null);
   const [savedIds, setSavedIds] = useState<number[]>([]);
   const [bookmarkMap, setBookmarkMap] = useState<Record<number, number>>({});
-  const [pendingBookmarks, setPendingBookmarks] = useState<Record<number, boolean>>({});
+  const [pendingBookmarks, setPendingBookmarks] = useState<
+    Record<number, boolean>
+  >({});
 
   const router = useRouter();
   const { isAuthenticated } = useAuth();
 
-  const [inquiryCollege, setInquiryCollege] = useState<AdmissionCollegeItem | null>(null);
+  const [inquiryCollege, setInquiryCollege] =
+    useState<AdmissionCollegeItem | null>(null);
   const [askName, setAskName] = useState("");
   const [askEmail, setAskEmail] = useState("");
   const [askPhone, setAskPhone] = useState("");
@@ -70,29 +80,56 @@ const AdmissionGrid: React.FC<AdmissionGridProps> = ({
 
   const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080";
 
-  const askErrors = useMemo(() => ({
-    name: askName && askName.trim().length < 2 ? "Name must be at least 2 characters" : "",
-    email: askEmail && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(askEmail) ? "Enter a valid email" : "",
-    phone: askPhone && !/^9\d{9}$/.test(askPhone) ? "Must be 10 digits starting with 9" : "",
-  }), [askName, askEmail, askPhone]);
+  const askErrors = useMemo(
+    () => ({
+      name:
+        askName && askName.trim().length < 2
+          ? "Name must be at least 2 characters"
+          : "",
+      email:
+        askEmail && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(askEmail)
+          ? "Enter a valid email"
+          : "",
+      phone:
+        askPhone && !/^9\d{9}$/.test(askPhone)
+          ? "Must be 10 digits starting with 9"
+          : "",
+    }),
+    [askName, askEmail, askPhone],
+  );
 
-  const askValid = askName.trim().length >= 2 && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(askEmail) && (!askPhone || /^9\d{9}$/.test(askPhone)) && askMessage.trim().length > 0;
+  const askValid =
+    askName.trim().length >= 2 &&
+    /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(askEmail) &&
+    (!askPhone || /^9\d{9}$/.test(askPhone)) &&
+    askMessage.trim().length > 0;
 
   const handleAskSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!inquiryCollege || !isAuthenticated) return;
     setAskSending(true);
     try {
-      const token = localStorage.getItem("token") || sessionStorage.getItem("token");
+      const token =
+        localStorage.getItem("token") || sessionStorage.getItem("token");
       const subject = `Question about ${inquiryCollege.name}`;
-      const content = `Name: ${askName}\nEmail: ${askEmail}\nPhone: ${askPhone}\n\nMessage:\n${askMessage}`;
-      await fetch(`${API_BASE}/api/v1/institutions/${inquiryCollege.id}/inquiry`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json", ...(token ? { Authorization: `Bearer ${token}` } : {}) },
-        body: JSON.stringify({ subject, content }),
-      });
+      const content = askMessage;
+      await fetch(
+        `${API_BASE}/api/v1/institutions/${inquiryCollege.id}/inquiry`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            ...(token ? { Authorization: `Bearer ${token}` } : {}),
+          },
+          body: JSON.stringify({ subject, content }),
+        },
+      );
       setAskSent(true);
-    } catch { /* silently fail */ } finally { setAskSending(false); }
+    } catch {
+      /* silently fail */
+    } finally {
+      setAskSending(false);
+    }
   };
 
   const openInquiry = (college: AdmissionCollegeItem) => {
@@ -112,48 +149,55 @@ const AdmissionGrid: React.FC<AdmissionGridProps> = ({
 
   const toggleSavedCollege = async (collegeId: number) => {
     if (!isAuthenticated) {
-      toast.error('Please login to save bookmarks')
-      return
+      toast.error("Please login to save bookmarks");
+      return;
     }
-    if (pendingBookmarks[collegeId]) return
-    setPendingBookmarks(prev => ({ ...prev, [collegeId]: true }))
-    const existingBookmarkId = bookmarkMap[collegeId]
+    if (pendingBookmarks[collegeId]) return;
+    setPendingBookmarks((prev) => ({ ...prev, [collegeId]: true }));
+    const existingBookmarkId = bookmarkMap[collegeId];
     try {
       if (existingBookmarkId) {
-        await apiService.deleteBookmark(existingBookmarkId)
-        setBookmarkMap(prev => {
-          const next = { ...prev }
-          delete next[collegeId]
-          return next
-        })
-        setSavedIds(prev => prev.filter(id => id !== collegeId))
-        toast.success('Removed from bookmarks')
+        await apiService.deleteBookmark(existingBookmarkId);
+        setBookmarkMap((prev) => {
+          const next = { ...prev };
+          delete next[collegeId];
+          return next;
+        });
+        setSavedIds((prev) => prev.filter((id) => id !== collegeId));
+        toast.success("Removed from bookmarks");
       } else {
-        const res = await apiService.createBookmark(collegeId, 'admissions')
-        setBookmarkMap(prev => ({ ...prev, [collegeId]: res.data.id }))
-        setSavedIds(prev => [...prev, collegeId])
-        toast.success('Added to bookmarks!')
+        const res = await apiService.createBookmark(collegeId, "admissions");
+        setBookmarkMap((prev) => ({ ...prev, [collegeId]: res.data.id }));
+        setSavedIds((prev) => [...prev, collegeId]);
+        toast.success("Added to bookmarks!");
       }
     } catch {
-      toast.error('Failed to save bookmark')
+      toast.error("Failed to save bookmark");
     } finally {
-      setPendingBookmarks(prev => { const next = { ...prev }; delete next[collegeId]; return next })
+      setPendingBookmarks((prev) => {
+        const next = { ...prev };
+        delete next[collegeId];
+        return next;
+      });
     }
-  }
+  };
 
   useEffect(() => {
-    if (!isAuthenticated) return
-    apiService.getBookmarksByType('admissions').then(items => {
-      const ids: number[] = []
-      const map: Record<number, number> = {}
-      items.forEach(b => {
-        ids.push(b.item_id)
-        map[b.item_id] = b.id
+    if (!isAuthenticated) return;
+    apiService
+      .getBookmarksByType("admissions")
+      .then((items) => {
+        const ids: number[] = [];
+        const map: Record<number, number> = {};
+        items.forEach((b) => {
+          ids.push(b.item_id);
+          map[b.item_id] = b.id;
+        });
+        setSavedIds(ids);
+        setBookmarkMap(map);
       })
-      setSavedIds(ids)
-      setBookmarkMap(map)
-    }).catch(() => {})
-  }, [isAuthenticated])
+      .catch(() => {});
+  }, [isAuthenticated]);
 
   useEffect(() => {
     setCurrentPage(1);
@@ -164,14 +208,27 @@ const AdmissionGrid: React.FC<AdmissionGridProps> = ({
       setIsLoading(true);
       setFetchError(null);
       try {
-        const response = await admissionService.getPublishedAdmissionColleges(level, currentPage, COLLEGES_PER_PAGE);
+        const response = await admissionService.getPublishedAdmissionColleges(
+          level,
+          currentPage,
+          COLLEGES_PER_PAGE,
+        );
 
         setColleges(response.data.colleges);
         setPagination(response.data.pagination);
       } catch (error) {
-        setFetchError(error instanceof Error ? error.message : "Failed to load admission colleges");
+        setFetchError(
+          error instanceof Error
+            ? error.message
+            : "Failed to load admission colleges",
+        );
         setColleges([]);
-        setPagination({ page: 1, pageSize: COLLEGES_PER_PAGE, total: 0, totalPages: 1 });
+        setPagination({
+          page: 1,
+          pageSize: COLLEGES_PER_PAGE,
+          total: 0,
+          totalPages: 1,
+        });
       } finally {
         setIsLoading(false);
       }
@@ -186,7 +243,9 @@ const AdmissionGrid: React.FC<AdmissionGridProps> = ({
     if (filters.province.length > 0) {
       results = results.filter((c) =>
         filters.province.some((p) =>
-          c.location.toLowerCase().includes(p.replace("prov_", "").toLowerCase()),
+          c.location
+            .toLowerCase()
+            .includes(p.replace("prov_", "").toLowerCase()),
         ),
       );
     }
@@ -208,19 +267,32 @@ const AdmissionGrid: React.FC<AdmissionGridProps> = ({
 
   const totalResults = pagination.total;
   const totalPages = Math.max(1, pagination.totalPages);
-  const showingFrom = totalResults === 0 ? 0 : (pagination.page - 1) * pagination.pageSize + 1;
-  const showingTo = Math.min(pagination.page * pagination.pageSize, totalResults);
+  const showingFrom =
+    totalResults === 0 ? 0 : (pagination.page - 1) * pagination.pageSize + 1;
+  const showingTo = Math.min(
+    pagination.page * pagination.pageSize,
+    totalResults,
+  );
 
   const getAdType = (index: number) => {
     if (index === 5) return "featured";
     if (index === 11) return "direct";
-    if (pagination.page === 1 && colleges.length < 6 && index === colleges.length - 1) {
+    if (
+      pagination.page === 1 &&
+      colleges.length < 6 &&
+      index === colleges.length - 1
+    ) {
       return "featured";
     }
     return null;
   };
 
-  const config = levelConfig[level] || levelConfig["high-school"] || { title: "Colleges", subtitle: "", badge: "" };
+  const config = levelConfig[level] ||
+    levelConfig["high-school"] || {
+      title: "Colleges",
+      subtitle: "",
+      badge: "",
+    };
 
   const handleSearchChange = (value: string) => {
     setFilters((prev) => ({ ...prev, search: value }));
@@ -232,7 +304,9 @@ const AdmissionGrid: React.FC<AdmissionGridProps> = ({
         <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-center">
           <div className="flex flex-col justify-start">
             <h1 className="mb-3 text-base text-gray-900">
-              Showing {showingFrom.toLocaleString()}-{showingTo.toLocaleString()} of {totalResults.toLocaleString()} <span className="font-bold">{config.title}</span>
+              Showing {showingFrom.toLocaleString()}-
+              {showingTo.toLocaleString()} of {totalResults.toLocaleString()}{" "}
+              <span className="font-bold">{config.title}</span>
             </h1>
             {fetchError && <p className="text-sm text-red-600">{fetchError}</p>}
           </div>
@@ -257,7 +331,10 @@ const AdmissionGrid: React.FC<AdmissionGridProps> = ({
           {isLoading ? (
             <>
               {Array.from({ length: 6 }).map((_, i) => (
-                <div key={i} className="flex animate-pulse flex-col rounded-md border border-gray-200 bg-white p-4">
+                <div
+                  key={i}
+                  className="flex animate-pulse flex-col rounded-md border border-gray-200 bg-white p-4"
+                >
                   <div className="h-35 w-full rounded-md bg-gray-200" />
                   <div className="mt-3 space-y-2.5">
                     <div className="h-5 w-3/4 rounded bg-gray-200" />
@@ -278,8 +355,13 @@ const AdmissionGrid: React.FC<AdmissionGridProps> = ({
               <div className="mb-6 flex h-24 w-24 items-center justify-center rounded-full bg-gray-50">
                 <FolderOpen className="h-36 w-36 text-gray-300" />
               </div>
-              <h3 className="text-xl font-bold text-gray-900">No Colleges Found</h3>
-              <p className="mt-1 text-sm text-gray-500">No colleges match your current filters. Try adjusting your search criteria.</p>
+              <h3 className="text-xl font-bold text-gray-900">
+                No Colleges Found
+              </h3>
+              <p className="mt-1 text-sm text-gray-500">
+                No colleges match your current filters. Try adjusting your
+                search criteria.
+              </p>
             </div>
           ) : (
             colleges.map((college, index) => {
@@ -290,32 +372,59 @@ const AdmissionGrid: React.FC<AdmissionGridProps> = ({
                     images={(() => {
                       const banners = extractHeroBanners(college);
                       if (banners.length > 0) return banners;
-                      return college.image_url ? [college.image_url] : ["/images/college-placeholder.png"];
+                      return college.image_url
+                        ? [college.image_url]
+                        : ["/images/college-placeholder.png"];
                     })()}
                     collegeName={college.name}
                     rating={college.rating ?? 4.0}
                     type={college.type || "College"}
                     location={college.location}
                     website={college.website || college.affiliation}
-                    programs={Array.isArray(college.featured_programs)
-                      ? (college.featured_programs as any[]).slice(0, 3).map((p) => {
-                          const name = p.title || "";
-                          const rawStatus = p.admissionStatus || "";
-                          const statusMap: Record<string, "Seats Available" | "Closing Soon" | "Opening Soon"> = {
-                            "seats-available": "Seats Available",
-                            "limited-seats": "Closing Soon",
-                            "opening-soon": "Opening Soon",
-                          };
-                          return { name, status: statusMap[rawStatus] || "Seats Available" };
-                        })
-                      : [{ name: college.affiliation || college.name || "Admission Open", status: "Seats Available" }]}
+                    programs={
+                      Array.isArray(college.featured_programs)
+                        ? (college.featured_programs as any[])
+                            .slice(0, 3)
+                            .map((p) => {
+                              const name = p.title || "";
+                              const rawStatus = p.admissionStatus || "";
+                              const statusMap: Record<
+                                string,
+                                | "Seats Available"
+                                | "Closing Soon"
+                                | "Opening Soon"
+                              > = {
+                                "seats-available": "Seats Available",
+                                "limited-seats": "Closing Soon",
+                                "opening-soon": "Opening Soon",
+                              };
+                              return {
+                                name,
+                                status:
+                                  statusMap[rawStatus] || "Seats Available",
+                              };
+                            })
+                        : [
+                            {
+                              name:
+                                college.affiliation ||
+                                college.name ||
+                                "Admission Open",
+                              status: "Seats Available",
+                            },
+                          ]
+                    }
                     moreProgramsCount={college.programs}
                     collegeId={college.id}
                     isSaved={savedIds.includes(college.id)}
                     isBookmarkPending={!!pendingBookmarks[college.id]}
                     onToggleSaved={() => toggleSavedCollege(college.id)}
-                    onNavigate={() => onNavigate("collegeDetails", { id: college.id })}
-                    onApply={() => onNavigate("collegeDetails", { id: college.id })}
+                    onNavigate={() =>
+                      onNavigate("collegeDetails", { id: college.id })
+                    }
+                    onApply={() =>
+                      onNavigate("collegeDetails", { id: college.id })
+                    }
                     onAskQuestion={() => openInquiry(college)}
                   />
 
@@ -340,47 +449,157 @@ const AdmissionGrid: React.FC<AdmissionGridProps> = ({
       />
 
       {inquiryCollege && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50" onClick={closeInquiry}>
-          <div className="mx-4 w-full max-w-lg rounded-2xl bg-white shadow-xl" onClick={e => e.stopPropagation()}>
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/50"
+          onClick={closeInquiry}
+        >
+          <div
+            className="mx-4 w-full max-w-lg rounded-2xl bg-white shadow-xl"
+            onClick={(e) => e.stopPropagation()}
+          >
             <div className="flex items-center justify-between px-6 py-4 border-b border-gray-200">
-              <h3 className="text-lg font-bold text-gray-900">Inquiry — {inquiryCollege.name}</h3>
-              <button onClick={closeInquiry} className="p-1 rounded-lg hover:bg-gray-100"><i className="fa-solid fa-xmark text-gray-500"></i></button>
+              <h3 className="text-lg font-bold text-gray-900">
+                Inquiry — {inquiryCollege.name}
+              </h3>
+              <button
+                onClick={closeInquiry}
+                className="p-1 rounded-lg hover:bg-gray-100"
+              >
+                <i className="fa-solid fa-xmark text-gray-500"></i>
+              </button>
             </div>
             {askSent ? (
               <div className="text-center py-8 px-6">
-                <div className="mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-green-100 mx-auto"><i className="fa-solid fa-check text-green-600 text-2xl"></i></div>
-                <p className="text-gray-900 font-bold text-lg">Question Sent!</p>
-                <p className="text-sm text-gray-500 mt-1">The institution will respond to your inquiry soon.</p>
-                <button onClick={closeInquiry} className="mt-6 rounded-md bg-brand-blue px-6 py-2.5 text-sm font-semibold text-white hover:bg-brand-hover">Close</button>
+                <div className="mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-green-100 mx-auto">
+                  <i className="fa-solid fa-check text-green-600 text-2xl"></i>
+                </div>
+                <p className="text-gray-900 font-bold text-lg">
+                  Question Sent!
+                </p>
+                <p className="text-sm text-gray-500 mt-1">
+                  The institution will respond to your inquiry soon.
+                </p>
+                <button
+                  onClick={closeInquiry}
+                  className="mt-6 rounded-md bg-brand-blue px-6 py-2.5 text-sm font-semibold text-white hover:bg-brand-hover"
+                >
+                  Close
+                </button>
               </div>
             ) : (
               <form className="px-6 py-4 space-y-4" onSubmit={handleAskSubmit}>
                 <div>
-                  <input type="text" placeholder="Full Name" value={askName} onChange={e => { setAskName(e.target.value); setAskTouched(true); }} className={`w-full rounded-md border px-4 py-3 text-sm focus:outline-none focus:ring-2 ${askTouched && askErrors.name ? "border-red-300 bg-red-50 focus:border-red-400 focus:ring-red-200" : "border-gray-200 bg-gray-50 focus:border-brand-blue focus:ring-brand-blue/20"}`} />
-                  {askTouched && askErrors.name && <p className="mt-1 text-xs text-red-500">{askErrors.name}</p>}
+                  <input
+                    type="text"
+                    placeholder="Full Name"
+                    value={askName}
+                    onChange={(e) => {
+                      setAskName(e.target.value);
+                      setAskTouched(true);
+                    }}
+                    className={`w-full rounded-md border px-4 py-3 text-sm focus:outline-none focus:ring-2 ${askTouched && askErrors.name ? "border-red-300 bg-red-50 focus:border-red-400 focus:ring-red-200" : "border-gray-200 bg-gray-50 focus:border-brand-blue focus:ring-brand-blue/20"}`}
+                  />
+                  {askTouched && askErrors.name && (
+                    <p className="mt-1 text-xs text-red-500">
+                      {askErrors.name}
+                    </p>
+                  )}
                 </div>
                 <div>
-                  <input type="email" placeholder="Email Address" value={askEmail} onChange={e => { setAskEmail(e.target.value); setAskTouched(true); }} className={`w-full rounded-md border px-4 py-3 text-sm focus:outline-none focus:ring-2 ${askTouched && askErrors.email ? "border-red-300 bg-red-50 focus:border-red-400 focus:ring-red-200" : "border-gray-200 bg-gray-50 focus:border-brand-blue focus:ring-brand-blue/20"}`} />
-                  {askTouched && askErrors.email && <p className="mt-1 text-xs text-red-500">{askErrors.email}</p>}
+                  <input
+                    type="email"
+                    placeholder="Email Address"
+                    value={askEmail}
+                    onChange={(e) => {
+                      setAskEmail(e.target.value);
+                      setAskTouched(true);
+                    }}
+                    className={`w-full rounded-md border px-4 py-3 text-sm focus:outline-none focus:ring-2 ${askTouched && askErrors.email ? "border-red-300 bg-red-50 focus:border-red-400 focus:ring-red-200" : "border-gray-200 bg-gray-50 focus:border-brand-blue focus:ring-brand-blue/20"}`}
+                  />
+                  {askTouched && askErrors.email && (
+                    <p className="mt-1 text-xs text-red-500">
+                      {askErrors.email}
+                    </p>
+                  )}
                 </div>
                 <div>
-                  <div className="flex rounded-md border overflow-hidden focus-within:ring-2 focus-within:ring-brand-blue/20 focus-within:border-brand-blue" style={askTouched && askErrors.phone ? { borderColor: "#fca5a5" } : { borderColor: "#e5e7eb" }}>
-                    <span className="flex items-center bg-gray-100 px-3 text-sm text-gray-500 font-medium border-r border-gray-200">+977</span>
-                    <input type="tel" placeholder="98XXXXXXXX" maxLength={10} value={askPhone} onChange={e => { const v = e.target.value.replace(/\D/g, ""); setAskPhone(v); setAskTouched(true); }} className="w-full bg-gray-50 px-4 py-3 text-sm focus:outline-none" />
+                  <div
+                    className="flex rounded-md border overflow-hidden focus-within:ring-2 focus-within:ring-brand-blue/20 focus-within:border-brand-blue"
+                    style={
+                      askTouched && askErrors.phone
+                        ? { borderColor: "#fca5a5" }
+                        : { borderColor: "#e5e7eb" }
+                    }
+                  >
+                    <span className="flex items-center bg-gray-100 px-3 text-sm text-gray-500 font-medium border-r border-gray-200">
+                      +977
+                    </span>
+                    <input
+                      type="tel"
+                      placeholder="98XXXXXXXX"
+                      maxLength={10}
+                      value={askPhone}
+                      onChange={(e) => {
+                        const v = e.target.value.replace(/\D/g, "");
+                        setAskPhone(v);
+                        setAskTouched(true);
+                      }}
+                      className="w-full bg-gray-50 px-4 py-3 text-sm focus:outline-none"
+                    />
                   </div>
-                  {askTouched && askErrors.phone && <p className="mt-1 text-xs text-red-500">{askErrors.phone}</p>}
+                  {askTouched && askErrors.phone && (
+                    <p className="mt-1 text-xs text-red-500">
+                      {askErrors.phone}
+                    </p>
+                  )}
                 </div>
                 <div>
-                  <textarea placeholder="Type your message..." rows={4} value={askMessage} maxLength={500} onChange={e => { setAskMessage(e.target.value); setAskTouched(true); }} className={`w-full rounded-md border px-4 py-3 text-sm focus:outline-none focus:ring-2 resize-none ${askTouched && !askMessage.trim() ? "border-red-300 bg-red-50 focus:border-red-400 focus:ring-red-200" : "border-gray-200 bg-gray-50 focus:border-brand-blue focus:ring-brand-blue/20"}`} />
+                  <textarea
+                    placeholder="Type your message..."
+                    rows={4}
+                    value={askMessage}
+                    maxLength={500}
+                    onChange={(e) => {
+                      setAskMessage(e.target.value);
+                      setAskTouched(true);
+                    }}
+                    className={`w-full rounded-md border px-4 py-3 text-sm focus:outline-none focus:ring-2 resize-none ${askTouched && !askMessage.trim() ? "border-red-300 bg-red-50 focus:border-red-400 focus:ring-red-200" : "border-gray-200 bg-gray-50 focus:border-brand-blue focus:ring-brand-blue/20"}`}
+                  />
                   <div className="flex justify-between mt-1">
-                    {askTouched && !askMessage.trim() ? <p className="text-xs text-red-500">Message is required</p> : <span />}
-                    <p className={`text-xs ${askMessage.length >= 500 ? "text-red-500 font-medium" : "text-gray-400"}`}>{askMessage.length}/500</p>
+                    {askTouched && !askMessage.trim() ? (
+                      <p className="text-xs text-red-500">
+                        Message is required
+                      </p>
+                    ) : (
+                      <span />
+                    )}
+                    <p
+                      className={`text-xs ${askMessage.length >= 500 ? "text-red-500 font-medium" : "text-gray-400"}`}
+                    >
+                      {askMessage.length}/500
+                    </p>
                   </div>
                 </div>
                 {isAuthenticated ? (
-                  <button type="submit" disabled={askSending || !askValid} className="w-full rounded-md bg-brand-blue py-3 text-sm font-bold text-white hover:bg-brand-hover disabled:opacity-50 transition-colors">{askSending ? "Sending..." : "Submit Question"}</button>
+                  <button
+                    type="submit"
+                    disabled={askSending || !askValid}
+                    className="w-full rounded-md bg-brand-blue py-3 text-sm font-bold text-white hover:bg-brand-hover disabled:opacity-50 transition-colors"
+                  >
+                    {askSending ? "Sending..." : "Submit Question"}
+                  </button>
                 ) : (
-                  <button type="button" onClick={() => router.push(`/login?redirect=${encodeURIComponent(window.location.pathname + window.location.search)}`)} className="w-full rounded-md bg-brand-blue py-3 text-sm font-bold text-white hover:bg-brand-hover transition-colors"><i className="fa-solid fa-lock mr-1.5"></i>Login to Submit</button>
+                  <button
+                    type="button"
+                    onClick={() =>
+                      router.push(
+                        `/login?redirect=${encodeURIComponent(window.location.pathname + window.location.search)}`,
+                      )
+                    }
+                    className="w-full rounded-md bg-brand-blue py-3 text-sm font-bold text-white hover:bg-brand-hover transition-colors"
+                  >
+                    <i className="fa-solid fa-lock mr-1.5"></i>Login to Submit
+                  </button>
                 )}
               </form>
             )}
