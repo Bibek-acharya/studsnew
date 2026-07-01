@@ -11,17 +11,28 @@ function resolveImageUrl(url: string | undefined): string {
 
 function stripHtml(html: string): string {
   if (!html) return "";
-  return html.replace(/<[^>]*>/g, "").replace(/&nbsp;/g, " ").replace(/\s+/g, " ").trim();
+  return html
+    .replace(/<[^>]*>/g, "")
+    .replace(/&nbsp;/g, " ")
+    .replace(/\s+/g, " ")
+    .trim();
 }
 
 function mapRawEntrance(raw: any): Exam {
   const badges: string[] = raw.badges || [];
-  const img = resolveImageUrl(raw.imageUrl || raw.institutionLogo);
+  const img = resolveImageUrl(
+    raw.imageUrl || raw.institutionLogo || raw.hero_banner || "",
+  );
   return {
     id: raw.slug || String(raw.id),
     numericId: Number(raw.id) || 0,
     slug: raw.slug || "",
-    institution: raw.university || raw.board || "",
+    institution:
+      raw.university ||
+      raw.board ||
+      raw.institution_name ||
+      raw.institution ||
+      "",
     verified: false,
     location: raw.location || "",
     affiliation: raw.board || "",
@@ -33,28 +44,43 @@ function mapRawEntrance(raw: any): Exam {
       icon: "award",
       type: "default",
     })),
-    deadline: raw.formDeadline || "",
+    deadline: raw.formDeadline || raw.deadline || "",
     eligibility: stripHtml(raw.description || raw.overview || ""),
     whatsapp: "",
     viber: "",
     status: raw.status || "Ongoing",
-    examDate: raw.examDate || "",
+    examDate: raw.examDate || raw.date || "",
     nepaliDate: raw.nepaliDate || "",
     imageUrl: img,
     phone: raw.phone || "",
     email: raw.email || "",
+    description: raw.description || "",
+    applicationFee: raw.application_fee || raw.fee || "",
     overviewDetails: raw.overview_details || undefined,
+    examDateSchedules: raw.exam_date_schedules || undefined,
+    eligibilityList: raw.eligibility_list || undefined,
+    applicationSteps: raw.application_steps || undefined,
+    examPattern: raw.exam_pattern || undefined,
+    subjectMarks: raw.subject_marks || undefined,
+    modelSets: raw.model_sets || undefined,
+    upcomingDates: raw.upcoming_dates || undefined,
+    contactPersons: raw.contact_persons || undefined,
+    faqs: raw.faqs || undefined,
     applicationLink: raw.application_link || "",
     noticeFile: raw.notice_file || "",
   };
 }
 
-async function apiRequest<T>(path: string, options: RequestInit = {}): Promise<T> {
-  const token = typeof window !== "undefined" ? localStorage.getItem("token") : null;
+async function apiRequest<T>(
+  path: string,
+  options: RequestInit = {},
+): Promise<T> {
+  const token =
+    typeof window !== "undefined" ? localStorage.getItem("token") : null;
   const headers: Record<string, string> = {
     "Content-Type": "application/json",
     ...(token ? { Authorization: `Bearer ${token}` } : {}),
-    ...(options.headers as Record<string, string> || {}),
+    ...((options.headers as Record<string, string>) || {}),
   };
 
   const response = await fetch(`${API_BASE_URL}${path}`, {
@@ -111,13 +137,11 @@ export interface EntranceDetailsResponse {
   data: Exam;
 }
 
-
-
 export const entranceService = {
   async getEntrances(
     filters: EntranceFilters = {},
     page: number = 1,
-    pageSize: number = 10
+    pageSize: number = 10,
   ): Promise<EntrancesResponse> {
     const response = await apiRequest<any>("/api/v1/entrances", {
       method: "POST",
@@ -134,7 +158,9 @@ export const entranceService = {
 
   async getEntranceFilterCounts(): Promise<EntranceFilterCountsResponse> {
     try {
-      return await apiRequest<EntranceFilterCountsResponse>("/api/v1/entrances/filter-counts");
+      return await apiRequest<EntranceFilterCountsResponse>(
+        "/api/v1/entrances/filter-counts",
+      );
     } catch (error) {
       throw error;
     }
@@ -161,44 +187,62 @@ export const entranceService = {
     location: string;
   }): Promise<{ data: { id: number }; message: string }> {
     const token = localStorage.getItem("token");
-    return apiRequest<{ data: { id: number }; message: string }>("/api/v1/institution/entrances", {
-      method: "POST",
-      headers: token ? { Authorization: `Bearer ${token}` } : {},
-      body: JSON.stringify(data),
-    });
+    return apiRequest<{ data: { id: number }; message: string }>(
+      "/api/v1/institution/entrances",
+      {
+        method: "POST",
+        headers: token ? { Authorization: `Bearer ${token}` } : {},
+        body: JSON.stringify(data),
+      },
+    );
   },
 
-  async updateEntrance(id: string, data: {
-    title?: string;
-    description?: string;
-    level?: string;
-    stream?: string;
-    date?: string;
-    deadline?: string;
-    status?: string;
-    location?: string;
-  }): Promise<{ data: { id: number }; message: string }> {
+  async updateEntrance(
+    id: string,
+    data: {
+      title?: string;
+      description?: string;
+      level?: string;
+      stream?: string;
+      date?: string;
+      deadline?: string;
+      status?: string;
+      location?: string;
+    },
+  ): Promise<{ data: { id: number }; message: string }> {
     const token = localStorage.getItem("token");
-    return apiRequest<{ data: { id: number }; message: string }>(`/api/v1/institution/entrances/${id}`, {
-      method: "PUT",
-      headers: token ? { Authorization: `Bearer ${token}` } : {},
-      body: JSON.stringify(data),
-    });
+    return apiRequest<{ data: { id: number }; message: string }>(
+      `/api/v1/institution/entrances/${id}`,
+      {
+        method: "PUT",
+        headers: token ? { Authorization: `Bearer ${token}` } : {},
+        body: JSON.stringify(data),
+      },
+    );
   },
 
   async deleteEntrance(id: string): Promise<{ message: string }> {
     const token = localStorage.getItem("token");
-    return apiRequest<{ message: string }>(`/api/v1/institution/entrances/${id}`, {
-      method: "DELETE",
-      headers: token ? { Authorization: `Bearer ${token}` } : {},
-    });
+    return apiRequest<{ message: string }>(
+      `/api/v1/institution/entrances/${id}`,
+      {
+        method: "DELETE",
+        headers: token ? { Authorization: `Bearer ${token}` } : {},
+      },
+    );
   },
 
-  async getMyEntrances(): Promise<{ data: { entrances: any[] }; message: string }> {
+  async getMyEntrances(): Promise<{
+    data: { entrances: any[] };
+    message: string;
+  }> {
     const token = localStorage.getItem("token");
-    return apiRequest<{ data: { entrances: any[] }; message: string }>("/api/v1/institution/entrances", {
-      method: "GET",
-      headers: token ? { Authorization: `Bearer ${token}` } : {},
-    });
+    return apiRequest<{ data: { entrances: any[] }; message: string }>(
+      "/api/v1/institution/entrances",
+      {
+        method: "GET",
+        headers: token ? { Authorization: `Bearer ${token}` } : {},
+      },
+    );
   },
 };
