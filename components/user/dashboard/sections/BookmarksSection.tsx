@@ -222,7 +222,7 @@ export default function BookmarksSection() {
                 college: {
                   id: c.id,
                   name: c.institution_name || c.name,
-                  image_url: c.logo_url || c.image_url || c.banner_url,
+                  image_url: c.banner_url || c.image_url || c.logo_url,
                   rating: c.rating,
                   type: c.organization_type || c.type,
                   location: c.district || c.location,
