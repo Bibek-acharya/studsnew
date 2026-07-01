@@ -67,19 +67,63 @@ interface LocalCourse {
 }
 
 const SEED_COURSES: LocalCourse[] = [
-  { id: 1, title: "Science (+2)", level: "+2 (Plus Two)", field: "Science", affiliation: "NEB", colleges: 145 },
-  { id: 2, title: "Management (+2)", level: "+2 (Plus Two)", field: "Management", affiliation: "NEB", colleges: 210 },
-  { id: 3, title: "A Level Science", level: "A Level", field: "Science", affiliation: "Cambridge", colleges: 25 },
-  { id: 4, title: "Diploma in Civil Engineering", level: "Diploma", field: "Engineering", affiliation: "CTEVT", colleges: 45 },
-  { id: 5, title: "MBA", level: "Masters", field: "Management", affiliation: "Tribhuvan University", colleges: 12 },
-  { id: 6, title: "Humanities (+2)", level: "+2 (Plus Two)", field: "Humanities", affiliation: "NEB", colleges: 85 },
+  {
+    id: 1,
+    title: "Science (+2)",
+    level: "+2 (Plus Two)",
+    field: "Science",
+    affiliation: "NEB",
+    colleges: 145,
+  },
+  {
+    id: 2,
+    title: "Management (+2)",
+    level: "+2 (Plus Two)",
+    field: "Management",
+    affiliation: "NEB",
+    colleges: 210,
+  },
+  {
+    id: 3,
+    title: "A Level Science",
+    level: "A Level",
+    field: "Science",
+    affiliation: "Cambridge",
+    colleges: 25,
+  },
+  {
+    id: 4,
+    title: "Diploma in Civil Engineering",
+    level: "Diploma",
+    field: "Engineering",
+    affiliation: "CTEVT",
+    colleges: 45,
+  },
+  {
+    id: 5,
+    title: "MBA",
+    level: "Masters",
+    field: "Management",
+    affiliation: "Tribhuvan University",
+    colleges: 12,
+  },
+  {
+    id: 6,
+    title: "Humanities (+2)",
+    level: "+2 (Plus Two)",
+    field: "Humanities",
+    affiliation: "NEB",
+    colleges: 85,
+  },
 ];
 
 function getLocalCourses(): LocalCourse[] {
   try {
     const raw = localStorage.getItem(LOCAL_COURSES_KEY);
     if (raw) return JSON.parse(raw);
-  } catch { /* ignore */ }
+  } catch {
+    /* ignore */
+  }
   localStorage.setItem(LOCAL_COURSES_KEY, JSON.stringify(SEED_COURSES));
   return [...SEED_COURSES];
 }
@@ -90,14 +134,17 @@ function saveLocalCourses(courses: LocalCourse[]) {
 
 // ─── Network helper ────────────────────────────────────────────────────────────
 
-async function apiFetch<T>(path: string, options: RequestInit = {}): Promise<T | null> {
+async function apiFetch<T>(
+  path: string,
+  options: RequestInit = {},
+): Promise<T | null> {
   try {
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), 5000);
 
     const headers: Record<string, string> = {
       "Content-Type": "application/json",
-      ...(options.headers as Record<string, string> || {}),
+      ...((options.headers as Record<string, string>) || {}),
     };
 
     const res = await fetch(`${API_BASE_URL}${path}`, {
@@ -157,9 +204,12 @@ export interface CourseFullDetails {
   highlightsDuration?: string;
   highlightsDegreeLevel?: string;
   offeringCollegesCount?: number;
+  data?: any;
 }
 
-export async function fetchCourses(params: CourseListParams = {}): Promise<{ courses: Course[]; meta: CourseMeta }> {
+export async function fetchCourses(
+  params: CourseListParams = {},
+): Promise<{ courses: Course[]; meta: CourseMeta }> {
   const query = new URLSearchParams();
   if (params.page) query.set("page", String(params.page));
   if (params.limit) query.set("limit", String(params.limit));
@@ -168,9 +218,9 @@ export async function fetchCourses(params: CourseListParams = {}): Promise<{ cou
   if (params.field) query.set("field", params.field);
   if (params.affiliation) query.set("affiliation", params.affiliation);
 
-  const result = await apiFetch<{ data: { courses: Course[]; meta: CourseMeta } }>(
-    `/api/v1/education/courses?${query.toString()}`
-  );
+  const result = await apiFetch<{
+    data: { courses: Course[]; meta: CourseMeta };
+  }>(`/api/v1/education/courses?${query.toString()}`);
 
   if (result?.data) {
     return result.data;
@@ -178,11 +228,16 @@ export async function fetchCourses(params: CourseListParams = {}): Promise<{ cou
 
   // Offline fallback
   const allCourses = getLocalCourses();
-  const filtered = allCourses.filter(c => {
+  const filtered = allCourses.filter((c) => {
     if (params.level && c.level !== params.level) return false;
     if (params.field && c.field !== params.field) return false;
-    if (params.affiliation && c.affiliation !== params.affiliation) return false;
-    if (params.search && !c.title.toLowerCase().includes(params.search.toLowerCase())) return false;
+    if (params.affiliation && c.affiliation !== params.affiliation)
+      return false;
+    if (
+      params.search &&
+      !c.title.toLowerCase().includes(params.search.toLowerCase())
+    )
+      return false;
     return true;
   });
 
@@ -191,7 +246,7 @@ export async function fetchCourses(params: CourseListParams = {}): Promise<{ cou
   const start = (page - 1) * limit;
 
   return {
-    courses: filtered.slice(start, start + limit).map(c => ({
+    courses: filtered.slice(start, start + limit).map((c) => ({
       id: String(c.id),
       title: c.title,
       level: c.level,
@@ -214,9 +269,11 @@ export async function fetchCourses(params: CourseListParams = {}): Promise<{ cou
   };
 }
 
-export async function fetchCourseById(id: string): Promise<CourseDetails | null> {
+export async function fetchCourseById(
+  id: string,
+): Promise<CourseDetails | null> {
   const result = await apiFetch<{ data: CourseDetails }>(
-    `/api/v1/education/courses/${id}`
+    `/api/v1/education/courses/${id}`,
   );
 
   if (result?.data) {
@@ -225,7 +282,7 @@ export async function fetchCourseById(id: string): Promise<CourseDetails | null>
 
   // Offline fallback
   const courses = getLocalCourses();
-  const course = courses.find(c => String(c.id) === id);
+  const course = courses.find((c) => String(c.id) === id);
   if (!course) return null;
 
   return {
@@ -244,10 +301,12 @@ export async function fetchCourseById(id: string): Promise<CourseDetails | null>
   };
 }
 
-export async function fetchCourseDetailsById(id: string): Promise<CourseFullDetails | null> {
+export async function fetchCourseDetailsById(
+  id: string,
+): Promise<CourseFullDetails | null> {
   try {
     const result = await apiFetch<{ data: CourseFullDetails }>(
-      `/api/v1/education/courses/${id}/details`
+      `/api/v1/education/courses/${id}/details`,
     );
     if (result?.data) return result.data;
   } catch {}
@@ -256,7 +315,7 @@ export async function fetchCourseDetailsById(id: string): Promise<CourseFullDeta
 
 export async function fetchCourseFilterCounts(): Promise<CourseFilterCounts> {
   const result = await apiFetch<{ data: CourseFilterCounts }>(
-    "/api/v1/education/courses/filter-counts"
+    "/api/v1/education/courses/filter-counts",
   );
 
   if (result?.data) {
