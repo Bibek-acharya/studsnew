@@ -2,15 +2,12 @@
 
 import React, { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
-
-interface CommentItem {
-  id: string;
-  author: string;
-  avatar: string;
-  time: string;
-  message: string;
-  likes: number;
-}
+import { useAuth } from "@/services/AuthContext";
+import {
+  fetchNewsComments,
+  postNewsComment,
+  NewsComment,
+} from "@/services/newsApi";
 
 function normalizeArticle(data: any): any {
   if (!data) return null;
@@ -86,10 +83,13 @@ function getImageUrl(image: string | null | undefined): string | null {
 const NewsDetailsPage: React.FC<{
   params: Promise<{ id: string }>;
 }> = ({ params }) => {
+  const { user, isAuthenticated } = useAuth();
   const [id, setId] = useState<string | null>(null);
   const [article, setArticle] = useState<any>(null);
   const [related, setRelated] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [comments, setComments] = useState<NewsComment[]>([]);
+  const [postingComment, setPostingComment] = useState(false);
 
   useEffect(() => {
     params.then((p) => setId(p.id));
@@ -153,19 +153,14 @@ const NewsDetailsPage: React.FC<{
     fetchNews();
   }, [id]);
 
-  const [commentInput, setCommentInput] = useState("");
+  useEffect(() => {
+    if (!id) return;
+    fetchNewsComments(id).then((data) => {
+      if (data && data.length > 0) setComments(data);
+    });
+  }, [id]);
 
-  const [comments, setComments] = useState<CommentItem[]>([
-    {
-      id: "seed-1",
-      author: "Rohan Sharma",
-      avatar: "R",
-      time: "2 days ago",
-      message:
-        "This extension is really helpful. I was having issues with document upload due to internet connectivity problems in my area.",
-      likes: 8,
-    },
-  ]);
+  const [commentInput, setCommentInput] = useState("");
 
   useEffect(() => {
     window.scrollTo(0, 0);
@@ -194,22 +189,32 @@ const NewsDetailsPage: React.FC<{
     return "bg-indigo-600";
   }, [categoryUi]);
 
-  const postComment = () => {
+  const postComment = async () => {
     const text = commentInput.trim();
+    if (!text || !id || !isAuthenticated) return;
 
-    if (!text) return;
+    setPostingComment(true);
+    try {
+      const authorName = user ? `${user.first_name} ${user.last_name}` : "User";
+      const avatarUrl =
+        user?.image_url ||
+        `https://ui-avatars.com/api/?name=${encodeURIComponent(authorName)}&background=random`;
 
-    const newComment: CommentItem = {
-      id: `${Date.now()}`,
-      author: "You (Guest)",
-      avatar: "Y",
-      time: "Just now",
-      message: text,
-      likes: 0,
-    };
+      const newComment = await postNewsComment(id, {
+        author: authorName,
+        avatar: avatarUrl,
+        message: text,
+      });
 
-    setComments((prev) => [newComment, ...prev]);
-    setCommentInput("");
+      if (newComment) {
+        setComments((prev) => [newComment, ...prev]);
+        setCommentInput("");
+      }
+    } catch {
+      // silently fail
+    } finally {
+      setPostingComment(false);
+    }
   };
 
   if (loading) {
@@ -340,7 +345,12 @@ const NewsDetailsPage: React.FC<{
                 onChange={(event) => setCommentInput(event.target.value)}
                 rows={4}
                 className="w-full p-4 outline-none resize-y text-gray-700 placeholder-gray-400"
-                placeholder="Join the discussion..."
+                placeholder={
+                  isAuthenticated
+                    ? "Join the discussion..."
+                    : "Log in to comment..."
+                }
+                readOnly={!isAuthenticated}
               ></textarea>
 
               <div className="bg-gray-50 px-4 py-3 flex items-center justify-between border-t border-gray-100">
@@ -350,12 +360,22 @@ const NewsDetailsPage: React.FC<{
                   <span>Please keep comments respectful</span>
                 </div>
 
-                <button
-                  onClick={postComment}
-                  className="bg-blue-600 hover:bg-blue-700 text-white px-5 py-2 rounded-md text-sm font-semibold transition-colors active:scale-95"
-                >
-                  Post Comment
-                </button>
+                {isAuthenticated ? (
+                  <button
+                    onClick={postComment}
+                    disabled={postingComment || !commentInput.trim()}
+                    className="bg-blue-600 hover:bg-blue-700 disabled:bg-gray-400 text-white px-5 py-2 rounded-md text-sm font-semibold transition-colors active:scale-95"
+                  >
+                    {postingComment ? "Posting..." : "Post Comment"}
+                  </button>
+                ) : (
+                  <Link
+                    href="/login"
+                    className="bg-blue-600 hover:bg-blue-700 text-white px-5 py-2 rounded-md text-sm font-semibold transition-colors"
+                  >
+                    Log in to Comment
+                  </Link>
+                )}
               </div>
             </div>
 
