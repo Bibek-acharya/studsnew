@@ -64,25 +64,45 @@ const InviteStudentPage: React.FC = () => {
     }
     let contacts: any[] = [];
     let sentInvites: any[] = [];
+    let studentDetails: Record<number, any> = {};
+
     try {
       const msgRes = await fetch(
         `${API_BASE_URL}/api/v1/institution/messages/students`,
-        {
-          headers: { Authorization: `Bearer ${token}` },
-        },
+        { headers: { Authorization: `Bearer ${token}` } },
       ).then((r) => r.json());
       contacts = msgRes?.data || [];
     } catch {
       /* skip */
     }
+
     try {
       const inviteRes = await fetch(
         `${API_BASE_URL}/api/v1/institution/invites`,
-        {
-          headers: { Authorization: `Bearer ${token}` },
-        },
+        { headers: { Authorization: `Bearer ${token}` } },
       ).then((r) => r.json());
       sentInvites = inviteRes?.data?.invites || inviteRes?.data || [];
+    } catch {
+      /* skip */
+    }
+
+    try {
+      const counselRes = await fetch(
+        `${API_BASE_URL}/api/v1/institution/counselling/bookings`,
+        { headers: { Authorization: `Bearer ${token}` } },
+      ).then((r) => r.json());
+      const bookings: any[] =
+        counselRes?.data?.bookings || counselRes?.data || [];
+      bookings.forEach((b: any) => {
+        if (b.user_id) {
+          studentDetails[b.user_id] = {
+            email: b.student_email || b.email || "",
+            phone: b.student_phone || b.phone || "",
+            address: b.student_address || b.address || "",
+            course: b.course || b.program || "",
+          };
+        }
+      });
     } catch {
       /* skip */
     }
@@ -93,16 +113,20 @@ const InviteStudentPage: React.FC = () => {
       if (i.user_id) inviteMap[i.user_id] = i.id;
     });
 
-    const entries: StudentEntry[] = contacts.map((c: any) => ({
-      user_id: c.user_id,
-      name: c.name || `User #${c.user_id}`,
-      email: c.email || "",
-      phone: c.phone || "",
-      course: c.course || c.last_message?.slice(0, 40) || "",
-      address: c.address || "",
-      invited: invitedUserIds.has(c.user_id),
-      invite_id: inviteMap[c.user_id],
-    }));
+    const entries: StudentEntry[] = contacts.map((c: any) => {
+      const details = studentDetails[c.user_id] || {};
+      return {
+        user_id: c.user_id,
+        name: c.name || `User #${c.user_id}`,
+        email: details.email || c.email || c.student_email || "",
+        phone: details.phone || c.phone || c.student_phone || "",
+        course:
+          details.course || c.course || c.last_message?.slice(0, 40) || "",
+        address: details.address || c.address || c.student_address || "",
+        invited: invitedUserIds.has(c.user_id),
+        invite_id: inviteMap[c.user_id],
+      };
+    });
     setStudents(entries);
     setLoading(false);
   }, []);

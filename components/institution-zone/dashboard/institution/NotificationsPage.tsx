@@ -192,6 +192,7 @@ const NotificationsPage: React.FC = () => {
     }
     setNotifications((prev) => prev.map((n) => ({ ...n, unread: false })));
     setMarkingRead(false);
+    window.dispatchEvent(new Event("institution-notifications-read"));
   };
 
   const tabs = [

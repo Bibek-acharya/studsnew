@@ -81,29 +81,44 @@ interface NavSection {
   isLogout?: boolean;
 }
 
-const InstitutionLayout: React.FC<Props> = ({ activePage, onNavigate, children }) => {
+const InstitutionLayout: React.FC<Props> = ({
+  activePage,
+  onNavigate,
+  children,
+}) => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
-  const [openDropdowns, setOpenDropdowns] = useState<Record<string, boolean>>({});
+  const [openDropdowns, setOpenDropdowns] = useState<Record<string, boolean>>(
+    {},
+  );
   const [notificationOpen, setNotificationOpen] = useState(false);
   const [showLogoutModal, setShowLogoutModal] = useState(false);
-  const [accessDisabled, setAccessDisabled] = useState<Record<string, boolean>>({});
+  const [accessDisabled, setAccessDisabled] = useState<Record<string, boolean>>(
+    {},
+  );
   const [notifCount, setNotifCount] = useState(0);
   const [msgCount, setMsgCount] = useState(0);
-  const [notifItems, setNotifItems] = useState<{ icon: React.ReactNode; bg: string; text: string; time: string }[]>([]);
+  const [notifItems, setNotifItems] = useState<
+    { icon: React.ReactNode; bg: string; text: string; time: string }[]
+  >([]);
   const [instName, setInstName] = useState("");
   const [instLogo, setInstLogo] = useState("");
   const [subType, setSubType] = useState("");
 
   useEffect(() => {
-    const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080";
+    const API_BASE_URL =
+      process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080";
     const token = localStorage.getItem("institutionToken");
     if (!token) return;
 
     const fetchAll = async () => {
       try {
         const [profileRes, accessRes] = await Promise.all([
-          fetch(`${API_BASE_URL}/api/v1/institution/profile`, { headers: { Authorization: `Bearer ${token}` } }),
-          fetch(`${API_BASE_URL}/api/v1/institutions/profile-access`, { headers: { Authorization: `Bearer ${token}` } }),
+          fetch(`${API_BASE_URL}/api/v1/institution/profile`, {
+            headers: { Authorization: `Bearer ${token}` },
+          }),
+          fetch(`${API_BASE_URL}/api/v1/institutions/profile-access`, {
+            headers: { Authorization: `Bearer ${token}` },
+          }),
         ]);
 
         const profileData = await profileRes.json();
@@ -114,9 +129,19 @@ const InstitutionLayout: React.FC<Props> = ({ activePage, onNavigate, children }
 
         const accessData = await accessRes.json();
         const access: Record<string, boolean> = accessData.data || {};
-        const allToggles = ["About", "Course & Fees", "Admission", "Scholarship", "News", "Events", "Blogs"];
+        const allToggles = [
+          "About",
+          "Course & Fees",
+          "Admission",
+          "Scholarship",
+          "News",
+          "Events",
+          "Blogs",
+        ];
         const disabled: Record<string, boolean> = {};
-        allToggles.forEach((t) => { if (access[t] === false) disabled[t] = true; });
+        allToggles.forEach((t) => {
+          if (access[t] === false) disabled[t] = true;
+        });
         setAccessDisabled(disabled);
       } catch {}
     };
@@ -126,7 +151,8 @@ const InstitutionLayout: React.FC<Props> = ({ activePage, onNavigate, children }
   useEffect(() => {
     const fetchProfile = async () => {
       try {
-        const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080";
+        const API_BASE_URL =
+          process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080";
         const token = localStorage.getItem("institutionToken");
         if (!token) return;
         const res = await fetch(`${API_BASE_URL}/api/v1/institution/profile`, {
@@ -151,7 +177,10 @@ const InstitutionLayout: React.FC<Props> = ({ activePage, onNavigate, children }
 
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
-      if (notificationRef.current && !notificationRef.current.contains(e.target as Node)) {
+      if (
+        notificationRef.current &&
+        !notificationRef.current.contains(e.target as Node)
+      ) {
         setNotificationOpen(false);
       }
     };
@@ -336,31 +365,78 @@ const InstitutionLayout: React.FC<Props> = ({ activePage, onNavigate, children }
   ];
 
   const fetchNotifications = useCallback(async () => {
-    const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080";
+    const API_BASE_URL =
+      process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080";
     const token = localStorage.getItem("institutionToken");
     if (!token) return;
     try {
       const [dashRes, msgRes] = await Promise.all([
-        fetch(`${API_BASE_URL}/api/v1/institution/dashboard`, { headers: { Authorization: `Bearer ${token}` } }).then(r => r.json()),
-        fetch(`${API_BASE_URL}/api/v1/institution/messages/students`, { headers: { Authorization: `Bearer ${token}` } }).then(r => r.json()),
+        fetch(`${API_BASE_URL}/api/v1/institution/dashboard`, {
+          headers: { Authorization: `Bearer ${token}` },
+        }).then((r) => r.json()),
+        fetch(`${API_BASE_URL}/api/v1/institution/messages/students`, {
+          headers: { Authorization: `Bearer ${token}` },
+        }).then((r) => r.json()),
       ]);
       const dash = dashRes?.data || {};
-      const unreadCount = Number(dash.unread_messages || 0) + Number(dash.pending_bookings || 0);
+      const unreadCount =
+        Number(dash.unread_messages || 0) + Number(dash.pending_bookings || 0);
       setNotifCount(unreadCount);
       setMsgCount(Number(dash.unread_messages || 0));
-      const items: { icon: React.ReactNode; bg: string; text: string; time: string }[] = [];
-      if (dash.pending_bookings > 0) items.push({ icon: <UserPlus className="text-blue-600 text-sm" />, bg: "bg-blue-50", text: `${dash.pending_bookings} pending counselling bookings`, time: "Now" });
-      if (dash.unread_messages > 0) items.push({ icon: <Chats className="text-green-600 text-sm" />, bg: "bg-green-50", text: `${dash.unread_messages} unread messages`, time: "Now" });
+      const items: {
+        icon: React.ReactNode;
+        bg: string;
+        text: string;
+        time: string;
+      }[] = [];
+      if (dash.pending_bookings > 0)
+        items.push({
+          icon: <UserPlus className="text-blue-600 text-sm" />,
+          bg: "bg-blue-50",
+          text: `${dash.pending_bookings} pending counselling bookings`,
+          time: "Now",
+        });
+      if (dash.unread_messages > 0)
+        items.push({
+          icon: <Chats className="text-green-600 text-sm" />,
+          bg: "bg-green-50",
+          text: `${dash.unread_messages} unread messages`,
+          time: "Now",
+        });
       const contacts = msgRes?.data || [];
       contacts.slice(0, 2).forEach((c: any, i: number) => {
-        items.push({ icon: <FileText className="text-purple-600 text-sm" />, bg: "bg-purple-50", text: `Message from ${c.name || `User #${c.user_id}`}`, time: i === 0 ? "Recently" : "Earlier" });
+        items.push({
+          icon: <FileText className="text-purple-600 text-sm" />,
+          bg: "bg-purple-50",
+          text: `Message from ${c.name || `User #${c.user_id}`}`,
+          time: i === 0 ? "Recently" : "Earlier",
+        });
       });
-      if (items.length === 0) items.push({ icon: <SquaresFour className="text-gray-400 text-sm" />, bg: "bg-gray-50", text: "No new notifications", time: "" });
+      if (items.length === 0)
+        items.push({
+          icon: <SquaresFour className="text-gray-400 text-sm" />,
+          bg: "bg-gray-50",
+          text: "No new notifications",
+          time: "",
+        });
       setNotifItems(items);
-    } catch { /* skip */ }
+    } catch {
+      /* skip */
+    }
   }, []);
 
-  useEffect(() => { fetchNotifications(); }, [fetchNotifications]);
+  useEffect(() => {
+    fetchNotifications();
+  }, [fetchNotifications]);
+
+  useEffect(() => {
+    const handler = () => fetchNotifications();
+    if (typeof window !== "undefined") {
+      window.addEventListener("institution-notifications-read", handler);
+      return () =>
+        window.removeEventListener("institution-notifications-read", handler);
+    }
+  }, [fetchNotifications]);
 
   return (
     <div className="bg-white text-gray-800 font-sans h-screen flex overflow-hidden">
@@ -400,23 +476,38 @@ const InstitutionLayout: React.FC<Props> = ({ activePage, onNavigate, children }
 
             if (section.type === "dropdown" && section.items) {
               const locked = isLocked(key);
-              const isOpen = openDropdowns[key] || isDropdownActive(section.items);
+              const isOpen =
+                openDropdowns[key] || isDropdownActive(section.items);
               const isActive = isDropdownActive(section.items);
 
               return (
                 <div key={key} className="flex flex-col">
                   <button
-                    onClick={() => { if (!locked) toggleDropdown(key); }}
+                    onClick={() => {
+                      if (!locked) toggleDropdown(key);
+                    }}
                     className={`w-full flex items-center justify-between px-3 py-2.5 rounded-md transition-colors ${
-                      locked ? "text-gray-300 cursor-not-allowed" : isActive
-                        ? "bg-brand-50 text-brand-600"
-                        : "text-gray-700 hover:bg-brand-50 hover:text-brand-600"
+                      locked
+                        ? "text-gray-300 cursor-not-allowed"
+                        : isActive
+                          ? "bg-brand-50 text-brand-600"
+                          : "text-gray-700 hover:bg-brand-50 hover:text-brand-600"
                     }`}
-                    title={locked ? "This section has been disabled by the admin" : ""}
+                    title={
+                      locked
+                        ? "This section has been disabled by the admin"
+                        : ""
+                    }
                   >
                     <div className="flex items-center gap-3">
-                      {locked ? <Lock weight="fill" className="w-[18px] h-[18px]" /> : section.icon}
-                      <span className="font-medium text-sm">{section.label}</span>
+                      {locked ? (
+                        <Lock weight="fill" className="w-[18px] h-[18px]" />
+                      ) : (
+                        section.icon
+                      )}
+                      <span className="font-medium text-sm">
+                        {section.label}
+                      </span>
                     </div>
                     {!locked && (
                       <CaretRight
@@ -438,13 +529,15 @@ const InstitutionLayout: React.FC<Props> = ({ activePage, onNavigate, children }
                               onNavigate(item.page);
                               setSidebarOpen(false);
                             }}
-            className={`flex items-center gap-2 px-3 py-2 text-sm rounded-md transition-colors ${
-              activePage === item.page
-                ? "text-black bg-blue-100"
-                : "text-gray-500 hover:text-brand-600 hover:bg-brand-50"
-            }`}
+                            className={`flex items-center gap-2 px-3 py-2 text-sm rounded-md transition-colors ${
+                              activePage === item.page
+                                ? "text-black bg-blue-100"
+                                : "text-gray-500 hover:text-brand-600 hover:bg-brand-50"
+                            }`}
                           >
-                            <span className="whitespace-nowrap">{item.label}</span>
+                            <span className="whitespace-nowrap">
+                              {item.label}
+                            </span>
                           </button>
                         ))}
                       </div>
@@ -477,9 +570,15 @@ const InstitutionLayout: React.FC<Props> = ({ activePage, onNavigate, children }
                         ? "bg-blue-100 text-black"
                         : "text-gray-700 hover:bg-brand-50 hover:text-brand-600"
                 }`}
-                title={locked ? "This section has been disabled by the admin" : ""}
+                title={
+                  locked ? "This section has been disabled by the admin" : ""
+                }
               >
-                {locked ? <Lock weight="fill" className="w-[18px] h-[18px]" /> : section.icon}
+                {locked ? (
+                  <Lock weight="fill" className="w-[18px] h-[18px]" />
+                ) : (
+                  section.icon
+                )}
                 <span className="font-medium text-sm">{section.label}</span>
               </button>
             );
@@ -536,31 +635,54 @@ const InstitutionLayout: React.FC<Props> = ({ activePage, onNavigate, children }
               {notificationOpen && (
                 <div className="absolute right-0 top-full mt-2 w-80 bg-white rounded-xl shadow-xl border border-gray-200 z-50">
                   <div className="p-3 border-b border-gray-100 flex items-center justify-between">
-                    <h3 className="text-sm font-bold text-gray-900">Notifications</h3>
-                    <button onClick={() => setNotificationOpen(false)} className="text-gray-400 hover:text-gray-600">
+                    <h3 className="text-sm font-bold text-gray-900">
+                      Notifications
+                    </h3>
+                    <button
+                      onClick={() => setNotificationOpen(false)}
+                      className="text-gray-400 hover:text-gray-600"
+                    >
                       <X className="w-[18px] h-[18px]" />
                     </button>
                   </div>
                   <div className="max-h-72 overflow-y-auto">
                     {notifItems.length === 0 ? (
-                      <div className="p-4 text-center text-sm text-gray-400">No notifications</div>
+                      <div className="p-4 text-center text-sm text-gray-400">
+                        No notifications
+                      </div>
                     ) : (
                       notifItems.map((notif, i) => (
-                        <div key={i} className="p-3 border-b border-gray-50 hover:bg-brand-50 cursor-pointer flex items-start gap-3 transition-colors">
-                          <div className={`w-8 h-8 rounded-full ${notif.bg} flex items-center justify-center shrink-0`}>
+                        <div
+                          key={i}
+                          className="p-3 border-b border-gray-50 hover:bg-brand-50 cursor-pointer flex items-start gap-3 transition-colors"
+                        >
+                          <div
+                            className={`w-8 h-8 rounded-full ${notif.bg} flex items-center justify-center shrink-0`}
+                          >
                             {notif.icon}
                           </div>
                           <div className="flex-1">
-                            <p className="text-sm font-medium text-gray-900">{notif.text}</p>
-                            {notif.time && <p className="text-xs text-gray-500 mt-0.5">{notif.time}</p>}
+                            <p className="text-sm font-medium text-gray-900">
+                              {notif.text}
+                            </p>
+                            {notif.time && (
+                              <p className="text-xs text-gray-500 mt-0.5">
+                                {notif.time}
+                              </p>
+                            )}
                           </div>
                         </div>
                       ))
                     )}
                   </div>
                   <div className="p-2 border-t border-gray-100 text-center">
-                    <button onClick={() => { onNavigate("notification"); setNotificationOpen(false); }}
-                      className="text-xs text-blue-600 hover:underline font-medium">
+                    <button
+                      onClick={() => {
+                        onNavigate("notification");
+                        setNotificationOpen(false);
+                      }}
+                      className="text-xs text-blue-600 hover:underline font-medium"
+                    >
                       View All Activity
                     </button>
                   </div>
@@ -570,14 +692,24 @@ const InstitutionLayout: React.FC<Props> = ({ activePage, onNavigate, children }
 
             <div className="pl-3 border-l border-gray-200 flex items-center gap-3">
               {instLogo ? (
-                <img className="h-10 w-10 rounded-full object-cover border border-gray-200" src={instLogo} alt="" />
+                <img
+                  className="h-10 w-10 rounded-full object-cover border border-gray-200"
+                  src={instLogo}
+                  alt=""
+                />
               ) : (
-                <div className="h-10 w-10 rounded-full bg-blue-100 flex items-center justify-center text-blue-600 font-bold text-sm">{instName.charAt(0)}</div>
+                <div className="h-10 w-10 rounded-full bg-blue-100 flex items-center justify-center text-blue-600 font-bold text-sm">
+                  {instName.charAt(0)}
+                </div>
               )}
               <div>
-                <p className="text-sm font-semibold text-gray-900">{instName || "Loading..."}</p>
+                <p className="text-sm font-semibold text-gray-900">
+                  {instName || "Loading..."}
+                </p>
                 {subType && (
-                  <span className={`text-[10px] font-semibold px-1.5 py-0.5 rounded ${subType === "premium" ? "bg-indigo-100 text-indigo-700" : "bg-gray-100 text-gray-600"}`}>
+                  <span
+                    className={`text-[10px] font-semibold px-1.5 py-0.5 rounded ${subType === "premium" ? "bg-indigo-100 text-indigo-700" : "bg-gray-100 text-gray-600"}`}
+                  >
                     {subType === "premium" ? "Premium" : "Free"}
                   </span>
                 )}
@@ -609,7 +741,10 @@ const InstitutionLayout: React.FC<Props> = ({ activePage, onNavigate, children }
       {/* Logout Modal */}
       {showLogoutModal && (
         <div className="fixed inset-0 z-[60] flex items-center justify-center px-4">
-          <div className="absolute inset-0 bg-black/45" onClick={() => setShowLogoutModal(false)} />
+          <div
+            className="absolute inset-0 bg-black/45"
+            onClick={() => setShowLogoutModal(false)}
+          />
           <div className="relative w-full max-w-sm rounded-2xl bg-white px-5 pb-5 pt-6 shadow-lg sm:px-6 sm:pb-6 sm:pt-7">
             <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-red-50 sm:h-14 sm:w-14">
               <div className="flex h-8 w-8 items-center justify-center rounded-full border-2 border-red-500 text-red-500">
@@ -622,7 +757,8 @@ const InstitutionLayout: React.FC<Props> = ({ activePage, onNavigate, children }
                 Log out of your account?
               </h3>
               <p className="mt-2 text-[15px] leading-6 text-slate-500 sm:text-base">
-                Are you sure you want to log out? You will need to re-enter your credentials to access your account.
+                Are you sure you want to log out? You will need to re-enter your
+                credentials to access your account.
               </p>
             </div>
 
