@@ -202,9 +202,12 @@ export default function CourseDetailPage({
       <style>{`
         @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
         .tab-content { animation: fadeIn 0.4s ease-in-out; }
-        .ql-editor { padding: 0; }
-        .ql-editor p, .ql-editor li { font-size: 15px; line-height: 1.8; color: #4b5563; }
+        .ql-editor { padding: 0; max-width: 100%; overflow-x: hidden; word-break: break-word; }
+        .ql-editor p, .ql-editor li { font-size: 15px; line-height: 1.8; color: #4b5563; word-wrap: break-word; overflow-wrap: break-word; }
         .ql-editor strong { font-weight: 700; color: #111827; }
+        .ql-editor img { max-width: 100%; height: auto; }
+        .ql-editor pre { white-space: pre-wrap; word-break: break-word; max-width: 100%; overflow-x: auto; }
+        .ql-editor table { max-width: 100%; overflow-x: auto; display: block; }
       `}</style>
 
       <div className="w-full bg-white text-gray-800">
