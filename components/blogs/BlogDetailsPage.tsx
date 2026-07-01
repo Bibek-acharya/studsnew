@@ -92,10 +92,13 @@ const BlogDetailsPage: React.FC<{ params: Promise<{ id: string }> }> = ({
   }, [blog]);
 
   const topCategoryClass = useMemo(() => {
-    if (topCategory === "Admission") return "bg-[#1e3a8a]";
+    if (topCategory === "Scholarship") return "bg-emerald-500";
+    if (topCategory === "Admission") return "bg-blue-700";
     if (topCategory === "Exams") return "bg-red-500";
-    if (topCategory === "Scholarship") return "bg-emerald-600";
-    return "bg-yellow-600";
+    if (topCategory === "Events") return "bg-purple-500";
+    if (topCategory === "Achievements") return "bg-amber-500";
+    if (topCategory === "Notice") return "bg-indigo-500";
+    return "bg-slate-500";
   }, [topCategory]);
 
   const postComment = async () => {

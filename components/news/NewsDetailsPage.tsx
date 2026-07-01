@@ -168,25 +168,36 @@ const NewsDetailsPage: React.FC<{
 
   const categoryUi = useMemo(() => {
     if (!article) return "Notice";
-
-    if (article.category === "Academic") return "Admission";
-    if (article.category === "Tech") return "Exam";
-    if (article.category === "Jobs") return "Fee";
-    if (article.category === "Policy") return "Notice";
-    if (article.category === "Events") return "Events";
-    if (article.category === "Announcements") return "Notice";
-    if (article.category === "Academics") return "Admission";
-    if (article.category === "Sports") return "Events";
-
-    return "Notice";
+    const cat = (article.category || "").toLowerCase();
+    if (["admission", "academic", "academics"].includes(cat))
+      return "Admission";
+    if (["scholarship"].includes(cat)) return "Scholarship";
+    if (["exam", "exams", "tech"].includes(cat)) return "Exams";
+    if (
+      [
+        "notice",
+        "announcement",
+        "announcements",
+        "policy",
+        "press-release",
+        "update",
+        "news",
+      ].includes(cat)
+    )
+      return "Notice";
+    if (["event", "events", "sports"].includes(cat)) return "Events";
+    if (["achievement", "achievements"].includes(cat)) return "Achievements";
+    return "Others";
   }, [article]);
 
   const categoryBadgeClass = useMemo(() => {
-    if (categoryUi === "Admission") return "bg-blue-600";
-    if (categoryUi === "Exam") return "bg-red-500";
-    if (categoryUi === "Fee") return "bg-orange-500";
-
-    return "bg-indigo-600";
+    if (categoryUi === "Exams") return "bg-orange-100 text-orange-700";
+    if (categoryUi === "Admission") return "bg-blue-100 text-blue-700";
+    if (categoryUi === "Scholarship") return "bg-emerald-100 text-emerald-700";
+    if (categoryUi === "Notice") return "bg-violet-100 text-violet-700";
+    if (categoryUi === "Events") return "bg-pink-100 text-pink-700";
+    if (categoryUi === "Achievements") return "bg-amber-100 text-amber-700";
+    return "bg-slate-100 text-slate-700";
   }, [categoryUi]);
 
   const postComment = async () => {
@@ -239,7 +250,7 @@ const NewsDetailsPage: React.FC<{
         <main className="w-full lg:w-[68%]">
           <div className="flex items-center gap-4 text-sm font-medium text-gray-500 mb-6 border-b border-gray-100 pb-4">
             <span
-              className={`${categoryBadgeClass} text-white px-3 py-1 rounded-full flex items-center gap-1.5`}
+              className={`${categoryBadgeClass} px-3 py-1 rounded-full flex items-center gap-1.5`}
             >
               <i className="fa-solid fa-graduation-cap text-sm"></i>
               {categoryUi}
@@ -440,23 +451,47 @@ const NewsDetailsPage: React.FC<{
             <div className="space-y-6">
               {related.length > 0 ? (
                 related.map((rel, idx) => {
-                  const relCategoryUi =
-                    rel.category === "Academic"
-                      ? "Admission"
-                      : rel.category === "Tech"
-                        ? "Exam"
-                        : rel.category === "Jobs"
-                          ? "Fee"
-                          : "Notice";
+                  const relCat = (rel.category || "").toLowerCase();
+                  const relCategoryUi = [
+                    "admission",
+                    "academic",
+                    "academics",
+                  ].includes(relCat)
+                    ? "Admission"
+                    : ["scholarship"].includes(relCat)
+                      ? "Scholarship"
+                      : ["exam", "exams", "tech"].includes(relCat)
+                        ? "Exams"
+                        : [
+                              "notice",
+                              "announcement",
+                              "announcements",
+                              "policy",
+                              "press-release",
+                              "update",
+                              "news",
+                            ].includes(relCat)
+                          ? "Notice"
+                          : ["event", "events", "sports"].includes(relCat)
+                            ? "Events"
+                            : ["achievement", "achievements"].includes(relCat)
+                              ? "Achievements"
+                              : "Others";
 
                   const relBadge =
-                    relCategoryUi === "Admission"
-                      ? "bg-blue-600"
-                      : relCategoryUi === "Exam"
-                        ? "bg-red-500"
-                        : relCategoryUi === "Fee"
-                          ? "bg-orange-500"
-                          : "bg-indigo-600";
+                    relCategoryUi === "Exams"
+                      ? "bg-orange-100 text-orange-700"
+                      : relCategoryUi === "Admission"
+                        ? "bg-blue-100 text-blue-700"
+                        : relCategoryUi === "Scholarship"
+                          ? "bg-emerald-100 text-emerald-700"
+                          : relCategoryUi === "Notice"
+                            ? "bg-violet-100 text-violet-700"
+                            : relCategoryUi === "Events"
+                              ? "bg-pink-100 text-pink-700"
+                              : relCategoryUi === "Achievements"
+                                ? "bg-amber-100 text-amber-700"
+                                : "bg-slate-100 text-slate-700";
 
                   return (
                     <div key={rel.id}>
@@ -476,7 +511,7 @@ const NewsDetailsPage: React.FC<{
 
                         <div className="flex items-center justify-between mb-2">
                           <span
-                            className={`${relBadge} text-white text-[11px] font-bold px-2.5 py-0.5 rounded-full tracking-wide uppercase`}
+                            className={`${relBadge} text-[11px] font-bold px-2.5 py-0.5 rounded-full tracking-wide uppercase`}
                           >
                             {relCategoryUi}
                           </span>
