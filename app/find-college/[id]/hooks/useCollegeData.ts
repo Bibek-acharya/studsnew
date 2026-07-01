@@ -64,29 +64,48 @@ export function useCollegeData(idStr: string) {
   const instAlumni = isInstitution ? college?.alumni_data : null;
   const instGallery = isInstitution ? college?.gallery_data : null;
   const instDownloads = isInstitution ? college?.downloads_data : null;
-  const instInstitutionPrograms = isInstitution ? college?.institution_programs : null;
-  const instInstitutionEvents = isInstitution ? college?.institution_events : null;
+  const instInstitutionPrograms = isInstitution
+    ? college?.institution_programs
+    : null;
+  const instInstitutionEvents = isInstitution
+    ? college?.institution_events
+    : null;
   const instInstitutionNews = isInstitution ? college?.institution_news : null;
-  const instInstitutionScholarships = isInstitution ? college?.institution_scholarships : null;
-  const instAdmissionPageData = isInstitution ? college?.admission_page_data : null;
+  const instInstitutionScholarships = isInstitution
+    ? college?.institution_scholarships
+    : null;
+  const instAdmissionPageData = isInstitution
+    ? college?.admission_page_data
+    : null;
 
-  const safeImageUrl = useCallback((url: string | null | undefined): string | null => {
-    if (!url || url.startsWith("blob:") || url.startsWith("data:")) return null;
-    return getImageUrl(url);
-  }, []);
+  const safeImageUrl = useCallback(
+    (url: string | null | undefined): string | null => {
+      if (!url || url.startsWith("blob:") || url.startsWith("data:"))
+        return null;
+      return getImageUrl(url);
+    },
+    [],
+  );
 
   const galleryImagesSource = useMemo(() => {
-    if (!instGallery || !Array.isArray(instGallery)) return FALLBACK_GALLERY_IMAGES;
-    return instGallery.flatMap((g: any) => {
-      if (g.images && Array.isArray(g.images)) {
-        return g.images.map((img: any) => safeImageUrl(img.url || img));
-      }
-      return safeImageUrl(g.url || g);
-    }).filter(Boolean);
+    if (!instGallery || !Array.isArray(instGallery))
+      return FALLBACK_GALLERY_IMAGES;
+    return instGallery
+      .flatMap((g: any) => {
+        if (g.images && Array.isArray(g.images)) {
+          return g.images.map((img: any) => safeImageUrl(img.url || img));
+        }
+        return safeImageUrl(g.url || g);
+      })
+      .filter(Boolean);
   }, [instGallery, safeImageUrl]);
 
-  const instLogo = isInstitution && college?.logo_url ? getImageUrl(college.logo_url) : null;
-  const instBanner = isInstitution && college?.banner_url ? getImageUrl(college.banner_url) : null;
+  const instLogo =
+    isInstitution && college?.logo_url ? getImageUrl(college.logo_url) : null;
+  const instBanner =
+    isInstitution && college?.banner_url
+      ? getImageUrl(college.banner_url)
+      : null;
 
   const mappedCourses = useMemo(() => {
     if (instCourses && Array.isArray(instCourses)) {
@@ -123,8 +142,14 @@ export function useCollegeData(idStr: string) {
     if (instFacilities && Array.isArray(instFacilities)) {
       return instFacilities.map((f: any) => {
         const rawIcon = (f.facilityIcon || f.icon || "").trim();
-        const icon = rawIcon ? `fa-${rawIcon.replace(/^fa-/, "").toLowerCase()}` : "";
-        return { icon, title: f.heading || f.title || "", desc: f.description || f.desc || "" };
+        const icon = rawIcon
+          ? `fa-${rawIcon.replace(/^fa-/, "").toLowerCase()}`
+          : "";
+        return {
+          icon,
+          title: f.heading || f.title || "",
+          desc: f.description || f.desc || "",
+        };
       });
     }
     return null;
@@ -142,22 +167,26 @@ export function useCollegeData(idStr: string) {
   }, [instDownloads]);
 
   const institutionProgramsFromTable = useMemo(() => {
-    if (!instInstitutionPrograms || !Array.isArray(instInstitutionPrograms)) return [];
+    if (!instInstitutionPrograms || !Array.isArray(instInstitutionPrograms))
+      return [];
     return instInstitutionPrograms
       .filter((p: any) => p.name)
       .map((p: any) => ({
+        id: p.id,
         name: p.name || "",
         level: p.duration || "",
         affiliation: p.capacity ? `${p.capacity} seats` : "",
         status: p.status === "active" ? "Ongoing" : "Closed",
+        courseId: p.id,
       }));
   }, [instInstitutionPrograms]);
 
   const mappedAdmissions = useMemo(() => {
     if (!instAdmissionPageData) return null;
-    const pageData = typeof instAdmissionPageData === "string"
-      ? JSON.parse(instAdmissionPageData)
-      : instAdmissionPageData;
+    const pageData =
+      typeof instAdmissionPageData === "string"
+        ? JSON.parse(instAdmissionPageData)
+        : instAdmissionPageData;
     const level = pageData?.overview_data?.level || "";
     const programs = pageData?.programs_data || [];
     return programs.map((p: any) => ({
@@ -172,7 +201,8 @@ export function useCollegeData(idStr: string) {
   }, [instAdmissionPageData]);
 
   const mappedEvents = useMemo(() => {
-    if (!instInstitutionEvents || !Array.isArray(instInstitutionEvents)) return null;
+    if (!instInstitutionEvents || !Array.isArray(instInstitutionEvents))
+      return null;
     return instInstitutionEvents
       .filter((e: any) => e.status === "upcoming" || e.status === "published")
       .map((e: any) => ({
@@ -180,12 +210,18 @@ export function useCollegeData(idStr: string) {
         image: safeImageUrl(e.image_url || e.image) || "",
         title: e.name || e.title || "",
         date: `${e.start_date || e.date || ""} | ${e.location || "TBD"}`,
-        desc: (e.short_desc || e.description || "").replace(/<[^>]*>/g, "").replace(/&nbsp;/g, " ").replace(/&amp;/g, "&").replace(/\s+/g, " ").trim(),
+        desc: (e.short_desc || e.description || "")
+          .replace(/<[^>]*>/g, "")
+          .replace(/&nbsp;/g, " ")
+          .replace(/&amp;/g, "&")
+          .replace(/\s+/g, " ")
+          .trim(),
       }));
   }, [instInstitutionEvents, safeImageUrl]);
 
   const mappedNews = useMemo(() => {
-    if (!instInstitutionNews || !Array.isArray(instInstitutionNews)) return null;
+    if (!instInstitutionNews || !Array.isArray(instInstitutionNews))
+      return null;
     return instInstitutionNews
       .filter((n: any) => n.status === "published")
       .map((n: any) => ({
@@ -194,13 +230,22 @@ export function useCollegeData(idStr: string) {
         badgeClass: "bg-blue-500 text-white",
         image: safeImageUrl(n.image_url || n.image) || "",
         title: n.title || "",
-        desc: (n.short_desc || n.excerpt || n.content || "").replace(/<[^>]*>/g, "").replace(/&nbsp;/g, " ").replace(/&amp;/g, "&").replace(/\s+/g, " ").trim(),
+        desc: (n.short_desc || n.excerpt || n.content || "")
+          .replace(/<[^>]*>/g, "")
+          .replace(/&nbsp;/g, " ")
+          .replace(/&amp;/g, "&")
+          .replace(/\s+/g, " ")
+          .trim(),
         time: n.created_at ? new Date(n.created_at).toLocaleDateString() : "",
       }));
   }, [instInstitutionNews, safeImageUrl]);
 
   const mappedScholarships = useMemo(() => {
-    if (!instInstitutionScholarships || !Array.isArray(instInstitutionScholarships)) return null;
+    if (
+      !instInstitutionScholarships ||
+      !Array.isArray(instInstitutionScholarships)
+    )
+      return null;
     return instInstitutionScholarships
       .filter((s: any) => s.status === "published")
       .map((s: any) => ({
@@ -209,17 +254,30 @@ export function useCollegeData(idStr: string) {
         program: s.field_of_study?.join(", ") || s.title || "",
         scholarship: s.title || "",
         benefit: s.value || "",
-        audience: (s.short_desc || s.description || "").replace(/<[^>]*>/g, "").replace(/&nbsp;/g, " ").replace(/&amp;/g, "&").replace(/\s+/g, " ").trim(),
+        audience: (s.short_desc || s.description || "")
+          .replace(/<[^>]*>/g, "")
+          .replace(/&nbsp;/g, " ")
+          .replace(/&amp;/g, "&")
+          .replace(/\s+/g, " ")
+          .trim(),
       }));
   }, [instInstitutionScholarships]);
 
   const name = isInstitution ? instName : college?.name || "";
   const locationText = isInstitution ? instLocation : college?.location || "";
   const rating = college?.rating ?? 0;
-  const reviewsCount = college?.reviews !== undefined ? Number(college.reviews || 0).toLocaleString() : "0";
+  const reviewsCount =
+    college?.reviews !== undefined
+      ? Number(college.reviews || 0).toLocaleString()
+      : "0";
   const website = (isInstitution ? instWebsite : college?.website) || "";
-  const websiteHref = website.startsWith("http") ? website : website ? `https://${website}` : "";
-  const description = (isInstitution ? instDescription : college?.description) || "";
+  const websiteHref = website.startsWith("http")
+    ? website
+    : website
+      ? `https://${website}`
+      : "";
+  const description =
+    (isInstitution ? instDescription : college?.description) || "";
   const isVerified = !!college?.verified || college?.claimed === true;
   const shareTitle = `${name} - Studsphere`;
   const shareText = `Check out ${name} on Studsphere`;
@@ -235,25 +293,30 @@ export function useCollegeData(idStr: string) {
     () => (programFilter: LevelFilter) =>
       programFilter === "all"
         ? FALLBACK_OFFERED_PROGRAMS
-        : FALLBACK_OFFERED_PROGRAMS.filter((item) => item.level === programFilter),
+        : FALLBACK_OFFERED_PROGRAMS.filter(
+            (item) => item.level === programFilter,
+          ),
     [],
   );
   const institutionCoursesFromStorage = useMemo(
-    () => getInstitutionCourses().map((c) => ({
-      id: c.id,
-      level: c.level,
-      name: c.name,
-      affiliation: c.level === "+2" ? "NEB" : `${c.level} Program`,
-      status: c.status === "Active" ? "Ongoing" : "Closed",
-      courseId: c.id,
-    })),
+    () =>
+      getInstitutionCourses().map((c) => ({
+        id: c.id,
+        level: c.level,
+        name: c.name,
+        affiliation: c.level === "+2" ? "NEB" : `${c.level} Program`,
+        status: c.status === "Active" ? "Ongoing" : "Closed",
+        courseId: c.id,
+      })),
     [],
   );
   const filteredScholarships = useMemo(
     () => (scholarshipFilter: LevelFilter) =>
       scholarshipFilter === "all"
         ? FALLBACK_SCHOLARSHIPS
-        : FALLBACK_SCHOLARSHIPS.filter((item) => item.level === scholarshipFilter),
+        : FALLBACK_SCHOLARSHIPS.filter(
+            (item) => item.level === scholarshipFilter,
+          ),
     [],
   );
 
@@ -300,7 +363,11 @@ export function useCollegeData(idStr: string) {
       if (collegeId && !reviewsData) {
         setReviewsLoading(true);
         apiService
-          .getCollegeReviews(collegeId, { page: 1, limit: 10 }, { suppressAuthExpired: true })
+          .getCollegeReviews(
+            collegeId,
+            { page: 1, limit: 10 },
+            { suppressAuthExpired: true },
+          )
           .then((res) => {
             if (res?.data) setReviewsData(res.data);
           })
