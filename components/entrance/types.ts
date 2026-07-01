@@ -36,6 +36,7 @@ export interface Exam {
   modelSets?: {
     id?: number;
     title: string;
+    size?: string;
     fileUrl?: string;
     description?: string;
   }[];
