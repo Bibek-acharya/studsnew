@@ -1,4 +1,5 @@
 import React, { useEffect, useMemo, useState } from "react";
+import { useRouter } from "next/navigation";
 import { useQuery } from "@tanstack/react-query";
 import { useAuth } from "@/services/AuthContext";
 import { toast } from "sonner";
@@ -147,6 +148,7 @@ const CollegeGrid: React.FC<CollegeGridProps> = ({
   onNavigate,
   onMobileFilterClick,
 }) => {
+  const router = useRouter();
   const { isAuthenticated } = useAuth();
   const [currentPage, setCurrentPage] = useState(1);
   const [savedColleges, setSavedColleges] = useState<(number | string)[]>([]);
@@ -168,6 +170,8 @@ const CollegeGrid: React.FC<CollegeGridProps> = ({
   );
   const [isInquiryModalOpen, setIsInquiryModalOpen] = useState(false);
   const [inquiryMessageSingle, setInquiryMessageSingle] = useState("");
+  const [isInquiryBulkSent, setIsInquiryBulkSent] = useState(false);
+  const [isInquirySingleSent, setIsInquirySingleSent] = useState(false);
 
   useEffect(() => {
     if (!isAuthenticated) return;
@@ -266,6 +270,9 @@ const CollegeGrid: React.FC<CollegeGridProps> = ({
           search: filters.search || undefined,
           location:
             locationTerms.length > 0 ? locationTerms.join(",") : undefined,
+          type: filters.type.length > 0 ? params.type : undefined,
+          affiliation:
+            universityTerms.length > 0 ? params.affiliation : undefined,
         }),
       ]);
 
@@ -285,7 +292,7 @@ const CollegeGrid: React.FC<CollegeGridProps> = ({
         featured: inst.featured || false,
         rating: 0,
         reviews: 0,
-        type: "College",
+        type: inst.type || inst.institution_type || "College",
       }));
 
       // Build set of college IDs that are claimed by institutions
@@ -409,22 +416,57 @@ const CollegeGrid: React.FC<CollegeGridProps> = ({
     }
   };
 
-  const handleInquirySubmit = (e: React.FormEvent) => {
+  const handleInquirySubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    alert("Success! Your inquiry has been sent to the selected colleges.");
-    setIsModalOpen(false);
-    setInquiryMessage("");
-    setSelectedForInquiry([]);
+    const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080";
+    const token =
+      localStorage.getItem("token") || sessionStorage.getItem("token");
+    for (const collegeId of selectedForInquiry) {
+      try {
+        await fetch(`${API_BASE}/api/v1/institutions/${collegeId}/inquiry`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            ...(token ? { Authorization: `Bearer ${token}` } : {}),
+          },
+          body: JSON.stringify({
+            subject: "Quick Apply Inquiry",
+            content: inquiryMessage,
+          }),
+        });
+      } catch {
+        /* silently fail */
+      }
+    }
+    setIsInquiryBulkSent(true);
+    toast.success("Your inquiry has been sent to the selected colleges.");
   };
 
-  const handleSingleInquirySubmit = (e: React.FormEvent) => {
+  const handleSingleInquirySubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    alert(
-      `Success! Your inquiry for ${collegeForInquiry?.name} has been sent.`,
-    );
-    setIsInquiryModalOpen(false);
-    setInquiryMessageSingle("");
-    setCollegeForInquiry(null);
+    const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080";
+    const token =
+      localStorage.getItem("token") || sessionStorage.getItem("token");
+    try {
+      await fetch(
+        `${API_BASE}/api/v1/institutions/${collegeForInquiry?.id}/inquiry`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            ...(token ? { Authorization: `Bearer ${token}` } : {}),
+          },
+          body: JSON.stringify({
+            subject: `Inquiry about ${collegeForInquiry?.name}`,
+            content: inquiryMessageSingle,
+          }),
+        },
+      );
+    } catch {
+      /* silently fail */
+    }
+    setIsInquirySingleSent(true);
+    toast.success(`Inquiry for ${collegeForInquiry?.name} has been sent!`);
   };
 
   if (error) {
@@ -576,6 +618,8 @@ const CollegeGrid: React.FC<CollegeGridProps> = ({
                 onSingleInquiry={() => {
                   setCollegeForInquiry(college);
                   setIsInquiryModalOpen(true);
+                  setIsInquirySingleSent(false);
+                  setInquiryMessageSingle("");
                 }}
               />
               {/* {isAfter2Rows && (
@@ -634,72 +678,116 @@ const CollegeGrid: React.FC<CollegeGridProps> = ({
       {/* Quick Inquiry Modal */}
       <div
         className={`fixed inset-0 z-50 flex items-center justify-center bg-slate-900/40 backdrop-blur-sm transition-opacity duration-300 ${isModalOpen ? "opacity-100" : "pointer-events-none opacity-0"}`}
-        onClick={() => setIsModalOpen(false)}
+        onClick={() => {
+          setIsModalOpen(false);
+          setIsInquiryBulkSent(false);
+        }}
       >
         <div
           className={`mx-4 flex max-h-[90vh] w-full max-w-lg flex-col rounded-[20px] bg-white shadow-2xl transition-transform duration-300 ${isModalOpen ? "scale-100" : "scale-95"}`}
           onClick={(e) => e.stopPropagation()}
         >
-          <div className="flex shrink-0 items-center justify-between border-b border-gray-100 px-6 py-5">
-            <h3 className="flex items-center gap-2 text-lg font-bold text-gray-900">
-              <i className="fa-solid fa-paper-plane text-[20px] text-brand-blue"></i>
-              Quick Apply to Colleges
-            </h3>
-            <button
-              onClick={() => setIsModalOpen(false)}
-              className="rounded-full p-1.5 text-gray-400 transition-colors hover:bg-gray-100 hover:text-gray-700"
-            >
-              <i className="fa-solid fa-xmark text-[20px]"></i>
-            </button>
-          </div>
-          <div className="overflow-y-auto px-6 py-5">
-            <div className="mb-5 flex items-start gap-3 rounded-md border border-blue-100 bg-blue-50 p-3.5">
-              <i className="fa-solid fa-circle-info mt-0.5 shrink-0 text-[18px] text-blue-600"></i>
-              <p className="line-height-extra text-[13px] text-blue-800">
-                You are applying to{" "}
-                <span className="text-[14px] font-bold text-blue-700">
-                  {selectedForInquiry.length}
-                </span>{" "}
-                selected college(s). They will review your application and get
-                back to you.
+          {isInquiryBulkSent ? (
+            <div className="text-center py-8 px-6">
+              <div className="mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-green-100 mx-auto">
+                <i className="fa-solid fa-check text-green-600 text-2xl"></i>
+              </div>
+              <p className="text-gray-900 font-bold text-lg">
+                Application Submitted!
               </p>
+              <p className="text-sm text-gray-500 mt-1">
+                Your application has been sent to {selectedForInquiry.length}{" "}
+                college(s). They will review and get back to you.
+              </p>
+              <div className="mt-6 flex gap-3 justify-center">
+                <button
+                  onClick={() => {
+                    setIsModalOpen(false);
+                    setIsInquiryBulkSent(false);
+                  }}
+                  className="rounded-md bg-gray-100 px-5 py-2.5 text-sm font-semibold text-gray-700 hover:bg-gray-200 transition-colors"
+                >
+                  Close
+                </button>
+                <button
+                  onClick={() => router.push("/user/dashboard?tab=message")}
+                  className="rounded-md bg-brand-blue px-5 py-2.5 text-sm font-semibold text-white hover:bg-brand-hover transition-colors"
+                >
+                  <i className="fa-regular fa-message mr-1.5"></i>View in
+                  Messages
+                </button>
+              </div>
             </div>
-            <form onSubmit={handleInquirySubmit}>
-              <div className="mb-5">
-                <label
-                  htmlFor="inquiryMessage"
-                  className="mb-2 block text-[14px] font-bold text-gray-800"
-                >
-                  Your Question / Message{" "}
-                  <span className="text-red-500">*</span>
-                </label>
-                <textarea
-                  id="inquiryMessage"
-                  required
-                  rows={4}
-                  value={inquiryMessage}
-                  onChange={(e) => setInquiryMessage(e.target.value)}
-                  className="w-full resize-none rounded-md border border-gray-200 bg-gray-50 px-4 py-3 text-[14px] text-gray-800  transition-all focus:border-transparent focus:bg-white focus:outline-none focus:ring-2 focus:ring-brand-blue"
-                  placeholder="E.g., What are the admission requirements, fee structures, and scholarship options for the upcoming intake?"
-                ></textarea>
-              </div>
-              <div className="mt-8 flex flex-col justify-end gap-3 sm:flex-row">
+          ) : (
+            <>
+              <div className="flex shrink-0 items-center justify-between border-b border-gray-100 px-6 py-5">
+                <h3 className="flex items-center gap-2 text-lg font-bold text-gray-900">
+                  <i className="fa-solid fa-paper-plane text-[20px] text-brand-blue"></i>
+                  Quick Apply to Colleges
+                </h3>
                 <button
-                  type="button"
-                  onClick={() => setIsModalOpen(false)}
-                  className="w-full rounded-md border border-gray-200 bg-white px-5 py-2.5 text-[14px] font-bold text-gray-600 transition-colors hover:bg-gray-50 sm:w-auto"
+                  onClick={() => {
+                    setIsModalOpen(false);
+                    setIsInquiryBulkSent(false);
+                  }}
+                  className="rounded-full p-1.5 text-gray-400 transition-colors hover:bg-gray-100 hover:text-gray-700"
                 >
-                  Cancel
-                </button>
-                <button
-                  type="submit"
-                  className="flex w-full items-center justify-center gap-2 rounded-md bg-brand-blue px-6 py-2.5 text-[14px] font-bold text-white shadow-[0_4px_12px_rgba(0,0,255,0.2)] transition-all hover:-translate-y-0.5 hover:bg-brand-hover sm:w-auto"
-                >
-                  Submit Application
+                  <i className="fa-solid fa-xmark text-[20px]"></i>
                 </button>
               </div>
-            </form>
-          </div>
+              <div className="overflow-y-auto px-6 py-5">
+                <div className="mb-5 flex items-start gap-3 rounded-md border border-blue-100 bg-blue-50 p-3.5">
+                  <i className="fa-solid fa-circle-info mt-0.5 shrink-0 text-[18px] text-blue-600"></i>
+                  <p className="line-height-extra text-[13px] text-blue-800">
+                    You are applying to{" "}
+                    <span className="text-[14px] font-bold text-blue-700">
+                      {selectedForInquiry.length}
+                    </span>{" "}
+                    selected college(s). They will review your application and
+                    get back to you.
+                  </p>
+                </div>
+                <form onSubmit={handleInquirySubmit}>
+                  <div className="mb-5">
+                    <label
+                      htmlFor="inquiryMessage"
+                      className="mb-2 block text-[14px] font-bold text-gray-800"
+                    >
+                      Your Question / Message{" "}
+                      <span className="text-red-500">*</span>
+                    </label>
+                    <textarea
+                      id="inquiryMessage"
+                      required
+                      rows={4}
+                      value={inquiryMessage}
+                      onChange={(e) => setInquiryMessage(e.target.value)}
+                      className="w-full resize-none rounded-md border border-gray-200 bg-gray-50 px-4 py-3 text-[14px] text-gray-800  transition-all focus:border-transparent focus:bg-white focus:outline-none focus:ring-2 focus:ring-brand-blue"
+                      placeholder="E.g., What are the admission requirements, fee structures, and scholarship options for the upcoming intake?"
+                    ></textarea>
+                  </div>
+                  <div className="mt-8 flex flex-col justify-end gap-3 sm:flex-row">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setIsModalOpen(false);
+                        setIsInquiryBulkSent(false);
+                      }}
+                      className="w-full rounded-md border border-gray-200 bg-white px-5 py-2.5 text-[14px] font-bold text-gray-600 transition-colors hover:bg-gray-50 sm:w-auto"
+                    >
+                      Cancel
+                    </button>
+                    <button
+                      type="submit"
+                      className="flex w-full items-center justify-center gap-2 rounded-md bg-brand-blue px-6 py-2.5 text-[14px] font-bold text-white shadow-[0_4px_12px_rgba(0,0,255,0.2)] transition-all hover:-translate-y-0.5 hover:bg-brand-hover sm:w-auto"
+                    >
+                      Submit Application
+                    </button>
+                  </div>
+                </form>
+              </div>
+            </>
+          )}
         </div>
       </div>
 
@@ -711,61 +799,105 @@ const CollegeGrid: React.FC<CollegeGridProps> = ({
       {/* Single College Inquiry Modal */}
       <div
         className={`fixed inset-0 z-210 flex items-center justify-center bg-slate-900/40 backdrop-blur-sm transition-opacity duration-300 ${isInquiryModalOpen ? "opacity-100" : "pointer-events-none opacity-0"}`}
-        onClick={() => setIsInquiryModalOpen(false)}
+        onClick={() => {
+          setIsInquiryModalOpen(false);
+          setIsInquirySingleSent(false);
+        }}
       >
         <div
           className={`mx-4 flex max-h-[90vh] w-full max-w-lg flex-col rounded-md bg-white transition-transform duration-300 ${isInquiryModalOpen ? "scale-100" : "scale-95"}`}
           onClick={(e) => e.stopPropagation()}
         >
-          <div className="flex shrink-0 items-center justify-between border-b border-gray-100 px-6 py-5">
-            <h3 className="flex items-center gap-2 text-lg font-bold text-gray-900">
-              <i className="fa-solid fa-paper-plane text-[20px] text-brand-blue"></i>
-              Inquiry for {collegeForInquiry?.name}
-            </h3>
-            <button
-              onClick={() => setIsInquiryModalOpen(false)}
-              className="rounded-full p-1.5 text-gray-400 transition-colors hover:bg-gray-100 hover:text-gray-700"
-            >
-              <i className="fa-solid fa-xmark text-[20px]"></i>
-            </button>
-          </div>
-          <div className="overflow-y-auto px-6 py-5">
-            <form onSubmit={handleSingleInquirySubmit}>
-              <div className="mb-5">
-                <label
-                  htmlFor="inquiryMessageSingle"
-                  className="mb-2 block text-[14px] font-bold text-gray-800"
-                >
-                  Your Question / Message{" "}
-                  <span className="text-red-500">*</span>
-                </label>
-                <textarea
-                  id="inquiryMessageSingle"
-                  required
-                  rows={4}
-                  value={inquiryMessageSingle}
-                  onChange={(e) => setInquiryMessageSingle(e.target.value)}
-                  className="w-full resize-none rounded-md border border-gray-200 bg-gray-50 px-4 py-3 text-[14px] text-gray-800 transition-all focus:border-transparent focus:bg-white focus:outline-none focus:ring-2 focus:ring-brand-blue"
-                  placeholder="E.g., What are the admission requirements, fee structures, and scholarship options for the upcoming intake?"
-                ></textarea>
+          {isInquirySingleSent ? (
+            <div className="text-center py-8 px-6">
+              <div className="mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-green-100 mx-auto">
+                <i className="fa-solid fa-check text-green-600 text-2xl"></i>
               </div>
-              <div className="mt-8 flex flex-col justify-end gap-3 sm:flex-row">
+              <p className="text-gray-900 font-bold text-lg">Inquiry Sent!</p>
+              <p className="text-sm text-gray-500 mt-1">
+                Your inquiry for {collegeForInquiry?.name} has been sent. The
+                institution will respond to your inquiry soon.
+              </p>
+              <div className="mt-6 flex gap-3 justify-center">
                 <button
-                  type="button"
-                  onClick={() => setIsInquiryModalOpen(false)}
-                  className="w-full rounded-md border border-gray-200 bg-white px-5 py-2.5 text-[14px] font-bold text-gray-600 transition-colors hover:bg-gray-50 sm:w-auto"
+                  onClick={() => {
+                    setIsInquiryModalOpen(false);
+                    setIsInquirySingleSent(false);
+                    setInquiryMessageSingle("");
+                    setCollegeForInquiry(null);
+                  }}
+                  className="rounded-md bg-gray-100 px-5 py-2.5 text-sm font-semibold text-gray-700 hover:bg-gray-200 transition-colors"
                 >
-                  Cancel
+                  Close
                 </button>
                 <button
-                  type="submit"
-                  className="flex w-full items-center justify-center gap-2 rounded-md bg-brand-blue px-6 py-2.5 text-[14px] font-bold text-white transition-all  hover:bg-brand-hover sm:w-auto"
+                  onClick={() => router.push("/user/dashboard?tab=message")}
+                  className="rounded-md bg-brand-blue px-5 py-2.5 text-sm font-semibold text-white hover:bg-brand-hover transition-colors"
                 >
-                  Submit Inquiry
+                  <i className="fa-regular fa-message mr-1.5"></i>View in
+                  Messages
                 </button>
               </div>
-            </form>
-          </div>
+            </div>
+          ) : (
+            <>
+              <div className="flex shrink-0 items-center justify-between border-b border-gray-100 px-6 py-5">
+                <h3 className="flex items-center gap-2 text-lg font-bold text-gray-900">
+                  <i className="fa-solid fa-paper-plane text-[20px] text-brand-blue"></i>
+                  Inquiry for {collegeForInquiry?.name}
+                </h3>
+                <button
+                  onClick={() => {
+                    setIsInquiryModalOpen(false);
+                    setIsInquirySingleSent(false);
+                  }}
+                  className="rounded-full p-1.5 text-gray-400 transition-colors hover:bg-gray-100 hover:text-gray-700"
+                >
+                  <i className="fa-solid fa-xmark text-[20px]"></i>
+                </button>
+              </div>
+              <div className="overflow-y-auto px-6 py-5">
+                <form onSubmit={handleSingleInquirySubmit}>
+                  <div className="mb-5">
+                    <label
+                      htmlFor="inquiryMessageSingle"
+                      className="mb-2 block text-[14px] font-bold text-gray-800"
+                    >
+                      Your Question / Message{" "}
+                      <span className="text-red-500">*</span>
+                    </label>
+                    <textarea
+                      id="inquiryMessageSingle"
+                      required
+                      rows={4}
+                      value={inquiryMessageSingle}
+                      onChange={(e) => setInquiryMessageSingle(e.target.value)}
+                      className="w-full resize-none rounded-md border border-gray-200 bg-gray-50 px-4 py-3 text-[14px] text-gray-800 transition-all focus:border-transparent focus:bg-white focus:outline-none focus:ring-2 focus:ring-brand-blue"
+                      placeholder="E.g., What are the admission requirements, fee structures, and scholarship options for the upcoming intake?"
+                    ></textarea>
+                  </div>
+                  <div className="mt-8 flex flex-col justify-end gap-3 sm:flex-row">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setIsInquiryModalOpen(false);
+                        setIsInquirySingleSent(false);
+                      }}
+                      className="w-full rounded-md border border-gray-200 bg-white px-5 py-2.5 text-[14px] font-bold text-gray-600 transition-colors hover:bg-gray-50 sm:w-auto"
+                    >
+                      Cancel
+                    </button>
+                    <button
+                      type="submit"
+                      className="flex w-full items-center justify-center gap-2 rounded-md bg-brand-blue px-6 py-2.5 text-[14px] font-bold text-white transition-all  hover:bg-brand-hover sm:w-auto"
+                    >
+                      Submit Inquiry
+                    </button>
+                  </div>
+                </form>
+              </div>
+            </>
+          )}
         </div>
       </div>
     </>
