@@ -403,10 +403,12 @@ const AdmissionGrid: React.FC<AdmissionGridProps> = ({
                                 | "Seats Available"
                                 | "Closing Soon"
                                 | "Opening Soon"
+                                | "Ongoing"
                               > = {
                                 "seats-available": "Seats Available",
                                 "limited-seats": "Closing Soon",
                                 "opening-soon": "Opening Soon",
+                                ongoing: "Ongoing",
                               };
                               return {
                                 name,

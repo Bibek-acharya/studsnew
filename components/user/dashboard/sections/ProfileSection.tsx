@@ -57,6 +57,7 @@ export default function ProfileSection() {
   const [rawPreferences, setRawPreferences] = useState<Record<string, any>>({});
   const [onboardingCompleted, setOnboardingCompleted] = useState(false);
   const [profileAddress, setProfileAddress] = useState("");
+  const [completion, setCompletion] = useState(0);
 
   const [personalData, setPersonalData] = useState({
     firstName: "",
@@ -257,10 +258,15 @@ export default function ProfileSection() {
     const fetchProfileData = async () => {
       try {
         setLoading(true);
-        const [profileRes, educationRes] = await Promise.all([
+        const [profileRes, educationRes, statsRes] = await Promise.all([
           apiService.getProfile(),
           apiService.getEducationEntries(),
+          apiService.getDashboardStats().catch(() => null),
         ]);
+
+        if (statsRes?.data?.profile_completion !== undefined) {
+          setCompletion(statsRes.data.profile_completion);
+        }
 
         const profile = profileRes.data;
         let province = "",
@@ -353,31 +359,7 @@ export default function ProfileSection() {
     );
   }, [selectedDistrict]);
 
-  const calculateCompletion = () => {
-    let filled = 0;
-    const total = 10;
-
-    if (personalData.firstName) filled++;
-    if (personalData.lastName) filled++;
-    if (personalData.phone) filled++;
-    if (personalData.dateOfBirth) filled++;
-    if (personalData.gender) filled++;
-    if (personalData.nationality) filled++;
-    if (
-      personalData.province ||
-      personalData.district ||
-      personalData.localLevel ||
-      profileAddress
-    )
-      filled++;
-    if (personalData.bio) filled++;
-    if (onboardingCompleted) filled++;
-    if (user?.role) filled++;
-
-    return Math.round((filled / total) * 100);
-  };
-
-  const completion = calculateCompletion();
+  // completion is set from backend dashboard stats in fetchProfileData
 
   if (loading) {
     return (

@@ -4,7 +4,7 @@ import { useState, useRef, useEffect } from "react";
 
 interface Program {
   name: string;
-  status: "Closing Soon" | "Opening Soon" | "Seats Available";
+  status: "Ongoing" | "Closing Soon" | "Opening Soon" | "Seats Available";
 }
 
 interface CollegeCardProps {
@@ -64,10 +64,11 @@ export default function CollegeCard({
     return () => clearInterval(interval);
   }, [currentSlide]);
 
-  const displayUrl = website?.replace(/^https?:\/\//, "").replace(/\/+$/, "") || "";
+  const displayUrl =
+    website?.replace(/^https?:\/\//, "").replace(/\/+$/, "") || "";
 
   return (
-    <div 
+    <div
       onClick={onNavigate}
       className="bg-white rounded-md border border-gray-200 hover:border-blue-200 overflow-hidden w-full max-w-85 flex flex-col h-full transition-transform cursor-pointer"
     >
@@ -90,14 +91,22 @@ export default function CollegeCard({
               />
             ))}
           </div>
-            
+
           {/* Prev Button */}
           <button
             onClick={prevSlide}
             className="absolute left-1 top-1/2 -translate-y-1/2 w-6 h-6 bg-black/40 hover:bg-black/60 text-white rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity z-10 focus:outline-none backdrop-blur-sm"
           >
-            <svg className="w-2.5 h-2.5" fill="currentColor" viewBox="0 0 20 20">
-              <path fillRule="evenodd" d="M12.707 5.293a1 1 0 010 1.414L9.414 10l3.293 3.293a1 1 0 01-1.414 1.414l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 0z" clipRule="evenodd" />
+            <svg
+              className="w-2.5 h-2.5"
+              fill="currentColor"
+              viewBox="0 0 20 20"
+            >
+              <path
+                fillRule="evenodd"
+                d="M12.707 5.293a1 1 0 010 1.414L9.414 10l3.293 3.293a1 1 0 01-1.414 1.414l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 0z"
+                clipRule="evenodd"
+              />
             </svg>
           </button>
 
@@ -106,14 +115,24 @@ export default function CollegeCard({
             onClick={nextSlide}
             className="absolute right-1 top-1/2 -translate-y-1/2 w-6 h-6 bg-black/40 hover:bg-black/60 text-white rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity z-10 focus:outline-none backdrop-blur-sm"
           >
-            <svg className="w-2.5 h-2.5" fill="currentColor" viewBox="0 0 20 20">
-              <path fillRule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clipRule="evenodd" />
+            <svg
+              className="w-2.5 h-2.5"
+              fill="currentColor"
+              viewBox="0 0 20 20"
+            >
+              <path
+                fillRule="evenodd"
+                d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z"
+                clipRule="evenodd"
+              />
             </svg>
           </button>
 
           {/* Tiny Integrated Text Links */}
           <div className="absolute bottom-2 left-2 z-20 flex items-center gap-1 bg-black/30 backdrop-blur-sm px-1.5 py-0.5 rounded border border-white/10">
-            <span className="text-white text-[8px] font-medium tracking-tight opacity-90">Required Counselling?</span>
+            <span className="text-white text-[8px] font-medium tracking-tight opacity-90">
+              Required Counselling?
+            </span>
             <span className="w-px h-2 bg-white/20"></span>
             <span className="text-emerald-300 text-[8px] font-bold tracking-tight cursor-pointer hover:text-emerald-100 transition-colors">
               Reserve Seat
@@ -141,14 +160,23 @@ export default function CollegeCard({
       <div className="p-3 pb-3 flex flex-col grow">
         {/* College Name + Verified */}
         <div className="flex items-center gap-1.5 mb-1 group/name relative">
-          <h2 
+          <h2
             title={collegeName}
             className="text-[#0f172a] text-[18px] font-bold leading-tight truncate transition-colors group-hover/name:text-brand-blue"
           >
             {collegeName}
           </h2>
-          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="#0d6efd" className="w-5 h-5 shrink-0 mt-0.5">
-            <path fillRule="evenodd" d="M8.603 3.799A4.49 4.49 0 0112 2.25c1.357 0 2.573.6 3.397 1.549a4.49 4.49 0 013.498 1.307 4.491 4.491 0 011.307 3.497A4.49 4.49 0 0121.75 12a4.49 4.49 0 01-1.549 3.397 4.491 4.491 0 01-1.307 3.497 4.491 4.491 0 01-3.497 1.307A4.49 4.49 0 0112 21.75a4.49 4.49 0 01-3.397-1.549 4.49 4.49 0 01-3.498-1.306 4.491 4.491 0 01-1.307-3.498A4.49 4.49 0 012.25 12c0-1.357.6-2.573 1.549-3.397a4.49 4.49 0 011.307-3.497 4.49 4.49 0 013.497-1.307zm7.007 6.387a.75.75 0 10-1.22-.872l-3.236 4.53L9.53 12.22a.75.75 0 00-1.06 1.06l2.25 2.25a.75.75 0 001.14-.094l3.75-5.25z" clipRule="evenodd" />
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            viewBox="0 0 24 24"
+            fill="#0d6efd"
+            className="w-5 h-5 shrink-0 mt-0.5"
+          >
+            <path
+              fillRule="evenodd"
+              d="M8.603 3.799A4.49 4.49 0 0112 2.25c1.357 0 2.573.6 3.397 1.549a4.49 4.49 0 013.498 1.307 4.491 4.491 0 011.307 3.497A4.49 4.49 0 0121.75 12a4.49 4.49 0 01-1.549 3.397 4.491 4.491 0 01-1.307 3.497 4.491 4.491 0 01-3.497 1.307A4.49 4.49 0 0112 21.75a4.49 4.49 0 01-3.397-1.549 4.49 4.49 0 01-3.498-1.306 4.491 4.491 0 01-1.307-3.498A4.49 4.49 0 012.25 12c0-1.357.6-2.573 1.549-3.397a4.49 4.49 0 011.307-3.497 4.49 4.49 0 013.497-1.307zm7.007 6.387a.75.75 0 10-1.22-.872l-3.236 4.53L9.53 12.22a.75.75 0 00-1.06 1.06l2.25 2.25a.75.75 0 001.14-.094l3.75-5.25z"
+              clipRule="evenodd"
+            />
           </svg>
         </div>
 
@@ -162,25 +190,61 @@ export default function CollegeCard({
           </div>
           <span className="mx-2 text-gray-300">|</span>
           <div className="flex items-center gap-1.5">
-            <svg className="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2">
-              <path strokeLinecap="round" strokeLinejoin="round" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+            <svg
+              className="w-4 h-4 text-gray-400"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+              strokeWidth="2"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"
+              />
             </svg>
             <span>{type}</span>
           </div>
           <span className="mx-2 text-gray-300">|</span>
           <div className="flex items-center gap-1.5 truncate">
-            <svg className="w-4 h-4 text-gray-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2">
-              <path strokeLinecap="round" strokeLinejoin="round" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-              <path strokeLinecap="round" strokeLinejoin="round" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+            <svg
+              className="w-4 h-4 text-gray-400 shrink-0"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+              strokeWidth="2"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"
+              />
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"
+              />
             </svg>
-            <span className="truncate" title={location}>{location}</span>
+            <span className="truncate" title={location}>
+              {location}
+            </span>
           </div>
         </div>
 
         {/* Website */}
         <div className="flex items-center gap-1.5 text-[12.5px] text-[#64748b] mb-2 hover:text-[#0d6efd] transition-colors cursor-pointer w-fit">
-          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2">
-            <path strokeLinecap="round" strokeLinejoin="round" d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9" />
+          <svg
+            className="w-4 h-4"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+            strokeWidth="2"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9"
+            />
           </svg>
           <span>{displayUrl}</span>
         </div>
@@ -189,29 +253,65 @@ export default function CollegeCard({
 
         {/* Programs Offered Header */}
         <div className="flex justify-between items-center mb-1.5">
-          <span className="text-[12.5px] font-medium text-[#64748b]">Programs Offered</span>
-          <span className="text-[12.5px] font-semibold text-[#2563eb]">Admission Open</span>
+          <span className="text-[12.5px] font-medium text-[#64748b]">
+            Programs Offered
+          </span>
+          <span className="text-[12.5px] font-semibold text-[#2563eb]">
+            Admission Open
+          </span>
         </div>
 
         {/* Programs List */}
         <ul className="space-y-1 mb-2">
-          {programs.map((program, index) => (
-            <li key={index} className="text-[12.5px] font-semibold text-[#1e293b]">
-              {program.name}
-            </li>
-          ))}
+          {programs.map((program, index) => {
+            const statusColor =
+              program.status === "Closing Soon"
+                ? "text-red-600 bg-red-50"
+                : program.status === "Opening Soon"
+                  ? "text-amber-600 bg-amber-50"
+                  : program.status === "Ongoing"
+                    ? "text-green-600 bg-green-50"
+                    : "text-emerald-600 bg-emerald-50";
+            return (
+              <li
+                key={index}
+                className="flex items-center justify-between text-[12.5px] font-semibold text-[#1e293b]"
+              >
+                <span>{program.name}</span>
+                <span
+                  className={`text-[10px] font-bold px-1.5 py-0.5 rounded ${statusColor}`}
+                >
+                  {program.status}
+                </span>
+              </li>
+            );
+          })}
         </ul>
 
         {moreProgramsCount > 0 && (
-          <a href="#" className="inline-flex items-center gap-1 text-[#2563eb] text-[12.5px] font-semibold hover:underline mb-2">
+          <a
+            href="#"
+            className="inline-flex items-center gap-1 text-[#2563eb] text-[12.5px] font-semibold hover:underline mb-2"
+          >
             {moreProgramsCount}+ programs
-            <svg className="w-2.5 h-2.5 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
-              <path fillRule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clipRule="evenodd" />
+            <svg
+              className="w-2.5 h-2.5 mt-0.5"
+              fill="currentColor"
+              viewBox="0 0 20 20"
+            >
+              <path
+                fillRule="evenodd"
+                d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z"
+                clipRule="evenodd"
+              />
             </svg>
           </a>
         )}
 
-        <div className="border-b border-dotted border-gray-200 mt-auto mb-3 w-full pt-2" style={{ borderBottomWidth: "1.5px", borderBottomStyle: "dotted" }}></div>
+        <div
+          className="border-b border-dotted border-gray-200 mt-auto mb-3 w-full pt-2"
+          style={{ borderBottomWidth: "1.5px", borderBottomStyle: "dotted" }}
+        ></div>
 
         {/* Actions: Ask Question, Apply Now, Bookmark */}
         <div className="flex items-center gap-1.5">
@@ -222,8 +322,18 @@ export default function CollegeCard({
             }}
             className="flex-1 py-2 px-2 bg-blue-50 text-blue-700 hover:bg-blue-100 border border-blue-100 rounded-md text-[13px] font-semibold transition-colors flex justify-center items-center gap-1 whitespace-nowrap"
           >
-            <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2">
-              <path strokeLinecap="round" strokeLinejoin="round" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+            <svg
+              className="w-3.5 h-3.5"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+              strokeWidth="2"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"
+              />
             </svg>
             Ask Question
           </button>
@@ -251,12 +361,29 @@ export default function CollegeCard({
             }`}
           >
             {isBookmarkPending ? (
-              <svg className="w-4 h-4 animate-spin text-gray-400" fill="none" viewBox="0 0 24 24">
-                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+              <svg
+                className="w-4 h-4 animate-spin text-gray-400"
+                fill="none"
+                viewBox="0 0 24 24"
+              >
+                <circle
+                  className="opacity-25"
+                  cx="12"
+                  cy="12"
+                  r="10"
+                  stroke="currentColor"
+                  strokeWidth="4"
+                />
+                <path
+                  className="opacity-75"
+                  fill="currentColor"
+                  d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"
+                />
               </svg>
             ) : (
-              <i className={`fa-${isSaved ? "solid" : "regular"} fa-bookmark text-[16px]`}></i>
+              <i
+                className={`fa-${isSaved ? "solid" : "regular"} fa-bookmark text-[16px]`}
+              ></i>
             )}
           </button>
         </div>
