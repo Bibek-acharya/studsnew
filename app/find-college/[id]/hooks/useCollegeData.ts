@@ -131,7 +131,7 @@ export function useCollegeData(idStr: string) {
         .map((p: any) => ({
           name: p.title || p.name || "",
           level: p.subtitle || p.level || "",
-          affiliation: p.affiliation || "",
+          affiliation: p.affiliation || p.subtitle || "",
           status: p.admissionStatus || p.status || "",
         }));
     }
@@ -193,7 +193,7 @@ export function useCollegeData(idStr: string) {
       level: level || p.subtitle || "",
       status: p.admissionStatus || "Ongoing",
       title: p.title || "",
-      affiliation: p.affiliation || "",
+      affiliation: p.affiliation || p.subtitle || "",
       openDate: p.openDate || "",
       deadline: p.deadline || "",
       image: p.programIcon || "",

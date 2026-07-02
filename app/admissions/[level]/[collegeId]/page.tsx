@@ -203,7 +203,7 @@ export default function AdmissionDetailPage() {
     (p: any) => ({
       icon: FlaskConical,
       title: p.title || "",
-      affiliation: p.affiliation || p.subtitle || "",
+      affiliation: p.subtitle || "",
       badge:
         p.admissionStatus === "open"
           ? "Admissions Open"

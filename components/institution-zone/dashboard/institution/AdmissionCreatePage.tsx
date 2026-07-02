@@ -69,7 +69,6 @@ interface ProgramCard {
   id: number;
   title: string;
   subtitle: string;
-  affiliation: string;
   admissionStatus: string;
   programIcon: string;
   description: string;
@@ -316,7 +315,6 @@ const AdmissionCreatePage: React.FC = () => {
             id: i + 1,
             title: String(p.title ?? ""),
             subtitle: String(p.subtitle ?? ""),
-            affiliation: String(p.affiliation ?? ""),
             admissionStatus: String(p.admissionStatus ?? ""),
             programIcon: String(p.programIcon ?? ""),
             description: String(p.description ?? ""),
@@ -872,7 +870,6 @@ const AdmissionCreatePage: React.FC = () => {
                   id: nextId(prev),
                   title: "",
                   subtitle: "",
-                  affiliation: "",
                   admissionStatus: "",
                   programIcon: "",
                   description: "",

@@ -99,11 +99,16 @@ function CreateBlogForm() {
       setLoadingBlog(true);
       institutionBlogsApi
         .getById(blogId)
-        .then((blog) => {
+        .then((blog: any) => {
           setTitle(blog.title || "");
           setContent(blog.content || "");
           setFeaturedImageUrl(blog.image || "");
           setFeaturedImagePreview(blog.image || "");
+          setShortDesc(blog.excerpt || "");
+          setBlogType(blog.category || "");
+          setReadingTime(blog.read_time || "");
+          setTags(blog.tags || "");
+          setStatus(blog.published ? "published" : "draft");
         })
         .catch(() => setError("Failed to load blog"))
         .finally(() => setLoadingBlog(false));
@@ -154,6 +159,8 @@ function CreateBlogForm() {
           excerpt: shortDesc.replace(/<[^>]*>/g, "").trim(),
           image: featuredImageUrl,
           category: blogType,
+          read_time: readingTime,
+          tags,
         };
 
         if (isEditing && blogId) {
