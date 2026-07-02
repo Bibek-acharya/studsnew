@@ -18,10 +18,26 @@ const initialFormData = {
 };
 
 const socialLinks = [
-  { icon: "fa-facebook-f", label: "Facebook", url: "https://www.facebook.com/share/1CEcyRH9ZZ/" },
-  { icon: "fa-instagram", label: "Instagram", url:"https://www.instagram.com/stud.sphere?igsh=NDM5Z29nc2ZqMmc=" },
-  { icon: "fa-tiktok", label: "TikTok", url: "https://www.tiktok.com/@stud.sphere?_r=1&_t=ZS-95OYyC0vodM" },
-  { icon: "fa-whatsapp", label: "WhatsApp", url: "https://wa.me/9779800000000" },
+  {
+    icon: "fa-facebook-f",
+    label: "Facebook",
+    url: "https://www.facebook.com/share/1CEcyRH9ZZ/",
+  },
+  {
+    icon: "fa-instagram",
+    label: "Instagram",
+    url: "https://www.instagram.com/stud.sphere?igsh=NDM5Z29nc2ZqMmc=",
+  },
+  {
+    icon: "fa-tiktok",
+    label: "TikTok",
+    url: "https://www.tiktok.com/@stud.sphere?_r=1&_t=ZS-95OYyC0vodM",
+  },
+  {
+    icon: "fa-whatsapp",
+    label: "WhatsApp",
+    url: "https://wa.me/9779800000000",
+  },
 ];
 
 const ContactPage: React.FC = () => {
@@ -59,20 +75,22 @@ const ContactPage: React.FC = () => {
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+    setIsSubmitting(true);
     try {
-      const res = await fetch("/api/v1/contact", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(formData),
+      await apiService.submitContactInquiry({
+        ...formData,
+        type: "contact",
+        subject: "Contact Form Inquiry",
       });
-      if (res.ok) {
-        showToast("Success!", "Your message has been sent successfully. We'll get back to you soon!");
-        setFormData(initialFormData);
-      } else {
-        showToast("Error", "Failed to send message. Please try again.");
-      }
-    } catch (error) {
+      showToast(
+        "Success!",
+        "Your message has been sent successfully. We'll get back to you soon!",
+      );
+      setFormData(initialFormData);
+    } catch {
       showToast("Error", "Failed to send message. Please try again.");
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -105,7 +123,6 @@ const ContactPage: React.FC = () => {
           <h1 className="mb-3 text-3xl font-bold text-black md:text-4xl">
             Contact Us
           </h1>
-         
         </header>
 
         <main className="mx-auto max-w-7xl px-4 pb-16 sm:px-6 lg:px-8">
@@ -185,8 +202,8 @@ const ContactPage: React.FC = () => {
               <div className="flex h-full flex-col space-y-8 rounded-md bg-[#1c64f2] p-8 text-white shadow-lg lg:p-10">
                 <InfoBlock title="Address">
                   <p className="text-sm leading-relaxed text-white/90">
-                   Sallyan House, Baghbajar <br/> 
-                   Kathmandu, Nepal
+                    Sallyan House, Baghbajar <br />
+                    Kathmandu, Nepal
                   </p>
                 </InfoBlock>
 
@@ -203,7 +220,6 @@ const ContactPage: React.FC = () => {
                   <p className="mb-1 text-sm leading-relaxed text-white/90">
                     9:00 AM - 6:00 PM
                   </p>
-                  
                 </InfoBlock>
 
                 <div className="mt-auto pt-4">
@@ -250,7 +266,9 @@ const ContactPage: React.FC = () => {
                 <i className="fa-solid fa-circle-check text-lg"></i>
               </div>
               <div>
-                <h4 className="text-sm font-bold text-gray-900">{toast.title}</h4>
+                <h4 className="text-sm font-bold text-gray-900">
+                  {toast.title}
+                </h4>
                 <p className="mt-1 text-sm text-gray-600">{toast.message}</p>
               </div>
               <button

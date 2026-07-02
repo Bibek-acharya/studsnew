@@ -51,7 +51,6 @@ const EducationNavbar: React.FC<EducationNavbarProps> = ({
   const [isMobileOpen, setIsMobileOpen] = useState(false);
   const [activeMenu, setActiveMenu] = useState<string | null>(null);
   const [isVisible, setIsVisible] = useState(true);
-  const [showMobileSearch, setShowMobileSearch] = useState(false);
   const lastScrollY = useRef(0);
   const hoverTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const router = useRouter();
@@ -60,19 +59,24 @@ const EducationNavbar: React.FC<EducationNavbarProps> = ({
   const [mobileMenus, setMobileMenus] = useState<Record<string, boolean>>({});
   const drawerDirection = user ? "right" : "left";
   const mobileSearchSuggestions = trendingSearches.slice(0, 4);
-  const [mobileLiveSuggestions, setMobileLiveSuggestions] = useState<{ title: string; type: string }[]>(
-    mobileSearchSuggestions,
-  );
+  const [mobileLiveSuggestions, setMobileLiveSuggestions] = useState<
+    { title: string; type: string }[]
+  >(mobileSearchSuggestions);
 
-  const [dashboardStats, setDashboardStats] = useState<DashboardStats | null>(null);
+  const [dashboardStats, setDashboardStats] = useState<DashboardStats | null>(
+    null,
+  );
 
   useEffect(() => {
     if (user) {
-      apiService.getDashboardStats().then((res) => {
-        if (res?.data) {
-          setDashboardStats(res.data);
-        }
-      }).catch(() => {});
+      apiService
+        .getDashboardStats()
+        .then((res) => {
+          if (res?.data) {
+            setDashboardStats(res.data);
+          }
+        })
+        .catch(() => {});
     }
   }, [user]);
 
@@ -103,16 +107,8 @@ const EducationNavbar: React.FC<EducationNavbarProps> = ({
   };
 
   const toggleMobileDrawer = () => {
-    setShowMobileSearch(false);
     setActiveMenu(null);
     setIsMobileOpen((prev) => !prev);
-  };
-
-  const toggleMobileSearch = () => {
-    setIsMobileOpen(false);
-    setActiveMenu(null);
-    setMobileLiveSuggestions(mobileSearchSuggestions);
-    setShowMobileSearch((prev) => !prev);
   };
 
   const handleMobileSearchStateChange = (
@@ -131,29 +127,32 @@ const EducationNavbar: React.FC<EducationNavbarProps> = ({
 
   useEffect(() => {
     if (!user) return;
-    apiService.getStudentNotifications(1, 50).then((res) => {
-      const list = res?.data?.notifications;
-      if (Array.isArray(list) && list.length > 0) {
-        setNotifications(
-          list.map((n: any) => ({
-            id: String(n.id),
-            type: n.type || "system",
-            title: n.title,
-            message: n.message,
-            time: n.created_at
-              ? new Date(n.created_at).toLocaleDateString()
-              : "",
-            isRead: n.read,
-            isArchived: false,
-            isFollowing: false,
-            icon: "fa-bell",
-            color: "text-gray-500",
-            bgColor: "bg-gray-100",
-          })),
-        );
-      }
-      setStudentNotifLoaded(true);
-    }).catch(() => setStudentNotifLoaded(true));
+    apiService
+      .getStudentNotifications(1, 50)
+      .then((res) => {
+        const list = res?.data?.notifications;
+        if (Array.isArray(list) && list.length > 0) {
+          setNotifications(
+            list.map((n: any) => ({
+              id: String(n.id),
+              type: n.type || "system",
+              title: n.title,
+              message: n.message,
+              time: n.created_at
+                ? new Date(n.created_at).toLocaleDateString()
+                : "",
+              isRead: n.read,
+              isArchived: false,
+              isFollowing: false,
+              icon: "fa-bell",
+              color: "text-gray-500",
+              bgColor: "bg-gray-100",
+            })),
+          );
+        }
+        setStudentNotifLoaded(true);
+      })
+      .catch(() => setStudentNotifLoaded(true));
   }, [user]);
 
   const visibleNotifications = useMemo(() => {
@@ -174,28 +173,39 @@ const EducationNavbar: React.FC<EducationNavbarProps> = ({
   );
 
   const [publicNotifList, setPublicNotifList] = useState<
-    { id: number; title: string; message: string; type: string; icon: string; color: string; bgColor: string }[]
+    {
+      id: number;
+      title: string;
+      message: string;
+      type: string;
+      icon: string;
+      color: string;
+      bgColor: string;
+    }[]
   >([]);
 
   const unreadPublicCount = publicNotifList.length;
 
   useEffect(() => {
-    apiService.getPublicNotifications().then((res) => {
-      const data = res?.data;
-      if (Array.isArray(data)) {
-        setPublicNotifList(
-          data.map((n: any) => ({
-            id: n.id,
-            title: n.title,
-            message: n.message,
-            type: n.type,
-            icon: n.icon || "fa-bell",
-            color: n.color || "text-gray-500",
-            bgColor: n.bgColor || "bg-gray-100",
-          })),
-        );
-      }
-    }).catch(() => {});
+    apiService
+      .getPublicNotifications()
+      .then((res) => {
+        const data = res?.data;
+        if (Array.isArray(data)) {
+          setPublicNotifList(
+            data.map((n: any) => ({
+              id: n.id,
+              title: n.title,
+              message: n.message,
+              type: n.type,
+              icon: n.icon || "fa-bell",
+              color: n.color || "text-gray-500",
+              bgColor: n.bgColor || "bg-gray-100",
+            })),
+          );
+        }
+      })
+      .catch(() => {});
   }, []);
 
   const markAsRead = (id: string) => {
@@ -272,7 +282,7 @@ const EducationNavbar: React.FC<EducationNavbarProps> = ({
   }, []);
 
   useEffect(() => {
-    if (isMobileOpen || showMobileSearch) {
+    if (isMobileOpen) {
       document.body.style.overflow = "hidden";
     } else {
       document.body.style.overflow = "";
@@ -280,7 +290,7 @@ const EducationNavbar: React.FC<EducationNavbarProps> = ({
     return () => {
       document.body.style.overflow = "";
     };
-  }, [isMobileOpen, showMobileSearch]);
+  }, [isMobileOpen]);
 
   useEffect(() => {
     const handleOpenAuthModal = () => {
@@ -289,7 +299,10 @@ const EducationNavbar: React.FC<EducationNavbarProps> = ({
 
     window.addEventListener("studsphere:open-auth-modal", handleOpenAuthModal);
     return () =>
-      window.removeEventListener("studsphere:open-auth-modal", handleOpenAuthModal);
+      window.removeEventListener(
+        "studsphere:open-auth-modal",
+        handleOpenAuthModal,
+      );
   }, [router]);
 
   const initials = useMemo(() => {
@@ -320,7 +333,6 @@ const EducationNavbar: React.FC<EducationNavbarProps> = ({
       setIsMobileOpen(false);
       setActiveMenu(null);
       setMobileLiveSuggestions(mobileSearchSuggestions);
-      setShowMobileSearch(false);
       return;
     }
     if (viewKey === "signup") {
@@ -328,7 +340,6 @@ const EducationNavbar: React.FC<EducationNavbarProps> = ({
       setIsMobileOpen(false);
       setActiveMenu(null);
       setMobileLiveSuggestions(mobileSearchSuggestions);
-      setShowMobileSearch(false);
       return;
     }
 
@@ -341,7 +352,6 @@ const EducationNavbar: React.FC<EducationNavbarProps> = ({
     setIsMobileOpen(false);
     setActiveMenu(null);
     setMobileLiveSuggestions(mobileSearchSuggestions);
-    setShowMobileSearch(false);
   };
 
   const renderMobileAction = (item: MobileMenuItem) => {
@@ -490,6 +500,16 @@ const EducationNavbar: React.FC<EducationNavbarProps> = ({
                 </div>
 
                 <div className="flex items-center gap-1.5 xs:gap-2 sm:gap-3 shrink-0 z-10">
+                  {/* Mobile Search Trigger */}
+                  <button
+                    type="button"
+                    onClick={toggleMobileDrawer}
+                    className="md:hidden flex h-10 w-10 items-center justify-center rounded-md text-gray-600 transition-colors hover:bg-gray-100 shrink-0"
+                    aria-label="Open search"
+                  >
+                    <Search size={20} />
+                  </button>
+
                   <button
                     onClick={() => go("login")}
                     className="hidden md:flex items-center gap-2 bg-brand-blue hover:bg-brand-hover text-white px-4 py-2.5 rounded-md text-[14px] font-semibold transition-colors shrink-0"
@@ -505,7 +525,7 @@ const EducationNavbar: React.FC<EducationNavbarProps> = ({
                         setActiveMenu((prev) =>
                           prev === "public-notifications"
                             ? null
-                            : "public-notifications"
+                            : "public-notifications",
                         )
                       }
                       className="relative flex items-center justify-center w-9.5 h-9.5 rounded-full border border-gray-200 hover:bg-gray-50 transition-colors text-[#475569] shrink-0"
@@ -542,7 +562,9 @@ const EducationNavbar: React.FC<EducationNavbarProps> = ({
                                   <div
                                     className={`mt-1 flex h-10 w-10 shrink-0 items-center justify-center rounded-full ${notif.bgColor} ${notif.color}`}
                                   >
-                                    <i className={`fa-solid ${notif.icon || "fa-bell"} text-sm`}></i>
+                                    <i
+                                      className={`fa-solid ${notif.icon || "fa-bell"} text-sm`}
+                                    ></i>
                                   </div>
                                   <div className="flex-1 min-w-0">
                                     <p className="mb-0.5 text-sm font-semibold text-black">
@@ -602,11 +624,21 @@ const EducationNavbar: React.FC<EducationNavbarProps> = ({
                   />
                 </Link>
 
-                <div className="block flex-1 max-w-3xl mx-4">
+                <div className="hidden md:block flex-1 max-w-3xl mx-4">
                   <SearchBar />
                 </div>
 
                 <div className="flex items-center gap-1.5 xs:gap-2 sm:gap-3 shrink-0">
+                  {/* Mobile Search Trigger */}
+                  <button
+                    type="button"
+                    onClick={toggleMobileDrawer}
+                    className="md:hidden flex h-10 w-10 items-center justify-center rounded-md text-gray-600 transition-colors hover:bg-gray-100 shrink-0"
+                    aria-label="Open search"
+                  >
+                    <Search size={20} />
+                  </button>
+
                   {/* Hamburger Menu - Mobile (Logged In) */}
                   <button
                     type="button"
@@ -769,7 +801,9 @@ const EducationNavbar: React.FC<EducationNavbarProps> = ({
                       <div className="flex w-[280px] flex-col overflow-hidden rounded-md border border-gray-200 bg-white text-left shadow-[0_8px_30px_rgb(0,0,0,0.12)]">
                         <div className="z-10 flex items-center justify-between border-b border-gray-100 bg-white px-3 py-2.5">
                           <div className="flex items-center gap-2">
-                            <h3 className="text-[15px] font-semibold text-gray-900">Notifications</h3>
+                            <h3 className="text-[15px] font-semibold text-gray-900">
+                              Notifications
+                            </h3>
                             {unreadNotificationCount > 0 && (
                               <span className="rounded-full bg-blue-600 px-2 py-0.5 text-xs font-bold text-white">
                                 {unreadNotificationCount}
@@ -844,14 +878,20 @@ const EducationNavbar: React.FC<EducationNavbarProps> = ({
                       type="button"
                       onClick={() =>
                         setActiveMenu((prev) =>
-                          prev === "mobile-profile-menu" ? null : "mobile-profile-menu",
+                          prev === "mobile-profile-menu"
+                            ? null
+                            : "mobile-profile-menu",
                         )
                       }
                       className={`relative flex h-9 w-9 items-center justify-center rounded-full text-sm font-bold text-white ring-2 ring-white ${user?.image_url ? "p-0" : "bg-brand-blue"}`}
                       aria-label="Open profile menu"
                     >
                       {user?.image_url ? (
-                        <img src={getImageUrl(user.image_url)} alt="" className="h-full w-full rounded-full object-cover" />
+                        <img
+                          src={getImageUrl(user.image_url)}
+                          alt=""
+                          className="h-full w-full rounded-full object-cover"
+                        />
                       ) : (
                         <span>{initials}</span>
                       )}
@@ -874,10 +914,17 @@ const EducationNavbar: React.FC<EducationNavbarProps> = ({
                               <div className="mt-2.5 pl-7.5">
                                 <div className="mb-1.5 flex items-center justify-between text-[11px] font-semibold text-gray-500">
                                   <span>Profile Completion</span>
-                                  <span className="text-[#5468FF]">{dashboardStats?.profile_completion ?? 0}%</span>
+                                  <span className="text-[#5468FF]">
+                                    {dashboardStats?.profile_completion ?? 0}%
+                                  </span>
                                 </div>
                                 <div className="h-1.5 w-full rounded-full bg-gray-200/80">
-                                  <div className="h-1.5 rounded-full bg-brand-blue" style={{ width: `${dashboardStats?.profile_completion ?? 0}%` }}></div>
+                                  <div
+                                    className="h-1.5 rounded-full bg-brand-blue"
+                                    style={{
+                                      width: `${dashboardStats?.profile_completion ?? 0}%`,
+                                    }}
+                                  ></div>
                                 </div>
                               </div>
                             </div>
@@ -889,7 +936,9 @@ const EducationNavbar: React.FC<EducationNavbarProps> = ({
                               <FileText size={18} />
                               <span>My Application</span>
                               {dashboardStats?.applications_submitted ? (
-                                <span className="ml-auto rounded-full bg-red-500 px-1.5 py-[1.5px] text-[10px] font-bold leading-none text-white">{dashboardStats.applications_submitted}</span>
+                                <span className="ml-auto rounded-full bg-red-500 px-1.5 py-[1.5px] text-[10px] font-bold leading-none text-white">
+                                  {dashboardStats.applications_submitted}
+                                </span>
                               ) : null}
                             </button>
                             <button
@@ -900,7 +949,9 @@ const EducationNavbar: React.FC<EducationNavbarProps> = ({
                               <Bookmark size={18} />
                               <span>Saved College</span>
                               {dashboardStats?.saved_colleges ? (
-                                <span className="ml-auto text-xs font-bold text-gray-400">{dashboardStats.saved_colleges}</span>
+                                <span className="ml-auto text-xs font-bold text-gray-400">
+                                  {dashboardStats.saved_colleges}
+                                </span>
                               ) : null}
                             </button>
                             <button
@@ -911,7 +962,9 @@ const EducationNavbar: React.FC<EducationNavbarProps> = ({
                               <Bell size={18} />
                               <span>Notifications</span>
                               {unreadNotificationCount > 0 && (
-                                <span className="ml-auto rounded-full bg-red-500 px-1.5 py-[1.5px] text-[10px] font-bold leading-none text-white">{unreadNotificationCount}</span>
+                                <span className="ml-auto rounded-full bg-red-500 px-1.5 py-[1.5px] text-[10px] font-bold leading-none text-white">
+                                  {unreadNotificationCount}
+                                </span>
                               )}
                             </button>
                             <button
@@ -971,7 +1024,11 @@ const EducationNavbar: React.FC<EducationNavbarProps> = ({
                     >
                       <div className="relative">
                         {user.image_url ? (
-                          <img src={getImageUrl(user.image_url)} alt="" className="h-9 w-9 rounded-full object-cover ring-2 ring-white" />
+                          <img
+                            src={getImageUrl(user.image_url)}
+                            alt=""
+                            className="h-9 w-9 rounded-full object-cover ring-2 ring-white"
+                          />
                         ) : (
                           <div className="flex h-9 w-9 items-center justify-center rounded-full bg-brand-blue text-white font-bold text-sm ring-2 ring-white">
                             <span>{initials}</span>
@@ -992,7 +1049,11 @@ const EducationNavbar: React.FC<EducationNavbarProps> = ({
                               viewBox="0 0 24 24"
                               fill="#0000FF"
                             >
-                              <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+                              <path
+                                stroke="none"
+                                d="M0 0h24v24H0z"
+                                fill="none"
+                              />
                               <path d="M12.01 2.011a3.2 3.2 0 0 1 2.113 .797l.154 .145l.698 .698a1.2 1.2 0 0 0 .71 .341l.135 .008h1a3.2 3.2 0 0 1 3.195 3.018l.005 .182v1c0 .27 .092 .533 .258 .743l.09 .1l.697 .698a3.2 3.2 0 0 1 .147 4.382l-.145 .154l-.698 .698a1.2 1.2 0 0 0 -.341 .71l-.008 .135v1a3.2 3.2 0 0 1 -3.018 3.195l-.182 .005h-1a1.2 1.2 0 0 0 -.743 .258l-.1 .09l-.698 .697a3.2 3.2 0 0 1 -4.382 .147l-.154 -.145l-.698 -.698a1.2 1.2 0 0 0 -.71 -.341l-.135 -.008h-1a3.2 3.2 0 0 1 -3.195 -3.018l-.005 -.182v-1a1.2 1.2 0 0 0 -.258 -.743l-.09 -.1l-.697 -.698a3.2 3.2 0 0 1 -.147 -4.382l.145 -.154l.698 -.698a1.2 1.2 0 0 0 .341 -.71l.008 -.135v-1l.005 -.182a3.2 3.2 0 0 1 3.013 -3.013l.182 -.005h1a1.2 1.2 0 0 0 .743 -.258l.1 -.09l.698 -.697a3.2 3.2 0 0 1 2.269 -.944zm3.697 7.282a1 1 0 0 0 -1.414 0l-3.293 3.292l-1.293 -1.292l-.094 -.083a1 1 0 0 0 -1.32 1.497l2 2l.094 .083a1 1 0 0 0 1.32 -.083l4 -4l.083 -.094a1 1 0 0 0 -.083 -1.32z" />
                             </svg>
                           )}
@@ -1023,10 +1084,17 @@ const EducationNavbar: React.FC<EducationNavbarProps> = ({
                               <div className="mt-2.5 pl-7.5">
                                 <div className="flex justify-between items-center text-[11px] font-semibold text-gray-500 mb-1.5">
                                   <span>Profile Completion</span>
-                                  <span className="text-[#5468FF]">{dashboardStats?.profile_completion ?? 0}%</span>
+                                  <span className="text-[#5468FF]">
+                                    {dashboardStats?.profile_completion ?? 0}%
+                                  </span>
                                 </div>
                                 <div className="w-full bg-gray-200/80 rounded-full h-1.5">
-                                  <div className="bg-brand-blue h-1.5 rounded-full" style={{ width: `${dashboardStats?.profile_completion ?? 0}%` }}></div>
+                                  <div
+                                    className="bg-brand-blue h-1.5 rounded-full"
+                                    style={{
+                                      width: `${dashboardStats?.profile_completion ?? 0}%`,
+                                    }}
+                                  ></div>
                                 </div>
                               </div>
                             </div>
@@ -1037,7 +1105,9 @@ const EducationNavbar: React.FC<EducationNavbarProps> = ({
                               <FileText size={18} />
                               <span>My Application</span>
                               {dashboardStats?.applications_submitted ? (
-                                <span className="ml-auto bg-red-500 text-white text-[10px] font-bold px-1.5 py-[1.5px] rounded-full leading-none">{dashboardStats.applications_submitted}</span>
+                                <span className="ml-auto bg-red-500 text-white text-[10px] font-bold px-1.5 py-[1.5px] rounded-full leading-none">
+                                  {dashboardStats.applications_submitted}
+                                </span>
                               ) : null}
                             </button>
                             <button
@@ -1047,7 +1117,9 @@ const EducationNavbar: React.FC<EducationNavbarProps> = ({
                               <Bookmark size={18} />
                               <span>Saved College</span>
                               {dashboardStats?.saved_colleges ? (
-                                <span className="ml-auto text-gray-400 text-xs font-bold">{dashboardStats.saved_colleges}</span>
+                                <span className="ml-auto text-gray-400 text-xs font-bold">
+                                  {dashboardStats.saved_colleges}
+                                </span>
                               ) : null}
                             </button>
                             <button
@@ -1057,7 +1129,9 @@ const EducationNavbar: React.FC<EducationNavbarProps> = ({
                               <Bell size={18} />
                               <span>Notifications</span>
                               {unreadNotificationCount > 0 && (
-                                <span className="ml-auto bg-red-500 text-white text-[10px] font-bold px-1.5 py-[1.5px] rounded-full leading-none">{unreadNotificationCount}</span>
+                                <span className="ml-auto bg-red-500 text-white text-[10px] font-bold px-1.5 py-[1.5px] rounded-full leading-none">
+                                  {unreadNotificationCount}
+                                </span>
                               )}
                             </button>
                             <button
@@ -1107,7 +1181,6 @@ const EducationNavbar: React.FC<EducationNavbarProps> = ({
               >
                 Find College
               </NavItem>
-              
 
               {toolsSection && (
                 <DesktopDropdown
@@ -1121,7 +1194,9 @@ const EducationNavbar: React.FC<EducationNavbarProps> = ({
                       prev === toolsSection.key ? null : toolsSection.key,
                     )
                   }
-                  onMouseEnter={() => handleDropdownMouseEnter(toolsSection.key)}
+                  onMouseEnter={() =>
+                    handleDropdownMouseEnter(toolsSection.key)
+                  }
                   onMouseLeave={handleDropdownMouseLeave}
                 >
                   {toolsSection.items.map((item) => (
@@ -1151,7 +1226,9 @@ const EducationNavbar: React.FC<EducationNavbarProps> = ({
                         : scholarshipsSection.key,
                     )
                   }
-                  onMouseEnter={() => handleDropdownMouseEnter(scholarshipsSection.key)}
+                  onMouseEnter={() =>
+                    handleDropdownMouseEnter(scholarshipsSection.key)
+                  }
                   onMouseLeave={handleDropdownMouseLeave}
                 >
                   {scholarshipsSection.items.map((item) => (
@@ -1163,9 +1240,9 @@ const EducationNavbar: React.FC<EducationNavbarProps> = ({
                       desc={item.desc}
                       onClick={getDropdownClick(item)}
                       iconElement={
-                        item.lucideIcon === "FileSpreadsheet"
-                          ? <FileSpreadsheet className="text-base sm:text-lg" />
-                          : undefined
+                        item.lucideIcon === "FileSpreadsheet" ? (
+                          <FileSpreadsheet className="text-base sm:text-lg" />
+                        ) : undefined
                       }
                     />
                   ))}
@@ -1193,7 +1270,9 @@ const EducationNavbar: React.FC<EducationNavbarProps> = ({
                         : admissionSection.key,
                     )
                   }
-                  onMouseEnter={() => handleDropdownMouseEnter(admissionSection.key)}
+                  onMouseEnter={() =>
+                    handleDropdownMouseEnter(admissionSection.key)
+                  }
                   onMouseLeave={handleDropdownMouseLeave}
                 >
                   {admissionSection.items.map((item) => (
@@ -1223,7 +1302,9 @@ const EducationNavbar: React.FC<EducationNavbarProps> = ({
                         : universitiesSection.key,
                     )
                   }
-                  onMouseEnter={() => handleDropdownMouseEnter(universitiesSection.key)}
+                  onMouseEnter={() =>
+                    handleDropdownMouseEnter(universitiesSection.key)
+                  }
                   onMouseLeave={handleDropdownMouseLeave}
                 >
                   {universitiesSection.items.map((item) => (
@@ -1300,13 +1381,14 @@ const EducationNavbar: React.FC<EducationNavbarProps> = ({
             )}
           </div>
         </div>
-
       </header>
 
       {/* Mobile Drawer Overlay */}
       <div
         className={`fixed inset-0 z-[140] md:hidden transition-opacity duration-300 ${
-          isMobileOpen ? "pointer-events-auto opacity-100" : "pointer-events-none opacity-0"
+          isMobileOpen
+            ? "pointer-events-auto opacity-100"
+            : "pointer-events-none opacity-0"
         }`}
         aria-hidden={!isMobileOpen}
       >
@@ -1346,7 +1428,11 @@ const EducationNavbar: React.FC<EducationNavbarProps> = ({
                   <div className="flex items-center gap-3">
                     <div className="relative">
                       {user.image_url ? (
-                        <img src={getImageUrl(user.image_url)} alt="" className="h-10 w-10 rounded-full object-cover" />
+                        <img
+                          src={getImageUrl(user.image_url)}
+                          alt=""
+                          className="h-10 w-10 rounded-full object-cover"
+                        />
                       ) : (
                         <div className="flex h-10 w-10 items-center justify-center rounded-full bg-brand-blue text-sm font-bold text-white">
                           <span>{initials}</span>
@@ -1365,6 +1451,27 @@ const EducationNavbar: React.FC<EducationNavbarProps> = ({
                   </div>
                 </div>
               )}
+
+              {/* Mobile Search + Sphere AI */}
+              <div className="mb-3 flex flex-col gap-2">
+                <SearchBar
+                  isMobile
+                  defaultSearchOpen={false}
+                  showSuggestionDropdown={false}
+                  onQueryStateChange={handleMobileSearchStateChange}
+                />
+                <button
+                  type="button"
+                  onClick={() => {
+                    setIsMobileOpen(false);
+                    router.push("/sphere-ai");
+                  }}
+                  className="flex items-center gap-2 rounded-md border border-gray-200 bg-gray-50 px-3 py-2 text-sm font-medium text-gray-700 transition-colors hover:bg-blue-50 hover:text-blue-600"
+                >
+                  <Search size={15} className="text-gray-500" />
+                  <span>Sphere AI</span>
+                </button>
+              </div>
 
               <div className="flex flex-col gap-1 text-[15px] font-semibold text-gray-700">
                 <button
@@ -1401,7 +1508,9 @@ const EducationNavbar: React.FC<EducationNavbarProps> = ({
                     <button
                       type="button"
                       className={`flex w-full items-center justify-between rounded-md p-2 text-left transition-colors hover:bg-gray-50 hover:text-blue-600 ${mobileMenus[mobileScholarshipsSection.key] ? "text-blue-600" : ""}`}
-                      onClick={() => toggleMobileMenu(mobileScholarshipsSection.key)}
+                      onClick={() =>
+                        toggleMobileMenu(mobileScholarshipsSection.key)
+                      }
                     >
                       <span>{mobileScholarshipsSection.label}</span>
                       <ChevronDown
@@ -1433,7 +1542,9 @@ const EducationNavbar: React.FC<EducationNavbarProps> = ({
                     <button
                       type="button"
                       className={`flex w-full items-center justify-between rounded-md p-2 text-left transition-colors hover:bg-gray-50 hover:text-blue-600 ${mobileMenus[mobileAdmissionSection.key] ? "text-blue-600" : ""}`}
-                      onClick={() => toggleMobileMenu(mobileAdmissionSection.key)}
+                      onClick={() =>
+                        toggleMobileMenu(mobileAdmissionSection.key)
+                      }
                     >
                       <span>{mobileAdmissionSection.label}</span>
                       <ChevronDown
@@ -1462,7 +1573,9 @@ const EducationNavbar: React.FC<EducationNavbarProps> = ({
                     <button
                       type="button"
                       className={`flex w-full items-center justify-between rounded-md p-2 text-left transition-colors hover:bg-gray-50 hover:text-blue-600 ${mobileMenus[mobileUniversitiesSection.key] ? "text-blue-600" : ""}`}
-                      onClick={() => toggleMobileMenu(mobileUniversitiesSection.key)}
+                      onClick={() =>
+                        toggleMobileMenu(mobileUniversitiesSection.key)
+                      }
                     >
                       <span>{mobileUniversitiesSection.label}</span>
                       <ChevronDown
@@ -1541,81 +1654,6 @@ const EducationNavbar: React.FC<EducationNavbarProps> = ({
           </div>
         </aside>
       </div>
-
-      {/* Mobile Search Overlay */}
-      <div
-        className={`fixed inset-0 z-[150] md:hidden transition-opacity duration-300 ${
-          showMobileSearch
-            ? "pointer-events-auto opacity-100"
-            : "pointer-events-none opacity-0"
-        }`}
-        aria-hidden={!showMobileSearch}
-      >
-        <div className="absolute inset-0 bg-white">
-          <div className="flex h-full flex-col">
-            <div className="flex items-center justify-between border-b border-gray-100 px-4 py-3">
-              <div>
-                <h2 className="text-base font-bold text-gray-900">
-                  Find colleges and courses
-                </h2>
-              </div>
-              <button
-                type="button"
-                onClick={() => setShowMobileSearch(false)}
-                className="flex h-9 w-9 items-center justify-center rounded-full text-gray-500 transition-colors hover:bg-gray-100 hover:text-gray-900"
-                aria-label="Close search panel"
-              >
-                <X size={18} />
-              </button>
-            </div>
-
-            <div className="flex-1 overflow-y-auto px-4 py-4 sm:px-6">
-              <div className="mx-auto flex w-full max-w-2xl flex-col gap-4">
-                <SearchBar
-                  isMobile
-                  defaultSearchOpen
-                  showSuggestionDropdown={false}
-                  onQueryStateChange={handleMobileSearchStateChange}
-                />
-                <div className="rounded-2xl bg-white p-0">
-                  <p className="text-[12px] font-semibold uppercase tracking-[0.16em] text-gray-400">
-                    Suggestions
-                  </p>
-                  {mobileLiveSuggestions.length > 0 ? (
-                    <div className="mt-3 grid gap-2">
-                      {mobileLiveSuggestions.map((item) => (
-                        <button
-                          key={item.title}
-                          type="button"
-                          onClick={() => {
-                            setShowMobileSearch(false);
-                            router.push(
-                              `/search?q=${encodeURIComponent(item.title)}`,
-                            );
-                          }}
-                          className="flex items-center justify-between rounded-xl bg-white px-4 py-3 text-left transition-colors hover:bg-blue-50/60"
-                        >
-                          <div className="min-w-0">
-                            <p className="truncate text-sm font-semibold text-gray-900">
-                              {item.title}
-                            </p>
-                          </div>
-                          <Search size={16} className="shrink-0 text-gray-400" />
-                        </button>
-                      ))}
-                    </div>
-                  ) : (
-                    <div className="mt-3 rounded-xl bg-white px-4 py-5 text-sm text-gray-500">
-                      No matches found. Try a different keyword.
-                    </div>
-                  )}
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-
     </>
   );
 };

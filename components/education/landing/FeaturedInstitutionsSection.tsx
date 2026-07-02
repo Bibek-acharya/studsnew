@@ -90,6 +90,7 @@ const CollegeCard: React.FC<{
         </div>
         <Image
           src={
+            college.banner_url ||
             college.image_url ||
             "https://placehold.co/600x400/f1f5f9/94a3b8?text=Image+Unavailable"
           }

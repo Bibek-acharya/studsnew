@@ -476,6 +476,8 @@ export interface College {
   name: string;
   full_name?: string;
   image_url?: string;
+  banner_url?: string;
+  logo_url?: string;
   description?: string;
   rating?: number;
   reviews?: number;
@@ -1304,6 +1306,18 @@ export const apiService = {
     return apiRequest<ContactInquiryResponse>("/api/v1/system/contact", {
       method: "POST",
       body: JSON.stringify(data),
+    });
+  },
+
+  async getContactInquiries(): Promise<{
+    data: { inquiries: ContactInquiryResponse["data"][] };
+  }> {
+    const token =
+      typeof window !== "undefined"
+        ? localStorage.getItem("superadmin_token")
+        : null;
+    return apiRequest("/api/v1/admin/contact", {
+      authToken: token || undefined,
     });
   },
 
