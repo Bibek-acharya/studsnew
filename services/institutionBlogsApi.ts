@@ -70,6 +70,7 @@ export interface InstitutionBlog {
   image: string;
   excerpt: string;
   category: string;
+  blog_category?: string;
   read_time?: string;
   tags?: string;
   published: boolean;
@@ -102,6 +103,7 @@ export const institutionBlogsApi = {
     image?: string;
     excerpt?: string;
     category?: string;
+    blog_category?: string;
     read_time?: string;
     tags?: string;
   }): Promise<InstitutionBlog> {
@@ -119,6 +121,7 @@ export const institutionBlogsApi = {
       image?: string;
       excerpt?: string;
       category?: string;
+      blog_category?: string;
       read_time?: string;
       tags?: string;
     },

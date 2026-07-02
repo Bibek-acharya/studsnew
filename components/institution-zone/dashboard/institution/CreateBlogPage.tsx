@@ -106,6 +106,7 @@ function CreateBlogForm() {
           setFeaturedImagePreview(blog.image || "");
           setShortDesc(blog.excerpt || "");
           setBlogType(blog.category || "");
+          setCategory(blog.blog_category || "");
           setReadingTime(blog.read_time || "");
           setTags(blog.tags || "");
           setStatus(blog.published ? "published" : "draft");
@@ -159,6 +160,7 @@ function CreateBlogForm() {
           excerpt: shortDesc.replace(/<[^>]*>/g, "").trim(),
           image: featuredImageUrl,
           category: blogType,
+          blog_category: category,
           read_time: readingTime,
           tags,
         };
