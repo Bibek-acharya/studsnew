@@ -1311,15 +1311,26 @@ export const apiService = {
 
   async getContactInquiries(): Promise<{
     inquiries: ContactInquiryResponse["data"][];
-    pagination?: { total: number; page: number; limit: number };
+    meta?: { total: number; page: number; limit: number };
   }> {
-    return apiRequest("/api/v1/admin/inquiries");
+    const token =
+      typeof window !== "undefined"
+        ? localStorage.getItem("superadmin_token")
+        : null;
+    return apiRequest("/api/v1/admin/inquiries", {
+      authToken: token || undefined,
+    });
   },
 
   async updateContactInquiryStatus(id: number, status: string): Promise<void> {
+    const token =
+      typeof window !== "undefined"
+        ? localStorage.getItem("superadmin_token")
+        : null;
     await apiRequest(`/api/v1/admin/inquiries/${id}/status`, {
       method: "PUT",
       body: JSON.stringify({ status }),
+      authToken: token || undefined,
     });
   },
 
