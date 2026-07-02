@@ -2,10 +2,23 @@
 
 import React, { useState, useEffect, useCallback, useMemo } from "react";
 import { useRouter } from "next/navigation";
-import { Plus, MagnifyingGlass, Eye, Pencil, Trash, Spinner, CaretLeft, CaretRight, X } from "@phosphor-icons/react";
+import {
+  Plus,
+  MagnifyingGlass,
+  Eye,
+  Pencil,
+  Trash,
+  Spinner,
+  CaretLeft,
+  CaretRight,
+  X,
+} from "@phosphor-icons/react";
 import { toast } from "sonner";
 import SectionHeader from "@/components/institution-zone/dashboard/shared/SectionHeader";
-import { institutionBlogsApi, InstitutionBlog } from "@/services/institutionBlogsApi";
+import {
+  institutionBlogsApi,
+  InstitutionBlog,
+} from "@/services/institutionBlogsApi";
 
 const STATUS_COLORS: Record<string, string> = {
   published: "bg-green-100 text-green-700",
@@ -13,7 +26,8 @@ const STATUS_COLORS: Record<string, string> = {
   scheduled: "bg-blue-100 text-blue-700",
 };
 
-const FALLBACK_IMAGE = "https://images.unsplash.com/photo-1499750310107-5fef28a66643?auto=format&fit=crop&q=80&w=800&h=400";
+const FALLBACK_IMAGE =
+  "https://images.unsplash.com/photo-1499750310107-5fef28a66643?auto=format&fit=crop&q=80&w=800&h=400";
 
 const BlogDirectoryPage: React.FC = () => {
   const router = useRouter();
@@ -22,7 +36,11 @@ const BlogDirectoryPage: React.FC = () => {
   const [search, setSearch] = useState("");
   const [page, setPage] = useState(1);
   const [total, setTotal] = useState(0);
-  const [deleteModal, setDeleteModal] = useState<{ isOpen: boolean; blogId: number | null; title: string }>({
+  const [deleteModal, setDeleteModal] = useState<{
+    isOpen: boolean;
+    blogId: number | null;
+    title: string;
+  }>({
     isOpen: false,
     blogId: null,
     title: "",
@@ -48,13 +66,22 @@ const BlogDirectoryPage: React.FC = () => {
 
   const filtered = useMemo(() => {
     if (!search) return blogs;
-    return blogs.filter((b) => b.title.toLowerCase().includes(search.toLowerCase()));
+    return blogs.filter((b) =>
+      b.title.toLowerCase().includes(search.toLowerCase()),
+    );
   }, [blogs, search]);
 
-  const handleDelete = useCallback((id: number) => {
-    const target = blogs.find((blog) => blog.id === id);
-    setDeleteModal({ isOpen: true, blogId: id, title: target?.title || "this blog" });
-  }, [blogs]);
+  const handleDelete = useCallback(
+    (id: number) => {
+      const target = blogs.find((blog) => blog.id === id);
+      setDeleteModal({
+        isOpen: true,
+        blogId: id,
+        title: target?.title || "this blog",
+      });
+    },
+    [blogs],
+  );
 
   const confirmDeleteBlog = useCallback(async () => {
     if (!deleteModal.blogId) return;
@@ -90,21 +117,33 @@ const BlogDirectoryPage: React.FC = () => {
       {/* Delete Confirmation Modal */}
       {deleteModal.isOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center">
-          <div className="absolute inset-0 bg-black/50" onClick={() => setDeleteModal({ isOpen: false, blogId: null, title: "" })} />
+          <div
+            className="absolute inset-0 bg-black/50"
+            onClick={() =>
+              setDeleteModal({ isOpen: false, blogId: null, title: "" })
+            }
+          />
           <div className="relative mx-4 w-full max-w-sm rounded-xl bg-white p-6 shadow-2xl">
             <button
-              onClick={() => setDeleteModal({ isOpen: false, blogId: null, title: "" })}
+              onClick={() =>
+                setDeleteModal({ isOpen: false, blogId: null, title: "" })
+              }
               className="absolute right-4 top-4 text-gray-400 hover:text-gray-600"
             >
               <X className="w-5 h-5" />
             </button>
-            <h3 className="mb-2 text-lg font-bold text-gray-900">Delete Blog</h3>
+            <h3 className="mb-2 text-lg font-bold text-gray-900">
+              Delete Blog
+            </h3>
             <p className="mb-6 text-sm text-gray-600">
-              Are you sure you want to delete &ldquo;{deleteModal.title}&rdquo;? This action cannot be undone.
+              Are you sure you want to delete &ldquo;{deleteModal.title}&rdquo;?
+              This action cannot be undone.
             </p>
             <div className="flex gap-3">
               <button
-                onClick={() => setDeleteModal({ isOpen: false, blogId: null, title: "" })}
+                onClick={() =>
+                  setDeleteModal({ isOpen: false, blogId: null, title: "" })
+                }
                 className="flex-1 rounded-lg border border-gray-300 px-4 py-2.5 font-semibold text-gray-700 hover:bg-gray-50"
               >
                 Cancel
@@ -124,7 +163,10 @@ const BlogDirectoryPage: React.FC = () => {
         <div className="p-6 border-b border-gray-100">
           <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
             <div className="relative w-full sm:w-80">
-              <MagnifyingGlass className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
+              <MagnifyingGlass
+                className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"
+                size={18}
+              />
               <input
                 type="text"
                 value={search}
@@ -134,7 +176,9 @@ const BlogDirectoryPage: React.FC = () => {
               />
             </div>
             <button
-              onClick={() => router.push("/institution-zone/dashboard/blogs/create")}
+              onClick={() =>
+                router.push("/institution-zone/dashboard/blogs/create")
+              }
               className="px-4 py-2 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-700 flex items-center gap-2 whitespace-nowrap"
             >
               <Plus size={18} />
@@ -154,67 +198,101 @@ const BlogDirectoryPage: React.FC = () => {
               <table className="w-full text-sm">
                 <thead className="bg-gray-50 border-b border-gray-200">
                   <tr>
-                    <th className="text-left py-3 px-6 font-semibold text-gray-700">Image</th>
-                    <th className="text-left py-3 px-6 font-semibold text-gray-700">Title</th>
-                    <th className="text-center py-3 px-6 font-semibold text-gray-700">Published</th>
-                    <th className="text-center py-3 px-6 font-semibold text-gray-700">Status</th>
-                    <th className="text-center py-3 px-6 font-semibold text-gray-700">Actions</th>
+                    <th className="text-left py-3 px-6 font-semibold text-gray-700">
+                      Image
+                    </th>
+                    <th className="text-left py-3 px-6 font-semibold text-gray-700">
+                      Title
+                    </th>
+                    <th className="text-center py-3 px-6 font-semibold text-gray-700">
+                      Published
+                    </th>
+                    <th className="text-center py-3 px-6 font-semibold text-gray-700">
+                      Status
+                    </th>
+                    <th className="text-center py-3 px-6 font-semibold text-gray-700">
+                      Actions
+                    </th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-gray-100">
                   {filtered.length === 0 ? (
                     <tr>
-                      <td colSpan={5} className="py-12 text-center text-gray-500">
-                        {search ? "No blogs found matching your search." : "No blogs yet. Create your first blog!"}
+                      <td
+                        colSpan={5}
+                        className="py-12 text-center text-gray-500"
+                      >
+                        {search
+                          ? "No blogs found matching your search."
+                          : "No blogs yet. Create your first blog!"}
                       </td>
                     </tr>
-                  ) : filtered.map((blog) => (
-                    <tr key={blog.id} className="hover:bg-gray-50">
-                      <td className="py-3 px-6">
-                        <img
-                          src={blog.image || FALLBACK_IMAGE}
-                          alt={blog.title}
-                          className="w-20 h-14 object-cover rounded-lg border border-gray-200"
-                        />
-                      </td>
-                      <td className="py-3 px-6">
-                        <p className="font-medium text-gray-900">{blog.title}</p>
-                        <p className="text-xs text-gray-500 mt-0.5">
-                          {stripHtml(blog.content || "").slice(0, 60)}
-                        </p>
-                      </td>
-                      <td className="text-center py-3 px-6 text-gray-500">
-                        {blog.created_at
-                          ? new Date(blog.created_at).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })
-                          : "N/A"}
-                      </td>
-                      <td className="text-center py-3 px-6">
-                        {blog.published ? (
-                          <span className="bg-green-100 text-green-700 px-2 py-1 rounded text-xs font-semibold">Published</span>
-                        ) : (
-                          <span className="bg-amber-100 text-amber-700 px-2 py-1 rounded text-xs font-semibold">Draft</span>
-                        )}
-                      </td>
-                      <td className="text-center py-3 px-6">
-                        <div className="flex items-center justify-center gap-2">
-                          <button
-                            onClick={() => router.push(`/institution-zone/dashboard/blogs/create?edit=${blog.id}`)}
-                            className="p-1.5 hover:bg-blue-50 rounded text-blue-600"
-                            title="Edit"
-                          >
-                            <Pencil className="w-4 h-4" />
-                          </button>
-                          <button
-                            onClick={() => handleDelete(blog.id)}
-                            className="p-1.5 hover:bg-red-50 rounded text-red-600"
-                            title="Delete"
-                          >
-                            <Trash className="w-4 h-4" />
-                          </button>
-                        </div>
-                      </td>
-                    </tr>
-                  ))}
+                  ) : (
+                    filtered.map((blog) => (
+                      <tr key={blog.id} className="hover:bg-gray-50">
+                        <td className="py-3 px-6">
+                          <img
+                            src={blog.image || FALLBACK_IMAGE}
+                            alt={blog.title}
+                            className="w-20 h-14 object-cover rounded-lg border border-gray-200"
+                          />
+                        </td>
+                        <td className="py-3 px-6">
+                          <p className="font-medium text-gray-900">
+                            {blog.title}
+                          </p>
+                          <p className="text-xs text-gray-500 mt-0.5">
+                            {stripHtml(blog.content || "").slice(0, 60)}
+                          </p>
+                        </td>
+                        <td className="text-center py-3 px-6 text-gray-500">
+                          {blog.created_at
+                            ? new Date(blog.created_at).toLocaleDateString(
+                                "en-US",
+                                {
+                                  month: "short",
+                                  day: "numeric",
+                                  year: "numeric",
+                                },
+                              )
+                            : "N/A"}
+                        </td>
+                        <td className="text-center py-3 px-6">
+                          {blog.status === "published" ? (
+                            <span className="bg-green-100 text-green-700 px-2 py-1 rounded text-xs font-semibold">
+                              Published
+                            </span>
+                          ) : (
+                            <span className="bg-amber-100 text-amber-700 px-2 py-1 rounded text-xs font-semibold">
+                              Draft
+                            </span>
+                          )}
+                        </td>
+                        <td className="text-center py-3 px-6">
+                          <div className="flex items-center justify-center gap-2">
+                            <button
+                              onClick={() =>
+                                router.push(
+                                  `/institution-zone/dashboard/blogs/create?edit=${blog.id}`,
+                                )
+                              }
+                              className="p-1.5 hover:bg-blue-50 rounded text-blue-600"
+                              title="Edit"
+                            >
+                              <Pencil className="w-4 h-4" />
+                            </button>
+                            <button
+                              onClick={() => handleDelete(blog.id)}
+                              className="p-1.5 hover:bg-red-50 rounded text-red-600"
+                              title="Delete"
+                            >
+                              <Trash className="w-4 h-4" />
+                            </button>
+                          </div>
+                        </td>
+                      </tr>
+                    ))
+                  )}
                 </tbody>
               </table>
             </div>
@@ -223,7 +301,9 @@ const BlogDirectoryPage: React.FC = () => {
               <div className="flex items-center justify-between px-6 py-4 border-t border-gray-100">
                 <p className="text-sm text-gray-500">
                   Showing{" "}
-                  <span className="font-medium">{(page - 1) * limit + 1}-{Math.min(page * limit, total)}</span>{" "}
+                  <span className="font-medium">
+                    {(page - 1) * limit + 1}-{Math.min(page * limit, total)}
+                  </span>{" "}
                   of <span className="font-medium">{total}</span> blogs
                 </p>
                 <div className="flex items-center gap-2">

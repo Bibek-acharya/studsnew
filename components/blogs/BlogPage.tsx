@@ -5,6 +5,7 @@ import Link from "next/link";
 import { FolderOpen } from "lucide-react";
 import { fetchPublicBlogs, BlogEntry } from "@/services/blogApi";
 import { getPublicBlogs } from "@/services/scholarshipProviderApi";
+import { getPublicInstitutionBlogs } from "@/services/institutionBlogsApi";
 import Pagination from "@/components/ui/Pagination";
 
 type BlogCategoryFilter =
@@ -88,7 +89,33 @@ const BlogPage: React.FC = () => {
             allBlogs = [...allBlogs, ...providerBlogs];
           }
         } catch {
-          // Provider blogs fetch failed, continue with admin blogs only
+          // Provider blogs fetch failed
+        }
+
+        try {
+          const instData = await getPublicInstitutionBlogs(1, 50);
+          if (instData?.blogs && instData.blogs.length > 0) {
+            const instBlogs = instData.blogs.map((b: any): BlogEntry => ({
+              id: b.id,
+              title: b.title,
+              slug: b.title?.toLowerCase().replace(/\s+/g, "-") || "",
+              excerpt:
+                stripHtml(b.excerpt || b.content || "").slice(0, 200) || "",
+              content: b.content || "",
+              image: b.image || "",
+              author: b.author || "Institution",
+              category: category || "Others",
+              tags: [],
+              read_time: b.read_time || "3 min",
+              featured: false,
+              published: b.status === "published",
+              views: b.views || 0,
+              created_at: b.published_at || b.created_at,
+            }));
+            allBlogs = [...allBlogs, ...instBlogs];
+          }
+        } catch {
+          // Institution blogs fetch failed
         }
 
         setBlogs(allBlogs);

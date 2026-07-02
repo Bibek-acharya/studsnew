@@ -109,7 +109,7 @@ function CreateBlogForm() {
           setCategory(blog.blog_category || "");
           setReadingTime(blog.read_time || "");
           setTags(blog.tags || "");
-          setStatus(blog.published ? "published" : "draft");
+          setStatus(blog.status === "published" ? "published" : "draft");
         })
         .catch(() => setError("Failed to load blog"))
         .finally(() => setLoadingBlog(false));
@@ -163,6 +163,7 @@ function CreateBlogForm() {
           blog_category: category,
           read_time: readingTime,
           tags,
+          status,
         };
 
         if (isEditing && blogId) {

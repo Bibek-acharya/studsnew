@@ -73,7 +73,8 @@ export interface InstitutionBlog {
   blog_category?: string;
   read_time?: string;
   tags?: string;
-  published: boolean;
+  status: string;
+  published_at?: string;
   created_at: string;
   updated_at: string;
 }
@@ -106,6 +107,7 @@ export const institutionBlogsApi = {
     blog_category?: string;
     read_time?: string;
     tags?: string;
+    status?: string;
   }): Promise<InstitutionBlog> {
     return apiCall("/api/v1/institution/blogs", {
       method: "POST",
@@ -124,6 +126,7 @@ export const institutionBlogsApi = {
       blog_category?: string;
       read_time?: string;
       tags?: string;
+      status?: string;
     },
   ): Promise<InstitutionBlog> {
     return apiCall(`/api/v1/institution/blogs/${id}`, {
@@ -140,3 +143,27 @@ export const institutionBlogsApi = {
     return uploadFile(file, folder);
   },
 };
+
+export async function getPublicInstitutionBlogs(
+  page = 1,
+  limit = 12,
+): Promise<{
+  blogs: InstitutionBlog[];
+  meta: { total: number; page: number; limit: number; totalPages: number };
+}> {
+  const API_BASE_URL =
+    process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080";
+  const res = await fetch(
+    `${API_BASE_URL}/api/v1/institutions/public/blogs?page=${page}&limit=${limit}`,
+    { headers: { "Content-Type": "application/json" }, credentials: "include" },
+  );
+  if (!res.ok)
+    return { blogs: [], meta: { total: 0, page: 1, limit, totalPages: 1 } };
+  const data = await res.json();
+  return (
+    data?.data || {
+      blogs: [],
+      meta: { total: 0, page: 1, limit, totalPages: 1 },
+    }
+  );
+}
