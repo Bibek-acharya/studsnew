@@ -1310,8 +1310,12 @@ export const apiService = {
   },
 
   async getContactInquiries(): Promise<{
-    inquiries: ContactInquiryResponse["data"][];
-    meta?: { total: number; page: number; limit: number };
+    success: boolean;
+    data: {
+      inquiries: ContactInquiryResponse["data"][];
+      meta: { total: number; page: number; limit: number };
+    };
+    message: string;
   }> {
     const token =
       typeof window !== "undefined"
@@ -1322,12 +1326,15 @@ export const apiService = {
     });
   },
 
-  async updateContactInquiryStatus(id: number, status: string): Promise<void> {
+  async updateContactInquiryStatus(
+    id: number,
+    status: string,
+  ): Promise<{ success: boolean; message: string }> {
     const token =
       typeof window !== "undefined"
         ? localStorage.getItem("superadmin_token")
         : null;
-    await apiRequest(`/api/v1/admin/inquiries/${id}/status`, {
+    return apiRequest(`/api/v1/admin/inquiries/${id}/status`, {
       method: "PUT",
       body: JSON.stringify({ status }),
       authToken: token || undefined,

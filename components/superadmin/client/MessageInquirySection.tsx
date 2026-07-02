@@ -33,7 +33,7 @@ export default function MessageInquirySection() {
   useEffect(() => {
     apiService
       .getContactInquiries()
-      .then((res) => setInquiries((res as any)?.inquiries || []))
+      .then((res) => setInquiries((res as any)?.data?.inquiries || []))
       .catch(() => setInquiries([]))
       .finally(() => setLoading(false));
   }, []);
