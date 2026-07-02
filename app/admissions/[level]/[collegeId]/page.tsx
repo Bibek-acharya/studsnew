@@ -67,7 +67,16 @@ const YoutubeIcon = ({ className }: { className?: string }) => (
 );
 
 const iconMap: Record<string, any> = {
-  FlaskConical, Briefcase, BookOpen, Monitor, Trophy, Wifi, Bus, Utensils, Users, ShieldCheck,
+  FlaskConical,
+  Briefcase,
+  BookOpen,
+  Monitor,
+  Trophy,
+  Wifi,
+  Bus,
+  Utensils,
+  Users,
+  ShieldCheck,
 };
 
 const EmptyTabState = ({ tabName }: { tabName: string }) => {
@@ -75,7 +84,9 @@ const EmptyTabState = ({ tabName }: { tabName: string }) => {
   return (
     <div className="flex flex-col items-center justify-center py-16">
       <FolderOpen className="w-32 h-32 text-gray-300 mb-4" />
-      <p className="text-gray-500 text-lg font-medium mb-6">No {tabName} information is currently available.</p>
+      <p className="text-gray-500 text-lg font-medium mb-6">
+        No {tabName} information is currently available.
+      </p>
       <button
         onClick={() => router.push("/")}
         className="bg-[#0000ff] hover:bg-[#0000cc] cursor-pointer text-white font-semibold py-2.5 px-6 rounded-md transition-colors text-sm"
@@ -98,28 +109,34 @@ export default function AdmissionDetailPage() {
 
   const { data: collegeData } = useQuery({
     queryKey: ["publishedAdmissionCollege", collegeIdNum],
-    queryFn: () => admissionService.getPublishedAdmissionCollegeById(collegeIdNum),
+    queryFn: () =>
+      admissionService.getPublishedAdmissionCollegeById(collegeIdNum),
     enabled: !isNaN(collegeIdNum),
   });
 
   const apData = collegeData?.data?.data || {};
   const institution = collegeData?.data?.institution;
   const collegeName = institution?.name || "College";
-  const applicationFormLink = (apData?.overview_data as any)?.applicationFormLink || "";
+  const applicationFormLink =
+    (apData?.overview_data as any)?.applicationFormLink || "";
   const heroBanner = (apData?.overview_data as any)?.heroBanner || "";
   const heroBanners: string[] = (() => {
-    if (Array.isArray(heroBanner)) return heroBanner.map(String).filter(Boolean);
+    if (Array.isArray(heroBanner))
+      return heroBanner.map(String).filter(Boolean);
     if (typeof heroBanner === "string" && heroBanner) {
       try {
         const parsed = JSON.parse(heroBanner);
-        return Array.isArray(parsed) ? parsed.map(String).filter(Boolean) : [heroBanner];
+        return Array.isArray(parsed)
+          ? parsed.map(String).filter(Boolean)
+          : [heroBanner];
       } catch {
         return [heroBanner];
       }
     }
     return [];
   })();
-  const admissionLevel = (apData?.overview_data as any)?.level || params.level as string || "";
+  const admissionLevel =
+    (apData?.overview_data as any)?.level || (params.level as string) || "";
 
   const [heroSlide, setHeroSlide] = useState(0);
   const heroIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
@@ -182,23 +199,34 @@ export default function AdmissionDetailPage() {
     }
   };
 
-  const programsData = ((apData?.programs_data as any[]) || []).map((p: any) => ({
-    icon: FlaskConical,
-    title: p.title || "",
-    badge: p.admissionStatus === "open" ? "Admissions Open" : p.admissionStatus || "",
-    badgeClass: p.admissionStatus === "open" ? "bg-green-100 text-green-700" : "bg-blue-100 text-blue-700",
-    desc: p.description || "",
-    leftTitle: "Available Streams:",
-    leftItems: p.streams || [],
-    rightTitle: "Career Opportunities:",
-    rightItems: p.careers || [],
-  }));
+  const programsData = ((apData?.programs_data as any[]) || []).map(
+    (p: any) => ({
+      icon: FlaskConical,
+      title: p.title || "",
+      affiliation: p.affiliation || p.subtitle || "",
+      badge:
+        p.admissionStatus === "open"
+          ? "Admissions Open"
+          : p.admissionStatus || "",
+      badgeClass:
+        p.admissionStatus === "open"
+          ? "bg-green-100 text-green-700"
+          : "bg-blue-100 text-blue-700",
+      desc: p.description || "",
+      leftTitle: "Available Streams:",
+      leftItems: p.streams || [],
+      rightTitle: "Career Opportunities:",
+      rightItems: p.careers || [],
+    }),
+  );
 
-  const facilitiesData = ((apData?.facilities_data as any[]) || []).map((f: any) => ({
-    icon: iconMap[f.facilityIcon] || ShieldCheck,
-    title: f.heading || "",
-    desc: f.description || "",
-  }));
+  const facilitiesData = ((apData?.facilities_data as any[]) || []).map(
+    (f: any) => ({
+      icon: iconMap[f.facilityIcon] || ShieldCheck,
+      title: f.heading || "",
+      desc: f.description || "",
+    }),
+  );
 
   const coursesData = ((apData?.courses_data as any[]) || []).map((c: any) => ({
     course: c.courseName || "",
@@ -207,14 +235,16 @@ export default function AdmissionDetailPage() {
     applyLink: c.applyLink || "",
   }));
 
-  const scholarshipData = ((apData?.scholarships_data as any[]) || []).map((s: any) => ({
-    name: s.name || "",
-    level: s.level || "",
-    stream: s.stream || "",
-    coverage: s.coverage || "",
-    eligibility: s.eligibility || "",
-    seats: s.seats || "",
-  }));
+  const scholarshipData = ((apData?.scholarships_data as any[]) || []).map(
+    (s: any) => ({
+      name: s.name || "",
+      level: s.level || "",
+      stream: s.stream || "",
+      coverage: s.coverage || "",
+      eligibility: s.eligibility || "",
+      seats: s.seats || "",
+    }),
+  );
 
   const eligibilityData = (() => {
     const ed = (apData as any)?.eligibility_data;
@@ -233,14 +263,16 @@ export default function AdmissionDetailPage() {
     a: f.answer || "",
   }));
 
-  const staffData = ((apData?.contact_persons_data as any[]) || []).map((s: any) => ({
-    name: s.name || "",
-    role: s.designation || "",
-    img: s.image || "",
-    phone: s.number || "",
-    email: s.email || "",
-    wa: s.whatsapp || "",
-  }));
+  const staffData = ((apData?.contact_persons_data as any[]) || []).map(
+    (s: any) => ({
+      name: s.name || "",
+      role: s.designation || "",
+      img: s.image || "",
+      phone: s.number || "",
+      email: s.email || "",
+      wa: s.whatsapp || "",
+    }),
+  );
 
   const admissionProcess = (apData?.admission_process_data as any[]) || [];
 
@@ -269,14 +301,20 @@ export default function AdmissionDetailPage() {
   return (
     <div className="min-h-screen bg-white">
       {/* Hero Section */}
-      <div className="mx-auto max-w-350 pt-12 pb-8">
+      <div className="mx-auto max-w-350 px-4 sm:px-6 lg:px-8 pt-12 pb-8">
         {/* Breadcrumb */}
         <nav className="flex items-center text-sm text-gray-500 mb-6 gap-2">
-          <span className="hover:text-gray-900 transition-colors cursor-pointer">Home</span>
+          <span className="hover:text-gray-900 transition-colors cursor-pointer">
+            Home
+          </span>
           <ChevronRight className="w-4 h-4 text-gray-400" />
-          <span className="hover:text-gray-900 transition-colors cursor-pointer">Admission</span>
+          <span className="hover:text-gray-900 transition-colors cursor-pointer">
+            Admission
+          </span>
           <ChevronRight className="w-4 h-4 text-gray-400" />
-          <span className="hover:text-gray-900 transition-colors cursor-pointer">+2 Admission</span>
+          <span className="hover:text-gray-900 transition-colors cursor-pointer">
+            +2 Admission
+          </span>
           <ChevronRight className="w-4 h-4 text-gray-400" />
           <span className="text-gray-900 font-semibold">{collegeName}</span>
         </nav>
@@ -286,7 +324,8 @@ export default function AdmissionDetailPage() {
             {collegeName} opens admission for {admissionLevel}
           </h1>
           <p className="text-sm text-gray-400 font-medium mt-2">
-            Created {timeAgo(createdAt)} &middot; Last modified {timeAgo(updatedAt)}
+            Created {timeAgo(createdAt)} &middot; Last modified{" "}
+            {timeAgo(updatedAt)}
           </p>
         </div>
 
@@ -300,7 +339,10 @@ export default function AdmissionDetailPage() {
                 <div
                   key={idx}
                   className="w-full h-full shrink-0 bg-cover bg-center"
-                  style={{ backgroundImage: `url('${url}')`, backgroundPosition: "center 20%" }}
+                  style={{
+                    backgroundImage: `url('${url}')`,
+                    backgroundPosition: "center 20%",
+                  }}
                 />
               ))}
             </div>
@@ -325,7 +367,9 @@ export default function AdmissionDetailPage() {
                       key={idx}
                       onClick={() => setHeroSlide(idx)}
                       className={`rounded-full transition-all duration-300 ${
-                        idx === heroSlide ? "w-3 h-3 bg-white" : "w-2 h-2 bg-white/50"
+                        idx === heroSlide
+                          ? "w-3 h-3 bg-white"
+                          : "w-2 h-2 bg-white/50"
                       }`}
                     />
                   ))}
@@ -337,7 +381,8 @@ export default function AdmissionDetailPage() {
           <div
             className="relative w-full h-[280px] md:h-[380px] bg-cover bg-center rounded-md overflow-hidden"
             style={{
-              backgroundImage: "url('https://kist-edu-np.s3.ap-south-1.amazonaws.com/uploads/album/value/c0374b68ef663e539f7e6aea4b84625b2a207a981656053172.jpg')",
+              backgroundImage:
+                "url('https://kist-edu-np.s3.ap-south-1.amazonaws.com/uploads/album/value/c0374b68ef663e539f7e6aea4b84625b2a207a981656053172.jpg')",
               backgroundPosition: "center 20%",
             }}
           >
@@ -348,7 +393,7 @@ export default function AdmissionDetailPage() {
 
       {/* Sticky Tab Navigation */}
       <div className="sticky top-0 z-40 bg-white border-b border-gray-100 overflow-hidden">
-        <div className="mx-auto max-w-350 relative">
+        <div className="mx-auto max-w-350 px-4 sm:px-6 lg:px-8 relative">
           <button
             onClick={() => scrollTabs(-1)}
             className="absolute left-0 top-1/2 -translate-y-1/2 z-10 w-9 h-9 bg-white border border-gray-200 rounded-full flex items-center justify-center md:hidden"
@@ -382,7 +427,7 @@ export default function AdmissionDetailPage() {
       </div>
 
       {/* Main Grid */}
-      <div className="mx-auto max-w-350 py-8 md:py-12 grid grid-cols-1 lg:grid-cols-3 gap-10 md:gap-10 bg-white">
+      <div className="mx-auto max-w-350 px-4 sm:px-6 lg:px-8 py-8 md:py-12 grid grid-cols-1 lg:grid-cols-3 gap-10 md:gap-10 bg-white">
         {/* Left: Main Content */}
         <div className="lg:col-span-2 min-h-[500px]">
           {/* Overview Tab */}
@@ -393,7 +438,9 @@ export default function AdmissionDetailPage() {
                   <div className="flex items-center gap-4">
                     <div className="w-12 h-12 rounded-md bg-[#f0f4ff] flex items-center justify-center relative flex-shrink-0">
                       <Bell className="w-6 h-6 text-[#226ee7]" />
-                      <span className="absolute -top-1 -left-1 text-[#60a5fa] text-[16px]">✨</span>
+                      <span className="absolute -top-1 -left-1 text-[#60a5fa] text-[16px]">
+                        ✨
+                      </span>
                     </div>
                     <div>
                       <span className="text-[13px] text-gray-500 font-medium">
@@ -411,7 +458,11 @@ export default function AdmissionDetailPage() {
 
                 <div className="mt-5 text-gray-700 text-[15px] leading-relaxed">
                   {whatsNewData.description ? (
-                    <div dangerouslySetInnerHTML={{ __html: whatsNewData.description }} />
+                    <div
+                      dangerouslySetInnerHTML={{
+                        __html: whatsNewData.description,
+                      }}
+                    />
                   ) : (
                     <p className="mb-4">
                       All the latest updates regarding{" "}
@@ -451,140 +502,171 @@ export default function AdmissionDetailPage() {
                   {overviewHeading || "Admissions Now Open for New Session"}
                 </h2>
                 {overviewDesc ? (
-                  <div className="prose prose-sm max-w-none text-gray-600 break-words overflow-hidden [&_p]:break-words [&_p]:overflow-hidden" dangerouslySetInnerHTML={{ __html: overviewDesc }} />
+                  <div
+                    className="prose prose-sm max-w-none text-gray-600 break-words overflow-hidden [&_p]:break-words [&_p]:overflow-hidden"
+                    dangerouslySetInnerHTML={{ __html: overviewDesc }}
+                  />
                 ) : (
                   <p className="text-gray-600">
-                    {collegeName} announces the official opening of admissions for the upcoming academic
-                    session. We invite prospective students to explore our comprehensive programs.
+                    {collegeName} announces the official opening of admissions
+                    for the upcoming academic session. We invite prospective
+                    students to explore our comprehensive programs.
                   </p>
                 )}
               </div>
 
               <div className="pt-6">
                 {programsData.length > 0 ? (
-                <>
-                <h2 className="text-2xl font-bold text-gray-900 mb-6">Our Programs</h2>
-                <div className="space-y-6">
-                  {programsData.map((prog, idx) => (
-                    <div key={idx} className="border border-gray-200 rounded-md p-6 bg-white">
-                      <div className="flex items-start justify-between gap-4 mb-4">
-                        <div className="flex items-start gap-4">
-                          <div className="w-12 h-12 rounded-md bg-[#0000ff] flex items-center justify-center text-white flex-shrink-0">
-                            <prog.icon className="w-6 h-6" />
-                          </div>
-                          <div>
-                            <h3 className="text-xl font-bold text-gray-900">{prog.title}</h3>
-                            <p className="text-sm text-gray-500">NEB Affiliated | 2 Years Program</p>
-                          </div>
-                        </div>
-                        <span
-                          className={`px-3 py-1 text-xs font-semibold rounded-full ${prog.badgeClass}`}
+                  <>
+                    <h2 className="text-2xl font-bold text-gray-900 mb-6">
+                      Our Programs
+                    </h2>
+                    <div className="space-y-6">
+                      {programsData.map((prog, idx) => (
+                        <div
+                          key={idx}
+                          className="border border-gray-200 rounded-md p-6 bg-white"
                         >
-                          {prog.badge}
-                        </span>
-                      </div>
-                      <p className="text-gray-700 leading-relaxed mb-4">{prog.desc}</p>
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div className="bg-gray-50 rounded-md p-4">
-                          <h4 className="font-semibold text-gray-900 mb-2">{prog.leftTitle}</h4>
-                          <ul className="space-y-1 text-sm text-gray-600">
-                            {prog.leftItems.map((item: any, i: number) => (
-                              <li key={i} className="flex items-center gap-2">
-                                <span className="w-1.5 h-1.5 rounded-full bg-[#0000ff]" />
-                                {item}
-                              </li>
-                            ))}
-                          </ul>
+                          <div className="flex items-start justify-between gap-4 mb-4">
+                            <div className="flex items-start gap-4">
+                              <div className="w-12 h-12 rounded-md bg-[#0000ff] flex items-center justify-center text-white flex-shrink-0">
+                                <prog.icon className="w-6 h-6" />
+                              </div>
+                              <div>
+                                <h3 className="text-xl font-bold text-gray-900">
+                                  {prog.title}
+                                </h3>
+                                <p className="text-sm text-gray-500">
+                                  {prog.affiliation ||
+                                    "NEB Affiliated | 2 Years Program"}
+                                </p>
+                              </div>
+                            </div>
+                            <span
+                              className={`px-3 py-1 text-xs font-semibold rounded-full ${prog.badgeClass}`}
+                            >
+                              {prog.badge}
+                            </span>
+                          </div>
+                          <p className="text-gray-700 leading-relaxed mb-4">
+                            {prog.desc}
+                          </p>
+                          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div className="bg-gray-50 rounded-md p-4">
+                              <h4 className="font-semibold text-gray-900 mb-2">
+                                {prog.leftTitle}
+                              </h4>
+                              <ul className="space-y-1 text-sm text-gray-600">
+                                {prog.leftItems.map((item: any, i: number) => (
+                                  <li
+                                    key={i}
+                                    className="flex items-center gap-2"
+                                  >
+                                    <span className="w-1.5 h-1.5 rounded-full bg-[#0000ff]" />
+                                    {item}
+                                  </li>
+                                ))}
+                              </ul>
+                            </div>
+                            <div className="bg-gray-50 rounded-md p-4">
+                              <h4 className="font-semibold text-gray-900 mb-2">
+                                {prog.rightTitle}
+                              </h4>
+                              <ul className="space-y-1 text-sm text-gray-600">
+                                {prog.rightItems.map((item: any, i: number) => (
+                                  <li
+                                    key={i}
+                                    className="flex items-center gap-2"
+                                  >
+                                    <span className="w-1.5 h-1.5 rounded-full bg-[#0000ff]" />
+                                    {item}
+                                  </li>
+                                ))}
+                              </ul>
+                            </div>
+                          </div>
                         </div>
-                        <div className="bg-gray-50 rounded-md p-4">
-                          <h4 className="font-semibold text-gray-900 mb-2">{prog.rightTitle}</h4>
-                          <ul className="space-y-1 text-sm text-gray-600">
-                            {prog.rightItems.map((item: any, i: number) => (
-                              <li key={i} className="flex items-center gap-2">
-                                <span className="w-1.5 h-1.5 rounded-full bg-[#0000ff]" />
-                                {item}
-                              </li>
-                            ))}
-                          </ul>
-                        </div>
-                      </div>
+                      ))}
                     </div>
-                    ))}
-                  </div>
-                </>
+                  </>
                 ) : (
                   <EmptyTabState tabName="Programs" />
                 )}
               </div>
             </div>
           )}
-   
-        {/* Eligibility Tab */}
+
+          {/* Eligibility Tab */}
           {activeTab === "eligibility" && (
             <div>
               <div className="mb-6">
                 {eligibilityData.length > 0 ? (
-                <>
-                <h2 className="text-[22px] font-bold text-gray-900 mb-4">
-                  Eligibility Criteria 2026
-                </h2>
-                <div className="overflow-x-auto rounded-md border border-gray-200">
-                  <table className="w-full text-left border-collapse min-w-[800px]">
-                    <thead>
-                      <tr className="bg-[#eff4fc] border-b border-gray-200">
-                        <th className="p-4 font-bold text-gray-900 w-[8%] border-r border-gray-200">
-                          S.N.
-                        </th>
-                        <th className="p-4 font-bold text-gray-900 w-[18%] border-r border-gray-200">
-                          Level
-                        </th>
-                        <th className="p-4 font-bold text-gray-900 w-[24%] border-r border-gray-200">
-                          Stream/Faculty
-                        </th>
-                        <th className="p-4 font-bold text-gray-900 w-[25%] border-r border-gray-200">
-                          Eligibility
-                        </th>
-                        <th className="p-4 font-bold text-gray-900 w-[25%]">Required Documents</th>
-                      </tr>
-                    </thead>
-                    <tbody className="text-[15px]">
-                      {eligibilityData.map((row: any, idx: number) => (
-                        <tr
-                          key={idx}
-                          className={
-                            idx < eligibilityData.length - 1
-                              ? "border-b border-gray-200 hover:bg-gray-50"
-                              : "hover:bg-gray-50"
-                          }
-                        >
-                          <td className="p-4 align-top border-r border-gray-200 text-gray-700">
-                            {row.sn}
-                          </td>
-                          <td className="p-4 align-top border-r border-gray-200 font-semibold text-gray-900">
-                            {row.level}
-                          </td>
-                          <td className="p-4 align-top border-r border-gray-200 text-gray-700">
-                            {row.stream}
-                          </td>
-                          <td className="p-4 align-top border-r border-gray-200 text-gray-700">
-                            {row.eligibility}
-                          </td>
-                          <td className="p-4 align-top text-gray-700">
-                            <ul className="space-y-1 text-sm">
-                              {row.docs.map((doc: any, i: number) => (
-                                <li key={i} className="flex items-center gap-2">
-                                  <span className="w-1.5 h-1.5 rounded-full bg-[#0000ff]" />
-                                  {doc}
-                                </li>
-                              ))}
-                            </ul>
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
-                </>
+                  <>
+                    <h2 className="text-[22px] font-bold text-gray-900 mb-4">
+                      Eligibility Criteria 2026
+                    </h2>
+                    <div className="overflow-x-auto rounded-md border border-gray-200">
+                      <table className="w-full text-left border-collapse min-w-[800px]">
+                        <thead>
+                          <tr className="bg-[#eff4fc] border-b border-gray-200">
+                            <th className="p-4 font-bold text-gray-900 w-[8%] border-r border-gray-200">
+                              S.N.
+                            </th>
+                            <th className="p-4 font-bold text-gray-900 w-[18%] border-r border-gray-200">
+                              Level
+                            </th>
+                            <th className="p-4 font-bold text-gray-900 w-[24%] border-r border-gray-200">
+                              Stream/Faculty
+                            </th>
+                            <th className="p-4 font-bold text-gray-900 w-[25%] border-r border-gray-200">
+                              Eligibility
+                            </th>
+                            <th className="p-4 font-bold text-gray-900 w-[25%]">
+                              Required Documents
+                            </th>
+                          </tr>
+                        </thead>
+                        <tbody className="text-[15px]">
+                          {eligibilityData.map((row: any, idx: number) => (
+                            <tr
+                              key={idx}
+                              className={
+                                idx < eligibilityData.length - 1
+                                  ? "border-b border-gray-200 hover:bg-gray-50"
+                                  : "hover:bg-gray-50"
+                              }
+                            >
+                              <td className="p-4 align-top border-r border-gray-200 text-gray-700">
+                                {row.sn}
+                              </td>
+                              <td className="p-4 align-top border-r border-gray-200 font-semibold text-gray-900">
+                                {row.level}
+                              </td>
+                              <td className="p-4 align-top border-r border-gray-200 text-gray-700">
+                                {row.stream}
+                              </td>
+                              <td className="p-4 align-top border-r border-gray-200 text-gray-700">
+                                {row.eligibility}
+                              </td>
+                              <td className="p-4 align-top text-gray-700">
+                                <ul className="space-y-1 text-sm">
+                                  {row.docs.map((doc: any, i: number) => (
+                                    <li
+                                      key={i}
+                                      className="flex items-center gap-2"
+                                    >
+                                      <span className="w-1.5 h-1.5 rounded-full bg-[#0000ff]" />
+                                      {doc}
+                                    </li>
+                                  ))}
+                                </ul>
+                              </td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+                  </>
                 ) : (
                   <EmptyTabState tabName="Eligibility Criteria" />
                 )}
@@ -596,31 +678,36 @@ export default function AdmissionDetailPage() {
           {activeTab === "process" && (
             <div>
               {admissionProcess.length > 0 ? (
-              <div>
-              <div className="mb-8">
-                <h2 className="text-2xl font-bold text-gray-900 mb-2">
-                  Admission Process 2026
-                </h2>
-                <p className="text-gray-600">
-                  Step-by-step guide for Science (+2) admission
-                </p>
-              </div>
-              {admissionProcess.map((step: any, idx: number) => (
-                <div key={idx} className="border border-gray-200 rounded-md p-6 mb-6">
-                  <div className="flex items-start gap-4 mb-4">
-                    <div className="w-10 h-10 rounded-full bg-[#0000ff] text-white flex items-center justify-center font-bold text-sm flex-shrink-0">
-                      {step.stepNumber || idx + 1}
-                    </div>
-                    <div>
-                      <h3 className="font-bold text-gray-900 text-lg mb-3">{step.title}</h3>
-                      <div className="space-y-3 text-sm text-gray-600">
-                        <p>{step.description}</p>
+                <div>
+                  <div className="mb-8">
+                    <h2 className="text-2xl font-bold text-gray-900 mb-2">
+                      Admission Process 2026
+                    </h2>
+                    <p className="text-gray-600">
+                      Step-by-step guide for Science (+2) admission
+                    </p>
+                  </div>
+                  {admissionProcess.map((step: any, idx: number) => (
+                    <div
+                      key={idx}
+                      className="border border-gray-200 rounded-md p-6 mb-6"
+                    >
+                      <div className="flex items-start gap-4 mb-4">
+                        <div className="w-10 h-10 rounded-full bg-[#0000ff] text-white flex items-center justify-center font-bold text-sm flex-shrink-0">
+                          {step.stepNumber || idx + 1}
+                        </div>
+                        <div>
+                          <h3 className="font-bold text-gray-900 text-lg mb-3">
+                            {step.title}
+                          </h3>
+                          <div className="space-y-3 text-sm text-gray-600">
+                            <p>{step.description}</p>
+                          </div>
+                        </div>
                       </div>
                     </div>
-                  </div>
+                  ))}
                 </div>
-                ))}
-              </div>
               ) : (
                 <EmptyTabState tabName="Admission Process" />
               )}
@@ -631,25 +718,32 @@ export default function AdmissionDetailPage() {
           {activeTab === "facilities" && (
             <div>
               {facilitiesData.length > 0 ? (
-              <div>
-              <div className="mb-8">
-                <h2 className="text-2xl font-bold text-gray-900 mb-2">Our Facilities</h2>
-                <p className="text-gray-600">
-                  World-class infrastructure for holistic learning
-                </p>
-              </div>
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {facilitiesData.map((fac, idx) => (
-                  <div key={idx} className="border border-gray-200 rounded-md p-6">
-                    <div className="w-12 h-12 rounded-md bg-[#0000ff] flex items-center justify-center text-white mb-4">
-                      <fac.icon className="w-6 h-6" />
-                    </div>
-                    <h3 className="font-bold text-gray-900 mb-2">{fac.title}</h3>
-                    <p className="text-sm text-gray-600">{fac.desc}</p>
+                <div>
+                  <div className="mb-8">
+                    <h2 className="text-2xl font-bold text-gray-900 mb-2">
+                      Our Facilities
+                    </h2>
+                    <p className="text-gray-600">
+                      World-class infrastructure for holistic learning
+                    </p>
                   </div>
-                ))}
-              </div>
-              </div>
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    {facilitiesData.map((fac, idx) => (
+                      <div
+                        key={idx}
+                        className="border border-gray-200 rounded-md p-6"
+                      >
+                        <div className="w-12 h-12 rounded-md bg-[#0000ff] flex items-center justify-center text-white mb-4">
+                          <fac.icon className="w-6 h-6" />
+                        </div>
+                        <h3 className="font-bold text-gray-900 mb-2">
+                          {fac.title}
+                        </h3>
+                        <p className="text-sm text-gray-600">{fac.desc}</p>
+                      </div>
+                    ))}
+                  </div>
+                </div>
               ) : (
                 <EmptyTabState tabName="Facilities" />
               )}
@@ -661,70 +755,87 @@ export default function AdmissionDetailPage() {
             <div>
               <div className="mb-6">
                 {coursesData.length > 0 ? (
-                <>
-                <h2 className="text-[22px] font-bold text-gray-900 mb-4">
-                  {collegeName} of Science Fees & Eligibility
-                </h2>
-                <h3 className="text-[17px] font-bold text-gray-900 mb-4">Full time Courses</h3>
-                <div className="overflow-x-auto rounded-md border border-gray-200">
-                  <table className="w-full text-left border-collapse min-w-[800px]">
-                    <thead>
-                      <tr className="bg-[#eff4fc] border-b border-gray-200">
-                        <th className="p-4 font-bold text-gray-900 w-[28%] border-r border-gray-200">
-                          Course
-                        </th>
-                        <th className="p-4 font-bold text-gray-900 w-[30%] border-r border-gray-200">
-                          Total Fees
-                        </th>
-                        <th className="p-4 font-bold text-gray-900 w-[27%] border-r border-gray-200">
-                          Application Date
-                        </th>
-                        <th className="p-4 font-bold text-gray-900 w-[15%]">Action</th>
-                      </tr>
-                    </thead>
-                    <tbody className="text-[15px]">
-                      {coursesData.map((row, idx) => (
-                        <tr
-                          key={idx}
-                          className={
-                            idx < coursesData.length - 1
-                              ? "border-b border-gray-200 hover:bg-gray-50"
-                              : "hover:bg-gray-50"
-                          }
-                        >
-                          <td className="p-4 align-top border-r border-gray-200">
-                            <div className="text-gray-900 font-semibold mb-1">{row.course}</div>
-                            <span className="text-[#2563eb] text-sm hover:underline cursor-pointer flex items-center">
-                              View Curriculum <ChevronRight className="w-3 h-3 ml-1" />
-                            </span>
-                          </td>
-                          <td className="p-4 align-top border-r border-gray-200">
-                            <div className="text-[#059669] mb-1">{row.fees}</div>
-                            <span className="text-[#2563eb] text-sm hover:underline cursor-pointer flex items-center">
-                              Check Details <ChevronRight className="w-3 h-3 ml-1" />
-                            </span>
-                          </td>
-                          <td className="p-4 align-top border-r border-gray-200 text-gray-700">
-                            {row.appDate}
-                          </td>
-                          <td className="p-4 align-top">
-                            <span
-                              className="text-[#2563eb] hover:underline cursor-pointer flex items-center"
-                              onClick={() => {
-                                const link = row.applyLink || applicationFormLink;
-                                if (link) window.open(link, "_blank", "noopener,noreferrer");
-                                else handleApplyNow();
-                              }}
+                  <>
+                    <h2 className="text-[22px] font-bold text-gray-900 mb-4">
+                      {collegeName} of Science Fees & Eligibility
+                    </h2>
+                    <h3 className="text-[17px] font-bold text-gray-900 mb-4">
+                      Full time Courses
+                    </h3>
+                    <div className="overflow-x-auto rounded-md border border-gray-200">
+                      <table className="w-full text-left border-collapse min-w-[800px]">
+                        <thead>
+                          <tr className="bg-[#eff4fc] border-b border-gray-200">
+                            <th className="p-4 font-bold text-gray-900 w-[28%] border-r border-gray-200">
+                              Course
+                            </th>
+                            <th className="p-4 font-bold text-gray-900 w-[30%] border-r border-gray-200">
+                              Total Fees
+                            </th>
+                            <th className="p-4 font-bold text-gray-900 w-[27%] border-r border-gray-200">
+                              Application Date
+                            </th>
+                            <th className="p-4 font-bold text-gray-900 w-[15%]">
+                              Action
+                            </th>
+                          </tr>
+                        </thead>
+                        <tbody className="text-[15px]">
+                          {coursesData.map((row, idx) => (
+                            <tr
+                              key={idx}
+                              className={
+                                idx < coursesData.length - 1
+                                  ? "border-b border-gray-200 hover:bg-gray-50"
+                                  : "hover:bg-gray-50"
+                              }
                             >
-                              Apply Now <ChevronRight className="w-4 h-4 ml-1" />
-                            </span>
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
-                </>
+                              <td className="p-4 align-top border-r border-gray-200">
+                                <div className="text-gray-900 font-semibold mb-1">
+                                  {row.course}
+                                </div>
+                                <span className="text-[#2563eb] text-sm hover:underline cursor-pointer flex items-center">
+                                  View Curriculum{" "}
+                                  <ChevronRight className="w-3 h-3 ml-1" />
+                                </span>
+                              </td>
+                              <td className="p-4 align-top border-r border-gray-200">
+                                <div className="text-[#059669] mb-1">
+                                  {row.fees}
+                                </div>
+                                <span className="text-[#2563eb] text-sm hover:underline cursor-pointer flex items-center">
+                                  Check Details{" "}
+                                  <ChevronRight className="w-3 h-3 ml-1" />
+                                </span>
+                              </td>
+                              <td className="p-4 align-top border-r border-gray-200 text-gray-700">
+                                {row.appDate}
+                              </td>
+                              <td className="p-4 align-top">
+                                <span
+                                  className="text-[#2563eb] hover:underline cursor-pointer flex items-center"
+                                  onClick={() => {
+                                    const link =
+                                      row.applyLink || applicationFormLink;
+                                    if (link)
+                                      window.open(
+                                        link,
+                                        "_blank",
+                                        "noopener,noreferrer",
+                                      );
+                                    else handleApplyNow();
+                                  }}
+                                >
+                                  Apply Now{" "}
+                                  <ChevronRight className="w-4 h-4 ml-1" />
+                                </span>
+                              </td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+                  </>
                 ) : (
                   <EmptyTabState tabName="Courses &amp; Fees" />
                 )}
@@ -737,77 +848,83 @@ export default function AdmissionDetailPage() {
             <div>
               <div>
                 {scholarshipData.length > 0 ? (
-                <>
-                <h2 className="text-[22px] font-bold text-gray-900 mb-4">
-                  Scholarships Overview
-                </h2>
-                <div className="overflow-x-auto rounded-md border border-gray-200">
-                  <table className="w-full text-left border-collapse min-w-[800px]">
-                    <thead>
-                      <tr className="bg-[#eff4fc] border-b border-gray-200">
-                        <th className="p-4 font-bold text-gray-900 w-[18%] border-r border-gray-200">
-                          Scholarship
-                        </th>
-                        <th className="p-4 font-bold text-gray-900 w-[10%] border-r border-gray-200">
-                          Level
-                        </th>
-                        <th className="p-4 font-bold text-gray-900 w-[15%] border-r border-gray-200">
-                          Stream
-                        </th>
-                        <th className="p-4 font-bold text-gray-900 w-[12%] border-r border-gray-200">
-                          Coverage
-                        </th>
-                        <th className="p-4 font-bold text-gray-900 w-[20%] border-r border-gray-200">
-                          Eligibility
-                        </th>
-                        <th className="p-4 font-bold text-gray-900 w-[10%] border-r border-gray-200">
-                          Seats
-                        </th>
-                        <th className="p-4 font-bold text-gray-900 w-[15%]">Action</th>
-                      </tr>
-                    </thead>
-                    <tbody className="text-[15px]">
-                      {scholarshipData.map((row, idx) => (
-                        <tr
-                          key={idx}
-                          className={
-                            idx < scholarshipData.length - 1
-                              ? "border-b border-gray-200 hover:bg-gray-50"
-                              : "hover:bg-gray-50"
-                          }
-                        >
-                          <td className="p-4 align-top border-r border-gray-200">
-                            <div className="text-gray-900 font-semibold mb-1">{row.name}</div>
-                            <span className="text-[#2563eb] text-sm hover:underline cursor-pointer flex items-center">
-                              View Scholarship <ChevronRight className="w-3 h-3 ml-1" />
-                            </span>
-                          </td>
-                          <td className="p-4 align-top border-r border-gray-200 text-gray-700">
-                            {row.level}
-                          </td>
-                          <td className="p-4 align-top border-r border-gray-200 text-gray-700">
-                            {row.stream}
-                          </td>
-                          <td className="p-4 align-top border-r border-gray-200 text-gray-700">
-                            {row.coverage}
-                          </td>
-                          <td className="p-4 align-top border-r border-gray-200 text-gray-700">
-                            {row.eligibility}
-                          </td>
-                          <td className="p-4 align-top border-r border-gray-200 text-gray-700">
-                            {row.seats}
-                          </td>
-                          <td className="p-4 align-top">
-                            <span className="text-[#2563eb] hover:underline cursor-pointer flex items-center">
-                              Download File <Download className="w-4 h-4 ml-1" />
-                            </span>
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
-                </>
+                  <>
+                    <h2 className="text-[22px] font-bold text-gray-900 mb-4">
+                      Scholarships Overview
+                    </h2>
+                    <div className="overflow-x-auto rounded-md border border-gray-200">
+                      <table className="w-full text-left border-collapse min-w-[800px]">
+                        <thead>
+                          <tr className="bg-[#eff4fc] border-b border-gray-200">
+                            <th className="p-4 font-bold text-gray-900 w-[18%] border-r border-gray-200">
+                              Scholarship
+                            </th>
+                            <th className="p-4 font-bold text-gray-900 w-[10%] border-r border-gray-200">
+                              Level
+                            </th>
+                            <th className="p-4 font-bold text-gray-900 w-[15%] border-r border-gray-200">
+                              Stream
+                            </th>
+                            <th className="p-4 font-bold text-gray-900 w-[12%] border-r border-gray-200">
+                              Coverage
+                            </th>
+                            <th className="p-4 font-bold text-gray-900 w-[20%] border-r border-gray-200">
+                              Eligibility
+                            </th>
+                            <th className="p-4 font-bold text-gray-900 w-[10%] border-r border-gray-200">
+                              Seats
+                            </th>
+                            <th className="p-4 font-bold text-gray-900 w-[15%]">
+                              Action
+                            </th>
+                          </tr>
+                        </thead>
+                        <tbody className="text-[15px]">
+                          {scholarshipData.map((row, idx) => (
+                            <tr
+                              key={idx}
+                              className={
+                                idx < scholarshipData.length - 1
+                                  ? "border-b border-gray-200 hover:bg-gray-50"
+                                  : "hover:bg-gray-50"
+                              }
+                            >
+                              <td className="p-4 align-top border-r border-gray-200">
+                                <div className="text-gray-900 font-semibold mb-1">
+                                  {row.name}
+                                </div>
+                                <span className="text-[#2563eb] text-sm hover:underline cursor-pointer flex items-center">
+                                  View Scholarship{" "}
+                                  <ChevronRight className="w-3 h-3 ml-1" />
+                                </span>
+                              </td>
+                              <td className="p-4 align-top border-r border-gray-200 text-gray-700">
+                                {row.level}
+                              </td>
+                              <td className="p-4 align-top border-r border-gray-200 text-gray-700">
+                                {row.stream}
+                              </td>
+                              <td className="p-4 align-top border-r border-gray-200 text-gray-700">
+                                {row.coverage}
+                              </td>
+                              <td className="p-4 align-top border-r border-gray-200 text-gray-700">
+                                {row.eligibility}
+                              </td>
+                              <td className="p-4 align-top border-r border-gray-200 text-gray-700">
+                                {row.seats}
+                              </td>
+                              <td className="p-4 align-top">
+                                <span className="text-[#2563eb] hover:underline cursor-pointer flex items-center">
+                                  Download File{" "}
+                                  <Download className="w-4 h-4 ml-1" />
+                                </span>
+                              </td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+                  </>
                 ) : (
                   <EmptyTabState tabName="Scholarships" />
                 )}
@@ -819,53 +936,64 @@ export default function AdmissionDetailPage() {
           {activeTab === "contact" && (
             <div>
               {staffData.length > 0 ? (
-              <div>
-              <div className="mb-8">
-                <h2 className="text-2xl font-bold text-gray-900 mb-2">Contact Information</h2>
-                <p className="text-gray-600">Get in touch with our admission team</p>
-              </div>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                {staffData.map((staff, idx) => (
-                  <div key={idx} className="border border-gray-200 rounded-md p-6 bg-white">
-                    <div className="flex items-start gap-4 mb-4">
-                      <img
-                        src={staff.img}
-                        alt={staff.name}
-                        className="w-20 h-20 rounded-md object-cover flex-shrink-0"
-                      />
-                      <div>
-                        <h4 className="font-bold text-gray-900">{staff.name}</h4>
-                        <p className="text-sm text-[#0000ff] font-medium">{staff.role}</p>
-                      </div>
-                    </div>
-                    <div className="space-y-2 text-sm mb-4">
-                      <div className="flex items-center gap-2 text-gray-600">
-                        <Phone className="w-4 h-4 text-[#0000ff]" />
-                        <span>{staff.phone}</span>
-                      </div>
-                      <div className="flex items-center gap-2 text-gray-600">
-                        <Mail className="w-4 h-4 text-[#0000ff]" />
+                <div>
+                  <div className="mb-8">
+                    <h2 className="text-2xl font-bold text-gray-900 mb-2">
+                      Contact Information
+                    </h2>
+                    <p className="text-gray-600">
+                      Get in touch with our admission team
+                    </p>
+                  </div>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    {staffData.map((staff, idx) => (
+                      <div
+                        key={idx}
+                        className="border border-gray-200 rounded-md p-6 bg-white"
+                      >
+                        <div className="flex items-start gap-4 mb-4">
+                          <img
+                            src={staff.img}
+                            alt={staff.name}
+                            className="w-20 h-20 rounded-md object-cover flex-shrink-0"
+                          />
+                          <div>
+                            <h4 className="font-bold text-gray-900">
+                              {staff.name}
+                            </h4>
+                            <p className="text-sm text-[#0000ff] font-medium">
+                              {staff.role}
+                            </p>
+                          </div>
+                        </div>
+                        <div className="space-y-2 text-sm mb-4">
+                          <div className="flex items-center gap-2 text-gray-600">
+                            <Phone className="w-4 h-4 text-[#0000ff]" />
+                            <span>{staff.phone}</span>
+                          </div>
+                          <div className="flex items-center gap-2 text-gray-600">
+                            <Mail className="w-4 h-4 text-[#0000ff]" />
+                            <a
+                              href={`mailto:${staff.email}`}
+                              className="hover:text-[#0000ff] transition"
+                            >
+                              {staff.email}
+                            </a>
+                          </div>
+                        </div>
                         <a
-                          href={`mailto:${staff.email}`}
-                          className="hover:text-[#0000ff] transition"
+                          href={`https://wa.me/${staff.wa}`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="w-full flex items-center justify-center gap-2 bg-[#0000ff] hover:bg-[#0000cc] text-white font-semibold py-2.5 px-4 rounded-md transition-colors text-sm"
                         >
-                          {staff.email}
+                          <WhatsAppIcon className="w-5 h-5" />
+                          Message on WhatsApp
                         </a>
                       </div>
-                    </div>
-                    <a
-                      href={`https://wa.me/${staff.wa}`}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="w-full flex items-center justify-center gap-2 bg-[#0000ff] hover:bg-[#0000cc] text-white font-semibold py-2.5 px-4 rounded-md transition-colors text-sm"
-                    >
-                      <WhatsAppIcon className="w-5 h-5" />
-                      Message on WhatsApp
-                    </a>
+                    ))}
                   </div>
-                ))}
-              </div>
-              </div>
+                </div>
               ) : (
                 <EmptyTabState tabName="Contact" />
               )}
@@ -876,43 +1004,45 @@ export default function AdmissionDetailPage() {
           {activeTab === "faq" && (
             <div>
               {faqData.length > 0 ? (
-              <div>
-              <div className="mb-6">
-                <h2 className="text-[20px] font-bold text-gray-900">
-                  Frequently Asked Questions
-                </h2>
-                <p className="text-[14px] text-gray-500 mt-1">
-                  Find answers to common questions
-                </p>
-              </div>
-              <div className="space-y-3">
-                {faqData.map((faq, idx) => (
-                  <div
-                    key={idx}
-                    className="bg-white rounded-md overflow-hidden border border-gray-100"
-                  >
-                    <button
-                      onClick={() => toggleFaq(idx)}
-                      className="w-full px-5 py-4 flex items-center justify-between text-left transition"
-                    >
-                      <span className="font-semibold text-gray-900 text-[15px] pr-4">
-                        Q: {faq.q}
-                      </span>
-                      <ChevronDown
-                        className={`w-5 h-5 text-gray-400 shrink-0 transition-transform ${
-                          openFaq === idx ? "rotate-180" : ""
-                        }`}
-                      />
-                    </button>
-                    {openFaq === idx && (
-                      <div className="px-5 pb-4">
-                        <p className="text-[14px] text-gray-600 leading-relaxed">{faq.a}</p>
-                      </div>
-                    )}
+                <div>
+                  <div className="mb-6">
+                    <h2 className="text-[20px] font-bold text-gray-900">
+                      Frequently Asked Questions
+                    </h2>
+                    <p className="text-[14px] text-gray-500 mt-1">
+                      Find answers to common questions
+                    </p>
                   </div>
-                ))}
-              </div>
-              </div>
+                  <div className="space-y-3">
+                    {faqData.map((faq, idx) => (
+                      <div
+                        key={idx}
+                        className="bg-white rounded-md overflow-hidden border border-gray-100"
+                      >
+                        <button
+                          onClick={() => toggleFaq(idx)}
+                          className="w-full px-5 py-4 flex items-center justify-between text-left transition"
+                        >
+                          <span className="font-semibold text-gray-900 text-[15px] pr-4">
+                            Q: {faq.q}
+                          </span>
+                          <ChevronDown
+                            className={`w-5 h-5 text-gray-400 shrink-0 transition-transform ${
+                              openFaq === idx ? "rotate-180" : ""
+                            }`}
+                          />
+                        </button>
+                        {openFaq === idx && (
+                          <div className="px-5 pb-4">
+                            <p className="text-[14px] text-gray-600 leading-relaxed">
+                              {faq.a}
+                            </p>
+                          </div>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                </div>
               ) : (
                 <EmptyTabState tabName="FAQ" />
               )}
@@ -929,8 +1059,8 @@ export default function AdmissionDetailPage() {
                   Are You Interested in this College?
                 </h3>
                 <p className="text-[13px] text-white/90 leading-relaxed mb-3">
-                  Apply now or download the brochure for more information about programs and
-                  admission process.
+                  Apply now or download the brochure for more information about
+                  programs and admission process.
                 </p>
               </div>
               <div className="space-y-3 pt-4 border-t border-blue-500/50">
@@ -952,7 +1082,9 @@ export default function AdmissionDetailPage() {
           </div>
 
           <div className="bg-white border border-gray-100 rounded-md p-5">
-            <h3 className="font-bold text-gray-900 text-[18px] mb-5">Contact Information</h3>
+            <h3 className="font-bold text-gray-900 text-[18px] mb-5">
+              Contact Information
+            </h3>
 
             <ul className="space-y-4">
               <li className="flex items-start gap-3 text-[13px]">
@@ -960,7 +1092,9 @@ export default function AdmissionDetailPage() {
                   <MapPin className="w-4 h-4" />
                 </div>
                 <div>
-                  <span className="block text-gray-900 font-bold text-[13px]">Address</span>
+                  <span className="block text-gray-900 font-bold text-[13px]">
+                    Address
+                  </span>
                   <span className="text-gray-500 font-medium text-[12px]">
                     {institution?.location || "N/A"}
                   </span>
@@ -971,7 +1105,9 @@ export default function AdmissionDetailPage() {
                   <Phone className="w-4 h-4" />
                 </div>
                 <div>
-                  <span className="block text-gray-900 font-bold text-[13px]">Phone</span>
+                  <span className="block text-gray-900 font-bold text-[13px]">
+                    Phone
+                  </span>
                   <span className="text-gray-500 font-medium text-[12px]">
                     {institution?.contact_phone || staffData[0]?.phone || "N/A"}
                   </span>
@@ -982,7 +1118,9 @@ export default function AdmissionDetailPage() {
                   <Mail className="w-4 h-4" />
                 </div>
                 <div>
-                  <span className="block text-gray-900 font-bold text-[13px]">Email</span>
+                  <span className="block text-gray-900 font-bold text-[13px]">
+                    Email
+                  </span>
                   <span className="text-gray-500 font-medium text-[12px]">
                     {institution?.contact_email || staffData[0]?.email || "N/A"}
                   </span>
@@ -993,21 +1131,33 @@ export default function AdmissionDetailPage() {
                   <Globe className="w-4 h-4" />
                 </div>
                 <div>
-                  <span className="block text-gray-900 font-bold text-[13px]">Website</span>
+                  <span className="block text-gray-900 font-bold text-[13px]">
+                    Website
+                  </span>
                   <a
                     href={institution?.website || "#"}
                     target="_blank"
                     rel="noopener noreferrer"
                     className="text-blue-500 font-medium text-[12px] hover:underline transition"
                   >
-                    {institution?.website ? (() => { try { return new URL(institution.website).hostname; } catch { return institution.website; } })() : "N/A"}
+                    {institution?.website
+                      ? (() => {
+                          try {
+                            return new URL(institution.website).hostname;
+                          } catch {
+                            return institution.website;
+                          }
+                        })()
+                      : "N/A"}
                   </a>
                 </div>
               </li>
             </ul>
 
             <div className="mt-5">
-              <h4 className="font-bold text-gray-900 text-[13px] mb-3">Follow Us</h4>
+              <h4 className="font-bold text-gray-900 text-[13px] mb-3">
+                Follow Us
+              </h4>
               <div className="flex items-center gap-3">
                 <a
                   href="https://www.facebook.com/"
@@ -1037,7 +1187,9 @@ export default function AdmissionDetailPage() {
             </div>
 
             <div className="mt-5 pt-5 border-t border-gray-100">
-              <h4 className="font-bold text-gray-900 text-[13px] mb-3">Location</h4>
+              <h4 className="font-bold text-gray-900 text-[13px] mb-3">
+                Location
+              </h4>
               <div className="rounded-md overflow-hidden border border-gray-200">
                 <iframe
                   src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3532.4762842059996!2d85.32!3d27.71!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x39eb190c0b8c5e01%3A0x1234567890abcdef!2sKamalpokhari%2C%20Kathmandu!5e0!3m2!1sen!2snp!4v1234567890"
@@ -1063,7 +1215,9 @@ export default function AdmissionDetailPage() {
               className="fixed inset-0 bg-gray-900/40 transition-opacity backdrop-blur-sm"
               onClick={() => setShowNotificationModal(false)}
             />
-            <span className="hidden sm:inline-block sm:align-middle sm:h-screen">&#8203;</span>
+            <span className="hidden sm:inline-block sm:align-middle sm:h-screen">
+              &#8203;
+            </span>
             <div className="inline-block align-bottom bg-white rounded-md px-4 pt-5 pb-4 text-left overflow-hidden transform transition-all sm:my-8 sm:align-middle sm:max-w-sm sm:w-full sm:p-6 relative">
               <button
                 onClick={() => setShowNotificationModal(false)}
@@ -1077,7 +1231,8 @@ export default function AdmissionDetailPage() {
                   className="text-[17px] font-bold text-gray-900 leading-snug mb-5"
                   id="modal-title"
                 >
-                  To get Recommendations &amp; Alerts, please share these details
+                  To get Recommendations &amp; Alerts, please share these
+                  details
                 </h3>
 
                 <div className="space-y-4">

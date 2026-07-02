@@ -1,9 +1,10 @@
 "use client";
 
-import React, { useState, lazy, Suspense, useCallback } from "react";
+import React, { useState, lazy, Suspense, useCallback, useEffect } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import Image from "next/image";
 import { clearAllAuthSessions, clearCookie } from "@/services/authSession";
+import { apiService } from "@/services/api";
 import {
   LayoutDashboard,
   GraduationCap,
@@ -35,7 +36,9 @@ const AddCollegeSection = lazy(() => import("./AddCollegeSection"));
 const CourseListSection = lazy(() => import("./CourseListSection"));
 const AddCourseSection = lazy(() => import("./AddCourseSection"));
 const ScholarshipListSection = lazy(() => import("./ScholarshipListSection"));
-const CreateScholarshipSection = lazy(() => import("./CreateScholarshipSection"));
+const CreateScholarshipSection = lazy(
+  () => import("./CreateScholarshipSection"),
+);
 const EntranceListSection = lazy(() => import("./EntranceListSection"));
 const AddEntranceSection = lazy(() => import("./AddEntranceSection"));
 const MessageInquirySection = lazy(() => import("./MessageInquirySection"));
@@ -49,8 +52,12 @@ const CampusFeedSection = lazy(() => import("./CampusFeedSection"));
 const NotificationSection = lazy(() => import("./NotificationSection"));
 const AccessControlSection = lazy(() => import("./AccessControlSection"));
 const PaymentSection = lazy(() => import("./PaymentSection"));
-const OrganizationProfileSection = lazy(() => import("./OrganizationProfileSection"));
-const OrganizationSettingsSection = lazy(() => import("./OrganizationSettingsSection"));
+const OrganizationProfileSection = lazy(
+  () => import("./OrganizationProfileSection"),
+);
+const OrganizationSettingsSection = lazy(
+  () => import("./OrganizationSettingsSection"),
+);
 const HistorySection = lazy(() => import("./HistorySection"));
 const BackupSection = lazy(() => import("./BackupSection"));
 const SettingsSection = lazy(() => import("./SettingsSection"));
@@ -58,16 +65,26 @@ const UserListSection = lazy(() => import("./UserListSection"));
 const AddUserSection = lazy(() => import("./AddUserSection"));
 const AnalyticsSection = lazy(() => import("./AnalyticsSection"));
 const PendingProvidersSection = lazy(() => import("./PendingProvidersSection"));
-const VerifiedProvidersSection = lazy(() => import("./VerifiedProvidersSection"));
-const PendingInstitutionsSection = lazy(() => import("./PendingInstitutionsSection"));
-const ManageProfileAccessSection = lazy(() => import("./ManageProfileAccessSection"));
+const VerifiedProvidersSection = lazy(
+  () => import("./VerifiedProvidersSection"),
+);
+const PendingInstitutionsSection = lazy(
+  () => import("./PendingInstitutionsSection"),
+);
+const ManageProfileAccessSection = lazy(
+  () => import("./ManageProfileAccessSection"),
+);
 const AdvertiseRequestSection = lazy(() => import("./AdvertiseRequestSection"));
 const ManageAdsSection = lazy(() => import("./ManageAdsSection"));
-const RejectedInstitutionsSection = lazy(() => import("./RejectedInstitutionsSection"));
+const RejectedInstitutionsSection = lazy(
+  () => import("./RejectedInstitutionsSection"),
+);
 const FeedbackListSection = lazy(() => import("./FeedbackListSection"));
 const AddUniversitySection = lazy(() => import("./AddUniversitySection"));
 const ListUniversitiesSection = lazy(() => import("./ListUniversitiesSection"));
-const DraftUniversitiesSection = lazy(() => import("./DraftUniversitiesSection"));
+const DraftUniversitiesSection = lazy(
+  () => import("./DraftUniversitiesSection"),
+);
 
 type SectionType =
   | "overview"
@@ -136,21 +153,118 @@ interface NavItemData {
 }
 
 const navItems: NavItemData[] = [
-  { icon: <LayoutDashboard size={20} />, label: "Overview", section: "overview" },
-  { icon: <GraduationCap size={20} />, label: "Student Dashboard", section: "student-overview", children: [{ section: "student-overview", label: "Overview" }, { section: "student-manage-user", label: "Manage User" }, { section: "student-faq", label: "FAQ" }] },
-  { icon: <Building2 size={20} />, label: "Institution Dashboard", section: "institution-overview", children: [{ section: "add-college", label: "Create Institution" }, { section: "manage-college", label: "Listed Institutions" }, { section: "manage-profile-access", label: "Manage Profile Access" }, { section: "advertise-request", label: "Advertise Request" }, { section: "pending-institutions", label: "Pending Institutions Request" }, { section: "rejected-institutions", label: "Rejected Institutions" }] },
-  { icon: <School size={20} />, label: "Manage Universities", section: "create-universities", children: [{ section: "create-universities", label: "Create Universities" }, { section: "draft-universities", label: "Drafts" }, { section: "list-universities", label: "List Universities" }] },
-  { icon: <HandHeart size={20} />, label: "Provider Dashboard", section: "provider-overview", children: [{ section: "provider-overview", label: "Overview" }, { section: "manage-scholarship", label: "Manage Scholarship" }, { section: "pending-providers", label: "Pending Providers" }, { section: "scholarship-provider", label: "Scholarship Provider" }, { section: "provider-calendar", label: "Calendar" }, { section: "provider-evaluation", label: "Evaluation & Results" }, { section: "manage-news", label: "Manage News" }, { section: "manage-events", label: "Manage Events" }, { section: "manage-blog", label: "Manage Blogs" }, { section: "assign-access", label: "Assign Access" }] },
-  { icon: <ShieldCheck size={20} />, label: "Assign Access", section: "access-control" },
+  {
+    icon: <LayoutDashboard size={20} />,
+    label: "Overview",
+    section: "overview",
+  },
+  {
+    icon: <GraduationCap size={20} />,
+    label: "Student Dashboard",
+    section: "student-overview",
+    children: [
+      { section: "student-overview", label: "Overview" },
+      { section: "student-manage-user", label: "Manage User" },
+      { section: "student-faq", label: "FAQ" },
+    ],
+  },
+  {
+    icon: <Building2 size={20} />,
+    label: "Institution Dashboard",
+    section: "institution-overview",
+    children: [
+      { section: "add-college", label: "Create Institution" },
+      { section: "manage-college", label: "Listed Institutions" },
+      { section: "manage-profile-access", label: "Manage Profile Access" },
+      { section: "advertise-request", label: "Advertise Request" },
+      {
+        section: "pending-institutions",
+        label: "Pending Institutions Request",
+      },
+      { section: "rejected-institutions", label: "Rejected Institutions" },
+    ],
+  },
+  {
+    icon: <School size={20} />,
+    label: "Manage Universities",
+    section: "create-universities",
+    children: [
+      { section: "create-universities", label: "Create Universities" },
+      { section: "draft-universities", label: "Drafts" },
+      { section: "list-universities", label: "List Universities" },
+    ],
+  },
+  {
+    icon: <HandHeart size={20} />,
+    label: "Provider Dashboard",
+    section: "provider-overview",
+    children: [
+      { section: "provider-overview", label: "Overview" },
+      { section: "manage-scholarship", label: "Manage Scholarship" },
+      { section: "pending-providers", label: "Pending Providers" },
+      { section: "scholarship-provider", label: "Scholarship Provider" },
+      { section: "provider-calendar", label: "Calendar" },
+      { section: "provider-evaluation", label: "Evaluation & Results" },
+      { section: "manage-news", label: "Manage News" },
+      { section: "manage-events", label: "Manage Events" },
+      { section: "manage-blog", label: "Manage Blogs" },
+      { section: "assign-access", label: "Assign Access" },
+    ],
+  },
+  {
+    icon: <ShieldCheck size={20} />,
+    label: "Assign Access",
+    section: "access-control",
+  },
   { icon: <CreditCard size={20} />, label: "Revenue", section: "payment" },
   { icon: <Megaphone size={20} />, label: "Manage Ads", section: "manage-ads" },
-  { icon: <Newspaper size={20} />, label: "News", section: "news-directory", children: [{ section: "create-news", label: "Create News" }, { section: "manage-news", label: "News Directory" }] },
-  { icon: <Calendar size={20} />, label: "Events", section: "events-directory", children: [{ section: "create-event", label: "Create Events" }, { section: "manage-events", label: "Events Directory" }] },
-  { icon: <FileText size={20} />, label: "Blogs", section: "blogs-directory", children: [{ section: "create-blog", label: "Create Blogs" }, { section: "manage-blog", label: "Blogs Directory" }] },
-  { icon: <Building size={20} />, label: "Manage Campus Feed", section: "manage-campus-feed" },
-  { icon: <Bell size={20} />, label: "Notification", section: "manage-notification" },
-  { icon: <MessageSquare size={20} />, label: "Feedback", section: "manage-feedback" },
-  { icon: <MessageSquare size={20} />, label: "Message", section: "message-inquiry" },
+  {
+    icon: <Newspaper size={20} />,
+    label: "News",
+    section: "news-directory",
+    children: [
+      { section: "create-news", label: "Create News" },
+      { section: "manage-news", label: "News Directory" },
+    ],
+  },
+  {
+    icon: <Calendar size={20} />,
+    label: "Events",
+    section: "events-directory",
+    children: [
+      { section: "create-event", label: "Create Events" },
+      { section: "manage-events", label: "Events Directory" },
+    ],
+  },
+  {
+    icon: <FileText size={20} />,
+    label: "Blogs",
+    section: "blogs-directory",
+    children: [
+      { section: "create-blog", label: "Create Blogs" },
+      { section: "manage-blog", label: "Blogs Directory" },
+    ],
+  },
+  {
+    icon: <Building size={20} />,
+    label: "Manage Campus Feed",
+    section: "manage-campus-feed",
+  },
+  {
+    icon: <Bell size={20} />,
+    label: "Notification",
+    section: "manage-notification",
+  },
+  {
+    icon: <MessageSquare size={20} />,
+    label: "Feedback",
+    section: "manage-feedback",
+  },
+  {
+    icon: <MessageSquare size={20} />,
+    label: "Message",
+    section: "message-inquiry",
+  },
   { icon: <BarChart3 size={20} />, label: "Analytics", section: "analytics" },
   { icon: <Settings size={20} />, label: "Settings", section: "settings" },
 ];
@@ -158,7 +272,39 @@ const navItems: NavItemData[] = [
 export default function DashboardShell() {
   const [activeSection, setActiveSection] = useState<SectionType>("overview");
   const [dropdowns, setDropdowns] = useState<Record<string, boolean>>({});
-  const [lockedSections, setLockedSections] = useState<Record<string, boolean>>({});
+  const [lockedSections, setLockedSections] = useState<Record<string, boolean>>(
+    {},
+  );
+  const [adminUser, setAdminUser] = useState<{
+    first_name: string;
+    last_name: string;
+    email: string;
+    role: string;
+  } | null>(null);
+  const [unreadInquiries, setUnreadInquiries] = useState(0);
+  const [unreadNotifications, setUnreadNotifications] = useState(0);
+
+  React.useEffect(() => {
+    const stored = localStorage.getItem("superadmin_user");
+    if (stored) {
+      try {
+        setAdminUser(JSON.parse(stored));
+      } catch {
+        /* ignore */
+      }
+    }
+    apiService
+      .getContactInquiries()
+      .then((res) => {
+        const inquiries: any[] = res?.data?.inquiries || [];
+        setUnreadInquiries(
+          inquiries.filter(
+            (i: any) => i.status === "new" || i.status === "pending",
+          ).length,
+        );
+      })
+      .catch(() => {});
+  }, []);
 
   const toggleDropdown = (name: string) => {
     setDropdowns((prev) => ({ ...prev, [name]: !prev[name] }));
@@ -170,8 +316,12 @@ export default function DashboardShell() {
 
   const handleLogout = useCallback(async () => {
     try {
-      const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080";
-      const token = typeof window !== "undefined" ? localStorage.getItem("superadmin_token") : null;
+      const API_BASE_URL =
+        process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080";
+      const token =
+        typeof window !== "undefined"
+          ? localStorage.getItem("superadmin_token")
+          : null;
       await fetch(`${API_BASE_URL}/api/v1/auth/logout`, {
         credentials: "include",
         headers: token ? { Authorization: `Bearer ${token}` } : undefined,
@@ -188,31 +338,47 @@ export default function DashboardShell() {
     if (activeSection.startsWith("edit-news-")) {
       const editId = parseInt(activeSection.replace("edit-news-", ""), 10);
       if (!isNaN(editId)) {
-        return <CreateNewsSection setActiveSection={navigateTo} editId={editId} />;
+        return (
+          <CreateNewsSection setActiveSection={navigateTo} editId={editId} />
+        );
       }
     }
     if (activeSection.startsWith("edit-event-")) {
       const editId = parseInt(activeSection.replace("edit-event-", ""), 10);
       if (!isNaN(editId)) {
-        return <CreateEventSection setActiveSection={navigateTo} editId={editId} />;
+        return (
+          <CreateEventSection setActiveSection={navigateTo} editId={editId} />
+        );
       }
     }
     if (activeSection.startsWith("edit-blog-")) {
       const editId = parseInt(activeSection.replace("edit-blog-", ""), 10);
       if (!isNaN(editId)) {
-        return <CreateBlogSection setActiveSection={navigateTo} editId={editId} />;
+        return (
+          <CreateBlogSection setActiveSection={navigateTo} editId={editId} />
+        );
       }
     }
     if (activeSection.startsWith("edit-institution-")) {
-      const editId = parseInt(activeSection.replace("edit-institution-", ""), 10);
+      const editId = parseInt(
+        activeSection.replace("edit-institution-", ""),
+        10,
+      );
       if (!isNaN(editId)) {
-        return <AddCollegeSection setActiveSection={navigateTo} editId={editId} />;
+        return (
+          <AddCollegeSection setActiveSection={navigateTo} editId={editId} />
+        );
       }
     }
     if (activeSection.startsWith("edit-university-")) {
-      const editId = parseInt(activeSection.replace("edit-university-", ""), 10);
+      const editId = parseInt(
+        activeSection.replace("edit-university-", ""),
+        10,
+      );
       if (!isNaN(editId)) {
-        return <AddUniversitySection setActiveSection={navigateTo} editId={editId} />;
+        return (
+          <AddUniversitySection setActiveSection={navigateTo} editId={editId} />
+        );
       }
     }
     switch (activeSection) {
@@ -225,11 +391,23 @@ export default function DashboardShell() {
       case "manage-course":
         return <CourseListSection setActiveSection={navigateTo} />;
       case "add-course":
-        return <AddCourseSection setActiveSection={navigateTo} lockedSections={lockedSections} setLockedSections={setLockedSections} />;
+        return (
+          <AddCourseSection
+            setActiveSection={navigateTo}
+            lockedSections={lockedSections}
+            setLockedSections={setLockedSections}
+          />
+        );
       case "manage-scholarship":
         return <ScholarshipListSection setActiveSection={navigateTo} />;
       case "create-scholarship":
-        return <CreateScholarshipSection setActiveSection={navigateTo} lockedSections={lockedSections} setLockedSections={setLockedSections} />;
+        return (
+          <CreateScholarshipSection
+            setActiveSection={navigateTo}
+            lockedSections={lockedSections}
+            setLockedSections={setLockedSections}
+          />
+        );
       case "manage-entrance":
         return <EntranceListSection setActiveSection={navigateTo} />;
       case "add-entrance":
@@ -304,7 +482,13 @@ export default function DashboardShell() {
     <div className="min-h-screen bg-white text-gray-800 font-sans h-screen flex overflow-hidden">
       <aside className="w-64 bg-white border-r border-gray-200 flex-shrink-0 flex flex-col z-20">
         <div className="h-16 flex items-center px-6 border-b border-gray-50">
-          <Image src="/studsphere.png" alt="StudySphere Logo" width={180} height={48} className="h-10 w-auto" />
+          <Image
+            src="/studsphere.png"
+            alt="StudySphere Logo"
+            width={180}
+            height={48}
+            className="h-10 w-auto"
+          />
         </div>
         <div className="flex-1 overflow-y-auto no-scrollbar py-4 px-4 flex flex-col gap-1">
           {navItems.map((item) =>
@@ -356,22 +540,52 @@ export default function DashboardShell() {
       <div className="flex-1 flex flex-col h-screen overflow-hidden">
         <header className="h-16 bg-white flex items-center justify-end px-6 shadow-sm z-10">
           <div className="flex items-center gap-3">
-            <button type="button" className="icon-btn-hover text-gray-400 hover:text-gray-600 transition-colors relative">
+            <button
+              type="button"
+              onClick={() => setActiveSection("message-inquiry")}
+              className="icon-btn-hover text-gray-400 hover:text-gray-600 transition-colors relative"
+            >
               <MessageSquare size={22} />
-              <span className="absolute -top-1 -right-1 min-w-5 h-5 flex items-center justify-center text-[10px] font-bold text-white bg-red-500 rounded-full px-1">3</span>
+              {unreadInquiries > 0 && (
+                <span className="absolute -top-1 -right-1 min-w-5 h-5 flex items-center justify-center text-[10px] font-bold text-white bg-red-500 rounded-full px-1">
+                  {unreadInquiries}
+                </span>
+              )}
             </button>
-            <button type="button" className="icon-btn-hover text-gray-400 hover:text-gray-600 transition-colors relative">
+            <button
+              type="button"
+              onClick={() => setActiveSection("manage-notification")}
+              className="icon-btn-hover text-gray-400 hover:text-gray-600 transition-colors relative"
+            >
               <Bell size={22} />
-              <span className="absolute -top-1 -right-1 min-w-5 h-5 flex items-center justify-center text-[10px] font-bold text-white bg-red-500 rounded-full px-1">5</span>
+              {unreadNotifications > 0 && (
+                <span className="absolute -top-1 -right-1 min-w-5 h-5 flex items-center justify-center text-[10px] font-bold text-white bg-red-500 rounded-full px-1">
+                  {unreadNotifications}
+                </span>
+              )}
             </button>
 
             <div className="pl-3 border-l border-gray-200 flex items-center gap-3">
               <div className="h-10 w-10 rounded-full bg-gradient-to-br from-blue-400 to-blue-600 flex items-center justify-center text-sm font-bold text-white shadow-sm">
-                SA
+                {adminUser
+                  ? (
+                      adminUser.first_name.charAt(0) +
+                      adminUser.last_name.charAt(0)
+                    ).toUpperCase()
+                  : "SA"}
               </div>
               <div>
-                <p className="text-sm font-semibold text-gray-900">Admin System</p>
-                <p className="text-xs text-gray-500">Super Admin</p>
+                <p className="text-sm font-semibold text-gray-900">
+                  {adminUser
+                    ? `${adminUser.first_name} ${adminUser.last_name}`
+                    : "Admin System"}
+                </p>
+                <p className="text-xs text-gray-500">
+                  {adminUser?.role === "superadmin" ||
+                  adminUser?.role === "super_admin"
+                    ? "Super Admin"
+                    : adminUser?.role || "Super Admin"}
+                </p>
               </div>
             </div>
           </div>
@@ -413,7 +627,9 @@ function NavItem({
       type="button"
       onClick={onClick}
       className={`nav-item flex items-center gap-3 px-3 py-2.5 rounded-md transition-colors w-full ${
-        active ? "active bg-blue-50 text-blue-600" : "text-gray-700 hover:bg-blue-50 hover:text-blue-600"
+        active
+          ? "active bg-blue-50 text-blue-600"
+          : "text-gray-700 hover:bg-blue-50 hover:text-blue-600"
       }`}
     >
       {icon}
@@ -446,7 +662,10 @@ function NavDropdown({
           {icon}
           <span className="font-medium text-sm">{label}</span>
         </div>
-        <ChevronRight size={14} className={`transition-transform duration-200 ${isOpen ? "rotate-90" : ""}`} />
+        <ChevronRight
+          size={14}
+          className={`transition-transform duration-200 ${isOpen ? "rotate-90" : ""}`}
+        />
       </button>
       <div
         className={`overflow-hidden transition-all duration-200 ${
@@ -465,7 +684,9 @@ function PlaceholderSection({ section }: { section: string }) {
       <div className="text-center">
         <FileText size={40} className="mx-auto mb-3 opacity-50" />
         <p className="text-lg font-medium">Coming Soon</p>
-        <p className="text-sm mt-1">{section.replace(/-/g, " ")} section is under development.</p>
+        <p className="text-sm mt-1">
+          {section.replace(/-/g, " ")} section is under development.
+        </p>
       </div>
     </div>
   );

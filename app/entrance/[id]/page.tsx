@@ -276,7 +276,7 @@ const EntranceDetailsPage: React.FC = () => {
   return (
     <div className="min-h-screen bg-white">
       {/* Hero Section */}
-      <div className="mx-auto max-w-350 pt-12 pb-8">
+      <div className="mx-auto max-w-350 px-4 sm:px-6 lg:px-8 pt-12 pb-8">
         <nav className="flex items-center text-sm text-gray-500 mb-6 gap-2">
           <span
             className="hover:text-gray-900 transition-colors cursor-pointer"
@@ -318,7 +318,7 @@ const EntranceDetailsPage: React.FC = () => {
 
       {/* Sticky Tab Navigation */}
       <div className="sticky top-0 z-40 bg-white border-b border-gray-100 overflow-hidden">
-        <div className="mx-auto max-w-350 relative">
+        <div className="mx-auto max-w-350 px-4 sm:px-6 lg:px-8 relative">
           <button
             onClick={() => scrollTabs(-1)}
             className="absolute left-0 top-1/2 -translate-y-1/2 z-10 w-9 h-9 bg-white border border-gray-200 rounded-full flex items-center justify-center md:hidden"
@@ -352,7 +352,7 @@ const EntranceDetailsPage: React.FC = () => {
       </div>
 
       {/* Main Grid */}
-      <div className="mx-auto max-w-350 py-8 md:py-12 grid grid-cols-1 lg:grid-cols-3 gap-10 md:gap-10 bg-white">
+      <div className="mx-auto max-w-350 px-4 sm:px-6 lg:px-8 py-8 md:py-12 grid grid-cols-1 lg:grid-cols-3 gap-10 md:gap-10 bg-white">
         {/* Left: Main Content */}
         <div className="lg:col-span-2 min-h-[500px]">
           {/* Overview Tab */}

@@ -663,6 +663,7 @@ export interface ForumPost {
   id: number;
   user_id: number;
   community_id: number;
+  category?: string;
   title: string;
   content: string;
   image_url?: string;
@@ -1765,6 +1766,30 @@ export const apiService = {
     if (!response.ok) throw new Error("Failed to fetch communities");
     const data = await response.json();
     return data.data || data;
+  },
+
+  async createForumCommunity(data: {
+    name: string;
+    description?: string;
+    emoji?: string;
+    bg_color?: string;
+  }): Promise<ForumCommunity> {
+    const token =
+      typeof window !== "undefined"
+        ? localStorage.getItem("superadmin_token")
+        : null;
+    const response = await fetch(`${API_BASE_URL}/api/v1/forum/communities`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        ...(token ? { Authorization: `Bearer ${token}` } : {}),
+      },
+      body: JSON.stringify(data),
+      credentials: "include",
+    });
+    if (!response.ok) throw new Error("Failed to create community");
+    const res = await response.json();
+    return res.data || res;
   },
 
   async getForumPosts(

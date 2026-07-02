@@ -11,13 +11,40 @@ import { institutionAdmissionApi } from "@/services/institutionAdmissionApi";
 import ImageCropperModal from "@/components/ScholarshipProvider/common/ImageCropperModal";
 
 const kebabToPascal = (name: string): string =>
-  name.replace(/-./g, (m) => m[1].toUpperCase()).replace(/^./, (m) => m.toUpperCase());
+  name
+    .replace(/-./g, (m) => m[1].toUpperCase())
+    .replace(/^./, (m) => m.toUpperCase());
 
-const DynamicIcon = ({ name, size = 24, className = "" }: { name: string; size?: number; className?: string }) => {
-  const IconComponent = (LucideIcons.icons as Record<string, React.ComponentType<{ size?: number; className?: string }>>)[kebabToPascal(name)];
-  return IconComponent ? <IconComponent size={size} className={className} /> : (
-    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className={className}>
-      <circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/>
+const DynamicIcon = ({
+  name,
+  size = 24,
+  className = "",
+}: {
+  name: string;
+  size?: number;
+  className?: string;
+}) => {
+  const IconComponent = (
+    LucideIcons.icons as Record<
+      string,
+      React.ComponentType<{ size?: number; className?: string }>
+    >
+  )[kebabToPascal(name)];
+  return IconComponent ? (
+    <IconComponent size={size} className={className} />
+  ) : (
+    <svg
+      width={size}
+      height={size}
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      className={className}
+    >
+      <circle cx="12" cy="12" r="10" />
+      <path d="M12 16v-4" />
+      <path d="M12 8h.01" />
     </svg>
   );
 };
@@ -42,6 +69,7 @@ interface ProgramCard {
   id: number;
   title: string;
   subtitle: string;
+  affiliation: string;
   admissionStatus: string;
   programIcon: string;
   description: string;
@@ -119,7 +147,14 @@ const nextId = <T extends { id: number }>(items: T[]) =>
   Math.max(0, ...items.map((i) => i.id)) + 1;
 
 const toArr = (v: unknown): string[] =>
-  Array.isArray(v) ? v.map(String) : typeof v === "string" && v ? v.split("\n").map(s => s.replace(/^-\s*/, "").trim()).filter(Boolean) : [];
+  Array.isArray(v)
+    ? v.map(String)
+    : typeof v === "string" && v
+      ? v
+          .split("\n")
+          .map((s) => s.replace(/^-\s*/, "").trim())
+          .filter(Boolean)
+      : [];
 
 function SectionItemHeader({
   icon,
@@ -150,7 +185,16 @@ function SectionItemHeader({
           onClick={onAdd}
           className="px-3 py-1.5 text-sm font-medium text-blue-600 bg-white border border-gray-200 rounded-lg hover:bg-blue-50 flex items-center gap-1.5 transition-colors shadow-sm shrink-0"
         >
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <svg
+            width="16"
+            height="16"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          >
             <line x1="12" y1="5" x2="12" y2="19" />
             <line x1="5" y1="12" x2="19" y2="12" />
           </svg>
@@ -163,7 +207,10 @@ function SectionItemHeader({
 
 const AdmissionCreatePage: React.FC = () => {
   const router = useRouter();
-  const editId = typeof window !== "undefined" ? new URLSearchParams(window.location.search).get("id") : null;
+  const editId =
+    typeof window !== "undefined"
+      ? new URLSearchParams(window.location.search).get("id")
+      : null;
 
   const [dataLoaded, setDataLoaded] = useState(false);
   const [saving, setSaving] = useState(false);
@@ -180,18 +227,22 @@ const AdmissionCreatePage: React.FC = () => {
   const [cropTargetIndex, setCropTargetIndex] = useState<number | null>(null);
 
   const getToken = () => localStorage.getItem("institutionToken");
-  const apiBase = () => process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080";
+  const apiBase = () =>
+    process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080";
 
   const uploadFile = async (file: File, folder: string): Promise<string> => {
     const base = apiBase();
     const token = getToken();
     const formData = new FormData();
     formData.append("file", file);
-    const res = await fetch(`${base}/api/v1/institution/upload?folder=${folder}`, {
-      method: "POST",
-      headers: { ...(token ? { Authorization: `Bearer ${token}` } : {}) },
-      body: formData,
-    });
+    const res = await fetch(
+      `${base}/api/v1/institution/upload?folder=${folder}`,
+      {
+        method: "POST",
+        headers: { ...(token ? { Authorization: `Bearer ${token}` } : {}) },
+        body: formData,
+      },
+    );
     if (!res.ok) throw new Error(`Upload error: ${res.status}`);
     const data = await res.json();
     const url = data?.data?.url || "";
@@ -212,7 +263,9 @@ const AdmissionCreatePage: React.FC = () => {
   const [contactPersons, setContactPersons] = useState<ContactPerson[]>([]);
   const [scholarships, setScholarships] = useState<ScholarshipCard[]>([]);
 
-  const [eligibilityCriteria, setEligibilityCriteria] = useState<EligibilityCriteria[]>([]);
+  const [eligibilityCriteria, setEligibilityCriteria] = useState<
+    EligibilityCriteria[]
+  >([]);
 
   const [admissionSteps, setAdmissionSteps] = useState<AdmissionStep[]>([]);
 
@@ -236,7 +289,9 @@ const AdmissionCreatePage: React.FC = () => {
       } else if (typeof hb === "string" && hb) {
         try {
           const parsed = JSON.parse(hb);
-          setHeroBanners(Array.isArray(parsed) ? parsed.map(String).filter(Boolean) : [hb]);
+          setHeroBanners(
+            Array.isArray(parsed) ? parsed.map(String).filter(Boolean) : [hb],
+          );
         } catch {
           setHeroBanners([hb]);
         }
@@ -261,13 +316,28 @@ const AdmissionCreatePage: React.FC = () => {
             id: i + 1,
             title: String(p.title ?? ""),
             subtitle: String(p.subtitle ?? ""),
+            affiliation: String(p.affiliation ?? ""),
             admissionStatus: String(p.admissionStatus ?? ""),
             programIcon: String(p.programIcon ?? ""),
             description: String(p.description ?? ""),
-            streams: Array.isArray(rawStreams) ? rawStreams.map(String) : (typeof rawStreams === "string" && rawStreams ? rawStreams.split("\n").map(s => s.replace(/^-\s*/, "").trim()).filter(Boolean) : []),
-            careers: Array.isArray(rawCareers) ? rawCareers.map(String) : (typeof rawCareers === "string" && rawCareers ? rawCareers.split("\n").map(s => s.replace(/^-\s*/, "").trim()).filter(Boolean) : []),
+            streams: Array.isArray(rawStreams)
+              ? rawStreams.map(String)
+              : typeof rawStreams === "string" && rawStreams
+                ? rawStreams
+                    .split("\n")
+                    .map((s) => s.replace(/^-\s*/, "").trim())
+                    .filter(Boolean)
+                : [],
+            careers: Array.isArray(rawCareers)
+              ? rawCareers.map(String)
+              : typeof rawCareers === "string" && rawCareers
+                ? rawCareers
+                    .split("\n")
+                    .map((s) => s.replace(/^-\s*/, "").trim())
+                    .filter(Boolean)
+                : [],
           };
-        })
+        }),
       );
     }
     const fd = data.facilities_data;
@@ -278,7 +348,7 @@ const AdmissionCreatePage: React.FC = () => {
           heading: String(f.heading ?? ""),
           facilityIcon: String(f.facilityIcon ?? ""),
           description: String(f.description ?? ""),
-        }))
+        })),
       );
     }
     const cd = data.courses_data;
@@ -291,7 +361,7 @@ const AdmissionCreatePage: React.FC = () => {
           feesText: String(c.feesText ?? ""),
           applicationDate: String(c.applicationDate ?? ""),
           applyLink: String(c.applyLink ?? ""),
-        }))
+        })),
       );
     }
     const dld = data.downloads_data;
@@ -301,7 +371,7 @@ const AdmissionCreatePage: React.FC = () => {
           id: i + 1,
           title: String(dl.title ?? ""),
           description: String(dl.description ?? ""),
-        }))
+        })),
       );
     }
     const fqd = data.faqs_data;
@@ -311,7 +381,7 @@ const AdmissionCreatePage: React.FC = () => {
           id: i + 1,
           question: String(fq.question ?? ""),
           answer: String(fq.answer ?? ""),
-        }))
+        })),
       );
     }
     const cpd = data.contact_persons_data;
@@ -325,7 +395,7 @@ const AdmissionCreatePage: React.FC = () => {
           email: String(item.email ?? ""),
           whatsapp: String(item.whatsapp ?? ""),
           image: String(item.image ?? ""),
-        }))
+        })),
       );
     }
     const sd = data.scholarships_data;
@@ -340,7 +410,7 @@ const AdmissionCreatePage: React.FC = () => {
           eligibility: String(s.eligibility ?? ""),
           seats: String(s.seats ?? ""),
           pdfUrl: String(s.pdfUrl ?? ""),
-        }))
+        })),
       );
     }
     const eld = data.eligibility_data;
@@ -354,7 +424,7 @@ const AdmissionCreatePage: React.FC = () => {
             stream: String(ec.stream ?? ""),
             eligibility: toArr(ec.eligibility),
             documents: toArr(ec.documents),
-          }))
+          })),
         );
       } else if (Array.isArray(eld)) {
         setEligibilityCriteria(
@@ -364,7 +434,7 @@ const AdmissionCreatePage: React.FC = () => {
             stream: String(ec.stream ?? ""),
             eligibility: toArr(ec.eligibility),
             documents: toArr(ec.documents),
-          }))
+          })),
         );
       }
     }
@@ -376,7 +446,7 @@ const AdmissionCreatePage: React.FC = () => {
           stepNumber: String(as.stepNumber ?? ""),
           title: String(as.title ?? ""),
           description: String(as.description ?? ""),
-        }))
+        })),
       );
     }
     const bd = data.brochure_data;
@@ -394,7 +464,10 @@ const AdmissionCreatePage: React.FC = () => {
       try {
         const res = await institutionAdmissionApi.get(Number(editId));
         if (res.success && res.data?.data) {
-          const d = typeof res.data.data === "string" ? JSON.parse(res.data.data) : res.data.data;
+          const d =
+            typeof res.data.data === "string"
+              ? JSON.parse(res.data.data)
+              : res.data.data;
           populateFromData(d);
         }
       } catch {
@@ -429,31 +502,49 @@ const AdmissionCreatePage: React.FC = () => {
       btnLink: whatsNewBtnLink,
     },
     programs_data: programs.map((p) => {
-      const { id: _, ...rest } = p; void _; return rest;
+      const { id: _, ...rest } = p;
+      void _;
+      return rest;
     }),
     facilities_data: facilities.map((f) => {
-      const { id: _, ...rest } = f; void _; return rest;
+      const { id: _, ...rest } = f;
+      void _;
+      return rest;
     }),
     courses_data: courses.map((c) => {
-      const { id: _, ...rest } = c; void _; return rest;
+      const { id: _, ...rest } = c;
+      void _;
+      return rest;
     }),
     downloads_data: downloads.map((d) => {
-      const { id: _, ...rest } = d; void _; return rest;
+      const { id: _, ...rest } = d;
+      void _;
+      return rest;
     }),
     faqs_data: faqs.map((fq) => {
-      const { id: _, ...rest } = fq; void _; return rest;
+      const { id: _, ...rest } = fq;
+      void _;
+      return rest;
     }),
     contact_persons_data: contactPersons.map((cp) => {
-      const { id: _, ...rest } = cp; void _; return rest;
+      const { id: _, ...rest } = cp;
+      void _;
+      return rest;
     }),
     scholarships_data: scholarships.map((s) => {
-      const { id: _, ...rest } = s; void _; return rest;
+      const { id: _, ...rest } = s;
+      void _;
+      return rest;
     }),
     eligibility_data: eligibilityCriteria.map((ec) => {
-      const { id: _, ...rest } = ec; void _; return rest;
+      const { id: _, ...rest } = ec;
+      void _;
+      return rest;
     }),
     admission_process_data: admissionSteps.map((as) => {
-      const { id: _, ...rest } = as; void _; return rest;
+      const { id: _, ...rest } = as;
+      void _;
+      return rest;
     }),
     brochure_data: {
       url: brochureUrl,
@@ -470,7 +561,7 @@ const AdmissionCreatePage: React.FC = () => {
         router.push(
           publish
             ? "/institution-zone/dashboard/admission/directory"
-            : "/institution-zone/dashboard/admission/draft"
+            : "/institution-zone/dashboard/admission/draft",
         );
       } else {
         await institutionAdmissionApi.create(data, publish);
@@ -489,7 +580,10 @@ const AdmissionCreatePage: React.FC = () => {
         <SectionHeader
           title="Edit Admission"
           breadcrumbItems={[
-            { label: "Dashboard", href: "/institution-zone/dashboard/overview" },
+            {
+              label: "Dashboard",
+              href: "/institution-zone/dashboard/overview",
+            },
             { label: "Edit Admission" },
           ]}
         />
@@ -515,16 +609,36 @@ const AdmissionCreatePage: React.FC = () => {
         <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
           <div className="border-b border-gray-200 bg-gray-50/50 px-6 py-4 flex items-center gap-3">
             <div className="p-2 bg-blue-100 text-blue-600 rounded-lg">
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="9" y1="21" x2="9" y2="9"/></svg>
+              <svg
+                width="20"
+                height="20"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              >
+                <rect x="3" y="3" width="18" height="18" rx="2" ry="2" />
+                <line x1="3" y1="9" x2="21" y2="9" />
+                <line x1="9" y1="21" x2="9" y2="9" />
+              </svg>
             </div>
             <div>
-              <h2 className="text-base font-semibold text-gray-800">Admissions Overview</h2>
-              <p className="text-sm text-gray-500 mt-0.5">Manage the main admission landing page content</p>
+              <h2 className="text-base font-semibold text-gray-800">
+                Admissions Overview
+              </h2>
+              <p className="text-sm text-gray-500 mt-0.5">
+                Manage the main admission landing page content
+              </p>
             </div>
           </div>
           <div className="p-6 space-y-5">
             <div>
-              <label className={labelClass}>Main Title (Admission Heading) <span className="text-red-500">*</span></label>
+              <label className={labelClass}>
+                Main Title (Admission Heading){" "}
+                <span className="text-red-500">*</span>
+              </label>
               <input
                 type="text"
                 className={`${inputClass} ${fieldError("overviewHeading")}`}
@@ -532,11 +646,15 @@ const AdmissionCreatePage: React.FC = () => {
                 value={overviewHeading}
                 onChange={(e) => setOverviewHeading(e.target.value)}
               />
-              <p className="text-xs text-gray-500 mt-1">This appears at the top of the admissions page</p>
+              <p className="text-xs text-gray-500 mt-1">
+                This appears at the top of the admissions page
+              </p>
             </div>
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <label className={labelClass}>Level <span className="text-red-500">*</span></label>
+                <label className={labelClass}>
+                  Level <span className="text-red-500">*</span>
+                </label>
                 <select
                   className={selectClass}
                   value={level}
@@ -557,7 +675,9 @@ const AdmissionCreatePage: React.FC = () => {
                   <option value="Bachelor">Bachelor</option>
                   <option value="Master">Master</option>
                 </select>
-                <p className="text-xs text-gray-500 mt-1">Select the academic level for this admission</p>
+                <p className="text-xs text-gray-500 mt-1">
+                  Select the academic level for this admission
+                </p>
               </div>
               <div>
                 <label className={labelClass}>Application Form Link</label>
@@ -568,61 +688,160 @@ const AdmissionCreatePage: React.FC = () => {
                   value={applicationFormLink}
                   onChange={(e) => setApplicationFormLink(e.target.value)}
                 />
-                <p className="text-xs text-gray-500 mt-1">URL where students can submit their application</p>
+                <p className="text-xs text-gray-500 mt-1">
+                  URL where students can submit their application
+                </p>
               </div>
             </div>
             <div>
-              <label className={labelClass}>Hero Banner Image <span className="text-red-500">*</span></label>
+              <label className={labelClass}>
+                Hero Banner Image <span className="text-red-500">*</span>
+              </label>
               <div className="grid grid-cols-5 gap-3">
                 {heroBanners.map((url, idx) => (
                   <div
                     key={idx}
-                    onClick={() => document.getElementById(`admission-banner-input-${idx}`)?.click()}
+                    onClick={() =>
+                      document
+                        .getElementById(`admission-banner-input-${idx}`)
+                        ?.click()
+                    }
                     className="relative aspect-video rounded-lg overflow-hidden border-2 border-gray-200 cursor-pointer hover:border-blue-400 transition-colors group"
                   >
-                    <img src={url} className="w-full h-full object-cover" alt={`Hero Banner ${idx + 1}`} />
+                    <img
+                      src={url}
+                      className="w-full h-full object-cover"
+                      alt={`Hero Banner ${idx + 1}`}
+                    />
                     <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
-                    <span className="absolute bottom-2 left-2 text-xs text-white/80 opacity-0 group-hover:opacity-100 transition-opacity">Click to replace</span>
-                    <button type="button" onClick={e => { e.stopPropagation(); setHeroBanners(prev => prev.filter((_, i) => i !== idx)); }}
-                      className="absolute top-2 right-2 p-1.5 bg-white/95 rounded-full text-red-500 hover:bg-white shadow-md opacity-0 group-hover:opacity-100 transition-opacity">
-                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+                    <span className="absolute bottom-2 left-2 text-xs text-white/80 opacity-0 group-hover:opacity-100 transition-opacity">
+                      Click to replace
+                    </span>
+                    <button
+                      type="button"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setHeroBanners((prev) =>
+                          prev.filter((_, i) => i !== idx),
+                        );
+                      }}
+                      className="absolute top-2 right-2 p-1.5 bg-white/95 rounded-full text-red-500 hover:bg-white shadow-md opacity-0 group-hover:opacity-100 transition-opacity"
+                    >
+                      <svg
+                        width="14"
+                        height="14"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth="2"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                      >
+                        <polyline points="3 6 5 6 21 6" />
+                        <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
+                      </svg>
                     </button>
-                    <input id={`admission-banner-input-${idx}`} type="file" className="hidden" accept="image/*" onChange={e => {
-                      const file = e.target.files?.[0];
-                      if (!file) return;
-                      if (!file.type.startsWith("image/")) { alert("Please select an image file."); return; }
-                      const reader = new FileReader();
-                      reader.onload = ev => { if (ev.target?.result) { setCropImageSrc(ev.target.result as string); setCropTargetIndex(idx); setCropperOpen(true); } };
-                      reader.readAsDataURL(file);
-                    }} />
+                    <input
+                      id={`admission-banner-input-${idx}`}
+                      type="file"
+                      className="hidden"
+                      accept="image/*"
+                      onChange={(e) => {
+                        const file = e.target.files?.[0];
+                        if (!file) return;
+                        if (!file.type.startsWith("image/")) {
+                          alert("Please select an image file.");
+                          return;
+                        }
+                        const reader = new FileReader();
+                        reader.onload = (ev) => {
+                          if (ev.target?.result) {
+                            setCropImageSrc(ev.target.result as string);
+                            setCropTargetIndex(idx);
+                            setCropperOpen(true);
+                          }
+                        };
+                        reader.readAsDataURL(file);
+                      }}
+                    />
                   </div>
                 ))}
                 {heroBanners.length < 5 && (
                   <div
-                    onClick={() => document.getElementById("admission-banner-input-new")?.click()}
+                    onClick={() =>
+                      document
+                        .getElementById("admission-banner-input-new")
+                        ?.click()
+                    }
                     className="aspect-video rounded-lg border-2 border-dashed border-gray-300 flex flex-col items-center justify-center text-center hover:bg-gray-50 hover:border-blue-400 transition-colors cursor-pointer"
                   >
                     <div className="p-3 bg-blue-50 text-blue-600 rounded-full">
-                      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+                      <svg
+                        width="24"
+                        height="24"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth="2"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                      >
+                        <rect
+                          x="3"
+                          y="3"
+                          width="18"
+                          height="18"
+                          rx="2"
+                          ry="2"
+                        />
+                        <circle cx="8.5" cy="8.5" r="1.5" />
+                        <polyline points="21 15 16 10 5 21" />
+                      </svg>
                     </div>
-                    <span className="mt-2 text-xs font-medium text-gray-600">Add Image</span>
-                    <span className="mt-0.5 text-[10px] text-gray-400">({heroBanners.length}/5)</span>
-                    <input id="admission-banner-input-new" type="file" className="hidden" accept="image/*" onChange={e => {
-                      const file = e.target.files?.[0];
-                      if (!file) return;
-                      if (!file.type.startsWith("image/")) { alert("Please select an image file."); return; }
-                      const reader = new FileReader();
-                      reader.onload = ev => { if (ev.target?.result) { setCropImageSrc(ev.target.result as string); setCropTargetIndex(heroBanners.length); setCropperOpen(true); } };
-                      reader.readAsDataURL(file);
-                    }} />
+                    <span className="mt-2 text-xs font-medium text-gray-600">
+                      Add Image
+                    </span>
+                    <span className="mt-0.5 text-[10px] text-gray-400">
+                      ({heroBanners.length}/5)
+                    </span>
+                    <input
+                      id="admission-banner-input-new"
+                      type="file"
+                      className="hidden"
+                      accept="image/*"
+                      onChange={(e) => {
+                        const file = e.target.files?.[0];
+                        if (!file) return;
+                        if (!file.type.startsWith("image/")) {
+                          alert("Please select an image file.");
+                          return;
+                        }
+                        const reader = new FileReader();
+                        reader.onload = (ev) => {
+                          if (ev.target?.result) {
+                            setCropImageSrc(ev.target.result as string);
+                            setCropTargetIndex(heroBanners.length);
+                            setCropperOpen(true);
+                          }
+                        };
+                        reader.readAsDataURL(file);
+                      }}
+                    />
                   </div>
                 )}
               </div>
-              <p className="text-xs text-gray-500 mt-1">Upload up to 5 banner images. Recommended size: 1920x600px (JPG/PNG)</p>
+              <p className="text-xs text-gray-500 mt-1">
+                Upload up to 5 banner images. Recommended size: 1920x600px
+                (JPG/PNG)
+              </p>
             </div>
             <div>
-              <label className={labelClass}>Overview Description <span className="text-red-500">*</span></label>
-              <div className={`border border-gray-200 rounded-lg overflow-hidden ${fieldError("overviewDesc")}`}>
+              <label className={labelClass}>
+                Overview Description <span className="text-red-500">*</span>
+              </label>
+              <div
+                className={`border border-gray-200 rounded-lg overflow-hidden ${fieldError("overviewDesc")}`}
+              >
                 <QuillEditor
                   value={overviewDesc}
                   onChange={setOverviewDesc}
@@ -632,7 +851,10 @@ const AdmissionCreatePage: React.FC = () => {
                   className="bg-white"
                 />
               </div>
-              <p className="text-xs text-gray-500 mt-1">Describe the admission program, key highlights, and what the page offers</p>
+              <p className="text-xs text-gray-500 mt-1">
+                Describe the admission program, key highlights, and what the
+                page offers
+              </p>
             </div>
           </div>
         </div>
@@ -650,6 +872,7 @@ const AdmissionCreatePage: React.FC = () => {
                   id: nextId(prev),
                   title: "",
                   subtitle: "",
+                  affiliation: "",
                   admissionStatus: "",
                   programIcon: "",
                   description: "",
@@ -662,20 +885,52 @@ const AdmissionCreatePage: React.FC = () => {
           />
           <div className="p-6 space-y-6">
             {programs.map((p) => (
-              <div key={p.id} className="p-5 bg-gray-50 rounded-lg border border-gray-200 relative group">
+              <div
+                key={p.id}
+                className="p-5 bg-gray-50 rounded-lg border border-gray-200 relative group"
+              >
                 <button
-                  onClick={() => setPrograms((prev) => prev.filter((x) => x.id !== p.id))}
+                  onClick={() =>
+                    setPrograms((prev) => prev.filter((x) => x.id !== p.id))
+                  }
                   className="absolute top-4 right-4 p-2 text-red-500 hover:bg-red-50 rounded-lg transition-colors"
                 >
-                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+                  <svg
+                    width="18"
+                    height="18"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  >
+                    <polyline points="3 6 5 6 21 6" />
+                    <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
+                  </svg>
                 </button>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pr-12">
                   <div className="md:col-span-2">
-                    <label className={labelClass}>Program Icon <span className="text-red-500">*</span></label>
+                    <label className={labelClass}>
+                      Program Icon <span className="text-red-500">*</span>
+                    </label>
                     <div className="flex items-center gap-3">
                       <div className="relative flex-1">
                         <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-gray-400"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+                          <svg
+                            width="16"
+                            height="16"
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="currentColor"
+                            strokeWidth="2"
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            className="text-gray-400"
+                          >
+                            <circle cx="11" cy="11" r="8" />
+                            <line x1="21" y1="21" x2="16.65" y2="16.65" />
+                          </svg>
                         </div>
                         <input
                           type="text"
@@ -684,7 +939,11 @@ const AdmissionCreatePage: React.FC = () => {
                           value={p.programIcon}
                           onChange={(e) =>
                             setPrograms((prev) =>
-                              prev.map((x) => (x.id === p.id ? { ...x, programIcon: e.target.value } : x))
+                              prev.map((x) =>
+                                x.id === p.id
+                                  ? { ...x, programIcon: e.target.value }
+                                  : x,
+                              ),
                             )
                           }
                         />
@@ -699,13 +958,20 @@ const AdmissionCreatePage: React.FC = () => {
                     </div>
                     <p className="text-xs text-gray-400 mt-1">
                       Enter a Lucide icon name. Browse icons at{" "}
-                      <a href="https://lucide.dev/icons" target="_blank" rel="noreferrer" className="text-blue-500 underline">
+                      <a
+                        href="https://lucide.dev/icons"
+                        target="_blank"
+                        rel="noreferrer"
+                        className="text-blue-500 underline"
+                      >
                         lucide.dev/icons
                       </a>
                     </p>
                   </div>
                   <div>
-                    <label className={labelClass}>Program Title <span className="text-red-500">*</span></label>
+                    <label className={labelClass}>
+                      Program Title <span className="text-red-500">*</span>
+                    </label>
                     <input
                       type="text"
                       className={inputClass}
@@ -713,13 +979,18 @@ const AdmissionCreatePage: React.FC = () => {
                       value={p.title}
                       onChange={(e) =>
                         setPrograms((prev) =>
-                          prev.map((x) => (x.id === p.id ? { ...x, title: e.target.value } : x))
+                          prev.map((x) =>
+                            x.id === p.id ? { ...x, title: e.target.value } : x,
+                          ),
                         )
                       }
                     />
                   </div>
                   <div>
-                    <label className={labelClass}>Subtitle / Affiliation <span className="text-red-500">*</span></label>
+                    <label className={labelClass}>
+                      Subtitle / Affiliation{" "}
+                      <span className="text-red-500">*</span>
+                    </label>
                     <input
                       type="text"
                       className={inputClass}
@@ -727,20 +998,30 @@ const AdmissionCreatePage: React.FC = () => {
                       value={p.subtitle}
                       onChange={(e) =>
                         setPrograms((prev) =>
-                          prev.map((x) => (x.id === p.id ? { ...x, subtitle: e.target.value } : x))
+                          prev.map((x) =>
+                            x.id === p.id
+                              ? { ...x, subtitle: e.target.value }
+                              : x,
+                          ),
                         )
                       }
                     />
                   </div>
 
                   <div>
-                    <label className={labelClass}>Admission Status <span className="text-red-500">*</span></label>
+                    <label className={labelClass}>
+                      Admission Status <span className="text-red-500">*</span>
+                    </label>
                     <select
                       className={selectClass}
                       value={p.admissionStatus}
                       onChange={(e) =>
                         setPrograms((prev) =>
-                          prev.map((x) => (x.id === p.id ? { ...x, admissionStatus: e.target.value } : x))
+                          prev.map((x) =>
+                            x.id === p.id
+                              ? { ...x, admissionStatus: e.target.value }
+                              : x,
+                          ),
                         )
                       }
                       style={{
@@ -761,7 +1042,9 @@ const AdmissionCreatePage: React.FC = () => {
                     </select>
                   </div>
                   <div className="md:col-span-2">
-                    <label className={labelClass}>Description <span className="text-red-500">*</span></label>
+                    <label className={labelClass}>
+                      Description <span className="text-red-500">*</span>
+                    </label>
                     <textarea
                       className={`${inputClass} min-h-[80px]`}
                       rows={3}
@@ -769,13 +1052,20 @@ const AdmissionCreatePage: React.FC = () => {
                       value={p.description}
                       onChange={(e) =>
                         setPrograms((prev) =>
-                          prev.map((x) => (x.id === p.id ? { ...x, description: e.target.value } : x))
+                          prev.map((x) =>
+                            x.id === p.id
+                              ? { ...x, description: e.target.value }
+                              : x,
+                          ),
                         )
                       }
                     />
                   </div>
                   <div>
-                    <label className={labelClass}>Available Streams (bullet points) <span className="text-red-500">*</span></label>
+                    <label className={labelClass}>
+                      Available Streams (bullet points){" "}
+                      <span className="text-red-500">*</span>
+                    </label>
                     <div className="space-y-2">
                       {p.streams.map((item, si) => (
                         <div key={si} className="flex items-center gap-2">
@@ -792,11 +1082,11 @@ const AdmissionCreatePage: React.FC = () => {
                                     ? {
                                         ...x,
                                         streams: x.streams.map((s, j) =>
-                                          j === si ? e.target.value : s
+                                          j === si ? e.target.value : s,
                                         ),
                                       }
-                                    : x
-                                )
+                                    : x,
+                                ),
                               )
                             }
                           />
@@ -805,14 +1095,31 @@ const AdmissionCreatePage: React.FC = () => {
                               setPrograms((prev) =>
                                 prev.map((x) =>
                                   x.id === p.id
-                                    ? { ...x, streams: x.streams.filter((_, j) => j !== si) }
-                                    : x
-                                )
+                                    ? {
+                                        ...x,
+                                        streams: x.streams.filter(
+                                          (_, j) => j !== si,
+                                        ),
+                                      }
+                                    : x,
+                                ),
                               )
                             }
                             className="p-1.5 text-red-400 hover:text-red-600 shrink-0"
                           >
-                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+                            <svg
+                              width="16"
+                              height="16"
+                              viewBox="0 0 24 24"
+                              fill="none"
+                              stroke="currentColor"
+                              strokeWidth="2"
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                            >
+                              <polyline points="3 6 5 6 21 6" />
+                              <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
+                            </svg>
                           </button>
                         </div>
                       ))}
@@ -820,19 +1127,36 @@ const AdmissionCreatePage: React.FC = () => {
                         onClick={() =>
                           setPrograms((prev) =>
                             prev.map((x) =>
-                              x.id === p.id ? { ...x, streams: [...x.streams, ""] } : x
-                            )
+                              x.id === p.id
+                                ? { ...x, streams: [...x.streams, ""] }
+                                : x,
+                            ),
                           )
                         }
                         className="text-sm text-blue-600 hover:text-blue-800 flex items-center gap-1"
                       >
-                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                        <svg
+                          width="14"
+                          height="14"
+                          viewBox="0 0 24 24"
+                          fill="none"
+                          stroke="currentColor"
+                          strokeWidth="2"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                        >
+                          <line x1="12" y1="5" x2="12" y2="19" />
+                          <line x1="5" y1="12" x2="19" y2="12" />
+                        </svg>
                         Add Stream
                       </button>
                     </div>
                   </div>
                   <div>
-                    <label className={labelClass}>Career Opportunities (bullet points) <span className="text-red-500">*</span></label>
+                    <label className={labelClass}>
+                      Career Opportunities (bullet points){" "}
+                      <span className="text-red-500">*</span>
+                    </label>
                     <div className="space-y-2">
                       {p.careers.map((item, ci) => (
                         <div key={ci} className="flex items-center gap-2">
@@ -849,11 +1173,11 @@ const AdmissionCreatePage: React.FC = () => {
                                     ? {
                                         ...x,
                                         careers: x.careers.map((c, j) =>
-                                          j === ci ? e.target.value : c
+                                          j === ci ? e.target.value : c,
                                         ),
                                       }
-                                    : x
-                                )
+                                    : x,
+                                ),
                               )
                             }
                           />
@@ -862,14 +1186,31 @@ const AdmissionCreatePage: React.FC = () => {
                               setPrograms((prev) =>
                                 prev.map((x) =>
                                   x.id === p.id
-                                    ? { ...x, careers: x.careers.filter((_, j) => j !== ci) }
-                                    : x
-                                )
+                                    ? {
+                                        ...x,
+                                        careers: x.careers.filter(
+                                          (_, j) => j !== ci,
+                                        ),
+                                      }
+                                    : x,
+                                ),
                               )
                             }
                             className="p-1.5 text-red-400 hover:text-red-600 shrink-0"
                           >
-                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+                            <svg
+                              width="16"
+                              height="16"
+                              viewBox="0 0 24 24"
+                              fill="none"
+                              stroke="currentColor"
+                              strokeWidth="2"
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                            >
+                              <polyline points="3 6 5 6 21 6" />
+                              <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
+                            </svg>
                           </button>
                         </div>
                       ))}
@@ -877,13 +1218,27 @@ const AdmissionCreatePage: React.FC = () => {
                         onClick={() =>
                           setPrograms((prev) =>
                             prev.map((x) =>
-                              x.id === p.id ? { ...x, careers: [...x.careers, ""] } : x
-                            )
+                              x.id === p.id
+                                ? { ...x, careers: [...x.careers, ""] }
+                                : x,
+                            ),
                           )
                         }
                         className="text-sm text-blue-600 hover:text-blue-800 flex items-center gap-1"
                       >
-                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                        <svg
+                          width="14"
+                          height="14"
+                          viewBox="0 0 24 24"
+                          fill="none"
+                          stroke="currentColor"
+                          strokeWidth="2"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                        >
+                          <line x1="12" y1="5" x2="12" y2="19" />
+                          <line x1="5" y1="12" x2="19" y2="12" />
+                        </svg>
                         Add Career
                       </button>
                     </div>
@@ -903,7 +1258,13 @@ const AdmissionCreatePage: React.FC = () => {
             onAdd={() =>
               setEligibilityCriteria((prev) => [
                 ...prev,
-                { id: nextId(prev), level: "", stream: "", eligibility: [], documents: [] },
+                {
+                  id: nextId(prev),
+                  level: "",
+                  stream: "",
+                  eligibility: [],
+                  documents: [],
+                },
               ])
             }
             addLabel="Add Criteria"
@@ -911,16 +1272,37 @@ const AdmissionCreatePage: React.FC = () => {
           <div className="p-6 space-y-6">
             <div className="space-y-6">
               {eligibilityCriteria.map((ec) => (
-                <div key={ec.id} className="p-5 bg-gray-50 rounded-lg border border-gray-200 relative group">
+                <div
+                  key={ec.id}
+                  className="p-5 bg-gray-50 rounded-lg border border-gray-200 relative group"
+                >
                   <button
-                    onClick={() => setEligibilityCriteria((prev) => prev.filter((x) => x.id !== ec.id))}
+                    onClick={() =>
+                      setEligibilityCriteria((prev) =>
+                        prev.filter((x) => x.id !== ec.id),
+                      )
+                    }
                     className="absolute top-4 right-4 p-2 text-red-500 hover:bg-red-50 rounded-lg transition-colors"
                   >
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+                    <svg
+                      width="18"
+                      height="18"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="2"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    >
+                      <polyline points="3 6 5 6 21 6" />
+                      <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
+                    </svg>
                   </button>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pr-12">
                     <div>
-                      <label className={labelClass}>Level <span className="text-red-500">*</span></label>
+                      <label className={labelClass}>
+                        Level <span className="text-red-500">*</span>
+                      </label>
                       <input
                         type="text"
                         className={inputClass}
@@ -928,13 +1310,19 @@ const AdmissionCreatePage: React.FC = () => {
                         value={ec.level}
                         onChange={(e) =>
                           setEligibilityCriteria((prev) =>
-                            prev.map((x) => (x.id === ec.id ? { ...x, level: e.target.value } : x))
+                            prev.map((x) =>
+                              x.id === ec.id
+                                ? { ...x, level: e.target.value }
+                                : x,
+                            ),
                           )
                         }
                       />
                     </div>
                     <div>
-                      <label className={labelClass}>Stream/Faculty <span className="text-red-500">*</span></label>
+                      <label className={labelClass}>
+                        Stream/Faculty <span className="text-red-500">*</span>
+                      </label>
                       <input
                         type="text"
                         className={inputClass}
@@ -942,17 +1330,26 @@ const AdmissionCreatePage: React.FC = () => {
                         value={ec.stream}
                         onChange={(e) =>
                           setEligibilityCriteria((prev) =>
-                            prev.map((x) => (x.id === ec.id ? { ...x, stream: e.target.value } : x))
+                            prev.map((x) =>
+                              x.id === ec.id
+                                ? { ...x, stream: e.target.value }
+                                : x,
+                            ),
                           )
                         }
                       />
                     </div>
                     <div>
-                      <label className={labelClass}>Eligibility (bullet points) <span className="text-red-500">*</span></label>
+                      <label className={labelClass}>
+                        Eligibility (bullet points){" "}
+                        <span className="text-red-500">*</span>
+                      </label>
                       <div className="space-y-2">
                         {toArr(ec.eligibility).map((item, ei) => (
                           <div key={ei} className="flex items-center gap-2">
-                            <span className="text-gray-400 shrink-0">&bull;</span>
+                            <span className="text-gray-400 shrink-0">
+                              &bull;
+                            </span>
                             <input
                               type="text"
                               className={inputClass}
@@ -962,9 +1359,15 @@ const AdmissionCreatePage: React.FC = () => {
                                 setEligibilityCriteria((prev) =>
                                   prev.map((x) =>
                                     x.id === ec.id
-                                      ? { ...x, eligibility: x.eligibility.map((v, j) => j === ei ? e.target.value : v) }
-                                      : x
-                                  )
+                                      ? {
+                                          ...x,
+                                          eligibility: x.eligibility.map(
+                                            (v, j) =>
+                                              j === ei ? e.target.value : v,
+                                          ),
+                                        }
+                                      : x,
+                                  ),
                                 )
                               }
                             />
@@ -973,14 +1376,31 @@ const AdmissionCreatePage: React.FC = () => {
                                 setEligibilityCriteria((prev) =>
                                   prev.map((x) =>
                                     x.id === ec.id
-                                      ? { ...x, eligibility: x.eligibility.filter((_, j) => j !== ei) }
-                                      : x
-                                  )
+                                      ? {
+                                          ...x,
+                                          eligibility: x.eligibility.filter(
+                                            (_, j) => j !== ei,
+                                          ),
+                                        }
+                                      : x,
+                                  ),
                                 )
                               }
                               className="p-1.5 text-red-400 hover:text-red-600 shrink-0"
                             >
-                              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+                              <svg
+                                width="16"
+                                height="16"
+                                viewBox="0 0 24 24"
+                                fill="none"
+                                stroke="currentColor"
+                                strokeWidth="2"
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                              >
+                                <polyline points="3 6 5 6 21 6" />
+                                <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
+                              </svg>
                             </button>
                           </div>
                         ))}
@@ -988,23 +1408,45 @@ const AdmissionCreatePage: React.FC = () => {
                           onClick={() =>
                             setEligibilityCriteria((prev) =>
                               prev.map((x) =>
-                                x.id === ec.id ? { ...x, eligibility: [...x.eligibility, ""] } : x
-                              )
+                                x.id === ec.id
+                                  ? {
+                                      ...x,
+                                      eligibility: [...x.eligibility, ""],
+                                    }
+                                  : x,
+                              ),
                             )
                           }
                           className="text-sm text-blue-600 hover:text-blue-800 flex items-center gap-1"
                         >
-                          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                          <svg
+                            width="14"
+                            height="14"
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="currentColor"
+                            strokeWidth="2"
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                          >
+                            <line x1="12" y1="5" x2="12" y2="19" />
+                            <line x1="5" y1="12" x2="19" y2="12" />
+                          </svg>
                           Add Item
                         </button>
                       </div>
                     </div>
                     <div>
-                      <label className={labelClass}>Required Documents (bullet points) <span className="text-red-500">*</span></label>
+                      <label className={labelClass}>
+                        Required Documents (bullet points){" "}
+                        <span className="text-red-500">*</span>
+                      </label>
                       <div className="space-y-2">
                         {toArr(ec.documents).map((item, di) => (
                           <div key={di} className="flex items-center gap-2">
-                            <span className="text-gray-400 shrink-0">&bull;</span>
+                            <span className="text-gray-400 shrink-0">
+                              &bull;
+                            </span>
                             <input
                               type="text"
                               className={inputClass}
@@ -1014,9 +1456,14 @@ const AdmissionCreatePage: React.FC = () => {
                                 setEligibilityCriteria((prev) =>
                                   prev.map((x) =>
                                     x.id === ec.id
-                                      ? { ...x, documents: x.documents.map((v, j) => j === di ? e.target.value : v) }
-                                      : x
-                                  )
+                                      ? {
+                                          ...x,
+                                          documents: x.documents.map((v, j) =>
+                                            j === di ? e.target.value : v,
+                                          ),
+                                        }
+                                      : x,
+                                  ),
                                 )
                               }
                             />
@@ -1025,14 +1472,31 @@ const AdmissionCreatePage: React.FC = () => {
                                 setEligibilityCriteria((prev) =>
                                   prev.map((x) =>
                                     x.id === ec.id
-                                      ? { ...x, documents: x.documents.filter((_, j) => j !== di) }
-                                      : x
-                                  )
+                                      ? {
+                                          ...x,
+                                          documents: x.documents.filter(
+                                            (_, j) => j !== di,
+                                          ),
+                                        }
+                                      : x,
+                                  ),
                                 )
                               }
                               className="p-1.5 text-red-400 hover:text-red-600 shrink-0"
                             >
-                              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+                              <svg
+                                width="16"
+                                height="16"
+                                viewBox="0 0 24 24"
+                                fill="none"
+                                stroke="currentColor"
+                                strokeWidth="2"
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                              >
+                                <polyline points="3 6 5 6 21 6" />
+                                <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
+                              </svg>
                             </button>
                           </div>
                         ))}
@@ -1040,13 +1504,27 @@ const AdmissionCreatePage: React.FC = () => {
                           onClick={() =>
                             setEligibilityCriteria((prev) =>
                               prev.map((x) =>
-                                x.id === ec.id ? { ...x, documents: [...x.documents, ""] } : x
-                              )
+                                x.id === ec.id
+                                  ? { ...x, documents: [...x.documents, ""] }
+                                  : x,
+                              ),
                             )
                           }
                           className="text-sm text-blue-600 hover:text-blue-800 flex items-center gap-1"
                         >
-                          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                          <svg
+                            width="14"
+                            height="14"
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="currentColor"
+                            strokeWidth="2"
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                          >
+                            <line x1="12" y1="5" x2="12" y2="19" />
+                            <line x1="5" y1="12" x2="19" y2="12" />
+                          </svg>
                           Add Item
                         </button>
                       </div>
@@ -1067,7 +1545,12 @@ const AdmissionCreatePage: React.FC = () => {
             onAdd={() =>
               setAdmissionSteps((prev) => [
                 ...prev,
-                { id: nextId(prev), stepNumber: String(prev.length + 1), title: "", description: "" },
+                {
+                  id: nextId(prev),
+                  stepNumber: String(prev.length + 1),
+                  title: "",
+                  description: "",
+                },
               ])
             }
             addLabel="Add Step"
@@ -1075,16 +1558,37 @@ const AdmissionCreatePage: React.FC = () => {
           <div className="p-6 space-y-6">
             <div className="space-y-6">
               {admissionSteps.map((step) => (
-                <div key={step.id} className="p-5 bg-gray-50 rounded-lg border border-gray-200 relative group">
+                <div
+                  key={step.id}
+                  className="p-5 bg-gray-50 rounded-lg border border-gray-200 relative group"
+                >
                   <button
-                    onClick={() => setAdmissionSteps((prev) => prev.filter((x) => x.id !== step.id))}
+                    onClick={() =>
+                      setAdmissionSteps((prev) =>
+                        prev.filter((x) => x.id !== step.id),
+                      )
+                    }
                     className="absolute top-4 right-4 p-2 text-red-500 hover:bg-red-50 rounded-lg transition-colors"
                   >
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+                    <svg
+                      width="18"
+                      height="18"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="2"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    >
+                      <polyline points="3 6 5 6 21 6" />
+                      <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
+                    </svg>
                   </button>
                   <div className="grid grid-cols-1 md:grid-cols-12 gap-6 pr-12">
                     <div className="md:col-span-2">
-                      <label className={labelClass}>Step # <span className="text-red-500">*</span></label>
+                      <label className={labelClass}>
+                        Step # <span className="text-red-500">*</span>
+                      </label>
                       <input
                         type="text"
                         className={`${inputClass} text-center font-semibold bg-gray-100`}
@@ -1093,7 +1597,9 @@ const AdmissionCreatePage: React.FC = () => {
                       />
                     </div>
                     <div className="md:col-span-10">
-                      <label className={labelClass}>Step Title <span className="text-red-500">*</span></label>
+                      <label className={labelClass}>
+                        Step Title <span className="text-red-500">*</span>
+                      </label>
                       <input
                         type="text"
                         className={inputClass}
@@ -1101,13 +1607,20 @@ const AdmissionCreatePage: React.FC = () => {
                         value={step.title}
                         onChange={(e) =>
                           setAdmissionSteps((prev) =>
-                            prev.map((x) => (x.id === step.id ? { ...x, title: e.target.value } : x))
+                            prev.map((x) =>
+                              x.id === step.id
+                                ? { ...x, title: e.target.value }
+                                : x,
+                            ),
                           )
                         }
                       />
                     </div>
                     <div className="md:col-span-12">
-                      <label className={labelClass}>Short Description <span className="text-red-500">*</span></label>
+                      <label className={labelClass}>
+                        Short Description{" "}
+                        <span className="text-red-500">*</span>
+                      </label>
                       <textarea
                         className={`${inputClass} min-h-[80px]`}
                         rows={3}
@@ -1115,7 +1628,11 @@ const AdmissionCreatePage: React.FC = () => {
                         value={step.description}
                         onChange={(e) =>
                           setAdmissionSteps((prev) =>
-                            prev.map((x) => (x.id === step.id ? { ...x, description: e.target.value } : x))
+                            prev.map((x) =>
+                              x.id === step.id
+                                ? { ...x, description: e.target.value }
+                                : x,
+                            ),
                           )
                         }
                       />
@@ -1136,7 +1653,12 @@ const AdmissionCreatePage: React.FC = () => {
             onAdd={() =>
               setFacilities((prev) => [
                 ...prev,
-                { id: nextId(prev), heading: "", facilityIcon: "", description: "" },
+                {
+                  id: nextId(prev),
+                  heading: "",
+                  facilityIcon: "",
+                  description: "",
+                },
               ])
             }
             addLabel="Add Facility"
@@ -1144,14 +1666,32 @@ const AdmissionCreatePage: React.FC = () => {
           <div className="p-6 space-y-4">
             <div className="space-y-4">
               {facilities.map((f) => (
-                <div key={f.id} className="flex gap-4 items-start p-5 bg-gray-50 rounded-lg border border-gray-200 relative group">
+                <div
+                  key={f.id}
+                  className="flex gap-4 items-start p-5 bg-gray-50 rounded-lg border border-gray-200 relative group"
+                >
                   <div className="flex-1 grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div className="md:col-span-2">
-                      <label className={labelClass}>Facility Icon <span className="text-red-500">*</span></label>
+                      <label className={labelClass}>
+                        Facility Icon <span className="text-red-500">*</span>
+                      </label>
                       <div className="flex items-center gap-3">
                         <div className="relative flex-1">
                           <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-gray-400"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+                            <svg
+                              width="16"
+                              height="16"
+                              viewBox="0 0 24 24"
+                              fill="none"
+                              stroke="currentColor"
+                              strokeWidth="2"
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              className="text-gray-400"
+                            >
+                              <circle cx="11" cy="11" r="8" />
+                              <line x1="21" y1="21" x2="16.65" y2="16.65" />
+                            </svg>
                           </div>
                           <input
                             type="text"
@@ -1160,7 +1700,11 @@ const AdmissionCreatePage: React.FC = () => {
                             value={f.facilityIcon}
                             onChange={(e) =>
                               setFacilities((prev) =>
-                                prev.map((x) => (x.id === f.id ? { ...x, facilityIcon: e.target.value } : x))
+                                prev.map((x) =>
+                                  x.id === f.id
+                                    ? { ...x, facilityIcon: e.target.value }
+                                    : x,
+                                ),
                               )
                             }
                           />
@@ -1175,7 +1719,9 @@ const AdmissionCreatePage: React.FC = () => {
                       </div>
                     </div>
                     <div className="md:col-span-2">
-                      <label className={labelClass}>Heading <span className="text-red-500">*</span></label>
+                      <label className={labelClass}>
+                        Heading <span className="text-red-500">*</span>
+                      </label>
                       <input
                         type="text"
                         className={inputClass}
@@ -1183,13 +1729,19 @@ const AdmissionCreatePage: React.FC = () => {
                         value={f.heading}
                         onChange={(e) =>
                           setFacilities((prev) =>
-                            prev.map((x) => (x.id === f.id ? { ...x, heading: e.target.value } : x))
+                            prev.map((x) =>
+                              x.id === f.id
+                                ? { ...x, heading: e.target.value }
+                                : x,
+                            ),
                           )
                         }
                       />
                     </div>
                     <div className="md:col-span-2">
-                      <label className={labelClass}>Description <span className="text-red-500">*</span></label>
+                      <label className={labelClass}>
+                        Description <span className="text-red-500">*</span>
+                      </label>
                       <textarea
                         className={`${inputClass} min-h-[80px]`}
                         rows={3}
@@ -1197,17 +1749,35 @@ const AdmissionCreatePage: React.FC = () => {
                         value={f.description}
                         onChange={(e) =>
                           setFacilities((prev) =>
-                            prev.map((x) => (x.id === f.id ? { ...x, description: e.target.value } : x))
+                            prev.map((x) =>
+                              x.id === f.id
+                                ? { ...x, description: e.target.value }
+                                : x,
+                            ),
                           )
                         }
                       />
                     </div>
                   </div>
                   <button
-                    onClick={() => setFacilities((prev) => prev.filter((x) => x.id !== f.id))}
+                    onClick={() =>
+                      setFacilities((prev) => prev.filter((x) => x.id !== f.id))
+                    }
                     className="p-2 text-red-500 hover:bg-red-50 rounded-lg mt-7 transition-colors"
                   >
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+                    <svg
+                      width="20"
+                      height="20"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="2"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    >
+                      <polyline points="3 6 5 6 21 6" />
+                      <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
+                    </svg>
                   </button>
                 </div>
               ))}
@@ -1221,105 +1791,153 @@ const AdmissionCreatePage: React.FC = () => {
             icon="book-open"
             title="Courses and Fees"
             subtitle="Manage course details, fees, application dates, and links"
-              onAdd={() =>
-                setCourses((prev) => [
-                  ...prev,
-                  {
-                    id: nextId(prev),
-                    courseName: "",
-                    curriculumLink: "",
-                    feesText: "",
-                    applicationDate: "",
-                    applyLink: "",
-                  },
-                ])
-              }
-              addLabel="Add Course"
-            />
-            <div className="p-6 space-y-6">
-              {courses.map((c) => (
-                <div key={c.id} className="p-5 bg-gray-50 rounded-lg border border-gray-200 relative group">
-                  <button
-                    onClick={() => setCourses((prev) => prev.filter((x) => x.id !== c.id))}
-                    className="absolute top-4 right-4 p-2 text-red-500 hover:bg-red-50 rounded-lg transition-colors"
+            onAdd={() =>
+              setCourses((prev) => [
+                ...prev,
+                {
+                  id: nextId(prev),
+                  courseName: "",
+                  curriculumLink: "",
+                  feesText: "",
+                  applicationDate: "",
+                  applyLink: "",
+                },
+              ])
+            }
+            addLabel="Add Course"
+          />
+          <div className="p-6 space-y-6">
+            {courses.map((c) => (
+              <div
+                key={c.id}
+                className="p-5 bg-gray-50 rounded-lg border border-gray-200 relative group"
+              >
+                <button
+                  onClick={() =>
+                    setCourses((prev) => prev.filter((x) => x.id !== c.id))
+                  }
+                  className="absolute top-4 right-4 p-2 text-red-500 hover:bg-red-50 rounded-lg transition-colors"
+                >
+                  <svg
+                    width="18"
+                    height="18"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
                   >
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
-                  </button>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pr-12">
-                    <div>
-                      <label className={labelClass}>Course Name <span className="text-red-500">*</span></label>
-                      <input
-                        type="text"
-                        className={inputClass}
-                        placeholder="e.g. Science (+2)"
-                        value={c.courseName}
-                        onChange={(e) =>
-                          setCourses((prev) =>
-                            prev.map((x) => (x.id === c.id ? { ...x, courseName: e.target.value } : x))
-                          )
-                        }
-                      />
-                    </div>
-                    <div>
-                      <label className={labelClass}>View Curriculum Link <span className="text-red-500">*</span></label>
-                      <input
-                        type="url"
-                        className={inputClass}
-                        placeholder="https://..."
-                        value={c.curriculumLink}
-                        onChange={(e) =>
-                          setCourses((prev) =>
-                            prev.map((x) => (x.id === c.id ? { ...x, curriculumLink: e.target.value } : x))
-                          )
-                        }
-                      />
-                    </div>
-                    <div>
-                      <label className={labelClass}>Total Fees <span className="text-red-500">*</span></label>
-                      <input
-                        type="text"
-                        className={inputClass}
-                        placeholder="e.g. Contact College for Details"
-                        value={c.feesText}
-                        onChange={(e) =>
-                          setCourses((prev) =>
-                            prev.map((x) => (x.id === c.id ? { ...x, feesText: e.target.value } : x))
-                          )
-                        }
-                      />
-                    </div>
-                    <div>
-                      <label className={labelClass}>Application Date <span className="text-red-500">*</span></label>
-                      <input
-                        type="text"
-                        className={inputClass}
-                        placeholder="e.g. Aug 2026"
-                        value={c.applicationDate}
-                        onChange={(e) =>
-                          setCourses((prev) =>
-                            prev.map((x) => (x.id === c.id ? { ...x, applicationDate: e.target.value } : x))
-                          )
-                        }
-                      />
-                    </div>
-                    <div>
-                      <label className={labelClass}>Apply Now Link <span className="text-red-500">*</span></label>
-                      <input
-                        type="url"
-                        className={inputClass}
-                        placeholder="https://..."
-                        value={c.applyLink}
-                        onChange={(e) =>
-                          setCourses((prev) =>
-                            prev.map((x) => (x.id === c.id ? { ...x, applyLink: e.target.value } : x))
-                          )
-                        }
-                      />
-                    </div>
+                    <polyline points="3 6 5 6 21 6" />
+                    <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
+                  </svg>
+                </button>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pr-12">
+                  <div>
+                    <label className={labelClass}>
+                      Course Name <span className="text-red-500">*</span>
+                    </label>
+                    <input
+                      type="text"
+                      className={inputClass}
+                      placeholder="e.g. Science (+2)"
+                      value={c.courseName}
+                      onChange={(e) =>
+                        setCourses((prev) =>
+                          prev.map((x) =>
+                            x.id === c.id
+                              ? { ...x, courseName: e.target.value }
+                              : x,
+                          ),
+                        )
+                      }
+                    />
+                  </div>
+                  <div>
+                    <label className={labelClass}>
+                      View Curriculum Link{" "}
+                      <span className="text-red-500">*</span>
+                    </label>
+                    <input
+                      type="url"
+                      className={inputClass}
+                      placeholder="https://..."
+                      value={c.curriculumLink}
+                      onChange={(e) =>
+                        setCourses((prev) =>
+                          prev.map((x) =>
+                            x.id === c.id
+                              ? { ...x, curriculumLink: e.target.value }
+                              : x,
+                          ),
+                        )
+                      }
+                    />
+                  </div>
+                  <div>
+                    <label className={labelClass}>
+                      Total Fees <span className="text-red-500">*</span>
+                    </label>
+                    <input
+                      type="text"
+                      className={inputClass}
+                      placeholder="e.g. Contact College for Details"
+                      value={c.feesText}
+                      onChange={(e) =>
+                        setCourses((prev) =>
+                          prev.map((x) =>
+                            x.id === c.id
+                              ? { ...x, feesText: e.target.value }
+                              : x,
+                          ),
+                        )
+                      }
+                    />
+                  </div>
+                  <div>
+                    <label className={labelClass}>
+                      Application Date <span className="text-red-500">*</span>
+                    </label>
+                    <input
+                      type="text"
+                      className={inputClass}
+                      placeholder="e.g. Aug 2026"
+                      value={c.applicationDate}
+                      onChange={(e) =>
+                        setCourses((prev) =>
+                          prev.map((x) =>
+                            x.id === c.id
+                              ? { ...x, applicationDate: e.target.value }
+                              : x,
+                          ),
+                        )
+                      }
+                    />
+                  </div>
+                  <div>
+                    <label className={labelClass}>
+                      Apply Now Link <span className="text-red-500">*</span>
+                    </label>
+                    <input
+                      type="url"
+                      className={inputClass}
+                      placeholder="https://..."
+                      value={c.applyLink}
+                      onChange={(e) =>
+                        setCourses((prev) =>
+                          prev.map((x) =>
+                            x.id === c.id
+                              ? { ...x, applyLink: e.target.value }
+                              : x,
+                          ),
+                        )
+                      }
+                    />
                   </div>
                 </div>
-              ))}
-            </div>
+              </div>
+            ))}
+          </div>
         </div>
 
         {/* 7. Scholarships Overview */}
@@ -1331,23 +1949,51 @@ const AdmissionCreatePage: React.FC = () => {
             onAdd={() =>
               setScholarships((prev) => [
                 ...prev,
-                { id: nextId(prev), name: "", level: "", stream: "", coverage: "", eligibility: "", seats: "", pdfUrl: "" },
+                {
+                  id: nextId(prev),
+                  name: "",
+                  level: "",
+                  stream: "",
+                  coverage: "",
+                  eligibility: "",
+                  seats: "",
+                  pdfUrl: "",
+                },
               ])
             }
             addLabel="Add Scholarship"
           />
           <div className="p-6 space-y-6">
             {scholarships.map((s) => (
-              <div key={s.id} className="p-5 bg-gray-50 rounded-lg border border-gray-200 relative group">
+              <div
+                key={s.id}
+                className="p-5 bg-gray-50 rounded-lg border border-gray-200 relative group"
+              >
                 <button
-                  onClick={() => setScholarships((prev) => prev.filter((x) => x.id !== s.id))}
+                  onClick={() =>
+                    setScholarships((prev) => prev.filter((x) => x.id !== s.id))
+                  }
                   className="absolute top-4 right-4 p-2 text-red-500 hover:bg-red-50 rounded-lg transition-colors"
                 >
-                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+                  <svg
+                    width="18"
+                    height="18"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  >
+                    <polyline points="3 6 5 6 21 6" />
+                    <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
+                  </svg>
                 </button>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pr-12">
                   <div>
-                    <label className={labelClass}>Scholarship Name <span className="text-red-500">*</span></label>
+                    <label className={labelClass}>
+                      Scholarship Name <span className="text-red-500">*</span>
+                    </label>
                     <input
                       type="text"
                       className={inputClass}
@@ -1355,13 +2001,17 @@ const AdmissionCreatePage: React.FC = () => {
                       value={s.name}
                       onChange={(e) =>
                         setScholarships((prev) =>
-                          prev.map((x) => (x.id === s.id ? { ...x, name: e.target.value } : x))
+                          prev.map((x) =>
+                            x.id === s.id ? { ...x, name: e.target.value } : x,
+                          ),
                         )
                       }
                     />
                   </div>
                   <div>
-                    <label className={labelClass}>Scholarship Level <span className="text-red-500">*</span></label>
+                    <label className={labelClass}>
+                      Scholarship Level <span className="text-red-500">*</span>
+                    </label>
                     <input
                       type="text"
                       className={inputClass}
@@ -1369,13 +2019,17 @@ const AdmissionCreatePage: React.FC = () => {
                       value={s.level}
                       onChange={(e) =>
                         setScholarships((prev) =>
-                          prev.map((x) => (x.id === s.id ? { ...x, level: e.target.value } : x))
+                          prev.map((x) =>
+                            x.id === s.id ? { ...x, level: e.target.value } : x,
+                          ),
                         )
                       }
                     />
                   </div>
                   <div>
-                    <label className={labelClass}>Stream <span className="text-red-500">*</span></label>
+                    <label className={labelClass}>
+                      Stream <span className="text-red-500">*</span>
+                    </label>
                     <input
                       type="text"
                       className={inputClass}
@@ -1383,13 +2037,19 @@ const AdmissionCreatePage: React.FC = () => {
                       value={s.stream}
                       onChange={(e) =>
                         setScholarships((prev) =>
-                          prev.map((x) => (x.id === s.id ? { ...x, stream: e.target.value } : x))
+                          prev.map((x) =>
+                            x.id === s.id
+                              ? { ...x, stream: e.target.value }
+                              : x,
+                          ),
                         )
                       }
                     />
                   </div>
                   <div>
-                    <label className={labelClass}>Coverage <span className="text-red-500">*</span></label>
+                    <label className={labelClass}>
+                      Coverage <span className="text-red-500">*</span>
+                    </label>
                     <input
                       type="text"
                       className={inputClass}
@@ -1397,13 +2057,19 @@ const AdmissionCreatePage: React.FC = () => {
                       value={s.coverage}
                       onChange={(e) =>
                         setScholarships((prev) =>
-                          prev.map((x) => (x.id === s.id ? { ...x, coverage: e.target.value } : x))
+                          prev.map((x) =>
+                            x.id === s.id
+                              ? { ...x, coverage: e.target.value }
+                              : x,
+                          ),
                         )
                       }
                     />
                   </div>
                   <div>
-                    <label className={labelClass}>Eligibility <span className="text-red-500">*</span></label>
+                    <label className={labelClass}>
+                      Eligibility <span className="text-red-500">*</span>
+                    </label>
                     <input
                       type="text"
                       className={inputClass}
@@ -1411,13 +2077,19 @@ const AdmissionCreatePage: React.FC = () => {
                       value={s.eligibility}
                       onChange={(e) =>
                         setScholarships((prev) =>
-                          prev.map((x) => (x.id === s.id ? { ...x, eligibility: e.target.value } : x))
+                          prev.map((x) =>
+                            x.id === s.id
+                              ? { ...x, eligibility: e.target.value }
+                              : x,
+                          ),
                         )
                       }
                     />
                   </div>
                   <div>
-                    <label className={labelClass}>Seats <span className="text-red-500">*</span></label>
+                    <label className={labelClass}>
+                      Seats <span className="text-red-500">*</span>
+                    </label>
                     <input
                       type="text"
                       className={inputClass}
@@ -1426,7 +2098,9 @@ const AdmissionCreatePage: React.FC = () => {
                       onChange={(e) => {
                         const v = e.target.value.replace(/[^0-9]/g, "");
                         setScholarships((prev) =>
-                          prev.map((x) => (x.id === s.id ? { ...x, seats: v } : x))
+                          prev.map((x) =>
+                            x.id === s.id ? { ...x, seats: v } : x,
+                          ),
                         );
                       }}
                     />
@@ -1435,24 +2109,95 @@ const AdmissionCreatePage: React.FC = () => {
                     <label className={labelClass}>Upload PDF/Doc</label>
                     <label className="border-2 border-dashed border-gray-300 rounded-xl p-4 flex flex-col items-center justify-center text-center hover:bg-gray-50 hover:border-blue-400 transition-colors cursor-pointer group">
                       <div className="p-2 bg-blue-50 text-blue-600 rounded-full group-hover:scale-110 transition-transform">
-                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+                        <svg
+                          width="20"
+                          height="20"
+                          viewBox="0 0 24 24"
+                          fill="none"
+                          stroke="currentColor"
+                          strokeWidth="2"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                        >
+                          <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                          <polyline points="17 8 12 3 7 8" />
+                          <line x1="12" y1="3" x2="12" y2="15" />
+                        </svg>
                       </div>
-                      <span className="mt-2 text-sm font-medium text-gray-900">{s.pdfUrl ? "Click to change PDF" : "Upload PDF/Doc"}</span>
-                      <input type="file" className="hidden" accept=".pdf,.doc,.docx" onChange={async e => {
-                        const file = e.target.files?.[0];
-                        if (!file) return;
-                        try {
-                          const url = await uploadFile(file, "institution/admission");
-                          setScholarships((prev) => prev.map((x) => x.id === s.id ? { ...x, pdfUrl: url } : x));
-                        } catch { /* skip */ }
-                      }} />
+                      <span className="mt-2 text-sm font-medium text-gray-900">
+                        {s.pdfUrl ? "Click to change PDF" : "Upload PDF/Doc"}
+                      </span>
+                      <input
+                        type="file"
+                        className="hidden"
+                        accept=".pdf,.doc,.docx"
+                        onChange={async (e) => {
+                          const file = e.target.files?.[0];
+                          if (!file) return;
+                          try {
+                            const url = await uploadFile(
+                              file,
+                              "institution/admission",
+                            );
+                            setScholarships((prev) =>
+                              prev.map((x) =>
+                                x.id === s.id ? { ...x, pdfUrl: url } : x,
+                              ),
+                            );
+                          } catch {
+                            /* skip */
+                          }
+                        }}
+                      />
                     </label>
                     {s.pdfUrl && (
                       <div className="mt-2 flex items-center gap-2 p-2 bg-blue-50 rounded-lg">
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-blue-600 shrink-0"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
-                        <a href={s.pdfUrl} target="_blank" rel="noreferrer" className="text-sm text-blue-700 truncate">View PDF</a>
-                        <button type="button" onClick={() => setScholarships((prev) => prev.map((x) => x.id === s.id ? { ...x, pdfUrl: "" } : x))} className="p-1 text-red-500 hover:bg-red-50 rounded ml-auto">
-                          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+                        <svg
+                          width="16"
+                          height="16"
+                          viewBox="0 0 24 24"
+                          fill="none"
+                          stroke="currentColor"
+                          strokeWidth="2"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          className="text-blue-600 shrink-0"
+                        >
+                          <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+                          <polyline points="14 2 14 8 20 8" />
+                        </svg>
+                        <a
+                          href={s.pdfUrl}
+                          target="_blank"
+                          rel="noreferrer"
+                          className="text-sm text-blue-700 truncate"
+                        >
+                          View PDF
+                        </a>
+                        <button
+                          type="button"
+                          onClick={() =>
+                            setScholarships((prev) =>
+                              prev.map((x) =>
+                                x.id === s.id ? { ...x, pdfUrl: "" } : x,
+                              ),
+                            )
+                          }
+                          className="p-1 text-red-500 hover:bg-red-50 rounded ml-auto"
+                        >
+                          <svg
+                            width="14"
+                            height="14"
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="currentColor"
+                            strokeWidth="2"
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                          >
+                            <polyline points="3 6 5 6 21 6" />
+                            <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
+                          </svg>
                         </button>
                       </div>
                     )}
@@ -1472,51 +2217,140 @@ const AdmissionCreatePage: React.FC = () => {
             onAdd={() =>
               setContactPersons((prev) => [
                 ...prev,
-                { id: nextId(prev), name: "", designation: "", number: "", email: "", whatsapp: "", image: "" },
+                {
+                  id: nextId(prev),
+                  name: "",
+                  designation: "",
+                  number: "",
+                  email: "",
+                  whatsapp: "",
+                  image: "",
+                },
               ])
             }
             addLabel="Add Contact Person"
           />
           <div className="p-6 space-y-6">
             {contactPersons.map((cp) => (
-              <div key={cp.id} className="p-5 bg-gray-50 rounded-lg border border-gray-200 relative group">
+              <div
+                key={cp.id}
+                className="p-5 bg-gray-50 rounded-lg border border-gray-200 relative group"
+              >
                 <button
-                  onClick={() => setContactPersons((prev) => prev.filter((x) => x.id !== cp.id))}
+                  onClick={() =>
+                    setContactPersons((prev) =>
+                      prev.filter((x) => x.id !== cp.id),
+                    )
+                  }
                   className="absolute top-4 right-4 p-2 text-red-500 hover:bg-red-50 rounded-lg transition-colors"
                 >
-                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+                  <svg
+                    width="18"
+                    height="18"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  >
+                    <polyline points="3 6 5 6 21 6" />
+                    <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
+                  </svg>
                 </button>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pr-12">
-                    <div className="md:col-span-2">
-                      <label className={labelClass}>Contact Person Image</label>
-                      <div className="flex items-center gap-4">
-                        <div className="w-20 h-20 bg-gray-200 rounded-lg flex items-center justify-center text-gray-400 border border-gray-300 overflow-hidden">
-                          {cp.image ? (
-                            <img src={cp.image} className="w-full h-full object-cover" alt="" />
-                          ) : (
-                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
-                          )}
-                        </div>
-                        <label className="px-4 py-2 bg-white border border-gray-300 text-sm font-medium rounded-lg hover:bg-gray-50 shadow-sm cursor-pointer">
-                          {cp.image ? "Change" : "Upload Image"}
-                          <input type="file" className="hidden" accept="image/*" onChange={async e => {
+                  <div className="md:col-span-2">
+                    <label className={labelClass}>Contact Person Image</label>
+                    <div className="flex items-center gap-4">
+                      <div className="w-20 h-20 bg-gray-200 rounded-lg flex items-center justify-center text-gray-400 border border-gray-300 overflow-hidden">
+                        {cp.image ? (
+                          <img
+                            src={cp.image}
+                            className="w-full h-full object-cover"
+                            alt=""
+                          />
+                        ) : (
+                          <svg
+                            width="24"
+                            height="24"
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="currentColor"
+                            strokeWidth="2"
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                          >
+                            <rect
+                              x="3"
+                              y="3"
+                              width="18"
+                              height="18"
+                              rx="2"
+                              ry="2"
+                            />
+                            <circle cx="8.5" cy="8.5" r="1.5" />
+                            <polyline points="21 15 16 10 5 21" />
+                          </svg>
+                        )}
+                      </div>
+                      <label className="px-4 py-2 bg-white border border-gray-300 text-sm font-medium rounded-lg hover:bg-gray-50 shadow-sm cursor-pointer">
+                        {cp.image ? "Change" : "Upload Image"}
+                        <input
+                          type="file"
+                          className="hidden"
+                          accept="image/*"
+                          onChange={async (e) => {
                             const file = e.target.files?.[0];
                             if (!file) return;
                             try {
-                              const url = await uploadFile(file, "institution/admission");
-                              setContactPersons((prev) => prev.map((x) => x.id === cp.id ? { ...x, image: url } : x));
-                            } catch { /* skip */ }
-                          }} />
-                        </label>
-                        {cp.image && (
-                          <button type="button" onClick={() => setContactPersons((prev) => prev.map((x) => x.id === cp.id ? { ...x, image: "" } : x))} className="p-2 text-red-500 hover:bg-red-50 rounded-lg">
-                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
-                          </button>
-                        )}
-                      </div>
+                              const url = await uploadFile(
+                                file,
+                                "institution/admission",
+                              );
+                              setContactPersons((prev) =>
+                                prev.map((x) =>
+                                  x.id === cp.id ? { ...x, image: url } : x,
+                                ),
+                              );
+                            } catch {
+                              /* skip */
+                            }
+                          }}
+                        />
+                      </label>
+                      {cp.image && (
+                        <button
+                          type="button"
+                          onClick={() =>
+                            setContactPersons((prev) =>
+                              prev.map((x) =>
+                                x.id === cp.id ? { ...x, image: "" } : x,
+                              ),
+                            )
+                          }
+                          className="p-2 text-red-500 hover:bg-red-50 rounded-lg"
+                        >
+                          <svg
+                            width="16"
+                            height="16"
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="currentColor"
+                            strokeWidth="2"
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                          >
+                            <polyline points="3 6 5 6 21 6" />
+                            <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
+                          </svg>
+                        </button>
+                      )}
                     </div>
+                  </div>
                   <div>
-                    <label className={labelClass}>Name <span className="text-red-500">*</span></label>
+                    <label className={labelClass}>
+                      Name <span className="text-red-500">*</span>
+                    </label>
                     <input
                       type="text"
                       className={inputClass}
@@ -1524,13 +2358,17 @@ const AdmissionCreatePage: React.FC = () => {
                       value={cp.name}
                       onChange={(e) =>
                         setContactPersons((prev) =>
-                          prev.map((x) => (x.id === cp.id ? { ...x, name: e.target.value } : x))
+                          prev.map((x) =>
+                            x.id === cp.id ? { ...x, name: e.target.value } : x,
+                          ),
                         )
                       }
                     />
                   </div>
                   <div>
-                    <label className={labelClass}>Designation <span className="text-red-500">*</span></label>
+                    <label className={labelClass}>
+                      Designation <span className="text-red-500">*</span>
+                    </label>
                     <input
                       type="text"
                       className={inputClass}
@@ -1538,13 +2376,19 @@ const AdmissionCreatePage: React.FC = () => {
                       value={cp.designation}
                       onChange={(e) =>
                         setContactPersons((prev) =>
-                          prev.map((x) => (x.id === cp.id ? { ...x, designation: e.target.value } : x))
+                          prev.map((x) =>
+                            x.id === cp.id
+                              ? { ...x, designation: e.target.value }
+                              : x,
+                          ),
                         )
                       }
                     />
                   </div>
                   <div>
-                    <label className={labelClass}>Number <span className="text-red-500">*</span></label>
+                    <label className={labelClass}>
+                      Number <span className="text-red-500">*</span>
+                    </label>
                     <input
                       type="text"
                       className={inputClass}
@@ -1553,13 +2397,17 @@ const AdmissionCreatePage: React.FC = () => {
                       onChange={(e) => {
                         const v = e.target.value.replace(/[^0-9+]/g, "");
                         setContactPersons((prev) =>
-                          prev.map((x) => (x.id === cp.id ? { ...x, number: v } : x))
+                          prev.map((x) =>
+                            x.id === cp.id ? { ...x, number: v } : x,
+                          ),
                         );
                       }}
                     />
                   </div>
                   <div>
-                    <label className={labelClass}>Email <span className="text-red-500">*</span></label>
+                    <label className={labelClass}>
+                      Email <span className="text-red-500">*</span>
+                    </label>
                     <input
                       type="email"
                       className={inputClass}
@@ -1567,13 +2415,19 @@ const AdmissionCreatePage: React.FC = () => {
                       value={cp.email}
                       onChange={(e) =>
                         setContactPersons((prev) =>
-                          prev.map((x) => (x.id === cp.id ? { ...x, email: e.target.value } : x))
+                          prev.map((x) =>
+                            x.id === cp.id
+                              ? { ...x, email: e.target.value }
+                              : x,
+                          ),
                         )
                       }
                     />
                   </div>
                   <div>
-                    <label className={labelClass}>WhatsApp Link <span className="text-red-500">*</span></label>
+                    <label className={labelClass}>
+                      WhatsApp Link <span className="text-red-500">*</span>
+                    </label>
                     <input
                       type="url"
                       className={inputClass}
@@ -1581,7 +2435,11 @@ const AdmissionCreatePage: React.FC = () => {
                       value={cp.whatsapp}
                       onChange={(e) =>
                         setContactPersons((prev) =>
-                          prev.map((x) => (x.id === cp.id ? { ...x, whatsapp: e.target.value } : x))
+                          prev.map((x) =>
+                            x.id === cp.id
+                              ? { ...x, whatsapp: e.target.value }
+                              : x,
+                          ),
                         )
                       }
                     />
@@ -1608,15 +2466,34 @@ const AdmissionCreatePage: React.FC = () => {
           />
           <div className="p-6 space-y-4">
             {faqs.map((f) => (
-              <div key={f.id} className="p-5 bg-gray-50 rounded-lg border border-gray-200 relative group flex flex-col gap-4">
+              <div
+                key={f.id}
+                className="p-5 bg-gray-50 rounded-lg border border-gray-200 relative group flex flex-col gap-4"
+              >
                 <button
-                  onClick={() => setFaqs((prev) => prev.filter((x) => x.id !== f.id))}
+                  onClick={() =>
+                    setFaqs((prev) => prev.filter((x) => x.id !== f.id))
+                  }
                   className="absolute top-4 right-4 p-2 text-red-500 hover:bg-red-50 rounded-lg z-10 transition-colors"
                 >
-                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+                  <svg
+                    width="18"
+                    height="18"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  >
+                    <polyline points="3 6 5 6 21 6" />
+                    <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
+                  </svg>
                 </button>
                 <div className="space-y-1.5 pr-12">
-                  <label className={labelClass}>Question <span className="text-red-500">*</span></label>
+                  <label className={labelClass}>
+                    Question <span className="text-red-500">*</span>
+                  </label>
                   <input
                     type="text"
                     className={inputClass}
@@ -1624,13 +2501,19 @@ const AdmissionCreatePage: React.FC = () => {
                     value={f.question}
                     onChange={(e) =>
                       setFaqs((prev) =>
-                        prev.map((x) => (x.id === f.id ? { ...x, question: e.target.value } : x))
+                        prev.map((x) =>
+                          x.id === f.id
+                            ? { ...x, question: e.target.value }
+                            : x,
+                        ),
                       )
                     }
                   />
                 </div>
                 <div className="space-y-1.5">
-                  <label className={labelClass}>Answer <span className="text-red-500">*</span></label>
+                  <label className={labelClass}>
+                    Answer <span className="text-red-500">*</span>
+                  </label>
                   <textarea
                     className={`${inputClass} min-h-[60px]`}
                     rows={2}
@@ -1638,7 +2521,9 @@ const AdmissionCreatePage: React.FC = () => {
                     value={f.answer}
                     onChange={(e) =>
                       setFaqs((prev) =>
-                        prev.map((x) => (x.id === f.id ? { ...x, answer: e.target.value } : x))
+                        prev.map((x) =>
+                          x.id === f.id ? { ...x, answer: e.target.value } : x,
+                        ),
                       )
                     }
                   />
@@ -1652,11 +2537,29 @@ const AdmissionCreatePage: React.FC = () => {
         <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
           <div className="border-b border-gray-200 bg-gray-50/50 px-6 py-4 flex items-center gap-3">
             <div className="p-2 bg-blue-100 text-blue-600 rounded-lg">
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+              <svg
+                width="20"
+                height="20"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              >
+                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+                <polyline points="14 2 14 8 20 8" />
+                <line x1="16" y1="13" x2="8" y2="13" />
+                <line x1="16" y1="17" x2="8" y2="17" />
+              </svg>
             </div>
             <div>
-              <h2 className="text-base font-semibold text-gray-800">Brochure (File Upload)</h2>
-              <p className="text-sm text-gray-500 mt-0.5">Upload your institution brochure for download</p>
+              <h2 className="text-base font-semibold text-gray-800">
+                Brochure (File Upload)
+              </h2>
+              <p className="text-sm text-gray-500 mt-0.5">
+                Upload your institution brochure for download
+              </p>
             </div>
           </div>
           <div className="p-6">
@@ -1664,32 +2567,81 @@ const AdmissionCreatePage: React.FC = () => {
               {brochureUrl ? (
                 <div className="flex flex-col items-center gap-3">
                   <div className="p-4 bg-blue-50 text-blue-600 rounded-full">
-                    <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+                    <svg
+                      width="32"
+                      height="32"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="2"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    >
+                      <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+                      <polyline points="14 2 14 8 20 8" />
+                      <line x1="16" y1="13" x2="8" y2="13" />
+                      <line x1="16" y1="17" x2="8" y2="17" />
+                    </svg>
                   </div>
-                  <span className="text-sm font-medium text-gray-900">Brochure uploaded</span>
-                  <span className="text-xs text-gray-500">Click anywhere to replace</span>
-                  <button type="button" onClick={(e) => { e.preventDefault(); e.stopPropagation(); setBrochureUrl(""); }}
-                    className="px-4 py-1.5 text-sm font-medium text-red-600 bg-red-50 rounded-lg hover:bg-red-100 transition-colors">
+                  <span className="text-sm font-medium text-gray-900">
+                    Brochure uploaded
+                  </span>
+                  <span className="text-xs text-gray-500">
+                    Click anywhere to replace
+                  </span>
+                  <button
+                    type="button"
+                    onClick={(e) => {
+                      e.preventDefault();
+                      e.stopPropagation();
+                      setBrochureUrl("");
+                    }}
+                    className="px-4 py-1.5 text-sm font-medium text-red-600 bg-red-50 rounded-lg hover:bg-red-100 transition-colors"
+                  >
                     Remove
                   </button>
                 </div>
               ) : (
                 <>
                   <div className="p-3 bg-blue-50 text-blue-600 rounded-full group-hover:scale-110 transition-transform">
-                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+                    <svg
+                      width="24"
+                      height="24"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="2"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    >
+                      <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                      <polyline points="17 8 12 3 7 8" />
+                      <line x1="12" y1="3" x2="12" y2="15" />
+                    </svg>
                   </div>
-                  <span className="mt-4 text-sm font-medium text-gray-900">Click to upload brochure</span>
-                  <span className="mt-1 text-xs text-gray-500">PDF format recommended</span>
+                  <span className="mt-4 text-sm font-medium text-gray-900">
+                    Click to upload brochure
+                  </span>
+                  <span className="mt-1 text-xs text-gray-500">
+                    PDF format recommended
+                  </span>
                 </>
               )}
-              <input type="file" className="hidden" accept=".pdf" onChange={async e => {
-                const file = e.target.files?.[0];
-                if (!file) return;
-                try {
-                  const url = await uploadFile(file, "institution/admission");
-                  setBrochureUrl(url);
-                } catch { /* skip */ }
-              }} />
+              <input
+                type="file"
+                className="hidden"
+                accept=".pdf"
+                onChange={async (e) => {
+                  const file = e.target.files?.[0];
+                  if (!file) return;
+                  try {
+                    const url = await uploadFile(file, "institution/admission");
+                    setBrochureUrl(url);
+                  } catch {
+                    /* skip */
+                  }
+                }}
+              />
             </label>
           </div>
         </div>
@@ -1701,7 +2653,20 @@ const AdmissionCreatePage: React.FC = () => {
             disabled={saving}
             className="px-6 py-3 text-base font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 flex items-center gap-2 transition-colors shadow-sm disabled:opacity-50"
           >
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
+            <svg
+              width="20"
+              height="20"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            >
+              <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z" />
+              <polyline points="17 21 17 13 7 13 7 21" />
+              <polyline points="7 3 7 8 15 8" />
+            </svg>
             {saving ? "Saving..." : "Save as Draft"}
           </button>
           <button
@@ -1709,7 +2674,19 @@ const AdmissionCreatePage: React.FC = () => {
             disabled={saving}
             className="px-6 py-3 text-base font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 flex items-center gap-2 transition-colors shadow-sm disabled:opacity-50"
           >
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+            <svg
+              width="20"
+              height="20"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            >
+              <line x1="22" y1="2" x2="11" y2="13" />
+              <polygon points="22 2 15 22 11 13 2 9 22 2" />
+            </svg>
             {saving ? "Saving..." : editId ? "Publish Changes" : "Publish"}
           </button>
         </div>
@@ -1719,10 +2696,15 @@ const AdmissionCreatePage: React.FC = () => {
         <ImageCropperModal
           imageSrc={cropImageSrc}
           onCropComplete={async (blob) => {
-            const croppedFile = new File([blob], "banner.jpg", { type: "image/jpeg" });
+            const croppedFile = new File([blob], "banner.jpg", {
+              type: "image/jpeg",
+            });
             try {
-              const url = await uploadFile(croppedFile, "institution/admission");
-              setHeroBanners(prev => {
+              const url = await uploadFile(
+                croppedFile,
+                "institution/admission",
+              );
+              setHeroBanners((prev) => {
                 if (cropTargetIndex !== null && cropTargetIndex < prev.length) {
                   const copy = [...prev];
                   copy[cropTargetIndex] = url;
@@ -1737,7 +2719,11 @@ const AdmissionCreatePage: React.FC = () => {
             setCropImageSrc(null);
             setCropTargetIndex(null);
           }}
-          onCancel={() => { setCropperOpen(false); setCropImageSrc(null); setCropTargetIndex(null); }}
+          onCancel={() => {
+            setCropperOpen(false);
+            setCropImageSrc(null);
+            setCropTargetIndex(null);
+          }}
         />
       )}
     </div>
