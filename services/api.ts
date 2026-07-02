@@ -1316,7 +1316,7 @@ export const apiService = {
       typeof window !== "undefined"
         ? localStorage.getItem("superadmin_token")
         : null;
-    return apiRequest("/api/v1/admin/contact", {
+    return apiRequest("/api/v1/system/contact", {
       authToken: token || undefined,
     });
   },
