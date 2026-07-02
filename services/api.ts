@@ -1310,14 +1310,16 @@ export const apiService = {
   },
 
   async getContactInquiries(): Promise<{
-    data: { inquiries: ContactInquiryResponse["data"][] };
+    inquiries: ContactInquiryResponse["data"][];
+    pagination?: { total: number; page: number; limit: number };
   }> {
-    const token =
-      typeof window !== "undefined"
-        ? localStorage.getItem("superadmin_token")
-        : null;
-    return apiRequest("/api/v1/system/contact", {
-      authToken: token || undefined,
+    return apiRequest("/api/v1/admin/inquiries");
+  },
+
+  async updateContactInquiryStatus(id: number, status: string): Promise<void> {
+    await apiRequest(`/api/v1/admin/inquiries/${id}/status`, {
+      method: "PUT",
+      body: JSON.stringify({ status }),
     });
   },
 

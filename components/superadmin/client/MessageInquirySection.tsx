@@ -28,14 +28,32 @@ export default function MessageInquirySection() {
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
   const [selected, setSelected] = useState<InquiryItem | null>(null);
+  const [updatingId, setUpdatingId] = useState<number | null>(null);
 
   useEffect(() => {
     apiService
       .getContactInquiries()
-      .then((res) => setInquiries(res?.data?.inquiries || []))
+      .then((res) => setInquiries((res as any)?.inquiries || []))
       .catch(() => setInquiries([]))
       .finally(() => setLoading(false));
   }, []);
+
+  const markAsRead = async (id: number) => {
+    setUpdatingId(id);
+    try {
+      await apiService.updateContactInquiryStatus(id, "read");
+      setInquiries((prev) =>
+        prev.map((i) => (i.id === id ? { ...i, status: "read" } : i)),
+      );
+      setSelected((prev) =>
+        prev?.id === id ? { ...prev, status: "read" } : prev,
+      );
+    } catch {
+      /* silently fail */
+    } finally {
+      setUpdatingId(null);
+    }
+  };
 
   const filtered = inquiries.filter((i) => {
     if (!search) return true;
@@ -142,6 +160,19 @@ export default function MessageInquirySection() {
                           {inquiry.email}
                         </span>
                       </div>
+                      {(inquiry.status === "new" ||
+                        inquiry.status === "pending") && (
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            markAsRead(inquiry.id);
+                          }}
+                          disabled={updatingId === inquiry.id}
+                          className="mt-1.5 rounded bg-blue-600 px-2 py-0.5 text-[10px] font-medium text-white transition-colors hover:bg-blue-700 disabled:opacity-50"
+                        >
+                          {updatingId === inquiry.id ? "..." : "Mark as Read"}
+                        </button>
+                      )}
                     </div>
                   </div>
                 </button>
@@ -176,18 +207,31 @@ export default function MessageInquirySection() {
                   <h4 className="text-lg font-bold text-gray-900">
                     {selected.name}
                   </h4>
-                  <span
-                    className={`mt-1 inline-block rounded px-2 py-0.5 text-xs font-medium ${
-                      selected.status === "new" || selected.status === "pending"
-                        ? "bg-yellow-100 text-yellow-700"
-                        : selected.status === "read" ||
-                            selected.status === "resolved"
-                          ? "bg-green-100 text-green-700"
-                          : "bg-gray-100 text-gray-600"
-                    }`}
-                  >
-                    {selected.status || "new"}
-                  </span>
+                  <div className="mt-1.5 flex items-center gap-2">
+                    <span
+                      className={`inline-block rounded px-2 py-0.5 text-xs font-medium ${
+                        selected.status === "new" ||
+                        selected.status === "pending"
+                          ? "bg-yellow-100 text-yellow-700"
+                          : selected.status === "read" ||
+                              selected.status === "resolved"
+                            ? "bg-green-100 text-green-700"
+                            : "bg-gray-100 text-gray-600"
+                      }`}
+                    >
+                      {selected.status || "new"}
+                    </span>
+                    {(selected.status === "new" ||
+                      selected.status === "pending") && (
+                      <button
+                        onClick={() => markAsRead(selected.id)}
+                        disabled={updatingId === selected.id}
+                        className="rounded-md bg-blue-600 px-3 py-1 text-xs font-medium text-white transition-colors hover:bg-blue-700 disabled:opacity-50"
+                      >
+                        {updatingId === selected.id ? "..." : "Mark as Read"}
+                      </button>
+                    )}
+                  </div>
                 </div>
               </div>
 
