@@ -8,6 +8,7 @@ import {
   AdminRow,
 } from "./index";
 import EmptyTabState from "./EmptyTabState";
+import { safeHtml } from "@/lib/html";
 
 interface TabAboutProps {
   description: string;
@@ -45,8 +46,12 @@ const TabAbout: React.FC<TabAboutProps> = ({
       <AboutVideoInteractive videos={instVideos || undefined} />
 
       {description && (
-        <div className="prose prose-gray max-w-none text-[15px] leading-[1.8] md:text-[16px] break-normal [overflow-wrap:normal] [word-break:normal] [hyphens:none] overflow-x-auto [&_pre]:overflow-x-auto [&_pre]:whitespace-pre-wrap [&_img]:max-w-full [&_table]:block [&_table]:overflow-x-auto">
-          <div dangerouslySetInnerHTML={{ __html: description }} />
+        <div className="rich-text max-w-none text-[15px] leading-[1.8] md:text-[16px] overflow-x-auto [&_pre]:overflow-x-auto [&_pre]:whitespace-pre-wrap [&_img]:max-w-full [&_table]:block [&_table]:overflow-x-auto">
+          <div
+            dangerouslySetInnerHTML={{
+              __html: safeHtml(description),
+            }}
+          />
         </div>
       )}
 

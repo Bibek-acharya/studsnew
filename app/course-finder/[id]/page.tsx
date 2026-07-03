@@ -5,6 +5,7 @@ import { useQuery } from "@tanstack/react-query";
 import { ChevronRight, ChevronLeft } from "lucide-react";
 import { fetchCourseDetailsById } from "@/services/course-api";
 import EmptyTabState from "@/components/course-finder/EmptyTabState";
+import { safeHtml } from "@/lib/html";
 
 type TabKey =
   | "overview"
@@ -324,7 +325,9 @@ export default function CourseDetailPage({
                   </h2>
                   <div
                     className="ql-editor"
-                    dangerouslySetInnerHTML={{ __html: course.description }}
+                    dangerouslySetInnerHTML={{
+                      __html: safeHtml(course.description),
+                    }}
                   />
                 </div>
               ) : null}

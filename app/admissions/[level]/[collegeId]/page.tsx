@@ -28,6 +28,7 @@ import {
   SearchX,
   FolderOpen,
 } from "lucide-react";
+import { safeHtml } from "@/lib/html";
 
 const TABS = [
   { id: "overview", label: "Overview" },
@@ -460,7 +461,7 @@ export default function AdmissionDetailPage() {
                   {whatsNewData.description ? (
                     <div
                       dangerouslySetInnerHTML={{
-                        __html: whatsNewData.description,
+                        __html: safeHtml(whatsNewData.description),
                       }}
                     />
                   ) : (
@@ -504,7 +505,7 @@ export default function AdmissionDetailPage() {
                 {overviewDesc ? (
                   <div
                     className="prose prose-sm max-w-none text-gray-600 break-words overflow-hidden [&_p]:break-words [&_p]:overflow-hidden"
-                    dangerouslySetInnerHTML={{ __html: overviewDesc }}
+                    dangerouslySetInnerHTML={{ __html: safeHtml(overviewDesc) }}
                   />
                 ) : (
                   <p className="text-gray-600">

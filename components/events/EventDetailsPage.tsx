@@ -9,6 +9,7 @@ import {
 } from "@/services/eventApi";
 import { getPublicEvents as getProviderPublicEvents } from "@/services/scholarshipProviderApi";
 import { getImageUrl, stripHtml } from "@/services/api";
+import { safeHtml } from "@/lib/html";
 
 const EventDetailsPage: React.FC<{ params: Promise<{ id: string }> }> = ({
   params,
@@ -169,7 +170,9 @@ const EventDetailsPage: React.FC<{ params: Promise<{ id: string }> }> = ({
             {event.title}
           </h1>
           <div className="hidden sm:block max-w-2xl news-content prose prose-invert prose-sm max-w-none prose-p:text-gray-200 prose-a:text-blue-300">
-            <div dangerouslySetInnerHTML={{ __html: event.excerpt }} />
+            <div
+              dangerouslySetInnerHTML={{ __html: safeHtml(event.excerpt) }}
+            />
           </div>
         </div>
       </div>
@@ -186,7 +189,9 @@ const EventDetailsPage: React.FC<{ params: Promise<{ id: string }> }> = ({
 
             <div
               className="news-content prose prose-slate max-w-none break-words overflow-hidden prose-img:max-w-full prose-img:h-auto prose-img:rounded-xl prose-pre:overflow-x-auto prose-pre:whitespace-pre-wrap prose-table:block prose-table:overflow-x-auto prose-a:text-blue-600 hover:prose-a:text-blue-700 prose-headings:text-gray-900 prose-p:text-gray-700 prose-li:text-gray-700"
-              dangerouslySetInnerHTML={{ __html: event.description || "" }}
+              dangerouslySetInnerHTML={{
+                __html: safeHtml(event.description || ""),
+              }}
             />
           </section>
         </div>
@@ -377,7 +382,9 @@ const EventDetailsPage: React.FC<{ params: Promise<{ id: string }> }> = ({
 
                     <p
                       className="text-gray-500 text-[13px] leading-relaxed mb-5 line-clamp-3 news-content"
-                      dangerouslySetInnerHTML={{ __html: rel.excerpt }}
+                      dangerouslySetInnerHTML={{
+                        __html: safeHtml(rel.excerpt),
+                      }}
                     />
 
                     <div className="border-t border-dashed border-gray-200 mb-4"></div>

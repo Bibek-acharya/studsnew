@@ -74,7 +74,7 @@ function PartnerCard({ partner }: { partner: Partner }) {
 export default function PartnersPage() {
   return (
     <div className="py-4 sm:py-6 lg:py-4 w-full max-w-350 mx-auto flex flex-col gap-10 lg:gap-12 mb-4">
-      <section className="bg-brand-blue rounded-md py-16 sm:py-24 px-4 sm:px-6 md:px-8">
+      <section className="bg-brand-blue rounded-md py-16 sm:py-24 px-6 sm:px-6 md:px-8">
         <div className="max-w-3xl mx-auto text-center">
           <h1 className="text-3xl md:text-4xl lg:text-5xl font-bold tracking-tight text-white mb-4">
             Our Partners

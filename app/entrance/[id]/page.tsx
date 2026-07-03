@@ -33,6 +33,7 @@ import {
   X,
   FolderOpen,
 } from "lucide-react";
+import { safeHtml } from "@/lib/html";
 
 const WhatsAppIcon = ({ className }: { className?: string }) => (
   <svg viewBox="0 0 24 24" fill="currentColor" className={className}>
@@ -364,7 +365,9 @@ const EntranceDetailsPage: React.FC = () => {
                 </h2>
                 <div
                   className="prose prose-gray max-w-none text-gray-600 break-words overflow-x-auto [&_pre]:overflow-x-auto [&_pre]:whitespace-pre-wrap [&_img]:max-w-full [&_table]:block [&_table]:overflow-x-auto [&_iframe]:max-w-full"
-                  dangerouslySetInnerHTML={{ __html: exam.description }}
+                  dangerouslySetInnerHTML={{
+                    __html: safeHtml(exam.description),
+                  }}
                 />
               </div>
 

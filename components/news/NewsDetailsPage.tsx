@@ -8,6 +8,7 @@ import {
   postNewsComment,
   NewsComment,
 } from "@/services/newsApi";
+import { safeHtml } from "@/lib/html";
 
 function normalizeArticle(data: any): any {
   if (!data) return null;
@@ -308,19 +309,19 @@ const NewsDetailsPage: React.FC<{
           )}
 
           {article.excerpt && (
-            <div className="news-content prose prose-slate max-w-none break-words bg-blue-50 border-l-[3px] border-blue-500 p-5 md:p-6 rounded-r-xl mb-10">
+            <div className="rich-text max-w-none bg-blue-50 border-l-[3px] border-blue-500 p-5 md:p-6 rounded-r-xl mb-10">
               <div
                 dangerouslySetInnerHTML={{
-                  __html: article.excerpt,
+                  __html: safeHtml(article.excerpt),
                 }}
               />
             </div>
           )}
 
           <div
-            className="news-content prose prose-slate max-w-none break-normal [overflow-wrap:normal] [word-break:normal] [hyphens:none] overflow-hidden mb-12 prose-img:max-w-full prose-img:h-auto prose-img:rounded-xl prose-pre:overflow-x-auto prose-pre:whitespace-pre-wrap prose-table:block prose-table:overflow-x-auto prose-a:text-blue-600 hover:prose-a:text-blue-700 prose-headings:text-gray-900 prose-p:text-gray-700 prose-li:text-gray-700"
+            className="rich-text mb-12"
             dangerouslySetInnerHTML={{
-              __html: article.content || article.excerpt || "",
+              __html: safeHtml(article.content || article.excerpt || ""),
             }}
           />
 
@@ -547,70 +548,6 @@ const NewsDetailsPage: React.FC<{
           </div>
         </aside>
       </div>
-
-      <style jsx global>{`
-        .news-content {
-          overflow-wrap: break-word;
-          word-break: break-word;
-        }
-        .news-content iframe {
-          width: 100%;
-          min-height: 400px;
-          border-radius: 12px;
-        }
-
-        .news-content img {
-          max-width: 100%;
-          height: auto;
-          border-radius: 12px;
-        }
-
-        .news-content table {
-          width: 100%;
-          display: block;
-          overflow-x: auto;
-        }
-
-        .news-content pre {
-          overflow-x: auto;
-          padding: 1rem;
-          border-radius: 0.75rem;
-          background: #0f172a;
-          color: white;
-        }
-
-        .news-content code {
-          white-space: pre-wrap;
-          word-break: break-word;
-        }
-
-        .news-content ul {
-          list-style: disc;
-          padding-left: 1.5rem;
-        }
-
-        .news-content ol {
-          list-style: decimal;
-          padding-left: 1.5rem;
-        }
-
-        .news-content blockquote {
-          border-left: 4px solid #2563eb;
-          padding-left: 1rem;
-          color: #475569;
-          font-style: italic;
-        }
-
-        .news-content a {
-          color: #2563eb;
-          text-decoration: underline;
-          font-weight: 500;
-        }
-
-        .news-content a:hover {
-          color: #1d4ed8;
-        }
-      `}</style>
     </div>
   );
 };

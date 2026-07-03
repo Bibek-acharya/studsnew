@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from "react";
 import { getImageUrl } from "@/services/api";
+import { safeHtml } from "@/lib/html";
 
 type CardData = {
   avatar: string;
@@ -23,12 +24,14 @@ interface VideoEntry {
 const getYouTubeId = (url: string): string | null => {
   if (!url) return null;
   const match = url.match(
-    /(?:youtube\.com\/(?:watch\?v=|embed\/|v\/|shorts\/)|youtu\.be\/)([a-zA-Z0-9_-]{11})/
+    /(?:youtube\.com\/(?:watch\?v=|embed\/|v\/|shorts\/)|youtu\.be\/)([a-zA-Z0-9_-]{11})/,
   );
   return match ? match[1] : null;
 };
 
-const AboutVideoInteractive: React.FC<{ videos?: VideoEntry[] }> = ({ videos }) => {
+const AboutVideoInteractive: React.FC<{ videos?: VideoEntry[] }> = ({
+  videos,
+}) => {
   const cardData = React.useMemo(() => {
     if (!videos || videos.length === 0) return {};
     const data: Record<string, CardData> = {};
@@ -157,7 +160,7 @@ const AboutVideoInteractive: React.FC<{ videos?: VideoEntry[] }> = ({ videos }) 
             </div>
           )}
           <h2
-            dangerouslySetInnerHTML={{ __html: mainData.title }}
+            dangerouslySetInnerHTML={{ __html: safeHtml(mainData.title) }}
             className="mb-2 text-[16px] font-normal leading-tight tracking-tight text-white sm:mb-3 sm:text-[18px]"
           />
           <p className="mb-4 text-[12px] leading-relaxed text-blue-100/80 sm:text-[13px]">

@@ -37,6 +37,7 @@ const CATEGORIES = [
   { value: "scholarship", label: "Scholarship" },
   { value: "exam", label: "Exam" },
   { value: "notice", label: "Notice" },
+  { value: "news", label: "News" },
   { value: "event", label: "Event" },
   { value: "achievement", label: "Achievement" },
   { value: "others", label: "Others" },

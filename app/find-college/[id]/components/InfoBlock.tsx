@@ -1,6 +1,7 @@
 "use client";
 
 import React from "react";
+import { safeHtml } from "@/lib/html";
 
 const InfoBlock: React.FC<{
   title: string;
@@ -19,7 +20,7 @@ const InfoBlock: React.FC<{
     </div>
     <div
       className="prose prose-gray max-w-none text-[14.5px] leading-[1.7] break-words overflow-x-auto [&_pre]:overflow-x-auto [&_pre]:whitespace-pre-wrap [&_img]:max-w-full [&_table]:block [&_table]:overflow-x-auto"
-      dangerouslySetInnerHTML={{ __html: desc }}
+      dangerouslySetInnerHTML={{ __html: safeHtml(desc) }}
     />
   </div>
 );

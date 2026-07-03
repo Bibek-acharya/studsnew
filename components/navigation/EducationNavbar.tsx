@@ -500,16 +500,6 @@ const EducationNavbar: React.FC<EducationNavbarProps> = ({
                 </div>
 
                 <div className="flex items-center gap-1.5 xs:gap-2 sm:gap-3 shrink-0 z-10">
-                  {/* Mobile Search Trigger */}
-                  <button
-                    type="button"
-                    onClick={toggleMobileDrawer}
-                    className="md:hidden flex h-10 w-10 items-center justify-center rounded-md text-gray-600 transition-colors hover:bg-gray-100 shrink-0"
-                    aria-label="Open search"
-                  >
-                    <Search size={20} />
-                  </button>
-
                   <button
                     onClick={() => go("login")}
                     className="hidden md:flex items-center gap-2 bg-brand-blue hover:bg-brand-hover text-white px-4 py-2.5 rounded-md text-[14px] font-semibold transition-colors shrink-0"
@@ -629,16 +619,6 @@ const EducationNavbar: React.FC<EducationNavbarProps> = ({
                 </div>
 
                 <div className="flex items-center gap-1.5 xs:gap-2 sm:gap-3 shrink-0">
-                  {/* Mobile Search Trigger */}
-                  <button
-                    type="button"
-                    onClick={toggleMobileDrawer}
-                    className="md:hidden flex h-10 w-10 items-center justify-center rounded-md text-gray-600 transition-colors hover:bg-gray-100 shrink-0"
-                    aria-label="Open search"
-                  >
-                    <Search size={20} />
-                  </button>
-
                   {/* Hamburger Menu - Mobile (Logged In) */}
                   <button
                     type="button"

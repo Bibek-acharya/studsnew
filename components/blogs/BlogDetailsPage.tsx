@@ -12,6 +12,7 @@ import {
 import { getPublicBlogByID } from "@/services/scholarshipProviderApi";
 import { useAuth } from "@/services/AuthContext";
 import { getImageUrl, stripHtml } from "@/services/api";
+import { safeHtml } from "@/lib/html";
 
 const BlogDetailsPage: React.FC<{ params: Promise<{ id: string }> }> = ({
   params,
@@ -205,13 +206,13 @@ const BlogDetailsPage: React.FC<{ params: Promise<{ id: string }> }> = ({
           </div>
 
           <div className="bg-blue-50 border-l-4 border-blue-500 p-5 rounded-r-xl mb-8 text-gray-700 text-sm sm:text-base leading-relaxed news-content">
-            <div dangerouslySetInnerHTML={{ __html: blog.excerpt }} />
+            <div dangerouslySetInnerHTML={{ __html: safeHtml(blog.excerpt) }} />
           </div>
 
           <div className="prose max-w-none text-gray-700 [&_pre]:overflow-x-auto [&_pre]:whitespace-pre-wrap [&_pre]:break-words [&_code]:break-words [&_img]:max-w-full news-content">
             <div
               className="text-gray-700 mb-8"
-              dangerouslySetInnerHTML={{ __html: blog.content }}
+              dangerouslySetInnerHTML={{ __html: safeHtml(blog.content) }}
             />
           </div>
 
