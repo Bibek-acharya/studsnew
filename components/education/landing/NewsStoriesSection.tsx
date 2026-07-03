@@ -42,7 +42,9 @@ const NewsStoriesSection: React.FC<NewsStoriesSectionProps> = ({
         ? "bg-purple-50 text-purple-600"
         : item.category?.toLowerCase().includes("admission")
           ? "bg-blue-50 text-blue-600"
-          : "bg-emerald-50 text-emerald-600",
+          : item.category?.toLowerCase().includes("news")
+            ? "bg-cyan-50 text-cyan-600"
+            : "bg-emerald-50 text-emerald-600",
     imgSrc:
       item.image || "https://placehold.co/600x400/f1f5f9/94a3b8?text=News",
     title: item.title,
