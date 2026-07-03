@@ -318,7 +318,7 @@ const NewsDetailsPage: React.FC<{
           )}
 
           <div
-            className="news-content prose prose-slate max-w-none break-words overflow-hidden mb-12 prose-img:max-w-full prose-img:h-auto prose-img:rounded-xl prose-pre:overflow-x-auto prose-pre:whitespace-pre-wrap prose-table:block prose-table:overflow-x-auto prose-a:text-blue-600 hover:prose-a:text-blue-700 prose-headings:text-gray-900 prose-p:text-gray-700 prose-li:text-gray-700"
+            className="news-content prose prose-slate max-w-none break-normal [overflow-wrap:normal] [word-break:normal] [hyphens:none] overflow-hidden mb-12 prose-img:max-w-full prose-img:h-auto prose-img:rounded-xl prose-pre:overflow-x-auto prose-pre:whitespace-pre-wrap prose-table:block prose-table:overflow-x-auto prose-a:text-blue-600 hover:prose-a:text-blue-700 prose-headings:text-gray-900 prose-p:text-gray-700 prose-li:text-gray-700"
             dangerouslySetInnerHTML={{
               __html: article.content || article.excerpt || "",
             }}

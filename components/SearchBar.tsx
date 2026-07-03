@@ -21,7 +21,10 @@ export const SearchBar: React.FC<{
   isMobile?: boolean;
   defaultSearchOpen?: boolean;
   showSuggestionDropdown?: boolean;
-  onQueryStateChange?: (query: string, suggestions: { title: string; type: string }[]) => void;
+  onQueryStateChange?: (
+    query: string,
+    suggestions: { title: string; type: string }[],
+  ) => void;
 }> = ({
   isMobile,
   defaultSearchOpen = false,
@@ -32,7 +35,9 @@ export const SearchBar: React.FC<{
   const [searchQuery, setSearchQuery] = useState("");
   const [searchCategory, setSearchCategory] = useState("colleges");
   const [categoryOpen, setCategoryOpen] = useState(false);
-  const [suggestions, setSuggestions] = useState<{ title: string; type: string }[]>([]);
+  const [suggestions, setSuggestions] = useState<
+    { title: string; type: string }[]
+  >([]);
   const [isLoadingSuggestions, setIsLoadingSuggestions] = useState(false);
   const [showBorder, setShowBorder] = useState(false);
   const [hoverAngle, setHoverAngle] = useState(0);
@@ -49,7 +54,9 @@ export const SearchBar: React.FC<{
     { value: "entrance", label: "Entrance" },
   ];
 
-  const selectedLabel = categoryOptions.find((o) => o.value === searchCategory)?.label || "Colleges";
+  const selectedLabel =
+    categoryOptions.find((o) => o.value === searchCategory)?.label ||
+    "Colleges";
 
   useEffect(() => {
     return () => {
@@ -59,7 +66,10 @@ export const SearchBar: React.FC<{
 
   useEffect(() => {
     const handleClick = (e: MouseEvent) => {
-      if (categoryRef.current && !categoryRef.current.contains(e.target as Node)) {
+      if (
+        categoryRef.current &&
+        !categoryRef.current.contains(e.target as Node)
+      ) {
         setCategoryOpen(false);
       }
     };
@@ -75,17 +85,27 @@ export const SearchBar: React.FC<{
       setIsLoadingSuggestions(false);
       return;
     }
-    const local = defaultSuggestions.filter((s) => s.text.toLowerCase().includes(query.toLowerCase()));
+    const local = defaultSuggestions.filter((s) =>
+      s.text.toLowerCase().includes(query.toLowerCase()),
+    );
     if (local.length > 0) {
       setSuggestions(local.map((s) => ({ title: s.text, type: "suggestion" })));
     }
     setIsLoadingSuggestions(true);
     debounceRef.current = setTimeout(async () => {
       try {
-        const res = await fetch(`${API_BASE_URL}/api/v1/search?q=${encodeURIComponent(query)}&cat=${searchCategory}&limit=5`, { credentials: "include" });
+        const res = await fetch(
+          `${API_BASE_URL}/api/v1/search?q=${encodeURIComponent(query)}&cat=${searchCategory}&limit=5`,
+          { credentials: "include" },
+        );
         const json = await res.json();
         if (json.success && json.data?.items) {
-          setSuggestions(json.data.items.map((item: any) => ({ title: item.title, type: item.type })));
+          setSuggestions(
+            json.data.items.map((item: any) => ({
+              title: item.title,
+              type: item.type,
+            })),
+          );
         }
       } catch {
         // ignore, keep local results
@@ -112,7 +132,6 @@ export const SearchBar: React.FC<{
       ) {
         setIsSearchOpen(false);
       }
-
     };
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
@@ -142,7 +161,8 @@ export const SearchBar: React.FC<{
     setSearchQuery(text);
     setIsSearchOpen(false);
 
-    const category = suggestionCategoryMap[text] || categoryMap[text.toLowerCase()] || null;
+    const category =
+      suggestionCategoryMap[text] || categoryMap[text.toLowerCase()] || null;
     const cat = category ? `&cat=${category}` : "";
     const query = `/search?q=${encodeURIComponent(text)}${cat}`;
     router.push(query);
@@ -160,7 +180,18 @@ export const SearchBar: React.FC<{
               className="search-item flex items-center gap-4 px-6 py-3.5 hover:bg-gray-50 cursor-pointer transition-colors"
               onClick={() => handleDropdownItemClick(item.text)}
             >
-              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-gray-600">
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="20"
+                height="20"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                className="text-gray-600"
+              >
                 <circle cx="11" cy="11" r="8"></circle>
                 <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
               </svg>
@@ -180,12 +211,25 @@ export const SearchBar: React.FC<{
               className={`search-item flex items-center gap-4 px-6 py-3.5 hover:bg-gray-50 cursor-pointer transition-colors ${isLoadingSuggestions ? "opacity-60" : ""}`}
               onClick={() => handleDropdownItemClick(item.title)}
             >
-              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-gray-600">
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="20"
+                height="20"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                className="text-gray-600"
+              >
                 <circle cx="11" cy="11" r="8"></circle>
                 <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
               </svg>
               <span className="text-[15px] text-gray-700">{item.title}</span>
-              <span className="ml-auto text-[12px] text-gray-400 capitalize">{item.type}</span>
+              <span className="ml-auto text-[12px] text-gray-400 capitalize">
+                {item.type}
+              </span>
             </div>
           ))}
         </>
@@ -201,39 +245,51 @@ export const SearchBar: React.FC<{
 
   return (
     <div className={isMobile ? "w-full" : "hidden max-w-480 flex-1 md:block"}>
-      <div className="group relative flex h-10 w-full items-center overflow-visible rounded-full border border-gray-300 bg-white transition-all focus-within:border-gray-400 focus-within:shadow-sm sm:h-11.5" ref={searchContainerRef}>
-        <button
-          type="button"
-          onClick={() => router.push("/sphere-ai")}
-          onMouseMove={(e) => {
-            const r = e.currentTarget.getBoundingClientRect();
-            const x = e.clientX - r.left - r.width / 2;
-            const y = e.clientY - r.top - r.height / 2;
-            const a = Math.atan2(y, x) * (180 / Math.PI) + 90;
-            setHoverAngle(a);
-          }}
-          onMouseEnter={() => setShowBorder(true)}
-          onMouseLeave={() => setShowBorder(false)}
-          className="relative flex items-center gap-2 bg-gray-100 hover:bg-blue-100 rounded-full px-3 py-1.5 shrink-0 ml-2 cursor-pointer transition-colors overflow-hidden"
-          aria-label="Open Sphere AI"
-        >
-          <span
-            className="absolute inset-0 rounded-full pointer-events-none transition-opacity duration-300"
-            style={{
-              border: "1.5px solid #0000FF",
-              opacity: showBorder ? 1 : 0,
-              maskImage: showBorder
-                ? `conic-gradient(from ${hoverAngle - 60}deg, transparent 0deg, black 30deg, black 150deg, transparent 180deg)`
-                : "none",
-              WebkitMaskImage: showBorder
-                ? `conic-gradient(from ${hoverAngle - 60}deg, transparent 0deg, black 30deg, black 150deg, transparent 180deg)`
-                : "none",
+      <div
+        className="group relative flex h-10 w-full items-center overflow-visible rounded-full border border-gray-300 bg-white transition-all focus-within:border-gray-400 focus-within:shadow-sm sm:h-11.5"
+        ref={searchContainerRef}
+      >
+        {!isMobile && (
+          <button
+            type="button"
+            onClick={() => router.push("/sphere-ai")}
+            onMouseMove={(e) => {
+              const r = e.currentTarget.getBoundingClientRect();
+              const x = e.clientX - r.left - r.width / 2;
+              const y = e.clientY - r.top - r.height / 2;
+              const a = Math.atan2(y, x) * (180 / Math.PI) + 90;
+              setHoverAngle(a);
             }}
-          />
-          <Search size={14} className="text-gray-700 relative z-10" />
-          <span className="text-sm font-medium text-gray-800 relative z-10">Sphere AI</span>
-        </button>
-        <div className="w-px h-6 bg-gray-300 shrink-0 mx-3" aria-hidden="true"></div>
+            onMouseEnter={() => setShowBorder(true)}
+            onMouseLeave={() => setShowBorder(false)}
+            className="relative flex items-center gap-2 bg-gray-100 hover:bg-blue-100 rounded-full px-3 py-1.5 shrink-0 ml-2 cursor-pointer transition-colors overflow-hidden"
+            aria-label="Open Sphere AI"
+          >
+            <span
+              className="absolute inset-0 rounded-full pointer-events-none transition-opacity duration-300"
+              style={{
+                border: "1.5px solid #0000FF",
+                opacity: showBorder ? 1 : 0,
+                maskImage: showBorder
+                  ? `conic-gradient(from ${hoverAngle - 60}deg, transparent 0deg, black 30deg, black 150deg, transparent 180deg)`
+                  : "none",
+                WebkitMaskImage: showBorder
+                  ? `conic-gradient(from ${hoverAngle - 60}deg, transparent 0deg, black 30deg, black 150deg, transparent 180deg)`
+                  : "none",
+              }}
+            />
+            <Search size={14} className="text-gray-700 relative z-10" />
+            <span className="text-sm font-medium text-gray-800 relative z-10">
+              Sphere AI
+            </span>
+          </button>
+        )}
+        {!isMobile && (
+          <div
+            className="w-px h-6 bg-gray-300 shrink-0 mx-3"
+            aria-hidden="true"
+          ></div>
+        )}
         <input
           ref={searchInputRef}
           type="text"
@@ -243,8 +299,12 @@ export const SearchBar: React.FC<{
           onClick={() => {
             setIsSearchOpen(true);
           }}
-          placeholder={isMobile ? "Search for courses, exams, scholarships..." : "Search for courses, exams, scholarships..."}
-          className="flex-1 bg-transparent border-none py-3.5 pl-1 pr-2 text-[15px] text-gray-800 placeholder-[#6b7280] focus:outline-none focus:ring-0"
+          placeholder={
+            isMobile
+              ? "Search colleges, courses..."
+              : "Search for courses, exams, scholarships..."
+          }
+          className="flex-1 bg-transparent border-none py-3.5 pl-3 pr-2 text-[15px] text-gray-800 placeholder-[#6b7280] focus:outline-none focus:ring-0"
           autoComplete="off"
         />
 
@@ -255,14 +315,20 @@ export const SearchBar: React.FC<{
               className="flex items-center gap-1 pl-2 pr-1 py-1 text-[14px] font-medium text-gray-800 hover:text-gray-900 transition-colors"
             >
               {selectedLabel}
-              <ChevronDown size={14} className={`text-gray-500 transition-transform ${categoryOpen ? "rotate-180" : ""}`} />
+              <ChevronDown
+                size={14}
+                className={`text-gray-500 transition-transform ${categoryOpen ? "rotate-180" : ""}`}
+              />
             </button>
             {categoryOpen && (
               <div className="absolute top-full left-0 mt-1 w-44 rounded-lg border border-gray-200 bg-white py-1 shadow-lg z-50">
                 {categoryOptions.map((opt) => (
                   <button
                     key={opt.value}
-                    onClick={() => { setSearchCategory(opt.value); setCategoryOpen(false); }}
+                    onClick={() => {
+                      setSearchCategory(opt.value);
+                      setCategoryOpen(false);
+                    }}
                     className={`w-full text-left px-3 py-2 text-[14px] transition-colors ${
                       searchCategory === opt.value
                         ? "text-brand-blue font-bold bg-blue-50"
@@ -292,7 +358,9 @@ export const SearchBar: React.FC<{
               const target = e.target as HTMLElement;
               if (target.closest(".delete-btn")) return;
               if (target.closest(".search-item")) {
-                const titleEl = target.closest(".search-item")?.querySelector("span:first-of-type");
+                const titleEl = target
+                  .closest(".search-item")
+                  ?.querySelector("span:first-of-type");
                 if (titleEl?.textContent) {
                   handleDropdownItemClick(titleEl.textContent);
                 }

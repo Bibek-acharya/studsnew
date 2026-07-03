@@ -9,18 +9,52 @@ interface HeroSectionProps {
     view: string,
     data?: { search?: string; [key: string]: unknown },
   ) => void;
-  slides?: { image: string; title?: string; subtitle?: string; link_url?: string; button_text?: string }[];
+  slides?: {
+    image: string;
+    title?: string;
+    subtitle?: string;
+    link_url?: string;
+    button_text?: string;
+  }[];
 }
 
 const DEFAULT_SLIDES = [
-  { image: "https://images.unsplash.com/photo-1541339907198-e08756dedf3f?q=80&w=2070&auto=format&fit=crop", text: "studsphere.com", url: "https://studsphere.com" },
-  { image: "https://images.unsplash.com/photo-1498243691581-b145c3f54a5a?q=80&w=2070&auto=format&fit=crop", text: "studsphere.com", url: "https://studsphere.com" },
-  { image: "https://images.unsplash.com/photo-1562774053-701939374585?q=80&w=2065&auto=format&fit=crop", text: "studsphere.com", url: "https://studsphere.com" },
-  { image: "https://images.unsplash.com/photo-1525926476841-be2069c93a4d?q=80&w=2070&auto=format&fit=crop", text: "studsphere.com", url: "https://studsphere.com" },
-  { image: "https://images.unsplash.com/photo-1606761568499-6d2451b23c66?q=80&w=1974&auto=format&fit=crop", text: "studsphere.com", url: "https://studsphere.com" },
+  {
+    image:
+      "https://images.unsplash.com/photo-1541339907198-e08756dedf3f?q=80&w=2070&auto=format&fit=crop",
+    text: "studsphere.com",
+    url: "https://studsphere.com",
+  },
+  {
+    image:
+      "https://images.unsplash.com/photo-1498243691581-b145c3f54a5a?q=80&w=2070&auto=format&fit=crop",
+    text: "studsphere.com",
+    url: "https://studsphere.com",
+  },
+  {
+    image:
+      "https://images.unsplash.com/photo-1562774053-701939374585?q=80&w=2065&auto=format&fit=crop",
+    text: "studsphere.com",
+    url: "https://studsphere.com",
+  },
+  {
+    image:
+      "https://images.unsplash.com/photo-1525926476841-be2069c93a4d?q=80&w=2070&auto=format&fit=crop",
+    text: "studsphere.com",
+    url: "https://studsphere.com",
+  },
+  {
+    image:
+      "https://images.unsplash.com/photo-1606761568499-6d2451b23c66?q=80&w=1974&auto=format&fit=crop",
+    text: "studsphere.com",
+    url: "https://studsphere.com",
+  },
 ];
 
-const HeroSection: React.FC<HeroSectionProps> = ({ onNavigate, slides = [] }) => {
+const HeroSection: React.FC<HeroSectionProps> = ({
+  onNavigate,
+  slides = [],
+}) => {
   const [currentSlide, setCurrentSlide] = useState(0);
   const [fade, setFade] = useState(true);
   const [desktopQuery, setDesktopQuery] = useState("");
@@ -35,16 +69,27 @@ const HeroSection: React.FC<HeroSectionProps> = ({ onNavigate, slides = [] }) =>
     }
     const fetchCarousel = async () => {
       try {
-        const res = await fetch(`${API_BASE}/api/v1/system/carousels?page=landing`);
+        const res = await fetch(
+          `${API_BASE}/api/v1/system/carousels?page=landing`,
+        );
         const json = await res.json();
         if (json.success && json.data && json.data.length > 0) {
           setFetchedSlides(
-            json.data.map((s: { image_url: string; link_url: string; title?: string; subtitle?: string }) => ({
-              image: s.image_url.startsWith("/uploads") ? `${API_BASE}${s.image_url}` : s.image_url,
-              title: s.title,
-              subtitle: s.subtitle,
-              link_url: s.link_url,
-            }))
+            json.data.map(
+              (s: {
+                image_url: string;
+                link_url: string;
+                title?: string;
+                subtitle?: string;
+              }) => ({
+                image: s.image_url.startsWith("/uploads")
+                  ? `${API_BASE}${s.image_url}`
+                  : s.image_url,
+                title: s.title,
+                subtitle: s.subtitle,
+                link_url: s.link_url,
+              }),
+            ),
           );
         }
       } catch {
@@ -54,11 +99,14 @@ const HeroSection: React.FC<HeroSectionProps> = ({ onNavigate, slides = [] }) =>
     fetchCarousel();
   }, [slides]);
 
-  const heroSlides = fetchedSlides.length > 0 ? fetchedSlides.map((s) => ({
-    image: s.image,
-    text: s.title || s.subtitle || "studsphere.com",
-    url: s.link_url || "https://studsphere.com",
-  })) : DEFAULT_SLIDES;
+  const heroSlides =
+    fetchedSlides.length > 0
+      ? fetchedSlides.map((s) => ({
+          image: s.image,
+          text: s.title || s.subtitle || "studsphere.com",
+          url: s.link_url || "https://studsphere.com",
+        }))
+      : DEFAULT_SLIDES.slice(0, 1);
 
   const slideCount = heroSlides.length;
   const safeIndex = slideCount > 0 ? currentSlide % slideCount : 0;
@@ -92,9 +140,12 @@ const HeroSection: React.FC<HeroSectionProps> = ({ onNavigate, slides = [] }) =>
 
   return (
     <div className="w-full pt-2 pb-6 md:pb-4 flex justify-center px-4 sm:px-6 md:px-8">
-        <main className="relative w-full max-w-350 h-60 sm:h-70 md:h-auto md:min-h-120 lg:h-135 flex items-center justify-center overflow-hidden rounded-xl md:rounded-2xl">
+      <main className="relative w-full max-w-350 h-60 sm:h-70 md:h-auto md:min-h-120 lg:h-135 flex items-center justify-center overflow-hidden rounded-xl md:rounded-2xl">
         {/* Background Slider Container */}
-        <div id="slider-container" className="absolute inset-0 z-0 overflow-hidden">
+        <div
+          id="slider-container"
+          className="absolute inset-0 z-0 overflow-hidden"
+        >
           <div
             className="flex h-full w-full transition-transform duration-700 ease-out"
             style={{ transform: `translateX(-${currentSlide * 100}%)` }}
@@ -158,7 +209,7 @@ const HeroSection: React.FC<HeroSectionProps> = ({ onNavigate, slides = [] }) =>
             </button>
           </form>
 
-            {/* <div className="mt-6 flex flex-wrap justify-center items-center gap-3 text-sm font-medium text-gray-200 drop-">
+          {/* <div className="mt-6 flex flex-wrap justify-center items-center gap-3 text-sm font-medium text-gray-200 drop-">
               <span className="font-bold text-white">Your recent visit:</span>
               <button
                 onClick={() => onNavigate("findCollege", { search: "BIT" })}
@@ -194,20 +245,22 @@ const HeroSection: React.FC<HeroSectionProps> = ({ onNavigate, slides = [] }) =>
             {heroSlides[safeIndex].text}
           </a>
 
-          <div className="flex items-center space-x-2 md:space-x-3">
-            {heroSlides.map((_, index) => (
-              <button
-                key={index}
-                onClick={() => setCurrentSlide(index)}
-                className={`nav-dot transition-all duration-300 focus:outline-none ${
-                  currentSlide === index
-                    ? "w-5 md:w-8 h-1.5 md:h-2.5 rounded-full bg-brand-blue"
-                    : "w-1.5 md:w-2.5 h-1.5 md:h-2.5 rounded-full bg-white/50 hover:bg-white/80"
-                }`}
-                aria-label={`Go to slide ${index + 1}`}
-              ></button>
-            ))}
-          </div>
+          {heroSlides.length > 1 && (
+            <div className="flex items-center space-x-2 md:space-x-3">
+              {heroSlides.map((_, index) => (
+                <button
+                  key={index}
+                  onClick={() => setCurrentSlide(index)}
+                  className={`nav-dot transition-all duration-300 focus:outline-none ${
+                    currentSlide === index
+                      ? "w-5 md:w-8 h-1.5 md:h-2.5 rounded-full bg-brand-blue"
+                      : "w-1.5 md:w-2.5 h-1.5 md:h-2.5 rounded-full bg-white/50 hover:bg-white/80"
+                  }`}
+                  aria-label={`Go to slide ${index + 1}`}
+                ></button>
+              ))}
+            </div>
+          )}
         </div>
 
         {/* Floating Link (Desktop) */}

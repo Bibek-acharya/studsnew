@@ -270,7 +270,7 @@ const CollegeRecommenderToolPage: React.FC<CollegeRecommenderToolPageProps> = ({
   }
 
   return (
-    <div className="flex flex-col overflow-visible bg-white text-slate-800 lg:flex-row">
+    <div className="flex flex-col overflow-visible bg-white text-slate-800 lg:flex-row px-4 sm:px-6 lg:px-8">
       {step === 1 && (
         <Step1
           step={step}

@@ -11,22 +11,57 @@ const faces = [
   { value: 1, color: "#eb3323", label: "Hate" },
 ];
 
-const FaceIcon = ({ face, selected }: { face: typeof faces[0]; selected: boolean }) => {
+const FaceIcon = ({
+  face,
+  selected,
+}: {
+  face: (typeof faces)[0];
+  selected: boolean;
+}) => {
   const basePath = "M 26 58 Q 50 88 74 58 Z";
   const sadPath = "M 30 70 Q 50 50 70 70";
   const hatePath = "M 26 76 Q 50 48 74 76 Z";
-  const neutralLine = <line x1="30" y1="64" x2="70" y2="64" stroke="#000" strokeWidth="4.5" strokeLinecap="round" />;
-  const happySmile = <path d="M 28 62 Q 50 80 72 62" stroke="#000" strokeWidth="4.5" strokeLinecap="round" fill="none" />;
+  const neutralLine = (
+    <line
+      x1="30"
+      y1="64"
+      x2="70"
+      y2="64"
+      stroke="#000"
+      strokeWidth="4.5"
+      strokeLinecap="round"
+    />
+  );
+  const happySmile = (
+    <path
+      d="M 28 62 Q 50 80 72 62"
+      stroke="#000"
+      strokeWidth="4.5"
+      strokeLinecap="round"
+      fill="none"
+    />
+  );
 
   return (
-    <svg viewBox="0 0 100 100" className={`w-10 h-10 transition-all duration-200 ${selected ? "scale-115 drop-" : ""}`}>
+    <svg
+      viewBox="0 0 100 100"
+      className={`w-10 h-10 transition-all duration-200 ${selected ? "scale-115 drop-" : ""}`}
+    >
       <circle cx="50" cy="50" r="50" fill={face.color} />
       <circle cx="33" cy="42" r="5.5" fill="#000" />
       <circle cx="67" cy="42" r="5.5" fill="#000" />
       {face.value === 5 && <path d={basePath} fill="#000" />}
       {face.value === 4 && happySmile}
       {face.value === 3 && neutralLine}
-      {face.value === 2 && <path d={sadPath} stroke="#000" strokeWidth="4.5" strokeLinecap="round" fill="none" />}
+      {face.value === 2 && (
+        <path
+          d={sadPath}
+          stroke="#000"
+          strokeWidth="4.5"
+          strokeLinecap="round"
+          fill="none"
+        />
+      )}
       {face.value === 1 && <path d={hatePath} fill="#000" />}
     </svg>
   );
@@ -49,8 +84,10 @@ export default function FeedbackWidget() {
     const checkSubmitted = async () => {
       setChecking(true);
       try {
-        const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080";
-        const token = localStorage.getItem("token") || sessionStorage.getItem("token");
+        const API_BASE =
+          process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080";
+        const token =
+          localStorage.getItem("token") || sessionStorage.getItem("token");
         const res = await fetch(`${API_BASE}/api/v1/feedback/status`, {
           headers: token ? { Authorization: `Bearer ${token}` } : {},
         });
@@ -89,8 +126,10 @@ export default function FeedbackWidget() {
     if (!rating) return;
     setSubmitting(true);
     try {
-      const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080";
-      const token = localStorage.getItem("token") || sessionStorage.getItem("token");
+      const API_BASE =
+        process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080";
+      const token =
+        localStorage.getItem("token") || sessionStorage.getItem("token");
       await fetch(`${API_BASE}/api/v1/feedback`, {
         method: "POST",
         headers: {
@@ -185,7 +224,8 @@ export default function FeedbackWidget() {
         return (
           <div className="flex flex-col h-full flex-grow">
             <h2 className="text-[#202124] text-[13px] font-semibold mb-2 tracking-tight leading-snug">
-              We may wish to follow up. Enter your email if you&apos;re happy for us to contact you.
+              We may wish to follow up. Enter your email if you&apos;re happy
+              for us to contact you.
             </h2>
             <textarea
               value={email}
@@ -232,36 +272,46 @@ export default function FeedbackWidget() {
   }
 
   return (
-    <div className="absolute left-0 top-1/2 z-50 -translate-y-1/2 scale-90 sm:scale-100 origin-left">
+    <div className="absolute left-0 top-1/2 z-50 -translate-y-1/2 scale-75 sm:scale-90 xl:scale-100 origin-left">
       <div className="flex items-stretch">
         <button
           onClick={() => setIsOpen(!isOpen)}
-          className="relative z-20 flex w-[36px] flex-col items-center justify-center rounded-r-md bg-brand-blue py-3 text-white cursor-pointer transition-colors shadow-[4px_0_15px_rgba(0,0,0,0.1)] hover:bg-brand-hover focus:outline-none sm:w-[42px] sm:py-4"
+          className="relative z-20 flex w-[30px] flex-col items-center justify-center rounded-r-md bg-brand-blue py-2 text-white cursor-pointer transition-colors shadow-[4px_0_15px_rgba(0,0,0,0.1)] hover:bg-brand-hover focus:outline-none sm:w-[36px] sm:py-3 xl:w-[42px] xl:py-4"
         >
           <svg
             xmlns="http://www.w3.org/2000/svg"
-            className={`w-5 h-5 mb-2 transition-transform duration-300 ${isOpen ? "rotate-180" : ""}`}
+            className={`w-4 h-4 mb-1 transition-transform duration-300 sm:w-5 sm:h-5 sm:mb-2 ${isOpen ? "rotate-180" : ""}`}
             fill="none"
             viewBox="0 0 24 24"
             stroke="currentColor"
             strokeWidth="2.5"
           >
-            <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              d="M9 5l7 7-7 7"
+            />
           </svg>
           <span
-            className="vertical-text mt-1 text-[13px] font-medium tracking-wide sm:text-[15px]"
-            style={{ writingMode: "vertical-rl", textOrientation: "mixed", transform: "rotate(180deg)" }}
+            className="vertical-text mt-1 text-[11px] font-medium tracking-wide sm:text-[13px] xl:text-[15px]"
+            style={{
+              writingMode: "vertical-rl",
+              textOrientation: "mixed",
+              transform: "rotate(180deg)",
+            }}
           >
             Feedback
           </span>
         </button>
-        
-        <div 
+
+        <div
           className={`relative z-10 -ml-[2px] flex items-stretch overflow-hidden rounded-r-lg bg-white shadow-xl transition-all duration-300 ease-in-out ${
-            isOpen ? "w-[280px] opacity-100 sm:w-[340px]" : "w-0 opacity-0"
+            isOpen
+              ? "w-[220px] opacity-100 sm:w-[280px] xl:w-[340px]"
+              : "w-0 opacity-0"
           }`}
         >
-          <div className="flex h-full w-[280px] min-w-[280px] flex-col px-4 py-2.5 sm:w-[340px] sm:min-w-[340px] sm:px-5 sm:py-3">
+          <div className="flex h-full w-[220px] min-w-[220px] flex-col px-3 py-2 sm:w-[280px] sm:min-w-[280px] sm:px-4 sm:py-2.5 xl:w-[340px] xl:min-w-[340px] xl:px-5 xl:py-3">
             {renderStep()}
           </div>
         </div>

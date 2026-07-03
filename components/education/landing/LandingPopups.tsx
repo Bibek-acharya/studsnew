@@ -24,7 +24,7 @@ const LandingPopups = () => {
       {showCommunity && (
         <div
           id="community-card"
-          className="fixed bottom-2 left-2 z-50 max-w-[calc(100vw-1rem)] rounded-md bg-white border border-gray-200 transition-all duration-300 animate-[slideUpLeft_0.5s_cubic-bezier(0.16,1,0.3,1)_forwards] xs:bottom-3 xs:left-3 xs:max-w-[calc(100vw-1.5rem)] sm:bottom-6 sm:left-4 sm:max-w-85 md:left-6"
+          className="fixed bottom-2 left-2 z-50 max-w-[calc(100vw-0.5rem)] rounded-md bg-white border border-gray-200 transition-all duration-300 animate-[slideUpLeft_0.5s_cubic-bezier(0.16,1,0.3,1)_forwards] xs:bottom-3 xs:left-3 xs:max-w-[calc(100vw-0.75rem)] sm:bottom-6 sm:left-4 sm:max-w-85 md:left-6"
         >
           <div className="absolute -top-2.5 sm:-top-3 -left-1.5 sm:-left-2 z-20">
             <span className="relative block overflow-hidden rounded-md bg-[#2563EB] px-2 py-0.5 text-[10px] font-bold tracking-wider text-white xs:px-2.5 xs:py-1 xs:text-[11px] sm:px-3.5 sm:py-1.5 sm:text-[13px]">
