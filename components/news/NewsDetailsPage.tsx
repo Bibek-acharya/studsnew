@@ -104,31 +104,45 @@ const NewsDetailsPage: React.FC<{
 
     async function fetchNews() {
       const safeId = id!;
+      const API_BASE =
+        process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080";
 
       try {
         if (safeId.startsWith("provider-")) {
           const slug = safeId.replace("provider-", "");
-          const data = await getPublicNewsBySlug(slug);
+          const data = await getPublicNewsBySlug(slug).catch(() => null);
           if (data) {
             setArticle(normalizeArticle(data));
             return;
           }
         } else if (safeId.startsWith("inst-")) {
           const slug = safeId.replace("inst-", "");
-          const data = await fetchInstitutionNewsBySlug(slug);
+          const data = await fetchInstitutionNewsBySlug(slug).catch(() => null);
           if (data) {
             setArticle(normalizeArticle(data));
             return;
           }
         } else if (safeId.startsWith("edu-")) {
           const slug = safeId.replace("edu-", "");
-          const data = await fetchPublicNewsBySlug(slug);
-          if (data) {
-            setArticle(normalizeArticle(data));
-            return;
+          // If slug is purely numeric, it's a fallback ID — fetch by ID directly
+          if (/^\d+$/.test(slug)) {
+            const res = await fetch(
+              `${API_BASE}/api/v1/education/news/${slug}`,
+            );
+            const json = await res.json();
+            if (json?.data) {
+              setArticle(normalizeArticle(json.data));
+              return;
+            }
+          } else {
+            const data = await fetchPublicNewsBySlug(slug).catch(() => null);
+            if (data) {
+              setArticle(normalizeArticle(data));
+              return;
+            }
           }
         } else {
-          const data = await fetchPublicNewsBySlug(safeId);
+          const data = await fetchPublicNewsBySlug(safeId).catch(() => null);
           if (data) {
             setArticle(normalizeArticle(data));
             return;

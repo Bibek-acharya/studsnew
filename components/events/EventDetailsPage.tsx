@@ -96,7 +96,17 @@ const EventDetailsPage: React.FC<{ params: Promise<{ slug: string }> }> = ({
             eventData = null;
           }
         } else {
-          eventData = await fetchPublicEventBySlug(slug);
+          if (/^\d+$/.test(slug)) {
+            const API_BASE =
+              process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080";
+            const res = await fetch(
+              `${API_BASE}/api/v1/education/events/${slug}`,
+            );
+            const json = await res.json();
+            eventData = json?.data || json;
+          } else {
+            eventData = await fetchPublicEventBySlug(slug);
+          }
         }
         setEvent(eventData);
 

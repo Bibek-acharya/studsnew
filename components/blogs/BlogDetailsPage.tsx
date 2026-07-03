@@ -65,10 +65,22 @@ const BlogDetailsPage: React.FC<{ params: Promise<{ slug: string }> }> = ({
             setRelated([]);
           }
         } else {
-          const [blogResult, commentsData] = await Promise.all([
-            fetchPublicBlogBySlug(safeId),
-            fetchBlogComments(safeId),
-          ]);
+          let blogResult, commentsData;
+          if (/^\d+$/.test(safeId)) {
+            const API_BASE =
+              process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080";
+            const res = await fetch(
+              `${API_BASE}/api/v1/education/blogs/${safeId}`,
+            );
+            const json = await res.json();
+            blogResult = json?.data || json;
+            commentsData = await fetchBlogComments(safeId).catch(() => []);
+          } else {
+            [blogResult, commentsData] = await Promise.all([
+              fetchPublicBlogBySlug(safeId),
+              fetchBlogComments(safeId),
+            ]);
+          }
           if (blogResult) {
             setBlog(blogResult.blog);
             setRelated(blogResult.related);
