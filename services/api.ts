@@ -218,6 +218,7 @@ export interface EducationEvent {
   interested: number;
   trending: boolean;
   featured: boolean;
+  slug?: string;
 }
 
 export interface EducationEventsResponse {
@@ -344,6 +345,7 @@ export interface EducationNewsItem {
   source?: string;
   tags?: string[];
   featured?: boolean;
+  slug?: string;
 }
 
 export interface EducationNewsResponse {

@@ -265,7 +265,7 @@ const NewsPage: React.FC = () => {
             Featured Story of the Week
           </h2>
           <Link
-            href={`/news/${featuredNews.id}`}
+            href={`/news/${(featuredNews as any).slug || featuredNews.id}`}
             className="relative w-full h-112.5 sm:h-100 rounded-md overflow-hidden shadow-lg group cursor-pointer block"
           >
             <img
@@ -384,7 +384,7 @@ const NewsPage: React.FC = () => {
                   </div>
 
                   <Link
-                    href={`/news/${item.id}`}
+                    href={`/news/${(item as any).slug || item.id}`}
                     className="font-bold text-lg text-slate-900 leading-snug mb-2 group-hover:text-blue-600 transition-colors "
                   >
                     {item.title}
@@ -399,7 +399,7 @@ const NewsPage: React.FC = () => {
                       {timeAgo(item.date)}
                     </span>
                     <Link
-                      href={`/news/${item.id}`}
+                      href={`/news/${(item as any).slug || item.id}`}
                       className="text-blue-600 font-semibold flex items-center group-hover:translate-x-1 transition-transform duration-200"
                     >
                       View Details

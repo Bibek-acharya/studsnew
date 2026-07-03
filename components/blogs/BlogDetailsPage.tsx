@@ -4,17 +4,21 @@ import React, { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import {
   fetchPublicBlogById,
+  fetchPublicBlogBySlug,
   fetchBlogComments,
   postBlogComment,
   BlogEntry,
   BlogComment,
 } from "@/services/blogApi";
-import { getPublicBlogByID } from "@/services/scholarshipProviderApi";
+import {
+  getPublicBlogByID,
+  getPublicBlogBySlug,
+} from "@/services/scholarshipProviderApi";
 import { useAuth } from "@/services/AuthContext";
 import { getImageUrl, stripHtml } from "@/services/api";
 import { safeHtml } from "@/lib/html";
 
-const BlogDetailsPage: React.FC<{ params: Promise<{ id: string }> }> = ({
+const BlogDetailsPage: React.FC<{ params: Promise<{ slug: string }> }> = ({
   params,
 }) => {
   const { user } = useAuth();
@@ -26,7 +30,7 @@ const BlogDetailsPage: React.FC<{ params: Promise<{ id: string }> }> = ({
   const [postingComment, setPostingComment] = useState(false);
 
   useEffect(() => {
-    params.then((p) => setId(p.id));
+    params.then((p) => setId(p.slug));
   }, [params]);
 
   useEffect(() => {
@@ -37,15 +41,15 @@ const BlogDetailsPage: React.FC<{ params: Promise<{ id: string }> }> = ({
       const safeId = id!;
       try {
         const isProvider = safeId.startsWith("provider-");
-        const actualId = isProvider ? safeId.replace("provider-", "") : safeId;
 
         if (isProvider) {
-          const blogData = await getPublicBlogByID(parseInt(actualId));
+          const slug = safeId.replace("provider-", "");
+          const blogData = await getPublicBlogBySlug(slug);
           if (blogData) {
             setBlog({
-              id: parseInt(actualId),
+              id: blogData.id || 0,
               title: blogData.title,
-              slug: blogData.title?.toLowerCase().replace(/\s+/g, "-") || "",
+              slug: slug,
               excerpt: blogData.content?.slice(0, 200) || "",
               content: blogData.content || "",
               image: blogData.image_url || "",
@@ -62,7 +66,7 @@ const BlogDetailsPage: React.FC<{ params: Promise<{ id: string }> }> = ({
           }
         } else {
           const [blogResult, commentsData] = await Promise.all([
-            fetchPublicBlogById(safeId),
+            fetchPublicBlogBySlug(safeId),
             fetchBlogComments(safeId),
           ]);
           if (blogResult) {
@@ -372,7 +376,7 @@ const BlogDetailsPage: React.FC<{ params: Promise<{ id: string }> }> = ({
                 return (
                   <Link
                     key={rel.id}
-                    href={`/blogs/${rel.id}`}
+                    href={`/blogs/${(rel as any).slug || rel.id}`}
                     className="group block text-left w-full"
                   >
                     <img

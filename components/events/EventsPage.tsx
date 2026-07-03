@@ -275,7 +275,7 @@ const EventsPage: React.FC = () => {
               Featured Story of the Week
             </h2>
             <Link
-              href={`/events/${featured.id}`}
+              href={`/events/${(featured as any).slug || featured.id}`}
               className="relative rounded-md overflow-hidden  h-87.5 sm:h-100 group  cursor-pointer block"
             >
               <img
@@ -361,7 +361,7 @@ const EventsPage: React.FC = () => {
                     </div>
 
                     <Link
-                      href={`/events/${event.id}`}
+                      href={`/events/${(event as any).slug || event.id}`}
                       className={`font-bold text-lg mb-3 leading-tight text-left text-black hover:text-[#0000ff]`}
                     >
                       {event.title}
@@ -382,7 +382,7 @@ const EventsPage: React.FC = () => {
 
                     <div className="mt-auto flex gap-2">
                       <Link
-                        href={`/events/${event.id}`}
+                        href={`/events/${(event as any).slug || event.id}`}
                         className="flex-1 bg-white border border-gray-300 text-gray-700 text-sm font-bold py-2 rounded-md hover:bg-gray-50 transition text-center"
                       >
                         Details

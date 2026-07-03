@@ -4,14 +4,16 @@ import React, { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import {
   fetchPublicEventById,
+  fetchPublicEventBySlug,
   fetchPublicEvents,
   EventEntry,
 } from "@/services/eventApi";
-import { getPublicEvents as getProviderPublicEvents } from "@/services/scholarshipProviderApi";
+import { getPublicEventBySlug } from "@/services/scholarshipProviderApi";
+import { fetchInstitutionEventBySlug } from "@/services/institutionEventsApi";
 import { getImageUrl, stripHtml } from "@/services/api";
 import { safeHtml } from "@/lib/html";
 
-const EventDetailsPage: React.FC<{ params: Promise<{ id: string }> }> = ({
+const EventDetailsPage: React.FC<{ params: Promise<{ slug: string }> }> = ({
   params,
 }) => {
   const [id, setId] = useState<string | null>(null);
@@ -21,91 +23,87 @@ const EventDetailsPage: React.FC<{ params: Promise<{ id: string }> }> = ({
 
   useEffect(() => {
     params.then(async (p) => {
-      setId(p.id);
+      setId(p.slug);
       try {
-        const isProvider = p.id.startsWith("provider-");
-        const isInst = p.id.startsWith("inst-");
-        const actualId = isProvider
-          ? p.id.replace("provider-", "")
+        const isProvider = p.slug.startsWith("provider-");
+        const isInst = p.slug.startsWith("inst-");
+        const slug = isProvider
+          ? p.slug.replace("provider-", "")
           : isInst
-            ? p.id.replace("inst-", "")
-            : p.id;
+            ? p.slug.replace("inst-", "")
+            : p.slug;
 
         let eventData: EventEntry | null;
         if (isProvider) {
           try {
-            const providerData = await getProviderPublicEvents(1, 100);
-            const found = providerData.events.find(
-              (e: any) => String(e.id) === actualId,
-            );
-            eventData = found
-              ? {
-                  id: `provider-${found.id}`,
-                  title: found.name,
-                  excerpt: found.short_desc || "",
-                  description: found.description || "",
-                  category: found.category || found.event_type || "Event",
-                  image: found.image_url || "",
-                  organizer: found.organized_by || "",
-                  location: found.location || "",
-                  date: found.start_date
-                    ? new Date(found.start_date).toLocaleDateString()
-                    : "",
-                  time: found.start_date
-                    ? new Date(found.start_date).toLocaleTimeString()
-                    : "",
-                  registrationFee: "",
-                  interestedCount: 0,
-                  published: true,
-                  created_at: found.created_at,
-                }
-              : null;
+            const providerData = await getPublicEventBySlug(slug);
+            if (providerData) {
+              eventData = {
+                id: `provider-${providerData.id}`,
+                title: providerData.name,
+                excerpt: providerData.short_desc || "",
+                description: providerData.description || "",
+                category:
+                  providerData.category || providerData.event_type || "Event",
+                image: providerData.image_url || "",
+                organizer: providerData.organized_by || "",
+                location: providerData.location || "",
+                date: providerData.start_date
+                  ? new Date(providerData.start_date).toLocaleDateString()
+                  : "",
+                time: providerData.start_date
+                  ? new Date(providerData.start_date).toLocaleTimeString()
+                  : "",
+                registrationFee: "",
+                interestedCount: 0,
+                published: true,
+                created_at: providerData.created_at,
+              };
+            } else {
+              eventData = null;
+            }
           } catch {
             eventData = null;
           }
         } else if (isInst) {
           try {
-            const API_BASE =
-              process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080";
-            const res = await fetch(
-              `${API_BASE}/api/v1/institutions/public/events/${actualId}`,
-            );
-            const json = await res.json();
-            const e = json?.data;
-            eventData = e
-              ? {
-                  id: `inst-${e.id}`,
-                  title: e.name || e.title,
-                  excerpt: e.short_desc || "",
-                  description: e.description || "",
-                  category: e.event_type || e.category || "Event",
-                  image: e.image_url || "",
-                  organizer: e.organized_by || "",
-                  location: e.location || "",
-                  date: e.start_date
-                    ? new Date(e.start_date).toLocaleDateString()
-                    : "",
-                  time: e.start_date
-                    ? new Date(e.start_date).toLocaleTimeString()
-                    : "",
-                  registrationFee: "",
-                  interestedCount: 0,
-                  published: true,
-                  created_at: e.created_at,
-                }
-              : null;
+            const instData = await fetchInstitutionEventBySlug(slug);
+            if (instData) {
+              eventData = {
+                id: `inst-${instData.id}`,
+                title: instData.name,
+                excerpt: instData.short_desc || "",
+                description: instData.description || "",
+                category: instData.event_type || instData.category || "Event",
+                image: instData.image_url || "",
+                organizer: instData.organized_by || "",
+                location: instData.location || "",
+                date: instData.start_date
+                  ? new Date(instData.start_date).toLocaleDateString()
+                  : "",
+                time: instData.start_date
+                  ? new Date(instData.start_date).toLocaleTimeString()
+                  : "",
+                registrationFee: "",
+                interestedCount: 0,
+                published: true,
+                created_at: instData.created_at,
+              };
+            } else {
+              eventData = null;
+            }
           } catch {
             eventData = null;
           }
         } else {
-          eventData = await fetchPublicEventById(p.id);
+          eventData = await fetchPublicEventBySlug(slug);
         }
         setEvent(eventData);
 
         if (eventData) {
           const eventsResult = await fetchPublicEvents({ limit: 10 });
           const relatedEvents = eventsResult.events
-            .filter((e) => e.id !== p.id && e.category === eventData.category)
+            .filter((e) => e.id !== p.slug && e.category === eventData.category)
             .slice(0, 3);
           setRelated(relatedEvents);
         }
@@ -391,7 +389,7 @@ const EventDetailsPage: React.FC<{ params: Promise<{ id: string }> }> = ({
 
                     <div className="flex items-center gap-3">
                       <Link
-                        href={`/events/${rel.id}`}
+                        href={`/events/${(rel as any).slug || rel.id}`}
                         className="flex-1 border border-gray-200 text-gray-700 text-[13px] font-semibold py-2.5 rounded-md hover:bg-gray-50 transition-colors text-center"
                       >
                         Details

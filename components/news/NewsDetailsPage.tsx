@@ -7,7 +7,10 @@ import {
   fetchNewsComments,
   postNewsComment,
   NewsComment,
+  fetchPublicNewsBySlug,
 } from "@/services/newsApi";
+import { fetchInstitutionNewsBySlug } from "@/services/institutionNewsApi";
+import { getPublicNewsBySlug } from "@/services/scholarshipProviderApi";
 import { safeHtml } from "@/lib/html";
 
 function normalizeArticle(data: any): any {
@@ -82,7 +85,7 @@ function getImageUrl(image: string | null | undefined): string | null {
 }
 
 const NewsDetailsPage: React.FC<{
-  params: Promise<{ id: string }>;
+  params: Promise<{ slug: string }>;
 }> = ({ params }) => {
   const { user, isAuthenticated } = useAuth();
   const [id, setId] = useState<string | null>(null);
@@ -93,7 +96,7 @@ const NewsDetailsPage: React.FC<{
   const [postingComment, setPostingComment] = useState(false);
 
   useEffect(() => {
-    params.then((p) => setId(p.id));
+    params.then((p) => setId(p.slug));
   }, [params]);
 
   useEffect(() => {
@@ -101,43 +104,33 @@ const NewsDetailsPage: React.FC<{
 
     async function fetchNews() {
       const safeId = id!;
-      const API_BASE =
-        process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080";
 
       try {
         if (safeId.startsWith("provider-")) {
-          const actualId = safeId.replace("provider-", "");
-          const res = await fetch(`${API_BASE}/api/v1/public/news/${actualId}`);
-          const data = await res.json();
-          if (data?.data) {
-            setArticle(normalizeArticle(data.data));
+          const slug = safeId.replace("provider-", "");
+          const data = await getPublicNewsBySlug(slug);
+          if (data) {
+            setArticle(normalizeArticle(data));
             return;
           }
         } else if (safeId.startsWith("inst-")) {
-          const actualId = safeId.replace("inst-", "");
-          const res = await fetch(
-            `${API_BASE}/api/v1/institutions/public/news/${actualId}`,
-          );
-          const data = await res.json();
-          if (data?.data) {
-            setArticle(normalizeArticle(data.data));
+          const slug = safeId.replace("inst-", "");
+          const data = await fetchInstitutionNewsBySlug(slug);
+          if (data) {
+            setArticle(normalizeArticle(data));
             return;
           }
         } else if (safeId.startsWith("edu-")) {
-          const actualId = safeId.replace("edu-", "");
-          const res = await fetch(
-            `${API_BASE}/api/v1/education/news/${actualId}`,
-          );
-          const data = await res.json();
-          if (data?.data) {
-            setArticle(normalizeArticle(data.data));
+          const slug = safeId.replace("edu-", "");
+          const data = await fetchPublicNewsBySlug(slug);
+          if (data) {
+            setArticle(normalizeArticle(data));
             return;
           }
         } else {
-          const res = await fetch(`${API_BASE}/api/v1/public/news/${safeId}`);
-          const data = await res.json();
-          if (data?.data) {
-            setArticle(normalizeArticle(data.data));
+          const data = await fetchPublicNewsBySlug(safeId);
+          if (data) {
+            setArticle(normalizeArticle(data));
             return;
           }
         }
@@ -492,7 +485,7 @@ const NewsDetailsPage: React.FC<{
                   return (
                     <div key={rel.id}>
                       <Link
-                        href={`/news/${rel.id}`}
+                        href={`/news/${(rel as any).slug || rel.id}`}
                         className="group cursor-pointer block"
                       >
                         {getImageUrl(rel.image) && (

@@ -13,6 +13,7 @@ interface NewsStoriesSectionProps {
 
 type NewsCard = {
   id: number;
+  slug?: string;
   badgeText: string;
   badgeColorClass: string;
   imgSrc: string;
@@ -35,6 +36,7 @@ const NewsStoriesSection: React.FC<NewsStoriesSectionProps> = ({
 
   const data: NewsCard[] = (newsArticles || []).map((item) => ({
     id: item.id,
+    slug: item.slug,
     badgeText: item.category || "News",
     badgeColorClass: item.category?.toLowerCase().includes("exam")
       ? "bg-orange-50 text-orange-600"

@@ -68,7 +68,9 @@ const EducationPage: React.FC<EducationPageProps> = ({
       } else if (view === "collegeDetails" && data?.id) {
         router.push(`/find-college/${data.id}`);
       } else if (view === "newsDetails" && data?.id) {
-        router.push(`/news/edu-${data.id}`);
+        router.push(`/news/${data.slug || `edu-${data.id}`}`);
+      } else if (view === "eventDetails" && data?.id) {
+        router.push(`/events/${data.slug || `edu-${data.id}`}`);
       } else if (view.startsWith("http")) {
         window.open(view, "_blank");
       } else {

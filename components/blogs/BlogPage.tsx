@@ -205,7 +205,7 @@ const BlogPage: React.FC = () => {
               Featured Story of the Week
             </h2>
             <Link
-              href={`/blogs/${featuredBlog.id}`}
+              href={`/blogs/${(featuredBlog as any).slug || featuredBlog.id}`}
               className="relative w-full h-87.5 sm:h-100 rounded-md overflow-hidden group cursor-pointer block"
             >
               <img
@@ -279,7 +279,7 @@ const BlogPage: React.FC = () => {
                   className="bg-white rounded-md border border-gray-200 hover:border-blue-500/20 overflow-hidden flex flex-col duration-300 cursor-pointer"
                 >
                   <Link
-                    href={`/blogs/${blog.id}`}
+                    href={`/blogs/${(blog as any).slug || blog.id}`}
                     className="h-32 w-full overflow-hidden p-4 "
                   >
                     <img
@@ -303,7 +303,7 @@ const BlogPage: React.FC = () => {
                     </div>
 
                     <Link
-                      href={`/blogs/${blog.id}`}
+                      href={`/blogs/${(blog as any).slug || blog.id}`}
                       className="text-lg font-bold text-gray-900 leading-snug mb-2 line-clamp-2 hover:text-[#0000ff]"
                     >
                       {blog.title}
@@ -329,7 +329,7 @@ const BlogPage: React.FC = () => {
                         </div>
                       </div>
                       <Link
-                        href={`/blogs/${blog.id}`}
+                        href={`/blogs/${(blog as any).slug || blog.id}`}
                         className="text-xs font-semibold text-[#0000ff] flex items-center "
                       >
                         View Details

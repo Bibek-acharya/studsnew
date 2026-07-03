@@ -14,6 +14,7 @@ export interface AdminNews {
   tags: string[];
   published: boolean;
   featured: boolean;
+  slug?: string;
   created_at: string;
   updated_at: string;
 }
@@ -188,4 +189,12 @@ export async function postNewsComment(
   } catch {
     return null;
   }
+}
+
+export async function fetchPublicNewsBySlug(slug: string): Promise<any> {
+  const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080";
+  const res = await fetch(`${API_BASE}/api/v1/education/news/by-slug/${slug}`);
+  if (!res.ok) throw new Error("News not found");
+  const data = await res.json();
+  return data.data || data;
 }

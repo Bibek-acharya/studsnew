@@ -539,7 +539,7 @@ const ProviderDetailPage: React.FC<{ params: Promise<{ id: string }> }> = ({
                           By {item.published_by || "Provider"}
                         </span>
                         <a
-                          href={`/news/${item.id}`}
+                          href={`/news/${(item as any).slug || item.id}`}
                           className="text-blue-600 font-bold hover:underline"
                         >
                           View Details
