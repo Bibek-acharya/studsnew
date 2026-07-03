@@ -174,17 +174,8 @@ const NewsDetailsPage: React.FC<{
       return "Admission";
     if (["scholarship"].includes(cat)) return "Scholarship";
     if (["exam", "exams", "tech"].includes(cat)) return "Exams";
-    if (
-      [
-        "notice",
-        "announcement",
-        "announcements",
-        "policy",
-        "press-release",
-        "update",
-        "news",
-      ].includes(cat)
-    )
+    if (["news", "announcement", "announcements"].includes(cat)) return "News";
+    if (["notice", "policy", "press-release", "update"].includes(cat))
       return "Notice";
     if (["event", "events", "sports"].includes(cat)) return "Events";
     if (["achievement", "achievements"].includes(cat)) return "Achievements";
@@ -195,6 +186,7 @@ const NewsDetailsPage: React.FC<{
     if (categoryUi === "Exams") return "bg-orange-100 text-orange-700";
     if (categoryUi === "Admission") return "bg-blue-100 text-blue-700";
     if (categoryUi === "Scholarship") return "bg-emerald-100 text-emerald-700";
+    if (categoryUi === "News") return "bg-cyan-100 text-cyan-700";
     if (categoryUi === "Notice") return "bg-violet-100 text-violet-700";
     if (categoryUi === "Events") return "bg-pink-100 text-pink-700";
     if (categoryUi === "Achievements") return "bg-amber-100 text-amber-700";
@@ -463,21 +455,22 @@ const NewsDetailsPage: React.FC<{
                       ? "Scholarship"
                       : ["exam", "exams", "tech"].includes(relCat)
                         ? "Exams"
-                        : [
-                              "notice",
-                              "announcement",
-                              "announcements",
-                              "policy",
-                              "press-release",
-                              "update",
-                              "news",
-                            ].includes(relCat)
-                          ? "Notice"
-                          : ["event", "events", "sports"].includes(relCat)
-                            ? "Events"
-                            : ["achievement", "achievements"].includes(relCat)
-                              ? "Achievements"
-                              : "Others";
+                        : ["news", "announcement", "announcements"].includes(
+                              relCat,
+                            )
+                          ? "News"
+                          : [
+                                "notice",
+                                "policy",
+                                "press-release",
+                                "update",
+                              ].includes(relCat)
+                            ? "Notice"
+                            : ["event", "events", "sports"].includes(relCat)
+                              ? "Events"
+                              : ["achievement", "achievements"].includes(relCat)
+                                ? "Achievements"
+                                : "Others";
 
                   const relBadge =
                     relCategoryUi === "Exams"
@@ -486,13 +479,15 @@ const NewsDetailsPage: React.FC<{
                         ? "bg-blue-100 text-blue-700"
                         : relCategoryUi === "Scholarship"
                           ? "bg-emerald-100 text-emerald-700"
-                          : relCategoryUi === "Notice"
-                            ? "bg-violet-100 text-violet-700"
-                            : relCategoryUi === "Events"
-                              ? "bg-pink-100 text-pink-700"
-                              : relCategoryUi === "Achievements"
-                                ? "bg-amber-100 text-amber-700"
-                                : "bg-slate-100 text-slate-700";
+                          : relCategoryUi === "News"
+                            ? "bg-cyan-100 text-cyan-700"
+                            : relCategoryUi === "Notice"
+                              ? "bg-violet-100 text-violet-700"
+                              : relCategoryUi === "Events"
+                                ? "bg-pink-100 text-pink-700"
+                                : relCategoryUi === "Achievements"
+                                  ? "bg-amber-100 text-amber-700"
+                                  : "bg-slate-100 text-slate-700";
 
                   return (
                     <div key={rel.id}>

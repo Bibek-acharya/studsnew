@@ -66,6 +66,7 @@ type NewsCategoryFilter =
   | "Admission"
   | "Scholarship"
   | "Exams"
+  | "News"
   | "Notice"
   | "Events"
   | "Achievements"
@@ -76,6 +77,7 @@ const categoryPills: NewsCategoryFilter[] = [
   "Admission",
   "Scholarship",
   "Exams",
+  "News",
   "Notice",
   "Events",
   "Achievements",
@@ -86,6 +88,7 @@ const categoryBadgeClass = (category: NewsCategoryFilter) => {
   if (category === "Exams") return "bg-orange-100 text-orange-700";
   if (category === "Admission") return "bg-blue-100 text-blue-700";
   if (category === "Scholarship") return "bg-emerald-100 text-emerald-700";
+  if (category === "News") return "bg-cyan-100 text-cyan-700";
   if (category === "Notice") return "bg-violet-100 text-violet-700";
   if (category === "Events") return "bg-pink-100 text-pink-700";
   if (category === "Achievements") return "bg-amber-100 text-amber-700";
@@ -97,17 +100,8 @@ const mapNewsToUiCategory = (article: NewsArticle): NewsCategoryFilter => {
   if (["admission", "academic", "academics"].includes(cat)) return "Admission";
   if (["scholarship"].includes(cat)) return "Scholarship";
   if (["exam", "exams", "tech"].includes(cat)) return "Exams";
-  if (
-    [
-      "notice",
-      "announcement",
-      "announcements",
-      "policy",
-      "press-release",
-      "update",
-      "news",
-    ].includes(cat)
-  )
+  if (["news", "announcement", "announcements"].includes(cat)) return "News";
+  if (["notice", "policy", "press-release", "update"].includes(cat))
     return "Notice";
   if (["event", "events", "sports"].includes(cat)) return "Events";
   if (["achievement", "achievements"].includes(cat)) return "Achievements";
