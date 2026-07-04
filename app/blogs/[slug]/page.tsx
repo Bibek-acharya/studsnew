@@ -3,6 +3,15 @@ import BlogDetailsPage from "@/components/blogs/BlogDetailsPage";
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080";
 
+const stripHtml = (s: string) =>
+  s
+    .replace(/<[^>]*>/g, "")
+    .replace(/&nbsp;/g, " ")
+    .replace(/&amp;/g, "&")
+    .replace(/&#39;/g, "'")
+    .replace(/&quot;/g, '"')
+    .trim();
+
 async function fetchMeta(slug: string) {
   try {
     if (slug.startsWith("provider-")) {
@@ -16,7 +25,7 @@ async function fetchMeta(slug: string) {
       return {
         title: d.title,
         image: d.image_url || "",
-        description: d.short_desc || "",
+        description: stripHtml(d.short_desc || ""),
       };
     }
     const rawSlug = slug;
@@ -32,7 +41,7 @@ async function fetchMeta(slug: string) {
     return {
       title: blog.title,
       image: blog.image || "",
-      description: blog.excerpt || "",
+      description: stripHtml(blog.excerpt || ""),
     };
   } catch {
     return null;

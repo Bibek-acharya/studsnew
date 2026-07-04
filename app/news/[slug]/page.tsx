@@ -3,6 +3,15 @@ import NewsDetailsPage from "@/components/news/NewsDetailsPage";
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080";
 
+const stripHtml = (s: string) =>
+  s
+    .replace(/<[^>]*>/g, "")
+    .replace(/&nbsp;/g, " ")
+    .replace(/&amp;/g, "&")
+    .replace(/&#39;/g, "'")
+    .replace(/&quot;/g, '"')
+    .trim();
+
 async function fetchMeta(slug: string) {
   try {
     if (slug.startsWith("provider-")) {
@@ -16,7 +25,7 @@ async function fetchMeta(slug: string) {
       return {
         title: d.title,
         image: d.image_url || "",
-        description: d.short_desc || "",
+        description: stripHtml(d.short_desc || ""),
       };
     }
     if (slug.startsWith("inst-")) {
@@ -31,7 +40,7 @@ async function fetchMeta(slug: string) {
       return {
         title: d.title,
         image: d.image || "",
-        description: d.excerpt || d.desc || "",
+        description: stripHtml(d.excerpt || d.desc || ""),
       };
     }
     const eduSlug = slug.startsWith("edu-") ? slug.replace("edu-", "") : slug;
@@ -46,7 +55,7 @@ async function fetchMeta(slug: string) {
     return {
       title: d.title,
       image: d.image || "",
-      description: d.excerpt || d.desc || "",
+      description: stripHtml(d.excerpt || d.desc || ""),
     };
   } catch {
     return null;

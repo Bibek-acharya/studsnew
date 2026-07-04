@@ -60,14 +60,14 @@ const ShareCollegeModal: React.FC<ShareCollegeModalProps> = ({
       icon: "fa-brands fa-whatsapp",
       iconColor: "text-white",
       iconBg: "bg-[#25D366]",
-      href: `https://wa.me/?text=${encodedText}%20${encodedUrl}`,
+      href: `https://wa.me/?text=${encodedUrl}`,
     },
     {
       name: "Viber",
       icon: "fa-brands fa-viber",
       iconColor: "text-white",
       iconBg: "bg-[#7360F2]",
-      href: `viber://forward?text=${encodedText}%20${encodedUrl}`,
+      href: `viber://forward?text=${encodedUrl}`,
     },
     {
       name: "Snapchat",
