@@ -8,7 +8,7 @@ const ClusterGroup = dynamic(
   { ssr: false },
 );
 
-const clusterIcon = (cluster: L.MarkerCluster) => {
+const clusterIcon = (cluster: any) => {
   const count = cluster.getChildCount();
   return L.divIcon({
     html: `<div style="background-color: #0000ff; color: white; border-radius: 50%; width: 36px; height: 36px; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 12px; box-shadow: 0 2px 6px rgba(0,0,0,0.3); border: 2px solid white;">${count}</div>`,
