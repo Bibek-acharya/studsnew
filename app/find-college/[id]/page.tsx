@@ -32,7 +32,11 @@ import {
   FALLBACK_DOWNLOADS,
 } from "./constants";
 
-const CollegeDetailsPage = ({ params }: { params: Promise<{ id: string }> }) => {
+const CollegeDetailsPage = ({
+  params,
+}: {
+  params: Promise<{ id: string }>;
+}) => {
   const { id: idStr } = React.use(params);
   const { user, isAuthenticated } = useAuth();
 
@@ -46,7 +50,8 @@ const CollegeDetailsPage = ({ params }: { params: Promise<{ id: string }> }) => 
   const [courseFilter, setCourseFilter] = useState<LevelFilter>("all");
   const [admissionFilter, setAdmissionFilter] = useState<LevelFilter>("all");
   const [programFilter, setProgramFilter] = useState<LevelFilter>("all");
-  const [scholarshipFilter, setScholarshipFilter] = useState<LevelFilter>("all");
+  const [scholarshipFilter, setScholarshipFilter] =
+    useState<LevelFilter>("all");
   const [eventsPage, setEventsPage] = useState(1);
   const [newsPage, setNewsPage] = useState(1);
   const [shareUrl, setShareUrl] = useState("");
@@ -61,13 +66,64 @@ const CollegeDetailsPage = ({ params }: { params: Promise<{ id: string }> }) => 
     if (activeTab === "review") data.loadReviews();
   }, [activeTab]);
 
+  useEffect(() => {
+    if (!data.name || !data.instBanner) return;
+    const setMeta = (prop: string, content: string) => {
+      let el = document.querySelector(
+        `meta[property="${prop}"]`,
+      ) as HTMLMetaElement | null;
+      if (!el) {
+        el = document.createElement("meta");
+        el.setAttribute("property", prop);
+        document.head.appendChild(el);
+      }
+      el.setAttribute("content", content);
+    };
+    const setName = (name: string, content: string) => {
+      let el = document.querySelector(
+        `meta[name="${name}"]`,
+      ) as HTMLMetaElement | null;
+      if (!el) {
+        el = document.createElement("meta");
+        el.setAttribute("name", name);
+        document.head.appendChild(el);
+      }
+      el.setAttribute("content", content);
+    };
+
+    const title = data.shareTitle || `${data.name} - Studsphere`;
+    const desc =
+      data.shareText ||
+      `${data.name} - ${data.description?.slice(0, 160) || "College details on Studsphere"}`;
+    const image = data.instBanner;
+
+    setMeta("og:title", title);
+    setMeta("og:description", desc);
+    setMeta("og:image", image);
+    setMeta("og:image:width", "1200");
+    setMeta("og:image:height", "630");
+    setName("twitter:card", "summary_large_image");
+    setName("twitter:title", title);
+    setName("twitter:description", desc);
+    setName("twitter:image", image);
+    document.title = title;
+  }, [
+    data.name,
+    data.instBanner,
+    data.shareTitle,
+    data.shareText,
+    data.description,
+  ]);
+
   if (data.loading) {
     return (
       <div className="w-full animate-pulse">
         <div className="relative h-55 w-full bg-brand-blue md:h-90" />
         <div className="mx-auto max-w-350 px-4 py-6 sm:px-6 lg:px-8">
           <div className="flex flex-col gap-6 md:flex-row">
-            <div className="-mt-16 shrink-0 md:-mt-20"><div className="h-24 w-24 rounded-lg bg-brand-blue md:h-32 md:w-32" /></div>
+            <div className="-mt-16 shrink-0 md:-mt-20">
+              <div className="h-24 w-24 rounded-lg bg-brand-blue md:h-32 md:w-32" />
+            </div>
             <div className="flex-1 space-y-3 pt-2">
               <div className="h-7 w-72 rounded bg-gray-300" />
               <div className="h-4 w-48 rounded bg-gray-200" />
@@ -75,7 +131,9 @@ const CollegeDetailsPage = ({ params }: { params: Promise<{ id: string }> }) => 
             </div>
           </div>
           <div className="mt-8 flex gap-6 border-b border-gray-200 pb-2">
-            {[1, 2, 3, 4, 5, 6].map((i) => (<div key={i} className="h-6 w-20 rounded bg-gray-200" />))}
+            {[1, 2, 3, 4, 5, 6].map((i) => (
+              <div key={i} className="h-6 w-20 rounded bg-gray-200" />
+            ))}
           </div>
           <div className="mt-8 space-y-4">
             <div className="h-4 w-full rounded bg-gray-200" />
@@ -92,15 +150,27 @@ const CollegeDetailsPage = ({ params }: { params: Promise<{ id: string }> }) => 
   const admissionsData = data.mappedAdmissions;
   const facilitiesData = data.mappedFacilities || FALLBACK_FACILITIES;
   const eventsData = data.mappedEvents || FALLBACK_EVENTS;
-  const alumniData = (data.instAlumni && Array.isArray(data.instAlumni) ? data.instAlumni : FALLBACK_ALUMNI);
+  const alumniData =
+    data.instAlumni && Array.isArray(data.instAlumni)
+      ? data.instAlumni
+      : FALLBACK_ALUMNI;
   const newsData = data.mappedNews || FALLBACK_NEWS_CARDS;
   const downloadsData = data.mappedDownloads || FALLBACK_DOWNLOADS;
 
   const offeredPrograms = data.mappedPrograms
-    ? [...data.mappedPrograms, ...data.institutionProgramsFromTable, ...data.institutionCoursesFromStorage]
-    : [...data.institutionProgramsFromTable, ...data.filteredPrograms(programFilter), ...data.institutionCoursesFromStorage];
+    ? [
+        ...data.mappedPrograms,
+        ...data.institutionProgramsFromTable,
+        ...data.institutionCoursesFromStorage,
+      ]
+    : [
+        ...data.institutionProgramsFromTable,
+        ...data.filteredPrograms(programFilter),
+        ...data.institutionCoursesFromStorage,
+      ];
 
-  const scholarshipsData = data.mappedScholarships || data.filteredScholarships(scholarshipFilter);
+  const scholarshipsData =
+    data.mappedScholarships || data.filteredScholarships(scholarshipFilter);
 
   return (
     <div className="w-full">
@@ -131,37 +201,74 @@ const CollegeDetailsPage = ({ params }: { params: Promise<{ id: string }> }) => 
       <div className="grid grid-cols-1 gap-10 px-6 py-8 md:gap-14 md:px-12 md:py-12 lg:grid-cols-3 lg:px-24 xl:px-32">
         <div className="lg:col-span-2">
           {activeTab === "about" && (
-            <TabAbout description={data.description} instVideos={data.instVideos} instVision={data.instVision} instMission={data.instMission} instOverviewData={data.instOverviewData} instLeadershipData={data.instLeadershipData} />
+            <TabAbout
+              description={data.description}
+              instVideos={data.instVideos}
+              instVision={data.instVision}
+              instMission={data.instMission}
+              instOverviewData={data.instOverviewData}
+              instLeadershipData={data.instLeadershipData}
+            />
           )}
           {activeTab === "courses" && (
-            <TabCourses courses={coursesData} filter={courseFilter} onFilterChange={setCourseFilter} hasApiData={!!data.mappedCourses} />
+            <TabCourses
+              courses={coursesData}
+              filter={courseFilter}
+              onFilterChange={setCourseFilter}
+              hasApiData={!!data.mappedCourses}
+            />
           )}
           {activeTab === "admissions" && (
-            <TabAdmissions admissions={admissionsData} filter={admissionFilter} onFilterChange={setAdmissionFilter} collegeId={data.collegeId} hasApiData={!!data.mappedAdmissions} />
+            <TabAdmissions
+              admissions={admissionsData}
+              filter={admissionFilter}
+              onFilterChange={setAdmissionFilter}
+              collegeId={data.collegeId}
+              hasApiData={!!data.mappedAdmissions}
+            />
           )}
           {activeTab === "offered" && (
-            <TabOffered programs={offeredPrograms} filter={programFilter} onFilterChange={setProgramFilter} hasApiData={!!data.mappedPrograms} />
+            <TabOffered
+              programs={offeredPrograms}
+              filter={programFilter}
+              onFilterChange={setProgramFilter}
+              hasApiData={!!data.mappedPrograms}
+            />
           )}
           {activeTab === "facilities" && (
             <TabFacilities facilities={facilitiesData} />
           )}
           {activeTab === "events" && (
-            <TabEvents events={eventsData} page={eventsPage} onPageChange={setEventsPage} />
+            <TabEvents
+              events={eventsData}
+              page={eventsPage}
+              onPageChange={setEventsPage}
+            />
           )}
           {activeTab === "scholarship" && (
-            <TabScholarship scholarships={scholarshipsData} filter={scholarshipFilter} onFilterChange={setScholarshipFilter} hasApiData={!!data.mappedScholarships} />
+            <TabScholarship
+              scholarships={scholarshipsData}
+              filter={scholarshipFilter}
+              onFilterChange={setScholarshipFilter}
+              hasApiData={!!data.mappedScholarships}
+            />
           )}
-          {activeTab === "alumni" && (
-            <TabAlumni alumni={alumniData} />
-          )}
+          {activeTab === "alumni" && <TabAlumni alumni={alumniData} />}
           {activeTab === "gallery" && (
             <TabGallery images={data.galleryImagesSource} />
           )}
           {activeTab === "review" && (
-            <TabReview reviewsData={data.reviewsData} reviewsLoading={data.reviewsLoading} />
+            <TabReview
+              reviewsData={data.reviewsData}
+              reviewsLoading={data.reviewsLoading}
+            />
           )}
           {activeTab === "news" && (
-            <TabNews news={newsData} page={newsPage} onPageChange={setNewsPage} />
+            <TabNews
+              news={newsData}
+              page={newsPage}
+              onPageChange={setNewsPage}
+            />
           )}
           {activeTab === "download" && (
             <TabDownloads downloads={downloadsData} />
@@ -210,11 +317,28 @@ const CollegeDetailsPage = ({ params }: { params: Promise<{ id: string }> }) => 
       {showUnfollowDialog && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
           <div className="mx-4 w-full max-w-md rounded-md bg-white p-6 shadow-xl">
-            <h3 className="mb-2 text-lg font-bold text-gray-900">Unfollow College</h3>
-            <p className="mb-6 text-gray-600">Are you sure you want to unfollow <strong>{data.name}</strong>?</p>
+            <h3 className="mb-2 text-lg font-bold text-gray-900">
+              Unfollow College
+            </h3>
+            <p className="mb-6 text-gray-600">
+              Are you sure you want to unfollow <strong>{data.name}</strong>?
+            </p>
             <div className="flex gap-3">
-              <button onClick={() => setShowUnfollowDialog(false)} className="flex-1 rounded-md border border-gray-200 px-4 py-2.5 font-semibold text-gray-700 transition-colors hover:bg-gray-50">Cancel</button>
-              <button onClick={() => { setIsFollowed(false); setShowUnfollowDialog(false); }} className="flex-1 rounded-md bg-red-500 px-4 py-2.5 font-semibold text-white transition-colors hover:bg-red-600">Unfollow</button>
+              <button
+                onClick={() => setShowUnfollowDialog(false)}
+                className="flex-1 rounded-md border border-gray-200 px-4 py-2.5 font-semibold text-gray-700 transition-colors hover:bg-gray-50"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={() => {
+                  setIsFollowed(false);
+                  setShowUnfollowDialog(false);
+                }}
+                className="flex-1 rounded-md bg-red-500 px-4 py-2.5 font-semibold text-white transition-colors hover:bg-red-600"
+              >
+                Unfollow
+              </button>
             </div>
           </div>
         </div>

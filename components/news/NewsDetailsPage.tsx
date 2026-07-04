@@ -3,6 +3,7 @@
 import React, { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { useAuth } from "@/services/AuthContext";
+import ShareCollegeModal from "@/app/find-college/[id]/ShareCollegeModal";
 import {
   fetchNewsComments,
   postNewsComment,
@@ -94,6 +95,8 @@ const NewsDetailsPage: React.FC<{
   const [loading, setLoading] = useState(true);
   const [comments, setComments] = useState<NewsComment[]>([]);
   const [postingComment, setPostingComment] = useState(false);
+  const [isShareModalOpen, setIsShareModalOpen] = useState(false);
+  const [shareUrl, setShareUrl] = useState("");
 
   useEffect(() => {
     params.then((p) => setId(p.slug));
@@ -135,7 +138,7 @@ const NewsDetailsPage: React.FC<{
               return;
             }
           } else {
-            const data = await fetchPublicNewsBySlug(slug).catch(() => null);
+            const data = await fetchPublicNewsBySlug(safeId).catch(() => null);
             if (data) {
               setArticle(normalizeArticle(data));
               return;
@@ -172,6 +175,10 @@ const NewsDetailsPage: React.FC<{
 
   useEffect(() => {
     window.scrollTo(0, 0);
+  }, [id]);
+
+  useEffect(() => {
+    setShareUrl(window.location.href);
   }, [id]);
 
   const categoryUi = useMemo(() => {
@@ -295,6 +302,17 @@ const NewsDetailsPage: React.FC<{
                 </strong>
               </span>
             </div>
+          </div>
+
+          <div className="flex items-center gap-3 mb-8">
+            <button
+              type="button"
+              onClick={() => setIsShareModalOpen(true)}
+              className="shrink-0 flex items-center justify-center rounded-md border border-gray-200 bg-white p-2.5 text-gray-700 transition-colors hover:bg-gray-50"
+              aria-label="Share article"
+            >
+              <i className="fa-solid fa-share-nodes"></i>
+            </button>
           </div>
 
           {getImageUrl(article.image) && (
@@ -550,6 +568,17 @@ const NewsDetailsPage: React.FC<{
           </div>
         </aside>
       </div>
+      <ShareCollegeModal
+        collegeName={article.title}
+        isOpen={isShareModalOpen}
+        onClose={() => setIsShareModalOpen(false)}
+        shareUrl={shareUrl}
+        shareTitle={article.title}
+        shareText={
+          article.excerpt ||
+          `Check out this article on Studsphere: ${article.title}`
+        }
+      />
     </div>
   );
 };
