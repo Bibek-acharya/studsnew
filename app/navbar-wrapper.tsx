@@ -19,14 +19,18 @@ export default function NavbarWrapper() {
     pathname === "/login" ||
     pathname === "/register" ||
     pathname === "/forgot-password" ||
-    pathname === "/sphere-ai";
+    pathname === "/sphere-ai" ||
+    pathname === "/map";
 
-  const handleNavigate = useCallback((viewKey: string) => {
-    const route = routeMap[viewKey as keyof typeof routeMap];
-    if (route) {
-      router.push(route);
-    }
-  }, [router]);
+  const handleNavigate = useCallback(
+    (viewKey: string) => {
+      const route = routeMap[viewKey as keyof typeof routeMap];
+      if (route) {
+        router.push(route);
+      }
+    },
+    [router],
+  );
 
   const handleLogout = useCallback(() => {
     logout();

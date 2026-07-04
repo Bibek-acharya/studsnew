@@ -6,7 +6,8 @@ import {
 } from "@/app/find-college/types";
 import { apiService } from "@/services/api";
 import GlobalFilterSection from "@/components/ui/GlobalFilterSection";
-import { FaSliders, FaStar } from "react-icons/fa6";
+import { FaSliders, FaStar, FaMap } from "react-icons/fa6";
+import Link from "next/link";
 import {
   NEPAL_DISTRICTS,
   NEPAL_LOCAL_BODIES,
@@ -213,7 +214,11 @@ type DistrictOption = {
 type LocalBodyOption = {
   id: string;
   label: string;
-  type: "Municipality" | "Sub-Metropolitan City" | "Metropolitan City" | "Gaunpalika";
+  type:
+    | "Municipality"
+    | "Sub-Metropolitan City"
+    | "Metropolitan City"
+    | "Gaunpalika";
 };
 
 type ProvinceOption = {
@@ -230,7 +235,10 @@ const localBodyIdMap: Record<string, string> = (() => {
   Object.entries(NEPAL_LOCAL_BODIES).forEach(([district, bodies]) => {
     bodies.forEach((body: { name: string; wards: number }) => {
       const key = `${district}:${body.name}`;
-      map[key] = `lb_${body.name.toLowerCase().replace(/[^a-z0-9]+/g, "_").replace(/^_+|_+$/g, "")}`;
+      map[key] = `lb_${body.name
+        .toLowerCase()
+        .replace(/[^a-z0-9]+/g, "_")
+        .replace(/^_+|_+$/g, "")}`;
     });
   });
   return map;
@@ -244,20 +252,33 @@ const provinceOptions: ProvinceOption[] = NEPAL_PROVINCES.map(
       (districtName: string) => ({
         id:
           districtIdMap[districtName] ||
-          `d_${districtName.toLowerCase().replace(/[^a-z0-9]+/g, "_").replace(/^_+|_+$/g, "")}`,
+          `d_${districtName
+            .toLowerCase()
+            .replace(/[^a-z0-9]+/g, "_")
+            .replace(/^_+|_+$/g, "")}`,
         label: districtName,
-        localBodies: ((NEPAL_LOCAL_BODIES as Record<string, { name: string; wards: number }[]>)[districtName] || []).map((body): LocalBodyOption => ({
+        localBodies: (
+          (
+            NEPAL_LOCAL_BODIES as Record<
+              string,
+              { name: string; wards: number }[]
+            >
+          )[districtName] || []
+        ).map((body): LocalBodyOption => ({
           id:
             localBodyIdMap[`${districtName}:${body.name}`] ||
-            `lb_${body.name.toLowerCase().replace(/[^a-z0-9]+/g, "_").replace(/^_+|_+$/g, "")}`,
+            `lb_${body.name
+              .toLowerCase()
+              .replace(/[^a-z0-9]+/g, "_")
+              .replace(/^_+|_+$/g, "")}`,
           label: body.name,
           type: (body.name.toLowerCase().includes("sub-metropolitan")
             ? "Sub-Metropolitan City"
             : body.name.toLowerCase().includes("metropolitan")
-            ? "Metropolitan City"
-            : body.name.toLowerCase().includes("municipality")
-            ? "Municipality"
-            : "Gaunpalika") as LocalBodyOption["type"],
+              ? "Metropolitan City"
+              : body.name.toLowerCase().includes("municipality")
+                ? "Municipality"
+                : "Gaunpalika") as LocalBodyOption["type"],
         })),
       }),
     );
@@ -361,13 +382,20 @@ const CustomSelect: React.FC<{
           stroke="currentColor"
           viewBox="0 0 24 24"
         >
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="m19 9-7 7-7-7" />
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeWidth={2}
+            d="m19 9-7 7-7-7"
+          />
         </svg>
       </button>
       {isOpen && (
         <div className="absolute z-50 mt-1 max-h-60 w-full overflow-auto rounded-md border border-gray-200 bg-white shadow-lg">
           {options.length === 0 ? (
-            <div className="px-3 py-2 text-[13px] text-gray-400">No options</div>
+            <div className="px-3 py-2 text-[13px] text-gray-400">
+              No options
+            </div>
           ) : (
             options.map((opt) => (
               <button
@@ -378,7 +406,9 @@ const CustomSelect: React.FC<{
                   setIsOpen(false);
                 }}
                 className={`flex w-full px-3 py-2 text-left text-[13.5px] hover:bg-gray-50 ${
-                  opt.id === value ? "bg-blue-50 text-blue-600" : "text-gray-900"
+                  opt.id === value
+                    ? "bg-blue-50 text-blue-600"
+                    : "text-gray-900"
                 }`}
               >
                 {opt.label}
@@ -392,7 +422,6 @@ const CustomSelect: React.FC<{
 };
 
 const SearchInput: React.FC<{
-
   placeholder: string;
   value: string;
   onChange: (v: string) => void;
@@ -640,8 +669,6 @@ const FilterSidebar: React.FC<FilterSidebarProps> = ({
     });
   };
 
-
-
   const clearAll = () => setFilters(DEFAULT_COLLEGE_FILTERS);
 
   // const handleLocate = () => {
@@ -752,10 +779,13 @@ const FilterSidebar: React.FC<FilterSidebarProps> = ({
   //     resolveLocation(); // Fallback instantly if geolocation unavailable
   //   }
   // };
-  
-  const academicLevelsWithCounts = useMemo(
 
-    () => ACADEMIC_LEVELS.map((item) => ({ ...item, count: getFacetCount(item.id) })),
+  const academicLevelsWithCounts = useMemo(
+    () =>
+      ACADEMIC_LEVELS.map((item) => ({
+        ...item,
+        count: getFacetCount(item.id),
+      })),
     [getFacetCount],
   );
 
@@ -792,36 +822,59 @@ const FilterSidebar: React.FC<FilterSidebarProps> = ({
 
   return (
     <>
+      {/* ── Map Button ──────────────────────────────────────── */}
+      <Link
+        href="/map"
+        className="flex items-center gap-2 w-full mb-3 px-4 py-2.5 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition text-sm font-medium"
+      >
+        <FaMap />
+        <span>View on Map</span>
+      </Link>
+
       {/* ── Filter Card ───────────────────────────────────── */}
       <div className="relative w-full rounded-md border border-gray-200 bg-white p-6 ">
         {/* Header */}
         <div className="mb-2 flex items-center justify-between">
           <div className="flex items-center gap-3">
-                    <FaSliders size={18} className="text-black" />
-                    <h3 className="font-black text-xl text-slate-900 tracking-tight">
-                      Filters
-                    </h3>
-                  </div>
+            <FaSliders size={18} className="text-black" />
+            <h3 className="font-black text-xl text-slate-900 tracking-tight">
+              Filters
+            </h3>
+          </div>
           <div className="flex items-center gap-2">
-          {onClose && (
-            <button type="button" onClick={onClose} className="lg:hidden flex items-center justify-center w-8 h-8 rounded-md text-gray-500 hover:bg-gray-100 hover:text-gray-700 transition-colors">
-              <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
-              </svg>
-            </button>
-          )}
-          {hasActiveFilters && (
-            <button
-              type="button"
-              onClick={() => setShowAppliedDropdown((prev) => !prev)}
-              className="inline-flex items-center gap-2 rounded-md px-3 py-1.5 text-[12px] font-semibold text-blue-700 transition-colors"
-            >
-              Applied ({appliedFilters.length + (isFeeApplied ? 1 : 0)})
-              <i
-                className={`fa-solid fa-chevron-down text-[10px] transition-transform ${showAppliedDropdown ? "rotate-180" : ""}`}
-              ></i>
-            </button>
-          )}
+            {onClose && (
+              <button
+                type="button"
+                onClick={onClose}
+                className="lg:hidden flex items-center justify-center w-8 h-8 rounded-md text-gray-500 hover:bg-gray-100 hover:text-gray-700 transition-colors"
+              >
+                <svg
+                  className="w-5 h-5"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                  strokeWidth={2}
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    d="M6 18L18 6M6 6l12 12"
+                  />
+                </svg>
+              </button>
+            )}
+            {hasActiveFilters && (
+              <button
+                type="button"
+                onClick={() => setShowAppliedDropdown((prev) => !prev)}
+                className="inline-flex items-center gap-2 rounded-md px-3 py-1.5 text-[12px] font-semibold text-blue-700 transition-colors"
+              >
+                Applied ({appliedFilters.length + (isFeeApplied ? 1 : 0)})
+                <i
+                  className={`fa-solid fa-chevron-down text-[10px] transition-transform ${showAppliedDropdown ? "rotate-180" : ""}`}
+                ></i>
+              </button>
+            )}
           </div>
         </div>
 
@@ -1032,7 +1085,8 @@ const FilterSidebar: React.FC<FilterSidebarProps> = ({
               value={filters.district[0] || ""}
               options={
                 filters.province[0]
-                  ? provinceOptions.find((p) => p.id === filters.province[0])?.districts || []
+                  ? provinceOptions.find((p) => p.id === filters.province[0])
+                      ?.districts || []
                   : []
               }
               onChange={(val) => {
@@ -1065,7 +1119,6 @@ const FilterSidebar: React.FC<FilterSidebarProps> = ({
             />
           </div>
         </Accordion>
-
 
         {/* 6. College Type */}
         <Accordion title="Colleges Type">
@@ -1174,25 +1227,42 @@ const FilterSidebar: React.FC<FilterSidebarProps> = ({
           <div className="flex flex-col gap-3.5 pt-1">
             <CheckboxItem
               id="rating-4.5"
-              label={<><FaStar className="inline text-yellow-500" /> 4.5 & above (Top Rated)</>}
+              label={
+                <>
+                  <FaStar className="inline text-yellow-500" /> 4.5 & above (Top
+                  Rated)
+                </>
+              }
               checked={filters.rating?.includes("4.5")}
               onChange={() => toggle("rating", "4.5")}
             />
             <CheckboxItem
               id="rating-4.0"
-              label={<><FaStar className="inline text-yellow-500" /> 4.0 & above</>}
+              label={
+                <>
+                  <FaStar className="inline text-yellow-500" /> 4.0 & above
+                </>
+              }
               checked={filters.rating?.includes("4.0")}
               onChange={() => toggle("rating", "4.0")}
             />
             <CheckboxItem
               id="rating-3.5"
-              label={<><FaStar className="inline text-yellow-500" /> 3.5 & above</>}
+              label={
+                <>
+                  <FaStar className="inline text-yellow-500" /> 3.5 & above
+                </>
+              }
               checked={filters.rating?.includes("3.5")}
               onChange={() => toggle("rating", "3.5")}
             />
             <CheckboxItem
               id="rating-3.0"
-              label={<><FaStar className="inline text-yellow-500" /> 3.0 & above</>}
+              label={
+                <>
+                  <FaStar className="inline text-yellow-500" /> 3.0 & above
+                </>
+              }
               checked={filters.rating?.includes("3.0")}
               onChange={() => toggle("rating", "3.0")}
             />

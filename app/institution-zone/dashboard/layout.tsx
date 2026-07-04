@@ -16,14 +16,16 @@ export default function DashboardLayout({
 
   const getActivePage = (path: string): InstitutionPage => {
     if (path.includes("/admission/create")) return "createAdmission";
-    if (path.includes("/admission/applications")) return "admissionApplications";
+    if (path.includes("/admission/applications"))
+      return "admissionApplications";
     if (path.includes("/admission/directory")) return "admissionDirectory";
     if (path.includes("/admission/shortlist")) return "admissionShortlist";
     if (path.includes("/admission/draft")) return "admissionDraft";
     if (path.includes("/scholarship/create")) return "scholarshipCreate";
     if (path.includes("/scholarship/draft")) return "scholarshipDraft";
     if (path.includes("/scholarship/shortlist")) return "scholarshipShortlist";
-    if (path.includes("/scholarship/applications")) return "scholarshipApplications";
+    if (path.includes("/scholarship/applications"))
+      return "scholarshipApplications";
     if (path.includes("/scholarship/list")) return "scholarshipList";
     if (path.includes("/counselling/requests")) return "counsellingRequests";
     if (path.includes("/counselling/history")) return "counsellingHistory";
@@ -43,6 +45,7 @@ export default function DashboardLayout({
     if (path.includes("/blogs/create")) return "createBlog";
     if (path.includes("/blogs/directory")) return "blogDirectory";
     if (path.includes("/invite-student")) return "inviteStudent";
+    if (path.includes("/college-location")) return "collegeLocation";
     if (path.includes("/reviews")) return "reviews";
     if (path.includes("/manage-advertisement")) return "manageAdvertisement";
     if (path.includes("/profile")) return "profile";
@@ -58,7 +61,8 @@ export default function DashboardLayout({
     const routeMap: Record<InstitutionPage, string> = {
       overview: "/institution-zone/dashboard/overview",
       createAdmission: "/institution-zone/dashboard/admission/create",
-      admissionApplications: "/institution-zone/dashboard/admission/applications",
+      admissionApplications:
+        "/institution-zone/dashboard/admission/applications",
       admissionDirectory: "/institution-zone/dashboard/admission/directory",
       admissionShortlist: "/institution-zone/dashboard/admission/shortlist",
       admissionDraft: "/institution-zone/dashboard/admission/draft",
@@ -66,7 +70,8 @@ export default function DashboardLayout({
       scholarshipDraft: "/institution-zone/dashboard/scholarship/draft",
       scholarshipShortlist: "/institution-zone/dashboard/scholarship/shortlist",
       scholarshipList: "/institution-zone/dashboard/scholarship/list",
-      scholarshipApplications: "/institution-zone/dashboard/scholarship/applications",
+      scholarshipApplications:
+        "/institution-zone/dashboard/scholarship/applications",
       counsellingRequests: "/institution-zone/dashboard/counselling/requests",
       counsellingHistory: "/institution-zone/dashboard/counselling/history",
       entranceDetails: "/institution-zone/dashboard/entrance",
@@ -91,6 +96,7 @@ export default function DashboardLayout({
       inviteStudent: "/institution-zone/dashboard/invite-student",
       reviews: "/institution-zone/dashboard/reviews",
       manageAdvertisement: "/institution-zone/dashboard/manage-advertisement",
+      collegeLocation: "/institution-zone/dashboard/college-location",
     };
 
     router.push(routeMap[page] || "/institution-zone/dashboard/overview");

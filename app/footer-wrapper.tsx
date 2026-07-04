@@ -17,7 +17,8 @@ export default function FooterWrapper() {
     pathname === "/login" ||
     pathname === "/register" ||
     pathname === "/forgot-password" ||
-    pathname === "/sphere-ai";
+    pathname === "/sphere-ai" ||
+    pathname === "/map";
 
   if (hideGlobalFooter) {
     return null;

@@ -28,6 +28,7 @@ import {
   ClipboardList,
   BookOpen,
   School,
+  MapPin,
 } from "lucide-react";
 
 const OverviewSection = lazy(() => import("./OverviewSection"));
@@ -85,6 +86,7 @@ const ListUniversitiesSection = lazy(() => import("./ListUniversitiesSection"));
 const DraftUniversitiesSection = lazy(
   () => import("./DraftUniversitiesSection"),
 );
+const MapCollegeListSection = lazy(() => import("./MapCollegeListSection"));
 
 type SectionType =
   | "overview"
@@ -138,7 +140,8 @@ type SectionType =
   | "create-universities"
   | "draft-universities"
   | "list-universities"
-  | `edit-university-${number}`;
+  | `edit-university-${number}`
+  | "map";
 
 interface NavChild {
   section: SectionType;
@@ -265,6 +268,7 @@ const navItems: NavItemData[] = [
     label: "Message",
     section: "message-inquiry",
   },
+  { icon: <MapPin size={20} />, label: "College Map", section: "map" },
   { icon: <BarChart3 size={20} />, label: "Analytics", section: "analytics" },
   { icon: <Settings size={20} />, label: "Settings", section: "settings" },
 ];
@@ -473,6 +477,8 @@ export default function DashboardShell() {
         return <DraftUniversitiesSection setActiveSection={navigateTo} />;
       case "list-universities":
         return <ListUniversitiesSection setActiveSection={navigateTo} />;
+      case "map":
+        return <MapCollegeListSection />;
       default:
         return <PlaceholderSection section={activeSection} />;
     }

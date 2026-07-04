@@ -22,6 +22,7 @@ import {
   Star,
   Megaphone,
   Lock,
+  MapPin,
 } from "@phosphor-icons/react";
 
 export type InstitutionPage =
@@ -59,7 +60,8 @@ export type InstitutionPage =
   | "analytics"
   | "notification"
   | "settings"
-  | "inviteStudent";
+  | "inviteStudent"
+  | "collegeLocation";
 
 interface Props {
   activePage: InstitutionPage;
@@ -333,6 +335,13 @@ const InstitutionLayout: React.FC<Props> = ({
       page: "manageAdvertisement",
       label: "Manage Advertisement",
       icon: <Megaphone className="w-[18px] h-[18px]" />,
+    },
+    {
+      key: "collegeLocation",
+      type: "item",
+      page: "collegeLocation",
+      label: "College Location",
+      icon: <MapPin className="w-[18px] h-[18px]" />,
     },
     {
       key: "profile",

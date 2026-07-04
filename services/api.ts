@@ -503,6 +503,8 @@ export interface College {
   campus_life_score?: number;
   career_fit_score?: number;
   balanced_fit_score?: number;
+  latitude?: number;
+  longitude?: number;
   about?: any;
   admissions?: any;
   admission_cards?: any;
@@ -1971,6 +1973,45 @@ export const apiService = {
 
   async getCollegeById(id: number): Promise<{ data: College }> {
     return apiRequest<{ data: College }>(`/api/v1/colleges/${id}`);
+  },
+
+  async getMapColleges(params: {
+    north?: number;
+    south?: number;
+    east?: number;
+    west?: number;
+  }): Promise<any> {
+    const qs = new URLSearchParams();
+    Object.entries(params || {}).forEach(([k, v]) => {
+      if (v !== undefined && v !== null) qs.set(k, String(v));
+    });
+    const s = qs.toString();
+    return apiRequest<any>(`/api/v1/map/colleges${s ? `?${s}` : ""}`);
+  },
+
+  async geocodeLocation(query: string): Promise<any> {
+    return apiRequest<any>(`/api/v1/geocode?q=${encodeURIComponent(query)}`);
+  },
+
+  async updateCollegeLocation(
+    id: number,
+    latitude: number,
+    longitude: number,
+  ): Promise<any> {
+    return apiRequest<any>(`/api/v1/admin/colleges/${id}/location`, {
+      method: "PUT",
+      body: JSON.stringify({ latitude, longitude }),
+    });
+  },
+
+  async updateInstitutionCollegeLocation(
+    latitude: number,
+    longitude: number,
+  ): Promise<any> {
+    return apiRequest<any>("/api/v1/institution/college/location", {
+      method: "PUT",
+      body: JSON.stringify({ latitude, longitude }),
+    });
   },
 
   async uploadForumMedia(_token: string, files: File[]): Promise<string[]> {
