@@ -456,13 +456,24 @@ export default function SuperadminCreateEntranceSection({
         setNoticeFile(exam.notice_file || "");
         setEntranceEmail(exam.email || "");
         setEntranceContactNumber(exam.contact_number || "");
-        if (exam.social_links)
-          setSocialLinks(
-            exam.social_links.map((s: any, i: number) => ({
-              ...s,
-              id: s.id || i + 1,
-            })),
-          );
+        if (exam.social_links) {
+          let links = exam.social_links;
+          if (typeof links === "string") {
+            try {
+              links = JSON.parse(links);
+            } catch {
+              links = [];
+            }
+          }
+          if (Array.isArray(links)) {
+            setSocialLinks(
+              links.map((s: any, i: number) => ({
+                ...s,
+                id: s.id || i + 1,
+              })),
+            );
+          }
+        }
         const institutionMeta = Array.isArray(exam.overview_details)
           ? exam.overview_details.find(
               (d: any) => d.type === "institution_meta",
