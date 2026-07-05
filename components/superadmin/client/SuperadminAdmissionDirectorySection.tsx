@@ -11,12 +11,6 @@ import {
   FolderOpen,
 } from "@phosphor-icons/react";
 import { superadminAdmissionApi } from "@/services/superadminRecordsApi";
-import CollegeFilterDropdown from "./CollegeFilterDropdown";
-
-interface Institution {
-  id: number;
-  institution_name: string;
-}
 
 interface PublishedAdmission {
   id: number;
@@ -53,24 +47,14 @@ export default function SuperadminAdmissionDirectorySection({
   setActiveSection: (s: string) => void;
 }) {
   const [admissions, setAdmissions] = useState<PublishedAdmission[]>([]);
-  const [institutions, setInstitutions] = useState<Institution[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
-  const [collegeFilter, setCollegeFilter] = useState<number | null>(null);
   const [page, setPage] = useState(1);
 
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const [res, insts] = await Promise.all([
-          superadminAdmissionApi.list("published", 1, 100),
-          fetch(
-            `${process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080"}/api/v1/superadmin/institutions`,
-          )
-            .then((r) => r.json())
-            .then((d) => d.data?.institutions || [])
-            .catch(() => []),
-        ]);
+        const res = await superadminAdmissionApi.list("published", 1, 100);
         if (Array.isArray(res.admissions)) {
           setAdmissions(
             res.admissions.map((a: any) => ({
@@ -86,7 +70,6 @@ export default function SuperadminAdmissionDirectorySection({
             })),
           );
         }
-        setInstitutions(insts);
       } catch {
         // silent
       } finally {
@@ -100,16 +83,7 @@ export default function SuperadminAdmissionDirectorySection({
 
   const ALL_LEVELS = ["+2", "A-Level", "Diploma/CTEVT", "Bachelor", "Master"];
 
-  const institutionMap = new Map(
-    institutions.map((i) => [i.id, i.institution_name]),
-  );
-  const enriched = admissions.map((a) => ({
-    ...a,
-    institution_name:
-      a.institution_name || institutionMap.get(a.institution_id) || "-",
-  }));
-
-  const filtered = enriched.filter((a) => {
+  const filtered = admissions.filter((a) => {
     if (activeLevel !== "all" && a.level !== activeLevel) return false;
     const s = search.toLowerCase();
     const matchesSearch =
@@ -118,9 +92,7 @@ export default function SuperadminAdmissionDirectorySection({
       a.program.toLowerCase().includes(s) ||
       a.level.toLowerCase().includes(s) ||
       (a.institution_name || "").toLowerCase().includes(s);
-    const matchesCollege =
-      collegeFilter === null || a.institution_id === collegeFilter;
-    return matchesSearch && matchesCollege;
+    return matchesSearch;
   });
 
   const totalPages = Math.max(1, Math.ceil(filtered.length / ITEMS_PER_PAGE));
@@ -194,11 +166,6 @@ export default function SuperadminAdmissionDirectorySection({
                 className="w-full pl-9 pr-4 py-2 border border-gray-300 rounded-lg text-sm focus:border-blue-600 outline-none"
               />
             </div>
-            <CollegeFilterDropdown
-              institutions={institutions}
-              value={collegeFilter}
-              onChange={setCollegeFilter}
-            />
           </div>
         </div>
 
@@ -207,7 +174,6 @@ export default function SuperadminAdmissionDirectorySection({
             <thead>
               <tr className="bg-gray-50 border-b border-gray-200 text-gray-600 font-medium">
                 <th className="px-4 py-3">Title</th>
-                <th className="px-4 py-3">Institution</th>
                 <th className="px-4 py-3">Program</th>
                 <th className="px-4 py-3">Level</th>
                 <th className="px-4 py-3">Published Date</th>
@@ -247,9 +213,6 @@ export default function SuperadminAdmissionDirectorySection({
                   >
                     <td className="px-4 py-3 font-medium text-gray-800">
                       {admission.title}
-                    </td>
-                    <td className="px-4 py-3 text-gray-600">
-                      {admission.institution_name}
                     </td>
                     <td className="px-4 py-3 text-gray-600">
                       {admission.program}

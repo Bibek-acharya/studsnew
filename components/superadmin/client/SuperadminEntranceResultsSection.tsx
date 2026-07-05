@@ -3,37 +3,20 @@ import React, { useState, useEffect } from "react";
 import { DownloadSimple } from "@phosphor-icons/react";
 import SectionHeader from "@/components/institution-zone/dashboard/shared/SectionHeader";
 import { superadminEntranceApi } from "@/services/superadminRecordsApi";
-import CollegeFilterDropdown from "./CollegeFilterDropdown";
-
-interface Institution {
-  id: number;
-  institution_name: string;
-}
-
 export default function SuperadminEntranceResultsSection({
   setActiveSection,
 }: {
   setActiveSection: (s: string) => void;
 }) {
   const [entrances, setEntrances] = useState<any[]>([]);
-  const [institutions, setInstitutions] = useState<Institution[]>([]);
   const [selectedExam, setSelectedExam] = useState("");
   const [applicants, setApplicants] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
-  const [collegeFilter, setCollegeFilter] = useState<number | null>(null);
 
   useEffect(() => {
-    Promise.all([
-      superadminEntranceApi.list(1, 100),
-      fetch("/api/v1/superadmin/institutions")
-        .then((r) => r.json())
-        .then((d) => d.data?.institutions || [])
-        .catch(() => []),
-    ])
-      .then(([res, insts]) => {
-        setEntrances(res.entrances || []);
-        setInstitutions(insts);
-      })
+    superadminEntranceApi
+      .list(1, 100)
+      .then((res) => setEntrances(res.entrances || []))
       .catch(() => setEntrances([]))
       .finally(() => setLoading(false));
   }, []);
@@ -48,11 +31,6 @@ export default function SuperadminEntranceResultsSection({
       .then(setApplicants)
       .catch(() => setApplicants([]));
   }, [selectedExam]);
-
-  const filteredEntrances = entrances.filter((e) => {
-    if (collegeFilter === null) return true;
-    return e.institution_id === collegeFilter;
-  });
 
   const filtered = applicants.filter((a) => a.score > 0 || a.rank > 0);
 
@@ -81,21 +59,12 @@ export default function SuperadminEntranceResultsSection({
               className="px-4 py-2.5 border border-gray-300 rounded-lg text-sm focus:border-blue-600 outline-none"
             >
               <option value="">Select Exam</option>
-              {filteredEntrances.map((e) => (
+              {entrances.map((e) => (
                 <option key={e.id} value={e.id}>
                   {e.title}
-                  {e.institution_name ? ` (${e.institution_name})` : ""}
                 </option>
               ))}
             </select>
-            <CollegeFilterDropdown
-              institutions={institutions}
-              value={collegeFilter}
-              onChange={(id) => {
-                setCollegeFilter(id);
-                setSelectedExam("");
-              }}
-            />
           </div>
           {filtered.length > 0 && (
             <button className="px-4 py-2.5 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-700 flex items-center gap-2">

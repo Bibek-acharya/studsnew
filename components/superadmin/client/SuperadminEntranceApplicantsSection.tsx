@@ -132,7 +132,6 @@ export default function SuperadminEntranceApplicantsSection({
             {entrances.map((e) => (
               <option key={e.id} value={e.id}>
                 {e.title}
-                {e.institution_name ? ` (${e.institution_name})` : ""}
               </option>
             ))}
           </select>

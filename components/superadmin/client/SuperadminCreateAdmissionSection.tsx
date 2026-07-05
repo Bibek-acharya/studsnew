@@ -7,7 +7,7 @@ import SectionHeader from "@/components/institution-zone/dashboard/shared/Sectio
 import "react-quill-new/dist/quill.snow.css";
 import { superadminAdmissionApi } from "@/services/superadminRecordsApi";
 import ImageCropperModal from "@/components/ScholarshipProvider/common/ImageCropperModal";
-import CollegePickerModal from "./CollegePickerModal";
+import InstitutionSelector from "./InstitutionSelector";
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080";
 
@@ -217,9 +217,6 @@ export default function SuperadminCreateAdmissionSection({
 
   const [dataLoaded, setDataLoaded] = useState(false);
   const [saving, setSaving] = useState(false);
-  const [institutionId, setInstitutionId] = useState<number | null>(null);
-  const [institutionName, setInstitutionName] = useState("");
-  const [collegePickerOpen, setCollegePickerOpen] = useState(false);
 
   const showLoading = !!editId && !dataLoaded;
 
@@ -231,6 +228,13 @@ export default function SuperadminCreateAdmissionSection({
   const [cropperOpen, setCropperOpen] = useState(false);
   const [cropImageSrc, setCropImageSrc] = useState<string | null>(null);
   const [cropTargetIndex, setCropTargetIndex] = useState<number | null>(null);
+  const [institutionFields, setInstitutionFields] = useState({
+    name: "",
+    location: "",
+    affiliation: "",
+    link: "",
+    institution_id: 0,
+  });
 
   const getToken = () => localStorage.getItem("superadmin_token");
 
@@ -456,9 +460,6 @@ export default function SuperadminCreateAdmissionSection({
     if (bd) {
       setBrochureUrl(String(bd.url ?? ""));
     }
-    if (data.institution_id) {
-      setInstitutionId(Number(data.institution_id));
-    }
   }, []);
 
   useEffect(() => {
@@ -472,9 +473,16 @@ export default function SuperadminCreateAdmissionSection({
         if (res?.data) {
           const d =
             typeof res.data === "string" ? JSON.parse(res.data) : res.data;
-          populateFromData({ ...d, institution_id: res.institution_id });
-          if (res.institution_name) {
-            setInstitutionName(res.institution_name);
+          populateFromData(d);
+          const od = d.overview_data || {};
+          if (od.institution_name) {
+            setInstitutionFields({
+              name: od.institution_name || "",
+              location: od.institution_location || "",
+              affiliation: od.institution_affiliation || "",
+              link: od.institution_link || "",
+              institution_id: d.institution_id || 0,
+            });
           }
         }
       } catch {
@@ -488,16 +496,19 @@ export default function SuperadminCreateAdmissionSection({
 
   const validate = useCallback(() => {
     const errs: Record<string, boolean> = {};
-    if (!institutionId) errs.institutionId = true;
     if (!overviewHeading.trim()) errs.overviewHeading = true;
     if (!overviewDesc.trim()) errs.overviewDesc = true;
     setErrors(errs);
     return Object.keys(errs).length === 0;
-  }, [overviewHeading, overviewDesc, institutionId]);
+  }, [overviewHeading, overviewDesc]);
 
   const collectData = () => ({
-    institution_id: institutionId,
+    institution_id: institutionFields.institution_id,
     overview_data: {
+      institution_name: institutionFields.name,
+      institution_location: institutionFields.location,
+      institution_link: institutionFields.link,
+      institution_affiliation: institutionFields.affiliation,
       overviewHeading,
       overviewDesc,
       applicationFormLink,
@@ -607,77 +618,10 @@ export default function SuperadminCreateAdmissionSection({
       />
 
       <div className="space-y-6">
-        {/* Institution Picker */}
-        <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
-          <div className="border-b border-gray-200 bg-gray-50/50 px-6 py-4 flex items-center gap-3">
-            <div className="p-2 bg-blue-100 text-blue-600 rounded-lg">
-              <svg
-                width="20"
-                height="20"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              >
-                <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
-                <polyline points="9 22 9 12 15 12 15 22" />
-              </svg>
-            </div>
-            <div>
-              <h2 className="text-base font-semibold text-gray-800">
-                Institution
-              </h2>
-              <p className="text-sm text-gray-500 mt-0.5">
-                Select the institution for this admission
-              </p>
-            </div>
-          </div>
-          <div className="p-6">
-            <label className={labelClass}>
-              Institution <span className="text-red-500">*</span>
-            </label>
-            <div className="flex items-center gap-3">
-              <div
-                className={`flex-1 px-4 py-2.5 border rounded-lg text-sm bg-gray-50 ${fieldError("institutionId")} ${institutionId ? "border-gray-200" : "border-red-300"}`}
-              >
-                {institutionId
-                  ? institutionName || `Institution #${institutionId}`
-                  : "No institution selected"}
-              </div>
-              <button
-                onClick={() => setCollegePickerOpen(true)}
-                className="px-4 py-2.5 text-sm font-medium text-blue-600 bg-white border border-gray-200 rounded-lg hover:bg-blue-50 transition-colors"
-              >
-                {institutionId ? "Change" : "Select"}
-              </button>
-              {institutionId && (
-                <button
-                  onClick={() => {
-                    setInstitutionId(null);
-                    setInstitutionName("");
-                  }}
-                  className="p-2.5 text-red-500 hover:bg-red-50 rounded-lg transition-colors"
-                >
-                  <svg
-                    width="16"
-                    height="16"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="2"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  >
-                    <polyline points="3 6 5 6 21 6" />
-                    <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
-                  </svg>
-                </button>
-              )}
-            </div>
-          </div>
-        </div>
+        <InstitutionSelector
+          value={institutionFields}
+          onChange={setInstitutionFields}
+        />
 
         {/* 1. Admissions Overview */}
         <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
@@ -2944,16 +2888,6 @@ export default function SuperadminCreateAdmissionSection({
           }}
         />
       )}
-
-      <CollegePickerModal
-        open={collegePickerOpen}
-        onClose={() => setCollegePickerOpen(false)}
-        onSelect={(inst) => {
-          setInstitutionId(inst.id);
-          setInstitutionName(inst.institution_name);
-        }}
-        selectedId={institutionId ?? undefined}
-      />
     </div>
   );
 }

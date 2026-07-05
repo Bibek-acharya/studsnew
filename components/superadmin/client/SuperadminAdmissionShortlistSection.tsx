@@ -11,14 +11,7 @@ import {
   CaretLeft,
   CaretRight,
 } from "@phosphor-icons/react";
-import CollegeFilterDropdown from "./CollegeFilterDropdown";
-
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080";
-
-interface Institution {
-  id: number;
-  institution_name: string;
-}
 
 interface Applicant {
   id: number;
@@ -49,10 +42,8 @@ export default function SuperadminAdmissionShortlistSection({
   setActiveSection: (s: string) => void;
 }) {
   const [data, setData] = useState<Applicant[]>([]);
-  const [institutions, setInstitutions] = useState<Institution[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
-  const [collegeFilter, setCollegeFilter] = useState<number | null>(null);
   const [page, setPage] = useState(1);
 
   const getToken = () => localStorage.getItem("superadmin_token");
@@ -65,21 +56,15 @@ export default function SuperadminAdmissionShortlistSection({
           setLoading(false);
           return;
         }
-        const [res, insts] = await Promise.all([
-          fetch(`${API_BASE_URL}/api/v1/superadmin/admissions`, {
+        const res = await fetch(
+          `${API_BASE_URL}/api/v1/superadmin/admissions`,
+          {
             headers: { Authorization: `Bearer ${token}` },
-          }).then((r) => r.json()),
-          fetch(`${API_BASE_URL}/api/v1/superadmin/institutions`, {
-            headers: { Authorization: `Bearer ${token}` },
-          })
-            .then((r) => r.json())
-            .then((d) => d.data?.institutions || [])
-            .catch(() => []),
-        ]);
+          },
+        ).then((r) => r.json());
         setData(
           (res?.data || []).filter((a: any) => a.status === "shortlisted"),
         );
-        setInstitutions(insts);
       } catch {
         setData([]);
       } finally {
@@ -106,20 +91,8 @@ export default function SuperadminAdmissionShortlistSection({
     }
   };
 
-  const institutionMap = new Map(
-    institutions.map((i) => [i.id, i.institution_name]),
-  );
-  const enriched = data.map((a) => ({
-    ...a,
-    institution_name:
-      a.institution_name || institutionMap.get(a.institution_id || 0) || "-",
-  }));
-
   const filtered = useMemo(() => {
-    let items = enriched.filter((a) => a.status === "shortlisted");
-    if (collegeFilter !== null) {
-      items = items.filter((a) => a.institution_id === collegeFilter);
-    }
+    let items = data.filter((a) => a.status === "shortlisted");
     if (search) {
       const s = search.toLowerCase();
       items = items.filter(
@@ -129,7 +102,7 @@ export default function SuperadminAdmissionShortlistSection({
       );
     }
     return items;
-  }, [enriched, search, collegeFilter]);
+  }, [data, search]);
 
   const totalPages = Math.ceil(filtered.length / ITEMS_PER_PAGE);
   const paginated = filtered.slice(
@@ -164,11 +137,6 @@ export default function SuperadminAdmissionShortlistSection({
                 className="w-full pl-10 pr-4 py-2.5 border border-gray-300 rounded-lg text-sm focus:border-blue-600 outline-none"
               />
             </div>
-            <CollegeFilterDropdown
-              institutions={institutions}
-              value={collegeFilter}
-              onChange={setCollegeFilter}
-            />
           </div>
         </div>
 
@@ -192,9 +160,6 @@ export default function SuperadminAdmissionShortlistSection({
                     Name
                   </th>
                   <th className="text-left px-4 py-3 font-semibold text-gray-700">
-                    Institution
-                  </th>
-                  <th className="text-left px-4 py-3 font-semibold text-gray-700">
                     Program
                   </th>
                   <th className="text-left px-4 py-3 font-semibold text-gray-700">
@@ -215,9 +180,6 @@ export default function SuperadminAdmissionShortlistSection({
                       <p className="font-medium text-gray-900">
                         {a.student_name}
                       </p>
-                    </td>
-                    <td className="px-4 py-3 text-gray-600">
-                      {a.institution_name}
                     </td>
                     <td className="px-4 py-3 text-gray-600">
                       {a.program_name}{" "}

@@ -10,8 +10,6 @@ import {
   CaretRight,
 } from "@phosphor-icons/react";
 import { superadminEntranceApi } from "@/services/superadminRecordsApi";
-import CollegeFilterDropdown from "./CollegeFilterDropdown";
-
 const statusColors: Record<string, string> = {
   upcoming: "text-orange-600 bg-orange-50",
   ongoing: "text-green-600 bg-green-50",
@@ -29,58 +27,31 @@ const statusPill = (status: string) => {
 
 const ITEMS_PER_PAGE = 5;
 
-interface Institution {
-  id: number;
-  institution_name: string;
-}
-
 export default function SuperadminEntranceDirectorySection({
   setActiveSection,
 }: {
   setActiveSection: (s: string) => void;
 }) {
   const [exams, setExams] = useState<any[]>([]);
-  const [institutions, setInstitutions] = useState<Institution[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
   const [page, setPage] = useState(1);
-  const [collegeFilter, setCollegeFilter] = useState<number | null>(null);
 
   useEffect(() => {
-    Promise.all([
-      superadminEntranceApi.list(1, 100),
-      fetch("/api/v1/superadmin/institutions")
-        .then((r) => r.json())
-        .then((d) => d.data?.institutions || [])
-        .catch(() => []),
-    ])
-      .then(([res, insts]) => {
-        setExams(res.entrances || []);
-        setInstitutions(insts);
-      })
+    superadminEntranceApi
+      .list(1, 100)
+      .then((res) => setExams(res.entrances || []))
       .catch(() => setExams([]))
       .finally(() => setLoading(false));
   }, []);
 
-  const institutionMap = new Map(
-    institutions.map((i) => [i.id, i.institution_name]),
-  );
-  const enriched = exams.map((e) => ({
-    ...e,
-    institution_name:
-      e.institution_name || institutionMap.get(e.institution_id) || "-",
-  }));
-
-  const filtered = enriched.filter((e) => {
+  const filtered = exams.filter((e) => {
     const s = search.toLowerCase();
-    const matchesSearch =
+    return (
       !s ||
       e.title.toLowerCase().includes(s) ||
-      e.status.toLowerCase().includes(s) ||
-      (e.institution_name || "").toLowerCase().includes(s);
-    const matchesCollege =
-      collegeFilter === null || e.institution_id === collegeFilter;
-    return matchesSearch && matchesCollege;
+      e.status.toLowerCase().includes(s)
+    );
   });
 
   const totalPages = Math.max(1, Math.ceil(filtered.length / ITEMS_PER_PAGE));
@@ -130,11 +101,6 @@ export default function SuperadminEntranceDirectorySection({
                 className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg text-sm focus:border-blue-600 outline-none"
               />
             </div>
-            <CollegeFilterDropdown
-              institutions={institutions}
-              value={collegeFilter}
-              onChange={setCollegeFilter}
-            />
           </div>
         </div>
 
@@ -145,9 +111,7 @@ export default function SuperadminEntranceDirectorySection({
         ) : paginated.length === 0 ? (
           <div className="text-center py-12 text-gray-400">
             <p className="text-sm">
-              {search || collegeFilter
-                ? "No entrances matched."
-                : "No entrances yet."}
+              {search ? "No entrances matched." : "No entrances yet."}
             </p>
           </div>
         ) : (
@@ -157,9 +121,6 @@ export default function SuperadminEntranceDirectorySection({
                 <tr>
                   <th className="text-left py-3 px-6 font-semibold text-gray-700">
                     Exam Name
-                  </th>
-                  <th className="text-left py-3 px-6 font-semibold text-gray-700">
-                    College
                   </th>
                   <th className="text-center py-3 px-6 font-semibold text-gray-700">
                     Date
@@ -183,9 +144,6 @@ export default function SuperadminEntranceDirectorySection({
                   <tr key={exam.id} className="hover:bg-gray-50">
                     <td className="py-3 px-6 font-medium text-gray-900">
                       {exam.title}
-                    </td>
-                    <td className="py-3 px-6 text-gray-600">
-                      {exam.institution_name}
                     </td>
                     <td className="text-center py-3 px-6 text-gray-600">
                       {new Date(exam.date).toLocaleDateString()}

@@ -9,13 +9,6 @@ import {
   Plus,
 } from "@phosphor-icons/react";
 import { superadminProgramApi } from "@/services/superadminRecordsApi";
-import CollegeFilterDropdown from "./CollegeFilterDropdown";
-
-interface Institution {
-  id: number;
-  institution_name: string;
-}
-
 interface Course {
   id: number;
   name: string;
@@ -32,22 +25,14 @@ export default function SuperadminCourseListSection({
   setActiveSection: (s: string) => void;
 }) {
   const [courses, setCourses] = useState<Course[]>([]);
-  const [institutions, setInstitutions] = useState<Institution[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
-  const [collegeFilter, setCollegeFilter] = useState<number | null>(null);
 
   useEffect(() => {
-    Promise.all([
-      superadminProgramApi.list(),
-      fetch("/api/v1/superadmin/institutions")
-        .then((r) => r.json())
-        .then((d) => d.data?.institutions || [])
-        .catch(() => []),
-    ])
-      .then(([programRes, insts]) => {
+    superadminProgramApi
+      .list()
+      .then((programRes) => {
         setCourses(programRes.programs || []);
-        setInstitutions(insts);
       })
       .catch(() => setCourses([]))
       .finally(() => setLoading(false));
@@ -67,24 +52,13 @@ export default function SuperadminCourseListSection({
     setActiveSection("superadmin-add-course");
   };
 
-  const institutionMap = new Map(
-    institutions.map((i) => [i.id, i.institution_name]),
-  );
-  const enriched = courses.map((c) => ({
-    ...c,
-    institution_name:
-      c.institution_name || institutionMap.get(c.institution_id) || "-",
-  }));
-
-  const filtered = enriched.filter((c) => {
+  const filtered = courses.filter((c) => {
     const q = search.toLowerCase();
     const matchesSearch =
       !search ||
       c.name.toLowerCase().includes(q) ||
       (c.institution_name || "").toLowerCase().includes(q);
-    const matchesCollege =
-      collegeFilter === null || c.institution_id === collegeFilter;
-    return matchesSearch && matchesCollege;
+    return matchesSearch;
   });
 
   return (
@@ -118,11 +92,6 @@ export default function SuperadminCourseListSection({
             className="w-full pl-10 pr-4 py-2.5 border border-gray-300 rounded-lg text-sm focus:border-blue-600 outline-none"
           />
         </div>
-        <CollegeFilterDropdown
-          institutions={institutions}
-          value={collegeFilter}
-          onChange={setCollegeFilter}
-        />
       </div>
 
       <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
@@ -134,9 +103,7 @@ export default function SuperadminCourseListSection({
           <div className="text-center py-12 text-gray-400">
             <BookOpen className="w-12 h-12 mx-auto mb-3 opacity-40" />
             <p className="text-sm">
-              {search || collegeFilter
-                ? "No courses matched."
-                : "No courses yet."}
+              {search ? "No courses matched." : "No courses yet."}
             </p>
           </div>
         ) : (
@@ -171,7 +138,7 @@ export default function SuperadminCourseListSection({
                       {c.name}
                     </td>
                     <td className="py-3 px-6 text-gray-600">
-                      {c.institution_name}
+                      {c.institution_name || "-"}
                     </td>
                     <td className="py-3 px-6 text-gray-600">
                       {c.duration || "-"}

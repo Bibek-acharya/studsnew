@@ -6,8 +6,8 @@ import * as LucideIcons from "lucide-react";
 import SectionHeader from "@/components/institution-zone/dashboard/shared/SectionHeader";
 import { superadminEntranceApi } from "@/services/superadminRecordsApi";
 import ImageCropperModal from "@/components/ScholarshipProvider/common/ImageCropperModal";
-import CollegePickerModal from "./CollegePickerModal";
 import "react-quill-new/dist/quill.snow.css";
+import InstitutionSelector from "./InstitutionSelector";
 
 const kebabToPascal = (name: string): string =>
   name
@@ -409,10 +409,13 @@ export default function SuperadminCreateEntranceSection({
   const [applicationLink, setApplicationLink] = useState("");
   const [noticeFile, setNoticeFile] = useState("");
   const [uploadingNotice, setUploadingNotice] = useState(false);
-
-  const [institutionId, setInstitutionId] = useState<number | null>(null);
-  const [institutionName, setInstitutionName] = useState("");
-  const [pickerOpen, setPickerOpen] = useState(false);
+  const [institutionFields, setInstitutionFields] = useState({
+    name: "",
+    location: "",
+    affiliation: "",
+    link: "",
+    institution_id: 0,
+  });
 
   useEffect(() => {
     const stored = localStorage.getItem("superadmin_edit_entrance_id");
@@ -443,9 +446,19 @@ export default function SuperadminCreateEntranceSection({
         if (exam.faqs) setFaqs(exam.faqs);
         setApplicationLink(exam.application_link || "");
         setNoticeFile(exam.notice_file || "");
-        if (exam.institution_id) {
-          setInstitutionId(exam.institution_id);
-          setInstitutionName(exam.institution_name || "");
+        const institutionMeta = Array.isArray(exam.overview_details)
+          ? exam.overview_details.find(
+              (d: any) => d.type === "institution_meta",
+            )
+          : null;
+        if (institutionMeta) {
+          setInstitutionFields({
+            name: institutionMeta.name || "",
+            location: institutionMeta.location || "",
+            affiliation: institutionMeta.affiliation || "",
+            link: institutionMeta.link || "",
+            institution_id: institutionMeta.institution_id || 0,
+          });
         }
       })
       .catch((e) => console.error("Failed to load entrance for edit", e))
@@ -546,10 +559,6 @@ export default function SuperadminCreateEntranceSection({
 
   const handleSave = async (publish: boolean) => {
     if (publish && !validate()) return;
-    if (!institutionId) {
-      alert("Please select an institution first.");
-      return;
-    }
     setSaving(true);
     try {
       const examTitle = title || overviewDetails[0]?.detail || "Entrance Exam";
@@ -564,7 +573,17 @@ export default function SuperadminCreateEntranceSection({
         hero_banner: heroBanner,
         status: publish ? "published" : "draft",
         application_fee: applicationFee,
-        overview_details: overviewDetails,
+        overview_details: [
+          ...overviewDetails.map(({ id, ...rest }) => rest),
+          {
+            type: "institution_meta",
+            name: institutionFields.name,
+            location: institutionFields.location,
+            affiliation: institutionFields.affiliation,
+            link: institutionFields.link,
+            institution_id: institutionFields.institution_id,
+          },
+        ],
         exam_date_schedules: examDateSchedules,
         eligibility_list: eligibilityList,
         application_steps: applicationSteps,
@@ -576,7 +595,6 @@ export default function SuperadminCreateEntranceSection({
         faqs: faqs,
         application_link: applicationLink,
         notice_file: noticeFile,
-        institution_id: institutionId,
       };
       if (editId) {
         await superadminEntranceApi.update(editId, payload);
@@ -608,65 +626,12 @@ export default function SuperadminCreateEntranceSection({
         </div>
       )}
 
-      <div className="space-y-6">
-        {/* Institution Selection */}
-        <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
-          <div className="border-b border-gray-200 bg-gray-50/50 px-6 py-4 flex items-center gap-3">
-            <div className="p-2 bg-blue-100 text-blue-600 rounded-lg">
-              <svg
-                width="20"
-                height="20"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              >
-                <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
-                <polyline points="9 22 9 12 15 12 15 22" />
-              </svg>
-            </div>
-            <div>
-              <h2 className="text-base font-semibold text-gray-800">
-                Institution
-              </h2>
-              <p className="text-sm text-gray-500 mt-0.5">
-                Select the institution this entrance belongs to
-              </p>
-            </div>
-          </div>
-          <div className="p-6">
-            <button
-              type="button"
-              onClick={() => setPickerOpen(true)}
-              className="w-full sm:w-auto px-4 py-2.5 border border-gray-300 rounded-lg text-sm text-left flex items-center gap-2 hover:border-blue-400 focus:border-blue-600 outline-none transition-colors bg-white"
-            >
-              <svg
-                width="16"
-                height="16"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                className="text-gray-400"
-              >
-                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
-                <polyline points="17 8 12 3 7 8" />
-                <line x1="12" y1="3" x2="12" y2="15" />
-              </svg>
-              {institutionName || "Select Institution..."}
-            </button>
-            {institutionId && !institutionName && (
-              <p className="text-xs text-gray-500 mt-2">
-                Institution ID: {institutionId}
-              </p>
-            )}
-          </div>
-        </div>
+      <InstitutionSelector
+        value={institutionFields}
+        onChange={setInstitutionFields}
+      />
 
+      <div className="space-y-6">
         {/* 1. Exam Overview */}
         <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
           <div className="border-b border-gray-200 bg-gray-50/50 px-6 py-4 flex items-center gap-3">
@@ -2356,16 +2321,6 @@ export default function SuperadminCreateEntranceSection({
           </div>
         </div>
       </div>
-
-      <CollegePickerModal
-        open={pickerOpen}
-        onClose={() => setPickerOpen(false)}
-        onSelect={(inst) => {
-          setInstitutionId(inst.id);
-          setInstitutionName(inst.institution_name);
-        }}
-        selectedId={institutionId ?? undefined}
-      />
 
       {cropperOpen && cropImageSrc && (
         <ImageCropperModal

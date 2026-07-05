@@ -9,14 +9,7 @@ import {
   CaretRight,
 } from "@phosphor-icons/react";
 import { superadminEntranceApi } from "@/services/superadminRecordsApi";
-import CollegeFilterDropdown from "./CollegeFilterDropdown";
-
 const ITEMS_PER_PAGE = 5;
-
-interface Institution {
-  id: number;
-  institution_name: string;
-}
 
 export default function SuperadminEntranceDraftSection({
   setActiveSection,
@@ -25,39 +18,17 @@ export default function SuperadminEntranceDraftSection({
 }) {
   const [page, setPage] = useState(1);
   const [drafts, setDrafts] = useState<any[]>([]);
-  const [institutions, setInstitutions] = useState<Institution[]>([]);
   const [loading, setLoading] = useState(true);
-  const [collegeFilter, setCollegeFilter] = useState<number | null>(null);
 
   useEffect(() => {
-    Promise.all([
-      superadminEntranceApi.list(1, 50, "draft"),
-      fetch("/api/v1/superadmin/institutions")
-        .then((r) => r.json())
-        .then((d) => d.data?.institutions || [])
-        .catch(() => []),
-    ])
-      .then(([res, insts]) => {
-        setDrafts(res.entrances || []);
-        setInstitutions(insts);
-      })
+    superadminEntranceApi
+      .list(1, 50, "draft")
+      .then((res) => setDrafts(res.entrances || []))
       .catch(() => setDrafts([]))
       .finally(() => setLoading(false));
   }, []);
 
-  const institutionMap = new Map(
-    institutions.map((i) => [i.id, i.institution_name]),
-  );
-  const enriched = drafts.map((d) => ({
-    ...d,
-    institution_name:
-      d.institution_name || institutionMap.get(d.institution_id) || "-",
-  }));
-
-  const filtered =
-    collegeFilter === null
-      ? enriched
-      : enriched.filter((d) => d.institution_id === collegeFilter);
+  const filtered = drafts;
 
   const totalPages = Math.max(1, Math.ceil(filtered.length / ITEMS_PER_PAGE));
   const safePage = Math.min(page, totalPages);
@@ -92,14 +63,6 @@ export default function SuperadminEntranceDraftSection({
         </div>
       </div>
 
-      <div className="mb-4">
-        <CollegeFilterDropdown
-          institutions={institutions}
-          value={collegeFilter}
-          onChange={setCollegeFilter}
-        />
-      </div>
-
       <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
         <div className="bg-gray-50/50 px-6 py-4 border-b border-gray-200">
           <h2 className="text-lg font-bold text-gray-900 flex items-center gap-2">
@@ -114,11 +77,7 @@ export default function SuperadminEntranceDraftSection({
         ) : paginated.length === 0 ? (
           <div className="text-center py-12 text-gray-400">
             <FileText className="w-12 h-12 mx-auto mb-3 opacity-40" />
-            <p className="text-sm">
-              {collegeFilter
-                ? "No drafts for this institution."
-                : "No draft entrance exams found."}
-            </p>
+            <p className="text-sm">No draft entrance exams found.</p>
           </div>
         ) : (
           <div className="divide-y divide-gray-100">
@@ -136,7 +95,7 @@ export default function SuperadminEntranceDraftSection({
                       {draft.title}
                     </h3>
                     <p className="text-sm text-gray-500">
-                      {draft.institution_name} &middot; {draft.status} &middot;{" "}
+                      {draft.status} &middot;{" "}
                       {new Date(draft.created_at).toLocaleDateString()}
                     </p>
                   </div>

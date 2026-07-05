@@ -14,14 +14,7 @@ import {
   CaretLeft,
   CaretRight,
 } from "@phosphor-icons/react";
-import CollegeFilterDropdown from "./CollegeFilterDropdown";
-
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080";
-
-interface Institution {
-  id: number;
-  institution_name: string;
-}
 
 interface Applicant {
   id: number;
@@ -59,11 +52,9 @@ export default function SuperadminAdmissionApplicationsSection({
   setActiveSection: (s: string) => void;
 }) {
   const [data, setData] = useState<Applicant[]>([]);
-  const [institutions, setInstitutions] = useState<Institution[]>([]);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState("all");
   const [search, setSearch] = useState("");
-  const [collegeFilter, setCollegeFilter] = useState<number | null>(null);
   const [page, setPage] = useState(1);
   const [selected, setSelected] = useState<number[]>([]);
 
@@ -77,19 +68,13 @@ export default function SuperadminAdmissionApplicationsSection({
           setLoading(false);
           return;
         }
-        const [res, insts] = await Promise.all([
-          fetch(`${API_BASE_URL}/api/v1/superadmin/admissions`, {
+        const res = await fetch(
+          `${API_BASE_URL}/api/v1/superadmin/admissions`,
+          {
             headers: { Authorization: `Bearer ${token}` },
-          }).then((r) => r.json()),
-          fetch(`${API_BASE_URL}/api/v1/superadmin/institutions`, {
-            headers: { Authorization: `Bearer ${token}` },
-          })
-            .then((r) => r.json())
-            .then((d) => d.data?.institutions || [])
-            .catch(() => []),
-        ]);
+          },
+        ).then((r) => r.json());
         setData(res?.data || []);
-        setInstitutions(insts);
       } catch {
         setData([]);
       } finally {
@@ -116,20 +101,9 @@ export default function SuperadminAdmissionApplicationsSection({
     }
   };
 
-  const institutionMap = new Map(
-    institutions.map((i) => [i.id, i.institution_name]),
-  );
-  const enriched = data.map((a) => ({
-    ...a,
-    institution_name:
-      a.institution_name || institutionMap.get(a.institution_id || 0) || "-",
-  }));
-
   const filtered = useMemo(() => {
-    return enriched.filter((row) => {
+    return data.filter((row) => {
       if (activeTab !== "all" && row.status !== activeTab) return false;
-      if (collegeFilter !== null && row.institution_id !== collegeFilter)
-        return false;
       if (search) {
         const s = search.toLowerCase();
         if (
@@ -141,7 +115,7 @@ export default function SuperadminAdmissionApplicationsSection({
       }
       return true;
     });
-  }, [enriched, activeTab, search, collegeFilter]);
+  }, [data, activeTab, search]);
 
   const totalPages = Math.ceil(filtered.length / ITEMS_PER_PAGE);
   const paginated = filtered.slice(
@@ -194,11 +168,6 @@ export default function SuperadminAdmissionApplicationsSection({
               />
             </div>
             <div className="flex items-center gap-2">
-              <CollegeFilterDropdown
-                institutions={institutions}
-                value={collegeFilter}
-                onChange={setCollegeFilter}
-              />
               <button className="px-4 py-2.5 border border-gray-300 text-sm font-medium text-gray-700 rounded-lg hover:bg-gray-50">
                 <Files size={18} /> Export
               </button>
@@ -255,9 +224,6 @@ export default function SuperadminAdmissionApplicationsSection({
                     Name
                   </th>
                   <th className="text-left px-4 py-3 font-semibold text-gray-700">
-                    Institution
-                  </th>
-                  <th className="text-left px-4 py-3 font-semibold text-gray-700">
                     Program
                   </th>
                   <th className="text-left px-4 py-3 font-semibold text-gray-700">
@@ -287,9 +253,6 @@ export default function SuperadminAdmissionApplicationsSection({
                         {a.student_name}
                       </p>
                       <p className="text-xs text-gray-500">{a.student_email}</p>
-                    </td>
-                    <td className="px-4 py-3 text-gray-600">
-                      {a.institution_name}
                     </td>
                     <td className="px-4 py-3 text-gray-600">
                       {a.program_name}{" "}

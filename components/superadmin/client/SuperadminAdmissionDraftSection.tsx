@@ -8,12 +8,6 @@ import {
   CaretRight,
 } from "@phosphor-icons/react";
 import { superadminAdmissionApi } from "@/services/superadminRecordsApi";
-import CollegeFilterDropdown from "./CollegeFilterDropdown";
-
-interface Institution {
-  id: number;
-  institution_name: string;
-}
 
 interface DraftAdmission {
   id: number;
@@ -33,23 +27,13 @@ export default function SuperadminAdmissionDraftSection({
   setActiveSection: (s: string) => void;
 }) {
   const [drafts, setDrafts] = useState<DraftAdmission[]>([]);
-  const [institutions, setInstitutions] = useState<Institution[]>([]);
   const [loading, setLoading] = useState(true);
-  const [collegeFilter, setCollegeFilter] = useState<number | null>(null);
   const [page, setPage] = useState(1);
 
   useEffect(() => {
     const fetchDrafts = async () => {
       try {
-        const [res, insts] = await Promise.all([
-          superadminAdmissionApi.list("draft", 1, 100),
-          fetch(
-            `${process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080"}/api/v1/superadmin/institutions`,
-          )
-            .then((r) => r.json())
-            .then((d) => d.data?.institutions || [])
-            .catch(() => []),
-        ]);
+        const res = await superadminAdmissionApi.list("draft", 1, 100);
         if (Array.isArray(res.admissions)) {
           setDrafts(
             res.admissions.map((a: any) => ({
@@ -63,7 +47,6 @@ export default function SuperadminAdmissionDraftSection({
             })),
           );
         }
-        setInstitutions(insts);
       } catch {
         // silent
       } finally {
@@ -73,18 +56,7 @@ export default function SuperadminAdmissionDraftSection({
     fetchDrafts();
   }, []);
 
-  const institutionMap = new Map(
-    institutions.map((i) => [i.id, i.institution_name]),
-  );
-  const enriched = drafts.map((d) => ({
-    ...d,
-    institution_name:
-      d.institution_name || institutionMap.get(d.institution_id) || "-",
-  }));
-
-  const filtered = enriched.filter((d) => {
-    return collegeFilter === null || d.institution_id === collegeFilter;
-  });
+  const filtered = drafts.filter(() => true);
 
   const totalPages = Math.max(1, Math.ceil(filtered.length / ITEMS_PER_PAGE));
   const safePage = Math.min(page, totalPages);
@@ -113,14 +85,6 @@ export default function SuperadminAdmissionDraftSection({
           <span>-</span>
           <span className="text-gray-800 font-medium">Draft Admission</span>
         </div>
-      </div>
-
-      <div className="mb-4">
-        <CollegeFilterDropdown
-          institutions={institutions}
-          value={collegeFilter}
-          onChange={setCollegeFilter}
-        />
       </div>
 
       <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
@@ -155,8 +119,7 @@ export default function SuperadminAdmissionDraftSection({
                       {draft.title}
                     </h3>
                     <p className="text-sm text-gray-500">
-                      {draft.level} - {draft.program} &middot;{" "}
-                      {draft.institution_name} &middot; Last edited:{" "}
+                      {draft.level} - {draft.program} &middot; Last edited:{" "}
                       {draft.lastEdited}
                     </p>
                   </div>
