@@ -1847,8 +1847,8 @@ const EntrancePage: React.FC = () => {
         <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
           <SectionItemHeader
             icon="users"
-            title="Contact Persons"
-            subtitle="Exam-related contact persons for inquiries"
+            title="Contact Information"
+            subtitle="Exam-related contact information for inquiries"
             onAdd={() =>
               setContactPersons((prev) => [
                 ...prev,

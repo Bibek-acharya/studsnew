@@ -2209,7 +2209,7 @@ const AdmissionCreatePage: React.FC = () => {
         <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
           <SectionItemHeader
             icon="users"
-            title="Key Contact Persons"
+            title="Key Contact Information"
             subtitle="Specific individuals for contact"
             onAdd={() =>
               setContactPersons((prev) => [
