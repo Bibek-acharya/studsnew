@@ -70,9 +70,9 @@ export default function MapSearchBar({ onSelect }: MapSearchBarProps) {
 
         if (
           collegeRes.status === "fulfilled" &&
-          Array.isArray(collegeRes.value?.data)
+          Array.isArray(collegeRes.value?.data?.colleges)
         ) {
-          const colleges: CollegeResult[] = collegeRes.value.data
+          const colleges: CollegeResult[] = collegeRes.value.data.colleges
             .filter((c: any) => c.latitude && c.longitude)
             .map((c: any) => ({
               resultType: "college" as const,

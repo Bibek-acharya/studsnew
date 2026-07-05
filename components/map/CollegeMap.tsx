@@ -134,7 +134,7 @@ export default function CollegeMap({
           process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080";
         const res = await fetch(`${API_BASE_URL}/api/v1/map/colleges`);
         const body = await res.json();
-        const colleges = body?.data || [];
+        const colleges = body?.data?.colleges || [];
         return colleges.filter(
           (c: any): c is College => c.latitude != null && c.longitude != null,
         );
