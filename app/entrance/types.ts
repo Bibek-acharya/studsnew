@@ -73,11 +73,25 @@ export interface ExamDetails {
   courses: string[];
   admissionSteps: { title: string; description: string }[];
   admitCardInfo: string;
-  upcomingDates: { date: string; dateEn: string; event: string; status?: string }[];
+  upcomingDates: {
+    date: string;
+    dateEn: string;
+    event: string;
+    status?: string;
+  }[];
   pastDates: { date: string; dateEn: string; event: string }[];
   faqs: { question: string; answer: string }[];
-  contactPersons: { name: string; role: string; img: string; phone: string; email: string; wa: string }[];
+  contactPersons: {
+    name: string;
+    role: string;
+    img: string;
+    phone: string;
+    email: string;
+    wa: string;
+  }[];
   overviewDetails?: { detail: string; information: string }[];
   applicationLink?: string;
   noticeFile?: string;
+  contactNumber?: string;
+  socialLinks?: { platform: string; url: string }[];
 }

@@ -941,7 +941,9 @@ const EntranceDetailsPage: React.FC = () => {
             exam.phone ||
             exam.email ||
             exam.website ||
-            exam.location) && (
+            exam.location ||
+            exam.contactNumber ||
+            (exam.socialLinks && exam.socialLinks.length > 0)) && (
             <div className="bg-white border border-gray-100 rounded-md p-5">
               <h3 className="font-bold text-gray-900 text-[18px] mb-5">
                 Contact Information
@@ -977,6 +979,21 @@ const EntranceDetailsPage: React.FC = () => {
                     </div>
                   </li>
                 )}
+                {exam.contactNumber && exam.contactNumber !== exam.phone && (
+                  <li className="flex items-start gap-3 text-[13px]">
+                    <div className="w-8 h-8 rounded-full bg-teal-50 flex items-center justify-center text-teal-600 shrink-0">
+                      <Phone className="w-4 h-4" />
+                    </div>
+                    <div>
+                      <span className="block text-gray-900 font-bold text-[13px]">
+                        Contact Number
+                      </span>
+                      <span className="text-gray-500 font-medium text-[12px]">
+                        {exam.contactNumber}
+                      </span>
+                    </div>
+                  </li>
+                )}
                 {exam.email && (
                   <li className="flex items-start gap-3 text-[13px]">
                     <div className="w-8 h-8 rounded-full bg-red-50 flex items-center justify-center text-red-500 shrink-0">
@@ -986,9 +1003,12 @@ const EntranceDetailsPage: React.FC = () => {
                       <span className="block text-gray-900 font-bold text-[13px]">
                         Email
                       </span>
-                      <span className="text-gray-500 font-medium text-[12px]">
+                      <a
+                        href={`mailto:${exam.email}`}
+                        className="text-gray-500 font-medium text-[12px] hover:text-[#0000ff] transition-colors"
+                      >
                         {exam.email}
-                      </span>
+                      </a>
                     </div>
                   </li>
                 )}
@@ -1001,12 +1021,63 @@ const EntranceDetailsPage: React.FC = () => {
                       <span className="block text-gray-900 font-bold text-[13px]">
                         Website
                       </span>
-                      <span className="text-[#0000ff] font-medium text-[12px] hover:underline cursor-pointer">
+                      <a
+                        href={
+                          exam.website.startsWith("http")
+                            ? exam.website
+                            : `https://${exam.website}`
+                        }
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-[#0000ff] font-medium text-[12px] hover:underline cursor-pointer"
+                      >
                         {exam.website}
-                      </span>
+                      </a>
                     </div>
                   </li>
                 )}
+                {exam.socialLinks &&
+                  exam.socialLinks.length > 0 &&
+                  exam.socialLinks.map((link, idx) => {
+                    const platformColors: Record<string, string> = {
+                      facebook: "bg-blue-50 text-blue-600",
+                      twitter: "bg-sky-50 text-sky-500",
+                      instagram: "bg-pink-50 text-pink-500",
+                      linkedin: "bg-blue-50 text-blue-700",
+                      youtube: "bg-red-50 text-red-600",
+                      tiktok: "bg-gray-100 text-gray-800",
+                      whatsapp: "bg-green-50 text-green-600",
+                      telegram: "bg-sky-50 text-sky-600",
+                    };
+                    const colorClass =
+                      platformColors[link.platform] ||
+                      "bg-gray-50 text-gray-600";
+                    return (
+                      <li
+                        key={idx}
+                        className="flex items-start gap-3 text-[13px]"
+                      >
+                        <div
+                          className={`w-8 h-8 rounded-full flex items-center justify-center shrink-0 ${colorClass}`}
+                        >
+                          <Globe className="w-4 h-4" />
+                        </div>
+                        <div>
+                          <span className="block text-gray-900 font-bold text-[13px] capitalize">
+                            {link.platform}
+                          </span>
+                          <a
+                            href={link.url}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="text-[#0000ff] font-medium text-[12px] hover:underline cursor-pointer"
+                          >
+                            View Profile
+                          </a>
+                        </div>
+                      </li>
+                    );
+                  })}
               </ul>
 
               {exam.location && (

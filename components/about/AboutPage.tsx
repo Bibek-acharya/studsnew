@@ -497,24 +497,24 @@ export default function AboutPage() {
         </section>
 
         {/* ==================== TESTIMONIALS ==================== */}
-        {testimonials.length > 0 && (
-          <section className="w-full max-w-350 mb-20 md:mb-32 px-2">
-            <h2 className="text-3xl md:text-4xl font-bold text-center text-slate-900 mb-4">
-              Testimonials
-            </h2>
-            <p className="text-center text-gray-500 text-[15px] mb-8 md:mb-12">
-              What our scholarship recipients have to say about us
-            </p>
+        <section className="w-full max-w-350 mb-20 md:mb-32 px-2">
+          <h2 className="text-3xl md:text-4xl font-bold text-center text-slate-900 mb-4">
+            Testimonials
+          </h2>
+          <p className="text-center text-gray-500 text-[15px] mb-8 md:mb-12">
+            What our scholarship recipients have to say about us
+          </p>
 
-            <div
-              ref={testimonialRef}
-              className="flex flex-nowrap gap-6 overflow-x-auto no-scrollbar pb-2"
-              style={{
-                scrollBehavior: "smooth",
-                scrollSnapType: "x proximity",
-              }}
-            >
-              {testimonials.map((t) => (
+          <div
+            ref={testimonialRef}
+            className="flex flex-nowrap gap-6 overflow-x-auto no-scrollbar pb-2"
+            style={{
+              scrollBehavior: "smooth",
+              scrollSnapType: "x proximity",
+            }}
+          >
+            {testimonials.length > 0 &&
+              testimonials.map((t) => (
                 <TestimonialCard
                   key={t.id}
                   name={t.user_name || "Anonymous"}
@@ -525,47 +525,45 @@ export default function AboutPage() {
                 />
               ))}
 
-              <div
-                className="bg-white rounded-xl shadow-sm border border-gray-100 relative overflow-hidden pb-8 flex-shrink-0 w-[85vw] max-w-[350px] md:w-[400px]"
-                style={{ scrollSnapAlign: "start" }}
-              >
-                <div className="p-6 md:p-8 pt-7 flex flex-col items-center justify-center h-full min-h-[300px]">
-                  <div className="w-16 h-16 rounded-full bg-blue-100 flex items-center justify-center mb-4">
-                    <i className="fa-solid fa-pen-to-square text-blue-600 text-2xl" />
-                  </div>
-                  <h3 className="text-blue-600 font-bold text-lg mb-2">
-                    Write a Review
-                  </h3>
-                  <p className="text-gray-500 text-[14px] text-center mb-4">
-                    Share your experience and help others make informed
-                    decisions.
-                  </p>
-                  <button
-                    onClick={() => setShowReviewModal(true)}
-                    className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2.5 rounded-lg text-[14px] font-semibold transition-colors cursor-pointer"
-                  >
-                    Write Review
-                  </button>
+            <div
+              className="bg-white rounded-xl shadow-sm border border-gray-100 relative overflow-hidden pb-8 flex-shrink-0 w-[85vw] max-w-[350px] md:w-[400px]"
+              style={{ scrollSnapAlign: "start" }}
+            >
+              <div className="p-6 md:p-8 pt-7 flex flex-col items-center justify-center h-full min-h-[300px]">
+                <div className="w-16 h-16 rounded-full bg-blue-100 flex items-center justify-center mb-4">
+                  <i className="fa-solid fa-pen-to-square text-blue-600 text-2xl" />
                 </div>
+                <h3 className="text-blue-600 font-bold text-lg mb-2">
+                  Write a Review
+                </h3>
+                <p className="text-gray-500 text-[14px] text-center mb-4">
+                  Share your experience and help others make informed decisions.
+                </p>
+                <button
+                  onClick={() => setShowReviewModal(true)}
+                  className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2.5 rounded-lg text-[14px] font-semibold transition-colors cursor-pointer"
+                >
+                  Write Review
+                </button>
               </div>
             </div>
+          </div>
 
-            <div className="flex justify-center gap-3 mt-8">
-              <button
-                onClick={() => scrollTestimonial("left")}
-                className="w-10 h-10 rounded-full border border-gray-300 flex items-center justify-center hover:bg-gray-100 transition-colors cursor-pointer"
-              >
-                <i className="fa-solid fa-chevron-left text-gray-600" />
-              </button>
-              <button
-                onClick={() => scrollTestimonial("right")}
-                className="w-10 h-10 rounded-full border border-gray-300 flex items-center justify-center hover:bg-gray-100 transition-colors cursor-pointer"
-              >
-                <i className="fa-solid fa-chevron-right text-gray-600" />
-              </button>
-            </div>
-          </section>
-        )}
+          <div className="flex justify-center gap-3 mt-8">
+            <button
+              onClick={() => scrollTestimonial("left")}
+              className="w-10 h-10 rounded-full border border-gray-300 flex items-center justify-center hover:bg-gray-100 transition-colors cursor-pointer"
+            >
+              <i className="fa-solid fa-chevron-left text-gray-600" />
+            </button>
+            <button
+              onClick={() => scrollTestimonial("right")}
+              className="w-10 h-10 rounded-full border border-gray-300 flex items-center justify-center hover:bg-gray-100 transition-colors cursor-pointer"
+            >
+              <i className="fa-solid fa-chevron-right text-gray-600" />
+            </button>
+          </div>
+        </section>
       </main>
 
       {/* ==================== REVIEW MODAL ==================== */}

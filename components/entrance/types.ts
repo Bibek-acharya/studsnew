@@ -59,4 +59,6 @@ export interface Exam {
   applicationLink?: string;
   noticeFile?: string;
   notice_file?: string;
+  contactNumber?: string;
+  socialLinks?: { platform: string; url: string }[];
 }

@@ -69,6 +69,8 @@ export function mapRawEntrance(raw: any): Exam {
     faqs: raw.faqs || undefined,
     applicationLink: raw.application_link || "",
     noticeFile: raw.notice_file || "",
+    contactNumber: raw.contact_number || raw.phone || "",
+    socialLinks: raw.social_links || undefined,
   };
 }
 

@@ -318,6 +318,11 @@ interface FaqItem {
   question: string;
   answer: string;
 }
+interface SocialLink {
+  id: number;
+  platform: string;
+  url: string;
+}
 
 const nextId = <T extends { id: number }>(items: T[]) =>
   Math.max(0, ...items.map((i) => i.id)) + 1;
@@ -409,6 +414,9 @@ export default function SuperadminCreateEntranceSection({
   const [applicationLink, setApplicationLink] = useState("");
   const [noticeFile, setNoticeFile] = useState("");
   const [uploadingNotice, setUploadingNotice] = useState(false);
+  const [entranceEmail, setEntranceEmail] = useState("");
+  const [entranceContactNumber, setEntranceContactNumber] = useState("");
+  const [socialLinks, setSocialLinks] = useState<SocialLink[]>([]);
   const [institutionFields, setInstitutionFields] = useState({
     name: "",
     location: "",
@@ -446,6 +454,15 @@ export default function SuperadminCreateEntranceSection({
         if (exam.faqs) setFaqs(exam.faqs);
         setApplicationLink(exam.application_link || "");
         setNoticeFile(exam.notice_file || "");
+        setEntranceEmail(exam.email || "");
+        setEntranceContactNumber(exam.contact_number || "");
+        if (exam.social_links)
+          setSocialLinks(
+            exam.social_links.map((s: any, i: number) => ({
+              ...s,
+              id: s.id || i + 1,
+            })),
+          );
         const institutionMeta = Array.isArray(exam.overview_details)
           ? exam.overview_details.find(
               (d: any) => d.type === "institution_meta",
@@ -593,6 +610,9 @@ export default function SuperadminCreateEntranceSection({
         upcoming_dates: upcomingDates,
         contact_persons: contactPersons,
         faqs: faqs,
+        email: entranceEmail,
+        contact_number: entranceContactNumber,
+        social_links: socialLinks.map(({ id, ...rest }) => rest),
         application_link: applicationLink,
         notice_file: noticeFile,
       };
@@ -1874,6 +1894,127 @@ export default function SuperadminCreateEntranceSection({
             addLabel="Add Contact Person"
           />
           <div className="p-6 space-y-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div>
+                <label className={labelClass}>Email</label>
+                <input
+                  type="email"
+                  className={inputClass}
+                  placeholder="entrance@example.com"
+                  value={entranceEmail}
+                  onChange={(e) => setEntranceEmail(e.target.value)}
+                />
+              </div>
+              <div>
+                <label className={labelClass}>Contact Number</label>
+                <input
+                  type="text"
+                  className={inputClass}
+                  placeholder="+977-01-XXXXXXX"
+                  value={entranceContactNumber}
+                  onChange={(e) =>
+                    setEntranceContactNumber(
+                      e.target.value.replace(/[^0-9+()-]/g, ""),
+                    )
+                  }
+                />
+              </div>
+            </div>
+
+            <div>
+              <div className="flex items-center justify-between mb-3">
+                <label className="text-sm font-medium text-gray-700">
+                  Social Links
+                </label>
+                <button
+                  type="button"
+                  onClick={() =>
+                    setSocialLinks((prev) => [
+                      ...prev,
+                      { id: nextId(prev), platform: "", url: "" },
+                    ])
+                  }
+                  className="text-sm text-blue-600 hover:text-blue-700 font-medium cursor-pointer"
+                >
+                  + Add Link
+                </button>
+              </div>
+              {socialLinks.length === 0 && (
+                <p className="text-xs text-gray-400">
+                  No social links added yet.
+                </p>
+              )}
+              <div className="space-y-3">
+                {socialLinks.map((sl) => (
+                  <div
+                    key={sl.id}
+                    className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg border border-gray-200"
+                  >
+                    <select
+                      className={`${inputClass} max-w-[180px]`}
+                      value={sl.platform}
+                      onChange={(e) =>
+                        setSocialLinks((prev) =>
+                          prev.map((x) =>
+                            x.id === sl.id
+                              ? { ...x, platform: e.target.value }
+                              : x,
+                          ),
+                        )
+                      }
+                    >
+                      <option value="">Select platform</option>
+                      <option value="facebook">Facebook</option>
+                      <option value="twitter">Twitter / X</option>
+                      <option value="instagram">Instagram</option>
+                      <option value="linkedin">LinkedIn</option>
+                      <option value="youtube">YouTube</option>
+                      <option value="tiktok">TikTok</option>
+                      <option value="whatsapp">WhatsApp</option>
+                      <option value="telegram">Telegram</option>
+                      <option value="other">Other</option>
+                    </select>
+                    <input
+                      type="url"
+                      className={inputClass}
+                      placeholder="https://..."
+                      value={sl.url}
+                      onChange={(e) =>
+                        setSocialLinks((prev) =>
+                          prev.map((x) =>
+                            x.id === sl.id ? { ...x, url: e.target.value } : x,
+                          ),
+                        )
+                      }
+                    />
+                    <button
+                      type="button"
+                      onClick={() =>
+                        setSocialLinks((prev) =>
+                          prev.filter((x) => x.id !== sl.id),
+                        )
+                      }
+                      className="p-2 text-red-500 hover:bg-red-50 rounded-lg transition-colors shrink-0 cursor-pointer"
+                    >
+                      <svg
+                        width="16"
+                        height="16"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth="2"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                      >
+                        <polyline points="3 6 5 6 21 6" />
+                        <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
+                      </svg>
+                    </button>
+                  </div>
+                ))}
+              </div>
+            </div>
+
             {contactPersons.map((cp) => (
               <div
                 key={cp.id}
