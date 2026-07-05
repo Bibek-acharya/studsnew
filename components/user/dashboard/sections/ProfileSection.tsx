@@ -231,6 +231,29 @@ export default function ProfileSection() {
       setEditMode(false);
       setToast({ message: "Profile saved", type: "success" });
       setTimeout(() => setToast(null), 3000);
+
+      const [refreshedProfile, refreshedStats] = await Promise.all([
+        apiService.getProfile().catch(() => null),
+        apiService.getDashboardStats().catch(() => null),
+      ]);
+      if (refreshedStats?.data?.profile_completion !== undefined) {
+        setCompletion(refreshedStats.data.profile_completion);
+      }
+      if (refreshedProfile?.data) {
+        const p = refreshedProfile.data;
+        setPersonalData((prev) => ({
+          ...prev,
+          firstName: p.first_name || prev.firstName,
+          lastName: p.last_name || prev.lastName,
+          middleName: p.middle_name || prev.middleName,
+          phone: p.phone || prev.phone,
+          alternatePhone: p.alternate_phone || prev.alternatePhone,
+          dateOfBirth: p.date_of_birth || prev.dateOfBirth,
+          gender: p.gender || prev.gender,
+          nationality: p.nationality || prev.nationality,
+          bio: p.bio ?? prev.bio,
+        }));
+      }
     } catch (err: any) {
       setToast({
         message: err.message || "Failed to save profile",
