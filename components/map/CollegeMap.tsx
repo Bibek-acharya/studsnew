@@ -130,8 +130,9 @@ export default function CollegeMap({
     {
       queryKey: [cacheKey],
       queryFn: async () => {
-        const r = await apiService.getMapColleges(viewport || {});
-        return r?.data?.colleges || [];
+        const r = await apiService.getColleges({ pageSize: 500 });
+        const colleges = r?.data?.colleges || [];
+        return colleges.filter((c: any) => c.latitude && c.longitude);
       },
       staleTime: 60_000,
       placeholderData: (prev) => prev,
