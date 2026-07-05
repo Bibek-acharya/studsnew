@@ -130,8 +130,11 @@ export default function CollegeMap({
     {
       queryKey: [cacheKey],
       queryFn: async () => {
-        const r = await apiService.getColleges({ pageSize: 500 });
-        const colleges = r?.data?.colleges || [];
+        const API_BASE_URL =
+          process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080";
+        const res = await fetch(`${API_BASE_URL}/api/v1/map/colleges`);
+        const body = await res.json();
+        const colleges = body?.data || [];
         return colleges.filter(
           (c: any): c is College => c.latitude != null && c.longitude != null,
         );

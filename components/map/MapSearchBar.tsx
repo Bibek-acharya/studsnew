@@ -60,7 +60,9 @@ export default function MapSearchBar({ onSelect }: MapSearchBarProps) {
       setSearching(true);
       try {
         const [collegeRes, locationRes] = await Promise.allSettled([
-          apiService.getColleges({ search: q, pageSize: 50 }),
+          fetch(
+            `${process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080"}/api/v1/map/colleges`,
+          ).then((r) => r.json()),
           apiService.geocodeLocation(q),
         ]);
 
@@ -68,9 +70,9 @@ export default function MapSearchBar({ onSelect }: MapSearchBarProps) {
 
         if (
           collegeRes.status === "fulfilled" &&
-          collegeRes.value?.data?.colleges
+          Array.isArray(collegeRes.value?.data)
         ) {
-          const colleges: CollegeResult[] = collegeRes.value.data.colleges
+          const colleges: CollegeResult[] = collegeRes.value.data
             .filter((c: any) => c.latitude && c.longitude)
             .map((c: any) => ({
               resultType: "college" as const,
@@ -78,7 +80,7 @@ export default function MapSearchBar({ onSelect }: MapSearchBarProps) {
               name: c.name,
               latitude: c.latitude,
               longitude: c.longitude,
-              district: c.location || c.district,
+              district: c.district || c.location,
               province: c.province,
             }));
           items.push(...colleges);
