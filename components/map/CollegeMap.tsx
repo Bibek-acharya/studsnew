@@ -32,8 +32,8 @@ interface Bounds {
 interface College {
   id: number;
   name: string;
-  latitude: number;
-  longitude: number;
+  latitude?: number;
+  longitude?: number;
   type?: string;
 }
 
@@ -132,10 +132,11 @@ export default function CollegeMap({
       queryFn: async () => {
         const r = await apiService.getColleges({ pageSize: 500 });
         const colleges = r?.data?.colleges || [];
-        return colleges.filter((c: any) => c.latitude && c.longitude);
+        return colleges.filter(
+          (c: any): c is College => c.latitude != null && c.longitude != null,
+        );
       },
       staleTime: 60_000,
-      placeholderData: (prev) => prev,
       retry: 1,
     },
   );

@@ -5,7 +5,7 @@ import L from "leaflet";
 import { HiViewGridAdd } from "react-icons/hi";
 
 interface FitAllButtonProps {
-  colleges: { latitude: number; longitude: number }[];
+  colleges: { latitude?: number; longitude?: number }[];
 }
 
 export default function FitAllButton({ colleges }: FitAllButtonProps) {
@@ -14,7 +14,9 @@ export default function FitAllButton({ colleges }: FitAllButtonProps) {
   const handleClick = () => {
     const valid = colleges.filter((c) => c.latitude && c.longitude);
     if (valid.length === 0) return;
-    const bounds = L.latLngBounds(valid.map((c) => [c.latitude, c.longitude]));
+    const bounds = L.latLngBounds(
+      valid.map((c) => [c.latitude!, c.longitude!]),
+    );
     if (bounds.isValid()) {
       map.fitBounds(bounds, { padding: [50, 50], maxZoom: 14 });
     }

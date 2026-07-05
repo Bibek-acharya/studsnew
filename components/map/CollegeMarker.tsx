@@ -8,8 +8,8 @@ interface CollegeMarkerProps {
   college: {
     id: number;
     name: string;
-    latitude: number;
-    longitude: number;
+    latitude?: number;
+    longitude?: number;
     logo?: string;
     district?: string;
     type?: string;
@@ -22,6 +22,7 @@ export default function CollegeMarker({
   college,
   isHighlighted,
 }: CollegeMarkerProps) {
+  if (college.latitude == null || college.longitude == null) return null;
   return (
     <Marker
       position={[college.latitude, college.longitude]}

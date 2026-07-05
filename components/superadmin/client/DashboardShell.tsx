@@ -236,6 +236,43 @@ const navItems: NavItemData[] = [
     ],
   },
   {
+    icon: <BookOpen size={20} />,
+    label: "Manage Courses",
+    section: "superadmin-course-directory",
+    children: [
+      { section: "superadmin-course-directory", label: "Course Directory" },
+      { section: "superadmin-add-course", label: "Add/Edit Course" },
+    ],
+  },
+  {
+    icon: <ClipboardList size={20} />,
+    label: "Manage Entrances",
+    section: "superadmin-entrance-directory",
+    children: [
+      { section: "superadmin-create-entrance", label: "Create Entrance" },
+      { section: "superadmin-entrance-draft", label: "Draft Entrance" },
+      { section: "superadmin-entrance-directory", label: "Entrance Directory" },
+      { section: "superadmin-entrance-applicants", label: "Applicants" },
+      { section: "superadmin-entrance-results", label: "Results" },
+    ],
+  },
+  {
+    icon: <FileText size={20} />,
+    label: "Manage Admissions",
+    section: "superadmin-admission-directory",
+    children: [
+      { section: "superadmin-create-admission", label: "Create Admission" },
+      { section: "superadmin-admission-draft", label: "Draft Admission" },
+      { section: "superadmin-admission-applications", label: "Applications" },
+      {
+        section: "superadmin-admission-directory",
+        label: "Admission Directory",
+      },
+      { section: "superadmin-admission-shortlist", label: "Shortlist" },
+    ],
+  },
+  { icon: <MapPin size={20} />, label: "College Map", section: "map" },
+  {
     icon: <School size={20} />,
     label: "Manage Universities",
     section: "create-universities",
@@ -316,43 +353,6 @@ const navItems: NavItemData[] = [
     label: "Message",
     section: "message-inquiry",
   },
-  {
-    icon: <BookOpen size={20} />,
-    label: "Manage Courses",
-    section: "superadmin-course-directory",
-    children: [
-      { section: "superadmin-course-directory", label: "Course Directory" },
-      { section: "superadmin-add-course", label: "Add/Edit Course" },
-    ],
-  },
-  {
-    icon: <ClipboardList size={20} />,
-    label: "Manage Entrances",
-    section: "superadmin-entrance-directory",
-    children: [
-      { section: "superadmin-create-entrance", label: "Create Entrance" },
-      { section: "superadmin-entrance-draft", label: "Draft Entrance" },
-      { section: "superadmin-entrance-directory", label: "Entrance Directory" },
-      { section: "superadmin-entrance-applicants", label: "Applicants" },
-      { section: "superadmin-entrance-results", label: "Results" },
-    ],
-  },
-  {
-    icon: <FileText size={20} />,
-    label: "Manage Admissions",
-    section: "superadmin-admission-directory",
-    children: [
-      { section: "superadmin-create-admission", label: "Create Admission" },
-      { section: "superadmin-admission-draft", label: "Draft Admission" },
-      { section: "superadmin-admission-applications", label: "Applications" },
-      {
-        section: "superadmin-admission-directory",
-        label: "Admission Directory",
-      },
-      { section: "superadmin-admission-shortlist", label: "Shortlist" },
-    ],
-  },
-  { icon: <MapPin size={20} />, label: "College Map", section: "map" },
   { icon: <BarChart3 size={20} />, label: "Analytics", section: "analytics" },
   { icon: <Settings size={20} />, label: "Settings", section: "settings" },
 ];
