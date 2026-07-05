@@ -87,6 +87,42 @@ const DraftUniversitiesSection = lazy(
   () => import("./DraftUniversitiesSection"),
 );
 const MapCollegeListSection = lazy(() => import("./MapCollegeListSection"));
+const SuperadminCourseListSection = lazy(
+  () => import("./SuperadminCourseListSection"),
+);
+const SuperadminAddCourseSection = lazy(
+  () => import("./SuperadminAddCourseSection"),
+);
+const SuperadminEntranceDirectorySection = lazy(
+  () => import("./SuperadminEntranceDirectorySection"),
+);
+const SuperadminCreateEntranceSection = lazy(
+  () => import("./SuperadminCreateEntranceSection"),
+);
+const SuperadminEntranceDraftSection = lazy(
+  () => import("./SuperadminEntranceDraftSection"),
+);
+const SuperadminEntranceApplicantsSection = lazy(
+  () => import("./SuperadminEntranceApplicantsSection"),
+);
+const SuperadminEntranceResultsSection = lazy(
+  () => import("./SuperadminEntranceResultsSection"),
+);
+const SuperadminAdmissionDirectorySection = lazy(
+  () => import("./SuperadminAdmissionDirectorySection"),
+);
+const SuperadminCreateAdmissionSection = lazy(
+  () => import("./SuperadminCreateAdmissionSection"),
+);
+const SuperadminAdmissionDraftSection = lazy(
+  () => import("./SuperadminAdmissionDraftSection"),
+);
+const SuperadminAdmissionApplicationsSection = lazy(
+  () => import("./SuperadminAdmissionApplicationsSection"),
+);
+const SuperadminAdmissionShortlistSection = lazy(
+  () => import("./SuperadminAdmissionShortlistSection"),
+);
 
 type SectionType =
   | "overview"
@@ -141,7 +177,19 @@ type SectionType =
   | "draft-universities"
   | "list-universities"
   | `edit-university-${number}`
-  | "map";
+  | "map"
+  | "superadmin-course-directory"
+  | "superadmin-add-course"
+  | "superadmin-entrance-directory"
+  | "superadmin-create-entrance"
+  | "superadmin-entrance-draft"
+  | "superadmin-entrance-applicants"
+  | "superadmin-entrance-results"
+  | "superadmin-admission-directory"
+  | "superadmin-create-admission"
+  | "superadmin-admission-draft"
+  | "superadmin-admission-applications"
+  | "superadmin-admission-shortlist";
 
 interface NavChild {
   section: SectionType;
@@ -267,6 +315,42 @@ const navItems: NavItemData[] = [
     icon: <MessageSquare size={20} />,
     label: "Message",
     section: "message-inquiry",
+  },
+  {
+    icon: <BookOpen size={20} />,
+    label: "Manage Courses",
+    section: "superadmin-course-directory",
+    children: [
+      { section: "superadmin-course-directory", label: "Course Directory" },
+      { section: "superadmin-add-course", label: "Add/Edit Course" },
+    ],
+  },
+  {
+    icon: <ClipboardList size={20} />,
+    label: "Manage Entrances",
+    section: "superadmin-entrance-directory",
+    children: [
+      { section: "superadmin-create-entrance", label: "Create Entrance" },
+      { section: "superadmin-entrance-draft", label: "Draft Entrance" },
+      { section: "superadmin-entrance-directory", label: "Entrance Directory" },
+      { section: "superadmin-entrance-applicants", label: "Applicants" },
+      { section: "superadmin-entrance-results", label: "Results" },
+    ],
+  },
+  {
+    icon: <FileText size={20} />,
+    label: "Manage Admissions",
+    section: "superadmin-admission-directory",
+    children: [
+      { section: "superadmin-create-admission", label: "Create Admission" },
+      { section: "superadmin-admission-draft", label: "Draft Admission" },
+      { section: "superadmin-admission-applications", label: "Applications" },
+      {
+        section: "superadmin-admission-directory",
+        label: "Admission Directory",
+      },
+      { section: "superadmin-admission-shortlist", label: "Shortlist" },
+    ],
   },
   { icon: <MapPin size={20} />, label: "College Map", section: "map" },
   { icon: <BarChart3 size={20} />, label: "Analytics", section: "analytics" },
@@ -479,6 +563,50 @@ export default function DashboardShell() {
         return <ListUniversitiesSection setActiveSection={navigateTo} />;
       case "map":
         return <MapCollegeListSection />;
+      case "superadmin-course-directory":
+        return <SuperadminCourseListSection setActiveSection={navigateTo} />;
+      case "superadmin-add-course":
+        return <SuperadminAddCourseSection setActiveSection={navigateTo} />;
+      case "superadmin-entrance-directory":
+        return (
+          <SuperadminEntranceDirectorySection setActiveSection={navigateTo} />
+        );
+      case "superadmin-create-entrance":
+        return (
+          <SuperadminCreateEntranceSection setActiveSection={navigateTo} />
+        );
+      case "superadmin-entrance-draft":
+        return <SuperadminEntranceDraftSection setActiveSection={navigateTo} />;
+      case "superadmin-entrance-applicants":
+        return (
+          <SuperadminEntranceApplicantsSection setActiveSection={navigateTo} />
+        );
+      case "superadmin-entrance-results":
+        return (
+          <SuperadminEntranceResultsSection setActiveSection={navigateTo} />
+        );
+      case "superadmin-admission-directory":
+        return (
+          <SuperadminAdmissionDirectorySection setActiveSection={navigateTo} />
+        );
+      case "superadmin-create-admission":
+        return (
+          <SuperadminCreateAdmissionSection setActiveSection={navigateTo} />
+        );
+      case "superadmin-admission-draft":
+        return (
+          <SuperadminAdmissionDraftSection setActiveSection={navigateTo} />
+        );
+      case "superadmin-admission-applications":
+        return (
+          <SuperadminAdmissionApplicationsSection
+            setActiveSection={navigateTo}
+          />
+        );
+      case "superadmin-admission-shortlist":
+        return (
+          <SuperadminAdmissionShortlistSection setActiveSection={navigateTo} />
+        );
       default:
         return <PlaceholderSection section={activeSection} />;
     }

@@ -7,23 +7,34 @@ import { apiService } from "@/services/api";
 export default function MapCollegeListSection() {
   const [search, setSearch] = useState("");
   const [colleges, setColleges] = useState<any[]>([]);
-  const [page, setPage] = useState(1);
-  const [totalPages, setTotalPages] = useState(1);
+  const [loading, setLoading] = useState(true);
   const [selected, setSelected] = useState<any>(null);
 
-  const load = useCallback(async (q: string, p: number) => {
-    const res = await apiService.getAdminColleges({
-      search: q || undefined,
-      page: p,
-      pageSize: 20,
-    });
-    setColleges(res?.data?.colleges || []);
-    setTotalPages(res?.data?.pagination?.totalPages || 1);
+  const load = useCallback(async () => {
+    setLoading(true);
+    try {
+      const res = await apiService.getColleges({ pageSize: 500 });
+      setColleges(res?.data?.colleges || []);
+    } catch (error) {
+      console.error("Failed to load colleges:", error);
+      setColleges([]);
+    } finally {
+      setLoading(false);
+    }
   }, []);
 
   useEffect(() => {
-    load(search, page);
-  }, [search, page, load]);
+    load();
+  }, [load]);
+
+  const filteredColleges = search
+    ? colleges.filter(
+        (c: any) =>
+          c.name?.toLowerCase().includes(search.toLowerCase()) ||
+          c.location?.toLowerCase().includes(search.toLowerCase()) ||
+          c.district?.toLowerCase().includes(search.toLowerCase()),
+      )
+    : colleges;
 
   if (selected) {
     return (
@@ -45,6 +56,7 @@ export default function MapCollegeListSection() {
           selectedCollege={selected}
           onSave={async (id, lat, lng) => {
             await apiService.updateCollegeLocation(id, lat, lng);
+            load();
           }}
         />
       </div>
@@ -59,45 +71,38 @@ export default function MapCollegeListSection() {
       <input
         type="text"
         value={search}
-        onChange={(e) => {
-          setSearch(e.target.value);
-          setPage(1);
-        }}
+        onChange={(e) => setSearch(e.target.value)}
         placeholder="Search colleges..."
         className="w-full px-4 py-2 border border-gray-300 rounded-lg mb-4 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
       />
-      <div className="space-y-2 max-h-[60vh] overflow-y-auto">
-        {colleges.map((c: any) => (
-          <button
-            key={c.id}
-            onClick={() => setSelected(c)}
-            className="w-full text-left px-4 py-3 rounded-lg border border-gray-200 hover:border-blue-400 hover:bg-blue-50 flex items-center gap-3 text-sm"
-          >
-            <span>{c.latitude && c.longitude ? "📍" : "○"}</span>
-            <span className="font-medium text-gray-800">{c.name}</span>
-            <span className="text-gray-500 ml-auto">{c.location}</span>
-            {(!c.latitude || !c.longitude) && (
-              <span className="text-xs text-orange-500">No location</span>
-            )}
-          </button>
-        ))}
-      </div>
-      {totalPages > 1 && (
-        <div className="flex justify-center gap-2 mt-4">
-          {Array.from({ length: totalPages }, (_, i) => (
-            <button
-              key={i}
-              onClick={() => setPage(i + 1)}
-              className={`px-3 py-1 rounded text-sm ${
-                page === i + 1
-                  ? "bg-blue-600 text-white"
-                  : "bg-gray-100 text-gray-600 hover:bg-gray-200"
-              }`}
-            >
-              {i + 1}
-            </button>
-          ))}
+      {loading ? (
+        <div className="flex items-center justify-center py-8">
+          <span className="w-6 h-6 border-2 border-blue-600 border-t-transparent rounded-full animate-spin" />
         </div>
+      ) : (
+        <>
+          <div className="text-sm text-gray-500 mb-2">
+            {filteredColleges.length} colleges
+          </div>
+          <div className="space-y-2 max-h-[60vh] overflow-y-auto">
+            {filteredColleges.map((c: any) => (
+              <button
+                key={c.id}
+                onClick={() => setSelected(c)}
+                className="w-full text-left px-4 py-3 rounded-lg border border-gray-200 hover:border-blue-400 hover:bg-blue-50 flex items-center gap-3 text-sm"
+              >
+                <span>{c.latitude && c.longitude ? "📍" : "○"}</span>
+                <span className="font-medium text-gray-800">{c.name}</span>
+                <span className="text-gray-500 ml-auto">
+                  {c.location || c.district}
+                </span>
+                {(!c.latitude || !c.longitude) && (
+                  <span className="text-xs text-orange-500">No location</span>
+                )}
+              </button>
+            ))}
+          </div>
+        </>
       )}
     </div>
   );
