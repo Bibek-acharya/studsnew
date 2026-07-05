@@ -434,6 +434,19 @@ export default function SuperadminCreateEntranceSection({
     superadminEntranceApi
       .getById(id)
       .then((exam) => {
+        const parseArray = (val: any): any[] => {
+          if (!val) return [];
+          if (typeof val === "string") {
+            try {
+              const parsed = JSON.parse(val);
+              return Array.isArray(parsed) ? parsed : [];
+            } catch {
+              return [];
+            }
+          }
+          return Array.isArray(val) ? val : [];
+        };
+
         const heroUrl = exam.hero_banner || "";
         setHeroBanner(
           heroUrl.startsWith("/") ? `${apiBase()}${heroUrl}` : heroUrl,
@@ -441,44 +454,30 @@ export default function SuperadminCreateEntranceSection({
         setTitle(exam.title || "");
         setDescription(exam.description || "");
         setApplicationFee(exam.application_fee || "");
-        if (exam.overview_details) setOverviewDetails(exam.overview_details);
-        if (exam.exam_date_schedules)
-          setExamDateSchedules(exam.exam_date_schedules);
-        if (exam.eligibility_list) setEligibilityList(exam.eligibility_list);
-        if (exam.application_steps) setApplicationSteps(exam.application_steps);
-        if (exam.exam_pattern) setExamPattern(exam.exam_pattern);
-        if (exam.subject_marks) setSubjectMarks(exam.subject_marks);
-        if (exam.model_sets) setModelSets(exam.model_sets);
-        if (exam.upcoming_dates) setUpcomingDates(exam.upcoming_dates);
-        if (exam.contact_persons) setContactPersons(exam.contact_persons);
-        if (exam.faqs) setFaqs(exam.faqs);
+        setOverviewDetails(parseArray(exam.overview_details));
+        setExamDateSchedules(parseArray(exam.exam_date_schedules));
+        setEligibilityList(parseArray(exam.eligibility_list));
+        setApplicationSteps(parseArray(exam.application_steps));
+        setExamPattern(parseArray(exam.exam_pattern));
+        setSubjectMarks(parseArray(exam.subject_marks));
+        setModelSets(parseArray(exam.model_sets));
+        setUpcomingDates(parseArray(exam.upcoming_dates));
+        setContactPersons(parseArray(exam.contact_persons));
+        setFaqs(parseArray(exam.faqs));
         setApplicationLink(exam.application_link || "");
         setNoticeFile(exam.notice_file || "");
         setEntranceEmail(exam.email || "");
         setEntranceContactNumber(exam.contact_number || "");
-        if (exam.social_links) {
-          let links = exam.social_links;
-          if (typeof links === "string") {
-            try {
-              links = JSON.parse(links);
-            } catch {
-              links = [];
-            }
-          }
-          if (Array.isArray(links)) {
-            setSocialLinks(
-              links.map((s: any, i: number) => ({
-                ...s,
-                id: s.id || i + 1,
-              })),
-            );
-          }
-        }
-        const institutionMeta = Array.isArray(exam.overview_details)
-          ? exam.overview_details.find(
-              (d: any) => d.type === "institution_meta",
-            )
-          : null;
+        setSocialLinks(
+          parseArray(exam.social_links).map((s: any, i: number) => ({
+            ...s,
+            id: s.id || i + 1,
+          })),
+        );
+        const parsedOverview = parseArray(exam.overview_details);
+        const institutionMeta = parsedOverview.find(
+          (d: any) => d.type === "institution_meta",
+        );
         if (institutionMeta) {
           setInstitutionFields({
             name: institutionMeta.name || "",
