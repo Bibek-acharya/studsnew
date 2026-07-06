@@ -454,7 +454,11 @@ export default function SuperadminCreateEntranceSection({
         setTitle(exam.title || "");
         setDescription(exam.description || "");
         setApplicationFee(exam.application_fee || "");
-        setOverviewDetails(parseArray(exam.overview_details));
+        setOverviewDetails(
+          parseArray(exam.overview_details).filter(
+            (d: any) => d.type !== "institution_meta",
+          ),
+        );
         setExamDateSchedules(parseArray(exam.exam_date_schedules));
         setEligibilityList(parseArray(exam.eligibility_list));
         setApplicationSteps(parseArray(exam.application_steps));
@@ -545,9 +549,9 @@ export default function SuperadminCreateEntranceSection({
 
   const validate = () => {
     const errs: Record<string, boolean> = {};
-    const hasEmpty = overviewDetails.some(
-      (d) => !(d.detail || "").trim() || !(d.information || "").trim(),
-    );
+    const hasEmpty = overviewDetails
+      .filter((d) => (d as any).type !== "institution_meta")
+      .some((d) => !(d.detail || "").trim() || !(d.information || "").trim());
     if (hasEmpty) errs.overviewDetails = true;
     setErrors(errs);
     return Object.keys(errs).length === 0;
@@ -602,14 +606,18 @@ export default function SuperadminCreateEntranceSection({
         application_fee: applicationFee,
         overview_details: [
           ...overviewDetails.map(({ id, ...rest }) => rest),
-          {
-            type: "institution_meta",
-            name: institutionFields.name,
-            location: institutionFields.location,
-            affiliation: institutionFields.affiliation,
-            link: institutionFields.link,
-            institution_id: institutionFields.institution_id,
-          },
+          ...(institutionFields.name
+            ? [
+                {
+                  type: "institution_meta",
+                  name: institutionFields.name,
+                  location: institutionFields.location,
+                  affiliation: institutionFields.affiliation,
+                  link: institutionFields.link,
+                  institution_id: institutionFields.institution_id,
+                },
+              ]
+            : []),
         ],
         exam_date_schedules: examDateSchedules,
         eligibility_list: eligibilityList,
