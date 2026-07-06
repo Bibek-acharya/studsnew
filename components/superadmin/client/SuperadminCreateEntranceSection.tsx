@@ -546,7 +546,7 @@ export default function SuperadminCreateEntranceSection({
   const validate = () => {
     const errs: Record<string, boolean> = {};
     const hasEmpty = overviewDetails.some(
-      (d) => !d.detail.trim() || !d.information.trim(),
+      (d) => !(d.detail || "").trim() || !(d.information || "").trim(),
     );
     if (hasEmpty) errs.overviewDetails = true;
     setErrors(errs);
