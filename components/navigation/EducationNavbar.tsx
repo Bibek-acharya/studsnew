@@ -1591,27 +1591,6 @@ const EducationNavbar: React.FC<EducationNavbarProps> = ({
                     </div>
                   </div>
                 )}
-
-                {user && (
-                  <div>
-                    <button
-                      type="button"
-                      className={`flex w-full items-center justify-between rounded-md p-2 text-left transition-colors hover:bg-gray-50 hover:text-blue-600 ${mobileMenus.partners ? "text-blue-600" : ""}`}
-                      onClick={() => toggleMobileMenu("partners")}
-                    >
-                      <span>Partner Modules</span>
-                      <ChevronDown
-                        size={14}
-                        className={`text-gray-400 transition-transform duration-200 ${mobileMenus.partners ? "rotate-180" : ""}`}
-                      />
-                    </button>
-                    <div
-                      className={`${mobileMenus.partners ? "flex" : "hidden"} ml-2 mt-1 flex-col gap-1 pl-4 py-2 font-medium`}
-                    >
-                      {partnerMobileItems.map(renderMobileAction)}
-                    </div>
-                  </div>
-                )}
               </div>
             </div>
 

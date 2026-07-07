@@ -390,6 +390,8 @@ export default function SuperadminCreateEntranceSection({
   const [overviewDetails, setOverviewDetails] = useState<OverviewDetail[]>([]);
   const [description, setDescription] = useState("");
   const [applicationFee, setApplicationFee] = useState("");
+  const [examMode, setExamMode] = useState("");
+  const [examScope, setExamScope] = useState("");
 
   const [examDateSchedules, setExamDateSchedules] = useState<
     ExamDateSchedule[]
@@ -454,6 +456,8 @@ export default function SuperadminCreateEntranceSection({
         setTitle(exam.title || "");
         setDescription(exam.description || "");
         setApplicationFee(exam.application_fee || "");
+        setExamMode(exam.exam_mode || "");
+        setExamScope(exam.exam_scope || "");
         setOverviewDetails(parseArray(exam.overview_details));
         setExamDateSchedules(parseArray(exam.exam_date_schedules));
         setEligibilityList(parseArray(exam.eligibility_list));
@@ -596,6 +600,8 @@ export default function SuperadminCreateEntranceSection({
         hero_banner: heroBanner,
         status: publish ? "published" : "draft",
         application_fee: applicationFee,
+        exam_mode: examMode,
+        exam_scope: examScope,
         institution_name: institutionFields.name,
         institution_location: institutionFields.location,
         institution_link: institutionFields.link,
@@ -825,6 +831,41 @@ export default function SuperadminCreateEntranceSection({
               <p className="text-xs text-gray-500 mt-1">
                 Application fee for the examination
               </p>
+            </div>
+            <div>
+              <label className={labelClass}>
+                Mode <span className="text-red-500">*</span>
+              </label>
+              <select
+                className={selectClass}
+                value={examMode}
+                onChange={(e) => setExamMode(e.target.value)}
+              >
+                <option value="">Select Mode</option>
+                <option value="online">Online</option>
+                <option value="offline">Offline</option>
+                <option value="hybrid">Hybrid</option>
+              </select>
+            </div>
+            <div>
+              <label className={labelClass}>
+                Exam Scope <span className="text-red-500">*</span>
+              </label>
+              <select
+                className={selectClass}
+                value={examScope}
+                onChange={(e) => setExamScope(e.target.value)}
+              >
+                <option value="">Select Scope</option>
+                <option value="nationwide">Nationwide</option>
+                <option value="province-wide">Province-wide</option>
+                <option value="district-level">District-level</option>
+                <option value="regional">Regional</option>
+                <option value="college-specific">College-specific</option>
+                <option value="university-wide">University-wide</option>
+                <option value="campus-specific">Campus-specific</option>
+                <option value="other">Other</option>
+              </select>
             </div>
             <div>
               <label className={labelClass}>Application Link</label>
