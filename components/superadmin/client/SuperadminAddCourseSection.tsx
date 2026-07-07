@@ -262,17 +262,21 @@ export default function SuperadminAddCourseSection({
         setDuration(res.duration || "");
         setEstFee(res.fee || "");
         setBannerUrl(res.banner_url || "");
-        const d = res.data;
+        const d =
+          typeof res.data === "string"
+            ? JSON.parse(res.data || "{}")
+            : res.data;
         if (d) {
           setLevel(d.level || "");
           setAffiliation(d.affiliation || "");
-          if (res.institution_name) {
+          if (res.institution_name || d.institution_name) {
             setInstitutionFields({
-              name: res.institution_name || "",
-              location: res.institution_location || "",
-              affiliation: res.institution_affiliation || "",
-              link: res.institution_link || "",
-              institution_id: res.institution_id || 0,
+              name: res.institution_name || d.institution_name || "",
+              location:
+                res.institution_location || d.institution_location || "",
+              affiliation: d.institution_affiliation || "",
+              link: res.institution_link || d.institution_link || "",
+              institution_id: res.institution_id || d.institution_id || 0,
             });
           }
           setScholarshipDesc(d.scholarshipDesc || "");
