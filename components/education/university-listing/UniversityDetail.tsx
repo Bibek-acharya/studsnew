@@ -221,9 +221,9 @@ const UniversityDetail: React.FC = () => {
         />
 
         <div className="relative bg-white">
-          <div className="relative mx-auto max-w-350 px-6 pb-8 md:px-12 lg:px-24 xl:px-32">
+          <div className="relative mx-auto max-w-[1400px] pb-8">
             {/* Logo */}
-            <div className="absolute -top-2 left-6 z-10 flex h-[120px] w-[120px] items-center justify-center overflow-hidden rounded-xl border border-gray-100 bg-white p-2 shadow-[0_4px_20px_-3px_rgba(0,0,0,0.1)] md:-top-4 md:left-12 md:h-[150px] md:w-[150px] lg:left-24 xl:left-32">
+            <div className="absolute -top-2 left-6 z-10 flex h-[120px] w-[120px] items-center justify-center overflow-hidden rounded-xl border border-gray-100 bg-white p-2 shadow-[0_4px_20px_-3px_rgba(0,0,0,0.1)] md:-top-4 md:h-[150px] md:w-[150px]">
               {uni?.logo ? (
                 <Image
                   src={uni.logo}
@@ -306,7 +306,7 @@ const UniversityDetail: React.FC = () => {
           {/* Tab Nav */}
           <div className="sticky top-0 z-40 overflow-x-auto border-b border-t border-gray-100 bg-white shadow-sm shadow-gray-100/50 no-scrollbar">
             <nav
-              className="mx-auto max-w-350 flex space-x-8 whitespace-nowrap px-6 md:px-12 lg:px-24 xl:px-32"
+              className="mx-auto max-w-[1400px] flex space-x-8 whitespace-nowrap"
               id="tab-nav"
             >
               {TABS.map((tab) => (
@@ -326,7 +326,7 @@ const UniversityDetail: React.FC = () => {
           </div>
 
           {/* Main Content */}
-          <div className="mx-auto max-w-350 grid grid-cols-1 gap-10 bg-white px-6 py-8 md:gap-14 md:px-12 md:py-12 lg:grid-cols-3 lg:px-24 xl:px-32">
+          <div className="mx-auto max-w-[1400px] grid grid-cols-1 gap-10 bg-white py-8 md:gap-14 md:py-12 lg:grid-cols-3">
             {/* Left Column */}
             <div className="lg:col-span-2">
               {/* ========== ABOUT ========== */}
