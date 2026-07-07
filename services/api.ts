@@ -2382,14 +2382,24 @@ export const apiService = {
     if (params?.search) query.set("search", params.search);
     if (params?.status) query.set("status", params.status);
     const qs = query.toString();
-    return apiRequest(`/api/v1/superadmin/scholarships${qs ? `?${qs}` : ""}`);
+    return apiRequest(`/api/v1/education/scholarships${qs ? `?${qs}` : ""}`);
   },
 
-  async toggleScholarshipFeature(id: number): Promise<{ message: string }> {
+  async toggleScholarshipFeature(
+    id: number,
+    featured: boolean,
+  ): Promise<{ message: string }> {
     return apiRequest<{ message: string }>(
-      `/api/v1/superadmin/scholarships/${id}/feature`,
-      { method: "PUT" },
+      `/api/v1/education/scholarships/${id}`,
+      { method: "PATCH", body: JSON.stringify({ isFeatured: featured }) },
     );
+  },
+
+  async updateScholarship(id: number, data: any): Promise<any> {
+    return apiRequest(`/api/v1/education/scholarships/${id}`, {
+      method: "PUT",
+      body: JSON.stringify(data),
+    });
   },
 
   scholarshipProviderLogout(): void {

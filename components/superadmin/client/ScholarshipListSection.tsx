@@ -52,14 +52,14 @@ export default function ScholarshipListSection({
     fetchScholarships(page);
   }, [page]);
 
-  const handleToggleFeature = async (id: number) => {
+  const handleToggleFeature = async (id: number, current: boolean) => {
     setTogglingId(id);
     try {
-      const res = await apiService.toggleScholarshipFeature(id);
-      toast.success(res.message || "Feature status toggled");
+      const res = await apiService.toggleScholarshipFeature(id, !current);
+      toast.success(res.message || "Feature status updated");
       fetchScholarships(page);
     } catch {
-      toast.error("Failed to toggle feature status");
+      toast.error("Failed to update feature status");
     } finally {
       setTogglingId(null);
     }
@@ -250,7 +250,9 @@ export default function ScholarshipListSection({
                           }
                           color={s.isFeatured ? "amber" : "purple"}
                           title={s.isFeatured ? "Unfeature" : "Feature"}
-                          onClick={() => handleToggleFeature(s.id)}
+                          onClick={() =>
+                            handleToggleFeature(s.id, s.isFeatured)
+                          }
                         />
                       </div>
                     </td>
