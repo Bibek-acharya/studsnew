@@ -2263,11 +2263,13 @@ export const apiService = {
     search?: string;
     page?: number;
     limit?: number;
+    status?: string;
   }): Promise<{ data: { users: any[]; pagination: any } }> {
     const query = new URLSearchParams();
     if (params?.search) query.set("search", params.search);
     if (params?.page) query.set("page", String(params.page));
     if (params?.limit) query.set("limit", String(params.limit));
+    if (params?.status) query.set("status", params.status);
     const qs = query.toString();
     return apiRequest<{ data: { users: any[]; pagination: any } }>(
       `/api/v1/superadmin/users${qs ? `?${qs}` : ""}`,
