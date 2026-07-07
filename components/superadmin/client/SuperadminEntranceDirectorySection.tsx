@@ -10,6 +10,8 @@ import {
   CaretRight,
 } from "@phosphor-icons/react";
 import { superadminEntranceApi } from "@/services/superadminRecordsApi";
+import { AlertTriangle, Loader2, X } from "lucide-react";
+
 const statusColors: Record<string, string> = {
   upcoming: "text-orange-600 bg-orange-50",
   ongoing: "text-green-600 bg-green-50",
@@ -36,6 +38,12 @@ export default function SuperadminEntranceDirectorySection({
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
   const [page, setPage] = useState(1);
+  const [deleteDialog, setDeleteDialog] = useState<{
+    open: boolean;
+    id: number | null;
+    title: string;
+  }>({ open: false, id: null, title: "" });
+  const [deleting, setDeleting] = useState(false);
 
   useEffect(() => {
     superadminEntranceApi
@@ -61,12 +69,17 @@ export default function SuperadminEntranceDirectorySection({
     safePage * ITEMS_PER_PAGE,
   );
 
-  const handleDelete = async (id: number) => {
+  const handleDelete = async () => {
+    if (!deleteDialog.id) return;
+    setDeleting(true);
     try {
-      await superadminEntranceApi.delete(id);
-      setExams((prev) => prev.filter((e) => e.id !== id));
-    } catch (e) {
-      console.error(e);
+      await superadminEntranceApi.delete(deleteDialog.id);
+      setExams((prev) => prev.filter((e) => e.id !== deleteDialog.id));
+      setDeleteDialog({ open: false, id: null, title: "" });
+    } catch {
+      alert("Failed to delete entrance. Please try again.");
+    } finally {
+      setDeleting(false);
     }
   };
 
@@ -173,7 +186,13 @@ export default function SuperadminEntranceDirectorySection({
                           <Pencil className="w-4 h-4" />
                         </button>
                         <button
-                          onClick={() => handleDelete(exam.id)}
+                          onClick={() =>
+                            setDeleteDialog({
+                              open: true,
+                              id: exam.id,
+                              title: exam.title,
+                            })
+                          }
                           className="p-1.5 hover:bg-red-50 rounded text-red-600"
                           title="Delete"
                         >
@@ -227,6 +246,51 @@ export default function SuperadminEntranceDirectorySection({
           </div>
         )}
       </div>
+
+      {deleteDialog.open && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
+          <div className="bg-white rounded-xl shadow-xl w-full max-w-md p-6 mx-4">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-lg font-bold text-gray-900 flex items-center gap-2">
+                <AlertTriangle className="w-5 h-5 text-red-500" />
+                Delete Entrance
+              </h3>
+              <button
+                onClick={() =>
+                  setDeleteDialog({ open: false, id: null, title: "" })
+                }
+                className="p-1 hover:bg-gray-100 rounded-lg transition-colors"
+              >
+                <X className="w-5 h-5 text-gray-500" />
+              </button>
+            </div>
+            <p className="text-sm text-gray-600 mb-2">
+              Are you sure you want to delete this entrance?
+            </p>
+            <p className="text-sm font-medium text-gray-900 mb-6">
+              &ldquo;{deleteDialog.title}&rdquo;
+            </p>
+            <div className="flex items-center justify-end gap-3">
+              <button
+                onClick={() =>
+                  setDeleteDialog({ open: false, id: null, title: "" })
+                }
+                className="px-4 py-2 border border-gray-300 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleDelete}
+                disabled={deleting}
+                className="px-4 py-2 bg-red-600 text-white rounded-lg text-sm font-medium hover:bg-red-700 transition-colors disabled:opacity-50 flex items-center gap-2"
+              >
+                {deleting && <Loader2 className="w-4 h-4 animate-spin" />}
+                {deleting ? "Deleting..." : "Delete"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

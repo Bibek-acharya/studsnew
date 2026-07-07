@@ -266,12 +266,12 @@ export default function SuperadminAddCourseSection({
         if (d) {
           setLevel(d.level || "");
           setAffiliation(d.affiliation || "");
-          if (d.institution_name) {
+          if (res.institution_name) {
             setInstitutionFields({
-              name: d.institution_name || "",
-              location: d.institution_location || "",
-              affiliation: d.institution_affiliation || "",
-              link: d.institution_link || "",
+              name: res.institution_name || "",
+              location: res.institution_location || "",
+              affiliation: res.institution_affiliation || "",
+              link: res.institution_link || "",
               institution_id: res.institution_id || 0,
             });
           }
@@ -345,11 +345,10 @@ export default function SuperadminAddCourseSection({
     fee: estFee,
     banner_url: bannerUrl,
     institution_id: institutionFields.institution_id,
+    institution_name: institutionFields.name,
+    institution_location: institutionFields.location,
+    institution_link: institutionFields.link,
     data: {
-      institution_name: institutionFields.name,
-      institution_location: institutionFields.location,
-      institution_link: institutionFields.link,
-      institution_affiliation: institutionFields.affiliation,
       level,
       affiliation: institutionFields.affiliation || affiliation,
       scholarshipDesc,

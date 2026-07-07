@@ -454,11 +454,7 @@ export default function SuperadminCreateEntranceSection({
         setTitle(exam.title || "");
         setDescription(exam.description || "");
         setApplicationFee(exam.application_fee || "");
-        setOverviewDetails(
-          parseArray(exam.overview_details).filter(
-            (d: any) => d.type !== "institution_meta",
-          ),
-        );
+        setOverviewDetails(parseArray(exam.overview_details));
         setExamDateSchedules(parseArray(exam.exam_date_schedules));
         setEligibilityList(parseArray(exam.eligibility_list));
         setApplicationSteps(parseArray(exam.application_steps));
@@ -478,17 +474,13 @@ export default function SuperadminCreateEntranceSection({
             id: s.id || i + 1,
           })),
         );
-        const parsedOverview = parseArray(exam.overview_details);
-        const institutionMeta = parsedOverview.find(
-          (d: any) => d.type === "institution_meta",
-        );
-        if (institutionMeta) {
+        if (exam.institution_name) {
           setInstitutionFields({
-            name: institutionMeta.name || "",
-            location: institutionMeta.location || "",
-            affiliation: institutionMeta.affiliation || "",
-            link: institutionMeta.link || "",
-            institution_id: institutionMeta.institution_id || 0,
+            name: exam.institution_name || "",
+            location: exam.institution_location || "",
+            affiliation: exam.institution_affiliation || "",
+            link: exam.institution_link || "",
+            institution_id: exam.institution_id || 0,
           });
         }
       })
@@ -604,21 +596,10 @@ export default function SuperadminCreateEntranceSection({
         hero_banner: heroBanner,
         status: publish ? "published" : "draft",
         application_fee: applicationFee,
-        overview_details: [
-          ...overviewDetails.map(({ id, ...rest }) => rest),
-          ...(institutionFields.name
-            ? [
-                {
-                  type: "institution_meta",
-                  name: institutionFields.name,
-                  location: institutionFields.location,
-                  affiliation: institutionFields.affiliation,
-                  link: institutionFields.link,
-                  institution_id: institutionFields.institution_id,
-                },
-              ]
-            : []),
-        ],
+        institution_name: institutionFields.name,
+        institution_location: institutionFields.location,
+        institution_link: institutionFields.link,
+        overview_details: [...overviewDetails.map(({ id, ...rest }) => rest)],
         exam_date_schedules: examDateSchedules,
         eligibility_list: eligibilityList,
         application_steps: applicationSteps,

@@ -474,13 +474,12 @@ export default function SuperadminCreateAdmissionSection({
           const d =
             typeof res.data === "string" ? JSON.parse(res.data) : res.data;
           populateFromData(d);
-          const od = d.overview_data || {};
-          if (od.institution_name) {
+          if (d.institution_name) {
             setInstitutionFields({
-              name: od.institution_name || "",
-              location: od.institution_location || "",
-              affiliation: od.institution_affiliation || "",
-              link: od.institution_link || "",
+              name: d.institution_name || "",
+              location: d.institution_location || "",
+              affiliation: d.institution_affiliation || "",
+              link: d.institution_link || "",
               institution_id: d.institution_id || 0,
             });
           }
@@ -504,11 +503,10 @@ export default function SuperadminCreateAdmissionSection({
 
   const collectData = () => ({
     institution_id: institutionFields.institution_id,
+    institution_name: institutionFields.name,
+    institution_location: institutionFields.location,
+    institution_link: institutionFields.link,
     overview_data: {
-      institution_name: institutionFields.name,
-      institution_location: institutionFields.location,
-      institution_link: institutionFields.link,
-      institution_affiliation: institutionFields.affiliation,
       overviewHeading,
       overviewDesc,
       applicationFormLink,
