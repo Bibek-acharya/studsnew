@@ -8,6 +8,7 @@ import {
   X,
   Plus,
 } from "@phosphor-icons/react";
+import { AlertTriangle, Loader2 } from "lucide-react";
 import { superadminProgramApi } from "@/services/superadminRecordsApi";
 interface Course {
   id: number;
@@ -38,12 +39,24 @@ export default function SuperadminCourseListSection({
       .finally(() => setLoading(false));
   }, []);
 
-  const handleDelete = async (id: number) => {
+  const [deleteDialog, setDeleteDialog] = useState<{
+    open: boolean;
+    id: number | null;
+    name: string;
+  }>({ open: false, id: null, name: "" });
+  const [deleting, setDeleting] = useState(false);
+
+  const handleDeleteConfirm = async () => {
+    if (!deleteDialog.id) return;
+    setDeleting(true);
     try {
-      await superadminProgramApi.delete(id);
-      setCourses((prev) => prev.filter((c) => c.id !== id));
-    } catch (e) {
-      console.error(e);
+      await superadminProgramApi.delete(deleteDialog.id);
+      setCourses((prev) => prev.filter((c) => c.id !== deleteDialog.id));
+      setDeleteDialog({ open: false, id: null, name: "" });
+    } catch {
+      alert("Failed to delete course. Please try again.");
+    } finally {
+      setDeleting(false);
     }
   };
 
@@ -161,7 +174,13 @@ export default function SuperadminCourseListSection({
                           <Pencil className="w-4 h-4" />
                         </button>
                         <button
-                          onClick={() => handleDelete(c.id)}
+                          onClick={() =>
+                            setDeleteDialog({
+                              open: true,
+                              id: c.id,
+                              name: c.name,
+                            })
+                          }
                           className="p-1.5 hover:bg-red-50 rounded text-red-600"
                           title="Delete"
                         >
@@ -176,6 +195,51 @@ export default function SuperadminCourseListSection({
           </div>
         )}
       </div>
+
+      {deleteDialog.open && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
+          <div className="bg-white rounded-xl shadow-xl w-full max-w-md p-6 mx-4">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-lg font-bold text-gray-900 flex items-center gap-2">
+                <AlertTriangle className="w-5 h-5 text-red-500" />
+                Delete Course
+              </h3>
+              <button
+                onClick={() =>
+                  setDeleteDialog({ open: false, id: null, name: "" })
+                }
+                className="p-1 hover:bg-gray-100 rounded-lg transition-colors"
+              >
+                <X className="w-5 h-5 text-gray-500" />
+              </button>
+            </div>
+            <p className="text-sm text-gray-600 mb-2">
+              Are you sure you want to delete this course?
+            </p>
+            <p className="text-sm font-medium text-gray-900 mb-6">
+              &ldquo;{deleteDialog.name}&rdquo;
+            </p>
+            <div className="flex items-center justify-end gap-3">
+              <button
+                onClick={() =>
+                  setDeleteDialog({ open: false, id: null, name: "" })
+                }
+                className="px-4 py-2 border border-gray-300 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleDeleteConfirm}
+                disabled={deleting}
+                className="px-4 py-2 bg-red-600 text-white rounded-lg text-sm font-medium hover:bg-red-700 transition-colors disabled:opacity-50 flex items-center gap-2"
+              >
+                {deleting && <Loader2 className="w-4 h-4 animate-spin" />}
+                {deleting ? "Deleting..." : "Delete"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
