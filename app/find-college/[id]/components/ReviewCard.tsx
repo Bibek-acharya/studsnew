@@ -1,6 +1,7 @@
 "use client";
 
 import React from "react";
+import { safeHtml } from "@/lib/html";
 
 const ReviewCard: React.FC<{
   initials: string;
@@ -37,13 +38,15 @@ const ReviewCard: React.FC<{
       <div className="mb-2 flex items-start gap-2">
         <i className="fa-solid fa-thumbs-up mt-0.5 text-green-500"></i>
         <p className="text-[13.5px] leading-relaxed text-gray-700">
-          <span className="font-bold text-gray-900">Pros:</span> {pros}
+          <span className="font-bold text-gray-900">Pros:</span>{" "}
+          <span dangerouslySetInnerHTML={{ __html: safeHtml(pros) }} />
         </p>
       </div>
       <div className="flex items-start gap-2">
         <i className="fa-solid fa-thumbs-down mt-0.5 text-red-500"></i>
         <p className="text-[13.5px] leading-relaxed text-gray-700">
-          <span className="font-bold text-gray-900">Cons:</span> {cons}
+          <span className="font-bold text-gray-900">Cons:</span>{" "}
+          <span dangerouslySetInnerHTML={{ __html: safeHtml(cons) }} />
         </p>
       </div>
     </div>

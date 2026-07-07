@@ -210,12 +210,7 @@ export function useCollegeData(idStr: string) {
         image: safeImageUrl(e.image_url || e.image) || "",
         title: e.name || e.title || "",
         date: `${e.start_date || e.date || ""} | ${e.location || "TBD"}`,
-        desc: (e.short_desc || e.description || "")
-          .replace(/<[^>]*>/g, "")
-          .replace(/&nbsp;/g, " ")
-          .replace(/&amp;/g, "&")
-          .replace(/\s+/g, " ")
-          .trim(),
+        desc: (e.short_desc || e.description || "").trim(),
       }));
   }, [instInstitutionEvents, safeImageUrl]);
 
@@ -230,12 +225,7 @@ export function useCollegeData(idStr: string) {
         badgeClass: "bg-blue-500 text-white",
         image: safeImageUrl(n.image_url || n.image) || "",
         title: n.title || "",
-        desc: (n.short_desc || n.excerpt || n.content || "")
-          .replace(/<[^>]*>/g, "")
-          .replace(/&nbsp;/g, " ")
-          .replace(/&amp;/g, "&")
-          .replace(/\s+/g, " ")
-          .trim(),
+        desc: (n.short_desc || n.excerpt || n.content || "").trim(),
         time: n.created_at ? new Date(n.created_at).toLocaleDateString() : "",
       }));
   }, [instInstitutionNews, safeImageUrl]);
@@ -254,12 +244,7 @@ export function useCollegeData(idStr: string) {
         program: s.field_of_study?.join(", ") || s.title || "",
         scholarship: s.title || "",
         benefit: s.value || "",
-        audience: (s.short_desc || s.description || "")
-          .replace(/<[^>]*>/g, "")
-          .replace(/&nbsp;/g, " ")
-          .replace(/&amp;/g, "&")
-          .replace(/\s+/g, " ")
-          .trim(),
+        audience: (s.short_desc || s.description || "").trim(),
       }));
   }, [instInstitutionScholarships]);
 

@@ -38,44 +38,70 @@ interface EntranceGridProps {
   onMobileFilterClick?: () => void;
 }
 
-const EntranceGrid: React.FC<EntranceGridProps> = ({ filters, setFilters, onMobileFilterClick }) => {
+const EntranceGrid: React.FC<EntranceGridProps> = ({
+  filters,
+  setFilters,
+  onMobileFilterClick,
+}) => {
   const [currentPage, setCurrentPage] = useState(1);
   const [savedIds, setSavedIds] = useState<number[]>([]);
   const [bookmarkMap, setBookmarkMap] = useState<Record<number, number>>({});
-  const [pendingBookmarks, setPendingBookmarks] = useState<Record<number, boolean>>({});
-  const { isAuthenticated } = useAuth()
+  const [pendingBookmarks, setPendingBookmarks] = useState<
+    Record<number, boolean>
+  >({});
+  const { isAuthenticated } = useAuth();
 
   const toggleSaved = async (examId: number) => {
-    if (!isAuthenticated) { toast.error('Please login to save bookmarks'); return }
-    if (pendingBookmarks[examId]) return
-    setPendingBookmarks(prev => ({ ...prev, [examId]: true }))
-    const existingBookmarkId = bookmarkMap[examId]
+    if (!isAuthenticated) {
+      toast.error("Please login to save bookmarks");
+      return;
+    }
+    if (pendingBookmarks[examId]) return;
+    setPendingBookmarks((prev) => ({ ...prev, [examId]: true }));
+    const existingBookmarkId = bookmarkMap[examId];
     try {
       if (existingBookmarkId) {
-        await apiService.deleteBookmark(existingBookmarkId)
-        setBookmarkMap(prev => { const n = { ...prev }; delete n[examId]; return n })
-        setSavedIds(prev => prev.filter(id => id !== examId))
-        toast.success('Removed from bookmarks')
+        await apiService.deleteBookmark(existingBookmarkId);
+        setBookmarkMap((prev) => {
+          const n = { ...prev };
+          delete n[examId];
+          return n;
+        });
+        setSavedIds((prev) => prev.filter((id) => id !== examId));
+        toast.success("Removed from bookmarks");
       } else {
-        const res = await apiService.createBookmark(examId, 'entrance')
-        setBookmarkMap(prev => ({ ...prev, [examId]: res.data.id }))
-        setSavedIds(prev => [...prev, examId])
-        toast.success('Added to bookmarks!')
+        const res = await apiService.createBookmark(examId, "entrance");
+        setBookmarkMap((prev) => ({ ...prev, [examId]: res.data.id }));
+        setSavedIds((prev) => [...prev, examId]);
+        toast.success("Added to bookmarks!");
       }
-    } catch { toast.error('Failed to save bookmark') }
-    finally { setPendingBookmarks(prev => { const n = { ...prev }; delete n[examId]; return n }) }
-  }
+    } catch {
+      toast.error("Failed to save bookmark");
+    } finally {
+      setPendingBookmarks((prev) => {
+        const n = { ...prev };
+        delete n[examId];
+        return n;
+      });
+    }
+  };
 
   useEffect(() => {
-    if (!isAuthenticated) return
-    apiService.getBookmarksByType('entrance').then(items => {
-      const ids: number[] = []
-      const map: Record<number, number> = {}
-      items.forEach(b => { ids.push(b.item_id); map[b.item_id] = b.id })
-      setSavedIds(ids)
-      setBookmarkMap(map)
-    }).catch(() => {})
-  }, [isAuthenticated])
+    if (!isAuthenticated) return;
+    apiService
+      .getBookmarksByType("entrance")
+      .then((items) => {
+        const ids: number[] = [];
+        const map: Record<number, number> = {};
+        items.forEach((b) => {
+          ids.push(b.item_id);
+          map[b.item_id] = b.id;
+        });
+        setSavedIds(ids);
+        setBookmarkMap(map);
+      })
+      .catch(() => {});
+  }, [isAuthenticated]);
 
   useEffect(() => {
     setCurrentPage(1);
@@ -83,17 +109,21 @@ const EntranceGrid: React.FC<EntranceGridProps> = ({ filters, setFilters, onMobi
 
   const apiFilters: EntranceFilters = {
     search: filters.search || undefined,
-    academicLevel: filters.academicLevel.length > 0 ? filters.academicLevel : undefined,
+    academicLevel:
+      filters.academicLevel.length > 0 ? filters.academicLevel : undefined,
     stream: filters.stream.length > 0 ? filters.stream : undefined,
     status: filters.status.length > 0 ? filters.status : undefined,
     sortBy: filters.sortBy || undefined,
     location: filters.location || undefined,
-    institutionType: filters.institutionType.length > 0 ? filters.institutionType : undefined,
+    institutionType:
+      filters.institutionType.length > 0 ? filters.institutionType : undefined,
     province: filters.province.length > 0 ? filters.province : undefined,
     district: filters.district.length > 0 ? filters.district : undefined,
     localLevel: filters.localLevel.length > 0 ? filters.localLevel : undefined,
-    applicationFee: filters.applicationFee.length > 0 ? filters.applicationFee : undefined,
-    scholarship: filters.scholarship.length > 0 ? filters.scholarship : undefined,
+    applicationFee:
+      filters.applicationFee.length > 0 ? filters.applicationFee : undefined,
+    scholarship:
+      filters.scholarship.length > 0 ? filters.scholarship : undefined,
     gpa: filters.gpa.length > 0 ? [filters.gpa] : undefined,
   };
 
@@ -103,7 +133,18 @@ const EntranceGrid: React.FC<EntranceGridProps> = ({ filters, setFilters, onMobi
     staleTime: 5 * 60 * 1000,
   });
 
-  const filteredExams = useMemo(() => data?.data?.entrances || [], [data]);
+  const filteredExams = useMemo(() => {
+    const entrances = data?.data?.entrances || [];
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    return entrances.filter((exam) => {
+      const endDateStr = exam.deadline || exam.examDate;
+      if (!endDateStr) return true;
+      const endDate = new Date(endDateStr);
+      endDate.setHours(0, 0, 0, 0);
+      return endDate >= today;
+    });
+  }, [data]);
   const total = data?.data?.total || 0;
   const totalPages = Math.max(1, Math.ceil(total / 18));
   const pagedExams = filteredExams;
@@ -121,10 +162,13 @@ const EntranceGrid: React.FC<EntranceGridProps> = ({ filters, setFilters, onMobi
           <div className="flex flex-col justify-start">
             <h1 className="mb-3 text-base text-gray-900">
               {total === 0 ? (
-                <>0 of 0 <span className="font-bold">Entrance Exams</span></>
+                <>
+                  0 of 0 <span className="font-bold">Entrance Exams</span>
+                </>
               ) : (
                 <>
-                  Showing {startItem} to {endItem} of {total} <span className="font-bold">Entrance Exams</span>
+                  Showing {startItem} to {endItem} of {total}{" "}
+                  <span className="font-bold">Entrance Exams</span>
                 </>
               )}
             </h1>
@@ -170,21 +214,30 @@ const EntranceGrid: React.FC<EntranceGridProps> = ({ filters, setFilters, onMobi
             No entrance exams found matching your filters.
           </div>
         ) : (
-        pagedExams.map((exam, index) => (
-          <React.Fragment key={exam.id}>
-            <EntranceCard exam={exam} isSaved={savedIds.includes(exam.numericId)} isPending={!!pendingBookmarks[exam.numericId]} onToggleSaved={(e) => { e.stopPropagation(); toggleSaved(exam.numericId) }} />
-            {showEntranceAds && index === 5 && (
-              <div className="col-span-1 md:col-span-2 xl:col-span-3 -mx-2">
-                <EntranceAds />
-              </div>
-            )}
-            {showApplicationAds && index === 11 && (
-              <div className="col-span-1 md:col-span-2 xl:col-span-3 -mx-2">
-                <ApplicationAds />
-              </div>
-            )}
-          </React.Fragment>
-        )))}
+          pagedExams.map((exam, index) => (
+            <React.Fragment key={exam.id}>
+              <EntranceCard
+                exam={exam}
+                isSaved={savedIds.includes(exam.numericId)}
+                isPending={!!pendingBookmarks[exam.numericId]}
+                onToggleSaved={(e) => {
+                  e.stopPropagation();
+                  toggleSaved(exam.numericId);
+                }}
+              />
+              {showEntranceAds && index === 5 && (
+                <div className="col-span-1 md:col-span-2 xl:col-span-3 -mx-2">
+                  <EntranceAds />
+                </div>
+              )}
+              {showApplicationAds && index === 11 && (
+                <div className="col-span-1 md:col-span-2 xl:col-span-3 -mx-2">
+                  <ApplicationAds />
+                </div>
+              )}
+            </React.Fragment>
+          ))
+        )}
       </div>
 
       {totalPages > 1 && (
@@ -218,13 +271,22 @@ const formatDate = (dateStr: string) => {
   try {
     const d = new Date(dateStr);
     if (isNaN(d.getTime())) return dateStr;
-    return d.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" });
+    return d.toLocaleDateString("en-US", {
+      month: "short",
+      day: "numeric",
+      year: "numeric",
+    });
   } catch {
     return dateStr;
   }
 };
 
-export const EntranceCard: React.FC<{ exam: Exam; isSaved: boolean; isPending: boolean; onToggleSaved: (e: React.MouseEvent) => void }> = ({ exam, isSaved, isPending, onToggleSaved }) => {
+export const EntranceCard: React.FC<{
+  exam: Exam;
+  isSaved: boolean;
+  isPending: boolean;
+  onToggleSaved: (e: React.MouseEvent) => void;
+}> = ({ exam, isSaved, isPending, onToggleSaved }) => {
   const router = useRouter();
 
   return (
@@ -240,7 +302,9 @@ export const EntranceCard: React.FC<{ exam: Exam; isSaved: boolean; isPending: b
           </div>
           <div className="flex flex-col min-w-0">
             <h3 className="group relative text-[13px] xs:text-[14px] sm:text-[15px] font-bold text-[#111827] flex items-center gap-1 sm:gap-1.5 min-w-0">
-              <span className="truncate">{truncateText(exam.institution, 20)}</span>
+              <span className="truncate">
+                {truncateText(exam.institution, 20)}
+              </span>
               {exam.verified && (
                 <BadgeCheckIcon className="w-3.25 h-3.25 sm:w-3.75 sm:h-3.75 text-white fill-blue-500 ml-0.5 sm:ml-1 shrink-0" />
               )}
@@ -251,19 +315,27 @@ export const EntranceCard: React.FC<{ exam: Exam; isSaved: boolean; isPending: b
             </h3>
             <div className="flex flex-col gap-1 text-[10px] xs:text-[11px] sm:text-[11px] text-[#6b7280] mt-0.5">
               {exam.location && (
-              <span className="flex items-center gap-1">
-                <MapPin className="w-2.5 h-2.5 sm:w-3 sm:h-3 shrink-0" />
-                <span className="truncate" title={exam.location}>{exam.location}</span>
-              </span>
+                <span className="flex items-center gap-1">
+                  <MapPin className="w-2.5 h-2.5 sm:w-3 sm:h-3 shrink-0" />
+                  <span className="truncate" title={exam.location}>
+                    {exam.location}
+                  </span>
+                </span>
               )}
               <span className="flex items-center gap-1">
                 <Award className="w-2.5 h-2.5 sm:w-3 sm:h-3 shrink-0" />
-                <span className="truncate" title={exam.affiliation}>{exam.affiliation}</span>
+                <span className="truncate" title={exam.affiliation}>
+                  {exam.affiliation}
+                </span>
               </span>
             </div>
             {exam.website && (
               <a
-                href={exam.website.startsWith("http") ? exam.website : `https://${exam.website}`}
+                href={
+                  exam.website.startsWith("http")
+                    ? exam.website
+                    : `https://${exam.website}`
+                }
                 target="_blank"
                 rel="noopener noreferrer"
                 className="text-[#2563eb] text-[10px] xs:text-[11px] sm:text-[11px] font-medium mt-0.5 sm:mt-1 flex items-center gap-1 hover:underline"
@@ -377,12 +449,29 @@ export const EntranceCard: React.FC<{ exam: Exam; isSaved: boolean; isPending: b
             onClick={isPending ? undefined : onToggleSaved}
           >
             {isPending ? (
-              <svg className="w-3.5 h-3.5 animate-spin text-gray-400" fill="none" viewBox="0 0 24 24">
-                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+              <svg
+                className="w-3.5 h-3.5 animate-spin text-gray-400"
+                fill="none"
+                viewBox="0 0 24 24"
+              >
+                <circle
+                  className="opacity-25"
+                  cx="12"
+                  cy="12"
+                  r="10"
+                  stroke="currentColor"
+                  strokeWidth="4"
+                />
+                <path
+                  className="opacity-75"
+                  fill="currentColor"
+                  d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"
+                />
               </svg>
             ) : (
-              <Bookmark className={`w-3.5 h-3.5 sm:w-4 sm:h-4 ${isSaved ? "text-[#0000ff] fill-[#0000ff]" : ""}`} />
+              <Bookmark
+                className={`w-3.5 h-3.5 sm:w-4 sm:h-4 ${isSaved ? "text-[#0000ff] fill-[#0000ff]" : ""}`}
+              />
             )}
           </button>
         </div>
