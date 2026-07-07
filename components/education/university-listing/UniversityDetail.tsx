@@ -4,6 +4,7 @@ import React, { useState, useEffect } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { useParams } from "next/navigation";
+import { safeHtml } from "@/lib/html";
 import ContactInfoRow from "@/app/find-college/[id]/components/ContactInfoRow";
 import ReviewCard from "@/app/find-college/[id]/components/ReviewCard";
 import RatingBar from "@/app/find-college/[id]/components/RatingBar";
@@ -104,9 +105,6 @@ const UniversityDetail: React.FC = () => {
   const shareText = `Check out ${name} on Studsphere`;
 
   const description = uni?.description || "";
-  const descriptionParagraphs = description
-    ? description.split("\n").filter(Boolean)
-    : [];
 
   const overviewList = uni?.overview
     ? Array.isArray(uni.overview)
@@ -346,17 +344,12 @@ const UniversityDetail: React.FC = () => {
                     </div>
                   ) : null}
 
-                  <div className="space-y-6 text-[15px] leading-[1.8] text-gray-600 md:text-[16px]">
-                    {descriptionParagraphs.length > 0 ? (
-                      descriptionParagraphs.map((para, idx) => (
-                        <p key={idx}>{para}</p>
-                      ))
-                    ) : (
-                      <p className="text-gray-400 italic">
-                        No description available.
-                      </p>
-                    )}
-                  </div>
+                  <div
+                    className="space-y-6 text-[15px] leading-[1.8] text-gray-600 md:text-[16px] rich-text"
+                    dangerouslySetInnerHTML={{
+                      __html: safeHtml(description),
+                    }}
+                  />
 
                   {(aboutData?.vision ||
                     aboutData?.mission ||
@@ -372,9 +365,12 @@ const UniversityDetail: React.FC = () => {
                               Our Vision
                             </h3>
                           </div>
-                          <p className="text-[14.5px] leading-[1.7] text-gray-600">
-                            {aboutData.vision as string}
-                          </p>
+                          <div
+                            className="text-[14.5px] leading-[1.7] text-gray-600 rich-text"
+                            dangerouslySetInnerHTML={{
+                              __html: safeHtml(aboutData.vision as string),
+                            }}
+                          />
                         </div>
                       )}
                       {aboutData?.mission && (
@@ -387,9 +383,12 @@ const UniversityDetail: React.FC = () => {
                               Our Mission
                             </h3>
                           </div>
-                          <p className="text-[14.5px] leading-[1.7] text-gray-600">
-                            {aboutData.mission as string}
-                          </p>
+                          <div
+                            className="text-[14.5px] leading-[1.7] text-gray-600 rich-text"
+                            dangerouslySetInnerHTML={{
+                              __html: safeHtml(aboutData.mission as string),
+                            }}
+                          />
                         </div>
                       )}
                       {aboutData?.values && (
@@ -402,9 +401,12 @@ const UniversityDetail: React.FC = () => {
                               Core Values
                             </h3>
                           </div>
-                          <p className="text-[14.5px] leading-[1.7] text-gray-600">
-                            {aboutData.values as string}
-                          </p>
+                          <div
+                            className="text-[14.5px] leading-[1.7] text-gray-600 rich-text"
+                            dangerouslySetInnerHTML={{
+                              __html: safeHtml(aboutData.values as string),
+                            }}
+                          />
                         </div>
                       )}
                     </div>
@@ -427,9 +429,14 @@ const UniversityDetail: React.FC = () => {
                             <div className="w-full text-[14px] font-semibold text-gray-800 sm:w-1/3">
                               {row.label || row.key || row.field}
                             </div>
-                            <div className="w-full text-[14px] text-gray-600 sm:w-2/3">
-                              {row.value || row.val || String(row)}
-                            </div>
+                            <div
+                              className="w-full text-[14px] text-gray-600 sm:w-2/3 rich-text"
+                              dangerouslySetInnerHTML={{
+                                __html: safeHtml(
+                                  row.value || row.val || String(row),
+                                ),
+                              }}
+                            />
                           </div>
                         ))}
                       </div>
@@ -489,9 +496,14 @@ const UniversityDetail: React.FC = () => {
                               <h4 className="text-[15px] font-bold text-gray-900">
                                 {h.title || h.label}
                               </h4>
-                              <p className="mt-1 text-[14px] text-gray-600">
-                                {h.description || h.text || h.desc}
-                              </p>
+                              <div
+                                className="mt-1 text-[14px] text-gray-600 rich-text"
+                                dangerouslySetInnerHTML={{
+                                  __html: safeHtml(
+                                    h.description || h.text || h.desc,
+                                  ),
+                                }}
+                              />
                             </div>
                           </div>
                         ))}
