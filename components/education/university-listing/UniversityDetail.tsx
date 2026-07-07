@@ -82,6 +82,42 @@ const UniversityDetail: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
+  const decodeB64 = (str: string): any => {
+    try {
+      const decoded = atob(str);
+      return JSON.parse(decoded);
+    } catch {
+      return str;
+    }
+  };
+
+  const decodeFields = (u: any): any => {
+    if (!u) return u;
+    const fields = [
+      "about",
+      "contact",
+      "overview",
+      "leadership",
+      "courses",
+      "programs",
+      "scholarships",
+      "events",
+      "news",
+      "downloads",
+      "gallery",
+      "faculties",
+      "admissions",
+      "quick",
+    ];
+    const out = { ...u };
+    for (const f of fields) {
+      if (typeof out[f] === "string" && out[f].length > 0) {
+        out[f] = decodeB64(out[f]);
+      }
+    }
+    return out;
+  };
+
   useEffect(() => {
     if (!id) {
       setLoading(false);
@@ -91,7 +127,7 @@ const UniversityDetail: React.FC = () => {
     apiService
       .getUniversityById(id)
       .then((res) => {
-        setUniversity(res.data.university);
+        setUniversity(decodeFields(res.data.university));
         setColleges(res.data.colleges || []);
       })
       .catch(() => setError("Failed to load university details"))
@@ -155,7 +191,10 @@ const UniversityDetail: React.FC = () => {
   const contactData: Record<string, any> = uni?.contact || {};
   const aboutData: Record<string, any> = uni?.about || {};
 
-  const videoUrl = (aboutData?.video_url as string) || "";
+  const videoUrl =
+    (aboutData?.video_url as string) ||
+    (Array.isArray(aboutData?.videos) && aboutData.videos[0]?.url) ||
+    "";
   const ytId = videoUrl ? getYouTubeId(videoUrl) : null;
 
   const toggleDropdown = (id: string) => {

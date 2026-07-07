@@ -315,6 +315,7 @@ export interface ScholarshipItem {
   application_end_date?: string;
   start_date?: string;
   end_date?: string;
+  isFeatured?: boolean;
 }
 
 export interface ScholarshipsResponse {
@@ -2356,6 +2357,41 @@ export const apiService = {
       },
     );
   },
+  async listAllScholarships(params?: {
+    page?: number;
+    limit?: number;
+    search?: string;
+    status?: string;
+  }): Promise<{
+    data: {
+      scholarships: any[];
+      total?: number;
+      page?: number;
+      limit?: number;
+      stats?: {
+        total: number;
+        active: number;
+        draft: number;
+        featured: number;
+      };
+    };
+  }> {
+    const query = new URLSearchParams();
+    if (params?.page) query.set("page", String(params.page));
+    if (params?.limit) query.set("limit", String(params.limit));
+    if (params?.search) query.set("search", params.search);
+    if (params?.status) query.set("status", params.status);
+    const qs = query.toString();
+    return apiRequest(`/api/v1/superadmin/scholarships${qs ? `?${qs}` : ""}`);
+  },
+
+  async toggleScholarshipFeature(id: number): Promise<{ message: string }> {
+    return apiRequest<{ message: string }>(
+      `/api/v1/superadmin/scholarships/${id}/feature`,
+      { method: "PUT" },
+    );
+  },
+
   scholarshipProviderLogout(): void {
     if (typeof window === "undefined") return;
     clearAllAuthSessions();

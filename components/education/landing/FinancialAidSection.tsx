@@ -2,11 +2,21 @@
 
 import { useState, type MouseEvent, type SyntheticEvent } from "react";
 import Image from "next/image";
-import { Bookmark, MapPin, GraduationCap, Calendar, Building, BadgeCheckIcon } from "lucide-react";
+import {
+  Bookmark,
+  MapPin,
+  GraduationCap,
+  Calendar,
+  Building,
+  BadgeCheckIcon,
+} from "lucide-react";
 import { ScholarshipItem } from "@/services/api";
 import HoverTooltip from "./HoverTooltip";
 
-function getScholarshipDateStatus(startDate?: string, endDate?: string): string {
+function getScholarshipDateStatus(
+  startDate?: string,
+  endDate?: string,
+): string {
   if (!startDate && !endDate) return "Ongoing";
   const now = new Date();
   const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
@@ -23,7 +33,9 @@ function getScholarshipDateStatus(startDate?: string, endDate?: string): string 
       if (endDay < today) return "Closed";
 
       const msPerDay = 1000 * 60 * 60 * 24;
-      const daysLeft = Math.round((endDay.getTime() - today.getTime()) / msPerDay);
+      const daysLeft = Math.round(
+        (endDay.getTime() - today.getTime()) / msPerDay,
+      );
 
       if (daysLeft <= 2) return "Ending Soon";
     }
@@ -72,14 +84,20 @@ interface FinancialAidSectionProps {
   scholarships?: ScholarshipItem[];
 }
 
-const FinancialAidSection: React.FC<FinancialAidSectionProps> = ({ onNavigate, scholarships = [] }) => {
+const FinancialAidSection: React.FC<FinancialAidSectionProps> = ({
+  onNavigate,
+  scholarships = [],
+}) => {
   const [bookmarked, setBookmarked] = useState<Set<number>>(new Set());
 
-  const items = scholarships.slice(0, 4);
+  const featured = scholarships.filter((s) => s.isFeatured);
+  if (featured.length === 0) return null;
+
+  const items = featured.slice(0, 4);
 
   const toggleBookmark = (e: MouseEvent<HTMLButtonElement>, id: number) => {
     e.stopPropagation();
-    setBookmarked(prev => {
+    setBookmarked((prev) => {
       const next = new Set(prev);
       if (next.has(id)) next.delete(id);
       else next.add(id);
@@ -88,124 +106,171 @@ const FinancialAidSection: React.FC<FinancialAidSectionProps> = ({ onNavigate, s
   };
 
   return (
-<section className="mt-16 sm:mt-20 md:mt-24 w-full px-4 sm:px-6 md:px-8">
-  <div className="max-w-350 mx-auto w-full">
-      {/* Header Section */}
-      <div className="text-center mb-8 sm:mb-10 md:mb-12">
-        <h2 className="text-[26px] xs:text-3xl sm:text-4xl md:text-[40px] font-bold text-[#0f172a] mb-3 sm:mb-4 tracking-tight px-2">Featured Financial Aid</h2>
-        <p className="text-[14px] sm:text-[15px] md:text-[16px] text-[#64748b] max-w-2xl mx-auto leading-relaxed px-2">
-          Discover scholarships, grants, and financial support options to fund your academic journey.
-        </p>
-      </div>
+    <section className="mt-16 sm:mt-20 md:mt-24 w-full px-4 sm:px-6 md:px-8">
+      <div className="max-w-350 mx-auto w-full">
+        {/* Header Section */}
+        <div className="text-center mb-8 sm:mb-10 md:mb-12">
+          <h2 className="text-[26px] xs:text-3xl sm:text-4xl md:text-[40px] font-bold text-[#0f172a] mb-3 sm:mb-4 tracking-tight px-2">
+            Featured Financial Aid
+          </h2>
+          <p className="text-[14px] sm:text-[15px] md:text-[16px] text-[#64748b] max-w-2xl mx-auto leading-relaxed px-2">
+            Discover scholarships, grants, and financial support options to fund
+            your academic journey.
+          </p>
+        </div>
 
-      {/* Grid Container for Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-5 md:gap-6">
-        {items.map((scholarship) => {
-          const dateStatus = getScholarshipDateStatus(scholarship.start_date, scholarship.end_date);
-          const statusStyle = getStatusStyle(dateStatus);
-          return (
-          <div key={scholarship.id} className="bg-white rounded-xl p-5 sm:p-6 md:p-7 flex flex-col h-full hover:-translate-y-1 border border-gray-200 hover:border-blue-500/20 transition-all duration-300 cursor-pointer">
-            {/* Image Area */}
-            <div className="w-full h-30 rounded-[10px] sm:rounded-md overflow-hidden mb-3 sm:mb-4 relative">
-              <Image
-                src={scholarship.image || "https://images.unsplash.com/photo-1498050108023-c5249f4df085?q=80&w=600&auto=format&fit=crop"}
-                alt={scholarship.title}
-                width={600}
-                height={400}
-                unoptimized
-                className="w-full h-full object-cover"
-                onError={(e: SyntheticEvent<HTMLImageElement>) => {
-                  e.currentTarget.src = "https://placehold.co/600x400/f1f5f9/94a3b8?text=Scholarship";
-                }}
-              />
-            </div>
-
-            {/* Content Area */}
-            <div className="flex flex-col grow px-0.5 sm:px-1">
-              {/* Tags */}
-              <div className="flex items-center gap-2 sm:gap-2.5 mb-2.5 sm:mb-3">
-                <span className="text-blue-600 bg-blue-50 px-2 py-1 rounded-md text-[10px] font-bold uppercase tracking-wide max-w-[100px] truncate">
-                  {scholarship.scholarship_type || "MERIT-BASED"}
-                </span>
-                <div className={`flex items-center gap-1.5 px-2 py-1 rounded-md ${statusStyle.statusBg}`}>
-                  <span className={`w-1.5 h-1.5 rounded-full ${statusStyle.statusDot}`}></span>
-                  <span className={`text-[10px] font-bold uppercase tracking-wide ${statusStyle.statusText}`}>
-                    {dateStatus}
-                  </span>
+        {/* Grid Container for Cards */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-5 md:gap-6">
+          {items.map((scholarship) => {
+            const dateStatus = getScholarshipDateStatus(
+              scholarship.start_date,
+              scholarship.end_date,
+            );
+            const statusStyle = getStatusStyle(dateStatus);
+            return (
+              <div
+                key={scholarship.id}
+                className="bg-white rounded-xl p-5 sm:p-6 md:p-7 flex flex-col h-full hover:-translate-y-1 border border-gray-200 hover:border-blue-500/20 transition-all duration-300 cursor-pointer"
+              >
+                {/* Image Area */}
+                <div className="w-full h-30 rounded-[10px] sm:rounded-md overflow-hidden mb-3 sm:mb-4 relative">
+                  <Image
+                    src={
+                      scholarship.image ||
+                      "https://images.unsplash.com/photo-1498050108023-c5249f4df085?q=80&w=600&auto=format&fit=crop"
+                    }
+                    alt={scholarship.title}
+                    width={600}
+                    height={400}
+                    unoptimized
+                    className="w-full h-full object-cover"
+                    onError={(e: SyntheticEvent<HTMLImageElement>) => {
+                      e.currentTarget.src =
+                        "https://placehold.co/600x400/f1f5f9/94a3b8?text=Scholarship";
+                    }}
+                  />
                 </div>
-              </div>
 
-              {/* Title & Institution */}
-              <HoverTooltip label={scholarship.title || "Scholarship"}>
-                <h3 className="text-[15px] xs:text-[16px] sm:text-[17px] font-bold text-[#0f172a] leading-[1.35] mb-1 sm:mb-1.5 line-clamp-2 hover:text-[#0000ff]">
-                  {scholarship.title || "Scholarship"}
-                </h3>
-              </HoverTooltip>
-              <div className="flex items-center text-[12px] xs:text-[13px] sm:text-[13.5px] text-[#64748b] mb-4 sm:mb-5 line-clamp-1">
-                <Building className="w-3.5 h-3.5 sm:w-4 sm:h-4 mr-1 sm:mr-1.5 shrink-0" />
-                <span>{scholarship.provider || "Tribhuvan University, Nepal"}</span>
-                <BadgeCheckIcon className="w-3.25 h-3.25 sm:w-3.75 sm:h-3.75 text-white fill-blue-500 ml-0.5 sm:ml-1 shrink-0" />
-              </div>
-
-              {/* Details Box */}
-              <div className="bg-[#f8fafc] rounded-md sm:rounded-md p-2.5 sm:p-3 md:p-3.5 flex flex-col gap-2 sm:gap-3 mt-auto border border-[#f1f5f9]">
-                {/* Row 1: Split */}
-                <div className="grid grid-cols-2 gap-1.5 sm:gap-2 text-[11px] xs:text-[12px] sm:text-[13px] text-[#475569]">
-                  <div className="flex items-center gap-1.5 sm:gap-2">
-                    <span className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-[#94a3b8] shrink-0 font-bold text-xs sm:text-sm">$</span>
-                    <span className="truncate font-medium">{scholarship.amount || "100% Tuition"}</span>
+                {/* Content Area */}
+                <div className="flex flex-col grow px-0.5 sm:px-1">
+                  {/* Tags */}
+                  <div className="flex items-center gap-2 sm:gap-2.5 mb-2.5 sm:mb-3">
+                    <span className="text-blue-600 bg-blue-50 px-2 py-1 rounded-md text-[10px] font-bold uppercase tracking-wide max-w-[100px] truncate">
+                      {scholarship.scholarship_type || "MERIT-BASED"}
+                    </span>
+                    <div
+                      className={`flex items-center gap-1.5 px-2 py-1 rounded-md ${statusStyle.statusBg}`}
+                    >
+                      <span
+                        className={`w-1.5 h-1.5 rounded-full ${statusStyle.statusDot}`}
+                      ></span>
+                      <span
+                        className={`text-[10px] font-bold uppercase tracking-wide ${statusStyle.statusText}`}
+                      >
+                        {dateStatus}
+                      </span>
+                    </div>
                   </div>
-                  <div className="flex items-center gap-1.5 sm:gap-2">
-                    <MapPin className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-[#94a3b8] shrink-0" />
-                    <span className="truncate">{scholarship.location || "Bagmati"}</span>
+
+                  {/* Title & Institution */}
+                  <HoverTooltip label={scholarship.title || "Scholarship"}>
+                    <h3 className="text-[15px] xs:text-[16px] sm:text-[17px] font-bold text-[#0f172a] leading-[1.35] mb-1 sm:mb-1.5 line-clamp-2 hover:text-[#0000ff]">
+                      {scholarship.title || "Scholarship"}
+                    </h3>
+                  </HoverTooltip>
+                  <div className="flex items-center text-[12px] xs:text-[13px] sm:text-[13.5px] text-[#64748b] mb-4 sm:mb-5 line-clamp-1">
+                    <Building className="w-3.5 h-3.5 sm:w-4 sm:h-4 mr-1 sm:mr-1.5 shrink-0" />
+                    <span>
+                      {scholarship.provider || "Tribhuvan University, Nepal"}
+                    </span>
+                    <BadgeCheckIcon className="w-3.25 h-3.25 sm:w-3.75 sm:h-3.75 text-white fill-blue-500 ml-0.5 sm:ml-1 shrink-0" />
+                  </div>
+
+                  {/* Details Box */}
+                  <div className="bg-[#f8fafc] rounded-md sm:rounded-md p-2.5 sm:p-3 md:p-3.5 flex flex-col gap-2 sm:gap-3 mt-auto border border-[#f1f5f9]">
+                    {/* Row 1: Split */}
+                    <div className="grid grid-cols-2 gap-1.5 sm:gap-2 text-[11px] xs:text-[12px] sm:text-[13px] text-[#475569]">
+                      <div className="flex items-center gap-1.5 sm:gap-2">
+                        <span className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-[#94a3b8] shrink-0 font-bold text-xs sm:text-sm">
+                          $
+                        </span>
+                        <span className="truncate font-medium">
+                          {scholarship.amount || "100% Tuition"}
+                        </span>
+                      </div>
+                      <div className="flex items-center gap-1.5 sm:gap-2">
+                        <MapPin className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-[#94a3b8] shrink-0" />
+                        <span className="truncate">
+                          {scholarship.location || "Bagmati"}
+                        </span>
+                      </div>
+                    </div>
+
+                    {/* Row 2: Level */}
+                    <div className="flex items-center gap-1.5 sm:gap-2 text-[11px] xs:text-[12px] sm:text-[13px] text-[#475569]">
+                      <GraduationCap className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-[#94a3b8] shrink-0" />
+                      <span className="truncate">
+                        {scholarship.eligibility ||
+                          "Bachelor (+2 Sci: 2.8+ GPA)"}
+                      </span>
+                    </div>
+
+                    {/* Row 3: Deadline */}
+                    <div className="flex items-center gap-1.5 sm:gap-2 text-[11px] xs:text-[12px] sm:text-[13px] md:text-[13.5px] text-[#ef4444] font-medium mt-0.5">
+                      <Calendar className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-[#ef4444] shrink-0" />
+                      <span>
+                        Ends: {scholarship.deadline || "Aug 15, 2026"}
+                      </span>
+                    </div>
+                  </div>
+
+                  {/* Action Buttons */}
+                  <div className="flex gap-2 sm:gap-2.5 mt-4 sm:mt-5 mb-1">
+                    <button
+                      onClick={() =>
+                        onNavigate(
+                          "scholarshipDetails",
+                          scholarship as unknown as { [key: string]: unknown },
+                        )
+                      }
+                      className="flex-1 bg-white border border-[#cbd5e1] text-[#334155] rounded-md py-2 sm:py-2.5 text-[12px] sm:text-[13px] md:text-[14px] font-semibold hover:bg-[#f8fafc] hover:text-[#0f172a] transition-all duration-200"
+                    >
+                      Details
+                    </button>
+                    <button className="flex-1 bg-brand-blue text-white rounded-md py-2 sm:py-2.5 text-[12px] sm:text-[13px] md:text-[14px] font-semibold hover:bg-brand-hover hover: transition-all duration-200">
+                      Apply
+                    </button>
+                    <HoverTooltip
+                      label={
+                        bookmarked.has(scholarship.id)
+                          ? "Remove Bookmark"
+                          : "Bookmark"
+                      }
+                    >
+                      <button
+                        className={`w-9 sm:w-10 md:w-11 shrink-0 rounded-md flex items-center justify-center transition-all duration-200 ${
+                          bookmarked.has(scholarship.id)
+                            ? "border-blue-200 bg-blue-50"
+                            : "bg-white border border-[#cbd5e1] text-[#94a3b8] hover:bg-[#f8fafc] hover:text-[#64748b]"
+                        }`}
+                        onClick={(e) => toggleBookmark(e, scholarship.id)}
+                        aria-label={
+                          bookmarked.has(scholarship.id)
+                            ? "Remove Bookmark"
+                            : "Bookmark"
+                        }
+                      >
+                        <Bookmark
+                          className={`w-3.5 h-3.5 sm:w-4 sm:h-4 md:w-4.5 md:h-4.5 ${bookmarked.has(scholarship.id) ? "text-[#0000ff] fill-[#0000ff]" : ""}`}
+                        />
+                      </button>
+                    </HoverTooltip>
                   </div>
                 </div>
-                
-                {/* Row 2: Level */}
-                <div className="flex items-center gap-1.5 sm:gap-2 text-[11px] xs:text-[12px] sm:text-[13px] text-[#475569]">
-                  <GraduationCap className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-[#94a3b8] shrink-0" />
-                  <span className="truncate">{scholarship.eligibility || "Bachelor (+2 Sci: 2.8+ GPA)"}</span>
-                </div>
-                
-                {/* Row 3: Deadline */}
-                <div className="flex items-center gap-1.5 sm:gap-2 text-[11px] xs:text-[12px] sm:text-[13px] md:text-[13.5px] text-[#ef4444] font-medium mt-0.5">
-                  <Calendar className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-[#ef4444] shrink-0" />
-                  <span>Ends: {scholarship.deadline || "Aug 15, 2026"}</span>
-                </div>
               </div>
-
-              {/* Action Buttons */}
-              <div className="flex gap-2 sm:gap-2.5 mt-4 sm:mt-5 mb-1">
-                <button 
-                  onClick={() => onNavigate("scholarshipDetails", scholarship as unknown as { [key: string]: unknown })}
-                  className="flex-1 bg-white border border-[#cbd5e1] text-[#334155] rounded-md py-2 sm:py-2.5 text-[12px] sm:text-[13px] md:text-[14px] font-semibold hover:bg-[#f8fafc] hover:text-[#0f172a] transition-all duration-200"
-                >
-                  Details
-                </button>
-                <button className="flex-1 bg-brand-blue text-white rounded-md py-2 sm:py-2.5 text-[12px] sm:text-[13px] md:text-[14px] font-semibold hover:bg-brand-hover hover: transition-all duration-200">
-                  Apply
-                </button>
-                <HoverTooltip
-                  label={bookmarked.has(scholarship.id) ? "Remove Bookmark" : "Bookmark"}
-                >
-                  <button
-                    className={`w-9 sm:w-10 md:w-11 shrink-0 rounded-md flex items-center justify-center transition-all duration-200 ${
-                      bookmarked.has(scholarship.id)
-                        ? "border-blue-200 bg-blue-50"
-                        : "bg-white border border-[#cbd5e1] text-[#94a3b8] hover:bg-[#f8fafc] hover:text-[#64748b]"
-                    }`}
-                    onClick={(e) => toggleBookmark(e, scholarship.id)}
-                    aria-label={bookmarked.has(scholarship.id) ? "Remove Bookmark" : "Bookmark"}
-                  >
-                    <Bookmark className={`w-3.5 h-3.5 sm:w-4 sm:h-4 md:w-4.5 md:h-4.5 ${bookmarked.has(scholarship.id) ? "text-[#0000ff] fill-[#0000ff]" : ""}`} />
-                  </button>
-                </HoverTooltip>
-              </div>
-            </div>
-          </div>
-          );
-        })}
-      </div>
+            );
+          })}
+        </div>
       </div>
     </section>
   );
