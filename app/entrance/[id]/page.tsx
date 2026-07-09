@@ -307,7 +307,7 @@ const EntranceDetailsPage: React.FC = () => {
         </div>
 
         <div
-          className="relative w-full h-[280px] md:h-[380px] max-md:bg-contain bg-cover bg-center rounded-md overflow-hidden"
+          className="relative w-full h-[280px] md:h-[380px] max-md:bg-contain bg-cover bg-center bg-no-repeat rounded-md overflow-hidden"
           style={{
             backgroundImage: `url('${exam.imageUrl}')`,
             backgroundPosition: "center 20%",

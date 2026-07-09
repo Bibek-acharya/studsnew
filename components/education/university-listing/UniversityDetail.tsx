@@ -253,7 +253,7 @@ const UniversityDetail: React.FC = () => {
       <div className="w-full bg-white font-sans">
         {/* Banner */}
         <div
-          className="h-[220px] w-full bg-brand-blue bg-cover bg-center md:h-[360px]"
+          className="h-[220px] w-full bg-brand-blue max-md:bg-contain bg-cover bg-center bg-no-repeat md:h-[360px]"
           style={
             uni?.cover ? { backgroundImage: `url(${uni.cover})` } : undefined
           }
@@ -286,7 +286,7 @@ const UniversityDetail: React.FC = () => {
                     {name}
                   </h1>
                   {uni?.verified && (
-                    <BadgeCheck className="h-6 w-6 fill-blue-500 text-white" />
+                    <BadgeCheck className="h-6 w-6 shrink-0 fill-blue-500 text-white" />
                   )}
                 </div>
                 <div className="flex items-center gap-1.5 pt-1">
@@ -320,21 +320,21 @@ const UniversityDetail: React.FC = () => {
                 </button>
               </div>
 
-              <div className="mt-8 flex w-full items-center gap-3 lg:mt-0 lg:w-auto">
+              <div className="mt-4 flex w-full flex-wrap items-center gap-3 lg:mt-0 lg:w-auto">
                 <Link
                   href={`/universities/${name.toLowerCase().replace(/\s+/g, "-")}/affiliated-colleges`}
-                  className="flex flex-1 items-center justify-center gap-2 rounded-xl bg-blue-600 px-6 py-3 text-[15px] font-semibold text-white shadow-sm shadow-blue-600/20 transition-colors hover:bg-blue-700 lg:flex-none"
+                  className="flex flex-1 items-center justify-center gap-2 rounded-xl bg-blue-600 px-4 py-2.5 text-[13px] font-semibold text-white shadow-sm shadow-blue-600/20 transition-colors hover:bg-blue-700 sm:flex-none sm:px-6 sm:py-3 sm:text-[15px]"
                 >
                   <Building2 className="h-4 w-4" />
                   View Affiliated Colleges
                 </Link>
-                <button className="flex items-center justify-center gap-2 rounded-xl border border-gray-200 bg-white px-5 py-3 text-[15px] font-semibold text-gray-700 shadow-sm transition-colors hover:bg-gray-50">
+                <button className="flex items-center justify-center gap-2 rounded-xl border border-gray-200 bg-white px-4 py-2.5 text-[13px] font-semibold text-gray-700 shadow-sm transition-colors hover:bg-gray-50 sm:px-5 sm:py-3 sm:text-[15px]">
                   <Download className="h-4 w-4" />
-                  Prospectus
+                  <span className="hidden sm:inline">Prospectus</span>
                 </button>
                 <button
                   onClick={() => setIsShareModalOpen(true)}
-                  className="flex items-center justify-center rounded-xl border border-gray-200 bg-white p-3 text-gray-700 shadow-sm transition-colors hover:bg-gray-50"
+                  className="flex items-center justify-center rounded-xl border border-gray-200 bg-white p-2.5 text-gray-700 shadow-sm transition-colors hover:bg-gray-50 sm:p-3"
                 >
                   <Share2 className="h-5 w-5" />
                 </button>
@@ -574,35 +574,78 @@ const UniversityDetail: React.FC = () => {
                       ))}
                     </div>
                   </div>
-                  <div className="w-full overflow-x-auto">
-                    <div className="min-w-[700px]">
-                      <div className="grid grid-cols-12 gap-4 border-b border-gray-100 bg-white px-6 py-5 items-center">
-                        <div className="col-span-4 text-[13px] font-bold uppercase tracking-wider text-gray-800">
+                  {coursesList.length > 0 ? (
+                    <>
+                      {/* Desktop header */}
+                      <div className="hidden sm:grid sm:grid-cols-12 gap-4 border-b border-gray-100 bg-white px-6 py-5 items-center">
+                        <div className="sm:col-span-4 text-[13px] font-bold uppercase tracking-wider text-gray-800">
                           COURSES NAME
                         </div>
-                        <div className="col-span-2 text-[13px] font-bold uppercase tracking-wider text-gray-800">
+                        <div className="sm:col-span-2 text-[13px] font-bold uppercase tracking-wider text-gray-800">
                           DURATION
                         </div>
-                        <div className="col-span-3 text-[13px] font-bold uppercase tracking-wider text-gray-800">
+                        <div className="sm:col-span-3 text-[13px] font-bold uppercase tracking-wider text-gray-800">
                           FEES / YEAR
                         </div>
-                        <div className="col-span-3 text-[13px] font-bold uppercase tracking-wider text-gray-800">
+                        <div className="sm:col-span-3 text-[13px] font-bold uppercase tracking-wider text-gray-800">
                           ELIGIBILITY & SEAT
                         </div>
                       </div>
-                      {coursesList.length > 0 ? (
-                        coursesList
-                          .filter(
-                            (c: any) =>
-                              courseFilter === "all" ||
-                              c.level === courseFilter,
-                          )
-                          .map((course: any, i: number) => (
-                            <div
-                              key={i}
-                              className="grid grid-cols-12 gap-4 border-b border-gray-100 px-6 py-5 transition-colors hover:bg-gray-50/50 items-center"
-                            >
-                              <div className="col-span-4 pr-4">
+                      {coursesList
+                        .filter(
+                          (c: any) =>
+                            courseFilter === "all" || c.level === courseFilter,
+                        )
+                        .map((course: any, i: number) => (
+                          <div
+                            key={i}
+                            className="border-b border-gray-100 px-6 py-5 transition-colors hover:bg-gray-50/50"
+                          >
+                            {/* Mobile card view */}
+                            <div className="sm:hidden space-y-3">
+                              <h4 className="text-[15.5px] font-bold text-gray-900">
+                                {course.name}
+                              </h4>
+                              {course.sub || course.description ? (
+                                <p className="text-[12px] text-gray-500">
+                                  {course.sub || course.description}
+                                </p>
+                              ) : null}
+                              <div className="flex flex-wrap gap-x-6 gap-y-2 text-[13px]">
+                                <div>
+                                  <span className="text-gray-400">
+                                    Duration:{" "}
+                                  </span>
+                                  <span className="font-semibold text-gray-900">
+                                    {course.duration}
+                                  </span>
+                                </div>
+                                <div>
+                                  <span className="text-gray-400">Fee: </span>
+                                  <span className="font-semibold text-[#2563eb]">
+                                    {course.fee} / Year
+                                  </span>
+                                </div>
+                                <div>
+                                  <span className="text-gray-400">
+                                    Eligibility:{" "}
+                                  </span>
+                                  <span className="text-gray-600">
+                                    {course.eligibility}
+                                  </span>
+                                </div>
+                                {course.seats ? (
+                                  <div>
+                                    <span className="inline-block rounded bg-[#eafaef] px-2.5 py-1 text-[11px] font-bold text-[#16a34a]">
+                                      {course.seats}
+                                    </span>
+                                  </div>
+                                ) : null}
+                              </div>
+                            </div>
+                            {/* Desktop grid view */}
+                            <div className="hidden sm:grid sm:grid-cols-12 gap-4 items-center">
+                              <div className="sm:col-span-4 pr-4">
                                 <h4 className="text-[15.5px] font-bold text-gray-900">
                                   {course.name}
                                 </h4>
@@ -610,7 +653,7 @@ const UniversityDetail: React.FC = () => {
                                   {course.sub || course.description || ""}
                                 </p>
                               </div>
-                              <div className="col-span-2">
+                              <div className="sm:col-span-2">
                                 <h4 className="text-[15.5px] font-bold text-gray-900">
                                   {course.duration}
                                 </h4>
@@ -618,7 +661,7 @@ const UniversityDetail: React.FC = () => {
                                   {course.durationSub || ""}
                                 </p>
                               </div>
-                              <div className="col-span-3">
+                              <div className="sm:col-span-3">
                                 <h4 className="text-[15.5px] font-bold text-[#2563eb]">
                                   {course.fee}
                                 </h4>
@@ -626,7 +669,7 @@ const UniversityDetail: React.FC = () => {
                                   / Year
                                 </p>
                               </div>
-                              <div className="col-span-3">
+                              <div className="sm:col-span-3">
                                 <p className="mb-2 text-[12.5px] font-medium text-gray-600">
                                   {course.eligibility}
                                 </p>
@@ -635,14 +678,12 @@ const UniversityDetail: React.FC = () => {
                                 </span>
                               </div>
                             </div>
-                          ))
-                      ) : (
-                        <div className="px-6 py-10 text-center text-gray-400">
-                          <EmptyTabState tabName="Courses" />
-                        </div>
-                      )}
-                    </div>
-                  </div>
+                          </div>
+                        ))}
+                    </>
+                  ) : (
+                    <EmptyTabState tabName="Courses" />
+                  )}
                 </div>
               )}
 
@@ -1111,69 +1152,108 @@ const UniversityDetail: React.FC = () => {
                       ))}
                     </div>
                   </div>
-                  <div className="w-full overflow-x-auto">
-                    <div className="min-w-[800px]">
-                      <div className="grid grid-cols-12 gap-4 border-b border-gray-100 bg-white px-6 py-5 items-center">
-                        <div className="col-span-2 text-[13px] font-bold uppercase tracking-wider text-gray-800">
+                  {scholarshipsList.length > 0 ? (
+                    <>
+                      {/* Desktop header */}
+                      <div className="hidden sm:grid sm:grid-cols-12 gap-4 border-b border-gray-100 bg-white px-6 py-5 items-center">
+                        <div className="sm:col-span-2 text-[13px] font-bold uppercase tracking-wider text-gray-800">
                           PROGRAM
                         </div>
-                        <div className="col-span-2 text-[13px] font-bold uppercase tracking-wider text-gray-800">
+                        <div className="sm:col-span-2 text-[13px] font-bold uppercase tracking-wider text-gray-800">
                           SCHOLARSHIP
                         </div>
-                        <div className="col-span-2 text-[13px] font-bold uppercase tracking-wider text-gray-800">
+                        <div className="sm:col-span-2 text-[13px] font-bold uppercase tracking-wider text-gray-800">
                           BENEFIT
                         </div>
-                        <div className="col-span-3 text-[13px] font-bold uppercase tracking-wider text-gray-800">
+                        <div className="sm:col-span-3 text-[13px] font-bold uppercase tracking-wider text-gray-800">
                           FOR WHOM
                         </div>
-                        <div className="col-span-3 text-[13px] font-bold uppercase tracking-wider text-gray-800"></div>
+                        <div className="sm:col-span-3 text-[13px] font-bold uppercase tracking-wider text-gray-800"></div>
                       </div>
-                      {scholarshipsList.length > 0 ? (
-                        scholarshipsList
-                          .filter(
-                            (s: any) =>
-                              scholarFilter === "all" ||
-                              s.level === scholarFilter,
-                          )
-                          .map((sch: any, i: number) => (
-                            <div
-                              key={i}
-                              className="grid grid-cols-12 gap-4 border-b border-gray-100 px-6 py-5 transition-colors hover:bg-gray-50/50 items-center"
-                            >
-                              <div className="col-span-2">
+                      {scholarshipsList
+                        .filter(
+                          (s: any) =>
+                            scholarFilter === "all" ||
+                            s.level === scholarFilter,
+                        )
+                        .map((sch: any, i: number) => (
+                          <div
+                            key={i}
+                            className="border-b border-gray-100 px-6 py-5 transition-colors hover:bg-gray-50/50"
+                          >
+                            {/* Mobile card view */}
+                            <div className="sm:hidden space-y-3">
+                              <h4 className="text-[15px] font-bold text-gray-900">
+                                {sch.name || sch.title || ""}
+                              </h4>
+                              <div className="flex flex-wrap gap-x-6 gap-y-2 text-[13px]">
+                                {sch.program ? (
+                                  <div>
+                                    <span className="text-gray-400">
+                                      Program:{" "}
+                                    </span>
+                                    <span className="font-semibold text-gray-900">
+                                      {sch.program}
+                                    </span>
+                                  </div>
+                                ) : null}
+                                {sch.benefit ? (
+                                  <div>
+                                    <span className="text-gray-400">
+                                      Benefit:{" "}
+                                    </span>
+                                    <span className="font-medium text-green-600">
+                                      {sch.benefit}
+                                    </span>
+                                  </div>
+                                ) : null}
+                                {sch.forWhom || sch.eligibility ? (
+                                  <div>
+                                    <span className="text-gray-400">For: </span>
+                                    <span className="text-gray-600">
+                                      {sch.forWhom || sch.eligibility}
+                                    </span>
+                                  </div>
+                                ) : null}
+                              </div>
+                              <button className="rounded-lg bg-blue-600 px-5 py-2 text-xs font-bold text-white transition-colors hover:bg-blue-700">
+                                Get Scholarship
+                              </button>
+                            </div>
+                            {/* Desktop grid view */}
+                            <div className="hidden sm:grid sm:grid-cols-12 gap-4 items-center">
+                              <div className="sm:col-span-2">
                                 <h4 className="text-[14px] font-bold text-gray-900">
                                   {sch.program || ""}
                                 </h4>
                               </div>
-                              <div className="col-span-2">
+                              <div className="sm:col-span-2">
                                 <h4 className="text-[14px] font-bold text-gray-900">
                                   {sch.name || sch.title || ""}
                                 </h4>
                               </div>
-                              <div className="col-span-2">
+                              <div className="sm:col-span-2">
                                 <span className="text-[13px] font-medium text-green-600">
                                   {sch.benefit || ""}
                                 </span>
                               </div>
-                              <div className="col-span-3">
+                              <div className="sm:col-span-3">
                                 <span className="text-[13px] text-gray-600">
                                   {sch.forWhom || sch.eligibility || ""}
                                 </span>
                               </div>
-                              <div className="col-span-3">
+                              <div className="sm:col-span-3">
                                 <button className="rounded-lg bg-blue-600 px-5 py-2 text-xs font-bold text-white transition-colors hover:bg-blue-700">
                                   Get Scholarship
                                 </button>
                               </div>
                             </div>
-                          ))
-                      ) : (
-                        <div className="px-6 py-10 text-center text-gray-400">
-                          <EmptyTabState tabName="Scholarship" />
-                        </div>
-                      )}
-                    </div>
-                  </div>
+                          </div>
+                        ))}
+                    </>
+                  ) : (
+                    <EmptyTabState tabName="Scholarship" />
+                  )}
                 </div>
               )}
 
