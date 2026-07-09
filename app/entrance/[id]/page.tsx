@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useRef } from "react";
+import React, { useState, useRef, useCallback, useEffect } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { useQuery } from "@tanstack/react-query";
 import {
@@ -197,7 +197,11 @@ const EntranceDetailsPage: React.FC = () => {
   const [activeTab, setActiveTab] = useState<TabId>("overview");
   const [openFaq, setOpenFaq] = useState<number | null>(null);
   const [showNotificationModal, setShowNotificationModal] = useState(false);
-  const tabNavRef = useRef<HTMLDivElement>(null);
+  const [canScrollTabsLeft, setCanScrollTabsLeft] = useState(false);
+  const [canScrollTabsRight, setCanScrollTabsRight] = useState(false);
+  const [isTabsOverflowing, setIsTabsOverflowing] = useState(false);
+  const tabsScrollRef = useRef<HTMLDivElement>(null);
+  const tabsNavRef = useRef<HTMLDivElement>(null);
 
   const { data: apiData, isLoading } = useQuery({
     queryKey: ["entrance", id],
@@ -232,11 +236,57 @@ const EntranceDetailsPage: React.FC = () => {
     ? mapExamToDetails(entrance)
     : undefined;
 
-  const scrollTabs = (direction: number) => {
-    if (tabNavRef.current) {
-      tabNavRef.current.scrollBy({ left: direction * 200, behavior: "smooth" });
+  const updateTabScrollState = useCallback(() => {
+    const container = tabsScrollRef.current;
+    const nav = tabsNavRef.current;
+    const firstTab = nav?.firstElementChild as HTMLElement | null;
+    const lastTab = nav?.lastElementChild as HTMLElement | null;
+    if (!container || !nav || !firstTab || !lastTab) {
+      setIsTabsOverflowing(false);
+      setCanScrollTabsLeft(false);
+      setCanScrollTabsRight(false);
+      return;
     }
+    const containerRect = container.getBoundingClientRect();
+    const firstTabRect = firstTab.getBoundingClientRect();
+    const lastTabRect = lastTab.getBoundingClientRect();
+    const leftOverflow = firstTabRect.left < containerRect.left - 4;
+    const rightOverflow = lastTabRect.right > containerRect.right + 4;
+    setIsTabsOverflowing(leftOverflow || rightOverflow);
+    setCanScrollTabsLeft(leftOverflow);
+    setCanScrollTabsRight(rightOverflow);
+  }, []);
+
+  const scrollTabs = (direction: "left" | "right") => {
+    const container = tabsScrollRef.current;
+    if (!container) return;
+    const step = Math.max(180, Math.floor(container.clientWidth * 0.5));
+    container.scrollBy({
+      left: direction === "left" ? -step : step,
+      behavior: "smooth",
+    });
   };
+
+  useEffect(() => {
+    const container = tabsScrollRef.current;
+    if (!container) return;
+    const doUpdate = () => updateTabScrollState();
+    doUpdate();
+    container.addEventListener("scroll", doUpdate, { passive: true });
+    window.addEventListener("resize", doUpdate);
+    let observer: ResizeObserver | null = null;
+    if (typeof ResizeObserver !== "undefined") {
+      observer = new ResizeObserver(() => doUpdate());
+      observer.observe(container);
+      if (tabsNavRef.current) observer.observe(tabsNavRef.current);
+    }
+    requestAnimationFrame(() => doUpdate());
+    return () => {
+      container.removeEventListener("scroll", doUpdate);
+      window.removeEventListener("resize", doUpdate);
+      observer?.disconnect();
+    };
+  }, [updateTabScrollState]);
 
   if (isLoading) {
     return (
@@ -320,14 +370,30 @@ const EntranceDetailsPage: React.FC = () => {
       {/* Sticky Tab Navigation */}
       <div className="sticky top-0 z-40 bg-white border-b border-gray-100 overflow-hidden">
         <div className="mx-auto max-w-350 px-4 sm:px-6 lg:px-8 relative">
-          <button
-            onClick={() => scrollTabs(-1)}
-            className={`absolute left-0 top-1/2 -translate-y-1/2 z-10 w-9 h-9 bg-white border border-gray-200 rounded-full flex items-center justify-center md:hidden ${TABS[0].id === activeTab ? "hidden" : ""}`}
+          {isTabsOverflowing && canScrollTabsLeft && (
+            <button
+              onClick={() => scrollTabs("left")}
+              className="absolute left-0 top-1/2 -translate-y-1/2 z-10 w-9 h-9 bg-white border border-gray-200 rounded-full flex items-center justify-center"
+            >
+              <ChevronLeft className="w-5 h-5 text-gray-600" />
+            </button>
+          )}
+          {isTabsOverflowing && canScrollTabsRight && (
+            <button
+              onClick={() => scrollTabs("right")}
+              className="absolute right-0 top-1/2 -translate-y-1/2 z-10 w-9 h-9 bg-white border border-gray-200 rounded-full flex items-center justify-center"
+            >
+              <ChevronRight className="w-5 h-5 text-gray-600" />
+            </button>
+          )}
+          <div
+            ref={tabsScrollRef}
+            className="overflow-x-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]"
           >
-            <ChevronLeft className="w-5 h-5 text-gray-600" />
-          </button>
-          <div className="overflow-x-auto no-scrollbar" ref={tabNavRef}>
-            <nav className="flex space-x-8 whitespace-nowrap border-b border-gray-100">
+            <nav
+              ref={tabsNavRef}
+              className="flex w-max space-x-8 whitespace-nowrap"
+            >
               {TABS.map((tab) => (
                 <button
                   key={tab.id}
@@ -343,12 +409,6 @@ const EntranceDetailsPage: React.FC = () => {
               ))}
             </nav>
           </div>
-          <button
-            onClick={() => scrollTabs(1)}
-            className={`absolute right-0 top-1/2 -translate-y-1/2 z-10 w-9 h-9 bg-white border border-gray-200 rounded-full flex items-center justify-center md:hidden ${TABS[TABS.length - 1].id === activeTab ? "hidden" : ""}`}
-          >
-            <ChevronRight className="w-5 h-5 text-gray-600" />
-          </button>
         </div>
       </div>
 
