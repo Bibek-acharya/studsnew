@@ -2162,6 +2162,7 @@ export default function SuperadminAddCourseSection({
             setCropperOpen(false);
             setCropImageSrc(null);
           }}
+          aspectRatio={3.68 / 1}
         />
       )}
     </div>
