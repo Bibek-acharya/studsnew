@@ -1,10 +1,12 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 import { useQuery } from "@tanstack/react-query";
 import { useAuth } from "@/services/AuthContext";
 import { toast } from "sonner";
 import { College, apiService, getImageUrl } from "@/services/api";
 import { CollegeFilters, isCollegeVerified } from "@/app/find-college/types";
+import { FaMap } from "react-icons/fa6";
 import {
   BadgeCheckIcon,
   LockIcon,
@@ -564,8 +566,19 @@ const CollegeGrid: React.FC<CollegeGridProps> = ({
           </div>
         </div>
 
+        {/* View on Map (mobile only, desktop has it in sidebar) */}
+        <div className="lg:hidden mb-3">
+          <Link
+            href="/map"
+            className="flex w-full items-center justify-center gap-2 rounded-md border border-black/20 px-4 py-3 text-gray-700 hover:text-brand-blue transition-all duration-200 text-[15px] font-medium"
+          >
+            <FaMap />
+            <span>View on Map</span>
+          </Link>
+        </div>
+
         {/* Bottom Row: Select All and Quick Apply */}
-        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 pt-2 pb-4">
+        <div className="flex flex-row justify-between items-center gap-4 pt-2 pb-4">
           <label className="group flex cursor-pointer items-center gap-2.5">
             <div className="relative flex h-5 w-5 items-center justify-center">
               <input

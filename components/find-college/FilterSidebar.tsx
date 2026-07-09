@@ -825,7 +825,7 @@ const FilterSidebar: React.FC<FilterSidebarProps> = ({
       {/* ── Map Button ──────────────────────────────────────── */}
       <Link
         href="/map"
-        className="flex items-center gap-2 w-full mb-3 px-4 py-2.5 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition text-sm font-medium"
+        className="flex w-full items-center justify-center gap-2 mb-3 px-4 py-3 rounded-md border border-black/20 text-gray-700 hover:text-brand-blue transition-all duration-200 text-[15px] font-medium"
       >
         <FaMap />
         <span>View on Map</span>
