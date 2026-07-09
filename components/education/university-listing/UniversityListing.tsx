@@ -34,6 +34,8 @@ const mapUniversity = (uni: University): UniversityData => ({
   programs: uni.programsCount || 0,
   colleges: uni.collegesCount || 0,
   tags: [],
+  cover: uni.cover || undefined,
+  website: uni.website || undefined,
 });
 
 const UniversityListing: React.FC<UniversityListingProps> = ({ type }) => {

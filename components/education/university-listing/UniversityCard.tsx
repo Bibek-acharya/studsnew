@@ -35,7 +35,14 @@ const UniversityCard: React.FC<{
   const collegesHref = uni.id
     ? `/universities/${uni.id}/affiliated-colleges`
     : `/universities/${toSlug(uni.name)}/affiliated-colleges`;
-  const website = `www.${uni.name.toLowerCase().replace(/[^a-z0-9]+/g, "")}.edu.np`;
+  const displayWebsite = uni.website
+    ? uni.website.replace(/^https?:\/\//, "")
+    : `www.${uni.name.toLowerCase().replace(/[^a-z0-9]+/g, "")}.edu.np`;
+  const websiteHref = uni.website
+    ? uni.website.startsWith("http")
+      ? uni.website
+      : `https://${uni.website}`
+    : `https://${displayWebsite}`;
 
   return (
     <div className="flex h-full flex-col rounded-md border border-gray-200 bg-white p-4 transition-all duration-300 hover:border-blue-500/20 overflow-visible">
@@ -44,7 +51,16 @@ const UniversityCard: React.FC<{
         href={detailHref}
         className="group relative h-35 shrink-0 cursor-pointer overflow-hidden rounded-md"
       >
-        <div className="flex h-full w-full items-center justify-center bg-brand-blue"></div>
+        {uni.cover ? (
+          <Image
+            src={uni.cover}
+            alt={`${uni.name} cover`}
+            fill
+            className="object-cover transition-transform duration-300 group-hover:scale-105"
+          />
+        ) : (
+          <div className="flex h-full w-full items-center justify-center bg-brand-blue" />
+        )}
       </Link>
 
       {/* Content */}
@@ -105,12 +121,12 @@ const UniversityCard: React.FC<{
         <div className="mb-2 mt-1 flex items-center gap-2 text-[14px] text-gray-500">
           <Globe className="h-4.5 w-4.5 shrink-0 text-gray-400" />
           <a
-            href={`https://${website}`}
+            href={websiteHref}
             target="_blank"
             rel="noopener noreferrer"
             className="truncate cursor-pointer font-medium text-brand-blue hover:underline"
           >
-            {website}
+            {displayWebsite}
           </a>
         </div>
 

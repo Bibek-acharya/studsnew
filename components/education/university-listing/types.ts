@@ -8,9 +8,9 @@ export interface UniversityData {
   programs: number;
   colleges: number;
   tags: string[];
+  cover?: string;
+  website?: string;
 }
-
-
 
 export type FilterKey = "academic" | "type" | "rating";
 

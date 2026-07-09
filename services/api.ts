@@ -2385,6 +2385,12 @@ export const apiService = {
     return apiRequest(`/api/v1/education/scholarships${qs ? `?${qs}` : ""}`);
   },
 
+  async deleteScholarship(id: number): Promise<{ message: string }> {
+    return apiRequest<{ message: string }>(`/api/v1/admin/scholarships/${id}`, {
+      method: "DELETE",
+    });
+  },
+
   async toggleScholarshipFeature(
     id: number,
     featured: boolean,

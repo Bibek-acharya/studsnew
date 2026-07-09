@@ -348,14 +348,20 @@ const NewsDetailsPage: React.FC<{
             <h3 className="text-lg font-bold mb-4 text-gray-900">Tags:</h3>
 
             <div className="flex flex-wrap gap-2.5">
-              {(article.tags || []).map((tag: string) => (
-                <button
-                  key={tag}
-                  className="bg-gray-100 hover:bg-gray-200 text-gray-600 px-4 py-1.5 rounded-full text-sm font-medium transition-colors"
-                >
-                  {tag}
-                </button>
-              ))}
+              {(article.tags || [])
+                .flatMap((tag: string) =>
+                  typeof tag === "string"
+                    ? tag.split(/\s+/).filter(Boolean)
+                    : [],
+                )
+                .map((tag: string) => (
+                  <button
+                    key={tag}
+                    className="bg-gray-100 hover:bg-gray-200 text-gray-600 px-4 py-1.5 rounded-full text-sm font-medium transition-colors"
+                  >
+                    {tag.startsWith("#") ? tag : `#${tag}`}
+                  </button>
+                ))}
             </div>
           </div>
 
