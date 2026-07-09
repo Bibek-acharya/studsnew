@@ -418,7 +418,17 @@ export const EntranceCard: React.FC<{
 
       <div className="mt-3 sm:mt-4 pt-1 flex flex-col gap-2 sm:gap-2.5">
         <button
-          onClick={() => router.push(`/entrance/${exam.id}`)}
+          onClick={() => {
+            if (exam.applicationLink) {
+              window.open(
+                exam.applicationLink,
+                "_blank",
+                "noopener,noreferrer",
+              );
+            } else {
+              router.push(`/entrance/${exam.id}`);
+            }
+          }}
           className="w-full flex items-center justify-center gap-2 py-2 sm:py-2.5 px-3 bg-brand-blue text-white font-bold text-[12px] sm:text-[13px] rounded-md hover:bg-brand-hover transition-colors"
         >
           <Send className="w-4 h-4" /> Apply Now

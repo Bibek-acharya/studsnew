@@ -307,7 +307,7 @@ const EntranceDetailsPage: React.FC = () => {
         </div>
 
         <div
-          className="relative w-full h-[280px] md:h-[380px] bg-cover bg-center rounded-md overflow-hidden"
+          className="relative w-full h-[280px] md:h-[380px] max-md:bg-contain bg-cover bg-center rounded-md overflow-hidden"
           style={{
             backgroundImage: `url('${exam.imageUrl}')`,
             backgroundPosition: "center 20%",
@@ -322,7 +322,7 @@ const EntranceDetailsPage: React.FC = () => {
         <div className="mx-auto max-w-350 px-4 sm:px-6 lg:px-8 relative">
           <button
             onClick={() => scrollTabs(-1)}
-            className="absolute left-0 top-1/2 -translate-y-1/2 z-10 w-9 h-9 bg-white border border-gray-200 rounded-full flex items-center justify-center md:hidden"
+            className={`absolute left-0 top-1/2 -translate-y-1/2 z-10 w-9 h-9 bg-white border border-gray-200 rounded-full flex items-center justify-center md:hidden ${TABS[0].id === activeTab ? "hidden" : ""}`}
           >
             <ChevronLeft className="w-5 h-5 text-gray-600" />
           </button>
@@ -345,7 +345,7 @@ const EntranceDetailsPage: React.FC = () => {
           </div>
           <button
             onClick={() => scrollTabs(1)}
-            className="absolute right-0 top-1/2 -translate-y-1/2 z-10 w-9 h-9 bg-white border border-gray-200 rounded-full flex items-center justify-center md:hidden"
+            className={`absolute right-0 top-1/2 -translate-y-1/2 z-10 w-9 h-9 bg-white border border-gray-200 rounded-full flex items-center justify-center md:hidden ${TABS[TABS.length - 1].id === activeTab ? "hidden" : ""}`}
           >
             <ChevronRight className="w-5 h-5 text-gray-600" />
           </button>
