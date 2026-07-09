@@ -2511,6 +2511,7 @@ export default function SuperadminCreateEntranceSection({
             setCropperOpen(false);
             setCropImageSrc(null);
           }}
+          aspectRatio={3.68 / 1}
         />
       )}
     </div>
