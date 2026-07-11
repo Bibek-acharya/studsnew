@@ -28,6 +28,8 @@ export interface Course {
   image?: string;
   source?: string;
   institutionName?: string;
+  isGlobal?: boolean;
+  status?: string;
 }
 
 export interface CourseDetails extends Course {
@@ -311,6 +313,13 @@ export async function fetchCourseDetailsById(
     if (result?.data) return result.data;
   } catch {}
   return null;
+}
+
+export async function searchGlobalCourses(query: string): Promise<Course[]> {
+  const result = await apiFetch<{ data: { courses: Course[] } }>(
+    `/api/v1/education/courses/search?q=${encodeURIComponent(query)}`,
+  );
+  return result?.data?.courses || [];
 }
 
 export async function fetchCourseFilterCounts(): Promise<CourseFilterCounts> {

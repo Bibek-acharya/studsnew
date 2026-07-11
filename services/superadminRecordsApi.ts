@@ -111,6 +111,60 @@ export const superadminEntranceApi = {
   },
 };
 
+export const superadminGlobalCourseApi = {
+  async list(
+    page = 1,
+    limit = 50,
+  ): Promise<{
+    courses: any[];
+    meta: { total: number; page: number; limit: number; pages: number };
+  }> {
+    return superadminFetch(`/api/v1/admin/courses?page=${page}&limit=${limit}`);
+  },
+
+  async listPending(
+    page = 1,
+    limit = 50,
+  ): Promise<{
+    courses: any[];
+    meta: { total: number; page: number; limit: number; pages: number };
+  }> {
+    return superadminFetch(
+      `/api/v1/admin/courses/pending?page=${page}&limit=${limit}`,
+    );
+  },
+
+  async getById(id: number): Promise<any> {
+    return superadminFetch(`/api/v1/admin/courses/${id}`);
+  },
+
+  async create(data: any): Promise<any> {
+    return superadminFetch("/api/v1/admin/courses", {
+      method: "POST",
+      body: JSON.stringify(data),
+    });
+  },
+
+  async update(id: number, data: any): Promise<any> {
+    return superadminFetch(`/api/v1/admin/courses/${id}`, {
+      method: "PUT",
+      body: JSON.stringify(data),
+    });
+  },
+
+  async delete(id: number): Promise<void> {
+    await superadminFetch(`/api/v1/admin/courses/${id}`, {
+      method: "DELETE",
+    });
+  },
+
+  async publish(id: number): Promise<any> {
+    return superadminFetch(`/api/v1/admin/courses/${id}/publish`, {
+      method: "PUT",
+    });
+  },
+};
+
 export const superadminAdmissionApi = {
   async list(
     status?: string,

@@ -1,11 +1,12 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import dynamic from "next/dynamic";
 import { useRouter, useSearchParams } from "next/navigation";
 import * as LucideIcons from "lucide-react";
 import SectionHeader from "@/components/institution-zone/dashboard/shared/SectionHeader";
 import { institutionProgramApi } from "@/services/institutionProgramApi";
+import { searchGlobalCourses } from "@/services/course-api";
 import ImageCropperModal from "@/components/ScholarshipProvider/common/ImageCropperModal";
 import "react-quill-new/dist/quill.snow.css";
 
@@ -213,6 +214,14 @@ const CourseCreatePage: React.FC = () => {
   const [cropperOpen, setCropperOpen] = useState(false);
   const [cropImageSrc, setCropImageSrc] = useState<string | null>(null);
 
+  const [globalCourseId, setGlobalCourseId] = useState<number | null>(null);
+  const [globalCourseTitle, setGlobalCourseTitle] = useState("");
+  const [searchQuery, setSearchQuery] = useState("");
+  const [searchResults, setSearchResults] = useState<any[]>([]);
+  const [searchOpen, setSearchOpen] = useState(false);
+  const [searching, setSearching] = useState(false);
+  const searchRef = useRef<HTMLDivElement>(null);
+
   const getToken = () => localStorage.getItem("institutionToken");
   const apiBase = () =>
     process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080";
@@ -307,6 +316,55 @@ const CourseCreatePage: React.FC = () => {
       .finally(() => setLoading(false));
   }, [editId]);
 
+  useEffect(() => {
+    const handler = (e: MouseEvent) => {
+      if (searchRef.current && !searchRef.current.contains(e.target as Node)) {
+        setSearchOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", handler);
+    return () => document.removeEventListener("mousedown", handler);
+  }, []);
+
+  useEffect(() => {
+    if (searchQuery.length < 2 || globalCourseId) {
+      setSearchResults([]);
+      return;
+    }
+    const timer = setTimeout(async () => {
+      setSearching(true);
+      try {
+        const results = await searchGlobalCourses(searchQuery);
+        setSearchResults(
+          results.filter((c) => c.id !== String(globalCourseId)),
+        );
+        setSearchOpen(true);
+      } catch {
+        setSearchResults([]);
+      }
+      setSearching(false);
+    }, 300);
+    return () => clearTimeout(timer);
+  }, [searchQuery, globalCourseId]);
+
+  const selectGlobalCourse = (course: any) => {
+    setGlobalCourseId(Number(course.id));
+    setGlobalCourseTitle(course.title);
+    setSearchQuery(course.title);
+    setSearchOpen(false);
+    setTitle(course.title || "");
+    setDuration(course.duration || "");
+    setEstFee(course.estFee || "");
+    setAffiliation(course.affiliation || "");
+    setLevel(course.level || "");
+  };
+
+  const clearGlobalCourse = () => {
+    setGlobalCourseId(null);
+    setGlobalCourseTitle("");
+    setSearchQuery("");
+  };
+
   const fieldError = (field: string) =>
     errors[field] ? "ring-2 ring-red-500" : "";
 
@@ -323,6 +381,7 @@ const CourseCreatePage: React.FC = () => {
     duration,
     fee: estFee,
     banner_url: bannerUrl,
+    globalCourseId: globalCourseId || undefined,
     data: {
       level,
       affiliation,
@@ -524,6 +583,94 @@ const CourseCreatePage: React.FC = () => {
                   }}
                 />
               </div>
+            </div>
+            <div ref={searchRef} className="relative">
+              <label className={labelClass}>
+                Global Course Template{" "}
+                <span className="text-xs text-gray-400 font-normal">
+                  (search & select to auto-fill)
+                </span>
+              </label>
+              <div className="relative">
+                <input
+                  type="text"
+                  className={`${inputClass} ${globalCourseId ? "pr-20" : ""}`}
+                  placeholder="Search for a global course..."
+                  value={searchQuery}
+                  onChange={(e) => {
+                    setSearchQuery(e.target.value);
+                    if (globalCourseId) clearGlobalCourse();
+                  }}
+                />
+                {searching && (
+                  <div className="absolute right-3 top-1/2 -translate-y-1/2">
+                    <div className="w-4 h-4 border-2 border-blue-500 border-t-transparent rounded-full animate-spin" />
+                  </div>
+                )}
+                {globalCourseId && (
+                  <button
+                    type="button"
+                    onClick={clearGlobalCourse}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-red-500"
+                  >
+                    <svg
+                      width="16"
+                      height="16"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="2"
+                    >
+                      <line x1="18" y1="6" x2="6" y2="18" />
+                      <line x1="6" y1="6" x2="18" y2="18" />
+                    </svg>
+                  </button>
+                )}
+              </div>
+              {searchOpen && searchResults.length > 0 && (
+                <div className="absolute z-50 mt-1 w-full bg-white border border-gray-200 rounded-lg shadow-lg max-h-60 overflow-y-auto">
+                  {searchResults.map((course) => (
+                    <button
+                      key={course.id}
+                      type="button"
+                      onClick={() => selectGlobalCourse(course)}
+                      className="w-full px-4 py-3 text-left hover:bg-blue-50 border-b border-gray-100 last:border-0 transition-colors"
+                    >
+                      <div className="text-sm font-medium text-gray-900">
+                        {course.title}
+                      </div>
+                      <div className="text-xs text-gray-500 mt-0.5">
+                        {course.level} {course.field ? `· ${course.field}` : ""}{" "}
+                        {course.duration ? `· ${course.duration}` : ""}
+                      </div>
+                    </button>
+                  ))}
+                </div>
+              )}
+              {searchOpen &&
+                searchQuery.length >= 2 &&
+                searchResults.length === 0 &&
+                !searching && (
+                  <div className="absolute z-50 mt-1 w-full bg-white border border-gray-200 rounded-lg shadow-lg p-4 text-sm text-gray-500">
+                    No global courses found. Fill the form below to create a new
+                    course — it will be submitted for review.
+                  </div>
+                )}
+              {globalCourseId && (
+                <div className="mt-2 flex items-center gap-2 px-3 py-1.5 bg-green-50 text-green-700 text-xs rounded-lg border border-green-200">
+                  <svg
+                    width="14"
+                    height="14"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                  >
+                    <polyline points="20 6 9 17 4 12" />
+                  </svg>
+                  Using template: <strong>{globalCourseTitle}</strong>
+                </div>
+              )}
             </div>
             <div>
               <label className={labelClass}>

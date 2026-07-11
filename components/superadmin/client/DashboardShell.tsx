@@ -29,6 +29,7 @@ import {
   BookOpen,
   School,
   MapPin,
+  Globe,
 } from "lucide-react";
 
 const OverviewSection = lazy(() => import("./OverviewSection"));
@@ -123,6 +124,8 @@ const SuperadminAdmissionApplicationsSection = lazy(
 const SuperadminAdmissionShortlistSection = lazy(
   () => import("./SuperadminAdmissionShortlistSection"),
 );
+const GlobalCourseListSection = lazy(() => import("./GlobalCourseListSection"));
+const GlobalCourseFormSection = lazy(() => import("./GlobalCourseFormSection"));
 
 type SectionType =
   | "overview"
@@ -189,7 +192,9 @@ type SectionType =
   | "superadmin-create-admission"
   | "superadmin-admission-draft"
   | "superadmin-admission-applications"
-  | "superadmin-admission-shortlist";
+  | "superadmin-admission-shortlist"
+  | "global-course-directory"
+  | "global-add-course";
 
 interface NavChild {
   section: SectionType;
@@ -242,6 +247,15 @@ const navItems: NavItemData[] = [
     children: [
       { section: "superadmin-course-directory", label: "Course Directory" },
       { section: "superadmin-add-course", label: "Add/Edit Course" },
+    ],
+  },
+  {
+    icon: <Globe size={20} />,
+    label: "Global Courses",
+    section: "global-course-directory",
+    children: [
+      { section: "global-course-directory", label: "Course List" },
+      { section: "global-add-course", label: "Add New" },
     ],
   },
   {
@@ -567,6 +581,10 @@ export default function DashboardShell() {
         return <SuperadminCourseListSection setActiveSection={navigateTo} />;
       case "superadmin-add-course":
         return <SuperadminAddCourseSection setActiveSection={navigateTo} />;
+      case "global-course-directory":
+        return <GlobalCourseListSection setActiveSection={navigateTo as any} />;
+      case "global-add-course":
+        return <GlobalCourseFormSection setActiveSection={navigateTo} />;
       case "superadmin-entrance-directory":
         return (
           <SuperadminEntranceDirectorySection setActiveSection={navigateTo} />
