@@ -31,12 +31,19 @@ interface CourseGridProps {
 const COURSES_PER_PAGE = 18;
 
 const levelBadgeColor = (level?: string) => {
-  const l = (level || '').toLowerCase()
-  if (l.includes('+2') || l.includes('plus two') || l.includes('higher secondary')) return 'bg-[#7c3aed]/10 text-[#7c3aed]'
-  if (l.includes('bachelor') || l.includes('bach') || l.includes('diploma')) return 'bg-[#db2777]/10 text-[#db2777]'
-  if (l.includes('master') || l.includes('post')) return 'bg-[#ea580c]/10 text-[#ea580c]'
-  return 'bg-gray-100 text-gray-600'
-}
+  const l = (level || "").toLowerCase();
+  if (
+    l.includes("+2") ||
+    l.includes("plus two") ||
+    l.includes("higher secondary")
+  )
+    return "bg-[#7c3aed]/10 text-[#7c3aed]";
+  if (l.includes("bachelor") || l.includes("bach") || l.includes("diploma"))
+    return "bg-[#db2777]/10 text-[#db2777]";
+  if (l.includes("master") || l.includes("post"))
+    return "bg-[#ea580c]/10 text-[#ea580c]";
+  return "bg-gray-100 text-gray-600";
+};
 
 const CourseGrid: React.FC<CourseGridProps> = ({
   onNavigate,
@@ -44,11 +51,13 @@ const CourseGrid: React.FC<CourseGridProps> = ({
   isLoading,
 }) => {
   const router = useRouter();
-  const { isAuthenticated } = useAuth()
+  const { isAuthenticated } = useAuth();
   const [currentPage, setCurrentPage] = useState(1);
   const [savedCourseIds, setSavedCourseIds] = useState<number[]>([]);
   const [bookmarkMap, setBookmarkMap] = useState<Record<number, number>>({});
-  const [pendingBookmarks, setPendingBookmarks] = useState<Record<number, boolean>>({});
+  const [pendingBookmarks, setPendingBookmarks] = useState<
+    Record<number, boolean>
+  >({});
 
   const ads = [
     <CourseCarouselAd key="0" />,
@@ -57,36 +66,56 @@ const CourseGrid: React.FC<CourseGridProps> = ({
   ];
 
   const toggleSaved = async (courseId: number) => {
-    if (!isAuthenticated) { toast.error('Please login to save bookmarks'); return }
-    if (pendingBookmarks[courseId]) return
-    setPendingBookmarks(prev => ({ ...prev, [courseId]: true }))
-    const existingBookmarkId = bookmarkMap[courseId]
+    if (!isAuthenticated) {
+      toast.error("Please login to save bookmarks");
+      return;
+    }
+    if (pendingBookmarks[courseId]) return;
+    setPendingBookmarks((prev) => ({ ...prev, [courseId]: true }));
+    const existingBookmarkId = bookmarkMap[courseId];
     try {
       if (existingBookmarkId) {
-        await apiService.deleteBookmark(existingBookmarkId)
-        setBookmarkMap(prev => { const n = { ...prev }; delete n[courseId]; return n })
-        setSavedCourseIds(prev => prev.filter(id => id !== courseId))
-        toast.success('Removed from bookmarks')
+        await apiService.deleteBookmark(existingBookmarkId);
+        setBookmarkMap((prev) => {
+          const n = { ...prev };
+          delete n[courseId];
+          return n;
+        });
+        setSavedCourseIds((prev) => prev.filter((id) => id !== courseId));
+        toast.success("Removed from bookmarks");
       } else {
-        const res = await apiService.createBookmark(courseId, 'courses')
-        setBookmarkMap(prev => ({ ...prev, [courseId]: res.data.id }))
-        setSavedCourseIds(prev => [...prev, courseId])
-        toast.success('Added to bookmarks!')
+        const res = await apiService.createBookmark(courseId, "courses");
+        setBookmarkMap((prev) => ({ ...prev, [courseId]: res.data.id }));
+        setSavedCourseIds((prev) => [...prev, courseId]);
+        toast.success("Added to bookmarks!");
       }
-    } catch { toast.error('Failed to save bookmark') }
-    finally { setPendingBookmarks(prev => { const n = { ...prev }; delete n[courseId]; return n }) }
-  }
+    } catch {
+      toast.error("Failed to save bookmark");
+    } finally {
+      setPendingBookmarks((prev) => {
+        const n = { ...prev };
+        delete n[courseId];
+        return n;
+      });
+    }
+  };
 
   useEffect(() => {
-    if (!isAuthenticated) return
-    apiService.getBookmarksByType('courses').then(items => {
-      const ids: number[] = []
-      const map: Record<number, number> = {}
-      items.forEach(b => { ids.push(b.item_id); map[b.item_id] = b.id })
-      setSavedCourseIds(ids)
-      setBookmarkMap(map)
-    }).catch(() => {})
-  }, [isAuthenticated])
+    if (!isAuthenticated) return;
+    apiService
+      .getBookmarksByType("courses")
+      .then((items) => {
+        const ids: number[] = [];
+        const map: Record<number, number> = {};
+        items.forEach((b) => {
+          ids.push(b.item_id);
+          map[b.item_id] = b.id;
+        });
+        setSavedCourseIds(ids);
+        setBookmarkMap(map);
+      })
+      .catch(() => {});
+  }, [isAuthenticated]);
 
   const allCourses = useMemo(() => {
     if (courses.length > 0) return courses;
@@ -215,7 +244,8 @@ const CourseGrid: React.FC<CourseGridProps> = ({
                           Eligibility:
                         </span>{" "}
                         <span className="text-gray-600">
-                          As per institution criteria
+                          {(course as any).eligibility ||
+                            "As per institution criteria"}
                         </span>
                       </div>
                     </div>
@@ -226,7 +256,8 @@ const CourseGrid: React.FC<CourseGridProps> = ({
                           Entrance:
                         </span>{" "}
                         <span className="text-gray-600">
-                          Entrance exam required
+                          {(course as any).entranceExam ||
+                            "Entrance exam required"}
                         </span>
                       </div>
                     </div>
@@ -256,9 +287,7 @@ const CourseGrid: React.FC<CourseGridProps> = ({
                   {/* Action Buttons - All in a single row */}
                   <div className="flex gap-2 mt-3 -mb-3 py-5 border-t border-dashed border-gray-200">
                     <button
-                      onClick={() =>
-                        router.push(`/course-finder/${course.id}`)
-                      }
+                      onClick={() => router.push(`/course-finder/${course.id}`)}
                       className="flex-[1.5] flex items-center justify-center border border-gray-200 hover:bg-gray-50 text-slate-600 font-medium py-2 rounded-md transition-colors text-[12px] whitespace-nowrap"
                     >
                       Details
@@ -292,9 +321,24 @@ const CourseGrid: React.FC<CourseGridProps> = ({
                       }`}
                     >
                       {pendingBookmarks[Number(course.id)] ? (
-                        <svg className="w-4 h-4 animate-spin text-gray-400" fill="none" viewBox="0 0 24 24">
-                          <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-                          <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+                        <svg
+                          className="w-4 h-4 animate-spin text-gray-400"
+                          fill="none"
+                          viewBox="0 0 24 24"
+                        >
+                          <circle
+                            className="opacity-25"
+                            cx="12"
+                            cy="12"
+                            r="10"
+                            stroke="currentColor"
+                            strokeWidth="4"
+                          />
+                          <path
+                            className="opacity-75"
+                            fill="currentColor"
+                            d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"
+                          />
                         </svg>
                       ) : (
                         <Bookmark

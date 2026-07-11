@@ -5,7 +5,7 @@ import dynamic from "next/dynamic";
 import * as LucideIcons from "lucide-react";
 import { superadminProgramApi } from "@/services/superadminRecordsApi";
 import ImageCropperModal from "@/components/ScholarshipProvider/common/ImageCropperModal";
-import InstitutionSelector from "./InstitutionSelector";
+
 import "react-quill-new/dist/quill.snow.css";
 
 const kebabToPascal = (name: string): string =>
@@ -201,13 +201,6 @@ export default function SuperadminAddCourseSection({
   const [level, setLevel] = useState("");
   const [affiliation, setAffiliation] = useState("");
   const [estFee, setEstFee] = useState("");
-  const [institutionFields, setInstitutionFields] = useState({
-    name: "",
-    location: "",
-    affiliation: "",
-    link: "",
-    institution_id: 0,
-  });
   const [bannerUrl, setBannerUrl] = useState("");
 
   const [eligibilityRows, setEligibilityRows] = useState<EligibilityRow[]>([]);
@@ -216,6 +209,7 @@ export default function SuperadminAddCourseSection({
   const [fullTimeCourses, setFullTimeCourses] = useState<FullTimeCourse[]>([]);
   const [feeItems, setFeeItems] = useState<FeeItem[]>([]);
   const [scholarshipDesc, setScholarshipDesc] = useState("");
+  const [scholarshipNotes, setScholarshipNotes] = useState("");
   const [scholarships, setScholarships] = useState<ScholarshipItem[]>([]);
   const [features, setFeatures] = useState<FeatureItem[]>([]);
   const [whoShouldChoose, setWhoShouldChoose] = useState<WhoShouldChoose[]>([]);
@@ -269,17 +263,8 @@ export default function SuperadminAddCourseSection({
         if (d) {
           setLevel(d.level || "");
           setAffiliation(d.affiliation || "");
-          if (res.institution_name || d.institution_name) {
-            setInstitutionFields({
-              name: res.institution_name || d.institution_name || "",
-              location:
-                res.institution_location || d.institution_location || "",
-              affiliation: d.institution_affiliation || "",
-              link: res.institution_link || d.institution_link || "",
-              institution_id: res.institution_id || d.institution_id || 0,
-            });
-          }
           setScholarshipDesc(d.scholarshipDesc || "");
+          setScholarshipNotes(d.scholarshipNotes || "");
           if (d.whoShouldChoose)
             setWhoShouldChoose(
               d.whoShouldChoose.map((x: any, i: number) => ({
@@ -348,14 +333,11 @@ export default function SuperadminAddCourseSection({
     duration,
     fee: estFee,
     banner_url: bannerUrl,
-    institution_id: institutionFields.institution_id,
-    institution_name: institutionFields.name,
-    institution_location: institutionFields.location,
-    institution_link: institutionFields.link,
     data: {
       level,
-      affiliation: institutionFields.affiliation || affiliation,
+      affiliation,
       scholarshipDesc,
+      scholarshipNotes,
       whoShouldChoose: whoShouldChoose.map(({ id, ...rest }) => rest),
       features: features.map(({ id, ...rest }) => rest),
       eligibilityRows: eligibilityRows.map(({ id, ...rest }) => rest),
@@ -437,12 +419,6 @@ export default function SuperadminAddCourseSection({
       </div>
 
       <div className="space-y-6">
-        {/* 0. Institution Selector */}
-        <InstitutionSelector
-          value={institutionFields}
-          onChange={setInstitutionFields}
-        />
-
         {/* 1. Course Overview */}
         <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
           <div className="border-b border-gray-200 bg-gray-50/50 px-6 py-4 flex items-center gap-3">
@@ -2000,6 +1976,18 @@ export default function SuperadminAddCourseSection({
                   </div>
                 </div>
               ))}
+            </div>
+            <div>
+              <label className={labelClass}>
+                Scholarship Notes (important details, bullet points)
+              </label>
+              <textarea
+                className={`${inputClass} min-h-[120px]`}
+                rows={5}
+                placeholder={`• Scholarship is awarded based on merit\n• Students must maintain 3.0 GPA\n• Apply before admission deadline`}
+                value={scholarshipNotes}
+                onChange={(e) => setScholarshipNotes(e.target.value)}
+              />
             </div>
           </div>
         </div>

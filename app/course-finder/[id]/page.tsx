@@ -26,7 +26,9 @@ type TabKey =
   | "courses"
   | "fees"
   | "scholarships"
-  | "faq";
+  | "faq"
+  | "news"
+  | "blogs";
 
 const tabs: { key: TabKey; label: string }[] = [
   { key: "overview", label: "Overview" },
@@ -36,6 +38,8 @@ const tabs: { key: TabKey; label: string }[] = [
   { key: "fees", label: "Program Fee" },
   { key: "scholarships", label: "Scholarships" },
   { key: "faq", label: "FAQ" },
+  { key: "news", label: "News" },
+  { key: "blogs", label: "Blogs" },
 ];
 
 function stripHtml(html: string): string {
@@ -366,6 +370,24 @@ export default function CourseDetailPage({
                 </div>
               ) : null}
 
+              {about.length > 0 && (
+                <div className="mb-8">
+                  <h2 className="text-2xl font-bold text-gray-900 mb-4">
+                    About This Course
+                  </h2>
+                  <div className="space-y-4">
+                    {about.map((item: any, i: number) => (
+                      <p
+                        key={i}
+                        className="text-gray-600 text-[15px] md:text-[15.5px] leading-[1.8]"
+                      >
+                        {item}
+                      </p>
+                    ))}
+                  </div>
+                </div>
+              )}
+
               {whoShouldChoose.length > 0 && (
                 <div className="pt-6">
                   <h2 className="text-2xl font-bold text-gray-900 mb-6">
@@ -381,10 +403,10 @@ export default function CourseDetailPage({
                           {getIcon(item.icon, i)}
                         </div>
                         <h3 className="font-bold text-gray-900 mb-2 text-[17px]">
-                          {item.title}
+                          {item.title != null ? String(item.title) : ""}
                         </h3>
                         <p className="text-sm text-gray-600">
-                          {item.shortDesc}
+                          {item.shortDesc != null ? String(item.shortDesc) : ""}
                         </p>
                       </div>
                     ))}
@@ -527,6 +549,7 @@ export default function CourseDetailPage({
               )}
 
               {!course?.description &&
+                about.length === 0 &&
                 whoShouldChoose.length === 0 &&
                 features.length === 0 &&
                 subjectGroups.length === 0 &&
@@ -584,9 +607,18 @@ export default function CourseDetailPage({
                               {row.stream || row.faculty || "-"}
                             </td>
                             <td className="p-4 align-top border-r border-gray-200 text-gray-700">
-                              {Array.isArray(row.eligibility)
-                                ? row.eligibility.join(", ")
-                                : row.eligibility || "-"}
+                              {Array.isArray(row.eligibility) &&
+                              row.eligibility.length > 0 ? (
+                                <ul className="list-disc list-inside space-y-1">
+                                  {row.eligibility.map(
+                                    (item: string, j: number) => (
+                                      <li key={j}>{item}</li>
+                                    ),
+                                  )}
+                                </ul>
+                              ) : (
+                                row.eligibility || "-"
+                              )}
                             </td>
                             <td className="p-4 align-top text-gray-700">
                               {row.documents?.length > 0 ? (
@@ -666,9 +698,7 @@ export default function CourseDetailPage({
                       <h2 className="text-[22px] font-bold text-gray-900 mb-4">
                         {courseTitle} Courses & Fees
                       </h2>
-                      <h3 className="text-[17px] font-bold text-gray-900 mb-4">
-                        Full time Courses
-                      </h3>
+
                       <div className="overflow-x-auto rounded border border-gray-200">
                         <table className="w-full text-left border-collapse min-w-[800px]">
                           <thead>
@@ -705,7 +735,31 @@ export default function CourseDetailPage({
                                 </td>
                                 <td className="p-4 align-top border-r border-gray-200 text-gray-700">
                                   {ft.startDate && ft.endDate
-                                    ? `${ft.startDate} - ${ft.endDate}`
+                                    ? (() => {
+                                        const s = new Date(ft.startDate);
+                                        const e = new Date(ft.endDate);
+                                        const months = [
+                                          "Jan",
+                                          "Feb",
+                                          "Mar",
+                                          "Apr",
+                                          "May",
+                                          "Jun",
+                                          "Jul",
+                                          "Aug",
+                                          "Sep",
+                                          "Oct",
+                                          "Nov",
+                                          "Dec",
+                                        ];
+                                        if (
+                                          !isNaN(s.getTime()) &&
+                                          !isNaN(e.getTime())
+                                        ) {
+                                          return `${months[s.getMonth()]}-${months[e.getMonth()]} ${s.getFullYear()}`;
+                                        }
+                                        return `${ft.startDate} - ${ft.endDate}`;
+                                      })()
                                     : ft.admissionDuration || "-"}
                                 </td>
                                 <td className="p-4 align-top">
@@ -887,13 +941,15 @@ export default function CourseDetailPage({
                   <h3 className="text-[17px] font-bold text-gray-900 mb-4">
                     Full time Courses
                   </h3>
-                  {feeItems.length > 0 && (
+                  {(feeItems.length > 0 ||
+                    courseGovtFee ||
+                    coursePrivateFee) && (
                     <div className="overflow-x-auto rounded border border-gray-200 mb-6">
                       <table className="w-full text-left border-collapse min-w-[800px]">
                         <thead>
                           <tr className="bg-[#eff4fc] border-b border-gray-200">
                             <th className="p-4 font-bold text-gray-900 w-[28%] border-r border-gray-200">
-                              Particulars
+                              Particular
                             </th>
                             <th className="p-4 font-bold text-gray-900 w-[30%] border-r border-gray-200">
                               Amount (NPR)
@@ -928,6 +984,38 @@ export default function CourseDetailPage({
                               </td>
                             </tr>
                           ))}
+                          {courseGovtFee && (
+                            <tr className="border-b border-gray-200 hover:bg-gray-50">
+                              <td className="p-4 align-top border-r border-gray-200 font-semibold text-gray-900">
+                                Government Fee
+                              </td>
+                              <td className="p-4 align-top border-r border-gray-200 text-gray-700">
+                                {courseGovtFee}
+                              </td>
+                              <td className="p-4 align-top border-r border-gray-200 text-gray-700">
+                                One-time
+                              </td>
+                              <td className="p-4 align-top text-gray-700">
+                                Government college
+                              </td>
+                            </tr>
+                          )}
+                          {coursePrivateFee && (
+                            <tr className="border-b border-gray-200 hover:bg-gray-50">
+                              <td className="p-4 align-top border-r border-gray-200 font-semibold text-gray-900">
+                                Private Fee
+                              </td>
+                              <td className="p-4 align-top border-r border-gray-200 text-gray-700">
+                                {coursePrivateFee}
+                              </td>
+                              <td className="p-4 align-top border-r border-gray-200 text-gray-700">
+                                One-time
+                              </td>
+                              <td className="p-4 align-top text-gray-700">
+                                Private college
+                              </td>
+                            </tr>
+                          )}
                         </tbody>
                         <tfoot>
                           <tr className="bg-[#eff4fc]">
@@ -948,52 +1036,6 @@ export default function CourseDetailPage({
                       </table>
                     </div>
                   )}
-                  <div className="overflow-x-auto rounded border border-gray-200">
-                    <table className="w-full text-left border-collapse min-w-[500px]">
-                      <thead>
-                        <tr className="bg-[#eff4fc] border-b border-gray-200">
-                          <th className="p-4 font-bold text-gray-900 w-[35%] border-r border-gray-200">
-                            Particulars
-                          </th>
-                          <th className="p-4 font-bold text-gray-900">
-                            Amount (NPR)
-                          </th>
-                        </tr>
-                      </thead>
-                      <tbody className="text-[15px]">
-                        {courseEstFee && (
-                          <tr className="border-b border-gray-200 hover:bg-gray-50">
-                            <td className="p-4 align-top border-r border-gray-200 font-semibold text-gray-900">
-                              Estimated Fee
-                            </td>
-                            <td className="p-4 align-top text-gray-700">
-                              {courseEstFee}
-                            </td>
-                          </tr>
-                        )}
-                        {courseGovtFee && (
-                          <tr className="border-b border-gray-200 hover:bg-gray-50">
-                            <td className="p-4 align-top border-r border-gray-200 font-semibold text-gray-900">
-                              Government Fee
-                            </td>
-                            <td className="p-4 align-top text-gray-700">
-                              {courseGovtFee}
-                            </td>
-                          </tr>
-                        )}
-                        {coursePrivateFee && (
-                          <tr className="border-b border-gray-200 hover:bg-gray-50">
-                            <td className="p-4 align-top border-r border-gray-200 font-semibold text-gray-900">
-                              Private Fee
-                            </td>
-                            <td className="p-4 align-top text-gray-700">
-                              {coursePrivateFee}
-                            </td>
-                          </tr>
-                        )}
-                      </tbody>
-                    </table>
-                  </div>
                 </div>
               ) : (
                 <EmptyTabState tabName="fee" />
@@ -1014,42 +1056,56 @@ export default function CourseDetailPage({
                       {scholarshipDesc}
                     </p>
                   )}
-                  <div className="space-y-4 mb-8">
-                    {scholarships.map((s: any, i: number) => (
-                      <div key={i} className="flex items-start gap-4">
-                        <div className="w-8 h-8 rounded-full bg-[#0000ff] flex items-center justify-center text-white shrink-0 mt-0.5">
-                          <span className="text-sm font-bold">{i + 1}</span>
-                        </div>
-                        <div>
-                          <h3 className="font-bold text-gray-900 mb-1 text-[16px]">
-                            {s.title}
-                          </h3>
-                          {s.subtitle && (
-                            <p className="text-sm text-gray-600 mb-2">
-                              {s.subtitle}
-                            </p>
-                          )}
-                          {s.description && (
-                            <p className="text-sm text-gray-600 mb-2">
-                              {s.description}
-                            </p>
-                          )}
-                          <div className="flex items-center gap-2 flex-wrap">
-                            {s.coverage && (
-                              <span className="px-3 py-1 bg-green-100 text-green-700 rounded-full font-semibold text-xs">
-                                {s.coverage}
-                              </span>
+
+                  {scholarships.length > 0 && (
+                    <>
+                      <h3 className="text-[17px] font-bold text-gray-900 mb-4">
+                        Scholarship Types
+                      </h3>
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
+                        {scholarships.map((s: any, i: number) => (
+                          <div
+                            key={i}
+                            className="border border-gray-200 rounded-xl p-5 bg-white"
+                          >
+                            <div className="flex items-center gap-3 mb-3">
+                              <div className="w-10 h-10 rounded-full bg-[#0000ff] flex items-center justify-center text-white shrink-0">
+                                <span className="text-sm font-bold">
+                                  {i + 1}
+                                </span>
+                              </div>
+                              <h3 className="font-bold text-gray-900 text-[16px]">
+                                {s.title}
+                              </h3>
+                            </div>
+                            {s.subtitle && (
+                              <p className="text-sm text-gray-500 mb-2">
+                                {s.subtitle}
+                              </p>
                             )}
-                            {s.requirement && (
-                              <span className="px-3 py-1 bg-blue-100 text-blue-700 rounded-full font-semibold text-xs">
-                                {s.requirement}
-                              </span>
+                            {s.description && (
+                              <p className="text-sm text-gray-600 mb-3">
+                                {s.description}
+                              </p>
                             )}
+                            <div className="flex items-center gap-2 flex-wrap">
+                              {s.coverage && (
+                                <span className="px-3 py-1 bg-green-100 text-green-700 rounded-full font-semibold text-xs">
+                                  Amount: {s.coverage}
+                                </span>
+                              )}
+                              {s.requirement && (
+                                <span className="px-3 py-1 bg-blue-100 text-blue-700 rounded-full font-semibold text-xs">
+                                  {s.requirement}
+                                </span>
+                              )}
+                            </div>
                           </div>
-                        </div>
+                        ))}
                       </div>
-                    ))}
-                  </div>
+                    </>
+                  )}
+
                   <div className="bg-[#f8fafc] border border-gray-200 rounded-xl p-5">
                     <h4 className="font-bold text-gray-900 mb-3 text-[16px]">
                       Important Notes:
@@ -1142,6 +1198,20 @@ export default function CourseDetailPage({
               ) : (
                 <EmptyTabState tabName="FAQ" />
               )}
+            </div>
+          )}
+
+          {/* News Tab */}
+          {activeTab === "news" && (
+            <div className="tab-content">
+              <EmptyTabState tabName="news" />
+            </div>
+          )}
+
+          {/* Blogs Tab */}
+          {activeTab === "blogs" && (
+            <div className="tab-content">
+              <EmptyTabState tabName="blogs" />
             </div>
           )}
         </div>
