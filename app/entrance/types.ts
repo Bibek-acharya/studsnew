@@ -59,6 +59,7 @@ export interface ExamDetails {
   conductingBody: string;
   examFrequency: string;
   examMode: string;
+  examScope: string;
   applicationFee: string;
   foreignFee: string;
   phone: string;
@@ -69,7 +70,12 @@ export interface ExamDetails {
   eligibility: { title: string; description: string }[];
   examPattern: { label: string; value: string }[];
   subjectMarks: { subject: string; marks: number }[];
-  modelSets: { title: string; size: string; description: string }[];
+  modelSets: {
+    title: string;
+    size: string;
+    description: string;
+    fileUrl?: string;
+  }[];
   courses: string[];
   admissionSteps: { title: string; description: string }[];
   admitCardInfo: string;
@@ -94,4 +100,8 @@ export interface ExamDetails {
   noticeFile?: string;
   contactNumber?: string;
   socialLinks?: { platform: string; url: string }[];
+  requiredDocuments?: any[];
+  examinationSchedule?: any[];
+  programsOffered?: any[];
+  embeddedMap?: string;
 }

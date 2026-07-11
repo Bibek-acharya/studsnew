@@ -44,6 +44,10 @@ export default function InstitutionSelector({
   const containerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
+    setQuery(value.name);
+  }, [value.name]);
+
+  useEffect(() => {
     const handleClick = (e: MouseEvent) => {
       if (
         containerRef.current &&

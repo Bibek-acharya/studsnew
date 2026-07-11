@@ -29,8 +29,20 @@ import {
   Building,
   BadgeCheckIcon,
   FileText,
+  DollarSign,
+  Calendar,
+  MessageCircle,
+  AlertTriangle,
+  CheckCircle2,
 } from "lucide-react";
-import { FaSliders } from "react-icons/fa6";
+import {
+  FaSliders,
+  FaFacebook,
+  FaTwitter,
+  FaInstagram,
+  FaYoutube,
+} from "react-icons/fa6";
+import { FaWhatsapp } from "react-icons/fa";
 
 interface EntranceGridProps {
   filters: EntranceFilterState;
@@ -384,35 +396,74 @@ export const EntranceCard: React.FC<{
 
         <div className="bg-[#f8fafc] rounded-md sm:rounded-md p-2 sm:p-2.5 flex flex-col gap-1.5 sm:gap-2 mt-auto border border-[#f1f5f9]">
           <div className="flex items-center gap-2 sm:gap-2.5 text-[11px] xs:text-[12px] sm:text-[13px] text-[#475569]">
-            <Clock className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-[#94a3b8] shrink-0" />
-            <span className="truncate font-medium text-red-500 text-[11px] sm:text-[12px]">
-              Ends: {formatDate(exam.deadline || exam.examDate) || "TBA"}
+            {exam.status && (
+              <span
+                className={`inline-flex items-center gap-1 text-[10px] font-bold px-1.5 py-0.5 rounded uppercase ${
+                  exam.status === "published" || exam.status === "Ongoing"
+                    ? "bg-green-50 text-green-700"
+                    : exam.status === "draft" || exam.status === "Upcoming"
+                      ? "bg-orange-50 text-orange-700"
+                      : "bg-red-50 text-red-700"
+                }`}
+              >
+                {exam.status === "published" || exam.status === "Ongoing" ? (
+                  <CheckCircle2 className="w-3 h-3" />
+                ) : (
+                  <AlertTriangle className="w-3 h-3" />
+                )}
+                {exam.status}
+              </span>
+            )}
+          </div>
+          <div className="flex items-center gap-2 sm:gap-2.5 text-[11px] xs:text-[12px] sm:text-[13px] text-[#475569]">
+            <Calendar className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-[#94a3b8] shrink-0" />
+            <span className="truncate font-medium text-[11px] sm:text-[12px]">
+              {exam.examDate
+                ? `Exam: ${formatDate(exam.examDate)}`
+                : exam.deadline
+                  ? `Deadline: ${formatDate(exam.deadline)}`
+                  : "TBA"}
             </span>
           </div>
+          {exam.applicationFee && (
+            <div className="flex items-center gap-2 sm:gap-2.5 text-[11px] xs:text-[12px] sm:text-[13px] text-[#475569]">
+              <DollarSign className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-[#94a3b8] shrink-0" />
+              <span className="font-semibold text-[11px] sm:text-[12px]">
+                {exam.applicationFee}
+              </span>
+            </div>
+          )}
           <div className="flex items-center gap-2 sm:gap-2.5 text-[11px] xs:text-[12px] sm:text-[13px] text-[#475569]">
             <GraduationCap className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-[#94a3b8] shrink-0" />
             <span className="truncate text-[11px] sm:text-[12px]">
               {exam.eligibility}
             </span>
           </div>
-          <div className="flex items-center gap-2 sm:gap-2.5 text-[11px] xs:text-[12px] sm:text-[13px] text-[#475569]">
-            <Users className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-[#94a3b8] shrink-0" />
-            <div className="flex gap-1.5 sm:gap-2 text-[10px] sm:text-[11px]">
-              <a
-                href={exam.whatsapp}
-                className="text-[#059669] hover:underline font-bold"
-              >
-                WhatsApp
-              </a>
-              <span className="text-gray-300">|</span>
-              <a
-                href={exam.viber}
-                className="text-[#6d28d9] hover:underline font-bold"
-              >
-                Viber
-              </a>
+          {exam.socialLinks && exam.socialLinks.length > 0 && (
+            <div className="flex items-center gap-1.5 flex-wrap pt-1 border-t border-[#e2e8f0] mt-1">
+              {exam.socialLinks.map((link, i) => {
+                const iconMap2: Record<string, React.ReactNode> = {
+                  facebook: <FaFacebook className="w-3 h-3" />,
+                  twitter: <FaTwitter className="w-3 h-3" />,
+                  instagram: <FaInstagram className="w-3 h-3" />,
+                  youtube: <FaYoutube className="w-3 h-3" />,
+                  whatsapp: <FaWhatsapp className="w-3 h-3" />,
+                };
+                return (
+                  <a
+                    key={i}
+                    href={link.url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="p-1 hover:bg-gray-100 rounded"
+                    title={link.platform}
+                  >
+                    {iconMap2[link.platform] || <Globe className="w-3 h-3" />}
+                  </a>
+                );
+              })}
             </div>
-          </div>
+          )}
         </div>
       </main>
 

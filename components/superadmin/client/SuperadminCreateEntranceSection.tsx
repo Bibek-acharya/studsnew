@@ -303,6 +303,8 @@ interface KeyDate {
   date: string;
   endDate: string;
   event: string;
+  icon: string;
+  color: string;
 }
 interface ContactPerson {
   id: number;
@@ -322,6 +324,22 @@ interface SocialLink {
   id: number;
   platform: string;
   url: string;
+}
+interface RequiredDocument {
+  id: number;
+  title: string;
+  description: string;
+}
+interface ExaminationScheduleItem {
+  id: number;
+  examDate: string;
+  shifts: string;
+  centers: string;
+}
+interface ProgramOfferedItem {
+  id: number;
+  programName: string;
+  description: string;
 }
 
 const nextId = <T extends { id: number }>(items: T[]) =>
@@ -414,11 +432,22 @@ export default function SuperadminCreateEntranceSection({
     null,
   );
   const [applicationLink, setApplicationLink] = useState("");
+  const [embeddedMap, setEmbeddedMap] = useState("");
   const [noticeFile, setNoticeFile] = useState("");
+  const [noticeFileName, setNoticeFileName] = useState("");
   const [uploadingNotice, setUploadingNotice] = useState(false);
   const [entranceEmail, setEntranceEmail] = useState("");
   const [entranceContactNumber, setEntranceContactNumber] = useState("");
   const [socialLinks, setSocialLinks] = useState<SocialLink[]>([]);
+  const [requiredDocuments, setRequiredDocuments] = useState<
+    RequiredDocument[]
+  >([]);
+  const [examinationSchedule, setExaminationSchedule] = useState<
+    ExaminationScheduleItem[]
+  >([]);
+  const [programsOffered, setProgramsOffered] = useState<ProgramOfferedItem[]>(
+    [],
+  );
   const [institutionFields, setInstitutionFields] = useState({
     name: "",
     location: "",
@@ -426,6 +455,12 @@ export default function SuperadminCreateEntranceSection({
     link: "",
     institution_id: 0,
   });
+
+  const ensureIds = (items: any[], start = 1): any[] =>
+    (items || []).map((item: any, i: number) => ({
+      ...item,
+      id: item.id != null ? item.id : i + start,
+    }));
 
   useEffect(() => {
     const stored = localStorage.getItem("superadmin_edit_entrance_id");
@@ -458,26 +493,34 @@ export default function SuperadminCreateEntranceSection({
         setApplicationFee(exam.application_fee || "");
         setExamMode(exam.exam_mode || "");
         setExamScope(exam.exam_scope || "");
-        setOverviewDetails(parseArray(exam.overview_details));
-        setExamDateSchedules(parseArray(exam.exam_date_schedules));
-        setEligibilityList(parseArray(exam.eligibility_list));
-        setApplicationSteps(parseArray(exam.application_steps));
-        setExamPattern(parseArray(exam.exam_pattern));
-        setSubjectMarks(parseArray(exam.subject_marks));
-        setModelSets(parseArray(exam.model_sets));
-        setUpcomingDates(parseArray(exam.upcoming_dates));
-        setContactPersons(parseArray(exam.contact_persons));
-        setFaqs(parseArray(exam.faqs));
-        setApplicationLink(exam.application_link || "");
-        setNoticeFile(exam.notice_file || "");
-        setEntranceEmail(exam.email || "");
-        setEntranceContactNumber(exam.contact_number || "");
-        setSocialLinks(
-          parseArray(exam.social_links).map((s: any, i: number) => ({
-            ...s,
-            id: s.id || i + 1,
+        setOverviewDetails(ensureIds(parseArray(exam.overview_details)));
+        setExamDateSchedules(ensureIds(parseArray(exam.exam_date_schedules)));
+        setEligibilityList(ensureIds(parseArray(exam.eligibility_list)));
+        setApplicationSteps(ensureIds(parseArray(exam.application_steps)));
+        setExamPattern(ensureIds(parseArray(exam.exam_pattern)));
+        setSubjectMarks(ensureIds(parseArray(exam.subject_marks)));
+        setModelSets(ensureIds(parseArray(exam.model_sets)));
+        setUpcomingDates(
+          ensureIds(parseArray(exam.upcoming_dates)).map((d: any) => ({
+            icon: "calendar",
+            color: "blue",
+            ...d,
           })),
         );
+        setContactPersons(ensureIds(parseArray(exam.contact_persons)));
+        setFaqs(ensureIds(parseArray(exam.faqs)));
+        setApplicationLink(exam.application_link || "");
+        setEmbeddedMap(exam.embedded_map || "");
+        setNoticeFile(exam.notice_file || "");
+        setNoticeFileName("");
+        setEntranceEmail(exam.email || "");
+        setEntranceContactNumber(exam.contact_number || "");
+        setSocialLinks(ensureIds(parseArray(exam.social_links)));
+        setRequiredDocuments(ensureIds(parseArray(exam.required_documents)));
+        setExaminationSchedule(
+          ensureIds(parseArray(exam.examination_schedule)),
+        );
+        setProgramsOffered(ensureIds(parseArray(exam.programs_offered)));
         if (exam.institution_name) {
           setInstitutionFields({
             name: exam.institution_name || "",
@@ -605,6 +648,7 @@ export default function SuperadminCreateEntranceSection({
         institution_name: institutionFields.name,
         institution_location: institutionFields.location,
         institution_link: institutionFields.link,
+        institution_affiliation: institutionFields.affiliation,
         overview_details: [...overviewDetails.map(({ id, ...rest }) => rest)],
         exam_date_schedules: examDateSchedules,
         eligibility_list: eligibilityList,
@@ -619,7 +663,13 @@ export default function SuperadminCreateEntranceSection({
         contact_number: entranceContactNumber,
         social_links: socialLinks.map(({ id, ...rest }) => rest),
         application_link: applicationLink,
+        embedded_map: embeddedMap,
         notice_file: noticeFile,
+        required_documents: requiredDocuments.map(({ id, ...rest }) => rest),
+        examination_schedule: examinationSchedule.map(
+          ({ id, ...rest }) => rest,
+        ),
+        programs_offered: programsOffered.map(({ id, ...rest }) => rest),
       };
       if (editId) {
         await superadminEntranceApi.update(editId, payload);
@@ -881,6 +931,19 @@ export default function SuperadminCreateEntranceSection({
               </p>
             </div>
             <div>
+              <label className={labelClass}>Embedded Map</label>
+              <textarea
+                className={inputClass}
+                rows={3}
+                placeholder="Paste Google Maps iframe embed code..."
+                value={embeddedMap}
+                onChange={(e) => setEmbeddedMap(e.target.value)}
+              />
+              <p className="text-xs text-gray-500 mt-1">
+                Google Maps iframe embed code for institution location
+              </p>
+            </div>
+            <div>
               <div className="flex items-center justify-between mb-4">
                 <h3 className="text-sm font-semibold text-gray-700">
                   Detail & Information Table
@@ -1032,7 +1095,14 @@ export default function SuperadminCreateEntranceSection({
               onClick={() =>
                 setExamDateSchedules((prev) => [
                   ...prev,
-                  { id: nextId(prev), date: "", endDate: "", event: "" },
+                  {
+                    id: nextId(prev),
+                    date: "",
+                    endDate: "",
+                    event: "",
+                    icon: "calendar",
+                    color: "blue",
+                  },
                 ])
               }
               className="px-3 py-1.5 text-sm font-medium text-blue-600 bg-white border border-gray-200 rounded-lg hover:bg-blue-50 flex items-center gap-1.5 transition-colors shadow-sm shrink-0"
@@ -1239,17 +1309,15 @@ export default function SuperadminCreateEntranceSection({
                       Criteria Description{" "}
                       <span className="text-red-500">*</span>
                     </label>
-                    <textarea
-                      className={`${inputClass} min-h-[60px]`}
-                      rows={2}
-                      placeholder="Must have passed 10+2 or equivalent..."
+                    <QuillEditor
+                      theme="snow"
+                      modules={quillModules}
+                      className="bg-white"
                       value={ec.description}
-                      onChange={(e) =>
+                      onChange={(v) =>
                         setEligibilityList((prev) =>
                           prev.map((x) =>
-                            x.id === ec.id
-                              ? { ...x, description: e.target.value }
-                              : x,
+                            x.id === ec.id ? { ...x, description: v } : x,
                           ),
                         )
                       }
@@ -1337,17 +1405,15 @@ export default function SuperadminCreateEntranceSection({
                     <label className={labelClass}>
                       Description <span className="text-red-500">*</span>
                     </label>
-                    <textarea
-                      className={`${inputClass} min-h-[80px]`}
-                      rows={3}
-                      placeholder="Description of this application step..."
+                    <QuillEditor
+                      theme="snow"
+                      modules={quillModules}
+                      className="bg-white"
                       value={step.description}
-                      onChange={(e) =>
+                      onChange={(v) =>
                         setApplicationSteps((prev) =>
                           prev.map((x) =>
-                            x.id === step.id
-                              ? { ...x, description: e.target.value }
-                              : x,
+                            x.id === step.id ? { ...x, description: v } : x,
                           ),
                         )
                       }
@@ -1789,7 +1855,14 @@ export default function SuperadminCreateEntranceSection({
             onAdd={() =>
               setUpcomingDates((prev) => [
                 ...prev,
-                { id: nextId(prev), date: "", endDate: "", event: "" },
+                {
+                  id: nextId(prev),
+                  date: "",
+                  endDate: "",
+                  event: "",
+                  icon: "calendar",
+                  color: "blue",
+                },
               ])
             }
             addLabel="Add Upcoming Date"
@@ -1831,7 +1904,7 @@ export default function SuperadminCreateEntranceSection({
                           <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
                         </svg>
                       </button>
-                      <div className="grid grid-cols-1 md:grid-cols-4 gap-4 pr-8">
+                      <div className="grid grid-cols-1 md:grid-cols-6 gap-4 pr-8">
                         <div>
                           <label className="text-xs font-medium text-gray-500 mb-1 block">
                             Start Date
@@ -1901,6 +1974,52 @@ export default function SuperadminCreateEntranceSection({
                               </span>
                             )}
                           </div>
+                        </div>
+                        <div>
+                          <label className="text-xs font-medium text-gray-500 mb-1 block">
+                            Icon
+                          </label>
+                          <input
+                            type="text"
+                            className={inputClass}
+                            placeholder="e.g. calendar, bell"
+                            value={d.icon}
+                            onChange={(e) =>
+                              setUpcomingDates((prev) =>
+                                prev.map((x) =>
+                                  x.id === d.id
+                                    ? { ...x, icon: e.target.value }
+                                    : x,
+                                ),
+                              )
+                            }
+                          />
+                        </div>
+                        <div>
+                          <label className="text-xs font-medium text-gray-500 mb-1 block">
+                            Color
+                          </label>
+                          <select
+                            className={selectClass}
+                            value={d.color}
+                            onChange={(e) =>
+                              setUpcomingDates((prev) =>
+                                prev.map((x) =>
+                                  x.id === d.id
+                                    ? { ...x, color: e.target.value }
+                                    : x,
+                                ),
+                              )
+                            }
+                          >
+                            <option value="blue">Blue</option>
+                            <option value="green">Green</option>
+                            <option value="orange">Orange</option>
+                            <option value="purple">Purple</option>
+                            <option value="red">Red</option>
+                            <option value="teal">Teal</option>
+                            <option value="indigo">Indigo</option>
+                          </select>
                         </div>
                       </div>
                     </div>
@@ -2405,6 +2524,7 @@ export default function SuperadminCreateEntranceSection({
                         "institution/entrance",
                       );
                       setNoticeFile(url);
+                      setNoticeFileName(file.name);
                     } catch (e) {
                       console.error("Notice upload failed:", e);
                     }
@@ -2414,7 +2534,10 @@ export default function SuperadminCreateEntranceSection({
               </label>
               {noticeFile && (
                 <button
-                  onClick={() => setNoticeFile("")}
+                  onClick={() => {
+                    setNoticeFile("");
+                    setNoticeFileName("");
+                  }}
                   className="text-sm text-red-500 hover:text-red-700"
                 >
                   Remove
@@ -2422,10 +2545,299 @@ export default function SuperadminCreateEntranceSection({
               )}
             </div>
             {noticeFile && (
-              <p className="mt-2 text-xs text-green-600">
-                File uploaded successfully
-              </p>
+              <div className="mt-3 p-3 bg-green-50 border border-green-200 rounded-lg">
+                <p className="text-xs font-medium text-green-700">
+                  File uploaded successfully
+                </p>
+                <p className="text-xs text-green-600 mt-1">
+                  {noticeFileName || noticeFile.split("/").pop()}
+                </p>
+              </div>
             )}
+          </div>
+        </div>
+
+        {/* 14. Required Documents */}
+        <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+          <SectionItemHeader
+            icon="file-check"
+            title="Required Documents"
+            subtitle="List required documents for applicants"
+            onAdd={() =>
+              setRequiredDocuments((prev) => [
+                ...prev,
+                { id: nextId(prev), title: "", description: "" },
+              ])
+            }
+            addLabel="Add Document"
+          />
+          <div className="p-6 space-y-4">
+            {requiredDocuments.map((doc) => (
+              <div
+                key={doc.id}
+                className="p-5 bg-gray-50 rounded-lg border border-gray-200 relative group"
+              >
+                <button
+                  onClick={() =>
+                    setRequiredDocuments((prev) =>
+                      prev.filter((x) => x.id !== doc.id),
+                    )
+                  }
+                  className="absolute top-4 right-4 p-2 text-red-500 hover:bg-red-50 rounded-lg transition-colors"
+                >
+                  <svg
+                    width="18"
+                    height="18"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  >
+                    <polyline points="3 6 5 6 21 6" />
+                    <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
+                  </svg>
+                </button>
+                <div className="grid grid-cols-1 gap-4 pr-12">
+                  <div>
+                    <label className={labelClass}>
+                      Document Title <span className="text-red-500">*</span>
+                    </label>
+                    <input
+                      type="text"
+                      className={inputClass}
+                      placeholder="e.g. SLC/SEE Marksheet"
+                      value={doc.title}
+                      onChange={(e) =>
+                        setRequiredDocuments((prev) =>
+                          prev.map((x) =>
+                            x.id === doc.id
+                              ? { ...x, title: e.target.value }
+                              : x,
+                          ),
+                        )
+                      }
+                    />
+                  </div>
+                  <div>
+                    <label className={labelClass}>Description</label>
+                    <textarea
+                      className={`${inputClass} min-h-[60px]`}
+                      rows={2}
+                      placeholder="Specifications about the document..."
+                      value={doc.description}
+                      onChange={(e) =>
+                        setRequiredDocuments((prev) =>
+                          prev.map((x) =>
+                            x.id === doc.id
+                              ? { ...x, description: e.target.value }
+                              : x,
+                          ),
+                        )
+                      }
+                    />
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* 15. Examination Schedule */}
+        <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+          <SectionItemHeader
+            icon="calendar-clock"
+            title="Examination Schedule"
+            subtitle="Exam date, shifts, and centers"
+            onAdd={() =>
+              setExaminationSchedule((prev) => [
+                ...prev,
+                {
+                  id: nextId(prev),
+                  examDate: "",
+                  shifts: "",
+                  centers: "",
+                },
+              ])
+            }
+            addLabel="Add Schedule"
+          />
+          <div className="p-6 space-y-4">
+            {examinationSchedule.map((es) => (
+              <div
+                key={es.id}
+                className="p-5 bg-gray-50 rounded-lg border border-gray-200 relative group"
+              >
+                <button
+                  onClick={() =>
+                    setExaminationSchedule((prev) =>
+                      prev.filter((x) => x.id !== es.id),
+                    )
+                  }
+                  className="absolute top-4 right-4 p-2 text-red-500 hover:bg-red-50 rounded-lg transition-colors"
+                >
+                  <svg
+                    width="18"
+                    height="18"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  >
+                    <polyline points="3 6 5 6 21 6" />
+                    <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
+                  </svg>
+                </button>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 pr-12">
+                  <div>
+                    <label className={labelClass}>
+                      Exam Date <span className="text-red-500">*</span>
+                    </label>
+                    <input
+                      type="date"
+                      className={inputClass}
+                      value={es.examDate}
+                      onChange={(e) =>
+                        setExaminationSchedule((prev) =>
+                          prev.map((x) =>
+                            x.id === es.id
+                              ? { ...x, examDate: e.target.value }
+                              : x,
+                          ),
+                        )
+                      }
+                    />
+                  </div>
+                  <div>
+                    <label className={labelClass}>Shifts</label>
+                    <input
+                      type="text"
+                      className={inputClass}
+                      placeholder="e.g. Morning, Day"
+                      value={es.shifts}
+                      onChange={(e) =>
+                        setExaminationSchedule((prev) =>
+                          prev.map((x) =>
+                            x.id === es.id
+                              ? { ...x, shifts: e.target.value }
+                              : x,
+                          ),
+                        )
+                      }
+                    />
+                  </div>
+                  <div>
+                    <label className={labelClass}>Centers</label>
+                    <input
+                      type="text"
+                      className={inputClass}
+                      placeholder="e.g. Pulchowk, Thapathali"
+                      value={es.centers}
+                      onChange={(e) =>
+                        setExaminationSchedule((prev) =>
+                          prev.map((x) =>
+                            x.id === es.id
+                              ? { ...x, centers: e.target.value }
+                              : x,
+                          ),
+                        )
+                      }
+                    />
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* 16. Programs Offered */}
+        <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+          <SectionItemHeader
+            icon="graduation-cap"
+            title="Programs Offered"
+            subtitle="Programs available through this entrance"
+            onAdd={() =>
+              setProgramsOffered((prev) => [
+                ...prev,
+                { id: nextId(prev), programName: "", description: "" },
+              ])
+            }
+            addLabel="Add Program"
+          />
+          <div className="p-6 space-y-4">
+            {programsOffered.map((pg) => (
+              <div
+                key={pg.id}
+                className="p-5 bg-gray-50 rounded-lg border border-gray-200 relative group"
+              >
+                <button
+                  onClick={() =>
+                    setProgramsOffered((prev) =>
+                      prev.filter((x) => x.id !== pg.id),
+                    )
+                  }
+                  className="absolute top-4 right-4 p-2 text-red-500 hover:bg-red-50 rounded-lg transition-colors"
+                >
+                  <svg
+                    width="18"
+                    height="18"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  >
+                    <polyline points="3 6 5 6 21 6" />
+                    <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
+                  </svg>
+                </button>
+                <div className="grid grid-cols-1 gap-4 pr-12">
+                  <div>
+                    <label className={labelClass}>
+                      Program Name <span className="text-red-500">*</span>
+                    </label>
+                    <input
+                      type="text"
+                      className={inputClass}
+                      placeholder="e.g. BE Civil Engineering"
+                      value={pg.programName}
+                      onChange={(e) =>
+                        setProgramsOffered((prev) =>
+                          prev.map((x) =>
+                            x.id === pg.id
+                              ? { ...x, programName: e.target.value }
+                              : x,
+                          ),
+                        )
+                      }
+                    />
+                  </div>
+                  <div>
+                    <label className={labelClass}>Description</label>
+                    <div className="border border-gray-200 rounded-lg overflow-hidden">
+                      <QuillEditor
+                        value={pg.description}
+                        onChange={(v: string) =>
+                          setProgramsOffered((prev) =>
+                            prev.map((x) =>
+                              x.id === pg.id ? { ...x, description: v } : x,
+                            ),
+                          )
+                        }
+                        modules={quillModules}
+                        placeholder="Program details..."
+                        style={{ minHeight: "100px" }}
+                        className="bg-white"
+                      />
+                    </div>
+                  </div>
+                </div>
+              </div>
+            ))}
           </div>
         </div>
 

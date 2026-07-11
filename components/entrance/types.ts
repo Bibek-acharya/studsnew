@@ -60,5 +60,11 @@ export interface Exam {
   noticeFile?: string;
   notice_file?: string;
   contactNumber?: string;
+  examMode?: string;
+  examScope?: string;
   socialLinks?: { platform: string; url: string }[];
+  requiredDocuments?: any[];
+  examinationSchedule?: any[];
+  programsOffered?: any[];
+  embeddedMap?: string;
 }

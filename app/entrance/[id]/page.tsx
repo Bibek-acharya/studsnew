@@ -32,8 +32,16 @@ import {
   ExternalLink,
   X,
   FolderOpen,
+  Send,
 } from "lucide-react";
 import { safeHtml } from "@/lib/html";
+import {
+  FaFacebook,
+  FaTwitter,
+  FaInstagram,
+  FaLinkedin,
+  FaYoutube,
+} from "react-icons/fa6";
 
 const WhatsAppIcon = ({ className }: { className?: string }) => (
   <svg viewBox="0 0 24 24" fill="currentColor" className={className}>
@@ -68,6 +76,9 @@ const TABS = [
   { id: "timeline", label: "Timeline" },
   { id: "contact", label: "Contact" },
   { id: "faq", label: "FAQ" },
+  { id: "documents", label: "Required Documents" },
+  { id: "schedule", label: "Exam Schedule" },
+  { id: "programs", label: "Programs Offered" },
 ] as const;
 
 type TabId = (typeof TABS)[number]["id"];
@@ -121,6 +132,20 @@ function mapExamToDetails(exam: Exam): ExamDetails {
     return [];
   };
 
+  const getPatternValue = (...labelKeywords: string[]): string => {
+    if (!exam.examPattern) return "";
+    for (const item of exam.examPattern) {
+      if (
+        labelKeywords.some((kw) =>
+          item.label.toLowerCase().includes(kw.toLowerCase()),
+        )
+      ) {
+        return item.value;
+      }
+    }
+    return "";
+  };
+
   return {
     id: exam.id,
     title: exam.title || "",
@@ -132,13 +157,14 @@ function mapExamToDetails(exam: Exam): ExamDetails {
     imageUrl: exam.imageUrl || "",
     registrationStart: "",
     registrationEnd: "",
-    examLevel: "",
-    duration: "",
-    questionType: "",
+    examLevel: getPatternValue("Exam Level", "Level", "Scope"),
+    duration: getPatternValue("Duration", "Exam Duration"),
+    questionType: getPatternValue("Question Type", "Questions", "Pattern"),
     description: exam.description || exam.eligibility || "",
     conductingBody: exam.institution || exam.affiliation || "",
     examFrequency: "",
-    examMode: "",
+    examMode: exam.examMode || getPatternValue("Exam Mode", "Mode") || "",
+    examScope: exam.examScope || "",
     applicationFee: exam.applicationFee || "",
     foreignFee: "",
     phone: exam.phone || "",
@@ -187,6 +213,11 @@ function mapExamToDetails(exam: Exam): ExamDetails {
     overviewDetails: exam.overviewDetails,
     applicationLink: exam.applicationLink,
     noticeFile: exam.noticeFile,
+    contactNumber: exam.contactNumber || "",
+    requiredDocuments: exam.requiredDocuments || [],
+    examinationSchedule: exam.examinationSchedule || [],
+    programsOffered: exam.programsOffered || [],
+    embeddedMap: exam.embeddedMap || "",
   };
 }
 
@@ -460,6 +491,19 @@ const EntranceDetailsPage: React.FC = () => {
                 </div>
               )}
 
+              {/* Application Fee */}
+              <div className="border border-gray-100 rounded-md p-5 sm:p-6">
+                <h2 className="text-2xl font-bold text-gray-900 mb-3">
+                  Application Fee
+                </h2>
+                <p className="text-gray-700">Regular: {exam.applicationFee}</p>
+                {exam.foreignFee && (
+                  <p className="text-gray-700 mt-1">
+                    Foreign: {exam.foreignFee}
+                  </p>
+                )}
+              </div>
+
               {/* Exam Dates & Schedule */}
               <div className="border border-gray-100 rounded-md p-5 sm:p-6">
                 <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
@@ -471,7 +515,36 @@ const EntranceDetailsPage: React.FC = () => {
                       Complete schedule for {exam.title}
                     </p>
                   </div>
-                  <button className="bg-[#0000ff] hover:bg-[#0000cc] text-white px-4 py-2 rounded-md font-medium text-sm flex items-center gap-2 transition-colors shrink-0">
+                  <button
+                    onClick={async () => {
+                      const token =
+                        typeof window !== "undefined"
+                          ? localStorage.getItem("institutionToken") ||
+                            localStorage.getItem("token")
+                          : null;
+                      if (!token) {
+                        router.push("/login");
+                        return;
+                      }
+                      try {
+                        const res = await fetch(
+                          `${process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080"}/api/v1/entrance/${exam.id}/notify`,
+                          {
+                            method: "POST",
+                            headers: {
+                              Authorization: `Bearer ${token}`,
+                              "Content-Type": "application/json",
+                            },
+                          },
+                        );
+                        if (res.ok) alert("You will be notified of updates.");
+                        else alert("Failed to subscribe. Try again.");
+                      } catch {
+                        alert("Failed to subscribe. Try again.");
+                      }
+                    }}
+                    className="bg-[#0000ff] hover:bg-[#0000cc] text-white px-4 py-2 rounded-md font-medium text-sm flex items-center gap-2 transition-colors shrink-0"
+                  >
                     <Bell className="w-4 h-4" /> Keep Me Notified
                   </button>
                 </div>
@@ -594,26 +667,6 @@ const EntranceDetailsPage: React.FC = () => {
                         </div>
                       </div>
                     ))}
-                    <div className="mt-6 border border-gray-200 rounded-md p-5">
-                      <div className="flex items-start gap-3">
-                        <div className="w-6 h-6 rounded-full bg-amber-50 flex items-center justify-center text-amber-500 shrink-0 mt-0.5">
-                          <AlertTriangle className="w-4 h-4" />
-                        </div>
-                        <div>
-                          <h4 className="font-semibold text-gray-900 text-sm mb-1">
-                            Application Fee
-                          </h4>
-                          <p className="text-sm text-gray-600">
-                            Regular: {exam.applicationFee}
-                          </p>
-                          {exam.foreignFee && (
-                            <p className="text-sm text-gray-600">
-                              Foreign: {exam.foreignFee}
-                            </p>
-                          )}
-                        </div>
-                      </div>
-                    </div>
                   </div>
                 </div>
               ) : (
@@ -731,7 +784,17 @@ const EntranceDetailsPage: React.FC = () => {
                             </p>
                           </div>
                         </div>
-                        <button className="text-[#0000ff] hover:bg-blue-50 p-2 rounded-full transition-colors">
+                        <button
+                          onClick={() =>
+                            set.fileUrl &&
+                            window.open(
+                              set.fileUrl,
+                              "_blank",
+                              "noopener,noreferrer",
+                            )
+                          }
+                          className="text-[#0000ff] hover:bg-blue-50 p-2 rounded-full transition-colors"
+                        >
                           <Download className="w-5 h-5" />
                         </button>
                       </div>
@@ -946,6 +1009,140 @@ const EntranceDetailsPage: React.FC = () => {
               )}
             </div>
           )}
+
+          {/* Required Documents Tab */}
+          {activeTab === "documents" && (
+            <div>
+              {exam.requiredDocuments && exam.requiredDocuments.length > 0 ? (
+                <div>
+                  <div className="mb-8">
+                    <h2 className="text-[22px] font-bold text-gray-900 mb-2">
+                      Required Documents
+                    </h2>
+                    <p className="text-gray-600">
+                      List of documents required for {exam.title} application.
+                    </p>
+                  </div>
+                  <div className="space-y-4">
+                    {exam.requiredDocuments.map((doc, idx) => (
+                      <div
+                        key={idx}
+                        className="border border-gray-200 rounded-md p-5 bg-white"
+                      >
+                        <h4 className="font-semibold text-gray-900 flex items-center gap-2 mb-2">
+                          <FileText className="w-4 h-4 text-[#0000ff]" />{" "}
+                          {doc.title}
+                        </h4>
+                        {doc.description && (
+                          <p className="text-sm text-gray-600 ml-6">
+                            {doc.description}
+                          </p>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              ) : (
+                <EmptyTabState tabName="Required Documents" />
+              )}
+            </div>
+          )}
+
+          {/* Exam Schedule Tab */}
+          {activeTab === "schedule" && (
+            <div>
+              {exam.examinationSchedule &&
+              exam.examinationSchedule.length > 0 ? (
+                <div>
+                  <div className="mb-8">
+                    <h2 className="text-[22px] font-bold text-gray-900 mb-2">
+                      Exam Schedule
+                    </h2>
+                    <p className="text-gray-600">
+                      Detailed examination schedule for {exam.title}.
+                    </p>
+                  </div>
+                  <div className="overflow-x-auto rounded-md border border-gray-200">
+                    <table className="w-full text-left border-collapse min-w-[600px]">
+                      <thead className="bg-[#eff4fc]">
+                        <tr>
+                          <th className="p-4 font-bold text-gray-900 border-r border-gray-200">
+                            Date
+                          </th>
+                          <th className="p-4 font-bold text-gray-900 border-r border-gray-200">
+                            Shifts
+                          </th>
+                          <th className="p-4 font-bold text-gray-900">
+                            Centers
+                          </th>
+                        </tr>
+                      </thead>
+                      <tbody className="text-[15px]">
+                        {exam.examinationSchedule.map((item, idx) => (
+                          <tr
+                            key={idx}
+                            className="border-b border-gray-200 hover:bg-gray-50"
+                          >
+                            <td className="p-4 border-r border-gray-200 text-gray-700 font-medium">
+                              {item.date}
+                            </td>
+                            <td className="p-4 border-r border-gray-200 text-gray-700">
+                              {item.shifts}
+                            </td>
+                            <td className="p-4 text-gray-700">
+                              {item.centers}
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              ) : (
+                <EmptyTabState tabName="Exam Schedule" />
+              )}
+            </div>
+          )}
+
+          {/* Programs Offered Tab */}
+          {activeTab === "programs" && (
+            <div>
+              {exam.programsOffered && exam.programsOffered.length > 0 ? (
+                <div>
+                  <div className="mb-8">
+                    <h2 className="text-[22px] font-bold text-gray-900 mb-2">
+                      Programs Offered
+                    </h2>
+                    <p className="text-gray-600">
+                      Programs available under {exam.title}.
+                    </p>
+                  </div>
+                  <div className="space-y-4">
+                    {exam.programsOffered.map((program, idx) => (
+                      <div
+                        key={idx}
+                        className="border border-gray-200 rounded-md p-5 bg-white"
+                      >
+                        <h4 className="font-semibold text-gray-900 text-lg mb-2">
+                          {program.name}
+                        </h4>
+                        {program.description && (
+                          <div
+                            className="text-sm text-gray-600 leading-relaxed prose prose-sm max-w-none"
+                            dangerouslySetInnerHTML={{
+                              __html: safeHtml(program.description),
+                            }}
+                          />
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              ) : (
+                <EmptyTabState tabName="Programs Offered" />
+              )}
+            </div>
+          )}
         </div>
 
         {/* Right Sidebar */}
@@ -1099,6 +1296,15 @@ const EntranceDetailsPage: React.FC = () => {
                 {exam.socialLinks &&
                   exam.socialLinks.length > 0 &&
                   exam.socialLinks.map((link, idx) => {
+                    const platformIcons: Record<string, React.ReactNode> = {
+                      facebook: <FaFacebook className="w-4 h-4" />,
+                      twitter: <FaTwitter className="w-4 h-4" />,
+                      instagram: <FaInstagram className="w-4 h-4" />,
+                      linkedin: <FaLinkedin className="w-4 h-4" />,
+                      youtube: <FaYoutube className="w-4 h-4" />,
+                      whatsapp: <WhatsAppIcon className="w-4 h-4" />,
+                      telegram: <Send className="w-4 h-4" />,
+                    };
                     const platformColors: Record<string, string> = {
                       facebook: "bg-blue-50 text-blue-600",
                       twitter: "bg-sky-50 text-sky-500",
@@ -1112,6 +1318,9 @@ const EntranceDetailsPage: React.FC = () => {
                     const colorClass =
                       platformColors[link.platform] ||
                       "bg-gray-50 text-gray-600";
+                    const socialIcon = platformIcons[link.platform] || (
+                      <Globe className="w-4 h-4" />
+                    );
                     return (
                       <li
                         key={idx}
@@ -1120,7 +1329,7 @@ const EntranceDetailsPage: React.FC = () => {
                         <div
                           className={`w-8 h-8 rounded-full flex items-center justify-center shrink-0 ${colorClass}`}
                         >
-                          <Globe className="w-4 h-4" />
+                          {socialIcon}
                         </div>
                         <div>
                           <span className="block text-gray-900 font-bold text-[13px] capitalize">
@@ -1139,6 +1348,15 @@ const EntranceDetailsPage: React.FC = () => {
                     );
                   })}
               </ul>
+
+              {exam.embeddedMap && (
+                <div className="mt-5 pt-5 border-t border-gray-100">
+                  <div
+                    className="rounded-md overflow-hidden border border-gray-200 [&_iframe]:w-full [&_iframe]:h-[200px]"
+                    dangerouslySetInnerHTML={{ __html: exam.embeddedMap }}
+                  />
+                </div>
+              )}
 
               {exam.location && (
                 <div className="mt-5 pt-5 border-t border-gray-100">

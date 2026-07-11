@@ -52,6 +52,8 @@ export function mapRawEntrance(raw: any): Exam {
     status: raw.status || "Ongoing",
     examDate: raw.examDate || raw.date || "",
     nepaliDate: raw.nepaliDate || "",
+    examMode: raw.exam_mode || "",
+    examScope: raw.exam_scope || "",
     imageUrl: bannerImg,
     phone: raw.phone || "",
     email: raw.email || "",
@@ -71,6 +73,10 @@ export function mapRawEntrance(raw: any): Exam {
     noticeFile: raw.notice_file || "",
     contactNumber: raw.contact_number || raw.phone || "",
     socialLinks: raw.social_links || undefined,
+    requiredDocuments: raw.required_documents || undefined,
+    examinationSchedule: raw.examination_schedule || undefined,
+    programsOffered: raw.programs_offered || undefined,
+    embeddedMap: raw.embedded_map || undefined,
   };
 }
 
