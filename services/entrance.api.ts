@@ -9,15 +9,6 @@ function resolveImageUrl(url: string | undefined): string {
   return url;
 }
 
-function stripHtml(html: string): string {
-  if (!html) return "";
-  return html
-    .replace(/<[^>]*>/g, "")
-    .replace(/&nbsp;/g, " ")
-    .replace(/\s+/g, " ")
-    .trim();
-}
-
 export function mapRawEntrance(raw: any): Exam {
   const badges: string[] = raw.badges || [];
   const bannerImg = resolveImageUrl(raw.imageUrl || raw.hero_banner || "");
@@ -46,7 +37,12 @@ export function mapRawEntrance(raw: any): Exam {
       type: "default",
     })),
     deadline: raw.formDeadline || raw.deadline || "",
-    eligibility: stripHtml(raw.description || raw.overview || ""),
+    eligibility: (() => {
+      if (raw.eligibility_list?.length > 0) {
+        return raw.eligibility_list[0].title || "";
+      }
+      return "";
+    })(),
     whatsapp: "",
     viber: "",
     status: raw.status || "Ongoing",

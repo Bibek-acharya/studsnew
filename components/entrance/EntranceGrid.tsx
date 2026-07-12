@@ -501,9 +501,9 @@ export const EntranceCard: React.FC<{
             <GraduationCap className="w-3.5 h-3.5 text-[#94a3b8] shrink-0" />
             <span
               className="font-semibold text-[#1e293b] text-[12px] truncate"
-              title={exam.eligibility}
+              title={exam.eligibilityList?.[0]?.title || exam.eligibility || ""}
             >
-              {exam.eligibility || "TBA"}
+              {exam.eligibilityList?.[0]?.title || exam.eligibility || "TBA"}
             </span>
           </div>
 
