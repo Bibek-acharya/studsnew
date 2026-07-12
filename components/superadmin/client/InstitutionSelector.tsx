@@ -138,30 +138,67 @@ export default function InstitutionSelector({
         <Building2 className="w-4 h-4 text-blue-600" />
         Institution Details
       </h3>
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        {/* Logo */}
-        <div className="flex flex-col items-center gap-2">
-          <label className="block text-sm font-medium text-gray-700 mb-1 self-start">
+      <div className="grid grid-cols-1 md:grid-cols-6 gap-4">
+        {/* Logo — spans 2 cols */}
+        <div className="md:col-span-2 flex flex-col">
+          <label className="block text-sm font-medium text-gray-700 mb-1.5">
             Logo
           </label>
-          <label className="cursor-pointer group">
-            {value.logo ? (
-              <div className="relative">
-                <img
-                  src={value.logo}
-                  alt="logo"
-                  className="w-20 h-20 rounded-lg object-contain border border-gray-200"
-                />
-                <div className="absolute inset-0 bg-black/40 rounded-lg flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
-                  <span className="text-white text-xs font-medium">Change</span>
+          <label className="cursor-pointer group flex-1">
+            <div
+              className={`border-2 border-dashed rounded-xl flex flex-col items-center justify-center text-center hover:bg-gray-50 hover:border-blue-400 transition-colors cursor-pointer relative overflow-hidden h-full min-h-[100px] ${
+                value.logo ? "border-blue-300 bg-blue-50/30" : "border-gray-300"
+              }`}
+            >
+              {value.logo ? (
+                <div className="relative w-full h-full flex items-center justify-center p-2">
+                  <img
+                    src={value.logo}
+                    alt="logo"
+                    className="max-w-full max-h-full object-contain rounded-lg"
+                  />
+                  <div className="absolute inset-0 bg-black/40 rounded-xl flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                    <span className="text-white text-xs font-medium">
+                      Click to replace
+                    </span>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      onChange({ ...value, logo: "" });
+                    }}
+                    className="absolute top-2 right-2 p-1.5 bg-white/95 rounded-full text-red-500 hover:bg-white shadow-md"
+                  >
+                    <svg
+                      width="12"
+                      height="12"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="2"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    >
+                      <polyline points="3 6 5 6 21 6" />
+                      <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
+                    </svg>
+                  </button>
                 </div>
-              </div>
-            ) : (
-              <div className="w-20 h-20 rounded-lg border-2 border-dashed border-gray-300 flex flex-col items-center justify-center text-gray-400 hover:border-blue-400 hover:text-blue-500 transition-colors">
-                <Building2 className="w-6 h-6 mb-1" />
-                <span className="text-[10px]">Upload</span>
-              </div>
-            )}
+              ) : (
+                <>
+                  <div className="p-2 bg-blue-50 text-blue-600 rounded-full mb-1.5">
+                    <Building2 className="w-5 h-5" />
+                  </div>
+                  <span className="text-xs font-medium text-gray-700">
+                    Upload Logo
+                  </span>
+                  <span className="text-[10px] text-gray-400 mt-0.5">
+                    JPG/PNG · Max 2MB
+                  </span>
+                </>
+              )}
+            </div>
             <input
               type="file"
               accept="image/*"
@@ -187,18 +224,9 @@ export default function InstitutionSelector({
               }}
             />
           </label>
-          {value.logo && (
-            <button
-              type="button"
-              onClick={() => onChange({ ...value, logo: "" })}
-              className="text-[11px] text-red-500 hover:text-red-700"
-            >
-              Remove
-            </button>
-          )}
         </div>
-        {/* Fields */}
-        <div className="md:col-span-2 grid grid-cols-1 md:grid-cols-2 gap-3">
+        {/* Fields — spans 4 cols */}
+        <div className="md:col-span-4 grid grid-cols-1 md:grid-cols-2 gap-3">
           <div className="flex flex-col gap-3">
             <div className="relative" ref={containerRef}>
               <label className="block text-sm font-medium text-gray-700 mb-1.5">
