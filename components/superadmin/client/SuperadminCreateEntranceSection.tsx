@@ -2546,12 +2546,24 @@ export default function SuperadminCreateEntranceSection({
             </div>
             {noticeFile && (
               <div className="mt-3 p-3 bg-green-50 border border-green-200 rounded-lg">
-                <p className="text-xs font-medium text-green-700">
-                  File uploaded successfully
-                </p>
-                <p className="text-xs text-green-600 mt-1">
-                  {noticeFileName || noticeFile.split("/").pop()}
-                </p>
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-xs font-medium text-green-700">
+                      File uploaded successfully
+                    </p>
+                    <p className="text-xs text-green-600 mt-1">
+                      {noticeFileName || noticeFile.split("/").pop()}
+                    </p>
+                  </div>
+                  <a
+                    href={noticeFile}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="px-3 py-1 text-xs font-medium text-blue-600 bg-blue-50 rounded-lg hover:bg-blue-100"
+                  >
+                    View
+                  </a>
+                </div>
               </div>
             )}
           </div>
