@@ -11,6 +11,7 @@ import {
 import { institutionEntranceApi } from "@/services/institutionEntranceApi";
 import { Exam } from "@/components/entrance/types";
 import type { ExamDetails } from "@/app/entrance/types";
+import { useAuth } from "@/services/AuthContext";
 import {
   Bell,
   ChevronDown,
@@ -84,6 +85,21 @@ const TABS = [
 type TabId = (typeof TABS)[number]["id"];
 
 function mapExamToDetails(exam: Exam): ExamDetails {
+  const calcStatus = (dateStr: string) => {
+    try {
+      const dt = new Date(dateStr);
+      if (isNaN(dt.getTime())) return "";
+      const now = new Date();
+      now.setHours(0, 0, 0, 0);
+      dt.setHours(0, 0, 0, 0);
+      if (dt < now) return "Closed";
+      if (dt.getTime() === now.getTime()) return "Ongoing";
+      return "Upcoming";
+    } catch {
+      return "";
+    }
+  };
+
   const mapUpcomingDates = () => {
     if (exam.upcomingDates && exam.upcomingDates.length > 0) {
       return exam.upcomingDates.map((d) => ({
@@ -103,7 +119,7 @@ function mapExamToDetails(exam: Exam): ExamDetails {
           }
         })(),
         event: d.event,
-        status: "",
+        status: calcStatus(d.date),
       }));
     }
     if (exam.examDate) {
@@ -125,7 +141,7 @@ function mapExamToDetails(exam: Exam): ExamDetails {
             }
           })(),
           event: `${exam.title} Exam`,
-          status: exam.status,
+          status: calcStatus(exam.examDate),
         },
       ];
     }
@@ -224,6 +240,7 @@ function mapExamToDetails(exam: Exam): ExamDetails {
 const EntranceDetailsPage: React.FC = () => {
   const params = useParams();
   const router = useRouter();
+  const { isAuthenticated } = useAuth();
   const id = params.id as string;
   const [activeTab, setActiveTab] = useState<TabId>("overview");
   const [openFaq, setOpenFaq] = useState<number | null>(null);
@@ -503,28 +520,13 @@ const EntranceDetailsPage: React.FC = () => {
                   </div>
                   <button
                     onClick={async () => {
-                      const token =
-                        typeof window !== "undefined"
-                          ? localStorage.getItem("institutionToken") ||
-                            localStorage.getItem("token")
-                          : null;
-                      if (!token) {
+                      if (!isAuthenticated) {
                         router.push("/login");
                         return;
                       }
                       try {
-                        const res = await fetch(
-                          `${process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080"}/api/v1/entrance/${exam.id}/notify`,
-                          {
-                            method: "POST",
-                            headers: {
-                              Authorization: `Bearer ${token}`,
-                              "Content-Type": "application/json",
-                            },
-                          },
-                        );
-                        if (res.ok) alert("You will be notified of updates.");
-                        else alert("Failed to subscribe. Try again.");
+                        await entranceService.notifyReminder(exam.id);
+                        alert("You will be notified of updates.");
                       } catch {
                         alert("Failed to subscribe. Try again.");
                       }
@@ -566,7 +568,15 @@ const EntranceDetailsPage: React.FC = () => {
                           </td>
                           <td className="p-4 align-top">
                             {date.status && (
-                              <span className="inline-block bg-green-700 text-white text-[10px] font-bold px-2 py-0.5 rounded uppercase">
+                              <span
+                                className={`inline-block text-white text-[10px] font-bold px-2 py-0.5 rounded uppercase ${
+                                  date.status === "Closed"
+                                    ? "bg-red-600"
+                                    : date.status === "Ongoing"
+                                      ? "bg-green-700"
+                                      : "bg-amber-600"
+                                }`}
+                              >
                                 {date.status}
                               </span>
                             )}

@@ -254,4 +254,11 @@ export const entranceService = {
       },
     );
   },
+
+  async notifyReminder(entranceId: number): Promise<{ message: string }> {
+    return apiRequest<{ message: string }>(
+      `/api/v1/entrances/${entranceId}/notify`,
+      { method: "POST" },
+    );
+  },
 };
