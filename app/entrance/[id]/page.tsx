@@ -490,19 +490,6 @@ const EntranceDetailsPage: React.FC = () => {
                 </div>
               )}
 
-              {/* Application Fee */}
-              <div className="border border-gray-100 rounded-md p-5 sm:p-6">
-                <h2 className="text-2xl font-bold text-gray-900 mb-3">
-                  Application Fee
-                </h2>
-                <p className="text-gray-700">Regular: {exam.applicationFee}</p>
-                {exam.foreignFee && (
-                  <p className="text-gray-700 mt-1">
-                    Foreign: {exam.foreignFee}
-                  </p>
-                )}
-              </div>
-
               {/* Exam Dates & Schedule */}
               <div className="border border-gray-100 rounded-md p-5 sm:p-6">
                 <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
