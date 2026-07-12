@@ -34,7 +34,7 @@ export function mapRawEntrance(raw: any): Exam {
       raw.institution_name ||
       raw.institution ||
       "",
-    verified: false,
+    verified: !!raw.verified,
     location: raw.location || "",
     affiliation: raw.board || "",
     website: raw.website || "",

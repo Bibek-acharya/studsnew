@@ -18,22 +18,16 @@ import {
   Bookmark,
   Clock,
   GraduationCap,
-  Users,
   Bell,
   Send,
-  PlayCircle,
   Flame,
   Monitor,
   Globe,
   TrendingUp,
   Building,
-  BadgeCheckIcon,
   FileText,
-  DollarSign,
+  Banknote,
   Calendar,
-  MessageCircle,
-  AlertTriangle,
-  CheckCircle2,
 } from "lucide-react";
 import { FaSliders } from "react-icons/fa6";
 
@@ -271,19 +265,28 @@ const truncateText = (text: string, maxLength: number) => {
   return text.slice(0, maxLength) + "...";
 };
 
-const formatDate = (dateStr: string) => {
-  if (!dateStr) return "";
+const formatDateExact = (dateStr: string) => {
+  if (!dateStr) return "TBA";
   try {
     const d = new Date(dateStr);
     if (isNaN(d.getTime())) return dateStr;
-    return d.toLocaleDateString("en-US", {
-      month: "short",
-      day: "numeric",
-      year: "numeric",
-    });
+    const day = String(d.getDate()).padStart(2, "0");
+    const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+    const month = months[d.getMonth()];
+    const year = d.getFullYear();
+    return `${day} ${month} ${year}`;
   } catch {
     return dateStr;
   }
+};
+
+const formatFee = (fee: string | undefined) => {
+  if (!fee) return "TBA";
+  const trimmed = fee.trim();
+  if (trimmed.toLowerCase().includes("rs") || trimmed.toLowerCase().includes("rupee")) {
+    return trimmed;
+  }
+  return `Rs. ${trimmed}`;
 };
 
 export const EntranceCard: React.FC<{
@@ -294,148 +297,177 @@ export const EntranceCard: React.FC<{
 }> = ({ exam, isSaved, isPending, onToggleSaved }) => {
   const router = useRouter();
 
+  const getStatusConfig = (status: string) => {
+    const s = (status || "").toLowerCase();
+    if (s === "published" || s === "ongoing" || s === "open") {
+      return { text: "ONGOING", bg: "bg-[#ecfdf5]", textCol: "text-[#059669]", dotCol: "bg-[#10b981]" };
+    }
+    if (s === "draft" || s === "upcoming") {
+      return { text: "UPCOMING", bg: "bg-[#fff7ed]", textCol: "text-[#ea580c]", dotCol: "bg-[#f97316]" };
+    }
+    return { text: "CLOSED", bg: "bg-[#fef2f2]", textCol: "text-[#dc2626]", dotCol: "bg-[#ef4444]" };
+  };
+
+  const getModeText = (mode: string | undefined) => {
+    const m = (mode || "").toLowerCase();
+    if (m === "online") return "Online";
+    if (m === "offline") return "Offline";
+    if (m === "hybrid") return "Hybrid";
+    return mode || "Online";
+  };
+
+  const getScopeText = (scope: string | undefined) => {
+    const s = (scope || "").toLowerCase();
+    if (s === "nationwide" || s === "national") return "National";
+    if (s === "province-wide" || s === "provincial") return "Provincial";
+    if (s === "district-level" || s === "district") return "District";
+    if (s === "regional") return "Regional";
+    if (s === "college-specific") return "College Specific";
+    if (s === "university-wide") return "University Wide";
+    if (s === "campus-specific") return "Campus Specific";
+    return scope || "National";
+  };
+
+  const statusConfig = getStatusConfig(exam.status);
+
   return (
-    <article className="bg-white rounded-md p-4 sm:p-5 border border-gray-200 flex flex-col h-full hover:border-blue-500/20 transition-all duration-300 overflow-visible">
-      <header className="flex justify-between items-start mb-4 sm:mb-5">
-        <div className="flex gap-2.5 sm:gap-3">
-          <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-md border border-gray-100 flex items-center justify-center bg-white shrink-0">
-            <img
-              src={exam.logo}
-              alt={exam.institution}
-              className="w-full h-full rounded-md object-contain"
-            />
-          </div>
-          <div className="flex flex-col min-w-0">
-            <h3 className="group relative text-[13px] xs:text-[14px] sm:text-[15px] font-bold text-[#111827] flex items-center gap-1 sm:gap-1.5 min-w-0">
-              <span className="truncate">
-                {truncateText(exam.institution, 20)}
-              </span>
-              {exam.verified && (
-                <BadgeCheckIcon className="w-3.25 h-3.25 sm:w-3.75 sm:h-3.75 text-white fill-blue-500 ml-0.5 sm:ml-1 shrink-0" />
-              )}
-              <div className="absolute bottom-full left-0 mb-2 invisible opacity-0 group-hover:visible group-hover:opacity-100 bg-gray-900 text-white text-[13px] font-medium py-1.5 px-3 rounded  whitespace-nowrap transition-all duration-200 z-100 pointer-events-none">
+    <article className="bg-white rounded-[20px] p-5 border border-[#e2e8f0] flex flex-col h-full hover:shadow-md transition-all duration-300 overflow-visible relative">
+      <header className="flex gap-3.5 items-start mb-4">
+        {/* Logo Container */}
+        <div className="w-[72px] h-[72px] rounded-2xl border border-[#f1f5f9] flex items-center justify-center bg-white p-1 shrink-0 shadow-sm">
+          <img
+            src={exam.logo}
+            alt={exam.institution}
+            className="w-full h-full rounded-xl object-contain"
+          />
+        </div>
+        
+        {/* Institution details */}
+        <div className="flex flex-col min-w-0 flex-1 pt-0.5">
+          <div className="flex items-center gap-1.5 min-w-0">
+            <h3 className="group relative text-[17px] font-bold text-[#0f172a] truncate">
+              {exam.institution}
+              {/* Tooltip */}
+              <div className="absolute bottom-full left-0 mb-2 invisible opacity-0 group-hover:visible group-hover:opacity-100 bg-gray-900 text-white text-[13px] font-medium py-1.5 px-3 rounded whitespace-nowrap transition-all duration-200 z-50 pointer-events-none">
                 {exam.institution}
                 <div className="absolute top-full left-4 -mt-px border-[5px] border-transparent border-t-gray-900"></div>
               </div>
             </h3>
-            <div className="flex flex-col gap-1 text-[10px] xs:text-[11px] sm:text-[11px] text-[#6b7280] mt-0.5">
-              {exam.location && (
-                <span className="flex items-center gap-1">
-                  <MapPin className="w-2.5 h-2.5 sm:w-3 sm:h-3 shrink-0" />
-                  <span className="truncate" title={exam.location}>
-                    {exam.location}
-                  </span>
-                </span>
-              )}
+            {exam.verified && (
+              <svg className="w-[18px] h-[18px] shrink-0" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <circle cx="12" cy="12" r="10" fill="#3b82f6" />
+                <path d="M8.5 12.5L11 15L16 9" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
+              </svg>
+            )}
+          </div>
+
+          {/* Location and Affiliation */}
+          <div className="flex items-center gap-1.5 text-xs text-[#64748b] mt-1 flex-wrap font-medium">
+            {exam.location && (
               <span className="flex items-center gap-1">
-                <Award className="w-2.5 h-2.5 sm:w-3 sm:h-3 shrink-0" />
+                <MapPin className="w-3.5 h-3.5 text-[#94a3b8] shrink-0" />
+                <span className="truncate" title={exam.location}>
+                  {exam.location}
+                </span>
+              </span>
+            )}
+            {exam.location && exam.affiliation && <span className="text-[#cbd5e1]">•</span>}
+            {exam.affiliation && (
+              <span className="flex items-center gap-1">
+                <Award className="w-3.5 h-3.5 text-[#94a3b8] shrink-0" />
                 <span className="truncate" title={exam.affiliation}>
                   {exam.affiliation}
                 </span>
               </span>
-            </div>
-            {exam.website && (
-              <a
-                href={
-                  exam.website.startsWith("http")
-                    ? exam.website
-                    : `https://${exam.website}`
-                }
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-[#2563eb] text-[10px] xs:text-[11px] sm:text-[11px] font-medium mt-0.5 sm:mt-1 flex items-center gap-1 hover:underline"
-              >
-                <ExternalLink className="w-2.5 h-2.5 sm:w-3 sm:h-3" />{" "}
-                {exam.website}
-              </a>
             )}
           </div>
+
+          {/* Website Link */}
+          {exam.website && (
+            <a
+              href={
+                exam.website.startsWith("http")
+                  ? exam.website
+                  : `https://${exam.website}`
+              }
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-[#2563eb] text-xs font-semibold mt-1.5 flex items-center gap-1 hover:underline"
+            >
+              <ExternalLink className="w-3.5 h-3.5" />
+              {exam.website}
+            </a>
+          )}
         </div>
-        <div className="w-8 h-8 opacity-0"></div>
       </header>
 
-      <main className="grow overflow-visible">
+      <main className="grow overflow-visible flex flex-col">
+        {/* Title */}
         <h4
-          className="group relative text-[15px] xs:text-[16px] sm:text-[17px] font-bold text-[#111827] mb-2.5 sm:mb-3 leading-tight cursor-pointer hover:text-brand-blue transition-colors"
+          className="group relative text-[17px] font-bold text-[#0f172a] mb-4 leading-snug cursor-pointer hover:text-brand-blue transition-colors"
           onClick={() => router.push(`/entrance/${exam.id}`)}
         >
-          <span className="truncate block">{exam.title}</span>
-          <div className="absolute bottom-full left-0 mb-2 invisible opacity-0 group-hover:visible group-hover:opacity-100 bg-gray-900 text-white text-[13px] font-medium py-1.5 px-3 rounded  whitespace-nowrap transition-all duration-200 z-100 pointer-events-none">
+          <span className="block truncate">{exam.title}</span>
+          <div className="absolute bottom-full left-0 mb-2 invisible opacity-0 group-hover:visible group-hover:opacity-100 bg-gray-900 text-white text-[13px] font-medium py-1.5 px-3 rounded whitespace-nowrap transition-all duration-200 z-50 pointer-events-none">
             {exam.title}
             <div className="absolute top-full left-4 -mt-px border-[5px] border-transparent border-t-gray-900"></div>
           </div>
         </h4>
 
-        <div className="flex flex-wrap gap-1.5 sm:gap-2 mb-3 sm:mb-4">
-          {(exam.tags || []).map((tag, tIdx) => (
-            <span
-              key={tIdx}
-              className={`px-1.5 sm:px-2 py-0.5 sm:py-1 rounded-md text-[9px] xs:text-[10px] sm:text-[10px] font-bold flex items-center gap-1 sm:gap-1.5 ${
-                tag.type === "alert"
-                  ? "bg-red-50 text-red-500"
-                  : tag.type === "warning"
-                    ? "bg-amber-50 text-amber-600"
-                    : tag.type === "success"
-                      ? "bg-emerald-50 text-emerald-600"
-                      : tag.type === "purple"
-                        ? "bg-purple-50 text-purple-600"
-                        : "bg-gray-50 text-gray-600"
-              }`}
-            >
-              {iconMap[tag.icon]} {tag.text}
-            </span>
-          ))}
+        {/* Badges row */}
+        <div className="flex flex-wrap gap-2.5 mb-4">
+          <span className={`px-3 py-1.5 rounded-lg text-xs font-bold flex items-center gap-1.5 ${statusConfig.bg} ${statusConfig.textCol}`}>
+            <span className={`w-2.5 h-2.5 rounded-full ${statusConfig.dotCol}`} />
+            {statusConfig.text}
+          </span>
+          <span className="px-3 py-1.5 rounded-lg text-xs font-bold text-[#475569] bg-[#f8fafc] border border-[#f1f5f9] flex items-center gap-1.5">
+            <Monitor className="w-3.5 h-3.5 text-[#64748b] shrink-0" />
+            {getModeText(exam.examMode)}
+          </span>
+          <span className="px-3 py-1.5 rounded-lg text-xs font-bold text-[#475569] bg-[#f8fafc] border border-[#f1f5f9] flex items-center gap-1.5">
+            <Globe className="w-3.5 h-3.5 text-[#64748b] shrink-0" />
+            {getScopeText(exam.examScope)}
+          </span>
         </div>
 
-        <div className="bg-[#f8fafc] rounded-md sm:rounded-md p-2 sm:p-2.5 flex flex-col gap-1.5 sm:gap-2 mt-auto border border-[#f1f5f9]">
-          <div className="flex items-center gap-2 sm:gap-2.5 text-[11px] xs:text-[12px] sm:text-[13px] text-[#475569]">
-            {exam.status && (
-              <span
-                className={`inline-flex items-center gap-1 text-[10px] font-bold px-1.5 py-0.5 rounded uppercase ${
-                  exam.status === "published" || exam.status === "Ongoing"
-                    ? "bg-green-50 text-green-700"
-                    : exam.status === "draft" || exam.status === "Upcoming"
-                      ? "bg-orange-50 text-orange-700"
-                      : "bg-red-50 text-red-700"
-                }`}
-              >
-                {exam.status === "published" || exam.status === "Ongoing" ? (
-                  <CheckCircle2 className="w-3 h-3" />
-                ) : (
-                  <AlertTriangle className="w-3 h-3" />
-                )}
-                {exam.status}
-              </span>
-            )}
-          </div>
-          <div className="flex items-center gap-2 sm:gap-2.5 text-[11px] xs:text-[12px] sm:text-[13px] text-[#475569]">
-            <Calendar className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-[#94a3b8] shrink-0" />
-            <span className="truncate font-medium text-[11px] sm:text-[12px]">
-              {exam.examDate
-                ? `Exam: ${formatDate(exam.examDate)}`
-                : exam.deadline
-                  ? `Deadline: ${formatDate(exam.deadline)}`
-                  : "TBA"}
+        {/* Gray details container */}
+        <div className="bg-[#f8fafc] border border-[#f1f5f9] rounded-xl p-4 flex flex-col gap-3 mb-5 mt-auto">
+          {/* Ends Row */}
+          <div className="flex items-center gap-3 text-[14px] text-[#475569]">
+            <Clock className="w-4 h-4 text-[#94a3b8] shrink-0" />
+            <span className="font-semibold text-[#ef4444]">
+              Ends: {formatDateExact(exam.deadline)}
             </span>
           </div>
-          {exam.applicationFee && (
-            <div className="flex items-center gap-2 sm:gap-2.5 text-[11px] xs:text-[12px] sm:text-[13px] text-[#475569]">
-              <DollarSign className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-[#94a3b8] shrink-0" />
-              <span className="font-semibold text-[11px] sm:text-[12px]">
-                {exam.applicationFee}
-              </span>
-            </div>
-          )}
-          <div className="flex items-center gap-2 sm:gap-2.5 text-[11px] xs:text-[12px] sm:text-[13px] text-[#475569]">
-            <GraduationCap className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-[#94a3b8] shrink-0" />
-            <span className="truncate text-[11px] sm:text-[12px]">
-              {exam.eligibility}
+
+          {/* Exam Date Row */}
+          <div className="flex items-center gap-3 text-[14px] text-[#475569]">
+            <Calendar className="w-4 h-4 text-[#94a3b8] shrink-0" />
+            <span className="font-semibold text-[#1e293b]">
+              Exam: {formatDateExact(exam.examDate) || "TBA"}
+            </span>
+          </div>
+
+          {/* Eligibility Row */}
+          <div className="flex items-center gap-3 text-[14px] text-[#475569]">
+            <GraduationCap className="w-4 h-4 text-[#94a3b8] shrink-0" />
+            <span className="font-semibold text-[#1e293b] truncate" title={exam.eligibility}>
+              {exam.eligibility || "TBA"}
+            </span>
+          </div>
+
+          {/* Fee Row */}
+          <div className="flex items-center gap-3 text-[14px] text-[#475569]">
+            <Banknote className="w-4 h-4 text-[#94a3b8] shrink-0" />
+            <span className="font-semibold text-[#1e293b]">
+              Fee: {formatFee(exam.applicationFee)}
             </span>
           </div>
         </div>
       </main>
 
-      <div className="mt-3 sm:mt-4 pt-1 flex flex-col gap-2 sm:gap-2.5">
+      {/* Action buttons */}
+      <div className="flex flex-col gap-3">
         <button
           onClick={() => {
             if (exam.applicationLink) {
@@ -448,38 +480,38 @@ export const EntranceCard: React.FC<{
               router.push(`/entrance/${exam.id}`);
             }
           }}
-          className="w-full flex items-center justify-center gap-2 py-2 sm:py-2.5 px-3 bg-brand-blue text-white font-bold text-[12px] sm:text-[13px] rounded-md hover:bg-brand-hover transition-colors"
+          className="w-full flex items-center justify-center gap-2.5 py-3.5 px-4 bg-[#1b52e8] text-white font-bold text-[15px] rounded-xl hover:bg-[#1b52e8]/90 transition-colors shadow-sm"
         >
-          <Send className="w-4 h-4" /> Apply Now
+          <Send className="w-4 h-4 rotate-45 -translate-y-0.5" /> Apply Now
         </button>
-        <div className="grid grid-cols-[1fr_1fr_auto] gap-2 sm:gap-2.5">
+        <div className="grid grid-cols-[1fr_1fr_auto] gap-3">
           <button
             onClick={() => router.push(`/entrance/${exam.id}`)}
-            className="flex items-center justify-center gap-1.5 py-1.5 sm:py-2 px-2 sm:px-3 border border-[#e2e8f0] text-[#475569] font-bold text-[11px] xs:text-[12px] rounded-md hover:bg-gray-50 transition-colors"
+            className="flex items-center justify-center gap-2 py-3 px-3 border border-[#cbd5e1] text-[#475569] font-bold text-[13px] rounded-xl hover:bg-gray-50 transition-colors"
           >
-            <FileText className="w-3.5 h-3.5" /> <span>View Detail</span>
+            <FileText className="w-4 h-4" /> <span>View Detailed</span>
           </button>
           <button
             onClick={() => router.push(`/entrance/${exam.id}`)}
-            className="flex items-center justify-center gap-1.5 py-1.5 sm:py-2 px-2 sm:px-3 border border-[#e2e8f0] text-[#475569] font-bold text-[11px] xs:text-[12px] rounded-md hover:bg-gray-50 transition-colors"
+            className="flex items-center justify-center gap-2 py-3 px-3 border border-[#cbd5e1] text-[#475569] font-bold text-[13px] rounded-xl hover:bg-gray-50 transition-colors"
           >
-            <Bell className="w-3.5 h-3.5" /> Notify
+            <Bell className="w-4 h-4" /> Notify
           </button>
           <button
             disabled={isPending}
-            className={`w-9 sm:w-10 shrink-0 rounded-md flex items-center justify-center transition-all duration-200 ${
+            className={`w-[52px] h-[48px] shrink-0 rounded-xl flex items-center justify-center transition-all duration-200 ${
               isPending
                 ? "bg-gray-50 border border-gray-100 cursor-not-allowed"
                 : isSaved
-                  ? "border-blue-200 bg-blue-50"
-                  : "bg-white border border-[#e2e8f0] text-[#94a3b8] hover:bg-[#f8fafc] hover:text-[#64748b]"
+                  ? "border-[#2563eb] bg-blue-50 text-[#2563eb]"
+                  : "bg-white border border-[#cbd5e1] text-[#94a3b8] hover:bg-[#f8fafc] hover:text-[#64748b]"
             }`}
             title={isSaved ? "Remove Bookmark" : "Bookmark"}
             onClick={isPending ? undefined : onToggleSaved}
           >
             {isPending ? (
               <svg
-                className="w-3.5 h-3.5 animate-spin text-gray-400"
+                className="w-4 h-4 animate-spin text-gray-400"
                 fill="none"
                 viewBox="0 0 24 24"
               >
@@ -499,7 +531,7 @@ export const EntranceCard: React.FC<{
               </svg>
             ) : (
               <Bookmark
-                className={`w-3.5 h-3.5 sm:w-4 sm:h-4 ${isSaved ? "text-[#0000ff] fill-[#0000ff]" : ""}`}
+                className={`w-4 h-4 ${isSaved ? "text-[#2563eb] fill-[#2563eb]" : ""}`}
               />
             )}
           </button>
