@@ -502,9 +502,9 @@ export default function SuperadminCreateEntranceSection({
         setModelSets(ensureIds(parseArray(exam.model_sets)));
         setUpcomingDates(
           ensureIds(parseArray(exam.upcoming_dates)).map((d: any) => ({
-            icon: "calendar",
-            color: "blue",
             ...d,
+            icon: (d.icon || "calendar").toLowerCase(),
+            color: (d.color || "blue").toLowerCase(),
           })),
         );
         setContactPersons(ensureIds(parseArray(exam.contact_persons)));
@@ -656,7 +656,11 @@ export default function SuperadminCreateEntranceSection({
         exam_pattern: examPattern,
         subject_marks: subjectMarks,
         model_sets: modelSets,
-        upcoming_dates: upcomingDates,
+        upcoming_dates: upcomingDates.map((d) => ({
+          ...d,
+          icon: d.icon.toLowerCase(),
+          color: d.color.toLowerCase(),
+        })),
         contact_persons: contactPersons,
         faqs: faqs,
         email: entranceEmail,
@@ -1997,21 +2001,38 @@ export default function SuperadminCreateEntranceSection({
                           <label className="text-xs font-medium text-gray-500 mb-1 block">
                             Icon
                           </label>
-                          <input
-                            type="text"
-                            className={inputClass}
-                            placeholder="e.g. calendar, bell"
-                            value={d.icon}
-                            onChange={(e) =>
-                              setUpcomingDates((prev) =>
-                                prev.map((x) =>
-                                  x.id === d.id
-                                    ? { ...x, icon: e.target.value }
-                                    : x,
-                                ),
-                              )
-                            }
-                          />
+                          <div className="flex items-center gap-2">
+                            <div className="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center shrink-0">
+                              {(() => {
+                                const key =
+                                  (d.icon || "calendar")
+                                    .charAt(0)
+                                    .toUpperCase() +
+                                  (d.icon || "calendar").slice(1).toLowerCase();
+                                const Icon = (LucideIcons as any)[key];
+                                return Icon ? (
+                                  <Icon size={14} />
+                                ) : (
+                                  <LucideIcons.Calendar size={14} />
+                                );
+                              })()}
+                            </div>
+                            <input
+                              type="text"
+                              className={inputClass}
+                              placeholder="e.g. calendar, bell"
+                              value={d.icon}
+                              onChange={(e) =>
+                                setUpcomingDates((prev) =>
+                                  prev.map((x) =>
+                                    x.id === d.id
+                                      ? { ...x, icon: e.target.value }
+                                      : x,
+                                  ),
+                                )
+                              }
+                            />
+                          </div>
                         </div>
                         <div>
                           <label className="text-xs font-medium text-gray-500 mb-1 block">

@@ -1113,7 +1113,7 @@ const EntranceDetailsPage: React.FC = () => {
                             className="border-b border-gray-200 hover:bg-gray-50"
                           >
                             <td className="p-4 border-r border-gray-200 text-gray-700 font-medium">
-                              {item.date}
+                              {item.examDate || item.date}
                             </td>
                             <td className="p-4 border-r border-gray-200 text-gray-700">
                               {item.shifts}
@@ -1153,7 +1153,7 @@ const EntranceDetailsPage: React.FC = () => {
                         className="border border-gray-200 rounded-md p-5 bg-white"
                       >
                         <h4 className="font-semibold text-gray-900 text-lg mb-2">
-                          {program.name}
+                          {program.programName || program.name}
                         </h4>
                         {program.description && (
                           <div

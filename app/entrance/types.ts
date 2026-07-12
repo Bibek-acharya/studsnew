@@ -84,8 +84,16 @@ export interface ExamDetails {
     dateEn: string;
     event: string;
     status?: string;
+    icon?: string;
+    color?: string;
   }[];
-  pastDates: { date: string; dateEn: string; event: string }[];
+  pastDates: {
+    date: string;
+    dateEn: string;
+    event: string;
+    icon?: string;
+    color?: string;
+  }[];
   faqs: { question: string; answer: string }[];
   contactPersons: {
     name: string;

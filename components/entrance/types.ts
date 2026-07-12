@@ -45,6 +45,8 @@ export interface Exam {
     date: string;
     event: string;
     endDate?: string;
+    icon?: string;
+    color?: string;
   }[];
   contactPersons?: {
     id?: number;
