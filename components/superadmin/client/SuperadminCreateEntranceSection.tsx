@@ -454,6 +454,7 @@ export default function SuperadminCreateEntranceSection({
     affiliation: "",
     link: "",
     institution_id: 0,
+    logo: "",
   });
 
   const ensureIds = (items: any[], start = 1): any[] =>
@@ -528,6 +529,7 @@ export default function SuperadminCreateEntranceSection({
             affiliation: exam.institution_affiliation || "",
             link: exam.institution_link || "",
             institution_id: exam.institution_id || 0,
+            logo: exam.institution_logo || "",
           });
         }
       })
@@ -649,6 +651,7 @@ export default function SuperadminCreateEntranceSection({
         institution_location: institutionFields.location,
         institution_link: institutionFields.link,
         institution_affiliation: institutionFields.affiliation,
+        institution_logo: institutionFields.logo,
         overview_details: [...overviewDetails.map(({ id, ...rest }) => rest)],
         exam_date_schedules: examDateSchedules,
         eligibility_list: eligibilityList,

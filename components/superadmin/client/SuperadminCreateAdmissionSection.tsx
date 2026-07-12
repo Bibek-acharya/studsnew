@@ -234,6 +234,7 @@ export default function SuperadminCreateAdmissionSection({
     affiliation: "",
     link: "",
     institution_id: 0,
+    logo: "",
   });
 
   const getToken = () => localStorage.getItem("superadmin_token");
@@ -481,6 +482,7 @@ export default function SuperadminCreateAdmissionSection({
               affiliation: d.institution_affiliation || "",
               link: d.institution_link || "",
               institution_id: d.institution_id || 0,
+              logo: d.institution_logo || "",
             });
           }
         }

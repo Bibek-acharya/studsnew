@@ -12,23 +12,21 @@ interface Institution {
   province?: string;
   website_url?: string;
   affiliation?: string;
+  logo_url?: string;
+}
+
+interface InstitutionFields {
+  name: string;
+  location: string;
+  affiliation: string;
+  link: string;
+  institution_id: number;
+  logo: string;
 }
 
 interface InstitutionSelectorProps {
-  value: {
-    name: string;
-    location: string;
-    affiliation: string;
-    link: string;
-    institution_id: number;
-  };
-  onChange: (value: {
-    name: string;
-    location: string;
-    affiliation: string;
-    link: string;
-    institution_id: number;
-  }) => void;
+  value: InstitutionFields;
+  onChange: (value: InstitutionFields) => void;
 }
 
 export default function InstitutionSelector({
@@ -102,6 +100,7 @@ export default function InstitutionSelector({
       affiliation: inst.affiliation || "",
       link: inst.website_url || "",
       institution_id: inst.id,
+      logo: inst.logo_url || "",
     });
   };
 
@@ -116,6 +115,7 @@ export default function InstitutionSelector({
       affiliation: "",
       link: "",
       institution_id: 0,
+      logo: "",
     });
   };
 
@@ -236,6 +236,31 @@ export default function InstitutionSelector({
               onChange={(e) => onChange({ ...value, link: e.target.value })}
               placeholder="https://example.edu.np"
               className="w-full pl-10 pr-4 py-2.5 border border-gray-300 rounded-lg text-sm focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none"
+            />
+          </div>
+        </div>
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-1.5">
+            Institution Logo
+          </label>
+          <div className="flex items-center gap-3">
+            {value.logo ? (
+              <img
+                src={value.logo}
+                alt="logo"
+                className="w-12 h-12 rounded-lg object-contain border border-gray-200"
+              />
+            ) : (
+              <div className="w-12 h-12 rounded-lg border border-dashed border-gray-300 flex items-center justify-center text-gray-400">
+                <Building2 className="w-5 h-5" />
+              </div>
+            )}
+            <input
+              type="text"
+              value={value.logo}
+              onChange={(e) => onChange({ ...value, logo: e.target.value })}
+              placeholder="Paste logo URL or upload..."
+              className="flex-1 px-4 py-2.5 border border-gray-300 rounded-lg text-sm focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none"
             />
           </div>
         </div>
