@@ -35,6 +35,7 @@ import {
   FolderOpen,
   Send,
 } from "lucide-react";
+import * as LucideIcons from "lucide-react";
 import { safeHtml } from "@/lib/html";
 import {
   FaFacebook,
@@ -49,6 +50,12 @@ const WhatsAppIcon = ({ className }: { className?: string }) => (
     <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z" />
   </svg>
 );
+
+const IconFromName = ({ name, size = 16 }: { name: string; size?: number }) => {
+  const key = name.charAt(0).toUpperCase() + name.slice(1).toLowerCase();
+  const Icon = (LucideIcons as any)[key];
+  return Icon ? <Icon size={size} /> : <LucideIcons.Calendar size={size} />;
+};
 
 const EmptyTabState = ({ tabName }: { tabName: string }) => {
   const router = useRouter();
@@ -120,6 +127,8 @@ function mapExamToDetails(exam: Exam): ExamDetails {
         })(),
         event: d.event,
         status: calcStatus(d.date),
+        icon: (d.icon || "calendar").toLowerCase(),
+        color: (d.color || "blue").toLowerCase(),
       }));
     }
     if (exam.examDate) {
@@ -142,6 +151,8 @@ function mapExamToDetails(exam: Exam): ExamDetails {
           })(),
           event: `${exam.title} Exam`,
           status: calcStatus(exam.examDate),
+          icon: "calendar",
+          color: "orange",
         },
       ];
     }
@@ -245,6 +256,11 @@ const EntranceDetailsPage: React.FC = () => {
   const [activeTab, setActiveTab] = useState<TabId>("overview");
   const [openFaq, setOpenFaq] = useState<number | null>(null);
   const [showNotificationModal, setShowNotificationModal] = useState(false);
+  const [notifyAlert, setNotifyAlert] = useState<{
+    show: boolean;
+    success: boolean;
+    message: string;
+  }>({ show: false, success: false, message: "" });
   const [canScrollTabsLeft, setCanScrollTabsLeft] = useState(false);
   const [canScrollTabsRight, setCanScrollTabsRight] = useState(false);
   const [isTabsOverflowing, setIsTabsOverflowing] = useState(false);
@@ -525,10 +541,18 @@ const EntranceDetailsPage: React.FC = () => {
                         return;
                       }
                       try {
-                        await entranceService.notifyReminder(exam.id);
-                        alert("You will be notified of updates.");
+                        await entranceService.notifyReminder(Number(exam.id));
+                        setNotifyAlert({
+                          show: true,
+                          success: true,
+                          message: "You will be notified of updates.",
+                        });
                       } catch {
-                        alert("Failed to subscribe. Try again.");
+                        setNotifyAlert({
+                          show: true,
+                          success: false,
+                          message: "Failed to subscribe. Try again.",
+                        });
                       }
                     }}
                     className="bg-[#0000ff] hover:bg-[#0000cc] text-white px-4 py-2 rounded-md font-medium text-sm flex items-center gap-2 transition-colors shrink-0"
@@ -826,23 +850,23 @@ const EntranceDetailsPage: React.FC = () => {
                     {[
                       ...exam.upcomingDates.map((d) => ({
                         ...d,
-                        icon: "Calendar",
                         type: "upcoming",
                       })),
                       ...exam.pastDates.map((d) => ({
                         ...d,
-                        icon: "Calendar",
                         type: "past",
                       })),
                     ].map((ev, i, arr) => {
-                      const colors = [
-                        "bg-blue-600",
-                        "bg-green-600",
-                        "bg-orange-600",
-                        "bg-purple-600",
-                        "bg-red-600",
-                      ];
-                      const color = colors[i % colors.length];
+                      const colorMap: Record<string, string> = {
+                        blue: "bg-blue-600",
+                        green: "bg-green-600",
+                        orange: "bg-orange-600",
+                        purple: "bg-purple-600",
+                        red: "bg-red-600",
+                        teal: "bg-teal-600",
+                        indigo: "bg-indigo-600",
+                      };
+                      const color = colorMap[ev.color || ""] || "bg-blue-600";
                       const isLast = i === arr.length - 1;
                       const displayDate = (() => {
                         try {
@@ -864,7 +888,10 @@ const EntranceDetailsPage: React.FC = () => {
                             <div
                               className={`flex h-8 w-8 items-center justify-center rounded-full ${color} text-white`}
                             >
-                              <Calendar size={16} />
+                              <IconFromName
+                                name={ev.icon || "calendar"}
+                                size={16}
+                              />
                             </div>
                             {!isLast && (
                               <div className="mt-2 w-0.5 flex-1 bg-gray-200" />
@@ -1464,6 +1491,60 @@ const EntranceDetailsPage: React.FC = () => {
                   className="rounded-md px-6 py-2 bg-[#0000ff] text-[15px] font-bold text-white hover:bg-[#0000cc] focus:outline-none transition-colors"
                 >
                   Submit
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {notifyAlert.show && (
+        <div className="fixed inset-0 z-50 overflow-y-auto">
+          <div className="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
+            <div
+              className="fixed inset-0 bg-gray-900/40 transition-opacity backdrop-blur-sm"
+              onClick={() =>
+                setNotifyAlert({ show: false, success: false, message: "" })
+              }
+            />
+            <span className="hidden sm:inline-block sm:align-middle sm:h-screen">
+              &#8203;
+            </span>
+            <div className="inline-block align-bottom bg-white rounded-md px-4 pt-5 pb-4 text-left overflow-hidden transform transition-all sm:my-8 sm:align-middle sm:max-w-sm sm:w-full sm:p-6 relative">
+              <button
+                onClick={() =>
+                  setNotifyAlert({ show: false, success: false, message: "" })
+                }
+                className="absolute top-4 right-4 text-gray-400 hover:text-gray-600 transition-colors"
+              >
+                <X className="h-5 w-5" />
+              </button>
+              <div className="px-2 pt-2 text-center">
+                <div
+                  className={`mx-auto w-12 h-12 rounded-full flex items-center justify-center mb-4 ${
+                    notifyAlert.success
+                      ? "bg-green-100 text-green-600"
+                      : "bg-red-100 text-red-600"
+                  }`}
+                >
+                  {notifyAlert.success ? (
+                    <CheckCircle2 className="w-6 h-6" />
+                  ) : (
+                    <AlertTriangle className="w-6 h-6" />
+                  )}
+                </div>
+                <p className="text-[15px] font-semibold text-gray-900">
+                  {notifyAlert.message}
+                </p>
+              </div>
+              <div className="mt-6 flex justify-center pb-2">
+                <button
+                  onClick={() =>
+                    setNotifyAlert({ show: false, success: false, message: "" })
+                  }
+                  className="rounded-md px-8 py-2 bg-[#0000ff] text-[14px] font-bold text-white hover:bg-[#0000cc] transition-colors"
+                >
+                  OK
                 </button>
               </div>
             </div>
