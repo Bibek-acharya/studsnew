@@ -270,11 +270,11 @@ const EntranceDetailsPage: React.FC = () => {
   const { data: apiData, isLoading } = useQuery({
     queryKey: ["entrance", id],
     queryFn: async () => {
-      const token =
+      const instToken =
         typeof window !== "undefined"
           ? localStorage.getItem("institutionToken")
           : null;
-      if (token) {
+      if (instToken) {
         try {
           const instData = await institutionEntranceApi.getById(
             Number(id) || 0,
@@ -282,6 +282,24 @@ const EntranceDetailsPage: React.FC = () => {
           if (instData) {
             return {
               data: mapRawEntrance(instData),
+            } as EntranceDetailsResponse;
+          }
+        } catch {
+          /* fallback */
+        }
+      }
+      const superToken =
+        typeof window !== "undefined"
+          ? localStorage.getItem("superadmin_token")
+          : null;
+      if (superToken) {
+        try {
+          const { superadminEntranceApi } =
+            await import("@/services/superadminRecordsApi");
+          const saData = await superadminEntranceApi.getById(Number(id) || 0);
+          if (saData) {
+            return {
+              data: mapRawEntrance(saData),
             } as EntranceDetailsResponse;
           }
         } catch {
