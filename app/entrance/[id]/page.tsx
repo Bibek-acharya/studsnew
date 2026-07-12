@@ -659,7 +659,7 @@ const EntranceDetailsPage: React.FC = () => {
                           <div className="w-10 h-10 rounded-full bg-[#0000ff] text-white flex items-center justify-center font-bold text-sm flex-shrink-0">
                             {idx + 1}
                           </div>
-                          <div>
+                          <div className="min-w-0">
                             <h3 className="font-bold text-gray-900 text-lg mb-3">
                               {step.title}
                             </h3>
