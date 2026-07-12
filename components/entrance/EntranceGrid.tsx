@@ -203,13 +203,13 @@ const EntranceGrid: React.FC<EntranceGridProps> = ({
         </div>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4 sm:gap-5 md:gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-5 md:gap-6">
         {isLoading ? (
-          <div className="col-span-1 md:col-span-2 xl:col-span-3 rounded-md border border-gray-100 bg-white py-16 text-center text-gray-500 shadow-[0_2px_15px_rgb(0,0,0,0.04)]">
+          <div className="col-span-full rounded-md border border-gray-100 bg-white py-16 text-center text-gray-500 shadow-[0_2px_15px_rgb(0,0,0,0.04)]">
             Loading entrance exams...
           </div>
         ) : filteredExams.length === 0 ? (
-          <div className="col-span-1 md:col-span-2 xl:col-span-3 rounded-md border border-gray-100 bg-white py-16 text-center text-gray-500 shadow-[0_2px_15px_rgb(0,0,0,0.04)]">
+          <div className="col-span-full rounded-md border border-gray-100 bg-white py-16 text-center text-gray-500 shadow-[0_2px_15px_rgb(0,0,0,0.04)]">
             No entrance exams found matching your filters.
           </div>
         ) : (
@@ -225,12 +225,12 @@ const EntranceGrid: React.FC<EntranceGridProps> = ({
                 }}
               />
               {showEntranceAds && index === 5 && (
-                <div className="col-span-1 md:col-span-2 xl:col-span-3 -mx-2">
+                <div className="col-span-full -mx-2">
                   <EntranceAds />
                 </div>
               )}
               {showApplicationAds && index === 11 && (
-                <div className="col-span-1 md:col-span-2 xl:col-span-3 -mx-2">
+                <div className="col-span-full -mx-2">
                   <ApplicationAds />
                 </div>
               )}
@@ -271,7 +271,20 @@ const formatDateExact = (dateStr: string) => {
     const d = new Date(dateStr);
     if (isNaN(d.getTime())) return dateStr;
     const day = String(d.getDate()).padStart(2, "0");
-    const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+    const months = [
+      "Jan",
+      "Feb",
+      "Mar",
+      "Apr",
+      "May",
+      "Jun",
+      "Jul",
+      "Aug",
+      "Sep",
+      "Oct",
+      "Nov",
+      "Dec",
+    ];
     const month = months[d.getMonth()];
     const year = d.getFullYear();
     return `${day} ${month} ${year}`;
@@ -283,7 +296,10 @@ const formatDateExact = (dateStr: string) => {
 const formatFee = (fee: string | undefined) => {
   if (!fee) return "TBA";
   const trimmed = fee.trim();
-  if (trimmed.toLowerCase().includes("rs") || trimmed.toLowerCase().includes("rupee")) {
+  if (
+    trimmed.toLowerCase().includes("rs") ||
+    trimmed.toLowerCase().includes("rupee")
+  ) {
     return trimmed;
   }
   return `Rs. ${trimmed}`;
@@ -300,12 +316,27 @@ export const EntranceCard: React.FC<{
   const getStatusConfig = (status: string) => {
     const s = (status || "").toLowerCase();
     if (s === "published" || s === "ongoing" || s === "open") {
-      return { text: "ONGOING", bg: "bg-[#ecfdf5]", textCol: "text-[#059669]", dotCol: "bg-[#10b981]" };
+      return {
+        text: "ONGOING",
+        bg: "bg-[#ecfdf5]",
+        textCol: "text-[#059669]",
+        dotCol: "bg-[#10b981]",
+      };
     }
     if (s === "draft" || s === "upcoming") {
-      return { text: "UPCOMING", bg: "bg-[#fff7ed]", textCol: "text-[#ea580c]", dotCol: "bg-[#f97316]" };
+      return {
+        text: "UPCOMING",
+        bg: "bg-[#fff7ed]",
+        textCol: "text-[#ea580c]",
+        dotCol: "bg-[#f97316]",
+      };
     }
-    return { text: "CLOSED", bg: "bg-[#fef2f2]", textCol: "text-[#dc2626]", dotCol: "bg-[#ef4444]" };
+    return {
+      text: "CLOSED",
+      bg: "bg-[#fef2f2]",
+      textCol: "text-[#dc2626]",
+      dotCol: "bg-[#ef4444]",
+    };
   };
 
   const getModeText = (mode: string | undefined) => {
@@ -341,7 +372,7 @@ export const EntranceCard: React.FC<{
             className="w-full h-full rounded-xl object-contain"
           />
         </div>
-        
+
         {/* Institution details */}
         <div className="flex flex-col min-w-0 flex-1 pt-0.5">
           <div className="flex items-center gap-1.5 min-w-0">
@@ -354,9 +385,20 @@ export const EntranceCard: React.FC<{
               </div>
             </h3>
             {exam.verified && (
-              <svg className="w-[18px] h-[18px] shrink-0" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <svg
+                className="w-[18px] h-[18px] shrink-0"
+                viewBox="0 0 24 24"
+                fill="none"
+                xmlns="http://www.w3.org/2000/svg"
+              >
                 <circle cx="12" cy="12" r="10" fill="#3b82f6" />
-                <path d="M8.5 12.5L11 15L16 9" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
+                <path
+                  d="M8.5 12.5L11 15L16 9"
+                  stroke="white"
+                  strokeWidth="2.5"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
               </svg>
             )}
           </div>
@@ -371,7 +413,9 @@ export const EntranceCard: React.FC<{
                 </span>
               </span>
             )}
-            {exam.location && exam.affiliation && <span className="text-[#cbd5e1]">•</span>}
+            {exam.location && exam.affiliation && (
+              <span className="text-[#cbd5e1]">•</span>
+            )}
             {exam.affiliation && (
               <span className="flex items-center gap-1">
                 <Award className="w-3.5 h-3.5 text-[#94a3b8] shrink-0" />
@@ -415,18 +459,22 @@ export const EntranceCard: React.FC<{
         </h4>
 
         {/* Badges row */}
-        <div className="flex flex-wrap gap-2.5 mb-4">
-          <span className={`px-3 py-1.5 rounded-lg text-xs font-bold flex items-center gap-1.5 ${statusConfig.bg} ${statusConfig.textCol}`}>
-            <span className={`w-2.5 h-2.5 rounded-full ${statusConfig.dotCol}`} />
-            {statusConfig.text}
+        <div className="grid grid-cols-3 gap-2 mb-4">
+          <span
+            className={`px-3 py-1.5 rounded-lg text-xs font-bold flex items-center justify-center gap-1.5 truncate ${statusConfig.bg} ${statusConfig.textCol}`}
+          >
+            <span
+              className={`w-2 h-2 rounded-full shrink-0 ${statusConfig.dotCol}`}
+            />
+            <span className="truncate">{statusConfig.text}</span>
           </span>
-          <span className="px-3 py-1.5 rounded-lg text-xs font-bold text-[#475569] bg-[#f8fafc] border border-[#f1f5f9] flex items-center gap-1.5">
+          <span className="px-3 py-1.5 rounded-lg text-xs font-bold text-[#475569] bg-[#f8fafc] border border-[#f1f5f9] flex items-center justify-center gap-1.5 truncate">
             <Monitor className="w-3.5 h-3.5 text-[#64748b] shrink-0" />
-            {getModeText(exam.examMode)}
+            <span className="truncate">{getModeText(exam.examMode)}</span>
           </span>
-          <span className="px-3 py-1.5 rounded-lg text-xs font-bold text-[#475569] bg-[#f8fafc] border border-[#f1f5f9] flex items-center gap-1.5">
+          <span className="px-3 py-1.5 rounded-lg text-xs font-bold text-[#475569] bg-[#f8fafc] border border-[#f1f5f9] flex items-center justify-center gap-1.5 truncate">
             <Globe className="w-3.5 h-3.5 text-[#64748b] shrink-0" />
-            {getScopeText(exam.examScope)}
+            <span className="truncate">{getScopeText(exam.examScope)}</span>
           </span>
         </div>
 
@@ -451,7 +499,10 @@ export const EntranceCard: React.FC<{
           {/* Eligibility Row */}
           <div className="flex items-center gap-3 text-[14px] text-[#475569]">
             <GraduationCap className="w-4 h-4 text-[#94a3b8] shrink-0" />
-            <span className="font-semibold text-[#1e293b] truncate" title={exam.eligibility}>
+            <span
+              className="font-semibold text-[#1e293b] truncate"
+              title={exam.eligibility}
+            >
               {exam.eligibility || "TBA"}
             </span>
           </div>
