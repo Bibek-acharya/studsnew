@@ -35,14 +35,7 @@ import {
   AlertTriangle,
   CheckCircle2,
 } from "lucide-react";
-import {
-  FaSliders,
-  FaFacebook,
-  FaTwitter,
-  FaInstagram,
-  FaYoutube,
-} from "react-icons/fa6";
-import { FaWhatsapp } from "react-icons/fa";
+import { FaSliders } from "react-icons/fa6";
 
 interface EntranceGridProps {
   filters: EntranceFilterState;
@@ -439,31 +432,6 @@ export const EntranceCard: React.FC<{
               {exam.eligibility}
             </span>
           </div>
-          {exam.socialLinks && exam.socialLinks.length > 0 && (
-            <div className="flex items-center gap-1.5 flex-wrap pt-1 border-t border-[#e2e8f0] mt-1">
-              {exam.socialLinks.map((link, i) => {
-                const iconMap2: Record<string, React.ReactNode> = {
-                  facebook: <FaFacebook className="w-3 h-3" />,
-                  twitter: <FaTwitter className="w-3 h-3" />,
-                  instagram: <FaInstagram className="w-3 h-3" />,
-                  youtube: <FaYoutube className="w-3 h-3" />,
-                  whatsapp: <FaWhatsapp className="w-3 h-3" />,
-                };
-                return (
-                  <a
-                    key={i}
-                    href={link.url}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="p-1 hover:bg-gray-100 rounded"
-                    title={link.platform}
-                  >
-                    {iconMap2[link.platform] || <Globe className="w-3 h-3" />}
-                  </a>
-                );
-              })}
-            </div>
-          )}
         </div>
       </main>
 

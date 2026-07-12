@@ -617,9 +617,12 @@ const EntranceDetailsPage: React.FC = () => {
                             <CheckCircle2 className="w-4 h-4 text-green-600" />{" "}
                             {item.title}
                           </h4>
-                          <p className="text-sm text-gray-600 ml-6">
-                            {item.description}
-                          </p>
+                          <div
+                            className="text-sm text-gray-600 ml-6 prose prose-sm max-w-none"
+                            dangerouslySetInnerHTML={{
+                              __html: safeHtml(item.description),
+                            }}
+                          />
                         </div>
                       ))}
                     </div>
@@ -660,9 +663,12 @@ const EntranceDetailsPage: React.FC = () => {
                             <h3 className="font-bold text-gray-900 text-lg mb-3">
                               {step.title}
                             </h3>
-                            <p className="text-sm text-gray-600 leading-relaxed">
-                              {step.description}
-                            </p>
+                            <div
+                              className="text-sm text-gray-600 leading-relaxed prose prose-sm max-w-none"
+                              dangerouslySetInnerHTML={{
+                                __html: safeHtml(step.description),
+                              }}
+                            />
                           </div>
                         </div>
                       </div>
