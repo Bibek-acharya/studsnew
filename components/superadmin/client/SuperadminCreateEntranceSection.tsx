@@ -809,7 +809,7 @@ export default function SuperadminCreateEntranceSection({
                       Click to upload banner image
                     </span>
                     <span className="mt-1 text-xs text-gray-500">
-                      Recommended size: 1920x600px (JPG/PNG)
+                      Recommended size: 1400x380px (JPG/PNG)
                     </span>
                   </>
                 )}
@@ -827,10 +827,28 @@ export default function SuperadminCreateEntranceSection({
                     }
                     const reader = new FileReader();
                     reader.onload = (ev) => {
-                      if (ev.target?.result) {
-                        setCropImageSrc(ev.target.result as string);
-                        setCropperOpen(true);
-                      }
+                      if (!ev.target?.result) return;
+                      const dataUrl = ev.target.result as string;
+                      const img = new Image();
+                      img.onload = async () => {
+                        const ratio = img.naturalWidth / img.naturalHeight;
+                        const targetRatio = 3.68;
+                        if (Math.abs(ratio - targetRatio) < 0.05) {
+                          try {
+                            const url = await uploadFile(
+                              file,
+                              "institution/entrance",
+                            );
+                            setHeroBanner(url);
+                          } catch (err) {
+                            console.error("Banner upload failed:", err);
+                          }
+                        } else {
+                          setCropImageSrc(dataUrl);
+                          setCropperOpen(true);
+                        }
+                      };
+                      img.src = dataUrl;
                     };
                     reader.readAsDataURL(file);
                   }}

@@ -379,8 +379,7 @@ const EntranceDetailsPage: React.FC = () => {
 
         <div className="mb-6">
           <h1 className="text-[28px] md:text-4xl font-bold text-gray-900">
-            {exam.title}: Application ({exam.status}), Exam Date, Syllabus,
-            Preparation, Admit Card, Admission
+            {exam.title}
           </h1>
           <p className="text-sm text-gray-400 font-medium mt-2">
             {exam.conductingBody} &middot; {exam.examLevel}
