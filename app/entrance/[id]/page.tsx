@@ -618,7 +618,7 @@ const EntranceDetailsPage: React.FC = () => {
                             {item.title}
                           </h4>
                           <div
-                            className="text-sm text-gray-600 ml-6 prose prose-sm max-w-none"
+                            className="text-sm text-gray-600 ml-6 prose prose-sm max-w-none break-words overflow-x-auto [&_pre]:overflow-x-auto [&_pre]:whitespace-pre-wrap [&_img]:max-w-full [&_table]:block [&_table]:overflow-x-auto [&_iframe]:max-w-full"
                             dangerouslySetInnerHTML={{
                               __html: safeHtml(item.description),
                             }}
@@ -664,7 +664,7 @@ const EntranceDetailsPage: React.FC = () => {
                               {step.title}
                             </h3>
                             <div
-                              className="text-sm text-gray-600 leading-relaxed prose prose-sm max-w-none"
+                              className="text-sm text-gray-600 leading-relaxed prose prose-sm max-w-none break-words overflow-x-auto [&_pre]:overflow-x-auto [&_pre]:whitespace-pre-wrap [&_img]:max-w-full [&_table]:block [&_table]:overflow-x-auto [&_iframe]:max-w-full"
                               dangerouslySetInnerHTML={{
                                 __html: safeHtml(step.description),
                               }}
