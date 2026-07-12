@@ -79,7 +79,7 @@ const TabAbout: React.FC<TabAboutProps> = ({
         instOverviewData.length > 0 && (
           <div className="space-y-6 rounded-md">
             <h2 className="text-[22px] font-bold text-gray-900">
-              University Overview
+              Institution Overview
             </h2>
             <div className="overflow-x-auto">
               <table className="w-full rounded-md border border-gray-200 text-left text-sm">

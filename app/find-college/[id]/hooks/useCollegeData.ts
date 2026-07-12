@@ -87,17 +87,23 @@ export function useCollegeData(idStr: string) {
     [],
   );
 
-  const galleryImagesSource = useMemo(() => {
+  const galleryGroups = useMemo(() => {
     if (!instGallery || !Array.isArray(instGallery))
       return FALLBACK_GALLERY_IMAGES;
-    return instGallery
-      .flatMap((g: any) => {
-        if (g.images && Array.isArray(g.images)) {
-          return g.images.map((img: any) => safeImageUrl(img.url || img));
-        }
-        return safeImageUrl(g.url || g);
-      })
-      .filter(Boolean);
+    return instGallery.map((g: any) => {
+      if (g.folder && Array.isArray(g.images)) {
+        return {
+          folder: g.folder,
+          images: g.images
+            .map((img: any) => safeImageUrl(img.url || img))
+            .filter(Boolean),
+        };
+      }
+      return {
+        folder: "Gallery",
+        images: [safeImageUrl(g.url || g)].filter(Boolean),
+      };
+    });
   }, [instGallery, safeImageUrl]);
 
   const instLogo =
@@ -144,7 +150,7 @@ export function useCollegeData(idStr: string) {
         const rawIcon = (f.facilityIcon || f.icon || "").trim();
         const icon = rawIcon
           ? `fa-${rawIcon.replace(/^fa-/, "").toLowerCase()}`
-          : "";
+          : null;
         return {
           icon,
           title: f.heading || f.title || "",
@@ -159,7 +165,7 @@ export function useCollegeData(idStr: string) {
     if (instDownloads && Array.isArray(instDownloads)) {
       return instDownloads.map((d: any) => ({
         title: d.title || d.name || "",
-        size: d.description || d.size || "",
+        size: d.size || d.description || "",
         file: d.file || null,
       }));
     }
@@ -328,7 +334,7 @@ export function useCollegeData(idStr: string) {
     instOverviewData,
     instLeadershipData,
     instAlumni,
-    galleryImagesSource,
+    galleryGroups,
     mappedCourses,
     mappedPrograms,
     mappedFacilities,

@@ -34,8 +34,15 @@ const AboutVideoInteractive: React.FC<{ videos?: VideoEntry[] }> = ({
 }) => {
   const cardData = React.useMemo(() => {
     if (!videos || videos.length === 0) return {};
+    if (!Array.isArray(videos)) {
+      if (process.env.NODE_ENV === "development") {
+        console.warn("[AboutVideoInteractive] videos is not an array:", videos);
+      }
+      return {};
+    }
     const data: Record<string, CardData> = {};
     videos.forEach((v, i) => {
+      if (!v.url) return;
       const key = v.name || `Video ${i + 1}`;
       data[key] = {
         avatar: v.avatar || "",

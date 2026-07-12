@@ -23,6 +23,7 @@ import {
   InquiryForm,
 } from "./components";
 import { useCollegeData } from "./hooks/useCollegeData";
+import { useFollow } from "./hooks/useFollow";
 import type { TabKey, LevelFilter } from "../types";
 import {
   FALLBACK_FACILITIES,
@@ -44,10 +45,8 @@ const CollegeDetailsPage = ({
   const [isClaimModalOpen, setIsClaimModalOpen] = useState(false);
   const [isShareModalOpen, setIsShareModalOpen] = useState(false);
   const [isCounsellingModalOpen, setIsCounsellingModalOpen] = useState(false);
-  const [isFollowed, setIsFollowed] = useState(false);
   const [showUnfollowDialog, setShowUnfollowDialog] = useState(false);
   const [activeTab, setActiveTab] = useState<TabKey>("about");
-  const [courseFilter, setCourseFilter] = useState<LevelFilter>("all");
   const [admissionFilter, setAdmissionFilter] = useState<LevelFilter>("all");
   const [programFilter, setProgramFilter] = useState<LevelFilter>("all");
   const [scholarshipFilter, setScholarshipFilter] =
@@ -57,6 +56,12 @@ const CollegeDetailsPage = ({
   const [shareUrl, setShareUrl] = useState("");
 
   const data = useCollegeData(idStr);
+  const {
+    isFollowed,
+    loading: followLoading,
+    toggleFollow,
+    unfollow,
+  } = useFollow(data.college?.id || data.collegeId || null);
 
   useEffect(() => {
     setShareUrl(window.location.href);
@@ -146,7 +151,7 @@ const CollegeDetailsPage = ({
     );
   }
 
-  const coursesData = data.mappedCourses || data.filteredCourses(courseFilter);
+  const coursesData = data.mappedCourses || [];
   const admissionsData = data.mappedAdmissions;
   const facilitiesData = data.mappedFacilities || FALLBACK_FACILITIES;
   const eventsData = data.mappedEvents || FALLBACK_EVENTS;
@@ -157,17 +162,10 @@ const CollegeDetailsPage = ({
   const newsData = data.mappedNews || FALLBACK_NEWS_CARDS;
   const downloadsData = data.mappedDownloads || FALLBACK_DOWNLOADS;
 
-  const offeredPrograms = data.mappedPrograms
-    ? [
-        ...data.mappedPrograms,
-        ...data.institutionProgramsFromTable,
-        ...data.institutionCoursesFromStorage,
-      ]
-    : [
-        ...data.institutionProgramsFromTable,
-        ...data.filteredPrograms(programFilter),
-        ...data.institutionCoursesFromStorage,
-      ];
+  const offeredPrograms =
+    data.institutionProgramsFromTable.length > 0
+      ? data.institutionProgramsFromTable
+      : data.mappedPrograms || [];
 
   const scholarshipsData =
     data.mappedScholarships || data.filteredScholarships(scholarshipFilter);
@@ -189,7 +187,8 @@ const CollegeDetailsPage = ({
         isFollowed={isFollowed}
         showUnfollowDialog={showUnfollowDialog}
         setShowUnfollowDialog={setShowUnfollowDialog}
-        setIsFollowed={setIsFollowed}
+        onToggleFollow={toggleFollow}
+        followLoading={followLoading}
         setIsAskQuestionOpen={setIsAskQuestionOpen}
         setIsShareModalOpen={setIsShareModalOpen}
         setIsClaimModalOpen={setIsClaimModalOpen}
@@ -210,14 +209,7 @@ const CollegeDetailsPage = ({
               instLeadershipData={data.instLeadershipData}
             />
           )}
-          {activeTab === "courses" && (
-            <TabCourses
-              courses={coursesData}
-              filter={courseFilter}
-              onFilterChange={setCourseFilter}
-              hasApiData={!!data.mappedCourses}
-            />
-          )}
+          {activeTab === "courses" && <TabCourses courses={coursesData} />}
           {activeTab === "admissions" && (
             <TabAdmissions
               admissions={admissionsData}
@@ -232,7 +224,7 @@ const CollegeDetailsPage = ({
               programs={offeredPrograms}
               filter={programFilter}
               onFilterChange={setProgramFilter}
-              hasApiData={!!data.mappedPrograms}
+              hasApiData={data.institutionProgramsFromTable.length > 0}
             />
           )}
           {activeTab === "facilities" && (
@@ -255,7 +247,7 @@ const CollegeDetailsPage = ({
           )}
           {activeTab === "alumni" && <TabAlumni alumni={alumniData} />}
           {activeTab === "gallery" && (
-            <TabGallery images={data.galleryImagesSource} />
+            <TabGallery images={data.galleryGroups} />
           )}
           {activeTab === "review" && (
             <TabReview
@@ -331,8 +323,8 @@ const CollegeDetailsPage = ({
                 Cancel
               </button>
               <button
-                onClick={() => {
-                  setIsFollowed(false);
+                onClick={async () => {
+                  await unfollow();
                   setShowUnfollowDialog(false);
                 }}
                 className="flex-1 rounded-md bg-red-500 px-4 py-2.5 font-semibold text-white transition-colors hover:bg-red-600"
