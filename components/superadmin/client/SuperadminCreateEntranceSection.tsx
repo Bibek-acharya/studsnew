@@ -711,6 +711,7 @@ export default function SuperadminCreateEntranceSection({
       <InstitutionSelector
         value={institutionFields}
         onChange={setInstitutionFields}
+        onUpload={(file) => uploadFile(file, "institution/logo")}
       />
 
       <div className="space-y-6">

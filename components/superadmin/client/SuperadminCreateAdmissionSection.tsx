@@ -621,6 +621,7 @@ export default function SuperadminCreateAdmissionSection({
         <InstitutionSelector
           value={institutionFields}
           onChange={setInstitutionFields}
+          onUpload={(file) => uploadFile(file, "institution/logo")}
         />
 
         {/* 1. Admissions Overview */}
