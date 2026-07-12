@@ -203,7 +203,7 @@ const EntranceGrid: React.FC<EntranceGridProps> = ({
         </div>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-5 md:gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4 sm:gap-5 md:gap-6">
         {isLoading ? (
           <div className="col-span-full rounded-md border border-gray-100 bg-white py-16 text-center text-gray-500 shadow-[0_2px_15px_rgb(0,0,0,0.04)]">
             Loading entrance exams...
@@ -362,21 +362,21 @@ export const EntranceCard: React.FC<{
   const statusConfig = getStatusConfig(exam.status);
 
   return (
-    <article className="bg-white rounded-[20px] p-5 border border-[#e2e8f0] flex flex-col h-full hover:shadow-md transition-all duration-300 overflow-visible relative">
-      <header className="flex gap-3.5 items-start mb-4">
+    <article className="bg-white rounded-[16px] p-4 border border-[#e2e8f0] flex flex-col h-full hover:shadow-md transition-all duration-300 overflow-visible relative">
+      <header className="flex gap-3 items-start mb-3">
         {/* Logo Container */}
-        <div className="w-[72px] h-[72px] rounded-2xl border border-[#f1f5f9] flex items-center justify-center bg-white p-1 shrink-0 shadow-sm">
+        <div className="w-[56px] h-[56px] rounded-xl border border-[#f1f5f9] flex items-center justify-center bg-white p-1 shrink-0 shadow-sm">
           <img
             src={exam.logo}
             alt={exam.institution}
-            className="w-full h-full rounded-xl object-contain"
+            className="w-full h-full rounded-lg object-contain"
           />
         </div>
 
         {/* Institution details */}
-        <div className="flex flex-col min-w-0 flex-1 pt-0.5">
+        <div className="flex flex-col min-w-0 flex-1 pt-0">
           <div className="flex items-center gap-1.5 min-w-0">
-            <h3 className="group relative text-[17px] font-bold text-[#0f172a] truncate">
+            <h3 className="group relative text-[15px] font-bold text-[#0f172a] truncate">
               {exam.institution}
               {/* Tooltip */}
               <div className="absolute bottom-full left-0 mb-2 invisible opacity-0 group-hover:visible group-hover:opacity-100 bg-gray-900 text-white text-[13px] font-medium py-1.5 px-3 rounded whitespace-nowrap transition-all duration-200 z-50 pointer-events-none">
@@ -448,7 +448,7 @@ export const EntranceCard: React.FC<{
       <main className="grow overflow-visible flex flex-col">
         {/* Title */}
         <h4
-          className="group relative text-[17px] font-bold text-[#0f172a] mb-4 leading-snug cursor-pointer hover:text-brand-blue transition-colors"
+          className="group relative text-[15px] font-bold text-[#0f172a] mb-3 leading-snug cursor-pointer hover:text-brand-blue transition-colors"
           onClick={() => router.push(`/entrance/${exam.id}`)}
         >
           <span className="block truncate">{exam.title}</span>
@@ -459,48 +459,48 @@ export const EntranceCard: React.FC<{
         </h4>
 
         {/* Badges row */}
-        <div className="grid grid-cols-3 gap-2 mb-4">
+        <div className="flex flex-nowrap gap-1.5 mb-3">
           <span
-            className={`px-3 py-1.5 rounded-lg text-xs font-bold flex items-center justify-center gap-1.5 truncate ${statusConfig.bg} ${statusConfig.textCol}`}
+            className={`px-2 py-1 rounded-md text-[10px] font-bold flex items-center gap-1 truncate ${statusConfig.bg} ${statusConfig.textCol}`}
           >
             <span
-              className={`w-2 h-2 rounded-full shrink-0 ${statusConfig.dotCol}`}
+              className={`w-1.5 h-1.5 rounded-full shrink-0 ${statusConfig.dotCol}`}
             />
             <span className="truncate">{statusConfig.text}</span>
           </span>
-          <span className="px-3 py-1.5 rounded-lg text-xs font-bold text-[#475569] bg-[#f8fafc] border border-[#f1f5f9] flex items-center justify-center gap-1.5 truncate">
-            <Monitor className="w-3.5 h-3.5 text-[#64748b] shrink-0" />
+          <span className="px-2 py-1 rounded-md text-[10px] font-bold text-[#475569] bg-[#f8fafc] border border-[#f1f5f9] flex items-center gap-1 truncate">
+            <Monitor className="w-3 h-3 text-[#64748b] shrink-0" />
             <span className="truncate">{getModeText(exam.examMode)}</span>
           </span>
-          <span className="px-3 py-1.5 rounded-lg text-xs font-bold text-[#475569] bg-[#f8fafc] border border-[#f1f5f9] flex items-center justify-center gap-1.5 truncate">
-            <Globe className="w-3.5 h-3.5 text-[#64748b] shrink-0" />
+          <span className="px-2 py-1 rounded-md text-[10px] font-bold text-[#475569] bg-[#f8fafc] border border-[#f1f5f9] flex items-center gap-1 truncate">
+            <Globe className="w-3 h-3 text-[#64748b] shrink-0" />
             <span className="truncate">{getScopeText(exam.examScope)}</span>
           </span>
         </div>
 
         {/* Gray details container */}
-        <div className="bg-[#f8fafc] border border-[#f1f5f9] rounded-xl p-4 flex flex-col gap-3 mb-5 mt-auto">
+        <div className="bg-[#f8fafc] border border-[#f1f5f9] rounded-lg p-3 flex flex-col gap-2 mb-3 mt-auto">
           {/* Ends Row */}
-          <div className="flex items-center gap-3 text-[14px] text-[#475569]">
-            <Clock className="w-4 h-4 text-[#94a3b8] shrink-0" />
-            <span className="font-semibold text-[#ef4444]">
-              Ends: {formatDateExact(exam.deadline)}
+          <div className="flex items-center gap-2 text-[13px] text-[#475569]">
+            <Clock className="w-3.5 h-3.5 text-[#94a3b8] shrink-0" />
+            <span className="font-semibold text-[#ef4444] text-[12px]">
+              Deadline: {formatDateExact(exam.deadline)}
             </span>
           </div>
 
           {/* Exam Date Row */}
-          <div className="flex items-center gap-3 text-[14px] text-[#475569]">
-            <Calendar className="w-4 h-4 text-[#94a3b8] shrink-0" />
-            <span className="font-semibold text-[#1e293b]">
+          <div className="flex items-center gap-2 text-[13px] text-[#475569]">
+            <Calendar className="w-3.5 h-3.5 text-[#94a3b8] shrink-0" />
+            <span className="font-semibold text-[#1e293b] text-[12px]">
               Exam: {formatDateExact(exam.examDate) || "TBA"}
             </span>
           </div>
 
           {/* Eligibility Row */}
-          <div className="flex items-center gap-3 text-[14px] text-[#475569]">
-            <GraduationCap className="w-4 h-4 text-[#94a3b8] shrink-0" />
+          <div className="flex items-center gap-2 text-[13px] text-[#475569]">
+            <GraduationCap className="w-3.5 h-3.5 text-[#94a3b8] shrink-0" />
             <span
-              className="font-semibold text-[#1e293b] truncate"
+              className="font-semibold text-[#1e293b] text-[12px] truncate"
               title={exam.eligibility}
             >
               {exam.eligibility || "TBA"}
@@ -508,17 +508,17 @@ export const EntranceCard: React.FC<{
           </div>
 
           {/* Fee Row */}
-          <div className="flex items-center gap-3 text-[14px] text-[#475569]">
-            <Banknote className="w-4 h-4 text-[#94a3b8] shrink-0" />
-            <span className="font-semibold text-[#1e293b]">
-              Fee: {formatFee(exam.applicationFee)}
+          <div className="flex items-center gap-2 text-[13px] text-[#475569]">
+            <Banknote className="w-3.5 h-3.5 text-[#94a3b8] shrink-0" />
+            <span className="font-semibold text-[#1e293b] text-[12px]">
+              Application Fee: {formatFee(exam.applicationFee)}
             </span>
           </div>
         </div>
       </main>
 
       {/* Action buttons */}
-      <div className="flex flex-col gap-3">
+      <div className="flex flex-col gap-2">
         <button
           onClick={() => {
             if (exam.applicationLink) {
@@ -531,30 +531,30 @@ export const EntranceCard: React.FC<{
               router.push(`/entrance/${exam.id}`);
             }
           }}
-          className="w-full flex items-center justify-center gap-2.5 py-3.5 px-4 bg-[#1b52e8] text-white font-bold text-[15px] rounded-xl hover:bg-[#1b52e8]/90 transition-colors shadow-sm"
+          className="w-full flex items-center justify-center gap-2 py-2.5 px-3 bg-[#1b52e8] text-white font-bold text-[13px] rounded-lg hover:bg-[#1b52e8]/90 transition-colors shadow-sm"
         >
-          <Send className="w-4 h-4 rotate-45 -translate-y-0.5" /> Apply Now
+          <Send className="w-3.5 h-3.5 rotate-45 -translate-y-0.5" /> Apply Now
         </button>
-        <div className="grid grid-cols-[1fr_1fr_auto] gap-3">
+        <div className="grid grid-cols-[1fr_1fr_auto] gap-2">
           <button
             onClick={() => router.push(`/entrance/${exam.id}`)}
-            className="flex items-center justify-center gap-2 py-3 px-3 border border-[#cbd5e1] text-[#475569] font-bold text-[13px] rounded-xl hover:bg-gray-50 transition-colors"
+            className="flex items-center justify-center gap-1.5 py-2 px-2.5 border border-[#cbd5e1] text-[#475569] font-bold text-[11px] rounded-lg hover:bg-gray-50 transition-colors"
           >
-            <FileText className="w-4 h-4" /> <span>View Detailed</span>
+            <FileText className="w-3.5 h-3.5" /> <span>View Detailed</span>
           </button>
           <button
             onClick={() => router.push(`/entrance/${exam.id}`)}
-            className="flex items-center justify-center gap-2 py-3 px-3 border border-[#cbd5e1] text-[#475569] font-bold text-[13px] rounded-xl hover:bg-gray-50 transition-colors"
+            className="flex items-center justify-center gap-1.5 py-2 px-2.5 border border-[#cbd5e1] text-[#475569] font-bold text-[11px] rounded-lg hover:bg-gray-50 transition-colors"
           >
-            <Bell className="w-4 h-4" /> Notify
+            <Bell className="w-3.5 h-3.5" /> Notify
           </button>
           <button
             disabled={isPending}
-            className={`w-[52px] h-[48px] shrink-0 rounded-xl flex items-center justify-center transition-all duration-200 ${
+            className={`w-[40px] h-[36px] shrink-0 rounded-lg flex items-center justify-center transition-all duration-200 ${
               isPending
                 ? "bg-gray-50 border border-gray-100 cursor-not-allowed"
                 : isSaved
-                  ? "border-[#2563eb] bg-blue-50 text-[#2563eb]"
+                  ? "border-blue-200 bg-blue-50"
                   : "bg-white border border-[#cbd5e1] text-[#94a3b8] hover:bg-[#f8fafc] hover:text-[#64748b]"
             }`}
             title={isSaved ? "Remove Bookmark" : "Bookmark"}
@@ -562,7 +562,7 @@ export const EntranceCard: React.FC<{
           >
             {isPending ? (
               <svg
-                className="w-4 h-4 animate-spin text-gray-400"
+                className="w-3.5 h-3.5 animate-spin text-gray-400"
                 fill="none"
                 viewBox="0 0 24 24"
               >
@@ -582,7 +582,7 @@ export const EntranceCard: React.FC<{
               </svg>
             ) : (
               <Bookmark
-                className={`w-4 h-4 ${isSaved ? "text-[#2563eb] fill-[#2563eb]" : ""}`}
+                className={`w-3.5 h-3.5 ${isSaved ? "text-[#2563eb] fill-[#2563eb]" : ""}`}
               />
             )}
           </button>
