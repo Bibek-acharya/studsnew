@@ -80,7 +80,12 @@ export function useCollegeData(idStr: string) {
 
   const safeImageUrl = useCallback(
     (url: string | null | undefined): string | null => {
-      if (!url || url.startsWith("blob:") || url.startsWith("data:"))
+      if (
+        !url ||
+        typeof url !== "string" ||
+        url.startsWith("blob:") ||
+        url.startsWith("data:")
+      )
         return null;
       return getImageUrl(url);
     },
@@ -262,11 +267,12 @@ export function useCollegeData(idStr: string) {
       ? Number(college.reviews || 0).toLocaleString()
       : "0";
   const website = (isInstitution ? instWebsite : college?.website) || "";
-  const websiteHref = website.startsWith("http")
-    ? website
-    : website
-      ? `https://${website}`
-      : "";
+  const websiteHref =
+    typeof website === "string" && website.startsWith("http")
+      ? website
+      : website
+        ? `https://${website}`
+        : "";
   const description =
     (isInstitution ? instDescription : college?.description) || "";
   const isVerified = !!college?.verified || college?.claimed === true;
