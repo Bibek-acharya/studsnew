@@ -362,14 +362,14 @@ export const EntranceCard: React.FC<{
   const statusConfig = getStatusConfig(exam.status);
 
   return (
-    <article className="bg-white rounded-[16px] p-4 border border-[#e2e8f0] flex flex-col h-full hover:shadow-md transition-all duration-300 overflow-visible relative">
+    <article className="bg-white rounded-xl p-4 border border-[#e2e8f0] flex flex-col h-full transition-all duration-300 overflow-visible relative">
       <header className="flex gap-3 items-start mb-3">
         {/* Logo Container */}
-        <div className="w-[56px] h-[56px] rounded-xl border border-[#f1f5f9] flex items-center justify-center bg-white p-1 shrink-0 shadow-sm">
+        <div className="w-[56px] h-[56px] rounded-xl border border-[#f1f5f9] flex items-center justify-center bg-white p-1 shrink-0">
           <img
             src={exam.logo}
             alt={exam.institution}
-            className="w-full h-full rounded-lg object-contain"
+            className="w-full h-full rounded-xl object-contain"
           />
         </div>
 
