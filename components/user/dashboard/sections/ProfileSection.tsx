@@ -572,141 +572,146 @@ export default function ProfileSection() {
                     <User className="w-5 h-5 text-blue-600" />
                     Basic Info
                   </h3>
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-4">
-                    <div>
-                      <label className="block text-xs font-semibold text-slate-500 mb-1">
-                        First Name
-                      </label>
-                      {editMode ? (
-                        <input
-                          type="text"
-                          value={personalData.firstName}
-                          onChange={(e) =>
-                            setPersonalData({
-                              ...personalData,
-                              firstName: e.target.value,
-                            })
-                          }
-                          className="w-full rounded-md border border-slate-200 px-3 py-2 text-sm focus:ring-blue-500 focus:border-blue-500 outline-none"
-                        />
-                      ) : (
-                        <p className="text-sm text-slate-800 font-medium bg-slate-50 border border-slate-200 rounded-md px-3 py-2">
-                          {personalData.firstName}
-                        </p>
-                      )}
+                  <div className="space-y-4">
+                    {/* Name Row - 3 columns */}
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                      <div>
+                        <label className="block text-xs font-semibold text-slate-500 mb-1">
+                          First Name
+                        </label>
+                        {editMode ? (
+                          <input
+                            type="text"
+                            value={personalData.firstName}
+                            onChange={(e) =>
+                              setPersonalData({
+                                ...personalData,
+                                firstName: e.target.value,
+                              })
+                            }
+                            className="w-full rounded-md border border-slate-200 px-3 py-2 text-sm focus:ring-blue-500 focus:border-blue-500 outline-none"
+                          />
+                        ) : (
+                          <p className="text-sm text-slate-800 font-medium bg-slate-50 border border-slate-200 rounded-md px-3 py-2">
+                            {personalData.firstName}
+                          </p>
+                        )}
+                      </div>
+                      <div>
+                        <label className="block text-xs font-semibold text-slate-500 mb-1">
+                          Middle Name (Optional)
+                        </label>
+                        {editMode ? (
+                          <input
+                            type="text"
+                            value={personalData.middleName}
+                            onChange={(e) =>
+                              setPersonalData({
+                                ...personalData,
+                                middleName: e.target.value,
+                              })
+                            }
+                            className="w-full rounded-md border border-slate-200 px-3 py-2 text-sm focus:ring-blue-500 focus:border-blue-500 outline-none"
+                          />
+                        ) : (
+                          <p className="text-sm text-slate-800 font-medium bg-slate-50 border border-slate-200 rounded-md px-3 py-2">
+                            {personalData.middleName || "-"}
+                          </p>
+                        )}
+                      </div>
+                      <div>
+                        <label className="block text-xs font-semibold text-slate-500 mb-1">
+                          Last Name
+                        </label>
+                        {editMode ? (
+                          <input
+                            type="text"
+                            value={personalData.lastName}
+                            onChange={(e) =>
+                              setPersonalData({
+                                ...personalData,
+                                lastName: e.target.value,
+                              })
+                            }
+                            className="w-full rounded-md border border-slate-200 px-3 py-2 text-sm focus:ring-blue-500 focus:border-blue-500 outline-none"
+                          />
+                        ) : (
+                          <p className="text-sm text-slate-800 font-medium bg-slate-50 border border-slate-200 rounded-md px-3 py-2">
+                            {personalData.lastName}
+                          </p>
+                        )}
+                      </div>
                     </div>
-                    <div>
-                      <label className="block text-xs font-semibold text-slate-500 mb-1">
-                        Middle Name (Optional)
-                      </label>
-                      {editMode ? (
-                        <input
-                          type="text"
-                          value={personalData.middleName}
-                          onChange={(e) =>
-                            setPersonalData({
-                              ...personalData,
-                              middleName: e.target.value,
-                            })
-                          }
-                          className="w-full rounded-md border border-slate-200 px-3 py-2 text-sm focus:ring-blue-500 focus:border-blue-500 outline-none"
-                        />
-                      ) : (
-                        <p className="text-sm text-slate-800 font-medium bg-slate-50 border border-slate-200 rounded-md px-3 py-2">
-                          {personalData.middleName || "-"}
-                        </p>
-                      )}
-                    </div>
-                    <div>
-                      <label className="block text-xs font-semibold text-slate-500 mb-1">
-                        Last Name
-                      </label>
-                      {editMode ? (
-                        <input
-                          type="text"
-                          value={personalData.lastName}
-                          onChange={(e) =>
-                            setPersonalData({
-                              ...personalData,
-                              lastName: e.target.value,
-                            })
-                          }
-                          className="w-full rounded-md border border-slate-200 px-3 py-2 text-sm focus:ring-blue-500 focus:border-blue-500 outline-none"
-                        />
-                      ) : (
-                        <p className="text-sm text-slate-800 font-medium bg-slate-50 border border-slate-200 rounded-md px-3 py-2">
-                          {personalData.lastName}
-                        </p>
-                      )}
-                    </div>
-                    <div>
-                      <label className="block text-xs font-semibold text-slate-500 mb-1">
-                        Date of Birth
-                      </label>
-                      {editMode ? (
-                        <input
-                          type="date"
-                          value={personalData.dateOfBirth}
-                          onChange={(e) =>
-                            setPersonalData({
-                              ...personalData,
-                              dateOfBirth: e.target.value,
-                            })
-                          }
-                          className="w-full rounded-md border border-slate-200 px-3 py-2 text-sm focus:ring-blue-500 focus:border-blue-500 outline-none"
-                        />
-                      ) : (
-                        <p className="text-sm text-slate-800 font-medium bg-slate-50 border border-slate-200 rounded-md px-3 py-2">
-                          {personalData.dateOfBirth}
-                        </p>
-                      )}
-                    </div>
-                    <div>
-                      <label className="block text-xs font-semibold text-slate-500 mb-1">
-                        Gender
-                      </label>
-                      {editMode ? (
-                        <select
-                          value={personalData.gender}
-                          onChange={(e) =>
-                            setPersonalData({
-                              ...personalData,
-                              gender: e.target.value,
-                            })
-                          }
-                          className="w-full rounded-md border border-slate-200 px-3 py-2 text-sm"
-                        >
-                          <option>Male</option>
-                          <option>Female</option>
-                          <option>Other</option>
-                        </select>
-                      ) : (
-                        <p className="text-sm text-slate-800 font-medium bg-slate-50 border border-slate-200 rounded-md px-3 py-2">
-                          {personalData.gender}
-                        </p>
-                      )}
-                    </div>
-                    <div>
-                      <label className="block text-xs font-semibold text-slate-500 mb-1">
-                        Nationality
-                      </label>
-                      {editMode ? (
-                        <input
-                          type="text"
-                          value={personalData.nationality}
-                          onChange={(e) =>
-                            setPersonalData({
-                              ...personalData,
-                              nationality: e.target.value,
-                            })
-                          }
-                          className="w-full rounded-md border border-slate-200 px-3 py-2 text-sm"
-                        />
-                      ) : (
-                        <p className="text-sm text-slate-800 font-medium bg-slate-50 border border-slate-200 rounded-md px-3 py-2">
-                          {personalData.nationality}
-                        </p>
-                      )}
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-4">
+                      <div>
+                        <label className="block text-xs font-semibold text-slate-500 mb-1">
+                          Date of Birth
+                        </label>
+                        {editMode ? (
+                          <input
+                            type="date"
+                            value={personalData.dateOfBirth}
+                            onChange={(e) =>
+                              setPersonalData({
+                                ...personalData,
+                                dateOfBirth: e.target.value,
+                              })
+                            }
+                            className="w-full rounded-md border border-slate-200 px-3 py-2 text-sm focus:ring-blue-500 focus:border-blue-500 outline-none"
+                          />
+                        ) : (
+                          <p className="text-sm text-slate-800 font-medium bg-slate-50 border border-slate-200 rounded-md px-3 py-2">
+                            {personalData.dateOfBirth}
+                          </p>
+                        )}
+                      </div>
+                      <div>
+                        <label className="block text-xs font-semibold text-slate-500 mb-1">
+                          Gender
+                        </label>
+                        {editMode ? (
+                          <select
+                            value={personalData.gender}
+                            onChange={(e) =>
+                              setPersonalData({
+                                ...personalData,
+                                gender: e.target.value,
+                              })
+                            }
+                            className="w-full rounded-md border border-slate-200 px-3 py-2 text-sm"
+                          >
+                            <option>Male</option>
+                            <option>Female</option>
+                            <option>Other</option>
+                          </select>
+                        ) : (
+                          <p className="text-sm text-slate-800 font-medium bg-slate-50 border border-slate-200 rounded-md px-3 py-2">
+                            {personalData.gender}
+                          </p>
+                        )}
+                      </div>
+                      <div>
+                        <label className="block text-xs font-semibold text-slate-500 mb-1">
+                          Nationality
+                        </label>
+                        {editMode ? (
+                          <input
+                            type="text"
+                            value={personalData.nationality}
+                            onChange={(e) =>
+                              setPersonalData({
+                                ...personalData,
+                                nationality: e.target.value,
+                              })
+                            }
+                            className="w-full rounded-md border border-slate-200 px-3 py-2 text-sm"
+                          />
+                        ) : (
+                          <p className="text-sm text-slate-800 font-medium bg-slate-50 border border-slate-200 rounded-md px-3 py-2">
+                            {personalData.nationality}
+                          </p>
+                        )}
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -716,170 +721,196 @@ export default function ProfileSection() {
                     <Phone className="w-5 h-5 text-blue-600" />
                     Contact Info
                   </h3>
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-4">
+                  <div className="space-y-4">
+                    {/* Email - read only */}
                     <div>
                       <label className="block text-xs font-semibold text-slate-500 mb-1">
                         Email
                       </label>
-                      {editMode ? (
-                        <input
-                          type="email"
-                          value={personalData.email}
-                          onChange={(e) =>
-                            setPersonalData({
-                              ...personalData,
-                              email: e.target.value,
-                            })
-                          }
-                          className="w-full rounded-md border border-slate-200 px-3 py-2 text-sm"
-                        />
-                      ) : (
-                        <p className="text-sm text-slate-800 font-medium bg-slate-50 border border-slate-200 rounded-md px-3 py-2">
-                          {personalData.email}
-                        </p>
-                      )}
+                      <p className="text-sm text-slate-800 font-medium bg-slate-50 border border-slate-200 rounded-md px-3 py-2">
+                        {personalData.email}
+                      </p>
                     </div>
-                    <div>
-                      <label className="block text-xs font-semibold text-slate-500 mb-1">
-                        Phone Number
-                      </label>
-                      {editMode ? (
-                        <input
-                          type="tel"
-                          value={personalData.phone}
-                          onChange={(e) =>
-                            setPersonalData({
-                              ...personalData,
-                              phone: e.target.value,
-                            })
-                          }
-                          className="w-full rounded-md border border-slate-200 px-3 py-2 text-sm"
-                        />
-                      ) : (
-                        <p className="text-sm text-slate-800 font-medium bg-slate-50 border border-slate-200 rounded-md px-3 py-2">
-                          {personalData.phone}
-                        </p>
-                      )}
+
+                    {/* Phone Row - 2 columns */}
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div>
+                        <label className="block text-xs font-semibold text-slate-500 mb-1">
+                          Phone Number
+                        </label>
+                        {editMode ? (
+                          <input
+                            type="tel"
+                            value={personalData.phone}
+                            onChange={(e) =>
+                              setPersonalData({
+                                ...personalData,
+                                phone: e.target.value,
+                              })
+                            }
+                            className="w-full rounded-md border border-slate-200 px-3 py-2 text-sm"
+                          />
+                        ) : (
+                          <p className="text-sm text-slate-800 font-medium bg-slate-50 border border-slate-200 rounded-md px-3 py-2">
+                            {personalData.phone}
+                          </p>
+                        )}
+                      </div>
+                      <div>
+                        <label className="block text-xs font-semibold text-slate-500 mb-1">
+                          Alternate Phone
+                        </label>
+                        {editMode ? (
+                          <input
+                            type="tel"
+                            value={personalData.alternatePhone}
+                            onChange={(e) =>
+                              setPersonalData({
+                                ...personalData,
+                                alternatePhone: e.target.value,
+                              })
+                            }
+                            placeholder="Optional"
+                            className="w-full rounded-md border border-slate-200 px-3 py-2 text-sm"
+                          />
+                        ) : (
+                          <p className="text-sm text-slate-800 font-medium bg-slate-50 border border-slate-200 rounded-md px-3 py-2">
+                            {personalData.alternatePhone || "-"}
+                          </p>
+                        )}
+                      </div>
                     </div>
-                    <div>
-                      <label className="block text-xs font-semibold text-slate-500 mb-1">
-                        Alternate Phone
-                      </label>
-                      {editMode ? (
-                        <input
-                          type="tel"
-                          value={personalData.alternatePhone}
-                          onChange={(e) =>
-                            setPersonalData({
-                              ...personalData,
-                              alternatePhone: e.target.value,
-                            })
-                          }
-                          placeholder="Optional"
-                          className="w-full rounded-md border border-slate-200 px-3 py-2 text-sm"
-                        />
-                      ) : (
-                        <p className="text-sm text-slate-800 font-medium bg-slate-50 border border-slate-200 rounded-md px-3 py-2">
-                          {personalData.alternatePhone || "-"}
-                        </p>
-                      )}
-                    </div>
-                    <div>
-                      <label className="block text-xs font-semibold text-slate-500 mb-1">
-                        Province
-                      </label>
-                      {editMode ? (
-                        <select
-                          value={selectedProvince}
-                          onChange={(e) => {
-                            setSelectedProvince(e.target.value);
-                            const districts =
+
+                    {/* Location Row - 3 columns */}
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                      <div>
+                        <label className="block text-xs font-semibold text-slate-500 mb-1">
+                          Province
+                        </label>
+                        {editMode ? (
+                          <select
+                            value={selectedProvince}
+                            onChange={(e) => {
+                              setSelectedProvince(e.target.value);
+                              const districts =
+                                NEPAL_DISTRICTS[
+                                  e.target.value as keyof typeof NEPAL_DISTRICTS
+                                ];
+                              setPersonalData({
+                                ...personalData,
+                                province: e.target.value,
+                                district: districts?.[0] || "",
+                                localLevel: "",
+                              });
+                              setSelectedDistrict(districts?.[0] || "");
+                            }}
+                            className="w-full rounded-md border border-slate-200 px-3 py-2 text-sm focus:ring-blue-500 focus:border-blue-500 outline-none"
+                          >
+                            {NEPAL_PROVINCES.map((prov) => (
+                              <option key={prov} value={prov}>
+                                {prov}
+                              </option>
+                            ))}
+                          </select>
+                        ) : (
+                          <p className="text-sm text-slate-800 font-medium bg-slate-50 border border-slate-200 rounded-md px-3 py-2">
+                            {personalData.province}
+                          </p>
+                        )}
+                      </div>
+                      <div>
+                        <label className="block text-xs font-semibold text-slate-500 mb-1">
+                          District
+                        </label>
+                        {editMode ? (
+                          <select
+                            value={selectedDistrict}
+                            onChange={(e) => {
+                              setSelectedDistrict(e.target.value);
+                              setPersonalData({
+                                ...personalData,
+                                district: e.target.value,
+                                localLevel: "",
+                              });
+                            }}
+                            className="w-full rounded-md border border-slate-200 px-3 py-2 text-sm focus:ring-blue-500 focus:border-blue-500 outline-none"
+                          >
+                            {(
                               NEPAL_DISTRICTS[
-                                e.target.value as keyof typeof NEPAL_DISTRICTS
-                              ];
-                            setPersonalData({
-                              ...personalData,
-                              province: e.target.value,
-                              district: districts?.[0] || "",
-                              localLevel: "",
-                            });
-                            setSelectedDistrict(districts?.[0] || "");
-                          }}
-                          className="w-full rounded-md border border-slate-200 px-3 py-2 text-sm focus:ring-blue-500 focus:border-blue-500 outline-none"
-                        >
-                          {NEPAL_PROVINCES.map((prov) => (
-                            <option key={prov} value={prov}>
-                              {prov}
-                            </option>
-                          ))}
-                        </select>
-                      ) : (
-                        <p className="text-sm text-slate-800 font-medium bg-slate-50 border border-slate-200 rounded-md px-3 py-2">
-                          {personalData.province}
-                        </p>
-                      )}
+                                selectedProvince as keyof typeof NEPAL_DISTRICTS
+                              ] || []
+                            ).map((dist) => (
+                              <option key={dist} value={dist}>
+                                {dist}
+                              </option>
+                            ))}
+                          </select>
+                        ) : (
+                          <p className="text-sm text-slate-800 font-medium bg-slate-50 border border-slate-200 rounded-md px-3 py-2">
+                            {personalData.district}
+                          </p>
+                        )}
+                      </div>
+                      <div>
+                        <label className="block text-xs font-semibold text-slate-500 mb-1">
+                          Local Level
+                        </label>
+                        {editMode ? (
+                          <select
+                            value={personalData.localLevel}
+                            onChange={(e) =>
+                              setPersonalData({
+                                ...personalData,
+                                localLevel: e.target.value,
+                              })
+                            }
+                            className="w-full rounded-md border border-slate-200 px-3 py-2 text-sm focus:ring-blue-500 focus:border-blue-500 outline-none"
+                          >
+                            <option value="">Select Local Level</option>
+                            {localBodies.map((body: { name: string }) => (
+                              <option key={body.name} value={body.name}>
+                                {body.name}
+                              </option>
+                            ))}
+                          </select>
+                        ) : (
+                          <p className="text-sm text-slate-800 font-medium bg-slate-50 border border-slate-200 rounded-md px-3 py-2">
+                            {personalData.localLevel}
+                          </p>
+                        )}
+                      </div>
                     </div>
-                    <div>
-                      <label className="block text-xs font-semibold text-slate-500 mb-1">
-                        District
-                      </label>
-                      {editMode ? (
-                        <select
-                          value={selectedDistrict}
-                          onChange={(e) => {
-                            setSelectedDistrict(e.target.value);
-                            setPersonalData({
-                              ...personalData,
-                              district: e.target.value,
-                              localLevel: "",
-                            });
-                          }}
-                          className="w-full rounded-md border border-slate-200 px-3 py-2 text-sm focus:ring-blue-500 focus:border-blue-500 outline-none"
-                        >
-                          {(
-                            NEPAL_DISTRICTS[
-                              selectedProvince as keyof typeof NEPAL_DISTRICTS
-                            ] || []
-                          ).map((dist) => (
-                            <option key={dist} value={dist}>
-                              {dist}
-                            </option>
-                          ))}
-                        </select>
-                      ) : (
-                        <p className="text-sm text-slate-800 font-medium bg-slate-50 border border-slate-200 rounded-md px-3 py-2">
-                          {personalData.district}
-                        </p>
-                      )}
-                    </div>
-                    <div>
-                      <label className="block text-xs font-semibold text-slate-500 mb-1">
-                        Local Level
-                      </label>
-                      {editMode ? (
-                        <select
-                          value={personalData.localLevel}
-                          onChange={(e) =>
-                            setPersonalData({
-                              ...personalData,
-                              localLevel: e.target.value,
-                            })
-                          }
-                          className="w-full rounded-md border border-slate-200 px-3 py-2 text-sm focus:ring-blue-500 focus:border-blue-500 outline-none"
-                        >
-                          <option value="">Select Local Level</option>
-                          {localBodies.map((body: { name: string }) => (
-                            <option key={body.name} value={body.name}>
-                              {body.name}
-                            </option>
-                          ))}
-                        </select>
-                      ) : (
-                        <p className="text-sm text-slate-800 font-medium bg-slate-50 border border-slate-200 rounded-md px-3 py-2">
-                          {personalData.localLevel}
-                        </p>
-                      )}
-                    </div>
+
+                    {/* Additional Info (collapsible) */}
+                    <details className="mt-4">
+                      <summary className="text-sm font-semibold text-slate-600 cursor-pointer hover:text-slate-800 select-none">
+                        Additional Info
+                      </summary>
+                      <div className="mt-4 space-y-4">
+                        <div>
+                          <label className="block text-xs font-semibold text-slate-500 mb-1">
+                            Bio
+                          </label>
+                          {editMode ? (
+                            <textarea
+                              value={personalData.bio}
+                              onChange={(e) =>
+                                setPersonalData({
+                                  ...personalData,
+                                  bio: e.target.value,
+                                })
+                              }
+                              rows={3}
+                              className="w-full rounded-md border border-slate-200 px-3 py-2 text-sm"
+                            />
+                          ) : (
+                            <p className="text-sm text-slate-800 font-medium bg-slate-50 border border-slate-200 rounded-md px-3 py-2">
+                              {personalData.bio || "-"}
+                            </p>
+                          )}
+                        </div>
+                      </div>
+                    </details>
                   </div>
                 </div>
               </div>
