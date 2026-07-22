@@ -606,9 +606,9 @@ const UniversityDetail: React.FC = () => {
                               <h4 className="text-[15.5px] font-bold text-gray-900">
                                 {course.name}
                               </h4>
-                              {course.sub || course.description ? (
+                              {course.sub_description ? (
                                 <p className="text-[12px] text-gray-500">
-                                  {course.sub || course.description}
+                                  {course.sub_description}
                                 </p>
                               ) : null}
                               <div className="flex flex-wrap gap-x-6 gap-y-2 text-[13px]">
@@ -623,7 +623,7 @@ const UniversityDetail: React.FC = () => {
                                 <div>
                                   <span className="text-gray-400">Fee: </span>
                                   <span className="font-semibold text-[#2563eb]">
-                                    {course.fee} / Year
+                                    {course.fees} / Year
                                   </span>
                                 </div>
                                 <div>
@@ -650,7 +650,7 @@ const UniversityDetail: React.FC = () => {
                                   {course.name}
                                 </h4>
                                 <p className="mt-1 text-[12px] text-gray-500">
-                                  {course.sub || course.description || ""}
+                                  {course.sub_description || ""}
                                 </p>
                               </div>
                               <div className="sm:col-span-2">
@@ -663,7 +663,7 @@ const UniversityDetail: React.FC = () => {
                               </div>
                               <div className="sm:col-span-3">
                                 <h4 className="text-[15.5px] font-bold text-[#2563eb]">
-                                  {course.fee}
+                                  {course.fees}
                                 </h4>
                                 <p className="mt-1 text-[12px] text-gray-500">
                                   / Year
