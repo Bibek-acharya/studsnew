@@ -1,6 +1,13 @@
 "use client";
 
-import React, { createContext, useContext, useState, ReactNode, useEffect, useMemo } from "react";
+import React, {
+  createContext,
+  useContext,
+  useState,
+  ReactNode,
+  useEffect,
+  useMemo,
+} from "react";
 import { apiService, AuthResponse } from "./api";
 import { clearAllAuthSessions, persistAuthSession } from "./authSession";
 
@@ -22,9 +29,20 @@ interface AuthContextType {
   user: User | null;
   isAuthenticated: boolean;
   loading: boolean;
-  login: (email: string, password: string, rememberMe?: boolean) => Promise<void>;
+  login: (
+    email: string,
+    password: string,
+    rememberMe?: boolean,
+  ) => Promise<void>;
   logout: () => void;
-  register: (email: string, password: string, firstName: string, lastName: string, role: string, educationLevel: string) => Promise<void>;
+  register: (
+    email: string,
+    password: string,
+    firstName: string,
+    lastName: string,
+    role: string,
+    educationLevel: string,
+  ) => Promise<void>;
   verifyOTP: (email: string, otp: string) => Promise<void>;
   sendOTP: (email: string) => Promise<void>;
   setUser: (user: User) => void;
@@ -43,12 +61,17 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     let isMounted = true;
 
     const bootstrapAuth = async () => {
-      const storedToken = typeof window !== "undefined"
-        ? (localStorage.getItem("token") || sessionStorage.getItem("token"))
-        : null;
-      const stored = typeof window !== "undefined"
-        ? (localStorage.getItem(USER_STORAGE_KEY) || sessionStorage.getItem(USER_STORAGE_KEY))
-        : null;
+      // NOTE: middleware.ts requires a `token` cookie to protect /user/dashboard/* routes.
+      // The backend MUST set an HttpOnly `token` cookie on login for this to work.
+      const storedToken =
+        typeof window !== "undefined"
+          ? localStorage.getItem("token") || sessionStorage.getItem("token")
+          : null;
+      const stored =
+        typeof window !== "undefined"
+          ? localStorage.getItem(USER_STORAGE_KEY) ||
+            sessionStorage.getItem(USER_STORAGE_KEY)
+          : null;
 
       // Only trust cached user state when a real auth token is also present.
       // This prevents stale superadmin/user records from being shown after logout.
@@ -70,6 +93,23 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         clearAllAuthSessions();
       } else if (isMounted) {
         setLoading(false);
+      }
+
+      // Sync check: if localStorage has token but cookie is missing, clear stale state
+      if (
+        storedToken &&
+        typeof window !== "undefined" &&
+        !document.cookie.includes("token=")
+      ) {
+        // Only clear if cookie is missing - backend should set it on login
+        // This prevents stale sessions when cookie expires but localStorage doesn't know
+        const hasTokenCookie = document.cookie
+          .split(";")
+          .some((c) => c.trim().startsWith("token="));
+        if (!hasTokenCookie) {
+          clearAllAuthSessions();
+          setUserState(null);
+        }
       }
     };
 
@@ -126,7 +166,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setUserState(userData);
   };
 
-  const register = async (email: string, password: string, firstName: string, lastName: string, role: string, educationLevel: string) => {
+  const register = async (
+    email: string,
+    password: string,
+    firstName: string,
+    lastName: string,
+    role: string,
+    educationLevel: string,
+  ) => {
     const response = await apiService.register({
       email,
       password,
@@ -180,24 +227,23 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     window.location.href = "/";
   };
 
-  const value = useMemo(() => ({
-    user,
-    isAuthenticated,
-    loading,
-    login,
-    logout,
-    register,
-    verifyOTP,
-    sendOTP,
-    setUser,
-    setSession,
-  }), [user, isAuthenticated, loading]);
-
-  return (
-    <AuthContext.Provider value={value}>
-      {children}
-    </AuthContext.Provider>
+  const value = useMemo(
+    () => ({
+      user,
+      isAuthenticated,
+      loading,
+      login,
+      logout,
+      register,
+      verifyOTP,
+      sendOTP,
+      setUser,
+      setSession,
+    }),
+    [user, isAuthenticated, loading],
   );
+
+  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 }
 
 export function useAuth() {
