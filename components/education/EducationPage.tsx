@@ -133,43 +133,31 @@ const EducationPage: React.FC<EducationPageProps> = ({
       {/* Section 4: Right Course. Right College. */}
       {/* <CourseCategoriesSection onNavigate={handleNavigate} /> */}
       {/* Section 5: Explore Featured Colleges & Universities */}
-      {featuredColleges.length > 0 && (
-        <FeaturedInstitutionsSection
-          onNavigate={handleNavigate}
-          featuredColleges={featuredColleges}
-        />
-      )}
+      <FeaturedInstitutionsSection
+        onNavigate={handleNavigate}
+        featuredColleges={featuredColleges}
+      />
       {/* Section 6: Featured Financial Aid */}
-      {scholarships.length > 0 && (
-        <FinancialAidSection
-          onNavigate={handleNavigate}
-          scholarships={scholarships}
-        />
-      )}
+      <FinancialAidSection
+        onNavigate={handleNavigate}
+        scholarships={scholarships}
+      />
       {/* Section 7: Find All Exam Announcements Easily */}
-      {exams.length > 0 && (
-        <ExamAnnouncementsSection onNavigate={handleNavigate} exams={exams} />
-      )}
+      <ExamAnnouncementsSection onNavigate={handleNavigate} exams={exams} />
       {/* Section 8: Latest News & Stories */}
-      {newsArticles.length > 0 && (
-        <NewsStoriesSection
-          onNavigate={handleNavigate}
-          newsArticles={newsArticles}
-        />
-      )}
+      <NewsStoriesSection
+        onNavigate={handleNavigate}
+        newsArticles={newsArticles}
+      />
       {/* Section 9: Ad Widgets */}
       <AdWidgetsSection ads={ads} />
       {/* Section 10: Top College Events */}
-      {eventSlides.length > 0 && (
-        <CampusEventsSection onNavigate={handleNavigate} events={eventSlides} />
-      )}
+      <CampusEventsSection onNavigate={handleNavigate} events={eventSlides} />
       {/* Section 11: What Our Students Say */}
-      {testimonials.length > 0 && (
-        <TestimonialsSection
-          onNavigate={handleNavigate}
-          testimonials={testimonials}
-        />
-      )}
+      <TestimonialsSection
+        onNavigate={handleNavigate}
+        testimonials={testimonials}
+      />
       {/* Section 12: Not sure where to start? */}
       {/* <RecommendedForYouSection onNavigate={onNavigate} /> */}
       {/* Floating Popups */}
