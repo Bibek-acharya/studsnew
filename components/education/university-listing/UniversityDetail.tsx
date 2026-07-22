@@ -700,7 +700,9 @@ const UniversityDetail: React.FC = () => {
                           Institutes & Affiliated Colleges
                         </h3>
                         <p className="mt-0.5 text-[13px] text-gray-500">
-                          Constituent and affiliated campuses
+                          {institutesList.length > 0
+                            ? "Institutes and faculties under this university"
+                            : "Constituent and affiliated campuses"}
                         </p>
                       </div>
                     </div>
@@ -783,8 +785,8 @@ const UniversityDetail: React.FC = () => {
                                   <Building2 className="h-5 w-5 text-blue-600" />
                                 </div>
                                 <h4 className="text-[15px] font-bold text-gray-900">
-                                  {inst.title ||
-                                    inst.name ||
+                                  {inst.name ||
+                                    inst.title ||
                                     `Institute ${idx + 1}`}
                                 </h4>
                               </div>
