@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useState, type ReactNode } from "react";
+import { useState, useEffect, type ReactNode } from "react";
 import { apiService } from "@/services/api";
 import { useAuth } from "@/services/AuthContext";
 import ConfirmDialog from "@/components/user/dashboard/ConfirmDialog";
@@ -61,6 +61,20 @@ export default function SettingsSection() {
   const [contactMessage, setContactMessage] = useState("");
   const [reportArea, setReportArea] = useState("Dashboard");
   const [reportMessage, setReportMessage] = useState("");
+  const [sessions, setSessions] = useState<
+    Array<{
+      id: number;
+      device_name: string;
+      device_type: string;
+      browser: string;
+      location: string;
+      ip_address: string;
+      is_current: boolean;
+      last_active_at: string;
+      created_at: string;
+    }>
+  >([]);
+  const [sessionsLoading, setSessionsLoading] = useState(true);
 
   const toggleSetting = (key: keyof typeof settings) => {
     setSettings((prev) => ({ ...prev, [key]: !prev[key] }));
@@ -136,6 +150,54 @@ export default function SettingsSection() {
     } catch (err: any) {
       showToast(err.message || "Failed to submit. Please try again.");
     }
+  };
+
+  useEffect(() => {
+    const fetchSessions = async () => {
+      try {
+        const res = await apiService.getLoginSessions();
+        setSessions(res.data || []);
+      } catch {
+        // ignore - show empty state
+      } finally {
+        setSessionsLoading(false);
+      }
+    };
+    fetchSessions();
+  }, []);
+
+  const handleRevokeSession = async (sessionId: number) => {
+    try {
+      await apiService.revokeSession(sessionId);
+      setSessions((prev) => prev.filter((s) => s.id !== sessionId));
+      showToast("Session revoked");
+    } catch {
+      showToast("Failed to revoke session");
+    }
+  };
+
+  const handleRevokeAll = async () => {
+    try {
+      await apiService.revokeAllSessions();
+      setSessions([]);
+      showToast("All other sessions logged out");
+    } catch {
+      showToast("Failed to logout other sessions");
+    }
+  };
+
+  const formatLastActive = (dateStr: string) => {
+    const now = new Date();
+    const date = new Date(dateStr);
+    const diffMs = now.getTime() - date.getTime();
+    const diffMins = Math.floor(diffMs / 60000);
+    if (diffMins < 1) return "just now";
+    if (diffMins < 60) return `${diffMins}m ago`;
+    const diffHours = Math.floor(diffMins / 60);
+    if (diffHours < 24) return `${diffHours}h ago`;
+    const diffDays = Math.floor(diffHours / 24);
+    if (diffDays < 30) return `${diffDays}d ago`;
+    return date.toLocaleDateString();
   };
 
   return (
@@ -234,49 +296,69 @@ export default function SettingsSection() {
               </div>
             </div>
 
-            <div className="bg-white rounded-md  border border-slate-200 p-6">
+            <div className="bg-white rounded-md border border-slate-200 p-6">
               <h3 className="font-bold text-slate-800 mb-4 flex items-center gap-2">
                 <Laptop className="w-5 h-5 text-indigo-600" /> Login Activity
               </h3>
-              <div className="space-y-4">
-                <div className="flex items-center justify-between py-2">
-                  <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-md bg-slate-100 flex items-center justify-center">
-                      <Laptop className="w-5 h-5 text-slate-500" />
-                    </div>
-                    <div>
-                      <p className="font-medium text-slate-800">
-                        MacBook Pro 16&quot;{" "}
-                        <span className="ml-2 bg-emerald-500 text-white text-xs px-2 py-0.5 rounded-full font-semibold">
-                          Active now
-                        </span>
-                      </p>
-                      <p className="text-sm text-slate-500">
-                        San Francisco, CA • Chrome
-                      </p>
-                    </div>
-                  </div>
+
+              {sessionsLoading ? (
+                <div className="flex items-center justify-center py-8">
+                  <div className="w-6 h-6 border-2 border-indigo-600 border-t-transparent rounded-full animate-spin" />
                 </div>
-                <div className="flex items-center justify-between py-2 border-t border-slate-100">
-                  <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-md bg-slate-100 flex items-center justify-center">
-                      <Smartphone className="w-5 h-5 text-slate-500" />
+              ) : sessions.length === 0 ? (
+                <p className="text-sm text-slate-500 py-4 text-center">
+                  No active sessions found.
+                </p>
+              ) : (
+                <div className="space-y-4">
+                  {sessions.map((session) => (
+                    <div
+                      key={session.id}
+                      className="flex items-center justify-between py-2 border-t border-slate-100 first:border-t-0"
+                    >
+                      <div className="flex items-center gap-3">
+                        <div className="w-10 h-10 rounded-md bg-slate-100 flex items-center justify-center">
+                          {session.device_type === "mobile" ? (
+                            <Smartphone className="w-5 h-5 text-slate-500" />
+                          ) : (
+                            <Laptop className="w-5 h-5 text-slate-500" />
+                          )}
+                        </div>
+                        <div>
+                          <p className="font-medium text-slate-800">
+                            {session.device_name}
+                            {session.is_current && (
+                              <span className="ml-2 bg-emerald-500 text-white text-xs px-2 py-0.5 rounded-full font-semibold">
+                                Active now
+                              </span>
+                            )}
+                          </p>
+                          <p className="text-sm text-slate-500">
+                            {session.location} • {session.browser}
+                            {!session.is_current && session.last_active_at && (
+                              <> • {formatLastActive(session.last_active_at)}</>
+                            )}
+                          </p>
+                        </div>
+                      </div>
+                      {!session.is_current && (
+                        <button
+                          onClick={() => handleRevokeSession(session.id)}
+                          className="px-3 py-1.5 bg-slate-100 text-slate-700 rounded-md text-sm font-medium hover:bg-slate-200 transition-colors"
+                        >
+                          Revoke
+                        </button>
+                      )}
                     </div>
-                    <div>
-                      <p className="font-medium text-slate-800">
-                        iPhone 13 Pro
-                      </p>
-                      <p className="text-sm text-slate-500">
-                        San Francisco, CA • Safari • 2 hours ago
-                      </p>
-                    </div>
-                  </div>
-                  <button className="px-3 py-1.5 bg-slate-100 text-slate-700 rounded-md text-sm font-medium hover:bg-slate-200 transition-colors">
-                    Revoke
-                  </button>
+                  ))}
                 </div>
-              </div>
-              <button className="mt-4 w-full border border-red-500 text-red-600 px-4 py-2.5 rounded-md text-sm font-semibold hover:bg-red-50 transition-colors">
+              )}
+
+              <button
+                type="button"
+                onClick={handleRevokeAll}
+                className="mt-4 w-full border border-red-500 text-red-600 px-4 py-2.5 rounded-md text-sm font-semibold hover:bg-red-50 transition-colors"
+              >
                 Logout from all devices
               </button>
             </div>

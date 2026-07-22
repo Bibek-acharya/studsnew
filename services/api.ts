@@ -2646,6 +2646,34 @@ export const apiService = {
     return apiRequest<void>(`/api/v1/invites/${id}/save`, { method: "PUT" });
   },
 
+  // === Login Sessions ===
+  async getLoginSessions(): Promise<{
+    success: boolean;
+    data: Array<{
+      id: number;
+      device_name: string;
+      device_type: string;
+      browser: string;
+      location: string;
+      ip_address: string;
+      is_current: boolean;
+      last_active_at: string;
+      created_at: string;
+    }>;
+  }> {
+    return apiRequest("/api/v1/auth/sessions");
+  },
+
+  async revokeSession(sessionId: number): Promise<void> {
+    return apiRequest(`/api/v1/auth/sessions/${sessionId}`, {
+      method: "DELETE",
+    });
+  },
+
+  async revokeAllSessions(): Promise<void> {
+    return apiRequest("/api/v1/auth/sessions", { method: "DELETE" });
+  },
+
   // === Profile ===
   async updateProfile(data: UpdateProfilePayload): Promise<ProfileResponse> {
     return apiRequest<ProfileResponse>("/api/v1/profile", {
