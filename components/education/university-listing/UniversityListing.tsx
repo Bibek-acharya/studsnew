@@ -36,6 +36,11 @@ const mapUniversity = (uni: University): UniversityData => ({
   tags: [],
   cover: uni.cover || undefined,
   website: uni.website || undefined,
+  verified: uni.verified,
+  isPopular: uni.isPopular,
+  established: uni.established,
+  students: uni.students,
+  status: uni.status,
 });
 
 const UniversityListing: React.FC<UniversityListingProps> = ({ type }) => {

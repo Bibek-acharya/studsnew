@@ -79,7 +79,9 @@ const UniversityCard: React.FC<{
               <span className="absolute top-full left-4 -mt-px border-[5px] border-transparent border-t-gray-900"></span>
             </span>
           </Link>
-          <BadgeCheck className="h-5 w-5 shrink-0 fill-blue-500 text-white" />
+          {uni.verified && (
+            <BadgeCheck className="h-5 w-5 shrink-0 fill-blue-500 text-white" />
+          )}
         </div>
 
         {/* Stats Row */}
@@ -93,6 +95,14 @@ const UniversityCard: React.FC<{
             <Award className="h-4.5 w-4.5 text-gray-400" />
             <span className="font-semibold text-slate-700">{uni.type}</span>
           </div>
+          {parseInt(uni.rank) > 0 && (
+            <>
+              <span className="mx-3 font-light text-gray-300">|</span>
+              <span className="inline-flex items-center gap-1 rounded bg-emerald-50 px-2 py-0.5 text-[11px] font-bold text-emerald-700">
+                Rank #{uni.rank}
+              </span>
+            </>
+          )}
           <span className="mx-3 font-light text-gray-300">|</span>
           <div className="flex min-w-0 flex-1 items-center gap-1.5">
             <MapPin className="h-4.5 w-4.5 shrink-0 text-gray-400" />

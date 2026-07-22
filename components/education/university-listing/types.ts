@@ -10,6 +10,11 @@ export interface UniversityData {
   tags: string[];
   cover?: string;
   website?: string;
+  verified?: boolean;
+  isPopular?: boolean;
+  established?: string;
+  students?: string;
+  status?: string;
 }
 
 export type FilterKey = "academic" | "type" | "rating";
