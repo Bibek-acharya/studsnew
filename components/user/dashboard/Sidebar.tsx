@@ -112,7 +112,7 @@ export default function Sidebar({ sidebarOpen, setSidebarOpen }: SidebarProps) {
     },
     {
       id: "faq",
-      label: "FAQ",
+      label: "Help & Support",
       icon: BadgeQuestionMark,
       href: "/user/dashboard/faq",
     },

@@ -415,8 +415,8 @@ export default function SettingsSection() {
                 />
                 <HelpItem
                   icon={BookOpen}
-                  title="FAQ"
-                  description="Find answers to common questions"
+                  title="Help & Support"
+                  description="Browse FAQs, contact support, or report a problem"
                   href="/user/dashboard/faq"
                 />
                 <HelpItem

@@ -1,205 +1,211 @@
-'use client'
+"use client";
 
 export interface FAQItem {
-  question: string
-  answer: string
+  question: string;
+  answer: string;
 }
 
 export interface FAQCategory {
-  id: string
-  label: string
-  description: string
-  items: FAQItem[]
+  id: string;
+  label: string;
+  description: string;
+  items: FAQItem[];
 }
 
 export const faqCategories: FAQCategory[] = [
   {
-    id: 'account',
-    label: 'Account',
-    description: 'Manage your profile, login methods, and account preferences.',
+    id: "account",
+    label: "Account",
+    description: "Manage your profile, login methods, and account preferences.",
     items: [
       {
-        question: 'How do I reset my password?',
+        question: "How do I reset my password?",
         answer:
-          'Go to the Security section and choose Change Password. If you can’t log in, use the password reset link on the login page and follow the instructions sent to your email.',
+          "Go to the Security section and choose Change Password. If you can’t log in, use the password reset link on the login page and follow the instructions sent to your email.",
       },
       {
-        question: 'Can I update my email address?',
+        question: "Can I update my email address?",
         answer:
-          'Yes. Navigate to your account settings and update your primary email address. You may need to verify the new address before it becomes active.',
+          "Yes. Navigate to your account settings and update your primary email address. You may need to verify the new address before it becomes active.",
       },
       {
-        question: 'How do I change my display name?',
+        question: "How do I change my display name?",
         answer:
-          'Open the Profile section and edit your name fields. Save your changes to update how your name appears across the platform.',
+          "Open the Profile section and edit your name fields. Save your changes to update how your name appears across the platform.",
       },
       {
-        question: 'How do I delete my account?',
+        question: "How do I delete my account?",
         answer:
-          'Account deletion is available in the Danger Zone section. Follow the prompts carefully, as deletion is permanent and will remove all application history and saved preferences.',
+          "Account deletion is available in the Danger Zone section. Follow the prompts carefully, as deletion is permanent and will remove all application history and saved preferences.",
       },
     ],
   },
   {
-    id: 'security',
-    label: 'Security',
-    description: 'Control your password, two-factor authentication, and account safety settings.',
+    id: "security",
+    label: "Security",
+    description:
+      "Control your password, two-factor authentication, and account safety settings.",
     items: [
       {
-        question: 'What is two-factor authentication?',
+        question: "What is two-factor authentication?",
         answer:
-          'Two-factor authentication adds an extra security step by requiring a code in addition to your password when signing in. This helps protect your account from unauthorized access.',
+          "Two-factor authentication adds an extra security step by requiring a code in addition to your password when signing in. This helps protect your account from unauthorized access.",
       },
       {
-        question: 'How do I turn on two-factor authentication?',
+        question: "How do I turn on two-factor authentication?",
         answer:
-          'Go to the Security tab and enable two-factor authentication. Choose whether to receive codes by email or through an authenticator app, then follow the setup prompts.',
+          "Go to the Security tab and enable two-factor authentication. Choose whether to receive codes by email or through an authenticator app, then follow the setup prompts.",
       },
       {
-        question: 'How can I tell if my account was accessed from a new device?',
+        question:
+          "How can I tell if my account was accessed from a new device?",
         answer:
-          'We send alerts for sign-ins from new devices or locations. Check your email notifications or the Security tab for recent login activity.',
+          "We send alerts for sign-ins from new devices or locations. Check your email notifications or the Security tab for recent login activity.",
       },
       {
-        question: 'What should I do if I suspect a security breach?',
+        question: "What should I do if I suspect a security breach?",
         answer:
-          'Immediately reset your password, enable two-factor authentication, and contact support using the Help & Support tab to report the issue.',
+          "Immediately reset your password, enable two-factor authentication, and contact support using the Help & Support tab to report the issue.",
       },
     ],
   },
   {
-    id: 'notifications',
-    label: 'Notifications',
-    description: 'Learn how to manage alerts for applications, scholarships, and platform updates.',
+    id: "notifications",
+    label: "Notifications",
+    description:
+      "Learn how to manage alerts for applications, scholarships, and platform updates.",
     items: [
       {
-        question: 'Can I change my email notification preferences?',
+        question: "Can I change my email notification preferences?",
         answer:
-          'Yes. Visit the Notifications section to toggle alerts for application updates, messages from colleges, scholarship opportunities, and daily email digests.',
+          "Yes. Visit the Notifications section to toggle alerts for application updates, messages from colleges, scholarship opportunities, and daily email digests.",
       },
       {
-        question: 'How do I stop push notifications?',
+        question: "How do I stop push notifications?",
         answer:
-          'If you are using a mobile device, disable push notifications from your device settings or in the app notification preferences. You can also turn off specific notification types in the Notifications section.',
+          "If you are using a mobile device, disable push notifications from your device settings or in the app notification preferences. You can also turn off specific notification types in the Notifications section.",
       },
       {
-        question: 'What are scholarship alert notifications?',
+        question: "What are scholarship alert notifications?",
         answer:
-          'Scholarship alert notifications tell you when a new scholarship matches your profile or when a deadline is approaching. These help you stay on top of new opportunities.',
+          "Scholarship alert notifications tell you when a new scholarship matches your profile or when a deadline is approaching. These help you stay on top of new opportunities.",
       },
       {
-        question: 'Why am I not receiving notification emails?',
+        question: "Why am I not receiving notification emails?",
         answer:
-          'Check that your email is verified, your notification preferences are enabled, and the messages are not in spam. If the issue persists, contact support through Help & Support.',
+          "Check that your email is verified, your notification preferences are enabled, and the messages are not in spam. If the issue persists, contact support through Help & Support.",
       },
     ],
   },
   {
-    id: 'applications',
-    label: 'Applications',
-    description: 'Get answers about applying to colleges, entrance exams, and scholarship tracking.',
+    id: "applications",
+    label: "Applications",
+    description:
+      "Get answers about applying to colleges, entrance exams, and scholarship tracking.",
     items: [
       {
-        question: 'How do I track my application status?',
+        question: "How do I track my application status?",
         answer:
-          'Use the Applications page to view the status of each submission, including applied, shortlisted, interview, accepted, or rejected stages.',
+          "Use the Applications page to view the status of each submission, including applied, shortlisted, interview, accepted, or rejected stages.",
       },
       {
-        question: 'Can I apply to multiple colleges at once?',
+        question: "Can I apply to multiple colleges at once?",
         answer:
-          'Yes. You can submit applications to multiple colleges. Each submission is tracked separately in the Applications dashboard.',
+          "Yes. You can submit applications to multiple colleges. Each submission is tracked separately in the Applications dashboard.",
       },
       {
-        question: 'How do I upload required documents?',
+        question: "How do I upload required documents?",
         answer:
-          'Open the relevant application and follow the document upload prompts. Accepted file types are listed on the application details page.',
+          "Open the relevant application and follow the document upload prompts. Accepted file types are listed on the application details page.",
       },
       {
-        question: 'What does shortlisted mean?',
+        question: "What does shortlisted mean?",
         answer:
-          'Shortlisted means your application has passed initial review and the institution is considering you for the next stage, such as an interview or final decision.',
+          "Shortlisted means your application has passed initial review and the institution is considering you for the next stage, such as an interview or final decision.",
       },
     ],
   },
   {
-    id: 'scholarships',
-    label: 'Scholarships',
-    description: 'Find out how scholarship recommendations work and how to apply for awards.',
+    id: "scholarships",
+    label: "Scholarships",
+    description:
+      "Find out how scholarship recommendations work and how to apply for awards.",
     items: [
       {
-        question: 'How do scholarship recommendations work?',
+        question: "How do scholarship recommendations work?",
         answer:
-          'We match scholarship opportunities to your profile based on factors like country preference, academic field, budget, and eligibility criteria.',
+          "We match scholarship opportunities to your profile based on factors like country preference, academic field, budget, and eligibility criteria.",
       },
       {
-        question: 'Can I save scholarships for later?',
+        question: "Can I save scholarships for later?",
         answer:
-          'Yes. Use the save action in the scholarship results to bookmark opportunities and return to them later from your saved list.',
+          "Yes. Use the save action in the scholarship results to bookmark opportunities and return to them later from your saved list.",
       },
       {
-        question: 'How do I apply for a scholarship?',
+        question: "How do I apply for a scholarship?",
         answer:
-          'Open the scholarship details page and follow the application instructions. Some scholarships require external forms or provider portals.',
+          "Open the scholarship details page and follow the application instructions. Some scholarships require external forms or provider portals.",
       },
       {
-        question: 'How do I know when a scholarship deadline is near?',
+        question: "How do I know when a scholarship deadline is near?",
         answer:
-          'Enable scholarship alerts in Notifications. We also display deadlines prominently on the scholarship details page and in your saved list.',
+          "Enable scholarship alerts in Notifications. We also display deadlines prominently on the scholarship details page and in your saved list.",
       },
     ],
   },
   {
-    id: 'support',
-    label: 'Support',
-    description: 'Contact support, report issues, and find help resources for using the site.',
+    id: "support",
+    label: "Support",
+    description:
+      "Get help with account issues, technical problems, and how to contact us.",
     items: [
       {
-        question: 'How do I contact support?',
+        question: "How do I contact support?",
         answer:
-          'Use the Help & Support section to send a message or report a bug. Our team will respond by email or through your dashboard notifications.',
+          "You can reach our support team by clicking the 'Contact Support' button at the top of this page. Fill in the subject and message fields, and we'll respond to your registered email address within 24-48 hours.",
       },
       {
-        question: 'How do I submit a bug report?',
+        question: "What are support response times?",
         answer:
-          'Open Help & Support, choose Report a Problem, describe the issue, and submit. Include screenshots if possible for faster resolution.',
+          "Our team typically responds within 24 hours during business days. Urgent issues are prioritized and may receive a faster response.",
       },
       {
-        question: 'Where can I find user guides?',
+        question: "How do I report a bug?",
         answer:
-          'We provide help content within the FAQ and Support sections. For more detailed guidance, check the Help Center or contact support directly.',
+          "Click the 'Report Bug' button at the top of this page. Select the problem area and describe the issue in detail, including steps to reproduce it if possible.",
       },
       {
-        question: 'How long does support take to respond?',
+        question: "Can I get phone support?",
         answer:
-          'Response times vary, but support typically replies within 24–48 hours. Urgent issues may receive priority if marked clearly in your message.',
+          "Currently we offer support via email and through our contact form. Phone support is not available at this time.",
       },
     ],
   },
   {
-    id: 'technical',
-    label: 'Technical',
-    description: 'Find help for browser issues, login problems, and compatibility questions.',
+    id: "technical",
+    label: "Technical",
+    description: "Troubleshooting common technical issues with the platform.",
     items: [
       {
-        question: 'What browsers are supported?',
+        question: "Why am I not receiving email notifications?",
         answer:
-          'The platform works best in the latest versions of Chrome, Edge, Firefox, and Safari. Make sure your browser is up to date for the best experience.',
+          "Check your spam/junk folder first. If nothing is there, verify your email address is correct in your profile settings. You can also check your notification preferences to ensure you have the right notifications enabled.",
       },
       {
-        question: 'Why is my page loading slowly?',
+        question: "The page is not loading properly. What should I do?",
         answer:
-          'Slow performance can be caused by a weak internet connection, too many browser tabs, or an unsupported browser. Clear your cache and try again.',
+          "Try clearing your browser cache and cookies, then refresh the page. If the issue persists, try a different browser or use incognito/private mode.",
       },
       {
-        question: 'How do I fix broken page layout?',
+        question: "Why was I logged out unexpectedly?",
         answer:
-          'Try refreshing the page, clearing browser cache, or using a different browser. If the issue persists, report it through Help & Support.',
+          "For security purposes, you may be logged out after a period of inactivity. Simply log back in to continue. If this happens frequently, check that your browser allows cookies.",
       },
       {
-        question: 'Can I use the platform on mobile?',
+        question: "How do I update the app?",
         answer:
-          'Yes. The dashboard is responsive and supports mobile browsers, though some features work best on a larger screen.',
+          "This is a web application, so it updates automatically. Just refresh your browser to get the latest version.",
       },
     ],
   },
-]
+];
