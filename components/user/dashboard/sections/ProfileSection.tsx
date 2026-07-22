@@ -26,7 +26,6 @@ import {
   Image as ImageIcon,
   GraduationCap,
   Building2,
-  Flag,
   Eye,
 } from "lucide-react";
 import {
@@ -76,15 +75,15 @@ export default function ProfileSection() {
   });
 
   const [education, setEducation] = useState<EducationEntry[]>([]);
-  const [preferredStudy, setPreferredStudy] = useState({
-    targetLevel: "",
-    preferredField: "",
-    preferredSpecialization: "",
-    preferredProvince: "",
-    preferredDistrict: "",
-    budgetRange: "",
-    scholarshipRequired: "Yes",
+  const [budgetFunding, setBudgetFunding] = useState({
+    tuitionBudgetRange: "",
+    livingExpenseBudget: "",
+    fundingSources: [] as string[],
+    willingLoan: "yes",
+    scholarshipRequired: "yes",
     scholarshipType: "Merit Based",
+    preferredField: "",
+    targetLevel: "",
   });
 
   const [documents, setDocuments] = useState({
@@ -193,14 +192,14 @@ export default function ProfileSection() {
           preference_role: "student",
           preference_flow: "profile",
           preferences: {
-            target_level: preferredStudy.targetLevel,
-            preferred_field: preferredStudy.preferredField,
-            preferred_specialization: preferredStudy.preferredSpecialization,
-            preferred_province: preferredStudy.preferredProvince,
-            preferred_district: preferredStudy.preferredDistrict,
-            budget_range: preferredStudy.budgetRange,
-            scholarship_required: preferredStudy.scholarshipRequired,
-            scholarship_type: preferredStudy.scholarshipType,
+            target_level: budgetFunding.targetLevel,
+            preferred_field: budgetFunding.preferredField,
+            tuition_budget_range: budgetFunding.tuitionBudgetRange,
+            living_expense_budget: budgetFunding.livingExpenseBudget,
+            funding_sources: budgetFunding.fundingSources,
+            willing_loan: budgetFunding.willingLoan,
+            scholarship_required: budgetFunding.scholarshipRequired,
+            scholarship_type: budgetFunding.scholarshipType,
           },
         },
         "",
@@ -343,15 +342,19 @@ export default function ProfileSection() {
         }
 
         setRawPreferences(prefs);
-        setPreferredStudy({
+        setBudgetFunding({
           targetLevel:
             prefs.target_level || prefs.course || prefs.education_level || "",
           preferredField:
             prefs.preferred_field || prefs.course || prefs.field || "",
-          preferredSpecialization: prefs.preferred_specialization || "",
-          preferredProvince: prefs.preferred_province || prefs.province || "",
-          preferredDistrict: prefs.preferred_district || prefs.district || "",
-          budgetRange: prefs.budget_range || prefs.budget || "",
+          tuitionBudgetRange:
+            prefs.tuition_budget_range ||
+            prefs.budget_range ||
+            prefs.budget ||
+            "",
+          livingExpenseBudget: prefs.living_expense_budget || "",
+          fundingSources: prefs.funding_sources || [],
+          willingLoan: prefs.willing_loan || "yes",
           scholarshipRequired:
             prefs.scholarship_required || prefs.scholarship || "No",
           scholarshipType: prefs.scholarship_type || "Merit Based",
@@ -474,35 +477,35 @@ export default function ProfileSection() {
             </div>
           </div>
 
-          {(preferredStudy.targetLevel ||
-            preferredStudy.preferredField ||
-            preferredStudy.budgetRange) && (
+          {(budgetFunding.targetLevel ||
+            budgetFunding.preferredField ||
+            budgetFunding.tuitionBudgetRange) && (
             <div className="mt-6 text-left border-t border-slate-100 pt-4">
               <h3 className="text-xs font-semibold text-slate-500 mb-3">
                 Preferences
               </h3>
               <div className="space-y-3">
-                {preferredStudy.targetLevel && (
+                {budgetFunding.targetLevel && (
                   <div>
                     <p className="text-xs text-slate-500">Target Level</p>
                     <p className="text-sm font-medium text-slate-800">
-                      {preferredStudy.targetLevel}
+                      {budgetFunding.targetLevel}
                     </p>
                   </div>
                 )}
-                {preferredStudy.preferredField && (
+                {budgetFunding.preferredField && (
                   <div>
                     <p className="text-xs text-slate-500">Preferred Field</p>
                     <p className="text-sm font-medium text-slate-800">
-                      {preferredStudy.preferredField}
+                      {budgetFunding.preferredField}
                     </p>
                   </div>
                 )}
-                {preferredStudy.budgetRange && (
+                {budgetFunding.tuitionBudgetRange && (
                   <div>
-                    <p className="text-xs text-slate-500">Budget Range</p>
+                    <p className="text-xs text-slate-500">Tuition Budget</p>
                     <p className="text-sm font-medium text-slate-800">
-                      Rs. {preferredStudy.budgetRange.replace("-", " - Rs. ")}
+                      {budgetFunding.tuitionBudgetRange}
                     </p>
                   </div>
                 )}
@@ -524,7 +527,7 @@ export default function ProfileSection() {
                     label: "Education History",
                     icon: GraduationCap,
                   },
-                  { id: "preferred", label: "Preferred Study", icon: Flag },
+                  { id: "budget", label: "Budget & Funding", icon: DollarSign },
                   { id: "documents", label: "Documents", icon: FileText },
                 ].map((tab) => (
                   <button
@@ -1174,229 +1177,202 @@ export default function ProfileSection() {
               </div>
             )}
 
-            {profileTab === "preferred" && (
+            {profileTab === "budget" && (
               <div className="space-y-8">
-                <div>
-                  <h3 className="text-lg font-bold text-slate-800 mb-4 flex items-center gap-2">
-                    <Award className="w-5 h-5 text-blue-600" />
-                    Study Goal
-                  </h3>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div>
-                      <label className="block text-xs font-semibold text-slate-500 mb-1">
-                        Target Level
-                      </label>
-                      {editMode ? (
-                        <select
-                          value={preferredStudy.targetLevel}
-                          onChange={(e) =>
-                            setPreferredStudy({
-                              ...preferredStudy,
-                              targetLevel: e.target.value,
-                            })
-                          }
-                          className="w-full rounded-md border border-slate-200 px-3 py-2 text-sm"
-                        >
-                          <option>+2</option>
-                          <option>A-Level</option>
-                          <option>Diploma</option>
-                          <option>Bachelor</option>
-                        </select>
-                      ) : (
-                        <p className="text-sm font-medium text-slate-800 bg-slate-50 border border-slate-200 rounded-md px-3 py-2">
-                          {preferredStudy.targetLevel}
-                        </p>
-                      )}
-                    </div>
-                    <div>
-                      <label className="block text-xs font-semibold text-slate-500 mb-1">
-                        Preferred Field
-                      </label>
-                      {editMode ? (
-                        <input
-                          type="text"
-                          value={preferredStudy.preferredField}
-                          onChange={(e) =>
-                            setPreferredStudy({
-                              ...preferredStudy,
-                              preferredField: e.target.value,
-                            })
-                          }
-                          className="w-full rounded-md border border-slate-200 px-3 py-2 text-sm"
-                        />
-                      ) : (
-                        <p className="text-sm font-medium text-slate-800 bg-slate-50 border border-slate-200 rounded-md px-3 py-2">
-                          {preferredStudy.preferredField}
-                        </p>
-                      )}
-                    </div>
-                    <div>
-                      <label className="block text-xs font-semibold text-slate-500 mb-1">
-                        Preferred Specialization (Optional)
-                      </label>
-                      {editMode ? (
-                        <input
-                          type="text"
-                          value={preferredStudy.preferredSpecialization}
-                          onChange={(e) =>
-                            setPreferredStudy({
-                              ...preferredStudy,
-                              preferredSpecialization: e.target.value,
-                            })
-                          }
-                          className="w-full rounded-md border border-slate-200 px-3 py-2 text-sm"
-                        />
-                      ) : (
-                        <p className="text-sm font-medium text-slate-800 bg-slate-50 border border-slate-200 rounded-md px-3 py-2">
-                          {preferredStudy.preferredSpecialization}
-                        </p>
-                      )}
-                    </div>
-                  </div>
-                </div>
-
-                <div>
-                  <h3 className="text-lg font-bold text-slate-800 mb-4 flex items-center gap-2">
-                    <MapPin className="w-5 h-5 text-blue-600" />
-                    Location Preference
-                  </h3>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div>
-                      <label className="block text-xs font-semibold text-slate-500 mb-1">
-                        Preferred Province
-                      </label>
-                      {editMode ? (
-                        <select
-                          value={preferredStudy.preferredProvince}
-                          onChange={(e) =>
-                            setPreferredStudy({
-                              ...preferredStudy,
-                              preferredProvince: e.target.value,
-                              preferredDistrict:
-                                NEPAL_DISTRICTS[
-                                  e.target.value as keyof typeof NEPAL_DISTRICTS
-                                ]?.[0] || "",
-                            })
-                          }
-                          className="w-full rounded-md border border-slate-200 px-3 py-2 text-sm"
-                        >
-                          {NEPAL_PROVINCES.map((prov) => (
-                            <option key={prov} value={prov}>
-                              {prov}
-                            </option>
-                          ))}
-                        </select>
-                      ) : (
-                        <p className="text-sm font-medium text-slate-800 bg-slate-50 border border-slate-200 rounded-md px-3 py-2">
-                          {preferredStudy.preferredProvince}
-                        </p>
-                      )}
-                    </div>
-                    <div>
-                      <label className="block text-xs font-semibold text-slate-500 mb-1">
-                        Preferred District
-                      </label>
-                      {editMode ? (
-                        <select
-                          value={preferredStudy.preferredDistrict}
-                          onChange={(e) =>
-                            setPreferredStudy({
-                              ...preferredStudy,
-                              preferredDistrict: e.target.value,
-                            })
-                          }
-                          className="w-full rounded-md border border-slate-200 px-3 py-2 text-sm"
-                        >
-                          {(
-                            NEPAL_DISTRICTS[
-                              preferredStudy.preferredProvince as keyof typeof NEPAL_DISTRICTS
-                            ] || []
-                          ).map((dist) => (
-                            <option key={dist} value={dist}>
-                              {dist}
-                            </option>
-                          ))}
-                        </select>
-                      ) : (
-                        <p className="text-sm font-medium text-slate-800 bg-slate-50 border border-slate-200 rounded-md px-3 py-2">
-                          {preferredStudy.preferredDistrict}
-                        </p>
-                      )}
-                    </div>
-                  </div>
-                </div>
-
                 <div>
                   <h3 className="text-lg font-bold text-slate-800 mb-4 flex items-center gap-2">
                     <DollarSign className="w-5 h-5 text-blue-600" />
                     Budget & Funding
                   </h3>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    {/* Tuition Budget */}
                     <div>
                       <label className="block text-xs font-semibold text-slate-500 mb-1">
-                        Budget Range (per year)
+                        Tuition Budget Range (Per Year)
                       </label>
                       {editMode ? (
                         <select
-                          value={preferredStudy.budgetRange}
+                          value={budgetFunding.tuitionBudgetRange}
                           onChange={(e) =>
-                            setPreferredStudy({
-                              ...preferredStudy,
-                              budgetRange: e.target.value,
+                            setBudgetFunding({
+                              ...budgetFunding,
+                              tuitionBudgetRange: e.target.value,
                             })
                           }
                           className="w-full rounded-md border border-slate-200 px-3 py-2 text-sm"
                         >
-                          <option value="0-500000">Rs. 0 - 500,000</option>
+                          <option value="">Select Range</option>
+                          <option value="<50000">Under Rs. 50,000</option>
+                          <option value="50000-200000">
+                            Rs. 50,000 - 2,00,000
+                          </option>
+                          <option value="200000-500000">
+                            Rs. 2,00,000 - 5,00,000
+                          </option>
                           <option value="500000-1000000">
-                            Rs. 500,000 - 1,000,000
+                            Rs. 5,00,000 - 10,00,000
                           </option>
-                          <option value="1000000-2000000">
-                            Rs. 1,000,000 - 2,000,000
-                          </option>
-                          <option value="2000000+">Rs. 2,000,000+</option>
+                          <option value=">1000000">Above Rs. 10,00,000</option>
                         </select>
                       ) : (
                         <p className="text-sm font-medium text-slate-800 bg-slate-50 border border-slate-200 rounded-md px-3 py-2">
-                          Rs.{" "}
-                          {preferredStudy.budgetRange.replace("-", " - Rs. ")}
+                          {budgetFunding.tuitionBudgetRange || "-"}
                         </p>
                       )}
                     </div>
+
+                    {/* Living Expense Budget */}
                     <div>
                       <label className="block text-xs font-semibold text-slate-500 mb-1">
-                        Scholarship Required
+                        Monthly Living Expense Budget
                       </label>
                       {editMode ? (
                         <select
-                          value={preferredStudy.scholarshipRequired}
+                          value={budgetFunding.livingExpenseBudget}
                           onChange={(e) =>
-                            setPreferredStudy({
-                              ...preferredStudy,
+                            setBudgetFunding({
+                              ...budgetFunding,
+                              livingExpenseBudget: e.target.value,
+                            })
+                          }
+                          className="w-full rounded-md border border-slate-200 px-3 py-2 text-sm"
+                        >
+                          <option value="">Select Range</option>
+                          <option value="<5000">Under Rs. 5,000</option>
+                          <option value="5000-15000">Rs. 5,000 - 15,000</option>
+                          <option value="15000-30000">
+                            Rs. 15,000 - 30,000
+                          </option>
+                          <option value=">30000">Above Rs. 30,000</option>
+                        </select>
+                      ) : (
+                        <p className="text-sm font-medium text-slate-800 bg-slate-50 border border-slate-200 rounded-md px-3 py-2">
+                          {budgetFunding.livingExpenseBudget || "-"}
+                        </p>
+                      )}
+                    </div>
+
+                    {/* Funding Sources */}
+                    <div className="md:col-span-2">
+                      <label className="block text-xs font-semibold text-slate-500 mb-1">
+                        Funding Sources (select all that apply)
+                      </label>
+                      {editMode ? (
+                        <div className="flex flex-wrap gap-3">
+                          {[
+                            "Family Support",
+                            "Education Loan",
+                            "Scholarship",
+                            "Work-Study",
+                            "Personal Savings",
+                          ].map((source) => (
+                            <label
+                              key={source}
+                              className="flex items-center gap-2 text-sm"
+                            >
+                              <input
+                                type="checkbox"
+                                checked={budgetFunding.fundingSources.includes(
+                                  source,
+                                )}
+                                onChange={(e) => {
+                                  if (e.target.checked) {
+                                    setBudgetFunding({
+                                      ...budgetFunding,
+                                      fundingSources: [
+                                        ...budgetFunding.fundingSources,
+                                        source,
+                                      ],
+                                    });
+                                  } else {
+                                    setBudgetFunding({
+                                      ...budgetFunding,
+                                      fundingSources:
+                                        budgetFunding.fundingSources.filter(
+                                          (s) => s !== source,
+                                        ),
+                                    });
+                                  }
+                                }}
+                                className="rounded border-slate-300"
+                              />
+                              {source}
+                            </label>
+                          ))}
+                        </div>
+                      ) : (
+                        <p className="text-sm font-medium text-slate-800 bg-slate-50 border border-slate-200 rounded-md px-3 py-2">
+                          {budgetFunding.fundingSources.join(", ") || "-"}
+                        </p>
+                      )}
+                    </div>
+
+                    {/* Willing to take loan */}
+                    <div>
+                      <label className="block text-xs font-semibold text-slate-500 mb-1">
+                        Willing to take education loan?
+                      </label>
+                      {editMode ? (
+                        <select
+                          value={budgetFunding.willingLoan}
+                          onChange={(e) =>
+                            setBudgetFunding({
+                              ...budgetFunding,
+                              willingLoan: e.target.value,
+                            })
+                          }
+                          className="w-full rounded-md border border-slate-200 px-3 py-2 text-sm"
+                        >
+                          <option value="yes">Yes</option>
+                          <option value="no">No</option>
+                          <option value="maybe">
+                            Maybe, depending on terms
+                          </option>
+                        </select>
+                      ) : (
+                        <p className="text-sm font-medium text-slate-800 bg-slate-50 border border-slate-200 rounded-md px-3 py-2">
+                          {budgetFunding.willingLoan}
+                        </p>
+                      )}
+                    </div>
+
+                    {/* Scholarship Required */}
+                    <div>
+                      <label className="block text-xs font-semibold text-slate-500 mb-1">
+                        Scholarship Required?
+                      </label>
+                      {editMode ? (
+                        <select
+                          value={budgetFunding.scholarshipRequired}
+                          onChange={(e) =>
+                            setBudgetFunding({
+                              ...budgetFunding,
                               scholarshipRequired: e.target.value,
                             })
                           }
                           className="w-full rounded-md border border-slate-200 px-3 py-2 text-sm"
                         >
-                          <option>Yes</option>
-                          <option>No</option>
+                          <option value="yes">Yes</option>
+                          <option value="no">No</option>
                         </select>
                       ) : (
                         <p className="text-sm font-medium text-slate-800 bg-slate-50 border border-slate-200 rounded-md px-3 py-2">
-                          {preferredStudy.scholarshipRequired}
+                          {budgetFunding.scholarshipRequired}
                         </p>
                       )}
                     </div>
+
+                    {/* Scholarship Type */}
                     <div>
                       <label className="block text-xs font-semibold text-slate-500 mb-1">
-                        Scholarship Type
+                        Preferred Scholarship Type
                       </label>
                       {editMode ? (
                         <select
-                          value={preferredStudy.scholarshipType}
+                          value={budgetFunding.scholarshipType}
                           onChange={(e) =>
-                            setPreferredStudy({
-                              ...preferredStudy,
+                            setBudgetFunding({
+                              ...budgetFunding,
                               scholarshipType: e.target.value,
                             })
                           }
@@ -1404,11 +1380,66 @@ export default function ProfileSection() {
                         >
                           <option>Merit Based</option>
                           <option>Need Based</option>
-                          <option>Either</option>
+                          <option>Sports</option>
+                          <option>Minority</option>
+                          <option>Any</option>
                         </select>
                       ) : (
                         <p className="text-sm font-medium text-slate-800 bg-slate-50 border border-slate-200 rounded-md px-3 py-2">
-                          {preferredStudy.scholarshipType}
+                          {budgetFunding.scholarshipType}
+                        </p>
+                      )}
+                    </div>
+
+                    {/* Target Level (keep from original) */}
+                    <div>
+                      <label className="block text-xs font-semibold text-slate-500 mb-1">
+                        Target Level
+                      </label>
+                      {editMode ? (
+                        <select
+                          value={budgetFunding.targetLevel}
+                          onChange={(e) =>
+                            setBudgetFunding({
+                              ...budgetFunding,
+                              targetLevel: e.target.value,
+                            })
+                          }
+                          className="w-full rounded-md border border-slate-200 px-3 py-2 text-sm"
+                        >
+                          <option value="">Select</option>
+                          <option>+2</option>
+                          <option>A-Level</option>
+                          <option>Diploma</option>
+                          <option>Bachelor</option>
+                        </select>
+                      ) : (
+                        <p className="text-sm font-medium text-slate-800 bg-slate-50 border border-slate-200 rounded-md px-3 py-2">
+                          {budgetFunding.targetLevel}
+                        </p>
+                      )}
+                    </div>
+
+                    {/* Preferred Field (keep from original) */}
+                    <div>
+                      <label className="block text-xs font-semibold text-slate-500 mb-1">
+                        Preferred Field
+                      </label>
+                      {editMode ? (
+                        <input
+                          type="text"
+                          value={budgetFunding.preferredField}
+                          onChange={(e) =>
+                            setBudgetFunding({
+                              ...budgetFunding,
+                              preferredField: e.target.value,
+                            })
+                          }
+                          className="w-full rounded-md border border-slate-200 px-3 py-2 text-sm"
+                        />
+                      ) : (
+                        <p className="text-sm font-medium text-slate-800 bg-slate-50 border border-slate-200 rounded-md px-3 py-2">
+                          {budgetFunding.preferredField || "-"}
                         </p>
                       )}
                     </div>
@@ -1428,10 +1459,10 @@ export default function ProfileSection() {
                             ![
                               "target_level",
                               "preferred_field",
-                              "preferred_specialization",
-                              "preferred_province",
-                              "preferred_district",
-                              "budget_range",
+                              "tuition_budget_range",
+                              "living_expense_budget",
+                              "funding_sources",
+                              "willing_loan",
                               "scholarship_required",
                               "scholarship_type",
                               "onboarding_completed",
@@ -1439,9 +1470,8 @@ export default function ProfileSection() {
                               "field",
                               "education_level",
                               "budget",
+                              "budget_range",
                               "scholarship",
-                              "province",
-                              "district",
                               "contact_number",
                             ].includes(key),
                         )
