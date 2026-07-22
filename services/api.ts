@@ -2744,6 +2744,63 @@ export const apiService = {
     });
   },
 
+  // === Profile Documents ===
+  async getProfileDocuments(): Promise<{
+    success: boolean;
+    data: Array<{
+      id: number;
+      file_name: string;
+      file_size: number;
+      type: string;
+      mime_type: string;
+      url: string;
+      created_at: string;
+    }>;
+  }> {
+    return apiRequest("/api/v1/profile/documents");
+  },
+
+  async uploadProfileDocument(
+    file: File,
+    type: string,
+  ): Promise<{
+    success: boolean;
+    data: {
+      id: number;
+      file_name: string;
+      file_size: number;
+      type: string;
+      mime_type: string;
+      url: string;
+      created_at: string;
+    };
+  }> {
+    const token =
+      typeof window !== "undefined"
+        ? localStorage.getItem("token") || sessionStorage.getItem("token")
+        : null;
+    const formData = new FormData();
+    formData.append("file", file);
+    formData.append("type", type);
+    const response = await fetch(
+      `${process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080"}/api/v1/profile/documents`,
+      {
+        method: "POST",
+        headers: token ? { Authorization: `Bearer ${token}` } : {},
+        body: formData,
+      },
+    );
+    if (!response.ok) {
+      const err = await response.json().catch(() => ({}));
+      throw new Error(err.message || "Failed to upload document");
+    }
+    return response.json();
+  },
+
+  async deleteProfileDocument(id: number): Promise<void> {
+    return apiRequest(`/api/v1/profile/documents/${id}`, { method: "DELETE" });
+  },
+
   // ─── Public Volunteer API ─────────────────────────────────────────
 
   async getPublicVolunteers(params?: {

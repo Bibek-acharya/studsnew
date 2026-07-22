@@ -26,7 +26,6 @@ import {
   Image as ImageIcon,
   GraduationCap,
   Building2,
-  Eye,
 } from "lucide-react";
 import {
   NEPAL_PROVINCES,
@@ -86,16 +85,21 @@ export default function ProfileSection() {
     targetLevel: "",
   });
 
-  const [documents, setDocuments] = useState({
-    seeMarksheet: null,
-    plus2Marksheet: null,
-    bachelorTranscript: null,
-    certificates: [] as File[],
-    citizenship: null,
-    sop: null,
-    recommendationLetter: null,
-    cv: null,
-  });
+  interface ProfileDocument {
+    id: number;
+    file_name: string;
+    file_size: number;
+    type: string;
+    mime_type: string;
+    url: string;
+    created_at: string;
+  }
+
+  const [profileDocuments, setProfileDocuments] = useState<ProfileDocument[]>(
+    [],
+  );
+  const [docsLoading, setDocsLoading] = useState(false);
+  const [uploadingDoc, setUploadingDoc] = useState(false);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
@@ -140,6 +144,54 @@ export default function ProfileSection() {
     setEducation(
       education.map((e) => (e.id === id ? { ...e, [field]: value } : e)),
     );
+  };
+
+  const handleDocumentUpload = async (
+    e: React.ChangeEvent<HTMLInputElement>,
+  ) => {
+    const files = e.target.files;
+    if (!files || files.length === 0) return;
+
+    setUploadingDoc(true);
+    try {
+      for (let i = 0; i < files.length; i++) {
+        const file = files[i];
+        const type = file.type.startsWith("image/") ? "image" : "document";
+        const res = await apiService.uploadProfileDocument(file, type);
+        if (res.data) {
+          setProfileDocuments((prev) => [...prev, res.data]);
+        }
+      }
+      setToast({ message: "Documents uploaded successfully", type: "success" });
+      setTimeout(() => setToast(null), 3000);
+    } catch (err: any) {
+      setToast({
+        message: err.message || "Failed to upload document",
+        type: "error",
+      });
+      setTimeout(() => setToast(null), 3000);
+    } finally {
+      setUploadingDoc(false);
+      e.target.value = "";
+    }
+  };
+
+  const handleDeleteDocument = async (docId: number) => {
+    try {
+      await apiService.deleteProfileDocument(docId);
+      setProfileDocuments((prev) => prev.filter((d) => d.id !== docId));
+      setToast({ message: "Document deleted", type: "success" });
+      setTimeout(() => setToast(null), 3000);
+    } catch {
+      setToast({ message: "Failed to delete document", type: "error" });
+      setTimeout(() => setToast(null), 3000);
+    }
+  };
+
+  const formatFileSize = (bytes: number) => {
+    if (bytes < 1024) return bytes + " B";
+    if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + " KB";
+    return (bytes / (1024 * 1024)).toFixed(1) + " MB";
   };
 
   const handleSave = async () => {
@@ -366,6 +418,14 @@ export default function ProfileSection() {
 
         setSelectedProvince(province || "");
         setSelectedDistrict(district || "");
+
+        // Fetch documents
+        try {
+          const docRes = await apiService.getProfileDocuments();
+          setProfileDocuments(docRes.data || []);
+        } catch {
+          // backend endpoint may not exist yet - silent fail
+        }
       } catch (err: any) {
         setError(err.message || "Failed to load profile");
       } finally {
@@ -1501,154 +1561,89 @@ export default function ProfileSection() {
             )}
 
             {profileTab === "documents" && (
-              <div className="space-y-8">
-                <div>
-                  <h3 className="text-lg font-bold text-slate-800 mb-4 flex items-center gap-2">
-                    <FileText className="w-5 h-5 text-blue-600" />
-                    Academic Documents
-                  </h3>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    {[
-                      {
-                        key: "seeMarksheet",
-                        label: "SEE Marksheet",
-                        uploaded: true,
-                      },
-                      {
-                        key: "plus2Marksheet",
-                        label: "+2 Marksheet",
-                        uploaded: true,
-                      },
-                      {
-                        key: "bachelorTranscript",
-                        label: "Bachelor Transcript",
-                        uploaded: false,
-                      },
-                      {
-                        key: "certificates",
-                        label: "Certificates",
-                        uploaded: true,
-                      },
-                    ].map((doc) => (
-                      <div
-                        key={doc.key}
-                        className="border border-slate-200 rounded-md p-4 flex items-center gap-3"
-                      >
-                        <div
-                          className={`w-10 h-10 rounded flex items-center justify-center ${doc.uploaded ? "bg-green-50 text-green-500" : "bg-slate-100 text-slate-400"}`}
-                        >
-                          {doc.uploaded ? (
-                            <Award className="w-5 h-5" />
-                          ) : (
-                            <FileText className="w-5 h-5" />
-                          )}
-                        </div>
-                        <div className="flex-1">
-                          <h4 className="text-sm font-medium text-slate-800">
-                            {doc.label}
-                          </h4>
-                          <p className="text-xs text-slate-500">
-                            {doc.uploaded ? "Uploaded" : "Not uploaded"}
-                          </p>
-                        </div>
-                        <div className="flex items-center gap-2">
-                          {doc.uploaded && (
-                            <button className="text-slate-600 hover:text-slate-800">
-                              <Eye className="w-4 h-4" />
-                            </button>
-                          )}
-                          {editMode && (
-                            <button className="text-blue-600 hover:text-blue-800">
-                              <Upload className="w-4 h-4" />
-                            </button>
-                          )}
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </div>
+              <div>
+                <h3 className="text-lg font-bold text-slate-800 mb-4 flex items-center gap-2">
+                  <FileText className="w-5 h-5 text-blue-600" />
+                  Documents
+                </h3>
+                <p className="text-sm text-slate-500 mb-6">
+                  Upload and manage your academic documents, certificates, and
+                  other files.
+                </p>
 
-                <div>
-                  <h3 className="text-lg font-bold text-slate-800 mb-4 flex items-center gap-2">
-                    <User className="w-5 h-5 text-blue-600" />
-                    Identity Documents
-                  </h3>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div className="border border-slate-200 rounded-md p-4 flex items-center gap-3">
-                      <div className="w-10 h-10 rounded bg-slate-100 text-slate-400 flex items-center justify-center">
-                        <FileText className="w-5 h-5" />
-                      </div>
-                      <div className="flex-1">
-                        <h4 className="text-sm font-medium text-slate-800">
-                          Citizenship / National ID
-                        </h4>
-                        <p className="text-xs text-slate-500">Not uploaded</p>
-                      </div>
-                      {editMode && (
-                        <button className="text-blue-600 hover:text-blue-800">
-                          <Upload className="w-4 h-4" />
+                {/* Upload Area */}
+                {editMode && (
+                  <div className="border-2 border-dashed border-slate-200 rounded-xl p-8 text-center mb-6 hover:border-blue-300 transition-colors">
+                    <Upload className="w-10 h-10 text-slate-300 mx-auto mb-3" />
+                    <p className="text-sm text-slate-500 mb-1">
+                      Upload academic documents
+                    </p>
+                    <p className="text-xs text-slate-400 mb-4">
+                      PDF, JPG, PNG (max 10MB each)
+                    </p>
+                    <label className="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg text-sm font-semibold hover:bg-blue-700 cursor-pointer transition-colors">
+                      {uploadingDoc ? "Uploading..." : "Choose Files"}
+                      <input
+                        type="file"
+                        multiple
+                        accept=".pdf,.jpg,.jpeg,.png"
+                        onChange={handleDocumentUpload}
+                        disabled={uploadingDoc}
+                        className="hidden"
+                      />
+                    </label>
+                  </div>
+                )}
+
+                {/* Document List */}
+                {docsLoading ? (
+                  <div className="flex items-center justify-center py-12">
+                    <div className="w-8 h-8 border-2 border-blue-600 border-t-transparent rounded-full animate-spin" />
+                  </div>
+                ) : profileDocuments.length === 0 ? (
+                  <div className="flex flex-col items-center justify-center py-12 text-center">
+                    <FileText className="w-12 h-12 text-slate-300 mx-auto mb-3" />
+                    <p className="text-sm text-slate-500">
+                      No documents uploaded yet.
+                    </p>
+                    {editMode && (
+                      <p className="text-xs text-slate-400 mt-1">
+                        Click the upload area above to add documents.
+                      </p>
+                    )}
+                  </div>
+                ) : (
+                  <div className="space-y-3">
+                    {profileDocuments.map((doc) => (
+                      <div
+                        key={doc.id}
+                        className="flex items-center justify-between border border-slate-200 rounded-lg p-4 hover:border-blue-200 transition-colors"
+                      >
+                        <div className="flex items-center gap-3 min-w-0">
+                          <div className="w-10 h-10 rounded-lg bg-blue-50 flex items-center justify-center shrink-0">
+                            <FileText className="w-5 h-5 text-blue-600" />
+                          </div>
+                          <div className="min-w-0">
+                            <p className="text-sm font-medium text-slate-800 truncate">
+                              {doc.file_name}
+                            </p>
+                            <p className="text-xs text-slate-500">
+                              {formatFileSize(doc.file_size)} •{" "}
+                              {new Date(doc.created_at).toLocaleDateString()}
+                            </p>
+                          </div>
+                        </div>
+                        <button
+                          onClick={() => handleDeleteDocument(doc.id)}
+                          className="w-8 h-8 rounded-full flex items-center justify-center text-slate-400 hover:text-red-600 hover:bg-red-50 transition-colors shrink-0"
+                          title="Delete document"
+                        >
+                          <Trash2 className="w-4 h-4" />
                         </button>
-                      )}
-                    </div>
-                  </div>
-                </div>
-
-                <div>
-                  <h3 className="text-lg font-bold text-slate-800 mb-4 flex items-center gap-2">
-                    <FileText className="w-5 h-5 text-blue-600" />
-                    Supporting Documents
-                  </h3>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    {[
-                      {
-                        key: "sop",
-                        label: "Statement of Purpose (SOP)",
-                        uploaded: false,
-                      },
-                      {
-                        key: "recommendationLetter",
-                        label: "Recommendation Letter",
-                        uploaded: false,
-                      },
-                      { key: "cv", label: "CV/Resume", uploaded: true },
-                    ].map((doc) => (
-                      <div
-                        key={doc.key}
-                        className="border border-slate-200 rounded-md p-4 flex items-center gap-3"
-                      >
-                        <div
-                          className={`w-10 h-10 rounded flex items-center justify-center ${doc.uploaded ? "bg-green-50 text-green-500" : "bg-slate-100 text-slate-400"}`}
-                        >
-                          {doc.uploaded ? (
-                            <Award className="w-5 h-5" />
-                          ) : (
-                            <FileText className="w-5 h-5" />
-                          )}
-                        </div>
-                        <div className="flex-1">
-                          <h4 className="text-sm font-medium text-slate-800">
-                            {doc.label}
-                          </h4>
-                          <p className="text-xs text-slate-500">
-                            {doc.uploaded ? "Uploaded" : "Not uploaded"}
-                          </p>
-                        </div>
-                        <div className="flex items-center gap-2">
-                          {doc.uploaded && (
-                            <button className="text-slate-600 hover:text-slate-800">
-                              <Eye className="w-4 h-4" />
-                            </button>
-                          )}
-                          {editMode && (
-                            <button className="text-blue-600 hover:text-blue-800">
-                              <Upload className="w-4 h-4" />
-                            </button>
-                          )}
-                        </div>
                       </div>
                     ))}
                   </div>
-                </div>
+                )}
               </div>
             )}
           </div>
