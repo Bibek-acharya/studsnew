@@ -27,8 +27,8 @@ export default function DashboardLayout({
     if (path.includes("/scholarship/applications"))
       return "scholarshipApplications";
     if (path.includes("/scholarship/list")) return "scholarshipList";
-    if (path.includes("/counselling/requests")) return "counsellingRequests";
     if (path.includes("/counselling/history")) return "counsellingHistory";
+    if (path.includes("/counselling")) return "counsellingRequests";
     if (path.includes("/entrance/results")) return "entranceResults";
     if (path.includes("/entrance/applicants")) return "entranceApplicants";
     if (path.includes("/entrance/draft")) return "entranceDraft";

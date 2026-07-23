@@ -1,34 +1,36 @@
 "use client";
 
-import React, { useEffect, useMemo, useRef, useState } from "react";
+import React, {
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+  useCallback,
+} from "react";
+import { useSearchParams } from "next/navigation";
 import { useAuth } from "@/services/AuthContext";
-import { apiService } from "@/services/api";
+import { apiService, College } from "@/services/api";
 
 interface BookCounsellingPageProps {
   onNavigate?: (view: any, data?: any) => void;
 }
 
-type DateSlot = {
-  day: string;
-  date: string;
-  slots: string;
-  available: boolean;
-};
-
-const mockColleges: string[] = [];
-
-const dates: DateSlot[] = [];
-
-const times: string[] = [];
-
 const BookCounsellingPage: React.FC<BookCounsellingPageProps> = () => {
   const { isAuthenticated } = useAuth();
+  const searchParams = useSearchParams();
+
   const [collegeInput, setCollegeInput] = useState("");
+  const [selectedCollegeId, setSelectedCollegeId] = useState<number | null>(
+    null,
+  );
   const [showSuggestions, setShowSuggestions] = useState(false);
+  const [colleges, setColleges] = useState<College[]>([]);
+  const [collegesLoading, setCollegesLoading] = useState(false);
+  const [highlightedIdx, setHighlightedIdx] = useState(-1);
 
   const [program, setProgram] = useState("");
   const [course, setCourse] = useState("");
-  const [selectedDate, setSelectedDate] = useState<DateSlot | null>(null);
+  const [selectedDate, setSelectedDate] = useState<string | null>(null);
   const [selectedTime, setSelectedTime] = useState<string | null>(null);
   const [isOnline, setIsOnline] = useState(false);
 
@@ -41,11 +43,97 @@ const BookCounsellingPage: React.FC<BookCounsellingPageProps> = () => {
   const [isConfirmed, setIsConfirmed] = useState(false);
   const [submitError, setSubmitError] = useState("");
 
+  const inputRef = useRef<HTMLInputElement>(null);
   const suggestionRef = useRef<HTMLDivElement>(null);
+  const debounceRef = useRef<ReturnType<typeof setTimeout> | undefined>(
+    undefined,
+  );
 
+  // Pre-fill college from URL params
+  useEffect(() => {
+    const name = searchParams.get("collegeName");
+    const id = searchParams.get("collegeId");
+    if (name) {
+      setCollegeInput(name);
+      if (id) setSelectedCollegeId(Number(id));
+    }
+  }, [searchParams]);
+
+  // Fetch colleges with debounce
+  const fetchColleges = useCallback(async (query: string) => {
+    if (!query.trim()) {
+      setColleges([]);
+      return;
+    }
+    setCollegesLoading(true);
+    try {
+      const res = await apiService.getColleges({
+        search: query,
+        limit: 10,
+        page: 1,
+      });
+      const list = res?.data?.colleges || [];
+      setColleges(list);
+    } catch {
+      setColleges([]);
+    }
+    setCollegesLoading(false);
+  }, []);
+
+  const handleInputChange = (value: string) => {
+    setCollegeInput(value);
+    setSelectedCollegeId(null);
+    setShowSuggestions(true);
+    setHighlightedIdx(-1);
+    if (debounceRef.current) clearTimeout(debounceRef.current);
+    debounceRef.current = setTimeout(() => fetchColleges(value), 250);
+  };
+
+  const selectCollege = (college: College) => {
+    setCollegeInput(college.name);
+    setSelectedCollegeId(college.id);
+    setShowSuggestions(false);
+    setHighlightedIdx(-1);
+  };
+
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (!showSuggestions || colleges.length === 0) return;
+
+    switch (e.key) {
+      case "ArrowDown":
+        e.preventDefault();
+        setHighlightedIdx((prev) =>
+          prev < colleges.length - 1 ? prev + 1 : 0,
+        );
+        break;
+      case "ArrowUp":
+        e.preventDefault();
+        setHighlightedIdx((prev) =>
+          prev > 0 ? prev - 1 : colleges.length - 1,
+        );
+        break;
+      case "Enter":
+        e.preventDefault();
+        if (highlightedIdx >= 0 && highlightedIdx < colleges.length) {
+          selectCollege(colleges[highlightedIdx]);
+        }
+        break;
+      case "Escape":
+        setShowSuggestions(false);
+        setHighlightedIdx(-1);
+        break;
+    }
+  };
+
+  // Close suggestions on outside click
   useEffect(() => {
     const handleOutside = (event: MouseEvent) => {
-      if (!suggestionRef.current?.contains(event.target as Node)) {
+      if (
+        suggestionRef.current &&
+        !suggestionRef.current.contains(event.target as Node) &&
+        inputRef.current &&
+        !inputRef.current.contains(event.target as Node)
+      ) {
         setShowSuggestions(false);
       }
     };
@@ -53,26 +141,12 @@ const BookCounsellingPage: React.FC<BookCounsellingPageProps> = () => {
     return () => document.removeEventListener("mousedown", handleOutside);
   }, []);
 
-  const filteredColleges = useMemo(() => {
-    if (!collegeInput.trim()) return [];
-    return mockColleges.filter((item) =>
-      item.toLowerCase().includes(collegeInput.toLowerCase()),
-    );
-  }, [collegeInput]);
-
-  const selectedDateText = selectedDate
-    ? `${selectedDate.day}, ${selectedDate.date} Nov`
-    : "";
-
-  const summaryCourse =
-    program && course ? `${program} in ${course}` : course || "Not selected";
-
-  const summaryDateTime =
-    selectedDate && selectedTime
-      ? `${selectedTime}, ${selectedDateText} 2026`
-      : selectedDate
-        ? `${selectedDateText} 2026 (Select time)`
-        : "Select a slot";
+  // Cleanup debounce
+  useEffect(() => {
+    return () => {
+      if (debounceRef.current) clearTimeout(debounceRef.current);
+    };
+  }, []);
 
   const isFormValid =
     !!collegeInput &&
@@ -101,7 +175,7 @@ const BookCounsellingPage: React.FC<BookCounsellingPageProps> = () => {
         program_level: program,
         interested_course: course,
         session_mode: isOnline ? "online" : "in_person",
-        session_date: `${selectedDateText} 2026`,
+        session_date: selectedDate || "",
         session_time: selectedTime || "",
         student_name: studentName,
         student_phone: studentPhone,
@@ -121,7 +195,9 @@ const BookCounsellingPage: React.FC<BookCounsellingPageProps> = () => {
     } catch (error) {
       setIsBooking(false);
       setSubmitError(
-        error instanceof Error ? error.message : "Failed to book counselling session",
+        error instanceof Error
+          ? error.message
+          : "Failed to book counselling session",
       );
     }
   };
@@ -134,53 +210,86 @@ const BookCounsellingPage: React.FC<BookCounsellingPageProps> = () => {
 
       <div className="relative z-10 mx-auto max-w-7xl px-4 py-8 md:py-12">
         <div className="flex flex-col items-start gap-6 lg:flex-row">
-          <div className="w-full overflow-hidden rounded-md border border-gray-100 bg-white  lg:w-2/3">
+          <div className="w-full overflow-hidden rounded-md border border-gray-100 bg-white lg:w-2/3">
             <div className="border-b border-gray-100 p-6">
-              <h1 className="text-2xl font-bold text-gray-900">Book Counseling Session</h1>
+              <h1 className="text-2xl font-bold text-gray-900">
+                Book Counseling Session
+              </h1>
             </div>
 
             <div className="space-y-8 p-6">
               <div className="space-y-5">
-                <h2 className="text-sm font-semibold uppercase tracking-wide text-gray-700">Academic Details</h2>
+                <h2 className="text-sm font-semibold uppercase tracking-wide text-gray-700">
+                  Academic Details
+                </h2>
 
-                <div ref={suggestionRef} className="relative">
+                <div className="relative">
                   <label className="mb-1 block text-sm font-medium text-gray-700">
                     Select College <span className="text-red-500">*</span>
                   </label>
                   <div className="relative">
                     <i className="fa-solid fa-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-sm text-gray-400"></i>
                     <input
+                      ref={inputRef}
                       type="text"
                       placeholder="Search and select your college..."
                       value={collegeInput}
-                      onChange={(event) => {
-                        setCollegeInput(event.target.value);
-                        setShowSuggestions(true);
+                      onChange={(e) => handleInputChange(e.target.value)}
+                      onFocus={() => {
+                        if (colleges.length > 0 || collegeInput.trim())
+                          setShowSuggestions(true);
                       }}
-                      onFocus={() => setShowSuggestions(true)}
+                      onKeyDown={handleKeyDown}
                       className="w-full rounded-md border border-gray-200 bg-gray-50 py-3 pl-10 pr-4 text-sm transition-all focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-500"
                     />
-
-                    {showSuggestions && filteredColleges.length > 0 && (
-                      <ul className="absolute z-20 mt-1 max-h-48 w-full overflow-y-auto rounded-md border border-gray-200 bg-white shadow-lg">
-                        {filteredColleges.map((item) => (
-                          <li key={item}>
-                            <button
-                              type="button"
-                              className="w-full border-b border-gray-50 px-4 py-2 text-left text-sm text-gray-700 transition-colors last:border-none hover:bg-blue-50"
-                              onMouseDown={(event) => {
-                                event.preventDefault();
-                                setCollegeInput(item);
-                                setShowSuggestions(false);
-                              }}
-                            >
-                              {item}
-                            </button>
-                          </li>
-                        ))}
-                      </ul>
+                    {collegesLoading && (
+                      <i className="fa-solid fa-spinner animate-spin absolute right-3 top-1/2 -translate-y-1/2 text-sm text-gray-400"></i>
                     )}
                   </div>
+
+                  {showSuggestions && (
+                    <div
+                      ref={suggestionRef}
+                      className="absolute z-20 mt-1 w-full rounded-md border border-gray-200 bg-white shadow-lg max-h-56 overflow-y-auto"
+                    >
+                      {colleges.length === 0 &&
+                        !collegesLoading &&
+                        collegeInput.trim() && (
+                          <div className="px-4 py-3 text-sm text-gray-400">
+                            No colleges found.
+                          </div>
+                        )}
+                      {colleges.map((item, idx) => (
+                        <button
+                          key={item.id}
+                          type="button"
+                          onMouseDown={(e) => {
+                            e.preventDefault();
+                            selectCollege(item);
+                          }}
+                          onMouseEnter={() => setHighlightedIdx(idx)}
+                          className={`w-full flex items-center gap-3 px-4 py-2.5 text-left text-sm transition-colors ${
+                            idx === highlightedIdx
+                              ? "bg-blue-50 text-blue-700"
+                              : "text-gray-700 hover:bg-gray-50"
+                          }`}
+                        >
+                          <i className="fa-solid fa-building-columns text-gray-300 w-4"></i>
+                          <div className="min-w-0 flex-1">
+                            <p className="font-medium truncate">{item.name}</p>
+                            {item.location && (
+                              <p className="text-xs text-gray-400 truncate">
+                                {item.location}
+                              </p>
+                            )}
+                          </div>
+                          {selectedCollegeId === item.id && (
+                            <i className="fa-solid fa-check text-blue-500"></i>
+                          )}
+                        </button>
+                      ))}
+                    </div>
+                  )}
                 </div>
 
                 <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
@@ -196,8 +305,12 @@ const BookCounsellingPage: React.FC<BookCounsellingPageProps> = () => {
                       <option value="" disabled>
                         Select Program
                       </option>
-                      <option value="Undergraduate">Undergraduate (Bachelors)</option>
-                      <option value="Postgraduate">Postgraduate (Masters)</option>
+                      <option value="Undergraduate">
+                        Undergraduate (Bachelors)
+                      </option>
+                      <option value="Postgraduate">
+                        Postgraduate (Masters)
+                      </option>
                       <option value="Diploma">Diploma / Certificate</option>
                     </select>
                     <i className="fa-solid fa-chevron-down absolute right-3 bottom-3.5 text-gray-400 pointer-events-none text-[12px]"></i>
@@ -215,11 +328,19 @@ const BookCounsellingPage: React.FC<BookCounsellingPageProps> = () => {
                       <option value="" disabled>
                         Select Course
                       </option>
-                      <option value="Computer Science & IT">Computer Science & IT</option>
-                      <option value="Business Administration">Business Administration</option>
+                      <option value="Computer Science & IT">
+                        Computer Science & IT
+                      </option>
+                      <option value="Business Administration">
+                        Business Administration
+                      </option>
                       <option value="Engineering">Engineering</option>
-                      <option value="Arts & Humanities">Arts & Humanities</option>
-                      <option value="Medicine & Health">Medicine & Health</option>
+                      <option value="Arts & Humanities">
+                        Arts & Humanities
+                      </option>
+                      <option value="Medicine & Health">
+                        Medicine & Health
+                      </option>
                     </select>
                     <i className="fa-solid fa-chevron-down absolute right-3 bottom-3.5 text-gray-400 pointer-events-none text-[12px]"></i>
                   </div>
@@ -231,85 +352,39 @@ const BookCounsellingPage: React.FC<BookCounsellingPageProps> = () => {
               <div className="space-y-5">
                 <div className="flex items-end justify-between">
                   <h2 className="text-sm font-semibold uppercase tracking-wide text-gray-700">
-                    Select a Slot <span className="text-red-500">*</span>
+                    Date & Time <span className="text-red-500">*</span>
                   </h2>
-                  <span className="rounded bg-gray-100 px-2 py-1 text-xs text-gray-500">November 2026</span>
                 </div>
 
                 <div>
-                  <p className="mb-3 text-sm text-gray-600">Available Dates (Assigned by College)</p>
-                  <div className="flex gap-3 overflow-x-auto pb-2 scrollbar-hide">
-                    {dates.map((item) => {
-                      const isSelected = selectedDate?.date === item.date;
-                      const isDisabled = !item.available;
-
-                      return (
-                        <button
-                          key={`${item.day}-${item.date}`}
-                          type="button"
-                          disabled={isDisabled}
-                          onClick={() => setSelectedDate(item)}
-                          className={`w-[78px] flex-shrink-0 rounded-md border p-3 transition-all ${
-                            isDisabled
-                              ? "cursor-not-allowed border-gray-100 bg-gray-50 opacity-60"
-                              : isSelected
-                                ? "border-[#0000FF] bg-brand-blue "
-                                : "border-gray-200 bg-white hover:border-[#0000FF]"
-                          }`}
-                        >
-                          <div className={`mb-1 text-xs font-medium ${isSelected ? "text-blue-100" : "text-gray-500"}`}>
-                            {item.day}
-                          </div>
-                          <div className={`mb-1 text-xl font-bold ${isSelected ? "text-white" : "text-gray-800"}`}>
-                            {item.date}
-                          </div>
-                          <span
-                            className={`inline-block rounded px-1.5 py-0.5 text-[10px] font-medium ${
-                              isSelected
-                                ? "bg-blue-500 text-white"
-                                : item.slots === "Booked"
-                                  ? "bg-red-50 text-red-500"
-                                  : item.slots === "Closed"
-                                    ? "bg-gray-200 text-gray-500"
-                                    : "bg-green-50 text-green-600"
-                            }`}
-                          >
-                            {item.slots.split(" ")[0]} {item.slots.split(" ")[1] || ""}
-                          </span>
-                        </button>
-                      );
-                    })}
-                  </div>
+                  <label className="mb-2 block text-sm font-medium text-gray-700">
+                    Preferred Date
+                  </label>
+                  <input
+                    type="date"
+                    value={selectedDate || ""}
+                    onChange={(e) => setSelectedDate(e.target.value)}
+                    className="w-full rounded-md border border-gray-200 bg-gray-50 p-3 text-sm focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  />
                 </div>
 
                 <div>
-                  <p className="mb-3 text-sm text-gray-600">Available Times</p>
-                  <div className="flex flex-wrap gap-3">
-                    {times.map((item) => {
-                      const isSelected = selectedTime === item;
-                      return (
-                        <button
-                          key={item}
-                          type="button"
-                          onClick={() => setSelectedTime(item)}
-                          className={`rounded-md border px-4 py-2 text-sm transition-all ${
-                            isSelected
-                              ? "border-[#0000FF] bg-brand-blue text-white "
-                              : "border-gray-200 bg-white text-gray-700 hover:border-[#0000FF]"
-                          }`}
-                        >
-                          {item}
-                        </button>
-                      );
-                    })}
-                  </div>
+                  <label className="mb-2 block text-sm font-medium text-gray-700">
+                    Preferred Time
+                  </label>
+                  <input
+                    type="time"
+                    value={selectedTime || ""}
+                    onChange={(e) => setSelectedTime(e.target.value)}
+                    className="w-full rounded-md border border-gray-200 bg-gray-50 p-3 text-sm focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  />
                 </div>
               </div>
 
               <hr className="border-gray-100" />
 
-              <div 
-                className={`flex items-start gap-4 rounded-md border transition-all p-4 cursor-pointer ${isOnline ? 'border-purple-200 bg-purple-50/50' : 'border-blue-100 bg-blue-50/50'}`}
+              <div
+                className={`flex items-start gap-4 rounded-md border transition-all p-4 cursor-pointer ${isOnline ? "border-purple-200 bg-purple-50/50" : "border-blue-100 bg-blue-50/50"}`}
                 onClick={() => setIsOnline(!isOnline)}
               >
                 <div className="pt-0.5" onClick={(e) => e.stopPropagation()}>
@@ -321,9 +396,12 @@ const BookCounsellingPage: React.FC<BookCounsellingPageProps> = () => {
                   />
                 </div>
                 <div>
-                  <label className="cursor-pointer font-medium text-gray-900">Request Online Session</label>
+                  <label className="cursor-pointer font-medium text-gray-900">
+                    Request Online Session
+                  </label>
                   <p className="mt-1 text-xs text-gray-500">
-                    Conduct the counseling session via Google Meet/Zoom instead of in-person.
+                    Conduct the counseling session via Google Meet/Zoom instead
+                    of in-person.
                   </p>
                 </div>
               </div>
@@ -331,7 +409,9 @@ const BookCounsellingPage: React.FC<BookCounsellingPageProps> = () => {
               <hr className="border-gray-100" />
 
               <div className="space-y-5">
-                <h2 className="text-sm font-semibold uppercase tracking-wide text-gray-700">Student Details</h2>
+                <h2 className="text-sm font-semibold uppercase tracking-wide text-gray-700">
+                  Student Details
+                </h2>
 
                 <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
                   <div className="space-y-1">
@@ -359,7 +439,9 @@ const BookCounsellingPage: React.FC<BookCounsellingPageProps> = () => {
                       <input
                         type="tel"
                         value={studentPhone}
-                        onChange={(event) => setStudentPhone(event.target.value)}
+                        onChange={(event) =>
+                          setStudentPhone(event.target.value)
+                        }
                         placeholder="e.g. +977-98XXXXXXXX"
                         className="w-full rounded-md border border-gray-200 bg-gray-50 py-3 pl-10 pr-4 text-sm focus:outline-none focus:ring-2 focus:ring-[#0000FF] transition-all focus:bg-white"
                       />
@@ -367,13 +449,17 @@ const BookCounsellingPage: React.FC<BookCounsellingPageProps> = () => {
                   </div>
 
                   <div className="space-y-1 md:col-span-2">
-                    <label className="block text-sm font-medium text-gray-700">Email Address <span className="text-red-500">*</span></label>
+                    <label className="block text-sm font-medium text-gray-700">
+                      Email Address <span className="text-red-500">*</span>
+                    </label>
                     <div className="relative">
                       <i className="fa-regular fa-envelope absolute left-3 top-1/2 -translate-y-1/2 text-sm text-gray-400"></i>
                       <input
                         type="email"
                         value={studentEmail}
-                        onChange={(event) => setStudentEmail(event.target.value)}
+                        onChange={(event) =>
+                          setStudentEmail(event.target.value)
+                        }
                         placeholder="e.g. student@college.edu"
                         className="w-full rounded-md border border-gray-200 bg-gray-50 py-3 pl-10 pr-4 text-sm focus:outline-none focus:ring-2 focus:ring-[#0000FF] transition-all focus:bg-white"
                       />
@@ -381,13 +467,17 @@ const BookCounsellingPage: React.FC<BookCounsellingPageProps> = () => {
                   </div>
 
                   <div className="space-y-1 md:col-span-2">
-                    <label className="block text-sm font-medium text-gray-700">Additional Notes</label>
+                    <label className="block text-sm font-medium text-gray-700">
+                      Additional Notes
+                    </label>
                     <div className="relative">
                       <i className="fa-regular fa-file-lines absolute left-3 top-3 text-sm text-gray-400"></i>
                       <textarea
                         rows={3}
                         value={studentNotes}
-                        onChange={(event) => setStudentNotes(event.target.value)}
+                        onChange={(event) =>
+                          setStudentNotes(event.target.value)
+                        }
                         placeholder="Any specific notes or questions for the counselor? (Optional)"
                         className="w-full resize-none rounded-md border border-gray-200 bg-gray-50 py-3 pl-10 pr-4 text-sm focus:outline-none focus:ring-2 focus:ring-[#0000FF] transition-all focus:bg-white"
                       />
@@ -399,7 +489,7 @@ const BookCounsellingPage: React.FC<BookCounsellingPageProps> = () => {
           </div>
 
           <div className="sticky top-28 w-full space-y-6 lg:w-1/3">
-            <div className="overflow-hidden rounded-md border border-gray-100 bg-white ">
+            <div className="overflow-hidden rounded-md border border-gray-100 bg-white">
               <div className="border-b border-gray-100 bg-gray-50/50 p-5">
                 <h2 className="font-bold text-gray-900">Booking Details</h2>
               </div>
@@ -409,9 +499,15 @@ const BookCounsellingPage: React.FC<BookCounsellingPageProps> = () => {
                   <div className="flex items-start justify-between">
                     <div className="text-sm">
                       <p className="mb-0.5 text-gray-500">College</p>
-                      <p className="font-medium text-gray-800">{collegeInput || "Not selected"}</p>
+                      <p className="font-medium text-gray-800">
+                        {collegeInput || "Not selected"}
+                      </p>
                     </div>
-                    <button type="button" onClick={() => suggestionRef.current?.scrollIntoView({ behavior: 'smooth' })} className="text-xs font-medium text-[#0000FF] hover:underline">
+                    <button
+                      type="button"
+                      onClick={() => inputRef.current?.focus()}
+                      className="text-xs font-medium text-[#0000FF] hover:underline"
+                    >
                       Edit
                     </button>
                   </div>
@@ -419,7 +515,11 @@ const BookCounsellingPage: React.FC<BookCounsellingPageProps> = () => {
                   <div className="flex items-start justify-between">
                     <div className="text-sm">
                       <p className="mb-0.5 text-gray-500">Program & Course</p>
-                      <p className="font-medium text-gray-800">{summaryCourse}</p>
+                      <p className="font-medium text-gray-800">
+                        {program && course
+                          ? `${program} in ${course}`
+                          : course || "Not selected"}
+                      </p>
                     </div>
                   </div>
 
@@ -427,14 +527,12 @@ const BookCounsellingPage: React.FC<BookCounsellingPageProps> = () => {
                     <div className="text-sm">
                       <p className="mb-0.5 text-gray-500">Session Mode</p>
                       <span
-                        className={`mt-1 inline-flex items-center gap-1 rounded px-2 py-1 text-xs font-medium ${
-                          isOnline
-                            ? "bg-purple-100 text-purple-700"
-                            : "bg-green-100 text-green-700"
-                        }`}
+                        className={`mt-1 inline-flex items-center gap-1 rounded px-2 py-1 text-xs font-medium ${isOnline ? "bg-purple-100 text-purple-700" : "bg-green-100 text-green-700"}`}
                       >
-                        <i className={`fa-solid ${isOnline ? "fa-video" : "fa-circle-check"} text-[10px]`}></i>
-                        {isOnline ? "Online Session (Meet/Zoom)" : "In-Person Campus Visit"}
+                        <i
+                          className={`fa-solid ${isOnline ? "fa-video" : "fa-circle-check"} text-[10px]`}
+                        ></i>
+                        {isOnline ? "Online Session" : "In-Person Campus Visit"}
                       </span>
                     </div>
                   </div>
@@ -444,7 +542,11 @@ const BookCounsellingPage: React.FC<BookCounsellingPageProps> = () => {
                       <p className="mb-1 text-gray-500">Date & Time</p>
                       <div className="flex items-center gap-2 font-medium text-gray-800">
                         <i className="fa-regular fa-calendar text-[#0000FF]"></i>
-                        <span>{summaryDateTime}</span>
+                        <span>
+                          {selectedDate && selectedTime
+                            ? `${selectedDate} at ${selectedTime}`
+                            : selectedDate || "Select date & time"}
+                        </span>
                       </div>
                     </div>
                   </div>
@@ -452,10 +554,16 @@ const BookCounsellingPage: React.FC<BookCounsellingPageProps> = () => {
 
                 <div className="mt-4 border-t border-gray-100 pt-4">
                   <div className="mb-6 flex items-center justify-between">
-                    <span className="text-sm font-medium text-gray-600">Session Fee</span>
+                    <span className="text-sm font-medium text-gray-600">
+                      Session Fee
+                    </span>
                     <div className="flex items-center gap-1">
-                        <span className="text-[14px] text-gray-400 line-through">NPR 500</span>
-                        <span className="text-xl font-bold text-[#1dc05c]">Free</span>
+                      <span className="text-[14px] text-gray-400 line-through">
+                        NPR 500
+                      </span>
+                      <span className="text-xl font-bold text-[#1dc05c]">
+                        Free
+                      </span>
                     </div>
                   </div>
 
@@ -463,7 +571,7 @@ const BookCounsellingPage: React.FC<BookCounsellingPageProps> = () => {
                     type="button"
                     disabled={!isFormValid || isBooking || isConfirmed}
                     onClick={handleConfirmBooking}
-                    className={`flex w-full items-center justify-center gap-2 rounded-md px-4 py-3.5 font-medium text-white  transition-colors disabled:cursor-not-allowed disabled:opacity-50 ${
+                    className={`flex w-full items-center justify-center gap-2 rounded-md px-4 py-3.5 font-medium text-white transition-colors disabled:cursor-not-allowed disabled:opacity-50 ${
                       isConfirmed
                         ? "bg-green-600 hover:bg-green-700"
                         : "bg-brand-blue hover:bg-[#0000CC]"
@@ -471,13 +579,12 @@ const BookCounsellingPage: React.FC<BookCounsellingPageProps> = () => {
                   >
                     {isBooking ? (
                       <>
-                        <i className="fa-solid fa-spinner animate-spin"></i>
+                        <i className="fa-solid fa-spinner animate-spin"></i>{" "}
                         Booking...
                       </>
                     ) : isConfirmed ? (
                       <>
-                        <i className="fa-solid fa-check"></i>
-                        Booking Confirmed!
+                        <i className="fa-solid fa-check"></i> Booking Confirmed!
                       </>
                     ) : (
                       "Confirm Booking"
@@ -485,26 +592,29 @@ const BookCounsellingPage: React.FC<BookCounsellingPageProps> = () => {
                   </button>
 
                   {submitError ? (
-                    <p className="mt-2 text-center text-xs text-red-500 font-medium">{submitError}</p>
-                  ) : (
-                    !isFormValid && (
-                      <p className="mt-2 text-center text-xs text-gray-400 italic">
-                        Please complete all required fields.
-                      </p>
-                    )
-                  )}
+                    <p className="mt-2 text-center text-xs text-red-500 font-medium">
+                      {submitError}
+                    </p>
+                  ) : !isFormValid ? (
+                    <p className="mt-2 text-center text-xs text-gray-400 italic">
+                      Please complete all required fields.
+                    </p>
+                  ) : null}
                 </div>
               </div>
             </div>
 
-            <div className="flex items-start gap-4 rounded-md border border-gray-100 bg-white p-5 ">
+            <div className="flex items-start gap-4 rounded-md border border-gray-100 bg-white p-5">
               <div className="mt-1 flex-shrink-0 rounded-full bg-blue-50 p-2">
                 <i className="fa-solid fa-headset text-[#0000FF]"></i>
               </div>
               <div>
-                <h3 className="text-sm font-medium text-gray-900">We can help you</h3>
+                <h3 className="text-sm font-medium text-gray-900">
+                  We can help you
+                </h3>
                 <p className="mb-3 mt-1 text-xs leading-relaxed text-gray-500">
-                  Call us +977 1 456-7890 or chat with our student support team for guidance.
+                  Call us +977 1 456-7890 or chat with our student support team
+                  for guidance.
                 </p>
                 <button
                   type="button"

@@ -8,11 +8,20 @@ import {
   CounsellingSession,
 } from "@/services/institutionCounsellingApi";
 
+type HistFilter = "All" | "upcoming" | "ongoing" | "completed" | "cancelled";
+
+const statusStyle: Record<string, string> = {
+  upcoming: "bg-blue-100 text-blue-700",
+  ongoing: "bg-green-100 text-green-700",
+  completed: "bg-gray-100 text-gray-600",
+  cancelled: "bg-red-100 text-red-700",
+};
+
 const CounsellingHistoryPage = () => {
   const [sessions, setSessions] = useState<CounsellingSession[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
-  const [filterStatus, setFilterStatus] = useState("All");
+  const [filterStatus, setFilterStatus] = useState<HistFilter>("All");
   const [deleteTarget, setDeleteTarget] = useState<number | null>(null);
 
   const loadSessions = () => {
@@ -45,7 +54,8 @@ const CounsellingHistoryPage = () => {
   };
 
   const filtered = sessions.filter((s) => {
-    if (filterStatus !== "All" && s.status !== filterStatus) return false;
+    const actual = s.actual_status || "upcoming";
+    if (filterStatus !== "All" && actual !== filterStatus) return false;
     if (search) {
       const q = search.toLowerCase();
       if (!s.title.toLowerCase().includes(q)) return false;
@@ -84,11 +94,12 @@ const CounsellingHistoryPage = () => {
           </div>
           <select
             value={filterStatus}
-            onChange={(e) => setFilterStatus(e.target.value)}
+            onChange={(e) => setFilterStatus(e.target.value as HistFilter)}
             className="px-4 py-2 border border-gray-300 rounded-lg text-sm focus:border-blue-600 outline-none"
           >
-            <option value="All">All Status</option>
-            <option value="scheduled">Scheduled</option>
+            <option value="All">All Sessions</option>
+            <option value="upcoming">Upcoming</option>
+            <option value="ongoing">Ongoing</option>
             <option value="completed">Completed</option>
             <option value="cancelled">Cancelled</option>
           </select>
@@ -125,17 +136,9 @@ const CounsellingHistoryPage = () => {
                 </div>
                 <div className="flex items-center gap-2">
                   <span
-                    className={`px-2 py-1 rounded text-xs font-medium ${
-                      s.status === "completed"
-                        ? "bg-green-100 text-green-700"
-                        : s.status === "scheduled"
-                          ? "bg-blue-100 text-blue-700"
-                          : s.status === "cancelled"
-                            ? "bg-red-100 text-red-700"
-                            : "bg-gray-100 text-gray-700"
-                    }`}
+                    className={`px-2 py-1 rounded text-xs font-medium ${statusStyle[s.actual_status || "upcoming"] || "bg-gray-100 text-gray-700"}`}
                   >
-                    {s.status}
+                    {s.actual_status || "upcoming"}
                   </span>
                   <button
                     onClick={() => setDeleteTarget(s.id)}

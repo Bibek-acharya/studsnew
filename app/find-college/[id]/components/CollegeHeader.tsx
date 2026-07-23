@@ -4,6 +4,7 @@ import React from "react";
 import { BadgeCheckIcon, MessageSquarePlus } from "lucide-react";
 import { getImageUrl } from "@/services/api";
 import { isCollegeVerified } from "../../types";
+import { useRouter } from "next/navigation";
 
 interface CollegeHeaderProps {
   name: string;
@@ -49,6 +50,7 @@ const CollegeHeader: React.FC<CollegeHeaderProps> = ({
   setIsClaimModalOpen,
   setIsCounsellingModalOpen,
 }) => {
+  const router = useRouter();
   return (
     <>
       <div
@@ -60,7 +62,11 @@ const CollegeHeader: React.FC<CollegeHeaderProps> = ({
         <div className="absolute bottom-10 right-4 z-20 md:bottom-6 md:right-6">
           {isVerified ? (
             <button
-              onClick={() => setIsCounsellingModalOpen(true)}
+              onClick={() =>
+                router.push(
+                  `/counselling?collegeName=${encodeURIComponent(name)}&collegeId=${college?.id || ""}`,
+                )
+              }
               className="flex items-center gap-2 rounded-md bg-blue-200 text-blue-800 cursor-pointer px-4 py-2 text-xs font-bold transition-all duration-300 md:bg-black/60 md:text-white md:px-6 md:py-3 md:text-base"
             >
               <MessageSquarePlus className="w-4 h-4 md:w-5 md:h-5" />
