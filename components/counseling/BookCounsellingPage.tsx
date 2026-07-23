@@ -15,6 +15,18 @@ interface BookCounsellingPageProps {
   onNavigate?: (view: any, data?: any) => void;
 }
 
+interface CounsellingSession {
+  id: number;
+  title: string;
+  description: string;
+  scheduled_at: string;
+  duration: number;
+  max_seats: number;
+  booked_seats: number;
+  available_seats: number;
+  status: string;
+}
+
 const BookCounsellingPage: React.FC<BookCounsellingPageProps> = () => {
   const { isAuthenticated } = useAuth();
   const searchParams = useSearchParams();
@@ -28,10 +40,14 @@ const BookCounsellingPage: React.FC<BookCounsellingPageProps> = () => {
   const [collegesLoading, setCollegesLoading] = useState(false);
   const [highlightedIdx, setHighlightedIdx] = useState(-1);
 
+  const [sessions, setSessions] = useState<CounsellingSession[]>([]);
+  const [sessionsLoading, setSessionsLoading] = useState(false);
+  const [selectedDate, setSelectedDate] = useState<string | null>(null);
+  const [selectedSession, setSelectedSession] =
+    useState<CounsellingSession | null>(null);
+
   const [program, setProgram] = useState("");
   const [course, setCourse] = useState("");
-  const [selectedDate, setSelectedDate] = useState<string | null>(null);
-  const [selectedTime, setSelectedTime] = useState<string | null>(null);
   const [isOnline, setIsOnline] = useState(false);
 
   const [studentName, setStudentName] = useState("");
@@ -49,15 +65,31 @@ const BookCounsellingPage: React.FC<BookCounsellingPageProps> = () => {
     undefined,
   );
 
-  // Pre-fill college from URL params
+  // Pre-fill college from URL params and load sessions
   useEffect(() => {
     const name = searchParams.get("collegeName");
     const id = searchParams.get("collegeId");
     if (name) {
       setCollegeInput(name);
-      if (id) setSelectedCollegeId(Number(id));
+      if (id) {
+        const parsed = Number(id);
+        setSelectedCollegeId(parsed);
+        fetchSessions(parsed);
+      }
     }
   }, [searchParams]);
+
+  const fetchSessions = async (institutionId: number) => {
+    setSessionsLoading(true);
+    try {
+      const res = await apiService.getPublicCounsellingSessions(institutionId);
+      const data = res?.data || res || [];
+      setSessions(Array.isArray(data) ? data : []);
+    } catch {
+      setSessions([]);
+    }
+    setSessionsLoading(false);
+  };
 
   // Fetch colleges with debounce
   const fetchColleges = useCallback(async (query: string) => {
@@ -72,8 +104,7 @@ const BookCounsellingPage: React.FC<BookCounsellingPageProps> = () => {
         limit: 10,
         page: 1,
       });
-      const list = res?.data?.colleges || [];
-      setColleges(list);
+      setColleges(res?.data?.colleges || []);
     } catch {
       setColleges([]);
     }
@@ -83,6 +114,9 @@ const BookCounsellingPage: React.FC<BookCounsellingPageProps> = () => {
   const handleInputChange = (value: string) => {
     setCollegeInput(value);
     setSelectedCollegeId(null);
+    setSessions([]);
+    setSelectedDate(null);
+    setSelectedSession(null);
     setShowSuggestions(true);
     setHighlightedIdx(-1);
     if (debounceRef.current) clearTimeout(debounceRef.current);
@@ -94,11 +128,11 @@ const BookCounsellingPage: React.FC<BookCounsellingPageProps> = () => {
     setSelectedCollegeId(college.id);
     setShowSuggestions(false);
     setHighlightedIdx(-1);
+    fetchSessions(college.id);
   };
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
     if (!showSuggestions || colleges.length === 0) return;
-
     switch (e.key) {
       case "ArrowDown":
         e.preventDefault();
@@ -114,9 +148,8 @@ const BookCounsellingPage: React.FC<BookCounsellingPageProps> = () => {
         break;
       case "Enter":
         e.preventDefault();
-        if (highlightedIdx >= 0 && highlightedIdx < colleges.length) {
+        if (highlightedIdx >= 0 && highlightedIdx < colleges.length)
           selectCollege(colleges[highlightedIdx]);
-        }
         break;
       case "Escape":
         setShowSuggestions(false);
@@ -125,7 +158,6 @@ const BookCounsellingPage: React.FC<BookCounsellingPageProps> = () => {
     }
   };
 
-  // Close suggestions on outside click
   useEffect(() => {
     const handleOutside = (event: MouseEvent) => {
       if (
@@ -141,23 +173,70 @@ const BookCounsellingPage: React.FC<BookCounsellingPageProps> = () => {
     return () => document.removeEventListener("mousedown", handleOutside);
   }, []);
 
-  // Cleanup debounce
   useEffect(() => {
     return () => {
       if (debounceRef.current) clearTimeout(debounceRef.current);
     };
   }, []);
 
-  const isFormValid =
-    !!collegeInput &&
-    !!program &&
-    !!course &&
-    !!selectedDate &&
-    !!selectedTime &&
-    !!studentName.trim() &&
-    !!studentEmail.trim() &&
-    !!studentPhone.trim() &&
-    studentPhone.trim().length > 6;
+  // Sessions grouped by date
+  const groupedByDate = useMemo(() => {
+    const groups: Record<string, CounsellingSession[]> = {};
+    sessions.forEach((session) => {
+      const d = new Date(session.scheduled_at);
+      const key = d.toLocaleDateString("en-US", {
+        weekday: "short",
+        year: "numeric",
+        month: "short",
+        day: "numeric",
+      });
+      if (!groups[key]) groups[key] = [];
+      groups[key].push(session);
+    });
+    return groups;
+  }, [sessions]);
+
+  const dates = useMemo(
+    () => Object.keys(groupedByDate).sort(),
+    [groupedByDate],
+  );
+
+  const filteredSessions = useMemo(() => {
+    if (!selectedDate) return [];
+    return groupedByDate[selectedDate] || [];
+  }, [groupedByDate, selectedDate]);
+
+  const formatTime = (scheduledAt: string) => {
+    const d = new Date(scheduledAt);
+    return d.toLocaleTimeString("en-US", {
+      hour: "2-digit",
+      minute: "2-digit",
+    });
+  };
+
+  const hasInstitutionSessions = selectedCollegeId && sessions.length > 0;
+  const showFreeForm = !selectedCollegeId;
+  const noActiveSessions =
+    selectedCollegeId !== null && !sessionsLoading && sessions.length === 0;
+
+  const isFormValid = hasInstitutionSessions
+    ? !!collegeInput &&
+      !!selectedSession &&
+      !!studentName.trim() &&
+      !!studentEmail.trim() &&
+      !!studentPhone.trim() &&
+      studentPhone.trim().length > 6
+    : showFreeForm
+      ? !!collegeInput &&
+        !!program &&
+        !!course &&
+        !!selectedDate &&
+        !!selectedSession &&
+        !!studentName.trim() &&
+        !!studentEmail.trim() &&
+        !!studentPhone.trim() &&
+        studentPhone.trim().length > 6
+      : false;
 
   const handleConfirmBooking = async () => {
     if (!isFormValid || isBooking) return;
@@ -170,22 +249,34 @@ const BookCounsellingPage: React.FC<BookCounsellingPageProps> = () => {
     setIsBooking(true);
 
     try {
-      await apiService.createCounsellingBooking("", {
-        college: collegeInput,
-        program_level: program,
-        interested_course: course,
-        session_mode: isOnline ? "online" : "in_person",
-        session_date: selectedDate || "",
-        session_time: selectedTime || "",
-        student_name: studentName,
-        student_phone: studentPhone,
-        student_email: studentEmail,
-        student_notes: studentNotes,
-      });
+      if (hasInstitutionSessions && selectedSession) {
+        await apiService.createPublicCounsellingBooking({
+          session_id: selectedSession.id,
+          program_level: program || "Not specified",
+          interested_course: course || "Not specified",
+          session_mode: isOnline ? "online" : "in_person",
+          student_name: studentName,
+          student_phone: studentPhone,
+          student_email: studentEmail,
+          student_notes: studentNotes,
+        });
+      } else {
+        await apiService.createCounsellingBooking("", {
+          college: collegeInput,
+          program_level: program,
+          interested_course: course,
+          session_mode: isOnline ? "online" : "in_person",
+          session_date: selectedDate || "",
+          session_time: selectedSession?.scheduled_at || "",
+          student_name: studentName,
+          student_phone: studentPhone,
+          student_email: studentEmail,
+          student_notes: studentNotes,
+        });
+      }
 
       setIsBooking(false);
       setIsConfirmed(true);
-
       setTimeout(() => {
         setIsConfirmed(false);
         window.alert(
@@ -218,14 +309,14 @@ const BookCounsellingPage: React.FC<BookCounsellingPageProps> = () => {
             </div>
 
             <div className="space-y-8 p-6">
+              {/* College Select */}
               <div className="space-y-5">
                 <h2 className="text-sm font-semibold uppercase tracking-wide text-gray-700">
-                  Academic Details
+                  Select College
                 </h2>
-
                 <div className="relative">
                   <label className="mb-1 block text-sm font-medium text-gray-700">
-                    Select College <span className="text-red-500">*</span>
+                    College <span className="text-red-500">*</span>
                   </label>
                   <div className="relative">
                     <i className="fa-solid fa-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-sm text-gray-400"></i>
@@ -246,7 +337,6 @@ const BookCounsellingPage: React.FC<BookCounsellingPageProps> = () => {
                       <i className="fa-solid fa-spinner animate-spin absolute right-3 top-1/2 -translate-y-1/2 text-sm text-gray-400"></i>
                     )}
                   </div>
-
                   {showSuggestions && (
                     <div
                       ref={suggestionRef}
@@ -291,98 +381,231 @@ const BookCounsellingPage: React.FC<BookCounsellingPageProps> = () => {
                     </div>
                   )}
                 </div>
-
-                <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-                  <div className="relative">
-                    <label className="mb-1 block text-sm font-medium text-gray-700">
-                      Program Level <span className="text-red-500">*</span>
-                    </label>
-                    <select
-                      value={program}
-                      onChange={(event) => setProgram(event.target.value)}
-                      className="w-full appearance-none rounded-md border border-gray-200 bg-gray-50 p-3 text-sm focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    >
-                      <option value="" disabled>
-                        Select Program
-                      </option>
-                      <option value="Undergraduate">
-                        Undergraduate (Bachelors)
-                      </option>
-                      <option value="Postgraduate">
-                        Postgraduate (Masters)
-                      </option>
-                      <option value="Diploma">Diploma / Certificate</option>
-                    </select>
-                    <i className="fa-solid fa-chevron-down absolute right-3 bottom-3.5 text-gray-400 pointer-events-none text-[12px]"></i>
-                  </div>
-
-                  <div className="relative">
-                    <label className="mb-1 block text-sm font-medium text-gray-700">
-                      Interested Course <span className="text-red-500">*</span>
-                    </label>
-                    <select
-                      value={course}
-                      onChange={(event) => setCourse(event.target.value)}
-                      className="w-full appearance-none rounded-md border border-gray-200 bg-gray-50 p-3 text-sm focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    >
-                      <option value="" disabled>
-                        Select Course
-                      </option>
-                      <option value="Computer Science & IT">
-                        Computer Science & IT
-                      </option>
-                      <option value="Business Administration">
-                        Business Administration
-                      </option>
-                      <option value="Engineering">Engineering</option>
-                      <option value="Arts & Humanities">
-                        Arts & Humanities
-                      </option>
-                      <option value="Medicine & Health">
-                        Medicine & Health
-                      </option>
-                    </select>
-                    <i className="fa-solid fa-chevron-down absolute right-3 bottom-3.5 text-gray-400 pointer-events-none text-[12px]"></i>
-                  </div>
-                </div>
               </div>
 
-              <hr className="border-gray-100" />
-
-              <div className="space-y-5">
-                <div className="flex items-end justify-between">
+              {/* Institution Sessions */}
+              {selectedCollegeId && (
+                <div className="space-y-5">
+                  <hr className="border-gray-100" />
                   <h2 className="text-sm font-semibold uppercase tracking-wide text-gray-700">
-                    Date & Time <span className="text-red-500">*</span>
+                    Available Sessions <span className="text-red-500">*</span>
                   </h2>
-                </div>
 
-                <div>
-                  <label className="mb-2 block text-sm font-medium text-gray-700">
-                    Preferred Date
-                  </label>
-                  <input
-                    type="date"
-                    value={selectedDate || ""}
-                    onChange={(e) => setSelectedDate(e.target.value)}
-                    className="w-full rounded-md border border-gray-200 bg-gray-50 p-3 text-sm focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  />
-                </div>
+                  {sessionsLoading ? (
+                    <div className="flex items-center justify-center py-8">
+                      <i className="fa-solid fa-spinner animate-spin text-gray-400 text-lg"></i>
+                    </div>
+                  ) : sessions.length === 0 ? (
+                    <p className="text-sm text-gray-400 py-4">
+                      No counselling sessions available from this college. Fill
+                      the form below to request one.
+                    </p>
+                  ) : (
+                    <>
+                      {/* Date Selection */}
+                      <div>
+                        <label className="text-sm font-medium text-gray-700 mb-2 block">
+                          Select Date
+                        </label>
+                        <div className="flex flex-wrap gap-2">
+                          {dates.map((date) => (
+                            <button
+                              key={date}
+                              onClick={() => {
+                                setSelectedDate(date);
+                                setSelectedSession(null);
+                              }}
+                              className={`px-4 py-2 rounded-lg text-sm font-medium border transition ${
+                                selectedDate === date
+                                  ? "bg-brand-blue text-white border-brand-blue"
+                                  : "bg-white text-gray-700 border-gray-200 hover:border-brand-blue"
+                              }`}
+                            >
+                              {date}
+                            </button>
+                          ))}
+                        </div>
+                      </div>
 
-                <div>
-                  <label className="mb-2 block text-sm font-medium text-gray-700">
-                    Preferred Time
-                  </label>
-                  <input
-                    type="time"
-                    value={selectedTime || ""}
-                    onChange={(e) => setSelectedTime(e.target.value)}
-                    className="w-full rounded-md border border-gray-200 bg-gray-50 p-3 text-sm focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  />
+                      {/* Time Slot Selection */}
+                      {selectedDate && (
+                        <div>
+                          <label className="text-sm font-medium text-gray-700 mb-2 block">
+                            Select Time Slot
+                          </label>
+                          <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+                            {filteredSessions.map((session) => (
+                              <button
+                                key={session.id}
+                                onClick={() => setSelectedSession(session)}
+                                disabled={session.available_seats <= 0}
+                                className={`flex flex-col items-center p-3 rounded-lg border text-sm transition ${
+                                  selectedSession?.id === session.id
+                                    ? "bg-brand-blue text-white border-brand-blue"
+                                    : session.available_seats > 0
+                                      ? "bg-white text-gray-700 border-gray-200 hover:border-brand-blue"
+                                      : "bg-gray-50 text-gray-400 border-gray-100 cursor-not-allowed"
+                                }`}
+                              >
+                                <span className="font-semibold">
+                                  {formatTime(session.scheduled_at)}
+                                </span>
+                                <span className="text-xs mt-0.5 opacity-75">
+                                  {session.available_seats > 0
+                                    ? `${session.available_seats} seat${session.available_seats > 1 ? "s" : ""} left`
+                                    : "Full"}
+                                </span>
+                              </button>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+                    </>
+                  )}
                 </div>
-              </div>
+              )}
+
+              {/* Free-form booking fields (shown when no institution sessions) */}
+              {!hasInstitutionSessions && (
+                <>
+                  <hr className="border-gray-100" />
+                  <div className="space-y-5">
+                    <h2 className="text-sm font-semibold uppercase tracking-wide text-gray-700">
+                      Academic Details
+                    </h2>
+                    <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+                      <div className="relative">
+                        <label className="mb-1 block text-sm font-medium text-gray-700">
+                          Program Level <span className="text-red-500">*</span>
+                        </label>
+                        <select
+                          value={program}
+                          onChange={(e) => setProgram(e.target.value)}
+                          className="w-full appearance-none rounded-md border border-gray-200 bg-gray-50 p-3 text-sm focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        >
+                          <option value="" disabled>
+                            Select Program
+                          </option>
+                          <option value="Undergraduate">
+                            Undergraduate (Bachelors)
+                          </option>
+                          <option value="Postgraduate">
+                            Postgraduate (Masters)
+                          </option>
+                          <option value="Diploma">Diploma / Certificate</option>
+                        </select>
+                        <i className="fa-solid fa-chevron-down absolute right-3 bottom-3.5 text-gray-400 pointer-events-none text-[12px]"></i>
+                      </div>
+                      <div className="relative">
+                        <label className="mb-1 block text-sm font-medium text-gray-700">
+                          Interested Course{" "}
+                          <span className="text-red-500">*</span>
+                        </label>
+                        <select
+                          value={course}
+                          onChange={(e) => setCourse(e.target.value)}
+                          className="w-full appearance-none rounded-md border border-gray-200 bg-gray-50 p-3 text-sm focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        >
+                          <option value="" disabled>
+                            Select Course
+                          </option>
+                          <option value="Computer Science & IT">
+                            Computer Science & IT
+                          </option>
+                          <option value="Business Administration">
+                            Business Administration
+                          </option>
+                          <option value="Engineering">Engineering</option>
+                          <option value="Arts & Humanities">
+                            Arts & Humanities
+                          </option>
+                          <option value="Medicine & Health">
+                            Medicine & Health
+                          </option>
+                        </select>
+                        <i className="fa-solid fa-chevron-down absolute right-3 bottom-3.5 text-gray-400 pointer-events-none text-[12px]"></i>
+                      </div>
+                    </div>
+                    <div>
+                      <label className="mb-2 block text-sm font-medium text-gray-700">
+                        Preferred Date
+                      </label>
+                      <input
+                        type="date"
+                        value={selectedDate || ""}
+                        onChange={(e) => setSelectedDate(e.target.value)}
+                        className="w-full rounded-md border border-gray-200 bg-gray-50 p-3 text-sm focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      />
+                    </div>
+                    <div>
+                      <label className="mb-2 block text-sm font-medium text-gray-700">
+                        Preferred Time
+                      </label>
+                      <input
+                        type="time"
+                        value={
+                          selectedSession?.scheduled_at
+                            ? formatTime(selectedSession.scheduled_at)
+                            : ""
+                        }
+                        onChange={(e) =>
+                          setSelectedSession({
+                            id: 0,
+                            scheduled_at: e.target.value,
+                          } as any)
+                        }
+                        className="w-full rounded-md border border-gray-200 bg-gray-50 p-3 text-sm focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      />
+                    </div>
+                  </div>
+                </>
+              )}
+
+              {/* When institution sessions available, show program/course after session selection */}
+              {hasInstitutionSessions && selectedSession && (
+                <>
+                  <hr className="border-gray-100" />
+                  <div className="space-y-5">
+                    <h2 className="text-sm font-semibold uppercase tracking-wide text-gray-700">
+                      Your Details
+                    </h2>
+                    <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+                      <div className="relative">
+                        <label className="mb-1 block text-sm font-medium text-gray-700">
+                          Program Level
+                        </label>
+                        <select
+                          value={program}
+                          onChange={(e) => setProgram(e.target.value)}
+                          className="w-full appearance-none rounded-md border border-gray-200 bg-gray-50 p-3 text-sm focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        >
+                          <option value="">Select</option>
+                          <option value="+2">+2</option>
+                          <option value="Bachelor">Bachelor</option>
+                          <option value="Master">Master</option>
+                          <option value="PhD">PhD</option>
+                        </select>
+                      </div>
+                      <div className="relative">
+                        <label className="mb-1 block text-sm font-medium text-gray-700">
+                          Interested Course
+                        </label>
+                        <input
+                          type="text"
+                          value={course}
+                          onChange={(e) => setCourse(e.target.value)}
+                          placeholder="e.g. Computer Science"
+                          className="w-full rounded-md border border-gray-200 bg-gray-50 p-3 text-sm focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        />
+                      </div>
+                    </div>
+                  </div>
+                </>
+              )}
 
               <hr className="border-gray-100" />
 
+              {/* Session Mode Toggle */}
               <div
                 className={`flex items-start gap-4 rounded-md border transition-all p-4 cursor-pointer ${isOnline ? "border-purple-200 bg-purple-50/50" : "border-blue-100 bg-blue-50/50"}`}
                 onClick={() => setIsOnline(!isOnline)}
@@ -391,7 +614,7 @@ const BookCounsellingPage: React.FC<BookCounsellingPageProps> = () => {
                   <input
                     type="checkbox"
                     checked={isOnline}
-                    onChange={(event) => setIsOnline(event.target.checked)}
+                    onChange={(e) => setIsOnline(e.target.checked)}
                     className="h-5 w-5 cursor-pointer rounded border-gray-300 text-[#0000FF] focus:ring-[#0000FF]"
                   />
                 </div>
@@ -408,11 +631,11 @@ const BookCounsellingPage: React.FC<BookCounsellingPageProps> = () => {
 
               <hr className="border-gray-100" />
 
+              {/* Student Details */}
               <div className="space-y-5">
                 <h2 className="text-sm font-semibold uppercase tracking-wide text-gray-700">
                   Student Details
                 </h2>
-
                 <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
                   <div className="space-y-1">
                     <label className="block text-sm font-medium text-gray-700">
@@ -423,13 +646,12 @@ const BookCounsellingPage: React.FC<BookCounsellingPageProps> = () => {
                       <input
                         type="text"
                         value={studentName}
-                        onChange={(event) => setStudentName(event.target.value)}
+                        onChange={(e) => setStudentName(e.target.value)}
                         placeholder="e.g. John Doe"
                         className="w-full rounded-md border border-gray-200 bg-gray-50 py-3 pl-10 pr-4 text-sm focus:outline-none focus:ring-2 focus:ring-[#0000FF] transition-all focus:bg-white"
                       />
                     </div>
                   </div>
-
                   <div className="space-y-1">
                     <label className="block text-sm font-medium text-gray-700">
                       Mobile Number <span className="text-red-500">*</span>
@@ -439,15 +661,12 @@ const BookCounsellingPage: React.FC<BookCounsellingPageProps> = () => {
                       <input
                         type="tel"
                         value={studentPhone}
-                        onChange={(event) =>
-                          setStudentPhone(event.target.value)
-                        }
+                        onChange={(e) => setStudentPhone(e.target.value)}
                         placeholder="e.g. +977-98XXXXXXXX"
                         className="w-full rounded-md border border-gray-200 bg-gray-50 py-3 pl-10 pr-4 text-sm focus:outline-none focus:ring-2 focus:ring-[#0000FF] transition-all focus:bg-white"
                       />
                     </div>
                   </div>
-
                   <div className="space-y-1 md:col-span-2">
                     <label className="block text-sm font-medium text-gray-700">
                       Email Address <span className="text-red-500">*</span>
@@ -457,15 +676,12 @@ const BookCounsellingPage: React.FC<BookCounsellingPageProps> = () => {
                       <input
                         type="email"
                         value={studentEmail}
-                        onChange={(event) =>
-                          setStudentEmail(event.target.value)
-                        }
+                        onChange={(e) => setStudentEmail(e.target.value)}
                         placeholder="e.g. student@college.edu"
                         className="w-full rounded-md border border-gray-200 bg-gray-50 py-3 pl-10 pr-4 text-sm focus:outline-none focus:ring-2 focus:ring-[#0000FF] transition-all focus:bg-white"
                       />
                     </div>
                   </div>
-
                   <div className="space-y-1 md:col-span-2">
                     <label className="block text-sm font-medium text-gray-700">
                       Additional Notes
@@ -475,9 +691,7 @@ const BookCounsellingPage: React.FC<BookCounsellingPageProps> = () => {
                       <textarea
                         rows={3}
                         value={studentNotes}
-                        onChange={(event) =>
-                          setStudentNotes(event.target.value)
-                        }
+                        onChange={(e) => setStudentNotes(e.target.value)}
                         placeholder="Any specific notes or questions for the counselor? (Optional)"
                         className="w-full resize-none rounded-md border border-gray-200 bg-gray-50 py-3 pl-10 pr-4 text-sm focus:outline-none focus:ring-2 focus:ring-[#0000FF] transition-all focus:bg-white"
                       />
@@ -488,12 +702,12 @@ const BookCounsellingPage: React.FC<BookCounsellingPageProps> = () => {
             </div>
           </div>
 
+          {/* Summary Sidebar */}
           <div className="sticky top-28 w-full space-y-6 lg:w-1/3">
             <div className="overflow-hidden rounded-md border border-gray-100 bg-white">
               <div className="border-b border-gray-100 bg-gray-50/50 p-5">
                 <h2 className="font-bold text-gray-900">Booking Details</h2>
               </div>
-
               <div className="space-y-4 p-5">
                 <div className="space-y-3">
                   <div className="flex items-start justify-between">
@@ -511,18 +725,17 @@ const BookCounsellingPage: React.FC<BookCounsellingPageProps> = () => {
                       Edit
                     </button>
                   </div>
-
-                  <div className="flex items-start justify-between">
-                    <div className="text-sm">
-                      <p className="mb-0.5 text-gray-500">Program & Course</p>
-                      <p className="font-medium text-gray-800">
-                        {program && course
-                          ? `${program} in ${course}`
-                          : course || "Not selected"}
-                      </p>
+                  {selectedSession && hasInstitutionSessions && (
+                    <div className="flex items-start justify-between">
+                      <div className="text-sm">
+                        <p className="mb-0.5 text-gray-500">Session</p>
+                        <p className="font-medium text-gray-800">
+                          {selectedSession.title} &middot;{" "}
+                          {formatTime(selectedSession.scheduled_at)}
+                        </p>
+                      </div>
                     </div>
-                  </div>
-
+                  )}
                   <div className="flex items-start justify-between">
                     <div className="text-sm">
                       <p className="mb-0.5 text-gray-500">Session Mode</p>
@@ -532,26 +745,11 @@ const BookCounsellingPage: React.FC<BookCounsellingPageProps> = () => {
                         <i
                           className={`fa-solid ${isOnline ? "fa-video" : "fa-circle-check"} text-[10px]`}
                         ></i>
-                        {isOnline ? "Online Session" : "In-Person Campus Visit"}
+                        {isOnline ? "Online Session" : "In-Person"}
                       </span>
                     </div>
                   </div>
-
-                  <div className="flex items-start justify-between border-t border-gray-100 pt-2">
-                    <div className="text-sm">
-                      <p className="mb-1 text-gray-500">Date & Time</p>
-                      <div className="flex items-center gap-2 font-medium text-gray-800">
-                        <i className="fa-regular fa-calendar text-[#0000FF]"></i>
-                        <span>
-                          {selectedDate && selectedTime
-                            ? `${selectedDate} at ${selectedTime}`
-                            : selectedDate || "Select date & time"}
-                        </span>
-                      </div>
-                    </div>
-                  </div>
                 </div>
-
                 <div className="mt-4 border-t border-gray-100 pt-4">
                   <div className="mb-6 flex items-center justify-between">
                     <span className="text-sm font-medium text-gray-600">
@@ -566,7 +764,6 @@ const BookCounsellingPage: React.FC<BookCounsellingPageProps> = () => {
                       </span>
                     </div>
                   </div>
-
                   <button
                     type="button"
                     disabled={!isFormValid || isBooking || isConfirmed}
@@ -590,7 +787,6 @@ const BookCounsellingPage: React.FC<BookCounsellingPageProps> = () => {
                       "Confirm Booking"
                     )}
                   </button>
-
                   {submitError ? (
                     <p className="mt-2 text-center text-xs text-red-500 font-medium">
                       {submitError}
