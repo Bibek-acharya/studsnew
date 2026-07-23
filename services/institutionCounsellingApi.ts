@@ -41,6 +41,7 @@ export interface CounsellingSession {
   max_seats: number;
   booked_seats: number;
   status: string;
+  actual_status?: string;
   created_at: string;
   updated_at: string;
 }
@@ -57,14 +58,24 @@ export interface CounsellingBooking {
   program_level: string;
   interested_course: string;
   session_mode: string;
+  meeting_link?: string;
+  meeting_platform?: string;
   created_at: string;
   updated_at: string;
   session?: CounsellingSession;
 }
 
 export const institutionCounsellingApi = {
-  async getSessions(): Promise<CounsellingSession[]> {
-    return apiCall("/api/v1/institution/counselling/sessions");
+  async getSessions(
+    page = 1,
+    limit = 50,
+  ): Promise<{
+    sessions: CounsellingSession[];
+    meta: { total: number; page: number; limit: number };
+  }> {
+    return apiCall(
+      `/api/v1/institution/counselling/sessions?page=${page}&limit=${limit}`,
+    );
   },
   async createSession(data: {
     title: string;
@@ -83,16 +94,46 @@ export const institutionCounsellingApi = {
       method: "DELETE",
     });
   },
-  async getBookings(): Promise<CounsellingBooking[]> {
-    return apiCall("/api/v1/institution/counselling/bookings");
+  async updateSession(
+    id: number,
+    data: {
+      title?: string;
+      description?: string;
+      scheduled_at?: string;
+      duration?: number;
+      max_seats?: number;
+      status?: string;
+    },
+  ): Promise<CounsellingSession> {
+    return apiCall(`/api/v1/institution/counselling/sessions/${id}`, {
+      method: "PUT",
+      body: JSON.stringify(data),
+    });
+  },
+  async getBookings(
+    page = 1,
+    limit = 20,
+  ): Promise<{
+    bookings: CounsellingBooking[];
+    meta: { total: number; page: number; limit: number };
+  }> {
+    return apiCall(
+      `/api/v1/institution/counselling/bookings?page=${page}&limit=${limit}`,
+    );
   },
   async updateBookingStatus(
     id: number,
     status: string,
+    meetingLink?: string,
+    meetingPlatform?: string,
   ): Promise<CounsellingBooking> {
     return apiCall(`/api/v1/institution/counselling/bookings/${id}/status`, {
       method: "PUT",
-      body: JSON.stringify({ status }),
+      body: JSON.stringify({
+        status,
+        meeting_link: meetingLink,
+        meeting_platform: meetingPlatform,
+      }),
     });
   },
 };

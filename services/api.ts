@@ -425,6 +425,7 @@ export interface CounsellingSessionItem {
   max_seats: number;
   booked_seats: number;
   status: string;
+  actual_status?: string;
 }
 
 export interface InstitutionCounsellingBookingItem {
@@ -441,16 +442,30 @@ export interface InstitutionCounsellingBookingItem {
   program_level?: string;
   interested_course?: string;
   session_mode?: string;
+  meeting_link?: string;
+  meeting_platform?: string;
   session?: CounsellingSessionItem;
 }
 
+export interface PaginationMeta {
+  total: number;
+  page: number;
+  limit: number;
+}
+
 export interface InstitutionCounsellingSessionsResponse {
-  data: CounsellingSessionItem[];
+  data: {
+    sessions: CounsellingSessionItem[];
+    meta: PaginationMeta;
+  };
   message: string;
 }
 
 export interface InstitutionCounsellingBookingsResponse {
-  data: InstitutionCounsellingBookingItem[];
+  data: {
+    bookings: InstitutionCounsellingBookingItem[];
+    meta: PaginationMeta;
+  };
   message: string;
 }
 
@@ -1404,28 +1419,57 @@ export const apiService = {
     );
   },
 
-  async getInstitutionCounsellingSessions(): Promise<InstitutionCounsellingSessionsResponse> {
+  async getInstitutionCounsellingSessions(
+    page = 1,
+    limit = 50,
+  ): Promise<InstitutionCounsellingSessionsResponse> {
     return apiRequest<InstitutionCounsellingSessionsResponse>(
-      "/api/v1/institution/counselling/sessions",
+      `/api/v1/institution/counselling/sessions?page=${page}&limit=${limit}`,
     );
   },
 
-  async getInstitutionCounsellingBookings(): Promise<InstitutionCounsellingBookingsResponse> {
+  async getInstitutionCounsellingBookings(
+    page = 1,
+    limit = 20,
+  ): Promise<InstitutionCounsellingBookingsResponse> {
     return apiRequest<InstitutionCounsellingBookingsResponse>(
-      "/api/v1/institution/counselling/bookings",
+      `/api/v1/institution/counselling/bookings?page=${page}&limit=${limit}`,
     );
   },
 
   async updateInstitutionBookingStatus(
     id: number,
     status: string,
+    meetingLink?: string,
+    meetingPlatform?: string,
   ): Promise<{ data: InstitutionCounsellingBookingItem; message: string }> {
     return apiRequest<{
       data: InstitutionCounsellingBookingItem;
       message: string;
     }>(`/api/v1/institution/counselling/bookings/${id}/status`, {
       method: "PUT",
-      body: JSON.stringify({ status }),
+      body: JSON.stringify({
+        status,
+        meeting_link: meetingLink,
+        meeting_platform: meetingPlatform,
+      }),
+    });
+  },
+
+  async updateCounsellingSession(
+    id: number,
+    data: {
+      title?: string;
+      description?: string;
+      scheduled_at?: string;
+      duration?: number;
+      max_seats?: number;
+      status?: string;
+    },
+  ): Promise<any> {
+    return apiRequest<any>(`/api/v1/institution/counselling/sessions/${id}`, {
+      method: "PUT",
+      body: JSON.stringify(data),
     });
   },
 
