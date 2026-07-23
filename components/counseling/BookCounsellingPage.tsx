@@ -215,7 +215,7 @@ const BookCounsellingPage: React.FC<BookCounsellingPageProps> = () => {
   };
 
   const hasInstitutionSessions = selectedCollegeId && sessions.length > 0;
-  const showFreeForm = !selectedCollegeId;
+  const showFreeForm = selectedCollegeId === null;
   const noActiveSessions =
     selectedCollegeId !== null && !sessionsLoading && sessions.length === 0;
 
@@ -396,10 +396,16 @@ const BookCounsellingPage: React.FC<BookCounsellingPageProps> = () => {
                       <i className="fa-solid fa-spinner animate-spin text-gray-400 text-lg"></i>
                     </div>
                   ) : sessions.length === 0 ? (
-                    <p className="text-sm text-gray-400 py-4">
-                      No counselling sessions available from this college. Fill
-                      the form below to request one.
-                    </p>
+                    <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4 text-sm text-yellow-800">
+                      <p className="font-medium">
+                        No active sessions available
+                      </p>
+                      <p className="mt-1 text-yellow-700">
+                        This college does not have any counselling sessions
+                        available for booking at the moment. Please check back
+                        later.
+                      </p>
+                    </div>
                   ) : (
                     <>
                       {/* Date Selection */}
@@ -465,8 +471,8 @@ const BookCounsellingPage: React.FC<BookCounsellingPageProps> = () => {
                 </div>
               )}
 
-              {/* Free-form booking fields (shown when no institution sessions) */}
-              {!hasInstitutionSessions && (
+              {/* Free-form booking fields (shown only when no college selected) */}
+              {showFreeForm && (
                 <>
                   <hr className="border-gray-100" />
                   <div className="space-y-5">
