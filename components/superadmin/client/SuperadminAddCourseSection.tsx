@@ -358,12 +358,12 @@ export default function SuperadminAddCourseSection({
       if (editId) {
         await superadminProgramApi.update(Number(editId), {
           ...data,
-          status: publish ? "active" : "draft",
+          status: publish ? "published" : "draft",
         });
       } else {
         await superadminProgramApi.create({
           ...data,
-          status: publish ? "active" : "draft",
+          status: publish ? "published" : "draft",
         });
       }
       localStorage.removeItem("superadmin_edit_course_id");
