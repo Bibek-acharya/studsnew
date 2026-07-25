@@ -534,24 +534,24 @@ export default function CalendarSection() {
           <span className="text-gray-800 font-medium">Calendar</span>
         </div>
       </div>
-      <div className="flex gap-1 bg-slate-100 p-1 rounded-md mb-6 w-fit">
-        {TABS.map((tab) => (
-          <button
-            key={tab.id}
-            onClick={() => handleSetActiveTab(tab.id)}
-            className={`flex items-center gap-2 px-4 py-2 text-sm font-semibold rounded-md transition-all whitespace-nowrap ${
-              activeTab === tab.id
-                ? "bg-white text-indigo-600 shadow-sm"
-                : "text-slate-500 hover:text-slate-700"
-            }`}
-          >
-            <tab.icon className="w-4 h-4" />
-            {tab.label}
-          </button>
-        ))}
-      </div>
-      <div className="bg-white rounded-md border border-slate-200 overflow-hidden flex flex-col min-h-[calc(100vh-12rem)]">
-        <div className="flex items-center gap-2 md:gap-3 pb-4 w-full lg:w-auto justify-between lg:justify-end overflow-x-auto">
+      <div className="flex items-center justify-between gap-4 mb-6">
+        <div className="flex gap-1 bg-slate-100 p-1 rounded-md w-fit">
+          {TABS.map((tab) => (
+            <button
+              key={tab.id}
+              onClick={() => handleSetActiveTab(tab.id)}
+              className={`flex items-center gap-2 px-4 py-2 text-sm font-semibold rounded-md transition-all whitespace-nowrap ${
+                activeTab === tab.id
+                  ? "bg-white text-indigo-600 shadow-sm"
+                  : "text-slate-500 hover:text-slate-700"
+              }`}
+            >
+              <tab.icon className="w-4 h-4" />
+              {tab.label}
+            </button>
+          ))}
+        </div>
+        <div className="flex items-center gap-2 shrink-0">
           <div className="relative">
             <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
             <input
@@ -559,18 +559,19 @@ export default function CalendarSection() {
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               placeholder="Search.."
-              className="pl-9 pr-4 py-1.5 border border-slate-200 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-brand-blue w-32 md:w-48 transition-all"
+              className="pl-9 pr-4 py-1.5 border border-slate-200 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 w-32 md:w-48 transition-all"
             />
           </div>
           <button
             onClick={() => openModal()}
-            className="flex items-center gap-1.5 px-3 md:px-4 py-1.5 bg-brand-blue text-white rounded-md text-sm font-medium hover:bg-blue-700 transition-colors  whitespace-nowrap"
+            className="flex items-center gap-1.5 px-3 md:px-4 py-1.5 bg-indigo-600 text-white rounded-md text-sm font-medium hover:bg-indigo-700 transition-colors whitespace-nowrap"
           >
             <Plus className="w-4 h-4" />
             New
           </button>
         </div>
-
+      </div>
+      <div className="bg-white rounded-md border border-slate-200 overflow-hidden flex flex-col min-h-[calc(100vh-12rem)]">
         {/* Loading State */}
         {loading && (
           <div className="p-6 space-y-2 animate-pulse">
