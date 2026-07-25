@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { apiService } from "@/services/api";
+import { useAuth } from "@/services/AuthContext";
 import ConfirmDialog from "@/components/user/dashboard/ConfirmDialog";
 import {
   AlertTriangle,
@@ -24,6 +25,7 @@ const tabs: { id: TabId; label: string; icon: LucideIcon }[] = [
 ];
 
 export default function SettingsSection() {
+  const { user } = useAuth();
   const [activeTab, setActiveTab] = useState<TabId>("security");
   const [currentPassword, setCurrentPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
@@ -47,6 +49,11 @@ export default function SettingsSection() {
     "deactivate" | "delete" | null
   >(null);
   const [toastMessage, setToastMessage] = useState("");
+  const [deletionStatus, setDeletionStatus] = useState<{
+    scheduled_deletion_at?: string;
+    days_remaining?: number;
+  } | null>(null);
+  const [deletingAction, setDeletingAction] = useState(false);
   const [totpData, setTotpData] = useState<{
     secret: string;
     qr_uri: string;
@@ -55,7 +62,7 @@ export default function SettingsSection() {
   const [totpVerifyCode, setTotpVerifyCode] = useState("");
   const [totpGenerating, setTotpGenerating] = useState(false);
   const [totpEnabling, setTotpEnabling] = useState(false);
-  const [totpEnabled, setTotpEnabled] = useState(false);
+  const [totpEnabled, setTotpEnabled] = useState(user?.totp_enabled || false);
   const [totpDisableCode, setTotpDisableCode] = useState("");
   const [totpDisablePassword, setTotpDisablePassword] = useState("");
   const [showDisableTOTP, setShowDisableTOTP] = useState(false);
@@ -116,6 +123,63 @@ export default function SettingsSection() {
     fetchSessions();
   }, []);
 
+  useEffect(() => {
+    const fetchDeletionStatus = async () => {
+      try {
+        const res = await apiService.getDeletionStatus();
+        if (res.data?.scheduled_deletion_at) setDeletionStatus(res.data);
+      } catch {}
+    };
+    fetchDeletionStatus();
+  }, []);
+
+  const handleDeactivate = async () => {
+    setDeletingAction(true);
+    try {
+      await apiService.deactivateAccount();
+      showToast("Account deactivated");
+      setDangerAction(null);
+      // Redirect to home after a short delay
+      setTimeout(() => {
+        window.location.href = "/";
+      }, 1500);
+    } catch (err: any) {
+      showToast(err.message || "Failed to deactivate");
+    } finally {
+      setDeletingAction(false);
+    }
+  };
+
+  const handleQueueDeletion = async () => {
+    setDeletingAction(true);
+    try {
+      const res = await apiService.queueDeletion();
+      setDeletionStatus({
+        scheduled_deletion_at: res.data?.scheduled_deletion_at,
+        days_remaining: 14,
+      });
+      showToast("Deletion scheduled. You have 14 days to cancel.");
+      setDangerAction(null);
+    } catch (err: any) {
+      showToast(err.message || "Failed to schedule deletion");
+    } finally {
+      setDeletingAction(false);
+    }
+  };
+
+  const handleCancelDeletion = async () => {
+    setDeletingAction(true);
+    try {
+      await apiService.cancelDeletion();
+      setDeletionStatus(null);
+      showToast("Deletion cancelled");
+    } catch (err: any) {
+      showToast(err.message || "Failed to cancel deletion");
+    } finally {
+      setDeletingAction(false);
+    }
+  };
+
   const handleGenerateTOTP = async () => {
     setTotpGenerating(true);
     try {
@@ -151,10 +215,6 @@ export default function SettingsSection() {
   const handleDisableTOTP = async () => {
     if (!totpDisableCode || totpDisableCode.length < 6) {
       showToast("Please enter a valid 6-digit code");
-      return;
-    }
-    if (!totpDisablePassword) {
-      showToast("Please enter your password");
       return;
     }
     setTotpEnabling(true);
@@ -331,12 +391,15 @@ export default function SettingsSection() {
                   Enter your password and a current code from your authenticator
                   app to disable 2FA.
                 </p>
+                <p className="text-sm text-slate-500 mb-4">
+                  Enter a code from your authenticator app to disable 2FA.
+                </p>
                 <div className="space-y-3">
                   <input
                     value={totpDisablePassword}
                     onChange={(e) => setTotpDisablePassword(e.target.value)}
                     type="password"
-                    placeholder="Current password"
+                    placeholder="Current password (if you have one)"
                     className="w-full rounded-md border border-slate-200 px-4 py-2.5 text-sm outline-none focus:border-red-500 focus:ring-2 focus:ring-red-500/20"
                   />
                   <input
@@ -364,11 +427,7 @@ export default function SettingsSection() {
                     </button>
                     <button
                       onClick={handleDisableTOTP}
-                      disabled={
-                        totpEnabling ||
-                        totpDisableCode.length < 6 ||
-                        !totpDisablePassword
-                      }
+                      disabled={totpEnabling || totpDisableCode.length < 6}
                       className="flex-1 rounded-md bg-red-600 px-4 py-2.5 text-sm font-semibold text-white hover:bg-red-700 disabled:opacity-50"
                     >
                       {totpEnabling ? "Disabling..." : "Disable 2FA"}
@@ -592,7 +651,8 @@ export default function SettingsSection() {
                   <div>
                     <p className="font-medium text-red-600">Delete Account</p>
                     <p className="text-sm text-slate-500">
-                      Permanently remove your account and all data.
+                      Permanently remove your account and all data. You have 14
+                      days to cancel after requesting.
                     </p>
                   </div>
                   <button
@@ -602,6 +662,27 @@ export default function SettingsSection() {
                     Delete Account
                   </button>
                 </div>
+                {deletionStatus?.scheduled_deletion_at && (
+                  <div className="flex items-center justify-between py-2 border-t border-red-200">
+                    <div>
+                      <p className="font-medium text-amber-800">
+                        Cancel Deletion
+                      </p>
+                      <p className="text-sm text-slate-500">
+                        Your account is scheduled for deletion on{" "}
+                        {deletionStatus.scheduled_deletion_at}. Cancel to keep
+                        your account.
+                      </p>
+                    </div>
+                    <button
+                      onClick={handleCancelDeletion}
+                      disabled={deletingAction}
+                      className="border border-amber-500 text-amber-700 px-4 py-2 rounded-md text-sm font-semibold hover:bg-amber-50 transition-colors disabled:opacity-50"
+                    >
+                      {deletingAction ? "Cancelling..." : "Cancel Deletion"}
+                    </button>
+                  </div>
+                )}
               </div>
             </div>
           </div>
@@ -680,11 +761,7 @@ export default function SettingsSection() {
         <ConfirmDialog
           isOpen={dangerAction === "deactivate"}
           onClose={() => setDangerAction(null)}
-          onConfirm={async () => {
-            // Phase 1: show toast only (backend endpoint TBD)
-            showToast("Account deactivated successfully");
-            setDangerAction(null);
-          }}
+          onConfirm={handleDeactivate}
           title="Deactivate Account?"
           message="Your profile will be hidden and you won't receive any notifications. You can reactivate by logging back in."
           confirmText="Yes, Deactivate"
@@ -695,23 +772,20 @@ export default function SettingsSection() {
         <ConfirmDialog
           isOpen={dangerAction === "delete"}
           onClose={() => setDangerAction(null)}
-          onConfirm={async () => {
-            // Phase 1: show toast only (backend endpoint TBD)
-            showToast("Account deletion request submitted");
-            setDangerAction(null);
-          }}
+          onConfirm={handleQueueDeletion}
           title="Delete Account?"
           message={
             <span>
-              This will permanently delete your account and all associated data.
+              Your account will be scheduled for deletion in 14 days. You can
+              cancel this anytime within the grace period.
               <strong className="block mt-2 text-red-600">
-                This action cannot be undone.
+                After 14 days, all data will be permanently removed.
               </strong>
             </span>
           }
-          confirmText="Yes, Delete Permanently"
+          confirmText="Yes, Schedule Deletion"
           variant="danger"
-          confirmLoadingText="Deleting..."
+          confirmLoadingText="Scheduling..."
         />
       </form>
     </div>

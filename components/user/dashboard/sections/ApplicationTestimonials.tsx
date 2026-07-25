@@ -1,33 +1,12 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { apiService } from "@/services/api";
-import { Star, MessageSquareText, Loader2, CheckCircle2 } from "lucide-react";
-import { Skeleton } from "@/components/ui/Skeleton";
+import { Star, MessageSquareText, Loader2 } from "lucide-react";
 import { Toast } from "@/components/ui/Toast";
 
-interface MyApplication {
-  id: number;
-  institution: string;
-  program: string;
-  type: string;
-  status: string;
-  applied_date: string;
-}
-
-interface Testimonial {
-  id: number;
-  rating: number;
-  experience: string;
-  created_at: string;
-}
-
 export default function ApplicationTestimonials() {
-  const [applications, setApplications] = useState<MyApplication[]>([]);
-  const [testimonials, setTestimonials] = useState<Testimonial[]>([]);
-  const [loading, setLoading] = useState(true);
   const [modalOpen, setModalOpen] = useState(false);
-  const [selectedApp, setSelectedApp] = useState<MyApplication | null>(null);
   const [rating, setRating] = useState(0);
   const [review, setReview] = useState("");
   const [submitting, setSubmitting] = useState(false);
@@ -35,70 +14,35 @@ export default function ApplicationTestimonials() {
     message: string;
     type: "success" | "error";
   } | null>(null);
-  const [fetchingTestimonials, setFetchingTestimonials] = useState(true);
 
-  useEffect(() => {
-    const fetch = async () => {
-      try {
-        const [appRes, testRes] = await Promise.all([
-          apiService.getMyApplications({ page: 1, limit: 50 }),
-          apiService.getUserTestimonials(),
-        ]);
-        if (appRes.success)
-          setApplications((appRes.data as any)?.applications || []);
-        if (testRes.success) setTestimonials(testRes.data || []);
-      } catch {
-        // ignore
-      } finally {
-        setLoading(false);
-        setFetchingTestimonials(false);
-      }
-    };
-    fetch();
-  }, []);
+  const charCount = review.length;
+  const charValid = charCount >= 20 && charCount <= 500;
 
-  const alreadyReviewed = (appId: number) => {
-    return testimonials.some((t) => t.id === appId);
-  };
-
-  const openModal = (app: MyApplication) => {
-    setSelectedApp(app);
+  const openModal = () => {
     setRating(0);
     setReview("");
     setModalOpen(true);
   };
 
-  const charCount = review.length;
-  const charValid = charCount >= 20 && charCount <= 500;
-
   const submitTestimonial = async () => {
-    if (!selectedApp || !rating || !charValid) return;
+    if (!rating || !charValid) return;
     setSubmitting(true);
     try {
       await apiService.submitTestimonial({
         name: "",
-        designation: `Student - ${selectedApp.program}`,
+        designation: "StudSphere User",
         rating,
         review,
       });
-      setTestimonials((prev) => [
-        ...prev,
-        {
-          id: selectedApp.id,
-          rating,
-          experience: review,
-          created_at: new Date().toISOString(),
-        },
-      ]);
       setModalOpen(false);
       setToast({
-        message: "Testimonial submitted! Thank you for your feedback.",
+        message: "Review submitted! Thank you for your feedback.",
         type: "success",
       });
       setTimeout(() => setToast(null), 3000);
     } catch (err: any) {
       setToast({
-        message: err.message || "Failed to submit testimonial",
+        message: err.message || "Failed to submit review",
         type: "error",
       });
       setTimeout(() => setToast(null), 3000);
@@ -107,121 +51,35 @@ export default function ApplicationTestimonials() {
     }
   };
 
-  if (loading) {
-    return (
-      <div className="space-y-3">
-        {Array.from({ length: 4 }).map((_, i) => (
-          <div
-            key={i}
-            className="bg-gray-50 rounded-md border border-gray-100 p-4 space-y-3 animate-pulse"
-          >
-            <Skeleton className="h-4 w-3/4" />
-            <Skeleton className="h-3 w-1/2" />
-            <Skeleton className="h-8 w-28 rounded-md" />
-          </div>
-        ))}
-      </div>
-    );
-  }
-
-  if (applications.length === 0) {
-    return (
+  return (
+    <>
       <div className="flex flex-col items-center justify-center py-16 text-center bg-white rounded-md border border-gray-100 p-6">
         <div className="w-24 h-24 bg-indigo-50 rounded-full flex items-center justify-center mb-4 text-indigo-500">
           <MessageSquareText className="w-12 h-12" />
         </div>
         <h3 className="text-xl font-semibold text-gray-900 mb-2">
-          You haven't applied to any college yet
+          Share Your Experience
         </h3>
         <p className="text-gray-500 mb-6 max-w-sm">
-          Once you submit applications to colleges, you can share your
-          experience and leave a testimonial here.
+          Tell us about your experience using StudSphere. Your feedback helps us
+          improve and assist other students.
         </p>
-        <a
-          href="/find-college"
+        <button
+          onClick={openModal}
           className="px-6 py-3 bg-indigo-600 text-white rounded-md font-medium hover:bg-indigo-700 transition-colors"
         >
-          Browse Colleges
-        </a>
-      </div>
-    );
-  }
-
-  return (
-    <>
-      <div className="bg-white rounded-md border border-gray-100 p-6">
-        <h3 className="text-lg font-semibold text-gray-900 mb-4">
-          Your Applications
-        </h3>
-        {testimonials.length > 0 && (
-          <div className="mb-6 p-4 bg-emerald-50 border border-emerald-100 rounded-md">
-            <h4 className="font-semibold text-emerald-800 text-sm mb-2 flex items-center gap-2">
-              <CheckCircle2 className="w-4 h-4" /> Your Testimonials
-            </h4>
-            {testimonials.map((t) => (
-              <div key={t.id} className="text-sm text-emerald-700 mb-1">
-                <span className="font-medium">Application #{t.id}</span>
-                <span className="mx-2">·</span>
-                {Array.from({ length: t.rating }, (_, i) => (
-                  <Star
-                    key={i}
-                    className="w-3 h-3 inline fill-yellow-400 text-yellow-400"
-                  />
-                ))}
-                <p className="text-emerald-600 mt-0.5 text-[13px]">
-                  {t.experience.slice(0, 100)}
-                </p>
-              </div>
-            ))}
-          </div>
-        )}
-        <div className="space-y-3">
-          {applications.map((app) => {
-            const reviewed = alreadyReviewed(app.id);
-            return (
-              <div
-                key={app.id}
-                className="flex items-center justify-between p-4 bg-gray-50 rounded-md border border-gray-100"
-              >
-                <div>
-                  <p className="font-medium text-gray-900">{app.institution}</p>
-                  <p className="text-sm text-gray-500">
-                    {app.program} · {app.type}
-                  </p>
-                </div>
-                <div className="flex items-center gap-3">
-                  <span
-                    className={`text-xs font-medium px-2 py-1 rounded ${app.status === "accepted" || app.status === "approved" ? "bg-green-100 text-green-700" : app.status === "rejected" ? "bg-red-100 text-red-700" : "bg-amber-100 text-amber-700"}`}
-                  >
-                    {app.status}
-                  </span>
-                  {reviewed ? (
-                    <span className="text-xs text-emerald-600 font-medium flex items-center gap-1">
-                      <CheckCircle2 className="w-3 h-3" /> Reviewed
-                    </span>
-                  ) : (
-                    <button
-                      onClick={() => openModal(app)}
-                      className="px-3 py-1.5 bg-indigo-600 text-white rounded-md text-sm font-medium hover:bg-indigo-700 transition-colors"
-                    >
-                      Write Testimonial
-                    </button>
-                  )}
-                </div>
-              </div>
-            );
-          })}
-        </div>
+          Write a Review
+        </button>
       </div>
 
-      {modalOpen && selectedApp && (
+      {modalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-gray-900/40 backdrop-blur-sm">
           <div className="bg-white rounded-md shadow-xl w-full max-w-md p-6">
             <h3 className="text-xl font-bold text-gray-900 mb-1">
-              Write a Testimonial
+              Write a Review
             </h3>
             <p className="text-sm text-gray-500 mb-4">
-              {selectedApp.institution} · {selectedApp.program}
+              Share your experience with StudSphere.
             </p>
 
             <div className="space-y-4">
@@ -255,7 +113,7 @@ export default function ApplicationTestimonials() {
                   value={review}
                   onChange={(e) => setReview(e.target.value)}
                   rows={4}
-                  placeholder="Share your experience with this application..."
+                  placeholder="Tell us about your experience..."
                   className={`w-full border rounded-md p-3 text-sm outline-none transition-all resize-none ${
                     review && !charValid
                       ? "border-red-400 focus:border-red-500 focus:ring-2 focus:ring-red-500/20"

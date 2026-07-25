@@ -23,6 +23,7 @@ interface User {
   provider_id?: number;
   permissions?: string[];
   is_sub_user?: boolean;
+  totp_enabled?: boolean;
 }
 
 interface AuthContextType {
@@ -171,6 +172,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       email: res.data.user.email,
       role: res.data.user.role,
       image_url: res.data.user.image_url,
+      totp_enabled: res.data.user.totp_enabled,
     };
 
     if (typeof window !== "undefined") {

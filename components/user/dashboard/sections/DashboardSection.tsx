@@ -27,9 +27,14 @@ import {
 } from "@/services/api";
 import { useAuth } from "@/services/AuthContext";
 import { SkeletonStatsGrid } from "@/components/ui/Skeleton";
+import { AlertTriangle } from "lucide-react";
 
 export default function DashboardSection() {
   const { user } = useAuth();
+  const [deletionInfo, setDeletionInfo] = useState<{
+    scheduled_deletion_at: string;
+    days_remaining: number;
+  } | null>(null);
   const [stats, setStats] = useState<DashboardStats | null>(null);
   const [recentApps, setRecentApps] = useState<RecentApplicationItem[]>([]);
   const [events, setEvents] = useState<CalendarEventItem[]>([]);
@@ -40,16 +45,20 @@ export default function DashboardSection() {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const [statsRes, appsRes, eventsRes, notifRes] = await Promise.all([
-          apiService.getDashboardStats(),
-          apiService.getRecentApplications(),
-          apiService.getCalendarEvents(),
-          apiService.getStudentNotifications(1, 5),
-        ]);
+        const [statsRes, appsRes, eventsRes, notifRes, delRes] =
+          await Promise.all([
+            apiService.getDashboardStats(),
+            apiService.getRecentApplications(),
+            apiService.getCalendarEvents(),
+            apiService.getStudentNotifications(1, 5),
+            apiService.getDeletionStatus(),
+          ]);
         setStats(statsRes.data);
         setRecentApps(appsRes.data.applications);
         setEvents(eventsRes.data);
         setActivities(notifRes.data.notifications);
+        if (delRes.data?.scheduled_deletion_at)
+          setDeletionInfo(delRes.data as any);
       } catch {
         setError("Failed to load dashboard data");
       } finally {
@@ -246,6 +255,35 @@ export default function DashboardSection() {
           <span className="text-gray-800 font-medium">Overview</span>
         </div>
       </div>
+
+      {deletionInfo?.scheduled_deletion_at && (
+        <div className="bg-amber-50 border border-amber-200 rounded-md p-4 mb-6 flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <AlertTriangle className="w-5 h-5 text-amber-600 shrink-0" />
+            <div>
+              <p className="font-semibold text-amber-800 text-sm">
+                Your account is queued for deletion
+              </p>
+              <p className="text-xs text-amber-600 mt-0.5">
+                Scheduled for {deletionInfo.scheduled_deletion_at}
+                {deletionInfo.days_remaining !== undefined && (
+                  <>
+                    {" "}
+                    · {deletionInfo.days_remaining} day
+                    {deletionInfo.days_remaining !== 1 ? "s" : ""} remaining
+                  </>
+                )}
+              </p>
+            </div>
+          </div>
+          <a
+            href="/user/dashboard/settings"
+            className="px-4 py-2 bg-amber-600 text-white rounded-md text-sm font-semibold hover:bg-amber-700 transition-colors shrink-0"
+          >
+            Cancel in Settings
+          </a>
+        </div>
+      )}
 
       <div className="flex flex-col lg:flex-row gap-6">
         <div className="w-full lg:w-2/3 xl:w-8/12 flex flex-col gap-6">

@@ -118,6 +118,7 @@ export interface AuthResponse {
       provider_id?: number;
       permissions?: string[];
       is_sub_user?: boolean;
+      totp_enabled?: boolean;
     };
     token: string;
   };
@@ -2756,6 +2757,29 @@ export const apiService = {
       method: "POST",
       body: JSON.stringify({ temp_token: tempToken, code }),
     });
+  },
+
+  async deactivateAccount(): Promise<{ success: boolean; message: string }> {
+    return apiRequest("/api/v1/auth/deactivate", { method: "POST" });
+  },
+
+  async queueDeletion(): Promise<{
+    success: boolean;
+    message: string;
+    data?: { scheduled_deletion_at: string };
+  }> {
+    return apiRequest("/api/v1/auth/delete-queue", { method: "POST" });
+  },
+
+  async cancelDeletion(): Promise<{ success: boolean; message: string }> {
+    return apiRequest("/api/v1/auth/cancel-deletion", { method: "POST" });
+  },
+
+  async getDeletionStatus(): Promise<{
+    success: boolean;
+    data: { scheduled_deletion_at?: string; days_remaining?: number };
+  }> {
+    return apiRequest("/api/v1/auth/deletion-status");
   },
 
   // === Login Sessions ===
