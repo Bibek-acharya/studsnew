@@ -288,7 +288,9 @@ const SphereAIPage: React.FC = () => {
                       />
                     </div>
                     <div className="max-w-[90%] sm:max-w-[80%]">
-                      <div className="prose prose-sm prose-slate max-w-none rounded-2xl rounded-bl-sm border border-slate-200 bg-white px-5 py-3.5 text-[15px] leading-relaxed text-slate-800 shadow-sm min-h-[3rem] flex items-center">
+                      <div
+                        className={`prose prose-sm prose-slate max-w-none rounded-2xl rounded-bl-sm border border-slate-200 bg-white px-5 py-3.5 text-[15px] leading-relaxed text-slate-800 shadow-sm min-h-[3rem] ${!msg.text && msg.streaming ? "flex items-center" : ""}`}
+                      >
                         {msg.text ? (
                           <ReactMarkdown remarkPlugins={[remarkGfm]}>
                             {msg.text}
