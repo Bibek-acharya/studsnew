@@ -282,8 +282,8 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
         </header>
 
         {/* Main Scrollable Area */}
-        <main className="flex-1 overflow-y-auto px-4 lg:px-8 py-0">
-          {children}
+        <main className="flex-1 overflow-y-auto">
+          <div className="px-4 lg:px-8 py-6">{children}</div>
         </main>
       </div>
 

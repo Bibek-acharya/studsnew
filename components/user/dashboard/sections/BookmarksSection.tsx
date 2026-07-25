@@ -398,6 +398,14 @@ export default function BookmarksSection() {
 
   return (
     <div className="flex flex-col w-full">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-6">
+        <h1 className="text-2xl font-bold text-gray-800">Bookmarks</h1>
+        <div className="flex items-center text-sm text-gray-500 mt-2 sm:mt-0 gap-2">
+          <span>Dashboard</span>
+          <span>-</span>
+          <span className="text-gray-800 font-medium">Bookmarks</span>
+        </div>
+      </div>
       <style jsx>{`
         .fade-in {
           animation: fadeIn 0.5s cubic-bezier(0.4, 0, 0.2, 1) forwards;

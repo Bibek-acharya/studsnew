@@ -489,1174 +489,1195 @@ export default function ProfileSection() {
   }
 
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-4 gap-8 pt-8">
-      <div className="lg:col-span-1">
-        <div className="bg-white p-6 rounded-md border border-slate-200 text-center">
-          <div className="relative inline-block">
-            {profileImage ? (
-              <img
-                src={profileImage}
-                className="w-24 h-24 rounded-full mx-auto border-4 border-slate-50 object-cover"
-                alt="Profile"
-              />
-            ) : (
-              <img
-                src="https://api.dicebear.com/7.x/avataaars/svg?seed=Alex"
-                className="w-24 h-24 rounded-full mx-auto border-4 border-slate-50"
-                alt="Profile"
-              />
-            )}
-            {editMode && (
-              <label className="absolute bottom-0 right-0 bg-blue-600 text-white p-2 rounded-full border-2 border-white flex items-center justify-center cursor-pointer hover:bg-blue-700">
-                <Upload className="w-3 h-3" />
-                <input
-                  type="file"
-                  accept="image/*"
-                  onChange={handleImageUpload}
-                  className="hidden"
-                />
-              </label>
-            )}
-          </div>
-          <h2 className="text-xl font-bold text-slate-800 mt-4">
-            {personalData.firstName} {personalData.middleName}{" "}
-            {personalData.lastName}
-          </h2>
-          <p className="text-sm text-slate-500">Student Profile</p>
-
-          <div className="mt-6 text-left">
-            <div className="flex justify-between text-xs font-semibold text-slate-600 mb-1">
-              <span>Profile Completion</span>
-              <span>{completion}%</span>
-            </div>
-            <div className="w-full bg-slate-100 rounded-full h-2">
-              <div
-                className="bg-brand-blue h-2 rounded-full"
-                style={{ width: `${completion}%` }}
-              ></div>
-            </div>
-          </div>
-
-          {(budgetFunding.targetLevel ||
-            budgetFunding.preferredField ||
-            budgetFunding.tuitionBudgetRange) && (
-            <div className="mt-6 text-left border-t border-slate-100 pt-4">
-              <h3 className="text-xs font-semibold text-slate-500 mb-3">
-                Preferences
-              </h3>
-              <div className="space-y-3">
-                {budgetFunding.targetLevel && (
-                  <div>
-                    <p className="text-xs text-slate-500">Target Level</p>
-                    <p className="text-sm font-medium text-slate-800">
-                      {budgetFunding.targetLevel}
-                    </p>
-                  </div>
-                )}
-                {budgetFunding.preferredField && (
-                  <div>
-                    <p className="text-xs text-slate-500">Preferred Field</p>
-                    <p className="text-sm font-medium text-slate-800">
-                      {budgetFunding.preferredField}
-                    </p>
-                  </div>
-                )}
-                {budgetFunding.tuitionBudgetRange && (
-                  <div>
-                    <p className="text-xs text-slate-500">Tuition Budget</p>
-                    <p className="text-sm font-medium text-slate-800">
-                      {budgetFunding.tuitionBudgetRange}
-                    </p>
-                  </div>
-                )}
-              </div>
-            </div>
-          )}
+    <div>
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-6">
+        <h1 className="text-2xl font-bold text-gray-800">My Profile</h1>
+        <div className="flex items-center text-sm text-gray-500 mt-2 sm:mt-0 gap-2">
+          <span>Dashboard</span>
+          <span>-</span>
+          <span className="text-gray-800 font-medium">Profile</span>
         </div>
       </div>
-
-      <div className="lg:col-span-3">
-        <div className="bg-white rounded-md border border-slate-200 min-h-[600px]">
-          <div className="border-b border-slate-100 overflow-x-auto">
-            <div className="flex px-6 justify-between items-center">
-              <nav className="flex gap-6 min-w-max">
-                {[
-                  { id: "personal", label: "Personal Details", icon: User },
-                  {
-                    id: "education",
-                    label: "Education History",
-                    icon: GraduationCap,
-                  },
-                  { id: "budget", label: "Budget & Funding", icon: DollarSign },
-                  { id: "documents", label: "Documents", icon: FileText },
-                ].map((tab) => (
-                  <button
-                    key={tab.id}
-                    onClick={() => setProfileTab(tab.id)}
-                    className={`border-b-2 py-4 px-1 text-sm font-medium transition-colors flex items-center gap-2 ${
-                      profileTab === tab.id
-                        ? "border-blue-500 text-blue-600"
-                        : "border-transparent text-slate-500 hover:text-slate-700"
-                    }`}
-                  >
-                    <tab.icon className="w-4 h-4" />
-                    {tab.label}
-                  </button>
-                ))}
-              </nav>
-              <button
-                onClick={() => (editMode ? handleSave() : setEditMode(true))}
-                disabled={saving}
-                className={`flex items-center gap-2 px-3 py-1.5 rounded-md text-sm font-medium transition-colors ${
-                  editMode
-                    ? "bg-brand-blue text-white hover:bg-blue-700"
-                    : "bg-blue-50 text-blue-600 hover:bg-blue-100"
-                } ${saving ? "opacity-50 cursor-not-allowed" : ""}`}
-              >
-                {editMode ? (
-                  <>
-                    <Save className="w-4 h-4" />{" "}
-                    {saving ? "Saving..." : "Save Changes"}
-                  </>
-                ) : (
-                  <>
-                    <Edit2 className="w-4 h-4" /> Edit Profile
-                  </>
-                )}
-              </button>
+      <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
+        <div className="lg:col-span-1">
+          <div className="bg-white p-6 rounded-md border border-slate-200 text-center">
+            <div className="relative inline-block">
+              {profileImage ? (
+                <img
+                  src={profileImage}
+                  className="w-24 h-24 rounded-full mx-auto border-4 border-slate-50 object-cover"
+                  alt="Profile"
+                />
+              ) : (
+                <img
+                  src="https://api.dicebear.com/7.x/avataaars/svg?seed=Alex"
+                  className="w-24 h-24 rounded-full mx-auto border-4 border-slate-50"
+                  alt="Profile"
+                />
+              )}
+              {editMode && (
+                <label className="absolute bottom-0 right-0 bg-blue-600 text-white p-2 rounded-full border-2 border-white flex items-center justify-center cursor-pointer hover:bg-blue-700">
+                  <Upload className="w-3 h-3" />
+                  <input
+                    type="file"
+                    accept="image/*"
+                    onChange={handleImageUpload}
+                    className="hidden"
+                  />
+                </label>
+              )}
             </div>
-          </div>
+            <h2 className="text-xl font-bold text-slate-800 mt-4">
+              {personalData.firstName} {personalData.middleName}{" "}
+              {personalData.lastName}
+            </h2>
+            <p className="text-sm text-slate-500">Student Profile</p>
 
-          <div className="p-6">
-            {profileTab === "personal" && (
-              <div className="space-y-8">
-                <div>
-                  <h3 className="text-lg font-bold text-slate-800 mb-4 flex items-center gap-2">
-                    <User className="w-5 h-5 text-blue-600" />
-                    Basic Info
-                  </h3>
-                  <div className="space-y-4">
-                    {/* Name Row - 3 columns */}
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                      <div>
-                        <label className="block text-xs font-semibold text-slate-500 mb-1">
-                          First Name
-                        </label>
-                        {editMode ? (
-                          <input
-                            type="text"
-                            value={personalData.firstName}
-                            onChange={(e) =>
-                              setPersonalData({
-                                ...personalData,
-                                firstName: e.target.value,
-                              })
-                            }
-                            className="w-full rounded-md border border-slate-200 px-3 py-2 text-sm focus:ring-blue-500 focus:border-blue-500 outline-none"
-                          />
-                        ) : (
-                          <p className="text-sm text-slate-800 font-medium bg-slate-50 border border-slate-200 rounded-md px-3 py-2">
-                            {personalData.firstName}
-                          </p>
-                        )}
-                      </div>
-                      <div>
-                        <label className="block text-xs font-semibold text-slate-500 mb-1">
-                          Middle Name (Optional)
-                        </label>
-                        {editMode ? (
-                          <input
-                            type="text"
-                            value={personalData.middleName}
-                            onChange={(e) =>
-                              setPersonalData({
-                                ...personalData,
-                                middleName: e.target.value,
-                              })
-                            }
-                            className="w-full rounded-md border border-slate-200 px-3 py-2 text-sm focus:ring-blue-500 focus:border-blue-500 outline-none"
-                          />
-                        ) : (
-                          <p className="text-sm text-slate-800 font-medium bg-slate-50 border border-slate-200 rounded-md px-3 py-2">
-                            {personalData.middleName || "-"}
-                          </p>
-                        )}
-                      </div>
-                      <div>
-                        <label className="block text-xs font-semibold text-slate-500 mb-1">
-                          Last Name
-                        </label>
-                        {editMode ? (
-                          <input
-                            type="text"
-                            value={personalData.lastName}
-                            onChange={(e) =>
-                              setPersonalData({
-                                ...personalData,
-                                lastName: e.target.value,
-                              })
-                            }
-                            className="w-full rounded-md border border-slate-200 px-3 py-2 text-sm focus:ring-blue-500 focus:border-blue-500 outline-none"
-                          />
-                        ) : (
-                          <p className="text-sm text-slate-800 font-medium bg-slate-50 border border-slate-200 rounded-md px-3 py-2">
-                            {personalData.lastName}
-                          </p>
-                        )}
-                      </div>
-                    </div>
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-4">
-                      <div>
-                        <label className="block text-xs font-semibold text-slate-500 mb-1">
-                          Date of Birth
-                        </label>
-                        {editMode ? (
-                          <input
-                            type="date"
-                            value={personalData.dateOfBirth}
-                            onChange={(e) =>
-                              setPersonalData({
-                                ...personalData,
-                                dateOfBirth: e.target.value,
-                              })
-                            }
-                            className="w-full rounded-md border border-slate-200 px-3 py-2 text-sm focus:ring-blue-500 focus:border-blue-500 outline-none"
-                          />
-                        ) : (
-                          <p className="text-sm text-slate-800 font-medium bg-slate-50 border border-slate-200 rounded-md px-3 py-2">
-                            {personalData.dateOfBirth}
-                          </p>
-                        )}
-                      </div>
-                      <div>
-                        <label className="block text-xs font-semibold text-slate-500 mb-1">
-                          Gender
-                        </label>
-                        {editMode ? (
-                          <select
-                            value={personalData.gender}
-                            onChange={(e) =>
-                              setPersonalData({
-                                ...personalData,
-                                gender: e.target.value,
-                              })
-                            }
-                            className="w-full rounded-md border border-slate-200 px-3 py-2 text-sm"
-                          >
-                            <option>Male</option>
-                            <option>Female</option>
-                            <option>Other</option>
-                          </select>
-                        ) : (
-                          <p className="text-sm text-slate-800 font-medium bg-slate-50 border border-slate-200 rounded-md px-3 py-2">
-                            {personalData.gender}
-                          </p>
-                        )}
-                      </div>
-                      <div>
-                        <label className="block text-xs font-semibold text-slate-500 mb-1">
-                          Nationality
-                        </label>
-                        {editMode ? (
-                          <input
-                            type="text"
-                            value={personalData.nationality}
-                            onChange={(e) =>
-                              setPersonalData({
-                                ...personalData,
-                                nationality: e.target.value,
-                              })
-                            }
-                            className="w-full rounded-md border border-slate-200 px-3 py-2 text-sm"
-                          />
-                        ) : (
-                          <p className="text-sm text-slate-800 font-medium bg-slate-50 border border-slate-200 rounded-md px-3 py-2">
-                            {personalData.nationality}
-                          </p>
-                        )}
-                      </div>
-                    </div>
-                  </div>
-                </div>
+            <div className="mt-6 text-left">
+              <div className="flex justify-between text-xs font-semibold text-slate-600 mb-1">
+                <span>Profile Completion</span>
+                <span>{completion}%</span>
+              </div>
+              <div className="w-full bg-slate-100 rounded-full h-2">
+                <div
+                  className="bg-brand-blue h-2 rounded-full"
+                  style={{ width: `${completion}%` }}
+                ></div>
+              </div>
+            </div>
 
-                <div>
-                  <h3 className="text-lg font-bold text-slate-800 mb-4 flex items-center gap-2">
-                    <Phone className="w-5 h-5 text-blue-600" />
-                    Contact Info
-                  </h3>
-                  <div className="space-y-4">
-                    {/* Email - read only */}
+            {(budgetFunding.targetLevel ||
+              budgetFunding.preferredField ||
+              budgetFunding.tuitionBudgetRange) && (
+              <div className="mt-6 text-left border-t border-slate-100 pt-4">
+                <h3 className="text-xs font-semibold text-slate-500 mb-3">
+                  Preferences
+                </h3>
+                <div className="space-y-3">
+                  {budgetFunding.targetLevel && (
                     <div>
-                      <label className="block text-xs font-semibold text-slate-500 mb-1">
-                        Email
-                      </label>
-                      <p className="text-sm text-slate-800 font-medium bg-slate-50 border border-slate-200 rounded-md px-3 py-2">
-                        {personalData.email}
+                      <p className="text-xs text-slate-500">Target Level</p>
+                      <p className="text-sm font-medium text-slate-800">
+                        {budgetFunding.targetLevel}
                       </p>
                     </div>
-
-                    {/* Phone Row - 2 columns */}
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      <div>
-                        <label className="block text-xs font-semibold text-slate-500 mb-1">
-                          Phone Number
-                        </label>
-                        {editMode ? (
-                          <input
-                            type="tel"
-                            value={personalData.phone}
-                            onChange={(e) =>
-                              setPersonalData({
-                                ...personalData,
-                                phone: e.target.value,
-                              })
-                            }
-                            className="w-full rounded-md border border-slate-200 px-3 py-2 text-sm"
-                          />
-                        ) : (
-                          <p className="text-sm text-slate-800 font-medium bg-slate-50 border border-slate-200 rounded-md px-3 py-2">
-                            {personalData.phone}
-                          </p>
-                        )}
-                      </div>
-                      <div>
-                        <label className="block text-xs font-semibold text-slate-500 mb-1">
-                          Alternate Phone
-                        </label>
-                        {editMode ? (
-                          <input
-                            type="tel"
-                            value={personalData.alternatePhone}
-                            onChange={(e) =>
-                              setPersonalData({
-                                ...personalData,
-                                alternatePhone: e.target.value,
-                              })
-                            }
-                            placeholder="Optional"
-                            className="w-full rounded-md border border-slate-200 px-3 py-2 text-sm"
-                          />
-                        ) : (
-                          <p className="text-sm text-slate-800 font-medium bg-slate-50 border border-slate-200 rounded-md px-3 py-2">
-                            {personalData.alternatePhone || "-"}
-                          </p>
-                        )}
-                      </div>
+                  )}
+                  {budgetFunding.preferredField && (
+                    <div>
+                      <p className="text-xs text-slate-500">Preferred Field</p>
+                      <p className="text-sm font-medium text-slate-800">
+                        {budgetFunding.preferredField}
+                      </p>
                     </div>
-
-                    {/* Location Row - 3 columns */}
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                      <div>
-                        <label className="block text-xs font-semibold text-slate-500 mb-1">
-                          Province
-                        </label>
-                        {editMode ? (
-                          <select
-                            value={selectedProvince}
-                            onChange={(e) => {
-                              setSelectedProvince(e.target.value);
-                              const districts =
-                                NEPAL_DISTRICTS[
-                                  e.target.value as keyof typeof NEPAL_DISTRICTS
-                                ];
-                              setPersonalData({
-                                ...personalData,
-                                province: e.target.value,
-                                district: districts?.[0] || "",
-                                localLevel: "",
-                              });
-                              setSelectedDistrict(districts?.[0] || "");
-                            }}
-                            className="w-full rounded-md border border-slate-200 px-3 py-2 text-sm focus:ring-blue-500 focus:border-blue-500 outline-none"
-                          >
-                            {NEPAL_PROVINCES.map((prov) => (
-                              <option key={prov} value={prov}>
-                                {prov}
-                              </option>
-                            ))}
-                          </select>
-                        ) : (
-                          <p className="text-sm text-slate-800 font-medium bg-slate-50 border border-slate-200 rounded-md px-3 py-2">
-                            {personalData.province}
-                          </p>
-                        )}
-                      </div>
-                      <div>
-                        <label className="block text-xs font-semibold text-slate-500 mb-1">
-                          District
-                        </label>
-                        {editMode ? (
-                          <select
-                            value={selectedDistrict}
-                            onChange={(e) => {
-                              setSelectedDistrict(e.target.value);
-                              setPersonalData({
-                                ...personalData,
-                                district: e.target.value,
-                                localLevel: "",
-                              });
-                            }}
-                            className="w-full rounded-md border border-slate-200 px-3 py-2 text-sm focus:ring-blue-500 focus:border-blue-500 outline-none"
-                          >
-                            {(
-                              NEPAL_DISTRICTS[
-                                selectedProvince as keyof typeof NEPAL_DISTRICTS
-                              ] || []
-                            ).map((dist) => (
-                              <option key={dist} value={dist}>
-                                {dist}
-                              </option>
-                            ))}
-                          </select>
-                        ) : (
-                          <p className="text-sm text-slate-800 font-medium bg-slate-50 border border-slate-200 rounded-md px-3 py-2">
-                            {personalData.district}
-                          </p>
-                        )}
-                      </div>
-                      <div>
-                        <label className="block text-xs font-semibold text-slate-500 mb-1">
-                          Local Level
-                        </label>
-                        {editMode ? (
-                          <select
-                            value={personalData.localLevel}
-                            onChange={(e) =>
-                              setPersonalData({
-                                ...personalData,
-                                localLevel: e.target.value,
-                              })
-                            }
-                            className="w-full rounded-md border border-slate-200 px-3 py-2 text-sm focus:ring-blue-500 focus:border-blue-500 outline-none"
-                          >
-                            <option value="">Select Local Level</option>
-                            {localBodies.map((body: { name: string }) => (
-                              <option key={body.name} value={body.name}>
-                                {body.name}
-                              </option>
-                            ))}
-                          </select>
-                        ) : (
-                          <p className="text-sm text-slate-800 font-medium bg-slate-50 border border-slate-200 rounded-md px-3 py-2">
-                            {personalData.localLevel}
-                          </p>
-                        )}
-                      </div>
+                  )}
+                  {budgetFunding.tuitionBudgetRange && (
+                    <div>
+                      <p className="text-xs text-slate-500">Tuition Budget</p>
+                      <p className="text-sm font-medium text-slate-800">
+                        {budgetFunding.tuitionBudgetRange}
+                      </p>
                     </div>
+                  )}
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
 
-                    {/* Additional Info (collapsible) */}
-                    <details className="mt-4">
-                      <summary className="text-sm font-semibold text-slate-600 cursor-pointer hover:text-slate-800 select-none">
-                        Additional Info
-                      </summary>
-                      <div className="mt-4 space-y-4">
+        <div className="lg:col-span-3">
+          <div className="bg-white rounded-md border border-slate-200 min-h-[600px]">
+            <div className="border-b border-slate-100 overflow-x-auto">
+              <div className="flex px-6 justify-between items-center">
+                <nav className="flex gap-6 min-w-max">
+                  {[
+                    { id: "personal", label: "Personal Details", icon: User },
+                    {
+                      id: "education",
+                      label: "Education History",
+                      icon: GraduationCap,
+                    },
+                    {
+                      id: "budget",
+                      label: "Budget & Funding",
+                      icon: DollarSign,
+                    },
+                    { id: "documents", label: "Documents", icon: FileText },
+                  ].map((tab) => (
+                    <button
+                      key={tab.id}
+                      onClick={() => setProfileTab(tab.id)}
+                      className={`border-b-2 py-4 px-1 text-sm font-medium transition-colors flex items-center gap-2 ${
+                        profileTab === tab.id
+                          ? "border-blue-500 text-blue-600"
+                          : "border-transparent text-slate-500 hover:text-slate-700"
+                      }`}
+                    >
+                      <tab.icon className="w-4 h-4" />
+                      {tab.label}
+                    </button>
+                  ))}
+                </nav>
+                <button
+                  onClick={() => (editMode ? handleSave() : setEditMode(true))}
+                  disabled={saving}
+                  className={`flex items-center gap-2 px-3 py-1.5 rounded-md text-sm font-medium transition-colors ${
+                    editMode
+                      ? "bg-brand-blue text-white hover:bg-blue-700"
+                      : "bg-blue-50 text-blue-600 hover:bg-blue-100"
+                  } ${saving ? "opacity-50 cursor-not-allowed" : ""}`}
+                >
+                  {editMode ? (
+                    <>
+                      <Save className="w-4 h-4" />{" "}
+                      {saving ? "Saving..." : "Save Changes"}
+                    </>
+                  ) : (
+                    <>
+                      <Edit2 className="w-4 h-4" /> Edit Profile
+                    </>
+                  )}
+                </button>
+              </div>
+            </div>
+
+            <div className="p-6">
+              {profileTab === "personal" && (
+                <div className="space-y-8">
+                  <div>
+                    <h3 className="text-lg font-bold text-slate-800 mb-4 flex items-center gap-2">
+                      <User className="w-5 h-5 text-blue-600" />
+                      Basic Info
+                    </h3>
+                    <div className="space-y-4">
+                      {/* Name Row - 3 columns */}
+                      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                         <div>
                           <label className="block text-xs font-semibold text-slate-500 mb-1">
-                            Bio
+                            First Name
                           </label>
                           {editMode ? (
-                            <textarea
-                              value={personalData.bio}
+                            <input
+                              type="text"
+                              value={personalData.firstName}
                               onChange={(e) =>
                                 setPersonalData({
                                   ...personalData,
-                                  bio: e.target.value,
+                                  firstName: e.target.value,
                                 })
                               }
-                              rows={3}
-                              className="w-full rounded-md border border-slate-200 px-3 py-2 text-sm"
+                              className="w-full rounded-md border border-slate-200 px-3 py-2 text-sm focus:ring-blue-500 focus:border-blue-500 outline-none"
                             />
                           ) : (
                             <p className="text-sm text-slate-800 font-medium bg-slate-50 border border-slate-200 rounded-md px-3 py-2">
-                              {personalData.bio || "-"}
+                              {personalData.firstName}
                             </p>
                           )}
                         </div>
-                      </div>
-                    </details>
-                  </div>
-                </div>
-              </div>
-            )}
-
-            {profileTab === "education" && (
-              <div>
-                <div className="flex justify-between items-center mb-4">
-                  <h3 className="text-lg font-bold text-slate-800 flex items-center gap-2">
-                    <GraduationCap className="w-5 h-5 text-blue-600" />
-                    Education History
-                  </h3>
-                  {editMode && (
-                    <button
-                      onClick={handleEducationAdd}
-                      className="flex items-center gap-2 px-3 py-1.5 bg-blue-50 text-blue-600 rounded-md text-sm font-medium hover:bg-blue-100"
-                    >
-                      <Plus className="w-4 h-4" /> Add Education
-                    </button>
-                  )}
-                </div>
-                <div className="space-y-4">
-                  {education.map((entry, index) => (
-                    <div
-                      key={entry.id}
-                      className="border border-slate-200 rounded-md p-4"
-                    >
-                      <div className="flex justify-between items-start mb-3">
-                        <span className="text-xs font-semibold text-slate-500">
-                          Entry {index + 1}
-                        </span>
-                        {editMode && (
-                          <button
-                            onClick={() => handleEducationRemove(entry.id)}
-                            className="text-red-500 hover:text-red-700"
-                          >
-                            <Trash2 className="w-4 h-4" />
-                          </button>
-                        )}
+                        <div>
+                          <label className="block text-xs font-semibold text-slate-500 mb-1">
+                            Middle Name (Optional)
+                          </label>
+                          {editMode ? (
+                            <input
+                              type="text"
+                              value={personalData.middleName}
+                              onChange={(e) =>
+                                setPersonalData({
+                                  ...personalData,
+                                  middleName: e.target.value,
+                                })
+                              }
+                              className="w-full rounded-md border border-slate-200 px-3 py-2 text-sm focus:ring-blue-500 focus:border-blue-500 outline-none"
+                            />
+                          ) : (
+                            <p className="text-sm text-slate-800 font-medium bg-slate-50 border border-slate-200 rounded-md px-3 py-2">
+                              {personalData.middleName || "-"}
+                            </p>
+                          )}
+                        </div>
+                        <div>
+                          <label className="block text-xs font-semibold text-slate-500 mb-1">
+                            Last Name
+                          </label>
+                          {editMode ? (
+                            <input
+                              type="text"
+                              value={personalData.lastName}
+                              onChange={(e) =>
+                                setPersonalData({
+                                  ...personalData,
+                                  lastName: e.target.value,
+                                })
+                              }
+                              className="w-full rounded-md border border-slate-200 px-3 py-2 text-sm focus:ring-blue-500 focus:border-blue-500 outline-none"
+                            />
+                          ) : (
+                            <p className="text-sm text-slate-800 font-medium bg-slate-50 border border-slate-200 rounded-md px-3 py-2">
+                              {personalData.lastName}
+                            </p>
+                          )}
+                        </div>
                       </div>
                       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-4">
                         <div>
                           <label className="block text-xs font-semibold text-slate-500 mb-1">
-                            Level
+                            Date of Birth
+                          </label>
+                          {editMode ? (
+                            <input
+                              type="date"
+                              value={personalData.dateOfBirth}
+                              onChange={(e) =>
+                                setPersonalData({
+                                  ...personalData,
+                                  dateOfBirth: e.target.value,
+                                })
+                              }
+                              className="w-full rounded-md border border-slate-200 px-3 py-2 text-sm focus:ring-blue-500 focus:border-blue-500 outline-none"
+                            />
+                          ) : (
+                            <p className="text-sm text-slate-800 font-medium bg-slate-50 border border-slate-200 rounded-md px-3 py-2">
+                              {personalData.dateOfBirth}
+                            </p>
+                          )}
+                        </div>
+                        <div>
+                          <label className="block text-xs font-semibold text-slate-500 mb-1">
+                            Gender
                           </label>
                           {editMode ? (
                             <select
-                              value={entry.level}
+                              value={personalData.gender}
                               onChange={(e) =>
-                                handleEducationChange(
-                                  entry.id,
-                                  "level",
-                                  e.target.value,
-                                )
+                                setPersonalData({
+                                  ...personalData,
+                                  gender: e.target.value,
+                                })
                               }
                               className="w-full rounded-md border border-slate-200 px-3 py-2 text-sm"
                             >
-                              <option value="">Select Level</option>
-                              <option>SEE</option>
-                              <option>+2</option>
-                              <option>A Level</option>
-                              <option>Diploma</option>
-                              <option>Bachelor</option>
+                              <option>Male</option>
+                              <option>Female</option>
+                              <option>Other</option>
                             </select>
                           ) : (
-                            <p className="text-sm font-medium text-slate-800 bg-slate-50 border border-slate-200 rounded-md px-3 py-2">
-                              {entry.level}
+                            <p className="text-sm text-slate-800 font-medium bg-slate-50 border border-slate-200 rounded-md px-3 py-2">
+                              {personalData.gender}
                             </p>
                           )}
                         </div>
                         <div>
                           <label className="block text-xs font-semibold text-slate-500 mb-1">
-                            Institution Name
+                            Nationality
                           </label>
                           {editMode ? (
                             <input
                               type="text"
-                              value={entry.institutionName}
+                              value={personalData.nationality}
                               onChange={(e) =>
-                                handleEducationChange(
-                                  entry.id,
-                                  "institutionName",
-                                  e.target.value,
-                                )
+                                setPersonalData({
+                                  ...personalData,
+                                  nationality: e.target.value,
+                                })
                               }
                               className="w-full rounded-md border border-slate-200 px-3 py-2 text-sm"
                             />
                           ) : (
-                            <p className="text-sm font-medium text-slate-800 bg-slate-50 border border-slate-200 rounded-md px-3 py-2">
-                              {entry.institutionName}
-                            </p>
-                          )}
-                        </div>
-                        <div>
-                          <label className="block text-xs font-semibold text-slate-500 mb-1">
-                            Board/University
-                          </label>
-                          {editMode ? (
-                            <input
-                              type="text"
-                              value={entry.boardUniversity}
-                              onChange={(e) =>
-                                handleEducationChange(
-                                  entry.id,
-                                  "boardUniversity",
-                                  e.target.value,
-                                )
-                              }
-                              className="w-full rounded-md border border-slate-200 px-3 py-2 text-sm"
-                            />
-                          ) : (
-                            <p className="text-sm font-medium text-slate-800 bg-slate-50 border border-slate-200 rounded-md px-3 py-2">
-                              {entry.boardUniversity}
-                            </p>
-                          )}
-                        </div>
-                        <div>
-                          <label className="block text-xs font-semibold text-slate-500 mb-1">
-                            Country
-                          </label>
-                          {editMode ? (
-                            <input
-                              type="text"
-                              value={entry.country}
-                              onChange={(e) =>
-                                handleEducationChange(
-                                  entry.id,
-                                  "country",
-                                  e.target.value,
-                                )
-                              }
-                              className="w-full rounded-md border border-slate-200 px-3 py-2 text-sm"
-                            />
-                          ) : (
-                            <p className="text-sm font-medium text-slate-800 bg-slate-50 border border-slate-200 rounded-md px-3 py-2">
-                              {entry.country}
-                            </p>
-                          )}
-                        </div>
-                        <div>
-                          <label className="block text-xs font-semibold text-slate-500 mb-1">
-                            Field/Stream
-                          </label>
-                          {editMode ? (
-                            <input
-                              type="text"
-                              value={entry.stream}
-                              onChange={(e) =>
-                                handleEducationChange(
-                                  entry.id,
-                                  "stream",
-                                  e.target.value,
-                                )
-                              }
-                              className="w-full rounded-md border border-slate-200 px-3 py-2 text-sm"
-                            />
-                          ) : (
-                            <p className="text-sm font-medium text-slate-800 bg-slate-50 border border-slate-200 rounded-md px-3 py-2">
-                              {entry.stream}
-                            </p>
-                          )}
-                        </div>
-                        <div>
-                          <label className="block text-xs font-semibold text-slate-500 mb-1">
-                            Start Year
-                          </label>
-                          {editMode ? (
-                            <input
-                              type="text"
-                              value={entry.startYear}
-                              onChange={(e) =>
-                                handleEducationChange(
-                                  entry.id,
-                                  "startYear",
-                                  e.target.value,
-                                )
-                              }
-                              className="w-full rounded-md border border-slate-200 px-3 py-2 text-sm"
-                            />
-                          ) : (
-                            <p className="text-sm font-medium text-slate-800 bg-slate-50 border border-slate-200 rounded-md px-3 py-2">
-                              {entry.startYear}
-                            </p>
-                          )}
-                        </div>
-                        <div>
-                          <label className="block text-xs font-semibold text-slate-500 mb-1">
-                            End Year
-                          </label>
-                          {editMode ? (
-                            <input
-                              type="text"
-                              value={entry.endYear}
-                              onChange={(e) =>
-                                handleEducationChange(
-                                  entry.id,
-                                  "endYear",
-                                  e.target.value,
-                                )
-                              }
-                              className="w-full rounded-md border border-slate-200 px-3 py-2 text-sm"
-                            />
-                          ) : (
-                            <p className="text-sm font-medium text-slate-800 bg-slate-50 border border-slate-200 rounded-md px-3 py-2">
-                              {entry.endYear}
-                            </p>
-                          )}
-                        </div>
-                        <div>
-                          <label className="block text-xs font-semibold text-slate-500 mb-1">
-                            Grading System
-                          </label>
-                          {editMode ? (
-                            <select
-                              value={entry.gradingSystem}
-                              onChange={(e) =>
-                                handleEducationChange(
-                                  entry.id,
-                                  "gradingSystem",
-                                  e.target.value,
-                                )
-                              }
-                              className="w-full rounded-md border border-slate-200 px-3 py-2 text-sm"
-                            >
-                              <option>GPA</option>
-                              <option>Percentage</option>
-                            </select>
-                          ) : (
-                            <p className="text-sm font-medium text-slate-800 bg-slate-50 border border-slate-200 rounded-md px-3 py-2">
-                              {entry.gradingSystem}
-                            </p>
-                          )}
-                        </div>
-                        <div>
-                          <label className="block text-xs font-semibold text-slate-500 mb-1">
-                            GPA / Percentage
-                          </label>
-                          {editMode ? (
-                            <input
-                              type="text"
-                              value={entry.grade}
-                              onChange={(e) =>
-                                handleEducationChange(
-                                  entry.id,
-                                  "grade",
-                                  e.target.value,
-                                )
-                              }
-                              className="w-full rounded-md border border-slate-200 px-3 py-2 text-sm"
-                            />
-                          ) : (
-                            <p className="text-sm font-medium text-slate-800 bg-slate-50 border border-slate-200 rounded-md px-3 py-2">
-                              {entry.grade}
+                            <p className="text-sm text-slate-800 font-medium bg-slate-50 border border-slate-200 rounded-md px-3 py-2">
+                              {personalData.nationality}
                             </p>
                           )}
                         </div>
                       </div>
                     </div>
-                  ))}
-                </div>
-              </div>
-            )}
-
-            {profileTab === "budget" && (
-              <div className="space-y-8">
-                <div>
-                  <h3 className="text-lg font-bold text-slate-800 mb-4 flex items-center gap-2">
-                    <DollarSign className="w-5 h-5 text-blue-600" />
-                    Budget & Funding
-                  </h3>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    {/* Tuition Budget */}
-                    <div>
-                      <label className="block text-xs font-semibold text-slate-500 mb-1">
-                        Tuition Budget Range (Per Year)
-                      </label>
-                      {editMode ? (
-                        <select
-                          value={budgetFunding.tuitionBudgetRange}
-                          onChange={(e) =>
-                            setBudgetFunding({
-                              ...budgetFunding,
-                              tuitionBudgetRange: e.target.value,
-                            })
-                          }
-                          className="w-full rounded-md border border-slate-200 px-3 py-2 text-sm"
-                        >
-                          <option value="">Select Range</option>
-                          <option value="<50000">Under Rs. 50,000</option>
-                          <option value="50000-200000">
-                            Rs. 50,000 - 2,00,000
-                          </option>
-                          <option value="200000-500000">
-                            Rs. 2,00,000 - 5,00,000
-                          </option>
-                          <option value="500000-1000000">
-                            Rs. 5,00,000 - 10,00,000
-                          </option>
-                          <option value=">1000000">Above Rs. 10,00,000</option>
-                        </select>
-                      ) : (
-                        <p className="text-sm font-medium text-slate-800 bg-slate-50 border border-slate-200 rounded-md px-3 py-2">
-                          {budgetFunding.tuitionBudgetRange || "-"}
-                        </p>
-                      )}
-                    </div>
-
-                    {/* Living Expense Budget */}
-                    <div>
-                      <label className="block text-xs font-semibold text-slate-500 mb-1">
-                        Monthly Living Expense Budget
-                      </label>
-                      {editMode ? (
-                        <select
-                          value={budgetFunding.livingExpenseBudget}
-                          onChange={(e) =>
-                            setBudgetFunding({
-                              ...budgetFunding,
-                              livingExpenseBudget: e.target.value,
-                            })
-                          }
-                          className="w-full rounded-md border border-slate-200 px-3 py-2 text-sm"
-                        >
-                          <option value="">Select Range</option>
-                          <option value="<5000">Under Rs. 5,000</option>
-                          <option value="5000-15000">Rs. 5,000 - 15,000</option>
-                          <option value="15000-30000">
-                            Rs. 15,000 - 30,000
-                          </option>
-                          <option value=">30000">Above Rs. 30,000</option>
-                        </select>
-                      ) : (
-                        <p className="text-sm font-medium text-slate-800 bg-slate-50 border border-slate-200 rounded-md px-3 py-2">
-                          {budgetFunding.livingExpenseBudget || "-"}
-                        </p>
-                      )}
-                    </div>
-
-                    {/* Funding Sources */}
-                    <div className="md:col-span-2">
-                      <label className="block text-xs font-semibold text-slate-500 mb-1">
-                        Funding Sources (select all that apply)
-                      </label>
-                      {editMode ? (
-                        <div className="flex flex-wrap gap-3">
-                          {[
-                            "Family Support",
-                            "Education Loan",
-                            "Scholarship",
-                            "Work-Study",
-                            "Personal Savings",
-                          ].map((source) => (
-                            <label
-                              key={source}
-                              className="flex items-center gap-2 text-sm"
-                            >
-                              <input
-                                type="checkbox"
-                                checked={budgetFunding.fundingSources.includes(
-                                  source,
-                                )}
-                                onChange={(e) => {
-                                  if (e.target.checked) {
-                                    setBudgetFunding({
-                                      ...budgetFunding,
-                                      fundingSources: [
-                                        ...budgetFunding.fundingSources,
-                                        source,
-                                      ],
-                                    });
-                                  } else {
-                                    setBudgetFunding({
-                                      ...budgetFunding,
-                                      fundingSources:
-                                        budgetFunding.fundingSources.filter(
-                                          (s) => s !== source,
-                                        ),
-                                    });
-                                  }
-                                }}
-                                className="rounded border-slate-300"
-                              />
-                              {source}
-                            </label>
-                          ))}
-                        </div>
-                      ) : (
-                        <p className="text-sm font-medium text-slate-800 bg-slate-50 border border-slate-200 rounded-md px-3 py-2">
-                          {budgetFunding.fundingSources.join(", ") || "-"}
-                        </p>
-                      )}
-                    </div>
-
-                    {/* Willing to take loan */}
-                    <div>
-                      <label className="block text-xs font-semibold text-slate-500 mb-1">
-                        Willing to take education loan?
-                      </label>
-                      {editMode ? (
-                        <select
-                          value={budgetFunding.willingLoan}
-                          onChange={(e) =>
-                            setBudgetFunding({
-                              ...budgetFunding,
-                              willingLoan: e.target.value,
-                            })
-                          }
-                          className="w-full rounded-md border border-slate-200 px-3 py-2 text-sm"
-                        >
-                          <option value="yes">Yes</option>
-                          <option value="no">No</option>
-                          <option value="maybe">
-                            Maybe, depending on terms
-                          </option>
-                        </select>
-                      ) : (
-                        <p className="text-sm font-medium text-slate-800 bg-slate-50 border border-slate-200 rounded-md px-3 py-2">
-                          {budgetFunding.willingLoan}
-                        </p>
-                      )}
-                    </div>
-
-                    {/* Scholarship Required */}
-                    <div>
-                      <label className="block text-xs font-semibold text-slate-500 mb-1">
-                        Scholarship Required?
-                      </label>
-                      {editMode ? (
-                        <select
-                          value={budgetFunding.scholarshipRequired}
-                          onChange={(e) =>
-                            setBudgetFunding({
-                              ...budgetFunding,
-                              scholarshipRequired: e.target.value,
-                            })
-                          }
-                          className="w-full rounded-md border border-slate-200 px-3 py-2 text-sm"
-                        >
-                          <option value="yes">Yes</option>
-                          <option value="no">No</option>
-                        </select>
-                      ) : (
-                        <p className="text-sm font-medium text-slate-800 bg-slate-50 border border-slate-200 rounded-md px-3 py-2">
-                          {budgetFunding.scholarshipRequired}
-                        </p>
-                      )}
-                    </div>
-
-                    {/* Scholarship Type */}
-                    <div>
-                      <label className="block text-xs font-semibold text-slate-500 mb-1">
-                        Preferred Scholarship Type
-                      </label>
-                      {editMode ? (
-                        <select
-                          value={budgetFunding.scholarshipType}
-                          onChange={(e) =>
-                            setBudgetFunding({
-                              ...budgetFunding,
-                              scholarshipType: e.target.value,
-                            })
-                          }
-                          className="w-full rounded-md border border-slate-200 px-3 py-2 text-sm"
-                        >
-                          <option>Merit Based</option>
-                          <option>Need Based</option>
-                          <option>Sports</option>
-                          <option>Minority</option>
-                          <option>Any</option>
-                        </select>
-                      ) : (
-                        <p className="text-sm font-medium text-slate-800 bg-slate-50 border border-slate-200 rounded-md px-3 py-2">
-                          {budgetFunding.scholarshipType}
-                        </p>
-                      )}
-                    </div>
-
-                    {/* Target Level (keep from original) */}
-                    <div>
-                      <label className="block text-xs font-semibold text-slate-500 mb-1">
-                        Target Level
-                      </label>
-                      {editMode ? (
-                        <select
-                          value={budgetFunding.targetLevel}
-                          onChange={(e) =>
-                            setBudgetFunding({
-                              ...budgetFunding,
-                              targetLevel: e.target.value,
-                            })
-                          }
-                          className="w-full rounded-md border border-slate-200 px-3 py-2 text-sm"
-                        >
-                          <option value="">Select</option>
-                          <option>+2</option>
-                          <option>A-Level</option>
-                          <option>Diploma</option>
-                          <option>Bachelor</option>
-                        </select>
-                      ) : (
-                        <p className="text-sm font-medium text-slate-800 bg-slate-50 border border-slate-200 rounded-md px-3 py-2">
-                          {budgetFunding.targetLevel}
-                        </p>
-                      )}
-                    </div>
-
-                    {/* Preferred Field (keep from original) */}
-                    <div>
-                      <label className="block text-xs font-semibold text-slate-500 mb-1">
-                        Preferred Field
-                      </label>
-                      {editMode ? (
-                        <input
-                          type="text"
-                          value={budgetFunding.preferredField}
-                          onChange={(e) =>
-                            setBudgetFunding({
-                              ...budgetFunding,
-                              preferredField: e.target.value,
-                            })
-                          }
-                          className="w-full rounded-md border border-slate-200 px-3 py-2 text-sm"
-                        />
-                      ) : (
-                        <p className="text-sm font-medium text-slate-800 bg-slate-50 border border-slate-200 rounded-md px-3 py-2">
-                          {budgetFunding.preferredField || "-"}
-                        </p>
-                      )}
-                    </div>
                   </div>
-                </div>
 
-                {Object.keys(rawPreferences).length > 0 && (
                   <div>
                     <h3 className="text-lg font-bold text-slate-800 mb-4 flex items-center gap-2">
-                      <Award className="w-5 h-5 text-blue-600" />
-                      Additional Preferences
+                      <Phone className="w-5 h-5 text-blue-600" />
+                      Contact Info
                     </h3>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      {Object.entries(rawPreferences)
-                        .filter(
-                          ([key]) =>
-                            ![
-                              "target_level",
-                              "preferred_field",
-                              "tuition_budget_range",
-                              "living_expense_budget",
-                              "funding_sources",
-                              "willing_loan",
-                              "scholarship_required",
-                              "scholarship_type",
-                              "onboarding_completed",
-                              "course",
-                              "field",
-                              "education_level",
-                              "budget",
-                              "budget_range",
-                              "scholarship",
-                              "contact_number",
-                            ].includes(key),
-                        )
-                        .map(([key, value]) => {
-                          const displayVal = String(value)
-                            .split("_")
-                            .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
-                            .join(" ");
-                          return (
-                            <div
-                              key={key}
-                              className="border border-slate-200 rounded-md p-4"
+                    <div className="space-y-4">
+                      {/* Email - read only */}
+                      <div>
+                        <label className="block text-xs font-semibold text-slate-500 mb-1">
+                          Email
+                        </label>
+                        <p className="text-sm text-slate-800 font-medium bg-slate-50 border border-slate-200 rounded-md px-3 py-2">
+                          {personalData.email}
+                        </p>
+                      </div>
+
+                      {/* Phone Row - 2 columns */}
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                          <label className="block text-xs font-semibold text-slate-500 mb-1">
+                            Phone Number
+                          </label>
+                          {editMode ? (
+                            <input
+                              type="tel"
+                              value={personalData.phone}
+                              onChange={(e) =>
+                                setPersonalData({
+                                  ...personalData,
+                                  phone: e.target.value,
+                                })
+                              }
+                              className="w-full rounded-md border border-slate-200 px-3 py-2 text-sm"
+                            />
+                          ) : (
+                            <p className="text-sm text-slate-800 font-medium bg-slate-50 border border-slate-200 rounded-md px-3 py-2">
+                              {personalData.phone}
+                            </p>
+                          )}
+                        </div>
+                        <div>
+                          <label className="block text-xs font-semibold text-slate-500 mb-1">
+                            Alternate Phone
+                          </label>
+                          {editMode ? (
+                            <input
+                              type="tel"
+                              value={personalData.alternatePhone}
+                              onChange={(e) =>
+                                setPersonalData({
+                                  ...personalData,
+                                  alternatePhone: e.target.value,
+                                })
+                              }
+                              placeholder="Optional"
+                              className="w-full rounded-md border border-slate-200 px-3 py-2 text-sm"
+                            />
+                          ) : (
+                            <p className="text-sm text-slate-800 font-medium bg-slate-50 border border-slate-200 rounded-md px-3 py-2">
+                              {personalData.alternatePhone || "-"}
+                            </p>
+                          )}
+                        </div>
+                      </div>
+
+                      {/* Location Row - 3 columns */}
+                      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <div>
+                          <label className="block text-xs font-semibold text-slate-500 mb-1">
+                            Province
+                          </label>
+                          {editMode ? (
+                            <select
+                              value={selectedProvince}
+                              onChange={(e) => {
+                                setSelectedProvince(e.target.value);
+                                const districts =
+                                  NEPAL_DISTRICTS[
+                                    e.target
+                                      .value as keyof typeof NEPAL_DISTRICTS
+                                  ];
+                                setPersonalData({
+                                  ...personalData,
+                                  province: e.target.value,
+                                  district: districts?.[0] || "",
+                                  localLevel: "",
+                                });
+                                setSelectedDistrict(districts?.[0] || "");
+                              }}
+                              className="w-full rounded-md border border-slate-200 px-3 py-2 text-sm focus:ring-blue-500 focus:border-blue-500 outline-none"
                             >
-                              <p className="text-xs font-semibold text-slate-500 mb-1 capitalize">
-                                {key.replace(/_/g, " ")}
-                              </p>
-                              <p className="text-sm font-medium text-slate-800">
-                                {displayVal}
-                              </p>
-                            </div>
-                          );
-                        })}
-                    </div>
-                  </div>
-                )}
-              </div>
-            )}
-
-            {profileTab === "documents" && (
-              <div>
-                <h3 className="text-lg font-bold text-slate-800 mb-4 flex items-center gap-2">
-                  <FileText className="w-5 h-5 text-blue-600" />
-                  Documents
-                </h3>
-                <p className="text-sm text-slate-500 mb-6">
-                  Upload and manage your academic documents, certificates, and
-                  other files.
-                </p>
-
-                {/* Upload Area */}
-                {editMode && (
-                  <div className="border-2 border-dashed border-slate-200 rounded-xl p-8 text-center mb-6 hover:border-blue-300 transition-colors">
-                    <Upload className="w-10 h-10 text-slate-300 mx-auto mb-3" />
-                    <p className="text-sm text-slate-500 mb-1">
-                      Upload academic documents
-                    </p>
-                    <p className="text-xs text-slate-400 mb-4">
-                      PDF, JPG, PNG (max 10MB each)
-                    </p>
-                    <label className="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg text-sm font-semibold hover:bg-blue-700 cursor-pointer transition-colors">
-                      {uploadingDoc ? "Uploading..." : "Choose Files"}
-                      <input
-                        type="file"
-                        multiple
-                        accept=".pdf,.jpg,.jpeg,.png"
-                        onChange={handleDocumentUpload}
-                        disabled={uploadingDoc}
-                        className="hidden"
-                      />
-                    </label>
-                  </div>
-                )}
-
-                {/* Document List */}
-                {docsLoading ? (
-                  <div className="flex items-center justify-center py-12">
-                    <div className="w-8 h-8 border-2 border-blue-600 border-t-transparent rounded-full animate-spin" />
-                  </div>
-                ) : profileDocuments.length === 0 ? (
-                  <div className="flex flex-col items-center justify-center py-12 text-center">
-                    <FileText className="w-12 h-12 text-slate-300 mx-auto mb-3" />
-                    <p className="text-sm text-slate-500">
-                      No documents uploaded yet.
-                    </p>
-                    {editMode && (
-                      <p className="text-xs text-slate-400 mt-1">
-                        Click the upload area above to add documents.
-                      </p>
-                    )}
-                  </div>
-                ) : (
-                  <div className="space-y-3">
-                    {profileDocuments.map((doc) => (
-                      <div
-                        key={doc.id}
-                        className="flex items-center justify-between border border-slate-200 rounded-lg p-4 hover:border-blue-200 transition-colors"
-                      >
-                        <div className="flex items-center gap-3 min-w-0">
-                          <div className="w-10 h-10 rounded-lg bg-blue-50 flex items-center justify-center shrink-0">
-                            <FileText className="w-5 h-5 text-blue-600" />
-                          </div>
-                          <div className="min-w-0">
-                            <p className="text-sm font-medium text-slate-800 truncate">
-                              {doc.file_name}
+                              {NEPAL_PROVINCES.map((prov) => (
+                                <option key={prov} value={prov}>
+                                  {prov}
+                                </option>
+                              ))}
+                            </select>
+                          ) : (
+                            <p className="text-sm text-slate-800 font-medium bg-slate-50 border border-slate-200 rounded-md px-3 py-2">
+                              {personalData.province}
                             </p>
-                            <p className="text-xs text-slate-500">
-                              {formatFileSize(doc.file_size)} •{" "}
-                              {new Date(doc.created_at).toLocaleDateString()}
+                          )}
+                        </div>
+                        <div>
+                          <label className="block text-xs font-semibold text-slate-500 mb-1">
+                            District
+                          </label>
+                          {editMode ? (
+                            <select
+                              value={selectedDistrict}
+                              onChange={(e) => {
+                                setSelectedDistrict(e.target.value);
+                                setPersonalData({
+                                  ...personalData,
+                                  district: e.target.value,
+                                  localLevel: "",
+                                });
+                              }}
+                              className="w-full rounded-md border border-slate-200 px-3 py-2 text-sm focus:ring-blue-500 focus:border-blue-500 outline-none"
+                            >
+                              {(
+                                NEPAL_DISTRICTS[
+                                  selectedProvince as keyof typeof NEPAL_DISTRICTS
+                                ] || []
+                              ).map((dist) => (
+                                <option key={dist} value={dist}>
+                                  {dist}
+                                </option>
+                              ))}
+                            </select>
+                          ) : (
+                            <p className="text-sm text-slate-800 font-medium bg-slate-50 border border-slate-200 rounded-md px-3 py-2">
+                              {personalData.district}
                             </p>
+                          )}
+                        </div>
+                        <div>
+                          <label className="block text-xs font-semibold text-slate-500 mb-1">
+                            Local Level
+                          </label>
+                          {editMode ? (
+                            <select
+                              value={personalData.localLevel}
+                              onChange={(e) =>
+                                setPersonalData({
+                                  ...personalData,
+                                  localLevel: e.target.value,
+                                })
+                              }
+                              className="w-full rounded-md border border-slate-200 px-3 py-2 text-sm focus:ring-blue-500 focus:border-blue-500 outline-none"
+                            >
+                              <option value="">Select Local Level</option>
+                              {localBodies.map((body: { name: string }) => (
+                                <option key={body.name} value={body.name}>
+                                  {body.name}
+                                </option>
+                              ))}
+                            </select>
+                          ) : (
+                            <p className="text-sm text-slate-800 font-medium bg-slate-50 border border-slate-200 rounded-md px-3 py-2">
+                              {personalData.localLevel}
+                            </p>
+                          )}
+                        </div>
+                      </div>
+
+                      {/* Additional Info (collapsible) */}
+                      <details className="mt-4">
+                        <summary className="text-sm font-semibold text-slate-600 cursor-pointer hover:text-slate-800 select-none">
+                          Additional Info
+                        </summary>
+                        <div className="mt-4 space-y-4">
+                          <div>
+                            <label className="block text-xs font-semibold text-slate-500 mb-1">
+                              Bio
+                            </label>
+                            {editMode ? (
+                              <textarea
+                                value={personalData.bio}
+                                onChange={(e) =>
+                                  setPersonalData({
+                                    ...personalData,
+                                    bio: e.target.value,
+                                  })
+                                }
+                                rows={3}
+                                className="w-full rounded-md border border-slate-200 px-3 py-2 text-sm"
+                              />
+                            ) : (
+                              <p className="text-sm text-slate-800 font-medium bg-slate-50 border border-slate-200 rounded-md px-3 py-2">
+                                {personalData.bio || "-"}
+                              </p>
+                            )}
                           </div>
                         </div>
-                        <button
-                          onClick={() => handleDeleteDocument(doc.id)}
-                          className="w-8 h-8 rounded-full flex items-center justify-center text-slate-400 hover:text-red-600 hover:bg-red-50 transition-colors shrink-0"
-                          title="Delete document"
-                        >
-                          <Trash2 className="w-4 h-4" />
-                        </button>
+                      </details>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {profileTab === "education" && (
+                <div>
+                  <div className="flex justify-between items-center mb-4">
+                    <h3 className="text-lg font-bold text-slate-800 flex items-center gap-2">
+                      <GraduationCap className="w-5 h-5 text-blue-600" />
+                      Education History
+                    </h3>
+                    {editMode && (
+                      <button
+                        onClick={handleEducationAdd}
+                        className="flex items-center gap-2 px-3 py-1.5 bg-blue-50 text-blue-600 rounded-md text-sm font-medium hover:bg-blue-100"
+                      >
+                        <Plus className="w-4 h-4" /> Add Education
+                      </button>
+                    )}
+                  </div>
+                  <div className="space-y-4">
+                    {education.map((entry, index) => (
+                      <div
+                        key={entry.id}
+                        className="border border-slate-200 rounded-md p-4"
+                      >
+                        <div className="flex justify-between items-start mb-3">
+                          <span className="text-xs font-semibold text-slate-500">
+                            Entry {index + 1}
+                          </span>
+                          {editMode && (
+                            <button
+                              onClick={() => handleEducationRemove(entry.id)}
+                              className="text-red-500 hover:text-red-700"
+                            >
+                              <Trash2 className="w-4 h-4" />
+                            </button>
+                          )}
+                        </div>
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-4">
+                          <div>
+                            <label className="block text-xs font-semibold text-slate-500 mb-1">
+                              Level
+                            </label>
+                            {editMode ? (
+                              <select
+                                value={entry.level}
+                                onChange={(e) =>
+                                  handleEducationChange(
+                                    entry.id,
+                                    "level",
+                                    e.target.value,
+                                  )
+                                }
+                                className="w-full rounded-md border border-slate-200 px-3 py-2 text-sm"
+                              >
+                                <option value="">Select Level</option>
+                                <option>SEE</option>
+                                <option>+2</option>
+                                <option>A Level</option>
+                                <option>Diploma</option>
+                                <option>Bachelor</option>
+                              </select>
+                            ) : (
+                              <p className="text-sm font-medium text-slate-800 bg-slate-50 border border-slate-200 rounded-md px-3 py-2">
+                                {entry.level}
+                              </p>
+                            )}
+                          </div>
+                          <div>
+                            <label className="block text-xs font-semibold text-slate-500 mb-1">
+                              Institution Name
+                            </label>
+                            {editMode ? (
+                              <input
+                                type="text"
+                                value={entry.institutionName}
+                                onChange={(e) =>
+                                  handleEducationChange(
+                                    entry.id,
+                                    "institutionName",
+                                    e.target.value,
+                                  )
+                                }
+                                className="w-full rounded-md border border-slate-200 px-3 py-2 text-sm"
+                              />
+                            ) : (
+                              <p className="text-sm font-medium text-slate-800 bg-slate-50 border border-slate-200 rounded-md px-3 py-2">
+                                {entry.institutionName}
+                              </p>
+                            )}
+                          </div>
+                          <div>
+                            <label className="block text-xs font-semibold text-slate-500 mb-1">
+                              Board/University
+                            </label>
+                            {editMode ? (
+                              <input
+                                type="text"
+                                value={entry.boardUniversity}
+                                onChange={(e) =>
+                                  handleEducationChange(
+                                    entry.id,
+                                    "boardUniversity",
+                                    e.target.value,
+                                  )
+                                }
+                                className="w-full rounded-md border border-slate-200 px-3 py-2 text-sm"
+                              />
+                            ) : (
+                              <p className="text-sm font-medium text-slate-800 bg-slate-50 border border-slate-200 rounded-md px-3 py-2">
+                                {entry.boardUniversity}
+                              </p>
+                            )}
+                          </div>
+                          <div>
+                            <label className="block text-xs font-semibold text-slate-500 mb-1">
+                              Country
+                            </label>
+                            {editMode ? (
+                              <input
+                                type="text"
+                                value={entry.country}
+                                onChange={(e) =>
+                                  handleEducationChange(
+                                    entry.id,
+                                    "country",
+                                    e.target.value,
+                                  )
+                                }
+                                className="w-full rounded-md border border-slate-200 px-3 py-2 text-sm"
+                              />
+                            ) : (
+                              <p className="text-sm font-medium text-slate-800 bg-slate-50 border border-slate-200 rounded-md px-3 py-2">
+                                {entry.country}
+                              </p>
+                            )}
+                          </div>
+                          <div>
+                            <label className="block text-xs font-semibold text-slate-500 mb-1">
+                              Field/Stream
+                            </label>
+                            {editMode ? (
+                              <input
+                                type="text"
+                                value={entry.stream}
+                                onChange={(e) =>
+                                  handleEducationChange(
+                                    entry.id,
+                                    "stream",
+                                    e.target.value,
+                                  )
+                                }
+                                className="w-full rounded-md border border-slate-200 px-3 py-2 text-sm"
+                              />
+                            ) : (
+                              <p className="text-sm font-medium text-slate-800 bg-slate-50 border border-slate-200 rounded-md px-3 py-2">
+                                {entry.stream}
+                              </p>
+                            )}
+                          </div>
+                          <div>
+                            <label className="block text-xs font-semibold text-slate-500 mb-1">
+                              Start Year
+                            </label>
+                            {editMode ? (
+                              <input
+                                type="text"
+                                value={entry.startYear}
+                                onChange={(e) =>
+                                  handleEducationChange(
+                                    entry.id,
+                                    "startYear",
+                                    e.target.value,
+                                  )
+                                }
+                                className="w-full rounded-md border border-slate-200 px-3 py-2 text-sm"
+                              />
+                            ) : (
+                              <p className="text-sm font-medium text-slate-800 bg-slate-50 border border-slate-200 rounded-md px-3 py-2">
+                                {entry.startYear}
+                              </p>
+                            )}
+                          </div>
+                          <div>
+                            <label className="block text-xs font-semibold text-slate-500 mb-1">
+                              End Year
+                            </label>
+                            {editMode ? (
+                              <input
+                                type="text"
+                                value={entry.endYear}
+                                onChange={(e) =>
+                                  handleEducationChange(
+                                    entry.id,
+                                    "endYear",
+                                    e.target.value,
+                                  )
+                                }
+                                className="w-full rounded-md border border-slate-200 px-3 py-2 text-sm"
+                              />
+                            ) : (
+                              <p className="text-sm font-medium text-slate-800 bg-slate-50 border border-slate-200 rounded-md px-3 py-2">
+                                {entry.endYear}
+                              </p>
+                            )}
+                          </div>
+                          <div>
+                            <label className="block text-xs font-semibold text-slate-500 mb-1">
+                              Grading System
+                            </label>
+                            {editMode ? (
+                              <select
+                                value={entry.gradingSystem}
+                                onChange={(e) =>
+                                  handleEducationChange(
+                                    entry.id,
+                                    "gradingSystem",
+                                    e.target.value,
+                                  )
+                                }
+                                className="w-full rounded-md border border-slate-200 px-3 py-2 text-sm"
+                              >
+                                <option>GPA</option>
+                                <option>Percentage</option>
+                              </select>
+                            ) : (
+                              <p className="text-sm font-medium text-slate-800 bg-slate-50 border border-slate-200 rounded-md px-3 py-2">
+                                {entry.gradingSystem}
+                              </p>
+                            )}
+                          </div>
+                          <div>
+                            <label className="block text-xs font-semibold text-slate-500 mb-1">
+                              GPA / Percentage
+                            </label>
+                            {editMode ? (
+                              <input
+                                type="text"
+                                value={entry.grade}
+                                onChange={(e) =>
+                                  handleEducationChange(
+                                    entry.id,
+                                    "grade",
+                                    e.target.value,
+                                  )
+                                }
+                                className="w-full rounded-md border border-slate-200 px-3 py-2 text-sm"
+                              />
+                            ) : (
+                              <p className="text-sm font-medium text-slate-800 bg-slate-50 border border-slate-200 rounded-md px-3 py-2">
+                                {entry.grade}
+                              </p>
+                            )}
+                          </div>
+                        </div>
                       </div>
                     ))}
                   </div>
-                )}
-              </div>
-            )}
+                </div>
+              )}
+
+              {profileTab === "budget" && (
+                <div className="space-y-8">
+                  <div>
+                    <h3 className="text-lg font-bold text-slate-800 mb-4 flex items-center gap-2">
+                      <DollarSign className="w-5 h-5 text-blue-600" />
+                      Budget & Funding
+                    </h3>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      {/* Tuition Budget */}
+                      <div>
+                        <label className="block text-xs font-semibold text-slate-500 mb-1">
+                          Tuition Budget Range (Per Year)
+                        </label>
+                        {editMode ? (
+                          <select
+                            value={budgetFunding.tuitionBudgetRange}
+                            onChange={(e) =>
+                              setBudgetFunding({
+                                ...budgetFunding,
+                                tuitionBudgetRange: e.target.value,
+                              })
+                            }
+                            className="w-full rounded-md border border-slate-200 px-3 py-2 text-sm"
+                          >
+                            <option value="">Select Range</option>
+                            <option value="<50000">Under Rs. 50,000</option>
+                            <option value="50000-200000">
+                              Rs. 50,000 - 2,00,000
+                            </option>
+                            <option value="200000-500000">
+                              Rs. 2,00,000 - 5,00,000
+                            </option>
+                            <option value="500000-1000000">
+                              Rs. 5,00,000 - 10,00,000
+                            </option>
+                            <option value=">1000000">
+                              Above Rs. 10,00,000
+                            </option>
+                          </select>
+                        ) : (
+                          <p className="text-sm font-medium text-slate-800 bg-slate-50 border border-slate-200 rounded-md px-3 py-2">
+                            {budgetFunding.tuitionBudgetRange || "-"}
+                          </p>
+                        )}
+                      </div>
+
+                      {/* Living Expense Budget */}
+                      <div>
+                        <label className="block text-xs font-semibold text-slate-500 mb-1">
+                          Monthly Living Expense Budget
+                        </label>
+                        {editMode ? (
+                          <select
+                            value={budgetFunding.livingExpenseBudget}
+                            onChange={(e) =>
+                              setBudgetFunding({
+                                ...budgetFunding,
+                                livingExpenseBudget: e.target.value,
+                              })
+                            }
+                            className="w-full rounded-md border border-slate-200 px-3 py-2 text-sm"
+                          >
+                            <option value="">Select Range</option>
+                            <option value="<5000">Under Rs. 5,000</option>
+                            <option value="5000-15000">
+                              Rs. 5,000 - 15,000
+                            </option>
+                            <option value="15000-30000">
+                              Rs. 15,000 - 30,000
+                            </option>
+                            <option value=">30000">Above Rs. 30,000</option>
+                          </select>
+                        ) : (
+                          <p className="text-sm font-medium text-slate-800 bg-slate-50 border border-slate-200 rounded-md px-3 py-2">
+                            {budgetFunding.livingExpenseBudget || "-"}
+                          </p>
+                        )}
+                      </div>
+
+                      {/* Funding Sources */}
+                      <div className="md:col-span-2">
+                        <label className="block text-xs font-semibold text-slate-500 mb-1">
+                          Funding Sources (select all that apply)
+                        </label>
+                        {editMode ? (
+                          <div className="flex flex-wrap gap-3">
+                            {[
+                              "Family Support",
+                              "Education Loan",
+                              "Scholarship",
+                              "Work-Study",
+                              "Personal Savings",
+                            ].map((source) => (
+                              <label
+                                key={source}
+                                className="flex items-center gap-2 text-sm"
+                              >
+                                <input
+                                  type="checkbox"
+                                  checked={budgetFunding.fundingSources.includes(
+                                    source,
+                                  )}
+                                  onChange={(e) => {
+                                    if (e.target.checked) {
+                                      setBudgetFunding({
+                                        ...budgetFunding,
+                                        fundingSources: [
+                                          ...budgetFunding.fundingSources,
+                                          source,
+                                        ],
+                                      });
+                                    } else {
+                                      setBudgetFunding({
+                                        ...budgetFunding,
+                                        fundingSources:
+                                          budgetFunding.fundingSources.filter(
+                                            (s) => s !== source,
+                                          ),
+                                      });
+                                    }
+                                  }}
+                                  className="rounded border-slate-300"
+                                />
+                                {source}
+                              </label>
+                            ))}
+                          </div>
+                        ) : (
+                          <p className="text-sm font-medium text-slate-800 bg-slate-50 border border-slate-200 rounded-md px-3 py-2">
+                            {budgetFunding.fundingSources.join(", ") || "-"}
+                          </p>
+                        )}
+                      </div>
+
+                      {/* Willing to take loan */}
+                      <div>
+                        <label className="block text-xs font-semibold text-slate-500 mb-1">
+                          Willing to take education loan?
+                        </label>
+                        {editMode ? (
+                          <select
+                            value={budgetFunding.willingLoan}
+                            onChange={(e) =>
+                              setBudgetFunding({
+                                ...budgetFunding,
+                                willingLoan: e.target.value,
+                              })
+                            }
+                            className="w-full rounded-md border border-slate-200 px-3 py-2 text-sm"
+                          >
+                            <option value="yes">Yes</option>
+                            <option value="no">No</option>
+                            <option value="maybe">
+                              Maybe, depending on terms
+                            </option>
+                          </select>
+                        ) : (
+                          <p className="text-sm font-medium text-slate-800 bg-slate-50 border border-slate-200 rounded-md px-3 py-2">
+                            {budgetFunding.willingLoan}
+                          </p>
+                        )}
+                      </div>
+
+                      {/* Scholarship Required */}
+                      <div>
+                        <label className="block text-xs font-semibold text-slate-500 mb-1">
+                          Scholarship Required?
+                        </label>
+                        {editMode ? (
+                          <select
+                            value={budgetFunding.scholarshipRequired}
+                            onChange={(e) =>
+                              setBudgetFunding({
+                                ...budgetFunding,
+                                scholarshipRequired: e.target.value,
+                              })
+                            }
+                            className="w-full rounded-md border border-slate-200 px-3 py-2 text-sm"
+                          >
+                            <option value="yes">Yes</option>
+                            <option value="no">No</option>
+                          </select>
+                        ) : (
+                          <p className="text-sm font-medium text-slate-800 bg-slate-50 border border-slate-200 rounded-md px-3 py-2">
+                            {budgetFunding.scholarshipRequired}
+                          </p>
+                        )}
+                      </div>
+
+                      {/* Scholarship Type */}
+                      <div>
+                        <label className="block text-xs font-semibold text-slate-500 mb-1">
+                          Preferred Scholarship Type
+                        </label>
+                        {editMode ? (
+                          <select
+                            value={budgetFunding.scholarshipType}
+                            onChange={(e) =>
+                              setBudgetFunding({
+                                ...budgetFunding,
+                                scholarshipType: e.target.value,
+                              })
+                            }
+                            className="w-full rounded-md border border-slate-200 px-3 py-2 text-sm"
+                          >
+                            <option>Merit Based</option>
+                            <option>Need Based</option>
+                            <option>Sports</option>
+                            <option>Minority</option>
+                            <option>Any</option>
+                          </select>
+                        ) : (
+                          <p className="text-sm font-medium text-slate-800 bg-slate-50 border border-slate-200 rounded-md px-3 py-2">
+                            {budgetFunding.scholarshipType}
+                          </p>
+                        )}
+                      </div>
+
+                      {/* Target Level (keep from original) */}
+                      <div>
+                        <label className="block text-xs font-semibold text-slate-500 mb-1">
+                          Target Level
+                        </label>
+                        {editMode ? (
+                          <select
+                            value={budgetFunding.targetLevel}
+                            onChange={(e) =>
+                              setBudgetFunding({
+                                ...budgetFunding,
+                                targetLevel: e.target.value,
+                              })
+                            }
+                            className="w-full rounded-md border border-slate-200 px-3 py-2 text-sm"
+                          >
+                            <option value="">Select</option>
+                            <option>+2</option>
+                            <option>A-Level</option>
+                            <option>Diploma</option>
+                            <option>Bachelor</option>
+                          </select>
+                        ) : (
+                          <p className="text-sm font-medium text-slate-800 bg-slate-50 border border-slate-200 rounded-md px-3 py-2">
+                            {budgetFunding.targetLevel}
+                          </p>
+                        )}
+                      </div>
+
+                      {/* Preferred Field (keep from original) */}
+                      <div>
+                        <label className="block text-xs font-semibold text-slate-500 mb-1">
+                          Preferred Field
+                        </label>
+                        {editMode ? (
+                          <input
+                            type="text"
+                            value={budgetFunding.preferredField}
+                            onChange={(e) =>
+                              setBudgetFunding({
+                                ...budgetFunding,
+                                preferredField: e.target.value,
+                              })
+                            }
+                            className="w-full rounded-md border border-slate-200 px-3 py-2 text-sm"
+                          />
+                        ) : (
+                          <p className="text-sm font-medium text-slate-800 bg-slate-50 border border-slate-200 rounded-md px-3 py-2">
+                            {budgetFunding.preferredField || "-"}
+                          </p>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+
+                  {Object.keys(rawPreferences).length > 0 && (
+                    <div>
+                      <h3 className="text-lg font-bold text-slate-800 mb-4 flex items-center gap-2">
+                        <Award className="w-5 h-5 text-blue-600" />
+                        Additional Preferences
+                      </h3>
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        {Object.entries(rawPreferences)
+                          .filter(
+                            ([key]) =>
+                              ![
+                                "target_level",
+                                "preferred_field",
+                                "tuition_budget_range",
+                                "living_expense_budget",
+                                "funding_sources",
+                                "willing_loan",
+                                "scholarship_required",
+                                "scholarship_type",
+                                "onboarding_completed",
+                                "course",
+                                "field",
+                                "education_level",
+                                "budget",
+                                "budget_range",
+                                "scholarship",
+                                "contact_number",
+                              ].includes(key),
+                          )
+                          .map(([key, value]) => {
+                            const displayVal = String(value)
+                              .split("_")
+                              .map(
+                                (w) => w.charAt(0).toUpperCase() + w.slice(1),
+                              )
+                              .join(" ");
+                            return (
+                              <div
+                                key={key}
+                                className="border border-slate-200 rounded-md p-4"
+                              >
+                                <p className="text-xs font-semibold text-slate-500 mb-1 capitalize">
+                                  {key.replace(/_/g, " ")}
+                                </p>
+                                <p className="text-sm font-medium text-slate-800">
+                                  {displayVal}
+                                </p>
+                              </div>
+                            );
+                          })}
+                      </div>
+                    </div>
+                  )}
+                </div>
+              )}
+
+              {profileTab === "documents" && (
+                <div>
+                  <h3 className="text-lg font-bold text-slate-800 mb-4 flex items-center gap-2">
+                    <FileText className="w-5 h-5 text-blue-600" />
+                    Documents
+                  </h3>
+                  <p className="text-sm text-slate-500 mb-6">
+                    Upload and manage your academic documents, certificates, and
+                    other files.
+                  </p>
+
+                  {/* Upload Area */}
+                  {editMode && (
+                    <div className="border-2 border-dashed border-slate-200 rounded-xl p-8 text-center mb-6 hover:border-blue-300 transition-colors">
+                      <Upload className="w-10 h-10 text-slate-300 mx-auto mb-3" />
+                      <p className="text-sm text-slate-500 mb-1">
+                        Upload academic documents
+                      </p>
+                      <p className="text-xs text-slate-400 mb-4">
+                        PDF, JPG, PNG (max 10MB each)
+                      </p>
+                      <label className="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg text-sm font-semibold hover:bg-blue-700 cursor-pointer transition-colors">
+                        {uploadingDoc ? "Uploading..." : "Choose Files"}
+                        <input
+                          type="file"
+                          multiple
+                          accept=".pdf,.jpg,.jpeg,.png"
+                          onChange={handleDocumentUpload}
+                          disabled={uploadingDoc}
+                          className="hidden"
+                        />
+                      </label>
+                    </div>
+                  )}
+
+                  {/* Document List */}
+                  {docsLoading ? (
+                    <div className="flex items-center justify-center py-12">
+                      <div className="w-8 h-8 border-2 border-blue-600 border-t-transparent rounded-full animate-spin" />
+                    </div>
+                  ) : profileDocuments.length === 0 ? (
+                    <div className="flex flex-col items-center justify-center py-12 text-center">
+                      <FileText className="w-12 h-12 text-slate-300 mx-auto mb-3" />
+                      <p className="text-sm text-slate-500">
+                        No documents uploaded yet.
+                      </p>
+                      {editMode && (
+                        <p className="text-xs text-slate-400 mt-1">
+                          Click the upload area above to add documents.
+                        </p>
+                      )}
+                    </div>
+                  ) : (
+                    <div className="space-y-3">
+                      {profileDocuments.map((doc) => (
+                        <div
+                          key={doc.id}
+                          className="flex items-center justify-between border border-slate-200 rounded-lg p-4 hover:border-blue-200 transition-colors"
+                        >
+                          <div className="flex items-center gap-3 min-w-0">
+                            <div className="w-10 h-10 rounded-lg bg-blue-50 flex items-center justify-center shrink-0">
+                              <FileText className="w-5 h-5 text-blue-600" />
+                            </div>
+                            <div className="min-w-0">
+                              <p className="text-sm font-medium text-slate-800 truncate">
+                                {doc.file_name}
+                              </p>
+                              <p className="text-xs text-slate-500">
+                                {formatFileSize(doc.file_size)} •{" "}
+                                {new Date(doc.created_at).toLocaleDateString()}
+                              </p>
+                            </div>
+                          </div>
+                          <button
+                            onClick={() => handleDeleteDocument(doc.id)}
+                            className="w-8 h-8 rounded-full flex items-center justify-center text-slate-400 hover:text-red-600 hover:bg-red-50 transition-colors shrink-0"
+                            title="Delete document"
+                          >
+                            <Trash2 className="w-4 h-4" />
+                          </button>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              )}
+            </div>
           </div>
         </div>
-      </div>
 
-      {toast && (
-        <div
-          className={`fixed bottom-4 right-4 z-50 rounded-lg px-4 py-3 text-sm font-semibold text-white shadow-lg ${toast.type === "error" ? "bg-red-600" : "bg-green-600"}`}
-        >
-          {toast.message}
-        </div>
-      )}
+        {toast && (
+          <div
+            className={`fixed bottom-4 right-4 z-50 rounded-lg px-4 py-3 text-sm font-semibold text-white shadow-lg ${toast.type === "error" ? "bg-red-600" : "bg-green-600"}`}
+          >
+            {toast.message}
+          </div>
+        )}
+      </div>
     </div>
   );
 }

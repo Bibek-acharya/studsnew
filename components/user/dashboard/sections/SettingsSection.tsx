@@ -207,7 +207,15 @@ export default function SettingsSection() {
 
   return (
     <div>
-      <div className="flex gap-1 bg-slate-100 p-1 rounded-md mb-6 w-fit mt-6">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-6">
+        <h1 className="text-2xl font-bold text-gray-800">Settings</h1>
+        <div className="flex items-center text-sm text-gray-500 mt-2 sm:mt-0 gap-2">
+          <span>Dashboard</span>
+          <span>-</span>
+          <span className="text-gray-800 font-medium">Settings</span>
+        </div>
+      </div>
+      <div className="flex gap-1 bg-slate-100 p-1 rounded-md mb-6 w-fit">
         {tabs.map((tab) => (
           <button
             key={tab.id}

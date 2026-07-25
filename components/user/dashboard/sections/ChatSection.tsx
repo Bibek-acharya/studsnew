@@ -1,182 +1,229 @@
-'use client'
+"use client";
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect } from "react";
 import {
-  Search, MessageSquare, Send, Paperclip, Info,
-  GraduationCap, Link2, FileText, Phone, Mail,
-  Building2, MapPin, Calendar, ChevronRight, CheckCheck,
-  X, Copy, Loader2, AlertCircle
-} from 'lucide-react'
-import { apiService, MessageContactItem, MessageItem } from '@/services/api'
-import { useAuth } from '@/services/AuthContext'
+  Search,
+  MessageSquare,
+  Send,
+  Paperclip,
+  Info,
+  GraduationCap,
+  Link2,
+  FileText,
+  Phone,
+  Mail,
+  Building2,
+  MapPin,
+  Calendar,
+  ChevronRight,
+  CheckCheck,
+  X,
+  Copy,
+  Loader2,
+  AlertCircle,
+} from "lucide-react";
+import { apiService, MessageContactItem, MessageItem } from "@/services/api";
+import { useAuth } from "@/services/AuthContext";
 
 interface Message {
-  id: string
-  conversationId: string
-  senderId: string
-  senderRole: 'student' | 'college'
-  messageType: 'text' | 'system' | 'document'
-  content: string
-  timestamp: number
-  readStatus: boolean
+  id: string;
+  conversationId: string;
+  senderId: string;
+  senderRole: "student" | "college";
+  messageType: "text" | "system" | "document";
+  content: string;
+  timestamp: number;
+  readStatus: boolean;
 }
 
 interface Conversation {
-  id: string
-  participants: { id: string; name: string; avatar: string; role: string }[]
-  type: string
-  status: string
-  lastMessage: string
-  updatedAt: number
-  unreadCount: Record<string, number>
+  id: string;
+  participants: { id: string; name: string; avatar: string; role: string }[];
+  type: string;
+  status: string;
+  lastMessage: string;
+  updatedAt: number;
+  unreadCount: Record<string, number>;
 }
 
-const mockDetails: Record<string, { title: string; role: string; items: { icon: string; label: string; value: string; copy?: boolean }[] }> = {}
+const mockDetails: Record<
+  string,
+  {
+    title: string;
+    role: string;
+    items: { icon: string; label: string; value: string; copy?: boolean }[];
+  }
+> = {};
 
-const filters = ['All', 'Admission', 'Inquiry', 'Counseling']
+const filters = ["All", "Admission", "Inquiry", "Counseling"];
 
 const iconMap: Record<string, React.ComponentType<{ className?: string }>> = {
-  'graduation-cap': GraduationCap,
-  'link-2': Link2,
-  'file-text': FileText,
-  'phone': Phone,
-  'mail': Mail,
-  'building-2': Building2,
-  'map-pin': MapPin,
-  'calendar': Calendar,
-}
+  "graduation-cap": GraduationCap,
+  "link-2": Link2,
+  "file-text": FileText,
+  phone: Phone,
+  mail: Mail,
+  "building-2": Building2,
+  "map-pin": MapPin,
+  calendar: Calendar,
+};
 
 export default function ChatSection() {
-  const { user } = useAuth()
-  const currentUserId = user?.id?.toString() || ''
+  const { user } = useAuth();
+  const currentUserId = user?.id?.toString() || "";
 
-  const [loading, setLoading] = useState(true)
-  const [error, setError] = useState<string | null>(null)
-  const [activeConvId, setActiveConvId] = useState<string | null>(null)
-  const [searchQuery, setSearchQuery] = useState('')
-  const [activeFilter, setActiveFilter] = useState('All')
-  const [contacts, setContacts] = useState<MessageContactItem[]>([])
-  const [allMessages, setAllMessages] = useState<MessageItem[]>([])
-  const [messageInput, setMessageInput] = useState('')
-  const [showContactInfo, setShowContactInfo] = useState(false)
-  const [toast, setToast] = useState<{message: string; type: 'success' | 'error'} | null>(null)
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [activeConvId, setActiveConvId] = useState<string | null>(null);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [activeFilter, setActiveFilter] = useState("All");
+  const [contacts, setContacts] = useState<MessageContactItem[]>([]);
+  const [allMessages, setAllMessages] = useState<MessageItem[]>([]);
+  const [messageInput, setMessageInput] = useState("");
+  const [showContactInfo, setShowContactInfo] = useState(false);
+  const [toast, setToast] = useState<{
+    message: string;
+    type: "success" | "error";
+  } | null>(null);
 
   useEffect(() => {
     const fetchData = async () => {
       try {
-        setLoading(true)
-        setError(null)
+        setLoading(true);
+        setError(null);
         const [contactsRes, messagesRes] = await Promise.all([
           apiService.getMessageContacts(),
-          apiService.getMessages({ page: 1, limit: 100 })
-        ])
-        setContacts(contactsRes.data || [])
-        setAllMessages(messagesRes.data?.messages || [])
+          apiService.getMessages({ page: 1, limit: 100 }),
+        ]);
+        setContacts(contactsRes.data || []);
+        setAllMessages(messagesRes.data?.messages || []);
       } catch (err: any) {
-        setError(err.message || 'Failed to load messages')
+        setError(err.message || "Failed to load messages");
       } finally {
-        setLoading(false)
+        setLoading(false);
       }
-    }
-    fetchData()
-  }, [])
+    };
+    fetchData();
+  }, []);
 
   // Build conversations from contacts
-  const conversations: Conversation[] = contacts.map(c => ({
+  const conversations: Conversation[] = contacts.map((c) => ({
     id: `conv_${c.user_id}`,
     participants: [
-      { id: currentUserId, name: 'Me', avatar: '', role: '' },
-      { id: c.user_id.toString(), name: c.name, avatar: `https://i.pravatar.cc/150?u=${c.user_id}`, role: '' }
+      { id: currentUserId, name: "Me", avatar: "", role: "" },
+      {
+        id: c.user_id.toString(),
+        name: c.name,
+        avatar: `https://i.pravatar.cc/150?u=${c.user_id}`,
+        role: "",
+      },
     ],
-    type: 'Inquiry',
-    status: 'Active',
+    type: "Inquiry",
+    status: "Active",
     lastMessage: c.last_message,
     updatedAt: Date.now(),
-    unreadCount: { [currentUserId]: c.unread }
-  }))
+    unreadCount: { [currentUserId]: c.unread },
+  }));
 
   // Build messages per conversation from all messages
-  const messages: Message[] = allMessages.map(m => ({
+  const messages: Message[] = allMessages.map((m) => ({
     id: m.id.toString(),
     conversationId: `conv_${m.sender_id === (user?.id || 0) ? m.receiver_id : m.sender_id}`,
     senderId: m.sender_id.toString(),
-    senderRole: m.direction === 'outgoing' ? 'student' : 'college',
-    messageType: 'text',
+    senderRole: m.direction === "outgoing" ? "student" : "college",
+    messageType: "text",
     content: m.content,
     timestamp: new Date(m.created_at).getTime(),
-    readStatus: m.read
-  }))
+    readStatus: m.read,
+  }));
 
   const filteredConversations = conversations
-    .filter(c => activeFilter === 'All' || c.type === activeFilter)
-    .filter(c => {
-      if (!searchQuery) return true
-      const other = c.participants.find(p => p.id !== currentUserId)
-      return other?.name.toLowerCase().includes(searchQuery.toLowerCase()) || c.lastMessage.toLowerCase().includes(searchQuery.toLowerCase())
+    .filter((c) => activeFilter === "All" || c.type === activeFilter)
+    .filter((c) => {
+      if (!searchQuery) return true;
+      const other = c.participants.find((p) => p.id !== currentUserId);
+      return (
+        other?.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        c.lastMessage.toLowerCase().includes(searchQuery.toLowerCase())
+      );
     })
-    .sort((a, b) => b.updatedAt - a.updatedAt)
+    .sort((a, b) => b.updatedAt - a.updatedAt);
 
-  const activeConversation = conversations.find(c => c.id === activeConvId)
-  const otherParticipant = activeConversation?.participants.find(p => p.id !== currentUserId)
+  const activeConversation = conversations.find((c) => c.id === activeConvId);
+  const otherParticipant = activeConversation?.participants.find(
+    (p) => p.id !== currentUserId,
+  );
   const conversationMessages = activeConvId
-    ? messages.filter(m => m.conversationId === activeConvId).sort((a, b) => a.timestamp - b.timestamp)
-    : []
+    ? messages
+        .filter((m) => m.conversationId === activeConvId)
+        .sort((a, b) => a.timestamp - b.timestamp)
+    : [];
 
   const handleSend = async () => {
-    if (!messageInput.trim() || !activeConvId || !otherParticipant) return
-    const receiverId = parseInt(otherParticipant.id)
-    if (isNaN(receiverId)) return
+    if (!messageInput.trim() || !activeConvId || !otherParticipant) return;
+    const receiverId = parseInt(otherParticipant.id);
+    if (isNaN(receiverId)) return;
 
     try {
-      await apiService.createMessage({ receiver_id: receiverId, subject: '', content: messageInput })
+      await apiService.createMessage({
+        receiver_id: receiverId,
+        subject: "",
+        content: messageInput,
+      });
 
       const newMessage: Message = {
-        id: 'msg_' + Date.now(),
+        id: "msg_" + Date.now(),
         conversationId: activeConvId,
         senderId: currentUserId,
-        senderRole: 'student',
-        messageType: 'text',
+        senderRole: "student",
+        messageType: "text",
         content: messageInput,
         timestamp: Date.now(),
-        readStatus: false
-      }
-      setAllMessages(prev => [...prev, {
-        id: Date.now(),
-        created_at: new Date().toISOString(),
-        updated_at: new Date().toISOString(),
-        sender_id: user?.id || 0,
-        receiver_id: receiverId,
-        subject: '',
-        content: messageInput,
-        read: false,
-        direction: 'outgoing'
-      }])
-      setMessageInput('')
-      setToast({ message: 'Message sent', type: 'success' })
-      setTimeout(() => setToast(null), 3000)
+        readStatus: false,
+      };
+      setAllMessages((prev) => [
+        ...prev,
+        {
+          id: Date.now(),
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString(),
+          sender_id: user?.id || 0,
+          receiver_id: receiverId,
+          subject: "",
+          content: messageInput,
+          read: false,
+          direction: "outgoing",
+        },
+      ]);
+      setMessageInput("");
+      setToast({ message: "Message sent", type: "success" });
+      setTimeout(() => setToast(null), 3000);
     } catch (err: any) {
-      setError(err.message || 'Failed to send message')
+      setError(err.message || "Failed to send message");
     }
-  }
+  };
 
   const selectConversation = (id: string) => {
-    setActiveConvId(id)
-    setShowContactInfo(false)
-  }
+    setActiveConvId(id);
+    setShowContactInfo(false);
+  };
 
   const formatTime = (timestamp: number) => {
-    return new Date(timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
-  }
+    return new Date(timestamp).toLocaleTimeString([], {
+      hour: "2-digit",
+      minute: "2-digit",
+    });
+  };
 
   const copyToClipboard = (text: string) => {
-    navigator.clipboard.writeText(text)
-  }
+    navigator.clipboard.writeText(text);
+  };
 
   const getStatusColor = (status: string) => {
-    if (status === 'Active') return 'bg-green-100 text-green-700'
-    if (status === 'Pending') return 'bg-yellow-100 text-yellow-700'
-    return 'bg-gray-100 text-gray-600'
-  }
+    if (status === "Active") return "bg-green-100 text-green-700";
+    if (status === "Pending") return "bg-yellow-100 text-yellow-700";
+    return "bg-gray-100 text-gray-600";
+  };
 
   if (loading) {
     return (
@@ -186,7 +233,7 @@ export default function ChatSection() {
           <p className="text-sm text-slate-500">Loading messages...</p>
         </div>
       </div>
-    )
+    );
   }
 
   if (error) {
@@ -195,23 +242,40 @@ export default function ChatSection() {
         <div className="flex flex-col items-center gap-3 text-center">
           <AlertCircle className="w-8 h-8 text-red-500" />
           <p className="text-sm text-red-600">{error}</p>
-          <button onClick={() => window.location.reload()} className="text-sm text-primary hover:underline">Retry</button>
+          <button
+            onClick={() => window.location.reload()}
+            className="text-sm text-primary hover:underline"
+          >
+            Retry
+          </button>
         </div>
       </div>
-    )
+    );
   }
 
   return (
-    <div className="h-[calc(100vh-140px)] mt-6 relative">
-      <div className="flex h-full bg-white rounded-md  border border-slate-200 overflow-hidden">
+    <div>
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-6">
+        <h1 className="text-2xl font-bold text-gray-800">Messages</h1>
+        <div className="flex items-center text-sm text-gray-500 mt-2 sm:mt-0 gap-2">
+          <span>Dashboard</span>
+          <span>-</span>
+          <span className="text-gray-800 font-medium">Messages</span>
+        </div>
+      </div>
+      <div className="h-[calc(100vh-200px)] bg-white rounded-md border border-slate-200 overflow-hidden">
         {/* Empty state when no contacts */}
         {contacts.length === 0 && !loading && !error && (
           <div className="absolute inset-0 flex flex-col items-center justify-center bg-white z-20">
             <div className="w-20 h-20 bg-blue-50 text-primary rounded-full flex items-center justify-center mb-4">
               <MessageSquare className="w-10 h-10" />
             </div>
-            <h2 className="text-xl font-bold text-slate-800 mb-2">No messages yet</h2>
-            <p className="text-slate-500 text-sm max-w-sm text-center">Start a conversation with a college or counselor.</p>
+            <h2 className="text-xl font-bold text-slate-800 mb-2">
+              No messages yet
+            </h2>
+            <p className="text-slate-500 text-sm max-w-sm text-center">
+              Start a conversation with a college or counselor.
+            </p>
           </div>
         )}
 
@@ -230,14 +294,15 @@ export default function ChatSection() {
               />
             </div>
             <div className="flex gap-2 overflow-x-auto pb-1">
-              {filters.map(f => (
+              {filters.map((f) => (
                 <button
                   key={f}
                   onClick={() => setActiveFilter(f)}
-                  className={`px-3 py-1.5 rounded-full text-xs font-semibold whitespace-nowrap transition-colors border ${activeFilter === f
-                    ? 'bg-slate-900 text-white border-slate-900'
-                    : 'bg-white text-slate-600 border-slate-200 hover:bg-slate-50'
-                    }`}
+                  className={`px-3 py-1.5 rounded-full text-xs font-semibold whitespace-nowrap transition-colors border ${
+                    activeFilter === f
+                      ? "bg-slate-900 text-white border-slate-900"
+                      : "bg-white text-slate-600 border-slate-200 hover:bg-slate-50"
+                  }`}
                 >
                   {f}
                 </button>
@@ -248,34 +313,47 @@ export default function ChatSection() {
           {/* Conversation List */}
           <div className="flex-1 overflow-y-auto">
             {filteredConversations.length === 0 ? (
-              <div className="p-8 text-center text-sm text-slate-500">No conversations found.</div>
+              <div className="p-8 text-center text-sm text-slate-500">
+                No conversations found.
+              </div>
             ) : (
-              filteredConversations.map(conv => {
-                const other = conv.participants.find(p => p.id !== currentUserId)
-                const unread = conv.unreadCount?.[currentUserId] || 0
-                const isActive = activeConvId === conv.id
+              filteredConversations.map((conv) => {
+                const other = conv.participants.find(
+                  (p) => p.id !== currentUserId,
+                );
+                const unread = conv.unreadCount?.[currentUserId] || 0;
+                const isActive = activeConvId === conv.id;
 
                 return (
                   <div
                     key={conv.id}
                     onClick={() => selectConversation(conv.id)}
-                    className={`p-4 border-b border-slate-100 cursor-pointer transition-colors mx-2 ${isActive
-                      ? 'bg-blue-100 border rounded-md'
-                      : 'hover:bg-slate-50 border-l-4 border-l-transparent'
-                      }`}
+                    className={`p-4 border-b border-slate-100 cursor-pointer transition-colors mx-2 ${
+                      isActive
+                        ? "bg-blue-100 border rounded-md"
+                        : "hover:bg-slate-50 border-l-4 border-l-transparent"
+                    }`}
                   >
                     <div className="flex gap-3">
-                      <img src={other?.avatar} className="w-10 h-10 rounded-full object-cover  bg-white" alt="Avatar" />
+                      <img
+                        src={other?.avatar}
+                        className="w-10 h-10 rounded-full object-cover  bg-white"
+                        alt="Avatar"
+                      />
                       <div className="flex-1 min-w-0">
                         <div className="flex justify-between items-start mb-0.5">
-                          <h4 className={`text-sm font-bold text-slate-900 truncate ${unread > 0 ? 'text-black' : ''}`}>
+                          <h4
+                            className={`text-sm font-bold text-slate-900 truncate ${unread > 0 ? "text-black" : ""}`}
+                          >
                             {other?.name}
                           </h4>
                           <span className="text-xs text-slate-400 whitespace-nowrap ml-2">
                             {formatTime(conv.updatedAt)}
                           </span>
                         </div>
-                        <p className={`text-sm text-slate-500 truncate ${unread > 0 ? 'font-semibold text-slate-800' : ''}`}>
+                        <p
+                          className={`text-sm text-slate-500 truncate ${unread > 0 ? "font-semibold text-slate-800" : ""}`}
+                        >
                           {conv.lastMessage}
                         </p>
                         <div className="flex items-center justify-between mt-2">
@@ -283,7 +361,9 @@ export default function ChatSection() {
                             <span className="text-[10px] px-2 py-0.5 rounded uppercase tracking-wider font-bold bg-blue-50 text-primary border border-blue-100">
                               {conv.type}
                             </span>
-                            <span className={`text-[10px] px-2 py-0.5 rounded uppercase tracking-wider font-bold ${getStatusColor(conv.status)}`}>
+                            <span
+                              className={`text-[10px] px-2 py-0.5 rounded uppercase tracking-wider font-bold ${getStatusColor(conv.status)}`}
+                            >
                               {conv.status}
                             </span>
                           </div>
@@ -296,7 +376,7 @@ export default function ChatSection() {
                       </div>
                     </div>
                   </div>
-                )
+                );
               })
             )}
           </div>
@@ -310,8 +390,13 @@ export default function ChatSection() {
               <div className="w-20 h-20 bg-blue-50 text-primary rounded-full flex items-center justify-center mb-4">
                 <MessageSquare className="w-10 h-10" />
               </div>
-              <h2 className="text-xl font-bold text-slate-800 mb-2">Your Messages</h2>
-              <p className="text-slate-500 text-sm max-w-sm text-center">Select a conversation from the left panel to start messaging, or start a new inquiry.</p>
+              <h2 className="text-xl font-bold text-slate-800 mb-2">
+                Your Messages
+              </h2>
+              <p className="text-slate-500 text-sm max-w-sm text-center">
+                Select a conversation from the left panel to start messaging, or
+                start a new inquiry.
+              </p>
             </div>
           )}
 
@@ -319,16 +404,24 @@ export default function ChatSection() {
           {activeConvId && otherParticipant && (
             <header className="h-[76px] px-6 border-b border-slate-200 bg-white flex items-center justify-between shrink-0">
               <div className="flex items-center gap-3">
-                <img src={otherParticipant.avatar} className="w-10 h-10 rounded-full object-cover border border-slate-100" alt="Avatar" />
+                <img
+                  src={otherParticipant.avatar}
+                  className="w-10 h-10 rounded-full object-cover border border-slate-100"
+                  alt="Avatar"
+                />
                 <div>
-                  <h2 className="text-base font-bold text-slate-900 leading-tight">{otherParticipant.name}</h2>
-                  <span className="text-xs text-slate-500 capitalize">{otherParticipant.role}</span>
+                  <h2 className="text-base font-bold text-slate-900 leading-tight">
+                    {otherParticipant.name}
+                  </h2>
+                  <span className="text-xs text-slate-500 capitalize">
+                    {otherParticipant.role}
+                  </span>
                 </div>
               </div>
               <div className="flex items-center gap-3">
                 <button
                   onClick={() => setShowContactInfo(!showContactInfo)}
-                  className={`p-2 rounded-md transition-colors ${showContactInfo ? 'bg-primary text-white' : 'text-slate-400 hover:text-primary hover:bg-blue-50'}`}
+                  className={`p-2 rounded-md transition-colors ${showContactInfo ? "bg-primary text-white" : "text-slate-400 hover:text-primary hover:bg-blue-50"}`}
                 >
                   <Info className="w-5 h-5" />
                 </button>
@@ -340,12 +433,14 @@ export default function ChatSection() {
           {activeConvId && (
             <div className="flex-1 overflow-y-auto p-6 space-y-6">
               {conversationMessages.length === 0 ? (
-                <div className="text-center text-slate-400 text-sm mt-10">Start the conversation...</div>
+                <div className="text-center text-slate-400 text-sm mt-10">
+                  Start the conversation...
+                </div>
               ) : (
-                conversationMessages.map(msg => {
-                  const isMine = msg.senderId === currentUserId
+                conversationMessages.map((msg) => {
+                  const isMine = msg.senderId === currentUserId;
 
-                  if (msg.messageType === 'system') {
+                  if (msg.messageType === "system") {
                     return (
                       <div key={msg.id} className="flex justify-center my-4">
                         <div className="bg-slate-100 border border-slate-200 text-slate-600 text-xs px-4 py-1.5 rounded-full font-medium flex items-center gap-2">
@@ -353,30 +448,43 @@ export default function ChatSection() {
                           {msg.content}
                         </div>
                       </div>
-                    )
+                    );
                   }
 
                   return (
-                    <div key={msg.id} className={`flex ${isMine ? 'justify-end' : 'justify-start'} mb-4`}>
-                      <div className={`max-w-[75%] md:max-w-[60%] flex flex-col ${isMine ? 'items-end' : 'items-start'}`}>
-                        <div className={`p-3.5 rounded-md  ${isMine ? 'bg-primary text-white rounded-br-sm' : 'bg-white border border-slate-200 text-slate-800 rounded-bl-sm'}`}>
-                          {msg.messageType === 'document' && (
+                    <div
+                      key={msg.id}
+                      className={`flex ${isMine ? "justify-end" : "justify-start"} mb-4`}
+                    >
+                      <div
+                        className={`max-w-[75%] md:max-w-[60%] flex flex-col ${isMine ? "items-end" : "items-start"}`}
+                      >
+                        <div
+                          className={`p-3.5 rounded-md  ${isMine ? "bg-primary text-white rounded-br-sm" : "bg-white border border-slate-200 text-slate-800 rounded-bl-sm"}`}
+                        >
+                          {msg.messageType === "document" && (
                             <div className="flex items-center gap-2 mb-2 p-2 bg-slate-200 rounded-md">
                               <FileText className="w-5 h-5" />
-                              <span className="text-sm font-medium underline cursor-pointer">Attachment.pdf</span>
+                              <span className="text-sm font-medium underline cursor-pointer">
+                                Attachment.pdf
+                              </span>
                             </div>
                           )}
-                          <p className="text-[14px] leading-relaxed break-words whitespace-pre-wrap">{msg.content}</p>
+                          <p className="text-[14px] leading-relaxed break-words whitespace-pre-wrap">
+                            {msg.content}
+                          </p>
                         </div>
                         <div className="text-[10px] font-medium text-slate-400 mt-1 flex items-center gap-1 px-1">
                           {formatTime(msg.timestamp)}
                           {isMine && (
-                            <CheckCheck className={`w-3.5 h-3.5 ${msg.readStatus ? 'text-primary' : 'text-slate-300'}`} />
+                            <CheckCheck
+                              className={`w-3.5 h-3.5 ${msg.readStatus ? "text-primary" : "text-slate-300"}`}
+                            />
                           )}
                         </div>
                       </div>
                     </div>
-                  )
+                  );
                 })
               )}
             </div>
@@ -394,15 +502,15 @@ export default function ChatSection() {
                     value={messageInput}
                     onChange={(e) => setMessageInput(e.target.value)}
                     onKeyDown={(e) => {
-                      if (e.key === 'Enter' && !e.shiftKey) {
-                        e.preventDefault()
-                        handleSend()
+                      if (e.key === "Enter" && !e.shiftKey) {
+                        e.preventDefault();
+                        handleSend();
                       }
                     }}
                     rows={1}
                     placeholder="Type your message here..."
                     className="w-full max-h-32 bg-transparent resize-none text-sm text-slate-800 focus:outline-none p-3 block"
-                    style={{ height: 'auto' }}
+                    style={{ height: "auto" }}
                   />
                 </div>
                 <button
@@ -421,51 +529,66 @@ export default function ChatSection() {
         {showContactInfo && activeConversation && otherParticipant && (
           <aside className="hidden xl:flex w-[320px] bg-white border-l border-slate-200 flex-col h-full shrink-0 overflow-y-auto">
             <div className="p-5 border-b border-slate-100 flex items-center gap-2 sticky top-0 bg-white z-10">
-              <h2 className="text-base font-semibold text-slate-900">Contact Info</h2>
-              <button onClick={() => setShowContactInfo(false)} className="ml-auto">
+              <h2 className="text-base font-semibold text-slate-900">
+                Contact Info
+              </h2>
+              <button
+                onClick={() => setShowContactInfo(false)}
+                className="ml-auto"
+              >
                 <X className="w-4 h-4 text-slate-400" />
               </button>
             </div>
 
             <div className="p-6">
               <h3 className="text-sm font-bold text-slate-900 mb-5">
-                {mockDetails[otherParticipant.id]?.title || 'About College'}
+                {mockDetails[otherParticipant.id]?.title || "About College"}
               </h3>
 
               <div className="flex items-center gap-4 mb-8">
-                <img src={otherParticipant.avatar} alt={otherParticipant.name} className="w-14 h-14 rounded-full object-cover ring-4 ring-slate-50" />
+                <img
+                  src={otherParticipant.avatar}
+                  alt={otherParticipant.name}
+                  className="w-14 h-14 rounded-full object-cover ring-4 ring-slate-50"
+                />
                 <div>
-                  <h4 className="text-base font-bold text-slate-900 leading-tight">{otherParticipant.name}</h4>
-                  <p className="text-sm text-slate-500">{mockDetails[otherParticipant.id]?.role || 'University'}</p>
+                  <h4 className="text-base font-bold text-slate-900 leading-tight">
+                    {otherParticipant.name}
+                  </h4>
+                  <p className="text-sm text-slate-500">
+                    {mockDetails[otherParticipant.id]?.role || "University"}
+                  </p>
                 </div>
               </div>
 
               <div className="space-y-5 mb-8">
                 {mockDetails[otherParticipant.id]?.items.map((item, idx) => {
-                  const IconComponent = iconMap[item.icon] || Info
+                  const IconComponent = iconMap[item.icon] || Info;
                   return (
                     <div key={idx} className="flex items-start gap-4">
                       <div className="w-9 h-9 rounded-full bg-slate-50 flex items-center justify-center text-slate-500 shrink-0 border border-slate-100">
                         <IconComponent className="w-4 h-4" />
                       </div>
                       <div
-                        className={`min-w-0 flex items-center justify-between w-full group ${item.copy ? 'cursor-pointer' : ''}`}
+                        className={`min-w-0 flex items-center justify-between w-full group ${item.copy ? "cursor-pointer" : ""}`}
                         onClick={() => item.copy && copyToClipboard(item.value)}
                       >
                         <div>
-                          <p className="text-xs text-slate-500 mb-0.5">{item.label}</p>
-                          <p className="text-sm font-semibold text-slate-900 truncate">{item.value}</p>
+                          <p className="text-xs text-slate-500 mb-0.5">
+                            {item.label}
+                          </p>
+                          <p className="text-sm font-semibold text-slate-900 truncate">
+                            {item.value}
+                          </p>
                         </div>
                         {item.copy && (
                           <Copy className="w-4 h-4 text-slate-300 opacity-0 group-hover:opacity-100 transition-opacity hover:text-primary" />
                         )}
                       </div>
                     </div>
-                  )
+                  );
                 })}
               </div>
-
-
             </div>
           </aside>
         )}
@@ -477,5 +600,5 @@ export default function ChatSection() {
         </div>
       )}
     </div>
-  )
+  );
 }
