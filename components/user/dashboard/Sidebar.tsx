@@ -14,11 +14,11 @@ import {
   Users,
   User,
   Bookmark,
-  Edit3,
   Star,
   Bell,
   Settings,
   BadgeQuestionMark,
+  Send,
   LogOut,
   X,
 } from "lucide-react";
@@ -87,6 +87,12 @@ export default function Sidebar({
       label: "Counselling",
       icon: Users,
       href: "/user/dashboard/counselling",
+    },
+    {
+      id: "sphereinvites",
+      label: "SphereInvites",
+      icon: Send,
+      href: "/user/dashboard/sphereinvites",
     },
     {
       id: "profile",
