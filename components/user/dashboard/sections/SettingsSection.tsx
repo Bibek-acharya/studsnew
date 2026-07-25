@@ -1,36 +1,28 @@
 "use client";
 
-import Link from "next/link";
-import { useState, useEffect, type ReactNode } from "react";
+import { useState, useEffect } from "react";
 import { apiService } from "@/services/api";
-import { useAuth } from "@/services/AuthContext";
 import ConfirmDialog from "@/components/user/dashboard/ConfirmDialog";
 import {
   AlertTriangle,
   Bell,
-  BookOpen,
   CheckCircle2,
-  ChevronRight,
   Laptop,
-  LifeBuoy,
   Lock,
-  MessageCircle,
   ShieldCheck,
   Smartphone,
   type LucideIcon,
 } from "lucide-react";
 
-type TabId = "security" | "notifications" | "help" | "danger";
+type TabId = "security" | "notifications" | "danger";
 
 const tabs: { id: TabId; label: string; icon: LucideIcon }[] = [
   { id: "security", label: "Security", icon: Lock },
   { id: "notifications", label: "Notifications", icon: Bell },
-  { id: "help", label: "Help & Support", icon: LifeBuoy },
   { id: "danger", label: "Danger Zone", icon: AlertTriangle },
 ];
 
 export default function SettingsSection() {
-  const { user } = useAuth();
   const [activeTab, setActiveTab] = useState<TabId>("security");
   const [currentPassword, setCurrentPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
@@ -39,7 +31,6 @@ export default function SettingsSection() {
     emailNotifications: true,
     smsNotifications: false,
     newsletter: true,
-    twoFactor: true,
     profileVisibility: "friends",
     compactSidebar: false,
     applicationUpdates: true,
@@ -50,9 +41,7 @@ export default function SettingsSection() {
     timezone: "Pacific Time (PT)",
     dateFormat: "MM/DD/YYYY",
   });
-  const [activeModal, setActiveModal] = useState<
-    null | "contact" | "report" | "totp"
-  >(null);
+  const [activeModal, setActiveModal] = useState<null | "totp">(null);
   const [dangerAction, setDangerAction] = useState<
     "deactivate" | "delete" | null
   >(null);
@@ -69,10 +58,6 @@ export default function SettingsSection() {
   const [totpDisableCode, setTotpDisableCode] = useState("");
   const [totpDisablePassword, setTotpDisablePassword] = useState("");
   const [showDisableTOTP, setShowDisableTOTP] = useState(false);
-  const [contactSubject, setContactSubject] = useState("");
-  const [contactMessage, setContactMessage] = useState("");
-  const [reportArea, setReportArea] = useState("Dashboard");
-  const [reportMessage, setReportMessage] = useState("");
   const [sessions, setSessions] = useState<
     Array<{
       id: number;
@@ -97,14 +82,6 @@ export default function SettingsSection() {
     window.setTimeout(() => setToastMessage(""), 3000);
   };
 
-  const openModal = (modal: "contact" | "report") => {
-    setActiveModal(modal);
-  };
-
-  const closeModal = () => {
-    setActiveModal(null);
-  };
-
   const handleChangePassword = async () => {
     if (newPassword !== confirmNewPassword) {
       showToast("Passwords do not match");
@@ -121,46 +98,6 @@ export default function SettingsSection() {
       showToast("Password updated successfully!");
     } catch (err: any) {
       showToast(err.message || "Failed to update password");
-    }
-  };
-
-  const submitHelpForm = async (modal: "contact" | "report") => {
-    try {
-      const name =
-        `${user?.first_name || ""} ${user?.last_name || ""}`.trim() ||
-        "Anonymous";
-      const email = user?.email || "";
-      if (modal === "contact") {
-        await apiService.submitContactInquiry({
-          name,
-          email,
-          phone: user?.phone || "",
-          subject: contactSubject,
-          message: contactMessage,
-          type: "support",
-        });
-      } else {
-        await apiService.submitContactInquiry({
-          name,
-          email,
-          phone: user?.phone || "",
-          subject: reportArea,
-          message: reportMessage,
-          type: "bug",
-        });
-      }
-      closeModal();
-      if (modal === "contact") {
-        setContactSubject("");
-        setContactMessage("");
-        showToast("Message sent to support successfully!");
-      } else {
-        setReportArea("Dashboard");
-        setReportMessage("");
-        showToast("Bug report submitted successfully!");
-      }
-    } catch (err: any) {
-      showToast(err.message || "Failed to submit. Please try again.");
     }
   };
 
@@ -614,41 +551,6 @@ export default function SettingsSection() {
           </div>
         )}
 
-        {activeTab === "help" && (
-          <div className="space-y-6 animate-in fade-in slide-in-from-bottom-2 duration-300">
-            <div className="bg-white rounded-md  border border-slate-200 p-6">
-              <h3 className="text-lg font-semibold text-slate-800 mb-5 flex items-center gap-2">
-                <LifeBuoy className="w-5 h-5 text-indigo-600" /> Help & Support
-              </h3>
-              <p className="text-slate-500 mb-6">
-                Need assistance? Our support team is here to help you.
-              </p>
-
-              <div className="space-y-0">
-                <HelpItem
-                  icon={MessageCircle}
-                  title="Contact Support"
-                  description="Talk to a representative"
-                  onClick={() => openModal("contact")}
-                />
-                <HelpItem
-                  icon={BookOpen}
-                  title="Help & Support"
-                  description="Browse FAQs, contact support, or report a problem"
-                  href="/user/dashboard/faq"
-                />
-                <HelpItem
-                  icon={AlertTriangle}
-                  title="Report a Problem"
-                  description="Let us know if something is broken"
-                  onClick={() => openModal("report")}
-                  isLast
-                />
-              </div>
-            </div>
-          </div>
-        )}
-
         {activeTab === "danger" && (
           <div className="space-y-6 animate-in fade-in slide-in-from-bottom-2 duration-300">
             <div className="bg-red-50 border border-red-100 rounded-md p-6">
@@ -712,7 +614,7 @@ export default function SettingsSection() {
               <div className="flex justify-center mb-4">
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img
-                  src={totpData.qr_uri}
+                  src={`https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(totpData.qr_uri)}`}
                   alt="TOTP QR Code"
                   className="w-48 h-48 border border-slate-200 rounded-md"
                 />
@@ -759,123 +661,6 @@ export default function SettingsSection() {
                     {totpEnabling ? "Verifying..." : "Verify & Enable"}
                   </button>
                 </div>
-              </div>
-            </div>
-          </div>
-        )}
-
-        {activeModal === "contact" && (
-          <div className="fixed inset-0 z-60 flex items-center justify-center bg-slate-950/50 p-4">
-            <div className="w-full max-w-md rounded-md bg-white p-6 shadow-2xl">
-              <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-indigo-50 text-indigo-600">
-                <MessageCircle className="w-6 h-6" />
-              </div>
-              <h3 className="text-xl font-semibold text-slate-900 text-center mb-2">
-                Contact Support
-              </h3>
-              <p className="text-sm text-slate-500 text-center mb-6">
-                Send us a message and we&apos;ll reply to your email.
-              </p>
-              <div className="space-y-4">
-                <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-2">
-                    Subject
-                  </label>
-                  <input
-                    type="text"
-                    value={contactSubject}
-                    onChange={(e) => setContactSubject(e.target.value)}
-                    placeholder="What do you need help with?"
-                    className="w-full rounded-md border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-900 outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-2">
-                    Message
-                  </label>
-                  <textarea
-                    value={contactMessage}
-                    onChange={(e) => setContactMessage(e.target.value)}
-                    placeholder="Describe your issue in detail..."
-                    className="w-full min-h-30 rounded-md border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-900 outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20"
-                  />
-                </div>
-              </div>
-              <div className="mt-6 flex gap-3">
-                <button
-                  type="button"
-                  onClick={closeModal}
-                  className="flex-1 rounded-md bg-slate-100 px-4 py-3 text-sm font-semibold text-slate-700 hover:bg-slate-200"
-                >
-                  Cancel
-                </button>
-                <button
-                  type="button"
-                  onClick={() => submitHelpForm("contact")}
-                  className="flex-1 rounded-md bg-indigo-600 px-4 py-3 text-sm font-semibold text-white hover:bg-indigo-700"
-                >
-                  Send Message
-                </button>
-              </div>
-            </div>
-          </div>
-        )}
-
-        {activeModal === "report" && (
-          <div className="fixed inset-0 z-60 flex items-center justify-center bg-slate-950/50 p-4">
-            <div className="w-full max-w-md rounded-md bg-white p-6 shadow-2xl">
-              <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-amber-100 text-amber-700">
-                <AlertTriangle className="w-6 h-6" />
-              </div>
-              <h3 className="text-xl font-semibold text-slate-900 text-center mb-2">
-                Report a Problem
-              </h3>
-              <p className="text-sm text-slate-500 text-center mb-6">
-                Found a bug or issue? Let us know so we can fix it.
-              </p>
-              <div className="space-y-4">
-                <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-2">
-                    Problem Area
-                  </label>
-                  <select
-                    value={reportArea}
-                    onChange={(e) => setReportArea(e.target.value)}
-                    className="w-full rounded-md border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-900 outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20"
-                  >
-                    <option>Dashboard</option>
-                    <option>Settings</option>
-                    <option>Profile</option>
-                    <option>Other</option>
-                  </select>
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-2">
-                    Description
-                  </label>
-                  <textarea
-                    value={reportMessage}
-                    onChange={(e) => setReportMessage(e.target.value)}
-                    placeholder="Please describe how to reproduce the bug..."
-                    className="w-full min-h-30 rounded-md border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-900 outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20"
-                  />
-                </div>
-              </div>
-              <div className="mt-6 flex gap-3">
-                <button
-                  type="button"
-                  onClick={closeModal}
-                  className="flex-1 rounded-md bg-slate-100 px-4 py-3 text-sm font-semibold text-slate-700 hover:bg-slate-200"
-                >
-                  Cancel
-                </button>
-                <button
-                  type="button"
-                  onClick={() => submitHelpForm("report")}
-                  className="flex-1 rounded-md bg-indigo-600 px-4 py-3 text-sm font-semibold text-white hover:bg-indigo-700"
-                >
-                  Submit Report
-                </button>
               </div>
             </div>
           </div>
@@ -928,52 +713,5 @@ export default function SettingsSection() {
         />
       </form>
     </div>
-  );
-}
-
-function HelpItem({
-  icon: Icon,
-  title,
-  description,
-  href,
-  onClick,
-  isLast,
-}: {
-  icon: LucideIcon;
-  title: string;
-  description: string;
-  href?: string;
-  onClick?: () => void;
-  isLast?: boolean;
-}) {
-  const content = (
-    <div
-      className={`w-full py-4 flex items-center justify-between text-left hover:bg-slate-50 transition-colors rounded-md ${!isLast ? "border-b border-slate-100" : ""}`}
-    >
-      <div className="flex items-center gap-4">
-        <div className="w-10 h-10 rounded-md bg-slate-100 flex items-center justify-center">
-          <Icon className="w-5 h-5 text-slate-500" />
-        </div>
-        <div>
-          <p className="font-medium text-slate-800">{title}</p>
-          <p className="text-sm text-slate-500">{description}</p>
-        </div>
-      </div>
-      <ChevronRight className="w-4 h-4 text-slate-400" />
-    </div>
-  );
-
-  if (href) {
-    return (
-      <Link href={href} className="block">
-        {content}
-      </Link>
-    );
-  }
-
-  return (
-    <button type="button" onClick={onClick} className="w-full text-left">
-      {content}
-    </button>
   );
 }
