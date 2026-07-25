@@ -2992,6 +2992,22 @@ export const apiService = {
       body: JSON.stringify(data),
     });
   },
+
+  async reindexEmbeddings(
+    force = false,
+  ): Promise<{ success: boolean; message: string }> {
+    const token =
+      typeof window !== "undefined"
+        ? localStorage.getItem("superadmin_token")
+        : null;
+    return apiRequest<{ success: boolean; message: string }>(
+      `/api/v1/admin/search/reindex?force=${force}`,
+      {
+        method: "POST",
+        authToken: token || undefined,
+      },
+    );
+  },
 };
 
 export const callApi = async <T>(path: string): Promise<T> => {
