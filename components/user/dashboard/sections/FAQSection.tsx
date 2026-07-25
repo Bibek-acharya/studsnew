@@ -11,6 +11,7 @@ import {
 import { faqCategories } from "./faqData";
 import { apiService } from "@/services/api";
 import { useAuth } from "@/services/AuthContext";
+import { Toast } from "@/components/ui/Toast";
 
 export default function FAQSection() {
   const { user } = useAuth();
@@ -309,13 +310,7 @@ export default function FAQSection() {
         )}
 
         {/* Toast notification */}
-        {toast && (
-          <div className="fixed bottom-6 right-6 z-50 rounded-lg border border-emerald-100 bg-white px-5 py-4 shadow-2xl">
-            <div className="flex items-center gap-3 text-sm text-slate-800">
-              <span>{toast}</span>
-            </div>
-          </div>
-        )}
+        {toast && <Toast message={toast} />}
       </div>
     </div>
   );

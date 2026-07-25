@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { apiService, CounsellingBookingItem } from "@/services/api";
+import { Skeleton } from "@/components/ui/Skeleton";
 
 export default function CounsellingSection() {
   const router = useRouter();
@@ -71,8 +72,18 @@ export default function CounsellingSection() {
       {counsellingTab === "upcoming" && (
         <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6">
           {isLoading ? (
-            <div className="col-span-full rounded-md border border-slate-200 bg-white p-8 text-center text-slate-500">
-              Loading counselling bookings...
+            <div className="col-span-full grid grid-cols-1 md:grid-cols-2 gap-4">
+              {Array.from({ length: 4 }).map((_, i) => (
+                <div
+                  key={i}
+                  className="bg-white rounded-md border border-slate-200 p-5 space-y-3 animate-pulse"
+                >
+                  <Skeleton className="h-4 w-3/4" />
+                  <Skeleton className="h-3 w-1/2" />
+                  <Skeleton className="h-3 w-full" />
+                  <Skeleton className="h-3 w-2/3" />
+                </div>
+              ))}
             </div>
           ) : upcomingSessions.length === 0 ? (
             <div className="col-span-full rounded-md border border-slate-200 bg-white p-8 text-center text-slate-500">

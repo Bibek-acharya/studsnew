@@ -17,6 +17,8 @@ import {
   AlertCircle,
 } from "lucide-react";
 import { apiService } from "@/services/api";
+import { ErrorState } from "@/components/ui/ErrorState";
+import { Toast } from "@/components/ui/Toast";
 
 interface CalendarEvent {
   id: number;
@@ -532,58 +534,65 @@ export default function CalendarSection() {
           <span className="text-gray-800 font-medium">Calendar</span>
         </div>
       </div>
+      <div className="flex gap-1 bg-slate-100 p-1 rounded-md mb-6 w-fit">
+        {TABS.map((tab) => (
+          <button
+            key={tab.id}
+            onClick={() => handleSetActiveTab(tab.id)}
+            className={`flex items-center gap-2 px-4 py-2 text-sm font-semibold rounded-md transition-all whitespace-nowrap ${
+              activeTab === tab.id
+                ? "bg-white text-indigo-600 shadow-sm"
+                : "text-slate-500 hover:text-slate-700"
+            }`}
+          >
+            <tab.icon className="w-4 h-4" />
+            {tab.label}
+          </button>
+        ))}
+      </div>
       <div className="bg-white rounded-md border border-slate-200 overflow-hidden flex flex-col min-h-[calc(100vh-12rem)]">
-        <div className="px-4 md:px-6 border-b border-slate-200 flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4 pb-0 shrink-0">
-          <div className="flex overflow-x-auto w-full lg:w-auto gap-4 md:gap-8">
-            {TABS.map((tab) => (
-              <button
-                key={tab.id}
-                onClick={() => handleSetActiveTab(tab.id)}
-                className={`flex items-center gap-2 pb-4 border-b-2 font-medium whitespace-nowrap transition-colors ${
-                  activeTab === tab.id
-                    ? "border-brand-blue text-brand-blue font-semibold"
-                    : "border-transparent text-slate-500 hover:text-slate-800"
-                }`}
-              >
-                <tab.icon className="w-4 h-4" />
-                {tab.label}
-              </button>
-            ))}
+        <div className="flex items-center gap-2 md:gap-3 pb-4 w-full lg:w-auto justify-between lg:justify-end overflow-x-auto">
+          <div className="relative">
+            <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
+            <input
+              type="text"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              placeholder="Search.."
+              className="pl-9 pr-4 py-1.5 border border-slate-200 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-brand-blue w-32 md:w-48 transition-all"
+            />
           </div>
-
-          <div className="flex items-center gap-2 md:gap-3 pb-4 w-full lg:w-auto justify-between lg:justify-end overflow-x-auto">
-            <div className="relative">
-              <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
-              <input
-                type="text"
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                placeholder="Search.."
-                className="pl-9 pr-4 py-1.5 border border-slate-200 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-brand-blue w-32 md:w-48 transition-all"
-              />
-            </div>
-            <button
-              onClick={() => openModal()}
-              className="flex items-center gap-1.5 px-3 md:px-4 py-1.5 bg-brand-blue text-white rounded-md text-sm font-medium hover:bg-blue-700 transition-colors  whitespace-nowrap"
-            >
-              <Plus className="w-4 h-4" />
-              New
-            </button>
-          </div>
+          <button
+            onClick={() => openModal()}
+            className="flex items-center gap-1.5 px-3 md:px-4 py-1.5 bg-brand-blue text-white rounded-md text-sm font-medium hover:bg-blue-700 transition-colors  whitespace-nowrap"
+          >
+            <Plus className="w-4 h-4" />
+            New
+          </button>
         </div>
 
         {/* Loading State */}
         {loading && (
-          <div className="flex items-center justify-center py-24 flex-1">
-            <Loader2 className="w-6 h-6 animate-spin text-primary" />
+          <div className="p-6 space-y-2 animate-pulse">
+            <div className="grid grid-cols-7 gap-1 mb-2">
+              {Array.from({ length: 7 }).map((_, i) => (
+                <div key={i} className="h-4 bg-slate-200 rounded" />
+              ))}
+            </div>
+            {Array.from({ length: 5 }).map((_, r) => (
+              <div key={r} className="grid grid-cols-7 gap-1">
+                {Array.from({ length: 7 }).map((_, c) => (
+                  <div key={c} className="h-16 bg-slate-200 rounded" />
+                ))}
+              </div>
+            ))}
           </div>
         )}
 
         {/* Error State */}
         {!loading && error && (
-          <div className="flex flex-col items-center justify-center py-24 flex-1 text-center px-4">
-            <AlertCircle className="w-10 h-10 text-red-400 mb-3" />
-            <p className="text-sm text-red-600 font-medium">{error}</p>
+          <div className="flex-1 flex items-center justify-center">
+            <ErrorState error={error} />
           </div>
         )}
 
@@ -799,11 +808,7 @@ export default function CalendarSection() {
           </div>
         )}
 
-        {toast && (
-          <div className="fixed bottom-4 right-4 z-50 rounded-lg bg-green-600 px-4 py-3 text-sm font-semibold text-white shadow-lg">
-            {toast.message}
-          </div>
-        )}
+        {toast && <Toast message={toast.message} />}
       </div>
     </div>
   );

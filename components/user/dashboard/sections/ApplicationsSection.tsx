@@ -21,6 +21,8 @@ import {
   Loader2,
 } from "lucide-react";
 import { apiService } from "@/services/api";
+import { Skeleton } from "@/components/ui/Skeleton";
+import { ErrorState } from "@/components/ui/ErrorState";
 
 type AppType = "all" | "admission" | "entrance" | "scholarship";
 
@@ -177,14 +179,25 @@ export default function ApplicationsSection() {
       {/* TABLE */}
       <div className="bg-white rounded-md border border-slate-200 overflow-hidden">
         {loading ? (
-          <div className="flex items-center justify-center py-16">
-            <Loader2 className="w-6 h-6 animate-spin text-primary" />
+          <div className="animate-pulse">
+            <div className="flex gap-4 px-6 py-4 border-b border-slate-200 bg-slate-50/50">
+              {Array.from({ length: 5 }).map((_, i) => (
+                <Skeleton key={i} className="h-4 flex-1" />
+              ))}
+            </div>
+            {Array.from({ length: 5 }).map((_, r) => (
+              <div
+                key={r}
+                className="flex gap-4 px-6 py-4 border-b border-slate-100"
+              >
+                {Array.from({ length: 5 }).map((_, c) => (
+                  <Skeleton key={c} className="h-4 flex-1" />
+                ))}
+              </div>
+            ))}
           </div>
         ) : error ? (
-          <div className="flex flex-col items-center justify-center py-16 text-center px-4">
-            <AlertCircle className="w-10 h-10 text-red-400 mb-3" />
-            <p className="text-sm text-red-600 font-medium">{error}</p>
-          </div>
+          <ErrorState error={error} />
         ) : (
           <>
             <table className="w-full">

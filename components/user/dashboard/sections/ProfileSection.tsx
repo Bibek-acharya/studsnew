@@ -32,6 +32,9 @@ import {
   NEPAL_DISTRICTS,
   NEPAL_LOCAL_BODIES,
 } from "@/lib/location-data";
+import { SkeletonProfileForm } from "@/components/ui/Skeleton";
+import { ErrorState } from "@/components/ui/ErrorState";
+import { Toast } from "@/components/ui/Toast";
 
 interface EducationEntry {
   id: number;
@@ -449,41 +452,32 @@ export default function ProfileSection() {
 
   if (loading) {
     return (
-      <div className="grid grid-cols-1 lg:grid-cols-4 gap-8 pt-8">
-        <div className="lg:col-span-1">
-          <div className="bg-white p-6 rounded-md border border-slate-200 text-center animate-pulse">
-            <div className="w-24 h-24 rounded-full mx-auto bg-slate-200" />
-            <div className="h-5 bg-slate-200 rounded mt-4 w-3/4 mx-auto" />
-            <div className="h-4 bg-slate-200 rounded mt-2 w-1/2 mx-auto" />
+      <div>
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-6">
+          <h1 className="text-2xl font-bold text-gray-800">My Profile</h1>
+          <div className="flex items-center text-sm text-gray-500 mt-2 sm:mt-0 gap-2">
+            <span>Dashboard</span>
+            <span>-</span>
+            <span className="text-gray-800 font-medium">Profile</span>
           </div>
         </div>
-        <div className="lg:col-span-3">
-          <div className="bg-white rounded-md border border-slate-200 min-h-[600px] animate-pulse p-6">
-            <div className="h-8 bg-slate-200 rounded w-1/3 mb-6" />
-            <div className="space-y-4">
-              <div className="h-10 bg-slate-200 rounded" />
-              <div className="h-10 bg-slate-200 rounded" />
-              <div className="h-10 bg-slate-200 rounded" />
-            </div>
-          </div>
-        </div>
+        <SkeletonProfileForm />
       </div>
     );
   }
 
   if (error) {
     return (
-      <div className="pt-8">
-        <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-md">
-          <p className="font-medium">Error loading profile</p>
-          <p className="text-sm mt-1">{error}</p>
-          <button
-            onClick={() => window.location.reload()}
-            className="mt-2 text-sm font-medium text-red-700 underline hover:no-underline"
-          >
-            Try again
-          </button>
+      <div>
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-6">
+          <h1 className="text-2xl font-bold text-gray-800">My Profile</h1>
+          <div className="flex items-center text-sm text-gray-500 mt-2 sm:mt-0 gap-2">
+            <span>Dashboard</span>
+            <span>-</span>
+            <span className="text-gray-800 font-medium">Profile</span>
+          </div>
         </div>
+        <ErrorState error={error} />
       </div>
     );
   }
@@ -1670,13 +1664,7 @@ export default function ProfileSection() {
           </div>
         </div>
 
-        {toast && (
-          <div
-            className={`fixed bottom-4 right-4 z-50 rounded-lg px-4 py-3 text-sm font-semibold text-white shadow-lg ${toast.type === "error" ? "bg-red-600" : "bg-green-600"}`}
-          >
-            {toast.message}
-          </div>
-        )}
+        {toast && <Toast message={toast.message} type={toast.type} />}
       </div>
     </div>
   );

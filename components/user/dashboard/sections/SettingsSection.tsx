@@ -13,6 +13,7 @@ import {
   Smartphone,
   type LucideIcon,
 } from "lucide-react";
+import { Toast } from "@/components/ui/Toast";
 
 type TabId = "security" | "notifications" | "danger";
 
@@ -674,14 +675,7 @@ export default function SettingsSection() {
           </div>
         )}
 
-        {toastMessage && (
-          <div className="fixed bottom-6 right-6 z-50 rounded-md border border-emerald-100 bg-white px-5 py-4 shadow-2xl">
-            <div className="flex items-center gap-3 text-sm text-slate-800">
-              <CheckCircle2 className="w-5 h-5 text-emerald-500" />
-              <span>{toastMessage}</span>
-            </div>
-          </div>
-        )}
+        {toastMessage && <Toast message={toastMessage} />}
 
         <ConfirmDialog
           isOpen={dangerAction === "deactivate"}

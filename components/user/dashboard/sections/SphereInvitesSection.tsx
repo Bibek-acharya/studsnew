@@ -1,100 +1,149 @@
-'use client'
+"use client";
 
-import { useState, useEffect } from 'react'
-import { Loader2, AlertCircle } from 'lucide-react'
-import { apiService, InviteItem } from '@/services/api'
+import { useState, useEffect } from "react";
+import { Loader2, AlertCircle } from "lucide-react";
+import { apiService, InviteItem } from "@/services/api";
+import { Skeleton } from "@/components/ui/Skeleton";
+import { Toast } from "@/components/ui/Toast";
 
 export default function SphereInvitesSection() {
-  const [loading, setLoading] = useState(true)
-  const [error, setError] = useState<string | null>(null)
-  const [filterType, setFilterType] = useState('all')
-  const [invites, setInvites] = useState<InviteItem[]>([])
-  const [toast, setToast] = useState<{message: string; type: 'success' | 'error'} | null>(null)
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [filterType, setFilterType] = useState("all");
+  const [invites, setInvites] = useState<InviteItem[]>([]);
+  const [toast, setToast] = useState<{
+    message: string;
+    type: "success" | "error";
+  } | null>(null);
 
   const fetchInvites = async () => {
     try {
-      setLoading(true)
-      setError(null)
-      const res = await apiService.getInvites()
-      setInvites(res.data?.invites || [])
+      setLoading(true);
+      setError(null);
+      const res = await apiService.getInvites();
+      setInvites(res.data?.invites || []);
     } catch (err: any) {
-      setError(err.message || 'Failed to load invites')
+      setError(err.message || "Failed to load invites");
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
-  }
+  };
 
   useEffect(() => {
-    fetchInvites()
-  }, [])
+    fetchInvites();
+  }, []);
 
-  const filtered = filterType === 'all' ? invites : invites.filter(i => i.type === filterType)
+  const filtered =
+    filterType === "all"
+      ? invites
+      : invites.filter((i) => i.type === filterType);
 
   const handleAccept = async (id: number) => {
     try {
-      await apiService.acceptInvite(id)
-      fetchInvites()
-      setToast({ message: 'Invite accepted', type: 'success' })
-      setTimeout(() => setToast(null), 3000)
-    } catch { /* ignore */ }
-  }
+      await apiService.acceptInvite(id);
+      fetchInvites();
+      setToast({ message: "Invite accepted", type: "success" });
+      setTimeout(() => setToast(null), 3000);
+    } catch {
+      /* ignore */
+    }
+  };
 
   const handleSave = async (id: number) => {
     try {
-      await apiService.saveInvite(id)
-      fetchInvites()
-      setToast({ message: 'Invite saved', type: 'success' })
-      setTimeout(() => setToast(null), 3000)
-    } catch { /* ignore */ }
-  }
+      await apiService.saveInvite(id);
+      fetchInvites();
+      setToast({ message: "Invite saved", type: "success" });
+      setTimeout(() => setToast(null), 3000);
+    } catch {
+      /* ignore */
+    }
+  };
 
   const handleDecline = async (id: number) => {
     try {
-      await apiService.declineInvite(id)
-      fetchInvites()
-      setToast({ message: 'Invite declined', type: 'success' })
-      setTimeout(() => setToast(null), 3000)
-    } catch { /* ignore */ }
-  }
+      await apiService.declineInvite(id);
+      fetchInvites();
+      setToast({ message: "Invite declined", type: "success" });
+      setTimeout(() => setToast(null), 3000);
+    } catch {
+      /* ignore */
+    }
+  };
 
-  const totalCount = invites.length
-  const acceptedCount = invites.filter(i => i.status === 'accepted').length
-  const savedCount = invites.filter(i => i.status === 'saved').length
+  const totalCount = invites.length;
+  const acceptedCount = invites.filter((i) => i.status === "accepted").length;
+  const savedCount = invites.filter((i) => i.status === "saved").length;
 
   const getPriorityColor = (_status: string) => {
-    return 'bg-blue-50 text-blue-700 border-blue-200'
-  }
+    return "bg-blue-50 text-blue-700 border-blue-200";
+  };
 
   const getTypeIcon = (type: string) => {
-    switch(type) {
-      case 'scholarship': return 'fa-graduation-cap'
-      case 'admission': return 'fa-file-check'
-      case 'event': return 'fa-calendar-days'
-      default: return 'fa-envelope'
+    switch (type) {
+      case "scholarship":
+        return "fa-graduation-cap";
+      case "admission":
+        return "fa-file-check";
+      case "event":
+        return "fa-calendar-days";
+      default:
+        return "fa-envelope";
     }
-  }
+  };
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center py-20">
-        <div className="flex flex-col items-center gap-3">
-          <Loader2 className="w-8 h-8 animate-spin text-primary" />
-          <p className="text-sm text-slate-500">Loading invites...</p>
+      <div>
+        <div className="flex items-center justify-between mb-8">
+          <div>
+            <h2 className="text-2xl font-bold text-slate-800 flex items-center gap-2">
+              <i className="fas fa-envelope-open-text text-blue-600"></i>{" "}
+              SphereInvites
+            </h2>
+            <p className="text-sm text-slate-500 mt-1">
+              Exclusive opportunities matched to your profile.
+            </p>
+          </div>
+        </div>
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+          {Array.from({ length: 4 }).map((_, i) => (
+            <div
+              key={i}
+              className="bg-white p-5 rounded-md border border-slate-100 space-y-3 animate-pulse"
+            >
+              <Skeleton className="h-12 w-12 rounded-md" />
+              <Skeleton className="h-4 w-20" />
+              <Skeleton className="h-6 w-8" />
+            </div>
+          ))}
+        </div>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          {Array.from({ length: 4 }).map((_, i) => (
+            <div
+              key={i}
+              className="bg-white rounded-md border border-slate-100 p-5 space-y-3 animate-pulse"
+            >
+              <Skeleton className="h-4 w-3/4" />
+              <Skeleton className="h-3 w-1/2" />
+              <Skeleton className="h-3 w-full" />
+              <Skeleton className="h-3 w-2/3" />
+            </div>
+          ))}
         </div>
       </div>
-    )
+    );
   }
 
   if (error) {
     return (
       <div className="flex items-center justify-center py-20">
-        <div className="flex flex-col items-center gap-3 text-center">
-          <AlertCircle className="w-8 h-8 text-red-500" />
-          <p className="text-sm text-red-600">{error}</p>
-          <button onClick={() => window.location.reload()} className="text-sm text-primary hover:underline">Retry</button>
+        <div className="flex items-center gap-2 text-red-500">
+          <AlertCircle className="w-5 h-5" />
+          <span>{error}</span>
         </div>
       </div>
-    )
+    );
   }
 
   return (
@@ -102,9 +151,12 @@ export default function SphereInvitesSection() {
       <div className="flex items-center justify-between mb-8">
         <div>
           <h2 className="text-2xl font-bold text-slate-800 flex items-center gap-2">
-            <i className="fas fa-envelope-open-text text-blue-600"></i> SphereInvites
+            <i className="fas fa-envelope-open-text text-blue-600"></i>{" "}
+            SphereInvites
           </h2>
-          <p className="text-sm text-slate-500 mt-1">Exclusive opportunities matched to your profile.</p>
+          <p className="text-sm text-slate-500 mt-1">
+            Exclusive opportunities matched to your profile.
+          </p>
         </div>
       </div>
 
@@ -116,7 +168,9 @@ export default function SphereInvitesSection() {
           </div>
           <div>
             <p className="text-2xl font-bold text-slate-800">{totalCount}</p>
-            <p className="text-xs text-slate-500 font-medium uppercase">Total Invites</p>
+            <p className="text-xs text-slate-500 font-medium uppercase">
+              Total Invites
+            </p>
           </div>
         </div>
         <div className="bg-white p-5 rounded-md  border border-slate-100 flex items-center gap-4">
@@ -125,7 +179,9 @@ export default function SphereInvitesSection() {
           </div>
           <div>
             <p className="text-2xl font-bold text-slate-800">{acceptedCount}</p>
-            <p className="text-xs text-slate-500 font-medium uppercase">Accepted</p>
+            <p className="text-xs text-slate-500 font-medium uppercase">
+              Accepted
+            </p>
           </div>
         </div>
         <div className="bg-white p-5 rounded-md  border border-slate-100 flex items-center gap-4">
@@ -134,7 +190,9 @@ export default function SphereInvitesSection() {
           </div>
           <div>
             <p className="text-2xl font-bold text-slate-800">{savedCount}</p>
-            <p className="text-xs text-slate-500 font-medium uppercase">Saved</p>
+            <p className="text-xs text-slate-500 font-medium uppercase">
+              Saved
+            </p>
           </div>
         </div>
         <div className="bg-gradient-to-r from-blue-600 to-blue-800 p-5 rounded-md  text-white flex flex-col justify-center relative overflow-hidden">
@@ -147,7 +205,10 @@ export default function SphereInvitesSection() {
             <i className="fas fa-arrow-trend-up mb-1 text-green-300"></i>
           </div>
           <div className="w-full bg-white/20 h-1.5 rounded-full mt-3">
-            <div className="bg-white h-1.5 rounded-full" style={{ width: '85%' }}></div>
+            <div
+              className="bg-white h-1.5 rounded-full"
+              style={{ width: "85%" }}
+            ></div>
           </div>
         </div>
       </div>
@@ -155,10 +216,30 @@ export default function SphereInvitesSection() {
       {/* Filter & Sort */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-6 gap-4">
         <div className="flex bg-white p-1 rounded-md border border-slate-200  overflow-x-auto">
-          <button onClick={() => setFilterType('all')} className={`px-4 py-2 text-sm font-medium rounded-md transition-colors whitespace-nowrap ${filterType === 'all' ? 'bg-blue-600 text-white' : 'text-slate-600 hover:text-blue-600'}`}>All Invites</button>
-          <button onClick={() => setFilterType('scholarship')} className={`px-4 py-2 text-sm font-medium rounded-md transition-colors whitespace-nowrap ${filterType === 'scholarship' ? 'bg-blue-600 text-white' : 'text-slate-600 hover:text-blue-600'}`}>Scholarships</button>
-          <button onClick={() => setFilterType('admission')} className={`px-4 py-2 text-sm font-medium rounded-md transition-colors whitespace-nowrap ${filterType === 'admission' ? 'bg-blue-600 text-white' : 'text-slate-600 hover:text-blue-600'}`}>Admissions</button>
-          <button onClick={() => setFilterType('event')} className={`px-4 py-2 text-sm font-medium rounded-md transition-colors whitespace-nowrap ${filterType === 'event' ? 'bg-blue-600 text-white' : 'text-slate-600 hover:text-blue-600'}`}>Events</button>
+          <button
+            onClick={() => setFilterType("all")}
+            className={`px-4 py-2 text-sm font-medium rounded-md transition-colors whitespace-nowrap ${filterType === "all" ? "bg-blue-600 text-white" : "text-slate-600 hover:text-blue-600"}`}
+          >
+            All Invites
+          </button>
+          <button
+            onClick={() => setFilterType("scholarship")}
+            className={`px-4 py-2 text-sm font-medium rounded-md transition-colors whitespace-nowrap ${filterType === "scholarship" ? "bg-blue-600 text-white" : "text-slate-600 hover:text-blue-600"}`}
+          >
+            Scholarships
+          </button>
+          <button
+            onClick={() => setFilterType("admission")}
+            className={`px-4 py-2 text-sm font-medium rounded-md transition-colors whitespace-nowrap ${filterType === "admission" ? "bg-blue-600 text-white" : "text-slate-600 hover:text-blue-600"}`}
+          >
+            Admissions
+          </button>
+          <button
+            onClick={() => setFilterType("event")}
+            className={`px-4 py-2 text-sm font-medium rounded-md transition-colors whitespace-nowrap ${filterType === "event" ? "bg-blue-600 text-white" : "text-slate-600 hover:text-blue-600"}`}
+          >
+            Events
+          </button>
         </div>
       </div>
 
@@ -168,58 +249,101 @@ export default function SphereInvitesSection() {
           <div className="w-20 h-20 bg-slate-50 rounded-full flex items-center justify-center mb-4">
             <i className="fas fa-envelope-open-text text-3xl text-slate-300"></i>
           </div>
-          <h3 className="text-lg font-semibold text-slate-800 mb-2">No invites yet</h3>
-          <p className="text-sm text-slate-500 max-w-sm">We&apos;ll notify you when opportunities match your profile.</p>
+          <h3 className="text-lg font-semibold text-slate-800 mb-2">
+            No invites yet
+          </h3>
+          <p className="text-sm text-slate-500 max-w-sm">
+            We&apos;ll notify you when opportunities match your profile.
+          </p>
         </div>
       )}
 
       {/* Invites Grid */}
       {filtered.length > 0 && (
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
-        {filtered.map(invite => (
-          <div key={invite.id} className="bg-white rounded-md  border border-slate-200 p-6 hover: transition-all flex flex-col h-full">
-            <div className="flex items-start justify-between mb-4">
-              <div className="h-12 w-12 rounded-md bg-blue-50 flex items-center justify-center text-blue-600 text-lg">
-                <i className={`fas ${getTypeIcon(invite.type)}`}></i>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
+          {filtered.map((invite) => (
+            <div
+              key={invite.id}
+              className="bg-white rounded-md  border border-slate-200 p-6 hover: transition-all flex flex-col h-full"
+            >
+              <div className="flex items-start justify-between mb-4">
+                <div className="h-12 w-12 rounded-md bg-blue-50 flex items-center justify-center text-blue-600 text-lg">
+                  <i className={`fas ${getTypeIcon(invite.type)}`}></i>
+                </div>
+                <span
+                  className={`text-xs px-2 py-1 rounded-full font-medium border ${getPriorityColor(invite.status)}`}
+                >
+                  {invite.status.charAt(0).toUpperCase() +
+                    invite.status.slice(1)}
+                </span>
               </div>
-              <span className={`text-xs px-2 py-1 rounded-full font-medium border ${getPriorityColor(invite.status)}`}>
-                {invite.status.charAt(0).toUpperCase() + invite.status.slice(1)}
-              </span>
+              <h3 className="font-bold text-slate-800 mb-1">{invite.title}</h3>
+              <p className="text-sm text-slate-600 mb-2 line-clamp-2">
+                {invite.message}
+              </p>
+              <div className="flex items-center justify-between mb-4 pb-4 border-b border-slate-100">
+                <span className="text-xs font-semibold text-slate-500">
+                  <i className="fas fa-calendar mr-1"></i>{" "}
+                  {invite.created_at
+                    ? new Date(invite.created_at).toLocaleDateString()
+                    : "N/A"}
+                </span>
+                <span className="text-xs font-bold text-blue-600 bg-blue-50 px-2 py-1 rounded">
+                  {invite.type}
+                </span>
+              </div>
+              <div className="mt-auto flex gap-2">
+                {invite.status === "pending" && (
+                  <>
+                    <button
+                      onClick={() => handleAccept(invite.id)}
+                      className="flex-1 px-3 py-2 text-xs font-bold text-white bg-green-600 rounded-md hover:bg-green-700 transition-colors"
+                    >
+                      Accept
+                    </button>
+                    <button
+                      onClick={() => handleSave(invite.id)}
+                      className="px-3 py-2 text-xs font-bold text-purple-600 bg-purple-50 rounded-md hover:bg-purple-100 transition-colors"
+                    >
+                      <i className="fas fa-bookmark"></i>
+                    </button>
+                    <button
+                      onClick={() => handleDecline(invite.id)}
+                      className="px-3 py-2 text-xs font-bold text-red-600 bg-red-50 rounded-md hover:bg-red-100 transition-colors"
+                    >
+                      <i className="fas fa-times"></i>
+                    </button>
+                  </>
+                )}
+                {invite.status === "accepted" && (
+                  <span className="flex-1 text-center px-3 py-2 text-xs font-bold text-green-600 bg-green-50 rounded-md">
+                    Accepted
+                  </span>
+                )}
+                {invite.status === "saved" && (
+                  <span className="flex-1 text-center px-3 py-2 text-xs font-bold text-purple-600 bg-purple-50 rounded-md">
+                    Saved
+                  </span>
+                )}
+                {invite.status === "declined" && (
+                  <span className="flex-1 text-center px-3 py-2 text-xs font-bold text-red-600 bg-red-50 rounded-md">
+                    Declined
+                  </span>
+                )}
+              </div>
             </div>
-            <h3 className="font-bold text-slate-800 mb-1">{invite.title}</h3>
-            <p className="text-sm text-slate-600 mb-2 line-clamp-2">{invite.message}</p>
-            <div className="flex items-center justify-between mb-4 pb-4 border-b border-slate-100">
-              <span className="text-xs font-semibold text-slate-500"><i className="fas fa-calendar mr-1"></i> {invite.created_at ? new Date(invite.created_at).toLocaleDateString() : 'N/A'}</span>
-              <span className="text-xs font-bold text-blue-600 bg-blue-50 px-2 py-1 rounded">{invite.type}</span>
-            </div>
-            <div className="mt-auto flex gap-2">
-              {invite.status === 'pending' && (
-                <>
-                  <button onClick={() => handleAccept(invite.id)} className="flex-1 px-3 py-2 text-xs font-bold text-white bg-green-600 rounded-md hover:bg-green-700 transition-colors">Accept</button>
-                  <button onClick={() => handleSave(invite.id)} className="px-3 py-2 text-xs font-bold text-purple-600 bg-purple-50 rounded-md hover:bg-purple-100 transition-colors"><i className="fas fa-bookmark"></i></button>
-                  <button onClick={() => handleDecline(invite.id)} className="px-3 py-2 text-xs font-bold text-red-600 bg-red-50 rounded-md hover:bg-red-100 transition-colors"><i className="fas fa-times"></i></button>
-                </>
-              )}
-              {invite.status === 'accepted' && (
-                <span className="flex-1 text-center px-3 py-2 text-xs font-bold text-green-600 bg-green-50 rounded-md">Accepted</span>
-              )}
-              {invite.status === 'saved' && (
-                <span className="flex-1 text-center px-3 py-2 text-xs font-bold text-purple-600 bg-purple-50 rounded-md">Saved</span>
-              )}
-              {invite.status === 'declined' && (
-                <span className="flex-1 text-center px-3 py-2 text-xs font-bold text-red-600 bg-red-50 rounded-md">Declined</span>
-              )}
-            </div>
-          </div>
-        ))}
-      </div>
+          ))}
+        </div>
       )}
 
       {/* Sponsored Section */}
       <div className="mt-12 border-t border-slate-200 pt-8 pb-8">
         <div className="flex items-center justify-between mb-6">
           <h3 className="text-xs font-bold text-slate-400 uppercase tracking-wider flex items-center gap-2">
-            Sponsored Opportunities <span className="bg-slate-200 text-slate-600 text-[10px] px-2 py-1 rounded font-semibold">Ad</span>
+            Sponsored Opportunities{" "}
+            <span className="bg-slate-200 text-slate-600 text-[10px] px-2 py-1 rounded font-semibold">
+              Ad
+            </span>
           </h3>
         </div>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
@@ -227,11 +351,20 @@ export default function SphereInvitesSection() {
             <div className="relative z-10">
               <div className="flex items-start justify-between">
                 <div>
-                  <span className="bg-white/20 backdrop-blur-sm text-[10px] font-bold px-2 py-0.5 rounded uppercase tracking-wide border border-white/10">Education</span>
-                  <h4 className="font-bold text-xl mt-3 mb-1">Study in Australia 🇦🇺</h4>
-                  <p className="text-indigo-100 text-sm mb-4 max-w-xs">Get free counseling, scholarship assessment, and visa processing assistance today.</p>
+                  <span className="bg-white/20 backdrop-blur-sm text-[10px] font-bold px-2 py-0.5 rounded uppercase tracking-wide border border-white/10">
+                    Education
+                  </span>
+                  <h4 className="font-bold text-xl mt-3 mb-1">
+                    Study in Australia 🇦🇺
+                  </h4>
+                  <p className="text-indigo-100 text-sm mb-4 max-w-xs">
+                    Get free counseling, scholarship assessment, and visa
+                    processing assistance today.
+                  </p>
                 </div>
-                <div className="h-10 w-10 bg-white/10 rounded-full flex items-center justify-center text-xl">✈️</div>
+                <div className="h-10 w-10 bg-white/10 rounded-full flex items-center justify-center text-xl">
+                  ✈️
+                </div>
               </div>
               <button className="bg-white text-indigo-700 text-xs font-bold px-4 py-2 rounded-md shadow hover:bg-slate-50 transition-colors">
                 Check Eligibility
@@ -246,26 +379,31 @@ export default function SphereInvitesSection() {
               </div>
               <div>
                 <div className="flex items-center gap-2 mb-1">
-                  <span className="text-[10px] font-bold text-orange-600 bg-orange-50 px-1.5 rounded uppercase tracking-wide">Course Deal</span>
+                  <span className="text-[10px] font-bold text-orange-600 bg-orange-50 px-1.5 rounded uppercase tracking-wide">
+                    Course Deal
+                  </span>
                 </div>
-                <h4 className="font-bold text-slate-800 text-lg group-hover:text-orange-600 transition-colors">Python for Beginners</h4>
-                <p className="text-slate-500 text-xs mt-1">Master coding with 50% off for StudSphere students.</p>
+                <h4 className="font-bold text-slate-800 text-lg group-hover:text-orange-600 transition-colors">
+                  Python for Beginners
+                </h4>
+                <p className="text-slate-500 text-xs mt-1">
+                  Master coding with 50% off for StudSphere students.
+                </p>
               </div>
             </div>
             <div className="bg-slate-50 px-5 py-3 border-t border-slate-100 flex items-center justify-between">
-              <span className="text-xs font-medium text-slate-500 line-through">$99.99</span>
+              <span className="text-xs font-medium text-slate-500 line-through">
+                $99.99
+              </span>
               <div className="flex items-center gap-2 text-sm font-bold text-slate-800">
-                $49.99 <i className="fas fa-arrow-right text-orange-500 group-hover:translate-x-1 transition-transform"></i>
+                $49.99{" "}
+                <i className="fas fa-arrow-right text-orange-500 group-hover:translate-x-1 transition-transform"></i>
               </div>
             </div>
           </div>
         </div>
       </div>
-      {toast && (
-        <div className="fixed bottom-4 right-4 z-50 rounded-lg bg-green-600 px-4 py-3 text-sm font-semibold text-white shadow-lg">
-          {toast.message}
-        </div>
-      )}
+      {toast && <Toast message={toast.message} />}
     </div>
-  )
+  );
 }

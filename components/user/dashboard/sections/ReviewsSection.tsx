@@ -17,6 +17,9 @@ import {
 } from "@/actions/review-actions";
 import { calculateAverageRating } from "@/lib/review-types";
 import ApplicationTestimonials from "./ApplicationTestimonials";
+import { SkeletonCardGrid } from "@/components/ui/Skeleton";
+import { ErrorState } from "@/components/ui/ErrorState";
+import { Toast } from "@/components/ui/Toast";
 
 interface Review {
   id: number;
@@ -221,62 +224,46 @@ export default function ReviewsSection() {
 
   if (loading) {
     return (
-      <div className="w-full max-w-6xl mx-auto">
-        <header className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900 tracking-tight">
-            My Reviews
-          </h1>
-          <p className="text-gray-500 mt-1">
-            Manage and track your college reviews and feedback.
-          </p>
-        </header>
-        <div className="flex items-center justify-center py-20">
-          <Loader2 className="w-8 h-8 animate-spin text-indigo-600" />
+      <div>
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-6">
+          <h1 className="text-2xl font-bold text-gray-800">My Reviews</h1>
+          <div className="flex items-center text-sm text-gray-500 mt-2 sm:mt-0 gap-2">
+            <span>Dashboard</span>
+            <span>-</span>
+            <span className="text-gray-800 font-medium">Reviews</span>
+          </div>
         </div>
+        <SkeletonCardGrid count={6} />
       </div>
     );
   }
 
   if (error) {
     return (
-      <div className="w-full max-w-6xl mx-auto">
-        <header className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900 tracking-tight">
-            My Reviews
-          </h1>
-          <p className="text-gray-500 mt-1">
-            Manage and track your college reviews and feedback.
-          </p>
-        </header>
-        <div className="flex flex-col items-center justify-center py-20 text-center">
-          <div className="w-24 h-24 bg-red-50 rounded-full flex items-center justify-center mb-4 text-red-500">
-            <MessageSquareText className="w-12 h-12" />
+      <div>
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-6">
+          <h1 className="text-2xl font-bold text-gray-800">My Reviews</h1>
+          <div className="flex items-center text-sm text-gray-500 mt-2 sm:mt-0 gap-2">
+            <span>Dashboard</span>
+            <span>-</span>
+            <span className="text-gray-800 font-medium">Reviews</span>
           </div>
-          <h3 className="text-xl font-semibold text-gray-900 mb-2">
-            Error loading reviews
-          </h3>
-          <p className="text-gray-500 mb-6">{error}</p>
-          <button
-            onClick={fetchReviews}
-            className="px-4 py-2 bg-indigo-600 text-white rounded-md font-medium hover:bg-indigo-700 transition-colors"
-          >
-            Try Again
-          </button>
         </div>
+        <ErrorState error={error} />
       </div>
     );
   }
 
   return (
-    <div className="w-full max-w-6xl mx-auto">
-      <header className="mb-8">
-        <h1 className="text-3xl font-bold text-gray-900 tracking-tight">
-          My Reviews
-        </h1>
-        <p className="text-gray-500 mt-1">
-          Manage and track your college reviews and feedback.
-        </p>
-      </header>
+    <div>
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-6">
+        <h1 className="text-2xl font-bold text-gray-800">My Reviews</h1>
+        <div className="flex items-center text-sm text-gray-500 mt-2 sm:mt-0 gap-2">
+          <span>Dashboard</span>
+          <span>-</span>
+          <span className="text-gray-800 font-medium">Reviews</span>
+        </div>
+      </div>
 
       <div className="flex gap-1 bg-slate-100 p-1 rounded-md mb-6 w-fit">
         <button
@@ -674,13 +661,7 @@ export default function ReviewsSection() {
         </>
       )}
 
-      {toast && (
-        <div
-          className={`fixed bottom-4 right-4 z-50 rounded-lg px-4 py-3 text-sm font-semibold text-white shadow-lg ${toast.type === "error" ? "bg-red-600" : "bg-green-600"}`}
-        >
-          {toast.message}
-        </div>
-      )}
+      {toast && <Toast message={toast.message} type={toast.type} />}
     </div>
   );
 }

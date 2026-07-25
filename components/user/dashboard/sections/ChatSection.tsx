@@ -24,6 +24,9 @@ import {
 } from "lucide-react";
 import { apiService, MessageContactItem, MessageItem } from "@/services/api";
 import { useAuth } from "@/services/AuthContext";
+import { SkeletonChatList } from "@/components/ui/Skeleton";
+import { ErrorState } from "@/components/ui/ErrorState";
+import { Toast } from "@/components/ui/Toast";
 
 interface Message {
   id: string;
@@ -227,10 +230,17 @@ export default function ChatSection() {
 
   if (loading) {
     return (
-      <div className="h-[calc(100vh-140px)] mt-6 flex items-center justify-center">
-        <div className="flex flex-col items-center gap-3">
-          <Loader2 className="w-8 h-8 animate-spin text-primary" />
-          <p className="text-sm text-slate-500">Loading messages...</p>
+      <div>
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-6">
+          <h1 className="text-2xl font-bold text-gray-800">Messages</h1>
+          <div className="flex items-center text-sm text-gray-500 mt-2 sm:mt-0 gap-2">
+            <span>Dashboard</span>
+            <span>-</span>
+            <span className="text-gray-800 font-medium">Messages</span>
+          </div>
+        </div>
+        <div className="h-[calc(100vh-200px)] bg-white rounded-md border border-slate-200 overflow-hidden">
+          <SkeletonChatList />
         </div>
       </div>
     );
@@ -238,17 +248,16 @@ export default function ChatSection() {
 
   if (error) {
     return (
-      <div className="h-[calc(100vh-140px)] mt-6 flex items-center justify-center">
-        <div className="flex flex-col items-center gap-3 text-center">
-          <AlertCircle className="w-8 h-8 text-red-500" />
-          <p className="text-sm text-red-600">{error}</p>
-          <button
-            onClick={() => window.location.reload()}
-            className="text-sm text-primary hover:underline"
-          >
-            Retry
-          </button>
+      <div>
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-6">
+          <h1 className="text-2xl font-bold text-gray-800">Messages</h1>
+          <div className="flex items-center text-sm text-gray-500 mt-2 sm:mt-0 gap-2">
+            <span>Dashboard</span>
+            <span>-</span>
+            <span className="text-gray-800 font-medium">Messages</span>
+          </div>
         </div>
+        <ErrorState error={error} />
       </div>
     );
   }
@@ -263,7 +272,7 @@ export default function ChatSection() {
           <span className="text-gray-800 font-medium">Messages</span>
         </div>
       </div>
-      <div className="h-[calc(100vh-200px)] bg-white rounded-md border border-slate-200 overflow-hidden">
+      <div className="h-[calc(100vh-200px)] bg-white rounded-md border border-slate-200 overflow-hidden relative">
         {/* Empty state when no contacts */}
         {contacts.length === 0 && !loading && !error && (
           <div className="absolute inset-0 flex flex-col items-center justify-center bg-white z-20">
@@ -594,11 +603,7 @@ export default function ChatSection() {
         )}
       </div>
 
-      {toast && (
-        <div className="fixed bottom-4 right-4 z-50 rounded-lg bg-green-600 px-4 py-3 text-sm font-semibold text-white shadow-lg">
-          {toast.message}
-        </div>
-      )}
+      {toast && <Toast message={toast.message} />}
     </div>
   );
 }

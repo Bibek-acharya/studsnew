@@ -3,6 +3,8 @@
 import { useState, useEffect } from "react";
 import { apiService } from "@/services/api";
 import { Star, MessageSquareText, Loader2, CheckCircle2 } from "lucide-react";
+import { Skeleton } from "@/components/ui/Skeleton";
+import { Toast } from "@/components/ui/Toast";
 
 interface MyApplication {
   id: number;
@@ -107,8 +109,17 @@ export default function ApplicationTestimonials() {
 
   if (loading) {
     return (
-      <div className="flex justify-center py-16">
-        <Loader2 className="w-8 h-8 animate-spin text-indigo-600" />
+      <div className="space-y-3">
+        {Array.from({ length: 4 }).map((_, i) => (
+          <div
+            key={i}
+            className="bg-gray-50 rounded-md border border-gray-100 p-4 space-y-3 animate-pulse"
+          >
+            <Skeleton className="h-4 w-3/4" />
+            <Skeleton className="h-3 w-1/2" />
+            <Skeleton className="h-8 w-28 rounded-md" />
+          </div>
+        ))}
       </div>
     );
   }
@@ -281,13 +292,7 @@ export default function ApplicationTestimonials() {
         </div>
       )}
 
-      {toast && (
-        <div
-          className={`fixed bottom-4 right-4 z-50 rounded-lg px-4 py-3 text-sm font-semibold text-white shadow-lg ${toast.type === "error" ? "bg-red-600" : "bg-green-600"}`}
-        >
-          {toast.message}
-        </div>
-      )}
+      {toast && <Toast message={toast.message} type={toast.type} />}
     </>
   );
 }

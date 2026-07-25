@@ -5,6 +5,9 @@ import { useRouter } from "next/navigation";
 import { useState, useEffect } from "react";
 import { ProgramCard } from "@/components/find-college/CollegeGrid";
 import { EntranceCard } from "@/components/entrance/EntranceGrid";
+import { Skeleton } from "@/components/ui/Skeleton";
+import { ErrorState } from "@/components/ui/ErrorState";
+import { Toast } from "@/components/ui/Toast";
 import {
   Bookmark,
   MapPin,
@@ -476,7 +479,7 @@ export default function BookmarksSection() {
       `}</style>
 
       {/* Tab Navigation */}
-      <div className="flex gap-1 bg-slate-100 p-1 rounded-md mb-6 w-fit mt-6">
+      <div className="flex gap-1 bg-slate-100 p-1 rounded-md mb-6 w-fit">
         {TABS.map((tab) => (
           <button
             key={tab}
@@ -497,18 +500,23 @@ export default function BookmarksSection() {
 
       {/* Loading State */}
       {loading && (
-        <div className="flex items-center justify-center py-24">
-          <Loader2 className="w-6 h-6 animate-spin text-primary" />
+        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6 sm:gap-8">
+          {Array.from({ length: 8 }).map((_, i) => (
+            <div
+              key={i}
+              className="bg-white rounded-md border border-slate-200 p-5 space-y-3 animate-pulse"
+            >
+              <Skeleton className="h-40 w-full rounded-md" />
+              <Skeleton className="h-4 w-3/4" />
+              <Skeleton className="h-3 w-1/2" />
+              <Skeleton className="h-8 w-full rounded-md" />
+            </div>
+          ))}
         </div>
       )}
 
       {/* Error State */}
-      {!loading && error && (
-        <div className="flex flex-col items-center justify-center py-24 text-center px-4 bg-white rounded-md border border-slate-200">
-          <AlertCircle className="w-10 h-10 text-red-400 mb-3" />
-          <p className="text-sm text-red-600 font-medium">{error}</p>
-        </div>
-      )}
+      {!loading && error && <ErrorState error={error} />}
 
       {/* Cards Grid */}
       {!loading && !error && filteredBookmarks.length > 0 ? (
@@ -938,11 +946,7 @@ export default function BookmarksSection() {
         )
       )}
 
-      {toast && (
-        <div className="fixed bottom-4 right-4 z-50 rounded-lg bg-green-600 px-4 py-3 text-sm font-semibold text-white shadow-lg">
-          {toast.message}
-        </div>
-      )}
+      {toast && <Toast message={toast.message} />}
     </div>
   );
 }
