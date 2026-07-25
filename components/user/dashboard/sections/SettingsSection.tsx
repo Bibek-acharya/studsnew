@@ -50,13 +50,25 @@ export default function SettingsSection() {
     timezone: "Pacific Time (PT)",
     dateFormat: "MM/DD/YYYY",
   });
-  const [activeModal, setActiveModal] = useState<null | "contact" | "report">(
-    null,
-  );
+  const [activeModal, setActiveModal] = useState<
+    null | "contact" | "report" | "totp"
+  >(null);
   const [dangerAction, setDangerAction] = useState<
     "deactivate" | "delete" | null
   >(null);
   const [toastMessage, setToastMessage] = useState("");
+  const [totpData, setTotpData] = useState<{
+    secret: string;
+    qr_uri: string;
+    account: string;
+  } | null>(null);
+  const [totpVerifyCode, setTotpVerifyCode] = useState("");
+  const [totpGenerating, setTotpGenerating] = useState(false);
+  const [totpEnabling, setTotpEnabling] = useState(false);
+  const [totpEnabled, setTotpEnabled] = useState(false);
+  const [totpDisableCode, setTotpDisableCode] = useState("");
+  const [totpDisablePassword, setTotpDisablePassword] = useState("");
+  const [showDisableTOTP, setShowDisableTOTP] = useState(false);
   const [contactSubject, setContactSubject] = useState("");
   const [contactMessage, setContactMessage] = useState("");
   const [reportArea, setReportArea] = useState("Dashboard");
@@ -166,6 +178,62 @@ export default function SettingsSection() {
     fetchSessions();
   }, []);
 
+  const handleGenerateTOTP = async () => {
+    setTotpGenerating(true);
+    try {
+      const res = await apiService.generateTOTPSecret();
+      setTotpData(res.data);
+      setActiveModal("totp");
+      setTotpVerifyCode("");
+    } catch (err: any) {
+      showToast(err.message || "Failed to setup 2FA");
+    } finally {
+      setTotpGenerating(false);
+    }
+  };
+
+  const handleEnableTOTP = async () => {
+    if (!totpVerifyCode || totpVerifyCode.length < 6) {
+      showToast("Please enter a valid 6-digit code");
+      return;
+    }
+    setTotpEnabling(true);
+    try {
+      await apiService.enableTOTP(totpVerifyCode);
+      setTotpEnabled(true);
+      setActiveModal(null);
+      showToast("Two-factor authentication enabled successfully");
+    } catch (err: any) {
+      showToast(err.message || "Failed to verify code");
+    } finally {
+      setTotpEnabling(false);
+    }
+  };
+
+  const handleDisableTOTP = async () => {
+    if (!totpDisableCode || totpDisableCode.length < 6) {
+      showToast("Please enter a valid 6-digit code");
+      return;
+    }
+    if (!totpDisablePassword) {
+      showToast("Please enter your password");
+      return;
+    }
+    setTotpEnabling(true);
+    try {
+      await apiService.disableTOTP(totpDisablePassword, totpDisableCode);
+      setTotpEnabled(false);
+      setShowDisableTOTP(false);
+      setTotpDisableCode("");
+      setTotpDisablePassword("");
+      showToast("Two-factor authentication disabled");
+    } catch (err: any) {
+      showToast(err.message || "Failed to disable 2FA");
+    } finally {
+      setTotpEnabling(false);
+    }
+  };
+
   const handleRevokeSession = async (sessionId: number) => {
     try {
       await apiService.revokeSession(sessionId);
@@ -272,29 +340,97 @@ export default function SettingsSection() {
               </button>
             </div>
 
-            <div className="bg-white rounded-md  border border-slate-200 p-6">
+            <div className="bg-white rounded-md border border-slate-200 p-6">
               <h3 className="font-bold text-slate-800 mb-4 flex items-center gap-2">
                 <ShieldCheck className="w-5 h-5 text-indigo-600" /> Two-Factor
                 Authentication
               </h3>
-              <div className="flex items-center justify-between py-3 border-b border-slate-100">
+              <div className="flex items-center justify-between py-3">
                 <div>
-                  <p className="font-medium text-slate-800">Enable 2FA</p>
+                  <p className="font-medium text-slate-800">
+                    Authenticator App
+                  </p>
                   <p className="text-sm text-slate-500">
-                    Add an extra layer of security to your account.
+                    {totpEnabled
+                      ? "Two-factor authentication is active. Your account is protected."
+                      : "Add an extra layer of security using Google Authenticator, Authy, or similar."}
                   </p>
                 </div>
-                <label className="relative inline-block w-11 h-6">
-                  <input
-                    type="checkbox"
-                    checked={settings.twoFactor}
-                    onChange={() => toggleSetting("twoFactor")}
-                    className="sr-only peer"
-                  />
-                  <div className="w-11 h-6 bg-slate-200 rounded-full peer peer-checked:bg-indigo-600 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-0.5 after:left-0.5 after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all after:"></div>
-                </label>
+                {totpEnabled ? (
+                  <button
+                    onClick={() => setShowDisableTOTP(true)}
+                    className="px-4 py-2 bg-red-50 text-red-600 rounded-md text-sm font-semibold hover:bg-red-100 transition-colors"
+                  >
+                    Disable
+                  </button>
+                ) : (
+                  <button
+                    onClick={handleGenerateTOTP}
+                    disabled={totpGenerating}
+                    className="px-4 py-2 bg-indigo-600 text-white rounded-md text-sm font-semibold hover:bg-indigo-700 transition-colors disabled:opacity-50"
+                  >
+                    {totpGenerating ? "Setting up..." : "Enable"}
+                  </button>
+                )}
               </div>
             </div>
+
+            {showDisableTOTP && (
+              <div className="bg-white rounded-md border border-slate-200 p-6">
+                <h3 className="font-bold text-red-600 mb-4 flex items-center gap-2">
+                  <ShieldCheck className="w-5 h-5" /> Disable Two-Factor
+                  Authentication
+                </h3>
+                <p className="text-sm text-slate-500 mb-4">
+                  Enter your password and a current code from your authenticator
+                  app to disable 2FA.
+                </p>
+                <div className="space-y-3">
+                  <input
+                    value={totpDisablePassword}
+                    onChange={(e) => setTotpDisablePassword(e.target.value)}
+                    type="password"
+                    placeholder="Current password"
+                    className="w-full rounded-md border border-slate-200 px-4 py-2.5 text-sm outline-none focus:border-red-500 focus:ring-2 focus:ring-red-500/20"
+                  />
+                  <input
+                    value={totpDisableCode}
+                    onChange={(e) =>
+                      setTotpDisableCode(
+                        e.target.value.replace(/\D/g, "").slice(0, 6),
+                      )
+                    }
+                    type="text"
+                    inputMode="numeric"
+                    placeholder="Authenticator code (000000)"
+                    className="w-full rounded-md border border-slate-200 px-4 py-2.5 text-sm text-center tracking-widest outline-none focus:border-red-500 focus:ring-2 focus:ring-red-500/20"
+                  />
+                  <div className="flex gap-3">
+                    <button
+                      onClick={() => {
+                        setShowDisableTOTP(false);
+                        setTotpDisableCode("");
+                        setTotpDisablePassword("");
+                      }}
+                      className="flex-1 rounded-md bg-slate-100 px-4 py-2.5 text-sm font-semibold text-slate-700 hover:bg-slate-200"
+                    >
+                      Cancel
+                    </button>
+                    <button
+                      onClick={handleDisableTOTP}
+                      disabled={
+                        totpEnabling ||
+                        totpDisableCode.length < 6 ||
+                        !totpDisablePassword
+                      }
+                      className="flex-1 rounded-md bg-red-600 px-4 py-2.5 text-sm font-semibold text-white hover:bg-red-700 disabled:opacity-50"
+                    >
+                      {totpEnabling ? "Disabling..." : "Disable 2FA"}
+                    </button>
+                  </div>
+                </div>
+              </div>
+            )}
 
             <div className="bg-white rounded-md border border-slate-200 p-6">
               <h3 className="font-bold text-slate-800 mb-4 flex items-center gap-2">
@@ -553,6 +689,74 @@ export default function SettingsSection() {
                     className="bg-red-600 text-white px-4 py-2 rounded-md text-sm font-semibold hover:bg-red-700 transition-colors"
                   >
                     Delete Account
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {activeModal === "totp" && totpData && (
+          <div className="fixed inset-0 z-60 flex items-center justify-center bg-slate-950/50 p-4">
+            <div className="w-full max-w-md rounded-md bg-white p-6 shadow-2xl text-center">
+              <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-indigo-50 text-indigo-600">
+                <ShieldCheck className="w-6 h-6" />
+              </div>
+              <h3 className="text-xl font-semibold text-slate-900 mb-2">
+                Setup Two-Factor Authentication
+              </h3>
+              <p className="text-sm text-slate-500 mb-4">
+                Scan this QR code with your authenticator app (Google
+                Authenticator, Authy, etc.).
+              </p>
+              <div className="flex justify-center mb-4">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
+                  src={totpData.qr_uri}
+                  alt="TOTP QR Code"
+                  className="w-48 h-48 border border-slate-200 rounded-md"
+                />
+              </div>
+              <p className="text-xs text-slate-400 mb-1">
+                Or enter this key manually:{" "}
+                <span className="font-mono font-bold text-slate-600">
+                  {totpData.secret}
+                </span>
+              </p>
+              <p className="text-xs text-slate-400 mb-4">
+                Account: {totpData.account}
+              </p>
+              <div className="space-y-3">
+                <input
+                  value={totpVerifyCode}
+                  onChange={(e) =>
+                    setTotpVerifyCode(
+                      e.target.value.replace(/\D/g, "").slice(0, 6),
+                    )
+                  }
+                  type="text"
+                  inputMode="numeric"
+                  placeholder="000000"
+                  className="w-full rounded-md border border-slate-200 bg-slate-50 px-4 py-3 text-center text-2xl tracking-widest text-slate-900 outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20"
+                />
+                <div className="flex gap-3">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setActiveModal(null);
+                      setTotpData(null);
+                    }}
+                    className="flex-1 rounded-md bg-slate-100 px-4 py-3 text-sm font-semibold text-slate-700 hover:bg-slate-200"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    type="button"
+                    onClick={handleEnableTOTP}
+                    disabled={totpEnabling || totpVerifyCode.length < 6}
+                    className="flex-1 rounded-md bg-indigo-600 px-4 py-3 text-sm font-semibold text-white hover:bg-indigo-700 disabled:opacity-50"
+                  >
+                    {totpEnabling ? "Verifying..." : "Verify & Enable"}
                   </button>
                 </div>
               </div>

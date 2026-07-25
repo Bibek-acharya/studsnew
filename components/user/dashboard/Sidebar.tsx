@@ -6,7 +6,6 @@ import { usePathname, useRouter } from "next/navigation";
 import Image from "next/image";
 import { useAuth } from "@/services/AuthContext";
 import { apiService } from "@/services/api";
-import LogoutModal from "./LogoutModal";
 import {
   LayoutDashboard,
   MessageSquare,
@@ -27,15 +26,19 @@ import {
 interface SidebarProps {
   sidebarOpen: boolean;
   setSidebarOpen: (open: boolean) => void;
+  onLogoutClick: () => void;
 }
 
-export default function Sidebar({ sidebarOpen, setSidebarOpen }: SidebarProps) {
+export default function Sidebar({
+  sidebarOpen,
+  setSidebarOpen,
+  onLogoutClick,
+}: SidebarProps) {
   const pathname = usePathname();
   const router = useRouter();
   const { logout } = useAuth();
   const [unreadMessages, setUnreadMessages] = useState(0);
   const [unreadNotifications, setUnreadNotifications] = useState(0);
-  const [showLogoutModal, setShowLogoutModal] = useState(false);
 
   useEffect(() => {
     const fetchCounts = async () => {
@@ -212,17 +215,13 @@ export default function Sidebar({ sidebarOpen, setSidebarOpen }: SidebarProps) {
         <div className="p-4 border-t border-gray-200 shrink-0">
           <button
             type="button"
-            onClick={() => setShowLogoutModal(true)}
+            onClick={onLogoutClick}
             className="w-full flex items-center gap-3 px-4 py-3 text-red-500 hover:bg-red-50 rounded-md transition-colors"
           >
             <LogOut className="w-5 h-5" />
             <span className="font-medium text-sm">Logout</span>
           </button>
         </div>
-        <LogoutModal
-          isOpen={showLogoutModal}
-          onClose={() => setShowLogoutModal(false)}
-        />
       </aside>
     </>
   );

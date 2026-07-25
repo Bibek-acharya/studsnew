@@ -47,6 +47,10 @@ interface AuthContextType {
   sendOTP: (email: string) => Promise<void>;
   setUser: (user: User) => void;
   setSession: (user: User, token: string) => void;
+  requiresTOTP: boolean;
+  totpTempToken: string | null;
+  verifyTOTP: (code: string) => Promise<void>;
+  cancelTOTP: () => void;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -56,6 +60,8 @@ const USER_STORAGE_KEY = "studsphere_user";
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [loading, setLoading] = useState(true);
   const [user, setUserState] = useState<User | null>(null);
+  const [requiresTOTP, setRequiresTOTP] = useState(false);
+  const [totpTempToken, setTotpTempToken] = useState<string | null>(null);
 
   useEffect(() => {
     let isMounted = true;
@@ -145,10 +151,43 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   const login = async (email: string, password: string, rememberMe = false) => {
-    const response: AuthResponse = await apiService.login(email, password);
+    const res = await apiService.login(email, password);
 
+    // Check if the response indicates TOTP is required
+    if (res.requires_totp && res.totp_token) {
+      setRequiresTOTP(true);
+      setTotpTempToken(res.totp_token);
+      return;
+    }
+
+    if (!res.data?.token) {
+      throw new Error(res.message || "Login failed. Please try again.");
+    }
+
+    const userData: User = {
+      id: res.data.user.id,
+      first_name: res.data.user.first_name,
+      last_name: res.data.user.last_name,
+      email: res.data.user.email,
+      role: res.data.user.role,
+      image_url: res.data.user.image_url,
+    };
+
+    if (typeof window !== "undefined") {
+      persistAuthSession(userData, res.data.token, rememberMe);
+    }
+    setUserState(userData);
+  };
+
+  const verifyTOTP = async (code: string) => {
+    if (!totpTempToken) throw new Error("No TOTP session");
+
+    const response: AuthResponse = await apiService.verifyLoginTOTP(
+      totpTempToken,
+      code,
+    );
     if (!response.data?.token) {
-      throw new Error(response.message || "Login failed. Please try again.");
+      throw new Error(response.message || "TOTP verification failed");
     }
 
     const userData: User = {
@@ -161,9 +200,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     };
 
     if (typeof window !== "undefined") {
-      persistAuthSession(userData, response.data.token, rememberMe);
+      persistAuthSession(userData, response.data.token, true);
     }
     setUserState(userData);
+    setRequiresTOTP(false);
+    setTotpTempToken(null);
+  };
+
+  const cancelTOTP = () => {
+    setRequiresTOTP(false);
+    setTotpTempToken(null);
   };
 
   const register = async (
@@ -239,8 +285,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       sendOTP,
       setUser,
       setSession,
+      requiresTOTP,
+      totpTempToken,
+      verifyTOTP,
+      cancelTOTP,
     }),
-    [user, isAuthenticated, loading],
+    [user, isAuthenticated, loading, requiresTOTP, totpTempToken],
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

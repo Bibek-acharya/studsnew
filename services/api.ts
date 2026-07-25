@@ -122,6 +122,8 @@ export interface AuthResponse {
     token: string;
   };
   message: string;
+  requires_totp?: boolean;
+  totp_token?: string;
 }
 
 export interface RegisterResponse {
@@ -2688,6 +2690,44 @@ export const apiService = {
 
   async saveInvite(id: number): Promise<void> {
     return apiRequest<void>(`/api/v1/invites/${id}/save`, { method: "PUT" });
+  },
+
+  // === TOTP 2FA ===
+  async generateTOTPSecret(): Promise<{
+    success: boolean;
+    data: { secret: string; qr_uri: string; account: string };
+    message: string;
+  }> {
+    return apiRequest("/api/v1/auth/totp/generate", { method: "POST" });
+  },
+
+  async enableTOTP(
+    code: string,
+  ): Promise<{ success: boolean; message: string }> {
+    return apiRequest("/api/v1/auth/totp/enable", {
+      method: "POST",
+      body: JSON.stringify({ code }),
+    });
+  },
+
+  async disableTOTP(
+    password: string,
+    code: string,
+  ): Promise<{ success: boolean; message: string }> {
+    return apiRequest("/api/v1/auth/totp/disable", {
+      method: "POST",
+      body: JSON.stringify({ password, code }),
+    });
+  },
+
+  async verifyLoginTOTP(
+    tempToken: string,
+    code: string,
+  ): Promise<AuthResponse> {
+    return apiRequest<AuthResponse>("/api/v1/auth/totp/verify", {
+      method: "POST",
+      body: JSON.stringify({ temp_token: tempToken, code }),
+    });
   },
 
   // === Login Sessions ===

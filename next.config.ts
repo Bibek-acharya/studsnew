@@ -9,7 +9,7 @@ const nextConfig: NextConfig = {
           {
             key: "Content-Security-Policy",
             value:
-              "connect-src 'self' https://api.studsphere.com http://localhost:8080 https://placehold.co https://images.unsplash.com https://api.qrserver.com;",
+              "connect-src 'self' https://api.studsphere.com https://ai.studsphere.com http://localhost:8080 https://placehold.co https://images.unsplash.com https://api.qrserver.com;",
           },
         ],
       },
@@ -36,6 +36,7 @@ const nextConfig: NextConfig = {
       { protocol: "https", hostname: "placehold.co" },
       { protocol: "http", hostname: "localhost" },
       { protocol: "https", hostname: "api.studsphere.com" },
+      { protocol: "https", hostname: "ai.studsphere.com" },
     ],
   },
   allowedDevOrigins: ["petersburg-inside-grande-llp.trycloudflare.com"],
