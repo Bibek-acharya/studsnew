@@ -16,6 +16,7 @@ import {
   updateReviewAction,
 } from "@/actions/review-actions";
 import { calculateAverageRating } from "@/lib/review-types";
+import ApplicationTestimonials from "./ApplicationTestimonials";
 
 interface Review {
   id: number;
@@ -301,20 +302,7 @@ export default function ReviewsSection() {
       </div>
 
       {reviewTab === "application" ? (
-        <div className="flex flex-col items-center justify-center py-16 text-center bg-white rounded-md border border-gray-100 p-6">
-          <div className="w-24 h-24 bg-indigo-50 rounded-full flex items-center justify-center mb-4 text-indigo-500">
-            <MessageSquareText className="w-12 h-12" />
-          </div>
-          <h3 className="text-xl font-semibold text-gray-900 mb-2">
-            Application Reviews
-          </h3>
-          <p className="text-gray-500 mb-2">
-            Rate and review your experience with college applications.
-          </p>
-          <p className="text-sm text-gray-400">
-            This feature will be available soon.
-          </p>
-        </div>
+        <ApplicationTestimonials />
       ) : (
         <>
           <section className="bg-white rounded-md  border border-gray-100 p-6">

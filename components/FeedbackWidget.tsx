@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { useAuth } from "@/services/AuthContext";
+import { apiService } from "@/services/api";
 
 const faces = [
   { value: 5, color: "#1fc354", label: "Love" },
@@ -126,22 +127,11 @@ export default function FeedbackWidget() {
     if (!rating) return;
     setSubmitting(true);
     try {
-      const API_BASE =
-        process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080";
-      const token =
-        localStorage.getItem("token") || sessionStorage.getItem("token");
-      await fetch(`${API_BASE}/api/v1/feedback`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          ...(token ? { Authorization: `Bearer ${token}` } : {}),
-        },
-        body: JSON.stringify({
-          rating,
-          experience,
-          designation: designation || undefined,
-          email: email || undefined,
-        }),
+      await apiService.submitTestimonial({
+        name: "",
+        designation: designation || "StudSphere User",
+        rating,
+        review: experience || "Great experience!",
       });
     } catch {
       // silently fail

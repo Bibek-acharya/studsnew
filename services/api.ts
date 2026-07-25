@@ -2573,6 +2573,34 @@ export const apiService = {
     });
   },
 
+  async submitTestimonial(data: {
+    name: string;
+    designation: string;
+    rating: number;
+    review: string;
+  }): Promise<{ success: boolean; message: string; data?: any }> {
+    return apiRequest("/api/v1/testimonials", {
+      method: "POST",
+      body: JSON.stringify(data),
+    });
+  },
+
+  async getUserTestimonials(): Promise<{
+    success: boolean;
+    data: Array<{
+      id: number;
+      user_id: number;
+      user_name: string;
+      role: string;
+      image_url: string;
+      rating: number;
+      experience: string;
+      created_at: string;
+    }>;
+  }> {
+    return apiRequest("/api/v1/testimonials");
+  },
+
   // === Dashboard ===
   async getDashboardStats(): Promise<DashboardStatsResponse> {
     return apiRequest<DashboardStatsResponse>("/api/v1/dashboard/stats");
