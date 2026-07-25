@@ -43,6 +43,12 @@ export default function FeedbackListSection() {
   }, [fetchFeedbacks]);
 
   const handleDelete = async (id: number) => {
+    if (
+      !window.confirm(
+        "Are you sure you want to delete this feedback? This action cannot be undone.",
+      )
+    )
+      return;
     setDeleting(id);
     try {
       const token = localStorage.getItem("superadmin_token");
@@ -61,7 +67,13 @@ export default function FeedbackListSection() {
   const formatTime = (dateStr: string) => {
     try {
       const d = new Date(dateStr);
-      return d.toLocaleDateString("en-US", { year: "numeric", month: "short", day: "numeric", hour: "2-digit", minute: "2-digit" });
+      return d.toLocaleDateString("en-US", {
+        year: "numeric",
+        month: "short",
+        day: "numeric",
+        hour: "2-digit",
+        minute: "2-digit",
+      });
     } catch {
       return dateStr;
     }
@@ -71,7 +83,15 @@ export default function FeedbackListSection() {
     return (
       <div className="flex items-center gap-0.5">
         {[1, 2, 3, 4, 5].map((star) => (
-          <Star key={star} size={14} className={star <= rating ? "fill-yellow-400 text-yellow-400" : "text-gray-300"} />
+          <Star
+            key={star}
+            size={14}
+            className={
+              star <= rating
+                ? "fill-yellow-400 text-yellow-400"
+                : "text-gray-300"
+            }
+          />
         ))}
       </div>
     );
@@ -89,7 +109,12 @@ export default function FeedbackListSection() {
     return (
       <div className="rounded-md border border-gray-200 bg-white p-8 text-center">
         <p className="text-red-500 mb-4">{error}</p>
-        <button onClick={fetchFeedbacks} className="rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700">Retry</button>
+        <button
+          onClick={fetchFeedbacks}
+          className="rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700"
+        >
+          Retry
+        </button>
       </div>
     );
   }
@@ -100,8 +125,12 @@ export default function FeedbackListSection() {
         <h2 className="flex items-center gap-2 text-lg font-bold text-gray-900">
           <MessageSquare size={20} className="text-blue-600" /> User Feedback
         </h2>
-        <button onClick={fetchFeedbacks} className="flex items-center gap-1.5 rounded-md bg-gray-100 px-3 py-1.5 text-xs font-medium text-gray-700 hover:bg-gray-200 transition-colors">
-          <Loader2 size={14} className={loading ? "animate-spin" : "hidden"} /> Refresh
+        <button
+          onClick={fetchFeedbacks}
+          className="flex items-center gap-1.5 rounded-md bg-gray-100 px-3 py-1.5 text-xs font-medium text-gray-700 hover:bg-gray-200 transition-colors"
+        >
+          <Loader2 size={14} className={loading ? "animate-spin" : "hidden"} />{" "}
+          Refresh
         </button>
       </div>
 
@@ -124,12 +153,21 @@ export default function FeedbackListSection() {
             </thead>
             <tbody className="divide-y divide-gray-100">
               {feedbacks.map((fb) => (
-                <tr key={fb.id} className="hover:bg-gray-50/50 transition-colors">
-                  <td className="px-4 py-3 font-medium text-gray-900">{fb.user_name || "Anonymous"}</td>
-                  <td className="px-4 py-3 text-gray-500 whitespace-nowrap">{formatTime(fb.created_at)}</td>
+                <tr
+                  key={fb.id}
+                  className="hover:bg-gray-50/50 transition-colors"
+                >
+                  <td className="px-4 py-3 font-medium text-gray-900">
+                    {fb.user_name || "Anonymous"}
+                  </td>
+                  <td className="px-4 py-3 text-gray-500 whitespace-nowrap">
+                    {formatTime(fb.created_at)}
+                  </td>
                   <td className="px-4 py-3">{renderStars(fb.rating)}</td>
                   <td className="px-4 py-3 text-gray-600 max-w-[300px]">
-                    <p className="truncate" title={fb.experience}>{fb.experience || "—"}</p>
+                    <p className="truncate" title={fb.experience}>
+                      {fb.experience || "—"}
+                    </p>
                   </td>
                   <td className="px-4 py-3">
                     <button
@@ -138,7 +176,11 @@ export default function FeedbackListSection() {
                       className="rounded-md p-1.5 text-gray-400 hover:bg-red-50 hover:text-red-600 transition-colors"
                       title="Delete"
                     >
-                      {deleting === fb.id ? <Loader2 size={14} className="animate-spin" /> : <Trash2 size={14} />}
+                      {deleting === fb.id ? (
+                        <Loader2 size={14} className="animate-spin" />
+                      ) : (
+                        <Trash2 size={14} />
+                      )}
                     </button>
                   </td>
                 </tr>

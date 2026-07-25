@@ -542,7 +542,7 @@ export default function CalendarSection() {
               onClick={() => handleSetActiveTab(tab.id)}
               className={`flex items-center gap-2 px-4 py-2 text-sm font-semibold rounded-md transition-all whitespace-nowrap ${
                 activeTab === tab.id
-                  ? "bg-white text-indigo-600 shadow-sm"
+                  ? "bg-white text-brand-blue "
                   : "text-slate-500 hover:text-slate-700"
               }`}
             >
@@ -559,12 +559,12 @@ export default function CalendarSection() {
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               placeholder="Search.."
-              className="pl-9 pr-4 py-1.5 border border-slate-200 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 w-32 md:w-48 transition-all"
+              className="pl-9 pr-4 py-1.5 border border-slate-200 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-brand-blue/20 w-32 md:w-48 transition-all"
             />
           </div>
           <button
             onClick={() => openModal()}
-            className="flex items-center gap-1.5 px-3 md:px-4 py-1.5 bg-indigo-600 text-white rounded-md text-sm font-medium hover:bg-indigo-700 transition-colors whitespace-nowrap"
+            className="flex items-center gap-1.5 px-3 md:px-4 py-1.5 bg-brand-blue text-white rounded-md text-sm font-medium hover:bg-brand-hover transition-colors whitespace-nowrap"
           >
             <Plus className="w-4 h-4" />
             New
@@ -680,7 +680,7 @@ export default function CalendarSection() {
 
         {showModal && (
           <div className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-            <div className="bg-white rounded-md shadow-xl w-full max-w-md overflow-hidden">
+            <div className="bg-white rounded-md  w-full max-w-md overflow-hidden">
               <div className="flex justify-between items-center p-4 md:p-6 border-b border-slate-100">
                 <h3 className="text-lg font-semibold text-slate-900">
                   {editingEvent ? "Edit Event" : "New Event"}

@@ -125,7 +125,7 @@ export default function SphereInvitesSection() {
           {Array.from({ length: 4 }).map((_, i) => (
             <div
               key={i}
-              className="bg-white rounded-xl border border-gray-100 shadow-sm p-5 flex items-center gap-4 animate-pulse"
+              className="bg-white rounded-xl border border-gray-100  p-5 flex items-center gap-4 animate-pulse"
             >
               <Skeleton className="w-12 h-12 rounded-xl shrink-0" />
               <div className="flex-1 space-y-2">
@@ -219,7 +219,7 @@ export default function SphereInvitesSection() {
             return (
               <div
                 key={invite.id}
-                className="bg-white rounded-xl border border-gray-100 shadow-sm p-5 flex items-center justify-between hover:shadow-md transition-all"
+                className="bg-white rounded-xl border border-gray-100  p-5 flex items-center justify-between hover: transition-all"
               >
                 <div className="flex items-center gap-4 min-w-0">
                   <div

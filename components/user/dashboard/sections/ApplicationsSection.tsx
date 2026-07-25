@@ -80,7 +80,7 @@ const STATUS_COLOR = {
 
 const TYPE_COLOR: Record<string, string> = {
   admission: "bg-blue-600",
-  entrance: "bg-indigo-600",
+  entrance: "bg-brand-blue",
   scholarship: "bg-amber-500",
   all: "bg-slate-600",
 };
@@ -167,7 +167,7 @@ export default function ApplicationsSection() {
             onClick={() => setActiveType(t)}
             className={`px-4 py-2 text-sm font-semibold rounded-md transition-all ${
               activeType === t
-                ? "bg-white text-primary"
+                ? "bg-white text-brand-blue"
                 : "text-slate-500 hover:text-slate-700"
             }`}
           >
@@ -278,7 +278,7 @@ export default function ApplicationsSection() {
                           app.type === "admission"
                             ? "bg-blue-50 text-blue-600"
                             : app.type === "entrance"
-                              ? "bg-indigo-50 text-indigo-600"
+                              ? "bg-indigo-50 text-brand-blue"
                               : "bg-amber-50 text-amber-600"
                         }`}
                       >
@@ -304,7 +304,7 @@ export default function ApplicationsSection() {
                           e.stopPropagation();
                           setSelected(app);
                         }}
-                        className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-primary bg-blue-50 hover:bg-blue-100 rounded-md transition-colors"
+                        className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-brand-blue bg-blue-50 hover:bg-blue-100 rounded-md transition-colors"
                       >
                         <Eye className="w-3.5 h-3.5" />
                         View
@@ -383,7 +383,7 @@ export default function ApplicationsSection() {
                     </h3>
                     <div className="bg-white border border-slate-200 rounded-md p-4">
                       <div className="flex items-center gap-4 mb-4">
-                        <div className="w-12 h-12 rounded-full bg-primary flex items-center justify-center">
+                        <div className="w-12 h-12 rounded-full bg-brand-blue flex items-center justify-center">
                           <span className="text-white font-bold">
                             {selected.user.name
                               .split(" ")
@@ -474,7 +474,7 @@ export default function ApplicationsSection() {
                         >
                           {i !== 0 && (
                             <div
-                              className={`absolute left-1.5 top-6 w-[2px] h-6 ${isDone ? "bg-primary" : "bg-slate-200"}`}
+                              className={`absolute left-1.5 top-6 w-[2px] h-6 ${isDone ? "bg-brand-blue" : "bg-slate-200"}`}
                             />
                           )}
                           <div className="relative z-10 flex flex-col items-center">
@@ -482,8 +482,8 @@ export default function ApplicationsSection() {
                               className={`w-3 h-3 rounded-full transition-all ${
                                 isDone
                                   ? isCurrent
-                                    ? "bg-primary ring-4 ring-primary/20"
-                                    : "bg-primary"
+                                    ? "bg-brand-blue ring-4 ring-primary/20"
+                                    : "bg-brand-blue"
                                   : "bg-slate-200"
                               }`}
                             />
@@ -495,7 +495,7 @@ export default function ApplicationsSection() {
                               {STATUS_LABEL[s]}
                             </p>
                             {isCurrent && (
-                              <p className="text-xs text-primary mt-0.5">
+                              <p className="text-xs text-brand-blue mt-0.5">
                                 Current status
                               </p>
                             )}

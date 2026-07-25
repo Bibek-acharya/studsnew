@@ -193,8 +193,8 @@ export default function Sidebar({
                 onClick={() => setSidebarOpen(false)}
                 className={`w-full flex items-center justify-between px-4 py-3 mb-1 rounded-md transition-colors duration-200 ${
                   active
-                    ? "bg-[#0000ff] text-white"
-                    : "text-gray-600 hover:bg-blue-50 hover:text-[#0000ff]"
+                    ? "bg-brand-blue text-white"
+                    : "text-gray-600 hover:bg-blue-50 hover:text-brand-blue"
                 }`}
               >
                 <div className="flex items-center gap-3">
@@ -205,8 +205,8 @@ export default function Sidebar({
                   <span
                     className={`text-xs font-bold px-2 py-0.5 rounded-md ${
                       active
-                        ? "bg-white text-[#0000ff]"
-                        : "bg-[#0000ff] text-white"
+                        ? "bg-white text-brand-blue"
+                        : "bg-brand-blue text-white"
                     }`}
                   >
                     {item.badge}

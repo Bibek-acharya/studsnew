@@ -276,7 +276,7 @@ export default function ChatSection() {
         {/* Empty state when no contacts */}
         {contacts.length === 0 && !loading && !error && (
           <div className="absolute inset-0 flex flex-col items-center justify-center bg-white z-20">
-            <div className="w-20 h-20 bg-blue-50 text-primary rounded-full flex items-center justify-center mb-4">
+            <div className="w-20 h-20 bg-blue-50 text-brand-blue rounded-full flex items-center justify-center mb-4">
               <MessageSquare className="w-10 h-10" />
             </div>
             <h2 className="text-xl font-bold text-slate-800 mb-2">
@@ -367,7 +367,7 @@ export default function ChatSection() {
                         </p>
                         <div className="flex items-center justify-between mt-2">
                           <div className="flex gap-1.5">
-                            <span className="text-[10px] px-2 py-0.5 rounded uppercase tracking-wider font-bold bg-blue-50 text-primary border border-blue-100">
+                            <span className="text-[10px] px-2 py-0.5 rounded uppercase tracking-wider font-bold bg-blue-50 text-brand-blue border border-blue-100">
                               {conv.type}
                             </span>
                             <span
@@ -377,7 +377,7 @@ export default function ChatSection() {
                             </span>
                           </div>
                           {unread > 0 && (
-                            <div className="w-5 h-5 bg-primary rounded-full text-white text-[10px] flex items-center justify-center font-bold">
+                            <div className="w-5 h-5 bg-brand-blue rounded-full text-white text-[10px] flex items-center justify-center font-bold">
                               {unread}
                             </div>
                           )}
@@ -396,7 +396,7 @@ export default function ChatSection() {
           {/* Empty State */}
           {!activeConvId && (
             <div className="absolute inset-0 flex flex-col items-center justify-center bg-white z-20">
-              <div className="w-20 h-20 bg-blue-50 text-primary rounded-full flex items-center justify-center mb-4">
+              <div className="w-20 h-20 bg-blue-50 text-brand-blue rounded-full flex items-center justify-center mb-4">
                 <MessageSquare className="w-10 h-10" />
               </div>
               <h2 className="text-xl font-bold text-slate-800 mb-2">
@@ -430,7 +430,7 @@ export default function ChatSection() {
               <div className="flex items-center gap-3">
                 <button
                   onClick={() => setShowContactInfo(!showContactInfo)}
-                  className={`p-2 rounded-md transition-colors ${showContactInfo ? "bg-primary text-white" : "text-slate-400 hover:text-primary hover:bg-blue-50"}`}
+                  className={`p-2 rounded-md transition-colors ${showContactInfo ? "bg-brand-blue text-white" : "text-slate-400 hover:text-brand-blue hover:bg-blue-50"}`}
                 >
                   <Info className="w-5 h-5" />
                 </button>
@@ -469,7 +469,7 @@ export default function ChatSection() {
                         className={`max-w-[75%] md:max-w-[60%] flex flex-col ${isMine ? "items-end" : "items-start"}`}
                       >
                         <div
-                          className={`p-3.5 rounded-md  ${isMine ? "bg-primary text-white rounded-br-sm" : "bg-white border border-slate-200 text-slate-800 rounded-bl-sm"}`}
+                          className={`p-3.5 rounded-md  ${isMine ? "bg-brand-blue text-white rounded-br-sm" : "bg-white border border-slate-200 text-slate-800 rounded-bl-sm"}`}
                         >
                           {msg.messageType === "document" && (
                             <div className="flex items-center gap-2 mb-2 p-2 bg-slate-200 rounded-md">
@@ -487,7 +487,7 @@ export default function ChatSection() {
                           {formatTime(msg.timestamp)}
                           {isMine && (
                             <CheckCheck
-                              className={`w-3.5 h-3.5 ${msg.readStatus ? "text-primary" : "text-slate-300"}`}
+                              className={`w-3.5 h-3.5 ${msg.readStatus ? "text-brand-blue" : "text-slate-300"}`}
                             />
                           )}
                         </div>
@@ -503,7 +503,7 @@ export default function ChatSection() {
           {activeConvId && (
             <div className="p-4 bg-white border-t border-slate-200">
               <div className="max-w-4xl mx-auto relative flex items-end gap-2">
-                <button className="p-3 text-slate-400 hover:text-primary transition-colors rounded-full hover:bg-blue-50 shrink-0">
+                <button className="p-3 text-slate-400 hover:text-brand-blue transition-colors rounded-full hover:bg-blue-50 shrink-0">
                   <Paperclip className="w-5 h-5" />
                 </button>
                 <div className="flex-1 bg-slate-50 border border-slate-200 rounded-md focus-within:bg-white focus-within:border-primary focus-within:ring-2 focus-within:ring-blue-100 transition-all p-1">
@@ -525,7 +525,7 @@ export default function ChatSection() {
                 <button
                   onClick={handleSend}
                   disabled={!messageInput.trim()}
-                  className="p-3 bg-primary text-white hover:bg-primary-hover transition-colors rounded-full  shrink-0 disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="p-3 bg-brand-blue text-white hover:bg-brand-blue-hover transition-colors rounded-full  shrink-0 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   <Send className="w-5 h-5 ml-0.5" />
                 </button>
@@ -591,7 +591,7 @@ export default function ChatSection() {
                           </p>
                         </div>
                         {item.copy && (
-                          <Copy className="w-4 h-4 text-slate-300 opacity-0 group-hover:opacity-100 transition-opacity hover:text-primary" />
+                          <Copy className="w-4 h-4 text-slate-300 opacity-0 group-hover:opacity-100 transition-opacity hover:text-brand-blue" />
                         )}
                       </div>
                     </div>

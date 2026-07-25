@@ -169,7 +169,7 @@ export default function DashboardSection() {
 
   const getInitialBg = (name: string) => {
     const colors = [
-      "bg-indigo-100 text-indigo-600",
+      "bg-indigo-100 text-brand-blue",
       "bg-red-100 text-red-600",
       "bg-purple-100 text-purple-600",
       "bg-green-100 text-green-600",
@@ -288,7 +288,7 @@ export default function DashboardSection() {
       <div className="flex flex-col lg:flex-row gap-6">
         <div className="w-full lg:w-2/3 xl:w-8/12 flex flex-col gap-6">
           {/* Banner Card */}
-          <div className="relative w-full h-[200px] bg-[#0000ff] rounded-xl overflow-hidden flex items-center">
+          <div className="relative w-full h-[200px] bg-brand-blue rounded-xl overflow-hidden flex items-center">
             <div className="absolute top-0 right-0 w-[250px] h-[250px] bg-white opacity-[0.04] rounded-full translate-x-1/3 -translate-y-1/3 pointer-events-none" />
             <div className="absolute top-0 right-0 w-[180px] h-[180px] bg-white opacity-[0.05] rounded-full translate-x-1/4 -translate-y-1/4 pointer-events-none" />
             <div className="absolute -right-[100px] top-1/2 -translate-y-1/2 w-[400px] h-[400px] bg-white/40 rounded-full pointer-events-none" />
@@ -318,7 +318,7 @@ export default function DashboardSection() {
           {/* Stats Cards Grid */}
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 xl:gap-6">
             {/* Active Applications */}
-            <div className="bg-white rounded-xl p-5 border border-gray-100 shadow-sm flex flex-col justify-between">
+            <div className="bg-white rounded-xl p-5 border border-gray-100  flex flex-col justify-between">
               <div className="flex items-center gap-3">
                 <div className="w-12 h-12 rounded-full bg-blue-50 text-blue-600 flex items-center justify-center shrink-0">
                   <FileText className="w-6 h-6" />
@@ -347,7 +347,7 @@ export default function DashboardSection() {
             </div>
 
             {/* Saved Scholarships */}
-            <div className="bg-white rounded-xl p-5 border border-gray-100 shadow-sm flex flex-col justify-between">
+            <div className="bg-white rounded-xl p-5 border border-gray-100  flex flex-col justify-between">
               <div className="flex items-center gap-3">
                 <div className="w-12 h-12 rounded-full bg-green-50 text-green-600 flex items-center justify-center shrink-0">
                   <Bookmark className="w-6 h-6" />
@@ -376,7 +376,7 @@ export default function DashboardSection() {
             </div>
 
             {/* Active Invities */}
-            <div className="bg-white rounded-xl p-5 border border-gray-100 shadow-sm flex flex-col justify-between">
+            <div className="bg-white rounded-xl p-5 border border-gray-100  flex flex-col justify-between">
               <div className="flex items-center gap-3">
                 <div className="w-12 h-12 rounded-full bg-purple-50 text-purple-600 flex items-center justify-center shrink-0">
                   <Mail className="w-6 h-6" />
@@ -405,7 +405,7 @@ export default function DashboardSection() {
             </div>
 
             {/* New Messages */}
-            <div className="bg-white rounded-xl p-5 border border-gray-100 shadow-sm flex flex-col justify-between">
+            <div className="bg-white rounded-xl p-5 border border-gray-100  flex flex-col justify-between">
               <div className="flex items-center gap-3">
                 <div className="w-12 h-12 rounded-full bg-amber-50 text-amber-600 flex items-center justify-center shrink-0">
                   <MessageCircle className="w-6 h-6" />
@@ -433,7 +433,7 @@ export default function DashboardSection() {
             </div>
 
             {/* Upcoming Deadlines */}
-            <div className="bg-white rounded-xl p-5 border border-gray-100 shadow-sm flex flex-col justify-between">
+            <div className="bg-white rounded-xl p-5 border border-gray-100  flex flex-col justify-between">
               <div className="flex items-center gap-3">
                 <div className="w-12 h-12 rounded-full bg-red-50 text-red-600 flex items-center justify-center shrink-0">
                   <Clock className="w-6 h-6" />
@@ -462,9 +462,9 @@ export default function DashboardSection() {
             </div>
 
             {/* Bookmarked Colleges */}
-            <div className="bg-white rounded-xl p-5 border border-gray-100 shadow-sm flex flex-col justify-between">
+            <div className="bg-white rounded-xl p-5 border border-gray-100  flex flex-col justify-between">
               <div className="flex items-center gap-3">
-                <div className="w-12 h-12 rounded-full bg-indigo-50 text-indigo-600 flex items-center justify-center shrink-0">
+                <div className="w-12 h-12 rounded-full bg-indigo-50 text-brand-blue flex items-center justify-center shrink-0">
                   <Building2 className="w-6 h-6" />
                 </div>
                 <div>
@@ -492,7 +492,7 @@ export default function DashboardSection() {
           </div>
 
           {/* Recent Applications */}
-          <div className="bg-white rounded-xl border border-gray-100 shadow-sm overflow-hidden">
+          <div className="bg-white rounded-xl border border-gray-100  overflow-hidden">
             <div className="p-5 border-b border-gray-100 flex justify-between items-center">
               <h3 className="text-lg font-bold text-gray-800">
                 Recent Applications
@@ -573,7 +573,7 @@ export default function DashboardSection() {
         {/* Right Column */}
         <div className="w-full lg:w-1/3 xl:w-4/12 flex flex-col gap-6">
           {/* Recent Activities */}
-          <div className="bg-white rounded-xl p-6 border border-gray-100 shadow-sm">
+          <div className="bg-white rounded-xl p-6 border border-gray-100 ">
             <div className="flex justify-between items-start mb-4">
               <div>
                 <h2 className="text-lg font-bold text-gray-800">
@@ -618,7 +618,7 @@ export default function DashboardSection() {
           </div>
 
           {/* Calendar */}
-          <div className="bg-white rounded-xl p-6 border border-gray-100 shadow-sm">
+          <div className="bg-white rounded-xl p-6 border border-gray-100 ">
             <div className="flex justify-between items-center mb-6">
               <h2 className="text-lg font-bold text-gray-800">Calendar</h2>
               <div className="flex items-center gap-2">

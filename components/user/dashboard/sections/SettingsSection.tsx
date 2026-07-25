@@ -283,7 +283,7 @@ export default function SettingsSection() {
             onClick={() => setActiveTab(tab.id)}
             className={`px-4 py-2 text-sm font-semibold rounded-md transition-all ${
               activeTab === tab.id
-                ? "bg-white text-primary"
+                ? "bg-white text-brand-blue"
                 : "text-slate-500 hover:text-slate-700"
             }`}
           >
@@ -297,7 +297,7 @@ export default function SettingsSection() {
           <div className="space-y-6 animate-in fade-in slide-in-from-bottom-2 duration-300">
             <div className="bg-white rounded-md  border border-slate-200 p-6">
               <h3 className="font-bold text-slate-800 mb-4 flex items-center gap-2">
-                <Lock className="w-5 h-5 text-indigo-600" /> Change Password
+                <Lock className="w-5 h-5 text-brand-blue" /> Change Password
               </h3>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="md:col-span-2">
@@ -309,7 +309,7 @@ export default function SettingsSection() {
                     value={currentPassword}
                     onChange={(e) => setCurrentPassword(e.target.value)}
                     placeholder="Enter current password"
-                    className="w-full px-3 py-2.5 border border-slate-200 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all"
+                    className="w-full px-3 py-2.5 border border-slate-200 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-brand-blue/20/20 focus:border-brand-blue transition-all"
                   />
                 </div>
                 <div>
@@ -321,7 +321,7 @@ export default function SettingsSection() {
                     value={newPassword}
                     onChange={(e) => setNewPassword(e.target.value)}
                     placeholder="Create new password"
-                    className="w-full px-3 py-2.5 border border-slate-200 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all"
+                    className="w-full px-3 py-2.5 border border-slate-200 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-brand-blue/20/20 focus:border-brand-blue transition-all"
                   />
                 </div>
                 <div>
@@ -333,14 +333,14 @@ export default function SettingsSection() {
                     value={confirmNewPassword}
                     onChange={(e) => setConfirmNewPassword(e.target.value)}
                     placeholder="Confirm new password"
-                    className="w-full px-3 py-2.5 border border-slate-200 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all"
+                    className="w-full px-3 py-2.5 border border-slate-200 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-brand-blue/20/20 focus:border-brand-blue transition-all"
                   />
                 </div>
               </div>
               <button
                 type="button"
                 onClick={handleChangePassword}
-                className="mt-4 bg-indigo-600 text-white px-4 py-2.5 rounded-md text-sm font-semibold hover:bg-indigo-700 transition-colors"
+                className="mt-4 bg-brand-blue text-white px-4 py-2.5 rounded-md text-sm font-semibold hover:bg-brand-hover transition-colors"
               >
                 Update Password
               </button>
@@ -348,7 +348,7 @@ export default function SettingsSection() {
 
             <div className="bg-white rounded-md border border-slate-200 p-6">
               <h3 className="font-bold text-slate-800 mb-4 flex items-center gap-2">
-                <ShieldCheck className="w-5 h-5 text-indigo-600" /> Two-Factor
+                <ShieldCheck className="w-5 h-5 text-brand-blue" /> Two-Factor
                 Authentication
               </h3>
               <div className="flex items-center justify-between py-3">
@@ -373,7 +373,7 @@ export default function SettingsSection() {
                   <button
                     onClick={handleGenerateTOTP}
                     disabled={totpGenerating}
-                    className="px-4 py-2 bg-indigo-600 text-white rounded-md text-sm font-semibold hover:bg-indigo-700 transition-colors disabled:opacity-50"
+                    className="px-4 py-2 bg-brand-blue text-white rounded-md text-sm font-semibold hover:bg-brand-hover transition-colors disabled:opacity-50"
                   >
                     {totpGenerating ? "Setting up..." : "Enable"}
                   </button>
@@ -439,7 +439,7 @@ export default function SettingsSection() {
 
             <div className="bg-white rounded-md border border-slate-200 p-6">
               <h3 className="font-bold text-slate-800 mb-4 flex items-center gap-2">
-                <Laptop className="w-5 h-5 text-indigo-600" /> Login Activity
+                <Laptop className="w-5 h-5 text-brand-blue" /> Login Activity
               </h3>
 
               {sessionsLoading ? (
@@ -510,7 +510,7 @@ export default function SettingsSection() {
           <div className="space-y-6 animate-in fade-in slide-in-from-bottom-2 duration-300">
             <div className="bg-white rounded-md  border border-slate-200 p-6">
               <h3 className="font-bold text-slate-800 mb-4 flex items-center gap-2">
-                <Bell className="w-5 h-5 text-indigo-600" /> Notification
+                <Bell className="w-5 h-5 text-brand-blue" /> Notification
                 Preferences
               </h3>
               <div className="space-y-0 divide-y divide-slate-100">
@@ -530,7 +530,7 @@ export default function SettingsSection() {
                       onChange={() => toggleSetting("applicationUpdates")}
                       className="sr-only peer"
                     />
-                    <div className="w-11 h-6 bg-slate-200 rounded-full peer peer-checked:bg-indigo-600 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-0.5 after:left-0.5 after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all after:"></div>
+                    <div className="w-11 h-6 bg-slate-200 rounded-full peer peer-checked:bg-brand-blue peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-0.5 after:left-0.5 after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all after:"></div>
                   </label>
                 </div>
                 <div className="flex items-center justify-between py-3">
@@ -549,7 +549,7 @@ export default function SettingsSection() {
                       onChange={() => toggleSetting("messagesFromColleges")}
                       className="sr-only peer"
                     />
-                    <div className="w-11 h-6 bg-slate-200 rounded-full peer peer-checked:bg-indigo-600 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-0.5 after:left-0.5 after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all after:"></div>
+                    <div className="w-11 h-6 bg-slate-200 rounded-full peer peer-checked:bg-brand-blue peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-0.5 after:left-0.5 after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all after:"></div>
                   </label>
                 </div>
                 <div className="flex items-center justify-between py-3">
@@ -568,7 +568,7 @@ export default function SettingsSection() {
                       onChange={() => toggleSetting("scholarshipAlerts")}
                       className="sr-only peer"
                     />
-                    <div className="w-11 h-6 bg-slate-200 rounded-full peer peer-checked:bg-indigo-600 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-0.5 after:left-0.5 after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all after:"></div>
+                    <div className="w-11 h-6 bg-slate-200 rounded-full peer peer-checked:bg-brand-blue peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-0.5 after:left-0.5 after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all after:"></div>
                   </label>
                 </div>
                 <div className="flex items-center justify-between py-3">
@@ -587,7 +587,7 @@ export default function SettingsSection() {
                       onChange={() => toggleSetting("systemNotifications")}
                       className="sr-only peer"
                     />
-                    <div className="w-11 h-6 bg-slate-200 rounded-full peer peer-checked:bg-indigo-600 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-0.5 after:left-0.5 after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all after:"></div>
+                    <div className="w-11 h-6 bg-slate-200 rounded-full peer peer-checked:bg-brand-blue peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-0.5 after:left-0.5 after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all after:"></div>
                   </label>
                 </div>
                 <div className="flex items-center justify-between py-3">
@@ -606,13 +606,13 @@ export default function SettingsSection() {
                       onChange={() => toggleSetting("emailDigest")}
                       className="sr-only peer"
                     />
-                    <div className="w-11 h-6 bg-slate-200 rounded-full peer peer-checked:bg-indigo-600 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-0.5 after:left-0.5 after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all after:"></div>
+                    <div className="w-11 h-6 bg-slate-200 rounded-full peer peer-checked:bg-brand-blue peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-0.5 after:left-0.5 after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all after:"></div>
                   </label>
                 </div>
               </div>
             </div>
             <div className="sticky bottom-0 bg-white/90 backdrop-blur-md border-t border-slate-200 p-4 rounded-md  mt-4 flex justify-end">
-              <button className="bg-indigo-600 text-white px-4 py-2.5 rounded-md text-sm font-semibold hover:bg-indigo-700 transition-colors flex items-center gap-2">
+              <button className="bg-brand-blue text-white px-4 py-2.5 rounded-md text-sm font-semibold hover:bg-brand-hover transition-colors flex items-center gap-2">
                 <CheckCircle2 className="w-4 h-4" /> Save Changes
               </button>
             </div>
@@ -690,8 +690,8 @@ export default function SettingsSection() {
 
         {activeModal === "totp" && totpData && (
           <div className="fixed inset-0 z-60 flex items-center justify-center bg-slate-950/50 p-4">
-            <div className="w-full max-w-md rounded-md bg-white p-6 shadow-2xl text-center">
-              <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-indigo-50 text-indigo-600">
+            <div className="w-full max-w-md rounded-md bg-white p-6  text-center">
+              <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-indigo-50 text-brand-blue">
                 <ShieldCheck className="w-6 h-6" />
               </div>
               <h3 className="text-xl font-semibold text-slate-900 mb-2">
@@ -729,7 +729,7 @@ export default function SettingsSection() {
                   type="text"
                   inputMode="numeric"
                   placeholder="000000"
-                  className="w-full rounded-md border border-slate-200 bg-slate-50 px-4 py-3 text-center text-2xl tracking-widest text-slate-900 outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20"
+                  className="w-full rounded-md border border-slate-200 bg-slate-50 px-4 py-3 text-center text-2xl tracking-widest text-slate-900 outline-none focus:border-brand-blue focus:ring-2 focus:ring-brand-blue/20/20"
                 />
                 <div className="flex gap-3">
                   <button
@@ -746,7 +746,7 @@ export default function SettingsSection() {
                     type="button"
                     onClick={handleEnableTOTP}
                     disabled={totpEnabling || totpVerifyCode.length < 6}
-                    className="flex-1 rounded-md bg-indigo-600 px-4 py-3 text-sm font-semibold text-white hover:bg-indigo-700 disabled:opacity-50"
+                    className="flex-1 rounded-md bg-brand-blue px-4 py-3 text-sm font-semibold text-white hover:bg-brand-hover disabled:opacity-50"
                   >
                     {totpEnabling ? "Verifying..." : "Verify & Enable"}
                   </button>

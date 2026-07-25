@@ -225,7 +225,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
             <button
               id="menu-toggle"
               onClick={() => setSidebarOpen(true)}
-              className="lg:hidden text-gray-500 hover:text-[#0000ff]"
+              className="lg:hidden text-gray-500 hover:text-brand-blue"
             >
               <Menu className="w-6 h-6" />
             </button>

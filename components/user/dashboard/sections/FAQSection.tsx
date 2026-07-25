@@ -104,24 +104,24 @@ export default function FAQSection() {
       </div>
       <div className="space-y-6 animate-in fade-in slide-in-from-bottom-2 duration-300">
         {/* Contact Support CTA banner */}
-        <div className="bg-indigo-50 border border-indigo-100 rounded-xl p-5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+        <div className="bg-indigo-50 border border-brand-blue/20 rounded-xl p-5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
           <div>
             <h3 className="font-semibold text-indigo-800">Need more help?</h3>
-            <p className="text-sm text-indigo-600 mt-1">
+            <p className="text-sm text-brand-blue mt-1">
               Contact our support team for personalized assistance.
             </p>
           </div>
           <div className="flex gap-2">
             <button
               onClick={() => setShowContactModal(true)}
-              className="px-4 py-2 bg-indigo-600 text-white rounded-lg text-sm font-semibold hover:bg-indigo-700 transition-colors flex items-center gap-2"
+              className="px-4 py-2 bg-brand-blue text-white rounded-lg text-sm font-semibold hover:bg-brand-hover transition-colors flex items-center gap-2"
             >
               <MessageCircle className="w-4 h-4" />
               Contact Support
             </button>
             <button
               onClick={() => setShowReportModal(true)}
-              className="px-4 py-2 bg-white text-indigo-600 border border-indigo-200 rounded-lg text-sm font-semibold hover:bg-indigo-50 transition-colors flex items-center gap-2"
+              className="px-4 py-2 bg-white text-brand-blue border border-brand-blue rounded-lg text-sm font-semibold hover:bg-brand-blue/10 transition-colors flex items-center gap-2"
             >
               <AlertTriangle className="w-4 h-4" />
               Report Bug
@@ -133,7 +133,7 @@ export default function FAQSection() {
         <div className="bg-white rounded-md border border-slate-200 p-6">
           <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between mb-6 text-slate-800">
             <div className="flex items-center gap-3">
-              <div className="rounded-md bg-indigo-50 p-3 text-indigo-600">
+              <div className="rounded-md bg-indigo-50 p-3 text-brand-blue">
                 <HelpCircle className="w-5 h-5" />
               </div>
               <div>
@@ -154,7 +154,7 @@ export default function FAQSection() {
                   onClick={() => setActiveCategory(categoryItem.id)}
                   className={`px-4 py-2 text-sm font-semibold rounded-md transition-all ${
                     activeCategory === categoryItem.id
-                      ? "bg-white text-primary"
+                      ? "bg-white text-brand-blue"
                       : "text-slate-500 hover:text-slate-700 hover:bg-slate-50"
                   }`}
                 >
@@ -183,7 +183,7 @@ export default function FAQSection() {
         {/* Contact Support Modal */}
         {showContactModal && (
           <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/40 backdrop-blur-sm p-4">
-            <div className="w-full max-w-md rounded-xl bg-white shadow-2xl p-6">
+            <div className="w-full max-w-md rounded-xl bg-white  p-6">
               <div className="flex items-center justify-between mb-4">
                 <h3 className="text-xl font-bold text-slate-900">
                   Contact Support
@@ -208,7 +208,7 @@ export default function FAQSection() {
                     value={contactSubject}
                     onChange={(e) => setContactSubject(e.target.value)}
                     placeholder="What do you need help with?"
-                    className="w-full rounded-lg border border-slate-200 px-4 py-3 text-sm outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20"
+                    className="w-full rounded-lg border border-slate-200 px-4 py-3 text-sm outline-none focus:border-brand-blue focus:ring-2 focus:ring-brand-blue/20/20"
                   />
                 </div>
                 <div>
@@ -220,7 +220,7 @@ export default function FAQSection() {
                     onChange={(e) => setContactMessage(e.target.value)}
                     placeholder="Describe your issue in detail..."
                     rows={4}
-                    className="w-full rounded-lg border border-slate-200 px-4 py-3 text-sm outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20"
+                    className="w-full rounded-lg border border-slate-200 px-4 py-3 text-sm outline-none focus:border-brand-blue focus:ring-2 focus:ring-brand-blue/20/20"
                   />
                 </div>
               </div>
@@ -234,7 +234,7 @@ export default function FAQSection() {
                 <button
                   onClick={submitContact}
                   disabled={submitting}
-                  className="flex-1 rounded-lg bg-indigo-600 px-4 py-3 text-sm font-semibold text-white hover:bg-indigo-700 disabled:opacity-50"
+                  className="flex-1 rounded-lg bg-brand-blue px-4 py-3 text-sm font-semibold text-white hover:bg-brand-hover disabled:opacity-50"
                 >
                   {submitting ? "Sending..." : "Send Message"}
                 </button>
@@ -246,7 +246,7 @@ export default function FAQSection() {
         {/* Report Bug Modal */}
         {showReportModal && (
           <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/40 backdrop-blur-sm p-4">
-            <div className="w-full max-w-md rounded-xl bg-white shadow-2xl p-6">
+            <div className="w-full max-w-md rounded-xl bg-white  p-6">
               <div className="flex items-center justify-between mb-4">
                 <h3 className="text-xl font-bold text-slate-900">
                   Report a Problem
@@ -269,7 +269,7 @@ export default function FAQSection() {
                   <select
                     value={reportArea}
                     onChange={(e) => setReportArea(e.target.value)}
-                    className="w-full rounded-lg border border-slate-200 px-4 py-3 text-sm outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20"
+                    className="w-full rounded-lg border border-slate-200 px-4 py-3 text-sm outline-none focus:border-brand-blue focus:ring-2 focus:ring-brand-blue/20/20"
                   >
                     <option>Dashboard</option>
                     <option>Settings</option>
@@ -286,7 +286,7 @@ export default function FAQSection() {
                     onChange={(e) => setReportMessage(e.target.value)}
                     placeholder="Please describe how to reproduce the bug..."
                     rows={4}
-                    className="w-full rounded-lg border border-slate-200 px-4 py-3 text-sm outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20"
+                    className="w-full rounded-lg border border-slate-200 px-4 py-3 text-sm outline-none focus:border-brand-blue focus:ring-2 focus:ring-brand-blue/20/20"
                   />
                 </div>
               </div>
@@ -300,7 +300,7 @@ export default function FAQSection() {
                 <button
                   onClick={submitReport}
                   disabled={submitting}
-                  className="flex-1 rounded-lg bg-indigo-600 px-4 py-3 text-sm font-semibold text-white hover:bg-indigo-700 disabled:opacity-50"
+                  className="flex-1 rounded-lg bg-brand-blue px-4 py-3 text-sm font-semibold text-white hover:bg-brand-hover disabled:opacity-50"
                 >
                   {submitting ? "Submitting..." : "Submit Report"}
                 </button>
@@ -332,14 +332,14 @@ function FAQItem({
       <button
         type="button"
         onClick={() => setOpen((prev) => !prev)}
-        className="w-full flex items-center justify-between gap-4 py-4 text-left text-slate-800 hover:text-indigo-600"
+        className="w-full flex items-center justify-between gap-4 py-4 text-left text-slate-800 hover:text-brand-blue"
       >
         <div className="flex items-center gap-3 font-semibold">
-          <HelpCircle className="w-5 h-5 text-indigo-600" />
+          <HelpCircle className="w-5 h-5 text-brand-blue" />
           <span>{question}</span>
         </div>
         <ChevronDown
-          className={`w-5 h-5 text-slate-400 transition-transform ${open ? "rotate-180 text-indigo-600" : ""}`}
+          className={`w-5 h-5 text-slate-400 transition-transform ${open ? "rotate-180 text-brand-blue" : ""}`}
         />
       </button>
       {open && (

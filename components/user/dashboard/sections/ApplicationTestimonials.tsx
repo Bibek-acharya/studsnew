@@ -66,7 +66,7 @@ export default function ApplicationTestimonials() {
         </p>
         <button
           onClick={openModal}
-          className="px-6 py-3 bg-indigo-600 text-white rounded-md font-medium hover:bg-indigo-700 transition-colors"
+          className="px-6 py-3 bg-brand-blue text-white rounded-md font-medium hover:bg-brand-hover transition-colors"
         >
           Write a Review
         </button>
@@ -74,7 +74,7 @@ export default function ApplicationTestimonials() {
 
       {modalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-gray-900/40 backdrop-blur-sm">
-          <div className="bg-white rounded-md shadow-xl w-full max-w-md p-6">
+          <div className="bg-white rounded-md  w-full max-w-md p-6">
             <h3 className="text-xl font-bold text-gray-900 mb-1">
               Write a Review
             </h3>
@@ -117,7 +117,7 @@ export default function ApplicationTestimonials() {
                   className={`w-full border rounded-md p-3 text-sm outline-none transition-all resize-none ${
                     review && !charValid
                       ? "border-red-400 focus:border-red-500 focus:ring-2 focus:ring-red-500/20"
-                      : "border-gray-300 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20"
+                      : "border-gray-300 focus:border-brand-blue focus:ring-2 focus:ring-brand-blue/20/20"
                   }`}
                 />
                 {review && !charValid && (
@@ -140,7 +140,7 @@ export default function ApplicationTestimonials() {
               <button
                 onClick={submitTestimonial}
                 disabled={submitting || !rating || !charValid}
-                className="flex-1 px-4 py-2.5 rounded-md bg-indigo-600 text-white font-medium hover:bg-indigo-700 transition-colors disabled:opacity-50 flex items-center justify-center gap-2"
+                className="flex-1 px-4 py-2.5 rounded-md bg-brand-blue text-white font-medium hover:bg-brand-hover transition-colors disabled:opacity-50 flex items-center justify-center gap-2"
               >
                 {submitting && <Loader2 className="w-4 h-4 animate-spin" />}
                 Submit

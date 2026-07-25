@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
+import { MessageSquare } from "lucide-react";
 import { apiService, CounsellingBookingItem } from "@/services/api";
 import { Skeleton } from "@/components/ui/Skeleton";
 
@@ -60,7 +61,7 @@ export default function CounsellingSection() {
             onClick={() => setCounsellingTab(idx === 0 ? "upcoming" : "past")}
             className={`px-4 py-2 text-sm font-semibold rounded-md transition-all ${
               counsellingTab === (idx === 0 ? "upcoming" : "past")
-                ? "bg-white text-primary"
+                ? "bg-white text-brand-blue"
                 : "text-slate-500 hover:text-slate-700"
             }`}
           >
@@ -86,8 +87,23 @@ export default function CounsellingSection() {
               ))}
             </div>
           ) : upcomingSessions.length === 0 ? (
-            <div className="col-span-full rounded-md border border-slate-200 bg-white p-8 text-center text-slate-500">
-              No upcoming counselling sessions found.
+            <div className="col-span-full flex flex-col items-center justify-center py-20 text-center bg-white rounded-md border border-gray-100">
+              <div className="w-20 h-20 bg-indigo-50 rounded-full flex items-center justify-center mb-4 text-indigo-500">
+                <MessageSquare className="w-10 h-10" />
+              </div>
+              <h3 className="text-xl font-semibold text-gray-900 mb-2">
+                No upcoming sessions
+              </h3>
+              <p className="text-gray-500 mb-6 max-w-sm">
+                Book a counselling session to get personalized guidance from our
+                experts.
+              </p>
+              <a
+                href="/counselling"
+                className="px-6 py-3 bg-brand-blue text-white rounded-md font-medium hover:bg-brand-hover transition-colors"
+              >
+                Book a Session
+              </a>
             </div>
           ) : (
             upcomingSessions.map((session) => (
@@ -147,7 +163,7 @@ export default function CounsellingSection() {
                 </div>
                 <button
                   onClick={() => router.push("/counseling")}
-                  className="w-full py-2.5 bg-blue-600 text-white text-xs font-bold rounded-md hover:bg-blue-700 shadow-lg shadow-blue-200 transition-all flex items-center justify-center gap-2 relative z-10"
+                  className="w-full py-2.5 bg-blue-600 text-white text-xs font-bold rounded-md hover:bg-blue-700  shadow-blue-200 transition-all flex items-center justify-center gap-2 relative z-10"
                 >
                   <i className="fas fa-calendar-day"></i> View Booking
                 </button>
@@ -160,12 +176,39 @@ export default function CounsellingSection() {
       {counsellingTab === "past" && (
         <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6">
           {isLoading ? (
-            <div className="col-span-full rounded-md border border-slate-200 bg-white p-8 text-center text-slate-500">
-              Loading past sessions...
+            <div className="col-span-full">
+              <Skeleton className="h-6 w-48 mb-4" />
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {Array.from({ length: 4 }).map((_, i) => (
+                  <div
+                    key={i}
+                    className="bg-white rounded-md border border-slate-200 p-5 space-y-3 animate-pulse"
+                  >
+                    <Skeleton className="h-4 w-3/4" />
+                    <Skeleton className="h-3 w-1/2" />
+                    <Skeleton className="h-3 w-full" />
+                    <Skeleton className="h-3 w-2/3" />
+                  </div>
+                ))}
+              </div>
             </div>
           ) : pastSessions.length === 0 ? (
-            <div className="col-span-full rounded-md border border-slate-200 bg-white p-8 text-center text-slate-500">
-              No past sessions available.
+            <div className="col-span-full flex flex-col items-center justify-center py-20 text-center bg-white rounded-md border border-gray-100">
+              <div className="w-20 h-20 bg-indigo-50 rounded-full flex items-center justify-center mb-4 text-indigo-500">
+                <MessageSquare className="w-10 h-10" />
+              </div>
+              <h3 className="text-xl font-semibold text-gray-900 mb-2">
+                No past sessions
+              </h3>
+              <p className="text-gray-500 mb-6 max-w-sm">
+                Your completed counselling sessions will appear here.
+              </p>
+              <a
+                href="/counselling"
+                className="px-6 py-3 bg-brand-blue text-white rounded-md font-medium hover:bg-brand-hover transition-colors"
+              >
+                Book a Session
+              </a>
             </div>
           ) : (
             pastSessions.map((session) => (

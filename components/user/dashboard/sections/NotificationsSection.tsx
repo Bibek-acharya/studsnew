@@ -69,7 +69,7 @@ const categoryDefs: {
     bgClass: "bg-indigo-100 text-indigo-700",
     textClass: "text-indigo-700",
     iconBg: "bg-indigo-50",
-    iconColor: "text-indigo-600",
+    iconColor: "text-brand-blue",
   },
   {
     key: "scholarship",
@@ -226,7 +226,7 @@ export default function NotificationsSection() {
             <span className="text-gray-800 font-medium">Notifications</span>
           </div>
         </div>
-        <div className="bg-white rounded-xl border border-gray-100 shadow-sm overflow-hidden">
+        <div className="bg-white rounded-xl border border-gray-100  overflow-hidden">
           <SkeletonNotificationList />
         </div>
       </div>
@@ -255,7 +255,7 @@ export default function NotificationsSection() {
         </div>
       </div>
 
-      <div className="bg-white rounded-xl border border-gray-100 shadow-sm overflow-hidden">
+      <div className="bg-white rounded-xl border border-gray-100  overflow-hidden">
         <div className="border-b border-gray-100">
           <div className="flex overflow-x-auto no-scrollbar gap-1 p-3">
             {categoryDefs.map((cat) => (

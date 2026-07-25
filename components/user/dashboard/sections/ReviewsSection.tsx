@@ -270,7 +270,7 @@ export default function ReviewsSection() {
           onClick={() => setReviewTab("college")}
           className={`px-4 py-2 text-sm font-semibold rounded-md transition-all ${
             reviewTab === "college"
-              ? "bg-white text-primary shadow-sm"
+              ? "bg-white text-brand-blue "
               : "text-slate-500 hover:text-slate-700"
           }`}
         >
@@ -280,7 +280,7 @@ export default function ReviewsSection() {
           onClick={() => setReviewTab("application")}
           className={`px-4 py-2 text-sm font-semibold rounded-md transition-all ${
             reviewTab === "application"
-              ? "bg-white text-primary shadow-sm"
+              ? "bg-white text-brand-blue "
               : "text-slate-500 hover:text-slate-700"
           }`}
         >
@@ -303,7 +303,7 @@ export default function ReviewsSection() {
                 <select
                   value={ratingFilter}
                   onChange={(e) => setRatingFilter(e.target.value)}
-                  className="w-full md:w-40 bg-gray-50 border border-gray-200 text-gray-700 text-sm rounded-md focus:ring-indigo-500 focus:border-indigo-500 block p-2.5 outline-none transition-shadow"
+                  className="w-full md:w-40 bg-gray-50 border border-gray-200 text-gray-700 text-sm rounded-md focus:ring-brand-blue/20 focus:border-brand-blue block p-2.5 outline-none transition-shadow"
                 >
                   <option value="all">All Ratings</option>
                   <option value="5">5 Stars</option>
@@ -329,7 +329,7 @@ export default function ReviewsSection() {
                 </p>
                 <a
                   href="/write-review"
-                  className="px-6 py-3 bg-indigo-600 text-white rounded-md font-medium hover:bg-indigo-700 transition-colors"
+                  className="px-6 py-3 bg-brand-blue text-white rounded-md font-medium hover:bg-brand-hover transition-colors"
                 >
                   Write a Review
                 </a>
@@ -339,7 +339,7 @@ export default function ReviewsSection() {
                 {filteredReviews.map((review) => (
                   <div
                     key={review.id}
-                    className="bg-white rounded-md border border-gray-100  hover:-translate-y-1 hover:shadow-lg transition-all duration-300 flex flex-col h-full overflow-hidden group"
+                    className="bg-white rounded-md border border-gray-100  hover:-translate-y-1 hover: transition-all duration-300 flex flex-col h-full overflow-hidden group"
                   >
                     <div className="p-5 flex-grow">
                       <div className="flex justify-between items-start mb-3">
@@ -392,14 +392,14 @@ export default function ReviewsSection() {
                     <div className="border-t border-gray-50 bg-gray-50/50 p-4 flex justify-between items-center">
                       <button
                         onClick={() => handleView(review)}
-                        className="text-sm font-semibold text-indigo-600 hover:text-indigo-700 flex items-center gap-1 transition-colors"
+                        className="text-sm font-semibold text-brand-blue hover:text-brand-blue flex items-center gap-1 transition-colors"
                       >
                         <Eye className="w-4 h-4" /> Read More
                       </button>
                       <div className="flex items-center gap-2">
                         <button
                           onClick={() => handleEdit(review)}
-                          className="w-8 h-8 rounded-full bg-white border border-gray-200 text-gray-500 hover:text-indigo-600 hover:border-indigo-200 flex items-center justify-center transition-all "
+                          className="w-8 h-8 rounded-full bg-white border border-gray-200 text-gray-500 hover:text-brand-blue hover:border-brand-blue flex items-center justify-center transition-all "
                         >
                           <Pencil className="w-4 h-4" />
                         </button>
@@ -419,7 +419,7 @@ export default function ReviewsSection() {
 
           {viewModalOpen && selectedReview && (
             <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-gray-900/40 backdrop-blur-sm">
-              <div className="bg-white rounded-md shadow-xl w-full max-w-2xl max-h-[90vh] overflow-y-auto relative">
+              <div className="bg-white rounded-md  w-full max-w-2xl max-h-[90vh] overflow-y-auto relative">
                 <button
                   onClick={() => setViewModalOpen(false)}
                   className="absolute top-4 right-4 text-gray-400 hover:text-gray-700 p-1 rounded-full hover:bg-gray-100 transition-colors"
@@ -524,7 +524,7 @@ export default function ReviewsSection() {
 
           {editModalOpen && selectedReview && (
             <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-gray-900/40 backdrop-blur-sm">
-              <div className="bg-white rounded-md shadow-xl w-full max-w-2xl max-h-[90vh] overflow-y-auto relative">
+              <div className="bg-white rounded-md  w-full max-w-2xl max-h-[90vh] overflow-y-auto relative">
                 <button
                   onClick={() => setEditModalOpen(false)}
                   className="absolute top-4 right-4 text-gray-400 hover:text-gray-700 p-1 rounded-full hover:bg-gray-100 transition-colors"
@@ -554,7 +554,7 @@ export default function ReviewsSection() {
                               rating: parseFloat(e.target.value) || 1,
                             })
                           }
-                          className="w-16 border border-gray-300 rounded-md p-2 text-center font-semibold focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none"
+                          className="w-16 border border-gray-300 rounded-md p-2 text-center font-semibold focus:ring-2 focus:ring-brand-blue/20 focus:border-brand-blue outline-none"
                         />
                         <span className="text-gray-500">/ 5</span>
                       </div>
@@ -570,7 +570,7 @@ export default function ReviewsSection() {
                         onChange={(e) =>
                           setEditForm({ ...editForm, title: e.target.value })
                         }
-                        className="w-full border border-gray-300 rounded-md p-2.5 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition-shadow"
+                        className="w-full border border-gray-300 rounded-md p-2.5 focus:ring-2 focus:ring-brand-blue/20 focus:border-brand-blue outline-none transition-shadow"
                       />
                     </div>
 
@@ -585,7 +585,7 @@ export default function ReviewsSection() {
                         }
                         rows={3}
                         placeholder="What are the best things about this college?"
-                        className="w-full border border-gray-300 rounded-md p-2.5 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition-shadow"
+                        className="w-full border border-gray-300 rounded-md p-2.5 focus:ring-2 focus:ring-brand-blue/20 focus:border-brand-blue outline-none transition-shadow"
                       />
                     </div>
 
@@ -600,7 +600,7 @@ export default function ReviewsSection() {
                         }
                         rows={3}
                         placeholder="What could be improved?"
-                        className="w-full border border-gray-300 rounded-md p-2.5 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition-shadow"
+                        className="w-full border border-gray-300 rounded-md p-2.5 focus:ring-2 focus:ring-brand-blue/20 focus:border-brand-blue outline-none transition-shadow"
                       />
                     </div>
                   </div>
@@ -615,7 +615,7 @@ export default function ReviewsSection() {
                     <button
                       onClick={saveEdit}
                       disabled={saving}
-                      className="px-5 py-2.5 rounded-md bg-indigo-600 text-white font-medium hover:bg-indigo-700 transition-colors  disabled:opacity-50 flex items-center gap-2"
+                      className="px-5 py-2.5 rounded-md bg-brand-blue text-white font-medium hover:bg-brand-hover transition-colors  disabled:opacity-50 flex items-center gap-2"
                     >
                       {saving && <Loader2 className="w-4 h-4 animate-spin" />}
                       Save Changes
@@ -628,7 +628,7 @@ export default function ReviewsSection() {
 
           {deleteModalOpen && selectedReview && (
             <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-gray-900/40 backdrop-blur-sm">
-              <div className="bg-white rounded-md shadow-xl w-full max-w-sm text-center p-6 md:p-8">
+              <div className="bg-white rounded-md  w-full max-w-sm text-center p-6 md:p-8">
                 <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4 text-red-600">
                   <Trash2 className="w-8 h-8" />
                 </div>

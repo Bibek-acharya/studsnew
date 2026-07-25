@@ -48,6 +48,8 @@ import { admissionService } from "@/services/admission.api";
 import { entranceService } from "@/services/entrance.api";
 import { fetchCourseById } from "@/services/course-api";
 import CollegeCard from "@/components/admissions/CollegeCard";
+import { ScholarshipCard } from "@/components/cards/ScholarshipCard";
+import { EventCard } from "@/components/cards/EventCard";
 
 type BookmarkType =
   | "Colleges"
@@ -489,7 +491,7 @@ export default function BookmarksSection() {
             }}
             className={`px-4 py-2 text-sm font-semibold rounded-md transition-all ${
               activeTab === tab
-                ? "bg-white text-primary"
+                ? "bg-white text-brand-blue"
                 : "text-slate-500 hover:text-slate-700"
             }`}
           >
@@ -500,7 +502,7 @@ export default function BookmarksSection() {
 
       {/* Loading State */}
       {loading && (
-        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6 sm:gap-8">
+        <div className="grid grid-cols-1 gap-6 md:grid-cols-2 xl:grid-cols-3">
           {Array.from({ length: 8 }).map((_, i) => (
             <div
               key={i}
@@ -520,7 +522,7 @@ export default function BookmarksSection() {
 
       {/* Cards Grid */}
       {!loading && !error && filteredBookmarks.length > 0 ? (
-        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6 sm:gap-8">
+        <div className="grid grid-cols-1 gap-6 md:grid-cols-2 xl:grid-cols-3">
           {filteredBookmarks.map((item) => (
             <div key={item.id} className="fade-in card-stagger h-full">
               {item.type === "Colleges" && (
@@ -539,7 +541,9 @@ export default function BookmarksSection() {
                   onToggleSaved={() => removeBookmark(item.bookmarkId)}
                   onToggleSelection={() => {}}
                   onClaim={() => {}}
-                  onSingleInquiry={() => {}}
+                  onSingleInquiry={() =>
+                    router.push(`/find-college/${item.college.id}?inquiry=true`)
+                  }
                 />
               )}
 
@@ -570,7 +574,7 @@ export default function BookmarksSection() {
                     </div>
 
                     <div className="relative group mb-1.5">
-                      <h2 className="text-base font-bold text-gray-900 group-hover:text-[#0000ff] cursor-pointer transition-colors truncate leading-tight">
+                      <h2 className="text-base font-bold text-gray-900 group-hover:text-brand-blue cursor-pointer transition-colors truncate leading-tight">
                         {item.name}
                       </h2>
                       <div className="custom-tooltip">
@@ -619,7 +623,7 @@ export default function BookmarksSection() {
                           <span className="font-bold text-gray-700">
                             Est. Fee:
                           </span>{" "}
-                          <span className="text-[#0000ff] font-bold">
+                          <span className="text-brand-blue font-bold">
                             {(item as CourseBookmark).estFee}
                           </span>
                         </div>
@@ -642,7 +646,7 @@ export default function BookmarksSection() {
                         Details
                       </button>
 
-                      <button className="flex-[2.5] bg-[#0014f4] hover:bg-blue-800 text-white font-semibold py-2 rounded-md  text-[12px] flex items-center justify-center transition-colors whitespace-nowrap">
+                      <button className="flex-[2.5] bg-brand-blue hover:bg-brand-hover text-white font-semibold py-2 rounded-md  text-[12px] flex items-center justify-center transition-colors whitespace-nowrap">
                         View Colleges
                       </button>
 
@@ -661,7 +665,7 @@ export default function BookmarksSection() {
                         <Bookmark
                           className={`w-4 h-4 transition-all ${
                             true
-                              ? "text-[#0000ff] fill-[#0000ff]"
+                              ? "text-brand-blue fill-brand-blue"
                               : "text-gray-400"
                           }`}
                         />
@@ -672,186 +676,38 @@ export default function BookmarksSection() {
               )}
 
               {item.type === "Scholarships" && (
-                <div className="relative flex flex-col bg-white rounded-md border border-gray-200/80 transition-all duration-300 p-3">
-                  <div className="h-31.25 w-full bg-gray-100 relative overflow-hidden rounded-md mb-3">
-                    {(item as ScholarshipBookmark).imageUrl ? (
-                      <img
-                        src={item.imageUrl}
-                        alt={item.name}
-                        className="w-full h-full object-cover"
-                      />
-                    ) : (
-                      <div className="w-full h-full p-3 flex items-start bg-linear-to-br from-gray-200 to-gray-50">
-                        <span className="text-gray-600 text-[13px] font-medium flex items-start gap-1.5 leading-snug">
-                          <ImageIcon className="w-4 h-4 mt-0.5 text-gray-400 shrink-0" />
-                          {item.name}
-                        </span>
-                      </div>
-                    )}
-                  </div>
-
-                  <div className="flex flex-col grow px-1">
-                    <div className="flex items-center gap-2 mb-2.5">
-                      <span className="text-blue-600 bg-blue-50 text-[10px] font-bold px-2 py-1 rounded-md uppercase tracking-wide">
-                        {(item as ScholarshipBookmark).badgeType}
-                      </span>
-                      {(() => {
-                        const style = getStatusStyle(
-                          (item as ScholarshipBookmark).status,
-                        );
-                        return (
-                          <div
-                            className={`flex items-center gap-1.5 px-2 py-1 rounded-md ${style.statusBg}`}
-                          >
-                            <span
-                              className={`w-1.5 h-1.5 rounded-full ${style.statusDot}`}
-                            ></span>
-                            <span
-                              className={`text-[10px] font-bold uppercase tracking-wide ${style.statusText}`}
-                            >
-                              {(item as ScholarshipBookmark).status}
-                            </span>
-                          </div>
-                        );
-                      })()}
-                    </div>
-
-                    <h3 className="font-bold text-[16px] leading-tight text-slate-900 mb-1 hover:text-brand-blue">
-                      {item.name}
-                    </h3>
-                    <div className="flex items-center gap-1.5 text-[12.5px] text-gray-500 mb-3.5">
-                      {(item as ScholarshipBookmark).org}
-                      <BadgeCheck className="w-3.5 h-3.5 text-white fill-[#2563eb]" />
-                    </div>
-
-                    <div className="bg-[#f9fafb] rounded-md p-3.5 border border-gray-100 mb-4 mt-auto flex flex-col gap-2.5">
-                      <div className="grid grid-cols-2 gap-x-2">
-                        <div className="flex items-center gap-1.5 text-[12px] text-gray-600 font-medium">
-                          <DollarSign className="w-3.5 h-3.5 text-gray-400 shrink-0" />
-                          <span className="truncate">
-                            {(item as ScholarshipBookmark).amount}
-                          </span>
-                        </div>
-                        <div className="flex items-center gap-1.5 text-[12px] text-gray-600 font-medium">
-                          <MapPin className="w-3.5 h-3.5 text-gray-400 shrink-0" />
-                          <span className="truncate">Global</span>
-                        </div>
-                      </div>
-
-                      <div className="flex items-center gap-1.5 text-[12px] text-gray-600 font-medium">
-                        <GraduationCap className="w-3.5 h-3.5 text-gray-400 shrink-0" />
-                        <span className="truncate">
-                          {(item as ScholarshipBookmark).eligibility}
-                        </span>
-                      </div>
-
-                      <div className="flex items-center gap-1.5 text-[12px] text-gray-800 font-medium">
-                        <Calendar className="w-3.5 h-3.5 text-[#f43f5e] shrink-0" />
-                        <span>
-                          Ends: {(item as ScholarshipBookmark).deadline}
-                        </span>
-                      </div>
-                    </div>
-
-                    <div className="flex items-center gap-2">
-                      <button className="flex-1 py-2 text-[13px] font-semibold text-gray-700 bg-white border border-gray-200 rounded-md hover:bg-gray-50 transition-colors">
-                        Details
-                      </button>
-                      <button className="flex-[1.2] py-2 text-[13px] font-semibold text-white bg-brand-blue rounded-md hover:bg-[#0000cc] transition-colors">
-                        Apply
-                      </button>
-                      <button
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          removeBookmark(item.id);
-                        }}
-                        className="p-2 border rounded-md transition-colors flex items-center justify-center border-blue-200 bg-blue-50"
-                        title="Remove Bookmark"
-                      >
-                        <Bookmark className="w-4.5 h-4.5 text-brand-blue fill-brand-blue" />
-                      </button>
-                    </div>
-                  </div>
-                </div>
+                <ScholarshipCard
+                  scholarship={{
+                    id: item.id,
+                    title: item.name,
+                    org: (item as ScholarshipBookmark).org,
+                    badgeType: (item as ScholarshipBookmark).badgeType,
+                    fundingType: (item as ScholarshipBookmark).amount,
+                    eligibility: (item as ScholarshipBookmark).eligibility,
+                    deadline: (item as ScholarshipBookmark).deadline,
+                    imageUrl: item.imageUrl,
+                    imagePlaceholder: item.name,
+                  }}
+                  isSaved={true}
+                  onToggleSaved={() => removeBookmark(item.id)}
+                />
               )}
 
               {item.type === "Events" && (
-                <div className="bg-white rounded-md border border-gray-200 hover:border-blue-500/20 overflow-hidden flex flex-col duration-300 cursor-pointer">
-                  <div className="h-35 w-full overflow-hidden p-4">
-                    <img
-                      src={item.imageUrl}
-                      alt={item.name}
-                      className="w-full h-full object-cover rounded-md"
-                    />
-                  </div>
-                  <div className="p-5 flex flex-col grow">
-                    <div className="flex justify-between items-center mb-3">
-                      <span
-                        className={`${badgeClass((item as EventBookmark).category)} text-white text-[10px] font-bold px-2 py-1 rounded-full uppercase tracking-wider`}
-                      >
-                        {(item as EventBookmark).category}
-                      </span>
-                      <span className="flex items-center text-xs text-gray-500 font-semibold">
-                        <i className="fa-regular fa-calendar mr-1.5"></i>{" "}
-                        {(item as EventBookmark).date}
-                      </span>
-                    </div>
-
-                    <Link
-                      href="#"
-                      className={`font-bold text-lg mb-3 leading-tight text-left text-black hover:text-[#0000ff]`}
-                    >
-                      {item.name}
-                    </Link>
-
-                    <div className="flex items-center text-xs text-gray-600 mb-2 font-semibold">
-                      <i className="fa-regular fa-building mr-2 text-gray-500"></i>{" "}
-                      {(item as EventBookmark).organizer}
-                    </div>
-                    <div className="flex items-center text-xs text-gray-600 mb-3 font-semibold">
-                      <i className="fa-solid fa-location-dot mr-2 text-gray-500"></i>{" "}
-                      {(item as EventBookmark).location}
-                    </div>
-
-                    <p className="text-xs text-gray-500 mb-5 line-clamp-3 leading-relaxed font-medium">
-                      {(item as EventBookmark).excerpt}
-                    </p>
-
-                    <div className="mt-auto flex gap-2">
-                      <Link
-                        href="#"
-                        className="flex-1 bg-white border border-gray-300 text-gray-700 text-sm font-bold py-2 rounded-md hover:bg-gray-50 transition text-center"
-                      >
-                        Details
-                      </Link>
-                      <button
-                        className={`flex-1 text-white text-sm font-bold py-2 rounded-md transition bg-brand-blue cursor-pointer hover:bg-blue-600`}
-                      >
-                        Register Now
-                      </button>
-                      <button
-                        className={`w-10 flex items-center justify-center border rounded-md transition-colors shrink-0 ${
-                          true
-                            ? "border-blue-200 bg-blue-50"
-                            : "border-gray-200 hover:bg-gray-50"
-                        }`}
-                        title="Remove Bookmark"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          removeBookmark(item.id);
-                        }}
-                      >
-                        <Bookmark
-                          className={`w-4 h-4 transition-all ${
-                            true
-                              ? "text-[#0000ff] fill-[#0000ff]"
-                              : "text-gray-400"
-                          }`}
-                        />
-                      </button>
-                    </div>
-                  </div>
-                </div>
+                <EventCard
+                  event={{
+                    id: item.id,
+                    title: item.name,
+                    image: item.imageUrl,
+                    category: (item as EventBookmark).category,
+                    organizer: (item as EventBookmark).organizer,
+                    location: (item as EventBookmark).location,
+                    excerpt: (item as EventBookmark).excerpt,
+                    date: (item as EventBookmark).date,
+                  }}
+                  isBookmarked={true}
+                  onToggleBookmark={() => removeBookmark(item.id)}
+                />
               )}
 
               {item.type === "Entrance" && (
@@ -939,7 +795,7 @@ export default function BookmarksSection() {
             <p className="text-slate-500 max-w-md mx-auto text-base">
               Save colleges, courses, and scholarships to find them later.
             </p>
-            <button className="mt-8 px-8 py-3 bg-indigo-600 text-white font-semibold rounded-md hover:bg-indigo-700 hover:-translate-y-0.5 transition-all shadow-lg shadow-indigo-200">
+            <button className="mt-8 px-8 py-3 bg-brand-blue text-white font-semibold rounded-md hover:bg-brand-hover transition-all">
               Explore Directory
             </button>
           </div>
