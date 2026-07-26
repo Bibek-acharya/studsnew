@@ -26,6 +26,7 @@ import {
   Users,
   UserPlus,
   ClipboardList,
+  HelpCircle,
   BookOpen,
   School,
   MapPin,
@@ -82,6 +83,7 @@ const RejectedInstitutionsSection = lazy(
   () => import("./RejectedInstitutionsSection"),
 );
 const FeedbackListSection = lazy(() => import("./FeedbackListSection"));
+const FAQManageSection = lazy(() => import("./FAQManageSection"));
 const AddUniversitySection = lazy(() => import("./AddUniversitySection"));
 const ListUniversitiesSection = lazy(() => import("./ListUniversitiesSection"));
 const DraftUniversitiesSection = lazy(
@@ -176,6 +178,7 @@ type SectionType =
   | "events-directory"
   | "blogs-directory"
   | "manage-feedback"
+  | "manage-faq"
   | "create-universities"
   | "draft-universities"
   | "list-universities"
@@ -361,6 +364,11 @@ const navItems: NavItemData[] = [
     icon: <MessageSquare size={20} />,
     label: "Feedback",
     section: "manage-feedback",
+  },
+  {
+    icon: <HelpCircle size={20} />,
+    label: "FAQ",
+    section: "manage-faq",
   },
   {
     icon: <MessageSquare size={20} />,
@@ -569,6 +577,8 @@ export default function DashboardShell() {
         return <ManageAdsSection />;
       case "manage-feedback":
         return <FeedbackListSection />;
+      case "manage-faq":
+        return <FAQManageSection />;
       case "create-universities":
         return <AddUniversitySection setActiveSection={navigateTo} />;
       case "draft-universities":

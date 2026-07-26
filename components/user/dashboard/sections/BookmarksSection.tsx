@@ -231,12 +231,17 @@ export default function BookmarksSection() {
                   rating: c.rating,
                   type: c.organization_type || c.type,
                   location: c.district || c.location,
-                  affiliation: c.affiliation,
+                  affiliation: c.affiliation || c.college_affiliation,
                   website: c.website_url || c.website,
                   description: c.about || c.description,
                   featured: c.featured,
                   claimed: c.claimed,
                   verified: c.verified,
+                  collegeType: c.organization_type,
+                  full_name: c.institution_name,
+                  email: c.email,
+                  phone: c.contact_number || c.contact_phone,
+                  established: c.established_year,
                 },
                 type: "Colleges" as const,
                 id: c.id,
@@ -280,7 +285,7 @@ export default function BookmarksSection() {
               if (!c) return null;
               return {
                 bookmarkId: b.id,
-                id: b.id,
+                id: c.id || b.id,
                 type: "Courses" as const,
                 name: c.title,
                 imageUrl: c.image,
@@ -289,6 +294,9 @@ export default function BookmarksSection() {
                 affiliation: c.affiliation,
                 level: c.level,
                 estFee: c.estFee,
+                field: c.field,
+                description: c.description,
+                shortTitle: c.shortTitle,
               };
             })
             .filter(Boolean);
@@ -312,6 +320,64 @@ export default function BookmarksSection() {
                 college: c,
                 type: "Admissions" as const,
                 id: c.id,
+              };
+            })
+            .filter(Boolean);
+          setBookmarks(enriched);
+        } else if (activeTab === "Scholarships") {
+          const details = await Promise.all(
+            items.map((b) =>
+              apiService
+                .getEducationScholarshipById(b.item_id)
+                .catch(() => null),
+            ),
+          );
+          if (cancelled) return;
+          const enriched = items
+            .map((b, i) => {
+              const s = details[i];
+              if (!s) return null;
+              const sch = s?.data?.scholarship || s?.data || s || {};
+              return {
+                bookmarkId: b.id,
+                id: sch.id || b.item_id,
+                type: "Scholarships" as const,
+                name: sch.title || "Scholarship",
+                imageUrl: sch.image,
+                org: sch.provider || "",
+                badgeType: sch.scholarship_type || "Scholarship",
+                amount: sch.amount || sch.value || "",
+                eligibility: sch.eligibility || "",
+                deadline: sch.deadline || sch.end_date || "",
+                status: sch.status || "OPEN",
+              };
+            })
+            .filter(Boolean);
+          setBookmarks(enriched);
+        } else if (activeTab === "Events") {
+          const details = await Promise.all(
+            items.map((b) =>
+              apiService.getEducationEventById(b.item_id).catch(() => null),
+            ),
+          );
+          if (cancelled) return;
+          const enriched = items
+            .map((b, i) => {
+              const e = details[i];
+              if (!e) return null;
+              const ev = e?.data?.event || e || {};
+              return {
+                bookmarkId: b.id,
+                id: ev.id || b.item_id,
+                type: "Events" as const,
+                name: ev.title || "Event",
+                imageUrl: ev.image,
+                category: ev.category || "workshop",
+                organizer: ev.organizer || "",
+                location: ev.location || "",
+                excerpt: ev.excerpt || ev.description || "",
+                date: ev.date || "",
+                time: ev.time || "",
               };
             })
             .filter(Boolean);
@@ -502,7 +568,7 @@ export default function BookmarksSection() {
 
       {/* Loading State */}
       {loading && (
-        <div className="grid grid-cols-1 gap-6 md:grid-cols-2 xl:grid-cols-3">
+        <div className="grid grid-cols-1 gap-8 md:grid-cols-2 xl:grid-cols-4">
           {Array.from({ length: 8 }).map((_, i) => (
             <div
               key={i}
@@ -522,7 +588,7 @@ export default function BookmarksSection() {
 
       {/* Cards Grid */}
       {!loading && !error && filteredBookmarks.length > 0 ? (
-        <div className="grid grid-cols-1 gap-6 md:grid-cols-2 xl:grid-cols-3">
+        <div className="grid grid-cols-1 gap-8 md:grid-cols-2 xl:grid-cols-4">
           {filteredBookmarks.map((item) => (
             <div key={item.id} className="fade-in card-stagger h-full">
               {item.type === "Colleges" && (
