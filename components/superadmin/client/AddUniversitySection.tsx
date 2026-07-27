@@ -82,11 +82,8 @@ interface GalleryAlbum {
 interface FacultyItem {
   id: number;
   name: string;
-  description: string;
-  dean: string;
-  image: string;
-  programs_count: string;
-  website: string;
+  programs: FacultyProgram[];
+  colleges: FacultyCollege[];
 }
 interface AdmissionItem {
   id: number;
