@@ -416,7 +416,7 @@ const UniversityDetail: React.FC = () => {
               <div className="mt-4 flex w-full flex-wrap items-center gap-3 lg:mt-0 lg:w-auto">
                 <Link
                   href={`/universities/${name.toLowerCase().replace(/\s+/g, "-")}/affiliated-colleges`}
-                  className="flex flex-1 items-center justify-center gap-2 rounded-xl bg-blue-600 px-4 py-2.5 text-[13px] font-semibold text-white shadow-sm shadow-blue-600/20 transition-colors hover:bg-blue-700 sm:flex-none sm:px-6 sm:py-3 sm:text-[15px]"
+                  className="flex flex-1 items-center justify-center gap-2 rounded-md bg-brand-blue px-4 py-2.5 text-[13px] font-semibold text-white transition-colors hover:bg-brand-hover sm:flex-none sm:px-6 sm:py-3 sm:text-[15px]"
                 >
                   <Building2 className="h-4 w-4" />
                   View Affiliated Colleges
@@ -426,7 +426,7 @@ const UniversityDetail: React.FC = () => {
                     href={aboutData?.prospectus_url as string}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="flex items-center justify-center gap-2 rounded-xl border border-gray-200 bg-white px-4 py-2.5 text-[13px] font-semibold text-gray-700 shadow-sm transition-colors hover:bg-gray-50 sm:px-5 sm:py-3 sm:text-[15px]"
+                    className="flex items-center justify-center gap-2 rounded-md border border-gray-200 bg-white px-4 py-2.5 text-[13px] font-semibold text-gray-700 transition-colors hover:bg-gray-50 sm:px-5 sm:py-3 sm:text-[15px]"
                   >
                     <Download className="h-4 w-4" />
                     <span className="hidden sm:inline">{aboutData?.prospectus_title as string || "Prospectus"}</span>
@@ -434,7 +434,7 @@ const UniversityDetail: React.FC = () => {
                 ) : null}
                 <button
                   onClick={() => setIsShareModalOpen(true)}
-                  className="flex items-center justify-center rounded-xl border border-gray-200 bg-white p-2.5 text-gray-700 shadow-sm transition-colors hover:bg-gray-50 sm:p-3"
+                  className="flex items-center justify-center rounded-md border border-gray-200 bg-white p-2.5 text-gray-700 transition-colors hover:bg-gray-50 sm:p-3"
                 >
                   <Share2 className="h-5 w-5" />
                 </button>
@@ -489,6 +489,15 @@ const UniversityDetail: React.FC = () => {
                       />
                     </div>
                   ) : null}
+
+                  {aboutData?.description && (
+                    <div
+                      className="space-y-6 text-[15px] leading-[1.8] text-gray-600 md:text-[16px] rich-text"
+                      dangerouslySetInnerHTML={{
+                        __html: safeHtml(aboutData.description as string),
+                      }}
+                    />
+                  )}
 
                   {(aboutData?.vision || aboutData?.mission) && (
                     <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
