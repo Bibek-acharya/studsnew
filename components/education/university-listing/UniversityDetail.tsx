@@ -559,7 +559,7 @@ const UniversityDetail: React.FC = () => {
                       Courses & fees – filter by level
                     </p>
                     <div className="flex gap-2 text-xs font-medium">
-                      {["all", "Bachelor", "Master"].map((level) => (
+                      {["all", "Bachelor's", "Master"].map((level) => (
                         <button
                           key={level}
                           onClick={() => setCourseFilter(level)}
@@ -928,201 +928,61 @@ const UniversityDetail: React.FC = () => {
               )}
 
               {activeTab === "tab-admissions" && (
-                <div>
+                <div className="overflow-hidden rounded-[20px] border border-gray-200 bg-white">
+                  <div className="flex flex-wrap items-center justify-between gap-4 border-b border-gray-100 bg-[#f4f8fc] px-6 py-4">
+                    <p className="text-[14px] font-semibold text-brand-blue">Admissions</p>
+                  </div>
                   {admissionsList.length > 0 ? (
-                    <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
-                      {admissionsList.map((ad: any, i: number) => (
-                        <div
-                          key={i}
-                          className="flex h-full w-full max-w-85 flex-col overflow-hidden rounded-md border border-gray-200 bg-white transition-transform hover:border-blue-200 cursor-pointer"
-                        >
-                          <div className="shrink-0 p-2.5 pb-0">
-                            <div className="group relative h-28 w-full overflow-hidden rounded-md bg-gray-200">
-                              <img
-                                src={
-                                  ad.image ||
-                                  (i === 0
-                                    ? "https://images.unsplash.com/photo-1523240795612-9a054b0db644?q=80&w=400&auto=format&fit=crop"
-                                    : "https://images.unsplash.com/photo-1515162816999-a0c47dc192f7?q=80&w=400&auto=format&fit=crop")
-                                }
-                                className="h-full w-full object-cover"
-                                alt=""
-                              />
-                              <div
-                                className={`absolute left-0 top-2.5 z-10 rounded-r-md px-2.5 py-1 text-[10px] font-bold uppercase tracking-wide text-white ${ad.status === "Ongoing" ? "bg-[#10b981]" : "bg-red-500"}`}
-                              >
-                                {ad.status}
-                              </div>
-                              <div className="absolute bottom-2 left-2 z-20 flex items-center gap-1 rounded border border-white/10 bg-black/30 px-1.5 py-0.5 backdrop-blur-sm">
-                                <span className="text-[8px] font-medium tracking-tight text-white opacity-90">
-                                  Required Counselling?
-                                </span>
-                                <span className="h-2 w-px bg-white/20"></span>
-                                <span className="text-[8px] font-bold tracking-tight text-emerald-300 transition-colors hover:text-emerald-100">
-                                  Reserve Seat
-                                </span>
-                              </div>
-                            </div>
-                          </div>
-                          <div className="flex grow flex-col p-3 pb-3">
-                            <div className="group/name mb-1 flex items-center gap-1.5">
-                              <h2
-                                title={ad.title}
-                                className="truncate text-[18px] font-bold leading-tight text-[#0f172a] transition-colors group-hover/name:text-brand-blue"
-                              >
-                                {ad.title}
-                              </h2>
-                              <svg
-                                xmlns="http://www.w3.org/2000/svg"
-                                viewBox="0 0 24 24"
-                                fill="#0d6efd"
-                                className="mt-0.5 h-5 w-5 shrink-0"
-                              >
-                                <path
-                                  fillRule="evenodd"
-                                  d="M8.603 3.799A4.49 4.49 0 0112 2.25c1.357 0 2.573.6 3.397 1.549a4.49 4.49 0 013.498 1.307 4.491 4.491 0 011.307 3.497A4.49 4.49 0 0121.75 12a4.49 4.49 0 01-1.549 3.397 4.491 4.491 0 01-1.307 3.497 4.491 4.491 0 01-3.497 1.307A4.49 4.49 0 0112 21.75a4.49 4.49 0 01-3.397-1.549 4.49 4.49 0 01-3.498-1.306 4.491 4.491 0 01-1.307-3.498A4.49 4.49 0 012.25 12c0-1.357.6-2.573 1.549-3.397a4.49 4.49 0 011.307-3.497 4.49 4.49 0 013.497-1.307zm7.007 6.387a.75.75 0 10-1.22-.872l-3.236 4.53L9.53 12.22a.75.75 0 00-1.06 1.06l2.25 2.25a.75.75 0 001.14-.094l3.75-5.25z"
-                                  clipRule="evenodd"
-                                />
-                              </svg>
-                            </div>
-                            <div className="mb-1.5 flex items-center overflow-hidden whitespace-nowrap text-[12px] text-[#64748b]">
-                              <div className="flex items-center gap-1">
-                                <svg
-                                  className="h-3.75 w-3.75 fill-[#f59e0b]"
-                                  viewBox="0 0 20 20"
-                                >
-                                  <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
-                                </svg>
-                                <span className="font-bold text-[#334155]">
-                                  4.5
-                                </span>
-                              </div>
-                              <span className="mx-2 text-gray-300">|</span>
-                              <div className="flex items-center gap-1.5">
-                                <svg
-                                  className="h-4 w-4 text-gray-400"
-                                  fill="none"
-                                  stroke="currentColor"
-                                  viewBox="0 0 24 24"
-                                  strokeWidth="2"
-                                >
-                                  <path
-                                    strokeLinecap="round"
-                                    strokeLinejoin="round"
-                                    d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"
-                                  />
-                                </svg>
-                                <span>{ad.faculty || ""}</span>
-                              </div>
-                              <span className="mx-2 text-gray-300">|</span>
-                              <div className="flex items-center gap-1.5 truncate">
-                                <svg
-                                  className="h-4 w-4 shrink-0 text-gray-400"
-                                  fill="none"
-                                  stroke="currentColor"
-                                  viewBox="0 0 24 24"
-                                  strokeWidth="2"
-                                >
-                                  <path
-                                    strokeLinecap="round"
-                                    strokeLinejoin="round"
-                                    d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"
-                                  />
-                                  <path
-                                    strokeLinecap="round"
-                                    strokeLinejoin="round"
-                                    d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"
-                                  />
-                                </svg>
-                                <span
-                                  className="truncate"
-                                  title={ad.campus || ""}
-                                >
-                                  {ad.campus || ""}
-                                </span>
-                              </div>
-                            </div>
-                            <div className="mb-2 flex cursor-pointer items-center gap-1.5 text-[12.5px] text-[#64748b] transition-colors hover:text-[#0d6efd] w-fit">
-                              <svg
-                                className="h-4 w-4"
-                                fill="none"
-                                stroke="currentColor"
-                                viewBox="0 0 24 24"
-                                strokeWidth="2"
-                              >
-                                <path
-                                  strokeLinecap="round"
-                                  strokeLinejoin="round"
-                                  d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9"
-                                />
-                              </svg>
-                              <span>University Central</span>
-                            </div>
-                            <hr className="mb-2 border-gray-100" />
-                            <div className="mb-1.5 flex items-center justify-between">
-                              <span className="text-[12.5px] font-medium text-[#64748b]">
-                                Programs Offered
-                              </span>
-                              <span className="text-[12.5px] font-semibold text-[#2563eb]">
-                                Admission Open
-                              </span>
-                            </div>
-                            <ul className="mb-2 space-y-1">
-                              <li className="flex items-center justify-between text-[12.5px]">
-                                <span className="font-semibold text-[#1e293b]">
-                                  {ad.title}
-                                </span>
-                                <div
-                                  className={`flex items-center gap-1.5 text-[11px] font-medium ${ad.status === "Ongoing" ? "text-[#059669]" : "text-[#ef4444]"}`}
-                                >
-                                  <span className="relative flex h-2 w-2 items-center justify-center">
-                                    <span
-                                      className={`absolute inline-flex h-full w-full animate-ping rounded-full opacity-75 ${ad.status === "Ongoing" ? "bg-[#059669]" : "bg-[#ef4444]"}`}
-                                    ></span>
-                                    <span
-                                      className={`relative inline-flex h-1.5 w-1.5 rounded-full ${ad.status === "Ongoing" ? "bg-[#059669]" : "bg-[#ef4444]"}`}
-                                    ></span>
-                                  </span>
-                                  {ad.status === "Ongoing"
-                                    ? "Seats Available"
-                                    : "Closed"}
-                                </div>
-                              </li>
-                            </ul>
-                            <div
-                              className="mt-auto mb-3 w-full border-b border-dotted border-gray-200 pt-2"
-                              style={{
-                                borderBottomWidth: "1.5px",
-                                borderBottomStyle: "dotted",
-                              }}
-                            ></div>
-                            <div className="flex items-center gap-1.5">
-                              <button className="flex flex-1 items-center justify-center gap-1 whitespace-nowrap rounded-md border border-blue-100 bg-blue-50 px-2 py-2 text-[13px] font-semibold text-blue-700 transition-colors hover:bg-blue-100">
-                                <svg
-                                  className="h-3.5 w-3.5"
-                                  fill="none"
-                                  stroke="currentColor"
-                                  viewBox="0 0 24 24"
-                                  strokeWidth="2"
-                                >
-                                  <path
-                                    strokeLinecap="round"
-                                    strokeLinejoin="round"
-                                    d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"
-                                  />
-                                </svg>
-                                Ask Question
-                              </button>
-                              <button className="flex flex-1 items-center justify-center gap-1 whitespace-nowrap rounded-md bg-brand-blue px-2 py-2 text-[13px] font-bold text-white transition-colors hover:bg-brand-hover">
-                                Apply Now
-                              </button>
-                              <button className="flex h-9 w-9 flex-none items-center justify-center rounded-md border border-gray-200 text-[#64748b] transition-colors hover:bg-gray-50">
-                                <i className="fa-regular fa-bookmark"></i>
-                              </button>
-                            </div>
-                          </div>
+                    <div className="w-full overflow-x-auto">
+                      <div className="min-w-[900px]">
+                        <div className="grid grid-cols-12 items-center gap-4 border-b border-gray-100 bg-white px-6 py-5">
+                          <div className="col-span-3 text-[13px] font-bold uppercase tracking-wider text-gray-800">PROGRAM</div>
+                          <div className="col-span-1 text-[13px] font-bold uppercase tracking-wider text-gray-800">FACULTY</div>
+                          <div className="col-span-1 text-[13px] font-bold uppercase tracking-wider text-gray-800">STATUS</div>
+                          <div className="col-span-1 text-[13px] font-bold uppercase tracking-wider text-gray-800">OPENS</div>
+                          <div className="col-span-1 text-[13px] font-bold uppercase tracking-wider text-gray-800">DEADLINE</div>
+                          <div className="col-span-1 text-[13px] font-bold uppercase tracking-wider text-gray-800">SEATS</div>
+                          <div className="col-span-1 text-[13px] font-bold uppercase tracking-wider text-gray-800">ENTRANCE</div>
+                          <div className="col-span-1 text-[13px] font-bold uppercase tracking-wider text-gray-800">FEE</div>
+                          <div className="col-span-2 text-[13px] font-bold uppercase tracking-wider text-gray-800">ACTIONS</div>
                         </div>
-                      ))}
+                        {admissionsList.map((ad: any, i: number) => (
+                          <div key={i} className="grid grid-cols-12 items-center gap-4 border-b border-gray-100 px-6 py-5 hover:bg-gray-50/50">
+                            <div className="col-span-3"><h4 className="text-[15.5px] font-bold text-gray-900">{ad.program || ad.title}</h4></div>
+                            <div className="col-span-1"><span className="text-[14px] text-gray-600">{ad.faculty || "-"}</span></div>
+                            <div className="col-span-1">
+                              <span className={`rounded-md px-2.5 py-1 text-[11px] font-bold ${ad.status === "Open" || ad.status === "Ongoing" ? "bg-[#ecfdf5] text-[#10b981]" : "bg-[#fef2f2] text-[#ef4444]"}`}>
+                                {ad.status}
+                              </span>
+                            </div>
+                            <div className="col-span-1"><span className="text-[14px] text-gray-600">{ad.opens_from || "-"}</span></div>
+                            <div className="col-span-1"><span className="text-[14px] text-gray-600">{ad.deadline || "-"}</span></div>
+                            <div className="col-span-1"><span className="text-[14px] text-gray-600">{ad.seats || "-"}</span></div>
+                            <div className="col-span-1"><span className="text-[14px] text-gray-600">{ad.entrance || "-"}</span></div>
+                            <div className="col-span-1"><span className="text-[14px] font-semibold text-gray-900">{ad.fee || "-"}</span></div>
+                            <div className="col-span-2 flex gap-2">
+                              {ad.application_link ? (
+                                <a href={ad.application_link} target="_blank" rel="noopener noreferrer" className="rounded-md bg-brand-blue px-3 py-2 text-xs font-bold text-white hover:bg-brand-hover transition-colors">
+                                  Apply Now
+                                </a>
+                              ) : (
+                                <span className="rounded-md bg-gray-100 px-3 py-2 text-xs font-bold text-gray-400 cursor-not-allowed">
+                                  Apply Now
+                                </span>
+                              )}
+                              {ad.program_link ? (
+                                <a href={ad.program_link} target="_blank" rel="noopener noreferrer" className="rounded-md bg-brand-blue/5 px-3 py-2 text-xs font-bold text-brand-blue hover:bg-brand-blue/10 transition-colors">
+                                  View Detail
+                                </a>
+                              ) : (
+                                <span className="rounded-md bg-gray-100 px-3 py-2 text-xs font-bold text-gray-400 cursor-not-allowed">
+                                  View Detail
+                                </span>
+                              )}
+                            </div>
+                          </div>
+                        ))}
+                      </div>
                     </div>
                   ) : (
                     <EmptyTabState tabName="Admissions" />

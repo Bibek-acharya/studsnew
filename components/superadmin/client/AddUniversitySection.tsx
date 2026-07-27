@@ -97,11 +97,15 @@ interface FacultyItem {
 interface AdmissionItem {
   id: number;
   program: string;
-  status: string;
-  open_date: string;
-  deadline: string;
-  campus: string;
   faculty: string;
+  status: string;
+  opens_from: string;
+  deadline: string;
+  seats: string;
+  entrance: string;
+  fee: string;
+  application_link: string;
+  program_link: string;
 }
 
 const DISTRICTS = Object.values(NEPAL_DISTRICTS).flat();
@@ -125,10 +129,7 @@ export default function AddUniversitySection({
   const [type, setType] = useState("");
   const [isNepali, setIsNepali] = useState(true);
   const [rank, setRank] = useState<number>(0);
-  const [rating, setRating] = useState<number>(0);
-  const [reviewCount, setReviewCount] = useState<number>(0);
   const [verified, setVerified] = useState(false);
-  const [popular, setPopular] = useState(false);
   const [description, setDescription] = useState("");
   const [established, setEstablished] = useState("");
   const [students, setStudents] = useState("");
@@ -236,10 +237,7 @@ export default function AddUniversitySection({
         setType(d.type || "");
         setIsNepali(d.is_nepali !== false);
         setRank(d.rank || 0);
-        setRating(d.rating || 0);
-        setReviewCount(d.review_count || 0);
         setVerified(d.verified || false);
-        setPopular(d.popular || d.isPopular || false);
         setDescription(d.description || "");
         setEstablished(d.established || "");
         setStudents(d.students || "");
@@ -420,10 +418,7 @@ export default function AddUniversitySection({
         type,
         is_nepali: isNepali,
         rank,
-        rating,
-        review_count: reviewCount,
         verified,
-        popular,
         status,
         description,
         established,
@@ -460,20 +455,22 @@ export default function AddUniversitySection({
         admissions: stripId(admissions),
       };
 
+      const targetSection = status === "draft" ? "draft-universities" : "list-universities";
+
       if (editId) {
         await api(`/api/v1/admin/universities/${editId}`, {
           method: "PUT",
           body: JSON.stringify(body),
         });
         setFormSuccess(true);
-        setTimeout(() => setActiveSection("list-universities"), 1500);
+        setTimeout(() => setActiveSection(targetSection), 1500);
       } else {
         await api("/api/v1/admin/universities", {
           method: "POST",
           body: JSON.stringify(body),
         });
         setFormSuccess(true);
-        setTimeout(() => setActiveSection("list-universities"), 1500);
+        setTimeout(() => setActiveSection(targetSection), 1500);
       }
     } catch (err: any) {
       setFormError(
@@ -491,7 +488,7 @@ export default function AddUniversitySection({
         <div className="max-w-[90rem] mx-auto space-y-8">
           <div>
             <h2 className="text-xl font-bold text-gray-800">
-              {editId ? "University Details" : "Create University"}
+              {editId ? "Edit University" : "Add University"}
             </h2>
             <p className="text-sm text-gray-500 mt-1">
               {editId
@@ -719,28 +716,6 @@ export default function AddUniversitySection({
                   onChange={(e) => setEstablished(e.target.value)}
                 />
               </div>
-              <div className="md:col-span-2">
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Website
-                </label>
-                <input
-                  type="text"
-                  className={inputClass}
-                  placeholder="www.university.edu"
-                  value={website}
-                  onChange={(e) => setWebsite(e.target.value)}
-                />
-              </div>
-            </div>
-          </div>
-
-          {/* ─── Stats & Badges ─── */}
-          <div className="bg-white p-6 rounded-md border border-gray-200">
-            <h3 className="text-lg font-semibold text-gray-800 mb-5">
-              <i className="fa-solid fa-chart-bar text-blue-500 mr-2"></i>Stats
-              & Badges
-            </h3>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
                   Rank
@@ -753,56 +728,17 @@ export default function AddUniversitySection({
                   onChange={(e) => setRank(Number(e.target.value))}
                 />
               </div>
-              <div>
+              <div className="md:col-span-2">
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Rating
+                  Website
                 </label>
                 <input
-                  type="number"
-                  step="0.1"
-                  min="0"
-                  max="5"
+                  type="text"
                   className={inputClass}
-                  placeholder="0.0"
-                  value={rating}
-                  onChange={(e) => setRating(Number(e.target.value))}
+                  placeholder="www.university.edu"
+                  value={website}
+                  onChange={(e) => setWebsite(e.target.value)}
                 />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Review Count
-                </label>
-                <input
-                  type="number"
-                  className={inputClass}
-                  placeholder="0"
-                  value={reviewCount}
-                  onChange={(e) => setReviewCount(Number(e.target.value))}
-                />
-              </div>
-              <div className="flex items-center gap-6">
-                <label className="flex items-center gap-2 cursor-pointer">
-                  <input
-                    type="checkbox"
-                    className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
-                    checked={verified}
-                    onChange={(e) => setVerified(e.target.checked)}
-                  />
-                  <span className="text-sm font-medium text-gray-700">
-                    Verified
-                  </span>
-                </label>
-                <label className="flex items-center gap-2 cursor-pointer">
-                  <input
-                    type="checkbox"
-                    className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
-                    checked={popular}
-                    onChange={(e) => setPopular(e.target.checked)}
-                  />
-                  <span className="text-sm font-medium text-gray-700">
-                    Popular
-                  </span>
-                </label>
               </div>
             </div>
           </div>
@@ -1418,15 +1354,17 @@ export default function AddUniversitySection({
                         updateItem(setCourses, c.id, "name", e.target.value)
                       }
                     />
-                    <input
-                      type="text"
+                    <select
                       className={`${inputClass} text-sm`}
-                      placeholder="Level (e.g. Bachelor)"
                       value={c.level}
                       onChange={(e) =>
                         updateItem(setCourses, c.id, "level", e.target.value)
                       }
-                    />
+                    >
+                      <option value="">Select Level</option>
+                      <option value="Bachelor's">Bachelor's</option>
+                      <option value="Master">Master</option>
+                    </select>
                     <input
                       type="text"
                       className={`${inputClass} text-sm`}
@@ -2136,11 +2074,15 @@ export default function AddUniversitySection({
                 onClick={() =>
                   addItem(setAdmissions, {
                     program: "",
-                    status: "Open",
-                    open_date: "",
-                    deadline: "",
-                    campus: "",
                     faculty: "",
+                    status: "Open",
+                    opens_from: "",
+                    deadline: "",
+                    seats: "",
+                    entrance: "",
+                    fee: "",
+                    application_link: "",
+                    program_link: "",
                   })
                 }
                 className="text-sm text-blue-600 bg-blue-50 px-3 py-1.5 rounded-md hover:bg-blue-100 transition-colors font-medium"
@@ -2161,17 +2103,31 @@ export default function AddUniversitySection({
                   >
                     <i className="fa-solid fa-trash"></i>
                   </button>
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-3 pr-10">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3 pr-10">
                     <input
                       type="text"
                       className={`${inputClass} text-sm`}
-                      placeholder="Program Name"
+                      placeholder="Program"
                       value={a.program}
                       onChange={(e) =>
                         updateItem(
                           setAdmissions,
                           a.id,
                           "program",
+                          e.target.value,
+                        )
+                      }
+                    />
+                    <input
+                      type="text"
+                      className={`${inputClass} text-sm`}
+                      placeholder="Faculty"
+                      value={a.faculty}
+                      onChange={(e) =>
+                        updateItem(
+                          setAdmissions,
+                          a.id,
+                          "faculty",
                           e.target.value,
                         )
                       }
@@ -2197,13 +2153,13 @@ export default function AddUniversitySection({
                     <input
                       type="text"
                       className={`${inputClass} text-sm`}
-                      placeholder="Campus"
-                      value={a.campus}
+                      placeholder="Opens From"
+                      value={a.opens_from}
                       onChange={(e) =>
                         updateItem(
                           setAdmissions,
                           a.id,
-                          "campus",
+                          "opens_from",
                           e.target.value,
                         )
                       }
@@ -2211,41 +2167,83 @@ export default function AddUniversitySection({
                     <input
                       type="text"
                       className={`${inputClass} text-sm`}
-                      placeholder="Faculty"
-                      value={a.faculty}
-                      onChange={(e) =>
-                        updateItem(
-                          setAdmissions,
-                          a.id,
-                          "faculty",
-                          e.target.value,
-                        )
-                      }
-                    />
-                    <input
-                      type="text"
-                      className={`${inputClass} text-sm`}
-                      placeholder="Open Date (e.g. 2025-07-01)"
-                      value={a.open_date}
-                      onChange={(e) =>
-                        updateItem(
-                          setAdmissions,
-                          a.id,
-                          "open_date",
-                          e.target.value,
-                        )
-                      }
-                    />
-                    <input
-                      type="text"
-                      className={`${inputClass} text-sm`}
-                      placeholder="Deadline (e.g. 2025-08-15)"
+                      placeholder="Deadline"
                       value={a.deadline}
                       onChange={(e) =>
                         updateItem(
                           setAdmissions,
                           a.id,
                           "deadline",
+                          e.target.value,
+                        )
+                      }
+                    />
+                    <input
+                      type="text"
+                      className={`${inputClass} text-sm`}
+                      placeholder="Seats"
+                      value={a.seats}
+                      onChange={(e) =>
+                        updateItem(
+                          setAdmissions,
+                          a.id,
+                          "seats",
+                          e.target.value,
+                        )
+                      }
+                    />
+                    <input
+                      type="text"
+                      className={`${inputClass} text-sm`}
+                      placeholder="Entrance"
+                      value={a.entrance}
+                      onChange={(e) =>
+                        updateItem(
+                          setAdmissions,
+                          a.id,
+                          "entrance",
+                          e.target.value,
+                        )
+                      }
+                    />
+                    <input
+                      type="text"
+                      className={`${inputClass} text-sm`}
+                      placeholder="Fee"
+                      value={a.fee}
+                      onChange={(e) =>
+                        updateItem(
+                          setAdmissions,
+                          a.id,
+                          "fee",
+                          e.target.value,
+                        )
+                      }
+                    />
+                    <input
+                      type="url"
+                      className={`${inputClass} text-sm`}
+                      placeholder="Application Link"
+                      value={a.application_link}
+                      onChange={(e) =>
+                        updateItem(
+                          setAdmissions,
+                          a.id,
+                          "application_link",
+                          e.target.value,
+                        )
+                      }
+                    />
+                    <input
+                      type="url"
+                      className={`${inputClass} text-sm`}
+                      placeholder="Program Link"
+                      value={a.program_link}
+                      onChange={(e) =>
+                        updateItem(
+                          setAdmissions,
+                          a.id,
+                          "program_link",
                           e.target.value,
                         )
                       }
@@ -2261,6 +2259,25 @@ export default function AddUniversitySection({
             </div>
           </div>
 
+          {/* ─── Verified ─── */}
+          <div className="bg-white p-6 rounded-md border border-gray-200">
+            <label className="flex items-center gap-3 cursor-pointer">
+              <div
+                role="switch"
+                aria-checked={verified}
+                onClick={() => setVerified(!verified)}
+                className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors ${verified ? "bg-blue-600" : "bg-gray-300"}`}
+              >
+                <span
+                  className={`inline-block h-5 w-5 transform rounded-full bg-white shadow transition-transform ${verified ? "translate-x-5" : "translate-x-0"}`}
+                />
+              </div>
+              <span className="text-sm font-medium text-gray-700">
+                Verified University
+              </span>
+            </label>
+          </div>
+
           {/* ─── Footer ─── */}
           <div className="flex items-center justify-end space-x-4 pt-6 mt-8 border-t border-gray-200 pb-10">
             <button
@@ -2270,19 +2287,17 @@ export default function AddUniversitySection({
             >
               Cancel
             </button>
-            {!editId && (
-              <button
-                type="button"
-                disabled={saving}
-                onClick={(e) => handleSubmit(e, "draft")}
-                className="px-6 py-2.5 bg-gray-600 text-white rounded-md font-medium hover:bg-gray-700 transition flex items-center gap-2 disabled:opacity-50"
-              >
-                <i
-                  className={`fa-solid ${saving ? "fa-spinner fa-spin" : "fa-save"}`}
-                ></i>
-                {saving ? "Saving..." : "Save as Draft"}
-              </button>
-            )}
+            <button
+              type="button"
+              disabled={saving}
+              onClick={(e) => handleSubmit(e, "draft")}
+              className="px-6 py-2.5 bg-gray-600 text-white rounded-md font-medium hover:bg-gray-700 transition flex items-center gap-2 disabled:opacity-50"
+            >
+              <i
+                className={`fa-solid ${saving ? "fa-spinner fa-spin" : "fa-save"}`}
+              ></i>
+              {saving ? "Saving..." : "Save as Draft"}
+            </button>
             <button
               type="submit"
               disabled={saving}
