@@ -471,6 +471,13 @@ const UniversityDetail: React.FC = () => {
               {/* ========== ABOUT ========== */}
               {activeTab === "tab-about" && (
                 <div className="space-y-10">
+                  <div
+                    className="space-y-6 text-[15px] leading-[1.8] text-gray-600 md:text-[16px] rich-text"
+                    dangerouslySetInnerHTML={{
+                      __html: safeHtml(description),
+                    }}
+                  />
+
                   {ytId ? (
                     <div className="relative h-[240px] w-full overflow-hidden rounded-md border border-gray-100 bg-brand-blue md:h-[400px]">
                       <iframe
@@ -482,13 +489,6 @@ const UniversityDetail: React.FC = () => {
                       />
                     </div>
                   ) : null}
-
-                  <div
-                    className="space-y-6 text-[15px] leading-[1.8] text-gray-600 md:text-[16px] rich-text"
-                    dangerouslySetInnerHTML={{
-                      __html: safeHtml(description),
-                    }}
-                  />
 
                   {(aboutData?.vision || aboutData?.mission) && (
                     <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
@@ -598,38 +598,6 @@ const UniversityDetail: React.FC = () => {
                       </div>
                     </div>
                   )}
-
-                  {uni?.quick &&
-                    Array.isArray(uni.quick) &&
-                    uni.quick.length > 0 && (
-                      <div className="overflow-hidden rounded-md border border-gray-100 bg-white">
-                        <div className="border-b border-gray-100 bg-[#f8fafc] px-6 py-4">
-                          <h3 className="flex items-center gap-2 text-[16px] font-bold text-gray-900">
-                            <Layers className="h-5 w-5 text-blue-600" /> Quick Highlights
-                          </h3>
-                        </div>
-                        <div className="divide-y divide-gray-100">
-                          {uni.quick.map((h: any, idx: number) => (
-                            <div
-                              key={idx}
-                              className="flex flex-col p-4 transition-colors hover:bg-gray-50 sm:flex-row"
-                            >
-                              <div className="w-full text-[14px] font-semibold text-gray-800 sm:w-1/3">
-                                {h.key || h.label || h.title}
-                              </div>
-                              <div
-                                className="w-full text-[14px] text-gray-600 sm:w-2/3 rich-text"
-                                dangerouslySetInnerHTML={{
-                                  __html: safeHtml(
-                                    h.value || h.val || h.description || h.text || h.desc || "",
-                                  ),
-                                }}
-                              />
-                            </div>
-                          ))}
-                        </div>
-                      </div>
-                    )}
                 </div>
               )}
 
@@ -1754,6 +1722,26 @@ const UniversityDetail: React.FC = () => {
                   </div>
                 );
               })()}
+
+              {uni?.quick &&
+                Array.isArray(uni.quick) &&
+                uni.quick.length > 0 && (
+                  <div className="w-full rounded-md border border-gray-100 bg-white p-5">
+                    <h3 className="mb-5 text-[18px] font-bold text-gray-900">
+                      Quick Highlights
+                    </h3>
+                    <div className="space-y-4">
+                      {uni.quick.map((h: any, idx: number) => (
+                        <div key={idx} className="flex items-start gap-3">
+                          <div>
+                            <span className="block text-gray-900 font-bold text-[13px]">{h.key || h.label || h.title}</span>
+                            <span className="text-gray-500 font-medium text-[12px]">{h.value || h.val || h.description || h.text || h.desc || ""}</span>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
             </div>
           </div>
         </div>

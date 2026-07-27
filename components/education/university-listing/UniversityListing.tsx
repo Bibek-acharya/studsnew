@@ -29,7 +29,7 @@ const mapUniversity = (uni: University): UniversityData => ({
   name: uni.name || "",
   location: uni.location || "",
   rating: uni.rating?.toString() || "",
-  type: uni.type || "",
+  type: (uni.type === "Private" ? "Private" : uni.type === "Public" ? "Public" : "") as "Public" | "Private",
   rank: uni.rank?.toString() || "0",
   programs: uni.programsCount || 0,
   colleges: uni.collegesCount || 0,

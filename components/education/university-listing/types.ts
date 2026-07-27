@@ -3,7 +3,7 @@ export interface UniversityData {
   name: string;
   location: string;
   rating: string;
-  type: "Public" | "Private";
+  type: "Public" | "Private" | "";
   rank: string;
   programs: number;
   colleges: number;
