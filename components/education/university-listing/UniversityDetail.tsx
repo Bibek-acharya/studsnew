@@ -102,6 +102,15 @@ const UniversityDetail: React.FC = () => {
   const [reviewText, setReviewText] = useState("");
   const [submittingReview, setSubmittingReview] = useState(false);
   const [submitError, setSubmitError] = useState("");
+  const [uniEvents, setUniEvents] = useState<any[]>([]);
+  const [uniNews, setUniNews] = useState<any[]>([]);
+  const [uniEventsLoading, setUniEventsLoading] = useState(false);
+  const [uniNewsLoading, setUniNewsLoading] = useState(false);
+  const [galFolder, setGalFolder] = useState("all");
+  const [galCount, setGalCount] = useState(9);
+  const [galIdx, setGalIdx] = useState<number | null>(null);
+  useEffect(() => { if (activeTab !== "tab-gallery") { setGalFolder("all"); setGalCount(9); setGalIdx(null); } }, [activeTab]);
+  useEffect(() => { setGalCount(9); }, [galFolder]);
 
   const decodeB64 = (str: string): any => {
     try {
@@ -272,6 +281,32 @@ const UniversityDetail: React.FC = () => {
     })();
   }, [activeTab, id]);
 
+  useEffect(() => {
+    if (activeTab !== "tab-events" || !id) return;
+    (async () => {
+      setUniEventsLoading(true);
+      try {
+        const res = await apiService.getUniversityEvents(id, { page: 1, limit: 50 });
+        const list = res?.data?.events || res?.events || [];
+        setUniEvents(list);
+      } catch { setUniEvents([]); }
+      finally { setUniEventsLoading(false); }
+    })();
+  }, [activeTab, id]);
+
+  useEffect(() => {
+    if (activeTab !== "tab-news" || !id) return;
+    (async () => {
+      setUniNewsLoading(true);
+      try {
+        const res = await apiService.getUniversityNews(id, { page: 1, limit: 50 });
+        const list = res?.data?.news || res?.news || [];
+        setUniNews(list);
+      } catch { setUniNews([]); }
+      finally { setUniNewsLoading(false); }
+    })();
+  }, [activeTab, id]);
+
   const handleSubmitReview = async () => {
     if (!reviewRating || !reviewText.trim()) return;
     setSubmittingReview(true);
@@ -346,7 +381,7 @@ const UniversityDetail: React.FC = () => {
       <div className="w-full bg-white font-sans">
         {/* Banner */}
         <div
-          className="h-[220px] w-full bg-brand-blue max-md:bg-contain bg-cover bg-center bg-no-repeat md:h-[360px]"
+          className="relative w-full bg-brand-blue bg-cover bg-center bg-no-repeat aspect-[16/3]"
           style={
             uni?.cover ? { backgroundImage: `url(${uni.cover})` } : undefined
           }
@@ -355,7 +390,7 @@ const UniversityDetail: React.FC = () => {
         <div className="relative bg-white">
           <div className="relative mx-auto max-w-[1400px] pb-8">
             {/* Logo */}
-            <div className="absolute -top-2 left-6 z-10 flex h-[120px] w-[120px] items-center justify-center overflow-hidden rounded-xl border border-gray-100 bg-white p-2 shadow-[0_4px_20px_-3px_rgba(0,0,0,0.1)] md:-top-4 md:h-[150px] md:w-[150px]">
+            <div className="absolute -top-4 left-6 z-10 flex h-20 w-20 items-center justify-center overflow-hidden rounded-md border border-gray-200 bg-white p-1.5 md:left-12 md:h-[150px] md:w-[150px] lg:left-24 xl:left-32">
               {uni?.logo ? (
                 <Image
                   src={uni.logo}
@@ -365,31 +400,37 @@ const UniversityDetail: React.FC = () => {
                   className="h-full w-full object-contain"
                 />
               ) : (
-                <div className="flex h-full w-full items-center justify-center bg-gray-100 text-3xl font-bold text-gray-400">
-                  {name.charAt(0)}
-                </div>
+                <div className="flex h-full w-full items-center justify-center bg-brand-blue rounded-sm" />
               )}
             </div>
 
             {/* Profile Header */}
-            <div className="flex flex-col items-start justify-between pt-20 lg:flex-row lg:items-end lg:pt-6 lg:ml-[180px]">
+            <div className="flex flex-col items-start justify-between pt-14 md:pt-20 lg:flex-row lg:items-end lg:pt-6 lg:pl-[170px]">
               <div className="w-full space-y-3 lg:w-auto">
                 <div className="flex items-center gap-2">
-                  <h1 className="text-[24px] font-bold tracking-tight text-gray-900 md:text-3xl">
+                  <h1 className="text-[18px] font-bold tracking-tight text-gray-900 md:text-[24px] lg:text-3xl truncate">
                     {name}
                   </h1>
                   {uni?.verified && (
                     <BadgeCheck className="h-6 w-6 shrink-0 fill-blue-500 text-white" />
                   )}
                 </div>
-                <div className="flex items-center gap-1.5 pt-1">
-                  <Star className="h-4 w-4 fill-blue-500 text-blue-500" />
-                  <span className="text-[14px] font-bold text-gray-900">
-                    {uni?.rating ?? "—"}
-                  </span>
-                  <span className="text-[14px] text-gray-500">
-                    ({uni?.review_count ?? 0} Reviews)
-                  </span>
+                <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-[12px] font-medium md:text-[14px]">
+                  <div className="flex items-center gap-1.5">
+                    <i className="fa-solid fa-location-dot text-gray-500"></i>
+                    <span className="text-gray-600">{uni?.location || ""}</span>
+                  </div>
+                  <div className="flex items-center gap-1.5">
+                    <i className="fa-solid fa-star text-yellow-400"></i>
+                    <span className="font-bold text-gray-900">{uni?.rating ?? "—"}</span>
+                    <span className="text-gray-500 whitespace-nowrap">({uni?.review_count ?? 0} Reviews)</span>
+                  </div>
+                  {uni?.website && (
+                    <a href={uni.website.startsWith("http") ? uni.website : `https://${uni.website}`} target="_blank" rel="noreferrer" className="hidden md:flex items-center gap-1 text-[13px] font-medium tracking-wide text-brand-blue hover:text-brand-hover">
+                      <i className="fa-solid fa-globe text-gray-500 text-[12px]"></i>
+                      {uni.website.replace(/^https?:\/\//, "")}
+                    </a>
+                  )}
                 </div>
                 <button
                   type="button"
@@ -400,23 +441,21 @@ const UniversityDetail: React.FC = () => {
                       setIsFollowed(true);
                     }
                   }}
-                  className={`flex items-center justify-center gap-1.5 rounded-full px-4 py-1.5 text-[13px] font-semibold transition-colors ${
+                  className={`flex items-center justify-center gap-1.5 rounded-full px-3 py-1 text-[12px] font-semibold transition-colors md:px-4 md:py-1.5 md:text-[13px] ${
                     isFollowed
                       ? "bg-green-300 text-gray-800 hover:bg-green-400"
                       : "bg-brand-blue text-white hover:bg-brand-hover"
                   }`}
                 >
-                  <i
-                    className={`fa-solid ${isFollowed ? "fa-check" : "fa-plus"}`}
-                  ></i>
+                  <i className={`fa-solid ${isFollowed ? "fa-check" : "fa-plus"}`}></i>
                   {isFollowed ? "Following" : "Follow"}
                 </button>
               </div>
 
-              <div className="mt-4 flex w-full flex-wrap items-center gap-3 lg:mt-0 lg:w-auto">
+              <div className="hidden mt-8 w-full flex-nowrap items-center gap-2 overflow-x-auto pb-1 md:flex lg:mt-0 lg:w-auto lg:gap-3 lg:overflow-visible lg:pb-0">
                 <Link
                   href={`/universities/${name.toLowerCase().replace(/\s+/g, "-")}/affiliated-colleges`}
-                  className="flex flex-1 items-center justify-center gap-2 rounded-md bg-brand-blue px-4 py-2.5 text-[13px] font-semibold text-white transition-colors hover:bg-brand-hover sm:flex-none sm:px-6 sm:py-3 sm:text-[15px]"
+                  className="shrink-0 flex items-center justify-center gap-2 rounded-md border border-gray-200 bg-brand-blue px-4 py-2.5 text-[13px] font-semibold text-white transition-colors hover:bg-brand-hover lg:px-5 lg:py-3 lg:text-[15px]"
                 >
                   <Building2 className="h-4 w-4" />
                   View Affiliated Colleges
@@ -426,15 +465,15 @@ const UniversityDetail: React.FC = () => {
                     href={aboutData?.prospectus_url as string}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="flex items-center justify-center gap-2 rounded-md border border-gray-200 bg-white px-4 py-2.5 text-[13px] font-semibold text-gray-700 transition-colors hover:bg-gray-50 sm:px-5 sm:py-3 sm:text-[15px]"
+                    className="shrink-0 flex items-center justify-center gap-2 rounded-md border border-gray-200 bg-white px-4 py-2.5 text-[13px] font-semibold text-gray-700 transition-colors hover:bg-gray-50 lg:px-5 lg:py-3 lg:text-[15px]"
                   >
                     <Download className="h-4 w-4" />
-                    <span className="hidden sm:inline">{aboutData?.prospectus_title as string || "Prospectus"}</span>
+                    <span>{aboutData?.prospectus_title as string || "Prospectus"}</span>
                   </a>
                 ) : null}
                 <button
                   onClick={() => setIsShareModalOpen(true)}
-                  className="flex items-center justify-center rounded-md border border-gray-200 bg-white p-2.5 text-gray-700 transition-colors hover:bg-gray-50 sm:p-3"
+                  className="shrink-0 flex items-center justify-center rounded-md border border-gray-200 bg-white p-2.5 text-gray-700 transition-colors hover:bg-gray-50 lg:p-3"
                 >
                   <Share2 className="h-5 w-5" />
                 </button>
@@ -748,284 +787,128 @@ const UniversityDetail: React.FC = () => {
 
               {/* ========== INSTITUTE / FACULTIES ========== */}
               {activeTab === "tab-institutes" && (
-                <div className="space-y-10">
+                <div className="space-y-8">
                   <div>
-                    <div className="mb-6 flex items-center gap-3 border-b border-gray-100 pb-3">
-                      <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-blue-50">
-                        <Building2 className="h-5 w-5 text-blue-600" />
-                      </div>
-                      <div>
-                        <h3 className="text-[18px] font-bold text-gray-900">
-                          Institutes & Affiliated Colleges
-                        </h3>
-                        <p className="mt-0.5 text-[13px] text-gray-500">
-                          {institutesList.length > 0
-                            ? "Institutes and faculties under this university"
-                            : "Constituent and affiliated campuses"}
-                        </p>
-                      </div>
-                    </div>
-                    <div className="grid grid-cols-1 gap-5">
-                      {colleges.length > 0 && (
-                        <div className="rounded-[16px] border border-gray-100 bg-white p-5 shadow-sm">
-                          <div
-                            className="flex cursor-pointer items-center justify-between"
-                            onClick={() => toggleDropdown("affiliated")}
-                          >
-                            <div className="flex items-center gap-3">
-                              <div className="flex h-10 w-10 items-center justify-center rounded-full bg-blue-50">
-                                <Users className="h-5 w-5 text-blue-600" />
-                              </div>
-                              <h4 className="text-[17px] font-bold text-gray-900">
-                                Affiliated Colleges ({colleges.length})
-                              </h4>
-                            </div>
-                            <ChevronDown
-                              className={`h-5 w-5 text-gray-500 transition-transform ${openDropdowns["affiliated"] ? "rotate-180" : ""}`}
-                            />
+                    <h3 className="text-[20px] font-bold text-gray-900">Institutes & Faculties</h3>
+                    <p className="mt-1 text-[13px] text-gray-500">Constituent and affiliated campuses</p>
+                  </div>
+                  {institutesList.length > 0 ? (
+                    <div className="space-y-8">
+                      {institutesList.map((fac: any, idx: number) => (
+                        <div key={idx} className="overflow-hidden rounded-md border border-gray-100 bg-white">
+                          <div className="flex items-center justify-between border-b border-gray-100 bg-[#f8fafc] px-6 py-4">
+                            <h4 className="text-[16px] font-bold text-gray-900">{fac.name || `Faculty ${idx + 1}`}</h4>
+                            {(fac.colleges && fac.colleges.length > 0) && (
+                              <button
+                                onClick={() => toggleDropdown(`fac-colleges-${idx}`)}
+                                className="text-xs font-semibold text-brand-blue hover:underline flex items-center gap-1"
+                              >
+                                <Building2 className="h-3.5 w-3.5" />
+                                View Colleges ({fac.colleges.length})
+                              </button>
+                            )}
                           </div>
-                          {openDropdowns["affiliated"] && (
-                            <div className="mt-6">
-                              <table className="prog-table w-full">
+                          {openDropdowns[`fac-colleges-${idx}`] && (
+                            <div className="border-b border-gray-100 px-6 py-4 bg-gray-50/50">
+                              <table className="w-full text-sm">
                                 <thead>
-                                  <tr>
-                                    <th className="bg-[#f8fafc] px-2 py-2.5 text-left text-[13px] font-semibold text-[#1e293b]">
-                                      #
-                                    </th>
-                                    <th className="bg-[#f8fafc] px-2 py-2.5 text-left text-[13px] font-semibold text-[#1e293b]">
-                                      College
-                                    </th>
-                                    <th className="bg-[#f8fafc] px-2 py-2.5 text-left text-[13px] font-semibold text-[#1e293b]">
-                                      Type
-                                    </th>
-                                    <th className="bg-[#f8fafc] px-2 py-2.5 text-left text-[13px] font-semibold text-[#1e293b]">
-                                      Rating
-                                    </th>
+                                  <tr className="border-b border-gray-200">
+                                    <th className="px-3 py-2 text-left text-[12px] font-bold uppercase text-gray-600 w-10">SN</th>
+                                    <th className="px-3 py-2 text-left text-[12px] font-bold uppercase text-gray-600">College Name</th>
+                                    <th className="px-3 py-2 text-left text-[12px] font-bold uppercase text-gray-600">Location</th>
                                   </tr>
                                 </thead>
-                                <tbody>
-                                  {colleges.map((col, idx) => (
-                                    <tr
-                                      key={col.id}
-                                      className="border-b border-gray-50"
-                                    >
-                                      <td className="px-2 py-2 text-[13px] text-[#334155]">
-                                        {idx + 1}
-                                      </td>
-                                      <td className="px-2 py-2 text-[13px] text-[#334155]">
-                                        {col.name}
-                                      </td>
-                                      <td className="px-2 py-2 text-[13px] text-[#334155]">
-                                        {col.affiliation || col.type}
-                                      </td>
-                                      <td className="px-2 py-2 text-[13px] text-[#334155]">
-                                        {col.rating ?? "—"}
-                                      </td>
+                                <tbody className="divide-y divide-gray-100">
+                                  {fac.colleges.map((c: any, ci: number) => (
+                                    <tr key={c.id || ci}>
+                                      <td className="px-3 py-2.5 text-[13px] text-gray-500">{ci + 1}</td>
+                                      <td className="px-3 py-2.5 text-[13px] font-medium text-gray-900">{c.name}</td>
+                                      <td className="px-3 py-2.5 text-[13px] text-gray-600">{c.location || "-"}</td>
                                     </tr>
                                   ))}
                                 </tbody>
                               </table>
                             </div>
                           )}
+                          {fac.programs && fac.programs.length > 0 && (
+                            <div className="overflow-x-auto">
+                              <div className="min-w-[600px]">
+                                <div className="grid grid-cols-12 gap-2 border-b border-gray-100 bg-white px-6 py-3">
+                                  <div className="col-span-1 text-[12px] font-bold uppercase tracking-wider text-gray-600">SN</div>
+                                  <div className="col-span-5 text-[12px] font-bold uppercase tracking-wider text-gray-600">PROGRAM</div>
+                                  <div className="col-span-3 text-[12px] font-bold uppercase tracking-wider text-gray-600">DURATION</div>
+                                  <div className="col-span-3 text-[12px] font-bold uppercase tracking-wider text-gray-600">YEARLY/SEMESTER</div>
+                                </div>
+                                <div className="divide-y divide-gray-100">
+                                  {fac.programs.map((p: any, pi: number) => (
+                                    <div key={p.id || pi} className="grid grid-cols-12 gap-2 px-6 py-3 hover:bg-gray-50/50 items-center">
+                                      <div className="col-span-1 text-[13px] text-gray-500">{pi + 1}</div>
+                                      <div className="col-span-5 text-[14px] font-medium text-gray-900">{p.name}</div>
+                                      <div className="col-span-3 text-[13px] text-gray-600">{p.duration || "-"}</div>
+                                      <div className="col-span-3 text-[13px] text-gray-600">{p.fee || "-"}</div>
+                                    </div>
+                                  ))}
+                                </div>
+                              </div>
+                            </div>
+                          )}
+                          {(!fac.programs || fac.programs.length === 0) && (!fac.colleges || fac.colleges.length === 0) && (
+                            <div className="px-6 py-4 text-sm text-gray-400">No programs or colleges added for this faculty.</div>
+                          )}
                         </div>
-                      )}
-                      {institutesList.length > 0 ? (
-                        institutesList.map((inst: any, idx: number) => (
-                          <div
-                            key={idx}
-                            className="rounded-md border border-gray-100 bg-white"
-                          >
-                            <div className="flex flex-col sm:flex-row gap-4 p-5">
-                              {inst.image && (
-                                <div className="shrink-0">
-                                  <img
-                                    src={inst.image}
-                                    alt={inst.name || ""}
-                                    className="h-20 w-20 rounded-md object-cover"
-                                  />
-                                </div>
-                              )}
-                              <div className="flex-1 min-w-0">
-                                <h4 className="text-[16px] font-bold text-gray-900">
-                                  {inst.name || inst.title || `Institute ${idx + 1}`}
-                                </h4>
-                                {inst.description && (
-                                  <p className="mt-1 text-[14px] text-gray-600">{inst.description}</p>
-                                )}
-                                <div className="mt-3 grid grid-cols-1 sm:grid-cols-3 gap-2 text-[13px]">
-                                  {inst.dean && (
-                                    <div>
-                                      <span className="font-semibold text-gray-800">Dean:</span>{" "}
-                                      <span className="text-gray-600">{inst.dean}</span>
-                                    </div>
-                                  )}
-                                  {inst.programs_count && (
-                                    <div>
-                                      <span className="font-semibold text-gray-800">Programs:</span>{" "}
-                                      <span className="text-gray-600">{inst.programs_count}</span>
-                                    </div>
-                                  )}
-                                  {inst.website && (
-                                    <div>
-                                      <span className="font-semibold text-gray-800">Website:</span>{" "}
-                                      <a href={inst.website} target="_blank" rel="noopener noreferrer" className="text-brand-blue hover:underline">{inst.website}</a>
-                                    </div>
-                                  )}
-                                </div>
-                              </div>
-                            </div>
-                          </div>
-                        ))
-                      ) : (
-                        <EmptyTabState tabName="Institutes" />
-                      )}
+                      ))}
                     </div>
-                  </div>
-                  <div>
-                    <div className="mb-6 flex items-center gap-3 border-b border-gray-100 pb-3">
-                      <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-green-50">
-                        <BookOpen className="h-5 w-5 text-green-600" />
-                      </div>
-                      <div>
-                        <h3 className="text-[18px] font-bold text-gray-900">
-                          Faculties
-                        </h3>
-                        <p className="mt-0.5 text-[13px] text-gray-500">
-                          Programs under each faculty
-                        </p>
-                      </div>
-                    </div>
-                    <div className="grid grid-cols-1 gap-5">
-                      {uni?.programs &&
-                      Array.isArray(uni.programs) &&
-                      uni.programs.length > 0 ? (
-                        uni.programs.map((fac: any, idx: number) => (
-                          <div
-                            key={idx}
-                            className="rounded-[16px] border border-gray-100 bg-white p-5 shadow-sm"
-                          >
-                            <div
-                              className="flex cursor-pointer items-center justify-between"
-                              onClick={() => toggleDropdown(`fac-${idx}`)}
-                            >
-                              <div className="flex items-center gap-3">
-                                <div className="flex h-10 w-10 items-center justify-center rounded-full bg-green-50">
-                                  <BookOpen className="h-5 w-5 text-green-600" />
-                                </div>
-                                <h4 className="text-[17px] font-bold text-gray-900">
-                                  {fac.title ||
-                                    fac.name ||
-                                    `Faculty ${idx + 1}`}
-                                </h4>
-                              </div>
-                              <ChevronDown
-                                className={`h-5 w-5 text-gray-500 transition-transform ${openDropdowns[`fac-${idx}`] ? "rotate-180" : ""}`}
-                              />
-                            </div>
-                            {openDropdowns[`fac-${idx}`] && (
-                              <div className="mt-6">
-                                <table className="prog-table w-full">
-                                  <thead>
-                                    <tr>
-                                      <th className="bg-[#f8fafc] px-2 py-2.5 text-left text-[13px] font-semibold text-[#1e293b]">
-                                        #
-                                      </th>
-                                      <th className="bg-[#f8fafc] px-2 py-2.5 text-left text-[13px] font-semibold text-[#1e293b]">
-                                        Programs
-                                      </th>
-                                      <th className="bg-[#f8fafc] px-2 py-2.5 text-left text-[13px] font-semibold text-[#1e293b]">
-                                        Duration
-                                      </th>
-                                    </tr>
-                                  </thead>
-                                  <tbody>
-                                    {(fac.programs || fac.items || []).map(
-                                      (p: any, pi: number) => (
-                                        <tr
-                                          key={pi}
-                                          className="border-b border-gray-50"
-                                        >
-                                          <td className="px-2 py-2 text-[13px] text-[#334155]">
-                                            {pi + 1}
-                                          </td>
-                                          <td className="px-2 py-2 text-[13px] text-[#334155]">
-                                            {p.name || p.title || p}
-                                          </td>
-                                          <td className="px-2 py-2 text-[13px] text-[#334155]">
-                                            {p.duration || "—"}
-                                          </td>
-                                        </tr>
-                                      ),
-                                    )}
-                                  </tbody>
-                                </table>
-                              </div>
-                            )}
-                          </div>
-                        ))
-                      ) : (
-                        <EmptyTabState tabName="Faculties" />
-                      )}
-                    </div>
-                  </div>
+                  ) : (
+                    <EmptyTabState tabName="Institutes" />
+                  )}
                 </div>
               )}
 
               {activeTab === "tab-admissions" && (
-                <div className="rounded-[20px] border border-gray-200 bg-white">
-                  <div className="flex flex-wrap items-center justify-between gap-4 border-b border-gray-100 bg-[#f4f8fc] px-6 py-4">
-                    <p className="text-[14px] font-semibold text-brand-blue">Admissions</p>
+                <div className="overflow-hidden rounded-md border border-gray-100 bg-white">
+                  <div className="border-b border-gray-100 bg-[#f8fafc] px-6 py-4">
+                    <h3 className="flex items-center gap-2 text-[16px] font-bold text-gray-900">
+                      Admissions
+                    </h3>
                   </div>
                   {admissionsList.length > 0 ? (
                     <div className="w-full overflow-x-auto">
-                      <div className="min-w-[1000px]">
-                        <div className="grid grid-cols-12 items-center gap-2 border-b border-gray-100 bg-white px-4 py-5">
-                          <div className="col-span-3 text-[13px] font-bold uppercase tracking-wider text-gray-800">PROGRAM</div>
-                          <div className="col-span-1 text-[13px] font-bold uppercase tracking-wider text-gray-800">FACULTY</div>
+                      <div className="min-w-[700px]">
+                        <div className="grid grid-cols-12 gap-2 border-b border-gray-100 bg-white px-6 py-5">
+                          <div className="col-span-4 text-[13px] font-bold uppercase tracking-wider text-gray-800">PROGRAM</div>
                           <div className="col-span-1 text-[13px] font-bold uppercase tracking-wider text-gray-800">STATUS</div>
-                          <div className="col-span-1 text-[13px] font-bold uppercase tracking-wider text-gray-800">OPENS</div>
-                          <div className="col-span-1 text-[13px] font-bold uppercase tracking-wider text-gray-800">DEADLINE</div>
-                          <div className="col-span-1 text-[13px] font-bold uppercase tracking-wider text-gray-800">SEATS</div>
-                          <div className="col-span-1 text-[13px] font-bold uppercase tracking-wider text-gray-800">ENTRANCE</div>
-                          <div className="col-span-1 text-[13px] font-bold uppercase tracking-wider text-gray-800">FEE</div>
-                          <div className="col-span-2 text-[13px] font-bold uppercase tracking-wider text-gray-800">ACTIONS</div>
+                          <div className="col-span-2 text-[13px] font-bold uppercase tracking-wider text-gray-800">OPENS</div>
+                          <div className="col-span-2 text-[13px] font-bold uppercase tracking-wider text-gray-800">DEADLINE</div>
+                          <div className="col-span-1 text-[13px] font-bold uppercase tracking-wider text-gray-800">APPL. FEE</div>
+                          <div className="col-span-2 text-[13px] font-bold uppercase tracking-wider text-gray-800">APPLY</div>
                         </div>
-                        {admissionsList.map((ad: any, i: number) => (
-                          <div key={i} className="grid grid-cols-12 items-center gap-2 border-b border-gray-100 px-4 py-5 hover:bg-gray-50/50">
-                            <div className="col-span-3 overflow-hidden text-ellipsis whitespace-nowrap" title={ad.program || ad.title}><h4 className="text-[15.5px] font-bold text-gray-900">{ad.program || ad.title}</h4></div>
-                            <div className="col-span-1 overflow-hidden text-ellipsis whitespace-nowrap" title={ad.faculty || ""}><span className="text-[14px] text-gray-600">{ad.faculty || "-"}</span></div>
-                            <div className="col-span-1">
-                              <span className={`rounded-md px-2.5 py-1 text-[11px] font-bold whitespace-nowrap ${ad.status === "Open" || ad.status === "Ongoing" ? "bg-[#ecfdf5] text-[#10b981]" : "bg-[#fef2f2] text-[#ef4444]"}`}>
-                                {ad.status}
-                              </span>
-                            </div>
-                            <div className="col-span-1 overflow-hidden text-ellipsis whitespace-nowrap" title={ad.opens_from || ""}><span className="text-[14px] text-gray-600">{ad.opens_from || "-"}</span></div>
-                            <div className="col-span-1 overflow-hidden text-ellipsis whitespace-nowrap" title={ad.deadline || ""}><span className="text-[14px] text-gray-600">{ad.deadline || "-"}</span></div>
-                            <div className="col-span-1 overflow-hidden text-ellipsis whitespace-nowrap" title={ad.seats || ""}><span className="text-[14px] text-gray-600">{ad.seats || "-"}</span></div>
-                            <div className="col-span-1 overflow-hidden text-ellipsis whitespace-nowrap" title={ad.entrance || ""}><span className="text-[14px] text-gray-600">{ad.entrance || "-"}</span></div>
-                            <div className="col-span-1 overflow-hidden text-ellipsis whitespace-nowrap" title={ad.fee || ""}><span className="text-[14px] font-semibold text-gray-900">{ad.fee || "-"}</span></div>
-                            <div className="col-span-2 flex gap-2 whitespace-nowrap">
-                              {ad.application_link ? (
-                                <a href={ad.application_link} target="_blank" rel="noopener noreferrer" className="rounded-md bg-brand-blue px-3 py-2 text-xs font-bold text-white hover:bg-brand-hover transition-colors">
-                                  Apply Now
-                                </a>
-                              ) : (
-                                <span className="rounded-md bg-gray-100 px-3 py-2 text-xs font-bold text-gray-400 cursor-not-allowed">
-                                  Apply Now
+                        <div className="divide-y divide-gray-100">
+                          {admissionsList.map((ad: any, i: number) => (
+                            <div key={i} className="grid grid-cols-12 gap-2 px-6 py-5 hover:bg-gray-50/50 items-center">
+                              <div className="col-span-4">
+                                <h4 className="text-[15.5px] font-bold text-gray-900">{ad.program || ad.title}</h4>
+                                {ad.faculty && <p className="text-[13px] text-gray-500">{ad.faculty}</p>}
+                              </div>
+                              <div className="col-span-1">
+                                <span className={`inline-block rounded-md px-2.5 py-1 text-[11px] font-bold whitespace-nowrap ${ad.status === "Open" || ad.status === "Ongoing" ? "bg-[#ecfdf5] text-[#10b981]" : "bg-[#fef2f2] text-[#ef4444]"}`}>
+                                  {ad.status}
                                 </span>
-                              )}
-                              {ad.program_link ? (
-                                <a href={ad.program_link} target="_blank" rel="noopener noreferrer" className="rounded-md bg-brand-blue/5 px-3 py-2 text-xs font-bold text-brand-blue hover:bg-brand-blue/10 transition-colors">
-                                  View Detail
-                                </a>
-                              ) : (
-                                <span className="rounded-md bg-gray-100 px-3 py-2 text-xs font-bold text-gray-400 cursor-not-allowed">
-                                  View Detail
-                                </span>
-                              )}
+                              </div>
+                              <div className="col-span-2 text-[14px] text-gray-600">{ad.opens_from || "-"}</div>
+                              <div className="col-span-2 text-[14px] text-gray-600">{ad.deadline || "-"}</div>
+                              <div className="col-span-1 text-[14px] font-semibold text-gray-900">{ad.fee || "-"}</div>
+                              <div className="col-span-2">
+                                {ad.application_link ? (
+                                  <a href={ad.application_link} target="_blank" rel="noopener noreferrer" className="text-brand-blue hover:underline font-semibold text-[13px]">
+                                    Apply Now
+                                  </a>
+                                ) : (
+                                  <span className="text-gray-400 text-[13px]">Apply Now</span>
+                                )}
+                              </div>
                             </div>
-                          </div>
-                        ))}
+                          ))}
+                        </div>
                       </div>
                     </div>
                   ) : (
@@ -1166,9 +1049,10 @@ const UniversityDetail: React.FC = () => {
               {/* ========== EVENTS ========== */}
               {activeTab === "tab-events" && (
                 <div>
-                  {eventsList.length > 0 ? (
+                  {uniEventsLoading ? <div className="py-12 text-center text-slate-500">Loading events...</div> :
+                  (uniEvents.length > 0 || eventsList.length > 0) ? (
                     <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
-                      {eventsList.map((ev: any, i: number) => (
+                      {(uniEvents.length > 0 ? uniEvents : eventsList).map((ev: any, i: number) => (
                         <div
                           key={i}
                           className="flex flex-col overflow-hidden rounded-md border border-gray-200 bg-white transition-colors hover:border-blue-500/20 duration-300"
@@ -1228,9 +1112,10 @@ const UniversityDetail: React.FC = () => {
               {/* ========== NEWS & NOTICES ========== */}
               {activeTab === "tab-news" && (
                 <div>
-                  {newsList.length > 0 ? (
+                  {uniNewsLoading ? <div className="py-12 text-center text-slate-500">Loading news...</div> :
+                  (uniNews.length > 0 || newsList.length > 0) ? (
                     <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
-                      {newsList.map((item: any, i: number) => (
+                      {(uniNews.length > 0 ? uniNews : newsList).map((item: any, i: number) => (
                         <div
                           key={i}
                           className="flex flex-col overflow-hidden rounded-2xl border border-gray-100 bg-white shadow-sm transition-shadow hover:shadow-md"
@@ -1349,14 +1234,9 @@ const UniversityDetail: React.FC = () => {
                         }
                       }
                       const allFolders = Array.from(groups.keys());
-                      const [galFolder, setGalFolder] = React.useState("all");
-                      const [galCount, setGalCount] = React.useState(9);
                       const galImages = galFolder === "all"
                         ? Array.from(groups.values()).flat()
                         : groups.get(galFolder) || [];
-                      const [galIdx, setGalIdx] = React.useState<number | null>(null);
-
-                      React.useEffect(() => { setGalCount(9); }, [galFolder]);
 
                       return (
                         <div>

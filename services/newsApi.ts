@@ -2,6 +2,7 @@ import { apiRequest } from "./api";
 
 export interface AdminNews {
   id: number;
+  university_id?: number;
   category: string;
   title: string;
   excerpt: string;
@@ -44,6 +45,7 @@ export const adminNewsApi = {
       limit?: number;
       category?: string;
       search?: string;
+      university_id?: number;
     } = {},
   ): Promise<{ news: AdminNews[]; meta: NewsMeta }> {
     const query = new URLSearchParams();
@@ -51,6 +53,7 @@ export const adminNewsApi = {
     if (params.limit) query.set("limit", String(params.limit));
     if (params.category) query.set("category", params.category);
     if (params.search) query.set("search", params.search);
+    if (params.university_id) query.set("university_id", String(params.university_id));
     const qs = query.toString();
     return extractData(
       apiRequest(`/api/v1/admin/news${qs ? "?" + qs : ""}`, {

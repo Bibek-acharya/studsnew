@@ -51,6 +51,8 @@ const BlogListSection = lazy(() => import("./BlogListSection"));
 const CreateBlogSection = lazy(() => import("./CreateBlogSection"));
 const EventListSection = lazy(() => import("./EventListSection"));
 const CreateEventSection = lazy(() => import("./CreateEventSection"));
+const UniversityNewsSection = lazy(() => import("./UniversityNewsSection"));
+const UniversityEventsSection = lazy(() => import("./UniversityEventsSection"));
 const CampusFeedSection = lazy(() => import("./CampusFeedSection"));
 const NotificationSection = lazy(() => import("./NotificationSection"));
 const AccessControlSection = lazy(() => import("./AccessControlSection"));
@@ -176,6 +178,8 @@ type SectionType =
   | "manage-ads"
   | "news-directory"
   | "events-directory"
+  | "university-news"
+  | "university-events"
   | "blogs-directory"
   | "manage-feedback"
   | "manage-faq"
@@ -297,6 +301,8 @@ const navItems: NavItemData[] = [
       { section: "create-universities", label: "Add University" },
       { section: "draft-universities", label: "Draft Universities" },
       { section: "list-universities", label: "All Universities" },
+      { section: "university-news", label: "University News" },
+      { section: "university-events", label: "University Events" },
     ],
   },
   {
@@ -585,6 +591,10 @@ export default function DashboardShell() {
         return <DraftUniversitiesSection setActiveSection={navigateTo} />;
       case "list-universities":
         return <ListUniversitiesSection setActiveSection={navigateTo} />;
+      case "university-news":
+        return <UniversityNewsSection setActiveSection={navigateTo} />;
+      case "university-events":
+        return <UniversityEventsSection setActiveSection={navigateTo} />;
       case "map":
         return <MapCollegeListSection />;
       case "superadmin-course-directory":
@@ -642,7 +652,7 @@ export default function DashboardShell() {
 
   return (
     <div className="min-h-screen bg-white text-gray-800 font-sans h-screen flex overflow-hidden">
-      <aside className="w-64 bg-white border-r border-gray-200 flex-shrink-0 flex flex-col z-20">
+      <aside className="w-80 bg-white border-r border-gray-200 flex-shrink-0 flex flex-col z-20">
         <div className="h-16 flex items-center px-6 border-b border-gray-50">
           <Image
             src="/studsphere.png"

@@ -165,6 +165,7 @@ export async function fetchPublicEventById(
 
 export interface AdminEvent {
   id: number;
+  university_id?: number;
   title: string;
   excerpt: string;
   description: string;
@@ -206,6 +207,7 @@ export const adminEventApi = {
       limit?: number;
       category?: string;
       search?: string;
+      university_id?: number;
     } = {},
   ): Promise<{ events: AdminEvent[]; meta: EventMeta }> {
     const query = new URLSearchParams();
@@ -213,6 +215,7 @@ export const adminEventApi = {
     if (params.limit) query.set("limit", String(params.limit));
     if (params.category) query.set("category", params.category);
     if (params.search) query.set("search", params.search);
+    if (params.university_id) query.set("university_id", String(params.university_id));
     const qs = query.toString();
     return extractData(
       apiRequest(`/api/v1/admin/events${qs ? "?" + qs : ""}`, {
