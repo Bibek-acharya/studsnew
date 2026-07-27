@@ -37,12 +37,12 @@ const UniversityCard: React.FC<{
     : `/universities/${toSlug(uni.name)}/affiliated-colleges`;
   const displayWebsite = uni.website
     ? uni.website.replace(/^https?:\/\//, "")
-    : `www.${uni.name.toLowerCase().replace(/[^a-z0-9]+/g, "")}.edu.np`;
+    : null;
   const websiteHref = uni.website
     ? uni.website.startsWith("http")
       ? uni.website
       : `https://${uni.website}`
-    : `https://${displayWebsite}`;
+    : null;
 
   return (
     <div className="flex h-full flex-col rounded-md border border-gray-200 bg-white p-4 transition-all duration-300 hover:border-blue-500/20 overflow-visible">
@@ -85,95 +85,90 @@ const UniversityCard: React.FC<{
         </div>
 
         {/* Stats Row */}
-        <div className="mb-2 flex min-w-0 items-center text-[14px] text-gray-500">
-          <div className="flex items-center gap-1 font-bold text-slate-700">
-            <Star className="h-4 w-4 fill-amber-500 text-amber-500" />
-            <span>{uni.rating}</span>
-          </div>
-          <span className="mx-3 font-light text-gray-300">|</span>
-          <div className="flex items-center gap-1.5">
-            <Award className="h-4.5 w-4.5 text-gray-400" />
-            <span className="font-semibold text-slate-700">{uni.type}</span>
-          </div>
-          {parseInt(uni.rank) > 0 && (
-            <>
-              <span className="mx-3 font-light text-gray-300">|</span>
-              <span className="inline-flex items-center gap-1 rounded bg-emerald-50 px-2 py-0.5 text-[11px] font-bold text-emerald-700">
-                Rank #{uni.rank}
-              </span>
-            </>
+        <div className="mb-2 flex min-w-0 flex-wrap items-center gap-x-3 gap-y-1 text-[14px] text-gray-500">
+          {uni.rating && uni.rating !== "0" && (
+            <div className="flex items-center gap-1 font-bold text-slate-700">
+              <Star className="h-4 w-4 fill-amber-500 text-amber-500" />
+              <span>{uni.rating}</span>
+            </div>
           )}
-          <span className="mx-3 font-light text-gray-300">|</span>
-          <div className="flex min-w-0 flex-1 items-center gap-1.5">
-            <MapPin className="h-4.5 w-4.5 shrink-0 text-gray-400" />
-            <span
-              className="group/location block min-w-0 truncate font-semibold text-slate-700"
-              title={uni.location}
-            >
-              <span className="block truncate">{uni.location}</span>
-              <span className="invisible absolute bottom-full left-0 mb-2 whitespace-nowrap rounded bg-gray-900 px-3 py-1.5 text-[13px] font-medium text-white opacity-0 transition-all duration-200 group-hover/location:visible group-hover/location:opacity-100">
-                {uni.location}
-                <span className="absolute top-full left-4 -mt-px border-[5px] border-transparent border-t-gray-900"></span>
-              </span>
+          {uni.type && (
+            <div className="flex items-center gap-1.5">
+              <Award className="h-4.5 w-4.5 text-gray-400" />
+              <span className="font-semibold text-slate-700">{uni.type}</span>
+            </div>
+          )}
+          {parseInt(uni.rank) > 0 && (
+            <span className="inline-flex items-center gap-1 rounded bg-emerald-50 px-2 py-0.5 text-[11px] font-bold text-emerald-700">
+              Rank #{uni.rank}
             </span>
-          </div>
+          )}
+          {uni.location && (
+            <div className="flex min-w-0 flex-1 items-center gap-1.5">
+              <MapPin className="h-4.5 w-4.5 shrink-0 text-gray-400" />
+              <span
+                className="group/location relative block min-w-0 truncate font-semibold text-slate-700"
+                title={uni.location}
+              >
+                <span className="block truncate">{uni.location}</span>
+                <span className="invisible absolute bottom-full left-0 mb-2 whitespace-nowrap rounded bg-gray-900 px-3 py-1.5 text-[13px] font-medium text-white opacity-0 transition-all duration-200 group-hover/location:visible group-hover/location:opacity-100">
+                  {uni.location}
+                  <span className="absolute top-full left-4 -mt-px border-[5px] border-transparent border-t-gray-900"></span>
+                </span>
+              </span>
+            </div>
+          )}
         </div>
 
         {/* Programs & Colleges Stats */}
-        <div className="mb-2 mt-1 flex items-center gap-4 text-[14px] text-gray-500">
-          <GraduationCap className="h-4.5 w-4.5 shrink-0 text-gray-400" />
-          <p className="font-semibold text-slate-700">
-            {uni.programs} Programs · {uni.colleges} Colleges
-          </p>
-        </div>
+        {(uni.programs || uni.colleges) && (
+          <div className="mb-2 mt-1 flex items-center gap-4 text-[14px] text-gray-500">
+            <GraduationCap className="h-4.5 w-4.5 shrink-0 text-gray-400" />
+            <p className="font-semibold text-slate-700">
+              {[uni.programs && `${uni.programs} Programs`, uni.colleges && `${uni.colleges} Colleges`].filter(Boolean).join(" · ")}
+            </p>
+          </div>
+        )}
 
         {/* Website */}
-        <div className="mb-2 mt-1 flex items-center gap-2 text-[14px] text-gray-500">
-          <Globe className="h-4.5 w-4.5 shrink-0 text-gray-400" />
-          <a
-            href={websiteHref}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="truncate cursor-pointer font-medium text-brand-blue hover:underline"
-          >
-            {displayWebsite}
-          </a>
-        </div>
+        {websiteHref && (
+          <div className="mb-2 mt-1 flex items-center gap-2 text-[14px] text-gray-500">
+            <Globe className="h-4.5 w-4.5 shrink-0 text-gray-400" />
+            <a
+              href={websiteHref}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="truncate cursor-pointer font-medium text-brand-blue hover:underline"
+            >
+              {displayWebsite}
+            </a>
+          </div>
+        )}
 
         {/* Quick Links */}
         <div className="mb-4 mt-2 flex items-center gap-4">
-          <span className="flex cursor-pointer items-center text-[12px] font-medium text-brand-blue transition-colors hover:text-blue-800">
-            Programs
-            <svg
-              className="ml-1 h-3 w-3"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2.5"
-              viewBox="0 0 24 24"
+          {uni.id && (
+            <Link
+              href={`/universities/${uni.id}?tab=courses`}
+              className="flex cursor-pointer items-center text-[12px] font-medium text-brand-blue transition-colors hover:text-blue-800"
             >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                d="M7 17L17 7M7 7h10v10"
-              />
-            </svg>
-          </span>
-          <span className="flex cursor-pointer items-center text-[12px] font-medium text-brand-blue transition-colors hover:text-blue-800">
-            Scholarships
-            <svg
-              className="ml-1 h-3 w-3"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2.5"
-              viewBox="0 0 24 24"
+              Programs
+              <svg className="ml-1 h-3 w-3" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M7 17L17 7M7 7h10v10" />
+              </svg>
+            </Link>
+          )}
+          {uni.id && (
+            <Link
+              href={`/universities/${uni.id}?tab=scholarship`}
+              className="flex cursor-pointer items-center text-[12px] font-medium text-brand-blue transition-colors hover:text-blue-800"
             >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                d="M7 17L17 7M7 7h10v10"
-              />
-            </svg>
-          </span>
+              Scholarships
+              <svg className="ml-1 h-3 w-3" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M7 17L17 7M7 7h10v10" />
+              </svg>
+            </Link>
+          )}
         </div>
 
         {/* Action Buttons */}

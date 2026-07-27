@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { useParams } from "next/navigation";
+import { useParams, useSearchParams } from "next/navigation";
 import { safeHtml } from "@/lib/html";
 import ContactInfoRow from "@/app/find-college/[id]/components/ContactInfoRow";
 import ReviewCard from "@/app/find-college/[id]/components/ReviewCard";
@@ -67,7 +67,20 @@ const getYouTubeId = (url: string): string | null => {
 const UniversityDetail: React.FC = () => {
   const params = useParams();
   const id = Number(params?.id) || 0;
-  const [activeTab, setActiveTab] = useState<TabKey>("tab-about");
+  const searchParams = useSearchParams();
+  const tabParam = searchParams?.get("tab");
+  const getInitialTab = (): TabKey => {
+    switch (tabParam) {
+      case "courses": return "tab-courses";
+      case "scholarship": return "tab-scholarship";
+      case "admissions": return "tab-admissions";
+      case "institutes": return "tab-institutes";
+      case "gallery": return "tab-gallery";
+      case "review": return "tab-review";
+      default: return "tab-about";
+    }
+  };
+  const [activeTab, setActiveTab] = useState<TabKey>(getInitialTab);
   const [courseFilter, setCourseFilter] = useState("all");
   const [scholarFilter, setScholarFilter] = useState("all");
   const [openDropdowns, setOpenDropdowns] = useState<Record<string, boolean>>(
@@ -408,10 +421,17 @@ const UniversityDetail: React.FC = () => {
                   <Building2 className="h-4 w-4" />
                   View Affiliated Colleges
                 </Link>
-                <button className="flex items-center justify-center gap-2 rounded-xl border border-gray-200 bg-white px-4 py-2.5 text-[13px] font-semibold text-gray-700 shadow-sm transition-colors hover:bg-gray-50 sm:px-5 sm:py-3 sm:text-[15px]">
-                  <Download className="h-4 w-4" />
-                  <span className="hidden sm:inline">Prospectus</span>
-                </button>
+                {(aboutData?.prospectus_url as string) ? (
+                  <a
+                    href={aboutData?.prospectus_url as string}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex items-center justify-center gap-2 rounded-xl border border-gray-200 bg-white px-4 py-2.5 text-[13px] font-semibold text-gray-700 shadow-sm transition-colors hover:bg-gray-50 sm:px-5 sm:py-3 sm:text-[15px]"
+                  >
+                    <Download className="h-4 w-4" />
+                    <span className="hidden sm:inline">{aboutData?.prospectus_title as string || "Prospectus"}</span>
+                  </a>
+                ) : null}
                 <button
                   onClick={() => setIsShareModalOpen(true)}
                   className="flex items-center justify-center rounded-xl border border-gray-200 bg-white p-2.5 text-gray-700 shadow-sm transition-colors hover:bg-gray-50 sm:p-3"
@@ -1178,10 +1198,7 @@ const UniversityDetail: React.FC = () => {
                         >
                           <div className="h-35 w-full overflow-hidden p-4">
                             <img
-                              src={
-                                ev.image ||
-                                "https://images.unsplash.com/photo-1540575467063-178a50c2df87?q=80&w=800&auto=format&fit=crop"
-                              }
+                              src={ev.image || ""}
                               alt={ev.title}
                               className="h-full w-full rounded-md object-cover"
                             />
@@ -1331,80 +1348,120 @@ const UniversityDetail: React.FC = () => {
 
               {/* ========== GALLERY ========== */}
               {activeTab === "tab-gallery" && (
-                <div className="space-y-10">
+                <div>
                   {galleryList.length > 0 ? (
                     (() => {
-                      const groups = new Map<string, typeof galleryList>();
+                      const groups = new Map<string, string[]>();
                       for (const img of galleryList) {
-                        const key = (img as any).folder || "Gallery";
-                        if (!groups.has(key)) groups.set(key, []);
-                        groups.get(key)!.push(img);
+                        if ((img as any).images) {
+                          const folder = (img as any).folder || "Gallery";
+                          for (const sub of (img as any).images) {
+                            const url = sub.url || sub.image || sub.src;
+                            if (url) {
+                              if (!groups.has(folder)) groups.set(folder, []);
+                              groups.get(folder)!.push(url);
+                            }
+                          }
+                        } else {
+                          const folder = (img as any).folder || (img as any).group || "Gallery";
+                          const url = (img as any).url || (img as any).image || (img as any).src;
+                          if (url) {
+                            if (!groups.has(folder)) groups.set(folder, []);
+                            groups.get(folder)!.push(url);
+                          }
+                        }
                       }
-                      const urls = galleryList.map(
-                        (i: any) => i.url || i.image || i.src,
-                      );
-                      return Array.from(groups.entries()).map(
-                        ([heading, items], gi) => (
-                          <div key={gi} className="space-y-5">
-                            <h3 className="text-lg font-bold capitalize tracking-tight text-gray-800">
-                              {heading}
-                            </h3>
-                            <div className="grid grid-cols-2 gap-3 md:grid-cols-3 xl:grid-cols-4 md:gap-5">
-                              {items
-                                .slice(0, items.length > 8 ? 7 : 8)
-                                .map((img: any, ii: number) => {
-                                  const url = img.url || img.image || img.src;
-                                  const globalIndex = urls.indexOf(url);
-                                  return (
-                                    <div
-                                      key={ii}
-                                      className="group cursor-pointer overflow-hidden rounded-2xl border border-gray-100 bg-white shadow-sm transition-all duration-300 hover:shadow-md"
-                                      onClick={() =>
-                                        setLightboxIndex(
-                                          globalIndex >= 0 ? globalIndex : null,
-                                        )
-                                      }
-                                    >
-                                      <div className="aspect-[4/3] overflow-hidden rounded-xl bg-gray-50">
-                                        <img
-                                          src={url}
-                                          alt={img.title || img.alt || ""}
-                                          className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-110"
-                                        />
-                                      </div>
-                                    </div>
-                                  );
-                                })}
-                              {items.length > 8 && (
-                                <div
-                                  className="group cursor-pointer overflow-hidden rounded-2xl border border-dashed border-blue-100 bg-blue-50/30 p-1.5 shadow-sm transition-all duration-300 hover:border-blue-300 hover:shadow-md"
-                                  onClick={() => {
-                                    const firstUrl =
-                                      (items[0] as any).url ||
-                                      (items[0] as any).image ||
-                                      (items[0] as any).src;
-                                    const firstIdx = urls.indexOf(firstUrl);
-                                    setLightboxIndex(
-                                      firstIdx >= 0 ? firstIdx : null,
-                                    );
-                                  }}
-                                >
-                                  <div className="aspect-[4/3] flex flex-col items-center justify-center overflow-hidden rounded-xl bg-blue-600/5">
-                                    <div className="flex h-12 w-12 items-center justify-center rounded-full bg-blue-100 transition-all duration-300 group-hover:bg-blue-600 group-hover:text-white">
-                                      <ArrowRight className="h-6 w-6" />
-                                    </div>
-                                    <span className="mt-2 text-sm font-bold text-blue-700">
-                                      View All
-                                    </span>
-                                  </div>
-                                  <p className="mt-2 px-1 text-center text-[12px] font-bold tracking-tight text-blue-600/60">
-                                    +{items.length - 7} PHOTOS
-                                  </p>
-                                </div>
-                              )}
-                            </div>
+                      const allFolders = Array.from(groups.keys());
+                      const [galFolder, setGalFolder] = React.useState("all");
+                      const [galCount, setGalCount] = React.useState(9);
+                      const galImages = galFolder === "all"
+                        ? Array.from(groups.values()).flat()
+                        : groups.get(galFolder) || [];
+                      const [galIdx, setGalIdx] = React.useState<number | null>(null);
+
+                      React.useEffect(() => { setGalCount(9); }, [galFolder]);
+
+                      return (
+                        <div>
+                          <div className="mb-6">
+                            <h2 className="text-[20px] font-bold text-gray-900">Campus Gallery</h2>
                           </div>
-                        ),
+                          {allFolders.length > 1 && (
+                            <div className="mb-6 flex flex-wrap gap-2">
+                              <button
+                                onClick={() => setGalFolder("all")}
+                                className={`px-4 py-2 rounded-md text-sm font-medium transition ${galFolder === "all" ? "bg-brand-blue text-white" : "bg-gray-100 text-gray-600 hover:bg-gray-200"}`}
+                              >
+                                All
+                              </button>
+                              {allFolders.map((f) => (
+                                <button
+                                  key={f}
+                                  onClick={() => setGalFolder(f)}
+                                  className={`px-4 py-2 rounded-md text-sm font-medium transition ${galFolder === f ? "bg-brand-blue text-white" : "bg-gray-100 text-gray-600 hover:bg-gray-200"}`}
+                                >
+                                  {f}
+                                </button>
+                              ))}
+                            </div>
+                          )}
+                          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3">
+                            {galImages.slice(0, galCount).map((url, idx) => (
+                              <div
+                                key={url}
+                                className="aspect-[16/10] overflow-hidden rounded-md cursor-pointer bg-brand-blue"
+                                onClick={() => setGalIdx(idx)}
+                              >
+                                <img
+                                  src={url}
+                                  className="h-full w-full object-cover transition duration-300 hover:scale-105"
+                                  alt="Gallery"
+                                />
+                              </div>
+                            ))}
+                          </div>
+                          {galCount < galImages.length && (
+                            <div className="mt-8 text-center">
+                              <button
+                                className="rounded-md bg-brand-blue px-8 py-3 text-sm font-bold text-white hover:bg-brand-hover transition"
+                                onClick={() => setGalCount((p) => p + 9)}
+                              >
+                                Load More
+                              </button>
+                            </div>
+                          )}
+                          {galIdx !== null && (
+                            <div
+                              className="fixed inset-0 z-50 flex items-center justify-center bg-black/90"
+                              onClick={() => setGalIdx(null)}
+                            >
+                              <button
+                                className="absolute left-4 top-1/2 -translate-y-1/2 flex h-12 w-12 items-center justify-center rounded-full bg-white/10 text-white hover:bg-white/20 transition"
+                                onClick={(e) => { e.stopPropagation(); setGalIdx((p) => p === 0 ? galImages.length - 1 : (p as number) - 1); }}
+                              >
+                                <i className="fa-solid fa-chevron-left text-xl"></i>
+                              </button>
+                              <img
+                                src={galImages[galIdx]}
+                                alt="Gallery preview"
+                                className="max-h-[90vh] max-w-[90vw] object-contain"
+                                onClick={(e) => e.stopPropagation()}
+                              />
+                              <button
+                                className="absolute right-4 top-1/2 -translate-y-1/2 flex h-12 w-12 items-center justify-center rounded-full bg-white/10 text-white hover:bg-white/20 transition"
+                                onClick={(e) => { e.stopPropagation(); setGalIdx((p) => p === galImages.length - 1 ? 0 : (p as number) + 1); }}
+                              >
+                                <i className="fa-solid fa-chevron-right text-xl"></i>
+                              </button>
+                              <button
+                                className="absolute top-4 right-4 flex h-10 w-10 items-center justify-center rounded-full bg-white/10 text-white hover:bg-white/20 transition"
+                                onClick={() => setGalIdx(null)}
+                              >
+                                <i className="fa-solid fa-xmark text-xl"></i>
+                              </button>
+                            </div>
+                          )}
+                        </div>
                       );
                     })()
                   ) : (

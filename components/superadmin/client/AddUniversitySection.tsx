@@ -83,11 +83,15 @@ interface DownloadItem {
   type: string;
   url: string;
 }
-interface GalleryItem {
+interface GalleryImage {
   id: number;
   url: string;
   caption: string;
-  group: string;
+}
+interface GalleryAlbum {
+  id: number;
+  folder: string;
+  images: GalleryImage[];
 }
 interface FacultyItem {
   id: number;
@@ -145,6 +149,7 @@ export default function AddUniversitySection({
   const [coverUrl, setCoverUrl] = useState("");
   const [logoFile, setLogoFile] = useState<File | null>(null);
   const [coverFile, setCoverFile] = useState<File | null>(null);
+  const [prospectusFile, setProspectusFile] = useState<File | null>(null);
   const [cropperOpen, setCropperOpen] = useState(false);
   const [cropImageSrc, setCropImageSrc] = useState<string | null>(null);
   const [cropperTarget, setCropperTarget] = useState<"logo" | "cover">("cover");
@@ -154,6 +159,8 @@ export default function AddUniversitySection({
 
   const [videos, setVideos] = useState<VideoItem[]>([]);
   const [aboutText, setAboutText] = useState("");
+  const [prospectusTitle, setProspectusTitle] = useState("");
+  const [prospectusUrl, setProspectusUrl] = useState("");
   const [vision, setVision] = useState("");
   const [mission, setMission] = useState("");
   const [overviewRows, setOverviewRows] = useState<OverviewRow[]>([]);
@@ -174,7 +181,7 @@ export default function AddUniversitySection({
   const [events, setEvents] = useState<EventItem[]>([]);
   const [news, setNews] = useState<NewsItem[]>([]);
   const [downloads, setDownloads] = useState<DownloadItem[]>([]);
-  const [gallery, setGallery] = useState<GalleryItem[]>([]);
+  const [gallery, setGallery] = useState<GalleryAlbum[]>([]);
   const [faculties, setFaculties] = useState<FacultyItem[]>([]);
   const [admissions, setAdmissions] = useState<AdmissionItem[]>([]);
 
@@ -278,6 +285,8 @@ export default function AddUniversitySection({
           if (aboutData.description) setAboutText(aboutData.description);
           if (aboutData.vision) setVision(aboutData.vision);
           if (aboutData.mission) setMission(aboutData.mission);
+          if (aboutData.prospectus_title) setProspectusTitle(aboutData.prospectus_title);
+          if (aboutData.prospectus_url) setProspectusUrl(aboutData.prospectus_url);
         }
 
         const overviewData = parseJson(d.overview);
@@ -327,7 +336,16 @@ export default function AddUniversitySection({
         if (d.events) setEvents(withId(parseJson(d.events) || []));
         if (d.news) setNews(withId(parseJson(d.news) || []));
         if (d.downloads) setDownloads(withId(parseJson(d.downloads) || []));
-        if (d.gallery) setGallery(withId(parseJson(d.gallery) || []));
+        if (d.gallery) {
+          const parsed = parseJson(d.gallery);
+          if (parsed) {
+            if (Array.isArray(parsed) && parsed.length > 0 && parsed[0].images) {
+              setGallery(withId(parsed.map((album: any) => ({ ...album, images: withId(album.images || []) }))));
+            } else {
+              setGallery(withId(parsed));
+            }
+          }
+        }
         if (d.faculties) setFaculties(withId(parseJson(d.faculties) || []));
         if (d.admissions) setAdmissions(withId(parseJson(d.admissions) || []));
       })
@@ -364,7 +382,10 @@ export default function AddUniversitySection({
     );
   };
 
-  const stripId = (arr: any[]) => arr.map(({ id, ...rest }) => rest);
+  const stripId = (arr: any[]): any[] => arr.map(({ id, images, ...rest }) => ({
+    ...rest,
+    ...(images ? { images: images.map(({ id: imgId, ...imgRest }: any) => imgRest) } : {}),
+  }));
 
   const handleCoverCrop = useCallback(
     (croppedBlob: Blob) => {
@@ -403,6 +424,7 @@ export default function AddUniversitySection({
       setSaving(true);
       let finalLogoUrl = logoUrl;
       let finalCoverUrl = coverUrl;
+      let finalProspectusUrl = prospectusUrl;
       if (logoFile) {
         try {
           finalLogoUrl = await uploadFile(logoFile, "university/logo");
@@ -411,6 +433,11 @@ export default function AddUniversitySection({
       if (coverFile) {
         try {
           finalCoverUrl = await uploadFile(coverFile, "university/cover");
+        } catch {}
+      }
+      if (prospectusFile) {
+        try {
+          finalProspectusUrl = await uploadFile(prospectusFile, "university/prospectus");
         } catch {}
       }
 
@@ -436,6 +463,8 @@ export default function AddUniversitySection({
           description: aboutText,
           vision,
           mission,
+          prospectus_title: prospectusTitle,
+          prospectus_url: finalProspectusUrl,
         },
         contact: {
           address: contactAddress,
@@ -951,6 +980,58 @@ export default function AddUniversitySection({
                   placeholder="Our mission is..."
                   minHeight={150}
                 />
+              </div>
+            </div>
+          </div>
+
+          {/* ─── Prospectus ─── */}
+          <div className="bg-white p-6 rounded-md border border-gray-200">
+            <h3 className="text-lg font-semibold text-gray-800 mb-5">
+              <i className="fa-solid fa-file-pdf text-blue-500 mr-2"></i>Prospectus
+            </h3>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Title</label>
+                <input
+                  type="text"
+                  className={inputClass}
+                  placeholder="e.g. General Prospectus 2025"
+                  value={prospectusTitle}
+                  onChange={(e) => setProspectusTitle(e.target.value)}
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">PDF File</label>
+                <div className="flex items-center gap-3">
+                  <label className="cursor-pointer bg-white border border-gray-300 rounded-md px-4 py-2.5 text-sm text-gray-600 hover:bg-gray-50 transition-colors">
+                    <i className="fa-solid fa-upload mr-2"></i>
+                    {prospectusFile ? prospectusFile.name : "Choose PDF"}
+                    <input
+                      type="file"
+                      accept=".pdf,application/pdf"
+                      className="hidden"
+                      onChange={(e) => {
+                        const file = e.target.files?.[0];
+                        if (file) setProspectusFile(file);
+                      }}
+                    />
+                  </label>
+                  {prospectusFile && (
+                    <button
+                      type="button"
+                      onClick={() => { setProspectusFile(null); setProspectusUrl(""); }}
+                      className="text-sm text-red-500 hover:text-red-700"
+                    >
+                      <i className="fa-solid fa-times"></i> Remove
+                    </button>
+                  )}
+                </div>
+                {prospectusUrl && !prospectusFile && (
+                  <p className="mt-1 text-xs text-gray-500">
+                    <i className="fa-solid fa-file-pdf text-red-500 mr-1"></i>
+                    Current: {prospectusTitle || "Prospectus"}
+                  </p>
+                )}
               </div>
             </div>
           </div>
@@ -1941,61 +2022,98 @@ export default function AddUniversitySection({
               </h3>
               <button
                 type="button"
-                onClick={() =>
-                  addItem(setGallery, { url: "", caption: "", group: "" })
-                }
+                onClick={() => {
+                  const newId = Date.now();
+                  setGallery((prev: any[]) => [...prev, { id: newId, folder: "", images: [{ id: Date.now() + 1, url: "", caption: "" }] }]);
+                }}
                 className="text-sm text-blue-600 bg-blue-50 px-3 py-1.5 rounded-md hover:bg-blue-100 transition-colors font-medium"
               >
-                <i className="fa-solid fa-plus mr-1"></i> Add Image
+                <i className="fa-solid fa-plus mr-1"></i> Add Album
               </button>
             </div>
             <div className="space-y-4">
-              {gallery.map((g) => (
+              {gallery.map((album: any) => (
                 <div
-                  key={g.id}
+                  key={album.id}
                   className="bg-gray-50 border border-gray-200 rounded-md p-4 relative group"
                 >
                   <button
                     type="button"
-                    onClick={() => removeItem(setGallery, g.id)}
+                    onClick={() => setGallery((prev: any[]) => prev.filter((x) => x.id !== album.id))}
                     className="absolute top-3 right-3 text-red-400 hover:text-red-600 hover:bg-red-50 p-1.5 rounded-md transition-colors opacity-0 group-hover:opacity-100"
                   >
                     <i className="fa-solid fa-trash"></i>
                   </button>
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-3 pr-10">
-                    <input
-                      type="url"
-                      className={`${inputClass} text-sm`}
-                      placeholder="Image URL"
-                      value={g.url}
-                      onChange={(e) =>
-                        updateItem(setGallery, g.id, "url", e.target.value)
-                      }
-                    />
+                  <div className="mb-3">
                     <input
                       type="text"
                       className={`${inputClass} text-sm`}
-                      placeholder="Caption"
-                      value={g.caption}
-                      onChange={(e) =>
-                        updateItem(setGallery, g.id, "caption", e.target.value)
-                      }
-                    />
-                    <input
-                      type="text"
-                      className={`${inputClass} text-sm`}
-                      placeholder="Group (e.g. Campus, Events)"
-                      value={g.group}
-                      onChange={(e) =>
-                        updateItem(setGallery, g.id, "group", e.target.value)
-                      }
+                      placeholder="Album name (e.g. Campus, Events)"
+                      value={album.folder}
+                      onChange={(e) => {
+                        setGallery((prev: any[]) => prev.map((x) => x.id === album.id ? { ...x, folder: e.target.value } : x));
+                      }}
                     />
                   </div>
+                  <div className="space-y-2">
+                    {(album.images || []).map((img: any) => (
+                      <div key={img.id} className="flex items-center gap-2">
+                        <div className="flex-1">
+                          <label className="cursor-pointer inline-block bg-white border border-gray-300 rounded-md px-3 py-2 text-xs text-gray-600 hover:bg-gray-50 transition-colors">
+                            <i className="fa-solid fa-upload mr-1"></i> Choose Image
+                            <input
+                              type="file"
+                              accept="image/*"
+                              className="hidden"
+                              onChange={async (e) => {
+                                const file = e.target.files?.[0];
+                                if (!file) return;
+                                try {
+                                  const url = await uploadFile(file, "university/gallery");
+                                  setGallery((prev: any[]) => prev.map((x) => x.id === album.id ? { ...x, images: x.images.map((y: any) => y.id === img.id ? { ...y, url } : y) } : x));
+                                } catch {}
+                              }}
+                            />
+                          </label>
+                        </div>
+                        {img.url && (
+                          <img src={img.url} className="h-10 w-10 rounded object-cover shrink-0" alt="" />
+                        )}
+                        <input
+                          type="text"
+                          className={`${inputClass} text-sm flex-1`}
+                          placeholder="Caption (optional)"
+                          value={img.caption}
+                          onChange={(e) => {
+                            setGallery((prev: any[]) => prev.map((x) => x.id === album.id ? { ...x, images: x.images.map((y: any) => y.id === img.id ? { ...y, caption: e.target.value } : y) } : x));
+                          }}
+                        />
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setGallery((prev: any[]) => prev.map((x) => x.id === album.id ? { ...x, images: x.images.filter((y: any) => y.id !== img.id) } : x));
+                          }}
+                          className="text-red-400 hover:text-red-600 text-xs shrink-0"
+                        >
+                          <i className="fa-solid fa-times"></i>
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setGallery((prev: any[]) => prev.map((x) => x.id === album.id ? { ...x, images: [...(x.images || []), { id: Date.now(), url: "", caption: "" }] } : x));
+                    }}
+                    className="mt-2 text-xs text-blue-600 hover:text-blue-800"
+                  >
+                    <i className="fa-solid fa-plus mr-1"></i> Add Image
+                  </button>
                 </div>
               ))}
               {gallery.length === 0 && (
                 <p className="text-sm text-gray-400 py-2">
-                  No gallery images added.
+                  No gallery albums added.
                 </p>
               )}
             </div>
