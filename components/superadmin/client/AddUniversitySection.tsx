@@ -92,11 +92,8 @@ interface AdmissionItem {
   status: string;
   opens_from: string;
   deadline: string;
-  seats: string;
-  entrance: string;
   fee: string;
   application_link: string;
-  program_link: string;
 }
 
 const DISTRICTS = Object.values(NEPAL_DISTRICTS).flat();
