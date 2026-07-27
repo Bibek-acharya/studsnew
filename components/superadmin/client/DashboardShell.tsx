@@ -53,6 +53,8 @@ const EventListSection = lazy(() => import("./EventListSection"));
 const CreateEventSection = lazy(() => import("./CreateEventSection"));
 const UniversityNewsSection = lazy(() => import("./UniversityNewsSection"));
 const UniversityEventsSection = lazy(() => import("./UniversityEventsSection"));
+const CreateUniversityNewsSection = lazy(() => import("./CreateUniversityNewsSection"));
+const CreateUniversityEventsSection = lazy(() => import("./CreateUniversityEventsSection"));
 const CampusFeedSection = lazy(() => import("./CampusFeedSection"));
 const NotificationSection = lazy(() => import("./NotificationSection"));
 const AccessControlSection = lazy(() => import("./AccessControlSection"));
@@ -180,6 +182,8 @@ type SectionType =
   | "events-directory"
   | "university-news"
   | "university-events"
+  | "create-university-news"
+  | "create-university-events"
   | "blogs-directory"
   | "manage-feedback"
   | "manage-faq"
@@ -467,6 +471,18 @@ export default function DashboardShell() {
         );
       }
     }
+    if (activeSection.startsWith("edit-university-news-")) {
+      const editId = parseInt(activeSection.replace("edit-university-news-", ""), 10);
+      if (!isNaN(editId)) {
+        return <CreateUniversityNewsSection setActiveSection={navigateTo} editId={editId} />;
+      }
+    }
+    if (activeSection.startsWith("edit-university-event-")) {
+      const editId = parseInt(activeSection.replace("edit-university-event-", ""), 10);
+      if (!isNaN(editId)) {
+        return <CreateUniversityEventsSection setActiveSection={navigateTo} editId={editId} />;
+      }
+    }
     if (activeSection.startsWith("edit-blog-")) {
       const editId = parseInt(activeSection.replace("edit-blog-", ""), 10);
       if (!isNaN(editId)) {
@@ -595,6 +611,10 @@ export default function DashboardShell() {
         return <UniversityNewsSection setActiveSection={navigateTo} />;
       case "university-events":
         return <UniversityEventsSection setActiveSection={navigateTo} />;
+      case "create-university-news":
+        return <CreateUniversityNewsSection setActiveSection={navigateTo} />;
+      case "create-university-events":
+        return <CreateUniversityEventsSection setActiveSection={navigateTo} />;
       case "map":
         return <MapCollegeListSection />;
       case "superadmin-course-directory":

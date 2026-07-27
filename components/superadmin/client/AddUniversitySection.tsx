@@ -168,6 +168,7 @@ export default function AddUniversitySection({
   const locationRef = useRef<HTMLDivElement>(null);
   const logoInputRef = useRef<HTMLInputElement>(null);
   const coverInputRef = useRef<HTMLInputElement>(null);
+  const formRef = useRef<HTMLFormElement>(null);
 
   const getToken = () => localStorage.getItem("superadmin_token");
   const apiBase = () =>
@@ -395,6 +396,29 @@ export default function AddUniversitySection({
     e.preventDefault();
     setFormError("");
     setFormSuccess(false);
+
+    if (status === "published") {
+      const missing: string[] = [];
+      if (!name.trim()) missing.push("University Name");
+      if (!description.trim()) missing.push("Description");
+      if (!location.trim()) missing.push("Location");
+      if (!type.trim()) missing.push("Type");
+
+      if (missing.length > 0) {
+        setFormError("Please fill in required fields: " + missing.join(", "));
+        if (formRef.current) {
+          const firstErr = formRef.current.querySelector('[required]') as HTMLElement | null;
+          if (firstErr) {
+            firstErr.focus();
+            firstErr.scrollIntoView({ behavior: "smooth", block: "center" });
+          } else {
+            formRef.current.scrollIntoView({ behavior: "smooth", block: "start" });
+          }
+        }
+        return;
+      }
+    }
+
     try {
       setSaving(true);
       let finalLogoUrl = logoUrl;
@@ -488,7 +512,7 @@ export default function AddUniversitySection({
 
   return (
     <div className="flex-1 overflow-y-auto bg-gray-50/50 p-4 md:p-8 font-sans">
-      <form onSubmit={handleSubmit}>
+      <form ref={formRef} onSubmit={handleSubmit}>
         <div className="max-w-[90rem] mx-auto space-y-8">
           <div>
             <h2 className="text-xl font-bold text-gray-800">
