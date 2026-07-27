@@ -673,7 +673,26 @@ const UniversityDetail: React.FC = () => {
                     </div>
                   </div>
                   {coursesList.length > 0 ? (
-                    <>
+                    (() => {
+                      const filtered = coursesList.filter(
+                        (c: any) => courseFilter === "all" || c.level === courseFilter,
+                      );
+                      if (filtered.length === 0) {
+                        return (
+                          <div className="flex flex-col items-center justify-center py-16 text-center">
+                            <p className="text-gray-500 text-lg font-medium mb-4">No Courses Found</p>
+                            <p className="text-gray-400 text-sm mb-6">No {courseFilter === "all" ? "" : courseFilter} courses are currently available for this university.</p>
+                            <a
+                              href="/course-finder"
+                              className="bg-[#0000ff] hover:bg-[#0000cc] cursor-pointer text-white font-semibold py-2.5 px-6 rounded-md transition-colors text-sm inline-block"
+                            >
+                              View All Courses
+                            </a>
+                          </div>
+                        );
+                      }
+                      return (
+                        <>
                       {/* Desktop header */}
                       <div className="hidden sm:grid sm:grid-cols-12 gap-4 border-b border-gray-100 bg-white px-6 py-5 items-center">
                         <div className="sm:col-span-4 text-[13px] font-bold uppercase tracking-wider text-gray-800">
@@ -689,12 +708,7 @@ const UniversityDetail: React.FC = () => {
                           ELIGIBILITY & SEAT
                         </div>
                       </div>
-                      {coursesList
-                        .filter(
-                          (c: any) =>
-                            courseFilter === "all" || c.level === courseFilter,
-                        )
-                        .map((course: any, i: number) => (
+                      {filtered.map((course: any, i: number) => (
                           <div
                             key={i}
                             className="border-b border-gray-100 px-6 py-5 transition-colors hover:bg-gray-50/50"
@@ -779,6 +793,8 @@ const UniversityDetail: React.FC = () => {
                           </div>
                         ))}
                     </>
+                    );
+                  })()
                   ) : (
                     <EmptyTabState tabName="Courses" />
                   )}
