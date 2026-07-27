@@ -92,7 +92,11 @@ interface GalleryItem {
 interface FacultyItem {
   id: number;
   name: string;
-  programs: string;
+  description: string;
+  dean: string;
+  image: string;
+  programs_count: string;
+  website: string;
 }
 interface AdmissionItem {
   id: number;
@@ -256,7 +260,7 @@ export default function AddUniversitySection({
               return JSON.parse(raw);
             } catch {}
             try {
-              return JSON.parse(atob(raw));
+              return JSON.parse(decodeURIComponent(escape(atob(raw))));
             } catch {}
           }
           return null;
@@ -2007,7 +2011,7 @@ export default function AddUniversitySection({
               <button
                 type="button"
                 onClick={() =>
-                  addItem(setFaculties, { name: "", programs: "" })
+                  addItem(setFaculties, { name: "", description: "", dean: "", image: "", programs_count: "", website: "" })
                 }
                 className="text-sm text-blue-600 bg-blue-50 px-3 py-1.5 rounded-md hover:bg-blue-100 transition-colors font-medium"
               >
@@ -2031,7 +2035,7 @@ export default function AddUniversitySection({
                     <input
                       type="text"
                       className={`${inputClass} text-sm`}
-                      placeholder="Faculty/Institute Name"
+                      placeholder="Institute/Faculty Name"
                       value={f.name}
                       onChange={(e) =>
                         updateItem(setFaculties, f.id, "name", e.target.value)
@@ -2040,17 +2044,50 @@ export default function AddUniversitySection({
                     <input
                       type="text"
                       className={`${inputClass} text-sm`}
-                      placeholder="Programs (e.g. B.Sc., M.Sc., PhD)"
-                      value={f.programs}
+                      placeholder="Dean/Head"
+                      value={f.dean}
                       onChange={(e) =>
-                        updateItem(
-                          setFaculties,
-                          f.id,
-                          "programs",
-                          e.target.value,
-                        )
+                        updateItem(setFaculties, f.id, "dean", e.target.value)
                       }
                     />
+                    <input
+                      type="text"
+                      className={`${inputClass} text-sm`}
+                      placeholder="Programs Count"
+                      value={f.programs_count}
+                      onChange={(e) =>
+                        updateItem(setFaculties, f.id, "programs_count", e.target.value)
+                      }
+                    />
+                    <input
+                      type="text"
+                      className={`${inputClass} text-sm`}
+                      placeholder="Website"
+                      value={f.website}
+                      onChange={(e) =>
+                        updateItem(setFaculties, f.id, "website", e.target.value)
+                      }
+                    />
+                    <input
+                      type="text"
+                      className={`${inputClass} text-sm`}
+                      placeholder="Image URL"
+                      value={f.image}
+                      onChange={(e) =>
+                        updateItem(setFaculties, f.id, "image", e.target.value)
+                      }
+                    />
+                    <div className="md:col-span-2">
+                      <textarea
+                        className={`${inputClass} text-sm`}
+                        placeholder="Description"
+                        rows={2}
+                        value={f.description}
+                        onChange={(e) =>
+                          updateItem(setFaculties, f.id, "description", e.target.value)
+                        }
+                      />
+                    </div>
                   </div>
                 </div>
               ))}

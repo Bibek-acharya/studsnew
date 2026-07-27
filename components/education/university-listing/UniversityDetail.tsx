@@ -81,10 +81,18 @@ const UniversityDetail: React.FC = () => {
   const [colleges, setColleges] = useState<UniversityCollege[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [reviewsData, setReviewsData] = useState<any>(null);
+  const [reviewsLoading, setReviewsLoading] = useState(false);
+  const [myReview, setMyReview] = useState<any>(null);
+  const [showReviewForm, setShowReviewForm] = useState(false);
+  const [reviewRating, setReviewRating] = useState(0);
+  const [reviewText, setReviewText] = useState("");
+  const [submittingReview, setSubmittingReview] = useState(false);
+  const [submitError, setSubmitError] = useState("");
 
   const decodeB64 = (str: string): any => {
     try {
-      const decoded = atob(str);
+      const decoded = decodeURIComponent(escape(atob(str)));
       return JSON.parse(decoded);
     } catch {
       return str;
@@ -223,6 +231,78 @@ const UniversityDetail: React.FC = () => {
     window.addEventListener("keydown", handleKey);
     return () => window.removeEventListener("keydown", handleKey);
   }, [lightboxIndex]);
+
+  useEffect(() => {
+    if (activeTab !== "tab-review" || !id) return;
+    (async () => {
+      setReviewsLoading(true);
+      try {
+        const token = apiService.getToken();
+        const [reviewsRes, myReviewRes] = await Promise.allSettled([
+          apiService.getUniversityReviews(id, { page: 1, limit: 10 }),
+          token ? apiService.getMyUniversityReview(id, { authToken: token }) : Promise.resolve(null),
+        ]);
+        if (reviewsRes.status === "fulfilled") {
+          setReviewsData(reviewsRes.value?.data || reviewsRes.value);
+        }
+        if (myReviewRes.status === "fulfilled" && myReviewRes.value?.data?.review) {
+          const r = myReviewRes.value.data.review;
+          setMyReview(r);
+          setReviewRating(Math.round(r.ratings?.overall || 5));
+          setReviewText(r.summaryTitle || "");
+        }
+      } catch {
+        // silently fail
+      } finally {
+        setReviewsLoading(false);
+      }
+    })();
+  }, [activeTab, id]);
+
+  const handleSubmitReview = async () => {
+    if (!reviewRating || !reviewText.trim()) return;
+    setSubmittingReview(true);
+    setSubmitError("");
+    try {
+      const token = apiService.getToken();
+      if (!token) {
+        setSubmitError("Please log in to submit a review.");
+        return;
+      }
+      await apiService.submitUniversityReview(
+        { university_id: id, rating: reviewRating, review: reviewText.trim() },
+        { authToken: token },
+      );
+      setShowReviewForm(false);
+      setReviewRating(0);
+      setReviewText("");
+      setMyReview(null);
+      setReviewsLoading(true);
+      try {
+        const t = apiService.getToken();
+        const [r1] = await Promise.allSettled([
+          apiService.getUniversityReviews(id, { page: 1, limit: 10 }),
+          t ? apiService.getMyUniversityReview(id, { authToken: t }) : Promise.resolve(null),
+        ]);
+        if (r1.status === "fulfilled") {
+          setReviewsData(r1.value?.data || r1.value);
+        }
+      } catch {
+        // silent
+      } finally {
+        setReviewsLoading(false);
+      }
+    } catch (err: any) {
+      const msg = err?.message || "";
+      if (msg.includes("already reviewed")) {
+        setSubmitError("You have already reviewed this university.");
+      } else {
+        setSubmitError(msg || "Failed to submit review.");
+      }
+    } finally {
+      setSubmittingReview(false);
+    }
+  };
 
   if (loading) {
     return (
@@ -372,7 +452,7 @@ const UniversityDetail: React.FC = () => {
               {activeTab === "tab-about" && (
                 <div className="space-y-10">
                   {ytId ? (
-                    <div className="relative h-[240px] w-full overflow-hidden rounded-[24px] bg-brand-blue shadow-sm md:h-[400px]">
+                    <div className="relative h-[240px] w-full overflow-hidden rounded-md border border-gray-100 bg-brand-blue md:h-[400px]">
                       <iframe
                         className="absolute inset-0 h-full w-full"
                         src={`https://www.youtube.com/embed/${ytId}?autoplay=1&mute=1&loop=1&playlist=${ytId}`}
@@ -390,12 +470,10 @@ const UniversityDetail: React.FC = () => {
                     }}
                   />
 
-                  {(aboutData?.vision ||
-                    aboutData?.mission ||
-                    aboutData?.values) && (
-                    <div className="grid grid-cols-1 gap-6 md:grid-cols-3">
+                  {(aboutData?.vision || aboutData?.mission) && (
+                    <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
                       {aboutData?.vision && (
-                        <div className="rounded-[20px] bg-[#f4f7fb] p-8">
+                        <div className="rounded-md border border-gray-100 bg-[#f4f7fb] p-8">
                           <div className="mb-4 flex items-center gap-3.5">
                             <div className="flex h-10 w-10 items-center justify-center rounded-full bg-blue-100/80 text-blue-600">
                               <Eye className="h-5 w-5" />
@@ -413,7 +491,7 @@ const UniversityDetail: React.FC = () => {
                         </div>
                       )}
                       {aboutData?.mission && (
-                        <div className="rounded-[20px] bg-[#f0fdf4] p-8">
+                        <div className="rounded-md border border-gray-100 bg-[#f0fdf4] p-8">
                           <div className="mb-4 flex items-center gap-3.5">
                             <div className="flex h-10 w-10 items-center justify-center rounded-full bg-green-100/80 text-green-600">
                               <Target className="h-5 w-5" />
@@ -430,29 +508,11 @@ const UniversityDetail: React.FC = () => {
                           />
                         </div>
                       )}
-                      {aboutData?.values && (
-                        <div className="rounded-[20px] bg-[#fef2f2] p-8">
-                          <div className="mb-4 flex items-center gap-3.5">
-                            <div className="flex h-10 w-10 items-center justify-center rounded-full bg-red-50 text-red-500">
-                              <Gem className="h-5 w-5" />
-                            </div>
-                            <h3 className="text-[16px] font-bold text-gray-900">
-                              Core Values
-                            </h3>
-                          </div>
-                          <div
-                            className="text-[14.5px] leading-[1.7] text-gray-600 rich-text"
-                            dangerouslySetInnerHTML={{
-                              __html: safeHtml(aboutData.values as string),
-                            }}
-                          />
-                        </div>
-                      )}
                     </div>
                   )}
 
                   {overviewList.length > 0 && (
-                    <div className="overflow-hidden rounded-[20px] border border-gray-100 bg-white shadow-sm">
+                    <div className="overflow-hidden rounded-md border border-gray-100 bg-white">
                       <div className="border-b border-gray-100 bg-[#f8fafc] px-6 py-4">
                         <h3 className="flex items-center gap-2 text-[16px] font-bold text-gray-900">
                           <Landmark className="h-5 w-5 text-blue-600" />{" "}
@@ -483,7 +543,7 @@ const UniversityDetail: React.FC = () => {
                   )}
 
                   {leadershipList.length > 0 && (
-                    <div className="overflow-hidden rounded-[20px] border border-gray-100 bg-white shadow-sm">
+                    <div className="overflow-hidden rounded-md border border-gray-100 bg-white">
                       <div className="border-b border-gray-100 bg-[#f8fafc] px-6 py-4">
                         <h3 className="flex items-center gap-2 text-[16px] font-bold text-gray-900">
                           <Users className="h-5 w-5 text-blue-600" /> Leadership
@@ -519,33 +579,35 @@ const UniversityDetail: React.FC = () => {
                     </div>
                   )}
 
-                  {aboutData?.highlights &&
-                    Array.isArray(aboutData.highlights) &&
-                    aboutData.highlights.length > 0 && (
-                      <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
-                        {aboutData.highlights.map((h: any, idx: number) => (
-                          <div
-                            key={idx}
-                            className="flex items-start gap-4 rounded-xl border border-blue-100 bg-blue-50 p-5"
-                          >
-                            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-blue-100">
-                              <Layers className="h-5 w-5 text-blue-600" />
-                            </div>
-                            <div>
-                              <h4 className="text-[15px] font-bold text-gray-900">
-                                {h.title || h.label}
-                              </h4>
+                  {uni?.quick &&
+                    Array.isArray(uni.quick) &&
+                    uni.quick.length > 0 && (
+                      <div className="overflow-hidden rounded-md border border-gray-100 bg-white">
+                        <div className="border-b border-gray-100 bg-[#f8fafc] px-6 py-4">
+                          <h3 className="flex items-center gap-2 text-[16px] font-bold text-gray-900">
+                            <Layers className="h-5 w-5 text-blue-600" /> Quick Highlights
+                          </h3>
+                        </div>
+                        <div className="divide-y divide-gray-100">
+                          {uni.quick.map((h: any, idx: number) => (
+                            <div
+                              key={idx}
+                              className="flex flex-col p-4 transition-colors hover:bg-gray-50 sm:flex-row"
+                            >
+                              <div className="w-full text-[14px] font-semibold text-gray-800 sm:w-1/3">
+                                {h.key || h.label || h.title}
+                              </div>
                               <div
-                                className="mt-1 text-[14px] text-gray-600 rich-text"
+                                className="w-full text-[14px] text-gray-600 sm:w-2/3 rich-text"
                                 dangerouslySetInnerHTML={{
                                   __html: safeHtml(
-                                    h.description || h.text || h.desc,
+                                    h.value || h.val || h.description || h.text || h.desc || "",
                                   ),
                                 }}
                               />
                             </div>
-                          </div>
-                        ))}
+                          ))}
+                        </div>
                       </div>
                     )}
                 </div>
@@ -774,62 +836,47 @@ const UniversityDetail: React.FC = () => {
                         institutesList.map((inst: any, idx: number) => (
                           <div
                             key={idx}
-                            className="rounded-[16px] border border-gray-100 bg-white p-5 shadow-sm"
+                            className="rounded-md border border-gray-100 bg-white"
                           >
-                            <div
-                              className="flex cursor-pointer items-center justify-between"
-                              onClick={() => toggleDropdown(`inst-${idx}`)}
-                            >
-                              <div className="flex items-center gap-3">
-                                <div className="flex h-10 w-10 items-center justify-center rounded-full bg-blue-50">
-                                  <Building2 className="h-5 w-5 text-blue-600" />
+                            <div className="flex flex-col sm:flex-row gap-4 p-5">
+                              {inst.image && (
+                                <div className="shrink-0">
+                                  <img
+                                    src={inst.image}
+                                    alt={inst.name || ""}
+                                    className="h-20 w-20 rounded-md object-cover"
+                                  />
                                 </div>
-                                <h4 className="text-[15px] font-bold text-gray-900">
-                                  {inst.name ||
-                                    inst.title ||
-                                    `Institute ${idx + 1}`}
+                              )}
+                              <div className="flex-1 min-w-0">
+                                <h4 className="text-[16px] font-bold text-gray-900">
+                                  {inst.name || inst.title || `Institute ${idx + 1}`}
                                 </h4>
+                                {inst.description && (
+                                  <p className="mt-1 text-[14px] text-gray-600">{inst.description}</p>
+                                )}
+                                <div className="mt-3 grid grid-cols-1 sm:grid-cols-3 gap-2 text-[13px]">
+                                  {inst.dean && (
+                                    <div>
+                                      <span className="font-semibold text-gray-800">Dean:</span>{" "}
+                                      <span className="text-gray-600">{inst.dean}</span>
+                                    </div>
+                                  )}
+                                  {inst.programs_count && (
+                                    <div>
+                                      <span className="font-semibold text-gray-800">Programs:</span>{" "}
+                                      <span className="text-gray-600">{inst.programs_count}</span>
+                                    </div>
+                                  )}
+                                  {inst.website && (
+                                    <div>
+                                      <span className="font-semibold text-gray-800">Website:</span>{" "}
+                                      <a href={inst.website} target="_blank" rel="noopener noreferrer" className="text-brand-blue hover:underline">{inst.website}</a>
+                                    </div>
+                                  )}
+                                </div>
                               </div>
-                              <ChevronDown
-                                className={`h-4 w-4 text-gray-500 transition-transform ${openDropdowns[`inst-${idx}`] ? "rotate-180" : ""}`}
-                              />
                             </div>
-                            {openDropdowns[`inst-${idx}`] && (
-                              <div className="mt-6">
-                                <table className="prog-table w-full">
-                                  <thead>
-                                    <tr>
-                                      <th className="bg-[#f8fafc] px-2 py-2.5 text-left text-[13px] font-semibold text-[#1e293b]">
-                                        #
-                                      </th>
-                                      <th className="bg-[#f8fafc] px-2 py-2.5 text-left text-[13px] font-semibold text-[#1e293b]">
-                                        Detail
-                                      </th>
-                                    </tr>
-                                  </thead>
-                                  <tbody>
-                                    {(
-                                      inst.items ||
-                                      inst.colleges ||
-                                      inst.programs ||
-                                      []
-                                    ).map((item: any, ii: number) => (
-                                      <tr
-                                        key={ii}
-                                        className="border-b border-gray-50"
-                                      >
-                                        <td className="px-2 py-2 text-[13px] text-[#334155]">
-                                          {ii + 1}
-                                        </td>
-                                        <td className="px-2 py-2 text-[13px] text-[#334155]">
-                                          {item.name || item.title || item}
-                                        </td>
-                                      </tr>
-                                    ))}
-                                  </tbody>
-                                </table>
-                              </div>
-                            )}
                           </div>
                         ))
                       ) : (
@@ -928,14 +975,14 @@ const UniversityDetail: React.FC = () => {
               )}
 
               {activeTab === "tab-admissions" && (
-                <div className="overflow-hidden rounded-[20px] border border-gray-200 bg-white">
+                <div className="rounded-[20px] border border-gray-200 bg-white">
                   <div className="flex flex-wrap items-center justify-between gap-4 border-b border-gray-100 bg-[#f4f8fc] px-6 py-4">
                     <p className="text-[14px] font-semibold text-brand-blue">Admissions</p>
                   </div>
                   {admissionsList.length > 0 ? (
                     <div className="w-full overflow-x-auto">
-                      <div className="min-w-[900px]">
-                        <div className="grid grid-cols-12 items-center gap-4 border-b border-gray-100 bg-white px-6 py-5">
+                      <div className="min-w-[1000px]">
+                        <div className="grid grid-cols-12 items-center gap-2 border-b border-gray-100 bg-white px-4 py-5">
                           <div className="col-span-3 text-[13px] font-bold uppercase tracking-wider text-gray-800">PROGRAM</div>
                           <div className="col-span-1 text-[13px] font-bold uppercase tracking-wider text-gray-800">FACULTY</div>
                           <div className="col-span-1 text-[13px] font-bold uppercase tracking-wider text-gray-800">STATUS</div>
@@ -947,20 +994,20 @@ const UniversityDetail: React.FC = () => {
                           <div className="col-span-2 text-[13px] font-bold uppercase tracking-wider text-gray-800">ACTIONS</div>
                         </div>
                         {admissionsList.map((ad: any, i: number) => (
-                          <div key={i} className="grid grid-cols-12 items-center gap-4 border-b border-gray-100 px-6 py-5 hover:bg-gray-50/50">
-                            <div className="col-span-3"><h4 className="text-[15.5px] font-bold text-gray-900">{ad.program || ad.title}</h4></div>
-                            <div className="col-span-1"><span className="text-[14px] text-gray-600">{ad.faculty || "-"}</span></div>
+                          <div key={i} className="grid grid-cols-12 items-center gap-2 border-b border-gray-100 px-4 py-5 hover:bg-gray-50/50">
+                            <div className="col-span-3 overflow-hidden text-ellipsis whitespace-nowrap" title={ad.program || ad.title}><h4 className="text-[15.5px] font-bold text-gray-900">{ad.program || ad.title}</h4></div>
+                            <div className="col-span-1 overflow-hidden text-ellipsis whitespace-nowrap" title={ad.faculty || ""}><span className="text-[14px] text-gray-600">{ad.faculty || "-"}</span></div>
                             <div className="col-span-1">
-                              <span className={`rounded-md px-2.5 py-1 text-[11px] font-bold ${ad.status === "Open" || ad.status === "Ongoing" ? "bg-[#ecfdf5] text-[#10b981]" : "bg-[#fef2f2] text-[#ef4444]"}`}>
+                              <span className={`rounded-md px-2.5 py-1 text-[11px] font-bold whitespace-nowrap ${ad.status === "Open" || ad.status === "Ongoing" ? "bg-[#ecfdf5] text-[#10b981]" : "bg-[#fef2f2] text-[#ef4444]"}`}>
                                 {ad.status}
                               </span>
                             </div>
-                            <div className="col-span-1"><span className="text-[14px] text-gray-600">{ad.opens_from || "-"}</span></div>
-                            <div className="col-span-1"><span className="text-[14px] text-gray-600">{ad.deadline || "-"}</span></div>
-                            <div className="col-span-1"><span className="text-[14px] text-gray-600">{ad.seats || "-"}</span></div>
-                            <div className="col-span-1"><span className="text-[14px] text-gray-600">{ad.entrance || "-"}</span></div>
-                            <div className="col-span-1"><span className="text-[14px] font-semibold text-gray-900">{ad.fee || "-"}</span></div>
-                            <div className="col-span-2 flex gap-2">
+                            <div className="col-span-1 overflow-hidden text-ellipsis whitespace-nowrap" title={ad.opens_from || ""}><span className="text-[14px] text-gray-600">{ad.opens_from || "-"}</span></div>
+                            <div className="col-span-1 overflow-hidden text-ellipsis whitespace-nowrap" title={ad.deadline || ""}><span className="text-[14px] text-gray-600">{ad.deadline || "-"}</span></div>
+                            <div className="col-span-1 overflow-hidden text-ellipsis whitespace-nowrap" title={ad.seats || ""}><span className="text-[14px] text-gray-600">{ad.seats || "-"}</span></div>
+                            <div className="col-span-1 overflow-hidden text-ellipsis whitespace-nowrap" title={ad.entrance || ""}><span className="text-[14px] text-gray-600">{ad.entrance || "-"}</span></div>
+                            <div className="col-span-1 overflow-hidden text-ellipsis whitespace-nowrap" title={ad.fee || ""}><span className="text-[14px] font-semibold text-gray-900">{ad.fee || "-"}</span></div>
+                            <div className="col-span-2 flex gap-2 whitespace-nowrap">
                               {ad.application_link ? (
                                 <a href={ad.application_link} target="_blank" rel="noopener noreferrer" className="rounded-md bg-brand-blue px-3 py-2 text-xs font-bold text-white hover:bg-brand-hover transition-colors">
                                   Apply Now
@@ -1369,207 +1416,287 @@ const UniversityDetail: React.FC = () => {
               {/* ========== REVIEW ========== */}
               {activeTab === "tab-review" && (
                 <div>
-                  <div className="mb-8 flex flex-col items-center gap-8 rounded-md border border-gray-200 bg-white p-8 md:flex-row">
-                    <div className="text-center md:border-r md:pr-8 md:text-left">
-                      <h2 className="mb-2 text-5xl font-extrabold text-gray-900">
-                        {uni?.rating ?? "—"}
-                      </h2>
-                      <div className="mb-2 flex items-center justify-center gap-1 md:justify-start">
-                        {Array.from({ length: 5 }).map((_, idx) => (
-                          <i
-                            key={idx}
-                            className={`fa-solid fa-star text-[14px] ${idx < Math.round(uni?.rating ?? 0) ? "text-yellow-400" : "text-gray-300"}`}
-                          ></i>
-                        ))}
+                  {reviewsLoading ? (
+                    <div className="animate-pulse space-y-4 py-8">
+                      <div className="flex items-center gap-6">
+                        <div className="h-20 w-20 rounded-full bg-gray-200" />
+                        <div className="space-y-2">
+                          <div className="h-4 w-40 rounded bg-gray-200" />
+                          <div className="h-3 w-24 rounded bg-gray-200" />
+                        </div>
                       </div>
-                      <p className="text-[13px] font-medium text-gray-500">
-                        Based on {uni?.review_count ?? 0} reviews
-                      </p>
-                    </div>
-                    <div className="w-full flex-1 space-y-2.5">
-                      {[
-                        { star: 5, pct: 80, color: "bg-green-500" },
-                        { star: 4, pct: 15, color: "bg-green-500" },
-                        { star: 3, pct: 3, color: "bg-yellow-400" },
-                        { star: 2, pct: 1, color: "bg-orange-400" },
-                        { star: 1, pct: 1, color: "bg-orange-400" },
-                      ].map((r) => (
-                        <RatingBar
-                          key={r.star}
-                          label={String(r.star)}
-                          width={`${r.pct}%`}
-                          color={r.color}
-                          pct={`${r.pct}%`}
-                        />
+                      {[1, 2, 3].map((i) => (
+                        <div key={i} className="space-y-2 rounded-lg border border-gray-100 p-4">
+                          <div className="h-4 w-48 rounded bg-gray-200" />
+                          <div className="h-3 w-full rounded bg-gray-100" />
+                          <div className="h-3 w-3/4 rounded bg-gray-100" />
+                        </div>
                       ))}
                     </div>
-                  </div>
+                  ) : (
+                    <>
+                      <div className="mb-8 flex flex-col items-center gap-8 rounded-md border border-gray-200 bg-white p-8 md:flex-row">
+                        <div className="text-center md:border-r md:pr-8 md:text-left">
+                          <h2 className="mb-2 text-5xl font-extrabold text-gray-900">
+                            {reviewsData?.overall_rating?.toFixed(1) || uni?.rating?.toFixed(1) || "0.0"}
+                          </h2>
+                          <div className="mb-2 flex items-center justify-center gap-1 md:justify-start">
+                            {Array.from({ length: 5 }).map((_, idx) => (
+                              <i
+                                key={idx}
+                                className={`fa-solid fa-star text-[14px] ${idx < Math.round(reviewsData?.overall_rating || uni?.rating || 0) ? "text-yellow-400" : "text-gray-300"}`}
+                              ></i>
+                            ))}
+                          </div>
+                          <p className="text-[13px] font-medium text-gray-500">
+                            Based on {reviewsData?.review_count || uni?.review_count || 0} reviews
+                          </p>
+                        </div>
+                        <div className="w-full flex-1 space-y-2.5">
+                          {[5, 4, 3, 2, 1].map((star) => {
+                            const dist = reviewsData?.distribution || {};
+                            const count = dist[star] || 0;
+                            const total = reviewsData?.review_count || 1;
+                            const pct = total > 0 ? Math.round((count / total) * 100) : 0;
+                            return (
+                              <RatingBar
+                                key={star}
+                                label={String(star)}
+                                width={`${pct}%`}
+                                color={star >= 4 ? "bg-green-500" : star >= 3 ? "bg-yellow-400" : "bg-orange-400"}
+                                pct={`${pct}%`}
+                              />
+                            );
+                          })}
+                        </div>
+                      </div>
 
-                  <div className="mb-4 flex items-center justify-between">
-                    <h3 className="text-[18px] font-bold text-gray-900">
-                      Recent Reviews
-                    </h3>
-                    <a
-                      href="/write-review"
-                      className="text-sm font-medium text-brand-blue hover:text-brand-hover"
-                    >
-                      Write a Review
-                    </a>
-                  </div>
+                      <div className="mb-4 flex items-center justify-between">
+                        <h3 className="text-[18px] font-bold text-gray-900">
+                          Recent Reviews
+                        </h3>
+                        <button
+                          onClick={() => setShowReviewForm(!showReviewForm)}
+                          className="text-sm font-medium text-brand-blue hover:text-brand-hover"
+                        >
+                          {showReviewForm ? "Cancel" : "Write a Review"}
+                        </button>
+                      </div>
 
-                  <div className="space-y-5">
-                    {uni?.reviews &&
-                    Array.isArray(uni.reviews) &&
-                    uni.reviews.length > 0 ? (
-                      uni.reviews.map((review: any, idx: number) => (
-                        <ReviewCard
-                          key={idx}
-                          initials={(review.name || "A")
-                            .charAt(0)
-                            .toUpperCase()}
-                          name={review.name}
-                          subtitle={review.subtitle || ""}
-                          rating={review.rating || 5}
-                          pros={review.pros || review.positive || ""}
-                          cons={review.cons || review.negative || ""}
-                          tone={idx % 2 === 0 ? "blue" : "purple"}
-                        />
-                      ))
-                    ) : (
-                      <EmptyTabState tabName="Reviews" />
-                    )}
-                  </div>
+                      {showReviewForm && (
+                        <div className="mb-6 rounded-md border border-gray-200 bg-white p-6">
+                          <h4 className="mb-4 text-[16px] font-bold text-gray-900">
+                            {myReview ? "Edit Your Review" : "Write Your Review"}
+                          </h4>
+                          <div className="mb-4">
+                            <label className="mb-2 block text-sm font-medium text-gray-700">Rating</label>
+                            <div className="flex gap-1">
+                              {[1, 2, 3, 4, 5].map((star) => (
+                                <button
+                                  key={star}
+                                  type="button"
+                                  onClick={() => setReviewRating(star)}
+                                  className="text-2xl transition-colors hover:scale-110"
+                                >
+                                  <i className={`${star <= (reviewRating || myReview?.rating) ? "fa-solid text-yellow-400" : "fa-regular text-gray-300"} fa-star`}></i>
+                                </button>
+                              ))}
+                            </div>
+                          </div>
+                          <div className="mb-4">
+                            <label className="mb-2 block text-sm font-medium text-gray-700">Review</label>
+                            <textarea
+                              className="w-full rounded-md border border-gray-300 p-3 text-sm focus:border-blue-500 focus:outline-none"
+                              rows={4}
+                              placeholder="Share your experience about this university..."
+                              value={reviewText}
+                              onChange={(e) => setReviewText(e.target.value)}
+                            />
+                          </div>
+                          {submitError && (
+                            <p className="mb-3 text-sm text-red-500">{submitError}</p>
+                          )}
+                          <button
+                            onClick={handleSubmitReview}
+                            disabled={submittingReview || !reviewRating || !reviewText.trim()}
+                            className="rounded-md bg-brand-blue px-6 py-2.5 text-sm font-bold text-white transition-colors hover:bg-brand-hover disabled:opacity-50"
+                          >
+                            {submittingReview ? "Submitting..." : myReview ? "Update Review" : "Submit Review"}
+                          </button>
+                        </div>
+                      )}
+
+                      <div className="space-y-5">
+                        {reviewsData?.reviews?.length > 0 ? (
+                          reviewsData.reviews.map((review: any, idx: number) => {
+                            const rating = review.ratings?.overall || Object.values(review.ratings || {}).reduce((s: number, v: any) => s + v, 0) / 10 || 5;
+                            return (
+                              <ReviewCard
+                                key={review.id}
+                                initials={review.userInitials || "U"}
+                                name={review.userName || "Anonymous"}
+                                subtitle="University Review"
+                                rating={Math.round(rating)}
+                                pros={review.summaryTitle || review.pros || ""}
+                                cons={review.cons || ""}
+                                tone={idx % 2 === 0 ? "blue" : "purple"}
+                              />
+                            );
+                          })
+                        ) : (
+                          <EmptyTabState tabName="Reviews" actionLabel="Write a Review" onAction={() => setShowReviewForm(true)} />
+                        )}
+                      </div>
+                    </>
+                  )}
                 </div>
               )}
             </div>
 
             {/* Right Column - matching college details page */}
+            {/* Right Column - matching college details page */}
             <div className="space-y-6 lg:col-span-1 lg:w-full lg:max-w-[400px] lg:ml-8 xl:ml-12">
-              <div className="w-full rounded-2xl border border-gray-200 bg-white p-4 sm:p-10">
-                <h3 className="mb-8 text-2xl font-bold text-gray-900">
-                  Contact Information
-                </h3>
-                <div className="flex flex-col gap-6">
-                  <ContactInfoRow
-                    icon="fa-solid fa-location-dot"
-                    title="Address"
-                    value={(contactData?.address as string) || "—"}
-                    badge="bg-brand-blue/5 text-[#0000FF]"
-                  />
-                  <ContactInfoRow
-                    icon="fa-solid fa-phone"
-                    title="Phone"
-                    value={(contactData?.phone as string) || "—"}
-                    badge="bg-emerald-50 text-emerald-600"
-                  />
-                  <ContactInfoRow
-                    icon="fa-solid fa-envelope"
-                    title="Email"
-                    value={(contactData?.email as string) || "—"}
-                    badge="bg-red-50 text-red-500"
-                    link={!!contactData?.email}
-                    linkHref={`mailto:${contactData?.email || ""}`}
-                  />
-                  <ContactInfoRow
-                    icon="fa-solid fa-globe"
-                    title="Website"
-                    value={
-                      (contactData?.website as string) || uni?.website || "—"
-                    }
-                    badge="bg-purple-50 text-purple-600"
-                    link={!!(contactData?.website || uni?.website)}
-                    linkHref={
-                      (contactData?.website as string) || uni?.website || "#"
-                    }
-                  />
-                  {(contactData?.social ||
-                    contactData?.facebook ||
-                    contactData?.twitter ||
-                    contactData?.instagram ||
-                    contactData?.youtube ||
-                    contactData?.linkedin) && (
-                    <div className="w-full">
-                      <h3 className="text-[15px] font-bold text-gray-900">
-                        Social Media
-                      </h3>
-                      <div className="mt-3 flex gap-5 text-[26px]">
-                        {(contactData?.facebook as string) && (
-                          <a
-                            href={contactData.facebook as string}
-                            className="text-[#1877F2] transition-transform hover:scale-110"
-                            title="Facebook"
-                            target="_blank"
-                            rel="noopener noreferrer"
-                          >
-                            <i className="fa-brands fa-facebook"></i>
-                          </a>
-                        )}
-                        {(contactData?.instagram as string) && (
-                          <a
-                            href={contactData.instagram as string}
-                            className="text-[#E4405F] transition-transform hover:scale-110"
-                            title="Instagram"
-                            target="_blank"
-                            rel="noopener noreferrer"
-                          >
-                            <i className="fa-brands fa-instagram"></i>
-                          </a>
-                        )}
-                        {(contactData?.tiktok as string) && (
-                          <a
-                            href={contactData.tiktok as string}
-                            className="text-black transition-transform hover:scale-110"
-                            title="TikTok"
-                            target="_blank"
-                            rel="noopener noreferrer"
-                          >
-                            <i className="fa-brands fa-tiktok"></i>
-                          </a>
-                        )}
-                        {(contactData?.youtube as string) && (
-                          <a
-                            href={contactData.youtube as string}
-                            className="text-[#FF0000] transition-transform hover:scale-110"
-                            title="YouTube"
-                            target="_blank"
-                            rel="noopener noreferrer"
-                          >
-                            <i className="fa-brands fa-youtube"></i>
-                          </a>
-                        )}
-                        {(contactData?.linkedin as string) && (
-                          <a
-                            href={contactData.linkedin as string}
-                            className="text-[#0A66C2] transition-transform hover:scale-110"
-                            title="LinkedIn"
-                            target="_blank"
-                            rel="noopener noreferrer"
-                          >
-                            <i className="fa-brands fa-linkedin"></i>
-                          </a>
-                        )}
-                      </div>
+              {(() => {
+                const hasAddress = !!contactData?.address;
+                const hasPhone = !!contactData?.phone;
+                const hasEmail = !!contactData?.email;
+                const hasWebsite = !!(contactData?.website || uni?.website);
+                const hasSocial = !!(contactData?.social ||
+                  contactData?.facebook ||
+                  contactData?.twitter ||
+                  contactData?.instagram ||
+                  contactData?.youtube ||
+                  contactData?.linkedin);
+                const hasMap = !!(contactData?.mapUrl || contactData?.address);
+                const hasAny = hasAddress || hasPhone || hasEmail || hasWebsite || hasSocial || hasMap;
+                if (!hasAny) return null;
+                return (
+                  <div className="w-full rounded-md border border-gray-100 bg-white p-5">
+                    <h3 className="mb-5 text-[18px] font-bold text-gray-900">
+                      Contact Information
+                    </h3>
+                    <div className="space-y-4">
+                      {hasAddress && (
+                        <ContactInfoRow
+                          icon="fa-solid fa-location-dot"
+                          title="Address"
+                          value={contactData?.address as string}
+                          badge="bg-brand-blue/5 text-[#0000FF]"
+                        />
+                      )}
+                      {hasPhone && (
+                        <ContactInfoRow
+                          icon="fa-solid fa-phone"
+                          title="Phone"
+                          value={contactData?.phone as string}
+                          badge="bg-emerald-50 text-emerald-600"
+                        />
+                      )}
+                      {hasEmail && (
+                        <ContactInfoRow
+                          icon="fa-solid fa-envelope"
+                          title="Email"
+                          value={contactData?.email as string}
+                          badge="bg-red-50 text-red-500"
+                          link
+                          linkHref={`mailto:${contactData?.email || ""}`}
+                        />
+                      )}
+                      {hasWebsite && (
+                        <ContactInfoRow
+                          icon="fa-solid fa-globe"
+                          title="Website"
+                          value={(contactData?.website as string) || uni?.website || ""}
+                          badge="bg-purple-50 text-purple-600"
+                          link
+                          linkHref={(contactData?.website as string) || uni?.website || "#"}
+                        />
+                      )}
+                      {hasSocial && (
+                        <div className="w-full">
+                          <h3 className="text-[15px] font-bold text-gray-900">
+                            Social Media
+                          </h3>
+                          <div className="mt-3 flex gap-5 text-[26px]">
+                            {(contactData?.facebook as string) && (
+                              <a
+                                href={contactData.facebook as string}
+                                className="text-[#1877F2] transition-transform hover:scale-110"
+                                title="Facebook"
+                                target="_blank"
+                                rel="noopener noreferrer"
+                              >
+                                <i className="fa-brands fa-facebook"></i>
+                              </a>
+                            )}
+                            {(contactData?.instagram as string) && (
+                              <a
+                                href={contactData.instagram as string}
+                                className="text-[#E4405F] transition-transform hover:scale-110"
+                                title="Instagram"
+                                target="_blank"
+                                rel="noopener noreferrer"
+                              >
+                                <i className="fa-brands fa-instagram"></i>
+                              </a>
+                            )}
+                            {(contactData?.tiktok as string) && (
+                              <a
+                                href={contactData.tiktok as string}
+                                className="text-black transition-transform hover:scale-110"
+                                title="TikTok"
+                                target="_blank"
+                                rel="noopener noreferrer"
+                              >
+                                <i className="fa-brands fa-tiktok"></i>
+                              </a>
+                            )}
+                            {(contactData?.youtube as string) && (
+                              <a
+                                href={contactData.youtube as string}
+                                className="text-[#FF0000] transition-transform hover:scale-110"
+                                title="YouTube"
+                                target="_blank"
+                                rel="noopener noreferrer"
+                              >
+                                <i className="fa-brands fa-youtube"></i>
+                              </a>
+                            )}
+                            {(contactData?.linkedin as string) && (
+                              <a
+                                href={contactData.linkedin as string}
+                                className="text-[#0A66C2] transition-transform hover:scale-110"
+                                title="LinkedIn"
+                                target="_blank"
+                                rel="noopener noreferrer"
+                              >
+                                <i className="fa-brands fa-linkedin"></i>
+                              </a>
+                            )}
+                          </div>
+                        </div>
+                      )}
+                      {hasMap && (
+                        <div className="mt-8 h-40 w-full overflow-hidden rounded-md">
+                          <iframe
+                            src={
+                              (contactData?.mapUrl as string) ||
+                              `https://www.google.com/maps?q=${encodeURIComponent((contactData?.address as string) || "")}&output=embed`
+                            }
+                            width="100%"
+                            height="100%"
+                            style={{ border: 0 }}
+                            allowFullScreen
+                            loading="lazy"
+                            referrerPolicy="no-referrer-when-downgrade"
+                            className="rounded-md"
+                          ></iframe>
+                        </div>
+                      )}
                     </div>
-                  )}
-                  {(contactData?.mapUrl || contactData?.address) && (
-                    <div className="mt-8 h-40 w-full overflow-hidden rounded-md">
-                      <iframe
-                        src={
-                          (contactData?.mapUrl as string) ||
-                          `https://www.google.com/maps?q=${encodeURIComponent((contactData?.address as string) || "")}&output=embed`
-                        }
-                        width="100%"
-                        height="100%"
-                        style={{ border: 0 }}
-                        allowFullScreen
-                        loading="lazy"
-                        referrerPolicy="no-referrer-when-downgrade"
-                        className="rounded-md"
-                      ></iframe>
-                    </div>
-                  )}
-                </div>
-              </div>
+                  </div>
+                );
+              })()}
             </div>
           </div>
         </div>

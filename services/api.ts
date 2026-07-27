@@ -2574,6 +2574,42 @@ export const apiService = {
     });
   },
 
+  async getUniversityReviews(
+    universityId: number,
+    params?: { page?: number; limit?: number },
+    options?: ApiRequestOptions,
+  ): Promise<any> {
+    const query = new URLSearchParams();
+    if (params?.page) query.set("page", String(params.page));
+    if (params?.limit) query.set("limit", String(params.limit));
+    const qs = query.toString();
+    return apiRequest<any>(
+      `/api/v1/education/reviews/university/${universityId}${qs ? `?${qs}` : ""}`,
+      options,
+    );
+  },
+
+  async submitUniversityReview(
+    data: { university_id: number; rating: number; review: string },
+    options?: ApiRequestOptions,
+  ): Promise<any> {
+    return apiRequest<any>("/api/v1/user/university-reviews", {
+      method: "POST",
+      body: JSON.stringify(data),
+      ...options,
+    });
+  },
+
+  async getMyUniversityReview(
+    universityId: number,
+    options?: ApiRequestOptions,
+  ): Promise<any> {
+    return apiRequest<any>(
+      `/api/v1/user/university-reviews/${universityId}`,
+      options,
+    );
+  },
+
   async submitTestimonial(data: {
     name: string;
     designation: string;

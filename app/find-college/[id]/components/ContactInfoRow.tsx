@@ -10,26 +10,26 @@ const ContactInfoRow: React.FC<{
   link?: boolean;
   linkHref?: string;
 }> = ({ icon, title, value, badge, link = false, linkHref = "#" }) => (
-  <div className="flex items-start gap-4">
+  <li className="flex items-start gap-3">
     <div
-      className={`mt-0.5 flex h-11 w-11 shrink-0 items-center justify-center rounded-full ${badge}`}
+      className={`mt-0.5 flex w-8 h-8 shrink-0 items-center justify-center rounded-full ${badge}`}
     >
-      <i className={`${icon} text-lg`}></i>
+      <i className={`${icon} text-xs`}></i>
     </div>
     <div>
-      <h3 className="text-[15px] font-bold text-gray-900">{title}</h3>
+      <span className="block text-gray-900 font-bold text-[13px]">{title}</span>
       {link ? (
         <a
           href={linkHref}
-          className="mt-0.5 inline-block text-sm text-gray-500 transition-colors hover:text-[#0000FF]"
+          className="text-gray-500 font-medium text-[12px] hover:text-[#0000ff] transition-colors"
         >
           {value}
         </a>
       ) : (
-        <p className="mt-0.5 text-sm text-gray-500">{value}</p>
+        <span className="text-gray-500 font-medium text-[12px]">{value}</span>
       )}
     </div>
-  </div>
+  </li>
 );
 
 export default ContactInfoRow;
