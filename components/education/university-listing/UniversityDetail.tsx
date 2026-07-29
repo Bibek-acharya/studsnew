@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { useParams, useSearchParams } from "next/navigation";
+import { useParams, useSearchParams, useRouter } from "next/navigation";
 import { safeHtml } from "@/lib/html";
 import ContactInfoRow from "@/app/find-college/[id]/components/ContactInfoRow";
 import ReviewCard from "@/app/find-college/[id]/components/ReviewCard";
@@ -11,6 +11,7 @@ import RatingBar from "@/app/find-college/[id]/components/RatingBar";
 import EmptyTabState from "@/app/find-college/[id]/components/EmptyTabState";
 import ShareCollegeModal from "@/app/find-college/[id]/ShareCollegeModal";
 import { apiService, University, UniversityCollege } from "@/services/api";
+import { useFollow } from "@/app/find-college/[id]/hooks/useFollow";
 import {
   BadgeCheck,
   Star,
@@ -86,7 +87,7 @@ const UniversityDetail: React.FC = () => {
   const [openDropdowns, setOpenDropdowns] = useState<Record<string, boolean>>(
     {},
   );
-  const [isFollowed, setIsFollowed] = useState(false);
+  const { isFollowed, loading: followLoading, toggleFollow, unfollow } = useFollow(id || null, `/universities/${id}`);
   const [showUnfollowDialog, setShowUnfollowDialog] = useState(false);
   const [isShareModalOpen, setIsShareModalOpen] = useState(false);
   const [lightboxIndex, setLightboxIndex] = useState<number | null>(null);
@@ -434,20 +435,25 @@ const UniversityDetail: React.FC = () => {
                 </div>
                 <button
                   type="button"
+                  disabled={followLoading}
                   onClick={() => {
                     if (isFollowed) {
                       setShowUnfollowDialog(true);
                     } else {
-                      setIsFollowed(true);
+                      toggleFollow();
                     }
                   }}
-                  className={`flex items-center justify-center gap-1.5 rounded-full px-3 py-1 text-[12px] font-semibold transition-colors md:px-4 md:py-1.5 md:text-[13px] ${
+                  className={`flex items-center justify-center gap-1.5 rounded-full px-3 py-1 text-[12px] font-semibold transition-colors md:px-4 md:py-1.5 md:text-[13px] disabled:opacity-50 ${
                     isFollowed
                       ? "bg-green-300 text-gray-800 hover:bg-green-400"
                       : "bg-brand-blue text-white hover:bg-brand-hover"
                   }`}
                 >
-                  <i className={`fa-solid ${isFollowed ? "fa-check" : "fa-plus"}`}></i>
+                  {followLoading ? (
+                    <i className="fa-solid fa-spinner fa-spin"></i>
+                  ) : (
+                    <i className={`fa-solid ${isFollowed ? "fa-check" : "fa-plus"}`}></i>
+                  )}
                   {isFollowed ? "Following" : "Follow"}
                 </button>
               </div>
@@ -1678,8 +1684,8 @@ const UniversityDetail: React.FC = () => {
                 Cancel
               </button>
               <button
-                onClick={() => {
-                  setIsFollowed(false);
+                onClick={async () => {
+                  await unfollow();
                   setShowUnfollowDialog(false);
                 }}
                 className="flex-1 rounded-md bg-red-500 px-4 py-2.5 font-semibold text-white transition-colors hover:bg-red-600"

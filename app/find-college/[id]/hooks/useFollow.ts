@@ -28,7 +28,7 @@ async function followFetch(path: string, options?: RequestInit): Promise<any> {
   return res.json();
 }
 
-export function useFollow(institutionId: number | null) {
+export function useFollow(institutionId: number | null, redirectPath?: string) {
   const [isFollowed, setIsFollowed] = useState(false);
   const [loading, setLoading] = useState(false);
   const { isAuthenticated } = useAuth();
@@ -46,7 +46,7 @@ export function useFollow(institutionId: number | null) {
 
   const toggleFollow = useCallback(async () => {
     if (!isAuthenticated) {
-      router.push(`/login?redirect=/find-college/${institutionId}`);
+      router.push(`/login?redirect=${redirectPath || `/find-college/${institutionId}`}`);
       return;
     }
     if (!institutionId) return;
@@ -68,7 +68,7 @@ export function useFollow(institutionId: number | null) {
     } finally {
       setLoading(false);
     }
-  }, [isFollowed, isAuthenticated, institutionId, router]);
+  }, [isFollowed, isAuthenticated, institutionId, router, redirectPath]);
 
   const unfollow = useCallback(async () => {
     if (!institutionId) return;
