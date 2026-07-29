@@ -310,14 +310,14 @@ const UniversityDetail: React.FC = () => {
 
   const handleSubmitReview = async () => {
     if (!reviewRating || !reviewText.trim()) return;
+    const token = apiService.getToken();
+    if (!token) {
+      setSubmitError("Please log in to submit a review.");
+      return;
+    }
     setSubmittingReview(true);
     setSubmitError("");
     try {
-      const token = apiService.getToken();
-      if (!token) {
-        setSubmitError("Please log in to submit a review.");
-        return;
-      }
       await apiService.submitUniversityReview(
         { university_id: id, rating: reviewRating, review: reviewText.trim() },
         { authToken: token },
@@ -941,144 +941,60 @@ const UniversityDetail: React.FC = () => {
 
               {/* ========== OFFERED PROGRAM ========== */}
               {/* ========== SCHOLARSHIP ========== */}
-              {activeTab === "tab-scholarship" && (
-                <div className="overflow-hidden rounded-[20px] border border-gray-100 bg-white shadow-sm">
-                  <div className="flex flex-wrap items-center justify-between gap-4 border-b border-gray-100 bg-[#f4f8fc] px-6 py-4">
-                    <p className="text-[14px] font-semibold tracking-wide text-blue-600">
-                      Scholarship opportunities – filter by level
-                    </p>
+              {activeTab === "tab-scholarship" && scholarshipsList.length > 0 && (
+                <div className="overflow-hidden rounded-md border border-gray-100 bg-white">
+                  <div className="flex flex-wrap items-center justify-between gap-4 border-b border-gray-100 bg-[#f8fafc] px-6 py-4">
+                    <h3 className="flex items-center gap-2 text-[16px] font-bold text-gray-900">Scholarships</h3>
                     <div className="flex gap-2 text-xs font-medium">
                       {["all", "+2", "Bachelor", "Master"].map((level) => (
-                        <button
-                          key={level}
-                          onClick={() => setScholarFilter(level)}
-                          className={`rounded-full px-4 py-1.5 shadow-sm transition-colors ${
-                            scholarFilter === level
-                              ? "bg-blue-600 text-white"
-                              : "border border-gray-200 bg-white text-gray-700 hover:bg-gray-100"
-                          }`}
-                        >
+                        <button key={level} onClick={() => setScholarFilter(level)} className={`rounded-md px-3 py-1.5 transition-colors ${scholarFilter === level ? "bg-blue-600 text-white" : "border border-gray-200 bg-white text-gray-700 hover:bg-gray-100"}`}>
                           {level === "all" ? "All" : level}
                         </button>
                       ))}
                     </div>
                   </div>
-                  {scholarshipsList.length > 0 ? (
-                    <>
-                      {/* Desktop header */}
-                      <div className="hidden sm:grid sm:grid-cols-12 gap-4 border-b border-gray-100 bg-white px-6 py-5 items-center">
-                        <div className="sm:col-span-2 text-[13px] font-bold uppercase tracking-wider text-gray-800">
-                          PROGRAM
-                        </div>
-                        <div className="sm:col-span-2 text-[13px] font-bold uppercase tracking-wider text-gray-800">
-                          SCHOLARSHIP
-                        </div>
-                        <div className="sm:col-span-2 text-[13px] font-bold uppercase tracking-wider text-gray-800">
-                          BENEFIT
-                        </div>
-                        <div className="sm:col-span-3 text-[13px] font-bold uppercase tracking-wider text-gray-800">
-                          ELIGIBILITY
-                        </div>
-                        <div className="sm:col-span-3 text-[13px] font-bold uppercase tracking-wider text-gray-800">
-                          ACTIONS
-                        </div>
-                      </div>
-                      {scholarshipsList
-                        .filter(
-                          (s: any) =>
-                            scholarFilter === "all" ||
-                            s.level === scholarFilter,
-                        )
-                        .map((sch: any, i: number) => (
-                          <div
-                            key={i}
-                            className="border-b border-gray-100 px-6 py-5 transition-colors hover:bg-gray-50/50"
-                          >
-                            {/* Mobile card view */}
-                            <div className="sm:hidden space-y-3">
-                              <h4 className="text-[15px] font-bold text-gray-900">
-                                {sch.name || sch.title || ""}
-                              </h4>
-                              <div className="flex flex-wrap gap-x-6 gap-y-2 text-[13px]">
-                                {sch.program ? (
-                                  <div>
-                                    <span className="text-gray-400">
-                                      Program:{" "}
-                                    </span>
-                                    <span className="font-semibold text-gray-900">
-                                      {sch.program}
-                                    </span>
-                                  </div>
-                                ) : null}
-                                {sch.benefit ? (
-                                  <div>
-                                    <span className="text-gray-400">
-                                      Benefit:{" "}
-                                    </span>
-                                    <span className="font-medium text-green-600">
-                                      {sch.benefit}
-                                    </span>
-                                  </div>
-                                ) : null}
-                                {sch.forWhom || sch.eligibility ? (
-                                  <div>
-                                    <span className="text-gray-400">For: </span>
-                                    <span className="text-gray-600">
-                                      {sch.forWhom || sch.eligibility}
-                                    </span>
-                                  </div>
-                                ) : null}
-                              </div>
+                  <>
+                    {/* Desktop header */}
+                    <div className="hidden sm:grid sm:grid-cols-12 gap-4 border-b border-gray-100 bg-white px-6 py-5 items-center">
+                      <div className="sm:col-span-2 text-[13px] font-bold uppercase tracking-wider text-gray-800">PROGRAM</div>
+                      <div className="sm:col-span-2 text-[13px] font-bold uppercase tracking-wider text-gray-800">SCHOLARSHIP</div>
+                      <div className="sm:col-span-2 text-[13px] font-bold uppercase tracking-wider text-gray-800">BENEFIT</div>
+                      <div className="sm:col-span-3 text-[13px] font-bold uppercase tracking-wider text-gray-800">ELIGIBILITY</div>
+                      <div className="sm:col-span-3 text-[13px] font-bold uppercase tracking-wider text-gray-800">ACTIONS</div>
+                    </div>
+                    {scholarshipsList
+                      .filter((s: any) => scholarFilter === "all" || s.level === scholarFilter)
+                      .map((sch: any, i: number) => (
+                        <div key={i} className="border-b border-gray-100 px-6 py-5 transition-colors hover:bg-gray-50/50">
+                          <div className="sm:hidden space-y-3">
+                            <h4 className="text-[15px] font-bold text-gray-900">{sch.name || sch.title || ""}</h4>
+                            <div className="flex flex-wrap gap-x-6 gap-y-2 text-[13px]">
+                              {sch.program ? <div><span className="text-gray-400">Program: </span><span className="font-semibold text-gray-900">{sch.program}</span></div> : null}
+                              {sch.benefit ? <div><span className="text-gray-400">Benefit: </span><span className="font-medium text-green-600">{sch.benefit}</span></div> : null}
+                              {sch.forWhom || sch.eligibility ? <div><span className="text-gray-400">For: </span><span className="text-gray-600">{sch.forWhom || sch.eligibility}</span></div> : null}
+                            </div>
+                            {sch.application_link ? (
+                              <a href={sch.application_link} target="_blank" rel="noopener noreferrer" className="inline-block rounded-lg bg-blue-600 px-5 py-2 text-xs font-bold text-white transition-colors hover:bg-blue-700">Apply Now</a>
+                            ) : (
+                              <span className="inline-block rounded-lg bg-gray-100 px-5 py-2 text-xs font-bold text-gray-400 cursor-not-allowed">Apply Now</span>
+                            )}
+                          </div>
+                          <div className="hidden sm:grid sm:grid-cols-12 gap-4 items-center">
+                            <div className="sm:col-span-2"><h4 className="text-[14px] font-bold text-gray-900">{sch.program || ""}</h4></div>
+                            <div className="sm:col-span-2"><h4 className="text-[14px] font-bold text-gray-900">{sch.name || sch.title || ""}</h4></div>
+                            <div className="sm:col-span-2"><span className="text-[13px] font-medium text-green-600">{sch.benefit || ""}</span></div>
+                            <div className="sm:col-span-3"><span className="text-[13px] text-gray-600">{sch.forWhom || sch.eligibility || ""}</span></div>
+                            <div className="sm:col-span-3">
                               {sch.application_link ? (
-                                <a href={sch.application_link} target="_blank" rel="noopener noreferrer" className="inline-block rounded-lg bg-blue-600 px-5 py-2 text-xs font-bold text-white transition-colors hover:bg-blue-700">
-                                  Apply Now
-                                </a>
+                                <a href={sch.application_link} target="_blank" rel="noopener noreferrer" className="rounded-lg bg-blue-600 px-5 py-2 text-xs font-bold text-white transition-colors hover:bg-blue-700">Apply Now</a>
                               ) : (
-                                <span className="inline-block rounded-lg bg-gray-100 px-5 py-2 text-xs font-bold text-gray-400 cursor-not-allowed">
-                                  Apply Now
-                                </span>
+                                <span className="rounded-lg bg-gray-100 px-5 py-2 text-xs font-bold text-gray-400 cursor-not-allowed">Apply Now</span>
                               )}
                             </div>
-                            {/* Desktop grid view */}
-                            <div className="hidden sm:grid sm:grid-cols-12 gap-4 items-center">
-                              <div className="sm:col-span-2">
-                                <h4 className="text-[14px] font-bold text-gray-900">
-                                  {sch.program || ""}
-                                </h4>
-                              </div>
-                              <div className="sm:col-span-2">
-                                <h4 className="text-[14px] font-bold text-gray-900">
-                                  {sch.name || sch.title || ""}
-                                </h4>
-                              </div>
-                              <div className="sm:col-span-2">
-                                <span className="text-[13px] font-medium text-green-600">
-                                  {sch.benefit || ""}
-                                </span>
-                              </div>
-                              <div className="sm:col-span-3">
-                                <span className="text-[13px] text-gray-600">
-                                  {sch.forWhom || sch.eligibility || ""}
-                                </span>
-                              </div>
-                              <div className="sm:col-span-3">
-                                {sch.application_link ? (
-                                  <a href={sch.application_link} target="_blank" rel="noopener noreferrer" className="rounded-lg bg-blue-600 px-5 py-2 text-xs font-bold text-white transition-colors hover:bg-blue-700">
-                                    Apply Now
-                                  </a>
-                                ) : (
-                                  <span className="rounded-lg bg-gray-100 px-5 py-2 text-xs font-bold text-gray-400 cursor-not-allowed">
-                                    Apply Now
-                                  </span>
-                                )}
-                              </div>
-                            </div>
                           </div>
-                        ))}
-                    </>
-                  ) : (
-                    <EmptyTabState tabName="Scholarship" />
-                  )}
+                        </div>
+                      ))}
+                  </>
                 </div>
               )}
 
@@ -1147,57 +1063,7 @@ const UniversityDetail: React.FC = () => {
 
               {/* ========== NEWS & NOTICES ========== */}
               {activeTab === "tab-news" && (
-                <div>
-                  {uniNewsLoading ? <div className="py-12 text-center text-slate-500">Loading news...</div> :
-                  (uniNews.length > 0 || newsList.length > 0) ? (
-                    <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
-                      {(uniNews.length > 0 ? uniNews : newsList).map((item: any, i: number) => (
-                        <div
-                          key={i}
-                          className="flex flex-col overflow-hidden rounded-2xl border border-gray-100 bg-white shadow-sm transition-shadow hover:shadow-md"
-                        >
-                          <div className="flex flex-1 flex-col p-5">
-                            <div className="mb-4">
-                              <span className="inline-block rounded-full bg-blue-100 px-3.5 py-1 text-[12px] font-bold text-blue-700">
-                                {item.tag || "News"}
-                              </span>
-                            </div>
-                            <div className="mb-4 h-[140px] w-full shrink-0 overflow-hidden rounded-xl">
-                              <img
-                                src={item.image || item.img || ""}
-                                alt=""
-                                className="h-full w-full object-cover transition-transform duration-500 hover:scale-105"
-                              />
-                            </div>
-                            <h3 className="mb-2 text-[17px] font-bold leading-tight text-gray-900">
-                              {item.title}
-                            </h3>
-                            <p className="mb-2 line-clamp-2 text-[13.5px] text-gray-500">
-                              {item.description || item.desc || ""}
-                            </p>
-                          </div>
-                          <div className="mt-auto flex items-center justify-between border-t border-gray-50 bg-white px-5 py-4">
-                            <div className="flex items-center gap-1.5 text-gray-400">
-                              <Clock className="h-4 w-4" />
-                              <span className="text-[12.5px] font-medium">
-                                {item.time || item.date || ""}
-                              </span>
-                            </div>
-                            <a
-                              href="#"
-                              className="flex items-center text-[13px] font-bold text-blue-600 transition-colors hover:text-blue-700"
-                            >
-                              Read more{" "}
-                              <ChevronRight className="ml-0.5 h-4 w-4" />
-                            </a>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  ) : (
-                    <EmptyTabState tabName="News & Notices" />
-                  )}
-                </div>
+                <EmptyTabState tabName="News & Notices" />
               )}
 
               {/* ========== DOWNLOAD ========== */}
@@ -1215,7 +1081,7 @@ const UniversityDetail: React.FC = () => {
                             <div className="flex h-12 w-12 items-center justify-center rounded-md bg-brand-blue/5 text-brand-blue"><i className="fa-regular fa-file-lines text-xl"></i></div>
                             <div>
                               <h4 className="font-bold text-gray-900">{dl.title || dl.name}</h4>
-                              <p className="text-[12.5px] text-gray-500">{dl.size || "Download file"}</p>
+                              <p className="text-[12.5px] text-gray-500">{dl.size || dl.type || ""}</p>
                             </div>
                           </div>
                           {dl.url || dl.link ? (
@@ -1413,12 +1279,14 @@ const UniversityDetail: React.FC = () => {
                         <h3 className="text-[18px] font-bold text-gray-900">
                           Recent Reviews
                         </h3>
-                        <button
-                          onClick={() => setShowReviewForm(!showReviewForm)}
-                          className="text-sm font-medium text-brand-blue hover:text-brand-hover"
-                        >
-                          {showReviewForm ? "Cancel" : "Write a Review"}
-                        </button>
+                        {reviewsData?.reviews?.length > 0 && (
+                          <button
+                            onClick={() => setShowReviewForm(!showReviewForm)}
+                            className="text-sm font-medium text-brand-blue hover:text-brand-hover"
+                          >
+                            {showReviewForm ? "Cancel" : "Write a Review"}
+                          </button>
+                        )}
                       </div>
 
                       {showReviewForm && (

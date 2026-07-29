@@ -35,7 +35,8 @@ export default function UniversityNewsSection({ setActiveSection }: { setActiveS
     (async () => {
       try {
         const token = localStorage.getItem("superadmin_token");
-        const res = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL || ""}/api/v1/admin/universities?limit=500`, {
+        const baseUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080";
+        const res = await fetch(`${baseUrl}/api/v1/admin/universities?limit=500&status=published`, {
           headers: token ? { Authorization: `Bearer ${token}` } : {},
         });
         const json = await res.json();

@@ -71,6 +71,7 @@ interface DownloadItem {
   title: string;
   type: string;
   url: string;
+  size?: string;
 }
 interface GalleryImage {
   id: number;
@@ -1513,7 +1514,8 @@ export default function AddUniversitySection({
                             try {
                               const url = await uploadFile(file, "university/downloads");
                               const ext = file.name.split(".").pop()?.toUpperCase() || "";
-                              setDownloads((prev: any[]) => prev.map((x) => x.id === d.id ? { ...x, url, type: ext } : x));
+                              const size = file.size > 1048576 ? `${(file.size / 1048576).toFixed(1)} MB` : `${(file.size / 1024).toFixed(0)} KB`;
+                              setDownloads((prev: any[]) => prev.map((x) => x.id === d.id ? { ...x, url, type: ext, size } : x));
                             } catch {}
                           }}
                         />

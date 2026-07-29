@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, lazy, Suspense, useCallback, useEffect } from "react";
+import { Toaster } from "sonner";
 import { AnimatePresence, motion } from "framer-motion";
 import Image from "next/image";
 import { clearAllAuthSessions, clearCookie } from "@/services/authSession";
@@ -800,6 +801,7 @@ export default function DashboardShell() {
         </main>
       </div>
     </div>
+    <Toaster position="bottom-right" closeButton={false} />
   );
 }
 
