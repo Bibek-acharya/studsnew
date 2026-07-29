@@ -419,7 +419,7 @@ const UniversityDetail: React.FC = () => {
                 <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-[12px] font-medium md:text-[14px]">
                   <div className="flex items-center gap-1.5">
                     <i className="fa-solid fa-location-dot text-gray-500"></i>
-                    <span className="text-gray-600">{uni?.location || ""}</span>
+                    <span className="text-gray-600">{contactData?.district || uni?.location || ""}</span>
                   </div>
                   <div className="flex items-center gap-1.5">
                     <i className="fa-solid fa-star text-yellow-400"></i>
@@ -657,22 +657,21 @@ const UniversityDetail: React.FC = () => {
 
               {/* ========== COURSES & FEES ========== */}
               {activeTab === "tab-courses" && (
-                <div className="overflow-hidden rounded-[20px] border border-gray-100 bg-white shadow-sm">
-                  <div className="flex flex-wrap items-center justify-between gap-4 border-b border-gray-100 bg-[#f4f8fc] px-6 py-4">
-                    <p className="text-[14px] font-semibold tracking-wide text-blue-600">
-                      Courses & fees – filter by level
-                    </p>
+                <div className="overflow-hidden rounded-md border border-gray-100 bg-white">
+                  <div className="flex flex-wrap items-center justify-between gap-4 border-b border-gray-100 bg-[#f8fafc] px-6 py-4">
+                    <h3 className="flex items-center gap-2 text-[16px] font-bold text-gray-900">
+                      Courses & fees
+                    </h3>
                     <div className="flex gap-2 text-xs font-medium">
                       {["all", "Bachelor's", "Master"].map((level) => (
                         <button
                           key={level}
                           onClick={() => setCourseFilter(level)}
-                          className={`rounded-full px-4 py-1.5 shadow-sm transition-colors ${
+                          className={`rounded-md px-3 py-1.5 transition-colors ${
                             courseFilter === level
                               ? "bg-blue-600 text-white"
                               : "border border-gray-200 bg-white text-gray-700 hover:bg-gray-100"
                           }`}
-                        >
                           {level === "all" ? "All" : level}
                         </button>
                       ))}
@@ -741,7 +740,7 @@ const UniversityDetail: React.FC = () => {
                                 <div>
                                   <span className="text-gray-400">Fee: </span>
                                   <span className="font-semibold text-[#2563eb]">
-                                    {course.fees} / Year
+                                    {course.fees}
                                   </span>
                                 </div>
                                 <div>
@@ -783,9 +782,7 @@ const UniversityDetail: React.FC = () => {
                                 <h4 className="text-[15.5px] font-bold text-[#2563eb]">
                                   {course.fees}
                                 </h4>
-                                <p className="mt-1 text-[12px] text-gray-500">
-                                  / Year
-                                </p>
+                                <p className="mt-1 text-[12px] text-gray-500"></p>
                               </div>
                               <div className="sm:col-span-3">
                                 <p className="mb-2 text-[12.5px] font-medium text-gray-600">
@@ -897,35 +894,37 @@ const UniversityDetail: React.FC = () => {
                     <div className="w-full overflow-x-auto">
                       <div className="min-w-[700px]">
                         <div className="grid grid-cols-12 gap-2 border-b border-gray-100 bg-white px-6 py-5">
-                          <div className="col-span-4 text-[13px] font-bold uppercase tracking-wider text-gray-800">PROGRAM</div>
-                          <div className="col-span-1 text-[13px] font-bold uppercase tracking-wider text-gray-800">STATUS</div>
+                          <div className="col-span-3 text-[13px] font-bold uppercase tracking-wider text-gray-800">PROGRAM</div>
+                          <div className="col-span-2 text-[13px] font-bold uppercase tracking-wider text-gray-800">STATUS</div>
                           <div className="col-span-2 text-[13px] font-bold uppercase tracking-wider text-gray-800">OPENS</div>
                           <div className="col-span-2 text-[13px] font-bold uppercase tracking-wider text-gray-800">DEADLINE</div>
-                          <div className="col-span-1 text-[13px] font-bold uppercase tracking-wider text-gray-800">APPL. FEE</div>
-                          <div className="col-span-2 text-[13px] font-bold uppercase tracking-wider text-gray-800">APPLY</div>
+                          <div className="col-span-2 text-[13px] font-bold uppercase tracking-wider text-gray-800">APPL. FEE</div>
+                          <div className="col-span-1 text-[13px] font-bold uppercase tracking-wider text-gray-800">APPLY</div>
                         </div>
                         <div className="divide-y divide-gray-100">
                           {admissionsList.map((ad: any, i: number) => (
                             <div key={i} className="grid grid-cols-12 gap-2 px-6 py-5 hover:bg-gray-50/50 items-center">
-                              <div className="col-span-4">
+                              <div className="col-span-3">
                                 <h4 className="text-[15.5px] font-bold text-gray-900">{ad.program || ad.title}</h4>
                                 {ad.faculty && <p className="text-[13px] text-gray-500">{ad.faculty}</p>}
                               </div>
-                              <div className="col-span-1">
+                              <div className="col-span-2">
                                 <span className={`inline-block rounded-md px-2.5 py-1 text-[11px] font-bold whitespace-nowrap ${ad.status === "Open" || ad.status === "Ongoing" ? "bg-[#ecfdf5] text-[#10b981]" : "bg-[#fef2f2] text-[#ef4444]"}`}>
                                   {ad.status}
                                 </span>
                               </div>
                               <div className="col-span-2 text-[14px] text-gray-600">{ad.opens_from || "-"}</div>
                               <div className="col-span-2 text-[14px] text-gray-600">{ad.deadline || "-"}</div>
-                              <div className="col-span-1 text-[14px] font-semibold text-gray-900">{ad.fee || "-"}</div>
-                              <div className="col-span-2">
+                              <div className="col-span-2 text-[14px] font-semibold text-gray-900">{ad.fee || "-"}</div>
+                              <div className="col-span-1">
                                 {ad.application_link ? (
-                                  <a href={ad.application_link} target="_blank" rel="noopener noreferrer" className="text-brand-blue hover:underline font-semibold text-[13px]">
+                                  <a href={ad.application_link} target="_blank" rel="noopener noreferrer" className="rounded-lg bg-blue-600 px-5 py-2 text-xs font-bold text-white transition-colors hover:bg-blue-700">
                                     Apply Now
                                   </a>
                                 ) : (
-                                  <span className="text-gray-400 text-[13px]">Apply Now</span>
+                                  <span className="rounded-lg bg-gray-100 px-5 py-2 text-xs font-bold text-gray-400 cursor-not-allowed">
+                                    Apply Now
+                                  </span>
                                 )}
                               </div>
                             </div>
@@ -977,9 +976,11 @@ const UniversityDetail: React.FC = () => {
                           BENEFIT
                         </div>
                         <div className="sm:col-span-3 text-[13px] font-bold uppercase tracking-wider text-gray-800">
-                          FOR WHOM
+                          ELIGIBILITY
                         </div>
-                        <div className="sm:col-span-3 text-[13px] font-bold uppercase tracking-wider text-gray-800"></div>
+                        <div className="sm:col-span-3 text-[13px] font-bold uppercase tracking-wider text-gray-800">
+                          ACTIONS
+                        </div>
                       </div>
                       {scholarshipsList
                         .filter(
@@ -1027,9 +1028,15 @@ const UniversityDetail: React.FC = () => {
                                   </div>
                                 ) : null}
                               </div>
-                              <button className="rounded-lg bg-blue-600 px-5 py-2 text-xs font-bold text-white transition-colors hover:bg-blue-700">
-                                Get Scholarship
-                              </button>
+                              {sch.application_link ? (
+                                <a href={sch.application_link} target="_blank" rel="noopener noreferrer" className="inline-block rounded-lg bg-blue-600 px-5 py-2 text-xs font-bold text-white transition-colors hover:bg-blue-700">
+                                  Apply Now
+                                </a>
+                              ) : (
+                                <span className="inline-block rounded-lg bg-gray-100 px-5 py-2 text-xs font-bold text-gray-400 cursor-not-allowed">
+                                  Apply Now
+                                </span>
+                              )}
                             </div>
                             {/* Desktop grid view */}
                             <div className="hidden sm:grid sm:grid-cols-12 gap-4 items-center">
@@ -1054,9 +1061,15 @@ const UniversityDetail: React.FC = () => {
                                 </span>
                               </div>
                               <div className="sm:col-span-3">
-                                <button className="rounded-lg bg-blue-600 px-5 py-2 text-xs font-bold text-white transition-colors hover:bg-blue-700">
-                                  Get Scholarship
-                                </button>
+                                {sch.application_link ? (
+                                  <a href={sch.application_link} target="_blank" rel="noopener noreferrer" className="rounded-lg bg-blue-600 px-5 py-2 text-xs font-bold text-white transition-colors hover:bg-blue-700">
+                                    Apply Now
+                                  </a>
+                                ) : (
+                                  <span className="rounded-lg bg-gray-100 px-5 py-2 text-xs font-bold text-gray-400 cursor-not-allowed">
+                                    Apply Now
+                                  </span>
+                                )}
                               </div>
                             </div>
                           </div>
@@ -1188,45 +1201,33 @@ const UniversityDetail: React.FC = () => {
 
               {/* ========== DOWNLOAD ========== */}
               {activeTab === "tab-download" && (
-                <div className="space-y-6">
-                  <div className="rounded-2xl border border-gray-100 bg-white p-6 shadow-sm">
-                    <h3 className="mb-5 flex items-center gap-3 border-b border-gray-100 pb-3 text-[20px] font-bold text-gray-900">
-                      <Download className="h-6 w-6 text-blue-600" /> Brochures &
-                      Forms
-                    </h3>
-                    {downloadsList.length > 0 ? (
-                      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-                        {downloadsList.map((dl: any, i: number) => (
-                          <div
-                            key={i}
-                            className="flex items-start gap-3 rounded-xl border border-gray-100 bg-[#f8fafc] p-5 transition-all hover:border-blue-200"
-                          >
-                            <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-lg bg-blue-50">
-                              <FileDown className="h-6 w-6 text-blue-600" />
-                            </div>
-                            <div className="flex-1">
-                              <h4 className="text-[15px] font-bold text-gray-900">
-                                {dl.title || dl.name}
-                              </h4>
-                              <p className="mb-2 text-[12px] text-gray-500">
-                                {dl.meta || dl.description || dl.size || ""}
-                              </p>
-                              <a
-                                href={dl.url || dl.link || "#"}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className="flex items-center gap-1.5 text-[13px] font-bold text-blue-600 transition-colors hover:text-blue-700"
-                              >
-                                <FileDown className="h-4 w-4" /> Download
-                              </a>
+                <div>
+                  <div className="mb-6">
+                    <h2 className="text-[20px] font-bold text-gray-900">Downloads</h2>
+                    <p className="mt-1 text-[14px] text-gray-500">Access brochures, forms, and study materials.</p>
+                  </div>
+                  {downloadsList.length > 0 ? (
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      {downloadsList.map((dl: any, i: number) => (
+                        <div key={dl.title || dl.name || i} className="flex items-center justify-between rounded-md border border-gray-200 bg-white p-5 transition">
+                          <div className="flex items-center gap-4">
+                            <div className="flex h-12 w-12 items-center justify-center rounded-md bg-brand-blue/5 text-brand-blue"><i className="fa-regular fa-file-lines text-xl"></i></div>
+                            <div>
+                              <h4 className="font-bold text-gray-900">{dl.title || dl.name}</h4>
+                              <p className="text-[12.5px] text-gray-500">{dl.size || "Download file"}</p>
                             </div>
                           </div>
-                        ))}
-                      </div>
-                    ) : (
-                      <EmptyTabState tabName="Download" />
-                    )}
-                  </div>
+                          {dl.url || dl.link ? (
+                            <a href={dl.url || dl.link} target="_blank" rel="noreferrer" className="flex items-center gap-2 rounded-md bg-brand-blue hover:bg-brand-hover px-5 py-2.5 text-sm font-bold text-white"><i className="fa-solid fa-download"></i>Download</a>
+                          ) : (
+                            <button className="flex items-center gap-2 rounded-md bg-brand-blue hover:bg-brand-hover px-5 py-2.5 text-sm font-bold text-white"><i className="fa-solid fa-download"></i>Download</button>
+                          )}
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <EmptyTabState tabName="downloads" />
+                  )}
                 </div>
               )}
 
@@ -1493,7 +1494,9 @@ const UniversityDetail: React.FC = () => {
             {/* Right Column - matching college details page */}
             <div className="space-y-6 lg:col-span-1 lg:w-full lg:max-w-[400px] lg:ml-8 xl:ml-12">
               {(() => {
-                const hasAddress = !!contactData?.address;
+                const fullAddress = [contactData?.state, contactData?.district, contactData?.municipality, contactData?.ward ? `Ward ${contactData.ward}` : "", contactData?.street].filter(Boolean).join(", ");
+                const displayAddress = fullAddress || contactData?.address || "";
+                const hasAddress = !!displayAddress;
                 const hasPhone = !!contactData?.phone;
                 const hasEmail = !!contactData?.email;
                 const hasWebsite = !!(contactData?.website || uni?.website);
@@ -1516,7 +1519,7 @@ const UniversityDetail: React.FC = () => {
                         <ContactInfoRow
                           icon="fa-solid fa-location-dot"
                           title="Address"
-                          value={contactData?.address as string}
+                          value={displayAddress}
                           badge="bg-brand-blue/5 text-[#0000FF]"
                         />
                       )}
@@ -1634,25 +1637,6 @@ const UniversityDetail: React.FC = () => {
                 );
               })()}
 
-              {uni?.quick &&
-                Array.isArray(uni.quick) &&
-                uni.quick.length > 0 && (
-                  <div className="w-full rounded-md border border-gray-100 bg-white p-5">
-                    <h3 className="mb-5 text-[18px] font-bold text-gray-900">
-                      Quick Highlights
-                    </h3>
-                    <div className="space-y-4">
-                      {uni.quick.map((h: any, idx: number) => (
-                        <div key={idx} className="flex items-start gap-3">
-                          <div>
-                            <span className="block text-gray-900 font-bold text-[13px]">{h.key || h.label || h.title}</span>
-                            <span className="text-gray-500 font-medium text-[12px]">{h.value || h.val || h.description || h.text || h.desc || ""}</span>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                )}
             </div>
           </div>
         </div>

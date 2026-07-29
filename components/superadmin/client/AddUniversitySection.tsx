@@ -1,9 +1,11 @@
 "use client";
 
 import React, { useState, useRef, useCallback, useEffect } from "react";
+import { toast } from "sonner";
 import RichTextEditor from "@/components/ScholarshipProvider/common/RichTextEditor";
 import ImageCropperModal from "@/components/ScholarshipProvider/common/ImageCropperModal";
-import { NEPAL_DISTRICTS } from "@/lib/location-data";
+import { NEPAL_PROVINCES, NEPAL_DISTRICTS, NEPAL_LOCAL_BODIES } from "@/lib/location-data";
+
 
 interface VideoItem {
   id: number;
@@ -62,6 +64,7 @@ interface ScholarshipItem {
   benefit: string;
   eligibility: string;
   level: string;
+  application_link: string;
 }
 interface DownloadItem {
   id: number;
@@ -96,7 +99,6 @@ interface AdmissionItem {
   application_link: string;
 }
 
-const DISTRICTS = Object.values(NEPAL_DISTRICTS).flat();
 
 const inputClass =
   "w-full px-3 py-2 border border-gray-300 rounded-md focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none transition-colors";
@@ -114,6 +116,11 @@ export default function AddUniversitySection({
 }) {
   const [name, setName] = useState("");
   const [location, setLocation] = useState("");
+  const [locState, setLocState] = useState("");
+  const [locDistrict, setLocDistrict] = useState("");
+  const [locMunicipality, setLocMunicipality] = useState("");
+  const [locWard, setLocWard] = useState("");
+  const [locStreet, setLocStreet] = useState("");
   const [type, setType] = useState("");
   const [isNepali, setIsNepali] = useState(true);
   const [rank, setRank] = useState<number>(0);
@@ -132,7 +139,7 @@ export default function AddUniversitySection({
   const [cropperTarget, setCropperTarget] = useState<"logo" | "cover">("cover");
   const [saving, setSaving] = useState(false);
   const [formError, setFormError] = useState("");
-  const [formSuccess, setFormSuccess] = useState(false);
+  const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
 
   const [videos, setVideos] = useState<VideoItem[]>([]);
   const [aboutText, setAboutText] = useState("");
@@ -151,9 +158,7 @@ export default function AddUniversitySection({
   const [contactYoutube, setContactYoutube] = useState("");
   const [contactLinkedin, setContactLinkedin] = useState("");
   const [mapEmbed, setMapEmbed] = useState("");
-  const [quickHighlights, setQuickHighlights] = useState<QuickHighlightRow[]>(
-    [],
-  );
+
 
   const [courses, setCourses] = useState<CourseItem[]>([]);
   const [scholarships, setScholarships] = useState<ScholarshipItem[]>([]);
@@ -163,9 +168,26 @@ export default function AddUniversitySection({
   const [faculties, setFaculties] = useState<FacultyItem[]>([]);
   const [admissions, setAdmissions] = useState<AdmissionItem[]>([]);
 
-  const [showSuggestions, setShowSuggestions] = useState(false);
-  const [locationFilter, setLocationFilter] = useState("");
-  const locationRef = useRef<HTMLDivElement>(null);
+  const [locStateSearch, setLocStateSearch] = useState("");
+  const [locDistrictSearch, setLocDistrictSearch] = useState("");
+  const [locMunicipalitySearch, setLocMunicipalitySearch] = useState("");
+  const [locWardSearch, setLocWardSearch] = useState("");
+  const [showStateDropdown, setShowStateDropdown] = useState(false);
+  const [showDistrictDropdown, setShowDistrictDropdown] = useState(false);
+  const [showMunicipalityDropdown, setShowMunicipalityDropdown] = useState(false);
+  const [showWardDropdown, setShowWardDropdown] = useState(false);
+  const [stateFocusIdx, setStateFocusIdx] = useState(-1);
+  const [districtFocusIdx, setDistrictFocusIdx] = useState(-1);
+  const [municipalityFocusIdx, setMunicipalityFocusIdx] = useState(-1);
+  const [wardFocusIdx, setWardFocusIdx] = useState(-1);
+  const stateRef = useRef<HTMLDivElement>(null);
+  const districtRef = useRef<HTMLDivElement>(null);
+  const municipalityRef = useRef<HTMLDivElement>(null);
+  const wardRef = useRef<HTMLDivElement>(null);
+  const stateInputRef = useRef<HTMLInputElement>(null);
+  const districtInputRef = useRef<HTMLInputElement>(null);
+  const municipalityInputRef = useRef<HTMLInputElement>(null);
+  const wardInputRef = useRef<HTMLInputElement>(null);
   const logoInputRef = useRef<HTMLInputElement>(null);
   const coverInputRef = useRef<HTMLInputElement>(null);
   const formRef = useRef<HTMLFormElement>(null);
@@ -225,6 +247,14 @@ export default function AddUniversitySection({
         setName(d.name || "");
         setLocation(d.location || "");
         setType(d.type || "");
+        if (d.contact) {
+          const c = typeof d.contact === "object" ? d.contact : {};
+          setLocState(c.state || "");
+          setLocDistrict(c.district || "");
+          setLocMunicipality(c.municipality || "");
+          setLocWard(c.ward || "");
+          setLocStreet(c.street || "");
+        }
         setIsNepali(d.is_nepali !== false);
         setRank(d.rank || 0);
         setVerified(d.verified || false);
@@ -326,9 +356,6 @@ export default function AddUniversitySection({
       .catch(() => {});
   }, [editId]);
 
-  const filteredDistricts = DISTRICTS.filter((d) =>
-    d.toLowerCase().includes(locationFilter.toLowerCase()),
-  );
 
   const addItem = <T extends { id: number }>(
     setter: React.Dispatch<React.SetStateAction<T[]>>,
@@ -363,6 +390,17 @@ export default function AddUniversitySection({
     ...(colleges ? { colleges: colleges.map(({ id: cId, ...cRest }: any) => cRest) } : {}),
   }));
 
+  useEffect(() => {
+    const handleClick = (e: MouseEvent) => {
+      if (stateRef.current && !stateRef.current.contains(e.target as Node)) setShowStateDropdown(false);
+      if (districtRef.current && !districtRef.current.contains(e.target as Node)) setShowDistrictDropdown(false);
+      if (municipalityRef.current && !municipalityRef.current.contains(e.target as Node)) setShowMunicipalityDropdown(false);
+      if (wardRef.current && !wardRef.current.contains(e.target as Node)) setShowWardDropdown(false);
+    };
+    document.addEventListener("mousedown", handleClick);
+    return () => document.removeEventListener("mousedown", handleClick);
+  }, []);
+
   const handleCoverCrop = useCallback(
     (croppedBlob: Blob) => {
       const croppedFile = new File([croppedBlob], "cover.jpg", {
@@ -395,24 +433,22 @@ export default function AddUniversitySection({
   ) => {
     e.preventDefault();
     setFormError("");
-    setFormSuccess(false);
+    setFieldErrors({});
 
     if (status === "published") {
-      const missing: string[] = [];
-      if (!name.trim()) missing.push("University Name");
-      if (!description.trim()) missing.push("Description");
-      if (!location.trim()) missing.push("Location");
-      if (!type.trim()) missing.push("Type");
+      const errs: Record<string, string> = {};
+      if (!name.trim()) errs.name = "University name is required";
+      if (!description.trim()) errs.description = "Description is required";
+      if (!locDistrict.trim()) errs.location = "District is required";
+      if (!type.trim()) errs.type = "Type is required";
 
-      if (missing.length > 0) {
-        setFormError("Please fill in required fields: " + missing.join(", "));
+      if (Object.keys(errs).length > 0) {
+        setFieldErrors(errs);
         if (formRef.current) {
-          const firstErr = formRef.current.querySelector('[required]') as HTMLElement | null;
-          if (firstErr) {
-            firstErr.focus();
-            firstErr.scrollIntoView({ behavior: "smooth", block: "center" });
-          } else {
-            formRef.current.scrollIntoView({ behavior: "smooth", block: "start" });
+          const firstInput = formRef.current.querySelector('input, select, textarea') as HTMLElement | null;
+          if (firstInput) {
+            firstInput.focus();
+            firstInput.scrollIntoView({ behavior: "smooth", block: "center" });
           }
         }
         return;
@@ -444,7 +480,6 @@ export default function AddUniversitySection({
         name,
         logo: finalLogoUrl.startsWith("data:") ? "" : finalLogoUrl,
         cover: finalCoverUrl.startsWith("data:") ? "" : finalCoverUrl,
-        location,
         type,
         is_nepali: isNepali,
         rank,
@@ -461,11 +496,17 @@ export default function AddUniversitySection({
           prospectus_title: prospectusTitle,
           prospectus_url: finalProspectusUrl,
         },
+        location: [locState, locDistrict, locMunicipality, locWard ? `Ward ${locWard}` : "", locStreet].filter(Boolean).join(", ") || location,
         contact: {
           address: contactAddress,
           phone: contactPhone,
           email: contactEmail,
           website: contactWebsite,
+          state: locState,
+          district: locDistrict,
+          municipality: locMunicipality,
+          ward: locWard,
+          street: locStreet,
           facebook: contactFacebook,
           instagram: contactInstagram,
           youtube: contactYoutube,
@@ -474,7 +515,7 @@ export default function AddUniversitySection({
         },
         overview: stripId(overviewRows),
         leadership: stripId(leadershipRows),
-        quick: stripId(quickHighlights),
+
         courses: stripId(courses),
         scholarships: stripId(scholarships),
         downloads: stripId(downloads),
@@ -490,15 +531,15 @@ export default function AddUniversitySection({
           method: "PUT",
           body: JSON.stringify(body),
         });
-        setFormSuccess(true);
-        setTimeout(() => setActiveSection(targetSection), 1500);
+        toast.success("University updated successfully!");
+        setTimeout(() => setActiveSection(targetSection), 800);
       } else {
         await api("/api/v1/admin/universities", {
           method: "POST",
           body: JSON.stringify(body),
         });
-        setFormSuccess(true);
-        setTimeout(() => setActiveSection(targetSection), 1500);
+        toast.success("University created successfully!");
+        setTimeout(() => setActiveSection(targetSection), 800);
       }
     } catch (err: any) {
       setFormError(
@@ -525,19 +566,7 @@ export default function AddUniversitySection({
             </p>
           </div>
 
-          {formSuccess && (
-            <div className="flex items-center gap-3 bg-green-50 border border-green-200 text-green-800 rounded-lg px-4 py-3 text-sm font-medium">
-              <i className="fa-solid fa-check-circle text-green-600"></i>{" "}
-              {editId ? "University updated" : "University created"}{" "}
-              successfully! Redirecting...
-            </div>
-          )}
-          {formError && (
-            <div className="flex items-center gap-3 bg-red-50 border border-red-200 text-red-800 rounded-lg px-4 py-3 text-sm font-medium">
-              <i className="fa-solid fa-exclamation-circle text-red-600"></i>{" "}
-              {formError}
-            </div>
-          )}
+
 
           {/* ─── Logo & Cover ─── */}
           <div className="bg-white p-6 rounded-md border border-gray-200">
@@ -654,49 +683,62 @@ export default function AddUniversitySection({
                   className={inputClass}
                   placeholder="Enter university name"
                   value={name}
-                  onChange={(e) => setName(e.target.value)}
+                  onChange={(e) => { setName(e.target.value); setFieldErrors((prev) => ({ ...prev, name: "" })); }}
                   required
                 />
+                {fieldErrors.name && <p className="mt-1 text-xs text-red-500">{fieldErrors.name}</p>}
               </div>
-              <div className="relative" ref={locationRef}>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Location (District)
-                </label>
-                <input
-                  type="text"
-                  className={inputClass}
-                  placeholder="Type a district..."
-                  value={location}
-                  onChange={(e) => {
-                    setLocation(e.target.value);
-                    setLocationFilter(e.target.value);
-                    setShowSuggestions(true);
-                  }}
-                  onFocus={() => setShowSuggestions(true)}
-                />
-                {showSuggestions && (
-                  <div className="absolute z-20 top-full mt-1 w-full bg-white border border-gray-200 rounded-md shadow-lg max-h-48 overflow-y-auto">
-                    {filteredDistricts.length === 0 ? (
-                      <div className="px-3 py-2 text-sm text-gray-400">
-                        No districts found
-                      </div>
-                    ) : (
-                      filteredDistricts.map((d) => (
-                        <button
-                          key={d}
-                          type="button"
-                          onClick={() => {
-                            setLocation(d);
-                            setShowSuggestions(false);
-                          }}
-                          className="w-full text-left px-3 py-2 text-sm hover:bg-blue-50 hover:text-blue-600 transition-colors"
-                        >
-                          {d}
-                        </button>
-                      ))
-                    )}
+              <div className="relative" ref={stateRef}>
+                <label className="block text-sm font-medium text-gray-700 mb-2">State</label>
+                <input ref={stateInputRef} type="text" className={inputClass} placeholder="Search state..." value={locStateSearch || locState} onChange={(e) => { setLocStateSearch(e.target.value); setShowStateDropdown(true); setStateFocusIdx(0); }} onFocus={() => setShowStateDropdown(true)} onKeyDown={(e) => { const opts = NEPAL_PROVINCES.filter((p) => p.toLowerCase().includes((locStateSearch || "").toLowerCase())); if (e.key === "ArrowDown") { e.preventDefault(); setStateFocusIdx((prev) => Math.min(prev + 1, opts.length - 1)); } else if (e.key === "ArrowUp") { e.preventDefault(); setStateFocusIdx((prev) => Math.max(prev - 1, 0)); } else if (e.key === "Enter" && stateFocusIdx >= 0 && opts[stateFocusIdx]) { e.preventDefault(); const v = opts[stateFocusIdx]; setLocState(v); setLocStateSearch(""); setShowStateDropdown(false); setStateFocusIdx(-1); setLocDistrict(""); setLocMunicipality(""); setLocWard(""); } }} />
+                {showStateDropdown && (
+                  <div className="absolute z-20 top-full mt-1 w-full bg-white border border-gray-200 rounded-md shadow-lg max-h-40 overflow-y-auto">
+                    {NEPAL_PROVINCES.filter((p) => p.toLowerCase().includes((locStateSearch || "").toLowerCase())).map((p, i) => (
+                      <button key={p} type="button" className={`w-full text-left px-3 py-2 text-sm ${stateFocusIdx === i ? "bg-blue-50 text-blue-600" : "hover:bg-blue-50 hover:text-blue-600"}`} onMouseEnter={() => setStateFocusIdx(i)} onClick={() => { setLocState(p); setLocStateSearch(""); setShowStateDropdown(false); setStateFocusIdx(-1); setLocDistrict(""); setLocMunicipality(""); setLocWard(""); }}>{p}</button>
+                    ))}
                   </div>
                 )}
+              </div>
+              <div className="relative" ref={districtRef}>
+                <label className="block text-sm font-medium text-gray-700 mb-2">District <span className="text-red-500">*</span></label>
+                <input ref={districtInputRef} type="text" className={inputClass} placeholder="Search district..." value={locDistrictSearch || locDistrict} onChange={(e) => { setLocDistrictSearch(e.target.value); setShowDistrictDropdown(true); setDistrictFocusIdx(0); }} onFocus={() => setShowDistrictDropdown(true)} onKeyDown={(e) => { const opts = locState ? (NEPAL_DISTRICTS as Record<string, string[]>)[locState] || [] : []; const filtered = opts.filter((d) => d.toLowerCase().includes((locDistrictSearch || "").toLowerCase())); if (e.key === "ArrowDown") { e.preventDefault(); setDistrictFocusIdx((prev) => Math.min(prev + 1, filtered.length - 1)); } else if (e.key === "ArrowUp") { e.preventDefault(); setDistrictFocusIdx((prev) => Math.max(prev - 1, 0)); } else if (e.key === "Enter" && districtFocusIdx >= 0 && filtered[districtFocusIdx]) { e.preventDefault(); const v = filtered[districtFocusIdx]; setLocDistrict(v); setLocDistrictSearch(""); setShowDistrictDropdown(false); setDistrictFocusIdx(-1); setLocMunicipality(""); setLocWard(""); } }} />
+                {fieldErrors.location && <p className="mt-1 text-xs text-red-500">{fieldErrors.location}</p>}
+                {showDistrictDropdown && locState && (
+                  <div className="absolute z-20 top-full mt-1 w-full bg-white border border-gray-200 rounded-md shadow-lg max-h-40 overflow-y-auto">
+                    {((NEPAL_DISTRICTS as Record<string, string[]>)[locState] || []).filter((d) => d.toLowerCase().includes((locDistrictSearch || "").toLowerCase())).map((d, i) => (
+                      <button key={d} type="button" className={`w-full text-left px-3 py-2 text-sm ${districtFocusIdx === i ? "bg-blue-50 text-blue-600" : "hover:bg-blue-50 hover:text-blue-600"}`} onMouseEnter={() => setDistrictFocusIdx(i)} onClick={() => { setLocDistrict(d); setLocDistrictSearch(""); setShowDistrictDropdown(false); setDistrictFocusIdx(-1); setLocMunicipality(""); setLocWard(""); }}>{d}</button>
+                    ))}
+                  </div>
+                )}
+              </div>
+              <div className="relative" ref={municipalityRef}>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Municipality</label>
+                <input ref={municipalityInputRef} type="text" className={inputClass} placeholder="Search municipality..." value={locMunicipalitySearch || locMunicipality} onChange={(e) => { setLocMunicipalitySearch(e.target.value); setShowMunicipalityDropdown(true); setMunicipalityFocusIdx(0); }} onFocus={() => setShowMunicipalityDropdown(true)} onKeyDown={(e) => { const opts = locDistrict ? (NEPAL_LOCAL_BODIES as Record<string, {name: string; wards: number}[]>)[locDistrict] || [] : []; const filtered = opts.filter((m) => m.name.toLowerCase().includes((locMunicipalitySearch || "").toLowerCase())); if (e.key === "ArrowDown") { e.preventDefault(); setMunicipalityFocusIdx((prev) => Math.min(prev + 1, filtered.length - 1)); } else if (e.key === "ArrowUp") { e.preventDefault(); setMunicipalityFocusIdx((prev) => Math.max(prev - 1, 0)); } else if (e.key === "Enter" && municipalityFocusIdx >= 0 && filtered[municipalityFocusIdx]) { e.preventDefault(); const v = filtered[municipalityFocusIdx].name; setLocMunicipality(v); setLocMunicipalitySearch(""); setShowMunicipalityDropdown(false); setMunicipalityFocusIdx(-1); setLocWard(""); } }} />
+                {showMunicipalityDropdown && locDistrict && (
+                  <div className="absolute z-20 top-full mt-1 w-full bg-white border border-gray-200 rounded-md shadow-lg max-h-40 overflow-y-auto">
+                    {((NEPAL_LOCAL_BODIES as Record<string, {name: string; wards: number}[]>)[locDistrict] || []).filter((m) => m.name.toLowerCase().includes((locMunicipalitySearch || "").toLowerCase())).map((m, i) => (
+                      <button key={m.name} type="button" className={`w-full text-left px-3 py-2 text-sm ${municipalityFocusIdx === i ? "bg-blue-50 text-blue-600" : "hover:bg-blue-50 hover:text-blue-600"}`} onMouseEnter={() => setMunicipalityFocusIdx(i)} onClick={() => { setLocMunicipality(m.name); setLocMunicipalitySearch(""); setShowMunicipalityDropdown(false); setMunicipalityFocusIdx(-1); setLocWard(""); }}>{m.name}</button>
+                    ))}
+                  </div>
+                )}
+              </div>
+              <div className="relative" ref={wardRef}>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Ward No.</label>
+                <input ref={wardInputRef} type="text" className={inputClass} placeholder="Search ward..." value={locWardSearch || locWard} onChange={(e) => { setLocWardSearch(e.target.value); setShowWardDropdown(true); setWardFocusIdx(0); }} onFocus={() => setShowWardDropdown(true)} onKeyDown={(e) => { const body = ((NEPAL_LOCAL_BODIES as Record<string, {name: string; wards: number}[]>)[locDistrict] || []).find((b) => b.name === locMunicipality); const opts = body ? Array.from({ length: body.wards }, (_, i) => String(i + 1)) : []; const filtered = opts.filter((w) => w.includes(locWardSearch || "")); if (e.key === "ArrowDown") { e.preventDefault(); setWardFocusIdx((prev) => Math.min(prev + 1, filtered.length - 1)); } else if (e.key === "ArrowUp") { e.preventDefault(); setWardFocusIdx((prev) => Math.max(prev - 1, 0)); } else if (e.key === "Enter" && wardFocusIdx >= 0 && filtered[wardFocusIdx]) { e.preventDefault(); setLocWard(filtered[wardFocusIdx]); setLocWardSearch(""); setShowWardDropdown(false); setWardFocusIdx(-1); } }} />
+                {showWardDropdown && locMunicipality && (() => {
+                  const body = ((NEPAL_LOCAL_BODIES as Record<string, {name: string; wards: number}[]>)[locDistrict] || []).find((b) => b.name === locMunicipality);
+                  return body ? (
+                    <div className="absolute z-20 top-full mt-1 w-full bg-white border border-gray-200 rounded-md shadow-lg max-h-40 overflow-y-auto">
+                      {Array.from({ length: body.wards }, (_, i) => String(i + 1)).filter((w) => w.includes(locWardSearch || "")).map((w, i) => (
+                        <button key={w} type="button" className={`w-full text-left px-3 py-2 text-sm ${wardFocusIdx === i ? "bg-blue-50 text-blue-600" : "hover:bg-blue-50 hover:text-blue-600"}`} onMouseEnter={() => setWardFocusIdx(i)} onClick={() => { setLocWard(w); setLocWardSearch(""); setShowWardDropdown(false); setWardFocusIdx(-1); }}>Ward {w}</button>
+                      ))}
+                    </div>
+                  ) : null;
+                })()}
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Street</label>
+                <input type="text" className={inputClass} placeholder="e.g. Kirtipur" value={locStreet} onChange={(e) => setLocStreet(e.target.value)} />
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -705,7 +747,7 @@ export default function AddUniversitySection({
                 <select
                   className={inputClass}
                   value={type}
-                  onChange={(e) => setType(e.target.value)}
+                  onChange={(e) => { setType(e.target.value); setFieldErrors((prev) => ({ ...prev, type: "" })); }}
                 >
                   <option value="">Select type</option>
                   {UNIVERSITY_TYPES.map((t) => (
@@ -714,6 +756,7 @@ export default function AddUniversitySection({
                     </option>
                   ))}
                 </select>
+                {fieldErrors.type && <p className="mt-1 text-xs text-red-500">{fieldErrors.type}</p>}
               </div>
               <div>
                 <label className="flex items-center gap-3 cursor-pointer h-full pt-6">
@@ -781,10 +824,11 @@ export default function AddUniversitySection({
             </h3>
             <RichTextEditor
               value={description}
-              onChange={setDescription}
+              onChange={(val: string) => { setDescription(val); setFieldErrors((prev) => ({ ...prev, description: "" })); }}
               placeholder="Write a detailed description of the university..."
               minHeight={200}
             />
+            {fieldErrors.description && <p className="mt-1 text-xs text-red-500">{fieldErrors.description}</p>}
           </div>
 
           {/* ─── About Section ─── */}
@@ -1155,75 +1199,7 @@ export default function AddUniversitySection({
             </div>
           </div>
 
-          {/* ─── Quick Highlights ─── */}
-          <div className="bg-white p-6 rounded-md border border-gray-200">
-            <div className="flex justify-between items-center mb-5">
-              <h3 className="text-lg font-semibold text-gray-800">
-                <i className="fa-solid fa-bolt text-blue-500 mr-2"></i>Quick
-                Highlights
-              </h3>
-              <button
-                type="button"
-                onClick={() =>
-                  addItem(setQuickHighlights, { key: "", value: "" })
-                }
-                className="text-sm text-blue-600 bg-blue-50 px-3 py-1.5 rounded-md hover:bg-blue-100 transition-colors font-medium"
-              >
-                <i className="fa-solid fa-plus mr-1"></i> Add Highlight
-              </button>
-            </div>
-            <div className="space-y-3">
-              {quickHighlights.map((r) => (
-                <div
-                  key={r.id}
-                  className="bg-gray-50 border border-gray-200 rounded-md p-4 relative group"
-                >
-                  <button
-                    type="button"
-                    onClick={() => removeItem(setQuickHighlights, r.id)}
-                    className="absolute top-3 right-3 text-red-400 hover:text-red-600 hover:bg-red-50 p-1.5 rounded-md transition-colors opacity-0 group-hover:opacity-100"
-                  >
-                    <i className="fa-solid fa-trash"></i>
-                  </button>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3 pr-10">
-                    <input
-                      type="text"
-                      className={`${inputClass} text-sm`}
-                      placeholder="Key"
-                      value={r.key}
-                      onChange={(e) =>
-                        updateItem(
-                          setQuickHighlights,
-                          r.id,
-                          "key",
-                          e.target.value,
-                        )
-                      }
-                    />
-                    <input
-                      type="text"
-                      className={`${inputClass} text-sm`}
-                      placeholder="Value"
-                      value={r.value}
-                      onChange={(e) =>
-                        updateItem(
-                          setQuickHighlights,
-                          r.id,
-                          "value",
-                          e.target.value,
-                        )
-                      }
-                    />
-                  </div>
-                </div>
-              ))}
-              {quickHighlights.length === 0 && (
-                <p className="text-sm text-gray-400 py-2">
-                  No highlights added.
-                </p>
-              )}
-            </div>
-          </div>
+
 
           {/* ═══════════════ COURSES ═══════════════ */}
           <div className="bg-white p-6 rounded-md border border-gray-200">
@@ -1379,6 +1355,7 @@ export default function AddUniversitySection({
                     benefit: "",
                     eligibility: "",
                     level: "",
+                    application_link: "",
                   })
                 }
                 className="text-sm text-blue-600 bg-blue-50 px-3 py-1.5 rounded-md hover:bg-blue-100 transition-colors font-medium"
@@ -1466,6 +1443,20 @@ export default function AddUniversitySection({
                           setScholarships,
                           s.id,
                           "eligibility",
+                          e.target.value,
+                        )
+                      }
+                    />
+                    <input
+                      type="url"
+                      className={`${inputClass} text-sm`}
+                      placeholder="Application Link"
+                      value={s.application_link}
+                      onChange={(e) =>
+                        updateItem(
+                          setScholarships,
+                          s.id,
+                          "application_link",
                           e.target.value,
                         )
                       }
@@ -1968,6 +1959,13 @@ export default function AddUniversitySection({
             </label>
           </div>
 
+          {formError && (
+            <div className="bg-red-50 border border-red-200 text-red-600 rounded-lg px-4 py-3 text-sm font-medium">
+              <i className="fa-solid fa-exclamation-circle mr-2"></i>
+              {formError}
+            </div>
+          )}
+
           {/* ─── Footer ─── */}
           <div className="flex items-center justify-end space-x-4 pt-6 mt-8 border-t border-gray-200 pb-10">
             <button
@@ -2016,6 +2014,7 @@ export default function AddUniversitySection({
             setCropperOpen(false);
             setCropImageSrc(null);
           }}
+          aspectRatio={cropperTarget === "cover" ? 1920 / 360 : 1}
         />
       )}
     </div>

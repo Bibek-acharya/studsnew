@@ -121,14 +121,18 @@ const UniversityCard: React.FC<{
         </div>
 
         {/* Programs & Colleges Stats */}
-        {(uni.programs || uni.colleges) && (
-          <div className="mb-2 mt-1 flex items-center gap-4 text-[14px] text-gray-500">
-            <GraduationCap className="h-4.5 w-4.5 shrink-0 text-gray-400" />
-            <p className="font-semibold text-slate-700">
-              {[uni.programs && `${uni.programs} Programs`, uni.colleges && `${uni.colleges} Colleges`].filter(Boolean).join(" · ")}
-            </p>
-          </div>
-        )}
+        <div className="mb-2 mt-1 flex items-center gap-4 text-[14px] text-gray-500">
+          <GraduationCap className="h-4.5 w-4.5 shrink-0 text-gray-400" />
+          <p className="font-semibold text-slate-700">
+            {uni.programs && uni.colleges
+              ? `${uni.programs} Programs · ${uni.colleges} Colleges`
+              : uni.programs
+                ? `${uni.programs} Programs`
+                : uni.colleges
+                  ? `${uni.colleges} Colleges`
+                  : "No Programs Available"}
+          </p>
+        </div>
 
         {/* Website */}
         {websiteHref && (
