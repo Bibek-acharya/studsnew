@@ -2618,7 +2618,7 @@ export const apiService = {
     if (params?.page) qs.set("page", String(params.page));
     if (params?.limit) qs.set("limit", String(params.limit));
     qs.set("university_id", String(universityId));
-    return apiRequest<any>(`/api/v1/admin/events?${qs.toString()}`);
+    return apiRequest<any>(`/api/v1/education/events?${qs.toString()}`);
   },
 
   async getUniversityNews(
@@ -2629,7 +2629,7 @@ export const apiService = {
     if (params?.page) qs.set("page", String(params.page));
     if (params?.limit) qs.set("limit", String(params.limit));
     qs.set("university_id", String(universityId));
-    return apiRequest<any>(`/api/v1/admin/news?${qs.toString()}`);
+    return apiRequest<any>(`/api/v1/education/news?${qs.toString()}`);
   },
 
   async submitTestimonial(data: {

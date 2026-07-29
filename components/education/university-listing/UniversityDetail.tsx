@@ -405,7 +405,7 @@ const UniversityDetail: React.FC = () => {
             </div>
 
             {/* Profile Header */}
-            <div className="flex flex-col items-start justify-between pt-14 md:pt-20 lg:flex-row lg:items-end lg:pt-6 lg:pl-[170px]">
+            <div className="flex flex-col items-start justify-between pt-20 md:pt-24 lg:flex-row lg:items-end lg:pt-6 lg:pl-[170px]">
               <div className="w-full space-y-3 lg:w-auto">
                 <div className="flex items-center gap-2">
                   <h1 className="text-[18px] font-bold tracking-tight text-gray-900 md:text-[24px] lg:text-3xl truncate">
