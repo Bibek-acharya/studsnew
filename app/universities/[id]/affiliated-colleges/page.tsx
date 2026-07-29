@@ -1,3 +1,6 @@
+"use client";
+
+import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import { Home } from "lucide-react";
 
@@ -15,18 +18,25 @@ async function fetchFromAPI<T>(path: string): Promise<T | null> {
   } catch { return null; }
 }
 
-export default async function Page({ params }: { params: Promise<{ id: string }> }) {
-  const { id } = await params;
+export default function Page({ params }: { params: { id: string } }) {
+  const [data, setData] = useState<{ matched: any; institutions: any[] }>({ matched: null, institutions: [] });
 
-  const uniPayload = await fetchFromAPI<{ universities: { id: number; name: string; is_nepali: boolean }[] }>("/api/v1/universities?pageSize=200");
-  const allUnis = uniPayload?.universities ?? [];
-  const matched = allUnis.find((u) => toSlug(u.name) === id) ?? null;
+  useEffect(() => {
+    (async () => {
+      const id = params.id;
+      const uniPayload = await fetchFromAPI<{ universities: { id: number; name: string; is_nepali: boolean }[] }>("/api/v1/universities?pageSize=200");
+      const allUnis = uniPayload?.universities ?? [];
+      const matched = allUnis.find((u) => toSlug(u.name) === id) ?? null;
+      let institutions: any[] = [];
+      if (matched) {
+        const instPayload = await fetchFromAPI<{ institutions: any[] }>(`/api/v1/institutions/public/by-university/${matched.id}`);
+        institutions = instPayload?.institutions ?? [];
+      }
+      setData({ matched, institutions });
+    })();
+  }, [params.id]);
 
-  let institutions: any[] = [];
-  if (matched) {
-    const instPayload = await fetchFromAPI<{ institutions: any[] }>(`/api/v1/institutions/public/by-university/${matched.id}`);
-    institutions = instPayload?.institutions ?? [];
-  }
+  const { matched, institutions } = data;
 
   return (
     <div className="min-h-screen bg-gray-50">
