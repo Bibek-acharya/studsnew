@@ -325,17 +325,6 @@ export default function AddUniversitySection({
           setMapEmbed(contactData.map_embed || "");
         }
 
-        const quickData = parseJson(d.quick);
-        if (quickData) {
-          const rows = Array.isArray(quickData)
-            ? quickData
-            : Object.entries(quickData).map(([k, v]) => ({
-                key: k,
-                value: String(v),
-              }));
-          setQuickHighlights(withId(rows));
-        }
-
         if (d.courses) setCourses(withId(parseJson(d.courses) || []));
         if (d.scholarships)
           setScholarships(withId(parseJson(d.scholarships) || []));

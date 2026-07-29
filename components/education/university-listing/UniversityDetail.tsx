@@ -672,6 +672,7 @@ const UniversityDetail: React.FC = () => {
                               ? "bg-blue-600 text-white"
                               : "border border-gray-200 bg-white text-gray-700 hover:bg-gray-100"
                           }`}
+                        >
                           {level === "all" ? "All" : level}
                         </button>
                       ))}
