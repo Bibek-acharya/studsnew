@@ -211,6 +211,10 @@ body {
   line-height: 1.8;
   color: #4b5563;
   font-size: 0.9375rem;
+  text-align: left;
+}
+.rich-text * {
+  text-align: left !important;
 }
 .rich-text :is(h1, h2, h3, h4, h5, h6) {
   font-weight: 700;

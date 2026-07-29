@@ -123,6 +123,8 @@ export default function AddUniversitySection({
   const [type, setType] = useState("");
   const [isNepali, setIsNepali] = useState(true);
   const [rank, setRank] = useState<number>(0);
+  const [programsCount, setProgramsCount] = useState<number>(0);
+  const [collegesCount, setCollegesCount] = useState<number>(0);
   const [verified, setVerified] = useState(false);
   const [description, setDescription] = useState("");
   const [established, setEstablished] = useState("");
@@ -250,6 +252,8 @@ export default function AddUniversitySection({
         }
         setIsNepali(d.is_nepali !== false);
         setRank(d.rank || 0);
+        setProgramsCount(d.programsCount || 0);
+        setCollegesCount(d.collegesCount || 0);
         setVerified(d.verified || false);
         setDescription(d.description || "");
         setEstablished(d.established || "");
@@ -477,6 +481,8 @@ export default function AddUniversitySection({
         type,
         is_nepali: isNepali,
         rank,
+        programsCount,
+        collegesCount,
         verified,
         status,
         description,
@@ -768,16 +774,16 @@ export default function AddUniversitySection({
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Rank
-                </label>
-                <input
-                  type="number"
-                  className={inputClass}
-                  placeholder="0"
-                  value={rank}
-                  onChange={(e) => setRank(Number(e.target.value))}
-                />
+                <label className="block text-sm font-medium text-gray-700 mb-2">Rank</label>
+                <input type="number" className={inputClass} placeholder="0" value={rank} onChange={(e) => setRank(Number(e.target.value))} />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Programs Count</label>
+                <input type="number" className={inputClass} placeholder="0" value={programsCount} onChange={(e) => setProgramsCount(Number(e.target.value))} />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Colleges Count</label>
+                <input type="number" className={inputClass} placeholder="0" value={collegesCount} onChange={(e) => setCollegesCount(Number(e.target.value))} />
               </div>
               <div className="md:col-span-2">
                 <label className="block text-sm font-medium text-gray-700 mb-2">
