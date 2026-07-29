@@ -344,18 +344,20 @@ export default function AddCollegeSection({
                 <div className="flex flex-wrap gap-2">
                   {levelOptions.map(opt => (
                     <label key={opt}
-                      className={`px-3 py-1.5 rounded-md border text-sm cursor-pointer transition-colors ${
+                      className={`px-3 py-1.5 rounded-md border text-sm cursor-pointer transition-colors flex items-center gap-1.5 ${
                         level.includes(opt)
                           ? "bg-blue-50 border-blue-400 text-blue-700"
                           : "bg-white border-gray-300 text-gray-600 hover:border-gray-400"
                       }`}>
                       <input type="checkbox" className="hidden" checked={level.includes(opt)}
                         onChange={() => toggleLevel(opt)} />
+                      {level.includes(opt) && <i className="fa-solid fa-check text-xs"></i>}
                       {opt}
                     </label>
                   ))}
                 </div>
               </div>
+              {level.some(l => l === "Bachelor" || l === "Master") ? (
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">Affiliated University</label>
                 <select className={inputClass} value={universityId} onChange={e => { setUniversityId(Number(e.target.value)); const uni = universities.find(u => u.id === Number(e.target.value)); if (uni) setAffiliation(uni.name); }}>
@@ -363,6 +365,12 @@ export default function AddCollegeSection({
                   {universities.map(u => <option key={u.id} value={u.id}>{u.name}</option>)}
                 </select>
               </div>
+              ) : (
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Affiliation</label>
+                <input type="text" className={inputClass} placeholder="e.g. Tribhuvan University" value={affiliation} onChange={e => setAffiliation(e.target.value)} />
+              </div>
+              )}
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">Website</label>
                 <input type="text" className={inputClass} placeholder="www.college.edu.np" value={website} onChange={e => setWebsite(e.target.value)} />

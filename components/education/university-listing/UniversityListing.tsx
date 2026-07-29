@@ -291,7 +291,7 @@ const UniversityListing: React.FC<UniversityListingProps> = ({ type }) => {
                       setSearchQuery(e.target.value);
                       setCurrentPage(1);
                     }}
-                    className="w-full rounded-xl border border-gray-200 bg-white py-2.5 pl-10 pr-4 text-[14px] font-medium text-gray-800 shadow-[0_2px_10px_-3px_rgba(0,0,0,0.05)] transition-all placeholder-gray-400 focus:border-[#2563eb] focus:outline-none focus:ring-4 focus:ring-blue-500/10 sm:w-[320px]"
+                    className="w-full rounded-md border border-gray-200 bg-white py-2.5 pl-10 pr-4 text-sm transition-all placeholder-gray-400 focus:border-transparent focus:outline-none focus:ring-1 focus:ring-brand-blue sm:w-[320px]"
                   />
                   <svg
                     className="absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400"

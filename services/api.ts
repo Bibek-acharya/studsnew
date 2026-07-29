@@ -1537,6 +1537,7 @@ export const apiService = {
     isNepali?: string;
   }): Promise<{ data: { universities: University[] } }> {
     const query = new URLSearchParams();
+    query.set("status", "published");
     if (params?.search) query.set("search", params.search);
     if (params?.type) query.set("type", params.type);
     if (params?.popular) query.set("popular", "true");

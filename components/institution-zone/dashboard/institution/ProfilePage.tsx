@@ -164,6 +164,9 @@ const ProfilePage: React.FC = () => {
   const router = useRouter();
   const [collegeName, setCollegeName] = useState("");
   const [location, setLocation] = useState("");
+  const [level, setLevel] = useState<string[]>([]);
+  const toggleLevel = (v: string) => setLevel(prev => prev.includes(v) ? prev.filter(l => l !== v) : [...prev, v]);
+  const levelOptions = ["+2", "Bachelor", "Master", "A Level", "CTEVT"];
   const [website, setWebsite] = useState("");
   const [contactEmail, setContactEmail] = useState("");
   const [contactPhone, setContactPhone] = useState("");
@@ -311,6 +314,7 @@ const ProfilePage: React.FC = () => {
         setYoutubeUrl(data.youtube_url || "");
         setLinkedinUrl(data.linkedin_url || "");
         setAffiliation(data.affiliation || "");
+        if (data.level) setLevel(data.level.split(",").filter(Boolean));
         setBrochureUrl(data.brochure_data?.url || "");
         setLogoUrl(data.logo_url || "");
         if (data.profile_status) setProfileStatus(data.profile_status);
@@ -610,6 +614,7 @@ const ProfilePage: React.FC = () => {
         status,
         institution_name: collegeName,
         location,
+        level: level.join(","),
         website,
         contact_email: contactEmail,
         contact_phone: contactPhone,
@@ -898,6 +903,18 @@ const ProfilePage: React.FC = () => {
                 )}
               </div>
               <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Level</label>
+                <div className="flex flex-wrap gap-2">
+                  {levelOptions.map(opt => (
+                    <label key={opt} className={`px-3 py-1.5 rounded-md border text-sm cursor-pointer transition-colors flex items-center gap-1.5 ${level.includes(opt) ? "bg-blue-50 border-blue-400 text-blue-700" : "bg-white border-gray-300 text-gray-600 hover:border-gray-400"}`}>
+                      <input type="checkbox" className="hidden" checked={level.includes(opt)} onChange={() => toggleLevel(opt)} />
+                      {level.includes(opt) && <i className="fa-solid fa-check text-xs"></i>}
+                      {opt}
+                    </label>
+                  ))}
+                </div>
+              </div>
+              <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
                   Website
                 </label>
@@ -933,24 +950,20 @@ const ProfilePage: React.FC = () => {
                   onChange={(e) => setContactPhone(e.target.value)}
                 />
               </div>
+              {level.some(l => l === "Bachelor" || l === "Master") ? (
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Affiliated University
-                </label>
-                <select
-                  className={inputClass}
-                  value={universityId}
-                  onChange={(e) => {
-                    const id = Number(e.target.value);
-                    setUniversityId(id);
-                    const uni = universities.find(u => u.id === id);
-                    setAffiliation(uni ? uni.name : "");
-                  }}
-                >
+                <label className="block text-sm font-medium text-gray-700 mb-2">Affiliated University</label>
+                <select className={inputClass} value={universityId} onChange={(e) => { const id = Number(e.target.value); setUniversityId(id); const uni = universities.find(u => u.id === id); setAffiliation(uni ? uni.name : ""); }}>
                   <option value={0}>Select University</option>
                   {universities.map(u => <option key={u.id} value={u.id}>{u.name}</option>)}
                 </select>
               </div>
+              ) : (
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Affiliation</label>
+                <input type="text" className={inputClass} placeholder="e.g. Tribhuvan University" value={affiliation} onChange={(e) => setAffiliation(e.target.value)} />
+              </div>
+              )}
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
                   Google Maps Embed URL
