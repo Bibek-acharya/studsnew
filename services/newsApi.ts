@@ -46,6 +46,7 @@ export const adminNewsApi = {
       category?: string;
       search?: string;
       university_id?: number;
+      has_university?: string;
     } = {},
   ): Promise<{ news: AdminNews[]; meta: NewsMeta }> {
     const query = new URLSearchParams();
@@ -54,6 +55,7 @@ export const adminNewsApi = {
     if (params.category) query.set("category", params.category);
     if (params.search) query.set("search", params.search);
     if (params.university_id) query.set("university_id", String(params.university_id));
+    if (params.has_university) query.set("has_university", params.has_university);
     const qs = query.toString();
     return extractData(
       apiRequest(`/api/v1/admin/news${qs ? "?" + qs : ""}`, {

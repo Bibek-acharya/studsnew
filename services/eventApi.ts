@@ -208,6 +208,7 @@ export const adminEventApi = {
       category?: string;
       search?: string;
       university_id?: number;
+      has_university?: string;
     } = {},
   ): Promise<{ events: AdminEvent[]; meta: EventMeta }> {
     const query = new URLSearchParams();
@@ -216,6 +217,7 @@ export const adminEventApi = {
     if (params.category) query.set("category", params.category);
     if (params.search) query.set("search", params.search);
     if (params.university_id) query.set("university_id", String(params.university_id));
+    if (params.has_university) query.set("has_university", params.has_university);
     const qs = query.toString();
     return extractData(
       apiRequest(`/api/v1/admin/events${qs ? "?" + qs : ""}`, {

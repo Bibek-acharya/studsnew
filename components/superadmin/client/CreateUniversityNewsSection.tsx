@@ -46,7 +46,7 @@ export default function CreateUniversityNewsSection({ setActiveSection, editId }
       try {
         const token = localStorage.getItem("superadmin_token");
         const baseUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080";
-        const res = await fetch(`${baseUrl}/api/v1/admin/universities?limit=500&status=published`, {
+        const res = await fetch(`${baseUrl}/api/v1/admin/universities?limit=500`, {
           headers: token ? { Authorization: `Bearer ${token}` } : {},
         });
         const json = await res.json();
@@ -116,7 +116,7 @@ export default function CreateUniversityNewsSection({ setActiveSection, editId }
 
       <div className="bg-white rounded-lg p-8 border border-slate-100">
         {error && <div className="mb-4 p-3 bg-red-50 text-red-600 text-sm rounded-lg">{error}</div>}
-        <div className="space-y-5 max-w-3xl">
+        <div className="space-y-5">
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">University *</label>
             <select className="w-full border border-gray-300 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:border-blue-500" value={universityId} onChange={(e) => setUniversityId(Number(e.target.value))}>

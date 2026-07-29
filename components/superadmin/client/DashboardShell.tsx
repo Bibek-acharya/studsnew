@@ -800,8 +800,8 @@ export default function DashboardShell() {
           </Suspense>
         </main>
       </div>
+      <Toaster position="bottom-right" closeButton={false} />
     </div>
-    <Toaster position="bottom-right" closeButton={false} />
   );
 }
 

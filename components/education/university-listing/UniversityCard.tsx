@@ -130,7 +130,7 @@ const UniversityCard: React.FC<{
                 ? `${uni.programs} Programs`
                 : uni.colleges
                   ? `${uni.colleges} Colleges`
-                  : "No Programs Available"}
+                  : "0 Programs · 0 Colleges"}
           </p>
         </div>
 

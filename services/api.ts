@@ -2632,6 +2632,21 @@ export const apiService = {
     return apiRequest<any>(`/api/v1/education/news?${qs.toString()}`);
   },
 
+  async getSponsoredInstitutions(universityId: number): Promise<any> {
+    return apiRequest<any>(`/api/v1/institutions/public/sponsored/${universityId}`);
+  },
+
+  async getInstitutionsByUniversity(universityId: number): Promise<any> {
+    return apiRequest<any>(`/api/v1/institutions/public/by-university/${universityId}`);
+  },
+
+  async toggleInstitutionSponsored(institutionId: number, isSponsored: boolean): Promise<any> {
+    return apiRequest<any>(`/api/v1/admin/institutions/${institutionId}/sponsored`, {
+      method: "PUT",
+      body: JSON.stringify({ is_sponsored: isSponsored }),
+    });
+  },
+
   async submitTestimonial(data: {
     name: string;
     designation: string;

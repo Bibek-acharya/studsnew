@@ -5,6 +5,7 @@ import { toast } from "sonner";
 import RichTextEditor from "@/components/ScholarshipProvider/common/RichTextEditor";
 import ImageCropperModal from "@/components/ScholarshipProvider/common/ImageCropperModal";
 import { NEPAL_PROVINCES, NEPAL_DISTRICTS, NEPAL_LOCAL_BODIES } from "@/lib/location-data";
+import DatePicker from "@/components/ScholarshipProvider/common/DatePicker";
 
 
 interface VideoItem {
@@ -106,8 +107,6 @@ const inputClass =
 
 const UNIVERSITY_TYPES = ["Public", "Private", "Community", "Constituent"];
 
-const STATUS_OPTIONS = ["Open", "Ongoing", "Closed"];
-
 export default function AddUniversitySection({
   setActiveSection,
   editId,
@@ -120,7 +119,6 @@ export default function AddUniversitySection({
   const [locState, setLocState] = useState("");
   const [locDistrict, setLocDistrict] = useState("");
   const [locMunicipality, setLocMunicipality] = useState("");
-  const [locWard, setLocWard] = useState("");
   const [locStreet, setLocStreet] = useState("");
   const [type, setType] = useState("");
   const [isNepali, setIsNepali] = useState(true);
@@ -172,23 +170,18 @@ export default function AddUniversitySection({
   const [locStateSearch, setLocStateSearch] = useState("");
   const [locDistrictSearch, setLocDistrictSearch] = useState("");
   const [locMunicipalitySearch, setLocMunicipalitySearch] = useState("");
-  const [locWardSearch, setLocWardSearch] = useState("");
   const [showStateDropdown, setShowStateDropdown] = useState(false);
   const [showDistrictDropdown, setShowDistrictDropdown] = useState(false);
   const [showMunicipalityDropdown, setShowMunicipalityDropdown] = useState(false);
-  const [showWardDropdown, setShowWardDropdown] = useState(false);
   const [stateFocusIdx, setStateFocusIdx] = useState(-1);
   const [districtFocusIdx, setDistrictFocusIdx] = useState(-1);
   const [municipalityFocusIdx, setMunicipalityFocusIdx] = useState(-1);
-  const [wardFocusIdx, setWardFocusIdx] = useState(-1);
   const stateRef = useRef<HTMLDivElement>(null);
   const districtRef = useRef<HTMLDivElement>(null);
   const municipalityRef = useRef<HTMLDivElement>(null);
-  const wardRef = useRef<HTMLDivElement>(null);
   const stateInputRef = useRef<HTMLInputElement>(null);
   const districtInputRef = useRef<HTMLInputElement>(null);
   const municipalityInputRef = useRef<HTMLInputElement>(null);
-  const wardInputRef = useRef<HTMLInputElement>(null);
   const logoInputRef = useRef<HTMLInputElement>(null);
   const coverInputRef = useRef<HTMLInputElement>(null);
   const formRef = useRef<HTMLFormElement>(null);
@@ -253,7 +246,6 @@ export default function AddUniversitySection({
           setLocState(c.state || "");
           setLocDistrict(c.district || "");
           setLocMunicipality(c.municipality || "");
-          setLocWard(c.ward || "");
           setLocStreet(c.street || "");
         }
         setIsNepali(d.is_nepali !== false);
@@ -341,7 +333,20 @@ export default function AddUniversitySection({
           }
         }
         if (d.faculties) setFaculties(withId(parseJson(d.faculties) || []));
-        if (d.admissions) setAdmissions(withId(parseJson(d.admissions) || []));
+        if (d.admissions) {
+          const parsed = withId(parseJson(d.admissions) || []);
+          const today = new Date(); today.setHours(0,0,0,0);
+          const recalculated = parsed.map((a: any) => {
+            if (!a.opens_from && !a.deadline) return a;
+            const open = a.opens_from ? new Date(a.opens_from + "T00:00:00") : null;
+            const dl = a.deadline ? new Date(a.deadline + "T00:00:00") : null;
+            let s = "Open";
+            if (dl && today >= dl) s = "Closed";
+            else if (open && today < open) s = "Ongoing";
+            return { ...a, status: s };
+          });
+          setAdmissions(recalculated);
+        }
       })
       .catch(() => {});
   }, [editId]);
@@ -385,7 +390,6 @@ export default function AddUniversitySection({
       if (stateRef.current && !stateRef.current.contains(e.target as Node)) setShowStateDropdown(false);
       if (districtRef.current && !districtRef.current.contains(e.target as Node)) setShowDistrictDropdown(false);
       if (municipalityRef.current && !municipalityRef.current.contains(e.target as Node)) setShowMunicipalityDropdown(false);
-      if (wardRef.current && !wardRef.current.contains(e.target as Node)) setShowWardDropdown(false);
     };
     document.addEventListener("mousedown", handleClick);
     return () => document.removeEventListener("mousedown", handleClick);
@@ -486,7 +490,7 @@ export default function AddUniversitySection({
           prospectus_title: prospectusTitle,
           prospectus_url: finalProspectusUrl,
         },
-        location: [locState, locDistrict, locMunicipality, locWard ? `Ward ${locWard}` : "", locStreet].filter(Boolean).join(", ") || location,
+        location: locDistrict || location,
         contact: {
           address: contactAddress,
           phone: contactPhone,
@@ -495,7 +499,6 @@ export default function AddUniversitySection({
           state: locState,
           district: locDistrict,
           municipality: locMunicipality,
-          ward: locWard,
           street: locStreet,
           facebook: contactFacebook,
           instagram: contactInstagram,
@@ -680,52 +683,39 @@ export default function AddUniversitySection({
               </div>
               <div className="relative" ref={stateRef}>
                 <label className="block text-sm font-medium text-gray-700 mb-2">State</label>
-                <input ref={stateInputRef} type="text" className={inputClass} placeholder="Search state..." value={locStateSearch || locState} onChange={(e) => { setLocStateSearch(e.target.value); setShowStateDropdown(true); setStateFocusIdx(0); }} onFocus={() => setShowStateDropdown(true)} onKeyDown={(e) => { const opts = NEPAL_PROVINCES.filter((p) => p.toLowerCase().includes((locStateSearch || "").toLowerCase())); if (e.key === "ArrowDown") { e.preventDefault(); setStateFocusIdx((prev) => Math.min(prev + 1, opts.length - 1)); } else if (e.key === "ArrowUp") { e.preventDefault(); setStateFocusIdx((prev) => Math.max(prev - 1, 0)); } else if (e.key === "Enter" && stateFocusIdx >= 0 && opts[stateFocusIdx]) { e.preventDefault(); const v = opts[stateFocusIdx]; setLocState(v); setLocStateSearch(""); setShowStateDropdown(false); setStateFocusIdx(-1); setLocDistrict(""); setLocMunicipality(""); setLocWard(""); } }} />
+                <input ref={stateInputRef} type="text" className={inputClass} placeholder="Search state..." value={locStateSearch || locState} onChange={(e) => { setLocStateSearch(e.target.value); setShowStateDropdown(true); setStateFocusIdx(0); }} onFocus={() => setShowStateDropdown(true)} onKeyDown={(e) => { const opts = NEPAL_PROVINCES.filter((p) => p.toLowerCase().includes((locStateSearch || "").toLowerCase())); if (e.key === "ArrowDown") { e.preventDefault(); setStateFocusIdx((prev) => Math.min(prev + 1, opts.length - 1)); } else if (e.key === "ArrowUp") { e.preventDefault(); setStateFocusIdx((prev) => Math.max(prev - 1, 0)); } else if (e.key === "Enter" && stateFocusIdx >= 0 && opts[stateFocusIdx]) { e.preventDefault(); const v = opts[stateFocusIdx]; setLocState(v); setLocStateSearch(""); setShowStateDropdown(false); setStateFocusIdx(-1); setLocDistrict(""); setLocMunicipality("");  } }} />
                 {showStateDropdown && (
                   <div className="absolute z-20 top-full mt-1 w-full bg-white border border-gray-200 rounded-md shadow-lg max-h-40 overflow-y-auto">
                     {NEPAL_PROVINCES.filter((p) => p.toLowerCase().includes((locStateSearch || "").toLowerCase())).map((p, i) => (
-                      <button key={p} type="button" className={`w-full text-left px-3 py-2 text-sm ${stateFocusIdx === i ? "bg-blue-50 text-blue-600" : "hover:bg-blue-50 hover:text-blue-600"}`} onMouseEnter={() => setStateFocusIdx(i)} onClick={() => { setLocState(p); setLocStateSearch(""); setShowStateDropdown(false); setStateFocusIdx(-1); setLocDistrict(""); setLocMunicipality(""); setLocWard(""); }}>{p}</button>
+                      <button key={p} type="button" className={`w-full text-left px-3 py-2 text-sm ${stateFocusIdx === i ? "bg-blue-50 text-blue-600" : "hover:bg-blue-50 hover:text-blue-600"}`} onMouseEnter={() => setStateFocusIdx(i)} onClick={() => { setLocState(p); setLocStateSearch(""); setShowStateDropdown(false); setStateFocusIdx(-1); setLocDistrict(""); setLocMunicipality("");  }}>{p}</button>
                     ))}
                   </div>
                 )}
               </div>
               <div className="relative" ref={districtRef}>
                 <label className="block text-sm font-medium text-gray-700 mb-2">District <span className="text-red-500">*</span></label>
-                <input ref={districtInputRef} type="text" className={inputClass} placeholder="Search district..." value={locDistrictSearch || locDistrict} onChange={(e) => { setLocDistrictSearch(e.target.value); setShowDistrictDropdown(true); setDistrictFocusIdx(0); }} onFocus={() => setShowDistrictDropdown(true)} onKeyDown={(e) => { const opts = locState ? (NEPAL_DISTRICTS as Record<string, string[]>)[locState] || [] : []; const filtered = opts.filter((d) => d.toLowerCase().includes((locDistrictSearch || "").toLowerCase())); if (e.key === "ArrowDown") { e.preventDefault(); setDistrictFocusIdx((prev) => Math.min(prev + 1, filtered.length - 1)); } else if (e.key === "ArrowUp") { e.preventDefault(); setDistrictFocusIdx((prev) => Math.max(prev - 1, 0)); } else if (e.key === "Enter" && districtFocusIdx >= 0 && filtered[districtFocusIdx]) { e.preventDefault(); const v = filtered[districtFocusIdx]; setLocDistrict(v); setLocDistrictSearch(""); setShowDistrictDropdown(false); setDistrictFocusIdx(-1); setLocMunicipality(""); setLocWard(""); } }} />
+                <input ref={districtInputRef} type="text" className={inputClass} placeholder="Search district..." value={locDistrictSearch || locDistrict} onChange={(e) => { setLocDistrictSearch(e.target.value); setShowDistrictDropdown(true); setDistrictFocusIdx(0); }} onFocus={() => setShowDistrictDropdown(true)} onKeyDown={(e) => { const opts = locState ? (NEPAL_DISTRICTS as Record<string, string[]>)[locState] || [] : []; const filtered = opts.filter((d) => d.toLowerCase().includes((locDistrictSearch || "").toLowerCase())); if (e.key === "ArrowDown") { e.preventDefault(); setDistrictFocusIdx((prev) => Math.min(prev + 1, filtered.length - 1)); } else if (e.key === "ArrowUp") { e.preventDefault(); setDistrictFocusIdx((prev) => Math.max(prev - 1, 0)); } else if (e.key === "Enter" && districtFocusIdx >= 0 && filtered[districtFocusIdx]) { e.preventDefault(); const v = filtered[districtFocusIdx]; setLocDistrict(v); setLocDistrictSearch(""); setShowDistrictDropdown(false); setDistrictFocusIdx(-1); setLocMunicipality("");  } }} />
                 {fieldErrors.location && <p className="mt-1 text-xs text-red-500">{fieldErrors.location}</p>}
                 {showDistrictDropdown && locState && (
                   <div className="absolute z-20 top-full mt-1 w-full bg-white border border-gray-200 rounded-md shadow-lg max-h-40 overflow-y-auto">
                     {((NEPAL_DISTRICTS as Record<string, string[]>)[locState] || []).filter((d) => d.toLowerCase().includes((locDistrictSearch || "").toLowerCase())).map((d, i) => (
-                      <button key={d} type="button" className={`w-full text-left px-3 py-2 text-sm ${districtFocusIdx === i ? "bg-blue-50 text-blue-600" : "hover:bg-blue-50 hover:text-blue-600"}`} onMouseEnter={() => setDistrictFocusIdx(i)} onClick={() => { setLocDistrict(d); setLocDistrictSearch(""); setShowDistrictDropdown(false); setDistrictFocusIdx(-1); setLocMunicipality(""); setLocWard(""); }}>{d}</button>
+                      <button key={d} type="button" className={`w-full text-left px-3 py-2 text-sm ${districtFocusIdx === i ? "bg-blue-50 text-blue-600" : "hover:bg-blue-50 hover:text-blue-600"}`} onMouseEnter={() => setDistrictFocusIdx(i)} onClick={() => { setLocDistrict(d); setLocDistrictSearch(""); setShowDistrictDropdown(false); setDistrictFocusIdx(-1); setLocMunicipality("");  }}>{d}</button>
                     ))}
                   </div>
                 )}
               </div>
               <div className="relative" ref={municipalityRef}>
                 <label className="block text-sm font-medium text-gray-700 mb-2">Municipality</label>
-                <input ref={municipalityInputRef} type="text" className={inputClass} placeholder="Search municipality..." value={locMunicipalitySearch || locMunicipality} onChange={(e) => { setLocMunicipalitySearch(e.target.value); setShowMunicipalityDropdown(true); setMunicipalityFocusIdx(0); }} onFocus={() => setShowMunicipalityDropdown(true)} onKeyDown={(e) => { const opts = locDistrict ? (NEPAL_LOCAL_BODIES as Record<string, {name: string; wards: number}[]>)[locDistrict] || [] : []; const filtered = opts.filter((m) => m.name.toLowerCase().includes((locMunicipalitySearch || "").toLowerCase())); if (e.key === "ArrowDown") { e.preventDefault(); setMunicipalityFocusIdx((prev) => Math.min(prev + 1, filtered.length - 1)); } else if (e.key === "ArrowUp") { e.preventDefault(); setMunicipalityFocusIdx((prev) => Math.max(prev - 1, 0)); } else if (e.key === "Enter" && municipalityFocusIdx >= 0 && filtered[municipalityFocusIdx]) { e.preventDefault(); const v = filtered[municipalityFocusIdx].name; setLocMunicipality(v); setLocMunicipalitySearch(""); setShowMunicipalityDropdown(false); setMunicipalityFocusIdx(-1); setLocWard(""); } }} />
+                <input ref={municipalityInputRef} type="text" className={inputClass} placeholder="Search municipality..." value={locMunicipalitySearch || locMunicipality} onChange={(e) => { setLocMunicipalitySearch(e.target.value); setShowMunicipalityDropdown(true); setMunicipalityFocusIdx(0); }} onFocus={() => setShowMunicipalityDropdown(true)} onKeyDown={(e) => { const opts = locDistrict ? (NEPAL_LOCAL_BODIES as Record<string, {name: string; wards: number}[]>)[locDistrict] || [] : []; const filtered = opts.filter((m) => m.name.toLowerCase().includes((locMunicipalitySearch || "").toLowerCase())); if (e.key === "ArrowDown") { e.preventDefault(); setMunicipalityFocusIdx((prev) => Math.min(prev + 1, filtered.length - 1)); } else if (e.key === "ArrowUp") { e.preventDefault(); setMunicipalityFocusIdx((prev) => Math.max(prev - 1, 0)); } else if (e.key === "Enter" && municipalityFocusIdx >= 0 && filtered[municipalityFocusIdx]) { e.preventDefault(); const v = filtered[municipalityFocusIdx].name; setLocMunicipality(v); setLocMunicipalitySearch(""); setShowMunicipalityDropdown(false); setMunicipalityFocusIdx(-1);  } }} />
                 {showMunicipalityDropdown && locDistrict && (
                   <div className="absolute z-20 top-full mt-1 w-full bg-white border border-gray-200 rounded-md shadow-lg max-h-40 overflow-y-auto">
                     {((NEPAL_LOCAL_BODIES as Record<string, {name: string; wards: number}[]>)[locDistrict] || []).filter((m) => m.name.toLowerCase().includes((locMunicipalitySearch || "").toLowerCase())).map((m, i) => (
-                      <button key={m.name} type="button" className={`w-full text-left px-3 py-2 text-sm ${municipalityFocusIdx === i ? "bg-blue-50 text-blue-600" : "hover:bg-blue-50 hover:text-blue-600"}`} onMouseEnter={() => setMunicipalityFocusIdx(i)} onClick={() => { setLocMunicipality(m.name); setLocMunicipalitySearch(""); setShowMunicipalityDropdown(false); setMunicipalityFocusIdx(-1); setLocWard(""); }}>{m.name}</button>
+                      <button key={m.name} type="button" className={`w-full text-left px-3 py-2 text-sm ${municipalityFocusIdx === i ? "bg-blue-50 text-blue-600" : "hover:bg-blue-50 hover:text-blue-600"}`} onMouseEnter={() => setMunicipalityFocusIdx(i)} onClick={() => { setLocMunicipality(m.name); setLocMunicipalitySearch(""); setShowMunicipalityDropdown(false); setMunicipalityFocusIdx(-1);  }}>{m.name}</button>
                     ))}
                   </div>
                 )}
               </div>
-              <div className="relative" ref={wardRef}>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Ward No.</label>
-                <input ref={wardInputRef} type="text" className={inputClass} placeholder="Search ward..." value={locWardSearch || locWard} onChange={(e) => { setLocWardSearch(e.target.value); setShowWardDropdown(true); setWardFocusIdx(0); }} onFocus={() => setShowWardDropdown(true)} onKeyDown={(e) => { const body = ((NEPAL_LOCAL_BODIES as Record<string, {name: string; wards: number}[]>)[locDistrict] || []).find((b) => b.name === locMunicipality); const opts = body ? Array.from({ length: body.wards }, (_, i) => String(i + 1)) : []; const filtered = opts.filter((w) => w.includes(locWardSearch || "")); if (e.key === "ArrowDown") { e.preventDefault(); setWardFocusIdx((prev) => Math.min(prev + 1, filtered.length - 1)); } else if (e.key === "ArrowUp") { e.preventDefault(); setWardFocusIdx((prev) => Math.max(prev - 1, 0)); } else if (e.key === "Enter" && wardFocusIdx >= 0 && filtered[wardFocusIdx]) { e.preventDefault(); setLocWard(filtered[wardFocusIdx]); setLocWardSearch(""); setShowWardDropdown(false); setWardFocusIdx(-1); } }} />
-                {showWardDropdown && locMunicipality && (() => {
-                  const body = ((NEPAL_LOCAL_BODIES as Record<string, {name: string; wards: number}[]>)[locDistrict] || []).find((b) => b.name === locMunicipality);
-                  return body ? (
-                    <div className="absolute z-20 top-full mt-1 w-full bg-white border border-gray-200 rounded-md shadow-lg max-h-40 overflow-y-auto">
-                      {Array.from({ length: body.wards }, (_, i) => String(i + 1)).filter((w) => w.includes(locWardSearch || "")).map((w, i) => (
-                        <button key={w} type="button" className={`w-full text-left px-3 py-2 text-sm ${wardFocusIdx === i ? "bg-blue-50 text-blue-600" : "hover:bg-blue-50 hover:text-blue-600"}`} onMouseEnter={() => setWardFocusIdx(i)} onClick={() => { setLocWard(w); setLocWardSearch(""); setShowWardDropdown(false); setWardFocusIdx(-1); }}>Ward {w}</button>
-                      ))}
-                    </div>
-                  ) : null;
-                })()}
-              </div>
+
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">Street</label>
                 <input type="text" className={inputClass} placeholder="e.g. Kirtipur" value={locStreet} onChange={(e) => setLocStreet(e.target.value)} />
@@ -1726,17 +1716,21 @@ export default function AddUniversitySection({
                                 <input type="text" className="w-full border border-gray-200 rounded px-2 py-1 text-sm focus:outline-none focus:border-blue-500" placeholder="e.g. 4 Years" value={p.duration} onChange={(e) => { const updated = [...(f.programs || [])]; updated[pi] = { ...updated[pi], duration: e.target.value }; setFaculties((prev: any[]) => prev.map((x) => x.id === f.id ? { ...x, programs: updated } : x)); }} />
                               </td>
                               <td className="px-3 py-2">
-                                <input type="text" className="w-full border border-gray-200 rounded px-2 py-1 text-sm focus:outline-none focus:border-blue-500" placeholder="e.g. Rs. 80,000" value={p.fee} onChange={(e) => { const updated = [...(f.programs || [])]; updated[pi] = { ...updated[pi], fee: e.target.value }; setFaculties((prev: any[]) => prev.map((x) => x.id === f.id ? { ...x, programs: updated } : x)); }} />
+                                <select className="w-full border border-gray-200 rounded px-2 py-1 text-sm focus:outline-none focus:border-blue-500 bg-white" value={p.fee} onChange={(e) => { const updated = [...(f.programs || [])]; updated[pi] = { ...updated[pi], fee: e.target.value }; setFaculties((prev: any[]) => prev.map((x) => x.id === f.id ? { ...x, programs: updated } : x)); }}>
+                                  <option value="">Select</option>
+                                  <option value="Yearly">Yearly</option>
+                                  <option value="Semester-wise">Semester-wise</option>
+                                </select>
                               </td>
                               <td className="px-3 py-2 text-center">
-                                <button onClick={() => setFaculties((prev: any[]) => prev.map((x) => x.id === f.id ? { ...x, programs: (x.programs || []).filter((_: any, i: number) => i !== pi) } : x))} className="text-red-400 hover:text-red-600 text-xs"><i className="fa-solid fa-times"></i></button>
+                                <button type="button" onClick={() => setFaculties((prev: any[]) => prev.map((x) => x.id === f.id ? { ...x, programs: (x.programs || []).filter((_: any, i: number) => i !== pi) } : x))} className="text-red-400 hover:text-red-600 text-xs"><i className="fa-solid fa-times"></i></button>
                               </td>
                             </tr>
                           ))}
                         </tbody>
                       </table>
                     </div>
-                    <button onClick={() => setFaculties((prev: any[]) => prev.map((x) => x.id === f.id ? { ...x, programs: [...(x.programs || []), { id: Date.now(), name: "", duration: "", fee: "" }] } : x))} className="mt-2 text-xs text-blue-600 hover:text-blue-800"><i className="fa-solid fa-plus mr-1"></i> Add Program</button>
+                    <button type="button" onClick={() => setFaculties((prev: any[]) => prev.map((x) => x.id === f.id ? { ...x, programs: [...(x.programs || []), { id: Date.now(), name: "", duration: "", fee: "" }] } : x))} className="mt-2 text-xs text-blue-600 hover:text-blue-800"><i className="fa-solid fa-plus mr-1"></i> Add Program</button>
                   </div>
 
                   <div>
@@ -1762,14 +1756,14 @@ export default function AddUniversitySection({
                                 <input type="text" className="w-full border border-gray-200 rounded px-2 py-1 text-sm focus:outline-none focus:border-blue-500" placeholder="Location" value={c.location} onChange={(e) => { const updated = [...(f.colleges || [])]; updated[ci] = { ...updated[ci], location: e.target.value }; setFaculties((prev: any[]) => prev.map((x) => x.id === f.id ? { ...x, colleges: updated } : x)); }} />
                               </td>
                               <td className="px-3 py-2 text-center">
-                                <button onClick={() => setFaculties((prev: any[]) => prev.map((x) => x.id === f.id ? { ...x, colleges: (x.colleges || []).filter((_: any, i: number) => i !== ci) } : x))} className="text-red-400 hover:text-red-600 text-xs"><i className="fa-solid fa-times"></i></button>
+                                <button type="button" onClick={() => setFaculties((prev: any[]) => prev.map((x) => x.id === f.id ? { ...x, colleges: (x.colleges || []).filter((_: any, i: number) => i !== ci) } : x))} className="text-red-400 hover:text-red-600 text-xs"><i className="fa-solid fa-times"></i></button>
                               </td>
                             </tr>
                           ))}
                         </tbody>
                       </table>
                     </div>
-                    <button onClick={() => setFaculties((prev: any[]) => prev.map((x) => x.id === f.id ? { ...x, colleges: [...(x.colleges || []), { id: Date.now(), name: "", location: "" }] } : x))} className="mt-2 text-xs text-blue-600 hover:text-blue-800"><i className="fa-solid fa-plus mr-1"></i> Add College</button>
+                    <button type="button" onClick={() => setFaculties((prev: any[]) => prev.map((x) => x.id === f.id ? { ...x, colleges: [...(x.colleges || []), { id: Date.now(), name: "", location: "" }] } : x))} className="mt-2 text-xs text-blue-600 hover:text-blue-800"><i className="fa-solid fa-plus mr-1"></i> Add College</button>
                   </div>
                 </div>
               ))}
@@ -1792,7 +1786,7 @@ export default function AddUniversitySection({
                   addItem(setAdmissions, {
                     program: "",
                     faculty: "",
-                    status: "Open",
+                    status: "",
                     opens_from: "",
                     deadline: "",
                     fee: "",
@@ -1846,51 +1840,33 @@ export default function AddUniversitySection({
                         )
                       }
                     />
-                    <select
-                      className={`${inputClass} text-sm`}
-                      value={a.status}
-                      onChange={(e) =>
-                        updateItem(
-                          setAdmissions,
-                          a.id,
-                          "status",
-                          e.target.value,
-                        )
-                      }
-                    >
-                      {STATUS_OPTIONS.map((s) => (
-                        <option key={s} value={s}>
-                          {s}
-                        </option>
-                      ))}
-                    </select>
-                    <input
-                      type="text"
-                      className={`${inputClass} text-sm`}
-                      placeholder="Opens From"
+                    <DatePicker
                       value={a.opens_from}
-                      onChange={(e) =>
-                        updateItem(
-                          setAdmissions,
-                          a.id,
-                          "opens_from",
-                          e.target.value,
-                        )
-                      }
+                      onChange={(val) => {
+                        updateItem(setAdmissions, a.id, "opens_from", val);
+                        const today = new Date(); today.setHours(0,0,0,0);
+                        const open = new Date(val + "T00:00:00");
+                        const dl = a.deadline ? new Date(a.deadline + "T00:00:00") : null;
+                        let status = "Open";
+                        if (dl && today >= dl) status = "Closed";
+                        else if (today < open) status = "Ongoing";
+                        updateItem(setAdmissions, a.id, "status", status);
+                      }}
+                      placeholder="Opens From"
                     />
-                    <input
-                      type="text"
-                      className={`${inputClass} text-sm`}
-                      placeholder="Deadline"
+                    <DatePicker
                       value={a.deadline}
-                      onChange={(e) =>
-                        updateItem(
-                          setAdmissions,
-                          a.id,
-                          "deadline",
-                          e.target.value,
-                        )
-                      }
+                      onChange={(val) => {
+                        updateItem(setAdmissions, a.id, "deadline", val);
+                        const today = new Date(); today.setHours(0,0,0,0);
+                        const open = a.opens_from ? new Date(a.opens_from + "T00:00:00") : null;
+                        const dl = new Date(val + "T00:00:00");
+                        let status = "Open";
+                        if (today >= dl) status = "Closed";
+                        else if (open && today < open) status = "Ongoing";
+                        updateItem(setAdmissions, a.id, "status", status);
+                      }}
+                      placeholder="Deadline"
                     />
                     <input
                       type="text"

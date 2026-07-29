@@ -22,7 +22,7 @@ export default function UniversityNewsSection({ setActiveSection }: { setActiveS
   const fetchNews = useCallback(async (p: number, s: string, uid: number) => {
     setLoading(true);
     try {
-      const params: any = { page: p, limit, search: s || undefined };
+      const params: any = { page: p, limit, search: s || undefined, has_university: "true" };
       if (uid) params.university_id = uid;
       const res = await adminNewsApi.list(params);
       setNews(res.news || []);
@@ -36,7 +36,7 @@ export default function UniversityNewsSection({ setActiveSection }: { setActiveS
       try {
         const token = localStorage.getItem("superadmin_token");
         const baseUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080";
-        const res = await fetch(`${baseUrl}/api/v1/admin/universities?limit=500&status=published`, {
+        const res = await fetch(`${baseUrl}/api/v1/admin/universities?limit=500`, {
           headers: token ? { Authorization: `Bearer ${token}` } : {},
         });
         const json = await res.json();

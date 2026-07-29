@@ -174,6 +174,8 @@ const ProfilePage: React.FC = () => {
   const [youtubeUrl, setYoutubeUrl] = useState("");
   const [linkedinUrl, setLinkedinUrl] = useState("");
   const [affiliation, setAffiliation] = useState("");
+  const [universityId, setUniversityId] = useState(0);
+  const [universities, setUniversities] = useState<{ id: number; name: string }[]>([]);
   const [brochureUrl, setBrochureUrl] = useState("");
   const [about, setAbout] = useState("");
   const [vision, setVision] = useState("");
@@ -237,6 +239,17 @@ const ProfilePage: React.FC = () => {
   useEffect(() => {
     loadProfile();
     loadSettings();
+    (async () => {
+      try {
+        const token = localStorage.getItem("institutionToken");
+        const base = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080";
+        const res = await fetch(`${base}/api/v1/admin/universities?limit=500`, {
+          headers: token ? { Authorization: `Bearer ${token}` } : {},
+        });
+        const json = await res.json();
+        setUniversities(json?.data?.universities?.map((u: any) => ({ id: u.id, name: u.name })) || []);
+      } catch {}
+    })();
   }, []);
 
   const getToken = () => localStorage.getItem("institutionToken");
@@ -286,6 +299,7 @@ const ProfilePage: React.FC = () => {
       const data = res?.data;
       if (data) {
         setCollegeName(data.institution_name || "");
+        setUniversityId(data.university_id || 0);
         setLocation(data.location || "");
         setWebsite(data.website || "");
         setContactEmail(data.contact_email || "");
@@ -606,6 +620,7 @@ const ProfilePage: React.FC = () => {
         youtube_url: youtubeUrl,
         linkedin_url: linkedinUrl,
         affiliation,
+        university_id: universityId || undefined,
         brochure_data: brochureUrl ? { url: brochureUrl } : null,
         logo_url: logoUrl,
         banner_url: bannerUrl,
@@ -920,15 +935,21 @@ const ProfilePage: React.FC = () => {
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Affiliation
+                  Affiliated University
                 </label>
-                <input
-                  type="text"
+                <select
                   className={inputClass}
-                  placeholder="Tribhuvan University"
-                  value={affiliation}
-                  onChange={(e) => setAffiliation(e.target.value)}
-                />
+                  value={universityId}
+                  onChange={(e) => {
+                    const id = Number(e.target.value);
+                    setUniversityId(id);
+                    const uni = universities.find(u => u.id === id);
+                    setAffiliation(uni ? uni.name : "");
+                  }}
+                >
+                  <option value={0}>Select University</option>
+                  {universities.map(u => <option key={u.id} value={u.id}>{u.name}</option>)}
+                </select>
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">

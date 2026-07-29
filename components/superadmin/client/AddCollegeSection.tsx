@@ -34,6 +34,8 @@ export default function AddCollegeSection({
 
   const levelOptions = ["+2", "Bachelor", "Master", "A Level", "CTEVT"];
   const [affiliation, setAffiliation] = useState("");
+  const [universityId, setUniversityId] = useState(0);
+  const [universities, setUniversities] = useState<{ id: number; name: string }[]>([]);
   const [about, setAbout] = useState("");
   const [vision, setVision] = useState("");
   const [mission, setMission] = useState("");
@@ -72,6 +74,7 @@ export default function AddCollegeSection({
         setLocation(d.district || "");
         setWebsite(d.website_url || "");
         setAffiliation(d.affiliation || "");
+        setUniversityId(d.university_id || 0);
         setAbout(d.about || "");
         setVision(d.vision || "");
         setMission(d.mission || "");
@@ -87,6 +90,20 @@ export default function AddCollegeSection({
       })
       .catch(() => {});
   }, [editId]);
+
+  useEffect(() => {
+    (async () => {
+      try {
+        const token = getToken();
+        const base = apiBase();
+        const res = await fetch(`${base}/api/v1/admin/universities?limit=500`, {
+          headers: token ? { Authorization: `Bearer ${token}` } : {},
+        });
+        const json = await res.json();
+        setUniversities(json?.data?.universities?.map((u: any) => ({ id: u.id, name: u.name })) || []);
+      } catch {}
+    })();
+  }, []);
 
   const filteredDistricts = DISTRICTS.filter(d => d.toLowerCase().includes(locationFilter.toLowerCase()));
 
@@ -169,6 +186,7 @@ export default function AddCollegeSection({
         website,
         level: level.join(","),
         affiliation,
+        university_id: universityId || undefined,
         logo_url: finalLogoUrl.startsWith("data:") ? "" : finalLogoUrl,
         banner_url: finalBannerUrl.startsWith("data:") ? "" : finalBannerUrl,
         about, vision, mission,
@@ -340,7 +358,10 @@ export default function AddCollegeSection({
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">Affiliated University</label>
-                <input type="text" className={inputClass} placeholder="e.g. Tribhuvan University" value={affiliation} onChange={e => setAffiliation(e.target.value)} />
+                <select className={inputClass} value={universityId} onChange={e => { setUniversityId(Number(e.target.value)); const uni = universities.find(u => u.id === Number(e.target.value)); if (uni) setAffiliation(uni.name); }}>
+                  <option value={0}>Select University</option>
+                  {universities.map(u => <option key={u.id} value={u.id}>{u.name}</option>)}
+                </select>
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">Website</label>

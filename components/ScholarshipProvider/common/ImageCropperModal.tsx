@@ -78,7 +78,7 @@ const ImageCropperModal: React.FC<ImageCropperModalProps> = ({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60">
-      <div className="relative bg-white rounded-xl w-full max-w-3xl mx-4 overflow-hidden">
+      <div className="relative bg-white rounded-xl w-full max-w-3xl mx-4 max-h-[90vh] overflow-y-auto">
         <div className="flex items-center justify-between px-6 py-4 border-b border-gray-200">
           <h3 className="text-lg font-semibold text-gray-900">Crop Banner Image</h3>
           <button
@@ -102,7 +102,7 @@ const ImageCropperModal: React.FC<ImageCropperModalProps> = ({
               ref={imageRef}
               src={imageSrc}
               alt="Crop preview"
-              className="max-h-[500px] w-auto object-contain"
+              className="max-h-[50vh] w-auto object-contain"
               onLoad={onImageLoad}
             />
           </ReactCrop>

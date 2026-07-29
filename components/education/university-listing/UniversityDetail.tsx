@@ -107,6 +107,7 @@ const UniversityDetail: React.FC = () => {
   const [uniNews, setUniNews] = useState<any[]>([]);
   const [uniEventsLoading, setUniEventsLoading] = useState(false);
   const [uniNewsLoading, setUniNewsLoading] = useState(false);
+  const [sponsoredInsts, setSponsoredInsts] = useState<any[]>([]);
   const [galFolder, setGalFolder] = useState("all");
   const [galCount, setGalCount] = useState(9);
   const [galIdx, setGalIdx] = useState<number | null>(null);
@@ -163,6 +164,9 @@ const UniversityDetail: React.FC = () => {
       })
       .catch(() => setError("Failed to load university details"))
       .finally(() => setLoading(false));
+    apiService.getSponsoredInstitutions(id).then((res) => {
+      setSponsoredInsts(res?.data?.institutions || res?.institutions || []);
+    }).catch(() => {});
   }, [id]);
 
   const uni = university;
@@ -585,7 +589,7 @@ const UniversityDetail: React.FC = () => {
                     </div>
                   )}
 
-                  {overviewList.length > 0 && (
+                  {overviewList.filter((row: any) => (row.label || row.key || row.field) && (row.value || row.val)).length > 0 && (
                     <div className="overflow-hidden rounded-md border border-gray-100 bg-white">
                       <div className="border-b border-gray-100 bg-[#f8fafc] px-6 py-4">
                         <h3 className="flex items-center gap-2 text-[16px] font-bold text-gray-900">
@@ -594,7 +598,7 @@ const UniversityDetail: React.FC = () => {
                         </h3>
                       </div>
                       <div className="divide-y divide-gray-100">
-                        {overviewList.map((row: any, idx: number) => (
+                        {overviewList.filter((row: any) => (row.label || row.key || row.field) && (row.value || row.val)).map((row: any, idx: number) => (
                           <div
                             key={idx}
                             className="flex flex-col p-4 transition-colors hover:bg-gray-50 sm:flex-row"
@@ -606,7 +610,7 @@ const UniversityDetail: React.FC = () => {
                               className="w-full text-[14px] text-gray-600 sm:w-2/3 rich-text"
                               dangerouslySetInnerHTML={{
                                 __html: safeHtml(
-                                  row.value || row.val || String(row),
+                                  row.value || row.val || "",
                                 ),
                               }}
                             />
@@ -857,7 +861,7 @@ const UniversityDetail: React.FC = () => {
                                   <div className="col-span-1 text-[12px] font-bold uppercase tracking-wider text-gray-600">SN</div>
                                   <div className="col-span-5 text-[12px] font-bold uppercase tracking-wider text-gray-600">PROGRAM</div>
                                   <div className="col-span-3 text-[12px] font-bold uppercase tracking-wider text-gray-600">DURATION</div>
-                                  <div className="col-span-3 text-[12px] font-bold uppercase tracking-wider text-gray-600">YEARLY/SEMESTER</div>
+                                  <div className="col-span-3 text-[12px] font-bold uppercase tracking-wider text-gray-600">FEE TYPE</div>
                                 </div>
                                 <div className="divide-y divide-gray-100">
                                   {fac.programs.map((p: any, pi: number) => (
@@ -910,9 +914,9 @@ const UniversityDetail: React.FC = () => {
                                 {ad.faculty && <p className="text-[13px] text-gray-500">{ad.faculty}</p>}
                               </div>
                               <div className="col-span-2">
-                                <span className={`inline-block rounded-md px-2.5 py-1 text-[11px] font-bold whitespace-nowrap ${ad.status === "Open" || ad.status === "Ongoing" ? "bg-[#ecfdf5] text-[#10b981]" : "bg-[#fef2f2] text-[#ef4444]"}`}>
-                                  {ad.status}
-                                </span>
+                                {(() => { const today = new Date(); today.setHours(0,0,0,0); const open = ad.opens_from ? new Date(ad.opens_from + "T00:00:00") : null; const dl = ad.deadline ? new Date(ad.deadline + "T00:00:00") : null; let s = ad.status || "Open"; if (dl && today >= dl) s = "Closed"; else if (open && today < open) s = "Ongoing"; return ( <span className={`inline-block rounded-md px-2.5 py-1 text-[11px] font-bold whitespace-nowrap ${s === "Open" || s === "Ongoing" ? "bg-[#ecfdf5] text-[#10b981]" : "bg-[#fef2f2] text-[#ef4444]"}`}>
+                                  {s}
+                                </span>); })()}
                               </div>
                               <div className="col-span-2 text-[14px] text-gray-600">{ad.opens_from || "-"}</div>
                               <div className="col-span-2 text-[14px] text-gray-600">{ad.deadline || "-"}</div>
@@ -1363,7 +1367,7 @@ const UniversityDetail: React.FC = () => {
             {/* Right Column - matching college details page */}
             <div className="space-y-6 lg:col-span-1 lg:w-full lg:max-w-[400px] lg:ml-8 xl:ml-12">
               {(() => {
-                const fullAddress = [contactData?.state, contactData?.district, contactData?.municipality, contactData?.ward ? `Ward ${contactData.ward}` : "", contactData?.street].filter(Boolean).join(", ");
+                const fullAddress = [contactData?.state, contactData?.district, contactData?.municipality].filter(Boolean).join(" / ");
                 const displayAddress = fullAddress || contactData?.address || "";
                 const hasAddress = !!displayAddress;
                 const hasPhone = !!contactData?.phone;
@@ -1506,6 +1510,46 @@ const UniversityDetail: React.FC = () => {
                 );
               })()}
 
+              {sponsoredInsts.length > 0 && (
+                <div>
+                  <div className="flex items-center justify-between mb-5">
+                    <h3 className="text-[20px] font-bold text-gray-900">Affiliated Colleges</h3>
+                  </div>
+                  <div className="space-y-4">
+                    {sponsoredInsts.map((inst: any) => (
+                      <div key={inst.id} className="bg-white border border-gray-200 rounded-[14px] p-5 flex items-center gap-4 transition-colors">
+                        <div className="w-[60px] h-[60px] rounded-lg bg-white border border-gray-100 flex items-center justify-center shrink-0 p-1">
+                          {inst.logo_url ? (
+                            <img src={inst.logo_url} alt={inst.institution_name} className="w-full h-full object-contain rounded" />
+                          ) : (
+                            <div className="w-full h-full bg-blue-50 text-blue-600 text-[10px] font-bold flex items-center justify-center rounded uppercase text-center leading-tight">{inst.institution_name?.charAt(0) || "C"}</div>
+                          )}
+                        </div>
+                        <div className="min-w-0 flex-1">
+                          <Link href={`/find-college/${inst.college_id || inst.id}`} className="block">
+                            <h4 className="text-[17px] font-bold text-gray-900 truncate hover:text-brand-hover transition-colors" title={inst.institution_name}>{inst.institution_name}</h4>
+                          </Link>
+                          <div className="flex items-center gap-1.5 text-gray-500 text-[13px] mt-1">
+                            <i className="fa-solid fa-location-dot text-xs"></i>
+                            <span className="truncate">{inst.district || ""}</span>
+                          </div>
+                          {inst.website_url && (
+                            <a href={inst.website_url.startsWith("http") ? inst.website_url : `https://${inst.website_url}`} target="_blank" rel="noopener noreferrer" className="flex items-center gap-1 text-brand-blue text-[13px] font-medium hover:text-brand-hover mt-1">
+                              <i className="fa-solid fa-globe text-xs"></i>
+                              {inst.website_url.replace(/^https?:\/\//, "")}
+                            </a>
+                          )}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                  <div className="mt-4 text-center">
+                    <Link href={`/universities/${name.toLowerCase().replace(/\s+/g, "-")}/affiliated-colleges`} className="text-sm font-semibold text-brand-blue hover:text-brand-hover transition-colors">
+                      View All Affiliated Colleges →
+                    </Link>
+                  </div>
+                </div>
+              )}
             </div>
           </div>
         </div>
