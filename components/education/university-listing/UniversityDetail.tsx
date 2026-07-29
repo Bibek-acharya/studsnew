@@ -390,7 +390,7 @@ const UniversityDetail: React.FC = () => {
         <div className="relative bg-white">
           <div className="relative mx-auto max-w-[1400px] pb-8">
             {/* Logo */}
-            <div className="absolute -top-4 left-6 z-10 flex h-20 w-20 items-center justify-center overflow-hidden rounded-md border border-gray-200 bg-white p-1.5 md:left-12 md:h-[150px] md:w-[150px] lg:left-24 xl:left-32">
+            <div className="relative -mt-2 z-10 flex h-20 w-20 items-center justify-center overflow-hidden rounded-md border border-gray-200 bg-white p-1.5 md:absolute md:-top-4 md:left-0 md:h-[150px] md:w-[150px]">
               {uni?.logo ? (
                 <Image
                   src={uni.logo}
@@ -405,7 +405,7 @@ const UniversityDetail: React.FC = () => {
             </div>
 
             {/* Profile Header */}
-            <div className="flex flex-col items-start justify-between pt-20 md:pt-24 lg:flex-row lg:items-end lg:pt-6 lg:pl-[170px]">
+            <div className="flex flex-col items-start justify-between pt-4 md:pt-24 md:pl-[170px] lg:flex-row lg:items-end lg:pt-6 lg:pl-[170px]">
               <div className="w-full space-y-3 lg:w-auto">
                 <div className="flex items-center gap-2">
                   <h1 className="text-[18px] font-bold tracking-tight text-gray-900 md:text-[24px] lg:text-3xl truncate">
@@ -484,7 +484,7 @@ const UniversityDetail: React.FC = () => {
           {/* Tab Nav */}
           <div className="sticky top-0 z-40 overflow-x-auto border-b border-t border-gray-100 bg-white shadow-sm shadow-gray-100/50 no-scrollbar">
             <nav
-              className="mx-auto max-w-[1400px] flex space-x-8 whitespace-nowrap"
+              className="mx-auto max-w-[1400px] flex space-x-8 whitespace-nowrap px-4 md:px-0"
               id="tab-nav"
             >
               {TABS.map((tab) => (
@@ -504,7 +504,7 @@ const UniversityDetail: React.FC = () => {
           </div>
 
           {/* Main Content */}
-          <div className="mx-auto max-w-[1400px] grid grid-cols-1 gap-10 bg-white py-8 md:gap-14 md:py-12 lg:grid-cols-3">
+          <div className="mx-auto max-w-[1400px] grid grid-cols-1 gap-10 bg-white py-8 px-4 md:px-0 md:gap-14 md:py-12 lg:grid-cols-3">
             {/* Left Column */}
             <div className="lg:col-span-2">
               {/* ========== ABOUT ========== */}
