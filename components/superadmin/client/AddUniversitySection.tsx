@@ -1883,7 +1883,7 @@ export default function AddUniversitySection({
                         className={`${inputClass} text-sm`}
                         placeholder="Short Description (max 100 characters)"
                         maxLength={100}
-                        value={a.short_description}
+                        value={a.short_description || ""}
                         onChange={(e) =>
                           updateItem(
                             setAdmissions,
@@ -1894,7 +1894,7 @@ export default function AddUniversitySection({
                         }
                       />
                       <p className="mt-1 text-xs text-gray-400">
-                        {a.short_description.length}/100
+                        {(a.short_description || "").length}/100
                       </p>
                     </div>
                   </div>
