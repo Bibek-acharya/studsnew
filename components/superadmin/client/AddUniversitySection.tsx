@@ -552,7 +552,21 @@ export default function AddUniversitySection({
 
   return (
     <div className="flex-1 overflow-y-auto bg-gray-50/50 p-4 md:p-8 font-sans">
-      <form ref={formRef} onSubmit={handleSubmit}>
+      <form
+        ref={formRef}
+        onSubmit={handleSubmit}
+        onKeyDown={(e) => {
+          if (e.key !== "Enter") return;
+          const target = e.target as HTMLElement;
+          if (target.tagName === "TEXTAREA") return;
+          if (
+            target.tagName === "BUTTON" &&
+            (target as HTMLButtonElement).type === "submit"
+          )
+            return;
+          e.preventDefault();
+        }}
+      >
         <div className="max-w-[90rem] mx-auto space-y-8">
           <div>
             <h2 className="text-xl font-bold text-gray-800">
