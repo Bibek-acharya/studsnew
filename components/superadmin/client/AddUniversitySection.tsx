@@ -51,6 +51,7 @@ interface FacultyCollege {
   id: number;
   name: string;
   location: string;
+  programs: string;
 }
 interface FacultyItem {
   id: number;
@@ -65,7 +66,6 @@ interface ScholarshipItem {
   benefit: string;
   eligibility: string;
   level: string;
-  application_link: string;
 }
 interface DownloadItem {
   id: number;
@@ -94,11 +94,18 @@ interface AdmissionItem {
   id: number;
   program: string;
   faculty: string;
-  status: string;
   opens_from: string;
   deadline: string;
-  fee: string;
-  application_link: string;
+  short_description: string;
+}
+interface NewsItem {
+  id: number;
+  text: string;
+  date: string;
+}
+interface OfficialNotice {
+  id: number;
+  url: string;
 }
 
 
@@ -168,6 +175,8 @@ export default function AddUniversitySection({
   const [gallery, setGallery] = useState<GalleryAlbum[]>([]);
   const [faculties, setFaculties] = useState<FacultyItem[]>([]);
   const [admissions, setAdmissions] = useState<AdmissionItem[]>([]);
+  const [officialNotices, setOfficialNotices] = useState<OfficialNotice[]>([]);
+  const [latestNews, setLatestNews] = useState<NewsItem[]>([]);
 
   const [locStateSearch, setLocStateSearch] = useState("");
   const [locDistrictSearch, setLocDistrictSearch] = useState("");
@@ -338,18 +347,13 @@ export default function AddUniversitySection({
         }
         if (d.faculties) setFaculties(withId(parseJson(d.faculties) || []));
         if (d.admissions) {
-          const parsed = withId(parseJson(d.admissions) || []);
-          const today = new Date(); today.setHours(0,0,0,0);
-          const recalculated = parsed.map((a: any) => {
-            if (!a.opens_from && !a.deadline) return a;
-            const open = a.opens_from ? new Date(a.opens_from + "T00:00:00") : null;
-            const dl = a.deadline ? new Date(a.deadline + "T00:00:00") : null;
-            let s = "Open";
-            if (dl && today >= dl) s = "Closed";
-            else if (open && today < open) s = "Ongoing";
-            return { ...a, status: s };
-          });
-          setAdmissions(recalculated);
+          setAdmissions(withId(parseJson(d.admissions) || []));
+        }
+        if (d.official_notices) {
+          setOfficialNotices(withId(parseJson(d.official_notices) || []));
+        }
+        if (d.latest_news) {
+          setLatestNews(withId(parseJson(d.latest_news) || []));
         }
       })
       .catch(() => {});
@@ -521,6 +525,8 @@ export default function AddUniversitySection({
         gallery: stripId(gallery),
         faculties: stripId(faculties),
         admissions: stripId(admissions),
+        official_notices: stripId(officialNotices),
+        latest_news: stripId(latestNews),
       };
 
       const targetSection = status === "draft" ? "draft-universities" : "list-universities";
@@ -650,9 +656,12 @@ export default function AddUniversitySection({
                       <i className="fa-regular fa-image text-4xl text-gray-400"></i>
                       <div className="flex text-sm text-gray-600 justify-center mt-3">
                         <span className="font-medium text-blue-600 hover:text-blue-500">
-                          Upload cover
+                          Click to upload cover image
                         </span>
                       </div>
+                      <p className="text-xs text-gray-500 mt-1">
+                        Recommended size: 1920 × 360 pixels
+                      </p>
                     </div>
                   )}
                   <input
@@ -1260,6 +1269,9 @@ export default function AddUniversitySection({
                       <option value="">Select Level</option>
                       <option value="Bachelor's">Bachelor's</option>
                       <option value="Master">Master</option>
+                      <option value="Master of Philosophy">Master of Philosophy</option>
+                      <option value="Doctorate">Doctorate</option>
+                      <option value="Post graduate diploma">Post graduate diploma</option>
                     </select>
                     <input
                       type="text"
@@ -1355,7 +1367,6 @@ export default function AddUniversitySection({
                     benefit: "",
                     eligibility: "",
                     level: "",
-                    application_link: "",
                   })
                 }
                 className="text-sm text-blue-600 bg-blue-50 px-3 py-1.5 rounded-md hover:bg-blue-100 transition-colors font-medium"
@@ -1443,20 +1454,6 @@ export default function AddUniversitySection({
                           setScholarships,
                           s.id,
                           "eligibility",
-                          e.target.value,
-                        )
-                      }
-                    />
-                    <input
-                      type="url"
-                      className={`${inputClass} text-sm`}
-                      placeholder="Application Link"
-                      value={s.application_link}
-                      onChange={(e) =>
-                        updateItem(
-                          setScholarships,
-                          s.id,
-                          "application_link",
                           e.target.value,
                         )
                       }
@@ -1762,6 +1759,7 @@ export default function AddUniversitySection({
                             <th className="px-3 py-2 text-left font-semibold text-gray-700 w-10">SN</th>
                             <th className="px-3 py-2 text-left font-semibold text-gray-700">College Name</th>
                             <th className="px-3 py-2 text-left font-semibold text-gray-700">Location</th>
+                            <th className="px-3 py-2 text-left font-semibold text-gray-700">Programs</th>
                             <th className="px-3 py-2 text-center w-10"></th>
                           </tr>
                         </thead>
@@ -1775,6 +1773,9 @@ export default function AddUniversitySection({
                               <td className="px-3 py-2">
                                 <input type="text" className="w-full border border-gray-200 rounded px-2 py-1 text-sm focus:outline-none focus:border-blue-500" placeholder="Location" value={c.location} onChange={(e) => { const updated = [...(f.colleges || [])]; updated[ci] = { ...updated[ci], location: e.target.value }; setFaculties((prev: any[]) => prev.map((x) => x.id === f.id ? { ...x, colleges: updated } : x)); }} />
                               </td>
+                              <td className="px-3 py-2">
+                                <input type="text" className="w-full border border-gray-200 rounded px-2 py-1 text-sm focus:outline-none focus:border-blue-500" placeholder="Programs" value={c.programs || ""} onChange={(e) => { const updated = [...(f.colleges || [])]; updated[ci] = { ...updated[ci], programs: e.target.value }; setFaculties((prev: any[]) => prev.map((x) => x.id === f.id ? { ...x, colleges: updated } : x)); }} />
+                              </td>
                               <td className="px-3 py-2 text-center">
                                 <button type="button" onClick={() => setFaculties((prev: any[]) => prev.map((x) => x.id === f.id ? { ...x, colleges: (x.colleges || []).filter((_: any, i: number) => i !== ci) } : x))} className="text-red-400 hover:text-red-600 text-xs"><i className="fa-solid fa-times"></i></button>
                               </td>
@@ -1783,7 +1784,7 @@ export default function AddUniversitySection({
                         </tbody>
                       </table>
                     </div>
-                    <button type="button" onClick={() => setFaculties((prev: any[]) => prev.map((x) => x.id === f.id ? { ...x, colleges: [...(x.colleges || []), { id: Date.now(), name: "", location: "" }] } : x))} className="mt-2 text-xs text-blue-600 hover:text-blue-800"><i className="fa-solid fa-plus mr-1"></i> Add College</button>
+                    <button type="button" onClick={() => setFaculties((prev: any[]) => prev.map((x) => x.id === f.id ? { ...x, colleges: [...(x.colleges || []), { id: Date.now(), name: "", location: "", programs: "" }] } : x))} className="mt-2 text-xs text-blue-600 hover:text-blue-800"><i className="fa-solid fa-plus mr-1"></i> Add College</button>
                   </div>
                 </div>
               ))}
@@ -1806,11 +1807,9 @@ export default function AddUniversitySection({
                   addItem(setAdmissions, {
                     program: "",
                     faculty: "",
-                    status: "",
                     opens_from: "",
                     deadline: "",
-                    fee: "",
-                    application_link: "",
+                    short_description: "",
                   })
                 }
                 className="text-sm text-blue-600 bg-blue-50 px-3 py-1.5 rounded-md hover:bg-blue-100 transition-colors font-medium"
@@ -1860,68 +1859,163 @@ export default function AddUniversitySection({
                         )
                       }
                     />
-                    <DatePicker
+                    <input
+                      type="text"
+                      className={`${inputClass} text-sm`}
+                      placeholder="Opens From (e.g. 2025-01-15)"
                       value={a.opens_from}
-                      onChange={(val) => {
-                        updateItem(setAdmissions, a.id, "opens_from", val);
-                        const today = new Date(); today.setHours(0,0,0,0);
-                        const open = new Date(val + "T00:00:00");
-                        const dl = a.deadline ? new Date(a.deadline + "T00:00:00") : null;
-                        let status = "Open";
-                        if (dl && today >= dl) status = "Closed";
-                        else if (today < open) status = "Ongoing";
-                        updateItem(setAdmissions, a.id, "status", status);
-                      }}
-                      placeholder="Opens From"
-                    />
-                    <DatePicker
-                      value={a.deadline}
-                      onChange={(val) => {
-                        updateItem(setAdmissions, a.id, "deadline", val);
-                        const today = new Date(); today.setHours(0,0,0,0);
-                        const open = a.opens_from ? new Date(a.opens_from + "T00:00:00") : null;
-                        const dl = new Date(val + "T00:00:00");
-                        let status = "Open";
-                        if (today >= dl) status = "Closed";
-                        else if (open && today < open) status = "Ongoing";
-                        updateItem(setAdmissions, a.id, "status", status);
-                      }}
-                      placeholder="Deadline"
+                      onChange={(e) =>
+                        updateItem(setAdmissions, a.id, "opens_from", e.target.value)
+                      }
                     />
                     <input
                       type="text"
                       className={`${inputClass} text-sm`}
-                      placeholder="Application Fee"
-                      value={a.fee}
+                      placeholder="Deadline (e.g. 2025-06-30)"
+                      value={a.deadline}
                       onChange={(e) =>
-                        updateItem(
-                          setAdmissions,
-                          a.id,
-                          "fee",
-                          e.target.value,
-                        )
+                        updateItem(setAdmissions, a.id, "deadline", e.target.value)
                       }
                     />
-                    <input
-                      type="url"
-                      className={`${inputClass} text-sm`}
-                      placeholder="Application Link"
-                      value={a.application_link}
-                      onChange={(e) =>
-                        updateItem(
-                          setAdmissions,
-                          a.id,
-                          "application_link",
-                          e.target.value,
-                        )
-                      }
-                    />
+                    <div className="md:col-span-2">
+                      <input
+                        type="text"
+                        className={`${inputClass} text-sm`}
+                        placeholder="Short Description (max 100 characters)"
+                        maxLength={100}
+                        value={a.short_description}
+                        onChange={(e) =>
+                          updateItem(
+                            setAdmissions,
+                            a.id,
+                            "short_description",
+                            e.target.value,
+                          )
+                        }
+                      />
+                      <p className="mt-1 text-xs text-gray-400">
+                        {a.short_description.length}/100
+                      </p>
+                    </div>
                   </div>
                 </div>
               ))}
               {admissions.length === 0 && (
                 <p className="text-sm text-gray-400 py-2">
                   No admission entries added.
+                </p>
+              )}
+            </div>
+          </div>
+
+          {/* ═══════════════ OFFICIAL NOTICES ═══════════════ */}
+          <div className="bg-white p-6 rounded-md border border-gray-200">
+            <div className="flex justify-between items-center mb-5">
+              <h3 className="text-lg font-semibold text-gray-800">
+                <i className="fa-solid fa-bullhorn text-blue-500 mr-2"></i>
+                Official Notices
+              </h3>
+              <button
+                type="button"
+                onClick={() => {
+                  const input = document.createElement('input');
+                  input.type = 'file';
+                  input.accept = 'image/*';
+                  input.multiple = true;
+                  input.onchange = async (e) => {
+                    const files = (e.target as HTMLInputElement).files;
+                    if (!files) return;
+                    for (let i = 0; i < files.length; i++) {
+                      try {
+                        const url = await uploadFile(files[i], "university/notices");
+                        setOfficialNotices((prev) => [...prev, { id: Date.now() + i, url }]);
+                      } catch (err) {
+                        toast.error(`Failed to upload ${files[i].name}`);
+                      }
+                    }
+                  };
+                  input.click();
+                }}
+                className="text-sm text-blue-600 bg-blue-50 px-3 py-1.5 rounded-md hover:bg-blue-100 transition-colors font-medium"
+              >
+                <i className="fa-solid fa-plus mr-1"></i> Add Notice
+              </button>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              {officialNotices.map((n) => (
+                <div key={n.id} className="relative group">
+                  <img
+                    src={n.url}
+                    alt="Official Notice"
+                    className="w-full h-48 object-cover rounded-md border border-gray-200"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setOfficialNotices((prev) => prev.filter((x) => x.id !== n.id))}
+                    className="absolute top-2 right-2 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
+                  >
+                    <i className="fa-solid fa-times text-xs"></i>
+                  </button>
+                </div>
+              ))}
+              {officialNotices.length === 0 && (
+                <p className="text-sm text-gray-400 py-2 col-span-full">
+                  No official notices added.
+                </p>
+              )}
+            </div>
+          </div>
+
+          {/* ═══════════════ LATEST NEWS & STORIES ═══════════════ */}
+          <div className="bg-white p-6 rounded-md border border-gray-200">
+            <div className="flex justify-between items-center mb-5">
+              <h3 className="text-lg font-semibold text-gray-800">
+                <i className="fa-solid fa-newspaper text-blue-500 mr-2"></i>
+                Latest News & Stories
+              </h3>
+              <button
+                type="button"
+                onClick={() => {
+                  const today = new Date().toISOString().split('T')[0];
+                  addItem(setLatestNews, { text: "", date: today });
+                }}
+                className="text-sm text-blue-600 bg-blue-50 px-3 py-1.5 rounded-md hover:bg-blue-100 transition-colors font-medium"
+              >
+                <i className="fa-solid fa-plus mr-1"></i> Add News
+              </button>
+            </div>
+            <div className="space-y-4">
+              {latestNews.map((n) => (
+                <div
+                  key={n.id}
+                  className="bg-gray-50 border border-gray-200 rounded-md p-4 relative group"
+                >
+                  <button
+                    type="button"
+                    onClick={() => removeItem(setLatestNews, n.id)}
+                    className="absolute top-3 right-3 text-red-400 hover:text-red-600 hover:bg-red-50 p-1.5 rounded-md transition-colors opacity-0 group-hover:opacity-100"
+                  >
+                    <i className="fa-solid fa-trash"></i>
+                  </button>
+                  <div className="pr-10">
+                    <input
+                      type="text"
+                      className={`${inputClass} text-sm`}
+                      placeholder="News or update text"
+                      value={n.text}
+                      onChange={(e) =>
+                        updateItem(setLatestNews, n.id, "text", e.target.value)
+                      }
+                    />
+                    <p className="mt-2 text-xs text-gray-500">
+                      Added on: <span className="font-medium">{n.date}</span>
+                    </p>
+                  </div>
+                </div>
+              ))}
+              {latestNews.length === 0 && (
+                <p className="text-sm text-gray-400 py-2">
+                  No latest news added.
                 </p>
               )}
             </div>

@@ -212,6 +212,10 @@ body {
   color: #4b5563;
   font-size: 0.9375rem;
   text-align: left;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+  word-break: normal;
+  hyphens: auto;
 }
 .rich-text * {
   text-align: left !important;

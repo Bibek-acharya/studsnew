@@ -30,6 +30,7 @@ import {
   FileDown,
   ChevronDown,
   ArrowRight,
+  Bookmark,
 } from "lucide-react";
 
 type TabKey =
@@ -65,6 +66,96 @@ const getYouTubeId = (url: string): string | null => {
   return match ? match[1] : null;
 };
 
+const toSlug = (name: string) =>
+  name
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/(^-|-$)/g, "");
+
+const stripEventHtml = (html: string) => {
+  if (typeof window === "undefined") return html;
+  const doc = new DOMParser().parseFromString(html, "text/html");
+  return doc.body.textContent || "";
+};
+
+const mapEventCategory = (category: string): string => {
+  if (category === "Workshop" || category === "Seminar")
+    return "Seminar & Workshop";
+  if (category === "Job Fair") return "Career Fairs";
+  if (category === "Hackathon") return "Hackthons";
+  return "Others";
+};
+
+const eventBadgeClass = (category: string) => {
+  if (category === "Seminar & Workshop") return "bg-[#00c2a8]";
+  if (category === "Career Fairs") return "bg-orange-500";
+  if (category === "Hackthons") return "bg-blue-500";
+  return "bg-blue-500";
+};
+
+const stripNewsHtml = (html: string) => {
+  if (!html) return "";
+  return html
+    .replace(/<[^>]*>/g, "")
+    .replace(/&nbsp;/g, " ")
+    .replace(/&amp;/g, "&")
+    .replace(/&lt;/g, "<")
+    .replace(/&gt;/g, ">")
+    .replace(/&quot;/g, '"')
+    .replace(/&#39;/g, "'");
+};
+
+const timeAgo = (dateStr: string) => {
+  if (!dateStr) return "Recently";
+  const date = new Date(dateStr);
+  if (isNaN(date.getTime())) return dateStr;
+  const now = new Date();
+  const diff = now.getTime() - date.getTime();
+  if (diff < 0)
+    return date.toLocaleDateString("en-US", {
+      year: "numeric",
+      month: "short",
+      day: "numeric",
+    });
+  const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+  if (days === 0) return "Today";
+  if (days === 1) return "1 day ago";
+  if (days < 30) return `${days} days ago`;
+  if (days < 365) {
+    const months = Math.floor(days / 30);
+    return `${months} month${months > 1 ? "s" : ""} ago`;
+  }
+  return date.toLocaleDateString("en-US", {
+    year: "numeric",
+    month: "short",
+    day: "numeric",
+  });
+};
+
+const mapNewsToUiCategory = (article: any): string => {
+  const cat = article.category?.toLowerCase() || "";
+  if (["admission", "academic", "academics"].includes(cat)) return "Admission";
+  if (["scholarship"].includes(cat)) return "Scholarship";
+  if (["exam", "exams", "tech"].includes(cat)) return "Exams";
+  if (["news", "announcement", "announcements"].includes(cat)) return "News";
+  if (["notice", "policy", "press-release", "update"].includes(cat))
+    return "Notice";
+  if (["event", "events", "sports"].includes(cat)) return "Events";
+  if (["achievement", "achievements"].includes(cat)) return "Achievements";
+  return "Others";
+};
+
+const newsCategoryBadgeClass = (category: string) => {
+  if (category === "Exams") return "bg-orange-100 text-orange-700";
+  if (category === "Admission") return "bg-blue-100 text-blue-700";
+  if (category === "Scholarship") return "bg-emerald-100 text-emerald-700";
+  if (category === "News") return "bg-cyan-100 text-cyan-700";
+  if (category === "Notice") return "bg-violet-100 text-violet-700";
+  if (category === "Events") return "bg-pink-100 text-pink-700";
+  if (category === "Achievements") return "bg-amber-100 text-amber-700";
+  return "bg-slate-100 text-slate-700";
+};
+
 const UniversityDetail: React.FC = () => {
   const params = useParams();
   const id = Number(params?.id) || 0;
@@ -91,6 +182,7 @@ const UniversityDetail: React.FC = () => {
   const [showUnfollowDialog, setShowUnfollowDialog] = useState(false);
   const [isShareModalOpen, setIsShareModalOpen] = useState(false);
   const [lightboxIndex, setLightboxIndex] = useState<number | null>(null);
+  const [officialNoticePreview, setOfficialNoticePreview] = useState<string | null>(null);
   const [university, setUniversity] = useState<University | null>(null);
   const [colleges, setColleges] = useState<UniversityCollege[]>([]);
   const [loading, setLoading] = useState(true);
@@ -98,6 +190,10 @@ const UniversityDetail: React.FC = () => {
   const [reviewsData, setReviewsData] = useState<any>(null);
   const [reviewsLoading, setReviewsLoading] = useState(false);
   const [myReview, setMyReview] = useState<any>(null);
+  const [courses, setCourses] = useState<any[]>([]);
+  const [coursesPage, setCoursesPage] = useState(1);
+  const [coursesTotal, setCoursesTotal] = useState(0);
+  const [coursesLoading, setCoursesLoading] = useState(false);
   const [showReviewForm, setShowReviewForm] = useState(false);
   const [reviewRating, setReviewRating] = useState(0);
   const [reviewText, setReviewText] = useState("");
@@ -139,6 +235,8 @@ const UniversityDetail: React.FC = () => {
       "gallery",
       "faculties",
       "admissions",
+      "official_notices",
+      "latest_news",
       "quick",
     ];
     const out = { ...u };
@@ -169,6 +267,20 @@ const UniversityDetail: React.FC = () => {
     }).catch(() => {});
   }, [id]);
 
+  useEffect(() => {
+    if (activeTab === "tab-courses" && id) {
+      setCoursesLoading(true);
+      apiService
+        .getUniversityCourses(id, coursesPage, 10)
+        .then((res) => {
+          setCourses(res.data.courses || []);
+          setCoursesTotal(res.data.total || 0);
+        })
+        .catch(() => setCourses([]))
+        .finally(() => setCoursesLoading(false));
+    }
+  }, [activeTab, coursesPage, id]);
+
   const uni = university;
   const name = uni?.name || "University";
   const shareUrl = typeof window !== "undefined" ? window.location.href : "";
@@ -197,6 +309,11 @@ const UniversityDetail: React.FC = () => {
       ? uni.admissions
       : []
     : [];
+  const officialNoticesList = uni?.official_notices
+    ? Array.isArray(uni.official_notices)
+      ? uni.official_notices
+      : []
+    : [];
   const scholarshipsList = uni?.scholarships
     ? Array.isArray(uni.scholarships)
       ? uni.scholarships
@@ -221,6 +338,11 @@ const UniversityDetail: React.FC = () => {
   const institutesList = uni?.faculties
     ? Array.isArray(uni.faculties)
       ? uni.faculties
+      : []
+    : [];
+  const latestNewsList = uni?.latest_news
+    ? Array.isArray(uni.latest_news)
+      ? uni.latest_news
       : []
     : [];
   const contactData: Record<string, any> = uni?.contact || {};
@@ -464,7 +586,7 @@ const UniversityDetail: React.FC = () => {
 
               <div className="hidden mt-8 w-full flex-nowrap items-center gap-2 overflow-x-auto pb-1 md:flex lg:mt-0 lg:w-auto lg:gap-3 lg:overflow-visible lg:pb-0">
                 <Link
-                  href={`/universities/${name.toLowerCase().replace(/\s+/g, "-")}/affiliated-colleges`}
+                  href={`/universities/${toSlug(name)}/affiliated-colleges`}
                   className="shrink-0 flex items-center justify-center gap-2 rounded-md border border-gray-200 bg-brand-blue px-4 py-2.5 text-[13px] font-semibold text-white transition-colors hover:bg-brand-hover lg:px-5 lg:py-3 lg:text-[15px]"
                 >
                   <Building2 className="h-4 w-4" />
@@ -659,6 +781,48 @@ const UniversityDetail: React.FC = () => {
                 </div>
               )}
 
+              {/* ========== LATEST UPDATES & NEWS ========== */}
+              {latestNewsList.length > 0 && (
+                <div className="overflow-hidden rounded-md border border-gray-200 bg-white">
+                  {/* Facebook-style post header */}
+                  <div className="px-6 py-4 border-b border-gray-100">
+                    <div className="flex items-start gap-3">
+                      {/* Profile picture */}
+                      <div className="flex-shrink-0">
+                        <img
+                          src="/icon.png"
+                          alt="StudSphere Team"
+                          className="h-12 w-12 rounded-full object-cover border-2 border-blue-500"
+                        />
+                      </div>
+                      {/* User info */}
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-2">
+                          <span className="font-bold text-gray-900 text-[15px]">StudSphere Team</span>
+                          <BadgeCheck className="h-4 w-4 shrink-0 fill-blue-500 text-white" />
+                        </div>
+                        <div className="flex items-center gap-2 text-[13px] text-gray-500 mt-0.5">
+                          <span>Content Curator</span>
+                          <span>•</span>
+                          <span>Updated at: {latestNewsList[0]?.date || new Date().toLocaleDateString()}</span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  {/* Post content */}
+                  <div className="divide-y divide-gray-100">
+                    {latestNewsList.map((item: any, idx: number) => (
+                      <div key={idx} className="px-6 py-4 hover:bg-gray-50 transition-colors">
+                        <div className="flex items-start gap-3">
+                          <span className="text-[13px] font-semibold text-blue-600 whitespace-nowrap mt-0.5">{item.date || "-"}</span>
+                          <span className="text-[14px] text-gray-700 leading-relaxed">{item.text || ""}</span>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
               {/* ========== COURSES & FEES ========== */}
               {activeTab === "tab-courses" && (
                 <div className="overflow-hidden rounded-md border border-gray-100 bg-white">
@@ -667,10 +831,13 @@ const UniversityDetail: React.FC = () => {
                       Courses & fees
                     </h3>
                     <div className="flex gap-2 text-xs font-medium">
-                      {["all", "Bachelor's", "Master"].map((level) => (
+                      {["all", "Bachelor's", "Master", "Master of Philosophy", "Doctorate", "Post graduate diploma"].map((level) => (
                         <button
                           key={level}
-                          onClick={() => setCourseFilter(level)}
+                          onClick={() => {
+                            setCourseFilter(level);
+                            setCoursesPage(1);
+                          }}
                           className={`rounded-md px-3 py-1.5 transition-colors ${
                             courseFilter === level
                               ? "bg-blue-600 text-white"
@@ -682,9 +849,13 @@ const UniversityDetail: React.FC = () => {
                       ))}
                     </div>
                   </div>
-                  {coursesList.length > 0 ? (
+                  {coursesLoading ? (
+                    <div className="flex items-center justify-center py-16">
+                      <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+                    </div>
+                  ) : courses.length > 0 ? (
                     (() => {
-                      const filtered = coursesList.filter(
+                      const filtered = courses.filter(
                         (c: any) => courseFilter === "all" || c.level === courseFilter,
                       );
                       if (filtered.length === 0) {
@@ -806,6 +977,29 @@ const UniversityDetail: React.FC = () => {
                   ) : (
                     <EmptyTabState tabName="Courses" />
                   )}
+                  {coursesTotal > 10 && (
+                    <div className="flex items-center justify-between border-t border-gray-100 bg-white px-6 py-4">
+                      <p className="text-sm text-gray-600">
+                        Showing {((coursesPage - 1) * 10) + 1} to {Math.min(coursesPage * 10, coursesTotal)} of {coursesTotal} courses
+                      </p>
+                      <div className="flex gap-2">
+                        <button
+                          onClick={() => setCoursesPage(p => Math.max(1, p - 1))}
+                          disabled={coursesPage === 1}
+                          className="rounded-md border border-gray-200 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                        >
+                          Previous
+                        </button>
+                        <button
+                          onClick={() => setCoursesPage(p => p + 1)}
+                          disabled={coursesPage * 10 >= coursesTotal}
+                          className="rounded-md border border-gray-200 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                        >
+                          Next
+                        </button>
+                      </div>
+                    </div>
+                  )}
                 </div>
               )}
 
@@ -840,6 +1034,7 @@ const UniversityDetail: React.FC = () => {
                                     <th className="px-3 py-2 text-left text-[12px] font-bold uppercase text-gray-600 w-10">SN</th>
                                     <th className="px-3 py-2 text-left text-[12px] font-bold uppercase text-gray-600">College Name</th>
                                     <th className="px-3 py-2 text-left text-[12px] font-bold uppercase text-gray-600">Location</th>
+                                    <th className="px-3 py-2 text-left text-[12px] font-bold uppercase text-gray-600">Programs</th>
                                   </tr>
                                 </thead>
                                 <tbody className="divide-y divide-gray-100">
@@ -848,6 +1043,7 @@ const UniversityDetail: React.FC = () => {
                                       <td className="px-3 py-2.5 text-[13px] text-gray-500">{ci + 1}</td>
                                       <td className="px-3 py-2.5 text-[13px] font-medium text-gray-900">{c.name}</td>
                                       <td className="px-3 py-2.5 text-[13px] text-gray-600">{c.location || "-"}</td>
+                                      <td className="px-3 py-2.5 text-[13px] text-gray-600">{c.programs || "-"}</td>
                                     </tr>
                                   ))}
                                 </tbody>
@@ -897,14 +1093,13 @@ const UniversityDetail: React.FC = () => {
                   </div>
                   {admissionsList.length > 0 ? (
                     <div className="w-full overflow-x-auto">
-                      <div className="min-w-[700px]">
+                      <div className="min-w-[800px]">
                         <div className="grid grid-cols-12 gap-2 border-b border-gray-100 bg-white px-6 py-5">
                           <div className="col-span-3 text-[13px] font-bold uppercase tracking-wider text-gray-800">PROGRAM</div>
-                          <div className="col-span-2 text-[13px] font-bold uppercase tracking-wider text-gray-800">STATUS</div>
                           <div className="col-span-2 text-[13px] font-bold uppercase tracking-wider text-gray-800">OPENS</div>
                           <div className="col-span-2 text-[13px] font-bold uppercase tracking-wider text-gray-800">DEADLINE</div>
-                          <div className="col-span-2 text-[13px] font-bold uppercase tracking-wider text-gray-800">APPL. FEE</div>
-                          <div className="col-span-1 text-[13px] font-bold uppercase tracking-wider text-gray-800">APPLY</div>
+                          <div className="col-span-3 text-[13px] font-bold uppercase tracking-wider text-gray-800">DESCRIPTION</div>
+                          <div className="col-span-2 text-[13px] font-bold uppercase tracking-wider text-gray-800">ACTIONS</div>
                         </div>
                         <div className="divide-y divide-gray-100">
                           {admissionsList.map((ad: any, i: number) => (
@@ -913,24 +1108,13 @@ const UniversityDetail: React.FC = () => {
                                 <h4 className="text-[15.5px] font-bold text-gray-900">{ad.program || ad.title}</h4>
                                 {ad.faculty && <p className="text-[13px] text-gray-500">{ad.faculty}</p>}
                               </div>
-                              <div className="col-span-2">
-                                {(() => { const today = new Date(); today.setHours(0,0,0,0); const open = ad.opens_from ? new Date(ad.opens_from + "T00:00:00") : null; const dl = ad.deadline ? new Date(ad.deadline + "T00:00:00") : null; let s = ad.status || "Open"; if (dl && today >= dl) s = "Closed"; else if (open && today < open) s = "Ongoing"; return ( <span className={`inline-block rounded-md px-2.5 py-1 text-[11px] font-bold whitespace-nowrap ${s === "Open" || s === "Ongoing" ? "bg-[#ecfdf5] text-[#10b981]" : "bg-[#fef2f2] text-[#ef4444]"}`}>
-                                  {s}
-                                </span>); })()}
-                              </div>
                               <div className="col-span-2 text-[14px] text-gray-600">{ad.opens_from || "-"}</div>
                               <div className="col-span-2 text-[14px] text-gray-600">{ad.deadline || "-"}</div>
-                              <div className="col-span-2 text-[14px] font-semibold text-gray-900">{ad.fee || "-"}</div>
-                              <div className="col-span-1">
-                                {ad.application_link ? (
-                                  <a href={ad.application_link} target="_blank" rel="noopener noreferrer" className="rounded-lg bg-blue-600 px-5 py-2 text-xs font-bold text-white transition-colors hover:bg-blue-700">
-                                    Apply Now
-                                  </a>
-                                ) : (
-                                  <span className="rounded-lg bg-gray-100 px-5 py-2 text-xs font-bold text-gray-400 cursor-not-allowed">
-                                    Apply Now
-                                  </span>
-                                )}
+                              <div className="col-span-3 text-[14px] text-gray-600">{ad.short_description || "-"}</div>
+                              <div className="col-span-2">
+                                <Link href={`/universities/${id}/affiliated-colleges`} className="rounded-lg bg-blue-600 px-5 py-2 text-xs font-bold text-white transition-colors hover:bg-blue-700">
+                                  View Colleges
+                                </Link>
                               </div>
                             </div>
                           ))}
@@ -943,6 +1127,34 @@ const UniversityDetail: React.FC = () => {
                 </div>
               )}
 
+              {/* ========== OFFICIAL NOTICES ========== */}
+              {activeTab === "tab-admissions" && officialNoticesList.length > 0 && (
+                <div className="mt-8">
+                  <div className="mb-4">
+                    <p className="text-[15px] text-gray-700">
+                      The official notice is available below for your review.
+                    </p>
+                  </div>
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    {officialNoticesList.map((notice: any, i: number) => (
+                      <div
+                        key={i}
+                        className="bg-white border border-gray-100 hover:border-blue-500/20 rounded-md overflow-hidden cursor-pointer transition-all duration-300 group"
+                        onClick={() => setOfficialNoticePreview(notice.url)}
+                      >
+                        <div className="h-30 w-full overflow-hidden bg-gray-100">
+                          <img
+                            src={notice.url}
+                            alt={`Official Notice ${i + 1}`}
+                            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 ease-out"
+                          />
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
               {/* ========== OFFERED PROGRAM ========== */}
               {/* ========== SCHOLARSHIP ========== */}
               {activeTab === "tab-scholarship" && scholarshipsList.length > 0 && (
@@ -950,7 +1162,7 @@ const UniversityDetail: React.FC = () => {
                   <div className="flex flex-wrap items-center justify-between gap-4 border-b border-gray-100 bg-[#f8fafc] px-6 py-4">
                     <h3 className="flex items-center gap-2 text-[16px] font-bold text-gray-900">Scholarships</h3>
                     <div className="flex gap-2 text-xs font-medium">
-                      {["all", "+2", "Bachelor", "Master"].map((level) => (
+                      {["all", "Bachelor", "Master", "Master of Philosophy", "Doctorate", "Post graduate diploma"].map((level) => (
                         <button key={level} onClick={() => setScholarFilter(level)} className={`rounded-md px-3 py-1.5 transition-colors ${scholarFilter === level ? "bg-blue-600 text-white" : "border border-gray-200 bg-white text-gray-700 hover:bg-gray-100"}`}>
                           {level === "all" ? "All" : level}
                         </button>
@@ -960,11 +1172,10 @@ const UniversityDetail: React.FC = () => {
                   <>
                     {/* Desktop header */}
                     <div className="hidden sm:grid sm:grid-cols-12 gap-4 border-b border-gray-100 bg-white px-6 py-5 items-center">
-                      <div className="sm:col-span-2 text-[13px] font-bold uppercase tracking-wider text-gray-800">PROGRAM</div>
-                      <div className="sm:col-span-2 text-[13px] font-bold uppercase tracking-wider text-gray-800">SCHOLARSHIP</div>
-                      <div className="sm:col-span-2 text-[13px] font-bold uppercase tracking-wider text-gray-800">BENEFIT</div>
+                      <div className="sm:col-span-3 text-[13px] font-bold uppercase tracking-wider text-gray-800">PROGRAM</div>
+                      <div className="sm:col-span-3 text-[13px] font-bold uppercase tracking-wider text-gray-800">SCHOLARSHIP</div>
+                      <div className="sm:col-span-3 text-[13px] font-bold uppercase tracking-wider text-gray-800">BENEFIT</div>
                       <div className="sm:col-span-3 text-[13px] font-bold uppercase tracking-wider text-gray-800">ELIGIBILITY</div>
-                      <div className="sm:col-span-3 text-[13px] font-bold uppercase tracking-wider text-gray-800">ACTIONS</div>
                     </div>
                     {scholarshipsList
                       .filter((s: any) => scholarFilter === "all" || s.level === scholarFilter)
@@ -977,24 +1188,12 @@ const UniversityDetail: React.FC = () => {
                               {sch.benefit ? <div><span className="text-gray-400">Benefit: </span><span className="font-medium text-green-600">{sch.benefit}</span></div> : null}
                               {sch.forWhom || sch.eligibility ? <div><span className="text-gray-400">For: </span><span className="text-gray-600">{sch.forWhom || sch.eligibility}</span></div> : null}
                             </div>
-                            {sch.application_link ? (
-                              <a href={sch.application_link} target="_blank" rel="noopener noreferrer" className="inline-block rounded-lg bg-blue-600 px-5 py-2 text-xs font-bold text-white transition-colors hover:bg-blue-700">Apply Now</a>
-                            ) : (
-                              <span className="inline-block rounded-lg bg-gray-100 px-5 py-2 text-xs font-bold text-gray-400 cursor-not-allowed">Apply Now</span>
-                            )}
                           </div>
                           <div className="hidden sm:grid sm:grid-cols-12 gap-4 items-center">
-                            <div className="sm:col-span-2"><h4 className="text-[14px] font-bold text-gray-900">{sch.program || ""}</h4></div>
-                            <div className="sm:col-span-2"><h4 className="text-[14px] font-bold text-gray-900">{sch.name || sch.title || ""}</h4></div>
-                            <div className="sm:col-span-2"><span className="text-[13px] font-medium text-green-600">{sch.benefit || ""}</span></div>
+                            <div className="sm:col-span-3"><h4 className="text-[14px] font-bold text-gray-900">{sch.program || ""}</h4></div>
+                            <div className="sm:col-span-3"><h4 className="text-[14px] font-bold text-gray-900">{sch.name || sch.title || ""}</h4></div>
+                            <div className="sm:col-span-3"><span className="text-[13px] font-medium text-green-600">{sch.benefit || ""}</span></div>
                             <div className="sm:col-span-3"><span className="text-[13px] text-gray-600">{sch.forWhom || sch.eligibility || ""}</span></div>
-                            <div className="sm:col-span-3">
-                              {sch.application_link ? (
-                                <a href={sch.application_link} target="_blank" rel="noopener noreferrer" className="rounded-lg bg-blue-600 px-5 py-2 text-xs font-bold text-white transition-colors hover:bg-blue-700">Apply Now</a>
-                              ) : (
-                                <span className="rounded-lg bg-gray-100 px-5 py-2 text-xs font-bold text-gray-400 cursor-not-allowed">Apply Now</span>
-                              )}
-                            </div>
                           </div>
                         </div>
                       ))}
@@ -1005,59 +1204,74 @@ const UniversityDetail: React.FC = () => {
               {/* ========== EVENTS ========== */}
               {activeTab === "tab-events" && (
                 <div>
-                  {uniEventsLoading ? <div className="py-12 text-center text-slate-500">Loading events...</div> :
-                  (uniEvents.length > 0 || eventsList.length > 0) ? (
-                    <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
-                      {(uniEvents.length > 0 ? uniEvents : eventsList).map((ev: any, i: number) => (
-                        <div
-                          key={i}
-                          className="flex flex-col overflow-hidden rounded-md border border-gray-200 bg-white transition-colors hover:border-blue-500/20 duration-300"
-                        >
-                          <div className="h-35 w-full overflow-hidden p-4">
-                            <img
-                              src={ev.image || ""}
-                              alt={ev.title}
-                              className="h-full w-full rounded-md object-cover"
-                            />
-                          </div>
-                          <div className="flex grow flex-col p-5">
-                            <div className="mb-3 flex items-center justify-between">
-                              <span className="rounded-full bg-teal-500 px-2 py-1 text-[10px] font-bold uppercase tracking-wider text-white">
-                                {ev.month || ""}
-                              </span>
-                              <span className="flex items-center text-xs font-semibold text-gray-500">
-                                <i className="fa-regular fa-calendar mr-1.5"></i>{" "}
-                                {ev.date || ""} {ev.month || ""}
-                              </span>
+                  {eventsList.length > 0 ? (
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                      {eventsList.map((event: any) => {
+                        const mapped = mapEventCategory(event.category);
+                        return (
+                          <article
+                            key={event.id}
+                            className="bg-white rounded-md border border-gray-200 hover:border-blue-500/20 overflow-hidden flex flex-col duration-300 cursor-pointer"
+                          >
+                            <div className="h-35 w-full overflow-hidden p-4">
+                              <img
+                                src={event.image}
+                                alt={event.title}
+                                className="w-full h-full object-cover rounded-md"
+                              />
                             </div>
-                            <h4 className="mb-3 text-left text-lg font-bold leading-tight text-black hover:text-[#0000ff]">
-                              {ev.title}
-                            </h4>
-                            <div className="mb-2 flex items-center text-xs font-semibold text-gray-600">
-                              <i className="fa-regular fa-building mr-2 text-gray-500"></i>
-                              University Central
+                            <div className="p-5 flex flex-col grow">
+                              <div className="flex justify-between items-center mb-3">
+                                <span
+                                  className={`${eventBadgeClass(mapped)} text-white text-[10px] font-bold px-2 py-1 rounded-full uppercase tracking-wider`}
+                                >
+                                  {mapped}
+                                </span>
+                                <span className="flex items-center text-xs text-gray-500 font-semibold">
+                                  <i className="fa-regular fa-calendar mr-1.5"></i> {event.date || ""}
+                                </span>
+                              </div>
+
+                              <Link
+                                href={`/events/${event.slug || event.id}`}
+                                className={`font-bold text-lg mb-3 leading-tight text-left text-black hover:text-[#0000ff]`}
+                              >
+                                {event.title}
+                              </Link>
+
+                              <div className="flex items-center text-xs text-gray-600 mb-2 font-semibold">
+                                <i className="fa-regular fa-building mr-2 text-gray-500"></i> {event.organizer || ""}
+                              </div>
+                              <div className="flex items-center text-xs text-gray-600 mb-3 font-semibold">
+                                <i className="fa-solid fa-location-dot mr-2 text-gray-500"></i> {event.location || ""}
+                              </div>
+
+                              <p className="text-xs text-gray-500 mb-5 line-clamp-3 leading-relaxed font-medium">
+                                {stripEventHtml(event.excerpt || "")}
+                              </p>
+
+                              <div className="mt-auto flex gap-2">
+                                <Link
+                                  href={`/events/${event.slug || event.id}`}
+                                  className="flex-1 bg-white border border-gray-300 text-gray-700 text-sm font-bold py-2 rounded-md hover:bg-gray-50 transition text-center"
+                                >
+                                  Details
+                                </Link>
+                                <button
+                                  className={`flex-1 text-white text-sm font-bold py-2 rounded-md transition bg-brand-blue cursor-pointer hover:bg-blue-600`}
+                                >
+                                  Register Now
+                                </button>
+                                <button
+                                  className="w-10 flex items-center justify-center border rounded-md transition-colors shrink-0 border-gray-200 hover:bg-gray-50"
+                                >
+                                  <Bookmark className="w-4 h-4 text-gray-400" />
+                                </button>
+                              </div>
                             </div>
-                            <div className="mb-3 flex items-center text-xs font-semibold text-gray-600">
-                              <i className="fa-solid fa-location-dot mr-2 text-gray-500"></i>
-                              {ev.location || "Central Campus"}
-                            </div>
-                            <p className="mb-5 line-clamp-3 text-xs font-medium leading-relaxed text-gray-500">
-                              {ev.description || ev.desc || ""}
-                            </p>
-                            <div className="mt-auto flex gap-2">
-                              <button className="flex-1 rounded-md border border-gray-300 bg-white py-2 text-sm font-bold text-gray-700 transition-colors hover:bg-gray-50">
-                                Details
-                              </button>
-                              <button className="flex-1 rounded-md bg-brand-blue py-2 text-sm font-bold text-white transition-colors hover:bg-blue-600">
-                                Register Now
-                              </button>
-                              <button className="flex w-10 shrink-0 items-center justify-center rounded-md border border-gray-200 transition-colors hover:bg-gray-50">
-                                <i className="fa-regular fa-bookmark text-gray-400"></i>
-                              </button>
-                            </div>
-                          </div>
-                        </div>
-                      ))}
+                          </article>
+                        );
+                      })}
                     </div>
                   ) : (
                     <EmptyTabState tabName="Events" />
@@ -1067,7 +1281,64 @@ const UniversityDetail: React.FC = () => {
 
               {/* ========== NEWS & NOTICES ========== */}
               {activeTab === "tab-news" && (
-                <EmptyTabState tabName="News & Notices" />
+                <div>
+                  {newsList.length > 0 ? (
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                      {newsList.map((item: any) => {
+                        const uiCategory = mapNewsToUiCategory(item);
+                        return (
+                          <article
+                            key={item.id}
+                            className="bg-white border border-gray-100 hover:border-blue-500/20 rounded-md p-5 flex flex-col transition-all duration-300 group cursor-pointer"
+                          >
+                            <div className="mb-4">
+                              <span
+                                className={`inline-flex items-center px-3 py-1 rounded-full text-[11px] font-bold uppercase tracking-wider ${newsCategoryBadgeClass(
+                                  uiCategory,
+                                )}`}
+                              >
+                                {uiCategory}
+                              </span>
+                            </div>
+
+                            <div className="rounded-md overflow-hidden aspect-16/10 mb-5 bg-gray-100 h-30">
+                              <img
+                                src={item.image}
+                                alt={item.title}
+                                className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 ease-out"
+                              />
+                            </div>
+
+                            <Link
+                              href={`/news/${item.slug || item.id}`}
+                              className="font-bold text-lg text-slate-900 leading-snug mb-2 group-hover:text-blue-600 transition-colors"
+                            >
+                              {item.title}
+                            </Link>
+                            <p className="text-slate-500 text-sm mb-5 grow line-clamp-2 leading-relaxed">
+                              {stripNewsHtml(item.excerpt)}
+                            </p>
+
+                            <div className="pt-4 border-t border-gray-100 flex justify-between items-center text-sm mt-auto">
+                              <span className="text-slate-400 flex items-center font-medium">
+                                <i className="fa-regular fa-clock mr-1.5"></i>{" "}
+                                {timeAgo(item.date)}
+                              </span>
+                              <Link
+                                href={`/news/${item.slug || item.id}`}
+                                className="text-blue-600 font-semibold flex items-center group-hover:translate-x-1 transition-transform duration-200"
+                              >
+                                View Details
+                              </Link>
+                            </div>
+                          </article>
+                        );
+                      })}
+                    </div>
+                  ) : (
+                    <EmptyTabState tabName="News & Notices" />
+                  )}
+                </div>
               )}
 
               {/* ========== DOWNLOAD ========== */}
@@ -1544,7 +1815,7 @@ const UniversityDetail: React.FC = () => {
                     ))}
                   </div>
                   <div className="mt-4 text-center">
-                    <Link href={`/universities/${name.toLowerCase().replace(/\s+/g, "-")}/affiliated-colleges`} className="text-sm font-semibold text-brand-blue hover:text-brand-hover transition-colors">
+                    <Link href={`/universities/${toSlug(name)}/affiliated-colleges`} className="text-sm font-semibold text-brand-blue hover:text-brand-hover transition-colors">
                       View All Affiliated Colleges →
                     </Link>
                   </div>
@@ -1641,6 +1912,28 @@ const UniversityDetail: React.FC = () => {
           >
             &#10095;
           </button>
+        </div>
+      )}
+
+      {/* Official Notice Preview Modal */}
+      {officialNoticePreview && (
+        <div
+          className="fixed inset-0 z-[1000] flex items-center justify-center bg-black/95"
+          onClick={() => setOfficialNoticePreview(null)}
+        >
+          <button
+            type="button"
+            onClick={() => setOfficialNoticePreview(null)}
+            className="absolute right-8 top-5 z-[1001] cursor-pointer text-[40px] text-white hover:text-gray-300"
+          >
+            &times;
+          </button>
+          <img
+            src={officialNoticePreview}
+            alt="Official Notice"
+            className="max-h-[85vh] max-w-[90%] rounded-md object-contain"
+            onClick={(e) => e.stopPropagation()}
+          />
         </div>
       )}
     </>

@@ -571,6 +571,8 @@ export interface University {
   gallery?: any;
   faculties?: any;
   admissions?: any;
+  official_notices?: any;
+  latest_news?: any;
   reviews?: any;
 }
 
@@ -1515,6 +1517,16 @@ export const apiService = {
   ): Promise<{ data: UniversityDetailResponse }> {
     return apiRequest<{ data: UniversityDetailResponse }>(
       `/api/v1/universities/${id}`,
+    );
+  },
+
+  async getUniversityCourses(
+    id: number,
+    page: number = 1,
+    limit: number = 10,
+  ): Promise<{ data: { courses: any[]; total: number; page: number; limit: number } }> {
+    return apiRequest<{ data: { courses: any[]; total: number; page: number; limit: number } }>(
+      `/api/v1/universities/${id}/courses?page=${page}&limit=${limit}`,
     );
   },
 
