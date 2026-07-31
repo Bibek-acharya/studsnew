@@ -1204,9 +1204,13 @@ const UniversityDetail: React.FC = () => {
               {/* ========== EVENTS ========== */}
               {activeTab === "tab-events" && (
                 <div>
-                  {eventsList.length > 0 ? (
+                  {uniEventsLoading ? (
+                    <div className="flex items-center justify-center py-16">
+                      <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+                    </div>
+                  ) : uniEvents.length > 0 ? (
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                      {eventsList.map((event: any) => {
+                      {uniEvents.map((event: any) => {
                         const mapped = mapEventCategory(event.category);
                         return (
                           <article
@@ -1282,9 +1286,13 @@ const UniversityDetail: React.FC = () => {
               {/* ========== NEWS & NOTICES ========== */}
               {activeTab === "tab-news" && (
                 <div>
-                  {newsList.length > 0 ? (
+                  {uniNewsLoading ? (
+                    <div className="flex items-center justify-center py-16">
+                      <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+                    </div>
+                  ) : uniNews.length > 0 ? (
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-                      {newsList.map((item: any) => {
+                      {uniNews.map((item: any) => {
                         const uiCategory = mapNewsToUiCategory(item);
                         return (
                           <article
