@@ -2663,22 +2663,24 @@ export const apiService = {
 
   async getUniversityEvents(
     universityId: number,
-    params?: { page?: number; limit?: number },
+    params?: { page?: number; limit?: number; category?: string },
   ): Promise<any> {
     const qs = new URLSearchParams();
     if (params?.page) qs.set("page", String(params.page));
     if (params?.limit) qs.set("limit", String(params.limit));
+    if (params?.category) qs.set("category", params.category);
     qs.set("university_id", String(universityId));
     return apiRequest<any>(`/api/v1/education/events?${qs.toString()}`);
   },
 
   async getUniversityNews(
     universityId: number,
-    params?: { page?: number; limit?: number },
+    params?: { page?: number; limit?: number; category?: string },
   ): Promise<any> {
     const qs = new URLSearchParams();
     if (params?.page) qs.set("page", String(params.page));
     if (params?.limit) qs.set("limit", String(params.limit));
+    if (params?.category) qs.set("category", params.category);
     qs.set("university_id", String(universityId));
     return apiRequest<any>(`/api/v1/education/news?${qs.toString()}`);
   },

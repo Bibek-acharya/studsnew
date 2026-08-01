@@ -1642,22 +1642,12 @@ export default function AddUniversitySection({
                             }}
                           />
                         </label>
-                        <div className="mt-4">
-                          <label className="text-sm font-medium text-gray-700 block mb-1.5">Image Title</label>
-                          <input
-                            type="text"
-                            className="w-full px-4 py-2.5 rounded-lg border border-gray-200 bg-white text-gray-900 focus:outline-none focus:border-blue-500 text-sm"
-                            placeholder="e.g. Main Building"
-                            value={img.caption || img.title || ""}
-                            onChange={(e) => setGallery((prev: any[]) => prev.map((g) => g.id === group.id ? { ...g, images: g.images.map((im: any) => im.id === img.id ? { ...im, caption: e.target.value, title: e.target.value } : im) } : g))}
-                          />
-                        </div>
                       </div>
                     ))}
                     <button
                       type="button"
                       className="border-2 border-dashed border-gray-300 rounded-2xl min-h-[280px] flex flex-col items-center justify-center hover:border-blue-500 hover:bg-blue-50/40 transition"
-                      onClick={() => setGallery((prev: any[]) => prev.map((g) => g.id === group.id ? { ...g, images: [...(g.images || []), { id: Date.now(), url: "", caption: "" }] } : g))}
+                      onClick={() => setGallery((prev: any[]) => prev.map((g) => g.id === group.id ? { ...g, images: [...(g.images || []), { id: Date.now(), url: "" }] } : g))}
                     >
                       <div className="w-14 h-14 rounded-2xl bg-blue-100 flex items-center justify-center text-blue-600 text-3xl mb-4">
                         <i className="fa-solid fa-plus"></i>

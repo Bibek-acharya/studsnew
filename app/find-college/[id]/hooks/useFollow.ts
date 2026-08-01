@@ -28,37 +28,37 @@ async function followFetch(path: string, options?: RequestInit): Promise<any> {
   return res.json();
 }
 
-export function useFollow(institutionId: number | null, redirectPath?: string) {
+export function useFollow(targetId: number | null, redirectPath?: string, targetType: "institution" | "university" = "institution") {
   const [isFollowed, setIsFollowed] = useState(false);
   const [loading, setLoading] = useState(false);
   const { isAuthenticated } = useAuth();
   const router = useRouter();
 
   useEffect(() => {
-    if (!institutionId || !isAuthenticated) {
+    if (!targetId || !isAuthenticated) {
       setIsFollowed(false);
       return;
     }
-    followFetch(`/api/v1/follow/status/${institutionId}`)
+    followFetch(`/api/v1/follow/status/${targetId}?type=${targetType}`)
       .then((data) => setIsFollowed(data.following))
       .catch(() => setIsFollowed(false));
-  }, [institutionId, isAuthenticated]);
+  }, [targetId, isAuthenticated, targetType]);
 
   const toggleFollow = useCallback(async () => {
     if (!isAuthenticated) {
-      router.push(`/login?redirect=${redirectPath || `/find-college/${institutionId}`}`);
+      router.push(`/login?redirect=${redirectPath || `/find-college/${targetId}`}`);
       return;
     }
-    if (!institutionId) return;
+    if (!targetId) return;
     setLoading(true);
     try {
       if (isFollowed) {
-        await followFetch(`/api/v1/follow/institution/${institutionId}`, {
+        await followFetch(`/api/v1/follow/institution/${targetId}?type=${targetType}`, {
           method: "DELETE",
         });
         setIsFollowed(false);
       } else {
-        await followFetch(`/api/v1/follow/institution/${institutionId}`, {
+        await followFetch(`/api/v1/follow/institution/${targetId}?type=${targetType}`, {
           method: "POST",
         });
         setIsFollowed(true);
@@ -68,13 +68,13 @@ export function useFollow(institutionId: number | null, redirectPath?: string) {
     } finally {
       setLoading(false);
     }
-  }, [isFollowed, isAuthenticated, institutionId, router, redirectPath]);
+  }, [isFollowed, isAuthenticated, targetId, router, redirectPath, targetType]);
 
   const unfollow = useCallback(async () => {
-    if (!institutionId) return;
+    if (!targetId) return;
     setLoading(true);
     try {
-      await followFetch(`/api/v1/follow/institution/${institutionId}`, {
+      await followFetch(`/api/v1/follow/institution/${targetId}?type=${targetType}`, {
         method: "DELETE",
       });
       setIsFollowed(false);
@@ -83,7 +83,7 @@ export function useFollow(institutionId: number | null, redirectPath?: string) {
     } finally {
       setLoading(false);
     }
-  }, [institutionId]);
+  }, [targetId, targetType]);
 
   return { isFollowed, loading, toggleFollow, unfollow };
 }
