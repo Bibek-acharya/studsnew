@@ -1309,40 +1309,32 @@ const UniversityDetail: React.FC = () => {
                           ? dateStr.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })
                           : event.date || "";
                         return (
-                          <div key={event.id} className="flex items-center justify-between rounded-md border border-gray-200 bg-white p-5 transition hover:border-blue-500/20">
-                            <div className="flex items-center gap-4 flex-1 min-w-0">
-                              <div className="flex h-20 w-32 flex-shrink-0 overflow-hidden rounded-md bg-gray-100">
-                                {event.image ? (
-                                  <img src={event.image} alt={event.title} className="h-full w-full object-cover" />
-                                ) : (
-                                  <div className="flex h-full w-full items-center justify-center text-gray-400">
-                                    <i className="fa-regular fa-calendar text-2xl"></i>
-                                  </div>
-                                )}
-                              </div>
-                              <div className="flex-1 min-w-0">
-                                <Link
-                                  href={`/events/${event.slug || event.id}`}
-                                  className="font-bold text-gray-900 hover:text-brand-blue line-clamp-2 leading-snug"
-                                >
-                                  {event.title}
-                                </Link>
-                                <div className="mt-2 flex items-center gap-3 flex-wrap">
-                                  <span className={`${eventBadgeClass(mapped)} text-white text-[10px] font-bold px-2 py-1 rounded-full uppercase tracking-wider`}>
-                                    {mapped}
-                                  </span>
-                                  <span className="flex items-center text-xs text-gray-500">
-                                    <i className="fa-regular fa-calendar mr-1.5"></i> {formattedDate}
-                                  </span>
+                          <div key={event.id} className="flex items-center gap-4 rounded-md border border-gray-200 bg-white p-4 transition hover:border-blue-500/20">
+                            <div className="flex h-16 w-24 flex-shrink-0 overflow-hidden rounded-md bg-gray-100">
+                              {event.image ? (
+                                <img src={event.image} alt={event.title} className="h-full w-full object-cover" />
+                              ) : (
+                                <div className="flex h-full w-full items-center justify-center text-gray-400">
+                                  <i className="fa-regular fa-calendar text-2xl"></i>
                                 </div>
+                              )}
+                            </div>
+                            <div className="flex-1 min-w-0">
+                              <Link
+                                href={`/events/${event.slug || event.id}`}
+                                className="font-bold text-gray-900 hover:text-brand-blue line-clamp-2 leading-snug cursor-pointer"
+                              >
+                                {event.title}
+                              </Link>
+                              <div className="mt-2 flex items-center gap-3 flex-wrap">
+                                <span className={`${eventBadgeClass(mapped)} text-white text-[10px] font-bold px-2 py-1 rounded-full uppercase tracking-wider`}>
+                                  {mapped}
+                                </span>
+                                <span className="flex items-center text-xs text-gray-500">
+                                  <i className="fa-regular fa-calendar mr-1.5"></i> {formattedDate}
+                                </span>
                               </div>
                             </div>
-                            <Link
-                              href={`/events/${event.slug || event.id}`}
-                              className="flex items-center gap-2 rounded-md bg-brand-blue hover:bg-brand-hover px-5 py-2.5 text-sm font-bold text-white flex-shrink-0 ml-4"
-                            >
-                              <i className="fa-regular fa-eye"></i>View Event
-                            </Link>
                           </div>
                         );
                       })}
@@ -1384,40 +1376,32 @@ const UniversityDetail: React.FC = () => {
                           ? dateStr.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })
                           : item.date || "";
                         return (
-                          <div key={item.id} className="flex items-center justify-between rounded-md border border-gray-200 bg-white p-5 transition hover:border-blue-500/20">
-                            <div className="flex items-center gap-4 flex-1 min-w-0">
-                              <div className="flex h-20 w-32 flex-shrink-0 overflow-hidden rounded-md bg-gray-100">
-                                {item.image ? (
-                                  <img src={item.image} alt={item.title} className="h-full w-full object-cover" />
-                                ) : (
-                                  <div className="flex h-full w-full items-center justify-center text-gray-400">
-                                    <i className="fa-regular fa-newspaper text-2xl"></i>
-                                  </div>
-                                )}
-                              </div>
-                              <div className="flex-1 min-w-0">
-                                <Link
-                                  href={`/news/${item.slug || item.id}`}
-                                  className="font-bold text-gray-900 hover:text-brand-blue line-clamp-2 leading-snug"
-                                >
-                                  {item.title}
-                                </Link>
-                                <div className="mt-2 flex items-center gap-3 flex-wrap">
-                                  <span className={`inline-flex items-center px-3 py-1 rounded-full text-[11px] font-bold uppercase tracking-wider ${newsCategoryBadgeClass(uiCategory)}`}>
-                                    {uiCategory}
-                                  </span>
-                                  <span className="flex items-center text-xs text-gray-500">
-                                    <i className="fa-regular fa-calendar mr-1.5"></i> {formattedDate}
-                                  </span>
+                          <div key={item.id} className="flex items-center gap-4 rounded-md border border-gray-200 bg-white p-4 transition hover:border-blue-500/20">
+                            <div className="flex h-16 w-24 flex-shrink-0 overflow-hidden rounded-md bg-gray-100">
+                              {item.image ? (
+                                <img src={item.image} alt={item.title} className="h-full w-full object-cover" />
+                              ) : (
+                                <div className="flex h-full w-full items-center justify-center text-gray-400">
+                                  <i className="fa-regular fa-newspaper text-2xl"></i>
                                 </div>
+                              )}
+                            </div>
+                            <div className="flex-1 min-w-0">
+                              <Link
+                                href={`/news/${item.slug || item.id}`}
+                                className="font-bold text-gray-900 hover:text-brand-blue line-clamp-2 leading-snug cursor-pointer"
+                              >
+                                {item.title}
+                              </Link>
+                              <div className="mt-2 flex items-center gap-3 flex-wrap">
+                                <span className={`inline-flex items-center px-3 py-1 rounded-full text-[11px] font-bold uppercase tracking-wider ${newsCategoryBadgeClass(uiCategory)}`}>
+                                  {uiCategory}
+                                </span>
+                                <span className="flex items-center text-xs text-gray-500">
+                                  <i className="fa-regular fa-calendar mr-1.5"></i> {formattedDate}
+                                </span>
                               </div>
                             </div>
-                            <Link
-                              href={`/news/${item.slug || item.id}`}
-                              className="flex items-center gap-2 rounded-md bg-brand-blue hover:bg-brand-hover px-5 py-2.5 text-sm font-bold text-white flex-shrink-0 ml-4"
-                            >
-                              <i className="fa-regular fa-eye"></i>Read News
-                            </Link>
                           </div>
                         );
                       })}
