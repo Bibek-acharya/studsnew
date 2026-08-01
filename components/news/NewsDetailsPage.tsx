@@ -12,7 +12,7 @@ import {
 } from "@/services/newsApi";
 import { fetchInstitutionNewsBySlug } from "@/services/institutionNewsApi";
 import { getPublicNewsBySlug } from "@/services/scholarshipProviderApi";
-import { safeHtml } from "@/lib/html";
+import RichText from "@/components/RichText";
 
 function normalizeArticle(data: any): any {
   if (!data) return null;
@@ -326,20 +326,14 @@ const NewsDetailsPage: React.FC<{
           )}
 
           {article.excerpt && (
-            <div className="rich-text max-w-none bg-blue-50 border-l-[3px] border-blue-500 p-5 md:p-6 rounded-r-xl mb-10">
-              <div
-                dangerouslySetInnerHTML={{
-                  __html: safeHtml(article.excerpt),
-                }}
-              />
+            <div className="max-w-none bg-blue-50 border-l-[3px] border-blue-500 p-5 md:p-6 rounded-r-xl mb-10">
+              <RichText html={article.excerpt} />
             </div>
           )}
 
-          <div
-            className="rich-text mb-12"
-            dangerouslySetInnerHTML={{
-              __html: safeHtml(article.content || article.excerpt || ""),
-            }}
+          <RichText
+            html={article.content || article.excerpt || ""}
+            className="mb-12"
           />
 
           <hr className="border-gray-100 mb-8" />

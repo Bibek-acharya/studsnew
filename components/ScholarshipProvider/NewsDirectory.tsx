@@ -17,7 +17,7 @@ import {
   ProviderNews,
 } from "@/services/scholarshipProviderApi";
 import ConfirmationModal from "./common/ConfirmationModal";
-import { safeHtml } from "@/lib/html";
+import RichText from "@/components/RichText";
 
 const FALLBACK_NEWS: ProviderNews[] = [
   {
@@ -312,14 +312,14 @@ const NewsDirectory: React.FC<NewsDirectoryProps> = memo(
                             {item.title}
                           </p>
                           {item.short_desc ? (
-                            <p
+                            <RichText
+                              html={
+                                item.short_desc.slice(0, 60) +
+                                (item.short_desc.length > 60 ? "..." : "")
+                              }
+                              variant="sm"
+                              as="p"
                               className="text-xs text-gray-500"
-                              dangerouslySetInnerHTML={{
-                                __html: safeHtml(
-                                  item.short_desc.slice(0, 60) +
-                                    (item.short_desc.length > 60 ? "..." : ""),
-                                ),
-                              }}
                             />
                           ) : (
                             <p className="text-xs text-gray-500">

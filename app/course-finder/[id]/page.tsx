@@ -17,7 +17,7 @@ import {
 } from "lucide-react";
 import { fetchCourseDetailsById } from "@/services/course-api";
 import EmptyTabState from "@/components/course-finder/EmptyTabState";
-import { safeHtml } from "@/lib/html";
+import RichText from "@/components/RichText";
 
 type TabKey =
   | "overview"
@@ -361,11 +361,9 @@ export default function CourseDetailPage({
                   <h2 className="text-2xl font-bold text-gray-900 mb-4">
                     Overview
                   </h2>
-                  <div
-                    className="ql-editor text-gray-600 text-[15px] md:text-[15.5px] leading-[1.8]"
-                    dangerouslySetInnerHTML={{
-                      __html: safeHtml(course.description),
-                    }}
+                  <RichText
+                    html={course.description}
+                    className="text-gray-600 text-[15px] md:text-[15.5px] leading-[1.8]"
                   />
                 </div>
               ) : null}

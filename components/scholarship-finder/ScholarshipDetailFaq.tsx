@@ -1,7 +1,7 @@
 "use client";
 
 import { ChevronDown } from "lucide-react";
-import { safeHtml } from "@/lib/html";
+import RichText from "@/components/RichText";
 
 function FaqTab({
   faqs,
@@ -42,9 +42,11 @@ function FaqTab({
             </button>
             {faqOpen.includes(i) && (
               <div className="px-5 pb-4">
-                <p
+                <RichText
+                  html={faq.a}
+                  variant="sm"
+                  as="p"
                   className="text-[14px] leading-relaxed text-gray-600 hyphens-none"
-                  dangerouslySetInnerHTML={{ __html: safeHtml(faq.a) }}
                 />
               </div>
             )}

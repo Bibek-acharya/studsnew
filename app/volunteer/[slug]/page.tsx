@@ -5,7 +5,7 @@ import { use, useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { apiService, getImageUrl } from "@/services/api";
 import { Calendar, ChevronRight } from "lucide-react";
-import { safeHtml } from "@/lib/html";
+import RichText from "@/components/RichText";
 
 function formatDate(dateStr: string): string {
   if (!dateStr) return "";
@@ -146,11 +146,9 @@ export default function VolunteerDetailsPage({
                 <h2 className="text-[22px] font-bold mb-4">
                   About this opportunity
                 </h2>
-                <div
-                  className="rich-text [word-break:keep-all] [&_*]:[word-break:keep-all] [overflow-wrap:break-word] [&_*]:[overflow-wrap:break-word] [&_img]:max-w-full [&_img]:h-auto [&_table]:max-w-full [&_pre]:whitespace-pre-wrap [&_iframe]:max-w-full"
-                  dangerouslySetInnerHTML={{
-                    __html: safeHtml(volunteer.description),
-                  }}
+                <RichText
+                  html={volunteer.description}
+                  className="[word-break:keep-all] [&_*]:[word-break:keep-all] [overflow-wrap:break-word] [&_*]:[overflow-wrap:break-word] [&_img]:max-w-full [&_img]:h-auto [&_table]:max-w-full [&_pre]:whitespace-pre-wrap [&_iframe]:max-w-full"
                 />
               </section>
             )}

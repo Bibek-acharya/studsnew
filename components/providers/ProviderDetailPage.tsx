@@ -36,7 +36,7 @@ import {
 
 import * as LucideIcons from "lucide-react";
 import { ArrowArcRightIcon } from "@phosphor-icons/react";
-import { safeHtml } from "@/lib/html";
+import RichText from "@/components/RichText";
 
 const stripHtml = (html: string) => {
   if (typeof window === "undefined") return html;
@@ -258,12 +258,7 @@ const ProviderDetailPage: React.FC<{ params: Promise<{ id: string }> }> = ({
             <div className="space-y-10">
               <div className="space-y-6">
                 {profile.about_text ? (
-                  <div
-                    className="rich-text break-words"
-                    dangerouslySetInnerHTML={{
-                      __html: safeHtml(profile.about_text),
-                    }}
-                  />
+                  <RichText html={profile.about_text} className="break-words" />
                 ) : (
                   <p className="text-gray-400 italic">
                     No description provided.

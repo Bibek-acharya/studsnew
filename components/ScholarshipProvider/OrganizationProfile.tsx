@@ -45,7 +45,7 @@ import {
   updateGalleryImage,
   deleteGalleryImage,
 } from "@/services/scholarshipProviderApi";
-import { safeHtml } from "@/lib/html";
+import RichText from "@/components/RichText";
 
 const TABS = ["Details", "Services", "Sectors", "Projects", "Gallery"] as const;
 type Tab = (typeof TABS)[number];
@@ -658,9 +658,10 @@ const OrganizationProfile: React.FC = memo(() => {
                     About Text
                   </label>
                   {aboutText ? (
-                    <div
-                      className="prose prose-sm max-w-none text-gray-700 break-words [&_*]:break-words"
-                      dangerouslySetInnerHTML={{ __html: safeHtml(aboutText) }}
+                    <RichText
+                      html={aboutText}
+                      variant="sm"
+                      className="break-words [&_*]:break-words"
                     />
                   ) : (
                     <p className="text-sm text-gray-400 py-2">Not provided</p>

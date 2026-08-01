@@ -11,7 +11,7 @@ import {
 import { getPublicEventBySlug } from "@/services/scholarshipProviderApi";
 import { fetchInstitutionEventBySlug } from "@/services/institutionEventsApi";
 import { getImageUrl, stripHtml } from "@/services/api";
-import { safeHtml } from "@/lib/html";
+import RichText from "@/components/RichText";
 
 const EventDetailsPage: React.FC<{ params: Promise<{ slug: string }> }> = ({
   params,
@@ -178,9 +178,7 @@ const EventDetailsPage: React.FC<{ params: Promise<{ slug: string }> }> = ({
             {event.title}
           </h1>
           <div className="hidden sm:block max-w-2xl news-content prose prose-invert prose-sm max-w-none prose-p:text-gray-200 prose-a:text-blue-300">
-            <div
-              dangerouslySetInnerHTML={{ __html: safeHtml(event.excerpt) }}
-            />
+            <RichText html={event.excerpt} variant="sm" />
           </div>
         </div>
       </div>
@@ -195,11 +193,9 @@ const EventDetailsPage: React.FC<{ params: Promise<{ slug: string }> }> = ({
               </h2>
             </div>
 
-            <div
+            <RichText
+              html={event.description || ""}
               className="news-content prose prose-slate max-w-none break-words overflow-hidden prose-img:max-w-full prose-img:h-auto prose-img:rounded-xl prose-pre:overflow-x-auto prose-pre:whitespace-pre-wrap prose-table:block prose-table:overflow-x-auto prose-a:text-blue-600 hover:prose-a:text-blue-700 prose-headings:text-gray-900 prose-p:text-gray-700 prose-li:text-gray-700"
-              dangerouslySetInnerHTML={{
-                __html: safeHtml(event.description || ""),
-              }}
             />
           </section>
         </div>
@@ -388,11 +384,11 @@ const EventDetailsPage: React.FC<{ params: Promise<{ slug: string }> }> = ({
                       </div>
                     </div>
 
-                    <p
+                    <RichText
+                      html={rel.excerpt}
+                      variant="sm"
+                      as="p"
                       className="text-gray-500 text-[13px] leading-relaxed mb-5 line-clamp-3 news-content"
-                      dangerouslySetInnerHTML={{
-                        __html: safeHtml(rel.excerpt),
-                      }}
                     />
 
                     <div className="border-t border-dashed border-gray-200 mb-4"></div>

@@ -2,7 +2,7 @@
 
 import React from "react";
 import { useRouter } from "next/navigation";
-import { safeHtml } from "@/lib/html";
+import RichText from "@/components/RichText";
 import EmptyTabState from "./EmptyTabState";
 
 interface TabNewsProps {
@@ -52,9 +52,10 @@ const TabNews: React.FC<TabNewsProps> = ({ news, page, onPageChange }) => {
               <h3 className="mb-2 text-[17px] font-bold text-gray-900">
                 {news.title}
               </h3>
-              <div
-                className="line-clamp-2 text-[13.5px] text-gray-500 rich-text"
-                dangerouslySetInnerHTML={{ __html: safeHtml(news.desc) }}
+              <RichText
+                html={news.desc}
+                variant="sm"
+                className="line-clamp-2 text-[13.5px] text-gray-500"
               />
             </div>
             <div className="flex items-center justify-between border-t border-gray-50 bg-white px-5 py-4">

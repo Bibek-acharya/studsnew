@@ -7,7 +7,7 @@ import {
   ClipboardList,
   FileText,
 } from "lucide-react";
-import { safeHtml } from "@/lib/html";
+import RichText from "@/components/RichText";
 
 export function EligibilityTab({
   criteria,
@@ -27,21 +27,17 @@ export function EligibilityTab({
   return (
     <div>
       <div className="mb-6">
-        <h2
+        <RichText
+          html={sectionTitle || "Eligibility &amp; Selection Criteria"}
+          variant="sm"
+          as="h2"
           className="text-[20px] font-bold text-gray-900 break-words hyphens-none"
-          dangerouslySetInnerHTML={{
-            __html: safeHtml(
-              sectionTitle || "Eligibility &amp; Selection Criteria",
-            ),
-          }}
         />
-        <p
+        <RichText
+          html={sectionSubtitle || "Requirements and selection process"}
+          variant="sm"
+          as="p"
           className="mt-1 text-[14px] text-gray-500 break-words hyphens-none"
-          dangerouslySetInnerHTML={{
-            __html: safeHtml(
-              sectionSubtitle || "Requirements and selection process",
-            ),
-          }}
         />
       </div>
       <div className="space-y-6">
@@ -63,9 +59,11 @@ export function EligibilityTab({
                     size={20}
                     className="mt-0.5 shrink-0 text-blue-600"
                   />
-                  <span
+                  <RichText
+                    html={item}
+                    variant="sm"
+                    as="span"
                     className="break-words"
-                    dangerouslySetInnerHTML={{ __html: safeHtml(item) }}
                   />
                 </li>
               ))}
@@ -86,9 +84,11 @@ export function EligibilityTab({
                   className="flex items-center gap-2 text-[14px] text-amber-800"
                 >
                   <FileText size={16} className="shrink-0 text-amber-600" />
-                  <span
+                  <RichText
+                    html={doc}
+                    variant="sm"
+                    as="span"
                     className="break-words hyphens-none"
-                    dangerouslySetInnerHTML={{ __html: safeHtml(doc) }}
                   />
                 </div>
               ))}
@@ -132,13 +132,17 @@ export function SelectionProcessSteps({
             >
               {s.num}
             </div>
-            <h4
+            <RichText
+              html={s.title}
+              variant="sm"
+              as="h4"
               className="mb-1 text-[14px] font-bold text-gray-900 break-words hyphens-none"
-              dangerouslySetInnerHTML={{ __html: safeHtml(s.title) }}
             />
-            <p
+            <RichText
+              html={s.desc}
+              variant="sm"
+              as="p"
               className="text-[12px] text-gray-600 break-words hyphens-none"
-              dangerouslySetInnerHTML={{ __html: safeHtml(s.desc) }}
             />
           </div>
         ))}

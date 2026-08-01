@@ -17,7 +17,7 @@ import {
   ProviderEvent,
 } from "@/services/scholarshipProviderApi";
 import ConfirmationModal from "./common/ConfirmationModal";
-import { safeHtml } from "@/lib/html";
+import RichText from "@/components/RichText";
 
 const FALLBACK_EVENTS: ProviderEvent[] = [
   {
@@ -359,14 +359,14 @@ const EventsDirectory: React.FC<EventsDirectoryProps> = memo(
                           {event.name}
                         </p>
                         {event.short_desc ? (
-                          <p
+                          <RichText
+                            html={
+                              event.short_desc.slice(0, 60) +
+                              (event.short_desc.length > 60 ? "..." : "")
+                            }
+                            variant="sm"
+                            as="p"
                             className="text-xs text-gray-500"
-                            dangerouslySetInnerHTML={{
-                              __html: safeHtml(
-                                event.short_desc.slice(0, 60) +
-                                  (event.short_desc.length > 60 ? "..." : ""),
-                              ),
-                            }}
                           />
                         ) : (
                           <p className="text-xs text-gray-500">

@@ -8,7 +8,7 @@ import {
   AdminRow,
 } from "./index";
 import EmptyTabState from "./EmptyTabState";
-import { safeHtml } from "@/lib/html";
+import RichText from "@/components/RichText";
 
 interface TabAboutProps {
   description: string;
@@ -46,13 +46,10 @@ const TabAbout: React.FC<TabAboutProps> = ({
       <AboutVideoInteractive videos={instVideos || undefined} />
 
       {description && (
-        <div className="rich-text max-w-none text-[15px] leading-[1.8] md:text-[16px] overflow-x-auto [&_pre]:overflow-x-auto [&_pre]:whitespace-pre-wrap [&_img]:max-w-full [&_table]:block [&_table]:overflow-x-auto">
-          <div
-            dangerouslySetInnerHTML={{
-              __html: safeHtml(description),
-            }}
-          />
-        </div>
+        <RichText
+          html={description}
+          className="max-w-none text-[15px] leading-[1.8] md:text-[16px] overflow-x-auto [&_pre]:overflow-x-auto [&_pre]:whitespace-pre-wrap [&_img]:max-w-full [&_table]:block [&_table]:overflow-x-auto"
+        />
       )}
 
       <div className="grid grid-cols-1 gap-6 md:grid-cols-2">

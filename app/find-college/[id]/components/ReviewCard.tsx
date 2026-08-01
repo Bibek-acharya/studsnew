@@ -1,7 +1,7 @@
 "use client";
 
 import React from "react";
-import { safeHtml } from "@/lib/html";
+import RichText from "@/components/RichText";
 
 const ReviewCard: React.FC<{
   initials: string;
@@ -39,14 +39,14 @@ const ReviewCard: React.FC<{
         <i className="fa-solid fa-thumbs-up mt-0.5 text-green-500"></i>
         <p className="text-[13.5px] leading-relaxed text-gray-700">
           <span className="font-bold text-gray-900">Pros:</span>{" "}
-          <span dangerouslySetInnerHTML={{ __html: safeHtml(pros) }} />
+          <RichText html={pros} variant="sm" as="span" />
         </p>
       </div>
       <div className="flex items-start gap-2">
         <i className="fa-solid fa-thumbs-down mt-0.5 text-red-500"></i>
         <p className="text-[13.5px] leading-relaxed text-gray-700">
           <span className="font-bold text-gray-900">Cons:</span>{" "}
-          <span dangerouslySetInnerHTML={{ __html: safeHtml(cons) }} />
+          <RichText html={cons} variant="sm" as="span" />
         </p>
       </div>
     </div>

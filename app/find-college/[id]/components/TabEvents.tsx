@@ -2,7 +2,7 @@
 
 import React from "react";
 import { useRouter } from "next/navigation";
-import { safeHtml } from "@/lib/html";
+import RichText from "@/components/RichText";
 import EmptyTabState from "./EmptyTabState";
 
 interface TabEventsProps {
@@ -70,9 +70,10 @@ const TabEvents: React.FC<TabEventsProps> = ({
                 <i className="fa-solid fa-location-dot mr-2 text-gray-500"></i>{" "}
                 {event.date.split(" | ")[1] || "TBD"}
               </div>
-              <div
-                className="text-xs text-gray-500 mb-5 line-clamp-3 leading-relaxed font-medium rich-text"
-                dangerouslySetInnerHTML={{ __html: safeHtml(event.desc) }}
+              <RichText
+                html={event.desc}
+                variant="sm"
+                className="text-xs text-gray-500 mb-5 line-clamp-3 leading-relaxed font-medium"
               />
               <div className="mt-auto flex gap-2">
                 <button

@@ -16,7 +16,7 @@ import {
 } from "@/services/scholarshipProviderApi";
 import { useAuth } from "@/services/AuthContext";
 import { getImageUrl, stripHtml } from "@/services/api";
-import { safeHtml } from "@/lib/html";
+import RichText from "@/components/RichText";
 
 const BlogDetailsPage: React.FC<{ params: Promise<{ slug: string }> }> = ({
   params,
@@ -222,14 +222,11 @@ const BlogDetailsPage: React.FC<{ params: Promise<{ slug: string }> }> = ({
           </div>
 
           <div className="bg-blue-50 border-l-4 border-blue-500 p-5 rounded-r-xl mb-8 text-gray-700 text-sm sm:text-base leading-relaxed news-content">
-            <div dangerouslySetInnerHTML={{ __html: safeHtml(blog.excerpt) }} />
+            <RichText html={blog.excerpt} variant="sm" />
           </div>
 
           <div className="prose max-w-none text-gray-700 [&_pre]:overflow-x-auto [&_pre]:whitespace-pre-wrap [&_pre]:break-words [&_code]:break-words [&_img]:max-w-full news-content">
-            <div
-              className="text-gray-700 mb-8"
-              dangerouslySetInnerHTML={{ __html: safeHtml(blog.content) }}
-            />
+            <RichText html={blog.content} className="text-gray-700 mb-8" />
           </div>
 
           <div className="mt-8 mb-6 flex flex-wrap items-center gap-3">

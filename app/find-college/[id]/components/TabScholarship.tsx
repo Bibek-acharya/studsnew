@@ -2,7 +2,7 @@
 
 import React from "react";
 import { useRouter } from "next/navigation";
-import { safeHtml } from "@/lib/html";
+import RichText from "@/components/RichText";
 import { FilterPills, ProgTh } from "./index";
 import type { LevelFilter } from "../../types";
 import EmptyTabState from "./EmptyTabState";
@@ -63,11 +63,10 @@ const TabScholarship: React.FC<TabScholarshipProps> = ({
                   {scholarship.benefit}
                 </span>
               </div>
-              <div
-                className="col-span-3 rich-text"
-                dangerouslySetInnerHTML={{
-                  __html: safeHtml(scholarship.audience),
-                }}
+              <RichText
+                html={scholarship.audience}
+                variant="sm"
+                className="col-span-3"
               />
               <div className="col-span-3">
                 <button

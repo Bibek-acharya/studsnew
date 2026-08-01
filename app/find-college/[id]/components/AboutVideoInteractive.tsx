@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from "react";
 import { getImageUrl } from "@/services/api";
-import { safeHtml } from "@/lib/html";
+import RichText from "@/components/RichText";
 
 type CardData = {
   avatar: string;
@@ -166,8 +166,10 @@ const AboutVideoInteractive: React.FC<{ videos?: VideoEntry[] }> = ({
               <i className="fa-solid fa-user text-white/60"></i>
             </div>
           )}
-          <h2
-            dangerouslySetInnerHTML={{ __html: safeHtml(mainData.title) }}
+          <RichText
+            html={mainData.title}
+            variant="sm"
+            as="h2"
             className="mb-2 text-[16px] font-normal leading-tight tracking-tight text-white sm:mb-3 sm:text-[18px]"
           />
           <p className="mb-4 text-[12px] leading-relaxed text-blue-100/80 sm:text-[13px]">

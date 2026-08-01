@@ -4,7 +4,7 @@ import React, { useState, useEffect } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { useParams, useSearchParams, useRouter } from "next/navigation";
-import { safeHtml } from "@/lib/html";
+import RichText from "@/components/RichText";
 import ContactInfoRow from "@/app/find-college/[id]/components/ContactInfoRow";
 import ReviewCard from "@/app/find-college/[id]/components/ReviewCard";
 import RatingBar from "@/app/find-college/[id]/components/RatingBar";
@@ -690,10 +690,11 @@ const UniversityDetail: React.FC = () => {
                             <div className="flex items-start gap-3">
                               <span className="text-[13px] font-bold text-blue-600 whitespace-nowrap mt-0.5">{item.date || "-"}</span>
                               <div className="flex-1">
-                                <div 
-                                  className="text-[14px] text-gray-700 leading-relaxed rich-text"
-                                  dangerouslySetInnerHTML={{ __html: safeHtml(item.text || "") }}
-                                />
+                              <RichText
+                                html={item.text || ""}
+                                variant="sm"
+                                className="text-[14px] text-gray-700 leading-relaxed"
+                              />
                                 {item.link && (
                                   <a
                                     href={item.link}
@@ -722,11 +723,9 @@ const UniversityDetail: React.FC = () => {
                     </div>
                   )}
 
-                  <div
-                    className="space-y-6 text-[15px] leading-[1.8] text-gray-600 md:text-[16px] rich-text"
-                    dangerouslySetInnerHTML={{
-                      __html: safeHtml(description),
-                    }}
+                  <RichText
+                    html={description}
+                    className="space-y-6 text-[15px] leading-[1.8] text-gray-600 md:text-[16px]"
                   />
 
                   {ytId ? (
@@ -742,11 +741,9 @@ const UniversityDetail: React.FC = () => {
                   ) : null}
 
                   {aboutData?.description && (
-                    <div
-                      className="space-y-6 text-[15px] leading-[1.8] text-gray-600 md:text-[16px] rich-text"
-                      dangerouslySetInnerHTML={{
-                        __html: safeHtml(aboutData.description as string),
-                      }}
+                    <RichText
+                      html={aboutData.description as string}
+                      className="space-y-6 text-[15px] leading-[1.8] text-gray-600 md:text-[16px]"
                     />
                   )}
 
@@ -762,11 +759,10 @@ const UniversityDetail: React.FC = () => {
                               Our Vision
                             </h3>
                           </div>
-                          <div
-                            className="text-[14.5px] leading-[1.7] text-gray-600 rich-text"
-                            dangerouslySetInnerHTML={{
-                              __html: safeHtml(aboutData.vision as string),
-                            }}
+                          <RichText
+                            html={aboutData.vision as string}
+                            variant="sm"
+                            className="text-[14.5px] leading-[1.7] text-gray-600"
                           />
                         </div>
                       )}
@@ -780,11 +776,10 @@ const UniversityDetail: React.FC = () => {
                               Our Mission
                             </h3>
                           </div>
-                          <div
-                            className="text-[14.5px] leading-[1.7] text-gray-600 rich-text"
-                            dangerouslySetInnerHTML={{
-                              __html: safeHtml(aboutData.mission as string),
-                            }}
+                          <RichText
+                            html={aboutData.mission as string}
+                            variant="sm"
+                            className="text-[14.5px] leading-[1.7] text-gray-600"
                           />
                         </div>
                       )}
@@ -808,13 +803,10 @@ const UniversityDetail: React.FC = () => {
                             <div className="w-full text-[14px] font-semibold text-gray-800 sm:w-1/3">
                               {row.label || row.key || row.field}
                             </div>
-                            <div
-                              className="w-full text-[14px] text-gray-600 sm:w-2/3 rich-text"
-                              dangerouslySetInnerHTML={{
-                                __html: safeHtml(
-                                  row.value || row.val || "",
-                                ),
-                              }}
+                            <RichText
+                              html={row.value || row.val || ""}
+                              variant="sm"
+                              className="w-full text-[14px] text-gray-600 sm:w-2/3"
                             />
                           </div>
                         ))}

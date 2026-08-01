@@ -36,7 +36,7 @@ import {
   Send,
 } from "lucide-react";
 import * as LucideIcons from "lucide-react";
-import { safeHtml } from "@/lib/html";
+import RichText from "@/components/RichText";
 import {
   FaFacebook,
   FaTwitter,
@@ -486,11 +486,9 @@ const EntranceDetailsPage: React.FC = () => {
                 <h2 className="text-2xl font-bold text-gray-900">
                   About {exam.title}
                 </h2>
-                <div
-                  className="prose prose-gray max-w-none text-gray-600 break-words overflow-x-auto [&_pre]:overflow-x-auto [&_pre]:whitespace-pre-wrap [&_img]:max-w-full [&_table]:block [&_table]:overflow-x-auto [&_iframe]:max-w-full"
-                  dangerouslySetInnerHTML={{
-                    __html: safeHtml(exam.description),
-                  }}
+                <RichText
+                  html={exam.description}
+                  className="text-gray-600 break-words overflow-x-auto [&_pre]:overflow-x-auto [&_pre]:whitespace-pre-wrap [&_img]:max-w-full [&_table]:block [&_table]:overflow-x-auto [&_iframe]:max-w-full"
                 />
               </div>
 
@@ -637,11 +635,10 @@ const EntranceDetailsPage: React.FC = () => {
                             <CheckCircle2 className="w-4 h-4 text-green-600" />{" "}
                             {item.title}
                           </h4>
-                          <div
-                            className="text-sm text-gray-600 ml-6 prose prose-sm max-w-none break-words overflow-x-auto [&_pre]:overflow-x-auto [&_pre]:whitespace-pre-wrap [&_img]:max-w-full [&_table]:block [&_table]:overflow-x-auto [&_iframe]:max-w-full"
-                            dangerouslySetInnerHTML={{
-                              __html: safeHtml(item.description),
-                            }}
+                          <RichText
+                            html={item.description}
+                            variant="sm"
+                            className="text-sm text-gray-600 ml-6 break-words overflow-x-auto [&_pre]:overflow-x-auto [&_pre]:whitespace-pre-wrap [&_img]:max-w-full [&_table]:block [&_table]:overflow-x-auto [&_iframe]:max-w-full"
                           />
                         </div>
                       ))}
@@ -683,11 +680,10 @@ const EntranceDetailsPage: React.FC = () => {
                             <h3 className="font-bold text-gray-900 text-lg mb-3">
                               {step.title}
                             </h3>
-                            <div
-                              className="text-sm text-gray-600 leading-relaxed prose prose-sm max-w-none break-words overflow-x-auto [&_pre]:overflow-x-auto [&_pre]:whitespace-pre-wrap [&_img]:max-w-full [&_table]:block [&_table]:overflow-x-auto [&_iframe]:max-w-full"
-                              dangerouslySetInnerHTML={{
-                                __html: safeHtml(step.description),
-                              }}
+                            <RichText
+                              html={step.description}
+                              variant="sm"
+                              className="text-sm text-gray-600 leading-relaxed"
                             />
                           </div>
                         </div>
@@ -1156,11 +1152,10 @@ const EntranceDetailsPage: React.FC = () => {
                           {program.programName || program.name}
                         </h4>
                         {program.description && (
-                          <div
-                            className="text-sm text-gray-600 leading-relaxed prose prose-sm max-w-none"
-                            dangerouslySetInnerHTML={{
-                              __html: safeHtml(program.description),
-                            }}
+                          <RichText
+                            html={program.description}
+                            variant="sm"
+                            className="text-sm text-gray-600 leading-relaxed"
                           />
                         )}
                       </div>
@@ -1380,9 +1375,9 @@ const EntranceDetailsPage: React.FC = () => {
 
               {exam.embeddedMap && (
                 <div className="mt-5 pt-5 border-t border-gray-100">
-                  <div
+                  <RichText
+                    html={exam.embeddedMap}
                     className="rounded-md overflow-hidden border border-gray-200 [&_iframe]:w-full [&_iframe]:h-[200px]"
-                    dangerouslySetInnerHTML={{ __html: exam.embeddedMap }}
                   />
                 </div>
               )}

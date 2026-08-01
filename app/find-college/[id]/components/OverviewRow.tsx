@@ -1,7 +1,7 @@
 "use client";
 
 import React from "react";
-import { safeHtml } from "@/lib/html";
+import RichText from "@/components/RichText";
 
 const OverviewRow: React.FC<{ label: string; value: string }> = ({
   label,
@@ -9,10 +9,7 @@ const OverviewRow: React.FC<{ label: string; value: string }> = ({
 }) => (
   <tr>
     <td className="w-1/3 px-2 py-3 font-semibold">{label}</td>
-    <td
-      className="px-4 py-3 rich-text"
-      dangerouslySetInnerHTML={{ __html: safeHtml(value) }}
-    />
+    <RichText html={value} variant="sm" as="td" className="px-4 py-3" />
   </tr>
 );
 

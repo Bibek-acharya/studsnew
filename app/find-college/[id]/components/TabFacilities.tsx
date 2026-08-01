@@ -1,7 +1,7 @@
 "use client";
 
 import React from "react";
-import { safeHtml } from "@/lib/html";
+import RichText from "@/components/RichText";
 import EmptyTabState from "./EmptyTabState";
 
 interface TabFacilitiesProps {
@@ -36,9 +36,10 @@ const TabFacilities: React.FC<TabFacilitiesProps> = ({ facilities }) => {
               <h4 className="text-[16px] font-bold text-gray-900">
                 {facility.title || facility.heading}
               </h4>
-              <div
-                className="text-[13px] text-gray-600 rich-text"
-                dangerouslySetInnerHTML={{ __html: safeHtml(facility.desc) }}
+              <RichText
+                html={facility.desc}
+                variant="sm"
+                className="text-[13px] text-gray-600"
               />
             </div>
           </div>

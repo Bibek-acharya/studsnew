@@ -28,7 +28,7 @@ import {
   SearchX,
   FolderOpen,
 } from "lucide-react";
-import { safeHtml } from "@/lib/html";
+import RichText from "@/components/RichText";
 
 const TABS = [
   { id: "overview", label: "Overview" },
@@ -459,11 +459,7 @@ export default function AdmissionDetailPage() {
 
                 <div className="mt-5 text-gray-700 text-[15px] leading-relaxed">
                   {whatsNewData.description ? (
-                    <div
-                      dangerouslySetInnerHTML={{
-                        __html: safeHtml(whatsNewData.description),
-                      }}
-                    />
+                    <RichText html={whatsNewData.description} />
                   ) : (
                     <p className="mb-4">
                       All the latest updates regarding{" "}
@@ -503,9 +499,10 @@ export default function AdmissionDetailPage() {
                   {overviewHeading || "Admissions Now Open for New Session"}
                 </h2>
                 {overviewDesc ? (
-                  <div
-                    className="prose prose-sm max-w-none text-gray-600 break-words overflow-hidden [&_p]:break-words [&_p]:overflow-hidden"
-                    dangerouslySetInnerHTML={{ __html: safeHtml(overviewDesc) }}
+                  <RichText
+                    html={overviewDesc}
+                    variant="sm"
+                    className="text-gray-600 break-words overflow-hidden [&_p]:break-words [&_p]:overflow-hidden"
                   />
                 ) : (
                   <p className="text-gray-600">

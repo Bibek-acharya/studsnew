@@ -26,7 +26,7 @@ import {
   PartnerMessageCarousel,
   RequestInfoForm,
 } from "./ScholarshipDetailSidebar";
-import { safeHtml } from "@/lib/html";
+import RichText from "@/components/RichText";
 
 interface ScholarshipDetailPageProps {
   scholarship: any;
@@ -362,17 +362,15 @@ export default function ScholarshipDetailPage({
             dynamicJourneyTimeline.length > 0 ? (
               <div className="space-y-10">
                 {desc && (
-                  <div
-                    className="rich-text text-[15px] leading-[1.8] text-gray-600 hyphens-none break-words"
-                    dangerouslySetInnerHTML={{ __html: safeHtml(desc) }}
+                  <RichText
+                    html={desc}
+                    className="text-[15px] leading-[1.8] text-gray-600 hyphens-none break-words"
                   />
                 )}
                 {scholarship.about_paragraph_2 && (
-                  <div
-                    className="rich-text mt-4 text-[15px] leading-[1.8] text-gray-600 hyphens-none break-words"
-                    dangerouslySetInnerHTML={{
-                      __html: safeHtml(scholarship.about_paragraph_2),
-                    }}
+                  <RichText
+                    html={scholarship.about_paragraph_2}
+                    className="mt-4 text-[15px] leading-[1.8] text-gray-600 hyphens-none break-words"
                   />
                 )}
                 {Array.isArray(scholarship.video_tutorials) &&

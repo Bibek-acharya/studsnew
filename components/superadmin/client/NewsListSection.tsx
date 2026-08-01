@@ -14,7 +14,7 @@ import {
   Star,
 } from "lucide-react";
 import { adminNewsApi, AdminNews } from "@/services/newsApi";
-import { safeHtml } from "@/lib/html";
+import RichText from "@/components/RichText";
 
 const STATUS_BADGE: Record<string, string> = {
   published: "bg-green-100 text-green-700",
@@ -337,19 +337,18 @@ export default function NewsListSection({
                     <td className="py-3 px-4">
                       <p className="font-medium text-gray-900">{item.title}</p>
                       {item.excerpt && (
-                        <p
+                        <RichText
+                          html={
+                            item.excerpt
+                              .replace(/<[^>]*>/g, "")
+                              .slice(0, 60) +
+                            (item.excerpt.replace(/<[^>]*>/g, "").length > 60
+                              ? "..."
+                              : "")
+                          }
+                          variant="sm"
+                          as="p"
                           className="text-xs text-gray-500"
-                          dangerouslySetInnerHTML={{
-                            __html: safeHtml(
-                              item.excerpt
-                                .replace(/<[^>]*>/g, "")
-                                .slice(0, 60) +
-                                (item.excerpt.replace(/<[^>]*>/g, "").length >
-                                60
-                                  ? "..."
-                                  : ""),
-                            ),
-                          }}
                         />
                       )}
                     </td>
