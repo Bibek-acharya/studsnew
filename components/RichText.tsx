@@ -2,7 +2,10 @@
 
 import React, { useEffect, useMemo, useState } from "react";
 import DOMPurify from "isomorphic-dompurify";
-import { findNoBreakTextTokens } from "./richTextUtils";
+import {
+  findNoBreakTextTokens,
+  normalizeRichTextText,
+} from "./richTextUtils";
 
 const PURIFY_CONFIG = {
   ALLOWED_TAGS: [
@@ -63,6 +66,7 @@ function protectDashPhrases(html: string): string {
 
   for (const textNode of textNodes) {
     if (textNode.parentElement?.closest("a, code, pre")) continue;
+    textNode.data = normalizeRichTextText(textNode.data);
 
     const tokens = findNoBreakTextTokens(textNode.data);
     if (tokens.length === 0) continue;
