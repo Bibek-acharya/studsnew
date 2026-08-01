@@ -21,7 +21,7 @@ const InfoBlock: React.FC<{
     <RichText
       html={desc}
       variant="sm"
-      className="text-[14.5px] leading-[1.7] break-words overflow-x-auto [&_pre]:overflow-x-auto [&_pre]:whitespace-pre-wrap [&_img]:max-w-full [&_table]:block [&_table]:overflow-x-auto"
+      className="text-[14.5px] leading-[1.7] overflow-x-auto [&_pre]:overflow-x-auto [&_pre]:whitespace-pre-wrap [&_img]:max-w-full [&_table]:block [&_table]:overflow-x-auto"
     />
   </div>
 );

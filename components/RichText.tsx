@@ -1,7 +1,8 @@
 "use client";
 
-import React, { useMemo } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import DOMPurify from "isomorphic-dompurify";
+import { findNoBreakTextTokens } from "./richTextUtils";
 
 const PURIFY_CONFIG = {
   ALLOWED_TAGS: [
@@ -42,6 +43,53 @@ const variantClass: Record<Variant, string> = {
   lg: "prose-lg",
 };
 
+function protectDashPhrases(html: string): string {
+  if (typeof DOMParser === "undefined" || !html) return html;
+
+  const document = new DOMParser().parseFromString(
+    `<div>${html}</div>`,
+    "text/html",
+  );
+  const root = document.body.firstElementChild;
+  if (!root) return html;
+
+  const walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT);
+  const textNodes: Text[] = [];
+  let node = walker.nextNode();
+  while (node) {
+    textNodes.push(node as Text);
+    node = walker.nextNode();
+  }
+
+  for (const textNode of textNodes) {
+    if (textNode.parentElement?.closest("a, code, pre")) continue;
+
+    const tokens = findNoBreakTextTokens(textNode.data);
+    if (tokens.length === 0) continue;
+
+    const pattern = new RegExp(
+      tokens.map((token) => token.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")).join("|"),
+      "g",
+    );
+    const fragment = document.createDocumentFragment();
+    let offset = 0;
+
+    textNode.data.replace(pattern, (match, index: number) => {
+      fragment.append(textNode.data.slice(offset, index));
+      const span = document.createElement("span");
+      span.className = "rich-text-no-break";
+      span.textContent = match;
+      fragment.append(span);
+      offset = index + match.length;
+      return match;
+    });
+    fragment.append(textNode.data.slice(offset));
+    textNode.replaceWith(fragment);
+  }
+
+  return root.innerHTML;
+}
+
 interface RichTextProps {
   html: string;
   className?: string;
@@ -59,14 +107,19 @@ const RichText: React.FC<RichTextProps> = ({
     () => DOMPurify.sanitize(html || "", PURIFY_CONFIG),
     [html],
   );
+  const [renderedHtml, setRenderedHtml] = useState(sanitized);
+
+  useEffect(() => {
+    setRenderedHtml(protectDashPhrases(sanitized));
+  }, [sanitized]);
 
   return (
     <Tag
       className={
-        `prose prose-slate max-w-none break-words hyphens-none text-left ` +
+        `rich-text-content prose prose-slate max-w-none break-normal hyphens-none text-left ` +
         `${variantClass[variant]} ${className}`
       }
-      dangerouslySetInnerHTML={{ __html: sanitized }}
+      dangerouslySetInnerHTML={{ __html: renderedHtml }}
     />
   );
 };

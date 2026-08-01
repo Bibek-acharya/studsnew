@@ -430,7 +430,7 @@ const BlogDetailsPage: React.FC<{ params: Promise<{ slug: string }> }> = ({
         </aside>
       </div>
       <style>{`
-        .news-content { overflow-wrap: break-word; word-break: break-word; }
+         .news-content { overflow-wrap: break-word; word-break: normal; hyphens: none; line-break: strict; }
         .news-content a { color: #2563eb !important; text-decoration: underline !important; font-weight: 500 !important; }
         .news-content a:hover { color: #1d4ed8 !important; }
       `}</style>

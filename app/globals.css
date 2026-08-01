@@ -206,6 +206,23 @@ body {
   padding: 2px 4px;
 }
 
+/* Keep prose at natural word boundaries. Long unbroken strings may still wrap. */
+.rich-text-content,
+.rich-text-content :is(p, li, blockquote, h1, h2, h3, td, th) {
+  overflow-wrap: normal;
+  word-break: normal;
+  hyphens: none;
+  line-break: strict;
+}
+
+.rich-text-content :is(a, code, pre) {
+  overflow-wrap: anywhere;
+}
+
+.rich-text-no-break {
+  white-space: nowrap;
+}
+
 /* Quill editor styles */
 
 .hide-scrollbar {
