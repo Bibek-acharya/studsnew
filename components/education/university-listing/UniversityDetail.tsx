@@ -175,6 +175,8 @@ const UniversityDetail: React.FC = () => {
   const [activeTab, setActiveTab] = useState<TabKey>(getInitialTab);
   const [courseFilter, setCourseFilter] = useState("all");
   const [scholarFilter, setScholarFilter] = useState("all");
+  const [admissionsPage, setAdmissionsPage] = useState(1);
+  const admissionsPerPage = 10;
   const [openDropdowns, setOpenDropdowns] = useState<Record<string, boolean>>(
     {},
   );
@@ -642,6 +644,54 @@ const UniversityDetail: React.FC = () => {
               {/* ========== ABOUT ========== */}
               {activeTab === "tab-about" && (
                 <div className="space-y-10">
+                  {/* ========== LATEST NEWS & STORIES ========== */}
+                  {latestNewsList.length > 0 && (
+                    <div className="overflow-hidden rounded-md border border-gray-200 bg-white">
+                      {/* Facebook-style post header */}
+                      <div className="px-6 py-4 border-b border-gray-100">
+                        <div className="flex items-start gap-3">
+                          {/* Profile picture */}
+                          <div className="flex-shrink-0">
+                            <img
+                              src="/icon.png"
+                              alt="StudSphere Team"
+                              className="h-12 w-12 rounded-full object-cover border-2 border-blue-500"
+                            />
+                          </div>
+                          {/* User info */}
+                          <div className="flex-1 min-w-0">
+                            <div className="flex items-center gap-2">
+                              <span className="font-bold text-gray-900 text-[15px]">StudSphere Team</span>
+                              <BadgeCheck className="h-4 w-4 shrink-0 fill-blue-500 text-white" />
+                            </div>
+                            <div className="flex items-center gap-2 text-[13px] text-gray-500 mt-0.5">
+                              <span>Content Curator</span>
+                              <span>•</span>
+                              <span>Updated at: {latestNewsList[0]?.date || new Date().toLocaleDateString()}</span>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                      {/* Title */}
+                      <div className="px-6 py-3 bg-blue-50 border-b border-gray-100">
+                        <h3 className="text-[16px] font-bold text-gray-900">
+                          {name} Latest News & Stories
+                        </h3>
+                      </div>
+                      {/* Post content */}
+                      <div className="divide-y divide-gray-100">
+                        {latestNewsList.map((item: any, idx: number) => (
+                          <div key={idx} className="px-6 py-4 hover:bg-gray-50 transition-colors">
+                            <div className="flex items-start gap-3">
+                              <span className="text-[13px] font-semibold text-blue-600 whitespace-nowrap mt-0.5">{item.date || "-"}</span>
+                              <span className="text-[14px] text-gray-700 leading-relaxed">{item.text || ""}</span>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
                   <div
                     className="space-y-6 text-[15px] leading-[1.8] text-gray-600 md:text-[16px] rich-text"
                     dangerouslySetInnerHTML={{
@@ -777,51 +827,9 @@ const UniversityDetail: React.FC = () => {
                         </table>
                       </div>
                     </div>
-                  )}
-                </div>
-              )}
-
-              {/* ========== LATEST UPDATES & NEWS ========== */}
-              {latestNewsList.length > 0 && (
-                <div className="overflow-hidden rounded-md border border-gray-200 bg-white">
-                  {/* Facebook-style post header */}
-                  <div className="px-6 py-4 border-b border-gray-100">
-                    <div className="flex items-start gap-3">
-                      {/* Profile picture */}
-                      <div className="flex-shrink-0">
-                        <img
-                          src="/icon.png"
-                          alt="StudSphere Team"
-                          className="h-12 w-12 rounded-full object-cover border-2 border-blue-500"
-                        />
-                      </div>
-                      {/* User info */}
-                      <div className="flex-1 min-w-0">
-                        <div className="flex items-center gap-2">
-                          <span className="font-bold text-gray-900 text-[15px]">StudSphere Team</span>
-                          <BadgeCheck className="h-4 w-4 shrink-0 fill-blue-500 text-white" />
-                        </div>
-                        <div className="flex items-center gap-2 text-[13px] text-gray-500 mt-0.5">
-                          <span>Content Curator</span>
-                          <span>•</span>
-                          <span>Updated at: {latestNewsList[0]?.date || new Date().toLocaleDateString()}</span>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                  {/* Post content */}
-                  <div className="divide-y divide-gray-100">
-                    {latestNewsList.map((item: any, idx: number) => (
-                      <div key={idx} className="px-6 py-4 hover:bg-gray-50 transition-colors">
-                        <div className="flex items-start gap-3">
-                          <span className="text-[13px] font-semibold text-blue-600 whitespace-nowrap mt-0.5">{item.date || "-"}</span>
-                          <span className="text-[14px] text-gray-700 leading-relaxed">{item.text || ""}</span>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
+                   )}
+                 </div>
+               )}
 
               {/* ========== COURSES & FEES ========== */}
               {activeTab === "tab-courses" && (
@@ -1092,35 +1100,62 @@ const UniversityDetail: React.FC = () => {
                     </h3>
                   </div>
                   {admissionsList.length > 0 ? (
-                    <div className="w-full overflow-x-auto">
-                      <div className="min-w-[800px]">
-                        <div className="grid grid-cols-12 gap-2 border-b border-gray-100 bg-white px-6 py-5">
-                          <div className="col-span-3 text-[13px] font-bold uppercase tracking-wider text-gray-800">PROGRAM</div>
-                          <div className="col-span-2 text-[13px] font-bold uppercase tracking-wider text-gray-800">OPENS</div>
-                          <div className="col-span-2 text-[13px] font-bold uppercase tracking-wider text-gray-800">DEADLINE</div>
-                          <div className="col-span-3 text-[13px] font-bold uppercase tracking-wider text-gray-800">DESCRIPTION</div>
-                          <div className="col-span-2 text-[13px] font-bold uppercase tracking-wider text-gray-800">ACTIONS</div>
-                        </div>
-                        <div className="divide-y divide-gray-100">
-                          {admissionsList.map((ad: any, i: number) => (
-                            <div key={i} className="grid grid-cols-12 gap-2 px-6 py-5 hover:bg-gray-50/50 items-center">
-                              <div className="col-span-3">
-                                <h4 className="text-[15.5px] font-bold text-gray-900">{ad.program || ad.title}</h4>
-                                {ad.faculty && <p className="text-[13px] text-gray-500">{ad.faculty}</p>}
-                              </div>
-                              <div className="col-span-2 text-[14px] text-gray-600">{ad.opens_from || "-"}</div>
-                              <div className="col-span-2 text-[14px] text-gray-600">{ad.deadline || "-"}</div>
-                              <div className="col-span-3 text-[14px] text-gray-600">{ad.short_description || "-"}</div>
-                              <div className="col-span-2">
-                                <Link href={`/universities/${id}/affiliated-colleges`} className="rounded-lg bg-blue-600 px-5 py-2 text-xs font-bold text-white transition-colors hover:bg-blue-700">
-                                  View Colleges
-                                </Link>
-                              </div>
-                            </div>
-                          ))}
+                    <>
+                      <div className="w-full overflow-x-auto">
+                        <div className="min-w-[800px]">
+                          <div className="grid grid-cols-12 gap-2 border-b border-gray-100 bg-white px-6 py-5">
+                            <div className="col-span-3 text-[13px] font-bold uppercase tracking-wider text-gray-800">PROGRAM</div>
+                            <div className="col-span-2 text-[13px] font-bold uppercase tracking-wider text-gray-800">OPENS</div>
+                            <div className="col-span-2 text-[13px] font-bold uppercase tracking-wider text-gray-800">DEADLINE</div>
+                            <div className="col-span-3 text-[13px] font-bold uppercase tracking-wider text-gray-800">DESCRIPTION</div>
+                            <div className="col-span-2 text-[13px] font-bold uppercase tracking-wider text-gray-800">ACTIONS</div>
+                          </div>
+                          <div className="divide-y divide-gray-100">
+                            {admissionsList
+                              .slice((admissionsPage - 1) * admissionsPerPage, admissionsPage * admissionsPerPage)
+                              .map((ad: any, i: number) => (
+                                <div key={i} className="grid grid-cols-12 gap-2 px-6 py-5 hover:bg-gray-50/50 items-center">
+                                  <div className="col-span-3">
+                                    <h4 className="text-[15.5px] font-bold text-gray-900">{ad.program || ad.title}</h4>
+                                    {ad.faculty && <p className="text-[13px] text-gray-500">{ad.faculty}</p>}
+                                  </div>
+                                  <div className="col-span-2 text-[14px] text-gray-600">{ad.opens_from || "-"}</div>
+                                  <div className="col-span-2 text-[14px] text-gray-600">{ad.deadline || "-"}</div>
+                                  <div className="col-span-3 text-[14px] text-gray-600">{ad.short_description || "-"}</div>
+                                  <div className="col-span-2">
+                                    <Link href={`/universities/${id}/affiliated-colleges`} className="rounded-lg bg-blue-600 px-5 py-2 text-xs font-bold text-white transition-colors hover:bg-blue-700">
+                                      View Colleges
+                                    </Link>
+                                  </div>
+                                </div>
+                              ))}
+                          </div>
                         </div>
                       </div>
-                    </div>
+                      {admissionsList.length > admissionsPerPage && (
+                        <div className="flex items-center justify-between border-t border-gray-100 bg-white px-6 py-4">
+                          <p className="text-sm text-gray-600">
+                            Showing {((admissionsPage - 1) * admissionsPerPage) + 1} to {Math.min(admissionsPage * admissionsPerPage, admissionsList.length)} of {admissionsList.length} admissions
+                          </p>
+                          <div className="flex gap-2">
+                            <button
+                              onClick={() => setAdmissionsPage(p => Math.max(1, p - 1))}
+                              disabled={admissionsPage === 1}
+                              className="rounded-md border border-gray-200 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                            >
+                              Previous
+                            </button>
+                            <button
+                              onClick={() => setAdmissionsPage(p => p + 1)}
+                              disabled={admissionsPage * admissionsPerPage >= admissionsList.length}
+                              className="rounded-md border border-gray-200 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                            >
+                              Next
+                            </button>
+                          </div>
+                        </div>
+                      )}
+                    </>
                   ) : (
                     <EmptyTabState tabName="Admissions" />
                   )}
@@ -1142,7 +1177,7 @@ const UniversityDetail: React.FC = () => {
                         className="bg-white border border-gray-100 hover:border-blue-500/20 rounded-md overflow-hidden cursor-pointer transition-all duration-300 group"
                         onClick={() => setOfficialNoticePreview(notice.url)}
                       >
-                        <div className="h-30 w-full overflow-hidden bg-gray-100">
+                        <div className="aspect-[4/3] w-full overflow-hidden bg-gray-100">
                           <img
                             src={notice.url}
                             alt={`Official Notice ${i + 1}`}
