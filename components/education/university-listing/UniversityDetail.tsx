@@ -11,6 +11,7 @@ import RatingBar from "@/app/find-college/[id]/components/RatingBar";
 import EmptyTabState from "@/app/find-college/[id]/components/EmptyTabState";
 import ShareCollegeModal from "@/app/find-college/[id]/ShareCollegeModal";
 import { apiService, University, UniversityCollege } from "@/services/api";
+import { isUniversityReviewValid } from "./university-review-validation";
 import { useFollow } from "@/app/find-college/[id]/hooks/useFollow";
 import {
   BadgeCheck,
@@ -203,7 +204,8 @@ const UniversityDetail: React.FC = () => {
   const [scholarshipsLoading, setScholarshipsLoading] = useState(false);
   const [showReviewForm, setShowReviewForm] = useState(false);
   const [reviewRating, setReviewRating] = useState(0);
-  const [reviewText, setReviewText] = useState("");
+  const [reviewPros, setReviewPros] = useState("");
+  const [reviewCons, setReviewCons] = useState("");
   const [submittingReview, setSubmittingReview] = useState(false);
   const [submitError, setSubmitError] = useState("");
   const [uniEvents, setUniEvents] = useState<any[]>([]);
@@ -404,8 +406,9 @@ const UniversityDetail: React.FC = () => {
         if (myReviewRes.status === "fulfilled" && myReviewRes.value?.data?.review) {
           const r = myReviewRes.value.data.review;
           setMyReview(r);
-          setReviewRating(Math.round(r.ratings?.overall || 5));
-          setReviewText(r.summaryTitle || "");
+          setReviewRating(Math.round(r.rating || r.ratings?.overall || 5));
+          setReviewPros(r.pros?.trim() || r.summaryTitle || "");
+          setReviewCons(r.cons || "");
         }
       } catch {
         // silently fail
@@ -442,7 +445,7 @@ const UniversityDetail: React.FC = () => {
   }, [activeTab, id]);
 
   const handleSubmitReview = async () => {
-    if (!reviewRating || !reviewText.trim()) return;
+    if (!isUniversityReviewValid(reviewRating, reviewPros, reviewCons)) return;
     const token = apiService.getToken();
     if (!token) {
       setSubmitError("Please log in to submit a review.");
@@ -451,14 +454,25 @@ const UniversityDetail: React.FC = () => {
     setSubmittingReview(true);
     setSubmitError("");
     try {
-      await apiService.submitUniversityReview(
-        { university_id: id, rating: reviewRating, review: reviewText.trim() },
-        { authToken: token },
-      );
+      if (myReview) {
+        await apiService.updateUniversityReview(
+          id,
+          { rating: reviewRating, pros: reviewPros.trim(), cons: reviewCons.trim() },
+          { authToken: token },
+        );
+      } else {
+        await apiService.submitUniversityReview(
+          { university_id: id, rating: reviewRating, pros: reviewPros.trim(), cons: reviewCons.trim() },
+          { authToken: token },
+        );
+      }
       setShowReviewForm(false);
-      setReviewRating(0);
-      setReviewText("");
-      setMyReview(null);
+      if (!myReview) {
+        setReviewRating(0);
+        setReviewPros("");
+        setReviewCons("");
+        setMyReview(null);
+      }
       setReviewsLoading(true);
       try {
         const t = apiService.getToken();
@@ -1652,21 +1666,33 @@ const UniversityDetail: React.FC = () => {
                             </div>
                           </div>
                           <div className="mb-4">
-                            <label className="mb-2 block text-sm font-medium text-gray-700">Review</label>
+                            <label className="mb-2 block text-sm font-medium text-gray-700">Pros</label>
                             <textarea
                               className="w-full rounded-md border border-gray-300 p-3 text-sm focus:border-blue-500 focus:outline-none"
                               rows={4}
-                              placeholder="Share your experience about this university..."
-                              value={reviewText}
-                              onChange={(e) => setReviewText(e.target.value)}
+                              placeholder="What do you like about this university?"
+                              value={reviewPros}
+                              onChange={(e) => setReviewPros(e.target.value)}
                             />
+                            <p className="mt-1 text-xs text-gray-500">Minimum 10 characters</p>
+                          </div>
+                          <div className="mb-4">
+                            <label className="mb-2 block text-sm font-medium text-gray-700">Cons</label>
+                            <textarea
+                              className="w-full rounded-md border border-gray-300 p-3 text-sm focus:border-blue-500 focus:outline-none"
+                              rows={4}
+                              placeholder="What could this university improve?"
+                              value={reviewCons}
+                              onChange={(e) => setReviewCons(e.target.value)}
+                            />
+                            <p className="mt-1 text-xs text-gray-500">Minimum 10 characters</p>
                           </div>
                           {submitError && (
                             <p className="mb-3 text-sm text-red-500">{submitError}</p>
                           )}
                           <button
                             onClick={handleSubmitReview}
-                            disabled={submittingReview || !reviewRating || !reviewText.trim()}
+                            disabled={submittingReview || !isUniversityReviewValid(reviewRating, reviewPros, reviewCons)}
                             className="rounded-md bg-brand-blue px-6 py-2.5 text-sm font-bold text-white transition-colors hover:bg-brand-hover disabled:opacity-50"
                           >
                             {submittingReview ? "Submitting..." : myReview ? "Update Review" : "Submit Review"}
@@ -1677,16 +1703,16 @@ const UniversityDetail: React.FC = () => {
                       <div className="space-y-5">
                         {reviewsData?.reviews?.length > 0 ? (
                           reviewsData.reviews.map((review: any, idx: number) => {
-                            const rating = review.ratings?.overall || Object.values(review.ratings || {}).reduce((s: number, v: any) => s + v, 0) / 10 || 5;
+                            const rating = review.rating || review.ratings?.overall || Object.values(review.ratings || {}).reduce((s: number, v: any) => s + v, 0) / 10 || 5;
                             return (
                               <ReviewCard
                                 key={review.id}
-                                initials={review.userInitials || "U"}
-                                name={review.userName || "Anonymous"}
+                                initials={review.user_initials || "U"}
+                                name={review.user_name || "Anonymous"}
                                 subtitle="University Review"
                                 rating={Math.round(rating)}
-                                pros={review.summaryTitle || review.pros || ""}
-                                cons={review.cons || ""}
+                                pros={review.pros || ""}
+                                cons={review.cons || "No cons provided."}
                                 tone={idx % 2 === 0 ? "blue" : "purple"}
                               />
                             );

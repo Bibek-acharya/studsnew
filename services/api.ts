@@ -2629,11 +2629,23 @@ export const apiService = {
   },
 
   async submitUniversityReview(
-    data: { university_id: number; rating: number; review: string },
+    data: { university_id: number; rating: number; pros: string; cons: string },
     options?: ApiRequestOptions,
   ): Promise<any> {
     return apiRequest<any>("/api/v1/user/university-reviews", {
       method: "POST",
+      body: JSON.stringify(data),
+      ...options,
+    });
+  },
+
+  async updateUniversityReview(
+    universityId: number,
+    data: { rating?: number; pros?: string; cons?: string },
+    options?: ApiRequestOptions,
+  ): Promise<any> {
+    return apiRequest<any>(`/api/v1/user/university-reviews/${universityId}`, {
+      method: "PUT",
       body: JSON.stringify(data),
       ...options,
     });
