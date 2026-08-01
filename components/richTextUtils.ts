@@ -1,4 +1,4 @@
-const NO_BREAK_TOKEN = /\S+(?:\s*[-–—]\s*\S+)+/g;
+const NO_BREAK_TOKEN = /\S*[-–—]\S*/g;
 
 export function findNoBreakTextTokens(text: string): string[] {
   return (text.match(NO_BREAK_TOKEN) ?? []).map((token) =>
