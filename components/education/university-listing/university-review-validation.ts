@@ -3,5 +3,5 @@ export function isUniversityReviewValid(
   pros: string,
   cons: string,
 ): boolean {
-  return rating > 0 && pros.trim().length >= 10 && cons.trim().length >= 10;
+  return rating >= 1 && rating <= 5 && pros.trim().length >= 10 && cons.trim().length >= 10;
 }

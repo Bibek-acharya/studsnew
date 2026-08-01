@@ -9,4 +9,8 @@ describe("isUniversityReviewValid", () => {
   it("accepts a rating and both fields with at least ten characters", () => {
     expect(isUniversityReviewValid(4, "a".repeat(10), "b".repeat(10))).toBe(true);
   });
+
+  it("rejects ratings above five", () => {
+    expect(isUniversityReviewValid(6, "a".repeat(10), "b".repeat(10))).toBe(false);
+  });
 });
