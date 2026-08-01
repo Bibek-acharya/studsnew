@@ -102,6 +102,7 @@ interface NewsItem {
   id: number;
   text: string;
   date: string;
+  link?: string;
 }
 interface OfficialNotice {
   id: number;
@@ -1416,10 +1417,8 @@ export default function AddUniversitySection({
                         )
                       }
                     />
-                    <input
-                      type="text"
+                    <select
                       className={`${inputClass} text-sm`}
-                      placeholder="Level (e.g. Bachelor)"
                       value={s.level}
                       onChange={(e) =>
                         updateItem(
@@ -1429,7 +1428,14 @@ export default function AddUniversitySection({
                           e.target.value,
                         )
                       }
-                    />
+                    >
+                      <option value="">Select Level</option>
+                      <option value="Bachelor">Bachelor</option>
+                      <option value="Master">Master</option>
+                      <option value="Master of Philosophy">Master of Philosophy</option>
+                      <option value="Doctorate">Doctorate</option>
+                      <option value="Post graduate diploma">Post graduate diploma</option>
+                    </select>
                     <input
                       type="text"
                       className={`${inputClass} text-sm`}
@@ -1976,12 +1982,21 @@ export default function AddUniversitySection({
               <button
                 type="button"
                 onClick={() => {
+                  if (latestNews.length >= 20) {
+                    toast.error("Maximum 20 news items allowed");
+                    return;
+                  }
                   const today = new Date().toISOString().split('T')[0];
-                  addItem(setLatestNews, { text: "", date: today });
+                  addItem(setLatestNews, { text: "", date: today, link: "" });
                 }}
-                className="text-sm text-blue-600 bg-blue-50 px-3 py-1.5 rounded-md hover:bg-blue-100 transition-colors font-medium"
+                className={`text-sm px-3 py-1.5 rounded-md transition-colors font-medium ${
+                  latestNews.length >= 20
+                    ? "text-gray-400 bg-gray-100 cursor-not-allowed"
+                    : "text-blue-600 bg-blue-50 hover:bg-blue-100"
+                }`}
+                disabled={latestNews.length >= 20}
               >
-                <i className="fa-solid fa-plus mr-1"></i> Add News
+                <i className="fa-solid fa-plus mr-1"></i> Add News ({latestNews.length}/20)
               </button>
             </div>
             <div className="space-y-4">
@@ -1998,13 +2013,21 @@ export default function AddUniversitySection({
                     <i className="fa-solid fa-trash"></i>
                   </button>
                   <div className="pr-10">
-                    <input
-                      type="text"
-                      className={`${inputClass} text-sm`}
-                      placeholder="News or update text"
+                    <RichTextEditor
                       value={n.text}
+                      onChange={(val) =>
+                        updateItem(setLatestNews, n.id, "text", val)
+                      }
+                      placeholder="News or update text"
+                      minHeight={100}
+                    />
+                    <input
+                      type="url"
+                      className={`${inputClass} text-sm mt-3`}
+                      placeholder="Optional link (e.g., https://example.com/news)"
+                      value={n.link || ""}
                       onChange={(e) =>
-                        updateItem(setLatestNews, n.id, "text", e.target.value)
+                        updateItem(setLatestNews, n.id, "link", e.target.value)
                       }
                     />
                     <p className="mt-2 text-xs text-gray-500">

@@ -214,8 +214,8 @@ body {
   text-align: left;
   word-wrap: break-word;
   overflow-wrap: break-word;
-  word-break: normal;
-  hyphens: auto;
+  word-break: keep-all;
+  hyphens: none;
 }
 .rich-text * {
   text-align: left !important;
@@ -548,7 +548,9 @@ body {
 
 .rich-text {
   overflow-wrap: break-word;
-  word-break: normal;
+  word-break: keep-all;
+  hyphens: none;
+  text-align: left;
 }
 .rich-text * {
   hyphens: none !important;

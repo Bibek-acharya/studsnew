@@ -1524,9 +1524,35 @@ export const apiService = {
     id: number,
     page: number = 1,
     limit: number = 10,
+    level: string = "",
   ): Promise<{ data: { courses: any[]; total: number; page: number; limit: number } }> {
+    const params = new URLSearchParams({
+      page: page.toString(),
+      limit: limit.toString(),
+    });
+    if (level && level !== "all") {
+      params.append("level", level);
+    }
     return apiRequest<{ data: { courses: any[]; total: number; page: number; limit: number } }>(
-      `/api/v1/universities/${id}/courses?page=${page}&limit=${limit}`,
+      `/api/v1/universities/${id}/courses?${params.toString()}`,
+    );
+  },
+
+  async getUniversityScholarships(
+    id: number,
+    page: number = 1,
+    limit: number = 10,
+    level: string = "",
+  ): Promise<{ data: { scholarships: any[]; total: number; page: number; limit: number } }> {
+    const params = new URLSearchParams({
+      page: page.toString(),
+      limit: limit.toString(),
+    });
+    if (level && level !== "all") {
+      params.append("level", level);
+    }
+    return apiRequest<{ data: { scholarships: any[]; total: number; page: number; limit: number } }>(
+      `/api/v1/universities/${id}/scholarships?${params.toString()}`,
     );
   },
 

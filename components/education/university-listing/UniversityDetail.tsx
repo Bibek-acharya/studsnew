@@ -177,6 +177,7 @@ const UniversityDetail: React.FC = () => {
   const [scholarFilter, setScholarFilter] = useState("all");
   const [admissionsPage, setAdmissionsPage] = useState(1);
   const admissionsPerPage = 10;
+  const [showAllNews, setShowAllNews] = useState(false);
   const [openDropdowns, setOpenDropdowns] = useState<Record<string, boolean>>(
     {},
   );
@@ -196,6 +197,10 @@ const UniversityDetail: React.FC = () => {
   const [coursesPage, setCoursesPage] = useState(1);
   const [coursesTotal, setCoursesTotal] = useState(0);
   const [coursesLoading, setCoursesLoading] = useState(false);
+  const [scholarships, setScholarships] = useState<any[]>([]);
+  const [scholarshipsPage, setScholarshipsPage] = useState(1);
+  const [scholarshipsTotal, setScholarshipsTotal] = useState(0);
+  const [scholarshipsLoading, setScholarshipsLoading] = useState(false);
   const [showReviewForm, setShowReviewForm] = useState(false);
   const [reviewRating, setReviewRating] = useState(0);
   const [reviewText, setReviewText] = useState("");
@@ -273,7 +278,7 @@ const UniversityDetail: React.FC = () => {
     if (activeTab === "tab-courses" && id) {
       setCoursesLoading(true);
       apiService
-        .getUniversityCourses(id, coursesPage, 10)
+        .getUniversityCourses(id, coursesPage, 10, courseFilter)
         .then((res) => {
           setCourses(res.data.courses || []);
           setCoursesTotal(res.data.total || 0);
@@ -281,7 +286,7 @@ const UniversityDetail: React.FC = () => {
         .catch(() => setCourses([]))
         .finally(() => setCoursesLoading(false));
     }
-  }, [activeTab, coursesPage, id]);
+  }, [activeTab, coursesPage, id, courseFilter]);
 
   const uni = university;
   const name = uni?.name || "University";
@@ -680,15 +685,40 @@ const UniversityDetail: React.FC = () => {
                       </div>
                       {/* Post content */}
                       <div className="divide-y divide-gray-100">
-                        {latestNewsList.map((item: any, idx: number) => (
+                        {(showAllNews ? latestNewsList : latestNewsList.slice(0, 10)).map((item: any, idx: number) => (
                           <div key={idx} className="px-6 py-4 hover:bg-gray-50 transition-colors">
                             <div className="flex items-start gap-3">
-                              <span className="text-[13px] font-semibold text-blue-600 whitespace-nowrap mt-0.5">{item.date || "-"}</span>
-                              <span className="text-[14px] text-gray-700 leading-relaxed">{item.text || ""}</span>
+                              <span className="text-[13px] font-bold text-blue-600 whitespace-nowrap mt-0.5">{item.date || "-"}</span>
+                              <div className="flex-1">
+                                <div 
+                                  className="text-[14px] text-gray-700 leading-relaxed rich-text"
+                                  dangerouslySetInnerHTML={{ __html: safeHtml(item.text || "") }}
+                                />
+                                {item.link && (
+                                  <a
+                                    href={item.link}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="inline-block mt-2 text-[13px] font-semibold text-blue-600 underline hover:text-blue-800 transition-colors"
+                                  >
+                                    View Detail
+                                  </a>
+                                )}
+                              </div>
                             </div>
                           </div>
                         ))}
                       </div>
+                      {latestNewsList.length > 10 && !showAllNews && (
+                        <div className="px-6 py-4 border-t border-gray-100 bg-gray-50">
+                          <button
+                            onClick={() => setShowAllNews(true)}
+                            className="w-full text-center text-[14px] font-semibold text-blue-600 hover:text-blue-800 transition-colors"
+                          >
+                            View More ({latestNewsList.length - 10} more)
+                          </button>
+                        </div>
+                      )}
                     </div>
                   )}
 
@@ -1273,7 +1303,7 @@ const UniversityDetail: React.FC = () => {
 
                               <Link
                                 href={`/events/${event.slug || event.id}`}
-                                className={`font-bold text-lg mb-3 leading-tight text-left text-black hover:text-[#0000ff]`}
+                                className={`font-bold text-base mb-3 leading-tight text-left text-black hover:text-[#0000ff]`}
                               >
                                 {event.title}
                               </Link>
@@ -1354,7 +1384,7 @@ const UniversityDetail: React.FC = () => {
 
                             <Link
                               href={`/news/${item.slug || item.id}`}
-                              className="font-bold text-lg text-slate-900 leading-snug mb-2 group-hover:text-blue-600 transition-colors"
+                              className="font-bold text-base text-slate-900 leading-snug mb-2 group-hover:text-blue-600 transition-colors"
                             >
                               {item.title}
                             </Link>
@@ -1449,7 +1479,9 @@ const UniversityDetail: React.FC = () => {
                       return (
                         <div>
                           <div className="mb-6">
-                            <h2 className="text-[20px] font-bold text-gray-900">Campus Gallery</h2>
+                            <h2 className="text-[20px] font-bold text-gray-900">
+                              {galFolder === "all" ? "Campus Gallery" : galFolder}
+                            </h2>
                           </div>
                           {allFolders.length > 1 && (
                             <div className="mb-6 flex flex-wrap gap-2">
