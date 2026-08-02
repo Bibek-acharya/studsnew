@@ -41,6 +41,7 @@ import {
 import Image from "next/image";
 import { trendingSearches } from "@/utils/searchDatabase";
 import { apiService, DashboardStats, getImageUrl } from "@/services/api";
+import TopBar from "./TopBar";
 
 const EducationNavbar: React.FC<EducationNavbarProps> = ({
   onNavigate,
@@ -462,8 +463,9 @@ const EducationNavbar: React.FC<EducationNavbarProps> = ({
 
   return (
     <>
+      <TopBar isVisible={isVisible} />
       <header
-        className={`fixed left-0 top-0 z-[120] w-full bg-white transition-transform duration-300 ${
+        className={`fixed left-0 top-7 z-[120] w-full bg-white transition-transform duration-300 ${
           isVisible ? "translate-y-0" : "-translate-y-full"
         } ${isScrolled ? "" : ""}`}
       >
