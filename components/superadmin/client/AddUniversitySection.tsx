@@ -604,11 +604,25 @@ export default function AddUniversitySection({
                   className="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-gray-300 border-dashed rounded-md hover:border-blue-400 transition cursor-pointer bg-gray-50 relative overflow-hidden h-40"
                 >
                   {logoUrl ? (
-                    <img
-                      src={logoUrl}
-                      className="absolute inset-0 w-full h-full object-contain p-2"
-                      alt="Logo"
-                    />
+                    <>
+                      <img
+                        src={logoUrl}
+                        className="absolute inset-0 w-full h-full object-contain p-2"
+                        alt="Logo"
+                      />
+                      <button
+                        type="button"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setLogoUrl("");
+                          setLogoFile(null);
+                          if (logoInputRef.current) logoInputRef.current.value = "";
+                        }}
+                        className="absolute top-2 right-2 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center hover:bg-red-600 transition-colors z-10"
+                      >
+                        <i className="fa-solid fa-times text-xs"></i>
+                      </button>
+                    </>
                   ) : (
                     <div className="space-y-1 text-center self-center">
                       <i className="fa-regular fa-building text-4xl text-gray-400"></i>
@@ -647,11 +661,25 @@ export default function AddUniversitySection({
                   className="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-gray-300 border-dashed rounded-md hover:border-blue-400 transition cursor-pointer bg-gray-50 relative overflow-hidden h-40"
                 >
                   {coverUrl ? (
-                    <img
-                      src={coverUrl}
-                      className="absolute inset-0 w-full h-full object-cover"
-                      alt="Cover"
-                    />
+                    <>
+                      <img
+                        src={coverUrl}
+                        className="absolute inset-0 w-full h-full object-cover"
+                        alt="Cover"
+                      />
+                      <button
+                        type="button"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setCoverUrl("");
+                          setCoverFile(null);
+                          if (coverInputRef.current) coverInputRef.current.value = "";
+                        }}
+                        className="absolute top-2 right-2 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center hover:bg-red-600 transition-colors z-10"
+                      >
+                        <i className="fa-solid fa-times text-xs"></i>
+                      </button>
+                    </>
                   ) : (
                     <div className="space-y-1 text-center self-center">
                       <i className="fa-regular fa-image text-4xl text-gray-400"></i>
@@ -975,11 +1003,40 @@ export default function AddUniversitySection({
                     </button>
                   )}
                 </div>
-                {prospectusUrl && !prospectusFile && (
-                  <p className="mt-1 text-xs text-gray-500">
-                    <i className="fa-solid fa-file-pdf text-red-500 mr-1"></i>
-                    Current: {prospectusTitle || "Prospectus"}
-                  </p>
+                {(prospectusUrl || prospectusFile) && (
+                  <div className="mt-3 bg-gray-50 border border-gray-200 rounded-md p-3 relative group">
+                    <button
+                      type="button"
+                      onClick={() => { setProspectusFile(null); setProspectusUrl(""); }}
+                      className="absolute top-2 right-2 text-red-400 hover:text-red-600 hover:bg-red-50 p-1.5 rounded-md transition-colors opacity-0 group-hover:opacity-100"
+                    >
+                      <i className="fa-solid fa-trash"></i>
+                    </button>
+                    <div className="flex items-center gap-3">
+                      <div className="p-2 bg-red-100 rounded-md">
+                        <i className="fa-solid fa-file-pdf text-red-500"></i>
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <p className="text-sm font-medium text-gray-700 truncate">
+                          {prospectusFile ? prospectusFile.name : (prospectusTitle || "Prospectus.pdf")}
+                        </p>
+                        <p className="text-xs text-gray-500">
+                          {prospectusFile ? `${(prospectusFile.size / 1024).toFixed(0)} KB` : "PDF File"}
+                        </p>
+                      </div>
+                      {prospectusUrl && !prospectusFile && (
+                        <a
+                          href={prospectusUrl}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-blue-500 hover:text-blue-700 text-sm"
+                          onClick={(e) => e.stopPropagation()}
+                        >
+                          <i className="fa-solid fa-external-link-alt"></i>
+                        </a>
+                      )}
+                    </div>
+                  </div>
                 )}
               </div>
             </div>
@@ -1218,7 +1275,7 @@ export default function AddUniversitySection({
                 <i className="fa-solid fa-book-open text-blue-500 mr-2"></i>
                 Courses & Fees
               </h3>
-              <button
+                <button
                 type="button"
                 onClick={() =>
                   addItem(setCourses, {
@@ -1359,7 +1416,7 @@ export default function AddUniversitySection({
                 <i className="fa-solid fa-hand-holding-heart text-blue-500 mr-2"></i>
                 Scholarships
               </h3>
-              <button
+                <button
                 type="button"
                 onClick={() =>
                   addItem(setScholarships, {
@@ -1528,7 +1585,7 @@ export default function AddUniversitySection({
                               const url = await uploadFile(file, "university/downloads");
                               const ext = file.name.split(".").pop()?.toUpperCase() || "";
                               const size = file.size > 1048576 ? `${(file.size / 1048576).toFixed(1)} MB` : `${(file.size / 1024).toFixed(0)} KB`;
-                              setDownloads((prev: any[]) => prev.map((x) => x.id === d.id ? { ...x, url, type: ext, size } : x));
+                              setDownloads((prev: any[]) => prev.map((x) => x.id === d.id ? { ...x, url, type: ext, size, fileName: file.name } : x));
                             } catch {}
                           }}
                         />
@@ -1545,10 +1602,37 @@ export default function AddUniversitySection({
                     </div>
                   </div>
                   {d.url && (
-                    <p className="mt-1 text-xs text-gray-500">
-                      <i className="fa-solid fa-file text-blue-500 mr-1"></i>
-                      {d.title || "File"} {d.type ? `(${d.type})` : ""}
-                    </p>
+                    <div className="mt-3 bg-white border border-gray-200 rounded-md p-3 relative group/file">
+                      <button
+                        type="button"
+                        onClick={() => updateItem(setDownloads, d.id, "url", "")}
+                        className="absolute top-2 right-2 text-red-400 hover:text-red-600 hover:bg-red-50 p-1.5 rounded-md transition-colors opacity-0 group-hover/file:opacity-100"
+                      >
+                        <i className="fa-solid fa-trash"></i>
+                      </button>
+                      <div className="flex items-center gap-3">
+                        <div className="p-2 bg-blue-100 rounded-md">
+                          <i className={`fa-solid ${d.type === "PDF" ? "fa-file-pdf text-red-500" : "fa-file text-blue-500"}`}></i>
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <p className="text-sm font-medium text-gray-700 truncate">
+                            {d.title || "Download File"}
+                          </p>
+                          <p className="text-xs text-gray-500">
+                            {d.type ? `${d.type} file` : "File"} {d.size ? `• ${d.size}` : ""}
+                          </p>
+                        </div>
+                        <a
+                          href={d.url}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-blue-500 hover:text-blue-700 text-sm"
+                          onClick={(e) => e.stopPropagation()}
+                        >
+                          <i className="fa-solid fa-external-link-alt"></i>
+                        </a>
+                      </div>
+                    </div>
                   )}
                 </div>
               ))}
@@ -1670,7 +1754,7 @@ export default function AddUniversitySection({
                 <i className="fa-solid fa-building-columns text-blue-500 mr-2"></i>
                 Faculties & Institutes
               </h3>
-              <button
+                <button
                 type="button"
                 onClick={() =>
                   addItem(setFaculties, { name: "", programs: [], colleges: [] })
@@ -1797,7 +1881,7 @@ export default function AddUniversitySection({
                 <i className="fa-solid fa-file-lines text-blue-500 mr-2"></i>
                 Admissions
               </h3>
-              <button
+                <button
                 type="button"
                 onClick={() =>
                   addItem(setAdmissions, {
@@ -1969,7 +2053,7 @@ export default function AddUniversitySection({
                 <i className="fa-solid fa-newspaper text-blue-500 mr-2"></i>
                 Latest News & Stories
               </h3>
-              <button
+                <button
                 type="button"
                 onClick={() => {
                   if (latestNews.length >= 20) {

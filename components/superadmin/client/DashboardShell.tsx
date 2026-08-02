@@ -132,6 +132,7 @@ const SuperadminAdmissionShortlistSection = lazy(
 );
 const GlobalCourseListSection = lazy(() => import("./GlobalCourseListSection"));
 const GlobalCourseFormSection = lazy(() => import("./GlobalCourseFormSection"));
+const UniversityReviewSection = lazy(() => import("./UniversityReviewSection"));
 
 type SectionType =
   | "overview"
@@ -205,7 +206,8 @@ type SectionType =
   | "superadmin-admission-applications"
   | "superadmin-admission-shortlist"
   | "global-course-directory"
-  | "global-add-course";
+  | "global-add-course"
+  | "university-reviews";
 
 interface NavChild {
   section: SectionType;
@@ -305,6 +307,7 @@ const navItems: NavItemData[] = [
       { section: "create-universities", label: "Add University" },
       { section: "draft-universities", label: "Draft Universities" },
       { section: "list-universities", label: "All Universities" },
+      { section: "university-reviews", label: "Reviews & Reports" },
       { section: "university-news", label: "University News" },
       { section: "university-events", label: "University Events" },
     ],
@@ -611,6 +614,8 @@ export default function DashboardShell() {
         return <UniversityNewsSection setActiveSection={navigateTo} />;
       case "university-events":
         return <UniversityEventsSection setActiveSection={navigateTo} />;
+      case "university-reviews":
+        return <UniversityReviewSection setActiveSection={navigateTo} />;
       case "create-university-news":
         return <CreateUniversityNewsSection setActiveSection={navigateTo} />;
       case "create-university-events":
