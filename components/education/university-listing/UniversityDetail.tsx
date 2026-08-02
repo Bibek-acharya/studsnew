@@ -1783,6 +1783,7 @@ const UniversityDetail: React.FC = () => {
                                 pros={review.pros || ""}
                                 cons={review.cons || "No cons provided."}
                                 tone={idx % 2 === 0 ? "blue" : "purple"}
+                                profileImage={review.user_profile_image}
                               />
                             );
                           })

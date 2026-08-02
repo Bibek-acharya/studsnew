@@ -11,15 +11,20 @@ const ReviewCard: React.FC<{
   pros: string;
   cons: string;
   tone: "blue" | "purple";
-}> = ({ initials, name, subtitle, rating, pros, cons, tone }) => (
+  profileImage?: string;
+}> = ({ initials, name, subtitle, rating, pros, cons, tone, profileImage }) => (
   <div className="rounded-md border border-gray-200 bg-white p-6 ">
     <div className="mb-4 flex items-start justify-between">
       <div className="flex items-center gap-3">
-        <div
-          className={`flex h-10 w-10 items-center justify-center rounded-full font-bold ${tone === "blue" ? "bg-brand-blue/10 text-brand-blue" : "bg-brand-blue/10 text-brand-blue"}`}
-        >
-          {initials}
-        </div>
+        {profileImage ? (
+          <img src={profileImage} alt="" className="h-10 w-10 rounded-full object-cover" />
+        ) : (
+          <div
+            className={`flex h-10 w-10 items-center justify-center rounded-full font-bold ${tone === "blue" ? "bg-brand-blue/10 text-brand-blue" : "bg-brand-blue/10 text-brand-blue"}`}
+          >
+            {initials}
+          </div>
+        )}
         <div>
           <h4 className="text-[14.5px] font-bold text-gray-900">{name}</h4>
           <p className="text-[12px] text-gray-500">{subtitle}</p>

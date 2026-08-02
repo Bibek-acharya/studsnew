@@ -21,7 +21,9 @@ interface ReviewItem {
   id: number;
   user_name: string;
   user_initials: string;
+  user_profile_image?: string;
   rating: number;
+  ratings?: Record<string, number>;
   pros: string;
   cons: string;
   created_at: string;
@@ -393,15 +395,19 @@ export default function UniversityReviewSection({ setActiveSection }: { setActiv
                         <div key={review.id} className="p-4 hover:bg-gray-50/50 transition-colors">
                           <div className="flex items-start justify-between gap-4">
                             <div className="flex items-start gap-3">
-                              <div className={`w-9 h-9 rounded-full bg-gradient-to-br ${getInitialsColors(review.user_name || "User")} flex items-center justify-center text-white text-[11px] font-bold shrink-0`}>
-                                {review.user_initials || getInitials(review.user_name || "User")}
-                              </div>
+                              {review.user_profile_image ? (
+                                <img src={review.user_profile_image} alt="" className="w-9 h-9 rounded-full object-cover shrink-0" />
+                              ) : (
+                                <div className={`w-9 h-9 rounded-full bg-gradient-to-br ${getInitialsColors(review.user_name || "User")} flex items-center justify-center text-white text-[11px] font-bold shrink-0`}>
+                                  {review.user_initials || getInitials(review.user_name || "User")}
+                                </div>
+                              )}
                               <div className="flex-1 min-w-0">
                                 <div className="flex items-center gap-2 mb-1">
                                   <p className="font-semibold text-gray-800 text-sm">{review.user_name || "Anonymous"}</p>
                                   <div className="flex items-center gap-0.5">
                                     {[1, 2, 3, 4, 5].map((star) => (
-                                      <Star key={star} size={12} className={`${star <= review.rating ? "fill-amber-400 text-amber-400" : "text-gray-300"}`} />
+                                      <Star key={star} size={12} className={`${star <= (review.rating || review.ratings?.overall || 0) ? "fill-amber-400 text-amber-400" : "text-gray-300"}`} />
                                     ))}
                                   </div>
                                 </div>
