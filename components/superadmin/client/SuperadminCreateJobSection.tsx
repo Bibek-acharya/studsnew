@@ -12,6 +12,7 @@ const QuillEditor = dynamic(() => import("react-quill-new"), { ssr: false });
 
 const quillModules = {
   toolbar: [
+    [{ header: [false, 1, 2, 3, 4] }],
     ["bold", "italic", "underline", "strike"],
     [{ list: "ordered" }, { list: "bullet" }],
     ["link", "clean"],
@@ -43,6 +44,7 @@ export default function SuperadminCreateJobSection({
     requirements: "",
     location: "",
     job_type: "full-time",
+    positions_open: 1,
     salary_range: "",
     application_deadline: "",
     status: "draft",
@@ -62,6 +64,7 @@ export default function SuperadminCreateJobSection({
             requirements: job.requirements || "",
             location: job.location || "",
             job_type: job.job_type || "full-time",
+            positions_open: job.positions_open || 1,
             salary_range: job.salary_range || "",
             application_deadline: job.application_deadline
               ? job.application_deadline.split("T")[0]
@@ -185,7 +188,7 @@ export default function SuperadminCreateJobSection({
             </div>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-5">
             <div>
               <label className={labelClass}>Job Type</label>
               <select
@@ -199,6 +202,17 @@ export default function SuperadminCreateJobSection({
                   </option>
                 ))}
               </select>
+            </div>
+            <div>
+              <label className={labelClass}>Positions Open</label>
+              <input
+                type="number"
+                min="1"
+                value={form.positions_open}
+                onChange={(e) => update("positions_open", e.target.value)}
+                className={inputClass}
+                placeholder="1"
+              />
             </div>
             <div>
               <label className={labelClass}>Salary Range</label>

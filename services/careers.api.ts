@@ -12,6 +12,7 @@ export interface Job {
   requirements: string;
   location: string;
   job_type: string;
+  positions_open: number;
   salary_range: string;
   application_deadline?: string;
   status: string;

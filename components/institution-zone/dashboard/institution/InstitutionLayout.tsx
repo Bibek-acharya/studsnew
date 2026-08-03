@@ -1,29 +1,29 @@
 "use client";
 import React, { useState, useRef, useEffect, useCallback } from "react";
+import Image from "next/image";
 import {
-  SquaresFour,
+  LayoutDashboard,
   UserPlus,
   GraduationCap,
-  ChatsCircle,
-  ClipboardText,
+  MessageSquare,
+  ClipboardList,
   BookOpen,
-  Chats,
   Newspaper,
-  CalendarBlank,
+  Calendar,
   FileText,
-  UserGear,
-  ChartBar,
+  UserCog,
+  BarChart3,
   Bell,
-  Gear,
-  SignOut,
-  CaretRight,
+  Settings,
+  LogOut,
+  ChevronRight,
   X,
-  EnvelopeOpen,
+  MailOpen,
   Star,
   Megaphone,
   Lock,
   MapPin,
-} from "@phosphor-icons/react";
+} from "lucide-react";
 
 export type InstitutionPage =
   | "overview"
@@ -217,13 +217,13 @@ const InstitutionLayout: React.FC<Props> = ({
       type: "item",
       page: "overview",
       label: "Overview",
-      icon: <SquaresFour className="w-[18px] h-[18px]" />,
+      icon: <LayoutDashboard size={20} />,
     },
     {
       key: "admission",
       type: "dropdown",
       label: "Manage Admission",
-      icon: <UserPlus className="w-[18px] h-[18px]" />,
+      icon: <UserPlus size={20} />,
       items: [
         { page: "createAdmission", label: "Create Admission" },
         { page: "admissionDraft", label: "Draft Admission" },
@@ -236,7 +236,7 @@ const InstitutionLayout: React.FC<Props> = ({
       key: "scholarship",
       type: "dropdown",
       label: "Manage Scholarship",
-      icon: <GraduationCap className="w-[18px] h-[18px]" />,
+      icon: <GraduationCap size={20} />,
       items: [
         { page: "scholarshipCreate", label: "Create Scholarship" },
         { page: "scholarshipDraft", label: "Draft Scholarship" },
@@ -249,7 +249,7 @@ const InstitutionLayout: React.FC<Props> = ({
       key: "counselling",
       type: "dropdown",
       label: "Manage Counselling",
-      icon: <ChatsCircle className="w-[18px] h-[18px]" />,
+      icon: <MessageSquare size={20} />,
       items: [
         { page: "counsellingRequests", label: "Counselling Requests" },
         { page: "counsellingHistory", label: "Session History" },
@@ -259,7 +259,7 @@ const InstitutionLayout: React.FC<Props> = ({
       key: "entrance",
       type: "dropdown",
       label: "Manage Entrance",
-      icon: <ClipboardText className="w-[18px] h-[18px]" />,
+      icon: <ClipboardList size={20} />,
       items: [
         { page: "entranceDetails", label: "Create Entrance" },
         { page: "entranceDraft", label: "Draft Entrance" },
@@ -272,7 +272,7 @@ const InstitutionLayout: React.FC<Props> = ({
       key: "course",
       type: "dropdown",
       label: "Manage Course",
-      icon: <BookOpen className="w-[18px] h-[18px]" />,
+      icon: <BookOpen size={20} />,
       items: [
         { page: "courseCreate", label: "Create Course" },
         { page: "courseList", label: "Course List" },
@@ -283,20 +283,20 @@ const InstitutionLayout: React.FC<Props> = ({
       type: "item",
       page: "message",
       label: "Message",
-      icon: <Chats className="w-[18px] h-[18px]" />,
+      icon: <MessageSquare size={20} />,
     },
     {
       key: "inviteStudent",
       type: "item",
       page: "inviteStudent",
       label: "Invite Student",
-      icon: <EnvelopeOpen className="w-[18px] h-[18px]" />,
+      icon: <MailOpen size={20} />,
     },
     {
       key: "news",
       type: "dropdown",
       label: "Manage News",
-      icon: <Newspaper className="w-[18px] h-[18px]" />,
+      icon: <Newspaper size={20} />,
       items: [
         { page: "createNews", label: "Create News" },
         { page: "newsDirectory", label: "News Directory" },
@@ -306,7 +306,7 @@ const InstitutionLayout: React.FC<Props> = ({
       key: "events",
       type: "dropdown",
       label: "Manage Events",
-      icon: <CalendarBlank className="w-[18px] h-[18px]" />,
+      icon: <Calendar size={20} />,
       items: [
         { page: "createEvent", label: "Create Event" },
         { page: "eventsDirectory", label: "Events Directory" },
@@ -316,7 +316,7 @@ const InstitutionLayout: React.FC<Props> = ({
       key: "blogs",
       type: "dropdown",
       label: "Manage Blogs",
-      icon: <FileText className="w-[18px] h-[18px]" />,
+      icon: <FileText size={20} />,
       items: [
         { page: "createBlog", label: "Create Blog" },
         { page: "blogDirectory", label: "Blog Directory" },
@@ -327,49 +327,49 @@ const InstitutionLayout: React.FC<Props> = ({
       type: "item",
       page: "reviews",
       label: "Reviews",
-      icon: <Star className="w-[18px] h-[18px]" />,
+      icon: <Star size={20} />,
     },
     {
       key: "manageAdvertisement",
       type: "item",
       page: "manageAdvertisement",
       label: "Manage Advertisement",
-      icon: <Megaphone className="w-[18px] h-[18px]" />,
+      icon: <Megaphone size={20} />,
     },
     {
       key: "collegeLocation",
       type: "item",
       page: "collegeLocation",
       label: "College Location",
-      icon: <MapPin className="w-[18px] h-[18px]" />,
+      icon: <MapPin size={20} />,
     },
     {
       key: "profile",
       type: "item",
       page: "profile",
       label: "Manage Profile",
-      icon: <UserGear className="w-[18px] h-[18px]" />,
+      icon: <UserCog size={20} />,
     },
     {
       key: "analytics",
       type: "item",
       page: "analytics",
       label: "Analytics",
-      icon: <ChartBar className="w-[18px] h-[18px]" />,
+      icon: <BarChart3 size={20} />,
     },
     {
       key: "notification",
       type: "item",
       page: "notification",
       label: "Notification",
-      icon: <Bell className="w-[18px] h-[18px]" />,
+      icon: <Bell size={20} />,
     },
     {
       key: "settings",
       type: "item",
       page: "settings",
       label: "Settings",
-      icon: <Gear className="w-[18px] h-[18px]" />,
+      icon: <Settings size={20} />,
     },
   ];
 
@@ -407,7 +407,7 @@ const InstitutionLayout: React.FC<Props> = ({
         });
       if (dash.unread_messages > 0)
         items.push({
-          icon: <Chats className="text-green-600 text-sm" />,
+          icon: <MessageSquare className="text-green-600 text-sm" />,
           bg: "bg-green-50",
           text: `${dash.unread_messages} unread messages`,
           time: "Now",
@@ -423,7 +423,7 @@ const InstitutionLayout: React.FC<Props> = ({
       });
       if (items.length === 0)
         items.push({
-          icon: <SquaresFour className="text-gray-400 text-sm" />,
+          icon: <LayoutDashboard className="text-gray-400 text-sm" />,
           bg: "bg-gray-50",
           text: "No new notifications",
           time: "",
@@ -459,27 +459,29 @@ const InstitutionLayout: React.FC<Props> = ({
 
       {/* Sidebar */}
       <aside
-        className={`fixed md:relative top-0 left-0 z-50 w-64 h-full bg-white border-r border-gray-200 flex-shrink-0 flex flex-col transition-transform duration-300 shadow-none ${
+        className={`fixed md:relative top-0 left-0 z-50 w-80 h-full bg-white border-r border-gray-200 flex-shrink-0 flex flex-col transition-transform duration-300 shadow-none ${
           sidebarOpen ? "translate-x-0" : "-translate-x-full md:translate-x-0"
         }`}
       >
         {/* Logo */}
         <div className="h-16 flex items-center justify-between px-6 border-b border-gray-50">
-          <img
-            src="https://test.studsphere.com/_next/image?url=%2Fstudsphere.png&w=3840&q=75"
+          <Image
+            src="/studsphere.png"
             alt="StudySphere Logo"
+            width={180}
+            height={48}
             className="h-10 w-auto"
           />
           <button
             onClick={() => setSidebarOpen(false)}
             className="text-gray-400 hover:text-gray-600 p-1 rounded md:hidden"
           >
-            <X className="w-5 h-5" />
+            <X size={20} />
           </button>
         </div>
 
         {/* Navigation */}
-        <div className="flex-1 overflow-y-auto py-4 px-4 flex flex-col gap-1">
+        <div className="flex-1 overflow-y-auto no-scrollbar py-4 px-4 flex flex-col gap-1">
           {navSections.map((section) => {
             const key = section.key;
 
@@ -487,109 +489,56 @@ const InstitutionLayout: React.FC<Props> = ({
               const locked = isLocked(key);
               const isOpen =
                 openDropdowns[key] || isDropdownActive(section.items);
-              const isActive = isDropdownActive(section.items);
 
               return (
-                <div key={key} className="flex flex-col">
-                  <button
-                    onClick={() => {
-                      if (!locked) toggleDropdown(key);
-                    }}
-                    className={`w-full flex items-center justify-between px-3 py-2.5 rounded-md transition-colors ${
-                      locked
-                        ? "text-gray-300 cursor-not-allowed"
-                        : isActive
-                          ? "bg-brand-50 text-brand-600"
-                          : "text-gray-700 hover:bg-brand-50 hover:text-brand-600"
-                    }`}
-                    title={
-                      locked
-                        ? "This section has been disabled by the admin"
-                        : ""
-                    }
-                  >
-                    <div className="flex items-center gap-3">
-                      {locked ? (
-                        <Lock weight="fill" className="w-[18px] h-[18px]" />
-                      ) : (
-                        section.icon
-                      )}
-                      <span className="font-medium text-sm">
-                        {section.label}
-                      </span>
-                    </div>
-                    {!locked && (
-                      <CaretRight
-                        className={`text-xs transition-transform duration-200 ${isOpen ? "rotate-90" : ""}`}
-                      />
-                    )}
-                  </button>
-                  {!locked && (
-                    <div
-                      className={`overflow-hidden transition-all duration-200 ${
-                        isOpen ? "max-h-96" : "max-h-0"
+                <NavDropdown
+                  key={key}
+                  icon={section.icon}
+                  label={section.label}
+                  isOpen={isOpen}
+                  onToggle={() => {
+                    if (!locked) toggleDropdown(key);
+                  }}
+                  locked={locked}
+                >
+                  {section.items.map((item) => (
+                    <button
+                      key={item.page}
+                      type="button"
+                      onClick={() => {
+                        onNavigate(item.page);
+                        setSidebarOpen(false);
+                      }}
+                      className={`w-full text-left px-3 py-2 text-sm font-medium rounded-md transition-colors ${
+                        activePage === item.page
+                          ? "text-blue-600 bg-blue-50"
+                          : "text-gray-500 hover:text-blue-600 hover:bg-blue-50"
                       }`}
                     >
-                      <div className="pl-10 pr-3 py-2 flex flex-col gap-1">
-                        {section.items.map((item) => (
-                          <button
-                            key={item.page}
-                            onClick={() => {
-                              onNavigate(item.page);
-                              setSidebarOpen(false);
-                            }}
-                            className={`flex items-center gap-2 px-3 py-2 text-sm rounded-md transition-colors ${
-                              activePage === item.page
-                                ? "text-black bg-blue-100"
-                                : "text-gray-500 hover:text-brand-600 hover:bg-brand-50"
-                            }`}
-                          >
-                            <span className="whitespace-nowrap">
-                              {item.label}
-                            </span>
-                          </button>
-                        ))}
-                      </div>
-                    </div>
-                  )}
-                </div>
+                      {item.label}
+                    </button>
+                  ))}
+                </NavDropdown>
               );
             }
 
             // Single nav item
             const isActive = activePage === section.page;
-            const isLogout = section.isLogout;
             const locked = isLocked(key);
 
             return (
-              <button
+              <NavItem
                 key={key}
+                icon={locked ? <Lock size={20} /> : section.icon}
+                label={section.label}
+                active={isActive && !locked}
                 onClick={() => {
                   if (!locked) {
                     onNavigate(section.page!);
                     setSidebarOpen(false);
                   }
                 }}
-                className={`flex items-center gap-3 px-3 py-2.5 rounded-md transition-colors ${
-                  isLogout
-                    ? "text-red-500 hover:bg-red-50"
-                    : locked
-                      ? "text-gray-300 cursor-not-allowed"
-                      : isActive
-                        ? "bg-blue-100 text-black"
-                        : "text-gray-700 hover:bg-brand-50 hover:text-brand-600"
-                }`}
-                title={
-                  locked ? "This section has been disabled by the admin" : ""
-                }
-              >
-                {locked ? (
-                  <Lock weight="fill" className="w-[18px] h-[18px]" />
-                ) : (
-                  section.icon
-                )}
-                <span className="font-medium text-sm">{section.label}</span>
-              </button>
+              />
             );
           })}
 
@@ -598,7 +547,7 @@ const InstitutionLayout: React.FC<Props> = ({
             onClick={() => setShowLogoutModal(true)}
             className="flex items-center gap-3 px-3 py-2.5 rounded-md transition-colors text-red-500 hover:bg-red-50"
           >
-            <SignOut className="w-[18px] h-[18px]" />
+            <LogOut size={20} />
             <span className="font-medium text-sm">Logout</span>
           </button>
         </div>
@@ -613,13 +562,13 @@ const InstitutionLayout: React.FC<Props> = ({
               onClick={() => setSidebarOpen(true)}
               className="md:hidden p-2 -ml-2 text-gray-500 hover:bg-gray-100 rounded-md"
             >
-              <SquaresFour className="w-5 h-5" />
+              <LayoutDashboard size={20} />
             </button>
           </div>
 
           <div className="flex items-center gap-3">
             <button className="icon-btn-hover text-gray-400 hover:text-gray-600 transition-colors relative">
-              <Chats className="w-5 h-5" />
+              <MessageSquare size={20} />
               {msgCount > 0 && (
                 <span className="absolute -top-1 -right-1 min-w-5 h-5 flex items-center justify-center text-[10px] font-bold text-white bg-red-500 rounded-full px-1">
                   {msgCount > 99 ? "99+" : msgCount}
@@ -632,7 +581,7 @@ const InstitutionLayout: React.FC<Props> = ({
                 onClick={() => setNotificationOpen(!notificationOpen)}
                 className="icon-btn-hover text-gray-400 hover:text-gray-600 transition-colors relative"
               >
-                <Bell className="w-5 h-5" />
+                <Bell size={20} />
                 {notifCount > 0 && (
                   <span className="absolute -top-1 -right-1 min-w-5 h-5 flex items-center justify-center text-[10px] font-bold text-white bg-red-500 rounded-full px-1">
                     {notifCount > 99 ? "99+" : notifCount}
@@ -651,7 +600,7 @@ const InstitutionLayout: React.FC<Props> = ({
                       onClick={() => setNotificationOpen(false)}
                       className="text-gray-400 hover:text-gray-600"
                     >
-                      <X className="w-[18px] h-[18px]" />
+                      <X size={18} />
                     </button>
                   </div>
                   <div className="max-h-72 overflow-y-auto">
@@ -728,7 +677,7 @@ const InstitutionLayout: React.FC<Props> = ({
         </header>
 
         {/* Page Content */}
-        <main className="flex-1 overflow-y-auto">{children}</main>
+        <main className="flex-1 overflow-y-auto p-4 md:p-6 lg:p-8">{children}</main>
       </div>
 
       {/* Custom CSS for icon button hover */}
@@ -796,5 +745,83 @@ const InstitutionLayout: React.FC<Props> = ({
     </div>
   );
 };
+
+function NavItem({
+  icon,
+  label,
+  active,
+  onClick,
+}: {
+  icon: React.ReactNode;
+  label: string;
+  active: boolean;
+  onClick: () => void;
+}) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      className={`nav-item flex items-center gap-3 px-3 py-2.5 rounded-md transition-colors w-full ${
+        active
+          ? "active bg-blue-50 text-blue-600"
+          : "text-gray-700 hover:bg-blue-50 hover:text-blue-600"
+      }`}
+    >
+      {icon}
+      <span className="font-medium text-sm">{label}</span>
+    </button>
+  );
+}
+
+function NavDropdown({
+  icon,
+  label,
+  isOpen,
+  onToggle,
+  locked,
+  children,
+}: {
+  icon: React.ReactNode;
+  label: string;
+  isOpen: boolean;
+  onToggle: () => void;
+  locked?: boolean;
+  children: React.ReactNode;
+}) {
+  return (
+    <div className="flex flex-col">
+      <button
+        type="button"
+        onClick={onToggle}
+        className={`nav-item flex items-center justify-between px-3 py-2 rounded-md transition-colors w-full ${
+          locked
+            ? "text-gray-300 cursor-not-allowed"
+            : "text-gray-700 hover:bg-blue-50 hover:text-blue-600"
+        }`}
+        title={locked ? "This section has been disabled by the admin" : ""}
+      >
+        <div className="flex items-center gap-3">
+          {locked ? <Lock size={20} /> : icon}
+          <span className="font-medium text-sm">{label}</span>
+        </div>
+        {!locked && (
+          <ChevronRight
+            size={14}
+            className={`transition-transform duration-200 ${isOpen ? "rotate-90" : ""}`}
+          />
+        )}
+      </button>
+      {!locked && (
+        <div
+          className={`overflow-hidden transition-all duration-200 ${
+            isOpen ? "max-h-[600px] opacity-100" : "max-h-0 opacity-0"
+          }`}
+        >
+          <div className="pl-10 pr-3 py-2 flex flex-col gap-1">{children}</div>
+        </div>
+      )}
+    </div>
+  );
+}
 
 export default InstitutionLayout;

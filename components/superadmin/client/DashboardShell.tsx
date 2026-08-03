@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, lazy, Suspense, useCallback, useEffect } from "react";
+import React, { useState, lazy, Suspense, useCallback, useEffect, useRef } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import Image from "next/image";
 import { clearAllAuthSessions, clearCookie } from "@/services/authSession";
@@ -32,6 +32,8 @@ import {
   MapPin,
   Globe,
   Briefcase,
+  Menu,
+  X,
 } from "lucide-react";
 
 const OverviewSection = lazy(() => import("./OverviewSection"));
@@ -423,6 +425,8 @@ export default function DashboardShell() {
   } | null>(null);
   const [unreadInquiries, setUnreadInquiries] = useState(0);
   const [unreadNotifications, setUnreadNotifications] = useState(0);
+  const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [showLogoutModal, setShowLogoutModal] = useState(false);
 
   React.useEffect(() => {
     const stored = localStorage.getItem("superadmin_user");
@@ -710,8 +714,21 @@ export default function DashboardShell() {
 
   return (
     <div className="min-h-screen bg-white text-gray-800 font-sans h-screen flex overflow-hidden">
-      <aside className="w-80 bg-white border-r border-gray-200 flex-shrink-0 flex flex-col z-20">
-        <div className="h-16 flex items-center px-6 border-b border-gray-50">
+      {/* Mobile Overlay */}
+      {sidebarOpen && (
+        <div
+          className="fixed inset-0 bg-black/40 z-40 md:hidden"
+          onClick={() => setSidebarOpen(false)}
+        />
+      )}
+
+      {/* Sidebar */}
+      <aside
+        className={`fixed md:relative top-0 left-0 z-50 w-80 h-full bg-white border-r border-gray-200 flex-shrink-0 flex flex-col transition-transform duration-300 shadow-none ${
+          sidebarOpen ? "translate-x-0" : "-translate-x-full md:translate-x-0"
+        }`}
+      >
+        <div className="h-16 flex items-center justify-between px-6 border-b border-gray-50">
           <Image
             src="/studsphere.png"
             alt="StudySphere Logo"
@@ -719,6 +736,12 @@ export default function DashboardShell() {
             height={48}
             className="h-10 w-auto"
           />
+          <button
+            onClick={() => setSidebarOpen(false)}
+            className="text-gray-400 hover:text-gray-600 p-1 rounded md:hidden"
+          >
+            <X size={20} />
+          </button>
         </div>
         <div className="flex-1 overflow-y-auto no-scrollbar py-4 px-4 flex flex-col gap-1">
           {navItems.map((item) =>
@@ -758,7 +781,7 @@ export default function DashboardShell() {
 
           <button
             type="button"
-            onClick={handleLogout}
+            onClick={() => setShowLogoutModal(true)}
             className="flex items-center gap-3 px-3 py-2.5 text-sm font-medium text-red-500 hover:bg-red-50 rounded-md transition-colors mt-2"
           >
             <LogOut size={20} />
@@ -768,7 +791,16 @@ export default function DashboardShell() {
       </aside>
 
       <div className="flex-1 flex flex-col h-screen overflow-hidden">
-        <header className="h-16 bg-white flex items-center justify-end px-6 shadow-sm z-10">
+        <header className="h-16 bg-white flex items-center justify-between px-4 md:px-6 shadow-sm z-10">
+          <div className="flex items-center gap-4">
+            <button
+              onClick={() => setSidebarOpen(true)}
+              className="md:hidden p-2 -ml-2 text-gray-500 hover:bg-gray-100 rounded-md"
+            >
+              <Menu size={20} />
+            </button>
+          </div>
+
           <div className="flex items-center gap-3">
             <button
               type="button"
@@ -837,6 +869,53 @@ export default function DashboardShell() {
           </Suspense>
         </main>
       </div>
+
+      {/* Logout Modal */}
+      {showLogoutModal && (
+        <div className="fixed inset-0 z-[60] flex items-center justify-center px-4">
+          <div
+            className="absolute inset-0 bg-black/45"
+            onClick={() => setShowLogoutModal(false)}
+          />
+          <div className="relative w-full max-w-sm rounded-2xl bg-white px-5 pb-5 pt-6 shadow-lg sm:px-6 sm:pb-6 sm:pt-7">
+            <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-red-50 sm:h-14 sm:w-14">
+              <div className="flex h-8 w-8 items-center justify-center rounded-full border-2 border-red-500 text-red-500">
+                <span className="text-xl leading-none font-semibold">!</span>
+              </div>
+            </div>
+
+            <div className="mx-auto max-w-xs text-center">
+              <h3 className="text-xl font-semibold tracking-tight text-slate-900 sm:text-2xl">
+                Log out of your account?
+              </h3>
+              <p className="mt-2 text-[15px] leading-6 text-slate-500 sm:text-base">
+                Are you sure you want to log out? You will need to re-enter your
+                credentials to access your account.
+              </p>
+            </div>
+
+            <div className="mt-6 grid grid-cols-2 gap-3 sm:mt-7">
+              <button
+                type="button"
+                onClick={() => setShowLogoutModal(false)}
+                className="h-11 rounded-xl bg-slate-100 text-base font-medium text-slate-600 transition-colors hover:bg-slate-200"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  setShowLogoutModal(false);
+                  handleLogout();
+                }}
+                className="h-11 rounded-xl bg-red-600 text-base font-semibold text-white shadow-sm transition-colors hover:bg-red-700"
+              >
+                Yes, Log out
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
