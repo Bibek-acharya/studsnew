@@ -592,8 +592,10 @@ const EntrancePage: React.FC = () => {
       };
       if (editId) {
         await institutionEntranceApi.update(Number(editId), payload);
+        window.dispatchEvent(new Event("institution-data-changed"));
       } else {
         await institutionEntranceApi.create(payload);
+        window.dispatchEvent(new Event("institution-data-changed"));
       }
       if (publish) {
         router.push("/institution-zone/dashboard/entrance/directory");

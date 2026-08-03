@@ -56,6 +56,7 @@ const AdmissionDraftPage: React.FC = () => {
   const handleDelete = async (id: number) => {
     await institutionAdmissionApi.delete(id);
     setDrafts((prev) => prev.filter((d) => d.id !== id));
+    window.dispatchEvent(new Event("institution-data-changed"));
   };
 
   return (

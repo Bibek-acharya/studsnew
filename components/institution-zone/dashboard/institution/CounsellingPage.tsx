@@ -299,6 +299,7 @@ const CounsellingPage: React.FC = () => {
           max_seats: parseInt(slotCapacity) || 10,
         });
         toast.success("Session updated");
+        window.dispatchEvent(new Event("institution-data-changed"));
       } else {
         await institutionCounsellingApi.createSession({
           title: slotTitle || "Counselling Session",
@@ -308,6 +309,7 @@ const CounsellingPage: React.FC = () => {
           max_seats: parseInt(slotCapacity) || 10,
         });
         toast.success("Session created");
+        window.dispatchEvent(new Event("institution-data-changed"));
       }
       resetSlotForm();
       loadCounsellingData();
@@ -326,6 +328,7 @@ const CounsellingPage: React.FC = () => {
       await institutionCounsellingApi.deleteSession(id);
       setSlots((prev) => prev.filter((s) => s.id !== id));
       toast.success("Session deleted");
+      window.dispatchEvent(new Event("institution-data-changed"));
       setDeleteTarget(null);
     } catch (error) {
       toast.error(

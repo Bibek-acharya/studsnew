@@ -924,9 +924,11 @@ export interface EducationEntryResponse {
 export interface InstitutionDashboardData {
   total_programs: number;
   total_students: number;
+  active_students: number;
   active_entrances: number;
   pending_bookings: number;
   unread_messages: number;
+  active_programs: number;
 }
 
 export interface InstitutionAnalyticsProgramStat {

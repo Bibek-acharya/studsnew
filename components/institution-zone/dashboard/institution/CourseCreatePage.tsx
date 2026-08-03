@@ -408,12 +408,14 @@ const CourseCreatePage: React.FC = () => {
           ...data,
           status: publish ? "active" : "draft",
         });
+        window.dispatchEvent(new Event("institution-data-changed"));
         if (publish) router.push("/institution-zone/dashboard/course/list");
       } else {
         const res = await institutionProgramApi.create({
           ...data,
           status: publish ? "active" : "draft",
         });
+        window.dispatchEvent(new Event("institution-data-changed"));
         if (res?.id)
           router.replace(
             `/institution-zone/dashboard/course/create?id=${res.id}`,

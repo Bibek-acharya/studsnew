@@ -612,8 +612,10 @@ const ScholarshipCreatePage: React.FC<ScholarshipCreatePageProps> = ({ onBack, s
     try {
       if (isEditing && scholarshipId) {
         await institutionScholarshipApi.updateScholarship(scholarshipId, payload);
+        window.dispatchEvent(new Event("institution-data-changed"));
       } else {
         await institutionScholarshipApi.createScholarship(payload);
+        window.dispatchEvent(new Event("institution-data-changed"));
       }
       if (draft) {
         toast.success(isEditing ? "Your scholarship draft has been updated." : "Your scholarship has been saved as a draft.");

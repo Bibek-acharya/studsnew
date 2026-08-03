@@ -1,6 +1,8 @@
 "use client";
-import React, { useState, useRef, useEffect, useCallback } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import Image from "next/image";
+import NotificationBell, { NotificationItem } from "@/components/shared/NotificationBell";
+import MessageBell from "@/components/shared/MessageBell";
 import {
   LayoutDashboard,
   UserPlus,
@@ -92,16 +94,15 @@ const InstitutionLayout: React.FC<Props> = ({
   const [openDropdowns, setOpenDropdowns] = useState<Record<string, boolean>>(
     {},
   );
-  const [notificationOpen, setNotificationOpen] = useState(false);
   const [showLogoutModal, setShowLogoutModal] = useState(false);
   const [accessDisabled, setAccessDisabled] = useState<Record<string, boolean>>(
     {},
   );
   const [notifCount, setNotifCount] = useState(0);
   const [msgCount, setMsgCount] = useState(0);
-  const [notifItems, setNotifItems] = useState<
-    { icon: React.ReactNode; bg: string; text: string; time: string }[]
-  >([]);
+  const [notifications, setNotifications] = useState<NotificationItem[]>([]);
+  const [notifLoading, setNotifLoading] = useState(false);
+  const [notifOpen, setNotifOpen] = useState(false);
   const [instName, setInstName] = useState("");
   const [instLogo, setInstLogo] = useState("");
   const [subType, setSubType] = useState("");
@@ -175,20 +176,6 @@ const InstitutionLayout: React.FC<Props> = ({
     localStorage.removeItem("institutionUser");
     window.location.href = "/institution-zone";
   };
-  const notificationRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    const handleClickOutside = (e: MouseEvent) => {
-      if (
-        notificationRef.current &&
-        !notificationRef.current.contains(e.target as Node)
-      ) {
-        setNotificationOpen(false);
-      }
-    };
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => document.removeEventListener("mousedown", handleClickOutside);
-  }, []);
 
   const toggleDropdown = (key: string) => {
     setOpenDropdowns((prev) => ({ ...prev, [key]: !prev[key] }));
@@ -392,50 +379,83 @@ const InstitutionLayout: React.FC<Props> = ({
         Number(dash.unread_messages || 0) + Number(dash.pending_bookings || 0);
       setNotifCount(unreadCount);
       setMsgCount(Number(dash.unread_messages || 0));
-      const items: {
-        icon: React.ReactNode;
-        bg: string;
-        text: string;
-        time: string;
-      }[] = [];
+
+      const items: NotificationItem[] = [];
       if (dash.pending_bookings > 0)
         items.push({
+          id: `booking-${Date.now()}`,
+          title: "Pending Bookings",
+          message: `${dash.pending_bookings} pending counselling bookings`,
+          read: false,
+          created_at: new Date().toISOString(),
           icon: <UserPlus className="text-blue-600 text-sm" />,
-          bg: "bg-blue-50",
-          text: `${dash.pending_bookings} pending counselling bookings`,
-          time: "Now",
+          iconBg: "bg-blue-50",
         });
       if (dash.unread_messages > 0)
         items.push({
-          icon: <MessageSquare className="text-green-600 text-sm" />,
-          bg: "bg-green-50",
-          text: `${dash.unread_messages} unread messages`,
-          time: "Now",
+          id: `message-${Date.now()}`,
+          title: "Unread Messages",
+          message: `${dash.unread_messages} unread messages`,
+          read: false,
+          created_at: new Date().toISOString(),
+          icon: <LayoutDashboard className="text-green-600 text-sm" />,
+          iconBg: "bg-green-50",
         });
       const contacts = msgRes?.data || [];
       contacts.slice(0, 2).forEach((c: any, i: number) => {
         items.push({
+          id: `contact-${c.user_id || i}`,
+          title: `Message from ${c.name || `User #${c.user_id}`}`,
+          message: "",
+          read: true,
+          created_at: new Date(Date.now() - (i === 0 ? 300000 : 3600000)).toISOString(),
           icon: <FileText className="text-purple-600 text-sm" />,
-          bg: "bg-purple-50",
-          text: `Message from ${c.name || `User #${c.user_id}`}`,
-          time: i === 0 ? "Recently" : "Earlier",
+          iconBg: "bg-purple-50",
         });
       });
-      if (items.length === 0)
-        items.push({
-          icon: <LayoutDashboard className="text-gray-400 text-sm" />,
-          bg: "bg-gray-50",
-          text: "No new notifications",
-          time: "",
-        });
-      setNotifItems(items);
+      setNotifications(items);
     } catch {
       /* skip */
     }
   }, []);
 
+  const handleMarkNotifRead = async (id: number | string) => {
+    try {
+      const API_BASE_URL =
+        process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080";
+      const token = localStorage.getItem("institutionToken");
+      if (!token) return;
+      await fetch(`${API_BASE_URL}/api/v1/institution/notifications/read-all`, {
+        method: "PUT",
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      setNotifications((prev) =>
+        prev.map((n) => (n.id === id ? { ...n, read: true } : n)),
+      );
+      setNotifCount((prev) => Math.max(0, prev - 1));
+    } catch {}
+  };
+
+  const handleMarkAllNotifRead = async () => {
+    try {
+      const API_BASE_URL =
+        process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080";
+      const token = localStorage.getItem("institutionToken");
+      if (!token) return;
+      await fetch(`${API_BASE_URL}/api/v1/institution/notifications/read-all`, {
+        method: "PUT",
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      setNotifications((prev) => prev.map((n) => ({ ...n, read: true })));
+      setNotifCount(0);
+      window.dispatchEvent(new Event("institution-notifications-read"));
+    } catch {}
+  };
+
   useEffect(() => {
     fetchNotifications();
+    const interval = setInterval(fetchNotifications, 60000);
+    return () => clearInterval(interval);
   }, [fetchNotifications]);
 
   useEffect(() => {
@@ -567,86 +587,24 @@ const InstitutionLayout: React.FC<Props> = ({
           </div>
 
           <div className="flex items-center gap-3">
-            <button className="icon-btn-hover text-gray-400 hover:text-gray-600 transition-colors relative">
-              <MessageSquare size={20} />
-              {msgCount > 0 && (
-                <span className="absolute -top-1 -right-1 min-w-5 h-5 flex items-center justify-center text-[10px] font-bold text-white bg-red-500 rounded-full px-1">
-                  {msgCount > 99 ? "99+" : msgCount}
-                </span>
-              )}
-            </button>
-
-            <div className="relative" ref={notificationRef}>
-              <button
-                onClick={() => setNotificationOpen(!notificationOpen)}
-                className="icon-btn-hover text-gray-400 hover:text-gray-600 transition-colors relative"
-              >
-                <Bell size={20} />
-                {notifCount > 0 && (
-                  <span className="absolute -top-1 -right-1 min-w-5 h-5 flex items-center justify-center text-[10px] font-bold text-white bg-red-500 rounded-full px-1">
-                    {notifCount > 99 ? "99+" : notifCount}
-                  </span>
-                )}
-              </button>
-
-              {/* Notification Dropdown */}
-              {notificationOpen && (
-                <div className="absolute right-0 top-full mt-2 w-80 bg-white rounded-xl shadow-xl border border-gray-200 z-50">
-                  <div className="p-3 border-b border-gray-100 flex items-center justify-between">
-                    <h3 className="text-sm font-bold text-gray-900">
-                      Notifications
-                    </h3>
-                    <button
-                      onClick={() => setNotificationOpen(false)}
-                      className="text-gray-400 hover:text-gray-600"
-                    >
-                      <X size={18} />
-                    </button>
-                  </div>
-                  <div className="max-h-72 overflow-y-auto">
-                    {notifItems.length === 0 ? (
-                      <div className="p-4 text-center text-sm text-gray-400">
-                        No notifications
-                      </div>
-                    ) : (
-                      notifItems.map((notif, i) => (
-                        <div
-                          key={i}
-                          className="p-3 border-b border-gray-50 hover:bg-brand-50 cursor-pointer flex items-start gap-3 transition-colors"
-                        >
-                          <div
-                            className={`w-8 h-8 rounded-full ${notif.bg} flex items-center justify-center shrink-0`}
-                          >
-                            {notif.icon}
-                          </div>
-                          <div className="flex-1">
-                            <p className="text-sm font-medium text-gray-900">
-                              {notif.text}
-                            </p>
-                            {notif.time && (
-                              <p className="text-xs text-gray-500 mt-0.5">
-                                {notif.time}
-                              </p>
-                            )}
-                          </div>
-                        </div>
-                      ))
-                    )}
-                  </div>
-                  <div className="p-2 border-t border-gray-100 text-center">
-                    <button
-                      onClick={() => {
-                        onNavigate("notification");
-                        setNotificationOpen(false);
-                      }}
-                      className="text-xs text-blue-600 hover:underline font-medium"
-                    >
-                      View All Activity
-                    </button>
-                  </div>
-                </div>
-              )}
-            </div>
+            <MessageBell
+              unreadCount={msgCount}
+              onClick={() => onNavigate("message")}
+            />
+            <NotificationBell
+              notifications={notifications}
+              unreadCount={notifCount}
+              loading={notifLoading}
+              isOpen={notifOpen}
+              onToggle={() => setNotifOpen(!notifOpen)}
+              onClose={() => setNotifOpen(false)}
+              onMarkRead={handleMarkNotifRead}
+              onMarkAllRead={handleMarkAllNotifRead}
+              onViewAll={() => {
+                onNavigate("notification");
+                setNotifOpen(false);
+              }}
+            />
 
             <div className="pl-3 border-l border-gray-200 flex items-center gap-3">
               {instLogo ? (

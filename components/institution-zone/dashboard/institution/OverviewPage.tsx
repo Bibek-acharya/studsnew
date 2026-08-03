@@ -1,14 +1,13 @@
 "use client";
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import {
+  Users,
   FileText,
   GraduationCap,
-  Users,
-  ChatCircleText,
-  ClipboardText,
-  CalendarBlank,
-  CalendarDots,
-} from "@phosphor-icons/react";
+  MessageSquare,
+  ClipboardList,
+  Calendar,
+} from "lucide-react";
 import SectionHeader from "../shared/SectionHeader";
 import StatCard from "../shared/StatCard";
 import CalendarWidget from "../shared/CalendarWidget";
@@ -17,55 +16,67 @@ const OverviewPage: React.FC = () => {
   const [dashboardData, setDashboardData] = useState<{
     total_programs: number;
     total_students: number;
+    active_students: number;
     active_entrances: number;
     pending_bookings: number;
     unread_messages: number;
+    active_programs: number;
   } | null>(null);
   const [institutionName, setInstitutionName] = useState("");
   const [loading, setLoading] = useState(true);
   const [recentAdmissions, setRecentAdmissions] = useState<any[]>([]);
 
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080";
-        const token = localStorage.getItem("institutionToken");
-        if (!token) {
-          setLoading(false);
-          return;
-        }
-
-        const authHeaders = { Authorization: `Bearer ${token}` };
-
-        const [dashboardRes, profileRes] = await Promise.all([
-          fetch(`${API_BASE_URL}/api/v1/institution/dashboard`, {
-            headers: authHeaders,
-          }).then(r => r.json()),
-          fetch(`${API_BASE_URL}/api/v1/institution/profile`, {
-            headers: authHeaders,
-          }).then(r => r.json()),
-        ]);
-
-        if (dashboardRes?.success) setDashboardData(dashboardRes.data);
-        if (profileRes?.success) setInstitutionName(profileRes.data?.institution_name || "");
-
-        try {
-          const admissionsRes = await fetch(`${API_BASE_URL}/api/v1/institution/admissions`, {
-            headers: authHeaders,
-          }).then(r => r.json());
-          if (admissionsRes?.success && Array.isArray(admissionsRes.data)) {
-            setRecentAdmissions(admissionsRes.data.slice(0, 4));
-          }
-        } catch {}
-      } catch (err) {
-        console.error("Failed to load dashboard:", err);
-      } finally {
+  const fetchData = useCallback(async () => {
+    try {
+      const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080";
+      const token = localStorage.getItem("institutionToken");
+      if (!token) {
         setLoading(false);
+        return;
       }
-    };
 
-    fetchData();
+      const authHeaders = { Authorization: `Bearer ${token}` };
+
+      const [dashboardRes, profileRes] = await Promise.all([
+        fetch(`${API_BASE_URL}/api/v1/institution/dashboard`, {
+          headers: authHeaders,
+        }).then(r => r.json()),
+        fetch(`${API_BASE_URL}/api/v1/institution/profile`, {
+          headers: authHeaders,
+        }).then(r => r.json()),
+      ]);
+
+      if (dashboardRes?.success) setDashboardData(dashboardRes.data);
+      if (profileRes?.success) setInstitutionName(profileRes.data?.institution_name || "");
+
+      try {
+        const admissionsRes = await fetch(`${API_BASE_URL}/api/v1/institution/admissions`, {
+          headers: authHeaders,
+        }).then(r => r.json());
+        if (admissionsRes?.success && Array.isArray(admissionsRes.data)) {
+          setRecentAdmissions(admissionsRes.data.slice(0, 4));
+        }
+      } catch {}
+    } catch (err) {
+      console.error("Failed to load dashboard:", err);
+    } finally {
+      setLoading(false);
+    }
   }, []);
+
+  useEffect(() => {
+    fetchData();
+
+    const interval = setInterval(fetchData, 30000);
+
+    const handleDataChanged = () => fetchData();
+    window.addEventListener("institution-data-changed", handleDataChanged);
+
+    return () => {
+      clearInterval(interval);
+      window.removeEventListener("institution-data-changed", handleDataChanged);
+    };
+  }, [fetchData]);
 
   const formatNumber = (n: number | undefined | null) => {
     if (n === undefined || n === null) return "—";
@@ -111,7 +122,7 @@ const OverviewPage: React.FC = () => {
             </div>
             <div className="relative z-10 px-6 md:px-10 flex flex-col items-start w-full md:max-w-[55%]">
               <div className="flex items-center gap-2 text-white/70 text-xs font-medium mb-5 bg-white/50 px-3 py-1 rounded-full backdrop-blur-sm">
-                <CalendarDots className="w-3.5 h-3.5" />
+                <Calendar className="w-3.5 h-3.5" />
                 <span>{new Date().toLocaleDateString("en-US", { month: "short", day: "2-digit", year: "numeric" })} {new Date().toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit", hour12: true }).toLowerCase()}</span>
               </div>
               <h1 className="text-white text-xl md:text-2xl leading-tight font-bold tracking-wide mb-1">
@@ -125,38 +136,46 @@ const OverviewPage: React.FC = () => {
 
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 xl:gap-6">
             <StatCard
-              icon={<Users weight="fill" />}
+              icon={<Users size={24} />}
               iconBg="bg-blue-50"
               iconColor="text-blue-600"
               label="Total Students"
               value={formatNumber(dashboardData?.total_students)}
-              trend={{ value: "Active", positive: true }}
+              trend={{ value: "All time", positive: true }}
             />
             <StatCard
-              icon={<FileText weight="fill" />}
+              icon={<Users size={24} />}
               iconBg="bg-green-50"
               iconColor="text-green-600"
+              label="Active Students"
+              value={formatNumber(dashboardData?.active_students)}
+              trend={{ value: "This Year", positive: true }}
+            />
+            <StatCard
+              icon={<FileText size={24} />}
+              iconBg="bg-indigo-50"
+              iconColor="text-indigo-600"
               label="Total Programs"
               value={formatNumber(dashboardData?.total_programs)}
             />
             <StatCard
-              icon={<ClipboardText weight="fill" />}
-              iconBg="bg-indigo-50"
-              iconColor="text-indigo-600"
+              icon={<ClipboardList size={24} />}
+              iconBg="bg-amber-50"
+              iconColor="text-amber-600"
               label="Active Entrances"
               value={formatNumber(dashboardData?.active_entrances)}
               badge={{ label: "Active", color: "green" }}
             />
             <StatCard
-              icon={<CalendarBlank weight="fill" />}
-              iconBg="bg-amber-50"
-              iconColor="text-amber-600"
+              icon={<Calendar size={24} />}
+              iconBg="bg-orange-50"
+              iconColor="text-orange-600"
               label="Pending Bookings"
               value={formatNumber(dashboardData?.pending_bookings)}
               badge={{ label: "Pending", color: "yellow" }}
             />
             <StatCard
-              icon={<ChatCircleText weight="fill" />}
+              icon={<MessageSquare size={24} />}
               iconBg="bg-purple-50"
               iconColor="text-purple-600"
               label="Unread Messages"
@@ -164,11 +183,11 @@ const OverviewPage: React.FC = () => {
               badge={{ label: "Unread", color: "red" }}
             />
             <StatCard
-              icon={<GraduationCap weight="fill" />}
+              icon={<GraduationCap size={24} />}
               iconBg="bg-red-50"
               iconColor="text-red-600"
               label="Active Programs"
-              value={formatNumber(dashboardData?.total_programs)}
+              value={formatNumber(dashboardData?.active_programs)}
               badge={{ label: "Active", color: "green" }}
             />
           </div>

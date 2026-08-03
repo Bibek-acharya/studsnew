@@ -32,6 +32,7 @@ const EntranceDraftPage: React.FC = () => {
     try {
       await institutionEntranceApi.delete(id);
       setDrafts(prev => prev.filter(d => d.id !== id));
+      window.dispatchEvent(new Event("institution-data-changed"));
     } catch (e) { console.error(e); }
   };
 

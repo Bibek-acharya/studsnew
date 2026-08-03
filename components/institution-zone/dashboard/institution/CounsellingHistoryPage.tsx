@@ -47,6 +47,7 @@ const CounsellingHistoryPage = () => {
       await institutionCounsellingApi.deleteSession(id);
       setSessions((prev) => prev.filter((s) => s.id !== id));
       toast.success("Session deleted");
+      window.dispatchEvent(new Event("institution-data-changed"));
       setDeleteTarget(null);
     } catch {
       toast.error("Failed to delete session");

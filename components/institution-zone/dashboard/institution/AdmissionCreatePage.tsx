@@ -556,6 +556,7 @@ const AdmissionCreatePage: React.FC = () => {
       const data = collectData();
       if (editId) {
         await institutionAdmissionApi.update(Number(editId), data, publish);
+        window.dispatchEvent(new Event("institution-data-changed"));
         router.push(
           publish
             ? "/institution-zone/dashboard/admission/directory"
@@ -563,6 +564,7 @@ const AdmissionCreatePage: React.FC = () => {
         );
       } else {
         await institutionAdmissionApi.create(data, publish);
+        window.dispatchEvent(new Event("institution-data-changed"));
         router.push("/institution-zone/dashboard/admission/draft");
       }
     } catch {

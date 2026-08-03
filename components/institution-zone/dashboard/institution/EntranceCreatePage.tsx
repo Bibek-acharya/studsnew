@@ -217,10 +217,12 @@ const EntranceCreatePage = () => {
       const data = collectData(publish);
       if (editId) {
         await institutionEntranceApi.update(Number(editId), data);
+        window.dispatchEvent(new Event("institution-data-changed"));
         if (publish)
           router.push("/institution-zone/dashboard/entrance/directory");
       } else {
         const res = await institutionEntranceApi.create(data);
+        window.dispatchEvent(new Event("institution-data-changed"));
         if (res?.id) {
           router.replace(
             `/institution-zone/dashboard/entrance/create?id=${res.id}`,

@@ -22,6 +22,7 @@ const CourseListPage: React.FC = () => {
     try {
       await institutionProgramApi.delete(id);
       setCourses(prev => prev.filter(c => c.id !== id));
+      window.dispatchEvent(new Event("institution-data-changed"));
     } catch (e) { console.error(e); }
   };
 

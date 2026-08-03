@@ -46,6 +46,7 @@ const EntranceDirectoryPage: React.FC = () => {
     try {
       await institutionEntranceApi.delete(id);
       setExams(prev => prev.filter(e => e.id !== id));
+      window.dispatchEvent(new Event("institution-data-changed"));
     } catch (e) { console.error(e); }
   };
 

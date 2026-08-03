@@ -1,13 +1,15 @@
 "use client";
 
-import { useState, useMemo, useEffect, useRef, ReactNode } from "react";
+import { useState, useMemo, useEffect, ReactNode } from "react";
 import { useRouter } from "next/navigation";
 import Sidebar from "./Sidebar";
 import LogoutModal from "./LogoutModal";
 import Link from "next/link";
-import { Menu, Search, Bell, Clock } from "lucide-react";
+import { Menu, Search, Clock } from "lucide-react";
 import { apiService, getImageUrl } from "@/services/api";
 import { useAuth } from "@/services/AuthContext";
+import NotificationBell from "@/components/shared/NotificationBell";
+import { NotificationItem as SharedNotificationItem } from "@/components/shared/NotificationBell";
 
 interface DashboardLayoutProps {
   children: ReactNode;
@@ -38,14 +40,13 @@ const notificationTabs: NotificationTab[] = [
 export default function DashboardLayout({ children }: DashboardLayoutProps) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [showLogoutModal, setShowLogoutModal] = useState(false);
-  const [notificationsOpen, setNotificationsOpen] = useState(false);
   const [currentNotifTab, setCurrentNotifTab] =
     useState<NotificationTab>("all");
   const [notifications, setNotifications] = useState<NotificationItem[]>([]);
   const [notifLoading, setNotifLoading] = useState(true);
+  const [notifOpen, setNotifOpen] = useState(false);
   const { user } = useAuth();
   const router = useRouter();
-  const notificationsRef = useRef<HTMLDivElement | null>(null);
 
   const initials = useMemo(() => {
     if (!user) return "KS";
@@ -193,21 +194,22 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
       }
     };
     fetchNotifications();
+    const interval = setInterval(fetchNotifications, 60000);
+    return () => clearInterval(interval);
   }, []);
 
-  useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      if (
-        notificationsRef.current &&
-        !notificationsRef.current.contains(event.target as Node)
-      ) {
-        setNotificationsOpen(false);
-      }
-    };
-
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => document.removeEventListener("mousedown", handleClickOutside);
-  }, []);
+  const toSharedNotifications = useMemo((): SharedNotificationItem[] => {
+    return notifications
+      .filter((n) => !n.isArchived)
+      .slice(0, 10)
+      .map((n) => ({
+        id: n.id,
+        title: n.title,
+        message: n.message,
+        read: n.isRead,
+        created_at: n.time,
+      }));
+  }, [notifications]);
 
   return (
     <div className="flex h-screen bg-gray-50 font-sans overflow-hidden text-gray-800">
@@ -241,18 +243,20 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
           </div>
 
           <div className="flex items-center gap-4 lg:gap-6">
-            <Link
-              href="/user/dashboard/notifications"
-              className="relative flex items-center justify-center w-10 h-10 rounded-full border border-gray-200 hover:bg-gray-50 transition-colors text-gray-600"
-              aria-label="Notifications"
-            >
-              <Bell className="w-5 h-5" />
-              {unreadNotificationCount > 0 && (
-                <span className="absolute -top-1.5 -right-1.5 flex h-5 w-5 items-center justify-center rounded-full border-2 border-white bg-red-500 text-[11px] font-bold text-white ">
-                  {unreadNotificationCount}
-                </span>
-              )}
-            </Link>
+            <NotificationBell
+              notifications={toSharedNotifications}
+              unreadCount={unreadNotificationCount}
+              loading={notifLoading}
+              isOpen={notifOpen}
+              onToggle={() => setNotifOpen(!notifOpen)}
+              onClose={() => setNotifOpen(false)}
+              onMarkRead={(id) => markAsRead(String(id))}
+              onMarkAllRead={markAllAsRead}
+              onViewAll={() => {
+                router.push("/user/dashboard/notifications");
+                setNotifOpen(false);
+              }}
+            />
 
             <div className="flex items-center gap-3 pl-4 border-l border-gray-200">
               <button

@@ -87,6 +87,7 @@ const ScholarshipListPage: React.FC = () => {
       });
       setScholarships((prev) => prev.filter((s) => s.id !== scholarshipId));
       toast.success("Scholarship deleted successfully");
+      window.dispatchEvent(new Event("institution-data-changed"));
     } catch {
       toast.error("Failed to delete scholarship");
     }
