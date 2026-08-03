@@ -136,7 +136,7 @@ export default function SuperadminCreateJobSection({
   }
 
   return (
-    <div className="p-4 md:p-6 lg:p-8 min-h-full">
+    <div className="min-h-full">
       <SectionHeader
         title={editId ? "Edit Job" : "Create Job"}
         breadcrumbItems={[
@@ -148,7 +148,7 @@ export default function SuperadminCreateJobSection({
 
       <form
         onSubmit={handleSubmit}
-        className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 max-w-3xl"
+        className="bg-white rounded-xl shadow-sm border border-gray-200 p-6"
       >
         <div className="space-y-5">
           <div>

@@ -104,7 +104,7 @@ export default function SuperadminJobDirectorySection({
   };
 
   return (
-    <div className="p-4 md:p-6 lg:p-8 min-h-full">
+    <div className="min-h-full">
       <SectionHeader
         title="Job Directory"
         breadcrumbItems={[{ label: "Dashboard" }, { label: "Job Directory" }]}
