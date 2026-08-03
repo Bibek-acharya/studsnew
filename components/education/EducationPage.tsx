@@ -5,7 +5,6 @@ import { useRouter } from "next/navigation";
 import HeroSection from "./landing/HeroSection";
 import SmarterToolsSection from "./landing/SmarterToolsSection";
 import EventShowcaseSection from "./landing/EventShowcaseSection";
-import CourseCategoriesSection from "./landing/CourseCategoriesSection";
 import FeaturedInstitutionsSection from "./landing/FeaturedInstitutionsSection";
 import FinancialAidSection from "./landing/FinancialAidSection";
 import ExamAnnouncementsSection from "./landing/ExamAnnouncementsSection";
@@ -13,7 +12,6 @@ import NewsStoriesSection from "./landing/NewsStoriesSection";
 import AdWidgetsSection from "./landing/AdWidgetsSection";
 import CampusEventsSection from "./landing/CampusEventsSection";
 import TestimonialsSection from "./landing/TestimonialsSection";
-import LandingPopups from "./landing/LandingPopups";
 import {
   College,
   EducationEvent,
@@ -173,7 +171,7 @@ const EducationPage: React.FC<EducationPageProps> = ({
       {/* Section 12: Not sure where to start? */}
       {/* <RecommendedForYouSection onNavigate={onNavigate} /> */}
       {/* Floating Popups */}
-      <LandingPopups />
+      {/* <LandingPopups /> */}
 
       {/* Back to Top */}
       <div
