@@ -2,11 +2,14 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
+import { useParams } from "next/navigation";
 import { ArrowLeft, MapPin, Clock, DollarSign, Calendar } from "lucide-react";
 import { careersApi, Job } from "@/services/api";
 import ApplicationModal from "./ApplicationModal";
 
-export default function JobDetailPage({ jobId }: { jobId: number }) {
+export default function JobDetailPage() {
+  const params = useParams();
+  const jobId = Number(params.id);
   const [job, setJob] = useState<Job | null>(null);
   const [loading, setLoading] = useState(true);
   const [showModal, setShowModal] = useState(false);

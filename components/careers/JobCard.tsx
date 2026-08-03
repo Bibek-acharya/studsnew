@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { MapPin, Clock, ArrowRight } from "lucide-react";
+import { stripHtml } from "@/services/api";
 
 interface JobCardProps {
   job: {
@@ -44,12 +45,13 @@ export default function JobCard({ job }: JobCardProps) {
           )}
           <span className="flex items-center gap-1">
             <Clock size={14} />
-            {job.job_type}
+            {job.job_type.replace(/-/g, " ").replace(/\b\w/g, (c) => c.toUpperCase())}
           </span>
         </div>
-        <p className="text-gray-500 text-xs leading-relaxed mb-4 flex-1 line-clamp-3">
-          {job.description.replace(/<[^>]*>/g, "")}
-        </p>
+        <div
+          className="prose prose-xs prose-p:my-1 prose-p:text-gray-500 prose-p:text-xs prose-p:leading-relaxed max-w-none mb-4 flex-1 line-clamp-3"
+          dangerouslySetInnerHTML={{ __html: job.description }}
+        />
         <div className="pt-3 border-t border-gray-100">
           <span className="inline-flex items-center gap-1 text-blue-600 font-semibold text-xs group-hover:text-blue-700 transition-colors">
             {isClosed ? "View Details" : "Apply Now"}
