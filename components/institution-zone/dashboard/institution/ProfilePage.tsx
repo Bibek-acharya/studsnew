@@ -182,7 +182,7 @@ const ProfilePage: React.FC = () => {
   const [youtubeUrl, setYoutubeUrl] = useState("");
   const [linkedinUrl, setLinkedinUrl] = useState("");
   const [affiliation, setAffiliation] = useState("");
-  const [universityId, setUniversityId] = useState(0);
+  const [universityIds, setUniversityIds] = useState<number[]>([]);
   const [universities, setUniversities] = useState<{ id: number; name: string }[]>([]);
   const [brochureUrl, setBrochureUrl] = useState("");
   const [about, setAbout] = useState("");
@@ -310,7 +310,16 @@ const ProfilePage: React.FC = () => {
       const data = res?.data;
       if (data) {
         setCollegeName(data.institution_name || "");
-        setUniversityId(data.university_id || 0);
+        const primaryUniId = data.university_id || 0;
+        const affiliationNames = (data.affiliation || "").split(",").map((s: string) => s.trim()).filter(Boolean);
+        const resolvedIds = affiliationNames
+          .map((name: string) => universities.find(u => u.name === name)?.id)
+          .filter((id: number | undefined) => id && id > 0);
+        if (resolvedIds.length > 0) {
+          setUniversityIds(resolvedIds);
+        } else if (primaryUniId > 0) {
+          setUniversityIds([primaryUniId]);
+        }
         setLocation(data.location || "");
         setWebsite(data.website || "");
         setContactEmail(data.contact_email || "");
@@ -641,8 +650,8 @@ const ProfilePage: React.FC = () => {
         tiktok_url: tiktokUrl,
         youtube_url: youtubeUrl,
         linkedin_url: linkedinUrl,
-        affiliation,
-        university_id: universityId || undefined,
+        affiliation: universityIds.map(id => universities.find(u => u.id === id)?.name || "").filter(Boolean).join(", "),
+        university_id: universityIds[0] || undefined,
         brochure_data: brochureUrl ? { url: brochureUrl } : null,
         logo_url: logoUrl,
         banner_url: bannerUrl,
@@ -1001,11 +1010,45 @@ const ProfilePage: React.FC = () => {
               </div>
               {level.some(l => l === "Bachelor" || l === "Master") ? (
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Affiliated University</label>
-                <select className={inputClass} value={universityId} onChange={(e) => { const id = Number(e.target.value); setUniversityId(id); const uni = universities.find(u => u.id === id); setAffiliation(uni ? uni.name : ""); }}>
-                  <option value={0}>Select University</option>
-                  {universities.map(u => <option key={u.id} value={u.id}>{u.name}</option>)}
-                </select>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Affiliated Universities</label>
+                <div className="border border-gray-300 rounded-md p-2 max-h-40 overflow-y-auto bg-white">
+                  {universities.length === 0 ? (
+                    <p className="text-sm text-gray-400">Loading universities...</p>
+                  ) : (
+                    universities.map(u => (
+                      <label key={u.id} className="flex items-center gap-2 py-1.5 px-2 hover:bg-gray-50 rounded cursor-pointer">
+                        <input
+                          type="checkbox"
+                          className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                          checked={universityIds.includes(u.id)}
+                          onChange={(e) => {
+                            if (e.target.checked) {
+                              setUniversityIds(prev => [...prev, u.id]);
+                            } else {
+                              setUniversityIds(prev => prev.filter(id => id !== u.id));
+                            }
+                          }}
+                        />
+                        <span className="text-sm text-gray-700">{u.name}</span>
+                      </label>
+                    ))
+                  )}
+                </div>
+                {universityIds.length > 0 && (
+                  <div className="flex flex-wrap gap-1.5 mt-2">
+                    {universityIds.map(id => {
+                      const uni = universities.find(u => u.id === id);
+                      return uni ? (
+                        <span key={id} className="inline-flex items-center gap-1 px-2.5 py-1 bg-blue-50 text-blue-700 text-xs font-medium rounded-full">
+                          {uni.name}
+                          <button type="button" onClick={() => setUniversityIds(prev => prev.filter(i => i !== id))} className="hover:text-blue-900">
+                            <i className="fa-solid fa-times text-[10px]"></i>
+                          </button>
+                        </span>
+                      ) : null;
+                    })}
+                  </div>
+                )}
               </div>
               ) : (
               <div>
