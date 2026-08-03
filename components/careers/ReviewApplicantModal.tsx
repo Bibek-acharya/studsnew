@@ -1,10 +1,15 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useMemo } from "react";
 import { JobApplication, careersApi } from "@/services/api";
 import { X, FileText, ExternalLink } from "lucide-react";
 import { toast } from "sonner";
 import JobEmailDialog from "./JobEmailDialog";
+
+interface Note {
+  text: string;
+  timestamp: string;
+}
 
 interface ReviewApplicantModalProps {
   applicant: JobApplication;
@@ -20,12 +25,30 @@ const statusColors: Record<string, string> = {
   reviewed: "bg-purple-100 text-purple-700",
 };
 
+function parseNotes(raw: string | undefined): Note[] {
+  if (!raw) return [];
+  try {
+    const parsed = JSON.parse(raw);
+    if (Array.isArray(parsed)) return parsed;
+    // Legacy single note format
+    if (typeof parsed === "string" && parsed.trim()) {
+      return [{ text: parsed, timestamp: "" }];
+    }
+    return [];
+  } catch {
+    // Legacy plain text note
+    if (raw.trim()) return [{ text: raw, timestamp: "" }];
+    return [];
+  }
+}
+
 export default function ReviewApplicantModal({
   applicant,
   onClose,
   onUpdated,
 }: ReviewApplicantModalProps) {
-  const [notes, setNotes] = useState(applicant.notes || "");
+  const previousNotes = useMemo(() => parseNotes(applicant.notes), [applicant.notes]);
+  const [newNote, setNewNote] = useState("");
   const [saving, setSaving] = useState(false);
   const [emailDialog, setEmailDialog] = useState<{
     open: boolean;
@@ -35,7 +58,7 @@ export default function ReviewApplicantModal({
   const handleStatusUpdate = async (status: string, emailNotes?: string) => {
     setSaving(true);
     try {
-      await careersApi.updateApplicantStatus(applicant.id, status, emailNotes || notes);
+      await careersApi.updateApplicantStatus(applicant.id, status, emailNotes || "");
       toast.success(`Applicant ${status}`);
       onUpdated();
     } catch {
@@ -46,12 +69,20 @@ export default function ReviewApplicantModal({
   };
 
   const handleSaveNotes = async () => {
+    if (!newNote.trim()) return;
     setSaving(true);
     try {
-      await careersApi.updateApplicantNotes(applicant.id, notes);
-      toast.success("Notes saved");
+      const note: Note = {
+        text: newNote.trim(),
+        timestamp: new Date().toISOString(),
+      };
+      const updatedNotes = JSON.stringify([...previousNotes, note]);
+      await careersApi.updateApplicantNotes(applicant.id, updatedNotes);
+      toast.success("Note saved");
+      setNewNote("");
+      onUpdated();
     } catch {
-      toast.error("Failed to save notes");
+      toast.error("Failed to save note");
     } finally {
       setSaving(false);
     }
@@ -87,7 +118,7 @@ export default function ReviewApplicantModal({
   return (
     <>
       <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
-        <div className="bg-white rounded-xl shadow-xl w-full max-w-2xl mx-4 max-h-[90vh] overflow-y-auto">
+        <div className="bg-white rounded-xl shadow-xl w-full max-w-2xl mx-4 max-h-[90vh] flex flex-col">
           <div className="flex items-center justify-between p-6 border-b border-gray-200">
             <h3 className="text-lg font-bold text-gray-900">
               Review Applicant
@@ -100,7 +131,7 @@ export default function ReviewApplicantModal({
             </button>
           </div>
 
-          <div className="p-6 space-y-6">
+          <div className="p-6 space-y-6 overflow-y-auto flex-1 min-h-0">
             <div className="grid grid-cols-2 gap-4">
               <div>
                 <p className="text-xs text-gray-500 uppercase tracking-wide mb-1">
@@ -187,24 +218,40 @@ export default function ReviewApplicantModal({
               <label className="block text-xs text-gray-500 uppercase tracking-wide mb-2">
                 Internal Notes
               </label>
+
+              {previousNotes.length > 0 && (
+                <div className="space-y-2 mb-3 max-h-40 overflow-y-auto">
+                  {previousNotes.map((note, i) => (
+                    <div key={i} className="bg-gray-50 border border-gray-200 rounded-lg p-3">
+                      <p className="text-sm text-gray-700 whitespace-pre-wrap">{note.text}</p>
+                      {note.timestamp && (
+                        <p className="text-xs text-gray-400 mt-1">
+                          {new Date(note.timestamp).toLocaleString()}
+                        </p>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              )}
+
               <textarea
-                value={notes}
-                onChange={(e) => setNotes(e.target.value)}
+                value={newNote}
+                onChange={(e) => setNewNote(e.target.value)}
                 rows={3}
                 className="w-full px-4 py-2.5 border border-gray-200 rounded-lg text-sm focus:border-blue-600 outline-none resize-none"
-                placeholder="Add notes about this applicant..."
+                placeholder="Add a new note..."
               />
               <button
                 onClick={handleSaveNotes}
-                disabled={saving}
-                className="mt-2 px-3 py-1.5 text-xs font-medium text-blue-600 hover:bg-blue-50 rounded transition-colors disabled:opacity-50"
+                disabled={saving || !newNote.trim()}
+                className="mt-2 px-3 py-1.5 text-xs font-medium text-blue-600 hover:bg-blue-50 rounded transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                Save Notes
+                Save Note
               </button>
             </div>
           </div>
 
-          <div className="flex items-center justify-end gap-3 p-6 border-t border-gray-200">
+          <div className="flex items-center justify-end gap-3 p-6 border-t border-gray-200 flex-shrink-0">
             <button
               onClick={onClose}
               className="px-4 py-2 border border-gray-300 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors"

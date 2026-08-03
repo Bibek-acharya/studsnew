@@ -69,7 +69,7 @@ export default function JobEmailDialog({
 
   return (
     <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/50">
-      <div className="bg-white rounded-xl shadow-xl w-full max-w-4xl mx-4 max-h-[90vh] flex flex-col">
+      <div className={`bg-white rounded-xl shadow-xl mx-4 max-h-[90vh] flex flex-col transition-all ${showPreview ? "w-full max-w-4xl" : "w-full max-w-lg"}`}>
         <div className="flex items-center justify-between p-6 border-b border-gray-200 flex-shrink-0">
           <h3 className="text-lg font-bold text-gray-900 flex items-center gap-2">
             <Envelope className="w-5 h-5 text-blue-600" />
