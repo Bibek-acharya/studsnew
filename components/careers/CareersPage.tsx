@@ -43,6 +43,8 @@ export default function CareersPage() {
     });
   }, [jobs, activeDept, search]);
 
+  const hasJobs = !loading && jobs.length > 0;
+
   return (
     <div className="py-4 sm:py-6 lg:py-4 w-full max-w-350 mx-auto flex flex-col gap-10 lg:gap-12 mb-4">
       <section className="bg-brand-blue rounded-md py-16 sm:py-24 px-6 sm:px-6 md:px-8">
@@ -59,44 +61,34 @@ export default function CareersPage() {
       </section>
 
       <section className="px-4 sm:px-6 md:px-8">
-        <div className="flex flex-col sm:flex-row sm:items-center gap-4 mb-8">
-          <div className="relative flex-1 max-w-md">
-            <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
-            <input
-              type="text"
-              placeholder="Search jobs..."
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              className="w-full pl-9 pr-4 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-            />
+        {hasJobs && (
+          <div className="flex flex-col sm:flex-row sm:items-center gap-3 mb-8">
+            <div className="relative flex-1 max-w-md">
+              <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+              <input
+                type="text"
+                placeholder="Search jobs..."
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                className="w-full pl-9 pr-4 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+              />
+            </div>
+            {departments.length > 0 && (
+              <select
+                value={activeDept}
+                onChange={(e) => setActiveDept(e.target.value)}
+                className="px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
+              >
+                <option value="All">All Departments</option>
+                {departments.map((dept) => (
+                  <option key={dept} value={dept}>
+                    {dept}
+                  </option>
+                ))}
+              </select>
+            )}
           </div>
-        </div>
-
-        <div className="flex flex-wrap gap-2 mb-8">
-          <button
-            onClick={() => setActiveDept("All")}
-            className={`px-4 py-1.5 text-xs font-medium rounded-full transition-colors ${
-              activeDept === "All"
-                ? "bg-blue-600 text-white"
-                : "bg-gray-100 text-gray-600 hover:bg-gray-200"
-            }`}
-          >
-            All
-          </button>
-          {departments.map((dept) => (
-            <button
-              key={dept}
-              onClick={() => setActiveDept(dept)}
-              className={`px-4 py-1.5 text-xs font-medium rounded-full transition-colors ${
-                activeDept === dept
-                  ? "bg-blue-600 text-white"
-                  : "bg-gray-100 text-gray-600 hover:bg-gray-200"
-              }`}
-            >
-              {dept}
-            </button>
-          ))}
-        </div>
+        )}
 
         {loading ? (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
