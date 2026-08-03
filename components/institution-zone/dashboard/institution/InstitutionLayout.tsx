@@ -375,9 +375,7 @@ const InstitutionLayout: React.FC<Props> = ({
         }).then((r) => r.json()),
       ]);
       const dash = dashRes?.data || {};
-      const unreadCount =
-        Number(dash.unread_messages || 0) + Number(dash.pending_bookings || 0);
-      setNotifCount(unreadCount);
+      setNotifCount(Number(dash.pending_bookings || 0));
       setMsgCount(Number(dash.unread_messages || 0));
 
       const items: NotificationItem[] = [];

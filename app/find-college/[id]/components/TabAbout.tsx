@@ -1,11 +1,9 @@
 "use client";
 
 import React from "react";
+import { Eye, Target, Landmark, Users } from "lucide-react";
 import {
   AboutVideoInteractive,
-  InfoBlock,
-  OverviewRow,
-  AdminRow,
 } from "./index";
 import EmptyTabState from "./EmptyTabState";
 import RichText from "@/components/RichText";
@@ -54,42 +52,62 @@ const TabAbout: React.FC<TabAboutProps> = ({
 
       <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
         {instVision && (
-          <InfoBlock
-            title="Our Vision"
-            desc={instVision}
-            icon="fa-solid fa-eye"
-            color="blue"
-          />
+          <div className="rounded-md border border-gray-100 bg-[#f4f7fb] p-8">
+            <div className="mb-4 flex items-center gap-3.5">
+              <div className="flex h-10 w-10 items-center justify-center rounded-full bg-blue-100/80 text-blue-600">
+                <Eye className="h-5 w-5" />
+              </div>
+              <h3 className="text-[16px] font-bold text-gray-900">Our Vision</h3>
+            </div>
+            <RichText
+              html={instVision}
+              variant="sm"
+              className="text-[14.5px] leading-[1.7] text-gray-600"
+            />
+          </div>
         )}
         {instMission && (
-          <InfoBlock
-            title="Our Mission"
-            desc={instMission}
-            icon="fa-solid fa-bullseye"
-            color="green"
-          />
+          <div className="rounded-md border border-gray-100 bg-[#f0fdf4] p-8">
+            <div className="mb-4 flex items-center gap-3.5">
+              <div className="flex h-10 w-10 items-center justify-center rounded-full bg-green-100/80 text-green-600">
+                <Target className="h-5 w-5" />
+              </div>
+              <h3 className="text-[16px] font-bold text-gray-900">Our Mission</h3>
+            </div>
+            <RichText
+              html={instMission}
+              variant="sm"
+              className="text-[14.5px] leading-[1.7] text-gray-600"
+            />
+          </div>
         )}
       </div>
 
       {instOverviewData &&
         Array.isArray(instOverviewData) &&
         instOverviewData.length > 0 && (
-          <div className="space-y-6 rounded-md">
-            <h2 className="text-[22px] font-bold text-gray-900">
-              Institution Overview
-            </h2>
-            <div className="overflow-x-auto">
-              <table className="w-full rounded-md border border-gray-200 text-left text-sm">
-                <tbody className="divide-y divide-gray-200 text-gray-600">
-                  {instOverviewData.map((row: any, i: number) => (
-                    <OverviewRow
-                      key={i}
-                      label={row.key || row.label || ""}
-                      value={row.value || ""}
-                    />
-                  ))}
-                </tbody>
-              </table>
+          <div className="overflow-hidden rounded-md border border-gray-100 bg-white">
+            <div className="border-b border-gray-100 bg-[#f8fafc] px-6 py-4">
+              <h3 className="flex items-center gap-2 text-[16px] font-bold text-gray-900">
+                <Landmark className="h-5 w-5 text-blue-600" /> Institution Overview
+              </h3>
+            </div>
+            <div className="divide-y divide-gray-100">
+              {instOverviewData.map((row: any, i: number) => (
+                <div
+                  key={i}
+                  className="flex flex-col p-4 transition-colors hover:bg-gray-50 sm:flex-row"
+                >
+                  <div className="w-full text-[14px] font-semibold text-gray-800 sm:w-1/3">
+                    {row.key || row.label || ""}
+                  </div>
+                  <RichText
+                    html={row.value || ""}
+                    variant="sm"
+                    className="w-full text-[14px] text-gray-600 sm:w-2/3"
+                  />
+                </div>
+              ))}
             </div>
           </div>
         )}
@@ -97,27 +115,32 @@ const TabAbout: React.FC<TabAboutProps> = ({
       {instLeadershipData &&
         Array.isArray(instLeadershipData) &&
         instLeadershipData.length > 0 && (
-          <div className="space-y-6 rounded-md">
-            <h2 className="text-[22px] font-bold text-gray-900">
-              Leadership &amp; Administration
-            </h2>
+          <div className="overflow-hidden rounded-md border border-gray-100 bg-white">
+            <div className="border-b border-gray-100 bg-[#f8fafc] px-6 py-4">
+              <h3 className="flex items-center gap-2 text-[16px] font-bold text-gray-900">
+                <Users className="h-5 w-5 text-blue-600" /> Leadership &amp; Administration
+              </h3>
+            </div>
             <div className="overflow-x-auto">
-              <table className="w-full rounded-md border border-gray-200 text-left text-sm">
-                <thead className="bg-gray-50 text-[13px] font-bold uppercase text-gray-700">
+              <table className="w-full text-left text-[14px] text-gray-600">
+                <thead className="border-b border-gray-100 bg-gray-50/50 text-[13px] uppercase tracking-wider text-gray-800">
                   <tr>
-                    <th className="px-4 py-3">Position</th>
-                    <th className="px-4 py-3">Role</th>
-                    <th className="px-4 py-3">Current Holder</th>
+                    <th className="px-6 py-4 font-bold">Position</th>
+                    <th className="px-6 py-4 font-bold">Role</th>
+                    <th className="px-6 py-4 font-bold">Current Holder</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-gray-200 text-gray-600">
+                <tbody className="divide-y divide-gray-100">
                   {instLeadershipData.map((row: any, i: number) => (
-                    <AdminRow
-                      key={i}
-                      position={row.position || ""}
-                      role={row.role || ""}
-                      holder={row.holder || ""}
-                    />
+                    <tr key={i}>
+                      <td className="px-6 py-4 font-bold text-gray-900">
+                        {row.position || ""}
+                      </td>
+                      <td className="px-6 py-4">{row.role || ""}</td>
+                      <td className="px-6 py-4 font-semibold">
+                        {row.holder || ""}
+                      </td>
+                    </tr>
                   ))}
                 </tbody>
               </table>

@@ -64,6 +64,7 @@ export function useCollegeData(idStr: string) {
   const instAlumni = isInstitution ? college?.alumni_data : null;
   const instGallery = isInstitution ? college?.gallery_data : null;
   const instDownloads = isInstitution ? college?.downloads_data : null;
+  const instFaqs = isInstitution ? college?.faqs_data : null;
   const instInstitutionPrograms = isInstitution
     ? college?.institution_programs
     : null;
@@ -176,6 +177,16 @@ export function useCollegeData(idStr: string) {
     }
     return null;
   }, [instDownloads]);
+
+  const mappedFaqs = useMemo(() => {
+    if (instFaqs && Array.isArray(instFaqs)) {
+      return instFaqs.map((f: any) => ({
+        question: f.question || "",
+        answer: f.answer || "",
+      }));
+    }
+    return null;
+  }, [instFaqs]);
 
   const institutionProgramsFromTable = useMemo(() => {
     if (!instInstitutionPrograms || !Array.isArray(instInstitutionPrograms))
@@ -345,6 +356,7 @@ export function useCollegeData(idStr: string) {
     mappedPrograms,
     mappedFacilities,
     mappedDownloads,
+    mappedFaqs,
     mappedAdmissions,
     mappedEvents,
     mappedNews,

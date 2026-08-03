@@ -20,6 +20,7 @@ import {
   TabReview,
   TabNews,
   TabDownloads,
+  TabFaq,
   InquiryForm,
 } from "./components";
 import { useCollegeData } from "./hooks/useCollegeData";
@@ -264,6 +265,9 @@ const CollegeDetailsPage = ({
           )}
           {activeTab === "download" && (
             <TabDownloads downloads={downloadsData} />
+          )}
+          {activeTab === "faq" && (
+            <TabFaq faqs={data.mappedFaqs || []} />
           )}
         </div>
 

@@ -13,6 +13,7 @@ export const TAB_DEFINITIONS: Array<[TabKey, string]> = [
   ["review", "Review"],
   ["news", "News & Notice"],
   ["download", "Downloads"],
+  ["faq", "FAQs"],
 ];
 
 export const FALLBACK_COURSES: { level: "+2" | "Bachelor" | "Master" | "all"; name: string; specialization: string; duration: string; type: string; fees: string; eligibility: string; seats: string }[] = [];

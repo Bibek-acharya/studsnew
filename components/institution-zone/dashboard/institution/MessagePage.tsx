@@ -113,9 +113,24 @@ const MessagePage = () => {
     }
   }, [activeConv?.messages]);
 
-  const handleSelectConversation = (conv: Conversation) => {
+  const handleSelectConversation = async (conv: Conversation) => {
     setActiveConv(conv);
     loadMessages(conv);
+    if (conv.status === "New") {
+      const token = localStorage.getItem("institutionToken");
+      if (token) {
+        try {
+          await fetch(`${API_BASE_URL}/api/v1/institution/messages/read/${conv.id}`, {
+            method: "PUT",
+            headers: { Authorization: `Bearer ${token}` },
+          });
+          setConversations(prev =>
+            prev.map(c => c.id === conv.id ? { ...c, status: "Read", statusColor: "bg-gray-100 text-gray-600" } : c)
+          );
+          window.dispatchEvent(new Event("institution-data-changed"));
+        } catch { /* skip */ }
+      }
+    }
   };
 
   const handleSendMessage = async () => {

@@ -70,6 +70,11 @@ interface DownloadItem {
   file: string;
   size: string;
 }
+interface FaqCard {
+  id: number;
+  question: string;
+  answer: string;
+}
 
 const formatFileSize = (bytes: number): string => {
   if (bytes === 0) return "0 B";
@@ -166,7 +171,7 @@ const ProfilePage: React.FC = () => {
   const [location, setLocation] = useState("");
   const [level, setLevel] = useState<string[]>([]);
   const toggleLevel = (v: string) => setLevel(prev => prev.includes(v) ? prev.filter(l => l !== v) : [...prev, v]);
-  const levelOptions = ["+2", "Bachelor", "Master", "A Level", "CTEVT"];
+  const levelOptions = ["+2", "A-Level", "TSLC (CTEVT)", "Diploma (CTEVT)", "PCL", "Bachelor's", "Bachelor's (Honours)", "Postgraduate Diploma (PGD)", "Master's", "MPhil", "PhD"];
   const [website, setWebsite] = useState("");
   const [contactEmail, setContactEmail] = useState("");
   const [contactPhone, setContactPhone] = useState("");
@@ -198,7 +203,9 @@ const ProfilePage: React.FC = () => {
   const [settingsLoading, setSettingsLoading] = useState(true);
   const [validationErrors, setValidationErrors] = useState<string[]>([]);
 
-  const [videos, setVideos] = useState<VideoItem[]>([]);
+  const [videos, setVideos] = useState<VideoItem[]>([
+    { id: 1, url: "", message: "", name: "", designation: "", avatar: "" },
+  ]);
   const [overviewRows, setOverviewRows] = useState<OverviewRow[]>([]);
   const [leadershipRows, setLeadershipRows] = useState<LeadershipRow[]>([]);
   const [courses, setCourses] = useState<CourseRow[]>([]);
@@ -214,6 +221,7 @@ const ProfilePage: React.FC = () => {
     imageIndex: number;
   } | null>(null);
   const [downloads, setDownloads] = useState<DownloadItem[]>([]);
+  const [faqs, setFaqs] = useState<FaqCard[]>([]);
 
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [locationFilter, setLocationFilter] = useState("");
@@ -322,15 +330,14 @@ const ProfilePage: React.FC = () => {
         setAbout(data.about || "");
         setVision(data.vision || "");
         setMission(data.mission || "");
-        if (data.videos)
+        if (data.videos && Array.isArray(data.videos) && data.videos.length > 0) {
           setVideos(
-            Array.isArray(data.videos)
-              ? data.videos.map((v: any, i: number) => ({
-                  ...v,
-                  id: v.id || i + 1,
-                }))
-              : [],
+            data.videos.slice(0, 1).map((v: any, i: number) => ({
+              ...v,
+              id: v.id || i + 1,
+            })),
           );
+        }
         if (data.overview_data)
           setOverviewRows(
             Array.isArray(data.overview_data)
@@ -413,6 +420,16 @@ const ProfilePage: React.FC = () => {
               ? data.downloads_data.map((d: any, i: number) => ({
                   ...d,
                   id: d.id || i + 1,
+                }))
+              : [],
+          );
+        if (data.faqs_data)
+          setFaqs(
+            Array.isArray(data.faqs_data)
+              ? data.faqs_data.map((f: any, i: number) => ({
+                  id: f.id || i + 1,
+                  question: f.question || "",
+                  answer: f.answer || "",
                 }))
               : [],
           );
@@ -641,6 +658,7 @@ const ProfilePage: React.FC = () => {
         alumni_data: alumni.map(({ id, ...rest }) => rest),
         gallery_data: galleryGroups,
         downloads_data: downloads.map(({ id, ...rest }) => rest),
+        faqs_data: faqs.map(({ id, ...rest }) => rest),
       };
       await api("/api/v1/institution/profile", {
         method: "PUT",
@@ -753,7 +771,7 @@ const ProfilePage: React.FC = () => {
               Banner
             </h3>
             <div className="grid grid-cols-1 md:grid-cols-8 gap-6">
-              <div className="md:col-span-1">
+              <div className="md:col-span-2">
                 <label className="block text-sm font-medium text-gray-700 mb-2">
                   Organization Logo
                 </label>
@@ -762,11 +780,25 @@ const ProfilePage: React.FC = () => {
                   className="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-gray-300 border-dashed rounded-md hover:border-blue-400 transition cursor-pointer bg-gray-50 relative overflow-hidden h-40"
                 >
                   {logoUrl ? (
-                    <img
-                      src={logoUrl}
-                      className="absolute inset-0 w-full h-full object-contain p-2"
-                      alt="Logo"
-                    />
+                    <>
+                      <img
+                        src={logoUrl}
+                        className="absolute inset-0 w-full h-full object-contain p-2"
+                        alt="Logo"
+                      />
+                      <button
+                        type="button"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setLogoUrl("");
+                          setLogoFile(null);
+                          if (logoInputRef.current) logoInputRef.current.value = "";
+                        }}
+                        className="absolute top-2 right-2 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center hover:bg-red-600 transition-colors z-10"
+                      >
+                        <i className="fa-solid fa-times text-xs"></i>
+                      </button>
+                    </>
                   ) : (
                     <div className="space-y-1 text-center self-center">
                       <i className="fa-regular fa-building text-4xl text-gray-400"></i>
@@ -795,7 +827,7 @@ const ProfilePage: React.FC = () => {
                   />
                 </div>
               </div>
-              <div className="md:col-span-7">
+              <div className="md:col-span-6">
                 <label className="block text-sm font-medium text-gray-700 mb-2">
                   Banner / Cover Image
                 </label>
@@ -804,11 +836,25 @@ const ProfilePage: React.FC = () => {
                   className="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-gray-300 border-dashed rounded-md hover:border-blue-400 transition cursor-pointer bg-gray-50 relative overflow-hidden h-40"
                 >
                   {bannerUrl ? (
-                    <img
-                      src={bannerUrl}
-                      className="absolute inset-0 w-full h-full object-cover"
-                      alt="Banner"
-                    />
+                    <>
+                      <img
+                        src={bannerUrl}
+                        className="absolute inset-0 w-full h-full object-cover"
+                        alt="Banner"
+                      />
+                      <button
+                        type="button"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setBannerUrl("");
+                          setBannerFile(null);
+                          if (bannerInputRef.current) bannerInputRef.current.value = "";
+                        }}
+                        className="absolute top-2 right-2 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center hover:bg-red-600 transition-colors z-10"
+                      >
+                        <i className="fa-solid fa-times text-xs"></i>
+                      </button>
+                    </>
                   ) : (
                     <div className="space-y-1 text-center self-center">
                       <i className="fa-regular fa-image text-4xl text-gray-400"></i>
@@ -817,6 +863,9 @@ const ProfilePage: React.FC = () => {
                           Upload banner
                         </span>
                       </div>
+                      <p className="text-xs text-gray-500 mt-1">
+                        Recommended size: 1920 × 360 pixels
+                      </p>
                     </div>
                   )}
                   <input
@@ -1056,41 +1105,15 @@ const ProfilePage: React.FC = () => {
             </h3>
 
             <div className="mb-8">
-              <div className="flex justify-between items-center mb-3">
-                <label className="block text-sm font-medium text-gray-700 mb-0">
-                  Video Links (Max 4)
-                </label>
-                <button
-                  type="button"
-                  onClick={() =>
-                    videos.length < 4 &&
-                    addItem(setVideos, {
-                      url: "",
-                      message: "",
-                      name: "",
-                      designation: "",
-                      avatar: "",
-                    })
-                  }
-                  className={`text-sm px-3 py-1.5 rounded-md font-medium ${videos.length >= 4 ? "text-gray-400 bg-gray-100 cursor-not-allowed" : "text-blue-600 bg-blue-50 hover:bg-blue-100"}`}
-                >
-                  <i className="fa-solid fa-plus mr-1"></i> Add Video
-                </button>
-              </div>
-              <div className="space-y-3">
-                {videos.map((v) => (
-                  <div
-                    key={v.id}
-                    className="bg-gray-50 border border-gray-200 rounded-md p-4 relative group"
-                  >
-                    <button
-                      type="button"
-                      onClick={() => removeItem(setVideos, v.id)}
-                      className="absolute top-3 right-3 text-red-400 hover:text-red-600 hover:bg-red-50 p-1.5 rounded-md transition-colors opacity-0 group-hover:opacity-100 z-10"
-                    >
-                      <i className="fa-solid fa-trash"></i>
-                    </button>
-                    <div className="space-y-3 pr-10">
+              <label className="block text-sm font-medium text-gray-700 mb-3">
+                Video Link
+              </label>
+              {(() => {
+                const v = videos[0];
+                if (!v) return <p className="text-sm text-gray-400 py-2">Loading...</p>;
+                return (
+                  <div className="bg-gray-50 border border-gray-200 rounded-md p-4">
+                    <div className="space-y-3">
                       <div className="flex items-center gap-3">
                         <div className="w-12 h-12 rounded-full bg-gray-200 overflow-hidden flex items-center justify-center border-2 border-gray-300 flex-shrink-0">
                           {v.avatar ? (
@@ -1176,11 +1199,8 @@ const ProfilePage: React.FC = () => {
                       </div>
                     </div>
                   </div>
-                ))}
-                {videos.length === 0 && (
-                  <p className="text-sm text-gray-400 py-2">No videos added.</p>
-                )}
-              </div>
+                );
+              })()}
             </div>
 
             <div className="mb-8">
@@ -2016,6 +2036,76 @@ const ProfilePage: React.FC = () => {
               {downloads.length === 0 && (
                 <p className="text-sm text-gray-400 py-4 text-center">
                   No documents added.
+                </p>
+              )}
+            </div>
+          </div>
+
+          {/* ─── FAQs ─── */}
+          <div className="bg-white p-6 rounded-md border border-gray-200">
+            <div className="flex justify-between items-center mb-5">
+              <h3 className="text-lg font-semibold text-gray-800">
+                <i className="fa-solid fa-circle-question text-blue-500 mr-2"></i>
+                FAQs
+              </h3>
+              <button
+                type="button"
+                onClick={() =>
+                  addItem(setFaqs, { question: "", answer: "" })
+                }
+                className="text-sm text-blue-600 bg-blue-50 px-3 py-1.5 rounded-md hover:bg-blue-100 transition-colors font-medium"
+              >
+                <i className="fa-solid fa-plus mr-1"></i> Add Question
+              </button>
+            </div>
+            <div className="space-y-4">
+              {faqs.map((f) => (
+                <div
+                  key={f.id}
+                  className="p-5 bg-gray-50 border border-gray-200 rounded-md relative group"
+                >
+                  <button
+                    type="button"
+                    onClick={() => removeItem(setFaqs, f.id)}
+                    className="absolute top-3 right-3 text-red-400 hover:text-red-600 hover:bg-red-50 p-1.5 rounded-md transition-colors opacity-0 group-hover:opacity-100"
+                  >
+                    <i className="fa-solid fa-trash"></i>
+                  </button>
+                  <div className="space-y-3 pr-10">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1.5">
+                        Question <span className="text-red-500">*</span>
+                      </label>
+                      <input
+                        type="text"
+                        className={inputClass}
+                        placeholder="e.g. What are the admission requirements?"
+                        value={f.question}
+                        onChange={(e) =>
+                          updateItem(setFaqs, f.id, "question", e.target.value)
+                        }
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1.5">
+                        Answer <span className="text-red-500">*</span>
+                      </label>
+                      <textarea
+                        className={`${inputClass} min-h-[60px]`}
+                        rows={2}
+                        placeholder="Answer description..."
+                        value={f.answer}
+                        onChange={(e) =>
+                          updateItem(setFaqs, f.id, "answer", e.target.value)
+                        }
+                      />
+                    </div>
+                  </div>
+                </div>
+              ))}
+              {faqs.length === 0 && (
+                <p className="text-sm text-gray-400 py-4 text-center">
+                  No FAQs added.
                 </p>
               )}
             </div>

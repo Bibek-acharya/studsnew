@@ -22,4 +22,5 @@ export { default as TabGallery } from "./TabGallery";
 export { default as TabReview } from "./TabReview";
 export { default as TabNews } from "./TabNews";
 export { default as TabDownloads } from "./TabDownloads";
+export { default as TabFaq } from "./TabFaq";
 export { default as InquiryForm } from "./InquiryForm";

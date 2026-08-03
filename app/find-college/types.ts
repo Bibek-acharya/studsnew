@@ -14,7 +14,8 @@ export type TabKey =
   | "gallery"
   | "review"
   | "news"
-  | "download";
+  | "download"
+  | "faq";
 
 export type LevelFilter = "all" | "+2" | "Bachelor" | "Master";
 
