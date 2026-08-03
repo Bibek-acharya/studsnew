@@ -45,6 +45,18 @@ export default function ReviewApplicantModal({
     }
   };
 
+  const handleSaveNotes = async () => {
+    setSaving(true);
+    try {
+      await careersApi.updateApplicantNotes(applicant.id, notes);
+      toast.success("Notes saved");
+    } catch {
+      toast.error("Failed to save notes");
+    } finally {
+      setSaving(false);
+    }
+  };
+
   const handleShortlist = () => {
     setEmailDialog({ open: true, action: "shortlist" });
   };
@@ -183,7 +195,7 @@ export default function ReviewApplicantModal({
                 placeholder="Add notes about this applicant..."
               />
               <button
-                onClick={() => handleStatusUpdate(applicant.status)}
+                onClick={handleSaveNotes}
                 disabled={saving}
                 className="mt-2 px-3 py-1.5 text-xs font-medium text-blue-600 hover:bg-blue-50 rounded transition-colors disabled:opacity-50"
               >

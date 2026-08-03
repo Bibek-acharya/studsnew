@@ -69,8 +69,8 @@ export default function JobEmailDialog({
 
   return (
     <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/50">
-      <div className="bg-white rounded-xl shadow-xl w-full max-w-lg mx-4">
-        <div className="flex items-center justify-between p-6 border-b border-gray-200">
+      <div className="bg-white rounded-xl shadow-xl w-full max-w-4xl mx-4 max-h-[90vh] flex flex-col">
+        <div className="flex items-center justify-between p-6 border-b border-gray-200 flex-shrink-0">
           <h3 className="text-lg font-bold text-gray-900 flex items-center gap-2">
             <Envelope className="w-5 h-5 text-blue-600" />
             Send Email
@@ -83,87 +83,103 @@ export default function JobEmailDialog({
           </button>
         </div>
 
-        <div className="p-6 space-y-4">
-          <div className="flex items-center gap-2 text-sm text-gray-600">
-            <span className="font-medium">To:</span>
-            {applicantName} &lt;{applicantEmail}&gt;
+        <div className="flex flex-1 min-h-0 overflow-hidden">
+          {/* Left: Form */}
+          <div className={`p-6 space-y-4 overflow-y-auto ${showPreview ? "w-1/2 border-r border-gray-200" : "w-full"}`}>
+            <div className="flex items-center gap-2 text-sm text-gray-600">
+              <span className="font-medium">To:</span>
+              {applicantName} &lt;{applicantEmail}&gt;
+            </div>
+
+            <div className="flex items-center gap-3">
+              <button
+                onClick={applyTemplate}
+                className={`flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-lg transition-colors ${
+                  useTemplate
+                    ? "bg-blue-100 text-blue-700"
+                    : "bg-gray-100 text-gray-600 hover:bg-gray-200"
+                }`}
+              >
+                <Lightning className="w-3.5 h-3.5" />
+                Use Template
+              </button>
+              <button
+                onClick={() => {
+                  setUseTemplate(false);
+                  setSubject("");
+                  setBody("");
+                }}
+                className={`px-3 py-1.5 text-xs font-medium rounded-lg transition-colors ${
+                  !useTemplate
+                    ? "bg-blue-100 text-blue-700"
+                    : "bg-gray-100 text-gray-600 hover:bg-gray-200"
+                }`}
+              >
+                Write Manually
+              </button>
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1.5">
+                Subject
+              </label>
+              <input
+                type="text"
+                value={subject}
+                onChange={(e) => setSubject(e.target.value)}
+                className="w-full px-4 py-2.5 border border-gray-200 rounded-lg text-sm focus:border-blue-600 outline-none"
+                placeholder="Email subject..."
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1.5">
+                Body
+              </label>
+              <textarea
+                value={body}
+                onChange={(e) => setBody(e.target.value)}
+                rows={showPreview ? 10 : 6}
+                className="w-full px-4 py-2.5 border border-gray-200 rounded-lg text-sm focus:border-blue-600 outline-none resize-none"
+                placeholder="Email body..."
+              />
+            </div>
+
+            {!showPreview && (
+              <button
+                onClick={() => setShowPreview(true)}
+                className="text-xs text-blue-600 hover:underline"
+              >
+                Show Preview
+              </button>
+            )}
           </div>
 
-          <div className="flex items-center gap-3">
-            <button
-              onClick={applyTemplate}
-              className={`flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-lg transition-colors ${
-                useTemplate
-                  ? "bg-blue-100 text-blue-700"
-                  : "bg-gray-100 text-gray-600 hover:bg-gray-200"
-              }`}
-            >
-              <Lightning className="w-3.5 h-3.5" />
-              Use Template
-            </button>
-            <button
-              onClick={() => {
-                setUseTemplate(false);
-                setSubject("");
-                setBody("");
-              }}
-              className={`px-3 py-1.5 text-xs font-medium rounded-lg transition-colors ${
-                !useTemplate
-                  ? "bg-blue-100 text-blue-700"
-                  : "bg-gray-100 text-gray-600 hover:bg-gray-200"
-              }`}
-            >
-              Write Manually
-            </button>
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1.5">
-              Subject
-            </label>
-            <input
-              type="text"
-              value={subject}
-              onChange={(e) => setSubject(e.target.value)}
-              className="w-full px-4 py-2.5 border border-gray-200 rounded-lg text-sm focus:border-blue-600 outline-none"
-              placeholder="Email subject..."
-            />
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1.5">
-              Body
-            </label>
-            <textarea
-              value={body}
-              onChange={(e) => setBody(e.target.value)}
-              rows={6}
-              className="w-full px-4 py-2.5 border border-gray-200 rounded-lg text-sm focus:border-blue-600 outline-none resize-none"
-              placeholder="Email body..."
-            />
-          </div>
-
-          <button
-            onClick={() => setShowPreview(!showPreview)}
-            className="text-xs text-blue-600 hover:underline"
-          >
-            {showPreview ? "Hide Preview" : "Show Preview"}
-          </button>
-
+          {/* Right: Preview */}
           {showPreview && (
-            <div className="border border-gray-200 rounded-lg p-4 bg-gray-50">
-              <p className="text-xs text-gray-500 mb-2 font-medium">Preview</p>
-              <p className="text-sm font-medium text-gray-900 mb-2">
-                Subject: {subject}
-              </p>
-              <div className="text-sm text-gray-700 whitespace-pre-wrap">
-                {body}
+            <div className="w-1/2 flex flex-col">
+              <div className="px-6 py-3 border-b border-gray-200 flex items-center justify-between flex-shrink-0">
+                <p className="text-xs text-gray-500 font-medium">Preview</p>
+                <button
+                  onClick={() => setShowPreview(false)}
+                  className="text-xs text-gray-400 hover:text-gray-600"
+                >
+                  Hide
+                </button>
+              </div>
+              <div className="flex-1 overflow-y-auto p-6 bg-gray-50">
+                <p className="text-sm font-medium text-gray-900 mb-3">
+                  Subject: {subject}
+                </p>
+                <div className="text-sm text-gray-700 whitespace-pre-wrap leading-relaxed">
+                  {body}
+                </div>
               </div>
             </div>
           )}
         </div>
 
-        <div className="flex items-center justify-end gap-3 p-6 border-t border-gray-200">
+        <div className="flex items-center justify-end gap-3 p-6 border-t border-gray-200 flex-shrink-0">
           <button
             onClick={onCancel}
             className="px-4 py-2 border border-gray-300 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors"

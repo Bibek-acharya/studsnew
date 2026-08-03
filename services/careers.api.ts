@@ -123,6 +123,17 @@ export const careersApi = {
       }
     );
   },
+  updateApplicantNotes: (id: number, notes: string) => {
+    const token = localStorage.getItem("superadmin_token");
+    return apiRequest<{ success: boolean; data: JobApplication }>(
+      `/api/v1/superadmin/jobs/applicants/${id}/notes`,
+      {
+        method: "PUT",
+        headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" },
+        body: JSON.stringify({ notes }),
+      }
+    );
+  },
   sendApplicantEmail: (id: number, subject: string, body: string, updateStatus?: string) => {
     const token = localStorage.getItem("superadmin_token");
     return apiRequest<{ success: boolean }>(
