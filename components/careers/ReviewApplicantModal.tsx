@@ -258,20 +258,42 @@ export default function ReviewApplicantModal({
             >
               Close
             </button>
-            <button
-              onClick={handleReject}
-              disabled={saving}
-              className="px-4 py-2 bg-red-600 text-white rounded-lg text-sm font-medium hover:bg-red-700 transition-colors disabled:opacity-50"
-            >
-              Reject
-            </button>
-            <button
-              onClick={handleShortlist}
-              disabled={saving}
-              className="px-4 py-2 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-700 transition-colors disabled:opacity-50"
-            >
-              Shortlist
-            </button>
+            {applicant.status === "pending" && (
+              <>
+                <button
+                  onClick={handleReject}
+                  disabled={saving}
+                  className="px-4 py-2 bg-red-600 text-white rounded-lg text-sm font-medium hover:bg-red-700 transition-colors disabled:opacity-50"
+                >
+                  Reject
+                </button>
+                <button
+                  onClick={handleShortlist}
+                  disabled={saving}
+                  className="px-4 py-2 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-700 transition-colors disabled:opacity-50"
+                >
+                  Shortlist
+                </button>
+              </>
+            )}
+            {applicant.status === "shortlisted" && (
+              <button
+                onClick={() => handleStatusUpdate("pending")}
+                disabled={saving}
+                className="px-4 py-2 bg-gray-600 text-white rounded-lg text-sm font-medium hover:bg-gray-700 transition-colors disabled:opacity-50"
+              >
+                Undo Shortlist
+              </button>
+            )}
+            {applicant.status === "rejected" && (
+              <button
+                onClick={() => handleStatusUpdate("pending")}
+                disabled={saving}
+                className="px-4 py-2 bg-gray-600 text-white rounded-lg text-sm font-medium hover:bg-gray-700 transition-colors disabled:opacity-50"
+              >
+                Undo Reject
+              </button>
+            )}
           </div>
         </div>
       </div>

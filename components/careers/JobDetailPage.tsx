@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useParams } from "next/navigation";
 import { ArrowLeft, MapPin, Clock, DollarSign, Calendar } from "lucide-react";
 import { careersApi, Job } from "@/services/api";
+import RichText from "@/components/RichText";
 import ApplicationModal from "./ApplicationModal";
 
 export default function JobDetailPage() {
@@ -104,15 +105,21 @@ export default function JobDetailPage() {
           )}
         </div>
 
-        <div className="prose prose-sm max-w-none mb-8">
+        <div className="mb-8">
           <h2 className="text-lg font-bold text-gray-900 mb-3">Description</h2>
-          <div dangerouslySetInnerHTML={{ __html: job.description }} />
+          <RichText
+            html={job.description}
+            className="space-y-4 text-[14px] leading-[1.8] text-gray-600 md:text-[15px]"
+          />
         </div>
 
         {job.requirements && (
-          <div className="prose prose-sm max-w-none mb-8">
+          <div className="mb-8">
             <h2 className="text-lg font-bold text-gray-900 mb-3">Requirements</h2>
-            <div dangerouslySetInnerHTML={{ __html: job.requirements }} />
+            <RichText
+              html={job.requirements}
+              className="space-y-4 text-[14px] leading-[1.8] text-gray-600 md:text-[15px]"
+            />
           </div>
         )}
 
