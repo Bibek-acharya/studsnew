@@ -1,5 +1,5 @@
 "use client";
-import React, { useState, useRef, useEffect, useCallback } from "react";
+import React, { useState, useRef, useEffect, useCallback, useMemo } from "react";
 import { useRouter } from "next/navigation";
 import { Plus, Trash } from "@phosphor-icons/react";
 import RichTextEditor from "@/components/ScholarshipProvider/common/RichTextEditor";
@@ -83,84 +83,9 @@ const formatFileSize = (bytes: number): string => {
   return `${(bytes / Math.pow(1024, i)).toFixed(1)} ${units[i]}`;
 };
 
-const DISTRICTS = [
-  "Achham",
-  "Arghakhanchi",
-  "Baglung",
-  "Baitadi",
-  "Bajhang",
-  "Bajura",
-  "Banke",
-  "Bara",
-  "Bardiya",
-  "Bhaktapur",
-  "Bhojpur",
-  "Chitwan",
-  "Dadeldhura",
-  "Dailekh",
-  "Dang",
-  "Darchula",
-  "Dhading",
-  "Dhankuta",
-  "Dhanusha",
-  "Dolakha",
-  "Dolpa",
-  "Doti",
-  "Gorkha",
-  "Gulmi",
-  "Humla",
-  "Ilam",
-  "Jajarkot",
-  "Jhapa",
-  "Jumla",
-  "Kailali",
-  "Kalikot",
-  "Kanchanpur",
-  "Kapilvastu",
-  "Kaski",
-  "Kathmandu",
-  "Kavrepalanchok",
-  "Khotang",
-  "Lalitpur",
-  "Lamjung",
-  "Mahottari",
-  "Makwanpur",
-  "Manang",
-  "Morang",
-  "Mugu",
-  "Mustang",
-  "Myagdi",
-  "Nawalpur",
-  "Nuwakot",
-  "Okhaldhunga",
-  "Palpa",
-  "Panchthar",
-  "Parbat",
-  "Parsa",
-  "Pyuthan",
-  "Ramechhap",
-  "Rasuwa",
-  "Rautahat",
-  "Rolpa",
-  "Rukum East",
-  "Rukum West",
-  "Rupandehi",
-  "Salyan",
-  "Sankhuwasabha",
-  "Saptari",
-  "Sarlahi",
-  "Sindhuli",
-  "Sindhupalchok",
-  "Siraha",
-  "Solukhumbu",
-  "Sunsari",
-  "Surkhet",
-  "Syangja",
-  "Tanahun",
-  "Taplejung",
-  "Terhathum",
-  "Udayapur",
-];
+import { NEPAL_DISTRICTS } from "@/lib/location-data";
+
+const DISTRICTS = Object.values(NEPAL_DISTRICTS).flat().sort();
 
 const inputClass =
   "w-full px-3 py-2 border border-gray-300 rounded-md focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none transition-colors";
@@ -194,11 +119,11 @@ const ProfilePage: React.FC = () => {
   const [bannerFile, setBannerFile] = useState<File | null>(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
-  const [publishing, setPublishing] = useState(false);
   const [saved, setSaved] = useState(false);
   const [profileStatus, setProfileStatus] = useState<"draft" | "published">(
     "draft",
   );
+  const [initialSnapshot, setInitialSnapshot] = useState<string>("");
   const [publicProfile, setPublicProfile] = useState(true);
   const [settingsLoading, setSettingsLoading] = useState(true);
   const [validationErrors, setValidationErrors] = useState<string[]>([]);
@@ -234,6 +159,24 @@ const ProfilePage: React.FC = () => {
   const filteredDistricts = DISTRICTS.filter((d) =>
     d.toLowerCase().includes(locationFilter.toLowerCase()),
   );
+
+  const isDirty = useMemo(() => {
+    if (!initialSnapshot) return false;
+    const current = JSON.stringify({
+      collegeName, location, level, website, contactEmail, contactPhone,
+      mapUrl, facebookUrl, instagramUrl, tiktokUrl, youtubeUrl, linkedinUrl,
+      affiliation, universityIds, brochureUrl, about, vision, mission,
+      logoUrl, bannerUrl, videos, overviewRows, leadershipRows, courses,
+      programs, facilities, alumni, galleryGroups, downloads, faqs,
+    });
+    return initialSnapshot !== current;
+  }, [
+    collegeName, location, level, website, contactEmail, contactPhone,
+    mapUrl, facebookUrl, instagramUrl, tiktokUrl, youtubeUrl, linkedinUrl,
+    affiliation, universityIds, brochureUrl, about, vision, mission,
+    logoUrl, bannerUrl, videos, overviewRows, leadershipRows, courses,
+    programs, facilities, alumni, galleryGroups, downloads, faqs,
+  ]);
 
   useEffect(() => {
     const handleClick = (e: MouseEvent) => {
@@ -443,6 +386,38 @@ const ProfilePage: React.FC = () => {
               : [],
           );
       }
+      const snapshotData = {
+        institution_name: data.institution_name || "",
+        location: data.location || "",
+        level: data.level || "",
+        website: data.website || "",
+        contact_email: data.contact_email || "",
+        contact_phone: data.contact_phone || "",
+        map_url: data.map_url || "",
+        facebook_url: data.facebook_url || "",
+        instagram_url: data.instagram_url || "",
+        tiktok_url: data.tiktok_url || "",
+        youtube_url: data.youtube_url || "",
+        linkedin_url: data.linkedin_url || "",
+        affiliation: data.affiliation || "",
+        logo_url: data.logo_url || "",
+        banner_url: data.banner_url || "",
+        about: data.about || "",
+        vision: data.vision || "",
+        mission: data.mission || "",
+        brochure_url: data.brochure_data?.url || "",
+        videos: data.videos || [],
+        overview_data: data.overview_data || [],
+        leadership_data: data.leadership_data || [],
+        courses_data: data.courses_data || [],
+        programs_data: data.programs_data || [],
+        facilities_data: data.facilities_data || [],
+        alumni_data: data.alumni_data || [],
+        gallery_data: data.gallery_data || [],
+        downloads_data: data.downloads_data || [],
+        faqs_data: data.faqs_data || [],
+      };
+      setInitialSnapshot(JSON.stringify(snapshotData));
     } catch (e) {
       console.error("Failed to load profile:", e);
     } finally {
@@ -634,8 +609,7 @@ const ProfilePage: React.FC = () => {
     setLinkedinErrors({});
     setValidationErrors([]);
     try {
-      if (status === "published") setPublishing(true);
-      else setSaving(true);
+      setSaving(true);
       const body = {
         status,
         institution_name: collegeName,
@@ -680,7 +654,6 @@ const ProfilePage: React.FC = () => {
       console.error("Failed to save profile:", e);
     } finally {
       setSaving(false);
-      setPublishing(false);
     }
   };
 
@@ -701,55 +674,13 @@ const ProfilePage: React.FC = () => {
         }}
       >
         <div className="max-w-[90rem] mx-auto space-y-8">
-          <div className="flex items-center justify-between">
-            <div>
-              <h2 className="text-xl font-bold text-gray-800">
-                Manage Profile
-              </h2>
-              <p className="text-sm text-gray-500 mt-1">
-                Update your institution profile information below.
-              </p>
-            </div>
-            <div className="flex items-center gap-4">
-              {profileStatus === "draft" ? (
-                <div className="flex items-center gap-3">
-                  <span className="inline-flex items-center gap-1.5 rounded-full bg-amber-100 px-3 py-1 text-xs font-semibold text-amber-700">
-                    <span className="h-2 w-2 rounded-full bg-amber-500" /> Draft
-                  </span>
-                  <button
-                    type="button"
-                    onClick={() => saveProfile("draft")}
-                    disabled={saving}
-                    className="px-4 py-2 border border-gray-300 rounded-md text-sm font-medium hover:bg-gray-50 disabled:opacity-50"
-                  >
-                    {saving ? "Saving..." : "Save Draft"}
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => saveProfile("published")}
-                    disabled={publishing}
-                    className="px-4 py-2 bg-green-600 text-white rounded-md text-sm font-medium hover:bg-green-700 disabled:opacity-50"
-                  >
-                    {publishing ? "Publishing..." : "Publish"}
-                  </button>
-                </div>
-              ) : (
-                <div className="flex items-center gap-3">
-                  <span className="inline-flex items-center gap-1.5 rounded-full bg-green-100 px-3 py-1 text-xs font-semibold text-green-700">
-                    <span className="h-2 w-2 rounded-full bg-green-500" />{" "}
-                    Published
-                  </span>
-                  <button
-                    type="button"
-                    onClick={() => saveProfile("draft")}
-                    disabled={saving}
-                    className="px-4 py-2 border border-red-300 text-red-600 rounded-md text-sm font-medium hover:bg-red-50 disabled:opacity-50"
-                  >
-                    Unpublish
-                  </button>
-                </div>
-              )}
-            </div>
+          <div>
+            <h2 className="text-xl font-bold text-gray-800">
+              Manage Profile
+            </h2>
+            <p className="text-sm text-gray-500 mt-1">
+              Update your institution profile information below.
+            </p>
           </div>
 
           {validationErrors.length > 0 && (
@@ -2214,29 +2145,41 @@ const ProfilePage: React.FC = () => {
           </div>
 
           {/* ─── Footer ─── */}
-          <div className="flex items-center justify-end space-x-4 pt-6 mt-8 border-t border-gray-200 pb-10">
-            <button
-              type="button"
-              className="px-6 py-2.5 bg-white border border-gray-300 rounded-md text-gray-700 font-medium hover:bg-gray-50 transition"
-            >
-              Cancel
-            </button>
-            <button
-              type="button"
-              className="px-6 py-2.5 bg-white border border-gray-300 rounded-md text-gray-700 font-medium hover:bg-gray-50 transition"
-            >
-              Save Draft
-            </button>
-            <button
-              type="submit"
-              disabled={saving}
-              className="px-6 py-2.5 bg-blue-600 text-white rounded-md font-medium hover:bg-blue-700 transition flex items-center gap-2 disabled:opacity-50"
-            >
-              <i
-                className={`fa-solid ${saving ? "fa-spinner fa-spin" : "fa-check"}`}
-              ></i>
-              {saving ? "Saving..." : "Publish Profile"}
-            </button>
+          <div className="border-t border-gray-200 pt-6 pb-10 flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              {profileStatus === "draft" ? (
+                <span className="inline-flex items-center gap-1.5 rounded-full bg-amber-100 px-3 py-1 text-xs font-semibold text-amber-700">
+                  <span className="h-2 w-2 rounded-full bg-amber-500" /> Draft
+                </span>
+              ) : (
+                <span className="inline-flex items-center gap-1.5 rounded-full bg-green-100 px-3 py-1 text-xs font-semibold text-green-700">
+                  <span className="h-2 w-2 rounded-full bg-green-500" /> Published
+                </span>
+              )}
+              <button
+                type="button"
+                onClick={() => saveProfile(profileStatus === "draft" ? "published" : "draft")}
+                disabled={saving}
+                className={`px-4 py-2 rounded-md text-sm font-medium transition disabled:opacity-50 ${
+                  profileStatus === "draft"
+                    ? "bg-green-600 text-white hover:bg-green-700"
+                    : "border border-red-300 text-red-600 hover:bg-red-50"
+                }`}
+              >
+                {saving ? "Saving..." : profileStatus === "draft" ? "Publish" : "Unpublish"}
+              </button>
+            </div>
+            {isDirty && (
+              <button
+                type="button"
+                onClick={() => saveProfile(profileStatus)}
+                disabled={saving}
+                className="px-5 py-2.5 bg-blue-600 text-white rounded-md text-sm font-medium hover:bg-blue-700 disabled:opacity-50 transition flex items-center gap-2"
+              >
+                <i className={`fa-solid ${saving ? "fa-spinner fa-spin" : "fa-check"}`}></i>
+                {saving ? "Saving..." : "Save Changes"}
+              </button>
+            )}
           </div>
         </div>
       </form>
