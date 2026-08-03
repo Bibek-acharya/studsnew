@@ -1,102 +1,120 @@
 "use client";
 
-import React from "react";
+import React, { useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
-import RichText from "@/components/RichText";
 import EmptyTabState from "./EmptyTabState";
 
 interface TabEventsProps {
   events: any[];
-  page: number;
-  onPageChange: (page: number) => void;
 }
 
-const ITEMS_PER_PAGE = 9;
-
-const TabEvents: React.FC<TabEventsProps> = ({
-  events,
-  page,
-  onPageChange,
-}) => {
+const TabEvents: React.FC<TabEventsProps> = ({ events }) => {
   const router = useRouter();
+  const [category, setCategory] = useState("all");
+  const [page, setPage] = useState(1);
+  const PER_PAGE = 8;
+
+  const categories = useMemo(() => {
+    const cats = new Set<string>();
+    events.forEach((e) => {
+      if (e.tag || e.category) cats.add(e.tag || e.category);
+    });
+    return Array.from(cats).sort();
+  }, [events]);
+
+  const filtered = useMemo(() => {
+    return events.filter((e) => {
+      if (category !== "all" && (e.tag || e.category) !== category) return false;
+      return true;
+    });
+  }, [events, category]);
+
+  const totalPages = Math.ceil(filtered.length / PER_PAGE);
+  const paginated = filtered.slice((page - 1) * PER_PAGE, page * PER_PAGE);
 
   if (events.length === 0) return <EmptyTabState tabName="events" />;
-
-  const paginated = events.slice(
-    (page - 1) * ITEMS_PER_PAGE,
-    page * ITEMS_PER_PAGE,
-  );
-  const totalPages = Math.ceil(events.length / ITEMS_PER_PAGE);
 
   return (
     <div>
       <div className="mb-6">
-        <h2 className="text-[20px] font-bold text-gray-900">
-          Events &amp; Activities
-        </h2>
-        <p className="mt-1 text-[14px] text-gray-500">
-          Happening around the campus – join the vibe.
-        </p>
+        <h2 className="text-[20px] font-bold text-gray-900">Events</h2>
+        <p className="mt-1 text-[14px] text-gray-500">Upcoming events and activities.</p>
       </div>
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {paginated.map((event) => (
-          <article
-            key={event.id || event.title}
-            className="bg-white rounded-md border border-gray-200 hover:border-blue-500/20 overflow-hidden flex flex-col duration-300 cursor-pointer"
+
+      {categories.length > 0 && (
+        <div className="mb-6 flex flex-wrap gap-2">
+          <button
+            onClick={() => { setCategory("all"); setPage(1); }}
+            className={`px-4 py-2 rounded-md text-sm font-medium transition ${category === "all" ? "bg-brand-blue text-white" : "bg-gray-100 text-gray-600 hover:bg-gray-200"}`}
           >
-            <div className="h-35 w-full overflow-hidden p-4 bg-brand-blue rounded-md">
-              {event.image ? (
-                <img
-                  src={event.image}
-                  alt={event.title}
-                  className="w-full h-full object-cover rounded-md"
-                />
-              ) : null}
-            </div>
-            <div className="p-5 flex flex-col grow">
-              <div className="flex justify-between items-center mb-3">
-                <span className="bg-blue-500 text-white text-[10px] font-bold px-2 py-1 rounded-full uppercase tracking-wider">
-                  Event
-                </span>
-                <span className="flex items-center text-xs text-gray-500 font-semibold">
-                  <i className="fa-regular fa-calendar mr-1.5"></i>{" "}
-                  {event.date.split(" | ")[0]}
-                </span>
+            All
+          </button>
+          {categories.map((cat) => (
+            <button
+              key={cat}
+              onClick={() => { setCategory(cat); setPage(1); }}
+              className={`px-4 py-2 rounded-md text-sm font-medium transition ${category === cat ? "bg-brand-blue text-white" : "bg-gray-100 text-gray-600 hover:bg-gray-200"}`}
+            >
+              {cat}
+            </button>
+          ))}
+        </div>
+      )}
+
+      {paginated.length > 0 ? (
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          {paginated.map((event: any) => {
+            const dateStr = event.date ? event.date.split(" | ")[0] : "";
+            const location = event.date ? event.date.split(" | ")[1] : "";
+            return (
+              <div key={event.id || event.title} className="flex items-center gap-4 rounded-md border border-gray-200 bg-white p-4 transition hover:border-blue-500/20">
+                <div className="flex h-16 w-24 flex-shrink-0 overflow-hidden rounded-md bg-gray-100">
+                  {event.image ? (
+                    <img src={event.image} alt={event.title} className="h-full w-full object-cover" />
+                  ) : (
+                    <div className="flex h-full w-full items-center justify-center text-gray-400">
+                      <i className="fa-regular fa-calendar text-2xl"></i>
+                    </div>
+                  )}
+                </div>
+                <div className="flex-1 min-w-0">
+                  <button
+                    onClick={() => router.push(`/events/inst-${event.id}`)}
+                    className="font-bold text-gray-900 hover:text-brand-blue line-clamp-2 leading-snug text-left cursor-pointer"
+                  >
+                    {event.title}
+                  </button>
+                  <div className="mt-2 flex items-center gap-3 flex-wrap">
+                    {(event.tag || event.category) && (
+                      <span className="bg-blue-500 text-white text-[10px] font-bold px-2 py-1 rounded-full uppercase tracking-wider">
+                        {event.tag || event.category}
+                      </span>
+                    )}
+                    <span className="flex items-center text-xs text-gray-500">
+                      <i className="fa-regular fa-calendar mr-1.5"></i> {dateStr}
+                    </span>
+                    {location && (
+                      <span className="flex items-center text-xs text-gray-500">
+                        <i className="fa-solid fa-location-dot mr-1.5"></i> {location}
+                      </span>
+                    )}
+                  </div>
+                </div>
               </div>
-              <h4 className="font-bold text-lg mb-3 leading-tight text-gray-900">
-                {event.title}
-              </h4>
-              <div className="flex items-center text-xs text-gray-600 mb-2 font-semibold">
-                <i className="fa-solid fa-location-dot mr-2 text-gray-500"></i>{" "}
-                {event.date.split(" | ")[1] || "TBD"}
-              </div>
-              <RichText
-                html={event.desc}
-                variant="sm"
-                className="text-xs text-gray-500 mb-5 line-clamp-3 leading-relaxed font-medium"
-              />
-              <div className="mt-auto flex gap-2">
-                <button
-                  onClick={() => router.push(`/events/inst-${event.id}`)}
-                  className="flex-1 bg-white border border-gray-300 text-gray-700 text-sm font-bold py-2 rounded-md hover:bg-gray-50 transition text-center"
-                >
-                  Details
-                </button>
-                <button className="flex-1 text-white text-sm font-bold py-2 rounded-md transition bg-brand-blue cursor-pointer hover:bg-blue-600">
-                  Register
-                </button>
-              </div>
-            </div>
-          </article>
-        ))}
-      </div>
+            );
+          })}
+        </div>
+      ) : (
+        <EmptyTabState tabName="Events" />
+      )}
+
       {totalPages > 1 && (
         <div className="mt-8 flex justify-center gap-2">
           {Array.from({ length: totalPages }).map((_, idx) => (
             <button
               key={idx}
               className={`h-10 w-10 rounded-md text-sm font-bold transition ${page === idx + 1 ? "bg-brand-blue text-white" : "bg-gray-100 text-gray-700 hover:bg-gray-200"}`}
-              onClick={() => onPageChange(idx + 1)}
+              onClick={() => setPage(idx + 1)}
             >
               {idx + 1}
             </button>

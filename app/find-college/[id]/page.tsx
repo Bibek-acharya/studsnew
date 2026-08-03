@@ -214,29 +214,19 @@ const CollegeDetailsPage = ({
           {activeTab === "admissions" && (
             <TabAdmissions
               admissions={admissionsData}
-              filter={admissionFilter}
-              onFilterChange={setAdmissionFilter}
               collegeId={data.collegeId}
-              hasApiData={!!data.mappedAdmissions}
             />
           )}
           {activeTab === "offered" && (
             <TabOffered
               programs={offeredPrograms}
-              filter={programFilter}
-              onFilterChange={setProgramFilter}
-              hasApiData={data.institutionProgramsFromTable.length > 0}
             />
           )}
           {activeTab === "facilities" && (
             <TabFacilities facilities={facilitiesData} />
           )}
           {activeTab === "events" && (
-            <TabEvents
-              events={eventsData}
-              page={eventsPage}
-              onPageChange={setEventsPage}
-            />
+            <TabEvents events={eventsData} />
           )}
           {activeTab === "scholarship" && (
             <TabScholarship
@@ -257,11 +247,7 @@ const CollegeDetailsPage = ({
             />
           )}
           {activeTab === "news" && (
-            <TabNews
-              news={newsData}
-              page={newsPage}
-              onPageChange={setNewsPage}
-            />
+            <TabNews news={newsData} />
           )}
           {activeTab === "download" && (
             <TabDownloads downloads={downloadsData} />

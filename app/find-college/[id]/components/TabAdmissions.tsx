@@ -1,54 +1,97 @@
 "use client";
 
-import React from "react";
+import React, { useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
-import { FilterPills, ProgTh } from "./index";
-import type { LevelFilter } from "../../types";
 import EmptyTabState from "./EmptyTabState";
 
 interface TabAdmissionsProps {
   admissions: any[] | null;
-  filter: LevelFilter;
-  onFilterChange: (f: LevelFilter) => void;
   collegeId: number | null;
-  hasApiData: boolean;
 }
 
-const TabAdmissions: React.FC<TabAdmissionsProps> = ({ admissions, filter, onFilterChange, collegeId, hasApiData }) => {
+const TabAdmissions: React.FC<TabAdmissionsProps> = ({ admissions, collegeId }) => {
   const router = useRouter();
+  const [page, setPage] = useState(1);
+  const PER_PAGE = 10;
 
-  if (!admissions || admissions.length === 0) return <EmptyTabState tabName="admission notices" />;
+  const filtered = useMemo(() => {
+    if (!admissions) return [];
+    return admissions;
+  }, [admissions]);
+
+  const totalPages = Math.ceil(filtered.length / PER_PAGE);
+  const paginated = filtered.slice((page - 1) * PER_PAGE, page * PER_PAGE);
+
+  if (!admissions || admissions.length === 0)
+    return <EmptyTabState tabName="admission notices" />;
 
   return (
-    <div className="rounded-[20px] border border-gray-200 bg-white">
-      <div className="flex flex-wrap items-center justify-between gap-4 border-b border-gray-100 bg-[#f4f8fc] px-6 py-4">
-        <p className="text-[14px] font-semibold text-brand-blue">Admission notices – filter by level</p>
-        {!hasApiData && <FilterPills active={filter} onChange={onFilterChange} />}
+    <div className="overflow-hidden rounded-md border border-gray-100 bg-white">
+      <div className="border-b border-gray-100 bg-[#f8fafc] px-6 py-4">
+        <h3 className="flex items-center gap-2 text-[16px] font-bold text-gray-900">
+          Admissions
+        </h3>
       </div>
+
       <div className="w-full overflow-x-auto">
         <div className="min-w-[800px]">
-          <div className="grid grid-cols-12 items-center gap-4 border-b border-gray-100 bg-white px-6 py-5">
-            <ProgTh className="col-span-3">PROGRAM NAME</ProgTh>
-            <ProgTh className="col-span-2">LEVEL</ProgTh>
-            <ProgTh className="col-span-3">AFFILIATION</ProgTh>
-            <ProgTh className="col-span-2">STATUS</ProgTh>
-            <ProgTh className="col-span-2">ACTION</ProgTh>
+          <div className="grid grid-cols-12 gap-2 border-b border-gray-100 bg-white px-6 py-5">
+            <div className="col-span-3 text-[13px] font-bold uppercase tracking-wider text-gray-800">PROGRAM</div>
+            <div className="col-span-2 text-[13px] font-bold uppercase tracking-wider text-gray-800">LEVEL</div>
+            <div className="col-span-3 text-[13px] font-bold uppercase tracking-wider text-gray-800">AFFILIATION</div>
+            <div className="col-span-2 text-[13px] font-bold uppercase tracking-wider text-gray-800">STATUS</div>
+            <div className="col-span-2 text-[13px] font-bold uppercase tracking-wider text-gray-800">ACTION</div>
           </div>
-          {admissions.map((admission: any, i: number) => (
-            <div key={admission.title || i} className="grid grid-cols-12 items-center gap-4 border-b border-gray-100 px-6 py-5 hover:bg-gray-50/50">
-              <div className="col-span-3"><h4 className="text-[15.5px] font-bold text-gray-900">{admission.title}</h4></div>
-              <div className="col-span-2"><span className="text-[14px] text-gray-600">{admission.level}</span></div>
-              <div className="col-span-3"><span className="text-[13px] text-gray-600">{admission.affiliation}</span></div>
-              <div className="col-span-2">
-                <span className={`rounded-md px-3 py-1.5 text-[12px] font-bold ${admission.status === "Ongoing" ? "bg-[#ecfdf5] text-[#10b981]" : "bg-[#fef2f2] text-[#ef4444]"}`}>{admission.status}</span>
+          <div className="divide-y divide-gray-100">
+            {paginated.map((admission: any, i: number) => (
+              <div key={admission.title || i} className="grid grid-cols-12 gap-2 px-6 py-5 hover:bg-gray-50/50 items-center">
+                <div className="col-span-3">
+                  <h4 className="text-[15.5px] font-bold text-gray-900">{admission.title}</h4>
+                </div>
+                <div className="col-span-2 text-[14px] text-gray-600">{admission.level}</div>
+                <div className="col-span-3 text-[14px] text-gray-600">{admission.affiliation}</div>
+                <div className="col-span-2">
+                  <span className={`rounded-md px-3 py-1.5 text-[12px] font-bold ${admission.status === "Ongoing" ? "bg-[#ecfdf5] text-[#10b981]" : "bg-[#fef2f2] text-[#ef4444]"}`}>
+                    {admission.status}
+                  </span>
+                </div>
+                <div className="col-span-2">
+                  <button
+                    onClick={() => router.push(`/admissions/${encodeURIComponent(admission.level)}/${collegeId}`)}
+                    className="rounded-lg bg-blue-600 px-5 py-2 text-xs font-bold text-white transition-colors hover:bg-blue-700"
+                  >
+                    Apply Now
+                  </button>
+                </div>
               </div>
-              <div className="col-span-2">
-                <button onClick={() => router.push(`/admissions/${encodeURIComponent(admission.level)}/${collegeId}`)} className="rounded-md bg-brand-blue/5 px-4 py-2 text-xs font-bold text-brand-blue hover:bg-brand-blue/10">Apply Now</button>
-              </div>
-            </div>
-          ))}
+            ))}
+          </div>
         </div>
       </div>
+
+      {totalPages > 1 && (
+        <div className="flex items-center justify-between border-t border-gray-100 bg-white px-6 py-4">
+          <p className="text-sm text-gray-600">
+            Showing {((page - 1) * PER_PAGE) + 1} to {Math.min(page * PER_PAGE, filtered.length)} of {filtered.length} admissions
+          </p>
+          <div className="flex gap-2">
+            <button
+              onClick={() => setPage(p => Math.max(1, p - 1))}
+              disabled={page === 1}
+              className="rounded-md border border-gray-200 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              Previous
+            </button>
+            <button
+              onClick={() => setPage(p => Math.min(totalPages, p + 1))}
+              disabled={page >= totalPages}
+              className="rounded-md border border-gray-200 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              Next
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
