@@ -16,11 +16,11 @@ interface JobEmailDialogProps {
 const templates: Record<string, { subject: string; body: string }> = {
   shortlist: {
     subject: "Congratulations! You've been shortlisted",
-    body: `Dear {{name}},\n\nWe are pleased to inform you that you have been shortlisted for the next round of our hiring process.\n\nOur team will be in touch with you shortly regarding the next steps.\n\nBest regards,\nStudySphere Hiring Team`,
+    body: `Dear {{name}},\n\nWe are pleased to inform you that you have been shortlisted for the next round of our hiring process.\n\nOur team will be in touch with you shortly regarding the next steps.\n\nBest regards,\nStudSphere Hiring Team`,
   },
   reject: {
     subject: "Update on your application",
-    body: `Dear {{name}},\n\nThank you for your interest in joining StudySphere. After careful review, we have decided to move forward with other candidates for this position.\n\nWe encourage you to apply for future openings that match your skills and experience.\n\nBest regards,\nStudySphere Hiring Team`,
+    body: `Dear {{name}},\n\nThank you for your interest in joining StudSphere. After careful review, we have decided to move forward with other candidates for this position.\n\nWe encourage you to apply for future openings that match your skills and experience.\n\nBest regards,\nStudSphere Hiring Team`,
   },
 };
 

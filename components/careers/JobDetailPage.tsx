@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import { useParams } from "next/navigation";
-import { ArrowLeft, MapPin, Clock, DollarSign, Calendar } from "lucide-react";
+import { MapPin, Clock, DollarSign, Calendar } from "lucide-react";
 import { careersApi, Job } from "@/services/api";
 import RichText from "@/components/RichText";
 import ApplicationModal from "./ApplicationModal";
@@ -58,13 +58,6 @@ export default function JobDetailPage() {
 
   return (
     <div className="py-4 sm:py-6 lg:py-4 w-full max-w-350 mx-auto px-4 sm:px-6 md:px-8 mb-4">
-      <Link
-        href="/careers"
-        className="inline-flex items-center gap-2 text-sm text-gray-500 hover:text-gray-700 mb-6"
-      >
-        <ArrowLeft size={16} />
-        Back to Careers
-      </Link>
 
       <div className="bg-white border border-gray-200 rounded-2xl p-6 sm:p-8">
         <div className="flex items-start justify-between mb-4">

@@ -3,7 +3,9 @@
 import React, { useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
+import { usePathname } from "next/navigation";
 import dynamic from "next/dynamic";
+import { Users, Briefcase, Newspaper, Download } from "lucide-react";
 
 const routeMap: Record<string, string> = {
   educationPage: "/",
@@ -22,10 +24,18 @@ const routeMap: Record<string, string> = {
   partner: "/scholarship-provider",
 };
 
+const connectItems = [
+  { label: "Community", href: "https://chat.whatsapp.com/HJOpX67y6eSKfKXWUaf1FB", icon: Users, external: true },
+  { label: "Careers", href: "/careers", icon: Briefcase, external: false },
+  { label: "Media & Press", href: "/media-press", icon: Newspaper, external: false },
+  { label: "Downloads", href: "/downloads", icon: Download, external: false },
+];
+
 const Newsletter = dynamic(() => import("./Newsletter"), { ssr: false });
 
 export default function Footer() {
   const [currentYear] = useState(() => new Date().getFullYear());
+  const pathname = usePathname();
 
   return (
     <div className="bg-[#f8f9fc] rounded-md p-4 sm:p-6 lg:p-4 w-full max-w-[1400px] mx-auto flex flex-col gap-10 lg:gap-12 border border-gray-50 mb-4 mt-16">
@@ -150,6 +160,34 @@ export default function Footer() {
                 <li><Link href={routeMap.providerZone} className="text-gray-500 hover:text-[#0000ff] text-sm transition-colors text-left">Provider Login</Link></li>
                 <li><Link href={routeMap.postScholarship} className="text-gray-500 hover:text-[#0000ff] text-sm transition-colors text-left">Post a Scholarship</Link></li>
                 <li><Link href={routeMap.providerZone} className="text-gray-500 hover:text-[#0000ff] text-sm transition-colors text-left">Pricing & Plans</Link></li>
+              </ul>
+            </div>
+
+            {/* Connect Column - mobile only */}
+            <div className="flex flex-col md:hidden">
+              <h4 className="font-semibold text-[#0000ff] mb-5 text-sm sm:text-base">Connect</h4>
+              <ul className="flex flex-col gap-4">
+                {connectItems.map((item) => (
+                  <li key={item.label}>
+                    {item.external ? (
+                      <a
+                        href={item.href}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="text-gray-500 hover:text-[#0000ff] text-sm transition-colors text-left"
+                      >
+                        {item.label}
+                      </a>
+                    ) : (
+                      <Link
+                        href={item.href}
+                        className="text-gray-500 hover:text-[#0000ff] text-sm transition-colors text-left"
+                      >
+                        {item.label}
+                      </Link>
+                    )}
+                  </li>
+                ))}
               </ul>
             </div>
 
