@@ -31,6 +31,7 @@ import {
   School,
   MapPin,
   Globe,
+  Briefcase,
 } from "lucide-react";
 
 const OverviewSection = lazy(() => import("./OverviewSection"));
@@ -133,6 +134,9 @@ const SuperadminAdmissionShortlistSection = lazy(
 const GlobalCourseListSection = lazy(() => import("./GlobalCourseListSection"));
 const GlobalCourseFormSection = lazy(() => import("./GlobalCourseFormSection"));
 const UniversityReviewSection = lazy(() => import("./UniversityReviewSection"));
+const SuperadminJobDirectorySection = lazy(() => import("./SuperadminJobDirectorySection"));
+const SuperadminCreateJobSection = lazy(() => import("./SuperadminCreateJobSection"));
+const SuperadminJobApplicantsSection = lazy(() => import("./SuperadminJobApplicantsSection"));
 
 type SectionType =
   | "overview"
@@ -207,7 +211,11 @@ type SectionType =
   | "superadmin-admission-shortlist"
   | "global-course-directory"
   | "global-add-course"
-  | "university-reviews";
+  | "university-reviews"
+  | "superadmin-job-directory"
+  | "superadmin-create-job"
+  | `superadmin-edit-job-${number}`
+  | `superadmin-job-applicants-${number}`;
 
 interface NavChild {
   section: SectionType;
@@ -327,6 +335,15 @@ const navItems: NavItemData[] = [
       { section: "manage-events", label: "Events Management" },
       { section: "manage-blog", label: "Blog Management" },
       { section: "assign-access", label: "Assign Access" },
+    ],
+  },
+  {
+    icon: <Briefcase size={20} />,
+    label: "Hiring Management",
+    section: "superadmin-job-directory",
+    children: [
+      { section: "superadmin-job-directory", label: "Job Directory" },
+      { section: "superadmin-create-job", label: "Create Job" },
     ],
   },
   {
@@ -670,7 +687,23 @@ export default function DashboardShell() {
         return (
           <SuperadminAdmissionShortlistSection setActiveSection={navigateTo} />
         );
+      case "superadmin-job-directory":
+        return <SuperadminJobDirectorySection setActiveSection={navigateTo} />;
+      case "superadmin-create-job":
+        return <SuperadminCreateJobSection setActiveSection={navigateTo} />;
       default:
+        if (activeSection.startsWith("superadmin-edit-job-")) {
+          const editId = parseInt(activeSection.replace("superadmin-edit-job-", ""), 10);
+          if (!isNaN(editId)) {
+            return <SuperadminCreateJobSection setActiveSection={navigateTo} editId={editId} />;
+          }
+        }
+        if (activeSection.startsWith("superadmin-job-applicants-")) {
+          const jobId = parseInt(activeSection.replace("superadmin-job-applicants-", ""), 10);
+          if (!isNaN(jobId)) {
+            return <SuperadminJobApplicantsSection setActiveSection={navigateTo} jobId={jobId} />;
+          }
+        }
         return <PlaceholderSection section={activeSection} />;
     }
   };

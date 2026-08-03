@@ -8,7 +8,7 @@ interface Partner {
 const partners: Partner[] = [
   {
     name: "Sowers Action Nepal",
-    logo: "https://projectshiksha.hundredgroupnepal.org/images/sa_new.jpeg",
+    logo: "/images/partners/sa_new.jpeg",
     description:
       "Nepal-based organization dedicated to empowering communities through education and skill development initiatives.",
     website: "https://projectshiksha.hundredgroupnepal.org",
@@ -16,26 +16,26 @@ const partners: Partner[] = [
 
   {
     name: "RONB",
-    logo: "https://projectshiksha.hundredgroupnepal.org/images/ronb.jpg",
+    logo: "/images/partners/ronb.jpg",
     description:
       "Network of organizations working together to create meaningful educational opportunities for underserved communities.",
   },
   {
     name: "Ncell",
-    logo: "https://projectshiksha.hundredgroupnepal.org/images/ncell.png",
+    logo: "/images/partners/ncell.png",
     description:
       "Leading telecommunications provider in Nepal, supporting digital education initiatives and connectivity for students.",
     website: "https://www.ncell.axiata.com",
   },
   {
     name: "Creating Opportunities",
-    logo: "https://projectshiksha.hundredgroupnepal.org/images/creating.png",
+    logo: "/images/partners/creating.png",
     description:
       "Organization focused on creating educational and professional pathways for youth in Nepal.",
   },
   {
     name: "Dari Club USA",
-    logo: "https://projectshiksha.hundredgroupnepal.org/images/dari-club.jpeg",
+    logo: "/images/partners/dari-club.jpeg",
     description:
       "US-based organization supporting educational projects and community development in Nepal.",
   },

@@ -7,23 +7,23 @@ import Link from "next/link";
 
 const partners = [
   {
-    src: "https://projectshiksha.hundredgroupnepal.org/images/sa_new.jpeg",
+    src: "/images/partners/sa_new.jpeg",
     alt: "Sowers Action Nepal",
   },
   {
-    src: "https://projectshiksha.hundredgroupnepal.org/images/ronb.jpg",
+    src: "/images/partners/ronb.jpg",
     alt: "RONB",
   },
   {
-    src: "https://projectshiksha.hundredgroupnepal.org/images/ncell.png",
+    src: "/images/partners/ncell.png",
     alt: "Ncell",
   },
   {
-    src: "https://projectshiksha.hundredgroupnepal.org/images/creating.png",
+    src: "/images/partners/creating.png",
     alt: "Creating Opportunities",
   },
   {
-    src: "https://projectshiksha.hundredgroupnepal.org/images/dari-club.jpeg",
+    src: "/images/partners/dari-club.jpeg",
     alt: "Dari Club USA",
   },
 ];

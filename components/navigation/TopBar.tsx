@@ -4,11 +4,7 @@ import React, { useState } from "react";
 import Link from "next/link";
 import { ChevronDown } from "lucide-react";
 
-interface TopBarProps {
-  isVisible?: boolean;
-}
-
-const TopBar: React.FC<TopBarProps> = ({ isVisible = true }) => {
+const TopBar: React.FC = () => {
   const [isSocialOpen, setIsSocialOpen] = useState(false);
 
   const socialLinks = [
@@ -51,7 +47,7 @@ const TopBar: React.FC<TopBarProps> = ({ isVisible = true }) => {
   ];
 
   return (
-    <div className={`hidden md:flex fixed top-0 left-0 z-[121] w-full bg-[#333333] transition-transform duration-300 ${isVisible ? "translate-y-0" : "-translate-y-full"}`}>
+    <div className="hidden md:flex w-full bg-[#333333]">
       <div className="mx-auto flex w-full max-w-350 items-center justify-end px-3 sm:px-6 lg:px-8">
         <nav
           className="flex items-center gap-0 text-[12px] sm:text-[13px] font-bold text-white"

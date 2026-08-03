@@ -463,12 +463,12 @@ const EducationNavbar: React.FC<EducationNavbarProps> = ({
 
   return (
     <>
-      <TopBar isVisible={isVisible} />
       <header
-        className={`fixed left-0 top-7 z-[120] w-full bg-white transition-transform duration-300 ${
+        className={`fixed left-0 top-0 z-[120] w-full bg-white transition-transform duration-300 ${
           isVisible ? "translate-y-0" : "-translate-y-full"
         } ${isScrolled ? "" : ""}`}
       >
+        <TopBar />
         <div className="w-full px-3 xs:px-4 sm:px-6 lg:px-8">
           <div className="mx-auto flex w-full max-w-350 items-center justify-between gap-2 sm:gap-4 py-2.5 sm:py-3">
             {!user ? (

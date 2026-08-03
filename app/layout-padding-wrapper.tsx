@@ -27,7 +27,7 @@ export default function LayoutPaddingWrapper({
       className={`flex min-h-screen flex-col ${
         isDashboardRoute || hidePaddingRoute
           ? ""
-          : "pt-18 xs:pt-20 sm:pt-24 md:pt-27"
+          : "pt-18 xs:pt-20 sm:pt-24 md:pt-34"
       }`}
     >
       {children}

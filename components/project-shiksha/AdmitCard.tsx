@@ -38,7 +38,7 @@ export default function AdmitCard({
       {/* Watermark Background */}
       <div className="absolute inset-0 flex items-center justify-center pointer-events-none z-0">
         <Image
-          src="https://projectshiksha.hundredgroupnepal.org/images/shiks.jpg"
+          src="/images/partners/shiks.jpg"
           alt="Watermark"
           width={400}
           height={400}
@@ -55,7 +55,7 @@ export default function AdmitCard({
           {/* Logo */}
           <div className="w-32 h-32 shrink-0 flex items-center justify-center">
             <Image
-              src="https://projectshiksha.hundredgroupnepal.org/images/shiks.jpg"
+              src="/images/partners/shiks.jpg"
               alt="Logo"
               width={128}
               height={128}
