@@ -55,10 +55,9 @@ export default function JobCard({ job }: JobCardProps) {
             {job.positions_open || 1} {job.positions_open === 1 ? "Position" : "Positions"}
           </span>
         </div>
-        <div
-          className="prose prose-xs prose-p:my-1 prose-p:text-gray-500 prose-p:text-xs prose-p:leading-relaxed max-w-none mb-4 flex-1 line-clamp-3"
-          dangerouslySetInnerHTML={{ __html: job.description }}
-        />
+        <p className="text-xs text-gray-500 leading-relaxed mb-4 flex-1 line-clamp-3">
+          {stripHtml(job.description)}
+        </p>
         <div className="pt-3 border-t border-gray-100">
           <span className="inline-flex items-center gap-1 text-blue-600 font-semibold text-xs group-hover:text-blue-700 transition-colors">
             {isClosed ? "View Details" : "Apply Now"}
