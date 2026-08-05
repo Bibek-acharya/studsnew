@@ -118,6 +118,7 @@ const ProfilePage: React.FC = () => {
     formState: { errors, isDirty },
     trigger,
     getValues,
+    getFieldState,
     setValue,
     reset,
     watch,
@@ -157,7 +158,20 @@ const ProfilePage: React.FC = () => {
     },
   });
 
+  const logoUrlW = watch("logoUrl");
+  const bannerUrlW = watch("bannerUrl");
+  const brochureUrlW = watch("brochureUrl");
   const level = watch("level");
+  const FIELD_ORDER: (keyof FormData)[] = [
+    "collegeName", "about", "logoUrl", "bannerUrl", "location",
+    "level", "website", "contactEmail", "contactPhone", "mapUrl",
+    "facebookUrl", "instagramUrl", "tiktokUrl", "youtubeUrl", "linkedinUrl",
+    "affiliation", "universityIds", "brochureUrl",
+    "vision", "mission",
+    "videos", "overviewRows", "leadershipRows", "courses",
+    "programs", "facilities", "alumni", "galleryGroups", "downloads", "faqs",
+  ];
+
   const toggleLevel = (v: string) => {
     const current = getValues("level");
     setValue(
@@ -470,10 +484,14 @@ const ProfilePage: React.FC = () => {
     const isValid = await trigger();
     if (!isValid) {
       setTimeout(() => {
-        const errFields = Object.keys(errors);
-        if (errFields.length > 0) {
-          const firstField = errFields[0];
-          const el = document.querySelector(`[name="${firstField}"]`);
+        const firstErrField = FIELD_ORDER.find(f => {
+          const state = getFieldState(f);
+          return state.error !== undefined;
+        });
+        if (firstErrField) {
+          const el = document.querySelector(
+            `[name="${firstErrField}"], [data-name="${firstErrField}"]`
+          );
           if (el) {
             el.scrollIntoView({ behavior: "smooth", block: "center" });
             (el as HTMLElement).focus();
@@ -580,13 +598,14 @@ const ProfilePage: React.FC = () => {
                   Organization Logo
                 </label>
                 <div
+                  data-name="logoUrl"
                   onClick={() => logoInputRef.current?.click()}
                   className="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-gray-300 border-dashed rounded-md hover:border-blue-400 transition cursor-pointer bg-gray-50 relative overflow-hidden h-40"
                 >
-                  {watch("logoUrl") ? (
+                  {logoUrlW ? (
                     <>
                       <img
-                        src={watch("logoUrl")}
+                        src={logoUrlW}
                         className="absolute inset-0 w-full h-full object-contain p-2"
                         alt="Logo"
                       />
@@ -639,13 +658,14 @@ const ProfilePage: React.FC = () => {
                   Banner / Cover Image
                 </label>
                 <div
+                  data-name="bannerUrl"
                   onClick={() => bannerInputRef.current?.click()}
                   className="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-gray-300 border-dashed rounded-md hover:border-blue-400 transition cursor-pointer bg-gray-50 relative overflow-hidden h-40"
                 >
-                  {watch("bannerUrl") ? (
+                  {bannerUrlW ? (
                     <>
                       <img
-                        src={watch("bannerUrl")}
+                        src={bannerUrlW}
                         className="absolute inset-0 w-full h-full object-cover"
                         alt="Banner"
                       />
@@ -1049,7 +1069,7 @@ const ProfilePage: React.FC = () => {
                 name="about"
                 control={control}
                 render={({ field }) => (
-                  <div>
+                  <div data-name="about">
                     <RichTextEditor
                       value={field.value}
                       onChange={field.onChange}
@@ -1071,7 +1091,7 @@ const ProfilePage: React.FC = () => {
                   name="vision"
                   control={control}
                   render={({ field }) => (
-                    <div>
+                    <div data-name="vision">
                       <RichTextEditor
                         value={field.value}
                         onChange={field.onChange}
@@ -1091,7 +1111,7 @@ const ProfilePage: React.FC = () => {
                   name="mission"
                   control={control}
                   render={({ field }) => (
-                    <div>
+                    <div data-name="mission">
                       <RichTextEditor
                         value={field.value}
                         onChange={field.onChange}
@@ -1975,18 +1995,18 @@ const ProfilePage: React.FC = () => {
                   }}
                 />
               </label>
-              {watch("brochureUrl") ? (
+              {brochureUrlW ? (
                 <div className="flex items-center gap-3 bg-gray-50 border border-gray-200 rounded-md p-3">
                   <div className="w-10 h-10 rounded bg-red-50 text-red-500 flex items-center justify-center flex-shrink-0">
                     <i className="fa-solid fa-file-pdf"></i>
                   </div>
                   <span className="text-sm text-gray-700 font-medium truncate max-w-[200px]">
                     {decodeURIComponent(
-                      watch("brochureUrl").split("/").pop() || "Brochure",
+                      brochureUrlW.split("/").pop() || "Brochure",
                     )}
                   </span>
                   <a
-                    href={watch("brochureUrl")}
+                    href={brochureUrlW}
                     target="_blank"
                     rel="noreferrer"
                     className="px-3 py-2 bg-green-50 border border-green-300 rounded-md text-sm text-green-700 hover:bg-green-100 flex items-center gap-1 flex-shrink-0"
