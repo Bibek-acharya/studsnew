@@ -23,6 +23,7 @@ import {
   TabFaq,
   InquiryForm,
 } from "./components";
+import TabRecognition from "./components/TabRecognition";
 import { useCollegeData } from "./hooks/useCollegeData";
 import { useFollow } from "./hooks/useFollow";
 import type { TabKey, LevelFilter } from "../types";
@@ -40,7 +41,7 @@ const CollegeDetailsPage = ({
   params: Promise<{ id: string }>;
 }) => {
   const { id: idStr } = React.use(params);
-  const { user, isAuthenticated } = useAuth();
+  const { isAuthenticated } = useAuth();
 
   const [isAskQuestionOpen, setIsAskQuestionOpen] = useState(false);
   const [isClaimModalOpen, setIsClaimModalOpen] = useState(false);
@@ -180,7 +181,7 @@ const CollegeDetailsPage = ({
         reviewsCount={data.reviewsCount}
         website={data.website}
         websiteHref={data.websiteHref}
-        instLogo={data.instLogo}
+        instLogo={data.instLogo}  
         instBanner={data.instBanner}
         isVerified={data.isVerified}
         college={data.college}
@@ -210,6 +211,7 @@ const CollegeDetailsPage = ({
               instLeadershipData={data.instLeadershipData}
             />
           )}
+          {activeTab === "recognition" && <TabRecognition />}
           {activeTab === "courses" && <TabCourses courses={coursesData} />}
           {activeTab === "admissions" && (
             <TabAdmissions

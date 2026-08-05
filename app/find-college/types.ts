@@ -4,17 +4,18 @@ export function isCollegeVerified(value: unknown): boolean {
 
 export type TabKey =
   | "about"
-  | "courses"
-  | "admissions"
+  | "recognition"
   | "offered"
+  | "admissions"
+  | "courses"
+  | "scholarship"
   | "facilities"
   | "events"
-  | "scholarship"
   | "alumni"
   | "gallery"
-  | "review"
   | "news"
   | "download"
+  | "review"
   | "faq";
 
 export type LevelFilter = "all" | "+2" | "Bachelor" | "Master";
