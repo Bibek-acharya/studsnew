@@ -3,60 +3,11 @@ import React, { useState, useRef, useEffect, useCallback } from "react";
 import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { useRouter } from "next/navigation";
 import { Plus, Trash } from "@phosphor-icons/react";
 import RichTextEditor from "@/components/ScholarshipProvider/common/RichTextEditor";
 import ImageCropperModal from "@/components/ScholarshipProvider/common/ImageCropperModal";
 import FileUpload from "@/components/ScholarshipProvider/common/FileUpload";
 
-interface VideoItem {
-  id: number;
-  url: string;
-  message: string;
-  name: string;
-  designation: string;
-  avatar: string;
-}
-interface OverviewRow {
-  id: number;
-  key: string;
-  value: string;
-}
-interface LeadershipRow {
-  id: number;
-  position: string;
-  role: string;
-  holder: string;
-}
-interface CourseRow {
-  id: number;
-  name: string;
-  duration: string;
-  fees: string;
-  eligibility: string;
-  seats: string;
-}
-interface ProgramRow {
-  id: number;
-  name: string;
-  level: string;
-  affiliation: string;
-  status: string;
-}
-interface FacilityRow {
-  id: number;
-  icon: string;
-  heading: string;
-  desc: string;
-}
-interface AlumniRow {
-  id: number;
-  photo: string;
-  name: string;
-  job: string;
-  batch: string;
-  linkedin: string;
-}
 
 const LINKEDIN_REGEX = /^https?:\/\/(www\.)?linkedin\.com\/in\/[\w-]+\/?$/i;
 
@@ -121,17 +72,6 @@ interface GalleryGroup {
   folder: string;
   images: GalleryEntry[];
 }
-interface DownloadItem {
-  id: number;
-  name: string;
-  file: string;
-  size: string;
-}
-interface FaqCard {
-  id: number;
-  question: string;
-  answer: string;
-}
 
 const formatFileSize = (bytes: number): string => {
   if (bytes === 0) return "0 B";
@@ -148,7 +88,6 @@ const inputClass =
   "w-full px-3 py-2 border border-gray-300 rounded-md focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none transition-colors";
 
 const ProfilePage: React.FC = () => {
-  const router = useRouter();
   const levelOptions = ["+2", "A-Level", "TSLC (CTEVT)", "Diploma (CTEVT)", "PCL", "Bachelor's", "Bachelor's (Honours)", "Postgraduate Diploma (PGD)", "Master's", "MPhil", "PhD"];
   const [universities, setUniversities] = useState<{ id: number; name: string }[]>([]);
   const [logoFile, setLogoFile] = useState<File | null>(null);
@@ -175,7 +114,6 @@ const ProfilePage: React.FC = () => {
 
   const {
     register,
-    handleSubmit,
     control,
     formState: { errors, isDirty },
     trigger,
@@ -528,75 +466,59 @@ const ProfilePage: React.FC = () => {
 
 
 
-  const validateRequired = (): string[] => {
-    const errors: string[] = [];
-    if (!collegeName.trim()) errors.push("Institution name is required");
-    if (!about.trim()) errors.push("About description is required");
-    if (!logoUrl) errors.push("Organization logo is required");
-    if (!bannerUrl) errors.push("Banner image is required");
-    return errors;
-  };
-
-  const validateLinkedIn = (): string[] => {
-    const errors: Record<number, string> = {};
-    const invalid: string[] = [];
-    alumni.forEach((a) => {
-      if (a.linkedin && !LINKEDIN_REGEX.test(a.linkedin.trim())) {
-        errors[a.id] =
-          "Must be a valid LinkedIn profile URL (https://linkedin.com/in/...)";
-        invalid.push(`${a.name || "Alumni"}: invalid LinkedIn URL`);
-      }
-    });
-    setLinkedinErrors(errors);
-    return invalid;
-  };
-
   const saveProfile = async (status: "draft" | "published") => {
-    if (status === "published") {
-      const requiredErrors = validateRequired();
-      const linkedinErrorsList = validateLinkedIn();
-      const allErrors = [...requiredErrors, ...linkedinErrorsList];
-      if (allErrors.length > 0) {
-        setValidationErrors(allErrors);
-        return;
-      }
+    const isValid = await trigger();
+    if (!isValid) {
+      setTimeout(() => {
+        const errFields = Object.keys(errors);
+        if (errFields.length > 0) {
+          const firstField = errFields[0];
+          const el = document.querySelector(`[name="${firstField}"]`);
+          if (el) {
+            el.scrollIntoView({ behavior: "smooth", block: "center" });
+            (el as HTMLElement).focus();
+          }
+        }
+      }, 100);
+      return;
     }
-    setLinkedinErrors({});
-    setValidationErrors([]);
+
     try {
       setSaving(true);
+      setSaved(false);
+      const fd = getValues();
       const body = {
         status,
-        institution_name: collegeName,
-        location,
-        level: level.join(","),
-        website,
-        contact_email: contactEmail,
-        contact_phone: contactPhone,
-        map_url: mapUrl,
-        facebook_url: facebookUrl,
-        instagram_url: instagramUrl,
-        tiktok_url: tiktokUrl,
-        youtube_url: youtubeUrl,
-        linkedin_url: linkedinUrl,
-        affiliation: universityIds.map(id => universities.find(u => u.id === id)?.name || "").filter(Boolean).join(", "),
-        university_id: universityIds[0] || undefined,
-        brochure_data: watch("brochureUrl") ? { url: watch("brochureUrl") } : null,
-        logo_url: logoUrl,
-        banner_url: bannerUrl,
-        about,
-        vision,
-        mission,
-        videos: watch("videos").map(({ id, ...rest }) => rest),
-        overview_data: watch("overviewRows").map(({ id, ...rest }) => rest),
-        leadership_data: watch("leadershipRows").map(({ id, ...rest }) => rest),
-        courses_data: watch("courses").map(({ id, ...rest }) => rest),
-        programs_data: watch("programs").map(({ id, ...rest }) => rest),
-        facilities_data: watch("facilities").map(({ id, ...rest }) => rest),
-        alumni_data: watch("alumni").map(({ id, ...rest }) => rest),
-        gallery_data: watch("galleryGroups"),
-        downloads_data: watch("downloads").map(({ id, ...rest }) => rest),
-        faqs_data: watch("faqs").map(({ id, ...rest }) => rest),
+        institution_name: fd.collegeName,
+        location: fd.location,
+        level: fd.level.join(","),
+        website: fd.website,
+        contact_email: fd.contactEmail,
+        contact_phone: fd.contactPhone,
+        map_url: fd.mapUrl,
+        facebook_url: fd.facebookUrl,
+        instagram_url: fd.instagramUrl,
+        tiktok_url: fd.tiktokUrl,
+        youtube_url: fd.youtubeUrl,
+        linkedin_url: fd.linkedinUrl,
+        affiliation: fd.universityIds.map(id => universities.find(u => u.id === id)?.name || "").filter(Boolean).join(", "),
+        university_id: fd.universityIds[0] || undefined,
+        brochure_data: fd.brochureUrl ? { url: fd.brochureUrl } : null,
+        logo_url: fd.logoUrl,
+        banner_url: fd.bannerUrl,
+        about: fd.about,
+        vision: fd.vision,
+        mission: fd.mission,
+        videos: fd.videos.map(({ id, ...rest }) => rest),
+        overview_data: fd.overviewRows.map(({ id, ...rest }) => rest),
+        leadership_data: fd.leadershipRows.map(({ id, ...rest }) => rest),
+        courses_data: fd.courses.map(({ id, ...rest }) => rest),
+        programs_data: fd.programs.map(({ id, ...rest }) => rest),
+        facilities_data: fd.facilities.map(({ id, ...rest }) => rest),
+        alumni_data: fd.alumni.map(({ id, ...rest }) => rest),
+        gallery_data: fd.galleryGroups,
+        downloads_data: fd.downloads.map(({ id, ...rest }) => rest),
+        faqs_data: fd.faqs.map(({ id, ...rest }) => rest),
       };
       await api("/api/v1/institution/profile", {
         method: "PUT",
@@ -604,6 +526,7 @@ const ProfilePage: React.FC = () => {
       });
       setProfileStatus(status);
       setSaved(true);
+      reset(fd);
       setTimeout(() => setSaved(false), 3000);
     } catch (e) {
       console.error("Failed to save profile:", e);
@@ -637,20 +560,6 @@ const ProfilePage: React.FC = () => {
               Update your institution profile information below.
             </p>
           </div>
-
-          {validationErrors.length > 0 && (
-            <div className="flex flex-col gap-2 bg-red-50 border border-red-200 text-red-800 rounded-lg px-4 py-3 text-sm font-medium">
-              <div className="flex items-center gap-2">
-                <i className="fa-solid fa-exclamation-circle text-red-600"></i>{" "}
-                Please fix these errors before publishing:
-              </div>
-              <ul className="list-disc pl-5 text-red-700">
-                {validationErrors.map((err, i) => (
-                  <li key={i}>{err}</li>
-                ))}
-              </ul>
-            </div>
-          )}
 
           {saved && (
             <div className="flex items-center gap-3 bg-green-50 border border-green-200 text-green-800 rounded-lg px-4 py-3 text-sm font-medium">
@@ -721,6 +630,9 @@ const ProfilePage: React.FC = () => {
                     }}
                   />
                 </div>
+                {errors.logoUrl && (
+                  <p className="mt-1 text-xs text-red-500">{errors.logoUrl.message}</p>
+                )}
               </div>
               <div className="md:col-span-6">
                 <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -783,6 +695,9 @@ const ProfilePage: React.FC = () => {
                     }}
                   />
                 </div>
+                {errors.bannerUrl && (
+                  <p className="mt-1 text-xs text-red-500">{errors.bannerUrl.message}</p>
+                )}
               </div>
             </div>
           </div>
@@ -804,6 +719,9 @@ const ProfilePage: React.FC = () => {
                   placeholder="Enter college name"
                   {...register("collegeName")}
                 />
+                {errors.collegeName && (
+                  <p className="mt-1 text-xs text-red-500">{errors.collegeName.message}</p>
+                )}
               </div>
               <div className="relative" ref={locationRef}>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
