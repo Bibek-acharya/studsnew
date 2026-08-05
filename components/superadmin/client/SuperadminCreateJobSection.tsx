@@ -83,7 +83,7 @@ export default function SuperadminCreateJobSection({
       .finally(() => setFetching(false));
   }, [editId, setActiveSection]);
 
-  const update = (field: string, value: string) =>
+  const update = (field: string, value: string | number) =>
     setForm((prev) => ({ ...prev, [field]: value }));
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -209,7 +209,7 @@ export default function SuperadminCreateJobSection({
                 type="number"
                 min="1"
                 value={form.positions_open}
-                onChange={(e) => update("positions_open", e.target.value)}
+                onChange={(e) => update("positions_open", parseInt(e.target.value) || 1)}
                 className={inputClass}
                 placeholder="1"
               />
