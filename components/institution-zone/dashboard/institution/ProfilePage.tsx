@@ -411,29 +411,27 @@ const ProfilePage: React.FC = () => {
   };
 
   const addItem = <T extends { id: number }>(
-    setter: React.Dispatch<React.SetStateAction<T[]>>,
+    fieldName: string,
     defaultItem: Omit<T, "id">,
   ) => {
-    setter((prev) => [
-      ...prev,
-      { ...defaultItem, id: Date.now() } as unknown as T,
-    ]);
+    const current = getValues(fieldName as any) as T[];
+    setValue(fieldName as any, [...current, { ...defaultItem, id: Date.now() } as unknown as T], { shouldDirty: true });
   };
   const removeItem = <T extends { id: number }>(
-    setter: React.Dispatch<React.SetStateAction<T[]>>,
+    fieldName: string,
     id: number,
   ) => {
-    setter((prev) => prev.filter((x) => x.id !== id));
+    const current = getValues(fieldName as any) as T[];
+    setValue(fieldName as any, current.filter((x) => x.id !== id), { shouldDirty: true });
   };
   const updateItem = (
-    setter: any,
+    fieldName: string,
     id: number,
     field: string,
     value: string,
   ) => {
-    setter((prev: any[]) =>
-      prev.map((x) => (x.id === id ? { ...x, [field]: value } : x)),
-    );
+    const current = getValues(fieldName as any) as any[];
+    setValue(fieldName as any, current.map((x: any) => (x.id === id ? { ...x, [field]: value } : x)), { shouldDirty: true });
   };
 
   const handleBannerCrop = useCallback(
@@ -445,7 +443,7 @@ const ProfilePage: React.FC = () => {
       );
       try {
         const url = await uploadFile(croppedFile, "institution/banner");
-        setBannerUrl(url);
+        setValue("bannerUrl", url, { shouldDirty: true });
       } catch {
         /* skip */
       }
@@ -456,35 +454,34 @@ const ProfilePage: React.FC = () => {
   );
 
   const addGalleryGroup = () => {
-    setGalleryGroups([...galleryGroups, { folder: "", images: [] }]);
+    const gg = getValues("galleryGroups") as GalleryGroup[];
+    setValue("galleryGroups", [...gg, { folder: "", images: [] }], { shouldDirty: true });
   };
   const removeGalleryGroup = (groupIndex: number) => {
-    setGalleryGroups(galleryGroups.filter((_, i) => i !== groupIndex));
+    const gg = getValues("galleryGroups") as GalleryGroup[];
+    setValue("galleryGroups", gg.filter((_, i) => i !== groupIndex), { shouldDirty: true });
   };
   const updateGalleryFolder = (groupIndex: number, value: string) => {
-    setGalleryGroups(
-      galleryGroups.map((g, i) =>
-        i === groupIndex ? { ...g, folder: value } : g,
-      ),
-    );
+    const gg = getValues("galleryGroups") as GalleryGroup[];
+    setValue("galleryGroups", gg.map((g, i) =>
+      i === groupIndex ? { ...g, folder: value } : g,
+    ), { shouldDirty: true });
   };
   const addGalleryImage = (groupIndex: number) => {
-    setGalleryGroups(
-      galleryGroups.map((g, i) =>
-        i === groupIndex && g.images.length < 8
-          ? { ...g, images: [...g.images, { title: "", url: "" }] }
-          : g,
-      ),
-    );
+    const gg = getValues("galleryGroups") as GalleryGroup[];
+    setValue("galleryGroups", gg.map((g, i) =>
+      i === groupIndex && g.images.length < 8
+        ? { ...g, images: [...g.images, { title: "", url: "" }] }
+        : g,
+    ), { shouldDirty: true });
   };
   const removeGalleryImage = (groupIndex: number, imageIndex: number) => {
-    setGalleryGroups(
-      galleryGroups.map((g, i) =>
-        i === groupIndex
-          ? { ...g, images: g.images.filter((_, pi) => pi !== imageIndex) }
-          : g,
-      ),
-    );
+    const gg = getValues("galleryGroups") as GalleryGroup[];
+    setValue("galleryGroups", gg.map((g, i) =>
+      i === groupIndex
+        ? { ...g, images: g.images.filter((_, pi) => pi !== imageIndex) }
+        : g,
+    ), { shouldDirty: true });
   };
   const updateGalleryImage = (
     groupIndex: number,
@@ -492,18 +489,17 @@ const ProfilePage: React.FC = () => {
     field: keyof GalleryEntry,
     value: string,
   ) => {
-    setGalleryGroups(
-      galleryGroups.map((g, i) =>
-        i === groupIndex
-          ? {
-              ...g,
-              images: g.images.map((img, pi) =>
-                pi === imageIndex ? { ...img, [field]: value } : img,
-              ),
-            }
-          : g,
-      ),
-    );
+    const gg = getValues("galleryGroups") as GalleryGroup[];
+    setValue("galleryGroups", gg.map((g, i) =>
+      i === groupIndex
+        ? {
+            ...g,
+            images: g.images.map((img, pi) =>
+              pi === imageIndex ? { ...img, [field]: value } : img,
+            ),
+          }
+        : g,
+    ), { shouldDirty: true });
   };
   const handleGalleryFileSelect = async (
     groupIndex: number,
@@ -513,37 +509,24 @@ const ProfilePage: React.FC = () => {
     setUploadingInfo({ groupIndex, imageIndex });
     try {
       const url = await uploadFile(file, "institution/gallery");
-      setGalleryGroups(
-        galleryGroups.map((g, i) =>
-          i === groupIndex
-            ? {
-                ...g,
-                images: g.images.map((img, pi) =>
-                  pi === imageIndex ? { ...img, url } : img,
-                ),
-              }
-            : g,
-        ),
-      );
+      const gg = getValues("galleryGroups") as GalleryGroup[];
+      setValue("galleryGroups", gg.map((g, i) =>
+        i === groupIndex
+          ? {
+              ...g,
+              images: g.images.map((img, pi) =>
+                pi === imageIndex ? { ...img, url } : img,
+              ),
+            }
+          : g,
+      ), { shouldDirty: true });
     } catch {
       /* skip */
     }
     setUploadingInfo(null);
   };
 
-  const handleFileChange = (
-    e: React.ChangeEvent<HTMLInputElement>,
-    setter: (url: string) => void,
-    fileSetter: (f: File) => void,
-  ) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      fileSetter(file);
-      const reader = new FileReader();
-      reader.onload = (ev) => setter(ev.target?.result as string);
-      reader.readAsDataURL(file);
-    }
-  };
+
 
   const validateRequired = (): string[] => {
     const errors: string[] = [];
@@ -598,22 +581,22 @@ const ProfilePage: React.FC = () => {
         linkedin_url: linkedinUrl,
         affiliation: universityIds.map(id => universities.find(u => u.id === id)?.name || "").filter(Boolean).join(", "),
         university_id: universityIds[0] || undefined,
-        brochure_data: brochureUrl ? { url: brochureUrl } : null,
+        brochure_data: watch("brochureUrl") ? { url: watch("brochureUrl") } : null,
         logo_url: logoUrl,
         banner_url: bannerUrl,
         about,
         vision,
         mission,
-        videos: videos.map(({ id, ...rest }) => rest),
-        overview_data: overviewRows.map(({ id, ...rest }) => rest),
-        leadership_data: leadershipRows.map(({ id, ...rest }) => rest),
-        courses_data: courses.map(({ id, ...rest }) => rest),
-        programs_data: programs.map(({ id, ...rest }) => rest),
-        facilities_data: facilities.map(({ id, ...rest }) => rest),
-        alumni_data: alumni.map(({ id, ...rest }) => rest),
-        gallery_data: galleryGroups,
-        downloads_data: downloads.map(({ id, ...rest }) => rest),
-        faqs_data: faqs.map(({ id, ...rest }) => rest),
+        videos: watch("videos").map(({ id, ...rest }) => rest),
+        overview_data: watch("overviewRows").map(({ id, ...rest }) => rest),
+        leadership_data: watch("leadershipRows").map(({ id, ...rest }) => rest),
+        courses_data: watch("courses").map(({ id, ...rest }) => rest),
+        programs_data: watch("programs").map(({ id, ...rest }) => rest),
+        facilities_data: watch("facilities").map(({ id, ...rest }) => rest),
+        alumni_data: watch("alumni").map(({ id, ...rest }) => rest),
+        gallery_data: watch("galleryGroups"),
+        downloads_data: watch("downloads").map(({ id, ...rest }) => rest),
+        faqs_data: watch("faqs").map(({ id, ...rest }) => rest),
       };
       await api("/api/v1/institution/profile", {
         method: "PUT",
@@ -691,10 +674,10 @@ const ProfilePage: React.FC = () => {
                   onClick={() => logoInputRef.current?.click()}
                   className="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-gray-300 border-dashed rounded-md hover:border-blue-400 transition cursor-pointer bg-gray-50 relative overflow-hidden h-40"
                 >
-                  {logoUrl ? (
+                  {watch("logoUrl") ? (
                     <>
                       <img
-                        src={logoUrl}
+                        src={watch("logoUrl")}
                         className="absolute inset-0 w-full h-full object-contain p-2"
                         alt="Logo"
                       />
@@ -702,7 +685,7 @@ const ProfilePage: React.FC = () => {
                         type="button"
                         onClick={(e) => {
                           e.stopPropagation();
-                          setLogoUrl("");
+                          setValue("logoUrl", "", { shouldDirty: true });
                           setLogoFile(null);
                           if (logoInputRef.current) logoInputRef.current.value = "";
                         }}
@@ -731,7 +714,7 @@ const ProfilePage: React.FC = () => {
                       if (!file) return;
                       try {
                         const url = await uploadFile(file, "institution/logo");
-                        setLogoUrl(url);
+                        setValue("logoUrl", url, { shouldDirty: true });
                       } catch {
                         /* skip */
                       }
@@ -747,10 +730,10 @@ const ProfilePage: React.FC = () => {
                   onClick={() => bannerInputRef.current?.click()}
                   className="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-gray-300 border-dashed rounded-md hover:border-blue-400 transition cursor-pointer bg-gray-50 relative overflow-hidden h-40"
                 >
-                  {bannerUrl ? (
+                  {watch("bannerUrl") ? (
                     <>
                       <img
-                        src={bannerUrl}
+                        src={watch("bannerUrl")}
                         className="absolute inset-0 w-full h-full object-cover"
                         alt="Banner"
                       />
@@ -758,7 +741,7 @@ const ProfilePage: React.FC = () => {
                         type="button"
                         onClick={(e) => {
                           e.stopPropagation();
-                          setBannerUrl("");
+                          setValue("bannerUrl", "", { shouldDirty: true });
                           setBannerFile(null);
                           if (bannerInputRef.current) bannerInputRef.current.value = "";
                         }}
@@ -817,10 +800,9 @@ const ProfilePage: React.FC = () => {
                 </label>
                 <input
                   type="text"
-                  className={inputClass}
+                  className={`${inputClass} ${errors.collegeName ? 'border-red-500' : ''}`}
                   placeholder="Enter college name"
-                  value={collegeName}
-                  onChange={(e) => setCollegeName(e.target.value)}
+                  {...register("collegeName")}
                 />
               </div>
               <div className="relative" ref={locationRef}>
@@ -829,11 +811,11 @@ const ProfilePage: React.FC = () => {
                 </label>
                 <input
                   type="text"
-                  className={inputClass}
+                  className={`${inputClass} ${errors.location ? 'border-red-500' : ''}`}
                   placeholder="Type a district..."
-                  value={location}
+                  value={watch("location")}
                   onChange={(e) => {
-                    setLocation(e.target.value);
+                    setValue("location", e.target.value, { shouldDirty: true });
                     setLocationFilter(e.target.value);
                     setShowSuggestions(true);
                   }}
@@ -851,7 +833,7 @@ const ProfilePage: React.FC = () => {
                           key={d}
                           type="button"
                           onClick={() => {
-                            setLocation(d);
+                            setValue("location", d, { shouldDirty: true });
                             setShowSuggestions(false);
                           }}
                           className="w-full text-left px-3 py-2 text-sm hover:bg-blue-50 hover:text-blue-600 transition-colors"
@@ -881,10 +863,9 @@ const ProfilePage: React.FC = () => {
                 </label>
                 <input
                   type="text"
-                  className={inputClass}
+                  className={`${inputClass} ${errors.website ? 'border-red-500' : ''}`}
                   placeholder="www.college.edu.np"
-                  value={website}
-                  onChange={(e) => setWebsite(e.target.value)}
+                  {...register("website")}
                 />
               </div>
               <div>
@@ -893,10 +874,9 @@ const ProfilePage: React.FC = () => {
                 </label>
                 <input
                   type="email"
-                  className={inputClass}
+                  className={`${inputClass} ${errors.contactEmail ? 'border-red-500' : ''}`}
                   placeholder="admission@college.edu.np"
-                  value={contactEmail}
-                  onChange={(e) => setContactEmail(e.target.value)}
+                  {...register("contactEmail")}
                 />
               </div>
               <div>
@@ -905,10 +885,9 @@ const ProfilePage: React.FC = () => {
                 </label>
                 <input
                   type="text"
-                  className={inputClass}
+                  className={`${inputClass} ${errors.contactPhone ? 'border-red-500' : ''}`}
                   placeholder="01-4XXXXXX"
-                  value={contactPhone}
-                  onChange={(e) => setContactPhone(e.target.value)}
+                  {...register("contactPhone")}
                 />
               </div>
               {level.some(l => l === "Bachelor" || l === "Master") ? (
@@ -923,12 +902,13 @@ const ProfilePage: React.FC = () => {
                         <input
                           type="checkbox"
                           className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
-                          checked={universityIds.includes(u.id)}
+                          checked={watch("universityIds").includes(u.id)}
                           onChange={(e) => {
+                            const ids = getValues("universityIds");
                             if (e.target.checked) {
-                              setUniversityIds(prev => [...prev, u.id]);
+                              setValue("universityIds", [...ids, u.id], { shouldDirty: true });
                             } else {
-                              setUniversityIds(prev => prev.filter(id => id !== u.id));
+                              setValue("universityIds", ids.filter(id => id !== u.id), { shouldDirty: true });
                             }
                           }}
                         />
@@ -937,14 +917,14 @@ const ProfilePage: React.FC = () => {
                     ))
                   )}
                 </div>
-                {universityIds.length > 0 && (
+                {watch("universityIds").length > 0 && (
                   <div className="flex flex-wrap gap-1.5 mt-2">
-                    {universityIds.map(id => {
+                    {watch("universityIds").map(id => {
                       const uni = universities.find(u => u.id === id);
                       return uni ? (
                         <span key={id} className="inline-flex items-center gap-1 px-2.5 py-1 bg-blue-50 text-blue-700 text-xs font-medium rounded-full">
                           {uni.name}
-                          <button type="button" onClick={() => setUniversityIds(prev => prev.filter(i => i !== id))} className="hover:text-blue-900">
+                          <button type="button" onClick={() => setValue("universityIds", getValues("universityIds").filter(i => i !== id), { shouldDirty: true })} className="hover:text-blue-900">
                             <i className="fa-solid fa-times text-[10px]"></i>
                           </button>
                         </span>
@@ -956,7 +936,7 @@ const ProfilePage: React.FC = () => {
               ) : (
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">Affiliation</label>
-                <input type="text" className={inputClass} placeholder="e.g. Tribhuvan University" value={affiliation} onChange={(e) => setAffiliation(e.target.value)} />
+                <input type="text" className={`${inputClass} ${errors.affiliation ? 'border-red-500' : ''}`} placeholder="e.g. Tribhuvan University" {...register("affiliation")} />
               </div>
               )}
               <div>
@@ -965,10 +945,9 @@ const ProfilePage: React.FC = () => {
                 </label>
                 <input
                   type="text"
-                  className={inputClass}
+                  className={`${inputClass} ${errors.mapUrl ? 'border-red-500' : ''}`}
                   placeholder="https://www.google.com/maps/embed?pb=..."
-                  value={mapUrl}
-                  onChange={(e) => setMapUrl(e.target.value)}
+                  {...register("mapUrl")}
                 />
               </div>
             </div>
@@ -986,10 +965,9 @@ const ProfilePage: React.FC = () => {
                 </label>
                 <input
                   type="text"
-                  className={inputClass}
+                  className={`${inputClass} ${errors.facebookUrl ? 'border-red-500' : ''}`}
                   placeholder="https://facebook.com/..."
-                  value={facebookUrl}
-                  onChange={(e) => setFacebookUrl(e.target.value)}
+                  {...register("facebookUrl")}
                 />
               </div>
               <div>
@@ -998,10 +976,9 @@ const ProfilePage: React.FC = () => {
                 </label>
                 <input
                   type="text"
-                  className={inputClass}
+                  className={`${inputClass} ${errors.instagramUrl ? 'border-red-500' : ''}`}
                   placeholder="https://instagram.com/..."
-                  value={instagramUrl}
-                  onChange={(e) => setInstagramUrl(e.target.value)}
+                  {...register("instagramUrl")}
                 />
               </div>
               <div>
@@ -1010,10 +987,9 @@ const ProfilePage: React.FC = () => {
                 </label>
                 <input
                   type="text"
-                  className={inputClass}
+                  className={`${inputClass} ${errors.tiktokUrl ? 'border-red-500' : ''}`}
                   placeholder="https://tiktok.com/..."
-                  value={tiktokUrl}
-                  onChange={(e) => setTiktokUrl(e.target.value)}
+                  {...register("tiktokUrl")}
                 />
               </div>
               <div>
@@ -1022,10 +998,9 @@ const ProfilePage: React.FC = () => {
                 </label>
                 <input
                   type="text"
-                  className={inputClass}
+                  className={`${inputClass} ${errors.youtubeUrl ? 'border-red-500' : ''}`}
                   placeholder="https://youtube.com/..."
-                  value={youtubeUrl}
-                  onChange={(e) => setYoutubeUrl(e.target.value)}
+                  {...register("youtubeUrl")}
                 />
               </div>
               <div>
@@ -1034,10 +1009,9 @@ const ProfilePage: React.FC = () => {
                 </label>
                 <input
                   type="text"
-                  className={inputClass}
+                  className={`${inputClass} ${errors.linkedinUrl ? 'border-red-500' : ''}`}
                   placeholder="https://linkedin.com/..."
-                  value={linkedinUrl}
-                  onChange={(e) => setLinkedinUrl(e.target.value)}
+                  {...register("linkedinUrl")}
                 />
               </div>
             </div>
@@ -1055,7 +1029,7 @@ const ProfilePage: React.FC = () => {
                 Video Link
               </label>
               {(() => {
-                const v = videos[0];
+                const v = watch("videos")[0];
                 if (!v) return <p className="text-sm text-gray-400 py-2">Loading...</p>;
                 return (
                   <div className="bg-gray-50 border border-gray-200 rounded-md p-4">
@@ -1086,7 +1060,7 @@ const ProfilePage: React.FC = () => {
                                   file,
                                   "institution/video-avatars",
                                 );
-                                updateItem(setVideos, v.id, "avatar", url);
+                                updateItem("videos", v.id, "avatar", url);
                               } catch {
                                 /* skip */
                               }
@@ -1099,7 +1073,7 @@ const ProfilePage: React.FC = () => {
                           placeholder="Video URL"
                           value={v.url}
                           onChange={(e) =>
-                            updateItem(setVideos, v.id, "url", e.target.value)
+                            updateItem("videos", v.id, "url", e.target.value)
                           }
                         />
                       </div>
@@ -1112,7 +1086,7 @@ const ProfilePage: React.FC = () => {
                           value={v.message}
                           onChange={(e) =>
                             updateItem(
-                              setVideos,
+                              "videos",
                               v.id,
                               "message",
                               e.target.value,
@@ -1125,7 +1099,7 @@ const ProfilePage: React.FC = () => {
                           placeholder="Person Name"
                           value={v.name}
                           onChange={(e) =>
-                            updateItem(setVideos, v.id, "name", e.target.value)
+                            updateItem("videos", v.id, "name", e.target.value)
                           }
                         />
                         <input
@@ -1135,7 +1109,7 @@ const ProfilePage: React.FC = () => {
                           value={v.designation}
                           onChange={(e) =>
                             updateItem(
-                              setVideos,
+                              "videos",
                               v.id,
                               "designation",
                               e.target.value,
@@ -1153,11 +1127,20 @@ const ProfilePage: React.FC = () => {
               <label className="block text-sm font-medium text-gray-700 mb-2">
                 About the College
               </label>
-              <RichTextEditor
-                value={about}
-                onChange={setAbout}
-                placeholder="Write a detailed description of your college..."
-                minHeight={200}
+              <Controller
+                name="about"
+                control={control}
+                render={({ field }) => (
+                  <div>
+                    <RichTextEditor
+                      value={field.value}
+                      onChange={field.onChange}
+                      placeholder="Write a detailed description of your college..."
+                      minHeight={200}
+                    />
+                    {errors.about && <p className="mt-1 text-xs text-red-500">{errors.about.message}</p>}
+                  </div>
+                )}
               />
             </div>
 
@@ -1166,22 +1149,40 @@ const ProfilePage: React.FC = () => {
                 <label className="block text-sm font-medium text-gray-700 mb-2">
                   Our Vision
                 </label>
-                <RichTextEditor
-                  value={vision}
-                  onChange={setVision}
-                  placeholder="Our vision is..."
-                  minHeight={150}
+                <Controller
+                  name="vision"
+                  control={control}
+                  render={({ field }) => (
+                    <div>
+                      <RichTextEditor
+                        value={field.value}
+                        onChange={field.onChange}
+                        placeholder="Our vision is..."
+                        minHeight={150}
+                      />
+                      {errors.vision && <p className="mt-1 text-xs text-red-500">{errors.vision.message}</p>}
+                    </div>
+                  )}
                 />
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
                   Our Mission
                 </label>
-                <RichTextEditor
-                  value={mission}
-                  onChange={setMission}
-                  placeholder="Our mission is..."
-                  minHeight={150}
+                <Controller
+                  name="mission"
+                  control={control}
+                  render={({ field }) => (
+                    <div>
+                      <RichTextEditor
+                        value={field.value}
+                        onChange={field.onChange}
+                        placeholder="Our mission is..."
+                        minHeight={150}
+                      />
+                      {errors.mission && <p className="mt-1 text-xs text-red-500">{errors.mission.message}</p>}
+                    </div>
+                  )}
                 />
               </div>
             </div>
@@ -1194,7 +1195,7 @@ const ProfilePage: React.FC = () => {
                 <button
                   type="button"
                   onClick={() =>
-                    addItem(setOverviewRows, { key: "", value: "" })
+                    addItem("overviewRows", { key: "", value: "" })
                   }
                   className="text-sm text-blue-600 bg-blue-50 px-3 py-1.5 rounded-md hover:bg-blue-100 transition-colors font-medium"
                 >
@@ -1202,14 +1203,14 @@ const ProfilePage: React.FC = () => {
                 </button>
               </div>
               <div className="space-y-3">
-                {overviewRows.map((r) => (
+                {watch("overviewRows").map((r) => (
                   <div
                     key={r.id}
                     className="bg-gray-50 border border-gray-200 rounded-md p-4 relative group"
                   >
                     <button
                       type="button"
-                      onClick={() => removeItem(setOverviewRows, r.id)}
+                      onClick={() => removeItem("overviewRows", r.id)}
                       className="absolute top-3 right-3 text-red-400 hover:text-red-600 hover:bg-red-50 p-1.5 rounded-md transition-colors opacity-0 group-hover:opacity-100"
                     >
                       <i className="fa-solid fa-trash"></i>
@@ -1222,7 +1223,7 @@ const ProfilePage: React.FC = () => {
                         value={r.key}
                         onChange={(e) =>
                           updateItem(
-                            setOverviewRows,
+                            "overviewRows",
                             r.id,
                             "key",
                             e.target.value,
@@ -1236,7 +1237,7 @@ const ProfilePage: React.FC = () => {
                         value={r.value}
                         onChange={(e) =>
                           updateItem(
-                            setOverviewRows,
+                            "overviewRows",
                             r.id,
                             "value",
                             e.target.value,
@@ -1246,7 +1247,7 @@ const ProfilePage: React.FC = () => {
                     </div>
                   </div>
                 ))}
-                {overviewRows.length === 0 && (
+                {watch("overviewRows").length === 0 && (
                   <p className="text-sm text-gray-400 py-2">No rows added.</p>
                 )}
               </div>
@@ -1260,7 +1261,7 @@ const ProfilePage: React.FC = () => {
                 <button
                   type="button"
                   onClick={() =>
-                    addItem(setLeadershipRows, {
+                    addItem("leadershipRows", {
                       position: "",
                       role: "",
                       holder: "",
@@ -1272,14 +1273,14 @@ const ProfilePage: React.FC = () => {
                 </button>
               </div>
               <div className="space-y-3">
-                {leadershipRows.map((r) => (
+                {watch("leadershipRows").map((r) => (
                   <div
                     key={r.id}
                     className="bg-gray-50 border border-gray-200 rounded-md p-4 relative group"
                   >
                     <button
                       type="button"
-                      onClick={() => removeItem(setLeadershipRows, r.id)}
+                      onClick={() => removeItem("leadershipRows", r.id)}
                       className="absolute top-3 right-3 text-red-400 hover:text-red-600 hover:bg-red-50 p-1.5 rounded-md transition-colors opacity-0 group-hover:opacity-100"
                     >
                       <i className="fa-solid fa-trash"></i>
@@ -1292,7 +1293,7 @@ const ProfilePage: React.FC = () => {
                         value={r.position}
                         onChange={(e) =>
                           updateItem(
-                            setLeadershipRows,
+                            "leadershipRows",
                             r.id,
                             "position",
                             e.target.value,
@@ -1306,7 +1307,7 @@ const ProfilePage: React.FC = () => {
                         value={r.role}
                         onChange={(e) =>
                           updateItem(
-                            setLeadershipRows,
+                            "leadershipRows",
                             r.id,
                             "role",
                             e.target.value,
@@ -1320,7 +1321,7 @@ const ProfilePage: React.FC = () => {
                         value={r.holder}
                         onChange={(e) =>
                           updateItem(
-                            setLeadershipRows,
+                            "leadershipRows",
                             r.id,
                             "holder",
                             e.target.value,
@@ -1330,7 +1331,7 @@ const ProfilePage: React.FC = () => {
                     </div>
                   </div>
                 ))}
-                {leadershipRows.length === 0 && (
+                {watch("leadershipRows").length === 0 && (
                   <p className="text-sm text-gray-400 py-2">No rows added.</p>
                 )}
               </div>
@@ -1347,7 +1348,7 @@ const ProfilePage: React.FC = () => {
               <button
                 type="button"
                 onClick={() =>
-                  addItem(setCourses, {
+                  addItem("courses", {
                     name: "",
                     duration: "",
                     fees: "",
@@ -1361,14 +1362,14 @@ const ProfilePage: React.FC = () => {
               </button>
             </div>
             <div className="space-y-3">
-              {courses.map((c) => (
+              {watch("courses").map((c) => (
                 <div
                   key={c.id}
                   className="bg-gray-50 border border-gray-200 rounded-md p-4 relative group"
                 >
                   <button
                     type="button"
-                    onClick={() => removeItem(setCourses, c.id)}
+                    onClick={() => removeItem("courses", c.id)}
                     className="absolute top-3 right-3 text-red-400 hover:text-red-600 hover:bg-red-50 p-1.5 rounded-md transition-colors opacity-0 group-hover:opacity-100"
                   >
                     <i className="fa-solid fa-trash"></i>
@@ -1380,7 +1381,7 @@ const ProfilePage: React.FC = () => {
                       placeholder="Course name"
                       value={c.name}
                       onChange={(e) =>
-                        updateItem(setCourses, c.id, "name", e.target.value)
+                        updateItem("courses", c.id, "name", e.target.value)
                       }
                     />
                     <input
@@ -1389,7 +1390,7 @@ const ProfilePage: React.FC = () => {
                       placeholder="Duration"
                       value={c.duration}
                       onChange={(e) =>
-                        updateItem(setCourses, c.id, "duration", e.target.value)
+                        updateItem("courses", c.id, "duration", e.target.value)
                       }
                     />
                     <input
@@ -1398,7 +1399,7 @@ const ProfilePage: React.FC = () => {
                       placeholder="Fees / Year"
                       value={c.fees}
                       onChange={(e) =>
-                        updateItem(setCourses, c.id, "fees", e.target.value)
+                        updateItem("courses", c.id, "fees", e.target.value)
                       }
                     />
                     <input
@@ -1408,7 +1409,7 @@ const ProfilePage: React.FC = () => {
                       placeholder="Seats"
                       value={c.seats}
                       onChange={(e) =>
-                        updateItem(setCourses, c.id, "seats", e.target.value)
+                        updateItem("courses", c.id, "seats", e.target.value)
                       }
                     />
                     <input
@@ -1418,7 +1419,7 @@ const ProfilePage: React.FC = () => {
                       value={c.eligibility}
                       onChange={(e) =>
                         updateItem(
-                          setCourses,
+                          "courses",
                           c.id,
                           "eligibility",
                           e.target.value,
@@ -1428,7 +1429,7 @@ const ProfilePage: React.FC = () => {
                   </div>
                 </div>
               ))}
-              {courses.length === 0 && (
+              {watch("courses").length === 0 && (
                 <p className="text-sm text-gray-400 py-4 text-center">
                   No courses added.
                 </p>
@@ -1447,7 +1448,7 @@ const ProfilePage: React.FC = () => {
               <button
                 type="button"
                 onClick={() =>
-                  addItem(setFacilities, { icon: "", heading: "", desc: "" })
+                  addItem("facilities", { icon: "", heading: "", desc: "" })
                 }
                 className="text-sm text-blue-600 bg-blue-50 px-3 py-1.5 rounded-md hover:bg-blue-100 transition-colors font-medium"
               >
@@ -1455,7 +1456,7 @@ const ProfilePage: React.FC = () => {
               </button>
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {facilities.map((f) => {
+              {watch("facilities").map((f) => {
                 const iconName = f.icon?.trim() || "";
                 const iconValid = iconName.length > 0;
                 return (
@@ -1465,7 +1466,7 @@ const ProfilePage: React.FC = () => {
                   >
                     <button
                       type="button"
-                      onClick={() => removeItem(setFacilities, f.id)}
+                      onClick={() => removeItem("facilities", f.id)}
                       className="absolute top-3 right-3 text-red-400 hover:text-red-600 hover:bg-red-50 p-1.5 rounded-md transition-colors opacity-0 group-hover:opacity-100 z-10"
                     >
                       <i className="fa-solid fa-trash"></i>
@@ -1477,7 +1478,7 @@ const ProfilePage: React.FC = () => {
                         value={f.heading}
                         onChange={(e) =>
                           updateItem(
-                            setFacilities,
+                            "facilities",
                             f.id,
                             "heading",
                             e.target.value,
@@ -1490,7 +1491,7 @@ const ProfilePage: React.FC = () => {
                         value={f.desc}
                         onChange={(e) =>
                           updateItem(
-                            setFacilities,
+                            "facilities",
                             f.id,
                             "desc",
                             e.target.value,
@@ -1519,7 +1520,7 @@ const ProfilePage: React.FC = () => {
                                 const v = e.target.value
                                   .replace(/\s+/g, "-")
                                   .toLowerCase();
-                                updateItem(setFacilities, f.id, "icon", v);
+                                updateItem("facilities", f.id, "icon", v);
                               }}
                             />
                             <p className="mt-1 text-[11px] text-gray-400">
@@ -1540,7 +1541,7 @@ const ProfilePage: React.FC = () => {
                   </div>
                 );
               })}
-              {facilities.length === 0 && (
+              {watch("facilities").length === 0 && (
                 <p className="text-sm text-gray-400 py-4 text-center col-span-2">
                   No facilities added.
                 </p>
@@ -1559,7 +1560,7 @@ const ProfilePage: React.FC = () => {
               <button
                 type="button"
                 onClick={() =>
-                  addItem(setAlumni, {
+                  addItem("alumni", {
                     photo: "",
                     name: "",
                     job: "",
@@ -1573,14 +1574,14 @@ const ProfilePage: React.FC = () => {
               </button>
             </div>
             <div className="space-y-3">
-              {alumni.map((a) => (
+              {watch("alumni").map((a, index) => (
                 <div
                   key={a.id}
                   className="bg-gray-50 border border-gray-200 rounded-md p-4 relative group"
                 >
                   <button
                     type="button"
-                    onClick={() => removeItem(setAlumni, a.id)}
+                    onClick={() => removeItem("alumni", a.id)}
                     className="absolute top-3 right-3 text-red-400 hover:text-red-600 hover:bg-red-50 p-1.5 rounded-md transition-colors opacity-0 group-hover:opacity-100 z-10"
                   >
                     <i className="fa-solid fa-trash"></i>
@@ -1612,7 +1613,7 @@ const ProfilePage: React.FC = () => {
                                 file,
                                 "institution/alumni",
                               );
-                              updateItem(setAlumni, a.id, "photo", url);
+                              updateItem("alumni", a.id, "photo", url);
                             } catch {
                               /* skip */
                             }
@@ -1626,7 +1627,7 @@ const ProfilePage: React.FC = () => {
                         placeholder="Full name"
                         value={a.name}
                         onChange={(e) =>
-                          updateItem(setAlumni, a.id, "name", e.target.value)
+                          updateItem("alumni", a.id, "name", e.target.value)
                         }
                       />
                       <input
@@ -1634,7 +1635,7 @@ const ProfilePage: React.FC = () => {
                         placeholder="Current job (e.g. Software Engineer at Google)"
                         value={a.job}
                         onChange={(e) =>
-                          updateItem(setAlumni, a.id, "job", e.target.value)
+                          updateItem("alumni", a.id, "job", e.target.value)
                         }
                       />
                       <div className="grid grid-cols-2 gap-2">
@@ -1643,45 +1644,17 @@ const ProfilePage: React.FC = () => {
                           placeholder="Batch year"
                           value={a.batch}
                           onChange={(e) =>
-                            updateItem(setAlumni, a.id, "batch", e.target.value)
+                            updateItem("alumni", a.id, "batch", e.target.value)
                           }
                         />
                         <div className="relative">
                           <input
-                            className={`${inputClass} text-sm ${linkedinErrors[a.id] ? "border-red-500 focus:ring-red-500" : ""}`}
+                            className={`${inputClass} text-sm ${errors.alumni?.[index]?.linkedin ? 'border-red-500' : ''}`}
                             placeholder="LinkedIn URL"
-                            value={a.linkedin}
-                            onChange={(e) => {
-                              updateItem(
-                                setAlumni,
-                                a.id,
-                                "linkedin",
-                                e.target.value,
-                              );
-                              if (linkedinErrors[a.id]) {
-                                setLinkedinErrors((prev) => ({
-                                  ...prev,
-                                  [a.id]: "",
-                                }));
-                              }
-                            }}
-                            onBlur={() => {
-                              if (
-                                a.linkedin &&
-                                !LINKEDIN_REGEX.test(a.linkedin.trim())
-                              ) {
-                                setLinkedinErrors((prev) => ({
-                                  ...prev,
-                                  [a.id]:
-                                    "Must be a valid LinkedIn profile URL",
-                                }));
-                              }
-                            }}
+                            {...register(`alumni.${index}.linkedin`)}
                           />
-                          {linkedinErrors[a.id] && (
-                            <p className="mt-1 text-xs text-red-500">
-                              {linkedinErrors[a.id]}
-                            </p>
+                          {errors.alumni?.[index]?.linkedin && (
+                            <p className="mt-1 text-xs text-red-500">{errors.alumni[index]?.linkedin?.message}</p>
                           )}
                         </div>
                       </div>
@@ -1689,7 +1662,7 @@ const ProfilePage: React.FC = () => {
                   </div>
                 </div>
               ))}
-              {alumni.length === 0 && (
+              {watch("alumni").length === 0 && (
                 <p className="text-sm text-gray-400 py-4 text-center">
                   No alumni added.
                 </p>
@@ -1735,7 +1708,7 @@ const ProfilePage: React.FC = () => {
             </div>
 
             <div className="p-6 space-y-8">
-              {galleryGroups.map((group, groupIndex) => (
+              {watch("galleryGroups").map((group, groupIndex) => (
                 <div
                   key={groupIndex}
                   className="border border-gray-200 rounded-2xl p-5"
@@ -1858,7 +1831,7 @@ const ProfilePage: React.FC = () => {
                 </div>
               ))}
 
-              {galleryGroups.length === 0 && (
+              {watch("galleryGroups").length === 0 && (
                 <p className="text-sm text-gray-500 text-center py-4">
                   No images added yet.
                 </p>
@@ -1876,7 +1849,7 @@ const ProfilePage: React.FC = () => {
               <button
                 type="button"
                 onClick={() =>
-                  addItem(setDownloads, { name: "", file: "", size: "" })
+                  addItem("downloads", { name: "", file: "", size: "" })
                 }
                 className="text-sm text-blue-600 bg-blue-50 px-3 py-1.5 rounded-md hover:bg-blue-100 transition-colors font-medium"
               >
@@ -1884,14 +1857,14 @@ const ProfilePage: React.FC = () => {
               </button>
             </div>
             <div className="space-y-3">
-              {downloads.map((d) => (
+              {watch("downloads").map((d) => (
                 <div
                   key={d.id}
                   className="flex items-center gap-3 bg-gray-50 border border-gray-200 rounded-md p-3 pr-10 relative group"
                 >
                   <button
                     type="button"
-                    onClick={() => removeItem(setDownloads, d.id)}
+                    onClick={() => removeItem("downloads", d.id)}
                     className="absolute top-2 right-2 text-red-400 hover:text-red-600 hover:bg-red-50 p-1.5 rounded-md transition-colors opacity-0 group-hover:opacity-100"
                   >
                     <i className="fa-solid fa-trash"></i>
@@ -1904,7 +1877,7 @@ const ProfilePage: React.FC = () => {
                     placeholder="Document name"
                     value={d.name}
                     onChange={(e) =>
-                      updateItem(setDownloads, d.id, "name", e.target.value)
+                      updateItem("downloads", d.id, "name", e.target.value)
                     }
                   />
                   {d.size && (
@@ -1935,9 +1908,9 @@ const ProfilePage: React.FC = () => {
                                 file,
                                 "institution/downloads",
                               );
-                              updateItem(setDownloads, d.id, "file", url);
+                              updateItem("downloads", d.id, "file", url);
                               updateItem(
-                                setDownloads,
+                                "downloads",
                                 d.id,
                                 "size",
                                 formatFileSize(file.size),
@@ -1963,9 +1936,9 @@ const ProfilePage: React.FC = () => {
                               file,
                               "institution/downloads",
                             );
-                            updateItem(setDownloads, d.id, "file", url);
+                            updateItem("downloads", d.id, "file", url);
                             updateItem(
-                              setDownloads,
+                              "downloads",
                               d.id,
                               "size",
                               formatFileSize(file.size),
@@ -1979,7 +1952,7 @@ const ProfilePage: React.FC = () => {
                   )}
                 </div>
               ))}
-              {downloads.length === 0 && (
+              {watch("downloads").length === 0 && (
                 <p className="text-sm text-gray-400 py-4 text-center">
                   No documents added.
                 </p>
@@ -1997,7 +1970,7 @@ const ProfilePage: React.FC = () => {
               <button
                 type="button"
                 onClick={() =>
-                  addItem(setFaqs, { question: "", answer: "" })
+                  addItem("faqs", { question: "", answer: "" })
                 }
                 className="text-sm text-blue-600 bg-blue-50 px-3 py-1.5 rounded-md hover:bg-blue-100 transition-colors font-medium"
               >
@@ -2005,14 +1978,14 @@ const ProfilePage: React.FC = () => {
               </button>
             </div>
             <div className="space-y-4">
-              {faqs.map((f) => (
+              {watch("faqs").map((f) => (
                 <div
                   key={f.id}
                   className="p-5 bg-gray-50 border border-gray-200 rounded-md relative group"
                 >
                   <button
                     type="button"
-                    onClick={() => removeItem(setFaqs, f.id)}
+                    onClick={() => removeItem("faqs", f.id)}
                     className="absolute top-3 right-3 text-red-400 hover:text-red-600 hover:bg-red-50 p-1.5 rounded-md transition-colors opacity-0 group-hover:opacity-100"
                   >
                     <i className="fa-solid fa-trash"></i>
@@ -2028,7 +2001,7 @@ const ProfilePage: React.FC = () => {
                         placeholder="e.g. What are the admission requirements?"
                         value={f.question}
                         onChange={(e) =>
-                          updateItem(setFaqs, f.id, "question", e.target.value)
+                          updateItem("faqs", f.id, "question", e.target.value)
                         }
                       />
                     </div>
@@ -2042,14 +2015,14 @@ const ProfilePage: React.FC = () => {
                         placeholder="Answer description..."
                         value={f.answer}
                         onChange={(e) =>
-                          updateItem(setFaqs, f.id, "answer", e.target.value)
+                          updateItem("faqs", f.id, "answer", e.target.value)
                         }
                       />
                     </div>
                   </div>
                 </div>
               ))}
-              {faqs.length === 0 && (
+              {watch("faqs").length === 0 && (
                 <p className="text-sm text-gray-400 py-4 text-center">
                   No FAQs added.
                 </p>
@@ -2077,25 +2050,25 @@ const ProfilePage: React.FC = () => {
                         file,
                         "institution/brochure",
                       );
-                      setBrochureUrl(url);
+                      setValue("brochureUrl", url, { shouldDirty: true });
                     } catch {
                       /* skip */
                     }
                   }}
                 />
               </label>
-              {brochureUrl ? (
+              {watch("brochureUrl") ? (
                 <div className="flex items-center gap-3 bg-gray-50 border border-gray-200 rounded-md p-3">
                   <div className="w-10 h-10 rounded bg-red-50 text-red-500 flex items-center justify-center flex-shrink-0">
                     <i className="fa-solid fa-file-pdf"></i>
                   </div>
                   <span className="text-sm text-gray-700 font-medium truncate max-w-[200px]">
                     {decodeURIComponent(
-                      brochureUrl.split("/").pop() || "Brochure",
+                      watch("brochureUrl").split("/").pop() || "Brochure",
                     )}
                   </span>
                   <a
-                    href={brochureUrl}
+                    href={watch("brochureUrl")}
                     target="_blank"
                     rel="noreferrer"
                     className="px-3 py-2 bg-green-50 border border-green-300 rounded-md text-sm text-green-700 hover:bg-green-100 flex items-center gap-1 flex-shrink-0"
@@ -2104,7 +2077,7 @@ const ProfilePage: React.FC = () => {
                   </a>
                   <button
                     type="button"
-                    onClick={() => setBrochureUrl("")}
+                    onClick={() => setValue("brochureUrl", "", { shouldDirty: true })}
                     className="text-red-400 hover:text-red-600 hover:bg-red-50 p-1.5 rounded-md transition-colors flex-shrink-0"
                   >
                     <i className="fa-solid fa-trash"></i>
