@@ -1,5 +1,8 @@
 "use client";
-import React, { useState, useRef, useEffect, useCallback, useMemo } from "react";
+import React, { useState, useRef, useEffect, useCallback } from "react";
+import { useForm, Controller } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { z } from "zod";
 import { useRouter } from "next/navigation";
 import { Plus, Trash } from "@phosphor-icons/react";
 import RichTextEditor from "@/components/ScholarshipProvider/common/RichTextEditor";
@@ -56,6 +59,60 @@ interface AlumniRow {
 }
 
 const LINKEDIN_REGEX = /^https?:\/\/(www\.)?linkedin\.com\/in\/[\w-]+\/?$/i;
+
+const alumniSchema = z.object({
+  id: z.number(),
+  photo: z.string(),
+  name: z.string(),
+  job: z.string(),
+  batch: z.string(),
+  linkedin: z.string().refine(
+    (val) => !val || LINKEDIN_REGEX.test(val),
+    { message: "Must be a valid LinkedIn profile URL (https://linkedin.com/in/...)" }
+  ),
+});
+
+const profileSchema = z.object({
+  collegeName: z.string().min(1, "Institution name is required"),
+  location: z.string(),
+  level: z.array(z.string()),
+  website: z.string(),
+  contactEmail: z.string(),
+  contactPhone: z.string(),
+  mapUrl: z.string(),
+  facebookUrl: z.string(),
+  instagramUrl: z.string(),
+  tiktokUrl: z.string(),
+  youtubeUrl: z.string(),
+  linkedinUrl: z.string(),
+  affiliation: z.string(),
+  universityIds: z.array(z.number()),
+  brochureUrl: z.string(),
+  about: z.string().min(1, "About description is required"),
+  vision: z.string(),
+  mission: z.string(),
+  logoUrl: z.string().min(1, "Organization logo is required"),
+  bannerUrl: z.string().min(1, "Banner image is required"),
+  videos: z.array(z.object({
+    id: z.number(), url: z.string(), message: z.string(),
+    name: z.string(), designation: z.string(), avatar: z.string(),
+  })),
+  overviewRows: z.array(z.object({ id: z.number(), key: z.string(), value: z.string() })),
+  leadershipRows: z.array(z.object({ id: z.number(), position: z.string(), role: z.string(), holder: z.string() })),
+  courses: z.array(z.object({ id: z.number(), name: z.string(), duration: z.string(), fees: z.string(), eligibility: z.string(), seats: z.string() })),
+  programs: z.array(z.object({ id: z.number(), name: z.string(), level: z.string(), affiliation: z.string(), status: z.string() })),
+  facilities: z.array(z.object({ id: z.number(), icon: z.string(), heading: z.string(), desc: z.string() })),
+  alumni: z.array(alumniSchema),
+  galleryGroups: z.array(z.object({
+    folder: z.string(),
+    images: z.array(z.object({ title: z.string(), url: z.string() })),
+  })),
+  downloads: z.array(z.object({ id: z.number(), name: z.string(), file: z.string(), size: z.string() })),
+  faqs: z.array(z.object({ id: z.number(), question: z.string(), answer: z.string() })),
+});
+
+type FormData = z.infer<typeof profileSchema>;
+
 interface GalleryEntry {
   title: string;
   url: string;
@@ -92,29 +149,8 @@ const inputClass =
 
 const ProfilePage: React.FC = () => {
   const router = useRouter();
-  const [collegeName, setCollegeName] = useState("");
-  const [location, setLocation] = useState("");
-  const [level, setLevel] = useState<string[]>([]);
-  const toggleLevel = (v: string) => setLevel(prev => prev.includes(v) ? prev.filter(l => l !== v) : [...prev, v]);
   const levelOptions = ["+2", "A-Level", "TSLC (CTEVT)", "Diploma (CTEVT)", "PCL", "Bachelor's", "Bachelor's (Honours)", "Postgraduate Diploma (PGD)", "Master's", "MPhil", "PhD"];
-  const [website, setWebsite] = useState("");
-  const [contactEmail, setContactEmail] = useState("");
-  const [contactPhone, setContactPhone] = useState("");
-  const [mapUrl, setMapUrl] = useState("");
-  const [facebookUrl, setFacebookUrl] = useState("");
-  const [instagramUrl, setInstagramUrl] = useState("");
-  const [tiktokUrl, setTiktokUrl] = useState("");
-  const [youtubeUrl, setYoutubeUrl] = useState("");
-  const [linkedinUrl, setLinkedinUrl] = useState("");
-  const [affiliation, setAffiliation] = useState("");
-  const [universityIds, setUniversityIds] = useState<number[]>([]);
   const [universities, setUniversities] = useState<{ id: number; name: string }[]>([]);
-  const [brochureUrl, setBrochureUrl] = useState("");
-  const [about, setAbout] = useState("");
-  const [vision, setVision] = useState("");
-  const [mission, setMission] = useState("");
-  const [logoUrl, setLogoUrl] = useState("");
-  const [bannerUrl, setBannerUrl] = useState("");
   const [logoFile, setLogoFile] = useState<File | null>(null);
   const [bannerFile, setBannerFile] = useState<File | null>(null);
   const [loading, setLoading] = useState(true);
@@ -123,31 +159,12 @@ const ProfilePage: React.FC = () => {
   const [profileStatus, setProfileStatus] = useState<"draft" | "published">(
     "draft",
   );
-  const [initialSnapshot, setInitialSnapshot] = useState<string>("");
   const [publicProfile, setPublicProfile] = useState(true);
   const [settingsLoading, setSettingsLoading] = useState(true);
-  const [validationErrors, setValidationErrors] = useState<string[]>([]);
-
-  const [videos, setVideos] = useState<VideoItem[]>([
-    { id: 1, url: "", message: "", name: "", designation: "", avatar: "" },
-  ]);
-  const [overviewRows, setOverviewRows] = useState<OverviewRow[]>([]);
-  const [leadershipRows, setLeadershipRows] = useState<LeadershipRow[]>([]);
-  const [courses, setCourses] = useState<CourseRow[]>([]);
-  const [programs, setPrograms] = useState<ProgramRow[]>([]);
-  const [facilities, setFacilities] = useState<FacilityRow[]>([]);
-  const [alumni, setAlumni] = useState<AlumniRow[]>([]);
-  const [linkedinErrors, setLinkedinErrors] = useState<Record<number, string>>(
-    {},
-  );
-  const [galleryGroups, setGalleryGroups] = useState<GalleryGroup[]>([]);
   const [uploadingInfo, setUploadingInfo] = useState<{
     groupIndex: number;
     imageIndex: number;
   } | null>(null);
-  const [downloads, setDownloads] = useState<DownloadItem[]>([]);
-  const [faqs, setFaqs] = useState<FaqCard[]>([]);
-
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [locationFilter, setLocationFilter] = useState("");
   const locationRef = useRef<HTMLDivElement>(null);
@@ -156,27 +173,65 @@ const ProfilePage: React.FC = () => {
   const [cropperOpen, setCropperOpen] = useState(false);
   const [cropImageSrc, setCropImageSrc] = useState<string | null>(null);
 
+  const {
+    register,
+    handleSubmit,
+    control,
+    formState: { errors, isDirty },
+    trigger,
+    getValues,
+    setValue,
+    reset,
+    watch,
+  } = useForm<FormData>({
+    resolver: zodResolver(profileSchema),
+    defaultValues: {
+      collegeName: "",
+      location: "",
+      level: [],
+      website: "",
+      contactEmail: "",
+      contactPhone: "",
+      mapUrl: "",
+      facebookUrl: "",
+      instagramUrl: "",
+      tiktokUrl: "",
+      youtubeUrl: "",
+      linkedinUrl: "",
+      affiliation: "",
+      universityIds: [],
+      brochureUrl: "",
+      about: "",
+      vision: "",
+      mission: "",
+      logoUrl: "",
+      bannerUrl: "",
+      videos: [{ id: 1, url: "", message: "", name: "", designation: "", avatar: "" }],
+      overviewRows: [],
+      leadershipRows: [],
+      courses: [],
+      programs: [],
+      facilities: [],
+      alumni: [],
+      galleryGroups: [],
+      downloads: [],
+      faqs: [],
+    },
+  });
+
+  const level = watch("level");
+  const toggleLevel = (v: string) => {
+    const current = getValues("level");
+    setValue(
+      "level",
+      current.includes(v) ? current.filter((l) => l !== v) : [...current, v],
+      { shouldDirty: true }
+    );
+  };
+
   const filteredDistricts = DISTRICTS.filter((d) =>
     d.toLowerCase().includes(locationFilter.toLowerCase()),
   );
-
-  const isDirty = useMemo(() => {
-    if (!initialSnapshot) return false;
-    const current = JSON.stringify({
-      collegeName, location, level, website, contactEmail, contactPhone,
-      mapUrl, facebookUrl, instagramUrl, tiktokUrl, youtubeUrl, linkedinUrl,
-      affiliation, universityIds, brochureUrl, about, vision, mission,
-      logoUrl, bannerUrl, videos, overviewRows, leadershipRows, courses,
-      programs, facilities, alumni, galleryGroups, downloads, faqs,
-    });
-    return initialSnapshot !== current;
-  }, [
-    collegeName, location, level, website, contactEmail, contactPhone,
-    mapUrl, facebookUrl, instagramUrl, tiktokUrl, youtubeUrl, linkedinUrl,
-    affiliation, universityIds, brochureUrl, about, vision, mission,
-    logoUrl, bannerUrl, videos, overviewRows, leadershipRows, courses,
-    programs, facilities, alumni, galleryGroups, downloads, faqs,
-  ]);
 
   useEffect(() => {
     const handleClick = (e: MouseEvent) => {
@@ -252,107 +307,21 @@ const ProfilePage: React.FC = () => {
       const res = await api("/api/v1/institution/profile");
       const data = res?.data;
       if (data) {
-        setCollegeName(data.institution_name || "");
+        if (data.profile_status) setProfileStatus(data.profile_status);
+
         const primaryUniId = data.university_id || 0;
         const affiliationNames = (data.affiliation || "").split(",").map((s: string) => s.trim()).filter(Boolean);
         const resolvedIds = affiliationNames
           .map((name: string) => universities.find(u => u.name === name)?.id)
           .filter((id: number | undefined) => id && id > 0);
-        if (resolvedIds.length > 0) {
-          setUniversityIds(resolvedIds);
-        } else if (primaryUniId > 0) {
-          setUniversityIds([primaryUniId]);
-        }
-        setLocation(data.location || "");
-        setWebsite(data.website || "");
-        setContactEmail(data.contact_email || "");
-        setContactPhone(data.contact_phone || "");
-        setMapUrl(data.map_url || "");
-        setFacebookUrl(data.facebook_url || "");
-        setInstagramUrl(data.instagram_url || "");
-        setTiktokUrl(data.tiktok_url || "");
-        setYoutubeUrl(data.youtube_url || "");
-        setLinkedinUrl(data.linkedin_url || "");
-        setAffiliation(data.affiliation || "");
-        if (data.level) setLevel(data.level.split(",").filter(Boolean));
-        setBrochureUrl(data.brochure_data?.url || "");
-        setLogoUrl(data.logo_url || "");
-        if (data.profile_status) setProfileStatus(data.profile_status);
-        setBannerUrl(data.banner_url || "");
-        setAbout(data.about || "");
-        setVision(data.vision || "");
-        setMission(data.mission || "");
-        if (data.videos && Array.isArray(data.videos) && data.videos.length > 0) {
-          setVideos(
-            data.videos.slice(0, 1).map((v: any, i: number) => ({
-              ...v,
-              id: v.id || i + 1,
-            })),
-          );
-        }
-        if (data.overview_data)
-          setOverviewRows(
-            Array.isArray(data.overview_data)
-              ? data.overview_data.map((r: any, i: number) => ({
-                  ...r,
-                  id: r.id || i + 1,
-                }))
-              : [],
-          );
-        if (data.leadership_data)
-          setLeadershipRows(
-            Array.isArray(data.leadership_data)
-              ? data.leadership_data.map((r: any, i: number) => ({
-                  ...r,
-                  id: r.id || i + 1,
-                }))
-              : [],
-          );
-        if (data.courses_data)
-          setCourses(
-            Array.isArray(data.courses_data)
-              ? data.courses_data.map((c: any, i: number) => ({
-                  ...c,
-                  id: c.id || i + 1,
-                }))
-              : [],
-          );
-        if (data.programs_data)
-          setPrograms(
-            Array.isArray(data.programs_data)
-              ? data.programs_data.map((p: any, i: number) => ({
-                  ...p,
-                  id: p.id || i + 1,
-                }))
-              : [],
-          );
-        if (data.facilities_data)
-          setFacilities(
-            Array.isArray(data.facilities_data)
-              ? data.facilities_data.map((f: any, i: number) => ({
-                  ...f,
-                  id: f.id || i + 1,
-                }))
-              : [],
-          );
-        if (data.alumni_data)
-          setAlumni(
-            Array.isArray(data.alumni_data)
-              ? data.alumni_data.map((a: any, i: number) => ({
-                  ...a,
-                  id: a.id || i + 1,
-                }))
-              : [],
-          );
+
+        let galleryGroupsData: GalleryGroup[] = [];
         if (data.gallery_data) {
-          if (
-            Array.isArray(data.gallery_data) &&
-            data.gallery_data.length > 0
-          ) {
+          if (Array.isArray(data.gallery_data) && data.gallery_data.length > 0) {
             if ("folder" in data.gallery_data[0]) {
-              setGalleryGroups(data.gallery_data);
+              galleryGroupsData = data.gallery_data;
             } else {
-              setGalleryGroups([
+              galleryGroupsData = [
                 {
                   folder: "Gallery",
                   images: data.gallery_data.map((g: any) => ({
@@ -360,64 +329,67 @@ const ProfilePage: React.FC = () => {
                     url: g.url || "",
                   })),
                 },
-              ]);
+              ];
             }
-          } else {
-            setGalleryGroups([]);
           }
         }
-        if (data.downloads_data)
-          setDownloads(
-            Array.isArray(data.downloads_data)
-              ? data.downloads_data.map((d: any, i: number) => ({
-                  ...d,
-                  id: d.id || i + 1,
-                }))
-              : [],
-          );
-        if (data.faqs_data)
-          setFaqs(
-            Array.isArray(data.faqs_data)
-              ? data.faqs_data.map((f: any, i: number) => ({
-                  id: f.id || i + 1,
-                  question: f.question || "",
-                  answer: f.answer || "",
-                }))
-              : [],
-          );
+
+        const dataToReset = {
+          collegeName: data.institution_name || "",
+          location: data.location || "",
+          level: data.level ? data.level.split(",").filter(Boolean) : [],
+          website: data.website || "",
+          contactEmail: data.contact_email || "",
+          contactPhone: data.contact_phone || "",
+          mapUrl: data.map_url || "",
+          facebookUrl: data.facebook_url || "",
+          instagramUrl: data.instagram_url || "",
+          tiktokUrl: data.tiktok_url || "",
+          youtubeUrl: data.youtube_url || "",
+          linkedinUrl: data.linkedin_url || "",
+          affiliation: data.affiliation || "",
+          universityIds: resolvedIds.length > 0 ? resolvedIds : (primaryUniId > 0 ? [primaryUniId] : []),
+          brochureUrl: data.brochure_data?.url || "",
+          about: data.about || "",
+          vision: data.vision || "",
+          mission: data.mission || "",
+          logoUrl: data.logo_url || "",
+          bannerUrl: data.banner_url || "",
+          videos: data.videos && Array.isArray(data.videos) && data.videos.length > 0
+            ? data.videos.slice(0, 1).map((v: any, i: number) => ({
+                ...v,
+                id: v.id || i + 1,
+              }))
+            : [{ id: 1, url: "", message: "", name: "", designation: "", avatar: "" }],
+          overviewRows: data.overview_data && Array.isArray(data.overview_data)
+            ? data.overview_data.map((r: any, i: number) => ({ ...r, id: r.id || i + 1 }))
+            : [],
+          leadershipRows: data.leadership_data && Array.isArray(data.leadership_data)
+            ? data.leadership_data.map((r: any, i: number) => ({ ...r, id: r.id || i + 1 }))
+            : [],
+          courses: data.courses_data && Array.isArray(data.courses_data)
+            ? data.courses_data.map((c: any, i: number) => ({ ...c, id: c.id || i + 1 }))
+            : [],
+          programs: data.programs_data && Array.isArray(data.programs_data)
+            ? data.programs_data.map((p: any, i: number) => ({ ...p, id: p.id || i + 1 }))
+            : [],
+          facilities: data.facilities_data && Array.isArray(data.facilities_data)
+            ? data.facilities_data.map((f: any, i: number) => ({ ...f, id: f.id || i + 1 }))
+            : [],
+          alumni: data.alumni_data && Array.isArray(data.alumni_data)
+            ? data.alumni_data.map((a: any, i: number) => ({ ...a, id: a.id || i + 1 }))
+            : [],
+          galleryGroups: galleryGroupsData,
+          downloads: data.downloads_data && Array.isArray(data.downloads_data)
+            ? data.downloads_data.map((d: any, i: number) => ({ ...d, id: d.id || i + 1 }))
+            : [],
+          faqs: data.faqs_data && Array.isArray(data.faqs_data)
+            ? data.faqs_data.map((f: any, i: number) => ({ id: f.id || i + 1, question: f.question || "", answer: f.answer || "" }))
+            : [],
+        };
+
+        reset(dataToReset as FormData);
       }
-      const snapshotData = {
-        institution_name: data.institution_name || "",
-        location: data.location || "",
-        level: data.level || "",
-        website: data.website || "",
-        contact_email: data.contact_email || "",
-        contact_phone: data.contact_phone || "",
-        map_url: data.map_url || "",
-        facebook_url: data.facebook_url || "",
-        instagram_url: data.instagram_url || "",
-        tiktok_url: data.tiktok_url || "",
-        youtube_url: data.youtube_url || "",
-        linkedin_url: data.linkedin_url || "",
-        affiliation: data.affiliation || "",
-        logo_url: data.logo_url || "",
-        banner_url: data.banner_url || "",
-        about: data.about || "",
-        vision: data.vision || "",
-        mission: data.mission || "",
-        brochure_url: data.brochure_data?.url || "",
-        videos: data.videos || [],
-        overview_data: data.overview_data || [],
-        leadership_data: data.leadership_data || [],
-        courses_data: data.courses_data || [],
-        programs_data: data.programs_data || [],
-        facilities_data: data.facilities_data || [],
-        alumni_data: data.alumni_data || [],
-        gallery_data: data.gallery_data || [],
-        downloads_data: data.downloads_data || [],
-        faqs_data: data.faqs_data || [],
-      };
-      setInitialSnapshot(JSON.stringify(snapshotData));
     } catch (e) {
       console.error("Failed to load profile:", e);
     } finally {
