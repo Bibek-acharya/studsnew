@@ -29,6 +29,11 @@ const getYouTubeId = (url: string): string | null => {
   return match ? match[1] : null;
 };
 
+const isIframeEmbed = (url: string): boolean => {
+  if (!url) return false;
+  return url.trim().toLowerCase().startsWith("<iframe");
+};
+
 const AboutVideoInteractive: React.FC<{ videos?: VideoEntry[] }> = ({
   videos,
 }) => {
@@ -84,7 +89,12 @@ const AboutVideoInteractive: React.FC<{ videos?: VideoEntry[] }> = ({
   return (
     <div className="mx-auto mb-10 flex w-full flex-col gap-6 xl:flex-row xl:gap-8">
       <div className="relative h-[50vh] w-full min-w-0 flex-1 overflow-hidden rounded-md bg-brand-blue ring-1 ring-gray-200/50 sm:h-85 sm:rounded-md">
-        {mainYouTubeId ? (
+        {isIframeEmbed(mainData.video) ? (
+          <div
+            className="absolute inset-0 h-full w-full"
+            dangerouslySetInnerHTML={{ __html: mainData.video }}
+          />
+        ) : mainYouTubeId ? (
           <iframe
             className="absolute inset-0 h-full w-full"
             src={`https://www.youtube.com/embed/${mainYouTubeId}?autoplay=1&mute=1&loop=1&playlist=${mainYouTubeId}`}
@@ -113,7 +123,12 @@ const AboutVideoInteractive: React.FC<{ videos?: VideoEntry[] }> = ({
                 className="group relative h-12.5 w-[70px] shrink-0 cursor-pointer transition-transform sm:h-[55px] sm:w-[85px]"
               >
                 <div className="relative h-full w-full overflow-hidden rounded-md border-2 border-white bg-brand-blue sm:rounded-md">
-                  {ytId ? (
+                  {isIframeEmbed(data.video) ? (
+                    <div
+                      className="absolute inset-0 h-full w-full pointer-events-none"
+                      dangerouslySetInnerHTML={{ __html: data.video }}
+                    />
+                  ) : ytId ? (
                     <iframe
                       className="absolute inset-0 h-full w-full pointer-events-none"
                       src={`https://www.youtube.com/embed/${ytId}?autoplay=1&mute=1&controls=0`}

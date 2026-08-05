@@ -50,9 +50,10 @@ const ProfileAboutSection: React.FC<Props> = ({
           if (!v) return <p className="text-sm text-gray-400 py-2">Loading...</p>;
           return (
             <div className="bg-gray-50 border border-gray-200 rounded-md p-4">
-              <div className="space-y-3">
-                <div className="flex items-center gap-3">
-                  <div className="w-12 h-12 rounded-full bg-gray-200 overflow-hidden flex items-center justify-center border-2 border-gray-300 flex-shrink-0">
+              <div className="flex gap-4">
+                {/* Left: Avatar - full height */}
+                <div className="flex flex-col items-center gap-2 flex-shrink-0">
+                  <div className="w-20 h-24 rounded-lg bg-gray-200 overflow-hidden flex items-center justify-center border-2 border-gray-300">
                     {v.avatar ? (
                       <img
                         src={v.avatar}
@@ -60,10 +61,10 @@ const ProfileAboutSection: React.FC<Props> = ({
                         alt=""
                       />
                     ) : (
-                      <i className="fa-solid fa-user text-gray-400 text-lg"></i>
+                      <i className="fa-solid fa-user text-gray-400 text-2xl"></i>
                     )}
                   </div>
-                  <label className="cursor-pointer text-xs font-medium text-brand-blue hover:text-brand-hover bg-brand-blue/5 hover:bg-brand-blue/10 px-3 py-1.5 rounded transition-colors">
+                  <label className="cursor-pointer text-xs font-medium text-blue-600 hover:text-blue-700 bg-blue-50 hover:bg-blue-100 px-3 py-1.5 rounded transition-colors">
                     <i className="fa-solid fa-camera mr-1"></i> Photo
                     <input
                       type="file"
@@ -84,53 +85,57 @@ const ProfileAboutSection: React.FC<Props> = ({
                       }}
                     />
                   </label>
+                </div>
+
+                {/* Right: 3 rows */}
+                <div className="flex-1 space-y-3">
+                  {/* Row 1: Video URL */}
                   <input
-                    type="url"
-                    className={`${inputClass} text-sm flex-1`}
-                    placeholder="Video URL"
+                    type="text"
+                    className={`${inputClass} text-sm`}
+                    placeholder="YouTube URL, video link, or iframe embed code"
                     value={v.url}
                     onChange={(e) =>
                       updateItem("videos", v.id, "url", e.target.value)
                     }
                   />
-                </div>
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-                  <input
-                    type="text"
+
+                  {/* Row 2: Name + Designation */}
+                  <div className="grid grid-cols-2 gap-3">
+                    <input
+                      type="text"
+                      className={`${inputClass} text-sm`}
+                      placeholder="Person Name"
+                      value={v.name}
+                      onChange={(e) =>
+                        updateItem("videos", v.id, "name", e.target.value)
+                      }
+                    />
+                    <input
+                      type="text"
+                      className={`${inputClass} text-sm`}
+                      placeholder="Designation"
+                      value={v.designation}
+                      onChange={(e) =>
+                        updateItem(
+                          "videos",
+                          v.id,
+                          "designation",
+                          e.target.value,
+                        )
+                      }
+                    />
+                  </div>
+
+                  {/* Row 3: Message textarea */}
+                  <textarea
                     className={`${inputClass} text-sm`}
                     placeholder="Message / Title"
+                    rows={3}
                     maxLength={240}
                     value={v.message}
                     onChange={(e) =>
-                      updateItem(
-                        "videos",
-                        v.id,
-                        "message",
-                        e.target.value,
-                      )
-                    }
-                  />
-                  <input
-                    type="text"
-                    className={`${inputClass} text-sm`}
-                    placeholder="Person Name"
-                    value={v.name}
-                    onChange={(e) =>
-                      updateItem("videos", v.id, "name", e.target.value)
-                    }
-                  />
-                  <input
-                    type="text"
-                    className={`${inputClass} text-sm`}
-                    placeholder="Designation"
-                    value={v.designation}
-                    onChange={(e) =>
-                      updateItem(
-                        "videos",
-                        v.id,
-                        "designation",
-                        e.target.value,
-                      )
+                      updateItem("videos", v.id, "message", e.target.value)
                     }
                   />
                 </div>
