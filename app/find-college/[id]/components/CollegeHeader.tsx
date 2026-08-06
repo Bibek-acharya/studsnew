@@ -23,6 +23,9 @@ interface CollegeHeaderProps {
   setShowUnfollowDialog: (v: boolean) => void;
   onToggleFollow?: () => void;
   followLoading?: boolean;
+  isBookmarked?: boolean;
+  bookmarkLoading?: boolean;
+  onToggleBookmark?: () => void;
   setIsAskQuestionOpen: (v: boolean) => void;
   setIsShareModalOpen: (v: boolean) => void;
   setIsClaimModalOpen: (v: boolean) => void;
@@ -45,6 +48,9 @@ const CollegeHeader: React.FC<CollegeHeaderProps> = ({
   setShowUnfollowDialog,
   onToggleFollow,
   followLoading,
+  isBookmarked,
+  bookmarkLoading,
+  onToggleBookmark,
   setIsAskQuestionOpen,
   setIsShareModalOpen,
   setIsClaimModalOpen,
@@ -136,6 +142,7 @@ const CollegeHeader: React.FC<CollegeHeaderProps> = ({
                   </a>
                 )}
               </div>
+              <div className="flex items-center gap-2">
               <button
                 type="button"
                 disabled={followLoading}
@@ -160,6 +167,25 @@ const CollegeHeader: React.FC<CollegeHeaderProps> = ({
                   </>
                 )}
               </button>
+              <button
+                type="button"
+                disabled={bookmarkLoading}
+                onClick={onToggleBookmark}
+                className={`flex items-center justify-center gap-1.5 rounded-full px-3 py-1 text-[12px] font-semibold transition-colors md:px-4 md:py-1.5 md:text-[13px] disabled:opacity-50 ${isBookmarked ? "bg-blue-200 text-blue-800 hover:bg-blue-300" : "border border-gray-300 text-gray-600 hover:bg-gray-100"}`}
+              >
+                {bookmarkLoading ? (
+                  <i className="fa-solid fa-spinner fa-spin"></i>
+                ) : isBookmarked ? (
+                  <>
+                    <i className="fa-solid fa-bookmark"></i>Bookmarked
+                  </>
+                ) : (
+                  <>
+                    <i className="fa-regular fa-bookmark"></i>Bookmark
+                  </>
+                )}
+              </button>
+              </div>
             </div>
 
             <div className="hidden mt-8 w-full flex-nowrap items-center gap-2 overflow-x-auto pb-1 md:flex lg:mt-0 lg:w-auto lg:gap-3 lg:overflow-visible lg:pb-0">

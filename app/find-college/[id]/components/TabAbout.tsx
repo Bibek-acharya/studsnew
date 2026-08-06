@@ -7,6 +7,15 @@ import {
 } from "./index";
 import EmptyTabState from "./EmptyTabState";
 import RichText from "@/components/RichText";
+import { getImageUrl } from "@/services/api";
+
+interface VideoEntry {
+  url: string;
+  message: string;
+  name: string;
+  designation: string;
+  avatar: string;
+}
 
 interface TabAboutProps {
   description: string;
@@ -147,6 +156,49 @@ const TabAbout: React.FC<TabAboutProps> = ({
             </div>
           </div>
         )}
+
+      {(() => {
+        const video: VideoEntry | undefined = Array.isArray(instVideos) && instVideos.length > 0
+          ? instVideos.find((v: VideoEntry) => v.message || v.name)
+          : undefined;
+        if (!video || (!video.message && !video.name)) return null;
+        return (
+          <div className="overflow-hidden rounded-md border border-gray-100 bg-white p-6 sm:p-8">
+            <div className="flex items-start gap-5">
+              {video.avatar ? (
+                <img
+                  src={getImageUrl(video.avatar)}
+                  alt={video.name || "Speaker"}
+                  className="h-16 w-16 shrink-0 rounded-md border border-gray-200 object-cover"
+                />
+              ) : (
+                <div className="h-16 w-16 shrink-0 rounded-md border border-gray-200 bg-gray-100 flex items-center justify-center">
+                  <i className="fa-solid fa-user text-gray-400 text-xl"></i>
+                </div>
+              )}
+              <div className="min-w-0 flex-1">
+                <div className="flex items-center gap-3 mb-2">
+                  {video.name && (
+                    <h4 className="text-[15px] font-bold text-gray-900">
+                      {video.name}
+                    </h4>
+                  )}
+                  {video.designation && (
+                    <span className="text-[13px] text-gray-500">
+                      {video.designation}
+                    </span>
+                  )}
+                </div>
+                <RichText
+                  html={video.message}
+                  variant="sm"
+                  className="text-[14px] leading-relaxed text-gray-600"
+                />
+              </div>
+            </div>
+          </div>
+        );
+      })()}
     </div>
   );
 };

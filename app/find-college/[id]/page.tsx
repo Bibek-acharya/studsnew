@@ -26,6 +26,7 @@ import {
 import TabRecognition from "./components/TabRecognition";
 import { useCollegeData } from "./hooks/useCollegeData";
 import { useFollow } from "./hooks/useFollow";
+import { useBookmark } from "./hooks/useBookmark";
 import type { TabKey, LevelFilter } from "../types";
 import {
   FALLBACK_FACILITIES,
@@ -64,6 +65,12 @@ const CollegeDetailsPage = ({
     toggleFollow,
     unfollow,
   } = useFollow(data.college?.id || data.collegeId || null);
+
+  const {
+    isBookmarked,
+    loading: bookmarkLoading,
+    toggleBookmark,
+  } = useBookmark(data.college?.id || data.collegeId || null);
 
   useEffect(() => {
     setShareUrl(window.location.href);
@@ -191,6 +198,9 @@ const CollegeDetailsPage = ({
         setShowUnfollowDialog={setShowUnfollowDialog}
         onToggleFollow={toggleFollow}
         followLoading={followLoading}
+        isBookmarked={isBookmarked}
+        bookmarkLoading={bookmarkLoading}
+        onToggleBookmark={toggleBookmark}
         setIsAskQuestionOpen={setIsAskQuestionOpen}
         setIsShareModalOpen={setIsShareModalOpen}
         setIsClaimModalOpen={setIsClaimModalOpen}
