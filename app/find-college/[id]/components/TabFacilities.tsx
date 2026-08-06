@@ -51,7 +51,7 @@ const TabFacilities: React.FC<TabFacilitiesProps> = ({ facilities }) => {
           >
             <div className="w-12 h-12 rounded-md bg-[#0000ff] flex items-center justify-center text-white mb-4">
               <i
-                className={`fa-solid ${facility.icon?.replace("fa-solid ", "").replace("fa-", "") || "question"} text-[22px]`}
+                className={`fa-solid fa-${facility.icon?.replace(/^fa-solid\s*/, "").replace(/^fa-/, "") || "question"} text-[22px]`}
               ></i>
             </div>
             <h3 className="font-bold text-gray-900 mb-2">

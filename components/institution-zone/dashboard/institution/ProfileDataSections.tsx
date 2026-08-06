@@ -18,12 +18,14 @@ interface ReorderItem {
     field: string,
     value: string,
   ) => void;
+  levelOptions?: string[];
 }
 
 const ProfileDataSections: React.FC<ReorderItem> = ({
   addItem,
   removeItem,
   updateItem,
+  levelOptions = [],
 }) => {
   const { watch } = useFormContext<FormData>();
 
@@ -40,6 +42,7 @@ const ProfileDataSections: React.FC<ReorderItem> = ({
             onClick={() =>
               addItem("courses", {
                 name: "",
+                level: "",
                 duration: "",
                 fees: "",
                 eligibility: "",
@@ -64,7 +67,21 @@ const ProfileDataSections: React.FC<ReorderItem> = ({
               >
                 <i className="fa-solid fa-trash"></i>
               </button>
-              <div className="grid grid-cols-1 md:grid-cols-5 gap-3 pr-10">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-3 pr-10">
+                <select
+                  className={`${inputClass} text-sm`}
+                  value={c.level}
+                  onChange={(e) =>
+                    updateItem("courses", c.id, "level", e.target.value)
+                  }
+                >
+                  <option value="">Level</option>
+                  {levelOptions.map((opt) => (
+                    <option key={opt} value={opt}>
+                      {opt}
+                    </option>
+                  ))}
+                </select>
                 <input
                   type="text"
                   className={`${inputClass} text-sm`}

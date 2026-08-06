@@ -217,11 +217,15 @@ const CollegeDetailsPage = ({
             <TabAdmissions
               admissions={admissionsData}
               collegeId={data.collegeId}
+              filter={admissionFilter}
+              onFilterChange={setAdmissionFilter}
             />
           )}
           {activeTab === "offered" && (
             <TabOffered
               programs={offeredPrograms}
+              filter={programFilter}
+              onFilterChange={setProgramFilter}
             />
           )}
           {activeTab === "facilities" && (

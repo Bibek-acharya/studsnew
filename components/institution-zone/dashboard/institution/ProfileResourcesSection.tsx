@@ -177,26 +177,6 @@ const ProfileResourcesSection: React.FC<Props> = ({
                         hideClearButton
                       />
                     )}
-
-                    <div className="mt-4">
-                      <label className="text-sm font-medium text-gray-700 block mb-1.5">
-                        Image Title
-                      </label>
-                      <input
-                        type="text"
-                        className="w-full px-4 py-2.5 rounded-lg border border-gray-200 bg-white text-gray-900 focus:outline-none focus:border-blue-500"
-                        placeholder="Leadership Training"
-                        value={img.title}
-                        onChange={(e) =>
-                          updateGalleryImage(
-                            groupIndex,
-                            imageIndex,
-                            "title",
-                            e.target.value,
-                          )
-                        }
-                      />
-                    </div>
                   </div>
                 ))}
 

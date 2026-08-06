@@ -2,31 +2,58 @@
 
 import React, { useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
+import FilterPills from "./FilterPills";
+import type { LevelFilter } from "../../types";
 import EmptyTabState from "./EmptyTabState";
 
 interface TabOfferedProps {
   programs: any[];
+  filter: LevelFilter;
+  onFilterChange: (f: LevelFilter) => void;
 }
 
-const TabOffered: React.FC<TabOfferedProps> = ({ programs }) => {
+const TabOffered: React.FC<TabOfferedProps> = ({ programs, filter, onFilterChange }) => {
   const router = useRouter();
   const [page, setPage] = useState(1);
   const PER_PAGE = 10;
 
-  const filtered = useMemo(() => programs, [programs]);
-
-  const totalPages = Math.ceil(filtered.length / PER_PAGE);
-  const paginated = filtered.slice((page - 1) * PER_PAGE, page * PER_PAGE);
+  const filtered = useMemo(() => {
+    if (filter === "all") return programs;
+    return programs.filter((p: any) => {
+      const level = (p.level || "").toLowerCase();
+      if (filter === "+2") return level.includes("+2") || level.includes("high school");
+      if (filter === "Bachelor") return level.includes("bachelor");
+      if (filter === "Master") return level.includes("master");
+      return true;
+    });
+  }, [programs, filter]);
 
   if (programs.length === 0)
     return <EmptyTabState tabName="programs" />;
 
+  if (filtered.length === 0)
+    return (
+      <div className="overflow-hidden rounded-md border border-gray-100 bg-white">
+        <div className="flex flex-wrap items-center justify-between gap-4 border-b border-gray-100 bg-[#f8fafc] px-6 py-4">
+          <h3 className="flex items-center gap-2 text-[16px] font-bold text-gray-900">
+            Offered Programs
+          </h3>
+          <FilterPills active={filter} onChange={(v) => { onFilterChange(v); setPage(1); }} />
+        </div>
+        <p className="text-sm text-gray-400 py-8 text-center">No programs found for this level.</p>
+      </div>
+    );
+
+  const totalPages = Math.ceil(filtered.length / PER_PAGE);
+  const paginated = filtered.slice((page - 1) * PER_PAGE, page * PER_PAGE);
+
   return (
     <div className="overflow-hidden rounded-md border border-gray-100 bg-white">
-      <div className="border-b border-gray-100 bg-[#f8fafc] px-6 py-4">
+      <div className="flex flex-wrap items-center justify-between gap-4 border-b border-gray-100 bg-[#f8fafc] px-6 py-4">
         <h3 className="flex items-center gap-2 text-[16px] font-bold text-gray-900">
           Offered Programs
         </h3>
+        <FilterPills active={filter} onChange={(v) => { onFilterChange(v); setPage(1); }} />
       </div>
 
       <div className="w-full overflow-x-auto">

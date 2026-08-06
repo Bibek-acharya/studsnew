@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import React, { useMemo } from "react";
 import { useRouter } from "next/navigation";
 import RichText from "@/components/RichText";
 import { FilterPills, ProgTh } from "./index";
@@ -22,8 +22,32 @@ const TabScholarship: React.FC<TabScholarshipProps> = ({
 }) => {
   const router = useRouter();
 
+  const filtered = useMemo(() => {
+    if (filter === "all") return scholarships;
+    return scholarships.filter((s: any) => {
+      const level = (s.level || "").toLowerCase();
+      if (filter === "+2") return level.includes("+2") || level.includes("high school");
+      if (filter === "Bachelor") return level.includes("bachelor");
+      if (filter === "Master") return level.includes("master");
+      return true;
+    });
+  }, [scholarships, filter]);
+
   if (scholarships.length === 0)
     return <EmptyTabState tabName="scholarships" />;
+
+  if (filtered.length === 0)
+    return (
+      <div className="overflow-hidden rounded-[20px] border border-gray-200 bg-white">
+        <div className="flex flex-wrap items-center justify-between gap-4 border-b border-gray-100 bg-[#f4f8fc] px-6 py-4">
+          <p className="text-[14px] font-semibold text-brand-blue">
+            Scholarship opportunities – filter by level
+          </p>
+          <FilterPills active={filter} onChange={onFilterChange} />
+        </div>
+        <p className="text-sm text-gray-400 py-8 text-center">No scholarships found for this level.</p>
+      </div>
+    );
 
   return (
     <div className="overflow-hidden rounded-[20px] border border-gray-200 bg-white">
@@ -31,9 +55,7 @@ const TabScholarship: React.FC<TabScholarshipProps> = ({
         <p className="text-[14px] font-semibold text-brand-blue">
           Scholarship opportunities – filter by level
         </p>
-        {!hasApiData && (
-          <FilterPills active={filter} onChange={onFilterChange} />
-        )}
+        <FilterPills active={filter} onChange={onFilterChange} />
       </div>
       <div className="w-full overflow-x-auto">
         <div className="min-w-[800px]">
@@ -44,7 +66,7 @@ const TabScholarship: React.FC<TabScholarshipProps> = ({
             <ProgTh className="col-span-3">FOR WHOM</ProgTh>
             <ProgTh className="col-span-3"></ProgTh>
           </div>
-          {scholarships.map((scholarship) => (
+          {filtered.map((scholarship) => (
             <div
               key={
                 scholarship.id ||

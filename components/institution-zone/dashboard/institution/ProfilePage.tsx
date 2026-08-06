@@ -54,7 +54,7 @@ export const profileSchema = z.object({
   })),
   overviewRows: z.array(z.object({ id: z.number(), key: z.string(), value: z.string() })),
   leadershipRows: z.array(z.object({ id: z.number(), position: z.string(), role: z.string(), holder: z.string() })),
-  courses: z.array(z.object({ id: z.number(), name: z.string(), duration: z.string(), fees: z.string(), eligibility: z.string(), seats: z.string() })),
+  courses: z.array(z.object({ id: z.number(), name: z.string(), level: z.string(), duration: z.string(), fees: z.string(), eligibility: z.string(), seats: z.string() })),
   programs: z.array(z.object({ id: z.number(), name: z.string(), level: z.string(), affiliation: z.string(), status: z.string() })),
   facilities: z.array(z.object({ id: z.number(), icon: z.string(), heading: z.string(), desc: z.string() })),
   alumni: z.array(alumniSchema),
@@ -619,6 +619,7 @@ const ProfilePage: React.FC = () => {
             addItem={addItem}
             removeItem={removeItem}
             updateItem={updateItem}
+            levelOptions={levelOptions}
           />
 
           <ProfileAlumniSection

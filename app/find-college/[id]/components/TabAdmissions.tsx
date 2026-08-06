@@ -2,35 +2,60 @@
 
 import React, { useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
+import FilterPills from "./FilterPills";
+import type { LevelFilter } from "../../types";
 import EmptyTabState from "./EmptyTabState";
 
 interface TabAdmissionsProps {
   admissions: any[] | null;
   collegeId: number | null;
+  filter: LevelFilter;
+  onFilterChange: (f: LevelFilter) => void;
 }
 
-const TabAdmissions: React.FC<TabAdmissionsProps> = ({ admissions, collegeId }) => {
+const TabAdmissions: React.FC<TabAdmissionsProps> = ({ admissions, collegeId, filter, onFilterChange }) => {
   const router = useRouter();
   const [page, setPage] = useState(1);
   const PER_PAGE = 10;
 
   const filtered = useMemo(() => {
     if (!admissions) return [];
-    return admissions;
-  }, [admissions]);
-
-  const totalPages = Math.ceil(filtered.length / PER_PAGE);
-  const paginated = filtered.slice((page - 1) * PER_PAGE, page * PER_PAGE);
+    if (filter === "all") return admissions;
+    return admissions.filter((a: any) => {
+      const level = (a.level || "").toLowerCase();
+      if (filter === "+2") return level.includes("+2") || level.includes("high school");
+      if (filter === "Bachelor") return level.includes("bachelor");
+      if (filter === "Master") return level.includes("master");
+      return true;
+    });
+  }, [admissions, filter]);
 
   if (!admissions || admissions.length === 0)
     return <EmptyTabState tabName="admission notices" />;
 
+  if (filtered.length === 0)
+    return (
+      <div className="overflow-hidden rounded-md border border-gray-100 bg-white">
+        <div className="flex flex-wrap items-center justify-between gap-4 border-b border-gray-100 bg-[#f8fafc] px-6 py-4">
+          <h3 className="flex items-center gap-2 text-[16px] font-bold text-gray-900">
+            Admissions
+          </h3>
+          <FilterPills active={filter} onChange={(v) => { onFilterChange(v); setPage(1); }} />
+        </div>
+        <p className="text-sm text-gray-400 py-8 text-center">No admissions found for this level.</p>
+      </div>
+    );
+
+  const totalPages = Math.ceil(filtered.length / PER_PAGE);
+  const paginated = filtered.slice((page - 1) * PER_PAGE, page * PER_PAGE);
+
   return (
     <div className="overflow-hidden rounded-md border border-gray-100 bg-white">
-      <div className="border-b border-gray-100 bg-[#f8fafc] px-6 py-4">
+      <div className="flex flex-wrap items-center justify-between gap-4 border-b border-gray-100 bg-[#f8fafc] px-6 py-4">
         <h3 className="flex items-center gap-2 text-[16px] font-bold text-gray-900">
           Admissions
         </h3>
+        <FilterPills active={filter} onChange={(v) => { onFilterChange(v); setPage(1); }} />
       </div>
 
       <div className="w-full overflow-x-auto">
