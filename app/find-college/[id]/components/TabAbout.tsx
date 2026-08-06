@@ -163,34 +163,34 @@ const TabAbout: React.FC<TabAboutProps> = ({
           : undefined;
         if (!video || (!video.message && !video.name)) return null;
         return (
-          <div className="overflow-hidden rounded-md bg-brand-blue p-6 sm:p-8">
+          <div className="overflow-hidden rounded-md bg-[#f4f7fb] p-6 sm:p-8">
             <div className="flex items-start gap-5">
               {video.avatar ? (
                 <img
                   src={getImageUrl(video.avatar)}
                   alt={video.name || "Speaker"}
-                  className="h-16 w-16 shrink-0 rounded-md border border-white/20 object-cover"
+                  className="h-20 w-20 shrink-0 rounded-md border border-gray-200 object-cover"
                 />
               ) : (
-                <div className="h-16 w-16 shrink-0 rounded-md border border-white/20 bg-white/10 flex items-center justify-center">
-                  <i className="fa-solid fa-user text-white/60 text-xl"></i>
+                <div className="h-20 w-20 shrink-0 rounded-md border border-gray-200 bg-gray-200 flex items-center justify-center">
+                  <i className="fa-solid fa-user text-gray-400 text-2xl"></i>
                 </div>
               )}
               <div className="min-w-0 flex-1">
                 {video.name && (
-                  <h4 className="text-[15px] font-bold text-white">
+                  <h4 className="text-[15px] font-bold text-gray-900">
                     {video.name}
                   </h4>
                 )}
                 {video.designation && (
-                  <p className="text-[13px] text-white/70 mb-2">
+                  <p className="text-[13px] text-gray-500 mb-2">
                     {video.designation}
                   </p>
                 )}
                 <RichText
                   html={video.message}
                   variant="sm"
-                  className="text-[14px] leading-relaxed text-white"
+                  className="text-[14px] leading-relaxed text-gray-700"
                 />
               </div>
             </div>

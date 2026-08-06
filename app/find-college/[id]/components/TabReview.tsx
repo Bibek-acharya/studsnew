@@ -1,6 +1,7 @@
 "use client";
 
 import React from "react";
+import { useRouter } from "next/navigation";
 import { RatingBar, ReviewCard } from "./index";
 import EmptyTabState from "./EmptyTabState";
 
@@ -10,6 +11,9 @@ interface TabReviewProps {
 }
 
 const TabReview: React.FC<TabReviewProps> = ({ reviewsData, reviewsLoading }) => {
+  const router = useRouter();
+  const hasReviews = reviewsData?.reviews?.length > 0;
+
   if (reviewsLoading) {
     return (
       <div className="animate-pulse space-y-4 py-8">
@@ -57,10 +61,12 @@ const TabReview: React.FC<TabReviewProps> = ({ reviewsData, reviewsLoading }) =>
 
       <div className="mb-4 flex justify-between items-center">
         <h3 className="text-[18px] font-bold text-gray-900">Recent Reviews</h3>
-        <a href="/write-review" className="text-sm font-medium text-brand-blue hover:text-brand-hover">Write a Review</a>
+        {hasReviews && (
+          <a href="/write-review" className="text-sm font-medium text-brand-blue hover:text-brand-hover">Write a Review</a>
+        )}
       </div>
 
-      {reviewsData?.reviews?.length > 0 ? (
+      {hasReviews ? (
         <div className="space-y-5">
           {reviewsData.reviews.map((review: any, idx: number) => {
             const avgRating = Object.values(review.ratings || {}).reduce((s: number, v: any) => s + v, 0) / 10;
@@ -68,7 +74,11 @@ const TabReview: React.FC<TabReviewProps> = ({ reviewsData, reviewsLoading }) =>
           })}
         </div>
       ) : (
-        <EmptyTabState tabName="reviews" />
+        <EmptyTabState
+          tabName="reviews"
+          actionLabel="Write a Review"
+          onAction={() => router.push("/write-review")}
+        />
       )}
     </div>
   );
