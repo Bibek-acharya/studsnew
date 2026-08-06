@@ -132,7 +132,6 @@ const ProfileAboutSection: React.FC<Props> = ({
                     className={`${inputClass} text-sm`}
                     placeholder="Message / Title"
                     rows={3}
-                    maxLength={240}
                     value={v.message}
                     onChange={(e) =>
                       updateItem("videos", v.id, "message", e.target.value)
