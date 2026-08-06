@@ -27,7 +27,7 @@ const ProfileDataSections: React.FC<ReorderItem> = ({
   updateItem,
   levelOptions = [],
 }) => {
-  const { watch } = useFormContext<FormData>();
+  const { watch, formState: { errors } } = useFormContext<FormData>();
 
   return (
     <>
@@ -55,7 +55,7 @@ const ProfileDataSections: React.FC<ReorderItem> = ({
           </button>
         </div>
         <div className="space-y-3">
-          {watch("courses").map((c) => (
+          {watch("courses").map((c, ci) => (
             <div
               key={c.id}
               className="bg-gray-50 border border-gray-200 rounded-md p-4 relative group"
@@ -68,71 +68,101 @@ const ProfileDataSections: React.FC<ReorderItem> = ({
                 <i className="fa-solid fa-trash"></i>
               </button>
               <div className="grid grid-cols-1 md:grid-cols-3 gap-3 pr-10">
-                <select
-                  className={`${inputClass} text-sm`}
-                  value={c.level}
-                  onChange={(e) =>
-                    updateItem("courses", c.id, "level", e.target.value)
-                  }
-                >
-                  <option value="">Level</option>
-                  {levelOptions.map((opt) => (
-                    <option key={opt} value={opt}>
-                      {opt}
-                    </option>
-                  ))}
-                </select>
-                <input
-                  type="text"
-                  className={`${inputClass} text-sm`}
-                  placeholder="Course name"
-                  value={c.name}
-                  onChange={(e) =>
-                    updateItem("courses", c.id, "name", e.target.value)
-                  }
-                />
-                <input
-                  type="text"
-                  className={`${inputClass} text-sm`}
-                  placeholder="Duration"
-                  value={c.duration}
-                  onChange={(e) =>
-                    updateItem("courses", c.id, "duration", e.target.value)
-                  }
-                />
-                <input
-                  type="text"
-                  className={`${inputClass} text-sm`}
-                  placeholder="Fees / Year"
-                  value={c.fees}
-                  onChange={(e) =>
-                    updateItem("courses", c.id, "fees", e.target.value)
-                  }
-                />
-                <input
-                  type="number"
-                  min="0"
-                  className={`${inputClass} text-sm`}
-                  placeholder="Seats"
-                  value={c.seats}
-                  onChange={(e) =>
-                    updateItem("courses", c.id, "seats", e.target.value)
-                  }
-                />
-                <input
-                  type="text"
-                  className={`${inputClass} text-sm`}
-                  placeholder="Eligibility"
-                  value={c.eligibility}
-                  onChange={(e) =>
-                    updateItem(
-                      "courses",
-                      c.id,
-                      "eligibility",
-                      e.target.value,
-                    )
-                  }
-                />
+                <div>
+                  <select
+                    className={`${inputClass} text-sm ${errors.courses?.[ci]?.level ? 'border-red-500' : ''}`}
+                    value={c.level}
+                    onChange={(e) =>
+                      updateItem("courses", c.id, "level", e.target.value)
+                    }
+                  >
+                    <option value="">Level</option>
+                    {levelOptions.map((opt) => (
+                      <option key={opt} value={opt}>
+                        {opt}
+                      </option>
+                    ))}
+                  </select>
+                  {errors.courses?.[ci]?.level && (
+                    <p className="mt-1 text-xs text-red-500">{errors.courses[ci]?.level?.message}</p>
+                  )}
+                </div>
+                <div>
+                  <input
+                    type="text"
+                    className={`${inputClass} text-sm ${errors.courses?.[ci]?.name ? 'border-red-500' : ''}`}
+                    placeholder="Course name"
+                    value={c.name}
+                    onChange={(e) =>
+                      updateItem("courses", c.id, "name", e.target.value)
+                    }
+                  />
+                  {errors.courses?.[ci]?.name && (
+                    <p className="mt-1 text-xs text-red-500">{errors.courses[ci]?.name?.message}</p>
+                  )}
+                </div>
+                <div>
+                  <input
+                    type="text"
+                    className={`${inputClass} text-sm ${errors.courses?.[ci]?.duration ? 'border-red-500' : ''}`}
+                    placeholder="Duration"
+                    value={c.duration}
+                    onChange={(e) =>
+                      updateItem("courses", c.id, "duration", e.target.value)
+                    }
+                  />
+                  {errors.courses?.[ci]?.duration && (
+                    <p className="mt-1 text-xs text-red-500">{errors.courses[ci]?.duration?.message}</p>
+                  )}
+                </div>
+                <div>
+                  <input
+                    type="text"
+                    className={`${inputClass} text-sm ${errors.courses?.[ci]?.fees ? 'border-red-500' : ''}`}
+                    placeholder="Fees / Year"
+                    value={c.fees}
+                    onChange={(e) =>
+                      updateItem("courses", c.id, "fees", e.target.value)
+                    }
+                  />
+                  {errors.courses?.[ci]?.fees && (
+                    <p className="mt-1 text-xs text-red-500">{errors.courses[ci]?.fees?.message}</p>
+                  )}
+                </div>
+                <div>
+                  <input
+                    type="number"
+                    min="0"
+                    className={`${inputClass} text-sm ${errors.courses?.[ci]?.seats ? 'border-red-500' : ''}`}
+                    placeholder="Seats"
+                    value={c.seats}
+                    onChange={(e) =>
+                      updateItem("courses", c.id, "seats", e.target.value)
+                    }
+                  />
+                  {errors.courses?.[ci]?.seats && (
+                    <p className="mt-1 text-xs text-red-500">{errors.courses[ci]?.seats?.message}</p>
+                  )}
+                </div>
+                <div>
+                  <input
+                    type="text"
+                    className={`${inputClass} text-sm ${errors.courses?.[ci]?.eligibility ? 'border-red-500' : ''}`}
+                    placeholder="Eligibility"
+                    value={c.eligibility}
+                    onChange={(e) =>
+                      updateItem(
+                        "courses",
+                        c.id,
+                        "eligibility",
+                        e.target.value,
+                      )
+                    }
+                  />
+                  {errors.courses?.[ci]?.eligibility && (
+                    <p className="mt-1 text-xs text-red-500">{errors.courses[ci]?.eligibility?.message}</p>
+                  )}
+                </div>
               </div>
             </div>
           ))}

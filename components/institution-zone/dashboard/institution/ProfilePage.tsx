@@ -3,6 +3,7 @@ import React, { useState, useRef, useEffect, useCallback } from "react";
 import { useForm, FormProvider } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
+import { toast } from "sonner";
 import ImageCropperModal from "@/components/ScholarshipProvider/common/ImageCropperModal";
 import { NEPAL_DISTRICTS } from "@/lib/location-data";
 import ProfileMediaSection from "./ProfileMediaSection";
@@ -481,6 +482,7 @@ const ProfilePage: React.FC = () => {
   const saveProfile = async (status: "draft" | "published") => {
     const isValid = await trigger();
     if (!isValid) {
+      toast.error("Please fix the errors below");
       setTimeout(() => {
         const firstErrField = FIELD_ORDER.find(f => {
           const state = getFieldState(f);
@@ -546,6 +548,7 @@ const ProfilePage: React.FC = () => {
       setTimeout(() => setSaved(false), 3000);
     } catch (e) {
       console.error("Failed to save profile:", e);
+      toast.error("Failed to save profile. Please try again.");
     } finally {
       setSaving(false);
     }
