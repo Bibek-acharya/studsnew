@@ -39,7 +39,7 @@ const AboutVideoInteractive: React.FC<{ videos?: VideoEntry[] }> = ({
     <div className="relative h-[50vh] w-full overflow-hidden rounded-md bg-brand-blue ring-1 ring-gray-200/50 sm:h-85">
       {isIframeEmbed(mainVideo.url) ? (
         <div
-          className="absolute inset-0 h-full w-full"
+          className="absolute inset-0 h-full w-full [&_iframe]:!w-full [&_iframe]:!h-full"
           dangerouslySetInnerHTML={{ __html: mainVideo.url }}
         />
       ) : youtubeId ? (

@@ -163,36 +163,34 @@ const TabAbout: React.FC<TabAboutProps> = ({
           : undefined;
         if (!video || (!video.message && !video.name)) return null;
         return (
-          <div className="overflow-hidden rounded-md border border-gray-100 bg-white p-6 sm:p-8">
+          <div className="overflow-hidden rounded-md bg-brand-blue p-6 sm:p-8">
             <div className="flex items-start gap-5">
               {video.avatar ? (
                 <img
                   src={getImageUrl(video.avatar)}
                   alt={video.name || "Speaker"}
-                  className="h-16 w-16 shrink-0 rounded-md border border-gray-200 object-cover"
+                  className="h-16 w-16 shrink-0 rounded-md border border-white/20 object-cover"
                 />
               ) : (
-                <div className="h-16 w-16 shrink-0 rounded-md border border-gray-200 bg-gray-100 flex items-center justify-center">
-                  <i className="fa-solid fa-user text-gray-400 text-xl"></i>
+                <div className="h-16 w-16 shrink-0 rounded-md border border-white/20 bg-white/10 flex items-center justify-center">
+                  <i className="fa-solid fa-user text-white/60 text-xl"></i>
                 </div>
               )}
               <div className="min-w-0 flex-1">
-                <div className="flex items-center gap-3 mb-2">
-                  {video.name && (
-                    <h4 className="text-[15px] font-bold text-gray-900">
-                      {video.name}
-                    </h4>
-                  )}
-                  {video.designation && (
-                    <span className="text-[13px] text-gray-500">
-                      {video.designation}
-                    </span>
-                  )}
-                </div>
+                {video.name && (
+                  <h4 className="text-[15px] font-bold text-white">
+                    {video.name}
+                  </h4>
+                )}
+                {video.designation && (
+                  <p className="text-[13px] text-white/70 mb-2">
+                    {video.designation}
+                  </p>
+                )}
                 <RichText
                   html={video.message}
                   variant="sm"
-                  className="text-[14px] leading-relaxed text-gray-600"
+                  className="text-[14px] leading-relaxed text-white"
                 />
               </div>
             </div>
