@@ -58,6 +58,23 @@ export const universityApi = {
       `/api/v1/universities/${id}/scholarships?${params.toString()}`,
     );
   },
+  async getAffiliatedColleges(
+    id: number,
+  ): Promise<{
+    data: {
+      university: { id: number; name: string };
+      affiliated_colleges: any[];
+      total: number;
+    };
+  }> {
+    return apiRequest<{
+      data: {
+        university: { id: number; name: string };
+        affiliated_colleges: any[];
+        total: number;
+      };
+    }>(`/api/v1/universities/${id}/affiliated-colleges`);
+  },
   async getUniversityFilterCounts(
     isNepali?: string,
   ): Promise<UniversityFilterCountsResponse> {
