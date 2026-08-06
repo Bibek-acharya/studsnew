@@ -69,7 +69,7 @@ const AboutVideoInteractive: React.FC<{ videos?: VideoEntry[] }> = ({
   if (!mainData || allKeys.length === 0) return null;
 
   const mainYouTubeId = getYouTubeId(mainData.video);
-  const messageIsLong = mainData.title && mainData.title.length > 120;
+  const messageIsLong = mainData.title && mainData.title.length > 250;
 
   return (
     <>
@@ -115,21 +115,23 @@ const AboutVideoInteractive: React.FC<{ videos?: VideoEntry[] }> = ({
                 <i className="fa-solid fa-user text-white/60"></i>
               </div>
             )}
-            <RichText
-              html={mainData.title}
-              variant="sm"
-              as="h2"
-              className={`mb-2 text-[16px] font-normal leading-tight tracking-tight text-white sm:mb-3 sm:text-[18px] ${messageIsLong ? "line-clamp-4" : ""}`}
-            />
-            {messageIsLong && (
-              <button
-                type="button"
-                onClick={() => setShowMessageModal(true)}
-                className="mb-4 text-[13px] font-medium text-blue-200 hover:text-white"
-              >
-                See more
-              </button>
-            )}
+            <div className="min-h-0 flex-1">
+              <RichText
+                html={mainData.title}
+                variant="sm"
+                as="h2"
+                className={`text-[16px] font-normal leading-relaxed tracking-tight text-white sm:text-[18px] ${messageIsLong ? "line-clamp-6" : ""}`}
+              />
+              {messageIsLong && (
+                <button
+                  type="button"
+                  onClick={() => setShowMessageModal(true)}
+                  className="mt-0.5 text-[13px] font-medium text-blue-200 hover:text-white"
+                >
+                  ...See more
+                </button>
+              )}
+            </div>
             <div className="mt-auto">
               <h4 className="mb-1 text-[11px] font-bold uppercase tracking-wide text-white sm:text-[12px]">
                 {mainData.author}
