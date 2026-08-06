@@ -1,78 +1,178 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import Link from "next/link";
 import { Home } from "lucide-react";
-
-const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080";
+import { ProgramCard } from "@/components/find-college/CollegeGrid";
+import { College } from "@/services/api";
+import { universityApi } from "@/services/university.api";
+import { useAuth } from "@/services/AuthContext";
+import { isCollegeVerified } from "@/app/find-college/types";
 
 const toSlug = (name: string) =>
   name.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "");
 
-async function fetchFromAPI<T>(path: string): Promise<T | null> {
-  try {
-    const res = await fetch(`${API_BASE}${path}`, { cache: "no-store" });
-    if (!res.ok) return null;
-    const json = await res.json();
-    return json?.success ? (json.data as T) : null;
-  } catch { return null; }
-}
-
 export default function Page({ params }: { params: { id: string } }) {
-  const [data, setData] = useState<{ matched: any; institutions: any[] }>({ matched: null, institutions: [] });
+  const [university, setUniversity] = useState<{
+    id: number;
+    name: string;
+  } | null>(null);
+  const [colleges, setColleges] = useState<College[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [savedIds, setSavedIds] = useState<number[]>([]);
+  const [bookmarkMap, setBookmarkMap] = useState<Record<number, number>>({});
+  const [pendingBookmarks, setPendingBookmarks] = useState<
+    Record<number, boolean>
+  >({});
+  const [selectedIds, setSelectedIds] = useState<number[]>([]);
+  const [quickInquiryMode, setQuickInquiryMode] = useState(false);
+  const { isAuthenticated } = useAuth();
 
   useEffect(() => {
     (async () => {
-      const id = params.id;
-      const uniPayload = await fetchFromAPI<{ universities: { id: number; name: string; is_nepali: boolean }[] }>("/api/v1/universities?pageSize=200");
-      const allUnis = uniPayload?.universities ?? [];
-      const matched = allUnis.find((u) => toSlug(u.name) === id) ?? null;
-      let institutions: any[] = [];
-      if (matched) {
-        const instPayload = await fetchFromAPI<{ institutions: any[] }>(`/api/v1/institutions/public/by-university/${matched.id}`);
-        institutions = instPayload?.institutions ?? [];
+      setLoading(true);
+      try {
+        const uniPayload = await universityApi.getUniversities();
+        const allUnis = uniPayload?.data?.universities ?? [];
+        const matched = allUnis.find(
+          (u: any) => toSlug(u.name) === params.id,
+        );
+
+        if (matched) {
+          setUniversity({ id: matched.id, name: matched.name });
+          const payload =
+            await universityApi.getAffiliatedColleges(matched.id);
+          const affiliated = payload?.data?.affiliated_colleges ?? [];
+          setColleges(
+            affiliated.map((c: any) => ({
+              id: c.college_id || c.id,
+              name: c.institution_name || c.name,
+              image_url: c.banner_url || c.logo_url,
+              logo_url: c.logo_url,
+              location: c.district || c.location,
+              website: c.website_url || c.website,
+              verified: c.verified ?? false,
+              claimed: c.claimed ?? false,
+              affiliation: c.affiliation || university?.name || "",
+              type: c.type || c.institution_type || "College",
+              description: c.about || c.description,
+              rating: c.rating || 0,
+              reviews: c.reviews || 0,
+              featured: c.featured ?? false,
+            } as College)),
+          );
+        }
+      } catch (err) {
+        console.error("Failed to fetch affiliated colleges:", err);
+      } finally {
+        setLoading(false);
       }
-      setData({ matched, institutions });
     })();
   }, [params.id]);
 
-  const { matched, institutions } = data;
+  useEffect(() => {
+    if (!isAuthenticated) return;
+    import("@/services/api").then(({ apiService }) => {
+      apiService
+        .getBookmarksByType("colleges")
+        .then((items: any[]) => {
+          const ids: number[] = [];
+          const map: Record<number, number> = {};
+          items.forEach((item: any) => {
+            ids.push(item.item_id);
+            map[item.item_id] = item.id;
+          });
+          setSavedIds(ids);
+          setBookmarkMap(map);
+        });
+    });
+  }, [isAuthenticated]);
+
+  const handleToggleSaved = async (collegeId: number) => {
+    if (!isAuthenticated) return;
+    setPendingBookmarks((prev) => ({ ...prev, [collegeId]: true }));
+    try {
+      const { apiService } = await import("@/services/api");
+      if (savedIds.includes(collegeId)) {
+        const bookmarkId = bookmarkMap[collegeId];
+        if (bookmarkId) await apiService.deleteBookmark(bookmarkId);
+        setSavedIds((prev) => prev.filter((id) => id !== collegeId));
+      } else {
+        const result = await apiService.createBookmark(
+          collegeId,
+          "colleges",
+        );
+        setBookmarkMap((prev) => ({
+          ...prev,
+          [collegeId]: result.data.id,
+        }));
+        setSavedIds((prev) => [...prev, collegeId]);
+      }
+    } catch (err) {
+      console.error("Bookmark error:", err);
+    } finally {
+      setPendingBookmarks((prev) => ({ ...prev, [collegeId]: false }));
+    }
+  };
+
+  const handleNavigate = (view: string, data?: any) => {
+    if (view === "detail" && data?.id) {
+      window.location.href = `/find-college/${data.id}`;
+    }
+  };
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-gray-400">Loading...</div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gray-50">
       <div className="mx-auto max-w-[1400px] px-4 py-6">
         <div className="flex items-center gap-2 text-sm text-gray-500 mb-6">
-          <Home className="w-4 h-4" /> <span>Universities</span> <span>-</span> <span className="text-gray-800 font-medium">{matched?.name || "University"} - Affiliated Colleges</span>
+          <Home className="w-4 h-4" /> <span>Universities</span>{" "}
+          <span>-</span>{" "}
+          <span className="text-gray-800 font-medium">
+            {university?.name || "University"} - Affiliated Colleges
+          </span>
         </div>
-        <h1 className="text-2xl font-bold text-gray-900 mb-2">{matched?.name || "University"} - Affiliated Colleges</h1>
-        <p className="text-gray-500 mb-8">{institutions.length} affiliated institutions</p>
+        <h1 className="text-2xl font-bold text-gray-900 mb-2">
+          {university?.name || "University"} - Affiliated Colleges
+        </h1>
+        <p className="text-gray-500 mb-8">
+          {colleges.length} affiliated colleges
+        </p>
 
-        {institutions.length === 0 ? (
-          <div className="text-center py-16 text-gray-400">No affiliated institutions found.</div>
+        {colleges.length === 0 ? (
+          <div className="text-center py-16 text-gray-400">
+            No affiliated colleges found.
+          </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {institutions.map((inst: any) => (
-              <Link key={inst.id} href={`/find-college/${inst.college_id || inst.id}`} className="block bg-white border border-gray-200 rounded-[14px] p-5 transition-colors hover:bg-gray-50">
-                <div className="flex items-center gap-4">
-                  <div className="w-[60px] h-[60px] rounded-lg bg-white border border-gray-100 flex items-center justify-center shrink-0 p-1">
-                    {inst.logo_url ? (
-                      <img src={inst.logo_url} alt={inst.institution_name} className="w-full h-full object-contain rounded" />
-                    ) : (
-                      <div className="w-full h-full bg-blue-50 text-blue-600 text-[10px] font-bold flex items-center justify-center rounded uppercase">{inst.institution_name?.charAt(0) || "C"}</div>
-                    )}
-                  </div>
-                  <div className="min-w-0 flex-1">
-                    <h3 className="text-[17px] font-bold text-gray-900 truncate">{inst.institution_name}</h3>
-                    {inst.district && <p className="text-[13px] text-gray-500 mt-0.5">{inst.district}</p>}
-                    {inst.website_url && (
-                      <a href={inst.website_url.startsWith("http") ? inst.website_url : `https://${inst.website_url}`} target="_blank" rel="noopener noreferrer" onClick={(e) => e.stopPropagation()} className="flex items-center gap-1 text-brand-blue text-[13px] font-medium hover:text-brand-hover mt-1">
-                        <i className="fa-solid fa-globe text-xs"></i>
-                        {inst.website_url.replace(/^https?:\/\//, "")}
-                      </a>
-                    )}
-                  </div>
-                </div>
-              </Link>
+            {colleges.map((college) => (
+              <ProgramCard
+                key={college.id}
+                college={college}
+                isVerified={isCollegeVerified(college.verified)}
+                isClaimed={true}
+                isSaved={savedIds.includes(college.id)}
+                isBookmarkPending={pendingBookmarks[college.id]}
+                isSelected={selectedIds.includes(college.id)}
+                isQuickInquiryMode={quickInquiryMode}
+                onNavigate={handleNavigate}
+                onToggleSaved={() => handleToggleSaved(college.id)}
+                onToggleSelection={() => {
+                  setSelectedIds((prev) =>
+                    prev.includes(college.id)
+                      ? prev.filter((id) => id !== college.id)
+                      : [...prev, college.id],
+                  );
+                }}
+                onClaim={() => {}}
+                onSingleInquiry={() => {}}
+              />
             ))}
           </div>
         )}
