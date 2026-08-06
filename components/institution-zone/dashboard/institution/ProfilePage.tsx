@@ -152,7 +152,7 @@ const ProfilePage: React.FC = () => {
   });
 
   const {
-    formState: { isDirty },
+    formState: { isDirty, errors },
     trigger,
     getValues,
     getFieldState,
@@ -484,18 +484,39 @@ const ProfilePage: React.FC = () => {
     if (!isValid) {
       toast.error("Please fix the errors below");
       setTimeout(() => {
-        const firstErrField = FIELD_ORDER.find(f => {
-          const state = getFieldState(f);
-          return state.error !== undefined;
-        });
-        if (firstErrField) {
-          const el = document.querySelector(
-            `[name="${firstErrField}"], [data-name="${firstErrField}"]`
-          );
-          if (el) {
-            el.scrollIntoView({ behavior: "smooth", block: "center" });
-            (el as HTMLElement).focus();
+        const findFirstErrorEl = (errors: any, prefix = ""): HTMLElement | null => {
+          for (const key of Object.keys(errors)) {
+            const err = errors[key];
+            if (!err) continue;
+            if (err.message) {
+              const name = prefix ? `${prefix}.${key}` : key;
+              const el = document.querySelector(
+                `[name="${name}"], [data-name="${name}"], [data-name^="${name}."]`
+              );
+              if (el) return el as HTMLElement;
+            }
+            if (typeof err === "object" && !err.message) {
+              if (Array.isArray(err)) {
+                for (let i = 0; i < err.length; i++) {
+                  if (err[i] && typeof err[i] === "object") {
+                    const name = prefix ? `${prefix}.${key}.${i}` : `${key}.${i}`;
+                    const found = findFirstErrorEl(err[i], name);
+                    if (found) return found;
+                  }
+                }
+              } else {
+                const name = prefix ? `${prefix}.${key}` : key;
+                const found = findFirstErrorEl(err, name);
+                if (found) return found;
+              }
+            }
           }
+          return null;
+        };
+        const el = findFirstErrorEl(errors);
+        if (el) {
+          el.scrollIntoView({ behavior: "smooth", block: "center" });
+          (el as HTMLElement).focus();
         }
       }, 100);
       return;

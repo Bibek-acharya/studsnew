@@ -102,46 +102,39 @@ const AboutVideoInteractive: React.FC<{ videos?: VideoEntry[] }> = ({
         </div>
 
         {/* Message card - 1/3 width */}
-        <div
-          className="relative w-full min-w-0 flex-[1] overflow-hidden rounded-md border border-gray-100 bg-white p-6 sm:p-8"
-        >
-          <div className="flex h-full flex-col">
-            <div className="flex items-start gap-4">
-              {mainData.avatar ? (
-                <img
-                  src={getImageUrl(mainData.avatar)}
-                  alt="Avatar"
-                  className="h-12 w-12 shrink-0 rounded-md border border-gray-200 object-cover"
-                />
-              ) : (
-                <div className="h-12 w-12 shrink-0 rounded-md border border-gray-200 bg-gray-100 flex items-center justify-center">
-                  <i className="fa-solid fa-user text-gray-400"></i>
-                </div>
-              )}
-              <div className="min-w-0">
-                <h4 className="text-[13px] font-bold text-gray-900">
-                  {mainData.author}
-                </h4>
-                <p className="text-[12px] text-gray-500">{mainData.role}</p>
-              </div>
-            </div>
-
-            <div className="mt-4 min-h-0 flex-1">
-              <RichText
-                html={mainData.title}
-                variant="sm"
-                as="h2"
-                className={`text-[15px] font-semibold leading-snug text-gray-900 sm:text-[16px] ${messageIsLong ? "line-clamp-4" : ""}`}
+        <div className="relative h-[50vh] w-full min-w-0 flex-[1] overflow-hidden rounded-md border border-white/10 bg-brand-blue sm:h-auto">
+          <div className="relative z-10 flex h-full flex-col justify-center px-5 py-6 sm:px-6">
+            {mainData.avatar ? (
+              <img
+                src={getImageUrl(mainData.avatar)}
+                alt="Avatar"
+                className="mb-3 h-12 w-12 rounded-md border border-white/20 object-cover sm:mb-4 sm:h-14 sm:w-14"
               />
-              {messageIsLong && (
-                <button
-                  type="button"
-                  onClick={() => setShowMessageModal(true)}
-                  className="mt-2 text-[13px] font-medium text-blue-600 hover:text-blue-700"
-                >
-                  See more
-                </button>
-              )}
+            ) : (
+              <div className="mb-3 h-12 w-12 rounded-md border border-white/20 bg-white/10 flex items-center justify-center sm:mb-4 sm:h-14 sm:w-14">
+                <i className="fa-solid fa-user text-white/60"></i>
+              </div>
+            )}
+            <RichText
+              html={mainData.title}
+              variant="sm"
+              as="h2"
+              className={`mb-2 text-[16px] font-normal leading-tight tracking-tight text-white sm:mb-3 sm:text-[18px] ${messageIsLong ? "line-clamp-4" : ""}`}
+            />
+            {messageIsLong && (
+              <button
+                type="button"
+                onClick={() => setShowMessageModal(true)}
+                className="mb-4 text-[13px] font-medium text-blue-200 hover:text-white"
+              >
+                See more
+              </button>
+            )}
+            <div className="mt-auto">
+              <h4 className="mb-1 text-[11px] font-bold uppercase tracking-wide text-white sm:text-[12px]">
+                {mainData.author}
+              </h4>
+              <p className="text-[12px] text-blue-200/60">{mainData.role}</p>
             </div>
           </div>
         </div>
