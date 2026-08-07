@@ -23,7 +23,6 @@ import {
   TabFaq,
   InquiryForm,
 } from "./components";
-import TabRecognition from "./components/TabRecognition";
 import { useCollegeData } from "./hooks/useCollegeData";
 import { useFollow } from "./hooks/useFollow";
 import { useBookmark } from "./hooks/useBookmark";
@@ -223,7 +222,6 @@ const CollegeDetailsPage = ({
               collegeName={data.name}
             />
           )}
-          {activeTab === "recognition" && <TabRecognition />}
           {activeTab === "courses" && <TabCourses courses={coursesData} />}
           {activeTab === "admissions" && (
             <TabAdmissions

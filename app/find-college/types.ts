@@ -4,7 +4,6 @@ export function isCollegeVerified(value: unknown): boolean {
 
 export type TabKey =
   | "about"
-  | "recognition"
   | "offered"
   | "admissions"
   | "courses"

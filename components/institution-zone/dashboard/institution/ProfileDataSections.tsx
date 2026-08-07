@@ -132,10 +132,9 @@ const ProfileDataSections: React.FC<ReorderItem> = ({
                 </div>
                 <div>
                   <input
-                    type="number"
-                    min="0"
+                    type="text"
                     className={`${inputClass} text-sm ${errors.courses?.[ci]?.seats ? 'border-red-500' : ''}`}
-                    placeholder="Seats"
+                    placeholder="Seats (e.g. 120)"
                     value={c.seats}
                     onChange={(e) =>
                       updateItem("courses", c.id, "seats", e.target.value)
@@ -146,9 +145,8 @@ const ProfileDataSections: React.FC<ReorderItem> = ({
                   )}
                 </div>
                 <div>
-                  <input
-                    type="text"
-                    className={`${inputClass} text-sm ${errors.courses?.[ci]?.eligibility ? 'border-red-500' : ''}`}
+                  <textarea
+                    className={`${inputClass} text-sm h-16 ${errors.courses?.[ci]?.eligibility ? 'border-red-500' : ''}`}
                     placeholder="Eligibility"
                     value={c.eligibility}
                     onChange={(e) =>
@@ -165,9 +163,8 @@ const ProfileDataSections: React.FC<ReorderItem> = ({
                   )}
                 </div>
                 <div>
-                  <input
-                    type="text"
-                    className={`${inputClass} text-sm`}
+                  <textarea
+                    className={`${inputClass} text-sm h-16`}
                     placeholder="Sub Description (e.g. Honors program)"
                     value={c.sub_description}
                     onChange={(e) =>

@@ -2,7 +2,6 @@
 
 import React, { useMemo, useState } from "react";
 import Link from "next/link";
-import EmptyTabState from "./EmptyTabState";
 
 interface TabCoursesProps {
   courses: any[] | null;
@@ -27,7 +26,25 @@ const TabCourses: React.FC<TabCoursesProps> = ({ courses }) => {
   const paginated = filtered.slice((page - 1) * PER_PAGE, page * PER_PAGE);
 
   if (!courses || courses.length === 0)
-    return <EmptyTabState tabName="courses" />;
+    return (
+      <div className="overflow-hidden rounded-md border border-gray-100 bg-white">
+        <div className="flex flex-wrap items-center justify-between gap-4 border-b border-gray-100 bg-[#f8fafc] px-6 py-4">
+          <h3 className="flex items-center gap-2 text-[16px] font-bold text-gray-900">
+            Courses & fees
+          </h3>
+        </div>
+        <div className="flex flex-col items-center justify-center py-16 text-center">
+          <p className="text-gray-500 text-lg font-medium mb-4">No Courses Found</p>
+          <p className="text-gray-400 text-sm mb-6">No courses are currently available for this institution.</p>
+          <Link
+            href="/course-finder"
+            className="bg-[#0000ff] hover:bg-[#0000cc] cursor-pointer text-white font-semibold py-2.5 px-6 rounded-md transition-colors text-sm inline-block"
+          >
+            View All Courses
+          </Link>
+        </div>
+      </div>
+    );
 
   return (
     <div className="overflow-hidden rounded-md border border-gray-100 bg-white">
@@ -52,7 +69,23 @@ const TabCourses: React.FC<TabCoursesProps> = ({ courses }) => {
         </div>
       </div>
 
-      {filtered.length === 0 ? (
+      {/* Desktop header */}
+      <div className="hidden sm:grid sm:grid-cols-12 gap-4 border-b border-gray-100 bg-white px-6 py-5 items-center">
+        <div className="sm:col-span-4 text-[13px] font-bold uppercase tracking-wider text-gray-800">
+          COURSES NAME
+        </div>
+        <div className="sm:col-span-2 text-[13px] font-bold uppercase tracking-wider text-gray-800">
+          DURATION
+        </div>
+        <div className="sm:col-span-3 text-[13px] font-bold uppercase tracking-wider text-gray-800">
+          FEES / YEAR
+        </div>
+        <div className="sm:col-span-3 text-[13px] font-bold uppercase tracking-wider text-gray-800">
+          ELIGIBILITY & SEAT
+        </div>
+      </div>
+
+      {paginated.length === 0 ? (
         <div className="flex flex-col items-center justify-center py-16 text-center">
           <p className="text-gray-500 text-lg font-medium mb-4">No Courses Found</p>
           <p className="text-gray-400 text-sm mb-6">No {courseFilter === "all" ? "" : courseFilter} courses are currently available.</p>
@@ -65,22 +98,6 @@ const TabCourses: React.FC<TabCoursesProps> = ({ courses }) => {
         </div>
       ) : (
         <>
-          {/* Desktop header */}
-          <div className="hidden sm:grid sm:grid-cols-12 gap-4 border-b border-gray-100 bg-white px-6 py-5 items-center">
-            <div className="sm:col-span-4 text-[13px] font-bold uppercase tracking-wider text-gray-800">
-              COURSES NAME
-            </div>
-            <div className="sm:col-span-2 text-[13px] font-bold uppercase tracking-wider text-gray-800">
-              DURATION
-            </div>
-            <div className="sm:col-span-3 text-[13px] font-bold uppercase tracking-wider text-gray-800">
-              FEES / YEAR
-            </div>
-            <div className="sm:col-span-3 text-[13px] font-bold uppercase tracking-wider text-gray-800">
-              ELIGIBILITY & SEAT
-            </div>
-          </div>
-
           {paginated.map((course: any, i: number) => (
               <div
                 key={i}
@@ -119,7 +136,7 @@ const TabCourses: React.FC<TabCoursesProps> = ({ courses }) => {
                         {course.eligibility}
                       </span>
                     </div>
-                    {course.seats ? (
+                    {course.seats && Number(course.seats) > 0 ? (
                       <div>
                         <span className="inline-block rounded bg-[#eafaef] px-2.5 py-1 text-[11px] font-bold text-[#16a34a]">
                           {course.seats}
@@ -156,9 +173,11 @@ const TabCourses: React.FC<TabCoursesProps> = ({ courses }) => {
                     <p className="mb-2 text-[12.5px] font-medium text-gray-600">
                       {course.eligibility}
                     </p>
-                    <span className="inline-block rounded bg-[#eafaef] px-2.5 py-1 text-[11px] font-bold text-[#16a34a]">
-                      {course.seats}
-                    </span>
+                    {course.seats && Number(course.seats) > 0 && (
+                      <span className="inline-block rounded bg-[#eafaef] px-2.5 py-1 text-[11px] font-bold text-[#16a34a]">
+                        {course.seats}
+                      </span>
+                    )}
                   </div>
                 </div>
               </div>

@@ -332,7 +332,7 @@ const InquiryForm: React.FC<InquiryFormProps> = ({
                     setInquiryName(e.target.value);
                     inquiryTouched.current = true;
                   }}
-                  className={`w-full rounded-md border px-4 py-3 text-[13.5px] focus:outline-none focus:ring-2 ${inquiryTouched.current && inquiryErrors.name ? "border-red-300 bg-red-50 focus:border-red-400 focus:ring-red-200" : "border-gray-200 bg-gray-50 focus:border-brand-blue focus:ring-brand-blue/20"}`}
+                  className={`w-full rounded-md border px-4 py-3 text-[13.5px] focus:outline-none focus:ring-0 ${inquiryTouched.current && inquiryErrors.name ? "border-red-300 bg-red-50 focus:border-red-400 focus:ring-red-200" : "border-gray-200 bg-gray-50 focus:border-brand-blue focus:ring-brand-blue/20"}`}
                 />
                 {inquiryTouched.current && inquiryErrors.name && (
                   <p className="mt-1 text-xs text-red-500">
@@ -349,7 +349,7 @@ const InquiryForm: React.FC<InquiryFormProps> = ({
                     setInquiryEmail(e.target.value);
                     inquiryTouched.current = true;
                   }}
-                  className={`w-full rounded-md border px-4 py-3 text-[13.5px] focus:outline-none focus:ring-2 ${inquiryTouched.current && inquiryErrors.email ? "border-red-300 bg-red-50 focus:border-red-400 focus:ring-red-200" : "border-gray-200 bg-gray-50 focus:border-brand-blue focus:ring-brand-blue/20"}`}
+                  className={`w-full rounded-md border px-4 py-3 text-[13.5px] focus:outline-none focus:ring-0 ${inquiryTouched.current && inquiryErrors.email ? "border-red-300 bg-red-50 focus:border-red-400 focus:ring-red-200" : "border-gray-200 bg-gray-50 focus:border-brand-blue focus:ring-brand-blue/20"}`}
                 />
                 {inquiryTouched.current && inquiryErrors.email && (
                   <p className="mt-1 text-xs text-red-500">
@@ -359,14 +359,14 @@ const InquiryForm: React.FC<InquiryFormProps> = ({
               </div>
               <div>
                 <div
-                  className="flex rounded-md border overflow-hidden focus-within:ring-2 focus-within:ring-brand-blue/20 focus-within:border-brand-blue"
+                  className="flex rounded-md border overflow-hidden focus-within:ring-0 focus-within:ring-brand-blue/20 focus-within:border-brand-blue"
                   style={
                     inquiryTouched.current && inquiryErrors.phone
                       ? { borderColor: "#fca5a5" }
                       : { borderColor: "#e5e7eb" }
                   }
                 >
-                  <span className="flex items-center bg-gray-100 px-3 text-sm text-gray-500 font-medium border-r border-gray-200">
+                  <span className="flex items-center bg-gray-100 px-3 text-sm text-gray-500 font-medium border-r border-brand-blue">
                     +977
                   </span>
                   <input
@@ -391,7 +391,7 @@ const InquiryForm: React.FC<InquiryFormProps> = ({
               <select
                 value={inquiryCourse}
                 onChange={(e) => setInquiryCourse(e.target.value)}
-                className="w-full rounded-md border border-gray-200 bg-gray-50 px-4 py-3 text-[13.5px] text-gray-600 focus:border-brand-blue focus:outline-none focus:ring-2 focus:ring-brand-blue/20"
+                className="w-full rounded-md border border-gray-200 bg-gray-50 px-4 py-3 text-[13.5px] text-gray-600 focus:border-brand-blue focus:outline-none focus:ring-0 focus:ring-brand-blue/20"
               >
                 <option value="">Select Course of Interest</option>
                 {(mappedPrograms || []).map((p: any) => (
@@ -477,7 +477,7 @@ const InquiryForm: React.FC<InquiryFormProps> = ({
                       setAskName(e.target.value);
                       askTouched.current = true;
                     }}
-                    className={`w-full rounded-md border px-4 py-3 text-sm focus:outline-none focus:ring-2 ${askTouched.current && askErrors.name ? "border-red-300 bg-red-50 focus:border-red-400 focus:ring-red-200" : "border-gray-200 bg-gray-50 focus:border-brand-blue focus:ring-brand-blue/20"}`}
+                    className={`w-full rounded-md border px-4 py-3 text-sm focus:outline-none focus:ring-0 ${askTouched.current && askErrors.name ? "border-red-300 bg-red-50 focus:border-red-400 focus:ring-red-200" : "border-gray-200 bg-gray-50 focus:border-brand-blue focus:ring-brand-blue/20"}`}
                   />
                   {askTouched.current && askErrors.name && (
                     <p className="mt-1 text-xs text-red-500">
@@ -494,7 +494,7 @@ const InquiryForm: React.FC<InquiryFormProps> = ({
                       setAskEmail(e.target.value);
                       askTouched.current = true;
                     }}
-                    className={`w-full rounded-md border px-4 py-3 text-sm focus:outline-none focus:ring-2 ${askTouched.current && askErrors.email ? "border-red-300 bg-red-50 focus:border-red-400 focus:ring-red-200" : "border-gray-200 bg-gray-50 focus:border-brand-blue focus:ring-brand-blue/20"}`}
+                    className={`w-full rounded-md border px-4 py-3 text-sm focus:outline-none focus:ring-0 ${askTouched.current && askErrors.email ? "border-red-300 bg-red-50 focus:border-red-400 focus:ring-red-200" : "border-gray-200 bg-gray-50 focus:border-brand-blue focus:ring-brand-blue/20"}`}
                   />
                   {askTouched.current && askErrors.email && (
                     <p className="mt-1 text-xs text-red-500">
@@ -504,7 +504,7 @@ const InquiryForm: React.FC<InquiryFormProps> = ({
                 </div>
                 <div>
                   <div
-                    className="flex rounded-md border overflow-hidden focus-within:ring-2 focus-within:ring-brand-blue/20 focus-within:border-brand-blue"
+                    className="flex rounded-md border overflow-hidden focus-within:ring-0 focus-within:ring-brand-blue/20 focus-within:border-brand-blue"
                     style={
                       askTouched.current && askErrors.phone
                         ? { borderColor: "#fca5a5" }
@@ -543,7 +543,7 @@ const InquiryForm: React.FC<InquiryFormProps> = ({
                       setAskMessage(e.target.value);
                       askTouched.current = true;
                     }}
-                    className={`w-full rounded-md border px-4 py-3 text-sm focus:outline-none focus:ring-2 resize-none ${askTouched.current && !askMessage.trim() ? "border-red-300 bg-red-50 focus:border-red-400 focus:ring-red-200" : "border-gray-200 bg-gray-50 focus:border-brand-blue focus:ring-brand-blue/20"}`}
+                    className={`w-full rounded-md border px-4 py-3 text-sm focus:outline-none focus:ring-0 resize-none ${askTouched.current && !askMessage.trim() ? "border-red-300 bg-red-50 focus:border-red-400 focus:ring-red-200" : "border-gray-200 bg-gray-50 focus:border-brand-blue focus:ring-brand-blue/20"}`}
                   />
                   <div className="flex justify-between mt-1">
                     {askTouched.current && !askMessage.trim() ? (

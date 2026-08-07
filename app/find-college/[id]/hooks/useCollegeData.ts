@@ -125,7 +125,9 @@ export function useCollegeData(idStr: string) {
         .filter((c: any) => c.courseName || c.name)
         .map((c: any) => ({
           name: c.courseName || c.name || "",
+          level: c.level || "",
           specialization: c.specialization || "",
+          sub_description: c.sub_description || "",
           duration: c.duration || "",
           type: c.type || "",
           fees: c.feesText || c.fees || "",

@@ -2,7 +2,6 @@ import type { TabKey } from "../types";
 
 export const TAB_DEFINITIONS: Array<[TabKey, string]> = [
   ["about", "About"],
-  ["recognition", "Recognition & Accreditation"],
   ["offered", "Programs Offered"],
   ["admissions", "Admissions"],
   ["courses", "Courses & Fees"],
