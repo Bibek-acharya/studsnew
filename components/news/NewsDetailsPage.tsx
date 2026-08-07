@@ -173,6 +173,59 @@ const NewsDetailsPage: React.FC<{
   }, [id]);
 
   useEffect(() => {
+    if (!article) return;
+    async function fetchRelated() {
+      try {
+        const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080";
+        const [instRes, eduRes] = await Promise.all([
+          fetch(`${API_BASE}/api/v1/institutions/public/news?page=1&limit=50`).catch(() => null),
+          fetch(`${API_BASE}/api/v1/education/news?page=1&limit=50`).catch(() => null),
+        ]);
+        const instData = instRes ? await instRes.json() : null;
+        const eduData = eduRes ? await eduRes.json() : null;
+        const allNews: any[] = [
+          ...(instData?.data?.news || []).map((n: any) => ({
+            id: `inst-${n.id}`,
+            slug: n.slug || `inst-${n.id}`,
+            title: n.title,
+            excerpt: n.short_desc || "",
+            image: n.image_url || "",
+            category: n.news_type || "News",
+            date: n.publish_date || n.created_at || "",
+            tags: n.tags || [],
+            source: "inst",
+          })),
+          ...(eduData?.data?.news || []).map((n: any) => ({
+            id: `edu-${n.id}`,
+            slug: n.slug || `edu-${n.id}`,
+            title: n.title,
+            excerpt: n.excerpt || "",
+            image: n.image || "",
+            category: n.category || "News",
+            date: n.date || "",
+            tags: n.tags || [],
+            source: "edu",
+          })),
+        ];
+        const currentCategory = (article.category || "").toLowerCase();
+        const currentTags = (article.tags || []).map((t: string) => t.toLowerCase());
+        const filtered = allNews.filter((n) => {
+          if (n.id === article.id) return false;
+          const nCat = (n.category || "").toLowerCase();
+          if (currentCategory && nCat === currentCategory) return true;
+          if (n.tags && currentTags.length > 0) {
+            const nTags = n.tags.map((t: string) => t.toLowerCase());
+            if (currentTags.some((t: string) => nTags.includes(t))) return true;
+          }
+          return false;
+        });
+        setRelated(filtered.slice(0, 5));
+      } catch {}
+    }
+    fetchRelated();
+  }, [article]);
+
+  useEffect(() => {
     if (!id) return;
     fetchNewsComments(id).then((data) => {
       if (data && data.length > 0) setComments(data);
@@ -261,7 +314,7 @@ const NewsDetailsPage: React.FC<{
 
   return (
     <div className="bg-white text-gray-800 antialiased selection:bg-blue-200 selection:text-blue-900">
-      <div className="max-w-350 mx-auto py-8 flex flex-col lg:flex-row gap-10 lg:gap-16 px-4 sm:px-6">
+      <div className="max-w-350 mx-auto py-8 flex flex-col lg:flex-row gap-10 lg:gap-16">
         <main className="w-full lg:w-[68%]">
           <div className="flex items-center gap-4 text-sm font-medium text-gray-500 mb-6 border-b border-gray-100 pb-4">
             <span

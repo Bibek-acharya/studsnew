@@ -76,7 +76,7 @@ export default function CollegeCard({
       <div className="p-2.5 pb-0 shrink-0">
         <div
           ref={carouselRef}
-          className="group relative h-28 w-full bg-gray-200 rounded-md overflow-hidden"
+          className="group relative aspect-[21/9] w-full bg-gray-200 rounded-md overflow-hidden"
         >
           <div
             className="carousel-track flex w-full h-full transition-transform duration-300 ease-in-out"

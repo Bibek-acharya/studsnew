@@ -140,10 +140,21 @@ const EventDetailsPage: React.FC<{ params: Promise<{ slug: string }> }> = ({
         setEvent(eventData);
 
         if (eventData) {
-          const eventsResult = await fetchPublicEvents({ limit: 10 });
+          const eventsResult = await fetchPublicEvents({ limit: 50 });
+          const currentCategory = (eventData.category || "").toLowerCase();
+          const currentTags = (eventData as any).tags || [];
           const relatedEvents = eventsResult.events
-            .filter((e) => e.id !== p.slug && e.category === eventData.category)
-            .slice(0, 3);
+            .filter((e) => {
+              if (e.id === p.slug) return false;
+              const eCat = (e.category || "").toLowerCase();
+              if (currentCategory && eCat === currentCategory) return true;
+              if (currentTags.length > 0 && (e as any).tags) {
+                const eTags = (e as any).tags.map((t: string) => t.toLowerCase());
+                if (currentTags.some((t: string) => eTags.includes(t))) return true;
+              }
+              return false;
+            })
+            .slice(0, 5);
           setRelated(relatedEvents);
         }
       } catch {
@@ -182,7 +193,7 @@ const EventDetailsPage: React.FC<{ params: Promise<{ slug: string }> }> = ({
   }
 
   return (
-    <main className="max-w-350 mx-auto pt-6 pb-10 lg:pb-14 bg-white min-h-screen px-4 sm:px-6">
+    <main className="max-w-350 mx-auto pt-6 pb-10 lg:pb-14 bg-white min-h-screen">
       <div className="relative w-full h-62.5 sm:h-75 lg:h-90 rounded-md lg:rounded-md overflow-hidden shadow-xl mb-10 lg:mb-16 bg-gray-100">
         <img
           src={getImageUrl(event.image)}
