@@ -64,7 +64,7 @@ const CollegeHeader: React.FC<CollegeHeaderProps> = ({
           <img
             src={instBanner}
             alt="College Banner"
-            className="w-full h-full object-contain"
+            className="w-full h-full object-cover"
           />
         )}
         <div className="absolute bottom-10 right-4 z-20 md:bottom-6 md:right-6">
