@@ -34,6 +34,33 @@ import {
   Bookmark,
 } from "lucide-react";
 
+function getMapEmbedUrl(mapUrl?: string, address?: string): string {
+  if (!mapUrl && !address) return "";
+  if (!mapUrl) {
+    return `https://www.google.com/maps?q=${encodeURIComponent(address || "")}&output=embed`;
+  }
+  if (mapUrl.includes("/maps/embed") || mapUrl.includes("output=embed")) {
+    return mapUrl;
+  }
+  const iframeMatch = mapUrl.match(/src=["']([^"']+)["']/);
+  if (iframeMatch) {
+    return iframeMatch[1];
+  }
+  const placeMatch = mapUrl.match(/google\.com\/maps\/place\/([^/?]+)/);
+  if (placeMatch) {
+    return `https://www.google.com/maps/embed?pb=!1m14!1m12!1m3!1d10000!2d0!3d0!2m2!1f0!2f0!3m2!1i1024!2i768!4f13.1!5e1!3m2!1sen!2s!4v1`;
+  }
+  const queryMatch = mapUrl.match(/[?&]q=([^&]+)/);
+  if (queryMatch) {
+    return `https://www.google.com/maps?q=${queryMatch[1]}&output=embed`;
+  }
+  const gooGlMatch = mapUrl.match(/maps\.app\.goo\.gl|goo\.gl\/maps/);
+  if (gooGlMatch) {
+    return mapUrl;
+  }
+  return `https://www.google.com/maps?q=${encodeURIComponent(mapUrl)}&output=embed`;
+}
+
 type TabKey =
   | "tab-about"
   | "tab-courses"
@@ -1925,10 +1952,7 @@ const UniversityDetail: React.FC = () => {
                       {hasMap && (
                         <div className="mt-8 h-40 w-full overflow-hidden rounded-md">
                           <iframe
-                            src={
-                              (contactData?.mapUrl as string) ||
-                              `https://www.google.com/maps?q=${encodeURIComponent((contactData?.address as string) || "")}&output=embed`
-                            }
+                            src={getMapEmbedUrl(contactData?.mapUrl as string, contactData?.address as string)}
                             width="100%"
                             height="100%"
                             style={{ border: 0 }}
