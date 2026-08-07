@@ -55,7 +55,7 @@ export const profileSchema = z.object({
   })),
   overviewRows: z.array(z.object({ id: z.number(), key: z.string(), value: z.string() })),
   leadershipRows: z.array(z.object({ id: z.number(), position: z.string(), role: z.string(), holder: z.string() })),
-  courses: z.array(z.object({ id: z.number(), name: z.string(), level: z.string(), duration: z.string(), fees: z.string(), eligibility: z.string(), seats: z.string(), sub_description: z.string().optional().default("") })),
+  courses: z.array(z.object({ id: z.number(), name: z.string(), level: z.string(), duration: z.string(), fees: z.string(), eligibility: z.string(), seats: z.string(), sub_description: z.string().default("") })),
   programs: z.array(z.object({ id: z.number(), name: z.string(), level: z.string(), affiliation: z.string(), status: z.string() })),
   facilities: z.array(z.object({ id: z.number(), icon: z.string(), heading: z.string(), desc: z.string() })),
   alumni: z.array(alumniSchema),
@@ -312,7 +312,7 @@ const ProfilePage: React.FC = () => {
             ? data.leadership_data.map((r: any, i: number) => ({ ...r, id: r.id || i + 1 }))
             : [],
           courses: data.courses_data && Array.isArray(data.courses_data)
-            ? data.courses_data.map((c: any, i: number) => ({ ...c, id: c.id || i + 1 }))
+            ? data.courses_data.map((c: any, i: number) => ({ ...c, id: c.id || i + 1, sub_description: c.sub_description || "" }))
             : [],
           programs: data.programs_data && Array.isArray(data.programs_data)
             ? data.programs_data.map((p: any, i: number) => ({ ...p, id: p.id || i + 1 }))
