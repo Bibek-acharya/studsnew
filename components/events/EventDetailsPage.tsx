@@ -89,6 +89,39 @@ const EventDetailsPage: React.FC<{ params: Promise<{ slug: string }> }> = ({
                 published: true,
                 created_at: instData.created_at,
               };
+            } else if (/^\d+$/.test(slug)) {
+              const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080";
+              const res = await fetch(`${API_BASE}/api/v1/institution/events/${slug}`).catch(() => null);
+              if (res && res.ok) {
+                const json = await res.json();
+                const instData2 = json?.data || json;
+                if (instData2) {
+                  eventData = {
+                    id: `inst-${instData2.id}`,
+                    title: instData2.name,
+                    excerpt: instData2.short_desc || "",
+                    description: instData2.description || "",
+                    category: instData2.event_type || instData2.category || "Event",
+                    image: instData2.image_url || "",
+                    organizer: instData2.organized_by || "",
+                    location: instData2.location || "",
+                    date: instData2.start_date
+                      ? new Date(instData2.start_date).toLocaleDateString()
+                      : "",
+                    time: instData2.start_date
+                      ? new Date(instData2.start_date).toLocaleTimeString()
+                      : "",
+                    registrationFee: "",
+                    interestedCount: 0,
+                    published: true,
+                    created_at: instData2.created_at,
+                  };
+                } else {
+                  eventData = null;
+                }
+              } else {
+                eventData = null;
+              }
             } else {
               eventData = null;
             }

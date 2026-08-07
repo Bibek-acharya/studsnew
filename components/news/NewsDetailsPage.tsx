@@ -125,6 +125,17 @@ const NewsDetailsPage: React.FC<{
             setArticle(normalizeArticle(data));
             return;
           }
+          if (/^\d+$/.test(slug)) {
+            const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080";
+            const res = await fetch(`${API_BASE}/api/v1/institution/news/${slug}`).catch(() => null);
+            if (res && res.ok) {
+              const json = await res.json();
+              if (json?.data) {
+                setArticle(normalizeArticle(json.data));
+                return;
+              }
+            }
+          }
         } else if (safeId.startsWith("edu-")) {
           const slug = safeId.replace("edu-", "");
           // If slug is purely numeric, it's a fallback ID — fetch by ID directly

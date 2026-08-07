@@ -34,14 +34,31 @@ async function fetchMeta(slug: string) {
         `${API_BASE}/api/v1/institutions/public/news/by-slug/${s}`,
         { cache: "no-store" },
       );
-      if (!res.ok) return null;
-      const json = await res.json();
-      const d = json.data || json;
-      return {
-        title: d.title,
-        image: d.image || "",
-        description: stripHtml(d.excerpt || d.desc || ""),
-      };
+      if (res.ok) {
+        const json = await res.json();
+        const d = json.data || json;
+        return {
+          title: d.title,
+          image: d.image_url || d.image || "",
+          description: stripHtml(d.short_desc || d.excerpt || d.desc || ""),
+        };
+      }
+      if (/^\d+$/.test(s)) {
+        const res2 = await fetch(
+          `${API_BASE}/api/v1/institution/news/${s}`,
+          { cache: "no-store" },
+        );
+        if (res2.ok) {
+          const json = await res2.json();
+          const d = json.data || json;
+          return {
+            title: d.title,
+            image: d.image_url || d.image || "",
+            description: stripHtml(d.short_desc || d.excerpt || d.desc || ""),
+          };
+        }
+      }
+      return null;
     }
     const eduSlug = slug.startsWith("edu-") ? slug.replace("edu-", "") : slug;
     const isNumeric = /^\d+$/.test(eduSlug);
