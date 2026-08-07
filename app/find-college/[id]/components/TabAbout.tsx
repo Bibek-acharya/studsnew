@@ -171,6 +171,49 @@ const TabAbout: React.FC<TabAboutProps> = ({
         )}
       </div>
 
+      {(() => {
+        const video: VideoEntry | undefined = Array.isArray(instVideos) && instVideos.length > 0
+          ? instVideos.find((v: VideoEntry) => v.message || v.name)
+          : undefined;
+        if (!video || (!video.message && !video.name)) return null;
+        return (
+          <div className="overflow-hidden rounded-md bg-[#f4f7fb] p-6 sm:p-8">
+            <div className="flex items-start gap-5">
+              {video.avatar ? (
+                <img
+                  src={getImageUrl(video.avatar)}
+                  alt={video.name || "Speaker"}
+                  className="h-24 w-24 shrink-0 rounded-md border border-gray-200 object-cover"
+                />
+              ) : (
+                <div className="h-24 w-24 shrink-0 rounded-md border border-gray-200 bg-gray-200 flex items-center justify-center">
+                  <i className="fa-solid fa-user text-gray-400 text-3xl"></i>
+                </div>
+              )}
+              <div className="min-w-0 flex-1">
+                <RichText
+                  html={video.message}
+                  variant="sm"
+                  className="text-[14px] leading-relaxed text-gray-700"
+                />
+                <div className="mt-3">
+                  {video.name && (
+                    <h4 className="text-[15px] font-bold text-gray-900">
+                      {video.name}
+                    </h4>
+                  )}
+                  {video.designation && (
+                    <p className="text-[13px] text-gray-500">
+                      {video.designation}
+                    </p>
+                  )}
+                </div>
+              </div>
+            </div>
+          </div>
+        );
+      })()}
+
       {instOverviewData &&
         Array.isArray(instOverviewData) &&
         instOverviewData.length > 0 && (
@@ -235,49 +278,6 @@ const TabAbout: React.FC<TabAboutProps> = ({
             </div>
           </div>
         )}
-
-      {(() => {
-        const video: VideoEntry | undefined = Array.isArray(instVideos) && instVideos.length > 0
-          ? instVideos.find((v: VideoEntry) => v.message || v.name)
-          : undefined;
-        if (!video || (!video.message && !video.name)) return null;
-        return (
-          <div className="overflow-hidden rounded-md bg-[#f4f7fb] p-6 sm:p-8">
-            <div className="flex items-start gap-5">
-              {video.avatar ? (
-                <img
-                  src={getImageUrl(video.avatar)}
-                  alt={video.name || "Speaker"}
-                  className="h-24 w-24 shrink-0 rounded-md border border-gray-200 object-cover"
-                />
-              ) : (
-                <div className="h-24 w-24 shrink-0 rounded-md border border-gray-200 bg-gray-200 flex items-center justify-center">
-                  <i className="fa-solid fa-user text-gray-400 text-3xl"></i>
-                </div>
-              )}
-              <div className="min-w-0 flex-1">
-                <RichText
-                  html={video.message}
-                  variant="sm"
-                  className="text-[14px] leading-relaxed text-gray-700"
-                />
-                <div className="mt-3">
-                  {video.name && (
-                    <h4 className="text-[15px] font-bold text-gray-900">
-                      {video.name}
-                    </h4>
-                  )}
-                  {video.designation && (
-                    <p className="text-[13px] text-gray-500">
-                      {video.designation}
-                    </p>
-                  )}
-                </div>
-              </div>
-            </div>
-          </div>
-        );
-      })()}
     </div>
   );
 };

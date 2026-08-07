@@ -87,7 +87,7 @@ export default function CollegeCard({
                 key={index}
                 src={img}
                 alt={`${collegeName} ${index + 1}`}
-                className="w-full h-full object-cover shrink-0"
+                className="w-full h-full object-contain shrink-0"
               />
             ))}
           </div>
