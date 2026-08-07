@@ -1,7 +1,8 @@
 "use client";
 
-import React from "react";
-import { Eye, Target, Landmark, Users } from "lucide-react";
+import React, { useState } from "react";
+import Link from "next/link";
+import { Eye, Target, Landmark, Users, BadgeCheck } from "lucide-react";
 import {
   AboutVideoInteractive,
 } from "./index";
@@ -17,6 +18,14 @@ interface VideoEntry {
   avatar: string;
 }
 
+interface NewsItem {
+  id: number;
+  slug: string;
+  title: string;
+  time: string;
+  desc?: string;
+}
+
 interface TabAboutProps {
   description: string;
   instVideos: any;
@@ -24,6 +33,8 @@ interface TabAboutProps {
   instMission: string | null;
   instOverviewData: any[] | null;
   instLeadershipData: any[] | null;
+  latestNews?: NewsItem[];
+  collegeName?: string;
 }
 
 const TabAbout: React.FC<TabAboutProps> = ({
@@ -33,7 +44,11 @@ const TabAbout: React.FC<TabAboutProps> = ({
   instMission,
   instOverviewData,
   instLeadershipData,
+  latestNews = [],
+  collegeName = "",
 }) => {
+  const [showAllNews, setShowAllNews] = useState(false);
+
   const hasData =
     description ||
     (Array.isArray(instVideos) && instVideos.length > 0) ||
@@ -44,13 +59,78 @@ const TabAbout: React.FC<TabAboutProps> = ({
       instOverviewData.length > 0) ||
     (instLeadershipData &&
       Array.isArray(instLeadershipData) &&
-      instLeadershipData.length > 0);
+      instLeadershipData.length > 0) ||
+    latestNews.length > 0;
 
   if (!hasData) return <EmptyTabState tabName="about" />;
 
   return (
     <div className="space-y-10">
       <AboutVideoInteractive videos={instVideos || undefined} />
+
+      {/* Latest News & Stories */}
+      {latestNews.length > 0 && (
+        <div className="overflow-hidden rounded-md border border-gray-200 bg-white">
+          <div className="px-6 py-4 border-b border-gray-100">
+            <div className="flex items-start gap-3">
+              <div className="flex-shrink-0">
+                <img
+                  src="/icon.png"
+                  alt="StudSphere Team"
+                  className="h-12 w-12 rounded-full object-cover border-2 border-blue-500"
+                />
+              </div>
+              <div className="flex-1 min-w-0">
+                <div className="flex items-center gap-2">
+                  <span className="font-bold text-gray-900 text-[15px]">StudSphere Team</span>
+                  <BadgeCheck className="h-4 w-4 shrink-0 fill-blue-500 text-white" />
+                </div>
+                <div className="flex items-center gap-2 text-[13px] text-gray-500 mt-0.5">
+                  <span>Content Curator</span>
+                  <span>•</span>
+                  <span>Updated at: {latestNews[0]?.time || new Date().toLocaleDateString()}</span>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div className="px-6 py-3 bg-blue-50 border-b border-gray-100">
+            <h3 className="text-[16px] font-bold text-gray-900">
+              {collegeName} Latest News & Stories
+            </h3>
+          </div>
+          <div className="divide-y divide-gray-100">
+            {(showAllNews ? latestNews : latestNews.slice(0, 10)).map((item) => (
+              <div key={item.id} className="px-6 py-4 hover:bg-gray-50 transition-colors">
+                <div className="flex items-start gap-3">
+                  <span className="text-[13px] font-bold text-blue-600 whitespace-nowrap mt-0.5">{item.time || "-"}</span>
+                  <div className="flex-1">
+                    <p className="text-[14px] text-gray-700 leading-relaxed font-medium">{item.title}</p>
+                    {item.desc && (
+                      <p className="text-[13px] text-gray-500 mt-1 line-clamp-2">{item.desc}</p>
+                    )}
+                    <Link
+                      href={`/news/${item.slug}`}
+                      className="inline-block mt-2 text-[13px] font-semibold text-blue-600 underline hover:text-blue-800 transition-colors"
+                    >
+                      View Detail
+                    </Link>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+          {latestNews.length > 10 && !showAllNews && (
+            <div className="px-6 py-4 border-t border-gray-100 bg-gray-50">
+              <button
+                onClick={() => setShowAllNews(true)}
+                className="w-full text-center text-[14px] font-semibold text-blue-600 hover:text-blue-800 transition-colors"
+              >
+                View More ({latestNews.length - 10} more)
+              </button>
+            </div>
+          )}
+        </div>
+      )}
 
       {description && (
         <RichText

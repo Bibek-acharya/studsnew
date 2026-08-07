@@ -88,7 +88,7 @@ const TabNews: React.FC<TabNewsProps> = ({ news }) => {
                 </div>
                 <div className="flex-1 min-w-0">
                   <button
-                    onClick={() => router.push(`/news/inst-${item.id}`)}
+                    onClick={() => router.push(`/news/${item.slug || `inst-${item.id}`}`)}
                     className="font-bold text-gray-900 hover:text-brand-blue line-clamp-2 leading-snug text-left cursor-pointer"
                   >
                     {item.title}

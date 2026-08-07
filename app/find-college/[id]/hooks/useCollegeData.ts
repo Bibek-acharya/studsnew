@@ -229,6 +229,7 @@ export function useCollegeData(idStr: string) {
       .filter((e: any) => e.status === "upcoming" || e.status === "published")
       .map((e: any) => ({
         id: e.id,
+        slug: e.slug || `inst-${e.id}`,
         image: safeImageUrl(e.image_url || e.image) || "",
         title: e.name || e.title || "",
         date: `${e.start_date || e.date || ""} | ${e.location || "TBD"}`,
@@ -243,12 +244,17 @@ export function useCollegeData(idStr: string) {
       .filter((n: any) => n.status === "published")
       .map((n: any) => ({
         id: n.id,
+        slug: n.slug || `inst-${n.id}`,
         badge: n.news_type || n.category || "News",
         badgeClass: "bg-blue-500 text-white",
         image: safeImageUrl(n.image_url || n.image) || "",
         title: n.title || "",
         desc: (n.short_desc || n.excerpt || n.content || "").trim(),
-        time: n.created_at ? new Date(n.created_at).toLocaleDateString() : "",
+        time: n.publish_date
+          ? new Date(n.publish_date).toLocaleDateString()
+          : n.created_at
+            ? new Date(n.created_at).toLocaleDateString()
+            : "",
       }));
   }, [instInstitutionNews, safeImageUrl]);
 

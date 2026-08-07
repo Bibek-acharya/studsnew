@@ -219,6 +219,8 @@ const CollegeDetailsPage = ({
               instMission={data.instMission}
               instOverviewData={data.instOverviewData}
               instLeadershipData={data.instLeadershipData}
+              latestNews={data.mappedNews || []}
+              collegeName={data.name}
             />
           )}
           {activeTab === "recognition" && <TabRecognition />}
