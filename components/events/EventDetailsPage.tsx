@@ -89,9 +89,9 @@ const EventDetailsPage: React.FC<{ params: Promise<{ slug: string }> }> = ({
                 published: true,
                 created_at: instData.created_at,
               };
-            } else if (/^\d+$/.test(slug)) {
+            } else {
               const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080";
-              const res = await fetch(`${API_BASE}/api/v1/institution/events/${slug}`).catch(() => null);
+              const res = await fetch(`${API_BASE}/api/v1/institutions/public/events/${slug}`).catch(() => null);
               if (res && res.ok) {
                 const json = await res.json();
                 const instData2 = json?.data || json;

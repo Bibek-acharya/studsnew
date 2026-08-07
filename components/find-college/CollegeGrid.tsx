@@ -282,6 +282,7 @@ const CollegeGrid: React.FC<CollegeGridProps> = ({
         params.affiliation = universityTerms.join(",");
       if (filters.feeMax < 2000000) params.feeMax = filters.feeMax;
       if (searchTerms.length > 0) params.search = searchTerms.join(" ");
+      if (filters.academic.length > 0) params.academic = filters.academic;
 
       // Fetch from both APIs in parallel
       const [collegeRes, institutionRes] = await Promise.all([

@@ -23,45 +23,34 @@ interface FilterSidebarProps {
 // ── Nepal Data ────────────────────────────────────────────────────────────────
 
 const ACADEMIC_LEVELS = [
-  { id: "plus2", label: "+2 / Higher Secondary", count: 3200 },
-  { id: "alevel", label: "A Level", count: 85 },
-  { id: "diploma", label: "Diploma / CTEVT", count: 410 },
-  { id: "bachelors", label: "Bachelors", count: 2500 },
-  { id: "masters", label: "Masters", count: 800 },
+  { id: "+2", label: "+2", count: 0 },
+  { id: "A-Level", label: "A-Level", count: 0 },
+  { id: "TSLC (CTEVT)", label: "TSLC (CTEVT)", count: 0 },
+  { id: "Diploma (CTEVT)", label: "Diploma (CTEVT)", count: 0 },
+  { id: "PCL", label: "PCL", count: 0 },
+  { id: "Bachelor's", label: "Bachelor's", count: 0 },
+  { id: "Bachelor's (Honours)", label: "Bachelor's (Honours)", count: 0 },
+  { id: "Postgraduate Diploma (PGD)", label: "Postgraduate Diploma (PGD)", count: 0 },
+  { id: "Master's", label: "Master's", count: 0 },
+  { id: "MPhil", label: "MPhil", count: 0 },
+  { id: "PhD", label: "PhD", count: 0 },
 ];
 
 const PROGRAMS: Record<
   string,
   Array<{ id: string; label: string; count: number }>
 > = {
-  plus2: [
-    { id: "p2_sci", label: "Science", count: 1200 },
-    { id: "p2_mgmt", label: "Management", count: 1500 },
-    { id: "p2_hum", label: "Humanities", count: 300 },
-    { id: "p2_edu", label: "Education", count: 150 },
-    { id: "p2_law", label: "Law", count: 50 },
-  ],
-  alevel: [
-    { id: "al_sci", label: "A Level - Science", count: 45 },
-    { id: "al_nonsci", label: "A Level - Non-Science/Mgmt", count: 40 },
-  ],
-  diploma: [
-    { id: "d_eng", label: "Engineering (CTEVT)", count: 150 },
-    { id: "d_med", label: "Medical & Nursing (CTEVT)", count: 120 },
-    { id: "d_hm", label: "Hotel Management & Tourism", count: 90 },
-    { id: "d_agr", label: "Agriculture & Forestry (CTEVT)", count: 50 },
-  ],
-  bachelors: [
-    { id: "b_it", label: "IT & Computing", count: 500 },
-    { id: "b_eng", label: "Engineering", count: 350 },
-    { id: "b_biz", label: "Business & Management", count: 800 },
-    { id: "b_med", label: "Medical & Health Sciences", count: 400 },
-    { id: "b_agr", label: "Agriculture & Forestry", count: 250 },
-  ],
-  masters: [
-    { id: "m_biz", label: "Business & Management", count: 300 },
-    { id: "m_it", label: "IT & Computing", count: 150 },
-  ],
+  "+2": [],
+  "A-Level": [],
+  "TSLC (CTEVT)": [],
+  "Diploma (CTEVT)": [],
+  "PCL": [],
+  "Bachelor's": [],
+  "Bachelor's (Honours)": [],
+  "Postgraduate Diploma (PGD)": [],
+  "Master's": [],
+  "MPhil": [],
+  "PhD": [],
 };
 
 const COURSES: Record<

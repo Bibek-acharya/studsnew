@@ -43,20 +43,18 @@ async function fetchMeta(slug: string) {
           description: stripHtml(d.short_desc || ""),
         };
       }
-      if (/^\d+$/.test(s)) {
-        const res2 = await fetch(
-          `${API_BASE}/api/v1/institution/events/${s}`,
-          { cache: "no-store" },
-        );
-        if (res2.ok) {
-          const json = await res2.json();
-          const d = json.data || json;
-          return {
-            title: d.name || d.title,
-            image: d.image_url || "",
-            description: stripHtml(d.short_desc || ""),
-          };
-        }
+      const res2 = await fetch(
+        `${API_BASE}/api/v1/institutions/public/events/${s}`,
+        { cache: "no-store" },
+      );
+      if (res2.ok) {
+        const json = await res2.json();
+        const d = json.data || json;
+        return {
+          title: d.name || d.title,
+          image: d.image_url || "",
+          description: stripHtml(d.short_desc || ""),
+        };
       }
       return null;
     }

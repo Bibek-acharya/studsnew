@@ -9,6 +9,7 @@ import { apiService } from "@/services/api";
 
 interface NewsArticle {
   id: string;
+  slug?: string;
   title: string;
   excerpt: string;
   content: string;
@@ -150,6 +151,7 @@ const NewsPage: React.FC = () => {
         if (instNews.length > 0) {
           const mapped = instNews.map((n: any): NewsArticle => ({
             id: `inst-${n.id}`,
+            slug: n.slug || `inst-${n.id}`,
             title: n.title,
             excerpt: n.short_desc || "",
             content: n.content || n.short_desc || "",
