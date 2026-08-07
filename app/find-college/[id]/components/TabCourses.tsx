@@ -136,7 +136,7 @@ const TabCourses: React.FC<TabCoursesProps> = ({ courses }) => {
                         {course.eligibility}
                       </span>
                     </div>
-                    {course.seats && Number(course.seats) > 0 ? (
+                    {course.seats ? (
                       <div>
                         <span className="inline-block rounded bg-[#eafaef] px-2.5 py-1 text-[11px] font-bold text-[#16a34a]">
                           {course.seats}
@@ -173,7 +173,7 @@ const TabCourses: React.FC<TabCoursesProps> = ({ courses }) => {
                     <p className="mb-2 text-[12.5px] font-medium text-gray-600">
                       {course.eligibility}
                     </p>
-                    {course.seats && Number(course.seats) > 0 && (
+                    {course.seats && (
                       <span className="inline-block rounded bg-[#eafaef] px-2.5 py-1 text-[11px] font-bold text-[#16a34a]">
                         {course.seats}
                       </span>

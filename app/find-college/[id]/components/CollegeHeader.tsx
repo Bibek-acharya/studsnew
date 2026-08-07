@@ -59,12 +59,14 @@ const CollegeHeader: React.FC<CollegeHeaderProps> = ({
   const router = useRouter();
   return (
     <>
-      <div
-        className="relative w-full bg-brand-blue bg-cover bg-center bg-no-repeat h-[400px]"
-        style={
-          instBanner ? { backgroundImage: `url('${instBanner}')` } : undefined
-        }
-      >
+      <div className="relative w-full bg-brand-blue h-[400px] overflow-hidden">
+        {instBanner && (
+          <img
+            src={instBanner}
+            alt="College Banner"
+            className="w-full h-full object-contain"
+          />
+        )}
         <div className="absolute bottom-10 right-4 z-20 md:bottom-6 md:right-6">
           {isVerified ? (
             <button
