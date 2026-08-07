@@ -108,7 +108,7 @@ const ShareCollegeModal: React.FC<ShareCollegeModalProps> = ({
       onClick={onClose}
     >
       <div
-        className={`mx-auto w-full max-w-sm rounded-2xl border border-gray-200 bg-white shadow-2xl transition-transform duration-300 ${isOpen ? "scale-100" : "scale-95"}`}
+        className={`mx-auto w-full max-w-md rounded-2xl border border-gray-200 bg-white shadow-2xl transition-transform duration-300 ${isOpen ? "scale-100" : "scale-95"}`}
         onClick={(event) => event.stopPropagation()}
       >
         <div className="flex items-center justify-between px-5 pt-5 pb-3">

@@ -165,6 +165,18 @@ export const collegeApi = {
     const query = new URLSearchParams();
     Object.entries(params || {}).forEach(([key, value]) => {
       if (value !== undefined && value !== null && value !== "") {
+        if (Array.isArray(value)) {
+          value.forEach((v) => {
+            if (v !== undefined && v !== null && v !== "") {
+              const normalized =
+                key === "type"
+                  ? typeIdToBackendValue[v.trim()] || v.trim()
+                  : String(v);
+              query.append(key, normalized);
+            }
+          });
+          return;
+        }
         const normalized =
           key === "type" && typeof value === "string"
             ? value

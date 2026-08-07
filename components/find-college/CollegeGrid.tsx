@@ -242,6 +242,11 @@ const CollegeGrid: React.FC<CollegeGridProps> = ({
     [filters],
   );
 
+  const districtTerms = useMemo(
+    () => [...filters.district, ...filters.location].map(toFilterLabel),
+    [filters],
+  );
+
   const universityTerms = useMemo(
     () => filters.university.map(toFilterLabel),
     [filters.university],
@@ -292,10 +297,22 @@ const CollegeGrid: React.FC<CollegeGridProps> = ({
           limit: COLLEGES_PER_PAGE,
           search: filters.search || undefined,
           location:
-            locationTerms.length > 0 ? locationTerms.join(",") : undefined,
+            districtTerms.length > 0 ? districtTerms.join(",") : undefined,
           type: filters.type.length > 0 ? params.type : undefined,
           affiliation:
             universityTerms.length > 0 ? params.affiliation : undefined,
+          academic:
+            filters.academic.length > 0 ? filters.academic : undefined,
+          courseDuration:
+            filters.courseDuration.length > 0
+              ? filters.courseDuration
+              : undefined,
+          facilities:
+            filters.facilities.length > 0 ? filters.facilities : undefined,
+          program:
+            filters.program.length > 0 ? filters.program : undefined,
+          course:
+            filters.course.length > 0 ? filters.course : undefined,
         }),
       ]);
 
