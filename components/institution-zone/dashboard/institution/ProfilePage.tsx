@@ -55,7 +55,7 @@ export const profileSchema = z.object({
   })),
   overviewRows: z.array(z.object({ id: z.number(), key: z.string(), value: z.string() })),
   leadershipRows: z.array(z.object({ id: z.number(), position: z.string(), role: z.string(), holder: z.string() })),
-  courses: z.array(z.object({ id: z.number(), name: z.string(), level: z.string(), duration: z.string(), fees: z.string(), eligibility: z.string(), seats: z.string(), sub_description: z.string() })),
+  courses: z.array(z.object({ id: z.number(), name: z.string(), level: z.string(), duration: z.string(), fees: z.string(), eligibility: z.string(), seats: z.string(), sub_description: z.string().optional().default("") })),
   programs: z.array(z.object({ id: z.number(), name: z.string(), level: z.string(), affiliation: z.string(), status: z.string() })),
   facilities: z.array(z.object({ id: z.number(), icon: z.string(), heading: z.string(), desc: z.string() })),
   alumni: z.array(alumniSchema),
@@ -155,21 +155,11 @@ const ProfilePage: React.FC = () => {
     formState: { isDirty, errors },
     trigger,
     getValues,
-    getFieldState,
     setValue,
     reset,
   } = methods;
 
   const level = methods.watch("level");
-  const FIELD_ORDER: (keyof FormData)[] = [
-    "collegeName", "about", "logoUrl", "bannerUrl", "location",
-    "level", "website", "contactEmail", "contactPhone", "mapUrl",
-    "facebookUrl", "instagramUrl", "tiktokUrl", "youtubeUrl", "linkedinUrl",
-    "affiliation", "universityIds", "brochureUrl",
-    "vision", "mission",
-    "videos", "overviewRows", "leadershipRows", "courses",
-    "programs", "facilities", "alumni", "galleryGroups", "downloads", "faqs",
-  ];
 
   const toggleLevel = (v: string) => {
     const current = getValues("level");
