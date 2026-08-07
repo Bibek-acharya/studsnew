@@ -122,8 +122,6 @@ const EventDetailsPage: React.FC<{ params: Promise<{ slug: string }> }> = ({
               } else {
                 eventData = null;
               }
-            } else {
-              eventData = null;
             }
           } catch {
             eventData = null;
