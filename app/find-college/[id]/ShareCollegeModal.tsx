@@ -28,7 +28,6 @@ const ShareCollegeModal: React.FC<ShareCollegeModalProps> = ({
   }, [isOpen]);
 
   const encodedUrl = encodeURIComponent(shareUrl);
-  const encodedText = encodeURIComponent(shareText);
   const displayUrl =
     shareUrl.replace(/^https?:\/\//i, "").replace(/\/$/, "") ||
     "example.com/share-link";
@@ -83,6 +82,13 @@ const ShareCollegeModal: React.FC<ShareCollegeModalProps> = ({
       iconBg: "bg-[#5865F2]",
       href: "https://discord.com/channels/@me",
     },
+    {
+      name: "Twitter",
+      icon: "fa-brands fa-x-twitter",
+      iconColor: "text-white",
+      iconBg: "bg-black",
+      href: `https://twitter.com/intent/tweet?url=${encodedUrl}&text=${encodeURIComponent(shareText)}`,
+    },
   ];
 
   const copyLink = async () => {
@@ -102,34 +108,27 @@ const ShareCollegeModal: React.FC<ShareCollegeModalProps> = ({
       onClick={onClose}
     >
       <div
-        className={`mx-auto w-full max-w-[640px] rounded-[20px] border border-[#E5E7EB] bg-[#F8FAFC] shadow-2xl transition-transform duration-300 ${isOpen ? "scale-100" : "scale-95"}`}
+        className={`mx-auto w-full max-w-sm rounded-2xl border border-gray-200 bg-white shadow-2xl transition-transform duration-300 ${isOpen ? "scale-100" : "scale-95"}`}
         onClick={(event) => event.stopPropagation()}
       >
-        <div className="flex items-center justify-between px-7 pt-7 pb-5">
-          <div>
-            <h3 className="text-3xl leading-tight font-bold text-gray-900 sm:text-[34px]">
-              Share with friends
-            </h3>
-          </div>
+        <div className="flex items-center justify-between px-5 pt-5 pb-3">
+          <h3 className="text-lg font-bold text-gray-900">
+            Share
+          </h3>
           <button
             type="button"
             onClick={onClose}
-            className="flex h-10 w-10 items-center justify-center rounded-full bg-gray-200 text-gray-500 transition-colors hover:bg-gray-300 hover:text-gray-700"
-            aria-label="Close share popup"
+            className="flex h-7 w-7 items-center justify-center rounded-full bg-gray-100 text-gray-500 transition-colors hover:bg-gray-200 hover:text-gray-700"
+            aria-label="Close"
           >
-            <i className="fa-solid fa-xmark text-lg"></i>
+            <i className="fa-solid fa-xmark text-sm"></i>
           </button>
         </div>
 
-        <div className="mx-7 border-t border-gray-200"></div>
+        <div className="mx-5 border-t border-gray-100"></div>
 
-        <div className="px-7 py-5">
-          <p className="sr-only">{collegeName}</p>
-          <p className="text-xl leading-tight font-medium text-gray-700 sm:text-2xl">
-            Share this link via
-          </p>
-
-          <div className="mt-6 flex items-center gap-6 overflow-x-auto py-1 pr-2 [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
+        <div className="px-5 py-4">
+          <div className="flex items-center gap-4 overflow-x-auto py-1">
             {socialLinks.map((item) => (
               <a
                 key={item.name}
@@ -140,7 +139,7 @@ const ShareCollegeModal: React.FC<ShareCollegeModalProps> = ({
                 aria-label={`Share on ${item.name}`}
               >
                 <span
-                  className={`flex h-[60px] w-[60px] items-center justify-center rounded-full text-[26px]  transition-transform group-hover:scale-105 ${item.iconColor} ${item.iconBg}`}
+                  className={`flex h-10 w-10 items-center justify-center rounded-full text-base transition-transform group-hover:scale-105 ${item.iconColor} ${item.iconBg}`}
                 >
                   <i className={item.icon}></i>
                 </span>
@@ -148,24 +147,19 @@ const ShareCollegeModal: React.FC<ShareCollegeModalProps> = ({
             ))}
           </div>
 
-          <p className="mt-5 text-md leading-tight font-medium text-gray-700 sm:text-xl">
-            Or copy link
-          </p>
-
-          <div className="mt-4 flex items-center gap-3 rounded-md border border-gray-200 bg-[#F8FAFC] px-4 py-3">
-            <i className="fa-solid fa-link text-[18px] text-gray-500"></i>
-            <p className="min-w-0 flex-1 truncate text-sm text-gray-600 sm:text-base">
+          <div className="mt-4 flex items-center gap-2 rounded-lg border border-gray-200 bg-gray-50 px-3 py-2">
+            <i className="fa-solid fa-link text-sm text-gray-400"></i>
+            <p className="min-w-0 flex-1 truncate text-xs text-gray-600">
               {displayUrl}
             </p>
             <button
               type="button"
               onClick={copyLink}
-              className="shrink-0 rounded-md bg-[#0A0DFF] px-6 py-2.5 text-base font-semibold text-white transition-colors hover:bg-brand-hover"
+              className="shrink-0 rounded-md bg-blue-600 px-3 py-1.5 text-xs font-semibold text-white transition-colors hover:bg-blue-700"
             >
               {copyLabel === "Copy link" ? "Copy" : copyLabel}
             </button>
           </div>
-          <p className="sr-only">{shareTitle}</p>
         </div>
       </div>
     </div>

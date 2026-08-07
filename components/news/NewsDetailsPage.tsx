@@ -209,8 +209,11 @@ const NewsDetailsPage: React.FC<{
         ];
         const currentCategory = (article.category || "").toLowerCase();
         const currentTags = (article.tags || []).map((t: string) => t.toLowerCase());
+        const currentTitle = (article.title || "").toLowerCase();
+        const stripHtml = (html: string) => html.replace(/<[^>]*>/g, "").replace(/&nbsp;/g, " ").replace(/&amp;/g, "&").trim();
         const filtered = allNews.filter((n) => {
           if (n.id === article.id) return false;
+          if ((n.title || "").toLowerCase() === currentTitle) return false;
           const nCat = (n.category || "").toLowerCase();
           if (currentCategory && nCat === currentCategory) return true;
           if (n.tags && currentTags.length > 0) {
@@ -218,7 +221,7 @@ const NewsDetailsPage: React.FC<{
             if (currentTags.some((t: string) => nTags.includes(t))) return true;
           }
           return false;
-        });
+        }).map((n) => ({ ...n, excerpt: stripHtml(n.excerpt || "") }));
         setRelated(filtered.slice(0, 5));
       } catch {}
     }

@@ -143,9 +143,12 @@ const EventDetailsPage: React.FC<{ params: Promise<{ slug: string }> }> = ({
           const eventsResult = await fetchPublicEvents({ limit: 50 });
           const currentCategory = (eventData.category || "").toLowerCase();
           const currentTags = (eventData as any).tags || [];
+          const currentTitle = (eventData.title || "").toLowerCase();
+          const stripHtml = (html: string) => html.replace(/<[^>]*>/g, "").replace(/&nbsp;/g, " ").replace(/&amp;/g, "&").trim();
           const relatedEvents = eventsResult.events
             .filter((e) => {
               if (e.id === p.slug) return false;
+              if ((e.title || "").toLowerCase() === currentTitle) return false;
               const eCat = (e.category || "").toLowerCase();
               if (currentCategory && eCat === currentCategory) return true;
               if (currentTags.length > 0 && (e as any).tags) {
@@ -154,6 +157,7 @@ const EventDetailsPage: React.FC<{ params: Promise<{ slug: string }> }> = ({
               }
               return false;
             })
+            .map((e) => ({ ...e, excerpt: stripHtml(e.excerpt || "") }))
             .slice(0, 5);
           setRelated(relatedEvents);
         }
