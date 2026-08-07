@@ -87,12 +87,18 @@ const TabNews: React.FC<TabNewsProps> = ({ news }) => {
                   )}
                 </div>
                 <div className="flex-1 min-w-0">
-                  <button
-                    onClick={() => router.push(`/news/${item.slug || `inst-${item.id}`}`)}
-                    className="font-bold text-gray-900 hover:text-brand-blue line-clamp-2 leading-snug text-left cursor-pointer"
-                  >
-                    {item.title}
-                  </button>
+                  {item.slug ? (
+                    <button
+                      onClick={() => router.push(`/news/${item.slug}`)}
+                      className="font-bold text-gray-900 hover:text-brand-blue line-clamp-2 leading-snug text-left cursor-pointer"
+                    >
+                      {item.title}
+                    </button>
+                  ) : (
+                    <span className="font-bold text-gray-900 line-clamp-2 leading-snug">
+                      {item.title}
+                    </span>
+                  )}
                   <div className="mt-2 flex items-center gap-3 flex-wrap">
                     {(item.badge || item.category) && (
                       <span className={`inline-flex items-center px-3 py-1 rounded-full text-[11px] font-bold uppercase tracking-wider ${getCategoryBadgeClass(item.badge || item.category)}`}>

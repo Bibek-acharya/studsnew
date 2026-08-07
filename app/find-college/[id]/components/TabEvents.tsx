@@ -78,12 +78,18 @@ const TabEvents: React.FC<TabEventsProps> = ({ events }) => {
                   )}
                 </div>
                 <div className="flex-1 min-w-0">
-                  <button
-                    onClick={() => router.push(`/events/${event.slug || `inst-${event.id}`}`)}
-                    className="font-bold text-gray-900 hover:text-brand-blue line-clamp-2 leading-snug text-left cursor-pointer"
-                  >
-                    {event.title}
-                  </button>
+                  {event.slug ? (
+                    <button
+                      onClick={() => router.push(`/events/${event.slug}`)}
+                      className="font-bold text-gray-900 hover:text-brand-blue line-clamp-2 leading-snug text-left cursor-pointer"
+                    >
+                      {event.title}
+                    </button>
+                  ) : (
+                    <span className="font-bold text-gray-900 line-clamp-2 leading-snug">
+                      {event.title}
+                    </span>
+                  )}
                   <div className="mt-2 flex items-center gap-3 flex-wrap">
                     {(event.tag || event.category) && (
                       <span className="bg-blue-500 text-white text-[10px] font-bold px-2 py-1 rounded-full uppercase tracking-wider">

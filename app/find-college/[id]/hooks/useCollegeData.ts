@@ -229,7 +229,7 @@ export function useCollegeData(idStr: string) {
       .filter((e: any) => e.status === "upcoming" || e.status === "published")
       .map((e: any) => ({
         id: e.id,
-        slug: e.slug || `inst-${e.id}`,
+        slug: e.slug || "",
         image: safeImageUrl(e.image_url || e.image) || "",
         title: e.name || e.title || "",
         date: `${e.start_date || e.date || ""} | ${e.location || "TBD"}`,
@@ -244,7 +244,7 @@ export function useCollegeData(idStr: string) {
       .filter((n: any) => n.status === "published")
       .map((n: any) => ({
         id: n.id,
-        slug: n.slug || `inst-${n.id}`,
+        slug: n.slug || "",
         badge: n.news_type || n.category || "News",
         badgeClass: "bg-blue-500 text-white",
         image: safeImageUrl(n.image_url || n.image) || "",

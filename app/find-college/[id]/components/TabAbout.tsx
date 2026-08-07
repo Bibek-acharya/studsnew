@@ -105,13 +105,18 @@ const TabAbout: React.FC<TabAboutProps> = ({
                   <span className="text-[13px] font-bold text-blue-600 whitespace-nowrap mt-0.5">{item.time || "-"}</span>
                   <div className="flex-1">
                     <p className="text-[14px] text-gray-700 leading-relaxed font-medium">
-                      {item.title}{" "}
-                      <Link
-                        href={`/news/${item.slug}`}
-                        className="text-[13px] font-semibold text-blue-600 underline hover:text-blue-800 transition-colors"
-                      >
-                        View Detail
-                      </Link>
+                      {item.title}
+                      {item.slug && (
+                        <>
+                          {" "}
+                          <Link
+                            href={`/news/${item.slug}`}
+                            className="text-[13px] font-semibold text-blue-600 underline hover:text-blue-800 transition-colors"
+                          >
+                            View Detail
+                          </Link>
+                        </>
+                      )}
                     </p>
                   </div>
                 </div>
