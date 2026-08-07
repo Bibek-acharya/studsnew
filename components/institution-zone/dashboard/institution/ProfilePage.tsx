@@ -713,6 +713,7 @@ const ProfilePage: React.FC = () => {
             setCropperOpen(false);
             setCropImageSrc(null);
           }}
+          aspectRatio={16 / 3}
         />
       )}
     </div>

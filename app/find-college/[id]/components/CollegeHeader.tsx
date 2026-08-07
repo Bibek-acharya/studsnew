@@ -60,7 +60,7 @@ const CollegeHeader: React.FC<CollegeHeaderProps> = ({
   return (
     <>
       <div
-        className="relative w-full bg-brand-blue bg-cover bg-center bg-no-repeat aspect-[16/3]"
+        className="relative w-full bg-brand-blue bg-cover bg-center bg-no-repeat h-[400px]"
         style={
           instBanner ? { backgroundImage: `url('${instBanner}')` } : undefined
         }
