@@ -1,31 +1,24 @@
 "use client";
 
 import React, { useMemo, useState } from "react";
+import Link from "next/link";
 import EmptyTabState from "./EmptyTabState";
 
 interface TabCoursesProps {
   courses: any[] | null;
 }
 
+const LEVEL_FILTERS = ["all", "Bachelor's", "Master", "Master of Philosophy", "Doctorate", "Post graduate diploma"];
+
 const TabCourses: React.FC<TabCoursesProps> = ({ courses }) => {
   const [courseFilter, setCourseFilter] = useState("all");
   const [page, setPage] = useState(1);
   const PER_PAGE = 10;
 
-  const levels = useMemo(() => {
-    if (!courses) return [];
-    const vals = new Set<string>();
-    courses.forEach((c) => {
-      const v = c.type || c.level;
-      if (v && typeof v === "string") vals.add(v);
-    });
-    return Array.from(vals).sort();
-  }, [courses]);
-
   const filtered = useMemo(() => {
     if (!courses) return [];
     return courses.filter((c) => {
-      if (courseFilter !== "all" && (c.type || c.level) !== courseFilter) return false;
+      if (courseFilter !== "all" && c.level !== courseFilter) return false;
       return true;
     });
   }, [courses, courseFilter]);
@@ -43,17 +36,7 @@ const TabCourses: React.FC<TabCoursesProps> = ({ courses }) => {
           Courses & fees
         </h3>
         <div className="flex gap-2 text-xs font-medium flex-wrap">
-          <button
-            onClick={() => { setCourseFilter("all"); setPage(1); }}
-            className={`rounded-md px-3 py-1.5 transition-colors ${
-              courseFilter === "all"
-                ? "bg-blue-600 text-white"
-                : "border border-gray-200 bg-white text-gray-700 hover:bg-gray-100"
-            }`}
-          >
-            All
-          </button>
-          {levels.map((level) => (
+          {LEVEL_FILTERS.map((level) => (
             <button
               key={level}
               onClick={() => { setCourseFilter(level); setPage(1); }}
@@ -63,7 +46,7 @@ const TabCourses: React.FC<TabCoursesProps> = ({ courses }) => {
                   : "border border-gray-200 bg-white text-gray-700 hover:bg-gray-100"
               }`}
             >
-              {level}
+              {level === "all" ? "All" : level}
             </button>
           ))}
         </div>
@@ -72,7 +55,13 @@ const TabCourses: React.FC<TabCoursesProps> = ({ courses }) => {
       {filtered.length === 0 ? (
         <div className="flex flex-col items-center justify-center py-16 text-center">
           <p className="text-gray-500 text-lg font-medium mb-4">No Courses Found</p>
-          <p className="text-gray-400 text-sm">No courses are currently available.</p>
+          <p className="text-gray-400 text-sm mb-6">No {courseFilter === "all" ? "" : courseFilter} courses are currently available.</p>
+          <Link
+            href="/course-finder"
+            className="bg-[#0000ff] hover:bg-[#0000cc] cursor-pointer text-white font-semibold py-2.5 px-6 rounded-md transition-colors text-sm inline-block"
+          >
+            View All Courses
+          </Link>
         </div>
       ) : (
         <>
@@ -93,80 +82,87 @@ const TabCourses: React.FC<TabCoursesProps> = ({ courses }) => {
           </div>
 
           {paginated.map((course: any, i: number) => (
-            <div
-              key={course.name || i}
-              className="border-b border-gray-100 px-6 py-5 transition-colors hover:bg-gray-50/50"
-            >
-              {/* Mobile card view */}
-              <div className="sm:hidden space-y-3">
-                <h4 className="text-[15.5px] font-bold text-gray-900">
-                  {course.name}
-                </h4>
-                {course.specialization || course.sub_description ? (
-                  <p className="text-[12px] text-gray-500">
-                    {course.specialization || course.sub_description}
-                  </p>
-                ) : null}
-                <div className="flex flex-wrap gap-x-6 gap-y-2 text-[13px]">
-                  <div>
-                    <span className="text-gray-400">Duration: </span>
-                    <span className="font-semibold text-gray-900">{course.duration}</span>
-                  </div>
-                  <div>
-                    <span className="text-gray-400">Fee: </span>
-                    <span className="font-semibold text-[#2563eb]">{course.fees}</span>
-                  </div>
-                  <div>
-                    <span className="text-gray-400">Eligibility: </span>
-                    <span className="text-gray-600">{course.eligibility}</span>
-                  </div>
-                  {course.seats ? (
-                    <div>
-                      <span className="inline-block rounded bg-[#eafaef] px-2.5 py-1 text-[11px] font-bold text-[#16a34a]">
-                        {course.seats}
-                      </span>
-                    </div>
-                  ) : null}
-                </div>
-              </div>
-
-              {/* Desktop grid view */}
-              <div className="hidden sm:grid sm:grid-cols-12 gap-4 items-center">
-                <div className="sm:col-span-4 pr-4">
+              <div
+                key={i}
+                className="border-b border-gray-100 px-6 py-5 transition-colors hover:bg-gray-50/50"
+              >
+                {/* Mobile card view */}
+                <div className="sm:hidden space-y-3">
                   <h4 className="text-[15.5px] font-bold text-gray-900">
                     {course.name}
                   </h4>
-                  <p className="mt-1 text-[12px] text-gray-500">
-                    {course.specialization || course.sub_description || ""}
-                  </p>
+                  {course.sub_description ? (
+                    <p className="text-[12px] text-gray-500">
+                      {course.sub_description}
+                    </p>
+                  ) : null}
+                  <div className="flex flex-wrap gap-x-6 gap-y-2 text-[13px]">
+                    <div>
+                      <span className="text-gray-400">
+                        Duration:{" "}
+                      </span>
+                      <span className="font-semibold text-gray-900">
+                        {course.duration}
+                      </span>
+                    </div>
+                    <div>
+                      <span className="text-gray-400">Fee: </span>
+                      <span className="font-semibold text-[#2563eb]">
+                        {course.fees}
+                      </span>
+                    </div>
+                    <div>
+                      <span className="text-gray-400">
+                        Eligibility:{" "}
+                      </span>
+                      <span className="text-gray-600">
+                        {course.eligibility}
+                      </span>
+                    </div>
+                    {course.seats ? (
+                      <div>
+                        <span className="inline-block rounded bg-[#eafaef] px-2.5 py-1 text-[11px] font-bold text-[#16a34a]">
+                          {course.seats}
+                        </span>
+                      </div>
+                    ) : null}
+                  </div>
                 </div>
-                <div className="sm:col-span-2">
-                  <h4 className="text-[15.5px] font-bold text-gray-900">
-                    {course.duration}
-                  </h4>
-                  <p className="mt-1 text-[12px] text-gray-500">
-                    {course.type || course.study_mode || ""}
-                  </p>
-                </div>
-                <div className="sm:col-span-3">
-                  <h4 className="text-[15.5px] font-bold text-[#2563eb]">
-                    {course.fees}
-                  </h4>
-                  <p className="mt-1 text-[12px] text-gray-500">
-                    {course.fee_note || ""}
-                  </p>
-                </div>
-                <div className="sm:col-span-3">
-                  <p className="mb-2 text-[12.5px] font-medium text-gray-600">
-                    {course.eligibility}
-                  </p>
-                  <span className="inline-block rounded bg-[#eafaef] px-2.5 py-1 text-[11px] font-bold text-[#16a34a]">
-                    {course.seats || ""}
-                  </span>
+                {/* Desktop grid view */}
+                <div className="hidden sm:grid sm:grid-cols-12 gap-4 items-center">
+                  <div className="sm:col-span-4 pr-4">
+                    <h4 className="text-[15.5px] font-bold text-gray-900">
+                      {course.name}
+                    </h4>
+                    <p className="mt-1 text-[12px] text-gray-500">
+                      {course.sub_description || ""}
+                    </p>
+                  </div>
+                  <div className="sm:col-span-2">
+                    <h4 className="text-[15.5px] font-bold text-gray-900">
+                      {course.duration}
+                    </h4>
+                    <p className="mt-1 text-[12px] text-gray-500">
+                      {course.durationSub || ""}
+                    </p>
+                  </div>
+                  <div className="sm:col-span-3">
+                    <h4 className="text-[15.5px] font-bold text-[#2563eb]">
+                      {course.fees}
+                    </h4>
+                    <p className="mt-1 text-[12px] text-gray-500"></p>
+                  </div>
+                  <div className="sm:col-span-3">
+                    <p className="mb-2 text-[12.5px] font-medium text-gray-600">
+                      {course.eligibility}
+                    </p>
+                    <span className="inline-block rounded bg-[#eafaef] px-2.5 py-1 text-[11px] font-bold text-[#16a34a]">
+                      {course.seats}
+                    </span>
+                  </div>
                 </div>
               </div>
-            </div>
-          ))}
+            ))}
 
           {totalPages > 1 && (
             <div className="flex items-center justify-between border-t border-gray-100 bg-white px-6 py-4">

@@ -54,7 +54,8 @@ const RichTextEditor: React.FC<RichTextEditorProps> = memo(({
       />
       <style>{`
         .ql-container {
-          height: ${minHeight}px;
+          min-height: ${minHeight}px;
+          max-height: 500px;
           overflow-y: auto;
         }
         .ql-editor {

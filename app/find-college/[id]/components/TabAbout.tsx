@@ -164,34 +164,36 @@ const TabAbout: React.FC<TabAboutProps> = ({
         if (!video || (!video.message && !video.name)) return null;
         return (
           <div className="overflow-hidden rounded-md bg-[#f4f7fb] p-6 sm:p-8">
-            <div className="flex items-start gap-5">
-              {video.avatar ? (
-                <img
-                  src={getImageUrl(video.avatar)}
-                  alt={video.name || "Speaker"}
-                  className="h-20 w-20 shrink-0 rounded-md border border-gray-200 object-cover"
-                />
-              ) : (
-                <div className="h-20 w-20 shrink-0 rounded-md border border-gray-200 bg-gray-200 flex items-center justify-center">
-                  <i className="fa-solid fa-user text-gray-400 text-2xl"></i>
+            <div className="flex flex-col items-start gap-5">
+              <RichText
+                html={video.message}
+                variant="sm"
+                className="text-[14px] leading-relaxed text-gray-700 w-full"
+              />
+              <div className="flex items-center gap-4 mt-auto">
+                {video.avatar ? (
+                  <img
+                    src={getImageUrl(video.avatar)}
+                    alt={video.name || "Speaker"}
+                    className="h-28 w-28 shrink-0 rounded-full border border-gray-200 object-cover"
+                  />
+                ) : (
+                  <div className="h-28 w-28 shrink-0 rounded-full border border-gray-200 bg-gray-200 flex items-center justify-center">
+                    <i className="fa-solid fa-user text-gray-400 text-3xl"></i>
+                  </div>
+                )}
+                <div className="min-w-0">
+                  {video.name && (
+                    <h4 className="text-[15px] font-bold text-gray-900">
+                      {video.name}
+                    </h4>
+                  )}
+                  {video.designation && (
+                    <p className="text-[13px] text-gray-500">
+                      {video.designation}
+                    </p>
+                  )}
                 </div>
-              )}
-              <div className="min-w-0 flex-1">
-                {video.name && (
-                  <h4 className="text-[15px] font-bold text-gray-900">
-                    {video.name}
-                  </h4>
-                )}
-                {video.designation && (
-                  <p className="text-[13px] text-gray-500 mb-2">
-                    {video.designation}
-                  </p>
-                )}
-                <RichText
-                  html={video.message}
-                  variant="sm"
-                  className="text-[14px] leading-relaxed text-gray-700"
-                />
               </div>
             </div>
           </div>

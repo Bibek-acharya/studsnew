@@ -127,16 +127,18 @@ const ProfileAboutSection: React.FC<Props> = ({
                     />
                   </div>
 
-                  {/* Row 3: Message textarea */}
-                  <textarea
-                    className={`${inputClass} text-sm`}
-                    placeholder="Message / Title"
-                    rows={3}
-                    value={v.message}
-                    onChange={(e) =>
-                      updateItem("videos", v.id, "message", e.target.value)
-                    }
-                  />
+                  {/* Row 3: Message Rich Text */}
+                  <div>
+                    <label className="block text-xs font-medium text-gray-500 mb-1">Message</label>
+                    <RichTextEditor
+                      value={v.message}
+                      onChange={(val: string) =>
+                        updateItem("videos", v.id, "message", val)
+                      }
+                      placeholder="Write a message..."
+                      minHeight={100}
+                    />
+                  </div>
                 </div>
               </div>
             </div>

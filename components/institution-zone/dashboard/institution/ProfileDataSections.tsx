@@ -47,6 +47,7 @@ const ProfileDataSections: React.FC<ReorderItem> = ({
                 fees: "",
                 eligibility: "",
                 seats: "",
+                sub_description: "",
               })
             }
             className="text-sm text-blue-600 bg-blue-50 px-3 py-1.5 rounded-md hover:bg-blue-100 transition-colors font-medium"
@@ -67,7 +68,7 @@ const ProfileDataSections: React.FC<ReorderItem> = ({
               >
                 <i className="fa-solid fa-trash"></i>
               </button>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-3 pr-10">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3 pr-10">
                 <div>
                   <select
                     className={`${inputClass} text-sm ${errors.courses?.[ci]?.level ? 'border-red-500' : ''}`}
@@ -162,6 +163,22 @@ const ProfileDataSections: React.FC<ReorderItem> = ({
                   {errors.courses?.[ci]?.eligibility && (
                     <p className="mt-1 text-xs text-red-500">{errors.courses[ci]?.eligibility?.message}</p>
                   )}
+                </div>
+                <div>
+                  <input
+                    type="text"
+                    className={`${inputClass} text-sm`}
+                    placeholder="Sub Description (e.g. Honors program)"
+                    value={c.sub_description}
+                    onChange={(e) =>
+                      updateItem(
+                        "courses",
+                        c.id,
+                        "sub_description",
+                        e.target.value,
+                      )
+                    }
+                  />
                 </div>
               </div>
             </div>
