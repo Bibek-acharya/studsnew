@@ -29,9 +29,7 @@ const EventDetailsPage: React.FC<{ params: Promise<{ slug: string }> }> = ({
         const isInst = p.slug.startsWith("inst-");
         const slug = isProvider
           ? p.slug.replace("provider-", "")
-          : isInst
-            ? p.slug.replace("inst-", "")
-            : p.slug;
+          : p.slug;
 
         let eventData: EventEntry | null;
         if (isProvider) {
@@ -67,7 +65,7 @@ const EventDetailsPage: React.FC<{ params: Promise<{ slug: string }> }> = ({
           }
         } else if (isInst) {
           try {
-            const instData = await fetchInstitutionEventBySlug(slug);
+            const instData = await fetchInstitutionEventBySlug(slug).catch(() => null);
             if (instData) {
               eventData = {
                 id: `inst-${instData.id}`,

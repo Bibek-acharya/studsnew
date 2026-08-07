@@ -29,9 +29,8 @@ async function fetchMeta(slug: string) {
       };
     }
     if (slug.startsWith("inst-")) {
-      const s = slug.replace("inst-", "");
       const res = await fetch(
-        `${API_BASE}/api/v1/institutions/public/events/by-slug/${s}`,
+        `${API_BASE}/api/v1/institutions/public/events/by-slug/${slug}`,
         { cache: "no-store" },
       );
       if (res.ok) {
@@ -44,7 +43,7 @@ async function fetchMeta(slug: string) {
         };
       }
       const res2 = await fetch(
-        `${API_BASE}/api/v1/institutions/public/events/${s}`,
+        `${API_BASE}/api/v1/institutions/public/events/${slug.replace("inst-", "")}`,
         { cache: "no-store" },
       );
       if (res2.ok) {

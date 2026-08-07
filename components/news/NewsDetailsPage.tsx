@@ -119,14 +119,13 @@ const NewsDetailsPage: React.FC<{
             return;
           }
         } else if (safeId.startsWith("inst-")) {
-          const slug = safeId.replace("inst-", "");
-          const data = await fetchInstitutionNewsBySlug(slug).catch(() => null);
+          const data = await fetchInstitutionNewsBySlug(safeId).catch(() => null);
           if (data) {
             setArticle(normalizeArticle(data));
             return;
           }
           const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080";
-          const res = await fetch(`${API_BASE}/api/v1/institutions/public/news/${slug}`).catch(() => null);
+          const res = await fetch(`${API_BASE}/api/v1/institutions/public/news/${safeId.replace("inst-", "")}`).catch(() => null);
           if (res && res.ok) {
             const json = await res.json();
             if (json?.data) {
