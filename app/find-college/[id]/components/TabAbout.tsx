@@ -104,16 +104,15 @@ const TabAbout: React.FC<TabAboutProps> = ({
                 <div className="flex items-start gap-3">
                   <span className="text-[13px] font-bold text-blue-600 whitespace-nowrap mt-0.5">{item.time || "-"}</span>
                   <div className="flex-1">
-                    <p className="text-[14px] text-gray-700 leading-relaxed font-medium">{item.title}</p>
-                    {item.desc && (
-                      <p className="text-[13px] text-gray-500 mt-1 line-clamp-2">{item.desc}</p>
-                    )}
-                    <Link
-                      href={`/news/${item.slug}`}
-                      className="inline-block mt-2 text-[13px] font-semibold text-blue-600 underline hover:text-blue-800 transition-colors"
-                    >
-                      View Detail
-                    </Link>
+                    <p className="text-[14px] text-gray-700 leading-relaxed font-medium">
+                      {item.title}{" "}
+                      <Link
+                        href={`/news/${item.slug}`}
+                        className="text-[13px] font-semibold text-blue-600 underline hover:text-blue-800 transition-colors"
+                      >
+                        View Detail
+                      </Link>
+                    </p>
                   </div>
                 </div>
               </div>
