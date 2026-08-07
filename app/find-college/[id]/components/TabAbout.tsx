@@ -3,9 +3,6 @@
 import React, { useState } from "react";
 import Link from "next/link";
 import { Eye, Target, Landmark, Users, BadgeCheck } from "lucide-react";
-import {
-  AboutVideoInteractive,
-} from "./index";
 import EmptyTabState from "./EmptyTabState";
 import RichText from "@/components/RichText";
 import { getImageUrl } from "@/services/api";
@@ -66,8 +63,6 @@ const TabAbout: React.FC<TabAboutProps> = ({
 
   return (
     <div className="space-y-10">
-      <AboutVideoInteractive videos={instVideos || undefined} />
-
       {/* Latest News & Stories */}
       {latestNews.length > 0 && (
         <div className="overflow-hidden rounded-md border border-gray-200 bg-white">

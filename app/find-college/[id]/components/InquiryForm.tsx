@@ -3,6 +3,7 @@
 import React, { useState, useRef, useMemo } from "react";
 import { useRouter } from "next/navigation";
 import { ContactInfoRow } from "./index";
+import AboutVideoInteractive from "./AboutVideoInteractive";
 
 interface InquiryFormProps {
   name: string;
@@ -15,6 +16,7 @@ interface InquiryFormProps {
   mappedPrograms: any[] | null;
   isAskQuestionOpen: boolean;
   setIsAskQuestionOpen: (v: boolean) => void;
+  instVideos?: any;
 }
 
 const InquiryForm: React.FC<InquiryFormProps> = ({
@@ -28,6 +30,7 @@ const InquiryForm: React.FC<InquiryFormProps> = ({
   mappedPrograms,
   isAskQuestionOpen,
   setIsAskQuestionOpen,
+  instVideos,
 }) => {
   const router = useRouter();
 
@@ -147,6 +150,9 @@ const InquiryForm: React.FC<InquiryFormProps> = ({
 
   return (
     <div className="space-y-6 lg:col-span-1 lg:w-full lg:max-w-[400px] lg:justify-self-end">
+      {instVideos && instVideos.length > 0 && (
+        <AboutVideoInteractive videos={instVideos} />
+      )}
       <div className="w-full rounded-2xl border border-gray-200 bg-white p-4 sm:p-10">
         <h3 className="mb-8 text-2xl font-bold text-gray-900">
           Contact Information

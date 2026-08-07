@@ -187,7 +187,6 @@ const ProfilePage: React.FC = () => {
   }, []);
 
   useEffect(() => {
-    loadProfile();
     loadSettings();
     (async () => {
       try {
@@ -197,8 +196,12 @@ const ProfilePage: React.FC = () => {
           headers: token ? { Authorization: `Bearer ${token}` } : {},
         });
         const json = await res.json();
-        setUniversities(json?.data?.universities?.map((u: any) => ({ id: u.id, name: u.name })) || []);
-      } catch {}
+        const unis = json?.data?.universities?.map((u: any) => ({ id: u.id, name: u.name })) || [];
+        setUniversities(unis);
+        loadProfile(unis);
+      } catch {
+        loadProfile([]);
+      }
     })();
   }, []);
 
@@ -242,7 +245,7 @@ const ProfilePage: React.FC = () => {
     return url.startsWith("/") ? `${base}${url}` : url;
   };
 
-  const loadProfile = async () => {
+  const loadProfile = async (unis: { id: number; name: string }[]) => {
     try {
       setLoading(true);
       const res = await api("/api/v1/institution/profile");
@@ -253,7 +256,7 @@ const ProfilePage: React.FC = () => {
         const primaryUniId = data.university_id || 0;
         const affiliationNames = (data.affiliation || "").split(",").map((s: string) => s.trim()).filter(Boolean);
         const resolvedIds = affiliationNames
-          .map((name: string) => universities.find(u => u.name === name)?.id)
+          .map((name: string) => unis.find(u => u.name === name)?.id)
           .filter((id: number | undefined) => id && id > 0);
 
         let galleryGroupsData: GalleryGroup[] = [];
@@ -530,7 +533,9 @@ const ProfilePage: React.FC = () => {
         tiktok_url: fd.tiktokUrl,
         youtube_url: fd.youtubeUrl,
         linkedin_url: fd.linkedinUrl,
-        affiliation: fd.universityIds.map(id => universities.find(u => u.id === id)?.name || "").filter(Boolean).join(", "),
+        affiliation: level.some(l => l === "Bachelor" || l === "Master")
+          ? fd.universityIds.map(id => universities.find(u => u.id === id)?.name || "").filter(Boolean).join(", ")
+          : fd.affiliation,
         university_id: fd.universityIds[0] || undefined,
         brochure_data: fd.brochureUrl ? { url: fd.brochureUrl } : null,
         logo_url: fd.logoUrl,

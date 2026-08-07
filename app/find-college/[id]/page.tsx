@@ -286,6 +286,7 @@ const CollegeDetailsPage = ({
           mappedPrograms={data.mappedPrograms}
           isAskQuestionOpen={isAskQuestionOpen}
           setIsAskQuestionOpen={setIsAskQuestionOpen}
+          instVideos={data.instVideos}
         />
       </div>
 
