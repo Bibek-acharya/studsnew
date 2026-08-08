@@ -98,6 +98,14 @@ interface DownloadCard {
   description: string;
 }
 
+interface TestimonialCard {
+  id: number;
+  name: string;
+  designation: string;
+  image: string;
+  message: string;
+}
+
 interface FaqCard {
   id: number;
   question: string;
@@ -257,6 +265,7 @@ const AdmissionCreatePage: React.FC = () => {
   const [facilities, setFacilities] = useState<FacilityCard[]>([]);
   const [courses, setCourses] = useState<CourseCard[]>([]);
   const [downloads, setDownloads] = useState<DownloadCard[]>([]);
+  const [testimonials, setTestimonials] = useState<TestimonialCard[]>([]);
 
   const [faqs, setFaqs] = useState<FaqCard[]>([]);
   const [contactPersons, setContactPersons] = useState<ContactPerson[]>([]);
