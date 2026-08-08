@@ -381,6 +381,18 @@ const AdmissionCreatePage: React.FC = () => {
         })),
       );
     }
+    const tld = data.testimonials_data;
+    if (tld && Array.isArray(tld)) {
+      setTestimonials(
+        tld.map((t: AnyRecord, i: number) => ({
+          id: i + 1,
+          name: String(t.name ?? ""),
+          designation: String(t.designation ?? ""),
+          image: String(t.image ?? ""),
+          message: String(t.message ?? ""),
+        })),
+      );
+    }
     const fqd = data.faqs_data;
     if (fqd && Array.isArray(fqd)) {
       setFaqs(
@@ -525,6 +537,11 @@ const AdmissionCreatePage: React.FC = () => {
     }),
     downloads_data: downloads.map((d) => {
       const { id: _, ...rest } = d;
+      void _;
+      return rest;
+    }),
+    testimonials_data: testimonials.map((t) => {
+      const { id: _, ...rest } = t;
       void _;
       return rest;
     }),
