@@ -9,6 +9,7 @@ import { superadminAdmissionApi } from "@/services/superadminRecordsApi";
 import { institutionAdmissionApi } from "@/services/institutionAdmissionApi";
 import ImageCropperModal from "@/components/ScholarshipProvider/common/ImageCropperModal";
 import InstitutionSelector from "./InstitutionSelector";
+import { toast } from "sonner";
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080";
 
@@ -579,37 +580,49 @@ export default function SuperadminCreateAdmissionSection({
     if (publish && !validate()) return;
     setSaving(true);
     try {
-      if (!whatsNewManuallyEdited && !whatsNewDesc.trim()) {
-        setGeneratingWhatsNew(true);
-        try {
-          const tempData = collectData();
-          const genResult = await institutionAdmissionApi.generateWhatsNew(
-            editId ? Number(editId) : 0,
-            tempData,
-          );
-          if (genResult.success && genResult.data) {
-            const whatsNew = (genResult.data as any).whats_new_data;
-            if (whatsNew?.description) {
-              setWhatsNewDesc(whatsNew.description);
-            }
-          }
-        } catch {
-          // silent - continue with save even if generation fails
-        } finally {
-          setGeneratingWhatsNew(false);
-        }
+      let admissionId = editId ? Number(editId) : 0;
+
+      if (editId) {
+        await superadminAdmissionApi.update(Number(editId), collectData(), publish);
+      } else {
+        const result = await superadminAdmissionApi.create(collectData(), publish);
+        admissionId = (result as any)?.data?.id || 0;
       }
 
-      const data = collectData();
-      if (editId) {
-        await superadminAdmissionApi.update(Number(editId), data, publish);
-      } else {
-        await superadminAdmissionApi.create(data, publish);
-      }
       localStorage.removeItem("superadmin_edit_admission_id");
       setActiveSection("superadmin-admission-directory");
+
+      // Background AI generation if What's New is empty and not manually edited
+      if (!whatsNewManuallyEdited && !whatsNewDesc.trim() && admissionId) {
+        toast.info("Generating What's New summary...");
+        institutionAdmissionApi
+          .generateWhatsNew(admissionId, collectData())
+          .then(async (genResult) => {
+            if (genResult.success && genResult.data) {
+              const whatsNew = (genResult.data as any).whats_new_data;
+              if (whatsNew?.description) {
+                // Save the generated summary back to the admission
+                const updatedData = {
+                  ...collectData(),
+                  whats_new_data: {
+                    ...collectData().whats_new_data,
+                    description: whatsNew.description,
+                  },
+                };
+                await institutionAdmissionApi.update(admissionId, updatedData, publish);
+                setWhatsNewDesc(whatsNew.description);
+                toast.success("What's New summary generated and saved!");
+              }
+            } else {
+              toast.error("Failed to generate What's New summary");
+            }
+          })
+          .catch(() => {
+            toast.error("Failed to generate What's New summary");
+          });
+      }
     } catch {
-      // silent
+      toast.error("Failed to save admission");
     } finally {
       setSaving(false);
     }
@@ -617,6 +630,7 @@ export default function SuperadminCreateAdmissionSection({
 
   const handleGenerateWhatsNew = async () => {
     setGeneratingWhatsNew(true);
+    toast.info("Generating What's New summary...");
     try {
       const data = collectData();
       const result = await institutionAdmissionApi.generateWhatsNew(
@@ -628,10 +642,13 @@ export default function SuperadminCreateAdmissionSection({
         if (whatsNew) {
           setWhatsNewDesc(whatsNew.description || "");
           setWhatsNewManuallyEdited(false);
+          toast.success("What's New summary generated!");
         }
+      } else {
+        toast.error("Failed to generate summary. Please try again.");
       }
     } catch {
-      // silent
+      toast.error("Failed to generate summary. Please try again.");
     } finally {
       setGeneratingWhatsNew(false);
     }
@@ -2594,106 +2611,6 @@ export default function SuperadminCreateAdmissionSection({
           </div>
         </div>
 
-        {/* 10. What's New */}
-        <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
-          <div className="border-b border-gray-200 bg-gray-50/50 px-6 py-4 flex items-center gap-3">
-            <div className="p-2 bg-blue-100 text-blue-600 rounded-lg">
-              <svg
-                width="20"
-                height="20"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              >
-                <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" />
-                <path d="M13.73 21a2 2 0 0 1-3.46 0" />
-              </svg>
-            </div>
-            <div>
-              <h2 className="text-base font-semibold text-gray-800">
-                What&apos;s New
-              </h2>
-              <p className="text-sm text-gray-500 mt-0.5">
-                Latest updates and announcements
-              </p>
-            </div>
-          </div>
-          <div className="p-6 grid grid-cols-2 gap-4">
-            <div className="md:col-span-1">
-              <label className={labelClass}>Title</label>
-              <input
-                type="text"
-                className={inputClass}
-                placeholder="e.g. New Scholarship Available"
-                value={whatsNewTitle}
-                onChange={(e) => setWhatsNewTitle(e.target.value)}
-              />
-            </div>
-            <div className="md:col-span-1">
-              <label className={labelClass}>Button Text</label>
-              <input
-                type="text"
-                className={inputClass}
-                placeholder="e.g. Learn More"
-                value={whatsNewBtnText}
-                onChange={(e) => setWhatsNewBtnText(e.target.value)}
-              />
-            </div>
-            <div className="md:col-span-1">
-              <label className={labelClass}>Button Link</label>
-              <input
-                type="url"
-                className={inputClass}
-                placeholder="https://..."
-                value={whatsNewBtnLink}
-                onChange={(e) => setWhatsNewBtnLink(e.target.value)}
-              />
-            </div>
-            <div className="md:col-span-2">
-              <label className={labelClass}>Description</label>
-              <textarea
-                className={`${inputClass} min-h-[60px]`}
-                rows={2}
-                placeholder="Brief description..."
-                value={whatsNewDesc}
-                onChange={(e) => {
-                  setWhatsNewDesc(e.target.value);
-                  setWhatsNewManuallyEdited(true);
-                }}
-              />
-            </div>
-            <div className="flex items-center gap-3 mt-2">
-              <button
-                onClick={handleGenerateWhatsNew}
-                disabled={generatingWhatsNew || saving}
-                className="px-4 py-2 text-sm font-medium text-purple-600 bg-purple-50 border border-purple-200 rounded-lg hover:bg-purple-100 flex items-center gap-2 transition-colors disabled:opacity-50"
-              >
-                {generatingWhatsNew ? (
-                  <>
-                    <svg className="animate-spin h-4 w-4" viewBox="0 0 24 24">
-                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
-                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
-                    </svg>
-                    Generating...
-                  </>
-                ) : (
-                  <>
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                      <path d="M12 2L2 7l10 5 10-5-10-5z" />
-                      <path d="M2 17l10 5 10-5" />
-                      <path d="M2 12l10 5 10-5" />
-                    </svg>
-                    Generate with AI
-                  </>
-                )}
-              </button>
-            </div>
-          </div>
-        </div>
-
         {/* 11. Downloads */}
         <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
           <SectionItemHeader
@@ -2885,6 +2802,135 @@ export default function SuperadminCreateAdmissionSection({
                 }}
               />
             </label>
+          </div>
+        </div>
+
+        {/* 13. What's New */}
+        <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+          <div className="border-b border-gray-200 bg-gray-50/50 px-6 py-4 flex items-center justify-between gap-4">
+            <div className="flex items-center gap-3">
+              <div className="p-2 bg-blue-100 text-blue-600 rounded-lg">
+                <svg
+                  width="20"
+                  height="20"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                >
+                  <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" />
+                  <path d="M13.73 21a2 2 0 0 1-3.46 0" />
+                </svg>
+              </div>
+              <div>
+                <h2 className="text-base font-semibold text-gray-800">
+                  What&apos;s New
+                </h2>
+                <p className="text-sm text-gray-500 mt-0.5">
+                  Latest updates and announcements for this admission
+                </p>
+              </div>
+            </div>
+            <button
+              onClick={handleGenerateWhatsNew}
+              disabled={generatingWhatsNew || saving}
+              className="px-4 py-2 text-sm font-medium text-purple-600 bg-purple-50 border border-purple-200 rounded-lg hover:bg-purple-100 flex items-center gap-2 transition-colors disabled:opacity-50 shrink-0"
+            >
+              {generatingWhatsNew ? (
+                <>
+                  <svg
+                    className="animate-spin h-4 w-4"
+                    viewBox="0 0 24 24"
+                  >
+                    <circle
+                      className="opacity-25"
+                      cx="12"
+                      cy="12"
+                      r="10"
+                      stroke="currentColor"
+                      strokeWidth="4"
+                      fill="none"
+                    />
+                    <path
+                      className="opacity-75"
+                      fill="currentColor"
+                      d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                    />
+                  </svg>
+                  Generating...
+                </>
+              ) : (
+                <>
+                  <svg
+                    width="16"
+                    height="16"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                  >
+                    <path d="M12 2L2 7l10 5 10-5-10-5z" />
+                    <path d="M2 17l10 5 10-5" />
+                    <path d="M2 12l10 5 10-5" />
+                  </svg>
+                  Generate with AI
+                </>
+              )}
+            </button>
+          </div>
+          <div className="p-6 space-y-4">
+            <div className="grid grid-cols-2 gap-4">
+              <div className="md:col-span-1">
+                <label className={labelClass}>Title</label>
+                <input
+                  type="text"
+                  className={inputClass}
+                  placeholder="e.g. New Scholarship Available"
+                  value={whatsNewTitle}
+                  onChange={(e) => setWhatsNewTitle(e.target.value)}
+                />
+              </div>
+              <div className="md:col-span-1">
+                <label className={labelClass}>Button Text</label>
+                <input
+                  type="text"
+                  className={inputClass}
+                  placeholder="e.g. Learn More"
+                  value={whatsNewBtnText}
+                  onChange={(e) => setWhatsNewBtnText(e.target.value)}
+                />
+              </div>
+              <div className="md:col-span-2">
+                <label className={labelClass}>Button Link</label>
+                <input
+                  type="url"
+                  className={inputClass}
+                  placeholder="https://..."
+                  value={whatsNewBtnLink}
+                  onChange={(e) => setWhatsNewBtnLink(e.target.value)}
+                />
+              </div>
+            </div>
+            <div>
+              <label className={labelClass}>Description</label>
+              <div className="border border-gray-200 rounded-lg overflow-visible">
+                <QuillEditor
+                  value={whatsNewDesc}
+                  onChange={(val: string) => {
+                    setWhatsNewDesc(val);
+                    setWhatsNewManuallyEdited(true);
+                  }}
+                  modules={quillModules}
+                  placeholder="Latest updates about admissions, deadlines, events..."
+                  className="bg-white"
+                />
+              </div>
+              <p className="text-xs text-gray-500 mt-1">
+                Rich text supported. Leave empty and click &quot;Generate with AI&quot; to auto-generate from admission data.
+              </p>
+            </div>
           </div>
         </div>
 
