@@ -38,6 +38,25 @@ export const institutionAdmissionApi = {
     });
   },
 
+  async generateWhatsNew(
+    id: number,
+    data: Record<string, unknown>,
+  ): Promise<{ success: boolean; data?: Record<string, unknown>; error?: string }> {
+    try {
+      const json = await apiRequest<any>(
+        `/api/v1/institution/admission-pages/${id}/generate-whats-new`,
+        {
+          method: "POST",
+          body: JSON.stringify({ data }),
+          authToken: institutionToken() || undefined,
+        },
+      );
+      return { success: true, data: json.data };
+    } catch (err: any) {
+      return { success: false, error: err.message || "Generation failed" };
+    }
+  },
+
   async delete(id: number) {
     return apiRequest<any>(`/api/v1/institution/admission-pages/${id}`, {
       method: "DELETE",
