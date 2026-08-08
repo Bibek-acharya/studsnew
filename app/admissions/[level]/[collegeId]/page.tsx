@@ -38,6 +38,8 @@ const TABS = [
   { id: "courses", label: "Courses & Fees" },
   { id: "scholarship", label: "Scholarships" },
   { id: "contact", label: "Contact" },
+  { id: "downloads", label: "Downloads" },
+  { id: "testimonials", label: "Testimonials" },
   { id: "faq", label: "FAQ" },
 ] as const;
 
@@ -272,6 +274,24 @@ export default function AdmissionDetailPage() {
       phone: s.number || "",
       email: s.email || "",
       wa: s.whatsapp || "",
+    }),
+  );
+
+  const downloadsData = ((apData?.downloads_data as any[]) || []).map(
+    (d: any) => ({
+      title: d.title || "",
+      description: d.description || "",
+      file: d.file || "",
+      size: d.size || "",
+    }),
+  );
+
+  const testimonialsData = ((apData?.testimonials_data as any[]) || []).map(
+    (t: any) => ({
+      name: t.name || "",
+      designation: t.designation || "",
+      image: t.image || "",
+      message: t.message || "",
     }),
   );
 
@@ -994,6 +1014,123 @@ export default function AdmissionDetailPage() {
                 </div>
               ) : (
                 <EmptyTabState tabName="Contact" />
+              )}
+            </div>
+          )}
+
+          {/* Downloads Tab */}
+          {activeTab === "downloads" && (
+            <div>
+              {downloadsData.length > 0 ? (
+                <div>
+                  <div className="mb-6">
+                    <h2 className="text-[20px] font-bold text-gray-900">Downloads</h2>
+                    <p className="mt-1 text-[14px] text-gray-500">
+                      Access brochures, forms, and study materials.
+                    </p>
+                  </div>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    {downloadsData.map((download: any, i: number) => (
+                      <div
+                        key={download.title || i}
+                        className="flex items-center justify-between rounded-md border border-gray-200 bg-white p-5 transition"
+                      >
+                        <div className="flex items-center gap-4">
+                          <div className="flex h-12 w-12 items-center justify-center rounded-md bg-blue-50 text-blue-600">
+                            <svg
+                              width="24"
+                              height="24"
+                              viewBox="0 0 24 24"
+                              fill="none"
+                              stroke="currentColor"
+                              strokeWidth="2"
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                            >
+                              <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+                              <polyline points="14 2 14 8 20 8" />
+                              <line x1="16" y1="13" x2="8" y2="13" />
+                              <line x1="16" y1="17" x2="8" y2="17" />
+                            </svg>
+                          </div>
+                          <div>
+                            <h4 className="font-bold text-gray-900">
+                              {download.title}
+                            </h4>
+                            <p className="text-[12.5px] text-gray-500">
+                              {download.size || download.description || "Download file"}
+                            </p>
+                          </div>
+                        </div>
+                        {download.file ? (
+                          <a
+                            href={download.file}
+                            target="_blank"
+                            rel="noreferrer"
+                            className="flex items-center gap-2 rounded-md bg-[#0000ff] hover:bg-[#0000cc] px-5 py-2.5 text-sm font-bold text-white"
+                          >
+                            <Download className="w-4 h-4" />
+                            Download
+                          </a>
+                        ) : (
+                          <button className="flex items-center gap-2 rounded-md bg-[#0000ff] hover:bg-[#0000cc] px-5 py-2.5 text-sm font-bold text-white">
+                            <Download className="w-4 h-4" />
+                            Download
+                          </button>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              ) : (
+                <EmptyTabState tabName="downloads" />
+              )}
+            </div>
+          )}
+
+          {/* Testimonials Tab */}
+          {activeTab === "testimonials" && (
+            <div>
+              {testimonialsData.length > 0 ? (
+                <div>
+                  <div className="mb-8">
+                    <h2 className="text-2xl font-bold text-gray-900 mb-2">
+                      Testimonials
+                    </h2>
+                    <p className="text-gray-600">
+                      What our students and alumni say about us
+                    </p>
+                  </div>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    {testimonialsData.map((testimonial: any, idx: number) => (
+                      <div
+                        key={idx}
+                        className="border border-gray-200 rounded-md p-6 bg-white"
+                      >
+                        <div className="flex items-start gap-4 mb-4">
+                          <img
+                            src={testimonial.image}
+                            alt={testimonial.name}
+                            className="w-16 h-16 rounded-full object-cover flex-shrink-0"
+                          />
+                          <div>
+                            <h4 className="font-bold text-gray-900">
+                              {testimonial.name}
+                            </h4>
+                            <p className="text-sm text-[#0000ff] font-medium">
+                              {testimonial.designation}
+                            </p>
+                          </div>
+                        </div>
+                        <p className="text-gray-600 text-[15px] leading-relaxed italic">
+                          &ldquo;{testimonial.message}&rdquo;
+                        </p>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              ) : (
+                <EmptyTabState tabName="Testimonials" />
               )}
             </div>
           )}
