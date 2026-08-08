@@ -2655,6 +2655,195 @@ const AdmissionCreatePage: React.FC = () => {
           </div>
         </div>
 
+        {/* 8.5 Testimonials */}
+        <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+          <SectionItemHeader
+            icon="message-square"
+            title="Testimonials"
+            subtitle="Student or alumni testimonials about the admission experience"
+            onAdd={() =>
+              setTestimonials((prev) => [
+                ...prev,
+                {
+                  id: nextId(prev),
+                  name: "",
+                  designation: "",
+                  image: "",
+                  message: "",
+                },
+              ])
+            }
+            addLabel="Add Testimonial"
+          />
+          <div className="p-6 space-y-6">
+            {testimonials.map((t) => (
+              <div
+                key={t.id}
+                className="p-5 bg-gray-50 rounded-lg border border-gray-200 relative group"
+              >
+                <button
+                  onClick={() =>
+                    setTestimonials((prev) => prev.filter((x) => x.id !== t.id))
+                  }
+                  className="absolute top-4 right-4 p-2 text-red-500 hover:bg-red-50 rounded-lg transition-colors"
+                >
+                  <svg
+                    width="18"
+                    height="18"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  >
+                    <polyline points="3 6 5 6 21 6" />
+                    <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
+                  </svg>
+                </button>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pr-12">
+                  <div className="md:col-span-2">
+                    <label className={labelClass}>Profile Image</label>
+                    <div className="flex items-center gap-4">
+                      <div className="w-20 h-20 bg-gray-200 rounded-full flex items-center justify-center text-gray-400 border border-gray-300 overflow-hidden">
+                        {t.image ? (
+                          <img
+                            src={t.image}
+                            className="w-full h-full object-cover"
+                            alt=""
+                          />
+                        ) : (
+                          <svg
+                            width="24"
+                            height="24"
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="currentColor"
+                            strokeWidth="2"
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                          >
+                            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
+                            <circle cx="12" cy="7" r="4" />
+                          </svg>
+                        )}
+                      </div>
+                      <label className="px-4 py-2 bg-white border border-gray-300 text-sm font-medium rounded-lg hover:bg-gray-50 shadow-sm cursor-pointer">
+                        {t.image ? "Change" : "Upload Image"}
+                        <input
+                          type="file"
+                          className="hidden"
+                          accept="image/*"
+                          onChange={async (e) => {
+                            const file = e.target.files?.[0];
+                            if (!file) return;
+                            try {
+                              const url = await uploadFile(
+                                file,
+                                "institution/admission",
+                              );
+                              setTestimonials((prev) =>
+                                prev.map((x) =>
+                                  x.id === t.id ? { ...x, image: url } : x,
+                                ),
+                              );
+                            } catch {
+                              /* skip */
+                            }
+                          }}
+                        />
+                      </label>
+                      {t.image && (
+                        <button
+                          type="button"
+                          onClick={() =>
+                            setTestimonials((prev) =>
+                              prev.map((x) =>
+                                x.id === t.id ? { ...x, image: "" } : x,
+                              ),
+                            )
+                          }
+                          className="p-2 text-red-500 hover:bg-red-50 rounded-lg"
+                        >
+                          <svg
+                            width="16"
+                            height="16"
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="currentColor"
+                            strokeWidth="2"
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                          >
+                            <polyline points="3 6 5 6 21 6" />
+                            <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
+                          </svg>
+                        </button>
+                      )}
+                    </div>
+                  </div>
+                  <div>
+                    <label className={labelClass}>
+                      Name <span className="text-red-500">*</span>
+                    </label>
+                    <input
+                      type="text"
+                      className={inputClass}
+                      placeholder="e.g. Ram Shrestha"
+                      value={t.name}
+                      onChange={(e) =>
+                        setTestimonials((prev) =>
+                          prev.map((x) =>
+                            x.id === t.id ? { ...x, name: e.target.value } : x,
+                          ),
+                        )
+                      }
+                    />
+                  </div>
+                  <div>
+                    <label className={labelClass}>
+                      Designation <span className="text-red-500">*</span>
+                    </label>
+                    <input
+                      type="text"
+                      className={inputClass}
+                      placeholder="e.g. Alumni, Batch 2024"
+                      value={t.designation}
+                      onChange={(e) =>
+                        setTestimonials((prev) =>
+                          prev.map((x) =>
+                            x.id === t.id
+                              ? { ...x, designation: e.target.value }
+                              : x,
+                          ),
+                        )
+                      }
+                    />
+                  </div>
+                  <div className="md:col-span-2">
+                    <label className={labelClass}>
+                      Testimonial Message <span className="text-red-500">*</span>
+                    </label>
+                    <textarea
+                      className={`${inputClass} min-h-[80px]`}
+                      rows={3}
+                      placeholder="Share the testimonial message..."
+                      value={t.message}
+                      onChange={(e) =>
+                        setTestimonials((prev) =>
+                          prev.map((x) =>
+                            x.id === t.id ? { ...x, message: e.target.value } : x,
+                          ),
+                        )
+                      }
+                    />
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+
         {/* 9. Frequently Asked Questions (FAQ) */}
         <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
           <SectionItemHeader
