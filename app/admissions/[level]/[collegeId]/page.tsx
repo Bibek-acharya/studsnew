@@ -2,6 +2,7 @@
 
 import React, { useState, useRef, useEffect, useCallback } from "react";
 import { useParams, useRouter } from "next/navigation";
+import Link from "next/link";
 import { useQuery } from "@tanstack/react-query";
 import { admissionService } from "@/services/admission.api";
 import {
@@ -107,6 +108,7 @@ export default function AdmissionDetailPage() {
 
   const [activeTab, setActiveTab] = useState<TabId>("overview");
   const [openFaq, setOpenFaq] = useState<number | null>(null);
+  const [openProgram, setOpenProgram] = useState<number>(0);
   const [showNotificationModal, setShowNotificationModal] = useState(false);
   const tabNavRef = useRef<HTMLDivElement>(null);
 
@@ -244,7 +246,7 @@ export default function AdmissionDetailPage() {
       level: s.level || "",
       stream: s.stream || "",
       coverage: s.coverage || "",
-      eligibility: s.eligibility || "",
+      eligibility: s.eligibility ? String(s.eligibility).split(/[\n.]+/).map((item: string) => item.replace(/^-\s*/, "").trim()).filter(Boolean) : [],
       seats: s.seats || "",
     }),
   );
@@ -256,8 +258,8 @@ export default function AdmissionDetailPage() {
       sn: i + 1,
       level: e.level || "",
       stream: e.stream || "",
-      eligibility: (e.eligibility || []).join(", "),
-      docs: e.documents || [],
+      eligibility: Array.isArray(e.eligibility) ? e.eligibility : (e.eligibility ? String(e.eligibility).split("\n").map((s: string) => s.replace(/^-\s*/, "").trim()).filter(Boolean) : []),
+      docs: Array.isArray(e.documents) ? e.documents : (e.documents ? String(e.documents).split("\n").map((s: string) => s.replace(/^-\s*/, "").trim()).filter(Boolean) : []),
     }));
   })();
 
@@ -322,20 +324,23 @@ export default function AdmissionDetailPage() {
   return (
     <div className="min-h-screen bg-white">
       {/* Hero Section */}
-      <div className="mx-auto max-w-350 px-4 sm:px-6 lg:px-8 pt-12 pb-8">
+      <div className="mx-auto max-w-350 pt-12 pb-8">
         {/* Breadcrumb */}
-        <nav className="flex items-center text-sm text-gray-500 mb-6 gap-2">
-          <span className="hover:text-gray-900 transition-colors cursor-pointer">
+        <nav className="flex items-center text-sm text-gray-500 mb-6 gap-2 flex-wrap">
+          <Link href="/" className="hover:text-gray-900 transition-colors">
             Home
-          </span>
+          </Link>
           <ChevronRight className="w-4 h-4 text-gray-400" />
-          <span className="hover:text-gray-900 transition-colors cursor-pointer">
-            Admission
-          </span>
+          <Link href="/admissions" className="hover:text-gray-900 transition-colors">
+            Admissions
+          </Link>
           <ChevronRight className="w-4 h-4 text-gray-400" />
-          <span className="hover:text-gray-900 transition-colors cursor-pointer">
-            +2 Admission
-          </span>
+          <Link
+            href={`/admissions/${encodeURIComponent(params.level as string)}`}
+            className="hover:text-gray-900 transition-colors"
+          >
+            {params.level} Admission
+          </Link>
           <ChevronRight className="w-4 h-4 text-gray-400" />
           <span className="text-gray-900 font-semibold">{collegeName}</span>
         </nav>
@@ -399,22 +404,13 @@ export default function AdmissionDetailPage() {
             )}
           </div>
         ) : (
-          <div
-            className="relative w-full h-[280px] md:h-[380px] bg-cover bg-center rounded-md overflow-hidden"
-            style={{
-              backgroundImage:
-                "url('https://kist-edu-np.s3.ap-south-1.amazonaws.com/uploads/album/value/c0374b68ef663e539f7e6aea4b84625b2a207a981656053172.jpg')",
-              backgroundPosition: "center 20%",
-            }}
-          >
-            <div className="absolute inset-0 bg-black/10" />
-          </div>
+          <div className="relative w-full h-[280px] md:h-[380px] bg-brand-blue rounded-md overflow-hidden" />
         )}
       </div>
 
       {/* Sticky Tab Navigation */}
       <div className="sticky top-0 z-40 bg-white border-b border-gray-100 overflow-hidden">
-        <div className="mx-auto max-w-350 px-4 sm:px-6 lg:px-8 relative">
+        <div className="mx-auto max-w-350 relative">
           <button
             onClick={() => scrollTabs(-1)}
             className="absolute left-0 top-1/2 -translate-y-1/2 z-10 w-9 h-9 bg-white border border-gray-200 rounded-full flex items-center justify-center md:hidden"
@@ -448,7 +444,7 @@ export default function AdmissionDetailPage() {
       </div>
 
       {/* Main Grid */}
-      <div className="mx-auto max-w-350 px-4 sm:px-6 lg:px-8 py-8 md:py-12 grid grid-cols-1 lg:grid-cols-3 gap-10 md:gap-10 bg-white">
+      <div className="mx-auto max-w-350 py-8 md:py-12 grid grid-cols-1 lg:grid-cols-3 gap-10 md:gap-10 bg-white">
         {/* Left: Main Content */}
         <div className="lg:col-span-2 min-h-[500px]">
           {/* Overview Tab */}
@@ -539,72 +535,93 @@ export default function AdmissionDetailPage() {
                     <h2 className="text-2xl font-bold text-gray-900 mb-6">
                       Our Programs
                     </h2>
-                    <div className="space-y-6">
-                      {programsData.map((prog, idx) => (
-                        <div
-                          key={idx}
-                          className="border border-gray-200 rounded-md p-6 bg-white"
-                        >
-                          <div className="flex items-start justify-between gap-4 mb-4">
-                            <div className="flex items-start gap-4">
-                              <div className="w-12 h-12 rounded-md bg-[#0000ff] flex items-center justify-center text-white flex-shrink-0">
-                                <prog.icon className="w-6 h-6" />
-                              </div>
-                              <div>
-                                <h3 className="text-xl font-bold text-gray-900">
-                                  {prog.title}
-                                </h3>
-                                <p className="text-sm text-gray-500">
-                                  {prog.affiliation ||
-                                    "NEB Affiliated | 2 Years Program"}
-                                </p>
-                              </div>
-                            </div>
-                            <span
-                              className={`px-3 py-1 text-xs font-semibold rounded-full ${prog.badgeClass}`}
+                    <div className="space-y-3">
+                      {programsData.map((prog, idx) => {
+                        const isOpen = openProgram === idx;
+                        return (
+                          <div
+                            key={idx}
+                            className="border border-gray-200 rounded-md bg-white overflow-hidden"
+                          >
+                            <button
+                              onClick={() => setOpenProgram(isOpen ? -1 : idx)}
+                              className="w-full flex items-center justify-between gap-4 p-4 text-left hover:bg-gray-50 transition-colors"
                             >
-                              {prog.badge}
-                            </span>
+                              <div className="flex items-center gap-4">
+                                <div className="w-10 h-10 rounded-md bg-[#0000ff] flex items-center justify-center text-white flex-shrink-0">
+                                  <prog.icon className="w-5 h-5" />
+                                </div>
+                                <div>
+                                  <h3 className="text-base font-bold text-gray-900">
+                                    {prog.title}
+                                  </h3>
+                                  <p className="text-sm text-gray-500">
+                                    {prog.affiliation ||
+                                      "NEB Affiliated | 2 Years Program"}
+                                  </p>
+                                </div>
+                              </div>
+                              <div className="flex items-center gap-3">
+                                <span
+                                  className={`px-3 py-1 text-xs font-semibold rounded-full ${prog.badgeClass}`}
+                                >
+                                  {prog.badge}
+                                </span>
+                                <ChevronDown
+                                  className={`w-5 h-5 text-gray-400 transition-transform ${
+                                    isOpen ? "rotate-180" : ""
+                                  }`}
+                                />
+                              </div>
+                            </button>
+                            {isOpen && (
+                              <div className="px-4 pb-4 pt-2 border-t border-gray-100">
+                                <p className="text-gray-700 leading-relaxed mb-4">
+                                  {prog.desc}
+                                </p>
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                  <div className="bg-gray-50 rounded-md p-4">
+                                    <h4 className="font-semibold text-gray-900 mb-2">
+                                      {prog.leftTitle}
+                                    </h4>
+                                    <ul className="space-y-1 text-sm text-gray-600">
+                                      {prog.leftItems.map(
+                                        (item: any, i: number) => (
+                                          <li
+                                            key={i}
+                                            className="flex items-center gap-2"
+                                          >
+                                            <span className="w-1.5 h-1.5 rounded-full bg-[#0000ff]" />
+                                            {item}
+                                          </li>
+                                        ),
+                                      )}
+                                    </ul>
+                                  </div>
+                                  <div className="bg-gray-50 rounded-md p-4">
+                                    <h4 className="font-semibold text-gray-900 mb-2">
+                                      {prog.rightTitle}
+                                    </h4>
+                                    <ul className="space-y-1 text-sm text-gray-600">
+                                      {prog.rightItems.map(
+                                        (item: any, i: number) => (
+                                          <li
+                                            key={i}
+                                            className="flex items-center gap-2"
+                                          >
+                                            <span className="w-1.5 h-1.5 rounded-full bg-[#0000ff]" />
+                                            {item}
+                                          </li>
+                                        ),
+                                      )}
+                                    </ul>
+                                  </div>
+                                </div>
+                              </div>
+                            )}
                           </div>
-                          <p className="text-gray-700 leading-relaxed mb-4">
-                            {prog.desc}
-                          </p>
-                          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            <div className="bg-gray-50 rounded-md p-4">
-                              <h4 className="font-semibold text-gray-900 mb-2">
-                                {prog.leftTitle}
-                              </h4>
-                              <ul className="space-y-1 text-sm text-gray-600">
-                                {prog.leftItems.map((item: any, i: number) => (
-                                  <li
-                                    key={i}
-                                    className="flex items-center gap-2"
-                                  >
-                                    <span className="w-1.5 h-1.5 rounded-full bg-[#0000ff]" />
-                                    {item}
-                                  </li>
-                                ))}
-                              </ul>
-                            </div>
-                            <div className="bg-gray-50 rounded-md p-4">
-                              <h4 className="font-semibold text-gray-900 mb-2">
-                                {prog.rightTitle}
-                              </h4>
-                              <ul className="space-y-1 text-sm text-gray-600">
-                                {prog.rightItems.map((item: any, i: number) => (
-                                  <li
-                                    key={i}
-                                    className="flex items-center gap-2"
-                                  >
-                                    <span className="w-1.5 h-1.5 rounded-full bg-[#0000ff]" />
-                                    {item}
-                                  </li>
-                                ))}
-                              </ul>
-                            </div>
-                          </div>
-                        </div>
-                      ))}
+                        );
+                      })}
                     </div>
                   </>
                 ) : (
@@ -664,18 +681,16 @@ export default function AdmissionDetailPage() {
                                 {row.stream}
                               </td>
                               <td className="p-4 align-top border-r border-gray-200 text-gray-700">
-                                {row.eligibility}
+                                <ul className="list-disc list-inside space-y-1 text-sm">
+                                  {row.eligibility.map((item: string, i: number) => (
+                                    <li key={i}>{item}</li>
+                                  ))}
+                                </ul>
                               </td>
                               <td className="p-4 align-top text-gray-700">
-                                <ul className="space-y-1 text-sm">
+                                <ul className="list-disc list-inside space-y-1 text-sm">
                                   {row.docs.map((doc: any, i: number) => (
-                                    <li
-                                      key={i}
-                                      className="flex items-center gap-2"
-                                    >
-                                      <span className="w-1.5 h-1.5 rounded-full bg-[#0000ff]" />
-                                      {doc}
-                                    </li>
+                                    <li key={i}>{doc}</li>
                                   ))}
                                 </ul>
                               </td>
@@ -702,7 +717,7 @@ export default function AdmissionDetailPage() {
                       Admission Process 2026
                     </h2>
                     <p className="text-gray-600">
-                      Step-by-step guide for Science (+2) admission
+                      Step-by-step guide for {admissionLevel || "this program"} admission
                     </p>
                   </div>
                   {admissionProcess.map((step: any, idx: number) => (
@@ -889,11 +904,8 @@ export default function AdmissionDetailPage() {
                             <th className="p-4 font-bold text-gray-900 w-[20%] border-r border-gray-200">
                               Eligibility
                             </th>
-                            <th className="p-4 font-bold text-gray-900 w-[10%] border-r border-gray-200">
+                            <th className="p-4 font-bold text-gray-900 w-[10%]">
                               Seats
-                            </th>
-                            <th className="p-4 font-bold text-gray-900 w-[15%]">
-                              Action
                             </th>
                           </tr>
                         </thead>
@@ -926,16 +938,14 @@ export default function AdmissionDetailPage() {
                                 {row.coverage}
                               </td>
                               <td className="p-4 align-top border-r border-gray-200 text-gray-700">
-                                {row.eligibility}
+                                <ul className="list-disc list-inside space-y-1 text-sm">
+                                  {row.eligibility.map((item: string, i: number) => (
+                                    <li key={i}>{item}</li>
+                                  ))}
+                                </ul>
                               </td>
-                              <td className="p-4 align-top border-r border-gray-200 text-gray-700">
+                              <td className="p-4 align-top text-gray-700">
                                 {row.seats}
-                              </td>
-                              <td className="p-4 align-top">
-                                <span className="text-[#2563eb] hover:underline cursor-pointer flex items-center">
-                                  Download File{" "}
-                                  <Download className="w-4 h-4 ml-1" />
-                                </span>
                               </td>
                             </tr>
                           ))}
