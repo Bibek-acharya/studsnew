@@ -123,10 +123,13 @@ export const admissionService = {
     return await apiRequest<AdmissionFilterCountsResponse>(`/api/v1/admissions/colleges/filter-counts?${query}`);
   },
 
-  async getPublishedAdmissionCollegeById(id: number): Promise<{
+  async getPublishedAdmissionCollegeById(id: number, level?: string): Promise<{
     data: { institution: AdmissionCollegeItem; data: Record<string, any>; created_at: string; updated_at: string; published_at?: string }
   }> {
-    return await apiRequest(`/api/v1/admissions/published/institutions/${id}`);
+    const params = new URLSearchParams();
+    if (level) params.append("level", level);
+    const query = params.toString();
+    return await apiRequest(`/api/v1/admissions/published/institutions/${id}${query ? `?${query}` : ""}`);
   },
 
   async getPublishedAdmissionColleges(

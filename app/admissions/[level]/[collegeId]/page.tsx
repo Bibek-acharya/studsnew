@@ -116,9 +116,9 @@ export default function AdmissionDetailPage() {
   const programsSectionRef = useRef<HTMLDivElement>(null);
 
   const { data: collegeData } = useQuery({
-    queryKey: ["publishedAdmissionCollege", collegeIdNum],
+    queryKey: ["publishedAdmissionCollege", collegeIdNum, params.level],
     queryFn: () =>
-      admissionService.getPublishedAdmissionCollegeById(collegeIdNum),
+      admissionService.getPublishedAdmissionCollegeById(collegeIdNum, params.level as string),
     enabled: !isNaN(collegeIdNum),
   });
 
