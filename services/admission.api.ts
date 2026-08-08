@@ -20,6 +20,7 @@ export interface AdmissionFiltersPayload {
 
 export interface AdmissionCollegeItem {
   id: number;
+  admission_page_id?: number;
   name: string;
   full_name?: string;
   location: string;
@@ -130,6 +131,12 @@ export const admissionService = {
     if (level) params.append("level", level);
     const query = params.toString();
     return await apiRequest(`/api/v1/admissions/published/institutions/${id}${query ? `?${query}` : ""}`);
+  },
+
+  async getPublishedAdmissionByPageID(pageId: number): Promise<{
+    data: { institution: AdmissionCollegeItem; data: Record<string, any>; created_at: string; updated_at: string; published_at?: string }
+  }> {
+    return await apiRequest(`/api/v1/admissions/published/pages/${pageId}`);
   },
 
   async getPublishedAdmissionColleges(

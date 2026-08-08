@@ -431,7 +431,7 @@ const AdmissionGrid: React.FC<AdmissionGridProps> = ({
                     }
                     onCourseClick={(courseName) =>
                       onNavigate("admissionDetails", {
-                        id: college.id,
+                        id: college.admission_page_id || college.id,
                         scrollTo: "programs",
                       })
                     }
@@ -439,7 +439,7 @@ const AdmissionGrid: React.FC<AdmissionGridProps> = ({
                       onNavigate("collegeDetails", { id: college.id })
                     }
                     onApply={() =>
-                      onNavigate("admissionDetails", { id: college.id })
+                      onNavigate("admissionDetails", { id: college.admission_page_id || college.id })
                     }
                     onAskQuestion={() => openInquiry(college)}
                   />

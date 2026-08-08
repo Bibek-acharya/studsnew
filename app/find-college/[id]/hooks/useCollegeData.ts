@@ -213,6 +213,7 @@ export function useCollegeData(idStr: string) {
         : instAdmissionPageData;
     const level = pageData?.overview_data?.level || "";
     const programs = pageData?.programs_data || [];
+    const admissionPageId = college?.admission_page_id;
     return programs.map((p: any) => ({
       level: level || p.subtitle || "",
       status: p.admissionStatus || "Ongoing",
@@ -221,8 +222,9 @@ export function useCollegeData(idStr: string) {
       openDate: p.openDate || "",
       deadline: p.deadline || "",
       image: p.programIcon || "",
+      admissionPageId: admissionPageId || 0,
     }));
-  }, [instAdmissionPageData]);
+  }, [instAdmissionPageData, college?.admission_page_id]);
 
   const mappedEvents = useMemo(() => {
     if (!instInstitutionEvents || !Array.isArray(instInstitutionEvents))
