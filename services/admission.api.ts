@@ -30,6 +30,7 @@ export interface AdmissionCollegeItem {
   programs: number;
   image_url?: string;
   hero_banner?: string;
+  card_image?: string;
   website?: string;
   email?: string;
   phone?: string;

@@ -177,7 +177,7 @@ export default function AdmissionDetailPage() {
         setTimeout(() => {
           programsSectionRef.current?.scrollIntoView({
             behavior: "smooth",
-            block: "start",
+            block: "nearest",
           });
         }, 100);
       }, 500);
@@ -1132,7 +1132,7 @@ export default function AdmissionDetailPage() {
                               {download.title}
                             </h4>
                             <p className="text-[12.5px] text-gray-500">
-                              {download.size || download.description || "Download file"}
+                              {download.size || "Download file"}
                             </p>
                           </div>
                         </div>

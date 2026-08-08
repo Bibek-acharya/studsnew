@@ -386,6 +386,7 @@ const AdmissionGrid: React.FC<AdmissionGridProps> = ({
                         ? [college.image_url]
                         : ["/images/college-placeholder.png"];
                     })()}
+                    cardImage={college.card_image}
                     collegeName={college.name}
                     rating={college.rating ?? 4.0}
                     type={college.type || "College"}

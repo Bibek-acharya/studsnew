@@ -1,7 +1,5 @@
 "use client";
 
-import { useState, useRef, useEffect } from "react";
-
 interface Program {
   name: string;
   status: "Upcoming" | "Ongoing" | "Closed";
@@ -9,6 +7,7 @@ interface Program {
 
 interface CollegeCardProps {
   images: string[];
+  cardImage?: string;
   collegeName: string;
   rating: number;
   type: string;
@@ -30,6 +29,7 @@ interface CollegeCardProps {
 
 export default function CollegeCard({
   images,
+  cardImage,
   collegeName,
   rating,
   type,
@@ -46,28 +46,6 @@ export default function CollegeCard({
   isBookmarkPending = false,
   onToggleSaved,
 }: CollegeCardProps) {
-  const [currentSlide, setCurrentSlide] = useState(0);
-  const carouselRef = useRef<HTMLDivElement>(null);
-
-  const goToSlide = (index: number) => {
-    setCurrentSlide(index);
-  };
-
-  const prevSlide = () => {
-    setCurrentSlide((prev) => (prev === 0 ? images.length - 1 : prev - 1));
-  };
-
-  const nextSlide = () => {
-    setCurrentSlide((prev) => (prev === images.length - 1 ? 0 : prev + 1));
-  };
-
-  useEffect(() => {
-    const interval = setInterval(() => {
-      nextSlide();
-    }, 3500);
-    return () => clearInterval(interval);
-  }, [currentSlide]);
-
   const displayUrl =
     website?.replace(/^https?:\/\//, "").replace(/\/+$/, "") || "";
 
@@ -76,62 +54,38 @@ export default function CollegeCard({
       onClick={onNavigate}
       className="bg-white rounded-md border border-gray-200 hover:border-blue-200 overflow-hidden w-full max-w-85 flex flex-col h-full transition-transform cursor-pointer"
     >
-      {/* Image Section with Carousel */}
+      {/* Image Section */}
       <div className="p-2.5 pb-0 shrink-0">
-        <div
-          ref={carouselRef}
-          className="group relative aspect-[21/9] w-full bg-gray-200 rounded-md overflow-hidden"
-        >
-          <div
-            className="carousel-track flex w-full h-full transition-transform duration-300 ease-in-out"
-            style={{ transform: `translateX(-${currentSlide * 100}%)` }}
-          >
-            {images.map((img, index) => (
-              <img
-                key={index}
-                src={img}
-                alt={`${collegeName} ${index + 1}`}
-                className="w-full h-full object-contain shrink-0"
-              />
-            ))}
-          </div>
-
-          {/* Prev Button */}
-          <button
-            onClick={prevSlide}
-            className="absolute left-1 top-1/2 -translate-y-1/2 w-6 h-6 bg-black/40 hover:bg-black/60 text-white rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity z-10 focus:outline-none backdrop-blur-sm"
-          >
-            <svg
-              className="w-2.5 h-2.5"
-              fill="currentColor"
-              viewBox="0 0 20 20"
-            >
-              <path
-                fillRule="evenodd"
-                d="M12.707 5.293a1 1 0 010 1.414L9.414 10l3.293 3.293a1 1 0 01-1.414 1.414l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 0z"
-                clipRule="evenodd"
-              />
-            </svg>
-          </button>
-
-          {/* Next Button */}
-          <button
-            onClick={nextSlide}
-            className="absolute right-1 top-1/2 -translate-y-1/2 w-6 h-6 bg-black/40 hover:bg-black/60 text-white rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity z-10 focus:outline-none backdrop-blur-sm"
-          >
-            <svg
-              className="w-2.5 h-2.5"
-              fill="currentColor"
-              viewBox="0 0 20 20"
-            >
-              <path
-                fillRule="evenodd"
-                d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z"
-                clipRule="evenodd"
-              />
-            </svg>
-          </button>
-
+        <div className="relative w-full aspect-[21/9] bg-gray-200 rounded-md overflow-hidden">
+          {cardImage ? (
+            <img
+              src={cardImage}
+              alt={collegeName}
+              className="w-full h-full object-cover"
+            />
+          ) : images.length > 0 ? (
+            <img
+              src={images[0]}
+              alt={collegeName}
+              className="w-full h-full object-cover"
+            />
+          ) : (
+            <div className="w-full h-full flex items-center justify-center text-gray-400">
+              <svg
+                className="w-12 h-12"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth="1.5"
+                  d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"
+                />
+              </svg>
+            </div>
+          )}
           {/* Tiny Integrated Text Links */}
           <div className="absolute bottom-2 left-2 z-20 flex items-center gap-1 bg-black/30 backdrop-blur-sm px-1.5 py-0.5 rounded border border-white/10">
             <span className="text-white text-[8px] font-medium tracking-tight opacity-90">
@@ -143,20 +97,6 @@ export default function CollegeCard({
             </span>
           </div>
 
-          {/* Pagination Dots */}
-          <div className="absolute bottom-2 right-3 flex items-center gap-1 z-10">
-            {images.map((_, index) => (
-              <button
-                key={index}
-                onClick={() => goToSlide(index)}
-                className={`dot-indicator transition-all duration-300 rounded-full focus:outline-none cursor-pointer ${
-                  index === currentSlide
-                    ? "w-3 h-1.5 bg-white"
-                    : "w-1.5 h-1.5 bg-white/50"
-                }`}
-              />
-            ))}
-          </div>
         </div>
       </div>
 
@@ -278,22 +218,27 @@ export default function CollegeCard({
                 : program.status === "Upcoming"
                   ? "text-amber-600 bg-amber-50"
                   : "text-green-600 bg-green-50";
+            const displayName =
+              program.name.length > 28
+                ? program.name.slice(0, 28) + "..."
+                : program.name;
             return (
               <li
                 key={index}
                 className="flex items-center justify-between text-[12.5px] font-semibold text-[#1e293b]"
               >
                 <span
-                  className="hover:text-brand-blue cursor-pointer"
+                  className="hover:text-brand-blue cursor-pointer truncate max-w-[180px]"
+                  title={program.name}
                   onClick={(e) => {
                     e.stopPropagation();
                     onCourseClick?.(program.name);
                   }}
                 >
-                  {program.name}
+                  {displayName}
                 </span>
                 <span
-                  className={`text-[10px] font-bold px-1.5 py-0.5 rounded ${statusColor}`}
+                  className={`text-[10px] font-bold px-1.5 py-0.5 rounded shrink-0 ${statusColor}`}
                 >
                   {program.status}
                 </span>

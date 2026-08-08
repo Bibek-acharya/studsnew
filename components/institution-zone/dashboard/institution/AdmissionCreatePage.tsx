@@ -233,6 +233,9 @@ const AdmissionCreatePage: React.FC = () => {
   const [applicationFormLink, setApplicationFormLink] = useState("");
   const [level, setLevel] = useState("");
   const [heroBanners, setHeroBanners] = useState<string[]>([]);
+  const [cardImage, setCardImage] = useState("");
+  const [cardImageCropperOpen, setCardImageCropperOpen] = useState(false);
+  const [cardImageCropSrc, setCardImageCropSrc] = useState<string | null>(null);
   const [cropperOpen, setCropperOpen] = useState(false);
   const [cropImageSrc, setCropImageSrc] = useState<string | null>(null);
   const [cropTargetIndex, setCropTargetIndex] = useState<number | null>(null);
@@ -280,6 +283,7 @@ const AdmissionCreatePage: React.FC = () => {
   >([]);
 
   const [admissionSteps, setAdmissionSteps] = useState<AdmissionStep[]>([]);
+  const [openPrograms, setOpenPrograms] = useState<Set<number>>(new Set());
 
   const [brochureUrl, setBrochureUrl] = useState("");
 
@@ -313,6 +317,7 @@ const AdmissionCreatePage: React.FC = () => {
       } else {
         setHeroBanners([]);
       }
+      setCardImage(String(od.cardImage ?? ""));
     }
     const wnd = data.whats_new_data;
     if (wnd) {
@@ -523,6 +528,7 @@ const AdmissionCreatePage: React.FC = () => {
       applicationFormLink,
       level,
       heroBanner: heroBanners.length > 0 ? JSON.stringify(heroBanners) : "",
+      cardImage,
     },
     whats_new_data: {
       title: whatsNewTitle,
@@ -916,6 +922,106 @@ const AdmissionCreatePage: React.FC = () => {
               </p>
             </div>
             <div>
+              <label className={labelClass}>Card Image</label>
+              <div className="flex items-start gap-4">
+                {cardImage ? (
+                  <div
+                    onClick={() =>
+                      document.getElementById("admission-card-image-input")?.click()
+                    }
+                    className="relative w-[318px] h-[136px] rounded-lg overflow-hidden border-2 border-gray-200 cursor-pointer hover:border-blue-400 transition-colors group"
+                  >
+                    <img
+                      src={cardImage}
+                      className="w-full h-full object-cover"
+                      alt="Card Image"
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+                    <span className="absolute bottom-2 left-2 text-xs text-white/80 opacity-0 group-hover:opacity-100 transition-opacity">
+                      Click to replace
+                    </span>
+                    <button
+                      type="button"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setCardImage("");
+                      }}
+                      className="absolute top-2 right-2 p-1.5 bg-white/95 rounded-full text-red-500 hover:bg-white shadow-md opacity-0 group-hover:opacity-100 transition-opacity"
+                    >
+                      <svg
+                        width="14"
+                        height="14"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth="2"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                      >
+                        <polyline points="3 6 5 6 21 6" />
+                        <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
+                      </svg>
+                    </button>
+                  </div>
+                ) : (
+                  <div
+                    onClick={() =>
+                      document.getElementById("admission-card-image-input")?.click()
+                    }
+                    className="w-[318px] h-[136px] rounded-lg border-2 border-dashed border-gray-300 flex flex-col items-center justify-center text-center hover:bg-gray-50 hover:border-blue-400 transition-colors cursor-pointer"
+                  >
+                    <div className="p-3 bg-blue-50 text-blue-600 rounded-full">
+                      <svg
+                        width="24"
+                        height="24"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth="2"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                      >
+                        <rect x="3" y="3" width="18" height="18" rx="2" ry="2" />
+                        <circle cx="8.5" cy="8.5" r="1.5" />
+                        <polyline points="21 15 16 10 5 21" />
+                      </svg>
+                    </div>
+                    <span className="mt-2 text-xs font-medium text-gray-600">
+                      Upload Card Image
+                    </span>
+                    <span className="mt-0.5 text-[10px] text-gray-400">
+                      318 x 136 px
+                    </span>
+                  </div>
+                )}
+                <input
+                  id="admission-card-image-input"
+                  type="file"
+                  className="hidden"
+                  accept="image/*"
+                  onChange={(e) => {
+                    const file = e.target.files?.[0];
+                    if (!file) return;
+                    if (!file.type.startsWith("image/")) {
+                      alert("Please select an image file.");
+                      return;
+                    }
+                    const reader = new FileReader();
+                    reader.onload = (ev) => {
+                      if (ev.target?.result) {
+                        setCardImageCropSrc(ev.target.result as string);
+                        setCardImageCropperOpen(true);
+                      }
+                    };
+                    reader.readAsDataURL(file);
+                  }}
+                />
+              </div>
+              <p className="text-xs text-gray-500 mt-1">
+                Image shown in admission cards. Recommended size: 318x136px (JPG/PNG)
+              </p>
+            </div>
+            <div>
               <label className={labelClass}>
                 Overview Description <span className="text-red-500">*</span>
               </label>
@@ -945,11 +1051,12 @@ const AdmissionCreatePage: React.FC = () => {
             icon="book-marked"
             title="Our Programs"
             subtitle="Manage programs offered and their details"
-            onAdd={() =>
+            onAdd={() => {
+              const newId = nextId(programs);
               setPrograms((prev) => [
                 ...prev,
                 {
-                  id: nextId(prev),
+                  id: newId,
                   title: "",
                   subtitle: "",
                   applyLink: "",
@@ -960,394 +1067,392 @@ const AdmissionCreatePage: React.FC = () => {
                   streams: [],
                   careers: [],
                 },
-              ])
-            }
+              ]);
+              setOpenPrograms((prev) => new Set([...prev, newId]));
+            }}
             addLabel="Add Program"
           />
-          <div className="p-6 space-y-6">
-            {programs.map((p) => (
-              <div
-                key={p.id}
-                className="p-5 bg-gray-50 rounded-lg border border-gray-200 relative group"
-              >
-                <button
-                  onClick={() =>
-                    setPrograms((prev) => prev.filter((x) => x.id !== p.id))
-                  }
-                  className="absolute top-4 right-4 p-2 text-red-500 hover:bg-red-50 rounded-lg transition-colors"
+          <div className="p-6 space-y-3">
+            {programs.map((p) => {
+              const isOpen = openPrograms.has(p.id);
+              return (
+                <div
+                  key={p.id}
+                  className="border border-gray-200 rounded-lg overflow-hidden bg-white"
                 >
-                  <svg
-                    width="18"
-                    height="18"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="2"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  >
-                    <polyline points="3 6 5 6 21 6" />
-                    <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
-                  </svg>
-                </button>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pr-12">
-                  <div className="md:col-span-2">
-                    <label className={labelClass}>
-                      Program Icon <span className="text-red-500">*</span>
-                    </label>
-                    <div className="flex items-center gap-3">
-                      <div className="relative flex-1">
-                        <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                          <svg
-                            width="16"
-                            height="16"
-                            viewBox="0 0 24 24"
-                            fill="none"
-                            stroke="currentColor"
-                            strokeWidth="2"
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            className="text-gray-400"
-                          >
-                            <circle cx="11" cy="11" r="8" />
-                            <line x1="21" y1="21" x2="16.65" y2="16.65" />
-                          </svg>
+                  <div className="flex items-center gap-3 px-4 py-3 bg-gray-50">
+                    <button
+                      onClick={() =>
+                        setOpenPrograms((prev) => {
+                          const next = new Set(prev);
+                          if (next.has(p.id)) {
+                            next.delete(p.id);
+                          } else {
+                            next.add(p.id);
+                          }
+                          return next;
+                        })
+                      }
+                      className="p-1 hover:bg-gray-200 rounded transition-colors"
+                    >
+                      <svg
+                        width="16"
+                        height="16"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth="2"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        className={`text-gray-500 transition-transform ${isOpen ? "rotate-180" : ""}`}
+                      >
+                        <polyline points="6 9 12 15 18 9" />
+                      </svg>
+                    </button>
+                    <div className="w-8 h-8 rounded bg-blue-50 text-blue-600 flex items-center justify-center shrink-0">
+                      {p.programIcon ? (
+                        <DynamicIcon name={p.programIcon} size={18} />
+                      ) : (
+                        <span className="text-xs text-gray-400">-</span>
+                      )}
+                    </div>
+                    <span className="text-sm font-semibold text-gray-800 truncate">
+                      {p.title || "New Program"}
+                    </span>
+                    <button
+                      onClick={() =>
+                        setPrograms((prev) => prev.filter((x) => x.id !== p.id))
+                      }
+                      className="ml-auto p-1.5 text-red-500 hover:bg-red-50 rounded-lg transition-colors"
+                    >
+                      <svg
+                        width="16"
+                        height="16"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth="2"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                      >
+                        <polyline points="3 6 5 6 21 6" />
+                        <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
+                      </svg>
+                    </button>
+                  </div>
+                  {isOpen && (
+                    <div className="p-5 grid grid-cols-1 md:grid-cols-2 gap-6 border-t border-gray-100">
+                      <div>
+                        <label className={labelClass}>
+                          Program Icon <span className="text-red-500">*</span>
+                        </label>
+                        <div className="flex items-center gap-3">
+                          <div className="relative flex-1">
+                            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                              <svg
+                                width="16"
+                                height="16"
+                                viewBox="0 0 24 24"
+                                fill="none"
+                                stroke="currentColor"
+                                strokeWidth="2"
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                className="text-gray-400"
+                              >
+                                <circle cx="11" cy="11" r="8" />
+                                <line x1="21" y1="21" x2="16.65" y2="16.65" />
+                              </svg>
+                            </div>
+                            <input
+                              type="text"
+                              className={`${inputClass} pl-10`}
+                              placeholder="e.g. graduation-cap, flask"
+                              value={p.programIcon}
+                              onChange={(e) =>
+                                setPrograms((prev) =>
+                                  prev.map((x) =>
+                                    x.id === p.id
+                                      ? { ...x, programIcon: e.target.value }
+                                      : x,
+                                  ),
+                                )
+                              }
+                            />
+                          </div>
+                          <div className="w-10 h-10 rounded-lg bg-blue-50 text-blue-600 flex items-center justify-center shrink-0">
+                            {p.programIcon ? (
+                              <DynamicIcon name={p.programIcon} size={20} />
+                            ) : (
+                              <span className="text-xs text-gray-400">Icon</span>
+                            )}
+                          </div>
                         </div>
+                        <p className="text-xs text-gray-400 mt-1">
+                          <a
+                            href="https://lucide.dev/icons"
+                            target="_blank"
+                            rel="noreferrer"
+                            className="text-blue-500 underline"
+                          >
+                            Browse icons
+                          </a>
+                        </p>
+                      </div>
+                      <div>
+                        <label className={labelClass}>
+                          Program Title <span className="text-red-500">*</span>
+                        </label>
                         <input
                           type="text"
-                          className={`${inputClass} pl-10`}
-                          placeholder="e.g. graduation-cap, flask, book-open"
-                          value={p.programIcon}
+                          className={inputClass}
+                          placeholder="e.g. Science (+2)"
+                          value={p.title}
                           onChange={(e) =>
                             setPrograms((prev) =>
                               prev.map((x) =>
                                 x.id === p.id
-                                  ? { ...x, programIcon: e.target.value }
+                                  ? { ...x, title: e.target.value }
                                   : x,
                               ),
                             )
                           }
                         />
                       </div>
-                      <div className="w-12 h-12 rounded-lg bg-blue-50 text-blue-600 flex items-center justify-center shrink-0">
-                        {p.programIcon ? (
-                          <DynamicIcon name={p.programIcon} size={24} />
-                        ) : (
-                          <span className="text-xs text-gray-400">Icon</span>
-                        )}
+                      <div>
+                        <label className={labelClass}>
+                          Subtitle / Affiliation{" "}
+                          <span className="text-red-500">*</span>
+                        </label>
+                        <input
+                          type="text"
+                          className={inputClass}
+                          placeholder="e.g. NEB Affiliated | 2 Years"
+                          value={p.subtitle}
+                          onChange={(e) =>
+                            setPrograms((prev) =>
+                              prev.map((x) =>
+                                x.id === p.id
+                                  ? { ...x, subtitle: e.target.value }
+                                  : x,
+                              ),
+                            )
+                          }
+                        />
+                      </div>
+                      <div>
+                        <label className={labelClass}>Start Date</label>
+                        <input
+                          type="date"
+                          className={inputClass}
+                          value={p.startDate}
+                          onChange={(e) =>
+                            setPrograms((prev) =>
+                              prev.map((x) =>
+                                x.id === p.id
+                                  ? { ...x, startDate: e.target.value }
+                                  : x,
+                              ),
+                            )
+                          }
+                        />
+                      </div>
+                      <div>
+                        <label className={labelClass}>End Date</label>
+                        <input
+                          type="date"
+                          className={inputClass}
+                          value={p.endDate}
+                          onChange={(e) =>
+                            setPrograms((prev) =>
+                              prev.map((x) =>
+                                x.id === p.id
+                                  ? { ...x, endDate: e.target.value }
+                                  : x,
+                              ),
+                            )
+                          }
+                        />
+                      </div>
+                      <div className="md:col-span-2">
+                        <label className={labelClass}>Application Form Link</label>
+                        <input
+                          type="url"
+                          className={inputClass}
+                          placeholder="https://example.com/apply"
+                          value={p.applyLink}
+                          onChange={(e) =>
+                            setPrograms((prev) =>
+                              prev.map((x) =>
+                                x.id === p.id
+                                  ? { ...x, applyLink: e.target.value }
+                                  : x,
+                              ),
+                            )
+                          }
+                        />
+                      </div>
+                      <div className="md:col-span-2">
+                        <label className={labelClass}>
+                          Description <span className="text-red-500">*</span>
+                        </label>
+                        <div className="border border-gray-200 rounded-lg overflow-visible">
+                          <QuillEditor
+                            value={p.description}
+                            onChange={(val: string) =>
+                              setPrograms((prev) =>
+                                prev.map((x) =>
+                                  x.id === p.id
+                                    ? { ...x, description: val }
+                                    : x,
+                                ),
+                              )
+                            }
+                            modules={quillModules}
+                            placeholder="Our Science program is designed for..."
+                            className="bg-white"
+                          />
+                        </div>
+                      </div>
+                      <div>
+                        <label className={labelClass}>
+                          Available Streams{" "}
+                          <span className="text-red-500">*</span>
+                        </label>
+                        <div className="space-y-2">
+                          {p.streams.map((item, si) => (
+                            <div key={si} className="flex items-center gap-2">
+                              <span className="text-gray-400 shrink-0">&bull;</span>
+                              <input
+                                type="text"
+                                className={inputClass}
+                                placeholder="e.g. Physics, Chemistry"
+                                value={item}
+                                onChange={(e) =>
+                                  setPrograms((prev) =>
+                                    prev.map((x) =>
+                                      x.id === p.id
+                                        ? {
+                                            ...x,
+                                            streams: x.streams.map((s, j) =>
+                                              j === si ? e.target.value : s,
+                                            ),
+                                          }
+                                        : x,
+                                    ),
+                                  )
+                                }
+                              />
+                              <button
+                                onClick={() =>
+                                  setPrograms((prev) =>
+                                    prev.map((x) =>
+                                      x.id === p.id
+                                        ? {
+                                            ...x,
+                                            streams: x.streams.filter(
+                                              (_, j) => j !== si,
+                                            ),
+                                          }
+                                        : x,
+                                    ),
+                                  )
+                                }
+                                className="p-1 text-red-400 hover:text-red-600 shrink-0"
+                              >
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="3 6 5 6 21 6" /><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" /></svg>
+                              </button>
+                            </div>
+                          ))}
+                          <button
+                            onClick={() =>
+                              setPrograms((prev) =>
+                                prev.map((x) =>
+                                  x.id === p.id
+                                    ? { ...x, streams: [...x.streams, ""] }
+                                    : x,
+                                ),
+                              )
+                            }
+                            className="text-sm text-blue-600 hover:text-blue-800 flex items-center gap-1"
+                          >
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><line x1="12" y1="5" x2="12" y2="19" /><line x1="5" y1="12" x2="19" y2="12" /></svg>
+                            Add Stream
+                          </button>
+                        </div>
+                      </div>
+                      <div>
+                        <label className={labelClass}>
+                          Career Opportunities{" "}
+                          <span className="text-red-500">*</span>
+                        </label>
+                        <div className="space-y-2">
+                          {p.careers.map((item, ci) => (
+                            <div key={ci} className="flex items-center gap-2">
+                              <span className="text-gray-400 shrink-0">&bull;</span>
+                              <input
+                                type="text"
+                                className={inputClass}
+                                placeholder="e.g. Software Engineer"
+                                value={item}
+                                onChange={(e) =>
+                                  setPrograms((prev) =>
+                                    prev.map((x) =>
+                                      x.id === p.id
+                                        ? {
+                                            ...x,
+                                            careers: x.careers.map((c, j) =>
+                                              j === ci ? e.target.value : c,
+                                            ),
+                                          }
+                                        : x,
+                                    ),
+                                  )
+                                }
+                              />
+                              <button
+                                onClick={() =>
+                                  setPrograms((prev) =>
+                                    prev.map((x) =>
+                                      x.id === p.id
+                                        ? {
+                                            ...x,
+                                            careers: x.careers.filter(
+                                              (_, j) => j !== ci,
+                                            ),
+                                          }
+                                        : x,
+                                    ),
+                                  )
+                                }
+                                className="p-1 text-red-400 hover:text-red-600 shrink-0"
+                              >
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="3 6 5 6 21 6" /><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" /></svg>
+                              </button>
+                            </div>
+                          ))}
+                          <button
+                            onClick={() =>
+                              setPrograms((prev) =>
+                                prev.map((x) =>
+                                  x.id === p.id
+                                    ? { ...x, careers: [...x.careers, ""] }
+                                    : x,
+                                ),
+                              )
+                            }
+                            className="text-sm text-blue-600 hover:text-blue-800 flex items-center gap-1"
+                          >
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><line x1="12" y1="5" x2="12" y2="19" /><line x1="5" y1="12" x2="19" y2="12" /></svg>
+                            Add Career
+                          </button>
+                        </div>
                       </div>
                     </div>
-                    <p className="text-xs text-gray-400 mt-1">
-                      Enter a Lucide icon name. Browse icons at{" "}
-                      <a
-                        href="https://lucide.dev/icons"
-                        target="_blank"
-                        rel="noreferrer"
-                        className="text-blue-500 underline"
-                      >
-                        lucide.dev/icons
-                      </a>
-                    </p>
-                  </div>
-                  <div>
-                    <label className={labelClass}>
-                      Program Title <span className="text-red-500">*</span>
-                    </label>
-                    <input
-                      type="text"
-                      className={inputClass}
-                      placeholder="e.g. Science (+2)"
-                      value={p.title}
-                      onChange={(e) =>
-                        setPrograms((prev) =>
-                          prev.map((x) =>
-                            x.id === p.id ? { ...x, title: e.target.value } : x,
-                          ),
-                        )
-                      }
-                    />
-                  </div>
-                  <div>
-                    <label className={labelClass}>
-                      Subtitle / Affiliation{" "}
-                      <span className="text-red-500">*</span>
-                    </label>
-                    <input
-                      type="text"
-                      className={inputClass}
-                      placeholder="e.g. NEB Affiliated | 2 Years Program"
-                      value={p.subtitle}
-                      onChange={(e) =>
-                        setPrograms((prev) =>
-                          prev.map((x) =>
-                            x.id === p.id
-                              ? { ...x, subtitle: e.target.value }
-                              : x,
-                          ),
-                        )
-                      }
-                    />
-                  </div>
-
-                  <div>
-                    <label className={labelClass}>Start Date</label>
-                    <input
-                      type="date"
-                      className={inputClass}
-                      value={p.startDate}
-                      onChange={(e) =>
-                        setPrograms((prev) =>
-                          prev.map((x) =>
-                            x.id === p.id
-                              ? { ...x, startDate: e.target.value }
-                              : x,
-                          ),
-                        )
-                      }
-                    />
-                  </div>
-                  <div>
-                    <label className={labelClass}>End Date</label>
-                    <input
-                      type="date"
-                      className={inputClass}
-                      value={p.endDate}
-                      onChange={(e) =>
-                        setPrograms((prev) =>
-                          prev.map((x) =>
-                            x.id === p.id
-                              ? { ...x, endDate: e.target.value }
-                              : x,
-                          ),
-                        )
-                      }
-                    />
-                  </div>
-                  <div className="md:col-span-2">
-                    <label className={labelClass}>Application Form Link</label>
-                    <input
-                      type="url"
-                      className={inputClass}
-                      placeholder="https://example.com/apply"
-                      value={p.applyLink}
-                      onChange={(e) =>
-                        setPrograms((prev) =>
-                          prev.map((x) =>
-                            x.id === p.id
-                              ? { ...x, applyLink: e.target.value }
-                              : x,
-                          ),
-                        )
-                      }
-                    />
-                  </div>
-                  <div className="md:col-span-2">
-                    <label className={labelClass}>
-                      Description <span className="text-red-500">*</span>
-                    </label>
-                    <div className="border border-gray-200 rounded-lg overflow-visible">
-                      <QuillEditor
-                        value={p.description}
-                        onChange={(val: string) =>
-                          setPrograms((prev) =>
-                            prev.map((x) =>
-                              x.id === p.id
-                                ? { ...x, description: val }
-                                : x,
-                            ),
-                          )
-                        }
-                        modules={quillModules}
-                        placeholder="Our Science program is designed for..."
-                        className="bg-white"
-                      />
-                    </div>
-                  </div>
-                  <div>
-                    <label className={labelClass}>
-                      Available Streams (bullet points){" "}
-                      <span className="text-red-500">*</span>
-                    </label>
-                    <div className="space-y-2">
-                      {p.streams.map((item, si) => (
-                        <div key={si} className="flex items-center gap-2">
-                          <span className="text-gray-400 shrink-0">&bull;</span>
-                          <input
-                            type="text"
-                            className={inputClass}
-                            placeholder="e.g. Physics, Chemistry, Biology"
-                            value={item}
-                            onChange={(e) =>
-                              setPrograms((prev) =>
-                                prev.map((x) =>
-                                  x.id === p.id
-                                    ? {
-                                        ...x,
-                                        streams: x.streams.map((s, j) =>
-                                          j === si ? e.target.value : s,
-                                        ),
-                                      }
-                                    : x,
-                                ),
-                              )
-                            }
-                          />
-                          <button
-                            onClick={() =>
-                              setPrograms((prev) =>
-                                prev.map((x) =>
-                                  x.id === p.id
-                                    ? {
-                                        ...x,
-                                        streams: x.streams.filter(
-                                          (_, j) => j !== si,
-                                        ),
-                                      }
-                                    : x,
-                                ),
-                              )
-                            }
-                            className="p-1.5 text-red-400 hover:text-red-600 shrink-0"
-                          >
-                            <svg
-                              width="16"
-                              height="16"
-                              viewBox="0 0 24 24"
-                              fill="none"
-                              stroke="currentColor"
-                              strokeWidth="2"
-                              strokeLinecap="round"
-                              strokeLinejoin="round"
-                            >
-                              <polyline points="3 6 5 6 21 6" />
-                              <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
-                            </svg>
-                          </button>
-                        </div>
-                      ))}
-                      <button
-                        onClick={() =>
-                          setPrograms((prev) =>
-                            prev.map((x) =>
-                              x.id === p.id
-                                ? { ...x, streams: [...x.streams, ""] }
-                                : x,
-                            ),
-                          )
-                        }
-                        className="text-sm text-blue-600 hover:text-blue-800 flex items-center gap-1"
-                      >
-                        <svg
-                          width="14"
-                          height="14"
-                          viewBox="0 0 24 24"
-                          fill="none"
-                          stroke="currentColor"
-                          strokeWidth="2"
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                        >
-                          <line x1="12" y1="5" x2="12" y2="19" />
-                          <line x1="5" y1="12" x2="19" y2="12" />
-                        </svg>
-                        Add Stream
-                      </button>
-                    </div>
-                  </div>
-                  <div>
-                    <label className={labelClass}>
-                      Career Opportunities (bullet points){" "}
-                      <span className="text-red-500">*</span>
-                    </label>
-                    <div className="space-y-2">
-                      {p.careers.map((item, ci) => (
-                        <div key={ci} className="flex items-center gap-2">
-                          <span className="text-gray-400 shrink-0">&bull;</span>
-                          <input
-                            type="text"
-                            className={inputClass}
-                            placeholder="e.g. Medicine (MBBS)"
-                            value={item}
-                            onChange={(e) =>
-                              setPrograms((prev) =>
-                                prev.map((x) =>
-                                  x.id === p.id
-                                    ? {
-                                        ...x,
-                                        careers: x.careers.map((c, j) =>
-                                          j === ci ? e.target.value : c,
-                                        ),
-                                      }
-                                    : x,
-                                ),
-                              )
-                            }
-                          />
-                          <button
-                            onClick={() =>
-                              setPrograms((prev) =>
-                                prev.map((x) =>
-                                  x.id === p.id
-                                    ? {
-                                        ...x,
-                                        careers: x.careers.filter(
-                                          (_, j) => j !== ci,
-                                        ),
-                                      }
-                                    : x,
-                                ),
-                              )
-                            }
-                            className="p-1.5 text-red-400 hover:text-red-600 shrink-0"
-                          >
-                            <svg
-                              width="16"
-                              height="16"
-                              viewBox="0 0 24 24"
-                              fill="none"
-                              stroke="currentColor"
-                              strokeWidth="2"
-                              strokeLinecap="round"
-                              strokeLinejoin="round"
-                            >
-                              <polyline points="3 6 5 6 21 6" />
-                              <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
-                            </svg>
-                          </button>
-                        </div>
-                      ))}
-                      <button
-                        onClick={() =>
-                          setPrograms((prev) =>
-                            prev.map((x) =>
-                              x.id === p.id
-                                ? { ...x, careers: [...x.careers, ""] }
-                                : x,
-                            ),
-                          )
-                        }
-                        className="text-sm text-blue-600 hover:text-blue-800 flex items-center gap-1"
-                      >
-                        <svg
-                          width="14"
-                          height="14"
-                          viewBox="0 0 24 24"
-                          fill="none"
-                          stroke="currentColor"
-                          strokeWidth="2"
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                        >
-                          <line x1="12" y1="5" x2="12" y2="19" />
-                          <line x1="5" y1="12" x2="19" y2="12" />
-                        </svg>
-                        Add Career
-                      </button>
-                    </div>
-                  </div>
+                  )}
                 </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
         </div>
 
@@ -2096,24 +2201,6 @@ const AdmissionCreatePage: React.FC = () => {
                         setDownloads((prev) =>
                           prev.map((x) =>
                             x.id === d.id ? { ...x, title: e.target.value } : x,
-                          ),
-                        )
-                      }
-                    />
-                  </div>
-                  <div>
-                    <label className={labelClass}>Description</label>
-                    <input
-                      type="text"
-                      className={inputClass}
-                      placeholder="Short description of the download..."
-                      value={d.description}
-                      onChange={(e) =>
-                        setDownloads((prev) =>
-                          prev.map((x) =>
-                            x.id === d.id
-                              ? { ...x, description: e.target.value }
-                              : x,
                           ),
                         )
                       }
@@ -3292,6 +3379,33 @@ const AdmissionCreatePage: React.FC = () => {
             setCropperOpen(false);
             setCropImageSrc(null);
             setCropTargetIndex(null);
+          }}
+        />
+      )}
+
+      {cardImageCropperOpen && cardImageCropSrc && (
+        <ImageCropperModal
+          imageSrc={cardImageCropSrc}
+          aspectRatio={318 / 136.283}
+          onCropComplete={async (blob) => {
+            const croppedFile = new File([blob], "card-image.jpg", {
+              type: "image/jpeg",
+            });
+            try {
+              const url = await uploadFile(
+                croppedFile,
+                "institution/admission",
+              );
+              setCardImage(url);
+            } catch {
+              // skip
+            }
+            setCardImageCropperOpen(false);
+            setCardImageCropSrc(null);
+          }}
+          onCancel={() => {
+            setCardImageCropperOpen(false);
+            setCardImageCropSrc(null);
           }}
         />
       )}
