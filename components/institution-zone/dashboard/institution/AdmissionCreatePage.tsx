@@ -280,6 +280,9 @@ const AdmissionCreatePage: React.FC = () => {
 
   const [brochureUrl, setBrochureUrl] = useState("");
 
+  const [generatingWhatsNew, setGeneratingWhatsNew] = useState(false);
+  const [whatsNewManuallyEdited, setWhatsNewManuallyEdited] = useState(false);
+
   const [errors, setErrors] = useState<Record<string, boolean>>({});
 
   const fieldError = (field: string) =>
@@ -581,6 +584,27 @@ const AdmissionCreatePage: React.FC = () => {
     if (publish && !validate()) return;
     setSaving(true);
     try {
+      if (!whatsNewManuallyEdited && !whatsNewDesc.trim()) {
+        setGeneratingWhatsNew(true);
+        try {
+          const tempData = collectData();
+          const genResult = await institutionAdmissionApi.generateWhatsNew(
+            editId ? Number(editId) : 0,
+            tempData,
+          );
+          if (genResult.success && genResult.data) {
+            const whatsNew = (genResult.data as any).whats_new_data;
+            if (whatsNew?.description) {
+              setWhatsNewDesc(whatsNew.description);
+            }
+          }
+        } catch {
+          // silent - continue with save even if generation fails
+        } finally {
+          setGeneratingWhatsNew(false);
+        }
+      }
+
       const data = collectData();
       if (editId) {
         await institutionAdmissionApi.update(Number(editId), data, publish);
@@ -599,6 +623,28 @@ const AdmissionCreatePage: React.FC = () => {
       // silent
     } finally {
       setSaving(false);
+    }
+  };
+
+  const handleGenerateWhatsNew = async () => {
+    setGeneratingWhatsNew(true);
+    try {
+      const data = collectData();
+      const result = await institutionAdmissionApi.generateWhatsNew(
+        editId ? Number(editId) : 0,
+        data,
+      );
+      if (result.success && result.data) {
+        const whatsNew = (result.data as any).whats_new_data;
+        if (whatsNew) {
+          setWhatsNewDesc(whatsNew.description || "");
+          setWhatsNewManuallyEdited(false);
+        }
+      }
+    } catch {
+      // silent
+    } finally {
+      setGeneratingWhatsNew(false);
     }
   };
 
@@ -882,6 +928,48 @@ const AdmissionCreatePage: React.FC = () => {
               <p className="text-xs text-gray-500 mt-1">
                 Describe the admission program, key highlights, and what the
                 page offers
+              </p>
+            </div>
+            <div className="border-t border-gray-200 pt-5 mt-5">
+              <div className="flex items-center justify-between mb-1.5">
+                <label className={labelClass}>What's New? Description</label>
+                <button
+                  onClick={handleGenerateWhatsNew}
+                  disabled={generatingWhatsNew || saving}
+                  className="px-4 py-2 text-sm font-medium text-purple-600 bg-purple-50 border border-purple-200 rounded-lg hover:bg-purple-100 flex items-center gap-2 transition-colors disabled:opacity-50"
+                >
+                  {generatingWhatsNew ? (
+                    <>
+                      <svg className="animate-spin h-4 w-4" viewBox="0 0 24 24">
+                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
+                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+                      </svg>
+                      Generating...
+                    </>
+                  ) : (
+                    <>
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                        <path d="M12 2L2 7l10 5 10-5-10-5z" />
+                        <path d="M2 17l10 5 10-5" />
+                        <path d="M2 12l10 5 10-5" />
+                      </svg>
+                      Generate with AI
+                    </>
+                  )}
+                </button>
+              </div>
+              <textarea
+                className={`${inputClass} min-h-[100px]`}
+                rows={4}
+                placeholder="Latest updates about admissions, deadlines, events..."
+                value={whatsNewDesc}
+                onChange={(e) => {
+                  setWhatsNewDesc(e.target.value);
+                  setWhatsNewManuallyEdited(true);
+                }}
+              />
+              <p className="text-xs text-gray-500 mt-1">
+                Use the &quot;Generate with AI&quot; button to auto-generate from admission data
               </p>
             </div>
           </div>
