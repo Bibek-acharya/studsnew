@@ -6,6 +6,7 @@ import * as LucideIcons from "lucide-react";
 import SectionHeader from "@/components/institution-zone/dashboard/shared/SectionHeader";
 import "react-quill-new/dist/quill.snow.css";
 import { superadminAdmissionApi } from "@/services/superadminRecordsApi";
+import { institutionAdmissionApi } from "@/services/institutionAdmissionApi";
 import ImageCropperModal from "@/components/ScholarshipProvider/common/ImageCropperModal";
 import InstitutionSelector from "./InstitutionSelector";
 
@@ -279,6 +280,9 @@ export default function SuperadminCreateAdmissionSection({
   const [admissionSteps, setAdmissionSteps] = useState<AdmissionStep[]>([]);
 
   const [brochureUrl, setBrochureUrl] = useState("");
+
+  const [generatingWhatsNew, setGeneratingWhatsNew] = useState(false);
+  const [whatsNewManuallyEdited, setWhatsNewManuallyEdited] = useState(false);
 
   const [errors, setErrors] = useState<Record<string, boolean>>({});
 
@@ -575,6 +579,27 @@ export default function SuperadminCreateAdmissionSection({
     if (publish && !validate()) return;
     setSaving(true);
     try {
+      if (!whatsNewManuallyEdited && !whatsNewDesc.trim()) {
+        setGeneratingWhatsNew(true);
+        try {
+          const tempData = collectData();
+          const genResult = await institutionAdmissionApi.generateWhatsNew(
+            editId ? Number(editId) : 0,
+            tempData,
+          );
+          if (genResult.success && genResult.data) {
+            const whatsNew = (genResult.data as any).whats_new_data;
+            if (whatsNew?.description) {
+              setWhatsNewDesc(whatsNew.description);
+            }
+          }
+        } catch {
+          // silent - continue with save even if generation fails
+        } finally {
+          setGeneratingWhatsNew(false);
+        }
+      }
+
       const data = collectData();
       if (editId) {
         await superadminAdmissionApi.update(Number(editId), data, publish);
@@ -587,6 +612,28 @@ export default function SuperadminCreateAdmissionSection({
       // silent
     } finally {
       setSaving(false);
+    }
+  };
+
+  const handleGenerateWhatsNew = async () => {
+    setGeneratingWhatsNew(true);
+    try {
+      const data = collectData();
+      const result = await institutionAdmissionApi.generateWhatsNew(
+        editId ? Number(editId) : 0,
+        data,
+      );
+      if (result.success && result.data) {
+        const whatsNew = (result.data as any).whats_new_data;
+        if (whatsNew) {
+          setWhatsNewDesc(whatsNew.description || "");
+          setWhatsNewManuallyEdited(false);
+        }
+      }
+    } catch {
+      // silent
+    } finally {
+      setGeneratingWhatsNew(false);
     }
   };
 
@@ -2612,8 +2659,37 @@ export default function SuperadminCreateAdmissionSection({
                 rows={2}
                 placeholder="Brief description..."
                 value={whatsNewDesc}
-                onChange={(e) => setWhatsNewDesc(e.target.value)}
+                onChange={(e) => {
+                  setWhatsNewDesc(e.target.value);
+                  setWhatsNewManuallyEdited(true);
+                }}
               />
+            </div>
+            <div className="flex items-center gap-3 mt-2">
+              <button
+                onClick={handleGenerateWhatsNew}
+                disabled={generatingWhatsNew || saving}
+                className="px-4 py-2 text-sm font-medium text-purple-600 bg-purple-50 border border-purple-200 rounded-lg hover:bg-purple-100 flex items-center gap-2 transition-colors disabled:opacity-50"
+              >
+                {generatingWhatsNew ? (
+                  <>
+                    <svg className="animate-spin h-4 w-4" viewBox="0 0 24 24">
+                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
+                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+                    </svg>
+                    Generating...
+                  </>
+                ) : (
+                  <>
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                      <path d="M12 2L2 7l10 5 10-5-10-5z" />
+                      <path d="M2 17l10 5 10-5" />
+                      <path d="M2 12l10 5 10-5" />
+                    </svg>
+                    Generate with AI
+                  </>
+                )}
+              </button>
             </div>
           </div>
         </div>
