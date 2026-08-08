@@ -23,8 +23,6 @@ const CampusEventsSection: React.FC<CampusEventsSectionProps> = ({ onNavigate, e
     });
   };
 
-  if (events.length === 0) return null;
-
   return (
 <section className="mt-16 sm:mt-20 md:mt-24 w-full px-4 sm:px-6 md:px-8">
   <div className="max-w-350 mx-auto w-full">

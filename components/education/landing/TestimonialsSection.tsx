@@ -22,8 +22,6 @@ interface TestimonialsSectionProps {
 const TestimonialsSection: React.FC<TestimonialsSectionProps> = ({ onNavigate, testimonials = [] }) => {
   void onNavigate;
 
-  if (testimonials.length === 0) return null;
-
   const containerRef = useRef<HTMLDivElement | null>(null);
 
   const scrollByWidth = (direction: -1 | 1) => {

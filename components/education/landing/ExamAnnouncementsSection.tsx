@@ -37,8 +37,6 @@ const ExamAnnouncementsSection: React.FC<ExamAnnouncementsSectionProps> = ({
   void _onNavigate;
   const [bookmarked, setBookmarked] = useState<Set<number>>(new Set());
 
-  if (exams.length === 0) return null;
-
   const toggleBookmark = (e: MouseEvent<HTMLButtonElement>, id: number) => {
     e.stopPropagation();
     setBookmarked((prev) => {

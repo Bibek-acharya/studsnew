@@ -91,9 +91,7 @@ const FinancialAidSection: React.FC<FinancialAidSectionProps> = ({
   const [bookmarked, setBookmarked] = useState<Set<number>>(new Set());
 
   const featured = scholarships.filter((s) => s.isFeatured);
-  if (featured.length === 0) return null;
-
-  const items = featured.slice(0, 4);
+  const items = featured.length > 0 ? featured.slice(0, 4) : scholarships.slice(0, 4);
 
   const toggleBookmark = (e: MouseEvent<HTMLButtonElement>, id: number) => {
     e.stopPropagation();
