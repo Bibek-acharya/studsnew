@@ -96,6 +96,7 @@ interface DownloadCard {
   id: number;
   title: string;
   description: string;
+  file: string;
 }
 
 interface TestimonialCard {
@@ -378,6 +379,7 @@ const AdmissionCreatePage: React.FC = () => {
           id: i + 1,
           title: String(dl.title ?? ""),
           description: String(dl.description ?? ""),
+          file: String(dl.file ?? ""),
         })),
       );
     }
@@ -1958,6 +1960,184 @@ const AdmissionCreatePage: React.FC = () => {
                         )
                       }
                     />
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* 6.5 Downloads */}
+        <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+          <SectionItemHeader
+            icon="download"
+            title="Downloads"
+            subtitle="Downloadable resources like syllabus, forms, and study materials"
+            onAdd={() =>
+              setDownloads((prev) => [
+                ...prev,
+                { id: nextId(prev), title: "", description: "", file: "" },
+              ])
+            }
+            addLabel="Add Download"
+          />
+          <div className="p-6 space-y-6">
+            {downloads.map((d) => (
+              <div
+                key={d.id}
+                className="p-5 bg-gray-50 rounded-lg border border-gray-200 relative group"
+              >
+                <button
+                  onClick={() =>
+                    setDownloads((prev) => prev.filter((x) => x.id !== d.id))
+                  }
+                  className="absolute top-4 right-4 p-2 text-red-500 hover:bg-red-50 rounded-lg transition-colors"
+                >
+                  <svg
+                    width="18"
+                    height="18"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  >
+                    <polyline points="3 6 5 6 21 6" />
+                    <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
+                  </svg>
+                </button>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pr-12">
+                  <div>
+                    <label className={labelClass}>Title</label>
+                    <input
+                      type="text"
+                      className={inputClass}
+                      placeholder="e.g. Syllabus 2026"
+                      value={d.title}
+                      onChange={(e) =>
+                        setDownloads((prev) =>
+                          prev.map((x) =>
+                            x.id === d.id ? { ...x, title: e.target.value } : x,
+                          ),
+                        )
+                      }
+                    />
+                  </div>
+                  <div>
+                    <label className={labelClass}>Description</label>
+                    <input
+                      type="text"
+                      className={inputClass}
+                      placeholder="Short description of the download..."
+                      value={d.description}
+                      onChange={(e) =>
+                        setDownloads((prev) =>
+                          prev.map((x) =>
+                            x.id === d.id
+                              ? { ...x, description: e.target.value }
+                              : x,
+                          ),
+                        )
+                      }
+                    />
+                  </div>
+                  <div className="md:col-span-2">
+                    <label className={labelClass}>Upload File</label>
+                    <label className="border-2 border-dashed border-gray-300 rounded-xl p-4 flex flex-col items-center justify-center text-center hover:bg-gray-50 hover:border-blue-400 transition-colors cursor-pointer group">
+                      <div className="p-2 bg-blue-50 text-blue-600 rounded-full group-hover:scale-110 transition-transform">
+                        <svg
+                          width="20"
+                          height="20"
+                          viewBox="0 0 24 24"
+                          fill="none"
+                          stroke="currentColor"
+                          strokeWidth="2"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                        >
+                          <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                          <polyline points="17 8 12 3 7 8" />
+                          <line x1="12" y1="3" x2="12" y2="15" />
+                        </svg>
+                      </div>
+                      <span className="mt-2 text-sm font-medium text-gray-900">
+                        {d.file ? "Click to change file" : "Upload PDF/Doc"}
+                      </span>
+                      <input
+                        type="file"
+                        className="hidden"
+                        accept=".pdf,.doc,.docx"
+                        onChange={async (e) => {
+                          const file = e.target.files?.[0];
+                          if (!file) return;
+                          try {
+                            const url = await uploadFile(
+                              file,
+                              "institution/admission",
+                            );
+                            setDownloads((prev) =>
+                              prev.map((x) =>
+                                x.id === d.id ? { ...x, file: url } : x,
+                              ),
+                            );
+                          } catch {
+                            /* skip */
+                          }
+                        }}
+                      />
+                    </label>
+                    {d.file && (
+                      <div className="mt-2 flex items-center gap-2 p-2 bg-blue-50 rounded-lg">
+                        <svg
+                          width="16"
+                          height="16"
+                          viewBox="0 0 24 24"
+                          fill="none"
+                          stroke="currentColor"
+                          strokeWidth="2"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          className="text-blue-600 shrink-0"
+                        >
+                          <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+                          <polyline points="14 2 14 8 20 8" />
+                        </svg>
+                        <a
+                          href={d.file}
+                          target="_blank"
+                          rel="noreferrer"
+                          className="text-sm text-blue-700 truncate"
+                        >
+                          View File
+                        </a>
+                        <button
+                          type="button"
+                          onClick={() =>
+                            setDownloads((prev) =>
+                              prev.map((x) =>
+                                x.id === d.id ? { ...x, file: "" } : x,
+                              ),
+                            )
+                          }
+                          className="p-1 text-red-500 hover:bg-red-50 rounded ml-auto"
+                        >
+                          <svg
+                            width="14"
+                            height="14"
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="currentColor"
+                            strokeWidth="2"
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                          >
+                            <polyline points="3 6 5 6 21 6" />
+                            <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
+                          </svg>
+                        </button>
+                      </div>
+                    )}
                   </div>
                 </div>
               </div>
