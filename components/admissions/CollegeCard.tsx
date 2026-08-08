@@ -4,7 +4,7 @@ import { useState, useRef, useEffect } from "react";
 
 interface Program {
   name: string;
-  status: "Ongoing" | "Closing Soon" | "Opening Soon" | "Seats Available";
+  status: "Upcoming" | "Ongoing" | "Closed";
 }
 
 interface CollegeCardProps {
@@ -17,6 +17,8 @@ interface CollegeCardProps {
   programs: Program[];
   moreProgramsCount?: number;
   onApply?: () => void;
+  onCollegeNameClick?: () => void;
+  onCourseClick?: (courseName: string) => void;
   onMockTest?: () => void;
   onAskQuestion?: () => void;
   onNavigate?: () => void;
@@ -36,6 +38,8 @@ export default function CollegeCard({
   programs,
   moreProgramsCount = 0,
   onApply,
+  onCollegeNameClick,
+  onCourseClick,
   onAskQuestion,
   onNavigate,
   isSaved = false,
@@ -163,6 +167,10 @@ export default function CollegeCard({
           <h2
             title={collegeName}
             className="text-[#0f172a] text-[18px] font-bold leading-tight truncate transition-colors group-hover/name:text-brand-blue"
+            onClick={(e) => {
+              e.stopPropagation();
+              onCollegeNameClick?.();
+            }}
           >
             {collegeName}
           </h2>
@@ -263,21 +271,27 @@ export default function CollegeCard({
 
         {/* Programs List */}
         <ul className="space-y-1 mb-2">
-          {programs.map((program, index) => {
+          {programs.slice(0, 3).map((program, index) => {
             const statusColor =
-              program.status === "Closing Soon"
+              program.status === "Closed"
                 ? "text-red-600 bg-red-50"
-                : program.status === "Opening Soon"
+                : program.status === "Upcoming"
                   ? "text-amber-600 bg-amber-50"
-                  : program.status === "Ongoing"
-                    ? "text-green-600 bg-green-50"
-                    : "text-emerald-600 bg-emerald-50";
+                  : "text-green-600 bg-green-50";
             return (
               <li
                 key={index}
                 className="flex items-center justify-between text-[12.5px] font-semibold text-[#1e293b]"
               >
-                <span>{program.name}</span>
+                <span
+                  className="hover:text-brand-blue cursor-pointer"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    onCourseClick?.(program.name);
+                  }}
+                >
+                  {program.name}
+                </span>
                 <span
                   className={`text-[10px] font-bold px-1.5 py-0.5 rounded ${statusColor}`}
                 >
@@ -288,24 +302,10 @@ export default function CollegeCard({
           })}
         </ul>
 
-        {moreProgramsCount > 0 && (
-          <a
-            href="#"
-            className="inline-flex items-center gap-1 text-[#2563eb] text-[12.5px] font-semibold hover:underline mb-2"
-          >
-            {moreProgramsCount}+ programs
-            <svg
-              className="w-2.5 h-2.5 mt-0.5"
-              fill="currentColor"
-              viewBox="0 0 20 20"
-            >
-              <path
-                fillRule="evenodd"
-                d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z"
-                clipRule="evenodd"
-              />
-            </svg>
-          </a>
+        {programs.length > 3 && (
+          <p className="text-[12.5px] font-semibold text-[#2563eb] mb-2">
+            +{programs.length - 3} more
+          </p>
         )}
 
         <div
@@ -344,7 +344,7 @@ export default function CollegeCard({
             }}
             className="flex-1 py-2 px-2 bg-brand-blue hover:bg-brand-hover text-white rounded-md text-[13px] font-bold transition-colors flex justify-center items-center gap-1 whitespace-nowrap"
           >
-            Apply Now
+            View Detail
           </button>
           <button
             disabled={isBookmarkPending}

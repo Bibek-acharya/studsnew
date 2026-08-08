@@ -131,7 +131,7 @@ interface AdmissionBookmark extends BaseBookmark {
   website: string;
   programs: {
     name: string;
-    status: "Closing Soon" | "Opening Soon" | "Seats Available";
+    status: "Upcoming" | "Ongoing" | "Closed";
   }[];
 }
 
@@ -803,20 +803,22 @@ export default function BookmarksSection() {
                   programs={(() => {
                     const fp = (item.college as any).featured_programs;
                     if (Array.isArray(fp)) {
-                      return fp.slice(0, 3).map((p: any) => {
+                      return fp.map((p: any) => {
                         const name = p.title || "";
                         const rawStatus = p.admissionStatus || "";
                         const statusMap: Record<
                           string,
-                          "Seats Available" | "Closing Soon" | "Opening Soon"
+                          "Upcoming" | "Ongoing" | "Closed"
                         > = {
-                          "seats-available": "Seats Available",
-                          "limited-seats": "Closing Soon",
-                          "opening-soon": "Opening Soon",
+                          "opening-soon": "Upcoming",
+                          ongoing: "Ongoing",
+                          "limited-seats": "Closed",
+                          "seats-available": "Ongoing",
+                          closed: "Closed",
                         };
                         return {
                           name,
-                          status: statusMap[rawStatus] || "Seats Available",
+                          status: statusMap[rawStatus] || "Ongoing",
                         };
                       });
                     }
@@ -826,7 +828,7 @@ export default function BookmarksSection() {
                           item.college.affiliation ||
                           item.college.name ||
                           "Admission Open",
-                        status: "Seats Available" as const,
+                        status: "Ongoing" as const,
                       },
                     ];
                   })()}

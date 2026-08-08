@@ -214,7 +214,7 @@ export default function FeaturedCollegeCard({
             onClick={onApply}
             className="w-full bg-[#1053F3] hover:bg-blue-700 text-white text-[13px] font-semibold py-2 rounded-md transition-colors "
           >
-            Apply Now
+            View Detail
           </button>
           <div className="grid grid-cols-2 gap-2">
             <button

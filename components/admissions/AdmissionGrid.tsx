@@ -393,49 +393,52 @@ const AdmissionGrid: React.FC<AdmissionGridProps> = ({
                     website={college.website || college.affiliation}
                     programs={
                       Array.isArray(college.featured_programs)
-                        ? (college.featured_programs as any[])
-                            .slice(0, 3)
-                            .map((p) => {
-                              const name = p.title || "";
-                              const rawStatus = p.admissionStatus || "";
-                              const statusMap: Record<
-                                string,
-                                | "Seats Available"
-                                | "Closing Soon"
-                                | "Opening Soon"
-                                | "Ongoing"
-                              > = {
-                                "seats-available": "Seats Available",
-                                "limited-seats": "Closing Soon",
-                                "opening-soon": "Opening Soon",
-                                ongoing: "Ongoing",
-                              };
-                              return {
-                                name,
-                                status:
-                                  statusMap[rawStatus] || "Seats Available",
-                              };
-                            })
+                        ? (college.featured_programs as any[]).map((p) => {
+                            const name = p.title || "";
+                            const rawStatus = p.admissionStatus || "";
+                            const statusMap: Record<
+                              string,
+                              "Upcoming" | "Ongoing" | "Closed"
+                            > = {
+                              "opening-soon": "Upcoming",
+                              ongoing: "Ongoing",
+                              "limited-seats": "Closed",
+                              "seats-available": "Ongoing",
+                              closed: "Closed",
+                            };
+                            return {
+                              name,
+                              status: statusMap[rawStatus] || "Ongoing",
+                            };
+                          })
                         : [
                             {
                               name:
                                 college.affiliation ||
                                 college.name ||
                                 "Admission Open",
-                              status: "Seats Available",
+                              status: "Ongoing" as const,
                             },
                           ]
                     }
-                    moreProgramsCount={college.programs}
                     collegeId={college.id}
                     isSaved={savedIds.includes(college.id)}
                     isBookmarkPending={!!pendingBookmarks[college.id]}
                     onToggleSaved={() => toggleSavedCollege(college.id)}
+                    onCollegeNameClick={() =>
+                      onNavigate("collegeDetails", { id: college.id })
+                    }
+                    onCourseClick={(courseName) =>
+                      onNavigate("admissionDetails", {
+                        id: college.id,
+                        scrollTo: "programs",
+                      })
+                    }
                     onNavigate={() =>
                       onNavigate("collegeDetails", { id: college.id })
                     }
                     onApply={() =>
-                      onNavigate("collegeDetails", { id: college.id })
+                      onNavigate("admissionDetails", { id: college.id })
                     }
                     onAskQuestion={() => openInquiry(college)}
                   />

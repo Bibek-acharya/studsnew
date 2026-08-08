@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useRef, useEffect, useCallback } from "react";
-import { useParams, useRouter } from "next/navigation";
+import { useParams, useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { useQuery } from "@tanstack/react-query";
 import { admissionService } from "@/services/admission.api";
@@ -103,6 +103,7 @@ const EmptyTabState = ({ tabName }: { tabName: string }) => {
 
 export default function AdmissionDetailPage() {
   const params = useParams();
+  const searchParams = useSearchParams();
   const collegeId = params.collegeId as string;
   const collegeIdNum = parseInt(collegeId, 10);
 
@@ -110,7 +111,9 @@ export default function AdmissionDetailPage() {
   const [openFaq, setOpenFaq] = useState<number | null>(null);
   const [openProgram, setOpenProgram] = useState<number>(0);
   const [showNotificationModal, setShowNotificationModal] = useState(false);
+  const [showApplyModal, setShowApplyModal] = useState(false);
   const tabNavRef = useRef<HTMLDivElement>(null);
+  const programsSectionRef = useRef<HTMLDivElement>(null);
 
   const { data: collegeData } = useQuery({
     queryKey: ["publishedAdmissionCollege", collegeIdNum],
@@ -164,6 +167,24 @@ export default function AdmissionDetailPage() {
     };
   }, [heroBanners.length, nextHeroSlide]);
 
+  // Handle scrollTo query parameter
+  useEffect(() => {
+    const scrollTo = searchParams.get("scrollTo");
+    if (scrollTo === "programs") {
+      // Wait for data to load and tab to be set
+      const timer = setTimeout(() => {
+        setActiveTab("overview");
+        setTimeout(() => {
+          programsSectionRef.current?.scrollIntoView({
+            behavior: "smooth",
+            block: "start",
+          });
+        }, 100);
+      }, 500);
+      return () => clearTimeout(timer);
+    }
+  }, [searchParams]);
+
   const timeAgo = (dateStr?: string) => {
     if (!dateStr) return "";
     const date = new Date(dateStr);
@@ -205,24 +226,49 @@ export default function AdmissionDetailPage() {
   };
 
   const programsData = ((apData?.programs_data as any[]) || []).map(
-    (p: any) => ({
-      icon: FlaskConical,
-      title: p.title || "",
-      affiliation: p.subtitle || "",
-      badge:
-        p.admissionStatus === "open"
-          ? "Admissions Open"
-          : p.admissionStatus || "",
-      badgeClass:
-        p.admissionStatus === "open"
-          ? "bg-green-100 text-green-700"
-          : "bg-blue-100 text-blue-700",
-      desc: p.description || "",
-      leftTitle: "Available Streams:",
-      leftItems: p.streams || [],
-      rightTitle: "Career Opportunities:",
-      rightItems: p.careers || [],
-    }),
+    (p: any) => {
+      const now = new Date();
+      const startDate = p.startDate ? new Date(p.startDate) : null;
+      const endDate = p.endDate ? new Date(p.endDate) : null;
+
+      let badge = "";
+      let badgeClass = "bg-blue-100 text-blue-700";
+
+      if (startDate && endDate) {
+        if (now < startDate) {
+          badge = "Upcoming";
+          badgeClass = "bg-yellow-100 text-yellow-700";
+        } else if (now >= startDate && now <= endDate) {
+          badge = "Ongoing";
+          badgeClass = "bg-green-100 text-green-700";
+        } else {
+          badge = "Closed";
+          badgeClass = "bg-red-100 text-red-700";
+        }
+      } else if (startDate && !endDate) {
+        if (now >= startDate) {
+          badge = "Ongoing";
+          badgeClass = "bg-green-100 text-green-700";
+        } else {
+          badge = "Upcoming";
+          badgeClass = "bg-yellow-100 text-yellow-700";
+        }
+      }
+
+      return {
+        icon: FlaskConical,
+        title: p.title || "",
+        affiliation: p.subtitle || "",
+        applyLink: p.applyLink || "",
+        badge,
+        badgeClass,
+        desc: p.description || "",
+        leftTitle: "Available Streams:",
+        leftItems: p.streams || [],
+        rightTitle: "Career Opportunities:",
+        rightItems: p.careers || [],
+      };
+    },
   );
 
   const facilitiesData = ((apData?.facilities_data as any[]) || []).map(
@@ -288,14 +334,14 @@ export default function AdmissionDetailPage() {
     }),
   );
 
-  const testimonialsData = ((apData?.testimonials_data as any[]) || []).map(
-    (t: any) => ({
+  const testimonialsData = ((apData?.testimonials_data as any[]) || [])
+    .map((t: any) => ({
       name: t.name || "",
       designation: t.designation || "",
       image: t.image || "",
       message: t.message || "",
-    }),
-  );
+    }))
+    .filter((t) => t.name || t.message);
 
   const admissionProcess = (apData?.admission_process_data as any[]) || [];
 
@@ -304,7 +350,14 @@ export default function AdmissionDetailPage() {
   const overviewHeading = (apData?.overview_data as any)?.overviewHeading || "";
 
   const handleApplyNow = () => {
-    if (applicationFormLink) {
+    const ongoingPrograms = programsData.filter(
+      (p) => p.badge === "Ongoing" && p.applyLink,
+    );
+    if (ongoingPrograms.length === 1) {
+      window.open(ongoingPrograms[0].applyLink, "_blank", "noopener,noreferrer");
+    } else if (ongoingPrograms.length > 1) {
+      setShowApplyModal(true);
+    } else if (applicationFormLink) {
       window.open(applicationFormLink, "_blank", "noopener,noreferrer");
     } else {
       window.open(`/admissions/apply/${collegeIdNum}`, "_blank");
@@ -529,7 +582,7 @@ export default function AdmissionDetailPage() {
                 )}
               </div>
 
-              <div className="pt-6">
+              <div ref={programsSectionRef} className="pt-6">
                 {programsData.length > 0 ? (
                   <>
                     <h2 className="text-2xl font-bold text-gray-900 mb-6">
@@ -576,10 +629,10 @@ export default function AdmissionDetailPage() {
                             </button>
                             {isOpen && (
                               <div className="px-4 pb-4 pt-2 border-t border-gray-100">
-                                <p className="text-gray-700 leading-relaxed mb-4">
-                                  {prog.desc}
-                                </p>
-                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div className="text-sm text-gray-700 leading-relaxed mb-4">
+                                  <RichText html={prog.desc} />
+                                </div>
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
                                   <div className="bg-gray-50 rounded-md p-4">
                                     <h4 className="font-semibold text-gray-900 mb-2">
                                       {prog.leftTitle}
@@ -617,6 +670,17 @@ export default function AdmissionDetailPage() {
                                     </ul>
                                   </div>
                                 </div>
+                                {prog.applyLink && (
+                                  <a
+                                    href={prog.applyLink}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="inline-flex items-center gap-2 bg-[#0000ff] hover:bg-[#0000cc] text-white font-semibold py-2.5 px-5 rounded-md transition-colors text-sm"
+                                  >
+                                    Apply Now
+                                    <ChevronRight className="w-4 h-4" />
+                                  </a>
+                                )}
                               </div>
                             )}
                           </div>
@@ -733,8 +797,8 @@ export default function AdmissionDetailPage() {
                           <h3 className="font-bold text-gray-900 text-lg mb-3">
                             {step.title}
                           </h3>
-                          <div className="space-y-3 text-sm text-gray-600">
-                            <p>{step.description}</p>
+                          <div className="text-sm text-gray-600">
+                            <RichText html={step.description} />
                           </div>
                         </div>
                       </div>
@@ -1421,6 +1485,70 @@ export default function AdmissionDetailPage() {
                 >
                   Submit
                 </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Apply Now Modal */}
+      {showApplyModal && (
+        <div className="fixed inset-0 z-50 overflow-y-auto">
+          <div className="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
+            <div
+              className="fixed inset-0 bg-gray-900/40 transition-opacity backdrop-blur-sm"
+              onClick={() => setShowApplyModal(false)}
+            />
+            <span className="hidden sm:inline-block sm:align-middle sm:h-screen">
+              &#8203;
+            </span>
+            <div className="inline-block align-bottom bg-white rounded-lg px-4 pt-5 pb-4 text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full sm:p-6 relative">
+              <button
+                onClick={() => setShowApplyModal(false)}
+                className="absolute top-4 right-4 text-gray-400 hover:text-gray-600 transition-colors"
+              >
+                <X className="h-5 w-5" />
+              </button>
+
+              <div className="px-2 pt-2">
+                <h3 className="text-lg font-bold text-gray-900 mb-1">
+                  Select a Program
+                </h3>
+                <p className="text-sm text-gray-500 mb-5">
+                  Choose an ongoing program to apply
+                </p>
+
+                <div className="space-y-3 max-h-[300px] overflow-y-auto">
+                  {programsData
+                    .filter((p) => p.badge === "Ongoing" && p.applyLink)
+                    .map((prog, idx) => (
+                      <button
+                        key={idx}
+                        onClick={() => {
+                          window.open(
+                            prog.applyLink,
+                            "_blank",
+                            "noopener,noreferrer",
+                          );
+                          setShowApplyModal(false);
+                        }}
+                        className="w-full flex items-center gap-4 p-4 border border-gray-200 rounded-lg hover:bg-gray-50 hover:border-blue-300 transition-colors text-left"
+                      >
+                        <div className="w-10 h-10 rounded-md bg-[#0000ff] flex items-center justify-center text-white flex-shrink-0">
+                          <prog.icon className="w-5 h-5" />
+                        </div>
+                        <div className="flex-1">
+                          <h4 className="font-semibold text-gray-900">
+                            {prog.title}
+                          </h4>
+                          <p className="text-sm text-gray-500">
+                            {prog.affiliation || "View program details"}
+                          </p>
+                        </div>
+                        <ChevronRight className="w-5 h-5 text-gray-400" />
+                      </button>
+                    ))}
+                </div>
               </div>
             </div>
           </div>

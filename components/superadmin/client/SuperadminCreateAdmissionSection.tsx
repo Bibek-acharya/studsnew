@@ -2983,6 +2983,7 @@ export default function SuperadminCreateAdmissionSection({
       {cropperOpen && cropImageSrc && (
         <ImageCropperModal
           imageSrc={cropImageSrc}
+          aspectRatio={1400 / 380}
           onCropComplete={async (blob) => {
             const croppedFile = new File([blob], "banner.jpg", {
               type: "image/jpeg",

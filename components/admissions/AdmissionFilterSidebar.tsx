@@ -229,10 +229,15 @@ const CheckboxItem: React.FC<{
         onChange={onChange}
         className="custom-checkbox"
       />
-      <span className="text-[14.5px] text-[#475569] transition-colors group-hover:text-gray-900 leading-tight">
+      <span className="text-[14.5px] text-[#475569] transition-colors group-hover:text-gray-900">
         {label}
       </span>
     </div>
+    {count !== undefined && count !== null && (
+      <span className="rounded-md bg-slate-50 px-2 py-0.5 text-[12px] font-medium text-slate-500">
+        {count.toLocaleString()}
+      </span>
+    )}
   </label>
 );
 
@@ -539,7 +544,7 @@ export default function AdmissionFilterSidebar({
 
   return (
     <>
-      <div className="relative w-full rounded-[20px] border border-gray-200 bg-white p-6">
+      <div className="relative w-full rounded-md border border-gray-200 bg-white p-6">
         <div className="mb-2 flex items-center justify-between">
           <div className="flex items-center gap-3">
             <FaSliders size={18} className="text-black" />
@@ -950,7 +955,13 @@ export default function AdmissionFilterSidebar({
           width: 100%;
           height: 4px;
           border-radius: 2px;
-          background: #e2e8f0;
+          background: #2563eb;
+          outline: none;
+        }
+        .fee-range::-webkit-slider-runnable-track {
+          background: #2563eb;
+          height: 4px;
+          border-radius: 2px;
         }
         .fee-range::-webkit-slider-thumb {
           -webkit-appearance: none;
@@ -959,10 +970,12 @@ export default function AdmissionFilterSidebar({
           border-radius: 50%;
           background: #2563eb;
           cursor: pointer;
-          box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.1);
+          box-shadow: 0 0 0 4px #eff6ff;
           transition: box-shadow 0.2s;
+          margin-top: -6px;
         }
-        .fee-range::-webkit-slider-thumb:hover { box-shadow: 0 0 0 6px rgba(37, 99, 235, 0.2); }
+        .fee-range::-webkit-slider-thumb:hover { box-shadow: 0 0 0 6px #dbeafe; }
+        .fee-range:focus { outline: none; }
 
         .toggle-switch {
           position: relative;

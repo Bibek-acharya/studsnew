@@ -70,7 +70,9 @@ interface ProgramCard {
   id: number;
   title: string;
   subtitle: string;
-  admissionStatus: string;
+  applyLink: string;
+  startDate: string;
+  endDate: string;
   programIcon: string;
   description: string;
   streams: string[];
@@ -329,7 +331,9 @@ const AdmissionCreatePage: React.FC = () => {
             id: i + 1,
             title: String(p.title ?? ""),
             subtitle: String(p.subtitle ?? ""),
-            admissionStatus: String(p.admissionStatus ?? ""),
+            applyLink: String(p.applyLink ?? ""),
+            startDate: String(p.startDate ?? ""),
+            endDate: String(p.endDate ?? ""),
             programIcon: String(p.programIcon ?? ""),
             description: String(p.description ?? ""),
             streams: Array.isArray(rawStreams)
@@ -768,19 +772,6 @@ const AdmissionCreatePage: React.FC = () => {
                   Select the academic level for this admission
                 </p>
               </div>
-              <div>
-                <label className={labelClass}>Application Form Link</label>
-                <input
-                  type="url"
-                  className={inputClass}
-                  placeholder="https://example.com/apply"
-                  value={applicationFormLink}
-                  onChange={(e) => setApplicationFormLink(e.target.value)}
-                />
-                <p className="text-xs text-gray-500 mt-1">
-                  URL where students can submit their application
-                </p>
-              </div>
             </div>
             <div>
               <label className={labelClass}>
@@ -961,7 +952,9 @@ const AdmissionCreatePage: React.FC = () => {
                   id: nextId(prev),
                   title: "",
                   subtitle: "",
-                  admissionStatus: "",
+                  applyLink: "",
+                  startDate: "",
+                  endDate: "",
                   programIcon: "",
                   description: "",
                   streams: [],
@@ -1097,57 +1090,78 @@ const AdmissionCreatePage: React.FC = () => {
                   </div>
 
                   <div>
-                    <label className={labelClass}>
-                      Admission Status <span className="text-red-500">*</span>
-                    </label>
-                    <select
-                      className={selectClass}
-                      value={p.admissionStatus}
+                    <label className={labelClass}>Start Date</label>
+                    <input
+                      type="date"
+                      className={inputClass}
+                      value={p.startDate}
                       onChange={(e) =>
                         setPrograms((prev) =>
                           prev.map((x) =>
                             x.id === p.id
-                              ? { ...x, admissionStatus: e.target.value }
-                              : x,
-                          ),
-                        )
-                      }
-                      style={{
-                        backgroundImage:
-                          "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%230000ff'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M19 9l-7 7-7-7'%3E%3C/path%3E%3C/svg%3E\")",
-                        backgroundRepeat: "no-repeat",
-                        backgroundPosition: "right 1rem center",
-                        backgroundSize: "1.2em",
-                        paddingRight: "2.5rem",
-                      }}
-                    >
-                      <option value="">Select Status</option>
-                      <option value="deadline-near">Deadline Near</option>
-                      <option value="limited-seats">Limited Seats</option>
-                      <option value="ongoing">Ongoing</option>
-                      <option value="seats-available">Seats Available</option>
-                      <option value="closed">Closed</option>
-                    </select>
-                  </div>
-                  <div className="md:col-span-2">
-                    <label className={labelClass}>
-                      Description <span className="text-red-500">*</span>
-                    </label>
-                    <textarea
-                      className={`${inputClass} min-h-[80px]`}
-                      rows={3}
-                      placeholder="Our Science program is designed for..."
-                      value={p.description}
-                      onChange={(e) =>
-                        setPrograms((prev) =>
-                          prev.map((x) =>
-                            x.id === p.id
-                              ? { ...x, description: e.target.value }
+                              ? { ...x, startDate: e.target.value }
                               : x,
                           ),
                         )
                       }
                     />
+                  </div>
+                  <div>
+                    <label className={labelClass}>End Date</label>
+                    <input
+                      type="date"
+                      className={inputClass}
+                      value={p.endDate}
+                      onChange={(e) =>
+                        setPrograms((prev) =>
+                          prev.map((x) =>
+                            x.id === p.id
+                              ? { ...x, endDate: e.target.value }
+                              : x,
+                          ),
+                        )
+                      }
+                    />
+                  </div>
+                  <div className="md:col-span-2">
+                    <label className={labelClass}>Application Form Link</label>
+                    <input
+                      type="url"
+                      className={inputClass}
+                      placeholder="https://example.com/apply"
+                      value={p.applyLink}
+                      onChange={(e) =>
+                        setPrograms((prev) =>
+                          prev.map((x) =>
+                            x.id === p.id
+                              ? { ...x, applyLink: e.target.value }
+                              : x,
+                          ),
+                        )
+                      }
+                    />
+                  </div>
+                  <div className="md:col-span-2">
+                    <label className={labelClass}>
+                      Description <span className="text-red-500">*</span>
+                    </label>
+                    <div className="border border-gray-200 rounded-lg overflow-visible">
+                      <QuillEditor
+                        value={p.description}
+                        onChange={(val: string) =>
+                          setPrograms((prev) =>
+                            prev.map((x) =>
+                              x.id === p.id
+                                ? { ...x, description: val }
+                                : x,
+                            ),
+                          )
+                        }
+                        modules={quillModules}
+                        placeholder="Our Science program is designed for..."
+                        className="bg-white"
+                      />
+                    </div>
                   </div>
                   <div>
                     <label className={labelClass}>
@@ -1709,21 +1723,23 @@ const AdmissionCreatePage: React.FC = () => {
                         Short Description{" "}
                         <span className="text-red-500">*</span>
                       </label>
-                      <textarea
-                        className={`${inputClass} min-h-[80px]`}
-                        rows={3}
-                        placeholder="Brief description of this step..."
-                        value={step.description}
-                        onChange={(e) =>
-                          setAdmissionSteps((prev) =>
-                            prev.map((x) =>
-                              x.id === step.id
-                                ? { ...x, description: e.target.value }
-                                : x,
-                            ),
-                          )
-                        }
-                      />
+                      <div className="border border-gray-200 rounded-lg overflow-visible">
+                        <QuillEditor
+                          value={step.description}
+                          onChange={(val: string) =>
+                            setAdmissionSteps((prev) =>
+                              prev.map((x) =>
+                                x.id === step.id
+                                  ? { ...x, description: val }
+                                  : x,
+                              ),
+                            )
+                          }
+                          modules={quillModules}
+                          placeholder="Brief description of this step..."
+                          className="bg-white"
+                        />
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -3247,6 +3263,7 @@ const AdmissionCreatePage: React.FC = () => {
       {cropperOpen && cropImageSrc && (
         <ImageCropperModal
           imageSrc={cropImageSrc}
+          aspectRatio={1400 / 380}
           onCropComplete={async (blob) => {
             const croppedFile = new File([blob], "banner.jpg", {
               type: "image/jpeg",
