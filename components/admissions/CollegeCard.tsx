@@ -51,8 +51,7 @@ export default function CollegeCard({
 
   return (
     <div
-      onClick={onNavigate}
-      className="bg-white rounded-md border border-gray-200 hover:border-blue-200 overflow-hidden w-full max-w-85 flex flex-col h-full transition-transform cursor-pointer"
+      className="bg-white rounded-md border border-gray-200 hover:border-blue-200 overflow-hidden w-full max-w-85 flex flex-col h-full transition-transform"
     >
       {/* Image Section */}
       <div className="p-2.5 pb-0 shrink-0">
@@ -106,7 +105,7 @@ export default function CollegeCard({
         <div className="flex items-center gap-1.5 mb-1 group/name relative">
           <h2
             title={collegeName}
-            className="text-[#0f172a] text-[18px] font-bold leading-tight truncate transition-colors group-hover/name:text-brand-blue"
+            className="text-[#0f172a] text-[18px] font-bold leading-tight truncate transition-colors group-hover/name:text-brand-blue cursor-pointer"
             onClick={(e) => {
               e.stopPropagation();
               onCollegeNameClick?.();

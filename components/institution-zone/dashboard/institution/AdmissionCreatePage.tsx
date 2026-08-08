@@ -1026,15 +1026,14 @@ const AdmissionCreatePage: React.FC = () => {
                 Overview Description <span className="text-red-500">*</span>
               </label>
               <div
-                className={`border border-gray-200 rounded-lg overflow-hidden ${fieldError("overviewDesc")}`}
+                className={`border border-gray-200 rounded-lg ${fieldError("overviewDesc")}`}
               >
                 <QuillEditor
                   value={overviewDesc}
                   onChange={setOverviewDesc}
                   modules={quillModules}
                   placeholder="Describe the admission program..."
-                  style={{ minHeight: "120px" }}
-                  className="bg-white"
+                  className="bg-white quill-auto-grow"
                 />
               </div>
               <p className="text-xs text-gray-500 mt-1">

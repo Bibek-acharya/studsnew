@@ -184,26 +184,29 @@ body {
 
 .ql-snow .ql-icon { width: 16px; height: 16px; }
 
-.ql-editor {
-  min-height: 120px;
-}
-
-.ql-editor.ql-blank::before {
-  color: #94a3b8;
-  font-style: normal;
-}
-
-.ql-snow .ql-icon {
-  width: 16px;
-  height: 16px;
-}
-
 .ql-snow .ql-picker {
   height: 28px;
 }
 
 .ql-snow .ql-picker-label {
   padding: 2px 4px;
+}
+
+/* Auto-grow quill editor */
+.quill-auto-grow .ql-container {
+  height: auto !important;
+}
+
+.quill-auto-grow .ql-editor {
+  min-height: 120px;
+  height: auto !important;
+  max-height: none !important;
+  overflow-y: visible !important;
+}
+
+/* Quill tooltip above everything */
+.ql-tooltip {
+  z-index: 50;
 }
 
 /* Keep prose at natural word boundaries. Long unbroken strings may still wrap. */

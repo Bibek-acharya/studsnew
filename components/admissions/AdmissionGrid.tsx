@@ -214,6 +214,14 @@ const AdmissionGrid: React.FC<AdmissionGridProps> = ({
           level,
           currentPage,
           COLLEGES_PER_PAGE,
+          {
+            search: filters.search,
+            province: filters.province,
+            district: filters.district,
+            local: filters.local,
+            type: filters.type,
+            sortBy: filters.sortBy,
+          },
         );
 
         setColleges(response.data.colleges);

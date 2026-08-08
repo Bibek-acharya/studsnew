@@ -143,11 +143,33 @@ export const admissionService = {
     level: string,
     page: number = 1,
     pageSize: number = 18,
+    filters?: {
+      search?: string;
+      province?: string[];
+      district?: string[];
+      local?: string[];
+      type?: string[];
+      sortBy?: string;
+    },
   ): Promise<AdmissionCollegeListResponse> {
     const params = new URLSearchParams();
     if (level) params.append("level", level);
     params.append("page", String(page));
     params.append("limit", String(pageSize));
+    if (filters?.search) params.append("search", filters.search);
+    if (filters?.province) {
+      filters.province.forEach((p) => params.append("province", p));
+    }
+    if (filters?.district) {
+      filters.district.forEach((d) => params.append("district", d));
+    }
+    if (filters?.local) {
+      filters.local.forEach((l) => params.append("local", l));
+    }
+    if (filters?.type) {
+      filters.type.forEach((t) => params.append("type", t));
+    }
+    if (filters?.sortBy) params.append("sortBy", filters.sortBy);
     return await apiRequest<AdmissionCollegeListResponse>(`/api/v1/admissions/published/institutions?${params}`);
   },
 

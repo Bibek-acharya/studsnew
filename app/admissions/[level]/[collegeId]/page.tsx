@@ -284,6 +284,7 @@ export default function AdmissionDetailPage() {
     fees: c.feesText || "Contact College for Details",
     appDate: c.applicationDate || "",
     applyLink: c.applyLink || "",
+    curriculumLink: c.curriculumLink || "",
   }));
 
   const scholarshipData = ((apData?.scholarships_data as any[]) || []).map(
@@ -503,6 +504,7 @@ export default function AdmissionDetailPage() {
           {/* Overview Tab */}
           {activeTab === "overview" && (
             <div className="space-y-10">
+              {whatsNewData.description && (
               <div className="border border-gray-100 bg-white rounded-md p-5 sm:p-6">
                 <div className="flex items-start justify-between">
                   <div className="flex items-center gap-4">
@@ -527,17 +529,7 @@ export default function AdmissionDetailPage() {
                 </div>
 
                 <div className="mt-5 text-gray-700 text-[15px] leading-relaxed">
-                  {whatsNewData.description ? (
-                    <RichText html={whatsNewData.description} />
-                  ) : (
-                    <p className="mb-4">
-                      All the latest updates regarding{" "}
-                      <span className="font-semibold text-gray-900">
-                        {collegeName} admissions
-                      </span>{" "}
-                      are as follows:
-                    </p>
-                  )}
+                  <RichText html={whatsNewData.description} />
                   {whatsNewData.btnText && whatsNewData.btnLink && (
                     <div className="flex justify-center mb-8">
                       <a
@@ -562,6 +554,7 @@ export default function AdmissionDetailPage() {
                   </div>
                 </div>
               </div>
+              )}
 
               <div className="space-y-6 text-gray-600 text-[15px] md:text-[15.5px] leading-[1.8]">
                 <h2 className="text-2xl font-bold text-gray-900">
@@ -597,7 +590,13 @@ export default function AdmissionDetailPage() {
                             className="border border-gray-200 rounded-md bg-white overflow-hidden"
                           >
                             <button
-                              onClick={() => setOpenProgram(isOpen ? -1 : idx)}
+                              onClick={(e) => {
+                                const scrollY = window.scrollY;
+                                setOpenProgram(isOpen ? -1 : idx);
+                                requestAnimationFrame(() => {
+                                  window.scrollTo({ top: scrollY });
+                                });
+                              }}
                               className="w-full flex items-center justify-between gap-4 p-4 text-left hover:bg-gray-50 transition-colors"
                             >
                               <div className="flex items-center gap-4">
@@ -632,7 +631,8 @@ export default function AdmissionDetailPage() {
                                 <div className="text-sm text-gray-700 leading-relaxed mb-4">
                                   <RichText html={prog.desc} />
                                 </div>
-                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                                <div className={`gap-4 mb-4 ${prog.leftItems.length > 0 && prog.rightItems.length > 0 ? "grid grid-cols-1 md:grid-cols-2" : "flex flex-col"}`}>
+                                  {prog.leftItems.length > 0 && (
                                   <div className="bg-gray-50 rounded-md p-4">
                                     <h4 className="font-semibold text-gray-900 mb-2">
                                       {prog.leftTitle}
@@ -651,6 +651,8 @@ export default function AdmissionDetailPage() {
                                       )}
                                     </ul>
                                   </div>
+                                  )}
+                                  {prog.rightItems.length > 0 && (
                                   <div className="bg-gray-50 rounded-md p-4">
                                     <h4 className="font-semibold text-gray-900 mb-2">
                                       {prog.rightTitle}
@@ -669,6 +671,7 @@ export default function AdmissionDetailPage() {
                                       )}
                                     </ul>
                                   </div>
+                                  )}
                                 </div>
                                 {prog.applyLink && (
                                   <a
@@ -891,41 +894,54 @@ export default function AdmissionDetailPage() {
                                 <div className="text-gray-900 font-semibold mb-1">
                                   {row.course}
                                 </div>
-                                <span className="text-[#2563eb] text-sm hover:underline cursor-pointer flex items-center">
+                                {row.curriculumLink ? (
+                                <a
+                                  href={row.curriculumLink}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  className="text-[#2563eb] text-sm hover:underline flex items-center"
+                                >
+                                  View Curriculum{" "}
+                                  <ChevronRight className="w-3 h-3 ml-1" />
+                                </a>
+                                ) : (
+                                <span className="text-gray-400 text-sm flex items-center">
                                   View Curriculum{" "}
                                   <ChevronRight className="w-3 h-3 ml-1" />
                                 </span>
+                                )}
                               </td>
                               <td className="p-4 align-top border-r border-gray-200">
-                                <div className="text-[#059669] mb-1">
+                                <div className="text-[#059669]">
                                   {row.fees}
                                 </div>
-                                <span className="text-[#2563eb] text-sm hover:underline cursor-pointer flex items-center">
-                                  Check Details{" "}
-                                  <ChevronRight className="w-3 h-3 ml-1" />
-                                </span>
                               </td>
                               <td className="p-4 align-top border-r border-gray-200 text-gray-700">
                                 {row.appDate}
                               </td>
                               <td className="p-4 align-top">
+                                {(row.applyLink || applicationFormLink) ? (
                                 <span
                                   className="text-[#2563eb] hover:underline cursor-pointer flex items-center"
                                   onClick={() => {
                                     const link =
                                       row.applyLink || applicationFormLink;
-                                    if (link)
-                                      window.open(
-                                        link,
-                                        "_blank",
-                                        "noopener,noreferrer",
-                                      );
-                                    else handleApplyNow();
+                                    window.open(
+                                      link,
+                                      "_blank",
+                                      "noopener,noreferrer",
+                                    );
                                   }}
                                 >
                                   Apply Now{" "}
                                   <ChevronRight className="w-4 h-4 ml-1" />
                                 </span>
+                                ) : (
+                                <span className="text-gray-400 flex items-center">
+                                  Apply Now{" "}
+                                  <ChevronRight className="w-4 h-4 ml-1" />
+                                </span>
+                                )}
                               </td>
                             </tr>
                           ))}
