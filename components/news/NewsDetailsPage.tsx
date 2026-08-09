@@ -612,7 +612,7 @@ const NewsDetailsPage: React.FC<{
                           {rel.title}
                         </h3>
 
-                        <p className="text-sm text-gray-600 line-clamp-2">
+                        <p className="text-sm text-gray-600 line-clamp-2 overflow-hidden break-words">
                           {rel.excerpt}
                         </p>
                       </Link>

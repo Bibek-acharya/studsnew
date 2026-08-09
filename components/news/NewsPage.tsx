@@ -294,7 +294,7 @@ const NewsPage: React.FC = () => {
                   <h3 className="text-3xl sm:text-4xl font-bold text-white mb-3 leading-tight tracking-tight">
                     {featuredNews.title}
                   </h3>
-                  <p className="text-gray-200 text-base sm:text-lg font-medium line-clamp-2">
+                  <p className="text-gray-200 text-base sm:text-lg font-medium line-clamp-2 overflow-hidden break-words">
                     {stripHtml(featuredNews.excerpt)}
                   </p>
                 </div>
@@ -391,7 +391,7 @@ const NewsPage: React.FC = () => {
                   >
                     {item.title}
                   </Link>
-                  <p className="text-slate-500 text-sm mb-5 grow line-clamp-2 leading-relaxed">
+                  <p className="text-slate-500 text-sm mb-5 grow line-clamp-2 leading-relaxed overflow-hidden break-words">
                     {stripHtml(item.excerpt)}
                   </p>
 

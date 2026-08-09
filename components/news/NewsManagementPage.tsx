@@ -592,7 +592,7 @@ const NewsManagementPage = () => {
                       <h3 className="font-bold text-gray-900 text-lg leading-tight mb-2 line-clamp-2">
                         {item.title}
                       </h3>
-                      <p className="text-sm text-gray-500 line-clamp-2 mb-5 flex-1 leading-relaxed">
+                      <p className="text-sm text-gray-500 line-clamp-2 mb-5 flex-1 leading-relaxed overflow-hidden break-words">
                         {item.desc}
                       </p>
                       <div className="pt-4 border-t border-gray-100 mt-auto">
