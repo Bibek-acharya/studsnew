@@ -185,8 +185,11 @@ export default function AddCollegeSection({
         location,
         website,
         level: level.join(","),
-        non_university_affiliation: level.some(l => l === "Bachelor" || l === "Master") ? undefined : affiliation,
-        university_affiliations: level.some(l => l === "Bachelor" || l === "Master") ? universityIds : [],
+        affiliation: level.some(l => l === "Bachelor" || l === "Master")
+          ? universityIds.map(id => universities.find(u => u.id === id)?.name || "").filter(Boolean).join(", ")
+          : "",
+        non_university_affiliation: level.some(l => l !== "Bachelor" && l !== "Master") ? affiliation : "",
+        university_affiliations: universityIds,
         logo_url: finalLogoUrl.startsWith("data:") ? "" : finalLogoUrl,
         banner_url: finalBannerUrl.startsWith("data:") ? "" : finalBannerUrl,
         about, vision, mission,
@@ -357,7 +360,7 @@ export default function AddCollegeSection({
                   ))}
                 </div>
               </div>
-              {level.some(l => l === "Bachelor" || l === "Master") ? (
+              {level.some(l => l === "Bachelor" || l === "Master") && (
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">Affiliated Universities</label>
                 <div className="border border-gray-300 rounded-md p-2 max-h-40 overflow-y-auto bg-white">
@@ -399,10 +402,11 @@ export default function AddCollegeSection({
                   </div>
                 )}
               </div>
-              ) : (
+              )}
+              {level.some(l => l !== "Bachelor" && l !== "Master") && (
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Affiliation</label>
-                <input type="text" className={inputClass} placeholder="e.g. Tribhuvan University" value={affiliation} onChange={e => setAffiliation(e.target.value)} />
+                <label className="block text-sm font-medium text-gray-700 mb-2">Non-University Affiliation</label>
+                <input type="text" className={inputClass} placeholder="e.g. NEB, CTEVT" value={affiliation} onChange={e => setAffiliation(e.target.value)} />
               </div>
               )}
               <div>
