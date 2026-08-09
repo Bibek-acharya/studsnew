@@ -7,7 +7,7 @@ interface TabCoursesProps {
   courses: any[] | null;
 }
 
-const LEVEL_FILTERS = ["all", "Bachelor's", "Master", "Master of Philosophy", "Doctorate", "Post graduate diploma"];
+const LEVEL_FILTERS = ["all", "+2", "Bachelor's", "Master", "Master of Philosophy", "Doctorate", "Post graduate diploma"];
 
 const TabCourses: React.FC<TabCoursesProps> = ({ courses }) => {
   const [courseFilter, setCourseFilter] = useState("all");
@@ -17,8 +17,16 @@ const TabCourses: React.FC<TabCoursesProps> = ({ courses }) => {
   const filtered = useMemo(() => {
     if (!courses) return [];
     return courses.filter((c) => {
-      if (courseFilter !== "all" && c.level !== courseFilter) return false;
-      return true;
+      if (courseFilter === "all") return true;
+      const level = (c.level || "").toLowerCase();
+      const filter = courseFilter.toLowerCase();
+      if (filter === "+2") return level.includes("+2") || level.includes("high school") || level.includes("neb");
+      if (filter === "master") return level.includes("master");
+      if (filter === "bachelor's") return level.includes("bachelor");
+      if (filter === "doctorate") return level.includes("doctorate") || level.includes("phd");
+      if (filter === "master of philosophy") return level.includes("philosophy") || level.includes("mphil");
+      if (filter === "post graduate diploma") return level.includes("diploma") && level.includes("post");
+      return level.includes(filter);
     });
   }, [courses, courseFilter]);
 
