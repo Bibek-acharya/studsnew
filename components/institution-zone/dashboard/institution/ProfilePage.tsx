@@ -259,10 +259,16 @@ const ProfilePage: React.FC = () => {
         if (data.profile_status) setProfileStatus(data.profile_status);
 
         const primaryUniId = data.university_id || 0;
-        const affiliationNames = (data.affiliation || "").split(",").map((s: string) => s.trim()).filter(Boolean);
-        const resolvedIds = affiliationNames
-          .map((name: string) => unis.find(u => u.name === name)?.id)
-          .filter((id: number | undefined) => id && id > 0);
+        // Use university_affiliations if available, otherwise fallback to parsing affiliation string
+        let resolvedIds: number[] = [];
+        if (data.university_affiliations && Array.isArray(data.university_affiliations) && data.university_affiliations.length > 0) {
+          resolvedIds = data.university_affiliations.filter((id: any) => typeof id === "number" && id > 0);
+        } else {
+          const affiliationNames = (data.affiliation || "").split(",").map((s: string) => s.trim()).filter(Boolean);
+          resolvedIds = affiliationNames
+            .map((name: string) => unis.find(u => u.name === name)?.id)
+            .filter((id: number | undefined) => id && id > 0);
+        }
 
         let galleryGroupsData: GalleryGroup[] = [];
         if (data.gallery_data) {
@@ -296,7 +302,7 @@ const ProfilePage: React.FC = () => {
           tiktokUrl: data.tiktok_url || "",
           youtubeUrl: data.youtube_url || "",
           linkedinUrl: data.linkedin_url || "",
-          affiliation: data.affiliation || "",
+          affiliation: data.non_university_affiliation || data.affiliation || "",
           universityIds: resolvedIds.length > 0 ? resolvedIds : (primaryUniId > 0 ? [primaryUniId] : []),
           brochureUrl: data.brochure_data?.url || "",
           about: data.about || "",
@@ -558,10 +564,10 @@ const ProfilePage: React.FC = () => {
         tiktok_url: fd.tiktokUrl,
         youtube_url: fd.youtubeUrl,
         linkedin_url: fd.linkedinUrl,
-        affiliation: level.some(l => l === "Bachelor" || l === "Master")
+        affiliation: level.some(l => l.includes("Bachelor") || l.includes("Master"))
           ? fd.universityIds.map(id => universities.find(u => u.id === id)?.name || "").filter(Boolean).join(", ")
           : "",
-        non_university_affiliation: level.some(l => l === "Bachelor" || l === "Master")
+        non_university_affiliation: level.some(l => l.includes("Bachelor") || l.includes("Master"))
           ? ""
           : fd.affiliation,
         university_affiliations: fd.universityIds,

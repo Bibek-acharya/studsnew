@@ -143,7 +143,7 @@ const ProfileGeneralSection: React.FC<Props> = ({
               {...register("contactPhone")}
             />
           </div>
-          {level.some(l => l === "Bachelor" || l === "Master") ? (
+          {level.some(l => l.includes("Bachelor") || l.includes("Master")) ? (
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">Affiliated Universities</label>
             <div className="border border-gray-300 rounded-md p-2 max-h-40 overflow-y-auto bg-white">
