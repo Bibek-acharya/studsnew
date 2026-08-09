@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Search, Link as LinkIcon } from "lucide-react";
 import FeedbackWidget from "@/components/FeedbackWidget";
 
@@ -58,6 +58,7 @@ const HeroSection: React.FC<HeroSectionProps> = ({
   const [currentSlide, setCurrentSlide] = useState(0);
   const [fade, setFade] = useState(true);
   const [desktopQuery, setDesktopQuery] = useState("");
+  const fetchedRef = useRef(false);
   const [fetchedSlides, setFetchedSlides] = useState(slides);
 
   const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080";
@@ -67,6 +68,8 @@ const HeroSection: React.FC<HeroSectionProps> = ({
       setFetchedSlides(slides);
       return;
     }
+    if (fetchedRef.current) return;
+    fetchedRef.current = true;
     const fetchCarousel = async () => {
       try {
         const res = await fetch(
@@ -97,7 +100,7 @@ const HeroSection: React.FC<HeroSectionProps> = ({
       }
     };
     fetchCarousel();
-  }, [slides]);
+  }, []);
 
   const heroSlides =
     fetchedSlides.length > 0
