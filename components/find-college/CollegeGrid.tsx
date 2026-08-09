@@ -1170,8 +1170,12 @@ export const ProgramCard: React.FC<{
         )}
 
         <div className="mt-2 flex items-center gap-4 mb-3">
-          <a
-            href="#"
+          <button
+            type="button"
+            onClick={(e) => {
+              e.stopPropagation();
+              onNavigate("collegeDetails", { id: college.id, tab: "admissions" });
+            }}
             className="interaction-btn text-[12px] font-medium text-brand-blue hover:text-blue-800 flex items-center transition-colors"
           >
             Admission
@@ -1188,9 +1192,13 @@ export const ProgramCard: React.FC<{
                 d="M7 17L17 7M7 7h10v10"
               />
             </svg>
-          </a>
-          <a
-            href="#"
+          </button>
+          <button
+            type="button"
+            onClick={(e) => {
+              e.stopPropagation();
+              onNavigate("collegeDetails", { id: college.id, tab: "courses" });
+            }}
             className="interaction-btn text-[12px] font-medium text-brand-blue hover:text-blue-800 flex items-center transition-colors"
           >
             Courses & Fees
@@ -1207,7 +1215,7 @@ export const ProgramCard: React.FC<{
                 d="M7 17L17 7M7 7h10v10"
               />
             </svg>
-          </a>
+          </button>
         </div>
 
         <div className="flex flex-col gap-3 mt-auto">

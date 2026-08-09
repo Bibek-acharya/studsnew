@@ -57,6 +57,17 @@ const CollegeDetailsPage = ({
   const [newsPage, setNewsPage] = useState(1);
   const [shareUrl, setShareUrl] = useState("");
 
+  // Read tab from URL query parameter
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      const urlParams = new URLSearchParams(window.location.search);
+      const tab = urlParams.get("tab") as TabKey | null;
+      if (tab && ["about", "courses", "admissions", "offered", "facilities", "events", "scholarship", "alumni", "gallery", "review", "news", "download", "faq"].includes(tab)) {
+        setActiveTab(tab);
+      }
+    }
+  }, []);
+
   const data = useCollegeData(idStr);
   const {
     isFollowed,

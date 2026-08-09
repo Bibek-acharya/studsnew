@@ -13,7 +13,8 @@ const FindCollegePage: React.FC = () => {
 
   const handleNavigate = (view: string, data?: any) => {
     if (view === "collegeDetails" && data?.id) {
-      router.push(`/find-college/${data.id}`);
+      const tabParam = data.tab ? `?tab=${data.tab}` : "";
+      router.push(`/find-college/${data.id}${tabParam}`);
     } else {
       console.log("Navigate to:", view, data);
     }
