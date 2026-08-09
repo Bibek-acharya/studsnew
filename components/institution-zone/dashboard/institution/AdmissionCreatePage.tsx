@@ -917,7 +917,7 @@ const AdmissionCreatePage: React.FC = () => {
                 )}
               </div>
               <p className="text-xs text-gray-500 mt-1">
-                Upload up to 5 banner images. Recommended size: 1920x600px
+                Upload up to 5 banner images. Recommended size: 1400x380px
                 (JPG/PNG)
               </p>
             </div>

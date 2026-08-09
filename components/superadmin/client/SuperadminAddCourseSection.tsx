@@ -519,7 +519,7 @@ export default function SuperadminAddCourseSection({
                       Click to upload banner image
                     </span>
                     <span className="mt-1 text-xs text-gray-500">
-                      Recommended size: 1920x600px (JPG/PNG)
+                      Recommended size: 1400x380px (JPG/PNG)
                     </span>
                   </>
                 )}

@@ -58,8 +58,23 @@ const ImageCropperModal: React.FC<ImageCropperModalProps> = ({
       initialCropSet.current = true;
 
       const { naturalWidth: width, naturalHeight: height } = e.currentTarget;
+      const imageAspect = width / height;
+      const tolerance = 0.05;
+
+      // If image already matches the target aspect ratio, use full image
+      if (Math.abs(imageAspect - aspectRatio) < tolerance) {
+        setCrop({
+          unit: "%",
+          x: 0,
+          y: 0,
+          width: 100,
+          height: 100,
+        });
+        return;
+      }
+
       const crop = makeAspectCrop(
-        { unit: "%", width: 80 },
+        { unit: "%", width: 90 },
         aspectRatio,
         width,
         height,
