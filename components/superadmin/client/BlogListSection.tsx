@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect, useCallback } from "react";
 import { toast } from "sonner";
-import { Home, FileText, Search, Eye, Pencil, Trash2, ChevronLeft, ChevronRight, Plus } from "lucide-react";
+import { Home, FileText, Search, Star, Eye, Pencil, Trash2, ChevronLeft, ChevronRight, Plus } from "lucide-react";
 import { superadminBlogApi, SuperAdminBlog } from "@/services/superadminBlogApi";
 
 const STATUS_BADGE: Record<string, string> = {
@@ -16,6 +16,13 @@ interface DeleteModalState {
   title: string;
 }
 
+interface FeaturedModalState {
+  isOpen: boolean;
+  blogId: number | null;
+  title: string;
+  setFeatured: boolean;
+}
+
 export default function BlogListSection({ setActiveSection }: { setActiveSection: (s: string) => void }) {
   const [blogs, setBlogs] = useState<SuperAdminBlog[]>([]);
   const [loading, setLoading] = useState(true);
@@ -23,6 +30,12 @@ export default function BlogListSection({ setActiveSection }: { setActiveSection
   const [page, setPage] = useState(1);
   const [total, setTotal] = useState(0);
   const [deleteModal, setDeleteModal] = useState<DeleteModalState>({ isOpen: false, blogId: null, title: "" });
+  const [featuredModal, setFeaturedModal] = useState<FeaturedModalState>({
+    isOpen: false,
+    blogId: null,
+    title: "",
+    setFeatured: false,
+  });
   const limit = 10;
 
   useEffect(() => {
@@ -76,6 +89,31 @@ export default function BlogListSection({ setActiveSection }: { setActiveSection
     }
   }, [deleteModal.blogId]);
 
+  const confirmFeatured = useCallback(async () => {
+    if (!featuredModal.blogId) return;
+    const { blogId, setFeatured } = featuredModal;
+    setFeaturedModal({ isOpen: false, blogId: null, title: "", setFeatured: false });
+    try {
+      await superadminBlogApi.update(blogId, { featured: setFeatured });
+      setBlogs((prev) =>
+        prev.map((b) =>
+          b.id === blogId
+            ? { ...b, featured: setFeatured }
+            : { ...b, featured: setFeatured ? false : b.featured },
+        ),
+      );
+      toast.success(
+        setFeatured
+          ? "Featured blog of the week set."
+          : "Featured blog removed.",
+      );
+    } catch (err) {
+      toast.error(
+        err instanceof Error ? err.message : "Failed to toggle featured",
+      );
+    }
+  }, [featuredModal]);
+
   const totalPages = Math.ceil(total / limit);
 
   if (loading) {
@@ -92,6 +130,37 @@ export default function BlogListSection({ setActiveSection }: { setActiveSection
             <div className="flex justify-end gap-3">
               <button onClick={() => setDeleteModal({ isOpen: false, blogId: null, title: "" })} className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200">Cancel</button>
               <button onClick={confirmDelete} className="px-4 py-2 text-sm font-medium text-white bg-red-600 rounded-lg hover:bg-red-700">Delete</button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {featuredModal.isOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
+          <div className="bg-white rounded-xl p-6 shadow-xl max-w-md w-full mx-4">
+            <h3 className="text-lg font-bold text-gray-900 mb-2">
+              {featuredModal.setFeatured
+                ? "Set as Featured Blog"
+                : "Remove Featured Blog"}
+            </h3>
+            <p className="text-sm text-gray-600 mb-6">
+              {featuredModal.setFeatured
+                ? `Are you sure you want to set "${featuredModal.title}" as the Featured Blog of the Week? This will replace any existing featured blog.`
+                : `Are you sure you want to remove "${featuredModal.title}" as the Featured Blog of the Week?`}
+            </p>
+            <div className="flex justify-end gap-3">
+              <button
+                onClick={() => setFeaturedModal({ isOpen: false, blogId: null, title: "", setFeatured: false })}
+                className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={confirmFeatured}
+                className={`px-4 py-2 text-sm font-medium text-white rounded-lg ${featuredModal.setFeatured ? "bg-yellow-500 hover:bg-yellow-600" : "bg-red-600 hover:bg-red-700"}`}
+              >
+                {featuredModal.setFeatured ? "Set as Featured" : "Remove"}
+              </button>
             </div>
           </div>
         </div>
@@ -179,6 +248,20 @@ export default function BlogListSection({ setActiveSection }: { setActiveSection
                   </td>
                   <td className="text-center py-3 px-4">
                     <div className="flex items-center justify-center gap-2">
+                      <button
+                        className={`p-1.5 rounded ${blog.featured ? "text-yellow-500 hover:bg-yellow-50" : "text-gray-400 hover:bg-yellow-50 hover:text-yellow-500"}`}
+                        title={blog.featured ? "Remove featured" : "Set as featured"}
+                        onClick={() =>
+                          setFeaturedModal({
+                            isOpen: true,
+                            blogId: blog.id,
+                            title: blog.title,
+                            setFeatured: !blog.featured,
+                          })
+                        }
+                      >
+                        <Star className={`w-4 h-4 ${blog.featured ? "fill-yellow-500" : ""}`} />
+                      </button>
                       <button
                         className="p-1.5 hover:bg-green-50 rounded text-green-600"
                         title="Edit"
