@@ -143,7 +143,7 @@ const ProfileGeneralSection: React.FC<Props> = ({
               {...register("contactPhone")}
             />
           </div>
-          {level.some(l => l.includes("Bachelor") || l.includes("Master")) ? (
+          {level.some(l => l.includes("Bachelor") || l.includes("Master")) && (
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">Affiliated Universities</label>
             <div className="border border-gray-300 rounded-md p-2 max-h-40 overflow-y-auto bg-white">
@@ -186,10 +186,11 @@ const ProfileGeneralSection: React.FC<Props> = ({
               </div>
             )}
           </div>
-          ) : (
+          )}
+          {level.some(l => !l.includes("Bachelor") && !l.includes("Master")) && (
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">Affiliation</label>
-            <input type="text" className={`${inputClass} ${errors.affiliation ? 'border-red-500' : ''}`} placeholder="e.g. Tribhuvan University" {...register("affiliation")} />
+            <label className="block text-sm font-medium text-gray-700 mb-2">Non-University Affiliation</label>
+            <input type="text" className={`${inputClass} ${errors.affiliation ? 'border-red-500' : ''}`} placeholder="e.g. NEB, CTEVT" {...register("affiliation")} />
           </div>
           )}
           <div>
