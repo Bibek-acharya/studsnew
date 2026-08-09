@@ -188,7 +188,7 @@ export default function AddCollegeSection({
         affiliation: level.some(l => l === "Bachelor" || l === "Master")
           ? universityIds.map(id => universities.find(u => u.id === id)?.name || "").filter(Boolean).join(", ")
           : "",
-        non_university_affiliation: level.some(l => l !== "Bachelor" && l !== "Master") ? affiliation : "",
+        non_university_affiliation: affiliation || "",
         university_affiliations: universityIds,
         logo_url: finalLogoUrl.startsWith("data:") ? "" : finalLogoUrl,
         banner_url: finalBannerUrl.startsWith("data:") ? "" : finalBannerUrl,

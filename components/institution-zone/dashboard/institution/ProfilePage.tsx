@@ -567,9 +567,7 @@ const ProfilePage: React.FC = () => {
         affiliation: level.some(l => l.includes("Bachelor") || l.includes("Master"))
           ? fd.universityIds.map(id => universities.find(u => u.id === id)?.name || "").filter(Boolean).join(", ")
           : "",
-        non_university_affiliation: level.some(l => l.includes("Bachelor") || l.includes("Master"))
-          ? ""
-          : fd.affiliation,
+        non_university_affiliation: fd.affiliation || "",
         university_affiliations: fd.universityIds,
         brochure_data: fd.brochureUrl ? { url: fd.brochureUrl } : null,
         logo_url: fd.logoUrl,
