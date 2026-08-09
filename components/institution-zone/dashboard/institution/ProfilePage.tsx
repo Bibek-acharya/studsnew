@@ -49,6 +49,7 @@ export const profileSchema = z.object({
   mission: z.string(),
   logoUrl: z.string().min(1, "Organization logo is required"),
   bannerUrl: z.string().min(1, "Banner image is required"),
+  cardImageUrl: z.string(),
   videos: z.array(z.object({
     id: z.number(), url: z.string(), message: z.string(),
     name: z.string(), designation: z.string(), avatar: z.string(),
@@ -95,6 +96,7 @@ const ProfilePage: React.FC = () => {
   const [universities, setUniversities] = useState<{ id: number; name: string }[]>([]);
   const [logoFile, setLogoFile] = useState<File | null>(null);
   const [bannerFile, setBannerFile] = useState<File | null>(null);
+  const [cardImageFile, setCardImageFile] = useState<File | null>(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
@@ -112,8 +114,10 @@ const ProfilePage: React.FC = () => {
   const locationRef = useRef<HTMLDivElement>(null);
   const logoInputRef = useRef<HTMLInputElement>(null);
   const bannerInputRef = useRef<HTMLInputElement>(null);
+  const cardImageInputRef = useRef<HTMLInputElement>(null);
   const [cropperOpen, setCropperOpen] = useState(false);
   const [cropImageSrc, setCropImageSrc] = useState<string | null>(null);
+  const [cropTarget, setCropTarget] = useState<"banner" | "card">("banner");
 
   const methods = useForm<FormData>({
     resolver: zodResolver(profileSchema),
@@ -138,6 +142,7 @@ const ProfilePage: React.FC = () => {
       mission: "",
       logoUrl: "",
       bannerUrl: "",
+      cardImageUrl: "",
       videos: [{ id: 1, url: "", message: "", name: "", designation: "", avatar: "" }],
       overviewRows: [],
       leadershipRows: [],
@@ -299,6 +304,7 @@ const ProfilePage: React.FC = () => {
           mission: data.mission || "",
           logoUrl: data.logo_url || "",
           bannerUrl: data.banner_url || "",
+          cardImageUrl: data.card_image_url || "",
           videos: data.videos && Array.isArray(data.videos) && data.videos.length > 0
             ? data.videos.slice(0, 1).map((v: any, i: number) => ({
                 ...v,
@@ -395,6 +401,25 @@ const ProfilePage: React.FC = () => {
       setCropImageSrc(null);
     },
     [bannerFile],
+  );
+
+  const handleCardImageCrop = useCallback(
+    async (croppedBlob: Blob) => {
+      const croppedFile = new File(
+        [croppedBlob],
+        cardImageFile?.name || "card.jpg",
+        { type: "image/jpeg" },
+      );
+      try {
+        const url = await uploadFile(croppedFile, "institution/card");
+        setValue("cardImageUrl", url, { shouldDirty: true });
+      } catch {
+        /* skip */
+      }
+      setCropperOpen(false);
+      setCropImageSrc(null);
+    },
+    [cardImageFile],
   );
 
   const addGalleryGroup = () => {
@@ -540,6 +565,7 @@ const ProfilePage: React.FC = () => {
         brochure_data: fd.brochureUrl ? { url: fd.brochureUrl } : null,
         logo_url: fd.logoUrl,
         banner_url: fd.bannerUrl,
+        card_image_url: fd.cardImageUrl,
         about: fd.about,
         vision: fd.vision,
         mission: fd.mission,
@@ -612,6 +638,10 @@ const ProfilePage: React.FC = () => {
             setCropImageSrc={setCropImageSrc}
             setCropperOpen={setCropperOpen}
             uploadFile={uploadFile}
+            cardImageInputRef={cardImageInputRef}
+            setCardImageFile={setCardImageFile}
+            cropTarget={cropTarget}
+            setCropTarget={setCropTarget}
           />
 
           <ProfileGeneralSection
@@ -708,12 +738,12 @@ const ProfilePage: React.FC = () => {
       {cropperOpen && cropImageSrc && (
         <ImageCropperModal
           imageSrc={cropImageSrc}
-          onCropComplete={handleBannerCrop}
+          onCropComplete={cropTarget === "banner" ? handleBannerCrop : handleCardImageCrop}
           onCancel={() => {
             setCropperOpen(false);
             setCropImageSrc(null);
           }}
-          aspectRatio={1920 / 400}
+          aspectRatio={cropTarget === "banner" ? 1920 / 400 : 310 / 140}
         />
       )}
     </div>
