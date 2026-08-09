@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect, useCallback } from "react";
 import { toast } from "sonner";
-import { Home, CalendarDays, Search, Pencil, Trash2, ChevronLeft, ChevronRight, Plus } from "lucide-react";
+import { Home, CalendarDays, Search, Star, Pencil, Trash2, ChevronLeft, ChevronRight, Plus } from "lucide-react";
 import { adminEventApi, AdminEvent } from "@/services/eventApi";
 
 const CATEGORY_COLORS: Record<string, string> = {
@@ -37,6 +37,13 @@ interface DeleteModalState {
   title: string;
 }
 
+interface FeaturedModalState {
+  isOpen: boolean;
+  eventId: number | null;
+  title: string;
+  setFeatured: boolean;
+}
+
 export default function EventListSection({ setActiveSection }: { setActiveSection: (s: string) => void }) {
   const [events, setEvents] = useState<AdminEvent[]>([]);
   const [loading, setLoading] = useState(true);
@@ -44,6 +51,12 @@ export default function EventListSection({ setActiveSection }: { setActiveSectio
   const [page, setPage] = useState(1);
   const [total, setTotal] = useState(0);
   const [deleteModal, setDeleteModal] = useState<DeleteModalState>({ isOpen: false, eventId: null, title: "" });
+  const [featuredModal, setFeaturedModal] = useState<FeaturedModalState>({
+    isOpen: false,
+    eventId: null,
+    title: "",
+    setFeatured: false,
+  });
   const limit = 10;
 
   const fetchEvents = useCallback(async (p: number, s: string) => {
@@ -85,6 +98,31 @@ export default function EventListSection({ setActiveSection }: { setActiveSectio
     }
   }, [deleteModal.eventId]);
 
+  const confirmFeatured = useCallback(async () => {
+    if (!featuredModal.eventId) return;
+    const { eventId, setFeatured } = featuredModal;
+    setFeaturedModal({ isOpen: false, eventId: null, title: "", setFeatured: false });
+    try {
+      await adminEventApi.toggleFeatured(eventId);
+      setEvents((prev) =>
+        prev.map((e) =>
+          e.id === eventId
+            ? { ...e, featured: setFeatured }
+            : { ...e, featured: setFeatured ? false : e.featured },
+        ),
+      );
+      toast.success(
+        setFeatured
+          ? "Featured event of the week set."
+          : "Featured event removed.",
+      );
+    } catch (err) {
+      toast.error(
+        err instanceof Error ? err.message : "Failed to toggle featured",
+      );
+    }
+  }, [featuredModal]);
+
   const totalPages = Math.ceil(total / limit);
 
   if (loading) {
@@ -101,6 +139,37 @@ export default function EventListSection({ setActiveSection }: { setActiveSectio
             <div className="flex justify-end gap-3">
               <button onClick={() => setDeleteModal({ isOpen: false, eventId: null, title: "" })} className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200">Cancel</button>
               <button onClick={confirmDelete} className="px-4 py-2 text-sm font-medium text-white bg-red-600 rounded-lg hover:bg-red-700">Delete</button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {featuredModal.isOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
+          <div className="bg-white rounded-xl p-6 shadow-xl max-w-md w-full mx-4">
+            <h3 className="text-lg font-bold text-gray-900 mb-2">
+              {featuredModal.setFeatured
+                ? "Set as Featured Event"
+                : "Remove Featured Event"}
+            </h3>
+            <p className="text-sm text-gray-600 mb-6">
+              {featuredModal.setFeatured
+                ? `Are you sure you want to set "${featuredModal.title}" as the Featured Event of the Week? This will replace any existing featured event.`
+                : `Are you sure you want to remove "${featuredModal.title}" as the Featured Event of the Week?`}
+            </p>
+            <div className="flex justify-end gap-3">
+              <button
+                onClick={() => setFeaturedModal({ isOpen: false, eventId: null, title: "", setFeatured: false })}
+                className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={confirmFeatured}
+                className={`px-4 py-2 text-sm font-medium text-white rounded-lg ${featuredModal.setFeatured ? "bg-yellow-500 hover:bg-yellow-600" : "bg-red-600 hover:bg-red-700"}`}
+              >
+                {featuredModal.setFeatured ? "Set as Featured" : "Remove"}
+              </button>
             </div>
           </div>
         </div>
@@ -150,13 +219,12 @@ export default function EventListSection({ setActiveSection }: { setActiveSectio
                 <th className="text-center py-3 px-4 font-semibold text-gray-700">Category</th>
                 <th className="text-center py-3 px-4 font-semibold text-gray-700">Date</th>
                 <th className="text-center py-3 px-4 font-semibold text-gray-700">Location</th>
-                <th className="text-center py-3 px-4 font-semibold text-gray-700">Featured</th>
                 <th className="text-center py-3 px-4 font-semibold text-gray-700">Actions</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-100">
               {events.length === 0 ? (
-                <tr><td colSpan={7} className="py-8 text-center text-gray-500">No events found</td></tr>
+                <tr><td colSpan={6} className="py-8 text-center text-gray-500">No events found</td></tr>
               ) : events.map((item) => {
                 const catLabel = CATEGORY_LABELS[item.category] || item.category;
                 const catColor = CATEGORY_COLORS[item.category] || "bg-gray-100 text-gray-700";
@@ -183,12 +251,21 @@ export default function EventListSection({ setActiveSection }: { setActiveSectio
                     </td>
                     <td className="text-center py-3 px-4 text-gray-600">{item.location || "-"}</td>
                     <td className="text-center py-3 px-4">
-                      <span className={`inline-flex items-center gap-1 rounded-full px-2 py-1 text-xs font-bold uppercase ${item.featured ? "bg-yellow-100 text-yellow-700" : "bg-gray-100 text-gray-500"}`}>
-                        {item.featured ? "Featured" : "Regular"}
-                      </span>
-                    </td>
-                    <td className="text-center py-3 px-4">
                       <div className="flex items-center justify-center gap-2">
+                        <button
+                          className={`p-1.5 rounded ${item.featured ? "text-yellow-500 hover:bg-yellow-50" : "text-gray-400 hover:bg-yellow-50 hover:text-yellow-500"}`}
+                          title={item.featured ? "Remove featured" : "Set as featured"}
+                          onClick={() =>
+                            setFeaturedModal({
+                              isOpen: true,
+                              eventId: item.id,
+                              title: item.title,
+                              setFeatured: !item.featured,
+                            })
+                          }
+                        >
+                          <Star className={`w-4 h-4 ${item.featured ? "fill-yellow-500" : ""}`} />
+                        </button>
                         <button className="p-1.5 hover:bg-green-50 rounded text-green-600" title="Edit" onClick={() => setActiveSection(`edit-event-${item.id}`)}><Pencil className="w-4 h-4" /></button>
                         <button className="p-1.5 hover:bg-red-50 rounded text-red-600" title="Delete" onClick={() => handleDelete(item.id)}><Trash2 className="w-4 h-4" /></button>
                       </div>
