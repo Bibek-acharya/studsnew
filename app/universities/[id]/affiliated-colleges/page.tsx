@@ -130,7 +130,7 @@ export default function Page({ params }: { params: { id: string } }) {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <div className="mx-auto max-w-[1400px] px-4 py-6">
+      <div className="mx-auto max-w-350 py-6">
         <div className="flex items-center gap-2 text-sm text-gray-500 mb-6">
           <Home className="w-4 h-4" /> <span>Universities</span>{" "}
           <span>-</span>{" "}
