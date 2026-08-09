@@ -320,7 +320,7 @@ const CollegeGrid: React.FC<CollegeGridProps> = ({
       const institutionColleges: College[] = (
         institutionRes?.data?.institutions || []
       ).map((inst: any) => ({
-        id: inst.college_id > 0 ? inst.college_id : (`inst_${inst.id}` as any),
+        id: `inst_${inst.id}` as any,
         name: inst.institution_name,
         image_url: inst.banner_url || inst.logo_url,
         description: inst.about,
