@@ -1158,7 +1158,7 @@ export const ProgramCard: React.FC<{
           <div className="flex items-center gap-2 text-[14px] text-gray-500 mb-3">
             <Globe className="w-4.5 h-4.5 text-gray-400 shrink-0" />
             <a
-              href={college.website}
+              href={college.website.match(/^https?:\/\//) ? college.website : `https://${college.website}`}
               target="_blank"
               rel="noopener noreferrer"
               onClick={(e) => e.stopPropagation()}

@@ -12,7 +12,6 @@ import {
   Globe,
 } from "lucide-react";
 import { College } from "@/services/api";
-import HoverTooltip from "./HoverTooltip";
 
 interface FeaturedInstitutionsSectionProps {
   onNavigate: (view: string, data?: { [key: string]: unknown }) => void;
@@ -84,10 +83,12 @@ const CollegeCard: React.FC<{
         onNavigate("collegeDetails", { id: college.id, name: college.name })
       }
     >
-      <div className="w-full h-30 rounded-md overflow-hidden mb-4 relative">
-        <div className="absolute top-3 left-3 bg-brand-blue text-white text-[10px] font-bold px-2 py-0.5 rounded uppercase tracking-wider z-10 ">
-          Featured
-        </div>
+      <div className="w-full h-35 rounded-md overflow-hidden mb-4 relative">
+        {college.featured && (
+          <div className="absolute top-3 left-3 bg-brand-blue text-white text-[10px] font-bold px-2 py-0.5 rounded uppercase tracking-wider z-10 ">
+            Featured
+          </div>
+        )}
         <Image
           src={
             college.banner_url ||
@@ -106,17 +107,22 @@ const CollegeCard: React.FC<{
         />
       </div>
 
-      <HoverTooltip label={college.name}>
-        <div className="flex items-center gap-1.5 mb-2">
-          <h2
-            className="text-[20px] font-bold text-slate-800 tracking-tight hover:text-blue-600 transition-colors line-clamp-1"
-            onClick={(e) => e.stopPropagation()}
-          >
+      <div className="flex items-center gap-1.5 mb-2">
+        <button
+          type="button"
+          onClick={() => onNavigate("collegeDetails", { id: college.id })}
+          className="group/title relative truncate text-left text-[20px] font-bold text-slate-800 tracking-tight transition-colors hover:text-blue-600 line-clamp-2"
+        >
+          <span className="truncate block" title={college.name}>
             {college.name}
-          </h2>
-          <BadgeCheckIcon className="w-5 h-5 text-white fill-blue-500 shrink-0" />
-        </div>
-      </HoverTooltip>
+          </span>
+          <span className="absolute bottom-full left-0 mb-2 invisible opacity-0 group-hover/title:visible group-hover/title:opacity-100 bg-gray-900 text-white text-[13px] font-medium py-1.5 px-3 rounded  whitespace-nowrap transition-all duration-200 z-50 pointer-events-none">
+            {college.name}
+            <span className="absolute top-full left-4 -mt-px border-[5px] border-transparent border-t-gray-900"></span>
+          </span>
+        </button>
+        <BadgeCheckIcon className="w-5 h-5 text-white fill-blue-500 shrink-0" />
+      </div>
 
       <div className="flex items-center text-[14px] text-gray-500 mb-2">
         <div className="flex items-center gap-1 font-bold text-slate-700">
@@ -146,20 +152,69 @@ const CollegeCard: React.FC<{
         </p>
       </div>
 
-      {college.website && (
+      {college.featured && college.website && (
         <div className="flex items-center gap-2 text-[14px] text-gray-500 mb-3">
           <Globe className="w-4.5 h-4.5 text-gray-400 shrink-0" />
-          <a
-            href={college.website}
-            target="_blank"
-            rel="noopener noreferrer"
-            onClick={(e) => e.stopPropagation()}
-            className="text-blue-600 hover:underline font-medium truncate"
-          >
-            {college.website.replace(/^https?:\/\//, "")}
-          </a>
+            <a
+              href={college.website.match(/^https?:\/\//) ? college.website : `https://${college.website}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              onClick={(e) => e.stopPropagation()}
+              className="text-brand-blue hover:underline font-medium truncate"
+            >
+              {college.website.replace(/^https?:\/\//, "")}
+            </a>
         </div>
       )}
+
+      <div className="mt-2 flex items-center gap-4 mb-3">
+        <button
+          type="button"
+          onClick={(e) => {
+            e.stopPropagation();
+            onNavigate("collegeDetails", { id: college.id, tab: "admissions" });
+          }}
+          className="text-[12px] font-medium text-brand-blue hover:text-blue-800 flex items-center transition-colors"
+        >
+          Admission
+          <svg
+            className="w-3 h-3 ml-1"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2.5"
+            viewBox="0 0 24 24"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              d="M7 17L17 7M7 7h10v10"
+            />
+          </svg>
+        </button>
+        <button
+          type="button"
+          onClick={(e) => {
+            e.stopPropagation();
+            onNavigate("collegeDetails", { id: college.id, tab: "courses" });
+          }}
+          className="text-[12px] font-medium text-brand-blue hover:text-blue-800 flex items-center transition-colors"
+        >
+          Courses & Fees
+          <svg
+            className="w-3 h-3 ml-1"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2.5"
+            viewBox="0 0 24 24"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              d="M7 17L17 7M7 7h10v10"
+            />
+          </svg>
+        </button>
+      </div>
 
       <div className="flex flex-col gap-3 mt-auto">
         <div className="flex gap-2">
@@ -173,7 +228,7 @@ const CollegeCard: React.FC<{
               });
             }}
           >
-            View Detail
+            View Details
           </button>
           <button
             className="flex-1 flex items-center justify-center gap-1.5 border border-gray-200 hover:bg-gray-50 text-slate-600 font-medium py-2 px-2 rounded-md transition-colors text-[13px]"
@@ -188,21 +243,20 @@ const CollegeCard: React.FC<{
             <MessageSquare className="w-4 h-4 text-gray-500" />
             Inquiry
           </button>
-          <HoverTooltip label={isBookmarked ? "Remove Bookmark" : "Bookmark"}>
-            <button
-              className={`w-10 flex items-center justify-center border rounded-md transition-colors shrink-0 ${
-                isBookmarked
-                  ? "border-blue-50 bg-blue-50"
-                  : "border-gray-200 hover:bg-gray-50"
-              }`}
-              onClick={(e) => onToggleBookmark(e, college.id)}
-              aria-label={isBookmarked ? "Remove Bookmark" : "Bookmark"}
-            >
-              <Bookmark
-                className={`w-4 h-4 transition-all ${isBookmarked ? "text-[#0000ff] fill-[#0000ff]" : "text-gray-400"}`}
-              />
-            </button>
-          </HoverTooltip>
+          <button
+            type="button"
+            className={`w-10 flex items-center justify-center border rounded-md transition-colors shrink-0 ${
+              isBookmarked
+                ? "border-blue-200 bg-blue-50"
+                : "border-gray-200 hover:bg-gray-50"
+            }`}
+            onClick={(e) => onToggleBookmark(e, college.id)}
+            title={isBookmarked ? "Remove Bookmark" : "Bookmark"}
+          >
+            <Bookmark
+              className={`w-4 h-4 transition-all ${isBookmarked ? "text-[#0000ff] fill-[#0000ff]" : "text-gray-400"}`}
+            />
+          </button>
         </div>
       </div>
     </div>

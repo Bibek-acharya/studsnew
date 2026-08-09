@@ -18,39 +18,6 @@ interface HeroSectionProps {
   }[];
 }
 
-const DEFAULT_SLIDES = [
-  {
-    image:
-      "https://images.unsplash.com/photo-1541339907198-e08756dedf3f?q=80&w=2070&auto=format&fit=crop",
-    text: "studsphere.com",
-    url: "https://studsphere.com",
-  },
-  {
-    image:
-      "https://images.unsplash.com/photo-1498243691581-b145c3f54a5a?q=80&w=2070&auto=format&fit=crop",
-    text: "studsphere.com",
-    url: "https://studsphere.com",
-  },
-  {
-    image:
-      "https://images.unsplash.com/photo-1562774053-701939374585?q=80&w=2065&auto=format&fit=crop",
-    text: "studsphere.com",
-    url: "https://studsphere.com",
-  },
-  {
-    image:
-      "https://images.unsplash.com/photo-1525926476841-be2069c93a4d?q=80&w=2070&auto=format&fit=crop",
-    text: "studsphere.com",
-    url: "https://studsphere.com",
-  },
-  {
-    image:
-      "https://images.unsplash.com/photo-1606761568499-6d2451b23c66?q=80&w=1974&auto=format&fit=crop",
-    text: "studsphere.com",
-    url: "https://studsphere.com",
-  },
-];
-
 const HeroSection: React.FC<HeroSectionProps> = ({
   onNavigate,
   slides = [],
@@ -109,7 +76,7 @@ const HeroSection: React.FC<HeroSectionProps> = ({
           text: s.title || s.subtitle || "studsphere.com",
           url: s.link_url || "https://studsphere.com",
         }))
-      : DEFAULT_SLIDES.slice(0, 1);
+      : [];
 
   const slideCount = heroSlides.length;
   const safeIndex = slideCount > 0 ? currentSlide % slideCount : 0;
@@ -140,6 +107,8 @@ const HeroSection: React.FC<HeroSectionProps> = ({
     if (!query) return;
     onNavigate("findCollege", { search: query });
   };
+
+  if (heroSlides.length === 0) return null;
 
   return (
     <div className="w-full pt-2 pb-6 md:pb-4 flex justify-center px-4 sm:px-6 md:px-8">
