@@ -28,24 +28,30 @@ export default function Page({ params }: { params: { id: string } }) {
   const { isAuthenticated } = useAuth();
 
   useEffect(() => {
+    console.log("AffiliatedColleges: useEffect running, params.id =", params.id);
     (async () => {
       setLoading(true);
       try {
         const universityId = Number(params.id);
+        console.log("AffiliatedColleges: universityId =", universityId);
         if (isNaN(universityId)) {
           setLoading(false);
           return;
         }
 
         // Fetch university details
+        console.log("AffiliatedColleges: fetching university", universityId);
         const uniPayload = await universityApi.getUniversityById(universityId);
+        console.log("AffiliatedColleges: uniPayload =", uniPayload);
         const uniData = uniPayload?.data?.university;
         if (uniData) {
           setUniversity({ id: uniData.id, name: uniData.name });
         }
 
         // Fetch affiliated colleges
+        console.log("AffiliatedColleges: fetching affiliated colleges", universityId);
         const payload = await universityApi.getAffiliatedColleges(universityId);
+        console.log("AffiliatedColleges: payload =", payload);
         const affiliated = payload?.data?.affiliated_colleges ?? [];
         setColleges(
           affiliated.map((c: any) => ({
