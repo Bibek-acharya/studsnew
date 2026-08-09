@@ -1,5 +1,5 @@
 "use client";
-import React from "react";
+import React, { useState } from "react";
 import { useFormContext } from "react-hook-form";
 import { FormData, inputClass } from "./ProfilePage";
 
@@ -28,6 +28,7 @@ const ProfileGeneralSection: React.FC<Props> = ({
   level,
   universities,
 }) => {
+  const [uniSearch, setUniSearch] = useState("");
   const {
     register,
     watch,
@@ -35,6 +36,10 @@ const ProfileGeneralSection: React.FC<Props> = ({
     getValues,
     formState: { errors },
   } = useFormContext<FormData>();
+
+  const filteredUniversities = universities.filter(u =>
+    u.name.toLowerCase().includes(uniSearch.toLowerCase())
+  );
 
   return (
     <>
@@ -146,29 +151,42 @@ const ProfileGeneralSection: React.FC<Props> = ({
           {level.some(l => l.includes("Bachelor") || l.includes("Master")) && (
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">Affiliated Universities</label>
-            <div className="border border-gray-300 rounded-md p-2 max-h-40 overflow-y-auto bg-white">
-              {universities.length === 0 ? (
-                <p className="text-sm text-gray-400">Loading universities...</p>
-              ) : (
-                universities.map(u => (
-                  <label key={u.id} className="flex items-center gap-2 py-1.5 px-2 hover:bg-gray-50 rounded cursor-pointer">
-                    <input
-                      type="checkbox"
-                      className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
-                      checked={watch("universityIds").includes(u.id)}
-                      onChange={(e) => {
-                        const ids = getValues("universityIds");
-                        if (e.target.checked) {
-                          setValue("universityIds", [...ids, u.id], { shouldDirty: true });
-                        } else {
-                          setValue("universityIds", ids.filter(id => id !== u.id), { shouldDirty: true });
-                        }
-                      }}
-                    />
-                    <span className="text-sm text-gray-700">{u.name}</span>
-                  </label>
-                ))
-              )}
+            <div className="border border-gray-300 rounded-md bg-white">
+              <div className="p-2 border-b border-gray-200">
+                <input
+                  type="text"
+                  className="w-full px-3 py-1.5 text-sm border border-gray-200 rounded-md focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none"
+                  placeholder="Search universities..."
+                  value={uniSearch}
+                  onChange={(e) => setUniSearch(e.target.value)}
+                />
+              </div>
+              <div className="max-h-40 overflow-y-auto p-2">
+                {universities.length === 0 ? (
+                  <p className="text-sm text-gray-400">Loading universities...</p>
+                ) : filteredUniversities.length === 0 ? (
+                  <p className="text-sm text-gray-400">No universities found</p>
+                ) : (
+                  filteredUniversities.map(u => (
+                    <label key={u.id} className="flex items-center gap-2 py-1.5 px-2 hover:bg-gray-50 rounded cursor-pointer">
+                      <input
+                        type="checkbox"
+                        className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                        checked={watch("universityIds").includes(u.id)}
+                        onChange={(e) => {
+                          const ids = getValues("universityIds");
+                          if (e.target.checked) {
+                            setValue("universityIds", [...ids, u.id], { shouldDirty: true });
+                          } else {
+                            setValue("universityIds", ids.filter(id => id !== u.id), { shouldDirty: true });
+                          }
+                        }}
+                      />
+                      <span className="text-sm text-gray-700">{u.name}</span>
+                    </label>
+                  ))
+                )}
+              </div>
             </div>
             {watch("universityIds").length > 0 && (
               <div className="flex flex-wrap gap-1.5 mt-2">
