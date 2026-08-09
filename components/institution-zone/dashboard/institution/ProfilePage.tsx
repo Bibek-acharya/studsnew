@@ -560,8 +560,11 @@ const ProfilePage: React.FC = () => {
         linkedin_url: fd.linkedinUrl,
         affiliation: level.some(l => l === "Bachelor" || l === "Master")
           ? fd.universityIds.map(id => universities.find(u => u.id === id)?.name || "").filter(Boolean).join(", ")
+          : "",
+        non_university_affiliation: level.some(l => l === "Bachelor" || l === "Master")
+          ? ""
           : fd.affiliation,
-        university_id: fd.universityIds[0] || undefined,
+        university_affiliations: fd.universityIds,
         brochure_data: fd.brochureUrl ? { url: fd.brochureUrl } : null,
         logo_url: fd.logoUrl,
         banner_url: fd.bannerUrl,
