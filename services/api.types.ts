@@ -419,6 +419,7 @@ export interface College {
   image_url?: string;
   banner_url?: string;
   logo_url?: string;
+  card_image_url?: string;
   description?: string;
   rating?: number;
   reviews?: number;
