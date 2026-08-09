@@ -5,17 +5,11 @@ import "react-quill-new/dist/quill.snow.css";
 import React, { useState, useCallback, useEffect, Suspense } from "react";
 import dynamic from "next/dynamic";
 import { useSearchParams, useRouter } from "next/navigation";
-import {
-  Newspaper,
-  FloppyDisk,
-  PaperPlaneTilt,
-  Image,
-  Spinner,
-  X,
-} from "@phosphor-icons/react";
+import { Newspaper, Spinner } from "@phosphor-icons/react";
+import { Home } from "lucide-react";
 import { toast } from "sonner";
-import SectionHeader from "@/components/institution-zone/dashboard/shared/SectionHeader";
 import { institutionNewsApi } from "@/services/institutionNewsApi";
+import FileUpload from "@/components/ScholarshipProvider/common/FileUpload";
 
 const ReactQuill = dynamic(() => import("react-quill-new"), { ssr: false });
 
@@ -111,6 +105,11 @@ function CreateNewsForm() {
     }
   }, []);
 
+  const handleClearImage = useCallback(() => {
+    setFeaturedImageUrl("");
+    setFeaturedImagePreview("");
+  }, []);
+
   const handleSave = useCallback(
     async (draft: boolean) => {
       if (!title.trim()) {
@@ -172,28 +171,18 @@ function CreateNewsForm() {
     ],
   );
 
-  const handleImageFileChange = useCallback(
-    (e: React.ChangeEvent<HTMLInputElement>) => {
-      const file = e.target.files?.[0];
-      if (file) handleImageSelect(file);
-    },
-    [handleImageSelect],
-  );
-
   if (loadingNews) {
     return (
-      <div className="p-4 md:p-6 lg:p-8">
-        <SectionHeader
-          title="Edit News"
-          breadcrumbItems={[
-            { label: "Dashboard", href: "/institution-zone/dashboard" },
-            {
-              label: "News",
-              href: "/institution-zone/dashboard/news/directory",
-            },
-            { label: "Edit" },
-          ]}
-        />
+      <div className="space-y-6">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-2">
+          <h1 className="text-2xl font-bold text-gray-800">Edit News</h1>
+          <div className="flex items-center text-sm text-gray-500 mt-2 sm:mt-0 gap-2">
+            <Home className="w-4 h-4" />
+            <span>Dashboard</span>
+            <span>-</span>
+            <span className="text-gray-800 font-medium">Edit News</span>
+          </div>
+        </div>
         <div className="flex items-center justify-center py-20">
           <Spinner className="w-8 h-8 text-blue-600 animate-spin" />
           <span className="ml-3 text-gray-500">Loading news...</span>
@@ -203,32 +192,67 @@ function CreateNewsForm() {
   }
 
   return (
-    <div className="p-4 md:p-6 lg:p-8">
-      <SectionHeader
-        title={isEditing ? "Edit News" : "Create News"}
-        breadcrumbItems={[
-          { label: "Dashboard", href: "/institution-zone/dashboard" },
-          { label: "News", href: "/institution-zone/dashboard/news/directory" },
-          { label: isEditing ? "Edit" : "Create" },
-        ]}
-      />
+    <div className="space-y-6">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-2">
+        <h1 className="text-2xl font-bold text-gray-800">
+          {isEditing ? "Edit News" : "Create News"}
+        </h1>
+        <div className="flex items-center text-sm text-gray-500 mt-2 sm:mt-0 gap-2">
+          <Home className="w-4 h-4" />
+          <span>Dashboard</span>
+          <span>-</span>
+          <span className="text-gray-800 font-medium">
+            {isEditing ? "Edit News" : "Create News"}
+          </span>
+        </div>
+      </div>
 
-      <div className="max-w-4xl mx-auto space-y-6">
-        <div className="bg-white rounded-xl p-6 border border-gray-100 shadow-sm">
-          <label className="block text-sm font-medium text-gray-700 mb-1.5">
-            News Title <span className="text-red-500">*</span>
-          </label>
-          <input
-            type="text"
-            value={title}
-            onChange={(e) => setTitle(e.target.value)}
-            placeholder="Enter news title..."
-            className="w-full px-4 py-2.5 border border-gray-300 rounded-lg text-sm focus:border-blue-600 outline-none"
-          />
+      <div className="bg-white rounded-lg p-8 border border-slate-100">
+        <div className="flex justify-between items-center mb-6">
+          <h2 className="text-lg font-bold text-gray-900 flex items-center gap-2">
+            <Newspaper className="w-5 h-5 text-blue-600" />{" "}
+            {isEditing ? "Edit News" : "Create News"}
+          </h2>
+          <div className="flex gap-2">
+            <button
+              onClick={() => router.back()}
+              className="px-4 py-2 bg-slate-100 text-slate-700 border border-slate-200 rounded-lg text-sm font-semibold hover:bg-slate-200 transition-colors"
+            >
+              Cancel
+            </button>
+            <button
+              onClick={() => handleSave(true)}
+              disabled={submitting || uploadingImage}
+              className="px-4 py-2 bg-slate-100 text-slate-700 border border-slate-200 rounded-lg text-sm font-semibold hover:bg-slate-200 transition-colors disabled:opacity-50"
+            >
+              {submitting ? "Saving..." : "Draft"}
+            </button>
+            <button
+              onClick={() => handleSave(false)}
+              disabled={
+                submitting || uploadingImage || !title.trim() || !featuredImageUrl
+              }
+              className="px-4 py-2 bg-blue-600 text-white rounded-lg text-sm font-semibold hover:bg-blue-700 transition-colors disabled:opacity-50"
+            >
+              {submitting ? "Saving..." : isEditing ? "Update" : "Publish"}
+            </button>
+          </div>
         </div>
 
-        <div className="bg-white rounded-xl p-6 border border-gray-100 shadow-sm">
+        <div className="space-y-6">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="md:col-span-2">
+              <label className="block text-sm font-medium text-gray-700 mb-1.5">
+                News Title <span className="text-red-500">*</span>
+              </label>
+              <input
+                type="text"
+                value={title}
+                onChange={(e) => setTitle(e.target.value)}
+                placeholder="Enter news title..."
+                className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm font-semibold focus:outline-none focus:border-blue-500"
+              />
+            </div>
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1.5">
                 News Type <span className="text-red-500">*</span>
@@ -236,7 +260,7 @@ function CreateNewsForm() {
               <select
                 value={newsType}
                 onChange={(e) => setNewsType(e.target.value)}
-                className="w-full px-4 py-2.5 border border-gray-300 rounded-lg text-sm focus:border-blue-600 outline-none"
+                className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:border-blue-500"
               >
                 <option value="">Select Type</option>
                 {NEWS_TYPES.map((t) => (
@@ -255,105 +279,78 @@ function CreateNewsForm() {
                 value={publishedBy}
                 onChange={(e) => setPublishedBy(e.target.value)}
                 placeholder="Author name"
-                className="w-full px-4 py-2.5 border border-gray-300 rounded-lg text-sm focus:border-blue-600 outline-none"
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1.5">
-                Publish Date
-              </label>
-              <input
-                type="date"
-                value={publishDate}
-                onChange={(e) => setPublishDate(e.target.value)}
-                className="w-full px-4 py-2.5 border border-gray-300 rounded-lg text-sm focus:border-blue-600 outline-none"
+                className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:border-blue-500"
               />
             </div>
           </div>
-        </div>
 
-        <div className="bg-white rounded-xl p-6 border border-gray-100 shadow-sm">
-          <label className="block text-sm font-medium text-gray-700 mb-1.5">
-            Featured Image <span className="text-red-500">*</span>
-          </label>
-          {featuredImagePreview ? (
-            <div className="relative">
-              <img
-                src={featuredImagePreview}
-                alt="Featured"
-                className="w-full h-48 object-cover rounded-lg border border-gray-200"
-              />
-              <button
-                type="button"
-                onClick={() => {
-                  setFeaturedImageUrl("");
-                  setFeaturedImagePreview("");
-                }}
-                className="absolute top-2 right-2 p-1.5 bg-white/90 rounded-full text-gray-600 hover:bg-white"
-              >
-                <X className="w-4 h-4" />
-              </button>
-            </div>
-          ) : (
-            <label className="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center hover:border-blue-500 cursor-pointer transition-colors block">
-              <Image className="w-12 h-12 text-gray-300 mx-auto mb-3" />
-              <p className="text-sm text-gray-500">
-                Click to upload or drag and drop
-              </p>
-              <p className="text-xs text-gray-400 mt-1">
-                PNG, JPG or WEBP (Max 5MB)
-              </p>
-              <input
-                type="file"
-                accept="image/*"
-                onChange={handleImageFileChange}
-                className="hidden"
-              />
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1.5">
+              Publish Date
             </label>
-          )}
-          {uploadingImage && (
-            <p className="mt-2 text-xs text-blue-600">
-              Uploading featured image...
+            <input
+              type="date"
+              value={publishDate}
+              onChange={(e) => setPublishDate(e.target.value)}
+              className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:border-blue-500"
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1.5">
+              Featured Image <span className="text-red-500">*</span>
+            </label>
+            <FileUpload
+              accept="image/*"
+              maxSize="5MB"
+              recommendedSize="800x600"
+              onFileSelect={handleImageSelect}
+              previewUrl={featuredImagePreview}
+              onClearPreview={handleClearImage}
+              previewClassName="w-full h-48 object-cover rounded-lg"
+            />
+            {uploadingImage && (
+              <p className="mt-2 text-xs text-blue-600">
+                Uploading featured image...
+              </p>
+            )}
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1.5">
+              Short Description / Summary
+            </label>
+            <div className="border border-gray-200 rounded-lg overflow-hidden">
+              <ReactQuill
+                theme="snow"
+                value={shortDesc}
+                onChange={setShortDesc}
+                modules={quillModules}
+                formats={quillFormats}
+                className="bg-white"
+              />
+            </div>
+            <p className="text-xs text-gray-500 text-right mt-1">
+              {shortDesc.replace(/<[^>]*>/g, "").length}/300 characters
             </p>
-          )}
-        </div>
-
-        <div className="bg-white rounded-xl p-6 border border-gray-100 shadow-sm">
-          <label className="block text-sm font-medium text-gray-700 mb-1.5">
-            Short Description / Summary
-          </label>
-          <div className="border border-gray-200 rounded-lg overflow-hidden">
-            <ReactQuill
-              theme="snow"
-              value={shortDesc}
-              onChange={setShortDesc}
-              modules={quillModules}
-              formats={quillFormats}
-              className="bg-white"
-            />
           </div>
-          <p className="text-xs text-gray-500 text-right mt-1">
-            {shortDesc.replace(/<[^>]*>/g, "").length}/300 characters
-          </p>
-        </div>
 
-        <div className="bg-white rounded-xl p-6 border border-gray-100 shadow-sm">
-          <label className="block text-sm font-medium text-gray-700 mb-1.5">
-            Full Content <span className="text-red-500">*</span>
-          </label>
-          <div className="border border-gray-200 rounded-lg overflow-hidden">
-            <ReactQuill
-              theme="snow"
-              value={content}
-              onChange={setContent}
-              modules={quillModules}
-              formats={quillFormats}
-              className="bg-white"
-            />
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1.5">
+              Full Content <span className="text-red-500">*</span>
+            </label>
+            <div className="border border-gray-200 rounded-lg overflow-hidden">
+              <ReactQuill
+                theme="snow"
+                value={content}
+                onChange={setContent}
+                modules={quillModules}
+                formats={quillFormats}
+                className="bg-white"
+              />
+            </div>
           </div>
-        </div>
 
-        <div className="bg-white rounded-xl p-6 border border-gray-100 shadow-sm">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1.5">
@@ -364,7 +361,7 @@ function CreateNewsForm() {
                 value={tags}
                 onChange={(e) => setTags(e.target.value)}
                 placeholder="news, event, scholarship (comma separated)"
-                className="w-full px-4 py-2.5 border border-gray-300 rounded-lg text-sm focus:border-blue-600 outline-none"
+                className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:border-blue-500"
               />
             </div>
             <div className="flex items-center justify-between p-4 border border-gray-200 rounded-lg">
@@ -388,34 +385,13 @@ function CreateNewsForm() {
             </div>
           </div>
         </div>
-
-        <div className="flex justify-end gap-3">
-          <button
-            onClick={() => handleSave(true)}
-            disabled={submitting || uploadingImage}
-            className="px-4 py-2 border border-gray-300 text-gray-700 rounded-lg text-sm font-medium hover:bg-gray-50 flex items-center gap-2 disabled:opacity-50"
-          >
-            <FloppyDisk />
-            {submitting ? "Saving..." : "Save Draft"}
-          </button>
-          <button
-            onClick={() => handleSave(false)}
-            disabled={
-              submitting || uploadingImage || !title.trim() || !featuredImageUrl
-            }
-            className="px-4 py-2 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-700 flex items-center gap-2 disabled:opacity-50"
-          >
-            <PaperPlaneTilt />
-            {submitting ? "Publishing..." : isEditing ? "Update" : "Publish"}
-          </button>
-        </div>
-
-        {error && (
-          <div className="p-4 bg-red-50 border border-red-200 rounded-lg text-red-700 text-sm">
-            {error}
-          </div>
-        )}
       </div>
+
+      {error && (
+        <div className="p-4 bg-red-50 border border-red-200 rounded-lg text-red-700 text-sm">
+          {error}
+        </div>
+      )}
     </div>
   );
 }
@@ -424,7 +400,7 @@ export default function CreateNewsPage() {
   return (
     <Suspense
       fallback={
-        <div className="p-4 md:p-6 lg:p-8">
+        <div className="space-y-6">
           <div className="flex items-center justify-center py-20">
             <Spinner className="w-8 h-8 text-blue-600 animate-spin" />
           </div>

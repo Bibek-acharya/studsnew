@@ -5,17 +5,11 @@ import "react-quill-new/dist/quill.snow.css";
 import React, { useState, useCallback, useEffect, Suspense } from "react";
 import dynamic from "next/dynamic";
 import { useSearchParams, useRouter } from "next/navigation";
-import {
-  CalendarBlank,
-  FloppyDisk,
-  PaperPlaneTilt,
-  Image,
-  Spinner,
-  X,
-} from "@phosphor-icons/react";
+import { CalendarBlank, Spinner } from "@phosphor-icons/react";
+import { Home } from "lucide-react";
 import { toast } from "sonner";
-import SectionHeader from "@/components/institution-zone/dashboard/shared/SectionHeader";
 import { institutionEventsApi } from "@/services/institutionEventsApi";
+import FileUpload from "@/components/ScholarshipProvider/common/FileUpload";
 
 const ReactQuill = dynamic(() => import("react-quill-new"), { ssr: false });
 
@@ -148,6 +142,11 @@ function CreateEventForm() {
     }
   }, []);
 
+  const handleClearImage = useCallback(() => {
+    setFeaturedImageUrl("");
+    setFeaturedImagePreview("");
+  }, []);
+
   const validate = useCallback(() => {
     const errs: Record<string, string> = {};
     if (!title.trim()) errs.title = "Event title is required";
@@ -263,31 +262,21 @@ function CreateEventForm() {
     ],
   );
 
-  const handleImageFileChange = useCallback(
-    (e: React.ChangeEvent<HTMLInputElement>) => {
-      const file = e.target.files?.[0];
-      if (file) handleImageSelect(file);
-    },
-    [handleImageSelect],
-  );
-
   const clearError = (field: string) =>
     setErrors((prev) => ({ ...prev, [field]: "" }));
 
   if (loadingEvent) {
     return (
-      <div className="p-4 md:p-6 lg:p-8">
-        <SectionHeader
-          title="Edit Event"
-          breadcrumbItems={[
-            { label: "Dashboard", href: "/institution-zone/dashboard" },
-            {
-              label: "Events",
-              href: "/institution-zone/dashboard/events/directory",
-            },
-            { label: "Edit" },
-          ]}
-        />
+      <div className="space-y-6">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-2">
+          <h1 className="text-2xl font-bold text-gray-800">Edit Event</h1>
+          <div className="flex items-center text-sm text-gray-500 mt-2 sm:mt-0 gap-2">
+            <Home className="w-4 h-4" />
+            <span>Dashboard</span>
+            <span>-</span>
+            <span className="text-gray-800 font-medium">Edit Event</span>
+          </div>
+        </div>
         <div className="flex items-center justify-center py-20">
           <Spinner className="w-8 h-8 text-blue-600 animate-spin" />
           <span className="ml-3 text-gray-500">Loading event...</span>
@@ -297,41 +286,71 @@ function CreateEventForm() {
   }
 
   return (
-    <div className="p-4 md:p-6 lg:p-8">
-      <SectionHeader
-        title={isEditing ? "Edit Event" : "Create Event"}
-        breadcrumbItems={[
-          { label: "Dashboard", href: "/institution-zone/dashboard" },
-          {
-            label: "Events",
-            href: "/institution-zone/dashboard/events/directory",
-          },
-          { label: isEditing ? "Edit" : "Create" },
-        ]}
-      />
+    <div className="space-y-6">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-2">
+        <h1 className="text-2xl font-bold text-gray-800">
+          {isEditing ? "Edit Event" : "Create Event"}
+        </h1>
+        <div className="flex items-center text-sm text-gray-500 mt-2 sm:mt-0 gap-2">
+          <Home className="w-4 h-4" />
+          <span>Dashboard</span>
+          <span>-</span>
+          <span className="text-gray-800 font-medium">
+            {isEditing ? "Edit Event" : "Create Event"}
+          </span>
+        </div>
+      </div>
 
-      <div className="max-w-4xl mx-auto space-y-6">
-        <div className="bg-white rounded-xl p-6 border border-gray-100 shadow-sm">
-          <label className="block text-sm font-medium text-gray-700 mb-1.5">
-            Event Title <span className="text-red-500">*</span>
-          </label>
-          <input
-            type="text"
-            value={title}
-            onChange={(e) => {
-              setTitle(e.target.value);
-              clearError("title");
-            }}
-            placeholder="Enter event title..."
-            className={`w-full px-4 py-2.5 border rounded-lg text-sm focus:border-blue-600 outline-none ${errors.title ? "border-red-500" : "border-gray-300"}`}
-          />
-          {errors.title && (
-            <p className="mt-1 text-xs text-red-500">{errors.title}</p>
-          )}
+      <div className="bg-white rounded-lg p-8 border border-slate-100">
+        <div className="flex justify-between items-center mb-6">
+          <h2 className="text-lg font-bold text-gray-900 flex items-center gap-2">
+            <CalendarBlank className="w-5 h-5 text-blue-600" />{" "}
+            {isEditing ? "Edit Event" : "Create Event"}
+          </h2>
+          <div className="flex gap-2">
+            <button
+              onClick={() => router.back()}
+              className="px-4 py-2 bg-slate-100 text-slate-700 border border-slate-200 rounded-lg text-sm font-semibold hover:bg-slate-200 transition-colors"
+            >
+              Cancel
+            </button>
+            <button
+              onClick={() => handleSave(true)}
+              disabled={submitting || uploadingImage}
+              className="px-4 py-2 bg-slate-100 text-slate-700 border border-slate-200 rounded-lg text-sm font-semibold hover:bg-slate-200 transition-colors disabled:opacity-50"
+            >
+              {submitting ? "Saving..." : "Draft"}
+            </button>
+            <button
+              onClick={() => handleSave(false)}
+              disabled={submitting || uploadingImage}
+              className="px-4 py-2 bg-blue-600 text-white rounded-lg text-sm font-semibold hover:bg-blue-700 transition-colors disabled:opacity-50"
+            >
+              {submitting ? "Saving..." : isEditing ? "Update" : "Publish"}
+            </button>
+          </div>
         </div>
 
-        <div className="bg-white rounded-xl p-6 border border-gray-100 shadow-sm">
+        <div className="space-y-6">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="md:col-span-2">
+              <label className="block text-sm font-medium text-gray-700 mb-1.5">
+                Event Title <span className="text-red-500">*</span>
+              </label>
+              <input
+                type="text"
+                value={title}
+                onChange={(e) => {
+                  setTitle(e.target.value);
+                  clearError("title");
+                }}
+                placeholder="Enter event title..."
+                className={`w-full px-3 py-2 border rounded-lg text-sm font-semibold focus:outline-none focus:border-blue-500 ${errors.title ? "border-red-500" : "border-gray-200"}`}
+              />
+              {errors.title && (
+                <p className="mt-1 text-xs text-red-500">{errors.title}</p>
+              )}
+            </div>
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1.5">
                 Event Type <span className="text-red-500">*</span>
@@ -342,7 +361,7 @@ function CreateEventForm() {
                   setEventType(e.target.value);
                   clearError("eventType");
                 }}
-                className={`w-full px-4 py-2.5 border rounded-lg text-sm focus:border-blue-600 outline-none ${errors.eventType ? "border-red-500" : "border-gray-300"}`}
+                className={`w-full px-3 py-2 border rounded-lg text-sm focus:outline-none focus:border-blue-500 ${errors.eventType ? "border-red-500" : "border-gray-200"}`}
               >
                 <option value="">Select Type</option>
                 {EVENT_TYPES.map((t) => (
@@ -362,7 +381,7 @@ function CreateEventForm() {
               <select
                 value={category}
                 onChange={(e) => setCategory(e.target.value)}
-                className="w-full px-4 py-2.5 border border-gray-300 rounded-lg text-sm focus:border-blue-600 outline-none"
+                className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:border-blue-500"
               >
                 <option value="">Select Category</option>
                 {CATEGORIES.map((c) => (
@@ -373,9 +392,7 @@ function CreateEventForm() {
               </select>
             </div>
           </div>
-        </div>
 
-        <div className="bg-white rounded-xl p-6 border border-gray-100 shadow-sm">
           <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1.5">
@@ -388,7 +405,7 @@ function CreateEventForm() {
                   setEventDate(e.target.value);
                   clearError("eventDate");
                 }}
-                className={`w-full px-4 py-2.5 border rounded-lg text-sm focus:border-blue-600 outline-none ${errors.eventDate ? "border-red-500" : "border-gray-300"}`}
+                className={`w-full px-3 py-2 border rounded-lg text-sm focus:outline-none focus:border-blue-500 ${errors.eventDate ? "border-red-500" : "border-gray-200"}`}
               />
               {errors.eventDate && (
                 <p className="mt-1 text-xs text-red-500">{errors.eventDate}</p>
@@ -402,7 +419,7 @@ function CreateEventForm() {
                 type="time"
                 value={startTime}
                 onChange={(e) => setStartTime(e.target.value)}
-                className="w-full px-4 py-2.5 border border-gray-300 rounded-lg text-sm focus:border-blue-600 outline-none"
+                className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:border-blue-500"
               />
             </div>
             <div>
@@ -416,7 +433,7 @@ function CreateEventForm() {
                   setEndTime(e.target.value);
                   clearError("endTime");
                 }}
-                className={`w-full px-4 py-2.5 border rounded-lg text-sm focus:border-blue-600 outline-none ${errors.endTime ? "border-red-500" : "border-gray-300"}`}
+                className={`w-full px-3 py-2 border rounded-lg text-sm focus:outline-none focus:border-blue-500 ${errors.endTime ? "border-red-500" : "border-gray-200"}`}
               />
               {errors.endTime && (
                 <p className="mt-1 text-xs text-red-500">{errors.endTime}</p>
@@ -431,13 +448,11 @@ function CreateEventForm() {
                 value={maxParticipants}
                 onChange={(e) => setMaxParticipants(e.target.value)}
                 placeholder="e.g. 200"
-                className="w-full px-4 py-2.5 border border-gray-300 rounded-lg text-sm focus:border-blue-600 outline-none"
+                className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:border-blue-500"
               />
             </div>
           </div>
-        </div>
 
-        <div className="bg-white rounded-xl p-6 border border-gray-100 shadow-sm">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1.5">
@@ -451,7 +466,7 @@ function CreateEventForm() {
                   clearError("venue");
                 }}
                 placeholder="e.g. Main Auditorium"
-                className={`w-full px-4 py-2.5 border rounded-lg text-sm focus:border-blue-600 outline-none ${errors.venue ? "border-red-500" : "border-gray-300"}`}
+                className={`w-full px-3 py-2 border rounded-lg text-sm focus:outline-none focus:border-blue-500 ${errors.venue ? "border-red-500" : "border-gray-200"}`}
               />
               {errors.venue && (
                 <p className="mt-1 text-xs text-red-500">{errors.venue}</p>
@@ -466,13 +481,11 @@ function CreateEventForm() {
                 value={onlineLink}
                 onChange={(e) => setOnlineLink(e.target.value)}
                 placeholder="https://zoom.us/j/..."
-                className="w-full px-4 py-2.5 border border-gray-300 rounded-lg text-sm focus:border-blue-600 outline-none"
+                className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:border-blue-500"
               />
             </div>
           </div>
-        </div>
 
-        <div className="bg-white rounded-xl p-6 border border-gray-100 shadow-sm">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1.5">
@@ -483,7 +496,7 @@ function CreateEventForm() {
                 value={organizedBy}
                 onChange={(e) => setOrganizedBy(e.target.value)}
                 placeholder="e.g. Department of Science"
-                className="w-full px-4 py-2.5 border border-gray-300 rounded-lg text-sm focus:border-blue-600 outline-none"
+                className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:border-blue-500"
               />
             </div>
             <div>
@@ -495,7 +508,7 @@ function CreateEventForm() {
                 value={contactPerson}
                 onChange={(e) => setContactPerson(e.target.value)}
                 placeholder="Contact name"
-                className="w-full px-4 py-2.5 border border-gray-300 rounded-lg text-sm focus:border-blue-600 outline-none"
+                className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:border-blue-500"
               />
             </div>
             <div>
@@ -510,7 +523,7 @@ function CreateEventForm() {
                   clearError("contactEmail");
                 }}
                 placeholder="events@example.com"
-                className={`w-full px-4 py-2.5 border rounded-lg text-sm focus:border-blue-600 outline-none ${errors.contactEmail ? "border-red-500" : "border-gray-300"}`}
+                className={`w-full px-3 py-2 border rounded-lg text-sm focus:outline-none focus:border-blue-500 ${errors.contactEmail ? "border-red-500" : "border-gray-200"}`}
               />
               {errors.contactEmail && (
                 <p className="mt-1 text-xs text-red-500">
@@ -519,105 +532,75 @@ function CreateEventForm() {
               )}
             </div>
           </div>
-        </div>
 
-        <div className="bg-white rounded-xl p-6 border border-gray-100 shadow-sm">
-          <label className="block text-sm font-medium text-gray-700 mb-1.5">
-            Featured Image <span className="text-red-500">*</span>
-          </label>
-          {featuredImagePreview ? (
-            <div className="relative">
-              <img
-                src={featuredImagePreview}
-                alt="Featured"
-                className="w-full h-48 object-cover rounded-lg border border-gray-200"
-              />
-              <button
-                type="button"
-                onClick={() => {
-                  setFeaturedImageUrl("");
-                  setFeaturedImagePreview("");
-                }}
-                className="absolute top-2 right-2 p-1.5 bg-white/90 rounded-full text-gray-600 hover:bg-white"
-              >
-                <X className="w-4 h-4" />
-              </button>
-            </div>
-          ) : (
-            <label
-              className={`border-2 border-dashed rounded-lg p-8 text-center hover:border-blue-500 cursor-pointer transition-colors block ${errors.featuredImage ? "border-red-500" : "border-gray-300"}`}
-            >
-              <Image className="w-12 h-12 text-gray-300 mx-auto mb-3" />
-              <p className="text-sm text-gray-500">
-                Click to upload or drag and drop
-              </p>
-              <p className="text-xs text-gray-400 mt-1">
-                PNG, JPG or WEBP (Max 5MB)
-              </p>
-              <input
-                type="file"
-                accept="image/*"
-                onChange={handleImageFileChange}
-                className="hidden"
-              />
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1.5">
+              Featured Image <span className="text-red-500">*</span>
             </label>
-          )}
-          {uploadingImage && (
-            <p className="mt-2 text-xs text-blue-600">
-              Uploading featured image...
+            <FileUpload
+              accept="image/*"
+              maxSize="5MB"
+              recommendedSize="1200x630"
+              onFileSelect={handleImageSelect}
+              previewUrl={featuredImagePreview}
+              onClearPreview={handleClearImage}
+              previewClassName="w-full h-48 object-cover rounded-lg"
+            />
+            {uploadingImage && (
+              <p className="mt-2 text-xs text-blue-600">
+                Uploading featured image...
+              </p>
+            )}
+            {errors.featuredImage && (
+              <p className="mt-1 text-xs text-red-500">{errors.featuredImage}</p>
+            )}
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1.5">
+              Short Description / Summary <span className="text-red-500">*</span>
+            </label>
+            <div
+              className={`border rounded-lg overflow-hidden ${errors.shortDesc ? "border-red-500" : "border-gray-200"}`}
+            >
+              <ReactQuill
+                theme="snow"
+                value={shortDesc}
+                onChange={setShortDesc}
+                modules={quillModules}
+                formats={quillFormats}
+                className="bg-white"
+              />
+            </div>
+            <p className="text-xs text-gray-500 text-right mt-1">
+              {shortDesc.replace(/<[^>]*>/g, "").length}/300 characters
             </p>
-          )}
-          {errors.featuredImage && (
-            <p className="mt-1 text-xs text-red-500">{errors.featuredImage}</p>
-          )}
-        </div>
-
-        <div className="bg-white rounded-xl p-6 border border-gray-100 shadow-sm">
-          <label className="block text-sm font-medium text-gray-700 mb-1.5">
-            Short Description / Summary <span className="text-red-500">*</span>
-          </label>
-          <div
-            className={`border rounded-lg overflow-hidden ${errors.shortDesc ? "border-red-500" : "border-gray-200"}`}
-          >
-            <ReactQuill
-              theme="snow"
-              value={shortDesc}
-              onChange={setShortDesc}
-              modules={quillModules}
-              formats={quillFormats}
-              className="bg-white"
-            />
+            {errors.shortDesc && (
+              <p className="mt-1 text-xs text-red-500">{errors.shortDesc}</p>
+            )}
           </div>
-          <p className="text-xs text-gray-500 text-right mt-1">
-            {shortDesc.replace(/<[^>]*>/g, "").length}/300 characters
-          </p>
-          {errors.shortDesc && (
-            <p className="mt-1 text-xs text-red-500">{errors.shortDesc}</p>
-          )}
-        </div>
 
-        <div className="bg-white rounded-xl p-6 border border-gray-100 shadow-sm">
-          <label className="block text-sm font-medium text-gray-700 mb-1.5">
-            Full Event Description <span className="text-red-500">*</span>
-          </label>
-          <div
-            className={`border rounded-lg overflow-hidden ${errors.description ? "border-red-500" : "border-gray-200"}`}
-          >
-            <ReactQuill
-              theme="snow"
-              value={description}
-              onChange={setDescription}
-              modules={quillModules}
-              formats={quillFormats}
-              className="bg-white"
-            />
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1.5">
+              Full Event Description <span className="text-red-500">*</span>
+            </label>
+            <div
+              className={`border rounded-lg overflow-hidden ${errors.description ? "border-red-500" : "border-gray-200"}`}
+            >
+              <ReactQuill
+                theme="snow"
+                value={description}
+                onChange={setDescription}
+                modules={quillModules}
+                formats={quillFormats}
+                className="bg-white"
+              />
+            </div>
+            {errors.description && (
+              <p className="mt-1 text-xs text-red-500">{errors.description}</p>
+            )}
           </div>
-          {errors.description && (
-            <p className="mt-1 text-xs text-red-500">{errors.description}</p>
-          )}
-        </div>
 
-        <div className="bg-white rounded-xl p-6 border border-gray-100 shadow-sm">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1.5">
@@ -628,7 +611,7 @@ function CreateEventForm() {
                 value={tags}
                 onChange={(e) => setTags(e.target.value)}
                 placeholder="event, workshop, campus (comma separated)"
-                className="w-full px-4 py-2.5 border border-gray-300 rounded-lg text-sm focus:border-blue-600 outline-none"
+                className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:border-blue-500"
               />
             </div>
             <div className="flex items-center justify-between p-4 border border-gray-200 rounded-lg">
@@ -652,32 +635,13 @@ function CreateEventForm() {
             </div>
           </div>
         </div>
-
-        <div className="flex justify-end gap-3">
-          <button
-            onClick={() => handleSave(true)}
-            disabled={submitting || uploadingImage}
-            className="px-4 py-2 border border-gray-300 text-gray-700 rounded-lg text-sm font-medium hover:bg-gray-50 flex items-center gap-2 disabled:opacity-50"
-          >
-            <FloppyDisk />
-            {submitting ? "Saving..." : "Save Draft"}
-          </button>
-          <button
-            onClick={() => handleSave(false)}
-            disabled={submitting || uploadingImage}
-            className="px-4 py-2 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-700 flex items-center gap-2 disabled:opacity-50"
-          >
-            <PaperPlaneTilt />
-            {submitting ? "Publishing..." : isEditing ? "Update" : "Publish"}
-          </button>
-        </div>
-
-        {error && (
-          <div className="p-4 bg-red-50 border border-red-200 rounded-lg text-red-700 text-sm">
-            {error}
-          </div>
-        )}
       </div>
+
+      {error && (
+        <div className="p-4 bg-red-50 border border-red-200 rounded-lg text-red-700 text-sm">
+          {error}
+        </div>
+      )}
     </div>
   );
 }
@@ -686,7 +650,7 @@ export default function CreateEventPage() {
   return (
     <Suspense
       fallback={
-        <div className="p-4 md:p-6 lg:p-8">
+        <div className="space-y-6">
           <div className="flex items-center justify-center py-20">
             <Spinner className="w-8 h-8 text-blue-600 animate-spin" />
           </div>

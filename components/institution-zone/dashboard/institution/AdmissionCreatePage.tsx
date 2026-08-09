@@ -611,35 +611,6 @@ const AdmissionCreatePage: React.FC = () => {
           : "/institution-zone/dashboard/admission/draft",
       );
 
-      // Background AI generation if What's New is empty and not manually edited
-      if (!whatsNewManuallyEdited && !whatsNewDesc.trim() && admissionId) {
-        toast.info("Generating What's New summary...");
-        institutionAdmissionApi
-          .generateWhatsNew(admissionId, collectData())
-          .then(async (genResult) => {
-            if (genResult.success && genResult.data) {
-              const whatsNew = (genResult.data as any).whats_new_data;
-              if (whatsNew?.description) {
-                // Save the generated summary back to the admission
-                const updatedData = {
-                  ...collectData(),
-                  whats_new_data: {
-                    ...collectData().whats_new_data,
-                    description: whatsNew.description,
-                  },
-                };
-                await institutionAdmissionApi.update(admissionId, updatedData, publish);
-                setWhatsNewDesc(whatsNew.description);
-                toast.success("What's New summary generated and saved!");
-              }
-            } else {
-              toast.error("Failed to generate What's New summary");
-            }
-          })
-          .catch(() => {
-            toast.error("Failed to generate What's New summary");
-          });
-      }
     } catch {
       toast.error("Failed to save admission");
     } finally {
