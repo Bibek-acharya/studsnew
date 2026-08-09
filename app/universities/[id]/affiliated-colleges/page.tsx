@@ -31,36 +31,38 @@ export default function Page({ params }: { params: { id: string } }) {
     (async () => {
       setLoading(true);
       try {
-        const uniPayload = await universityApi.getUniversities();
-        const allUnis = uniPayload?.data?.universities ?? [];
-        const matched = allUnis.find(
-          (u: any) => toSlug(u.name) === params.id,
-        );
-
-        if (matched) {
-          setUniversity({ id: matched.id, name: matched.name });
-          const payload =
-            await universityApi.getAffiliatedColleges(matched.id);
-          const affiliated = payload?.data?.affiliated_colleges ?? [];
-          setColleges(
-            affiliated.map((c: any) => ({
-              id: c.college_id || c.id,
-              name: c.institution_name || c.name,
-              image_url: c.banner_url || c.logo_url,
-              logo_url: c.logo_url,
-              location: c.district || c.location,
-              website: c.website_url || c.website,
-              verified: c.verified ?? false,
-              claimed: c.claimed ?? false,
-              affiliation: c.affiliation || university?.name || "",
-              type: c.type || c.institution_type || "College",
-              description: c.about || c.description,
-              rating: c.rating || 0,
-              reviews: c.reviews || 0,
-              featured: c.featured ?? false,
-            } as College)),
-          );
+        const universityId = Number(params.id);
+        if (isNaN(universityId)) {
+          setLoading(false);
+          return;
         }
+
+        // Fetch university details
+        const uniPayload = await universityApi.getUniversityById(universityId);
+        const uniData = uniPayload?.data?.university;
+        if (uniData) {
+          setUniversity({ id: uniData.id, name: uniData.name });
+        }
+
+        // Fetch affiliated colleges
+        const payload = await universityApi.getAffiliatedColleges(universityId);
+        const affiliated = payload?.data?.affiliated_colleges ?? [];
+        setColleges(
+          affiliated.map((c: any) => ({
+            id: c.college_id || c.id,
+            name: c.name,
+            image_url: c.image_url,
+            location: c.location,
+            website: c.website,
+            verified: c.verified ?? false,
+            claimed: true,
+            affiliation: c.affiliation || "",
+            type: c.type || "College",
+            rating: c.rating || 0,
+            reviews: c.reviews || 0,
+            featured: c.featured ?? false,
+          } as College)),
+        );
       } catch (err) {
         console.error("Failed to fetch affiliated colleges:", err);
       } finally {
