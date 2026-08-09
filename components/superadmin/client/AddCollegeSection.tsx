@@ -34,7 +34,7 @@ export default function AddCollegeSection({
 
   const levelOptions = ["+2", "Bachelor", "Master", "A Level", "CTEVT"];
   const [affiliation, setAffiliation] = useState("");
-  const [universityId, setUniversityId] = useState(0);
+  const [universityIds, setUniversityIds] = useState<number[]>([]);
   const [universities, setUniversities] = useState<{ id: number; name: string }[]>([]);
   const [about, setAbout] = useState("");
   const [vision, setVision] = useState("");
@@ -73,8 +73,8 @@ export default function AddCollegeSection({
         setCollegeName(d.institution_name || "");
         setLocation(d.district || "");
         setWebsite(d.website_url || "");
-        setAffiliation(d.affiliation || "");
-        setUniversityId(d.university_id || 0);
+        setAffiliation(d.non_university_affiliation || d.affiliation || "");
+        setUniversityIds(d.university_affiliations || (d.university_id ? [d.university_id] : []));
         setAbout(d.about || "");
         setVision(d.vision || "");
         setMission(d.mission || "");
@@ -185,8 +185,8 @@ export default function AddCollegeSection({
         location,
         website,
         level: level.join(","),
-        affiliation,
-        university_id: universityId || undefined,
+        non_university_affiliation: level.some(l => l === "Bachelor" || l === "Master") ? undefined : affiliation,
+        university_affiliations: level.some(l => l === "Bachelor" || l === "Master") ? universityIds : [],
         logo_url: finalLogoUrl.startsWith("data:") ? "" : finalLogoUrl,
         banner_url: finalBannerUrl.startsWith("data:") ? "" : finalBannerUrl,
         about, vision, mission,
@@ -359,11 +359,45 @@ export default function AddCollegeSection({
               </div>
               {level.some(l => l === "Bachelor" || l === "Master") ? (
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Affiliated University</label>
-                <select className={inputClass} value={universityId} onChange={e => { setUniversityId(Number(e.target.value)); const uni = universities.find(u => u.id === Number(e.target.value)); if (uni) setAffiliation(uni.name); }}>
-                  <option value={0}>Select University</option>
-                  {universities.map(u => <option key={u.id} value={u.id}>{u.name}</option>)}
-                </select>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Affiliated Universities</label>
+                <div className="border border-gray-300 rounded-md p-2 max-h-40 overflow-y-auto bg-white">
+                  {universities.length === 0 ? (
+                    <p className="text-sm text-gray-400">Loading universities...</p>
+                  ) : (
+                    universities.map(u => (
+                      <label key={u.id} className="flex items-center gap-2 py-1.5 px-2 hover:bg-gray-50 rounded cursor-pointer">
+                        <input
+                          type="checkbox"
+                          className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                          checked={universityIds.includes(u.id)}
+                          onChange={(e) => {
+                            if (e.target.checked) {
+                              setUniversityIds(prev => [...prev, u.id]);
+                            } else {
+                              setUniversityIds(prev => prev.filter(id => id !== u.id));
+                            }
+                          }}
+                        />
+                        <span className="text-sm text-gray-700">{u.name}</span>
+                      </label>
+                    ))
+                  )}
+                </div>
+                {universityIds.length > 0 && (
+                  <div className="flex flex-wrap gap-1.5 mt-2">
+                    {universityIds.map(id => {
+                      const uni = universities.find(u => u.id === id);
+                      return uni ? (
+                        <span key={id} className="inline-flex items-center gap-1 px-2.5 py-1 bg-blue-50 text-blue-700 text-xs font-medium rounded-full">
+                          {uni.name}
+                          <button type="button" onClick={() => setUniversityIds(prev => prev.filter(i => i !== id))} className="hover:text-blue-900">
+                            <i className="fa-solid fa-times text-[10px]"></i>
+                          </button>
+                        </span>
+                      ) : null;
+                    })}
+                  </div>
+                )}
               </div>
               ) : (
               <div>
