@@ -81,12 +81,23 @@ const TabAdmissions: React.FC<TabAdmissionsProps> = ({ admissions, collegeId, fi
                   </span>
                 </div>
                 <div className="col-span-2">
-                  <button
-                    onClick={() => router.push(`/admissions/${encodeURIComponent(admission.level)}/${admission.admissionPageId || collegeId}`)}
-                    className="rounded-lg bg-blue-600 px-5 py-2 text-xs font-bold text-white transition-colors hover:bg-blue-700"
-                  >
-                    Apply Now
-                  </button>
+                  {admission.applyLink ? (
+                    <a
+                      href={admission.applyLink}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="rounded-lg bg-blue-600 px-5 py-2 text-xs font-bold text-white transition-colors hover:bg-blue-700 inline-block"
+                    >
+                      Apply Now
+                    </a>
+                  ) : (
+                    <button
+                      onClick={() => router.push(`/admissions/${encodeURIComponent(admission.level)}/${admission.admissionPageId || collegeId}`)}
+                      className="rounded-lg bg-blue-600 px-5 py-2 text-xs font-bold text-white transition-colors hover:bg-blue-700"
+                    >
+                      Apply Now
+                    </button>
+                  )}
                 </div>
               </div>
             ))}

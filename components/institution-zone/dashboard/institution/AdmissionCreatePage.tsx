@@ -2734,10 +2734,9 @@ const AdmissionCreatePage: React.FC = () => {
                       placeholder="e.g. 9800000000"
                       value={cp.number}
                       onChange={(e) => {
-                        const v = e.target.value.replace(/[^0-9+]/g, "");
                         setContactPersons((prev) =>
                           prev.map((x) =>
-                            x.id === cp.id ? { ...x, number: v } : x,
+                            x.id === cp.id ? { ...x, number: e.target.value } : x,
                           ),
                         );
                       }}

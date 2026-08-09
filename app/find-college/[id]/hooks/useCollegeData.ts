@@ -223,6 +223,7 @@ export function useCollegeData(idStr: string) {
       deadline: p.deadline || "",
       image: p.programIcon || "",
       admissionPageId: admissionPageId || 0,
+      applyLink: p.applyLink || "",
     }));
   }, [instAdmissionPageData, college?.admission_page_id]);
 
