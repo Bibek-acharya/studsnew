@@ -366,14 +366,9 @@ const InstitutionLayout: React.FC<Props> = ({
     const token = localStorage.getItem("institutionToken");
     if (!token) return;
     try {
-      const [dashRes, msgRes] = await Promise.all([
-        fetch(`${API_BASE_URL}/api/v1/institution/dashboard`, {
-          headers: { Authorization: `Bearer ${token}` },
-        }).then((r) => r.json()),
-        fetch(`${API_BASE_URL}/api/v1/institution/messages/students`, {
-          headers: { Authorization: `Bearer ${token}` },
-        }).then((r) => r.json()),
-      ]);
+      const dashRes = await fetch(`${API_BASE_URL}/api/v1/institution/dashboard`, {
+        headers: { Authorization: `Bearer ${token}` },
+      }).then((r) => r.json());
       const dash = dashRes?.data || {};
       setNotifCount(Number(dash.pending_bookings || 0));
       setMsgCount(Number(dash.unread_messages || 0));
@@ -399,18 +394,6 @@ const InstitutionLayout: React.FC<Props> = ({
           icon: <LayoutDashboard className="text-green-600 text-sm" />,
           iconBg: "bg-green-50",
         });
-      const contacts = msgRes?.data || [];
-      contacts.slice(0, 2).forEach((c: any, i: number) => {
-        items.push({
-          id: `contact-${c.user_id || i}`,
-          title: `Message from ${c.name || `User #${c.user_id}`}`,
-          message: "",
-          read: true,
-          created_at: new Date(Date.now() - (i === 0 ? 300000 : 3600000)).toISOString(),
-          icon: <FileText className="text-purple-600 text-sm" />,
-          iconBg: "bg-purple-50",
-        });
-      });
       setNotifications(items);
     } catch {
       /* skip */

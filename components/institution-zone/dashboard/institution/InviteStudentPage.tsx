@@ -68,10 +68,16 @@ const InviteStudentPage: React.FC = () => {
 
     try {
       const msgRes = await fetch(
-        `${API_BASE_URL}/api/v1/institution/messages/students`,
+        `${API_BASE_URL}/api/v1/conversations?limit=100&offset=0`,
         { headers: { Authorization: `Bearer ${token}` } },
       ).then((r) => r.json());
-      contacts = msgRes?.data || [];
+      contacts = (msgRes?.conversations || []).map((c: any) => ({
+        user_id: c.student_id,
+        name: c.student_name || `User #${c.student_id}`,
+        email: c.student_email || "",
+        phone: c.student_phone || "",
+        last_message: c.last_message_preview || "",
+      }));
     } catch {
       /* skip */
     }

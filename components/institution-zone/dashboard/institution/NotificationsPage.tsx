@@ -85,25 +85,25 @@ const NotificationsPage: React.FC = () => {
 
     try {
       const msgRes = await fetch(
-        `${API_BASE_URL}/api/v1/institution/messages/students`,
+        `${API_BASE_URL}/api/v1/conversations?limit=5&offset=0`,
         {
           headers: { Authorization: `Bearer ${token}` },
         },
       ).then((r) => r.json());
-      const contacts = msgRes?.data || [];
-      if (Array.isArray(contacts)) {
-        contacts.slice(0, 5).forEach((c: any, i: number) => {
+      const conversations = msgRes?.conversations || [];
+      if (Array.isArray(conversations)) {
+        conversations.slice(0, 5).forEach((c: any, i: number) => {
           items.push({
-            id: `msg-${c.user_id || i}`,
+            id: `msg-${c.id || i}`,
             type: "message",
             icon: "ph ph-chats",
             iconBg: "bg-green-50",
             iconColor: "text-green-600",
-            title: "New message from applicant",
-            desc: `${c.name || `User #${c.user_id}`} - ${c.last_message || ""}`,
+            title: "New message",
+            desc: `${c.student_name || "Student"} - ${c.last_message_preview || ""}`,
             time: timeAgo(c.last_message_date),
             unread: true,
-            created_at: c.last_message_date || new Date().toISOString(),
+            created_at: c.last_message_at || new Date().toISOString(),
           });
         });
       }

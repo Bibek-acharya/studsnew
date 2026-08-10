@@ -110,29 +110,32 @@ export const dashboardApi = {
     );
   },
   async getMessages(params?: { page?: number; limit?: number }): Promise<MessagesResponse> {
-    const query = new URLSearchParams();
-    if (params?.page) query.set("page", String(params.page));
-    if (params?.limit) query.set("limit", String(params.limit));
-    const qs = query.toString();
-    return apiRequest<MessagesResponse>(`/api/v1/messages${qs ? `?${qs}` : ""}`);
+    const limit = params?.limit || 20;
+    const offset = params?.page ? (params.page - 1) * limit : 0;
+    const data = await apiRequest<{ conversations: Array<{ unread_count: number }> }>(`/api/v1/conversations?limit=${limit}&offset=${offset}`);
+    return { data: { messages: data.conversations.map(c => ({ read: c.unread_count === 0 })) } } as MessagesResponse;
   },
   async getMessageById(id: number): Promise<MessageResponse> {
-    return apiRequest<MessageResponse>(`/api/v1/messages/${id}`);
+    const data = await apiRequest<{ id: number }>(`/api/v1/conversations/${id}`);
+    return { data } as MessageResponse;
   },
   async createMessage(data: CreateMessagePayload): Promise<MessageResponse> {
-    return apiRequest<MessageResponse>("/api/v1/messages", {
+    const result = await apiRequest<{ conversation: { id: number } }>("/api/v1/conversations", {
       method: "POST",
-      body: JSON.stringify(data),
+      body: JSON.stringify({ institution_id: data.receiver_id, content: data.content, subject: data.subject, client_message_id: crypto.randomUUID() }),
     });
+    return { data: result.conversation } as MessageResponse;
   },
   async replyToMessage(id: number, content: string): Promise<MessageResponse> {
-    return apiRequest<MessageResponse>(`/api/v1/messages/${id}/reply`, {
+    const data = await apiRequest<{ id: number }>(`/api/v1/conversations/${id}/messages`, {
       method: "POST",
-      body: JSON.stringify({ content }),
+      body: JSON.stringify({ content, client_message_id: crypto.randomUUID() }),
     });
+    return { data } as MessageResponse;
   },
   async getMessageContacts(): Promise<MessageContactsResponse> {
-    return apiRequest<MessageContactsResponse>("/api/v1/messages/contacts");
+    const data = await apiRequest<{ conversations: Array<{ id: number; institution_name?: string; student_name?: string }> }>("/api/v1/conversations?limit=100&offset=0");
+    return { success: true, message: "ok", data: data.conversations.map(c => ({ id: c.id, name: c.institution_name || c.student_name || "Unknown", last_message: "", unread: 0 })) } as unknown as MessageContactsResponse;
   },
   async getCalendarEvents(): Promise<CalendarEventsResponse> {
     return apiRequest<CalendarEventsResponse>("/api/v1/calendar/events");
