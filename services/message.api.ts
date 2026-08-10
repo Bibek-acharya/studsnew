@@ -85,22 +85,22 @@ class MessageApi {
   // REST API Methods
 
   async getConversations(limit = 20, offset = 0): Promise<Conversation[]> {
-    const response = await apiRequest(`${API_BASE}/api/v1/conversations?limit=${limit}&offset=${offset}`);
+    const response = await apiRequest<{ conversations: Conversation[] }>(`${API_BASE}/api/v1/conversations?limit=${limit}&offset=${offset}`);
     return response.conversations || [];
   }
 
   async getConversation(id: number): Promise<Conversation> {
-    const response = await apiRequest(`${API_BASE}/api/v1/conversations/${id}`);
+    const response = await apiRequest<Conversation>(`${API_BASE}/api/v1/conversations/${id}`);
     return response;
   }
 
   async getMessages(conversationId: number, limit = 50, offset = 0): Promise<Message[]> {
-    const response = await apiRequest(`${API_BASE}/api/v1/conversations/${conversationId}/messages?limit=${limit}&offset=${offset}`);
+    const response = await apiRequest<{ messages: Message[] }>(`${API_BASE}/api/v1/conversations/${conversationId}/messages?limit=${limit}&offset=${offset}`);
     return response.messages || [];
   }
 
   async createConversation(payload: CreateConversationPayload): Promise<{ conversation: Conversation; message: Message }> {
-    const response = await apiRequest(`${API_BASE}/api/v1/conversations`, {
+    const response = await apiRequest<{ conversation: Conversation; message: Message }>(`${API_BASE}/api/v1/conversations`, {
       method: "POST",
       body: JSON.stringify(payload),
     });
@@ -108,7 +108,7 @@ class MessageApi {
   }
 
   async sendMessage(conversationId: number, payload: SendMessagePayload): Promise<Message> {
-    const response = await apiRequest(`${API_BASE}/api/v1/conversations/${conversationId}/messages`, {
+    const response = await apiRequest<Message>(`${API_BASE}/api/v1/conversations/${conversationId}/messages`, {
       method: "POST",
       body: JSON.stringify(payload),
     });
@@ -116,20 +116,20 @@ class MessageApi {
   }
 
   async editMessage(conversationId: number, messageId: number, content: string): Promise<void> {
-    await apiRequest(`${API_BASE}/api/v1/conversations/${conversationId}/messages/${messageId}`, {
+    await apiRequest<void>(`${API_BASE}/api/v1/conversations/${conversationId}/messages/${messageId}`, {
       method: "PUT",
       body: JSON.stringify({ content }),
     });
   }
 
   async deleteMessage(conversationId: number, messageId: number): Promise<void> {
-    await apiRequest(`${API_BASE}/api/v1/conversations/${conversationId}/messages/${messageId}`, {
+    await apiRequest<void>(`${API_BASE}/api/v1/conversations/${conversationId}/messages/${messageId}`, {
       method: "DELETE",
     });
   }
 
   async markAsRead(conversationId: number, lastMessageId: number): Promise<void> {
-    await apiRequest(`${API_BASE}/api/v1/conversations/${conversationId}/read`, {
+    await apiRequest<void>(`${API_BASE}/api/v1/conversations/${conversationId}/read`, {
       method: "POST",
       body: JSON.stringify({ last_message_id: lastMessageId }),
     });
@@ -152,7 +152,7 @@ class MessageApi {
       throw new Error("Upload failed");
     }
 
-    return response.json();
+    return response.json() as Promise<UploadResponse>;
   }
 
   // WebSocket Methods
