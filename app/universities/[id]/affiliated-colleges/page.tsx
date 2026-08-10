@@ -56,9 +56,12 @@ export default function Page({ params }: { params: { id: string } }) {
         
         setUniversities(unisWithCounts);
 
+        // Select university from URL or first one
         const universityId = Number(params.id);
         if (!isNaN(universityId)) {
           setSelectedUniId(universityId);
+        } else if (unisWithCounts.length > 0 && !selectedUniId) {
+          setSelectedUniId(unisWithCounts[0].id);
         }
       } catch (err) {
         console.error("Failed to fetch universities:", err);
@@ -187,7 +190,7 @@ export default function Page({ params }: { params: { id: string } }) {
                 className={`snap-start flex-shrink-0 w-[240px] h-[124px] rounded-xl p-5 cursor-pointer border-2 transition-all duration-200 flex flex-col justify-between ${
                   selectedUniId === uni.id
                     ? "border-[#2563eb] bg-white"
-                    : "border-gray-200 bg-gray-50"
+                    : "border-gray-200 bg-white"
                 }`}
               >
                 <div className="flex justify-between items-start gap-3">
@@ -199,7 +202,7 @@ export default function Page({ params }: { params: { id: string } }) {
                   )}
                 </div>
                 <div className="text-[#2563eb] text-[14px] font-medium flex items-center mt-3">
-                  {uni.colleges_count}+ colleges
+                  {uni.colleges_count} colleges
                   <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="2.5" stroke="currentColor" className="w-3.5 h-3.5 ml-1.5 mt-[2px]">
                     <path strokeLinecap="round" strokeLinejoin="round" d="m8.25 4.5 7.5 7.5-7.5 7.5" />
                   </svg>
@@ -211,7 +214,7 @@ export default function Page({ params }: { params: { id: string } }) {
       </div>
 
       {/* Main Content */}
-      <div className="mx-auto max-w-[1340px] px-6 mt-6 flex flex-col lg:flex-row gap-8">
+      <div className="mx-auto max-w-350 mt-6 flex flex-col lg:flex-row gap-8">
         {/* Left Sidebar - Filters */}
         <aside className="hidden lg:block w-full shrink-0 lg:w-[280px]">
           <FilterSidebar filters={filters} setFilters={setFilters} />
