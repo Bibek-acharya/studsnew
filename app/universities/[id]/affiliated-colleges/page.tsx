@@ -248,7 +248,8 @@ export default function Page({ params }: { params: { id: string } }) {
     <div className="min-h-screen">
       {/* University Cards Header */}
       <div className="mx-auto max-w-350 px-6 pt-8">
-        <div className="bg-[#F2F6FE] rounded-[16px] p-6 relative">
+        <h2 className="text-[20px] font-bold text-[#0f172a]">Affiliated Colleges</h2>
+        <div className="bg-[#F2F6FE] rounded-xl py-6 relative">
           <div className="relative">
             {/* Left Arrow */}
             {canScrollLeft && (
@@ -265,7 +266,7 @@ export default function Page({ params }: { params: { id: string } }) {
                 <button
                   key={uni.id}
                   onClick={() => setSelectedUniId(uni.id)}
-                  className={`snap-start flex-shrink-0 w-[240px] h-[124px] rounded-xl p-5 cursor-pointer border-2 transition-all duration-200 flex flex-col justify-between ${
+                  className={`snap-start shrink-0 w-60 h-31 rounded-xl p-5 cursor-pointer border-2 transition-all duration-200 flex flex-col justify-between ${
                     selectedUniId === uni.id
                       ? "border-[#2563eb] bg-white"
                       : "border-transparent bg-white"
