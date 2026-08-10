@@ -14,7 +14,6 @@ import {
   FaDirections,
   FaShareAlt,
   FaComments,
-  FaPhone,
   FaPaperPlane,
   FaExpand,
   FaChevronLeft,
@@ -160,7 +159,7 @@ export default function CollegePopup({ college }: CollegePopupProps) {
                   onClick={toggleBookmark}
                   className={`w-7 h-7 border-0 rounded-full flex items-center justify-center cursor-pointer transition-colors ${
                     isBookmarked
-                      ? "bg-indigo-100 text-indigo-600"
+                      ? "bg-[#0000ff]/10 text-[#0000ff]"
                       : "bg-gray-100 text-slate-500 hover:bg-gray-200"
                   }`}
                   aria-label="Bookmark"
@@ -239,14 +238,14 @@ export default function CollegePopup({ college }: CollegePopupProps) {
           <section className="px-3 pt-3 pb-3">
             <div className="grid grid-cols-5 gap-1.5">
               <a href="/find-college" className="border-0 bg-transparent cursor-pointer flex flex-col items-center gap-1 text-gray-700 text-[10px] font-bold no-underline">
-                <span className="w-9 h-9 rounded-full bg-indigo-600 text-white flex items-center justify-center">
+                <span className="w-9 h-9 rounded-full bg-[#0000ff] text-white flex items-center justify-center">
                   <FaBuilding className="w-3.5 h-3.5" />
                 </span>
                 <span>View</span>
               </a>
 
               <a href={`/find-college/${college.id}`} className="border-0 bg-transparent cursor-pointer flex flex-col items-center gap-1 text-gray-700 text-[10px] font-bold no-underline">
-                <span className="w-9 h-9 rounded-full bg-blue-50 text-indigo-600 flex items-center justify-center">
+                <span className="w-9 h-9 rounded-full bg-[#0000ff]/10 text-[#0000ff] flex items-center justify-center">
                   <FaInfoCircle className="w-3.5 h-3.5" />
                 </span>
                 <span>Details</span>
@@ -258,21 +257,21 @@ export default function CollegePopup({ college }: CollegePopupProps) {
                 rel="noopener noreferrer"
                 className="border-0 bg-transparent cursor-pointer flex flex-col items-center gap-1 text-gray-700 text-[10px] font-bold no-underline"
               >
-                <span className="w-9 h-9 rounded-full bg-blue-50 text-indigo-600 flex items-center justify-center">
+                <span className="w-9 h-9 rounded-full bg-[#0000ff]/10 text-[#0000ff] flex items-center justify-center">
                   <FaDirections className="w-3.5 h-3.5" />
                 </span>
                 <span>Visit</span>
               </a>
 
               <a href={`/find-college/${college.id}?tab=courses`} className="border-0 bg-transparent cursor-pointer flex flex-col items-center gap-1 text-gray-700 text-[10px] font-bold no-underline">
-                <span className="w-9 h-9 rounded-full bg-blue-50 text-indigo-600 flex items-center justify-center">
+                <span className="w-9 h-9 rounded-full bg-[#0000ff]/10 text-[#0000ff] flex items-center justify-center">
                   <FaComments className="w-3.5 h-3.5" />
                 </span>
                 <span>Courses</span>
               </a>
 
               <button onClick={() => setShareOpen(true)} className="border-0 bg-transparent cursor-pointer flex flex-col items-center gap-1 text-gray-700 text-[10px] font-bold">
-                <span className="w-9 h-9 rounded-full bg-blue-50 text-indigo-600 flex items-center justify-center">
+                <span className="w-9 h-9 rounded-full bg-[#0000ff]/10 text-[#0000ff] flex items-center justify-center">
                   <FaShareAlt className="w-3.5 h-3.5" />
                 </span>
                 <span>Share</span>
@@ -282,12 +281,10 @@ export default function CollegePopup({ college }: CollegePopupProps) {
             <div className="h-px bg-gray-200 my-3" />
 
             <div className="grid grid-cols-2 gap-2">
-              <a href={college.phone ? `tel:${college.phone}` : "#"} className="h-9 border-0 rounded-md text-xs font-extrabold text-white cursor-pointer flex justify-center items-center gap-1.5 bg-gray-900 no-underline">
-                <FaPhone className="w-3 h-3 rotate-90" />
+              <a href={college.phone ? `tel:${college.phone}` : "#"} className="h-9 border-0 rounded-md text-xs font-extrabold text-white cursor-pointer flex justify-center items-center bg-gray-900 no-underline hover:bg-gray-800 transition-colors">
                 Call Now
               </a>
-              <button onClick={() => setInquiryOpen(true)} className="h-9 border-0 rounded-md text-xs font-extrabold text-white cursor-pointer flex justify-center items-center gap-1.5 bg-indigo-600 hover:bg-indigo-700 transition-colors">
-                <FaPaperPlane className="w-3 h-3" />
+              <button onClick={() => setInquiryOpen(true)} className="h-9 border-0 rounded-md text-xs font-extrabold text-white cursor-pointer flex justify-center items-center hover:opacity-90 transition-colors" style={{ backgroundColor: "#0000ff" }}>
                 Inquiry
               </button>
             </div>
@@ -327,7 +324,7 @@ export default function CollegePopup({ college }: CollegePopupProps) {
               <>
                 <div className="flex shrink-0 items-center justify-between border-b border-gray-100 px-6 py-5">
                   <h3 className="flex items-center gap-2 text-lg font-bold text-gray-900">
-                    <FaPaperPlane className="text-[20px] text-indigo-600" />
+                    <FaPaperPlane className="text-[20px] text-[#0000ff]" />
                     Inquiry for {college.name}
                   </h3>
                   <button onClick={closeInquiry} className="rounded-full p-1.5 text-gray-400 transition-colors hover:bg-gray-100 hover:text-gray-700">
@@ -346,7 +343,7 @@ export default function CollegePopup({ college }: CollegePopupProps) {
                         rows={4}
                         value={inquiryMessage}
                         onChange={(e) => setInquiryMessage(e.target.value)}
-                        className="w-full resize-none rounded-md border border-gray-200 bg-gray-50 px-4 py-3 text-[14px] text-gray-800 transition-all focus:border-transparent focus:bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                        className="w-full resize-none rounded-md border border-gray-200 bg-gray-50 px-4 py-3 text-[14px] text-gray-800 transition-all focus:border-transparent focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#0000ff]"
                         placeholder="E.g., What are the admission requirements, fee structures, and scholarship options?"
                       />
                     </div>
@@ -354,7 +351,7 @@ export default function CollegePopup({ college }: CollegePopupProps) {
                       <button type="button" onClick={closeInquiry} className="w-full rounded-md border border-gray-200 bg-white px-5 py-2.5 text-[14px] font-bold text-gray-600 transition-colors hover:bg-gray-50 sm:w-auto">
                         Cancel
                       </button>
-                      <button type="submit" disabled={inquirySending || !inquiryMessage.trim()} className="flex w-full items-center justify-center gap-2 rounded-md bg-indigo-600 px-6 py-2.5 text-[14px] font-bold text-white transition-all hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed sm:w-auto">
+                      <button type="submit" disabled={inquirySending || !inquiryMessage.trim()} className="flex w-full items-center justify-center gap-2 rounded-md bg-[#0000ff] px-6 py-2.5 text-[14px] font-bold text-white transition-all hover:bg-[#0000ff]/80 disabled:opacity-50 disabled:cursor-not-allowed sm:w-auto">
                         {inquirySending ? (<><FaSpinner className="animate-spin" /> Sending...</>) : "Submit Inquiry"}
                       </button>
                     </div>
