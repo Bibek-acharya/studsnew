@@ -1,7 +1,5 @@
 import { apiRequest } from "./api";
 
-const API_BASE = process.env.NEXT_PUBLIC_API_URL || "";
-
 export interface Conversation {
   id: number;
   student_id: number;
@@ -85,22 +83,22 @@ class MessageApi {
   // REST API Methods
 
   async getConversations(limit = 20, offset = 0): Promise<Conversation[]> {
-    const response = await apiRequest<{ conversations: Conversation[] }>(`${API_BASE}/api/v1/conversations?limit=${limit}&offset=${offset}`);
+    const response = await apiRequest<{ conversations: Conversation[] }>(`/api/v1/conversations?limit=${limit}&offset=${offset}`);
     return response.conversations || [];
   }
 
   async getConversation(id: number): Promise<Conversation> {
-    const response = await apiRequest<Conversation>(`${API_BASE}/api/v1/conversations/${id}`);
+    const response = await apiRequest<Conversation>(`/api/v1/conversations/${id}`);
     return response;
   }
 
   async getMessages(conversationId: number, limit = 50, offset = 0): Promise<Message[]> {
-    const response = await apiRequest<{ messages: Message[] }>(`${API_BASE}/api/v1/conversations/${conversationId}/messages?limit=${limit}&offset=${offset}`);
+    const response = await apiRequest<{ messages: Message[] }>(`/api/v1/conversations/${conversationId}/messages?limit=${limit}&offset=${offset}`);
     return response.messages || [];
   }
 
   async createConversation(payload: CreateConversationPayload): Promise<{ conversation: Conversation; message: Message }> {
-    const response = await apiRequest<{ conversation: Conversation; message: Message }>(`${API_BASE}/api/v1/conversations`, {
+    const response = await apiRequest<{ conversation: Conversation; message: Message }>(`/api/v1/conversations`, {
       method: "POST",
       body: JSON.stringify(payload),
     });
@@ -108,7 +106,7 @@ class MessageApi {
   }
 
   async sendMessage(conversationId: number, payload: SendMessagePayload): Promise<Message> {
-    const response = await apiRequest<Message>(`${API_BASE}/api/v1/conversations/${conversationId}/messages`, {
+    const response = await apiRequest<Message>(`/api/v1/conversations/${conversationId}/messages`, {
       method: "POST",
       body: JSON.stringify(payload),
     });
@@ -116,20 +114,20 @@ class MessageApi {
   }
 
   async editMessage(conversationId: number, messageId: number, content: string): Promise<void> {
-    await apiRequest<void>(`${API_BASE}/api/v1/conversations/${conversationId}/messages/${messageId}`, {
+    await apiRequest<void>(`/api/v1/conversations/${conversationId}/messages/${messageId}`, {
       method: "PUT",
       body: JSON.stringify({ content }),
     });
   }
 
   async deleteMessage(conversationId: number, messageId: number): Promise<void> {
-    await apiRequest<void>(`${API_BASE}/api/v1/conversations/${conversationId}/messages/${messageId}`, {
+    await apiRequest<void>(`/api/v1/conversations/${conversationId}/messages/${messageId}`, {
       method: "DELETE",
     });
   }
 
   async markAsRead(conversationId: number, lastMessageId: number): Promise<void> {
-    await apiRequest<void>(`${API_BASE}/api/v1/conversations/${conversationId}/read`, {
+    await apiRequest<void>(`/api/v1/conversations/${conversationId}/read`, {
       method: "POST",
       body: JSON.stringify({ last_message_id: lastMessageId }),
     });
@@ -140,7 +138,7 @@ class MessageApi {
     formData.append("file", file);
 
     const token = localStorage.getItem("token") || sessionStorage.getItem("token");
-    const response = await fetch(`${API_BASE}/api/v1/uploads`, {
+    const response = await fetch(`/api/v1/uploads`, {
       method: "POST",
       headers: {
         Authorization: `Bearer ${token}`,
@@ -162,7 +160,8 @@ class MessageApi {
       return;
     }
 
-    const wsUrl = `${API_BASE.replace("http", "ws")}/api/v1/ws?token=${token}&user_type=${userType}&user_id=${userId}`;
+    const wsProtocol = window.location.protocol === "https:" ? "wss:" : "ws:";
+    const wsUrl = `${wsProtocol}//${window.location.host}/api/v1/ws?token=${token}&user_type=${userType}&user_id=${userId}`;
     this.ws = new WebSocket(wsUrl);
 
     this.ws.onopen = () => {

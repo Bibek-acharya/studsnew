@@ -9,7 +9,7 @@ const nextConfig: NextConfig = {
           {
             key: "Content-Security-Policy",
             value:
-              "connect-src 'self' https://api.studsphere.com https://ai.studsphere.com http://localhost:8080 https://placehold.co https://images.unsplash.com https://api.qrserver.com;",
+              "connect-src 'self' https://api.studsphere.com https://ai.studsphere.com wss://ai.studsphere.com http://localhost:8080 ws://localhost:8080 https://placehold.co https://images.unsplash.com https://api.qrserver.com;",
           },
         ],
       },
