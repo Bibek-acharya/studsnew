@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Popup } from "react-leaflet";
 import Image from "next/image";
 import {
@@ -29,7 +29,12 @@ interface CollegePopupProps {
 
 export default function CollegePopup({ college }: CollegePopupProps) {
   const [shareOpen, setShareOpen] = useState(false);
+  const [origin, setOrigin] = useState("");
   const stars = Math.round(college.rating || 0);
+
+  useEffect(() => {
+    setOrigin(window.location.origin);
+  }, []);
 
   const typeColor: Record<string, string> = {
     public: "bg-blue-100 text-blue-700",
@@ -39,7 +44,9 @@ export default function CollegePopup({ college }: CollegePopupProps) {
   const typeBadge =
     typeColor[college.type?.toLowerCase() || ""] || "bg-gray-100 text-gray-600";
 
-  const shareUrl = `https://studsphere.com/find-college/${college.id}`;
+  const shareUrl = origin
+    ? `${origin}/find-college/${college.id}`
+    : `https://studsphere.com/find-college/${college.id}`;
 
   return (
     <>
