@@ -35,6 +35,8 @@ interface College {
   latitude?: number;
   longitude?: number;
   type?: string;
+  rating?: number;
+  reviews?: number;
 }
 
 interface SearchResult {
