@@ -114,7 +114,7 @@ const AdmissionGrid: React.FC<AdmissionGridProps> = ({
       const token =
         localStorage.getItem("token") || sessionStorage.getItem("token");
       const subject = `Question about ${inquiryCollege.name}`;
-      const content = askMessage;
+      const content = `Name: ${askName}\nEmail: ${askEmail}\nPhone: ${askPhone ? "+977" + askPhone : "Not provided"}\n\n${askMessage}`;
       await fetch(
         `${API_BASE}/api/v1/institutions/${inquiryCollege.id}/inquiry`,
         {

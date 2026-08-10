@@ -106,7 +106,7 @@ const InquiryForm: React.FC<InquiryFormProps> = ({
       const token =
         localStorage.getItem("token") || sessionStorage.getItem("token");
       const subject = `Inquiry about ${name} - ${inquiryCourse || "General"}`;
-      const content = inquiryCourse || "General inquiry";
+      const content = `Name: ${inquiryName}\nEmail: ${inquiryEmail}\nPhone: ${inquiryPhone ? "+977" + inquiryPhone : "Not provided"}\nCourse: ${inquiryCourse || "General"}\n\n${inquiryCourse || "General inquiry"}`;
       await fetch(`${API_BASE}/api/v1/institutions/${collegeId}/inquiry`, {
         method: "POST",
         headers: {

@@ -122,9 +122,14 @@ export default function CollegePopup({ college }: CollegePopupProps) {
     setInquirySending(true);
     try {
       const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080";
+      const token = localStorage.getItem("token") || sessionStorage.getItem("token");
+      const headers: Record<string, string> = { "Content-Type": "application/json" };
+      if (token) {
+        headers["Authorization"] = `Bearer ${token}`;
+      }
       await fetch(`${API_BASE}/api/v1/institutions/${college.id}/inquiry`, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers,
         body: JSON.stringify({
           subject: `Inquiry about ${college.name}`,
           content: inquiryMessage.trim(),

@@ -22,7 +22,6 @@ import EntranceApplicantsPage from "./institution/EntranceApplicantsPage";
 import EntranceResultsPage from "./institution/EntranceResultsPage";
 import CourseCreatePage from "./institution/CourseCreatePage";
 import CourseListPage from "./institution/CourseListPage";
-import MessagePage from "./institution/MessagePage";
 import CreateNewsPage from "./institution/CreateNewsPage";
 import NewsDirectoryPage from "./institution/NewsDirectoryPage";
 import CreateEventPage from "./institution/CreateEventPage";
@@ -60,7 +59,6 @@ const InstitutionDashboard: React.FC = () => {
       case "entranceResults": return <EntranceResultsPage />;
       case "courseCreate": return <CourseCreatePage />;
       case "courseList": return <CourseListPage />;
-      case "message": return <MessagePage />;
       case "createNews": return <CreateNewsPage />;
       case "newsDirectory": return <NewsDirectoryPage />;
       case "createEvent": return <CreateEventPage />;

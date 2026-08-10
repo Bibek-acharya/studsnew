@@ -12,6 +12,8 @@ import {
   Globe,
 } from "lucide-react";
 import { College } from "@/services/api";
+import { useAuth } from "@/services/AuthContext";
+import { toast } from "sonner";
 
 interface FeaturedInstitutionsSectionProps {
   onNavigate: (view: string, data?: { [key: string]: unknown }) => void;
@@ -22,6 +24,11 @@ const FeaturedInstitutionsSection: React.FC<
   FeaturedInstitutionsSectionProps
 > = ({ onNavigate, featuredColleges = [] }) => {
   const [bookmarked, setBookmarked] = useState<Set<string | number>>(new Set());
+  const [inquiryCollege, setInquiryCollege] = useState<{ id: number; name: string } | null>(null);
+  const [inquiryMessage, setInquiryMessage] = useState("");
+  const [inquirySending, setInquirySending] = useState(false);
+  const [inquirySent, setInquirySent] = useState(false);
+  const { isAuthenticated } = useAuth();
 
   const colleges: College[] = featuredColleges;
 
@@ -59,10 +66,124 @@ const FeaturedInstitutionsSection: React.FC<
               isBookmarked={bookmarked.has(college.id)}
               onNavigate={onNavigate}
               onToggleBookmark={toggleBookmark}
+              onInquiry={setInquiryCollege}
             />
           ))}
         </div>
       </div>
+
+      {/* Inquiry Modal */}
+      {inquiryCollege && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/40 backdrop-blur-sm"
+          onClick={() => { setInquiryCollege(null); setInquirySent(false); setInquiryMessage(""); }}
+        >
+          <div
+            className="mx-4 flex max-h-[90vh] w-full max-w-lg flex-col rounded-md bg-white"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {inquirySent ? (
+              <div className="text-center py-8 px-6">
+                <div className="mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-green-100 mx-auto">
+                  <i className="fa-solid fa-check text-green-600 text-2xl"></i>
+                </div>
+                <p className="text-gray-900 font-bold text-lg">Inquiry Sent!</p>
+                <p className="text-sm text-gray-500 mt-1">
+                  Your inquiry for {inquiryCollege.name} has been sent. The institution will respond soon.
+                </p>
+                <div className="mt-6 flex gap-3 justify-center">
+                  <button
+                    onClick={() => { setInquiryCollege(null); setInquirySent(false); setInquiryMessage(""); }}
+                    className="rounded-md bg-gray-100 px-5 py-2.5 text-sm font-semibold text-gray-700 hover:bg-gray-200 transition-colors"
+                  >
+                    Close
+                  </button>
+                </div>
+              </div>
+            ) : (
+              <>
+                <div className="flex shrink-0 items-center justify-between border-b border-gray-100 px-6 py-5">
+                  <h3 className="flex items-center gap-2 text-lg font-bold text-gray-900">
+                    <MessageSquare className="w-5 h-5 text-brand-blue" />
+                    Inquiry for {inquiryCollege.name}
+                  </h3>
+                  <button
+                    onClick={() => { setInquiryCollege(null); setInquirySent(false); setInquiryMessage(""); }}
+                    className="rounded-full p-1.5 text-gray-400 transition-colors hover:bg-gray-100 hover:text-gray-700"
+                  >
+                    <i className="fa-solid fa-xmark text-[20px]"></i>
+                  </button>
+                </div>
+                <div className="overflow-y-auto px-6 py-5">
+                  <form
+                    onSubmit={async (e) => {
+                      e.preventDefault();
+                      if (!inquiryMessage.trim()) return;
+                      if (!isAuthenticated) {
+                        toast.error("Please log in to send an inquiry");
+                        return;
+                      }
+                      setInquirySending(true);
+                      try {
+                        const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080";
+                        const token = localStorage.getItem("token") || sessionStorage.getItem("token");
+                        await fetch(`${API_BASE}/api/v1/institutions/${inquiryCollege.id}/inquiry`, {
+                          method: "POST",
+                          headers: {
+                            "Content-Type": "application/json",
+                            ...(token ? { Authorization: `Bearer ${token}` } : {}),
+                          },
+                          body: JSON.stringify({
+                            subject: `Inquiry about ${inquiryCollege.name}`,
+                            content: inquiryMessage.trim(),
+                          }),
+                        });
+                        setInquirySent(true);
+                        toast.success(`Inquiry for ${inquiryCollege.name} sent!`);
+                      } catch {
+                        toast.error("Failed to send inquiry");
+                      } finally {
+                        setInquirySending(false);
+                      }
+                    }}
+                  >
+                    <div className="mb-5">
+                      <label htmlFor="inquiryMessageLanding" className="mb-2 block text-[14px] font-bold text-gray-800">
+                        Your Question / Message <span className="text-red-500">*</span>
+                      </label>
+                      <textarea
+                        id="inquiryMessageLanding"
+                        required
+                        rows={4}
+                        value={inquiryMessage}
+                        onChange={(e) => setInquiryMessage(e.target.value)}
+                        className="w-full resize-none rounded-md border border-gray-200 bg-gray-50 px-4 py-3 text-[14px] text-gray-800 transition-all focus:border-transparent focus:bg-white focus:outline-none focus:ring-2 focus:ring-brand-blue"
+                        placeholder="E.g., What are the admission requirements, fee structures, and scholarship options?"
+                      />
+                    </div>
+                    <div className="mt-8 flex flex-col justify-end gap-3 sm:flex-row">
+                      <button
+                        type="button"
+                        onClick={() => { setInquiryCollege(null); setInquirySent(false); setInquiryMessage(""); }}
+                        className="w-full rounded-md border border-gray-200 bg-white px-5 py-2.5 text-[14px] font-bold text-gray-600 transition-colors hover:bg-gray-50 sm:w-auto"
+                      >
+                        Cancel
+                      </button>
+                      <button
+                        type="submit"
+                        disabled={inquirySending || !inquiryMessage.trim()}
+                        className="flex w-full items-center justify-center gap-2 rounded-md bg-brand-blue px-6 py-2.5 text-[14px] font-bold text-white transition-all hover:bg-brand-hover disabled:opacity-50 sm:w-auto"
+                      >
+                        {inquirySending ? "Sending..." : "Submit Inquiry"}
+                      </button>
+                    </div>
+                  </form>
+                </div>
+              </>
+            )}
+          </div>
+        </div>
+      )}
     </section>
   );
 };
@@ -75,7 +196,8 @@ const CollegeCard: React.FC<{
     e: MouseEvent<HTMLButtonElement>,
     id: string | number,
   ) => void;
-}> = ({ college, isBookmarked, onNavigate, onToggleBookmark }) => {
+  onInquiry: (college: { id: number; name: string }) => void;
+}> = ({ college, isBookmarked, onNavigate, onToggleBookmark, onInquiry }) => {
   return (
     <div
       className="bg-white rounded-xl p-4 border border-gray-200 flex flex-col h-full hover:border-blue-500/20 transition-all duration-300 cursor-pointer"
@@ -234,10 +356,7 @@ const CollegeCard: React.FC<{
             className="flex-1 flex items-center justify-center gap-1.5 border border-gray-200 hover:bg-gray-50 text-slate-600 font-medium py-2 px-2 rounded-md transition-colors text-[13px]"
             onClick={(e) => {
               e.stopPropagation();
-              onNavigate("campusForum", {
-                collegeId: college.id,
-                collegeName: college.name,
-              });
+              onInquiry({ id: college.id as number, name: college.name });
             }}
           >
             <MessageSquare className="w-4 h-4 text-gray-500" />

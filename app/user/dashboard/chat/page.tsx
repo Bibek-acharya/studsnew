@@ -1,9 +1,51 @@
-import ChatSection from "@/components/user/dashboard/sections/ChatSection";
+"use client";
 
-export const metadata = {
-  title: "Messages | MeroCollege Student",
-};
+import React, { useState, useEffect } from "react";
+import { messageApi, Conversation } from "@/services/message.api";
+import ConversationList from "@/components/messaging/ConversationList";
+import ChatWindow from "@/components/messaging/ChatWindow";
 
-export default function Page() {
-  return <ChatSection />;
+export default function ChatPage() {
+  const [selectedConversation, setSelectedConversation] = useState<Conversation | null>(null);
+  const [userId, setUserId] = useState<number>(0);
+
+  useEffect(() => {
+    const userData = localStorage.getItem("user");
+    if (userData) {
+      const user = JSON.parse(userData);
+      setUserId(user.id);
+
+      const token = localStorage.getItem("token") || sessionStorage.getItem("token");
+      if (token) {
+        messageApi.connectWebSocket("student", user.id, token);
+      }
+    }
+
+    return () => {
+      messageApi.disconnectWebSocket();
+    };
+  }, []);
+
+  return (
+    <div className="flex h-[calc(100vh-64px)]">
+      <ConversationList
+        userRole="student"
+        selectedId={selectedConversation?.id || null}
+        onSelect={setSelectedConversation}
+      />
+      {selectedConversation ? (
+        <div className="flex-1">
+          <ChatWindow
+            conversation={selectedConversation}
+            userRole="student"
+            userId={userId}
+          />
+        </div>
+      ) : (
+        <div className="flex-1 flex items-center justify-center text-gray-400">
+          Select a conversation to start chatting
+        </div>
+      )}
+    </div>
+  );
 }
