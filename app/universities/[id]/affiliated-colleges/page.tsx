@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect, useMemo } from "react";
+import React, { useState, useEffect, useMemo, useRef } from "react";
 import { useRouter } from "next/navigation";
 import FilterSidebar from "@/components/find-college/FilterSidebar";
 import { ProgramCard } from "@/components/find-college/CollegeGrid";
@@ -8,7 +8,7 @@ import { College } from "@/services/api";
 import { universityApi } from "@/services/university.api";
 import { useAuth } from "@/services/AuthContext";
 import { isCollegeVerified, CollegeFilters, DEFAULT_COLLEGE_FILTERS } from "@/app/find-college/types";
-import { SlidersHorizontal, ChevronDown } from "lucide-react";
+import { SlidersHorizontal, ChevronLeft, ChevronRight } from "lucide-react";
 import Pagination from "@/components/ui/Pagination";
 import ClaimCollegeModal from "@/components/find-college/ClaimCollegeModal";
 
@@ -37,6 +37,9 @@ export default function Page({ params }: { params: { id: string } }) {
   const [inquiryMessage, setInquiryMessage] = useState("");
   const [isInquirySent, setIsInquirySent] = useState(false);
   const [collegeToClaim, setCollegeToClaim] = useState<College | null>(null);
+  const uniScrollRef = useRef<HTMLDivElement>(null);
+  const [canScrollLeft, setCanScrollLeft] = useState(false);
+  const [canScrollRight, setCanScrollRight] = useState(false);
   const PER_PAGE = 18;
   const { isAuthenticated } = useAuth();
 
@@ -207,39 +210,93 @@ export default function Page({ params }: { params: { id: string } }) {
 
   const selectedUni = universities.find(u => u.id === selectedUniId);
 
+  // Check scroll position for navigation arrows
+  const checkScroll = () => {
+    if (uniScrollRef.current) {
+      const { scrollLeft, scrollWidth, clientWidth } = uniScrollRef.current;
+      setCanScrollLeft(scrollLeft > 0);
+      setCanScrollRight(scrollLeft + clientWidth < scrollWidth - 1);
+    }
+  };
+
+  useEffect(() => {
+    checkScroll();
+    const ref = uniScrollRef.current;
+    if (ref) {
+      ref.addEventListener("scroll", checkScroll);
+      window.addEventListener("resize", checkScroll);
+    }
+    return () => {
+      if (ref) ref.removeEventListener("scroll", checkScroll);
+      window.removeEventListener("resize", checkScroll);
+    };
+  }, [universities]);
+
+  const scrollUniversities = (direction: "left" | "right") => {
+    if (uniScrollRef.current) {
+      const scrollAmount = 260;
+      uniScrollRef.current.scrollBy({
+        left: direction === "left" ? -scrollAmount : scrollAmount,
+        behavior: "smooth",
+      });
+    }
+  };
+
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen">
       {/* University Cards Header */}
-      <div className="bg-white border-b border-gray-100">
-        <div className="mx-auto max-w-350 py-6">
+      <div className="border-b border-gray-100" style={{ backgroundColor: "#f2f6fe" }}>
+        <div className="mx-auto max-w-350 py-6 relative">
           <h2 className="text-[22px] font-bold text-[#0f172a] mb-5 tracking-tight">Affiliated Universities</h2>
-          <div className="flex gap-4 overflow-x-auto hide-scrollbar snap-x pb-2">
-            {universities.map((uni) => (
+          <div className="relative">
+            {/* Left Arrow */}
+            {canScrollLeft && (
               <button
-                key={uni.id}
-                onClick={() => setSelectedUniId(uni.id)}
-                className={`snap-start flex-shrink-0 w-[240px] h-[124px] rounded-xl p-5 cursor-pointer border-2 transition-all duration-200 flex flex-col justify-between ${
-                  selectedUniId === uni.id
-                    ? "border-[#2563eb] bg-white"
-                    : "border-gray-200 bg-white"
-                }`}
+                onClick={() => scrollUniversities("left")}
+                className="absolute left-0 top-1/2 -translate-y-1/2 z-10 w-10 h-10 rounded-full bg-white shadow-md border border-gray-200 flex items-center justify-center hover:bg-gray-50 transition-colors -ml-2"
               >
-                <div className="flex justify-between items-start gap-3">
-                  <h3 className="text-[16px] font-bold text-[#0f172a] leading-[1.3] tracking-tight pr-2">{uni.name}</h3>
-                  {selectedUniId === uni.id && (
-                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-[22px] h-[22px] text-[#2563eb] flex-shrink-0 mt-0.5">
-                      <path fillRule="evenodd" d="M2.25 12c0-5.385 4.365-9.75 9.75-9.75s9.75 4.365 9.75 9.75-4.365 9.75-9.75 9.75S2.25 17.385 2.25 12Zm13.36-1.814a.75.75 0 1 0-1.22-.872l-3.236 4.53L9.53 12.22a.75.75 0 0 0-1.06 1.06l2.25 2.25a.75.75 0 0 0 1.14-.094l3.75-5.25Z" clipRule="evenodd" />
-                    </svg>
-                  )}
-                </div>
-                <div className="text-[#2563eb] text-[14px] font-medium flex items-center mt-3">
-                  {uni.colleges_count} colleges
-                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="2.5" stroke="currentColor" className="w-3.5 h-3.5 ml-1.5 mt-[2px]">
-                    <path strokeLinecap="round" strokeLinejoin="round" d="m8.25 4.5 7.5 7.5-7.5 7.5" />
-                  </svg>
-                </div>
+                <ChevronLeft className="w-5 h-5 text-gray-600" />
               </button>
-            ))}
+            )}
+            
+            <div ref={uniScrollRef} className="flex gap-4 overflow-x-auto hide-scrollbar snap-x pb-2">
+              {universities.map((uni) => (
+                <button
+                  key={uni.id}
+                  onClick={() => setSelectedUniId(uni.id)}
+                  className={`snap-start flex-shrink-0 w-[240px] h-[124px] rounded-xl p-5 cursor-pointer border-2 transition-all duration-200 flex flex-col justify-between ${
+                    selectedUniId === uni.id
+                      ? "border-[#2563eb] bg-white"
+                      : "border-gray-200 bg-white"
+                  }`}
+                >
+                  <div className="flex justify-between items-start gap-3">
+                    <h3 className="text-[16px] font-bold text-[#0f172a] leading-[1.3] tracking-tight pr-2">{uni.name}</h3>
+                    {selectedUniId === uni.id && (
+                      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-[22px] h-[22px] text-[#2563eb] flex-shrink-0 mt-0.5">
+                        <path fillRule="evenodd" d="M2.25 12c0-5.385 4.365-9.75 9.75-9.75s9.75 4.365 9.75 9.75-4.365 9.75-9.75 9.75S2.25 17.385 2.25 12Zm13.36-1.814a.75.75 0 1 0-1.22-.872l-3.236 4.53L9.53 12.22a.75.75 0 0 0-1.06 1.06l2.25 2.25a.75.75 0 0 0 1.14-.094l3.75-5.25Z" clipRule="evenodd" />
+                      </svg>
+                    )}
+                  </div>
+                  <div className="text-[#2563eb] text-[14px] font-medium flex items-center mt-3">
+                    {uni.colleges_count} colleges
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="2.5" stroke="currentColor" className="w-3.5 h-3.5 ml-1.5 mt-[2px]">
+                      <path strokeLinecap="round" strokeLinejoin="round" d="m8.25 4.5 7.5 7.5-7.5 7.5" />
+                    </svg>
+                  </div>
+                </button>
+              ))}
+            </div>
+
+            {/* Right Arrow */}
+            {canScrollRight && (
+              <button
+                onClick={() => scrollUniversities("right")}
+                className="absolute right-0 top-1/2 -translate-y-1/2 z-10 w-10 h-10 rounded-full bg-white shadow-md border border-gray-200 flex items-center justify-center hover:bg-gray-50 transition-colors -mr-2"
+              >
+                <ChevronRight className="w-5 h-5 text-gray-600" />
+              </button>
+            )}
           </div>
         </div>
       </div>
