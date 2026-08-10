@@ -214,7 +214,7 @@ export default function Page({ params }: { params: { id: string } }) {
       </div>
 
       {/* Main Content */}
-      <div className="mx-auto max-w-350 mt-6 flex flex-col lg:flex-row gap-8">
+      <div className="mx-auto max-w-350 mt-6 flex flex-col lg:flex-row gap-8 bg-white">
         {/* Left Sidebar - Filters */}
         <aside className="hidden lg:block w-full shrink-0 lg:w-[280px]">
           <FilterSidebar filters={filters} setFilters={setFilters} />
