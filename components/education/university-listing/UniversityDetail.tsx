@@ -648,7 +648,7 @@ const UniversityDetail: React.FC = () => {
 
               <div className="hidden mt-8 w-full flex-nowrap items-center gap-2 overflow-x-auto pb-1 md:flex lg:mt-0 lg:w-auto lg:gap-3 lg:overflow-visible lg:pb-0">
                 <Link
-                  href={`/universities/${toSlug(name)}/affiliated-colleges`}
+                  href={`/universities/${id}/affiliated-colleges`}
                   className="shrink-0 flex items-center justify-center gap-2 rounded-md border border-gray-200 bg-brand-blue px-4 py-2.5 text-[13px] font-semibold text-white transition-colors hover:bg-brand-hover lg:px-5 lg:py-3 lg:text-[15px]"
                 >
                   <Building2 className="h-4 w-4" />
@@ -2002,7 +2002,7 @@ const UniversityDetail: React.FC = () => {
                     ))}
                   </div>
                   <div className="mt-4 text-center">
-                    <Link href={`/universities/${toSlug(name)}/affiliated-colleges`} className="text-sm font-semibold text-brand-blue hover:text-brand-hover transition-colors">
+                    <Link href={`/universities/${id}/affiliated-colleges`} className="text-sm font-semibold text-brand-blue hover:text-brand-hover transition-colors">
                       View All Affiliated Colleges →
                     </Link>
                   </div>
