@@ -35,8 +35,12 @@ interface College {
   latitude?: number;
   longitude?: number;
   type?: string;
-  rating?: number;
   reviews?: number;
+  logo?: string;
+  district?: string;
+  rating?: number;
+  gallery?: any[];
+  phone?: string;
 }
 
 interface SearchResult {
