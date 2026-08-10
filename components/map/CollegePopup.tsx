@@ -6,6 +6,7 @@ import Image from "next/image";
 import {
   FaMapMarkerAlt,
   FaStar,
+  FaRegBookmark,
   FaBookmark,
   FaTimes,
   FaBuilding,
@@ -157,7 +158,11 @@ export default function CollegePopup({ college }: CollegePopupProps) {
                   }`}
                   aria-label="Bookmark"
                 >
-                  <FaBookmark className="w-3 h-3" />
+                  {isBookmarked ? (
+                    <FaBookmark className="w-3 h-3" />
+                  ) : (
+                    <FaRegBookmark className="w-3 h-3" />
+                  )}
                 </button>
                 <button
                   className="w-7 h-7 border-0 rounded-full bg-gray-100 flex items-center justify-center text-slate-500 cursor-pointer hover:bg-gray-200"
@@ -170,7 +175,7 @@ export default function CollegePopup({ college }: CollegePopupProps) {
 
             {/* Rating */}
             <div className="flex items-center gap-1 text-xs mt-1">
-              {college.rating !== undefined && (
+              {(college.rating ?? 0) > 0 && (
                 <>
                   <span className="font-extrabold">{college.rating}</span>
                   <span className="text-amber-400 tracking-tight text-sm">
@@ -179,7 +184,7 @@ export default function CollegePopup({ college }: CollegePopupProps) {
                   </span>
                 </>
               )}
-              {college.reviews !== undefined && (
+              {(college.reviews ?? 0) > 0 && (
                 <span className="text-gray-500">({college.reviews})</span>
               )}
             </div>
@@ -271,7 +276,7 @@ export default function CollegePopup({ college }: CollegePopupProps) {
 
             <div className="grid grid-cols-2 gap-2">
               <a href={college.phone ? `tel:${college.phone}` : "#"} className="h-9 border-0 rounded-md text-xs font-extrabold text-white cursor-pointer flex justify-center items-center gap-1.5 bg-gray-900 no-underline">
-                <FaPhone className="w-3 h-3" />
+                <FaPhone className="w-3 h-3 rotate-90" />
                 Call Now
               </a>
               <button onClick={() => setInquiryOpen(true)} className="h-9 border-0 rounded-md text-xs font-extrabold text-white cursor-pointer flex justify-center items-center gap-1.5 bg-indigo-600 hover:bg-indigo-700 transition-colors">
