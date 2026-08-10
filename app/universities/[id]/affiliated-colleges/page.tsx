@@ -10,6 +10,7 @@ import { useAuth } from "@/services/AuthContext";
 import { isCollegeVerified, CollegeFilters, DEFAULT_COLLEGE_FILTERS } from "@/app/find-college/types";
 import { SlidersHorizontal, ChevronDown } from "lucide-react";
 import Pagination from "@/components/ui/Pagination";
+import ClaimCollegeModal from "@/components/find-college/ClaimCollegeModal";
 
 interface University {
   id: number;
@@ -35,6 +36,7 @@ export default function Page({ params }: { params: { id: string } }) {
   const [isInquiryModalOpen, setIsInquiryModalOpen] = useState(false);
   const [inquiryMessage, setInquiryMessage] = useState("");
   const [isInquirySent, setIsInquirySent] = useState(false);
+  const [collegeToClaim, setCollegeToClaim] = useState<College | null>(null);
   const PER_PAGE = 18;
   const { isAuthenticated } = useAuth();
 
@@ -309,7 +311,7 @@ export default function Page({ params }: { params: { id: string } }) {
                         prev.includes(college.id) ? prev.filter((id) => id !== college.id) : [...prev, college.id]
                       );
                     }}
-                  onClaim={() => {}}
+                  onClaim={() => setCollegeToClaim(college)}
                   onSingleInquiry={() => {
                     setCollegeForInquiry(college);
                     setIsInquiryModalOpen(true);
@@ -408,6 +410,11 @@ export default function Page({ params }: { params: { id: string } }) {
           )}
         </div>
       </div>
+
+      <ClaimCollegeModal
+        college={collegeToClaim}
+        onClose={() => setCollegeToClaim(null)}
+      />
     </div>
   );
 }
