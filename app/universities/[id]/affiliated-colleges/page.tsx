@@ -65,12 +65,14 @@ export default function Page({ params }: { params: { id: string } }) {
         
         setUniversities(unisWithCounts);
 
-        // Select university from URL or first one
-        const universityId = Number(params.id);
-        if (!isNaN(universityId)) {
-          setSelectedUniId(universityId);
-        } else if (unisWithCounts.length > 0 && !selectedUniId) {
-          setSelectedUniId(unisWithCounts[0].id);
+        // Only set selected university if not already set
+        if (!selectedUniId) {
+          const universityId = Number(params.id);
+          if (!isNaN(universityId)) {
+            setSelectedUniId(universityId);
+          } else if (unisWithCounts.length > 0) {
+            setSelectedUniId(unisWithCounts[0].id);
+          }
         }
       } catch (err) {
         console.error("Failed to fetch universities:", err);
