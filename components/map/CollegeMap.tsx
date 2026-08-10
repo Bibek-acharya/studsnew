@@ -141,6 +141,18 @@ export default function CollegeMap({
         const res = await fetch(`${API_BASE_URL}/api/v1/map/colleges`);
         const body = await res.json();
         const colleges = body?.data?.colleges || [];
+        // Debug: log first college to verify data shape
+        if (colleges.length > 0) {
+          console.log("[Map] First college data:", {
+            id: colleges[0].id,
+            name: colleges[0].name,
+            rating: colleges[0].rating,
+            reviews: colleges[0].reviews,
+            gallery: colleges[0].gallery,
+            hasGallery: !!colleges[0].gallery,
+            galleryLength: Array.isArray(colleges[0].gallery) ? colleges[0].gallery.length : "not array",
+          });
+        }
         return colleges.filter(
           (c: any): c is College => c.latitude != null && c.longitude != null,
         );
