@@ -245,9 +245,8 @@ export default function Page({ params }: { params: { id: string } }) {
   return (
     <div className="min-h-screen">
       {/* University Cards Header */}
-      <div className="border-b border-gray-100" style={{ backgroundColor: "#f2f6fe" }}>
-        <div className="mx-auto max-w-350 py-6 relative">
-          <h2 className="text-[22px] font-bold text-[#0f172a] mb-5 tracking-tight">Affiliated Universities</h2>
+      <div className="mx-auto max-w-350 px-6 pt-8">
+        <div className="bg-[#F2F6FE] rounded-[16px] p-6 relative">
           <div className="relative">
             {/* Left Arrow */}
             {canScrollLeft && (
@@ -267,7 +266,7 @@ export default function Page({ params }: { params: { id: string } }) {
                   className={`snap-start flex-shrink-0 w-[240px] h-[124px] rounded-xl p-5 cursor-pointer border-2 transition-all duration-200 flex flex-col justify-between ${
                     selectedUniId === uni.id
                       ? "border-[#2563eb] bg-white"
-                      : "border-gray-200 bg-white"
+                      : "border-transparent bg-white"
                   }`}
                 >
                   <div className="flex justify-between items-start gap-3">
