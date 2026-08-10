@@ -62,7 +62,9 @@ export default function MessageBubble({ message, isOwn, onEdit, onDelete }: Mess
                 {new Date(message.created_at).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
               </span>
               {message.edited_at && (
-                <span className={`text-xs ${isOwn ? "text-blue-100" : "text-gray-400}`}>(edited)</span>
+                <span className={`text-xs ${isOwn ? "text-blue-100" : "text-gray-400"}`}>
+                  (edited)
+                </span>
               )}
               {isOwn && (
                 <span className="text-xs">
