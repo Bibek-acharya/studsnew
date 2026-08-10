@@ -91,7 +91,7 @@ export default function Page({ params }: { params: { id: string } }) {
             location: c.location,
             website: c.website,
             verified: c.verified ?? false,
-            claimed: true,
+            claimed: c.college_id > 0 || (c.claimed ?? false),
             affiliation: c.affiliation || "",
             type: c.type || "College",
             rating: c.rating || 0,
@@ -299,7 +299,7 @@ export default function Page({ params }: { params: { id: string } }) {
                     key={college.id}
                     college={college}
                     isVerified={isCollegeVerified(college.verified)}
-                    isClaimed={true}
+                    isClaimed={!!college.claimed}
                     isSaved={savedIds.includes(college.id)}
                     isBookmarkPending={pendingBookmarks[college.id]}
                     isSelected={selectedIds.includes(college.id)}
@@ -311,13 +311,13 @@ export default function Page({ params }: { params: { id: string } }) {
                         prev.includes(college.id) ? prev.filter((id) => id !== college.id) : [...prev, college.id]
                       );
                     }}
-                  onClaim={() => setCollegeToClaim(college)}
-                  onSingleInquiry={() => {
-                    setCollegeForInquiry(college);
-                    setIsInquiryModalOpen(true);
-                    setIsInquirySent(false);
-                    setInquiryMessage("");
-                  }}
+                    onClaim={() => setCollegeToClaim(college)}
+                    onSingleInquiry={() => {
+                      setCollegeForInquiry(college);
+                      setIsInquiryModalOpen(true);
+                      setIsInquirySent(false);
+                      setInquiryMessage("");
+                    }}
                   />
                 ))}
               </div>
