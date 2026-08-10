@@ -81,12 +81,19 @@ export default function CollegePopup({ college }: CollegePopupProps) {
     for (const item of college.gallery) {
       if (typeof item === "string") {
         galleryImages.push(item);
-      } else if (item.url) {
-        galleryImages.push(item.url);
-      } else if (item.image) {
-        galleryImages.push(item.image);
-      } else if (item.src) {
-        galleryImages.push(item.src);
+      } else if (item && typeof item === "object") {
+        // Handle GalleryGroup format: { folder: string, images: string[] }
+        if (Array.isArray((item as any).images)) {
+          for (const img of (item as any).images) {
+            if (typeof img === "string") galleryImages.push(img);
+          }
+        } else if ((item as any).url) {
+          galleryImages.push((item as any).url);
+        } else if ((item as any).image) {
+          galleryImages.push((item as any).image);
+        } else if ((item as any).src) {
+          galleryImages.push((item as any).src);
+        }
       }
     }
   }
