@@ -247,9 +247,9 @@ export default function Page({ params }: { params: { id: string } }) {
   return (
     <div className="min-h-screen">
       {/* University Cards Header */}
-      <div className="mx-auto max-w-350 px-6 pt-8">
-        <h2 className="text-[20px] font-bold text-[#0f172a]">Affiliated Colleges</h2>
-        <div className="bg-[#F2F6FE] rounded-xl py-6 relative">
+      <div className="mx-auto max-w-350 pt-8">
+        <h2 className="text-[20px] mb-2 font-bold text-[#0f172a]">Affiliated Colleges</h2>
+        <div className="bg-[#F2F6FE] rounded-xl p-6 relative">
           <div className="relative">
             {/* Left Arrow */}
             {canScrollLeft && (
