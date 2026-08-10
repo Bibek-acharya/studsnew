@@ -9,6 +9,7 @@ import { universityApi } from "@/services/university.api";
 import { useAuth } from "@/services/AuthContext";
 import { isCollegeVerified, CollegeFilters, DEFAULT_COLLEGE_FILTERS } from "@/app/find-college/types";
 import { SlidersHorizontal, ChevronDown } from "lucide-react";
+import Pagination from "@/components/ui/Pagination";
 
 interface University {
   id: number;
@@ -29,19 +30,31 @@ export default function Page({ params }: { params: { id: string } }) {
   const [pendingBookmarks, setPendingBookmarks] = useState<Record<number, boolean>>({});
   const [selectedIds, setSelectedIds] = useState<number[]>([]);
   const [quickInquiryMode, setQuickInquiryMode] = useState(false);
+  const [currentPage, setCurrentPage] = useState(1);
+  const PER_PAGE = 18;
   const { isAuthenticated } = useAuth();
 
-  // Fetch universities list
+  // Fetch universities list with actual affiliated counts
   useEffect(() => {
     (async () => {
       try {
         const payload = await universityApi.getUniversities();
         const unis = payload?.data?.universities ?? [];
-        setUniversities(unis.map((u: any) => ({
-          id: u.id,
-          name: u.name,
-          colleges_count: u.collegesCount || 0,
-        })));
+        
+        // Fetch actual affiliated counts for each university
+        const unisWithCounts = await Promise.all(
+          unis.map(async (u: any) => {
+            try {
+              const res = await universityApi.getAffiliatedColleges(u.id);
+              const count = res?.data?.affiliated_colleges?.length ?? 0;
+              return { id: u.id, name: u.name, colleges_count: count };
+            } catch {
+              return { id: u.id, name: u.name, colleges_count: 0 };
+            }
+          })
+        );
+        
+        setUniversities(unisWithCounts);
 
         const universityId = Number(params.id);
         if (!isNaN(universityId)) {
@@ -65,7 +78,7 @@ export default function Page({ params }: { params: { id: string } }) {
           affiliated.map((c: any) => ({
             id: c.college_id || c.id,
             name: c.name,
-            image_url: c.image_url,
+            image_url: c.card_image_url || c.banner_url || c.image_url || c.logo_url,
             location: c.location,
             website: c.website,
             verified: c.verified ?? false,
@@ -124,6 +137,13 @@ export default function Page({ params }: { params: { id: string } }) {
     });
   }, [colleges, filters]);
 
+  const paginatedColleges = useMemo(() => {
+    const start = (currentPage - 1) * PER_PAGE;
+    return filteredColleges.slice(start, start + PER_PAGE);
+  }, [filteredColleges, currentPage]);
+
+  const totalPages = Math.ceil(filteredColleges.length / PER_PAGE);
+
   const handleToggleSaved = async (collegeId: number) => {
     if (!isAuthenticated) return;
     setPendingBookmarks((prev) => ({ ...prev, [collegeId]: true }));
@@ -157,17 +177,17 @@ export default function Page({ params }: { params: { id: string } }) {
     <div className="min-h-screen bg-gray-50">
       {/* University Cards Header */}
       <div className="bg-white border-b border-gray-100">
-        <div className="mx-auto max-w-[1340px] px-6 py-6">
+        <div className="mx-auto max-w-350 py-6">
           <h2 className="text-[22px] font-bold text-[#0f172a] mb-5 tracking-tight">Affiliated Universities</h2>
           <div className="flex gap-4 overflow-x-auto hide-scrollbar snap-x pb-2">
             {universities.map((uni) => (
               <button
                 key={uni.id}
                 onClick={() => setSelectedUniId(uni.id)}
-                className={`snap-start flex-shrink-0 w-[240px] h-[124px] rounded-xl p-5 cursor-pointer border-[1.5px] transition-all duration-200 flex flex-col justify-between ${
+                className={`snap-start flex-shrink-0 w-[240px] h-[124px] rounded-xl p-5 cursor-pointer border-2 transition-all duration-200 flex flex-col justify-between ${
                   selectedUniId === uni.id
-                    ? "border-[#2563eb] shadow-md ring-1 ring-blue-600/20"
-                    : "border-transparent shadow-sm hover:shadow-md hover:border-gray-200 bg-gray-50 hover:bg-white"
+                    ? "border-[#2563eb] bg-white"
+                    : "border-gray-200 bg-gray-50"
                 }`}
               >
                 <div className="flex justify-between items-start gap-3">
@@ -221,7 +241,7 @@ export default function Page({ params }: { params: { id: string } }) {
                   placeholder="Search colleges..."
                   value={filters.search}
                   onChange={(e) => setFilters(prev => ({ ...prev, search: e.target.value }))}
-                  className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-gray-200 focus:outline-none focus:border-blue-500 text-sm shadow-sm bg-white"
+                  className="w-full pl-10 pr-4 py-2.5 rounded-md border border-gray-200 focus:outline-none focus:border-blue-500 text-sm bg-white"
                 />
                 <svg className="w-4 h-4 text-gray-400 absolute left-3.5 top-1/2 -translate-y-1/2" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2"><path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg>
               </div>
@@ -238,29 +258,36 @@ export default function Page({ params }: { params: { id: string } }) {
           ) : filteredColleges.length === 0 ? (
             <div className="text-center py-16 text-gray-400">No affiliated colleges found.</div>
           ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5">
-              {filteredColleges.map((college) => (
-                <ProgramCard
-                  key={college.id}
-                  college={college}
-                  isVerified={isCollegeVerified(college.verified)}
-                  isClaimed={true}
-                  isSaved={savedIds.includes(college.id)}
-                  isBookmarkPending={pendingBookmarks[college.id]}
-                  isSelected={selectedIds.includes(college.id)}
-                  isQuickInquiryMode={quickInquiryMode}
-                  onNavigate={handleNavigate}
-                  onToggleSaved={() => handleToggleSaved(college.id)}
-                  onToggleSelection={() => {
-                    setSelectedIds((prev) =>
-                      prev.includes(college.id) ? prev.filter((id) => id !== college.id) : [...prev, college.id]
-                    );
-                  }}
-                  onClaim={() => {}}
-                  onSingleInquiry={() => {}}
-                />
-              ))}
-            </div>
+            <>
+              <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5">
+                {paginatedColleges.map((college) => (
+                  <ProgramCard
+                    key={college.id}
+                    college={college}
+                    isVerified={isCollegeVerified(college.verified)}
+                    isClaimed={true}
+                    isSaved={savedIds.includes(college.id)}
+                    isBookmarkPending={pendingBookmarks[college.id]}
+                    isSelected={selectedIds.includes(college.id)}
+                    isQuickInquiryMode={quickInquiryMode}
+                    onNavigate={handleNavigate}
+                    onToggleSaved={() => handleToggleSaved(college.id)}
+                    onToggleSelection={() => {
+                      setSelectedIds((prev) =>
+                        prev.includes(college.id) ? prev.filter((id) => id !== college.id) : [...prev, college.id]
+                      );
+                    }}
+                    onClaim={() => {}}
+                    onSingleInquiry={() => {}}
+                  />
+                ))}
+              </div>
+              <Pagination
+                currentPage={currentPage}
+                totalPages={totalPages}
+                onPageChange={setCurrentPage}
+              />
+            </>
           )}
         </section>
       </div>
