@@ -8,7 +8,6 @@ import ImagePreview from "./ImagePreview";
 interface MessageBubbleProps {
   message: Message;
   isOwn: boolean;
-  ownInitials: string;
   otherInitials: string;
   onEdit?: (message: Message) => void;
   onDelete?: (message: Message) => void;
@@ -62,7 +61,7 @@ function StatusCheck({ status }: { status: string }) {
   );
 }
 
-export default function MessageBubble({ message, isOwn, ownInitials, otherInitials, onEdit, onDelete }: MessageBubbleProps) {
+export default function MessageBubble({ message, isOwn, otherInitials, onEdit, onDelete }: MessageBubbleProps) {
   const isDeleted = message.deleted_at !== null;
   const [expanded, setExpanded] = useState(false);
   const [previewFile, setPreviewFile] = useState<{ src: string; name: string } | null>(null);
@@ -78,8 +77,8 @@ export default function MessageBubble({ message, isOwn, ownInitials, otherInitia
     && message.attachments!.every(a => a.file_type.startsWith("image/"));
 
   const avatarEl = (
-    <div className={`w-7 h-7 rounded-full bg-blue-100 flex items-center justify-center text-blue-600 font-semibold text-[10px] flex-shrink-0 ${isOwn ? "ml-1" : "mr-1"}`}>
-      {isOwn ? ownInitials : otherInitials}
+    <div className="w-7 h-7 rounded-full bg-blue-100 flex items-center justify-center text-blue-600 font-semibold text-[10px] flex-shrink-0 mr-1">
+      {otherInitials}
     </div>
   );
 
@@ -164,7 +163,7 @@ export default function MessageBubble({ message, isOwn, ownInitials, otherInitia
     : "bg-white text-slate-800 border border-slate-200 rounded-2xl";
 
   const statusEl = isOwn && !isDeleted && (
-    <span className="ml-1.5 flex items-end pb-1">
+    <span className={`flex ${isOwn ? "justify-end" : "justify-start"} mt-0.5`}>
       <StatusCheck status={message.status || "sent"} />
     </span>
   );
@@ -186,7 +185,7 @@ export default function MessageBubble({ message, isOwn, ownInitials, otherInitia
 
         {editDeleteButtons}
 
-        <div className="flex items-end">
+        <div className="flex flex-col">
           {isDeleted ? (
             <div className={`relative ${bubbleClass} px-3 py-2 text-xs leading-relaxed opacity-60`}>
               <p className={isOwn ? "italic" : "italic text-slate-500"}>This message was deleted</p>
@@ -205,8 +204,6 @@ export default function MessageBubble({ message, isOwn, ownInitials, otherInitia
           {statusEl}
         </div>
       </div>
-
-      {isOwn && avatarEl}
     </div>
     {previewFile && (
       <ImagePreview

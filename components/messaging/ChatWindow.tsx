@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useEffect, useState, useRef } from "react";
+import { Info } from "lucide-react";
 import { messageApi, Message, Conversation } from "@/services/message.api";
 import MessageBubble from "./MessageBubble";
 import MessageInput from "./MessageInput";
@@ -193,7 +194,6 @@ export default function ChatWindow({ conversation, userRole, userId, onToggleCon
     .toUpperCase()
     .slice(0, 2);
 
-  const ownInitials = "Me";
   const otherInitials = contactInitials;
 
   return (
@@ -224,7 +224,7 @@ export default function ChatWindow({ conversation, userRole, userId, onToggleCon
             }`}
             title="Info"
           >
-            i
+            <Info className="w-4 h-4" />
           </button>
         )}
       </header>
@@ -256,7 +256,6 @@ export default function ChatWindow({ conversation, userRole, userId, onToggleCon
                 key={message.id}
                 message={message}
                 isOwn={message.sender_type === userRole && message.sender_id === userId}
-                ownInitials={ownInitials}
                 otherInitials={otherInitials}
                 onEdit={handleEdit}
                 onDelete={handleDelete}

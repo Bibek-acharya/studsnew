@@ -60,6 +60,20 @@ export default function ContactInfo({ conversation, userRole, onClose }: Contact
     ? (instProfile?.institution_name || conversation.institution_name || "Unknown")
     : (studentProfile ? `${studentProfile.first_name} ${studentProfile.last_name}` : conversation.student_name || "Unknown");
 
+  function formatAddress(raw: string): string {
+    try {
+      const parsed = JSON.parse(raw);
+      const parts: string[] = [];
+      if (parsed.localLevel) parts.push(parsed.localLevel);
+      if (parsed.district) parts.push(parsed.district);
+      if (parsed.province) parts.push(parsed.province);
+      if (parsed.country) parts.push(parsed.country);
+      return parts.length > 0 ? parts.join(", ") : raw;
+    } catch {
+      return raw;
+    }
+  }
+
   const initials = name
     .split(" ")
     .map((n) => n[0])
@@ -127,7 +141,10 @@ export default function ContactInfo({ conversation, userRole, onClose }: Contact
               </button>
               <div style={{ display: aboutOpen ? "block" : "none" }} className="space-y-3 pt-2 text-xs">
                 {userRole === "student" && instProfile?.about ? (
-                  <p className="text-slate-600 leading-relaxed">{instProfile.about}</p>
+                  <div
+                    className="text-slate-600 leading-relaxed prose prose-xs max-w-none"
+                    dangerouslySetInnerHTML={{ __html: instProfile.about }}
+                  />
                 ) : userRole === "institution" && studentProfile?.bio ? (
                   <p className="text-slate-600 leading-relaxed">{studentProfile.bio}</p>
                 ) : (
@@ -195,7 +212,7 @@ export default function ContactInfo({ conversation, userRole, onClose }: Contact
                     {studentProfile?.address && (
                       <div>
                         <p className="text-slate-400 font-medium">Address</p>
-                        <p className="text-slate-800 font-semibold mt-0.5">{studentProfile.address}</p>
+                        <p className="text-slate-800 font-semibold mt-0.5">{formatAddress(studentProfile.address)}</p>
                       </div>
                     )}
                     {!studentProfile?.email && !studentProfile?.phone && !studentProfile?.address && (

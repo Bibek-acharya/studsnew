@@ -29,7 +29,9 @@ export default function ConversationList({ userRole, selectedId, onSelect, conve
 
   const filtered = conversations.filter((c) => {
     const name = (userRole === "student" ? c.institution_name : c.student_name) || "";
-    return name.toLowerCase().includes(search.toLowerCase());
+    const preview = c.last_message_preview || "";
+    const q = search.toLowerCase();
+    return name.toLowerCase().includes(q) || preview.toLowerCase().includes(q);
   });
 
   let sorted = [...filtered];
