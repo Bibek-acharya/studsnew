@@ -43,6 +43,13 @@ const RATING_CATEGORIES = [
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080";
 
+function resolveImageUrl(url: string | null | undefined): string {
+  if (!url) return "";
+  if (url.startsWith("http://") || url.startsWith("https://")) return url;
+  if (url.startsWith("/")) return `${API_BASE}${url}`;
+  return `${API_BASE}/${url}`;
+}
+
 function getToken(): string | null {
   if (typeof window === "undefined") return null;
   return localStorage.getItem("institutionToken");
@@ -182,7 +189,7 @@ export default function ReviewsPage() {
                       <div className="flex items-center gap-2">
                         <div className="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center text-blue-600 text-xs font-semibold">
                           {review.user_profile_image ? (
-                            <img src={review.user_profile_image} className="w-8 h-8 rounded-full object-cover" />
+                            <img src={resolveImageUrl(review.user_profile_image)} className="w-8 h-8 rounded-full object-cover" />
                           ) : (
                             review.user_initials || review.user_name?.charAt(0)?.toUpperCase() || "?"
                           )}
@@ -254,7 +261,7 @@ export default function ReviewsPage() {
               <div className="flex items-center gap-3">
                 <div className="w-12 h-12 rounded-full bg-blue-100 flex items-center justify-center text-blue-600 font-bold text-lg">
                   {selectedReview.user_profile_image ? (
-                    <img src={selectedReview.user_profile_image} className="w-12 h-12 rounded-full object-cover" />
+                    <img src={resolveImageUrl(selectedReview.user_profile_image)} className="w-12 h-12 rounded-full object-cover" />
                   ) : (
                     selectedReview.user_initials || selectedReview.user_name?.charAt(0)?.toUpperCase() || "?"
                   )}
@@ -337,28 +344,6 @@ export default function ReviewsPage() {
                   <p className="text-sm text-gray-700">{selectedReview.summary_title}</p>
                 </div>
               )}
-
-              {/* Additional Info */}
-              <div className="grid grid-cols-3 gap-4 bg-gray-50 rounded-xl p-4">
-                <div>
-                  <p className="text-xs text-gray-500">Yearly Fee</p>
-                  <p className="font-semibold text-gray-800">
-                    {selectedReview.yearly_fee ? `Rs. ${selectedReview.yearly_fee.toLocaleString()}` : "—"}
-                  </p>
-                </div>
-                <div>
-                  <p className="text-xs text-gray-500">Scholarship</p>
-                  <p className="font-semibold text-gray-800">
-                    {selectedReview.scholarship === true ? "Yes" : selectedReview.scholarship === false ? "No" : "—"}
-                  </p>
-                </div>
-                <div>
-                  <p className="text-xs text-gray-500">Internship Outcome</p>
-                  <p className="font-semibold text-gray-800 capitalize">
-                    {selectedReview.internship_outcome || "—"}
-                  </p>
-                </div>
-              </div>
 
               {/* Footer meta */}
               <div className="flex items-center justify-between text-xs text-gray-400 pt-2 border-t border-gray-100">

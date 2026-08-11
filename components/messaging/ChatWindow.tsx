@@ -11,9 +11,10 @@ interface ChatWindowProps {
   userRole: "student" | "institution";
   userId: number;
   onToggleContactInfo?: () => void;
+  showContactInfo?: boolean;
 }
 
-export default function ChatWindow({ conversation, userRole, userId, onToggleContactInfo }: ChatWindowProps) {
+export default function ChatWindow({ conversation, userRole, userId, onToggleContactInfo, showContactInfo }: ChatWindowProps) {
   const [messages, setMessages] = useState<Message[]>([]);
   const [typingUsers, setTypingUsers] = useState<Array<{ user_type: string; user_id: number }>>([]);
   const [loading, setLoading] = useState(true);
@@ -185,47 +186,71 @@ export default function ChatWindow({ conversation, userRole, userId, onToggleCon
   };
 
   const contactName = userRole === "student" ? conversation.institution_name : conversation.student_name;
+  const contactInitials = (contactName || "U")
+    .split(" ")
+    .map((n) => n[0])
+    .join("")
+    .toUpperCase()
+    .slice(0, 2);
+
+  const ownInitials = "Me";
+  const otherInitials = contactInitials;
 
   return (
-    <div className="flex flex-col h-full min-h-0">
-      <div className="h-[60px] px-4 border-b border-gray-200 bg-white flex items-center justify-between shrink-0">
-        <div className="flex items-center gap-3">
-          <div className="w-9 h-9 rounded-full bg-blue-100 flex items-center justify-center text-blue-600 font-semibold text-sm">
-            {(contactName || "U").split(" ").map((n) => n[0]).join("").toUpperCase().slice(0, 2)}
+    <main className="flex-1 bg-white flex-col min-w-0 relative flex">
+      <header className="h-[72px] flex-shrink-0 border-b border-slate-200 px-6 flex items-center justify-between bg-white z-10">
+        <div className="flex items-center space-x-3">
+          <div className="relative cursor-pointer" onClick={onToggleContactInfo}>
+            <div className="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center text-blue-600 font-semibold text-sm">
+              {contactInitials}
+            </div>
           </div>
-          <div>
-            <h2 className="text-sm font-semibold text-gray-900">{contactName || "Unknown"}</h2>
-            <p className="text-xs text-gray-500">{userRole === "student" ? "Institution" : "Student"}</p>
+
+          <div className="cursor-pointer" onClick={onToggleContactInfo}>
+            <h2 className="text-sm font-bold text-slate-900 hover:text-blue-600 transition-colors">
+              {contactName || "Unknown"}
+            </h2>
+            <p className="text-xs text-slate-500 font-medium">
+              {userRole === "student" ? "Institution" : "Student"}
+            </p>
           </div>
         </div>
-        {onToggleContactInfo && (
-          <button
-            onClick={onToggleContactInfo}
-            className="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-full transition-colors"
-            title="Contact Info"
-          >
-            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-            </svg>
-          </button>
-        )}
-      </div>
+      </header>
 
-      <div className="flex-1 overflow-y-auto p-4 min-h-0">
+      <div className="flex-1 overflow-y-auto p-4 sm:p-6 bg-slate-50/50" id="chatMessagesContainer">
         {loading ? (
-          <div className="text-center text-gray-400">Loading messages...</div>
+          <div className="flex items-center justify-center h-full text-slate-400 text-sm">
+            Loading messages...
+          </div>
         ) : messages.length === 0 ? (
-          <div className="text-center text-gray-400">No messages yet</div>
+          <div className="flex flex-col items-center justify-center h-full text-slate-400 text-sm">
+            <i className="fa-regular fa-comments text-3xl mb-2 text-slate-200"></i>
+            No messages yet
+          </div>
         ) : (
-          messages.map((message) => (
-            <MessageBubble
-              key={message.id}
-              message={message}
-              isOwn={message.sender_type === userRole && message.sender_id === userId}
-              onEdit={handleEdit}
-              onDelete={handleDelete}
-            />
-          ))
+          <>
+            <div className="flex justify-center my-2">
+              <span className="bg-slate-200 text-slate-600 text-[10px] px-3 py-0.5 rounded-sm font-medium">
+                {(() => {
+                  const first = messages[0];
+                  if (!first) return "";
+                  const d = new Date(first.created_at);
+                  return d.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" });
+                })()}
+              </span>
+            </div>
+            {messages.map((message) => (
+               <MessageBubble
+                key={message.id}
+                message={message}
+                isOwn={message.sender_type === userRole && message.sender_id === userId}
+                ownInitials={ownInitials}
+                otherInitials={otherInitials}
+                onEdit={handleEdit}
+                onDelete={handleDelete}
+              />
+            ))}
+          </>
         )}
         <div ref={messagesEndRef} />
       </div>
@@ -238,6 +263,6 @@ export default function ChatWindow({ conversation, userRole, userId, onToggleCon
         onTypingStop={() => messageApi.sendTypingStop(conversation.id)}
         onUpload={handleUpload}
       />
-    </div>
+    </main>
   );
 }
