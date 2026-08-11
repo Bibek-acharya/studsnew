@@ -64,6 +64,10 @@ export default function MessageBubble({ message, isOwn, ownInitials, otherInitia
 
   const timeStr = new Date(message.created_at).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }).toLowerCase();
 
+  const isImageOnly = !message.content?.trim()
+    && (message.attachments?.length ?? 0) > 0
+    && message.attachments!.every(a => a.file_type.startsWith("image/"));
+
   const avatarEl = (
     <div className={`w-7 h-7 rounded-full bg-blue-100 flex items-center justify-center text-blue-600 font-semibold text-[10px] flex-shrink-0 ${isOwn ? "ml-1" : "mr-1"}`}>
       {isOwn ? ownInitials : otherInitials}
@@ -72,46 +76,50 @@ export default function MessageBubble({ message, isOwn, ownInitials, otherInitia
 
   const bubbleContent = (
     <>
-      <p className="whitespace-pre-wrap">{displayContent}</p>
-      {isLong && (
-        <button
-          onClick={() => setExpanded(!expanded)}
-          className={`text-[10px] mt-1 underline ${isOwn ? "text-blue-200" : "text-blue-600"}`}
-        >
-          {expanded ? "Show less" : "Read more"}
-        </button>
-      )}
-
-      {message.attachments?.length > 0 && (
-        <div className="mt-2 space-y-1.5">
-          {message.attachments.map((attachment) => (
-            <div key={attachment.id}>
-              {attachment.file_type.startsWith("image/") ? (
-                <img
-                  src={getImageUrl(`/uploads/${attachment.thumbnail_key || attachment.storage_key}`)}
-                  alt={attachment.file_name}
-                  onClick={() => setPreviewFile({ src: getImageUrl(`/uploads/${attachment.thumbnail_key || attachment.storage_key}`), name: attachment.file_name })}
-                  className="rounded-lg max-w-xs max-h-48 object-cover cursor-pointer hover:opacity-90 transition-opacity"
-                />
-              ) : (
-                <a
-                  href={getImageUrl(`/uploads/${attachment.storage_key}`)}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className={`flex items-center gap-1.5 underline ${isOwn ? "text-blue-200 hover:text-white" : "text-blue-600 hover:text-blue-700"}`}
-                >
-                  <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                  </svg>
-                  <span>{attachment.file_name}</span>
-                </a>
-              )}
-            </div>
-          ))}
-        </div>
+      {message.content && message.content.trim() && (
+        <>
+          <p className="whitespace-pre-wrap">{displayContent}</p>
+          {isLong && (
+            <button
+              onClick={() => setExpanded(!expanded)}
+              className={`text-[10px] mt-1 underline ${isOwn ? "text-blue-200" : "text-blue-600"}`}
+            >
+              {expanded ? "Show less" : "Read more"}
+            </button>
+          )}
+        </>
       )}
     </>
   );
+
+  const attachmentsEl = message.attachments?.length > 0 ? (
+    <div className={isImageOnly ? "space-y-1.5" : "mt-2 space-y-1.5"}>
+      {message.attachments.map((attachment) => (
+        <div key={attachment.id}>
+          {attachment.file_type.startsWith("image/") ? (
+            <img
+              src={getImageUrl(`/uploads/${attachment.thumbnail_key || attachment.storage_key}`)}
+              alt={attachment.file_name}
+              onClick={() => setPreviewFile({ src: getImageUrl(`/uploads/${attachment.thumbnail_key || attachment.storage_key}`), name: attachment.file_name })}
+              className="rounded-lg max-w-xs max-h-48 object-cover cursor-pointer hover:opacity-90 transition-opacity"
+            />
+          ) : (
+            <a
+              href={getImageUrl(`/uploads/${attachment.storage_key}`)}
+              target="_blank"
+              rel="noopener noreferrer"
+              className={`flex items-center gap-1.5 underline ${isOwn ? "text-blue-200 hover:text-white" : "text-blue-600 hover:text-blue-700"}`}
+            >
+              <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+              </svg>
+              <span>{attachment.file_name}</span>
+            </a>
+          )}
+        </div>
+      ))}
+    </div>
+  ) : null;
 
   const editDeleteButtons = !isDeleted && isOwn && (
     <div className="absolute top-1/2 -translate-y-1/2 -left-14 hidden group-hover/action:flex items-center space-x-1 bg-white p-1 rounded-md border border-slate-200 shadow-sm z-10">
@@ -160,18 +168,26 @@ export default function MessageBubble({ message, isOwn, ownInitials, otherInitia
 
         {editDeleteButtons}
 
-        <div className={`relative ${bubbleClass} p-3.5 text-xs leading-relaxed ${isDeleted ? "opacity-60" : ""}`}>
-          {isDeleted ? (
+        {isDeleted ? (
+          <div className={`relative ${bubbleClass} p-3.5 text-xs leading-relaxed opacity-60`}>
             <p className={isOwn ? "italic" : "italic text-slate-500"}>This message was deleted</p>
-          ) : (
-            <>
-              {bubbleContent}
-              <div className={`flex items-center space-x-1 mt-1 text-[9px] ${isOwn ? "justify-end" : "justify-start"} ${isOwn ? "text-white/80" : "text-slate-400"} font-medium`}>
-                {isOwn && <StatusCheck status={message.status || "sent"} />}
-              </div>
-            </>
-          )}
-        </div>
+          </div>
+        ) : isImageOnly ? (
+          <div className="relative">
+            {attachmentsEl}
+            <div className={`flex items-center space-x-1 mt-1 text-[9px] ${isOwn ? "justify-end" : "justify-start"} ${isOwn ? "text-white/80" : "text-slate-400"} font-medium`}>
+              {isOwn && <StatusCheck status={message.status || "sent"} />}
+            </div>
+          </div>
+        ) : (
+          <div className={`relative ${bubbleClass} p-3.5 text-xs leading-relaxed`}>
+            {bubbleContent}
+            {attachmentsEl}
+            <div className={`flex items-center space-x-1 mt-1 text-[9px] ${isOwn ? "justify-end" : "justify-start"} ${isOwn ? "text-white/80" : "text-slate-400"} font-medium`}>
+              {isOwn && <StatusCheck status={message.status || "sent"} />}
+            </div>
+          </div>
+        )}
       </div>
 
       {isOwn && avatarEl}
