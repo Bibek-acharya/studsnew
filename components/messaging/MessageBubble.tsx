@@ -2,6 +2,7 @@
 
 import React, { useState } from "react";
 import { Message } from "@/services/message.api";
+import { getImageUrl } from "@/services/api";
 
 interface MessageBubbleProps {
   message: Message;
@@ -52,13 +53,13 @@ export default function MessageBubble({ message, isOwn, onEdit, onDelete }: Mess
                   <div key={attachment.id} className={`text-xs ${isOwn ? "text-blue-100" : "text-gray-500"}`}>
                     {attachment.file_type.startsWith("image/") ? (
                       <img
-                        src={`/api/v1/uploads/${attachment.thumbnail_key || attachment.storage_key}`}
+                        src={getImageUrl(`/uploads/${attachment.thumbnail_key || attachment.storage_key}`)}
                         alt={attachment.file_name}
                         className="rounded max-w-xs max-h-40"
                       />
                     ) : (
                       <a
-                        href={`/api/v1/uploads/${attachment.storage_key}`}
+                        href={getImageUrl(`/uploads/${attachment.storage_key}`)}
                         target="_blank"
                         rel="noopener noreferrer"
                         className="underline"

@@ -99,12 +99,30 @@ const BookCounsellingPage: React.FC<BookCounsellingPageProps> = () => {
     }
     setCollegesLoading(true);
     try {
-      const res = await apiService.getColleges({
-        search: query,
-        limit: 10,
-        page: 1,
-      });
-      setColleges(res?.data?.colleges || []);
+      const [collegeRes, instRes] = await Promise.all([
+        apiService.getColleges({ search: query, limit: 10, page: 1 }),
+        apiService.getPublicInstitutions({ search: query, limit: 10 }),
+      ]);
+
+      const tableColleges = (collegeRes as any)?.data?.colleges || [];
+
+      const instColleges = ((instRes as any)?.data?.institutions || [])
+        .map((inst: any) => ({
+          id: inst.id,
+          name: inst.institution_name,
+          location: inst.district || "",
+          type: inst.type || inst.institution_type || "College",
+        }));
+
+      const claimedCollegeIds = new Set(
+        ((instRes as any)?.data?.institutions || [])
+          .filter((inst: any) => inst.college_id > 0)
+          .map((inst: any) => inst.college_id),
+      );
+
+      const unclaimed = tableColleges.filter((c: any) => !claimedCollegeIds.has(c.id));
+
+      setColleges([...instColleges, ...unclaimed] as College[]);
     } catch {
       setColleges([]);
     }
