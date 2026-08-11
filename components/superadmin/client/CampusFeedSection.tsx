@@ -8,7 +8,10 @@ import {
   Users,
   ArrowLeft,
   Loader2,
+  Pencil,
+  Trash2,
 } from "lucide-react";
+import DynamicIcon from "@/components/shared/DynamicIcon";
 import {
   apiService,
   type ForumCommunity,
@@ -24,12 +27,18 @@ export default function CampusFeedSection() {
   const [createForm, setCreateForm] = useState({
     name: "",
     description: "",
-    emoji: "",
+    icon: "",
     bg_color: "",
   });
   const [creating, setCreating] = useState(false);
   const [communityPosts, setCommunityPosts] = useState<ForumPost[]>([]);
   const [postsLoading, setPostsLoading] = useState(false);
+  const [editingCommunity, setEditingCommunity] = useState<ForumCommunity | null>(null);
+  const [editForm, setEditForm] = useState({ name: "", description: "", icon: "", bg_color: "" });
+  const [saving, setSaving] = useState(false);
+  const [deleteConfirm, setDeleteConfirm] = useState<number | null>(null);
+  const [deleting, setDeleting] = useState(false);
+  const [deletingPostId, setDeletingPostId] = useState<number | null>(null);
 
   const fetchCommunities = () => {
     setLoading(true);
@@ -51,12 +60,68 @@ export default function CampusFeedSection() {
     try {
       await apiService.createForumCommunity(createForm);
       setShowCreate(false);
-      setCreateForm({ name: "", description: "", emoji: "", bg_color: "" });
+      setCreateForm({ name: "", description: "", icon: "", bg_color: "" });
       fetchCommunities();
     } catch {
       /* ignore */
     } finally {
       setCreating(false);
+    }
+  };
+
+  const handleEdit = (community: ForumCommunity) => {
+    setEditingCommunity(community);
+    setEditForm({
+      name: community.name,
+      description: community.description || "",
+      icon: community.icon || "",
+      bg_color: community.bg_color || "",
+    });
+  };
+
+  const handleSaveEdit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!editForm.name.trim()) return;
+    setSaving(true);
+    try {
+      const token = localStorage.getItem("superadmin_token") || "";
+      await apiService.updateForumCommunity(token, editingCommunity!.id, editForm);
+      setEditingCommunity(null);
+      fetchCommunities();
+    } catch {
+      /* ignore */
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const handleDelete = async (communityId: number) => {
+    setDeleting(true);
+    try {
+      const token = localStorage.getItem("superadmin_token") || "";
+      await apiService.deleteForumCommunity(token, communityId);
+      setDeleteConfirm(null);
+      fetchCommunities();
+      if (selectedCommunity?.id === communityId) {
+        setSelectedCommunity(null);
+        setCommunityPosts([]);
+      }
+    } catch {
+      /* ignore */
+    } finally {
+      setDeleting(false);
+    }
+  };
+
+  const handlePostDelete = async (postId: number) => {
+    try {
+      const token = localStorage.getItem("superadmin_token") || "";
+      await apiService.adminDeleteForumPost(token, postId);
+      setCommunityPosts((p) => p.filter((x) => x.id !== postId));
+    } catch {
+      /* ignore */
+    } finally {
+      setDeletingPostId(null);
     }
   };
 
@@ -90,7 +155,10 @@ export default function CampusFeedSection() {
             </button>
             <div>
               <h2 className="text-lg font-bold text-gray-900">
-                {selectedCommunity.emoji} {selectedCommunity.name}
+                {selectedCommunity.icon ? (
+                  <DynamicIcon name={selectedCommunity.icon} size={20} className="inline mr-1 text-blue-600" />
+                ) : null}
+                {selectedCommunity.name}
               </h2>
               {selectedCommunity.description && (
                 <p className="text-sm text-gray-500">
@@ -142,6 +210,14 @@ export default function CampusFeedSection() {
                   <span className="ml-auto rounded bg-gray-100 px-2 py-0.5 text-xs font-medium text-gray-600">
                     {post.category}
                   </span>
+                  <button
+                    type="button"
+                    onClick={(e) => { e.stopPropagation(); setDeletingPostId(post.id); }}
+                    className="ml-2 flex h-7 w-7 items-center justify-center rounded-md text-gray-400 transition-colors hover:bg-red-50 hover:text-red-600"
+                    title="Delete post"
+                  >
+                    <Trash2 size={14} />
+                  </button>
                 </div>
                 <h3 className="mb-1 text-base font-bold text-gray-900">
                   {post.title}
@@ -164,7 +240,34 @@ export default function CampusFeedSection() {
             ))
           )}
         </div>
-      </div>
+
+      {deletingPostId && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
+          <div className="w-full max-w-sm rounded-lg bg-white p-6 shadow-xl">
+            <h3 className="mb-2 text-lg font-bold text-gray-900">Delete Post</h3>
+            <p className="mb-4 text-sm text-gray-600">
+              Delete this post and all its comments, votes, and attached files? This cannot be undone.
+            </p>
+            <div className="flex gap-2">
+              <button
+                type="button"
+                onClick={() => handlePostDelete(deletingPostId)}
+                className="rounded-md bg-red-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-red-700"
+              >
+                Delete
+              </button>
+              <button
+                type="button"
+                onClick={() => setDeletingPostId(null)}
+                className="rounded-md bg-gray-200 px-4 py-2 text-sm font-medium text-gray-600 transition-colors hover:bg-gray-300"
+              >
+                Cancel
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
     );
   }
 
@@ -186,16 +289,31 @@ export default function CampusFeedSection() {
       {showCreate && (
         <div className="border-b border-gray-100 bg-gray-50 px-5 py-4">
           <form onSubmit={handleCreate} className="flex flex-col gap-3">
-            <div className="flex gap-3">
+            <div className="flex items-center gap-3">
+              <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-lg bg-blue-50 text-blue-600">
+                {createForm.icon ? (
+                  <DynamicIcon name={createForm.icon} size={24} />
+                ) : (
+                  <span className="text-xs text-gray-400">Icon</span>
+                )}
+              </div>
               <input
                 type="text"
-                value={createForm.emoji}
+                value={createForm.icon}
                 onChange={(e) =>
-                  setCreateForm((p) => ({ ...p, emoji: e.target.value }))
+                  setCreateForm((p) => ({ ...p, icon: e.target.value }))
                 }
-                placeholder="Emoji"
-                className="w-16 rounded-md border border-gray-200 px-2 py-2 text-center text-sm outline-none focus:border-blue-400"
+                placeholder="e.g. users, book-open, graduation-cap"
+                className="flex-1 rounded-md border border-gray-200 px-3 py-2 text-sm outline-none focus:border-blue-400"
               />
+            </div>
+            <p className="text-xs text-gray-400">
+              Icon name from{" "}
+              <a href="https://lucide.dev/icons" target="_blank" rel="noopener noreferrer" className="text-blue-600 underline">
+                lucide.dev/icons
+              </a>
+            </p>
+            <div className="flex gap-3">
               <input
                 type="text"
                 value={createForm.name}
@@ -245,6 +363,103 @@ export default function CampusFeedSection() {
         </div>
       )}
 
+      {editingCommunity && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
+          <div className="w-full max-w-md rounded-lg bg-white p-6 shadow-xl">
+            <h3 className="mb-4 text-lg font-bold text-gray-900">Edit Community</h3>
+            <form onSubmit={handleSaveEdit} className="flex flex-col gap-3">
+              <div className="flex items-center gap-3">
+                <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-lg bg-blue-50 text-blue-600">
+                  {editForm.icon ? (
+                    <DynamicIcon name={editForm.icon} size={24} />
+                  ) : (
+                    <span className="text-xs text-gray-400">Icon</span>
+                  )}
+                </div>
+                <input
+                  type="text"
+                  value={editForm.icon}
+                  onChange={(e) => setEditForm((p) => ({ ...p, icon: e.target.value }))}
+                  placeholder="e.g. users, book-open"
+                  className="flex-1 rounded-md border border-gray-200 px-3 py-2 text-sm outline-none focus:border-blue-400"
+                />
+              </div>
+              <p className="text-xs text-gray-400">
+                <a href="https://lucide.dev/icons" target="_blank" rel="noopener noreferrer" className="text-blue-600 underline">
+                  Browse icons
+                </a>
+              </p>
+              <input
+                type="text"
+                value={editForm.name}
+                onChange={(e) => setEditForm((p) => ({ ...p, name: e.target.value }))}
+                placeholder="Community name"
+                required
+                className="w-full rounded-md border border-gray-200 px-3 py-2 text-sm outline-none focus:border-blue-400"
+              />
+              <input
+                type="text"
+                value={editForm.bg_color}
+                onChange={(e) => setEditForm((p) => ({ ...p, bg_color: e.target.value }))}
+                placeholder="Bg color (hex)"
+                className="w-full rounded-md border border-gray-200 px-3 py-2 text-sm outline-none focus:border-blue-400"
+              />
+              <input
+                type="text"
+                value={editForm.description}
+                onChange={(e) => setEditForm((p) => ({ ...p, description: e.target.value }))}
+                placeholder="Short description"
+                className="w-full rounded-md border border-gray-200 px-3 py-2 text-sm outline-none focus:border-blue-400"
+              />
+              <div className="flex gap-2 mt-2">
+                <button
+                  type="submit"
+                  disabled={saving}
+                  className="rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-blue-700 disabled:opacity-50"
+                >
+                  {saving ? "Saving..." : "Save Changes"}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setEditingCommunity(null)}
+                  className="rounded-md bg-gray-200 px-4 py-2 text-sm font-medium text-gray-600 transition-colors hover:bg-gray-300"
+                >
+                  Cancel
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {deleteConfirm && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
+          <div className="w-full max-w-sm rounded-lg bg-white p-6 shadow-xl">
+            <h3 className="mb-2 text-lg font-bold text-gray-900">Delete Community</h3>
+            <p className="mb-4 text-sm text-gray-600">
+              This will permanently delete this community and all its posts, comments, votes, and uploaded files. This action cannot be undone.
+            </p>
+            <div className="flex gap-2">
+              <button
+                type="button"
+                onClick={() => handleDelete(deleteConfirm)}
+                disabled={deleting}
+                className="rounded-md bg-red-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-red-700 disabled:opacity-50"
+              >
+                {deleting ? "Deleting..." : "Delete"}
+              </button>
+              <button
+                type="button"
+                onClick={() => setDeleteConfirm(null)}
+                className="rounded-md bg-gray-200 px-4 py-2 text-sm font-medium text-gray-600 transition-colors hover:bg-gray-300"
+              >
+                Cancel
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       <div className="divide-y divide-gray-100">
         {loading ? (
           <div className="flex items-center justify-center py-12 text-sm text-gray-400">
@@ -258,19 +473,27 @@ export default function CampusFeedSection() {
           </div>
         ) : (
           communities.map((community) => (
-            <button
+            <div
               key={community.id}
-              type="button"
-              onClick={() => viewCommunity(community)}
-              className="flex w-full items-center gap-4 px-5 py-4 text-left transition-colors hover:bg-gray-50"
+              className="flex w-full items-center gap-4 px-5 py-4 transition-colors hover:bg-gray-50"
             >
-              <div
+              <button
+                type="button"
+                onClick={() => viewCommunity(community)}
                 className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl text-xl"
                 style={{ backgroundColor: community.bg_color || "#e0e7ff" }}
               >
-                {community.emoji || "🏫"}
-              </div>
-              <div className="min-w-0 flex-1">
+                {community.icon ? (
+                  <DynamicIcon name={community.icon} size={22} className="text-white" />
+                ) : (
+                  <Building size={22} className="text-white" />
+                )}
+              </button>
+              <button
+                type="button"
+                onClick={() => viewCommunity(community)}
+                className="min-w-0 flex-1 text-left"
+              >
                 <p className="text-sm font-semibold text-gray-900">
                   {community.name}
                 </p>
@@ -279,7 +502,7 @@ export default function CampusFeedSection() {
                     {community.description}
                   </p>
                 )}
-              </div>
+              </button>
               <div className="flex shrink-0 items-center gap-3 text-xs text-gray-400">
                 <span className="flex items-center gap-1">
                   <MessageSquare size={13} />
@@ -290,7 +513,27 @@ export default function CampusFeedSection() {
                   {community.member_count || 0}
                 </span>
               </div>
-            </button>
+              <div className="flex shrink-0 items-center gap-1">
+                <button
+                  type="button"
+                  onClick={(e) => { e.stopPropagation(); handleEdit(community); }}
+                  className="flex h-8 w-8 items-center justify-center rounded-md text-gray-400 transition-colors hover:bg-gray-100 hover:text-blue-600"
+                  title="Edit community"
+                >
+                  <Pencil size={15} />
+                </button>
+                {!community.is_general && (
+                  <button
+                    type="button"
+                    onClick={(e) => { e.stopPropagation(); setDeleteConfirm(community.id); }}
+                    className="flex h-8 w-8 items-center justify-center rounded-md text-gray-400 transition-colors hover:bg-gray-100 hover:text-red-600"
+                    title="Delete community"
+                  >
+                    <Trash2 size={15} />
+                  </button>
+                )}
+              </div>
+            </div>
           ))
         )}
       </div>

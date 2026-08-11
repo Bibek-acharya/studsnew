@@ -6,6 +6,7 @@ import { apiService, ForumPost, ForumCommunity, ForumComment } from "@/services/
 import { useAuth } from "@/services/AuthContext";
 import { ForumPostCard, JoinButton, ImageGrid } from "./ForumPostCard";
 import { Image, BarChart2, Video, ChevronUp, X, CheckCircle, AlertTriangle, Info } from "lucide-react";
+import DynamicIcon from "@/components/shared/DynamicIcon";
 
 const CommunityHeader: React.FC<{
   community: ForumCommunity;
@@ -20,7 +21,11 @@ const CommunityHeader: React.FC<{
       <div className="max-w-300 mx-auto">
         <div className="mb-5 flex items-center justify-between">
           <div className="w-24 h-24 rounded-md overflow-hidden border border-gray-100 bg-white flex items-center justify-center text-4xl">
-            {community.emoji || "🎓"}
+            {community.icon ? (
+              <DynamicIcon name={community.icon} size={40} />
+            ) : (
+              <span className="text-4xl">🎓</span>
+            )}
           </div>
           {onBack && (
              <button onClick={onBack} className="flex items-center gap-2 text-[#5468ff] font-bold text-sm hover:underline transition">
@@ -527,7 +532,8 @@ const CampusForumPage: React.FC = () => {
 
   const handleCreatePostClick = () => {
     if (!isAuthenticated) { addToast("Please login to create a post", "warning"); return; }
-    if (selectedCommunityId && isMemberOf(selectedCommunityId)) {
+    const selCommunity = communities.find((c) => c.id === selectedCommunityId);
+    if (selectedCommunityId && (selCommunity?.is_general || isMemberOf(selectedCommunityId))) {
       setModalCommunityId(selectedCommunityId);
     }
     setIsCreatePostModalOpen(true);
@@ -558,7 +564,8 @@ const CampusForumPage: React.FC = () => {
     if (!isAuthenticated) { addToast("Please login", "warning"); return; }
     if (!modalCommunityId || !modalTitle.trim()) return;
 
-    if (!isMemberOf(modalCommunityId)) {
+    const targetCommunity = communities.find((c) => c.id === modalCommunityId);
+    if (targetCommunity && !targetCommunity.is_general && !isMemberOf(modalCommunityId)) {
       addToast("You must join this community before posting.", "warning");
       return;
     }
@@ -656,7 +663,13 @@ const CampusForumPage: React.FC = () => {
                 {communities.map((item) => (
                   <div key={item.id} className={`flex w-full items-center gap-2 rounded-md p-2 transition cursor-pointer ${selectedCommunityId === item.id ? "bg-blue-50" : "hover:bg-gray-50"}`}
                     onClick={() => setSelectedCommunityId(item.id)}>
-                    <div className={`h-9 w-9 shrink-0 ${item.bg_color || "bg-gray-100"} flex items-center justify-center rounded-md text-lg`}>{item.emoji}</div>
+                    <div className={`h-9 w-9 shrink-0 ${item.bg_color || "bg-gray-100"} flex items-center justify-center rounded-md text-lg`}>
+                      {item.icon ? (
+                        <DynamicIcon name={item.icon} size={20} />
+                      ) : (
+                        <span className="text-lg">🎓</span>
+                      )}
+                    </div>
                     <div className="flex-1 min-w-0">
                       <span className={`block text-[13px] font-bold truncate ${selectedCommunityId === item.id ? "text-blue-600" : "text-gray-600"}`}>{item.name}</span>
                       {item.member_count !== undefined && (
@@ -683,7 +696,11 @@ const CampusForumPage: React.FC = () => {
              <div className="lg:hidden mb-4">
                 <div className={`flex items-center justify-between rounded-md p-4 bg-white border border-gray-100`}>
                   <div className="flex items-center gap-3">
-                    <span className="text-2xl">{selectedCommunity.emoji}</span>
+                    {selectedCommunity.icon ? (
+                      <DynamicIcon name={selectedCommunity.icon} size={28} />
+                    ) : (
+                      <span className="text-2xl">🎓</span>
+                    )}
                     <div>
                       <p className="font-bold text-gray-900">{selectedCommunity.name}</p>
                       <p className="text-[11px] text-gray-500">{selectedCommunity.member_count ?? 0} members</p>
@@ -724,7 +741,11 @@ const CampusForumPage: React.FC = () => {
           ) : (
             selectedCommunityId && (
               <div className="flex flex-col items-center gap-3 rounded-md border border-dashed border-blue-200 bg-blue-50/60 py-8 text-center px-6">
-                <span className="text-3xl">{selectedCommunity?.emoji || "🔒"}</span>
+                {selectedCommunity?.icon ? (
+                  <DynamicIcon name={selectedCommunity.icon} size={32} />
+                ) : (
+                  <span className="text-3xl">🔒</span>
+                )}
                 <p className="text-sm font-bold text-gray-700">Join <strong>{selectedCommunity?.name}</strong> to start contributing</p>
                 <JoinButton
                   communityId={selectedCommunityId}
@@ -927,7 +948,7 @@ const CampusForumPage: React.FC = () => {
                     className="w-full appearance-none rounded-md border border-gray-200 bg-slate-50 px-5 py-3.5 text-base font-bold text-gray-700 outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition">
                     <option value={0}>Choose where to post...</option>
                     {communities.filter((c) => c.is_member).map((c) => (
-                      <option key={c.id} value={c.id}>{c.emoji} {c.name}</option>
+                      <option key={c.id} value={c.id}>{c.icon || "🎓"} {c.name}</option>
                     ))}
                   </select>
                   <div className="pointer-events-none absolute inset-y-0 right-4 flex items-center text-gray-400">

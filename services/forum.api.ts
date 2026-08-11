@@ -15,7 +15,7 @@ export const forumApi = {
   async createForumCommunity(data: {
     name: string;
     description?: string;
-    emoji?: string;
+    icon?: string;
     bg_color?: string;
   }): Promise<ForumCommunity> {
     const token = typeof window !== "undefined" ? localStorage.getItem("superadmin_token") : null;
@@ -187,5 +187,46 @@ export const forumApi = {
     if (!response.ok) throw new Error("Failed to upload media");
     const data = await response.json();
     return data.data?.urls || data.urls || [];
+  },
+  async updateForumCommunity(token: string, id: number, data: {
+    name: string;
+    description?: string;
+    icon?: string;
+    bg_color?: string;
+  }): Promise<ForumCommunity> {
+    const response = await fetch(`${API_BASE_URL}/api/v1/forum/communities/${id}`, {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+        ...(token ? { Authorization: `Bearer ${token}` } : {}),
+      },
+      body: JSON.stringify(data),
+      credentials: "include",
+    });
+    if (!response.ok) throw new Error("Failed to update community");
+    const res = await response.json();
+    return res.data || res;
+  },
+  async deleteForumCommunity(token: string, id: number): Promise<void> {
+    const response = await fetch(`${API_BASE_URL}/api/v1/forum/communities/${id}`, {
+      method: "DELETE",
+      headers: {
+        "Content-Type": "application/json",
+        ...(token ? { Authorization: `Bearer ${token}` } : {}),
+      },
+      credentials: "include",
+    });
+    if (!response.ok) throw new Error("Failed to delete community");
+  },
+  async adminDeleteForumPost(token: string, id: number): Promise<void> {
+    const response = await fetch(`${API_BASE_URL}/api/v1/forum/admin/posts/${id}`, {
+      method: "DELETE",
+      headers: {
+        "Content-Type": "application/json",
+        ...(token ? { Authorization: `Bearer ${token}` } : {}),
+      },
+      credentials: "include",
+    });
+    if (!response.ok) throw new Error("Failed to delete post");
   },
 };

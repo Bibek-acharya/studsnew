@@ -22,6 +22,7 @@ import {
   X,
   CheckCircle,
 } from "lucide-react";
+import DynamicIcon from "@/components/shared/DynamicIcon";
 import {
   apiService,
   ForumPost,
@@ -196,7 +197,11 @@ const PostCardComponent: React.FC<{
             className="w-10 h-10 rounded-md flex items-center justify-center text-white font-bold shrink-0"
             style={{ backgroundColor: community?.bg_color || "#6366f1" }}
           >
-            {community?.emoji || communityName.substring(0, 3).toUpperCase()}
+            {community?.icon ? (
+              <DynamicIcon name={community.icon} size={14} />
+            ) : (
+              communityName.substring(0, 3).toUpperCase()
+            )}
           </div>
           <div>
             <div className="flex items-center gap-2">
@@ -377,7 +382,11 @@ const PollPostComponent: React.FC<{
             className="w-10 h-10 rounded-md flex items-center justify-center text-white font-bold shrink-0"
             style={{ backgroundColor: community?.bg_color || "#6366f1" }}
           >
-            {community?.emoji || communityName.substring(0, 3).toUpperCase()}
+            {community?.icon ? (
+              <DynamicIcon name={community.icon} size={14} />
+            ) : (
+              communityName.substring(0, 3).toUpperCase()
+            )}
           </div>
           <div>
             <div className="flex items-center gap-2">
@@ -695,7 +704,11 @@ const CampusFeedPage: React.FC = () => {
                     className="w-10 h-10 rounded-md flex items-center justify-center shrink-0 text-lg"
                     style={{ backgroundColor: comm.bg_color || "#f3f4f6" }}
                   >
-                    <span>{comm.emoji || getAvatarFromName(comm.name)}</span>
+                    <span>{comm.icon ? (
+                      <DynamicIcon name={comm.icon} size={16} />
+                    ) : (
+                      <span>{getAvatarFromName(comm.name)}</span>
+                    )}</span>
                   </div>
                   <div className="min-w-0 flex-1">
                     <span className="text-sm font-medium text-gray-700 group-hover:text-blue-600 transition block truncate">

@@ -4,6 +4,7 @@ import React, { useState } from "react";
 import { useRouter } from "next/navigation";
 import { ForumPost, ForumComment } from "@/services/api";
 import { ArrowUp, ArrowDown, MessageSquare, MoreVertical, EyeOff, Flag, Share2 } from "lucide-react";
+import DynamicIcon from "@/components/shared/DynamicIcon";
 
 function parseImageUrls(rawUrl?: string): string[] {
   if (!rawUrl) return [];
@@ -264,7 +265,11 @@ const ForumPostCard: React.FC<ForumPostCardProps> = ({
       <div className="mb-3 flex items-start justify-between">
         <div className="flex items-center gap-3">
           <div className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-md ${post.community?.bg_color || "bg-blue-600"} text-lg`}>
-            {post.community?.emoji || "✨"}
+            {post.community?.icon ? (
+              <DynamicIcon name={post.community.icon} size={14} />
+            ) : (
+              <span>✨</span>
+            )}
           </div>
           <div>
             <div className="flex items-center gap-2">

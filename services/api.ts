@@ -363,6 +363,8 @@ export const apiService = {
   // Forum
   getForumCommunities: forumApi.getForumCommunities.bind(forumApi),
   createForumCommunity: forumApi.createForumCommunity.bind(forumApi),
+  updateForumCommunity: forumApi.updateForumCommunity.bind(forumApi),
+  deleteForumCommunity: forumApi.deleteForumCommunity.bind(forumApi),
   getForumPosts: forumApi.getForumPosts.bind(forumApi),
   joinForumCommunity: forumApi.joinForumCommunity.bind(forumApi),
   getForumPostComments: forumApi.getForumPostComments.bind(forumApi),
@@ -374,6 +376,7 @@ export const apiService = {
   createForumPost: forumApi.createForumPost.bind(forumApi),
   updateForumPost: forumApi.updateForumPost.bind(forumApi),
   deleteForumPost: forumApi.deleteForumPost.bind(forumApi),
+  adminDeleteForumPost: forumApi.adminDeleteForumPost.bind(forumApi),
   uploadForumMedia: forumApi.uploadForumMedia.bind(forumApi),
 
   // Counselling

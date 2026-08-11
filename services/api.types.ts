@@ -590,12 +590,13 @@ export interface ForumUser {
 export interface ForumCommunity {
   id: number;
   name: string;
-  emoji: string;
+  icon: string;
   description?: string;
   bg_color?: string;
   member_count?: number;
   post_count?: number;
   is_member?: boolean;
+  is_general?: boolean;
 }
 
 export interface ForumComment {
