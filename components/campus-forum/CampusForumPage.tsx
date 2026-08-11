@@ -4,7 +4,7 @@ import React, { useEffect, useState, useRef, useCallback } from "react";
 import { apiService, ForumPost, ForumCommunity } from "@/services/api";
 import { useAuth } from "@/services/AuthContext";
 import DynamicIcon from "@/components/shared/DynamicIcon";
-import { Heart, MessageCircle, Image, BarChart2, Video, X, Plus } from "lucide-react";
+import { Heart, MessageCircle, Image, BarChart2, Video, X, Plus, Send, ChevronDown, ChevronUp, Maximize2, ChevronRight } from "lucide-react";
 
 /* ── helpers ─────────────────────────────────────────────────────────── */
 
@@ -44,7 +44,7 @@ const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080";
 
 function imageUrl(path?: string): string {
   if (!path) return "";
-  if (path.startsWith("http")) return path;
+  if (path.startsWith("http") || path.startsWith("blob:")) return path;
   return `${API_BASE}${path}`;
 }
 
@@ -64,11 +64,25 @@ function parsePollOptions(post: ForumPost): PollOption[] {
 
 /* ── internal components ──────────────────────────────────────────────── */
 
+interface CommentData {
+  id: number;
+  content: string;
+  user_id: number;
+  user_name: string;
+  user?: { id: number; first_name: string; last_name: string; image_url?: string };
+  parent_id?: number;
+  replies?: CommentData[];
+  created_at: string;
+}
+
 const PostCard: React.FC<{
   post: ForumPost;
   onLike: (id: number) => void;
   onCommentClick: (id: number) => void;
-}> = ({ post, onLike, onCommentClick }) => {
+  onLightbox: (url: string, type: "image" | "video") => void;
+  comments?: CommentData[];
+  commentsOpen?: boolean;
+}> = ({ post, onLike, onCommentClick, onLightbox, comments = [], commentsOpen }) => {
   const images = parseImageUrls(post);
   const pollOptions = parsePollOptions(post);
   const user = post.user;
@@ -112,28 +126,24 @@ const PostCard: React.FC<{
       )}
 
       {images.length > 0 && (
-        <div className={`grid gap-1 rounded-xl overflow-hidden ${
-          images.length === 1 ? "grid-cols-1" :
-          images.length === 2 ? "grid-cols-2" :
-          images.length === 3 ? "grid-cols-2" :
-          images.length === 4 ? "grid-cols-2" :
-          "grid-cols-3"
-        }`}>
+        <div className={`grid gap-2 ${images.length === 1 ? "grid-cols-1" : "grid-cols-2"}`}>
           {images.map((url, i) => (
-            <img
-              key={i}
-              src={imageUrl(url)}
-              alt={`Post image ${i + 1}`}
-              className="w-full object-cover rounded-lg border border-slate-100"
-              style={{ maxHeight: i === 0 && images.length === 1 ? 320 : 200 }}
-            />
+            <div key={i} className="relative rounded-xl overflow-hidden border border-slate-100 cursor-pointer group" onClick={() => onLightbox(imageUrl(url), "image")}>
+              <img src={imageUrl(url)} alt="" className="w-full max-h-60 object-cover" />
+              <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors flex items-center justify-center">
+                <Maximize2 className="h-5 w-5 text-white opacity-0 group-hover:opacity-100 transition-opacity" />
+              </div>
+            </div>
           ))}
         </div>
       )}
 
       {post.video_url && (
-        <div className="rounded-xl overflow-hidden border border-slate-100 bg-black">
-          <video src={imageUrl(post.video_url)} controls className="w-full max-h-80 object-contain" />
+        <div className="relative rounded-xl overflow-hidden border border-slate-100 bg-black cursor-pointer group" onClick={() => onLightbox(imageUrl(post.video_url), "video")}>
+          <video src={imageUrl(post.video_url)} className="w-full max-h-60 object-contain" />
+          <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors flex items-center justify-center">
+            <Maximize2 className="h-6 w-6 text-white opacity-0 group-hover:opacity-100 transition-opacity" />
+          </div>
         </div>
       )}
 
@@ -143,15 +153,12 @@ const PostCard: React.FC<{
             <BarChart2 className="h-3.5 w-3.5 text-[#0000ff]" />
             Poll {post.total_votes != null && `(${post.total_votes} votes)`}
           </div>
-          {pollOptions.map((opt, idx) => {
+          {pollOptions.map((opt: any, idx: number) => {
             const total = post.total_votes || 1;
-            const pct = Math.round((opt.votes / total) * 100);
+            const pct = Math.round(((opt.votes || 0) / total) * 100);
             return (
               <div key={idx} className="relative overflow-hidden rounded-lg border border-slate-200 bg-white">
-                <div
-                  className="absolute inset-0 bg-blue-50/60 rounded-lg transition-all"
-                  style={{ width: `${pct}%` }}
-                />
+                <div className="absolute inset-0 bg-blue-50/60 rounded-lg transition-all" style={{ width: `${pct}%` }} />
                 <div className="relative flex items-center justify-between px-3 py-2 text-xs font-semibold text-slate-700">
                   <span>{opt.text}</span>
                   <span className="text-slate-400 font-normal">{pct}%</span>
@@ -165,9 +172,7 @@ const PostCard: React.FC<{
       <div className="flex items-center gap-6 pt-2 border-t border-slate-100 text-xs font-semibold text-slate-500">
         <button
           onClick={() => onLike(post.id)}
-          className={`flex items-center gap-1.5 transition-colors cursor-pointer ${
-            post.is_liked ? "text-rose-500" : "hover:text-slate-800"
-          }`}
+          className={`flex items-center gap-1.5 transition-colors cursor-pointer ${post.is_liked ? "text-rose-500" : "hover:text-slate-800"}`}
         >
           <Heart className={`h-3.5 w-3.5 ${post.is_liked ? "fill-current" : ""}`} />
           <span>{post.upvotes || 0}</span>
@@ -180,6 +185,127 @@ const PostCard: React.FC<{
           <span>{post.comment_count || 0} Comments</span>
         </button>
       </div>
+
+      {commentsOpen && (
+        <CommentSection postId={post.id} comments={comments} />
+      )}
+    </div>
+  );
+};
+
+const CommentItem: React.FC<{
+  comment: CommentData;
+  postId: number;
+  onReply: (postId: number, parentId: number, content: string) => void;
+}> = ({ comment, postId, onReply }) => {
+  const [collapsed, setCollapsed] = useState(false);
+  const [showReply, setShowReply] = useState(false);
+  const [replyContent, setReplyContent] = useState("");
+  const [submitting, setSubmitting] = useState(false);
+
+  const handleReply = async () => {
+    if (!replyContent.trim()) return;
+    setSubmitting(true);
+    try {
+      await onReply(postId, comment.id, replyContent.trim());
+      setReplyContent("");
+      setShowReply(false);
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  return (
+    <div className="text-xs">
+      <div className="flex items-start gap-2">
+        <button onClick={() => setCollapsed(!collapsed)} className="mt-0.5 text-slate-400 hover:text-slate-600">
+          {collapsed ? <ChevronRight className="h-3 w-3" /> : <ChevronDown className="h-3 w-3" />}
+        </button>
+        <div className="flex-1 min-w-0">
+          <div className="flex items-center gap-1.5">
+            <span className="font-bold text-slate-800 text-[11px]">{comment.user_name}</span>
+            <span className="text-[10px] text-slate-400">{relativeTime(comment.created_at)}</span>
+          </div>
+          {!collapsed && (
+            <>
+              <p className="text-slate-700 mt-0.5 leading-relaxed">{comment.content}</p>
+              <button onClick={() => setShowReply(!showReply)} className="text-[10px] font-bold text-slate-400 hover:text-[#0000ff] mt-1">
+                Reply
+              </button>
+              {showReply && (
+                <div className="mt-2 flex gap-2">
+                  <input
+                    value={replyContent}
+                    onChange={(e) => setReplyContent(e.target.value)}
+                    placeholder="Write a reply..."
+                    className="flex-1 border border-slate-200 rounded-md px-2.5 py-1.5 text-xs outline-none focus:border-[#0000ff]"
+                    onKeyDown={(e) => e.key === "Enter" && handleReply()}
+                  />
+                  <button onClick={handleReply} disabled={submitting} className="text-[#0000ff] font-bold text-xs disabled:opacity-50">
+                    {submitting ? "..." : "Reply"}
+                  </button>
+                </div>
+              )}
+            </>
+          )}
+        </div>
+      </div>
+      {!collapsed && comment.replies && comment.replies.length > 0 && (
+        <div className="ml-4 mt-2 pl-3 border-l-2 border-slate-200 space-y-3">
+          {comment.replies.map((reply) => (
+            <CommentItem key={reply.id} comment={reply} postId={postId} onReply={onReply} />
+          ))}
+        </div>
+      )}
+    </div>
+  );
+};
+
+const CommentSection: React.FC<{
+  postId: number;
+  comments: CommentData[];
+}> = ({ postId, comments }) => {
+  const [newComment, setNewComment] = useState("");
+  const token = apiService.getToken();
+
+  const handleAddComment = async () => {
+    if (!token || !newComment.trim()) return;
+    try {
+      await apiService.createForumComment(token, postId, { content: newComment.trim() });
+      setNewComment("");
+    } catch {}
+  };
+
+  const handleReply = async (pId: number, parentId: number, content: string) => {
+    if (!token) return;
+    try {
+      await apiService.createForumComment(token, pId, { content, parent_id: parentId });
+    } catch {}
+  };
+
+  return (
+    <div className="border-t border-slate-100 pt-3 space-y-3">
+      <div className="flex gap-2">
+        <input
+          value={newComment}
+          onChange={(e) => setNewComment(e.target.value)}
+          placeholder="Write a comment..."
+          className="flex-1 border border-slate-200 rounded-md px-3 py-2 text-xs outline-none focus:border-[#0000ff]"
+          onKeyDown={(e) => e.key === "Enter" && handleAddComment()}
+        />
+        <button onClick={handleAddComment} className="bg-[#0000ff] text-white rounded-md px-3 py-2 text-xs font-bold hover:opacity-90">
+          <Send className="h-3.5 w-3.5" />
+        </button>
+      </div>
+      {comments.length === 0 ? (
+        <p className="text-[11px] text-slate-400 text-center py-2">No comments yet. Be the first!</p>
+      ) : (
+        <div className="space-y-3">
+          {comments.map((c) => (
+            <CommentItem key={c.id} comment={c} postId={postId} onReply={handleReply} />
+          ))}
+        </div>
+      )}
     </div>
   );
 };
@@ -193,10 +319,14 @@ const CreatePostModal: React.FC<{
     images: File[];
     video: File | null;
     poll: { question: string; options: PollOption[]; duration: string } | null;
+    communityId: number;
   }) => void;
   isSubmitting: boolean;
   user: { first_name: string; last_name: string; image_url?: string } | null;
-}> = ({ isOpen, onClose, onSubmit, isSubmitting, user }) => {
+  communities: ForumCommunity[];
+  selectedCommunityId: number;
+  onCommunityChange: (id: number) => void;
+}> = ({ isOpen, onClose, onSubmit, isSubmitting, user, communities, selectedCommunityId, onCommunityChange }) => {
   const [title, setTitle] = useState("");
   const [content, setContent] = useState("");
   const [images, setImages] = useState<File[]>([]);
@@ -280,7 +410,7 @@ const CreatePostModal: React.FC<{
             duration: pollDuration,
           }
         : null;
-    onSubmit({ title, content, images, video, poll });
+    onSubmit({ title, content, images, video, poll, communityId: selectedCommunityId });
     reset();
   };
 
@@ -311,6 +441,17 @@ const CreatePostModal: React.FC<{
               <span className="text-[0.875rem] text-gray-500 font-medium">Student</span>
             </div>
           </div>
+          <div className="flex-1" />
+          <select
+            value={selectedCommunityId || 0}
+            onChange={(e) => onCommunityChange(Number(e.target.value))}
+            className="text-xs font-bold text-slate-600 bg-slate-50 border border-slate-200 rounded-lg px-3 py-1.5 outline-none focus:border-[#0000ff]"
+          >
+            <option value={0} disabled>Select community</option>
+            {communities.filter(c => c.is_member || c.is_general).map((c) => (
+              <option key={c.id} value={c.id}>{c.name}</option>
+            ))}
+          </select>
           <button
             onClick={handleClose}
             className="text-gray-800 hover:text-black hover:bg-gray-100 p-2 rounded-full transition-colors w-9 h-9 flex items-center justify-center"
@@ -492,6 +633,28 @@ const CreatePostModal: React.FC<{
   );
 };
 
+/* ── lightbox ─────────────────────────────────────────────────────────── */
+
+const Lightbox: React.FC<{
+  url: string | null;
+  type: "image" | "video";
+  onClose: () => void;
+}> = ({ url, type, onClose }) => {
+  if (!url) return null;
+  return (
+    <div className="fixed inset-0 bg-black/90 z-50 flex items-center justify-center p-4" onClick={onClose}>
+      <button onClick={onClose} className="absolute top-4 right-4 text-white/80 hover:text-white p-2 z-10">
+        <X className="h-7 w-7" />
+      </button>
+      {type === "image" ? (
+        <img src={url} alt="" className="max-w-full max-h-[90vh] object-contain rounded-lg" onClick={(e) => e.stopPropagation()} />
+      ) : (
+        <video src={url} controls autoPlay className="max-w-full max-h-[90vh] rounded-lg" onClick={(e) => e.stopPropagation()} />
+      )}
+    </div>
+  );
+};
+
 /* ── toast ────────────────────────────────────────────────────────────── */
 
 interface ToastItem {
@@ -531,6 +694,10 @@ const CampusForumPage: React.FC = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [toasts, setToasts] = useState<ToastItem[]>([]);
   const toastIdRef = useRef(0);
+  const [openComments, setOpenComments] = useState<Record<number, boolean>>({});
+  const [commentsData, setCommentsData] = useState<Record<number, CommentData[]>>({});
+  const [lightboxUrl, setLightboxUrl] = useState<string | null>(null);
+  const [lightboxType, setLightboxType] = useState<"image" | "video">("image");
 
   const token = apiService.getToken();
 
@@ -554,7 +721,7 @@ const CampusForumPage: React.FC = () => {
     try {
       const data = await apiService.getForumPosts(50, token || undefined, selectedCommunityId || undefined, 1);
       const list: ForumPost[] = isArray(data) ? (data as ForumPost[]) : ((data as { posts?: ForumPost[] })?.posts || []);
-      if (!selectedCommunityId) {
+      if (!selectedCommunityId && communities.length > 0) {
         const joinedIds = communities.filter((c) => c.is_member).map((c) => c.id);
         const generalId = communities.find((c) => c.is_general)?.id;
         const userId = user?.id;
@@ -629,6 +796,7 @@ const CampusForumPage: React.FC = () => {
     images: File[];
     video: File | null;
     poll: { question: string; options: PollOption[]; duration: string } | null;
+    communityId: number;
   }) => {
     if (!data.title.trim() && !data.content.trim() && data.images.length === 0 && !data.video && !data.poll) {
       showToast("Please add a title, content, or media");
@@ -665,9 +833,9 @@ const CampusForumPage: React.FC = () => {
       const pollItems = data.poll ? data.poll.options.map((o) => o.text) : [];
 
       const newPost = await apiService.createForumPost(token, {
-        community_id: selectedCommunityId || communities.find((c) => c.is_general)?.id || communities[0]?.id || 0,
+        community_id: data.communityId || selectedCommunityId || communities.find((c) => c.is_general)?.id || communities[0]?.id || 0,
         category: "General",
-        title: data.title || data.content.slice(0, 80) || "Untitled",
+        title: data.title || "Untitled",
         content: data.content,
         poll_options: pollItems.length > 1 ? pollItems : undefined,
         is_poll: pollItems.length > 1,
@@ -703,8 +871,23 @@ const CampusForumPage: React.FC = () => {
     }
   };
 
-  const handleCommentClick = (_postId: number) => {
-    // Placeholder — deep link to post detail in future
+  const handleCommentClick = async (postId: number) => {
+    const isOpen = openComments[postId];
+    if (isOpen) {
+      setOpenComments((p) => ({ ...p, [postId]: false }));
+    } else {
+      setOpenComments((p) => ({ ...p, [postId]: true }));
+      try {
+        const data = await apiService.getForumPostComments(postId, 50, 0);
+        const cmts = data?.comments || data || [];
+        setCommentsData((p) => ({ ...p, [postId]: cmts }));
+      } catch {}
+    }
+  };
+
+  const handleLightbox = (url: string, type: "image" | "video") => {
+    setLightboxUrl(url);
+    setLightboxType(type);
   };
 
   const selectedCommunity = communities.find((c) => c.id === selectedCommunityId);
@@ -870,6 +1053,9 @@ const CampusForumPage: React.FC = () => {
                     post={post}
                     onLike={handleLike}
                     onCommentClick={handleCommentClick}
+                    onLightbox={handleLightbox}
+                    comments={commentsData[post.id]}
+                    commentsOpen={openComments[post.id]}
                   />
                 ))}
               </div>
@@ -932,7 +1118,12 @@ const CampusForumPage: React.FC = () => {
         onSubmit={handleSubmitPost}
         isSubmitting={isSubmitting}
         user={user ? { first_name: user.first_name, last_name: user.last_name, image_url: user.image_url } : null}
+        communities={communities}
+        selectedCommunityId={selectedCommunityId || communities.find((c) => c.is_general)?.id || 0}
+        onCommunityChange={setSelectedCommunityId}
       />
+
+      <Lightbox url={lightboxUrl} type={lightboxType} onClose={() => setLightboxUrl(null)} />
 
       <ToastContainer toasts={toasts} />
     </div>

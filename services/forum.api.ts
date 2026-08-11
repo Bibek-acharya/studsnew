@@ -48,7 +48,10 @@ export const forumApi = {
     const response = await fetch(
       `${API_BASE_URL}/api/v1/forum/posts?${params.toString()}`,
       {
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json",
+          ...(_token ? { Authorization: `Bearer ${_token}` } : {}),
+        },
         credentials: "include",
       },
     );
