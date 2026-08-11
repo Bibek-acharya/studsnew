@@ -1,7 +1,9 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Conversation } from "@/services/message.api";
+import { dashboardApi } from "@/services/dashboard.api";
+import { collegeApi } from "@/services/college.api";
 
 interface ContactInfoProps {
   conversation: Conversation;
@@ -9,9 +11,56 @@ interface ContactInfoProps {
   onClose?: () => void;
 }
 
+interface InstitutionProfile {
+  institution_name?: string;
+  about?: string;
+  website_url?: string;
+  contact_email?: string;
+  contact_phone?: string;
+  district?: string;
+  logo_url?: string;
+}
+
+interface StudentProfile {
+  id: number;
+  first_name: string;
+  last_name: string;
+  email: string;
+  phone: string;
+  address: string;
+  bio: string;
+  image_url: string;
+}
+
 export default function ContactInfo({ conversation, userRole, onClose }: ContactInfoProps) {
-  const name = userRole === "student" ? conversation.institution_name : conversation.student_name;
-  const initials = (name || "U")
+  const [instProfile, setInstProfile] = useState<InstitutionProfile | null>(null);
+  const [studentProfile, setStudentProfile] = useState<StudentProfile | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    async function fetchProfile() {
+      try {
+        if (userRole === "student" && conversation.institution_id) {
+          const resp = await collegeApi.getPublicInstitutionById(conversation.institution_id);
+          setInstProfile(resp?.data || resp);
+        } else if (userRole === "institution" && conversation.student_id) {
+          const resp = await dashboardApi.getStudentProfile(conversation.student_id);
+          setStudentProfile(resp?.data || resp);
+        }
+      } catch (err) {
+        console.error("Failed to load profile:", err);
+      } finally {
+        setLoading(false);
+      }
+    }
+    fetchProfile();
+  }, [userRole, conversation.institution_id, conversation.student_id]);
+
+  const name = userRole === "student"
+    ? (instProfile?.institution_name || conversation.institution_name || "Unknown")
+    : (studentProfile ? `${studentProfile.first_name} ${studentProfile.last_name}` : conversation.student_name || "Unknown");
+
+  const initials = name
     .split(" ")
     .map((n) => n[0])
     .join("")
@@ -19,7 +68,7 @@ export default function ContactInfo({ conversation, userRole, onClose }: Contact
     .slice(0, 2);
 
   const [aboutOpen, setAboutOpen] = useState(true);
-  const [addressOpen, setAddressOpen] = useState(true);
+  const [detailsOpen, setDetailsOpen] = useState(true);
 
   return (
     <aside className="w-full md:w-80 lg:w-[360px] flex-shrink-0 bg-white border-l border-slate-200 flex flex-col z-20 transition-all duration-300">
@@ -43,7 +92,7 @@ export default function ContactInfo({ conversation, userRole, onClose }: Contact
           </div>
 
           <div>
-            <h3 className="text-lg font-bold text-slate-900">{name || "Unknown"}</h3>
+            <h3 className="text-lg font-bold text-slate-900">{name}</h3>
 
             <div className="flex flex-col items-center justify-center space-y-1 mt-2 text-slate-500 text-xs">
               <div className="flex items-center space-x-1.5">
@@ -64,53 +113,100 @@ export default function ContactInfo({ conversation, userRole, onClose }: Contact
 
         <hr className="border-slate-200" />
 
-        <div className="border-b border-slate-200 pb-4">
-          <button
-            onClick={() => setAboutOpen(!aboutOpen)}
-            className="w-full flex items-center justify-between text-left font-bold text-slate-900 py-1 text-xs"
-          >
-            <span>About</span>
-            <i className={`fa-solid fa-chevron-up text-[10px] text-slate-400 transition-transform ${aboutOpen ? "" : "rotate-180"}`}></i>
-          </button>
-          <div className={`${aboutOpen ? "open" : ""} space-y-3 pt-2 text-xs`} style={{ display: aboutOpen ? "block" : "none" }}>
-            <p className="text-slate-600 leading-relaxed">
-              {userRole === "student"
-                ? `${name || "This institution"} is available for questions. Click "View Profile" to see details about courses, fees, and more.`
-                : `${name || "This student"} is interested in learning more about your institution.`}
-            </p>
-            <button className="w-full py-2 px-3 bg-slate-50 hover:bg-slate-100 border border-slate-200 text-blue-600 font-semibold rounded-sm transition-all text-xs">
-              View Profile
-            </button>
-          </div>
-        </div>
+        {loading ? (
+          <div className="text-center text-slate-400 text-xs py-4">Loading...</div>
+        ) : (
+          <>
+            <div className="border-b border-slate-200 pb-4">
+              <button
+                onClick={() => setAboutOpen(!aboutOpen)}
+                className="w-full flex items-center justify-between text-left font-bold text-slate-900 py-1 text-xs"
+              >
+                <span>About</span>
+                <i className={`fa-solid fa-chevron-up text-[10px] text-slate-400 transition-transform ${aboutOpen ? "" : "rotate-180"}`}></i>
+              </button>
+              <div style={{ display: aboutOpen ? "block" : "none" }} className="space-y-3 pt-2 text-xs">
+                {userRole === "student" && instProfile?.about ? (
+                  <p className="text-slate-600 leading-relaxed">{instProfile.about}</p>
+                ) : userRole === "institution" && studentProfile?.bio ? (
+                  <p className="text-slate-600 leading-relaxed">{studentProfile.bio}</p>
+                ) : (
+                  <p className="text-slate-400 italic">No information available</p>
+                )}
+              </div>
+            </div>
 
-        <div className="border-b border-slate-200 pb-4">
-          <button
-            onClick={() => setAddressOpen(!addressOpen)}
-            className="w-full flex items-center justify-between text-left font-bold text-slate-900 py-1 text-xs"
-          >
-            <span>Details</span>
-            <i className={`fa-solid fa-chevron-up text-[10px] text-slate-400 transition-transform ${addressOpen ? "" : "rotate-180"}`}></i>
-          </button>
-          <div className={`${addressOpen ? "open" : ""} space-y-2 pt-2 text-xs`} style={{ display: addressOpen ? "block" : "none" }}>
-            <div>
-              <p className="text-slate-400 font-medium">Role</p>
-              <p className="text-slate-800 font-semibold mt-0.5 capitalize">
-                {userRole === "student" ? "Institution" : "Student"}
-              </p>
+            <div className="pb-4">
+              <button
+                onClick={() => setDetailsOpen(!detailsOpen)}
+                className="w-full flex items-center justify-between text-left font-bold text-slate-900 py-1 text-xs"
+              >
+                <span>Contact Details</span>
+                <i className={`fa-solid fa-chevron-up text-[10px] text-slate-400 transition-transform ${detailsOpen ? "" : "rotate-180"}`}></i>
+              </button>
+              <div style={{ display: detailsOpen ? "block" : "none" }} className="space-y-2 pt-2 text-xs">
+                {userRole === "student" ? (
+                  <>
+                    {instProfile?.website_url && (
+                      <div>
+                        <p className="text-slate-400 font-medium">Website</p>
+                        <a href={instProfile.website_url} target="_blank" rel="noopener noreferrer"
+                          className="text-blue-600 hover:underline font-semibold mt-0.5 block">
+                          {instProfile.website_url}
+                        </a>
+                      </div>
+                    )}
+                    {instProfile?.contact_email && (
+                      <div>
+                        <p className="text-slate-400 font-medium">Email</p>
+                        <p className="text-slate-800 font-semibold mt-0.5">{instProfile.contact_email}</p>
+                      </div>
+                    )}
+                    {instProfile?.contact_phone && (
+                      <div>
+                        <p className="text-slate-400 font-medium">Phone</p>
+                        <p className="text-slate-800 font-semibold mt-0.5">{instProfile.contact_phone}</p>
+                      </div>
+                    )}
+                    {instProfile?.district && (
+                      <div>
+                        <p className="text-slate-400 font-medium">Location</p>
+                        <p className="text-slate-800 font-semibold mt-0.5">{instProfile.district}</p>
+                      </div>
+                    )}
+                    {!instProfile?.website_url && !instProfile?.contact_email && !instProfile?.contact_phone && !instProfile?.district && (
+                      <p className="text-slate-400 italic">No contact details available</p>
+                    )}
+                  </>
+                ) : (
+                  <>
+                    {studentProfile?.email && (
+                      <div>
+                        <p className="text-slate-400 font-medium">Email</p>
+                        <p className="text-slate-800 font-semibold mt-0.5">{studentProfile.email}</p>
+                      </div>
+                    )}
+                    {studentProfile?.phone && (
+                      <div>
+                        <p className="text-slate-400 font-medium">Phone</p>
+                        <p className="text-slate-800 font-semibold mt-0.5">{studentProfile.phone}</p>
+                      </div>
+                    )}
+                    {studentProfile?.address && (
+                      <div>
+                        <p className="text-slate-400 font-medium">Address</p>
+                        <p className="text-slate-800 font-semibold mt-0.5">{studentProfile.address}</p>
+                      </div>
+                    )}
+                    {!studentProfile?.email && !studentProfile?.phone && !studentProfile?.address && (
+                      <p className="text-slate-400 italic">No contact details available</p>
+                    )}
+                  </>
+                )}
+              </div>
             </div>
-            <div>
-              <p className="text-slate-400 font-medium">Conversation ID</p>
-              <p className="text-slate-800 font-semibold mt-0.5">#{conversation.id}</p>
-            </div>
-            <div>
-              <p className="text-slate-400 font-medium">Messages</p>
-              <p className="text-slate-800 font-semibold mt-0.5">
-                {conversation.unread_count > 0 ? `${conversation.unread_count} unread` : "All read"}
-              </p>
-            </div>
-          </div>
-        </div>
+          </>
+        )}
       </div>
     </aside>
   );

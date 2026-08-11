@@ -239,4 +239,8 @@ export const dashboardApi = {
       authToken: token || undefined,
     });
   },
+  async getStudentProfile(studentId: number): Promise<{ success: boolean; data: { id: number; first_name: string; last_name: string; email: string; phone: string; address: string; bio: string; image_url: string }; message: string }> {
+    const token = typeof window !== "undefined" ? localStorage.getItem("institutionToken") : null;
+    return apiRequest(`/api/v1/institution/students/${studentId}`, { authToken: token || undefined });
+  },
 };

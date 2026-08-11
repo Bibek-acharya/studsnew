@@ -200,14 +200,12 @@ export default function ChatWindow({ conversation, userRole, userId, onToggleCon
     <main className="flex-1 bg-white flex-col min-w-0 relative flex">
       <header className="h-[72px] flex-shrink-0 border-b border-slate-200 px-6 flex items-center justify-between bg-white z-10">
         <div className="flex items-center space-x-3">
-          <div className="relative cursor-pointer" onClick={onToggleContactInfo}>
-            <div className="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center text-blue-600 font-semibold text-sm">
-              {contactInitials}
-            </div>
+          <div className="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center text-blue-600 font-semibold text-sm">
+            {contactInitials}
           </div>
 
-          <div className="cursor-pointer" onClick={onToggleContactInfo}>
-            <h2 className="text-sm font-bold text-slate-900 hover:text-blue-600 transition-colors">
+          <div>
+            <h2 className="text-sm font-bold text-slate-900">
               {contactName || "Unknown"}
             </h2>
             <p className="text-xs text-slate-500 font-medium">
@@ -215,6 +213,20 @@ export default function ChatWindow({ conversation, userRole, userId, onToggleCon
             </p>
           </div>
         </div>
+
+        {onToggleContactInfo && (
+          <button
+            onClick={onToggleContactInfo}
+            className={`w-8 h-8 flex items-center justify-center rounded-full border-2 text-xs font-bold transition-colors ${
+              showContactInfo
+                ? "border-blue-600 text-blue-600 bg-blue-50"
+                : "border-slate-300 text-slate-400 hover:text-slate-600 hover:border-slate-400"
+            }`}
+            title="Info"
+          >
+            i
+          </button>
+        )}
       </header>
 
       <div className="flex-1 overflow-y-auto p-4 sm:p-6 bg-slate-50/50" id="chatMessagesContainer">
