@@ -3,14 +3,13 @@
 import React, { useMemo, useState, useEffect } from "react";
 import Link from "next/link";
 import { submitReviewAction } from "@/actions/review-actions";
-import { getCollegesBySearch } from "@/lib/college-suggestions";
+import { collegeApi } from "@/services/college.api";
+import type { College } from "@/services/api";
 import { courseDataByLevel, searchCourses } from "@/lib/course-suggestions";
 import { ratingCategories, ratingStatusLabels } from "@/lib/review-types";
 import { useAuth } from "@/services/AuthContext";
 
 type StudentType = "current" | "alumni" | null;
-
-const popularColleges = getCollegesBySearch("");
 
 const courseDataMap: Record<string, string[]> = courseDataByLevel;
 
@@ -43,6 +42,9 @@ const WriteReviewPage: React.FC = () => {
     }
   }, [user]);
 
+  const [filteredColleges, setFilteredColleges] = useState<College[]>([]);
+  const [isCollegeLoading, setIsCollegeLoading] = useState(false);
+
   const [showCollegeList, setShowCollegeList] = useState(false);
   const [showCourseList, setShowCourseList] = useState(false);
 
@@ -54,8 +56,27 @@ const WriteReviewPage: React.FC = () => {
     type: "success" | "error";
   }>({ open: false, title: "", message: "", type: "success" });
 
-  const filteredColleges = useMemo(() => {
-    return getCollegesBySearch(collegeInput);
+  useEffect(() => {
+    const timer = setTimeout(async () => {
+      const query = collegeInput.trim();
+      if (query.length > 0) {
+        setIsCollegeLoading(true);
+        try {
+          const res = await collegeApi.getColleges({
+            search: query,
+            pageSize: 10,
+          });
+          setFilteredColleges(res.data.colleges || []);
+        } catch {
+          setFilteredColleges([]);
+        } finally {
+          setIsCollegeLoading(false);
+        }
+      } else {
+        setFilteredColleges([]);
+      }
+    }, 300);
+    return () => clearTimeout(timer);
   }, [collegeInput]);
 
   const currentCourseSuggestions = useMemo(() => {
@@ -170,14 +191,23 @@ const WriteReviewPage: React.FC = () => {
       return;
     }
 
-    const selectedCollege = popularColleges.find(
+    const selectedCollege = filteredColleges.find(
       (c) => c.name.toLowerCase() === collegeInput.toLowerCase(),
     );
+
+    if (!selectedCollege) {
+      showMessage(
+        "error",
+        "Invalid College",
+        "Please select a college from the dropdown suggestions.",
+      );
+      return;
+    }
 
     setSubmitting(true);
     try {
       const result = await submitReviewAction({
-        collegeId: selectedCollege?.id || Math.floor(Math.random() * 1000),
+        collegeId: selectedCollege.id,
         collegeName: collegeInput,
         studentType,
         course: courseInput,
@@ -292,10 +322,15 @@ const WriteReviewPage: React.FC = () => {
                     placeholder="Search Your Campus/college Name"
                     className="w-full rounded-md border border-slate-200 bg-white py-3 pl-10 pr-4 text-sm placeholder-slate-400 focus:border-transparent focus:outline-none focus:ring-2 focus:ring-blue-500"
                   />
-                  {showCollegeList && filteredColleges.length > 0 && (
+                  {showCollegeList && (isCollegeLoading || filteredColleges.length > 0) && (
                     <ul className="absolute left-0 top-full z-20 mt-1 max-h-52 w-full overflow-y-auto rounded-md border border-slate-200 bg-white shadow-lg">
-                      {filteredColleges.map((item) => (
-                        <li key={item.id}>
+                      {isCollegeLoading ? (
+                        <li className="px-4 py-3 text-sm text-slate-500">
+                          Searching...
+                        </li>
+                      ) : (
+                        filteredColleges.map((item) => (
+                          <li key={item.id}>
                           <button
                             type="button"
                             className="w-full border-b border-slate-50 px-4 py-3 text-left text-sm font-medium text-slate-700 transition-colors last:border-0 hover:bg-blue-50"
