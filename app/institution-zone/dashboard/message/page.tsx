@@ -4,8 +4,10 @@ import MessagingShell from "@/components/messaging/MessagingShell";
 
 export default function MessagePage() {
   return (
-    <div className="-m-4 md:-m-6 lg:-m-8 h-[calc(100vh-4rem)]">
-      <MessagingShell userRole="institution" />
+    <div className="p-4 h-[calc(100vh-4rem)]">
+      <div className="h-full border border-slate-200 rounded-lg overflow-hidden bg-slate-100">
+        <MessagingShell userRole="institution" />
+      </div>
     </div>
   );
 }
