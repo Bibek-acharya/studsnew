@@ -38,6 +38,10 @@ export function MessagingProvider({ children }: { children: React.ReactNode }) {
   }, [refreshConversations]);
 
   useEffect(() => {
+    window.dispatchEvent(new CustomEvent("messaging-unread-changed", { detail: unreadCount }));
+  }, [unreadCount]);
+
+  useEffect(() => {
     const unsubCreated = messageApi.on("message.created", () => refreshConversations());
     const unsubRead = messageApi.on("message.read", () => refreshConversations());
     return () => { unsubCreated(); unsubRead(); };

@@ -41,19 +41,23 @@ export default function Sidebar({
   const [unreadNotifications, setUnreadNotifications] = useState(0);
 
   useEffect(() => {
-    const fetchCounts = async () => {
+    const handler = (e: Event) => {
+      setUnreadMessages((e as CustomEvent).detail);
+    };
+    window.addEventListener("messaging-unread-changed", handler);
+    return () => window.removeEventListener("messaging-unread-changed", handler);
+  }, []);
+
+  useEffect(() => {
+    const fetchNotifications = async () => {
       try {
-        const [msgRes, notifRes] = await Promise.all([
-          apiService.getMessages(),
-          apiService.getStudentNotifications(),
-        ]);
-        setUnreadMessages(msgRes.data.messages.filter((m) => !m.read).length);
+        const notifRes = await apiService.getStudentNotifications();
         setUnreadNotifications(notifRes.data.unread_count);
       } catch {
-        // keep defaults (0)
+        // keep default (0)
       }
     };
-    fetchCounts();
+    fetchNotifications();
   }, []);
 
   const navItems = [

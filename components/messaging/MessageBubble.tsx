@@ -27,11 +27,10 @@ export default function MessageBubble({ message, isOwn, onEdit, onDelete }: Mess
           isOwn ? "bg-blue-500 text-white" : "bg-gray-100 text-gray-900"
         } ${isDeleted ? "opacity-50 italic" : ""}`}
       >
-        {!isOwn && (
-          <p className={`text-xs font-medium mb-1 ${isOwn ? "text-blue-100" : "text-gray-500"}`}>
-            {message.sender_name}
-          </p>
-        )}
+        {/* Sender label — show for both sides */}
+        <p className={`text-xs font-medium mb-1 ${isOwn ? "text-blue-200" : "text-gray-500"}`}>
+          {isOwn ? "You" : message.sender_name}
+        </p>
 
         {isDeleted ? (
           <p className="text-sm">This message was deleted</p>

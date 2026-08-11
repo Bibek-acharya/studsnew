@@ -371,7 +371,6 @@ const InstitutionLayout: React.FC<Props> = ({
       }).then((r) => r.json());
       const dash = dashRes?.data || {};
       setNotifCount(Number(dash.pending_bookings || 0));
-      setMsgCount(Number(dash.unread_messages || 0));
 
       const items: NotificationItem[] = [];
       if (dash.pending_bookings > 0)
@@ -447,6 +446,15 @@ const InstitutionLayout: React.FC<Props> = ({
         window.removeEventListener("institution-notifications-read", handler);
     }
   }, [fetchNotifications]);
+
+  useEffect(() => {
+    const handler = (e: Event) => setMsgCount((e as CustomEvent).detail);
+    if (typeof window !== "undefined") {
+      window.addEventListener("messaging-unread-changed", handler);
+      return () =>
+        window.removeEventListener("messaging-unread-changed", handler);
+    }
+  }, []);
 
   return (
     <div className="bg-white text-gray-800 font-sans h-screen flex overflow-hidden">

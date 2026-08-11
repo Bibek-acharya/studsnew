@@ -23,7 +23,26 @@ export default function ChatWindow({ conversation, userRole, userId, onToggleCon
     loadMessages();
     const cleanup = setupWebSocketListeners();
     markAsRead();
-    return cleanup;
+
+    const pollInterval = setInterval(async () => {
+      try {
+        const latestMsgs = await messageApi.getMessages(conversation.id, 1, 0);
+        if (!latestMsgs || latestMsgs.length === 0) return;
+        setMessages((prev) => {
+          const existingIds = new Set(prev.map((m) => m.id));
+          const newMsgs = latestMsgs.filter((m) => !existingIds.has(m.id));
+          if (newMsgs.length === 0) return prev;
+          return [...prev, ...newMsgs].sort(
+            (a, b) => new Date(a.created_at).getTime() - new Date(b.created_at).getTime()
+          );
+        });
+      } catch {}
+    }, 5000);
+
+    return () => {
+      cleanup();
+      clearInterval(pollInterval);
+    };
   }, [conversation.id]);
 
   useEffect(() => {
@@ -168,7 +187,7 @@ export default function ChatWindow({ conversation, userRole, userId, onToggleCon
   const contactName = userRole === "student" ? conversation.institution_name : conversation.student_name;
 
   return (
-    <div className="flex flex-col h-full">
+    <div className="flex flex-col h-full min-h-0">
       <div className="h-[60px] px-4 border-b border-gray-200 bg-white flex items-center justify-between shrink-0">
         <div className="flex items-center gap-3">
           <div className="w-9 h-9 rounded-full bg-blue-100 flex items-center justify-center text-blue-600 font-semibold text-sm">
@@ -192,7 +211,7 @@ export default function ChatWindow({ conversation, userRole, userId, onToggleCon
         )}
       </div>
 
-      <div className="flex-1 overflow-y-auto p-4">
+      <div className="flex-1 overflow-y-auto p-4 min-h-0">
         {loading ? (
           <div className="text-center text-gray-400">Loading messages...</div>
         ) : messages.length === 0 ? (

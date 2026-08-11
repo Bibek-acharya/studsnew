@@ -6,6 +6,7 @@ interface PendingFile {
   id: number;
   name: string;
   size: number;
+  blob?: File;
 }
 
 interface MessageInputProps {
@@ -25,6 +26,7 @@ export default function MessageInput({ onSend, onTypingStart, onTypingStop, onUp
 
   const handleSend = () => {
     if (!content.trim() && pendingFiles.length === 0) return;
+    pendingFiles.forEach((f) => { if (f.blob) URL.revokeObjectURL(URL.createObjectURL(f.blob)); });
     onSend(content, pendingFiles.map((f) => f.id));
     setContent("");
     setPendingFiles([]);
@@ -57,7 +59,7 @@ export default function MessageInput({ onSend, onTypingStart, onTypingStop, onUp
     setUploading(true);
     try {
       const uploadId = await onUpload(file);
-      setPendingFiles((prev) => [...prev, { id: uploadId, name: file.name, size: file.size }]);
+      setPendingFiles((prev) => [...prev, { id: uploadId, name: file.name, size: file.size, blob: file }]);
     } catch (error) {
       console.error("Upload failed:", error);
     } finally {
@@ -69,7 +71,11 @@ export default function MessageInput({ onSend, onTypingStart, onTypingStop, onUp
   };
 
   const removeFile = (id: number) => {
-    setPendingFiles((prev) => prev.filter((f) => f.id !== id));
+    setPendingFiles((prev) => {
+      const file = prev.find((f) => f.id === id);
+      if (file?.blob) URL.revokeObjectURL(URL.createObjectURL(file.blob));
+      return prev.filter((f) => f.id !== id);
+    });
   };
 
   const formatSize = (bytes: number) => {
@@ -84,9 +90,17 @@ export default function MessageInput({ onSend, onTypingStart, onTypingStop, onUp
         <div className="flex flex-wrap gap-2 mb-2">
           {pendingFiles.map((file) => (
             <div key={file.id} className="flex items-center gap-2 bg-blue-50 border border-blue-200 rounded-lg px-3 py-1.5 text-sm">
-              <svg className="w-4 h-4 text-blue-500 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-              </svg>
+              {file.name.match(/\.(jpg|jpeg|png|gif|webp)$/i) ? (
+                <img
+                  src={URL.createObjectURL(file.blob!)}
+                  alt={file.name}
+                  className="w-10 h-10 rounded object-cover"
+                />
+              ) : (
+                <svg className="w-4 h-4 text-blue-500 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                </svg>
+              )}
               <span className="text-gray-700 truncate max-w-[150px]">{file.name}</span>
               <span className="text-gray-400 text-xs">{formatSize(file.size)}</span>
               <button
