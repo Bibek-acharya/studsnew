@@ -127,12 +127,14 @@ export default function CollegePopup({ college }: CollegePopupProps) {
       if (token) {
         headers["Authorization"] = `Bearer ${token}`;
       }
-      await fetch(`${API_BASE}/api/v1/institutions/${college.id}/inquiry`, {
+      await fetch(`${API_BASE}/api/v1/conversations`, {
         method: "POST",
         headers,
         body: JSON.stringify({
+          institution_id: college.id,
           subject: `Inquiry about ${college.name}`,
           content: inquiryMessage.trim(),
+          client_message_id: crypto.randomUUID(),
         }),
       });
       setInquirySent(true);

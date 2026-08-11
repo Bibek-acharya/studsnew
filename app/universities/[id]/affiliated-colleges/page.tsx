@@ -191,7 +191,7 @@ export default function Page({ params }: { params: { id: string } }) {
     const token = localStorage.getItem("token") || sessionStorage.getItem("token");
     try {
       await fetch(
-        `${API_BASE}/api/v1/institutions/${collegeForInquiry?.id}/inquiry`,
+        `${API_BASE}/api/v1/conversations`,
         {
           method: "POST",
           headers: {
@@ -199,8 +199,10 @@ export default function Page({ params }: { params: { id: string } }) {
             ...(token ? { Authorization: `Bearer ${token}` } : {}),
           },
           body: JSON.stringify({
+            institution_id: collegeForInquiry?.id,
             subject: `Inquiry about ${collegeForInquiry?.name}`,
             content: inquiryMessage,
+            client_message_id: crypto.randomUUID(),
           }),
         },
       );

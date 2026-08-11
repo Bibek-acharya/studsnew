@@ -127,15 +127,17 @@ const FeaturedInstitutionsSection: React.FC<
                       try {
                         const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080";
                         const token = localStorage.getItem("token") || sessionStorage.getItem("token");
-                        await fetch(`${API_BASE}/api/v1/institutions/${inquiryCollege.id}/inquiry`, {
+                        await fetch(`${API_BASE}/api/v1/conversations`, {
                           method: "POST",
                           headers: {
                             "Content-Type": "application/json",
                             ...(token ? { Authorization: `Bearer ${token}` } : {}),
                           },
                           body: JSON.stringify({
+                            institution_id: inquiryCollege.id,
                             subject: `Inquiry about ${inquiryCollege.name}`,
                             content: inquiryMessage.trim(),
+                            client_message_id: crypto.randomUUID(),
                           }),
                         });
                         setInquirySent(true);

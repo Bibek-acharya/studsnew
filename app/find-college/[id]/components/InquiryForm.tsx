@@ -107,13 +107,13 @@ const InquiryForm: React.FC<InquiryFormProps> = ({
         localStorage.getItem("token") || sessionStorage.getItem("token");
       const subject = `Inquiry about ${name} - ${inquiryCourse || "General"}`;
       const content = `Name: ${inquiryName}\nEmail: ${inquiryEmail}\nPhone: ${inquiryPhone ? "+977" + inquiryPhone : "Not provided"}\nCourse: ${inquiryCourse || "General"}\n\n${inquiryCourse || "General inquiry"}`;
-      await fetch(`${API_BASE}/api/v1/institutions/${collegeId}/inquiry`, {
+      await fetch(`${API_BASE}/api/v1/conversations`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
           ...(token ? { Authorization: `Bearer ${token}` } : {}),
         },
-        body: JSON.stringify({ subject, content }),
+        body: JSON.stringify({ institution_id: Number(collegeId), content, subject, client_message_id: crypto.randomUUID() }),
       });
       setInquirySent(true);
     } catch {
@@ -132,13 +132,13 @@ const InquiryForm: React.FC<InquiryFormProps> = ({
         localStorage.getItem("token") || sessionStorage.getItem("token");
       const subject = `Question about ${name}`;
       const content = askMessage;
-      await fetch(`${API_BASE}/api/v1/institutions/${collegeId}/inquiry`, {
+      await fetch(`${API_BASE}/api/v1/conversations`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
           ...(token ? { Authorization: `Bearer ${token}` } : {}),
         },
-        body: JSON.stringify({ subject, content }),
+        body: JSON.stringify({ institution_id: Number(collegeId), content, subject, client_message_id: crypto.randomUUID() }),
       });
       setAskSent(true);
     } catch {

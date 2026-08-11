@@ -493,15 +493,17 @@ const CollegeGrid: React.FC<CollegeGridProps> = ({
       localStorage.getItem("token") || sessionStorage.getItem("token");
     for (const collegeId of selectedForInquiry) {
       try {
-        await fetch(`${API_BASE}/api/v1/institutions/${collegeId}/inquiry`, {
+        await fetch(`${API_BASE}/api/v1/conversations`, {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
             ...(token ? { Authorization: `Bearer ${token}` } : {}),
           },
           body: JSON.stringify({
+            institution_id: collegeId,
             subject: "Quick Apply Inquiry",
             content: inquiryMessage,
+            client_message_id: crypto.randomUUID(),
           }),
         });
       } catch {
@@ -519,7 +521,7 @@ const CollegeGrid: React.FC<CollegeGridProps> = ({
       localStorage.getItem("token") || sessionStorage.getItem("token");
     try {
       await fetch(
-        `${API_BASE}/api/v1/institutions/${collegeForInquiry?.id}/inquiry`,
+        `${API_BASE}/api/v1/conversations`,
         {
           method: "POST",
           headers: {
@@ -527,8 +529,10 @@ const CollegeGrid: React.FC<CollegeGridProps> = ({
             ...(token ? { Authorization: `Bearer ${token}` } : {}),
           },
           body: JSON.stringify({
+            institution_id: collegeForInquiry?.id,
             subject: `Inquiry about ${collegeForInquiry?.name}`,
             content: inquiryMessageSingle,
+            client_message_id: crypto.randomUUID(),
           }),
         },
       );

@@ -116,14 +116,14 @@ const AdmissionGrid: React.FC<AdmissionGridProps> = ({
       const subject = `Question about ${inquiryCollege.name}`;
       const content = `Name: ${askName}\nEmail: ${askEmail}\nPhone: ${askPhone ? "+977" + askPhone : "Not provided"}\n\n${askMessage}`;
       await fetch(
-        `${API_BASE}/api/v1/institutions/${inquiryCollege.id}/inquiry`,
+        `${API_BASE}/api/v1/conversations`,
         {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
             ...(token ? { Authorization: `Bearer ${token}` } : {}),
           },
-          body: JSON.stringify({ subject, content }),
+          body: JSON.stringify({ institution_id: inquiryCollege.id, subject, content, client_message_id: crypto.randomUUID() }),
         },
       );
       setAskSent(true);
