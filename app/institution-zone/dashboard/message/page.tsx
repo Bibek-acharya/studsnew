@@ -4,10 +4,12 @@ import React, { useState, useEffect } from "react";
 import { messageApi, Conversation } from "@/services/message.api";
 import ConversationList from "@/components/messaging/ConversationList";
 import ChatWindow from "@/components/messaging/ChatWindow";
+import ContactInfo from "@/components/messaging/ContactInfo";
 
 export default function MessagePage() {
   const [selectedConversation, setSelectedConversation] = useState<Conversation | null>(null);
   const [userId, setUserId] = useState<number>(0);
+  const [showContactInfo, setShowContactInfo] = useState(false);
 
   useEffect(() => {
     const userData = localStorage.getItem("institutionUser");
@@ -27,19 +29,29 @@ export default function MessagePage() {
   }, []);
 
   return (
-    <div className="flex h-[calc(100vh-64px)]">
+    <div className="flex h-screen max-h-screen overflow-hidden">
       <ConversationList
         userRole="institution"
         selectedId={selectedConversation?.id || null}
         onSelect={setSelectedConversation}
       />
       {selectedConversation ? (
-        <div className="flex-1">
-          <ChatWindow
-            conversation={selectedConversation}
-            userRole="institution"
-            userId={userId}
-          />
+        <div className="flex-1 flex">
+          <div className="flex-1">
+            <ChatWindow
+              conversation={selectedConversation}
+              userRole="institution"
+              userId={userId}
+              onToggleContactInfo={() => setShowContactInfo(!showContactInfo)}
+            />
+          </div>
+          {showContactInfo && (
+            <ContactInfo
+              conversation={selectedConversation}
+              userRole="institution"
+              onClose={() => setShowContactInfo(false)}
+            />
+          )}
         </div>
       ) : (
         <div className="flex-1 flex items-center justify-center text-gray-400">

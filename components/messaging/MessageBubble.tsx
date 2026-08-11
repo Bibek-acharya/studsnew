@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import React, { useState } from "react";
 import { Message } from "@/services/message.api";
 
 interface MessageBubbleProps {
@@ -10,8 +10,15 @@ interface MessageBubbleProps {
   onDelete?: (message: Message) => void;
 }
 
+const MAX_LENGTH = 200;
+
 export default function MessageBubble({ message, isOwn, onEdit, onDelete }: MessageBubbleProps) {
   const isDeleted = message.deleted_at !== null;
+  const [expanded, setExpanded] = useState(false);
+  const isLong = message.content && message.content.length > MAX_LENGTH;
+  const displayContent = isLong && !expanded
+    ? message.content.slice(0, MAX_LENGTH) + "..."
+    : message.content;
 
   return (
     <div className={`flex ${isOwn ? "justify-end" : "justify-start"} mb-2`}>
@@ -30,7 +37,15 @@ export default function MessageBubble({ message, isOwn, onEdit, onDelete }: Mess
           <p className="text-sm">This message was deleted</p>
         ) : (
           <>
-            <p className="text-sm whitespace-pre-wrap">{message.content}</p>
+            <p className="text-sm whitespace-pre-wrap">{displayContent}</p>
+            {isLong && (
+              <button
+                onClick={() => setExpanded(!expanded)}
+                className={`text-xs mt-1 underline ${isOwn ? "text-blue-100" : "text-blue-600"}`}
+              >
+                {expanded ? "Show less" : "Read more"}
+              </button>
+            )}
 
             {message.attachments?.length > 0 && (
               <div className="mt-2 space-y-1">
@@ -68,7 +83,19 @@ export default function MessageBubble({ message, isOwn, onEdit, onDelete }: Mess
               )}
               {isOwn && (
                 <span className="text-xs">
-                  {message.status === "read" ? "✓✓" : message.status === "delivered" ? "✓✓" : "✓"}
+                  {message.status === "read" ? (
+                    <svg className="w-4 h-4 text-blue-300 inline" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                  ) : message.status === "delivered" ? (
+                    <svg className="w-4 h-4 text-blue-300 inline" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                    </svg>
+                  ) : (
+                    <svg className="w-4 h-4 text-blue-300 inline" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                    </svg>
+                  )}
                 </span>
               )}
             </div>

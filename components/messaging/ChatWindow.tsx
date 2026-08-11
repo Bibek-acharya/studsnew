@@ -10,9 +10,10 @@ interface ChatWindowProps {
   conversation: Conversation;
   userRole: "student" | "institution";
   userId: number;
+  onToggleContactInfo?: () => void;
 }
 
-export default function ChatWindow({ conversation, userRole, userId }: ChatWindowProps) {
+export default function ChatWindow({ conversation, userRole, userId, onToggleContactInfo }: ChatWindowProps) {
   const [messages, setMessages] = useState<Message[]>([]);
   const [typingUsers, setTypingUsers] = useState<Array<{ user_type: string; user_id: number }>>([]);
   const [loading, setLoading] = useState(true);
@@ -43,7 +44,16 @@ export default function ChatWindow({ conversation, userRole, userId }: ChatWindo
   const setupWebSocketListeners = () => {
     const unsubCreated = messageApi.on("message.created", (data) => {
       if (data.conversation_id === conversation.id) {
-        setMessages((prev) => [...prev, data.message]);
+        const incoming = data.message;
+        setMessages((prev) => {
+          const exists = prev.some((m) => m.client_message_id === incoming.client_message_id);
+          if (exists) {
+            return prev.map((m) =>
+              m.client_message_id === incoming.client_message_id ? { ...incoming, status: "sent" } : m
+            );
+          }
+          return [...prev, { ...incoming, status: "delivered" }];
+        });
       }
     });
 
@@ -155,8 +165,33 @@ export default function ChatWindow({ conversation, userRole, userId }: ChatWindo
     }
   };
 
+  const contactName = userRole === "student" ? conversation.institution_name : conversation.student_name;
+
   return (
     <div className="flex flex-col h-full">
+      <div className="h-[60px] px-4 border-b border-gray-200 bg-white flex items-center justify-between shrink-0">
+        <div className="flex items-center gap-3">
+          <div className="w-9 h-9 rounded-full bg-blue-100 flex items-center justify-center text-blue-600 font-semibold text-sm">
+            {(contactName || "U").split(" ").map((n) => n[0]).join("").toUpperCase().slice(0, 2)}
+          </div>
+          <div>
+            <h2 className="text-sm font-semibold text-gray-900">{contactName || "Unknown"}</h2>
+            <p className="text-xs text-gray-500">{userRole === "student" ? "Institution" : "Student"}</p>
+          </div>
+        </div>
+        {onToggleContactInfo && (
+          <button
+            onClick={onToggleContactInfo}
+            className="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-full transition-colors"
+            title="Contact Info"
+          >
+            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+          </button>
+        )}
+      </div>
+
       <div className="flex-1 overflow-y-auto p-4">
         {loading ? (
           <div className="text-center text-gray-400">Loading messages...</div>
