@@ -65,6 +65,7 @@ const PostCard: React.FC<{
   const pollOptions = parsePollOptions(post);
   const user = post.user;
   const avatarLetter = user ? (user.first_name?.[0] || "U").toUpperCase() : "U";
+  const avatarUrl = user?.image_url;
   const communityName = post.community?.name || "";
   const isGeneral = post.community?.is_general || communityName === "General";
 
@@ -72,8 +73,12 @@ const PostCard: React.FC<{
     <div className="bg-white rounded-lg p-5 border border-slate-200/80 shadow-xs space-y-3 card-hover">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-3">
-          <div className="w-9 h-9 rounded-full bg-blue-50 text-blue-600 flex items-center justify-center flex-shrink-0 text-sm font-bold">
-            {avatarLetter}
+          <div className="w-9 h-9 rounded-full bg-blue-50 text-blue-600 flex items-center justify-center flex-shrink-0 text-sm font-bold overflow-hidden">
+            {avatarUrl ? (
+              <img src={avatarUrl} alt="" className="w-full h-full object-cover" />
+            ) : (
+              avatarLetter
+            )}
           </div>
           <div>
             <h4 className="text-xs font-bold text-slate-900 leading-snug">
@@ -175,6 +180,7 @@ const CreatePostModal: React.FC<{
   isOpen: boolean;
   onClose: () => void;
   onSubmit: (data: {
+    title: string;
     content: string;
     images: File[];
     video: File | null;
@@ -183,6 +189,7 @@ const CreatePostModal: React.FC<{
   isSubmitting: boolean;
   user: { first_name: string; last_name: string; image_url?: string } | null;
 }> = ({ isOpen, onClose, onSubmit, isSubmitting, user }) => {
+  const [title, setTitle] = useState("");
   const [content, setContent] = useState("");
   const [images, setImages] = useState<File[]>([]);
   const [imagePreviews, setImagePreviews] = useState<string[]>([]);
@@ -199,6 +206,7 @@ const CreatePostModal: React.FC<{
   const avatarLetter = user ? (user.first_name?.[0] || "U").toUpperCase() : "U";
 
   const reset = () => {
+    setTitle("");
     setContent("");
     setImages([]);
     setImagePreviews([]);
@@ -264,7 +272,7 @@ const CreatePostModal: React.FC<{
             duration: pollDuration,
           }
         : null;
-    onSubmit({ content, images, video, poll });
+    onSubmit({ title, content, images, video, poll });
     reset();
   };
 
@@ -304,12 +312,18 @@ const CreatePostModal: React.FC<{
         </div>
 
         <div className="flex-1 my-3 flex flex-col overflow-y-auto pr-1">
+          <input
+            type="text"
+            value={title}
+            onChange={(e) => setTitle(e.target.value)}
+            placeholder="Post title"
+            className="w-full text-[1rem] font-bold text-gray-900 placeholder-gray-400 bg-transparent border-none py-1 outline-none"
+          />
           <textarea
             value={content}
             onChange={(e) => setContent(e.target.value)}
             placeholder="Tell others about yourself..."
-            className="w-full text-[1.05rem] text-gray-800 placeholder-gray-400 bg-transparent border-none py-1 outline-none font-medium leading-relaxed resize-none min-h-[80px]"
-            autoFocus
+            className="w-full text-[0.95rem] text-gray-800 placeholder-gray-400 bg-transparent border-none py-1 outline-none font-medium leading-relaxed resize-none min-h-[60px]"
           />
 
           <div className="mt-2 space-y-3">
@@ -583,8 +597,8 @@ const CampusForumPage: React.FC = () => {
             : c
         )
       );
-    } catch (e) {
-      showToast("Failed to update membership");
+    } catch (e: any) {
+      showToast(e?.message || "Failed to update membership");
     } finally {
       setJoinLoading((p) => ({ ...p, [communityId]: false }));
     }
@@ -599,12 +613,16 @@ const CampusForumPage: React.FC = () => {
   };
 
   const handleSubmitPost = async (data: {
+    title: string;
     content: string;
     images: File[];
     video: File | null;
     poll: { question: string; options: PollOption[]; duration: string } | null;
   }) => {
-    if (!data.content.trim() && data.images.length === 0 && !data.video && !data.poll) return;
+    if (!data.title.trim() && !data.content.trim() && data.images.length === 0 && !data.video && !data.poll) {
+      showToast("Please add a title, content, or media");
+      return;
+    }
     if (data.images.length > 10) {
       showToast("Max 10 images");
       return;
@@ -638,7 +656,7 @@ const CampusForumPage: React.FC = () => {
       const newPost = await apiService.createForumPost(token, {
         community_id: selectedCommunityId || communities.find((c) => c.is_general)?.id || communities[0]?.id || 0,
         category: "General",
-        title: data.content.slice(0, 80),
+        title: data.title || data.content.slice(0, 80) || "Untitled",
         content: data.content,
         poll_options: pollItems.length > 1 ? pollItems : undefined,
         is_poll: pollItems.length > 1,

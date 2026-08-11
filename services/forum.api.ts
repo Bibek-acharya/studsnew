@@ -65,7 +65,10 @@ export const forumApi = {
         credentials: "include",
       },
     );
-    if (!response.ok) throw new Error("Failed to join community");
+    if (!response.ok) {
+      const body = await response.json().catch(() => ({}));
+      throw new Error(body.error || body.message || "Failed to join community");
+    }
     const data = await response.json();
     return data.data || data;
   },

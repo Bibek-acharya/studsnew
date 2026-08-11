@@ -585,6 +585,7 @@ export interface ForumUser {
   last_name: string;
   email: string;
   role: string;
+  image_url?: string;
 }
 
 export interface ForumCommunity {
@@ -633,6 +634,7 @@ export interface ForumPost {
   is_saved?: boolean;
   created_at: string;
   CreatedAt?: string;
+  user_name?: string;
   user?: ForumUser;
   community?: ForumCommunity;
 }
