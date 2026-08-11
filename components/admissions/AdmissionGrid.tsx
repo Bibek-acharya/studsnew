@@ -115,7 +115,7 @@ const AdmissionGrid: React.FC<AdmissionGridProps> = ({
         localStorage.getItem("token") || sessionStorage.getItem("token");
       const subject = `Question about ${inquiryCollege.name}`;
       const content = `Name: ${askName}\nEmail: ${askEmail}\nPhone: ${askPhone ? "+977" + askPhone : "Not provided"}\n\n${askMessage}`;
-      await fetch(
+      const res = await fetch(
         `${API_BASE}/api/v1/conversations`,
         {
           method: "POST",
@@ -126,6 +126,7 @@ const AdmissionGrid: React.FC<AdmissionGridProps> = ({
           body: JSON.stringify({ institution_id: inquiryCollege.id, subject, content, client_message_id: crypto.randomUUID() }),
         },
       );
+      if (!res.ok) throw new Error("Failed to send");
       setAskSent(true);
     } catch {
       /* silently fail */
