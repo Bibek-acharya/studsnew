@@ -52,11 +52,33 @@ const WriteReviewPage: React.FC = () => {
         setIsCollegeLoading(true);
         setCollegeSearchError(false);
         try {
-          const res = await collegeApi.getColleges({
-            search: query,
-            pageSize: 10,
-          });
-          setFilteredColleges((res as any)?.data?.colleges || []);
+          const [collegeRes, instRes] = await Promise.all([
+            collegeApi.getColleges({ search: query, pageSize: 10 }),
+            collegeApi.getPublicInstitutions({ search: query, limit: 10 }),
+          ]);
+
+          const colleges = (collegeRes as any)?.data?.colleges || [];
+
+          const instColleges = ((instRes as any)?.data?.institutions || [])
+            .map((inst: any) => ({
+              id: inst.college_id > 0 ? inst.college_id : `inst_${inst.id}`,
+              name: inst.institution_name,
+              location: inst.district || "",
+              type: inst.type || inst.institution_type || "College",
+            }));
+
+          const claimedIds = new Set(
+            ((instRes as any)?.data?.institutions || [])
+              .filter((inst: any) => inst.college_id > 0)
+              .map((inst: any) => inst.college_id),
+          );
+
+          const filteredColleges = colleges.filter(
+            (c: any) => !claimedIds.has(c.id),
+          );
+
+          const merged = [...instColleges, ...filteredColleges] as College[];
+          setFilteredColleges(merged);
         } catch {
           setFilteredColleges([]);
           setCollegeSearchError(true);
@@ -190,7 +212,7 @@ const WriteReviewPage: React.FC = () => {
     setSubmitting(true);
     try {
       const result = await submitReviewAction({
-        collegeId: selectedCollege.id,
+        collegeId: typeof selectedCollege.id === "number" ? selectedCollege.id : 0,
         collegeName: collegeInput,
         studentType,
         course: courseInput,
