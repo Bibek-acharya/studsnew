@@ -11,13 +11,13 @@ export interface Review {
   userName?: string;
   userInitials?: string;
   studentType: "current" | "alumni";
-  course: string;
-  level: string;
+  course?: string;
+  level?: string;
   batchYear: number;
   ratings: Record<string, number>;
   pros: string;
   cons: string;
-  summaryTitle: string;
+  summaryTitle?: string;
   yearlyFee?: number;
   scholarship?: boolean;
   internshipOutcome?: string;
@@ -33,13 +33,13 @@ export interface ReviewInput {
   collegeId: number;
   collegeName?: string;
   studentType: "current" | "alumni";
-  course: string;
-  level: string;
+  course?: string;
+  level?: string;
   batchYear: number;
   ratings: Record<string, number>;
   pros: string;
   cons: string;
-  summaryTitle: string;
+  summaryTitle?: string;
   yearlyFee?: number;
   scholarship?: boolean;
   internshipOutcome?: string;
@@ -137,12 +137,6 @@ export function validateReviewInput(input: ReviewInput): string[] {
   if (!input.studentType) {
     errors.push("Student type is required");
   }
-  if (!input.course) {
-    errors.push("Course is required");
-  }
-  if (!input.level) {
-    errors.push("Level is required");
-  }
   if (!input.batchYear) {
     errors.push("Batch year is required");
   }
@@ -151,9 +145,6 @@ export function validateReviewInput(input: ReviewInput): string[] {
   }
   if (!input.cons || input.cons.trim().length < 10) {
     errors.push("Cons must be at least 10 characters");
-  }
-  if (!input.summaryTitle || input.summaryTitle.trim().length < 5) {
-    errors.push("Summary title must be at least 5 characters");
   }
   if (!input.email || !input.email.includes("@")) {
     errors.push("Valid email is required");

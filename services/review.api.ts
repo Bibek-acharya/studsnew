@@ -21,13 +21,13 @@ export const reviewApi = {
       collegeId: number;
       collegeName?: string;
       studentType: "current" | "alumni";
-      course: string;
-      level: string;
+      course?: string;
+      level?: string;
       batchYear: number;
       ratings: Record<string, number>;
       pros: string;
       cons: string;
-      summaryTitle: string;
+      summaryTitle?: string;
       yearlyFee?: number;
       scholarship?: boolean;
       internshipOutcome?: string;
@@ -37,7 +37,22 @@ export const reviewApi = {
   ): Promise<any> {
     return apiRequest<any>("/api/v1/user/reviews", {
       method: "POST",
-      body: JSON.stringify(data),
+      body: JSON.stringify({
+        college_id: data.collegeId,
+        college_name: data.collegeName,
+        student_type: data.studentType,
+        course: data.course,
+        level: data.level,
+        batch_year: data.batchYear,
+        ratings: data.ratings,
+        pros: data.pros,
+        cons: data.cons,
+        summary_title: data.summaryTitle,
+        yearly_fee: data.yearlyFee,
+        scholarship: data.scholarship,
+        internship_outcome: data.internshipOutcome,
+        email: data.email,
+      }),
       ...options,
     });
   },

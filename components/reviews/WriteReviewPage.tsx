@@ -122,7 +122,6 @@ const WriteReviewPage: React.FC = () => {
     setBatchYear("");
     setPros("");
     setCons("");
-    setSummaryTitle("");
     setYearlyFee("");
     setScholarship("");
     setInternshipOutcome("");

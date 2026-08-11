@@ -70,7 +70,7 @@ const TabReview: React.FC<TabReviewProps> = ({ reviewsData, reviewsLoading }) =>
         <div className="space-y-5">
           {reviewsData.reviews.map((review: any, idx: number) => {
             const avgRating = Object.values(review.ratings || {}).reduce((s: number, v: any) => s + v, 0) / 10;
-            return <ReviewCard key={review.id} initials={review.userInitials || "U"} name={review.userName || "Anonymous"} subtitle={`${review.course} · Batch ${review.batchYear}`} rating={Math.round(avgRating)} pros={review.pros} cons={review.cons} tone={idx % 2 === 0 ? "blue" : "purple"} />;
+            return <ReviewCard key={review.id} initials={review.userInitials || "U"} name={review.userName || "Anonymous"} subtitle={`${review.course ? `${review.course} · ` : ""}Batch ${review.batchYear}`} rating={Math.round(avgRating)} pros={review.pros} cons={review.cons} tone={idx % 2 === 0 ? "blue" : "purple"} yearlyFee={review.yearlyFee} scholarship={review.scholarship} internshipOutcome={review.internshipOutcome} ratings={review.ratings} />;
           })}
         </div>
       ) : (
