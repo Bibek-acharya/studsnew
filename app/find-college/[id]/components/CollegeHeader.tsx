@@ -59,7 +59,7 @@ const CollegeHeader: React.FC<CollegeHeaderProps> = ({
   const router = useRouter();
   return (
     <>
-      <div className="relative w-full bg-brand-blue overflow-hidden">
+      <div className="relative w-full bg-brand-blue overflow-hidden min-h-55 md:min-h-[400px]">
         {instBanner && (
           <img
             src={instBanner}
