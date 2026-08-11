@@ -79,21 +79,31 @@ class MessageApi {
   private reconnectAttempts = 0;
   private maxReconnectAttempts = 10;
   private reconnectTimeout: NodeJS.Timeout | null = null;
+  private authToken: string | null = null;
+
+  private getToken(): string | null {
+    if (this.authToken) return this.authToken;
+    if (typeof window === "undefined") return null;
+    return localStorage.getItem("token")
+      || localStorage.getItem("institutionToken")
+      || sessionStorage.getItem("token")
+      || sessionStorage.getItem("institutionToken");
+  }
 
   // REST API Methods
 
   async getConversations(limit = 20, offset = 0): Promise<Conversation[]> {
-    const response = await apiRequest<{ conversations: Conversation[] }>(`/api/v1/conversations?limit=${limit}&offset=${offset}`);
+    const response = await apiRequest<{ conversations: Conversation[] }>(`/api/v1/conversations?limit=${limit}&offset=${offset}`, { authToken: this.getToken() || undefined });
     return response.conversations || [];
   }
 
   async getConversation(id: number): Promise<Conversation> {
-    const response = await apiRequest<Conversation>(`/api/v1/conversations/${id}`);
+    const response = await apiRequest<Conversation>(`/api/v1/conversations/${id}`, { authToken: this.getToken() || undefined });
     return response;
   }
 
   async getMessages(conversationId: number, limit = 50, offset = 0): Promise<Message[]> {
-    const response = await apiRequest<{ messages: Message[] }>(`/api/v1/conversations/${conversationId}/messages?limit=${limit}&offset=${offset}`);
+    const response = await apiRequest<{ messages: Message[] }>(`/api/v1/conversations/${conversationId}/messages?limit=${limit}&offset=${offset}`, { authToken: this.getToken() || undefined });
     return response.messages || [];
   }
 
@@ -101,6 +111,7 @@ class MessageApi {
     const response = await apiRequest<{ conversation: Conversation; message: Message }>(`/api/v1/conversations`, {
       method: "POST",
       body: JSON.stringify(payload),
+      authToken: this.getToken() || undefined,
     });
     return response;
   }
@@ -109,6 +120,7 @@ class MessageApi {
     const response = await apiRequest<Message>(`/api/v1/conversations/${conversationId}/messages`, {
       method: "POST",
       body: JSON.stringify(payload),
+      authToken: this.getToken() || undefined,
     });
     return response;
   }
@@ -117,12 +129,14 @@ class MessageApi {
     await apiRequest<void>(`/api/v1/conversations/${conversationId}/messages/${messageId}`, {
       method: "PUT",
       body: JSON.stringify({ content }),
+      authToken: this.getToken() || undefined,
     });
   }
 
   async deleteMessage(conversationId: number, messageId: number): Promise<void> {
     await apiRequest<void>(`/api/v1/conversations/${conversationId}/messages/${messageId}`, {
       method: "DELETE",
+      authToken: this.getToken() || undefined,
     });
   }
 
@@ -130,6 +144,7 @@ class MessageApi {
     await apiRequest<void>(`/api/v1/conversations/${conversationId}/read`, {
       method: "POST",
       body: JSON.stringify({ last_message_id: lastMessageId }),
+      authToken: this.getToken() || undefined,
     });
   }
 
@@ -137,12 +152,10 @@ class MessageApi {
     const formData = new FormData();
     formData.append("file", file);
 
-    const token = localStorage.getItem("token") || localStorage.getItem("institutionToken") || sessionStorage.getItem("token");
-
     const response = await apiRequest<UploadResponse>(`/api/v1/uploads`, {
       method: "POST",
       body: formData,
-      authToken: token || undefined,
+      authToken: this.getToken() || undefined,
     });
 
     return response;
@@ -151,6 +164,8 @@ class MessageApi {
   // WebSocket Methods
 
   connectWebSocket(userType: string, userId: number, token: string): void {
+    this.authToken = token;
+
     if (this.ws?.readyState === WebSocket.OPEN) {
       return;
     }
