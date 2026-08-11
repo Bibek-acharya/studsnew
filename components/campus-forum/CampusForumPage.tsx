@@ -282,7 +282,11 @@ const CreatePostModal: React.FC<{
         <div className="flex items-center justify-between pb-2">
           <div className="flex items-center gap-3.5">
             <div className="w-12 h-12 rounded-full bg-blue-50 text-blue-600 flex items-center justify-center flex-shrink-0 text-lg font-bold overflow-hidden">
-              {avatarLetter}
+              {user?.image_url ? (
+                <img src={user.image_url} alt="" className="w-full h-full object-cover" />
+              ) : (
+                avatarLetter
+              )}
             </div>
             <div className="flex flex-col">
               <h2 className="text-[1.1rem] font-bold text-gray-900 leading-snug tracking-tight">
