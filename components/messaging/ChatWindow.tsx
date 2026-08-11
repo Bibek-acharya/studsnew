@@ -3,6 +3,9 @@
 import React, { useEffect, useState, useRef } from "react";
 import { Info } from "lucide-react";
 import { messageApi, Message, Conversation } from "@/services/message.api";
+import { collegeApi } from "@/services/college.api";
+import { dashboardApi } from "@/services/dashboard.api";
+import { getImageUrl } from "@/services/api";
 import MessageBubble from "./MessageBubble";
 import MessageInput from "./MessageInput";
 import TypingIndicator from "./TypingIndicator";
@@ -19,7 +22,40 @@ export default function ChatWindow({ conversation, userRole, userId, onToggleCon
   const [messages, setMessages] = useState<Message[]>([]);
   const [typingUsers, setTypingUsers] = useState<Array<{ user_type: string; user_id: number }>>([]);
   const [loading, setLoading] = useState(true);
+  const [otherAvatarUrl, setOtherAvatarUrl] = useState<string>("");
+  const [ownAvatarUrl, setOwnAvatarUrl] = useState<string>("");
   const messagesEndRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const tokenKey = userRole === "student" ? "token" : "institutionToken";
+    const userKey = userRole === "student" ? "studsphere_user" : "institutionUser";
+    const token = localStorage.getItem(tokenKey) || sessionStorage.getItem(tokenKey);
+    const userData = localStorage.getItem(userKey) || sessionStorage.getItem(userKey);
+    if (userData) {
+      try {
+        const parsed = JSON.parse(userData);
+        const imgUrl = parsed.image_url || parsed.logo_url || "";
+        if (imgUrl) setOwnAvatarUrl(getImageUrl(imgUrl.startsWith("/") ? imgUrl : `/${imgUrl}`));
+      } catch {}
+    }
+
+    async function fetchOtherAvatar() {
+      try {
+        if (userRole === "student" && conversation.institution_id) {
+          const resp = await collegeApi.getPublicInstitutionById(conversation.institution_id);
+          const data = resp?.data || resp;
+          if (data?.logo_url) setOtherAvatarUrl(getImageUrl(data.logo_url.startsWith("/") ? data.logo_url : `/${data.logo_url}`));
+        } else if (userRole === "institution" && conversation.student_id) {
+          if (token) {
+            const resp = await dashboardApi.getStudentProfile(conversation.student_id);
+            const data = resp?.data || resp;
+            if (data?.image_url) setOtherAvatarUrl(getImageUrl(data.image_url.startsWith("/") ? data.image_url : `/${data.image_url}`));
+          }
+        }
+      } catch {}
+    }
+    fetchOtherAvatar();
+  }, [userRole, conversation.institution_id, conversation.student_id]);
 
   useEffect(() => {
     loadMessages();
@@ -167,23 +203,18 @@ export default function ChatWindow({ conversation, userRole, userId, onToggleCon
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   };
 
-  const handleEdit = async (message: Message) => {
-    const newContent = prompt("Edit message:", message.content);
-    if (newContent && newContent !== message.content) {
-      await messageApi.editMessage(conversation.id, message.id, newContent);
-      setMessages((prev) =>
-        prev.map((m) => (m.id === message.id ? { ...m, content: newContent, edited_at: new Date().toISOString() } : m))
-      );
-    }
+  const handleEdit = async (message: Message, newContent: string) => {
+    await messageApi.editMessage(conversation.id, message.id, newContent);
+    setMessages((prev) =>
+      prev.map((m) => (m.id === message.id ? { ...m, content: newContent, edited_at: new Date().toISOString() } : m))
+    );
   };
 
   const handleDelete = async (message: Message) => {
-    if (confirm("Delete this message?")) {
-      await messageApi.deleteMessage(conversation.id, message.id);
-      setMessages((prev) =>
-        prev.map((m) => (m.id === message.id ? { ...m, deleted_at: new Date().toISOString() } : m))
-      );
-    }
+    await messageApi.deleteMessage(conversation.id, message.id);
+    setMessages((prev) =>
+      prev.map((m) => (m.id === message.id ? { ...m, deleted_at: new Date().toISOString() } : m))
+    );
   };
 
   const contactName = userRole === "student" ? conversation.institution_name : conversation.student_name;
@@ -257,6 +288,8 @@ export default function ChatWindow({ conversation, userRole, userId, onToggleCon
                 message={message}
                 isOwn={message.sender_type === userRole && message.sender_id === userId}
                 otherInitials={otherInitials}
+                otherAvatarUrl={otherAvatarUrl}
+                ownAvatarUrl={ownAvatarUrl}
                 onEdit={handleEdit}
                 onDelete={handleDelete}
               />

@@ -9,8 +9,10 @@ interface MessageBubbleProps {
   message: Message;
   isOwn: boolean;
   otherInitials: string;
-  onEdit?: (message: Message) => void;
-  onDelete?: (message: Message) => void;
+  otherAvatarUrl?: string;
+  ownAvatarUrl?: string;
+  onEdit?: (message: Message, newContent: string) => Promise<void>;
+  onDelete?: (message: Message) => Promise<void>;
 }
 
 const MAX_LENGTH = 200;
@@ -61,10 +63,13 @@ function StatusCheck({ status }: { status: string }) {
   );
 }
 
-export default function MessageBubble({ message, isOwn, otherInitials, onEdit, onDelete }: MessageBubbleProps) {
+export default function MessageBubble({ message, isOwn, otherInitials, otherAvatarUrl, ownAvatarUrl, onEdit, onDelete }: MessageBubbleProps) {
   const isDeleted = message.deleted_at !== null;
   const [expanded, setExpanded] = useState(false);
   const [previewFile, setPreviewFile] = useState<{ src: string; name: string } | null>(null);
+  const [editing, setEditing] = useState(false);
+  const [editText, setEditText] = useState("");
+  const [deleting, setDeleting] = useState(false);
   const isLong = message.content && message.content.length > MAX_LENGTH;
   const displayContent = isLong && !expanded
     ? message.content.slice(0, MAX_LENGTH) + "..."
@@ -77,8 +82,18 @@ export default function MessageBubble({ message, isOwn, otherInitials, onEdit, o
     && message.attachments!.every(a => a.file_type.startsWith("image/"));
 
   const avatarEl = (
-    <div className="w-7 h-7 rounded-full bg-blue-100 flex items-center justify-center text-blue-600 font-semibold text-[10px] flex-shrink-0 mr-1">
-      {otherInitials}
+    <div className="w-7 h-7 rounded-full bg-blue-100 flex items-center justify-center text-blue-600 font-semibold text-[10px] flex-shrink-0 mr-1 overflow-hidden">
+      {otherAvatarUrl ? (
+        <img src={otherAvatarUrl} alt="" className="w-full h-full object-cover" />
+      ) : (
+        otherInitials
+      )}
+    </div>
+  );
+
+  const ownAvatarEl = ownAvatarUrl && (
+    <div className="w-7 h-7 rounded-full flex-shrink-0 ml-1 overflow-hidden">
+      <img src={ownAvatarUrl} alt="" className="w-full h-full object-cover" />
     </div>
   );
 
@@ -133,16 +148,16 @@ export default function MessageBubble({ message, isOwn, otherInitials, onEdit, o
   ) : null;
 
   const editDeleteButtons = !isDeleted && isOwn && (
-    <div className="absolute top-1/2 -translate-y-1/2 -left-14 hidden group-hover/action:flex items-center space-x-1 bg-white p-1 rounded-md border border-slate-200 shadow-sm z-10">
+    <div className="absolute top-1/2 -translate-y-1/2 -left-14 hidden group-hover:flex items-center space-x-1 bg-white p-1 rounded-md border border-slate-200 shadow-sm z-10">
       {onEdit && (
-        <button onClick={() => onEdit(message)} className="p-1 text-slate-400 hover:text-blue-600" title="Edit">
+        <button onClick={() => { setEditText(message.content || ""); setEditing(true); }} className="p-1 text-slate-400 hover:text-blue-600" title="Edit">
           <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
           </svg>
         </button>
       )}
       {onDelete && (
-        <button onClick={() => onDelete(message)} className="p-1 text-slate-400 hover:text-red-500" title="Delete">
+        <button onClick={() => setDeleting(true)} className="p-1 text-slate-400 hover:text-red-500" title="Delete">
           <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
           </svg>
@@ -167,6 +182,20 @@ export default function MessageBubble({ message, isOwn, otherInitials, onEdit, o
       <StatusCheck status={message.status || "sent"} />
     </span>
   );
+
+  const handleEditSubmit = async () => {
+    if (editText.trim() && editText !== message.content && onEdit) {
+      await onEdit(message, editText.trim());
+    }
+    setEditing(false);
+  };
+
+  const handleDeleteConfirm = async () => {
+    if (onDelete) {
+      await onDelete(message);
+    }
+    setDeleting(false);
+  };
 
   return (
     <>
@@ -204,7 +233,56 @@ export default function MessageBubble({ message, isOwn, otherInitials, onEdit, o
           {statusEl}
         </div>
       </div>
+
+      {isOwn && ownAvatarEl}
     </div>
+
+    {editing && (
+      <div className="fixed inset-0 z-50 bg-black/40 flex items-center justify-center p-4" onClick={() => setEditing(false)}>
+        <div className="bg-white rounded-xl shadow-xl w-full max-w-md p-5" onClick={(e) => e.stopPropagation()}>
+          <h3 className="text-sm font-bold text-slate-900 mb-3">Edit Message</h3>
+          <textarea
+            value={editText}
+            onChange={(e) => setEditText(e.target.value)}
+            className="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-blue-600 resize-none min-h-[80px]"
+            autoFocus
+            onKeyDown={(e) => {
+              if (e.key === "Enter" && !e.shiftKey) {
+                e.preventDefault();
+                handleEditSubmit();
+              }
+              if (e.key === "Escape") setEditing(false);
+            }}
+          />
+          <div className="flex justify-end gap-2 mt-3">
+            <button onClick={() => setEditing(false)} className="px-4 py-1.5 text-xs font-medium text-slate-600 hover:bg-slate-100 rounded-md transition-colors">
+              Cancel
+            </button>
+            <button onClick={handleEditSubmit} className="px-4 py-1.5 text-xs font-medium text-white bg-blue-600 hover:bg-blue-700 rounded-md transition-colors">
+              Save
+            </button>
+          </div>
+        </div>
+      </div>
+    )}
+
+    {deleting && (
+      <div className="fixed inset-0 z-50 bg-black/40 flex items-center justify-center p-4" onClick={() => setDeleting(false)}>
+        <div className="bg-white rounded-xl shadow-xl w-full max-w-sm p-5" onClick={(e) => e.stopPropagation()}>
+          <h3 className="text-sm font-bold text-slate-900 mb-2">Delete Message</h3>
+          <p className="text-xs text-slate-500 mb-4">This message will be deleted. This action cannot be undone.</p>
+          <div className="flex justify-end gap-2">
+            <button onClick={() => setDeleting(false)} className="px-4 py-1.5 text-xs font-medium text-slate-600 hover:bg-slate-100 rounded-md transition-colors">
+              Cancel
+            </button>
+            <button onClick={handleDeleteConfirm} className="px-4 py-1.5 text-xs font-medium text-white bg-red-500 hover:bg-red-600 rounded-md transition-colors">
+              Delete
+            </button>
+          </div>
+        </div>
+      </div>
+    )}
+
     {previewFile && (
       <ImagePreview
         src={previewFile.src}
