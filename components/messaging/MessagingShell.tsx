@@ -8,11 +8,22 @@ import ChatWindow from "./ChatWindow";
 import ContactInfo from "./ContactInfo";
 
 function getStoredUserId(userRole: "student" | "institution"): number {
-  const storageKey = userRole === "student" ? "user" : "institutionUser";
+  const storageKeys = userRole === "student" ? ["studsphere_user", "user"] : ["institutionUser"];
   if (typeof window === "undefined") return 0;
-  const userData = localStorage.getItem(storageKey);
-  if (!userData) return 0;
-  try { return JSON.parse(userData).id || 0; } catch { return 0; }
+  for (const key of storageKeys) {
+    // Check both localStorage and sessionStorage (Remember Me off = sessionStorage)
+    for (const storage of [window.localStorage, window.sessionStorage]) {
+      const userData = storage.getItem(key);
+      if (userData) {
+        try {
+          const parsed = JSON.parse(userData);
+          const id = parsed.id || parsed.user?.id;
+          if (id) return id;
+        } catch {}
+      }
+    }
+  }
+  return 0;
 }
 
 function Shell({ userRole }: { userRole: "student" | "institution" }) {
