@@ -329,6 +329,7 @@ const CollegeGrid: React.FC<CollegeGridProps> = ({
         verified: inst.verified ?? false,
         claimed: inst.claimed ?? false,
         affiliation: inst.affiliation || "",
+        non_university_affiliation: inst.non_university_affiliation || "",
         featured: inst.featured || false,
         rating: 0,
         reviews: 0,
@@ -1148,10 +1149,19 @@ export const ProgramCard: React.FC<{
             className="group/affil leading-snug pr-4 font-semibold text-slate-700 line-clamp-1"
             title={college.affiliation || ""}
           >
-            <span className="truncate block">{college.affiliation || ""}</span>
-            {college.affiliation && (
+            <span className="truncate block">
+              {[
+                college.non_university_affiliation,
+                college.affiliation,
+              ]
+                .filter(Boolean)
+                .join(", ") || ""}
+            </span>
+            {(college.affiliation || college.non_university_affiliation) && (
               <span className="absolute bottom-full left-0 mb-2 invisible opacity-0 group-hover/affil:visible group-hover/affil:opacity-100 bg-gray-900 text-white text-[13px] font-medium py-1.5 px-3 rounded  whitespace-nowrap transition-all duration-200 z-50 pointer-events-none">
-                {college.affiliation}
+                {[college.non_university_affiliation, college.affiliation]
+                  .filter(Boolean)
+                  .join(", ")}
                 <span className="absolute top-full left-4 -mt-px border-[5px] border-transparent border-t-gray-900"></span>
               </span>
             )}

@@ -426,6 +426,7 @@ export interface College {
   type?: string;
   location?: string;
   affiliation?: string;
+  non_university_affiliation?: string;
   verified?: boolean;
   claimed?: boolean;
   featured?: boolean;
