@@ -8,6 +8,10 @@ import type { College } from "@/services/api";
 import { ratingCategories, ratingStatusLabels } from "@/lib/review-types";
 import { useAuth } from "@/services/AuthContext";
 
+interface CollegeResult extends College {
+  institutionId?: number;
+}
+
 type StudentType = "current" | "alumni" | null;
 
 const WriteReviewPage: React.FC = () => {
@@ -31,7 +35,7 @@ const WriteReviewPage: React.FC = () => {
   const [certify, setCertify] = useState(false);
   const [ratings, setRatings] = useState<Record<string, number>>({});
 
-  const [filteredColleges, setFilteredColleges] = useState<College[]>([]);
+  const [filteredColleges, setFilteredColleges] = useState<CollegeResult[]>([]);
   const [isCollegeLoading, setIsCollegeLoading] = useState(false);
   const [collegeSearchError, setCollegeSearchError] = useState(false);
 
@@ -59,26 +63,27 @@ const WriteReviewPage: React.FC = () => {
 
           const colleges = (collegeRes as any)?.data?.colleges || [];
 
-          const instColleges = ((instRes as any)?.data?.institutions || [])
-            .map((inst: any) => ({
-              id: inst.college_id > 0 ? inst.college_id : `inst_${inst.id}`,
-              name: inst.institution_name,
-              location: inst.district || "",
-              type: inst.type || inst.institution_type || "College",
-            }));
+          const instData = (instRes as any)?.data?.institutions || [];
+
+          const instColleges: CollegeResult[] = instData.map((inst: any) => ({
+            id: inst.college_id > 0 ? inst.college_id : NaN,
+            name: inst.institution_name,
+            location: inst.district || "",
+            type: inst.type || inst.institution_type || "College",
+            institutionId: inst.id,
+          }));
 
           const claimedIds = new Set(
-            ((instRes as any)?.data?.institutions || [])
+            instData
               .filter((inst: any) => inst.college_id > 0)
               .map((inst: any) => inst.college_id),
           );
 
-          const filteredColleges = colleges.filter(
+          const unclaimed = colleges.filter(
             (c: any) => !claimedIds.has(c.id),
           );
 
-          const merged = [...instColleges, ...filteredColleges] as College[];
-          setFilteredColleges(merged);
+          setFilteredColleges([...instColleges, ...unclaimed]);
         } catch {
           setFilteredColleges([]);
           setCollegeSearchError(true);
@@ -212,8 +217,9 @@ const WriteReviewPage: React.FC = () => {
     setSubmitting(true);
     try {
       const result = await submitReviewAction({
-        collegeId: typeof selectedCollege.id === "number" ? selectedCollege.id : 0,
+        collegeId: typeof selectedCollege.id === "number" && !isNaN(selectedCollege.id) ? selectedCollege.id : 0,
         collegeName: collegeInput,
+        institutionId: selectedCollege.institutionId,
         studentType,
         course: courseInput,
         batchYear: parseInt(batchYear),
@@ -337,7 +343,7 @@ const WriteReviewPage: React.FC = () => {
                         </li>
                       ) : filteredColleges.length > 0 ? (
                         filteredColleges.map((item) => (
-                          <li key={item.id}>
+                          <li key={String(item.id)}>
                           <button
                             type="button"
                             className="w-full border-b border-slate-50 px-4 py-3 text-left text-sm font-medium text-slate-700 transition-colors last:border-0 hover:bg-blue-50"

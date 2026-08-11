@@ -6,6 +6,8 @@ export interface ReviewRating {
 export interface Review {
   id: number;
   collegeId: number;
+  universityId?: number;
+  institutionId?: number;
   collegeName?: string;
   userId?: number;
   userName?: string;
@@ -32,6 +34,7 @@ export interface Review {
 export interface ReviewInput {
   collegeId: number;
   collegeName?: string;
+  institutionId?: number;
   studentType: "current" | "alumni";
   course?: string;
   level?: string;

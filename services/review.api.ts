@@ -20,6 +20,7 @@ export const reviewApi = {
     data: {
       collegeId: number;
       collegeName?: string;
+      institutionId?: number;
       studentType: "current" | "alumni";
       course?: string;
       level?: string;
@@ -40,6 +41,7 @@ export const reviewApi = {
       body: JSON.stringify({
         college_id: data.collegeId,
         college_name: data.collegeName,
+        institution_id: data.institutionId,
         student_type: data.studentType,
         course: data.course,
         level: data.level,
