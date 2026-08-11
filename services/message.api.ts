@@ -137,7 +137,7 @@ class MessageApi {
     const formData = new FormData();
     formData.append("file", file);
 
-    const token = localStorage.getItem("token") || sessionStorage.getItem("token");
+    const token = localStorage.getItem("token") || localStorage.getItem("institutionToken") || sessionStorage.getItem("token");
     const response = await fetch(`/api/v1/uploads`, {
       method: "POST",
       headers: {

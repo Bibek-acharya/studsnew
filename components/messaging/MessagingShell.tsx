@@ -7,23 +7,27 @@ import ConversationList from "./ConversationList";
 import ChatWindow from "./ChatWindow";
 import ContactInfo from "./ContactInfo";
 
+function getStoredUserId(userRole: "student" | "institution"): number {
+  const storageKey = userRole === "student" ? "user" : "institutionUser";
+  if (typeof window === "undefined") return 0;
+  const userData = localStorage.getItem(storageKey);
+  if (!userData) return 0;
+  try { return JSON.parse(userData).id || 0; } catch { return 0; }
+}
+
 function Shell({ userRole }: { userRole: "student" | "institution" }) {
   const [selectedConversation, setSelectedConversation] = useState<Conversation | null>(null);
-  const [userId, setUserId] = useState<number>(0);
+  const [userId, setUserId] = useState<number>(() => getStoredUserId(userRole));
   const [showContactInfo, setShowContactInfo] = useState(false);
   const { conversations, markConversationRead } = useMessaging();
 
   useEffect(() => {
     const storageKey = userRole === "student" ? "user" : "institutionUser";
     const tokenKey = userRole === "student" ? "token" : "institutionToken";
-    const userData = localStorage.getItem(storageKey);
-    if (userData) {
-      const user = JSON.parse(userData);
-      setUserId(user.id);
-      const token = localStorage.getItem(tokenKey) || sessionStorage.getItem(tokenKey);
-      if (token) {
-        messageApi.connectWebSocket(userRole, user.id, token);
-      }
+    const rawUserId = getStoredUserId(userRole);
+    const token = localStorage.getItem(tokenKey) || sessionStorage.getItem(tokenKey);
+    if (token) {
+      messageApi.connectWebSocket(userRole, rawUserId, token);
     }
     return () => { messageApi.disconnectWebSocket(); };
   }, [userRole]);
