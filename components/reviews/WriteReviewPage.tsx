@@ -20,21 +20,16 @@ const WriteReviewPage: React.FC = () => {
 
   const [studentType, setStudentType] = useState<StudentType>(null);
   const [collegeInput, setCollegeInput] = useState("");
+  const [courseInput, setCourseInput] = useState("");
   const [batchYear, setBatchYear] = useState("");
   const [pros, setPros] = useState("");
   const [cons, setCons] = useState("");
   const [yearlyFee, setYearlyFee] = useState("");
   const [scholarship, setScholarship] = useState("");
   const [internshipOutcome, setInternshipOutcome] = useState("");
-  const [email, setEmail] = useState("");
+  const [email, setEmail] = useState(user?.email || "");
   const [certify, setCertify] = useState(false);
   const [ratings, setRatings] = useState<Record<string, number>>({});
-
-  useEffect(() => {
-    if (user?.email) {
-      setEmail(user.email);
-    }
-  }, [user]);
 
   const [filteredColleges, setFilteredColleges] = useState<College[]>([]);
   const [isCollegeLoading, setIsCollegeLoading] = useState(false);
@@ -119,6 +114,7 @@ const WriteReviewPage: React.FC = () => {
   const resetForm = () => {
     setStudentType(null);
     setCollegeInput("");
+    setCourseInput("");
     setBatchYear("");
     setPros("");
     setCons("");
@@ -193,6 +189,7 @@ const WriteReviewPage: React.FC = () => {
         collegeId: selectedCollege.id,
         collegeName: collegeInput,
         studentType,
+        course: courseInput,
         batchYear: parseInt(batchYear),
         ratings,
         pros,
@@ -230,7 +227,7 @@ const WriteReviewPage: React.FC = () => {
 
   return (
     <div className="relative min-h-screen bg-white py-12 font-sans">
-      <div className="mx-auto max-w-6xl">
+      <div className="mx-auto max-w-350">
         <div className="mb-10 text-center lg:text-left">
           <h1 className="mb-3 text-3xl font-extrabold tracking-tight text-slate-900 md:text-4xl">
             Review Your college Experience
@@ -348,6 +345,19 @@ const WriteReviewPage: React.FC = () => {
                     </option>
                   ))}
                 </select>
+              </div>
+
+              <div className="mb-8">
+                <label className="mb-2 block text-sm font-semibold text-slate-900">
+                  Courses/Program
+                </label>
+                <input
+                  type="text"
+                  value={courseInput}
+                  onChange={(event) => setCourseInput(event.target.value)}
+                  placeholder="e.g. BSc CSIT, Computer Engineering"
+                  className="w-full rounded-md border border-slate-200 bg-white py-3 px-4 text-sm placeholder-slate-400 focus:border-transparent focus:outline-none focus:ring-2 focus:ring-blue-500"
+                />
               </div>
             </section>
 
