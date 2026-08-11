@@ -383,11 +383,12 @@ export default function AboutPage() {
                     Our Mission
                   </h3>
                 </div>
-                <p className="text-green-50 text-sm md:text-base leading-relaxed">
-                  To provide accessible, affordable, and high-quality digital
-                  learning tools across Nepal, bridging the academic gap and
-                  fostering innovation.
-                </p>
+                <div className="text-green-50 text-sm md:text-base leading-relaxed space-y-2">
+                  <p><strong>Verify &amp; Validate:</strong> Provide the most accurate and up-to-date academic data available.</p>
+                  <p><strong>Simplify Discovery:</strong> Remove the complexity from college and course selection.</p>
+                  <p><strong>Accelerate Careers:</strong> Create a direct pipeline between talented students and top employers.</p>
+                  <p><strong>Cultivate Success:</strong> Equipping the next generation with the tools to build a sustainable future.</p>
+                </div>
               </div>
 
               <div className="side-card w-full bg-[#0A61EF] rounded-xl p-6 md:p-8 text-white shadow-lg flex flex-col justify-center">
@@ -418,9 +419,7 @@ export default function AboutPage() {
                   </h3>
                 </div>
                 <p className="text-blue-50 text-sm md:text-base leading-relaxed">
-                  To create a future where every student in Nepal has the
-                  resources and mentorship to achieve their dreams regardless of
-                  their background.
+                  To be the definitive digital gateway in Nepal for student empowerment, setting the gold standard for how education and career opportunities are discovered.
                 </p>
               </div>
             </div>

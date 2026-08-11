@@ -4,7 +4,7 @@ import React, { useEffect, useState, useRef, useCallback } from "react";
 import { apiService, ForumPost, ForumCommunity } from "@/services/api";
 import { useAuth } from "@/services/AuthContext";
 import DynamicIcon from "@/components/shared/DynamicIcon";
-import { Heart, MessageCircle, Image, BarChart2, Video, X, Plus, Send, ChevronDown, ChevronUp, Maximize2, ChevronRight } from "lucide-react";
+import { Heart, MessageCircle, Image, BarChart2, Video, X, Plus, Send, ChevronDown, ChevronUp, Maximize2, ChevronRight, ChevronLeft } from "lucide-react";
 
 /* ── helpers ─────────────────────────────────────────────────────────── */
 
@@ -92,7 +92,7 @@ const PostCard: React.FC<{
   const isGeneral = post.community?.is_general || communityName === "General";
 
   return (
-    <div className="bg-white rounded-lg p-5 border border-slate-200/80 shadow-xs space-y-3 card-hover">
+    <div className="bg-white lg:rounded-lg lg:border lg:border-slate-200/80 rounded-none border-0 border-b border-slate-100 px-4 py-3 lg:px-5 lg:py-5 space-y-3">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-3">
           <div className="w-9 h-9 rounded-full bg-blue-50 text-blue-600 flex items-center justify-center flex-shrink-0 text-sm font-bold overflow-hidden">
@@ -250,7 +250,7 @@ const CommentItem: React.FC<{
           )}
         </div>
       </div>
-      {!collapsed && comment.replies && comment.replies.length > 0 && (
+      {!collapsed && Array.isArray(comment.replies) && comment.replies.length > 0 && (
         <div className="ml-4 mt-2 pl-3 border-l-2 border-slate-200 space-y-3">
           {comment.replies.map((reply) => (
             <CommentItem key={reply.id} comment={reply} postId={postId} onReply={onReply} />
@@ -297,11 +297,11 @@ const CommentSection: React.FC<{
           <Send className="h-3.5 w-3.5" />
         </button>
       </div>
-      {comments.length === 0 ? (
+      {!Array.isArray(comments) || comments.length === 0 ? (
         <p className="text-[11px] text-slate-400 text-center py-2">No comments yet. Be the first!</p>
       ) : (
         <div className="space-y-3">
-          {comments.map((c) => (
+          {(comments as CommentData[]).map((c) => (
             <CommentItem key={c.id} comment={c} postId={postId} onReply={handleReply} />
           ))}
         </div>
@@ -418,11 +418,11 @@ const CreatePostModal: React.FC<{
 
   return (
     <div
-      className="fixed inset-0 bg-slate-900/60 backdrop-blur-xs z-50 flex items-center justify-center p-4"
+      className="fixed inset-0 bg-slate-900/60 backdrop-blur-xs z-[250] flex items-center justify-center p-4"
       onClick={handleClose}
     >
       <div
-        className="bg-white rounded-[28px] w-full max-w-lg shadow-2xl flex flex-col max-h-[85vh] overflow-hidden p-6 sm:p-7"
+        className="bg-white rounded-md w-full max-w-lg shadow-2xl flex flex-col max-h-[85vh] overflow-hidden p-6 sm:p-7"
         onClick={(e) => e.stopPropagation()}
       >
         <div className="flex items-center justify-between pb-2">
@@ -642,7 +642,7 @@ const Lightbox: React.FC<{
 }> = ({ url, type, onClose }) => {
   if (!url) return null;
   return (
-    <div className="fixed inset-0 bg-black/90 z-50 flex items-center justify-center p-4" onClick={onClose}>
+    <div className="fixed inset-0 bg-black/90 z-[9999] flex items-center justify-center p-4" onClick={onClose}>
       <button onClick={onClose} className="absolute top-4 right-4 text-white/80 hover:text-white p-2 z-10">
         <X className="h-7 w-7" />
       </button>
@@ -878,8 +878,8 @@ const CampusForumPage: React.FC = () => {
     } else {
       setOpenComments((p) => ({ ...p, [postId]: true }));
       try {
-        const data = await apiService.getForumPostComments(postId, 50, 0);
-        const cmts = data?.comments || data || [];
+        const raw = await apiService.getForumPostComments(postId, 50, 0);
+        const cmts = Array.isArray(raw?.comments) ? raw.comments : Array.isArray(raw) ? raw : [];
         setCommentsData((p) => ({ ...p, [postId]: cmts }));
       } catch {}
     }
@@ -895,9 +895,9 @@ const CampusForumPage: React.FC = () => {
   return (
     <div className="min-h-screen bg-slate-50 text-slate-800 antialiased py-6">
       <main className="max-w-[1400px] mx-auto">
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 px-4 sm:px-6 lg:px-8">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 px-0 lg:px-8">
           {/* ── LEFT SIDEBAR ── */}
-          <aside className="lg:col-span-3 space-y-5">
+          <aside className="lg:col-span-3 space-y-5 order-2 lg:order-1 hidden lg:block">
             <div className="bg-white rounded-lg p-5 border border-slate-200/80 shadow-xs">
               <div className="flex items-center justify-between mb-4 px-1">
                 <h3 className="text-xs font-extrabold text-black tracking-wider uppercase">
@@ -968,7 +968,7 @@ const CampusForumPage: React.FC = () => {
           </aside>
 
           {/* ── MIDDLE ── */}
-          <section className="lg:col-span-6 space-y-5">
+          <section className="lg:col-span-6 space-y-5 order-1 lg:order-2">
             {/* Create Post Widget */}
             <div className="bg-white rounded-lg p-4 border border-slate-200/80 shadow-xs input-glow transition-all">
               <div className="flex items-center gap-3 pb-3 border-b border-slate-100">
@@ -1046,24 +1046,84 @@ const CampusForumPage: React.FC = () => {
                 </button>
               </div>
             ) : (
-              <div className="space-y-4">
-                {posts.map((post) => (
-                  <PostCard
-                    key={post.id}
-                    post={post}
-                    onLike={handleLike}
-                    onCommentClick={handleCommentClick}
-                    onLightbox={handleLightbox}
-                    comments={commentsData[post.id]}
-                    commentsOpen={openComments[post.id]}
-                  />
-                ))}
+              <div className="lg:space-y-4 space-y-0 divide-y divide-slate-100">
+                {posts.flatMap((post, idx) => {
+                  const cards = [
+                    <PostCard
+                      key={post.id}
+                      post={post}
+                      onLike={handleLike}
+                      onCommentClick={handleCommentClick}
+                      onLightbox={handleLightbox}
+                      comments={commentsData[post.id]}
+                      commentsOpen={openComments[post.id]}
+                    />,
+                  ];
+                  if (
+                    (idx + 1) % 5 === 0 ||
+                    (idx === posts.length - 1 && posts.length < 5)
+                  ) {
+                    cards.push(
+                      <div key={`communities-${idx}`} className="lg:hidden px-0 py-4 bg-white border-b border-slate-100">
+                        <div className="flex items-center justify-between px-4 mb-3">
+                          <h3 className="text-xs font-extrabold text-black tracking-wider uppercase">Discover Communities</h3>
+                          <div className="flex gap-1">
+                            <button
+                              onClick={() => document.getElementById(`comm-scroll-${idx}`)?.scrollBy({ left: -200, behavior: "smooth" })}
+                              className="p-1 rounded-full hover:bg-slate-100 text-slate-500"
+                            >
+                              <ChevronLeft className="h-4 w-4" />
+                            </button>
+                            <button
+                              onClick={() => document.getElementById(`comm-scroll-${idx}`)?.scrollBy({ left: 200, behavior: "smooth" })}
+                              className="p-1 rounded-full hover:bg-slate-100 text-slate-500"
+                            >
+                              <ChevronRight className="h-4 w-4" />
+                            </button>
+                          </div>
+                        </div>
+                        <div
+                          id={`comm-scroll-${idx}`}
+                          className="flex gap-3 overflow-x-auto scrollbar-hide px-4"
+                          style={{ scrollSnapType: "x mandatory" }}
+                        >
+                          {communities.filter((c) => !c.is_general).map((item) => (
+                            <div
+                              key={item.id}
+                              className="flex-shrink-0 w-[130px] flex flex-col items-center gap-2 p-3 rounded-xl border border-slate-200 bg-white"
+                              style={{ scrollSnapAlign: "start" }}
+                            >
+                              <div
+                                className="w-12 h-12 rounded-xl flex items-center justify-center text-lg flex-shrink-0"
+                                style={{ backgroundColor: (item.bg_color || "#e0e7ff") + "40" }}
+                              >
+                                {item.icon ? <DynamicIcon name={item.icon} size={22} className="text-slate-700" /> : null}
+                              </div>
+                              <p className="text-[11px] font-bold text-slate-800 text-center leading-tight line-clamp-2">
+                                {item.name}
+                              </p>
+                              <button
+                                onClick={(e) => { e.stopPropagation(); handleJoinToggle(item.id); }}
+                                className={`w-full py-1.5 text-[10px] font-bold rounded-full transition-all ${
+                                  item.is_member ? 'bg-green-600 hover:bg-green-700 text-white' : 'bg-[#0000ff] hover:opacity-90 text-white'
+                                }`}
+                              >
+                                {joinLoading[item.id] ? "..." : item.is_member ? "Joined" : "Join"}
+                              </button>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    );
+                  }
+                  return cards;
+                })}
               </div>
             )}
           </section>
 
           {/* ── RIGHT SIDEBAR ── */}
-          <aside className="lg:col-span-3 space-y-5">
+          <aside className="lg:col-span-3 space-y-5 hidden lg:block">
             <div className="bg-white rounded-lg p-5 border border-slate-200/80 shadow-xs">
               <div className="flex items-center gap-2 mb-4 px-1">
                 <svg
