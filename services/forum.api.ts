@@ -5,7 +5,10 @@ const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080";
 export const forumApi = {
   async getForumCommunities(_token?: string): Promise<ForumCommunity[]> {
     const response = await fetch(`${API_BASE_URL}/api/v1/forum/communities`, {
-      headers: { "Content-Type": "application/json" },
+      headers: {
+        "Content-Type": "application/json",
+        ...(_token ? { Authorization: `Bearer ${_token}` } : {}),
+      },
       credentials: "include",
     });
     if (!response.ok) throw new Error("Failed to fetch communities");

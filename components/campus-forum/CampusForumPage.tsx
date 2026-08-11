@@ -40,6 +40,14 @@ function isArray<T>(data: unknown): data is T[] {
   return Array.isArray(data);
 }
 
+const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080";
+
+function imageUrl(path?: string): string {
+  if (!path) return "";
+  if (path.startsWith("http")) return path;
+  return `${API_BASE}${path}`;
+}
+
 interface PollOption {
   text: string;
   votes: number;
@@ -75,7 +83,7 @@ const PostCard: React.FC<{
         <div className="flex items-center gap-3">
           <div className="w-9 h-9 rounded-full bg-blue-50 text-blue-600 flex items-center justify-center flex-shrink-0 text-sm font-bold overflow-hidden">
             {avatarUrl ? (
-              <img src={avatarUrl} alt="" className="w-full h-full object-cover" />
+              <img src={imageUrl(avatarUrl)} alt="" className="w-full h-full object-cover" />
             ) : (
               avatarLetter
             )}
@@ -114,7 +122,7 @@ const PostCard: React.FC<{
           {images.map((url, i) => (
             <img
               key={i}
-              src={url}
+              src={imageUrl(url)}
               alt={`Post image ${i + 1}`}
               className="w-full object-cover rounded-lg border border-slate-100"
               style={{ maxHeight: i === 0 && images.length === 1 ? 320 : 200 }}
@@ -125,7 +133,7 @@ const PostCard: React.FC<{
 
       {post.video_url && (
         <div className="rounded-xl overflow-hidden border border-slate-100 bg-black">
-          <video src={post.video_url} controls className="w-full max-h-80 object-contain" />
+          <video src={imageUrl(post.video_url)} controls className="w-full max-h-80 object-contain" />
         </div>
       )}
 
@@ -291,7 +299,7 @@ const CreatePostModal: React.FC<{
           <div className="flex items-center gap-3.5">
             <div className="w-12 h-12 rounded-full bg-blue-50 text-blue-600 flex items-center justify-center flex-shrink-0 text-lg font-bold overflow-hidden">
               {user?.image_url ? (
-                <img src={user.image_url} alt="" className="w-full h-full object-cover" />
+                <img src={imageUrl(user.image_url)} alt="" className="w-full h-full object-cover" />
               ) : (
                 avatarLetter
               )}
@@ -331,7 +339,7 @@ const CreatePostModal: React.FC<{
               <div className="grid gap-2 grid-cols-2">
                 {imagePreviews.map((url, i) => (
                   <div key={i} className="relative rounded-xl overflow-hidden border border-gray-100 shadow-sm bg-gray-50 group">
-                    <img src={url} alt={`Preview ${i + 1}`} className="w-full h-32 object-cover" />
+                    <img src={imageUrl(url)} alt={`Preview ${i + 1}`} className="w-full h-32 object-cover" />
                     <button
                       onClick={() => removeImage(i)}
                       className="absolute top-2 right-2 bg-black/60 hover:bg-black/80 text-white w-7 h-7 rounded-full flex items-center justify-center transition-all shadow-md backdrop-blur-sm"
@@ -534,7 +542,7 @@ const CampusForumPage: React.FC = () => {
 
   const fetchCommunities = useCallback(async () => {
     try {
-      const data = await apiService.getForumCommunities();
+      const data = await apiService.getForumCommunities(token || undefined);
       setCommunities(isArray(data) ? data : []);
     } catch (e) {
       console.error(e);
@@ -549,7 +557,10 @@ const CampusForumPage: React.FC = () => {
       if (!selectedCommunityId) {
         const joinedIds = communities.filter((c) => c.is_member).map((c) => c.id);
         const generalId = communities.find((c) => c.is_general)?.id;
-        setPosts(list.filter((p) => joinedIds.includes(p.community_id) || p.community_id === generalId));
+        const userId = user?.id;
+        setPosts(list.filter((p) =>
+          joinedIds.includes(p.community_id) || p.community_id === generalId || (userId && p.user_id === userId)
+        ));
       } else {
         setPosts(list);
       }
@@ -780,7 +791,7 @@ const CampusForumPage: React.FC = () => {
               <div className="flex items-center gap-3 pb-3 border-b border-slate-100">
                 <div className="w-9 h-9 rounded-full bg-blue-50 text-blue-600 flex items-center justify-center flex-shrink-0 text-sm font-bold overflow-hidden">
                   {user?.image_url ? (
-                    <img src={user.image_url} alt="" className="w-full h-full object-cover" />
+                    <img src={imageUrl(user.image_url)} alt="" className="w-full h-full object-cover" />
                   ) : (
                     (user?.first_name?.[0] || "🎓").toUpperCase()
                   )}

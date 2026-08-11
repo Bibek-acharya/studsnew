@@ -18,6 +18,14 @@ import {
   type ForumPost,
 } from "@/services/api";
 
+const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080";
+
+function resolveImageUrl(path?: string): string {
+  if (!path) return "";
+  if (path.startsWith("http")) return path;
+  return `${API_BASE}${path}`;
+}
+
 export default function CampusFeedSection() {
   const [communities, setCommunities] = useState<ForumCommunity[]>([]);
   const [loading, setLoading] = useState(true);
@@ -227,7 +235,7 @@ export default function CampusFeedSection() {
                 </p>
                 {post.image_url && (
                   <img
-                    src={post.image_url}
+                    src={resolveImageUrl(post.image_url)}
                     alt=""
                     className="mt-2 h-40 w-full rounded-md object-cover"
                   />
