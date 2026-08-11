@@ -15,6 +15,7 @@ interface CollegeHeaderProps {
   websiteHref: string;
   instLogo: string | null;
   instBanner: string | null;
+  followerCount: number;
   isVerified: boolean;
   college: any;
   isInstitution: boolean;
@@ -41,6 +42,7 @@ const CollegeHeader: React.FC<CollegeHeaderProps> = ({
   websiteHref,
   instLogo,
   instBanner,
+  followerCount,
   isVerified,
   college,
   isInstitution,
@@ -143,6 +145,22 @@ const CollegeHeader: React.FC<CollegeHeaderProps> = ({
                     {website.toLowerCase()}
                   </a>
                 )}
+                {followerCount > 0 && (
+                  <span className="text-gray-500 hidden md:inline">|</span>
+                )}
+                <div className="flex items-center gap-1.5 shrink-0">
+                  <i className="fa-solid fa-users text-gray-500"></i>
+                  <span className="font-bold text-gray-900">
+                    {followerCount >= 1000000
+                      ? `${(followerCount / 1000000).toFixed(1).replace(/\.0$/, "")}M`
+                      : followerCount >= 1000
+                        ? `${(followerCount / 1000).toFixed(1).replace(/\.0$/, "")}k`
+                        : followerCount}
+                  </span>
+                  <span className="text-gray-500 whitespace-nowrap">
+                    {followerCount === 1 ? "Follower" : "Followers"}
+                  </span>
+                </div>
               </div>
               <div className="flex items-center gap-2">
               <button

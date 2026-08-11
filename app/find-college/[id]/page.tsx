@@ -200,6 +200,7 @@ const CollegeDetailsPage = ({
         websiteHref={data.websiteHref}
         instLogo={data.instLogo}  
         instBanner={data.instBanner}
+        followerCount={data.followerCount}
         isVerified={data.isVerified}
         college={data.college}
         isInstitution={data.isInstitution}

@@ -295,6 +295,7 @@ export function useCollegeData(idStr: string) {
       : website
         ? `https://${website}`
         : "";
+  const followerCount = college?.follower_count ?? 0;
   const description =
     (isInstitution ? instDescription : college?.description) || "";
   const isVerified = !!college?.verified || college?.claimed === true;
@@ -350,6 +351,7 @@ export function useCollegeData(idStr: string) {
     reviewsCount,
     website,
     websiteHref,
+    followerCount,
     description,
     isVerified,
     shareTitle,
