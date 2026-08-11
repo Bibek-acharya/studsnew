@@ -66,6 +66,7 @@ const PostCard: React.FC<{
   const user = post.user;
   const avatarLetter = user ? (user.first_name?.[0] || "U").toUpperCase() : "U";
   const communityName = post.community?.name || "";
+  const isGeneral = post.community?.is_general || communityName === "General";
 
   return (
     <div className="bg-white rounded-lg p-5 border border-slate-200/80 shadow-xs space-y-3 card-hover">
@@ -79,10 +80,10 @@ const PostCard: React.FC<{
               {user ? `${user.first_name} ${user.last_name}` : "Anonymous"}
             </h4>
             <div className="flex items-center gap-1.5 text-[11px] text-slate-400 font-medium">
-              {communityName && (
+              {communityName && !isGeneral && (
                 <span className="text-blue-600 font-bold">{communityName}</span>
               )}
-              {communityName && <span>·</span>}
+              {communityName && !isGeneral && <span>·</span>}
               <span>{relativeTime(post.created_at || post.CreatedAt || new Date().toISOString())}</span>
             </div>
           </div>
@@ -527,7 +528,13 @@ const CampusForumPage: React.FC = () => {
     try {
       const data = await apiService.getForumPosts(50, token || undefined, selectedCommunityId || undefined, 1);
       const list: ForumPost[] = isArray(data) ? (data as ForumPost[]) : ((data as { posts?: ForumPost[] })?.posts || []);
-      setPosts(list);
+      if (!selectedCommunityId) {
+        const joinedIds = communities.filter((c) => c.is_member).map((c) => c.id);
+        const generalId = communities.find((c) => c.is_general)?.id;
+        setPosts(list.filter((p) => joinedIds.includes(p.community_id) || p.community_id === generalId));
+      } else {
+        setPosts(list);
+      }
     } catch (e) {
       console.error(e);
     } finally {
@@ -625,7 +632,7 @@ const CampusForumPage: React.FC = () => {
       const pollItems = data.poll ? data.poll.options.map((o) => o.text) : [];
 
       const newPost = await apiService.createForumPost(token, {
-        community_id: selectedCommunityId || 0,
+        community_id: selectedCommunityId || communities.find((c) => c.is_general)?.id || communities[0]?.id || 0,
         category: "General",
         title: data.content.slice(0, 80),
         content: data.content,
@@ -691,7 +698,7 @@ const CampusForumPage: React.FC = () => {
               </div>
 
               <div className="space-y-3.5">
-                {communities.map((item) => (
+                {communities.filter((c) => !c.is_general).map((item) => (
                   <div key={item.id} className="flex items-center justify-between py-1 group">
                     <div
                       className="flex items-center gap-3 min-w-0 flex-1 cursor-pointer"

@@ -58,7 +58,10 @@ export const forumApi = {
       `${API_BASE_URL}/api/v1/forum/communities/${id}/join`,
       {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json",
+          ...(_token ? { Authorization: `Bearer ${_token}` } : {}),
+        },
         credentials: "include",
       },
     );
@@ -83,7 +86,10 @@ export const forumApi = {
       `${API_BASE_URL}/api/v1/forum/posts/${postId}/comments`,
       {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json",
+          ...(_token ? { Authorization: `Bearer ${_token}` } : {}),
+        },
         credentials: "include",
         body: JSON.stringify(data),
       },
@@ -97,7 +103,10 @@ export const forumApi = {
       `${API_BASE_URL}/api/v1/forum/posts/${postId}/poll/vote`,
       {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json",
+          ...(_token ? { Authorization: `Bearer ${_token}` } : {}),
+        },
         credentials: "include",
         body: JSON.stringify({ option_index: optionIdx }),
       },
@@ -111,7 +120,10 @@ export const forumApi = {
       `${API_BASE_URL}/api/v1/forum/posts/${postId}/like`,
       {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json",
+          ...(_token ? { Authorization: `Bearer ${_token}` } : {}),
+        },
         credentials: "include",
       },
     );
@@ -124,7 +136,10 @@ export const forumApi = {
       `${API_BASE_URL}/api/v1/forum/posts/${postId}/dislike`,
       {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json",
+          ...(_token ? { Authorization: `Bearer ${_token}` } : {}),
+        },
         credentials: "include",
       },
     );
@@ -137,7 +152,10 @@ export const forumApi = {
       `${API_BASE_URL}/api/v1/forum/posts/${postId}/save`,
       {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json",
+          ...(_token ? { Authorization: `Bearer ${_token}` } : {}),
+        },
         credentials: "include",
       },
     );
@@ -148,7 +166,10 @@ export const forumApi = {
   async createForumPost(_token: string, data: any): Promise<ForumPost> {
     const response = await fetch(`${API_BASE_URL}/api/v1/forum/posts`, {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: {
+        "Content-Type": "application/json",
+        ...(_token ? { Authorization: `Bearer ${_token}` } : {}),
+      },
       credentials: "include",
       body: JSON.stringify(data),
     });
@@ -159,7 +180,10 @@ export const forumApi = {
   async updateForumPost(_token: string, id: number, data: any): Promise<ForumPost> {
     const response = await fetch(`${API_BASE_URL}/api/v1/forum/posts/${id}`, {
       method: "PUT",
-      headers: { "Content-Type": "application/json" },
+      headers: {
+        "Content-Type": "application/json",
+        ...(_token ? { Authorization: `Bearer ${_token}` } : {}),
+      },
       credentials: "include",
       body: JSON.stringify(data),
     });
@@ -170,7 +194,10 @@ export const forumApi = {
   async deleteForumPost(_token: string, id: number): Promise<any> {
     const response = await fetch(`${API_BASE_URL}/api/v1/forum/posts/${id}`, {
       method: "DELETE",
-      headers: { "Content-Type": "application/json" },
+      headers: {
+        "Content-Type": "application/json",
+        ...(_token ? { Authorization: `Bearer ${_token}` } : {}),
+      },
       credentials: "include",
     });
     if (!response.ok) throw new Error("Failed to delete post");
@@ -181,6 +208,9 @@ export const forumApi = {
     files.forEach((file) => formData.append("files", file));
     const response = await fetch(`${API_BASE_URL}/api/v1/forum/upload`, {
       method: "POST",
+      headers: {
+        ...(_token ? { Authorization: `Bearer ${_token}` } : {}),
+      },
       body: formData,
       credentials: "include",
     });
