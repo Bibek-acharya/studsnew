@@ -160,8 +160,9 @@ class MessageApi {
       return;
     }
 
+    const apiHost = process.env.NEXT_PUBLIC_API_URL?.replace(/^https?:\/\//, "") || window.location.host;
     const wsProtocol = window.location.protocol === "https:" ? "wss:" : "ws:";
-    const wsUrl = `${wsProtocol}//${window.location.host}/api/v1/ws?token=${token}&user_type=${userType}&user_id=${userId}`;
+    const wsUrl = `${wsProtocol}//${apiHost}/api/v1/ws?token=${token}&user_type=${userType}&user_id=${userId}`;
     this.ws = new WebSocket(wsUrl);
 
     this.ws.onopen = () => {

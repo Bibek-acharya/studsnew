@@ -31,7 +31,7 @@ export default function ConversationList({ userRole, selectedId, onSelect }: Con
   };
 
   const filtered = conversations.filter((c) => {
-    const name = userRole === "student" ? c.institution_name : c.student_name;
+    const name = (userRole === "student" ? c.institution_name : c.student_name) || "";
     return name.toLowerCase().includes(search.toLowerCase());
   });
 
