@@ -25,6 +25,7 @@ import {
   Megaphone,
   Lock,
   MapPin,
+  Users,
 } from "lucide-react";
 
 export type InstitutionPage =
@@ -62,7 +63,7 @@ export type InstitutionPage =
   | "analytics"
   | "notification"
   | "settings"
-  | "inviteStudent"
+  | "students"
   | "collegeLocation";
 
 interface Props {
@@ -273,11 +274,11 @@ const InstitutionLayout: React.FC<Props> = ({
       icon: <MessageSquare size={20} />,
     },
     {
-      key: "inviteStudent",
+      key: "students",
       type: "item",
-      page: "inviteStudent",
-      label: "Invite Student",
-      icon: <MailOpen size={20} />,
+      page: "students",
+      label: "Students",
+      icon: <Users size={20} />,
     },
     {
       key: "news",

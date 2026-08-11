@@ -44,7 +44,7 @@ export default function DashboardLayout({
     if (path.includes("/events/directory")) return "eventsDirectory";
     if (path.includes("/blogs/create")) return "createBlog";
     if (path.includes("/blogs/directory")) return "blogDirectory";
-    if (path.includes("/invite-student")) return "inviteStudent";
+    if (path.includes("/students")) return "students";
     if (path.includes("/college-location")) return "collegeLocation";
     if (path.includes("/reviews")) return "reviews";
     if (path.includes("/manage-advertisement")) return "manageAdvertisement";
@@ -93,7 +93,7 @@ export default function DashboardLayout({
       analytics: "/institution-zone/dashboard/analytics",
       notification: "/institution-zone/dashboard/notifications",
       settings: "/institution-zone/dashboard/settings",
-      inviteStudent: "/institution-zone/dashboard/invite-student",
+      students: "/institution-zone/dashboard/students",
       reviews: "/institution-zone/dashboard/reviews",
       manageAdvertisement: "/institution-zone/dashboard/manage-advertisement",
       collegeLocation: "/institution-zone/dashboard/college-location",

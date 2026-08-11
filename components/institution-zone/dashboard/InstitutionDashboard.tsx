@@ -32,7 +32,7 @@ import ProfilePage from "./institution/ProfilePage";
 import AnalyticsPage from "./institution/AnalyticsPage";
 import NotificationsPage from "./institution/NotificationsPage";
 import SettingsPage from "./institution/SettingsPage";
-import InviteStudentPage from "./institution/InviteStudentPage";
+import StudentsPage from "./institution/StudentsPage";
 import ReviewsPage from "./institution/ReviewsPage";
 import ManageAdvertisementPage from "./institution/ManageAdvertisementPage";
 
@@ -69,7 +69,7 @@ const InstitutionDashboard: React.FC = () => {
       case "analytics": return <AnalyticsPage />;
       case "notification": return <NotificationsPage />;
       case "settings": return <SettingsPage />;
-      case "inviteStudent": return <InviteStudentPage />;
+      case "students": return <StudentsPage />;
       case "reviews": return <ReviewsPage />;
       case "manageAdvertisement": return <ManageAdvertisementPage />;
       default: return <OverviewPage />;
