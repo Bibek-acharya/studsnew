@@ -5,13 +5,10 @@ import Link from "next/link";
 import { submitReviewAction } from "@/actions/review-actions";
 import { collegeApi } from "@/services/college.api";
 import type { College } from "@/services/api";
-import { courseDataByLevel, searchCourses } from "@/lib/course-suggestions";
 import { ratingCategories, ratingStatusLabels } from "@/lib/review-types";
 import { useAuth } from "@/services/AuthContext";
 
 type StudentType = "current" | "alumni" | null;
-
-const courseDataMap: Record<string, string[]> = courseDataByLevel;
 
 const WriteReviewPage: React.FC = () => {
   const { user, isAuthenticated } = useAuth();
@@ -23,12 +20,9 @@ const WriteReviewPage: React.FC = () => {
 
   const [studentType, setStudentType] = useState<StudentType>(null);
   const [collegeInput, setCollegeInput] = useState("");
-  const [courseInput, setCourseInput] = useState("");
-  const [level, setLevel] = useState("");
   const [batchYear, setBatchYear] = useState("");
   const [pros, setPros] = useState("");
   const [cons, setCons] = useState("");
-  const [summaryTitle, setSummaryTitle] = useState("");
   const [yearlyFee, setYearlyFee] = useState("");
   const [scholarship, setScholarship] = useState("");
   const [internshipOutcome, setInternshipOutcome] = useState("");
@@ -46,7 +40,6 @@ const WriteReviewPage: React.FC = () => {
   const [isCollegeLoading, setIsCollegeLoading] = useState(false);
 
   const [showCollegeList, setShowCollegeList] = useState(false);
-  const [showCourseList, setShowCourseList] = useState(false);
 
   const [submitting, setSubmitting] = useState(false);
   const [modal, setModal] = useState<{
@@ -78,10 +71,6 @@ const WriteReviewPage: React.FC = () => {
     }, 300);
     return () => clearTimeout(timer);
   }, [collegeInput]);
-
-  const currentCourseSuggestions = useMemo(() => {
-    return searchCourses(courseInput, level);
-  }, [level, courseInput]);
 
   const averageRating = useMemo(() => {
     const vals = Object.values(ratings) as number[];
@@ -130,8 +119,6 @@ const WriteReviewPage: React.FC = () => {
   const resetForm = () => {
     setStudentType(null);
     setCollegeInput("");
-    setCourseInput("");
-    setLevel("");
     setBatchYear("");
     setPros("");
     setCons("");
@@ -174,12 +161,9 @@ const WriteReviewPage: React.FC = () => {
     }
     if (
       !collegeInput ||
-      !level ||
-      !courseInput ||
       !batchYear ||
       !pros ||
       !cons ||
-      !summaryTitle ||
       !email ||
       !certify
     ) {
@@ -210,13 +194,10 @@ const WriteReviewPage: React.FC = () => {
         collegeId: selectedCollege.id,
         collegeName: collegeInput,
         studentType,
-        course: courseInput,
-        level,
         batchYear: parseInt(batchYear),
         ratings,
         pros,
         cons,
-        summaryTitle,
         yearlyFee: yearlyFee ? parseInt(yearlyFee) : undefined,
         scholarship: scholarship === "yes",
         internshipOutcome: internshipOutcome || undefined,
@@ -249,7 +230,7 @@ const WriteReviewPage: React.FC = () => {
   };
 
   return (
-    <div className="relative min-h-screen bg-slate-50 px-4 py-12 font-sans sm:px-6 lg:px-8">
+    <div className="relative min-h-screen bg-white py-12 font-sans">
       <div className="mx-auto max-w-6xl">
         <div className="mb-10 text-center lg:text-left">
           <h1 className="mb-3 text-3xl font-extrabold tracking-tight text-slate-900 md:text-4xl">
@@ -346,92 +327,28 @@ const WriteReviewPage: React.FC = () => {
                             </div>
                           </button>
                         </li>
-                      ))}
+                      )))}
                     </ul>
                   )}
                 </div>
               </div>
 
-              <div className="grid grid-cols-1 gap-6 md:grid-cols-3">
-                <div>
-                  <label className="mb-2 block text-sm font-semibold text-slate-900">
-                    Level <span className="text-red-500">*</span>
-                  </label>
-                  <select
-                    value={level}
-                    onChange={(event) => {
-                      setLevel(event.target.value);
-                      setCourseInput("");
-                    }}
-                    className="w-full cursor-pointer appearance-none rounded-md border border-slate-200 bg-white px-4 py-3 text-sm text-slate-700 focus:border-transparent focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  >
-                    <option value="">Select Level</option>
-                    <option value="+2 / High School">+2 / High School</option>
-                    <option value="Bachelor's Degree">Bachelor's Degree</option>
-                    <option value="Master's Degree">Master's Degree</option>
-                    <option value="Diploma">Diploma</option>
-                  </select>
-                </div>
-
-                <div>
-                  <label className="mb-2 block text-sm font-semibold text-slate-900">
-                    Courses/Program <span className="text-red-500">*</span>
-                  </label>
-                  <div className="relative">
-                    <i className="fa-solid fa-magnifying-glass pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"></i>
-                    <input
-                      value={courseInput}
-                      onFocus={() => setShowCourseList(true)}
-                      onBlur={() =>
-                        setTimeout(() => setShowCourseList(false), 150)
-                      }
-                      onChange={(event) => setCourseInput(event.target.value)}
-                      placeholder={
-                        level
-                          ? "Search your courses and program"
-                          : "Select Level first"
-                      }
-                      className="w-full rounded-md border border-slate-200 bg-white py-3 pl-10 pr-4 text-sm placeholder-slate-400 focus:border-transparent focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    />
-                    {showCourseList && currentCourseSuggestions.length > 0 && (
-                      <ul className="absolute left-0 top-full z-20 mt-1 max-h-52 w-full overflow-y-auto rounded-md border border-slate-200 bg-white shadow-lg">
-                        {currentCourseSuggestions.map((item) => (
-                          <li key={item}>
-                            <button
-                              type="button"
-                              className="w-full border-b border-slate-50 px-4 py-3 text-left text-sm font-medium text-slate-700 transition-colors last:border-0 hover:bg-blue-50"
-                              onMouseDown={(event) => {
-                                event.preventDefault();
-                                setCourseInput(item);
-                                setShowCourseList(false);
-                              }}
-                            >
-                              {item}
-                            </button>
-                          </li>
-                        ))}
-                      </ul>
-                    )}
-                  </div>
-                </div>
-
-                <div>
-                  <label className="mb-2 block text-sm font-semibold text-slate-900">
-                    Batch/Year <span className="text-red-500">*</span>
-                  </label>
-                  <select
-                    value={batchYear}
-                    onChange={(event) => setBatchYear(event.target.value)}
-                    className="w-full cursor-pointer appearance-none rounded-md border border-slate-200 bg-white px-4 py-3 text-sm text-slate-700 focus:border-transparent focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  >
-                    <option value="">Select Year</option>
-                    {years.map((year) => (
-                      <option key={year} value={year}>
-                        {year}
-                      </option>
-                    ))}
-                  </select>
-                </div>
+              <div className="mb-8">
+                <label className="mb-2 block text-sm font-semibold text-slate-900">
+                  Batch/Year <span className="text-red-500">*</span>
+                </label>
+                <select
+                  value={batchYear}
+                  onChange={(event) => setBatchYear(event.target.value)}
+                  className="w-full cursor-pointer appearance-none rounded-md border border-slate-200 bg-white px-4 py-3 text-sm text-slate-700 focus:border-transparent focus:outline-none focus:ring-2 focus:ring-blue-500"
+                >
+                  <option value="">Select Year</option>
+                  {years.map((year) => (
+                    <option key={year} value={year}>
+                      {year}
+                    </option>
+                  ))}
+                </select>
               </div>
             </section>
 
@@ -508,17 +425,6 @@ const WriteReviewPage: React.FC = () => {
                 required
               />
 
-              <div>
-                <label className="mb-3 block text-sm font-bold text-slate-900">
-                  Review Title (Summary) <span className="text-red-500">*</span>
-                </label>
-                <input
-                  value={summaryTitle}
-                  onChange={(event) => setSummaryTitle(event.target.value)}
-                  placeholder="Eg. Great learning environment but needs better infrastructure"
-                  className="w-full rounded-md border border-slate-200 bg-white p-4 text-sm placeholder-slate-400 focus:border-transparent focus:outline-none focus:ring-2 focus:ring-blue-500"
-                />
-              </div>
             </section>
 
             <section className="rounded-md border border-slate-200 bg-white p-6  md:p-8">
