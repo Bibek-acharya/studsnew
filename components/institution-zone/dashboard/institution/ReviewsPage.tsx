@@ -76,16 +76,7 @@ export default function ReviewsPage() {
     setLoading(true);
     setError(null);
     try {
-      const profileRes = await authFetch("/api/v1/institution/profile");
-      const profileJson = await profileRes.json();
-      const collegeId = profileJson?.data?.college_id || profileJson?.college_id;
-
-      if (!collegeId) {
-        setError("Could not determine college ID from institution profile.");
-        return;
-      }
-
-      const reviewsRes = await authFetch(`/api/v1/institution/reviews/college/${collegeId}?limit=100`);
+      const reviewsRes = await authFetch("/api/v1/institution/reviews?limit=100");
       const reviewsJson = await reviewsRes.json();
       if (!reviewsRes.ok) {
         setError(reviewsJson?.message || reviewsJson?.error || "Failed to load reviews");
