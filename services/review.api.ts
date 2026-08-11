@@ -3,13 +3,14 @@ import { apiRequest, type ApiRequestOptions } from "./api";
 export const reviewApi = {
   async getCollegeReviews(
     collegeId: number,
-    params?: { page?: number; limit?: number; sort?: string },
+    params?: { page?: number; limit?: number; sort?: string; inst_id?: number },
     options?: ApiRequestOptions,
   ): Promise<any> {
     const query = new URLSearchParams();
     if (params?.page) query.set("page", String(params.page));
     if (params?.limit) query.set("limit", String(params.limit));
     if (params?.sort) query.set("sort", params.sort);
+    if (params?.inst_id) query.set("inst_id", String(params.inst_id));
     const queryStr = query.toString();
     return apiRequest<any>(
       `/api/v1/education/reviews/college/${collegeId}${queryStr ? `?${queryStr}` : ""}`,

@@ -382,10 +382,11 @@ export function useCollegeData(idStr: string) {
     loadReviews: () => {
       if (collegeId && !reviewsData) {
         setReviewsLoading(true);
+        const isInst = idStr.startsWith("inst_");
         apiService
           .getCollegeReviews(
-            collegeId,
-            { page: 1, limit: 10 },
+            isInst ? 0 : collegeId,
+            { page: 1, limit: 10, ...(isInst ? { inst_id: collegeId } : {}) },
             { suppressAuthExpired: true },
           )
           .then((res) => {
