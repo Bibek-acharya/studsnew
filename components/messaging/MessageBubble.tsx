@@ -16,38 +16,47 @@ interface MessageBubbleProps {
 
 const MAX_LENGTH = 200;
 
+function truncateFileName(name: string, maxLen: number = 20): string {
+  if (name.length <= maxLen) return name;
+  const dotIdx = name.lastIndexOf(".");
+  if (dotIdx <= 0) {
+    const half = Math.floor((maxLen - 3) / 2);
+    return name.slice(0, half) + "..." + name.slice(name.length - half);
+  }
+  const ext = name.slice(dotIdx);
+  const base = name.slice(0, dotIdx);
+  const available = maxLen - ext.length - 3;
+  if (available <= 2) return name.slice(0, maxLen - 3) + "..." + ext;
+  const front = Math.ceil(available / 2);
+  const back = available - front;
+  return base.slice(0, front) + "..." + base.slice(base.length - back) + ext;
+}
+
 function StatusCheck({ status }: { status: string }) {
   if (status === "read") {
     return (
       <span className="text-blue-400" title="Read">
-        <svg className="w-3.5 h-3.5 inline" fill="currentColor" viewBox="0 0 24 24">
-          <path d="M18 7l-1.41-1.41-6.34 6.34 1.41 1.41L18 7zm4.24-1.41L11.66 16.17 7.48 12l-1.41 1.41L11.66 19l12-12-1.42-1.41zM.41 13.41L6 19l1.41-1.41L1.83 12 .41 13.41z" />
+        <svg className="w-3.5 h-3.5 inline" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 13l4 4L23 7" />
         </svg>
       </span>
     );
   }
   if (status === "delivered") {
     return (
-      <span className="text-slate-300" title="Delivered">
-        <svg className="w-3.5 h-3.5 inline" fill="currentColor" viewBox="0 0 24 24">
-          <path d="M18 7l-1.41-1.41-6.34 6.34 1.41 1.41L18 7zm4.24-1.41L11.66 16.17 7.48 12l-1.41 1.41L11.66 19l12-12-1.42-1.41zM.41 13.41L6 19l1.41-1.41L1.83 12 .41 13.41z" />
-        </svg>
-      </span>
-    );
-  }
-  if (status === "sending") {
-    return (
-      <span className="text-slate-300" title="Sending">
-        <svg className="w-3.5 h-3.5 inline" fill="currentColor" viewBox="0 0 24 24">
-          <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41L9 16.17z" />
+      <span className="text-slate-400" title="Delivered">
+        <svg className="w-3.5 h-3.5 inline" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 13l4 4L23 7" />
         </svg>
       </span>
     );
   }
   return (
-    <span className="text-slate-300" title="Sent">
-      <svg className="w-3.5 h-3.5 inline" fill="currentColor" viewBox="0 0 24 24">
-        <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41L9 16.17z" />
+    <span className="text-slate-400" title="Sent">
+      <svg className="w-3.5 h-3.5 inline" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
       </svg>
     </span>
   );
@@ -93,7 +102,7 @@ export default function MessageBubble({ message, isOwn, ownInitials, otherInitia
   );
 
   const attachmentsEl = message.attachments?.length > 0 ? (
-    <div className={isImageOnly ? "space-y-1.5" : "mt-2 space-y-1.5"}>
+    <div className={isImageOnly ? "space-y-1.5" : "mt-1.5 space-y-1.5"}>
       {message.attachments.map((attachment) => (
         <div key={attachment.id}>
           {attachment.file_type.startsWith("image/") ? (
@@ -108,12 +117,15 @@ export default function MessageBubble({ message, isOwn, ownInitials, otherInitia
               href={getImageUrl(`/uploads/${attachment.storage_key}`)}
               target="_blank"
               rel="noopener noreferrer"
-              className={`flex items-center gap-1.5 underline ${isOwn ? "text-blue-200 hover:text-white" : "text-blue-600 hover:text-blue-700"}`}
+              className={`flex items-center gap-1.5 text-[11px] ${isOwn ? "text-blue-200 hover:text-white" : "text-blue-600 hover:text-blue-700"}`}
             >
-              <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg className="w-3.5 h-3.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
               </svg>
-              <span>{attachment.file_name}</span>
+              <span>{truncateFileName(attachment.file_name)}</span>
+              <span className="text-[10px] opacity-60 ml-auto">
+                {(attachment.file_size / 1024).toFixed(0)} KB
+              </span>
             </a>
           )}
         </div>
@@ -148,8 +160,14 @@ export default function MessageBubble({ message, isOwn, ownInitials, otherInitia
   );
 
   const bubbleClass = isOwn
-    ? "bg-blue-600 text-white rounded-2xl shadow-sm"
-    : "bg-white text-slate-800 border border-slate-200 rounded-2xl shadow-sm";
+    ? "bg-blue-600 text-white rounded-2xl"
+    : "bg-white text-slate-800 border border-slate-200 rounded-2xl";
+
+  const statusEl = isOwn && !isDeleted && (
+    <span className="ml-1.5 flex items-end pb-1">
+      <StatusCheck status={message.status || "sent"} />
+    </span>
+  );
 
   return (
     <>
@@ -168,26 +186,24 @@ export default function MessageBubble({ message, isOwn, ownInitials, otherInitia
 
         {editDeleteButtons}
 
-        {isDeleted ? (
-          <div className={`relative ${bubbleClass} p-3.5 text-xs leading-relaxed opacity-60`}>
-            <p className={isOwn ? "italic" : "italic text-slate-500"}>This message was deleted</p>
-          </div>
-        ) : isImageOnly ? (
-          <div className="relative">
-            {attachmentsEl}
-            <div className={`flex items-center space-x-1 mt-1 text-[9px] ${isOwn ? "justify-end" : "justify-start"} ${isOwn ? "text-white/80" : "text-slate-400"} font-medium`}>
-              {isOwn && <StatusCheck status={message.status || "sent"} />}
+        <div className="flex items-end">
+          {isDeleted ? (
+            <div className={`relative ${bubbleClass} px-3 py-2 text-xs leading-relaxed opacity-60`}>
+              <p className={isOwn ? "italic" : "italic text-slate-500"}>This message was deleted</p>
             </div>
-          </div>
-        ) : (
-          <div className={`relative ${bubbleClass} p-3.5 text-xs leading-relaxed`}>
-            {bubbleContent}
-            {attachmentsEl}
-            <div className={`flex items-center space-x-1 mt-1 text-[9px] ${isOwn ? "justify-end" : "justify-start"} ${isOwn ? "text-white/80" : "text-slate-400"} font-medium`}>
-              {isOwn && <StatusCheck status={message.status || "sent"} />}
+          ) : isImageOnly ? (
+            <div className="relative">
+              {attachmentsEl}
             </div>
-          </div>
-        )}
+          ) : (
+            <div className={`relative ${bubbleClass} px-3 py-2 text-xs leading-relaxed`}>
+              {bubbleContent}
+              {attachmentsEl}
+            </div>
+          )}
+
+          {statusEl}
+        </div>
       </div>
 
       {isOwn && avatarEl}
