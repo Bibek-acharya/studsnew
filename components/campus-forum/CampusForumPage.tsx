@@ -648,8 +648,8 @@ const CampusForumPage: React.FC = () => {
 
       setPosts((p) => [newPost, ...p]);
       showToast("Post published successfully!");
-    } catch (e) {
-      showToast("Failed to create post");
+    } catch (e: any) {
+      showToast(e?.message || "Failed to create post");
     } finally {
       setIsSubmitting(false);
     }

@@ -173,7 +173,10 @@ export const forumApi = {
       credentials: "include",
       body: JSON.stringify(data),
     });
-    if (!response.ok) throw new Error("Failed to create post");
+    if (!response.ok) {
+      const body = await response.json().catch(() => ({}));
+      throw new Error(body.error || body.message || "Failed to create post");
+    }
     const result = await response.json();
     return result.data || result;
   },
