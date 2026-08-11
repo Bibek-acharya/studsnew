@@ -154,6 +154,7 @@ export type {
   ForumCommunity,
   ForumComment,
   ForumPost,
+  TrendingPost,
   DashboardStats,
   DashboardStatsResponse,
   RecentApplicationItem,
@@ -362,6 +363,7 @@ export const apiService = {
 
   // Forum
   getForumCommunities: forumApi.getForumCommunities.bind(forumApi),
+  getTrendingForumPosts: forumApi.getTrendingForumPosts.bind(forumApi),
   createForumCommunity: forumApi.createForumCommunity.bind(forumApi),
   updateForumCommunity: forumApi.updateForumCommunity.bind(forumApi),
   deleteForumCommunity: forumApi.deleteForumCommunity.bind(forumApi),

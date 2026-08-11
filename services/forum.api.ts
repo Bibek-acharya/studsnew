@@ -229,4 +229,13 @@ export const forumApi = {
     });
     if (!response.ok) throw new Error("Failed to delete post");
   },
+  async getTrendingForumPosts(): Promise<any[]> {
+    const response = await fetch(`${API_BASE_URL}/api/v1/forum/posts/trending`, {
+      headers: { "Content-Type": "application/json" },
+      credentials: "include",
+    });
+    if (!response.ok) throw new Error("Failed to fetch trending posts");
+    const data = await response.json();
+    return data.data || data;
+  },
 };

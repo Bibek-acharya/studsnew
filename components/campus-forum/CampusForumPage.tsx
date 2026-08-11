@@ -1,318 +1,570 @@
 "use client";
 
-import React, { useEffect, useRef, useState, useCallback } from "react";
-import { useRouter } from "next/navigation";
-import { apiService, ForumPost, ForumCommunity, ForumComment } from "@/services/api";
+import React, { useEffect, useState, useRef, useCallback } from "react";
+import { apiService, ForumPost, ForumCommunity } from "@/services/api";
 import { useAuth } from "@/services/AuthContext";
-import { ForumPostCard, JoinButton, ImageGrid } from "./ForumPostCard";
-import { Image, BarChart2, Video, ChevronUp, X, CheckCircle, AlertTriangle, Info } from "lucide-react";
 import DynamicIcon from "@/components/shared/DynamicIcon";
+import { Heart, MessageCircle, Image, BarChart2, Video, X, Plus } from "lucide-react";
 
-const CommunityHeader: React.FC<{
-  community: ForumCommunity;
-  onJoin: (id: number) => void;
-  onShare: (id: number) => void;
-  onInvite: (id: number) => void;
-  isLoading: boolean;
-  onBack?: () => void;
-}> = ({ community, onJoin, onShare, onInvite, isLoading, onBack }) => {
+/* ── helpers ─────────────────────────────────────────────────────────── */
+
+function relativeTime(dateStr: string): string {
+  const now = Date.now();
+  const then = new Date(dateStr).getTime();
+  const diff = Math.floor((now - then) / 1000);
+  if (diff < 60) return "Just now";
+  const mins = Math.floor(diff / 60);
+  if (mins < 60) return `${mins}m ago`;
+  const hrs = Math.floor(mins / 60);
+  if (hrs < 24) return `${hrs}h ago`;
+  const days = Math.floor(hrs / 24);
+  if (days < 7) return `${days}d ago`;
+  const weeks = Math.floor(days / 7);
+  if (weeks < 4) return `${weeks}w ago`;
+  const months = Math.floor(days / 30);
+  if (months < 12) return `${months}mo ago`;
+  return `${Math.floor(days / 365)}y ago`;
+}
+
+function parseImageUrls(post: ForumPost): string[] {
+  if (!post.image_url) return [];
+  try {
+    const parsed = JSON.parse(post.image_url);
+    return Array.isArray(parsed) ? parsed : [post.image_url];
+  } catch {
+    return [post.image_url];
+  }
+}
+
+function isArray<T>(data: unknown): data is T[] {
+  return Array.isArray(data);
+}
+
+interface PollOption {
+  text: string;
+  votes: number;
+}
+
+function parsePollOptions(post: ForumPost): PollOption[] {
+  if (!post.poll_options) return [];
+  try {
+    return JSON.parse(post.poll_options);
+  } catch {
+    return [];
+  }
+}
+
+/* ── internal components ──────────────────────────────────────────────── */
+
+const PostCard: React.FC<{
+  post: ForumPost;
+  onLike: (id: number) => void;
+  onCommentClick: (id: number) => void;
+}> = ({ post, onLike, onCommentClick }) => {
+  const images = parseImageUrls(post);
+  const pollOptions = parsePollOptions(post);
+  const user = post.user;
+  const avatarLetter = user ? (user.first_name?.[0] || "U").toUpperCase() : "U";
+  const communityName = post.community?.name || "";
+
   return (
-    <header className="bg-white w-full border-b border-gray-100 pt-10 pb-8 px-4 sm:px-8 lg:px-12 mb-6">
-      <div className="max-w-300 mx-auto">
-        <div className="mb-5 flex items-center justify-between">
-          <div className="w-24 h-24 rounded-md overflow-hidden border border-gray-100 bg-white flex items-center justify-center text-4xl">
-            {community.icon ? (
-              <DynamicIcon name={community.icon} size={40} />
-            ) : (
-              <span className="text-4xl">🎓</span>
-            )}
+    <div className="bg-white rounded-lg p-5 border border-slate-200/80 shadow-xs space-y-3 card-hover">
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-3">
+          <div className="w-9 h-9 rounded-full bg-blue-50 text-blue-600 flex items-center justify-center flex-shrink-0 text-sm font-bold">
+            {avatarLetter}
           </div>
-          {onBack && (
-             <button onClick={onBack} className="flex items-center gap-2 text-[#5468ff] font-bold text-sm hover:underline transition">
-               <span className="text-lg">←</span> Back to Global Feed
-             </button>
-          )}
-        </div>
-
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
-          <div className="flex flex-col gap-1.5">
-            <h1 className="text-[32px] font-bold text-[#0f1d3a] tracking-tight">{community.name}</h1>
-            <p className="text-[15px] text-gray-500 flex items-center gap-2">
-              <span>🚀</span> {community.description || "The heart of tech enthusiasts & community discussions."}
-            </p>
-            <p className="text-[13px] text-gray-400 font-medium mt-1">
-              {community.member_count ?? 0} members <span className="mx-1">•</span> {community.post_count ?? 0} posts
-            </p>
-          </div>
-
-          <div className="flex items-center gap-3">
-            <button
-              onClick={() => onJoin(community.id)}
-              disabled={isLoading}
-              className={`px-8 py-2.5 rounded-full font-bold text-[14px] transition-all duration-200 active:scale-95 flex items-center gap-2 ${
-                community.is_member
-                  ? "bg-gray-100 text-gray-500 hover:bg-red-50 hover:text-red-500 hover:border-red-200 group"
-                  : "bg-[#5468ff] hover:bg-[#4355eb] text-white"
-              }`}
-            >
-              {isLoading ? "..." : community.is_member ? "Leave Community" : "Join Community"}
-            </button>
-            <button
-              onClick={() => onInvite(community.id)}
-              className="bg-white border-[1.5px] border-[#5468ff] text-[#5468ff] hover:bg-[#f4f6ff] px-6 py-2.5 rounded-full font-bold text-[14px] transition-all duration-200 active:scale-95"
-            >
-              Invite Friends
-            </button>
-            <button
-              onClick={() => onShare(community.id)}
-              className="bg-white border-[1.5px] border-[#5468ff] text-[#5468ff] hover:bg-[#f4f6ff] w-11 h-11 rounded-full flex items-center justify-center transition-all duration-200 active:scale-95"
-            >
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <circle cx="18" cy="5" r="3"></circle>
-                <circle cx="6" cy="12" r="3"></circle>
-                <circle cx="18" cy="19" r="3"></circle>
-                <line x1="8.59" y1="13.51" x2="15.42" y2="17.49"></line>
-                <line x1="15.41" y1="6.51" x2="8.59" y2="10.49"></line>
-              </svg>
-            </button>
+          <div>
+            <h4 className="text-xs font-bold text-slate-900 leading-snug">
+              {user ? `${user.first_name} ${user.last_name}` : "Anonymous"}
+            </h4>
+            <div className="flex items-center gap-1.5 text-[11px] text-slate-400 font-medium">
+              {communityName && (
+                <span className="text-blue-600 font-bold">{communityName}</span>
+              )}
+              {communityName && <span>·</span>}
+              <span>{relativeTime(post.created_at || post.CreatedAt || new Date().toISOString())}</span>
+            </div>
           </div>
         </div>
       </div>
-    </header>
+
+      {post.title && (
+        <h3 className="text-sm font-bold text-slate-900 leading-snug">{post.title}</h3>
+      )}
+
+      {post.content && (
+        <p className="text-xs text-slate-800 leading-relaxed font-medium">{post.content}</p>
+      )}
+
+      {images.length > 0 && (
+        <div className={`grid gap-1 rounded-xl overflow-hidden ${
+          images.length === 1 ? "grid-cols-1" :
+          images.length === 2 ? "grid-cols-2" :
+          images.length === 3 ? "grid-cols-2" :
+          images.length === 4 ? "grid-cols-2" :
+          "grid-cols-3"
+        }`}>
+          {images.map((url, i) => (
+            <img
+              key={i}
+              src={url}
+              alt={`Post image ${i + 1}`}
+              className="w-full object-cover rounded-lg border border-slate-100"
+              style={{ maxHeight: i === 0 && images.length === 1 ? 320 : 200 }}
+            />
+          ))}
+        </div>
+      )}
+
+      {post.video_url && (
+        <div className="rounded-xl overflow-hidden border border-slate-100 bg-black">
+          <video src={post.video_url} controls className="w-full max-h-80 object-contain" />
+        </div>
+      )}
+
+      {post.is_poll && pollOptions.length > 0 && (
+        <div className="space-y-2 bg-slate-50 p-3.5 rounded-xl border border-slate-200/80">
+          <div className="flex items-center gap-1.5 text-xs font-bold text-slate-800">
+            <BarChart2 className="h-3.5 w-3.5 text-[#0000ff]" />
+            Poll {post.total_votes != null && `(${post.total_votes} votes)`}
+          </div>
+          {pollOptions.map((opt, idx) => {
+            const total = post.total_votes || 1;
+            const pct = Math.round((opt.votes / total) * 100);
+            return (
+              <div key={idx} className="relative overflow-hidden rounded-lg border border-slate-200 bg-white">
+                <div
+                  className="absolute inset-0 bg-blue-50/60 rounded-lg transition-all"
+                  style={{ width: `${pct}%` }}
+                />
+                <div className="relative flex items-center justify-between px-3 py-2 text-xs font-semibold text-slate-700">
+                  <span>{opt.text}</span>
+                  <span className="text-slate-400 font-normal">{pct}%</span>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      )}
+
+      <div className="flex items-center gap-6 pt-2 border-t border-slate-100 text-xs font-semibold text-slate-500">
+        <button
+          onClick={() => onLike(post.id)}
+          className={`flex items-center gap-1.5 transition-colors cursor-pointer ${
+            post.is_liked ? "text-rose-500" : "hover:text-slate-800"
+          }`}
+        >
+          <Heart className={`h-3.5 w-3.5 ${post.is_liked ? "fill-current" : ""}`} />
+          <span>{post.upvotes || 0}</span>
+        </button>
+        <button
+          onClick={() => onCommentClick(post.id)}
+          className="flex items-center gap-1.5 hover:text-slate-800 transition-colors cursor-pointer"
+        >
+          <MessageCircle className="h-3.5 w-3.5" />
+          <span>{post.comment_count || 0} Comments</span>
+        </button>
+      </div>
+    </div>
   );
 };
 
-interface Toast {
-  id: number;
-  message: string;
-  type: "success" | "error" | "info" | "warning";
-}
+const CreatePostModal: React.FC<{
+  isOpen: boolean;
+  onClose: () => void;
+  onSubmit: (data: {
+    content: string;
+    images: File[];
+    video: File | null;
+    poll: { question: string; options: PollOption[]; duration: string } | null;
+  }) => void;
+  isSubmitting: boolean;
+  user: { first_name: string; last_name: string; image_url?: string } | null;
+}> = ({ isOpen, onClose, onSubmit, isSubmitting, user }) => {
+  const [content, setContent] = useState("");
+  const [images, setImages] = useState<File[]>([]);
+  const [imagePreviews, setImagePreviews] = useState<string[]>([]);
+  const [video, setVideo] = useState<File | null>(null);
+  const [videoPreview, setVideoPreview] = useState<string | null>(null);
+  const [showPoll, setShowPoll] = useState(false);
+  const [pollQuestion, setPollQuestion] = useState("");
+  const [pollOptions, setPollOptions] = useState<string[]>(["", ""]);
+  const [pollDuration, setPollDuration] = useState("2 Weeks");
 
-const ToastContainer: React.FC<{ toasts: Toast[]; onDismiss: (id: number) => void }> = ({ toasts, onDismiss }) => {
-  if (toasts.length === 0) return null;
+  const imageInputRef = useRef<HTMLInputElement>(null);
+  const videoInputRef = useRef<HTMLInputElement>(null);
 
-  const iconMap = {
-    success: <CheckCircle className="h-5 w-5 text-green-500 shrink-0" />,
-    error: <X className="h-5 w-5 text-red-500 shrink-0" />,
-    warning: <AlertTriangle className="h-5 w-5 text-amber-500 shrink-0" />,
-    info: <Info className="h-5 w-5 text-blue-500 shrink-0" />,
+  const avatarLetter = user ? (user.first_name?.[0] || "U").toUpperCase() : "U";
+
+  const reset = () => {
+    setContent("");
+    setImages([]);
+    setImagePreviews([]);
+    setVideo(null);
+    setVideoPreview(null);
+    setShowPoll(false);
+    setPollQuestion("");
+    setPollOptions(["", ""]);
+    setPollDuration("2 Weeks");
   };
 
-  const borderMap = {
-    success: "border-green-200 bg-green-50/95",
-    error: "border-red-200 bg-red-50/95",
-    warning: "border-amber-200 bg-amber-50/95",
-    info: "border-blue-200 bg-blue-50/95",
+  const handleClose = () => {
+    reset();
+    onClose();
   };
+
+  const handleImagePick = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files;
+    if (!files) return;
+    const newFiles = Array.from(files);
+    const total = [...images, ...newFiles].slice(0, 10);
+    setImages(total);
+    setImagePreviews(total.map((f) => URL.createObjectURL(f)));
+    if (imageInputRef.current) imageInputRef.current.value = "";
+  };
+
+  const handleVideoPick = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setVideo(file);
+    setVideoPreview(URL.createObjectURL(file));
+    if (videoInputRef.current) videoInputRef.current.value = "";
+  };
+
+  const removeImage = (idx: number) => {
+    setImages((p) => p.filter((_, i) => i !== idx));
+    setImagePreviews((p) => p.filter((_, i) => i !== idx));
+  };
+
+  const removeVideo = () => {
+    setVideo(null);
+    setVideoPreview(null);
+  };
+
+  const addPollOption = () => {
+    if (pollOptions.length >= 5) return;
+    setPollOptions((p) => [...p, ""]);
+  };
+
+  const removePollOption = (idx: number) => {
+    if (pollOptions.length <= 2) return;
+    setPollOptions((p) => p.filter((_, i) => i !== idx));
+  };
+
+  const handleSubmit = () => {
+    const poll =
+      showPoll && pollOptions.filter((o) => o.trim()).length >= 2
+        ? {
+            question: pollQuestion.trim() || "Poll",
+            options: pollOptions
+              .filter((o) => o.trim())
+              .map((o) => ({ text: o.trim(), votes: 0 })),
+            duration: pollDuration,
+          }
+        : null;
+    onSubmit({ content, images, video, poll });
+    reset();
+  };
+
+  if (!isOpen) return null;
 
   return (
-    <div className="fixed top-24 right-4 z-200 flex flex-col gap-3 w-80">
-      {toasts.map((toast) => (
-        <div
-          key={toast.id}
-          className={`flex items-start gap-3 rounded-md border px-4 py-3 backdrop-blur-sm animate-in fade-in slide-in-from-right duration-300 ${borderMap[toast.type]}`}
-        >
-          {iconMap[toast.type]}
-          <p className="flex-1 text-sm font-semibold text-gray-800">{toast.message}</p>
-          <button onClick={() => onDismiss(toast.id)} className="text-gray-400 hover:text-gray-600 shrink-0 mt-0.5">
-            <X className="h-4 w-4" />
+    <div
+      className="fixed inset-0 bg-slate-900/60 backdrop-blur-xs z-50 flex items-center justify-center p-4"
+      onClick={handleClose}
+    >
+      <div
+        className="bg-white rounded-[28px] w-full max-w-lg shadow-2xl flex flex-col max-h-[85vh] overflow-hidden p-6 sm:p-7"
+        onClick={(e) => e.stopPropagation()}
+      >
+        <div className="flex items-center justify-between pb-2">
+          <div className="flex items-center gap-3.5">
+            <div className="w-12 h-12 rounded-full bg-blue-50 text-blue-600 flex items-center justify-center flex-shrink-0 text-lg font-bold overflow-hidden">
+              {avatarLetter}
+            </div>
+            <div className="flex flex-col">
+              <h2 className="text-[1.1rem] font-bold text-gray-900 leading-snug tracking-tight">
+                {user ? `${user.first_name} ${user.last_name}` : "Guest"}
+              </h2>
+              <span className="text-[0.875rem] text-gray-500 font-medium">Student</span>
+            </div>
+          </div>
+          <button
+            onClick={handleClose}
+            className="text-gray-800 hover:text-black hover:bg-gray-100 p-2 rounded-full transition-colors w-9 h-9 flex items-center justify-center"
+          >
+            <X className="h-[18px] w-[18px]" />
           </button>
+        </div>
+
+        <div className="flex-1 my-3 flex flex-col overflow-y-auto pr-1">
+          <textarea
+            value={content}
+            onChange={(e) => setContent(e.target.value)}
+            placeholder="Tell others about yourself..."
+            className="w-full text-[1.05rem] text-gray-800 placeholder-gray-400 bg-transparent border-none py-1 outline-none font-medium leading-relaxed resize-none min-h-[80px]"
+            autoFocus
+          />
+
+          <div className="mt-2 space-y-3">
+            {imagePreviews.length > 0 && (
+              <div className="grid gap-2 grid-cols-2">
+                {imagePreviews.map((url, i) => (
+                  <div key={i} className="relative rounded-xl overflow-hidden border border-gray-100 shadow-sm bg-gray-50 group">
+                    <img src={url} alt={`Preview ${i + 1}`} className="w-full h-32 object-cover" />
+                    <button
+                      onClick={() => removeImage(i)}
+                      className="absolute top-2 right-2 bg-black/60 hover:bg-black/80 text-white w-7 h-7 rounded-full flex items-center justify-center transition-all shadow-md backdrop-blur-sm"
+                    >
+                      <X className="h-3.5 w-3.5" />
+                    </button>
+                  </div>
+                ))}
+              </div>
+            )}
+
+            {videoPreview && (
+              <div className="relative rounded-xl overflow-hidden border border-gray-100 shadow-sm bg-black">
+                <video src={videoPreview} controls className="w-full max-h-[200px] object-contain" />
+                <button
+                  onClick={removeVideo}
+                  className="absolute top-2 right-2 bg-black/70 hover:bg-black/90 text-white w-7 h-7 rounded-full flex items-center justify-center transition-all shadow-md backdrop-blur-sm z-10"
+                >
+                  <X className="h-3.5 w-3.5" />
+                </button>
+              </div>
+            )}
+
+            {showPoll && (
+              <div className="space-y-3 bg-slate-50 rounded-2xl p-4 border border-gray-200">
+                <div className="flex items-center justify-between">
+                  <span className="text-xs font-bold text-gray-500 uppercase tracking-wider">Create a poll</span>
+                  <button
+                    onClick={() => setShowPoll(false)}
+                    className="text-[10px] font-bold text-gray-400 hover:text-red-500"
+                  >
+                    Remove
+                  </button>
+                </div>
+                <textarea
+                  value={pollQuestion}
+                  onChange={(e) => setPollQuestion(e.target.value)}
+                  placeholder="Ask a question..."
+                  className="w-full border border-gray-200 rounded-lg p-3 text-sm text-gray-800 placeholder-gray-400 focus:border-[#0000ff] outline-none transition-all resize-y min-h-[60px]"
+                />
+                <div className="flex flex-col gap-2">
+                  {pollOptions.map((opt, i) => (
+                    <div key={i} className="relative">
+                      <input
+                        type="text"
+                        value={opt}
+                        onChange={(e) =>
+                          setPollOptions((p) => p.map((o, idx) => (idx === i ? e.target.value : o)))
+                        }
+                        placeholder={`Option ${i + 1}`}
+                        className="w-full border border-gray-200 rounded-lg px-4 py-2.5 pr-10 text-sm text-gray-800 placeholder-gray-400 focus:border-[#0000ff] outline-none transition-all"
+                      />
+                      {pollOptions.length > 2 && (
+                        <button
+                          onClick={() => removePollOption(i)}
+                          className="absolute right-2 top-1/2 -translate-y-1/2 w-7 h-7 flex items-center justify-center text-gray-400 hover:text-red-500 rounded-full hover:bg-red-50 transition-colors"
+                        >
+                          <X className="h-3.5 w-3.5" />
+                        </button>
+                      )}
+                    </div>
+                  ))}
+                </div>
+                {pollOptions.length < 5 && (
+                  <button
+                    onClick={addPollOption}
+                    className="text-[#0000ff] font-semibold text-sm flex items-center gap-1.5 hover:underline"
+                  >
+                    <Plus className="h-3.5 w-3.5" /> Add option
+                  </button>
+                )}
+                <div className="relative border border-gray-200 rounded-lg px-3.5 py-3 focus-within:border-[#0000ff] transition-all">
+                  <label className="absolute -top-2.5 left-3 bg-slate-50 px-1 text-[11px] font-semibold text-gray-400">
+                    Poll Duration
+                  </label>
+                  <select
+                    value={pollDuration}
+                    onChange={(e) => setPollDuration(e.target.value)}
+                    className="w-full bg-transparent border-none outline-none text-gray-800 text-sm cursor-pointer font-medium"
+                  >
+                    <option value="1 Day">1 Day</option>
+                    <option value="3 Days">3 Days</option>
+                    <option value="1 Week">1 Week</option>
+                    <option value="2 Weeks">2 Weeks</option>
+                  </select>
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+
+        <input
+          ref={imageInputRef}
+          type="file"
+          accept="image/*"
+          multiple
+          className="hidden"
+          onChange={handleImagePick}
+        />
+        <input
+          ref={videoInputRef}
+          type="file"
+          accept="video/*"
+          className="hidden"
+          onChange={handleVideoPick}
+        />
+
+        <div className="pt-4 border-t border-gray-100 flex items-center justify-between mt-auto">
+          <div className="flex items-center gap-1 sm:gap-2 text-gray-600">
+            <button
+              onClick={() => imageInputRef.current?.click()}
+              className="flex items-center gap-2 px-3 py-2 rounded-full hover:bg-gray-100 text-gray-600 hover:text-[#0000ff] transition-all group"
+              title="Add Image"
+            >
+              <Image className="h-[18px] w-[18px] group-hover:scale-110 transition-transform" />
+              <span className="text-xs font-semibold hidden sm:inline">Image</span>
+            </button>
+            <button
+              onClick={() => setShowPoll((p) => !p)}
+              className={`flex items-center gap-2 px-3 py-2 rounded-full transition-all group ${
+                showPoll
+                  ? "bg-blue-50 text-[#0000ff]"
+                  : "hover:bg-gray-100 text-gray-600 hover:text-[#0000ff]"
+              }`}
+              title="Create Poll"
+            >
+              <BarChart2 className="h-[18px] w-[18px] group-hover:scale-110 transition-transform" />
+              <span className="text-xs font-semibold hidden sm:inline">Poll</span>
+            </button>
+            <button
+              onClick={() => videoInputRef.current?.click()}
+              className="flex items-center gap-2 px-3 py-2 rounded-full hover:bg-gray-100 text-gray-600 hover:text-[#0000ff] transition-all group"
+              title="Add Video"
+            >
+              <Video className="h-[18px] w-[18px] group-hover:scale-110 transition-transform" />
+              <span className="text-xs font-semibold hidden sm:inline">Video</span>
+            </button>
+          </div>
+
+          <button
+            onClick={handleSubmit}
+            disabled={isSubmitting}
+            className="bg-[#0000ff] text-white font-bold py-2.5 px-7 rounded-full text-[15px] hover:opacity-90 active:scale-95 transition-all shadow-sm disabled:opacity-50"
+          >
+            {isSubmitting ? "Publishing..." : "Publish"}
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+/* ── toast ────────────────────────────────────────────────────────────── */
+
+interface ToastItem {
+  id: number;
+  message: string;
+}
+
+const ToastContainer: React.FC<{
+  toasts: ToastItem[];
+}> = ({ toasts }) => {
+  if (toasts.length === 0) return null;
+  return (
+    <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-[70] flex flex-col gap-2 items-center pointer-events-none">
+      {toasts.map((t) => (
+        <div
+          key={t.id}
+          className="bg-gray-900 text-white px-5 py-2.5 rounded-full text-sm font-medium shadow-xl flex items-center gap-2 animate-in fade-in slide-in-from-bottom duration-300"
+        >
+          <span>{t.message}</span>
         </div>
       ))}
     </div>
   );
 };
 
-const BackToTop: React.FC = () => {
-  const [visible, setVisible] = useState(false);
-
-  useEffect(() => {
-    const toggle = () => setVisible(window.scrollY > 400);
-    window.addEventListener("scroll", toggle);
-    return () => window.removeEventListener("scroll", toggle);
-  }, []);
-
-  if (!visible) return null;
-
-  return (
-    <button
-      onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
-      className="fixed bottom-8 right-8 z-90 h-12 w-12 rounded-full bg-[#5468ff] text-white flex items-center justify-center hover:bg-[#4355eb] transition-all active:scale-95"
-    >
-      <ChevronUp className="h-6 w-6" />
-    </button>
-  );
-};
-
-const openAuthModal = (view: "login" | "signup" = "login") => {
-  const path = view === "signup" ? "/register" : "/login";
-  window.location.href = path;
-};
+/* ── main page ────────────────────────────────────────────────────────── */
 
 const CampusForumPage: React.FC = () => {
-  const router = useRouter()
   const { user, isAuthenticated } = useAuth();
   const [posts, setPosts] = useState<ForumPost[]>([]);
   const [communities, setCommunities] = useState<ForumCommunity[]>([]);
+  const [trending, setTrending] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [isLoadingMore, setIsLoadingMore] = useState(false);
-  const [hasMore, setHasMore] = useState(true);
-  const [page, setPage] = useState(1);
   const [selectedCommunityId, setSelectedCommunityId] = useState<number | null>(null);
-
-  const [openComments, setOpenComments] = useState<Record<number, boolean>>({});
-  const [commentsMap, setCommentsMap] = useState<Record<number, ForumComment[]>>({});
-  const [totalCommentsMap, setTotalCommentsMap] = useState<Record<number, number>>({});
-  const [commentInputs, setCommentInputs] = useState<Record<number, string>>({});
-  const [isCommentsLoading, setIsCommentsLoading] = useState<Record<number, boolean>>({});
-  const [replyingTo, setReplyingTo] = useState<Record<number, ForumComment | null>>({});
-
-  const [openDropdown, setOpenDropdown] = useState<number | null>(null);
-  const [isCreatePostModalOpen, setIsCreatePostModalOpen] = useState(false);
-
   const [joinLoading, setJoinLoading] = useState<Record<number, boolean>>({});
-
-  const [modalCommunityId, setModalCommunityId] = useState<number>(0);
-  const [modalTitle, setModalTitle] = useState("");
-  const [modalContent, setModalContent] = useState("");
-  const [isPollEnabled, setIsPollEnabled] = useState(false);
-  const [pollOptions, setPollOptions] = useState<string[]>(["", ""]);
-  const [selectedImages, setSelectedImages] = useState<File[]>([]);
-  const [selectedVideo, setSelectedVideo] = useState<File | null>(null);
-  const [imagePreviews, setImagePreviews] = useState<string[]>([]);
-  const [videoPreviews, setVideoPreview] = useState<string | null>(null);
+  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
-
-  const [hiddenPostIds, setHiddenPostIds] = useState<Set<number>>(new Set());
-  const [sharePostId, setSharePostId] = useState<number | null>(null);
-  const [isInviteModalOpen, setIsInviteModalOpen] = useState(false);
-  const [inviteCommunityId, setInviteCommunityId] = useState<number | null>(null);
-  const [inviteCopySuccess, setInviteCopySuccess] = useState(false);
-  const [reportPostId, setReportPostId] = useState<number | null>(null);
-  const [reportReason, setReportReason] = useState("");
-  const [reportOther, setReportOther] = useState("");
-  const [reportSubmitted, setReportSubmitted] = useState(false);
-  const [copySuccess, setCopySuccess] = useState(false);
-  const [editPostId, setEditPostId] = useState<number | null>(null);
-  const [editTitle, setEditTitle] = useState("");
-  const [editContent, setEditContent] = useState("");
-  const [isEditSubmitting, setIsEditSubmitting] = useState(false);
-  const [confirmLeaveId, setConfirmLeaveId] = useState<number | null>(null);
-  const [deletePostId, setDeletePostId] = useState<number | null>(null);
-  const [isDeleting, setIsDeleting] = useState(false);
-
-  const [toasts, setToasts] = useState<Toast[]>([]);
+  const [toasts, setToasts] = useState<ToastItem[]>([]);
   const toastIdRef = useRef(0);
-
-  const addToast = useCallback((message: string, type: Toast["type"] = "info") => {
-    const id = ++toastIdRef.current;
-    setToasts((prev) => [...prev, { id, message, type }]);
-    setTimeout(() => {
-      setToasts((prev) => prev.filter((t) => t.id !== id));
-    }, 3500);
-  }, []);
-
-  const dismissToast = useCallback((id: number) => {
-    setToasts((prev) => prev.filter((t) => t.id !== id));
-  }, []);
-
-  const imageInputRef = useRef<HTMLInputElement | null>(null);
-  const videoInputRef = useRef<HTMLInputElement | null>(null);
-  const sentinelRef = useRef<HTMLDivElement | null>(null);
 
   const token = apiService.getToken();
 
-  useEffect(() => {
-    fetchInitialData();
+  const showToast = useCallback((message: string) => {
+    const id = ++toastIdRef.current;
+    setToasts((p) => [...p, { id, message }]);
+    setTimeout(() => setToasts((p) => p.filter((t) => t.id !== id)), 3000);
   }, []);
 
-  useEffect(() => {
-    fetchPosts(true);
-  }, [selectedCommunityId]);
-
-  useEffect(() => {
-    const observer = new IntersectionObserver(
-      (entries) => {
-        if (entries[0].isIntersecting && hasMore && !isLoadingMore) {
-          loadMorePosts();
-        }
-      },
-      { rootMargin: "200px" }
-    );
-
-    const current = sentinelRef.current;
-    if (current) observer.observe(current);
-    return () => { if (current) observer.unobserve(current); };
-  }, [hasMore, isLoadingMore]);
-
-  useEffect(() => {
-    if (!isCreatePostModalOpen) return;
-    const handleEsc = (e: KeyboardEvent) => { if (e.key === "Escape") setIsCreatePostModalOpen(false); };
-    document.addEventListener("keydown", handleEsc);
-    document.body.style.overflow = "hidden";
-    return () => { document.removeEventListener("keydown", handleEsc); document.body.style.overflow = ""; };
-  }, [isCreatePostModalOpen]);
-
-  const fetchInitialData = async () => {
+  const fetchCommunities = useCallback(async () => {
     try {
-      const fetched = await apiService.getForumCommunities(token || undefined);
-      setCommunities(fetched || []);
+      const data = await apiService.getForumCommunities();
+      setCommunities(isArray(data) ? data : []);
     } catch (e) {
       console.error(e);
     }
-  };
+  }, []);
 
-  const fetchPosts = async (reset = false) => {
-    if (reset) {
-      setIsLoading(true);
-      setPosts([]);
-      setPage(1);
-      setHasMore(true);
-    } else {
-      setIsLoadingMore(true);
-    }
-
+  const fetchPosts = useCallback(async () => {
+    setIsLoading(true);
     try {
-      const currentPage = reset ? 1 : page;
-      const result = await apiService.getForumPosts(10, token || undefined, selectedCommunityId || undefined, currentPage);
-      const newPosts = result.posts || [];
-      
-      if (reset) {
-        setPosts(newPosts);
-      } else {
-        setPosts((prev) => [...prev, ...newPosts]);
-      }
-      
-      setHasMore(result.has_more !== false && newPosts.length === 10);
-      setPage(currentPage + 1);
+      const data = await apiService.getForumPosts(50, token || undefined, selectedCommunityId || undefined, 1);
+      const list: ForumPost[] = isArray(data) ? (data as ForumPost[]) : ((data as { posts?: ForumPost[] })?.posts || []);
+      setPosts(list);
     } catch (e) {
       console.error(e);
     } finally {
       setIsLoading(false);
-      setIsLoadingMore(false);
     }
-  };
+  }, [token, selectedCommunityId]);
 
-  const loadMorePosts = () => {
-    fetchPosts(false);
+  const fetchTrending = useCallback(async () => {
+    try {
+      const data = await apiService.getTrendingForumPosts();
+      setTrending(isArray(data) ? data : []);
+    } catch (e) {
+      console.error(e);
+    }
+  }, []);
+
+  useEffect(() => {
+    fetchCommunities();
+    fetchTrending();
+  }, [fetchCommunities, fetchTrending]);
+
+  useEffect(() => {
+    fetchPosts();
+  }, [fetchPosts]);
+
+  const handleCommunityClick = (id: number) => {
+    setSelectedCommunityId((prev) => (prev === id ? null : id));
   };
 
   const handleJoinToggle = async (communityId: number) => {
-    if (!isAuthenticated) {
-      addToast("Please login to join communities", "warning");
+    if (!isAuthenticated || !token) {
+      showToast("Please login to join communities");
       return;
     }
-
-    const comm = communities.find(c => c.id === communityId);
-    if (comm?.is_member && confirmLeaveId === null) {
-      setConfirmLeaveId(communityId);
-      return;
-    }
-
-    setConfirmLeaveId(null);
     setJoinLoading((p) => ({ ...p, [communityId]: true }));
     try {
-      const updated = await apiService.joinForumCommunity(token!, communityId);
+      const updated = await apiService.joinForumCommunity(token, communityId);
       setCommunities((prev) =>
         prev.map((c) =>
           c.id === communityId
@@ -321,252 +573,37 @@ const CampusForumPage: React.FC = () => {
         )
       );
     } catch (e) {
-      addToast("Failed to update membership.", "error");
+      showToast("Failed to update membership");
     } finally {
       setJoinLoading((p) => ({ ...p, [communityId]: false }));
     }
   };
 
-  const isMemberOf = (communityId: number) => {
-    return communities.find((c) => c.id === communityId)?.is_member ?? false;
-  };
-
-  const toggleComments = async (postId: number) => {
-    const opening = !openComments[postId];
-    setOpenComments((p) => ({ ...p, [postId]: opening }));
-    if (opening && !commentsMap[postId]?.length) {
-      fetchComments(postId, 10, 0);
-    }
-  };
-
-  const fetchComments = async (postId: number, limit: number, offset: number) => {
-    setIsCommentsLoading((p) => ({ ...p, [postId]: true }));
-    try {
-      const data = await apiService.getForumPostComments(postId, limit, offset);
-      setCommentsMap((p) => ({
-        ...p,
-        [postId]: offset === 0 ? data.comments : [...(p[postId] || []), ...data.comments],
-      }));
-      setTotalCommentsMap((p) => ({ ...p, [postId]: data.total_count }));
-    } catch (e) {
-      console.error(e);
-    } finally {
-      setIsCommentsLoading((p) => ({ ...p, [postId]: false }));
-    }
-  };
-
-  const handleLoadMoreComments = (postId: number) => {
-    fetchComments(postId, 10, commentsMap[postId]?.length || 0);
-  };
-
-  const handleSetReply = (postId: number, comment: ForumComment) => {
-    setReplyingTo((p) => ({ ...p, [postId]: comment }));
-    document.getElementById(`comment-input-${postId}`)?.focus();
-  };
-
-  const handleCommentSubmit = async (postId: number) => {
-    if (!isAuthenticated) {
-      addToast("Please login to comment", "warning");
-      return;
-    }
-    const content = commentInputs[postId]?.trim();
-    if (!content) return;
-
-    const parentComment = replyingTo[postId];
-    const parentId = parentComment?.id;
-
-    try {
-      const newComment = await apiService.createForumComment(token!, postId, {
-        content,
-        parent_id: parentId,
-      });
-
-      if (parentId) {
-        setCommentsMap((prev) => {
-          const updated = (prev[postId] || []).map((c) => {
-            if (c.id === parentId) {
-              return { ...c, replies: [...(c.replies || []), newComment] };
-            }
-            return c;
-          });
-          return { ...prev, [postId]: updated };
-        });
-      } else {
-        setCommentsMap((p) => ({
-          ...p,
-          [postId]: [...(p[postId] || []), { ...newComment, replies: [] }],
-        }));
-        setTotalCommentsMap((p) => ({ ...p, [postId]: (p[postId] || 0) + 1 }));
-      }
-
-      setCommentInputs((p) => ({ ...p, [postId]: "" }));
-      setReplyingTo((p) => ({ ...p, [postId]: null }));
-      setPosts((p) =>
-        p.map((post) => (post.id === postId ? { ...post, comment_count: post.comment_count + 1 } : post))
-      );
-    } catch (e) {
-      addToast("Failed to add comment.", "error");
-    }
-  };
-
-  const handlePollVote = async (postId: number, optionIdx: number) => {
-    if (!isAuthenticated) {
-      addToast("Please login to vote", "warning");
-      return;
-    }
-    try {
-      const updated = await apiService.voteForumPoll(token!, postId, optionIdx);
-      setPosts((p) => p.map((post) => (post.id === postId ? { ...post, ...updated } : post)));
-    } catch (e) {
-      console.error(e);
-      addToast("Failed to cast vote.", "error");
-    }
-  };
-
-  const handleLike = async (postId: number) => {
-    if (!isAuthenticated) return addToast("Please login to like posts", "warning");
-    try {
-      const updated = await apiService.likeForumPost(token!, postId);
-      setPosts((p) =>
-        p.map((post) =>
-          post.id === postId
-            ? { ...post, upvotes: updated.upvotes, downvotes: updated.downvotes, is_liked: updated.is_liked, is_disliked: updated.is_disliked }
-            : post
-        )
-      );
-    } catch (e) { console.error(e); }
-  };
-
-  const handleDislike = async (postId: number) => {
-    if (!isAuthenticated) return addToast("Please login to dislike posts", "warning");
-    try {
-      const updated = await apiService.dislikeForumPost(token!, postId);
-      setPosts((p) =>
-        p.map((post) =>
-          post.id === postId
-            ? { ...post, upvotes: updated.upvotes, downvotes: updated.downvotes, is_liked: updated.is_liked, is_disliked: updated.is_disliked }
-            : post
-        )
-      );
-    } catch (e) { console.error(e); }
-  };
-
-  const handleNotInterested = (postId: number) => {
-    setHiddenPostIds((prev) => new Set([...prev, postId]));
-    setOpenDropdown(null);
-  };
-
-  const handleOpenShare = (postId: number) => {
-    setSharePostId(postId);
-    setOpenDropdown(null);
-    setCopySuccess(false);
-  };
-
-  const handleOpenReport = (postId: number) => {
-    setReportPostId(postId);
-    setOpenDropdown(null);
-    setReportReason("");
-    setReportOther("");
-    setReportSubmitted(false);
-  };
-
-  const handleCopyLink = (postId: number) => {
-    const url = `${window.location.origin}${window.location.pathname}?post=${postId}`;
-    navigator.clipboard.writeText(url).then(() => {
-      setCopySuccess(true);
-      setTimeout(() => setCopySuccess(false), 2500);
-    });
-  };
-
-  const getShareUrl = (postId: number) =>
-    encodeURIComponent(`${window.location.origin}${window.location.pathname}?post=${postId}`);
-
-  const handleReportSubmit = () => {
-    if (!reportReason) return;
-    setReportSubmitted(true);
-    setTimeout(() => setReportPostId(null), 1800);
-  };
-
-  const handleOpenEdit = (post: ForumPost) => {
-    setEditPostId(post.id);
-    setEditTitle(post.title);
-    setEditContent(post.content);
-    setOpenDropdown(null);
-  };
-
-  const handleEditSubmit = async () => {
-    if (!editPostId || !editTitle.trim()) return;
-    setIsEditSubmitting(true);
-    try {
-      const updated = await apiService.updateForumPost(token!, editPostId, {
-        title: editTitle.trim(),
-        content: editContent.trim(),
-      });
-      setPosts((p) => p.map((post) => (post.id === editPostId ? { ...post, ...updated } : post)));
-      setEditPostId(null);
-    } catch (e) {
-      addToast("Failed to update post.", "error");
-    } finally {
-      setIsEditSubmitting(false);
-    }
-  };
-
-  const handleOpenDelete = (postId: number) => {
-    setDeletePostId(postId);
-    setOpenDropdown(null);
-  };
-
-  const handleDeleteConfirm = async () => {
-    if (!deletePostId) return;
-    setIsDeleting(true);
-    try {
-      await apiService.deleteForumPost(token!, deletePostId);
-      setPosts((p) => p.filter((post) => post.id !== deletePostId));
-      setDeletePostId(null);
-    } catch (e) {
-      addToast("Failed to delete post.", "error");
-    } finally {
-      setIsDeleting(false);
-    }
-  };
-
   const handleCreatePostClick = () => {
-    if (!isAuthenticated) { addToast("Please login to create a post", "warning"); return; }
-    const selCommunity = communities.find((c) => c.id === selectedCommunityId);
-    if (selectedCommunityId && (selCommunity?.is_general || isMemberOf(selectedCommunityId))) {
-      setModalCommunityId(selectedCommunityId);
+    if (!isAuthenticated) {
+      showToast("Please login to create a post");
+      return;
     }
-    setIsCreatePostModalOpen(true);
+    setIsCreateModalOpen(true);
   };
 
-  const resetModal = () => {
-    setModalCommunityId(0); setModalTitle(""); setModalContent("");
-    setIsPollEnabled(false); setPollOptions(["", ""]);
-    setSelectedImages([]); setSelectedVideo(null);
-    setImagePreviews([]); setVideoPreview(null);
-    if (imageInputRef.current) imageInputRef.current.value = "";
-    if (videoInputRef.current) videoInputRef.current.value = "";
-  };
-
-  const handleImagesChange = (files: FileList | null) => {
-    if (!files) return;
-    const arr = Array.from(files).slice(0, 4);
-    setSelectedImages(arr);
-    setImagePreviews(arr.map((f) => URL.createObjectURL(f)));
-  };
-
-  const handleVideoChange = (file: File | null) => {
-    setSelectedVideo(file);
-    setVideoPreview(file ? URL.createObjectURL(file) : null);
-  };
-
-  const handlePostSubmit = async () => {
-    if (!isAuthenticated) { addToast("Please login", "warning"); return; }
-    if (!modalCommunityId || !modalTitle.trim()) return;
-
-    const targetCommunity = communities.find((c) => c.id === modalCommunityId);
-    if (targetCommunity && !targetCommunity.is_general && !isMemberOf(modalCommunityId)) {
-      addToast("You must join this community before posting.", "warning");
+  const handleSubmitPost = async (data: {
+    content: string;
+    images: File[];
+    video: File | null;
+    poll: { question: string; options: PollOption[]; duration: string } | null;
+  }) => {
+    if (!data.content.trim() && data.images.length === 0 && !data.video && !data.poll) return;
+    if (data.images.length > 10) {
+      showToast("Max 10 images");
+      return;
+    }
+    if (data.video && data.video.size > 50 * 1024 * 1024) {
+      showToast("Video must be under 50MB");
+      return;
+    }
+    if (!token) {
+      showToast("Please login to post");
       return;
     }
 
@@ -575,822 +612,289 @@ const CampusForumPage: React.FC = () => {
       let imageUrlValue: string | undefined;
       let videoUrlValue: string | undefined;
 
-      if (selectedImages.length > 0) {
-        const urls = await apiService.uploadForumMedia(token!, selectedImages);
+      if (data.images.length > 0) {
+        const urls = await apiService.uploadForumMedia(token, data.images);
         imageUrlValue = urls.length === 1 ? urls[0] : JSON.stringify(urls);
       }
 
-      if (selectedVideo) {
-        const urls = await apiService.uploadForumMedia(token!, [selectedVideo]);
+      if (data.video) {
+        const urls = await apiService.uploadForumMedia(token, [data.video]);
         videoUrlValue = urls[0];
       }
 
-      const pollItems = isPollEnabled ? pollOptions.map((o) => o.trim()).filter(Boolean) : [];
-      const newPost = await apiService.createForumPost(token!, {
-        community_id: modalCommunityId,
+      const pollItems = data.poll ? data.poll.options.map((o) => o.text) : [];
+
+      const newPost = await apiService.createForumPost(token, {
+        community_id: selectedCommunityId || 0,
         category: "General",
-        title: modalTitle.trim(),
-        content: modalContent.trim(),
+        title: data.content.slice(0, 80),
+        content: data.content,
         poll_options: pollItems.length > 1 ? pollItems : undefined,
         is_poll: pollItems.length > 1,
         image_url: imageUrlValue,
         video_url: videoUrlValue,
       });
+
       setPosts((p) => [newPost, ...p]);
-      resetModal();
-      setIsCreatePostModalOpen(false);
+      showToast("Post published successfully!");
     } catch (e) {
-      addToast("Failed to create post.", "error");
+      showToast("Failed to create post");
     } finally {
       setIsSubmitting(false);
     }
   };
 
-  const selectedCommunity = communities.find((c) => c.id === selectedCommunityId);
-  const canPostInFeed = !selectedCommunityId || isMemberOf(selectedCommunityId);
-  const forumCardUser = {
-    id: user?.id ?? 0,
-    first_name: user?.first_name ?? "Guest",
-    last_name: user?.last_name ?? "User",
-    role: user?.role ?? "STUDENT",
+  const handleLike = async (postId: number) => {
+    if (!isAuthenticated || !token) {
+      showToast("Please login to like posts");
+      return;
+    }
+    try {
+      const updated = await apiService.likeForumPost(token, postId);
+      setPosts((p) =>
+        p.map((post) =>
+          post.id === postId
+            ? { ...post, upvotes: updated.upvotes, downvotes: updated.downvotes, is_liked: updated.is_liked, is_disliked: updated.is_disliked }
+            : post
+        )
+      );
+    } catch (e) {
+      console.error(e);
+    }
   };
 
+  const handleCommentClick = (_postId: number) => {
+    // Placeholder — deep link to post detail in future
+  };
+
+  const selectedCommunity = communities.find((c) => c.id === selectedCommunityId);
+
   return (
-    <div className="min-h-screen bg-gray-50 text-[#1a1a1a] antialiased pb-12">
-      {selectedCommunity && (
-        <CommunityHeader
-          community={selectedCommunity}
-          onJoin={handleJoinToggle}
-          onShare={(id) => { setSharePostId(id); setCopySuccess(false); }}
-          onInvite={(id) => { setInviteCommunityId(id); setIsInviteModalOpen(true); setInviteCopySuccess(false); }}
-          isLoading={!!joinLoading[selectedCommunity.id]}
-          onBack={() => setSelectedCommunityId(null)}
-        />
-      )}
-
-      <div className={`mx-auto w-full gap-8 px-4 ${selectedCommunity ? "max-w-[1200px] grid grid-cols-1 lg:grid-cols-3 py-4" : "max-w-350 flex justify-center py-6"}`}>
-        
-        {!selectedCommunity && (
-          <div className="sticky top-6 hidden shrink-0 space-y-6 lg:block w-[280px]">
-              <div 
-                onClick={() => user && router.push(`/campus-forum/user/${user.id}`)}
-                className="flex flex-col items-center rounded-md border border-gray-100 bg-white p-5 text-center  cursor-pointer hover:border-gray-200 transition"
-              >
-                <div className="relative mb-3 h-20 w-20 overflow-hidden rounded-full border-4 border-white ">
-                  <img src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${user?.first_name || "guest"}`} alt="Profile" className="h-full w-full object-cover" />
-                </div>
-                <h2 className="text-lg font-bold text-gray-900">{user ? `${user.first_name} ${user.last_name}` : "Guest User"}</h2>
-                <p className="text-[11px] font-bold text-gray-400 mb-2 uppercase tracking-widest">{user?.role || "STUDENT"}</p>
-                {!isAuthenticated && (
-                  <button
-                    type="button"
-                    onClick={(e) => { e.stopPropagation(); openAuthModal("login"); }}
-                    className="mt-1 text-sm font-bold text-blue-600 hover:underline"
-                  >
-                    Login / Register
-                  </button>
-                )}
-              </div>
-
-            <div className="rounded-md border border-gray-100 bg-white p-5">
-              <div className="flex items-center justify-between mb-4">
-                <h3 className="text-xs font-black uppercase tracking-widest text-gray-400">Student Communities</h3>
+    <div className="min-h-screen bg-slate-50 text-slate-800 antialiased py-6">
+      <main className="max-w-[1400px] mx-auto">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 px-4 sm:px-6 lg:px-8">
+          {/* ── LEFT SIDEBAR ── */}
+          <aside className="lg:col-span-3 space-y-5">
+            <div className="bg-white rounded-lg p-5 border border-slate-200/80 shadow-xs">
+              <div className="flex items-center justify-between mb-4 px-1">
+                <h3 className="text-xs font-extrabold text-black tracking-wider uppercase">
+                  Discover Communities
+                </h3>
                 {selectedCommunityId && (
-                  <button onClick={() => setSelectedCommunityId(null)} className="text-[10px] font-black text-blue-600 hover:underline">CLEAR</button>
-                )}
-              </div>
-              <div className="space-y-1">
-                {communities.map((item) => (
-                  <div key={item.id} className={`flex w-full items-center gap-2 rounded-md p-2 transition cursor-pointer ${selectedCommunityId === item.id ? "bg-blue-50" : "hover:bg-gray-50"}`}
-                    onClick={() => setSelectedCommunityId(item.id)}>
-                    <div className={`h-9 w-9 shrink-0 ${item.bg_color || "bg-gray-100"} flex items-center justify-center rounded-md text-lg`}>
-                      {item.icon ? (
-                        <DynamicIcon name={item.icon} size={20} />
-                      ) : (
-                        <span className="text-lg">🎓</span>
-                      )}
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <span className={`block text-[13px] font-bold truncate ${selectedCommunityId === item.id ? "text-blue-600" : "text-gray-600"}`}>{item.name}</span>
-                      {item.member_count !== undefined && (
-                        <span className="text-[10px] text-gray-400">{item.member_count} members</span>
-                      )}
-                    </div>
-                    <JoinButton
-                      communityId={item.id}
-                      isMember={!!item.is_member}
-                      isLoading={!!joinLoading[item.id]}
-                      onToggle={handleJoinToggle}
-                      size="sm"
-                    />
-                  </div>
-                ))}
-              </div>
-            </div>
-          </div>
-        )}
-
-        <div className={`w-full flex-1 space-y-4 ${selectedCommunity ? "lg:col-span-2 max-w-[800px]" : "max-w-[600px]"}`}>
-
-          {selectedCommunity && (
-             <div className="lg:hidden mb-4">
-                <div className={`flex items-center justify-between rounded-md p-4 bg-white border border-gray-100`}>
-                  <div className="flex items-center gap-3">
-                    {selectedCommunity.icon ? (
-                      <DynamicIcon name={selectedCommunity.icon} size={28} />
-                    ) : (
-                      <span className="text-2xl">🎓</span>
-                    )}
-                    <div>
-                      <p className="font-bold text-gray-900">{selectedCommunity.name}</p>
-                      <p className="text-[11px] text-gray-500">{selectedCommunity.member_count ?? 0} members</p>
-                    </div>
-                  </div>
-                  <JoinButton
-                    communityId={selectedCommunity.id}
-                    isMember={!!selectedCommunity.is_member}
-                    isLoading={!!joinLoading[selectedCommunity.id]}
-                    onToggle={handleJoinToggle}
-                    size="md"
-                  />
-                </div>
-             </div>
-          )}
-
-          {canPostInFeed ? (
-            <div className={`rounded-md border  p-4 ${selectedCommunity ? "bg-white border-gray-200" : "bg-white border-gray-100"}`}>
-              <div className="mb-4 flex items-center gap-3" onClick={handleCreatePostClick}>
-                <span className="text-2xl leading-none">🎓</span>
-                <div className="text-[#8e98a8] text-[15px] flex-1 cursor-pointer">
-                   {selectedCommunity ? `Ask anonymously in ${selectedCommunity.name}...` : "Ask about courses, colleges, or exams..."}
-                </div>
-              </div>
-              <div className="flex items-center gap-1 border-t border-gray-50 pt-3">
-                {[
-                  { label: "Image", color: "text-[#3b82f6]", icon: <Image className="h-5 w-5" /> },
-                  { label: "Poll", color: "text-[#a855f7]", icon: <BarChart2 className="h-5 w-5" /> },
-                  { label: "Video", color: "text-[#ef4444]", icon: <Video className="h-5 w-5" /> },
-                ].map((b) => (
-                  <button key={b.label} onClick={handleCreatePostClick} className="flex items-center gap-2 rounded-md px-3 py-2 text-[14px] font-bold text-gray-600 transition hover:bg-gray-50">
-                    <span className={b.color}>{b.icon}</span>
-                    {b.label}
+                  <button
+                    onClick={() => setSelectedCommunityId(null)}
+                    className="text-[10px] font-black text-blue-600 hover:underline"
+                  >
+                    Show all
                   </button>
-                ))}
-              </div>
-            </div>
-          ) : (
-            selectedCommunityId && (
-              <div className="flex flex-col items-center gap-3 rounded-md border border-dashed border-blue-200 bg-blue-50/60 py-8 text-center px-6">
-                {selectedCommunity?.icon ? (
-                  <DynamicIcon name={selectedCommunity.icon} size={32} />
-                ) : (
-                  <span className="text-3xl">🔒</span>
                 )}
-                <p className="text-sm font-bold text-gray-700">Join <strong>{selectedCommunity?.name}</strong> to start contributing</p>
-                <JoinButton
-                  communityId={selectedCommunityId}
-                  isMember={false}
-                  isLoading={!!joinLoading[selectedCommunityId]}
-                  onToggle={handleJoinToggle}
-                  size="md"
-                />
               </div>
-            )
-          )}
 
-          {isLoading ? (
-            <div className="flex justify-center py-12">
-              <div className="h-8 w-8 animate-spin rounded-full border-4 border-blue-600 border-t-transparent" />
-            </div>
-          ) : posts.length === 0 ? (
-            <div className="flex flex-col items-center justify-center rounded-md border border-dashed border-gray-200 bg-white py-12 text-center">
-              <span className="mb-3 text-4xl">🌵</span>
-              <p className="text-lg font-bold text-gray-400">No posts yet in this community.</p>
-              <button onClick={handleCreatePostClick} className="mt-4 text-sm font-black text-blue-600 hover:underline">Be the first to post!</button>
-            </div>
-          ) : (
-            <>
-              {posts.filter((p) => !hiddenPostIds.has(p.id)).map((post) => (
-                <ForumPostCard
-                  key={post.id}
-                  post={post}
-                  user={forumCardUser}
-                  isAuthenticated={isAuthenticated}
-                  openDropdown={openDropdown}
-                  openComments={openComments}
-                  commentsMap={commentsMap}
-                  totalCommentsMap={totalCommentsMap}
-                  commentInputs={commentInputs}
-                  isCommentsLoading={isCommentsLoading}
-                  replyingTo={replyingTo}
-                  joinLoading={joinLoading}
-                  onDropdownToggle={setOpenDropdown}
-                  onEdit={handleOpenEdit}
-                  onDelete={handleOpenDelete}
-                  onShare={handleOpenShare}
-                  onNotInterested={handleNotInterested}
-                  onReport={handleOpenReport}
-                  onLike={handleLike}
-                  onDislike={handleDislike}
-                  onPollVote={handlePollVote}
-                  onToggleComments={toggleComments}
-                  onCommentInputChange={(postId, value) => setCommentInputs((p) => ({ ...p, [postId]: value }))}
-                  onCommentSubmit={handleCommentSubmit}
-                  onSetReply={handleSetReply}
-                  onCancelReply={(postId) => setReplyingTo((p) => ({ ...p, [postId]: null }))}
-                  onLoadMoreComments={handleLoadMoreComments}
-                  onJoinToggle={handleJoinToggle}
-                />
-              ))}
-
-              <div ref={sentinelRef} className="h-4" />
-              {isLoadingMore && (
-                <div className="flex justify-center py-8">
-                  <div className="h-6 w-6 animate-spin rounded-full border-2 border-blue-600 border-t-transparent" />
-                </div>
-              )}
-              {!hasMore && posts.length > 0 && (
-                <div className="text-center py-6 text-sm font-bold text-gray-400">
-                  You have reached the end of the feed
-                </div>
-              )}
-            </>
-          )}
-        </div>
-
-        <div className={`sticky top-6 hidden h-fit shrink-0 space-y-6 lg:block ${selectedCommunity ? "w-[320px]" : "w-[300px]"}`}>
-           {selectedCommunity ? (
-              <div className="space-y-6">
-                <div className="bg-white rounded-md border border-gray-200 p-5">
-                  <h3 className="text-[16px] font-bold text-[#0f1d3a] mb-4 flex items-center gap-2">
-                    <span>🔥</span> Trending {selectedCommunity.name}
-                  </h3>
-                  <div className="flex flex-col gap-4">
-                    {[
-                      { title: `What are the best resources for ${selectedCommunity.name}?`, replies: 42, time: "3 hrs ago" },
-                      { title: `How to manage time for ${selectedCommunity.name} exam?`, replies: 28, time: "5 hrs ago" },
-                      { title: `Discussion about recent ${selectedCommunity.name} curriculum`, replies: 15, time: "1 day ago" },
-                    ].map((item, idx) => (
-                      <div key={idx} className="group cursor-pointer border-b border-gray-50 pb-4 last:border-0 last:pb-0">
-                        <h4 className="text-[14px] font-bold text-[#334155] group-hover:text-[#5468ff] transition-colors leading-snug">
-                          {item.title}
-                        </h4>
-                        <p className="text-[12px] text-gray-400 mt-1.5 flex items-center gap-1">
-                          {item.replies} replies <span>•</span> {item.time}
+              <div className="space-y-3.5">
+                {communities.map((item) => (
+                  <div key={item.id} className="flex items-center justify-between py-1 group">
+                    <div
+                      className="flex items-center gap-3 min-w-0 flex-1 cursor-pointer"
+                      onClick={() => handleCommunityClick(item.id)}
+                    >
+                      <div
+                        className={`w-9 h-9 rounded-md flex items-center justify-center text-sm font-semibold flex-shrink-0 transition-transform group-hover:scale-105 ${
+                          item.bg_color || "bg-blue-100/70"
+                        }`}
+                      >
+                        {item.icon ? (
+                          <DynamicIcon name={item.icon} size={20} />
+                        ) : (
+                          <span className="text-lg">🎓</span>
+                        )}
+                      </div>
+                      <div className="truncate">
+                        <p
+                          className={`text-xs font-bold truncate leading-snug transition-colors ${
+                            selectedCommunityId === item.id
+                              ? "text-blue-600"
+                              : "text-slate-800 group-hover:text-blue-600"
+                          }`}
+                          title={item.name}
+                        >
+                          {item.name}
+                        </p>
+                        <p className="text-[11px] font-medium text-slate-400">
+                          {item.member_count ?? 0} members
                         </p>
                       </div>
-                    ))}
-                  </div>
-                  <button className="w-full mt-5 py-2.5 text-[14px] font-bold text-[#5468ff] bg-[#f4f6ff] hover:bg-[#e0e7ff] rounded-md transition-colors">
-                    View all trends
-                  </button>
-                </div>
-
-                <div className="bg-white rounded-md border border-gray-100 p-5">
-                  <h3 className="text-[16px] font-bold text-[#0f1d3a] mb-4 flex items-center gap-2">
-                    <span>📅</span> News & Events
-                  </h3>
-                  <div className="flex flex-col gap-4">
-                    {[
-                      { title: "Scholarship applications open for 2026 intake", date: "April 15", type: "NEWS" },
-                      { title: "Inter-college Science Fair - registration active", date: "May 10", type: "EVENT" },
-                      { title: "Guest lecture on AI & future of Education", date: "March 30", type: "EVENT" },
-                    ].map((item, idx) => (
-                      <div key={idx} className="group cursor-pointer border-b border-gray-50 pb-4 last:border-0 last:pb-0">
-                        <div className="flex items-center justify-between mb-1.5">
-                           <span className={`text-[9px] font-black px-2 py-0.5 rounded-full ${item.type === 'NEWS' ? 'bg-blue-50 text-blue-600' : 'bg-purple-50 text-purple-600'}`}>
-                             {item.type}
-                           </span>
-                           <span className="text-[10px] text-gray-400 font-bold">{item.date}</span>
-                        </div>
-                        <h4 className="text-[13px] font-bold text-gray-700 group-hover:text-[#5468ff] transition-colors leading-snug">
-                          {item.title}
-                        </h4>
-                      </div>
-                    ))}
-                  </div>
-                  <button className="w-full mt-5 py-2.5 text-[13px] font-bold text-gray-400 hover:text-gray-600 border border-gray-100 rounded-md transition-colors">
-                    View academic calendar
-                  </button>
-                </div>
-              </div>
-           ) : (
-             <div className="space-y-6">
-               <div className="rounded-md border border-gray-100 bg-white p-5">
-                 <div className="mb-4 flex items-center gap-2">
-                   <span className="text-xl">🔥</span>
-                   <h3 className="text-xs font-black uppercase tracking-widest text-gray-400">Trending Discussions</h3>
-                 </div>
-                 <div className="space-y-4">
-                   {[
-                     { title: "When are the TU BSc.CSIT 4th sem results coming?", cat: "TU UPDATES", replies: 62 },
-                     { title: "Best YouTube channels for CEE Physics prep?", cat: "MEDICAL PREP", replies: 34 },
-                   ].map((item, idx) => (
-                     <div key={idx}>
-                       <h4 className="cursor-pointer text-sm font-bold leading-snug text-gray-800 hover:text-blue-600 transition">{item.title}</h4>
-                       <div className="mt-2 flex items-center justify-between">
-                         <span className="text-[10px] font-black text-blue-600/70">{item.cat}</span>
-                         <span className="text-[10px] font-bold text-gray-400">{item.replies} Replies</span>
-                       </div>
-                       {idx === 0 && <div className="mt-4 h-px bg-gray-50" />}
-                     </div>
-                   ))}
-                 </div>
-               </div>
-
-                <div className="bg-white rounded-md border border-gray-100 p-5">
-                  <h3 className="text-[14px] font-black text-gray-400 uppercase tracking-widest mb-4 flex items-center gap-2">
-                    <span>📅</span> News & Events
-                  </h3>
-                  <div className="flex flex-col gap-4">
-                    {[
-                      { title: "CUET 2026 dates announced", date: "April 15", type: "NEWS" },
-                      { title: "StudentHack 2026 - Hackathon", date: "May 10", type: "EVENT" },
-                    ].map((item, idx) => (
-                      <div key={idx} className="group cursor-pointer">
-                        <div className="flex items-center justify-between mb-1">
-                           <span className={`text-[9px] font-black px-2 py-0.5 rounded-full ${item.type === 'NEWS' ? 'bg-blue-50 text-blue-600' : 'bg-purple-50 text-purple-600'}`}>
-                             {item.type}
-                           </span>
-                           <span className="text-[10px] text-gray-400 font-bold">{item.date}</span>
-                        </div>
-                        <h4 className="text-[13px] font-bold text-gray-700 group-hover:text-blue-600 transition-colors leading-snug">
-                          {item.title}
-                        </h4>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-             </div>
-           )}
-        </div>
-      </div>
-
-      {isCreatePostModalOpen && (
-        <div className="fixed inset-0 z-100 flex items-center mt-20 justify-center bg-black/50 backdrop-blur-sm px-3" onClick={() => setIsCreatePostModalOpen(false)}>
-          <div className="relative h-[75vh] w-full max-w-[620px] overflow-hidden rounded-md bg-white flex flex-col" onClick={(e) => e.stopPropagation()}>
-            <div className="flex items-center justify-between border-b border-gray-100 px-6 py-5">
-              <button onClick={() => setIsCreatePostModalOpen(false)} className="flex items-center gap-2 text-gray-900 group">
-                <div className="flex h-8 w-8 items-center justify-center rounded-full bg-slate-50 group-hover:bg-slate-100 transition"><span className="text-lg">←</span></div>
-                <span className="text-xl font-black tracking-tight">Create Post</span>
-              </button>
-              <button onClick={handlePostSubmit} disabled={!modalCommunityId || !modalTitle.trim() || isSubmitting}
-                className={`rounded-full px-7 py-2.5 text-sm font-black uppercase tracking-widest transition-all ${modalCommunityId && modalTitle.trim() && !isSubmitting ? "bg-blue-600 text-white  hover:bg-blue-700 active:scale-95" : "bg-gray-100 text-gray-400"}`}>
-                {isSubmitting ? "Posting..." : "Post"}
-              </button>
-            </div>
-
-            <div className="flex-1 overflow-y-auto px-8 py-8 space-y-6">
-              <div>
-                <label className="block text-[10px] font-black uppercase tracking-[0.2em] text-gray-400 mb-2">Target Community</label>
-                <div className="relative">
-                  <select value={modalCommunityId} onChange={(e) => setModalCommunityId(Number(e.target.value))}
-                    className="w-full appearance-none rounded-md border border-gray-200 bg-slate-50 px-5 py-3.5 text-base font-bold text-gray-700 outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition">
-                    <option value={0}>Choose where to post...</option>
-                    {communities.filter((c) => c.is_member).map((c) => (
-                      <option key={c.id} value={c.id}>{c.icon || "🎓"} {c.name}</option>
-                    ))}
-                  </select>
-                  <div className="pointer-events-none absolute inset-y-0 right-4 flex items-center text-gray-400">
-                    <svg className="h-5 w-5" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 11.117l3.71-3.886a.75.75 0 111.08 1.04l-4.25 4.453a.75.75 0 01-1.08 0L5.21 8.27a.75.75 0 01.02-1.06z" clipRule="evenodd" /></svg>
-                  </div>
-                </div>
-                {communities.filter((c) => c.is_member).length === 0 && (
-                  <p className="mt-2 text-xs text-orange-500 font-bold">⚠ You haven&apos;t joined any communities yet. Join one from the sidebar to post.</p>
-                )}
-              </div>
-
-              <input value={modalTitle} onChange={(e) => setModalTitle(e.target.value)} placeholder="Title of your post"
-                className="w-full border-b border-transparent bg-transparent text-2xl font-black text-gray-900 outline-none placeholder:text-gray-300" />
-              <textarea value={modalContent} onChange={(e) => setModalContent(e.target.value)}
-                placeholder="Share thoughts, ask questions or seek advice..."
-                className="min-h-[100px] w-full resize-none border-none bg-transparent text-lg font-medium leading-relaxed text-gray-600 outline-none placeholder:text-gray-300" />
-
-              {imagePreviews.length > 0 && (
-                <div>
-                  <div className="flex items-center justify-between mb-2">
-                    <span className="text-[10px] font-black uppercase tracking-widest text-gray-400">{imagePreviews.length} Image{imagePreviews.length > 1 ? "s" : ""}</span>
-                    <button onClick={() => { setSelectedImages([]); setImagePreviews([]); if (imageInputRef.current) imageInputRef.current.value = ""; }}
-                      className="text-[10px] font-bold text-red-400 hover:text-red-600">Remove</button>
-                  </div>
-                  <ImageGrid urls={imagePreviews} />
-                </div>
-              )}
-
-              {videoPreviews && (
-                <div>
-                  <div className="flex items-center justify-between mb-2">
-                    <span className="text-[10px] font-black uppercase tracking-widest text-gray-400">Video</span>
-                    <button onClick={() => { setSelectedVideo(null); setVideoPreview(null); if (videoInputRef.current) videoInputRef.current.value = ""; }}
-                      className="text-[10px] font-bold text-red-400 hover:text-red-600">Remove</button>
-                  </div>
-                  <video src={videoPreviews} controls className="w-full rounded-md max-h-52 bg-black" />
-                </div>
-              )}
-
-              {isPollEnabled && (
-                <div className="rounded-md border border-purple-100 bg-purple-50/50 p-6 space-y-4">
-                  <div className="flex items-center justify-between">
-                    <p className="text-xs font-black uppercase tracking-widest text-purple-600">Poll Options</p>
-                    <button onClick={() => setIsPollEnabled(false)} className="text-[10px] font-bold text-purple-400 hover:text-purple-600">REMOVE POLL</button>
-                  </div>
-                  <div className="space-y-3">
-                    {pollOptions.map((option, index) => (
-                      <input key={index} value={option} onChange={(e) => setPollOptions((p) => p.map((o, i) => (i === index ? e.target.value : o)))}
-                        placeholder={`Option ${index + 1}`}
-                        className="w-full rounded-md border border-purple-100 bg-white px-4 py-3 text-sm font-bold text-gray-700 outline-none focus:ring-2 focus:ring-purple-500/20 focus:border-purple-500" />
-                    ))}
-                  </div>
-                  {pollOptions.length < 4 && (
-                    <button onClick={() => setPollOptions((p) => [...p, ""])} className="text-xs font-black text-purple-600 flex items-center gap-1">
-                      <span className="text-lg">+</span> Add option
+                    </div>
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleJoinToggle(item.id);
+                      }}
+                      disabled={joinLoading[item.id]}
+                      className={`ml-2 px-4 py-1.5 text-xs font-bold rounded-full transition-all flex-shrink-0 ${
+                        item.is_member
+                          ? "bg-green-600 hover:bg-green-700 text-white"
+                          : "bg-[#0000ff] hover:opacity-90 text-white active:scale-95"
+                      }`}
+                    >
+                      {joinLoading[item.id] ? "..." : item.is_member ? "Joined" : "Join"}
                     </button>
-                  )}
-                </div>
-              )}
-            </div>
-
-            <div className="border-t border-gray-100 bg-white px-8 py-5">
-              <div className="flex items-center justify-center gap-12">
-                {[
-                  { label: "Image", icon: "🖼️", bg: "bg-blue-50", text: "text-blue-600" },
-                  { label: "Poll", icon: "📊", bg: "bg-purple-50", text: "text-purple-600" },
-                  { label: "Video", icon: "🎥", bg: "bg-red-50", text: "text-red-600" },
-                ].map((item) => (
-                  <button key={item.label} onClick={() => {
-                    if (item.label === "Image") imageInputRef.current?.click();
-                    if (item.label === "Video") videoInputRef.current?.click();
-                    if (item.label === "Poll") setIsPollEnabled((p) => !p);
-                  }} className="flex flex-col items-center gap-2 group">
-                    <div className={`flex h-14 w-14 items-center justify-center rounded-full text-2xl ${item.bg} ${item.text} transition-all group-hover:scale-110 active:scale-95 ${item.label === "Poll" && isPollEnabled ? "ring-2 ring-purple-600 ring-offset-4" : ""}`}>{item.icon}</div>
-                    <span className="text-xs font-black text-gray-400 group-hover:text-gray-600 uppercase tracking-widest">{item.label}</span>
-                  </button>
+                  </div>
                 ))}
               </div>
-              <input ref={imageInputRef} type="file" accept="image/*" multiple className="hidden" onChange={(e) => handleImagesChange(e.target.files)} />
-              <input ref={videoInputRef} type="file" accept="video/*" className="hidden" onChange={(e) => handleVideoChange(e.target.files?.[0] || null)} />
             </div>
-          </div>
-        </div>
-      )}
+          </aside>
 
-      {editPostId !== null && (
-        <div
-          className="fixed inset-0 z-110 flex items-center justify-center bg-black/50 backdrop-blur-sm px-4"
-          onClick={() => setEditPostId(null)}
-        >
-          <div
-            className="w-full max-w-lg rounded-md bg-white overflow-hidden"
-            onClick={(e) => e.stopPropagation()}
-          >
-            <div className="flex items-center justify-between px-6 pt-6 pb-4 border-b border-gray-100">
-              <h3 className="text-lg font-black text-gray-900">Edit Post</h3>
-              <button onClick={() => setEditPostId(null)} className="rounded-full p-1.5 hover:bg-gray-100 transition">
-                <svg className="h-5 w-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
-                </svg>
-              </button>
-            </div>
-            <div className="px-6 py-6 space-y-4">
-              <div>
-                <label className="block text-[10px] font-black uppercase tracking-widest text-gray-400 mb-1.5">Title</label>
-                <input
-                  value={editTitle}
-                  onChange={(e) => setEditTitle(e.target.value)}
-                  className="w-full rounded-md border border-gray-200 bg-gray-50 px-4 py-3 text-base font-bold text-gray-900 outline-none focus:border-blue-400 focus:bg-white transition"
-                  placeholder="Post title"
-                />
-              </div>
-              <div>
-                <label className="block text-[10px] font-black uppercase tracking-widest text-gray-400 mb-1.5">Content</label>
-                <textarea
-                  value={editContent}
-                  onChange={(e) => setEditContent(e.target.value)}
-                  className="w-full rounded-md border border-gray-200 bg-gray-50 px-4 py-3 text-sm font-medium text-gray-700 outline-none focus:border-blue-400 focus:bg-white transition resize-none"
-                  placeholder="What's on your mind?"
-                  rows={5}
-                />
-              </div>
-            </div>
-            <div className="px-6 pb-6 flex gap-3">
-              <button
-                onClick={() => setEditPostId(null)}
-                className="flex-1 rounded-md border border-gray-200 py-3 text-sm font-black text-gray-600 hover:bg-gray-50 transition"
-              >
-                Cancel
-              </button>
-              <button
-                onClick={handleEditSubmit}
-                disabled={!editTitle.trim() || isEditSubmitting}
-                className="flex-1 rounded-md bg-blue-600 py-3 text-sm font-black text-white transition hover:bg-blue-700 active:scale-[0.98] disabled:opacity-40"
-              >
-                {isEditSubmitting ? 'Saving...' : 'Save Changes'}
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {deletePostId !== null && (
-        <div
-          className="fixed inset-0 z-110 flex items-center justify-center bg-black/50 backdrop-blur-sm px-4"
-          onClick={() => setDeletePostId(null)}
-        >
-          <div
-            className="w-full max-w-sm rounded-md bg-white p-8 text-center"
-            onClick={(e) => e.stopPropagation()}
-          >
-            <div className="flex h-16 w-16 items-center justify-center rounded-full bg-red-100 mx-auto mb-4">
-              <svg className="h-8 w-8 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-              </svg>
-            </div>
-            <h3 className="text-xl font-black text-gray-900 mb-2">Delete Post?</h3>
-            <p className="text-sm text-gray-500 mb-6">This action cannot be undone. The post will be permanently removed.</p>
-            <div className="flex gap-3">
-              <button
-                onClick={() => setDeletePostId(null)}
-                className="flex-1 rounded-md border border-gray-200 py-3 text-sm font-black text-gray-600 hover:bg-gray-50 transition"
-              >
-                Cancel
-              </button>
-              <button
-                onClick={handleDeleteConfirm}
-                disabled={isDeleting}
-                className="flex-1 rounded-md bg-red-600 py-3 text-sm font-black text-white transition hover:bg-red-700 active:scale-[0.98] disabled:opacity-50"
-              >
-                {isDeleting ? 'Deleting...' : 'Delete'}
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {sharePostId !== null && (
-      <div
-        className="fixed inset-0 z-110 flex items-end sm:items-center justify-center bg-black/40 backdrop-blur-sm px-4"
-        onClick={() => setSharePostId(null)}
-      >
-        <div
-          className="w-full max-w-sm rounded-md bg-white overflow-hidden"
-          onClick={(e) => e.stopPropagation()}
-        >
-          <div className="flex items-center justify-between px-6 pt-6 pb-4 border-b border-gray-100">
-            <h3 className="text-lg font-black text-gray-900">Share Post</h3>
-            <button onClick={() => setSharePostId(null)} className="rounded-full p-1.5 hover:bg-gray-100 transition">
-              <svg className="h-5 w-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
-              </svg>
-            </button>
-          </div>
-
-          <div className="px-6 py-4">
-            <p className="text-[11px] font-black uppercase tracking-widest text-gray-400 mb-3">Post Link</p>
-            <div className="flex items-center gap-2 rounded-md border border-gray-200 bg-gray-50 px-4 py-2.5">
-              <span className="flex-1 truncate text-xs font-medium text-gray-600">
-                {`${window.location.origin}${window.location.pathname}?post=${sharePostId}`}
-              </span>
-              <button
-                onClick={() => handleCopyLink(sharePostId)}
-                className={`shrink-0 rounded-md px-3 py-1.5 text-[11px] font-black uppercase tracking-widest transition ${copySuccess
-                  ? 'bg-green-100 text-green-600'
-                  : 'bg-blue-600 text-white hover:bg-blue-700'
-                  }`}
-              >
-                {copySuccess ? '✓ Copied!' : 'Copy'}
-              </button>
-            </div>
-          </div>
-
-          <div className="px-6 pb-6">
-            <p className="text-[11px] font-black uppercase tracking-widest text-gray-400 mb-3">Share On</p>
-            <div className="grid grid-cols-5 gap-3">
-              {[
-                {
-                  name: 'WhatsApp',
-                  color: 'bg-green-50',
-                  iconColor: 'text-green-600',
-                  href: `https://api.whatsapp.com/send?text=${getShareUrl(sharePostId)}`,
-                  icon: (cls: string) => (
-                    <svg className={cls} viewBox="0 0 24 24" fill="currentColor">
-                      <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z" />
-                    </svg>
-                  ),
-                },
-                {
-                  name: 'Twitter',
-                  color: 'bg-gray-50',
-                  iconColor: 'text-gray-900',
-                  href: `https://twitter.com/intent/tweet?url=${getShareUrl(sharePostId)}`,
-                  icon: (cls: string) => (
-                    <svg className={cls} viewBox="0 0 24 24" fill="currentColor">
-                      <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z" />
-                    </svg>
-                  ),
-                },
-                {
-                  name: 'Facebook',
-                  color: 'bg-blue-50',
-                  iconColor: 'text-blue-700',
-                  href: `https://www.facebook.com/sharer/sharer.php?u=${getShareUrl(sharePostId)}`,
-                  icon: (cls: string) => (
-                    <svg className={cls} viewBox="0 0 24 24" fill="currentColor">
-                      <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z" />
-                    </svg>
-                  ),
-                },
-                  {
-                    name: 'Telegram',
-                    color: 'bg-sky-50',
-                    iconColor: 'text-sky-600',
-                    href: `https://t.me/share/url?url=${getShareUrl(sharePostId)}`,
-                    icon: (cls: string) => (
-                      <svg className={cls} viewBox="0 0 24 24" fill="currentColor">
-                        <path d="M11.944 0A12 12 0 000 12a12 12 0 0012 12 12 12 0 0012-12A12 12 0 0012 0a12 12 0 00-.056 0zm4.962 7.224c.1-.002.321.023.465.14a.506.506 0 01.171.325c.016.093.036.306.02.472-.18 1.898-.962 6.502-1.36 8.627-.168.9-.499 1.201-.82 1.23-.696.065-1.225-.46-1.9-.902-1.056-.693-1.653-1.124-2.678-1.8-1.185-.78-.417-1.21.258-1.91.177-.184 3.247-2.977 3.307-3.23.007-.032.014-.15-.056-.212s-.174-.041-.249-.024c-.106.024-1.793 1.14-5.061 3.345-.48.33-.913.49-1.302.48-.428-.008-1.252-.241-1.865-.44-.752-.245-1.349-.374-1.297-.789.027-.216.325-.437.893-.663 3.498-1.524 5.83-2.529 6.998-3.014 3.332-1.386 4.025-1.627 4.476-1.635z" />
-                      </svg>
-                    ),
-                  },
-                  {
-                    name: 'Messenger',
-                    color: 'bg-blue-50',
-                    iconColor: 'text-blue-600',
-                    href: `https://www.messenger.com/share?link=${getShareUrl(sharePostId)}`,
-                    icon: (cls: string) => (
-                      <svg className={cls} viewBox="0 0 24 24" fill="currentColor">
-                        <path d="M12 0C5.373 0 0 4.975 0 11.111c0 3.497 1.745 6.616 4.472 8.652V24l4.086-2.242c1.09.301 2.246.464 3.442.464 6.627 0 12-4.974 12-11.111C24 4.975 18.627 0 12 0zm1.193 14.963l-3.056-3.259-5.963 3.259L10.732 8.2l3.131 3.259L19.752 8.2l-6.559 6.763z" />
-                      </svg>
-                    ),
-                  },
-                ].map((p) => (
-                <a
-                  key={p.name}
-                  href={p.href}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="flex flex-col items-center gap-1.5 group"
-                >
-                  <div className={`flex h-14 w-14 items-center justify-center rounded-md ${p.color} transition-all group-hover:scale-110`}>
-                    {p.icon("w-7 h-7 " + p.iconColor)}
-                  </div>
-                  <span className="text-[10px] font-bold text-gray-500 group-hover:text-gray-700">{p.name}</span>
-                </a>
-              ))}
-            </div>
-          </div>
-        </div>
-      </div>
-    )
-  }
-
-
-      {confirmLeaveId !== null && (
-        <div className="fixed inset-0 z-130 flex items-center justify-center bg-black/50 backdrop-blur-sm px-4">
-          <div className="w-full max-w-sm rounded-[32px] bg-white overflow-hidden p-8 text-center animate-in fade-in zoom-in duration-300">
-            <div className="w-20 h-20 bg-red-50 text-red-500 rounded-md flex items-center justify-center text-4xl mx-auto mb-6">👋</div>
-            <h3 className="text-2xl font-black text-gray-900 mb-2">Leave Community?</h3>
-            <p className="text-gray-500 text-sm font-medium mb-8">
-              Are you sure you want to leave <strong>{communities.find(c => c.id === confirmLeaveId)?.name}</strong>? You can rejoin at any time.
-            </p>
-            <div className="flex flex-col gap-3">
-              <button 
-                onClick={() => handleJoinToggle(confirmLeaveId)}
-                className="w-full py-4 rounded-md bg-red-600 text-sm font-black text-white hover:bg-red-700 active:scale-95 transition-all uppercase tracking-widest"
-              >
-                Yes, Leave
-              </button>
-              <button 
-                onClick={() => setConfirmLeaveId(null)}
-                className="w-full py-4 text-sm font-black text-gray-400 hover:text-gray-600 uppercase tracking-widest transition"
-              >
-                Cancel
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {isInviteModalOpen && inviteCommunityId !== null && (
-        <div className="fixed inset-0 z-120 flex items-center justify-center bg-black/40 backdrop-blur-sm px-4" onClick={() => setIsInviteModalOpen(false)}>
-          <div className="w-full max-w-sm rounded-[32px] bg-white overflow-hidden" onClick={e => e.stopPropagation()}>
-            <div className="p-8 text-center">
-              <div className="w-20 h-20 bg-blue-50 text-blue-600 rounded-md flex items-center justify-center text-4xl mx-auto mb-6">🤝</div>
-              <h3 className="text-2xl font-black text-gray-900 mb-2">Invite Friends</h3>
-              <p className="text-gray-500 text-sm font-medium mb-8">Share this community with your friends and grow together!</p>
-              
-              <div className="flex flex-col gap-4">
-                <div className="flex items-center gap-2 p-4 bg-gray-50 rounded-md border border-gray-100">
-                  <span className="flex-1 truncate text-xs font-bold text-gray-400">
-                    {`${window.location.origin}${window.location.pathname}?community=${inviteCommunityId}`}
-                  </span>
-                  <button 
-                    onClick={() => {
-                      const url = `${window.location.origin}${window.location.pathname}?community=${inviteCommunityId}`;
-                      navigator.clipboard.writeText(url);
-                      setInviteCopySuccess(true);
-                      setTimeout(() => setInviteCopySuccess(false), 2000);
-                    }}
-                    className={`px-4 py-2 rounded-md text-[11px] font-black uppercase tracking-widest transition-all ${inviteCopySuccess ? 'bg-green-100 text-green-600' : 'bg-blue-600 text-white hover:bg-blue-700 active:scale-95'}`}
-                  >
-                    {inviteCopySuccess ? '✓ Copied' : 'Copy'}
-                  </button>
+          {/* ── MIDDLE ── */}
+          <section className="lg:col-span-6 space-y-5">
+            {/* Create Post Widget */}
+            <div className="bg-white rounded-lg p-4 border border-slate-200/80 shadow-xs input-glow transition-all">
+              <div className="flex items-center gap-3 pb-3 border-b border-slate-100">
+                <div className="w-9 h-9 rounded-full bg-blue-50 text-blue-600 flex items-center justify-center flex-shrink-0 text-sm font-bold overflow-hidden">
+                  {user?.image_url ? (
+                    <img src={user.image_url} alt="" className="w-full h-full object-cover" />
+                  ) : (
+                    (user?.first_name?.[0] || "🎓").toUpperCase()
+                  )}
                 </div>
-                <button onClick={() => setIsInviteModalOpen(false)} className="w-full py-4 text-sm font-black text-gray-400 hover:text-gray-600 uppercase tracking-widest transition">
-                  Close
+                <input
+                  type="text"
+                  readOnly
+                  onClick={handleCreatePostClick}
+                  placeholder="Ask about courses, colleges, or exams..."
+                  className="w-full bg-transparent text-slate-700 placeholder-slate-400 text-sm focus:outline-none font-medium cursor-pointer"
+                />
+              </div>
+
+              <div className="flex items-center justify-start gap-4 pt-3 px-1">
+                <button
+                  onClick={handleCreatePostClick}
+                  className="flex items-center gap-2 text-slate-600 hover:text-[#0000ff] font-semibold text-xs transition-colors py-1 px-2.5 rounded-full hover:bg-blue-50/50"
+                >
+                  <Image className="h-[14px] w-[14px] text-blue-500" />
+                  <span>Image</span>
+                </button>
+                <button
+                  onClick={handleCreatePostClick}
+                  className="flex items-center gap-2 text-slate-600 hover:text-[#0000ff] font-semibold text-xs transition-colors py-1 px-2.5 rounded-full hover:bg-purple-50/50"
+                >
+                  <BarChart2 className="h-[14px] w-[14px] text-purple-500" />
+                  <span>Poll</span>
+                </button>
+                <button
+                  onClick={handleCreatePostClick}
+                  className="flex items-center gap-2 text-slate-600 hover:text-[#0000ff] font-semibold text-xs transition-colors py-1 px-2.5 rounded-full hover:bg-rose-50/50"
+                >
+                  <Video className="h-[14px] w-[14px] text-rose-500" />
+                  <span>Video</span>
                 </button>
               </div>
             </div>
-          </div>
-        </div>
-      )}
 
-      {reportPostId !== null && (
-        <div
-          className="fixed inset-0 z-110 flex items-end sm:items-center justify-center bg-black/40 backdrop-blur-sm px-4"
-          onClick={() => setReportPostId(null)}
-        >
-          <div
-            className="w-full max-w-sm rounded-md bg-white overflow-hidden"
-            onClick={(e) => e.stopPropagation()}
-          >
-            {!reportSubmitted ? (
-              <>
-                <div className="flex items-center justify-between px-6 pt-6 pb-4 border-b border-gray-100">
-                  <h3 className="text-lg font-black text-gray-900">Report Post</h3>
-                  <button onClick={() => setReportPostId(null)} className="rounded-full p-1.5 hover:bg-gray-100 transition">
-                    <svg className="h-5 w-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
-                    </svg>
-                  </button>
-                </div>
-
-                <div className="px-6 py-4">
-                  <p className="text-[11px] font-black uppercase tracking-widest text-gray-400 mb-3">Why are you reporting this?</p>
-                  <div className="space-y-2">
-                    {[
-                      'Spam or misleading',
-                      'Harassment or bullying',
-                      'Hate speech or discrimination',
-                      'False information',
-                      'Inappropriate content',
-                      'Other',
-                    ].map((reason) => (
-                      <button
-                        key={reason}
-                        onClick={() => setReportReason(reason)}
-                        className={`flex w-full items-center justify-between rounded-md border px-4 py-3 text-sm font-bold transition ${
-                          reportReason === reason
-                            ? 'border-red-400 bg-red-50 text-red-700'
-                            : 'border-gray-100 bg-gray-50 text-gray-700 hover:border-gray-200 hover:bg-gray-100'
-                        }`}
-                      >
-                        <span>{reason}</span>
-                        {reportReason === reason && (
-                          <svg className="h-4 w-4 text-red-500" fill="currentColor" viewBox="0 0 20 20">
-                            <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.857-9.809a.75.75 0 00-1.214-.882l-3.483 4.79-1.88-1.88a.75.75 0 10-1.06 1.061l2.5 2.5a.75.75 0 001.137-.089l4-5.5z" clipRule="evenodd" />
-                          </svg>
-                        )}
-                      </button>
-                    ))}
-                  </div>
-
-                  {reportReason === 'Other' && (
-                    <textarea
-                      value={reportOther}
-                      onChange={(e) => setReportOther(e.target.value)}
-                      placeholder="Describe the issue..."
-                      className="mt-3 w-full rounded-md border border-gray-200 bg-gray-50 px-4 py-3 text-sm font-medium text-gray-700 outline-none focus:border-red-300 focus:bg-white transition resize-none"
-                      rows={3}
-                    />
-                  )}
-                </div>
-
-                <div className="px-6 pb-6">
-                  <button
-                    onClick={handleReportSubmit}
-                    disabled={!reportReason || (reportReason === 'Other' && !reportOther.trim())}
-                    className="w-full rounded-md bg-red-600 py-3.5 text-sm font-black uppercase tracking-widest text-white transition hover:bg-red-700 active:scale-[0.98] disabled:opacity-40 disabled:cursor-not-allowed"
+            {/* Posts Feed */}
+            {isLoading ? (
+              <div className="flex justify-center py-12">
+                <div className="h-8 w-8 animate-spin rounded-full border-4 border-[#0000ff] border-t-transparent" />
+              </div>
+            ) : posts.length === 0 ? (
+              <div className="bg-white rounded-lg border border-slate-200/80 p-12 text-center shadow-xs flex flex-col items-center justify-center min-h-[320px]">
+                <div className="w-14 h-14 rounded-full bg-blue-50 text-[#0000ff] flex items-center justify-center mb-4 text-2xl shadow-xs">
+                  <svg
+                    className="h-6 w-6"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    viewBox="0 0 24 24"
                   >
-                    Submit Report
-                  </button>
-                </div>
-              </>
-            ) : (
-              <div className="flex flex-col items-center gap-3 px-8 py-12 text-center">
-                <div className="flex h-16 w-16 items-center justify-center rounded-full bg-green-100">
-                  <svg className="h-8 w-8 text-green-600" fill="currentColor" viewBox="0 0 20 20">
-                    <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.857-9.809a.75.75 0 00-1.214-.882l-3.483 4.79-1.88-1.88a.75.75 0 10-1.06 1.061l2.5 2.5a.75.75 0 001.137-.089l4-5.5z" clipRule="evenodd" />
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0115.75 21H5.25A2.25 2.25 0 013 18.75V8.25A2.25 2.25 0 015.25 6H10"
+                    />
                   </svg>
                 </div>
-                <h3 className="text-lg font-black text-gray-900">Report Submitted</h3>
-                <p className="text-sm text-gray-500">Thank you for helping keep our community safe. We&apos;ll review this post.</p>
+                <h3 className="text-slate-800 font-bold text-lg mb-1">
+                  No posts yet in this community.
+                </h3>
+                <button
+                  onClick={handleCreatePostClick}
+                  className="text-[#0000ff] hover:underline font-bold text-sm transition-all focus:outline-none mt-1"
+                >
+                  Be the first to post!
+                </button>
+              </div>
+            ) : (
+              <div className="space-y-4">
+                {posts.map((post) => (
+                  <PostCard
+                    key={post.id}
+                    post={post}
+                    onLike={handleLike}
+                    onCommentClick={handleCommentClick}
+                  />
+                ))}
               </div>
             )}
-          </div>
-        </div>
-      )}
+          </section>
 
-      <BackToTop />
-      <ToastContainer toasts={toasts} onDismiss={dismissToast} />
+          {/* ── RIGHT SIDEBAR ── */}
+          <aside className="lg:col-span-3 space-y-5">
+            <div className="bg-white rounded-lg p-5 border border-slate-200/80 shadow-xs">
+              <div className="flex items-center gap-2 mb-4 px-1">
+                <svg
+                  className="h-4 w-4 text-amber-500"
+                  fill="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path d="M17.657 18.657A8 8 0 016.343 7.343S7 9 9 10c0-2 .5-5 2.986-7C14 5 16.09 5.777 17.656 7.343A8 8 0 0117.657 18.657z" />
+                  <path
+                    fillRule="evenodd"
+                    d="M10.5 20a.5.5 0 01-.5.5h-2a.5.5 0 01-.5-.5V19a.5.5 0 01.5-.5h.5v-1.5a.5.5 0 01.5-.5h1a.5.5 0 01.5.5V20z"
+                    clipRule="evenodd"
+                  />
+                </svg>
+                <h3 className="text-xs font-extrabold text-black tracking-wider uppercase">
+                  Trending Discussions
+                </h3>
+              </div>
+
+              <div className="space-y-4">
+                {trending.length > 0 ? (
+                  trending.map((item, idx) => (
+                    <div key={item.id || idx}>
+                      <div className="group cursor-pointer">
+                        <p className="text-xs font-bold text-slate-800 group-hover:text-blue-600 transition-colors leading-relaxed">
+                          {item.title || item.content?.slice(0, 80)}
+                        </p>
+                        <div className="flex items-center justify-between mt-2 text-[11px]">
+                          <span className="text-blue-600 font-bold bg-blue-50 px-2 py-0.5 rounded uppercase tracking-wider">
+                            {item.category || item.community?.name || "General"}
+                          </span>
+                          <span className="text-slate-400 font-medium">
+                            {item.comment_count || 0} Replies
+                          </span>
+                        </div>
+                      </div>
+                      {idx < trending.length - 1 && <hr className="mt-4 border-slate-100" />}
+                    </div>
+                  ))
+                ) : (
+                  <p className="text-xs text-slate-400">No trending discussions yet.</p>
+                )}
+              </div>
+            </div>
+          </aside>
+        </div>
+      </main>
+
+      <CreatePostModal
+        isOpen={isCreateModalOpen}
+        onClose={() => setIsCreateModalOpen(false)}
+        onSubmit={handleSubmitPost}
+        isSubmitting={isSubmitting}
+        user={user ? { first_name: user.first_name, last_name: user.last_name, image_url: user.image_url } : null}
+      />
+
+      <ToastContainer toasts={toasts} />
     </div>
   );
 };

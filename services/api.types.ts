@@ -637,6 +637,14 @@ export interface ForumPost {
   community?: ForumCommunity;
 }
 
+export interface TrendingPost {
+  id: number;
+  title: string;
+  category: string;
+  upvotes: number;
+  comment_count: number;
+}
+
 // ─── Dashboard ───────────────────────────────────────────────────────────────
 
 export interface DashboardStats {
