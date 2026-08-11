@@ -21,11 +21,13 @@ export default function MessageInput({ onSend, onTypingStart, onTypingStop, onUp
   const [content, setContent] = useState("");
   const [uploading, setUploading] = useState(false);
   const [pendingFiles, setPendingFiles] = useState<PendingFile[]>([]);
+  const [uploadError, setUploadError] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const typingTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   const handleSend = () => {
     if (!content.trim() && pendingFiles.length === 0) return;
+    setUploadError(null);
     pendingFiles.forEach((f) => { if (f.blob) URL.revokeObjectURL(URL.createObjectURL(f.blob)); });
     onSend(content, pendingFiles.map((f) => f.id));
     setContent("");
@@ -57,11 +59,12 @@ export default function MessageInput({ onSend, onTypingStart, onTypingStop, onUp
     if (!file) return;
 
     setUploading(true);
+    setUploadError(null);
     try {
       const uploadId = await onUpload(file);
       setPendingFiles((prev) => [...prev, { id: uploadId, name: file.name, size: file.size, blob: file }]);
     } catch (error) {
-      console.error("Upload failed:", error);
+      setUploadError(error instanceof Error ? error.message : "Upload failed");
     } finally {
       setUploading(false);
       if (fileInputRef.current) {
@@ -86,6 +89,19 @@ export default function MessageInput({ onSend, onTypingStart, onTypingStop, onUp
 
   return (
     <div className="border-t border-gray-200 p-3 bg-white">
+      {uploadError && (
+        <div className="mb-2 text-xs text-red-600 bg-red-50 border border-red-200 rounded px-3 py-1.5 flex items-center gap-2">
+          <svg className="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+          </svg>
+          <span className="flex-1">{uploadError}</span>
+          <button onClick={() => setUploadError(null)} className="text-red-400 hover:text-red-600">
+            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          </button>
+        </div>
+      )}
       {pendingFiles.length > 0 && (
         <div className="flex flex-wrap gap-2 mb-2">
           {pendingFiles.map((file) => (

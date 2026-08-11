@@ -138,19 +138,14 @@ class MessageApi {
     formData.append("file", file);
 
     const token = localStorage.getItem("token") || localStorage.getItem("institutionToken") || sessionStorage.getItem("token");
-    const response = await fetch(`/api/v1/uploads`, {
+
+    const response = await apiRequest<UploadResponse>(`/api/v1/uploads`, {
       method: "POST",
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
       body: formData,
+      authToken: token || undefined,
     });
 
-    if (!response.ok) {
-      throw new Error("Upload failed");
-    }
-
-    return response.json() as Promise<UploadResponse>;
+    return response;
   }
 
   // WebSocket Methods
