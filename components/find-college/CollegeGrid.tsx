@@ -500,7 +500,7 @@ const CollegeGrid: React.FC<CollegeGridProps> = ({
             ...(token ? { Authorization: `Bearer ${token}` } : {}),
           },
           body: JSON.stringify({
-            institution_id: collegeId,
+            institution_id: Number(String(collegeId).replace("inst_", "")),
             subject: "Quick Apply Inquiry",
             content: inquiryMessage,
             client_message_id: crypto.randomUUID(),
@@ -529,7 +529,7 @@ const CollegeGrid: React.FC<CollegeGridProps> = ({
             ...(token ? { Authorization: `Bearer ${token}` } : {}),
           },
           body: JSON.stringify({
-            institution_id: collegeForInquiry?.id,
+            institution_id: Number(String(collegeForInquiry?.id).replace("inst_", "")),
             subject: `Inquiry about ${collegeForInquiry?.name}`,
             content: inquiryMessageSingle,
             client_message_id: crypto.randomUUID(),

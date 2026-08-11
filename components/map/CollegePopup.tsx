@@ -131,7 +131,7 @@ export default function CollegePopup({ college }: CollegePopupProps) {
         method: "POST",
         headers,
         body: JSON.stringify({
-          institution_id: college.id,
+          institution_id: Number(String(college.id).replace("inst_", "")),
           subject: `Inquiry about ${college.name}`,
           content: inquiryMessage.trim(),
           client_message_id: crypto.randomUUID(),

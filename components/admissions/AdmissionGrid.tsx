@@ -123,7 +123,7 @@ const AdmissionGrid: React.FC<AdmissionGridProps> = ({
             "Content-Type": "application/json",
             ...(token ? { Authorization: `Bearer ${token}` } : {}),
           },
-          body: JSON.stringify({ institution_id: inquiryCollege.id, subject, content, client_message_id: crypto.randomUUID() }),
+          body: JSON.stringify({ institution_id: Number(String(inquiryCollege.id).replace("inst_", "")), subject, content, client_message_id: crypto.randomUUID() }),
         },
       );
       if (!res.ok) throw new Error("Failed to send");

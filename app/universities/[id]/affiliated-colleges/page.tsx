@@ -199,7 +199,7 @@ export default function Page({ params }: { params: { id: string } }) {
             ...(token ? { Authorization: `Bearer ${token}` } : {}),
           },
           body: JSON.stringify({
-            institution_id: collegeForInquiry?.id,
+            institution_id: Number(String(collegeForInquiry?.id).replace("inst_", "")),
             subject: `Inquiry about ${collegeForInquiry?.name}`,
             content: inquiryMessage,
             client_message_id: crypto.randomUUID(),

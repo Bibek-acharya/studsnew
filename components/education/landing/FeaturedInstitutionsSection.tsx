@@ -134,7 +134,7 @@ const FeaturedInstitutionsSection: React.FC<
                             ...(token ? { Authorization: `Bearer ${token}` } : {}),
                           },
                           body: JSON.stringify({
-                            institution_id: inquiryCollege.id,
+                            institution_id: Number(String(inquiryCollege.id).replace("inst_", "")),
                             subject: `Inquiry about ${inquiryCollege.name}`,
                             content: inquiryMessage.trim(),
                             client_message_id: crypto.randomUUID(),
