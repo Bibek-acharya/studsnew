@@ -33,6 +33,7 @@ const WriteReviewPage: React.FC = () => {
 
   const [filteredColleges, setFilteredColleges] = useState<College[]>([]);
   const [isCollegeLoading, setIsCollegeLoading] = useState(false);
+  const [collegeSearchError, setCollegeSearchError] = useState(false);
 
   const [showCollegeList, setShowCollegeList] = useState(false);
 
@@ -49,19 +50,22 @@ const WriteReviewPage: React.FC = () => {
       const query = collegeInput.trim();
       if (query.length > 0) {
         setIsCollegeLoading(true);
+        setCollegeSearchError(false);
         try {
           const res = await collegeApi.getColleges({
             search: query,
             pageSize: 10,
           });
-          setFilteredColleges(res.data.colleges || []);
+          setFilteredColleges((res as any)?.data?.colleges || []);
         } catch {
           setFilteredColleges([]);
+          setCollegeSearchError(true);
         } finally {
           setIsCollegeLoading(false);
         }
       } else {
         setFilteredColleges([]);
+        setCollegeSearchError(false);
       }
     }, 300);
     return () => clearTimeout(timer);
@@ -299,13 +303,17 @@ const WriteReviewPage: React.FC = () => {
                     placeholder="Search Your Campus/college Name"
                     className="w-full rounded-md border border-slate-200 bg-white py-3 pl-10 pr-4 text-sm placeholder-slate-400 focus:border-transparent focus:outline-none focus:ring-2 focus:ring-blue-500"
                   />
-                  {showCollegeList && (isCollegeLoading || filteredColleges.length > 0) && (
+                  {showCollegeList && collegeInput.trim().length > 0 && (
                     <ul className="absolute left-0 top-full z-20 mt-1 max-h-52 w-full overflow-y-auto rounded-md border border-slate-200 bg-white shadow-lg">
                       {isCollegeLoading ? (
                         <li className="px-4 py-3 text-sm text-slate-500">
                           Searching...
                         </li>
-                      ) : (
+                      ) : collegeSearchError ? (
+                        <li className="px-4 py-3 text-sm text-red-500">
+                          Failed to search colleges. Try again.
+                        </li>
+                      ) : filteredColleges.length > 0 ? (
                         filteredColleges.map((item) => (
                           <li key={item.id}>
                           <button
@@ -323,7 +331,11 @@ const WriteReviewPage: React.FC = () => {
                             </div>
                           </button>
                         </li>
-                      )))}
+                      ))) : (
+                        <li className="px-4 py-3 text-sm text-slate-500">
+                          No colleges found
+                        </li>
+                      )}
                     </ul>
                   )}
                 </div>
@@ -382,7 +394,7 @@ const WriteReviewPage: React.FC = () => {
                           className={`whitespace-nowrap rounded border px-2 py-1 text-xs font-bold ${currentValue ? "border-amber-100 bg-amber-50 text-amber-700" : "text-slate-400"}`}
                         >
                           {currentValue
-                            ? ratingStatusLabels[currentValue - 1]
+                            ? ratingStatusLabels[currentValue]
                             : "Not Rated"}
                         </span>
                       </div>

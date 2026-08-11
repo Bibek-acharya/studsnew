@@ -14,7 +14,7 @@ export default function TypingIndicator({ typingUsers, currentUserId }: TypingIn
 
   return (
     <div className="px-4 py-1 text-sm text-gray-500 italic">
-      {others.length === 1 ? "Someone is typing..." : `${others.length} people are typing...`}
+      {others.length === 1 ? "Typing..." : `${others.length} people are typing...`}
     </div>
   );
 }

@@ -80,8 +80,8 @@ export const ratingCategories = [
 ];
 
 export const ratingStatusLabels: Record<number, string> = {
-  1: "Terrible",
-  2: "Bad",
+  1: "Bad",
+  2: "Terrible",
   3: "Okay",
   4: "Good",
   5: "Excellent",
