@@ -22,6 +22,7 @@ const CourseFinderPage: React.FC<CourseFinderPageProps> = ({ onNavigate }) => {
   const [globalSearch, setGlobalSearch] = useState("");
   const [showMobileFilters, setShowMobileFilters] = useState(false);
   const [courses, setCourses] = useState<GlobalCourse[]>([]);
+  const [total, setTotal] = useState(0);
   const [loading, setLoading] = useState(true);
   const [page] = useState(1);
   const [limit] = useState(100);
@@ -31,6 +32,7 @@ const CourseFinderPage: React.FC<CourseFinderPageProps> = ({ onNavigate }) => {
     fetchGlobalCourses(page, limit)
       .then((res) => {
         setCourses(res.courses || []);
+        setTotal(res.meta.total);
       })
       .catch(() => setCourses([]))
       .finally(() => setLoading(false));
