@@ -194,11 +194,11 @@ export function useCollegeData(idStr: string) {
     if (!instInstitutionPrograms || !Array.isArray(instInstitutionPrograms))
       return [];
     return instInstitutionPrograms
-      .filter((p: any) => p.name)
+      .filter((p: any) => p.globalCourseTitle)
       .map((p: any) => ({
         id: p.id,
-        name: p.name || "",
-        level: p.duration || "",
+        name: p.globalCourseTitle || "",
+        level: "",
         affiliation: p.capacity ? `${p.capacity} seats` : "",
         status: p.status === "active" ? "Ongoing" : "Closed",
         courseId: p.id,

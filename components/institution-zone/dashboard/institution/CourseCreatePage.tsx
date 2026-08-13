@@ -256,63 +256,32 @@ const CourseCreatePage: React.FC = () => {
     institutionProgramApi
       .getById(Number(editId))
       .then((res) => {
-        setTitle(res.name || "");
-        setDescription(res.description || "");
-        setDuration(res.duration || "");
+        setTitle(res.globalCourseTitle || "");
+        setDescription(res.overrides?.description || "");
         setEstFee(res.fee || "");
-        setBannerUrl(res.banner_url || "");
-        const d = res.data;
-        if (d) {
-          setLevel(d.level || "");
-          setAffiliation(d.affiliation || "");
-          setScholarshipDesc(d.scholarshipDesc || "");
-          if (d.whoShouldChoose)
-            setWhoShouldChoose(
-              d.whoShouldChoose.map((x: any, i: number) => ({
-                ...x,
-                id: i + 1,
-              })),
-            );
-          if (d.features)
-            setFeatures(
-              d.features.map((x: any, i: number) => ({ ...x, id: i + 1 })),
-            );
-          if (d.eligibilityRows)
-            setEligibilityRows(
-              d.eligibilityRows.map((x: any, i: number) => ({
-                ...x,
-                id: i + 1,
-              })),
-            );
-          if (d.admissionSteps)
-            setAdmissionSteps(
-              d.admissionSteps.map((x: any, i: number) => ({
-                ...x,
-                id: i + 1,
-              })),
-            );
-          if (d.fullTimeCourses)
-            setFullTimeCourses(
-              d.fullTimeCourses.map((x: any, i: number) => ({
-                ...x,
-                id: i + 1,
-              })),
-            );
-          if (d.subjectGroups)
-            setSubjectGroups(
-              d.subjectGroups.map((x: any, i: number) => ({ ...x, id: i + 1 })),
-            );
-          if (d.feeItems)
-            setFeeItems(
-              d.feeItems.map((x: any, i: number) => ({ ...x, id: i + 1 })),
-            );
-          if (d.scholarships)
-            setScholarships(
-              d.scholarships.map((x: any, i: number) => ({ ...x, id: i + 1 })),
-            );
-          if (d.faqs)
-            setFaqs(d.faqs.map((x: any, i: number) => ({ ...x, id: i + 1 })));
-        }
+        setBannerUrl(res.overrides?.bannerUrl || "");
+        if (res.whoShouldChoose)
+          setWhoShouldChoose(
+            res.whoShouldChoose.map((x: any, i: number) => ({
+              ...x,
+              id: i + 1,
+            })),
+          );
+        if (res.features)
+          setFeatures(
+            res.features.map((x: any, i: number) => ({ ...x, id: i + 1 })),
+          );
+        if (res.fullTimeCourses)
+          setFullTimeCourses(
+            res.fullTimeCourses.map((x: any, i: number) => ({
+              ...x,
+              id: i + 1,
+            })),
+          );
+        if (res.feeItems)
+          setFeeItems(
+            res.feeItems.map((x: any, i: number) => ({ ...x, id: i + 1 })),
+          );
       })
       .catch(() => {})
       .finally(() => setLoading(false));
@@ -373,26 +342,19 @@ const CourseCreatePage: React.FC = () => {
   };
 
   const collectData = () => ({
-    name: title,
-    description,
-    duration,
+    globalCourseId: selectedGlobalCourse?.id || 0,
     fee: estFee,
-    banner_url: bannerUrl,
-    globalCourseId: selectedGlobalCourse?.id || undefined,
-    data: {
-      level,
-      affiliation,
-      scholarshipDesc,
-      whoShouldChoose: whoShouldChoose.map(({ id, ...rest }) => rest),
-      features: features.map(({ id, ...rest }) => rest),
-      eligibilityRows: eligibilityRows.map(({ id, ...rest }) => rest),
-      admissionSteps: admissionSteps.map(({ id, ...rest }) => rest),
-      fullTimeCourses: fullTimeCourses.map(({ id, ...rest }) => rest),
-      subjectGroups: subjectGroups.map(({ id, ...rest }) => rest),
-      feeItems: feeItems.map(({ id, ...rest }) => rest),
-      scholarships: scholarships.map(({ id, ...rest }) => rest),
-      faqs: faqs.map(({ id, ...rest }) => rest),
+    eligibility: "",
+    capacity: 0,
+    whoShouldChoose: whoShouldChoose.map(({ id, ...rest }) => rest),
+    features: features.map(({ id, ...rest }) => rest),
+    fullTimeCourses: fullTimeCourses.map(({ id, ...rest }) => rest),
+    feeItems: feeItems.map(({ id, ...rest }) => rest),
+    overrides: {
+      description: description || undefined,
+      bannerUrl: bannerUrl || undefined,
     },
+    nullifiedFields: [] as string[],
   });
 
   const handleSave = async (publish: boolean) => {
