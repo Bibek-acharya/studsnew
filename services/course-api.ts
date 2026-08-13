@@ -11,6 +11,30 @@ function getAuthHeaders(): HeadersInit {
 async function apiCall<T>(path: string, options: RequestInit = {}): Promise<T> {
   const headers: Record<string, string> = {
     "Content-Type": "application/json",
+    ...((options.headers as Record<string, string>) || {}),
+  };
+  const res = await fetch(`${API_BASE_URL}${path}`, {
+    ...options,
+    headers,
+    credentials: "include",
+  });
+  const text = await res.text();
+  let data;
+  try {
+    data = JSON.parse(text);
+  } catch {
+    throw new Error(`Unexpected response: ${text.substring(0, 100)}`);
+  }
+  if (!res.ok)
+    throw new Error(
+      data?.message || data?.error || `Request failed (${res.status})`,
+    );
+  return data?.data ?? data;
+}
+
+async function apiCallWithAuth<T>(path: string, options: RequestInit = {}): Promise<T> {
+  const headers: Record<string, string> = {
+    "Content-Type": "application/json",
     ...(getAuthHeaders() as Record<string, string>),
     ...((options.headers as Record<string, string>) || {}),
   };
