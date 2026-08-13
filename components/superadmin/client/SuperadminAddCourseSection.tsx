@@ -4,7 +4,20 @@ import React, { useState, useEffect } from "react";
 import dynamic from "next/dynamic";
 import * as LucideIcons from "lucide-react";
 import { superadminProgramApi } from "@/services/superadminRecordsApi";
+import { universityApi } from "@/services/university.api";
 import ImageCropperModal from "@/components/ScholarshipProvider/common/ImageCropperModal";
+import type {
+  PersonaItem,
+  FeatureItem,
+  EligibilityRow,
+  AdmissionStep,
+  SubjectGroup,
+  FeeItem,
+  ScholarshipItem,
+  FullTimeCourse,
+  FaqItem,
+  CareerItem,
+} from "@/types/course";
 
 import "react-quill-new/dist/quill.snow.css";
 
@@ -63,71 +76,7 @@ const labelClass = "block text-sm font-medium text-gray-700 mb-1.5";
 const selectClass =
   "w-full px-4 py-2.5 border border-gray-200 rounded-lg text-sm focus:border-blue-600 outline-none appearance-none bg-white transition-colors";
 
-interface EligibilityRow {
-  id: number;
-  level: string;
-  stream: string;
-  eligibility: string[];
-  documents: string[];
-}
-
-interface AdmissionStep {
-  id: number;
-  title: string;
-  description: string;
-}
-
-interface SubjectGroup {
-  id: number;
-  groupName: string;
-  description: string;
-  subjects: string[];
-  careers: string[];
-}
-
-interface FullTimeCourse {
-  id: number;
-  course: string;
-  totalFees: string;
-  seats: string;
-  startDate: string;
-  endDate: string;
-}
-
-interface FeeItem {
-  id: number;
-  particular: string;
-  amount: string;
-  frequency: string;
-  notes: string;
-}
-
-interface ScholarshipItem {
-  id: number;
-  title: string;
-  subtitle: string;
-  coverage: string;
-  requirement: string;
-}
-
-interface FeatureItem {
-  id: number;
-  title: string;
-  shortDesc: string;
-}
-
-interface WhoShouldChoose {
-  id: number;
-  icon: string;
-  title: string;
-  shortDesc: string;
-}
-
-interface FaqItem {
-  id: number;
-  question: string;
-  answer: string;
-}
+type WithId<T> = T & { id: number };
 
 const nextId = <T extends { id: number }>(items: T[]) =>
   Math.max(0, ...items.map((i) => i.id)) + 1;
@@ -196,24 +145,38 @@ export default function SuperadminAddCourseSection({
   const [loading, setLoading] = useState(!!editId);
 
   const [title, setTitle] = useState("");
+  const [shortTitle, setShortTitle] = useState("");
   const [description, setDescription] = useState("");
   const [duration, setDuration] = useState("");
   const [level, setLevel] = useState("");
-  const [affiliation, setAffiliation] = useState("");
+  const [field, setField] = useState("");
+  const [affiliationId, setAffiliationId] = useState<number | null>(null);
+  const [affiliationName, setAffiliationName] = useState("");
+  const [nonUniversityAffiliation, setNonUniversityAffiliation] = useState("");
   const [estFee, setEstFee] = useState("");
+  const [govtFee, setGovtFee] = useState("");
+  const [privateFee, setPrivateFee] = useState("");
+  const [mode, setMode] = useState("");
+  const [degreeLabel, setDegreeLabel] = useState("");
+  const [careerPath, setCareerPath] = useState("");
+  const [location, setLocation] = useState("");
+  const [badges, setBadges] = useState("");
   const [bannerUrl, setBannerUrl] = useState("");
 
-  const [eligibilityRows, setEligibilityRows] = useState<EligibilityRow[]>([]);
-  const [admissionSteps, setAdmissionSteps] = useState<AdmissionStep[]>([]);
-  const [subjectGroups, setSubjectGroups] = useState<SubjectGroup[]>([]);
-  const [fullTimeCourses, setFullTimeCourses] = useState<FullTimeCourse[]>([]);
-  const [feeItems, setFeeItems] = useState<FeeItem[]>([]);
+  const [universities, setUniversities] = useState<{ id: number; name: string }[]>([]);
+
+  const [eligibilityRows, setEligibilityRows] = useState<WithId<EligibilityRow>[]>([]);
+  const [admissionSteps, setAdmissionSteps] = useState<WithId<AdmissionStep>[]>([]);
+  const [subjectGroups, setSubjectGroups] = useState<WithId<SubjectGroup>[]>([]);
+  const [fullTimeCourses, setFullTimeCourses] = useState<WithId<FullTimeCourse>[]>([]);
+  const [feeItems, setFeeItems] = useState<WithId<FeeItem>[]>([]);
   const [scholarshipDesc, setScholarshipDesc] = useState("");
   const [scholarshipNotes, setScholarshipNotes] = useState("");
-  const [scholarships, setScholarships] = useState<ScholarshipItem[]>([]);
-  const [features, setFeatures] = useState<FeatureItem[]>([]);
-  const [whoShouldChoose, setWhoShouldChoose] = useState<WhoShouldChoose[]>([]);
-  const [faqs, setFaqs] = useState<FaqItem[]>([]);
+  const [scholarships, setScholarships] = useState<WithId<ScholarshipItem>[]>([]);
+  const [features, setFeatures] = useState<WithId<FeatureItem>[]>([]);
+  const [whoShouldChoose, setWhoShouldChoose] = useState<WithId<PersonaItem>[]>([]);
+  const [faqs, setFaqs] = useState<WithId<FaqItem>[]>([]);
+  const [careers, setCareers] = useState<WithId<CareerItem>[]>([]);
 
   const [errors, setErrors] = useState<Record<string, boolean>>({});
   const [cropperOpen, setCropperOpen] = useState(false);
@@ -262,7 +225,18 @@ export default function SuperadminAddCourseSection({
             : res.data;
         if (d) {
           setLevel(d.level || "");
-          setAffiliation(d.affiliation || "");
+          setAffiliationId(d.affiliationId ?? null);
+          setAffiliationName(d.affiliationName || "");
+          setNonUniversityAffiliation(d.nonUniversityAffiliation || "");
+          setShortTitle(d.shortTitle || "");
+          setField(d.field || "");
+          setGovtFee(d.govtFee || "");
+          setPrivateFee(d.privateFee || "");
+          setMode(d.mode || "");
+          setDegreeLabel(d.degreeLabel || "");
+          setCareerPath(d.careerPath || "");
+          setLocation(d.location || "");
+          setBadges(Array.isArray(d.badges) ? d.badges.join(", ") : d.badges || "");
           setScholarshipDesc(d.scholarshipDesc || "");
           setScholarshipNotes(d.scholarshipNotes || "");
           if (d.whoShouldChoose)
@@ -311,11 +285,23 @@ export default function SuperadminAddCourseSection({
             );
           if (d.faqs)
             setFaqs(d.faqs.map((x: any, i: number) => ({ ...x, id: i + 1 })));
+          if (d.careers)
+            setCareers(d.careers.map((x: any, i: number) => ({ ...x, id: i + 1 })));
         }
       })
       .catch(() => {})
       .finally(() => setLoading(false));
   }, [editId]);
+
+  useEffect(() => {
+    universityApi
+      .getUniversities()
+      .then((res) => {
+        const list = res?.data?.universities || [];
+        setUniversities(list.map((u: any) => ({ id: u.id, name: u.name })));
+      })
+      .catch(() => {});
+  }, []);
 
   const fieldError = (field: string) =>
     errors[field] ? "ring-2 ring-red-500" : "";
@@ -323,6 +309,12 @@ export default function SuperadminAddCourseSection({
   const validate = () => {
     const errs: Record<string, boolean> = {};
     if (!title.trim()) errs.title = true;
+    if ((level === "Bachelor" || level === "Master") && !affiliationId) {
+      errs.affiliation = true;
+    }
+    if (["+2", "A Level", "CTEVT", "Diploma"].includes(level) && !nonUniversityAffiliation.trim()) {
+      errs.nonUniversityAffiliation = true;
+    }
     setErrors(errs);
     return Object.keys(errs).length === 0;
   };
@@ -335,7 +327,18 @@ export default function SuperadminAddCourseSection({
     banner_url: bannerUrl,
     data: {
       level,
-      affiliation,
+      shortTitle,
+      field,
+      affiliationId: level === "Bachelor" || level === "Master" ? affiliationId : null,
+      affiliationName: level === "Bachelor" || level === "Master" ? affiliationName : "",
+      nonUniversityAffiliation: ["+2", "A Level", "CTEVT", "Diploma"].includes(level) ? nonUniversityAffiliation : "",
+      govtFee,
+      privateFee,
+      mode,
+      degreeLabel,
+      careerPath,
+      location,
+      badges: badges.split(",").map(b => b.trim()).filter(Boolean),
       scholarshipDesc,
       scholarshipNotes,
       whoShouldChoose: whoShouldChoose.map(({ id, ...rest }) => rest),
@@ -347,6 +350,7 @@ export default function SuperadminAddCourseSection({
       feeItems: feeItems.map(({ id, ...rest }) => rest),
       scholarships: scholarships.map(({ id, ...rest }) => rest),
       faqs: faqs.map(({ id, ...rest }) => rest),
+      careers: careers.map(({ id, ...rest }) => rest),
     },
   });
 
@@ -606,20 +610,56 @@ export default function SuperadminAddCourseSection({
                 >
                   <option value="">Select Level</option>
                   <option value="+2">+2</option>
+                  <option value="A Level">A Level</option>
                   <option value="Bachelor">Bachelor</option>
                   <option value="Master">Master</option>
+                  <option value="CTEVT">CTEVT</option>
                   <option value="Diploma">Diploma</option>
                 </select>
               </div>
               <div>
-                <label className={labelClass}>Affiliation / Board</label>
-                <input
-                  type="text"
-                  className={inputClass}
-                  placeholder="e.g. NEB, Tribhuvan University"
-                  value={affiliation}
-                  onChange={(e) => setAffiliation(e.target.value)}
-                />
+                <label className={labelClass}>
+                  Affiliation / Board
+                  {(level === "Bachelor" || level === "Master") && (
+                    <span className="text-red-500"> *</span>
+                  )}
+                </label>
+                {(level === "Bachelor" || level === "Master") ? (
+                  <select
+                    className={`${selectClass} ${fieldError("affiliation")}`}
+                    value={affiliationId ?? ""}
+                    onChange={(e) => {
+                      const val = e.target.value;
+                      const id = val ? Number(val) : null;
+                      setAffiliationId(id);
+                      const uni = universities.find((u) => u.id === id);
+                      setAffiliationName(uni?.name || "");
+                    }}
+                    style={{
+                      backgroundImage:
+                        "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%230000ff'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M19 9l-7 7-7-7'%3E%3C/path%3E%3C/svg%3E\")",
+                      backgroundRepeat: "no-repeat",
+                      backgroundPosition: "right 1rem center",
+                      backgroundSize: "1.2em",
+                      paddingRight: "2.5rem",
+                    }}
+                  >
+                    <option value="">Select University</option>
+                    {universities.map((u) => (
+                      <option key={u.id} value={u.id}>
+                        {u.name}
+                      </option>
+                    ))}
+                  </select>
+                ) : (
+                  <input
+                    type="text"
+                    className={`${inputClass} ${fieldError("nonUniversityAffiliation")}`}
+                    placeholder="e.g. NEB, CTEVT"
+                    value={nonUniversityAffiliation}
+                    onChange={(e) => setNonUniversityAffiliation(e.target.value)}
+                  />
+                )}
               </div>
               <div>
                 <label className={labelClass}>Estimated Fee</label>
