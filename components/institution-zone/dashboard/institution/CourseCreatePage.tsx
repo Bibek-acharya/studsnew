@@ -1,12 +1,14 @@
 "use client";
 
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect } from "react";
 import dynamic from "next/dynamic";
 import { useRouter, useSearchParams } from "next/navigation";
 import * as LucideIcons from "lucide-react";
 import SectionHeader from "@/components/institution-zone/dashboard/shared/SectionHeader";
 import { institutionProgramApi } from "@/services/institutionProgramApi";
-import { searchGlobalCourses } from "@/services/course-api";
+import { fetchCoursesByAffiliation, fetchSecondaryCourses } from "@/services/course-api";
+import { universityApi } from "@/services/university.api";
+import { GlobalCourse } from "@/types/course";
 import ImageCropperModal from "@/components/ScholarshipProvider/common/ImageCropperModal";
 import "react-quill-new/dist/quill.snow.css";
 
@@ -214,13 +216,13 @@ const CourseCreatePage: React.FC = () => {
   const [cropperOpen, setCropperOpen] = useState(false);
   const [cropImageSrc, setCropImageSrc] = useState<string | null>(null);
 
-  const [globalCourseId, setGlobalCourseId] = useState<number | null>(null);
-  const [globalCourseTitle, setGlobalCourseTitle] = useState("");
-  const [searchQuery, setSearchQuery] = useState("");
-  const [searchResults, setSearchResults] = useState<any[]>([]);
-  const [searchOpen, setSearchOpen] = useState(false);
-  const [searching, setSearching] = useState(false);
-  const searchRef = useRef<HTMLDivElement>(null);
+  const [selectedLevel, setSelectedLevel] = useState("");
+  const [selectedAffiliationId, setSelectedAffiliationId] = useState<number | null>(null);
+  const [nonUniversityAffiliation, setNonUniversityAffiliation] = useState("");
+  const [globalCourses, setGlobalCourses] = useState<GlobalCourse[]>([]);
+  const [selectedGlobalCourse, setSelectedGlobalCourse] = useState<GlobalCourse | null>(null);
+  const [loadingCourses, setLoadingCourses] = useState(false);
+  const [universities, setUniversities] = useState<{ id: number; name: string }[]>([]);
 
   const getToken = () => localStorage.getItem("institutionToken");
   const apiBase = () =>
@@ -317,52 +319,47 @@ const CourseCreatePage: React.FC = () => {
   }, [editId]);
 
   useEffect(() => {
-    const handler = (e: MouseEvent) => {
-      if (searchRef.current && !searchRef.current.contains(e.target as Node)) {
-        setSearchOpen(false);
-      }
-    };
-    document.addEventListener("mousedown", handler);
-    return () => document.removeEventListener("mousedown", handler);
+    universityApi.getUniversities().then((res) => {
+      setUniversities(res.data?.universities || []);
+    }).catch(() => {});
   }, []);
 
   useEffect(() => {
-    if (searchQuery.length < 2 || globalCourseId) {
-      setSearchResults([]);
+    if (!selectedLevel) {
+      setGlobalCourses([]);
       return;
     }
-    const timer = setTimeout(async () => {
-      setSearching(true);
-      try {
-        const results = await searchGlobalCourses(searchQuery);
-        setSearchResults(
-          results.filter((c) => c.id !== String(globalCourseId)),
-        );
-        setSearchOpen(true);
-      } catch {
-        setSearchResults([]);
-      }
-      setSearching(false);
-    }, 300);
-    return () => clearTimeout(timer);
-  }, [searchQuery, globalCourseId]);
 
-  const selectGlobalCourse = (course: any) => {
-    setGlobalCourseId(Number(course.id));
-    setGlobalCourseTitle(course.title);
-    setSearchQuery(course.title);
-    setSearchOpen(false);
+    setLoadingCourses(true);
+
+    if (selectedLevel === "Bachelor" || selectedLevel === "Master") {
+      if (selectedAffiliationId) {
+        fetchCoursesByAffiliation(selectedAffiliationId, 1, 100)
+          .then(res => setGlobalCourses(res.courses || []))
+          .catch(() => setGlobalCourses([]))
+          .finally(() => setLoadingCourses(false));
+      } else {
+        setGlobalCourses([]);
+        setLoadingCourses(false);
+      }
+    } else {
+      fetchSecondaryCourses(1, 100)
+        .then(res => setGlobalCourses(res.courses || []))
+        .catch(() => setGlobalCourses([]))
+        .finally(() => setLoadingCourses(false));
+    }
+  }, [selectedLevel, selectedAffiliationId]);
+
+  const selectGlobalCourse = (course: GlobalCourse) => {
+    setSelectedGlobalCourse(course);
     setTitle(course.title || "");
     setDuration(course.duration || "");
     setEstFee(course.estFee || "");
-    setAffiliation(course.affiliation || "");
     setLevel(course.level || "");
   };
 
   const clearGlobalCourse = () => {
-    setGlobalCourseId(null);
-    setGlobalCourseTitle("");
-    setSearchQuery("");
+    setSelectedGlobalCourse(null);
   };
 
   const fieldError = (field: string) =>
@@ -381,7 +378,7 @@ const CourseCreatePage: React.FC = () => {
     duration,
     fee: estFee,
     banner_url: bannerUrl,
-    globalCourseId: globalCourseId || undefined,
+    globalCourseId: selectedGlobalCourse?.id || undefined,
     data: {
       level,
       affiliation,
@@ -586,94 +583,83 @@ const CourseCreatePage: React.FC = () => {
                 />
               </div>
             </div>
-            <div ref={searchRef} className="relative">
-              <label className={labelClass}>
-                Global Course Template{" "}
-                <span className="text-xs text-gray-400 font-normal">
-                  (search & select to auto-fill)
-                </span>
-              </label>
-              <div className="relative">
+            <div>
+              <label className={labelClass}>Level</label>
+              <select
+                className={selectClass}
+                value={selectedLevel}
+                onChange={(e) => {
+                  setSelectedLevel(e.target.value);
+                  setSelectedAffiliationId(null);
+                  setSelectedGlobalCourse(null);
+                }}
+              >
+                <option value="">Select Level</option>
+                <option value="+2">+2</option>
+                <option value="A Level">A Level</option>
+                <option value="CTEVT">CTEVT</option>
+                <option value="Diploma">Diploma</option>
+                <option value="Bachelor">Bachelor</option>
+                <option value="Master">Master</option>
+              </select>
+            </div>
+
+            {(selectedLevel === "Bachelor" || selectedLevel === "Master") && (
+              <div>
+                <label className={labelClass}>University / Affiliation</label>
+                <select
+                  className={selectClass}
+                  value={selectedAffiliationId || ""}
+                  onChange={(e) => {
+                    setSelectedAffiliationId(Number(e.target.value) || null);
+                    setSelectedGlobalCourse(null);
+                  }}
+                >
+                  <option value="">Select University</option>
+                  {universities.map((u) => (
+                    <option key={u.id} value={u.id}>{u.name}</option>
+                  ))}
+                </select>
+              </div>
+            )}
+
+            {["+2", "A Level", "CTEVT", "Diploma"].includes(selectedLevel) && (
+              <div>
+                <label className={labelClass}>Board / Non-University Affiliation</label>
                 <input
                   type="text"
-                  className={`${inputClass} ${globalCourseId ? "pr-20" : ""}`}
-                  placeholder="Search for a global course..."
-                  value={searchQuery}
-                  onChange={(e) => {
-                    setSearchQuery(e.target.value);
-                    if (globalCourseId) clearGlobalCourse();
-                  }}
+                  className={inputClass}
+                  placeholder="e.g. NEB, CTEVT, A Level"
+                  value={nonUniversityAffiliation}
+                  onChange={(e) => setNonUniversityAffiliation(e.target.value)}
                 />
-                {searching && (
-                  <div className="absolute right-3 top-1/2 -translate-y-1/2">
-                    <div className="w-4 h-4 border-2 border-blue-500 border-t-transparent rounded-full animate-spin" />
-                  </div>
-                )}
-                {globalCourseId && (
-                  <button
-                    type="button"
-                    onClick={clearGlobalCourse}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-red-500"
-                  >
-                    <svg
-                      width="16"
-                      height="16"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="currentColor"
-                      strokeWidth="2"
-                    >
-                      <line x1="18" y1="6" x2="6" y2="18" />
-                      <line x1="6" y1="6" x2="18" y2="18" />
-                    </svg>
-                  </button>
-                )}
               </div>
-              {searchOpen && searchResults.length > 0 && (
-                <div className="absolute z-50 mt-1 w-full bg-white border border-gray-200 rounded-lg shadow-lg max-h-60 overflow-y-auto">
-                  {searchResults.map((course) => (
-                    <button
-                      key={course.id}
-                      type="button"
-                      onClick={() => selectGlobalCourse(course)}
-                      className="w-full px-4 py-3 text-left hover:bg-blue-50 border-b border-gray-100 last:border-0 transition-colors"
-                    >
-                      <div className="text-sm font-medium text-gray-900">
-                        {course.title}
-                      </div>
-                      <div className="text-xs text-gray-500 mt-0.5">
-                        {course.level} {course.field ? `· ${course.field}` : ""}{" "}
-                        {course.duration ? `· ${course.duration}` : ""}
-                      </div>
-                    </button>
-                  ))}
-                </div>
-              )}
-              {searchOpen &&
-                searchQuery.length >= 2 &&
-                searchResults.length === 0 &&
-                !searching && (
-                  <div className="absolute z-50 mt-1 w-full bg-white border border-gray-200 rounded-lg shadow-lg p-4 text-sm text-gray-500">
-                    No global courses found. Fill the form below to create a new
-                    course — it will be submitted for review.
-                  </div>
-                )}
-              {globalCourseId && (
-                <div className="mt-2 flex items-center gap-2 px-3 py-1.5 bg-green-50 text-green-700 text-xs rounded-lg border border-green-200">
-                  <svg
-                    width="14"
-                    height="14"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="2"
-                  >
-                    <polyline points="20 6 9 17 4 12" />
-                  </svg>
-                  Using template: <strong>{globalCourseTitle}</strong>
-                </div>
-              )}
+            )}
+
+            <div>
+              <label className={labelClass}>Course</label>
+              <select
+                className={selectClass}
+                value={selectedGlobalCourse?.id || ""}
+                onChange={(e) => {
+                  const course = globalCourses.find(c => c.id === Number(e.target.value));
+                  if (course) selectGlobalCourse(course);
+                }}
+                disabled={loadingCourses || globalCourses.length === 0}
+              >
+                <option value="">{loadingCourses ? "Loading courses..." : globalCourses.length === 0 ? "No courses available" : "Select Course"}</option>
+                {globalCourses.map(course => (
+                  <option key={course.id} value={course.id}>{course.title}</option>
+                ))}
+              </select>
             </div>
+
+            <button
+              type="button"
+              className="text-sm text-blue-600 hover:text-blue-800"
+            >
+              Can't find your course? Request new course
+            </button>
             <div>
               <label className={labelClass}>
                 Course Title <span className="text-red-500">*</span>
@@ -762,7 +748,134 @@ const CourseCreatePage: React.FC = () => {
           </div>
         </div>
 
-        {/* 2. Who Should Choose This Course */}
+        {/* 2. Global Course Information (Locked) */}
+        {selectedGlobalCourse && (
+          <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+            <div className="border-b border-gray-200 bg-gray-50/50 px-6 py-4 flex items-center gap-3">
+              <div className="p-2 bg-green-100 text-green-600 rounded-lg">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
+                  <path d="M7 11V7a5 5 0 0 1 10 0v4" />
+                </svg>
+              </div>
+              <div>
+                <h2 className="text-base font-semibold text-gray-800">Global Course Information</h2>
+                <p className="text-sm text-gray-500 mt-0.5">This information is locked and inherited from the global catalog</p>
+              </div>
+            </div>
+            <div className="p-6 space-y-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label className={labelClass}>Title</label>
+                  <input type="text" className={`${inputClass} bg-gray-50`} value={selectedGlobalCourse.title} disabled />
+                </div>
+                <div>
+                  <label className={labelClass}>Duration</label>
+                  <input type="text" className={`${inputClass} bg-gray-50`} value={selectedGlobalCourse.duration} disabled />
+                </div>
+                <div>
+                  <label className={labelClass}>Level</label>
+                  <input type="text" className={`${inputClass} bg-gray-50`} value={selectedGlobalCourse.level} disabled />
+                </div>
+                <div>
+                  <label className={labelClass}>Field</label>
+                  <input type="text" className={`${inputClass} bg-gray-50`} value={selectedGlobalCourse.field} disabled />
+                </div>
+                {selectedGlobalCourse.affiliationName && (
+                  <div>
+                    <label className={labelClass}>University Affiliation</label>
+                    <input type="text" className={`${inputClass} bg-gray-50`} value={selectedGlobalCourse.affiliationName} disabled />
+                  </div>
+                )}
+                {selectedGlobalCourse.nonUniversityAffiliation && (
+                  <div>
+                    <label className={labelClass}>Board Affiliation</label>
+                    <input type="text" className={`${inputClass} bg-gray-50`} value={selectedGlobalCourse.nonUniversityAffiliation} disabled />
+                  </div>
+                )}
+              </div>
+              {selectedGlobalCourse.description && (
+                <div>
+                  <label className={labelClass}>Description</label>
+                  <textarea className={`${inputClass} bg-gray-50`} rows={3} value={selectedGlobalCourse.description} disabled />
+                </div>
+              )}
+            </div>
+          </div>
+        )}
+
+        {/* 3. Institution-Specific Information */}
+        {selectedGlobalCourse && (
+          <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+            <div className="border-b border-gray-200 bg-gray-50/50 px-6 py-4 flex items-center gap-3">
+              <div className="p-2 bg-purple-100 text-purple-600 rounded-lg">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
+                  <polyline points="9 22 9 12 15 12 15 22" />
+                </svg>
+              </div>
+              <div>
+                <h2 className="text-base font-semibold text-gray-800">Institution-Specific Information</h2>
+                <p className="text-sm text-gray-500 mt-0.5">Fill in details specific to your institution</p>
+              </div>
+            </div>
+            <div className="p-6 space-y-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label className={labelClass}>Estimated Fee</label>
+                  <input
+                    type="text"
+                    className={inputClass}
+                    placeholder="e.g. NPR 80,000/year"
+                    value={estFee}
+                    onChange={(e) => setEstFee(e.target.value)}
+                  />
+                </div>
+                <div>
+                  <label className={labelClass}>Capacity (Seats)</label>
+                  <input
+                    type="number"
+                    min="0"
+                    className={inputClass}
+                    placeholder="e.g. 60"
+                  />
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* 4. Optional Overrides */}
+        {selectedGlobalCourse && (
+          <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+            <div className="border-b border-gray-200 bg-gray-50/50 px-6 py-4 flex items-center gap-3">
+              <div className="p-2 bg-orange-100 text-orange-600 rounded-lg">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" />
+                  <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" />
+                </svg>
+              </div>
+              <div>
+                <h2 className="text-base font-semibold text-gray-800">Optional Overrides</h2>
+                <p className="text-sm text-gray-500 mt-0.5">Override global defaults if your institution differs</p>
+              </div>
+            </div>
+            <div className="p-6 space-y-4">
+              <div>
+                <label className={labelClass}>Custom Description</label>
+                <textarea
+                  className={inputClass}
+                  rows={3}
+                  placeholder="Override the global course description for your institution..."
+                  value={description}
+                  onChange={(e) => setDescription(e.target.value)}
+                />
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* 5. Who Should Choose This Course */}
         <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
           <SectionItemHeader
             icon="users"
