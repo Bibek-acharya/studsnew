@@ -3,7 +3,8 @@ import React, { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { MagnifyingGlass, Pencil, Trash, BookOpen, X } from "@phosphor-icons/react";
 import SectionHeader from "../shared/SectionHeader";
-import { institutionProgramApi, InstitutionProgram } from "@/services/institutionProgramApi";
+import { institutionProgramApi } from "@/services/institutionProgramApi";
+import { InstitutionProgram } from "@/types/course";
 
 const CourseListPage: React.FC = () => {
   const router = useRouter();

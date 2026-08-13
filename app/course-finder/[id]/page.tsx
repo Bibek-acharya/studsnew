@@ -179,11 +179,11 @@ export default function CourseDetailPage({
   const courseDuration = stripHtml(course?.duration || "");
   const courseLevel = stripHtml(course?.level || "");
   const courseField = stripHtml(course?.field || "");
-  const courseAffiliation = stripHtml(course?.affiliation || "");
+  const courseAffiliation = stripHtml(course?.affiliationName || "");
   const courseEstFee = course?.estFee || "";
   const courseGovtFee = course?.govtFee || "";
   const coursePrivateFee = course?.privateFee || "";
-  const courseImage = course?.image;
+  const courseImage = course?.bannerUrl;
   const highlights = course?.highlights || [];
   const about = details?.about || [];
   const admissionRequirements = details?.admissionRequirements || [];

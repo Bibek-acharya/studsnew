@@ -153,10 +153,15 @@ export interface InstitutionProgram {
   institution_link: string;
   globalCourseId: number;
   globalCourseTitle: string;
+  name: string;
+  description: string;
+  duration: string;
   fee: string;
   eligibility: string;
   capacity: number;
   status: string;
+  banner_url: string;
+  data: Record<string, any>;
   whoShouldChoose: PersonaItem[];
   features: FeatureItem[];
   fullTimeCourses: FullTimeCourse[];

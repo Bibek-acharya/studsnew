@@ -60,3 +60,39 @@ export async function fetchSecondaryCourses(page = 1, limit = 20): Promise<{ cou
 export async function fetchResolvedCourse(globalCourseId: number, institutionId: number): Promise<ResolvedCourse> {
   return apiCall(`/api/v1/education/courses/${globalCourseId}/resolved?institutionId=${institutionId}`);
 }
+
+export async function fetchCourses(params?: {
+  page?: number;
+  limit?: number;
+  search?: string;
+  level?: string;
+  field?: string;
+  affiliation?: string;
+}): Promise<{ courses: GlobalCourse[]; meta?: { total: number } }> {
+  const query = new URLSearchParams();
+  if (params?.page) query.set("page", String(params.page));
+  if (params?.limit) query.set("limit", String(params.limit));
+  if (params?.search) query.set("search", params.search);
+  if (params?.level) query.set("level", params.level);
+  if (params?.field) query.set("field", params.field);
+  if (params?.affiliation) query.set("affiliation", params.affiliation);
+  const qs = query.toString();
+  return apiCall(`/api/v1/education/courses${qs ? `?${qs}` : ""}`);
+}
+
+export async function fetchCourseById(id: string | number): Promise<GlobalCourse> {
+  return apiCall(`/api/v1/education/courses/${id}`);
+}
+
+export interface CourseFullDetails {
+  course: GlobalCourse;
+  about: string[];
+  admissionRequirements: string[];
+  curriculum: any[];
+  careerOpportunities: { title: string; icon?: string; color?: string }[];
+  data?: Record<string, any>;
+}
+
+export async function fetchCourseDetailsById(id: string | number): Promise<CourseFullDetails> {
+  return apiCall(`/api/v1/education/courses/${id}/details`);
+}

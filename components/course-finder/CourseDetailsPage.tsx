@@ -2,7 +2,7 @@
 
 import React, { useState, useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { apiService, EducationCourse } from "../../services/api";
+import { apiService } from "../../services/api";
 import { fetchCourseDetailsById, CourseFullDetails } from "../../services/course-api";
 import CourseGrid from "./CourseGrid";
 import { CourseFinderFilters, defaultCourseFinderFilters } from "./types";
@@ -43,7 +43,7 @@ const CourseDetailsPage: React.FC<CourseDetailsPageProps> = ({
     queryFn: () => fetchCourseDetailsById(String(courseId)),
   });
 
-  const allCourses = useMemo(() => (listData?.data?.courses || []) as EducationCourse[], [listData]);
+  const allCourses = useMemo(() => (listData?.data?.courses || []) as unknown as import("../../types/course").GlobalCourse[], [listData]);
 
   const course = useMemo(() => {
     const found = allCourses.find(c => String(c.id) === String(courseId));
@@ -59,7 +59,7 @@ const CourseDetailsPage: React.FC<CourseDetailsPageProps> = ({
   const courseField = stripHtml(course?.field || details?.course?.field || "");
   const courseDescription = stripHtml(course?.description || details?.course?.description || details?.about?.join(" ") || "");
   const courseEstFee = stripHtml(course?.estFee || details?.course?.estFee || "");
-  const courseAffiliation = stripHtml(course?.affiliation || details?.course?.affiliation || "");
+  const courseAffiliation = stripHtml(course?.affiliationName || details?.course?.affiliationName || "");
   const courseLocation = stripHtml((course as any)?.location || details?.course?.location || "");
 
   const tabs: { id: string; label: string; visible: boolean }[] = [
@@ -187,7 +187,7 @@ const CourseDetailsPage: React.FC<CourseDetailsPageProps> = ({
               <section className="animate-fade-in">
                 <h2 className="text-2xl font-bold text-gray-900 mb-4">Eligibility Criteria</h2>
                 <ul className="space-y-3">
-                  {details.admissionRequirements.map((req, i) => (
+                  {details.admissionRequirements.map((req: string, i: number) => (
                     <li key={i} className="flex items-start gap-3 p-4 bg-blue-50 rounded-md">
                       <span className="w-6 h-6 rounded-full bg-blue-600 text-white flex items-center justify-center text-xs font-bold shrink-0 mt-0.5">{i + 1}</span>
                       <span className="text-gray-700 break-words overflow-hidden">{stripHtml(req)}</span>
