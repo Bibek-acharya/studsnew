@@ -1,7 +1,7 @@
 "use client";
 
-import React, { useMemo, useState, useEffect } from "react";
-import { GlobalCourse } from "@/types/course";
+import React, { useMemo, useState } from "react";
+import { useQuery } from "@tanstack/react-query";
 import { fetchGlobalCourses } from "@/services/course-api";
 import CourseFilters from "./CourseFilters";
 import {
@@ -21,24 +21,13 @@ const CourseFinderPage: React.FC<CourseFinderPageProps> = ({ onNavigate }) => {
   );
   const [globalSearch, setGlobalSearch] = useState("");
   const [showMobileFilters, setShowMobileFilters] = useState(false);
-  const [courses, setCourses] = useState<GlobalCourse[]>([]);
-  const [total, setTotal] = useState(0);
-  const [loading, setLoading] = useState(true);
-  const [page] = useState(1);
-  const [limit] = useState(100);
 
-  useEffect(() => {
-    setLoading(true);
-    fetchGlobalCourses(page, limit)
-      .then((res) => {
-        setCourses(res.courses || []);
-        setTotal(res.meta.total);
-      })
-      .catch(() => setCourses([]))
-      .finally(() => setLoading(false));
-  }, [page, limit]);
+  const { data, isLoading } = useQuery({
+    queryKey: ["global-courses"],
+    queryFn: () => fetchGlobalCourses(1, 100),
+  });
 
-  const allCourses = courses;
+  const allCourses = data?.courses || [];
 
   const filteredCourses = useMemo(() => {
     const q = globalSearch.trim().toLowerCase();
@@ -189,7 +178,7 @@ const CourseFinderPage: React.FC<CourseFinderPageProps> = ({ onNavigate }) => {
             onNavigate={onNavigate}
             filters={filters}
             onFiltersChange={setFilters}
-            isLoading={loading}
+            isLoading={isLoading}
           />
         </section>
       </main>
