@@ -91,15 +91,15 @@ const EventShowcaseSection: React.FC<EventShowcaseSectionProps> = ({ onNavigate 
                     <img
                       src={slide.image}
                       alt={slide.alt}
-                      className="w-full h-[200px] xs:h-[260px] sm:h-[320px] md:h-[380px] lg:h-[420px] object-cover rounded-xl md:rounded-xl "
+                      className="w-full h-50 xs:h-65 sm:h-80 md:h-95 lg:h-105 object-cover rounded-xl md:rounded-xl "
                     />
                   </div>
 
                   <div className="w-full lg:w-[45%] flex flex-col items-start pr-0 lg:pr-10">
                     <div
-                      className={`inline-flex items-center gap-2 px-3 sm:px-4 py-1 sm:py-1.5 rounded-full border mb-4 sm:mb-5 md:mb-6 ${"badgeClass" in slide ? slide.badgeClass : "bg-blue-50 border-blue-100 text-[#0000FF]"}`}
+                      className={`inline-flex items-center gap-2 px-3 sm:px-4 py-1 sm:py-1.5 rounded-full border mb-4 sm:mb-5 md:mb-6 ${"badgeClass" in slide ? slide.badgeClass : "bg-blue-50 border-blue-100 text-brand-blue"}`}
                     >
-                      <svg className={`w-3.5 h-3.5 sm:w-4 sm:h-4 ${"badgeIconClass" in slide ? slide.badgeIconClass : "text-[#0000FF]"}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <svg className={`w-3.5 h-3.5 sm:w-4 sm:h-4 ${"badgeIconClass" in slide ? slide.badgeIconClass : "text-brand-blue"}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
                       </svg>
                       <span className="font-medium text-xs sm:text-sm">{slide.badgeText || "Featured"}</span>
@@ -131,7 +131,7 @@ const EventShowcaseSection: React.FC<EventShowcaseSectionProps> = ({ onNavigate 
                         href={slide.link_url || "#"}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="inline-flex items-center justify-center bg-brand-blue hover:bg-[#0000CC] text-white font-semibold py-2.5 sm:py-3 md:py-3.5 px-5 sm:px-6 md:px-8 rounded-md transition-colors text-[13px] sm:text-[14px] md:text-[15px]"
+                        className="inline-flex items-center justify-center bg-brand-blue hover:bg-brand-hover text-white font-semibold py-2.5 sm:py-3 md:py-3.5 px-5 sm:px-6 md:px-8 rounded-md transition-colors text-[13px] sm:text-[14px] md:text-[15px]"
                       >
                         Apply Now
                       </a>

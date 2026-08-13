@@ -131,7 +131,7 @@ const EducationPage: React.FC<EducationPageProps> = ({
       {/* Section 4: Right Course. Right College. */}
       {/* <CourseCategoriesSection onNavigate={handleNavigate} /> */}
       {/* Section 5: Explore Featured Colleges & Universities */}
-      {featuredColleges.length > 0 && (
+      {featuredColleges.length > 0 && ( 
         <FeaturedInstitutionsSection
           onNavigate={handleNavigate}
           featuredColleges={featuredColleges}
