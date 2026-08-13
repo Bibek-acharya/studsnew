@@ -1,3 +1,3 @@
-import { EducationCourse } from "../../services/api";
+import { GlobalCourse } from "@/types/course";
 
-export const mockCourses: EducationCourse[] = [];
+export const mockCourses: GlobalCourse[] = [];

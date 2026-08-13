@@ -1,8 +1,8 @@
 "use client";
 
 import React, { useMemo, useState, useEffect } from "react";
-import { useQuery } from "@tanstack/react-query";
-import { apiService, EducationCourse } from "../../services/api";
+import { GlobalCourse } from "@/types/course";
+import { fetchGlobalCourses } from "@/services/course-api";
 import CourseFilters from "./CourseFilters";
 import {
   CourseFinderFilters,
@@ -21,16 +21,22 @@ const CourseFinderPage: React.FC<CourseFinderPageProps> = ({ onNavigate }) => {
   );
   const [globalSearch, setGlobalSearch] = useState("");
   const [showMobileFilters, setShowMobileFilters] = useState(false);
+  const [courses, setCourses] = useState<GlobalCourse[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [page] = useState(1);
+  const [limit] = useState(100);
 
-  const { data, isLoading } = useQuery({
-    queryKey: ["education-courses"],
-    queryFn: () => apiService.getEducationCourses(),
-  });
+  useEffect(() => {
+    setLoading(true);
+    fetchGlobalCourses(page, limit)
+      .then((res) => {
+        setCourses(res.courses || []);
+      })
+      .catch(() => setCourses([]))
+      .finally(() => setLoading(false));
+  }, [page, limit]);
 
-  const allCourses = useMemo(
-    () => (data?.data?.courses || []) as EducationCourse[],
-    [data],
-  );
+  const allCourses = courses;
 
   const filteredCourses = useMemo(() => {
     const q = globalSearch.trim().toLowerCase();
@@ -41,7 +47,7 @@ const CourseFinderPage: React.FC<CourseFinderPageProps> = ({ onNavigate }) => {
         const hit =
           course.title?.toLowerCase().includes(q) ||
           course.field?.toLowerCase().includes(q) ||
-          course.affiliation?.toLowerCase().includes(q);
+          course.affiliationName?.toLowerCase().includes(q);
         if (!hit) return false;
       }
 
@@ -181,7 +187,7 @@ const CourseFinderPage: React.FC<CourseFinderPageProps> = ({ onNavigate }) => {
             onNavigate={onNavigate}
             filters={filters}
             onFiltersChange={setFilters}
-            isLoading={isLoading}
+            isLoading={loading}
           />
         </section>
       </main>

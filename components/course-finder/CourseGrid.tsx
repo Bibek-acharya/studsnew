@@ -10,7 +10,8 @@ import {
   Briefcase,
   Bookmark,
 } from "lucide-react";
-import { EducationCourse, apiService } from "../../services/api";
+import { GlobalCourse } from "@/types/course";
+import { apiService } from "../../services/api";
 import { useAuth } from "@/services/AuthContext";
 import { CourseFinderFilters } from "./types";
 import Pagination from "@/components/ui/Pagination";
@@ -21,7 +22,7 @@ import SudsphereBannerAd from "./ads/SudsphereBannerAd";
 
 interface CourseGridProps {
   onNavigate: (view: any, data?: any) => void;
-  courses: EducationCourse[];
+  courses: GlobalCourse[];
   totalCourses: number;
   isLoading?: boolean;
   filters: CourseFinderFilters;
@@ -190,7 +191,7 @@ const CourseGrid: React.FC<CourseGridProps> = ({
                 <div className="relative h-28 w-full p-3 pb-2">
                   <img
                     src={
-                      course.image ||
+                      course.bannerUrl ||
                       `https://images.unsplash.com/photo-1517694712202-14dd9538aa97?auto=format&fit=crop&w=400&q=200`
                     }
                     alt={course.title}
@@ -233,7 +234,7 @@ const CourseGrid: React.FC<CourseGridProps> = ({
                           Affiliation:
                         </span>{" "}
                         <span className="text-gray-600">
-                          {course.affiliation || "Tribhuvan University"}
+                          {course.affiliationName || "Tribhuvan University"}
                         </span>
                       </div>
                     </div>
