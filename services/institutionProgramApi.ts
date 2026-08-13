@@ -1,3 +1,5 @@
+import { InstitutionProgram, CourseApprovalRequest } from '@/types/course';
+
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080";
 
 function getAuthHeaders(): HeadersInit {
@@ -31,31 +33,9 @@ async function apiCall<T>(path: string, options: RequestInit = {}): Promise<T> {
   return data?.data ?? data;
 }
 
-export interface InstitutionProgram {
-  id: number;
-  institution_id: number;
-  name: string;
-  description: string;
-  duration: string;
-  fee: string;
-  eligibility: string;
-  capacity: number;
-  banner_url: string;
-  data: any;
-  status: string;
-  created_at: string;
-  globalCourseId?: number | null;
-}
-
 export const institutionProgramApi = {
-  async list(
-    page = 1,
-    limit = 50,
-  ): Promise<{ programs: InstitutionProgram[]; meta: { total: number } }> {
-    const params = new URLSearchParams({
-      page: String(page),
-      limit: String(limit),
-    }).toString();
+  async list(page = 1, limit = 50): Promise<{ programs: InstitutionProgram[]; meta: { total: number } }> {
+    const params = new URLSearchParams({ page: String(page), limit: String(limit) }).toString();
     return apiCall(`/api/v1/institution/programs?${params}`);
   },
 
@@ -79,5 +59,23 @@ export const institutionProgramApi = {
 
   async delete(id: number): Promise<void> {
     await apiCall(`/api/v1/institution/programs/${id}`, { method: "DELETE" });
+  },
+};
+
+export const courseApprovalApi = {
+  async list(page = 1, limit = 20): Promise<{ requests: CourseApprovalRequest[]; meta: { total: number } }> {
+    const params = new URLSearchParams({ page: String(page), limit: String(limit) }).toString();
+    return apiCall(`/api/v1/institution/course-requests?${params}`);
+  },
+
+  async getById(id: number): Promise<CourseApprovalRequest> {
+    return apiCall(`/api/v1/institution/course-requests/${id}`);
+  },
+
+  async create(data: any): Promise<CourseApprovalRequest> {
+    return apiCall("/api/v1/institution/course-requests", {
+      method: "POST",
+      body: JSON.stringify(data),
+    });
   },
 };
