@@ -265,7 +265,7 @@ const CourseDetailsPage: React.FC<CourseDetailsPageProps> = ({
                       Who Should Choose This Course?
                     </h2>
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                      {details.course.whoShouldChoose.map(
+                      {details?.course?.whoShouldChoose?.map(
                         (item: any, i: number) => (
                           <div
                             key={i}
@@ -293,7 +293,7 @@ const CourseDetailsPage: React.FC<CourseDetailsPageProps> = ({
                       Key Features
                     </h2>
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                      {details.course.features.map(
+                      {details?.course?.features?.map(
                         (item: any, i: number) => (
                           <div
                             key={i}
@@ -350,7 +350,7 @@ const CourseDetailsPage: React.FC<CourseDetailsPageProps> = ({
                           </tr>
                         </thead>
                         <tbody className="text-[15px]">
-                          {details.course.eligibilityRows.map(
+                          {details?.course?.eligibilityRows?.map(
                             (row: any, i: number) => (
                               <tr
                                 key={i}
@@ -436,7 +436,7 @@ const CourseDetailsPage: React.FC<CourseDetailsPageProps> = ({
                   </p>
                 </div>
                 {(details?.course?.admissionSteps?.length ?? 0) > 0 ? (
-                  details.course.admissionSteps.map(
+                  details?.course?.admissionSteps?.map(
                     (step: any, i: number) => (
                       <div key={i} className="mb-6">
                         <div className="flex items-start gap-4 mb-4">
@@ -484,7 +484,7 @@ const CourseDetailsPage: React.FC<CourseDetailsPageProps> = ({
                           </tr>
                         </thead>
                         <tbody className="text-[15px]">
-                          {details.course.fullTimeCourses.map((ftc: any, i: number) => (
+                          {details?.course?.fullTimeCourses?.map((ftc: any, i: number) => (
                             <tr key={i} className="border-b border-gray-200 hover:bg-gray-50">
                               <td className="p-4 align-top border-r border-gray-200">
                                 <div className="text-gray-900 font-semibold mb-1">{ftc.course}</div>
@@ -513,7 +513,7 @@ const CourseDetailsPage: React.FC<CourseDetailsPageProps> = ({
                   <div>
                     <h2 className="text-2xl font-bold text-gray-900 mb-6">Course Details</h2>
                     <div className="space-y-6">
-                      {details.course.subjectGroups.map((group: any, i: number) => (
+                      {details?.course?.subjectGroups?.map((group: any, i: number) => (
                         <div key={i} className="border border-gray-200 rounded-xl p-6 bg-white">
                           <div className="flex items-start justify-between gap-4 mb-4">
                             <div className="flex items-start gap-4">
@@ -618,7 +618,7 @@ const CourseDetailsPage: React.FC<CourseDetailsPageProps> = ({
                           </tr>
                         </thead>
                         <tbody className="text-[15px]">
-                          {details.course.feeItems.map(
+                          {details?.course?.feeItems?.map(
                             (item: any, i: number) => (
                               <tr
                                 key={i}
@@ -683,7 +683,7 @@ const CourseDetailsPage: React.FC<CourseDetailsPageProps> = ({
                   </h2>
                   {details?.course?.scholarshipDesc && (
                     <p className="text-[15px] text-gray-600 mt-1">
-                      {details.course.scholarshipDesc}
+                      {details?.course?.scholarshipDesc}
                     </p>
                   )}
                 </div>
@@ -710,7 +710,7 @@ const CourseDetailsPage: React.FC<CourseDetailsPageProps> = ({
                         </tr>
                       </thead>
                       <tbody className="text-[15px]">
-                        {details.course.scholarships.map(
+                        {details?.course?.scholarships?.map(
                           (sch: any, i: number) => (
                             <tr
                               key={i}
@@ -755,7 +755,7 @@ const CourseDetailsPage: React.FC<CourseDetailsPageProps> = ({
                 )}
                 {details?.course?.scholarshipNotes && (
                   <p className="mt-4 text-sm text-gray-500">
-                    {details.course.scholarshipNotes}
+                    {details?.course?.scholarshipNotes}
                   </p>
                 )}
               </div>
@@ -769,7 +769,7 @@ const CourseDetailsPage: React.FC<CourseDetailsPageProps> = ({
                 </h2>
                 {(details?.course?.faqs?.length ?? 0) > 0 ? (
                   <div className="space-y-3">
-                    {details.course.faqs.map((faq: any, i: number) => (
+                    {details?.course?.faqs?.map((faq: any, i: number) => (
                       <FaqItem key={i} question={faq.question} answer={faq.answer} />
                     ))}
                   </div>
