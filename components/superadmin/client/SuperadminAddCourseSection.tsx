@@ -350,8 +350,8 @@ export default function SuperadminAddCourseSection({
       const firstErrKey = Object.keys(errs)[0];
       const el = document.getElementById(errorFieldIds[firstErrKey]);
       if (el) {
-        const top = el.getBoundingClientRect().top + window.scrollY - 100;
-        window.scrollTo({ top, behavior: "smooth" });
+        el.scrollIntoView({ behavior: "smooth", block: "center" });
+        el.focus({ preventScroll: true });
       }
     }
 
@@ -586,6 +586,7 @@ export default function SuperadminAddCourseSection({
               <input
                 type="text"
                 id="course-title"
+                required
                 className={`${inputClass} ${fieldError("title")}`}
                 placeholder="e.g. 10+2 Science"
                 value={title}
@@ -712,6 +713,7 @@ export default function SuperadminAddCourseSection({
                 {needsUniversityAffiliation ? (
                   <select
                     id="course-affiliation"
+                    required
                     className={`${selectClass} ${fieldError("affiliation")}`}
                     value={affiliationId ?? ""}
                     onChange={(e) => {
@@ -741,6 +743,7 @@ export default function SuperadminAddCourseSection({
                   <input
                     type="text"
                     id="course-non-university-affiliation"
+                    required
                     className={`${inputClass} ${fieldError("nonUniversityAffiliation")}`}
                     placeholder="e.g. NEB, CTEVT"
                     value={nonUniversityAffiliation}
@@ -1023,26 +1026,6 @@ export default function SuperadminAddCourseSection({
                   </svg>
                 </button>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pr-12">
-                  <div>
-                    <label className={labelClass}>
-                      Level <span className="text-red-500">*</span>
-                    </label>
-                    <input
-                      type="text"
-                      className={inputClass}
-                      placeholder="e.g. +2 Science"
-                      value={ec.level}
-                      onChange={(e) =>
-                        setEligibilityRows((prev) =>
-                          prev.map((x) =>
-                            x.id === ec.id
-                              ? { ...x, level: e.target.value }
-                              : x,
-                          ),
-                        )
-                      }
-                    />
-                  </div>
                   <div>
                     <label className={labelClass}>Stream/Faculty</label>
                     <input

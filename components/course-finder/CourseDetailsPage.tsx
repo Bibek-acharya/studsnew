@@ -329,22 +329,19 @@ const CourseDetailsPage: React.FC<CourseDetailsPageProps> = ({
                       Full time Courses
                     </h3>
                     <div className="overflow-x-auto rounded border border-gray-200">
-                      <table className="w-full text-left border-collapse min-w-[800px]">
+                      <table className="w-full text-left border-collapse min-w-[600px]">
                         <thead>
                           <tr className="bg-[#eff4fc] border-b border-gray-200">
                             <th className="p-4 font-bold text-gray-900 w-[8%] border-r border-gray-200">
                               S.N.
                             </th>
-                            <th className="p-4 font-bold text-gray-900 w-[18%] border-r border-gray-200">
-                              Level
-                            </th>
-                            <th className="p-4 font-bold text-gray-900 w-[24%] border-r border-gray-200">
+                            <th className="p-4 font-bold text-gray-900 w-[28%] border-r border-gray-200">
                               Stream/Faculty
                             </th>
-                            <th className="p-4 font-bold text-gray-900 w-[25%] border-r border-gray-200">
+                            <th className="p-4 font-bold text-gray-900 w-[32%] border-r border-gray-200">
                               Eligibility
                             </th>
-                            <th className="p-4 font-bold text-gray-900 w-[25%]">
+                            <th className="p-4 font-bold text-gray-900 w-[32%]">
                               Required Documents
                             </th>
                           </tr>
@@ -358,9 +355,6 @@ const CourseDetailsPage: React.FC<CourseDetailsPageProps> = ({
                               >
                                 <td className="p-4 align-top border-r border-gray-200 text-gray-700">
                                   {i + 1}
-                                </td>
-                                <td className="p-4 align-top border-r border-gray-200 font-semibold text-gray-900">
-                                  {row.level || courseLevel}
                                 </td>
                                 <td className="p-4 align-top border-r border-gray-200 text-gray-700">
                                   {row.stream || "-"}
