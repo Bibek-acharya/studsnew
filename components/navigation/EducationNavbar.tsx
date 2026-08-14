@@ -1411,10 +1411,8 @@ const EducationNavbar: React.FC<EducationNavbarProps> = ({
           className={`absolute top-0 h-full w-80 max-w-[85vw] bg-white shadow-2xl md:hidden transform transition-transform duration-300 ease-in-out ${
             isMobileOpen
               ? "translate-x-0"
-              : drawerDirection === "left"
-                ? "-translate-x-full"
-                : "translate-x-full"
-          } ${drawerDirection === "left" ? "left-0" : "right-0"}`}
+              : "translate-x-full"
+          } right-0`}
         >
           <div className="flex h-full flex-col">
             <div className="flex items-center justify-between border-b border-gray-200 p-4">
@@ -1460,27 +1458,6 @@ const EducationNavbar: React.FC<EducationNavbarProps> = ({
                   </div>
                 </div>
               )}
-
-              {/* Mobile Search + Sphere AI */}
-              <div className="mb-3 flex flex-col gap-2">
-                <SearchBar
-                  isMobile
-                  defaultSearchOpen={false}
-                  showSuggestionDropdown={false}
-                  onQueryStateChange={handleMobileSearchStateChange}
-                />
-                <button
-                  type="button"
-                  onClick={() => {
-                    setIsMobileOpen(false);
-                    router.push("/sphere-ai");
-                  }}
-                  className="flex items-center gap-2 rounded-md border border-gray-200 bg-gray-50 px-3 py-2 text-sm font-medium text-gray-700 transition-colors hover:bg-blue-50 hover:text-blue-600"
-                >
-                  <Search size={15} className="text-gray-500" />
-                  <span>Sphere AI</span>
-                </button>
-              </div>
 
               <div className="flex flex-col gap-1 text-[15px] font-semibold text-gray-700">
                 <button
