@@ -135,8 +135,6 @@ const SuperadminAdmissionApplicationsSection = lazy(
 const SuperadminAdmissionShortlistSection = lazy(
   () => import("./SuperadminAdmissionShortlistSection"),
 );
-const GlobalCourseListSection = lazy(() => import("./GlobalCourseListSection"));
-const GlobalCourseFormSection = lazy(() => import("./GlobalCourseFormSection"));
 const UniversityReviewSection = lazy(() => import("./UniversityReviewSection"));
 const SuperadminJobDirectorySection = lazy(() => import("./SuperadminJobDirectorySection"));
 const SuperadminCreateJobSection = lazy(() => import("./SuperadminCreateJobSection"));
@@ -213,8 +211,6 @@ type SectionType =
   | "superadmin-admission-draft"
   | "superadmin-admission-applications"
   | "superadmin-admission-shortlist"
-  | "global-course-directory"
-  | "global-add-course"
   | "university-reviews"
   | "superadmin-job-directory"
   | "superadmin-create-job"
@@ -272,15 +268,6 @@ const navItems: NavItemData[] = [
     children: [
       { section: "superadmin-course-directory", label: "Course Directory" },
       { section: "superadmin-add-course", label: "Add Course" },
-    ],
-  },
-  {
-    icon: <Globe size={20} />,
-    label: "Global Course Management",
-    section: "global-course-directory",
-    children: [
-      { section: "global-course-directory", label: "Course Directory" },
-      { section: "global-add-course", label: "Add Course" },
     ],
   },
   {
@@ -718,10 +705,6 @@ export default function DashboardShell() {
         return <SuperadminCourseListSection setActiveSection={navigateTo} />;
       case "superadmin-add-course":
         return <SuperadminAddCourseSection setActiveSection={navigateTo} />;
-      case "global-course-directory":
-        return <GlobalCourseListSection setActiveSection={navigateTo as any} />;
-      case "global-add-course":
-        return <GlobalCourseFormSection setActiveSection={navigateTo} />;
       case "superadmin-entrance-directory":
         return (
           <SuperadminEntranceDirectorySection setActiveSection={navigateTo} />

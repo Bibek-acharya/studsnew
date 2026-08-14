@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from "react";
 import dynamic from "next/dynamic";
 import * as LucideIcons from "lucide-react";
-import { superadminProgramApi } from "@/services/superadminRecordsApi";
+import { superadminGlobalCourseApi } from "@/services/superadminRecordsApi";
 import { universityApi } from "@/services/university.api";
 import ImageCropperModal from "@/components/ScholarshipProvider/common/ImageCropperModal";
 import type {
@@ -137,7 +137,7 @@ export default function SuperadminAddCourseSection({
 }) {
   const editId = (() => {
     if (typeof window === "undefined") return null;
-    const stored = localStorage.getItem("superadmin_edit_course_id");
+    const stored = localStorage.getItem("superadmin_edit_global_course_id");
     return stored ? Number(stored) : null;
   })();
 
@@ -211,83 +211,76 @@ export default function SuperadminAddCourseSection({
       setLoading(false);
       return;
     }
-    superadminProgramApi
+    superadminGlobalCourseApi
       .getById(Number(editId))
       .then((res) => {
-        setTitle(res.name || "");
+        setTitle(res.title || "");
         setDescription(res.description || "");
         setDuration(res.duration || "");
-        setEstFee(res.fee || "");
-        setBannerUrl(res.banner_url || "");
-        const d =
-          typeof res.data === "string"
-            ? JSON.parse(res.data || "{}")
-            : res.data;
-        if (d) {
-          setLevel(d.level || "");
-          setAffiliationId(d.affiliationId ?? null);
-          setAffiliationName(d.affiliationName || "");
-          setNonUniversityAffiliation(d.nonUniversityAffiliation || "");
-          setShortTitle(d.shortTitle || "");
-          setField(d.field || "");
-          setGovtFee(d.govtFee || "");
-          setPrivateFee(d.privateFee || "");
-          setMode(d.mode || "");
-          setDegreeLabel(d.degreeLabel || "");
-          setCareerPath(d.careerPath || "");
-          setLocation(d.location || "");
-          setBadges(Array.isArray(d.badges) ? d.badges.join(", ") : d.badges || "");
-          setScholarshipDesc(d.scholarshipDesc || "");
-          setScholarshipNotes(d.scholarshipNotes || "");
-          if (d.whoShouldChoose)
-            setWhoShouldChoose(
-              d.whoShouldChoose.map((x: any, i: number) => ({
-                ...x,
-                id: i + 1,
-              })),
-            );
-          if (d.features)
-            setFeatures(
-              d.features.map((x: any, i: number) => ({ ...x, id: i + 1 })),
-            );
-          if (d.eligibilityRows)
-            setEligibilityRows(
-              d.eligibilityRows.map((x: any, i: number) => ({
-                ...x,
-                id: i + 1,
-              })),
-            );
-          if (d.admissionSteps)
-            setAdmissionSteps(
-              d.admissionSteps.map((x: any, i: number) => ({
-                ...x,
-                id: i + 1,
-              })),
-            );
-          if (d.fullTimeCourses)
-            setFullTimeCourses(
-              d.fullTimeCourses.map((x: any, i: number) => ({
-                ...x,
-                id: i + 1,
-              })),
-            );
-          if (d.subjectGroups)
-            setSubjectGroups(
-              d.subjectGroups.map((x: any, i: number) => ({ ...x, id: i + 1 })),
-            );
-          if (d.feeItems)
-            setFeeItems(
-              d.feeItems.map((x: any, i: number) => ({ ...x, id: i + 1 })),
-            );
-          if (d.scholarships)
-            setScholarships(
-              d.scholarships.map((x: any, i: number) => ({ ...x, id: i + 1 })),
-            );
-          if (d.faqs)
-            setFaqs(d.faqs.map((x: any, i: number) => ({ ...x, id: i + 1 })));
-          if (d.careers)
-            setCareers(d.careers.map((x: any, i: number) => ({ ...x, id: i + 1 })));
-        }
+        setLevel(res.level || "");
+        setField(res.field || "");
+        setAffiliationName(res.affiliation || "");
+        setEstFee(res.estFee || "");
+        setGovtFee(res.govtFee || "");
+        setPrivateFee(res.privateFee || "");
+        setMode(res.mode || "");
+        setDegreeLabel(res.degreeLabel || "");
+        setCareerPath(res.careerPath || "");
+        setLocation(res.location || "");
+        setBadges(Array.isArray(res.badges) ? res.badges.join(", ") : res.badges || "");
+        setBannerUrl(res.bannerUrl || "");
+        setShortTitle(res.shortTitle || "");
+        setScholarshipDesc(res.scholarshipDesc || "");
+        setScholarshipNotes(res.scholarshipNotes || "");
+        setNonUniversityAffiliation(res.nonUniversityAffiliation || "");
+        if (res.whoShouldChoose)
+          setWhoShouldChoose(
+            res.whoShouldChoose.map((x: any, i: number) => ({
+              ...x,
+              id: i + 1,
+            })),
+          );
+        if (res.features)
+          setFeatures(
+            res.features.map((x: any, i: number) => ({ ...x, id: i + 1 })),
+          );
+        if (res.eligibilityRows)
+          setEligibilityRows(
+            res.eligibilityRows.map((x: any, i: number) => ({
+              ...x,
+              id: i + 1,
+            })),
+          );
+        if (res.admissionSteps)
+          setAdmissionSteps(
+            res.admissionSteps.map((x: any, i: number) => ({
+              ...x,
+              id: i + 1,
+            })),
+          );
+        if (res.fullTimeCourses)
+          setFullTimeCourses(
+            res.fullTimeCourses.map((x: any, i: number) => ({
+              ...x,
+              id: i + 1,
+            })),
+          );
+        if (res.subjectGroups)
+          setSubjectGroups(
+            res.subjectGroups.map((x: any, i: number) => ({ ...x, id: i + 1 })),
+          );
+        if (res.feeItems)
+          setFeeItems(
+            res.feeItems.map((x: any, i: number) => ({ ...x, id: i + 1 })),
+          );
+        if (res.scholarships)
+          setScholarships(
+            res.scholarships.map((x: any, i: number) => ({ ...x, id: i + 1 })),
+          );
+        if (res.faqs)
+          setFaqs(res.faqs.map((x: any, i: number) => ({ ...x, id: i + 1 })));
+        if (res.careers)
+          setCareers(res.careers.map((x: any, i: number) => ({ ...x, id: i + 1 })));
       })
       .catch(() => {})
       .finally(() => setLoading(false));
@@ -357,17 +350,17 @@ export default function SuperadminAddCourseSection({
     try {
       const data = collectData();
       if (editId) {
-        await superadminProgramApi.update(Number(editId), {
+        await superadminGlobalCourseApi.update(Number(editId), {
           ...data,
           status: publish ? "published" : "draft",
         });
       } else {
-        await superadminProgramApi.create({
+        await superadminGlobalCourseApi.create({
           ...data,
           status: publish ? "published" : "draft",
         });
       }
-      localStorage.removeItem("superadmin_edit_course_id");
+      localStorage.removeItem("superadmin_edit_global_course_id");
       setActiveSection("superadmin-course-directory");
     } catch (e: any) {
       console.error("Failed to save course:", e);
@@ -409,7 +402,7 @@ export default function SuperadminAddCourseSection({
         <div className="flex gap-3">
           <button
             onClick={() => {
-              localStorage.removeItem("superadmin_edit_course_id");
+              localStorage.removeItem("superadmin_edit_global_course_id");
               setActiveSection("superadmin-course-directory");
             }}
             className="px-4 py-2.5 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"

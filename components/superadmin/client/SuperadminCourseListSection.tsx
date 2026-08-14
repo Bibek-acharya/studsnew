@@ -9,7 +9,7 @@ import {
   Plus,
 } from "@phosphor-icons/react";
 import { AlertTriangle, Loader2 } from "lucide-react";
-import { superadminProgramApi } from "@/services/superadminRecordsApi";
+import { superadminGlobalCourseApi } from "@/services/superadminRecordsApi";
 interface Course {
   id: number;
   name: string;
@@ -30,10 +30,10 @@ export default function SuperadminCourseListSection({
   const [search, setSearch] = useState("");
 
   useEffect(() => {
-    superadminProgramApi
+    superadminGlobalCourseApi
       .list()
-      .then((programRes) => {
-        setCourses(programRes.programs || []);
+      .then((res) => {
+        setCourses(res.courses || []);
       })
       .catch(() => setCourses([]))
       .finally(() => setLoading(false));
@@ -50,7 +50,7 @@ export default function SuperadminCourseListSection({
     if (!deleteDialog.id) return;
     setDeleting(true);
     try {
-      await superadminProgramApi.delete(deleteDialog.id);
+      await superadminGlobalCourseApi.delete(deleteDialog.id);
       setCourses((prev) => prev.filter((c) => c.id !== deleteDialog.id));
       setDeleteDialog({ open: false, id: null, name: "" });
     } catch {
@@ -61,7 +61,7 @@ export default function SuperadminCourseListSection({
   };
 
   const handleEdit = (id: number) => {
-    localStorage.setItem("superadmin_edit_course_id", String(id));
+    localStorage.setItem("superadmin_edit_global_course_id", String(id));
     setActiveSection("superadmin-add-course");
   };
 
@@ -85,7 +85,7 @@ export default function SuperadminCourseListSection({
         </div>
         <button
           onClick={() => {
-            localStorage.removeItem("superadmin_edit_course_id");
+            localStorage.removeItem("superadmin_edit_global_course_id");
             setActiveSection("superadmin-add-course");
           }}
           className="flex items-center gap-2 bg-blue-600 text-white px-4 py-2.5 rounded-lg text-sm font-medium hover:bg-blue-700 transition-colors"
