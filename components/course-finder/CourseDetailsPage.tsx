@@ -529,7 +529,7 @@ const CourseDetailsPage: React.FC<CourseDetailsPageProps> = ({
                           {group.description && (
                             <p className="text-gray-700 leading-relaxed mb-4">{group.description}</p>
                           )}
-                          {(group.subjects?.length ?? 0) > 0 || (group.careers?.length ?? 0) > 0 || group.streams || group.careerList) && (
+                          {((group.subjects?.length ?? 0) > 0 || (group.careers?.length ?? 0) > 0 || group.streams || group.careerList) && (
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                               {((group.subjects?.length ?? 0) > 0 || group.streams) && (
                                 <div className="bg-gray-50 rounded-lg p-4">
