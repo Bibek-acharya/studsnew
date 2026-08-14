@@ -25,6 +25,7 @@ import {
   MessageSquare,
   Sparkles,
   LogIn,
+  CircleUser,
 } from "lucide-react";
 import {
   desktopMenuSections,
@@ -1625,7 +1626,7 @@ const EducationNavbar: React.FC<EducationNavbarProps> = ({
       </div>
 
       {/* Mobile Bottom Tab Navigation */}
-      <div className="fixed bottom-0 left-0 right-0 z-[150] bg-white border-t border-gray-200 shadow-[0_-2px_10px_rgba(0,0,0,0.05)] md:hidden">
+      <div className="fixed bottom-0 left-0 right-0 z-[150] bg-white shadow-[0_-2px_8px_rgba(0,0,0,0.06)] md:hidden">
         <nav className="flex items-center justify-around h-16 pb-safe">
           <button
             onClick={() => {
@@ -1650,7 +1651,7 @@ const EducationNavbar: React.FC<EducationNavbarProps> = ({
             }`}
           >
             <MessageSquare size={20} />
-            <span className="text-[10px] font-medium">Campus</span>
+            <span className="text-[10px] font-medium">Feed</span>
           </button>
 
           <button
@@ -1680,10 +1681,10 @@ const EducationNavbar: React.FC<EducationNavbarProps> = ({
                 <img
                   src={getImageUrl(user.image_url)}
                   alt=""
-                  className="w-6 h-6 rounded-full object-cover"
+                  className="w-7 h-7 rounded-full object-cover ring-2 ring-brand-blue"
                 />
               ) : (
-                <User size={20} />
+                <CircleUser size={24} />
               )}
               <span className="text-[10px] font-medium">Profile</span>
             </button>
@@ -1697,7 +1698,7 @@ const EducationNavbar: React.FC<EducationNavbarProps> = ({
                 isRouteActive("/login") ? "text-brand-blue" : "text-gray-500"
               }`}
             >
-              <LogIn size={20} />
+              <CircleUser size={24} />
               <span className="text-[10px] font-medium">Login</span>
             </button>
           )}
